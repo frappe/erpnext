@@ -18,16 +18,16 @@ class Bin(Document):
 		self.update_qty(args)
 
 		if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
-			from erpnext.stock.stock_ledger import update_entries_after
+			from erpnext.stock.stock_ledger import update_entries_after, update_qty_in_future_sle
 
 			if not args.get("posting_date"):
 				args["posting_date"] = nowdate()
 
-			# Updates valuation rate, stock value, stock queue for current transaction
-
 			if args.get("is_cancelled") and via_landed_cost_voucher:
 				return
 
+			# Reposts only current voucher SL Entries
+			# Updates valuation rate, stock value, stock queue for current transaction
 			update_entries_after({
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
@@ -35,8 +35,11 @@ class Bin(Document):
 				"posting_time": args.get("posting_time"),
 				"voucher_type": args.get("voucher_type"),
 				"voucher_no": args.get("voucher_no"),
-				"sle_id": args.sle_id
+				"sle_id": args.name
 			}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
+
+			# Update qty_after_transaction in future SLEs of this item and warehouse
+			update_qty_in_future_sle(args)
 
 	def update_qty(self, args):
 		# update the stock values (for current quantities)

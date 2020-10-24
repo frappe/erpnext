@@ -94,7 +94,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 			posting_date='2020-04-12'
 		)
 
-		repost_future_sle("Stock Reconciliation", reco3.name)
+		# repost_future_sle("Stock Reconciliation", reco3.name)
 
 		# Check valuation rate of finished goods warehouse after back-dated entry at Stores
 		target_wh_sle = get_previous_sle({
@@ -136,7 +136,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(stock_value_difference, -200)
 
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-		repost_future_sle("Purchase Receipt", pr.name)
+		# repost_future_sle("Purchase Receipt", pr.name)
 
 		outgoing_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": return_pr.name}, ["outgoing_rate", "stock_value_difference"])
@@ -182,7 +182,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		# Repost future SLE for Purchase Receipt
-		repost_future_sle("Purchase Receipt", pr.name)
+		# repost_future_sle("Purchase Receipt", pr.name)
 
 
 		# check outgoing_rate for DN after reposting
@@ -250,7 +250,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		# Repost future SLE for Purchase Receipt
-		repost_future_sle("Purchase Receipt", pr.name)
+		# repost_future_sle("Purchase Receipt", pr.name)
 
 
 		# check outgoing_rate for DN after reposting
@@ -302,7 +302,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		# Repost future SLE for Purchase Receipt
-		repost_future_sle("Purchase Receipt", pr.name)
+		# repost_future_sle("Purchase Receipt", pr.name)
 
 		pr1.reload()
 		self.assertEqual(pr1.items[0].valuation_rate, 125)

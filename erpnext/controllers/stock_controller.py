@@ -392,19 +392,51 @@ class StockController(AccountsController):
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
 
-def compare_existing_and_expected_gle(existing_gle, expected_gle):
-	matched = True
-	for entry in expected_gle:
-		account_existed = False
-		for e in existing_gle:
-			if entry.account == e.account:
-				account_existed = True
-			if entry.account == e.account and entry.against_account == e.against_account \
-					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center) \
-					and (entry.debit != e.debit or entry.credit != e.credit):
-				matched = False
+	def repost_future_sle_and_gle(self):
+		if self.check_if_future_sle_exists():
+			self.create_repost_item_valuation_entry()
+
+	def check_if_future_sle_exists(self):
+		sl_entries = frappe.db.get_all("Stock Ledger Entry",
+			filters={"voucher_type": self.doctype, "voucher_no": self.name},
+			fields=["item_code", "warehouse"],
+			order_by="creation asc")
+	
+		distinct_item_warehouses = list(set([(d.item_code, d.warehouse) for d in sl_entries]))
+
+		sle_exists = False
+		for item_code, warehouse in distinct_item_warehouses:
+			args = {
+				"item_code": item_code,
+				"warehouse": warehouse,
+				"posting_date": self.posting_date,
+				"posting_time": self.posting_time,
+				"voucher_no": self.name
+			}
+			if self.get_sle(args):
+				sle_exists = True
 				break
-		if not account_existed:
-			matched = False
-			break
-	return matched
+		return sle_exists
+
+	def get_sle(self, args):
+		return frappe.db.sql("""
+			select name
+			from `tabStock Ledger Entry`
+			where
+				item_code=%(item_code)s
+				and warehouse=%(warehouse)s
+				and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+				and voucher_no != %(voucher_no)s
+				and is_cancelled = 0
+			limit 1
+		""", args)
+
+	def create_repost_item_valuation_entry(self):
+		repost_entry = frappe.new_doc("Repost Item Valuation")
+		repost_entry.based_on = 'Transaction'
+		repost_entry.voucher_type = self.doctype
+		repost_entry.voucher_no = self.name
+		repost_entry.posting_date = self.posting_date
+		repost_entry.posting_time = self.posting_time
+		repost_entry.save()
+		repost_entry.submit()

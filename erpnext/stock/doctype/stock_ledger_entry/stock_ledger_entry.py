@@ -142,6 +142,7 @@ class StockLedgerEntry(Document):
 		is_group_warehouse(self.warehouse)
 
 	def validate_with_last_transaction_posting_time(self):
+		return
 		last_transaction_time = frappe.db.sql("""
 			select MAX(timestamp(posting_date, posting_time)) as posting_time
 			from `tabStock Ledger Entry`
