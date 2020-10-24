@@ -270,7 +270,7 @@ class PurchaseInvoice(BuyingController):
 						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
 						# This is done in cases when Purchase Invoice is created before Purchase Receipt
 						if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
-							msg = _("Row {}: Expense Head changed to {1 ").format(item.idx, frappe.bold(stock_not_billed_account))
+							msg = _("Row {}: Expense Head changed to {} ").format(item.idx, frappe.bold(stock_not_billed_account))
 							msg += _("as no Purchase Receipt is created against Item {}. ").format(frappe.bold(item.item_code))
 							msg += _("This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice")
 							frappe.msgprint(msg, title=_("Expense Head Changed"))
