@@ -102,8 +102,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						if (!records_length) {
 							const warehouse = me.dialog.fields_dict.warehouse.get_value().bold();
 							frappe.msgprint(
-								__(`Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.`, 
-								[me.item.item_code.bold(), warehouse])
+								__('Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.', [me.item.item_code.bold(), warehouse])
 							);
 						}
 						if (records_length < qty) {
