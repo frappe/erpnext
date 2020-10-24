@@ -44,7 +44,6 @@
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
-  "cost_center",
   "more_details",
   "status",
   "amended_from",
@@ -270,12 +269,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "cost_center",
-   "fieldtype": "Link",
-   "label": "Cost Center",
-   "options": "Cost Center"
-  },
-  {
    "collapsible": 1,
    "fieldname": "more_details",
    "fieldtype": "Section Break",
@@ -371,7 +364,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2020-10-24 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
