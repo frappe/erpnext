@@ -120,7 +120,7 @@ class POSInvoice(SalesInvoice):
 				error_msg.append(msg)
 
 		if error_msg:
-			frappe.throw(error_msg, title=_("Item Unavailable"))
+			frappe.throw(error_msg, title=_("Item Unavailable"), as_list=True)
 
 	def validate_serialised_or_batched_item(self):
 		error_msg = []
@@ -145,7 +145,7 @@ class POSInvoice(SalesInvoice):
 				error_msg.append(msg)
 
 		if error_msg:
-			frappe.throw(error_msg, title=_("Invalid Item"))
+			frappe.throw(error_msg, title=_("Invalid Item"), as_list=True)
 
 	def validate_return_items_qty(self):
 		if not self.get("is_return"): return
