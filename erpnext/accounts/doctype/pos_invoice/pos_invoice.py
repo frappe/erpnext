@@ -10,11 +10,10 @@ from erpnext.controllers.selling_controller import SellingController
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
-	get_loyalty_program_details_with_points, validate_loyalty_points
-
+from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
+from erpnext.accounts.doctype.loyalty_program.loyalty_program import get_loyalty_program_details_with_points, validate_loyalty_points
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option, get_mode_of_payment_info
-from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 
 from six import iteritems
 
@@ -56,6 +55,7 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
+		self.check_phone_payments()
 		self.set_status(update=True)
 
 	def on_cancel(self):
@@ -67,6 +67,18 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
+
+	def check_phone_payments(self):
+		for pay in self.payments:
+			if pay.type == "Phone" and pay.amount >= 0:
+				paid_amt = frappe.db.get_value("Payment Request",
+					filters=dict(
+						reference_doctype="POS Invoice", reference_name=self.name,
+						mode_of_payment=pay.mode_of_payment, status="Paid"),
+					fieldname="grand_total")
+
+				if pay.amount != paid_amt:
+					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
 	def validate_stock_availablility(self):
 		if self.is_return:
@@ -328,20 +340,31 @@ class POSInvoice(SalesInvoice):
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
 
-def add_return_modes(doc, pos_profile):
-	def append_payment(payment_mode):
-		payment = doc.append('payments', {})
-		payment.default = payment_mode.default
-		payment.mode_of_payment = payment_mode.parent
-		payment.account = payment_mode.default_account
-		payment.type = payment_mode.type
+	def create_payment_request(self):
+		for pay in self.payments:
+			if pay.type == "Phone":
+				if pay.amount <= 0:
+					frappe.throw(_("Payment amount cannot be less than or equal to 0"))
 
-	for pos_payment_method in pos_profile.get('payments'):
-		pos_payment_method = pos_payment_method.as_dict()
-		mode_of_payment = pos_payment_method.mode_of_payment
-		if pos_payment_method.allow_in_returns and not [d for d in doc.get('payments') if d.mode_of_payment == mode_of_payment]:
-			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
-			append_payment(payment_mode[0])
+				if not self.contact_mobile:
+					frappe.throw(_("Please enter the phone number first"))
+
+				payment_gateway = frappe.db.get_value("Payment Gateway Account", {
+					"payment_account": pay.account,
+				})
+				record = {
+					"payment_gateway": payment_gateway,
+					"dt": "POS Invoice",
+					"dn": self.name,
+					"payment_request_type": "Inward",
+					"party_type": "Customer",
+					"party": self.customer,
+					"mode_of_payment": pay.mode_of_payment,
+					"recipient_id": self.contact_mobile,
+					"submit_doc": True
+				}
+
+				return make_payment_request(**record)
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):
@@ -400,3 +423,18 @@ def make_merge_log(invoices):
 
 	if merge_log.get('pos_invoices'):
 		return merge_log.as_dict()
+
+def add_return_modes(doc, pos_profile):
+	def append_payment(payment_mode):
+		payment = doc.append('payments', {})
+		payment.default = payment_mode.default
+		payment.mode_of_payment = payment_mode.parent
+		payment.account = payment_mode.default_account
+		payment.type = payment_mode.type
+
+	for pos_payment_method in pos_profile.get('payments'):
+		pos_payment_method = pos_payment_method.as_dict()
+		mode_of_payment = pos_payment_method.mode_of_payment
+		if pos_payment_method.allow_in_returns and not [d for d in doc.get('payments') if d.mode_of_payment == mode_of_payment]:
+			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
+			append_payment(payment_mode[0])

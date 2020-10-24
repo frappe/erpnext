@@ -175,6 +175,24 @@ erpnext.PointOfSale.Payment = class {
 			}
 		})
 
+		frappe.realtime.on("process_phone_payment", function(data) {
+			frappe.dom.unfreeze();
+			cur_frm.reload_doc();
+			let message = data["ResultDesc"];
+			let title = __("Payment Failed");
+
+			if (data["ResultCode"] == 0) {
+				title = __("Payment Received");
+				$('.btn.btn-xs.btn-default[data-fieldname=request_for_payment]').html(`Payment Received`)
+				me.events.submit_invoice();
+			}
+
+			frappe.msgprint({
+				"message": message,
+				"title": title
+			});
+		});
+
 		this.$payment_modes.on('click', '.shortcut', function(e) {
 			const value = $(this).attr('data-value');
 			me.selected_mode.set_value(value);
