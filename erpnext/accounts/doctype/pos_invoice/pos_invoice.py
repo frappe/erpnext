@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos
+from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 
 from six import iteritems
 
@@ -57,6 +58,7 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc.make_loyalty_point_entry()
 		if self.redeem_loyalty_points and self.loyalty_points:
 			self.apply_loyalty_points()
+		self.check_phone_payments()
 		self.set_status(update=True)
 
 	def on_cancel(self):
@@ -68,6 +70,18 @@ class POSInvoice(SalesInvoice):
 			against_psi_doc = frappe.get_doc("POS Invoice", self.return_against)
 			against_psi_doc.delete_loyalty_point_entry()
 			against_psi_doc.make_loyalty_point_entry()
+
+	def check_phone_payments(self):
+		for pay in self.payments:
+			if pay.type == "Phone" and pay.amount >= 0:
+				paid_amt = frappe.db.get_value("Payment Request",
+					filters=dict(
+						reference_doctype="POS Invoice", reference_name=self.name,
+						mode_of_payment=pay.mode_of_payment, status="Paid"),
+					fieldname="grand_total")
+
+				if pay.amount != paid_amt:
+					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
 	def validate_stock_availablility(self):
 		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
@@ -92,21 +106,19 @@ class POSInvoice(SalesInvoice):
 
 				if len(invalid_serial_nos):
 					multiple_nos = 's' if len(invalid_serial_nos) > 1 else ''
-					frappe.throw(_("Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. \
-						Please select valid serial no.".format(d.idx, multiple_nos,
-						frappe.bold(', '.join(invalid_serial_nos)))), title=_("Not Available"))
+					frappe.throw(_("Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. Please select valid serial no.").format(
+						d.idx, multiple_nos, frappe.bold(', '.join(invalid_serial_nos))), title=_("Not Available"))
 			else:
 				if allow_negative_stock:
 					return
 
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
 				if not (flt(available_stock) > 0):
-					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.'
-						.format(d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse))), title=_("Not Available"))
+					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.').format(
+						d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse)), title=_("Not Available"))
 				elif flt(available_stock) < flt(d.qty):
-					frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. \
-						Available quantity {}.'.format(d.idx, frappe.bold(d.item_code),
-						frappe.bold(d.warehouse), frappe.bold(d.qty))), title=_("Not Available"))
+					frappe.msgprint(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.').format(
+						d.idx, frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty)), title=_("Not Available"))
 
 	def validate_serialised_or_batched_item(self):
 		for d in self.get("items"):
@@ -117,14 +129,14 @@ class POSInvoice(SalesInvoice):
 
 
 			if serialized and batched and (no_batch_selected or no_serial_selected):
-				frappe.throw(_('Row #{}: Please select a serial no and batch against item: {} or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
+				frappe.throw(_('Row #{}: Please select a serial no and batch against item: {} or remove it to complete transaction.').format(
+					d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 			if serialized and no_serial_selected:
-				frappe.throw(_('Row #{}: No serial number selected against item: {}. Please select one or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
+				frappe.throw(_('Row #{}: No serial number selected against item: {}. Please select one or remove it to complete transaction.').format(
+					d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 			if batched and no_batch_selected:
-				frappe.throw(_('Row #{}: No batch selected against item: {}. Please select a batch or remove it to complete transaction.'
-						.format(d.idx, frappe.bold(d.item_code))), title=_("Invalid Item"))
+				frappe.throw(_('Row #{}: No batch selected against item: {}. Please select a batch or remove it to complete transaction.').format(
+					d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
 	def validate_return_items(self):
 		if not self.get("is_return"): return
@@ -139,7 +151,8 @@ class POSInvoice(SalesInvoice):
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def validate_change_account(self):
-		if frappe.db.get_value("Account", self.account_for_change_amount, "company") != self.company:
+		if self.change_amount and self.account_for_change_amount and \
+			frappe.db.get_value("Account", self.account_for_change_amount, "company") != self.company:
 			frappe.throw(_("The selected change account {} doesn't belongs to Company {}.").format(self.account_for_change_amount, self.company))
 
 	def validate_change_amount(self):
@@ -150,7 +163,7 @@ class POSInvoice(SalesInvoice):
 			self.base_change_amount = flt(self.base_paid_amount - base_grand_total + flt(self.base_write_off_amount))
 
 		if flt(self.change_amount) and not self.account_for_change_amount:
-			msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
+			frappe.msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
 
 	def verify_payment_amount(self):
 		for entry in self.payments:
@@ -166,7 +179,7 @@ class POSInvoice(SalesInvoice):
 				total_amount_in_payments += payment.amount
 			invoice_total = self.rounded_total or self.grand_total
 			if total_amount_in_payments < invoice_total:
-				frappe.throw(_("Total payments amount can't be greater than {}".format(-invoice_total)))
+				frappe.throw(_("Total payments amount can't be greater than {}").format(-invoice_total))
 
 	def validate_loyalty_transaction(self):
 		if self.redeem_loyalty_points and (not self.loyalty_redemption_account or not self.loyalty_redemption_cost_center):
@@ -312,6 +325,32 @@ class POSInvoice(SalesInvoice):
 		for pay in self.payments:
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
+
+	def create_payment_request(self):
+		for pay in self.payments:
+			if pay.type == "Phone":
+				if pay.amount <= 0:
+					frappe.throw(_("Payment amount cannot be less than or equal to 0"))
+
+				if not self.contact_mobile:
+					frappe.throw(_("Please enter the phone number first"))
+
+				payment_gateway = frappe.db.get_value("Payment Gateway Account", {
+					"payment_account": pay.account,
+				})
+				record = {
+					"payment_gateway": payment_gateway,
+					"dt": "POS Invoice",
+					"dn": self.name,
+					"payment_request_type": "Inward",
+					"party_type": "Customer",
+					"party": self.customer,
+					"mode_of_payment": pay.mode_of_payment,
+					"recipient_id": self.contact_mobile,
+					"submit_doc": True
+				}
+
+				return make_payment_request(**record)
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):

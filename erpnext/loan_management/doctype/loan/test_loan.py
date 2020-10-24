@@ -14,7 +14,7 @@ from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_
 	process_loan_interest_accrual_for_term_loans)
 from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
 from erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall import create_process_loan_security_shortfall
-from erpnext.loan_management.doctype.loan.loan import create_loan_security_unpledge
+from erpnext.loan_management.doctype.loan.loan import unpledge_security
 from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpledge import get_pledged_security_qty
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
 from erpnext.loan_management.doctype.loan_disbursement.loan_disbursement import get_disbursal_amount
@@ -199,10 +199,9 @@ class TestLoan(unittest.TestCase):
 			"Loan Closure", flt(loan.loan_amount + accrued_interest_amount))
 		repayment_entry.submit()
 
-		amounts = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['paid_interest_amount',
-			'paid_principal_amount'])
+		amount = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name}, ['sum(paid_interest_amount)'])
 
-		self.assertEquals(flt(amounts[0], 2),flt(accrued_interest_amount, 2))
+		self.assertEquals(flt(amount, 2),flt(accrued_interest_amount, 2))
 		self.assertEquals(flt(repayment_entry.penalty_amount, 5), 0)
 
 		loan.load_from_db()
@@ -307,7 +306,7 @@ class TestLoan(unittest.TestCase):
 		loan.load_from_db()
 		self.assertEquals(loan.status, "Loan Closure Requested")
 
-		unpledge_request = create_loan_security_unpledge(loan.name, loan.applicant_type, loan.applicant, loan.company, as_dict=0)
+		unpledge_request = unpledge_security(loan=loan.name, save=1)
 		unpledge_request.submit()
 		unpledge_request.status = 'Approved'
 		unpledge_request.save()
@@ -317,6 +316,11 @@ class TestLoan(unittest.TestCase):
 
 		self.assertEqual(loan.status, 'Closed')
 		self.assertEquals(sum(pledged_qty.values()), 0)
+
+		amounts = amounts = calculate_amounts(loan.name, add_days(last_date, 6), "Regular Repayment")
+		self.assertEqual(amounts['pending_principal_amount'], 0)
+		self.assertEqual(amounts['payable_principal_amount'], 0)
+		self.assertEqual(amounts['interest_amount'], 0)
 
 	def test_disbursal_check_with_shortfall(self):
 		pledges = [{

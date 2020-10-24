@@ -577,8 +577,9 @@ class Item(WebsiteGenerator):
 						# if barcode is getting updated , the row name has to reset.
 						# Delete previous old row doc and re-enter row as if new to reset name in db.
 						item_barcode.set("__islocal", True)
+						item_barcode_entry_name = item_barcode.name
 						item_barcode.name = None
-						frappe.delete_doc("Item Barcode", item_barcode.name)
+						frappe.delete_doc("Item Barcode", item_barcode_entry_name)
 
 	def validate_warehouse_for_reorder(self):
 		'''Validate Reorder level table for duplicate and conditional mandatory'''
@@ -984,9 +985,7 @@ class Item(WebsiteGenerator):
 				if self.stock_ledger_created():
 					return True
 
-			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
-				frappe.db.get_value("Production Order",
-					filters={"production_item": self.name, "docstatus": 1}):
+			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}):
 				return True
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):
@@ -1189,8 +1188,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.clear_cache()
-
+		item_cache.rebuild_cache()
 
 def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):

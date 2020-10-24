@@ -44,7 +44,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 			0: ["_Test Supplier", 300, "Overdue"],
 			1: ["_Test Supplier 1", 250, "Overdue"],
 		}
-		self.check_expected_values(invoices, expected_value, invoice_type="Purchase", )
+		self.check_expected_values(invoices, expected_value, "Purchase")
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"

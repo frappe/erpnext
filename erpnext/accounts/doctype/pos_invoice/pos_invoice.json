@@ -460,7 +460,7 @@
   },
   {
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
    "read_only": 1
@@ -1580,7 +1580,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 15:08:39.337385",
+ "modified": "2020-09-28 16:51:24.641755",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",

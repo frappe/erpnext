@@ -74,6 +74,7 @@
   "cost_center",
   "section_break_12",
   "status",
+  "custom_remarks",
   "remarks",
   "column_break_16",
   "letter_head",
@@ -578,8 +579,7 @@
    "fieldtype": "Small Text",
    "label": "Remarks",
    "no_copy": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only_depends_on": "eval:doc.custom_remarks == 0"
   },
   {
    "fieldname": "column_break_16",
@@ -804,12 +804,18 @@
    "read_only": 1,
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "custom_remarks",
+   "fieldtype": "Check",
+   "label": "Custom Remarks"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-13 22:33:59.860146",
+ "modified": "2020-09-02 13:39:43.383705",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
