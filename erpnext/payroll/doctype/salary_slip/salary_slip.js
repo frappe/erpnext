@@ -198,7 +198,7 @@ var calculate_totals = function(frm) {
 		frappe.call({
 			method: "set_totals",
 			doc: frm.doc,
-			callback: function(r) {
+			callback: function() {
 				frm.refresh_fields();
 			}
 		});
@@ -232,7 +232,7 @@ frappe.ui.form.on('Salary Detail', {
 						var result = data.message;
 						frappe.model.set_value(cdt, cdn, 'condition', result.condition);
 						frappe.model.set_value(cdt, cdn, 'amount_based_on_formula', result.amount_based_on_formula);
-						if(result.amount_based_on_formula == 1){
+						if(result.amount_based_on_formula === 1){
 							frappe.model.set_value(cdt, cdn, 'formula', result.formula);
 						}
 						else{
@@ -254,7 +254,7 @@ frappe.ui.form.on('Salary Detail', {
 
 	amount_based_on_formula: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if(child.amount_based_on_formula == 1){
+		if(child.amount_based_on_formula === 1){
 			frappe.model.set_value(cdt, cdn, 'amount', null);
 		}
 		else{

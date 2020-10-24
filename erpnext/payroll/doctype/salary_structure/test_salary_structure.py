@@ -109,7 +109,7 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(salary_structure_assignment.variable, 200)
 
 	def test_multi_currency_salary_structure(self):
-		emp = make_employee("test_muti_currency_employee@salary.com")
+		make_employee("test_muti_currency_employee@salary.com")
 		sal_struct = make_salary_structure("Salary Structure Multi Currency", "Monthly", currency='USD')
 		self.assertEqual(sal_struct.currency, 'USD')
 
