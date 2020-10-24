@@ -107,7 +107,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							);
 						}
 						if (records_length < qty) {
-							frappe.msgprint(__(`Fetched only {0} available serial numbers.`, [records_length]));
+							frappe.msgprint(__('Fetched only {0} available serial numbers.', [records_length]));
 						}
 						let serial_no_list_field = this.dialog.fields_dict.serial_no;
 						numbers = auto_fetched_serial_numbers.join('\n');
@@ -353,7 +353,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							});
 							if (selected_batches.includes(val)) {
 								this.set_value("");
-								frappe.throw(__(`Batch {0} already selected.`, [val]));
+								frappe.throw(__('Batch {0} already selected.', [val]));
 							}
 
 							if (me.warehouse_details.name) {
@@ -372,7 +372,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 							} else {
 								this.set_value("");
-								frappe.throw(__(`Please select a warehouse to get available quantities`));
+								frappe.throw(__('Please select a warehouse to get available quantities'));
 							}
 							// e.stopImmediatePropagation();
 						}
@@ -407,7 +407,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 								parseFloat(available_qty) < parseFloat(selected_qty)) {
 
 								this.set_value('0');
-								frappe.throw(__(`For transfer from source, selected quantity cannot be greater than available quantity`));
+								frappe.throw(__('For transfer from source, selected quantity cannot be greater than available quantity'));
 							} else {
 								this.grid.refresh();
 							}
