@@ -150,7 +150,7 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	currency: function (frm) {
-		var company_currency
+		var company_currency;
 		if (!frm.doc.company) {
 			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
 		}
