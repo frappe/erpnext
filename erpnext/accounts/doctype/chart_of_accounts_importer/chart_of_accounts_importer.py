@@ -195,7 +195,7 @@ def build_response_as_excel(writer):
 	reader = csv.reader(f)
 
 	from frappe.utils.xlsxutils import make_xlsx
-	xlsx_file = make_xlsx(reader, "Chart Of Accounts Importer Template")
+	xlsx_file = make_xlsx(reader, "Chart of Accounts Importer Template")
 
 	f.close()
 	os.remove(filename)
