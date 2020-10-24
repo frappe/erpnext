@@ -25,14 +25,10 @@ class TestRequestforQuotation(unittest.TestCase):
 		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.get('suppliers')[0].supplier)
 		sq.submit()
 
-		# No Quote first supplier quotation
-		rfq.get('suppliers')[1].no_quote = 1
-		rfq.get('suppliers')[1].quote_status = 'No Quote'
-
 		rfq.update_rfq_supplier_status() #rfq.get('suppliers')[1].supplier)
 
 		self.assertEqual(rfq.get('suppliers')[0].quote_status, 'Received')
-		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'No Quote')
+		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'Pending')
 
 	def test_make_supplier_quotation(self):
 		rfq = make_request_for_quotation()
