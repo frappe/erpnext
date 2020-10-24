@@ -91,7 +91,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if(this.frm.doc.currency == company_currency) {
 				this.frm.set_value("conversion_rate", 1);
 			} else {
-				const subs =  [conversion_rate_label, this.frm.doc.currency, company_currency]
+				const subs =  [conversion_rate_label, this.frm.doc.currency, company_currency];
 				const err_message = __('{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}', subs);
 				frappe.throw(err_message);
 			}
