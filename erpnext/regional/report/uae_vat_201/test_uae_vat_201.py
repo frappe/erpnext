@@ -11,14 +11,10 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 	get_total_emiratewise, 
 	get_tourist_tax_return_total, 
 	get_tourist_tax_return_tax,
-	get_reverse_charge_total,
-	get_reverse_charge_tax,
 	get_zero_rated_total,
 	get_exempt_total,
 	get_standard_rated_expenses_total,
 	get_standard_rated_expenses_tax,
-	get_reverse_charge_recoverable_total,
-	get_reverse_charge_recoverable_tax
 	)
 
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
@@ -62,17 +58,12 @@ class TestUaeVat201(TestCase):
 		self.assertEqual(amounts_by_emirate["Sharjah"]["raw_vat_amount"],5)
 		self.assertEqual(amounts_by_emirate["Dubai"]["raw_amount"],200)
 		self.assertEqual(amounts_by_emirate["Dubai"]["raw_vat_amount"],10)
-
 		self.assertEqual(get_tourist_tax_return_total(filters),100)
 		self.assertEqual(get_tourist_tax_return_tax(filters),2)
-		self.assertEqual(get_reverse_charge_total(filters),250)
-		self.assertEqual(get_reverse_charge_tax(filters),12.5)
 		self.assertEqual(get_zero_rated_total(filters),100)
 		self.assertEqual(get_exempt_total(filters),100)
 		self.assertEqual(get_standard_rated_expenses_total(filters),250)
 		self.assertEqual(get_standard_rated_expenses_tax(filters),1)
-		self.assertEqual(get_reverse_charge_recoverable_total(filters),250)
-		self.assertEqual(get_reverse_charge_recoverable_tax(filters),12.5)
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
@@ -305,32 +296,3 @@ def create_purchase_invoices():
 	pi.recoverable_standard_rated_expenses = 1
 
 	pi.submit()
-
-	pi = make_purchase_invoice(
-			company="_Test Company UAE VAT",
-			supplier = '_Test UAE Supplier',
-			supplier_warehouse = '_Test UAE VAT Supplier Warehouse - _TCUV',
-			warehouse = '_Test UAE VAT Supplier Warehouse - _TCUV',
-			currency = 'AED',
-			cost_center = 'Main - _TCUV',
-			expense_account = 'Cost of Goods Sold - _TCUV',
-			item = "_Test UAE VAT Item",
-			do_not_save=1,
-			uom = "Nos"
-		)
-
-	pi.append("taxes", {
-			"charge_type": "On Net Total",
-			"account_head": "VAT 5% - _TCUV",
-			"cost_center": "Main - _TCUV",
-			"description": "VAT 5% @ 5.0",
-			"rate": 5.0
-		})
-
-	pi.reverse_charge = "Y"
-
-	pi.recoverable_reverse_charge = 100
-
-	pi.submit()
-
-
