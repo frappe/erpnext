@@ -23,8 +23,8 @@ def get_healthcare_services_to_invoice(patient, company):
 		items_to_invoice += get_lab_tests_to_invoice(patient, company)
 		items_to_invoice += get_clinical_procedures_to_invoice(patient, company)
 		items_to_invoice += get_inpatient_services_to_invoice(patient, company)
+		items_to_invoice += get_therapy_plans_to_invoice(patient, company)
 		items_to_invoice += get_therapy_sessions_to_invoice(patient, company)
-
 
 		return items_to_invoice
 
@@ -35,12 +35,13 @@ def validate_customer_created(patient):
 		msg +=  " <b><a href='#Form/Patient/{0}'>{0}</a></b>".format(patient.name)
 		frappe.throw(msg, title=_('Customer Not Found'))
 
+
 def get_appointments_to_invoice(patient, company):
 	appointments_to_invoice = []
 	patient_appointments = frappe.get_list(
 			'Patient Appointment',
 			fields = '*',
-			filters = {'patient': patient.name, 'company': company, 'invoiced': 0},
+			filters = {'patient': patient.name, 'company': company, 'invoiced': 0, 'status': ['not in', 'Cancelled']},
 			order_by = 'appointment_date'
 		)
 
@@ -246,12 +247,44 @@ def get_inpatient_services_to_invoice(patient, company):
 	return services_to_invoice
 
 
+def get_therapy_plans_to_invoice(patient, company):
+	therapy_plans_to_invoice = []
+	therapy_plans = frappe.get_list(
+		'Therapy Plan',
+		fields=['therapy_plan_template', 'name'],
+		filters={
+			'patient': patient.name,
+			'invoiced': 0,
+			'company': company,
+			'therapy_plan_template': ('!=', '')
+		}
+	)
+	for plan in therapy_plans:
+		therapy_plans_to_invoice.append({
+			'reference_type': 'Therapy Plan',
+			'reference_name': plan.name,
+			'service': frappe.db.get_value('Therapy Plan Template', plan.therapy_plan_template, 'linked_item')
+		})
+
+	return therapy_plans_to_invoice
+
+
 def get_therapy_sessions_to_invoice(patient, company):
 	therapy_sessions_to_invoice = []
+	therapy_plans = frappe.db.get_all('Therapy Plan', {'therapy_plan_template': ('!=', '')})
+	therapy_plans_created_from_template = []
+	for entry in therapy_plans:
+		therapy_plans_created_from_template.append(entry.name)
+
 	therapy_sessions = frappe.get_list(
 		'Therapy Session',
 		fields='*',
-		filters={'patient': patient.name, 'invoiced': 0, 'company': company}
+		filters={
+			'patient': patient.name,
+			'invoiced': 0,
+			'company': company,
+			'therapy_plan': ('not in', therapy_plans_created_from_template)
+		}
 	)
 	for therapy in therapy_sessions:
 		if not therapy.appointment:
@@ -368,8 +401,8 @@ def validate_invoiced_on_submit(item):
 	else:
 		is_invoiced = frappe.db.get_value(item.reference_dt, item.reference_dn, 'invoiced')
 	if is_invoiced:
-		frappe.throw(_('The item referenced by {0} - {1} is already invoiced'\
-		).format(item.reference_dt, item.reference_dn))
+		frappe.throw(_('The item referenced by {0} - {1} is already invoiced').format(
+			item.reference_dt, item.reference_dn))
 
 
 def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):

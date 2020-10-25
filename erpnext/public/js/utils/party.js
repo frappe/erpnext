@@ -224,6 +224,10 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 		party = frm.doc.party_name;
 	}
 
+	if (!frm.doc.company) {
+		frappe.throw(__("Kindly select the company first"));
+	}
+
 	frappe.call({
 		method: "erpnext.accounts.party.set_taxes",
 		args: {
@@ -273,7 +277,7 @@ erpnext.utils.validate_mandatory = function(frm, label, value, trigger_on) {
 erpnext.utils.get_shipping_address = function(frm, callback){
 	if (frm.doc.company) {
 		frappe.call({
-			method: "frappe.contacts.doctype.address.address.get_shipping_address",
+			method: "erpnext.accounts.custom.address.get_shipping_address",
 			args: {
 				company: frm.doc.company,
 				address: frm.doc.shipping_address

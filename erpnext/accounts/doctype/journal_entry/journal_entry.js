@@ -210,7 +210,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
 				frappe.model.set_default_values(jvd);
 			});
-			var posting_date = this.frm.posting_date;
+			var posting_date = this.frm.doc.posting_date;
 			if(!this.frm.doc.amended_from) this.frm.set_value('posting_date', posting_date || frappe.datetime.get_today());
 		}
 	},
@@ -638,20 +638,12 @@ $.extend(erpnext.journal_entry, {
 		return { filters: filters };
 	},
 
-	reverse_journal_entry: function(frm) {
-		var me = frm.doc;
-		for(var i=0; i<me.accounts.length; i++) {
-			me.accounts[i].credit += me.accounts[i].debit;
-			me.accounts[i].debit = me.accounts[i].credit - me.accounts[i].debit;
-			me.accounts[i].credit -= me.accounts[i].debit;
-			me.accounts[i].credit_in_account_currency = me.accounts[i].credit;
-			me.accounts[i].debit_in_account_currency = me.accounts[i].debit;
-			me.accounts[i].reference_type = "Journal Entry";
-			me.accounts[i].reference_name = me.name
-		}
-		frm.copy_doc();
-		cur_frm.reload_doc();
-	}
+	reverse_journal_entry: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_reverse_journal_entry",
+			frm: cur_frm
+		})
+	},
 });
 
 $.extend(erpnext.journal_entry, {

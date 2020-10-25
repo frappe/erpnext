@@ -93,6 +93,7 @@ def resolve_dunning(doc, state):
 
 def calculate_interest_and_amount(posting_date, outstanding_amount, rate_of_interest, dunning_fee, overdue_days):
 	interest_amount = 0
+	grand_total = 0
 	if rate_of_interest:
 		interest_per_year = flt(outstanding_amount) * flt(rate_of_interest) / 100
 		interest_amount = (interest_per_year * cint(overdue_days)) / 365 

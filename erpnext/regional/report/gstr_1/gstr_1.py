@@ -131,6 +131,9 @@ class Gstr1Report(object):
 					taxable_value += abs(net_amount)
 				elif tax_rate:
 					taxable_value += abs(net_amount)
+				elif not tax_rate and self.filters.get('type_of_business') == 'EXPORT' \
+					and invoice_details.get('export_type') == "Without Payment of Tax":
+					taxable_value += abs(net_amount)
 
 		row += [tax_rate or 0, taxable_value]
 

@@ -119,12 +119,10 @@ frappe.ui.form.on('Loan', {
 
 	create_loan_security_unpledge: function(frm) {
 		frappe.call({
-			method: "erpnext.loan_management.doctype.loan.loan.create_loan_security_unpledge",
+			method: "erpnext.loan_management.doctype.loan.loan.unpledge_security",
 			args : {
 				"loan": frm.doc.name,
-				"applicant_type": frm.doc.applicant_type,
-				"applicant": frm.doc.applicant,
-				"company": frm.doc.company
+				"as_dict": 1
 			},
 			callback: function(r) {
 				if (r.message)
