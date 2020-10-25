@@ -56,10 +56,10 @@ def make_custom_fields():
 			dict(fieldname='customer_name_in_arabic', label='Customer Name in Arabic',
 				fieldtype='Read Only', insert_after='customer_name',
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
-			dict(fieldname='emirate', label='Emirate', insert_after='customer_address',
-				fieldtype='Read Only', fetch_from='customer_address.emirate'),
+			dict(fieldname='emirate', label='Emirate', insert_after='permit_no', fieldtype='Select',
+				options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain'),
 			dict(fieldname='tourist_tax_return', label='Tax Refund provided to Tourists (AED)',
-				insert_after='permit_no', fieldtype='Currency', print_hide=1, default='0'),
+				insert_after='emirate', fieldtype='Currency', print_hide=1, default='0'),
 		]
 
 	invoice_item_fields = [
@@ -100,10 +100,6 @@ def make_custom_fields():
 		'Supplier': [
 			dict(fieldname='supplier_name_in_arabic', label='Supplier Name in Arabic',
 				fieldtype='Data', insert_after='supplier_name'),
-		],
-		'Address': [
-			dict(fieldname='emirate', label='Emirate', fieldtype='Select', insert_after='state',
-			options='Abu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
 		],
 		'Purchase Invoice': purchase_invoice_fields + invoice_fields,
 		'Purchase Order': purchase_invoice_fields + invoice_fields,

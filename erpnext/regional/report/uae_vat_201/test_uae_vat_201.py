@@ -34,12 +34,11 @@ class TestUaeVat201(TestCase):
 		make_company("_Test Company UAE VAT", "_TCUV")
 		set_vat_accounts()
 
-		make_customers()
+		make_customer()
 
 		make_supplier()
 
 		create_warehouse("_Test UAE VAT Supplier Warehouse", company="_Test Company UAE VAT")
-
 
 		make_item("_Test UAE VAT Item", properties = {"is_zero_rated": 0, "is_exempt": 0})
 		make_item("_Test UAE VAT Zero Rated Item", properties = {"is_zero_rated": 1, "is_exempt": 0})
@@ -122,64 +121,16 @@ def set_vat_accounts():
 			"doctype": "UAE VAT Settings",
 		}).insert()
 
-def make_customers():
-	if not frappe.db.exists("Customer", "_Test Dubai Customer"):
+def make_customer():
+	if not frappe.db.exists("Customer", "_Test UAE Customer"):
 		customer = frappe.get_doc({
 			"doctype": "Customer",
-			"customer_name": "_Test Dubai Customer",
+			"customer_name": "_Test UAE Customer",
 			"customer_type": "Company",
 		})
 		customer.insert()
 	else:
-		customer = frappe.get_doc("Customer", "_Test Dubai Customer")
-
-	if not frappe.db.exists("Customer", "_Test Sharjah Customer"):
-		customer = frappe.get_doc({
-			"doctype": "Customer",
-			"customer_name": "_Test Sharjah Customer",
-			"customer_type": "Company",
-		})
-		customer.insert()
-	else:
-		customer = frappe.get_doc("Customer", "_Test Sharjah Customer")
-
-	if not frappe.db.exists('Address', '_Test Dubai Address'):
-		address = frappe.get_doc({
-			"address_line1": "_Test Address Line 1",
-			"address_title": "_Test Dubai Address",
-			"address_type": "Billing",
-			"city": "_Test City",
-			"state": "Test State",
-			"country": "United Arab Emirates",
-			"doctype": "Address",
-			"emirate": "Dubai"
-		}).insert()
-
-		address.append("links", {
-			"link_doctype": "Customer",
-			"link_name": "_Test Dubai Customer"
-		})
-
-		address.save()
-
-	if not frappe.db.exists('Address', '_Test Sharjah Address'):
-		address = frappe.get_doc({
-			"address_line1": "_Test Address Line 1",
-			"address_title": "_Test Sharjah Address",
-			"address_type": "Billing",
-			"city": "_Test City",
-			"state": "Test State",
-			"country": "United Arab Emirates",
-			"doctype": "Address",
-			"emirate": "Sharjah"
-		}).insert()
-
-		address.append("links", {
-			"link_doctype": "Customer",
-			"link_name": "_Test Sharjah Customer"
-		})
-
-		address.save()
+		customer = frappe.get_doc("Customer", "_Test UAE Customer")
 
 def make_supplier():
 
@@ -230,7 +181,7 @@ def make_item(item_code, properties=None):
 
 def make_sales_invoices():
 	si = create_sales_invoice(company="_Test Company UAE VAT",
-			customer = '_Test Dubai Customer',
+			customer = '_Test UAE Customer',
 			currency = 'AED',
 			warehouse = 'Finished Goods - _TCUV',
 			debit_to = 'Debtors - _TCUV',
@@ -248,10 +199,11 @@ def make_sales_invoices():
 			"description": "VAT 5% @ 5.0",
 			"rate": 5.0
 		})
+	si.emirate = 'Dubai'
 	si.submit()
 
 	si = create_sales_invoice(company="_Test Company UAE VAT",
-			customer = '_Test Sharjah Customer',
+			customer = '_Test UAE Customer',
 			currency = 'AED',
 			warehouse = 'Finished Goods - _TCUV',
 			debit_to = 'Debtors - _TCUV',
@@ -262,6 +214,7 @@ def make_sales_invoices():
 			item = "_Test UAE VAT Item",
 			do_not_save=1
 		)
+	si.emirate = 'Sharjah'
 	si.append("taxes", {
 			"charge_type": "On Net Total",
 			"account_head": "VAT 5% - _TCUV",
@@ -272,7 +225,7 @@ def make_sales_invoices():
 	si.submit()
 
 	si = create_sales_invoice(company="_Test Company UAE VAT",
-			customer = '_Test Dubai Customer',
+			customer = '_Test UAE Customer',
 			currency = 'AED',
 			warehouse = 'Finished Goods - _TCUV',
 			debit_to = 'Debtors - _TCUV',
@@ -286,6 +239,8 @@ def make_sales_invoices():
 
 	si.tourist_tax_return = 2
 
+	si.emirate = 'Dubai'
+
 	si.append("taxes", {
 			"charge_type": "On Net Total",
 			"account_head": "VAT 5% - _TCUV",
@@ -296,7 +251,7 @@ def make_sales_invoices():
 	si.submit()
 
 	si = create_sales_invoice(company="_Test Company UAE VAT",
-			customer = '_Test Sharjah Customer',
+			customer = '_Test UAE Customer',
 			currency = 'AED',
 			warehouse = 'Finished Goods - _TCUV',
 			debit_to = 'Debtors - _TCUV',
@@ -305,10 +260,13 @@ def make_sales_invoices():
 			cost_center = 'Main - _TCUV',
 			sales_taxes_and_charges_template = "UAE VAT 5% - _TCUV",
 			item = "_Test UAE VAT Zero Rated Item",
+			do_not_save=1
 		)
+	si.emirate = 'Sharjah'
+	si.submit()
 
 	si = create_sales_invoice(company="_Test Company UAE VAT",
-			customer = '_Test Sharjah Customer',
+			customer = '_Test UAE Customer',
 			currency = 'AED',
 			warehouse = 'Finished Goods - _TCUV',
 			debit_to = 'Debtors - _TCUV',
@@ -317,7 +275,10 @@ def make_sales_invoices():
 			cost_center = 'Main - _TCUV',
 			sales_taxes_and_charges_template = "UAE VAT 5% - _TCUV",
 			item = "_Test UAE VAT Exempt Item",
+			do_not_save=1
 		)
+	si.emirate = 'Sharjah'
+	si.submit()
 
 def create_purchase_invoices():
 
