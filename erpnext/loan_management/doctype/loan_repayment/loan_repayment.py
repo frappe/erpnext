@@ -13,6 +13,7 @@ from frappe.utils import date_diff, add_days, getdate, add_months, get_first_day
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
+from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
 
 class LoanRepayment(AccountsController):
 
@@ -21,6 +22,9 @@ class LoanRepayment(AccountsController):
 		self.set_missing_values(amounts)
 		self.validate_amount()
 		self.allocate_amounts(amounts['pending_accrual_entries'])
+
+	def before_submit(self):
+		self.book_unaccrued_interest()
 
 	def on_submit(self):
 		self.update_paid_amount()
@@ -72,6 +76,26 @@ class LoanRepayment(AccountsController):
 			msg = _("Amount of {0} is required for Loan closure").format(self.payable_amount)
 			frappe.throw(msg)
 
+	def book_unaccrued_interest(self):
+		if self.payment_type == 'Loan Closure':
+			total_interest_paid = 0
+			for payment in self.repayment_details:
+				total_interest_paid += payment.paid_interest_amount
+
+			if total_interest_paid < self.interest_payable:
+				if not self.is_term_loan:
+					process = process_loan_interest_accrual_for_demand_loans(posting_date=self.posting_date,
+						loan=self.against_loan)
+
+					lia = frappe.db.get_value('Loan Interest Accrual', {'process_loan_interest_accrual':
+						process}, ['name', 'interest_amount', 'payable_principal_amount'], as_dict=1)
+
+					self.append('repayment_details', {
+						'loan_interest_accrual': lia.name,
+						'paid_interest_amount': lia.interest_amount,
+						'paid_principal_amount': lia.payable_principal_amount
+					})
+
 	def update_paid_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
 
@@ -116,6 +140,7 @@ class LoanRepayment(AccountsController):
 	def allocate_amounts(self, paid_entries):
 		self.set('repayment_details', [])
 		self.principal_amount_paid = 0
+		total_interest_paid = 0
 		interest_paid = self.amount_paid - self.penalty_amount
 
 		if self.amount_paid - self.penalty_amount > 0 and paid_entries:
@@ -137,11 +162,16 @@ class LoanRepayment(AccountsController):
 						interest_paid = 0
 						paid_principal=0
 
+				total_interest_paid += interest_amount
 				self.append('repayment_details', {
 					'loan_interest_accrual': lia,
 					'paid_interest_amount': interest_amount,
 					'paid_principal_amount': paid_principal
 				})
+
+		if self.payment_type == 'Loan Closure' and total_interest_paid < self.interest_payable:
+			unaccrued_interest = self.interest_payable - total_interest_paid
+			interest_paid -= unaccrued_interest
 
 		if interest_paid:
 			self.principal_amount_paid += interest_paid
@@ -281,7 +311,7 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 
 		due_date = add_days(entry.posting_date, 1)
 		no_of_late_days = date_diff(posting_date,
-					add_days(due_date, loan_type_details.grace_period_in_days))
+			add_days(due_date, loan_type_details.grace_period_in_days))
 
 		if no_of_late_days > 0 and (not against_loan_doc.repay_from_salary):
 			penalty_amount += (entry.interest_amount * (loan_type_details.penalty_interest_rate / 100) * no_of_late_days)/365
@@ -297,7 +327,10 @@ def get_amounts(amounts, against_loan, posting_date, payment_type):
 		if not final_due_date:
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
-	pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
+	if against_loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
+		pending_principal_amount = against_loan_doc.total_payment - against_loan_doc.total_principal_paid - against_loan_doc.total_interest_payable
+	else:
+		pending_principal_amount = against_loan_doc.disbursed_amount
 
 	if payment_type == "Loan Closure":
 		if due_date:

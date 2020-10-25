@@ -37,6 +37,8 @@ def get_pricing_rules(args, doc=None):
 
 	rules = []
 
+	pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
+
 	if not pricing_rules: return []
 
 	if apply_multiple_pricing_rules(pricing_rules):
@@ -50,6 +52,23 @@ def get_pricing_rules(args, doc=None):
 			rules.append(pricing_rule)
 
 	return rules
+
+def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
+	filtered_pricing_rules = []
+	if doc:
+		for pricing_rule in pricing_rules:
+			if pricing_rule.condition:
+				try:
+					if frappe.safe_eval(pricing_rule.condition, None, doc.as_dict()):
+						filtered_pricing_rules.append(pricing_rule)
+				except:
+					pass
+			else:
+				filtered_pricing_rules.append(pricing_rule)
+	else:
+		filtered_pricing_rules = pricing_rules
+
+	return filtered_pricing_rules
 
 def _get_pricing_rules(apply_on, args, values):
 	apply_on_field = frappe.scrub(apply_on)
@@ -447,9 +466,14 @@ def apply_pricing_rule_on_transaction(doc):
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
 
-def get_applied_pricing_rules(item_row):
-	return (json.loads(item_row.get("pricing_rules"))
-		if item_row.get("pricing_rules") else [])
+def get_applied_pricing_rules(pricing_rules):
+	if pricing_rules:
+		if pricing_rules.startswith('['):
+			return json.loads(pricing_rules)
+		else:
+			return pricing_rules.split(',')
+
+	return []
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	free_item = pricing_rule.free_item

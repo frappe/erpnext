@@ -1,5 +1,4 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
-# MIT License. See license.txt
 
 # For license information, please see license.txt
 
@@ -7,9 +6,10 @@ from __future__ import unicode_literals
 import frappe
 import json
 import copy
+import re
+
 from frappe import throw, _
 from frappe.utils import flt, cint, getdate
-
 from frappe.model.document import Document
 
 from six import string_types
@@ -31,6 +31,7 @@ class PricingRule(Document):
 		self.validate_max_discount()
 		self.validate_price_list_with_currency()
 		self.validate_dates()
+		self.validate_condition()
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
@@ -141,6 +142,10 @@ class PricingRule(Document):
 		if self.valid_from and self.valid_upto and getdate(self.valid_from) > getdate(self.valid_upto):
 			frappe.throw(_("Valid from date must be less than valid upto date"))
 
+	def validate_condition(self):
+		if self.condition and ("=" in self.condition) and re.match("""[\w\.:_]+\s*={1}\s*[\w\.@'"]+""", self.condition):
+			frappe.throw(_("Invalid condition expression"))
+
 #--------------------------------------------------------------------------------
 
 @frappe.whitelist()
@@ -208,7 +213,7 @@ def get_serial_no_for_item(args):
 
 def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=False):
 	from erpnext.accounts.doctype.pricing_rule.utils import (get_pricing_rules,
-		get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
+			get_applied_pricing_rules, get_pricing_rule_items, get_product_discount_rule)
 
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)
@@ -237,7 +242,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 	update_args_for_pricing_rule(args)
 
-	pricing_rules = (get_applied_pricing_rules(args)
+	pricing_rules = (get_applied_pricing_rules(args.get('pricing_rules'))
 		if for_validate and args.get("pricing_rules") else get_pricing_rules(args, doc))
 
 	if pricing_rules:
@@ -365,8 +370,9 @@ def set_discount_amount(rate, item_details):
 			item_details.rate = rate
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
-	from erpnext.accounts.doctype.pricing_rule.utils import get_pricing_rule_items
-	for d in json.loads(pricing_rules):
+	from erpnext.accounts.doctype.pricing_rule.utils import (get_applied_pricing_rules,
+		get_pricing_rule_items)
+	for d in get_applied_pricing_rules(pricing_rules):
 		if not d or not frappe.db.exists("Pricing Rule", d): continue
 		pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 

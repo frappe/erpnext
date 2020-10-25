@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr
+from frappe.utils import cstr, cint
 from frappe import msgprint, throw, _
 
 from frappe.model.document import Document
@@ -159,7 +159,7 @@ class NamingSeries(Document):
 			prefix = self.parse_naming_series()
 			self.insert_series(prefix)
 			frappe.db.sql("update `tabSeries` set current = %s where name = %s",
-				(self.current_value, prefix))
+				(cint(self.current_value), prefix))
 			msgprint(_("Series Updated Successfully"))
 		else:
 			msgprint(_("Please select prefix first"))
