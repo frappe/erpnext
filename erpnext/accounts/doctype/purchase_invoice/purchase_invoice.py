@@ -151,14 +151,16 @@ class PurchaseInvoice(BuyingController):
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
-					You can change the parent account to a Balance Sheet account or select a different account.")
-				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
+			frappe.throw(
+				_("Please ensure {} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account")
+			)
 
 		if self.supplier and account.account_type != "Payable":
-			frappe.throw(_("Please ensure {} account is a Payable account. \
-					Change the account type to Payable or select a different account.")
-				.format(frappe.bold("Credit To")), title=_("Invalid Account"))
+			frappe.throw(
+				_("Please ensure {} account is a Payable account. Change the account type to Payable or select a different account.")
+				.format(frappe.bold("Credit To")), title=_("Invalid Account")
+			)
 
 		self.party_account_currency = account.account_currency
 
@@ -244,10 +246,10 @@ class PurchaseInvoice(BuyingController):
 
 				if self.update_stock and (not item.from_warehouse):
 					if for_validate and item.expense_account and item.expense_account != warehouse_account[item.warehouse]["account"]:
-						frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because account {2}
-							is not linked to warehouse {3} or it is not the default inventory account'''.format(
-								item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]),
-								frappe.bold(item.expense_account), frappe.bold(item.warehouse))))
+						msg = _("Row {}: Expense Head changed to {} ").format(item.idx, frappe.bold(warehouse_account[item.warehouse]["account"]))
+						msg += _("because account {} is not linked to warehouse {} ").format(frappe.bold(item.expense_account), frappe.bold(item.warehouse))
+						msg += _("or it is not the default inventory account")
+						frappe.msgprint(msg, title=_("Expense Head Changed"))
 
 					item.expense_account = warehouse_account[item.warehouse]["account"]
 				else:
@@ -259,19 +261,19 @@ class PurchaseInvoice(BuyingController):
 
 						if negative_expense_booked_in_pr:
 							if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
-								frappe.msgprint(_('''Row {0}: Expense Head changed to {1} because
-								expense is booked against this account in Purchase Receipt {2}'''.format(
-								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.purchase_receipt))))
+								msg = _("Row {}: Expense Head changed to {} ").format(item.idx, frappe.bold(stock_not_billed_account))
+								msg += _("because expense is booked against this account in Purchase Receipt {}").format(frappe.bold(item.purchase_receipt))
+								frappe.msgprint(msg, title=_("Expense Head Changed"))
 
 							item.expense_account = stock_not_billed_account
 					else:
 						# If no purchase receipt present then book expense in 'Stock Received But Not Billed'
 						# This is done in cases when Purchase Invoice is created before Purchase Receipt
 						if for_validate and item.expense_account and item.expense_account != stock_not_billed_account:
-							frappe.msgprint(_('''Row {0}: Expense Head changed to {1} as no Purchase
-								Receipt is created against Item {2}. This is done to handle accounting for cases
-								when Purchase Receipt is created after Purchase Invoice'''.format(
-								item.idx, frappe.bold(stock_not_billed_account), frappe.bold(item.item_code))))
+							msg = _("Row {}: Expense Head changed to {} ").format(item.idx, frappe.bold(stock_not_billed_account))
+							msg += _("as no Purchase Receipt is created against Item {}. ").format(frappe.bold(item.item_code))
+							msg += _("This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice")
+							frappe.msgprint(msg, title=_("Expense Head Changed"))
 
 						item.expense_account = stock_not_billed_account
 
@@ -299,10 +301,11 @@ class PurchaseInvoice(BuyingController):
 
 			for d in self.get('items'):
 				if not d.purchase_order:
-					throw(_("""Purchase Order Required for item {0}
-						To submit the invoice without purchase order please set
-						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Order Required')),
-						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
+					msg = _("Purchase Order Required for item {}").format(frappe.bold(d.item_code))
+					msg += "<br><br>"
+					msg += _("To submit the invoice without purchase order please set {} ").format(frappe.bold(_('Purchase Order Required')))
+					msg += _("as {} in {}").format(frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
+					throw(msg, title=_("Mandatory Purchase Order"))
 
 	def pr_required(self):
 		stock_items = self.get_stock_items()
@@ -313,10 +316,11 @@ class PurchaseInvoice(BuyingController):
 
 			for d in self.get('items'):
 				if not d.purchase_receipt and d.item_code in stock_items:
-					throw(_("""Purchase Receipt Required for item {0}
-						To submit the invoice without purchase receipt please set
-						{1} as {2} in {3}""").format(frappe.bold(d.item_code), frappe.bold(_('Purchase Receipt Required')),
-						frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings')))
+					msg = _("Purchase Receipt Required for item {}").format(frappe.bold(d.item_code))
+					msg += "<br><br>"
+					msg += _("To submit the invoice without purchase receipt please set {} ").format(frappe.bold(_('Purchase Receipt Required')))
+					msg += _("as {} in {}").format(frappe.bold('No'), get_link_to_form('Buying Settings', 'Buying Settings', 'Buying Settings'))
+					throw(msg, title=_("Mandatory Purchase Receipt"))
 
 	def validate_write_off_account(self):
 		if self.write_off_amount and not self.write_off_account:

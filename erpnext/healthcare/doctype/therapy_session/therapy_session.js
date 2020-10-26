@@ -92,7 +92,8 @@ frappe.ui.form.on('Therapy Session', {
 						'start_date': data.message.appointment_date,
 						'start_time': data.message.appointment_time,
 						'service_unit': data.message.service_unit,
-						'company': data.message.company
+						'company': data.message.company,
+						'duration': data.message.duration
 					};
 					frm.set_value(values);
 				}
@@ -107,6 +108,7 @@ frappe.ui.form.on('Therapy Session', {
 				'start_date': '',
 				'start_time': '',
 				'service_unit': '',
+				'duration': ''
 			};
 			frm.set_value(values);
 		}
