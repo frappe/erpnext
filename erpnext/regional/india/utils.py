@@ -132,15 +132,22 @@ def set_place_of_supply(doc, method=None):
 	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
 
 def set_transporter_address_display(doc, method=None):
+	if doc.transporter_address:
+		# once supplier is set, address can be selected from multiple transporter addresses
+		doc.transporter_address_display = get_address_display(doc.transporter_address)
+		return
+
 	transporter_address = frappe.db.get_value("Dynamic Link", {
 		'link_doctype': 'Supplier',
 		'link_name': doc.transporter,
 		'parenttype': 'Address'}, "parent")
 
 	if not transporter_address:
+		doc.transporter_address = ""
 		doc.transporter_address_display = ""
 		return
 
+	doc.transporter_address = transporter_address
 	doc.transporter_address_display = get_address_display(transporter_address)
 
 # don't remove this function it is used in tests
