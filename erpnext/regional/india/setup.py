@@ -328,12 +328,21 @@ def make_custom_fields(update=True):
 			'translatable': 0
 		},
 		{
+			'fieldname': 'transporter_address_display',
+			'label': 'Transporter Address',
+			'fieldtype': 'Small Text',
+			'insert_after': 'transporter_name',
+			'read_only': 1,
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
 			'fieldname': 'mode_of_transport',
 			'label': 'Mode of Transport',
 			'fieldtype': 'Select',
 			'options': '\nRoad\nAir\nRail\nShip',
 			'default': 'Road',
-			'insert_after': 'transporter_name',
+			'insert_after': 'transporter_address_display',
 			'print_hide': 1,
 			'translatable': 0
 		},

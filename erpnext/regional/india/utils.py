@@ -12,6 +12,7 @@ from erpnext.regional.india import number_state_mapping
 from six import string_types
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_account_currency
+from frappe.contacts.doctype.address.address import get_address_display
 
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
@@ -129,6 +130,18 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 
 def set_place_of_supply(doc, method=None):
 	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
+
+def set_transporter_address_display(doc, method=None):
+	transporter_address = frappe.db.get_value("Dynamic Link", {
+		'link_doctype': 'Supplier',
+		'link_name': doc.transporter,
+		'parenttype': 'Address'}, "parent")
+
+	if not transporter_address:
+		doc.transporter_address_display = ""
+		return
+
+	doc.transporter_address_display = get_address_display(transporter_address)
 
 # don't remove this function it is used in tests
 def test_method():
