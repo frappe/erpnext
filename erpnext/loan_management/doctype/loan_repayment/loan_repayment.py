@@ -310,6 +310,7 @@ def get_accrued_interest_entries(against_loan):
 				payable_principal_amount - paid_principal_amount > 0)
 			AND
 				docstatus = 1
+			ORDER BY posting_date
 		""", (against_loan), as_dict=1)
 
 	return unpaid_accrued_entries
@@ -366,7 +367,8 @@ def get_amounts(amounts, against_loan, posting_date):
 	if due_date:
 		pending_days = date_diff(posting_date, due_date) + 1
 	else:
-		pending_days = date_diff(posting_date, against_loan_doc.disbursement_date) + 1
+		last_accrual_date = get_last_accural_date(against_loan_doc.name)
+		pending_days = date_diff(posting_date, last_accrual_date) + 1
 
 	if pending_days > 0:
 		principal_amount = flt(pending_principal_amount, precision)
