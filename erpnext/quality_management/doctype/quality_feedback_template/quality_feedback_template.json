@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:TMPL-{template}",
+ "autoname": "field:template",
  "creation": "2019-05-26 21:17:24.283061",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -17,7 +17,8 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Template",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "cb_00",
@@ -36,7 +37,7 @@
   }
  ],
  "links": [],
- "modified": "2020-07-03 16:06:03.749415",
+ "modified": "2020-10-21 12:39:02.221128",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Template",

@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:FDBK-{#####}",
+ "autoname": "format:QA-FB-{#####}",
  "creation": "2019-05-26 21:23:05.308379",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -60,7 +60,7 @@
   }
  ],
  "links": [],
- "modified": "2020-07-03 15:50:58.589302",
+ "modified": "2020-10-21 12:39:20.740854",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback",

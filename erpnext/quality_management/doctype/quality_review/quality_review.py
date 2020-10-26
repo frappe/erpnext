@@ -7,7 +7,9 @@ import frappe
 from frappe.model.document import Document
 
 class QualityReview(Document):
-	pass
+	def validate(self):
+		# if any child item is failed, fail the parent
+		self.status = 'Failed' if any([d.status=='Failed' for d in self.reviews]) else 'Passed'
 
 def review():
 	day = frappe.utils.getdate().day
