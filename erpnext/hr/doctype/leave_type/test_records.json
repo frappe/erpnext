@@ -1,35 +1,35 @@
 [
-    {
-        "doctype": "Leave Type",
-        "leave_type_name": "_Test Leave Type",
-        "include_holiday": 1,
-        "full_day_abbr": "TLT",
-        "half_day_abbr": "LTHD"
-    },
-    {
-        "doctype": "Leave Type",
-        "is_lwp": 1,
-        "leave_type_name": "_Test Leave Type LWP",
-        "include_holiday": 1,
-        "full_day_abbr": "LWP",
-        "half_day_abbr": "LWPHD"
-    },
-    {
-        "doctype": "Leave Type",
-        "leave_type_name": "_Test Leave Type Encashment",
-        "include_holiday": 1,
-        "allow_encashment": 1,
-        "encashment_threshold_days": 5,
-        "earning_component": "Leave Encashment",
-        "full_day_abbr": "LTE",
-        "half_day_abbr": "LTEHD"
-    },
-    {
-        "doctype": "Leave Type",
-        "leave_type_name": "_Test Leave Type Earned",
-        "include_holiday": 1,
-        "is_earned_leave": 1,
-        "full_day_abbr": "EL",
-        "half_day_abbr": "ELHD"
-    }
+	{
+		"doctype": "Leave Type",
+		"leave_type_name": "_Test Leave Type",
+		"include_holiday": 1,
+		"full_day_abbr": "TLT",
+		"half_day_abbr": "LTHD"
+	},
+	{
+		"doctype": "Leave Type",
+		"is_lwp": 1,
+		"leave_type_name": "_Test Leave Type LWP",
+		"include_holiday": 1,
+		"full_day_abbr": "LWP",
+		"half_day_abbr": "LWPHD"
+	},
+	{
+		"doctype": "Leave Type",
+		"leave_type_name": "_Test Leave Type Encashment",
+		"include_holiday": 1,
+		"allow_encashment": 1,
+		"encashment_threshold_days": 5,
+		"earning_component": "Leave Encashment",
+		"full_day_abbr": "LTE",
+		"half_day_abbr": "LTEHD"
+	},
+	{
+		"doctype": "Leave Type",
+		"leave_type_name": "_Test Leave Type Earned",
+		"include_holiday": 1,
+		"is_earned_leave": 1,
+		"full_day_abbr": "EL",
+		"half_day_abbr": "ELHD"
+	}
 ]
