@@ -15,19 +15,33 @@ from pyqrcode import create as qrcreate
 from Crypto.Cipher import PKCS1_v1_5, AES
 from Crypto.Util.Padding import pad, unpad
 from frappe.model.document import Document
-from frappe import _, get_module_path, scrub
+from frappe import _, get_module_path, scrub, bold
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
 from frappe.utils.data import get_datetime, cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable')
-	if not doc.doctype in ['Sales Invoice', 'Purchase Invoice'] or not einvoicing_enabled: return
+	invalid_doctype = doc.doctype not in ['Sales Invoice', 'Purchase Invoice']
+	invalid_supply_type = doc.gst_category not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 
-	if doc.docstatus == 0 and doc._action == 'save' and doc.irn:
-		frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
+	if invalid_doctype or invalid_supply_type or not einvoicing_enabled: return
+
+	if doc.docstatus == 0 and doc._action == 'save':
+		if doc.irn:
+			frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
+		if len(doc.name) > 16:
+			title = _('Document Name Too Long')
+			msg = (_('As you have E-Invoicing enabled, To be able to generate IRN for this invoice, document name {} exceed 16 letters. ')
+						.format(bold(_('should not'))))
+			msg += '<br><br>'
+			msg += (_('You {} modify your {} in order to have document name of {} length of 16. ')
+						.format(bold(_('must')), bold(_('naming series')), bold(_('maximum'))))
+			frappe.throw(msg, title=title)
+
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
+
 	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
 		frappe.throw(_('You must cancel IRN before cancelling the document.'), title=_('Cancel Not Allowed'))
 
