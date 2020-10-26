@@ -250,7 +250,9 @@ class TestLeaveApplication(unittest.TestCase):
 			frappe.get_doc(dict(
 				leave_type_name = leave_type,
 				doctype = 'Leave Type',
-				is_optional_leave = 1
+				is_optional_leave = 1,
+				full_day_abbr = "LT",
+				half_day_abbr = "LTHD",
 			)).insert()
 
 		allocate_leaves(employee, leave_period, leave_type, 10)
@@ -286,7 +288,9 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_type = frappe.get_doc(dict(
 			leave_type_name = 'Test Leave Type',
 			doctype = 'Leave Type',
-			max_leaves_allowed = 5
+			max_leaves_allowed = 5,
+			full_day_abbr = "LT",
+			half_day_abbr = "LTHD",
 		)).insert()
 
 		date = add_days(nowdate(), -7)
@@ -326,7 +330,9 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_type = frappe.get_doc(dict(
 			leave_type_name = 'Test Leave Type',
 			doctype = 'Leave Type',
-			applicable_after = 15
+			applicable_after = 15,
+			full_day_abbr = "LT",
+			half_day_abbr = "LTHD",
 		)).insert()
 		date = add_days(nowdate(), -7)
 		frappe.db.set_value('Employee', employee.name, "date_of_joining", date)
@@ -349,7 +355,9 @@ class TestLeaveApplication(unittest.TestCase):
 		frappe.delete_doc_if_exists("Leave Type", "Test Leave Type 1", force=1)
 		leave_type_1 = frappe.get_doc(dict(
 			leave_type_name = 'Test Leave Type 1',
-			doctype = 'Leave Type'
+			doctype = 'Leave Type',
+			full_day_abbr = "LT1",
+			half_day_abbr = "LT1HD",
 		)).insert()
 
 		allocate_leaves(employee, leave_period, leave_type_1.name, 10)
@@ -377,7 +385,9 @@ class TestLeaveApplication(unittest.TestCase):
 			leave_type_name = 'Test Leave Type',
 			doctype = 'Leave Type',
 			max_leaves_allowed = 15,
-			max_continuous_days_allowed = 3
+			max_continuous_days_allowed = 3,
+			full_day_abbr = "LT",
+			half_day_abbr = "LTHD",
 		)).insert()
 
 		date = add_days(nowdate(), -7)
@@ -421,14 +431,13 @@ class TestLeaveApplication(unittest.TestCase):
 		employee = get_employee()
 		leave_type = 'Test Earned Leave Type'
 		frappe.delete_doc_if_exists("Leave Type", 'Test Earned Leave Type', force=1)
-		frappe.get_doc(dict(
-			leave_type_name = leave_type,
-			doctype = 'Leave Type',
-			is_earned_leave = 1,
-			earned_leave_frequency = 'Monthly',
-			rounding = 0.5,
-			max_leaves_allowed = 6
-		)).insert()
+		if not frappe.db.exists('Leave Type', leave_type):
+			frappe.get_doc(dict(
+				leave_type_name = leave_type, doctype = 'Leave Type',
+				is_earned_leave = 1, earned_leave_frequency = 'Monthly',
+				rounding = 0.5, max_leaves_allowed = 6,
+				full_day_abbr = "LT", half_day_abbr = "LTHD",
+			)).insert()
 
 		leave_policy = frappe.get_doc({
 			"doctype": "Leave Policy",

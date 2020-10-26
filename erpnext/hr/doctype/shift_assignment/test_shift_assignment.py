@@ -6,13 +6,12 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import nowdate, add_days
-
-test_dependencies = ["Shift Type"]
-
+from erpnext.hr.doctype.shift_type.test_shift_type import create_shift_type
 class TestShiftAssignment(unittest.TestCase):
 
 	def setUp(self):
 		frappe.db.sql("delete from `tabShift Assignment`")
+		create_shift_type()
 
 	def test_make_shift_assignment(self):
 		shift_assignment = frappe.get_doc({
