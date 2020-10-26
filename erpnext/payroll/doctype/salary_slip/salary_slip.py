@@ -350,15 +350,9 @@ class SalarySlip(TransactionBase):
 		daily_wages_fraction_for_half_day = \
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
-		# leave_types = frappe.db.sql(""" Select name, is_lwp, is_ppl, fraction_of_daily_salary_per_leave, include_holiday
-		# 	FROM `tabLeave Type`
-		# 	WHERE is_lwp = 1 or is_ppl = 1
-		# """, as_dict = 1)
-
 		leave_types = frappe.get_all("Leave Type",
-			filters = {"is_lwp": 1},
-			or_filters = {"is_ppl": 1},
-			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"], as_dict=1)
+			or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
+			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"])
 
 		leave_type_map = {}
 		for leave_type in leave_types:
@@ -380,10 +374,11 @@ class SalarySlip(TransactionBase):
 
 			if formatdate(d.attendance_date, "yyyy-mm-dd") in holidays:
 				if d.status == "Absent" or \
-					(d.leave_type and d.leave_type in leave_type_map.keys() and not leave_type_map[d.leave_type][include_holiday]):
+					(d.leave_type and d.leave_type in leave_type_map.keys() and not leave_type_map[d.leave_type]['include_holiday']):
 						continue
 
-			fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type]["fraction_of_daily_salary_per_leave"]
+			if d.leave_type:
+				fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type]["fraction_of_daily_salary_per_leave"]
 
 			if d.status == "Half Day":
 				equivalent_lwp =  (1 - daily_wages_fraction_for_half_day)
@@ -391,15 +386,13 @@ class SalarySlip(TransactionBase):
 				if d.leave_type in leave_type_map.keys() and leave_type_map[d.leave_type]["is_ppl"]:
 					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
 				lwp += equivalent_lwp
-
-			elif d.status == "On Leave" and d.leave_type in leave_type_map.keys():
+			elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
 				equivalent_lwp = 1
 				if leave_type_map[d.leave_type]["is_ppl"]:
 					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
 				lwp += equivalent_lwp
 			elif d.status == "Absent":
 				absent += 1
-
 		return lwp, absent
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
@@ -983,9 +976,8 @@ class SalarySlip(TransactionBase):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
 			total_amount = amounts['interest_amount'] + amounts['payable_principal_amount']
 			if payment.total_payment > total_amount:
-				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2}
-					against loan {3}""").format(payment.idx, frappe.bold(payment.total_payment),
-					frappe.bold(total_amount), frappe.bold(payment.loan)))
+				frappe.throw(_("Row {0}: Paid amount {1} is greater than pending accrued amount {2}against loan {3}").format(
+					payment.idx, frappe.bold(payment.total_payment),frappe.bold(total_amount), frappe.bold(payment.loan)))
 
 			self.total_interest_amount += payment.interest_amount
 			self.total_principal_amount += payment.principal_amount
