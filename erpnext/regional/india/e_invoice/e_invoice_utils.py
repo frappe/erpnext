@@ -418,7 +418,7 @@ def get_payment_details(invoice):
 def get_return_doc_reference(invoice):
 	invoice_date = frappe.db.get_value('Sales Invoice', invoice.return_against, 'posting_date')
 	return frappe._dict(dict(
-		invoice_name=invoice.return_against, invoice_date=invoice_date
+		invoice_name=invoice.return_against, invoice_date=format_date(invoice_date, 'dd/mm/yyyy')
 	))
 
 def get_eway_bill_details(invoice):
