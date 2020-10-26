@@ -396,13 +396,13 @@ def get_value_details(invoice):
 	for t in invoice.taxes:
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
-				value_details.total_cess_amt += abs(t.base_tax_amount)
+				value_details.total_cess_amt += abs(t.base_tax_amount_after_discount_amount)
 			elif t.account_head in gst_accounts.igst_account:
-				value_details.total_igst_amt += abs(t.base_tax_amount)
+				value_details.total_igst_amt += abs(t.base_tax_amount_after_discount_amount)
 			elif t.account_head in gst_accounts.sgst_account:
-				value_details.total_sgst_amt += abs(t.base_tax_amount)
+				value_details.total_sgst_amt += abs(t.base_tax_amount_after_discount_amount)
 			elif t.account_head in gst_accounts.cgst_account:
-				value_details.total_cgst_amt += abs(t.base_tax_amount)
+				value_details.total_cgst_amt += abs(t.base_tax_amount_after_discount_amount)
 	
 	return value_details
 
@@ -499,7 +499,7 @@ def make_einvoice(doctype, name):
 def validate_einvoice(validations, einvoice, errors=[]):
 	for fieldname, field_validation in validations.items():
 		value = einvoice.get(fieldname, None)
-		if value in (None, "None", {}, []):
+		if not value or value == "None":
 			# remove keys with empty values
 			einvoice.pop(fieldname, None)
 			continue
@@ -511,6 +511,9 @@ def validate_einvoice(validations, einvoice, errors=[]):
 			if isinstance(value, list):
 				for d in value:
 					validate_einvoice(child_validations, d, errors)
+					if not d:
+						# remove empty dicts
+						einvoice.pop(fieldname, None)
 			else:
 				validate_einvoice(child_validations, value, errors)
 				if not value:
