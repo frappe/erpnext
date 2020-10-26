@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 import frappe
+from erpnext.hr.utils import create_standard_attendance_status
 
 def execute():
 
@@ -7,34 +8,7 @@ def execute():
     frappe.reload_doc("HR", "doctype", 'Leave Application')
     frappe.reload_doc("HR", "doctype", 'Attendance')
 
-    statuses = {
-        "Present": "P",
-        "Absent": "A",
-        "Work From Home": "WFH",
-        "Half Day": "HD",
-        "On Leave": "L"
-    }
-
-    for status in statuses.keys():
-        if not frappe.db.exists("Attendance Status", status):
-            att_status = frappe.new_doc("Attendance Status")
-            att_status.name = status
-            att_status.abbr = statuses[status]
-
-            if status == "Half Day":
-                att_status.is_half_day = 1
-                att_status.applicable_for_employee_checkins = 1
-                att_status.applicable_for_leave_application = 1
-                att_status.applicable_for_attendance_request = 1
-            elif status == "On Leave":
-                att_status.is_leave = 1
-                att_status.applicable_for_leave_application = 1
-            elif status in ["Work From Home", "Present"]:
-                att_status.is_present = 1
-                if status == "Present":
-                    att_status.applicable_for_employee_checkins = 1
-
-            att_status.save()
+    create_standard_attendance_status()
 
     #create default Abbr for Leave type
 
