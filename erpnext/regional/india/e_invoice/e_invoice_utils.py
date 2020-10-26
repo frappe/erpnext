@@ -247,7 +247,6 @@ def decrypt_irn_response(data):
 def handle_err_response(response):
 	if response.get('Status') == 0:
 		err_details = response.get('ErrorDetails')
-		print(response)
 		errors = []
 		for d in err_details:
 			err_code = d.get('ErrorCode')
@@ -260,11 +259,12 @@ def handle_err_response(response):
 			errors.append(d.get('ErrorMessage'))
 
 		if errors:
+			frappe.log_error(title="E Invoice API Request Failed", message=json.dumps(errors, default=str, indent=4))
 			if len(errors) > 1:
 				li = ['<li>'+ d +'</li>' for d in errors]
 				frappe.throw(_("""<ul style='padding-left: 20px'>{}</ul>""").format(''.join(li)), title=_('API Request Failed'))
 			else:
-				frappe.throw(_('{}').format(errors[0]), title=_('API Request Failed'))
+				frappe.throw(errors[0], title=_('API Request Failed'))
 
 	return response
 
@@ -488,6 +488,7 @@ def make_einvoice(doctype, name):
 	validations = json.loads(read_json('einv_validation'))
 	errors = validate_einvoice(validations, einvoice, [])
 	if errors:
+		frappe.log_error(title="E Invoice Validation Failed", message=json.dumps(errors, default=str, indent=4))
 		if len(errors) > 1:
 			li = ['<li>'+ d +'</li>' for d in errors]
 			frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=_('E Invoice Validation Failed'))
