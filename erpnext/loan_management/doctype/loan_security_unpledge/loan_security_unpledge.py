@@ -51,9 +51,11 @@ class LoanSecurityUnpledge(Document):
 		for security in self.securities:
 			pledged_qty = pledge_qty_map.get(security.loan_security, 0)
 			if security.qty > pledged_qty:
-				frappe.throw(_("""Row {0}: {1} {2} of {3} is pledged against Loan {4}.
-					You are trying to unpledge more""").format(security.idx, pledged_qty, security.uom,
-					frappe.bold(security.loan_security), frappe.bold(self.loan)))
+				msg = _("Row {0}: {1} {2} of {3} is pledged against Loan {4}.").format(security.idx, pledged_qty, security.uom,
+					frappe.bold(security.loan_security), frappe.bold(self.loan))
+				msg += "<br>"
+				msg += _("You are trying to unpledge more.")
+				frappe.throw(msg, title=_("Loan Security Unpledge Error"))
 
 			qty_after_unpledge = pledged_qty - security.qty
 			ltv_ratio = ltv_ratio_map.get(security.loan_security_type)
