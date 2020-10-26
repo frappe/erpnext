@@ -57,29 +57,29 @@ frappe.ui.form.on('Production Plan', {
 		if (frm.doc.docstatus === 1) {
 			frm.trigger("show_progress");
 
-			if  (frm.doc.status === "Closed") {
-				frm.add_custom_button(__("Re-open"), function() {
-					frm.events.close_open_production_plan(frm, false);
-				}, __("Status"));
-			} else {
-				frm.add_custom_button(__("Close"), function() {
-					frm.events.close_open_production_plan(frm, true);
-				}, __("Status"));
+			if (frm.doc.status !== "Completed") {
+				if (frm.doc.po_items && frm.doc.status !== "Closed") {
+					frm.add_custom_button(__("Work Order"), ()=> {
+						frm.trigger("make_work_order");
+					}, __('Create'));
+				}
+
+				if (frm.doc.mr_items && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
+					frm.add_custom_button(__("Material Request"), ()=> {
+						frm.trigger("make_material_request");
+					}, __('Create'));
+				}
+
+				if  (frm.doc.status === "Closed") {
+					frm.add_custom_button(__("Re-open"), function() {
+						frm.events.close_open_production_plan(frm, false);
+					}, __("Status"));
+				} else {
+					frm.add_custom_button(__("Close"), function() {
+						frm.events.close_open_production_plan(frm, true);
+					}, __("Status"));
+				}
 			}
-		}
-
-		if (frm.doc.docstatus === 1 && frm.doc.po_items
-			&& !in_list(['Closed', 'Completed'], frm.doc.status)) {
-			frm.add_custom_button(__("Work Order"), ()=> {
-				frm.trigger("make_work_order");
-			}, __('Create'));
-		}
-
-		if (frm.doc.docstatus === 1 && frm.doc.mr_items
-			&& !in_list(['Material Requested', 'Completed', 'Closed'], frm.doc.status)) {
-			frm.add_custom_button(__("Material Request"), ()=> {
-				frm.trigger("make_material_request");
-			}, __('Create'));
 		}
 
 		if (frm.doc.status !== "Closed") {
