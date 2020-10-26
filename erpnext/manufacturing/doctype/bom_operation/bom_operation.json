@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:49",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "sequence_id",
   "operation",
   "workstation",
   "description",
@@ -106,11 +108,19 @@
    "fieldname": "batch_size",
    "fieldtype": "Int",
    "label": "Batch Size"
+  },
+  {
+   "depends_on": "eval:doc.parenttype == \"Routing\"",
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "label": "Sequence ID"
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2020-06-16 17:01:11.128420",
+ "links": [],
+ "modified": "2020-10-13 18:14:10.018774",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

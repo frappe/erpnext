@@ -282,7 +282,8 @@ doc_events = {
 # to maintain data integrity we exempted payment entry. it will un-link when sales invoice get cancelled.
 # if payment entry not in auto cancel exempted doctypes it will cancel payment entry.
 auto_cancel_exempted_doctypes= [
-	"Payment Entry"
+	"Payment Entry",
+	"Inpatient Medication Entry"
 ]
 
 scheduler_events = {
