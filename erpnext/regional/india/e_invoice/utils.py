@@ -18,7 +18,7 @@ from frappe.model.document import Document
 from frappe import _, get_module_path, scrub, bold
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import get_datetime, cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime
+from frappe.utils.data import get_datetime, cstr, cint, formatdate as format_date, flt, time_diff_in_seconds, now_datetime
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable')
