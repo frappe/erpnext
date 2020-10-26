@@ -96,13 +96,13 @@ class POSInvoice(SalesInvoice):
 				serial_nos = get_serial_nos(d.serial_no)
 				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
 
-				invalid_serial_nos = frappe.bold(', '.join(invalid_serial_nos))
+				bold_invalid_serial_nos = frappe.bold(', '.join(invalid_serial_nos))
 				if len(invalid_serial_nos) == 1:
 					msg = (_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
-								.format(d.idx, invalid_serial_nos))
-				else:
+								.format(d.idx, bold_invalid_serial_nos))
+				elif invalid_serial_nos:
 					msg = (_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
-								.format(d.idx, invalid_serial_nos))
+								.format(d.idx, bold_invalid_serial_nos))
 
 			else:
 				if allow_negative_stock:
