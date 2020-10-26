@@ -83,10 +83,10 @@
             "InvStDt": "{period_details.start_date}",
             "InvEndDt": "{period_details.end_date}"
         }},
-        "PrecDocDtls": {{
+        "PrecDocDtls": [{{
             "InvNo": "{prev_doc_details.invoice_name}",
             "InvDt": "{prev_doc_details.invoice_date}"
-        }}
+        }}]
     }},
     "ExpDtls": {{
         "ShipBNo": "{export_details.bill_no}",
