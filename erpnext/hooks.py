@@ -21,9 +21,14 @@ web_include_js = "assets/js/erpnext-web.min.js"
 web_include_css = "assets/css/erpnext-web.css"
 
 doctype_js = {
+	"Address": "public/js/address.js",
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js"
+}
+
+override_doctype_class = {
+	'Address': 'erpnext.accounts.custom.address.ERPNextAddress'
 }
 
 welcome_email = "erpnext.setup.utils.welcome_email"
@@ -277,7 +282,8 @@ doc_events = {
 # to maintain data integrity we exempted payment entry. it will un-link when sales invoice get cancelled.
 # if payment entry not in auto cancel exempted doctypes it will cancel payment entry.
 auto_cancel_exempted_doctypes= [
-	"Payment Entry"
+	"Payment Entry",
+	"Inpatient Medication Entry"
 ]
 
 scheduler_events = {
