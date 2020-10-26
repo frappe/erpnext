@@ -210,6 +210,7 @@
 [data-route="point-of-sale"] .item-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale"] .total-summary-wrapper:last-child { border-bottom: none; }
 [data-route="point-of-sale"] .invoices-container .invoice-wrapper:last-child { border-bottom: none; }
+[data-route="point-of-sale"] .new-btn { background-color: #5e64ff; color: white; border: none;}
 [data-route="point-of-sale"] .summary-btns:last-child { margin-right: 0px; }
 [data-route="point-of-sale"] ::-webkit-scrollbar { width: 1px }
 
