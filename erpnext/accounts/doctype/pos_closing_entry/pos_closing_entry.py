@@ -14,19 +14,51 @@ from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import
 
 class POSClosingEntry(Document):
 	def validate(self):
-		user = frappe.get_all('POS Closing Entry',
-			filters = { 'user': self.user, 'docstatus': 1 },
+		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
+			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
+
+		self.validate_pos_closing()
+		self.validate_pos_invoices()
+	
+	def validate_pos_closing(self):
+		user = frappe.get_all("POS Closing Entry", 
+			filters = { "user": self.user, "docstatus": 1, "pos_profile": self.pos_profile },
 			or_filters = {
-					'period_start_date': ('between', [self.period_start_date, self.period_end_date]),
-					'period_end_date': ('between', [self.period_start_date, self.period_end_date])
+				"period_start_date": ("between", [self.period_start_date, self.period_end_date]),
+				"period_end_date": ("between", [self.period_start_date, self.period_end_date])
 			})
 
 		if user:
-			frappe.throw(_("POS Closing Entry {} against {} between selected period"
-				.format(frappe.bold("already exists"), frappe.bold(self.user))), title=_("Invalid Period"))
+			bold_already_exists = frappe.bold(_("already exists"))
+			bold_user = frappe.bold(self.user)
+			frappe.throw(_("POS Closing Entry {} against {} between selected period")
+				.format(bold_already_exists, bold_user), title=_("Invalid Period"))
+	
+	def validate_pos_invoices(self):
+		invalid_rows = []
+		for d in self.pos_transactions:
+			invalid_row = {'idx': d.idx}
+			pos_invoice = frappe.db.get_values("POS Invoice", d.pos_invoice, 
+				["consolidated_invoice", "pos_profile", "docstatus", "owner"], as_dict=1)[0]
+			if pos_invoice.consolidated_invoice:
+				invalid_row.setdefault('msg', []).append(_('POS Invoice is {}').format(frappe.bold("already consolidated")))
+				invalid_rows.append(invalid_row)
+				continue
+			if pos_invoice.pos_profile != self.pos_profile:
+				invalid_row.setdefault('msg', []).append(_("POS Profile doesn't matches {}").format(frappe.bold(self.pos_profile)))
+			if pos_invoice.docstatus != 1:
+				invalid_row.setdefault('msg', []).append(_('POS Invoice is not {}').format(frappe.bold("submitted")))
+			if pos_invoice.owner != self.user:
+				invalid_row.setdefault('msg', []).append(_("POS Invoice isn't created by user {}").format(frappe.bold(self.owner)))
 
-		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
-			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
+			if invalid_row.get('msg'):
+				invalid_rows.append(invalid_row)
+
+		if not invalid_rows:
+			return
+
+		error_list = [_("Row #{}: {}").format(row.get('idx'), row.get('msg')) for row in invalid_rows]
+		frappe.throw(error_list, title=_("Invalid POS Invoices"), as_list=True)
 
 	def on_submit(self):
 		merge_pos_invoices(self.pos_transactions)
@@ -47,16 +79,15 @@ def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
 	return [c['user'] for c in cashiers_list]
 
 @frappe.whitelist()
-def get_pos_invoices(start, end, user):
+def get_pos_invoices(start, end, pos_profile, user):
 	data = frappe.db.sql("""
 	select
 		name, timestamp(posting_date, posting_time) as "timestamp"
 	from
 		`tabPOS Invoice`
 	where
-		owner = %s and docstatus = 1 and
-		(consolidated_invoice is NULL or consolidated_invoice = '')
-	""", (user), as_dict=1)
+		owner = %s and docstatus = 1 and pos_profile = %s and ifnull(consolidated_invoice,'') = ''
+	""", (user, pos_profile), as_dict=1)
 
 	data = list(filter(lambda d: get_datetime(start) <= get_datetime(d.timestamp) <= get_datetime(end), data))
 	# need to get taxes and payments so can't avoid get_doc
@@ -76,7 +107,8 @@ def make_closing_entry_from_opening(opening_entry):
 	closing_entry.net_total = 0
 	closing_entry.total_quantity = 0
 
-	invoices = get_pos_invoices(closing_entry.period_start_date, closing_entry.period_end_date, closing_entry.user)
+	invoices = get_pos_invoices(closing_entry.period_start_date, closing_entry.period_end_date,
+		closing_entry.pos_profile, closing_entry.user)
 
 	pos_transactions = []
 	taxes = []
