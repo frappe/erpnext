@@ -365,13 +365,39 @@ class SellingController(StockController):
 		self.make_sl_entries(sl_entries)
 
 	def set_po_nos(self):
-		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
-			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
-			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
-			if sales_orders:
-				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				if po_nos and po_nos[0].get('po_no'):
-					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+		self.po_no = ''
+		if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
+			self.set_pos_for_sales_invoice()
+		if self.doctype == 'Delivery Note' and hasattr(self, "items"):
+			self.set_pos_for_delivery_note()
+
+	def set_pos_for_sales_invoice(self):
+		ref_fieldname1 = "sales_order"
+		ref_fieldname2 = "delivery_note"
+		sales_orders = list(set([d.get(ref_fieldname1) for d in self.items if d.get(ref_fieldname1)]))
+		if sales_orders:
+			so_po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
+			if so_po_nos and so_po_nos[0].get('po_no'):
+				self.po_no += ', '.join(list(set([d.po_no for d in so_po_nos if d.po_no])))
+		delivery_notes = list(set([d.get(ref_fieldname2) for d in self.items if d.get(ref_fieldname2)]))
+		if delivery_notes:
+			dn_po_nos = frappe.get_all('Delivery Note', 'po_no', filters = {'name': ('in', delivery_notes)})
+			if dn_po_nos and dn_po_nos[0].get('po_no'):
+				self.po_no += ', '.join(list(set([d.po_no for d in dn_po_nos if d.po_no])))
+
+	def set_pos_for_delivery_note(self):
+		ref_fieldname1 = "against_sales_order"
+		ref_fieldname2 = "against_sales_invoice"
+		sales_orders = list(set([d.get(ref_fieldname1) for d in self.items if d.get(ref_fieldname1)]))
+		sales_invoices = list(set([d.get(ref_fieldname2) for d in self.items if d.get(ref_fieldname2)]))
+		if sales_orders:
+			so_po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
+			if so_po_nos and so_po_nos[0].get('po_no'):
+				self.po_no += ', '.join(list(set([d.po_no for d in so_po_nos if d.po_no])))
+		if sales_invoices:
+			si_po_nos = frappe.get_all('Sales Invoice', 'po_no', filters = {'name': ('in', sales_invoices)})
+			if si_po_nos and si_po_nos[0].get('po_no'):
+				self.po_no += ', '.join(list(set([d.po_no for d in si_po_nos if d.po_no])))
 
 	def set_gross_profit(self):
 		if self.doctype == "Sales Order":
