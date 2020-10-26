@@ -37,7 +37,7 @@ def validate_event_and_status(order_id, event, status):
 			frappe.throw("Getting unexpect status!")
 
 	elif event == "wholesale_order":
-		if status != "on-hold":
+		if status != "pending":
 			frappe.log_error(message="Order ID: {} -- Status {}".format(order_id, status), 
 				title="WooCommerce Event: {}".format(event))
 			frappe.throw("Getting unexpect status!")
