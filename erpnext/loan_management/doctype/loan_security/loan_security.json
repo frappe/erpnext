@@ -25,6 +25,7 @@
   },
   {
    "fetch_from": "loan_security_type.haircut",
+   "fetch_if_empty": 1,
    "fieldname": "haircut",
    "fieldtype": "Percent",
    "label": "Haircut %"
@@ -64,8 +65,9 @@
    "reqd": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-04-29 13:21:26.043492",
+ "modified": "2020-10-26 07:34:48.601766",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",
