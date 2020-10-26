@@ -386,7 +386,7 @@ def get_value_details(invoice):
 	value_details = frappe._dict(dict())
 	value_details.base_net_total = abs(invoice.base_net_total)
 	value_details.invoice_discount_amt = abs(invoice.discount_amount)
-	value_details.round_off = abs(invoice.base_rounding_adjustment)
+	value_details.round_off = 0
 	value_details.base_grand_total = abs(invoice.base_rounded_total)
 	value_details.grand_total = abs(invoice.rounded_total)
 	value_details.total_cgst_amt = 0
