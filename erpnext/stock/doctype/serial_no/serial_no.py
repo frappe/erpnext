@@ -343,10 +343,11 @@ def validate_material_transfer_entry(sle_doc):
 
 def validate_so_serial_no(sr, sales_order):
 	if not sr.sales_order or sr.sales_order!= sales_order:
-		msg = _("Sales Order {0} has reservation for item {1}")
-		msg += _(", you can only deliver reserved {1} against {0}.")
-		msg += _(" Serial No {2} cannot be delivered")
-		frappe.throw(msg.format(sales_order, sr.item_code, sr.name))
+		msg = (_("Sales Order {0} has reservation for the item {1}, you can only deliver reserved {1} against {0}.")
+			.format(sales_order, sr.item_code))
+
+		frappe.throw(_("""{0} Serial No {1} cannot be delivered""")
+			.format(msg, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
 	if (sn.warehouse and not sle.skip_serial_no_validaiton
@@ -575,8 +576,8 @@ def get_pos_reserved_serial_nos(filters):
 
 	pos_transacted_sr_nos = frappe.db.sql("""select item.serial_no as serial_no
 		from `tabPOS Invoice` p, `tabPOS Invoice Item` item
-		where p.name = item.parent 
-		and p.consolidated_invoice is NULL 
+		where p.name = item.parent
+		and p.consolidated_invoice is NULL
 		and p.docstatus = 1
 		and item.docstatus = 1
 		and item.item_code = %(item_code)s
@@ -608,7 +609,7 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 		SELECT sr.name FROM `tabSerial No` sr {batch_join_selection}
 		WHERE
 			sr.name not in ({excluded_sr_nos}) AND
-			sr.item_code = %(item_code)s AND 
+			sr.item_code = %(item_code)s AND
 			sr.warehouse = %(warehouse)s AND
 			ifnull(sr.sales_invoice,'') = '' AND
 			ifnull(sr.delivery_document_no, '') = ''
@@ -623,5 +624,5 @@ def fetch_serial_numbers(filters, qty, do_not_include=[]):
 				batch_join_selection=batch_join_selection,
 				batch_no_condition=batch_no_condition
 			), filters, as_dict=1)
-		
+
 	return serial_numbers

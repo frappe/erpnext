@@ -112,8 +112,8 @@ class BuyingController(StockController):
 			"docstatus": 1
 		})]
 		if self.is_return and len(not_cancelled_asset):
-			frappe.throw(_("{} has submitted assets linked to it. You need to cancel the assets to create purchase return.".format(self.return_against)),
-				title=_("Not Allowed"))
+			frappe.throw(_("{} has submitted assets linked to it. You need to cancel the assets to create purchase return.")
+				.format(self.return_against), title=_("Not Allowed"))
 
 	def get_asset_items(self):
 		if self.doctype not in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
@@ -798,8 +798,8 @@ class BuyingController(StockController):
 							asset.set(field, None)
 							asset.supplier = None
 						if asset.docstatus == 1 and delete_asset:
-							frappe.throw(_('Cannot cancel this document as it is linked with submitted asset {0}.\
-								Please cancel the it to continue.').format(frappe.utils.get_link_to_form('Asset', asset.name)))
+							frappe.throw(_('Cannot cancel this document as it is linked with submitted asset {0}. Please cancel it to continue.')
+								.format(frappe.utils.get_link_to_form('Asset', asset.name)))
 
 					asset.flags.ignore_validate_update_after_submit = True
 					asset.flags.ignore_mandatory = True
