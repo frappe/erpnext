@@ -1,12 +1,11 @@
 {
  "actions": [],
- "autoname": "naming_series:",
+ "autoname": "format:QA-MEET-{YY}-{MM}-{DD}",
  "creation": "2018-10-15 16:25:41.548432",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
   "date",
   "cb_00",
   "status",
@@ -55,16 +54,11 @@
    "fieldname": "sb_01",
    "fieldtype": "Section Break",
    "label": "Minutes"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series",
-   "options": "MTNG-.YYYY.-.MM.-.DD.-"
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-05-19 13:18:59.821740",
+ "modified": "2020-10-21 13:08:50.367577",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",
