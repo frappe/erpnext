@@ -361,7 +361,7 @@ def validate_serial_no(sle, item_det):
 	elif serial_nos:
 		for serial_no in serial_nos:
 			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
-			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
+			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse and not frappe.flags.allow_repost_serial_no:
 				frappe.throw(_("Cannot cancel {0} {1} because {2} {3} does not belong to the warehouse {4}")
 					.format(sle.voucher_type, sle.voucher_no, label_serial_no, serial_no, sle.warehouse))
 
@@ -386,7 +386,7 @@ def validate_so_serial_no(sr, sales_order,):
 		be delivered""").format(sales_order, sr.item_code, label_serial_no, sr.name))
 
 def has_duplicate_serial_no(sn, sle):
-	if frappe.flags.skip_duplicate_serial_no_validation:
+	if frappe.flags.allow_repost_serial_no:
 		return False
 
 	if (sn.warehouse and not sle.skip_serial_no_validaiton
