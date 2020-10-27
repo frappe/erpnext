@@ -156,7 +156,7 @@ class update_entries_after(object):
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
-		if (sle.serial_no and not self.via_landed_cost_voucher) or not cint(self.allow_negative_stock):
+		if (sle.serial_no and not self.via_landed_cost_voucher and not frappe.flags.allow_repost_serial_no) or not cint(self.allow_negative_stock):
 			# validate negative stock for serialized items, fifo valuation
 			# or when negative stock is not allowed for moving average
 			if not self.validate_negative_stock(sle):
