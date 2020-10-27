@@ -12,8 +12,8 @@ from erpnext.controllers.accounts_controller import AccountsController
 
 class Loan(AccountsController):
 	def validate(self):
-		if self.applicant_type == 'Employee':
-			validate_employe_currency_with_company_currency(self.applicant, self.company)
+		if self.applicant_type == 'Employee' and self.repay_from_salary:
+			validate_employee_currency_with_company_currency(self.applicant, self.company)
 		self.set_loan_amount()
 		self.validate_loan_amount()
 		self.set_missing_fields()
@@ -276,7 +276,7 @@ def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, a
 
 	return unpledge_request
 
-def validate_employe_currency_with_company_currency(applicant, company):
+def validate_employee_currency_with_company_currency(applicant, company):
 		from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
 		if not applicant:
 			frappe.throw(_("Please select Applicant"))
@@ -285,5 +285,5 @@ def validate_employe_currency_with_company_currency(applicant, company):
 		employee_currency = get_employee_currency(applicant)
 		company_currency = erpnext.get_company_currency(company)
 		if employee_currency != company_currency:
-			frappe.throw(_("Currency in salary structure for employee {0} should be in {1}")
-				.format(applicant, company_currency))
+			frappe.throw(_("Loan cannot be repayed from salary for Employee  {0} because salary is processed in currency {1}")
+				.format(applicant, employee_currency))

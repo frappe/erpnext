@@ -34,7 +34,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Maximum Exemption Amount",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
   },
@@ -50,12 +50,12 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Actual Amount",
-   "options": "currency"
+   "options": "Company:company:default_currency"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-10-20 16:47:31.480870",
+ "modified": "2020-10-27 13:59:00.672996",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Proof Submission Detail",

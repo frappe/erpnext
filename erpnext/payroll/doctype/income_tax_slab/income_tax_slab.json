@@ -9,7 +9,6 @@
   "effective_from",
   "company",
   "column_break_3",
-  "currency",
   "standard_tax_exemption_amount",
   "allow_tax_exemption",
   "disabled",
@@ -71,7 +70,7 @@
    "fieldname": "standard_tax_exemption_amount",
    "fieldtype": "Currency",
    "label": "Standard Tax Exemption Amount",
-   "options": "currency"
+   "options": "Company:company:default_currency"
   },
   {
    "fieldname": "company",
@@ -91,20 +90,11 @@
    "fieldtype": "Table",
    "label": "Other Taxes and Charges",
    "options": "Income Tax Slab Other Charges"
-  },
-  {
-   "default": "Company:company:default_currency",
-   "fieldname": "currency",
-   "fieldtype": "Link",
-   "label": "Currency",
-   "options": "Currency",
-   "print_hide": 1,
-   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-19 13:54:24.728075",
+ "modified": "2020-10-27 14:01:24.574428",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Income Tax Slab",
