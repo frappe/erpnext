@@ -13,11 +13,9 @@ from frappe.utils import getdate, add_days, get_datetime, flt
 
 
 class TestGratuity(unittest.TestCase):
-
 	def setUp(self):
 		frappe.db.sql("DELETE FROM `tabgratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
-
 
 	def test_check_gratuity_amount_based_on_current_slab_and_additional_salary_creation(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
@@ -33,15 +31,15 @@ class TestGratuity(unittest.TestCase):
 		rule.save()
 		rule.reload()
 
-		gra = frappe.new_doc("Gratuity")
-		gra.employee = employee
-		gra.posting_date = getdate()
-		gra.gratuity_rule = rule.name
-		gra.pay_via_salary_slip = 1
-		gra.salary_component = "Performance Bonus"
-		gra.payroll_date = getdate()
-		gra.save()
-		gra.submit()
+		gratuity = frappe.new_doc("Gratuity")
+		gratuity.employee = employee
+		gratuity.posting_date = getdate()
+		gratuity.gratuity_rule = rule.name
+		gratuity.pay_via_salary_slip = 1
+		gratuity.salary_component = "Performance Bonus"
+		gratuity.payroll_date = getdate()
+		gratuity.save()
+		gratuity.submit()
 
 		#work experience calculation
 		date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
@@ -49,11 +47,11 @@ class TestGratuity(unittest.TestCase):
 
 		experience = employee_total_workings_days/rule.total_working_days_per_year
 
-		gra.reload()
+		gratuity.reload()
 
 		from math import floor
 
-		self.assertEqual(floor(experience), gra.current_work_experience)
+		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
 		#amount Calculation 6
 		component_amount = frappe.get_list("Salary Detail",
@@ -68,15 +66,13 @@ class TestGratuity(unittest.TestCase):
 		''' 5 - 0 fraction is 1 '''
 
 		gratuity_amount = component_amount[0].amount * experience
-		gra.reload()
+		gratuity.reload()
 
-		self.assertEqual(flt(gratuity_amount, 2), flt(gra.amount, 2))
+		self.assertEqual(flt(gratuity_amount, 2), flt(gratuity.amount, 2))
 
 		#additional salary creation (Pay via salary slip)
-		self.assertTrue(frappe.db.exists("Additional Salary", {"ref_docname": gra.name}))
-		self.assertEqual(gra.status, "Paid")
-
-
+		self.assertTrue(frappe.db.exists("Additional Salary", {"ref_docname": gratuity.name}))
+		self.assertEqual(gratuity.status, "Paid")
 
 	def test_check_gratuity_amount_based_on_all_previous_slabs(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
@@ -102,17 +98,17 @@ class TestGratuity(unittest.TestCase):
 
 		mof.save()
 
-		gra = frappe.new_doc("Gratuity")
-		gra.employee = employee
-		gra.posting_date = getdate()
-		gra.gratuity_rule = rule.name
-		gra.pay_via_salary_slip = 0
-		gra.payroll_date = getdate()
-		gra.expense_account = "Payment Account - _TC"
-		gra.mode_of_payment = "Cheque"
+		gratuity = frappe.new_doc("Gratuity")
+		gratuity.employee = employee
+		gratuity.posting_date = getdate()
+		gratuity.gratuity_rule = rule.name
+		gratuity.pay_via_salary_slip = 0
+		gratuity.payroll_date = getdate()
+		gratuity.expense_account = "Payment Account - _TC"
+		gratuity.mode_of_payment = "Cheque"
 
-		gra.save()
-		gra.submit()
+		gratuity.save()
+		gratuity.submit()
 
 		#work experience calculation
 		date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
@@ -120,11 +116,11 @@ class TestGratuity(unittest.TestCase):
 
 		experience = employee_total_workings_days/rule.total_working_days_per_year
 
-		gra.reload()
+		gratuity.reload()
 
 		from math import floor
 
-		self.assertEqual(floor(experience), gra.current_work_experience)
+		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
 		#amount Calculation 6
 		component_amount = frappe.get_list("Salary Detail",
@@ -145,25 +141,29 @@ class TestGratuity(unittest.TestCase):
 
 
 		gratuity_amount = ((0 * 1) + (4 * 0.7) + (1 * 1)) *  component_amount[0].amount
-		gra.reload()
+		gratuity.reload()
 
-		self.assertEqual(flt(gratuity_amount, 2), flt(gra.amount, 2))
-		self.assertEqual(gra.status, "Unpaid")
+		self.assertEqual(flt(gratuity_amount, 2), flt(gratuity.amount, 2))
+		self.assertEqual(gratuity.status, "Unpaid")
 
 
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
-		pay_entry = get_payment_entry("Gratuity", gra.name)
+		pay_entry = get_payment_entry("Gratuity", gratuity.name)
 		pay_entry.reference_no = "123467"
 		pay_entry.reference_date = getdate()
 
 		pay_entry.save()
 		pay_entry.submit()
 
-		gra.reload()
+		gratuity.reload()
 
-		self.assertEqual(gra.status, "Paid")
-		self.assertEqual(gra.paid_amount, flt(gra.amount, 2))
+		self.assertEqual(gratuity.status, "Paid")
+		self.assertEqual(gratuity.paid_amount, flt(gratuity.amount, 2))
+
+	def tearDown(self):
+		frappe.db.sql("DELETE FROM `tabgratuity`")
+		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
 def create_employee_and_get_last_salary_slip():
 	employee = make_employee("test_employee@salary.com")

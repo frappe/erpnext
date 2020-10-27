@@ -9,7 +9,6 @@ from frappe.model.document import Document
 from frappe.utils import flt, get_datetime, get_link_to_form
 from math import floor
 
-from frappe.utils import get_datetime
 class Gratuity(Document):
 	def validate(self):
 		data = calculate_work_experience_and_amount(self.employee, self.gratuity_rule)
@@ -22,6 +21,9 @@ class Gratuity(Document):
 			self.status = "Paid"
 
 	def on_submit(self):
+		create_additional_salary()
+
+	def create_additional_salary(self):
 		if self.pay_via_salary_slip:
 			additional_salary = frappe.new_doc('Additional Salary')
 			additional_salary.employee = self.employee
@@ -170,7 +172,7 @@ def get_total_applicable_component_amount(employee, applicable_earnings_componen
 		fields=["amount"])
 	total_applicable_components_amount = 0
 	if not len(component_and_amounts):
-		frappe.throw("No Applicable Component is present in last month salary slip")
+		frappe.throw(_("No Applicable Component is present in last month salary slip"))
 	for data in component_and_amounts:
 		total_applicable_components_amount += data.amount
 
@@ -180,10 +182,17 @@ def get_gratuity_rule_slabs(gratuity_rule):
 	return frappe.get_all("Gratuity Rule Slab", filters= {'parent': gratuity_rule}, fields = ["*"], order_by="idx")
 
 def get_salary_structure(employee):
-	return frappe.get_list("Salary Structure Assignment", filters = {"employee": employee, 'docstatus': 1}, fields=["from_date", "salary_structure"], order_by = "from_date desc")[0].salary_structure
+	return frappe.get_list("Salary Structure Assignment", filters = {
+			"employee": employee, 'docstatus': 1
+		},
+		fields=["from_date", "salary_structure"],
+		order_by = "from_date desc")[0].salary_structure
 
 def get_last_salary_slip(employee):
-	return frappe.get_list("Salary Slip", filters = {"employee": employee, 'docstatus': 1}, order_by = "start_date desc")[0].name
+	return frappe.get_list("Salary Slip", filters = {
+			"employee": employee, 'docstatus': 1
+		},
+		order_by = "start_date desc")[0].name
 
 
 

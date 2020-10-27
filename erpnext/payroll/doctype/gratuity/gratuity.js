@@ -2,24 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Gratuity', {
-	refresh: function(frm){
-		if(frm.doc.docstatus === 1 && frm.doc.pay_via_salary_slip === 0 && frm.doc.status === "Unpaid") {
-			frm.add_custom_button(__("Make Payment Entry"), function() {
-				return frappe.call({
-					method: 'erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry',
-					args: {
-						"dt": cur_frm.doc.doctype,
-						"dn": cur_frm.doc.name
-					},
-					callback: function(r) {
-						var doclist = frappe.model.sync(r.message);
-						frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-					}
-				});
-			});
-		}
-	},
-	onload: function(frm){
+	setup: function(frm){
 		frm.set_query('salary_component', function() {
 			return {
 				filters: {
@@ -30,12 +13,29 @@ frappe.ui.form.on('Gratuity', {
 		frm.set_query("expense_account", function() {
 			return {
 				filters: {
-					"root_type": "Asset",
+					"root_type": "Expense",
 					"is_group": 0,
 					"company": frm.doc.company
 				}
 			};
 		});
+	},
+	refresh: function(frm){
+		if(frm.doc.docstatus === 1 && frm.doc.pay_via_salary_slip === 0 && frm.doc.status === "Unpaid") {
+			frm.add_custom_button(__("Create Payment Entry"), function() {
+				return frappe.call({
+					method: 'erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry',
+					args: {
+						"dt": frm.doc.doctype,
+						"dn": frm.doc.name
+					},
+					callback: function(r) {
+						var doclist = frappe.model.sync(r.message);
+						frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+					}
+				});
+			});
+		}
 	},
 	employee: function(frm) {
 		frm.events.calculate_work_experience_and_amount(frm);

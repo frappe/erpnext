@@ -9,10 +9,9 @@ def execute():
     frappe.reload_doc('payroll', 'doctype', 'gratuity_rule')
     frappe.reload_doc('payroll', 'doctype', 'gratuity_rule_slab')
     frappe.reload_doc('payroll', 'doctype', 'gratuity_applicable_component')
-    region = erpnext.get_region()
-    if region == "India":
+    if frappe.db.exists("company", {"country": "India"}):
         from erpnext.regional.india.setup import create_gratuity_rule
         create_gratuity_rule()
-    elif region == "United Arab Emirates":
+    if frappe.db.exists("company", {"country": "United Arab Emirates"}):
         from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
         create_gratuity_rule()
