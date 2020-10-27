@@ -243,7 +243,7 @@ doc_events = {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.regional.italy.utils.sales_invoice_on_submit"],
 		"on_cancel": "erpnext.regional.italy.utils.sales_invoice_on_cancel",
 		"on_trash": "erpnext.regional.check_deletion_permission",
-		"validate": "erpnext.regional.india.utils.set_transporter_address_display"
+		"validate": "erpnext.regional.india.utils.set_transporter_address"
 	},
 	"Purchase Invoice": {
 		"validate": "erpnext.regional.india.utils.update_grand_total_for_rcm"

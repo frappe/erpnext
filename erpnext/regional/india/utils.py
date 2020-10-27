@@ -131,7 +131,11 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 def set_place_of_supply(doc, method=None):
 	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
 
-def set_transporter_address_display(doc, method=None):
+def set_transporter_address(doc, method=None):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+	if country != 'India':
+		return
+
 	if doc.transporter_address:
 		# once supplier is set, address can be selected from multiple transporter addresses
 		doc.transporter_address_display = get_address_display(doc.transporter_address)
