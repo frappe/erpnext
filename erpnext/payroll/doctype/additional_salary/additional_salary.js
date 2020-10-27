@@ -24,22 +24,40 @@ frappe.ui.form.on('Additional Salary', {
 
 	employee: function(frm) {
 		if (frm.doc.employee) {
-			frm.trigger('get_employee_details');
+			frm.trigger('set_company');
+			frm.trigger('get_employee_currency');
 		} else {
 			frm.set_value("company", null);
 		}
 	},
 
-	get_employee_details: function(frm) {
+	set_company: function(frm) {
 		frappe.call({
-			method: "get_employee_details",
+			method: "frappe.client.get_value",
+			args:{
+				doctype: "Employee",
+				fieldname: "company",
+				filters:{
+					name: frm.doc.employee
+				}
+			},
+			callback: function(data) {
+				if(data.message){
+					frm.set_value("company", data.message.company);
+				}
+			}
+		});
+	},
+
+	get_employee_currency: function(frm) {
+		frappe.call({
+			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
 			args: {
 				employee: frm.doc.employee,
 			},
 			callback: function(r) {
 				if(r.message) {
-					frm.set_value('currency', r.message['currency']);
-					frm.set_value('company', r.message['company']);
+					frm.set_value('currency', r.message);
 					frm.refresh_fields();
 				}
 			}

@@ -8,6 +8,9 @@ from frappe.model.document import Document
 
 class SanctionedLoanAmount(Document):
 	def validate(self):
+		if self.applicant_type == 'Employee':
+			from erpnext.loan_management.doctype.loan.loan import validate_employe_currency_with_company_currency
+			validate_employe_currency_with_company_currency(self.applicant, self.company)
 		sanctioned_doc = frappe.db.exists('Sanctioned Loan Amount', {'applicant': self.applicant, 'company': self.company})
 
 		if sanctioned_doc and sanctioned_doc != self.name:

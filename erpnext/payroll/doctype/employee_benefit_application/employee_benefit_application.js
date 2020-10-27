@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Employee Benefit Application', {
 	employee: function(frm) {
-		// frm.trigger('get_employee_currency');
+		frm.trigger('get_employee_currency');
 		frm.trigger('set_earning_component');
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
@@ -39,6 +39,23 @@ frappe.ui.form.on('Employee Benefit Application', {
 		});
 	},
 
+	get_employee_currency: function(frm) {
+		if (frm.doc.employee) {
+			frappe.call({
+				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+				args: {
+					employee: frm.doc.employee,
+				},
+				callback: function(r) {
+					if(r.message) {
+						frm.set_value('currency', r.message);
+						frm.refresh_fields();
+					}
+				}
+			});
+		}
+	},
+
 	payroll_period: function(frm) {
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
@@ -63,8 +80,7 @@ var get_max_benefits=function(frm, method, args) {
 		callback: function (data) {
 			if(!data.exc){
 				if(data.message){
-					frm.set_value("max_benefits", data.message['max_benefits']);
-					frm.set_value("currency", data.message['currency']);
+					frm.set_value("max_benefits", data.message);
 				} else {
 					frm.set_value("max_benefits", 0);
 				}

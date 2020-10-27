@@ -35,7 +35,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Maximum Exempted Amount",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1,
    "reqd": 1
   },
@@ -44,13 +44,13 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Declared Amount",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "reqd": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-10-27 13:56:34.214973",
+ "modified": "2020-10-20 16:43:09.606265",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Declaration Category",
