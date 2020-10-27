@@ -420,15 +420,15 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_period = get_leave_period()
 		employee = get_employee()
 		leave_type = 'Test Earned Leave Type'
-		if not frappe.db.exists('Leave Type', leave_type):
-			frappe.get_doc(dict(
-				leave_type_name = leave_type,
-				doctype = 'Leave Type',
-				is_earned_leave = 1,
-				earned_leave_frequency = 'Monthly',
-				rounding = 0.5,
-				max_leaves_allowed = 6
-			)).insert()
+		frappe.delete_doc_if_exists("Leave Type", 'Test Earned Leave Type', force=1)
+		frappe.get_doc(dict(
+			leave_type_name = leave_type,
+			doctype = 'Leave Type',
+			is_earned_leave = 1,
+			earned_leave_frequency = 'Monthly',
+			rounding = 0.5,
+			max_leaves_allowed = 6
+		)).insert()
 
 		leave_policy = frappe.get_doc({
 			"doctype": "Leave Policy",

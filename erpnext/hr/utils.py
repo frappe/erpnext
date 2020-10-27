@@ -332,7 +332,8 @@ def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type
 
 		if new_allocation != allocation.total_leaves_allocated:
 			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
-			create_additional_leave_ledger_entry(allocation, earned_leaves, today)
+			today_date = today()
+			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
 
 
 def get_leave_allocations(date, leave_type):

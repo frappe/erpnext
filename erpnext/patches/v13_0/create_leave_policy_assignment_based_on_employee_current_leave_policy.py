@@ -34,7 +34,7 @@ def execute():
                 alloc = frappe.db.exists("Leave Allocation", {"employee":employee.name, "leave_policy": grade.default_leave_policy, "docstatus": 1})
                 if not alloc:
                     create_assignment(employee.name, grade.default_leave_policy)
-                leave_policy.append(default_leave_policy)
+                leave_policy.append(grade.default_leave_policy)
 
     #for old Leave allocation and leave policy from allocation, which may got updated in employee grade.
     leave_allocations = frappe.db.sql("SELECT leave_policy, leave_period, employee FROM `tabLeave Allocation` WHERE leave_policy IS NOT NULL and leave_policy != '' and docstatus = 1 ", as_dict = 1)
@@ -68,7 +68,7 @@ def create_assignment(employee, leave_policy, leave_period=None, allocation_exis
             frappe.db.sql("Update `tabLeave Allocation` set leave_policy_assignment = %s", lpa.name)
 
 
-def get_employee_with_grade(garde):
+def get_employee_with_grade(grade):
     return frappe.get_list("Employee", filters = {"grade": grade})
 
 

@@ -2,7 +2,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 	onload: function(list_view) {
 		let me = this;
 		list_view.page.add_inner_button( __("Bulk Leave Policy Assignment"), function(){
-			me.dialog = frappe.ui.form.MultiSelectDialog({
+			me.dialog = new frappe.ui.form.MultiSelectDialog({
 				doctype: "Employee",
 				target: cur_list,
 				setters: {
@@ -92,8 +92,8 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 			});
 		});
 
-		me.dialog = list_view.page.add_inner_button( __("Grant Leaves"), function(){
-			frappe.ui.form.MultiSelectDialog({
+		list_view.page.add_inner_button( __("Grant Leaves"), function(){
+			me.dialog = new frappe.ui.form.MultiSelectDialog({
 				doctype: "Leave Policy Assignment",
 				target: cur_list,
 				setters: {
@@ -110,7 +110,7 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 				},
 				add_filters_group: 1,
 				primary_action_label: "Grant Leaves" ,
-				action(leave_policy_assignments, h) {
+				action(leave_policy_assignments) {
 					frappe.call({
 						method: 'erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment.grant_leave_for_multiple_employees',
 						async: false,

@@ -102,7 +102,7 @@ def grant_leave_for_multiple_employees(leave_policy_assignments):
 	for assignment in leave_policy_assignments:
 		try:
 			frappe.get_doc("Leave Policy Assignment", assignment).grant_leave_alloc_for_employee()
-		except:
+		except Exception:
 			not_granted.append(assignment)
 
 		if len(not_granted):
