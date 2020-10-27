@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
 
 class EmployeeIncentive(Document):
 	def validate(self):
@@ -29,3 +30,11 @@ class EmployeeIncentive(Document):
 		additional_salary.ref_doctype = self.doctype
 		additional_salary.ref_docname = self.name
 		additional_salary.submit()
+
+	def get_employee_details(self, employee):
+		employee_currency = get_employee_currency(employee)
+		company = frappe.db.get_value('Employee', employee, 'company')
+		return {
+			'currency': employee_currency,
+			'company': company
+		}

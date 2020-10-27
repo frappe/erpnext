@@ -23,40 +23,22 @@ frappe.ui.form.on('Employee Incentive', {
 
 	employee: function(frm) {
 		if (frm.doc.employee) {
-			frm.trigger('set_company');
-			frm.trigger('get_employee_currency');
+			frm.trigger('get_employee_details');
 		} else {
 			frm.set_value("company", null);
 		}
 	},
 
-	set_company: function(frm) {
+	get_employee_details: function(frm) {
 		frappe.call({
-			method: "frappe.client.get_value",
-			args:{
-				doctype: "Employee",
-				fieldname: "company",
-				filters:{
-					name: frm.doc.employee
-				}
-			},
-			callback: function(data) {
-				if(data.message){
-					frm.set_value("company", data.message.company);
-				}
-			}
-		});
-	},
-
-	get_employee_currency: function(frm) {
-		frappe.call({
-			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+			method: "get_employee_details",
 			args: {
 				employee: frm.doc.employee,
 			},
 			callback: function(r) {
 				if(r.message) {
-					frm.set_value('currency', r.message);
+					frm.set_value('currency', r.message['currency']);
+					frm.set_value('company', r.message['company']);
 					frm.refresh_fields();
 				}
 			}
