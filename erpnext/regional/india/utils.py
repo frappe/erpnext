@@ -136,9 +136,9 @@ def set_transporter_address(doc, method=None):
 	if country != 'India':
 		return
 
-	if doc.transporter_address:
+	if doc.get("transporter_address"):
 		# once supplier is set, address can be selected from multiple transporter addresses
-		doc.transporter_address_display = get_address_display(doc.transporter_address)
+		doc.transporter_address_display = get_address_display(doc.get("transporter_address"))
 		return
 
 	transporter_address = frappe.db.get_value("Dynamic Link", {
