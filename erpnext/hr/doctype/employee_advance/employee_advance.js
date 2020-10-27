@@ -144,6 +144,7 @@ frappe.ui.form.on('Employee Advance', {
 	employee: function (frm) {
 		if (frm.doc.employee) {
 			frm.trigger('get_pending_amount');
+			// frm.trigger('get_employee_currency');
 		}
 	},
 
@@ -161,6 +162,21 @@ frappe.ui.form.on('Employee Advance', {
 			}
 		});
 	},
+
+	// get_employee_currency: function(frm) {
+	// 	frappe.call({
+	// 		method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+	// 		args: {
+	// 			employee: frm.doc.employee,
+	// 		},
+	// 		callback: function(r) {
+	// 			if(r.message) {
+	// 				frm.set_value('currency', r.message);
+	// 				frm.refresh_fields();
+	// 			}
+	// 		}
+	// 	});
+	// },
 
 	currency: function(frm) {
 		var from_currency = frm.doc.currency;

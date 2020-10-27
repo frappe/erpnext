@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('Employee Benefit Application', {
 	employee: function(frm) {
+		// frm.trigger('get_employee_currency');
 		frm.trigger('set_earning_component');
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
