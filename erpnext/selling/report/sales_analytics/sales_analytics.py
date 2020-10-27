@@ -23,7 +23,14 @@ class Analytics(object):
 		self.get_columns()
 		self.get_data()
 		self.get_chart_data()
-		return self.columns, self.data, None, self.chart
+
+		# Skipping total row for tree-view reports
+		skip_total_row = 0
+
+		if self.filters.tree_type in ["Supplier Group", "Item Group", "Customer Group", "Territory"]:
+			skip_total_row = 1
+
+		return self.columns, self.data, None, self.chart, None, skip_total_row
 
 	def get_columns(self):
 		self.columns = [{
@@ -210,9 +217,6 @@ class Analytics(object):
 	def get_rows(self):
 		self.data = []
 		self.get_periodic_data()
-		total_row = {
-			"entity": "Total",
-		}
 
 		for entity, period_data in iteritems(self.entity_periodic_data):
 			row = {
@@ -226,9 +230,6 @@ class Analytics(object):
 				row[scrub(period)] = amount
 				total += amount
 
-				if not total_row.get(scrub(period)): total_row[scrub(period)] = 0
-				total_row[scrub(period)] += amount
-
 			row["total"] = total
 
 			if self.filters.tree_type == "Item":
@@ -236,8 +237,6 @@ class Analytics(object):
 				row["item_brand"] = period_data.get("item_brand")
 
 			self.data.append(row)
-
-		self.data.append(total_row)
 
 	def get_rows_by_group(self):
 		self.get_periodic_data()

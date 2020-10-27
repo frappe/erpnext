@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import frappe
 test_records = frappe.get_test_records('Product Bundle')
 
-def make_product_bundle(parent, items):
+def make_product_bundle(parent, items, qty=None):
 	if frappe.db.exists("Product Bundle", parent):
 		return frappe.get_doc("Product Bundle", parent)
 
@@ -17,7 +17,7 @@ def make_product_bundle(parent, items):
 	})
 
 	for item in items:
-		product_bundle.append("items", {"item_code": item, "qty": 1})
+		product_bundle.append("items", {"item_code": item, "qty": qty or 1})
 
 	product_bundle.insert()
 

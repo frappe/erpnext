@@ -17,7 +17,8 @@ def get_columns():
 		{
 			"fieldname": "lead_owner",
 			"label": _("Lead Owner"),
-			"fieldtype": "Data",
+			"fieldtype": "Link",
+			"options": "User",
 			"width": "130"
 		},
 		{

@@ -125,13 +125,15 @@ def get_maintenance_tasks():
 			"start_date": nowdate(),
 			"periodicity": "Monthly",
 			"maintenance_type": "Preventive Maintenance",
-			"maintenance_status": "Planned"
+			"maintenance_status": "Planned",
+			"assign_to": "marcus@abc.com"
 			},
 			{"maintenance_task": "Check Gears",
 			"start_date": nowdate(),
 			"periodicity": "Yearly",
 			"maintenance_type": "Calibration",
-			"maintenance_status": "Planned"
+			"maintenance_status": "Planned",
+			"assign_to": "thalia@abc.com"
 			}
 		]
 

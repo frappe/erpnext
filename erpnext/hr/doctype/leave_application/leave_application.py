@@ -56,7 +56,7 @@ class LeaveApplication(Document):
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
-		self.status = "Cancelled"
+		self.db_set("status", "Cancelled")
 		# notify leave applier about cancellation
 		self.notify_employee()
 		self.cancel_attendance()
@@ -428,14 +428,25 @@ def get_leave_details(employee, date):
 	leave_allocation = {}
 	for d in allocation_records:
 		allocation = allocation_records.get(d, frappe._dict())
+
+		total_allocated_leaves = frappe.db.get_value('Leave Allocation', {
+			'from_date': ('<=', date),
+			'to_date': ('>=', date),
+			'leave_type': allocation.leave_type,
+			'employee': employee,
+			'docstatus': 1
+		}, 'SUM(total_leaves_allocated)') or 0
+
 		remaining_leaves = get_leave_balance_on(employee, d, date, to_date = allocation.to_date,
 			consider_all_leaves_in_the_allocation_period=True)
+
 		end_date = allocation.to_date
 		leaves_taken = get_leaves_for_period(employee, d, allocation.from_date, end_date) * -1
 		leaves_pending = get_pending_leaves_for_period(employee, d, allocation.from_date, end_date)
 
 		leave_allocation[d] = {
-			"total_leaves": allocation.total_leaves_allocated,
+			"total_leaves": total_allocated_leaves,
+			"expired_leaves": max(total_allocated_leaves - (remaining_leaves + leaves_taken), 0),
 			"leaves_taken": leaves_taken,
 			"pending_leaves": leaves_pending,
 			"remaining_leaves": remaining_leaves}
@@ -588,7 +599,7 @@ def get_leave_entries(employee, leave_type, from_date, to_date):
 			is_carry_forward, is_expired
 		FROM `tabLeave Ledger Entry`
 		WHERE employee=%(employee)s AND leave_type=%(leave_type)s
-			AND docstatus=1 
+			AND docstatus=1
 			AND (leaves<0
 				OR is_expired=1)
 			AND (from_date between %(from_date)s AND %(to_date)s

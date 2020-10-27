@@ -129,7 +129,7 @@ class Customer(TransactionBase):
 				address = frappe.get_doc('Address', address_name.get('name'))
 				if not address.has_link('Customer', self.name):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
-					address.save()
+					address.save(ignore_permissions=self.flags.ignore_permissions)
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
 
@@ -147,7 +147,7 @@ class Customer(TransactionBase):
 					contact = frappe.get_doc('Contact', contact_name.get('name'))
 					if not contact.has_link('Customer', self.name):
 						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-						contact.save()
+						contact.save(ignore_permissions=self.flags.ignore_permissions)
 
 			else:
 				lead.lead_name = lead.lead_name.lstrip().split(" ")
@@ -180,6 +180,14 @@ class Customer(TransactionBase):
 
 	def validate_credit_limit_on_change(self):
 		if self.get("__islocal") or not self.credit_limits:
+			return
+		
+		past_credit_limits = [d.credit_limit
+			for d in frappe.db.get_all("Customer Credit Limit", filters={'parent': self.name}, fields=["credit_limit"], order_by="company")]
+		
+		current_credit_limits = [d.credit_limit for d in sorted(self.credit_limits, key=lambda k: k.company)]
+
+		if past_credit_limits == current_credit_limits:
 			return
 
 		company_record = []
@@ -299,6 +307,8 @@ def get_loyalty_programs(doc):
 
 	return lp_details
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_customer_list(doctype, txt, searchfield, start, page_len, filters=None):
 	from erpnext.controllers.queries import get_fields
 
@@ -467,6 +477,8 @@ def make_address(args, is_primary_address=1):
 
 	return address
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, filters):
 	customer = filters.get('customer')
 	return frappe.db.sql("""

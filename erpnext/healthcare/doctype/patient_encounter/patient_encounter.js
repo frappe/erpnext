@@ -116,7 +116,7 @@ var schedule_inpatient = function(frm) {
 			}
 		},
 		freeze: true,
-		freeze_message: "Process Inpatient Scheduling"
+		freeze_message: __("Process Inpatient Scheduling")
 	});
 };
 
@@ -130,7 +130,7 @@ var schedule_discharge = function(frm) {
 			}
 		},
 		freeze: true,
-		freeze_message: "Process Discharge"
+		freeze_message: __("Process Discharge")
 	});
 };
 

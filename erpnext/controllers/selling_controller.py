@@ -10,6 +10,7 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -53,10 +54,10 @@ class SellingController(StockController):
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
-		self.set_missing_lead_customer_details()
+		self.set_missing_lead_customer_details(for_validate=for_validate)
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
-	def set_missing_lead_customer_details(self):
+	def set_missing_lead_customer_details(self, for_validate=False):
 		customer, lead = None, None
 		if getattr(self, "customer", None):
 			customer = self.customer
@@ -92,6 +93,11 @@ class SellingController(StockController):
 			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
+
+		if self.get('taxes_and_charges') and not self.get('taxes') and not for_validate:
+			taxes = get_taxes_and_charges('Sales Taxes and Charges Template', self.taxes_and_charges)
+			for tax in taxes:
+				self.append('taxes', tax)
 
 	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
@@ -216,7 +222,9 @@ class SellingController(StockController):
 							'target_warehouse': p.target_warehouse,
 							'company': self.company,
 							'voucher_type': self.doctype,
-							'allow_zero_valuation': d.allow_zero_valuation_rate
+							'allow_zero_valuation': d.allow_zero_valuation_rate,
+							'sales_invoice_item': d.get("sales_invoice_item"),
+							'delivery_note_item': d.get("dn_detail")
 						}))
 			else:
 				il.append(frappe._dict({
@@ -232,7 +240,9 @@ class SellingController(StockController):
 					'target_warehouse': d.target_warehouse,
 					'company': self.company,
 					'voucher_type': self.doctype,
-					'allow_zero_valuation': d.allow_zero_valuation_rate
+					'allow_zero_valuation': d.allow_zero_valuation_rate,
+					'sales_invoice_item': d.get("sales_invoice_item"),
+					'delivery_note_item': d.get("dn_detail")
 				}))
 		return il
 
@@ -301,7 +311,11 @@ class SellingController(StockController):
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
 				return_rate = 0
 				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					return_rate = self.get_incoming_rate_for_sales_return(d.item_code, self.return_against)
+					against_document_no = (d.get("sales_invoice_item")
+						if self.doctype == "Sales Invoice" else d.get("delivery_note_item"))
+
+					return_rate = self.get_incoming_rate_for_sales_return(d.item_code,
+						self.return_against, against_document_no)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
