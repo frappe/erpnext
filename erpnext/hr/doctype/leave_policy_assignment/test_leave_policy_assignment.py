@@ -12,8 +12,8 @@ from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_polic
 class TestLeavePolicyAssignment(unittest.TestCase):
 
 	def setUp(self):
-		for dt in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
-			frappe.db.sql("DELETE FROM `tab%s`" % dt)
+		for doctype in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
+			frappe.db.sql("delete from `tab{0}`".format(doctype))
 
 	def test_grant_leaves(self):
 		leave_period = get_leave_period()
@@ -97,7 +97,7 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 		self.assertEqual(leave_policy_assignment_doc.leaves_allocated, 0)
 
 	def tearDown(self):
-		for dt in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
-			frappe.db.sql("DELETE FROM `tab%s`" % dt)
+		for doctype in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
+			frappe.db.sql("delete from `tab{0}`".format(doctype))
 
 
