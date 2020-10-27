@@ -8,6 +8,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
 
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
@@ -38,41 +39,27 @@ class EmployeeAdvance(Document):
 			self.status = "Cancelled"
 
 	def set_total_advance_paid(self):
-		paid_amount = 0
-		return_amount = 0
-
-		paid_amount_data = frappe.db.sql("""
-			select debit_in_account_currency as paid_amount, account
+		paid_amount_in_company_currency = frappe.db.sql("""
+			select select ifnull(sum(debit_in_company_currency), 0) as paid_amount
 			from `tabGL Entry`
 			where against_voucher_type = 'Employee Advance'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
-		""", (self.name, self.employee), as_dict=1)
+		""", (self.name, self.employee), as_dict=1)[0].paid_amount
 
-		return_amount_data = frappe.db.sql("""
-			select credit_in_account_currency as return_amount, account
+		return_amount_in_company_currency = frappe.db.sql("""
+			select ifnull(sum(credit_in_company_currency), 0) as return_amount
 			from `tabGL Entry`
 			where against_voucher_type = 'Employee Advance'
 				and voucher_type != 'Expense Claim'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
-		""", (self.name, self.employee), as_dict=1)
+		""", (self.name, self.employee), as_dict=1)[0].return_amount
 
-		for pmd in paid_amount_data:
-			account_currency = frappe.db.get_value('Account', pmd.account, 'account_currency')
-			if account_currency != self.currency:
-				paid_amount += flt(pmd.paid_amount) / flt(self.exchange_rate)
-			else:
-				paid_amount += flt(pmd.paid_amount)
-
-		for rmd in return_amount_data:
-			account_currency = frappe.db.get_value('Account', rmd.account, 'account_currency')
-			if account_currency != self.currency:
-				return_amount += flt(rmd.paid_amount) / flt(self.exchange_rate)
-			else:
-				return_amount += flt(rmd.paid_amount)
+		paid_amount = flt(paid_amount_in_company_currency) / flt(self.exchange_rate)
+		return_amount = flt(return_amount_in_company_currency) / flt(self.exchange_rate)
 
 		if flt(paid_amount) > self.advance_amount:
 			frappe.throw(_("Row {0}# Paid Amount cannot be greater than requested advance amount"),
@@ -106,10 +93,16 @@ class EmployeeAdvance(Document):
 
 @frappe.whitelist()
 def get_pending_amount(employee, posting_date):
+	employee_curency = get_employee_currency(employee)
 	employee_due_amount = frappe.get_all("Employee Advance", \
 		filters = {"employee":employee, "docstatus":1, "posting_date":("<=", posting_date)}, \
 		fields = ["advance_amount", "paid_amount"])
-	return sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
+	pending_amount = sum([(emp.advance_amount - emp.paid_amount) for emp in employee_due_amount])
+	return {
+		'pending_amount': pending_amount,
+		'employee_currency': employee_curency
+	}
+	
 
 @frappe.whitelist()
 def make_bank_entry(dt, dn):
