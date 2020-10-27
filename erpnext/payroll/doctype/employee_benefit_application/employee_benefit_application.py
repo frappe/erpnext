@@ -106,23 +106,14 @@ class EmployeeBenefitApplication(Document):
 def get_max_benefits(employee, on_date):
 	sal_struct = get_assigned_salary_structure(employee, on_date)
 	if sal_struct:
-		currency = frappe.db.get_value("Salary Structure", sal_struct, "currency")
 		max_benefits = frappe.db.get_value("Salary Structure", sal_struct, "max_benefits")
 		if max_benefits > 0:
-			return max_benefits, currency
-			return{
-				'max_benefits': max_benefits,
-				'currency': currency
-			}
-	return{
-			'max_benefits': False,
-			'currency': False
-		}
+			return max_benefits
+	return False
 
 @frappe.whitelist()
 def get_max_benefits_remaining(employee, on_date, payroll_period):
-	max_benefits_and_currency = get_max_benefits(employee, on_date)
-	max_benefits = max_benefits_and_currency['max_benefits']
+	max_benefits = get_max_benefits(employee, on_date)
 	if max_benefits and max_benefits > 0:
 		have_depends_on_payment_days = False
 		per_day_amount_total = 0
@@ -155,11 +146,8 @@ def get_max_benefits_remaining(employee, on_date, payroll_period):
 				leave_days_amount = leave_days * per_day_amount_total
 				prev_sal_slip_flexi_total += leave_days_amount
 
-			max_benefits = max_benefits - prev_sal_slip_flexi_total
-	return {
-		'max_benefits': max_benefits,
-		'currency': max_benefits_and_currency['currency']
-	}
+			return max_benefits - prev_sal_slip_flexi_total
+	return max_benefits
 
 def calculate_lwp(employee, start_date, holidays, working_days):
 	lwp = 0

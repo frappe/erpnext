@@ -7,7 +7,6 @@ import frappe
 from frappe.model.document import Document
 from frappe import _, bold
 from frappe.utils import getdate, date_diff, comma_and, formatdate
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
 
 class AdditionalSalary(Document):
 
@@ -89,14 +88,6 @@ class AdditionalSalary(Document):
 			end_date = getdate(self.to_date)
 		no_of_days = date_diff(getdate(end_date), getdate(start_date)) + 1
 		return amount_per_day * no_of_days
-
-	def get_employee_details(self, employee):
-		employee_currency = get_employee_currency(employee)
-		company = frappe.db.get_value('Employee', employee, 'company')
-		return {
-			'currency': employee_currency,
-			'company': company
-		}
 
 @frappe.whitelist()
 def get_additional_salary_component(employee, start_date, end_date, component_type):

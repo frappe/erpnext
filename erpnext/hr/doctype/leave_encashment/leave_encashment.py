@@ -11,7 +11,6 @@ from erpnext.hr.utils import set_employee_name
 from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_assigned_salary_structure
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import create_leave_ledger_entry
 from erpnext.hr.doctype.leave_allocation.leave_allocation import get_unused_leaves
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
 
 class LeaveEncashment(Document):
 	def validate(self):
@@ -87,7 +86,6 @@ class LeaveEncashment(Document):
 		self.encashment_amount = self.encashable_days * per_day_encashment if per_day_encashment > 0 else 0
 
 		self.leave_allocation = allocation.name
-		self.currency = get_employee_currency(self.employee)
 		return True
 
 	def get_leave_allocation(self):

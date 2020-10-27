@@ -23,7 +23,8 @@ frappe.ui.form.on('Salary Structure Assignment', {
 				filters: {
 					company: frm.doc.company,
 					docstatus: 1,
-					disabled: 0
+					disabled: 0,
+					currency: frm.doc.currency
 				}
 			};
 		});
