@@ -147,3 +147,4 @@ def execute():
 	]
 
 	create_custom_fields({ 'Sales Invoice': fields }, update=True)
+	frappe.reload_doctype('Sales Invoice')
