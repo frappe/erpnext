@@ -378,8 +378,8 @@ def _get_days_columns(start_day, end_day, month, year, add_month=False, get_att_
 def get_attendance_list(conditions, filters):
 	attendance_list = frappe.db.sql("""select employee,
 		CONCAT(day(attendance_date),"/",month(attendance_date)) as date_of_attendance,
-		status, leave_type, remaining_half_day_status from tabAttendance where docstatus = 1 %s order by employee, attendance_date""" %
-		conditions, filters, as_dict=1)
+		status, leave_type, remaining_half_day_status from tabAttendance where docstatus = 1 {conditions} order by employee, attendance_date""".format(conditions=conditions)
+		,filters, as_dict=1)
 
 	att_map = {}
 	for d in attendance_list:

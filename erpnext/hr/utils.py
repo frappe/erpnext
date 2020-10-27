@@ -527,5 +527,8 @@ def create_standard_attendance_status():
 				att_status.is_present = 1
 				if status == "Present":
 					att_status.applicable_for_employee_checkins = 1
+			elif status == "Absent":
+				att_status.applicable_for_employee_checkins = 1
+
 
 			att_status.save()

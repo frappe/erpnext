@@ -32,7 +32,6 @@ class AttendanceStatus(Document):
 				references.append("Leave application")
 
 		if self.is_half_day and self.applicable_for_attendance_request:
-			print("Iam HEre")
 			att_status = self.get_duplicate(["is_half_day"], "applicable_for_attendance_request")
 			if att_status:
 				documents.append(att_status)

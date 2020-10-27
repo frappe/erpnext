@@ -7,11 +7,13 @@ import frappe
 import unittest
 from frappe.utils import nowdate, add_days
 from erpnext.hr.doctype.shift_type.test_shift_type import create_shift_type
+from erpnext.hr.utils import create_standard_attendance_status
 class TestShiftAssignment(unittest.TestCase):
 
 	def setUp(self):
 		frappe.db.sql("delete from `tabShift Assignment`")
 		create_shift_type()
+		create_standard_attendance_status()
 
 	def test_make_shift_assignment(self):
 		shift_assignment = frappe.get_doc({

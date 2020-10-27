@@ -6,9 +6,13 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import nowdate, add_days
+from erpnext.hr.doctype.shift_type.test_shift_type import create_shift_type
+from erpnext.hr.utils import create_standard_attendance_status
 
 class TestShiftRequest(unittest.TestCase):
 	def setUp(self):
+		create_shift_type()
+		create_standard_attendance_status()
 		for doctype in ["Shift Request", "Shift Assignment"]:
 			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
 
@@ -41,6 +45,10 @@ class TestShiftRequest(unittest.TestCase):
 			shift_request.cancel()
 			shift_assignment_doc = frappe.get_doc("Shift Assignment", {"shift_request": d.get('shift_request')})
 			self.assertEqual(shift_assignment_doc.docstatus, 2)
+
+	def tearDown(self):
+		for doctype in ["Shift Request", "Shift Assignment"]:
+			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
 
 def set_shift_approver(department):
 	department_doc = frappe.get_doc("Department", department)
