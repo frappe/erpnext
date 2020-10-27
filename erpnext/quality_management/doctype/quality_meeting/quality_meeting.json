@@ -6,22 +6,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "date",
-  "cb_00",
   "status",
+  "cb_00",
   "sb_00",
   "agenda",
   "sb_01",
   "minutes"
  ],
  "fields": [
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "read_only": 1
-  },
   {
    "default": "Open",
    "fieldname": "status",
@@ -58,7 +50,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-21 13:08:50.367577",
+ "modified": "2020-10-27 16:36:45.657883",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",

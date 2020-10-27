@@ -7,7 +7,6 @@
  "engine": "InnoDB",
  "field_order": [
   "template",
-  "cb_00",
   "sb_00",
   "parameters"
  ],
@@ -16,13 +15,9 @@
    "fieldname": "template",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Template",
+   "label": "Template Name",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "cb_00",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "sb_00",
@@ -36,8 +31,14 @@
    "reqd": 1
   }
  ],
- "links": [],
- "modified": "2020-10-21 12:39:02.221128",
+ "links": [
+  {
+   "group": "Records",
+   "link_doctype": "Quality Feedback",
+   "link_fieldname": "template"
+  }
+ ],
+ "modified": "2020-10-27 16:18:53.579688",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Template",
