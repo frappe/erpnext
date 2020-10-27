@@ -33,7 +33,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Quality",
- "modified": "2020-10-26 15:24:58.058088",
+ "modified": "2020-10-27 16:28:54.138055",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
@@ -47,6 +47,7 @@
    "type": "DocType"
   },
   {
+   "doc_view": "Tree",
    "label": "Quality Procedure",
    "link_to": "Quality Procedure",
    "type": "DocType"
@@ -57,9 +58,12 @@
    "type": "DocType"
   },
   {
+   "color": "#ff8989",
    "doc_view": "",
+   "format": "{} Open",
    "label": "Quality Review",
    "link_to": "Quality Review",
+   "stats_filter": "{\"status\": \"Open\"}",
    "type": "DocType"
   },
   {
@@ -72,9 +76,12 @@
    "type": "DocType"
   },
   {
+   "color": "#ff8989",
    "doc_view": "",
+   "format": "{} Open",
    "label": "Non Conformance",
    "link_to": "Non Conformance",
+   "stats_filter": "{\"status\": \"Open\"}",
    "type": "DocType"
   }
  ]

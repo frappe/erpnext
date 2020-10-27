@@ -61,13 +61,13 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Passed\nFailed"
+   "options": "Open\nPassed\nFailed"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-21 12:21:18.460863",
+ "modified": "2020-10-27 16:28:20.908637",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Review Objective",

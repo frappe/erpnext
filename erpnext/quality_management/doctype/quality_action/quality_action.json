@@ -80,8 +80,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Review",
-   "options": "Quality Review",
-   "reqd": 1
+   "options": "Quality Review"
   },
   {
    "fieldname": "feedback",
@@ -92,7 +91,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-21 13:01:31.920215",
+ "modified": "2020-10-27 16:21:59.533937",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action",
