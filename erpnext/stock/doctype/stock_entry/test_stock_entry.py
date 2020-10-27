@@ -795,6 +795,32 @@ class TestStockEntry(unittest.TestCase):
 			])
 		)
 
+	def test_conversion_factor_change(self):
+		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
+		repack_entry = frappe.copy_doc(test_records[3])
+		repack_entry.posting_date = nowdate()
+		repack_entry.posting_time = nowtime()
+		repack_entry.set_stock_entry_type()
+		repack_entry.insert()
+
+		# check current uom and conversion factor
+		self.assertTrue(repack_entry.items[0].uom, "_Test UOM")
+		self.assertTrue(repack_entry.items[0].conversion_factor, 1)
+
+		# change conversion factor
+		repack_entry.items[0].uom = "_Test UOM 1"
+		repack_entry.items[0].stock_uom = "_Test UOM 1"
+		repack_entry.items[0].conversion_factor = 2
+		repack_entry.save()
+		repack_entry.submit()
+
+		self.assertEqual(repack_entry.items[0].conversion_factor, 2)
+		self.assertEqual(repack_entry.items[0].uom, "_Test UOM 1")
+		self.assertEqual(repack_entry.items[0].qty, 50)
+		self.assertEqual(repack_entry.items[0].transfer_qty, 100)
+
+		frappe.db.set_default("allow_negative_stock", 0)
+
 def make_serialized_item(**args):
 	args = frappe._dict(args)
 	se = frappe.copy_doc(test_records[0])
