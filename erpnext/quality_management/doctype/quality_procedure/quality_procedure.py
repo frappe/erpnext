@@ -47,7 +47,7 @@ class QualityProcedure(NestedSet):
 				# Check if any child process belongs to another parent.
 				parent_quality_procedure = frappe.db.get_value("Quality Procedure", process.procedure, "parent_quality_procedure")
 				if parent_quality_procedure and parent_quality_procedure != self.name:
-					frappe.throw(_("{0} already has a Parent Procedure {1}.".format(frappe.bold(process.procedure), frappe.bold(parent_quality_procedure))),
+					frappe.throw(_("{0} already has a Parent Procedure {1}.").format(frappe.bold(process.procedure), frappe.bold(parent_quality_procedure)),
 						title=_("Invalid Child Procedure"))
 
 @frappe.whitelist()
