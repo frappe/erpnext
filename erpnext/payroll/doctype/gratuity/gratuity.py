@@ -21,7 +21,7 @@ class Gratuity(Document):
 			self.status = "Paid"
 
 	def on_submit(self):
-		create_additional_salary()
+		self.create_additional_salary()
 
 	def create_additional_salary(self):
 		if self.pay_via_salary_slip:
@@ -193,7 +193,4 @@ def get_last_salary_slip(employee):
 			"employee": employee, 'docstatus': 1
 		},
 		order_by = "start_date desc")[0].name
-
-
-
 

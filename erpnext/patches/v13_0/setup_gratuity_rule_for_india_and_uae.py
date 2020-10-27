@@ -2,8 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-
-import erpnext, frappe
+import frappe
 
 def execute():
     frappe.reload_doc('payroll', 'doctype', 'gratuity_rule')
