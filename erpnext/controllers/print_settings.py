@@ -64,26 +64,22 @@ def has_taxes_field(doc):
 	return False
 
 def get_print_settings():
+
+	# return ['comp']
 	settings = {
 		'compact_item_print': {
 			'condition': 'erpnext.controllers.print_settings.has_items_field',
-			'fieldtype': 'Check',
 			'child_field': 'items',
-			'label': 'Compact Item Print',
-			'set_template': 'erpnext.controllers.print_settings.print_settings_for_item_table'
+			# 'set_template': 'erpnext.controllers.print_settings.print_settings_for_item_table'
 		},
 		'print_uom_after_quantity': {
 			'condition': 'erpnext.controllers.print_settings.has_taxes_field',
-			'fieldtype': 'Check',
 			'child_field': 'items',
-			'label': 'Print UOM after Quantity',
-			'set_template': 'erpnext.controllers.print_settings.print_settings_for_item_table'
+			# 'set_template': 'erpnext.controllers.print_settings.print_settings_for_item_table'
 		},
 		'print_taxes_with_zero_amount': {
 			'condition': 'erpnext.controllers.print_settings.has_taxes_field',
-			'fieldtype': 'Check',
-			'label': 'Print taxes with zero amount',
-			'set_template': 'erpnext.controllers.print_settings.print_settings_for_taxes'
+			# 'set_template': 'erpnext.controllers.print_settings.print_settings_for_taxes'
 		}
 	}
 

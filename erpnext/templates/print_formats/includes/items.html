@@ -1,0 +1,33 @@
+{%- if data -%}
+	{%- set visible_columns = get_visible_columns(doc.get(df.fieldname),
+		table_meta, df) -%}
+
+	<div {{ fieldmeta(df) }}>
+		<table class="table table-bordered table-condensed">
+			<thead>
+				<tr>
+					<th style="width: 40px" class="table-sr">{{ _("Sr") }}</th>
+					{% for tdf in visible_columns %}
+					{% if (data and not print_settings.compact_item_print) or tdf.fieldname in doc.get(df.fieldname)[0].flags.compact_item_fields %}
+						<th style="width: {{ get_width(tdf) }};" class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
+							{{ _(tdf.label) }}</th>
+					{% endif %}
+					{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for d in data %}
+				<tr>
+					<td class="table-sr">{{ d.idx }}</td>
+					{% for tdf in visible_columns %}
+					{% if not doc.get(df.fieldname)[0].flags.compact_item_print or tdf.fieldname in doc.get(df.fieldname)[0].flags.compact_item_fields %}
+						<td class="{{ get_align_class(tdf) }}" {{ fieldmeta(df) }}>
+						<div class="value">{{ print_value(tdf, d, doc, visible_columns) }}</div></td>
+					{% endif %}
+					{% endfor %}
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+{%- endif -%}
