@@ -26,18 +26,25 @@ class POSInvoiceMergeLog(Document):
 		for d in self.pos_invoices:
 			status, docstatus, is_return, return_against = frappe.db.get_value(
 				'POS Invoice', d.pos_invoice, ['status', 'docstatus', 'is_return', 'return_against'])
-
+			
+			bold_pos_invoice = frappe.bold(d.pos_invoice)
+			bold_status = frappe.bold(status)
 			if docstatus != 1:
-				frappe.throw(_("Row #{}: POS Invoice {} is not submitted yet").format(d.idx, d.pos_invoice))
+				frappe.throw(_("Row #{}: POS Invoice {} is not submitted yet").format(d.idx, bold_pos_invoice))
 			if status == "Consolidated":
-				frappe.throw(_("Row #{}: POS Invoice {} has been {}").format(d.idx, d.pos_invoice, status))
-			if is_return and return_against not in [d.pos_invoice for d in self.pos_invoices] and status != "Consolidated":
-				# if return entry is not getting merged in the current pos closing and if it is not consolidated
-				frappe.throw(
-					_("Row #{}: Return Invoice {} cannot be made against unconsolidated invoice. \
-					You can add original invoice {} manually to proceed.")
-					.format(d.idx, frappe.bold(d.pos_invoice), frappe.bold(return_against))
-				)
+				frappe.throw(_("Row #{}: POS Invoice {} has been {}").format(d.idx, bold_pos_invoice, bold_status))
+			if is_return and return_against and return_against not in [d.pos_invoice for d in self.pos_invoices]:
+				bold_return_against = frappe.bold(return_against)
+				return_against_status = frappe.db.get_value('POS Invoice', return_against, "status")
+				if return_against_status != "Consolidated":
+					# if return entry is not getting merged in the current pos closing and if it is not consolidated
+					bold_unconsolidated = frappe.bold("not Consolidated")
+					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}. ")
+								.format(d.idx, bold_return_against, bold_pos_invoice, bold_unconsolidated))
+					msg += _("Original invoice should be consolidated before or along with the return invoice.")
+					msg += "<br><br>"
+					msg += _("You can add original invoice {} manually to proceed.").format(bold_return_against)
+					frappe.throw(msg)
 
 	def on_submit(self):
 		pos_invoice_docs = [frappe.get_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]

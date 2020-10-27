@@ -378,7 +378,7 @@ class WorkOrder(Document):
 			select
 				operation, description, workstation, idx,
 				base_hour_rate as hour_rate, time_in_mins,
-				"Pending" as status, parent as bom, batch_size
+				"Pending" as status, parent as bom, batch_size, sequence_id
 			from
 				`tabBOM Operation`
 			where
@@ -403,7 +403,7 @@ class WorkOrder(Document):
 		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
 
 		for d in self.get("operations"):
-			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * math.ceil(flt(self.qty) / flt(d.batch_size))
+			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * (flt(self.qty) / flt(d.batch_size))
 
 		self.calculate_operating_cost()
 
@@ -865,6 +865,7 @@ def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto
 		'bom_no': work_order.bom_no,
 		'project': work_order.project,
 		'company': work_order.company,
+		'sequence_id': row.get("sequence_id"),
 		'wip_warehouse': work_order.wip_warehouse
 	})
 
