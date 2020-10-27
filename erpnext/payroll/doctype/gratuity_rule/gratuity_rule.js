@@ -22,7 +22,6 @@ frappe.ui.form.on('Gratuity Rule Slab', {
 		Wrong order may lead to Wrong Calculation
 	*/
 
-
 	gratuity_rule_slabs_add(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		let array_idx = row.idx - 1;
