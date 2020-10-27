@@ -1362,10 +1362,15 @@ def validate_and_delete_children(parent, data):
 		d.delete()
 		
 		from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty, get_ordered_qty
-		update_bin_qty(d.item_code, d.warehouse, {
-			"reserved_qty": get_reserved_qty(d.item_code, d.warehouse),
-			"ordered_qty": get_ordered_qty(d.item_code, d.warehouse)
-		})
+		# updating both will be time consuming, update it based on the doctype. reserved qty if sales order, otherwise ordered qty
+		if parent.doctype == "Sales Order":
+			update_bin_qty(d.item_code, d.warehouse, {
+				"reserved_qty": get_reserved_qty(d.item_code, d.warehouse)
+			}) 
+		else:
+			update_bin_qty(d.item_code, d.warehouse, {
+				"ordered_qty": get_ordered_qty(d.item_code, d.warehouse)
+			}) 
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
