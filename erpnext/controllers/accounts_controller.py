@@ -1204,7 +1204,6 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.uom = item.stock_uom
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
-	# child_item.conversion_factor = get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
 	set_child_tax_template_and_map(item, child_item, p_doc)
@@ -1237,10 +1236,14 @@ def validate_and_delete_children(parent, data):
 		d.delete()
 
 		from erpnext.stock.stock_balance import update_bin_qty, get_ordered_qty, get_reserved_qty
-		update_bin_qty(d.item_code, d.warehouse, {
-			"reserved_qty": get_reserved_qty(d.item_code, d.warehouse),
-			"ordered_qty": get_ordered_qty(d.item_code, d.warehouse)
-		})
+		if parent.doctype == "Sales Order":
+			update_bin_qty(d.item_code, d.warehouse, {
+				"reserved_qty": get_reserved_qty(d.item_code, d.warehouse)
+			}) 
+		else:
+			update_bin_qty(d.item_code, d.warehouse, {
+				"ordered_qty": get_ordered_qty(d.item_code, d.warehouse)
+			}) 
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
