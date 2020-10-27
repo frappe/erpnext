@@ -23,6 +23,14 @@ class BuyingController(StockController):
 		if hasattr(self, "taxes"):
 			print_settings_for_taxes(self)
 
+	def before_print(self):
+		pass
+
+	def get_print_settings(self):
+		items_field = self.meta.get_field('items')
+		if items_field and items_field.fieldtype == 'Table':
+			return ['compact_item_print', 'print_uom_after_quantity']
+
 	def get_feed(self):
 		if self.get("supplier_name"):
 			return _("From {0} | {1} {2}").format(self.supplier_name, self.currency,

@@ -20,6 +20,17 @@ class SellingController(StockController):
 		if hasattr(self, "taxes"):
 			print_settings_for_taxes(self)
 
+	def before_print(self):
+		self.print_templates = {
+			"items": "templates/print_formats/includes/items.html",
+		}
+		self.flags.compact_item_fields = ['description']
+
+	def get_print_settings(self):
+		items_field = self.meta.get_field('items')
+		if items_field and items_field.fieldtype == 'Table':
+			return ['compact_item_print', 'print_uom_after_quantity']
+
 
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
