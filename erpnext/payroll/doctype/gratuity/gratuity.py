@@ -14,11 +14,8 @@ class Gratuity(Document):
 		data = calculate_work_experience_and_amount(self.employee, self.gratuity_rule)
 		self.current_work_experience = data["current_work_experience"]
 		self.amount = data["amount"]
-
-	def before_submit(self):
-		self.status = "Unpaid"
-		if self.pay_via_salary_slip:
-			self.status = "Paid"
+		if self.docstatus == 1:
+			self.status = "Unpaid"
 
 	def on_submit(self):
 		self.create_additional_salary()
