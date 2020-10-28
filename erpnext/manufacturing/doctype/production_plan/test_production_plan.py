@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
+from six import string_types
 from frappe.utils import nowdate, now_datetime, flt
 from erpnext.stock.doctype.item.test_item import create_item
 from erpnext.manufacturing.doctype.production_plan.production_plan import get_sales_orders
@@ -287,6 +288,7 @@ def make_bom(**args):
 	bom = frappe.get_doc({
 		'doctype': 'BOM',
 		'is_default': 1,
+		'is_active': 1,
 		'item': args.item,
 		'currency': args.currency or 'USD',
 		'quantity': args.quantity or 1,
@@ -296,20 +298,20 @@ def make_bom(**args):
 	})
 
 	for item in args.raw_materials:
-		item_doc = frappe.get_doc('Item', item)
+		item_doc = item
+		if isinstance(item, string_types):
+			item_doc = frappe.get_doc('Item', item)
 
 		bom.append('items', {
-			'item_code': item,
+			'item_code': item_doc.name,
 			'qty': args.rm_qty or 1.0,
 			'uom': item_doc.stock_uom,
 			'stock_uom': item_doc.stock_uom,
 			'rate': item_doc.valuation_rate or args.rate,
+			'source_warehouse': args.source_warehouse
 		})
 
 	if not args.do_not_save:
 		bom.insert(ignore_permissions=True)
-
-		if not args.do_not_submit:
-			bom.submit()
 
 	return bom

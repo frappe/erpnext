@@ -12,7 +12,7 @@
   "item_name",
   "description",
   "allow_alternative_item",
-  "include_item_in_manufacturing",
+  "skip_material_transfer",
   "qty_section",
   "required_qty",
   "rate",
@@ -21,7 +21,21 @@
   "transferred_qty",
   "consumed_qty",
   "available_qty_at_source_warehouse",
-  "available_qty_at_wip_warehouse"
+  "available_qty_at_wip_warehouse",
+  "other_information_section",
+  "uom",
+  "stock_uom",
+  "batch_no",
+  "serial_no",
+  "column_break_21",
+  "cost_center",
+  "conversion_factor",
+  "stock_qty",
+  "consumed_serial_no",
+  "consumed_batch_no",
+  "alternative_item_section",
+  "alternative_item",
+  "stock_entry"
  ],
  "fields": [
   {
@@ -87,12 +101,6 @@
    "label": "Allow Alternative Item"
   },
   {
-   "default": "0",
-   "fieldname": "include_item_in_manufacturing",
-   "fieldtype": "Check",
-   "label": "Include Item In Manufacturing"
-  },
-  {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
   },
@@ -127,11 +135,112 @@
    "fieldtype": "Currency",
    "label": "Amount",
    "read_only": 1
+  },
+  {
+   "fieldname": "other_information_section",
+   "fieldtype": "Section Break",
+   "label": "Other Information"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fetch_if_empty": 1,
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM"
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fetch_if_empty": 1,
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor"
+  },
+  {
+   "fieldname": "stock_qty",
+   "fieldtype": "Float",
+   "label": "Transfer Qty as Per Stock UOM"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Code",
+   "label": "Batch No",
+   "no_copy": 1,
+   "options": "Batch",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Code",
+   "label": "Serial No",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumed_serial_no",
+   "fieldtype": "Code",
+   "label": "Consumed Serial No",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumed_batch_no",
+   "fieldtype": "Code",
+   "label": "Consumed Batch No",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "alternative_item_section",
+   "fieldtype": "Section Break",
+   "label": "Alternative Item"
+  },
+  {
+   "fieldname": "alternative_item",
+   "fieldtype": "Link",
+   "label": "Alternative Item",
+   "no_copy": 1,
+   "options": "Item",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_entry",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Stock Entry",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Default Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "default": "0",
+   "fieldname": "skip_material_transfer",
+   "fieldtype": "Check",
+   "label": "Skip Material Transfer"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-04-13 18:46:32.966416",
+ "modified": "2020-12-17 16:04:55.030093",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

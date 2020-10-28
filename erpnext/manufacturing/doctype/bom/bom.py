@@ -163,21 +163,6 @@ class BOM(WebsiteGenerator):
 		frappe.cache().hdel('bom_children', self.name)
 		self.check_recursion()
 
-	def on_submit(self):
-		self.manage_default_bom()
-
-	def on_cancel(self):
-		frappe.db.set(self, "is_active", 0)
-		frappe.db.set(self, "is_default", 0)
-
-		# check if used in any other bom
-		self.validate_bom_links()
-		self.manage_default_bom()
-
-	def on_update_after_submit(self):
-		self.validate_bom_links()
-		self.manage_default_bom()
-
 	def get_item_det(self, item_code):
 		item = get_item_details(item_code)
 
@@ -208,7 +193,6 @@ class BOM(WebsiteGenerator):
 				"item_name": item.item_name,
 				"bom_no": item.bom_no,
 				"stock_qty": item.stock_qty,
-				"include_item_in_manufacturing": item.include_item_in_manufacturing,
 				"qty": item.qty,
 				"uom": item.uom,
 				"stock_uom": item.stock_uom,
@@ -232,8 +216,6 @@ class BOM(WebsiteGenerator):
 		item = self.get_item_det(args['item_code'])
 
 		args['bom_no'] = args['bom_no'] or item and cstr(item['default_bom']) or ''
-		args['transfer_for_manufacture'] = (cstr(args.get('include_item_in_manufacturing', '')) or
-			item and item.include_item_in_manufacturing or 0)
 		args.update(item)
 
 		rate = self.get_rm_rate(args)
@@ -249,7 +231,6 @@ class BOM(WebsiteGenerator):
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: flt(rate) * (flt(self.conversion_rate) or 1),
-			 'include_item_in_manufacturing': cint(args.get('transfer_for_manufacture')),
 			 'sourced_by_supplier'		: args.get('sourced_by_supplier', 0)
 		}
 
@@ -313,7 +294,7 @@ class BOM(WebsiteGenerator):
 			if save:
 				d.db_update()
 
-		if self.docstatus == 1:
+		if self.docstatus == 0:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost(update_hour_rate)
 		if save:
@@ -324,7 +305,7 @@ class BOM(WebsiteGenerator):
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
 			parent_boms = frappe.db.sql_list("""select distinct parent from `tabBOM Item`
-				where bom_no = %s and docstatus=1 and parenttype='BOM'""", self.name)
+				where bom_no = %s and docstatus=0 and parenttype='BOM'""", self.name)
 
 			for bom in parent_boms:
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
@@ -350,19 +331,21 @@ class BOM(WebsiteGenerator):
 			check the current one as default if it the only bom for the selected item,
 			update default bom in item master
 		"""
+		default_bom = frappe.get_cached_value("Item", self.item, "default_bom")
+		if (default_bom and self.is_default and self.is_active and default_bom == self.name):
+			return
+
 		if self.is_default and self.is_active:
 			from frappe.model.utils import set_default
 			set_default(self, "item")
-			item = frappe.get_doc("Item", self.item)
-			if item.default_bom != self.name:
+			if default_bom != self.name:
 				frappe.db.set_value('Item', self.item, 'default_bom', self.name)
-		elif not frappe.db.exists(dict(doctype='BOM', docstatus=1, item=self.item, is_default=1)) \
-			and self.is_active:
-			frappe.db.set(self, "is_default", 1)
+		elif (not frappe.db.exists(dict(doctype='BOM', docstatus=0, item=self.item, is_default=1))
+			and self.is_active):
+			self.is_default = 1
 		else:
-			frappe.db.set(self, "is_default", 0)
-			item = frappe.get_doc("Item", self.item)
-			if item.default_bom == self.name:
+			self.is_default = 0
+			if default_bom == self.name:
 				frappe.db.set_value('Item', self.item, 'default_bom', None)
 
 	def clear_operations(self):
@@ -580,7 +563,6 @@ class BOM(WebsiteGenerator):
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
 					'rate'			: flt(d.base_rate) / (flt(d.conversion_factor) or 1.0),
-					'include_item_in_manufacturing': d.include_item_in_manufacturing,
 					'sourced_by_supplier': d.sourced_by_supplier
 				}))
 
@@ -606,14 +588,13 @@ class BOM(WebsiteGenerator):
 				bom_item.stock_uom,
 				bom_item.stock_qty,
 				bom_item.rate,
-				bom_item.include_item_in_manufacturing,
 				bom_item.sourced_by_supplier,
 				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
 			FROM `tabBOM Explosion Item` bom_item, tabBOM bom
 			WHERE
 				bom_item.parent = bom.name
 				AND bom.name = %s
-				AND bom.docstatus = 1
+				AND bom.docstatus = 0
 		""", bom_no, as_dict = 1)
 
 		for d in child_fb_items:
@@ -626,7 +607,6 @@ class BOM(WebsiteGenerator):
 				'stock_uom'				: d['stock_uom'],
 				'stock_qty'				: d['qty_consumed_per_unit'] * stock_qty,
 				'rate'					: flt(d['rate']),
-				'include_item_in_manufacturing': d.get('include_item_in_manufacturing', 0),
 				'sourced_by_supplier': d.get('sourced_by_supplier', 0)
 			}))
 
@@ -643,7 +623,6 @@ class BOM(WebsiteGenerator):
 				ch.set(i, self.cur_exploded_items[d][i])
 			ch.amount = flt(ch.stock_qty) * flt(ch.rate)
 			ch.qty_consumed_per_unit = flt(ch.stock_qty) / flt(self.quantity)
-			ch.docstatus = self.docstatus
 
 			if save:
 				ch.db_insert()
@@ -651,9 +630,9 @@ class BOM(WebsiteGenerator):
 	def validate_bom_links(self):
 		if not self.is_active:
 			act_pbom = frappe.db.sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
-				where bom_item.bom_no = %s and bom_item.docstatus = 1 and bom_item.parenttype='BOM'
+				where bom_item.bom_no = %s and bom_item.docstatus = 0 and bom_item.parenttype='BOM'
 				and exists (select * from `tabBOM` where name = bom_item.parent
-					and docstatus = 1 and is_active = 1)""", self.name)
+					and docstatus < 2 and is_active = 1)""", self.name)
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
@@ -803,7 +782,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 			is_stock_item=is_stock_item,
 			qty_field="stock_qty",
 			select_columns = """, bom_item.source_warehouse, bom_item.operation,
-				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
+				bom_item.description, bom_item.rate, bom_item.sourced_by_supplier,
 				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
@@ -816,7 +795,7 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 		query = query.format(table="BOM Item", where_conditions="", is_stock_item=is_stock_item,
 			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns = """, bom_item.uom, bom_item.conversion_factor, bom_item.source_warehouse,
-				bom_item.idx, bom_item.operation, bom_item.include_item_in_manufacturing, bom_item.sourced_by_supplier,
+				bom_item.idx, bom_item.operation, bom_item.sourced_by_supplier,
 				bom_item.description, bom_item.base_rate as rate """)
 		items = frappe.db.sql(query, { "qty": qty, "bom": bom, "company": company }, as_dict=True)
 
@@ -847,9 +826,7 @@ def validate_bom_no(item, bom_no):
 	bom = frappe.get_doc("BOM", bom_no)
 	if not bom.is_active:
 		frappe.throw(_("BOM {0} must be active").format(bom_no))
-	if bom.docstatus != 1:
-		if not getattr(frappe.flags, "in_test", False):
-			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
+
 	if item:
 		rm_item_exists = False
 		for d in bom.items:
@@ -906,7 +883,7 @@ def get_boms_in_bottom_up_order(bom_no=None):
 	def _get_parent(bom_no):
 		return frappe.db.sql_list("""
 			select distinct bom_item.parent from `tabBOM Item` bom_item
-			where bom_item.bom_no = %s and bom_item.docstatus=1 and bom_item.parenttype='BOM'
+			where bom_item.bom_no = %s and bom_item.parenttype='BOM'
 				and exists(select bom.name from `tabBOM` bom where bom.name=bom_item.parent and bom.is_active=1)
 		""", bom_no)
 
@@ -917,7 +894,7 @@ def get_boms_in_bottom_up_order(bom_no=None):
 	else:
 		# get all leaf BOMs
 		bom_list = frappe.db.sql_list("""select name from `tabBOM` bom
-			where docstatus=1 and is_active=1
+			where docstatus < 2 and is_active=1
 				and not exists(select bom_no from `tabBOM Item`
 					where parent=bom.name and ifnull(bom_no, '')!='')""")
 
@@ -1109,9 +1086,6 @@ def make_variant_bom(source_name, bom_no, item, variant_items, target_doc=None):
 	doc = get_mapped_doc('BOM', source_name, {
 		'BOM': {
 			'doctype': 'BOM',
-			'validation': {
-				'docstatus': ['=', 1]
-			}
 		},
 		'BOM Item': {
 			'doctype': 'BOM Item',

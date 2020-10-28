@@ -9,6 +9,14 @@ frappe.ui.form.on("Work Order", {
 			'Job Card': 'Create Job Card'
 		};
 
+		frm.set_indicator_formatter('item_code', function(doc) {
+			if (!doc.transferred_qty && !doc.consumed_qty) {
+				return "blue";
+			} else {
+				return (doc.transferred_qty === doc.consumed_qty) ? "green": "orange";
+			}
+		});
+
 		// Set query for warehouses
 		frm.set_query("wip_warehouse", function() {
 			return {
@@ -174,10 +182,9 @@ frappe.ui.form.on("Work Order", {
 			}
 		}
 
-		if (frm.doc.status == "Completed" &&
-			frm.doc.__onload.backflush_raw_materials_based_on == "Material Transferred for Manufacture") {
+		if (frm.doc.status == 'Completed') {
 			frm.add_custom_button(__('Create BOM'), () => {
-				frm.trigger("make_bom");
+				frm.trigger('make_bom');
 			});
 		}
 	},
@@ -480,8 +487,7 @@ frappe.ui.form.on("Work Order Item", {
 							"item_name": r.message.item_name,
 							"description": r.message.description,
 							"source_warehouse": r.message.default_warehouse,
-							"allow_alternative_item": r.message.allow_alternative_item,
-							"include_item_in_manufacturing": r.message.include_item_in_manufacturing
+							"allow_alternative_item": r.message.allow_alternative_item
 						});
 					}
 				}
@@ -528,6 +534,13 @@ erpnext.work_order = {
 				}, __("Status"));
 			}
 
+			let remainined_items = frm.doc.required_items.filter(d => d.transferred_qty > d.consumed_qty);
+			if (!frm.doc.skip_transfer && remainined_items && remainined_items.length > 0) {
+				frm.add_custom_button(__("Excess Material Return"), () => {
+					erpnext.work_order.make_se(frm, "Material Transfer for Manufacture", true);
+				}, __("Create"));
+			}
+
 			const show_start_btn = (frm.doc.skip_transfer
 				|| frm.doc.transfer_material_against == 'Job Card') ? 0 : 1;
 
@@ -564,8 +577,7 @@ erpnext.work_order = {
 						}
 						if (counter > 0) {
 							var consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
-								const backflush_raw_materials_based_on = frm.doc.__onload.backflush_raw_materials_based_on;
-								erpnext.work_order.make_consumption_se(frm, backflush_raw_materials_based_on);
+								erpnext.work_order.make_consumption_se(frm);
 							});
 							consumption_btn.addClass('btn-primary');
 						}
@@ -639,9 +651,20 @@ erpnext.work_order = {
 		return flt(max, precision('qty'));
 	},
 
-	show_prompt_for_qty_input: function(frm, purpose) {
+	show_prompt_for_qty_input: function(frm, purpose, is_material_return) {
 		let max = this.get_max_transferable_qty(frm, purpose);
+		let data = {};
+		if (is_material_return) {
+			max = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
+		}
+
 		return new Promise((resolve, reject) => {
+			if (is_material_return && !max) {
+				data.qty = 0;
+				resolve(data);
+				return;
+			}
+
 			frappe.prompt({
 				fieldtype: 'Float',
 				label: __('Qty for {0}', [purpose]),
@@ -650,6 +673,10 @@ erpnext.work_order = {
 				default: max
 			}, data => {
 				max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
+
+				if (is_material_return) {
+					max = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
+				}
 
 				if (data.qty > max) {
 					frappe.msgprint(__('Quantity must not be more than {0}', [max]));
@@ -661,13 +688,14 @@ erpnext.work_order = {
 		});
 	},
 
-	make_se: function(frm, purpose) {
-		this.show_prompt_for_qty_input(frm, purpose)
+	make_se: function(frm, purpose, is_material_return) {
+		this.show_prompt_for_qty_input(frm, purpose, is_material_return)
 			.then(data => {
 				return frappe.xcall('erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry', {
 					'work_order_id': frm.doc.name,
 					'purpose': purpose,
-					'qty': data.qty
+					'qty': data.qty,
+					'is_return': is_material_return
 				});
 			}).then(stock_entry => {
 				frappe.model.sync(stock_entry);
@@ -689,15 +717,9 @@ erpnext.work_order = {
 			});
 	},
 
-	make_consumption_se: function(frm, backflush_raw_materials_based_on) {
-		if(!frm.doc.skip_transfer){
-			var max = (backflush_raw_materials_based_on === "Material Transferred for Manufacture") ?
-				flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty) :
-				flt(frm.doc.qty) - flt(frm.doc.produced_qty);
-				// flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
-		} else {
-			var max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
-		}
+	make_consumption_se: function(frm) {
+		let work_order_qty = frm.doc.material_transferred_for_manufacturing || frm.doc.qty;
+		let max = flt(work_order_qty) - flt(frm.doc.produced_qty);
 
 		frappe.call({
 			method:"erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry",

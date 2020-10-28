@@ -7,8 +7,6 @@
  "field_order": [
   "raw_materials_consumption_section",
   "material_consumption",
-  "column_break_3",
-  "backflush_raw_materials_based_on",
   "capacity_planning",
   "disable_capacity_planning",
   "allow_overtime",
@@ -54,10 +52,6 @@
    "label": "Allow Production on Holidays"
   },
   {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "30",
    "depends_on": "eval:!doc.disable_capacity_planning",
    "description": "Plan operations X days in advance",
@@ -86,13 +80,6 @@
    "fieldname": "overproduction_percentage_for_work_order",
    "fieldtype": "Percent",
    "label": "Overproduction Percentage For Work Order"
-  },
-  {
-   "default": "BOM",
-   "fieldname": "backflush_raw_materials_based_on",
-   "fieldtype": "Select",
-   "label": "Backflush Raw Materials Based On",
-   "options": "BOM\nMaterial Transferred for Manufacture"
   },
   {
    "default": "0",
@@ -181,7 +168,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-16 15:54:38.967341",
+ "modified": "2021-04-16 15:54:38.967341",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

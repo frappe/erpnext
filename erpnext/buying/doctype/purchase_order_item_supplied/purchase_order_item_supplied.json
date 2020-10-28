@@ -24,7 +24,8 @@
   "col_break1",
   "consumed_qty",
   "returned_qty",
-  "total_supplied_qty"
+  "total_supplied_qty",
+  "description"
  ],
  "fields": [
   {
@@ -177,13 +178,20 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "rm_item_code.description",
+   "fetch_if_empty": 1,
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
   }
  ],
  "hide_toolbar": 1,
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-06-09 15:17:58.128242",
+ "modified": "2021-06-10 15:17:58.128242",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item Supplied",

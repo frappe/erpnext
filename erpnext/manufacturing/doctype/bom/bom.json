@@ -537,7 +537,6 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
- "is_submittable": 1,
  "links": [],
  "modified": "2021-05-16 12:25:09.081968",
  "modified_by": "Administrator",
@@ -546,7 +545,6 @@
  "owner": "Administrator",
  "permissions": [
   {
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -555,11 +553,9 @@
    "report": 1,
    "role": "Manufacturing Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   },
   {
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -568,7 +564,6 @@
    "report": 1,
    "role": "Manufacturing User",
    "share": 1,
-   "submit": 1,
    "write": 1
   }
  ],

@@ -11,6 +11,8 @@ frappe.listview_settings['Stock Entry'] = {
 
 		} else if (doc.purpose === 'Send to Warehouse' && doc.per_transferred === 100) {
 			return [__("Goods Transferred"), "green", "per_transferred,=,100"];
+		} else if (doc.purpose === 'Material Transfer for Manufacture' && doc.is_return) {
+			return [__("Stock Return"), "orange", "is_return,=,1"];
 		} else if (doc.docstatus === 2) {
 			return [__("Canceled"), "red", "docstatus,=,2"];
 		} else {

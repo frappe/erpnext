@@ -23,7 +23,6 @@
   "disabled",
   "allow_alternative_item",
   "is_stock_item",
-  "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
   "standard_rate",
@@ -243,12 +242,6 @@
    "label": "Maintain Stock",
    "oldfieldname": "is_stock_item",
    "oldfieldtype": "Select"
-  },
-  {
-   "default": "1",
-   "fieldname": "include_item_in_manufacturing",
-   "fieldtype": "Check",
-   "label": "Include Item In Manufacturing"
   },
   {
    "bold": 1,

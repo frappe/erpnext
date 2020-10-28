@@ -59,7 +59,7 @@ frappe.ui.form.on("BOM", {
 				filters: {
 					'item': d.item_code,
 					'is_active': 1,
-					'docstatus': 1
+					'docstatus': 0
 				}
 			};
 		});
@@ -93,7 +93,7 @@ frappe.ui.form.on("BOM", {
 			});
 		}
 
-		if(frm.doc.docstatus!=0) {
+		if (!frm.is_new()) {
 			frm.add_custom_button(__("Work Order"), function() {
 				frm.trigger("make_work_order");
 			}, __("Create"));
@@ -325,7 +325,8 @@ frappe.ui.form.on("BOM", {
 			freeze: true,
 			args: {
 				update_parent: true,
-				from_child_bom:false
+				from_child_bom:false,
+				save: frm.doc.docstatus === 0 ? true : false
 			},
 			callback: function(r) {
 				refresh_field("items");
@@ -437,7 +438,6 @@ var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
 				"scrap_items": scrap_items,
 				"qty": d.qty,
 				"stock_qty": d.stock_qty,
-				"include_item_in_manufacturing": d.include_item_in_manufacturing,
 				"uom": d.uom,
 				"stock_uom": d.stock_uom,
 				"conversion_factor": d.conversion_factor,

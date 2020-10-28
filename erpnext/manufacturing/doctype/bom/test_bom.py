@@ -20,6 +20,9 @@ class TestBOM(unittest.TestCase):
 		if not frappe.get_value('Item', '_Test Item'):
 			make_test_records('Item')
 
+		if not frappe.db.get_value('BOM'):
+			make_test_records('BOM')
+
 	def test_get_items(self):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 		items_dict = get_bom_items_as_dict(bom=get_default_bom(),
@@ -216,7 +219,7 @@ class TestBOM(unittest.TestCase):
 		})
 		bom.insert(ignore_permissions=True)
 		bom.update_cost()
-		bom.submit()
+
 		# test that sourced_by_supplier rate is zero even after updating cost
 		self.assertEqual(bom.items[2].rate, 0)
 		# test in Purchase Order sourced_by_supplier is not added to Supplied Item
@@ -320,4 +323,6 @@ def reset_item_valuation_rate(item_code, warehouse_list=None, qty=None, rate=Non
 			warehouse_list.append("_Test Warehouse - _TC")
 
 	for warehouse in warehouse_list:
-		create_stock_reconciliation(item_code=item_code, warehouse=warehouse, qty=qty, rate=rate)
+		company = frappe.get_cached_value("Warehouse", warehouse, "company")
+		create_stock_reconciliation(item_code=item_code, warehouse=warehouse,
+			qty=qty, rate=rate, company=company)

@@ -36,7 +36,6 @@
   "qty_consumed_per_unit",
   "section_break_27",
   "has_variants",
-  "include_item_in_manufacturing",
   "original_item",
   "column_break_33",
   "sourced_by_supplier"
@@ -251,13 +250,6 @@
    "label": "Allow Alternative Item"
   },
   {
-   "default": "0",
-   "fetch_from": "item_code.include_item_in_manufacturing",
-   "fieldname": "include_item_in_manufacturing",
-   "fieldtype": "Check",
-   "label": "Include Item In Manufacturing"
-  },
-  {
    "fieldname": "original_item",
    "fieldtype": "Link",
    "hidden": 1,
@@ -290,7 +282,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-08 14:19:37.563300",
+ "modified": "2020-11-25 08:34:17.790246",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",

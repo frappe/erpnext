@@ -20,13 +20,14 @@
   "sales_invoice_no",
   "pick_list",
   "purchase_receipt_no",
+  "inspection_required",
+  "from_bom",
+  "is_return",
   "col2",
   "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "inspection_required",
-  "from_bom",
   "apply_putaway_rule",
   "sb1",
   "bom_no",
@@ -255,6 +256,7 @@
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "label": "BOM No",
+   "mandatory_depends_on": "from_bom",
    "options": "BOM"
   },
   {
@@ -263,6 +265,7 @@
    "fieldname": "fg_completed_qty",
    "fieldtype": "Float",
    "label": "For Quantity",
+   "mandatory_depends_on": "from_bom",
    "oldfieldname": "fg_completed_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1
@@ -278,14 +281,6 @@
    "fieldname": "use_multi_level_bom",
    "fieldtype": "Check",
    "label": "Use Multi-Level BOM",
-   "print_hide": 1
-  },
-  {
-   "depends_on": "from_bom",
-   "fieldname": "get_items",
-   "fieldtype": "Button",
-   "label": "Get Items",
-   "oldfieldtype": "Button",
    "print_hide": 1
   },
   {
@@ -622,7 +617,15 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
-  }
+  },
+  {
+   "depends_on": "from_bom",
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items",
+   "oldfieldtype": "Button",
+   "print_hide": 1
+  },
  ],
  "icon": "fa fa-file-text",
  "idx": 1,

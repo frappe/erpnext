@@ -26,7 +26,7 @@
     "include_item_in_manufacturing": 1
    }
   ],
-  "docstatus": 1,
+  "docstatus": 0,
   "doctype": "BOM",
   "currency": "USD",
   "is_active": 1,
@@ -72,7 +72,7 @@
     "include_item_in_manufacturing": 1
    }
   ],
-  "docstatus": 1,
+  "docstatus": 0,
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
@@ -118,7 +118,7 @@
     "include_item_in_manufacturing": 1
    }
   ],
-  "docstatus": 1,
+  "docstatus": 0,
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,
@@ -153,7 +153,7 @@
     "include_item_in_manufacturing": 1
    }
   ],
-  "docstatus": 1,
+  "docstatus": 0,
   "doctype": "BOM",
   "is_active": 1,
   "is_default": 1,

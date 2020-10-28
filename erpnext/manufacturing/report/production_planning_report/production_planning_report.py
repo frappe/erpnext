@@ -128,7 +128,7 @@ class ProductionPlanReport(object):
 				FROM
 					`tabBOM` as bom, `tab{1}` as bom_item
 				WHERE
-					bom_item.parent in ({2}) and bom_item.parent = bom.name and bom.docstatus = 1
+					bom_item.parent in ({2}) and bom_item.parent = bom.name and bom.docstatus < 2
 			""".format(qty_field, bom_doctype, ','.join(["%s"] * len(bom_nos))), tuple(bom_nos), as_dict=1)
 
 		if not raw_materials: return
