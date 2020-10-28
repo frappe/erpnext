@@ -235,9 +235,9 @@ def get_reverse_charge_recoverable_tax(filters):
 def get_conditions_join(filters):
 	"""The conditions to be used to filter data to calculate the total vat."""
 	conditions = ""
-	for opts in (("company", " and `tabPurchase Invoice`.company=%(company)s"),
-		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
-		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s")):
+	for opts in (("company", " and p.company=%(company)s"),
+		("from_date", " and p.posting_date>=%(from_date)s"),
+		("to_date", " and p.posting_date<=%(to_date)s")):
 			if filters.get(opts[0]):
 				conditions += opts[1]
 	return conditions
