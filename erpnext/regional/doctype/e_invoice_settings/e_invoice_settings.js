@@ -15,7 +15,7 @@ frappe.ui.form.on('E Invoice Settings', {
 			frm.add_custom_button(__("Fetch Token"),
 				() => {
 					frm.call({
-						method: 'erpnext.regional.india.e_invoice.e_invoice_utils.fetch_token',
+						method: 'erpnext.regional.india.e_invoice.utils.fetch_token',
 						freeze: true,
 						callback: () => frm.refresh()
 					});
