@@ -9,7 +9,6 @@ def execute(filters=None):
 	columns = get_columns()
 	data, emirates, amounts_by_emirate = get_data(filters)
 	chart = get_chart(emirates, amounts_by_emirate)
-
 	return columns, data, None, chart
 
 def get_columns():
@@ -49,7 +48,6 @@ def get_data(filters = None):
 	emirates, amounts_by_emirate = append_vat_on_sales(data, filters)
 	append_vat_on_expenses(data, filters)
 	return data, emirates, amounts_by_emirate
-
 
 def get_chart(emirates, amounts_by_emirate):
 	"""Returns chart data."""
@@ -167,16 +165,6 @@ def get_emirates():
 		'Fujairah'
 	]
 
-def get_conditions(filters):
-	"""The conditions to be used to filter data to calculate the total sale."""
-	conditions = ""
-	for opts in (("company", " and company=%(company)s"),
-		("from_date", " and posting_date>=%(from_date)s"),
-		("to_date", " and posting_date<=%(to_date)s")):
-			if filters.get(opts[0]):
-				conditions += opts[1]
-	return conditions
-
 def get_filters(filters):
 	"""The conditions to be used to filter data to calculate the total sale."""
 	query_filters = {}
@@ -215,16 +203,6 @@ def get_reverse_charge_tax(filters):
 		{where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
-def get_conditions_join(filters):
-	"""The conditions to be used to filter data to calculate the total vat."""
-	conditions = ""
-	for opts in (("company", " and `tabPurchase Invoice`.company=%(company)s"),
-		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
-		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s")):
-			if filters.get(opts[0]):
-				conditions += opts[1]
-	return conditions
-
 def get_reverse_charge_recoverable_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
@@ -253,6 +231,16 @@ def get_reverse_charge_recoverable_tax(filters):
 		and account in (select account from `tabUAE VAT Account` where  parent=%(company)s)
 		{where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
+
+def get_conditions_join(filters):
+	"""The conditions to be used to filter data to calculate the total vat."""
+	conditions = ""
+	for opts in (("company", " and `tabPurchase Invoice`.company=%(company)s"),
+		("from_date", " and `tabPurchase Invoice`.posting_date>=%(from_date)s"),
+		("to_date", " and `tabPurchase Invoice`.posting_date<=%(to_date)s")):
+			if filters.get(opts[0]):
+				conditions += opts[1]
+	return conditions
 
 def get_standard_rated_expenses_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
@@ -307,8 +295,9 @@ def get_zero_rated_total(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(i.base_amount) as total from
-		`tabSales Invoice Item` i, `tabSales Invoice` s
-		where s.docstatus = 1 and i.parent = s.name and i.is_zero_rated = 1
+		`tabSales Invoice Item` i inner join `tabSales Invoice` s
+		on i.parent = s.name
+		where s.docstatus = 1 and  i.is_zero_rated = 1
 		{where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
 
@@ -317,7 +306,18 @@ def get_exempt_total(filters):
 	conditions = get_conditions(filters)
 	return frappe.db.sql("""
 		select sum(i.base_amount) as total from
-		`tabSales Invoice Item` i, `tabSales Invoice` s
-		where s.docstatus = 1 and i.parent = s.name and i.is_exempt = 1
+		`tabSales Invoice Item` i inner join `tabSales Invoice` s
+		on i.parent = s.name
+		where s.docstatus = 1 and  i.is_exempt = 1
 		{where_conditions} ;
 		""".format(where_conditions=conditions), filters)[0][0] or 0
+
+def get_conditions(filters):
+	"""The conditions to be used to filter data to calculate the total sale."""
+	conditions = ""
+	for opts in (("company", " and company=%(company)s"),
+		("from_date", " and posting_date>=%(from_date)s"),
+		("to_date", " and posting_date<=%(to_date)s")):
+			if filters.get(opts[0]):
+				conditions += opts[1]
+	return conditions
