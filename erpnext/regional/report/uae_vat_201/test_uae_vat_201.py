@@ -190,7 +190,7 @@ def make_sales_invoices():
 			"description": "VAT 5% @ 5.0",
 			"rate": 5.0
 		})
-	si.emirate = 'Dubai'
+	si.vat_emirate = 'Dubai'
 	si.submit()
 
 	si = create_sales_invoice(company="_Test Company UAE VAT",
@@ -205,7 +205,7 @@ def make_sales_invoices():
 			item = "_Test UAE VAT Item",
 			do_not_save=1
 		)
-	si.emirate = 'Sharjah'
+	si.vat_emirate = 'Sharjah'
 	si.append("taxes", {
 			"charge_type": "On Net Total",
 			"account_head": "VAT 5% - _TCUV",
@@ -230,7 +230,7 @@ def make_sales_invoices():
 
 	si.tourist_tax_return = 2
 
-	si.emirate = 'Dubai'
+	si.vat_emirate = 'Dubai'
 
 	si.append("taxes", {
 			"charge_type": "On Net Total",
@@ -253,7 +253,7 @@ def make_sales_invoices():
 			item = "_Test UAE VAT Zero Rated Item",
 			do_not_save=1
 		)
-	si.emirate = 'Sharjah'
+	si.vat_emirate = 'Sharjah'
 	si.submit()
 
 	si = create_sales_invoice(company="_Test Company UAE VAT",
@@ -268,7 +268,7 @@ def make_sales_invoices():
 			item = "_Test UAE VAT Exempt Item",
 			do_not_save=1
 		)
-	si.emirate = 'Sharjah'
+	si.vat_emirate = 'Sharjah'
 	si.submit()
 
 def create_purchase_invoices():

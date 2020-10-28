@@ -147,9 +147,9 @@ def append_data(data, no, legend, amount, vat_amount):
 def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
 	return frappe.db.sql(f"""
-		select emirate, sum(total), sum(total_taxes_and_charges) from `tabSales Invoice`
+		select vat_emirate as emirate, sum(total), sum(total_taxes_and_charges) from `tabSales Invoice`
 		where docstatus = 1 {get_conditions(filters)}
-		group by `tabSales Invoice`.emirate;
+		group by `tabSales Invoice`.vat_emirate;
 		""", filters)
 
 def get_emirates():
