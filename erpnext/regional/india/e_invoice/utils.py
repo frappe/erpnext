@@ -526,7 +526,7 @@ def validate_einvoice(validations, einvoice, errors=[]):
 		if value_type == 'string':
 			einvoice[fieldname] = str(value)
 		elif value_type == 'number':
-			einvoice[fieldname] = flt(value, 2) if fieldname != 'Pin' else int(value)
+			einvoice[fieldname] = flt(value, 2) if fieldname != 'Pin' or fieldname != 'Distance' else int(value)
 
 		max_length = field_validation.get('maxLength')
 		minimum = flt(field_validation.get('minimum'))
