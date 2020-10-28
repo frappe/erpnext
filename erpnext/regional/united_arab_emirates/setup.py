@@ -55,10 +55,10 @@ def make_custom_fields():
 			dict(fieldname='customer_name_in_arabic', label='Customer Name in Arabic',
 				fieldtype='Read Only', insert_after='customer_name',
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
-			dict(fieldname='emirate', label='Emirate', insert_after='permit_no', fieldtype='Select',
+			dict(fieldname='vat_emirate', label='VAT Emirate', insert_after='permit_no', fieldtype='Select',
 				options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain'),
 			dict(fieldname='tourist_tax_return', label='Tax Refund provided to Tourists (AED)',
-				insert_after='emirate', fieldtype='Currency', print_hide=1, default='0'),
+				insert_after='vat_emirate', fieldtype='Currency', print_hide=1, default='0'),
 		]
 
 	invoice_item_fields = [
