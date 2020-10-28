@@ -69,6 +69,12 @@ class TestLoanDisbursement(unittest.TestCase):
 		# After repayment loan disbursement entry should go through
 		make_loan_disbursement_entry(loan.name, 500000, disbursement_date=add_days(last_date, 16))
 
+		# check for disbursement accrual
+		loan_interest_accrual = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name,
+			'accrual_type': 'Disbursement'})
+
+		self.assertTrue(loan_interest_accrual)
+
 	def test_loan_topup_with_additional_pledge(self):
 		pledge = [{
 			"loan_security": "Test Security 1",

@@ -218,7 +218,7 @@ def get_no_of_days_for_interest_accural(loan, posting_date):
 
 def get_last_accural_date(loan):
 	last_posting_date = frappe.db.sql(""" SELECT MAX(posting_date) from `tabLoan Interest Accrual`
-		WHERE loan = %s""", (loan))
+		WHERE loan = %s and docstatus = 1""", (loan))
 
 	if last_posting_date[0][0]:
 		# interest for last interest accrual date is already booked, so add 1 day

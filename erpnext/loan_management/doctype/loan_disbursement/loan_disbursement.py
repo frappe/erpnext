@@ -77,7 +77,7 @@ class LoanDisbursement(AccountsController):
 
 		if disbursed_amount == 0:
 			status = "Sanctioned"
-			total_payment = loan_details.loan_amount
+
 		elif disbursed_amount >= loan_details.loan_amount:
 			status = "Disbursed"
 		else:
@@ -89,7 +89,7 @@ class LoanDisbursement(AccountsController):
 		disbursed_amount = self.disbursed_amount + loan_details.disbursed_amount
 		total_payment = loan_details.total_payment
 
-		if loan_details.status == "Disbursed" and not loan_details.is_term_loan:
+		if loan_details.status in ("Disbursed", "Partially Disbursed") and not loan_details.is_term_loan:
 			process_loan_interest_accrual_for_demand_loans(posting_date=add_days(self.disbursement_date, -1),
 				loan=self.against_loan, accrual_type="Disbursement")
 
@@ -108,7 +108,6 @@ class LoanDisbursement(AccountsController):
 			status = "Disbursed"
 		else:
 			status = "Partially Disbursed"
-			total_payment = disbursed_amount
 
 		return disbursed_amount, status, total_payment
 
@@ -198,6 +197,9 @@ def get_disbursal_amount(loan):
 		security_value = flt(loan_details.loan_amount)
 
 	disbursal_amount = flt(security_value) - flt(pending_principal_amount)
+
+	if loan_details.is_term_loan and (disbursal_amount + loan_details.loan_amount) > loan_details.loan_amount:
+		disbursal_amount = loan_details.loan_amount - loan_details.disbursed_amount
 
 	return disbursal_amount
 
