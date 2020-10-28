@@ -123,13 +123,13 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					"Download E-Invoice",
 					() => {
 						frappe.call({
-							method: 'erpnext.regional.india.e_invoice.e_invoice_utils.make_einvoice',
+							method: 'erpnext.regional.india.e_invoice.utils.make_einvoice',
 							args: { doctype, name },
 							freeze: true,
 							callback: (res) => {
 								if (!res.exc) {
 									const args = {
-										cmd: 'erpnext.regional.india.e_invoice.e_invoice_utils.download_einvoice',
+										cmd: 'erpnext.regional.india.e_invoice.utils.download_einvoice',
 										einvoice: JSON.stringify([res.message]),
 										name: name
 									};
@@ -142,7 +142,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					"Upload Signed E-Invoice",
 					() => {
 						new frappe.ui.FileUploader({
-							method: 'erpnext.regional.india.e_invoice.e_invoice_utils.upload_einvoice',
+							method: 'erpnext.regional.india.e_invoice.utils.upload_einvoice',
 							allow_multiple: 0,
 							doctype: doctype,
 							docname: name,
@@ -173,7 +173,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							primary_action: function() {
 								const data = d.get_values();
 								const args = {
-									cmd: 'erpnext.regional.india.e_invoice.e_invoice_utils.download_cancel_einvoice',
+									cmd: 'erpnext.regional.india.e_invoice.utils.download_cancel_einvoice',
 									irn: irn, reason: data.reason.split('-')[0], remark: data.remark, name: name
 								};
 								open_url_post(frappe.request.url, args);
@@ -188,7 +188,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 					"Upload Cancel JSON",
 					() => {
 						new frappe.ui.FileUploader({
-							method: 'erpnext.regional.india.e_invoice.e_invoice_utils.upload_cancel_ack',
+							method: 'erpnext.regional.india.e_invoice.utils.upload_cancel_ack',
 							allow_multiple: 0,
 							doctype: doctype,
 							docname: name,

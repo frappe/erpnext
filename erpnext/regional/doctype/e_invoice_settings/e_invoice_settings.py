@@ -17,7 +17,9 @@ class EInvoiceSettings(Document):
 				frappe.throw(_("{} is required").format(frappe.unscrub(d)), title=_("Missing Values"))
 	
 	def before_save(self):
-		if not self.public_key or self.has_value_changed('public_key_file'):
+		previous = self.get_doc_before_save()
+		public_file_changed = previous.get('public_key_file') != self.get('public_key_file') if previous else True
+		if not self.public_key or public_file_changed:
 			self.public_key = self.read_key_file()
 
 	def read_key_file(self):
