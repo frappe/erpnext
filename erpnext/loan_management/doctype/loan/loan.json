@@ -344,13 +344,14 @@
    "fieldtype": "Currency",
    "label": "Written Off Amount",
    "no_copy": 1,
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-22 11:03:43.697394",
+ "modified": "2020-10-27 23:37:02.785940",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
