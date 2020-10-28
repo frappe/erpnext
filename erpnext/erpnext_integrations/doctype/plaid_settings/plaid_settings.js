@@ -21,10 +21,11 @@ frappe.ui.form.on('Plaid Settings', {
 					method: "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.enqueue_synchronization",
 					freeze: true,
 					callback: () => {
+						let bank_transaction_link = '<a href="#List/Bank Transaction">Bank Transaction</a>';
+
 						frappe.msgprint({
 							title: __("Sync Started"),
-							message: __(`The sync has started in the background, please check the
-								<a href="#List/Bank Transaction">Bank Transaction list</a> for new records.`),
+							message: __("The sync has started in the background, please check the {0} list for new records.", [bank_transaction_link]),
 							alert: 1
 						})
 					}
