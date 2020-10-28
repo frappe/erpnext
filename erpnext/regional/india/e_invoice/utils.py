@@ -22,8 +22,8 @@ from frappe.utils.data import get_datetime, cstr, cint, format_date, flt, time_d
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable')
-	invalid_doctype = doc.doctype not in ['Sales Invoice', 'Purchase Invoice']
-	invalid_supply_type = doc.gst_category not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
+	invalid_doctype = doc.doctype not in ['Sales Invoice']
+	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 
 	if invalid_doctype or invalid_supply_type or not einvoicing_enabled: return
 
