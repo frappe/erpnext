@@ -301,7 +301,8 @@ def get_accrued_interest_entries(against_loan):
 	unpaid_accrued_entries = frappe.db.sql(
 		"""
 			SELECT name, posting_date, interest_amount - paid_interest_amount as interest_amount,
-				payable_principal_amount - paid_principal_amount as payable_principal_amount
+				payable_principal_amount - paid_principal_amount as payable_principal_amount,
+				accrual_type
 			FROM
 				`tabLoan Interest Accrual`
 			WHERE
@@ -342,7 +343,7 @@ def get_amounts(amounts, against_loan, posting_date):
 		no_of_late_days = date_diff(posting_date,
 			add_days(due_date, loan_type_details.grace_period_in_days))
 
-		if no_of_late_days > 0 and (not against_loan_doc.repay_from_salary):
+		if no_of_late_days > 0 and (not against_loan_doc.repay_from_salary) and entry.accrual_type == 'Regular':
 			penalty_amount += (entry.interest_amount * (loan_type_details.penalty_interest_rate / 100) * no_of_late_days)/365
 
 		total_pending_interest += entry.interest_amount
@@ -353,7 +354,7 @@ def get_amounts(amounts, against_loan, posting_date):
 			'payable_principal_amount': flt(entry.payable_principal_amount, precision)
 		})
 
-		if not final_due_date:
+		if due_date and not final_due_date:
 			final_due_date = add_days(due_date, loan_type_details.grace_period_in_days)
 
 	if against_loan_doc.status in ('Disbursed', 'Loan Closure Requested', 'Closed'):
