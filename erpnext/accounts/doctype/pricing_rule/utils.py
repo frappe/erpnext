@@ -14,9 +14,8 @@ import frappe
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
-from frappe import _, throw
-from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, today
-
+from frappe import _, bold
+from frappe.utils import cint, flt, get_link_to_form, getdate, today, fmt_money
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
@@ -299,12 +298,13 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 			fieldname = field
 
 	if fieldname:
-		msg = _("""If you {0} {1} quantities of the item <b>{2}</b>, the scheme <b>{3}</b>
-			will be applied on the item.""").format(type_of_transaction, args.get(fieldname), item_code, args.rule_description)
+		msg = (_("If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item.")
+			.format(type_of_transaction, args.get(fieldname), bold(item_code), bold(args.rule_description)))
 
 		if fieldname in ['min_amt', 'max_amt']:
-			msg = _("""If you {0} {1} worth item <b>{2}</b>, the scheme <b>{3}</b> will be applied on the item.
-				""").format(frappe.fmt_money(type_of_transaction, args.get(fieldname)), item_code, args.rule_description)
+			msg = (_("If you {0} {1} worth item {2}, the scheme {3} will be applied on the item.")
+				.format(type_of_transaction, fmt_money(args.get(fieldname), currency=args.get("currency")),
+					bold(item_code), bold(args.rule_description)))
 
 		frappe.msgprint(msg)
 
