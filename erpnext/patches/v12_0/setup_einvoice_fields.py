@@ -8,6 +8,7 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc("regional", "doctype", "e_invoice_settings")
 	custom_fields = {
 		'Sales Invoice': [
 			dict(fieldname='irn', label='IRN', fieldtype='Data', read_only=1, insert_after='customer', no_copy=1, print_hide=1,
