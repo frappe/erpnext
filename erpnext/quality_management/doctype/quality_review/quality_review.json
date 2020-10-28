@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:REV-{#####}",
+ "autoname": "format:QA-REV-{#####}",
  "creation": "2018-10-02 11:45:16.301955",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -18,6 +18,7 @@
  ],
  "fields": [
   {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -50,7 +51,7 @@
    "collapsible": 1,
    "fieldname": "sb_01",
    "fieldtype": "Section Break",
-   "label": "Additional Information"
+   "label": "Notes"
   },
   {
    "fieldname": "reviews",
@@ -63,7 +64,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Open\nClosed"
+   "options": "Open\nPassed\nFailed",
+   "read_only": 1
   },
   {
    "fieldname": "goal",
@@ -74,8 +76,15 @@
    "reqd": 1
   }
  ],
- "links": [],
- "modified": "2020-02-01 10:59:38.933115",
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Review",
+   "link_doctype": "Quality Action",
+   "link_fieldname": "review"
+  }
+ ],
+ "modified": "2020-10-21 12:56:47.046172",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Review",
@@ -120,5 +129,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "goal",
  "track_changes": 1
 }
