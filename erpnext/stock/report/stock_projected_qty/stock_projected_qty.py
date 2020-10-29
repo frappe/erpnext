@@ -3,9 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
+from frappe import _, scrub
 from frappe.utils import flt, today
-from erpnext.stock.utils import update_included_uom_in_list_report
+from frappe.desk.query_report import group_report_data
+from erpnext.stock.utils import update_included_uom_in_dict_report
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
@@ -26,7 +27,7 @@ def execute(filters=None):
 
 		# item = item_map.setdefault(bin.item_code, get_item(bin.item_code))
 		company = warehouse_company.setdefault(bin.warehouse,
-			frappe.db.get_value("Warehouse", bin.warehouse, "company"))
+			frappe.get_cached_value("Warehouse", bin.warehouse, "company"))
 
 		if filters.brand and filters.brand != item.brand:
 			continue
@@ -50,30 +51,73 @@ def execute(filters=None):
 		if (re_order_level or re_order_qty) and re_order_level > bin.projected_qty:
 			shortage_qty = re_order_level - flt(bin.projected_qty)
 
-		data.append([item.name, item.item_group, item.brand, bin.warehouse,
-			item.alt_uom or item.stock_uom if filters.qty_field == "Contents Qty" else item.stock_uom,
-			bin.actual_qty * alt_uom_size,
-			bin.planned_qty * alt_uom_size,
-			bin.indented_qty * alt_uom_size,
-			bin.ordered_qty * alt_uom_size,
-			bin.reserved_qty * alt_uom_size,
-			bin.reserved_qty_for_production * alt_uom_size,
-			bin.reserved_qty_for_sub_contract * alt_uom_size,
-			bin.projected_qty * alt_uom_size,
-			re_order_level * alt_uom_size,
-			re_order_qty * alt_uom_size,
-			shortage_qty * alt_uom_size
-		])
+		data.append({
+			"item_code": item.name,
+			"item_name": item.item_name,
+			"item_group": item.item_group,
+			"brand": item.brand,
+			"warehouse": bin.warehouse,
+			"uom": item.alt_uom or item.stock_uom if filters.qty_field == "Contents Qty" else item.stock_uom,
+			"actual_qty": bin.actual_qty * alt_uom_size,
+			"planned_qty": bin.planned_qty * alt_uom_size,
+			"indented_qty": bin.indented_qty * alt_uom_size,
+			"ordered_qty": bin.ordered_qty * alt_uom_size,
+			"reserved_qty": bin.reserved_qty * alt_uom_size,
+			"reserved_qty_for_production": bin.reserved_qty_for_production * alt_uom_size,
+			"reserved_qty_for_sub_contract": bin.reserved_qty_for_sub_contract * alt_uom_size,
+			"projected_qty": bin.projected_qty * alt_uom_size,
+			"re_order_level": re_order_level * alt_uom_size,
+			"re_order_qty": re_order_qty * alt_uom_size,
+			"shortage_qty": shortage_qty * alt_uom_size
+		})
 
 		if include_uom:
 			conversion_factors.append(item.conversion_factor)
 
-	update_included_uom_in_list_report(columns, data, include_uom, conversion_factors)
-	return columns, data
+	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
+
+	grouped_data = get_grouped_data(columns, data, filters, item_map)
+
+	return columns, grouped_data
+
+
+def get_grouped_data(columns, data, filters, item_map):
+	group_by = []
+	for i in range(2):
+		group_label = filters.get("group_by_" + str(i + 1), "").replace("Group by ", "")
+
+		if not group_label or group_label == "Ungrouped":
+			continue
+		elif group_label == "Item":
+			group_field = "item_code"
+		else:
+			group_field = scrub(group_label)
+
+		group_by.append(group_field)
+
+	if not group_by:
+		return data
+
+	total_fields = [c['fieldname'] for c in columns if c['fieldtype'] in ['Float', 'Currency', 'Int']]
+
+	def postprocess_group(group_object, grouped_by):
+		if not group_object.group_field:
+			group_object.totals['item_code'] = "'Total'"
+		elif group_object.group_field == 'item_code':
+			group_object.totals['item_code'] = group_object.group_value
+
+			copy_fields = ['item_name', 'item_group', 'brand', 'uom']
+			for f in copy_fields:
+				group_object.totals[f] = group_object.rows[0][f]
+		else:
+			group_object.totals['item_code'] = "'{0}: {1}'".format(group_object.group_label, group_object.group_value)
+
+	return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group)
+
 
 def get_columns():
 	return [
-		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150},
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 250},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 120},
