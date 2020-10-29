@@ -209,7 +209,7 @@ class TestSubscription(unittest.TestCase):
 		subscription = frappe.new_doc('Subscription')
 		subscription.customer = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start = '2018-01-01'
+		subscription.start = add_days(nowdate(), -1000)
 		subscription.days_until_due = 1
 		subscription.insert()
 		subscription.process()		# generate first invoice
