@@ -18,6 +18,7 @@ from erpnext.stock.get_item_details import get_conversion_factor, get_default_in
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.accounts.doctype.transaction_type.transaction_type import get_transaction_type_defaults
 from frappe import _, throw
 from frappe.utils import cint, flt, cstr, get_datetime, get_link_to_form, getdate, today
 
@@ -546,6 +547,7 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 		item=get_item_defaults(free_item, company),
 		item_group=get_item_group_defaults(free_item, company),
 		brand=get_brand_defaults(free_item, company),
+		transaction_type=get_transaction_type_defaults(args.transaction_type_name, company)
 	)
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
