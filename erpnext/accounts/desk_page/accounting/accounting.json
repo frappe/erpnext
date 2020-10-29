@@ -83,7 +83,7 @@
   {
    "hidden": 0,
    "label": "Value-Added Tax (VAT UAE)",
-   "links": "[\n    {\n        \"label\": \"UAE VAT Setting\",\n        \"name\": \"UAE VAT Setting\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"UAE VAT 201\",\n        \"name\": \"UAE VAT 201\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"label\": \"UAE VAT Settings\",\n        \"name\": \"UAE VAT Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"UAE VAT 201\",\n        \"name\": \"UAE VAT 201\",\n        \"type\": \"report\"\n    }\n]"
   }
  ],
  "category": "Modules",
