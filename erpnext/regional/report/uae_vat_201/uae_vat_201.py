@@ -113,6 +113,7 @@ def standard_rated_expenses_emiratewise(data, filters):
 				"amount": frappe.format(amount, 'Currency'),
 				"vat_amount": frappe.format(vat, 'Currency'),
 			}
+	amounts_by_emirate = append_emiratewise_expenses(data, emirates, amounts_by_emirate)
 
 	for d, emirate in enumerate(emirates, 97):
 		if emirate in amounts_by_emirate:
@@ -125,6 +126,18 @@ def standard_rated_expenses_emiratewise(data, filters):
 				frappe.format(0, 'Currency'), frappe.format(0, 'Currency'))
 	return emirates, amounts_by_emirate
 
+def append_emiratewise_expenses(data, emirates, amounts_by_emirate):
+	"""Append emiratewise standard rated expenses and vat."""
+	for d, emirate in enumerate(emirates, 97):
+		if emirate in amounts_by_emirate:
+			amounts_by_emirate[emirate]["no"] = _('1{0}').format(chr(d))
+			amounts_by_emirate[emirate]["legend"] = _('Standard rated supplies in {0}').format(emirate)
+			data.append(amounts_by_emirate[emirate])
+		else:
+			append_data(data, _('1{0}').format(chr(d)),
+				_('Standard rated supplies in {0}').format(emirate),
+				frappe.format(0, 'Currency'), frappe.format(0, 'Currency'))
+	return amounts_by_emirate
 
 def append_vat_on_expenses(data, filters):
 	"""Appends Expenses and All Other Inputs."""
