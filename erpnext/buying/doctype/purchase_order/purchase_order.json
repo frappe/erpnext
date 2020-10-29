@@ -49,12 +49,14 @@
   "plc_conversion_rate",
   "ignore_pricing_rule",
   "sec_warehouse",
-  "set_warehouse",
-  "col_break_warehouse",
   "is_subcontracted",
+  "col_break_warehouse",
   "supplier_warehouse",
-  "items_section",
+  "before_items_section",
   "scan_barcode",
+  "items_col_break",
+  "set_warehouse",
+  "items_section",
   "items",
   "sb_last_purchase",
   "total_qty",
@@ -433,7 +435,8 @@
   },
   {
    "fieldname": "sec_warehouse",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Subcontracting"
   },
   {
    "description": "Sets 'Warehouse' in each row of the Items table.",
@@ -466,6 +469,7 @@
   {
    "fieldname": "items_section",
    "fieldtype": "Section Break",
+   "hide_border": 1,
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -1078,13 +1082,21 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
+  },
+  {
+   "fieldname": "before_items_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "items_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-07 14:31:57.661221",
+ "modified": "2020-10-29 13:24:45.723179",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
