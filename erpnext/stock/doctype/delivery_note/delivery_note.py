@@ -71,7 +71,7 @@ class DeliveryNote(SellingController):
 					where name=`tabSales Invoice Item`.parent and is_return=1 and update_stock=1)"""
 			})
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
 			if self.get("print_without_amount"):

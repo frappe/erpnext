@@ -11,26 +11,10 @@ from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
-from erpnext.controllers.print_settings import print_settings_for_taxes
 
 from erpnext.controllers.stock_controller import StockController
 
 class SellingController(StockController):
-	def __setup__(self):
-		if hasattr(self, "taxes"):
-			print_settings_for_taxes(self)
-
-	def before_print(self):
-		self.print_templates = {
-			"items": "templates/print_formats/includes/items.html",
-		}
-		self.flags.compact_item_fields = ['description']
-
-	def get_print_settings(self):
-		items_field = self.meta.get_field('items')
-		if items_field and items_field.fieldtype == 'Table':
-			return ['compact_item_print', 'print_uom_after_quantity']
-
 
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
