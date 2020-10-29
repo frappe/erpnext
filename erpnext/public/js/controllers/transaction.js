@@ -352,9 +352,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		let show_description = function(idx, exist = null) {
 			if (exist) {
-				scan_barcode_field.set_new_description(__('Row #{0}: Qty increased by 1', [idx]));
+				frappe.show_alert({
+					message: __('Row #{0}: Qty increased by 1', [idx]),
+					indicator: 'green'
+				});
 			} else {
-				scan_barcode_field.set_new_description(__('Row #{0}: Item added', [idx]));
+				frappe.show_alert({
+					message: __('Row #{0}: Item added', [idx]),
+					indicator: 'green'
+				});
 			}
 		}
 
@@ -365,7 +371,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}).then(r => {
 				const data = r && r.message;
 				if (!data || Object.keys(data).length === 0) {
-					scan_barcode_field.set_new_description(__('Cannot find Item with this barcode'));
+					frappe.show_alert({
+						message: __('Cannot find Item with this Barcode'),
+						indicator: 'red'
+					});
 					return;
 				}
 
@@ -651,7 +660,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
 					child.charge_type = "On Net Total";
 					child.account_head = tax;
-					child.rate = rate;
+					child.rate = 0;
 				}
 			});
 		}
