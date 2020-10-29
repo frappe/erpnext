@@ -263,7 +263,7 @@ class ExpenseClaim(AccountsController):
 	def set_expense_account(self, validate=False):
 		for expense in self.expenses:
 			if not expense.default_account or not validate:
-				expense.default_account = get_expense_claim_account(expense.expense_type, self.company)["account"]
+				expense.default_account = get_expense_claim_account(expense.expense_item, self.company)["account"]
 
 def update_reimbursed_amount(doc, jv=None):
 
@@ -324,8 +324,8 @@ def make_bank_entry(dt, dn):
 	return je.as_dict()
 
 @frappe.whitelist()
-def get_expense_claim_account_and_cost_center(expense_claim_type, company):
-	data = get_expense_claim_account(expense_claim_type, company)
+def get_expense_claim_account_and_cost_center(expense_item, company):
+	data = get_expense_claim_account(expense_item, company)
 	cost_center = erpnext.get_default_cost_center(company)
 
 	return {
@@ -334,12 +334,12 @@ def get_expense_claim_account_and_cost_center(expense_claim_type, company):
 	}
 
 @frappe.whitelist()
-def get_expense_claim_account(expense_claim_type, company):
-	account = frappe.db.get_value("Expense Claim Account",
-		{"parent": expense_claim_type, "company": company}, "default_account")
+def get_expense_claim_account(expense_item, company):
+	account = frappe.db.get_value("Item Default",
+		{"parent": expense_item, "company": company}, "expense_account")
 	if not account:
-		frappe.throw(_("Set the default account for the {0} {1}")
-			.format(frappe.bold("Expense Claim Type"), get_link_to_form("Expense Claim Type", expense_claim_type)))
+		frappe.throw(_("Set the Default Expense Account for the {0} {1}")
+			.format(frappe.bold("Item"), get_link_to_form("Item", expense_item)))
 
 	return {
 		"account": account
