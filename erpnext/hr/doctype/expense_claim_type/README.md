@@ -1,1 +1,0 @@
-Type of expense for Expense Claim.

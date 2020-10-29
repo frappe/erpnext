@@ -38,7 +38,7 @@ def setup(domain):
 	import_json('Lead')
 	setup_currency_exchange()
 	#setup_mode_of_payment()
-	setup_account_to_expense_type()
+	setup_account_to_expense_items()
 	setup_budget()
 	setup_pos_profile()
 
@@ -343,19 +343,19 @@ def setup_account():
 
 	frappe.flags.in_import = False
 
-def setup_account_to_expense_type():
+def setup_account_to_expense_items():
 	company_abbr = frappe.get_cached_value('Company',  erpnext.get_default_company(),  "abbr")
-	expense_types = [{'name': _('Calls'), "account": "Sales Expenses - "+ company_abbr},
+	expense_items = [{'name': _('Calls'), "account": "Sales Expenses - "+ company_abbr},
 		{'name': _('Food'), "account": "Entertainment Expenses - "+ company_abbr},
 		{'name': _('Medical'), "account": "Utility Expenses - "+ company_abbr},
 		{'name': _('Others'), "account": "Miscellaneous Expenses - "+ company_abbr},
 		{'name': _('Travel'), "account": "Travel Expenses - "+ company_abbr}]
 
-	for expense_type in expense_types:
-		doc = frappe.get_doc("Expense Claim Type", expense_type["name"])
-		doc.append("accounts", {
+	for expense_item in expense_items:
+		doc = frappe.get_doc("Item", expense_item["name"])
+		doc.append("item_defaults", {
 			"company" : erpnext.get_default_company(),
-			"default_account" : expense_type["account"]
+			"default_expense_account" : expense_item["account"]
 		})
 		doc.save(ignore_permissions=True)
 

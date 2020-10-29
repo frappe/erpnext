@@ -56,12 +56,12 @@ def install(country=None):
 		{'doctype': 'Salary Component', 'salary_component': _('Leave Encashment'), 'description': _('Leave Encashment'), 'type': 'Earning'},
 
 
-		# expense claim type
-		{'doctype': 'Expense Claim Type', 'name': _('Calls'), 'expense_type': _('Calls')},
-		{'doctype': 'Expense Claim Type', 'name': _('Food'), 'expense_type': _('Food')},
-		{'doctype': 'Expense Claim Type', 'name': _('Medical'), 'expense_type': _('Medical')},
-		{'doctype': 'Expense Claim Type', 'name': _('Others'), 'expense_type': _('Others')},
-		{'doctype': 'Expense Claim Type', 'name': _('Travel'), 'expense_type': _('Travel')},
+		# expense claim items
+		{'doctype': 'Item', 'item_code': _('Calls'), 'item_group': _('Services'), 'is_stock_item': 0, 'include_item_in_manufacturing': 0, 'stock_uom': 'Nos'},
+		{'doctype': 'Item', 'item_code': _('Food'), 'item_group': _('Services'), 'is_stock_item': 0, 'include_item_in_manufacturing': 0, 'stock_uom': 'Nos'},
+		{'doctype': 'Item', 'item_code': _('Medical'), 'item_group': _('Services'), 'is_stock_item': 0, 'include_item_in_manufacturing': 0, 'stock_uom': 'Nos'},
+		{'doctype': 'Item', 'item_code': _('Others'), 'item_group': _('Services'), 'is_stock_item': 0, 'include_item_in_manufacturing': 0, 'stock_uom': 'Nos'},
+		{'doctype': 'Item', 'item_code': _('Travel'), 'item_group': _('Services'), 'is_stock_item': 0, 'include_item_in_manufacturing': 0, 'stock_uom': 'Nos'},
 
 		# leave type
 		{'doctype': 'Leave Type', 'leave_type_name': _('Casual Leave'), 'name': _('Casual Leave'),

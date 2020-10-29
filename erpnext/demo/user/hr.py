@@ -86,17 +86,17 @@ def get_payroll_entry():
 
 def get_expenses():
 	expenses = []
-	expese_types = frappe.db.sql("""select ect.name, eca.default_account from `tabExpense Claim Type` ect,
-		`tabExpense Claim Account` eca where eca.parent=ect.name
-		and eca.company=%s """, frappe.flags.company,as_dict=1)
+	expense_items = frappe.db.sql("""select item.name, acc.default_expense_account from `tabItem` item,
+		`tabItem Default` acc where acc.parent=acc.name
+		and acc.company=%s """, frappe.flags.company,as_dict=1)
 
-	for expense_type in expese_types[:random.randint(1,4)]:
+	for expense_item in expense_items[:random.randint(1,4)]:
 		claim_amount = random.randint(1,20)*10
 
 		expenses.append({
 			"expense_date": frappe.flags.current_date,
-			"expense_type": expense_type.name,
-			"default_account": expense_type.default_account or "Miscellaneous Expenses - WPL",
+			"expense_item": expense_item.name,
+			"default_account": expense_item.default_expense_account or "Miscellaneous Expenses - WPL",
 			"amount": claim_amount,
 			"sanctioned_amount": claim_amount
 		})

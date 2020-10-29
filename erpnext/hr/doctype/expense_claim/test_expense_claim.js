@@ -15,7 +15,7 @@ QUnit.test("Test: Expense Claim [HR]", function (assert) {
 			cur_frm.set_value('expenses',[]),
 			d = frappe.model.add_child(cur_frm.doc,'Expense Claim Detail','expenses'),
 			d.expense_date = '2017-08-01',
-			d.expense_type = 'Test Expense Type 1',
+			d.expense_item = 'Test Expense Type 1',
 			d.description  = 'This is just to test Expense Claim',
 			d.amount = 2000,
 			d.sanctioned_amount=2000,
