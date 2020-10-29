@@ -46,6 +46,7 @@ frappe.ui.form.on("Leave Application", {
 
 	make_dashboard: function(frm) {
 		var leave_details;
+		let lwps;
 		if (frm.doc.employee) {
 			frappe.call({
 				method: "erpnext.hr.doctype.leave_application.leave_application.get_leave_details",
@@ -61,6 +62,7 @@ frappe.ui.form.on("Leave Application", {
 					if (!r.exc && r.message['leave_approver']) {
 						frm.set_value('leave_approver', r.message['leave_approver']);
 					}
+					lwps = r.message["lwps"];
 				}
 			});
 			$("div").remove(".form-dashboard-section");
@@ -70,6 +72,18 @@ frappe.ui.form.on("Leave Application", {
 				})
 			);
 			frm.dashboard.show();
+			let allowed_leave_types =  Object.keys(leave_details);
+
+			// lwps should be allowed, lwps don't have any allocation
+			allowed_leave_types = allowed_leave_types.concat(lwps);
+
+			frm.set_query('leave_type', function(){
+				return {
+					filters : [
+						['leave_type_name', 'in', allowed_leave_types]
+					]
+				};
+			});
 		}
 	},
 
