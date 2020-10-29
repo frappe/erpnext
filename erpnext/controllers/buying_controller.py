@@ -13,23 +13,11 @@ from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 from frappe.contacts.doctype.address.address import get_address_display
-from erpnext.controllers.print_settings import print_settings_for_taxes
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
 
 class BuyingController(StockController):
-	def __setup__(self):
-		if hasattr(self, "taxes"):
-			print_settings_for_taxes(self)
-
-	def before_print(self):
-		pass
-
-	def get_print_settings(self):
-		items_field = self.meta.get_field('items')
-		if items_field and items_field.fieldtype == 'Table':
-			return ['compact_item_print', 'print_uom_after_quantity']
 
 	def get_feed(self):
 		if self.get("supplier_name"):
