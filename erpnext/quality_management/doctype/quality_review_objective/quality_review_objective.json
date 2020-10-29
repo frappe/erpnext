@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-05-26 15:17:44.796958",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -9,10 +10,12 @@
   "target",
   "uom",
   "sb_00",
+  "status",
   "review"
  ],
  "fields": [
   {
+   "columns": 3,
    "fieldname": "objective",
    "fieldtype": "Text",
    "in_list_view": 1,
@@ -20,6 +23,7 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "target",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -27,6 +31,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fetch_from": "target_unit",
    "fieldname": "uom",
    "fieldtype": "Link",
@@ -49,10 +54,20 @@
   {
    "fieldname": "cb_00",
    "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nPassed\nFailed"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-05-26 16:14:12.586128",
+ "links": [],
+ "modified": "2020-10-27 16:28:20.908637",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Review Objective",
