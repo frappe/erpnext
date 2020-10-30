@@ -4,7 +4,7 @@ import sys
 errors_encounter = 0
 pattern = re.compile(r"_\(([\"']{,3})(?P<message>((?!\1).)*)\1(\s*,\s*context\s*=\s*([\"'])(?P<py_context>((?!\5).)*)\5)*(\s*,\s*(.)*?\s*(,\s*([\"'])(?P<js_context>((?!\11).)*)\11)*)*\)")
 words_pattern = re.compile(r"_{1,2}\([\"'`]{1,3}.*?[a-zA-Z]")
-start_pattern = re.compile(r"_{1,2}\([f\"'`]{1,3}")
+start_pattern = re.compile(r"_{1,2}\([\"'`]{1,3}")
 f_string_pattern = re.compile(r"_\(f[\"']")
 starts_with_f_pattern = re.compile(r"_\(f")
 
