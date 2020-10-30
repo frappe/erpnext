@@ -594,6 +594,15 @@ class StockEntry(StockController):
 				if not row.subcontracted_item:
 					frappe.throw(_("Row {0}: Subcontracted Item is mandatory for the raw material {1}")
 						.format(row.idx, frappe.bold(row.item_code)))
+				elif not row.po_detail:
+					filters = {
+						"parent": self.purchase_order, "docstatus": 1,
+						"rm_item_code": row.item_code, "main_item_code": row.subcontracted_item
+					}
+
+					po_detail = frappe.db.get_value("Purchase Order Item Supplied", filters, "name")
+					if po_detail:
+						row.db_set("po_detail", po_detail)
 
 	def validate_bom(self):
 		for d in self.get('items'):
