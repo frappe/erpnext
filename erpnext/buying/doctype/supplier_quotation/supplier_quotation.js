@@ -37,13 +37,15 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 						source_doctype: "Material Request",
 						target: me.frm,
 						setters: {
-							company: me.frm.doc.company
+							schedule_date: undefined,
+							status: undefined
 						},
 						get_query_filters: {
 							material_request_type: "Purchase",
 							docstatus: 1,
 							status: ["!=", "Stopped"],
-							per_ordered: ["<", 99.99]
+							per_ordered: ["<", 99.99],
+							company: me.frm.doc.company
 						}
 					})
 				}, __("Get Items From"));
@@ -58,11 +60,11 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 					source_doctype: "Request for Quotation",
 					target: me.frm,
 					setters: {
-						company: me.frm.doc.company,
 						transaction_date: null
 					},
 					get_query_filters: {
-						supplier: me.frm.doc.supplier
+						supplier: me.frm.doc.supplier,
+						company: me.frm.doc.company
 					},
 					get_query_method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier"
 
