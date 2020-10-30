@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -1955,7 +1956,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-09 15:59:57.544736",
+ "modified": "2020-10-30 13:57:45.086303",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

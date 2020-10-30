@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:08",
@@ -932,7 +933,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-07-26 17:46:19.951223",
+ "modified": "2020-10-30 13:58:59.212060",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

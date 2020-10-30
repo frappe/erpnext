@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -1109,7 +1110,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-03 23:20:26.381024",
+ "modified": "2020-10-30 14:00:08.347534",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

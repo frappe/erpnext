@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-06-01 14:38:51.012597",
@@ -587,7 +588,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-02 13:39:43.383705",
+ "modified": "2020-10-30 13:56:20.007336",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

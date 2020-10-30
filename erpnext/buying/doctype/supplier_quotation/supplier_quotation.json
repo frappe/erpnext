@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:45",
@@ -807,7 +808,7 @@
  "idx": 29,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-01 20:56:17.932007",
+ "modified": "2020-10-30 13:58:33.043971",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
