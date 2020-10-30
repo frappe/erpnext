@@ -167,8 +167,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
 
-		this.frm.toggle_display("customer_name",
-			(this.frm.doc.customer_name && this.frm.doc.customer_name!==this.frm.doc.customer));
 		if(this.frm.fields_dict.packed_items) {
 			var packing_list_exists = (this.frm.doc.packed_items || []).length;
 			this.frm.toggle_display("packing_list", packing_list_exists ? true : false);

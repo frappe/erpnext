@@ -330,7 +330,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.supplier_name != doc.supplier",
+   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
    "label": "Supplier Name",
@@ -396,7 +396,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.customer_name != doc.customer",
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -539,7 +539,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-10-16 18:25:46.566083",
+ "modified": "2020-10-31 02:19:47.431238",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

@@ -61,6 +61,7 @@
    "options": "Customer"
   },
   {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -76,7 +77,7 @@
    "label": "Contact Number"
   }
  ],
- "modified": "2020-03-03 15:41:19.327854",
+ "modified": "2020-10-31 02:15:24.932441",
  "modified_by": "Administrator",
  "module": "Restaurant",
  "name": "Restaurant Reservation",

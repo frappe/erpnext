@@ -176,7 +176,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:doc.supplier != doc.supplier_name",
+   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
@@ -1108,7 +1108,7 @@
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "modified": "2020-10-16 23:20:00.326255",
+ "modified": "2020-10-31 02:19:45.862473",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

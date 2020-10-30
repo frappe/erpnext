@@ -128,7 +128,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "customer",
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -229,7 +229,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 16:13:56.862320",
+ "modified": "2020-10-31 02:15:25.071474",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule",

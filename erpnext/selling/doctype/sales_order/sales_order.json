@@ -250,6 +250,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -1683,7 +1684,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-22 15:35:37.149800",
+ "modified": "2020-10-31 02:15:24.064266",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

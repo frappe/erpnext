@@ -236,6 +236,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
@@ -323,6 +324,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "label": "Customer Name",
@@ -1531,7 +1533,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-16 23:20:04.674373",
+ "modified": "2020-10-31 02:19:44.185579",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

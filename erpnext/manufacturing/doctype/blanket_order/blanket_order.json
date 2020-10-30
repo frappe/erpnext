@@ -46,7 +46,7 @@
    "options": "Customer"
   },
   {
-   "depends_on": "eval:doc.blanket_order_type == \"Selling\"",
+   "depends_on": "eval:doc.blanket_order_type == \"Selling\" && doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -61,7 +61,7 @@
    "options": "Supplier"
   },
   {
-   "depends_on": "eval:doc.blanket_order_type == \"Purchasing\"",
+   "depends_on": "eval:doc.blanket_order_type == \"Purchasing\" && doc.supplier && doc.supplier_name != doc.supplier",
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
@@ -130,7 +130,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:15:03.732878",
+ "modified": "2020-10-31 02:22:43.401035",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Blanket Order",

@@ -84,6 +84,7 @@
    "options": "Customer"
   },
   {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
@@ -124,7 +125,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-03-03 16:15:08.724140",
+ "modified": "2020-10-31 02:15:25.247747",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",

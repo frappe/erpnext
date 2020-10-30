@@ -250,7 +250,7 @@
   },
   {
    "bold": 1,
-   "depends_on": "supplier",
+   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
    "fetch_from": "supplier.supplier_name",
    "fieldname": "supplier_name",
    "fieldtype": "Data",
@@ -1760,7 +1760,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-16 23:20:13.928341",
+ "modified": "2020-10-31 02:19:44.823640",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
