@@ -75,14 +75,11 @@ export default {
 			// TODO: multiline translations don't work
 			page_title: __('Publish Items'),
 			search_placeholder: __('Search Items ...'),
-			empty_state_message: __(`No Items selected yet. Browse and click on items below to publish.`),
-			valid_items_instruction: __(`Only items with an image and description can be published. Please update them if an item in your inventory does not appear.`),
+			empty_state_message: __('No Items selected yet. Browse and click on items below to publish.'),
+			valid_items_instruction: __('Only items with an image and description can be published. Please update them if an item in your inventory does not appear.'),
 			last_sync_message: (hub.settings.last_sync_datetime)
-				? __(`Last sync was
-				<a href="#marketplace/profile">
-					${comment_when(hub.settings.last_sync_datetime)}</a>.
-				<a href="#marketplace/published-items">
-					See your Published Items</a>.`)
+				? __('Last sync was {0}.', [`<a href="#marketplace/profile">${comment_when(hub.settings.last_sync_datetime)}</a>`]) + 
+				  ` <a href="#marketplace/published-items">${__('See your Published Items.')}</a>`
 				: ''
 		};
 	},
@@ -147,11 +144,9 @@ export default {
 		},
 
 		add_last_sync_message() {
-			this.last_sync_message = __(`Last sync was
-				<a href="#marketplace/profile">
-					${comment_when(hub.settings.last_sync_datetime)}</a>.
-				<a href="#marketplace/published-items">
-					See your Published Items</a>.`);
+			this.last_sync_message = __('Last sync was {0}.',
+				[`<a href="#marketplace/profile">${comment_when(hub.settings.last_sync_datetime)}</a>`]
+			) + `<a href="#marketplace/published-items">${__('See your Published Items')}</a>.`;
 		},
 
 		clear_last_sync_message() {

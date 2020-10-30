@@ -29,7 +29,7 @@ export default {
 
 			// Constants
 			page_title: __('Saved Items'),
-			empty_state_message: __(`You haven't saved any items yet.`)
+			empty_state_message: __('You have not saved any items yet.')
 		};
 	},
 	created() {
@@ -64,8 +64,13 @@ export default {
 
 			const item_name = this.items.filter(item => item.hub_item_name === hub_item_name);
 
-			alert = frappe.show_alert(__(`<span>${item_name} removed.
-				<a href="#" data-action="undo-remove"><b>Undo</b></a></span>`),
+			alert = frappe.show_alert(`
+				<span>
+					${__('{0} removed.', [item_name], 'A specific Item has been removed.')}
+					<a href="#" data-action="undo-remove">
+						<b>${__('Undo', None, 'Undo removal of item.')}</b>
+					</a>
+				</span>`,
 				grace_period/1000,
 				{
 					'undo-remove': undo_remove.bind(this)
