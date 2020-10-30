@@ -367,12 +367,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
-					setters: {},
+					setters: {
+						schedule_date: undefined,
+						status: undefined
+					},
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
 						status: ["!=", "Stopped"],
 						per_ordered: ["<", 99.99],
+						company: me.frm.doc.company
 					}
 				})
 			}, __("Get items from"));
@@ -384,11 +388,12 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					source_doctype: "Supplier Quotation",
 					target: me.frm,
 					setters: {
-						supplier: me.frm.doc.supplier
+						supplier: me.frm.doc.supplier,
+						valid_till: undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Stopped"],
+						status: ["not in", ["Stopped", "Expired"]],
 					}
 				})
 			}, __("Get items from"));
