@@ -78,7 +78,7 @@ class StudentAttendance(Document):
 			})
 
 		if attendance_record:
-			record = get_link_to_form('Attendance Record', attendance_record)
+			record = get_link_to_form('Student Attendance', attendance_record)
 			frappe.throw(_('Student Attendance record {0} already exists against the Student {1}')
 				.format(record, frappe.bold(self.student)), title=_('Duplicate Entry'))
 
