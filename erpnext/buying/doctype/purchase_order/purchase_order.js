@@ -92,7 +92,6 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		if(doc.docstatus == 1) {
 			this.frm.fields_dict.items_section.wrapper.addClass("hide-border");
 			if(!this.frm.doc.set_warehouse) {
-				console.log("wtf");
 				this.frm.fields_dict.items_section.wrapper.removeClass("hide-border");
 			}
 
