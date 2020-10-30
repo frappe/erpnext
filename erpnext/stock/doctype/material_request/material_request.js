@@ -173,7 +173,8 @@ frappe.ui.form.on('Material Request', {
 			source_doctype: "Sales Order",
 			target: frm,
 			setters: {
-				customer: frm.doc.customer || undefined
+				customer: frm.doc.customer || undefined,
+				delivery_date: undefined,
 			},
 			get_query_filters: {
 				docstatus: 1,
