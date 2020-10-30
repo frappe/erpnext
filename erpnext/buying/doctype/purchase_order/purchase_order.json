@@ -30,8 +30,8 @@
   "customer_contact_email",
   "section_addresses",
   "supplier_address",
-  "contact_person",
   "address_display",
+  "contact_person",
   "contact_display",
   "contact_mobile",
   "contact_email",
@@ -110,18 +110,13 @@
   "payment_terms_template",
   "payment_schedule",
   "tracking_section",
-  "per_billed",
+  "status",
   "column_break_75",
+  "per_billed",
   "per_received",
   "terms_section_break",
   "tc_name",
   "terms",
-  "more_info",
-  "status",
-  "ref_sq",
-  "column_break_74",
-  "party_account_currency",
-  "inter_company_order_reference",
   "column_break5",
   "letter_head",
   "select_print_heading",
@@ -133,7 +128,12 @@
   "to_date",
   "column_break_97",
   "auto_repeat",
-  "update_auto_repeat_reference"
+  "update_auto_repeat_reference",
+  "more_info",
+  "ref_sq",
+  "column_break_74",
+  "party_account_currency",
+  "inter_company_order_reference"
  ],
  "fields": [
   {
@@ -315,34 +315,34 @@
   {
    "fieldname": "supplier_address",
    "fieldtype": "Link",
-   "label": "Select Supplier Address",
+   "label": "Supplier Address",
    "options": "Address",
    "print_hide": 1
   },
   {
    "fieldname": "contact_person",
    "fieldtype": "Link",
-   "label": "Contact Person",
+   "label": "Supplier Contact",
    "options": "Contact",
    "print_hide": 1
   },
   {
    "fieldname": "address_display",
    "fieldtype": "Small Text",
-   "label": "Address",
+   "label": "Supplier Address Details",
    "read_only": 1
   },
   {
    "fieldname": "contact_display",
    "fieldtype": "Small Text",
    "in_global_search": 1,
-   "label": "Contact",
+   "label": "Contact Name",
    "read_only": 1
   },
   {
    "fieldname": "contact_mobile",
    "fieldtype": "Small Text",
-   "label": "Mobile No",
+   "label": "Contact Mobile No",
    "read_only": 1
   },
   {
@@ -360,14 +360,14 @@
   {
    "fieldname": "shipping_address",
    "fieldtype": "Link",
-   "label": "Select Shipping Address",
+   "label": "Company Shipping Address",
    "options": "Address",
    "print_hide": 1
   },
   {
    "fieldname": "shipping_address_display",
    "fieldtype": "Small Text",
-   "label": "Shipping Address",
+   "label": "Shipping Address Details",
    "print_hide": 1,
    "read_only": 1
   },
@@ -602,7 +602,8 @@
   },
   {
    "fieldname": "section_break_52",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
    "fieldname": "taxes",
@@ -634,6 +635,7 @@
    "options": "fa fa-money"
   },
   {
+   "depends_on": "doc.base_taxes_and_charges_added",
    "fieldname": "base_taxes_and_charges_added",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Added (Company Currency)",
@@ -644,6 +646,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "doc.base_taxes_and_charges_deducted",
    "fieldname": "base_taxes_and_charges_deducted",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Deducted (Company Currency)",
@@ -654,6 +657,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "doc.base_total_taxes_and_charges",
    "fieldname": "base_total_taxes_and_charges",
    "fieldtype": "Currency",
    "label": "Total Taxes and Charges (Company Currency)",
@@ -669,6 +673,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "doc.taxes_and_charges_added",
    "fieldname": "taxes_and_charges_added",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Added",
@@ -679,6 +684,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "doc.taxes_and_charges_deducted",
    "fieldname": "taxes_and_charges_deducted",
    "fieldtype": "Currency",
    "label": "Taxes and Charges Deducted",
@@ -689,6 +695,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "doc.total_taxes_and_charges",
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
    "label": "Total Taxes and Charges",
@@ -698,7 +705,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "discount_amount",
+   "collapsible_depends_on": "apply_discount_on",
    "fieldname": "discount_section",
    "fieldtype": "Section Break",
    "label": "Additional Discount"
@@ -738,7 +745,8 @@
   },
   {
    "fieldname": "totals_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Totals"
   },
   {
    "fieldname": "base_grand_total",
@@ -906,12 +914,12 @@
   },
   {
    "fieldname": "ref_sq",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Ref SQ",
+   "fieldtype": "Link",
+   "label": "Supplier Quotation",
    "no_copy": 1,
    "oldfieldname": "ref_sq",
    "oldfieldtype": "Data",
+   "options": "Supplier Quotation",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1065,7 +1073,7 @@
    "collapsible": 1,
    "fieldname": "tracking_section",
    "fieldtype": "Section Break",
-   "label": "Tracking"
+   "label": "Order Status"
   },
   {
    "fieldname": "column_break_75",
@@ -1074,13 +1082,13 @@
   {
    "fieldname": "billing_address",
    "fieldtype": "Link",
-   "label": "Select Billing Address",
+   "label": "Company Billing Address",
    "options": "Address"
   },
   {
    "fieldname": "billing_address_display",
    "fieldtype": "Small Text",
-   "label": "Billing Address",
+   "label": "Billing Address Details",
    "read_only": 1
   },
   {
@@ -1096,7 +1104,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-29 13:24:45.723179",
+ "modified": "2020-10-30 10:50:22.740001",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
