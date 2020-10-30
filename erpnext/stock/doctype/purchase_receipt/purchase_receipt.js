@@ -136,7 +136,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 								company: me.frm.doc.company
 							}
 						})
-					}, __("Get items from"));
+					}, __("Get Items From"));
 			}
 
 			if(this.frm.doc.docstatus == 1 && this.frm.doc.status!="Closed") {

@@ -90,7 +90,7 @@ frappe.ui.form.on('Material Request', {
 	make_custom_buttons: function(frm) {
 		if (frm.doc.docstatus==0) {
 			frm.add_custom_button(__("Bill of Materials"),
-				() => frm.events.get_items_from_bom(frm), __("Get items from"));
+				() => frm.events.get_items_from_bom(frm), __("Get Items From"));
 		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.status != 'Stopped') {
@@ -147,7 +147,7 @@ frappe.ui.form.on('Material Request', {
 
 		if (frm.doc.docstatus===0) {
 			frm.add_custom_button(__('Sales Order'), () => frm.events.get_items_from_sales_order(frm),
-				__("Get items from"));
+				__("Get Items From"));
 		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.status == 'Stopped') {

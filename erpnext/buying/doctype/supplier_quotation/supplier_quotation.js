@@ -46,7 +46,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 							per_ordered: ["<", 99.99]
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 
 			this.frm.add_custom_button(__("Request for Quotation"),
 			function() {
@@ -67,7 +67,7 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 					get_query_method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier"
 
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 		}
 	},
 
