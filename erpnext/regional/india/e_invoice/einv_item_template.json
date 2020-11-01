@@ -18,6 +18,11 @@
     "SgstAmt": "{item.sgst_amount}",
     "CesRt": "{item.cess_rate}",
     "CesAmt": "{item.cess_amount}",
+    "CesNonAdvlAmt": "{item.cess_nadv_amount}",
+    "StateCesRt": "{item.state_cess_rate}",
+    "StateCesAmt": "{item.state_cess_amount}",
+    "StateCesNonAdvlAmt": "{item.state_cess_nadv_amount}",
+    "OthChrg": "{item.other_charges}",
     "TotItemVal": "{item.total_value}",
     "BchDtls": {{
         "Nm": "{item.batch_no}",

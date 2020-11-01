@@ -66,6 +66,7 @@
         "CesVal": "{value_details.total_cess_amt}",
         "Discount": "{value_details.invoice_discount_amt}",
         "RndOffAmt": "{value_details.round_off}",
+        "OthChrg": "{value_details.total_other_charges}",
         "TotInvVal": "{value_details.base_grand_total}",
         "TotInvValFc": "{value_details.grand_total}"
     }},
