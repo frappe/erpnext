@@ -471,11 +471,12 @@ class SellingController(StockController):
 			self.applies_to_item_name = ''
 
 		if self.meta.has_field('applies_to_vehicle') and not self.get('applies_to_vehicle'):
-			self.vehicle_license_plate = ''
-			self.vehicle_chassis_no = ''
-			self.vehicle_engine_no = ''
-			self.vehicle_last_odometer = ''
-			self.vehicle_color = ''
+			pass
+			# self.vehicle_license_plate = ''
+			# self.vehicle_chassis_no = ''
+			# self.vehicle_engine_no = ''
+			# self.vehicle_last_odometer = ''
+			# self.vehicle_color = ''
 
 def set_default_income_account_for_item(obj):
 	for d in obj.get("items"):
