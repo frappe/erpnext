@@ -119,3 +119,46 @@
 	</tr>
 	{% endif %}
 </table>
+
+{% if doc.is_pos %}
+<table class="table table-bordered section-break table-narrow table-last-row-bold" style="border: 0 !important;">
+	<tr>
+		{{ empty_columns() }}
+		<th>Payment</th>
+		<th>Amount</th>
+	</tr>
+	{% for p in doc.payments %}
+	<tr>
+		{{ empty_columns() }}
+		<td>{{ p.mode_of_payment }} Amount</td>
+		<td class="text-right">{{ p.get_formatted('amount') }}</td>
+	</tr>
+	{% endfor %}
+	{% if doc.payments|len > 1 %}
+	<tr>
+		{{ empty_columns() }}
+		<td class="total-border">Total Paid Amount</td>
+		<td class="text-right total-border">{{ doc.get_formatted('paid_amount') }}</td>
+	</tr>
+	{% endif %}
+	{% if doc.change_amount %}
+	<tr>
+		{{ empty_columns() }}
+		<td>Change Amount</td>
+		<td class="text-right">{{ doc.get_formatted('change_amount') }}</td>
+	</tr>
+	{% endif %}
+	{% if doc.write_off_amount %}
+	<tr>
+		{{ empty_columns() }}
+		<td>Write Off Amount</td>
+		<td class="text-right">{{ doc.get_formatted('write_off_amount') }}</td>
+	</tr>
+	{% endif %}
+	<tr>
+		{{ empty_columns() }}
+		<td>Outstanding Amount</td>
+		<td class="text-right">{{ doc.get_formatted('outstanding_amount') }}</td>
+	</tr>
+</table>
+{% endif %}

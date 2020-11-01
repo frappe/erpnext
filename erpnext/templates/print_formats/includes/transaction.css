@@ -132,6 +132,14 @@
 		border: transparent !important;
 	}
 
+	.transaction-pf .no-bt {
+		border-top: transparent !important;
+	}
+
+	.transaction-pf .no-bt td {
+		border-top: transparent !important;
+	}
+
 	.transaction-pf .total-border {
 		border-top: #000 2px solid !important;
 	}

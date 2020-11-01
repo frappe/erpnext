@@ -4,12 +4,18 @@
 {%- set company = frappe.get_cached_doc("Company", doc.company) -%}
 {%- set address = doc.company_address_doc -%}
 
-{% macro row(label, value, value_border=True, hide_empty=True, empty_value=None, style=None) -%}
-	{% if not hide_empty or (value and value != empty_value) %}
-	<div class="print-row"{% if style %}{{ style }}{% endif %}>
+{% macro row(label, value, value_border=True, hide_empty=True, empty_value=None, style=None, condition=True) -%}
+	{% if condition and not hide_empty or (value and value != empty_value) %}
+	<div class="print-row"{% if style %} style="{{ style }}"{% endif %}>
 		<div class="print-col">{{ _(label) }}:</div>
 		<div class="value {% if value_border %}value-border{% endif %}">{{ value }}</div>
 	</div>
+	{% endif %}
+{%- endmacro %}
+
+{% macro table_col(label, value, hide_empty=True, empty_value=None, style=None, condition=True, suffix=None) -%}
+	{% if condition and not hide_empty or (value and value != empty_value) %}
+	<td>{% if label %}<strong>{{ _(label) }}:</strong> {% endif %}{{ value }}{% if suffix %}{{ suffix }}{% endif %}</td>
 	{% endif %}
 {%- endmacro %}
 
@@ -57,7 +63,8 @@
 
 			<div class="sec-details clearfix">
 				<div class="party">
-					<strong>{{ row('Customer', doc.customer_name) }}</strong>
+					<strong>{{ row('Billed To', doc.bill_to_name or doc.customer_name) }}</strong>
+					{{ row('Customer', doc.customer_name, condition=doc.bill_to and doc.customer != doc.bill_to) }}
 					{{ row('Address', doc.address_display, style="line-height:1.3;") }}
 					{{ row('Port Of Loading', doc.pol_address_display, style="line-height:1.3;") }}
 					{{ row('Port Of Arrival', doc.poa_address_display, style="line-height:1.3;") }}
@@ -65,35 +72,49 @@
 					{% if doc.delivery_notes -%}
 						{{ row('Delivery', frappe.list_original_names("Delivery Note", doc.delivery_notes)|join(', ')) }}
 					{%- endif %}
+					{% if doc.sales_team -%}
+						{{ row('Advisor', doc.sales_team|map(attribute='sales_person')|join(', ')) }}
+					{%- endif %}
 				</div>
 				<div class="doc">
 					{{ row('Date', frappe.format_date(doc.posting_date, "d MMMM, Y")) }}
+					{{ row('Payment', "Credit" if not doc.is_pos else doc.payments|map(attribute="mode_of_payment")|unique|join('/') or 'Cash') }}
 					{{ row('STRN', doc.tax_strn) }}
 					{{ row('NTN/CNIC', doc.tax_id or doc.tax_cnic) }}
 					{{ row('PO #', doc.po_no) }}
+					{{ row('RO #', doc.project) }}
 					{{ row('Against', doc.get('return_against')) }}
-					{{ row('Original', '<div class="print-checkbox"></div>', value_border=False) }}
-					{{ row('Duplicate', '<div class="print-checkbox"></div>', value_border=False) }}
+					<div class="print-row clearfix">
+						<strong class="pull-left text-right" style="width: 31%">Original: </strong><div class="print-checkbox pull-left" style="margin-left: 5px"></div>
+						<strong class="pull-left" style="margin-left: 17px">Duplicate: </strong><div class="print-checkbox pull-left" style="margin-left: 5px"></div>
+					</div>
 				</div>
 			</div>
+
+			{% if doc.get('applies_to_item') or doc.get('vehicle_license_plate') or doc.get('vehicle_engine_no') or doc.get('vehicle_chassis_no') or doc.get('vehicle_last_odometer') %}
+			<table class="table table-bordered no-bt">
+				<tr class="no-bt">
+					{{ table_col(None, doc.get('applies_to_item_name')) }}
+					{{ table_col('Reg #', doc.get('vehicle_license_plate')) }}
+					{{ table_col('Engine #', doc.get('vehicle_engine_no')) }}
+					{{ table_col('Chassis #', doc.get('vehicle_chassis_no')) }}
+					{{ table_col('Odometer', doc.get('vehicle_last_odometer'), suffix=" km") }}
+				</tr>
+			</table>
+			{% endif %}
+
+			{% if doc.get('insurance_company') or doc.get('insurance_surveyor') %}
+			<table class="table table-bordered no-bt">
+				<tr class="no-bt">
+					{{ table_col('Insurance', doc.get('insurance_company_name')) }}
+					{{ table_col('Loss #', doc.get('insurance_loss_no')) }}
+					{{ table_col('Policy #', doc.get('insurance_policy_no')) }}
+					{{ table_col('Surveyor', doc.get('insurance_surveyor')) }}
+				</tr>
+			</table>
+			{% endif %}
 		</div>
 	</div>
-
-	{% if doc.get('applies_to_item') %}
-		<div class="sec-details clearfix">
-			<div class="applies-to-left">
-				{{ row('Product', doc.get('applies_to_item_name')) }}
-				{{ row('Vehicle Id', doc.get('applies_to_vehicle')) }}
-				{{ row('Color', doc.get('vehicle_color')) }}
-			</div>
-			<div class="applies-to-right">
-				{{ row('License Plate', doc.get_formatted('vehicle_license_plate')) }}
-				{{ row('Engine No', doc.get_formatted('vehicle_engine_no')) }}
-				{{ row('Chassis No', doc.get_formatted('vehicle_chassis_no')) }}
-				{{ row('Odometer Value', doc.get_formatted('vehicle_last_odometer')) }}
-			</div>
-		</div>
-	{% endif %}
 
 {% include template_file or 'templates/print_formats/includes/tax_exclusive_transaction.html' %}
 
