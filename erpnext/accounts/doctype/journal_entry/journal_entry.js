@@ -237,7 +237,11 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 					out.filters.push([jvd.reference_type, "party_type", "=", jvd.party_type]);
 					party_field = "party"
 				} else if(jvd.reference_type.indexOf("Sales")===0) {
-					party_field = "customer";
+					if (jvd.reference_type == "Sales Invoice") {
+						party_field = "bill_to";
+					} else {
+						party_field = "customer";
+					}
 				} else if (jvd.reference_type.indexOf("Purchase")===0) {
 					party_field = "supplier";
 				} else if (['Employee Advance', 'Expense Claim'.includes(jvd.reference_type)]) {

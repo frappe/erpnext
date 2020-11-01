@@ -10,6 +10,8 @@
   "naming_series",
   "customer",
   "customer_name",
+  "bill_to",
+  "bill_to_name",
   "po_no",
   "po_date",
   "stin",
@@ -285,7 +287,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "customer.tax_id",
+   "fetch_from": "bill_to.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1606,7 +1608,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "customer.tax_cnic",
+   "fetch_from": "bill_to.tax_cnic",
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1614,7 +1616,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "customer.tax_strn",
+   "fetch_from": "bill_to.tax_strn",
    "fieldname": "tax_strn",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1970,12 +1972,29 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0 || doc.bill_to != doc.customer",
+   "fieldname": "bill_to",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Bill To",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.bill_to && doc.bill_to_name != doc.bill_to",
+   "fetch_from": "bill_to.customer_name",
+   "fieldname": "bill_to_name",
+   "fieldtype": "Data",
+   "label": "Bill To Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-31 02:15:22.289096",
+ "modified": "2020-11-01 18:10:52.807733",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2068,7 +2087,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
+ "search_fields": "posting_date, due_date, customer,bill_to, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",

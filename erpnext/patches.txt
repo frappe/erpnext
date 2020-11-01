@@ -688,3 +688,4 @@ erpnext.patches.v12_0.transaction_type_for_purchase
 erpnext.patches.v12_0.update_pricing_rule_table
 erpnext.patches.v12_0.remove_stin_property_setter
 erpnext.patches.v12_0.add_vehicles_domain
+erpnext.patches.v12_0.set_bill_to_in_sales_invoice

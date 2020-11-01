@@ -38,6 +38,7 @@ class SellingController(StockController):
 
 	def validate(self):
 		super(SellingController, self).validate()
+		self.validate_bill_to()
 		self.validate_items()
 		self.validate_max_discount()
 		self.validate_selling_price()
@@ -81,9 +82,11 @@ class SellingController(StockController):
 				fetch_payment_terms_template = True
 
 			party_details = _get_party_details(customer,
+				bill_to=self.get("bill_to"),
 				ignore_permissions=self.flags.ignore_permissions,
 				doctype=self.doctype, company=self.company,
 				fetch_payment_terms_template=fetch_payment_terms_template,
+				has_stin=self.get("has_stin"),
 				party_address=self.customer_address, shipping_address=self.shipping_address_name)
 			if not self.meta.get_field("sales_team"):
 				party_details.pop("sales_team")
@@ -388,6 +391,12 @@ class SellingController(StockController):
 			for item in self.items:
 				item.gross_profit = flt(((item.base_rate - item.valuation_rate) * item.stock_qty), self.precision("amount", item))
 
+	def validate_bill_to(self):
+		if not self.meta.get_field('bill_to'):
+			return
+		if not self.get('bill_to'):
+			self.bill_to = self.customer
+			self.bill_to_name = self.customer_name
 
 	def set_customer_address(self):
 		address_dict = {

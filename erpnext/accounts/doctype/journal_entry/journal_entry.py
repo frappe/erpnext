@@ -257,7 +257,7 @@ class JournalEntry(AccountsController):
 	def validate_reference_doc(self):
 		"""Validates reference document"""
 		field_dict = {
-			'Sales Invoice': ["Customer", "Debit To"],
+			'Sales Invoice': ["Customer", "Debit To", "Bill To"],
 			'Purchase Invoice': ["Supplier", "Credit To", "Letter of Credit"],
 			'Sales Order': ["Customer"],
 			'Purchase Order': ["Supplier"],
@@ -305,10 +305,10 @@ class JournalEntry(AccountsController):
 
 					# check if party and account match
 					if d.reference_type in ("Sales Invoice", "Purchase Invoice", "Expense Claim", "Landed Cost Voucher", "Employee Advance"):
-						if d.reference_type == "Purchase Invoice":
+						if d.reference_type in ("Sales Invoice", "Purchase Invoice"):
 							billing_party = against_voucher[2] if against_voucher[2] else against_voucher[0]
 							account = against_voucher[1]
-							billing_party_type = field_dict.get(d.reference_type)[2] if against_voucher[2] else field_dict.get(d.reference_type)[0]
+							billing_party_type = field_dict.get(d.reference_type)[2] if d.reference_type == "Purchase Invoice" and against_voucher[2] else field_dict.get(d.reference_type)[0]
 							account_field = field_dict.get(d.reference_type)[1]
 						else:
 							billing_party, account = against_voucher
@@ -860,7 +860,7 @@ def get_payment_entry(ref_doc, args):
 	party_row = je.append("accounts", {
 		"account": args.get("party_account"),
 		"party_type": args.get("party_type"),
-		"party": ref_doc.get(scrub(args.get("party_type"))),
+		"party": ref_doc.get('bill_to') or ref_doc.get(scrub(args.get("party_type"))),
 		"cost_center": cost_center,
 		"account_type": frappe.db.get_value("Account", args.get("party_account"), "account_type"),
 		"account_currency": args.get("party_account_currency") or \
@@ -1008,12 +1008,17 @@ def get_outstanding(args):
 		fields.append(party_field)
 		if args.get("doctype") == "Purchase Invoice":
 			fields.append('letter_of_credit')
+		if args.get("doctype") == "Sales Invoice":
+			fields.append('bill_to')
 
 		invoice = frappe.db.get_value(args["doctype"], args["docname"], fields, as_dict=1)
 		if invoice.get("party_type"):
 			party_type = invoice.get("party_type")
 		if invoice.get("letter_of_credit"):
 			party_type = "Letter of Credit"
+			party_field = 'letter_of_credit'
+		if invoice.get("bill_to"):
+			party_field = 'bill_to'
 
 		exchange_rate = invoice.conversion_rate if (args.get("account_currency") != company_currency) else 1
 

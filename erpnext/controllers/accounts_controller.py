@@ -585,14 +585,12 @@ class AccountsController(TransactionBase):
 		order_doctype = None
 		if self.doctype == "Sales Invoice":
 			party_account = self.debit_to
-			party_type = "Customer"
-			party = self.customer
+			party_type, party = self.get_billing_party()
 			order_field = "sales_order"
 			order_doctype = "Sales Order"
 		elif self.doctype == "Purchase Invoice":
 			party_account = self.credit_to
-			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
-			party = self.letter_of_credit if self.letter_of_credit else self.supplier
+			party_type, party = self.get_billing_party()
 			order_field = "purchase_order"
 			order_doctype = "Purchase Order"
 		elif self.doctype == "Expense Claim":
@@ -655,13 +653,11 @@ class AccountsController(TransactionBase):
 		"""
 
 		if self.doctype == "Sales Invoice":
-			party_type = "Customer"
-			party = self.customer
+			party_type, party = self.get_billing_party()
 			party_account = self.debit_to
 			dr_or_cr = "credit_in_account_currency"
 		elif self.doctype == "Purchase Invoice":
-			party_type = "Letter of Credit" if self.letter_of_credit else "Supplier"
-			party = self.letter_of_credit if self.letter_of_credit else self.supplier
+			party_type, party = self.get_billing_party()
 			party_account = self.credit_to
 			dr_or_cr = "debit_in_account_currency"
 		elif self.doctype == "Expense Claim":
@@ -723,7 +719,8 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim"]:
-			if self.is_return: return
+			if self.get('is_return'):
+				return
 
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self, True)
@@ -865,6 +862,9 @@ class AccountsController(TransactionBase):
 		return party_type, party
 
 	def get_billing_party(self):
+		if self.get("bill_to"):
+			party_type, party = self.get_party()
+			return party_type, self.get("bill_to")
 		if self.get("letter_of_credit"):
 			return "Letter of Credit", self.get("letter_of_credit")
 		else:
