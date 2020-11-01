@@ -30,7 +30,10 @@ common_properties = [
 		{"fieldname": "sec_applies_to", "property": "hidden", "value": 0}],
 
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'),
-		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}]
+		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}],
+
+	[('Sales Invoice',),
+		{"fieldname": "sec_insurance", "property": "hidden", "value": 0}]
 ]
 
 data = {
@@ -48,6 +51,7 @@ data = {
 	],
 	'properties': [
 		{"doctype": "Item", "fieldname": "is_vehicle", "property": "in_standard_filter", "value": 1},
+		{"doctype": "Customer", "fieldname": "is_insurance_company", "property": "in_standard_filter", "value": 1},
 	],
 	'custom_fields': {
 		"Sales Invoice": applies_to_fields,

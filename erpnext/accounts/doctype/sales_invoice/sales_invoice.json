@@ -45,6 +45,14 @@
   "tax_strn",
   "inter_company_invoice_reference",
   "customer_group",
+  "sec_insurance",
+  "insurance_company",
+  "insurance_company_name",
+  "col_break_insurance",
+  "insurance_policy_no",
+  "insurance_loss_no",
+  "col_break_insurance2",
+  "insurance_surveyor",
   "sec_applies_to",
   "applies_to_item",
   "col_break_applies_to",
@@ -1989,12 +1997,58 @@
    "fieldtype": "Data",
    "label": "Bill To Name",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "insurance_company",
+   "fieldname": "sec_insurance",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Insurance Details"
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.insurance_company && doc.insurance_company_name != doc.insurance_company",
+   "fetch_from": "insurance_company.customer_name",
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "label": "Insurance Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_insurance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_policy_no",
+   "fieldtype": "Data",
+   "label": "Policy #"
+  },
+  {
+   "fieldname": "col_break_insurance2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_loss_no",
+   "fieldtype": "Data",
+   "label": "Loss #"
+  },
+  {
+   "fieldname": "insurance_surveyor",
+   "fieldtype": "Link",
+   "label": "Insurance Surveyor",
+   "options": "Insurance Surveyor"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-11-01 18:26:48.446500",
+ "modified": "2020-11-01 22:26:16.260845",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

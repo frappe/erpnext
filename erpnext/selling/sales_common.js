@@ -91,6 +91,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.insurance_company) {
+			this.frm.set_query("insurance_company", function(doc) {
+				return {filters: {is_insurance_company: 1}};
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}

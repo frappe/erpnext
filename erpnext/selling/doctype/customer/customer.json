@@ -40,6 +40,7 @@
   "market_segment",
   "is_internal_customer",
   "represents_company",
+  "is_insurance_company",
   "allowed_to_transact_section",
   "companies",
   "address_contacts",
@@ -521,12 +522,18 @@
    "fieldname": "dn_not_required",
    "fieldtype": "Check",
    "label": "Allow Sales Invoice Creation Without Delivery Note"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_insurance_company",
+   "fieldtype": "Check",
+   "label": "Is Insurance Company"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-10-16 22:43:01.417529",
+ "modified": "2020-11-01 22:29:44.880535",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
