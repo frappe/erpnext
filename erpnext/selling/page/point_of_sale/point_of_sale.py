@@ -14,11 +14,11 @@ from six import string_types
 def get_items(start, page_length, price_list, item_group, pos_profile, search_value=""):
 	data = dict()
 	result = []
-	warehouse, show_only_available_items = "", False
+	warehouse, hide_unavailable_items = "", False
 
 	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 	if not allow_negative_stock:
-		warehouse, show_only_available_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'show_only_available_items'])
+		warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -48,7 +48,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
 
 	bin_join_selection, bin_join_condition = "", ""
-	if show_only_available_items:
+	if hide_unavailable_items:
 		bin_join_selection = ", `tabBin` bin"
 		bin_join_condition = "AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
 
