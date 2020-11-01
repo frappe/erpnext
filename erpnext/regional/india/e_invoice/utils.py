@@ -347,19 +347,20 @@ def get_item_list(invoice):
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 		item.qty = abs(item.qty)
-		item.unit_rate = abs(item.base_price_list_rate) if item.discount_amount else abs(item.base_rate)
+		item.unit_rate = abs(item.base_price_list_rate) if item.discount_amount else abs(item.base_net_rate)
 		item.total_amount = abs(item.unit_rate * item.qty)
 		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.base_amount = abs(item.base_amount)
+		item.base_amount = abs(item.base_net_amount)
 		item.tax_rate = 0
 		item.igst_amount = 0
 		item.cgst_amount = 0
 		item.sgst_amount = 0
 		item.cess_rate = 0
 		item.cess_amount = 0
+		item.other_charges = 0
 		for t in invoice.taxes:
+			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
 			if t.account_head in gst_accounts_list:
-				item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
 				if t.account_head in gst_accounts.cess_account:
 					item.cess_rate += item_tax_detail[0]
 					item.cess_amount += abs(item_tax_detail[1])
@@ -372,8 +373,10 @@ def get_item_list(invoice):
 				elif t.account_head in gst_accounts.cgst_account:
 					item.tax_rate += item_tax_detail[0]
 					item.cgst_amount += abs(item_tax_detail[1])
+			else:
+				item.other_charges += abs(item_tax_detail[1])
 		
-		item.total_value = abs(item.base_amount + item.igst_amount + item.sgst_amount + item.cgst_amount + item.cess_amount)
+		item.total_value = abs(item.base_amount + item.igst_amount + item.sgst_amount + item.cgst_amount + item.cess_amount + item.other_charges)
 		einv_item = item_schema.format(item=item)
 		item_list.append(einv_item)
 
@@ -386,13 +389,14 @@ def get_value_details(invoice):
 	value_details = frappe._dict(dict())
 	value_details.base_net_total = abs(invoice.base_net_total)
 	value_details.invoice_discount_amt = abs(invoice.discount_amount)
-	value_details.round_off = abs(invoice.base_rounding_adjustment)
+	value_details.round_off = invoice.rounding_adjustment if invoice.rounding_adjustment > 0 else 0
 	value_details.base_grand_total = abs(invoice.base_rounded_total)
 	value_details.grand_total = abs(invoice.rounded_total)
 	value_details.total_cgst_amt = 0
 	value_details.total_sgst_amt = 0
 	value_details.total_igst_amt = 0
 	value_details.total_cess_amt = 0
+	value_details.total_other_charges = 0
 	for t in invoice.taxes:
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
@@ -403,6 +407,8 @@ def get_value_details(invoice):
 				value_details.total_sgst_amt += abs(t.base_tax_amount_after_discount_amount)
 			elif t.account_head in gst_accounts.cgst_account:
 				value_details.total_cgst_amt += abs(t.base_tax_amount_after_discount_amount)
+		else:
+			value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
 	
 	return value_details
 
