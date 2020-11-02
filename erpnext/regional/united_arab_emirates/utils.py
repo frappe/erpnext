@@ -35,7 +35,12 @@ def get_account_currency(account):
 	if not account:
 		return
 	def generator():
-		account_currency, company = frappe.get_cached_value("Account", account, ["account_currency", "company"])
+		account_currency, company = frappe.get_cached_value(
+			"Account",
+			account,
+			["account_currency",
+			"company"]
+		)
 		if not account_currency:
 			account_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
@@ -53,8 +58,8 @@ def get_tax_accounts(company):
 
 	if not tax_accounts_list and not frappe.flags.in_test:
 		frappe.throw(_('Please set Vat Accounts for Company: "{0}" in UAE VAT Settings').format(company))
-	for d in tax_accounts_list:
-		for key, name in d.items():
+	for tax_account in tax_accounts_list:
+		for _, name in tax_account.items():
 			tax_accounts_dict[name] = name
 
 	return tax_accounts_dict
@@ -131,8 +136,7 @@ def make_gl_entry(tax, gl_entries, doc, tax_accounts):
 	if flt(tax.base_tax_amount_after_discount_amount)  and tax.account_head in tax_accounts:
 		account_currency = get_account_currency(tax.account_head)
 
-		gl_entries.append(doc.get_gl_dict(
-			{
+		gl_entries.append(doc.get_gl_dict({
 				"account": tax.account_head,
 				"cost_center": tax.cost_center,
 				"posting_date": doc.posting_date,
@@ -141,8 +145,8 @@ def make_gl_entry(tax, gl_entries, doc, tax_accounts):
 				dr_or_cr + "_in_account_currency": tax.base_tax_amount_after_discount_amount \
 					if account_currency==doc.company_currency \
 					else tax.tax_amount_after_discount_amount
-			}, account_currency, item=tax)
-		)
+			}, account_currency, item=tax
+		))
 	return gl_entries
 
 
@@ -152,4 +156,6 @@ def validate_returns(doc, method):
 	if country != 'United Arab Emirates':
 		return
 	if doc.reverse_charge == 'Y' and  flt(doc.recoverable_standard_rated_expenses) != 0:
-		frappe.throw(_("Recoverable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"))
+		frappe.throw(_(
+			"Recoverable Standard Rated expenses should not be set when Reverse Charge Applicable is Y"
+		))
