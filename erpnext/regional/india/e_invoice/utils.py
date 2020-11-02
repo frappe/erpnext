@@ -32,11 +32,13 @@ def validate_einvoice_fields(doc):
 			frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
 		if len(doc.name) > 16:
 			title = _('Document Name Too Long')
-			msg = (_('As you have E-Invoicing enabled, To be able to generate IRN for this invoice, document name {} exceed 16 letters. ')
-						.format(bold(_('should not'))))
+			msg = _('As you have E-Invoicing enabled, To be able to generate IRN for this invoice, ')
+			msg += _('document name {} exceed 16 letters. ').format(bold(_('should not')))
 			msg += '<br><br>'
-			msg += (_('You {} modify your {} in order to have document name of {} length of 16. ')
-						.format(bold(_('must')), bold(_('naming series')), bold(_('maximum'))))
+			msg += _('You must {} your {} in order to have document name of {} length 16. ').format(
+				bold(_('modify')), bold(_('naming series')), bold(_('maximum'))
+			)
+			msg += _('Please account for ammended document names too. ')
 			frappe.throw(msg, title=title)
 
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
