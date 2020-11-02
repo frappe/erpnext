@@ -425,9 +425,9 @@ frappe.ui.form.on('Stock Entry', {
 	show_bom_custom_button: function(frm){
 		if (frm.doc.docstatus === 0 &&
 			['Material Issue', 'Material Receipt', 'Material Transfer', 'Send to Subcontractor'].includes(frm.doc.purpose)) {
-				frm.add_custom_button(__('Bill of Materials'), function() {
-					frm.events.get_items_from_bom(frm);
-				}, __("Get Items From"));
+			frm.add_custom_button(__('Bill of Materials'), function() {
+				frm.events.get_items_from_bom(frm);
+			}, __("Get Items From"));
 		}
 	},
 
