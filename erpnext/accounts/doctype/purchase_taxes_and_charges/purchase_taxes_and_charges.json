@@ -28,7 +28,8 @@
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail"
+  "item_wise_tax_detail",
+  "is_advance_tax"
  ],
  "fields": [
   {
@@ -39,7 +40,9 @@
    "oldfieldname": "category",
    "oldfieldtype": "Select",
    "options": "Valuation and Total\nValuation\nTotal",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "Add",
@@ -49,7 +52,9 @@
    "oldfieldname": "add_deduct_tax",
    "oldfieldtype": "Select",
    "options": "Add\nDeduct",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "columns": 2,
@@ -61,7 +66,9 @@
    "oldfieldname": "charge_type",
    "oldfieldtype": "Select",
    "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:[\"On Previous Row Amount\", \"On Previous Row Total\"].indexOf(doc.charge_type)!==-1",
@@ -69,7 +76,9 @@
    "fieldtype": "Data",
    "label": "Reference Row #",
    "oldfieldname": "row_id",
-   "oldfieldtype": "Data"
+   "oldfieldtype": "Data",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
@@ -77,11 +86,15 @@
    "fieldname": "included_in_print_rate",
    "fieldtype": "Check",
    "label": "Is this Tax included in Basic Rate?",
-   "report_hide": 1
+   "report_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "col_break1",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "columns": 2,
@@ -92,7 +105,9 @@
    "oldfieldname": "account_head",
    "oldfieldtype": "Link",
    "options": "Account",
-   "reqd": 1
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": ":Company",
@@ -101,7 +116,9 @@
    "label": "Cost Center",
    "oldfieldname": "cost_center",
    "oldfieldtype": "Link",
-   "options": "Cost Center"
+   "options": "Cost Center",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "description",
@@ -111,11 +128,15 @@
    "oldfieldtype": "Small Text",
    "print_width": "300px",
    "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "300px"
   },
   {
    "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "columns": 2,
@@ -124,11 +145,15 @@
    "in_list_view": 1,
    "label": "Rate",
    "oldfieldname": "rate",
-   "oldfieldtype": "Currency"
+   "oldfieldtype": "Currency",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "columns": 2,
@@ -138,7 +163,9 @@
    "label": "Amount",
    "oldfieldname": "tax_amount",
    "oldfieldtype": "Currency",
-   "options": "currency"
+   "options": "currency",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "tax_amount_after_discount_amount",
@@ -146,7 +173,9 @@
    "label": "Tax Amount After Discount Amount",
    "options": "currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "columns": 2,
@@ -157,11 +186,15 @@
    "oldfieldname": "total",
    "oldfieldtype": "Currency",
    "options": "currency",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_tax_amount",
@@ -169,7 +202,9 @@
    "label": "Amount (Company Currency)",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_total",
@@ -177,7 +212,9 @@
    "hidden": 1,
    "label": "Total (Company Currency)",
    "options": "Company:company:default_currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "base_tax_amount_after_discount_amount",
@@ -185,7 +222,9 @@
    "label": "Tax Amount After Discount Amount",
    "options": "Company:company:default_currency",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "item_wise_tax_detail",
@@ -195,22 +234,38 @@
    "oldfieldname": "item_wise_tax_detail",
    "oldfieldtype": "Small Text",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
-   "label": "Accounting Dimensions"
+   "label": "Accounting Dimensions",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "dimension_col_break",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_advance_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Advance Tax",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-18 17:26:09.703215",
+ "modified": "2020-10-25 18:24:43.487567",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",
