@@ -8,8 +8,7 @@ from frappe import _
 def execute(filters=None):
 	columns = get_columns()
 	data, emirates, amounts_by_emirate = get_data(filters)
-	chart = get_chart(emirates, amounts_by_emirate)
-	return columns, data, None, chart
+	return columns, data
 
 def get_columns():
 	"""Creates a list of dictionaries that are used to generate column headers of the data table."""
@@ -48,32 +47,6 @@ def get_data(filters = None):
 	emirates, amounts_by_emirate = append_vat_on_sales(data, filters)
 	append_vat_on_expenses(data, filters)
 	return data, emirates, amounts_by_emirate
-
-def get_chart(emirates, amounts_by_emirate):
-	"""Returns chart data."""
-	labels = []
-	amount = []
-	vat_amount = []
-	for emirate in emirates:
-		if emirate in amounts_by_emirate:
-			amount.append(amounts_by_emirate[emirate]["raw_amount"])
-			vat_amount.append(amounts_by_emirate[emirate]["raw_vat_amount"])
-			labels.append(emirate)
-
-	datasets = []
-	datasets.append({'name': _('Amount (AED)'), 'values':  amount})
-	datasets.append({'name': _('Vat Amount (AED)'), 'values': vat_amount})
-
-	chart = {
-		"type": "bar",
-		"fieldtype": "Currency",
-		"data": {
-			'labels': labels,
-			'datasets': datasets
-		}
-	}
-
-	return chart
 
 def append_vat_on_sales(data, filters):
 	"""Appends Sales and All Other Outputs."""
