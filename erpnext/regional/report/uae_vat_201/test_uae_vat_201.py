@@ -101,12 +101,11 @@ def set_vat_accounts():
 		)
 
 		uae_vat_accounts = []
-		for d in vat_accounts:
-			uae_vat_accounts.append(
-				{
+		for account in vat_accounts:
+			uae_vat_accounts.append({
 				"doctype": "UAE VAT Account", 
-				"account":d.name
-				})
+				"account": account.name
+			})
 
 		frappe.get_doc({
 			"company": "_Test Company UAE VAT",
