@@ -359,9 +359,6 @@ class PaymentEntry(AccountsController):
 		if not self.apply_tax_withholding_amount:
 			return
 
-		if self.references:
-			return
-
 		args = frappe._dict({
 			'company': self.company,
 			'supplier': self.party,
@@ -390,10 +387,17 @@ class PaymentEntry(AccountsController):
 			self.remove(d)
 
 	def set_amounts(self):
+		self.set_amounts_after_tax()
 		self.set_amounts_in_company_currency()
 		self.set_total_allocated_amount()
 		self.set_unallocated_amount()
 		self.set_difference_amount()
+
+	def set_amounts_after_tax(self):
+		self.paid_amount_after_tax = flt(flt(self.paid_amount) + flt(self.total_taxes_and_charges),
+			self.precision("paid_amount_after_tax"))
+		self.base_paid_amount_after_tax = flt(flt(self.paid_amount_after_tax) * flt(self.source_exchange_rate),
+			self.precision("base_paid_amount_after_tax"))
 
 	def set_amounts_in_company_currency(self):
 		self.base_paid_amount, self.base_received_amount, self.difference_amount = 0, 0, 0
@@ -426,12 +430,12 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
-					self.unallocated_amount = (self.base_received_amount + self.base_total_taxes_and_charges + total_deductions -
+					self.unallocated_amount = (self.base_received_amount + total_deductions -
 						self.base_total_allocated_amount) / self.source_exchange_rate
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount - total_deductions) \
 				and self.total_allocated_amount < self.received_amount + (total_deductions / self.target_exchange_rate):
-					self.unallocated_amount = (self.base_paid_amount + self.base_total_taxes_and_charges - (total_deductions +
+					self.unallocated_amount = (self.base_paid_amount - (total_deductions +
 						self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
@@ -449,7 +453,7 @@ class PaymentEntry(AccountsController):
 
 		total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
 
-		self.difference_amount = flt(self.difference_amount - total_deductions + self.base_total_taxes_and_charges,
+		self.difference_amount = flt(self.difference_amount - total_deductions,
 			self.precision("difference_amount"))
 
 	# Paid amount is auto allocated in the reference document by default.
@@ -590,8 +594,8 @@ class PaymentEntry(AccountsController):
 					"account": self.paid_from,
 					"account_currency": self.paid_from_account_currency,
 					"against": self.party if self.payment_type=="Pay" else self.paid_to,
-					"credit_in_account_currency": self.paid_amount,
-					"credit": self.base_paid_amount,
+					"credit_in_account_currency": self.paid_amount_after_tax,
+					"credit": self.base_paid_amount_after_tax,
 					"cost_center": self.cost_center
 				}, item=self)
 			)
@@ -613,7 +617,10 @@ class PaymentEntry(AccountsController):
 			if account_currency != self.company_currency:
 				frappe.throw(_("Currency for {0} must be {1}").format(d.account_head, self.company_currency))
 
-			dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
+			if self.payment_type == 'Pay':
+				dr_or_cr = "debit" if d.add_deduct_tax == "Add" else "credit"
+			elif self.payment_type == 'Receive':
+				dr_or_cr = "credit" if d.add_deduct_tax == "Add" else "debit"
 
 			gl_entries.append(
 				self.get_gl_dict({

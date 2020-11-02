@@ -24,9 +24,9 @@
   "contact_person",
   "contact_email",
   "tds_details_section",
-  "tax_withholding_category",
-  "column_break_20",
   "apply_tax_withholding_amount",
+  "column_break_20",
+  "tax_withholding_category",
   "payment_accounts_section",
   "party_balance",
   "paid_from",
@@ -38,8 +38,10 @@
   "paid_to_account_balance",
   "payment_amounts_section",
   "paid_amount",
+  "paid_amount_after_tax",
   "source_exchange_rate",
   "base_paid_amount",
+  "base_paid_amount_after_tax",
   "column_break_21",
   "received_amount",
   "target_exchange_rate",
@@ -579,7 +581,9 @@
    "fieldtype": "Small Text",
    "label": "Remarks",
    "no_copy": 1,
-   "read_only_depends_on": "eval:doc.custom_remarks == 0"
+   "read_only_depends_on": "eval:doc.custom_remarks == 0",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_16",
@@ -732,6 +736,7 @@
    "show_seconds": 1
   },
   {
+   "depends_on": "eval:doc.apply_tax_withholding_amount",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
    "label": "Tax Withholding Category",
@@ -809,13 +814,33 @@
    "default": "0",
    "fieldname": "custom_remarks",
    "fieldtype": "Check",
-   "label": "Custom Remarks"
+   "label": "Custom Remarks",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "paid_amount_after_tax",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Paid Amount After Tax",
+   "options": "paid_from_account_currency",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "base_paid_amount_after_tax",
+   "fieldtype": "Currency",
+   "label": "Paid Amount After Tax (Company Currency)",
+   "options": "Company:company:default_currency",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-02 13:39:43.383705",
+ "modified": "2020-10-25 20:50:14.896628",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

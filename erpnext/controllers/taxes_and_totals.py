@@ -37,6 +37,7 @@ class calculate_taxes_and_totals(object):
 		self.validate_conversion_rate()
 		self.calculate_item_values()
 		self.validate_item_tax_template()
+		self.apply_advance_taxes()
 		self.initialize_taxes()
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
@@ -646,6 +647,32 @@ class calculate_taxes_and_totals(object):
 
 		self.calculate_paid_amount()
 
+	def apply_advance_taxes(self):
+		if cint(self.doc.get('adjust_advance_taxes')):
+			if self.doc.get('advances'):
+				payment_entry_list = [d.reference_name for d in self.doc.get('advances')]
+				advance_taxes = get_advance_taxes(payment_entry_list)
+				accounts = []
+
+				# Remove already added advance taxes if any
+				for tax in self.doc.get('taxes'):
+					if tax.is_advance_tax:
+						self.doc.remove(tax)
+					else:
+						accounts.append(tax.account_head)
+
+				for tax in advance_taxes:
+					# Reverse add deduct from payment entry in invoice
+					if tax.account_head in accounts:
+						add_deduct_tax = 'Deduct' if tax.add_deduct_tax == 'Add' else 'Add'
+						tax.update({
+							'add_deduct_tax': add_deduct_tax,
+							'category': tax.get('category') or 'Total',
+							'is_advance_tax': 1,
+							'charge_type': 'On Net Total' if tax.charge_type == 'On Paid Amount' else tax.charge_type
+						})
+
+						self.doc.append('taxes', tax)
 
 def get_itemised_tax_breakup_html(doc):
 	if not doc.taxes:
@@ -742,3 +769,16 @@ def get_rounded_tax_amount(itemised_tax, precision):
 	for taxes in itemised_tax.values():
 		for tax_account in taxes:
 			taxes[tax_account]["tax_amount"] = flt(taxes[tax_account]["tax_amount"], precision)
+
+def get_advance_taxes(payment_entry_list):
+	taxes = []
+	if payment_entry_list:
+		taxes = frappe.db.sql(
+			"""
+				SELECT t.parent, t.add_deduct_tax, t.charge_type, t.rate,
+					t.account_head, t.cost_center, t.tax_amount, t.description
+				FROM `tabAdvance Taxes and Charges` t, `tabPayment Entry` p
+				WHERE t.parent = p.name AND t.parent in %s
+			""", (payment_entry_list, ), as_dict=1)
+
+	return taxes

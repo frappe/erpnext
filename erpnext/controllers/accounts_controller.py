@@ -523,10 +523,6 @@ class AccountsController(TransactionBase):
 		payment_entries = get_advance_payment_entries(party_type, party, party_account,
 			order_doctype, order_list, include_unallocated)
 
-		payment_entry_list = [d.reference_name for d in payment_entries]
-
-		payment_entry_taxes = get_payment_entry_taxes(payment_entry_list)
-
 		res = journal_entries + payment_entries
 
 		return res
@@ -1086,13 +1082,6 @@ def get_advance_payment_entries(party_type, party, party_account, order_doctype,
 			""".format(party_account_field, limit_cond), (party_account, party_type, party, payment_type), as_dict=1)
 
 	return list(payment_entries_against_order) + list(unallocated_payment_entries)
-
-def get_payment_entry_taxes(payment_entry_list):
-	taxes = frappe.db.sql("""
-		SELECT t.parent, t.add_deduct_tax, t.charge_type, t.account_head, t.cost_center,
-		t.tax_amount FROM `tabAdvance Taxes and Charges` where t.parent in %s"""
-	,(payment_entry_list, ), as_dict=1)
-
 
 def update_invoice_status():
 	# Daily update the status of the invoices

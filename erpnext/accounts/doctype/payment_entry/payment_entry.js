@@ -223,7 +223,7 @@ frappe.ui.form.on('Payment Entry', {
 		var company_currency = frm.doc.company? frappe.get_doc(":Company", frm.doc.company).default_currency: "";
 
 		frm.set_currency_labels(["base_paid_amount", "base_received_amount", "base_total_allocated_amount",
-			"difference_amount"], company_currency);
+			"difference_amount", "base_paid_amount_after_tax"], company_currency);
 
 		frm.set_currency_labels(["paid_amount"], frm.doc.paid_from_account_currency);
 		frm.set_currency_labels(["received_amount"], frm.doc.paid_to_account_currency);
@@ -367,6 +367,16 @@ frappe.ui.form.on('Payment Entry', {
 						]);
 					}
 				}
+			});
+		}
+	},
+
+	apply_tax_withholding_amount: function(frm) {
+		if (!frm.doc.apply_tax_withholding_amount) {
+			frm.set_value("tax_withholding_category", '');
+		} else {
+			frappe.db.get_value('Supplier', frm.doc.party, 'tax_withholding_category', (values) => {
+				frm.set_value("tax_withholding_category", values.tax_withholding_category);
 			});
 		}
 	},

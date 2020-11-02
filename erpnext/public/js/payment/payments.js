@@ -8,7 +8,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.dialog = new frappe.ui.Dialog({
 			title: 'Payment'
 		});
-	
+
 		this.dialog.show();
 		this.$body = this.dialog.body;
 		this.set_payment_primary_action();
@@ -25,7 +25,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 	set_payment_primary_action: function(){
 		var me = this;
-	
+
 		this.dialog.set_primary_action(__("Submit"), function() {
 			// Allow no ZERO payment
 			$.each(me.frm.doc.payments, function (index, data) {
@@ -100,7 +100,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.selected_mode.select()
 		this.bind_amount_change_event();
 	},
-	
+
 	bind_keyboard_event: function(){
 		var me = this;
 		this.payment_val = '';
@@ -114,17 +114,17 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			me.idx = $(this).attr("idx");
 			me.set_outstanding_amount()
 		})
-		
+
 		$(this.$body).find('.form-control').click(function(){
 			me.idx = $(this).attr("idx");
 			me.set_outstanding_amount();
 			me.update_paid_amount(true);
 		})
-		
+
 		$(this.$body).find('.write_off_amount').change(function(){
 			me.write_off_amount(flt($(this).val()), precision("write_off_amount"));
 		})
-		
+
 		$(this.$body).find('.change_amount').change(function(){
 			me.change_amount(flt($(this).val()), precision("change_amount"));
 		})
@@ -138,7 +138,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		$(this.$body).find('.amount').attr('disabled', true);
 		this.selected_mode.attr('disabled', false);
 	},
-	
+
 	bind_numeric_keys_event: function(){
 		var me = this;
 		$(this.$body).find('.pos-keyboard-key').click(function(){
@@ -147,7 +147,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			me.idx = me.selected_mode.attr("idx")
 			me.update_paid_amount()
 		})
-		
+
 		$(this.$body).find('.delete-btn').click(function(){
 			me.payment_val =  cstr(flt(me.selected_mode.val())).slice(0, -1);
 			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency));
@@ -156,7 +156,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		})
 
 	},
-	
+
 	bind_amount_change_event: function(){
 		var me = this;
 		this.selected_mode.change(function(){
