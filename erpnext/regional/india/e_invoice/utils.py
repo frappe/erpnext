@@ -373,8 +373,6 @@ def get_item_list(invoice):
 				elif t.account_head in gst_accounts.cgst_account:
 					item.tax_rate += item_tax_detail[0]
 					item.cgst_amount += abs(item_tax_detail[1])
-			else:
-				item.other_charges += abs(item_tax_detail[1])
 		
 		item.total_value = abs(item.base_amount + item.igst_amount + item.sgst_amount + item.cgst_amount + item.cess_amount + item.other_charges)
 		einv_item = item_schema.format(item=item)
@@ -388,8 +386,8 @@ def get_value_details(invoice):
 
 	value_details = frappe._dict(dict())
 	value_details.base_net_total = abs(invoice.base_net_total)
-	value_details.invoice_discount_amt = abs(invoice.discount_amount)
-	value_details.round_off = invoice.rounding_adjustment if invoice.rounding_adjustment > 0 else 0
+	value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount > 0 else 0
+	value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount < 0 else 0)
 	value_details.base_grand_total = abs(invoice.base_rounded_total)
 	value_details.grand_total = abs(invoice.rounded_total)
 	value_details.total_cgst_amt = 0
