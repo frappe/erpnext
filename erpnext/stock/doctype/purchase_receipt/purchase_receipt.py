@@ -77,8 +77,8 @@ class PurchaseReceipt(BuyingController):
 					'target_field': 'returned_qty',
 					'target_parent_dt': 'Purchase Receipt',
 					'target_parent_field': 'per_returned',
-					'target_ref_field': 'stock_qty',
-					'source_field': '-1 * stock_qty',
+					'target_ref_field': 'received_stock_qty',
+					'source_field': '-1 * received_stock_qty',
 					'percent_join_field_parent': 'return_against'
 				}
 			])
@@ -503,7 +503,7 @@ class PurchaseReceipt(BuyingController):
 
 		for pr in set(updated_pr):
 			pr_doc = self if (pr == self.name) else frappe.get_doc("Purchase Receipt", pr)
-			pr_doc.update_billing_percentage(update_modified=update_modified)
+			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 		self.load_from_db()
 
@@ -543,6 +543,39 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 
 	return updated_pr
 
+def update_billing_percentage(pr_doc, update_modified=True):
+	# Update Billing % based on pending accepted qty
+	total_amount, total_billed_amount = 0, 0
+	for item in pr_doc.items:
+		returned_qty = frappe.db.sql("""
+			select sum(abs(child.qty)) as qty
+			from
+				`tabPurchase Receipt Item` child,
+				`tabPurchase Receipt` parent
+			where
+				child.parent = parent.name
+				and parent.docstatus = 1
+				and parent.is_return = 1
+				and child.purchase_receipt_item = %(row_name)s
+			""", {"row_name": item.name})
+		returned_qty = returned_qty[0][0] if returned_qty else 0
+
+		returned_amount = flt(returned_qty) * flt(item.rate)
+		pending_amount = flt(item.amount) - returned_amount
+		total_billable_amount = pending_amount if item.billed_amt <= pending_amount else item.billed_amt
+
+		total_amount += total_billable_amount
+		total_billed_amount += flt(item.billed_amt)
+
+	print(total_billed_amount, total_amount)
+	percent_billed = round(100 * (total_billed_amount / total_amount), 6)
+	pr_doc.db_set("per_billed", percent_billed)
+	pr_doc.load_from_db()
+
+	if update_modified:
+		pr_doc.set_status(update=True)
+		pr_doc.notify_update()
+
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
@@ -562,6 +595,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 	def update_item(source_doc, target_doc, source_parent):
 		target_doc.qty, returned_qty = get_pending_qty(source_doc)
+		target_doc.stock_qty = flt(target_doc.qty) * flt(target_doc.conversion_factor, target_doc.precision("conversion_factor"))
 		returned_qty_map[source_doc.name] = returned_qty
 
 	def get_pending_qty(item_row):
