@@ -66,13 +66,13 @@ def get_chart(emirates, amounts_by_emirate):
 
 	chart = {
 		"type": "bar",
-		"fieldtype": "Currency"
+		"fieldtype": "Currency",
 		"data": {
 			'labels': labels,
 			'datasets': datasets
 		}
 	}
-	
+
 	return chart
 
 def append_vat_on_sales(data, filters):
@@ -89,14 +89,14 @@ def append_vat_on_sales(data, filters):
 		frappe.format(get_reverse_charge_total(filters), 'Currency'),
 		frappe.format(get_reverse_charge_tax(filters), 'Currency'))
 
-	append_data(data, '4', _('Zero Rated'), 
+	append_data(data, '4', _('Zero Rated'),
 		frappe.format(get_zero_rated_total(filters), 'Currency'), "-")
 
 	append_data(data, '5', _('Exempt Supplies'),
 		frappe.format(get_exempt_total(filters), 'Currency'),"-")
 
 	append_data(data, '', '', '', '')
-	
+
 	return emirates, amounts_by_emirate
 
 def standard_rated_expenses_emiratewise(data, filters):
@@ -159,7 +159,7 @@ def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
 	query_filters = get_filters(filters)
 	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_list('Sales Invoice', 
+	return frappe.db.get_list('Sales Invoice',
 		filters = query_filters,
 		fields = ['vat_emirate as emirate','sum(total)', 'sum(total_taxes_and_charges)'],
 		group_by='vat_emirate',
@@ -194,7 +194,7 @@ def get_reverse_charge_total(filters):
 	query_filters = get_filters(filters)
 	query_filters['reverse_charge'] = ['=', 'Y']
 	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_list('Purchase Invoice', 
+	return frappe.db.get_list('Purchase Invoice',
 		filters = query_filters,
 		fields = ['sum(total)'],
 		as_list=True,
@@ -222,7 +222,7 @@ def get_reverse_charge_recoverable_total(filters):
 	query_filters['reverse_charge'] = ['=', 'Y']
 	query_filters['recoverable_reverse_charge'] = ['>', '0']
 	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_list('Purchase Invoice', 
+	return frappe.db.get_list('Purchase Invoice',
 		filters = query_filters,
 		fields = ['sum(total)'],
 		as_list=True,
@@ -260,7 +260,7 @@ def get_standard_rated_expenses_total(filters):
 	query_filters = get_filters(filters)
 	query_filters['recoverable_standard_rated_expenses'] = ['>', 0]
 	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_list('Purchase Invoice', 
+	return frappe.db.get_list('Purchase Invoice',
 		filters = query_filters,
 		fields = ['sum(total)'],
 		as_list=True,
@@ -272,7 +272,7 @@ def get_standard_rated_expenses_tax(filters):
 	query_filters = get_filters(filters)
 	query_filters['recoverable_standard_rated_expenses'] = ['>', 0]
 	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_list('Purchase Invoice', 
+	return frappe.db.get_list('Purchase Invoice',
 		filters = query_filters,
 		fields = ['sum(recoverable_standard_rated_expenses)'],
 		as_list=True,
@@ -284,7 +284,7 @@ def get_tourist_tax_return_total(filters):
 	query_filters = get_filters(filters)
 	query_filters['tourist_tax_return'] = ['>', 0]
 	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_list('Sales Invoice', 
+	return frappe.db.get_list('Sales Invoice',
 		filters = query_filters,
 		fields = ['sum(total)'],
 		as_list=True,
@@ -296,7 +296,7 @@ def get_tourist_tax_return_tax(filters):
 	query_filters = get_filters(filters)
 	query_filters['tourist_tax_return'] = ['>', 0]
 	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_list('Sales Invoice', 
+	return frappe.db.get_list('Sales Invoice',
 		filters = query_filters,
 		fields = ['sum(tourist_tax_return)'],
 		as_list=True,
