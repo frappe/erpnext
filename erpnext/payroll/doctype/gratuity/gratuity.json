@@ -19,8 +19,10 @@
   "pay_via_salary_slip",
   "payroll_date",
   "salary_component",
+  "payable_account",
   "expense_account",
   "mode_of_payment",
+  "cost_center",
   "column_break_15",
   "current_work_experience",
   "amount",
@@ -173,12 +175,28 @@
    "fieldtype": "Currency",
    "label": "Paid Amount",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.pay_via_salary_slip == 0",
+   "fieldname": "payable_account",
+   "fieldtype": "Link",
+   "label": "Payable Account",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 0",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval: doc.pay_via_salary_slip == 0",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "mandatory_depends_on": "eval: doc.pay_via_salary_slip == 0",
+   "options": "Cost Center"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-27 14:04:41.886934",
+ "modified": "2020-11-02 18:21:11.971488",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity",
