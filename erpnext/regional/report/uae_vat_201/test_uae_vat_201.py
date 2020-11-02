@@ -15,7 +15,7 @@ from erpnext.regional.report.uae_vat_201.uae_vat_201 import (
 	get_exempt_total,
 	get_standard_rated_expenses_total,
 	get_standard_rated_expenses_tax,
-	)
+)
 
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 
