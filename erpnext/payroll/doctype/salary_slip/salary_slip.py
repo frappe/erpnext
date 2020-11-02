@@ -83,13 +83,12 @@ class SalarySlip(TransactionBase):
 				"employee": self.employee,
 				"ref_doctype": "Gratuity",
 				"docstatus": 1,
-			}, fields = ["ref_docname", "name"])[0]
+			}, fields = ["ref_docname", "name"], limit=1)
 
-		status = "Paid" if self.docstatus == 1 else "Unpaid"
-
-
-		if add_salary and add_salary.name in [data.additional_salary for data in self.earnings]:
-			frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
+		if len(add_salary):
+			status = "Paid" if self.docstatus == 1 else "Unpaid"
+			if add_salary[0].name in [data.additional_salary for data in self.earnings]:
+				frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
 
 	def on_cancel(self):
 		self.set_status()

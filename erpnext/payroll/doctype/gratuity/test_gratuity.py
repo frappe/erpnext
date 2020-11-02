@@ -9,27 +9,19 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip
 from erpnext.payroll.doctype.gratuity.gratuity import get_last_salary_slip
 from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
+from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
 from frappe.utils import getdate, add_days, get_datetime, flt
 
 
 class TestGratuity(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("DELETE FROM `tabgratuity`")
+		frappe.db.sql("DELETE FROM `tabGratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
 	def test_check_gratuity_amount_based_on_current_slab_and_additional_salary_creation(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
-		rule = frappe.db.exists("Gratuity Rule", "Rule Under Unlimited Contract on termination (UAE)")
-		if not rule:
-			create_gratuity_rule()
-		else:
-			rule = frappe.get_doc("Gratuity Rule", "Rule Under Unlimited Contract on termination (UAE)")
-		rule.applicable_earnings_component = []
-		rule.append("applicable_earnings_component", {
-			"salary_component": "Basic Salary"
-		})
-		rule.save()
-		rule.reload()
+
+		rule = get_gratuity_rule("Rule Under Unlimited Contract on termination (UAE)")
 
 		gratuity = frappe.new_doc("Gratuity")
 		gratuity.employee = employee
@@ -72,31 +64,12 @@ class TestGratuity(unittest.TestCase):
 
 		#additional salary creation (Pay via salary slip)
 		self.assertTrue(frappe.db.exists("Additional Salary", {"ref_docname": gratuity.name}))
-		self.assertEqual(gratuity.status, "Paid")
 
 	def test_check_gratuity_amount_based_on_all_previous_slabs(self):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
-		rule = frappe.db.exists("Gratuity Rule", "Rule Under Limited Contract (UAE)")
-		if not rule:
-			create_gratuity_rule()
-		else:
-			rule = frappe.get_doc("Gratuity Rule", rule)
-		rule.applicable_earnings_component = []
-		rule = frappe.get_doc("Gratuity Rule", "Rule Under Limited Contract (UAE)")
-		rule.append("applicable_earnings_component", {
-			"salary_component": "Basic Salary"
-		})
-		rule.save()
-		rule.reload()
-
-		mof = frappe.get_doc("Mode of Payment", "Cheque")
-		mof.accounts = []
-		mof.append("accounts", {
-			"company": "_Test Company",
-			"default_account": "_Test Bank - _TC"
-		})
-
-		mof.save()
+		rule = get_gratuity_rule("Rule Under Limited Contract (UAE)")
+		set_mode_of_payment_account()
+		payable_account = get_payable_account("_Test Company")
 
 		gratuity = frappe.new_doc("Gratuity")
 		gratuity.employee = employee
@@ -105,6 +78,7 @@ class TestGratuity(unittest.TestCase):
 		gratuity.pay_via_salary_slip = 0
 		gratuity.payroll_date = getdate()
 		gratuity.expense_account = "Payment Account - _TC"
+		gratuity.payable_account = payable_account
 		gratuity.mode_of_payment = "Cheque"
 
 		gratuity.save()
@@ -132,13 +106,11 @@ class TestGratuity(unittest.TestCase):
 		},
 		fields=["amount"])
 
-
 		''' range  | Fraction
 			0-1    |    0
 			1-5    |   0.7
 			5-0    |    1
 		'''
-
 
 		gratuity_amount = ((0 * 1) + (4 * 0.7) + (1 * 1)) *  component_amount[0].amount
 		gratuity.reload()
@@ -146,24 +118,44 @@ class TestGratuity(unittest.TestCase):
 		self.assertEqual(flt(gratuity_amount, 2), flt(gratuity.amount, 2))
 		self.assertEqual(gratuity.status, "Unpaid")
 
-
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-
 		pay_entry = get_payment_entry("Gratuity", gratuity.name)
 		pay_entry.reference_no = "123467"
 		pay_entry.reference_date = getdate()
-
 		pay_entry.save()
 		pay_entry.submit()
-
 		gratuity.reload()
 
 		self.assertEqual(gratuity.status, "Paid")
 		self.assertEqual(gratuity.paid_amount, flt(gratuity.amount, 2))
 
 	def tearDown(self):
-		frappe.db.sql("DELETE FROM `tabgratuity`")
+		frappe.db.sql("DELETE FROM `tabGratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
+
+def get_gratuity_rule(name):
+	rule = frappe.db.exists("Gratuity Rule", name)
+	if not rule:
+		create_gratuity_rule()
+	else:
+		rule = frappe.get_doc("Gratuity Rule", name)
+	rule.applicable_earnings_component = []
+	rule.append("applicable_earnings_component", {
+		"salary_component": "Basic Salary"
+	})
+	rule.save()
+	rule.reload()
+
+	return rule
+
+def set_mode_of_payment_account():
+	mode_of_payment = frappe.get_doc("Mode of Payment", "Cheque")
+	mode_of_payment.accounts = []
+	mode_of_payment.append("accounts", {
+		"company": "_Test Company",
+		"default_account": "_Test Bank - _TC"
+	})
+	mode_of_payment.save()
 
 def create_employee_and_get_last_salary_slip():
 	employee = make_employee("test_employee@salary.com")
