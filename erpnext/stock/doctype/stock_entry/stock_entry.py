@@ -804,7 +804,7 @@ class StockEntry(StockController):
 		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
 			'stock_uom'				: item.stock_uom,
-			'description'		  	: item.description,
+			'description'		  	: cstr(item.description).strip(),
 			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
 			'hide_item_code'		: get_hide_item_code(args, item),

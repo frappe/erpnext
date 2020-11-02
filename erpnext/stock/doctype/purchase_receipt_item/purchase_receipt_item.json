@@ -216,7 +216,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -1314,7 +1313,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:13.264915",
+ "modified": "2020-11-02 13:42:39.769819",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
