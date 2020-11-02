@@ -263,6 +263,7 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
+			self.pricing_rules = []
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -301,6 +302,7 @@ class AccountsController(TransactionBase):
 
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
+						self.set_pricing_rule_details(item, ret)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -322,6 +324,9 @@ class AccountsController(TransactionBase):
 					if item.get('discount_amount'):
 						item.rate = item.price_list_rate - item.discount_amount
 
+				if item.get("apply_discount_on_discounted_rate") and pricing_rule_args.get("rate"):
+					item.rate = pricing_rule_args.get("rate")
+
 			elif pricing_rule_args.get('free_item_data'):
 				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
 
@@ -334,6 +339,18 @@ class AccountsController(TransactionBase):
 
 						frappe.msgprint(_("Row {0}: user has not applied the rule {1} on the item {2}")
 							.format(item.idx, frappe.bold(title), frappe.bold(item.item_code)))
+
+	def set_pricing_rule_details(self, item_row, args):
+		pricing_rules = get_applied_pricing_rules(args.get("pricing_rules"))
+		if not pricing_rules: return
+
+		for pricing_rule in pricing_rules:
+			self.append("pricing_rules", {
+				"pricing_rule": pricing_rule,
+				"item_code": item_row.item_code,
+				"child_docname": item_row.name,
+				"rule_applied": True
+			})
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -946,8 +963,10 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 	company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
 	if not conversion_rate:
-		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
-			conversion_rate_label, currency, company_currency))
+		throw(
+			_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.")
+			.format(conversion_rate_label, currency, company_currency)
+		)
 
 
 def validate_taxes_and_charges(tax):
