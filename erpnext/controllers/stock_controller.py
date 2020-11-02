@@ -338,11 +338,15 @@ class StockController(AccountsController):
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):
+		target_ref_field = "amount"
+		if self.doctype == "Delivery Note":
+			target_ref_field = "amount - (returned_qty * rate)"
+
 		self._update_percent_field({
 			"target_dt": self.doctype + " Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_billed",
-			"target_ref_field": "amount",
+			"target_ref_field": target_ref_field,
 			"target_field": "billed_amt",
 			"name": self.name,
 		}, update_modified)
