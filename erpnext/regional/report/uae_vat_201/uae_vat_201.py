@@ -65,14 +65,14 @@ def get_chart(emirates, amounts_by_emirate):
 	datasets.append({'name': _('Vat Amount (AED)'), 'values': vat_amount})
 
 	chart = {
-			"data": {
-				'labels': labels,
-				'datasets': datasets
-			}
+		"type": "bar",
+		"fieldtype": "Currency"
+		"data": {
+			'labels': labels,
+			'datasets': datasets
 		}
-
-	chart["type"] = "bar"
-	chart["fieldtype"] = "Currency"
+	}
+	
 	return chart
 
 def append_vat_on_sales(data, filters):
