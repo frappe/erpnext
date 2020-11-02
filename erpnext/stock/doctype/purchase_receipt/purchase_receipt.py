@@ -567,7 +567,6 @@ def update_billing_percentage(pr_doc, update_modified=True):
 		total_amount += total_billable_amount
 		total_billed_amount += flt(item.billed_amt)
 
-	print(total_billed_amount, total_amount)
 	percent_billed = round(100 * (total_billed_amount / total_amount), 6)
 	pr_doc.db_set("per_billed", percent_billed)
 	pr_doc.load_from_db()
