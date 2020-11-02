@@ -95,8 +95,10 @@ def set_vat_accounts():
 			fields=["name"],
 			filters = {
 				"company": "_Test Company UAE VAT",
-				"is_group":0, 
-				"account_type": "Tax"})
+				"is_group": 0, 
+				"account_type": "Tax"
+			}
+		)
 
 		uae_vat_accounts = []
 		for d in vat_accounts:
