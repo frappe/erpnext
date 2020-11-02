@@ -13,7 +13,7 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 
 	def setUp(self):
 		for doctype in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
-			frappe.db.sql("delete from `tab{0}`".format(doctype))
+			frappe.db.sql("delete from `tab{0}`".format(doctype)) #nosec
 
 	def test_grant_leaves(self):
 		leave_period = get_leave_period()
@@ -98,6 +98,6 @@ class TestLeavePolicyAssignment(unittest.TestCase):
 
 	def tearDown(self):
 		for doctype in ["Leave Application", "Leave Allocation", "Leave Policy Assignment", "Leave Ledger Entry"]:
-			frappe.db.sql("delete from `tab{0}`".format(doctype))
+			frappe.db.sql("delete from `tab{0}`".format(doctype)) #nosec
 
 
