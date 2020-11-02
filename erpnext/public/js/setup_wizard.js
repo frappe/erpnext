@@ -164,7 +164,7 @@ erpnext.setup.slides_settings = [
 							let message = __(
 								'Account {0} already exists. Please enter a different name for your bank account.',
 								[me.values.bank_account]
-							)
+							);
 							frappe.msgprint(message);
 						}
 					}
