@@ -34,6 +34,7 @@
   "retain_sample",
   "sample_quantity",
   "tracking_section",
+  "received_stock_qty",
   "stock_qty",
   "col_break_tracking_section",
   "returned_qty",
@@ -848,6 +849,12 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "received_stock_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty in Stock UOM",
+   "print_hide": 1
   }
  ],
  "idx": 1,

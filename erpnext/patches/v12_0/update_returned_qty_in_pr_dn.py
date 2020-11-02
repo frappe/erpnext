@@ -15,6 +15,13 @@ def execute():
 			# Update original receipt/delivery document from return
 			return_doc = frappe.get_cached_doc(doctype, return_doc.name)
 			return_doc.update_prevdoc_status()
+			return_against = frappe.get_doc(doctype, return_doc.return_against)
+			return_against.update_billing_status()
+
+	# Set received qty in stock uom in PR, as returned qty is checked against it
+	frappe.db.sql(""" update `tabPurchase Receipt Item`
+		set received_stock_qty = received_qty * conversion_factor
+		where docstatus = 1 """)
 
 	for doctype in ('Purchase Receipt', 'Delivery Note'):
 		update_from_return_docs(doctype)
