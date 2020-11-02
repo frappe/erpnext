@@ -48,12 +48,12 @@ class TestUaeVat201(TestCase):
 		filters = {"company": "_Test Company UAE VAT"}
 		total_emiratewise = get_total_emiratewise(filters)
 		amounts_by_emirate = {}
-		for d in total_emiratewise:
-			emirate, amount, vat= d
+		for data in total_emiratewise:
+			emirate, amount, vat = data
 			amounts_by_emirate[emirate] = {
-					"raw_amount": amount,
-					"raw_vat_amount": vat,
-					}
+				"raw_amount": amount,
+				"raw_vat_amount": vat,
+			}
 		self.assertEqual(amounts_by_emirate["Sharjah"]["raw_amount"],300)
 		self.assertEqual(amounts_by_emirate["Sharjah"]["raw_vat_amount"],5)
 		self.assertEqual(amounts_by_emirate["Dubai"]["raw_amount"],200)
