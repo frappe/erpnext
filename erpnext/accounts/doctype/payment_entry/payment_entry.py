@@ -1182,7 +1182,7 @@ def set_party_account(dt, dn, doc, party_type):
 	elif dt == "Expense Claim":
 		party_account = doc.payable_account
 	elif dt == "Gratuity":
-		party_account = doc.expense_account
+		party_account = doc.payable_account
 	else:
 		party_account = get_party_account(party_type, doc.get(party_type.lower()), doc.company)
 	return party_account

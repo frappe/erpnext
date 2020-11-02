@@ -7,9 +7,11 @@ import frappe
 from frappe import _, bold
 from frappe.model.document import Document
 from frappe.utils import flt, get_datetime, get_link_to_form
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
 from math import floor
 
-class Gratuity(Document):
+class Gratuity(AccountsController):
 	def validate(self):
 		data = calculate_work_experience_and_amount(self.employee, self.gratuity_rule)
 		self.current_work_experience = data["current_work_experience"]
@@ -18,7 +20,51 @@ class Gratuity(Document):
 			self.status = "Unpaid"
 
 	def on_submit(self):
-		self.create_additional_salary()
+		if self.pay_via_salary_slip:
+			self.create_additional_salary()
+		else:
+			self.create_gl_entries()
+
+	def on_cancel(self):
+		self.ignore_linked_doctypes = ['GL Entry']
+		self.create_gl_entries(cancel=True)
+
+	def create_gl_entries(self, cancel=False):
+		gl_entries = self.get_gl_entries()
+		make_gl_entries(gl_entries, cancel)
+
+	def get_gl_entries(self):
+		gl_entry = []
+		# payable entry
+		if self.amount:
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": self.payable_account,
+					"credit": self.amount,
+					"credit_in_account_currency": self.amount,
+					"against": self.expense_account,
+					"party_type": "Employee",
+					"party": self.employee,
+					"against_voucher_type": self.doctype,
+					"against_voucher": self.name,
+					"cost_center": self.cost_center
+				}, item=self)
+			)
+
+			# expense entries
+			gl_entry.append(
+				self.get_gl_dict({
+					"account": self.expense_account,
+					"debit": self.amount,
+					"debit_in_account_currency": self.amount,
+					"against": self.employee,
+					"cost_center": self.cost_center
+				}, item=self)
+			)
+		else:
+			frappe.throw(_("Total Amount can not be zero"))
+
+		return gl_entry
 
 	def create_additional_salary(self):
 		if self.pay_via_salary_slip:

@@ -19,6 +19,16 @@ frappe.ui.form.on('Gratuity', {
 				}
 			};
 		});
+
+		frm.set_query("payable_account", function() {
+			return {
+				filters: {
+					"root_type": "Liability",
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			};
+		});
 	},
 	refresh: function(frm){
 		if(frm.doc.docstatus === 1 && frm.doc.pay_via_salary_slip === 0 && frm.doc.status === "Unpaid") {
