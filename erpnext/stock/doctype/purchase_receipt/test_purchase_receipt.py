@@ -316,9 +316,11 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr.cancel()
 
 	def test_purchase_return_full(self):
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1")
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
+			supplier_warehouse = "Work in Progress - TCP1")
 
-		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-5, do_not_submit=1)
+		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
+			supplier_warehouse = "Work in Progress - TCP1", is_return=1, return_against=pr.name, qty=-5, do_not_submit=1)
 		return_pr.items[0].purchase_receipt_item = pr.items[0].name
 		return_pr.submit()
 
