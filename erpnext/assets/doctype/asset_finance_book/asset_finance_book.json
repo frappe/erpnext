@@ -55,6 +55,7 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Depreciation Posting Date",
+   "mandatory_depends_on": "eval:parent.doctype == 'Asset'",
    "reqd": 1
   },
   {
@@ -86,7 +87,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-16 12:11:30.631788",
+ "modified": "2020-10-30 15:22:29.119868",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Finance Book",
