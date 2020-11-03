@@ -47,7 +47,8 @@
    "fieldname": "appointment",
    "fieldtype": "Link",
    "label": "Appointment",
-   "options": "Patient Appointment"
+   "options": "Patient Appointment",
+   "set_only_once": 1
   },
   {
    "fieldname": "patient",
@@ -90,7 +91,8 @@
    "fetch_from": "therapy_template.default_duration",
    "fieldname": "duration",
    "fieldtype": "Int",
-   "label": "Duration"
+   "label": "Duration",
+   "reqd": 1
   },
   {
    "fieldname": "location",
@@ -220,7 +222,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-30 10:56:10.354268",
+ "modified": "2020-10-22 23:10:21.178644",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",

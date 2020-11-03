@@ -53,7 +53,7 @@ def execute():
 	# renamed reports from "Minutes to First Response for Issues" to "First Response Time for Issues". Same for Opportunity
 	for report in ['Minutes to First Response for Issues', 'Minutes to First Response for Opportunity']:
 		if frappe.db.exists('Report', report):
-			frappe.delete_doc('Report', report)
+			frappe.delete_doc('Report', report, ignore_permissions=True)
 
 
 def convert_to_seconds(value, unit):
