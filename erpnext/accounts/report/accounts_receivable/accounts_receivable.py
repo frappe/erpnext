@@ -45,6 +45,12 @@ class ReceivablePayableReport(object):
 			if not isinstance(self.filters.get("project"), list):
 				self.filters.project = [d.strip() for d in cstr(self.filters.project).strip().split(',') if d]
 
+		if self.filters.get("sales_person"):
+			sales_person = self.filters.sales_person
+			self.filters.sales_person = frappe.get_all("Sales Person",
+				filters={'name': ['descendants of', self.filters.sales_person]})
+			self.filters.sales_person = set([sales_person] + [d.name for d in self.filters.sales_person])
+
 	def get_columns(self):
 		columns = [
 			{
@@ -361,7 +367,8 @@ class ReceivablePayableReport(object):
 			self.payment_term_map = self.get_payment_term_detail(voucher_nos)
 
 		for gle in gl_entries_data:
-			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers, return_entries) and self.is_in_cost_center(gle) and self.is_in_project(gle):
+			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers, return_entries)\
+					and self.is_in_cost_center(gle) and self.is_in_project(gle) and self.is_in_sales_person(gle):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle, self.filters.report_date, self.dr_or_cr, return_entries)
 
@@ -729,6 +736,13 @@ class ReceivablePayableReport(object):
 		else:
 			return True
 
+	def is_in_sales_person(self, gle):
+		if self.filters.get("sales_person"):
+			sales_person = self.get_sales_person(gle.voucher_no, gle.against_voucher, gle.party)
+			return sales_person and sales_person in self.filters.sales_person
+		else:
+			return True
+
 	def get_return_entries(self, party_type):
 		doctype = None
 		if party_type == "Customer":
@@ -905,15 +919,6 @@ class ReceivablePayableReport(object):
 			if self.filters.get("sales_partner"):
 				conditions.append("gle.party in (select name from tabCustomer where default_sales_partner=%s)")
 				values.append(self.filters.get("sales_partner"))
-
-			if self.filters.get("sales_person"):
-				sales_persons = frappe.get_all("Sales Person", filters={'name': ['subtree of', self.filters.get("sales_person")]})
-				sales_persons = [d.name for d in sales_persons]
-
-				conditions.append("""exists(select name from `tabSales Team` steam where steam.sales_person in %s
-					and ((steam.parent = voucher_no and steam.parenttype = voucher_type)
-						or (steam.parent = against_voucher and steam.parenttype = against_voucher_type)))""")
-				values.append(sales_persons)
 
 		elif party_type_field=="supplier":
 			account_type = "Payable"
