@@ -255,6 +255,32 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.items[0].returned_qty, 2)
 		self.assertEqual(dn.per_returned, 40)
 
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		return_dn_2 = make_return_doc("Delivery Note", dn.name)
+
+		# Check if unreturned amount is mapped in 2nd return
+		self.assertEqual(return_dn_2.items[0].qty, -3)
+
+		si = make_sales_invoice(dn.name)
+		si.submit()
+
+		self.assertEqual(si.items[0].qty, 3)
+
+		dn.load_from_db()
+		# DN should be completed on billing all unreturned amount
+		self.assertEqual(dn.items[0].billed_amt, 1500)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, 'Completed')
+
+		si.load_from_db()
+		si.cancel()
+
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 0)
+
+		dn1.cancel()
+		dn.cancel()
+
 	def test_sales_return_for_non_bundled_items_full(self):
 		from erpnext.stock.doctype.item.test_item import make_item
 
