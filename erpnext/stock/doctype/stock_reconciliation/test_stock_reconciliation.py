@@ -34,11 +34,11 @@ class TestStockReconciliation(unittest.TestCase):
 		# [[qty, valuation_rate, posting_date,
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
 		input_data = [
-			[50, 1000],
-			[25, 900],
-			["", 1000],
-			[20, ""],
-			[0, ""]
+			[50, 1000, "2012-12-26", "12:00"],
+			[25, 900, "2012-12-26", "12:00"],
+			["", 1000, "2012-12-20", "12:05"],
+			[20, "", "2012-12-26", "12:05"],
+			[0, "", "2012-12-31", "12:10"]
 		]
 
 		for d in input_data:
@@ -47,13 +47,13 @@ class TestStockReconciliation(unittest.TestCase):
 			last_sle = get_previous_sle({
 				"item_code": "_Test Item",
 				"warehouse": "Stores - TCP1",
-				"posting_date": nowdate(),
-				"posting_time": nowtime()
+				"posting_date": d[2],
+				"posting_time": d[3]
 			})
 
 			# submit stock reconciliation
 			stock_reco = create_stock_reconciliation(qty=d[0], rate=d[1],
-				posting_date=nowdate(), posting_time=nowtime(), warehouse="Stores - TCP1",
+				posting_date=d[2], posting_time=d[3], warehouse="Stores - TCP1",
 				company=company, expense_account = "Stock Adjustment - TCP1")
 
 			# check stock value
@@ -196,13 +196,13 @@ class TestStockReconciliation(unittest.TestCase):
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
+	make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
 		target=warehouse, qty=10, basic_rate=700)
 
-	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
+	make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
 		source=warehouse, qty=15)
 
-	make_stock_entry(posting_date=nowdate(), posting_time=nowtime(), item_code="_Test Item",
+	make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
 		target=warehouse, qty=15, basic_rate=1200)
 
 def create_batch_or_serial_no_items():
