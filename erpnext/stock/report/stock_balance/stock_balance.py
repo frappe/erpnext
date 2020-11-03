@@ -168,6 +168,7 @@ def get_stock_ledger_entries(filters, items):
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
+		and is_cancelled = 0
 		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec
 		(item_conditions_sql, conditions), as_dict=1)
 
