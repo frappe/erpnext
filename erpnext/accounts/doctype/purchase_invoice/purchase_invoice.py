@@ -416,7 +416,7 @@ class PurchaseInvoice(BuyingController):
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-	def make_gl_entries(self, gl_entries=None):
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -424,7 +424,7 @@ class PurchaseInvoice(BuyingController):
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
 			if self.docstatus == 1:
-				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False)
+				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 			elif self.docstatus == 2:
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
