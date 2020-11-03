@@ -13,3 +13,11 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 	wrapper.pos = new erpnext.PointOfSale.Controller(wrapper);
 	window.cur_pos = wrapper.pos;
 };
+
+frappe.pages['point-of-sale'].refresh = function(wrapper) {
+	if (document.scannerDetectionData) {
+		onScan.detachFrom(document);
+		wrapper.pos.wrapper.html("");
+		wrapper.pos.check_opening_entry();
+	}
+}

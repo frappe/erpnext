@@ -9,8 +9,8 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	init_component() {
-        this.prepare_dom();
-        this.initialize_numpad();
+		this.prepare_dom();
+		this.initialize_numpad();
 		this.bind_events();
 		this.attach_shortcuts();
 		
@@ -18,32 +18,32 @@ erpnext.PointOfSale.Payment = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-            `<section class="col-span-6 flex shadow rounded payment-section bg-white mx-h-70 h-100 d-none">
+			`<section class="col-span-6 flex shadow rounded payment-section bg-white mx-h-70 h-100 d-none">
 				<div class="flex flex-col p-16 pt-8 pb-8 w-full">
 					<div class="text-grey mb-6 payment-section no-select pointer">
 						PAYMENT METHOD<span class="octicon octicon-chevron-down collapse-indicator"></span>
 					</div>
 					<div class="payment-modes flex flex-wrap"></div>
 					<div class="invoice-details-section"></div>
-                    <div class="flex mt-auto justify-center w-full">
-                        <div class="flex flex-col justify-center flex-1 ml-4">
-                            <div class="flex w-full">
-                                <div class="totals-remarks items-end justify-end flex flex-1">
-                                    <div class="remarks text-md-0 text-grey mr-auto"></div>
-                                    <div class="totals flex justify-end pt-4"></div>
-                                </div>
-                                <div class="number-pad w-40 mb-4 ml-8 d-none"></div>
-                            </div>
-                            <div class="flex items-center justify-center mt-4 submit-order h-16 w-full rounded bg-primary text-md text-white no-select pointer text-bold">
-                                Complete Order
+					<div class="flex mt-auto justify-center w-full">
+						<div class="flex flex-col justify-center flex-1 ml-4">
+							<div class="flex w-full">
+								<div class="totals-remarks items-end justify-end flex flex-1">
+									<div class="remarks text-md-0 text-grey mr-auto"></div>
+									<div class="totals flex justify-end pt-4"></div>
+								</div>
+								<div class="number-pad w-40 mb-4 ml-8 d-none"></div>
+							</div>
+							<div class="flex items-center justify-center mt-4 submit-order h-16 w-full rounded bg-primary text-md text-white no-select pointer text-bold">
+								Complete Order
 							</div>
 							<div class="order-time flex items-center justify-end mt-2 pt-2 pb-2 w-full text-md-0 text-grey no-select pointer d-none"></div>
-                        </div>
-                    </div>
-                </div>
-            </section>`
-        )
-        this.$component = this.wrapper.find('.payment-section');
+						</div>
+					</div>
+				</div>
+			</section>`
+		)
+		this.$component = this.wrapper.find('.payment-section');
 		this.$payment_modes = this.$component.find('.payment-modes');
 		this.$totals_remarks = this.$component.find('.totals-remarks');
 		this.$totals = this.$component.find('.totals');
@@ -170,18 +170,33 @@ erpnext.PointOfSale.Payment = class {
 				me.selected_mode = me[`${mode}_control`];
 				const doc = me.events.get_frm().doc;
 				me.selected_mode?.$input?.get(0).focus();
-				!me.selected_mode?.get_value() ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
+				const current_value = me.selected_mode?.get_value()
+				!current_value && doc.grand_total > doc.paid_amount ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
 			}
 		})
+
+		frappe.realtime.on("process_phone_payment", function(data) {
+			frappe.dom.unfreeze();
+			cur_frm.reload_doc();
+			let message = data["ResultDesc"];
+			let title = __("Payment Failed");
+
+			if (data["ResultCode"] == 0) {
+				title = __("Payment Received");
+				$('.btn.btn-xs.btn-default[data-fieldname=request_for_payment]').html(`Payment Received`)
+				me.events.submit_invoice();
+			}
+
+			frappe.msgprint({
+				"message": message,
+				"title": title
+			});
+		});
 
 		this.$payment_modes.on('click', '.shortcut', function(e) {
 			const value = $(this).attr('data-value');
 			me.selected_mode.set_value(value);
 		})
-
-		// this.$totals_remarks.on('click', '.remarks', () => {
-		// 	this.toggle_remarks_control();
-		// })
 
 		this.$component.on('click', '.submit-order', () => {
 			const doc = this.events.get_frm().doc;
@@ -215,7 +230,7 @@ erpnext.PointOfSale.Payment = class {
 		frappe.ui.form.on("Sales Invoice Payment", "amount", (frm, cdt, cdn) => {
 			// for setting correct amount after loyalty points are redeemed
 			const default_mop = locals[cdt][cdn];
-			const mode = default_mop.mode_of_payment.replace(' ', '_').toLowerCase();
+			const mode = default_mop.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			if (this[`${mode}_control`] && this[`${mode}_control`].get_value() != default_mop.amount) {
 				this[`${mode}_control`].set_value(default_mop.amount);
 			}
@@ -236,6 +251,8 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	attach_shortcuts() {
+		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
+		this.$component.find('.submit-order').attr("title", `${ctrl_label}+Enter`);
 		frappe.ui.keys.on("ctrl+enter", () => {
 			const payment_is_visible = this.$component.is(":visible");
 			const active_mode = this.$payment_modes.find(".border-primary");
@@ -244,21 +261,28 @@ erpnext.PointOfSale.Payment = class {
 			}
 		});
 
-		frappe.ui.keys.on("tab", () => {
-			const payment_is_visible = this.$component.is(":visible");
-			const mode_of_payments = Array.from(this.$payment_modes.find(".mode-of-payment")).map(m => $(m).attr("data-mode"));
-			let active_mode = this.$payment_modes.find(".border-primary");
-			active_mode = active_mode.length ? active_mode.attr("data-mode") : undefined;
-
-			if (!active_mode) return;
-
-			const mode_index = mode_of_payments.indexOf(active_mode);
-			const next_mode_index = (mode_index + 1) % mode_of_payments.length;
-			const next_mode_to_be_clicked = this.$payment_modes.find(`.mode-of-payment[data-mode="${mode_of_payments[next_mode_index]}"]`);
-
-			if (payment_is_visible && mode_index != next_mode_index) {
-				next_mode_to_be_clicked.click();
-			}
+		frappe.ui.keys.add_shortcut({
+			shortcut: "tab",
+			action: () => {
+				const payment_is_visible = this.$component.is(":visible");
+				let active_mode = this.$payment_modes.find(".border-primary");
+				active_mode = active_mode.length ? active_mode.attr("data-mode") : undefined;
+	
+				if (!active_mode) return;
+	
+				const mode_of_payments = Array.from(this.$payment_modes.find(".mode-of-payment")).map(m => $(m).attr("data-mode"));
+				const mode_index = mode_of_payments.indexOf(active_mode);
+				const next_mode_index = (mode_index + 1) % mode_of_payments.length;
+				const next_mode_to_be_clicked = this.$payment_modes.find(`.mode-of-payment[data-mode="${mode_of_payments[next_mode_index]}"]`);
+	
+				if (payment_is_visible && mode_index != next_mode_index) {
+					next_mode_to_be_clicked.click();
+				}
+			},
+			condition: () => this.$component.is(':visible') && this.$payment_modes.find(".border-primary").length,
+			description: __("Switch Between Payment Modes"),
+			ignore_inputs: true,
+			page: cur_page.page.page
 		});
 	}
 
@@ -318,7 +342,7 @@ erpnext.PointOfSale.Payment = class {
 		this.$payment_modes.html(
 		   `${
 			   payments.map((p, i) => {
-				const mode = p.mode_of_payment.replace(' ', '_').toLowerCase();
+				const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 				const payment_type = p.type;
 				const margin = i % 2 === 0 ? 'pr-2' : 'pl-2';
 				const amount = p.amount > 0 ? format_currency(p.amount, currency) : '';
@@ -338,13 +362,13 @@ erpnext.PointOfSale.Payment = class {
 		)
 
 		payments.forEach(p => {
-			const mode = p.mode_of_payment.replace(' ', '_').toLowerCase();
+			const mode = p.mode_of_payment.replace(/ +/g, "_").toLowerCase();
 			const me = this;
 			this[`${mode}_control`] = frappe.ui.form.make_control({
 				df: {
-					label: __(`${p.mode_of_payment}`),
+					label: p.mode_of_payment,
 					fieldtype: 'Currency',
-					placeholder: __(`Enter ${p.mode_of_payment} amount.`),
+					placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
 					onchange: function() {
 						if (this.value || this.value == 0) {
 							frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
@@ -385,7 +409,7 @@ erpnext.PointOfSale.Payment = class {
 				${
 					shortcuts.map(s => {
 						return `<div class="shortcut rounded bg-light-grey text-dark-grey pt-2 pb-2 no-select pointer" data-value="${s}">
-									${format_currency(s, currency)}
+									${format_currency(s, currency, 0)}
 								</div>`
 					}).join('')
 				}
@@ -422,11 +446,11 @@ erpnext.PointOfSale.Payment = class {
 
 		let description, read_only, max_redeemable_amount;
 		if (!loyalty_points) {
-			description = __(`You don't have enough points to redeem.`);
+			description = __("You don't have enough points to redeem.");
 			read_only = true;
 		} else {
 			max_redeemable_amount = flt(flt(loyalty_points) * flt(conversion_factor), precision("loyalty_amount", doc))
-			description = __(`You can redeem upto ${format_currency(max_redeemable_amount)}.`);
+			description = __("You can redeem upto {0}.", [format_currency(max_redeemable_amount)]);
 			read_only = false;
 		}
 
@@ -446,9 +470,9 @@ erpnext.PointOfSale.Payment = class {
 
 		this['loyalty-amount_control'] = frappe.ui.form.make_control({
 			df: {
-				label: __('Redeem Loyalty Points'),
+				label: __("Redeem Loyalty Points"),
 				fieldtype: 'Currency',
-				placeholder: __(`Enter amount to be redeemed.`),
+				placeholder: __("Enter amount to be redeemed."),
 				options: 'company:currency',
 				read_only,
 				onchange: async function() {
@@ -456,7 +480,7 @@ erpnext.PointOfSale.Payment = class {
 
 					if (this.value > max_redeemable_amount) {
 						frappe.show_alert({
-							message: __(`You cannot redeem more than ${format_currency(max_redeemable_amount)}.`),
+							message: __("You cannot redeem more than {0}.", [format_currency(max_redeemable_amount)]),
 							indicator: "red"
 						});
 						frappe.utils.play_sound("submit");
@@ -509,5 +533,5 @@ erpnext.PointOfSale.Payment = class {
 
 	toggle_component(show) {
 		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
-    }
+	}
  }

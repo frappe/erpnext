@@ -9,11 +9,13 @@
   "naming_series",
   "patient",
   "patient_name",
+  "invoiced",
   "column_break_4",
   "company",
   "status",
   "start_date",
   "section_break_3",
+  "therapy_plan_template",
   "therapy_plan_details",
   "title",
   "section_break_9",
@@ -46,6 +48,7 @@
    "fieldtype": "Table",
    "label": "Therapy Plan Details",
    "options": "Therapy Plan Detail",
+   "read_only_depends_on": "therapy_plan_template",
    "reqd": 1
   },
   {
@@ -105,11 +108,27 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "therapy_plan_template",
+   "fieldtype": "Link",
+   "label": "Therapy Plan Template",
+   "options": "Therapy Plan Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "links": [],
- "modified": "2020-05-25 14:38:53.649315",
+ "modified": "2020-10-23 01:27:42.128855",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",

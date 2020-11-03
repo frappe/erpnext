@@ -49,6 +49,11 @@ class TestProgram(unittest.TestCase):
 		self.assertEqual(course[1].name, "_Test Course 2")
 		frappe.db.rollback()
 
+	def tearDown(self):
+		for dt in ["Program", "Course", "Topic", "Article"]:
+			for entry in frappe.get_all(dt):
+				frappe.delete_doc(dt, entry.program)
+
 def make_program(name):
 	program = frappe.get_doc({
 		"doctype": "Program",
