@@ -428,7 +428,7 @@ class SalesInvoice(SellingController):
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
-			for fieldname in ('naming_series', 'currency', 'letter_head', 'tc_name',
+			for fieldname in ('currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
@@ -479,14 +479,14 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
-					You can change the parent account to a Balance Sheet account or select a different account.")
-				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
+			msg = _("Please ensure {} account is a Balance Sheet account. ").format(frappe.bold("Debit To"))
+			msg += _("You can change the parent account to a Balance Sheet account or select a different account.")
+			frappe.throw(msg, title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			frappe.throw(_("Please ensure {} account is a Receivable account. \
-					Change the account type to Receivable or select a different account.")
-				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
+			msg = _("Please ensure {} account is a Receivable account. ").format(frappe.bold("Debit To"))
+			msg += _("Change the account type to Receivable or select a different account.")
+			frappe.throw(msg, title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
@@ -572,7 +572,8 @@ class SalesInvoice(SellingController):
 
 	def validate_pos(self):
 		if self.is_return:
-			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) > \
+			invoice_total = self.rounded_total or self.grand_total
+			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(invoice_total) > \
 				1.0/(10.0**(self.precision("grand_total") + 1.0)):
 					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
@@ -1140,8 +1141,10 @@ class SalesInvoice(SellingController):
 			where redeem_against=%s''', (lp_entry[0].name), as_dict=1)
 		if against_lp_entry:
 			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
-			frappe.throw(_('''{} can't be cancelled since the Loyalty Points earned has been redeemed.
-				First cancel the {} No {}''').format(self.doctype, self.doctype, invoice_list))
+			frappe.throw(
+				_('''{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}''')
+				.format(self.doctype, self.doctype, invoice_list)
+			)
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where invoice=%s''', (self.name))
 			# Set loyalty program
@@ -1612,16 +1615,24 @@ def update_multi_mode_option(doc, pos_profile):
 		payment.type = payment_mode.type
 
 	doc.set('payments', [])
+	invalid_modes = []
 	for pos_payment_method in pos_profile.get('payments'):
 		pos_payment_method = pos_payment_method.as_dict()
 
 		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
 		if not payment_mode:
-			frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
-				.format(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment)), title=_("Missing Account"))
+			invalid_modes.append(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment))
+			continue
 
 		payment_mode[0].default = pos_payment_method.default
 		append_payment(payment_mode[0])
+
+	if invalid_modes:
+		if invalid_modes == 1:
+			msg = _("Please set default Cash or Bank account in Mode of Payment {}")
+		else:
+			msg = _("Please set default Cash or Bank account in Mode of Payments {}")
+		frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
 
 def get_all_mode_of_payments(doc):
 	return frappe.db.sql("""

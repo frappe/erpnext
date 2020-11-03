@@ -7,6 +7,10 @@ frappe.ui.form.on("Shopping Cart Settings", {
 			frm.fields_dict.quotation_series.df.options = frm.doc.__onload.quotation_series;
 			frm.refresh_field("quotation_series");
 		}
+
+		frm.set_query('payment_gateway_account', function() {
+			return { 'filters': { 'payment_channel': "Email" } };
+		});
 	},
 	enabled: function(frm) {
 		if (frm.doc.enabled === 1) {

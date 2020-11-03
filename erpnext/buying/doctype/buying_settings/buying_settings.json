@@ -46,26 +46,26 @@
   {
    "fieldname": "po_required",
    "fieldtype": "Select",
-   "label": "Purchase Order Required for Purchase Invoice & Receipt Creation",
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
    "options": "No\nYes"
   },
   {
    "fieldname": "pr_required",
    "fieldtype": "Select",
-   "label": "Purchase Receipt Required for Purchase Invoice Creation",
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
    "options": "No\nYes"
   },
   {
    "default": "0",
    "fieldname": "maintain_same_rate",
    "fieldtype": "Check",
-   "label": "Maintain same rate throughout purchase cycle"
+   "label": "Maintain Same Rate Throughout the Purchase Cycle"
   },
   {
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item to be added multiple times in a transaction"
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
   },
   {
    "fieldname": "subcontract",
@@ -93,9 +93,10 @@
  ],
  "icon": "fa fa-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-05-15 14:49:32.513611",
+ "modified": "2020-10-13 12:00:23.276329",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
