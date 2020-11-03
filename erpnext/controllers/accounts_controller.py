@@ -23,6 +23,8 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
+class AccountMissingError(frappe.ValidationError): pass
+
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
 class AccountsController(TransactionBase):
@@ -736,7 +738,7 @@ class AccountsController(TransactionBase):
 		return self._abbr
 
 	def raise_missing_debit_credit_account_error(self, party_type, party):
-		"""Raise an error if debit to/credit to account does not exist"""
+		"""Raise an error if debit to/credit to account does not exist."""
 		db_or_cr = frappe.bold("Debit To") if self.doctype == "Sales Invoice" else frappe.bold("Credit To")
 		rec_or_pay = "Receivable" if self.doctype == "Sales Invoice" else "Payable"
 
@@ -748,7 +750,7 @@ class AccountsController(TransactionBase):
 		message += "<br><ul><li>" + _("'Account' in the Accounting section of Customer {0}").format(link_to_party) + "</li>"
 		message += "<li>" + _("'Default {0} Account' in Company {1}").format(rec_or_pay, link_to_company) + "</li></ul>"
 
-		frappe.throw(message, title=_("Account Missing"))
+		frappe.throw(message, title=_("Account Missing"), exc=AccountMissingError)
 
 	def validate_party(self):
 		party_type, party = self.get_party()
