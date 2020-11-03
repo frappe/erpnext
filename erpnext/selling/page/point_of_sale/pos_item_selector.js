@@ -81,7 +81,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		function get_item_image_html() {
 			if (item_image) {
 				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-							<img class="h-full" src="${item_image}" alt="${item_image}" style="object-fit: cover;">
+							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
 						</div>`
 			} else {
 				return `<div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-grey-100">
