@@ -5,7 +5,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, bold
-from frappe.model.document import Document
 from frappe.utils import flt, get_datetime, get_link_to_form
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.controllers.accounts_controller import AccountsController

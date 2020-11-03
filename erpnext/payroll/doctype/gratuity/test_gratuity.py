@@ -158,7 +158,7 @@ def set_mode_of_payment_account():
 	mode_of_payment.save()
 
 def create_employee_and_get_last_salary_slip():
-	employee = make_employee("test_employee@salary.com")
+	employee = make_employee("test_employee@salary.com", company='_Test Company')
 	frappe.db.set_value("Employee", employee, "relieving_date", getdate())
 	frappe.db.set_value("Employee", employee, "date_of_joining", add_days(getdate(), - (6*365)))
 	if not frappe.db.exists("Salary Slip", {"employee":employee}):
@@ -168,5 +168,15 @@ def create_employee_and_get_last_salary_slip():
 	else:
 		salary_slip = get_last_salary_slip(employee)
 
-	return employee, salary_slip
+	#just to see what going on travis will remove this
+	print(frappe.db.get_value("Employee", "test_employee@salary.com", "company"))
+	print(frappe.db.get_value("Employee", "test_employee@salary.com", "holiday_list"))
 
+	if not frappe.db.get_value("Employee", "test_employee@salary.com", "holiday_list"):
+		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
+		make_holiday_list()
+		frappe.db.set_value("Company", '_Test Company', "default_holiday_list", "Salary Slip Test Holiday List")
+
+	print(frappe.db.get_value("Employee", "test_employee@salary.com", "holiday_list"))
+
+	return employee, salary_slip
