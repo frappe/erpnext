@@ -513,7 +513,7 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 		where po_detail=%s and (pr_detail is null or pr_detail = '') and docstatus=1""", po_detail)
 	billed_against_po = billed_against_po and billed_against_po[0][0] or 0
 
-	# Get all Delivery Note Item rows against the Sales Order Item row
+	# Get all Purchase Receipt Item rows against the Purchase Order Item row
 	pr_details = frappe.db.sql("""select pr_item.name, pr_item.amount, pr_item.parent
 		from `tabPurchase Receipt Item` pr_item, `tabPurchase Receipt` pr
 		where pr.name=pr_item.parent and pr_item.purchase_order_item=%s
@@ -544,6 +544,9 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 	return updated_pr
 
 def update_billing_percentage(pr_doc, update_modified=True):
+	# Reload as billed amount was set in db directly
+	pr_doc.load_from_db()
+
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
 	for item in pr_doc.items:
@@ -567,7 +570,7 @@ def update_billing_percentage(pr_doc, update_modified=True):
 		total_amount += total_billable_amount
 		total_billed_amount += flt(item.billed_amt)
 
-	percent_billed = round(100 * (total_billed_amount / total_amount), 6)
+	percent_billed = round(100 * (total_billed_amount / (total_amount or 1)), 6)
 	pr_doc.db_set("per_billed", percent_billed)
 	pr_doc.load_from_db()
 
