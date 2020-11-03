@@ -58,7 +58,12 @@ def repost_sl_entries(doc):
 		}], allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
 
 def repost_gl_entries(doc):
-	ref_doc = frappe.get_doc(doc.voucher_type, doc.voucher_no)
-	items, warehouses = ref_doc.get_items_and_warehouses()
+	if doc.based_on == 'Transaction':
+		ref_doc = frappe.get_doc(doc.voucher_type, doc.voucher_no)
+		items, warehouses = ref_doc.get_items_and_warehouses()
+	else:
+		items = [doc.item_code]
+		warehouses = [doc.warehouse]
+
 	update_gl_entries_after(doc.posting_date, doc.posting_time,
 		warehouses, items, company=doc.company)

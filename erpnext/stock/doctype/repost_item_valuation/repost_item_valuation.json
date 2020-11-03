@@ -18,6 +18,7 @@
   "company",
   "allow_negative_stock",
   "via_landed_cost_voucher",
+  "allow_zero_rate",
   "amended_from",
   "error_section",
   "error_log"
@@ -130,12 +131,18 @@
    "fieldname": "via_landed_cost_voucher",
    "fieldtype": "Check",
    "label": "Via Landed Cost Voucher"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_zero_rate",
+   "fieldtype": "Check",
+   "label": "Allow Zero Rate"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-23 12:29:58.214176",
+ "modified": "2020-10-28 12:32:45.722101",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
