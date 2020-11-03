@@ -97,6 +97,12 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.received_by_type) {
+			this.frm.set_query("received_by_type", function(doc) {
+				return {filters: {name: ['in', ['Employee', 'Customer', 'Contact']]}};
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}

@@ -31,14 +31,14 @@
   "posting_time",
   "set_posting_time",
   "due_date",
-  "more_information",
+  "more_info",
   "transaction_type",
   "order_type",
-  "column_break_31",
+  "more_info_cb_1",
   "project",
   "source",
   "campaign",
-  "col_break23",
+  "more_info_cb_2",
   "cost_center",
   "tax_id",
   "tax_cnic",
@@ -1359,12 +1359,6 @@
    "report_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_information",
-   "fieldtype": "Section Break",
-   "label": "More Information"
-  },
-  {
    "fieldname": "inter_company_invoice_reference",
    "fieldtype": "Link",
    "label": "Inter Company Invoice Reference",
@@ -1396,11 +1390,6 @@
    "label": "Is Discounted",
    "no_copy": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "col_break23",
-   "fieldtype": "Column Break",
-   "width": "50%"
   },
   {
    "default": "Draft",
@@ -1942,10 +1931,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_31",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_208",
    "fieldtype": "Column Break"
   },
@@ -2044,12 +2029,27 @@
    "fieldtype": "Link",
    "label": "Insurance Surveyor",
    "options": "Insurance Surveyor"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break",
+   "width": "50%"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-11-02 23:49:42.172463",
+ "modified": "2020-11-04 00:14:17.653847",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
