@@ -7,16 +7,18 @@ import frappe
 import unittest
 
 test_dependencies = ["Customer", "Supplier"]
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import get_temporary_opening_account
 
 class TestOpeningInvoiceCreationTool(unittest.TestCase):
-	def make_invoices(self, invoice_type="Sales"):
+	def make_invoices(self, invoice_type="Sales", company=None):
 		doc = frappe.get_single("Opening Invoice Creation Tool")
-		args = get_opening_invoice_creation_dict(invoice_type=invoice_type)
+		args = get_opening_invoice_creation_dict(invoice_type=invoice_type, company=company)
 		doc.update(args)
 		return doc.make_invoices()
 
 	def test_opening_sales_invoice_creation(self):
+		property_setter = make_property_setter("Sales Invoice", "update_stock", "default", 1, "Check")
 		invoices = self.make_invoices()
 
 		self.assertEqual(len(invoices), 2)
@@ -26,6 +28,13 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 			1: ["_Test Customer 1", 250, "Overdue"],
 		}
 		self.check_expected_values(invoices, expected_value)
+
+		si = frappe.get_doc("Sales Invoice", invoices[0])
+
+		# Check if update stock is not enabled
+		self.assertEqual(si.update_stock, 0)
+
+		property_setter.delete()
 
 	def check_expected_values(self, invoices, expected_value, invoice_type="Sales"):
 		doctype = "Sales Invoice" if invoice_type == "Sales" else "Purchase Invoice"
@@ -45,6 +54,32 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 			1: ["_Test Supplier 1", 250, "Overdue"],
 		}
 		self.check_expected_values(invoices, expected_value, "Purchase")
+
+	def test_opening_sales_invoice_creation_with_missing_debit_account(self):
+		company = make_company()
+		old_default_receivable_account = frappe.db.get_value("Company", company.name, "default_receivable_account")
+		frappe.db.set_value("Company", company.name, "default_receivable_account", "")
+
+		if not frappe.db.exists("Cost Center", "_Test Opening Invoice Company - _TOIC"):
+			cc = frappe.get_doc({"doctype": "Cost Center", "cost_center_name": "_Test Opening Invoice Company",
+				"is_group": 1, "company": "_Test Opening Invoice Company"})
+			cc.insert(ignore_mandatory=True)
+			cc2 = frappe.get_doc({"doctype": "Cost Center", "cost_center_name": "Main", "is_group": 0,
+				"company": "_Test Opening Invoice Company", "parent_cost_center": cc.name})
+			cc2.insert()
+
+		frappe.db.set_value("Company", company.name, "cost_center", "Main - _TOIC")
+
+		self.make_invoices(company="_Test Opening Invoice Company")
+
+		# Check if missing debit account error raised
+		error_log = frappe.db.exists("Error Log", {"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]})
+		self.assertTrue(error_log)
+
+		# teardown
+		frappe.db.set_value("Company", company.name, "default_receivable_account", old_default_receivable_account)
+		company.delete()
+		frappe.get_doc("Error Log", error_log).delete()
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
@@ -77,3 +112,15 @@ def get_opening_invoice_creation_dict(**args):
 
 	invoice_dict.update(args)
 	return invoice_dict
+
+def make_company():
+	if frappe.db.exists("Company", "_Test Opening Invoice Company"):
+		return frappe.get_doc("Company", "_Test Opening Invoice Company")
+
+	company = frappe.new_doc("Company")
+	company.company_name = "_Test Opening Invoice Company"
+	company.abbr = "_TOIC"
+	company.default_currency = "INR"
+	company.country = "India"
+	company.insert()
+	return company
