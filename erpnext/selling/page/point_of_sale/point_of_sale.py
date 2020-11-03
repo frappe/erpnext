@@ -231,13 +231,31 @@ def set_customer_info(fieldname, customer, value=""):
 		frappe.db.set_value('Customer', customer, 'loyalty_program', value)
 
 	contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact')
+	if not contact:
+		contact = frappe.db.sql("""
+			SELECT parent FROM `tabDynamic Link`
+			WHERE
+				parenttype = 'Contact' AND
+				parentfield = 'links' AND
+				link_doctype = 'Customer' AND
+				link_name = %s
+			""", (customer), as_dict=1)
+		contact = contact[0].get('parent') if contact else None
 
-	if contact:
-		contact_doc = frappe.get_doc('Contact', contact)
-		if fieldname == 'email_id':
-			contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
-			frappe.db.set_value('Customer', customer, 'email_id', value)
-		elif fieldname == 'mobile_no':
-			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
-			frappe.db.set_value('Customer', customer, 'mobile_no', value)
-		contact_doc.save()
+	if not contact:
+		new_contact = frappe.new_doc('Contact')
+		new_contact.is_primary_contact = 1
+		new_contact.first_name = customer
+		new_contact.set('links', [{'link_doctype': 'Customer', 'link_name': customer}])
+		new_contact.save()
+		contact = new_contact.name
+		frappe.db.set_value('Customer', customer, 'customer_primary_contact', contact)
+
+	contact_doc = frappe.get_doc('Contact', contact)
+	if fieldname == 'email_id':
+		contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+		frappe.db.set_value('Customer', customer, 'email_id', value)
+	elif fieldname == 'mobile_no':
+		contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+		frappe.db.set_value('Customer', customer, 'mobile_no', value)
+	contact_doc.save()
