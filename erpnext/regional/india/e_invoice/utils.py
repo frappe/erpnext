@@ -563,7 +563,7 @@ def update_einvoice_fields(doctype, name, signed_einvoice):
 
 	frappe.db.set_value(doctype, name, 'irn', signed_einvoice.get('Irn'))
 	frappe.db.set_value(doctype, name, 'ewaybill', signed_einvoice.get('EwbNo'))
-	frappe.db.set_value(doctype, name, 'signed_qr_code', signed_einvoice.get('SignedQRCode').split('.')[1])
+	frappe.db.set_value(doctype, name, 'signed_qr_code', '.'.join(signed_einvoice.get('SignedQRCode').split('.')[1:]))
 	frappe.db.set_value(doctype, name, 'signed_einvoice', decrypted_signed_invoice)
 
 @frappe.whitelist()
