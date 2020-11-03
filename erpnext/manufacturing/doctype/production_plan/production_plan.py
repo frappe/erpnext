@@ -571,6 +571,8 @@ def get_sales_orders(self):
 		so_filter += " and so.customer = %(customer)s"
 	if self.project:
 		so_filter += " and so.project = %(project)s"
+	if self.sales_order_status:
+		so_filter += "and so.status = %(sales_order_status)s"
 
 	if self.item_code:
 		item_filter += " and so_item.item_code = %(item)s"
@@ -594,8 +596,8 @@ def get_sales_orders(self):
 			"customer": self.customer,
 			"project": self.project,
 			"item": self.item_code,
-			"company": self.company
-
+			"company": self.company,
+			"sales_order_status": self.sales_order_status
 		}, as_dict=1)
 	return open_so
 
