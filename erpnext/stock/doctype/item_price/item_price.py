@@ -4,12 +4,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-
-
-class ItemPriceDuplicateItem(frappe.ValidationError): pass
-
-
 from frappe.model.document import Document
+
+
+class ItemPriceDuplicateItem(frappe.ValidationError):
+	pass
 
 
 class ItemPrice(Document):
@@ -44,8 +43,7 @@ class ItemPrice(Document):
 
 	def update_item_details(self):
 		if self.item_code:
-			self.item_name, self.item_description = frappe.db.get_value("Item",
-				self.item_code,["item_name", "description"])
+			self.item_name, self.item_description = frappe.db.get_value("Item", self.item_code,["item_name", "description"])
 
 	def check_duplicates(self):
 		conditions = """

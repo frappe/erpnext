@@ -52,7 +52,7 @@ class StockController(AccountsController):
 						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
 							.format(d.idx, serial_no_data.name, d.batch_no))
 
-			if d.qty > 0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
+			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
 
 				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):

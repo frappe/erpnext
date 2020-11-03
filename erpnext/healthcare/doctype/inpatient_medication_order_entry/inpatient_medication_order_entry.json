@@ -1,0 +1,94 @@
+{
+ "actions": [],
+ "creation": "2020-09-14 21:51:30.259164",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "drug",
+  "drug_name",
+  "dosage",
+  "dosage_form",
+  "instructions",
+  "column_break_4",
+  "date",
+  "time",
+  "is_completed"
+ ],
+ "fields": [
+  {
+   "fieldname": "drug",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Drug",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "drug.item_name",
+   "fieldname": "drug_name",
+   "fieldtype": "Data",
+   "label": "Drug Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "dosage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Dosage",
+   "reqd": 1
+  },
+  {
+   "fieldname": "dosage_form",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Dosage Form",
+   "options": "Dosage Form",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "label": "Time",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_completed",
+   "fieldtype": "Check",
+   "label": "Is Order Completed",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "instructions",
+   "fieldtype": "Small Text",
+   "label": "Instructions"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2020-09-30 14:03:26.755925",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Inpatient Medication Order Entry",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
