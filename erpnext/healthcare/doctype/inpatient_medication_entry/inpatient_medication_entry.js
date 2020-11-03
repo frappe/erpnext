@@ -21,6 +21,19 @@ frappe.ui.form.on('Inpatient Medication Entry', {
 				}
 			};
 		});
+
+		frm.set_query('warehouse', () => {
+			return {
+				filters: {
+					company: frm.doc.company
+				}
+			};
+		});
+	},
+
+	patient: function(frm) {
+		if (frm.doc.patient)
+			frm.set_value('service_unit', '');
 	},
 
 	get_medication_orders: function(frm) {
