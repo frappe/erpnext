@@ -54,9 +54,14 @@ class Membership(Document):
 			self.to_date = add_months(self.from_date, 1)
 
 	def on_payment_authorized(self, status_changed_to=None):
-		if status_changed_to in ("Completed", "Authorized"):
-			self.load_from_db()
-			self.db_set('paid', 1)
+		if status_changed_to not in ("Completed", "Authorized"):
+			return
+		self.load_from_db()
+		self.db_set('paid', 1)
+		settings = frappe.get_doc("Membership Settings")
+		if settings.enable_invoicing and settings.create_for_web_forms:
+			self.generate_invoice(with_payment_entry=settings.make_payment_entry, save=True)
+
 
 	def generate_invoice(self, with_payment_entry=True, save=True):
 		if not (self.paid or self.currency or self.amount):
