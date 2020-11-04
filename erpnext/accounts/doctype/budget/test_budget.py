@@ -259,7 +259,6 @@ def set_total_expense_zero(posting_date, budget_against_field=None, budget_again
 		args[budget_against_field] = budget_against
 
 	existing_expense = get_actual_expense(args)
-	print(existing_expense)
 
 	if existing_expense:
 		if budget_against_field == "cost_center":
