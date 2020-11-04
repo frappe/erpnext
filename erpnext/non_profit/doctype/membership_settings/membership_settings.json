@@ -11,9 +11,11 @@
   "billing_frequency",
   "webhook_secret",
   "column_break_6",
-  "enable_auto_invoicing",
+  "enable_invoicing",
+  "make_payment_entry",
   "company",
   "debit_account",
+  "payment_account",
   "column_break_9",
   "send_email",
   "send_invoice",
@@ -58,14 +60,7 @@
    "label": "Invoicing"
   },
   {
-   "default": "0",
-   "fieldname": "enable_auto_invoicing",
-   "fieldtype": "Check",
-   "label": "Enable Auto Invoicing",
-   "mandatory_depends_on": "eval:doc.send_invoice"
-  },
-  {
-   "depends_on": "eval:doc.enable_auto_invoicing",
+   "depends_on": "eval:doc.enable_invoicing",
    "fieldname": "debit_account",
    "fieldtype": "Link",
    "label": "Debit Account",
@@ -77,7 +72,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.enable_auto_invoicing",
+   "depends_on": "eval:doc.enable_invoicing",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -86,7 +81,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.enable_auto_invoicing && doc.send_email",
+   "depends_on": "eval:doc.enable_invoicing && doc.send_email",
    "fieldname": "send_invoice",
    "fieldtype": "Check",
    "label": "Send Invoice with Email"
@@ -119,11 +114,34 @@
    "label": "Email Template",
    "mandatory_depends_on": "eval:doc.send_email",
    "options": "Email Template"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_invoicing",
+   "fieldtype": "Check",
+   "label": "Enable Invoicing",
+   "mandatory_depends_on": "eval:doc.send_invoice || doc.make_payment_entry"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.enable_invoicing",
+   "fieldname": "make_payment_entry",
+   "fieldtype": "Check",
+   "label": "Make Payment Entry"
+  },
+  {
+   "depends_on": "eval:doc.make_payment_entry",
+   "fieldname": "payment_account",
+   "fieldtype": "Link",
+   "label": "Payment To",
+   "mandatory_depends_on": "eval:doc.make_payment_entry",
+   "options": "Account"
   }
  ],
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-05 17:26:37.287395",
+ "modified": "2020-11-04 19:51:21.990595",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",
