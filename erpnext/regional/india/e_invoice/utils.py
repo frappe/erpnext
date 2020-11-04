@@ -643,6 +643,7 @@ class GSPConnector():
 		self.gstin_details_url = self.base_url + 'test/enriched/ei/api/master/gstin'
 		self.generate_irn_url = self.base_url + 'test/enriched/ei/api/invoice'
 		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
+		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
 	
 	def get_auth_token(self):
 		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
@@ -749,5 +750,23 @@ class GSPConnector():
 		except Exception as e:
 			self.log_error(e)
 	
+	def cancel_eway_bill(self, docname, eway_bill, reason, remark):
+		headers = self.get_headers()
+		doctype = 'Sales Invoice'
+		data = json.dumps({
+			'ewbNo': eway_bill,
+			'cancelRsnCode': reason,
+			'cancelRmrk': remark
+		})
+
+		try:
+			res = make_post_request(self.cancel_ewaybill_url, headers=headers, data=data)
+			if res.get('success'):
+				frappe.db.set_value(doctype, docname, 'ewaybill', '')
+				frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 1)
+
+		except Exception as e:
+			self.log_error(e)
+
 	def log_error(self, exc):
 		print(exc)
