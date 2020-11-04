@@ -460,6 +460,22 @@ class Subscription(Document):
 
 		return False
 
+	def get_date_for_early_invoice(self):
+		invoice_date = getdate(self.current_invoice_end)
+		if self.generate_invoice_early:
+			invoice_date = add_days(self.current_invoice_end, -self.generate_invoice_days_early)
+
+		return invoice_date
+
+	def is_ready_for_early_invoice(self):
+		returnval = False
+		if self.generate_invoice_early:
+			invoice_date = self.get_date_for_early_invoice()
+			if getdate(nowdate()) >= getdate(invoice_date):
+				returnval = True
+
+		return returnval
+
 	def process_for_active(self):
 		"""
 		Called by `process` if the status of the `Subscription` is 'Active'.
@@ -478,6 +494,10 @@ class Subscription(Document):
 
 		if self.cancel_at_period_end and getdate() > getdate(self.current_invoice_end):
 			self.cancel_subscription_at_period_end()
+
+		if not self.is_current_invoice_generated() and not self.is_postpaid_to_invoice() and \
+			not self.is_prepaid_to_invoice() and self.is_ready_for_early_invoice():
+			self.generate_invoice()
 
 	def cancel_subscription_at_period_end(self):
 		"""

@@ -18,6 +18,8 @@
   "trial_period_end",
   "follow_calendar_months",
   "generate_new_invoices_past_due_date",
+  "generate_invoice_early",
+  "generate_invoice_days_early",
   "column_break_11",
   "current_invoice_start",
   "current_invoice_end",
@@ -245,10 +247,21 @@
    "fieldtype": "Link",
    "label": "Cost Center",
    "options": "Cost Center"
+  },
+  {
+   "default": "0",
+   "fieldname": "generate_invoice_early",
+   "fieldtype": "Check",
+   "label": "Generate Invoice Early"
+  },
+  {
+   "fieldname": "generate_invoice_days_early",
+   "fieldtype": "Int",
+   "label": "Generate Invoice Days Early"
   }
  ],
  "links": [],
- "modified": "2020-06-25 10:52:52.265105",
+ "modified": "2020-11-05 01:24:42.129620",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

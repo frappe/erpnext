@@ -140,6 +140,22 @@ class TestSubscription(unittest.TestCase):
 		self.assertEqual(subscription.status, 'Unpaid')
 		subscription.delete()
 
+	def test_invoice_is_generated_on_days_early(self):
+		subscription = frappe.new_doc('Subscription')
+		subscription.party_type = 'Customer'
+		subscription.party = '_Test Customer'
+		subscription.start_date = add_days(nowdate(), -25)
+		subscription.generate_invoice_early = 1
+		subscription.generate_invoice_days_early = 10
+		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
+		subscription.insert()
+		subscription.process()
+
+		self.assertEqual(subscription.status, 'Active')
+		self.assertEqual(len(subscription.invoices), 1)
+
+		subscription.delete()
+
 	def test_status_goes_back_to_active_after_invoice_is_paid(self):
 		subscription = frappe.new_doc('Subscription')
 		subscription.party_type = 'Customer'
