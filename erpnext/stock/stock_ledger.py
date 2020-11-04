@@ -62,6 +62,14 @@ def delete_cancelled_entry(voucher_type, voucher_no):
 	frappe.db.sql("""delete from `tabStock Ledger Entry`
 		where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
 
+def get_allow_negative_stock(sle=None):
+	if sle and sle.get('allow_negative_stock'):
+		return True
+	allow_negative_stock_setting = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
+	allow_negative_stock_role = frappe.db.get_single_value("Stock Settings", "restrict_negative_stock_to_role")
+	has_negative_stock_role_permission = not allow_negative_stock_role or allow_negative_stock_role in frappe.get_roles()
+	return cint(allow_negative_stock_setting and has_negative_stock_role_permission)
+
 class update_entries_after(object):
 	"""
 		update valution rate and qty after transaction
@@ -85,10 +93,7 @@ class update_entries_after(object):
 		self.allow_negative_stock = allow_negative_stock
 		self.via_landed_cost_voucher = via_landed_cost_voucher
 		if not self.allow_negative_stock:
-			allow_negative_stock_setting = cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
-			allow_negative_stock_role = frappe.db.get_single_value("Stock Settings", "restrict_negative_stock_to_role")
-			has_negative_stock_role_permission = not allow_negative_stock_role or allow_negative_stock_role in frappe.get_roles()
-			self.allow_negative_stock = cint(allow_negative_stock_setting and has_negative_stock_role_permission)
+			self.allow_negative_stock = get_allow_negative_stock()
 
 		self.args = args
 		for key, value in iteritems(args):
@@ -156,7 +161,7 @@ class update_entries_after(object):
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
-		if (sle.serial_no and not self.via_landed_cost_voucher and not frappe.flags.allow_repost_serial_no) or not cint(self.allow_negative_stock):
+		if not cint(self.allow_negative_stock):
 			# validate negative stock for serialized items, fifo valuation
 			# or when negative stock is not allowed for moving average
 			if not self.validate_negative_stock(sle):

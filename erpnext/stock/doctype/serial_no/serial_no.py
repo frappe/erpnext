@@ -7,6 +7,7 @@ import frappe
 from frappe.model.naming import make_autoname
 from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
+from erpnext.stock.stock_ledger import get_allow_negative_stock
 
 from frappe import _, ValidationError
 
@@ -361,7 +362,7 @@ def validate_serial_no(sle, item_det):
 	elif serial_nos:
 		for serial_no in serial_nos:
 			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
-			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse and not frappe.flags.allow_repost_serial_no:
+			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse and not get_allow_negative_stock(sle):
 				frappe.throw(_("Cannot cancel {0} {1} because {2} {3} does not belong to the warehouse {4}")
 					.format(sle.voucher_type, sle.voucher_no, label_serial_no, serial_no, sle.warehouse))
 
