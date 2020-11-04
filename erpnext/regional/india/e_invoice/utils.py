@@ -77,9 +77,7 @@ def get_doc_details(invoice):
 
 	return frappe._dict(dict(invoice_type=invoice_type, invoice_name=invoice_name, invoice_date=invoice_date))
 
-def get_party_details(address):
-	from erpnext.regional.doctype.e_invoice_settings.e_invoice_settings import GSPConnector
-
+def get_party_details(address_name):
 	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 	gstin = address.get('gstin')
 
@@ -333,30 +331,27 @@ def validate_einvoice(validations, einvoice, errors=[]):
 	
 	return errors
 
-def update_invoice(invoice, res):
-	doctype = invoice.doctype
-	name = invoice.name
-
+def update_invoice(doctype, docname, res):
 	enc_signed_invoice = res.get('SignedInvoice')
-	dec_signed_invoice = jwt.decode(enc_signed_invoice)['data']
+	dec_signed_invoice = jwt.decode(enc_signed_invoice, verify=False)['data']
 
-	frappe.db.set_value(doctype, name, 'irn', res.get('Irn'))
-	frappe.db.set_value(doctype, name, 'ewaybill', res.get('EwbNo'))
-	frappe.db.set_value(doctype, name, 'signed_invoice', dec_signed_invoice)
+	frappe.db.set_value(doctype, docname, 'irn', res.get('Irn'))
+	frappe.db.set_value(doctype, docname, 'ewaybill', res.get('EwbNo'))
+	frappe.db.set_value(doctype, docname, 'signed_einvoice', dec_signed_invoice)
 
-	signed_qrcode = res.get('SignedQRCode')
-	frappe.db.set_value(doctype, name, 'signed_qr_code', signed_qrcode)
+	signed_qr_code = res.get('SignedQRCode')
+	frappe.db.set_value(doctype, docname, 'signed_qr_code', signed_qr_code)
 
-	attach_qrcode_image(doctype, name, signed_qrcode)
+	attach_qrcode_image(doctype, docname, signed_qr_code)
 
-def attach_qrcode_image(doctype, name, qrcode):
+def attach_qrcode_image(doctype, docname, qrcode):
 	if not qrcode: return
 
 	_file = frappe.new_doc('File')
 	_file.update({
-		'file_name': f'QRCode_{name}.png',
+		'file_name': f'QRCode_{docname}.png',
 		'attached_to_doctype': doctype,
-		'attached_to_name': name,
+		'attached_to_name': docname,
 		'content': 'qrcode',
 		'is_private': 1
 	})
@@ -366,7 +361,7 @@ def attach_qrcode_image(doctype, name, qrcode):
 	abs_file_path = os.path.abspath(_file.get_full_path())
 	url.png(abs_file_path, scale=2)
 
-	frappe.db.set_value(doctype, name, 'qrcode_image', _file.file_url)
+	frappe.db.set_value(doctype, docname, 'qrcode_image', _file.file_url)
 
 class GSPConnector():
 	def __init__(self):
@@ -458,10 +453,10 @@ class GSPConnector():
 		try:
 			res = make_post_request(self.generate_irn_url, headers=headers, data=data)
 			if res.get('success'):
-				update_invoice(invoice, res)
+				update_invoice(doctype, docname, res.get('result'))
 			else:
 				# {'success': False, 'message': '3039 : Seller Details:Pincode-560009 does not belong to the state-1, 2177 : Invalid item unit code(s)-UNIT'}
-				self.log_error()
+				self.log_error(res)
 
 		except Exception as e:
 			self.log_error(e)
@@ -504,3 +499,13 @@ class GSPConnector():
 
 	def log_error(self, exc):
 		print(exc)
+
+@frappe.whitelist()
+def generate_irn(docname):
+	gsp_connector = GSPConnector()
+	gsp_connector.generate_irn(docname)
+
+@frappe.whitelist()
+def cancel_irn(docname, irn, reason, remark):
+	gsp_connector = GSPConnector()
+	gsp_connector.cancel_irn(docname, irn, reason, remark)
