@@ -13,7 +13,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				const action = () => {
 					frappe.call({
 						method: 'erpnext.regional.india.e_invoice.utils.generate_irn',
-						args: { doctype: doctype, name: name },
+						args: { docname: name },
 						freeze: true,
 						callback: () => frm.reload_doc()
 					})
@@ -48,8 +48,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							frappe.call({
 								method: 'erpnext.regional.india.e_invoice.utils.cancel_irn',
 								args: { 
-									doctype: doctype,
-									name: name,
+									docname: name,
 									irn: irn,
 									reason: data.reason.split('-')[0],
 									remark: data.remark
