@@ -779,7 +779,9 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_default_supplier(source_name, selected_items=[], target_doc=None):
+def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
+	if not selected_items: return
+
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
@@ -878,7 +880,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=[], tar
 		frappe.msgprint(_("Purchase Order already created for all Sales Order items"))
 
 @frappe.whitelist()
-def make_purchase_order(source_name, selected_items=[], target_doc=None):
+def make_purchase_order(source_name, selected_items=None, target_doc=None):
+	if not selected_items: return
+
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
