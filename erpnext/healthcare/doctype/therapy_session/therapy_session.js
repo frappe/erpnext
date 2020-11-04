@@ -46,7 +46,7 @@ frappe.ui.form.on('Therapy Session', {
 						frappe.model.open_mapped_doc({
 							method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.invoice_therapy_session',
 							frm: frm,
-						})
+						});
 					}, 'Create');
 				}
 			});
@@ -67,7 +67,7 @@ frappe.ui.form.on('Therapy Session', {
 				name: frm.doc.therapy_plan
 			},
 			callback: function(data) {
-				let therapy_types = (data.message.therapy_plan_details || []).map(function(d){ return d.therapy_type });
+				let therapy_types = (data.message.therapy_plan_details || []).map(function(d){ return d.therapy_type; });
 				frm.set_query('therapy_type', function() {
 					return {
 						filters: { 'therapy_type': ['in', therapy_types]}
