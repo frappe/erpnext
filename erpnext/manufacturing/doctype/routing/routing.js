@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Routing', {
-	setup: function(frm) {
+	onload: function(frm) {
 		frappe.meta.get_docfield("BOM Operation", "sequence_id",
 			frm.doc.name).in_list_view = true;
 
