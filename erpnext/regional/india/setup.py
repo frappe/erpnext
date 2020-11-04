@@ -303,6 +303,7 @@ def make_custom_fields(update=True):
 			'label': 'Vehicle No',
 			'fieldtype': 'Data',
 			'insert_after': 'lr_no',
+			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
 			'print_hide': 1,
 			'translatable': 0
 		},
@@ -333,7 +334,6 @@ def make_custom_fields(update=True):
 			'label': 'Mode of Transport',
 			'fieldtype': 'Select',
 			'options': '\nRoad\nAir\nRail\nShip',
-			'default': 'Road',
 			'insert_after': 'transporter_name',
 			'print_hide': 1,
 			'translatable': 0
