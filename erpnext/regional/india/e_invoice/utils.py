@@ -630,3 +630,35 @@ def attach_qrcode_image(doctype, name):
 	url.png(abs_file_path, scale=2)
 
 	frappe.db.set_value(doctype, name, 'qrcode_image', _file.file_url)
+
+class GSPConnector():
+	def __init__(self):
+		self.credentials = frappe.get_cached_doc('E Invoice Settings')
+
+		self.base_url = 'https://gsp.adaequare.com/'
+		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
+	
+	def get_auth_token(self):
+		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
+			self.fetch_auth_token()
+		
+		return self.credentials.auth_token
+
+	def fetch_auth_token(self):
+		headers = {
+			'gspappid': self.credentials.client_id,
+			'gspappsecret': self.credentials.client_secret
+		}
+
+		try:
+			res = make_post_request(self.authenticate_url, headers=headers)
+			self.credentials.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
+			self.credentials.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
+			self.credentials.save()
+
+		except Exception as e:
+			self.log_error(e)
+			raise
+
+	def log_error(self, exc):
+		print(exc)
