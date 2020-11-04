@@ -53,7 +53,7 @@ class TestUaeVat201(TestCase):
 				"raw_amount": amount,
 				"raw_vat_amount": vat,
 			}
-		self.assertEqual(amounts_by_emirate["Sharjah"]["raw_amount"],300)
+		self.assertEqual(amounts_by_emirate["Sharjah"]["raw_amount"],100)
 		self.assertEqual(amounts_by_emirate["Sharjah"]["raw_vat_amount"],5)
 		self.assertEqual(amounts_by_emirate["Dubai"]["raw_amount"],200)
 		self.assertEqual(amounts_by_emirate["Dubai"]["raw_vat_amount"],10)

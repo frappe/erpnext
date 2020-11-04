@@ -118,14 +118,23 @@ def append_data(data, no, legend, amount, vat_amount):
 
 def get_total_emiratewise(filters):
 	"""Returns Emiratewise Amount and Taxes."""
-	query_filters = get_filters(filters)
-	query_filters['docstatus'] = ['=', 1]
-	return frappe.db.get_all('Sales Invoice',
-		filters = query_filters,
-		fields = ['vat_emirate as emirate','sum(total)', 'sum(total_taxes_and_charges)'],
-		group_by='vat_emirate',
-		as_list=True
-	)
+	conditions = get_conditions(filters)
+	try:
+		return frappe.db.sql("""
+			select
+				s.vat_emirate as emirate, sum(i.base_amount) as total, sum(s.total_taxes_and_charges)
+			from
+				`tabSales Invoice Item` i inner join `tabSales Invoice` s
+			on
+				i.parent = s.name
+			where
+				s.docstatus = 1 and  i.is_exempt != 1 and i.is_zero_rated != 1
+				{where_conditions}
+			group by
+				s.vat_emirate;
+			""".format(where_conditions=conditions), filters)
+	except (IndexError, TypeError):
+		return 0
 
 def get_emirates():
 	"""Returns a List of emirates in the order that they are to be displayed."""
