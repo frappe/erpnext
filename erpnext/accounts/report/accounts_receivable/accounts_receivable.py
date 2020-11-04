@@ -330,9 +330,12 @@ class ReceivablePayableReport(object):
 	def get_data(self):
 		from erpnext.accounts.utils import get_currency_precision
 		self.currency_precision = get_currency_precision() or 2
+
 		self.dr_or_cr = "debit" if erpnext.get_party_account_type(self.filters.get("party_type")) == "Receivable" else "credit"
 		if self.filters.get("party_type") == "Employee":
 			self.dr_or_cr = "debit"
+
+		self.reverse_dr_or_cr = "credit" if self.dr_or_cr == "debit" else "debit"
 
 		future_vouchers = self.get_entries_after(self.filters.report_date, self.filters.get("party_type"))
 
@@ -361,7 +364,7 @@ class ReceivablePayableReport(object):
 			self.payment_term_map = self.get_payment_term_detail(voucher_nos)
 
 		for gle in gl_entries_data:
-			if self.is_receivable_or_payable(gle, self.dr_or_cr, future_vouchers, return_entries) and self.is_in_cost_center(gle) and self.is_in_project(gle):
+			if self.is_receivable_or_payable(gle, future_vouchers, return_entries) and self.is_in_cost_center(gle) and self.is_in_project(gle):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle, self.filters.report_date, self.dr_or_cr, return_entries)
 
@@ -698,8 +701,7 @@ class ReceivablePayableReport(object):
 		# returns a generator
 		return self.get_gl_entries(party_type, report_date)
 
-	@staticmethod
-	def is_receivable_or_payable(gle, dr_or_cr, future_vouchers, return_entries):
+	def is_receivable_or_payable(self, gle, future_vouchers, return_entries):
 		return (
 			# advance
 			(not gle.against_voucher) or
@@ -708,7 +710,7 @@ class ReceivablePayableReport(object):
 			(gle.against_voucher_type in ["Sales Order", "Purchase Order"]) or
 
 			# sales invoice/purchase invoice
-			(gle.against_voucher==gle.voucher_no and gle.get(dr_or_cr) > 0) or
+			(gle.against_voucher==gle.voucher_no and gle.get(self.dr_or_cr) - gle.get(self.reverse_dr_or_cr) > 0) or
 
 			# standalone credit notes
 			(gle.against_voucher==gle.voucher_no and gle.voucher_no in return_entries and not return_entries.get(gle.voucher_no)) or
