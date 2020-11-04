@@ -39,6 +39,9 @@ common_properties = [
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'),
 		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}],
 
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'),
+		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
+
 	[('Sales Invoice',),
 		{"fieldname": "sec_insurance", "property": "hidden", "value": 0}],
 ]
