@@ -371,6 +371,11 @@ class TestWorkOrder(unittest.TestCase):
 		ste1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
 		self.assertEqual(len(ste1.items), 3)
 
+	def test_cost_center_for_manufacture(self):
+		wo_order = make_wo_order_test_record()
+		ste = make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
+		self.assertEquals(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
+
 	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
 		rm1 = "Test Batch Size Item RM 1 For BOM"
