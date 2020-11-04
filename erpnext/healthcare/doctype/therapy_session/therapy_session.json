@@ -194,6 +194,7 @@
    "fieldname": "total_counts_completed",
    "fieldtype": "Int",
    "label": "Total Counts Completed",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -222,7 +223,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-22 23:10:21.178644",
+ "modified": "2020-11-04 18:14:25.999939",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",
