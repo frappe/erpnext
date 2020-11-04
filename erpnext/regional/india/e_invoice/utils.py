@@ -218,7 +218,7 @@ def get_eway_bill_details(invoice):
 	if invoice.is_return:
 		frappe.throw(_('E-Way Bill cannot be generated for Credit Notes & Debit Notes'), title=_('E Invoice Validation Failed'))
 
-	mode_of_transport = { 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
+	mode_of_transport = { '': '', 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
 	vehicle_type = { 'Regular': 'R', 'Over Dimensional Cargo (ODC)': 'O' }
 
 	return frappe._dict(dict(
@@ -381,6 +381,7 @@ class GSPConnector():
 		self.generate_irn_url = self.base_url + 'test/enriched/ei/api/invoice'
 		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
 		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
+		self.generate_ewaybill_url = self.base_url + 'test/enriched/ei/api/ewaybill'
 	
 	def get_auth_token(self):
 		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
@@ -422,6 +423,8 @@ class GSPConnector():
 			res = make_get_request(self.gstin_details_url + params, headers=headers)
 			if res.get('success'):
 				return res.get('result')
+			else:
+				self.log_error(res)
 
 		except Exception as e:
 			self.log_error(e)
@@ -483,6 +486,42 @@ class GSPConnector():
 			if res.get('success'):
 				frappe.db.set_value(doctype, docname, 'irn_cancelled', 1)
 				# frappe.db.set_value(doctype, docname, 'cancelled_on', res.get('CancelDate'))
+			else:
+				self.log_error(res)
+
+		except Exception as e:
+			self.log_error(e)
+	
+	def generate_eway_bill(self, **kwargs):
+		args = frappe._dict(kwargs)
+
+		headers = self.get_headers()
+		doctype = 'Sales Invoice'
+		docname = args.docname
+		eway_bill_details = get_eway_bill_details(args)
+		data = json.dumps({
+			"Irn": args.irn,
+			"Distance": cint(eway_bill_details.distance),
+			"TransMode": eway_bill_details.mode_of_transport,
+			"TransId": eway_bill_details.gstin,
+			"TransName": eway_bill_details.transporter,
+			"TrnDocDt": eway_bill_details.document_date,
+			"TrnDocNo": eway_bill_details.document_name,
+			"VehNo": eway_bill_details.vehicle_no,
+			"VehType": eway_bill_details.vehicle_type
+		})
+
+		try:
+			res = make_post_request(self.generate_ewaybill_url, headers=headers, data=data)
+			if res.get('success'):
+				frappe.db.set_value(doctype, docname, 'ewaybill', res.get('result').get('EwbNo'))
+				frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 0)
+				for d in args:
+					if d in ['docname', 'cmd']: continue
+					# update eway bill details in sales invoice
+					frappe.db.set_value(doctype, docname, d, args[d])
+			else:
+				self.log_error(res)
 
 		except Exception as e:
 			self.log_error(e)
@@ -502,6 +541,9 @@ class GSPConnector():
 				frappe.db.set_value(doctype, docname, 'ewaybill', '')
 				frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 1)
 
+			else:
+				self.log_error(res)
+
 		except Exception as e:
 			self.log_error(e)
 
@@ -517,3 +559,13 @@ def generate_irn(docname):
 def cancel_irn(docname, irn, reason, remark):
 	gsp_connector = GSPConnector()
 	gsp_connector.cancel_irn(docname, irn, reason, remark)
+
+@frappe.whitelist()
+def generate_eway_bill(**kwargs):
+	gsp_connector = GSPConnector()
+	gsp_connector.generate_eway_bill(**kwargs)
+
+@frappe.whitelist()
+def cancel_eway_bill(docname, eway_bill, reason, remark):
+	gsp_connector = GSPConnector()
+	gsp_connector.cancel_eway_bill(docname, eway_bill, reason, remark)
