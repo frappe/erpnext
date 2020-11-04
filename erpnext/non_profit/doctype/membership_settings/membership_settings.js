@@ -37,6 +37,16 @@ frappe.ui.form.on("Membership Settings", {
 			};
 		});
 
+		frm.set_query('payment_account', function(doc) {
+			return {
+				filters: {
+					'account_type': ['in', ['Bank', 'Cash']],
+					'is_group': 0,
+					'company': frm.doc.company
+				}
+			};
+		});
+
 		let docs_url = "https://docs.erpnext.com/docs/user/manual/en/non_profit/membership";
 
 		frm.set_intro(__("You can learn more about memberships in the manual. ") + `<a href='${docs_url}'>${__('ERPNext Docs')}</a>`, true);

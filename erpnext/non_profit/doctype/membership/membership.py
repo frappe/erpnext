@@ -58,7 +58,7 @@ class Membership(Document):
 			self.load_from_db()
 			self.db_set('paid', 1)
 
-	def generate_invoice(self, save=True):
+	def generate_invoice(self, with_payment_entry=True, save=True):
 		if not (self.paid or self.currency or self.amount):
 			frappe.throw(_("The payment for this membership is not paid. To generate invoice fill the payment details"))
 
@@ -80,6 +80,17 @@ class Membership(Document):
 
 		invoice = make_invoice(self, member, plan, settings)
 		self.invoice = invoice.name
+
+		if with_payment_entry:
+			from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+			frappe.flags.ignore_account_permission=True
+			pe = get_payment_entry(dt='Sales Invoice', dn=invoice.name, bank_amount=invoice.grand_total)
+			frappe.flags.ignore_account_permission=False
+			pe.paid_to = settings.payment_account
+			pe.reference_no = self.name
+			pe.reference_date = getdate()
+			pe.save(ignore_permissions=True)
+			pe.submit()
 
 		if save:
 			self.save()
@@ -252,3 +263,4 @@ def get_plan_from_razorpay_id(plan_id):
 		return plan[0]['name']
 	except:
 		return None
+
