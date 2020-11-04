@@ -669,6 +669,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
 					if (pending_qty > 0) {
 						po_items.push({
+							"doctype": "Sales Order Item",
 							"name": d.name,
 							"item_name": d.item_name,
 							"item_code": d.item_code,
