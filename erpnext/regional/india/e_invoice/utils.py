@@ -556,20 +556,17 @@ def validate_einvoice(validations, einvoice, errors=[]):
 	
 	return errors
 
-def update_einvoice_fields(doctype, name, signed_einvoice):
-	enc_signed_invoice = signed_einvoice.get('SignedInvoice')
-	decrypted_signed_invoice = jwt_decrypt(enc_signed_invoice)['data']
+def update_invoice(invoice, res):
+	doctype = invoice.doctype
+	name = invoice.name
 
-	if json.loads(decrypted_signed_invoice)['DocDtls']['No'] != name:
-		frappe.throw(
-			_("Document number of uploaded Signed E-Invoice doesn't matches with Sales Invoice"),
-			title=_("Inappropriate E-Invoice")
-		)
+	enc_signed_invoice = res.get('SignedInvoice')
+	dec_signed_invoice = jwt.decode(enc_signed_invoice)['data']
 
-	frappe.db.set_value(doctype, name, 'irn', signed_einvoice.get('Irn'))
-	frappe.db.set_value(doctype, name, 'ewaybill', signed_einvoice.get('EwbNo'))
-	frappe.db.set_value(doctype, name, 'signed_qr_code', signed_einvoice.get('SignedQRCode'))
-	frappe.db.set_value(doctype, name, 'signed_einvoice', decrypted_signed_invoice)
+	frappe.db.set_value(doctype, name, 'irn', res.get('Irn'))
+	frappe.db.set_value(doctype, name, 'ewaybill', res.get('EwbNo'))
+	frappe.db.set_value(doctype, name, 'signed_invoice', dec_signed_invoice)
+	frappe.db.set_value(doctype, name, 'signed_qr_code', res.get('SignedQRCode'))
 
 @frappe.whitelist()
 def download_einvoice():
@@ -644,6 +641,8 @@ class GSPConnector():
 		self.base_url = 'https://gsp.adaequare.com/'
 		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
 		self.gstin_details_url = self.base_url + 'test/enriched/ei/api/master/gstin'
+		self.generate_irn_url = self.base_url + 'test/enriched/ei/api/invoice'
+		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
 	
 	def get_auth_token(self):
 		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
@@ -715,5 +714,40 @@ class GSPConnector():
 		frappe.cache().hset('gstin_cache', key, details)
 		return details
 
+	def generate_irn(self, docname):
+		headers = self.get_headers()
+		doctype = 'Sales Invoice'
+		einvoice = make_einvoice(doctype, docname)
+		data = json.dumps(einvoice)
+
+		try:
+			res = make_post_request(self.generate_irn_url, headers=headers, data=data)
+			if res.get('success'):
+				update_invoice(invoice, res)
+			else:
+				# {'success': False, 'message': '3039 : Seller Details:Pincode-560009 does not belong to the state-1, 2177 : Invalid item unit code(s)-UNIT'}
+				self.log_error()
+
+		except Exception as e:
+			self.log_error(e)
+	
+	def cancel_irn(self, docname, irn, reason, remark):
+		headers = self.get_headers()
+		doctype = 'Sales Invoice'
+		data = json.dumps({
+			'Irn': irn,
+			'Cnlrsn': reason,
+			'Cnlrem': remark
+		})
+
+		try:
+			res = make_post_request(self.cancel_irn_url, headers=headers, data=data)
+			if res.get('success'):
+				frappe.db.set_value(doctype, docname, 'irn_cancelled', 1)
+				# frappe.db.set_value(doctype, docname, 'cancelled_on', res.get('CancelDate'))
+
+		except Exception as e:
+			self.log_error(e)
+	
 	def log_error(self, exc):
 		print(exc)
