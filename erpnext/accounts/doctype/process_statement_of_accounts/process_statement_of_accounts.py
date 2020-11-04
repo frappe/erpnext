@@ -126,8 +126,12 @@ def get_customers_based_on_sales_person(sales_person):
 	sales_person_records = frappe._dict()
 	for d in records:
 		sales_person_records.setdefault(d.parenttype, set()).add(d.parent)
-	customers = frappe.get_list('Customer', fields=['name', 'email_id'], \
+	
+	try:
+		customers = frappe.get_list('Customer', fields=['name', 'email_id'], \
 			filters=[['name', 'in', list(sales_person_records['Customer'])]])
+	except:
+		customers = []
 	return customers
 
 def get_recipients_and_cc(customer, doc):
