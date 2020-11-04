@@ -33,7 +33,14 @@ def execute():
 
 			item.save()
 
-		rename_field('Expense Claim Detail', 'expense_type', 'expense_item')
+		rename_field('Expense Claim Detail', 'expense_item', 'item_code')
+		rename_field('Expense Claim Detail', 'amount', 'claimed_amount')
+		rename_field('Expense Claim Detail', 'sanctioned_amount', 'amount')
+		frappe.db.sql("""
+			UPDATE `tabExpense Claim Detail`
+			SET parentfield='items'
+			WHERE parentfield='expenses'"""
+		)
 
 		frappe.reload_doc('hr', 'doctype', 'expense_claim_detail')
 		frappe.reload_doc('hr', 'doctype', 'expense_claim')

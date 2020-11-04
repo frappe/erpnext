@@ -3,8 +3,9 @@
 
 frappe.provide("erpnext.hr");
 frappe.provide("erpnext.accounts.dimensions");
+{% include 'erpnext/public/js/controllers/buying.js' %};
 
-erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
+erpnext.hr.ExpenseClaimController = erpnext.buying.BuyingController.extend({
 	expense_item: function(doc, cdt, cdn) {
 		let d = locals[cdt][cdn];
 		if (!doc.company) {
@@ -45,13 +46,13 @@ cur_frm.cscript.onload = function(doc) {
 };
 
 cur_frm.cscript.clear_sanctioned = function(doc) {
-	var val = doc.expenses || [];
+	var val = doc.items || [];
 	for(var i = 0; i<val.length; i++){
-		val[i].sanctioned_amount ='';
+		val[i].amount ='';
 	}
 
 	doc.total_sanctioned_amount = '';
-	refresh_many(['sanctioned_amount', 'total_sanctioned_amount']);
+	refresh_many(['amount', 'total_sanctioned_amount']);
 };
 
 cur_frm.cscript.refresh = function(doc) {
@@ -102,9 +103,9 @@ cur_frm.cscript.validate = function(doc) {
 cur_frm.cscript.calculate_total = function(doc){
 	doc.total_claimed_amount = 0;
 	doc.total_sanctioned_amount = 0;
-	$.each((doc.expenses || []), function(i, d) {
-		doc.total_claimed_amount += d.amount;
-		doc.total_sanctioned_amount += d.sanctioned_amount;
+	$.each((doc.items || []), function(i, d) {
+		doc.total_claimed_amount += d.claimed_amount;
+		doc.total_sanctioned_amount += d.amount;
 	});
 };
 
@@ -147,7 +148,7 @@ frappe.ui.form.on("Expense Claim", {
 			};
 		});
 
-		frm.set_query("expense_item", "expenses", function() {
+		frm.set_query("expense_item", "items", function() {
 			return {
 				filters: {
 					"disabled": 0,
@@ -175,6 +176,18 @@ frappe.ui.form.on("Expense Claim", {
 			};
 		});
 
+<<<<<<< HEAD
+=======
+		frm.set_query("cost_center", "items", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"is_group": 0
+				}
+			};
+		});
+
+>>>>>>> refactor: replace Expense Taxes and Charges with Purchase Taxes table
 		frm.set_query("payable_account", function() {
 			return {
 				filters: {
@@ -316,7 +329,7 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	set_child_cost_center: function(frm){
-		(frm.doc.expenses || []).forEach(function(d) {
+		(frm.doc.items || []).forEach(function(d) {
 			if (!d.cost_center){
 				d.cost_center = frm.doc.cost_center;
 			}
@@ -364,17 +377,18 @@ frappe.ui.form.on("Expense Claim", {
 });
 
 frappe.ui.form.on("Expense Claim Detail", {
-	amount: function(frm, cdt, cdn) {
+	claimed_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, 'sanctioned_amount', child.amount);
+		frappe.model.set_value(cdt, cdn, 'amount', child.claimed_amount);
+		frappe.model.set_value(cdt, cdn, 'rate', child.claimed_amount);
 	},
 
-	sanctioned_amount: function(frm, cdt, cdn) {
+	amount: function(frm, cdt, cdn) {
 		cur_frm.cscript.calculate_total(frm.doc, cdt, cdn);
 		frm.trigger("get_taxes");
 	},
 	cost_center: function(frm, cdt, cdn) {
-		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "expenses", "cost_center");
+		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
 	}
 });
 
@@ -436,7 +450,7 @@ frappe.ui.form.on("Expense Taxes and Charges", {
 
 	rate: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if(!child.amount) {
+		if(!child.claimed_amount) {
 			child.tax_amount = flt(frm.doc.total_sanctioned_amount) * (flt(child.rate)/100);
 		}
 		frm.trigger("calculate_total_tax", cdt, cdn);

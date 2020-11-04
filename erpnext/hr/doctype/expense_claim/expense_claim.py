@@ -113,7 +113,7 @@ class ExpenseClaim(AccountsController):
 					"account": self.payable_account,
 					"credit": self.grand_total,
 					"credit_in_account_currency": self.grand_total,
-					"against": ",".join([d.default_account for d in self.expenses]),
+					"against": ",".join([d.default_account for d in self.items]),
 					"party_type": "Employee",
 					"party": self.employee,
 					"against_voucher_type": self.doctype,
@@ -123,12 +123,12 @@ class ExpenseClaim(AccountsController):
 			)
 
 		# expense entries
-		for data in self.expenses:
+		for data in self.items:
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": data.default_account,
-					"debit": data.sanctioned_amount,
-					"debit_in_account_currency": data.sanctioned_amount,
+					"debit": data.amount,
+					"debit_in_account_currency": data.amount,
 					"against": self.employee,
 					"cost_center": data.cost_center or self.cost_center
 				}, item=data)
@@ -140,7 +140,7 @@ class ExpenseClaim(AccountsController):
 					"account": data.advance_account,
 					"credit": data.allocated_amount,
 					"credit_in_account_currency": data.allocated_amount,
-					"against": ",".join([d.default_account for d in self.expenses]),
+					"against": ",".join([d.default_account for d in self.items]),
 					"party_type": "Employee",
 					"party": self.employee,
 					"against_voucher_type": "Employee Advance",
@@ -193,9 +193,9 @@ class ExpenseClaim(AccountsController):
 			)
 
 	def validate_account_details(self):
-		for data in self.expenses:
+		for data in self.items:
 			if not data.cost_center:
-				frappe.throw(_("Row {0}: {1} is required in the expenses table to book an expense claim.")
+				frappe.throw(_("Row {0}: {1} is required in the items table to book an expense claim.")
 					.format(data.idx, frappe.bold("Cost Center")))
 
 		if self.is_paid:
@@ -205,12 +205,12 @@ class ExpenseClaim(AccountsController):
 	def calculate_total_amount(self):
 		self.total_claimed_amount = 0
 		self.total_sanctioned_amount = 0
-		for d in self.get('expenses'):
+		for d in self.get('items'):
 			if self.approval_status == 'Rejected':
-				d.sanctioned_amount = 0.0
+				d.amount = 0.0
 
-			self.total_claimed_amount += flt(d.amount)
-			self.total_sanctioned_amount += flt(d.sanctioned_amount)
+			self.total_claimed_amount += flt(d.claimed_amount)
+			self.total_sanctioned_amount += flt(d.amount)
 
 	def calculate_taxes(self):
 		self.total_taxes_and_charges = 0
@@ -256,12 +256,12 @@ class ExpenseClaim(AccountsController):
 				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
 	def validate_sanctioned_amount(self):
-		for d in self.get('expenses'):
-			if flt(d.sanctioned_amount) > flt(d.amount):
+		for d in self.get('items'):
+			if flt(d.amount) > flt(d.claimed_amount):
 				frappe.throw(_("Sanctioned Amount cannot be greater than Claim Amount in Row {0}.").format(d.idx))
 
 	def set_expense_account(self, validate=False):
-		for expense in self.expenses:
+		for expense in self.items:
 			if not expense.default_account or not validate:
 				expense.default_account = get_expense_claim_account(expense.expense_item, self.company)["account"]
 

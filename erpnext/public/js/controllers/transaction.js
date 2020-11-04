@@ -774,7 +774,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if (me.frm.doc.currency == company_currency) {
 					me.frm.set_value("conversion_rate", 1.0);
 				}
-				if (me.frm.doc.price_list_currency == company_currency) {
+				if (me.frm.doc.price_list_currency == company_currency && frappe.meta.has_field(me.frm.doc.doctype, "plc_conversion_rate")) {
 					me.frm.set_value('plc_conversion_rate', 1.0);
 				}
 				if (company_doc.default_letter_head) {
@@ -994,7 +994,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
-		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
+		if(frappe.meta.has_field(this.frm.doc.doctype, "plc_conversion_rate") && this.frm.doc.currency === this.frm.doc.price_list_currency &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
@@ -1562,6 +1562,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	apply_price_list: function(item, reset_plc_conversion) {
+		if (!frappe.meta.has_field(this.frm.doc.doctype, "price_list_currency")) {
+			return;
+		}
 		// We need to reset plc_conversion_rate sometimes because the call to
 		// `erpnext.stock.get_item_details.apply_price_list` is sensitive to its value
 		if (!reset_plc_conversion) {

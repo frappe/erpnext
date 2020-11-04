@@ -18,13 +18,14 @@
   "posting_date",
   "is_paid",
   "expense_details",
-  "expenses",
+  "items",
   "section_break_12",
   "total_claimed_amount",
   "column_break_13",
   "total_sanctioned_amount",
   "total_amount_reimbursed",
   "sb1",
+  "taxes_and_charges",
   "taxes",
   "transactions_section",
   "total_taxes_and_charges",
@@ -154,18 +155,9 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "fieldname": "expenses",
-   "fieldtype": "Table",
-   "label": "Expenses",
-   "oldfieldname": "expense_voucher_details",
-   "oldfieldtype": "Table",
-   "options": "Expense Claim Detail",
-   "reqd": 1
-  },
-  {
    "fieldname": "sb1",
    "fieldtype": "Section Break",
-   "label": "Expense Taxes and Charges",
+   "label": "Taxes and Charges",
    "options": "Simple"
   },
   {
@@ -345,8 +337,8 @@
   {
    "fieldname": "taxes",
    "fieldtype": "Table",
-   "label": "Expense Taxes and Charges",
-   "options": "Expense Taxes and Charges"
+   "label": "Purchase Taxes and Charges",
+   "options": "Purchase Taxes and Charges"
   },
   {
    "fieldname": "section_break_16",
@@ -401,13 +393,28 @@
    "label": "Outstanding Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "taxes_and_charges",
+   "fieldtype": "Link",
+   "label": "Purchase Taxes and Charges Template",
+   "options": "Purchase Taxes and Charges Template"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Expenses",
+   "oldfieldname": "expense_voucher_details",
+   "oldfieldtype": "Table",
+   "options": "Expense Claim Detail",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-13 13:55:42.908993",
+ "modified": "2020-11-04 16:47:56.130420",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
