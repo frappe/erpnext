@@ -147,7 +147,7 @@ def get_account_balance(request_payload):
 		return response
 	except Exception:
 		frappe.log_error(title=_("Account Balance Processing Error"))
-		frappe.throw(title=_("Error"), message=_("Please check your configuration and try again"))
+		frappe.throw(_("Please check your configuration and try again"), title=_("Error"))
 
 @frappe.whitelist(allow_guest=True)
 def process_balance_info(**kwargs):
@@ -173,7 +173,8 @@ def process_balance_info(**kwargs):
 			ref_doc.db_set("account_balance", balance_info)
 
 			request.handle_success(account_balance_response)
-			frappe.publish_realtime("refresh_mpesa_dashboard")
+			frappe.publish_realtime("refresh_mpesa_dashboard", doctype="Mpesa Settings",
+				docname=transaction_data.reference_docname, user=transaction_data.owner)
 		except Exception:
 			request.handle_failure(account_balance_response)
 			frappe.log_error(title=_("Mpesa Account Balance Processing Error"), message=account_balance_response)
