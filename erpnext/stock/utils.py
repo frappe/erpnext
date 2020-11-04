@@ -284,7 +284,6 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		return
 
 	convertible_cols = {}
-
 	is_dict_obj = False
 	if isinstance(result[0], dict):
 		is_dict_obj = True
@@ -306,13 +305,13 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 	for row_idx, row in enumerate(result):
 		data = row.items() if is_dict_obj else enumerate(row)
 		for key, value in data:
-			if not key in convertible_columns or not conversion_factors[row_idx]:
+			if key not in convertible_columns or not conversion_factors[row_idx-1]:
 				continue
 
 			if convertible_columns.get(key) == 'rate':
-				new_value = flt(value) * conversion_factors[row_idx]
+				new_value = flt(value) * conversion_factors[row_idx-1]
 			else:
-				new_value = flt(value) / conversion_factors[row_idx]
+				new_value = flt(value) / conversion_factors[row_idx-1]
 
 			if not is_dict_obj:
 				row.insert(key+1, new_value)
