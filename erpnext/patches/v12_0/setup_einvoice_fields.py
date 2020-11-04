@@ -30,3 +30,11 @@ def execute():
 	create_custom_fields(custom_fields, update=True)
 	add_permissions()
 	add_print_formats()
+
+	frappe.db.set_value('Custom Field', { 'fieldname': 'mode_of_transport' }, 'default', '')
+	frappe.db.set_value('Custom Field', { 'fieldname': 'distance' }, 'mandatory_depends_on', 'transporter')
+	frappe.db.set_value('Custom Field', { 'fieldname': 'vehicle_no' }, 'mandatory_depends_on', 'eval:doc.mode_of_transport == "Road"')
+	frappe.db.set_value('Custom Field', { 'fieldname': 'vehicle_no' }, 'depends_on', 'depends_on': 'eval:doc.mode_of_transport == "Road"')
+	frappe.db.set_value('Custom Field', { 'fieldname': 'gst_vehicle_type' }, 'mandatory_depends_on', 'eval:doc.mode_of_transport == "Road"')
+	frappe.db.set_value('Custom Field', { 'fieldname': 'lr_date' }, 'mandatory_depends_on', 'eval:in_list(["Air", "Ship", "Rail"], doc.mode_of_transport)')
+	frappe.db.set_value('Custom Field', { 'fieldname': 'lr_no' }, 'mandatory_depends_on', 'eval:in_list(["Air", "Ship", "Rail"], doc.mode_of_transport)')
