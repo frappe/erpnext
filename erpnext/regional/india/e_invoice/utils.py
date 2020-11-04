@@ -300,16 +300,18 @@ def get_doc_details(invoice):
 
 	return frappe._dict(dict(invoice_type=invoice_type, invoice_name=invoice_name, invoice_date=invoice_date))
 
-def get_party_gstin_details(address_name):
-	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
+def get_party_details(address):
+	from erpnext.regional.doctype.e_invoice_settings.e_invoice_settings import GSPConnector
 
+	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 	gstin = address.get('gstin')
-	gstin_details = get_gstin_details(gstin)
+
+	gstin_details = GSPConnector.get_gstin_details(gstin)
 	legal_name = gstin_details.get('LegalName')
 	trade_name = gstin_details.get('TradeName')
-	location = gstin_details.get('AddrLoc')
+	location = gstin_details.get('AddrLoc') or address.get('city')
 	state_code = gstin_details.get('StateCode')
-	pincode = cint(gstin_details.get('AddrPncd'))
+	pincode = gstin_details.get('AddrPncd')
 	address_line1 = '{} {}'.format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
 	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
 	email_id = address.get('email_id')
@@ -376,7 +378,10 @@ def get_item_list(invoice):
 					item.tax_rate += item_tax_detail[0]
 					item.cgst_amount += abs(item_tax_detail[1])
 		
-		item.total_value = abs(item.base_amount + item.igst_amount + item.sgst_amount + item.cgst_amount + item.cess_amount + item.other_charges)
+		item.total_value = abs(
+			item.base_amount + item.igst_amount + item.sgst_amount +
+			item.cgst_amount + item.cess_amount + item.other_charges
+		)
 		einv_item = item_schema.format(item=item)
 		item_list.append(einv_item)
 
@@ -456,19 +461,19 @@ def make_einvoice(doctype, name):
 	doc_details = get_doc_details(invoice)
 	value_details = get_value_details(invoice)
 	trans_details = get_trans_details(invoice)
-	seller_details = get_party_gstin_details(invoice.company_address)
+	seller_details = get_party_details(invoice.company_address)
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
-		buyer_details = get_party_gstin_details(invoice.customer_address)
+		buyer_details = get_party_details(invoice.customer_address)
 		place_of_supply = get_place_of_supply(invoice, doctype) or invoice.billing_address_gstin
 		place_of_supply = place_of_supply[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
-		shipping_details = get_party_gstin_details(invoice.shipping_address_name)
+		shipping_details = get_party_details(invoice.shipping_address_name)
 	
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -532,7 +537,7 @@ def validate_einvoice(validations, einvoice, errors=[]):
 		if value_type == 'string':
 			einvoice[fieldname] = str(value)
 		elif value_type == 'number':
-			einvoice[fieldname] = flt(value, 2) if fieldname != 'Pin' or fieldname != 'Distance' else int(value)
+			einvoice[fieldname] = flt(value, 2) if fieldname not in ['Pin', 'Distance'] else int(value)
 
 		max_length = field_validation.get('maxLength')
 		minimum = flt(field_validation.get('minimum'))
@@ -638,6 +643,7 @@ class GSPConnector():
 
 		self.base_url = 'https://gsp.adaequare.com/'
 		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
+		self.gstin_details_url = self.base_url + 'test/enriched/ei/api/master/gstin'
 	
 	def get_auth_token(self):
 		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
@@ -660,6 +666,54 @@ class GSPConnector():
 		except Exception as e:
 			self.log_error(e)
 			raise
+	
+	def get_headers(self):
+		return {
+			'content-type': 'application/json',
+			'user_name': self.credentials.username,
+			'password': self.credentials.get_password(),
+			'gstin': self.credentials.gstin,
+			'authorization': self.get_auth_token(),
+			'requestid': str(base64.b64encode(os.urandom(18))),
+		}
+	
+	def fetch_gstin_details(self, gstin):
+		headers = self.get_headers()
+
+		try:
+			params = '?gstin={gstin}'.format(gstin=gstin)
+			res = make_get_request(self.gstin_details_url + params, headers=headers)
+			if res.get('success'):
+				return res.get('result')
+
+		except Exception as e:
+			self.log_error(e)
+		
+		return {}
+	
+	@staticmethod
+	def get_gstin_details(gstin):
+		'''fetch or get cached GSTIN details'''
+
+		if not hasattr(frappe.local, 'gstin_cache'):
+			frappe.local.gstin_cache = {}
+
+		key = gstin
+		details = frappe.local.gstin_cache.get(key)
+		if details:
+			return details
+
+		details = frappe.cache().hget('gstin_cache', key)
+		if details:
+			frappe.local.gstin_cache[key] = details
+			return details
+		
+		gsp_connector = GSPConnector()
+		details = gsp_connector.fetch_gstin_details(gstin)
+
+		frappe.local.gstin_cache[key] = details
+		frappe.cache().hset('gstin_cache', key, details)
+		return details
 
 	def log_error(self, exc):
 		print(exc)
