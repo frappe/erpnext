@@ -150,20 +150,20 @@ def get_emirates():
 
 def get_filters(filters):
 	"""The conditions to be used to filter data to calculate the total sale."""
-	query_filters = {}
+	query_filters = []
 	if filters.get("company"):
-		query_filters["company"] = ['=', filters['company']]
+		query_filters.append(["company", '=', filters['company']])
 	if filters.get("from_date"):
-		query_filters["posting_date"] = ['>=', filters['from_date']]
+		query_filters.append(["posting_date", '>=', filters['from_date']])
 	if filters.get("from_date"):
-		query_filters["posting_date"] = ['<=', filters['to_date']]
+		query_filters.append(["posting_date", '<=', filters['to_date']])
 	return query_filters
 
 def get_reverse_charge_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made."""
 	query_filters = get_filters(filters)
-	query_filters['reverse_charge'] = ['=', 'Y']
-	query_filters['docstatus'] = ['=', 1]
+	query_filters.append(['reverse_charge', '=', 'Y'])
+	query_filters.append(['docstatus', '=', 1])
 	try:
 		return frappe.db.get_all('Purchase Invoice',
 			filters = query_filters,
@@ -193,9 +193,9 @@ def get_reverse_charge_tax(filters):
 def get_reverse_charge_recoverable_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
-	query_filters['reverse_charge'] = ['=', 'Y']
-	query_filters['recoverable_reverse_charge'] = ['>', '0']
-	query_filters['docstatus'] = ['=', 1]
+	query_filters.append(['reverse_charge', '=', 'Y'])
+	query_filters.append(['recoverable_reverse_charge', '>', '0'])
+	query_filters.append(['docstatus', '=', 1])
 	try:
 		return frappe.db.get_all('Purchase Invoice',
 			filters = query_filters,
@@ -238,8 +238,8 @@ def get_conditions_join(filters):
 def get_standard_rated_expenses_total(filters):
 	"""Returns the sum of the total of each Purchase invoice made with recoverable reverse charge."""
 	query_filters = get_filters(filters)
-	query_filters['recoverable_standard_rated_expenses'] = ['>', 0]
-	query_filters['docstatus'] = ['=', 1]
+	query_filters.append(['recoverable_standard_rated_expenses', '>', 0])
+	query_filters.append(['docstatus', '=', 1])
 	try:
 		return frappe.db.get_all('Purchase Invoice',
 			filters = query_filters,
@@ -253,8 +253,8 @@ def get_standard_rated_expenses_total(filters):
 def get_standard_rated_expenses_tax(filters):
 	"""Returns the sum of the tax of each Purchase invoice made."""
 	query_filters = get_filters(filters)
-	query_filters['recoverable_standard_rated_expenses'] = ['>', 0]
-	query_filters['docstatus'] = ['=', 1]
+	query_filters.append(['recoverable_standard_rated_expenses', '>', 0])
+	query_filters.append(['docstatus', '=', 1])
 	try:
 		return frappe.db.get_all('Purchase Invoice',
 			filters = query_filters,
@@ -268,8 +268,8 @@ def get_standard_rated_expenses_tax(filters):
 def get_tourist_tax_return_total(filters):
 	"""Returns the sum of the total of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters['tourist_tax_return'] = ['>', 0]
-	query_filters['docstatus'] = ['=', 1]
+	query_filters.append(['tourist_tax_return', '>', 0])
+	query_filters.append(['docstatus', '=', 1])
 	try:
 		return frappe.db.get_all('Sales Invoice',
 			filters = query_filters,
@@ -283,8 +283,8 @@ def get_tourist_tax_return_total(filters):
 def get_tourist_tax_return_tax(filters):
 	"""Returns the sum of the tax of each Sales invoice with non zero tourist_tax_return."""
 	query_filters = get_filters(filters)
-	query_filters['tourist_tax_return'] = ['>', 0]
-	query_filters['docstatus'] = ['=', 1]
+	query_filters.append(['tourist_tax_return', '>', 0])
+	query_filters.append(['docstatus', '=', 1])
 	try:
 		return frappe.db.get_all('Sales Invoice',
 			filters = query_filters,
@@ -300,7 +300,7 @@ def get_zero_rated_total(filters):
 	conditions = get_conditions(filters)
 	try:
 		return frappe.db.sql("""
-			select 
+			select
 				sum(i.base_amount) as total
 			from
 				`tabSales Invoice Item` i inner join `tabSales Invoice` s
