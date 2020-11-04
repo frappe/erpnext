@@ -343,17 +343,18 @@ def update_invoice(invoice, res):
 	frappe.db.set_value(doctype, name, 'irn', res.get('Irn'))
 	frappe.db.set_value(doctype, name, 'ewaybill', res.get('EwbNo'))
 	frappe.db.set_value(doctype, name, 'signed_invoice', dec_signed_invoice)
-	frappe.db.set_value(doctype, name, 'signed_qr_code', res.get('SignedQRCode'))
 
+	signed_qrcode = res.get('SignedQRCode')
+	frappe.db.set_value(doctype, name, 'signed_qr_code', signed_qrcode)
 
-def attach_qrcode_image(doctype, name):
-	qrcode = frappe.db.get_value(doctype, name, 'signed_qr_code')
+	attach_qrcode_image(doctype, name, signed_qrcode)
 
+def attach_qrcode_image(doctype, name, qrcode):
 	if not qrcode: return
 
 	_file = frappe.new_doc('File')
 	_file.update({
-		'file_name': 'Signed_QR_{name}.png'.format(name=name),
+		'file_name': f'QRCode_{name}.png',
 		'attached_to_doctype': doctype,
 		'attached_to_name': name,
 		'content': 'qrcode',
