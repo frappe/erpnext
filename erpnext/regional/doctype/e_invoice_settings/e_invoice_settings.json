@@ -9,13 +9,11 @@
   "section_break_2",
   "client_id",
   "client_secret",
-  "public_key_file",
   "public_key",
   "column_break_3",
   "gstin",
   "username",
   "password",
-  "auto_refresh_token",
   "auth_token",
   "token_expiry",
   "sek"
@@ -43,12 +41,6 @@
    "fieldname": "client_secret",
    "fieldtype": "Data",
    "label": "Client Secret",
-   "reqd": 1
-  },
-  {
-   "fieldname": "public_key_file",
-   "fieldtype": "Attach",
-   "label": "Public Key",
    "reqd": 1
   },
   {
@@ -80,21 +72,8 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "description": "Token will be automatically refreshed 10 mins before expiry",
-   "fieldname": "auto_refresh_token",
-   "fieldtype": "Check",
-   "label": "Auto Refresh Token"
-  },
-  {
    "fieldname": "auth_token",
    "fieldtype": "Data",
-   "hidden": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "token_expiry",
-   "fieldtype": "Datetime",
    "hidden": 1,
    "read_only": 1
   },
@@ -103,12 +82,19 @@
    "fieldtype": "Data",
    "hidden": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "token_expiry",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-23 19:55:11.417161",
+ "modified": "2020-11-03 21:23:50.277305",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",
