@@ -14,7 +14,7 @@ frappe.ui.form.on('Therapy Plan', {
 		if (!frm.doc.__islocal) {
 			frm.trigger('show_progress_for_therapies');
 			if (frm.doc.status != 'Completed') {
-				let therapy_types = (frm.doc.therapy_plan_details || []).map(function(d){ return d.therapy_type });
+				let therapy_types = (frm.doc.therapy_plan_details || []).map(function(d){ return d.therapy_type; });
 				const fields = [{
 					fieldtype: 'Link',
 					label: __('Therapy Type'),
@@ -24,7 +24,7 @@ frappe.ui.form.on('Therapy Plan', {
 					get_query: function() {
 						return {
 							filters: { 'therapy_type': ['in', therapy_types]}
-						}
+						};
 					}
 				}];
 
