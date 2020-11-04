@@ -60,10 +60,16 @@ def get_trans_details(invoice):
 	elif invoice.gst_category == 'Deemed Export': supply_type = 'DEXP'
 
 	if not supply_type: 
-		return _('Invalid invoice transaction category.')
+		rr, sez, overseas, export = bold('Registered Regular'), bold('SEZ'), bold('Overseas'), bold('Deemed Export')
+		frappe.throw(
+			_('GST category should be one of {}, {}, {}, {}').format(rr, sez, overseas, export),
+			title=_('Invalid Supply Type')
+		)
 
 	return frappe._dict(dict(
-		tax_scheme='GST', supply_type=supply_type, reverse_charge=invoice.reverse_charge
+		tax_scheme='GST',
+		supply_type=supply_type,
+		reverse_charge=invoice.reverse_charge
 	))
 
 def get_doc_details(invoice):
@@ -75,7 +81,11 @@ def get_doc_details(invoice):
 	invoice_name = invoice.name
 	invoice_date = format_date(invoice.posting_date, 'dd/mm/yyyy')
 
-	return frappe._dict(dict(invoice_type=invoice_type, invoice_name=invoice_name, invoice_date=invoice_date))
+	return frappe._dict(dict(
+		invoice_type=invoice_type,
+		invoice_name=invoice_name,
+		invoice_date=invoice_date
+	))
 
 def get_party_details(address_name):
 	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
@@ -127,16 +137,11 @@ def get_item_list(invoice):
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 		item.qty = abs(item.qty)
 		item.unit_rate = abs(item.base_price_list_rate) if item.discount_amount else abs(item.base_net_rate)
-		item.total_amount = abs(item.unit_rate * item.qty)
+		item.gross_amount = abs(item.unit_rate * item.qty)
 		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.base_amount = abs(item.base_net_amount)
-		item.tax_rate = 0
-		item.igst_amount = 0
-		item.cgst_amount = 0
-		item.sgst_amount = 0
-		item.cess_rate = 0
-		item.cess_amount = 0
-		item.other_charges = 0
+		item.taxable_value = abs(item.base_net_amount)
+		item.tax_rate = item.cess_rate = item.other_charges = 0
+		item.cgst_amount = item.sgst_amount = item.igst_amount = item.cess_amount = 0
 		for t in invoice.taxes:
 			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
 			if t.account_head in gst_accounts_list:
@@ -210,8 +215,8 @@ def get_return_doc_reference(invoice):
 	))
 
 def get_eway_bill_details(invoice):
-	if not invoice.distance:
-		frappe.throw(_('Distance is mandatory for E-Way Bill generation'), title=_('E Invoice Validation Failed'))
+	if invoice.is_return:
+		frappe.throw(_('E-Way Bill cannot be generated for Credit Notes & Debit Notes'), title=_('E Invoice Validation Failed'))
 
 	mode_of_transport = { 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
 	vehicle_type = { 'Regular': 'R', 'Over Dimensional Cargo (ODC)': 'O' }
@@ -220,7 +225,7 @@ def get_eway_bill_details(invoice):
 		gstin=invoice.gst_transporter_id,
 		name=invoice.transporter_name,
 		mode_of_transport=mode_of_transport[invoice.mode_of_transport],
-		distance=invoice.distance,
+		distance=invoice.distance or 0,
 		document_name=invoice.lr_no,
 		document_date=format_date(invoice.lr_date, 'dd/mm/yyyy'),
 		vehicle_no=invoice.vehicle_no,
@@ -232,6 +237,7 @@ def make_einvoice(doctype, name):
 	invoice = frappe.get_doc(doctype, name)
 	schema = read_json('einv_template')
 
+	trans_details = get_trans_details(invoice)
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
 	value_details = get_value_details(invoice)
@@ -272,7 +278,7 @@ def make_einvoice(doctype, name):
 	einvoice = json.loads(einvoice)
 	
 	validations = json.loads(read_json('einv_validation'))
-	errors = validate_einvoice(validations, einvoice, [])
+	errors = validate_einvoice(validations, einvoice)
 	if errors:
 		frappe.log_error(title="E Invoice Validation Failed", message=json.dumps(errors, default=str, indent=4))
 		if len(errors) > 1:
@@ -312,7 +318,9 @@ def validate_einvoice(validations, einvoice, errors=[]):
 		if value_type == 'string':
 			einvoice[fieldname] = str(value)
 		elif value_type == 'number':
-			einvoice[fieldname] = flt(value, 2) if fieldname not in ['Pin', 'Distance'] else int(value)
+			is_integer = '.' not in str(field_validation.get('maximum'))
+			einvoice[fieldname] = flt(value, 2) if not is_integer else cint(value)
+			value = einvoice[fieldname]
 
 		max_length = field_validation.get('maxLength')
 		minimum = flt(field_validation.get('minimum'))
@@ -320,12 +328,12 @@ def validate_einvoice(validations, einvoice, errors=[]):
 		pattern_str = field_validation.get('pattern')
 		pattern = re.compile(pattern_str or '')
 
-		label = field_validation.get('label') or fieldname
+		label = field_validation.get('description') or fieldname
 
 		if value_type == 'string' and len(value) > max_length:
 			errors.append(_('{} should not exceed {} characters').format(label, max_length))
-		if value_type == 'number' and not (flt(value) <= maximum):
-			errors.append(_('{} should be less than {}').format(label, maximum))
+		if value_type == 'number' and (value > maximum or value < minimum):
+			errors.append(_('{} {} should be between {} and {}').format(label, value, minimum, maximum))
 		if pattern_str and not pattern.match(value):
 			errors.append(field_validation.get('validationMsg'))
 	
