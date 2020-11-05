@@ -14,6 +14,7 @@
   "column_break_9",
   "update_stock",
   "ignore_pricing_rule",
+  "hide_unavailable_items",
   "warehouse",
   "campaign",
   "company_address",
@@ -307,13 +308,19 @@
    "fieldtype": "Check",
    "label": "Update Stock",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_unavailable_items",
+   "fieldtype": "Check",
+   "label": "Hide Unavailable Items"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-20 13:16:50.665081",
+ "modified": "2020-10-29 13:18:38.795925",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

@@ -304,7 +304,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 				{
 					"fieldtype": "Select", "label": __("Get Suppliers By"),
 					"fieldname": "search_type",
-					"options": ["Tag","Supplier Group"],
+					"options": ["Supplier Group", "Tag"],
 					"reqd": 1,
 					onchange() {
 						if(dialog.get_value('search_type') == 'Tag'){
