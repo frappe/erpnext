@@ -317,10 +317,13 @@ def download_datev_csv(filters):
 		filters = json.loads(filters)
 
 	validate(filters)
+	company = filters.get('company')
 
 	# set chart of accounts used
-	coa = frappe.get_value('Company', filters.get('company'), 'chart_of_accounts')
+	coa = frappe.get_value('Company', company, 'chart_of_accounts')
 	filters['skr'] = '04' if 'SKR04' in coa else ('03' if 'SKR03' in coa else '')
+
+	filters['account_number_length'] = frappe.get_value('DATEV Settings', company, 'account_number_length')
 
 	transactions = get_transactions(filters)
 	account_names = get_account_names(filters)
