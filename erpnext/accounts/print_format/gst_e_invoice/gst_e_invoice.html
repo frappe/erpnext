@@ -2,12 +2,27 @@
 {%- set einvoice = json.loads(doc.signed_einvoice) -%}
 
 <div class="page-break">
-	<div id="header-html" class="hidden-pdf">
+	<div {% if print_settings.repeat_header_footer %} id="header-html" class="hidden-pdf" {% endif %}>
+		{% if letter_head and not no_letterhead %}
+			<div class="letter-head">{{ letter_head }}</div>
+		{% endif %}
 		<div class="print-heading">
-			<h2>E-Invoice</h2>
+			<h2>E Invoice<br><small>{{ doc.name }}</small></h2>
 		</div>
 	</div>
-	<div class="row section-break" style="border-bottom: 1px solid #d1d8dd;">
+	{% if print_settings.repeat_header_footer %}
+	<div id="footer-html" class="visible-pdf">
+		{% if not no_letterhead and footer %}
+		<div class="letter-head-footer">
+			{{ footer }}
+		</div>
+		{% endif %}
+		<p class="text-center small page-number visible-pdf">
+			{{ _("Page {0} of {1}").format('<span class="page"></span>', '<span class="topage"></span>') }}
+		</p>
+	</div>
+	{% endif %}
+	<div class="row section-break" style="border-bottom: 1px solid #d1d8dd; padding-bottom: 10px;">
 		<h5 class="font-bold" style="margin-left: 15px; margin-top: 0px;">1. Transaction Details</h5>
 		<div class="col-xs-8 column-break">
 			<div class="row data-field">
