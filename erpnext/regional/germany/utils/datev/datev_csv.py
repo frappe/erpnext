@@ -155,20 +155,22 @@ def get_header(filters, csv_class):
 	return header
 
 
-def download_csv_files_as_zip(csv_data_list):
+def zip_and_download(zip_filename, csv_files):
 	"""
 	Put CSV files in a zip archive and send that to the client.
 
 	Params:
-	csv_data_list -- list of dicts [{'file_name': 'EXTF_Buchunsstapel.zip', 'csv_data': get_datev_csv()}]
+	zip_filename	Name of the zip file
+	csv_files		list of dicts [{'file_name': 'my_file.csv', 'csv_data': 'comma,separated,values'}]
 	"""
 	zip_buffer = BytesIO()
 
-	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
-	for csv_file in csv_data_list:
-		datev_zip.writestr(csv_file.get('file_name'), csv_file.get('csv_data'))
-	datev_zip.close()
+	zip_file = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
+	for csv_file in csv_files:
+		zip_file.writestr(csv_file.get('file_name'), csv_file.get('csv_data'))
+
+	zip_file.close()
 
 	frappe.response['filecontent'] = zip_buffer.getvalue()
-	frappe.response['filename'] = 'DATEV.zip'
+	frappe.response['filename'] = zip_filename
 	frappe.response['type'] = 'binary'
