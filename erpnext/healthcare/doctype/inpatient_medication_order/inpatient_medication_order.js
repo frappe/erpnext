@@ -12,7 +12,8 @@ frappe.ui.form.on('Inpatient Medication Order', {
 		frm.set_query('patient', () => {
 			return {
 				filters: {
-					'inpatient_record': ['!=', '']
+					'inpatient_record': ['!=', ''],
+					'inpatient_status': 'Admitted'
 				}
 			};
 		});

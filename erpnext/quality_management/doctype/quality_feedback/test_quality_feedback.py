@@ -5,49 +5,27 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.quality_management.doctype.quality_feedback_template.test_quality_feedback_template import create_template
+
 
 class TestQualityFeedback(unittest.TestCase):
-
 	def test_quality_feedback(self):
-		create_template()
-		test_create_feedback = create_feedback()
-		test_get_feedback = get_feedback()
+		template = frappe.get_doc(dict(
+			doctype = 'Quality Feedback Template',
+			template = 'Test Template',
+			parameters = [
+				dict(parameter='Test Parameter 1'),
+				dict(parameter='Test Parameter 2')
+			]
+		)).insert()
 
-		self.assertEqual(test_create_feedback, test_get_feedback)
+		feedback = frappe.get_doc(dict(
+			doctype = 'Quality Feedback',
+			template = template.name,
+			document_type = 'User',
+			document_name = frappe.session.user
+		)).insert()
 
-def create_feedback():
-	create_customer()
+		self.assertEqual(template.parameters[0].parameter, feedback.parameters[0].parameter)
 
-	feedabck = frappe.get_doc({
-		"doctype": "Quality Feedback",
-		"template": "TMPL-_Test Feedback Template",
-		"document_type": "Customer",
-		"document_name": "Quality Feedback Customer",
-		"date": frappe.utils.nowdate(),
-		"parameters": [
-			{
-				"parameter": "Test Parameter",
-				"rating": 3,
-				"feedback": "Test Feedback"
-			}
-		]
-	})
-
-	feedback_exists = frappe.db.exists("Quality Feedback", {"template": "TMPL-_Test Feedback Template"})
-
-	if not feedback_exists:
-		feedabck.insert()
-		return feedabck.name
-	else:
-		return feedback_exists
-
-def get_feedback():
-	return frappe.db.exists("Quality Feedback", {"template": "TMPL-_Test Feedback Template"})
-
-def create_customer():
-	if not frappe.db.exists("Customer", {"customer_name": "Quality Feedback Customer"}):
-		customer = frappe.get_doc({
-				"doctype": "Customer",
-				"customer_name": "Quality Feedback Customer"
-			}).insert(ignore_permissions=True)
+		feedback.delete()
+		template.delete()
