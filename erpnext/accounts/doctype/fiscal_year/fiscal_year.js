@@ -9,11 +9,7 @@ frappe.ui.form.on('Fiscal Year', {
 		}
 	},
 	refresh: function (frm) {
-		let doc = frm.doc;
-		frm.toggle_enable('year_start_date', doc.__islocal);
-		frm.toggle_enable('year_end_date', doc.__islocal);
-
-		if (!doc.__islocal && (doc.name != frappe.sys_defaults.fiscal_year)) {
+		if (!frm.doc.__islocal && (frm.doc.name != frappe.sys_defaults.fiscal_year)) {
 			frm.add_custom_button(__("Set as Default"), () => frm.events.set_as_default(frm));
 			frm.set_intro(__("To set this Fiscal Year as Default, click on 'Set as Default'"));
 		} else {
