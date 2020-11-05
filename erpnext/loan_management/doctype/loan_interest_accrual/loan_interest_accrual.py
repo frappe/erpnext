@@ -135,7 +135,7 @@ def make_accrual_interest_entry_for_demand_loans(posting_date, process_loan_inte
 	for loan in open_loans:
 		calculate_accrual_amount_for_demand_loans(loan, posting_date, process_loan_interest, accrual_type)
 
-def make_accrual_interest_entry_for_term_loans(posting_date, process_loan_interest, term_loan=None, loan_type=None):
+def make_accrual_interest_entry_for_term_loans(posting_date, process_loan_interest, term_loan=None, loan_type=None, accrual_type="Regular"):
 	curr_date = posting_date or add_days(nowdate(), 1)
 
 	term_loans = get_term_loans(curr_date, term_loan, loan_type)
@@ -154,7 +154,8 @@ def make_accrual_interest_entry_for_term_loans(posting_date, process_loan_intere
 			'payable_principal': loan.principal_amount,
 			'process_loan_interest': process_loan_interest,
 			'repayment_schedule_name': loan.payment_entry,
-			'posting_date': posting_date
+			'posting_date': posting_date,
+			'accrual_type': accrual_type
 		})
 
 		make_loan_interest_accrual_entry(args)
