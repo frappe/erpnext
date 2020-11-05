@@ -20,8 +20,10 @@ frappe.ui.form.on('Fiscal Year', {
 		return frm.call('set_as_default');
 	},
 	year_start_date: function(frm) {
-		let year_end_date =
-			frappe.datetime.add_days(frappe.datetime.add_months(frm.doc.year_start_date, 12), -1);
-		frm.set_value("year_end_date", year_end_date);
+		if (!frm.doc.is_short_year) {
+			let year_end_date =
+				frappe.datetime.add_days(frappe.datetime.add_months(frm.doc.year_start_date, 12), -1);
+			frm.set_value("year_end_date", year_end_date);
+		}
 	},
 });
