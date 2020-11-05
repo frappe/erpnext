@@ -237,8 +237,8 @@ def make_einvoice(doctype, name):
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
 	value_details = get_value_details(invoice)
-	trans_details = get_trans_details(invoice)
 	seller_details = get_party_details(invoice.company_address)
+	seller_details.update({ 'pincode': 193502 })
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
@@ -496,15 +496,15 @@ class GSPConnector():
 		docname = args.docname
 		eway_bill_details = get_eway_bill_details(args)
 		data = json.dumps({
-			"Irn": args.irn,
-			"Distance": cint(eway_bill_details.distance),
-			"TransMode": eway_bill_details.mode_of_transport,
-			"TransId": eway_bill_details.gstin,
-			"TransName": eway_bill_details.transporter,
-			"TrnDocDt": eway_bill_details.document_date,
-			"TrnDocNo": eway_bill_details.document_name,
-			"VehNo": eway_bill_details.vehicle_no,
-			"VehType": eway_bill_details.vehicle_type
+			'Irn': args.irn,
+			'Distance': cint(eway_bill_details.distance),
+			'TransMode': eway_bill_details.mode_of_transport,
+			'TransId': eway_bill_details.gstin,
+			'TransName': eway_bill_details.transporter,
+			'TrnDocDt': eway_bill_details.document_date,
+			'TrnDocNo': eway_bill_details.document_name,
+			'VehNo': eway_bill_details.vehicle_no,
+			'VehType': eway_bill_details.vehicle_type
 		})
 
 		try:
@@ -544,7 +544,13 @@ class GSPConnector():
 			self.log_error(e)
 
 	def log_error(self, exc):
-		print(exc)
+		message = "\n".join(["Data:", json.dumps(exc), "--" * 50, "\nException:", traceback.format_exc()])
+		frappe.log_error(title="E Invoicing Error", message=message)
+		link_to_error_list = '<a href="desk#List/{0}">{1}</a>'.format('Error Log', 'Error Log')
+		frappe.throw(
+			_('An error occurred while making API request. Please check {} for more information.').format(link_to_error_list),
+			title=_('E Invoice Request Failed')
+		)
 
 @frappe.whitelist()
 def generate_irn(docname):
