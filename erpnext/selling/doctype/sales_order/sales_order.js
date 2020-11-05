@@ -573,12 +573,6 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					"default": 0
 				},
 				{
-					"fieldtype": "Section Break",
-					"label": "",
-					"fieldname": "sec_break_dialog",
-					"hide_border": 1
-				},
-				{
 					fieldname: 'items_for_po', fieldtype: 'Table', label: 'Select Items',
 					fields: [
 						{
@@ -616,16 +610,13 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							read_only:1,
 							in_list_view:1
 						},
-					],
-					data: me.frm.doc.items.map((item) =>{
-						item.pending_qty = (flt(item.stock_qty) - flt(item.ordered_qty)) / flt(item.conversion_factor);
-						return item;
-					}).filter((item) => {return item.pending_qty > 0;})
+					]
 				}
 			],
 			primary_action_label: 'Create Purchase Order',
 			primary_action (args) {
 				if (!args) return;
+
 				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children();
 				if(selected_items.length == 0) {
 					frappe.throw({message: 'Please select Items from the Table', title: __('Items Required'), indicator:'blue'})
@@ -635,8 +626,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 				var method = args.against_default_supplier ? "make_purchase_order_for_default_supplier" : "make_purchase_order"
 				return frappe.call({
-					type: "GET",
 					method: "erpnext.selling.doctype.sales_order.sales_order." + method,
+					freeze: true,
+					freeze_message: __("Creating Purchase Order ..."),
 					args: {
 						"source_name": me.frm.doc.name,
 						"selected_items": selected_items
@@ -660,8 +652,9 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			}
 		});
 
-		dialog.fields_dict["against_default_supplier"].df.onchange = () => {
-			console.log("yo");
+		dialog.fields_dict["against_default_supplier"].df.onchange = () => set_po_items_data(dialog);
+
+		function set_po_items_data (dialog) {
 			var against_default_supplier = dialog.get_value("against_default_supplier");
 			var items_for_po = dialog.get_value("items_for_po");
 
@@ -671,16 +664,28 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				dialog.fields_dict["items_for_po"].df.data = items_with_supplier;
 				dialog.get_field("items_for_po").refresh();
 			} else {
-				let pending_items = me.frm.doc.items.map((item) =>{
-					item.pending_qty = (flt(item.stock_qty) - flt(item.ordered_qty)) / flt(item.conversion_factor);
-					return item;
-					}).filter((item) => {return item.pending_qty > 0;});
+				let po_items = [];
+				me.frm.doc.items.forEach(d => {
+					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
+					if (pending_qty > 0) {
+						po_items.push({
+							"doctype": "Sales Order Item",
+							"name": d.name,
+							"item_name": d.item_name,
+							"item_code": d.item_code,
+							"pending_qty": pending_qty,
+							"uom": d.uom,
+							"supplier": d.supplier
+						});
+					}
+				});
 
-				dialog.fields_dict["items_for_po"].df.data = pending_items;
+				dialog.fields_dict["items_for_po"].df.data = po_items;
 				dialog.get_field("items_for_po").refresh();
 			}
 		}
 
+		set_po_items_data(dialog);
 		dialog.get_field("items_for_po").grid.only_sortable();
 		dialog.get_field("items_for_po").refresh();
 		dialog.wrapper.find('.grid-heading-row .grid-row-check').click();
