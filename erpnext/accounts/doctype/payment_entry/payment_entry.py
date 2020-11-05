@@ -913,8 +913,9 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 		elif ref_doc.doctype == "Employee Advance":
 			total_amount = ref_doc.advance_amount
-			if party_account_currency != company_currency:
+			if party_account_currency != ref_doc.currency:
 				exchange_rate = ref_doc.get("exchange_rate")
+				total_amount = flt(total_amount) * flt(exchange_rate)
 		if not total_amount:
 			if party_account_currency == company_currency:
 				total_amount = ref_doc.base_grand_total
@@ -936,6 +937,10 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				- flt(ref_doc.get("total_amount_reimbursed")) - flt(ref_doc.get("total_advance_amount"))
 		elif reference_doctype == "Employee Advance":
 			outstanding_amount = (flt(ref_doc.advance_amount) - flt(ref_doc.paid_amount))
+			if party_account_currency != ref_doc.currency:
+				outstanding_amount = flt(outstanding_amount) * flt(exchange_rate)
+				if party_account_currency == company_currency:
+					exchange_rate = 1
 		else:
 			outstanding_amount = flt(total_amount) - flt(ref_doc.advance_paid)
 	else:
@@ -960,12 +965,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	party_type = set_party_type(dt)
 	party_account = set_party_account(dt, dn, doc, party_type)
-	exchange_rate = 1
 	party_account_currency = set_party_account_currency(dt, party_account, doc)
-	if dt != 'Expense Claim' and party_account_currency != doc.currency:
-		exchange_rate = doc.get('exchange_rate', 1)
 	payment_type = set_payment_type(dt, doc)
-	grand_total, outstanding_amount = set_grand_total_and_outstanding_amount(party_amount, dt, party_account_currency, doc, exchange_rate)
+	grand_total, outstanding_amount = set_grand_total_and_outstanding_amount(party_amount, dt, party_account_currency, doc)
 
 	# bank or cash
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
@@ -1092,7 +1094,7 @@ def set_payment_type(dt, doc):
 		payment_type = "Pay"
 	return payment_type
 
-def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_currency, doc, exchange_rate):
+def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_currency, doc):
 	grand_total = outstanding_amount = 0
 	if party_amount:
 		grand_total = outstanding_amount = party_amount
@@ -1107,8 +1109,11 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 		outstanding_amount = doc.grand_total \
 			- doc.total_amount_reimbursed
 	elif dt == "Employee Advance":
-		grand_total = flt(doc.advance_amount) * flt(exchange_rate)
-		outstanding_amount = (flt(doc.advance_amount) - flt(doc.paid_amount)) * flt(exchange_rate)
+		grand_total = flt(doc.advance_amount)
+		outstanding_amount = flt(doc.advance_amount)
+		if party_account_currency != doc.currency:
+			grand_total = flt(doc.advance_amount) * flt(doc.exchange_rate)
+			outstanding_amount = (flt(doc.advance_amount) - flt(doc.paid_amount)) * flt(doc.exchange_rate)
 	elif dt == "Fees":
 		grand_total = doc.grand_total
 		outstanding_amount = doc.outstanding_amount

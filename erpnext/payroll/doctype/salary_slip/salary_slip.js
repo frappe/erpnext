@@ -77,19 +77,40 @@ frappe.ui.form.on("Salary Slip", {
 		frm.trigger("set_dynamic_labels");
 	},
 
-	currency: function(frm) {
-		calculate_totals(frm);
-		frm.trigger("set_dynamic_labels");
-	},
-
 	set_dynamic_labels: function(frm) {
 		var company_currency = frm.doc.company? erpnext.get_currency(frm.doc.company): frappe.defaults.get_default("currency");
-		if (frm.doc.currency && company_currency!=frm.doc.currency) {
-			frm.events.hide_loan_section(frm);
+		frappe.run_serially([
+			() => 	frm.events.set_exchange_rate(frm, company_currency),
+			() => 	frm.events.change_form_labels(frm, company_currency),
+			() => 	frm.events.change_grid_labels(frm),
+			() => 	frm.refresh_fields()
+		]);
+	},
+
+	set_exchange_rate: function(frm, company_currency) {
+		if (frm.doc.currency) {
+			var from_currency = frm.doc.currency;
+			if(from_currency != company_currency) {
+				frm.events.hide_loan_section(frm);
+				frappe.call({
+					method: "erpnext.setup.utils.get_exchange_rate",
+					args: {
+						from_currency: from_currency,
+						to_currency: company_currency,
+					},
+					callback: function(r) {
+						frm.set_value("exchange_rate", flt(r.message));
+						frm.set_df_property('exchange_rate', 'hidden', 0);
+						frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+							+ " = [?] " + company_currency);
+					}
+				});
+			} else {
+				frm.set_value("exchange_rate", 1.0);
+				frm.set_df_property('exchange_rate', 'hidden', 1);
+				frm.set_df_property("exchange_rate", "description", "" );
+			}
 		}
-		frm.events.change_form_labels(frm, company_currency);
-		frm.events.change_grid_labels(frm);
-		frm.refresh_fields();
 	},
 
 	exchange_rate: function(frm) {
@@ -107,9 +128,6 @@ frappe.ui.form.on("Salary Slip", {
 
 		frm.set_currency_labels(["hour_rate", "gross_pay", "total_deduction", "net_pay", "rounded_total", "total_in_words"],
 			frm.doc.currency);
-
-		cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-			+ " = [?] " + company_currency);
 
 		// toggle fields
 		frm.toggle_display(["exchange_rate", "base_hour_rate", "base_gross_pay", "base_total_deduction",
@@ -175,7 +193,7 @@ frappe.ui.form.on("Salary Slip", {
 				doc: frm.doc,
 				callback: function(r) {
 					if (r.message){
-						frm.fields_dict.absent_days.set_description("Unmarked Days is treated as "+ r.message +". You can can change this in " + frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true));
+						frm.fields_dict.absent_days.set_description(__("Unmarked Days is treated as {0}. You can can change this in {1}", [r.message, frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true)]));
 					}
 					frm.refresh();
 				}

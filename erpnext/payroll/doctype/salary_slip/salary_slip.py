@@ -395,44 +395,22 @@ class SalarySlip(TransactionBase):
 		if self.salary_structure:
 			self.calculate_component_amounts("earnings")
 		self.gross_pay = self.get_component_totals("earnings")
-		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
+		self.base_gross_pay = flt(flt(self.gross_pay) * flt(self.exchange_rate), self.precision('base_gross_pay'))
 
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
 		self.total_deduction = self.get_component_totals("deductions")
-		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
+		self.base_total_deduction = flt(flt(self.total_deduction) * flt(self.exchange_rate), self.precision('base_total_deduction'))
 
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay)
-		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
-		self.base_rounded_total = rounded(self.base_net_pay)
+		self.base_net_pay = flt(flt(self.net_pay) * flt(self.exchange_rate), self.precision('base_net_pay'))
+		self.base_rounded_total = flt(rounded(self.base_net_pay), self.precision('base_net_pay'))
 		if self.hour_rate:
-			self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
+			self.base_hour_rate = flt(flt(self.hour_rate) * flt(self.exchange_rate), self.precision('base_hour_rate'))
 		self.set_net_total_in_words()
-
-	def set_base_amounts_after_exchange_rate_change(self):
-		self.db_set("exchange_rate", self.exchange_rate)
-		base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
-		self.db_set("base_gross_pay", base_gross_pay)
-		base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
-		self.db_set("base_total_deduction", base_total_deduction)
-		base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
-		self.db_set("base_net_pay", base_net_pay)
-		base_rounded_total = rounded(self.base_net_pay)
-		self.db_set("base_rounded_total", base_rounded_total)
-		if self.hour_rate:
-			base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
-			self.db_set("base_hour_rate", base_hour_rate)
-		company_currency = erpnext.get_company_currency(self.company)
-		base_total = base_net_pay if self.is_rounding_total_disabled() else base_rounded_total
-		base_total_in_words = money_in_words(base_total, company_currency)
-		self.db_set("base_total_in_words", base_total_in_words)
-		self.db_set("docstatus", 0)
-		frappe.db.commit()
-		self.docstatus = 0
-		self.set_status()
 
 	def calculate_component_amounts(self, component_type):
 		if not getattr(self, '_salary_structure_doc', None):
@@ -1092,15 +1070,13 @@ class SalarySlip(TransactionBase):
 			if self.deductions:
 				for deduction in self.deductions:
 					self.total_deduction += flt(deduction.amount)
-			self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
-			self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
 			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
-			self.rounded_total = rounded(self.net_pay)
-			self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
-			self.base_rounded_total = rounded(self.base_net_pay)
+		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
+		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
+		self.rounded_total = rounded(self.net_pay)
+		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
+		self.base_rounded_total = rounded(self.base_net_pay)
 		self.set_net_total_in_words()
-
-		return
 
 	#calculate total working hours, earnings based on hourly wages and totals
 	def calculate_total_for_salary_slip_based_on_timesheet(self):
@@ -1117,12 +1093,7 @@ class SalarySlip(TransactionBase):
 				if earning.salary_component == salary_component:
 					self.earnings[i].amount = wages_amount
 				self.gross_pay += self.earnings[i].amount
-		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
-		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
-		self.rounded_total = rounded(self.net_pay)
-		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
-		self.base_rounded_total = rounded(self.base_net_pay)
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
