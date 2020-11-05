@@ -238,7 +238,6 @@ def make_einvoice(doctype, name):
 	doc_details = get_doc_details(invoice)
 	value_details = get_value_details(invoice)
 	seller_details = get_party_details(invoice.company_address)
-	seller_details.update({ 'pincode': 193502 })
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
@@ -462,7 +461,6 @@ class GSPConnector():
 			if res.get('success'):
 				update_invoice(doctype, docname, res.get('result'))
 			else:
-				# {'success': False, 'message': '3039 : Seller Details:Pincode-560009 does not belong to the state-1, 2177 : Invalid item unit code(s)-UNIT'}
 				self.log_error(res)
 
 		except Exception as e:
@@ -536,7 +534,6 @@ class GSPConnector():
 			if res.get('success'):
 				frappe.db.set_value(doctype, docname, 'ewaybill', '')
 				frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 1)
-
 			else:
 				self.log_error(res)
 
