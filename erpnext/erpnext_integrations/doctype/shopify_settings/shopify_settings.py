@@ -15,12 +15,13 @@ from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_sh
 
 class ShopifySettings(Document):
 	def validate(self):
-		if self.enable_shopify == 1:
-			setup_custom_fields()
-			self.validate_access_credentials()
-			self.register_webhooks()
-		else:
-			self.unregister_webhooks()
+		pass
+		# if self.enable_shopify == 1:
+		# 	setup_custom_fields()
+		# 	self.validate_access_credentials()
+		# 	self.register_webhooks()
+		# else:
+		# 	self.unregister_webhooks()
 
 	def validate_access_credentials(self):
 		if not (self.get_password(raise_exception=False) and self.api_key and self.shopify_url):
@@ -87,7 +88,7 @@ def get_shopify_url(path, settings):
 def get_header(settings):
 	header = {'Content-Type': 'application/json'}
 
-	return header;
+	return header
 
 @frappe.whitelist()
 def get_series():
@@ -121,17 +122,23 @@ def setup_custom_fields():
 		],
 		"Sales Order": [
 			dict(fieldname='shopify_order_id', label='Shopify Order Id',
-				fieldtype='Data', insert_after='title', read_only=1, print_hide=1)
+				fieldtype='Data', insert_after='title', read_only=1, print_hide=1),
+			dict(fieldname='shopify_order_number', label='Shopify Order Number',
+				fieldtype='Data', insert_after='shopify_order_id', read_only=1, print_hide=1)
 		],
 		"Delivery Note":[
 			dict(fieldname='shopify_order_id', label='Shopify Order Id',
 				fieldtype='Data', insert_after='title', read_only=1, print_hide=1),
+			dict(fieldname='shopify_order_number', label='Shopify Order Number',
+				fieldtype='Data', insert_after='shopify_order_id', read_only=1, print_hide=1),
 			dict(fieldname='shopify_fulfillment_id', label='Shopify Fulfillment Id',
 				fieldtype='Data', insert_after='title', read_only=1, print_hide=1)
 		],
 		"Sales Invoice": [
 			dict(fieldname='shopify_order_id', label='Shopify Order Id',
-				fieldtype='Data', insert_after='title', read_only=1, print_hide=1)
+				fieldtype='Data', insert_after='title', read_only=1, print_hide=1),
+			dict(fieldname='shopify_order_number', label='Shopify Order Number',
+				fieldtype='Data', insert_after='shopify_order_id', read_only=1, print_hide=1)
 		]
 	}
 
