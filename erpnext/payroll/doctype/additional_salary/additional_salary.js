@@ -24,8 +24,10 @@ frappe.ui.form.on('Additional Salary', {
 
 	employee: function(frm) {
 		if (frm.doc.employee) {
-			frm.trigger('set_company');
-			frm.trigger('get_employee_currency');
+			frappe.run_serially([
+				() => 	frm.trigger('get_employee_currency'),
+				() => 	frm.trigger('set_company')
+			]);
 		} else {
 			frm.set_value("company", null);
 		}

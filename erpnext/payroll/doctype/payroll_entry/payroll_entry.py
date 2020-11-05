@@ -230,11 +230,11 @@ class PayrollEntry(Document):
 
 			# Earnings
 			for acc_cc, amount in earnings.items():
-				exchange_rate, conversion_rate = self.get_exchange_rate(acc_cc[0], company_currency, currencies)
+				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
 				payable_amount += flt(amount, precision)
 				accounts.append({
 						"account": acc_cc[0],
-						"debit_in_account_currency": flt((amount * conversion_rate), precision),
+						"debit_in_account_currency": flt(amt, precision),
 						"exchange_rate": flt(exchange_rate),
 						"party_type": '',
 						"cost_center": acc_cc[1] or self.cost_center,
@@ -243,11 +243,11 @@ class PayrollEntry(Document):
 
 			# Deductions
 			for acc_cc, amount in deductions.items():
-				exchange_rate, conversion_rate = self.get_exchange_rate(acc_cc[0], company_currency, currencies)
+				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
 				payable_amount -= flt(amount, precision)
 				accounts.append({
 						"account": acc_cc[0],
-						"credit_in_account_currency": flt((amount * conversion_rate), precision),
+						"credit_in_account_currency": flt(amt, precision),
 						"exchange_rate": flt(exchange_rate),
 						"cost_center": acc_cc[1] or self.cost_center,
 						"party_type": '',
@@ -255,10 +255,10 @@ class PayrollEntry(Document):
 					})
 
 			# Payable amount
-			exchange_rate, conversion_rate = self.get_exchange_rate(payroll_payable_account, company_currency, currencies)
+			exchange_rate, payable_amt = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, payable_amount, company_currency, currencies)
 			accounts.append({
 				"account": payroll_payable_account,
-				"credit_in_account_currency": flt((payable_amount * conversion_rate), precision),
+				"credit_in_account_currency": flt(payable_amt, precision),
 				"exchange_rate": flt(exchange_rate),
 				"party_type": '',
 				"cost_center": self.cost_center
@@ -280,7 +280,7 @@ class PayrollEntry(Document):
 
 		return jv_name
 
-	def get_exchange_rate(self, account, company_currency, currencies):
+	def get_amount_and_exchange_rate_for_journal_entry(self, account, amount, company_currency, currencies):
 		conversion_rate = 1
 		exchange_rate = self.exchange_rate
 		account_currency = frappe.db.get_value('Account', account, 'account_currency')
@@ -289,7 +289,8 @@ class PayrollEntry(Document):
 		if account_currency == company_currency:
 			conversion_rate = self.exchange_rate
 			exchange_rate = 1
-		return exchange_rate, conversion_rate
+		amount = flt(amount) * flt(conversion_rate)
+		return exchange_rate, amount
 
 	def make_payment_entry(self):
 		self.check_permission('write')
@@ -327,18 +328,18 @@ class PayrollEntry(Document):
 		multi_currency = 0
 		company_currency = erpnext.get_company_currency(self.company)
 
-		exchange_rate, conversion_rate = self.get_exchange_rate(self.payment_account, company_currency, currencies)
+		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(self.payment_account, je_payment_amount, company_currency, currencies)
 		accounts.append({
 				"account": self.payment_account,
 				"bank_account": self.bank_account,
-				"credit_in_account_currency": flt(je_payment_amount * conversion_rate, precision),
+				"credit_in_account_currency": flt(amount, precision),
 				"exchange_rate": flt(exchange_rate),
 			})
 
-		exchange_rate, conversion_rate = self.get_exchange_rate(payroll_payable_account, company_currency, currencies)
+		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, je_payment_amount, company_currency, currencies)
 		accounts.append({
 				"account": payroll_payable_account,
-				"debit_in_account_currency": flt(je_payment_amount * conversion_rate, precision),
+				"debit_in_account_currency": flt(amount, precision),
 				"exchange_rate": flt(exchange_rate),
 				"reference_type": self.doctype,
 				"reference_name": self.name
@@ -520,22 +521,18 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 		else:
 			salary_slip_name = frappe.db.sql(
 				'''SELECT 
-						name 
-					FROM
-						`tabSalary Slip` 
-					WHERE 
-						company=%s
-					AND 
-						start_date >= %s 
-					AND 
-						end_date <= %s
-					AND 
-						employee = %s
+						name
+					FROM `tabSalary Slip`
+					WHERE company=%s
+					AND start_date >= %s
+					AND end_date <= %s
+					AND employee = %s
 				''', (args.company, args.start_date, args.end_date, emp), as_dict=True)
 
 			salary_slip_doc = frappe.get_doc('Salary Slip', salary_slip_name[0].name)
 			salary_slip_doc.exchange_rate = args.exchange_rate
-			salary_slip_doc.set_base_amounts_after_exchange_rate_change()
+			salary_slip_doc.set_totals()
+			salary_slip_doc.db_update()
 
 	payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
 	payroll_entry.db_set("salary_slips_created", 1)

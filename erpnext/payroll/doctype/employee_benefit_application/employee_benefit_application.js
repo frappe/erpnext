@@ -3,8 +3,12 @@
 
 frappe.ui.form.on('Employee Benefit Application', {
 	employee: function(frm) {
-		frm.trigger('get_employee_currency');
-		frm.trigger('set_earning_component');
+		if (frm.doc.employee) {
+			frappe.run_serially([
+				() => 	frm.trigger('get_employee_currency'),
+				() => 	frm.trigger('set_earning_component')
+			]);
+		}
 		var method, args;
 		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
 			method = "erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining";

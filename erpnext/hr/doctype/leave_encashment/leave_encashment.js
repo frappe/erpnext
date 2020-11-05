@@ -22,8 +22,12 @@ frappe.ui.form.on('Leave Encashment', {
 		}
 	},
 	employee: function(frm) {
-		frm.trigger("get_leave_details_for_encashment");
-		frm.trigger('get_employee_currency');
+		if (frm.doc.employee) {
+			frappe.run_serially([
+				() => 	frm.trigger('get_employee_currency'),
+				() => 	frm.trigger('get_leave_details_for_encashment')
+			]);
+		}
 	},
 	leave_type: function(frm) {
 		frm.trigger("get_leave_details_for_encashment");

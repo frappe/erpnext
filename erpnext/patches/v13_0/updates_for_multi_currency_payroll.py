@@ -2,81 +2,103 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe, erpnext
+from frappe.model.utils.rename_field import rename_field
 
 def execute():
-	company = erpnext.get_default_company()
-	company_currency = erpnext.get_company_currency(company)
-	default_payroll_payable_account = frappe.db.get_value('Company', erpnext.get_company_currency(company), 'default_payroll_payable_account')
-	frappe.reload_doc('accounts', 'doctype', 'salary_component_account')
-	frappe.reload_doc('hr', 'doctype', 'employee_advance')
-	frappe.reload_doc('hr', 'doctype', 'leave_encashment')
+
+	frappe.reload_doc('Accounts', 'doctype', 'Salary Component Account')
+	if frappe.db.has_column('Salary Component Account', 'default_account'):
+		rename_field("Salary Component Account", "default_account", "account")
 
 	doctype_list = [
-		'additional_salary',
-		'employee_benefit_application',
-		'employee_benefit_claim',
-		'employee_incentive',
-		'employee_tax_exemption_declaration',
-		'employee_tax_exemption_proof_submission',
-		'income_tax_slab',
-		'payroll_entry',
-		'retention_bonus',
-		'salary_structure',
-		'salary_structure_assignment',
-		'salary_slip'
+		{
+		'module':'HR',
+		'doctype':'Employee Advance'
+		},
+		{
+		'module':'HR',
+		'doctype':'Leave Encashment'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Additional Salary'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Employee Benefit Application'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Employee Benefit Claim'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Employee Incentive'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Payroll Entry'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Retention Bonus'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Salary Structure'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Salary Structure Assignment'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Salary Slip'
+		},
 	]
 
-	for doctype in doctype_list:
-		frappe.reload_doc('payroll', 'doctype', doctype)
+	for item in doctype_list:
+		frappe.reload_doc(item['module'], 'doctype', item['doctype'])
+	
 
-	currency_change_list = [
-		'tabLeave Encashment',
-		'tabEmployee Benefit Application',
-		'tabEmployee Benefit Claim',
-		'tabEmployee Incentive',
-		'tabEmployee Tax Exemption Declaration',
-		'tabEmployee Tax Exemption Proof Submission',
-		'tabIncome Tax Slab',
-		'tabAdditional Salary',
-		'tabRetention Bonus',
-		'tabSalary Structure'
-	]
+	for item in doctype_list:
+		all_doc = frappe.get_all(item['doctype'])
+		if all_doc:
+			for record in all_doc:
+				doc = frappe.get_doc(item['doctype'], record)
+				if doc.doctype == 'Employee Incentive':
+					if not doc.company:
+						doc.company = frappe.db.get_value('Employee', doc.get('employee'), 'company')
+				if not doc.currency:
+					doc.currency = frappe.db.get_value('Company', doc.get('company'), 'default_currency')
+				if doc.doctype in ['Employee Advance', 'Payroll Entry', 'Salary Slip']:
+					if not doc.exchange_rate:
+						doc.exchange_rate = 1
+				if doc.doctype in ['Payroll Entry', 'Salary Structure Assignment']:
+					if not doc.payroll_payable_account:
+						doc.payroll_payable_account = frappe.db.get_value('Company', doc.get('company'), 'default_payroll_payable_account')
+					if doc.income_tax_slab:
+						update_income_tax_slab(doc.income_tax_slab)
+				if doc.doctype == 'Salary Slip':
+					update_base(doc)
+				doc.db_update()
 
-	for table in currency_change_list:
-		frappe.db.sql("""
-			UPDATE `{0}`
-			SET currency = '{1}'
-		""".format(table, company_currency))
+def update_base(doc):
+	if not doc.base_hour_rate:
+		doc.base_hour_rate = doc.get('hour_rate')
+	if not doc.base_gross_pay:
+		doc.base_gross_pay = doc.get('gross_pay')
+	if not doc.base_total_deduction:
+		doc.base_total_deduction = doc.get('total_deduction')
+	if not doc.base_net_pay:
+		doc.base_net_pay = doc.get('net_pay')
+	if not doc.base_rounded_total:
+		doc.base_rounded_total = doc.get('rounded_total')
+	if not doc.base_total_in_words:
+		doc.base_total_in_words = doc.get('total_in_words')
 
-	frappe.db.sql("""
-		UPDATE `tabSalary Structure Assignment`
-		SET currency = %s, payroll_payable_account = %s
-	""", (company_currency, default_payroll_payable_account))
-
-	if frappe.db.has_column('Salary Component Account', 'default_account'):
-		frappe.db.sql("""
-			UPDATE `tabSalary Component Account`
-			SET account = default_account,
-		""")
-
-	frappe.db.sql("""
-		UPDATE `tabPayroll Entry`
-		SET currency = %s, exchange_rate = 1, payroll_payable_account = %s
-	""", (company_currency, default_payroll_payable_account))
-
-	frappe.db.sql("""
-		UPDATE `tabEmployee Advance`
-		SET currency = %s, exchange_rate = 1
-	""", (company_currency))
-
-	frappe.db.sql("""
-		UPDATE `tabSalary Slip`
-		SET currency = %s,
-			exchange_rate = 1,
-			base_hour_rate = hour_rate,
-			base_gross_pay = gross_pay,
-			base_total_deduction = total_deduction,
-			base_net_pay = net_pay,
-			base_rounded_total = rounded_total,
-			base_total_in_words = total_in_words
-	""", (company_currency))
+def update_income_tax_slab(income_tax_slab):
+	income_tax_slab_doc = frappe.get_doc('Income Tax Slab', income_tax_slab)
+	if not income_tax_slab_doc.currency:
+		income_tax_slab_doc.currency = doc.get('currency')
+		income_tax_slab_doc.db_update()

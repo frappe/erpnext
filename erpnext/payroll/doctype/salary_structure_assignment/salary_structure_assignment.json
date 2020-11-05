@@ -118,6 +118,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "salary_structure",
    "fieldname": "income_tax_slab",
    "fieldtype": "Link",
    "label": "Income Tax Slab",
@@ -145,7 +146,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-23 13:20:29.906934",
+ "modified": "2020-11-05 16:59:04.831473",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",

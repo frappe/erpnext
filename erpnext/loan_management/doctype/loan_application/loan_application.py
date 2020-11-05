@@ -17,8 +17,8 @@ from six import string_types
 class LoanApplication(Document):
 	def validate(self):
 		if self.applicant_type == 'Employee':
-			from erpnext.loan_management.doctype.loan.loan import validate_employe_currency_with_company_currency
-			validate_employe_currency_with_company_currency(self.applicant, self.company)
+			from erpnext.loan_management.doctype.loan.loan import validate_employee_currency_with_company_currency
+			validate_employee_currency_with_company_currency(self.applicant, self.company)
 		self.set_pledge_amount()
 		self.set_loan_amount()
 		self.validate_loan_amount()
