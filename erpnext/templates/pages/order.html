@@ -42,10 +42,10 @@
 		</span>
 	</div>
 	<div class="col-6 text-muted text-right small">
-		{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
+		{{ frappe.utils.format_date(doc.transaction_date, 'medium') }}
 		{% if doc.valid_till %}
 		<p>
-		{{ _("Valid Till") }}: {{ frappe.utils.formatdate(doc.valid_till, 'medium') }}
+		{{ _("Valid Till") }}: {{ frappe.utils.format_date(doc.valid_till, 'medium') }}
 		</p>
 		{% endif %}
 	</div>
