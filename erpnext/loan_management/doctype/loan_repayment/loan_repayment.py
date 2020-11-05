@@ -341,10 +341,10 @@ def get_amounts(amounts, against_loan, posting_date):
 
 		due_date = add_days(entry.posting_date, 1)
 		no_of_late_days = date_diff(posting_date,
-			add_days(due_date, loan_type_details.grace_period_in_days))
+			add_days(due_date, loan_type_details.grace_period_in_days)) + 1
 
 		if no_of_late_days > 0 and (not against_loan_doc.repay_from_salary) and entry.accrual_type == 'Regular':
-			penalty_amount += (entry.interest_amount * (loan_type_details.penalty_interest_rate / 100) * no_of_late_days)/365
+			penalty_amount += (entry.interest_amount * (loan_type_details.penalty_interest_rate / 100) * no_of_late_days)
 
 		total_pending_interest += entry.interest_amount
 		payable_principal_amount += entry.payable_principal_amount
