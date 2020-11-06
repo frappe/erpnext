@@ -30,14 +30,12 @@ def get_columns():
 			"label": _("Amount (AED)"),
 			"fieldtype": "Currency",
 			"width": 125,
-			"options": "currency"
 		},
 		{
 			"fieldname": "vat_amount",
 			"label": _("VAT Amount (AED)"),
 			"fieldtype": "Currency",
 			"width": 150,
-			"options": "currency"
 		}
 	]
 
