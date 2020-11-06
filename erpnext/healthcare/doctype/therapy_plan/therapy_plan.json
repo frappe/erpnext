@@ -115,7 +115,8 @@
    "fieldname": "therapy_plan_template",
    "fieldtype": "Link",
    "label": "Therapy Plan Template",
-   "options": "Therapy Plan Template"
+   "options": "Therapy Plan Template",
+   "set_only_once": 1
   },
   {
    "default": "0",
@@ -128,7 +129,7 @@
   }
  ],
  "links": [],
- "modified": "2020-10-23 01:27:42.128855",
+ "modified": "2020-11-04 18:13:13.564999",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",
