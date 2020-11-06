@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2019-05-09 15:47:39.760406",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -54,6 +53,7 @@
   {
    "fieldname": "transaction_type",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Transaction Type",
    "options": "DocType"
   },
@@ -109,9 +109,9 @@
   }
  ],
  "in_create": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-02-27 14:40:10.502605",
+ "modified": "2020-09-04 12:16:36.569066",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",

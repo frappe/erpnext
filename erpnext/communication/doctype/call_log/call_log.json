@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "field:id",
  "creation": "2019-06-05 12:07:02.634534",
  "doctype": "DocType",
@@ -14,6 +15,7 @@
   "contact",
   "contact_name",
   "column_break_10",
+  "customer",
   "lead",
   "lead_name",
   "section_break_5",
@@ -28,7 +30,8 @@
   },
   {
    "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Call Details"
   },
   {
    "fieldname": "id",
@@ -125,10 +128,19 @@
    "in_list_view": 1,
    "label": "Lead Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
   }
  ],
  "in_create": 1,
- "modified": "2019-08-06 05:46:53.144683",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2020-08-25 17:08:34.085731",
  "modified_by": "Administrator",
  "module": "Communication",
  "name": "Call Log",

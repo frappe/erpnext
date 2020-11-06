@@ -7,6 +7,8 @@ import unittest
 import frappe
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_clinical_procedure_template
 
+test_dependencies = ['Item']
+
 class TestClinicalProcedure(unittest.TestCase):
 	def test_procedure_template_item(self):
 		patient, medical_department, practitioner = create_healthcare_docs()

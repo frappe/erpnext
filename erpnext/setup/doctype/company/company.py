@@ -140,7 +140,8 @@ class Company(NestedSet):
 			{"warehouse_name": _("All Warehouses"), "is_group": 1},
 			{"warehouse_name": _("Stores"), "is_group": 0},
 			{"warehouse_name": _("Work In Progress"), "is_group": 0},
-			{"warehouse_name": _("Finished Goods"), "is_group": 0}]:
+			{"warehouse_name": _("Finished Goods"), "is_group": 0},
+			{"warehouse_name": _("Goods In Transit"), "is_group": 0, "warehouse_type": "Transit"}]:
 
 			if not frappe.db.exists("Warehouse", "{0} - {1}".format(wh_detail["warehouse_name"], self.abbr)):
 				warehouse = frappe.get_doc({
@@ -149,7 +150,8 @@ class Company(NestedSet):
 					"is_group": wh_detail["is_group"],
 					"company": self.name,
 					"parent_warehouse": "{0} - {1}".format(_("All Warehouses"), self.abbr) \
-						if not wh_detail["is_group"] else ""
+						if not wh_detail["is_group"] else "",
+					"warehouse_type" : wh_detail["warehouse_type"] if "warehouse_type" in wh_detail else None
 				})
 				warehouse.flags.ignore_permissions = True
 				warehouse.flags.ignore_mandatory = True
@@ -440,7 +442,7 @@ def install_country_fixtures(company):
 			module_name = "erpnext.regional.{0}.setup.setup".format(frappe.scrub(company_doc.country))
 			frappe.get_attr(module_name)(company_doc, False)
 		except Exception as e:
-			frappe.log_error(str(e), frappe.get_traceback())
+			frappe.log_error()
 			frappe.throw(_("Failed to setup defaults for country {0}. Please contact support@erpnext.com").format(frappe.bold(company_doc.country)))
 
 

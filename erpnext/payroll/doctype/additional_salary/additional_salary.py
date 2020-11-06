@@ -5,8 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe import _
-from frappe.utils import getdate, date_diff
+from frappe import _, bold
+from frappe.utils import getdate, date_diff, comma_and, formatdate
 
 class AdditionalSalary(Document):
 
@@ -22,8 +22,36 @@ class AdditionalSalary(Document):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_recurring_additional_salary_overlap()
 		if self.amount < 0:
 			frappe.throw(_("Amount should not be less than zero."))
+
+	def validate_recurring_additional_salary_overlap(self):
+		if self.is_recurring:
+			additional_salaries = frappe.db.sql("""
+				SELECT
+					name
+				FROM `tabAdditional Salary`
+				WHERE
+					employee=%s
+					AND name <> %s
+					AND docstatus=1
+					AND is_recurring=1
+					AND salary_component = %s
+					AND to_date >= %s
+					AND from_date <= %s""",
+				(self.employee, self.name, self.salary_component, self.from_date, self.to_date), as_dict = 1)
+
+			additional_salaries = [salary.name for salary in additional_salaries]
+
+			if additional_salaries and len(additional_salaries):
+				frappe.throw(_("Additional Salary: {0} already exist for Salary Component: {1} for period {2} and {3}").format(
+					bold(comma_and(additional_salaries)),
+					bold(self.salary_component),
+					bold(formatdate(self.from_date)),
+					bold(formatdate(self.to_date)
+				)))
+
 
 	def validate_dates(self):
 		date_of_joining, relieving_date = frappe.db.get_value("Employee", self.employee,

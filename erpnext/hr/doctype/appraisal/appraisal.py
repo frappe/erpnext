@@ -50,7 +50,7 @@ class Appraisal(Document):
 			total_w += flt(d.per_weightage)
 
 		if int(total_w) != 100:
-			frappe.throw(_("Total weightage assigned should be 100%. It is {0}").format(str(total_w) + "%"))
+			frappe.throw(_("Total weightage assigned should be 100%.<br>It is {0}").format(str(total_w) + "%"))
 
 		if frappe.db.get_value("Employee", self.employee, "user_id") != \
 				frappe.session.user and total == 0:

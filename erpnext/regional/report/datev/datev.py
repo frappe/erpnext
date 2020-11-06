@@ -9,31 +9,91 @@ Provide a report and downloadable CSV according to the German DATEV format.
 """
 from __future__ import unicode_literals
 
-import datetime
 import json
-import zipfile
-import six
 import frappe
-import pandas as pd
-
 from frappe import _
-from csv import QUOTE_NONNUMERIC
-from six import BytesIO
 from six import string_types
-from .datev_constants import DataCategory
-from .datev_constants import Transactions
-from .datev_constants import DebtorsCreditors
-from .datev_constants import AccountNames
-from .datev_constants import QUERY_REPORT_COLUMNS
+from erpnext.regional.germany.utils.datev.datev_csv import download_csv_files_as_zip, get_datev_csv
+from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
+
+COLUMNS = [
+	{
+		"label": "Umsatz (ohne Soll/Haben-Kz)",
+		"fieldname": "Umsatz (ohne Soll/Haben-Kz)",
+		"fieldtype": "Currency",
+		"width": 100
+	},
+	{
+		"label": "Soll/Haben-Kennzeichen",
+		"fieldname": "Soll/Haben-Kennzeichen",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Konto",
+		"fieldname": "Konto",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Gegenkonto (ohne BU-Schlüssel)",
+		"fieldname": "Gegenkonto (ohne BU-Schlüssel)",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Belegdatum",
+		"fieldname": "Belegdatum",
+		"fieldtype": "Date",
+		"width": 100
+	},
+	{
+		"label": "Belegfeld 1",
+		"fieldname": "Belegfeld 1",
+		"fieldtype": "Data",
+		"width": 150
+	},
+	{
+		"label": "Buchungstext",
+		"fieldname": "Buchungstext",
+		"fieldtype": "Text",
+		"width": 300
+	},
+	{
+		"label": "Beleginfo - Art 1",
+		"fieldname": "Beleginfo - Art 1",
+		"fieldtype": "Link",
+		"options": "DocType",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 1",
+		"fieldname": "Beleginfo - Inhalt 1",
+		"fieldtype": "Dynamic Link",
+		"options": "Beleginfo - Art 1",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Art 2",
+		"fieldname": "Beleginfo - Art 2",
+		"fieldtype": "Link",
+		"options": "DocType",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 2",
+		"fieldname": "Beleginfo - Inhalt 2",
+		"fieldtype": "Dynamic Link",
+		"options": "Beleginfo - Art 2",
+		"width": 150
+	}
+]
 
 
 def execute(filters=None):
 	"""Entry point for frappe."""
 	validate(filters)
-	result = get_transactions(filters, as_dict=0)
-	columns = QUERY_REPORT_COLUMNS
-
-	return columns, result
+	return COLUMNS, get_transactions(filters, as_dict=0)
 
 
 def validate(filters):
@@ -240,146 +300,8 @@ def get_account_names(filters):
 	""", filters, as_dict=1)
 
 
-def get_datev_csv(data, filters, csv_class):
-	"""
-	Fill in missing columns and return a CSV in DATEV Format.
-
-	For automatic processing, DATEV requires the first line of the CSV file to
-	hold meta data such as the length of account numbers oder the category of
-	the data.
-
-	Arguments:
-	data -- array of dictionaries
-	filters -- dict
-	csv_class -- defines DATA_CATEGORY, FORMAT_NAME and COLUMNS
-	"""
-	empty_df = pd.DataFrame(columns=csv_class.COLUMNS)
-	data_df = pd.DataFrame.from_records(data)
-
-	result = empty_df.append(data_df, sort=True)
-
-	if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS:
-		result['Belegdatum'] = pd.to_datetime(result['Belegdatum'])
-
-	if csv_class.DATA_CATEGORY == DataCategory.ACCOUNT_NAMES:
-		result['Sprach-ID'] = 'de-DE'
-
-	data = result.to_csv(
-		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
-		sep=str(';'),
-		# European decimal seperator
-		decimal=',',
-		# Windows "ANSI" encoding
-		encoding='latin_1',
-		# format date as DDMM
-		date_format='%d%m',
-		# Windows line terminator
-		line_terminator='\r\n',
-		# Do not number rows
-		index=False,
-		# Use all columns defined above
-		columns=csv_class.COLUMNS,
-		# Quote most fields, even currency values with "," separator
-		quoting=QUOTE_NONNUMERIC
-	)
-
-	if not six.PY2:
-		data = data.encode('latin_1')
-
-	header = get_header(filters, csv_class)
-	header = ';'.join(header).encode('latin_1')
-
-	# 1st Row: Header with meta data
-	# 2nd Row: Data heading (Überschrift der Nutzdaten), included in `data` here.
-	# 3rd - nth Row: Data (Nutzdaten)
-	return header + b'\r\n' + data
-
-
-def get_header(filters, csv_class):
-	description = filters.get('voucher_type', csv_class.FORMAT_NAME)
-
-	header = [
-		# DATEV format
-		#	"DTVF" = created by DATEV software,
-		#	"EXTF" = created by other software
-		'"EXTF"',
-		# version of the DATEV format
-		#	141 = 1.41, 
-		#	510 = 5.10,
-		#	720 = 7.20
-		'700',
-		csv_class.DATA_CATEGORY,
-		'"%s"' % csv_class.FORMAT_NAME,
-		# Format version (regarding format name)
-		csv_class.FORMAT_VERSION,
-		# Generated on
-		datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '000',
-		# Imported on -- stays empty
-		'',
-		# Origin. Any two symbols, will be replaced by "SV" on import.
-		'"EN"',
-		# I = Exported by
-		'"%s"' % frappe.session.user,
-		# J = Imported by -- stays empty
-		'',
-		# K = Tax consultant number (Beraternummer)
-		filters.get('consultant_number', '0000000'),
-		# L = Tax client number (Mandantennummer)
-		filters.get('client_number', '00000'),
-		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
-		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
-		# N = Length of account numbers (Sachkontenlänge)
-		'%d' % filters.get('acc_len', 4),
-		# O = Transaction batch start date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd") if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
-		# P = Transaction batch end date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd") if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
-		# Q = Description (for example, "Sales Invoice") Max. 30 chars
-		'"{}"'.format(_(description)) if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
-		# R = Diktatkürzel
-		'',
-		# S = Buchungstyp
-		#	1 = Transaction batch (Finanzbuchführung),
-		#	2 = Annual financial statement (Jahresabschluss)
-		'1' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
-		# T = Rechnungslegungszweck
-		#	0 oder leer = vom Rechnungslegungszweck unabhängig
-		#	50 = Handelsrecht
-		#	30 = Steuerrecht
-		#	64 = IFRS
-		#	40 = Kalkulatorik
-		#	11 = Reserviert
-		#	12 = Reserviert
-		'0' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
-		# U = Festschreibung
-		# TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
-		'0',
-		# V = Default currency, for example, "EUR"
-		'"%s"' % filters.get('default_currency', 'EUR') if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
-		# reserviert
-		'',
-		# Derivatskennzeichen
-		'',
-		# reserviert
-		'',
-		# reserviert
-		'',
-		# SKR
-		'"%s"' % filters.get('skr', '04'),
-		# Branchen-Lösungs-ID
-		'',
-		# reserviert
-		'',
-		# reserviert
-		'',
-		# Anwendungsinformation (Verarbeitungskennzeichen der abgebenden Anwendung)
-		''
-	]
-	return header
-
-
 @frappe.whitelist()
-def download_datev_csv(filters=None):
+def download_datev_csv(filters):
 	"""
 	Provide accounting entries for download in DATEV format.
 
@@ -400,38 +322,26 @@ def download_datev_csv(filters=None):
 	coa = frappe.get_value('Company', filters.get('company'), 'chart_of_accounts')
 	filters['skr'] = '04' if 'SKR04' in coa else ('03' if 'SKR03' in coa else '')
 
-	# set account number length
-	account_numbers = frappe.get_list('Account', fields=['account_number'], filters={'is_group': 0, 'account_number': ('!=', '')})
-	filters['acc_len'] = max([len(a.account_number) for a in account_numbers])
-
-	filters['consultant_number'] = frappe.get_value('DATEV Settings', filters.get('company'), 'consultant_number')
-	filters['client_number'] = frappe.get_value('DATEV Settings', filters.get('company'), 'client_number')
-	filters['default_currency'] = frappe.get_value('Company', filters.get('company'), 'default_currency')
-
-	# This is where my zip will be written
-	zip_buffer = BytesIO()
-	# This is my zip file
-	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
-
 	transactions = get_transactions(filters)
-	transactions_csv = get_datev_csv(transactions, filters, csv_class=Transactions)
-	datev_zip.writestr('EXTF_Buchungsstapel.csv', transactions_csv)
-
 	account_names = get_account_names(filters)
-	account_names_csv = get_datev_csv(account_names, filters, csv_class=AccountNames)
-	datev_zip.writestr('EXTF_Kontenbeschriftungen.csv', account_names_csv)
-
 	customers = get_customers(filters)
-	customers_csv = get_datev_csv(customers, filters, csv_class=DebtorsCreditors)
-	datev_zip.writestr('EXTF_Kunden.csv', customers_csv)
-
 	suppliers = get_suppliers(filters)
-	suppliers_csv = get_datev_csv(suppliers, filters, csv_class=DebtorsCreditors)
-	datev_zip.writestr('EXTF_Lieferanten.csv', suppliers_csv)
-	
-	# You must call close() before exiting your program or essential records will not be written.
-	datev_zip.close()
 
-	frappe.response['filecontent'] = zip_buffer.getvalue()
-	frappe.response['filename'] = 'DATEV.zip'
-	frappe.response['type'] = 'binary'
+	download_csv_files_as_zip([
+		{
+			'file_name': 'EXTF_Buchungsstapel.csv',
+			'csv_data': get_datev_csv(transactions, filters, csv_class=Transactions)
+		},
+		{
+			'file_name': 'EXTF_Kontenbeschriftungen.csv',
+			'csv_data': get_datev_csv(account_names, filters, csv_class=AccountNames)
+		},
+		{
+			'file_name': 'EXTF_Kunden.csv',
+			'csv_data': get_datev_csv(customers, filters, csv_class=DebtorsCreditors)
+		},
+		{
+			'file_name': 'EXTF_Lieferanten.csv',
+			'csv_data': get_datev_csv(suppliers, filters, csv_class=DebtorsCreditors)
+		},
+	])

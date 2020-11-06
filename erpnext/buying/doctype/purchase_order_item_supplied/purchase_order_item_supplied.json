@@ -148,11 +148,11 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-12 15:43:53.862897",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item Supplied",
- "owner": "dhanalekshmi@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC"

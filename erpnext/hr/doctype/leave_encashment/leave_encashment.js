@@ -2,6 +2,10 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Leave Encashment', {
+	onload: function(frm) {
+		// Ignore cancellation of doctype on cancel all.
+		frm.ignore_doctypes_on_cancel_all = ["Leave Ledger Entry"];
+	},
 	setup: function(frm) {
 		frm.set_query("leave_type", function() {
 			return {
@@ -33,7 +37,7 @@ frappe.ui.form.on('Leave Encashment', {
 				doc: frm.doc,
 				callback: function(r) {
 					frm.refresh_fields();
-					}
+				}
 			});
 		}
 	}

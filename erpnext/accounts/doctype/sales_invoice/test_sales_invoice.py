@@ -206,10 +206,19 @@ class TestSalesInvoice(unittest.TestCase):
 			"rate": 14,
 			'included_in_print_rate': 1
 		})
+		si.append("taxes", {
+			"charge_type": "On Item Quantity",
+			"account_head": "_Test Account Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "CESS",
+			"rate": 5,
+			'included_in_print_rate': 1
+		})
 		si.insert()
 
 		# with inclusive tax
-		self.assertEqual(si.net_total, 4385.96)
+		self.assertEqual(si.items[0].net_amount, 3947.368421052631)
+		self.assertEqual(si.net_total, 3947.37)
 		self.assertEqual(si.grand_total, 5000)
 
 		si.reload()
@@ -222,8 +231,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		# with inclusive tax and additional discount
-		self.assertEqual(si.net_total, 4285.96)
-		self.assertEqual(si.grand_total, 4885.99)
+		self.assertEqual(si.net_total, 3847.37)
+		self.assertEqual(si.grand_total, 4886)
 
 		si.reload()
 
@@ -235,7 +244,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		# with inclusive tax and additional discount
-		self.assertEqual(si.net_total, 4298.25)
+		self.assertEqual(si.net_total, 3859.65)
 		self.assertEqual(si.grand_total, 4900.00)
 
 	def test_sales_invoice_discount_amount(self):

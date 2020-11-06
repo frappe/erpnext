@@ -361,11 +361,11 @@
  ],
  "icon": "fa fa-bug",
  "idx": 1,
- "modified": "2019-05-24 10:56:30.626200",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Warranty Claim",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,
