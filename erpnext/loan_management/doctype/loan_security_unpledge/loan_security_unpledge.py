@@ -67,10 +67,18 @@ class LoanSecurityUnpledge(Document):
 			security_value += qty_after_unpledge * current_price
 
 		if not security_value and flt(pending_principal_amount, 2) > 0:
-			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
+			self._throw(security_value, pending_principal_amount, ltv_ratio)
 
 		if security_value and flt(pending_principal_amount/security_value) * 100 > ltv_ratio:
-			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
+			self._throw(security_value, pending_principal_amount, ltv_ratio)
+
+	def _throw(self, security_value, pending_principal_amount, ltv_ratio):
+		msg = _("Loan Security Value after unpledge is {0}").format(frappe.bold(security_value))
+		msg += '<br>'
+		msg += _("Pending principal amount is {0}").format(frappe.bold(flt(pending_principal_amount, 2)))
+		msg += '<br>'
+		msg += _("Loan To Security Value ratio must always be {0}").format(frappe.bold(ltv_ratio))
+		frappe.throw(msg, title=_("Loan To Value ratio breach"))
 
 	def on_update_after_submit(self):
 		self.approve()
