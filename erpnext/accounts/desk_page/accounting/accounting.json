@@ -83,7 +83,7 @@
   {
    "hidden": 0,
    "label": "Value-Added Tax (VAT UAE)",
-   "links": "[\n    {\n        \"country\": \"United Arab Emirates\",\n        \"is_query_report\": true,\n        \"label\": \"UAE VAT 201\",\n        \"name\": \"UAE VAT 201\",\n        \"type\": \"report\"\n    },\n    {\n        \"country\": \"United Arab Emirates\",\n        \"label\": \"UAE VAT Settings\",\n        \"name\": \"UAE VAT Settings\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"country\": \"United Arab Emirates\",\n        \"label\": \"UAE VAT Settings\",\n        \"name\": \"UAE VAT Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"country\": \"United Arab Emirates\",\n        \"is_query_report\": true,\n        \"label\": \"UAE VAT 201\",\n        \"name\": \"UAE VAT 201\",\n        \"type\": \"report\"\n    }\n\n]"
   }
  ],
  "category": "Modules",
@@ -103,7 +103,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-11-06 23:30:39.515679",
+ "modified": "2020-11-06 23:34:50.325014",
  "modified_by": "moha@gmail.com",
  "module": "Accounts",
  "name": "Accounting",
