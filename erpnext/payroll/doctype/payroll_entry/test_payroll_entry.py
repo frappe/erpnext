@@ -7,12 +7,12 @@ import frappe
 import random
 from dateutil.relativedelta import relativedelta
 from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
-from frappe.utils import add_months
+from frappe.utils import add_months, flt
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_start_end_dates, get_end_date
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.payroll.doctype.salary_slip.test_salary_slip import get_salary_component_account, \
-		make_earning_salary_component, make_deduction_salary_component, create_account
-from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+		make_earning_salary_component, make_deduction_salary_component, create_account, make_employee_salary_slip
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure, create_salary_structure_assignment
 from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
 
@@ -45,20 +45,41 @@ class TestPayrollEntry(unittest.TestCase):
 
 	def test_multi_currency_payroll_entry(self): # pylint: disable=no-self-use
 		company = erpnext.get_default_company()
+		employee = make_employee("test_muti_currency_employee@payroll.com", company=company)
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
 			if not frappe.db.get_value('Salary Component Account',
 				{'parent': data.name, 'company': company}, 'name'):
 				get_salary_component_account(data.name)
 
-		employee = frappe.db.get_value("Employee", {'company': company})
 		company_doc = frappe.get_doc('Company', company)
-		currency = frappe.db.get_value("Currency", {'currency_name':  ('not in',[company_doc.default_currency]), 'enabled': 1}, 'currency_name')
-		exchange_rate = random.random()*100
-		make_salary_structure("_Test Multi Currency Salary Structure", "Monthly", employee, company=company, currency=currency)
+		salary_structure = make_salary_structure("_Test Multi Currency Salary Structure", "Monthly", company=company, currency='USD')
+		salary_structure_assignment = create_salary_structure_assignment(employee, salary_structure.name, company=company)
+		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""",(frappe.db.get_value("Employee", {"user_id": "test_muti_currency_employee@payroll.com"})))
+		salary_slip = make_employee_salary_slip("test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure")
+		salary_slip.exchange_rate = 70
+		salary_slip.calculate_net_pay()
+		salary_slip.db_update()
 		dates = get_start_end_dates('Monthly', nowdate())
-		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
-			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account=company_doc.default_payroll_payable_account,
-				currency=currency, exchange_rate=exchange_rate)
+		payroll_entry = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, 
+			payable_account=company_doc.default_payroll_payable_account, currency='USD', exchange_rate=70)
+		payroll_entry.make_payment_entry()
+
+		salary_slip.load_from_db()
+
+		payroll_je = salary_slip.journal_entry
+		payroll_je_doc = frappe.get_doc('Journal Entry', payroll_je)
+
+		self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_debit)
+		self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_credit)
+
+		payment_entry = frappe.db.sql('''
+			Select ifnull(sum(je.total_debit),0) as total_debit, ifnull(sum(je.total_credit),0) as total_credit from `tabJournal Entry` je, `tabJournal Entry Account` jea
+			Where je.name = jea.parent
+			And jea.reference_name = %s
+			''', (payroll_entry.name), as_dict=1)
+
+		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_debit)
+		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_credit)
 
 	def test_payroll_entry_with_employee_cost_center(self): # pylint: disable=no-self-use
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
@@ -201,6 +222,7 @@ def make_payroll_entry(**args):
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
 	if payroll_entry.get_sal_slip_list(ss_status = 1):
+		print('inside')
 		payroll_entry.make_payment_entry()
 
 	return payroll_entry
