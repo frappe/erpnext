@@ -51,6 +51,7 @@ frappe.ui.form.on('POS Closing Entry', {
 			args: {
 				start: frappe.datetime.get_datetime_as_string(frm.doc.period_start_date),
 				end: frappe.datetime.get_datetime_as_string(frm.doc.period_end_date),
+				pos_profile: frm.doc.pos_profile,
 				user: frm.doc.user
 			},
 			callback: (r) => {

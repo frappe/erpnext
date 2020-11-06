@@ -5,23 +5,23 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "send_email",
-  "email_sent",
   "supplier",
   "contact",
-  "no_quote",
   "quote_status",
   "column_break_3",
   "supplier_name",
   "email_id",
-  "download_pdf"
+  "send_email",
+  "email_sent"
  ],
  "fields": [
   {
    "allow_on_submit": 1,
+   "columns": 2,
    "default": "1",
    "fieldname": "send_email",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Send Email"
   },
   {
@@ -35,7 +35,7 @@
    "read_only": 1
   },
   {
-   "columns": 4,
+   "columns": 2,
    "fieldname": "supplier",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -45,7 +45,7 @@
   },
   {
    "allow_on_submit": 1,
-   "columns": 3,
+   "columns": 2,
    "fieldname": "contact",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -55,19 +55,11 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "0",
-   "depends_on": "eval:doc.docstatus >= 1 && doc.quote_status != 'Received'",
-   "fieldname": "no_quote",
-   "fieldtype": "Check",
-   "label": "No Quote"
-  },
-  {
-   "allow_on_submit": 1,
-   "depends_on": "eval:doc.docstatus >= 1 && !doc.no_quote",
+   "depends_on": "eval:doc.docstatus >= 1",
    "fieldname": "quote_status",
    "fieldtype": "Select",
    "label": "Quote Status",
-   "options": "Pending\nReceived\nNo Quote",
+   "options": "Pending\nReceived",
    "read_only": 1
   },
   {
@@ -90,17 +82,12 @@
    "in_list_view": 1,
    "label": "Email Id",
    "no_copy": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "download_pdf",
-   "fieldtype": "Button",
-   "label": "Download PDF"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-28 19:31:11.855588",
+ "modified": "2020-11-04 22:01:43.832942",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Supplier",
