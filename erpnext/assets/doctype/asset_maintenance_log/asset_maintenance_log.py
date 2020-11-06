@@ -11,7 +11,7 @@ from erpnext.assets.doctype.asset_maintenance.asset_maintenance import calculate
 
 class AssetMaintenanceLog(Document):
 	def validate(self):
-		if getdate(self.due_date) < getdate(nowdate()):
+		if getdate(self.due_date) < getdate(nowdate()) and self.maintenance_status not in ["Completed", "Cancelled"]:
 			self.maintenance_status = "Overdue"
 
 		if self.maintenance_status == "Completed" and not self.completion_date:

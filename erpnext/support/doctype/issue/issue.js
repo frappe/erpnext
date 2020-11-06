@@ -2,10 +2,14 @@ frappe.ui.form.on("Issue", {
 	onload: function(frm) {
 		frm.email_field = "raised_by";
 
-		frappe.db.get_value("Support Settings", {name: "Support Settings"}, "allow_resetting_service_level_agreement", (r) => {
-			if (!r.allow_resetting_service_level_agreement) {
-				frm.set_df_property("reset_service_level_agreement", "hidden", 1) ;
-			}
+		frappe.db.get_value("Support Settings", {name: "Support Settings"},
+			["allow_resetting_service_level_agreement", "track_service_level_agreement"], (r) => {
+				if (r && r.track_service_level_agreement == "0") {
+					frm.set_df_property("service_level_section", "hidden", 1);
+				}
+				if (r && r.allow_resetting_service_level_agreement == "0") {
+					frm.set_df_property("reset_service_level_agreement", "hidden", 1);
+				}
 		});
 
 		if (frm.doc.service_level_agreement) {
@@ -38,7 +42,7 @@ frappe.ui.form.on("Issue", {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.status !== "Closed" && frm.doc.agreement_fulfilled === "Ongoing") {
+		if (frm.doc.status !== "Closed" && frm.doc.agreement_status === "Ongoing") {
 			if (frm.doc.service_level_agreement) {
 				frappe.call({
 					'method': 'frappe.client.get',
@@ -85,14 +89,14 @@ frappe.ui.form.on("Issue", {
 			if (frm.doc.service_level_agreement) {
 				frm.dashboard.clear_headline();
 
-				let agreement_fulfilled = (frm.doc.agreement_fulfilled == "Fulfilled") ?
+				let agreement_status = (frm.doc.agreement_status == "Fulfilled") ?
 					{"indicator": "green", "msg": "Service Level Agreement has been fulfilled"} :
 					{"indicator": "red", "msg": "Service Level Agreement Failed"};
 
 				frm.dashboard.set_headline_alert(
 					'<div class="row">' +
 						'<div class="col-xs-12">' +
-							'<span class="indicator whitespace-nowrap '+ agreement_fulfilled.indicator +'"><span class="hidden-xs">'+ agreement_fulfilled.msg +'</span></span> ' +
+							'<span class="indicator whitespace-nowrap '+ agreement_status.indicator +'"><span class="hidden-xs">'+ agreement_status.msg +'</span></span> ' +
 						'</div>' +
 					'</div>'
 				);
@@ -198,31 +202,31 @@ function set_time_to_resolve_and_response(frm) {
 	frm.dashboard.clear_headline();
 
 	var time_to_respond = get_status(frm.doc.response_by_variance);
-	if (!frm.doc.first_responded_on && frm.doc.agreement_fulfilled === "Ongoing") {
-		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_fulfilled);
+	if (!frm.doc.first_responded_on && frm.doc.agreement_status === "Ongoing") {
+		time_to_respond = get_time_left(frm.doc.response_by, frm.doc.agreement_status);
 	}
 
 	var time_to_resolve = get_status(frm.doc.resolution_by_variance);
-	if (!frm.doc.resolution_date && frm.doc.agreement_fulfilled === "Ongoing") {
-		time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_fulfilled);
+	if (!frm.doc.resolution_date && frm.doc.agreement_status === "Ongoing") {
+		time_to_resolve = get_time_left(frm.doc.resolution_by, frm.doc.agreement_status);
 	}
 
 	frm.dashboard.set_headline_alert(
 		'<div class="row">' +
-			'<div class="col-xs-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span class="hidden-xs">Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
+			'<div class="col-xs-12 col-sm-6">' +
+				'<span class="indicator whitespace-nowrap '+ time_to_respond.indicator +'"><span>Time to Respond: '+ time_to_respond.diff_display +'</span></span> ' +
 			'</div>' +
-			'<div class="col-xs-6">' +
-				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span class="hidden-xs">Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
+			'<div class="col-xs-12 col-sm-6">' +
+				'<span class="indicator whitespace-nowrap '+ time_to_resolve.indicator +'"><span>Time to Resolve: '+ time_to_resolve.diff_display +'</span></span> ' +
 			'</div>' +
 		'</div>'
 	);
 }
 
-function get_time_left(timestamp, agreement_fulfilled) {
+function get_time_left(timestamp, agreement_status) {
 	const diff = moment(timestamp).diff(moment());
 	const diff_display = diff >= 44500 ? moment.duration(diff).humanize() : "Failed";
-	let indicator = (diff_display == 'Failed' && agreement_fulfilled != "Fulfilled") ? "red" : "green";
+	let indicator = (diff_display == 'Failed' && agreement_status != "Fulfilled") ? "red" : "green";
 	return {"diff_display": diff_display, "indicator": indicator};
 }
 

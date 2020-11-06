@@ -16,6 +16,7 @@
   "opportunity_from",
   "party_name",
   "customer_name",
+  "source",
   "column_break0",
   "title",
   "opportunity_type",
@@ -23,7 +24,7 @@
   "converted_by",
   "sales_stage",
   "order_lost_reason",
-  "mins_to_first_response",
+  "first_response_time",
   "expected_closing",
   "next_contact",
   "contact_by",
@@ -49,10 +50,9 @@
   "contact_email",
   "contact_mobile",
   "more_info",
-  "source",
+  "company",
   "campaign",
   "column_break1",
-  "company",
   "transaction_date",
   "amended_from",
   "lost_reasons"
@@ -150,13 +150,6 @@
    "fieldtype": "Small Text",
    "label": "Lost Reason",
    "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "bold": 1,
-   "fieldname": "mins_to_first_response",
-   "fieldtype": "Float",
-   "label": "Mins to first response",
    "read_only": 1
   },
   {
@@ -344,7 +337,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "Source",
+   "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
   },
@@ -411,7 +404,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
-   "options": "Lost Reason Detail",
+   "options": "Opportunity Lost Reason Detail",
    "read_only": 1
   },
   {
@@ -419,12 +412,19 @@
    "fieldtype": "Link",
    "label": "Converted By",
    "options": "User"
+  },
+  {
+   "bold": 1,
+   "fieldname": "first_response_time",
+   "fieldtype": "Duration",
+   "label": "First Response Time",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2020-07-14 16:49:15.888503",
+ "modified": "2020-08-12 17:34:35.066961",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

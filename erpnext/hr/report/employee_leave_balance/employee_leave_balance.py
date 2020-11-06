@@ -132,6 +132,9 @@ def get_conditions(filters):
 	if filters.get('employee'):
 		conditions['name'] = filters.get('employee')
 
+	if filters.get('company'):
+		conditions['company'] = filters.get('company')
+
 	return conditions
 
 def get_department_leave_approver_map(department=None):

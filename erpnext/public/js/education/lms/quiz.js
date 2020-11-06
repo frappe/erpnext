@@ -140,7 +140,7 @@ class Question {
 	make_question() {
 		let question_wrapper = document.createElement('h5');
 		question_wrapper.classList.add('mt-3');
-		question_wrapper.innerText = this.question;
+		question_wrapper.innerHTML = this.question;
 		this.wrapper.appendChild(question_wrapper);
 	}
 

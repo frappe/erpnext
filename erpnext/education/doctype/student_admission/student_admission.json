@@ -51,12 +51,14 @@
    "fieldname": "admission_start_date",
    "fieldtype": "Date",
    "label": "Admission Start Date",
+   "mandatory_depends_on": "enable_admission_application",
    "no_copy": 1
   },
   {
    "fieldname": "admission_end_date",
    "fieldtype": "Date",
    "label": "Admission End Date",
+   "mandatory_depends_on": "enable_admission_application",
    "no_copy": 1
   },
   {
@@ -83,6 +85,7 @@
   },
   {
    "default": "0",
+   "depends_on": "published",
    "fieldname": "enable_admission_application",
    "fieldtype": "Check",
    "label": "Enable Admission Application"
@@ -91,7 +94,7 @@
  "has_web_view": 1,
  "is_published_field": "published",
  "links": [],
- "modified": "2020-06-15 20:18:38.591626",
+ "modified": "2020-09-18 00:14:54.615321",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Admission",
