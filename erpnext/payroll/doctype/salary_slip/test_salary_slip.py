@@ -273,7 +273,6 @@ class TestSalarySlip(unittest.TestCase):
 		salary_slip = make_salary_slip(salary_structure.name, employee = applicant)
 		salary_slip.exchange_rate = 70
 		salary_slip.calculate_net_pay()
-		# salary_slip.submit()
 
 		self.assertEqual(salary_slip.gross_pay, 78000)
 		self.assertEqual(salary_slip.base_gross_pay, 78000*70)
@@ -403,15 +402,17 @@ def make_employee_salary_slip(user, payroll_frequency, salary_structure=None):
 		salary_structure_doc = make_salary_structure(salary_structure, payroll_frequency, employee)
 	else:
 		salary_structure_doc = frappe.get_doc('Salary Structure', salary_structure)
-	salary_slip = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})
+	salary_slip_name = frappe.db.get_value("Salary Slip", {"employee": frappe.db.get_value("Employee", {"user_id": user})})
 
-	if not salary_slip:
+	if not salary_slip_name:
 		salary_slip = make_salary_slip(salary_structure_doc.name, employee = employee)
 		salary_slip.employee_name = frappe.get_value("Employee",
 			{"name":frappe.db.get_value("Employee", {"user_id": user})}, "employee_name")
 		salary_slip.payroll_frequency = payroll_frequency
 		salary_slip.posting_date = nowdate()
 		salary_slip.insert()
+	else:
+		salary_slip = frappe.get_doc('Salary Slip', salary_slip_name)
 
 	return salary_slip
 
