@@ -16,9 +16,15 @@ from frappe.utils.jinja import render_template
 
 def execute(filters=None):
 	filters = filters if isinstance(filters, _dict) else _dict(filters)
+
 	if not filters:
 		filters.setdefault('fiscal_year', get_fiscal_year(nowdate())[0])
 		filters.setdefault('company', frappe.db.get_default("company"))
+
+	region = frappe.db.get_value("Company", fieldname = ["country"], filters = { "name": filters.company })
+	if region != 'United States':
+		return [],[]
+
 	data = []
 	columns = get_columns()
 	data = frappe.db.sql("""

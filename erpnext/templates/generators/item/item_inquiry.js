@@ -22,6 +22,13 @@ frappe.ready(() => {
 			},
 			{
 				fieldtype: 'Data',
+				label: __('Phone Number'),
+				fieldname: 'phone',
+				options: 'Phone',
+				reqd: 1
+			},
+			{
+				fieldtype: 'Data',
 				label: __('Subject'),
 				fieldname: 'subject',
 				reqd: 1

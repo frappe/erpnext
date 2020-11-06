@@ -8,6 +8,7 @@
   "program",
   "min_age",
   "max_age",
+  "description",
   "column_break_4",
   "application_fee",
   "applicant_naming_series"
@@ -18,52 +19,47 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Program",
-   "options": "Program",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Program"
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "application_fee",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Application Fee",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Application Fee"
   },
   {
    "fieldname": "applicant_naming_series",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Naming Series (for Student Applicant)",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Naming Series (for Student Applicant)"
   },
   {
    "fieldname": "min_age",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Minimum Age",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Minimum Age"
   },
   {
    "fieldname": "max_age",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Maximum Age",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Maximum Age"
+  },
+  {
+   "fetch_from": "program.description",
+   "fetch_if_empty": 1,
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-06-10 23:06:30.037404",
+ "modified": "2020-10-05 13:03:42.005985",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Admission Program",

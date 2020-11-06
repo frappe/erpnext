@@ -8,6 +8,7 @@ from frappe import _
 from frappe.utils import flt, getdate, cint, date_diff, formatdate
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from frappe.model.document import Document
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
 
 class AssetValueAdjustment(Document):
 	def validate(self):
@@ -53,17 +54,33 @@ class AssetValueAdjustment(Document):
 		je.company = self.company
 		je.remark = "Depreciation Entry against {0} worth {1}".format(self.asset, self.difference_amount)
 
-		je.append("accounts", {
+		credit_entry = {
 			"account": accumulated_depreciation_account,
 			"credit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center
-		})
+		}
 
-		je.append("accounts", {
+		debit_entry = {
 			"account": depreciation_expense_account,
 			"debit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center
-		})
+		}
+
+		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
+
+		for dimension in accounting_dimensions:
+			if dimension.get('mandatory_for_bs'):
+				credit_entry.update({
+					dimension['fieldname']: self.get(dimension['fieldname']) or dimension.get('default_dimension')
+				})
+
+			if dimension.get('mandatory_for_pl'):
+				debit_entry.update({
+					dimension['fieldname']: self.get(dimension['fieldname']) or dimension.get('default_dimension')
+				})
+		
+		je.append("accounts", credit_entry)
+		je.append("accounts", debit_entry)
 
 		je.flags.ignore_permissions = True
 		je.submit()

@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
 from frappe.utils import cint
 from frappe.integrations.utils import get_payment_gateway_controller
+from erpnext.non_profit.doctype.membership_type.membership_type import get_membership_type
 
 class Member(Document):
 	def onload(self):
@@ -53,6 +54,19 @@ class Member(Document):
 
 		return subscription
 
+	def make_customer_and_link(self):
+		if self.customer:
+			frappe.msgprint(_("A customer is already linked to this Member"))
+		cust = create_customer(frappe._dict({
+			'fullname': self.member_name,
+			'email': self.email_id or self.user,
+			'phone': None
+		}))
+
+		self.customer = cust
+		self.save()
+
+
 def get_or_create_member(user_details):
 	member_list = frappe.get_all("Member", filters={'email': user_details.email, 'membership_type': user_details.plan_id})
 	if member_list and member_list[0]:
@@ -61,19 +75,23 @@ def get_or_create_member(user_details):
 		return create_member(user_details)
 
 def create_member(user_details):
+	user_details = frappe._dict(user_details)
 	member = frappe.new_doc("Member")
 	member.update({
 		"member_name": user_details.fullname,
 		"email_id": user_details.email,
-		"pan_number": user_details.pan,
+		"pan_number": user_details.pan or None,
 		"membership_type": user_details.plan_id,
-		"customer": create_customer(user_details)
+		"subscription_id": user_details.subscription_id or None
 	})
 
 	member.insert(ignore_permissions=True)
+	member.customer = create_customer(user_details, member.name)
+	member.save(ignore_permissions=True)
+
 	return member
 
-def create_customer(user_details):
+def create_customer(user_details, member=None):
 	customer = frappe.new_doc("Customer")
 	customer.customer_name = user_details.fullname
 	customer.customer_type = "Individual"
@@ -83,8 +101,10 @@ def create_customer(user_details):
 	try:
 		contact = frappe.new_doc("Contact")
 		contact.first_name = user_details.fullname
-		contact.add_phone(user_details.mobile, is_primary_phone=1, is_primary_mobile_no=1)
-		contact.add_email(user_details.email, is_primary=1)
+		if user_details.mobile:
+			contact.add_phone(user_details.mobile, is_primary_phone=1, is_primary_mobile_no=1)
+		if user_details.email:
+			contact.add_email(user_details.email, is_primary=1)
 		contact.insert(ignore_permissions=True)
 
 		contact.append("links", {
@@ -92,7 +112,13 @@ def create_customer(user_details):
 			"link_name": customer.name
 		})
 
-		contact.save()
+		if member:
+			contact.append("links", {
+				"link_doctype": "Member",
+				"link_name": member
+			})
+
+		contact.save(ignore_permissions=True)
 
 	except frappe.DuplicateEntryError:
 		return customer.name
@@ -121,11 +147,9 @@ def create_member_subscription_order(user_details):
 			'subscription_id': 'sub_EZycCvXFvqnC6p'
 		}
 	"""
-	# {"plan_id":"IFF Starter","fullname":"Shivam Mishra","mobile":"7506056962","email":"shivam@shivam.dev","pan":"Testing123"}
+
 	user_details = frappe._dict(user_details)
 	member = get_or_create_member(user_details)
-	if not member:
-		member = create_member(user_details)
 
 	subscription = member.setup_subscription()
 
@@ -133,3 +157,24 @@ def create_member_subscription_order(user_details):
 	member.save(ignore_permissions=True)
 
 	return subscription
+
+@frappe.whitelist()
+def register_member(fullname, email, rzpay_plan_id, subscription_id, pan=None, mobile=None):
+	plan = get_membership_type(rzpay_plan_id)
+	if not plan:
+		raise frappe.DoesNotExistError
+
+	member = frappe.db.exists("Member", {'email': email, 'subscription_id': subscription_id })
+	if member:
+		return member
+	else:
+		member = create_member(dict(
+			fullname=fullname,
+			email=email,
+			plan_id=plan,
+			subscription_id=subscription_id,
+			pan=pan,
+			mobile=mobile
+		))
+
+		return member.name

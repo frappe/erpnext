@@ -31,7 +31,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 				sle['posting_time'] = now_datetime().strftime('%H:%M:%S.%f')
 
 				if cancel:
-					sle['actual_qty'] = -flt(sle.get('actual_qty'), 0)
+					sle['actual_qty'] = -flt(sle.get('actual_qty'))
 
 					if sle['actual_qty'] < 0 and not sle.get('outgoing_rate'):
 						sle['outgoing_rate'] = get_incoming_outgoing_rate_for_cancel(sle.item_code,

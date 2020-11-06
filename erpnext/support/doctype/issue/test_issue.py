@@ -73,7 +73,7 @@ class TestIssue(unittest.TestCase):
 		issue.status = 'Closed'
 		issue.save()
 
-		self.assertEqual(issue.agreement_fulfilled, 'Fulfilled')
+		self.assertEqual(issue.agreement_status, 'Fulfilled')
 
 	def test_issue_metrics(self):
 		creation = datetime.datetime(2020, 3, 4, 4, 0)

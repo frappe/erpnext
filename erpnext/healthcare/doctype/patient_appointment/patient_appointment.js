@@ -226,7 +226,9 @@ let check_and_set_availability = function(frm) {
 			primary_action_label: __('Book'),
 			primary_action: function() {
 				frm.set_value('appointment_time', selected_slot);
-				frm.set_value('duration', duration);
+				if (!frm.doc.duration) {
+					frm.set_value('duration', duration);
+				}
 				frm.set_value('practitioner', d.get_value('practitioner'));
 				frm.set_value('department', d.get_value('department'));
 				frm.set_value('appointment_date', d.get_value('appointment_date'));

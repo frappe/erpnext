@@ -89,7 +89,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
 
 
-	def test_update_child_qty_rate(self):
+	def test_update_child(self):
 		mr = make_material_request(qty=10)
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
@@ -119,7 +119,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
 
-	def test_add_new_item_in_update_child_qty_rate(self):
+	def test_update_child_adding_new_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
 		po.save()
@@ -145,7 +145,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.status, 'To Receive and Bill')
 
 
-	def test_remove_item_in_update_child_qty_rate(self):
+	def test_update_child_removing_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
 		po.save()
@@ -185,7 +185,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEquals(len(po.get('items')), 1)
 		self.assertEqual(po.status, 'To Receive and Bill')
 
-	def test_update_child_qty_rate_perm(self):
+	def test_update_child_perm(self):
 		po = create_purchase_order(item_code= "_Test Item", qty=4)
 
 		user = 'test@example.com'
@@ -201,6 +201,110 @@ class TestPurchaseOrder(unittest.TestCase):
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
 		frappe.set_user("Administrator")
+
+	def test_update_child_with_tax_template(self):
+		"""
+			Test Action: Create a PO with one item having its tax account head already in the PO.
+			Add the same item + new item with tax template via Update Items.
+			Expected result: First Item's tax row is updated. New tax row is added for second Item.
+		"""
+		if not frappe.db.exists("Item", "Test Item with Tax"):
+			make_item("Test Item with Tax", {
+				'is_stock_item': 1,
+			})
+
+		if not frappe.db.exists("Item Tax Template", {"title": 'Test Update Items Template'}):
+			frappe.get_doc({
+				'doctype': 'Item Tax Template',
+				'title': 'Test Update Items Template',
+				'company': '_Test Company',
+				'taxes': [
+					{
+						'tax_type': "_Test Account Service Tax - _TC",
+						'tax_rate': 10,
+					}
+				]
+			}).insert()
+
+		new_item_with_tax = frappe.get_doc("Item", "Test Item with Tax")
+
+		new_item_with_tax.append("taxes", {
+			"item_tax_template": "Test Update Items Template",
+			"valid_from": nowdate()
+		})
+		new_item_with_tax.save()
+
+		tax_template = "_Test Account Excise Duty @ 10"
+		item =  "_Test Item Home Desktop 100"
+		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
+			item_doc = frappe.get_doc("Item", item)
+			item_doc.append("taxes", {
+				"item_tax_template": tax_template,
+				"valid_from": nowdate()
+			})
+			item_doc.save()
+		else:
+			# update valid from
+			frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = CURDATE()
+				where parent = %(item)s and item_tax_template = %(tax)s""",
+					{"item": item, "tax": tax_template})
+
+		po = create_purchase_order(item_code=item, qty=1, do_not_save=1)
+
+		po.append("taxes", {
+			"account_head": "_Test Account Excise Duty - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"doctype": "Purchase Taxes and Charges",
+			"rate": 10
+		})
+		po.insert()
+		po.submit()
+
+		self.assertEqual(po.taxes[0].tax_amount, 50)
+		self.assertEqual(po.taxes[0].total, 550)
+
+		items = json.dumps([
+			{'item_code' : item, 'rate' : 500, 'qty' : 1, 'docname': po.items[0].name},
+			{'item_code' : item, 'rate' : 100, 'qty' : 1}, # added item whose tax account head already exists in PO
+			{'item_code' : new_item_with_tax.name, 'rate' : 100, 'qty' : 1} # added item whose tax account head  is missing in PO
+		])
+		update_child_qty_rate('Purchase Order', items, po.name)
+
+		po.reload()
+		self.assertEqual(po.taxes[0].tax_amount, 70)
+		self.assertEqual(po.taxes[0].total, 770)
+		self.assertEqual(po.taxes[1].account_head, "_Test Account Service Tax - _TC")
+		self.assertEqual(po.taxes[1].tax_amount, 70)
+		self.assertEqual(po.taxes[1].total, 840)
+
+		# teardown
+		frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = NULL
+			where parent = %(item)s and item_tax_template = %(tax)s""", {"item": item, "tax": tax_template})
+		po.cancel()
+		po.delete()
+		new_item_with_tax.delete()
+		frappe.get_doc("Item Tax Template", "Test Update Items Template").delete()
+
+	def test_update_child_uom_conv_factor_change(self):
+		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
+		total_reqd_qty = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+
+		trans_item = json.dumps([{
+			'item_code': po.get("items")[0].item_code,
+			'rate': po.get("items")[0].rate,
+			'qty': po.get("items")[0].qty,
+			'uom': "_Test UOM 1",
+			'conversion_factor': 2,
+			'docname': po.get("items")[0].name
+		}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		po.reload()
+
+		total_reqd_qty_after_change = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+
+		self.assertEqual(total_reqd_qty_after_change, 2 * total_reqd_qty)
 
 	def test_update_qty(self):
 		po = create_purchase_order()
@@ -585,12 +689,12 @@ class TestPurchaseOrder(unittest.TestCase):
 		make_subcontracted_item(item_code)
 
 		po = create_purchase_order(item_code=item_code, qty=1,
-			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", include_exploded_items=1)
 
 		name = frappe.db.get_value('BOM', {'item': item_code}, 'name')
 		bom = frappe.get_doc('BOM', name)
 
-		exploded_items = sorted([d.item_code for d in bom.exploded_items])
+		exploded_items = sorted([d.item_code for d in bom.exploded_items if not d.get('sourced_by_supplier')])
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
 		self.assertEquals(exploded_items, supplied_items)
 
@@ -598,7 +702,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", include_exploded_items=0)
 
 		supplied_items1 = sorted([d.rm_item_code for d in po1.supplied_items])
-		bom_items = sorted([d.item_code for d in bom.items])
+		bom_items = sorted([d.item_code for d in bom.items if not d.get('sourced_by_supplier')])
 
 		self.assertEquals(supplied_items1, bom_items)
 

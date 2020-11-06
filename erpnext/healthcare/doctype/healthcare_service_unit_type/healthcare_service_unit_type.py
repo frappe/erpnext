@@ -39,7 +39,9 @@ class HealthcareServiceUnitType(Document):
 	def on_trash(self):
 		if self.item:
 			try:
-				frappe.delete_doc('Item', self.item)
+				item = self.item
+				self.db_set('item', '')
+				frappe.delete_doc('Item', item)
 			except Exception:
 				frappe.throw(_('Not permitted. Please disable the Service Unit Type'))
 

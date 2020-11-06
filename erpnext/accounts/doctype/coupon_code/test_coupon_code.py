@@ -9,6 +9,8 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.get_item_details import get_item_details
 from frappe.test_runner import make_test_objects
 
+test_dependencies = ['Item']
+
 def test_create_test_data():
 	frappe.set_user("Administrator")
 	# create test item
@@ -94,7 +96,6 @@ def test_create_test_data():
 		"used":0
 		})
 		coupon_code.insert()
-
 
 class TestCouponCode(unittest.TestCase):
 	def setUp(self):

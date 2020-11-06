@@ -21,6 +21,10 @@
   "total_security_value",
   "column_break_11",
   "maximum_loan_value",
+  "more_information_section",
+  "reference_no",
+  "column_break_18",
+  "description",
   "amended_from"
  ],
  "fields": [
@@ -129,11 +133,34 @@
    "label": "Applicant Type",
    "options": "Employee\nMember\nCustomer",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Reference No"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-02 23:38:24.002382",
+ "modified": "2020-09-04 22:38:19.894488",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",

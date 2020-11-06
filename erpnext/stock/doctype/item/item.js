@@ -26,19 +26,19 @@ frappe.ui.form.on("Item", {
 
 	refresh: function(frm) {
 		if (frm.doc.is_stock_item) {
-			frm.add_custom_button(__("Balance"), function() {
+			frm.add_custom_button(__("Stock Balance"), function() {
 				frappe.route_options = {
 					"item_code": frm.doc.name
 				}
 				frappe.set_route("query-report", "Stock Balance");
 			}, __("View"));
-			frm.add_custom_button(__("Ledger"), function() {
+			frm.add_custom_button(__("Stock Ledger"), function() {
 				frappe.route_options = {
 					"item_code": frm.doc.name
 				}
 				frappe.set_route("query-report", "Stock Ledger");
 			}, __("View"));
-			frm.add_custom_button(__("Projected"), function() {
+			frm.add_custom_button(__("Stock Projected Qty"), function() {
 				frappe.route_options = {
 					"item_code": frm.doc.name
 				}
@@ -117,7 +117,7 @@ frappe.ui.form.on("Item", {
 		const stock_exists = (frm.doc.__onload
 			&& frm.doc.__onload.stock_exists) ? 1 : 0;
 
-		['is_stock_item', 'has_serial_no', 'has_batch_no'].forEach((fieldname) => {
+		['is_stock_item', 'has_serial_no', 'has_batch_no', 'has_variants'].forEach((fieldname) => {
 			frm.set_df_property(fieldname, 'read_only', stock_exists);
 		});
 
