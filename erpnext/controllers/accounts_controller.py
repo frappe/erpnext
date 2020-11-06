@@ -38,9 +38,12 @@ print_total_fields_from_items = [
 	('taxable_total', 'taxable_amount'),
 
 	('total_discount', 'total_discount'),
+	('tax_exclusive_total_discount', 'tax_exclusive_total_discount'),
 	('total_before_discount', 'amount_before_discount'),
-	('total_exclusive_total_discount', 'total_exclusive_total_discount'),
 	('tax_exclusive_total_before_discount', 'tax_exclusive_amount_before_discount'),
+
+	('grand_total', 'tax_inclusive_amount'),
+	('total_taxes_and_charges', 'item_taxes_and_charges'),
 
 	('total_net_weight', 'total_weight')
 ]
