@@ -188,7 +188,7 @@ def get_conditions(filters):
 		conditions += "AND so.transaction_date <= '%s'" %filters.to_date
 
 	if filters.get("item_code"):
-		conditions += "AND so_item.item_code = '%s'" %frappe.db.escape(filters.item_code)
+		conditions += "AND so_item.item_code = %s" %frappe.db.escape(filters.item_code)
 
 	if filters.get("customer"):
 		conditions += "AND so.customer = %s" %frappe.db.escape(filters.customer)

@@ -124,7 +124,7 @@ class TestStockReconciliation(unittest.TestCase):
 		to_delete_records.append(sr.name)
 
 		sr = create_stock_reconciliation(item_code=serial_item_code,
-			warehouse = serial_warehouse, qty=5, rate=300, serial_no = '\n'.join(serial_nos))
+			warehouse = serial_warehouse, qty=5, rate=300)
 
 		serial_nos1 = get_serial_nos(sr.items[0].serial_no)
 		self.assertEqual(len(serial_nos1), 5)
