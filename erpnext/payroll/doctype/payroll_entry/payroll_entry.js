@@ -159,17 +159,35 @@ frappe.ui.form.on('Payroll Entry', {
 		}
 		if (frm.doc.currency) {
 			if (company_currency != frm.doc.currency) {
-				cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-				+ " = [?] " + company_currency);
-				cur_frm.set_df_property("exchange_rate", "hidden", 0);
-				frm.set_value('exchange_rate', null);
+				frappe.call({
+					method: "erpnext.setup.utils.get_exchange_rate",
+					args: {
+						from_currency: frm.doc.currency,
+						to_currency: company_currency,
+					},
+					callback: function(r) {
+						frm.set_value("exchange_rate", flt(r.message));
+						frm.set_df_property('exchange_rate', 'hidden', 0);
+						frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+							+ " = [?] " + company_currency);
+					}
+				});
+			} else {
+				frm.set_value("exchange_rate", 1.0);
+				frm.set_df_property('exchange_rate', 'hidden', 1);
+				frm.set_df_property("exchange_rate", "description", "" );
 			}
-			else {
-				cur_frm.set_df_property("exchange_rate", "description", "");
-				cur_frm.set_df_property("exchange_rate", "hidden", 1);
-				frm.doc.exchange_rate = 1;
+			// 	cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+			// 	+ " = [?] " + company_currency);
+			// 	cur_frm.set_df_property("exchange_rate", "hidden", 0);
+			// 	frm.set_value('exchange_rate', null);
+			// }
+			// else {
+			// 	cur_frm.set_df_property("exchange_rate", "description", "");
+			// 	cur_frm.set_df_property("exchange_rate", "hidden", 1);
+			// 	frm.doc.exchange_rate = 1;
 
-			}
+			// }
 		}
 	},
 
