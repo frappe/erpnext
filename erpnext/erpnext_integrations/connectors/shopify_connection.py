@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 import json
-from frappe.utils import cstr, cint, nowdate, getdate, flt, get_request_session
+from frappe.utils import cstr, cint, nowdate, getdate, flt, get_request_session, get_datetime
 from erpnext.erpnext_integrations.utils import validate_webhooks_request
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note, make_sales_invoice
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import sync_item_from_shopify
@@ -84,7 +84,7 @@ def create_order(order, shopify_settings, old_order_sync=False, company=None):
 		if order.get("financial_status") == "paid":
 			create_sales_invoice(order, shopify_settings, so, old_order_sync=old_order_sync)
 
-		if order.get("fulfillments"):
+		if order.get("fulfillments") and not old_order_sync:
 			create_delivery_note(order, shopify_settings, so)
 
 def create_sales_order(shopify_order, shopify_settings, company=None):
@@ -93,7 +93,7 @@ def create_sales_order(shopify_order, shopify_settings, company=None):
 	so = frappe.db.get_value("Sales Order", {"shopify_order_id": shopify_order.get("id")}, "name")
 
 	if not so:
-		items = get_order_items(shopify_order.get("line_items"), shopify_settings)
+		items = get_order_items(shopify_order.get("line_items"), shopify_settings, getdate(shopify_order.get('created_at')))
 
 		if not items:
 			message = 'Following items exists in the shopify order but relevant records were not found in the shopify Product master'
@@ -201,7 +201,7 @@ def get_discounted_amount(order):
 		discounted_amount += flt(discount.get("amount"))
 	return discounted_amount
 
-def get_order_items(order_items, shopify_settings):
+def get_order_items(order_items, shopify_settings, delivery_date):
 	items = []
 	all_product_exists = True
 	product_not_exists = []
@@ -219,7 +219,7 @@ def get_order_items(order_items, shopify_settings):
 				"item_code": item_code,
 				"item_name": shopify_item.get("name"),
 				"rate": shopify_item.get("price"),
-				"delivery_date": nowdate(),
+				"delivery_date": delivery_date,
 				"qty": shopify_item.get("quantity"),
 				"stock_uom": shopify_item.get("uom") or _("Nos"),
 				"warehouse": shopify_settings.warehouse
@@ -299,15 +299,18 @@ def sync_old_orders():
 		orders_list = [d.get('id') for d in orders]
 
 		for order in orders:
-			if is_sync_complete(order):
+			if is_sync_complete(shopify_settings, order):
 				stop_sync(shopify_settings)
+				return
 
 			sync_sales_order(order=order, old_order_sync=True)
 			last_order_id = order.get('id')
 
 		if last_order_id:
+			shopify_settings.load_from_db()
 			shopify_settings.last_order_id = last_order_id
 			shopify_settings.save()
+			frappe.db.commit()
 
 	except Exception as e:
 		raise e
@@ -316,27 +319,26 @@ def stop_sync(shopify_settings):
 	shopify_settings.sync_missing_orders = 0
 	shopify_settings.last_order_id = ''
 	shopify_settings.save()
+	frappe.db.commit()
 
 def get_url(shopify_settings):
 	last_order_id = shopify_settings.last_order_id
 
 	if not last_order_id:
 		if shopify_settings.sync_based_on == 'Date':
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&created_at_min={0}".format(
-				getdate(shopify_settings.from_date)))
+			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&created_at_min={0}&since_id=0".format(
+				get_datetime(shopify_settings.from_date)), shopify_settings)
 		else:
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&name={0}".format(
-				shopify_settings.from_order_number), shopify_settings)
+			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(
+				shopify_settings.from_order_id), shopify_settings)
 	else:
 		url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(last_order_id), shopify_settings)
 
+	return url
+
 def is_sync_complete(shopify_settings, order):
 	if shopify_settings.sync_based_on == 'Date':
-		if getdate(order.get('created_at')) > shopify_settings.to_date:
-			return True
+		return getdate(shopify_settings.to_date) < getdate(order.get('created_at'))
 	else:
-		if order.get('name') > shopify_settings.to_order_number:
-			return True
-
-	return False
+		return cstr(order.get('id')) == cstr(shopify_settings.to_order_id)
 

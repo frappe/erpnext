@@ -49,8 +49,8 @@
   "column_break_41",
   "from_date",
   "to_date",
-  "from_order_no",
-  "to_order_no",
+  "from_order_id",
+  "to_order_id",
   "last_order_id"
  ],
  "fields": [
@@ -274,7 +274,7 @@
    "label": "Syncing Missing Orders"
   },
   {
-   "depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders",
+   "depends_on": "eval:doc.sync_missing_orders",
    "fieldname": "last_order_id",
    "fieldtype": "Data",
    "label": "Last Order Id",
@@ -297,7 +297,7 @@
    "fieldtype": "Select",
    "label": "Sync Based On",
    "mandatory_depends_on": "eval:doc.sync_missing_orders",
-   "options": "\nDate\nShopify Order Number"
+   "options": "\nDate\nShopify Order Id"
   },
   {
    "depends_on": "eval:doc.sync_based_on == 'Date' && doc.sync_missing_orders",
@@ -314,25 +314,23 @@
    "mandatory_depends_on": "eval:doc.sync_based_on == 'Date' && doc.sync_missing_orders"
   },
   {
-   "depends_on": "eval:doc.sync_based_on == 'Shopify Order Number' && doc.sync_missing_orders",
-   "description": "Eg: #1234",
-   "fieldname": "from_order_no",
+   "depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders",
+   "fieldname": "from_order_id",
    "fieldtype": "Data",
-   "label": "From Order Number",
+   "label": "From Order Id",
    "mandatory_depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders"
   },
   {
-   "depends_on": "eval:doc.sync_based_on == 'Shopify Order Number' && doc.sync_missing_orders",
-   "description": "Eg: #1236 ",
-   "fieldname": "to_order_no",
+   "depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders",
+   "fieldname": "to_order_id",
    "fieldtype": "Data",
-   "label": "To Order Number",
+   "label": "To Order Id",
    "mandatory_depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-11-05 16:16:55.785504",
+ "modified": "2020-11-05 20:44:03.664891",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Shopify Settings",
