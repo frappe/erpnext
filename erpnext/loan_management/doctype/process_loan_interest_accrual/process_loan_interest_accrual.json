@@ -10,6 +10,7 @@
   "loan_type",
   "loan",
   "process_type",
+  "accrual_type",
   "amended_from"
  ],
  "fields": [
@@ -47,12 +48,18 @@
    "hidden": 1,
    "label": "Process Type",
    "read_only": 1
+  },
+  {
+   "fieldname": "accrual_type",
+   "fieldtype": "Select",
+   "label": "Accrual Type",
+   "options": "Regular\nRepayment\nDisbursement"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-05 10:49:35.657728",
+ "modified": "2020-11-06 04:43:56.581670",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Interest Accrual",

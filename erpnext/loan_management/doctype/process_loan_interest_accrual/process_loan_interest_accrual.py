@@ -20,11 +20,11 @@ class ProcessLoanInterestAccrual(Document):
 
 		if (not self.loan or not loan_doc.is_term_loan) and self.process_type != 'Term Loans':
 			make_accrual_interest_entry_for_demand_loans(self.posting_date, self.name,
-				open_loans = open_loans, loan_type = self.loan_type)
+				open_loans = open_loans, loan_type = self.loan_type, accrual_type=self.accrual_type)
 
 		if (not self.loan or loan_doc.is_term_loan) and self.process_type != 'Demand Loans':
 			make_accrual_interest_entry_for_term_loans(self.posting_date, self.name, term_loan=self.loan,
-				loan_type=self.loan_type)
+				loan_type=self.loan_type, accrual_type=self.accrual_type)
 
 
 def process_loan_interest_accrual_for_demand_loans(posting_date=None, loan_type=None, loan=None, accrual_type="Regular"):
