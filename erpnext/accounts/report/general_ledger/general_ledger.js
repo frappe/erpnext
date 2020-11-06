@@ -147,6 +147,12 @@ frappe.query_reports["General Ledger"] = {
 			}
 		},
 		{
+			"fieldname": "include_dimensions",
+			"label": __("Consider Accounting Dimensions"),
+			"fieldtype": "Check",
+			"default": 0
+		},
+		{
 			"fieldname": "show_opening_entries",
 			"label": __("Show Opening Entries"),
 			"fieldtype": "Check"

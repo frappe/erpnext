@@ -133,11 +133,11 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-11-12 15:41:21.053462",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Item",
- "owner": "wasim@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
  "sort_order": "DESC"

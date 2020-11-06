@@ -923,7 +923,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
-   "options": "Lost Reason Detail",
+   "options": "Quotation Lost Reason Detail",
    "read_only": 1
   }
  ],
@@ -932,7 +932,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-07-18 04:59:09.960118",
+ "modified": "2020-07-26 17:46:19.951223",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

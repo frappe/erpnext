@@ -135,7 +135,7 @@ var create_import_button = function(frm) {
 			callback: function(r) {
 				if(!r.exc) {
 					clearInterval(frm.page["interval"]);
-					frm.page.set_indicator(__('Import Successfull'), 'blue');
+					frm.page.set_indicator(__('Import Successful'), 'blue');
 					create_reset_button(frm);
 				}
 			}

@@ -35,14 +35,18 @@
 <div class="row transaction-subheading">
 	<div class="col-6">
 		<span class="indicator {{ doc.indicator_color or ("blue" if doc.docstatus==1 else "darkgrey") }}">
-			{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
+			{% if doc.doctype == "Quotation" and not doc.docstatus %}
+				{{ _("Pending") }}
+			{% else %}
+				{{ _(doc.get('indicator_title')) or _(doc.status) or _("Submitted") }}
+			{% endif %}
 		</span>
 	</div>
 	<div class="col-6 text-muted text-right small">
-		{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
+		{{ frappe.utils.format_date(doc.transaction_date, 'medium') }}
 		{% if doc.valid_till %}
 		<p>
-		{{ _("Valid Till") }}: {{ frappe.utils.formatdate(doc.valid_till, 'medium') }}
+		{{ _("Valid Till") }}: {{ frappe.utils.format_date(doc.valid_till, 'medium') }}
 		</p>
 		{% endif %}
 	</div>
@@ -95,7 +99,6 @@
 		</div>
 		{% endfor %}
 	</div>
-
 	<!-- taxes -->
 	<div class="order-taxes d-flex justify-content-end">
 		<table>

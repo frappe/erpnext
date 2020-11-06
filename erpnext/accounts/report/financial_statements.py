@@ -14,7 +14,7 @@ import frappe, erpnext
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr)
+from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr, cint)
 
 from six import itervalues
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
@@ -46,7 +46,7 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
 
-	for i in range(math.ceil(months / months_to_add)):
+	for i in range(cint(math.ceil(months / months_to_add))):
 		period = frappe._dict({
 			"from_date": start_date
 		})
@@ -307,7 +307,7 @@ def get_accounts(company, root_type):
 		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
 
 
-def filter_accounts(accounts, depth=10):
+def filter_accounts(accounts, depth=20):
 	parent_children_map = {}
 	accounts_by_name = {}
 	for d in accounts:
@@ -423,7 +423,7 @@ def set_gl_entries_by_account(
 				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 
 		if filters and filters.get('presentation_currency'):
-			convert_to_presentation_currency(gl_entries, get_currency(filters))
+			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get('company'))
 
 		for entry in gl_entries:
 			gl_entries_by_account.setdefault(entry.account, []).append(entry)

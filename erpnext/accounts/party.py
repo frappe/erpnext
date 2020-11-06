@@ -203,7 +203,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	return out
 
 @frappe.whitelist()
-def get_party_account(party_type, party, company):
+def get_party_account(party_type, party, company=None):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Group),
@@ -611,7 +611,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 			cond = "posting_date <= '{0}'".format(posting_date)
 
 	if company:
-		cond += "and company = '{0}'".format(company)
+		cond += "and company = {0}".format(frappe.db.escape(company))
 
 	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`

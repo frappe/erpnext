@@ -347,8 +347,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		# create additional salary of 150000
 		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""", (employee))
-		data["additional-1"] = create_additional_salary(employee, payroll_period, 50000)
-		data["additional-2"] = create_additional_salary(employee, payroll_period, 100000)
+		data["additional-1"] = create_additional_salary(employee, payroll_period, 150000)
 		data["deducted_dates"] = create_salary_slips_for_payroll_period(employee,
 			salary_structure.name, payroll_period)
 

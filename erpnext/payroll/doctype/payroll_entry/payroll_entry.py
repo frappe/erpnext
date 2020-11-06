@@ -90,7 +90,7 @@ class PayrollEntry(Document):
 		cond = ''
 		for f in ['company', 'branch', 'department', 'designation']:
 			if self.get(f):
-				cond += " and t1." + f + " = '" + self.get(f).replace("'", "\'") + "'"
+				cond += " and t1." + f + " = " + frappe.db.escape(self.get(f))
 
 		return cond
 

@@ -78,7 +78,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "HR",
- "modified": "2020-06-16 19:20:50.976045",
+ "modified": "2020-08-11 17:04:38.655417",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
@@ -88,7 +88,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "color": "#9deca2",
+   "color": "#cef6d1",
    "format": "{} Active",
    "label": "Employee",
    "link_to": "Employee",
@@ -96,16 +96,17 @@
    "type": "DocType"
   },
   {
-   "label": "Attendance",
-   "link_to": "Attendance",
-   "stats_filter": "",
-   "type": "DocType"
-  },
-  {
+   "color": "#ffe8cd",
    "format": "{} Open",
    "label": "Leave Application",
    "link_to": "Leave Application",
    "stats_filter": "{\"status\":\"Open\"}",
+   "type": "DocType"
+  },
+  {
+   "label": "Attendance",
+   "link_to": "Attendance",
+   "stats_filter": "",
    "type": "DocType"
   },
   {

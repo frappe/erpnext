@@ -83,6 +83,7 @@ def get_healthcare_service_unit():
 	if not service_unit:
 		service_unit = frappe.new_doc("Healthcare Service Unit")
 		service_unit.healthcare_service_unit_name = "Test Service Unit Ip Occupancy"
+		service_unit.company = "_Test Company"
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1
 		service_unit.occupancy_status = "Vacant"

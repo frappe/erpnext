@@ -72,7 +72,7 @@ erpnext.accounts.bankReconciliation = class BankReconciliation {
 	check_plaid_status() {
 		const me = this;
 		frappe.db.get_value("Plaid Settings", "Plaid Settings", "enabled", (r) => {
-			if (r && r.enabled == "1") {
+			if (r && r.enabled === "1") {
 				me.plaid_status = "active"
 			} else {
 				me.plaid_status = "inactive"
@@ -139,7 +139,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 	}
 
 	make() {
-		const me = this;	
+		const me = this;
 		new frappe.ui.FileUploader({
 			method: 'erpnext.accounts.doctype.bank_transaction.bank_transaction_upload.upload_bank_statement',
 			allow_multiple: 0,
@@ -214,31 +214,35 @@ erpnext.accounts.bankTransactionSync = class bankTransactionSync {
 
 	init_config() {
 		const me = this;
-		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.plaid_configuration')
-		.then(result => {
-			me.plaid_env = result.plaid_env;
-			me.plaid_public_key = result.plaid_public_key;
-			me.client_name = result.client_name;
-			me.sync_transactions()
-		})
+		frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.get_plaid_configuration')
+			.then(result => {
+				me.plaid_env = result.plaid_env;
+				me.client_name = result.client_name;
+				me.link_token = result.link_token;
+				me.sync_transactions();
+			})
 	}
 
 	sync_transactions() {
 		const me = this;
-		frappe.db.get_value("Bank Account", me.parent.bank_account, "bank", (v) => {
+		frappe.db.get_value("Bank Account", me.parent.bank_account, "bank", (r) => {
 			frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.sync_transactions', {
-				bank: v['bank'],
+				bank: r.bank,
 				bank_account: me.parent.bank_account,
 				freeze: true
 			})
 			.then((result) => {
-				let result_title = (result.length > 0) ? __("{0} bank transaction(s) created", [result.length]) : __("This bank account is already synchronized")
+				let result_title = (result && result.length > 0)
+					? __("{0} bank transaction(s) created", [result.length])
+					: __("This bank account is already synchronized");
+
 				let result_msg = `
-					<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;">
-						<h5 class="text-muted">${result_title}</h5>
-					</div>`
+				<div class="flex justify-center align-center text-muted" style="height: 50vh; display: flex;">
+					<h5 class="text-muted">${result_title}</h5>
+				</div>`
+
 				this.parent.$main_section.append(result_msg)
-				frappe.show_alert({message:__("Bank account '{0}' has been synchronized", [me.parent.bank_account]), indicator:'green'});
+				frappe.show_alert({ message: __("Bank account '{0}' has been synchronized", [me.parent.bank_account]), indicator: 'green' });
 			})
 		})
 	}
@@ -384,7 +388,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 		})
 
 		frappe.xcall('erpnext.accounts.page.bank_reconciliation.bank_reconciliation.get_linked_payments',
-			{bank_transaction: data, freeze:true, freeze_message:__("Finding linked payments")}
+			{ bank_transaction: data, freeze: true, freeze_message: __("Finding linked payments") }
 		).then((result) => {
 			me.make_dialog(result)
 		})
