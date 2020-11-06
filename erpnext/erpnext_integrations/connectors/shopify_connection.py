@@ -294,9 +294,7 @@ def sync_old_orders():
 	try:
 		res = session.get(url, headers=get_header(shopify_settings))
 		res.raise_for_status()
-
 		orders = res.json()["orders"]
-		orders_list = [d.get('id') for d in orders]
 
 		for order in orders:
 			if is_sync_complete(shopify_settings, order):
