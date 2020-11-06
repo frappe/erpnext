@@ -49,7 +49,8 @@ class LoanInterestAccrual(AccountsController):
 					"debit_in_account_currency": self.interest_amount,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.loan,
-					"remarks": _("Against Loan:") + self.loan,
+					"remarks": _("Interest accrued from {0} to {1} against loan: {2}").format(
+						get_last_accural_date(self.loan), self.posting_date, self.loan),
 					"cost_center": erpnext.get_default_cost_center(self.company),
 					"posting_date": self.posting_date
 				})
@@ -65,7 +66,8 @@ class LoanInterestAccrual(AccountsController):
 					"credit_in_account_currency":  self.interest_amount,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.loan,
-					"remarks": _("Against Loan:") + self.loan,
+					"remarks": ("Interest accrued from {0} to {1} against loan: {2}").format(
+						get_last_accural_date(self.loan), self.posting_date, self.loan),
 					"cost_center": erpnext.get_default_cost_center(self.company),
 					"posting_date": self.posting_date
 				})
