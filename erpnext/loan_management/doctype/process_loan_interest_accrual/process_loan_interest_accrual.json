@@ -52,14 +52,16 @@
   {
    "fieldname": "accrual_type",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Accrual Type",
-   "options": "Regular\nRepayment\nDisbursement"
+   "options": "Regular\nRepayment\nDisbursement",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-06 04:43:56.581670",
+ "modified": "2020-11-06 13:28:51.478909",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Interest Accrual",

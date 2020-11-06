@@ -7,7 +7,8 @@ frappe.ui.form.on('Loan', {
 	setup: function(frm) {
 		frm.make_methods = {
 			'Loan Disbursement': function() { frm.trigger('make_loan_disbursement') },
-			'Loan Security Unpledge': function() { frm.trigger('create_loan_security_unpledge') }
+			'Loan Security Unpledge': function() { frm.trigger('create_loan_security_unpledge') },
+			'Loan Write Off': function() { frm.trigger('make_loan_write_off_entry') }
 		}
 	},
 	onload: function (frm) {

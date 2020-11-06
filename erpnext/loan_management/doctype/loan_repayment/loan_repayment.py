@@ -14,7 +14,7 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import update_shortfall_status
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import get_per_day_interest, get_last_accural_date
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import get_per_day_interest, get_last_accrual_date
 
 class LoanRepayment(AccountsController):
 
@@ -78,7 +78,7 @@ class LoanRepayment(AccountsController):
 		if self.total_interest_paid > self.interest_payable:
 			if not self.is_term_loan:
 				# get last loan interest accrual date
-				last_accrual_date = get_last_accural_date(self.against_loan)
+				last_accrual_date = get_last_accrual_date(self.against_loan)
 
 				# get posting date upto which interest has to be accrued
 				per_day_interest = flt(get_per_day_interest(self.pending_principal_amount,
@@ -86,7 +86,6 @@ class LoanRepayment(AccountsController):
 
 				no_of_days = flt(flt(self.total_interest_paid - self.interest_payable,
 					precision)/per_day_interest, 0) - 1
-
 
 				posting_date = add_days(last_accrual_date, no_of_days)
 
@@ -368,7 +367,7 @@ def get_amounts(amounts, against_loan, posting_date):
 	if due_date:
 		pending_days = date_diff(posting_date, due_date) + 1
 	else:
-		last_accrual_date = get_last_accural_date(against_loan_doc.name)
+		last_accrual_date = get_last_accrual_date(against_loan_doc.name)
 		pending_days = date_diff(posting_date, last_accrual_date) + 1
 
 	if pending_days > 0:

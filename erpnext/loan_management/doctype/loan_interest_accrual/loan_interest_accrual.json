@@ -27,6 +27,7 @@
   "section_break_15",
   "process_loan_interest_accrual",
   "repayment_schedule_name",
+  "last_accrual_date",
   "amended_from"
  ],
  "fields": [
@@ -163,13 +164,20 @@
    "fieldtype": "Currency",
    "label": "Penalty Amount",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "last_accrual_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Last Accrual Date",
+   "read_only": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-11 11:17:44.704694",
+ "modified": "2020-11-06 13:22:40.197916",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
