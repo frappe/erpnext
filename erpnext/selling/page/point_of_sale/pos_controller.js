@@ -637,7 +637,7 @@ erpnext.PointOfSale.Controller = class {
 		if (!(available_qty > 0)) {
 			frappe.model.clear_doc(item_row.doctype, item_row.name);
 			frappe.throw({
-				title: _("Not Available"),
+				title: __("Not Available"),
 				message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
 			})
 		} else if (available_qty < qty_needed) {
