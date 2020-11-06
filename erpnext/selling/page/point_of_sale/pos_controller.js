@@ -555,6 +555,8 @@ erpnext.PointOfSale.Controller = class {
 					frappe.utils.play_sound("error");
 					return;
 				}
+				if (!item_code) return;
+
 				item_selected_from_selector && (value = flt(value))
 
 				const args = { item_code, batch_no, [field]: value };
