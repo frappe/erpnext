@@ -489,13 +489,16 @@ class AccountsController(TransactionBase):
 			'reference_date': self.get("reference_date") or self.get("cheque_date") or self.get("bill_date")
 		})
 
-		accounting_dimensions = get_accounting_dimensions()
+		accounting_dimensions = get_accounting_dimensions(as_list=False)
 		dimension_dict = frappe._dict()
 
 		for dimension in accounting_dimensions:
-			dimension_dict[dimension] = self.get(dimension)
-			if item and item.get(dimension):
-				dimension_dict[dimension] = item.get(dimension)
+			dimension_dict[dimension.fieldname] = self.get(dimension.fieldname)
+			if item and item.get(dimension.fieldname):
+				dimension_dict[dimension.fieldname] = item.get(dimension.fieldname)
+
+			if not args.get(dimension.fieldname) and args.get('party') and args.get('party_type') == dimension.document_type:
+				dimension_dict[dimension.fieldname] = args.get('party')
 
 		gl_dict.update(dimension_dict)
 		gl_dict.update(args)

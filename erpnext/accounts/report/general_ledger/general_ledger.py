@@ -32,9 +32,10 @@ def execute(filters=None):
 
 	filters = set_account_currency(filters)
 
-	res = get_result(filters, account_details)
+	accounting_dimensions = get_accounting_dimensions(as_list=False)
+	res = get_result(filters, account_details, accounting_dimensions)
 
-	columns = get_columns(filters)
+	columns = get_columns(filters, accounting_dimensions)
 
 	return columns, res
 
@@ -106,8 +107,8 @@ def set_account_currency(filters):
 
 	return filters
 
-def get_result(filters, account_details):
-	gl_entries = get_gl_entries(filters)
+def get_result(filters, account_details, accounting_dimensions):
+	gl_entries = get_gl_entries(filters, accounting_dimensions)
 
 	supplier_invoice_details = get_supplier_invoice_details()
 
@@ -132,9 +133,10 @@ def get_result(filters, account_details):
 
 	return result
 
-def get_gl_entries(filters):
+def get_gl_entries(filters, accounting_dimensions):
 	currency_map = get_currency(filters)
 	filters.ledger_currency = currency_map.get("presentation_currency") or currency_map.get("company_currency")
+	dimensions_fields = ", " + ", ".join([d.fieldname for d in accounting_dimensions]) if accounting_dimensions else ""
 
 	gl_entries = frappe.db.sql("""
 		select
@@ -142,11 +144,12 @@ def get_gl_entries(filters):
 			voucher_type, voucher_no, cost_center, project, account_currency,
 			debit, credit, debit_in_account_currency, credit_in_account_currency,
 			remarks, against, is_opening, against_voucher_type, against_voucher, reference_no, reference_date,
-			%(ledger_currency)s as currency
+			%(ledger_currency)s as currency {dimensions_fields}
 		from `tabGL Entry`
 		where company=%(company)s {conditions}
 		order by posting_date, account, creation
-		""".format(conditions=get_conditions(filters)), filters, as_dict=1)
+		""".format(conditions=get_conditions(filters, accounting_dimensions), dimensions_fields=dimensions_fields),
+			filters, as_dict=1, debug=1)
 
 	if filters.get('presentation_currency'):
 		return convert_to_presentation_currency(gl_entries, currency_map)
@@ -197,7 +200,7 @@ def merge_similar_entries(filters, gl_entries, supplier_invoice_details):
 	return out
 
 
-def get_conditions(filters):
+def get_conditions(filters, accounting_dimensions):
 	conditions = []
 	if filters.get("account"):
 		lft, rgt = frappe.db.get_value("Account", filters["account"], ["lft", "rgt"])
@@ -261,12 +264,10 @@ def get_conditions(filters):
 	if match_conditions:
 		conditions.append(match_conditions)
 
-	accounting_dimensions = get_accounting_dimensions()
-
 	if accounting_dimensions:
 		for dimension in accounting_dimensions:
-			if filters.get(dimension):
-				conditions.append("{0} in (%({0})s)".format(dimension))
+			if filters.get(dimension.fieldname):
+				conditions.append("{0} in (%({0})s)".format(dimension.fieldname))
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -371,7 +372,7 @@ def get_supplier_invoice_details():
 
 	return inv_details
 
-def get_columns(filters):
+def get_columns(filters, accounting_dimensions):
 	columns = [
 		{
 			"label": _("Posting Date"),
@@ -476,6 +477,18 @@ def get_columns(filters):
 			"width": 100,
 			"hide_if_filtered": 1
 		},
+	]
+
+	if accounting_dimensions:
+		for dimension in accounting_dimensions:
+			columns.append({
+				"label": _(dimension.label),
+				"fieldname": dimension.fieldname,
+				"fieldtype": "Link",
+				"options": dimension.document_type
+			})
+
+	columns += [
 		{
 			"label": _("Ref Date"),
 			"fieldname": "reference_date",

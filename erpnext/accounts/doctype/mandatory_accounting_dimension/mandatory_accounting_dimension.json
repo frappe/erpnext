@@ -1,0 +1,30 @@
+{
+ "creation": "2020-11-07 22:52:35.640363",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "accounting_dimension"
+ ],
+ "fields": [
+  {
+   "fieldname": "accounting_dimension",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Accounting Dimension",
+   "options": "Accounting Dimension",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-11-07 22:55:55.121209",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Mandatory Accounting Dimension",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

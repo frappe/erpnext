@@ -23,6 +23,7 @@
   "account_type",
   "tax_rate",
   "party_type",
+  "mandatory_accounting_dimensions",
   "freeze_account",
   "balance_must_be",
   "lft",
@@ -199,12 +200,18 @@
    "fieldtype": "Link",
    "label": "Default Party Type",
    "options": "Party Type"
+  },
+  {
+   "fieldname": "mandatory_accounting_dimensions",
+   "fieldtype": "Table MultiSelect",
+   "label": "Mandatory Accounting Dimensions",
+   "options": "Mandatory Accounting Dimension"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-10-03 14:12:19.073155",
+ "modified": "2020-11-07 22:55:27.480597",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Account",
