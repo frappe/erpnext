@@ -179,7 +179,7 @@ def toggle_disabling(doc):
 
 def get_doctypes_with_dimensions():
 	doclist = ["GL Entry", "Sales Invoice", "POS Invoice", "Purchase Invoice", "Payment Entry", "Asset",
-		"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
+		"Expense Claim", "Expense Claim Item", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
 		"Sales Invoice Item", "POS Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
 		"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",

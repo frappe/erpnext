@@ -16,6 +16,7 @@
   "column_break_8",
   "amount",
   "rate",
+  "qty",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break"
@@ -123,15 +124,22 @@
    "print_width": "150px",
    "reqd": 1,
    "width": "150px"
+  },
+  {
+   "default": "1",
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "label": "Qty",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-04 16:21:57.670858",
+ "modified": "2020-11-07 19:03:53.015650",
  "modified_by": "Administrator",
  "module": "HR",
- "name": "Expense Claim Detail",
+ "name": "Expense Claim Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

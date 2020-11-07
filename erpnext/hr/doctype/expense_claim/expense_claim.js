@@ -376,7 +376,7 @@ frappe.ui.form.on("Expense Claim", {
 	}
 });
 
-frappe.ui.form.on("Expense Claim Detail", {
+frappe.ui.form.on("Expense Claim Item", {
 	claimed_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, 'amount', child.claimed_amount);

@@ -6,5 +6,5 @@ import frappe
 
 from frappe.model.document import Document
 
-class ExpenseClaimDetail(Document):
+class ExpenseClaimItem(Document):
 	pass

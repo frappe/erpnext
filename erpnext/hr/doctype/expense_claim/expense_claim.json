@@ -406,7 +406,7 @@
    "label": "Expenses",
    "oldfieldname": "expense_voucher_details",
    "oldfieldtype": "Table",
-   "options": "Expense Claim Detail",
+   "options": "Expense Claim Item",
    "reqd": 1
   }
  ],
@@ -414,7 +414,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-04 16:47:56.130420",
+ "modified": "2020-11-07 19:04:06.268867",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
