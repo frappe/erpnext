@@ -142,6 +142,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.is_term_loan",
    "fieldname": "paid_principal_amount",
    "fieldtype": "Currency",
    "label": "Paid Principal Amount",
@@ -177,7 +178,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-06 13:22:40.197916",
+ "modified": "2020-11-07 05:49:25.448875",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
