@@ -100,7 +100,7 @@ class TestExpenseClaim(unittest.TestCase):
 			 "payable_account": payable_account,
 			 "approval_status": "Rejected",
 			 "expenses":
-			 	[{ "expense_item": "Travel", "default_account": "Travel Expenses - _TC4", "amount": 300, "sanctioned_amount": 200 }]
+			 	[{ "item_code": "Travel", "default_account": "Travel Expenses - _TC4", "amount": 300, "sanctioned_amount": 200 }]
 		})
 		expense_claim.submit()
 
@@ -140,7 +140,7 @@ def make_expense_claim(payable_account, amount, sanctioned_amount, company, acco
 		 "company": company,
 		'currency': currency,
 		 "expenses": [{
-			"expense_item": "Travel",
+			"item_code": "Travel",
 			"default_account": account,
 			"currency": currency,
 			"amount": amount,

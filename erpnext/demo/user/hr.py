@@ -95,7 +95,7 @@ def get_expenses():
 
 		expenses.append({
 			"expense_date": frappe.flags.current_date,
-			"expense_item": expense_item.name,
+			"item_code": expense_item.name,
 			"default_account": expense_item.default_expense_account or "Miscellaneous Expenses - WPL",
 			"amount": claim_amount,
 			"sanctioned_amount": claim_amount

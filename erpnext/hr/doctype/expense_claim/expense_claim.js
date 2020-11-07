@@ -6,22 +6,22 @@ frappe.provide("erpnext.accounts.dimensions");
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
 erpnext.hr.ExpenseClaimController = erpnext.buying.BuyingController.extend({
-	expense_item: function(doc, cdt, cdn) {
+	item_code: function(doc, cdt, cdn) {
 		let d = locals[cdt][cdn];
 		if (!doc.company) {
-			d.expense_item = "";
+			d.item_code = "";
 			frappe.msgprint(__("Please set the Company"));
 			this.frm.refresh_fields();
 			return;
 		}
 
-		if (!d.expense_item) {
+		if (!d.item_code) {
 			return;
 		}
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account_and_cost_center",
 			args: {
-				"expense_item": d.expense_item,
+				"item_code": d.item_code,
 				"company": doc.company
 			},
 			callback: function(r) {
@@ -36,7 +36,7 @@ erpnext.hr.ExpenseClaimController = erpnext.buying.BuyingController.extend({
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');
-cur_frm.add_fetch('expense_item','description','description');
+cur_frm.add_fetch('item_code','description','description');
 
 cur_frm.cscript.onload = function(doc) {
 	if (doc.__islocal) {
@@ -148,7 +148,7 @@ frappe.ui.form.on("Expense Claim", {
 			};
 		});
 
-		frm.set_query("expense_item", "items", function() {
+		frm.set_query("item_code", "items", function() {
 			return {
 				filters: {
 					"disabled": 0,

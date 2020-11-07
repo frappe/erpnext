@@ -37,7 +37,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "expense_item",
+   "depends_on": "item_code",
    "fieldname": "default_account",
    "fieldtype": "Link",
    "hidden": 1,
