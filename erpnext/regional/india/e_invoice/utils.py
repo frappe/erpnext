@@ -240,9 +240,7 @@ def get_eway_bill_details(invoice):
 		vehicle_type=vehicle_type[invoice.gst_vehicle_type]
 	))
 
-@frappe.whitelist()
-def make_einvoice(doctype, name):
-	invoice = frappe.get_doc(doctype, name)
+def make_einvoice(invoice):
 	schema = read_json('einv_template')
 
 	trans_details = get_trans_details(invoice)
@@ -255,7 +253,7 @@ def make_einvoice(doctype, name):
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
 		buyer_details = get_party_details(invoice.customer_address)
-		place_of_supply = get_place_of_supply(invoice, doctype) or invoice.billing_address_gstin
+		place_of_supply = get_place_of_supply(invoice, invoice.doctype) or invoice.billing_address_gstin
 		place_of_supply = place_of_supply[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 	
@@ -351,42 +349,10 @@ def validate_einvoice(validations, einvoice, errors=[]):
 	
 	return errors
 
-def update_invoice(doctype, docname, res):
-	enc_signed_invoice = res.get('SignedInvoice')
-	dec_signed_invoice = jwt.decode(enc_signed_invoice, verify=False)['data']
-
-	frappe.db.set_value(doctype, docname, 'irn', res.get('Irn'))
-	frappe.db.set_value(doctype, docname, 'ewaybill', res.get('EwbNo'))
-	frappe.db.set_value(doctype, docname, 'signed_einvoice', dec_signed_invoice)
-
-	signed_qr_code = res.get('SignedQRCode')
-	frappe.db.set_value(doctype, docname, 'signed_qr_code', signed_qr_code)
-
-	attach_qrcode_image(doctype, docname, signed_qr_code)
-
-def attach_qrcode_image(doctype, docname, qrcode):
-	if not qrcode: return
-
-	_file = frappe.new_doc('File')
-	_file.update({
-		'file_name': f'QRCode_{docname}.png',
-		'attached_to_doctype': doctype,
-		'attached_to_name': docname,
-		'content': 'qrcode',
-		'is_private': 1
-	})
-	_file.insert()
-	frappe.db.commit()
-	url = qrcreate(qrcode)
-	abs_file_path = os.path.abspath(_file.get_full_path())
-	url.png(abs_file_path, scale=2)
-
-	frappe.db.set_value(doctype, docname, 'qrcode_image', _file.file_url)
-
 class ResponseFailure(Exception): pass
 
 class GSPConnector():
-	def __init__(self):
+	def __init__(self, doctype, docname):
 		self.credentials = frappe.get_cached_doc('E Invoice Settings')
 
 		self.base_url = 'https://gsp.adaequare.com/'
@@ -397,6 +363,8 @@ class GSPConnector():
 		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
 		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
 		self.generate_ewaybill_url = self.base_url + 'test/enriched/ei/api/ewaybill'
+
+		self.invoice = frappe.get_cached_doc(doctype, docname)
 	
 	def get_auth_token(self):
 		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
@@ -473,23 +441,22 @@ class GSPConnector():
 		frappe.cache().hset('gstin_cache', key, details)
 		return details
 
-	def generate_irn(self, docname):
+	def generate_irn(self):
 		headers = self.get_headers()
-		doctype = 'Sales Invoice'
-		einvoice = make_einvoice(doctype, docname)
+		einvoice = make_einvoice(self.invoice)
 		data = json.dumps(einvoice)
 
 		try:
 			res = make_post_request(self.generate_irn_url, headers=headers, data=data)
 			if res.get('success'):
-				update_invoice(doctype, docname, res.get('result'))
+				self.set_einvoice_data(res.get('result'))
 
 			elif '2150' in res.get('message'):
 				# IRN already generated
 				irn = res.get('result')[0].get('Desc').get('Irn')
 				irn_details = self.get_irn_details(irn)
 				if irn_details:
-					update_invoice(doctype, docname, irn_details)
+					self.set_einvoice_data(irn_details)
 
 			else:
 				self.log_error(res)
@@ -521,9 +488,8 @@ class GSPConnector():
 			self.log_error()
 			self.raise_error(True)
 	
-	def cancel_irn(self, docname, irn, reason, remark):
+	def cancel_irn(self, irn, reason, remark):
 		headers = self.get_headers()
-		doctype = 'Sales Invoice'
 		data = json.dumps({
 			'Irn': irn,
 			'Cnlrsn': reason,
@@ -533,8 +499,14 @@ class GSPConnector():
 		try:
 			res = make_post_request(self.cancel_irn_url, headers=headers, data=data)
 			if res.get('success'):
-				frappe.db.set_value(doctype, docname, 'irn_cancelled', 1)
-				# frappe.db.set_value(doctype, docname, 'cancelled_on', res.get('CancelDate'))
+				self.invoice.irn_cancelled = 1
+				self.invoice.flags.updater_reference = {
+					'doctype': self.invoice.doctype,
+					'docname': self.invoice.name,
+					'label': _('IRN Cancelled - {}').format(remark)
+				}
+				self.update_invoice()
+
 			else:
 				self.log_error(res)
 				raise ResponseFailure
@@ -550,8 +522,6 @@ class GSPConnector():
 		args = frappe._dict(kwargs)
 
 		headers = self.get_headers()
-		doctype = 'Sales Invoice'
-		docname = args.docname
 		eway_bill_details = get_eway_bill_details(args)
 		data = json.dumps({
 			'Irn': args.irn,
@@ -568,12 +538,16 @@ class GSPConnector():
 		try:
 			res = make_post_request(self.generate_ewaybill_url, headers=headers, data=data)
 			if res.get('success'):
-				frappe.db.set_value(doctype, docname, 'ewaybill', res.get('result').get('EwbNo'))
-				frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 0)
-				for d in args:
-					if d in ['docname', 'cmd']: continue
-					# update eway bill details in sales invoice
-					frappe.db.set_value(doctype, docname, d, args[d])
+				self.invoice.ewaybill = res.get('result').get('EwbNo')
+				self.invoice.eway_bill_cancelled = 0
+				self.invoice.update(args)
+				self.invoice.flags.updater_reference = {
+					'doctype': self.invoice.doctype,
+					'docname': self.invoice.name,
+					'label': _('E-Way Bill Generated')
+				}
+				self.update_invoice()
+
 			else:
 				self.log_error(res)
 				raise ResponseFailure
@@ -585,7 +559,7 @@ class GSPConnector():
 			self.log_error(data)
 			self.raise_error(True)
 	
-	def cancel_eway_bill(self, docname, eway_bill, reason, remark):
+	def cancel_eway_bill(self, eway_bill, reason, remark):
 		headers = self.get_headers()
 		doctype = 'Sales Invoice'
 		data = json.dumps({
@@ -597,8 +571,15 @@ class GSPConnector():
 		try:
 			res = make_post_request(self.cancel_ewaybill_url, headers=headers, data=data)
 			if res.get('success'):
-				frappe.db.set_value(doctype, docname, 'ewaybill', '')
-				frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 1)
+				self.invoice.ewaybill = ''
+				self.invoice.eway_bill_cancelled = 1
+				self.invoice.flags.updater_reference = {
+					'doctype': self.invoice.doctype,
+					'docname': self.invoice.name,
+					'label': _('E-Way Bill Cancelled - {}').format(remark)
+				}
+				self.update_invoice()
+
 			else:
 				self.log_error(res)
 				raise ResponseFailure
@@ -625,23 +606,67 @@ class GSPConnector():
 			raise_exception=raise_exception,
 			indicator='red'
 		)
+	
+	def set_einvoice_data(self, res):
+		enc_signed_invoice = res.get('SignedInvoice')
+		dec_signed_invoice = jwt.decode(enc_signed_invoice, verify=False)['data']
+
+		self.invoice.irn = res.get('Irn')
+		self.invoice.ewaybill = res.get('EwbNo')
+		self.invoice.signed_einvoice = dec_signed_invoice
+		self.invoice.signed_qr_code = res.get('SignedQRCode')
+
+		self.attach_qrcode_image()
+
+		self.invoice.flags.updater_reference = {
+			'doctype': self.invoice.doctype,
+			'docname': self.invoice.name,
+			'label': _('IRN Generated')
+		}
+		self.update_invoice()
+	
+	def attach_qrcode_image(self):
+		qrcode = self.invoice.signed_qr_code
+		doctype = self.invoice.doctype
+		docname = self.invoice.name
+
+		_file = frappe.new_doc('File')
+		_file.update({
+			'file_name': f'QRCode_{docname}.png',
+			'attached_to_doctype': doctype,
+			'attached_to_name': docname,
+			'content': 'qrcode',
+			'is_private': 1
+		})
+		_file.insert()
+		frappe.db.commit()
+		url = qrcreate(qrcode)
+		abs_file_path = os.path.abspath(_file.get_full_path())
+		url.png(abs_file_path, scale=2)
+
+		self.invoice.qrcode_image = _file.file_url
+	
+	def update_invoice(self):
+		self.invoice.flags.ignore_validate_update_after_submit = True
+		self.invoice.flags.ignore_validate = True
+		self.invoice.save()
 
 @frappe.whitelist()
-def generate_irn(docname):
-	gsp_connector = GSPConnector()
-	gsp_connector.generate_irn(docname)
+def generate_irn(doctype, docname):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.generate_irn()
 
 @frappe.whitelist()
-def cancel_irn(docname, irn, reason, remark):
-	gsp_connector = GSPConnector()
-	gsp_connector.cancel_irn(docname, irn, reason, remark)
+def cancel_irn(doctype, docname, irn, reason, remark):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.cancel_irn(irn, reason, remark)
 
 @frappe.whitelist()
-def generate_eway_bill(**kwargs):
-	gsp_connector = GSPConnector()
+def generate_eway_bill(doctype, docname, **kwargs):
+	gsp_connector = GSPConnector(doctype, docname)
 	gsp_connector.generate_eway_bill(**kwargs)
 
 @frappe.whitelist()
-def cancel_eway_bill(docname, eway_bill, reason, remark):
-	gsp_connector = GSPConnector()
-	gsp_connector.cancel_eway_bill(docname, eway_bill, reason, remark)
+def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
+	gsp_connector = GSPConnector(doctype, docname)
+	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
