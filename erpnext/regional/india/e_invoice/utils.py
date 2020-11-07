@@ -136,14 +136,23 @@ def get_item_list(invoice):
 		item.gross_amount = abs(item.unit_rate * item.qty)
 		item.discount_amount = abs(item.discount_amount * item.qty)
 		item.taxable_value = abs(item.base_net_amount)
-		item.tax_rate = item.cess_rate = item.other_charges = 0
-		item.cgst_amount = item.sgst_amount = item.igst_amount = item.cess_amount = 0
+
+		for attr in [
+			'tax_rate', 'cess_rate', 'cess_nadv_amount',
+			'cgst_amount',  'sgst_amount', 'igst_amount',
+			'cess_amount', 'cess_nadv_amount', 'other_charges'
+			]:
+			item[attr] = 0
+
 		for t in invoice.taxes:
 			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
 			if t.account_head in gst_accounts_list:
 				if t.account_head in gst_accounts.cess_account:
-					item.cess_rate += item_tax_detail[0]
-					item.cess_amount += abs(item_tax_detail[1])
+					if t.charge_type == 'On Item Quantity':
+						item.cess_nadv_amount += abs(item_tax_detail[1])
+					else:
+						item.cess_rate += item_tax_detail[0]
+						item.cess_amount += abs(item_tax_detail[1])
 				elif t.account_head in gst_accounts.igst_account:
 					item.tax_rate += item_tax_detail[0]
 					item.igst_amount += abs(item_tax_detail[1])
@@ -156,7 +165,7 @@ def get_item_list(invoice):
 		
 		item.total_value = abs(
 			item.base_amount + item.igst_amount + item.sgst_amount +
-			item.cgst_amount + item.cess_amount + item.other_charges
+			item.cgst_amount + item.cess_amount + item.cess_nadv_amount + item.other_charges
 		)
 		einv_item = item_schema.format(item=item)
 		item_list.append(einv_item)
@@ -170,9 +179,11 @@ def get_value_details(invoice):
 	value_details = frappe._dict(dict())
 	value_details.base_net_total = abs(invoice.base_net_total)
 	value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount > 0 else 0
+	# discount amount cannnot be -ve in an e-invoice, so if -ve include discount in round_off
 	value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount < 0 else 0)
-	value_details.base_grand_total = abs(invoice.base_rounded_total)
-	value_details.grand_total = abs(invoice.rounded_total)
+	disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
+	value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else doc.base_rounded_total
+	value_details.grand_total = abs(invoice.grand_total) if disable_rounded else doc.rounded_total
 	value_details.total_cgst_amt = 0
 	value_details.total_sgst_amt = 0
 	value_details.total_igst_amt = 0
