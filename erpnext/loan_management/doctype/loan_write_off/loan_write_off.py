@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import getdate, flt
+from frappe.utils import getdate, flt, cint
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.general_ledger import make_gl_entries
 
@@ -19,10 +19,12 @@ class LoanWriteOff(AccountsController):
 			self.cost_center = erpnext.get_default_cost_center(self.company)
 
 	def validate_write_off_amount(self):
+		precision = cint(frappe.db.get_default("currency_precision")) or 2
 		total_payment, principal_paid, interest_payable, written_off_amount = frappe.get_value("Loan", self.loan,
 			['total_payment', 'total_principal_paid','total_interest_payable', 'written_off_amount'])
 
-		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount)
+		pending_principal_amount = flt(flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount),
+			precision)
 
 		if self.write_off_amount > pending_principal_amount:
 			frappe.throw(_("Write off amount cannot be greater than pending principal amount"))
