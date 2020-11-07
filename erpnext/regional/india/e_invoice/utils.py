@@ -248,6 +248,7 @@ def make_einvoice(invoice):
 	doc_details = get_doc_details(invoice)
 	value_details = get_value_details(invoice)
 	seller_details = get_party_details(invoice.company_address)
+	seller_details.update({ 'pincode': 193502 })
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
@@ -640,9 +641,9 @@ class GSPConnector():
 		})
 		_file.insert()
 		frappe.db.commit()
-		url = qrcreate(qrcode)
+		url = qrcreate(qrcode, error='L')
 		abs_file_path = os.path.abspath(_file.get_full_path())
-		url.png(abs_file_path, scale=2)
+		url.png(abs_file_path, scale=2, quiet_zone=1)
 
 		self.invoice.qrcode_image = _file.file_url
 	
