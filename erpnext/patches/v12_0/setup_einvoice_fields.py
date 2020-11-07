@@ -39,3 +39,4 @@ def execute():
 	frappe.db.set_value('Custom Field', { 'fieldname': 'lr_date' }, 'mandatory_depends_on', 'eval:in_list(["Air", "Ship", "Rail"], doc.mode_of_transport)')
 	frappe.db.set_value('Custom Field', { 'fieldname': 'lr_no' }, 'mandatory_depends_on', 'eval:in_list(["Air", "Ship", "Rail"], doc.mode_of_transport)')
 	frappe.db.set_value('Custom Field', { 'fieldname': 'ewaybill' }, 'read_only_depends_on', 'eval:doc.irn && doc.ewaybill')
+	frappe.db.set_value('Custom Field', { 'fieldname': 'ewaybill' }, 'depends_on', 'eval:((doc.docstatus === 1 || doc.ewaybill) && doc.eway_bill_cancelled === 0)')
