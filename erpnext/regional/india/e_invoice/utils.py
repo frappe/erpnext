@@ -640,9 +640,9 @@ class GSPConnector():
 		})
 		_file.insert()
 		frappe.db.commit()
-		url = qrcreate(qrcode)
-		abs_file_path = os.path.abspath(_file.get_full_path())
-		url.png(abs_file_path, scale=2)
+		url = qrcreate(qrcode, error='L')
+		abs_file_path = os.path.abspath(file.get_full_path())
+		url.png(abs_file_path, scale=2, quiet_zone=1)
 
 		self.invoice.qrcode_image = _file.file_url
 	
