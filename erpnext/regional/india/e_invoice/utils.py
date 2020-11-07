@@ -9,12 +9,13 @@ import jwt
 import json
 import base64
 import frappe
+import traceback
 from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, formatdate as format_date, flt, time_diff_in_seconds, now_datetime
+from frappe.utils.data import cstr, cint, formatdate as format_date, flt, time_diff_in_seconds, now_datetime, add_to_date
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable')
