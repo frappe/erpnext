@@ -183,8 +183,8 @@ def get_value_details(invoice):
 	# discount amount cannnot be -ve in an e-invoice, so if -ve include discount in round_off
 	value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount < 0 else 0)
 	disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
-	value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else doc.base_rounded_total
-	value_details.grand_total = abs(invoice.grand_total) if disable_rounded else doc.rounded_total
+	value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else invoice.base_rounded_total
+	value_details.grand_total = abs(invoice.grand_total) if disable_rounded else invoice.rounded_total
 	value_details.total_cgst_amt = 0
 	value_details.total_sgst_amt = 0
 	value_details.total_igst_amt = 0
@@ -287,7 +287,12 @@ def make_einvoice(doctype, name):
 	validations = json.loads(read_json('einv_validation'))
 	errors = validate_einvoice(validations, einvoice)
 	if errors:
-		frappe.log_error(title="E Invoice Validation Failed", message=json.dumps(errors, default=str, indent=4))
+		message = "\n".join([
+			"E Invoice: ", json.dumps(einvoice, default=str, indent=4),
+			"-" * 50,
+			"Errors: ", json.dumps(errors, default=str, indent=4)
+		])
+		frappe.log_error(title="E Invoice Validation Failed", message=message)
 		if len(errors) > 1:
 			li = ['<li>'+ d +'</li>' for d in errors]
 			frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=_('E Invoice Validation Failed'))
@@ -378,6 +383,8 @@ def attach_qrcode_image(doctype, docname, qrcode):
 
 	frappe.db.set_value(doctype, docname, 'qrcode_image', _file.file_url)
 
+class ResponseFailure(Exception): pass
+
 class GSPConnector():
 	def __init__(self):
 		self.credentials = frappe.get_cached_doc('E Invoice Settings')
@@ -386,6 +393,7 @@ class GSPConnector():
 		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
 		self.gstin_details_url = self.base_url + 'test/enriched/ei/api/master/gstin'
 		self.generate_irn_url = self.base_url + 'test/enriched/ei/api/invoice'
+		self.irn_details_url = self.base_url + 'test/enriched/ei/api/invoice/irn'
 		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
 		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
 		self.generate_ewaybill_url = self.base_url + 'test/enriched/ei/api/ewaybill'
@@ -401,16 +409,16 @@ class GSPConnector():
 			'gspappid': self.credentials.client_id,
 			'gspappsecret': self.credentials.client_secret
 		}
-
+		res = {}
 		try:
 			res = make_post_request(self.authenticate_url, headers=headers)
 			self.credentials.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
 			self.credentials.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
 			self.credentials.save()
 
-		except Exception as e:
-			self.log_error(e)
-			raise
+		except Exception:
+			self.log_error(res)
+			self.raise_error(True)
 	
 	def get_headers(self):
 		return {
@@ -432,11 +440,14 @@ class GSPConnector():
 				return res.get('result')
 			else:
 				self.log_error(res)
-
-		except Exception as e:
-			self.log_error(e)
+				raise ResponseFailure
 		
-		return {}
+		except ResponseFailure:
+			self.raise_error()
+
+		except Exception:
+			self.log_error()
+			self.raise_error(True)
 	
 	@staticmethod
 	def get_gstin_details(gstin):
@@ -472,11 +483,43 @@ class GSPConnector():
 			res = make_post_request(self.generate_irn_url, headers=headers, data=data)
 			if res.get('success'):
 				update_invoice(doctype, docname, res.get('result'))
+
+			elif '2150' in res.get('message'):
+				# IRN already generated
+				irn = res.get('result')[0].get('Desc').get('Irn')
+				irn_details = self.get_irn_details(irn)
+				if irn_details:
+					update_invoice(doctype, docname, irn_details)
+
 			else:
 				self.log_error(res)
+				raise ResponseFailure
+		
+		except ResponseFailure:
+			self.raise_error()
 
-		except Exception as e:
-			self.log_error(e)
+		except Exception:
+			self.log_error(data)
+			self.raise_error(True)
+	
+	def get_irn_details(self, irn):
+		headers = self.get_headers()
+
+		try:
+			params = '?irn={irn}'.format(irn=irn)
+			res = make_get_request(self.irn_details_url + params, headers=headers)
+			if res.get('success'):
+				return res.get('result')
+			else:
+				self.log_error(res)
+				raise ResponseFailure
+		
+		except ResponseFailure:
+			self.raise_error()
+
+		except Exception:
+			self.log_error()
+			self.raise_error(True)
 	
 	def cancel_irn(self, docname, irn, reason, remark):
 		headers = self.get_headers()
@@ -494,9 +537,14 @@ class GSPConnector():
 				# frappe.db.set_value(doctype, docname, 'cancelled_on', res.get('CancelDate'))
 			else:
 				self.log_error(res)
+				raise ResponseFailure
+		
+		except ResponseFailure:
+			self.raise_error()
 
-		except Exception as e:
-			self.log_error(e)
+		except Exception:
+			self.log_error(data)
+			self.raise_error(True)
 	
 	def generate_eway_bill(self, **kwargs):
 		args = frappe._dict(kwargs)
@@ -528,9 +576,14 @@ class GSPConnector():
 					frappe.db.set_value(doctype, docname, d, args[d])
 			else:
 				self.log_error(res)
+				raise ResponseFailure
 
-		except Exception as e:
-			self.log_error(e)
+		except ResponseFailure:
+			self.raise_error()
+
+		except Exception:
+			self.log_error(data)
+			self.raise_error(True)
 	
 	def cancel_eway_bill(self, docname, eway_bill, reason, remark):
 		headers = self.get_headers()
@@ -548,17 +601,29 @@ class GSPConnector():
 				frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 1)
 			else:
 				self.log_error(res)
+				raise ResponseFailure
 
-		except Exception as e:
-			self.log_error(e)
+		except ResponseFailure:
+			self.raise_error()
 
-	def log_error(self, exc):
-		message = "\n".join(["Data:", json.dumps(exc), "--" * 50, "\nException:", traceback.format_exc()])
+		except Exception:
+			self.log_error(data)
+			self.raise_error(True)
+
+	def log_error(self, data={}):
+		if not isinstance(data, dict):
+			data = json.loads(data)
+
+		message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
 		frappe.log_error(title="E Invoicing Error", message=message)
+	
+	def raise_error(self, raise_exception=False):
 		link_to_error_list = '<a href="desk#List/{0}">{1}</a>'.format('Error Log', 'Error Log')
-		frappe.throw(
+		frappe.msgprint(
 			_('An error occurred while making API request. Please check {} for more information.').format(link_to_error_list),
-			title=_('E Invoice Request Failed')
+			title=_('E Invoice Request Failed'),
+			raise_exception=raise_exception,
+			indicator='red'
 		)
 
 @frappe.whitelist()
