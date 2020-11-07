@@ -185,7 +185,7 @@ class ExpenseClaim(AccountsController):
 					"party": d.party,
 					"against_voucher_type": "Purchase Invoice" if d.requires_purchase_invoice else "",
 					"against_voucher": d.purchase_invoice if d.requires_purchase_invoice else "",
-				})
+				}, item=d)
 			)
 
 		for d in self.advances:
@@ -201,7 +201,7 @@ class ExpenseClaim(AccountsController):
 						"against_voucher_type": "Employee Advance",
 						"against_voucher": d.reference_name,
 						"project": d.project
-					})
+					}, item=d)
 				)
 
 		return gl_entry

@@ -11,7 +11,6 @@
   "expense_account",
   "party_type",
   "party",
-  "cost_center",
   "column_break_7",
   "project",
   "task",
@@ -22,7 +21,10 @@
   "section_break_6",
   "claim_amount",
   "column_break_8",
-  "sanctioned_amount"
+  "sanctioned_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break"
  ],
  "fields": [
   {
@@ -165,11 +167,21 @@
    "options": "Company:company:default_currency",
    "print_width": "150px",
    "width": "150px"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-03-03 15:36:36.635428",
+ "modified": "2020-11-07 23:26:24.775791",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Detail",

@@ -116,9 +116,7 @@ frappe.ui.form.on("Journal Entry", {
 			},
 			callback: function(r){
 				if(r.message){
-					$.each(frm.doc.accounts || [], function(i, jvd) {
-						frappe.model.set_value(jvd.doctype, jvd.name, "cost_center", r.message.cost_center);
-					});
+					frm.set_value("cost_center", r.message.cost_center);
 				}
 			}
 		});
@@ -156,6 +154,15 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		});
 
 		me.frm.set_query("cost_center", "accounts", function(doc, cdt, cdn) {
+			return {
+				filters: {
+					company: me.frm.doc.company,
+					is_group: 0
+				}
+			};
+		});
+
+		me.frm.set_query("cost_center", function(doc, cdt, cdn) {
 			return {
 				filters: {
 					company: me.frm.doc.company,

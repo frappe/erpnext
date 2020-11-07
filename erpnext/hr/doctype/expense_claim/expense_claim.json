@@ -32,6 +32,9 @@
   "get_advances",
   "allocate_advances_automatically",
   "advances",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break_column",
   "more_details",
   "payable_account",
   "column_break_24",
@@ -283,12 +286,28 @@
    "fieldname": "allocate_advances_automatically",
    "fieldtype": "Check",
    "label": "Allocate Advances Automatically"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break_column",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:05.067524",
+ "modified": "2020-11-07 23:27:17.033233",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
