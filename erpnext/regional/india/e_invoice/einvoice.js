@@ -9,6 +9,10 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			const { docstatus, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
 
+			if (ewaybill && irn) {
+				frm.set_df_property('ewaybill', 'read_only', 1);
+			}
+
 			if (docstatus == 0 && !irn && !__unsaved) {
 				const action = () => {
 					frappe.call({
