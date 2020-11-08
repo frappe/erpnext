@@ -1,4 +1,5 @@
 {
+ "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-09-03 03:33:27.680331",
  "doctype": "DocType",
@@ -20,8 +21,8 @@
   "customer",
   "customer_name",
   "vehicle_details",
-  "model",
   "license_plate",
+  "color",
   "column_break_8",
   "chassis_no",
   "engine_no",
@@ -31,16 +32,15 @@
   "insurance_details",
   "insurance_company",
   "column_break_19",
-  "policy_no",
+  "insurance_policy_no",
   "column_break_15",
-  "start_date",
+  "insurance_start_date",
   "column_break_23",
-  "end_date",
+  "insurance_end_date",
   "additional_details",
   "fuel_type",
   "uom",
   "column_break_30",
-  "color",
   "carbon_check_date",
   "column_break_21",
   "wheels",
@@ -99,12 +99,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "model",
-   "fieldtype": "Data",
-   "in_standard_filter": 1,
-   "label": "Model"
-  },
-  {
    "fieldname": "vehicle_details",
    "fieldtype": "Section Break",
    "label": "Details"
@@ -138,27 +132,13 @@
   },
   {
    "fieldname": "insurance_company",
-   "fieldtype": "Data",
-   "label": "Insurance Company"
-  },
-  {
-   "fieldname": "policy_no",
-   "fieldtype": "Data",
-   "label": "Policy No"
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Customer"
   },
   {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "start_date",
-   "fieldtype": "Date",
-   "label": "Start Date"
-  },
-  {
-   "fieldname": "end_date",
-   "fieldtype": "Date",
-   "label": "End Date"
   },
   {
    "fieldname": "additional_details",
@@ -188,8 +168,9 @@
   },
   {
    "fieldname": "color",
-   "fieldtype": "Data",
-   "label": "Color"
+   "fieldtype": "Link",
+   "label": "Color",
+   "options": "Vehicle Color"
   },
   {
    "fieldname": "wheels",
@@ -536,15 +517,43 @@
    "hidden": 1,
    "in_preview": 1,
    "label": "Image"
+  },
+  {
+   "fieldname": "insurance_policy_no",
+   "fieldtype": "Data",
+   "label": "Insurance Policy No"
+  },
+  {
+   "fieldname": "insurance_start_date",
+   "fieldtype": "Date",
+   "label": "Insurance Start Date"
+  },
+  {
+   "fieldname": "insurance_end_date",
+   "fieldtype": "Date",
+   "label": "Insurance End Date"
   }
  ],
  "image_field": "image",
- "modified": "2020-10-31 02:19:47.431238",
+ "modified": "2020-11-08 18:17:26.083515",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
  "owner": "Administrator",
  "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Manager",
+   "share": 1,
+   "write": 1
+  },
   {
    "create": 1,
    "delete": 1,
@@ -603,7 +612,7 @@
    "share": 1
   }
  ],
- "search_fields": "item_code, item_group, brand, warehouse, customer, sales_order",
+ "search_fields": "item_code, item_name, customer, license_plate, chassis_no, engine_no, warehouse",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,
  "sort_field": "modified",

@@ -11,21 +11,35 @@
   "title",
   "project_name",
   "status",
-  "project_type",
   "project_template",
+  "copied_from",
   "column_break_5",
   "is_active",
   "percent_complete",
   "column_break_10",
   "priority",
   "percent_complete_method",
-  "customer_details",
-  "item_code",
+  "more_info",
+  "project_type",
+  "more_info_cb_1",
+  "department",
+  "more_info_cb_2",
+  "customer_details_section",
   "customer",
-  "copied_from",
   "column_break_14",
   "sales_order",
-  "department",
+  "sec_applies_to",
+  "applies_to_item",
+  "col_break_applies_to",
+  "applies_to_item_name",
+  "sec_insurance",
+  "insurance_company",
+  "insurance_company_name",
+  "col_break_insurance",
+  "insurance_policy_no",
+  "insurance_loss_no",
+  "col_break_insurance2",
+  "insurance_surveyor",
   "section_break0",
   "notes",
   "section_break_18",
@@ -164,14 +178,6 @@
    "fieldtype": "Link",
    "label": "Department",
    "options": "Department"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "customer_details",
-   "fieldtype": "Section Break",
-   "label": "Details",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-user"
   },
   {
    "fieldname": "customer",
@@ -445,12 +451,6 @@
    "label": "Message"
   },
   {
-   "fieldname": "item_code",
-   "fieldtype": "Link",
-   "label": "Item Code",
-   "options": "Item"
-  },
-  {
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "hidden": 1,
@@ -467,11 +467,105 @@
   {
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "customer",
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "applies_to_item",
+   "fieldname": "sec_applies_to",
+   "fieldtype": "Section Break",
+   "label": "Applies To",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-user"
+  },
+  {
+   "fieldname": "col_break_applies_to",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "fetch_from": "applies_to_item.item_name",
+   "fieldname": "applies_to_item_name",
+   "fieldtype": "Data",
+   "label": "Applies to Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "applies_to_item",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Applies to Item",
+   "options": "Item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "insurance_company",
+   "fieldname": "sec_insurance",
+   "fieldtype": "Section Break",
+   "label": "Insurance Details"
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.insurance_company && doc.insurance_company_name != doc.insurance_company",
+   "fetch_from": "insurance_company.customer_name",
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "label": "Insurance Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_insurance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_policy_no",
+   "fieldtype": "Data",
+   "label": "Policy #"
+  },
+  {
+   "fieldname": "insurance_loss_no",
+   "fieldtype": "Data",
+   "label": "Loss #"
+  },
+  {
+   "fieldname": "col_break_insurance2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_surveyor",
+   "fieldtype": "Link",
+   "label": "Insurance Surveyor",
+   "options": "Insurance Surveyor"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2020-10-23 13:31:45.156993",
+ "modified": "2020-11-08 17:20:53.281751",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

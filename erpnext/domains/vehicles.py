@@ -15,7 +15,7 @@ applies_to_fields = [
 		"insert_after": "vehicle_engine_no"},
 	{"label": "Odometer Reading", "fieldname": "vehicle_last_odometer", "fieldtype": "Int", "no_copy": 0,
 		"insert_after": "col_break_vehicle_2", "read_only": 0, "fetch_from": "applies_to_vehicle.last_odometer"},
-	{"label": "Color", "fieldname": "vehicle_color", "fieldtype": "Data", "no_copy": 0,
+	{"label": "Color", "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color", "no_copy": 0,
 		"insert_after": "vehicle_last_odometer", "read_only": 0, "fetch_from": "applies_to_vehicle.color"},
 ]
 
@@ -27,6 +27,8 @@ service_person_fields = [
 ]
 
 for d in applies_to_fields:
+	d['translatable'] = 0
+for d in service_person_fields:
 	d['translatable'] = 0
 
 common_properties = [
@@ -70,6 +72,7 @@ data = {
 		"Delivery Note": applies_to_fields + service_person_fields,
 		"Sales Order": applies_to_fields + service_person_fields,
 		"Quotation": applies_to_fields + service_person_fields,
+		"Project": applies_to_fields + service_person_fields,
 	},
 	'default_portal_role': 'Customer'
 }
