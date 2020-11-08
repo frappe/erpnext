@@ -1,0 +1,206 @@
+{
+ "creation": "2020-11-08 14:32:35.387008",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "bill_date",
+  "bill_no",
+  "supplier",
+  "remarks",
+  "column_break_4",
+  "expense_account",
+  "exchange_rate",
+  "item_tax_template",
+  "tax_rate",
+  "sec_break1",
+  "total_amount",
+  "base_total_amount",
+  "col_break2",
+  "tax_amount",
+  "base_tax_amount",
+  "column_break_18",
+  "expense_amount",
+  "base_expense_amount",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "bill_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Bill Date",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "bill_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Bill No / Ref No",
+   "no_copy": 1,
+   "options": "reference_type"
+  },
+  {
+   "columns": 2,
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "columns": 1,
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Remarks",
+   "translatable": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 2,
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "label": "Expense Account",
+   "oldfieldname": "account",
+   "oldfieldtype": "Link",
+   "options": "Account",
+   "print_width": "250px",
+   "reqd": 1,
+   "search_index": 1,
+   "width": "250px"
+  },
+  {
+   "default": "1",
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "no_copy": 1,
+   "precision": "9"
+  },
+  {
+   "fieldname": "tax_rate",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Tax Rate",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sec_break1",
+   "fieldtype": "Section Break",
+   "label": "Amount"
+  },
+  {
+   "bold": 1,
+   "columns": 1,
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Amount",
+   "options": "payable_account_currency",
+   "print_hide_if_no_value": 1
+  },
+  {
+   "fieldname": "base_total_amount",
+   "fieldtype": "Currency",
+   "label": "Total Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "tax_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Tax Amount",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_tax_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "expense_amount",
+   "fieldtype": "Currency",
+   "label": "Expense Amount",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_expense_amount",
+   "fieldtype": "Currency",
+   "label": "Expense Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "columns": 2,
+   "description": "If Income or Expense",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Cost Center",
+   "oldfieldname": "cost_center",
+   "oldfieldtype": "Link",
+   "options": "Cost Center"
+  },
+  {
+   "columns": 1,
+   "fieldname": "item_tax_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tax Template",
+   "options": "Item Tax Template"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-11-08 16:06:36.182444",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Expense Entry Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

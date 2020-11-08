@@ -611,7 +611,7 @@ class JournalEntry(AccountsController):
 						"reference_no": d.cheque_no or self.bill_no,
 						"reference_date": d.cheque_date or self.bill_date,
 						"cost_center": d.cost_center or self.get('cost_center'),
-						"project": d.project,
+						"project": d.project or self.get('project'),
 						"finance_book": self.finance_book
 					}, item=d)
 				)

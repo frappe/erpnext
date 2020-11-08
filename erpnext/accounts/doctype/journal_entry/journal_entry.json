@@ -24,6 +24,7 @@
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
+  "expense_entry_name",
   "cheque_no",
   "cheque_date",
   "column_break99",
@@ -523,12 +524,21 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "expense_entry_name",
+   "fieldtype": "Link",
+   "label": "Expense Entry Reference",
+   "no_copy": 1,
+   "options": "Expense Entry",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2020-11-07 23:31:41.500884",
+ "modified": "2020-11-08 14:57:51.298811",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

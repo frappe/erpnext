@@ -49,6 +49,7 @@
   "column_break1",
   "contact_html",
   "default_payable_accounts",
+  "expense_account",
   "tax_category",
   "tax_withholding_category",
   "default_bank_account",
@@ -400,12 +401,18 @@
    "fieldname": "pr_not_required",
    "fieldtype": "Check",
    "label": "Allow Purchase Invoice Creation Without Purchase Receipt"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "label": "Default Expense Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "modified": "2020-10-12 13:37:02.640932",
+ "modified": "2020-11-08 15:00:09.600435",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
