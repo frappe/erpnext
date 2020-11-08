@@ -110,7 +110,7 @@ class ExpenseEntry(Document):
 		company_currency = get_company_currency(self.company)
 		multi_currency = 1 if self.payable_account_currency != company_currency else 0
 
-		doc = self.get_journal_entry(d, multi_currency)
+		doc = self.get_journal_entry(d, multi_currency, self.journal_entry_series)
 		self.append_expense_entry(doc, d)
 		self.append_tax_entry(doc, d)
 		self.append_supplier_credit_entry(doc, d)
@@ -124,7 +124,14 @@ class ExpenseEntry(Document):
 		paid_from_account_currency = frappe.get_cached_value("Account", self.paid_from_account, "account_currency")
 		multi_currency = 1 if paid_from_account_currency != company_currency else 0
 
-		doc = self.get_journal_entry(d, multi_currency)
+		payment_account_type = frappe.get_cached_value("Account", self.paid_from_account, "account_type")
+		naming_series = None
+		if payment_account_type == "Bank":
+			naming_series = self.bank_entry_series
+		elif payment_account_type == "Cash":
+			naming_series = self.cash_entry_series
+
+		doc = self.get_journal_entry(d, multi_currency, naming_series=naming_series)
 
 		if bill_jv:
 			self.append_supplier_debit_entry(doc, d, bill_jv)
@@ -138,7 +145,7 @@ class ExpenseEntry(Document):
 		doc.submit()
 		return doc
 
-	def get_journal_entry(self, d, multi_currency):
+	def get_journal_entry(self, d, multi_currency, naming_series=None):
 		doc = frappe.new_doc("Journal Entry")
 		doc.update({
 			"expense_entry_name": self.name,
@@ -151,6 +158,9 @@ class ExpenseEntry(Document):
 			"multi_currency": multi_currency,
 			"user_remark": d.remarks
 		})
+
+		if naming_series:
+			doc.naming_series = naming_series
 
 		self.set_accounting_dimensions(self, doc)
 

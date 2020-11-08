@@ -21,7 +21,12 @@
   "project",
   "2_add_edit_gl_entries",
   "accounts",
-  "addtional_info"
+  "addtional_info",
+  "journal_entry_series",
+  "column_break_19",
+  "bank_entry_series",
+  "column_break_21",
+  "cash_entry_series"
  ],
  "fields": [
   {
@@ -170,10 +175,36 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "fieldname": "journal_entry_series",
+   "fieldtype": "Data",
+   "label": "Journal Entry Series",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_entry_series",
+   "fieldtype": "Data",
+   "label": "Bank Entry Series",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_entry_series",
+   "fieldtype": "Data",
+   "label": "Cash Entry Series",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-11-08 16:07:01.138370",
+ "modified": "2020-11-08 16:38:25.270532",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Expense Entry",
