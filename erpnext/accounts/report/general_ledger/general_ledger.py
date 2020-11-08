@@ -149,7 +149,7 @@ def get_gl_entries(filters, accounting_dimensions):
 		where company=%(company)s {conditions}
 		order by posting_date, account, creation
 		""".format(conditions=get_conditions(filters, accounting_dimensions), dimensions_fields=dimensions_fields),
-			filters, as_dict=1, debug=1)
+			filters, as_dict=1)
 
 	if filters.get('presentation_currency'):
 		return convert_to_presentation_currency(gl_entries, currency_map)
