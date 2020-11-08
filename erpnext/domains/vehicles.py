@@ -32,7 +32,7 @@ for d in service_person_fields:
 	d['translatable'] = 0
 
 common_properties = [
-	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail'),
+	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail', 'Project'),
 		{"fieldname": "vehicle", "property": "in_standard_filter", "value": 1}],
 
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
