@@ -7,7 +7,7 @@ def execute():
 	if "Vehicles" not in frappe.get_active_domains():
 		return
 
-	dts = ['Project', 'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Vehicle']
+	dts = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Vehicle']
 
 	all_colors = set()
 	for dt in dts:

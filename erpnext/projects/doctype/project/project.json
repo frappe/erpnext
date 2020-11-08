@@ -522,6 +522,7 @@
    "collapsible_depends_on": "insurance_company",
    "fieldname": "sec_insurance",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Insurance Details"
   },
   {
@@ -565,7 +566,7 @@
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2020-11-08 17:20:53.281751",
+ "modified": "2020-11-08 18:24:02.766605",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

@@ -35,16 +35,16 @@ common_properties = [
 	[('Delivery Note Item', 'Sales Invoice Item', 'Purchase Receipt Item', 'Purchase Invoice Item', 'Stock Entry Detail'),
 		{"fieldname": "vehicle", "property": "in_standard_filter", "value": 1}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
 		{"fieldname": "sec_applies_to", "property": "hidden", "value": 0}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
 		{"fieldname": "applies_to_item", "property": "fetch_from", "value": "applies_to_vehicle.item_code"}],
 
-	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'),
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
 		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
 
-	[('Sales Invoice',),
+	[('Sales Invoice', 'Project'),
 		{"fieldname": "sec_insurance", "property": "hidden", "value": 0}],
 ]
 
