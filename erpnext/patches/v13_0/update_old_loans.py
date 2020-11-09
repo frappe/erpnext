@@ -70,7 +70,7 @@ def execute():
 			payments = frappe.db.sql(''' SELECT j.name, a.debit, a.debit_in_account_currency, j.posting_date
 				FROM `tabJournal Entry` j, `tabJournal Entry Account` a
 				WHERE a.parent = j.name and a.reference_type='Loan' and a.reference_name = %s
-				and account = %s
+				and a.account = %s and j.docstatus = 1
 			''', (loan.name, loan.loan_account), as_dict=1)
 
 			for payment in payments:
