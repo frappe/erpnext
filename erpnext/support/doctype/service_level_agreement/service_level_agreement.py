@@ -111,6 +111,12 @@ class ServiceLevelAgreement(Document):
 				"options": "Service Level Agreement"
 			},
 			{
+				"fieldname": "priority",
+				"fieldtype": "Link",
+				"label": "Priority",
+				"options": "Issue Priority"
+			},
+			{
 				"fieldname": "response_by",
 				"fieldtype": "Datetime",
 				"label": "Response By",
@@ -121,6 +127,12 @@ class ServiceLevelAgreement(Document):
 				"fieldtype": "Duration",
 				"hide_seconds": 1,
 				"label": "Response By Variance",
+				"read_only": 1
+			},
+			{
+				"fieldname": "first_responded_on",
+				"fieldtype": "Datetime",
+				"label": "First Responded On",
 				"read_only": 1
 			},
 			{
@@ -154,18 +166,6 @@ class ServiceLevelAgreement(Document):
 				"fieldtype": "Datetime",
 				"hidden": 1,
 				"label": "Service Level Agreement Creation",
-				"read_only": 1
-			},
-			{
-				"fieldname": "priority",
-				"fieldtype": "Link",
-				"label": "Priority",
-				"options": "Issue Priority"
-			},
-			{
-				"fieldname": "first_responded_on",
-				"fieldtype": "Datetime",
-				"label": "First Responded On",
 				"read_only": 1
 			},
 			{
@@ -392,7 +392,11 @@ def apply(doc, method=None):
 	set_response_by_and_variance(doc, meta, start_date_time, priority)
 	set_resolution_by_and_variance(doc, meta, start_date_time, priority)
 
-	from_db = frappe._dict({}) if doc.__unsaved else frappe.get_doc(doc.doctype, doc.name)
+	if frappe.db.exists(doc.doctype, doc.name):
+		from_db = frappe.get_doc(doc.doctype, doc.name)
+	else:
+		from_db = frappe._dict({})
+
 	update_status(doc, from_db, meta)
 
 
