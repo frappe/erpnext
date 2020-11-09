@@ -276,7 +276,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 		this.frm.add_custom_button(__("Product Bundle"), function() {
 			erpnext.buying.get_items_from_product_bundle(me.frm);
-		}, __("Get items from"));
+		}, __("Get Items From"));
 	},
 
 	shipping_address: function(){
