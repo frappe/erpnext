@@ -161,7 +161,7 @@ class ReceivablePayableReport(object):
 				# advance / unlinked payment or other adjustment
 				row.paid -= gle_balance
 		if gle.cost_center:
-			row.cost_center =  str(gle.cost_center)
+			row.cost_center =  gle.cost_center
 
 	def update_sub_total_row(self, row, party):
 		total_row = self.total_row_map.get(party)
