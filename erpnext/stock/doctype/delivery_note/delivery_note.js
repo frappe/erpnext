@@ -151,7 +151,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								project: me.frm.doc.project || undefined,
 							}
 						})
-					}, __("Get items from"));
+					}, __("Get Items From"));
 			}
 		}
 
