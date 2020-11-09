@@ -1,7 +1,7 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.query_reports["Quoted Item Comparison"] = {
+frappe.query_reports["Supplier Quotation Comparison"] = {
 	filters: [
 		{
 			fieldtype: "Link",
@@ -79,6 +79,13 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			}
 		},
 		{
+			"fieldname":"group_by",
+			"label": __("Group by"),
+			"fieldtype": "Select",
+			"options": [__("Group by Supplier"), __("Group by Item")],
+			"default": __("Group by Supplier")
+		},
+		{
 			fieldtype: "Check",
 			label: __("Include Expired"),
 			fieldname: "include_expired",
@@ -98,6 +105,9 @@ frappe.query_reports["Quoted Item Comparison"] = {
 			}
 		}
 
+		if(column.fieldname === "price_per_unit" && data.price_per_unit && data.min && data.min === 1){
+			value = `<div style="color:green">${value}</div>`;
+		}
 		return value;
 	},
 

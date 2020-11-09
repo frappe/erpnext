@@ -117,7 +117,7 @@
    "depends_on": "eval:doc.is_flexible_benefit != 1",
    "fieldname": "section_break_2",
    "fieldtype": "Section Break",
-   "label": "Condtion and formula"
+   "label": "Condition and formula"
   },
   {
    "allow_on_submit": 1,
@@ -206,38 +206,28 @@
    "collapsible": 1,
    "fieldname": "section_break_5",
    "fieldtype": "Section Break",
-   "label": "Component properties and references ",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Component properties and references "
   },
   {
    "fieldname": "column_break_11",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_19",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "column_break_18",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "column_break_24",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-07-01 12:13:41.956495",
+ "modified": "2020-10-07 20:39:41.619283",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Detail",

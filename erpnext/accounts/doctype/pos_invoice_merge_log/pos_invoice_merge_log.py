@@ -26,18 +26,25 @@ class POSInvoiceMergeLog(Document):
 		for d in self.pos_invoices:
 			status, docstatus, is_return, return_against = frappe.db.get_value(
 				'POS Invoice', d.pos_invoice, ['status', 'docstatus', 'is_return', 'return_against'])
-
+			
+			bold_pos_invoice = frappe.bold(d.pos_invoice)
+			bold_status = frappe.bold(status)
 			if docstatus != 1:
-				frappe.throw(_("Row #{}: POS Invoice {} is not submitted yet").format(d.idx, d.pos_invoice))
+				frappe.throw(_("Row #{}: POS Invoice {} is not submitted yet").format(d.idx, bold_pos_invoice))
 			if status == "Consolidated":
-				frappe.throw(_("Row #{}: POS Invoice {} has been {}").format(d.idx, d.pos_invoice, status))
-			if is_return and return_against not in [d.pos_invoice for d in self.pos_invoices] and status != "Consolidated":
-				# if return entry is not getting merged in the current pos closing and if it is not consolidated
-				frappe.throw(
-					_("Row #{}: Return Invoice {} cannot be made against unconsolidated invoice. \
-					You can add original invoice {} manually to proceed.")
-					.format(d.idx, frappe.bold(d.pos_invoice), frappe.bold(return_against))
-				)
+				frappe.throw(_("Row #{}: POS Invoice {} has been {}").format(d.idx, bold_pos_invoice, bold_status))
+			if is_return and return_against and return_against not in [d.pos_invoice for d in self.pos_invoices]:
+				bold_return_against = frappe.bold(return_against)
+				return_against_status = frappe.db.get_value('POS Invoice', return_against, "status")
+				if return_against_status != "Consolidated":
+					# if return entry is not getting merged in the current pos closing and if it is not consolidated
+					bold_unconsolidated = frappe.bold("not Consolidated")
+					msg = (_("Row #{}: Original Invoice {} of return invoice {} is {}. ")
+								.format(d.idx, bold_return_against, bold_pos_invoice, bold_unconsolidated))
+					msg += _("Original invoice should be consolidated before or along with the return invoice.")
+					msg += "<br><br>"
+					msg += _("You can add original invoice {} manually to proceed.").format(bold_return_against)
+					frappe.throw(msg)
 
 	def on_submit(self):
 		pos_invoice_docs = [frappe.get_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
@@ -96,17 +103,28 @@ class POSInvoiceMergeLog(Document):
 				loyalty_amount_sum += doc.loyalty_amount
 			
 			for item in doc.get('items'):
-				items.append(item)
+				found = False
+				for i in items:
+					if (i.item_code == item.item_code and not i.serial_no and not i.batch_no and
+						i.uom == item.uom and i.net_rate == item.net_rate):
+						found = True
+						i.qty = i.qty + item.qty
+				if not found:
+					item.rate = item.net_rate
+					items.append(item)
 			
 			for tax in doc.get('taxes'):
 				found = False
 				for t in taxes:
-					if t.account_head == tax.account_head and t.cost_center == tax.cost_center and t.rate == tax.rate:
-						t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount)
-						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount)
+					if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
+						t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
+						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
 						found = True
 				if not found:
 					tax.charge_type = 'Actual'
+					tax.included_in_print_rate = 0
+					tax.tax_amount = tax.tax_amount_after_discount_amount
+					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
 					taxes.append(tax)
 
 			for payment in doc.get('payments'):
@@ -127,6 +145,8 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('items', items)
 		invoice.set('payments', payments)
 		invoice.set('taxes', taxes)
+		invoice.additional_discount_percentage = 0
+		invoice.discount_amount = 0.0
 
 		return invoice
 	

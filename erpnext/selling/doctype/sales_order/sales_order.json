@@ -1460,7 +1460,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-31 14:13:17.962015",
+ "modified": "2020-10-07 14:30:01.782617",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1534,7 +1534,7 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
- "title_field": "customer",
+ "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1
 }
