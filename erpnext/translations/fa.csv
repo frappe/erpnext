@@ -473,7 +473,6 @@ Cannot deduct when category is for 'Valuation' or 'Valuation and Total',نمی �
 Cannot deduct when category is for 'Valuation' or 'Vaulation and Total',نمی توانید کسر وقتی دسته است برای ارزش گذاری &quot;یا&quot; Vaulation و مجموع:,
 "Cannot delete Serial No {0}, as it is used in stock transactions",نمی توانید حذف سریال نه {0}، آن را به عنوان در معاملات سهام مورد استفاده,
 Cannot enroll more than {0} students for this student group.,نمی توانید بیش از {0} دانش آموزان برای این گروه از دانشجویان ثبت نام.,
-Cannot find Item with this barcode,با این بارکد نمی توان مورد را یافت,
 Cannot find active Leave Period,می توانید دوره فعال خروج را پیدا نکنید,
 Cannot produce more Item {0} than Sales Order quantity {1},می تواند مورد دیگر {0} از مقدار سفارش فروش تولید نمی {1},
 Cannot promote Employee with status Left,کارمند با وضعیت چپ را نمیتوان ارتقا داد,
@@ -690,7 +689,6 @@ Create Variants,ایجاد انواع,
 "Create and manage daily, weekly and monthly email digests.",ایجاد و مدیریت روزانه، هفتگی و ماهانه هضم ایمیل.,
 Create customer quotes,درست به نقل از مشتری,
 Create rules to restrict transactions based on values.,ایجاد قوانین برای محدود کردن معاملات بر اساس ارزش.,
-Created By,خلق شده توسط,
 Created {0} scorecards for {1} between: ,{0} کارت امتیازی برای {1} ایجاد شده بین:,
 Creating Company and Importing Chart of Accounts,ایجاد شرکت و وارد کردن نمودار حساب,
 Creating Fees,ایجاد هزینه ها,
@@ -1078,7 +1076,6 @@ For Warehouse is required before Submit,ذخیره سازی قبل از ارسا
 For row {0}: Enter Planned Qty,برای ردیف {0}: تعداد برنامه ریزی شده را وارد کنید,
 "For {0}, only credit accounts can be linked against another debit entry",برای {0}، تنها حساب های اعتباری می تواند در مقابل ورود بدهی دیگر مرتبط,
 "For {0}, only debit accounts can be linked against another credit entry",برای {0}، تنها حساب های بانکی را می توان در برابر ورود اعتباری دیگر مرتبط,
-Form View,فرم مشاهده,
 Forum Activity,فعالیت انجمن,
 Free item code is not selected,کد مورد رایگان انتخاب نشده است,
 Freight and Forwarding Charges,حمل و نقل و حمل و نقل اتهامات,
@@ -2638,7 +2635,6 @@ Send SMS,ارسال اس ام اس,
 Send mass SMS to your contacts,ارسال اس ام اس انبوه به مخاطبین خود,
 Sensitivity,حساسیت,
 Sent,فرستاده,
-Serial #,سریال #,
 Serial No and Batch,سریال نه و دسته ای,
 Serial No is mandatory for Item {0},سریال بدون برای مورد الزامی است {0},
 Serial No {0} does not belong to Batch {1},شماره سریال {0} به دسته {1} تعلق ندارد,
@@ -3303,7 +3299,6 @@ Welcome to ERPNext,به ERPNext خوش آمدید,
 What do you need help with?,به چه نیاز دارید کمک کنیم؟,
 What does it do?,چه کاری انجام میدهد؟,
 Where manufacturing operations are carried.,که در آن عملیات ساخت در حال انجام شده است.,
-"While creating account for child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA",هنگام ایجاد حساب کاربری برای شرکت کودک {0} ، حساب والدین {1} یافت نشد. لطفاً حساب والدین را در COA مربوطه ایجاد کنید,
 White,سفید,
 Wire Transfer,انتقال سیم,
 WooCommerce Products,محصولات WooCommerce,
@@ -3493,6 +3488,7 @@ Likes,دوست دارد,
 Merge with existing,ادغام با موجود,
 Office,دفتر,
 Orientation,گرایش,
+Parent,والدین,
 Passive,غیر فعال,
 Payment Failed,پرداخت ناموفق,
 Percent,در صد,
@@ -3543,6 +3539,7 @@ Shift,تغییر مکان,
 Show {0},نمایش {0},
 "Special Characters except ""-"", ""#"", ""."", ""/"", ""{"" and ""}"" not allowed in naming series",کاراکترهای خاص به جز &quot;-&quot; ، &quot;#&quot; ، &quot;.&quot; ، &quot;/&quot; ، &quot;{&quot; و &quot;}&quot; در سریال نامگذاری مجاز نیستند,
 Target Details,جزئیات هدف,
+{0} already has a Parent Procedure {1}.,{0} در حال حاضر یک روش والدین {1} دارد.,
 API,API,
 Annual,سالیانه,
 Approved,تایید,
@@ -7558,10 +7555,6 @@ Quality Feedback Template Parameter,پارامتر قالب بازخورد کی�
 Quality Goal,هدف کیفیت,
 Monitoring Frequency,فرکانس نظارت,
 Weekday,روز هفته,
-January-April-July-October,ژانویه-آوریل-جولای-اکتبر,
-Revision and Revised On,بازبینی و اصلاح شده در,
-Revision,تجدید نظر,
-Revised On,اصلاح شده در,
 Objectives,اهداف,
 Quality Goal Objective,هدف کیفیت هدف,
 Objective,هدف، واقعگرایانه,
@@ -7574,7 +7567,6 @@ Parent Procedure,رویه والدین,
 Processes,مراحل,
 Quality Procedure Process,فرایند روش کیفیت,
 Process Description,شرح فرایند,
-Child Procedure,رویه کودک,
 Link existing Quality Procedure.,رویه کیفیت موجود را پیوند دهید.,
 Additional Information,اطلاعات اضافی,
 Quality Review Objective,هدف مرور کیفیت,
@@ -9091,7 +9083,6 @@ Unmarked days,روزهای بدون علامت,
 Absent Days,روزهای غایب,
 Conditions and Formula variable and example,شرایط و متغیر فرمول و مثال,
 Feedback By,بازخورد توسط,
-MTNG-.YYYY.-.MM.-.DD.-,MTNG -. آره. -. MM. -. DD - -,
 Manufacturing Section,بخش ساخت,
 "By default, the Customer Name is set as per the Full Name entered. If you want Customers to be named by a ",به طور پیش فرض ، نام مشتری بر اساس نام کامل وارد شده تنظیم می شود. اگر می خواهید مشتریان توسط الف نامگذاری شوند,
 Configure the default Price List when creating a new Sales transaction. Item prices will be fetched from this Price List.,هنگام ایجاد یک معامله جدید فروش ، لیست قیمت پیش فرض را پیکربندی کنید. قیمت اقلام از این لیست قیمت دریافت می شود.,
@@ -9692,7 +9683,6 @@ Available Balance,موجودی موجود,
 Reserved Balance,موجودی رزرو شده,
 Uncleared Balance,تراز نامشخص,
 Payment related to {0} is not completed,پرداخت مربوط به {0} تکمیل نشده است,
-Row #{}: Serial No{}. {} has already been transacted into another POS Invoice. Please select valid serial no.,ردیف # {}: شماره سریال {}. {} قبلاً به فاکتور POS دیگری معامله شده است. لطفا شماره سریال معتبر را انتخاب کنید.,
 Row #{}: Item Code: {} is not available under warehouse {}.,ردیف # {}: کد مورد: {} در انبار موجود نیست {}.,
 Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.,ردیف # {}: مقدار سهام برای کد مورد کافی نیست: {} زیر انبار {}. مقدار موجود {}.,
 Row #{}: Please select a serial no and batch against item: {} or remove it to complete transaction.,ردیف شماره {}: لطفاً شماره سریال و دسته ای از موارد را انتخاب کنید: {} یا آن را حذف کنید تا معامله کامل شود.,
@@ -9732,3 +9722,115 @@ Quantity not available for {0} in warehouse {1},مقدار برای {0} در ا�
 Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.,لطفاً اجازه دهید سهام منفی را در تنظیمات سهام فعال کنید یا ورود سهام را برای ادامه ایجاد کنید.,
 No Inpatient Record found against patient {0},هیچ سابقه بستری در مورد بیمار یافت نشد {0},
 An Inpatient Medication Order {0} against Patient Encounter {1} already exists.,یک دستور دارویی در بیماران بستری {0} علیه ملاقات با بیمار {1} از قبل موجود است.,
+Allow In Returns,در بازگشت مجاز است,
+Hide Unavailable Items,موارد موجود را پنهان کنید,
+Apply Discount on Discounted Rate,تخفیف را با نرخ تخفیف اعمال کنید,
+Therapy Plan Template,الگوی طرح درمانی,
+Fetching Template Details,واکشی جزئیات الگو,
+Linked Item Details,جزئیات مورد پیوند داده شده,
+Therapy Types,انواع درمان,
+Therapy Plan Template Detail,جزئیات الگوی طرح درمانی,
+Non Conformance,عدم انطباق,
+Process Owner,صاحب فرآیند,
+Corrective Action,اقدام اصلاحی,
+Preventive Action,اقدام پیشگیرانه,
+Problem,مسئله,
+Responsible,مسئول,
+Completion By,تکمیل توسط,
+Process Owner Full Name,نام کامل مالک فرآیند,
+Right Index,نمایه درست,
+Left Index,شاخص چپ,
+Sub Procedure,روش فرعی,
+Passed,گذشت,
+Print Receipt,رسید چاپ,
+Edit Receipt,رسید را ویرایش کنید,
+Focus on search input,بر ورودی جستجو تمرکز کنید,
+Focus on Item Group filter,روی فیلتر گروه مورد تمرکز کنید,
+Checkout Order / Submit Order / New Order,سفارش پرداخت / ارسال سفارش / سفارش جدید,
+Add Order Discount,تخفیف سفارش را اضافه کنید,
+Item Code: {0} is not available under warehouse {1}.,کد مورد: {0} در انبار موجود نیست {1}.,
+Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.,شماره های سریال برای مورد {0} زیر انبار {1} در دسترس نیست. لطفاً انبار را تغییر دهید.,
+Fetched only {0} available serial numbers.,فقط {0} شماره سریال موجود دریافت شد.,
+Switch Between Payment Modes,جابجایی بین حالت های پرداخت,
+Enter {0} amount.,{0} مقدار را وارد کنید.,
+You don't have enough points to redeem.,شما امتیاز کافی برای استفاده ندارید.,
+You can redeem upto {0}.,می توانید تا {0} استفاده کنید.,
+Enter amount to be redeemed.,مبلغی را که باید استفاده شود وارد کنید.,
+You cannot redeem more than {0}.,نمی توانید بیش از {0} استفاده کنید.,
+Open Form View,نمای فرم را باز کنید,
+POS invoice {0} created succesfully,فاکتور POS {0} با موفقیت ایجاد شد,
+Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.,مقدار سهام برای کد مورد کافی نیست: {0} زیر انبار {1}. مقدار موجود {2}.,
+Serial No: {0} has already been transacted into another POS Invoice.,شماره سریال: {0} قبلاً به فاکتور POS دیگری معامله شده است.,
+Balance Serial No,شماره سریال موجودی,
+Warehouse: {0} does not belong to {1},انبار: {0} متعلق به {1} نیست,
+Please select batches for batched item {0},لطفاً دسته ها را برای مورد دسته ای انتخاب کنید {0},
+Please select quantity on row {0},لطفاً مقدار را در ردیف {0} انتخاب کنید,
+Please enter serial numbers for serialized item {0},لطفا شماره سریال را برای مورد سریال وارد کنید {0},
+Batch {0} already selected.,دسته ای {0} از قبل انتخاب شده است.,
+Please select a warehouse to get available quantities,لطفاً یک انبار را برای دریافت مقادیر موجود انتخاب کنید,
+"For transfer from source, selected quantity cannot be greater than available quantity",برای انتقال از منبع ، مقدار انتخاب شده نمی تواند بیشتر از مقدار موجود باشد,
+Cannot find Item with this Barcode,با این بارکد نمی توانید مورد را پیدا کنید,
+{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2},{0} اجباری است. شاید سابقه تبدیل ارز برای {1} تا {2} ایجاد نشده باشد,
+{} has submitted assets linked to it. You need to cancel the assets to create purchase return.,{} دارایی های مرتبط با آن را ارسال کرده است. برای ایجاد بازده خرید ، باید دارایی ها را لغو کنید.,
+Cannot cancel this document as it is linked with submitted asset {0}. Please cancel it to continue.,نمی توان این سند را لغو کرد زیرا با دارایی ارسالی {0} مرتبط است. لطفاً برای ادامه آن را لغو کنید.,
+Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.,ردیف شماره {}: شماره سریال {} قبلاً به فاکتور POS دیگری انتقال داده شده است. لطفا شماره سریال معتبر را انتخاب کنید.,
+Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.,ردیف # {}: شماره سریال. {} قبلاً به یک فاکتور POS دیگر تبدیل شده است. لطفا شماره سریال معتبر را انتخاب کنید.,
+Item Unavailable,مورد موجود نیست,
+Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {},ردیف # {}: شماره سریال {} قابل بازگشت نیست زیرا در فاکتور اصلی معامله نشده است {},
+Please set default Cash or Bank account in Mode of Payment {},لطفاً پول نقد یا حساب بانکی پیش فرض را در روش پرداخت تنظیم کنید {},
+Please set default Cash or Bank account in Mode of Payments {},لطفاً پول نقد یا حساب بانکی پیش فرض را در حالت پرداخت تنظیم کنید {},
+Please ensure {} account is a Balance Sheet account. You can change the parent account to a Balance Sheet account or select a different account.,لطفاً اطمینان حاصل کنید که {} حساب یک حساب ترازنامه است. می توانید حساب والد را به یک حساب ترازنامه تغییر دهید یا یک حساب دیگر انتخاب کنید.,
+Please ensure {} account is a Payable account. Change the account type to Payable or select a different account.,لطفاً اطمینان حاصل کنید که حساب {} یک حساب قابل پرداخت است. نوع حساب را به Payable تغییر دهید یا حساب دیگری را انتخاب کنید.,
+Row {}: Expense Head changed to {} ,ردیف {}: سر هزینه به {} تغییر یافت,
+because account {} is not linked to warehouse {} ,زیرا حساب {} به انبار پیوند ندارد {},
+or it is not the default inventory account,یا حساب موجودی پیش فرض نیست,
+Expense Head Changed,سر هزینه تغییر کرد,
+because expense is booked against this account in Purchase Receipt {},زیرا هزینه در قبض خرید در مقابل این حساب رزرو شده است {},
+as no Purchase Receipt is created against Item {}. ,چون هیچ رسید خریدی در برابر مورد {} ایجاد نمی شود.,
+This is done to handle accounting for cases when Purchase Receipt is created after Purchase Invoice,این کار برای رسیدگی به حسابداری در مواردی است که پس از فاکتور خرید ، رسید خرید ایجاد می شود,
+Purchase Order Required for item {},سفارش خرید برای مورد مورد نیاز است {},
+To submit the invoice without purchase order please set {} ,برای ارسال فاکتور بدون سفارش خرید لطفاً {},
+as {} in {},به عنوان {} در {},
+Mandatory Purchase Order,سفارش خرید اجباری,
+Purchase Receipt Required for item {},رسید خرید برای مورد نیاز است {},
+To submit the invoice without purchase receipt please set {} ,برای ارسال فاکتور بدون رسید خرید لطفاً تنظیم کنید {},
+Mandatory Purchase Receipt,رسید خرید اجباری,
+POS Profile {} does not belongs to company {},نمایه POS {} متعلق به شرکت نیست {},
+User {} is disabled. Please select valid user/cashier,کاربر {} غیرفعال است. لطفاً کاربر / صندوقدار معتبر را انتخاب کنید,
+Row #{}: Original Invoice {} of return invoice {} is {}. ,ردیف # {}: فاکتور اصلی {} فاکتور برگشت {} {} است.,
+Original invoice should be consolidated before or along with the return invoice.,فاکتور اصلی باید قبل یا همراه با فاکتور برگشت ادغام شود.,
+You can add original invoice {} manually to proceed.,برای ادامه کار می توانید فاکتور اصلی را {} به صورت دستی اضافه کنید.,
+Please ensure {} account is a Balance Sheet account. ,لطفاً اطمینان حاصل کنید که {} حساب یک حساب ترازنامه است.,
+You can change the parent account to a Balance Sheet account or select a different account.,می توانید حساب والد را به یک حساب ترازنامه تغییر دهید یا یک حساب دیگر انتخاب کنید.,
+Please ensure {} account is a Receivable account. ,لطفاً مطمئن شوید که {} حساب یک حساب قابل دریافت است.,
+Change the account type to Receivable or select a different account.,نوع حساب را به قابل دریافت تغییر دهید یا حساب دیگری را انتخاب کنید.,
+{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {},از زمان استفاده از امتیازات وفاداری کسب شده ، {} قابل لغو نیست. ابتدا {} نه {} را لغو کنید,
+already exists,درحال حاضر وجود دارد,
+POS Closing Entry {} against {} between selected period,ورودی بسته شدن POS بین دوره انتخاب شده {} در برابر {},
+POS Invoice is {},فاکتور POS {} است,
+POS Profile doesn't matches {},نمایه POS مطابقت ندارد {},
+POS Invoice is not {},فاکتور POS {} نیست,
+POS Invoice isn't created by user {},فاکتور POS توسط کاربر ایجاد نشده است {},
+Row #{}: {},ردیف شماره {}: {},
+Invalid POS Invoices,فاکتورهای POS نامعتبر است,
+Please add the account to root level Company - {},لطفاً حساب را به سطح root شرکت اضافه کنید - {},
+"While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA",هنگام ایجاد حساب برای شرکت کودک {0} ، حساب والد {1} پیدا نشد. لطفاً حساب والدین را در COA مربوطه ایجاد کنید,
+Account Not Found,حساب یافت نشد,
+"While creating account for Child Company {0}, parent account {1} found as a ledger account.",هنگام ایجاد حساب برای شرکت کودک {0} ، حساب والد {1} به عنوان یک حساب دفتر پیدا شد.,
+Please convert the parent account in corresponding child company to a group account.,لطفاً حساب والدین را در شرکت مربوط به فرزند به یک حساب گروهی تبدیل کنید.,
+Invalid Parent Account,حساب والد نامعتبر است,
+"Renaming it is only allowed via parent company {0}, to avoid mismatch.",تغییر نام آن فقط از طریق شرکت مادر {0} مجاز است تا از عدم تطابق جلوگیری شود.,
+"If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item.",اگر {0} {1} مقادیر مورد {2} داشته باشید ، طرح {3} روی مورد اعمال می شود.,
+"If you {0} {1} worth item {2}, the scheme {3} will be applied on the item.",اگر {0} {1} مورد موردی را داشته باشید {2} ، طرح {3} روی مورد اعمال می شود.,
+"As the field {0} is enabled, the field {1} is mandatory.",همانطور که قسمت {0} فعال است ، قسمت {1} اجباری است.,
+"As the field {0} is enabled, the value of the field {1} should be more than 1.",همانطور که قسمت {0} فعال است ، مقدار فیلد {1} باید بیش از 1 باشد.,
+Cannot deliver Serial No {0} of item {1} as it is reserved to fullfill Sales Order {2},نمی توان شماره سریال {0} مورد {1} را تحویل داد زیرا برای تکمیل سفارش فروش {2} محفوظ است,
+"Sales Order {0} has reservation for the item {1}, you can only deliver reserved {1} against {0}.",سفارش فروش {0} برای مورد رزرو دارد {1} ، شما فقط می توانید رزرو شده {1} را در مقابل {0} تحویل دهید.,
+{0} Serial No {1} cannot be delivered,{0} شماره سریال {1} تحویل داده نمی شود,
+Row {0}: Subcontracted Item is mandatory for the raw material {1},ردیف {0}: مورد پیمانکاری فرعی برای ماده اولیه اجباری است {1},
+"As there are sufficient raw materials, Material Request is not required for Warehouse {0}.",از آنجا که مواد اولیه کافی وجود دارد ، درخواست مواد برای انبار {0} لازم نیست.,
+" If you still want to proceed, please enable {0}.",اگر هنوز می خواهید ادامه دهید ، لطفاً {0} را فعال کنید.,
+The item referenced by {0} - {1} is already invoiced,مورد ارجاع شده توسط {0} - {1} قبلاً فاکتور شده است,
+Therapy Session overlaps with {0},جلسه درمانی با {0} همپوشانی دارد,
+Therapy Sessions Overlapping,جلسات درمانی با هم تداخل دارند,
+Therapy Plans,برنامه های درمانی,

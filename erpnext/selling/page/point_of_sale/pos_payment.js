@@ -409,7 +409,7 @@ erpnext.PointOfSale.Payment = class {
 				${
 					shortcuts.map(s => {
 						return `<div class="shortcut rounded bg-light-grey text-dark-grey pt-2 pb-2 no-select pointer" data-value="${s}">
-									${format_currency(s, currency)}
+									${format_currency(s, currency, 0)}
 								</div>`
 					}).join('')
 				}
