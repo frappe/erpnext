@@ -34,7 +34,7 @@ class Membership(Document):
 				self.member = member_name
 
 		# get last membership (if active)
-		last_membership = erpnext.get_last_membership()
+		last_membership = erpnext.get_last_membership(self.member)
 
 		# if person applied for offline membership
 		if last_membership and not frappe.session.user == "Administrator":
