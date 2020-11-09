@@ -401,27 +401,28 @@ def apply(doc, method=None):
 
 
 def update_status(doc, from_db, meta):
-	if meta.has_field("status") and meta.has_field("first_responded_on") and doc.status != "Open" and \
-		from_db.status == "Open" and not doc.first_responded_on:
+	if meta.has_field("status"):
+		if meta.has_field("first_responded_on") and doc.status != "Open" and \
+			from_db.status == "Open" and not doc.first_responded_on:
 
-		doc.first_responded_on = frappe.flags.current_time or now_datetime(doc.get("owner"))
+			doc.first_responded_on = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
-	if meta.has_field("status") and doc.status == "Closed" and from_db.status != "Closed":
-		if meta.has_field("resolution_date"):
-			doc.resolution_date = frappe.flags.current_time or now_datetime(doc.get("owner"))
+		if doc.status in ["Resolved", "Closed"] and from_db.status not in ["Resolved", "Closed"]:
+			if meta.has_field("resolution_date"):
+				doc.resolution_date = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
-		if meta.has_field("agreement_status") and from_db.agreement_status == "Ongoing":
+			if meta.has_field("agreement_status") and from_db.agreement_status == "Ongoing":
+				set_service_level_agreement_variance(doc.doctype, doc.name)
+				update_agreement_status(doc, from_db, meta)
+
+			set_resolution_time(doc, meta)
+			set_user_resolution_time(doc, meta)
+
+		if doc.status == "Open" and from_db.status != "Open":
+			# if no date, it should be set as None and not a blank string "", as per mysql strict config
+			# enable SLA and variance on Reopen
+			reset_metrics(doc, meta)
 			set_service_level_agreement_variance(doc.doctype, doc.name)
-			update_agreement_status(doc, from_db, meta)
-
-		set_resolution_time(doc, meta)
-		set_user_resolution_time(doc, meta)
-
-	if meta.has_field("status") and doc.status == "Open" and not from_db.status == "Open":
-		# if no date, it should be set as None and not a blank string "", as per mysql strict config
-		# enable SLA and variance on Reopen
-		reset_metrics(doc, meta)
-		set_service_level_agreement_variance(doc.doctype, doc.name)
 
 	handle_hold_time(doc, meta, from_db.status)
 
