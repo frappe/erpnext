@@ -5,7 +5,7 @@
     {{ add_header(0, 1, doc, letter_head, no_letterhead, print_settings) }}
 
     {%- for label, value in (
-        (_("Received On"), frappe.utils.formatdate(doc.voucher_date)),
+        (_("Received On"), frappe.utils.format_date(doc.voucher_date)),
         (_("Received From"), doc.pay_to_recd_from),
         (_("Amount"), "<strong>" + doc.get_formatted("total_amount") + "</strong><br>" + (doc.total_amount_in_words or "") + "<br>"),
         (_("Remarks"), doc.remark)
