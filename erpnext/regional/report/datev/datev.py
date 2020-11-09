@@ -11,10 +11,11 @@ from __future__ import unicode_literals
 
 import json
 import frappe
-from frappe import _
 from six import string_types
+
+from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.regional.germany.utils.datev.datev_csv import download_csv_files_as_zip, get_datev_csv
+from erpnext.regional.germany.utils.datev.datev_csv import zip_and_download, get_datev_csv
 from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
 
 COLUMNS = [
@@ -344,7 +345,8 @@ def download_datev_csv(filters):
 	customers = get_customers(filters)
 	suppliers = get_suppliers(filters)
 
-	download_csv_files_as_zip([
+	zip_name = '{} DATEV.zip'.format(frappe.utils.datetime.date.today())
+	zip_and_download(zip_name, [
 		{
 			'file_name': 'EXTF_Buchungsstapel.csv',
 			'csv_data': get_datev_csv(transactions, filters, csv_class=Transactions)
