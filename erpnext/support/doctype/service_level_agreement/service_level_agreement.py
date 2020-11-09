@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
+from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
 	time_diff_in_seconds, get_time_zone, to_timedelta, get_datetime_str, get_link_to_form
 from datetime import datetime
 from erpnext.support.doctype.issue.issue import get_holidays
@@ -130,9 +130,9 @@ class ServiceLevelAgreement(Document):
 			},
 			{
 				"default": "Ongoing",
-				"fieldname": "agreement_fulfilled",
+				"fieldname": "agreement_status",
 				"fieldtype": "Select",
-				"label": "Service Level Agreement Fulfilled",
+				"label": "Service Level Agreement Status",
 				"options": "Ongoing\nFulfilled\nFailed",
 				"read_only": 1
 			},
@@ -362,7 +362,6 @@ def apply(doc, method=None):
 		return
 
 	meta = frappe.get_meta(doc.doctype)
-	from_db = frappe._dict({}) if doc.is_new() else frappe.get_doc(doc.doctype, doc.name)
 
 	if meta.has_field("customer") and service_level_agreement.customer and doc.get("customer") and \
 		not service_level_agreement.customer == doc.get("customer"):
@@ -385,6 +384,7 @@ def apply(doc, method=None):
 	set_response_by_and_variance(doc, meta, start_date_time, priority)
 	set_resolution_by_and_variance(doc, meta, start_date_time, priority)
 
+	from_db = frappe._dict({}) if doc.is_new() else frappe.get_doc(doc.doctype, doc.name)
 	update_status(doc, from_db, meta)
 
 
@@ -398,7 +398,7 @@ def update_status(doc, from_db, meta):
 		if meta.has_field("resolution_date"):
 			doc.resolution_date = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
-		if meta.has_field("agreement_fulfilled") and from_db.agreement_fulfilled == "Ongoing":
+		if meta.has_field("agreement_status") and from_db.agreement_status == "Ongoing":
 			set_service_level_agreement_variance(doc.doctype, doc.name)
 			update_agreement_status(doc, from_db, meta)
 
@@ -471,7 +471,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 
 def set_service_level_agreement_variance(doctype, doc=None):
 
-	filters = {"status": "Open", "agreement_fulfilled": "Ongoing"}
+	filters = {"status": "Open", "agreement_status": "Ongoing"}
 
 	if doc:
 		filters = {"name": doc}
@@ -481,18 +481,18 @@ def set_service_level_agreement_variance(doctype, doc=None):
 		current_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
 		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
-			variance = round(time_diff_in_hours(doc.response_by, current_time), 2)
+			variance = round(time_diff_in_seconds(doc.response_by, current_time), 2)
 			frappe.db.set_value(doc.doctype, doc.name, "response_by_variance", variance, update_modified=False)
 
 			if variance < 0:
-				frappe.db.set_value(doc.doctype, doc.name, "agreement_fulfilled", "Failed", update_modified=False)
+				frappe.db.set_value(doc.doctype, doc.name, "agreement_status", "Failed", update_modified=False)
 
 		if not doc.resolution_date: # resolution_date set when issue has been closed
-			variance = round(time_diff_in_hours(doc.resolution_by, current_time), 2)
+			variance = round(time_diff_in_seconds(doc.resolution_by, current_time), 2)
 			frappe.db.set_value(doc.doctype, doc.name, "resolution_by_variance", variance, update_modified=False)
 
 			if variance < 0:
-				frappe.db.set_value(doc.doctype, doc.name, "agreement_fulfilled", "Failed", update_modified=False)
+				frappe.db.set_value(doc.doctype, doc.name, "agreement_status", "Failed", update_modified=False)
 
 
 def set_user_resolution_time(doc, meta):
@@ -555,7 +555,7 @@ def reset_service_level_agreement(doc, reason, user):
 
 	doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
 	doc.set_response_and_resolution_time(priority=doc.priority, service_level_agreement=doc.service_level_agreement)
-	doc.agreement_fulfilled = "Ongoing"
+	doc.agreement_status = "Ongoing"
 	doc.save()
 
 
@@ -569,8 +569,8 @@ def reset_metrics(doc, meta):
 	if not meta.has_field("user_resolution_time"):
 		doc.user_resolution_time = None
 
-	if meta.has_field("agreement_fulfilled"):
-		doc.agreement_fulfilled = "Ongoing"
+	if meta.has_field("agreement_status"):
+		doc.agreement_status = "Ongoing"
 
 
 def set_resolution_time(doc, meta):
@@ -621,14 +621,14 @@ def handle_hold_time(doc, meta, status):
 				if meta.has_field("first_responded_on") and not doc.first_responded_on:
 					response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 					response_by = add_to_date(response_by, seconds=round(last_hold_time))
-					response_by_variance = round(time_diff_in_hours(response_by, now_time))
+					response_by_variance = round(time_diff_in_seconds(response_by, now_time))
 
 					update_values['response_by'] = response_by
 					update_values['response_by_variance'] = response_by_variance + (last_hold_time // 3600)
 
 				resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 				resolution_by = add_to_date(resolution_by, seconds=round(last_hold_time))
-				resolution_by_variance = round(time_diff_in_hours(resolution_by, now_time))
+				resolution_by_variance = round(time_diff_in_seconds(resolution_by, now_time))
 
 				update_values['resolution_by'] = resolution_by
 				update_values['resolution_by_variance'] = resolution_by_variance + (last_hold_time // 3600)
@@ -637,32 +637,32 @@ def handle_hold_time(doc, meta, status):
 			doc.update(update_values)
 
 
-def update_agreement_fulfilled_on_custom_status(doc):
+def update_agreement_status_on_custom_status(doc):
 	# Update Agreement Fulfilled status using Custom Scripts for Custom Status
 
 	meta = frappe.get_meta(doc.doctype)
 	if meta.has_field("first_responded_on") and not doc.first_responded_on:
 		# first_responded_on set when first reply is sent to customer
-		doc.response_by_variance = round(time_diff_in_hours(doc.response_by, now_datetime(doc.get("owner"))), 2)
+		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_datetime(doc.get("owner"))), 2)
 
 	if meta.has_field("resolution_date") and not doc.resolution_date:
 		# resolution_date set when issue has been closed
-		doc.resolution_by_variance = round(time_diff_in_hours(doc.resolution_by, now_datetime(doc.get("owner"))), 2)
+		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_datetime(doc.get("owner"))), 2)
 
-	if meta.has_field("agreement_fulfilled"):
-		doc.agreement_fulfilled = "Fulfilled" if doc.response_by_variance > 0 and doc.resolution_by_variance > 0 else "Failed"
+	if meta.has_field("agreement_status"):
+		doc.agreement_status = "Fulfilled" if doc.response_by_variance > 0 and doc.resolution_by_variance > 0 else "Failed"
 
 
 def update_agreement_status(doc, from_db, meta):
-	if meta.has_field("service_level_agreement") and meta.has_field("agreement_fulfilled") and \
-		doc.service_level_agreement and doc.agreement_fulfilled == "Ongoing":
+	if meta.has_field("service_level_agreement") and meta.has_field("agreement_status") and \
+		doc.service_level_agreement and doc.agreement_status == "Ongoing":
 
 		if (meta.has_field("response_by_variance") and from_db.response_by_variance < 0) or \
 			(meta.has_field("resolution_by_variance") and from_db.resolution_by_variance < 0):
 
-			doc.agreement_fulfilled = "Failed"
+			doc.agreement_status = "Failed"
 		else:
-			doc.agreement_fulfilled = "Fulfilled"
+			doc.agreement_status = "Fulfilled"
 
 
 def is_holiday(date, holidays):
@@ -680,7 +680,7 @@ def set_response_by_and_variance(doc, meta, start_date_time, priority):
 		doc.response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
 
 	if meta.has_field("response_by_variance"):
-		doc.response_by_variance = round(time_diff_in_hours(doc.response_by, now_datetime(doc.get("owner"))))
+		doc.response_by_variance = round(time_diff_in_seconds(doc.response_by, now_datetime(doc.get("owner"))))
 
 
 def set_resolution_by_and_variance(doc, meta, start_date_time, priority):
@@ -688,7 +688,7 @@ def set_resolution_by_and_variance(doc, meta, start_date_time, priority):
 		doc.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 
 	if meta.has_field("resolution_by_variance"):
-		doc.resolution_by_variance = round(time_diff_in_hours(doc.resolution_by, now_datetime(doc.get("owner"))))
+		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_datetime(doc.get("owner"))))
 
 def now_datetime(user):
 	dt = convert_utc_to_user_timezone(datetime.utcnow(), user)
