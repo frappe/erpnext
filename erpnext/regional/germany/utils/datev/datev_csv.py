@@ -104,7 +104,7 @@ def get_header(filters, csv_class):
 		# L = Tax client number (Mandantennummer)
 		datev_settings.get('client_number', '00000'),
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
-		frappe.utils.formatdate(frappe.defaults.get_user_default('year_start_date'), 'yyyyMMdd'),
+		frappe.utils.formatdate(filters.get('fiscal_year_start'), 'yyyyMMdd'),
 		# N = Length of account numbers (Sachkontenlänge)
 		datev_settings.get('account_number_length', '4'),
 		# O = Transaction batch start date (YYYYMMDD)
