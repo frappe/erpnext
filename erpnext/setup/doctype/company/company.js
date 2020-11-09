@@ -77,13 +77,13 @@ frappe.ui.form.on("Company", {
 				});
 			}
 
-			if (frappe.perm.has_perm("Cost Ceter", 0, 'read')) {
+			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
 					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
 				}, __("View"));
 			}
 
-			if (frappe.perm.has_perm("Accounts", 0, 'read')) {
+			if (frappe.perm.has_perm("Account", 0, 'read')) {
 				frm.add_custom_button(__('Chart of Accounts'), function() {
 					frappe.set_route('Tree', 'Account', {'company': frm.doc.name});
 				}, __("View"));
