@@ -167,6 +167,14 @@ class ServiceLevelAgreement(Document):
 				"fieldtype": "Datetime",
 				"label": "First Responded On",
 				"read_only": 1
+			},
+			{
+				"depends_on": "eval:!doc.__islocal",
+				"fieldname": "resolution_date",
+				"fieldtype": "Datetime",
+				"label": "Resolution Date",
+				"no_copy": 1,
+				"read_only": 1
 			}
 		]
 
@@ -370,7 +378,7 @@ def apply(doc, method=None):
 			service_level_agreement.customer))
 
 	doc.service_level_agreement = service_level_agreement.name
-	doc.priority = doc.priority or service_level_agreement.default_priority
+	doc.priority = doc.get("priority") or service_level_agreement.default_priority
 	priority = get_priority(doc)
 
 	if not doc.creation:
@@ -384,7 +392,7 @@ def apply(doc, method=None):
 	set_response_by_and_variance(doc, meta, start_date_time, priority)
 	set_resolution_by_and_variance(doc, meta, start_date_time, priority)
 
-	from_db = frappe._dict({}) if doc.is_new() else frappe.get_doc(doc.doctype, doc.name)
+	from_db = frappe._dict({}) if doc.__unsaved else frappe.get_doc(doc.doctype, doc.name)
 	update_status(doc, from_db, meta)
 
 
@@ -487,7 +495,7 @@ def set_service_level_agreement_variance(doctype, doc=None):
 			if variance < 0:
 				frappe.db.set_value(doc.doctype, doc.name, "agreement_status", "Failed", update_modified=False)
 
-		if not doc.resolution_date: # resolution_date set when issue has been closed
+		if not doc.get("resolution_date"): # resolution_date set when issue has been closed
 			variance = round(time_diff_in_seconds(doc.resolution_by, current_time), 2)
 			frappe.db.set_value(doc.doctype, doc.name, "resolution_by_variance", variance, update_modified=False)
 
