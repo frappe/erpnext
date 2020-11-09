@@ -62,8 +62,6 @@ class LoanInterestAccrual(AccountsController):
 			gle_map.append(
 				self.get_gl_dict({
 					"account": self.interest_income_account,
-					"party_type": self.applicant_type,
-					"party": self.applicant,
 					"against": self.loan_account,
 					"credit": self.interest_amount,
 					"credit_in_account_currency":  self.interest_amount,
