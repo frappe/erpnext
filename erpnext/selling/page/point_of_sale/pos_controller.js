@@ -157,10 +157,10 @@ erpnext.PointOfSale.Controller = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<div class="app grid grid-cols-10 pt-8 gap-6"></div>`
+			`<div class="point-of-sale-app"></div>`
 		);
 
-		this.$components_wrapper = this.wrapper.find('.app');
+		this.$components_wrapper = this.wrapper.find('.point-of-sale-app');
 	}
 
 	prepare_components() {

@@ -2,7 +2,8 @@
 	"css/erpnext.css": [
 		"public/less/erpnext.less",
 		"public/less/hub.less",
-		"public/less/call_popup.less"
+		"public/less/call_popup.less",
+		"public/scss/point-of-sale.scss"
 	],
 	"css/marketplace.css": [
 		"public/less/hub.less"
