@@ -24,7 +24,7 @@ class Membership(Document):
 				user = frappe.get_doc('User', frappe.session.user)
 				member = frappe.get_doc(dict(
 					doctype='Member',
-					email=frappe.session.user,
+					email_id=frappe.session.user,
 					membership_type=self.membership_type,
 					member_name=user.get_fullname()
 				)).insert(ignore_permissions=True)
@@ -97,8 +97,12 @@ class Membership(Document):
 			frappe.throw(_("You need to enable <b>Send Acknowledge Email</b> in Membership Settings"))
 
 		member = frappe.get_doc("Member", self.member)
+		
+		if not member.email_id:
+			frappe.throw(_("Email address of member {0} is missing").format(frappe.utils.get_link_to_form("Member", self.member)))
+
 		plan = frappe.get_doc("Membership Type", self.membership_type)
-		email = member.email_id if member.email_id else member.email
+		email = member.email_id
 		attachments = [frappe.attach_print("Membership", self.name, print_format=settings.membership_print_format)]
 
 		if self.invoice and settings.send_invoice:
