@@ -18,6 +18,7 @@ def execute():
 	frappe.reload_doc('loan_management', 'doctype', 'loan_repayment_detail')
 	frappe.reload_doc('loan_management', 'doctype', 'loan_interest_accrual')
 	frappe.reload_doc('accounts', 'doctype', 'gl_entry')
+	frappe.reload_doc('accounts', 'doctype', 'journal_entry_account')
 
 	updated_loan_types = []
 
