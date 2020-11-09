@@ -149,6 +149,8 @@ class TestSubscription(unittest.TestCase):
 		subscription.generate_invoice_days_early = 10
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
 		subscription.insert()
+
+		self.assertEqual(len(subscription.invoices), 0)
 		subscription.process()
 
 		self.assertEqual(subscription.status, 'Active')
