@@ -63,8 +63,6 @@ class LoanWriteOff(AccountsController):
 				"against_voucher": self.loan,
 				"remarks": _("Against Loan:") + self.loan,
 				"cost_center": self.cost_center,
-				"party_type": self.applicant_type,
-				"party": self.applicant,
 				"posting_date": getdate(self.posting_date)
 			})
 		)
