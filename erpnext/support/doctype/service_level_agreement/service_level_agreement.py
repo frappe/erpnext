@@ -54,8 +54,8 @@ class ServiceLevelAgreement(Document):
 			support_and_resolution.idx = week.index(support_and_resolution.workday) + 1
 
 			if to_timedelta(support_and_resolution.start_time) >= to_timedelta(support_and_resolution.end_time):
-				frappe.throw(_("Start Time can't be greater than or equal to End Time \
-					for {0}.".format(support_and_resolution.workday)))
+				frappe.throw(_("Start Time can't be greater than or equal to End Time for {0}.").format(
+					support_and_resolution.workday))
 
 		# Check for repeated workday
 		if not len(set(support_days)) == len(support_days):
@@ -351,7 +351,7 @@ def apply(doc, method=None):
 	# Applies SLA to document on validate
 
 	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
-		not doc.doctype in get_documents_with_active_service_level_agreement():
+		doc.doctype not in get_documents_with_active_service_level_agreement():
 
 		return
 
