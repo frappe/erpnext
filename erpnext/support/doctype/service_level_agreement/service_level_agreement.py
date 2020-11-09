@@ -7,7 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
-	time_diff_in_seconds, get_time_zone, to_timedelta, get_datetime_str, get_link_to_form
+	get_time_zone, to_timedelta, get_datetime_str, get_link_to_form
 from datetime import datetime
 from erpnext.support.doctype.issue.issue import get_holidays
 
