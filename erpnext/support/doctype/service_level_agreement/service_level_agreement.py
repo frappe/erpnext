@@ -722,3 +722,17 @@ def get_tz(user):
 @frappe.whitelist()
 def get_user_time(user, to_string=False):
 	return get_datetime_str(now_datetime(user)) if to_string else now_datetime(user)
+
+@frappe.whitelist()
+def get_sla_doctypes():
+	doctypes = []
+	data = frappe.get_list('Service Level Agreement',
+		{'enabled': 1},
+		['document_type'],
+		distinct=1
+	)
+
+	for entry in data:
+		doctypes.append(entry.document_type)
+
+	return doctypes
