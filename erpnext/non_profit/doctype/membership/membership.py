@@ -86,6 +86,20 @@ class Membership(Document):
 		invoice = make_invoice(self, member, plan, settings)
 		self.invoice = invoice.name
 
+		if with_payment_entry:
+			if not settings.payment_account:
+				frappe.throw(_("You need to set <b>Payment Account</b> in Membership Settings"))
+
+			from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+			frappe.flags.ignore_account_permission=True
+			pe = get_payment_entry(dt='Sales Invoice', dn=invoice.name, bank_amount=invoice.grand_total)
+			frappe.flags.ignore_account_permission=False
+			pe.paid_to = settings.payment_account
+			pe.reference_no = self.name
+			pe.reference_date = getdate()
+			pe.save(ignore_permissions=True)
+			pe.submit()
+
 		if save:
 			self.save()
 
@@ -97,7 +111,7 @@ class Membership(Document):
 			frappe.throw(_("You need to enable <b>Send Acknowledge Email</b> in Membership Settings"))
 
 		member = frappe.get_doc("Member", self.member)
-		
+
 		if not member.email_id:
 			frappe.throw(_("Email address of member {0} is missing").format(frappe.utils.get_link_to_form("Member", self.member)))
 
