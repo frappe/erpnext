@@ -162,6 +162,8 @@ def get_member_based_on_subscription(subscription_id, email):
 		return None
 
 def verify_signature(data):
+	if frappe.flags.in_test:
+		return True
 	signature = frappe.request.headers.get('X-Razorpay-Signature')
 
 	settings = frappe.get_doc("Membership Settings")
