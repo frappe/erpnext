@@ -116,7 +116,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							company: me.frm.doc.company
 						}
 					})
-				}, __("Get items from"), "btn-default");
+				}, __("Get Items From"), "btn-default");
 		}
 
 		this.toggle_reqd_lead_customer();
