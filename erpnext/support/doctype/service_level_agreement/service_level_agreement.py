@@ -117,9 +117,9 @@ class ServiceLevelAgreement(Document):
 				"read_only": 1
 			},
 			{
-				"description": "in hours",
 				"fieldname": "response_by_variance",
-				"fieldtype": "Float",
+				"fieldtype": "Duration",
+				"hide_seconds": 1,
 				"label": "Response By Variance",
 				"read_only": 1
 			},
@@ -143,9 +143,9 @@ class ServiceLevelAgreement(Document):
 				"read_only": 1
 			},
 			{
-				"description": "in hours",
 				"fieldname": "resolution_by_variance",
-				"fieldtype": "Float",
+				"fieldtype": "Duration",
+				"hide_seconds": 1,
 				"label": "Resolution By Variance",
 				"read_only": 1
 			},
