@@ -378,7 +378,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: me.frm.doc.company
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 		this.frm.add_custom_button(__('Supplier Quotation'),
 			function() {
@@ -395,7 +395,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						status: ["not in", ["Stopped", "Expired"]],
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 		this.frm.add_custom_button(__('Update Rate as per Last Purchase'),
 			function() {

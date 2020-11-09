@@ -14,11 +14,9 @@ from six import string_types
 def get_items(start, page_length, price_list, item_group, pos_profile, search_value=""):
 	data = dict()
 	result = []
-	warehouse, hide_unavailable_items = "", False
 
 	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-	if not allow_negative_stock:
-		warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
+	warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
@@ -97,7 +95,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			if not allow_negative_stock:
+			if allow_negative_stock:
 				item_stock_qty = frappe.db.sql("""select ifnull(sum(actual_qty), 0) from `tabBin` where item_code = %s""", item_code)[0][0]
 			else:
 				item_stock_qty = get_stock_availability(item_code, warehouse)
@@ -231,13 +229,31 @@ def set_customer_info(fieldname, customer, value=""):
 		frappe.db.set_value('Customer', customer, 'loyalty_program', value)
 
 	contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact')
+	if not contact:
+		contact = frappe.db.sql("""
+			SELECT parent FROM `tabDynamic Link`
+			WHERE
+				parenttype = 'Contact' AND
+				parentfield = 'links' AND
+				link_doctype = 'Customer' AND
+				link_name = %s
+			""", (customer), as_dict=1)
+		contact = contact[0].get('parent') if contact else None
 
-	if contact:
-		contact_doc = frappe.get_doc('Contact', contact)
-		if fieldname == 'email_id':
-			contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
-			frappe.db.set_value('Customer', customer, 'email_id', value)
-		elif fieldname == 'mobile_no':
-			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
-			frappe.db.set_value('Customer', customer, 'mobile_no', value)
-		contact_doc.save()
+	if not contact:
+		new_contact = frappe.new_doc('Contact')
+		new_contact.is_primary_contact = 1
+		new_contact.first_name = customer
+		new_contact.set('links', [{'link_doctype': 'Customer', 'link_name': customer}])
+		new_contact.save()
+		contact = new_contact.name
+		frappe.db.set_value('Customer', customer, 'customer_primary_contact', contact)
+
+	contact_doc = frappe.get_doc('Contact', contact)
+	if fieldname == 'email_id':
+		contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+		frappe.db.set_value('Customer', customer, 'email_id', value)
+	elif fieldname == 'mobile_no':
+		contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+		frappe.db.set_value('Customer', customer, 'mobile_no', value)
+	contact_doc.save()
