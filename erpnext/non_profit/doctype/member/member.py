@@ -18,8 +18,6 @@ class Member(Document):
 
 
 	def validate(self):
-		if self.email:
-			self.validate_email_type(self.email)
 		if self.email_id:
 			self.validate_email_type(self.email_id)
 
