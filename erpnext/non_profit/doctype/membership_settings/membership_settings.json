@@ -139,17 +139,18 @@
    "options": "Account"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.enable_invoicing",
    "description": "Automatically create an invoice when payment is authorized from a web form entry",
    "fieldname": "create_for_web_forms",
-   "fieldtype": "Data",
+   "fieldtype": "Check",
    "label": "Auto Create Invoice for Web Forms"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-11-04 20:19:55.163749",
+ "modified": "2020-11-09 12:28:49.972434",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",
