@@ -52,23 +52,6 @@ class TestMembership(unittest.TestCase):
 		# In any case if details were missing, the invoicing would throw an error
 		invoice = entry.generate_invoice(save=True)
 		self.assertEqual(invoice.name, entry.invoice)
-		# entry.delete()
-
-		# # Remove customer
-		# old_customer = self.member_doc.customer
-		# self.member_doc.customer = None
-		# self.member_doc.save()
-
-		# entry = make_membership(self.member)
-		# self.assertRaises(frappe.ValidationError, entry.generate_invoice)
-		
-		# # Add customer value back
-		# self.member_doc.customer = old_customer
-		# self.member_doc.save()
-
-		# # Remove company
-		# set_config(company, None)
-		# self.assertRaises(frappe.ValidationError, entry.generate_invoice)
 
 	def test_renew_within_30_days(self):
 		# create a membership for two months
