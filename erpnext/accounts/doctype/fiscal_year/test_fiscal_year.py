@@ -24,16 +24,3 @@ class TestFiscalYear(unittest.TestCase):
 		})
 
 		self.assertRaises(FiscalYearIncorrectDate, fy.insert)
-
-	def test_short_year(self):
-		if frappe.db.exists("Fiscal Year", "_Test Short Fiscal Year"):
-			frappe.delete_doc("Fiscal Year", "_Test Short Fiscal Year")
-
-		doc = frappe.get_doc({
-			"doctype": "Fiscal Year",
-			"year": "_Test Short Fiscal Year",
-			"is_short_year": 1,
-			"year_end_date": "2020-04-01",
-			"year_start_date": "2020-12-31"
-		})
-		doc.insert()
