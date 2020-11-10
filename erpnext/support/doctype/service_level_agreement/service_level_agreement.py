@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.core.utils import get_parent_doc
 from frappe.utils import time_diff_in_seconds, getdate, get_weekdays, add_to_date, get_time, get_datetime, \
 	get_time_zone, to_timedelta, get_datetime_str, get_link_to_form
 from datetime import datetime
@@ -302,8 +303,8 @@ def apply(doc, method=None):
 	if not doc.creation:
 		doc.creation = now_datetime(doc.get("owner"))
 
-	if meta.has_field("service_level_agreement_creation"):
-		doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
+		if meta.has_field("service_level_agreement_creation"):
+			doc.service_level_agreement_creation = now_datetime(doc.get("owner"))
 
 	start_date_time = get_datetime(doc.get("service_level_agreement_creation") or doc.creation)
 
@@ -330,7 +331,7 @@ def update_status(doc, from_db, meta):
 
 			if meta.has_field("agreement_status") and from_db.agreement_status == "Ongoing":
 				set_service_level_agreement_variance(doc.doctype, doc.name)
-				update_agreement_status(doc, from_db, meta)
+				update_agreement_status(doc, meta)
 
 			set_resolution_time(doc, meta)
 			set_user_resolution_time(doc, meta)
@@ -407,23 +408,23 @@ def set_service_level_agreement_variance(doctype, doc=None):
 	if doc:
 		filters = {"name": doc}
 
-	for doc in frappe.get_all(doctype, filters=filters):
-		doc = frappe.get_doc(doctype, doc.name)
-		current_time = frappe.flags.current_time or now_datetime(doc.get("owner"))
+	for entry in frappe.get_all(doctype, filters=filters):
+		current_doc = frappe.get_doc(doctype, entry.name)
+		current_time = frappe.flags.current_time or now_datetime(current_doc.get("owner"))
 
-		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
-			variance = round(time_diff_in_seconds(doc.response_by, current_time), 2)
-			frappe.db.set_value(doc.doctype, doc.name, "response_by_variance", variance, update_modified=False)
-
-			if variance < 0:
-				frappe.db.set_value(doc.doctype, doc.name, "agreement_status", "Failed", update_modified=False)
-
-		if not doc.get("resolution_date"): # resolution_date set when issue has been closed
-			variance = round(time_diff_in_seconds(doc.resolution_by, current_time), 2)
-			frappe.db.set_value(doc.doctype, doc.name, "resolution_by_variance", variance, update_modified=False)
+		if not current_doc.first_responded_on: # first_responded_on set when first reply is sent to customer
+			variance = round(time_diff_in_seconds(current_doc.response_by, current_time), 2)
+			frappe.db.set_value(current_doc.doctype, current_doc.name, "response_by_variance", variance, update_modified=False)
 
 			if variance < 0:
-				frappe.db.set_value(doc.doctype, doc.name, "agreement_status", "Failed", update_modified=False)
+				frappe.db.set_value(current_doc.doctype, current_doc.name, "agreement_status", "Failed", update_modified=False)
+
+		if not current_doc.get("resolution_date"): # resolution_date set when issue has been closed
+			variance = round(time_diff_in_seconds(current_doc.resolution_by, current_time), 2)
+			frappe.db.set_value(current_doc.doctype, current_doc.name, "resolution_by_variance", variance, update_modified=False)
+
+			if variance < 0:
+				frappe.db.set_value(current_doc.doctype, current_doc.name, "agreement_status", "Failed", update_modified=False)
 
 
 def set_user_resolution_time(doc, meta):
@@ -510,6 +511,25 @@ def set_resolution_time(doc, meta):
 		return
 
 	doc.resolution_time = time_diff_in_seconds(doc.resolution_date, doc.creation)
+
+
+# called via hooks on communication update
+def update_hold_time(doc, status):
+	parent = get_parent_doc(doc)
+	if not parent:
+		return
+
+	if doc.communication_type == "Comment":
+		return
+
+	status_field = parent.meta.get_field("status")
+	if status_field:
+		options = (status_field.options or "").splitlines()
+
+		# if status has a "Replied" option, then handle hold time
+		if ("Replied" in options) and doc.sent_or_received == "Received":
+			meta = frappe.get_meta(parent.doctype)
+			handle_hold_time(parent, meta, 'Replied')
 
 
 def handle_hold_time(doc, meta, status):
@@ -680,16 +700,17 @@ def update_agreement_status_on_custom_status(doc):
 		doc.agreement_status = "Fulfilled" if doc.response_by_variance > 0 and doc.resolution_by_variance > 0 else "Failed"
 
 
-def update_agreement_status(doc, from_db, meta):
+def update_agreement_status(doc, meta):
 	if meta.has_field("service_level_agreement") and meta.has_field("agreement_status") and \
 		doc.service_level_agreement and doc.agreement_status == "Ongoing":
 
-		if (meta.has_field("response_by_variance") and from_db.response_by_variance < 0) or \
-			(meta.has_field("resolution_by_variance") and from_db.resolution_by_variance < 0):
+		if meta.has_field("response_by_variance") and meta.has_field("resolution_by_variance"):
+			if frappe.db.get_value(doc.doctype, doc.name, "response_by_variance") < 0 or \
+				frappe.db.get_value(doc.doctype, doc.name, "resolution_by_variance") < 0:
 
-			doc.agreement_status = "Failed"
-		else:
-			doc.agreement_status = "Fulfilled"
+				doc.agreement_status = "Failed"
+			else:
+				doc.agreement_status = "Fulfilled"
 
 
 def is_holiday(date, holidays):
