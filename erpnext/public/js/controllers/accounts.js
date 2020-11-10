@@ -154,11 +154,8 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 			callback: function(r) {
 				if(d.charge_type!=="Actual"){
 					frappe.model.set_value(cdt, cdn, "rate", r.message.tax_rate || 0);
-					frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
 				}
-				else if(d.charge_type == 'Actual'){
-					frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
-				}
+				frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
 			}
 		})
 	}
