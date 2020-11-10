@@ -136,6 +136,19 @@ class ServiceLevelAgreement(Document):
 				"read_only": 1
 			},
 			{
+				"fieldname": "on_hold_since",
+				"fieldtype": "Datetime",
+				"hidden": 1,
+				"label": "On Hold Since",
+				"read_only": 1
+			},
+			{
+				"fieldname": "total_hold_time",
+				"fieldtype": "Duration",
+				"label": "Total Hold Time",
+				"read_only": 1
+			},
+			{
 				"fieldname": "cb",
 				"fieldtype": "Column Break",
 				"read_only": 1
@@ -647,7 +660,7 @@ def handle_hold_time(doc, meta, status):
 				update_values['resolution_by_variance'] = resolution_by_variance + (last_hold_time // 3600)
 				update_values['on_hold_since'] = None
 
-			doc.update(update_values)
+			doc.db_set(update_values)
 
 
 def update_agreement_status_on_custom_status(doc):
