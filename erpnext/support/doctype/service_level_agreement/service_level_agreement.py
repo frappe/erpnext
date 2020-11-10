@@ -63,7 +63,7 @@ class ServiceLevelAgreement(Document):
 			frappe.throw(_("Workday {0} has been repeated.").format(repeated_days))
 
 	def validate_doc(self):
-		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement") and self.enable:
+		if not frappe.db.get_single_value("Support Settings", "track_service_level_agreement") and self.enabled:
 			frappe.throw(_("{0} is not enabled in {1}").format(frappe.bold("Track Service Level Agreement"),
 				get_link_to_form("Support Settings", "Support Settings")))
 
@@ -97,100 +97,7 @@ class ServiceLevelAgreement(Document):
 		})
 
 	def before_insert(self):
-		service_level_agreement_fields = [
-			{
-				"collapsible": 1,
-				"fieldname": "service_level_section",
-				"fieldtype": "Section Break",
-				"label": "Service Level"
-			},
-			{
-				"fieldname": "service_level_agreement",
-				"fieldtype": "Link",
-				"label": "Service Level Agreement",
-				"options": "Service Level Agreement"
-			},
-			{
-				"fieldname": "priority",
-				"fieldtype": "Link",
-				"label": "Priority",
-				"options": "Issue Priority"
-			},
-			{
-				"fieldname": "response_by",
-				"fieldtype": "Datetime",
-				"label": "Response By",
-				"read_only": 1
-			},
-			{
-				"fieldname": "response_by_variance",
-				"fieldtype": "Duration",
-				"hide_seconds": 1,
-				"label": "Response By Variance",
-				"read_only": 1
-			},
-			{
-				"fieldname": "first_responded_on",
-				"fieldtype": "Datetime",
-				"label": "First Responded On",
-				"read_only": 1
-			},
-			{
-				"fieldname": "on_hold_since",
-				"fieldtype": "Datetime",
-				"hidden": 1,
-				"label": "On Hold Since",
-				"read_only": 1
-			},
-			{
-				"fieldname": "total_hold_time",
-				"fieldtype": "Duration",
-				"label": "Total Hold Time",
-				"read_only": 1
-			},
-			{
-				"fieldname": "cb",
-				"fieldtype": "Column Break",
-				"read_only": 1
-			},
-			{
-				"default": "Ongoing",
-				"fieldname": "agreement_status",
-				"fieldtype": "Select",
-				"label": "Service Level Agreement Status",
-				"options": "Ongoing\nFulfilled\nFailed",
-				"read_only": 1
-			},
-			{
-				"fieldname": "resolution_by",
-				"fieldtype": "Datetime",
-				"label": "Resolution By",
-				"read_only": 1
-			},
-			{
-				"fieldname": "resolution_by_variance",
-				"fieldtype": "Duration",
-				"hide_seconds": 1,
-				"label": "Resolution By Variance",
-				"read_only": 1
-			},
-			{
-				"fieldname": "service_level_agreement_creation",
-				"fieldtype": "Datetime",
-				"hidden": 1,
-				"label": "Service Level Agreement Creation",
-				"read_only": 1
-			},
-			{
-				"depends_on": "eval:!doc.__islocal",
-				"fieldname": "resolution_date",
-				"fieldtype": "Datetime",
-				"label": "Resolution Date",
-				"no_copy": 1,
-				"read_only": 1
-			}
-		]
-
+		service_level_agreement_fields = get_service_level_agreement_fields()
 		meta = frappe.get_meta(self.document_type)
 
 		if meta.custom:
@@ -266,6 +173,7 @@ class ServiceLevelAgreement(Document):
 		field.default = sla_field.get("default")
 		field.save(ignore_permissions=True)
 
+
 def check_agreement_status():
 	service_level_agreements = frappe.get_all("Service Level Agreement", filters=[
 		{"enabled": 1},
@@ -287,10 +195,10 @@ def get_active_service_level_agreement_for(doctype, priority, customer=None, ser
 		["Service Level Agreement", "enabled", "=", 1]
 	]
 
-	or_filters = []
-
 	if priority:
 		filters.append(["Service Level Priority", "priority", "=", priority])
+
+	or_filters = []
 
 	if customer:
 		or_filters.append(
@@ -370,10 +278,8 @@ def set_documents_with_active_service_level_agreement():
 
 def apply(doc, method=None):
 	# Applies SLA to document on validate
-
 	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
 		doc.doctype not in get_documents_with_active_service_level_agreement():
-
 		return
 
 	service_level_agreement = get_active_service_level_agreement_for(doctype=doc.get("doctype"), priority=doc.get("priority"),
@@ -386,7 +292,6 @@ def apply(doc, method=None):
 
 	if meta.has_field("customer") and service_level_agreement.customer and doc.get("customer") and \
 		not service_level_agreement.customer == doc.get("customer"):
-
 		frappe.throw(_("Service Level Agreement {0} is specific to Customer {1}").format(service_level_agreement.name,
 			service_level_agreement.customer))
 
@@ -417,7 +322,6 @@ def update_status(doc, from_db, meta):
 	if meta.has_field("status"):
 		if meta.has_field("first_responded_on") and doc.status != "Open" and \
 			from_db.status == "Open" and not doc.first_responded_on:
-
 			doc.first_responded_on = frappe.flags.current_time or now_datetime(doc.get("owner"))
 
 		if doc.status in ["Resolved", "Closed"] and from_db.status not in ["Resolved", "Closed"]:
@@ -438,6 +342,7 @@ def update_status(doc, from_db, meta):
 			set_service_level_agreement_variance(doc.doctype, doc.name)
 
 	handle_hold_time(doc, meta, from_db.status)
+
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
@@ -650,17 +555,113 @@ def handle_hold_time(doc, meta, status):
 					response_by_variance = round(time_diff_in_seconds(response_by, now_time))
 
 					update_values['response_by'] = response_by
-					update_values['response_by_variance'] = response_by_variance + (last_hold_time // 3600)
+					update_values['response_by_variance'] = response_by_variance + last_hold_time
 
 				resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 				resolution_by = add_to_date(resolution_by, seconds=round(last_hold_time))
 				resolution_by_variance = round(time_diff_in_seconds(resolution_by, now_time))
 
 				update_values['resolution_by'] = resolution_by
-				update_values['resolution_by_variance'] = resolution_by_variance + (last_hold_time // 3600)
+				update_values['resolution_by_variance'] = resolution_by_variance + last_hold_time
 				update_values['on_hold_since'] = None
 
 			doc.db_set(update_values)
+
+
+def get_service_level_agreement_fields():
+	return  [
+		{
+			"collapsible": 1,
+			"fieldname": "service_level_section",
+			"fieldtype": "Section Break",
+			"label": "Service Level"
+		},
+		{
+			"fieldname": "service_level_agreement",
+			"fieldtype": "Link",
+			"label": "Service Level Agreement",
+			"options": "Service Level Agreement"
+		},
+		{
+			"fieldname": "priority",
+			"fieldtype": "Link",
+			"label": "Priority",
+			"options": "Issue Priority"
+		},
+		{
+			"fieldname": "response_by",
+			"fieldtype": "Datetime",
+			"label": "Response By",
+			"read_only": 1
+		},
+		{
+			"fieldname": "response_by_variance",
+			"fieldtype": "Duration",
+			"hide_seconds": 1,
+			"label": "Response By Variance",
+			"read_only": 1
+		},
+		{
+			"fieldname": "first_responded_on",
+			"fieldtype": "Datetime",
+			"label": "First Responded On",
+			"read_only": 1
+		},
+		{
+			"fieldname": "on_hold_since",
+			"fieldtype": "Datetime",
+			"hidden": 1,
+			"label": "On Hold Since",
+			"read_only": 1
+		},
+		{
+			"fieldname": "total_hold_time",
+			"fieldtype": "Duration",
+			"label": "Total Hold Time",
+			"read_only": 1
+		},
+		{
+			"fieldname": "cb",
+			"fieldtype": "Column Break",
+			"read_only": 1
+		},
+		{
+			"default": "Ongoing",
+			"fieldname": "agreement_status",
+			"fieldtype": "Select",
+			"label": "Service Level Agreement Status",
+			"options": "Ongoing\nFulfilled\nFailed",
+			"read_only": 1
+		},
+		{
+			"fieldname": "resolution_by",
+			"fieldtype": "Datetime",
+			"label": "Resolution By",
+			"read_only": 1
+		},
+		{
+			"fieldname": "resolution_by_variance",
+			"fieldtype": "Duration",
+			"hide_seconds": 1,
+			"label": "Resolution By Variance",
+			"read_only": 1
+		},
+		{
+			"fieldname": "service_level_agreement_creation",
+			"fieldtype": "Datetime",
+			"hidden": 1,
+			"label": "Service Level Agreement Creation",
+			"read_only": 1
+		},
+		{
+			"depends_on": "eval:!doc.__islocal",
+			"fieldname": "resolution_date",
+			"fieldtype": "Datetime",
+			"label": "Resolution Date",
+			"no_copy": 1,
+			"read_only": 1
+		}
+	]
 
 
 def update_agreement_status_on_custom_status(doc):
@@ -716,9 +717,11 @@ def set_resolution_by_and_variance(doc, meta, start_date_time, priority):
 	if meta.has_field("resolution_by_variance"):
 		doc.resolution_by_variance = round(time_diff_in_seconds(doc.resolution_by, now_datetime(doc.get("owner"))))
 
+
 def now_datetime(user):
 	dt = convert_utc_to_user_timezone(datetime.utcnow(), user)
 	return dt.replace(tzinfo=None)
+
 
 def convert_utc_to_user_timezone(utc_timestamp, user):
 	from pytz import timezone, UnknownTimeZoneError
@@ -730,12 +733,15 @@ def convert_utc_to_user_timezone(utc_timestamp, user):
 	except UnknownTimeZoneError:
 		return utcnow
 
+
 def get_tz(user):
 	return frappe.db.get_value("User", user, "time_zone") or get_time_zone()
+
 
 @frappe.whitelist()
 def get_user_time(user, to_string=False):
 	return get_datetime_str(now_datetime(user)) if to_string else now_datetime(user)
+
 
 @frappe.whitelist()
 def get_sla_doctypes():
