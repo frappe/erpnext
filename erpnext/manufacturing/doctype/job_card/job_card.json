@@ -36,6 +36,7 @@
   "items",
   "more_information",
   "operation_id",
+  "sequence_id",
   "transferred_qty",
   "requested_qty",
   "column_break_20",
@@ -297,10 +298,18 @@
    "fieldname": "operation_row_number",
    "fieldtype": "Select",
    "label": "Operation Row Number"
+  },
+  {
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "label": "Sequence Id",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-08-24 15:21:21.398267",
+ "links": [],
+ "modified": "2020-10-14 12:58:25.327897",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",
