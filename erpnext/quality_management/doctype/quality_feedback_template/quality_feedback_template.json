@@ -1,13 +1,12 @@
 {
  "actions": [],
- "autoname": "format:TMPL-{template}",
+ "autoname": "field:template",
  "creation": "2019-05-26 21:17:24.283061",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "template",
-  "cb_00",
   "sb_00",
   "parameters"
  ],
@@ -16,12 +15,9 @@
    "fieldname": "template",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Template",
-   "reqd": 1
-  },
-  {
-   "fieldname": "cb_00",
-   "fieldtype": "Column Break"
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "sb_00",
@@ -35,8 +31,14 @@
    "reqd": 1
   }
  ],
- "links": [],
- "modified": "2020-07-03 16:06:03.749415",
+ "links": [
+  {
+   "group": "Records",
+   "link_doctype": "Quality Feedback",
+   "link_fieldname": "template"
+  }
+ ],
+ "modified": "2020-10-27 16:18:53.579688",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Template",
