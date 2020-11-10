@@ -308,14 +308,14 @@
    "fieldname": "sales_order_status",
    "fieldtype": "Select",
    "label": "Sales Order Status",
-   "options": "\nDraft\nOn Hold\nTo Deliver and Bill\nTo Bill\nTo Deliver\nCompleted\nCancelled\nClosed"
+   "options": "\nTo Deliver and Bill\nTo Bill\nTo Deliver"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-03 15:19:18.270529",
+ "modified": "2020-11-10 18:01:54.991970",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
