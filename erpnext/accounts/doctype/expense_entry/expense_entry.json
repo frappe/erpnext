@@ -88,15 +88,6 @@
    "width": "50%"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Expense Entry",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
@@ -143,15 +134,6 @@
    "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Expense Entry",
-   "print_hide": 1,
-   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -201,10 +183,19 @@
    "fieldtype": "Data",
    "label": "Cash Entry Series",
    "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Expense Entry",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-11-08 16:38:25.270532",
+ "modified": "2020-11-10 14:21:58.242305",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Expense Entry",
