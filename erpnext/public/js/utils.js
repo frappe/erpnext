@@ -539,7 +539,7 @@ erpnext.utils.update_child_items = function(opts) {
 				fieldtype: "Table",
 				label: "Items",
 				cannot_add_rows: cannot_add_row,
-				in_place_edit: true,
+				in_place_edit: false,
 				reqd: 1,
 				data: this.data,
 				get_data: () => {

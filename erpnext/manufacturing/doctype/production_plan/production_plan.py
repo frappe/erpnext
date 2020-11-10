@@ -219,12 +219,16 @@ class ProductionPlan(Document):
 			filters = {'docstatus': 0, 'production_plan': ("=", self.name)}):
 			frappe.delete_doc('Work Order', d.name)
 
-	def set_status(self):
+	def set_status(self, close=None):
 		self.status = {
 			0: 'Draft',
 			1: 'Submitted',
 			2: 'Cancelled'
 		}.get(self.docstatus)
+
+		if close:
+			self.db_set('status', 'Closed')
+			return
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
@@ -234,6 +238,9 @@ class ProductionPlan(Document):
 		if self.status != 'Completed':
 			self.update_ordered_status()
 			self.update_requested_status()
+
+		if close is not None:
+			self.db_set('status', self.status)
 
 	def update_ordered_status(self):
 		update_status = False
