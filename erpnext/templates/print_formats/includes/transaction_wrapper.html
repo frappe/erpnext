@@ -47,7 +47,7 @@
 					{{ row('Target', doc.t_warehouses|join(', ')) }}
 				</div>
 				<div class="doc">
-					{{ row('Date', frappe.format_date(doc.posting_date, "d MMMM, Y")) }}
+					{{ row('Date', frappe.format_date(doc.posting_date or doc.transaction_date, "d MMMM, Y")) }}
 					{{ row('Type', doc.transaction_type) }}
 					{% if doc.doctype not in ['Delivery Note', 'Purchase Receipt'] -%}
 						{{ row('STRN', doc.tax_strn) }}
