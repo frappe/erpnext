@@ -380,13 +380,13 @@ class SellingController(StockController):
 		po_nos = []
 		self.get_po_nos('Sales Order', 'sales_order', po_nos)
 		self.get_po_nos('Delivery Note', 'delivery_note', po_nos)
-		self.po_no = ', '.join(list(set(po_nos)))
+		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
 
 	def set_pos_for_delivery_note(self):
 		po_nos = []
 		self.get_po_nos('Sales Order', 'against_sales_order', po_nos)
 		self.get_po_nos('Sales Invoice', 'against_sales_invoice', po_nos)
-		self.po_no = ', '.join(list(set((x.strip() for x in ','.join(po_nos).split(',')))))
+		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
 
 	def get_po_nos(self, ref_doctype, ref_fieldname, po_nos):
 		doc_list = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
