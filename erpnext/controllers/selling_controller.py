@@ -370,8 +370,19 @@ class SellingController(StockController):
 			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
 			if sales_orders:
 				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				if po_nos and po_nos[0].get('po_no'):
-					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+
+			elif not sales_orders and self.doctype  == "Sales Invoice":
+				dns = list(set([d.get("delivery_note") for d in self.items if d.get("delivery_note")]))
+				if dns:
+					po_nos = frappe.get_all('Delivery Note', 'po_no', filters = {'name': ('in', dns)})
+
+			elif not sales_orders and self.doctype  == "Delivery Note":
+				invoices = list(set([d.get("against_sales_invoice") for d in self.items if d.get("against_sales_invoice")]))
+				if invoices:
+					po_nos = frappe.get_all('Sales Invoice', 'po_no', filters = {'name': ('in', invoices)})
+
+			if po_nos and po_nos[0].get('po_no'):
+				self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
 
 	def set_gross_profit(self):
 		if self.doctype == "Sales Order":
