@@ -23,7 +23,8 @@ def execute():
 	updated_loan_types = []
 
 	loans = frappe.get_all('Loan', fields=['name', 'loan_type', 'company', 'status', 'mode_of_payment',
-		'applicant_type', 'applicant', 'loan_account', 'payment_account', 'interest_income_account'])
+		'applicant_type', 'applicant', 'loan_account', 'payment_account', 'interest_income_account'],
+		filters={'docstatus': 1})
 
 	for loan in loans:
 		# Update details in Loan Types and Loan
@@ -39,7 +40,26 @@ def execute():
 		penalty_account = create_account(company=loan.company, account_type='Income Account',
 			account_name='Penalty Account', parent_account=group_income_account)
 
-		if not loan_type_company:
+		# Same loan type used for multiple companies
+		if loan_type_company and loan_type_company != loan.company:
+			# get loan type for appropriate company
+			loan_type_name = frappe.get_value('Loan Type', {'company': loan.company,
+				'mode_of_payment': loan.mode_of_payment, 'loan_account': loan.loan_account,
+				'payment_account': loan.payment_account, 'interest_income_account': loan.interest_income_account,
+				'penalty_income_account': loan.penalty_income_account}, 'name')
+
+			if not loan_type_name:
+				loan_type_name = loan.loan_type + " - " + ''.join([c[0] for c in loan.company.split()]).upper()
+				create_loan_type(loan, loan_type_name, penalty_account)
+
+			# update loan type in loan
+			frappe.db.sql("UPDATE `tabLoan` set loan_type = %s where name = %s", (loan_type_name,
+				loan.name))
+
+			if loan_type_name not in updated_loan_types:
+				updated_loan_types.append(loan_type_name)
+
+		elif not loan_type_company:
 			loan_type_doc = frappe.get_doc('Loan Type', loan.loan_type)
 			loan_type_doc.is_term_loan = 1
 			loan_type_doc.company = loan.company
@@ -87,3 +107,14 @@ def execute():
 				jv.flags.ignore_links = True
 				jv.cancel()
 
+def create_loan_type(loan, loan_type_name, penalty_account):
+	loan_type_doc = frappe.new_doc('Loan Type')
+	loan_type_doc.loan_name = loan_type_name
+	loan_type_doc.is_term_loan = 1
+	loan_type_doc.company = loan.company
+	loan_type_doc.mode_of_payment = loan.mode_of_payment
+	loan_type_doc.payment_account = loan.payment_account
+	loan_type_doc.loan_account = loan.loan_account
+	loan_type_doc.interest_income_account = loan.interest_income_account
+	loan_type_doc.penalty_income_account = penalty_account
+	loan_type_doc.submit()
