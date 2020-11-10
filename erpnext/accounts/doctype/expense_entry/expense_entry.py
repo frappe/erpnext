@@ -65,7 +65,8 @@ class ExpenseEntry(Document):
 
 	def set_missing_values(self):
 		company_currency = get_company_currency(self.company)
-		self.payable_account_currency = frappe.get_cached_value("Account", self.payable_account, "account_currency")
+		self.payable_account_currency = frappe.get_cached_value("Account", self.payable_account, "account_currency") \
+			if self.payable_account else company_currency
 
 		for d in self.accounts:
 			if self.payable_account_currency == company_currency:
