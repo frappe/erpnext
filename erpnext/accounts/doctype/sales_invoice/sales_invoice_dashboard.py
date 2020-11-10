@@ -11,7 +11,8 @@ def get_data():
 			'Payment Request': 'reference_name',
 			'Sales Invoice': 'return_against',
 			'Auto Repeat': 'reference_document',
-			'Backorder': 'reference_doc'
+			'Backorder': 'reference_doc',
+			'Integration Request': 'reference_id_'
 		},
 		'internal_links': {
 			'Sales Order': ['items', 'sales_order']
@@ -30,8 +31,8 @@ def get_data():
 			# 	'items': ['Timesheet', 'Delivery Note', 'Sales Order']
 			# },
 			{
-				'label': _('Returns & Backorder'),
-				'items': ['Sales Invoice','Backorder']
+				'label': _('Returns & Backorder & Web'),
+				'items': ['Sales Invoice','Backorder', 'Integration Request']
 			},
 			# {
 			# 	'label': _('Subscription'),
