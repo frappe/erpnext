@@ -29,6 +29,7 @@ def execute():
 	for loan in loans:
 		# Update details in Loan Types and Loan
 		loan_type_company = frappe.db.get_value('Loan Type', loan.loan_type, 'company')
+		loan_type = loan.loan_type
 
 		group_income_account = frappe.get_value('Account', {'company': loan.company,
 			'is_group': 1, 'root_type': 'Income', 'account_name': _('Indirect Income')})
@@ -56,6 +57,7 @@ def execute():
 			frappe.db.sql("UPDATE `tabLoan` set loan_type = %s where name = %s", (loan_type_name,
 				loan.name))
 
+			loan_type = loan_type_name
 			if loan_type_name not in updated_loan_types:
 				updated_loan_types.append(loan_type_name)
 
@@ -70,8 +72,9 @@ def execute():
 			loan_type_doc.penalty_income_account = penalty_account
 			loan_type_doc.submit()
 			updated_loan_types.append(loan.loan_type)
+			loan_type = loan.loan_type
 
-		if loan.loan_type in updated_loan_types:
+		if loan_type in updated_loan_types:
 			if loan.status == 'Fully Disbursed':
 				status = 'Disbursed'
 			elif loan.status == 'Repaid/Closed':
@@ -85,7 +88,7 @@ def execute():
 				'status': status
 			})
 
-			process_loan_interest_accrual_for_term_loans(posting_date=nowdate(), loan_type=loan.loan_type,
+			process_loan_interest_accrual_for_term_loans(posting_date=nowdate(), loan_type=loan_type,
 				loan=loan.name)
 
 			payments = frappe.db.sql(''' SELECT j.name, a.debit, a.debit_in_account_currency, j.posting_date
@@ -96,7 +99,7 @@ def execute():
 
 			for payment in payments:
 				repayment_entry = make_repayment_entry(loan.name, loan.loan_applicant_type, loan.applicant,
-					loan.loan_type, loan.company)
+					loan_type, loan.company)
 
 				repayment_entry.amount_paid = payment.debit_in_account_currency
 				repayment_entry.posting_date = payment.posting_date
