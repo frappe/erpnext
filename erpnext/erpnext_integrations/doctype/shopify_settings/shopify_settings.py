@@ -15,13 +15,12 @@ from erpnext.erpnext_integrations.doctype.shopify_log.shopify_log import make_sh
 
 class ShopifySettings(Document):
 	def validate(self):
-		pass
-		# if self.enable_shopify == 1:
-		# 	setup_custom_fields()
-		# 	self.validate_access_credentials()
-		# 	self.register_webhooks()
-		# else:
-		# 	self.unregister_webhooks()
+		if self.enable_shopify == 1:
+			setup_custom_fields()
+			self.validate_access_credentials()
+			self.register_webhooks()
+		else:
+			self.unregister_webhooks()
 
 	def validate_access_credentials(self):
 		if not (self.get_password(raise_exception=False) and self.api_key and self.shopify_url):
