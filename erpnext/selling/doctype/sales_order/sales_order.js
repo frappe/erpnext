@@ -236,7 +236,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							status: ["!=", "Lost"]
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 		}
 
 		this.order_type(doc);
