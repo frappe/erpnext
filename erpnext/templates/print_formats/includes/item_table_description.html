@@ -11,11 +11,11 @@
 
 <div>
 	{% if doc.in_format_data("item_code") and "item_code" in display_columns -%}
-		<div class="primary">
-			{% if compact %}<strong>{% endif %}
-				{{ _(doc.item_code) }}
-			{% if compact %}</strong>{% endif %}
+		{% if compact %}
+		<div class="primary compact-item">
+			{{ _(doc.item_code) }}
 		</div>
+		{% endif %}
 	{%- endif %}
 
 	{%- if doc.in_format_data("item_name") and "item_name" in display_columns and
