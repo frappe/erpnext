@@ -216,7 +216,7 @@ class LoanRepayment(AccountsController):
 					"debit_in_account_currency": self.penalty_amount,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": _("Repayment against loan:") + self.against_loan,
+					"remarks": _("Penalty against loan:") + self.against_loan,
 					"cost_center": self.cost_center,
 					"party_type": self.applicant_type,
 					"party": self.applicant,
@@ -232,7 +232,7 @@ class LoanRepayment(AccountsController):
 					"credit_in_account_currency": self.penalty_amount,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
-					"remarks": _("Repayment against loan:") + self.against_loan,
+					"remarks": _("Penalty against loan:") + self.against_loan,
 					"cost_center": self.cost_center,
 					"posting_date": getdate(self.posting_date)
 				})
@@ -247,7 +247,7 @@ class LoanRepayment(AccountsController):
 				"debit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": _("Against Loan:") + self.against_loan,
+				"remarks": _("Repayment against Loan: ") + self.against_loan,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(self.posting_date)
 			})
@@ -263,7 +263,7 @@ class LoanRepayment(AccountsController):
 				"credit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": _("Against Loan:") + self.against_loan,
+				"remarks": _("Repayment against Loan: ") + self.against_loan,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(self.posting_date)
 			})
