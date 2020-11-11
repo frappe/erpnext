@@ -82,7 +82,7 @@ class OpeningInvoiceCreationTool(Document):
 
 			# Allow to create invoice even if no party present in customer or supplier.
 			if not frappe.db.exists(row.party_type, row.party):
-				if self.create_missing_party:
+				if self.get('create_missing_party'):
 					self.add_party(row.party_type, row.party)
 				else:
 					frappe.throw(_("{0} {1} does not exist.").format(frappe.bold(row.party_type), frappe.bold(row.party)))
