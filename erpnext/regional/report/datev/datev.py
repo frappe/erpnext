@@ -94,8 +94,11 @@ COLUMNS = [
 
 def execute(filters=None):
 	"""Entry point for frappe."""
-	validate(filters)
-	return COLUMNS, get_transactions(filters, as_dict=0)
+	data = []
+	if filters and validate(filters):
+		data = get_transactions(filters, as_dict=0)
+
+	return COLUMNS, data
 
 
 def validate(filters):
@@ -114,10 +117,14 @@ def validate(filters):
 
 	validate_fiscal_year(from_date, to_date, company)
 
-	try:
-		frappe.get_doc('DATEV Settings', filters.get('company'))
-	except frappe.DoesNotExistError:
-		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
+	if not frappe.db.exists('DATEV Settings', filters.get('company')):
+		frappe.log_error(_('Please create {} for Company {}.').format(
+			'<a href="desk#List/DATEV%20Settings/List">{}</a>'.format(_('DATEV Settings')),
+			frappe.bold(filters.get('company'))
+		))
+		return False
+
+	return True
 
 
 def validate_fiscal_year(from_date, to_date, company):

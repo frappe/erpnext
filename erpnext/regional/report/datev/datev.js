@@ -30,9 +30,23 @@ frappe.query_reports["DATEV"] = {
 		}
 	],
 	onload: function(query_report) {
+		let company = frappe.query_report.get_filter_value('company');
+		frappe.db.exists('DATEV Settings', company).then((settings_exist) => {
+			if (!settings_exist) {
+				frappe.confirm(__('DATEV Settings for your Company are missing. Would you like to create them now?'),
+					() => frappe.new_doc('DATEV Settings', {'company': company})
+				);
+			}
+		});
+
 		query_report.page.add_menu_item(__("Download DATEV File"), () => {
 			const filters = JSON.stringify(query_report.get_values());
 			window.open(`/api/method/erpnext.regional.report.datev.datev.download_datev_csv?filters=${filters}`);
+		});
+
+		query_report.page.add_menu_item(__("Change DATEV Settings"), () => {
+			let company = frappe.query_report.get_filter_value('company'); // read company from filters again – it might have changed by now.
+			frappe.set_route('Form', 'DATEV Settings', company);
 		});
 	}
 };
