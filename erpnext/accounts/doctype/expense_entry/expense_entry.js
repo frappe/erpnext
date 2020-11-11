@@ -56,12 +56,19 @@ frappe.ui.form.on('Expense Entry', {
 		erpnext.hide_company();
 	},
 
+	payable_account: function (frm) {
+		if (!frm.doc.payable_account) {
+			var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+			frm.set_value("payable_account_currency", company_currency);
+		}
+	},
+
 	payable_account_currency: function (frm) {
 		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		var bill_dates = [];
 		$.each(frm.doc.accounts || [], function (i, d) {
 			if (d.bill_date && !bill_dates.includes(d.bill_date)) {
-				bill_dates.push(d.bill_date);
+				bill_dates.push(d.bill_date || frm.doc.transaction_date);
 			}
 		});
 
@@ -159,11 +166,21 @@ frappe.ui.form.on('Expense Entry Detail', {
 $.extend(erpnext.accounts.expense_entry, {
 	calcualte_totals: function(frm) {
 		$.each(frm.doc.accounts || [], function (i, d) {
+			d.expense_amount = flt(flt(d.total_amount) - flt(d.tax_amount), precision('expense_amount', d));
+
 			d.base_total_amount = flt(flt(d.total_amount) * flt(d.exchange_rate), precision('base_total_amount', d));
 			d.base_tax_amount = flt(flt(d.tax_amount) * flt(d.exchange_rate), precision('base_tax_amount', d));
-
-			d.expense_amount = flt(flt(d.total_amount) - flt(d.tax_amount), precision('expense_amount', d));
 			d.base_expense_amount = flt(flt(d.base_total_amount) - flt(d.base_tax_amount), precision('base_expense_amount', d));
+		});
+
+		var total_fields = [
+			['total', 'total_amount'],
+			['total_tax_amount', 'tax_amount'],
+			['total_expense_amount', 'expense_amount'],
+		]
+		$.each(total_fields, function (i, f) {
+			frm.doc[f[0]] = flt(frappe.utils.sum(frm.doc.accounts.map(d => flt(d[f[1]]))), precision(f[0]));
+			frm.doc["base_" + f[0]] = flt(frappe.utils.sum(frm.doc.accounts.map(d => flt(d["base_" + f[1]]))), precision("base_" + f[0]));
 		});
 
 		frm.refresh_fields();

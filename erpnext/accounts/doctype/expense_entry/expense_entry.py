@@ -24,6 +24,9 @@ class ExpenseEntry(Document):
 		self.calculate_taxes()
 		self.calculate_totals()
 
+	def before_submit(self):
+		self.set_missing_bill_dates()
+
 	def on_submit(self):
 		self.make_journal_entries()
 
@@ -72,10 +75,15 @@ class ExpenseEntry(Document):
 			if self.payable_account_currency == company_currency:
 				d.exchange_rate = 1.0
 			elif not d.exchange_rate or d.exchange_rate == 1.0:
-				d.exchange_rate = get_exchange_rate(self.payable_account_currency, company_currency, d.bill_date)
+				d.exchange_rate = get_exchange_rate(self.payable_account_currency, company_currency, d.bill_date or self.transaction_date)
 				if not d.exchange_rate:
 					frappe.throw(_("Could not find Exchange Rate from {0} to {1} on {2}").format(
-						self.payable_account_currency, company_currency, d.bill_date))
+						self.payable_account_currency, company_currency, d.bill_date or self.transaction_date))
+
+	def set_missing_bill_dates(self):
+		for d in self.accounts:
+			if not d.bill_date:
+				d.bill_date = self.transaction_date
 
 	def calculate_taxes(self):
 		for d in self.accounts:
@@ -98,6 +106,15 @@ class ExpenseEntry(Document):
 
 			d.expense_amount = flt(flt(d.total_amount) - flt(d.tax_amount), d.precision('expense_amount'))
 			d.base_expense_amount = flt(flt(d.base_total_amount) - flt(d.base_tax_amount), d.precision('base_expense_amount'))
+
+		total_fields = [
+			['total', 'total_amount'],
+			['total_tax_amount', 'tax_amount'],
+			['total_expense_amount', 'expense_amount'],
+		]
+		for target_f, source_f in total_fields:
+			self.set(target_f, flt(sum([d.get(source_f) for d in self.accounts]), self.precision(target_f)))
+			self.set("base_" + target_f, flt(sum([d.get("base_" + source_f) for d in self.accounts]), self.precision("base_" + target_f)))
 
 	def make_journal_entries(self):
 		for d in self.accounts:
@@ -151,11 +168,11 @@ class ExpenseEntry(Document):
 		doc.update({
 			"expense_entry_name": self.name,
 			"company": self.company,
-			"posting_date": d.bill_date,
+			"posting_date": d.bill_date or self.transaction_date,
 			"bill_no": d.bill_no or self.name,
-			"bill_date": d.bill_date,
+			"bill_date": d.bill_date or self.transaction_date,
 			"cheque_no": d.bill_no or self.name,
-			"cheque_date": d.bill_date,
+			"cheque_date": d.bill_date or self.transaction_date,
 			"multi_currency": multi_currency,
 			"user_remark": d.remarks
 		})

@@ -21,6 +21,15 @@
   "project",
   "2_add_edit_gl_entries",
   "accounts",
+  "section_break_17",
+  "total_expense_amount",
+  "base_total_expense_amount",
+  "column_break_20",
+  "total_tax_amount",
+  "base_total_tax_amount",
+  "column_break_23",
+  "total",
+  "base_total",
   "addtional_info",
   "journal_entry_series",
   "column_break_19",
@@ -72,6 +81,7 @@
    "hidden": 1,
    "label": "Payable Account Currency",
    "options": "Currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -162,6 +172,7 @@
    "fieldname": "journal_entry_series",
    "fieldtype": "Data",
    "label": "Journal Entry Series",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -172,6 +183,7 @@
    "fieldname": "bank_entry_series",
    "fieldtype": "Data",
    "label": "Bank Entry Series",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -182,6 +194,7 @@
    "fieldname": "cash_entry_series",
    "fieldtype": "Data",
    "label": "Cash Entry Series",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -192,10 +205,67 @@
    "options": "Expense Entry",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.total != doc.base_total",
+   "fieldname": "base_total",
+   "fieldtype": "Currency",
+   "label": "Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tax_amount",
+   "fieldtype": "Currency",
+   "label": "Total Tax Amount",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_expense_amount",
+   "fieldtype": "Currency",
+   "label": "Total Expense Amount",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.total != doc.base_total",
+   "fieldname": "base_total_tax_amount",
+   "fieldtype": "Data",
+   "label": "Total Tax Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.total != doc.base_total",
+   "fieldname": "base_total_expense_amount",
+   "fieldtype": "Currency",
+   "label": "Total Expense Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-11-10 14:21:58.242305",
+ "modified": "2020-11-11 02:02:25.522327",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Expense Entry",
