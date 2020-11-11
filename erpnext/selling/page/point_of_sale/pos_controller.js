@@ -555,6 +555,8 @@ erpnext.PointOfSale.Controller = class {
 					frappe.utils.play_sound("error");
 					return;
 				}
+				if (!item_code) return;
+
 				item_selected_from_selector && (value = flt(value))
 
 				const args = { item_code, batch_no, [field]: value };
@@ -637,7 +639,7 @@ erpnext.PointOfSale.Controller = class {
 		if (!(available_qty > 0)) {
 			frappe.model.clear_doc(item_row.doctype, item_row.name);
 			frappe.throw({
-				title: _("Not Available"),
+				title: __("Not Available"),
 				message: __('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
 			})
 		} else if (available_qty < qty_needed) {

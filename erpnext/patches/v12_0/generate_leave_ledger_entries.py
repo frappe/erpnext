@@ -11,8 +11,6 @@ def execute():
 	frappe.reload_doc("HR", "doctype", "Leave Ledger Entry")
 	frappe.reload_doc("HR", "doctype", "Leave Encashment")
 	frappe.reload_doc("HR", "doctype", "Leave Type")
-	if frappe.db.a_row_exists("Leave Ledger Entry"):
-		return
 
 	if not frappe.get_meta("Leave Allocation").has_field("unused_leaves"):
 		frappe.reload_doc("HR", "doctype", "Leave Allocation")
