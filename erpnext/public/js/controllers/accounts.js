@@ -146,13 +146,13 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	if(!d.charge_type && d.account_head){
 		frappe.msgprint(__("Please select Charge Type first"));
 		frappe.model.set_value(cdt, cdn, "account_head", "");
-	} else if(d.account_head) {
+	} else if (d.account_head) {
 		frappe.call({
 			type:"GET",
 			method: "erpnext.controllers.accounts_controller.get_tax_rate",
 			args: {"account_head":d.account_head},
 			callback: function(r) {
-				if(d.charge_type!=="Actual"){
+				if (d.charge_type!=="Actual") {
 					frappe.model.set_value(cdt, cdn, "rate", r.message.tax_rate || 0);
 				}
 				frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
