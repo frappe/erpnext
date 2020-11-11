@@ -43,16 +43,17 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	init_cart_components() {
 		this.$component.append(
-			`<div class="cart-container flex flex-col items-center rounded-md flex-1 relative">
-				<div class="absolute flex flex-col p-8 pt-0 w-full h-full">
-					<div class="flex text-grey cart-header pt-2 pb-2 p-4 mt-2 mb-2 w-full f-shrink-0">
-						<div class="flex-1">Item</div>
-						<div class="mr-4">Qty</div>
-						<div class="rate-list-header mr-1 text-right">Amount</div>
+			`<div class="cart-container">
+				<div class="abs-cart-container">
+					<div class="cart-label">Item Cart</div>
+					<div class="cart-header">
+						<div class="name-header">Item</div>
+						<div class="qty-header">Qty</div>
+						<div class="rate-amount-header">Amount</div>
 					</div>
-					<div class="cart-items-section flex flex-col flex-1 scroll-y rounded-md w-full"></div>
-					<div class="cart-totals-section flex flex-col w-full mt-4 f-shrink-0"></div>
-					<div class="numpad-section flex flex-col mt-4 d-none w-full p-8 pt-0 pb-0 f-shrink-0"></div>
+					<div class="cart-items-section"></div>
+					<div class="cart-totals-section"></div>
+					<div class="numpad-section"></div>
 				</div>		
 			</div>`
 		);
@@ -71,13 +72,10 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 	
 	make_no_items_placeholder() {
-		this.$cart_header.addClass('d-none');
+		this.$cart_header.css('display', 'none');
 		this.$cart_items_wrapper.html(
-			`<div class="no-item-wrapper flex items-center h-18">
-				<div class="flex-1 text-center text-grey">No items in cart</div>
-			</div>`
-		)
-		this.$cart_items_wrapper.addClass('mt-4 border-grey border-dashed');
+			`<div class="no-item-wrapper">No items in cart</div>`
+		);
 	}
 
 	make_cart_totals_section() {
@@ -87,30 +85,18 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount flex items-center pt-4 pb-4 pr-4 pl-4 text-grey pointer no-select d-none">
 				+ Add Discount
 			</div>
-			<div class="border border-grey rounded-md">
-				<div class="net-total flex justify-between items-center h-16 pr-8 pl-8 border-b-grey">
-					<div class="flex flex-col">
-						<div class="text-md text-dark-grey text-bold">Net Total</div>
-					</div>
-					<div class="flex flex-col text-right">
-						<div class="text-md text-dark-grey text-bold">0.00</div>
-					</div>
-				</div>
-				<div class="taxes"></div>
-				<div class="grand-total flex justify-between items-center h-16 pr-8 pl-8 border-b-grey">
-					<div class="flex flex-col">
-						<div class="text-md text-dark-grey text-bold">Grand Total</div>
-					</div>
-					<div class="flex flex-col text-right">
-						<div class="text-md text-dark-grey text-bold">0.00</div>
-					</div>
-				</div>
-				<div class="checkout-btn flex items-center justify-center h-16 pr-8 pl-8 text-center text-grey no-select pointer rounded-md-b text-md text-bold">
-					Checkout
-				</div>
-				<div class="edit-cart-btn flex items-center justify-center h-16 pr-8 pl-8 text-center text-grey no-select pointer d-none text-md text-bold">
-					Edit Cart
-				</div>
+			<div class="net-total-container">
+				<div class="net-total-label">Net Total</div>
+				<div class="net-total-value">0.00</div>
+			</div>
+			<div class="taxes-container"></div>
+			<div class="grand-total-container">
+				<div>Grand Total</div>
+				<div>0.00</div>
+			</div>
+			<div class="checkout-btn">Checkout</div>
+			<div class="edit-cart-btn flex items-center justify-center h-16 pr-8 pl-8 text-center text-grey no-select pointer d-none text-md text-bold">
+				Edit Cart
 			</div>`
 		)
 
@@ -136,23 +122,20 @@ erpnext.PointOfSale.ItemCart = class {
 				[ '', '', '', 'col-span-2' ],
 				[ '', '', '', 'col-span-2' ],
 				[ '', '', '', 'col-span-2' ],
-				[ '', '', '', 'col-span-2 text-bold text-danger' ]
+				[ '', '', '', 'col-span-2 remove-btn' ]
 			],
 			fieldnames_map: { 'Quantity': 'qty', 'Discount': 'discount_percentage' }
 		})
 
 		this.$numpad_section.prepend(
-			`<div class="flex mb-2 justify-between">
+			`<div class="numpad-totals">
 				<span class="numpad-net-total"></span>
 				<span class="numpad-grand-total"></span>
 			</div>`
 		)
 
 		this.$numpad_section.append(
-			`<div class="numpad-btn checkout-btn flex items-center justify-center h-16 pr-8 pl-8 bg-primary
-				text-center text-white no-select pointer rounded-md text-md text-bold mt-4" data-button-value="checkout">
-					Checkout
-			</div>`
+			`<div class="numpad-btn checkout-btn" data-button-value="checkout">Checkout</div>`
 		)
 	}
 	
@@ -167,10 +150,9 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 
 		this.$customer_section.on('click', '.customer-display', function(e) {
-			// don't triggger the event if .reset-customer-btn btn is clicked which is under .customer-header
-			if ($(e.target).closest('.reset-customer-btn').length) return;
+			if ($(this).find('.reset-customer-btn').length == 0) return;
 
-			const show = !me.$cart_container.hasClass('d-none');
+			const show = me.$cart_container.is(':visible');
 			me.toggle_customer_info(show);
 		});
 
@@ -283,20 +265,15 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	toggle_item_highlight(item) {
 		const $cart_item = $(item);
-		const item_is_highlighted = $cart_item.hasClass("shadow-base");
 
-		if (!item || item_is_highlighted) {
+		if (!item) {
 			this.item_is_selected = false;
-			this.$cart_container.find('.cart-item-wrapper').removeClass("shadow-base").css("opacity", "1");
+			this.$cart_container.find('.cart-item-wrapper').css("background-color", "");
 		} else {
-			$cart_item.addClass("shadow-base");
+			$cart_item.css("background-color", "var(--gray-50)");
 			this.item_is_selected = true;
-			this.$cart_container.find('.cart-item-wrapper').css("opacity", "1");
-			this.$cart_container.find('.cart-item-wrapper').not(item).removeClass("shadow-base").css("opacity", "0.65");
+			this.$cart_container.find('.cart-item-wrapper').not(item).css("background-color", "");
 		}
-		// highlight with inner shadow-base
-		// $cart_item.addClass("shadow-base-inner bg-selected");
-		// me.$cart_container.find('.cart-item-wrapper').not(this).removeClass("shadow-base-inner bg-selected");
 	}
 
 	make_customer_selector() {
@@ -464,6 +441,7 @@ erpnext.PointOfSale.ItemCart = class {
 		}
 
 	}
+
 	get_customer_image() {
 		const { customer, image } = this.customer_info || {};
 		if (image) {
@@ -485,57 +463,47 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	render_net_total(value) {
 		const currency = this.events.get_frm().doc.currency;
-		this.$totals_section.find('.net-total').html(
-			`<div class="flex flex-col">
-				<div class="text-md text-dark-grey text-bold">Net Total</div>
-			</div>
-			<div class="flex flex-col text-right">
-				<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
-			</div>`
+		this.$totals_section.find('.net-total-container').html(
+			`<div>Net Total</div><div>${format_currency(value, currency)}</div>`
 		)
 
-		this.$numpad_section.find('.numpad-net-total').html(`Net Total: <span class="text-bold">${format_currency(value, currency)}</span>`)
+		this.$numpad_section.find('.numpad-net-total').html(
+			`<div>Net Total: <span>${format_currency(value, currency)}</span></div>`
+		);
 	}
 	
 	render_grand_total(value) {
 		const currency = this.events.get_frm().doc.currency;
-		this.$totals_section.find('.grand-total').html(
-			`<div class="flex flex-col">
-				<div class="text-md text-dark-grey text-bold">Grand Total</div>
-			</div>
-			<div class="flex flex-col text-right">
-				<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
-			</div>`
+		this.$totals_section.find('.grand-total-container').html(
+			`<div>Grand Total</div><div>${format_currency(value, currency)}</div>`
 		)
 
-		this.$numpad_section.find('.numpad-grand-total').html(`Grand Total: <span class="text-bold">${format_currency(value, currency)}</span>`)
+		this.$numpad_section.find('.numpad-grand-total').html(
+			`<div>Grand Total: <span>${format_currency(value, currency)}</span></div>`
+		)
 	}
 
 	render_taxes(value, taxes) {
 		if (taxes.length) {
 			const currency = this.events.get_frm().doc.currency;
-			this.$totals_section.find('.taxes').html(
-				`<div class="flex items-center justify-between h-16 pr-8 pl-8 border-b-grey">
-					<div class="flex overflow-hidden whitespace-nowrap">
-						<div class="text-md text-dark-grey text-bold w-fit">Tax Charges</div>
-						<div class="flex ml-4 text-dark-grey">
-						${	
-							taxes.map((t, i) => {
-								let margin_left = '';
-								if (i !== 0) margin_left = 'ml-2';
-								const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
-								return `<span class="border-grey p-1 pl-2 pr-2 rounded-md ${margin_left}">${description}</span>`
-							}).join('')
-						}
-						</div>
+			this.$totals_section.find('.taxes-container').css('display', 'flex').html(
+				`<div class="tax-label">
+					<div>Tax Charges</div>
+					<div class="tax-desc">
+					${
+						taxes.map((t, i) => {
+							let margin_left = '';
+							if (i !== 0) margin_left = '10px';
+							const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+							return `<span style="margin-left: ${margin_left}">${description}</span>`
+						}).join('')
+					}
 					</div>
-					<div class="flex flex-col text-right f-shrink-0 ml-4">
-						<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
-					</div>
-				</div>`
+				</div>
+				<div class="">${format_currency(value, currency)}</div>`
 			)
 		} else {
-			this.$totals_section.find('.taxes').html('')
+			this.$totals_section.find('.taxes-container').css('display', 'none').html('');
 		}
 	}
 
@@ -564,9 +532,9 @@ erpnext.PointOfSale.ItemCart = class {
 			this.render_cart_item(item_row, $item);
 		}
 
-		const no_of_cart_items = this.$cart_items_wrapper.children().length;
-		no_of_cart_items > 0 && this.highlight_checkout_btn(no_of_cart_items > 0);
-		
+		const no_of_cart_items = this.$cart_items_wrapper.find('.cart-item-wrapper').length;
+		this.highlight_checkout_btn(no_of_cart_items > 0);
+
 		this.update_empty_cart_section(no_of_cart_items);
 	}
 	
@@ -576,32 +544,33 @@ erpnext.PointOfSale.ItemCart = class {
 		
 		if (!$item_to_update.length) {
 			this.$cart_items_wrapper.append(
-				`<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 rounded-md border-grey pointer no-select" 
+				`<div class="cart-item-wrapper" 
 						data-item-code="${escape(item_data.item_code)}" data-uom="${escape(item_data.uom)}"
 						data-batch-no="${escape(item_data.batch_no || '')}">
-				</div>`
+				</div>
+				<div class="seperator"></div>`
 			)
 			$item_to_update = this.get_cart_item(item_data);
 		}
 
 		$item_to_update.html(
-			`<div class="flex flex-col flex-1 f-shrink-1 overflow-hidden whitespace-nowrap">
-				<div class="text-md text-dark-grey text-bold">
+			`${get_item_image_html()}
+			<div class="item-name-desc">
+				<div class="item-name">
 					${item_data.item_name}
 				</div>
 				${get_description_html()}
 			</div>
-				${get_rate_discount_html()}
-			</div>`
+			${get_rate_discount_html()}`
 		)
 
 		set_dynamic_rate_header_width();
 		this.scroll_to_item($item_to_update);
 
 		function set_dynamic_rate_header_width() {
-			const rate_cols = Array.from(me.$cart_items_wrapper.find(".rate-col"));
-			me.$cart_header.find(".rate-list-header").css("width", "");
-			me.$cart_items_wrapper.find(".rate-col").css("width", "");
+			const rate_cols = Array.from(me.$cart_items_wrapper.find(".item-rate-amount"));
+			me.$cart_header.find(".rate-amount-header").css("width", "");
+			me.$cart_items_wrapper.find(".item-rate-amount").css("width", "");
 			let max_width = rate_cols.reduce((max_width, elm) => {
 				if ($(elm).width() > max_width)
 					max_width = $(elm).width();
@@ -611,30 +580,26 @@ erpnext.PointOfSale.ItemCart = class {
 			max_width += 1;
 			if (max_width == 1) max_width = "";
 
-			me.$cart_header.find(".rate-list-header").css("width", max_width);
-			me.$cart_items_wrapper.find(".rate-col").css("width", max_width);
+			me.$cart_header.find(".rate-amount-header").css("width", max_width);
+			me.$cart_items_wrapper.find(".item-rate-amount").css("width", max_width);
 		}
 		
 		function get_rate_discount_html() {
 			if (item_data.rate && item_data.amount && item_data.rate !== item_data.amount) {
 				return `
-					<div class="flex f-shrink-0 ml-4 items-center">
-						<div class="flex w-8 h-8 rounded-md bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
-							<span>${item_data.qty || 0}</span>
-						</div>
-						<div class="rate-col flex flex-col f-shrink-0 text-right">
-							<div class="text-md text-dark-grey text-bold">${format_currency(item_data.amount, currency)}</div>
-							<div class="text-md-0 text-dark-grey">${format_currency(item_data.rate, currency)}</div>
+					<div class="item-qty-rate">
+						<div class="item-qty"><span>${item_data.qty || 0}</span></div>
+						<div class="item-rate-amount">
+							<div class="item-rate">${format_currency(item_data.amount, currency)}</div>
+							<div class="item-amount">${format_currency(item_data.rate, currency)}</div>
 						</div>
 					</div>`
 			} else {
 				return `
-					<div class="flex f-shrink-0 ml-4 text-right">
-						<div class="flex w-8 h-8 rounded-md bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
-							<span>${item_data.qty || 0}</span>
-						</div>
-						<div class="rate-col flex flex-col f-shrink-0 text-right">
-							<div class="text-md text-dark-grey text-bold">${format_currency(item_data.rate, currency)}</div>
+					<div class="item-qty-rate">
+						<div class="item-qty"><span>${item_data.qty || 0}</span></div>
+						<div class="item-rate-amount">
+							<div class="item-rate">${format_currency(item_data.rate, currency)}</div>
 						</div>
 					</div>`
 			}
@@ -650,9 +615,18 @@ erpnext.PointOfSale.ItemCart = class {
 					}
 				}
 				item_data.description = frappe.ellipsis(item_data.description, 45);
-				return `<div class="text-grey">${item_data.description}</div>`
+				return `<div class="item-desc">${item_data.description}</div>`
 			}
 			return ``;
+		}
+
+		function get_item_image_html() {
+			const { image, item_name } = item_data;
+			if (image) {
+				return `<div class="item-image"><img src="${image}" alt="${image}""></div>`
+			} else {
+				return `<div class="item-image item-abbr">${frappe.get_abbr(item_name)}</div>`
+			}
 		}
 	}
 
@@ -669,20 +643,23 @@ erpnext.PointOfSale.ItemCart = class {
 
 	toggle_checkout_btn(show_checkout) {
 		if (show_checkout) {
-			this.$totals_section.find('.checkout-btn').removeClass('d-none');
-			this.$totals_section.find('.edit-cart-btn').addClass('d-none');
+			this.$totals_section.find('.checkout-btn').css('display', 'flex');
+			this.$totals_section.find('.edit-cart-btn').css('display', 'none');
 		} else {
-			this.$totals_section.find('.checkout-btn').addClass('d-none');
-			this.$totals_section.find('.edit-cart-btn').removeClass('d-none');
+			this.$totals_section.find('.checkout-btn').css('display', 'none');
+			this.$totals_section.find('.edit-cart-btn').css('display', 'flex');
 		}
 	}
 
 	highlight_checkout_btn(toggle) {
-		const has_primary_class = this.$totals_section.find('.checkout-btn').hasClass('bg-primary');
-		if (toggle && !has_primary_class) {
-			this.$totals_section.find('.checkout-btn').addClass('bg-primary text-white text-lg');
-		} else if (!toggle && has_primary_class) {
-			this.$totals_section.find('.checkout-btn').removeClass('bg-primary text-white text-lg');
+		if (toggle) {
+			this.$cart_container.find('.checkout-btn').css({
+				'background-color': 'var(--blue-500)'
+			});
+		} else {
+			this.$cart_container.find('.checkout-btn').css({
+				'background-color': 'var(--blue-200)'
+			});
 		}
 	}
 	
@@ -690,8 +667,7 @@ erpnext.PointOfSale.ItemCart = class {
 		const $no_item_element = this.$cart_items_wrapper.find('.no-item-wrapper');
 
 		// if cart has items and no item is present
-		no_of_cart_items > 0 && $no_item_element && $no_item_element.remove()
-			&& this.$cart_items_wrapper.removeClass('mt-4 border-grey border-dashed') && this.$cart_header.removeClass('d-none');
+		no_of_cart_items > 0 && $no_item_element && $no_item_element.remove() && this.$cart_header.css('display', 'flex');
 
 		no_of_cart_items === 0 && !$no_item_element.length && this.make_no_items_placeholder();
 	}
@@ -754,36 +730,36 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 	
 	highlight_numpad_btn($btn, curr_action) {
-		const curr_action_is_highlighted = $btn.hasClass('shadow-base-inner');
+		const curr_action_is_highlighted = $btn.hasClass('highlighted-numpad-btn');
 		const curr_action_is_action = ['qty', 'discount_percentage', 'rate', 'done'].includes(curr_action);
 
 		if (!curr_action_is_highlighted) {
-			$btn.addClass('shadow-base-inner bg-selected');
+			$btn.addClass('highlighted-numpad-btn');
 		}
 		if (this.prev_action === curr_action && curr_action_is_highlighted) {
 			// if Qty is pressed twice
-			$btn.removeClass('shadow-base-inner bg-selected');
+			$btn.removeClass('highlighted-numpad-btn');
 		}
 		if (this.prev_action && this.prev_action !== curr_action && curr_action_is_action) {
 			// Order: Qty -> Rate then remove Qty highlight
 			const prev_btn = $(`[data-button-value='${this.prev_action}']`);
-			prev_btn.removeClass('shadow-base-inner bg-selected');
+			prev_btn.removeClass('highlighted-numpad-btn');
 		}
 		if (!curr_action_is_action || curr_action === 'done') {
 			// if numbers are clicked
 			setTimeout(() => {
-				$btn.removeClass('shadow-base-inner bg-selected');
-			}, 100);
+				$btn.removeClass('highlighted-numpad-btn');
+			}, 200);
 		}
 	}
 
 	toggle_numpad(show) {
 		if (show) {
-			this.$totals_section.addClass('d-none');
-			this.$numpad_section.removeClass('d-none');
+			this.$totals_section.css('display', 'none');
+			this.$numpad_section.css('display', 'flex');
 		} else {
-			this.$totals_section.removeClass('d-none');
-			this.$numpad_section.addClass('d-none');
+			this.$totals_section.css('display', 'flex');
+			this.$numpad_section.css('display', 'none');
 		}
 		this.reset_numpad();
 	}
@@ -791,7 +767,7 @@ erpnext.PointOfSale.ItemCart = class {
 	reset_numpad() {
 		this.numpad_value = '';
 		this.prev_action = undefined;
-		this.$numpad_section.find('.shadow-base-inner').removeClass('shadow-base-inner bg-selected');
+		this.$numpad_section.find('.highlighted-numpad-btn').removeClass('highlighted-numpad-btn');
 	}
 
 	toggle_numpad_field_edit(fieldname) {
@@ -804,7 +780,7 @@ erpnext.PointOfSale.ItemCart = class {
 		if (show) {
 			const { customer } = this.customer_info || {};
 
-			this.$cart_container.addClass('d-none');
+			this.$cart_container.css('display', 'none');
 			this.$customer_section.css({
 				'height': '100%',
 				'padding-top': '0px',
@@ -842,7 +818,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.fetch_customer_transactions();
 
 		} else {
-			this.$cart_container.removeClass('d-none');
+			this.$cart_container.css('display', 'flex');
 			this.$customer_section.css({
 				'height': '',
 				'padding-top': '',
@@ -988,20 +964,18 @@ erpnext.PointOfSale.ItemCart = class {
 		this.update_totals_section(frm);
 
 		if(frm.doc.docstatus === 1) {
-			this.$totals_section.find('.checkout-btn').addClass('d-none');
-			this.$totals_section.find('.edit-cart-btn').addClass('d-none');
-			this.$totals_section.find('.grand-total').removeClass('border-b-grey');
+			this.$totals_section.find('.checkout-btn').css('display', 'none');
+			this.$totals_section.find('.edit-cart-btn').css('display', 'none');
 		} else {
-			this.$totals_section.find('.checkout-btn').removeClass('d-none');
-			this.$totals_section.find('.edit-cart-btn').addClass('d-none');
-			this.$totals_section.find('.grand-total').addClass('border-b-grey');
+			this.$totals_section.find('.checkout-btn').css('display', 'flex');
+			this.$totals_section.find('.edit-cart-btn').css('display', 'none');
 		}
 
 		this.toggle_component(true);
 	}
 
 	toggle_component(show) {
-		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
+		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
 	}
 	
 }
