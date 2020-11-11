@@ -60,7 +60,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			billing_address=party_address, shipping_address=shipping_address)
 
 	if fetch_payment_terms_template:
-		party_details["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
+		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
 
 	if not party_details.get("currency"):
 		party_details["currency"] = currency
@@ -318,7 +318,7 @@ def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 	due_date = None
 	if (bill_date or posting_date) and party:
 		due_date = bill_date or posting_date
-		template_name = get_pyt_term_template(party, party_type, company)
+		template_name = get_payment_terms_template(party, party_type, company)
 
 		if template_name:
 			due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
@@ -391,7 +391,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
-		"company":			company
+		"company": company
 	}
 
 	if tax_category:
@@ -425,7 +425,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 
 @frappe.whitelist()
-def get_pyt_term_template(party_name, party_type, company=None):
+def get_payment_terms_template(party_name, party_type, company=None):
 	if party_type not in ("Customer", "Supplier"):
 		return
 	template = None

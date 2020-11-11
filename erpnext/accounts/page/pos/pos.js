@@ -81,7 +81,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					me.page.set_indicator(__("Online"), "green")
 				}
 			}
-		})
+		});
 	},
 
 	onload: function () {
@@ -278,6 +278,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		})
 	},
 
+	set_pos_profile_title(pos_profile) {
+		this.page.set_title_sub(
+			`<span class="indicator blue">
+				<a class="text-muted" href="#Form/POS Profile/${pos_profile}">${pos_profile}</a>
+			</span>`
+		);
+	},
+
 	get_data_from_server: function (callback) {
 		var me = this;
 		frappe.call({
@@ -286,6 +294,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			freeze_message: __("Master data syncing, it might take some time"),
 			callback: function (r) {
 				localStorage.setItem('doc', JSON.stringify(r.message.doc));
+				me.set_pos_profile_title(r.message.pos_profile.name);
 				me.init_master_data(r)
 				me.set_interval_for_si_sync();
 				me.check_internet_connection();
@@ -1064,6 +1073,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					$(frappe.render_template("pos_item", {
 						item_code: escape(obj.name),
 						item_price: item_price,
+						title: obj.name === obj.item_name ? obj.name : obj.item_name,
 						item_name: obj.name === obj.item_name ? "" : obj.item_name,
 						item_image: obj.image,
 						item_stock: __('Stock Qty') + ": " + me.get_actual_qty(obj),
@@ -1545,6 +1555,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		$.each(this.frm.doc.items || [], function (i, d) {
 			$(frappe.render_template("pos_bill_item_new", {
 				item_code: escape(d.item_code),
+				title: d.item_code === d.item_name ? d.item_code : d.item_name,
 				item_name: (d.item_name === d.item_code || !d.item_name) ? "" : ("<br>" + d.item_name),
 				qty: d.qty,
 				discount_percentage: d.discount_percentage || 0.0,

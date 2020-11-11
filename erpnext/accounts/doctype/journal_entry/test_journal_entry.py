@@ -139,6 +139,49 @@ class TestJournalEntry(unittest.TestCase):
 
 		self.assertFalse(gle)
 
+	def test_reverse_journal_entry(self):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry 
+		jv = make_journal_entry("_Test Bank USD - _TC",
+			"Sales - _TC", 100, exchange_rate=50, save=False)
+
+		jv.get("accounts")[1].credit_in_account_currency = 5000
+		jv.get("accounts")[1].exchange_rate = 1
+		jv.submit()
+
+		rjv = make_reverse_journal_entry(jv.name)
+		rjv.posting_date = nowdate()
+		rjv.submit()
+
+
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
+			order by account asc""", rjv.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+
+		expected_values = {
+			"_Test Bank USD - _TC": {
+				"account_currency": "USD",
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"credit": 5000,
+				"credit_in_account_currency": 100,
+			},
+			"Sales - _TC": {
+				"account_currency": "INR",
+				"debit": 5000,
+				"debit_in_account_currency": 5000,
+				"credit": 0,
+				"credit_in_account_currency": 0,
+			}
+		}
+
+		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
+			for i, gle in enumerate(gl_entries):
+				self.assertEqual(expected_values[gle.account][field], gle[field])
+
 	def test_disallow_change_in_account_currency_for_a_party(self):
 		# create jv in USD
 		jv = make_journal_entry("_Test Bank USD - _TC",

@@ -19,6 +19,11 @@ def execute(filters=None):
 	if not filters:
 		filters.setdefault('fiscal_year', get_fiscal_year(nowdate())[0])
 		filters.setdefault('company', frappe.db.get_default("company"))
+
+	region = frappe.db.get_value("Company", fieldname = ["country"], filters = { "name": filters.company })
+	if region != 'United States':
+		return [],[]
+
 	data = []
 	columns = get_columns()
 	data = frappe.db.sql("""

@@ -356,6 +356,7 @@
    "fieldname": "bill_date",
    "fieldtype": "Date",
    "label": "Supplier Invoice Date",
+   "no_copy": 1,
    "oldfieldname": "bill_date",
    "oldfieldtype": "Date",
    "print_hide": 1
@@ -1307,7 +1308,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-08-20 11:08:19.611710",
+ "modified": "2020-09-21 12:22:09.164068",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

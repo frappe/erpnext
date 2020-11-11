@@ -452,6 +452,9 @@ erpnext.utils.update_child_items = function(opts) {
 	const frm = opts.frm;
 	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
 	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
+	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
+	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
+
 	this.data = [];
 	const fields = [{
 		fieldtype:'Data',
@@ -472,14 +475,16 @@ erpnext.utils.update_child_items = function(opts) {
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
-		label: __('Qty')
+		label: __('Qty'),
+		precision: get_precision("qty")
 	}, {
 		fieldtype:'Currency',
 		fieldname:"rate",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
-		label: __('Rate')
+		label: __('Rate'),
+		precision: get_precision("rate")
 	}];
 
 	if (frm.doc.doctype == 'Sales Order' || frm.doc.doctype == 'Purchase Order' ) {
@@ -494,7 +499,8 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldtype: 'Float',
 			fieldname: "conversion_factor",
 			in_list_view: 1,
-			label: __("Conversion Factor")
+			label: __("Conversion Factor"),
+			precision: get_precision('conversion_factor')
 		})
 	}
 

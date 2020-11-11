@@ -714,6 +714,64 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.pos_gl_entry(si, pos, 50)
 
+	def test_pos_returns_without_repayment(self):
+		pos_profile = make_pos_profile()
+
+		pos = create_sales_invoice(qty = 10, do_not_save=True)
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 500})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500})
+		pos.insert()
+		pos.submit()
+
+		pos_return = create_sales_invoice(is_return=1,
+			return_against=pos.name, qty=-5, do_not_save=True)
+
+		pos_return.is_pos = 1
+		pos_return.pos_profile = pos_profile.name
+
+		pos_return.insert()
+		pos_return.submit()
+
+		self.assertFalse(pos_return.is_pos)
+		self.assertFalse(pos_return.get('payments'))
+
+	def test_pos_returns_with_repayment(self):
+		pos_profile = make_pos_profile()
+
+		pos_profile.append('payments', {
+			'default': 1,
+			'mode_of_payment': 'Cash',
+			'amount': 0.0
+		})
+
+		pos_profile.save()
+
+		pos = create_sales_invoice(qty = 10, do_not_save=True)
+
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 500})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500})
+		pos.insert()
+		pos.submit()
+
+		pos_return = create_sales_invoice(is_return=1,
+			return_against=pos.name, qty=-5, do_not_save=True)
+
+		pos_return.is_pos = 1
+		pos_return.pos_profile = pos_profile.name
+		pos_return.insert()
+		pos_return.submit()
+
+		self.assertEqual(pos_return.get('payments')[0].amount, -500)
+		pos_profile.payments = []
+		pos_profile.save()
+
+
 	def test_pos_change_amount(self):
 		make_pos_profile()
 

@@ -158,6 +158,46 @@ class TestProductionPlan(unittest.TestCase):
 		self.assertTrue(mr.material_request_type, 'Customer Provided')
 		self.assertTrue(mr.customer, '_Test Customer')
 
+	def test_production_plan_with_multi_level_bom(self):
+		#|Item Code			|	Qty	|
+		#|Test BOM 1	 		|	1	|
+		#|	Test BOM 2		|	2	|
+		#|		Test BOM 3	|	3	|
+
+		for item_code in ["Test BOM 1", "Test BOM 2", "Test BOM 3", "Test RM BOM 1"]:
+			create_item(item_code, is_stock_item=1)
+
+		# created bom upto 3 level
+		if not frappe.db.get_value('BOM', {'item': "Test BOM 3"}):
+			make_bom(item = "Test BOM 3", raw_materials = ["Test RM BOM 1"], rm_qty=3)
+
+		if not frappe.db.get_value('BOM', {'item': "Test BOM 2"}):
+			make_bom(item = "Test BOM 2", raw_materials = ["Test BOM 3"], rm_qty=3)
+
+		if not frappe.db.get_value('BOM', {'item': "Test BOM 1"}):
+			make_bom(item = "Test BOM 1", raw_materials = ["Test BOM 2"], rm_qty=2)
+
+		item_code = "Test BOM 1"
+		pln = frappe.new_doc('Production Plan')
+		pln.company = "_Test Company"
+		pln.append("po_items", {
+			"item_code": item_code,
+			"bom_no": frappe.db.get_value('BOM', {'item': "Test BOM 1"}),
+			"planned_qty": 3,
+			"make_work_order_for_sub_assembly_items": 1
+		})
+
+		pln.submit()
+		pln.make_work_order()
+
+		#last level sub-assembly work order produce qty
+		to_produce_qty = frappe.db.get_value("Work Order",
+			{"production_plan": pln.name, "production_item": "Test BOM 3"}, "qty")
+
+		self.assertEqual(to_produce_qty, 18.0)
+		pln.cancel()
+		frappe.delete_doc("Production Plan", pln.name)
+
 def create_production_plan(**args):
 	args = frappe._dict(args)
 
@@ -205,12 +245,16 @@ def make_bom(**args):
 
 		bom.append('items', {
 			'item_code': item,
-			'qty': 1,
+			'qty': args.rm_qty or 1.0,
 			'uom': item_doc.stock_uom,
 			'stock_uom': item_doc.stock_uom,
 			'rate': item_doc.valuation_rate or args.rate,
 		})
 
-	bom.insert(ignore_permissions=True)
-	bom.submit()
+	if not args.do_not_save:
+		bom.insert(ignore_permissions=True)
+
+		if not args.do_not_submit:
+			bom.submit()
+
 	return bom

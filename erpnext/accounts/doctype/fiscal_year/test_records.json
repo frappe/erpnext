@@ -58,5 +58,12 @@
   "year": "_Test Fiscal Year 2021",
   "year_end_date": "2021-12-31",
   "year_start_date": "2021-01-01"
+ },
+ {
+  "doctype": "Fiscal Year",
+  "year": "_Test Short Fiscal Year 2021",
+  "is_short_year": 1,
+  "year_end_date": "2021-12-31",
+  "year_start_date": "2021-04-01"
  }
 ]

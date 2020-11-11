@@ -166,7 +166,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -245,9 +244,10 @@
  ],
  "icon": "fa fa-calendar",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "max_attachments": 3,
- "modified": "2020-08-13 17:22:44.832397",
+ "modified": "2020-09-23 19:11:58.806837",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",

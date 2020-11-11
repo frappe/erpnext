@@ -96,11 +96,7 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 
 	if with_valuation_rate:
 		if with_serial_no:
-			serial_nos = last_entry.get("serial_no")
-
-			if (serial_nos and
-				len(get_serial_nos_data(serial_nos)) < last_entry.qty_after_transaction):
-				serial_nos = get_serial_nos_data_after_transactions(args)
+			serial_nos = get_serial_nos_data_after_transactions(args)
 
 			return ((last_entry.qty_after_transaction, last_entry.valuation_rate, serial_nos)
 				if last_entry else (0.0, 0.0, 0.0))
@@ -288,7 +284,6 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 		return
 
 	convertible_cols = {}
-
 	is_dict_obj = False
 	if isinstance(result[0], dict):
 		is_dict_obj = True
@@ -310,13 +305,13 @@ def update_included_uom_in_report(columns, result, include_uom, conversion_facto
 	for row_idx, row in enumerate(result):
 		data = row.items() if is_dict_obj else enumerate(row)
 		for key, value in data:
-			if not key in convertible_columns or not conversion_factors[row_idx]:
+			if key not in convertible_columns or not conversion_factors[row_idx-1]:
 				continue
 
 			if convertible_columns.get(key) == 'rate':
-				new_value = flt(value) * conversion_factors[row_idx]
+				new_value = flt(value) * conversion_factors[row_idx-1]
 			else:
-				new_value = flt(value) / conversion_factors[row_idx]
+				new_value = flt(value) / conversion_factors[row_idx-1]
 
 			if not is_dict_obj:
 				row.insert(key+1, new_value)

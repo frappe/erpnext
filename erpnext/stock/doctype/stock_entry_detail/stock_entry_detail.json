@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "hash",
  "creation": "2013-03-29 18:22:12",
  "doctype": "DocType",
@@ -17,6 +16,7 @@
   "item_group",
   "col_break2",
   "item_name",
+  "subcontracted_item",
   "section_break_8",
   "description",
   "column_break_10",
@@ -57,7 +57,6 @@
   "material_request",
   "material_request_item",
   "original_item",
-  "subcontracted_item",
   "reference_section",
   "against_stock_entry",
   "ste_detail",
@@ -415,6 +414,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.purpose == 'Send to Subcontractor'",
    "fieldname": "subcontracted_item",
    "fieldtype": "Link",
    "label": "Subcontracted Item",
@@ -497,15 +497,12 @@
    "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
    "fieldname": "set_basic_rate_manually",
    "fieldtype": "Check",
-   "label": "Set Basic Rate Manually",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Set Basic Rate Manually"
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2020-06-08 12:57:03.172887",
+ "modified": "2020-09-04 12:12:35.668198",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

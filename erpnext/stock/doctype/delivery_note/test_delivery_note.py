@@ -57,7 +57,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		sle = frappe.get_doc("Stock Ledger Entry", {"voucher_type": "Delivery Note", "voucher_no": dn.name})
 
-		self.assertEqual(sle.stock_value_difference, -1*stock_queue[0][1])
+		self.assertEqual(sle.stock_value_difference, flt(-1*stock_queue[0][1]))
 
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 

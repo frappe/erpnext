@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "ACC-SUB-.YYYY.-.#####",
  "creation": "2017-07-18 17:50:43.967266",
  "doctype": "DocType",
@@ -184,7 +183,8 @@
    "fieldname": "invoices",
    "fieldtype": "Table",
    "label": "Invoices",
-   "options": "Subscription Invoice"
+   "options": "Subscription Invoice",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -197,8 +197,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "links": [],
- "modified": "2020-01-27 14:37:32.845173",
+ "modified": "2020-08-27 23:30:02.504042",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

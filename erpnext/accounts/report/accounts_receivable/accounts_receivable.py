@@ -160,6 +160,8 @@ class ReceivablePayableReport(object):
 			else:
 				# advance / unlinked payment or other adjustment
 				row.paid -= gle_balance
+		if gle.cost_center:
+			row.cost_center =  gle.cost_center
 
 	def update_sub_total_row(self, row, party):
 		total_row = self.total_row_map.get(party)
@@ -210,7 +212,6 @@ class ReceivablePayableReport(object):
 		for key, row in self.voucher_balance.items():
 			row.outstanding = flt(row.invoiced - row.paid - row.credit_note, self.currency_precision)
 			row.invoice_grand_total = row.invoiced
-
 			if abs(row.outstanding) > 1.0/10 ** self.currency_precision:
 				# non-zero oustanding, we must consider this row
 
@@ -577,7 +578,7 @@ class ReceivablePayableReport(object):
 
 		self.gl_entries = frappe.db.sql("""
 			select
-				name, posting_date, account, party_type, party, voucher_type, voucher_no,
+				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
 				against_voucher_type, against_voucher, account_currency, remarks, {0}
 			from
 				`tabGL Entry`
@@ -617,8 +618,18 @@ class ReceivablePayableReport(object):
 		elif party_type_field=="supplier":
 			self.add_supplier_filters(conditions, values)
 
+		if self.filters.cost_center:
+			self.get_cost_center_conditions(conditions)
+
 		self.add_accounting_dimensions_filters(conditions, values)
 		return " and ".join(conditions), values
+
+	def get_cost_center_conditions(self, conditions):
+		lft, rgt = frappe.db.get_value("Cost Center", self.filters.cost_center, ["lft", "rgt"])
+		cost_center_list = [center.name for center in frappe.get_list("Cost Center", filters = {'lft': (">=", lft), 'rgt': ("<=", rgt)})]
+
+		cost_center_string = '", "'.join(cost_center_list)
+		conditions.append('cost_center in ("{0}")'.format(cost_center_string))
 
 	def get_order_by_condition(self):
 		if self.filters.get('group_by_party'):
@@ -731,6 +742,7 @@ class ReceivablePayableReport(object):
 			self.add_column(_("Customer Contact"), fieldname='customer_primary_contact',
 				fieldtype='Link', options='Contact')
 
+		self.add_column(label=_('Cost Center'), fieldname='cost_center', fieldtype='Data')
 		self.add_column(label=_('Voucher Type'), fieldname='voucher_type', fieldtype='Data')
 		self.add_column(label=_('Voucher No'), fieldname='voucher_no', fieldtype='Dynamic Link',
 			options='voucher_type', width=180)

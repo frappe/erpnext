@@ -4,11 +4,13 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, getdate, cstr
 from frappe.model.meta import get_field_precision
 from frappe.utils.xlsxutils import handle_html
 from six import iteritems
 import json
+from erpnext.regional.india.utils import get_gst_accounts
+from erpnext.regional.report.gstr_1.gstr_1 import get_company_gstin_number
 
 def execute(filters=None):
 	return _execute(filters)
@@ -41,6 +43,12 @@ def _execute(filters=None):
 
 			data.append(row)
 			added_item.append((d.parent, d.item_code))
+		# gst is already added, just add qty and taxable value
+		else:
+			row = [d.gst_hsn_code, d.description, d.stock_uom, d.stock_qty, d.base_net_amount, d.base_net_amount]
+			for tax in tax_columns:
+				row += [0]
+			data.append(row)
 	if data:
 		data = get_merged_data(columns, data) # merge same hsn code data
 	return columns, data
@@ -141,7 +149,7 @@ def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoic
 
 	tax_details = frappe.db.sql("""
 		select
-			parent, description, item_wise_tax_detail,
+			parent, account_head, item_wise_tax_detail,
 			base_tax_amount_after_discount_amount
 		from `tab%s`
 		where
@@ -153,11 +161,11 @@ def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoic
 	""" % (tax_doctype, '%s', ', '.join(['%s']*len(invoice_item_row)), conditions),
 		tuple([doctype] + list(invoice_item_row)))
 
-	for parent, description, item_wise_tax_detail, tax_amount in tax_details:
-		description = handle_html(description)
-		if description not in tax_columns and tax_amount:
+	for parent, account_head, item_wise_tax_detail, tax_amount in tax_details:
+
+		if account_head not in tax_columns and tax_amount:
 			# as description is text editor earlier and markup can break the column convention in reports
-			tax_columns.append(description)
+			tax_columns.append(account_head)
 
 		if item_wise_tax_detail:
 			try:
@@ -175,17 +183,17 @@ def get_tax_accounts(item_list, columns, company_currency, doctype="Sales Invoic
 					for d in item_row_map.get(parent, {}).get(item_code, []):
 						item_tax_amount = tax_amount
 						if item_tax_amount:
-							itemised_tax.setdefault((parent, item_code), {})[description] = frappe._dict({
+							itemised_tax.setdefault((parent, item_code), {})[account_head] = frappe._dict({
 								"tax_amount": flt(item_tax_amount, tax_amount_precision)
 							})
 			except ValueError:
 				continue
 
 	tax_columns.sort()
-	for desc in tax_columns:
+	for account_head in tax_columns:
 		columns.append({
-			"label": desc,
-			"fieldname": frappe.scrub(desc),
+			"label": account_head,
+			"fieldname": frappe.scrub(account_head),
 			"fieldtype": "Float",
 			"width": 110
 		})
@@ -211,4 +219,77 @@ def get_merged_data(columns, data):
 		result.append(value)
 
 	return result
+
+@frappe.whitelist()
+def get_json(filters, report_name, data):
+	filters = json.loads(filters)
+	report_data = json.loads(data)
+	gstin = filters.get('company_gstin') or get_company_gstin_number(filters["company"])
+
+	if not filters.get('from_date') or not filters.get('to_date'):
+		frappe.throw(_("Please enter From Date and To Date to generate JSON"))
+
+	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
+
+	gst_json = {"version": "GST2.3.4",
+		"hash": "hash", "gstin": gstin, "fp": fp}
+
+	gst_json["hsn"] = {
+		"data": get_hsn_wise_json_data(filters, report_data)
+	}
+
+	return {
+		'report_name': report_name,
+		'data': gst_json
+	}
+
+@frappe.whitelist()
+def download_json_file():
+	'''download json content in a file'''
+	data = frappe._dict(frappe.local.form_dict)
+	frappe.response['filename'] = frappe.scrub("{0}".format(data['report_name'])) + '.json'
+	frappe.response['filecontent'] = data['data']
+	frappe.response['content_type'] = 'application/json'
+	frappe.response['type'] = 'download'
+
+def get_hsn_wise_json_data(filters, report_data):
+
+	filters = frappe._dict(filters)
+	gst_accounts = get_gst_accounts(filters.company)
+	data = []
+	count = 1
+
+	for hsn in report_data:
+		row = {
+			"num": count,
+			"hsn_sc": hsn.get("gst_hsn_code"),
+			"desc": hsn.get("description"),
+			"uqc": hsn.get("stock_uom").upper(),
+			"qty": hsn.get("stock_qty"),
+			"val": flt(hsn.get("total_amount"), 2),
+			"txval": flt(hsn.get("taxable_amount", 2)),
+			"iamt": 0.0,
+			"camt": 0.0,
+			"samt": 0.0,
+			"csamt": 0.0
+
+		}
+
+		for account in gst_accounts.get('igst_account'):
+			row['iamt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+
+		for account in gst_accounts.get('cgst_account'):
+			row['camt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+
+		for account in gst_accounts.get('sgst_account'):
+			row['samt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+
+		for account in gst_accounts.get('cess_account'):
+			row['csamt'] += flt(hsn.get(frappe.scrub(cstr(account)), 0.0), 2)
+
+		data.append(row)
+		count +=1
+
+	return data
+
 

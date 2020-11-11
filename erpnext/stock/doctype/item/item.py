@@ -111,6 +111,7 @@ class Item(WebsiteGenerator):
 		self.synced_with_hub = 0
 
 		self.validate_has_variants()
+		self.validate_attributes_in_variants()
 		self.validate_stock_exists_for_template_item()
 		self.validate_attributes()
 		self.validate_variant_attributes()
@@ -806,6 +807,76 @@ class Item(WebsiteGenerator):
 			if frappe.db.exists("Item", {"variant_of": self.name}):
 				frappe.throw(_("Item has variants."))
 
+	def validate_attributes_in_variants(self):
+		if not self.has_variants or self.get("__islocal"):
+			return
+
+		old_doc = self.get_doc_before_save()
+		old_doc_attributes = set([attr.attribute for attr in old_doc.attributes])
+		own_attributes = [attr.attribute for attr in self.attributes]
+
+		# Check if old attributes were removed from the list
+		# Is old_attrs is a subset of new ones
+		# that means we need not check any changes
+		if old_doc_attributes.issubset(set(own_attributes)):
+			return
+
+		from collections import defaultdict
+
+		# get all item variants
+		items = [item["name"] for item in frappe.get_all("Item", {"variant_of": self.name})]
+
+		# get all deleted attributes
+		deleted_attribute = list(old_doc_attributes.difference(set(own_attributes)))
+
+		# fetch all attributes of these items
+		item_attributes = frappe.get_all(
+			"Item Variant Attribute",
+			filters={
+				"parent": ["in", items],
+				"attribute": ["in", deleted_attribute]
+			},
+			fields=["attribute", "parent"]
+		)
+		not_included = defaultdict(list)
+
+		for attr in item_attributes:
+			if attr["attribute"] not in own_attributes:
+				not_included[attr["parent"]].append(attr["attribute"])
+
+		if not len(not_included):
+			return
+
+		def body(docnames):
+			docnames.sort()
+			return "<br>".join(docnames)
+
+		def table_row(title, body):
+			return """<tr>
+				<td>{0}</td>
+				<td>{1}</td>
+			</tr>""".format(title, body)
+
+		rows = ''
+		for docname, attr_list in not_included.items():
+			link = "<a href='#Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
+			rows += table_row(link, body(attr_list))
+
+		error_description = _('The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template.')
+
+		message = """
+			<div>{0}</div><br>
+			<table class="table">
+				<thead>
+					<td>{1}</td>
+					<td>{2}</td>
+				</thead>
+				{3}
+			</table>
+		""".format(error_description, _('Variant Items'), _('Attributes'), rows)
+
+		frappe.throw(message, title=_("Variant Attribute Error"), is_minimizable=True)
+
 	def validate_stock_exists_for_template_item(self):
 		if self.stock_ledger_created() and self._doc_before_save:
 			if (cint(self._doc_before_save.has_variants) != cint(self.has_variants)
@@ -912,9 +983,7 @@ class Item(WebsiteGenerator):
 				if self.stock_ledger_created():
 					return True
 
-			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}) or \
-				frappe.db.get_value("Production Order",
-					filters={"production_item": self.name, "docstatus": 1}):
+			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}):
 				return True
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):
@@ -1001,8 +1070,8 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
 		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
 
-	
-	
+
+
 	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date
 							   or "1900-01-01")
 	purchase_receipt_date = getdate(last_purchase_receipt and
@@ -1010,7 +1079,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 	if last_purchase_order and (purchase_order_date >= purchase_receipt_date or not last_purchase_receipt):
 		# use purchase order
-		
+
 		last_purchase = last_purchase_order[0]
 		purchase_date = purchase_order_date
 
@@ -1030,7 +1099,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 		"discount_percentage": flt(last_purchase.discount_percentage),
 		"purchase_date": purchase_date
 	})
-	
+
 
 	conversion_rate = flt(conversion_rate) or 1.0
 	out.update({
@@ -1069,8 +1138,7 @@ def invalidate_item_variants_cache_for_website(doc):
 
 	if item_code:
 		item_cache = ItemVariantsCacheManager(item_code)
-		item_cache.clear_cache()
-
+		item_cache.rebuild_cache()
 
 def check_stock_uom_with_bin(item, stock_uom):
 	if stock_uom == frappe.db.get_value("Item", item, "stock_uom"):

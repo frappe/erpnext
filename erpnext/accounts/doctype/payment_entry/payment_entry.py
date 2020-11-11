@@ -84,7 +84,7 @@ class PaymentEntry(AccountsController):
 		self.delink_advance_entry_references()
 		self.update_payment_schedule(cancel=1)
 		self.set_payment_req_status()
-		self.set_status()
+		self.set_status(update=True)
 
 	def set_payment_req_status(self):
 		from erpnext.accounts.doctype.payment_request.payment_request import update_payment_req_status
@@ -279,7 +279,7 @@ class PaymentEntry(AccountsController):
 				outstanding_amount, is_return = frappe.get_cached_value(d.reference_doctype, d.reference_name, ["outstanding_amount", "is_return"])
 				if outstanding_amount <= 0 and not is_return:
 					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
-		
+
 		for k, v in no_oustanding_refs.items():
 			frappe.msgprint(_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.<br><br>\
 					If this is undesirable please cancel the corresponding Payment Entry.")
@@ -340,13 +340,16 @@ class PaymentEntry(AccountsController):
 					frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` + %s
 							WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
 
-	def set_status(self):
+	def set_status(self, update=False):
 		if self.docstatus == 2:
 			self.status = 'Cancelled'
 		elif self.docstatus == 1:
 			self.status = 'Submitted'
 		else:
 			self.status = 'Draft'
+
+		if update:
+			self.db_set('status', self.status)
 
 	def set_amounts(self):
 		self.set_amounts_in_company_currency()

@@ -207,6 +207,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
+		stock_rbnb_currency = get_account_currency(stock_rbnb)
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 
@@ -242,7 +243,6 @@ class PurchaseReceipt(BuyingController):
 
 					# stock received but not billed
 					if d.base_net_amount:
-						stock_rbnb_currency = get_account_currency(stock_rbnb)
 						gl_entries.append(self.get_gl_dict({
 							"account": stock_rbnb,
 							"against": warehouse_account[d.warehouse]["account"],
@@ -288,7 +288,8 @@ class PurchaseReceipt(BuyingController):
 						if self.is_return or flt(d.item_tax_amount):
 							loss_account = expenses_included_in_valuation
 						else:
-							loss_account = stock_rbnb
+							cogs_account = self.get_company_default("default_expense_account")
+							loss_account = cogs_account
 
 						gl_entries.append(self.get_gl_dict({
 							"account": loss_account,
@@ -499,6 +500,8 @@ def update_billed_amount_based_on_po(po_detail, update_modified=True):
 @frappe.whitelist()
 def make_purchase_invoice(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
+	from erpnext.accounts.party import get_payment_terms_template
+
 	doc = frappe.get_doc('Purchase Receipt', source_name)
 	returned_qty_map = get_returned_qty_map(source_name)
 	invoiced_qty_map = get_invoiced_qty_map(source_name)
@@ -509,6 +512,7 @@ def make_purchase_invoice(source_name, target_doc=None):
 
 		doc = frappe.get_doc(target)
 		doc.ignore_pricing_rule = 1
+		doc.payment_terms_template = get_payment_terms_template(source.supplier, "Supplier", source.company)
 		doc.run_method("onload")
 		doc.run_method("set_missing_values")
 		doc.run_method("calculate_taxes_and_totals")

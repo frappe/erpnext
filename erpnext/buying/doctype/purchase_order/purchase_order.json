@@ -1055,7 +1055,8 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-07-01 12:40:45.240948",
+ "links": [],
+ "modified": "2020-09-14 14:36:12.418690",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1112,5 +1113,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "supplier",
- "title_field": "title"
+ "title_field": "supplier",
+ "track_changes": 1
 }

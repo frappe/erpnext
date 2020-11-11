@@ -6,6 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt
 from erpnext.stock.utils import update_included_uom_in_report
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 def execute(filters=None):
 	include_uom = filters.get("include_uom")
@@ -23,6 +24,7 @@ def execute(filters=None):
 
 	actual_qty = stock_value = 0
 
+	available_serial_nos = {}
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
@@ -41,6 +43,9 @@ def execute(filters=None):
 				"stock_value": stock_value
 			})
 
+		if sle.serial_no:
+			update_available_serial_nos(available_serial_nos, sle)
+
 		data.append(sle)
 
 		if include_uom:
@@ -48,6 +53,27 @@ def execute(filters=None):
 
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
+
+def update_available_serial_nos(available_serial_nos, sle):
+	serial_nos = get_serial_nos(sle.serial_no)
+	key = (sle.item_code, sle.warehouse)
+	if key not in available_serial_nos:
+		available_serial_nos.setdefault(key, [])
+
+	existing_serial_no = available_serial_nos[key]
+	for sn in serial_nos:
+		if sle.actual_qty > 0:
+			if sn in existing_serial_no:
+				existing_serial_no.remove(sn)
+			else:
+				existing_serial_no.append(sn)
+		else:
+			if sn in existing_serial_no:
+				existing_serial_no.remove(sn)
+			else:
+				existing_serial_no.append(sn)
+
+	sle.balance_serial_no = '\n'.join(existing_serial_no)
 
 def get_columns():
 	columns = [
@@ -70,7 +96,8 @@ def get_columns():
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
-		{"label": _("Serial #"), "fieldname": "serial_no", "width": 100},
+		{"label": _("Serial No"), "fieldname": "serial_no", "width": 100},
+		{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]

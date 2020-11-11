@@ -175,6 +175,13 @@ def get_items_list(pos_profile, company):
 		if args_list:
 			cond = "and i.item_group in (%s)" % (', '.join(['%s'] * len(args_list)))
 
+	bin_join = bin_cond = ""
+	if pos_profile.get('hide_unavailable_items'):
+		bin_join = ",`tabBin` b"
+		bin_cond = "and i.item_code = b.item_code and ifnull(b.actual_qty, 0) > 0 "
+		if pos_profile.get('warehouse'):
+			bin_cond += "and b.warehouse = {}".format(frappe.db.escape(pos_profile.get('warehouse')))
+
 	return frappe.db.sql("""
 		select
 			i.name, i.item_code, i.item_name, i.description, i.item_group, i.has_batch_no,
@@ -186,11 +193,13 @@ def get_items_list(pos_profile, company):
 		left join `tabItem Default` id on id.parent = i.name and id.company = %s
 		left join `tabItem Tax` it on it.parent = i.name
 		left join `tabUOM Conversion Detail` c on i.name = c.parent and i.sales_uom = c.uom
+		{bin_join}
 		where
 			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
 			{cond}
+			{bin_cond}
 		group by i.item_code
-		""".format(cond=cond), tuple([company] + args_list), as_dict=1)
+		""".format(cond=cond, bin_join=bin_join, bin_cond=bin_cond), tuple([company] + args_list), as_dict=1)
 
 
 def get_item_groups(pos_profile):
