@@ -95,9 +95,7 @@ erpnext.PointOfSale.ItemCart = class {
 				<div>0.00</div>
 			</div>
 			<div class="checkout-btn">Checkout</div>
-			<div class="edit-cart-btn flex items-center justify-center h-16 pr-8 pl-8 text-center text-grey no-select pointer d-none text-md text-bold">
-				Edit Cart
-			</div>`
+			<div class="edit-cart-btn">Edit Cart</div>`
 		)
 
 		this.$add_discount_elem = this.$component.find(".add-discount");
@@ -176,7 +174,7 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 
 		this.$component.on('click', '.checkout-btn', function() {
-			if (!$(this).hasClass('bg-primary')) return;
+			if ($(this).attr('style').indexOf('--blue-500') == -1) return;
 			
 			me.events.checkout();
 			me.toggle_checkout_btn(false);
@@ -265,8 +263,9 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	toggle_item_highlight(item) {
 		const $cart_item = $(item);
+		const item_is_highlighted = $cart_item.attr("style") == "background-color:var(--gray-50);";
 
-		if (!item) {
+		if (!item || item_is_highlighted) {
 			this.item_is_selected = false;
 			this.$cart_container.find('.cart-item-wrapper').css("background-color", "");
 		} else {
@@ -522,7 +521,7 @@ erpnext.PointOfSale.ItemCart = class {
 		const $item = this.get_cart_item(item);
 
 		if (remove_item) {
-			$item && $item.remove();
+			$item && $item.next().remove() && $item.remove();
 		} else {
 			const { item_code, batch_no, uom } = item;
 			const search_field = batch_no ? 'batch_no' : 'item_code';
