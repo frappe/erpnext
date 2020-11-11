@@ -5,6 +5,7 @@ from frappe.utils import nowdate
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
 from erpnext.loan_management.doctype.loan.loan import make_repayment_entry
+from frappe.model.naming import make_autoname
 
 def execute():
 
@@ -50,7 +51,6 @@ def execute():
 				'penalty_income_account': loan.penalty_income_account}, 'name')
 
 			if not loan_type_name:
-				loan_type_name = loan.loan_type + " - " + ''.join([c[0] for c in loan.company.split()]).upper()
 				loan_type_name = create_loan_type(loan, loan_type_name, penalty_account)
 
 			# update loan type in loan
@@ -111,12 +111,8 @@ def execute():
 				jv.cancel()
 
 def create_loan_type(loan, loan_type_name, penalty_account):
-
-	if frappe.db.get_value('Loan Type', loan_type_name):
-		loan_type_name = loan_type_name + '-1'
-
 	loan_type_doc = frappe.new_doc('Loan Type')
-	loan_type_doc.loan_name = loan_type_name
+	loan_type_doc.loan_name = make_autoname("Loan Type-.####")
 	loan_type_doc.is_term_loan = 1
 	loan_type_doc.company = loan.company
 	loan_type_doc.mode_of_payment = loan.mode_of_payment
@@ -126,4 +122,4 @@ def create_loan_type(loan, loan_type_name, penalty_account):
 	loan_type_doc.penalty_income_account = penalty_account
 	loan_type_doc.submit()
 
-	return loan_type_name
+	return loan_type_doc.name
