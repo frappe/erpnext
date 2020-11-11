@@ -248,20 +248,16 @@ erpnext.PointOfSale.ItemSelector = class {
 	
 	resize_selector(minimize) {
 		minimize ? 
-		this.$component.find('.search-field').removeClass('mr-8') : 
-		this.$component.find('.search-field').addClass('mr-8');
-
-		minimize ? 
-		this.$component.find('.filter-section').addClass('flex-col') : 
-		this.$component.find('.filter-section').removeClass('flex-col');
+		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') : 
+		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(12, minmax(0, 1fr))');
 
 		minimize ?
-		this.$component.removeClass('col-span-6').addClass('col-span-2') :
-		this.$component.removeClass('col-span-2').addClass('col-span-6')
+		this.$component.css('grid-column', 'span 2 / span 2') :
+		this.$component.css('grid-column', 'span 6 / span 6')
 
 		minimize ?
-		this.$items_container.removeClass('grid-cols-4').addClass('grid-cols-1') :
-		this.$items_container.removeClass('grid-cols-1').addClass('grid-cols-4')
+		this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
+		this.$items_container.css('grid-template-columns', 'repeat(4, minmax(0, 1fr))')
 	}
 
 	toggle_component(show) {
