@@ -16,10 +16,10 @@ erpnext.PointOfSale.ItemCart = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<section class="col-span-4 flex flex-col shadow rounded item-cart bg-white mx-h-70 h-100"></section>`
+			`<section class="customer-cart-container"></section>`
 		)
 
-		this.$component = this.wrapper.find('.item-cart');
+		this.$component = this.wrapper.find('.customer-cart-container');
 	}
 
 	init_child_components() {
@@ -29,7 +29,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 	init_customer_selector() {
 		this.$component.append(
-			`<div class="customer-section rounded flex flex-col m-8 mb-0"></div>`
+			`<div class="customer-section"></div>`
 		)
 		this.$customer_section = this.$component.find('.customer-section');
 	}
@@ -37,21 +37,20 @@ erpnext.PointOfSale.ItemCart = class {
 	reset_customer_selector() {
 		const frm = this.events.get_frm();
 		frm.set_value('customer', '');
-		this.$customer_section.removeClass('border pr-4 pl-4');
 		this.make_customer_selector();
 		this.customer_field.set_focus();
 	}
 	
 	init_cart_components() {
 		this.$component.append(
-			`<div class="cart-container flex flex-col items-center rounded flex-1 relative">
+			`<div class="cart-container flex flex-col items-center rounded-md flex-1 relative">
 				<div class="absolute flex flex-col p-8 pt-0 w-full h-full">
 					<div class="flex text-grey cart-header pt-2 pb-2 p-4 mt-2 mb-2 w-full f-shrink-0">
 						<div class="flex-1">Item</div>
 						<div class="mr-4">Qty</div>
 						<div class="rate-list-header mr-1 text-right">Amount</div>
 					</div>
-					<div class="cart-items-section flex flex-col flex-1 scroll-y rounded w-full"></div>
+					<div class="cart-items-section flex flex-col flex-1 scroll-y rounded-md w-full"></div>
 					<div class="cart-totals-section flex flex-col w-full mt-4 f-shrink-0"></div>
 					<div class="numpad-section flex flex-col mt-4 d-none w-full p-8 pt-0 pb-0 f-shrink-0"></div>
 				</div>		
@@ -88,7 +87,7 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="add-discount flex items-center pt-4 pb-4 pr-4 pl-4 text-grey pointer no-select d-none">
 				+ Add Discount
 			</div>
-			<div class="border border-grey rounded">
+			<div class="border border-grey rounded-md">
 				<div class="net-total flex justify-between items-center h-16 pr-8 pl-8 border-b-grey">
 					<div class="flex flex-col">
 						<div class="text-md text-dark-grey text-bold">Net Total</div>
@@ -106,7 +105,7 @@ erpnext.PointOfSale.ItemCart = class {
 						<div class="text-md text-dark-grey text-bold">0.00</div>
 					</div>
 				</div>
-				<div class="checkout-btn flex items-center justify-center h-16 pr-8 pl-8 text-center text-grey no-select pointer rounded-b text-md text-bold">
+				<div class="checkout-btn flex items-center justify-center h-16 pr-8 pl-8 text-center text-grey no-select pointer rounded-md-b text-md text-bold">
 					Checkout
 				</div>
 				<div class="edit-cart-btn flex items-center justify-center h-16 pr-8 pl-8 text-center text-grey no-select pointer d-none text-md text-bold">
@@ -151,7 +150,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$numpad_section.append(
 			`<div class="numpad-btn checkout-btn flex items-center justify-center h-16 pr-8 pl-8 bg-primary
-				text-center text-white no-select pointer rounded text-md text-bold mt-4" data-button-value="checkout">
+				text-center text-white no-select pointer rounded-md text-md text-bold mt-4" data-button-value="checkout">
 					Checkout
 			</div>`
 		)
@@ -159,15 +158,17 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	bind_events() {
 		const me = this;
-		this.$customer_section.on('click', '.add-remove-customer', function (e) {
-			const customer_info_is_visible = me.$cart_container.hasClass('d-none');
-			customer_info_is_visible ? 
-				me.toggle_customer_info(false) : me.reset_customer_selector();
+		this.$customer_section.on('click', '.reset-customer-btn', function (e) {
+			me.reset_customer_selector();
 		});
 
-		this.$customer_section.on('click', '.customer-header', function(e) {
-			// don't triggger the event if .add-remove-customer btn is clicked which is under .customer-header
-			if ($(e.target).closest('.add-remove-customer').length) return;
+		this.$customer_section.on('click', '.close-details-btn', function (e) {
+			me.toggle_customer_info(false);
+		});
+
+		this.$customer_section.on('click', '.customer-display', function(e) {
+			// don't triggger the event if .reset-customer-btn btn is clicked which is under .customer-header
+			if ($(e.target).closest('.reset-customer-btn').length) return;
 
 			const show = !me.$cart_container.hasClass('d-none');
 			me.toggle_customer_info(show);
@@ -282,24 +283,26 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	toggle_item_highlight(item) {
 		const $cart_item = $(item);
-		const item_is_highlighted = $cart_item.hasClass("shadow");
+		const item_is_highlighted = $cart_item.hasClass("shadow-base");
 
 		if (!item || item_is_highlighted) {
 			this.item_is_selected = false;
-			this.$cart_container.find('.cart-item-wrapper').removeClass("shadow").css("opacity", "1");
+			this.$cart_container.find('.cart-item-wrapper').removeClass("shadow-base").css("opacity", "1");
 		} else {
-			$cart_item.addClass("shadow");
+			$cart_item.addClass("shadow-base");
 			this.item_is_selected = true;
 			this.$cart_container.find('.cart-item-wrapper').css("opacity", "1");
-			this.$cart_container.find('.cart-item-wrapper').not(item).removeClass("shadow").css("opacity", "0.65");
+			this.$cart_container.find('.cart-item-wrapper').not(item).removeClass("shadow-base").css("opacity", "0.65");
 		}
-		// highlight with inner shadow
-		// $cart_item.addClass("shadow-inner bg-selected");
-		// me.$cart_container.find('.cart-item-wrapper').not(this).removeClass("shadow-inner bg-selected");
+		// highlight with inner shadow-base
+		// $cart_item.addClass("shadow-base-inner bg-selected");
+		// me.$cart_container.find('.cart-item-wrapper').not(this).removeClass("shadow-base-inner bg-selected");
 	}
 
 	make_customer_selector() {
-		this.$customer_section.html(`<div class="customer-search-field flex flex-1 items-center"></div>`);
+		this.$customer_section.html(`
+			<div class="customer-field"></div>
+		`);
 		const me = this;
 		const query = { query: 'erpnext.controllers.queries.customer_query' };
 		const allowed_customer_group = this.events.get_allowed_customer_group() || [];
@@ -313,6 +316,7 @@ erpnext.PointOfSale.ItemCart = class {
 				label: __('Customer'),
 				fieldtype: 'Link',
 				options: 'Customer',
+				input_class: 'input-xs',
 				placeholder: __('Search by customer name, phone, email.'),
 				get_query: () => query,
 				onchange: function() {
@@ -332,7 +336,7 @@ erpnext.PointOfSale.ItemCart = class {
 					}
 				},
 			},
-			parent: this.$customer_section.find('.customer-search-field'),
+			parent: this.$customer_section.find('.customer-field'),
 			render_input: true,
 		});
 		this.customer_field.toggle_label(false);
@@ -414,7 +418,7 @@ erpnext.PointOfSale.ItemCart = class {
 					stroke-linecap="round" stroke-linejoin="round">
 					<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
 				</svg> 
-				<div class="edit-discount p-1 pr-3 pl-3 text-dark-grey rounded w-fit bg-green-200 mb-2">
+				<div class="edit-discount p-1 pr-3 pl-3 text-dark-grey rounded-md w-fit bg-green-200 mb-2">
 					${String(discount).bold()}% off
 				</div>
 				`
@@ -423,18 +427,18 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 	
 	update_customer_section() {
-		const { customer, email_id='', mobile_no='', image } = this.customer_info || {};
+		const { customer, email_id='', mobile_no='' } = this.customer_info || {};
 
 		if (customer) {
-			this.$customer_section.addClass('border pr-4 pl-4').html(
-				`<div class="customer-details flex flex-col">
-					<div class="customer-header flex items-center rounded h-18 pointer">
-						${get_customer_image()}
-						<div class="customer-name flex flex-col flex-1 f-shrink-1 overflow-hidden whitespace-nowrap">
-							<div class="text-md text-dark-grey text-bold">${customer}</div>
+			this.$customer_section.html(
+				`<div class="customer-details">
+					<div class="customer-display">
+						${this.get_customer_image()}
+						<div class="customer-name-desc">
+							<div class="customer-name">${customer}</div>
 							${get_customer_description()}
 						</div>
-						<div class="f-shrink-0 add-remove-customer flex items-center pointer" data-customer="${escape(customer)}">
+						<div class="reset-customer-btn" data-customer="${escape(customer)}">
 							<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
 								<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
 							</svg>
@@ -449,26 +453,23 @@ erpnext.PointOfSale.ItemCart = class {
 
 		function get_customer_description() {
 			if (!email_id && !mobile_no) {
-				return `<div class="text-grey-200 italic">Click to add email / phone</div>`
+				return `<div class="customer-desc">Click to add email / phone</div>`
 			} else if (email_id && !mobile_no) {
-				return `<div class="text-grey">${email_id}</div>`
+				return `<div class="customer-desc">${email_id}</div>`
 			} else if (mobile_no && !email_id) {
-				return `<div class="text-grey">${mobile_no}</div>`
+				return `<div class="customer-desc">${mobile_no}</div>`
 			} else {
-				return `<div class="text-grey">${email_id} | ${mobile_no}</div>`
+				return `<div class="customer-desc">${email_id} - ${mobile_no}</div>`
 			}
 		}
 
-		function get_customer_image() {
-			if (image) {
-				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200">
-							<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">
-						</div>`
-			} else {
-				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200 text-md">
-							${frappe.get_abbr(customer)}
-						</div>`
-			}
+	}
+	get_customer_image() {
+		const { customer, image } = this.customer_info || {};
+		if (image) {
+			return `<div class="customer-image"><img src="${image}" alt="${image}""></div>`
+		} else {
+			return `<div class="customer-image customer-abbr">${frappe.get_abbr(customer)}</div>`
 		}
 	}
 	
@@ -523,7 +524,7 @@ erpnext.PointOfSale.ItemCart = class {
 								let margin_left = '';
 								if (i !== 0) margin_left = 'ml-2';
 								const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
-								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${description}</span>`
+								return `<span class="border-grey p-1 pl-2 pr-2 rounded-md ${margin_left}">${description}</span>`
 							}).join('')
 						}
 						</div>
@@ -575,7 +576,7 @@ erpnext.PointOfSale.ItemCart = class {
 		
 		if (!$item_to_update.length) {
 			this.$cart_items_wrapper.append(
-				`<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 rounded border-grey pointer no-select" 
+				`<div class="cart-item-wrapper flex items-center h-18 pr-4 pl-4 rounded-md border-grey pointer no-select" 
 						data-item-code="${escape(item_data.item_code)}" data-uom="${escape(item_data.uom)}"
 						data-batch-no="${escape(item_data.batch_no || '')}">
 				</div>`
@@ -618,7 +619,7 @@ erpnext.PointOfSale.ItemCart = class {
 			if (item_data.rate && item_data.amount && item_data.rate !== item_data.amount) {
 				return `
 					<div class="flex f-shrink-0 ml-4 items-center">
-						<div class="flex w-8 h-8 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
+						<div class="flex w-8 h-8 rounded-md bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
 							<span>${item_data.qty || 0}</span>
 						</div>
 						<div class="rate-col flex flex-col f-shrink-0 text-right">
@@ -629,7 +630,7 @@ erpnext.PointOfSale.ItemCart = class {
 			} else {
 				return `
 					<div class="flex f-shrink-0 ml-4 text-right">
-						<div class="flex w-8 h-8 rounded bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
+						<div class="flex w-8 h-8 rounded-md bg-light-grey mr-4 items-center justify-center font-bold f-shrink-0">
 							<span>${item_data.qty || 0}</span>
 						</div>
 						<div class="rate-col flex flex-col f-shrink-0 text-right">
@@ -753,25 +754,25 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 	
 	highlight_numpad_btn($btn, curr_action) {
-		const curr_action_is_highlighted = $btn.hasClass('shadow-inner');
+		const curr_action_is_highlighted = $btn.hasClass('shadow-base-inner');
 		const curr_action_is_action = ['qty', 'discount_percentage', 'rate', 'done'].includes(curr_action);
 
 		if (!curr_action_is_highlighted) {
-			$btn.addClass('shadow-inner bg-selected');
+			$btn.addClass('shadow-base-inner bg-selected');
 		}
 		if (this.prev_action === curr_action && curr_action_is_highlighted) {
 			// if Qty is pressed twice
-			$btn.removeClass('shadow-inner bg-selected');
+			$btn.removeClass('shadow-base-inner bg-selected');
 		}
 		if (this.prev_action && this.prev_action !== curr_action && curr_action_is_action) {
 			// Order: Qty -> Rate then remove Qty highlight
 			const prev_btn = $(`[data-button-value='${this.prev_action}']`);
-			prev_btn.removeClass('shadow-inner bg-selected');
+			prev_btn.removeClass('shadow-base-inner bg-selected');
 		}
 		if (!curr_action_is_action || curr_action === 'done') {
 			// if numbers are clicked
 			setTimeout(() => {
-				$btn.removeClass('shadow-inner bg-selected');
+				$btn.removeClass('shadow-base-inner bg-selected');
 			}, 100);
 		}
 	}
@@ -790,7 +791,7 @@ erpnext.PointOfSale.ItemCart = class {
 	reset_numpad() {
 		this.numpad_value = '';
 		this.prev_action = undefined;
-		this.$numpad_section.find('.shadow-inner').removeClass('shadow-inner bg-selected');
+		this.$numpad_section.find('.shadow-base-inner').removeClass('shadow-base-inner bg-selected');
 	}
 
 	toggle_numpad_field_edit(fieldname) {
@@ -801,48 +802,60 @@ erpnext.PointOfSale.ItemCart = class {
 
 	toggle_customer_info(show) {
 		if (show) {
-			this.$cart_container.addClass('d-none')
-			this.$customer_section.addClass('flex-1 scroll-y').removeClass('mb-0 border pr-4 pl-4')
-			this.$customer_section.find('.icon').addClass('w-24 h-24 text-2xl').removeClass('w-12 h-12 text-md')
-			this.$customer_section.find('.customer-header').removeClass('h-18');
-			this.$customer_section.find('.customer-details').addClass('sticky z-100 bg-white');
+			const { customer } = this.customer_info || {};
 
-			this.$customer_section.find('.customer-name').html(
-				`<div class="text-md text-dark-grey text-bold">${this.customer_info.customer}</div>
-				<div class="last-transacted-on text-grey-200"></div>`
-			)
-	
-			this.$customer_section.find('.customer-details').append(
-				`<div class="customer-form">
-					<div class="text-grey mt-4 mb-6">CONTACT DETAILS</div>
-					<div class="grid grid-cols-2 gap-4">
-						<div class="email_id-field"></div>
-						<div class="mobile_no-field"></div>
-						<div class="loyalty_program-field"></div>
-						<div class="loyalty_points-field"></div>
+			this.$cart_container.addClass('d-none');
+			this.$customer_section.css({
+				'height': '100%',
+				'padding-top': '0px',
+				'overflow-x': 'hidden',
+				'overflow-y': 'scroll'
+			});
+			this.$customer_section.find('.customer-details').html(
+				`<div class="header">
+					<div class="label">Contact Details</div>
+					<div class="close-details-btn">
+						<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+							<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+						</svg>
 					</div>
-					<div class="text-grey mt-4 mb-6">RECENT TRANSACTIONS</div>
-				</div>`
-			)
+				</div>
+				<div class="customer-display">
+					${this.get_customer_image()}
+					<div class="customer-name-desc">
+						<div class="customer-name">${customer}</div>
+						<div class="customer-desc"></div>
+					</div>
+				</div>
+				<div class="customer-fields-container">
+					<div class="email_id-field"></div>
+					<div class="mobile_no-field"></div>
+					<div class="loyalty_program-field"></div>
+					<div class="loyalty_points-field"></div>
+				</div>
+				<div class="transactions-label">Recent Transactions</div>`
+			);
 			// transactions need to be in diff div from sticky elem for scrolling
-			this.$customer_section.append(`<div class="customer-transactions flex-1 rounded"></div>`)
+			this.$customer_section.append(`<div class="customer-transactions"></div>`)
 
-			this.render_customer_info_form();
+			this.render_customer_fields();
 			this.fetch_customer_transactions();
 
 		} else {
 			this.$cart_container.removeClass('d-none');
-			this.$customer_section.removeClass('flex-1 scroll-y').addClass('mb-0 border pr-4 pl-4');
-			this.$customer_section.find('.icon').addClass('w-12 h-12 text-md').removeClass('w-24 h-24 text-2xl');
-			this.$customer_section.find('.customer-header').addClass('h-18')
-			this.$customer_section.find('.customer-details').removeClass('sticky z-100 bg-white');
+			this.$customer_section.css({
+				'height': '',
+				'padding-top': '',
+				'overflow-x': '',
+				'overflow-y': ''
+			});
 
 			this.update_customer_section();
 		}
 	}
 
-	render_customer_info_form() {
-		const $customer_form = this.$customer_section.find('.customer-form');
+	render_customer_fields() {
+		const $customer_form = this.$customer_section.find('.customer-fields-container');
 
 		const dfs = [{
 			fieldname: 'email_id',
@@ -864,7 +877,7 @@ erpnext.PointOfSale.ItemCart = class {
 		},{
 			fieldname: 'loyalty_points',
 			label: __('Loyalty Points'),
-			fieldtype: 'Int',
+			fieldtype: 'Data',
 			read_only: 1
 		}];
 
@@ -916,14 +929,14 @@ erpnext.PointOfSale.ItemCart = class {
 			const transaction_container = this.$customer_section.find('.customer-transactions');
 
 			if (!res.length) {
-				transaction_container.removeClass('flex-1 border rounded').html(
-					`<div class="text-grey text-center">No recent transactions found</div>`
+				transaction_container.html(
+					`<div class="text-center">No recent transactions found</div>`
 				)
 				return;
 			};
 
 			const elapsed_time = moment(res[0].posting_date+" "+res[0].posting_time).fromNow();
-			this.$customer_section.find('.last-transacted-on').html(`Last transacted ${elapsed_time}`);
+			this.$customer_section.find('.customer-desc').html(`Last transacted ${elapsed_time}`);
 
 			res.forEach(invoice => {
 				const posting_datetime = moment(invoice.posting_date+" "+invoice.posting_time).format("Do MMMM, h:mma");
@@ -934,20 +947,22 @@ erpnext.PointOfSale.ItemCart = class {
 				if (invoice.status === 'Return') (indicator_color = 'grey');
 
 				transaction_container.append(
-					`<div class="invoice-wrapper flex p-3 justify-between border-grey rounded pointer no-select" data-invoice-name="${escape(invoice.name)}">
-						<div class="flex flex-col justify-end">
-							<div class="text-dark-grey text-bold overflow-hidden whitespace-nowrap mb-2">${invoice.name}</div>
-							<div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
-								${posting_datetime}
-							</div>
+					`<div class="invoice-wrapper" data-invoice-name="${escape(invoice.name)}">
+						<div class="invoice-name-date">
+							<div class="invoice-name">${invoice.name}</div>
+							<div class="invoice-date">${posting_datetime}</div>
 						</div>
-						<div class="flex flex-col text-right">
-							<div class="f-shrink-0 text-md text-dark-grey text-bold ml-4">
+						<div class="invoice-total-status">
+							<div class="invoice-total">
 								${format_currency(invoice.grand_total, invoice.currency, 0) || 0}
 							</div>
-							<div class="f-shrink-0 text-grey ml-4 text-bold indicator ${indicator_color}">${invoice.status}</div>
+							<div class="invoice-status">
+								<span class="indicator ${indicator_color}" />
+								${invoice.status}
+							</div>
 						</div>
-					</div>`
+					</div>
+					<div class="seperator"></div>`
 				)
 			});
 		})
