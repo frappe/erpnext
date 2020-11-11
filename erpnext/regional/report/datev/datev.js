@@ -11,14 +11,14 @@ frappe.query_reports["DATEV"] = {
 		{
 			"fieldname": "from_date",
 			"label": __("From Date"),
-			"default": frappe.datetime.month_start(),
+			"default": moment().subtract(1, 'month').startOf('month').format(),
 			"fieldtype": "Date",
 			"reqd": 1
 		},
 		{
 			"fieldname": "to_date",
 			"label": __("To Date"),
-			"default": frappe.datetime.now_date(),
+			"default": moment().subtract(1, 'month').endOf('month').format(),
 			"fieldtype": "Date",
 			"reqd": 1
 		},
