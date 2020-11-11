@@ -51,7 +51,7 @@ def execute():
 
 			if not loan_type_name:
 				loan_type_name = loan.loan_type + " - " + ''.join([c[0] for c in loan.company.split()]).upper()
-				create_loan_type(loan, loan_type_name, penalty_account)
+				loan_type_name = create_loan_type(loan, loan_type_name, penalty_account)
 
 			# update loan type in loan
 			frappe.db.sql("UPDATE `tabLoan` set loan_type = %s where name = %s", (loan_type_name,
@@ -111,6 +111,10 @@ def execute():
 				jv.cancel()
 
 def create_loan_type(loan, loan_type_name, penalty_account):
+
+	if frappe.db.get_value('Loan Type', loan_type_name):
+		loan_type_name = loan_type_name + '-1'
+
 	loan_type_doc = frappe.new_doc('Loan Type')
 	loan_type_doc.loan_name = loan_type_name
 	loan_type_doc.is_term_loan = 1
