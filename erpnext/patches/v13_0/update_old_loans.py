@@ -125,3 +125,5 @@ def create_loan_type(loan, loan_type_name, penalty_account):
 	loan_type_doc.interest_income_account = loan.interest_income_account
 	loan_type_doc.penalty_income_account = penalty_account
 	loan_type_doc.submit()
+
+	return loan_type_name
