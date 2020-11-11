@@ -47,6 +47,7 @@ class WorkOrder(Document):
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
 		self.calculate_operating_cost()
+		self.calculate_total_cost()
 		self.validate_qty()
 		self.validate_operation_time()
 		self.status = self.get_status()
@@ -128,6 +129,10 @@ class WorkOrder(Document):
 			else self.planned_operating_cost
 		self.total_operating_cost = flt(self.additional_operating_cost) + flt(variable_cost)
 
+	def calculate_total_cost(self):
+		bom_cost, bom_qty = frappe.db.get_value("BOM", self.bom_no, ["base_total_cost", "quantity"])
+		self.total_cost = bom_cost * self.qty / bom_qty
+		
 	def validate_work_order_against_so(self):
 		# already ordered qty
 		ordered_qty_against_so = frappe.db.sql("""select sum(qty) from `tabWork Order`
