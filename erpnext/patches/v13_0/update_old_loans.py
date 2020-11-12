@@ -29,7 +29,8 @@ def execute():
 
 	loans_to_close = [d.parent for d in loans_list]
 
-	frappe.db.sql("UPDATE `tabLoan` set status = 'Closed' where name not in (%s)" % (', '.join(['%s'] * len(loans_to_close))), tuple(loans_to_close))
+	if loans_to_close:
+		frappe.db.sql("UPDATE `tabLoan` set status = 'Closed' where name not in (%s)" % (', '.join(['%s'] * len(loans_to_close))), tuple(loans_to_close))
 
 	loans = frappe.get_all('Loan', fields=['name', 'loan_type', 'company', 'status', 'mode_of_payment',
 		'applicant_type', 'applicant', 'loan_account', 'payment_account', 'interest_income_account'],
