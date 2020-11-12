@@ -15,6 +15,7 @@ class ProductBundle(Document):
 	def validate(self):
 		self.validate_main_item()
 		self.validate_child_items()
+		self.validate_duplicate_packing_item()
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "uom", "qty")
 
@@ -28,6 +29,14 @@ class ProductBundle(Document):
 			if frappe.db.exists("Product Bundle", item.item_code):
 				frappe.throw(_("Row #{0}: Child Item should not be a Product Bundle. Please remove Item {1} and Save").format(item.idx, frappe.bold(item.item_code)))
 
+	def validate_duplicate_packing_item(self):
+		items = []
+		for d in self.items:
+			if d.item_code not in items:
+				items.append(d.item_code)
+			else:
+				frappe.throw(_("The item {0} added multiple times")
+					.format(frappe.bold(d.item_code)), title=_("Duplicate Item Error"))
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
