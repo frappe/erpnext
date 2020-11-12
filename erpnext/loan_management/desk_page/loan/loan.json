@@ -3,7 +3,7 @@
   {
    "hidden": 0,
    "label": "Loan",
-   "links": "[\n    {\n        \"description\": \"Loan Type for interest and penalty rates\",\n        \"label\": \"Loan Type\",\n        \"name\": \"Loan Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Loan Applications from customers and employees.\",\n        \"label\": \"Loan Application\",\n        \"name\": \"Loan Application\",\n        \"type\": \"doctype\"\n    },\n    {   \"dependencies\": [\n            \"Loan Type\"\n        ],\n        \"description\": \"Loans provided to customers and employees.\",\n        \"label\": \"Loan\",\n        \"name\": \"Loan\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Loan Type for interest and penalty rates\",\n        \"label\": \"Loan Type\",\n        \"name\": \"Loan Type\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Loan Applications from customers and employees.\",\n        \"label\": \"Loan Application\",\n        \"name\": \"Loan Application\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Loans provided to customers and employees.\",\n        \"label\": \"Loan\",\n        \"name\": \"Loan\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -13,7 +13,7 @@
   {
    "hidden": 0,
    "label": "Disbursement and Repayment",
-   "links": "[\n    {\n        \"label\": \"Loan Disbursement\",\n        \"name\": \"Loan Disbursement\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Loan Repayment\",\n        \"name\": \"Loan Repayment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Loan Interest Accrual\",\n        \"name\": \"Loan Interest Accrual\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"label\": \"Loan Disbursement\",\n        \"name\": \"Loan Disbursement\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Loan Repayment\",\n        \"name\": \"Loan Repayment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Loan Write Off\",\n        \"name\": \"Loan Write Off\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Loan Interest Accrual\",\n        \"name\": \"Loan Interest Accrual\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -34,10 +34,11 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Loan",
- "modified": "2020-06-07 19:42:14.947902",
+ "modified": "2020-10-17 12:59:50.336085",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",
