@@ -15,9 +15,9 @@ class CallLog(Document):
 		number = strip_number(self.get('from'))
 		self.contact = get_contact_with_phone_number(number)
 		self.lead = get_lead_with_phone_number(number)
-
-		contact = frappe.get_doc("Contact", self.contact)
-		self.customer = contact.get_link_for("Customer")
+		if self.contact:
+			contact = frappe.get_doc("Contact", self.contact)
+			self.customer = contact.get_link_for("Customer")
 
 	def after_insert(self):
 		self.trigger_call_popup()

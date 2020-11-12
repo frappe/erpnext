@@ -55,10 +55,11 @@ class BOM(WebsiteGenerator):
 			conflicting_bom = frappe.get_doc("BOM", name)
 
 			if conflicting_bom.item != self.item:
+				msg = (_("A BOM with name {0} already exists for item {1}.")
+					.format(frappe.bold(name), frappe.bold(conflicting_bom.item)))
 
-				frappe.throw(_("""A BOM with name {0} already exists for item {1}.
-					<br> Did you rename the item? Please contact Administrator / Tech support
-				""").format(frappe.bold(name), frappe.bold(conflicting_bom.item)))
+				frappe.throw(_("{0}{1} Did you rename the item? Please contact Administrator / Tech support")
+					.format(msg, "<br>"))
 
 		self.name = name
 
@@ -72,6 +73,7 @@ class BOM(WebsiteGenerator):
 		self.validate_uom_is_interger()
 		self.set_bom_material_details()
 		self.validate_materials()
+		self.set_routing_operations()
 		self.validate_operations()
 		self.calculate_cost()
 		self.update_cost(update_parent=False, from_child_bom=True, save=False)
@@ -111,18 +113,13 @@ class BOM(WebsiteGenerator):
 	def get_routing(self):
 		if self.routing:
 			self.set("operations", [])
-			for d in frappe.get_all("BOM Operation", fields = ["*"],
-				filters = {'parenttype': 'Routing', 'parent': self.routing}, order_by="idx"):
-				child = self.append('operations', {
-					"operation": d.operation,
-					"workstation": d.workstation,
-					"description": d.description,
-					"time_in_mins": d.time_in_mins,
-					"batch_size": d.batch_size,
-					"operating_cost": d.operating_cost,
-					"idx": d.idx
-				})
-				child.hour_rate = flt(d.hour_rate / self.conversion_rate, 2)
+			fields = ["sequence_id", "operation", "workstation", "description",
+				"time_in_mins", "batch_size", "operating_cost", "idx", "hour_rate"]
+
+			for row in frappe.get_all("BOM Operation", fields = fields,
+				filters = {'parenttype': 'Routing', 'parent': self.routing}, order_by="sequence_id, idx"):
+				child = self.append('operations', row)
+				child.hour_rate = flt(row.hour_rate / self.conversion_rate, 2)
 
 	def set_bom_material_details(self):
 		for item in self.get("items"):
@@ -570,6 +567,10 @@ class BOM(WebsiteGenerator):
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
+
+	def set_routing_operations(self):
+		if self.routing and self.with_operations and not self.operations:
+			self.get_routing()
 
 	def validate_operations(self):
 		if self.with_operations and not self.get('operations'):

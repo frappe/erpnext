@@ -14,6 +14,7 @@
   "column_break_4",
   "company",
   "posting_date",
+  "accrual_type",
   "is_term_loan",
   "section_break_7",
   "pending_principal_amount",
@@ -22,9 +23,11 @@
   "column_break_14",
   "interest_amount",
   "paid_interest_amount",
+  "penalty_amount",
   "section_break_15",
   "process_loan_interest_accrual",
   "repayment_schedule_name",
+  "last_accrual_date",
   "amended_from"
  ],
  "fields": [
@@ -139,6 +142,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.is_term_loan",
    "fieldname": "paid_principal_amount",
    "fieldtype": "Currency",
    "label": "Paid Principal Amount",
@@ -149,12 +153,32 @@
    "fieldtype": "Currency",
    "label": "Paid Interest Amount",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "accrual_type",
+   "fieldtype": "Select",
+   "label": "Accrual Type",
+   "options": "Regular\nRepayment\nDisbursement"
+  },
+  {
+   "fieldname": "penalty_amount",
+   "fieldtype": "Currency",
+   "label": "Penalty Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "last_accrual_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "Last Accrual Date",
+   "read_only": 1
   }
  ],
  "in_create": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-16 11:24:23.258404",
+ "modified": "2020-11-07 05:49:25.448875",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
