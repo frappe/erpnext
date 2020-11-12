@@ -23,6 +23,14 @@ def execute():
 
 	updated_loan_types = []
 
+	# Update old loan status as closed
+	loans_list = frappe.db.sql("""SELECT distinct parent from `tabRepayment Schedule`
+		where paid = 0 and docstatus = 1""", as_dict=1)
+
+	loans_to_close = [d.parent for d in loans_list]
+
+	frappe.db.sql("UPDATE `tabLoan` set status = 'Closed' where name not in (%s)" % (', '.join(['%s'] * len(loans_to_close))), tuple(loans_to_close))
+
 	loans = frappe.get_all('Loan', fields=['name', 'loan_type', 'company', 'status', 'mode_of_payment',
 		'applicant_type', 'applicant', 'loan_account', 'payment_account', 'interest_income_account'],
 		filters={'docstatus': 1, 'status': ('!=', 'Closed')})
@@ -91,7 +99,7 @@ def execute():
 			process_loan_interest_accrual_for_term_loans(posting_date=nowdate(), loan_type=loan_type,
 				loan=loan.name)
 
-			payments = frappe.db.sql(''' SELECT j.name, a.debit, a.debit_in_account_currency, j.posting_date
+			payments = frappe.db.sql(''' SELECT j.name, a.credit, a.credit_in_account_currency, j.posting_date
 				FROM `tabJournal Entry` j, `tabJournal Entry Account` a
 				WHERE a.parent = j.name and a.reference_type='Loan' and a.reference_name = %s
 				and a.account = %s and j.docstatus = 1
