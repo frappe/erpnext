@@ -139,7 +139,7 @@ def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
-		address_name = party_details.shipping_address_name or party_details.customer_address
+		address_name = party_details.customer_address or party_details.shipping_address_name
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		address_name = party_details.shipping_address or party_details.supplier_address
 
@@ -236,7 +236,7 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 		if tax_category.gst_state == number_state_mapping[state_code] or \
 	 		(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
-				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
+				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
 
 def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
