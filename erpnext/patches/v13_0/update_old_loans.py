@@ -25,7 +25,7 @@ def execute():
 
 	loans = frappe.get_all('Loan', fields=['name', 'loan_type', 'company', 'status', 'mode_of_payment',
 		'applicant_type', 'applicant', 'loan_account', 'payment_account', 'interest_income_account'],
-		filters={'docstatus': 1})
+		filters={'docstatus': 1, 'status': ('!=', 'Closed')})
 
 	for loan in loans:
 		# Update details in Loan Types and Loan
