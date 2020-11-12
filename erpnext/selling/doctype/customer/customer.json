@@ -526,7 +526,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-10-16 22:43:01.417529",
+ "modified": "2020-11-12 14:02:23.455985",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -534,6 +534,7 @@
  "owner": "Administrator",
  "permissions": [
   {
+   "export": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User"
@@ -609,6 +610,7 @@
    "role": "Accounts User"
   },
   {
+   "export": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
