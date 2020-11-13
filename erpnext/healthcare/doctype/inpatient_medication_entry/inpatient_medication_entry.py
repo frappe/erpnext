@@ -199,6 +199,7 @@ class InpatientMedicationEntry(Document):
 
 def get_pending_medication_orders(entry):
 	filters, values = get_filters(entry)
+	to_remove = []
 
 	data = frappe.db.sql("""
 		SELECT
@@ -225,7 +226,10 @@ def get_pending_medication_orders(entry):
 		doc['service_unit'] = get_current_healthcare_service_unit(inpatient_record)
 
 		if entry.service_unit and doc.service_unit != entry.service_unit:
-			data.remove(doc)
+			to_remove.append(doc)
+
+	for doc in to_remove:
+		data.remove(doc)
 
 	return data
 
