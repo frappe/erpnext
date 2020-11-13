@@ -403,25 +403,25 @@ class SellingController(StockController):
 
 		for d in self.get('items'):
 			if self.doctype in ["POS Invoice","Sales Invoice"]:
-				in_stock_items = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
-				no_stock_items = [d.item_code, d.description, d.sales_order or d.delivery_note]
+				stock_items = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
+				non_stock_items = [d.item_code, d.description, d.sales_order or d.delivery_note]
 			elif self.doctype == "Delivery Note":
-				in_stock_items = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-				no_stock_items = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
+				stock_items = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
+				non_stock_items = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 			elif self.doctype in ["Sales Order", "Quotation"]:
-				in_stock_items = [d.item_code, d.description, d.warehouse, '']
-				no_stock_items = [d.item_code, d.description]
+				stock_items = [d.item_code, d.description, d.warehouse, '']
+				non_stock_items = [d.item_code, d.description]
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				if in_stock_items in check_list:
+				if stock_items in check_list:
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
-					check_list.append(in_stock_items)
+					check_list.append(stock_items)
 			else:
-				if no_stock_items in chk_dupl_itm:
+				if non_stock_items in chk_dupl_itm:
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
-					chk_dupl_itm.append(no_stock_items)
+					chk_dupl_itm.append(non_stock_items)
 
 	def validate_target_warehouse(self):
 		items = self.get("items") + (self.get("packed_items") or [])
