@@ -385,7 +385,7 @@ class TestPricingRule(unittest.TestCase):
 		so.load_from_db()
 		self.assertEqual(so.items[1].is_free_item, 1)
 		self.assertEqual(so.items[1].item_code, "_Test Item 2")
-	
+
 	def test_cumulative_pricing_rule(self):
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Cumulative Pricing Rule')
 		test_record = {
@@ -429,34 +429,61 @@ class TestPricingRule(unittest.TestCase):
 		details = get_item_details(args)
 
 		self.assertTrue(details)
-	
+
 	def test_pricing_rule_for_condition(self):
 		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
-		
+
 		make_pricing_rule(selling=1, margin_type="Percentage", \
 			condition="customer=='_Test Customer 1' and is_return==0", discount_percentage=10)
-		
+
 		# Incorrect Customer and Correct is_return value
 		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 2", is_return=0)
 		si.items[0].price_list_rate = 1000
 		si.submit()
 		item = si.items[0]
 		self.assertEquals(item.rate, 100)
-		
+
 		# Correct Customer and Incorrect is_return value
 		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", is_return=1, qty=-1)
 		si.items[0].price_list_rate = 1000
 		si.submit()
 		item = si.items[0]
 		self.assertEquals(item.rate, 100)
-		
+
 		# Correct Customer and correct is_return value
 		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", is_return=0)
 		si.items[0].price_list_rate = 1000
 		si.submit()
 		item = si.items[0]
 		self.assertEquals(item.rate, 900)
-		
+
+	def test_multiple_pricing_rules(self):
+		make_pricing_rule(discount_percentage=20, selling=1, priority=1, apply_multiple_pricing_rules=1,
+			title="_Test Pricing Rule 1")
+		make_pricing_rule(discount_percentage=10, selling=1, title="_Test Pricing Rule 2", priority=2,
+			apply_multiple_pricing_rules=1)
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1)
+		self.assertEqual(si.items[0].discount_percentage, 30)
+		si.delete()
+
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+
+	def test_multiple_pricing_rules_with_apply_discount_on_discounted_rate(self):
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule")
+
+		make_pricing_rule(discount_percentage=20, selling=1, priority=1, apply_multiple_pricing_rules=1,
+			title="_Test Pricing Rule 1")
+		make_pricing_rule(discount_percentage=10, selling=1, priority=2,
+			apply_discount_on_rate=1, title="_Test Pricing Rule 2", apply_multiple_pricing_rules=1)
+
+		si = create_sales_invoice(do_not_submit=True, customer="_Test Customer 1", qty=1)
+		self.assertEqual(si.items[0].discount_percentage, 28)
+		si.delete()
+
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 1")
+		frappe.delete_doc_if_exists("Pricing Rule", "_Test Pricing Rule 2")
+
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
 
@@ -468,6 +495,7 @@ def make_pricing_rule(**args):
 		"applicable_for": args.applicable_for,
 		"selling": args.selling or 0,
 		"currency": "USD",
+		"apply_discount_on_rate": args.apply_discount_on_rate or 0,
 		"buying": args.buying or 0,
 		"min_qty": args.min_qty or 0.0,
 		"max_qty": args.max_qty or 0.0,
@@ -476,8 +504,12 @@ def make_pricing_rule(**args):
 		"rate": args.rate or 0.0,
 		"margin_type": args.margin_type,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
-		"condition": args.condition or ''
+		"condition": args.condition or '',
+		"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0
 	})
+
+	if args.get("priority"):
+		doc.priority = args.get("priority")
 
 	apply_on = doc.apply_on.replace(' ', '_').lower()
 	child_table = {'Item Code': 'items', 'Item Group': 'item_groups', 'Brand': 'brands'}

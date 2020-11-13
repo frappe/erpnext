@@ -1,33 +1,54 @@
 {
+ "actions": [],
  "creation": "2019-05-26 20:36:44.337186",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "problem",
-  "sb_00",
-  "resolution"
+  "resolution",
+  "status",
+  "responsible",
+  "completion_by"
  ],
  "fields": [
   {
    "fieldname": "problem",
    "fieldtype": "Long Text",
    "in_list_view": 1,
-   "label": "Review"
-  },
-  {
-   "fieldname": "sb_00",
-   "fieldtype": "Section Break"
+   "label": "Problem"
   },
   {
    "fieldname": "resolution",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Resolution"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Open\nCompleted"
+  },
+  {
+   "fieldname": "responsible",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Responsible",
+   "options": "User"
+  },
+  {
+   "fieldname": "completion_by",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Completion By"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-05-28 13:09:50.435323",
+ "links": [],
+ "modified": "2020-10-21 12:59:25.566682",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action Resolution",
