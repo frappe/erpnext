@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2014-11-27 14:12:07.542534",
  "doctype": "DocType",
  "document_type": "Document",
@@ -36,7 +37,7 @@
   {
    "default": "0",
    "depends_on": "eval:!doc.disable_capacity_planning",
-   "description": "Plan time logs outside Workstation Working Hours.",
+   "description": "Plan time logs outside Workstation working hours",
    "fieldname": "allow_overtime",
    "fieldtype": "Check",
    "label": "Allow Overtime"
@@ -56,17 +57,17 @@
   {
    "default": "30",
    "depends_on": "eval:!doc.disable_capacity_planning",
-   "description": "Try planning operations for X days in advance.",
+   "description": "Plan operations X days in advance",
    "fieldname": "capacity_planning_for_days",
    "fieldtype": "Int",
    "label": "Capacity Planning For (Days)"
   },
   {
    "depends_on": "eval:!doc.disable_capacity_planning",
-   "description": "Default 10 mins",
+   "description": "Default: 10 mins",
    "fieldname": "mins_between_operations",
    "fieldtype": "Int",
-   "label": "Time Between Operations (in mins)"
+   "label": "Time Between Operations (Mins)"
   },
   {
    "fieldname": "section_break_6",
@@ -92,14 +93,14 @@
   },
   {
    "default": "0",
-   "description": "Allow multiple Material Consumption against a Work Order",
+   "description": "Allow multiple material consumptions against a Work Order",
    "fieldname": "material_consumption",
    "fieldtype": "Check",
    "label": "Allow Multiple Material Consumption"
   },
   {
    "default": "0",
-   "description": "Update BOM cost automatically via Scheduler, based on latest valuation rate / price list rate / last purchase rate of raw materials.",
+   "description": "Update BOM cost automatically via scheduler, based on the latest Valuation Rate/Price List Rate/Last Purchase Rate of raw materials",
    "fieldname": "update_bom_costs_automatically",
    "fieldtype": "Check",
    "label": "Update BOM Cost Automatically"
@@ -135,7 +136,7 @@
   {
    "fieldname": "over_production_for_sales_and_work_order_section",
    "fieldtype": "Section Break",
-   "label": "Over Production for Sales and Work Order"
+   "label": "Overproduction for Sales and Work Order"
   },
   {
    "fieldname": "raw_materials_consumption_section",
@@ -157,8 +158,10 @@
   }
  ],
  "icon": "icon-wrench",
+ "index_web_pages_for_search": 1,
  "issingle": 1,
- "modified": "2019-11-26 13:10:45.569341",
+ "links": [],
+ "modified": "2020-10-13 10:55:43.996581",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

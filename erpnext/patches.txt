@@ -632,7 +632,7 @@ execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_source')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_field')
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
-erpnext.patches.v12_0.generate_leave_ledger_entries #27-08-2020
+erpnext.patches.v12_0.generate_leave_ledger_entries #04-11-2020
 execute:frappe.delete_doc_if_exists("Report", "Loan Repayment")
 erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
 erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
@@ -730,3 +730,7 @@ erpnext.patches.v13_0.rename_issue_doctype_fields
 erpnext.patches.v13_0.change_default_pos_print_format
 erpnext.patches.v13_0.set_youtube_video_id
 erpnext.patches.v13_0.print_uom_after_quantity_patch
+erpnext.patches.v13_0.set_payment_channel_in_payment_gateway_account
+erpnext.patches.v13_0.create_healthcare_custom_fields_in_stock_entry_detail
+erpnext.patches.v13_0.update_reason_for_resignation_in_employee
+execute:frappe.delete_doc("Report", "Quoted Item Comparison")
