@@ -356,10 +356,10 @@ erpnext.PointOfSale.Controller = class {
 
 				toggle_other_sections: (show) => {
 					if (show) {
-						this.item_details.$component.hasClass('d-none') ? '' : this.item_details.$component.addClass('d-none');
-						this.item_selector.$component.addClass('d-none');
+						this.item_details.$component.is(':visible') ? this.item_details.$component.css('display', 'none') : '';
+						this.item_selector.$component.css('display', 'none');
 					} else {
-						this.item_selector.$component.removeClass('d-none');
+						this.item_selector.$component.css('display', 'flex');
 					}
 				},
 

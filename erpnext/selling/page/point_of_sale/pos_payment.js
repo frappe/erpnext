@@ -18,38 +18,28 @@ erpnext.PointOfSale.Payment = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<section class="col-span-6 flex shadow rounded payment-section bg-white mx-h-70 h-100 d-none">
-				<div class="flex flex-col p-16 pt-8 pb-8 w-full">
-					<div class="text-grey mb-6 payment-section no-select pointer">
-						PAYMENT METHOD<span class="octicon octicon-chevron-down collapse-indicator"></span>
-					</div>
-					<div class="payment-modes flex flex-wrap"></div>
-					<div class="invoice-details-section"></div>
-					<div class="flex mt-auto justify-center w-full">
-						<div class="flex flex-col justify-center flex-1 ml-4">
-							<div class="flex w-full">
-								<div class="totals-remarks items-end justify-end flex flex-1">
-									<div class="remarks text-md-0 text-grey mr-auto"></div>
-									<div class="totals flex justify-end pt-4"></div>
-								</div>
-								<div class="number-pad w-40 mb-4 ml-8 d-none"></div>
-							</div>
-							<div class="flex items-center justify-center mt-4 submit-order h-16 w-full rounded bg-primary text-md text-white no-select pointer text-bold">
-								Complete Order
-							</div>
-							<div class="order-time flex items-center justify-end mt-2 pt-2 pb-2 w-full text-md-0 text-grey no-select pointer d-none"></div>
-						</div>
-					</div>
+			`<section class="payment-container">
+				<div class="section-label payment-section">
+					Payment Method
+					<span class="ml-2 collapse-indicator mb-1" style="display: inline;">
+						<svg class="icon icon-sm" style=""><use class="mb-1" href="#icon-down"></use></svg>
+					</span>
 				</div>
+				<div class="payment-modes"></div>
+				<div class="invoice-fields-section"></div>
+				<div class="totals-section">
+					<div class="totals"></div>
+					<div class="number-pad"></div>
+				</div>
+				<div class="submit-order-btn">Complete Order</div>
 			</section>`
 		)
-		this.$component = this.wrapper.find('.payment-section');
+		this.$component = this.wrapper.find('.payment-container');
 		this.$payment_modes = this.$component.find('.payment-modes');
-		this.$totals_remarks = this.$component.find('.totals-remarks');
+		this.$totals_section = this.$component.find('.totals-section');
 		this.$totals = this.$component.find('.totals');
-		this.$remarks = this.$component.find('.remarks');
 		this.$numpad = this.$component.find('.number-pad');
-		this.$invoice_details_section = this.$component.find('.invoice-details-section');
+		this.$invoice_fields_section = this.$component.find('.invoice-fields-section');
 	}
 
 	make_invoice_fields_control() {
@@ -57,13 +47,16 @@ erpnext.PointOfSale.Payment = class {
 			const fields = doc.invoice_fields;
 			if (!fields.length) return;
 
-			this.$invoice_details_section.html(
-				`<div class="text-grey pb-6 mt-2 pointer no-select">
-					ADDITIONAL INFORMATION<span class="octicon octicon-chevron-down collapse-indicator"></span>
+			this.$invoice_fields_section.html(
+				`<div class="section-label">
+					Additional Information
+					<span class="ml-2 collapse-indicator mb-1" style="display: inline;">
+						<svg class="icon icon-sm" style=""><use class="mb-1" href="#icon-down"></use></svg>
+					</span>
 				</div>
-				<div class="invoice-fields grid grid-cols-2 gap-4 mb-6 d-none"></div>`
+				<div class="invoice-fields"></div>`
 			);
-			this.$invoice_fields = this.$invoice_details_section.find('.invoice-fields');
+			this.$invoice_fields = this.$invoice_fields_section.find('.invoice-fields');
 			const frm = this.events.get_frm();
 
 			fields.forEach(df => {
@@ -127,9 +120,9 @@ erpnext.PointOfSale.Payment = class {
 		this.selected_mode.set_value(this.numpad_value);
 
 		function highlight_numpad_btn($btn) {
-			$btn.addClass('shadow-inner bg-selected');
+			$btn.addClass('shadow-base-inner bg-selected');
 			setTimeout(() => {
-				$btn.removeClass('shadow-inner bg-selected');
+				$btn.removeClass('shadow-base-inner bg-selected');
 			}, 100);
 		}
 	}
@@ -142,13 +135,16 @@ erpnext.PointOfSale.Payment = class {
 			// if clicked element doesn't have .mode-of-payment class then return
 			if (!$(e.target).is(mode_clicked)) return;
 
+			// const scrollRight = mode_clicked.offset().right - me.$payment_modes.offset().right + me.$payment_modes.scrollRight();
+			// me.$payment_modes.animate({ scrollRight });
+
 			const mode = mode_clicked.attr('data-mode');
 
 			// hide all control fields and shortcuts
-			$(`.mode-of-payment-control`).addClass('d-none');
-			$(`.cash-shortcuts`).addClass('d-none');
-			me.$payment_modes.find(`.pay-amount`).removeClass('d-none');
-			me.$payment_modes.find(`.loyalty-amount-name`).addClass('d-none');
+			$(`.mode-of-payment-control`).css('display', 'none');
+			$(`.cash-shortcuts`).css('display', 'none');
+			me.$payment_modes.find(`.pay-amount`).css('display', 'inline');
+			me.$payment_modes.find(`.loyalty-amount-name`).css('display', 'none');
 
 			// remove highlight from all mode-of-payments
 			$('.mode-of-payment').removeClass('border-primary');
@@ -161,10 +157,10 @@ erpnext.PointOfSale.Payment = class {
 			} else {
 				// clicked one is not selected then select it
 				mode_clicked.addClass('border-primary');
-				mode_clicked.find('.mode-of-payment-control').removeClass('d-none');
-				mode_clicked.find('.cash-shortcuts').removeClass('d-none');
-				me.$payment_modes.find(`.${mode}-amount`).addClass('d-none');
-				me.$payment_modes.find(`.${mode}-name`).removeClass('d-none');
+				mode_clicked.find('.mode-of-payment-control').css('display', 'flex');
+				mode_clicked.find('.cash-shortcuts').css('display', 'grid');
+				me.$payment_modes.find(`.${mode}-amount`).css('display', 'none');
+				me.$payment_modes.find(`.${mode}-name`).css('display', 'inline');
 				me.toggle_numpad(true);
 
 				me.selected_mode = me[`${mode}_control`];
@@ -198,7 +194,7 @@ erpnext.PointOfSale.Payment = class {
 			me.selected_mode.set_value(value);
 		})
 
-		this.$component.on('click', '.submit-order', () => {
+		this.$component.on('click', '.submit-order-btn', () => {
 			const doc = this.events.get_frm().doc;
 			const paid_amount = doc.paid_amount;
 			const items = doc.items;
@@ -217,9 +213,9 @@ erpnext.PointOfSale.Payment = class {
 			this.update_totals_section(frm.doc);
 
 			// need to re calculate cash shortcuts after discount is applied
-			const is_cash_shortcuts_invisible = this.$payment_modes.find('.cash-shortcuts').hasClass('d-none');
+			const is_cash_shortcuts_invisible = !this.$payment_modes.find('.cash-shortcuts').is(':visible');
 			this.attach_cash_shortcuts(frm.doc);
-			!is_cash_shortcuts_invisible && this.$payment_modes.find('.cash-shortcuts').removeClass('d-none');
+			!is_cash_shortcuts_invisible && this.$payment_modes.find('.cash-shortcuts').css('display', 'grid');
 		})
 
 		frappe.ui.form.on('POS Invoice', 'loyalty_amount', (frm) => {
@@ -236,28 +232,28 @@ erpnext.PointOfSale.Payment = class {
 			}
 		});
 
-		this.$component.on('click', '.invoice-details-section', function(e) {
+		this.$component.on('click', '.invoice-fields-section', function(e) {
 			if ($(e.target).closest('.invoice-fields').length) return;
 
-			me.$payment_modes.addClass('d-none');
-			me.$invoice_fields.toggleClass("d-none");
+			me.$payment_modes.css('display', 'none');
+			me.$invoice_fields.css('display', 'grid');
 			me.toggle_numpad(false);
 		});
 		this.$component.on('click', '.payment-section', () => {
-			this.$invoice_fields.addClass("d-none");
-			this.$payment_modes.toggleClass('d-none');
+			this.$invoice_fields.css('display', 'none');
+			this.$payment_modes.css('display', 'flex');
 			this.toggle_numpad(true);
 		})
 	}
 
 	attach_shortcuts() {
 		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
-		this.$component.find('.submit-order').attr("title", `${ctrl_label}+Enter`);
+		this.$component.find('.submit-order-btn').attr("title", `${ctrl_label}+Enter`);
 		frappe.ui.keys.on("ctrl+enter", () => {
 			const payment_is_visible = this.$component.is(":visible");
 			const active_mode = this.$payment_modes.find(".border-primary");
 			if (payment_is_visible && active_mode.length) {
-				this.$component.find('.submit-order').click();
+				this.$component.find('.submit-order-btn').click();
 			}
 		});
 
@@ -287,15 +283,13 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	toggle_numpad(show) {
-		if (show) {
-			this.$numpad.removeClass('d-none');
-			this.$remarks.addClass('d-none');
-			this.$totals_remarks.addClass('w-60 justify-center').removeClass('justify-end w-full');
-		} else {
-			this.$numpad.addClass('d-none');
-			this.$remarks.removeClass('d-none');
-			this.$totals_remarks.removeClass('w-60 justify-center').addClass('justify-end w-full');
-		}
+		// if (show) {
+		// 	this.$numpad.css('display', 'flex');
+		// 	this.$totals_section.addClass('w-60 justify-center').removeClass('justify-end w-full');
+		// } else {
+		// 	this.$numpad.css('display', 'none');
+		// 	this.$totals_section.removeClass('w-60 justify-center').addClass('justify-end w-full');
+		// }
 	}
 
 	render_payment_section() {
@@ -327,7 +321,7 @@ erpnext.PointOfSale.Payment = class {
 					fieldtype: 'Data',
 					onchange: function() {}
 				},
-				parent: this.$totals_remarks.find(`.remarks`),
+				parent: this.$totals_section.find(`.remarks`),
 				render_input: true,
 			});
 			this[`remark_control`].set_value('');
@@ -348,12 +342,11 @@ erpnext.PointOfSale.Payment = class {
 				const amount = p.amount > 0 ? format_currency(p.amount, currency) : '';
 
 				return (
-					`<div class="w-half ${margin} bg-white">
-						<div class="mode-of-payment rounded border border-grey text-grey text-md
-								mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="${mode}" data-payment-type="${payment_type}">
+					`<div class="payment-mode-wrapper">
+						<div class="mode-of-payment" data-mode="${mode}" data-payment-type="${payment_type}">
 							${p.mode_of_payment}
-							<div class="${mode}-amount pay-amount inline float-right text-bold">${amount}</div>
-							<div class="${mode} mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
+							<div class="${mode}-amount pay-amount">${amount}</div>
+							<div class="${mode} mode-of-payment-control"></div>
 						</div>
 					</div>`
 				)
@@ -405,12 +398,10 @@ erpnext.PointOfSale.Payment = class {
 
 		this.$payment_modes.find('.cash-shortcuts').remove();
 		this.$payment_modes.find('[data-payment-type="Cash"]').find('.mode-of-payment-control').after(
-			`<div class="cash-shortcuts grid grid-cols-3 gap-2 flex-1 text-center text-md-0 mb-2 d-none">
+			`<div class="cash-shortcuts">
 				${
 					shortcuts.map(s => {
-						return `<div class="shortcut rounded bg-light-grey text-dark-grey pt-2 pb-2 no-select pointer" data-value="${s}">
-									${format_currency(s, currency, 0)}
-								</div>`
+						return `<div class="shortcut" data-value="${s}">${format_currency(s, currency, 0)}</div>`
 					}).join('')
 				}
 			</div>`
@@ -457,13 +448,12 @@ erpnext.PointOfSale.Payment = class {
 		const margin = this.$payment_modes.children().length % 2 === 0 ? 'pr-2' : 'pl-2';
 		const amount = doc.loyalty_amount > 0 ? format_currency(doc.loyalty_amount, doc.currency) : '';
 		this.$payment_modes.append(
-			`<div class="w-half ${margin} bg-white">
-				<div class="mode-of-payment rounded border border-grey text-grey text-md
-						mb-4 p-8 pt-4 pb-4 no-select pointer" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
+			`<div class="payment-mode-wrapper">
+				<div class="mode-of-payment" data-mode="loyalty-amount" data-payment-type="loyalty-amount">
 					Redeem Loyalty Points
-					<div class="loyalty-amount-amount pay-amount inline float-right text-bold">${amount}</div>
-					<div class="loyalty-amount-name inline float-right text-bold text-md-0 d-none">${loyalty_program}</div>
-					<div class="loyalty-amount mode-of-payment-control mt-4 flex flex-1 items-center d-none"></div>
+					<div class="loyalty-amount-amount pay-amount">${amount}</div>
+					<div class="loyalty-amount-name">${loyalty_program}</div>
+					<div class="loyalty-amount mode-of-payment-control"></div>
 				</div>
 			</div>`
 		)
@@ -520,18 +510,24 @@ erpnext.PointOfSale.Payment = class {
 		const label = change ? __('Change') : __('To Be Paid');
 
 		this.$totals.html(
-			`<div>
-				<div class="pr-8 border-r-grey">Paid Amount</div>
-				<div class="pr-8 border-r-grey text-bold text-2xl">${format_currency(paid_amount, currency)}</div>
+			`<div class="col">
+				<div class="total-label">Grand Total</div>
+				<div class="value">${format_currency(doc.grand_total, currency)}</div>
 			</div>
-			<div>
-				<div class="pl-8">${label}</div>
-				<div class="pl-8 text-green-400 text-bold text-2xl">${format_currency(change || remaining, currency)}</div>
+			<div class="seperator-y"></div>
+			<div class="col">
+				<div class="total-label">Paid Amount</div>
+				<div class="value">${format_currency(paid_amount, currency)}</div>
+			</div>
+			<div class="seperator-y"></div>
+			<div class="col">
+				<div class="total-label">${label}</div>
+				<div class="value">${format_currency(change || remaining, currency)}</div>
 			</div>`
 		)
 	}
 
 	toggle_component(show) {
-		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
+		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
 	}
  }

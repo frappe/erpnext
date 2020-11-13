@@ -261,6 +261,6 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	toggle_component(show) {
-		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
+		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
 	}
 }

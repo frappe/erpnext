@@ -78,12 +78,23 @@ erpnext.PointOfSale.ItemCart = class {
 		);
 	}
 
+	get_discount_icon() {
+		return (
+			`<svg class="discount-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path d="M19 15.6213C19 15.2235 19.158 14.842 19.4393 14.5607L20.9393 13.0607C21.5251 12.4749 21.5251 11.5251 20.9393 10.9393L19.4393 9.43934C19.158 9.15804 19 8.7765 19 8.37868V6.5C19 5.67157 18.3284 5 17.5 5H15.6213C15.2235 5 14.842 4.84196 14.5607 4.56066L13.0607 3.06066C12.4749 2.47487 11.5251 2.47487 10.9393 3.06066L9.43934 4.56066C9.15804 4.84196 8.7765 5 8.37868 5H6.5C5.67157 5 5 5.67157 5 6.5V8.37868C5 8.7765 4.84196 9.15804 4.56066 9.43934L3.06066 10.9393C2.47487 11.5251 2.47487 12.4749 3.06066 13.0607L4.56066 14.5607C4.84196 14.842 5 15.2235 5 15.6213V17.5C5 18.3284 5.67157 19 6.5 19H8.37868C8.7765 19 9.15804 19.158 9.43934 19.4393L10.9393 20.9393C11.5251 21.5251 12.4749 21.5251 13.0607 20.9393L14.5607 19.4393C14.842 19.158 15.2235 19 15.6213 19H17.5C18.3284 19 19 18.3284 19 17.5V15.6213Z" stroke="#323C45" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+				<path d="M15 9L9 15" stroke="#323C45" stroke-miterlimit="10" stroke-linecap="round" stroke-linejoin="round"/>
+				<path d="M10.5 9.5C10.5 10.0523 10.0523 10.5 9.5 10.5C8.94772 10.5 8.5 10.0523 8.5 9.5C8.5 8.94772 8.94772 8.5 9.5 8.5C10.0523 8.5 10.5 8.94772 10.5 9.5Z" fill="white" stroke="#323C45" stroke-linecap="round" stroke-linejoin="round"/>
+				<path d="M15.5 14.5C15.5 15.0523 15.0523 15.5 14.5 15.5C13.9477 15.5 13.5 15.0523 13.5 14.5C13.5 13.9477 13.9477 13.5 14.5 13.5C15.0523 13.5 15.5 13.9477 15.5 14.5Z" fill="white" stroke="#323C45" stroke-linecap="round" stroke-linejoin="round"/>
+			</svg>`
+		);
+	}
+
 	make_cart_totals_section() {
 		this.$totals_section = this.$component.find('.cart-totals-section');
 
 		this.$totals_section.append(
-			`<div class="add-discount flex items-center pt-4 pb-4 pr-4 pl-4 text-grey pointer no-select d-none">
-				+ Add Discount
+			`<div class="add-discount-wrapper">
+				${this.get_discount_icon()} Add Discount
 			</div>
 			<div class="net-total-container">
 				<div class="net-total-label">Net Total</div>
@@ -98,7 +109,7 @@ erpnext.PointOfSale.ItemCart = class {
 			<div class="edit-cart-btn">Edit Cart</div>`
 		)
 
-		this.$add_discount_elem = this.$component.find(".add-discount");
+		this.$add_discount_elem = this.$component.find(".add-discount-wrapper");
 	}
 	
 	make_cart_numpad() {
@@ -178,19 +189,15 @@ erpnext.PointOfSale.ItemCart = class {
 			
 			me.events.checkout();
 			me.toggle_checkout_btn(false);
-
-			me.$add_discount_elem.removeClass("d-none");
 		});
 
 		this.$totals_section.on('click', '.edit-cart-btn', () => {
 			this.events.edit_cart();
 			this.toggle_checkout_btn(true);
-
-			this.$add_discount_elem.addClass("d-none");
 		});
 
-		this.$component.on('click', '.add-discount', () => {
-			const can_edit_discount = this.$add_discount_elem.find('.edit-discount').length;
+		this.$component.on('click', '.add-discount-wrapper', () => {
+			const can_edit_discount = this.$add_discount_elem.find('.edit-discount-btn').length;
 
 			if(!this.discount_field || can_edit_discount) this.show_discount_control();
 		});
@@ -244,10 +251,10 @@ erpnext.PointOfSale.ItemCart = class {
 				this.$component.find(".edit-cart-btn").click()
 			}
 		});
-		this.$component.find(".add-discount").attr("title", `${ctrl_label}+D`);
+		this.$component.find(".add-discount-wrapper").attr("title", `${ctrl_label}+D`);
 		frappe.ui.keys.add_shortcut({
 			shortcut: "ctrl+d",
-			action: () => this.$component.find(".add-discount").click(),
+			action: () => this.$component.find(".add-discount-wrapper").click(),
 			condition: () => this.$add_discount_elem.is(":visible"),
 			description: __("Add Order Discount"),
 			ignore_inputs: true,
@@ -292,7 +299,6 @@ erpnext.PointOfSale.ItemCart = class {
 				label: __('Customer'),
 				fieldtype: 'Link',
 				options: 'Customer',
-				input_class: 'input-xs',
 				placeholder: __('Search by customer name, phone, email.'),
 				get_query: () => query,
 				onchange: function() {
@@ -351,9 +357,9 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	show_discount_control() {
-		this.$add_discount_elem.removeClass("pr-4 pl-4");
+		this.$add_discount_elem.css({ 'padding': '0px', 'border': 'none' })
 		this.$add_discount_elem.html(
-			`<div class="add-discount-field flex flex-1 items-center"></div>`
+			`<div class="add-discount-field"></div>`
 		);
 		const me = this;
 
@@ -362,14 +368,19 @@ erpnext.PointOfSale.ItemCart = class {
 				label: __('Discount'),
 				fieldtype: 'Data',
 				placeholder: __('Enter discount percentage.'),
+				input_class: 'input-xs',
 				onchange: function() {
 					const frm = me.events.get_frm();
-					if (this.value.length || this.value === 0) {
+					if (flt(this.value) != 0) {
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
 						me.hide_discount_control(this.value);
 					} else {
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
-						me.$add_discount_elem.html(`+ Add Discount`);
+						me.$add_discount_elem.css({
+							'border': '1px dashed var(--gray-500)',
+							'padding': 'var(--padding-sm) var(--padding-md)'
+						});
+						me.$add_discount_elem.html(`${me.get_discount_icon()} Add Discount`);
 						me.discount_field = undefined;
 					}
 				},
@@ -383,21 +394,19 @@ erpnext.PointOfSale.ItemCart = class {
 
 	hide_discount_control(discount) {
 		if (!discount) {
-			this.$add_discount_elem.removeClass("pr-4 pl-4");
+			this.$add_discount_elem.css({ 'padding': '0px', 'border': 'none' });
 			this.$add_discount_elem.html(
-				`<div class="add-discount-field flex flex-1 items-center"></div>`
+				`<div class="add-discount-field"></div>`
 			);
 		} else {
-			this.$add_discount_elem.addClass('pr-4 pl-4');
 			this.$add_discount_elem.html(
-				`<svg class="mr-2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" 
+				`<svg class="discount-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" 
 					stroke-linecap="round" stroke-linejoin="round">
 					<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
 				</svg> 
-				<div class="edit-discount p-1 pr-3 pl-3 text-dark-grey rounded-md w-fit bg-green-200 mb-2">
+				<div class="edit-discount-btn">
 					${String(discount).bold()}% off
-				</div>
-				`
+				</div>`
 			);
 		}
 	}
@@ -652,10 +661,12 @@ erpnext.PointOfSale.ItemCart = class {
 
 	highlight_checkout_btn(toggle) {
 		if (toggle) {
+			this.$add_discount_elem.css('display', 'flex');
 			this.$cart_container.find('.checkout-btn').css({
 				'background-color': 'var(--blue-500)'
 			});
 		} else {
+			this.$add_discount_elem.css('display', 'none');
 			this.$cart_container.find('.checkout-btn').css({
 				'background-color': 'var(--blue-200)'
 			});
