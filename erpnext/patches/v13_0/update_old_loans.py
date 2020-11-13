@@ -107,17 +107,18 @@ def execute():
 			''', (loan.name, loan.loan_account), as_dict=1)
 
 			for payment in payments:
-				repayment_entry = make_repayment_entry(loan.name, loan.loan_applicant_type, loan.applicant,
-					loan_type, loan.company)
+				if payment.credit_in_account_currency:
+					repayment_entry = make_repayment_entry(loan.name, loan.loan_applicant_type, loan.applicant,
+						loan_type, loan.company)
 
-				repayment_entry.amount_paid = payment.debit_in_account_currency
-				repayment_entry.posting_date = payment.posting_date
-				repayment_entry.save()
-				repayment_entry.submit()
+					repayment_entry.amount_paid = payment.credit_in_account_currency
+					repayment_entry.posting_date = payment.posting_date
+					repayment_entry.save()
+					repayment_entry.submit()
 
-				jv = frappe.get_doc('Journal Entry', payment.name)
-				jv.flags.ignore_links = True
-				jv.cancel()
+					jv = frappe.get_doc('Journal Entry', payment.name)
+					jv.flags.ignore_links = True
+					jv.cancel()
 
 def create_loan_type(loan, loan_type_name, penalty_account):
 	loan_type_doc = frappe.new_doc('Loan Type')
