@@ -159,16 +159,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				};
 			});
 		}
-		if (this.frm.fields_dict["items"].grid.get_field("cost_center")) {
-			this.frm.set_query("cost_center", "items", function(doc) {
-				return {
-					filters: {
-						"company": doc.company,
-						"is_group": 0
-					}
-				};
-			});
-		}
 
 		if (this.frm.fields_dict["items"].grid.get_field("expense_account")) {
 			this.frm.set_query("expense_account", "items", function(doc) {
