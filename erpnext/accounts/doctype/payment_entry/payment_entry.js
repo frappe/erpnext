@@ -88,15 +88,6 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		});
 
-		frm.set_query("cost_center", "deductions", function() {
-			return {
-				filters: {
-					"is_group": 0,
-					"company": frm.doc.company
-				}
-			}
-		});
-
 		frm.set_query("reference_doctype", "references", function() {
 			if (frm.doc.party_type=="Customer") {
 				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"];

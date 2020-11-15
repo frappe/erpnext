@@ -3,14 +3,6 @@
 
 frappe.ui.form.on('Shipping Rule', {
 	refresh: function(frm) {
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company
-				}
-			}
-		})
-
 		frm.set_query("account", function() {
 			return {
 				filters: {
