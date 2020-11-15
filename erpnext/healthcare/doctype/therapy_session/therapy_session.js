@@ -22,6 +22,10 @@ frappe.ui.form.on('Therapy Session', {
 	},
 
 	refresh: function(frm) {
+		if (frm.doc.therapy_plan) {
+			frm.trigger('filter_therapy_types');
+		}
+
 		if (!frm.doc.__islocal) {
 			frm.dashboard.add_indicator(__('Counts Targeted: {0}', [frm.doc.total_counts_targeted]), 'blue');
 			frm.dashboard.add_indicator(__('Counts Completed: {0}', [frm.doc.total_counts_completed]),
@@ -36,13 +40,41 @@ frappe.ui.form.on('Therapy Session', {
 				})
 			}, 'Create');
 
-			frm.add_custom_button(__('Sales Invoice'), function() {
-				frappe.model.open_mapped_doc({
-					method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.invoice_therapy_session',
-					frm: frm,
-				})
-			}, 'Create');
+			frappe.db.get_value('Therapy Plan', {'name': frm.doc.therapy_plan}, 'therapy_plan_template', (r) => {
+				if (r && !r.therapy_plan_template) {
+					frm.add_custom_button(__('Sales Invoice'), function() {
+						frappe.model.open_mapped_doc({
+							method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.invoice_therapy_session',
+							frm: frm,
+						});
+					}, 'Create');
+				}
+			});
 		}
+	},
+
+	therapy_plan: function(frm) {
+		if (frm.doc.therapy_plan) {
+			frm.trigger('filter_therapy_types');
+		}
+	},
+
+	filter_therapy_types: function(frm) {
+		frappe.call({
+			'method': 'frappe.client.get',
+			args: {
+				doctype: 'Therapy Plan',
+				name: frm.doc.therapy_plan
+			},
+			callback: function(data) {
+				let therapy_types = (data.message.therapy_plan_details || []).map(function(d){ return d.therapy_type; });
+				frm.set_query('therapy_type', function() {
+					return {
+						filters: { 'therapy_type': ['in', therapy_types]}
+					};
+				});
+			}
+		});
 	},
 
 	patient: function(frm) {
@@ -98,19 +130,6 @@ frappe.ui.form.on('Therapy Session', {
 					frm.set_value(values);
 				}
 			});
-		} else {
-			let values = {
-				'patient': '',
-				'therapy_type': '',
-				'therapy_plan': '',
-				'practitioner': '',
-				'department': '',
-				'start_date': '',
-				'start_time': '',
-				'service_unit': '',
-				'duration': ''
-			};
-			frm.set_value(values);
 		}
 	},
 

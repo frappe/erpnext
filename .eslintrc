@@ -5,7 +5,7 @@
 		"es6": true
 	},
 	"parserOptions": {
-		"ecmaVersion": 6,
+		"ecmaVersion": 9,
 		"sourceType": "module"
 	},
 	"extends": "eslint:recommended",
@@ -14,6 +14,14 @@
 			"error",
 			"tab",
 			{ "SwitchCase": 1 }
+		],
+		"brace-style": [
+			"error",
+			"1tbs"
+		],
+		"space-unary-ops": [
+			"error",
+			{ "words": true }
 		],
 		"linebreak-style": [
 			"error",
@@ -44,12 +52,10 @@
 		"no-control-regex": [
 			"off"
 		],
-		"spaced-comment": [
-			"warn"
-		],
-		"no-trailing-spaces": [
-			"warn"
-		]
+		"space-before-blocks": "warn",
+		"keyword-spacing": "warn",
+		"comma-spacing": "warn",
+		"key-spacing": "warn"
 	},
 	"root": true,
 	"globals": {

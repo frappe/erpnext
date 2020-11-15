@@ -98,7 +98,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-11-04 13:10:01.517009",
+ "modified": "2020-11-06 13:05:58.650150",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
@@ -108,7 +108,7 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "label": "Chart of Accounts",
+   "label": "Chart Of Accounts",
    "link_to": "Account",
    "type": "DocType"
   },
