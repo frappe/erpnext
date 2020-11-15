@@ -3,14 +3,6 @@
 
 frappe.ui.form.on('Budget', {
 	onload: function(frm) {
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company
-				}
-			}
-		})
-
 		frm.set_query("project", function() {
 			return {
 				filters: {
@@ -18,7 +10,7 @@ frappe.ui.form.on('Budget', {
 				}
 			}
 		})
-		
+
 		frm.set_query("account", "accounts", function() {
 			return {
 				filters: {
@@ -28,7 +20,7 @@ frappe.ui.form.on('Budget', {
 				}
 			}
 		})
-		
+
 		frm.set_query("monthly_distribution", function() {
 			return {
 				filters: {

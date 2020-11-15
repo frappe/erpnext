@@ -222,15 +222,6 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			return erpnext.journal_entry.account_query(me.frm);
 		});
 
-		me.frm.set_query("cost_center", "accounts", function(doc, cdt, cdn) {
-			return {
-				filters: {
-					company: me.frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
-
 		me.frm.set_query("party_type", "accounts", function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
 
