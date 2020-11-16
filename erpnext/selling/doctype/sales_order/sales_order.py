@@ -905,6 +905,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
+		target.schedule_date = source.delivery_date
 		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
 		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
 		target.project = source_parent.project
@@ -934,7 +935,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				["parent", "sales_order"],
 				["stock_uom", "stock_uom"],
 				["uom", "uom"],
-				["conversion_factor", "conversion_factor"]
+				["conversion_factor", "conversion_factor"],
+				["delivery_date", "schedule_date"]
 			],
 			"field_no_map": [
 				"rate",
