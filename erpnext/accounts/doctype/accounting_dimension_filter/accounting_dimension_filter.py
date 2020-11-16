@@ -44,7 +44,6 @@ def get_dimension_filter_map():
 		""", as_dict=1)
 
 	dimension_filter_map = {}
-	account_filter_map = {}
 
 	for f in filters:
 		if f.accounting_dimension in ('Cost Center', 'Project'):

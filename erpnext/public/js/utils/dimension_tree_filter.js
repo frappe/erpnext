@@ -1,5 +1,4 @@
 frappe.provide('frappe.ui.form');
-
 let default_dimensions = {};
 
 let doctypes_with_dimensions = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
@@ -34,7 +33,7 @@ doctypes_with_dimensions.forEach((doctype) => {
 							parent_fields.push(df.fieldname);
 						} else if (df.fieldtype === 'Table') {
 							setup_child_filters(frm, df.options, df.fieldname, dimension['fieldname']);
-						};
+						}
 
 						setup_account_filters(frm, dimension['fieldname'], parent_fields);
 					});
@@ -90,7 +89,7 @@ let copy_dimension = function(frm, cdt, cdn, fieldname) {
 		let row = frappe.get_doc(cdt, cdn);
 		frm.script_manager.copy_from_first_row(fieldname, row, [dimension['fieldname']]);
 	});
-}
+};
 
 let setup_child_filters = function(frm, doctype, parentfield, dimension) {
 	let fields = [];
@@ -107,10 +106,10 @@ let setup_child_filters = function(frm, doctype, parentfield, dimension) {
 			return erpnext.queries.get_filtered_dimensions(row, fields, dimension, doc.company);
 		});
 	});
-}
+};
 
 let setup_account_filters = function(frm, dimension, fields) {
 	frm.set_query(dimension, function(doc) {
 		return erpnext.queries.get_filtered_dimensions(doc, fields, dimension, doc.company);
 	});
-}
+};

@@ -134,7 +134,7 @@ $.extend(erpnext.queries, {
 				'account': account,
 				'company': company
 			}
-		}
+		};
 	}
 });
 
