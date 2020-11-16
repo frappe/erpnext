@@ -47,6 +47,10 @@ def get_project(name):
 
 def make_project(args):
 	args = frappe._dict(args)
+
+	if args.project_name and frappe.db.exists("Project", {"project_name": args.project_name}):
+		return frappe.get_doc("Project", {"project_name": args.project_name})
+
 	if args.project_template_name:
 		template = make_project_template(args.project_template_name)
 	else:
