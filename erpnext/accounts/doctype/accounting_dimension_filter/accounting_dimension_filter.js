@@ -5,13 +5,13 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 	onload: function(frm) {
 		frappe.db.get_list('Accounting Dimension',
 			{fields: ['name']}).then((res) => {
-				let options = ['Cost Center', 'Project'];
+			let options = ['Cost Center', 'Project'];
 
-				res.forEach((dimension) => {
-					options.push(dimension.name);
-				});
+			res.forEach((dimension) => {
+				options.push(dimension.name);
+			});
 
-				frm.set_df_property('accounting_dimension', 'options', options);
+			frm.set_df_property('accounting_dimension', 'options', options);
 		});
 	},
 
