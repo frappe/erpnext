@@ -56,8 +56,6 @@ def make_custom_fields():
 			dict(fieldname='customer_name_in_arabic', label='Customer Name in Arabic',
 				fieldtype='Read Only', insert_after='customer_name',
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
-			dict(fieldname='branch', label='Branch', options='Branch',
-				fieldtype='Link', insert_after='company', print_hide=1),
 			dict(fieldname='vat_emirate', label='VAT Emirate', insert_after='permit_no', fieldtype='Select',
 				options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain',
 				fetch_from='company_address.emirate'),
@@ -105,10 +103,6 @@ def make_custom_fields():
 				fieldtype='Data', insert_after='supplier_name'),
 		],
 		'Address': [
-			dict(fieldname='emirate', label='Emirate', fieldtype='Select', insert_after='state',
-			options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
-		],
-		'Branch': [
 			dict(fieldname='emirate', label='Emirate', fieldtype='Select', insert_after='state',
 			options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
 		],
