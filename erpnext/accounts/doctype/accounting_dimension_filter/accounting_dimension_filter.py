@@ -32,23 +32,21 @@ def get_dimension_filter_map():
 	filters = frappe.db.sql(
 		""" SELECT
 				a.applicable_on_account, d.dimension_value, p.accounting_dimension,
-				p.allow_or_restrict, ad.fieldname, a.is_mandatory
+				p.allow_or_restrict, a.is_mandatory
 			FROM
 				`tabApplicable On Account` a, `tabAllowed Dimension` d,
-				`tabAccounting Dimension Filter` p, `tabAccounting Dimension` ad
+				`tabAccounting Dimension Filter` p
 			WHERE
 				p.name = a.parent
 				AND p.disabled = 0
 				AND p.name = d.parent
-				AND (p.accounting_dimension = ad.name
-				OR p.accounting_dimension in ('Cost Center', 'Project'))
+
 		""", as_dict=1)
 
 	dimension_filter_map = {}
 
 	for f in filters:
-		if f.accounting_dimension in ('Cost Center', 'Project'):
-			f.fieldname = scrub(f.accounting_dimension)
+		f.fieldname = scrub(f.accounting_dimension)
 
 		build_map(dimension_filter_map, f.fieldname, f.applicable_on_account, f.dimension_value,
 			f.allow_or_restrict, f.is_mandatory)
