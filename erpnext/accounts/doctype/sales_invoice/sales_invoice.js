@@ -446,6 +446,29 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		this.frm.refresh_field("outstanding_amount");
 		this.frm.refresh_field("paid_amount");
 		this.frm.refresh_field("base_paid_amount");
+	},
+
+	branch: function(){
+		const me = this
+		if (this.frm.doc.branch) {
+			frappe.call({
+				async: false,
+				method: "frappe.client.get_value",
+				args: {
+					"doctype": "Branch",
+					"filters": {
+						'name': this.frm.doc.branch
+					},
+					"fieldname": ['emirate']
+				},
+				callback: function (res) {
+					if (res.message && res.message['emirate']) {
+						me.frm.set_value("vat_emirate", res.message['emirate'])
+						me.frm.refresh_field("vat_emirate")
+					}
+				}
+			})
+		}
 	}
 });
 

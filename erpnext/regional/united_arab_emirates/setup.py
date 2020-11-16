@@ -38,8 +38,9 @@ def make_custom_fields():
 			dict(fieldname='supplier_name_in_arabic', label='Supplier Name in Arabic',
 				fieldtype='Read Only', insert_after='supplier_name',
 				fetch_from='supplier.supplier_name_in_arabic', print_hide=1),
-			dict(fieldname='recoverable_standard_rated_expenses', label='Recoverable Standard Rated Expenses (AED)',
-				insert_after='permit_no', fieldtype='Currency', print_hide=1, default='0'),
+			dict(fieldname='recoverable_standard_rated_expenses', print_hide=1, default='0',
+				label='Recoverable Standard Rated Expenses (AED)', insert_after='permit_no',
+				fieldtype='Currency', ),
 			dict(fieldname='reverse_charge', label='Reverse Charge Applicable',
 				fieldtype='Select', insert_after='recoverable_standard_rated_expenses', print_hide=1,
 				options='Y\nN', default='N'),
@@ -55,6 +56,8 @@ def make_custom_fields():
 			dict(fieldname='customer_name_in_arabic', label='Customer Name in Arabic',
 				fieldtype='Read Only', insert_after='customer_name',
 				fetch_from='customer.customer_name_in_arabic', print_hide=1),
+			dict(fieldname='branch', label='Branch', options='Branch',
+				fieldtype='Link', insert_after='company', print_hide=1),
 			dict(fieldname='vat_emirate', label='VAT Emirate', insert_after='permit_no', fieldtype='Select',
 				options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain',
 				fetch_from='company_address.emirate'),
@@ -103,7 +106,11 @@ def make_custom_fields():
 		],
 		'Address': [
 			dict(fieldname='emirate', label='Emirate', fieldtype='Select', insert_after='state',
-			options='Abu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
+			options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
+		],
+		'Branch': [
+			dict(fieldname='emirate', label='Emirate', fieldtype='Select', insert_after='state',
+			options='\nAbu Dhabi\nAjman\nDubai\nFujairah\nRas Al Khaimah\nSharjah\nUmm Al Quwain')
 		],
 		'Purchase Invoice': purchase_invoice_fields + invoice_fields,
 		'Purchase Order': purchase_invoice_fields + invoice_fields,
