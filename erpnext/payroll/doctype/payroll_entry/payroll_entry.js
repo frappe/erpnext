@@ -112,7 +112,7 @@ frappe.ui.form.on('Payroll Entry', {
 					"company": frm.doc.company
 				}
 			};
-		})
+		});
 	},
 
 	payroll_frequency: function (frm) {
