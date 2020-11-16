@@ -80,7 +80,9 @@ def validate_returned_items(doc):
 				ref = valid_items.get(d.item_code, frappe._dict())
 				validate_quantity(doc, d, ref, valid_items, already_returned_items)
 
-				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate) > ref.rate:
+				company_currency = erpnext.get_company_currency(doc.company)
+				precision = get_field_precision(frappe.get_meta(doc.doctype + " Item").get_field("rate"), company_currency)
+				if ref.rate and doc.doctype in ("Delivery Note", "Sales Invoice") and flt(d.rate, precision=precision) > ref.rate:
 					frappe.throw(_("Row # {0}: Rate cannot be greater than the rate used in {1} {2}")
 						.format(d.idx, doc.doctype, doc.return_against))
 
