@@ -112,15 +112,7 @@ frappe.ui.form.on('Payroll Entry', {
 					"company": frm.doc.company
 				}
 			};
-		}),
-
-		frm.set_query("project", function () {
-			return {
-				filters: {
-					company: frm.doc.company
-				}
-			};
-		});
+		})
 	},
 
 	payroll_frequency: function (frm) {
