@@ -202,17 +202,27 @@ class PaymentEntry(AccountsController):
 		# if account_type not in account_types:
 		# 	frappe.throw(_("Account Type for {0} must be {1}").format(account, comma_or(account_types)))
 
-	def set_exchange_rate(self):
+	def set_exchange_rate(self, ref_doc=None):
 		if self.paid_from and not self.source_exchange_rate:
 			if self.paid_from_account_currency == self.company_currency:
 				self.source_exchange_rate = 1
 			else:
-				self.source_exchange_rate = get_exchange_rate(self.paid_from_account_currency,
-					self.company_currency, self.posting_date)
+				if ref_doc:
+					if self.paid_from_account_currency == ref_doc.currency:
+						self.source_exchange_rate = ref_doc.get("exchange_rate")
+
+			if not self.source_exchange_rate:
+					self.source_exchange_rate = get_exchange_rate(self.paid_from_account_currency,
+						self.company_currency, self.posting_date)
 
 		if self.paid_to and not self.target_exchange_rate:
-			self.target_exchange_rate = get_exchange_rate(self.paid_to_account_currency,
-				self.company_currency, self.posting_date)
+			if ref_doc:
+				if self.paid_to_account_currency == ref_doc.currency:
+					self.target_exchange_rate = ref_doc.get("exchange_rate")
+
+			if not self.target_exchange_rate:
+				self.target_exchange_rate = get_exchange_rate(self.paid_to_account_currency,
+					self.company_currency, self.posting_date)
 
 	def validate_mandatory(self):
 		for field in ("paid_amount", "received_amount", "source_exchange_rate", "target_exchange_rate"):
@@ -913,8 +923,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 		elif ref_doc.doctype == "Employee Advance":
 			total_amount = ref_doc.advance_amount
+			exchange_rate = ref_doc.get("exchange_rate")
 			if party_account_currency != ref_doc.currency:
-				exchange_rate = ref_doc.get("exchange_rate")
 				total_amount = flt(total_amount) * flt(exchange_rate)
 		if not total_amount:
 			if party_account_currency == company_currency:
@@ -948,6 +958,12 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		exchange_rate = get_exchange_rate(party_account_currency,
 			company_currency, ref_doc.posting_date)
 
+	print('total_amount')
+	print(total_amount)
+	print('outstanding_amount')
+	print(outstanding_amount)
+	print('exchange_rate')
+	print(exchange_rate)
 	return frappe._dict({
 		"due_date": ref_doc.get("due_date"),
 		"total_amount": total_amount,
@@ -959,6 +975,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 @frappe.whitelist()
 def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None):
+	reference_doc = None
 	doc = frappe.get_doc(dt, dn)
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
@@ -1049,7 +1066,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.setup_party_account_field()
 	pe.set_missing_values()
 	if party_account and bank:
-		pe.set_exchange_rate()
+		if dt == "Employee Advance":
+			reference_doc = doc
+		pe.set_exchange_rate(ref_doc=reference_doc)
 		pe.set_amounts()
 	return pe
 
@@ -1110,7 +1129,7 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 			- doc.total_amount_reimbursed
 	elif dt == "Employee Advance":
 		grand_total = flt(doc.advance_amount)
-		outstanding_amount = flt(doc.advance_amount)
+		outstanding_amount = flt(doc.advance_amount) - flt(doc.paid_amount)
 		if party_account_currency != doc.currency:
 			grand_total = flt(doc.advance_amount) * flt(doc.exchange_rate)
 			outstanding_amount = (flt(doc.advance_amount) - flt(doc.paid_amount)) * flt(doc.exchange_rate)
