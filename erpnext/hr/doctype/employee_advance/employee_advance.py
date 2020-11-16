@@ -38,41 +38,29 @@ class EmployeeAdvance(Document):
 			self.status = "Cancelled"
 
 	def set_total_advance_paid(self):
-		paid_amount = 0
-		return_amount = 0
-
-		paid_amount_data = frappe.db.sql("""
-			select debit_in_account_currency as paid_amount, account
+		paid_amount = frappe.db.sql("""
+			select ifnull(sum(debit), 0) as paid_amount
 			from `tabGL Entry`
 			where against_voucher_type = 'Employee Advance'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
-		""", (self.name, self.employee), as_dict=1)
+		""", (self.name, self.employee), as_dict=1)[0].paid_amount
 
-		return_amount_data = frappe.db.sql("""
-			select credit_in_account_currency as return_amount, account
+		return_amount = frappe.db.sql("""
+			select ifnull(sum(credit), 0) as return_amount
 			from `tabGL Entry`
 			where against_voucher_type = 'Employee Advance'
 				and voucher_type != 'Expense Claim'
 				and against_voucher = %s
 				and party_type = 'Employee'
 				and party = %s
-		""", (self.name, self.employee), as_dict=1)
+		""", (self.name, self.employee), as_dict=1)[0].return_amount
 
-		for pmd in paid_amount_data:
-			account_currency = frappe.db.get_value('Account', pmd.account, 'account_currency')
-			if account_currency != self.currency:
-				paid_amount += flt(pmd.paid_amount) / flt(self.exchange_rate)
-			else:
-				paid_amount += flt(pmd.paid_amount)
-
-		for rmd in return_amount_data:
-			account_currency = frappe.db.get_value('Account', rmd.account, 'account_currency')
-			if account_currency != self.currency:
-				return_amount += flt(rmd.paid_amount) / flt(self.exchange_rate)
-			else:
-				return_amount += flt(rmd.paid_amount)
+		if paid_amount != 0:
+			paid_amount = flt(paid_amount) / flt(self.exchange_rate)
+		if return_amount != 0:
+			return_amount = flt(return_amount) / flt(self.exchange_rate)
 
 		if flt(paid_amount) > self.advance_amount:
 			frappe.throw(_("Row {0}# Paid Amount cannot be greater than requested advance amount"),
