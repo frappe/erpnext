@@ -48,6 +48,13 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 60
 			},
 			{
+				"label": _("Taxable Total"),
+				"fieldtype": "Currency",
+				"fieldname": "base_taxable_total",
+				"options": "Company:company:default_currency",
+				"width": 120
+			},
+			{
 				"label": _("Net Total"),
 				"fieldtype": "Currency",
 				"fieldname": "base_net_total",
@@ -55,16 +62,30 @@ class FBRInvoiceWiseTaxes(object):
 				"width": 120
 			},
 			{
-				"label": _("Grand Total"),
+				"label": _("Total Taxes"),
 				"fieldtype": "Currency",
-				"fieldname": "base_grand_total",
+				"fieldname": "base_total_taxes_and_charges",
 				"options": "Company:company:default_currency",
 				"width": 120
 			},
 			{
-				"label": _("Total Taxes"),
+				"label": _("Total After Taxes"),
 				"fieldtype": "Currency",
-				"fieldname": "base_total_taxes_and_charges",
+				"fieldname": "base_total_after_taxes",
+				"options": "Company:company:default_currency",
+				"width": 120
+			},
+			{
+				"label": _("Discount After Taxes"),
+				"fieldtype": "Currency",
+				"fieldname": "base_total_discount_after_taxes",
+				"options": "Company:company:default_currency",
+				"width": 120
+			},
+			{
+				"label": _("Grand Total"),
+				"fieldtype": "Currency",
+				"fieldname": "base_grand_total",
 				"options": "Company:company:default_currency",
 				"width": 120
 			},
@@ -110,15 +131,17 @@ class FBRInvoiceWiseTaxes(object):
 			})
 
 		if self.filters.detail_by == "Customer":
-			fieldnames = ['party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn', 'base_net_total', 'base_grand_total']
+			fieldnames = ['party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn', 'base_taxable_total', 'base_net_total']
 			for (description, rate) in self.tax_columns:
 				fieldnames.append(get_tax_fieldname(description, rate))
-			fieldnames += ['base_total_taxes_and_charges']
+			fieldnames += ['base_total_taxes_and_charges', 'base_total_after_taxes', 'base_total_discount_after_taxes',
+				'base_grand_total']
 		else:
-			fieldnames = ['posting_date', 'invoice', 'stin', 'base_net_total', 'base_grand_total']
+			fieldnames = ['posting_date', 'invoice', 'stin', 'base_taxable_total', 'base_net_total']
 			for (description, rate) in self.tax_columns:
 				fieldnames.append(get_tax_fieldname(description, rate))
-			fieldnames += ['base_total_taxes_and_charges', 'party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn']
+			fieldnames += ['base_total_taxes_and_charges', 'base_total_after_taxes', 'base_total_discount_after_taxes',
+				'base_grand_total', 'party', 'party_name', 'tax_id', 'tax_cnic', 'tax_strn']
 
 		columns = [list(filter(lambda d: d['fieldname'] == f, all_columns))[0] for f in fieldnames]
 
@@ -128,14 +151,15 @@ class FBRInvoiceWiseTaxes(object):
 		return columns
 
 	def get_data(self):
-		conditions = "and i.customer = %(party)s" if self.filters.party else ""
+		conditions = "and i.bill_to = %(party)s" if self.filters.party else ""
 
 		self.invoices = frappe.db.sql("""
 			select
-				i.name as invoice, i.posting_date, i.base_net_total, i.base_grand_total, i.base_total_taxes_and_charges,
-				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn, i.stin
+				i.name as invoice, i.posting_date, i.base_taxable_total, i.base_net_total,
+				i.base_grand_total, i.base_total_taxes_and_charges, i.base_total_after_taxes, i.base_total_discount_after_taxes,
+				i.bill_to as party, i.bill_to_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn, i.stin
 			from `tabSales Invoice` i
-			left join `tabCustomer` c on c.name = i.customer
+			left join `tabCustomer` c on c.name = i.bill_to
 			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
 				and abs(i.base_total_taxes_and_charges) > 0 {0}
 			order by i.posting_date, i.name
@@ -173,7 +197,8 @@ class FBRInvoiceWiseTaxes(object):
 		self.customer_aggregate = frappe._dict()
 		if self.filters.detail_by == "Customer":
 			party_fields = ['party', 'tax_id', 'tax_cnic', 'tax_strn']
-			aggregate_fields = ['base_net_total', 'base_grand_total', 'base_total_taxes_and_charges']
+			aggregate_fields = ['base_taxable_total', 'base_net_total', 'base_grand_total',
+				'base_total_taxes_and_charges', 'base_total_after_taxes', 'base_total_discount_after_taxes']
 			for (description, rate) in self.tax_columns:
 				aggregate_fields.append(get_tax_fieldname(description, rate))
 
