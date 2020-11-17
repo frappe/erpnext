@@ -292,7 +292,7 @@ class BuyingController(StockController):
 			# backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
 
 			for raw_material in transferred_raw_materials + non_stock_items:
-				rm_item_key = (raw_material.rm_item_code, item.purchase_order)
+				rm_item_key = (raw_material.rm_item_code, item.item_code, item.purchase_order)
 				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
 
 				consumed_qty = raw_material_data.get('qty', 0)
@@ -881,7 +881,7 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 		purchase_receipt_supplied_items = get_supplied_items(args[1], args[2], references)
 
 		for data in purchase_receipt_supplied_items:
-			pr_key = (data.rm_item_code, args[0])
+			pr_key = (data.rm_item_code, data.main_item_code, args[0])
 			if pr_key not in backflushed_raw_materials_map:
 				backflushed_raw_materials_map.setdefault(pr_key, frappe._dict({
 					"qty": 0.0,
@@ -907,7 +907,7 @@ def get_backflushed_subcontracted_raw_materials(purchase_orders):
 
 def get_supplied_items(item_code, purchase_receipt, references):
 	return frappe.get_all("Purchase Receipt Item Supplied",
-		fields=["rm_item_code", "consumed_qty", "serial_no", "batch_no"],
+		fields=["rm_item_code", "main_item_code", "consumed_qty", "serial_no", "batch_no"],
 		filters={"main_item_code": item_code, "parent": purchase_receipt, "reference_name": ("in", references)})
 
 def get_asset_item_details(asset_items):

@@ -594,6 +594,15 @@ class StockEntry(StockController):
 				if not row.subcontracted_item:
 					frappe.throw(_("Row {0}: Subcontracted Item is mandatory for the raw material {1}")
 						.format(row.idx, frappe.bold(row.item_code)))
+				elif not row.po_detail:
+					filters = {
+						"parent": self.purchase_order, "docstatus": 1,
+						"rm_item_code": row.item_code, "main_item_code": row.subcontracted_item
+					}
+
+					po_detail = frappe.db.get_value("Purchase Order Item Supplied", filters, "name")
+					if po_detail:
+						row.db_set("po_detail", po_detail)
 
 	def validate_bom(self):
 		for d in self.get('items'):
@@ -1104,7 +1113,10 @@ class StockEntry(StockController):
 				for d in backflushed_materials.get(item.item_code):
 					if d.get(item.warehouse):
 						if (qty > req_qty):
-							qty-= d.get(item.warehouse)
+							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+
+			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
+				qty = frappe.utils.ceil(qty)
 
 			if qty > 0:
 				self.add_to_stock_entry_detail({
@@ -1185,8 +1197,6 @@ class StockEntry(StockController):
 		return item_dict
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
-		cost_center = frappe.db.get_value("Company", self.company, 'cost_center')
-
 		for d in item_dict:
 			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
 
@@ -1197,9 +1207,10 @@ class StockEntry(StockController):
 			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
-			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
+			se_child.cost_center = (item_dict[d].get("cost_center") or
+				get_default_cost_center(item_dict[d], company = self.company))
 
 			for field in ["idx", "po_detail", "original_item",
 				"expense_account", "description", "item_name"]:
