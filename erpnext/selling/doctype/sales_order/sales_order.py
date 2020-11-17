@@ -844,7 +844,8 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 						"contact_email",
 						"contact_person",
 						"taxes_and_charges",
-						"shipping_address"
+						"shipping_address",
+						"terms"
 					],
 					"validation": {
 						"docstatus": ["=", 1]
@@ -863,7 +864,10 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 					"field_no_map": [
 						"rate",
 						"price_list_rate",
-						"item_tax_template"
+						"item_tax_template",
+						"discount_percentage",
+						"discount_amount",
+						"pricing_rules"
 					],
 					"postprocess": update_item,
 					"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in items_to_map
@@ -917,7 +921,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				"contact_email",
 				"contact_person",
 				"taxes_and_charges",
-				"shipping_address"
+				"shipping_address",
+				"terms"
 			],
 			"validation": {
 				"docstatus": ["=", 1]
@@ -937,7 +942,10 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 				"rate",
 				"price_list_rate",
 				"item_tax_template",
-				"supplier"
+				"discount_percentage",
+				"discount_amount",
+				"supplier",
+				"pricing_rules"
 			],
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map
