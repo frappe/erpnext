@@ -8,7 +8,7 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 				filters : {
 					'company': frm.doc.company
 				}
-			}
+			};
 		});
 
 		frappe.db.get_list('Accounting Dimension',
@@ -41,7 +41,7 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 				frm.set_query('dimension_value', 'dimensions', function() {
 					return {
 						filters: filters
-					}
+					};
 				});
 			}
 		});

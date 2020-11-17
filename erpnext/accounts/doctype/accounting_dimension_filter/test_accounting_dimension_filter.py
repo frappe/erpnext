@@ -10,6 +10,7 @@ from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension imp
 
 class TestAccountingDimensionFilter(unittest.TestCase):
 	def setUp(self):
+		create_dimension()
 		create_accounting_dimension_filter()
 
 	def test_allowed_dimension_validation(self):
@@ -42,7 +43,7 @@ def create_accounting_dimension_filter():
 			}],
 			'dimensions': [{
 				'accounting_dimension': 'Cost Center',
-				'dimension_value': '_Test Cost Center 3 - _TC'
+				'dimension_value': '_Test Cost Center 2 - _TC'
 			}]
 		}).insert()
 	else:
