@@ -459,6 +459,14 @@ class calculate_taxes_and_totals(object):
 				tax_on_net_total = weighted_distrubution_tax_on_net_total.get(tax.idx)
 				current_tax_amount = actual * (tax_on_net_amount / tax_on_net_total)
 
+		elif tax.charge_type == "Manual":
+			item_key = item.item_code or item.item_name
+			current_tax_amount = flt(json.loads(tax.manual_distribution_detail or '{}').get(item_key))
+			if self.doc.calculate_tax_on_company_currency:
+				current_tax_amount = current_tax_amount / (self.doc.conversion_rate or 1)
+
+			total_net_amount = sum([d.net_amount for d in self.doc.items if (d.item_code or d.item_name) == item_key])
+			current_tax_amount *= item.net_amount / total_net_amount if total_net_amount else 0
 		elif tax.charge_type == "On Net Total":
 			current_tax_amount = (tax_rate / 100.0) * item.taxable_amount
 		elif tax.charge_type == "On Previous Row Amount":
@@ -645,7 +653,7 @@ class calculate_taxes_and_totals(object):
 			actual_taxes_dict = {}
 
 			for tax in self.doc.get("taxes"):
-				if tax.charge_type in ["Actual", "Weighted Distribution", "On Item Quantity"]:
+				if tax.charge_type in ["Actual", "Weighted Distribution", "Manual", "On Item Quantity"]:
 					tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax.tax_amount, tax)
 					actual_taxes_dict.setdefault(tax.idx, tax_amount)
 				elif tax.row_id in actual_taxes_dict:
@@ -829,29 +837,33 @@ def get_itemised_tax_breakup_html(doc):
 	headers = get_itemised_tax_breakup_header(doc.doctype + " Item", tax_accounts)
 
 	# get tax breakup data
-	itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
+	itemised_tax, itemised_taxable_amount, itemised_net_amount, itemised_qty = get_itemised_tax_breakup_data(doc)
+
+	# currency
+	if cint(doc.get("calculate_tax_on_company_currency")):
+		currency = erpnext.get_company_currency(doc.company)
+		conversion_rate = 1.0
+		for k in itemised_taxable_amount.keys():
+			itemised_taxable_amount[k] = itemised_taxable_amount[k] * doc.conversion_rate
+		for k in itemised_net_amount.keys():
+			itemised_net_amount[k] = itemised_net_amount[k] * doc.conversion_rate
+	else:
+		currency = doc.currency
+		conversion_rate = doc.conversion_rate
 
 	# get totals
 	item_totals = {}
 	tax_totals = {}
 	total_taxes_and_charges = 0
 	for item, taxes in iteritems(itemised_tax):
-		item_totals.setdefault(item, 0)
+		item_totals.setdefault(item, itemised_net_amount[item])
+
 		for tax, tax_data in iteritems(taxes):
 			tax_totals.setdefault(tax, 0)
 
 			tax_totals[tax] += tax_data.tax_amount
 			item_totals[item] += tax_data.tax_amount
 			total_taxes_and_charges += tax_data.tax_amount
-
-	if cint(doc.get("calculate_tax_on_company_currency")):
-		currency = erpnext.get_company_currency(doc.company)
-		conversion_rate = 1.0
-		for k in itemised_taxable_amount.keys():
-			itemised_taxable_amount[k] = itemised_taxable_amount[k] * doc.conversion_rate
-	else:
-		currency = doc.currency
-		conversion_rate = doc.conversion_rate
 
 	get_rounded_tax_amount(itemised_tax, doc.precision("tax_amount", "taxes"))
 
@@ -863,6 +875,8 @@ def get_itemised_tax_breakup_html(doc):
 			headers=headers,
 			itemised_tax=itemised_tax,
 			itemised_taxable_amount=itemised_taxable_amount,
+			itemised_net_amount=itemised_net_amount,
+			itemised_qty=itemised_qty,
 			tax_accounts=tax_accounts,
 			item_totals=item_totals,
 			tax_totals=tax_totals,
@@ -881,7 +895,10 @@ def update_itemised_tax_data(doc):
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
-	return [_("Item")] + tax_accounts
+	out = [_("Item"), _("Net Amount")] + tax_accounts
+	if item_doctype.startswith("Purchase"):
+		out.append("Valuation Rate")
+	return out
 
 @erpnext.allow_regional
 def get_itemised_tax_breakup_data(doc):
@@ -889,7 +906,11 @@ def get_itemised_tax_breakup_data(doc):
 
 	itemised_taxable_amount = get_itemised_taxable_amount(doc.items)
 
-	return itemised_tax, itemised_taxable_amount
+	itemised_net_amount = get_itemised_net_amount(doc.items)
+
+	itemised_qty = get_itemised_qty(doc.items)
+
+	return itemised_tax, itemised_taxable_amount, itemised_net_amount, itemised_qty
 
 def get_itemised_tax(taxes, with_tax_account=False):
 	itemised_tax = {}
@@ -929,6 +950,24 @@ def get_itemised_taxable_amount(items):
 		itemised_taxable_amount[item_code] += item.taxable_amount
 
 	return itemised_taxable_amount
+
+def get_itemised_net_amount(items):
+	itemised_net_amount = frappe._dict()
+	for item in items:
+		item_code = item.item_code or item.item_name
+		itemised_net_amount.setdefault(item_code, 0)
+		itemised_net_amount[item_code] += item.net_amount
+
+	return itemised_net_amount
+
+def get_itemised_qty(items):
+	itemised_qty = frappe._dict()
+	for item in items:
+		item_code = item.item_code or item.item_name
+		itemised_qty.setdefault(item_code, 0)
+		itemised_qty[item_code] += item.qty
+
+	return itemised_qty
 
 def get_rounded_tax_amount(itemised_tax, precision):
 	# Rounding based on tax_amount precision

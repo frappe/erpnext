@@ -1039,8 +1039,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.get_exchange_rate(transaction_date, this.frm.doc.currency, company_currency,
 				function(exchange_rate) {
 					if(exchange_rate != me.frm.doc.conversion_rate) {
-						me.set_margin_amount_based_on_currency(exchange_rate);
-						me.set_actual_charges_based_on_currency(exchange_rate);
+						// me.set_margin_amount_based_on_currency(exchange_rate);
+						// me.set_actual_charges_based_on_currency(exchange_rate);
 						me.frm.set_value("conversion_rate", exchange_rate);
 					}
 				});
@@ -1067,9 +1067,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(this.frm.doc.ignore_pricing_rule) {
 				this.calculate_taxes_and_totals();
 			} else if (!this.in_apply_price_list){
-				if (!cint(this.frm.doc.calculate_tax_on_company_currency)) {
-					this.set_actual_charges_based_on_currency();
-				}
+				// if (!cint(this.frm.doc.calculate_tax_on_company_currency)) {
+				// 	this.set_actual_charges_based_on_currency();
+				// }
 				this.apply_price_list();
 			}
 
@@ -1097,7 +1097,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	set_margin_amount_based_on_currency: function(exchange_rate) {
-		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]), this.frm.doc.doctype) {
+		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"], this.frm.doc.doctype)) {
 			var me = this;
 			$.each(this.frm.doc.items || [], function(i, d) {
 				if(d.margin_type == "Amount") {

@@ -522,6 +522,16 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				current_tax_amount = actual * (tax_on_net_amount / tax_on_net_total);
 			}
 
+		} else if (tax.charge_type == "Manual") {
+			var item_key = item.item_code || item.item_name;
+			current_tax_amount = flt(JSON.parse(tax.manual_distribution_detail || '{}')[item_key]);
+			if (this.frm.doc.calculate_tax_on_company_currency) {
+				current_tax_amount = current_tax_amount / (this.frm.doc.conversion_rate || 1);
+			}
+
+			var total_net_amount = frappe.utils.sum(this.frm.doc.items.filter(d => (d.item_code || d.item_name) === item_key)
+				.map(d => d.net_amount));
+			current_tax_amount *= total_net_amount ? item.net_amount / total_net_amount : 0;
 		} else if(tax.charge_type == "On Net Total") {
 			current_tax_amount = (tax_rate / 100.0) * item.taxable_amount;
 		} else if(tax.charge_type == "On Previous Row Amount") {
@@ -790,7 +800,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			var actual_taxes_dict = {};
 
 			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
-				if (in_list(["Actual", "Weighted Distribution", "On Item Quantity"], tax.charge_type)) {
+				if (in_list(["Actual", "Weighted Distribution", "Manual", "On Item Quantity"], tax.charge_type)) {
 					var tax_amount = (tax.category == "Valuation") ? 0.0 : tax.tax_amount;
 					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 					actual_taxes_dict[tax.idx] = tax_amount;

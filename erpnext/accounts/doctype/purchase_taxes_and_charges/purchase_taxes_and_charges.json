@@ -29,7 +29,9 @@
   "base_total",
   "base_tax_amount_after_discount_amount",
   "base_displayed_total",
-  "item_wise_tax_detail"
+  "set_manual_distribution",
+  "item_wise_tax_detail",
+  "manual_distribution_detail"
  ],
  "fields": [
   {
@@ -60,7 +62,7 @@
    "label": "Type",
    "oldfieldname": "charge_type",
    "oldfieldtype": "Select",
-   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity\nWeighted Distribution",
+   "options": "\nActual\nOn Net Total\nOn Previous Row Amount\nOn Previous Row Total\nOn Item Quantity\nWeighted Distribution\nManual",
    "reqd": 1
   },
   {
@@ -193,7 +195,7 @@
    "fieldname": "item_wise_tax_detail",
    "fieldtype": "Code",
    "hidden": 1,
-   "label": "Item Wise Tax Detail ",
+   "label": "Item Wise Tax Detail",
    "oldfieldname": "item_wise_tax_detail",
    "oldfieldtype": "Small Text",
    "print_hide": 1,
@@ -224,11 +226,24 @@
    "label": "Total (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.charge_type == \"Manual\"",
+   "fieldname": "set_manual_distribution",
+   "fieldtype": "Button",
+   "label": "Set Manual Distribution"
+  },
+  {
+   "fieldname": "manual_distribution_detail",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Manual Distribution Detail",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-01 02:46:21.936581",
+ "modified": "2020-11-16 17:27:36.692502",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",

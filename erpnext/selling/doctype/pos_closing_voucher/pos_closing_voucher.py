@@ -152,7 +152,7 @@ def get_tax_details(invoice_list):
 	tax_details = defaultdict(int)
 	for invoice in invoice_list:
 		doc = frappe.get_doc("Sales Invoice", invoice.name)
-		itemised_tax, itemised_taxable_amount = get_itemised_tax_breakup_data(doc)
+		itemised_tax, itemised_taxable_amount, itemised_net_amount, itemised_qty = get_itemised_tax_breakup_data(doc)
 
 		if itemised_tax:
 			for a in itemised_tax:

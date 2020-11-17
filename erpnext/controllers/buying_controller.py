@@ -13,6 +13,7 @@ from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock.doctype.stock_entry.stock_entry import get_used_alternative_items
 from erpnext.stock.doctype.serial_no.serial_no import get_auto_serial_nos, auto_make_serial_nos, get_serial_nos
 from frappe.contacts.doctype.address.address import get_address_display
+import json
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
@@ -189,8 +190,16 @@ class BuyingController(StockController):
 				stock_and_asset_items_amount += flt(d.base_net_amount)
 				last_item_idx = d.idx
 
-		total_valuation_amount = sum([flt(d.base_tax_amount_after_discount_amount) for d in self.get("taxes")
-			if d.category in ["Valuation", "Valuation and Total"]])
+		valuation_taxes = [d for d in self.get("taxes") if d.category in ["Valuation", "Valuation and Total"]]
+		total_valuation_amount = sum([flt(d.base_tax_amount_after_discount_amount) for d in valuation_taxes])
+
+		total_non_stock_asset_valuation_tax = 0
+		for item in self.get(parentfield):
+			if item.qty and item.item_code not in stock_and_asset_items:
+				item_tax_detail = json.loads(item.item_tax_detail or '{}')
+				for tax in valuation_taxes:
+					tax_amount = flt(item_tax_detail.get(tax.name)) * self.conversion_rate
+					total_non_stock_asset_valuation_tax += tax_amount
 
 		valuation_amount_adjustment = total_valuation_amount
 		for i, item in enumerate(self.get(parentfield)):
@@ -200,12 +209,16 @@ class BuyingController(StockController):
 				item_proportion = flt(item.base_net_amount) / stock_and_asset_items_amount if stock_and_asset_items_amount \
 					else flt(item.qty) / stock_and_asset_items_qty
 
+				item.item_tax_amount = total_non_stock_asset_valuation_tax * item_proportion
+				item_tax_detail = json.loads(item.item_tax_detail or '{}')
+				for tax in valuation_taxes:
+					tax_amount = flt(item_tax_detail.get(tax.name)) * self.conversion_rate
+					item.item_tax_amount += tax_amount
+
 				if i == (last_item_idx - 1):
-					item.item_tax_amount = flt(valuation_amount_adjustment,
-						self.precision("item_tax_amount", item))
+					item.item_tax_amount = flt(valuation_amount_adjustment, self.precision("item_tax_amount", item))
 				else:
-					item.item_tax_amount = flt(item_proportion * total_valuation_amount,
-						self.precision("item_tax_amount", item))
+					item.item_tax_amount = flt(item.item_tax_amount, self.precision("item_tax_amount", item))
 					valuation_amount_adjustment -= item.item_tax_amount
 
 				self.round_floats_in(item)
