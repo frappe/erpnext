@@ -50,7 +50,7 @@ def execute(filters=None):
 		}
 	]
 
-	if 'ifsc_code' in frappe.get_meta("Employee")._valid_columns:
+	if frappe.db.has_column('Employee', 'ifsc_code'):
 		columns.append({
 			"label": _("IFSC Code"),
 			"fieldtype": "Data",
@@ -78,7 +78,7 @@ def execute(filters=None):
 	payroll_entries = get_payroll_entries(accounts, filters)
 	salary_slips = get_salary_slips(payroll_entries)
 
-	if 'ifsc_code' in frappe.get_meta("Employee")._valid_columns:
+	if frappe.db.has_column('Employee', 'ifsc_code'):
 		get_emp_bank_ifsc_code(salary_slips)
 
 	for salary in salary_slips:
