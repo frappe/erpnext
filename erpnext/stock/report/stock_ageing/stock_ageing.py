@@ -20,7 +20,8 @@ def execute(filters=None):
 
 		fifo_queue = sorted(filter(_func, item_dict["fifo_queue"]), key=_func)
 		details = item_dict["details"]
-		if not fifo_queue and (not item_dict.get("total_qty")): continue
+
+		if not fifo_queue: continue
 
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
