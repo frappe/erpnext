@@ -32,7 +32,7 @@ class LeaveEncashment(Document):
 		additional_salary.employee = self.employee
 		earning_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
 		if not earning_component:
-			frappe.throw(_("Please set Earning Component for Leave type: {0}.".format(self.leave_type)))
+			frappe.throw(_("Please set Earning Component for Leave type: {0}.").format(self.leave_type))
 		additional_salary.salary_component = earning_component
 		additional_salary.payroll_date = self.encashment_date
 		additional_salary.amount = self.encashment_amount
