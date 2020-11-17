@@ -260,7 +260,11 @@ def check_amount_vs_description(amount_matching, description_matching):
 						continue
 
 				if "reference_no" in am_match and "reference_no" in des_match:
-					if difflib.SequenceMatcher(lambda x: x == " ", am_match["reference_no"], des_match["reference_no"]).ratio() > 70:
+					# Sequence Matcher does not handle None as input
+					am_reference = am_match["reference_no"] or ""
+					des_reference = des_match["reference_no"] or ""
+
+					if difflib.SequenceMatcher(lambda x: x == " ", am_reference, des_reference).ratio() > 70:
 						if am_match not in result:
 							result.append(am_match)
 		if result:
