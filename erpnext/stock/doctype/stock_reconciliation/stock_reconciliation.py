@@ -69,6 +69,8 @@ class StockReconciliation(StockController):
 
 				if item_dict.get("serial_nos"):
 					item.current_serial_no = item_dict.get("serial_nos")
+					if self.purpose == "Stock Reconciliation" and not item.serial_no:
+						item.serial_no = item.current_serial_no
 
 				item.current_qty = item_dict.get("qty")
 				item.current_valuation_rate = item_dict.get("rate")
@@ -174,7 +176,7 @@ class StockReconciliation(StockController):
 
 			# item managed batch-wise not allowed
 			if item.has_batch_no and not row.batch_no and not frappe.flags.in_test:
-				if not item.create_new_batch or self.purpose != 'Opening Stock':
+				if not item.create_new_batch:
 					raise frappe.ValidationError(_("Batch no is required for the batched item {0}").format(item_code))
 
 			# docstatus should be < 2
@@ -190,7 +192,7 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 
-		serialized_items = False
+		serialized_items = []
 		for row in self.items:
 			item = frappe.get_cached_doc("Item", row.item_code)
 			if not (item.has_serial_no):
@@ -228,27 +230,29 @@ class StockReconciliation(StockController):
 				sl_entries.append(sle_data)
 
 			else:
-				serialized_items = True
+				serialized_items.append(row.item_code)
 
 		if serialized_items:
-			self.get_sle_for_serialized_items(sl_entries)
+			self.get_sle_for_serialized_items(sl_entries, serialized_items)
 
 		if sl_entries:
 			allow_negative_stock = frappe.get_cached_value("Stock Settings", None, "allow_negative_stock")
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
-	def get_sle_for_serialized_items(self, sl_entries):
-		self.issue_existing_serial_and_batch(sl_entries)
-		self.add_new_serial_and_batch(sl_entries)
-		self.update_valuation_rate_for_serial_no()
+	def get_sle_for_serialized_items(self, sl_entries, serialized_items=[]):
+		self.issue_existing_serial_and_batch(sl_entries, serialized_items)
+		self.add_new_serial_and_batch(sl_entries, serialized_items)
+		self.update_valuation_rate_for_serial_no(serialized_items)
 
 		if sl_entries:
 			sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
-	def issue_existing_serial_and_batch(self, sl_entries):
+	def issue_existing_serial_and_batch(self, sl_entries, serialized_items=[]):
 		from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
 		for row in self.items:
+			if row.item_code not in serialized_items: continue
+
 			serial_nos = get_serial_nos(row.serial_no) or []
 
 			# To issue existing serial nos
@@ -302,8 +306,10 @@ class StockReconciliation(StockController):
 
 					sl_entries.append(new_args)
 
-	def add_new_serial_and_batch(self, sl_entries):
+	def add_new_serial_and_batch(self, sl_entries, serialized_items=[]):
 		for row in self.items:
+			if row.item_code not in serialized_items: continue
+
 			if row.qty:
 				args = self.get_sle_for_items(row)
 
@@ -315,9 +321,9 @@ class StockReconciliation(StockController):
 
 				sl_entries.append(args)
 
-	def update_valuation_rate_for_serial_no(self):
+	def update_valuation_rate_for_serial_no(self, serialized_items=[]):
 		for d in self.items:
-			if not d.serial_no: continue
+			if d.item_code not in serialized_items: continue
 
 			serial_nos = get_serial_nos(d.serial_no)
 			self.update_valuation_rate_for_serial_nos(d, serial_nos)
@@ -353,7 +359,7 @@ class StockReconciliation(StockController):
 			"valuation_rate": flt(row.valuation_rate, row.precision("valuation_rate"))
 		})
 
-		if not row.batch_no:
+		if not row.batch_no or serial_nos:
 			data.qty_after_transaction = flt(row.qty, row.precision("qty"))
 
 		if self.docstatus == 2 and not row.batch_no:
@@ -372,19 +378,29 @@ class StockReconciliation(StockController):
 		return data
 
 	def make_sle_on_cancel(self):
+		serialized_items = []
+		batched_items = []
 		sl_entries = []
 
 		for row in self.items:
-			if not (row.serial_no and row.current_serial_no):
+			if row.batch_no:
+				batched_items.append(row)
+
+			if row.serial_no:
+				serialized_items.append(row.item_code)
+			else:
 				sl_entries.append(self.get_sle_for_items(row))
 
-		self.get_sle_for_serialized_items(sl_entries)
+		if serialized_items:
+			self.get_sle_for_serialized_items(sl_entries, serialized_items)
 
 		if sl_entries:
 			sl_entries.reverse()
 			allow_negative_stock = frappe.db.get_value("Stock Settings", None, "allow_negative_stock")
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
+		if batched_items:
+			self.delete_auto_created_batches()
 
 	def merge_similar_item_serial_nos(self, sl_entries):
 		# If user has put the same item in multiple row with different serial no
@@ -510,7 +526,7 @@ def get_stock_balance_for(item_code, warehouse,
 	else:
 		qty, rate = data
 
-	if item_dict.get("has_batch_no"):
+	if item_dict.get("has_batch_no") and batch_no:
 		qty = get_batch_qty(batch_no, warehouse, posting_date=posting_date, posting_time=posting_time) or 0
 
 	return {

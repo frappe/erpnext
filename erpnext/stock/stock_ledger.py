@@ -255,9 +255,6 @@ class update_entries_after(object):
 		if sle.serial_no:
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
-			if sle.voucher_type == "Stock Reconciliation":
-				self.wh_data.qty_after_transaction = sle.qty_after_transaction
-
 			self.wh_data.stock_value = flt(self.wh_data.qty_after_transaction) * flt(self.wh_data.valuation_rate)
 		else:
 			if sle.voucher_type=="Stock Reconciliation":

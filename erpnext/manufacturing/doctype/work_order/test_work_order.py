@@ -62,15 +62,18 @@ class TestWorkOrder(unittest.TestCase):
 	def test_over_production(self):
 		wo_doc = self.check_planned_qty()
 
-		test_stock_entry.make_stock_entry(item_code="_Test Item",
+		se1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target="_Test Warehouse - _TC", qty=100, basic_rate=100)
-		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+		se2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
 			target="_Test Warehouse - _TC", qty=100, basic_rate=100)
 
 		s = frappe.get_doc(make_stock_entry(wo_doc.name, "Manufacture", 7))
 		s.insert()
 
 		self.assertRaises(StockOverProductionError, s.submit)
+		s.cancel()
+		se2.cancel()
+		se1.cancel()
 
 	def test_planned_operating_cost(self):
 		wo_order = make_wo_order_test_record(item="_Test FG Item 2",

@@ -162,7 +162,7 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 
 		out = float(frappe.db.sql("""select sum(actual_qty)
 			from `tabStock Ledger Entry`
-			where warehouse=%s and batch_no=%s {0}""".format(cond),
+			where warehouse=%s and batch_no=%s and ifnull(is_cancelled) = 0 {0}""".format(cond),
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:
