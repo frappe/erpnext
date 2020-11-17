@@ -207,9 +207,9 @@ class TestStockReconciliation(unittest.TestCase):
 	def test_stock_reco_for_serial_and_batch_item(self):
 		set_perpetual_inventory()
 
-		item = frappe.db.exists("Item", {'item_name': 'Batched and Serialised Item'})
+		item = frappe.db.exists("Item", {'item_name': 'Batched and Serialised Item 1'})
 		if not item:
-			item = create_item("Batched and Serialised Item")
+			item = create_item("Batched and Serialised Item 1")
 			item.has_batch_no = 1
 			item.create_new_batch = 1
 			item.has_serial_no = 1
@@ -217,7 +217,7 @@ class TestStockReconciliation(unittest.TestCase):
 			item.serial_no_series = "S-.####"
 			item.save()
 		else:
-			item = frappe.get_doc("Item", {'item_name': 'Batched and Serialised Item'})
+			item = frappe.get_doc("Item", {'item_name': 'Batched and Serialised Item 1'})
 
 		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
 
@@ -236,7 +236,7 @@ class TestStockReconciliation(unittest.TestCase):
 		self.assertEqual(frappe.db.exists("Batch", batch_no), None)
 
 		if frappe.db.exists("Serial No", serial_nos[0]):
-				frappe.delete_doc("Serial No", serial_nos[0])
+			frappe.delete_doc("Serial No", serial_nos[0])
 
 	def test_stock_reco_for_serial_and_batch_item_with_future_dependent_entry(self):
 		"""
@@ -255,9 +255,9 @@ class TestStockReconciliation(unittest.TestCase):
 
 		set_perpetual_inventory()
 
-		item = frappe.db.exists("Item", {'item_name': 'Batched and Serialised Item'})
+		item = frappe.db.exists("Item", {'item_name': 'Batched and Serialised Item 1'})
 		if not item:
-			item = create_item("Batched and Serialised Item")
+			item = create_item("Batched and Serialised Item 1")
 			item.has_batch_no = 1
 			item.create_new_batch = 1
 			item.has_serial_no = 1
@@ -265,7 +265,7 @@ class TestStockReconciliation(unittest.TestCase):
 			item.serial_no_series = "S-.####"
 			item.save()
 		else:
-			item = frappe.get_doc("Item", {'item_name': 'Batched and Serialised Item'})
+			item = frappe.get_doc("Item", {'item_name': 'Batched and Serialised Item 1'})
 
 		warehouse = "_Test Warehouse for Stock Reco2 - _TC"
 
@@ -391,6 +391,35 @@ class TestStockReconciliation(unittest.TestCase):
 		for doc in [sr, ste2, ste1]:
 			doc.cancel()
 			frappe.delete_doc(doc.doctype, doc.name)
+
+	def test_stock_reco_with_serial_and_batch(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
+		warehouse = "_Test Warehouse for Stock Reco1 - _TC"
+		ste1=make_stock_entry(item_code="Stock-Reco-Serial-Item-1",
+			target=warehouse, qty=2, basic_rate=100)
+
+		ste2=make_stock_entry(item_code="Stock-Reco-batch-Item-1",
+			target=warehouse, qty=2, basic_rate=100)
+
+		sr = create_stock_reconciliation(item_code="Stock-Reco-Serial-Item-1",
+			warehouse = warehouse, rate=200, do_not_submit=True)
+
+		sr.append("items", {
+			"item_code": "Stock-Reco-batch-Item-1",
+			"warehouse": warehouse,
+			"batch_no": ste2.items[0].batch_no,
+			"valuation_rate": 200
+		})
+
+		sr.submit()
+		sle = frappe.get_all("Stock Ledger Entry", filters={"item_code": "Stock-Reco-batch-Item-1",
+			"warehouse": warehouse, "voucher_no": sr.name, "voucher_type": sr.doctype})
+
+		self.assertEquals(len(sle), 1)
+
+		for doc in [sr, ste2, ste1]:
+			doc.cancel()
 
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
