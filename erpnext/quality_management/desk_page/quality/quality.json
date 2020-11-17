@@ -34,7 +34,118 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Quality",
- "modified": "2020-10-27 16:28:54.138055",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Goal and Procedure",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Goal",
+   "link_to": "Quality Goal",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Procedure",
+   "link_to": "Quality Procedure",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tree of Procedures",
+   "link_to": "Quality Procedure",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Feedback",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Feedback",
+   "link_to": "Quality Feedback",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Feedback Template",
+   "link_to": "Quality Feedback Template",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Meeting",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Meeting",
+   "link_to": "Quality Meeting",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Review and Action",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Non Conformance",
+   "link_to": "Non Conformance",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Review",
+   "link_to": "Quality Review",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Quality Action",
+   "link_to": "Quality Action",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  }
+ ],
+ "modified": "2020-11-17 13:00:31.488858",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
@@ -43,23 +154,26 @@
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "Grey",
    "label": "Quality Goal",
    "link_to": "Quality Goal",
    "type": "DocType"
   },
   {
+   "color": "Grey",
    "doc_view": "Tree",
    "label": "Quality Procedure",
    "link_to": "Quality Procedure",
    "type": "DocType"
   },
   {
+   "color": "Grey",
    "label": "Quality Inspection",
    "link_to": "Quality Inspection",
    "type": "DocType"
   },
   {
-   "color": "#ff8989",
+   "color": "Grey",
    "doc_view": "",
    "format": "{} Open",
    "label": "Quality Review",
@@ -68,7 +182,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ff8989",
+   "color": "Grey",
    "doc_view": "",
    "format": "{} Open",
    "label": "Quality Action",
@@ -77,7 +191,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ff8989",
+   "color": "Grey",
    "doc_view": "",
    "format": "{} Open",
    "label": "Non Conformance",
