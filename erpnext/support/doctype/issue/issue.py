@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime, time_diff_in_seconds, time_diff
+from frappe.utils import now_datetime, getdate, get_weekdays, add_to_date, get_time, get_datetime, time_diff_in_seconds
 from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
@@ -355,13 +355,13 @@ def set_service_level_agreement_variance(issue=None):
 		doc = frappe.get_doc("Issue", issue.name)
 
 		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
-			variance = round(time_diff_in_hours(doc.response_by, current_time), 2)
+			variance = round(time_diff_in_seconds(doc.response_by, current_time), 2)
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="response_by_variance", val=variance, update_modified=False)
 			if variance < 0:
 				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_status", val="Failed", update_modified=False)
 
 		if not doc.resolution_date: # resolution_date set when issue has been closed
-			variance = round(time_diff_in_hours(doc.resolution_by, current_time), 2)
+			variance = round(time_diff_in_seconds(doc.resolution_by, current_time), 2)
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
 				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_status", val="Failed", update_modified=False)
