@@ -709,8 +709,12 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 					mr_items.append(items)
 
 	if not mr_items:
-		frappe.msgprint(_("""As raw materials projected quantity is more than required quantity, there is no need to create material request.
-			Still if you want to make material request, kindly enable <b>Ignore Existing Projected Quantity</b> checkbox"""))
+		to_enable = frappe.bold(_("Ignore Existing Projected Quantity"))
+		warehouse = frappe.bold(doc.get('for_warehouse'))
+		message = _("As there are sufficient raw materials, Material Request is not required for Warehouse {0}.").format(warehouse) + "<br><br>"
+		message += _(" If you still want to proceed, please enable {0}.").format(to_enable)
+
+		frappe.msgprint(message, title=_("Note"))
 
 	return mr_items
 

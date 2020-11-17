@@ -81,7 +81,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 					me.page.set_indicator(__("Online"), "green")
 				}
 			}
-		})
+		});
 	},
 
 	onload: function () {
@@ -278,6 +278,14 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 		})
 	},
 
+	set_pos_profile_title(pos_profile) {
+		this.page.set_title_sub(
+			`<span class="indicator blue">
+				<a class="text-muted" href="#Form/POS Profile/${pos_profile}">${pos_profile}</a>
+			</span>`
+		);
+	},
+
 	get_data_from_server: function (callback) {
 		var me = this;
 		frappe.call({
@@ -286,6 +294,7 @@ erpnext.pos.PointOfSale = erpnext.taxes_and_totals.extend({
 			freeze_message: __("Master data syncing, it might take some time"),
 			callback: function (r) {
 				localStorage.setItem('doc', JSON.stringify(r.message.doc));
+				me.set_pos_profile_title(r.message.pos_profile.name);
 				me.init_master_data(r)
 				me.set_interval_for_si_sync();
 				me.check_internet_connection();
