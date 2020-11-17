@@ -80,7 +80,7 @@
    "link_to": "Patient",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -89,7 +89,7 @@
    "link_to": "Healthcare Practitioner",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -98,7 +98,7 @@
    "link_to": "Practitioner Schedule",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -107,7 +107,7 @@
    "link_to": "Medical Department",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -116,7 +116,7 @@
    "link_to": "Healthcare Service Unit Type",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -125,7 +125,7 @@
    "link_to": "Healthcare Service Unit",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -134,7 +134,7 @@
    "link_to": "Medical Code Standard",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -143,7 +143,7 @@
    "link_to": "Medical Code",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -159,7 +159,7 @@
    "link_to": "Appointment Type",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -168,7 +168,7 @@
    "link_to": "Clinical Procedure Template",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -177,7 +177,7 @@
    "link_to": "Prescription Dosage",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -186,7 +186,7 @@
    "link_to": "Prescription Duration",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -195,7 +195,7 @@
    "link_to": "Antibiotic",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -211,7 +211,7 @@
    "link_to": "Patient Appointment",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -220,7 +220,7 @@
    "link_to": "Clinical Procedure",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -229,7 +229,7 @@
    "link_to": "Patient Encounter",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -238,7 +238,7 @@
    "link_to": "Vital Signs",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -247,7 +247,7 @@
    "link_to": "Complaint",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -256,7 +256,7 @@
    "link_to": "Diagnosis",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -265,7 +265,7 @@
    "link_to": "Fee Validity",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -281,7 +281,7 @@
    "link_to": "Healthcare Settings",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -297,7 +297,7 @@
    "link_to": "Lab Test Template",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -306,7 +306,7 @@
    "link_to": "Lab Test Sample",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -315,7 +315,7 @@
    "link_to": "Lab Test UOM",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -324,7 +324,7 @@
    "link_to": "Sensitivity",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -340,7 +340,7 @@
    "link_to": "Lab Test",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -349,7 +349,7 @@
    "link_to": "Sample Collection",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -358,7 +358,7 @@
    "link_to": "Dosage Form",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -374,7 +374,7 @@
    "link_to": "Exercise Type",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -383,7 +383,7 @@
    "link_to": "Therapy Type",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -392,7 +392,7 @@
    "link_to": "Therapy Plan",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -401,7 +401,7 @@
    "link_to": "Therapy Session",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -410,7 +410,7 @@
    "link_to": "Patient Assessment Template",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -419,7 +419,7 @@
    "link_to": "Patient Assessment",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -435,7 +435,7 @@
    "link_to": "patient_history",
    "link_type": "Page",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -444,7 +444,7 @@
    "link_to": "patient-progress",
    "link_type": "Page",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -453,7 +453,7 @@
    "link_to": "Patient Medical Record",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -462,7 +462,7 @@
    "link_to": "Inpatient Record",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -478,7 +478,7 @@
    "link_to": "Patient Appointment Analytics",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -487,10 +487,10 @@
    "link_to": "Lab Test Report",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:31.675127",
+ "modified": "2020-11-17 13:18:36.771243",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",

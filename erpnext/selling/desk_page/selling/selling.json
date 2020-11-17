@@ -60,7 +60,7 @@
    "link_to": "Customer",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -69,7 +69,7 @@
    "link_to": "Quotation",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -78,7 +78,7 @@
    "link_to": "Sales Order",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -87,7 +87,7 @@
    "link_to": "Sales Invoice",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -96,7 +96,7 @@
    "link_to": "Blanket Order",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -105,7 +105,7 @@
    "link_to": "Sales Partner",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -114,7 +114,7 @@
    "link_to": "Sales Person",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -130,7 +130,7 @@
    "link_to": "Item",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -139,7 +139,7 @@
    "link_to": "Item Price",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -148,7 +148,7 @@
    "link_to": "Price List",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -157,7 +157,7 @@
    "link_to": "Item Group",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -166,7 +166,7 @@
    "link_to": "Product Bundle",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -175,7 +175,7 @@
    "link_to": "Promotional Scheme",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -184,7 +184,7 @@
    "link_to": "Pricing Rule",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -193,7 +193,7 @@
    "link_to": "Shipping Rule",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -202,7 +202,7 @@
    "link_to": "Coupon Code",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -218,7 +218,7 @@
    "link_to": "Selling Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -227,7 +227,7 @@
    "link_to": "Terms and Conditions",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -236,7 +236,7 @@
    "link_to": "Sales Taxes and Charges Template",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -245,7 +245,7 @@
    "link_to": "Lead Source",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -254,7 +254,7 @@
    "link_to": "Customer Group",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -263,7 +263,7 @@
    "link_to": "Contact",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -272,7 +272,7 @@
    "link_to": "Address",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -281,7 +281,7 @@
    "link_to": "Territory",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -290,7 +290,7 @@
    "link_to": "Campaign",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -306,7 +306,7 @@
    "link_to": "Sales Analytics",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -315,7 +315,7 @@
    "link_to": "Sales Order Analysis",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -324,7 +324,7 @@
    "link_to": "sales-funnel",
    "link_type": "Page",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -333,7 +333,7 @@
    "link_to": "Sales Order Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -342,7 +342,7 @@
    "link_to": "Quotation Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -351,7 +351,7 @@
    "link_to": "Customer Acquisition and Loyalty",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -360,7 +360,7 @@
    "link_to": "Inactive Customers",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -369,7 +369,7 @@
    "link_to": "Sales Person-wise Transaction Summary",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -378,7 +378,7 @@
    "link_to": "Item-wise Sales History",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -394,7 +394,7 @@
    "link_to": "Lead Details",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -403,7 +403,7 @@
    "link_to": "Address And Contacts",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -412,7 +412,7 @@
    "link_to": "Available Stock for Packing Items",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -421,7 +421,7 @@
    "link_to": "Pending SO Items For Purchase Request",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -430,7 +430,7 @@
    "link_to": "Delivery Note Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -439,7 +439,7 @@
    "link_to": "Sales Invoice Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -448,7 +448,7 @@
    "link_to": "Customer Credit Balance",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -457,7 +457,7 @@
    "link_to": "Customers Without Any Sales Transactions",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -466,7 +466,7 @@
    "link_to": "Sales Partners Commission",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -475,7 +475,7 @@
    "link_to": "Territory Target Variance Based On Item Group",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -484,7 +484,7 @@
    "link_to": "Sales Person Target Variance Based On Item Group",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -493,10 +493,10 @@
    "link_to": "Sales Partner Target Variance based on Item Group",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:30.100950",
+ "modified": "2020-11-17 13:18:38.357500",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",

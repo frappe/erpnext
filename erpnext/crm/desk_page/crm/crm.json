@@ -58,7 +58,7 @@
    "link_to": "Lead",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -67,7 +67,7 @@
    "link_to": "Opportunity",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -76,7 +76,7 @@
    "link_to": "Customer",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -85,7 +85,7 @@
    "link_to": "Contact",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -94,7 +94,7 @@
    "link_to": "Communication",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -103,7 +103,7 @@
    "link_to": "Lead Source",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -112,7 +112,7 @@
    "link_to": "Contract",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -121,7 +121,7 @@
    "link_to": "Appointment",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -130,7 +130,7 @@
    "link_to": "Newsletter",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -146,7 +146,7 @@
    "link_to": "Lead Details",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -155,7 +155,7 @@
    "link_to": "sales-funnel",
    "link_type": "Page",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -164,7 +164,7 @@
    "link_to": "Prospects Engaged But Not Converted",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -173,7 +173,7 @@
    "link_to": "First Response Time for Opportunity",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -182,7 +182,7 @@
    "link_to": "Inactive Customers",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -191,7 +191,7 @@
    "link_to": "Campaign Efficiency",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -200,7 +200,7 @@
    "link_to": "Lead Owner Efficiency",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -216,7 +216,7 @@
    "link_to": "Maintenance Schedule",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -225,7 +225,7 @@
    "link_to": "Maintenance Visit",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -234,7 +234,7 @@
    "link_to": "Warranty Claim",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -250,7 +250,7 @@
    "link_to": "Campaign",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -259,7 +259,7 @@
    "link_to": "Email Campaign",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -268,7 +268,7 @@
    "link_to": "Social Media Post",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -284,7 +284,7 @@
    "link_to": "Customer Group",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -293,7 +293,7 @@
    "link_to": "Territory",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -302,7 +302,7 @@
    "link_to": "Sales Person",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -311,7 +311,7 @@
    "link_to": "SMS Center",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -320,7 +320,7 @@
    "link_to": "SMS Log",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -329,7 +329,7 @@
    "link_to": "SMS Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -338,7 +338,7 @@
    "link_to": "Email Group",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -347,7 +347,7 @@
    "link_to": "Twitter Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -356,10 +356,10 @@
    "link_to": "LinkedIn Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:28.196723",
+ "modified": "2020-11-17 13:18:40.216301",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",

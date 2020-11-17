@@ -76,7 +76,7 @@
    "link_to": "Material Request",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -85,7 +85,7 @@
    "link_to": "Purchase Order",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -94,7 +94,7 @@
    "link_to": "Purchase Invoice",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -103,7 +103,7 @@
    "link_to": "Request for Quotation",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -112,7 +112,7 @@
    "link_to": "Supplier Quotation",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -128,7 +128,7 @@
    "link_to": "Item",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -137,7 +137,7 @@
    "link_to": "Item Price",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -146,7 +146,7 @@
    "link_to": "Price List",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -155,7 +155,7 @@
    "link_to": "Product Bundle",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -164,7 +164,7 @@
    "link_to": "Item Group",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -173,7 +173,7 @@
    "link_to": "Promotional Scheme",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -182,7 +182,7 @@
    "link_to": "Pricing Rule",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -198,7 +198,7 @@
    "link_to": "Buying Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -207,7 +207,7 @@
    "link_to": "Purchase Taxes and Charges Template",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -216,7 +216,7 @@
    "link_to": "Terms and Conditions",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -232,7 +232,7 @@
    "link_to": "Supplier",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -241,7 +241,7 @@
    "link_to": "Supplier Group",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -250,7 +250,7 @@
    "link_to": "Contact",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -259,7 +259,7 @@
    "link_to": "Address",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -275,7 +275,7 @@
    "link_to": "Supplier Scorecard",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -284,7 +284,7 @@
    "link_to": "Supplier Scorecard Variable",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -293,7 +293,7 @@
    "link_to": "Supplier Scorecard Criteria",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -302,7 +302,7 @@
    "link_to": "Supplier Scorecard Standing",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -318,7 +318,7 @@
    "link_to": "Purchase Analytics",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -327,7 +327,7 @@
    "link_to": "Purchase Order Analysis",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -336,7 +336,7 @@
    "link_to": "Supplier-Wise Sales Analytics",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -345,7 +345,7 @@
    "link_to": "Requested Items to Order and Receive",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -354,7 +354,7 @@
    "link_to": "Purchase Order Trends",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -363,7 +363,7 @@
    "link_to": "Procurement Tracker",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -379,7 +379,7 @@
    "link_to": "Items To Be Requested",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -388,7 +388,7 @@
    "link_to": "Item-wise Purchase History",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -397,7 +397,7 @@
    "link_to": "Purchase Receipt Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -406,7 +406,7 @@
    "link_to": "Purchase Invoice Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -415,7 +415,7 @@
    "link_to": "Subcontracted Raw Materials To Be Transferred",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -424,7 +424,7 @@
    "link_to": "Subcontracted Item To Be Received",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -433,7 +433,7 @@
    "link_to": "Supplier Quotation Comparison",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -442,7 +442,7 @@
    "link_to": "Material Requests for which Supplier Quotations are not created",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -451,7 +451,7 @@
    "link_to": "Address And Contacts",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -467,10 +467,10 @@
    "link_to": "Import Supplier Invoice",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:25.184766",
+ "modified": "2020-11-17 13:18:43.304970",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",

@@ -44,7 +44,7 @@
    "link_to": "Crop",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -53,7 +53,7 @@
    "link_to": "Crop Cycle",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -62,7 +62,7 @@
    "link_to": "Location",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -78,7 +78,7 @@
    "link_to": "Plant Analysis",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -87,7 +87,7 @@
    "link_to": "Soil Analysis",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -96,7 +96,7 @@
    "link_to": "Water Analysis",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -105,7 +105,7 @@
    "link_to": "Soil Texture",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -114,7 +114,7 @@
    "link_to": "Weather",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -123,7 +123,7 @@
    "link_to": "Agriculture Analysis Criteria",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -139,7 +139,7 @@
    "link_to": "Disease",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -148,10 +148,10 @@
    "link_to": "Fertilizer",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:25.889184",
+ "modified": "2020-11-17 13:18:42.501139",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Agriculture",

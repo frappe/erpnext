@@ -49,7 +49,7 @@
    "link_to": "Quality Goal",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -58,7 +58,7 @@
    "link_to": "Quality Procedure",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -67,7 +67,7 @@
    "link_to": "Quality Procedure",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -83,7 +83,7 @@
    "link_to": "Quality Feedback",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -92,7 +92,7 @@
    "link_to": "Quality Feedback Template",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -108,7 +108,7 @@
    "link_to": "Quality Meeting",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -124,7 +124,7 @@
    "link_to": "Non Conformance",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -133,7 +133,7 @@
    "link_to": "Quality Review",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -142,10 +142,10 @@
    "link_to": "Quality Action",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:31.488858",
+ "modified": "2020-11-17 13:18:37.174448",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",

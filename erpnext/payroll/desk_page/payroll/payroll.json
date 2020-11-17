@@ -54,7 +54,7 @@
    "link_to": "Salary Component",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -63,7 +63,7 @@
    "link_to": "Salary Structure",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -72,7 +72,7 @@
    "link_to": "Salary Structure Assignment",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -81,7 +81,7 @@
    "link_to": "Payroll Entry",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -90,7 +90,7 @@
    "link_to": "Salary Slip",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -106,7 +106,7 @@
    "link_to": "Payroll Period",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -115,7 +115,7 @@
    "link_to": "Income Tax Slab",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -124,7 +124,7 @@
    "link_to": "Employee Other Income",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -133,7 +133,7 @@
    "link_to": "Employee Tax Exemption Declaration",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -142,7 +142,7 @@
    "link_to": "Employee Tax Exemption Proof Submission",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -151,7 +151,7 @@
    "link_to": "Employee Tax Exemption Category",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -160,7 +160,7 @@
    "link_to": "Employee Tax Exemption Sub Category",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -176,7 +176,7 @@
    "link_to": "Additional Salary",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -185,7 +185,7 @@
    "link_to": "Retention Bonus",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -194,7 +194,7 @@
    "link_to": "Employee Incentive",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -203,7 +203,7 @@
    "link_to": "Employee Benefit Application",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -212,7 +212,7 @@
    "link_to": "Employee Benefit Claim",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -228,7 +228,7 @@
    "link_to": "Salary Register",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -237,7 +237,7 @@
    "link_to": "Salary Payments Based On Payment Mode",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -246,7 +246,7 @@
    "link_to": "Salary Payments via ECS",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -255,7 +255,7 @@
    "link_to": "Income Tax Deductions",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -264,7 +264,7 @@
    "link_to": "Professional Tax Deductions",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -273,7 +273,7 @@
    "link_to": "Provident Fund Deductions",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -282,10 +282,10 @@
    "link_to": "Bank Remittance",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:27.751514",
+ "modified": "2020-11-17 13:18:40.644642",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",

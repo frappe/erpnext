@@ -74,7 +74,7 @@
    "link_to": "Item",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -83,7 +83,7 @@
    "link_to": "Item Group",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -92,7 +92,7 @@
    "link_to": "Product Bundle",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -101,7 +101,7 @@
    "link_to": "Price List",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -110,7 +110,7 @@
    "link_to": "Item Price",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -119,7 +119,7 @@
    "link_to": "Shipping Rule",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -128,7 +128,7 @@
    "link_to": "Pricing Rule",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -137,7 +137,7 @@
    "link_to": "Item Alternative",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -146,7 +146,7 @@
    "link_to": "Item Manufacturer",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -155,7 +155,7 @@
    "link_to": "Customs Tariff Number",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -171,7 +171,7 @@
    "link_to": "Material Request",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -180,7 +180,7 @@
    "link_to": "Stock Entry",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -189,7 +189,7 @@
    "link_to": "Delivery Note",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -198,7 +198,7 @@
    "link_to": "Purchase Receipt",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -207,7 +207,7 @@
    "link_to": "Pick List",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -216,7 +216,7 @@
    "link_to": "Delivery Trip",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -232,7 +232,7 @@
    "link_to": "Stock Ledger",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -241,7 +241,7 @@
    "link_to": "Stock Balance",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -250,7 +250,7 @@
    "link_to": "Stock Projected Qty",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -259,7 +259,7 @@
    "link_to": "stock-balance",
    "link_type": "Page",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -268,7 +268,7 @@
    "link_to": "Stock Ageing",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -277,7 +277,7 @@
    "link_to": "Item Price Stock",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -293,7 +293,7 @@
    "link_to": "Stock Settings",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -302,7 +302,7 @@
    "link_to": "Warehouse",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -311,7 +311,7 @@
    "link_to": "UOM",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -320,7 +320,7 @@
    "link_to": "Item Variant Settings",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -329,7 +329,7 @@
    "link_to": "Brand",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -338,7 +338,7 @@
    "link_to": "Item Attribute",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -347,7 +347,7 @@
    "link_to": "UOM Conversion Factor",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -363,7 +363,7 @@
    "link_to": "Serial No",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -372,7 +372,7 @@
    "link_to": "Batch",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -381,7 +381,7 @@
    "link_to": "Installation Note",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -390,7 +390,7 @@
    "link_to": "Serial No Service Contract Expiry",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -399,7 +399,7 @@
    "link_to": "Serial No Status",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -408,7 +408,7 @@
    "link_to": "Serial No Warranty Expiry",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -424,7 +424,7 @@
    "link_to": "Stock Reconciliation",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -433,7 +433,7 @@
    "link_to": "Landed Cost Voucher",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -442,7 +442,7 @@
    "link_to": "Packing Slip",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -451,7 +451,7 @@
    "link_to": "Quality Inspection",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -460,7 +460,7 @@
    "link_to": "Quality Inspection Template",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -469,7 +469,7 @@
    "link_to": "Quick Stock Balance",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -485,7 +485,7 @@
    "link_to": "Item-wise Price List Rate",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -494,7 +494,7 @@
    "link_to": "Stock Analytics",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -503,7 +503,7 @@
    "link_to": "Stock Qty vs Serial No Count",
    "link_type": "Report",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -512,7 +512,7 @@
    "link_to": "Delivery Note Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -521,7 +521,7 @@
    "link_to": "Purchase Receipt Trends",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -530,7 +530,7 @@
    "link_to": "Sales Order Analysis",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -539,7 +539,7 @@
    "link_to": "Purchase Order Analysis",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -548,7 +548,7 @@
    "link_to": "Item Shortage Report",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -557,7 +557,7 @@
    "link_to": "Batch-Wise Balance History",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -573,7 +573,7 @@
    "link_to": "Requested Items To Be Transferred",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -582,7 +582,7 @@
    "link_to": "Batch Item Expiry Status",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -591,7 +591,7 @@
    "link_to": "Item Prices",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -600,7 +600,7 @@
    "link_to": "Itemwise Recommended Reorder Level",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -609,7 +609,7 @@
    "link_to": "Item Variant Details",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -618,7 +618,7 @@
    "link_to": "Subcontracted Raw Materials To Be Transferred",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -627,7 +627,7 @@
    "link_to": "Subcontracted Item To Be Received",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -636,10 +636,10 @@
    "link_to": "Stock and Account Value Comparison",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:29.632812",
+ "modified": "2020-11-17 13:18:38.783880",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
