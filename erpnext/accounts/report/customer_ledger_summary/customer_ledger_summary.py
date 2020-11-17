@@ -109,13 +109,6 @@ class PartyLedgerSummaryReport(object):
 				"fieldtype": "Currency",
 				"options": "currency",
 				"width": 120
-			},
-			{
-				"label": _("Currency"),
-				"fieldname": "currency",
-				"fieldtype": "Link",
-				"options": "Currency",
-				"width": 50
 			}
 		]
 

@@ -706,9 +706,6 @@ class Item(WebsiteGenerator):
 
 		self.item_name = self.clean_name(self.item_name)
 
-		if not self.description:
-			self.description = self.item_name
-
 	def validate_barcode(self):
 		from stdnum import ean
 		if len(self.barcodes) > 0:

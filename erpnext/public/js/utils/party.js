@@ -97,6 +97,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 	args.tax_id = frm.doc.tax_id;
 	args.tax_cnic = frm.doc.tax_cnic;
 	args.tax_strn = frm.doc.tax_strn;
+	args.bill_to = frm.doc.bill_to;
 	args.letter_of_credit = frm.doc.letter_of_credit;
 
 	if (frappe.meta.has_field(frm.doc.doctype, 'has_stin')) {
@@ -142,7 +143,7 @@ erpnext.utils.get_party_account_details = function (frm) {
 		account_field = "credit_to";
 	} else if (frm.doc.customer) {
 		party_type = "Customer";
-		party = frm.doc.customer;
+		party = frm.doc.bill_to || frm.doc.customer;
 		account_field = "debit_to";
 	} else {
 		return;
@@ -267,9 +268,9 @@ erpnext.utils.set_taxes = function(frm, triggered_from_field) {
 	if (frm.doc.lead) {
 		party_type = 'Lead';
 		party = frm.doc.lead;
-	} else if (frm.doc.customer) {
+	} else if (frm.doc.customer || frm.doc.bill_to) {
 		party_type = 'Customer';
-		party = frm.doc.customer;
+		party = frm.doc.bill_to || frm.doc.customer;
 	} else if (frm.doc.supplier) {
 		party_type = 'Supplier';
 		party = frm.doc.supplier;

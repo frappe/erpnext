@@ -167,7 +167,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -981,7 +980,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:09.867713",
+ "modified": "2020-11-02 13:42:42.606460",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

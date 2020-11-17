@@ -495,6 +495,22 @@ def set_project_status(project, status):
 	project.save()
 
 @frappe.whitelist()
+def get_project_details(project_name):
+	project = frappe.get_doc("Project", project_name)
+
+	out = {}
+	fieldnames = [
+		'customer', 'applies_to_vehicle',
+		'service_advisor', 'service_manager',
+		'insurance_company', 'insurance_loss_no', 'insurance_policy_no', 'insurance_surveyor'
+	]
+	for f in fieldnames:
+		if project.get(f):
+			out[f] = project.get(f)
+
+	return out
+
+@frappe.whitelist()
 def make_against_project(project_name, dt):
 	from frappe.model.utils import get_fetch_values
 
@@ -516,20 +532,20 @@ def make_against_project(project_name, dt):
 			doc.party_name = project.customer
 			doc.update(get_fetch_values(doc.doctype, 'party_name', project.customer))
 
-	if project.item_code:
+	if project.applies_to_item:
 		if doc.meta.has_field('item_code'):
-			doc.item_code = project.item_code
-			doc.update(get_fetch_values(doc.doctype, 'item_code', project.item_code))
+			doc.item_code = project.applies_to_item
+			doc.update(get_fetch_values(doc.doctype, 'item_code', project.applies_to_item))
 
 			if doc.meta.has_field('serial_no'):
 				doc.serial_no = project.serial_no
 				doc.update(get_fetch_values(doc.doctype, 'serial_no', project.serial_no))
 		else:
 			child = doc.append("purposes" if dt == "Maintenance Visit" else "items", {
-				"item_code": project.item_code,
+				"item_code": project.applies_to_item,
 				"serial_no": project.serial_no
 			})
-			child.update(get_fetch_values(child.doctype, 'item_code', project.item_code))
+			child.update(get_fetch_values(child.doctype, 'item_code', project.applies_to_item))
 			if child.meta.has_field('serial_no'):
 				child.update(get_fetch_values(child.doctype, 'serial_no', project.serial_no))
 

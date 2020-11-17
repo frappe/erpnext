@@ -16,6 +16,10 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 				filters: {'docstatus': ['!=', 2]}
 			};
 		});
+
+		this.frm.set_query("insurance_company", function(doc) {
+			return {filters: {is_insurance_company: 1}};
+		});
 	},
 
 	refresh: function () {

@@ -11,6 +11,7 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Payment Entry': 'party',
 			'Journal Entry': 'party',
+			'Sales Invoice': 'bill_to',
 			'Quotation': 'party_name',
 			'Opportunity': 'party_name'
 		},

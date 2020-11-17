@@ -15,6 +15,7 @@
   "action_if_quality_inspection_is_not_submitted",
   "show_barcode_field",
   "clean_description_html",
+  "filter_items_by_applicable_to",
   "section_break_7",
   "restrict_amounts_in_report_to_role",
   "restrict_negative_stock_to_role",
@@ -203,12 +204,18 @@
    "fieldtype": "Link",
    "label": "Restrict Allow Negative Stock For Role",
    "options": "Role"
+  },
+  {
+   "default": "0",
+   "fieldname": "filter_items_by_applicable_to",
+   "fieldtype": "Check",
+   "label": "Filter Items in Transactions by Applicable To Item"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-10-03 14:12:33.202835",
+ "modified": "2020-11-03 00:02:44.175087",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

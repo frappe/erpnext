@@ -881,7 +881,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					var party_account_field = 'credit_to';
 				}
 
-				var party = me.frm.doc[frappe.model.scrub(party_type)];
+				var party = me.frm.doc.bill_to || me.frm.doc[frappe.model.scrub(party_type)];
 				if(party && me.frm.doc.company) {
 					return frappe.call({
 						method: "erpnext.accounts.party.get_party_account_details",
@@ -2003,6 +2003,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		var args = me.get_item_defaults_args();
 		args.args.letter_of_credit = me.frm.doc.letter_of_credit;
+		args.args.bill_to = me.frm.doc.bill_to;
 
 		return frappe.call({
 			method: "erpnext.accounts.doctype.transaction_type.transaction_type.get_transaction_type_details",

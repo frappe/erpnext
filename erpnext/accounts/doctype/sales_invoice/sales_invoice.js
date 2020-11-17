@@ -265,23 +265,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	tc_name: function() {
 		this.get_terms();
 	},
-	customer: function() {
-		if (this.frm.doc.is_pos){
-			var pos_profile = this.frm.doc.pos_profile;
-		}
-		var me = this;
-		if(this.frm.updating_party_details) return;
-		erpnext.utils.get_party_details(this.frm,
-			"erpnext.accounts.party.get_party_details", {
-				posting_date: this.frm.doc.posting_date,
-				party: this.frm.doc.customer,
-				party_type: "Customer",
-				account: this.frm.doc.debit_to,
-				price_list: this.frm.doc.selling_price_list,
-				pos_profile: pos_profile
-			}, function() {
-				me.apply_pricing_rule();
-			});
+
+	customer: function () {
+		this.frm.set_value("bill_to", this.frm.doc.customer);
 
 		if(this.frm.doc.customer) {
 			frappe.call({
@@ -296,6 +282,26 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 				}
 			});
 		}
+	},
+
+	bill_to: function() {
+		if (this.frm.doc.is_pos){
+			var pos_profile = this.frm.doc.pos_profile;
+		}
+		var me = this;
+		if(this.frm.updating_party_details) return;
+		erpnext.utils.get_party_details(this.frm,
+			"erpnext.accounts.party.get_party_details", {
+				posting_date: this.frm.doc.posting_date,
+				party: this.frm.doc.customer,
+				party_type: "Customer",
+				bill_to: this.frm.doc.bill_to,
+				account: this.frm.doc.debit_to,
+				price_list: this.frm.doc.selling_price_list,
+				pos_profile: pos_profile
+			}, function() {
+				me.apply_pricing_rule();
+			});
 	},
 
 	make_inter_company_invoice: function() {
@@ -331,11 +337,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	write_off_outstanding_amount_automatically: function() {
+		var grand_total = this.frm.doc.rounded_total || this.frm.doc.grand_total;
 		if(cint(this.frm.doc.write_off_outstanding_amount_automatically)) {
 			frappe.model.round_floats_in(this.frm.doc, ["grand_total", "paid_amount"]);
 			// this will make outstanding amount 0
 			this.frm.set_value("write_off_amount",
-				flt(this.frm.doc.grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
+				flt(grand_total - this.frm.doc.paid_amount - this.frm.doc.total_advance, precision("write_off_amount"))
 			);
 			this.frm.toggle_enable("write_off_amount", false);
 

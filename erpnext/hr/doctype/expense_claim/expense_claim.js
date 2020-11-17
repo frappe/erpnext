@@ -202,7 +202,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			},
 			callback: function(r) {
 				if (r.message) {
-					d.expense_account = r.message;
+					frappe.model.set_value(cdt, cdn, 'expense_account', r.message);
 				}
 			}
 		});

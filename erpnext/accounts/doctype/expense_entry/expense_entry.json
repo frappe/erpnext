@@ -1,0 +1,294 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2020-11-08 14:32:41.510042",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "entry_type_and_date",
+  "company",
+  "title",
+  "payable_account",
+  "payable_account_currency",
+  "paid_from_account",
+  "column_break1",
+  "amended_from",
+  "transaction_date",
+  "naming_series",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
+  "2_add_edit_gl_entries",
+  "accounts",
+  "section_break_17",
+  "total_expense_amount",
+  "base_total_expense_amount",
+  "column_break_20",
+  "total_tax_amount",
+  "base_total_tax_amount",
+  "column_break_23",
+  "total",
+  "base_total",
+  "addtional_info",
+  "journal_entry_series",
+  "column_break_19",
+  "bank_entry_series",
+  "column_break_21",
+  "cash_entry_series"
+ ],
+ "fields": [
+  {
+   "fieldname": "entry_type_and_date",
+   "fieldtype": "Section Break",
+   "options": "fa fa-flag"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "oldfieldname": "company",
+   "oldfieldtype": "Link",
+   "options": "Company",
+   "print_hide": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "description": "Mandatory if supplier name is set",
+   "fieldname": "payable_account",
+   "fieldtype": "Link",
+   "in_global_search": 1,
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Payable Account",
+   "options": "Account"
+  },
+  {
+   "fetch_from": "payable_account.account_currency",
+   "fieldname": "payable_account_currency",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Payable Account Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "description": "Set if bills are paid",
+   "fieldname": "paid_from_account",
+   "fieldtype": "Link",
+   "label": "Paid From Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "column_break1",
+   "fieldtype": "Column Break",
+   "oldfieldtype": "Column Break",
+   "width": "50%"
+  },
+  {
+   "default": "Today",
+   "fieldname": "transaction_date",
+   "fieldtype": "Date",
+   "label": "Transaction Date",
+   "no_copy": 1,
+   "oldfieldname": "posting_date",
+   "oldfieldtype": "Date",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "default": "EXP-",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "no_copy": 1,
+   "oldfieldname": "naming_series",
+   "oldfieldtype": "Select",
+   "options": "EXP-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "2_add_edit_gl_entries",
+   "fieldtype": "Section Break",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-table"
+  },
+  {
+   "fieldname": "accounts",
+   "fieldtype": "Table",
+   "label": "Accounting Entries",
+   "oldfieldname": "entries",
+   "oldfieldtype": "Table",
+   "options": "Expense Entry Detail",
+   "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "addtional_info",
+   "fieldtype": "Section Break",
+   "label": "More Information",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-file-text"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "default": ":Company",
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "journal_entry_series",
+   "fieldtype": "Data",
+   "label": "Journal Entry Series",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bank_entry_series",
+   "fieldtype": "Data",
+   "label": "Bank Entry Series",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cash_entry_series",
+   "fieldtype": "Data",
+   "label": "Cash Entry Series",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Expense Entry",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.total != doc.base_total",
+   "fieldname": "base_total",
+   "fieldtype": "Currency",
+   "label": "Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_tax_amount",
+   "fieldtype": "Currency",
+   "label": "Total Tax Amount",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_expense_amount",
+   "fieldtype": "Currency",
+   "label": "Total Expense Amount",
+   "options": "payable_account_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.total != doc.base_total",
+   "fieldname": "base_total_tax_amount",
+   "fieldtype": "Data",
+   "label": "Total Tax Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.total != doc.base_total",
+   "fieldname": "base_total_expense_amount",
+   "fieldtype": "Currency",
+   "label": "Total Expense Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2020-11-11 02:02:25.522327",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Expense Entry",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1
+}

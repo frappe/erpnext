@@ -31,13 +31,13 @@
   "more_info",
   "transaction_type",
   "order_type",
-  "column_break_39",
+  "more_info_cb_1",
   "project",
   "inter_company_order_reference",
   "party_account_currency",
-  "column_break_77",
+  "more_info_cb_2",
   "source",
-  "col_break_33",
+  "more_info_cb_3",
   "campaign",
   "tax_id",
   "tax_cnic",
@@ -1005,10 +1005,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_77",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "source",
    "fieldtype": "Link",
    "label": "Source",
@@ -1357,10 +1353,6 @@
    "options": "Transaction Type"
   },
   {
-   "fieldname": "column_break_39",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_52",
    "fieldtype": "Column Break"
   },
@@ -1644,10 +1636,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "col_break_33",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "eval:doc.docstatus==1",
    "fieldname": "update_item_prices",
    "fieldtype": "Button",
@@ -1679,12 +1667,24 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_3",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-31 02:15:24.064266",
+ "modified": "2020-11-04 00:14:47.082022",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

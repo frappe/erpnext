@@ -221,20 +221,21 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		applicable_to_item = filters.get('applicable_to_item')
 		del filters['applicable_to_item']
 
-		variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
-		if variant_of:
-			all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
-			all_variants.append(variant_of)
-			applicable_to_item_match_cond = "ap.applicable_to_item in ({0})"\
-				.format(", ".join([frappe.db.escape(d) for d in all_variants]))
-		else:
-			applicable_to_item_match_cond = "ap.applicable_to_item = {0}".format(frappe.db.escape(applicable_to_item))
+		if frappe.get_cached_value("Stock Settings", None, "filter_items_by_applicable_to"):
+			variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
+			if variant_of:
+				all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
+				all_variants.append(variant_of)
+				applicable_to_item_match_cond = "ap.applicable_to_item in ({0})"\
+					.format(", ".join([frappe.db.escape(d) for d in all_variants]))
+			else:
+				applicable_to_item_match_cond = "ap.applicable_to_item = {0}".format(frappe.db.escape(applicable_to_item))
 
-		applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
-			or exists(select ap.name
-				from `tabItem Applicable To` ap
-				where ap.parent = tabItem.name and {0}))
-		""".format(applicable_to_item_match_cond)
+			applicable_to_item_cond = """and (tabItem.applicable_to_all = 1
+				or exists(select ap.name
+					from `tabItem Applicable To` ap
+					where ap.parent = tabItem.name and {0}))
+			""".format(applicable_to_item_match_cond)
 
 	return frappe.db.sql("""select tabItem.name,
 		if(length(tabItem.item_name) > 40,

@@ -28,12 +28,14 @@
   "more_info",
   "transaction_type",
   "order_type",
-  "column_break_36",
+  "more_info_cb_1",
   "project",
   "pick_list",
   "source",
   "campaign",
-  "col_break_39",
+  "more_info_cb_2",
+  "received_by_type",
+  "received_by",
   "tax_id",
   "tax_cnic",
   "tax_strn",
@@ -1324,14 +1326,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break_36",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "col_break_39",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_46",
    "fieldtype": "Column Break"
   },
@@ -1638,12 +1632,36 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "eval:doc.received_by || doc.docstatus == 0",
+   "fieldname": "received_by_type",
+   "fieldtype": "Link",
+   "label": "Received By Type",
+   "options": "DocType"
+  },
+  {
+   "allow_on_submit": 1,
+   "depends_on": "received_by_type",
+   "fieldname": "received_by",
+   "fieldtype": "Dynamic Link",
+   "label": "Received By",
+   "options": "received_by_type"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-10-31 02:15:23.339981",
+ "modified": "2020-11-04 00:36:05.259674",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

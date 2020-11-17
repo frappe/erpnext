@@ -190,10 +190,10 @@ frappe.ui.form.on("Item", {
 	},
 
 	item_code: function(frm) {
-		if(!frm.doc.item_name)
-			frm.set_value("item_name", frm.doc.item_code);
-		if(!frm.doc.description)
-			frm.set_value("description", frm.doc.item_code);
+		// if(!frm.doc.item_name)
+		// 	frm.set_value("item_name", frm.doc.item_code);
+		// if(!frm.doc.description)
+		// 	frm.set_value("description", frm.doc.item_code);
 	},
 
 	is_stock_item: function(frm) {

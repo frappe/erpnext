@@ -55,7 +55,7 @@ def get_transaction_type_details(args, items):
 		party = args.supplier
 	elif args.customer:
 		party_type = "Customer"
-		party = args.customer
+		party = args.bill_to or args.customer
 
 	out = frappe._dict({
 		"items": get_item_defaults_info(args, items),

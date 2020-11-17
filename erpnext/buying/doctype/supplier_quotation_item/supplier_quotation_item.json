@@ -168,7 +168,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
    "print_width": "300px",
-   "reqd": 1,
    "width": "300px"
   },
   {
@@ -922,7 +921,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:11.618646",
+ "modified": "2020-11-02 13:42:41.260335",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

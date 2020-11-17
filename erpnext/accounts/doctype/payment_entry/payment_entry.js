@@ -150,7 +150,11 @@ frappe.ui.form.on('Payment Entry', {
 				'Purchase Order', 'Expense Claim', 'Fees'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
-				filters[frappe.model.scrub(doc.party_type)] = doc.party;
+				if (child.reference_doctype == "Sales Invoice") {
+					filters['bill_to'] = doc.party;
+				} else {
+					filters[frappe.model.scrub(doc.party_type)] = doc.party;
+				}
 			}
 
 			if(child.reference_doctype == "Expense Claim") {

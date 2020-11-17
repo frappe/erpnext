@@ -200,6 +200,11 @@ def get_data():
 					"is_query_report": True,
 				},
 				{
+					"type": "doctype",
+					"name": "Expense Entry",
+					"description": _("Expense entries.")
+				},
+				{
 					"type": "report",
 					"name": "Customer Ledger Summary",
 					"doctype": "GL Entry",

@@ -10,6 +10,8 @@
   "naming_series",
   "customer",
   "customer_name",
+  "bill_to",
+  "bill_to_name",
   "po_no",
   "po_date",
   "stin",
@@ -29,20 +31,28 @@
   "posting_time",
   "set_posting_time",
   "due_date",
-  "more_information",
+  "more_info",
   "transaction_type",
   "order_type",
-  "column_break_31",
+  "more_info_cb_1",
   "project",
   "source",
   "campaign",
-  "col_break23",
+  "more_info_cb_2",
   "cost_center",
   "tax_id",
   "tax_cnic",
   "tax_strn",
   "inter_company_invoice_reference",
   "customer_group",
+  "sec_insurance",
+  "insurance_company",
+  "insurance_company_name",
+  "col_break_insurance",
+  "insurance_policy_no",
+  "insurance_loss_no",
+  "col_break_insurance2",
+  "insurance_surveyor",
   "sec_applies_to",
   "applies_to_item",
   "col_break_applies_to",
@@ -285,7 +295,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "customer.tax_id",
+   "fetch_from": "bill_to.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "hidden": 1,
@@ -307,6 +317,7 @@
    "default": "0",
    "fieldname": "is_pos",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Include Payment (POS)",
    "oldfieldname": "is_pos",
    "oldfieldtype": "Check",
@@ -1348,12 +1359,6 @@
    "report_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_information",
-   "fieldtype": "Section Break",
-   "label": "More Information"
-  },
-  {
    "fieldname": "inter_company_invoice_reference",
    "fieldtype": "Link",
    "label": "Inter Company Invoice Reference",
@@ -1385,11 +1390,6 @@
    "label": "Is Discounted",
    "no_copy": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "col_break23",
-   "fieldtype": "Column Break",
-   "width": "50%"
   },
   {
    "default": "Draft",
@@ -1606,7 +1606,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "customer.tax_cnic",
+   "fetch_from": "bill_to.tax_cnic",
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1614,7 +1614,7 @@
    "read_only": 1
   },
   {
-   "fetch_from": "customer.tax_strn",
+   "fetch_from": "bill_to.tax_strn",
    "fieldname": "tax_strn",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1931,10 +1931,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "column_break_31",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_208",
    "fieldtype": "Column Break"
   },
@@ -1970,12 +1966,90 @@
   {
    "fieldname": "col_break_applies_to",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0 || doc.bill_to != doc.customer",
+   "fieldname": "bill_to",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Bill To",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.bill_to && doc.bill_to_name != doc.bill_to && (doc.docstatus == 0 || doc.bill_to != doc.customer)",
+   "fetch_from": "bill_to.customer_name",
+   "fieldname": "bill_to_name",
+   "fieldtype": "Data",
+   "label": "Bill To Name",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "insurance_company",
+   "fieldname": "sec_insurance",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Insurance Details"
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.insurance_company && doc.insurance_company_name != doc.insurance_company",
+   "fetch_from": "insurance_company.customer_name",
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "label": "Insurance Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_insurance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_policy_no",
+   "fieldtype": "Data",
+   "label": "Policy #"
+  },
+  {
+   "fieldname": "col_break_insurance2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_loss_no",
+   "fieldtype": "Data",
+   "label": "Loss #"
+  },
+  {
+   "fieldname": "insurance_surveyor",
+   "fieldtype": "Link",
+   "label": "Insurance Surveyor",
+   "options": "Insurance Surveyor"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_info",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "more_info_cb_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "more_info_cb_2",
+   "fieldtype": "Column Break",
+   "width": "50%"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-10-31 02:15:22.289096",
+ "modified": "2020-11-04 19:07:06.063912",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2068,7 +2142,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
+ "search_fields": "posting_date, due_date, customer,bill_to, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
  "sort_field": "posting_date",
  "sort_order": "DESC",

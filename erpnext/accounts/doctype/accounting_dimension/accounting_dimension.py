@@ -162,8 +162,9 @@ def toggle_disabling(doc):
 
 def get_doctypes_with_dimensions():
 	doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
-		"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
-		"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
+		"Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
+		"Expense Entry", "Expense Entry Detail", "Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges",
+		"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
 		"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
 		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
@@ -180,7 +181,7 @@ def get_accounting_dimensions(as_list=True):
 		return accounting_dimensions
 
 def get_checks_for_pl_and_bs_accounts():
-	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
+	dimensions = frappe.db.sql("""SELECT p.name, p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
 		FROM `tabAccounting Dimension`p ,`tabAccounting Dimension Detail` c
 		WHERE p.name = c.parent""", as_dict=1)
 

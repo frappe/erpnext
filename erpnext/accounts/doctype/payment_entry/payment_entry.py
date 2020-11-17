@@ -272,8 +272,9 @@ class PaymentEntry(AccountsController):
 						party_field = "party" if d.reference_doctype=="Landed Cost Voucher" else scrub(self.party_type)
 						party_type_field = "party_type" if d.reference_doctype=="Landed Cost Voucher" else ""
 
-						if self.party != ref_doc.get(party_field) or (party_type_field and self.party_type != ref_doc.get(party_type_field)):
-							frappe.throw(_("{0} {1} is not associated with {2} {3}")
+						ref_party = ref_doc.get("bill_to") or ref_doc.get(party_field)
+						if self.party != ref_party or (party_type_field and self.party_type != ref_doc.get(party_type_field)):
+							frappe.throw(_("{0} {1} is not associated with {2} {3} for payments")
 								.format(d.reference_doctype, d.reference_name, self.party_type, self.party))
 					else:
 						self.validate_journal_entry(d)
@@ -1110,7 +1111,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.posting_date = nowdate()
 	pe.mode_of_payment = doc.get("mode_of_payment")
 	pe.party_type = party_type
-	pe.party = doc.get(scrub(party_type)) or doc.get("party")
+	pe.party = doc.get('bill_to') or doc.get(scrub(party_type)) or doc.get("party")
 	pe.contact_person = doc.get("contact_person")
 	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()

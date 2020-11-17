@@ -91,6 +91,18 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			});
 		}
 
+		if(this.frm.fields_dict.insurance_company) {
+			this.frm.set_query("insurance_company", function(doc) {
+				return {filters: {is_insurance_company: 1}};
+			});
+		}
+
+		if(this.frm.fields_dict.received_by_type) {
+			this.frm.set_query("received_by_type", function(doc) {
+				return {filters: {name: ['in', ['Employee', 'Customer', 'Contact']]}};
+			});
+		}
+
 		if(!this.frm.fields_dict["items"]) {
 			return;
 		}
@@ -584,23 +596,20 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 });
 
 frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
-	if(in_list(["Delivery Note", "Sales Invoice"], frm.doc.doctype)) {
-		if(frm.doc.project) {
-			frappe.call({
-				method:'erpnext.projects.doctype.project.project.get_cost_center_name' ,
-				args: {	project: frm.doc.project	},
-				callback: function(r, rt) {
-					if(!r.exc) {
-						$.each(frm.doc["items"] || [], function(i, row) {
-							if(r.message) {
-								frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
-								frappe.msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
-							}
-						})
-					}
+	if (frm.doc.project) {
+		frappe.call({
+			method: 'erpnext.projects.doctype.project.project.get_project_details',
+			args: {project_name: frm.doc.project},
+			callback: function (r) {
+				if (!r.exc) {
+					$.each(r.message, function(fieldname, value) {
+						if (frm.fields_dict[fieldname]) {
+							frm.set_value(fieldname, value);
+						}
+					});
 				}
-			})
-		}
+			}
+		});
 	}
 })
 

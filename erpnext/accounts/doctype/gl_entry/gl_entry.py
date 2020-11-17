@@ -90,22 +90,30 @@ class GLEntry(Document):
 				self.project = None
 
 	def validate_dimensions_for_pl_and_bs(self):
-
 		account_type = frappe.db.get_value("Account", self.account, "report_type")
 
-		for dimension in get_checks_for_pl_and_bs_accounts():
+		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
+		if accounting_dimensions:
+			mandatory_for_account = frappe.get_all("Mandatory Accounting Dimension",
+				filters={'parenttype': 'Account', 'parent': self.account}, fields=['accounting_dimension'])
+			mandatory_for_account = [d.accounting_dimension for d in mandatory_for_account]
 
-			if account_type == "Profit and Loss" \
-				and self.company == dimension.company and dimension.mandatory_for_pl and not dimension.disabled:
-				if not self.get(dimension.fieldname):
-					frappe.throw(_("Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}.")
+			for dimension in get_checks_for_pl_and_bs_accounts():
+				if dimension.name in mandatory_for_account and self.company == dimension.company and not dimension.disabled:
+					frappe.throw(_("Accounting Dimension <b>{0}</b> is required for Account <b>{1}</b>.")
 						.format(dimension.label, self.account))
 
-			if account_type == "Balance Sheet" \
-				and self.company == dimension.company and dimension.mandatory_for_bs and not dimension.disabled:
-				if not self.get(dimension.fieldname):
-					frappe.throw(_("Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.")
-						.format(dimension.label, self.account))
+				if account_type == "Profit and Loss" \
+					and self.company == dimension.company and dimension.mandatory_for_pl and not dimension.disabled:
+					if not self.get(dimension.fieldname):
+						frappe.throw(_("Accounting Dimension <b>{0}</b> is required for 'Profit and Loss' account {1}.")
+							.format(dimension.label, self.account))
+
+				if account_type == "Balance Sheet" \
+					and self.company == dimension.company and dimension.mandatory_for_bs and not dimension.disabled:
+					if not self.get(dimension.fieldname):
+						frappe.throw(_("Accounting Dimension <b>{0}</b> is required for 'Balance Sheet' account {1}.")
+							.format(dimension.label, self.account))
 
 
 	def check_pl_account(self):

@@ -17,9 +17,14 @@
   "amended_from",
   "posting_date",
   "finance_book",
+  "accounting_dimensions_section",
+  "cost_center",
+  "dimension_col_break",
+  "project",
   "2_add_edit_gl_entries",
   "accounts",
   "section_break99",
+  "expense_entry_name",
   "cheque_no",
   "cheque_date",
   "column_break99",
@@ -497,12 +502,43 @@
   {
    "fieldname": "column_break_45",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "dimension_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "expense_entry_name",
+   "fieldtype": "Link",
+   "label": "Expense Entry Reference",
+   "no_copy": 1,
+   "options": "Expense Entry",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 176,
  "is_submittable": 1,
- "modified": "2020-10-20 14:44:39.964803",
+ "modified": "2020-11-08 14:57:51.298811",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

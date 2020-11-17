@@ -116,9 +116,7 @@ frappe.ui.form.on("Journal Entry", {
 			},
 			callback: function(r){
 				if(r.message){
-					$.each(frm.doc.accounts || [], function(i, jvd) {
-						frappe.model.set_value(jvd.doctype, jvd.name, "cost_center", r.message.cost_center);
-					});
+					frm.set_value("cost_center", r.message.cost_center);
 				}
 			}
 		});
@@ -156,6 +154,15 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 		});
 
 		me.frm.set_query("cost_center", "accounts", function(doc, cdt, cdn) {
+			return {
+				filters: {
+					company: me.frm.doc.company,
+					is_group: 0
+				}
+			};
+		});
+
+		me.frm.set_query("cost_center", function(doc, cdt, cdn) {
 			return {
 				filters: {
 					company: me.frm.doc.company,
@@ -237,7 +244,11 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 					out.filters.push([jvd.reference_type, "party_type", "=", jvd.party_type]);
 					party_field = "party"
 				} else if(jvd.reference_type.indexOf("Sales")===0) {
-					party_field = "customer";
+					if (jvd.reference_type == "Sales Invoice") {
+						party_field = "bill_to";
+					} else {
+						party_field = "customer";
+					}
 				} else if (jvd.reference_type.indexOf("Purchase")===0) {
 					party_field = "supplier";
 				} else if (['Employee Advance', 'Expense Claim'.includes(jvd.reference_type)]) {
