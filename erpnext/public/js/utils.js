@@ -116,6 +116,19 @@ $.extend(erpnext.utils, {
 		}
 	},
 
+	set_place_of_supply: function(frm){
+		frappe.call({
+			method: "erpnext.regional.india.utils.get_place_of_supply",
+			args: {
+				"party_details": frm.doc,
+				"doctype": frm.doc.doctype
+			},
+			callback: function(r){
+					frm.set_value("place_of_supply", r.message)
+			}
+		})
+	},
+
 	add_indicator_for_multicompany: function(frm, info) {
 		frm.dashboard.stats_area.removeClass('hidden');
 		frm.dashboard.stats_area_row.addClass('flex');
@@ -304,21 +317,6 @@ $.extend(erpnext.utils, {
 			}
 			frappe.ui.form.make_quick_entry(doctype, null, null, new_doc);
 		});
-	},
-
-	set_place_of_supply: function(frm){
-		frappe.call({
-			method: "erpnext.regional.india.utils.get_place_of_supply",
-			args: {
-				"party_details": frm.doc,
-				"doctype": frm.doc.doctype
-			},
-			callback: function(r){
-				if(r.message){
-					frm.set_value("place_of_supply", r.message)
-				}
-			}
-		})
 	}
 
 });

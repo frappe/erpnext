@@ -138,6 +138,9 @@ def test_method():
 @frappe.whitelist()
 def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
+	if isinstance(party_details, string_types):
+		party_details = json.loads(party_details)
+		party_details = frappe._dict(party_details)
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		address_name = party_details.customer_address or party_details.shipping_address_name
