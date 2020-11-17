@@ -28,8 +28,8 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 	setup_filters: function(frm) {
 		let filters = {};
 
-		frappe.model.with_doctype(frm.doc.accounting_dimension, function() {
-			if (frm.doc.accounting_dimension) {
+		if (frm.doc.accounting_dimension) {
+			frappe.model.with_doctype(frm.doc.accounting_dimension, function() {
 				if (frappe.model.is_tree(frm.doc.accounting_dimension)) {
 					filters['is_group'] = 0;
 				}
@@ -43,8 +43,8 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 						filters: filters
 					};
 				});
-			}
-		});
+			});
+		}
 	},
 
 	accounting_dimension: function(frm) {
