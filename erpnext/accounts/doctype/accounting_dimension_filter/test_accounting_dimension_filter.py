@@ -74,9 +74,9 @@ def create_accounting_dimension_filter():
 
 def disable_dimension_filter():
 	doc = frappe.get_doc('Accounting Dimension Filter', {'accounting_dimension': 'Cost Center'})
-	doc.disabled = 0
+	doc.disabled = 1
 	doc.save()
 
 	doc = frappe.get_doc('Accounting Dimension Filter', {'accounting_dimension': 'Location'})
-	doc.disabled = 0
+	doc.disabled = 1
 	doc.save()
