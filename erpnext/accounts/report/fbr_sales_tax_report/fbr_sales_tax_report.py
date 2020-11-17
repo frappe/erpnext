@@ -5,6 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import getdate, nowdate, flt, cint
+from erpnext import get_company_currency
+from frappe.model.meta import get_field_precision
+import json
+
 
 class FBRInvoiceWiseTaxes(object):
 	def __init__(self, filters=None):
@@ -18,6 +22,14 @@ class FBRInvoiceWiseTaxes(object):
 		self.filters.sales_tax_account = frappe.get_cached_value('Company', self.filters.company, "sales_tax_account")
 		self.filters.extra_tax_account = frappe.get_cached_value('Company', self.filters.company, "extra_tax_account")
 		self.filters.further_tax_account = frappe.get_cached_value('Company', self.filters.company, "further_tax_account")
+
+		self.filters.tax_accounts = []
+		if self.filters.sales_tax_account:
+			self.filters.tax_accounts.append(self.filters.sales_tax_account)
+		if self.filters.extra_tax_account:
+			self.filters.tax_accounts.append(self.filters.extra_tax_account)
+		if self.filters.further_tax_account:
+			self.filters.tax_accounts.append(self.filters.further_tax_account)
 
 	def run(self, args):
 		if self.filters.from_date > self.filters.to_date:
@@ -170,7 +182,8 @@ class FBRInvoiceWiseTaxes(object):
 				"fieldtype": "Currency",
 				"fieldname": "extra_tax",
 				"options": "Company:company:default_currency",
-				"width": 110
+				"width": 110,
+				"hide_for_export": 1
 			},
 			{
 				"label": _("ST Withheld at Source"),
@@ -203,7 +216,7 @@ class FBRInvoiceWiseTaxes(object):
 			{
 				"label": _("Total Value of Sales"),
 				"fieldtype": "Currency",
-				"fieldname": "base_grand_total",
+				"fieldname": "base_total_after_taxes",
 				"options": "Company:company:default_currency",
 				"width": 110
 			},
@@ -220,71 +233,127 @@ class FBRInvoiceWiseTaxes(object):
 		return columns
 
 	def get_data(self):
+		self.get_invoices()
+		self.process_invoice_map()
+
+		for i, d in enumerate(self.invoices):
+			d.sr_no = i+1
+
+		return self.invoices
+
+	def get_invoices(self):
 		conditions = "and i.bill_to = %(party)s" if self.filters.party else ""
 
-		self.invoices = frappe.db.sql("""
-			select
-				i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
-				i.base_taxable_total, i.base_grand_total, addr.state, addr.name as address_name,
-				i.bill_to as party, i.bill_to_name as party_name, c.tax_id, c.tax_cnic, c.tax_strn,
-				cc.tax_description as description
-			from `tabSales Invoice` i
-			left join `tabCustomer` c on c.name = i.bill_to
-			left join `tabAddress` addr on addr.name = i.customer_address
-			left join `tabCost Center` cc on cc.name = i.cost_center
-			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
-				and ifnull(i.stin, 0) != 0 and ifnull(i.is_return, 0) = 0 and i.order_type != 'Maintenance' {0}
-			order by i.posting_date, i.stin
-		""".format(conditions), self.filters, as_dict=1)
+		if self.filters.tax_accounts:
+			self.invoices = frappe.db.sql("""
+				select
+					i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
+					addr.state, addr.name as address_name,
+					i.bill_to as party, i.bill_to_name as party_name,
+					c.tax_id, c.tax_cnic, c.tax_strn,
+					cc.tax_description as description, i.conversion_rate
+				from `tabSales Invoice` i
+				left join `tabCustomer` c on c.name = i.bill_to
+				left join `tabAddress` addr on addr.name = i.customer_address
+				left join `tabCost Center` cc on cc.name = i.cost_center
+				where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
+					and ifnull(i.is_return, 0) = 0 and exists(select tax.name from `tabSales Taxes and Charges` tax
+						where tax.parent = i.name and tax.account_head in ({0}) and tax.base_tax_amount_after_discount_amount != 0)
+					{1}
+				order by i.posting_date, i.stin
+			""".format(",".join([frappe.db.escape(d) for d in self.filters.tax_accounts]), conditions), self.filters, as_dict=1)
+		else:
+			self.invoices = []
 
-		invoices_map = {}
+		self.invoices_map = {}
 		for d in self.invoices:
+			d.base_taxable_total = 0
+			d.base_total_after_taxes = 0
 			d.sales_tax = 0
 			d.extra_tax = 0
 			d.further_tax = 0
 			d.tax_strn = "Registered" if d.tax_strn else "Unregistered"
 			d.sale_type = " Goods at standard rate (default)"
 			d.document_type = "SI"
-			invoices_map[d.invoice] = d
+			self.invoices_map[d.invoice] = frappe._dict({
+				'invoice': d, 'items': [], 'taxes': []
+			})
 
-		tax_accounts = []
-		if self.filters.sales_tax_account:
-			tax_accounts.append(self.filters.sales_tax_account)
-		if self.filters.extra_tax_account:
-			tax_accounts.append(self.filters.extra_tax_account)
-		if self.filters.further_tax_account:
-			tax_accounts.append(self.filters.further_tax_account)
+		invoice_names = list(self.invoices_map.keys())
 
-		if invoices_map and tax_accounts:
+		if invoice_names:
+			invoice_items = frappe.db.sql("""
+				select i.parent as invoice, i.base_taxable_amount, i.item_tax_detail
+				from `tabSales Invoice Item` i
+				where i.parent in %s
+			""", [invoice_names], as_dict=1)
+
+			for d in invoice_items:
+				self.invoices_map[d.invoice]['items'].append(d)
+
+		if invoice_names and self.filters.tax_accounts:
 			taxes = frappe.db.sql("""
 				select
-					parent as invoice, rate, sum(base_tax_amount_after_discount_amount) as amount, account_head
+					name, parent as invoice, rate, account_head
 				from `tabSales Taxes and Charges`
-				where parent in ({0}) and account_head in ({1})
+				where parent in %s and account_head in %s
 					and abs(base_tax_amount_after_discount_amount) > 0
 				group by parent, account_head
-			""".format(", ".join(['%s'] * len(invoices_map.keys())), ", ".join(['%s'] * len(tax_accounts))),
-				list(invoices_map.keys()) + tax_accounts, as_dict=1)
-		else:
-			taxes = []
+			""", [invoice_names, self.filters.tax_accounts], as_dict=1)
 
-		for tax in taxes:
-			tax_field = ''
-			if tax.account_head == self.filters.sales_tax_account:
-				tax_field = 'sales_tax'
-				invoices_map[tax.invoice]['rate'] = tax.rate
-			elif tax.account_head == self.filters.extra_tax_account:
-				tax_field = 'extra_tax'
-			elif tax.account_head == self.filters.further_tax_account:
-				tax_field = 'further_tax'
+			for tax in taxes:
+				self.invoices_map[tax.invoice]['taxes'].append(tax)
 
-			if tax_field:
-				invoices_map[tax.invoice][tax_field] += flt(tax.amount)
+	def process_invoice_map(self):
+		company_currency = get_company_currency(self.filters.company)
+		tax_precision = get_field_precision(frappe.get_meta("Sales Taxes and Charges").get_field("base_tax_amount"),
+			company_currency)
+		taxable_precision = get_field_precision(frappe.get_meta("Sales Invoice").get_field("base_taxable_total"),
+			company_currency)
+		total_precision = get_field_precision(frappe.get_meta("Sales Invoice").get_field("base_total_after_taxes"),
+			company_currency)
 
-		for i, d in enumerate(self.invoices):
-			d.sr_no = i+1
+		for inv_obj in self.invoices_map.values():
+			for item in inv_obj['items']:
+				item_tax_detail = json.loads(item.item_tax_detail or '{}')
+				has_tax = False
 
-		return self.invoices
+				for tax in inv_obj['taxes']:
+					tax_field = self.get_tax_field(tax.account_head)
+					if tax_field and item_tax_detail.get(tax.name):
+						has_tax = True
+						inv_obj['invoice'][tax_field] += flt(item_tax_detail.get(tax.name))
+
+				if has_tax:
+					inv_obj['invoice']['base_taxable_total'] += item.base_taxable_amount
+
+			for tax in inv_obj['taxes']:
+				tax_field = self.get_tax_field(tax.account_head)
+
+				if tax_field:
+					inv_obj['invoice'][tax_field] = flt(inv_obj['invoice'][tax_field], tax_precision)
+					inv_obj['invoice'][tax_field] = flt(inv_obj['invoice'][tax_field] * inv_obj['invoice'].conversion_rate,
+						tax_precision)
+
+					inv_obj['invoice']['base_total_after_taxes'] += inv_obj['invoice'][tax_field]
+
+			inv_obj['invoice']['rate'] = flt(inv_obj['invoice']['sales_tax'] / inv_obj['invoice']['base_taxable_total'] * 100\
+				if inv_obj['invoice']['base_taxable_total'] else 0, 2)
+
+			inv_obj['invoice']['base_total_after_taxes'] += inv_obj['invoice']['base_taxable_total']
+			inv_obj['invoice']['base_taxable_total'] = flt(inv_obj['invoice']['base_taxable_total'], taxable_precision)
+			inv_obj['invoice']['base_total_after_taxes'] = flt(inv_obj['invoice']['base_total_after_taxes'], total_precision)
+
+	def get_tax_field(self, account_head):
+		tax_field = ''
+		if account_head == self.filters.sales_tax_account:
+			tax_field = 'sales_tax'
+		elif account_head == self.filters.extra_tax_account:
+			tax_field = 'extra_tax'
+		elif account_head == self.filters.further_tax_account:
+			tax_field = 'further_tax'
+
+		return tax_field
 
 
 def execute(filters=None):
