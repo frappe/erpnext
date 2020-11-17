@@ -32,7 +32,7 @@ class LeaveEncashment(Document):
 		additional_salary.employee = self.employee
 		earning_component = frappe.get_value("Leave Type", self.leave_type, "earning_component")
 		if not earning_component:
-			frappe.throw(_("Please set Earning Component for Leave type: {0}.".format(self.leave_type)))
+			frappe.throw(_("Please set Earning Component for Leave type: {0}.").format(self.leave_type))
 		additional_salary.salary_component = earning_component
 		additional_salary.payroll_date = self.encashment_date
 		additional_salary.amount = self.encashment_amount
@@ -98,7 +98,11 @@ class LeaveEncashment(Document):
 		create_leave_ledger_entry(self, args, submit)
 
 		# create reverse entry for expired leaves
-		to_date = self.get_leave_allocation().get('to_date')
+		leave_allocation = self.get_leave_allocation()
+		if not leave_allocation:
+			return
+
+		to_date = leave_allocation.get('to_date')
 		if to_date < getdate(nowdate()):
 			args = frappe._dict(
 				leaves=self.encashable_days,
