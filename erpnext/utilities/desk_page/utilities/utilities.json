@@ -33,7 +33,7 @@
    "link_to": "Video",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -42,10 +42,10 @@
    "link_to": "Video Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:29.198857",
+ "modified": "2020-11-17 13:18:39.317897",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Utilities",

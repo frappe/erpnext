@@ -59,7 +59,7 @@
    "link_to": "Loan Type",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -68,7 +68,7 @@
    "link_to": "Loan Application",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -77,7 +77,7 @@
    "link_to": "Loan",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -93,7 +93,7 @@
    "link_to": "Grant Application",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -109,7 +109,7 @@
    "link_to": "Member",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -118,7 +118,7 @@
    "link_to": "Membership",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -127,7 +127,7 @@
    "link_to": "Membership Type",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -136,7 +136,7 @@
    "link_to": "Membership Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -152,7 +152,7 @@
    "link_to": "Volunteer",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -161,7 +161,7 @@
    "link_to": "Volunteer Type",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -177,7 +177,7 @@
    "link_to": "Chapter",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -193,7 +193,7 @@
    "link_to": "Donor",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -202,10 +202,10 @@
    "link_to": "Donor Type",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:26.036726",
+ "modified": "2020-11-17 13:18:42.271279",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",

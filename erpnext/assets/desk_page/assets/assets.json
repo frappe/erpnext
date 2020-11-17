@@ -49,7 +49,7 @@
    "link_to": "Asset",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -58,7 +58,7 @@
    "link_to": "Location",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -67,7 +67,7 @@
    "link_to": "Asset Category",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -76,7 +76,7 @@
    "link_to": "Asset Movement",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -92,7 +92,7 @@
    "link_to": "Asset Maintenance Team",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -101,7 +101,7 @@
    "link_to": "Asset Maintenance",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -110,7 +110,7 @@
    "link_to": "Asset Maintenance Log",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -119,7 +119,7 @@
    "link_to": "Asset Value Adjustment",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -128,7 +128,7 @@
    "link_to": "Asset Repair",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -144,7 +144,7 @@
    "link_to": "Asset Depreciation Ledger",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -153,7 +153,7 @@
    "link_to": "Asset Depreciations and Balances",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -162,10 +162,10 @@
    "link_to": "Asset Maintenance",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:26.576154",
+ "modified": "2020-11-17 13:18:41.714472",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",

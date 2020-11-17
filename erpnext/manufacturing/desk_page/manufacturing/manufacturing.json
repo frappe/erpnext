@@ -58,7 +58,7 @@
    "link_to": "Work Order",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -67,7 +67,7 @@
    "link_to": "Production Plan",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -76,7 +76,7 @@
    "link_to": "Stock Entry",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -85,7 +85,7 @@
    "link_to": "Job Card",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -94,7 +94,7 @@
    "link_to": "Downtime Entry",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -110,7 +110,7 @@
    "link_to": "Item",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -119,7 +119,7 @@
    "link_to": "BOM",
    "link_type": "DocType",
    "onboard": 1,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -128,7 +128,7 @@
    "link_to": "Workstation",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -137,7 +137,7 @@
    "link_to": "Operation",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -146,7 +146,7 @@
    "link_to": "Routing",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -162,7 +162,7 @@
    "link_to": "Production Planning Report",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -171,7 +171,7 @@
    "link_to": "Work Order Summary",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -180,7 +180,7 @@
    "link_to": "Quality Inspection Summary",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -189,7 +189,7 @@
    "link_to": "Downtime Analysis",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -198,7 +198,7 @@
    "link_to": "Job Card Summary",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -207,7 +207,7 @@
    "link_to": "BOM Search",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -216,7 +216,7 @@
    "link_to": "BOM Stock Report",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -225,7 +225,7 @@
    "link_to": "Production Analytics",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -234,7 +234,7 @@
    "link_to": "BOM Operations Time",
    "link_type": "Report",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -250,7 +250,7 @@
    "link_to": "BOM Update Tool",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -259,7 +259,7 @@
    "link_to": "bom-comparison-tool",
    "link_type": "Page",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   },
   {
    "hidden": 0,
@@ -275,10 +275,10 @@
    "link_to": "Manufacturing Settings",
    "link_type": "DocType",
    "onboard": 0,
-   "type": "Card Break"
+   "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:00:24.140642",
+ "modified": "2020-11-17 13:18:44.426761",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
