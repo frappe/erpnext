@@ -18,8 +18,35 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Utilities",
- "modified": "2020-09-10 12:33:30.089853",
- "modified_by": "user@erpnext.com",
+ "links": [
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Video",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Video",
+   "link_to": "Video",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Video Settings",
+   "link_to": "Video Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  }
+ ],
+ "modified": "2020-11-17 13:00:29.198857",
+ "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Utilities",
  "owner": "user@erpnext.com",
