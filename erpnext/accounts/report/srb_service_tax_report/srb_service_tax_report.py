@@ -156,15 +156,15 @@ class FBRInvoiceWiseTaxes(object):
 		return columns
 
 	def get_data(self):
-		conditions = "and i.customer = %(party)s" if self.filters.party else ""
+		conditions = "and i.bill_to = %(party)s" if self.filters.party else ""
 
 		self.invoices = frappe.db.sql("""
 			select
 				i.name as invoice, i.stin, DATE_FORMAT(i.posting_date, '%%d/%%m/%%Y') as posting_date,
 				i.base_taxable_total, i.base_grand_total, addr.city, addr.name as address_name,
-				i.customer as party, i.customer_name as party_name, c.tax_id, c.tax_cnic
+				i.bill_to as party, i.bill_to_name as party_name, c.tax_id, c.tax_cnic
 			from `tabSales Invoice` i
-			left join `tabCustomer` c on c.name = i.customer
+			left join `tabCustomer` c on c.name = i.bill_to
 			left join `tabAddress` addr on addr.name = i.customer_address
 			where i.docstatus = 1 and i.company = %(company)s and i.posting_date between %(from_date)s and %(to_date)s
 				and ifnull(i.stin, 0) != 0 and ifnull(i.is_return, 0) = 0 and i.order_type = 'Maintenance' {0}
