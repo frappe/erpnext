@@ -135,6 +135,7 @@ def test_method():
 	'''test function'''
 	return 'overridden'
 
+@frappe.whitelist()
 def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
