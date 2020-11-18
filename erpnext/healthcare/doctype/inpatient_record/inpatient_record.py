@@ -50,7 +50,7 @@ class InpatientRecord(Document):
 
 		if ip_record:
 			msg = _(("Already {0} Patient {1} with Inpatient Record ").format(ip_record[0].status, self.patient) \
-				+ """ <b><a href="#Form/Inpatient Record/{0}">{0}</a></b>""".format(ip_record[0].name))
+				+ """ <b><a href="/app/Form/Inpatient Record/{0}">{0}</a></b>""".format(ip_record[0].name))
 			frappe.throw(msg)
 
 	def admit(self, service_unit, check_in, expected_discharge=None):

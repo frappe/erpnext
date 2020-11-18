@@ -85,7 +85,7 @@ class CallPopup {
 								<br>
 								<a
 									class="text-small text-muted"
-									href="#Form/Call Log/${this.call_log.name}">
+									href="/desk/Form/Call Log/${this.call_log.name}">
 									${__('View call log')}
 								</a>
 							`,
@@ -167,7 +167,7 @@ class CallPopup {
 				const issue_field = this.dialog.get_field("last_issue");
 				issue_field.set_value(issue.subject);
 				issue_field.$wrapper.append(`
-					<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
+					<a class="text-medium" href="/desk/List/Issue?customer=${issue.customer}">
 						${__('View all issues from {0}', [issue.customer])}
 					</a>
 				`);
