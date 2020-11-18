@@ -240,7 +240,6 @@ class SalarySlip(TransactionBase):
 				self.absent_days += unmarked_days #will be treated as absent
 				self.payment_days -= unmarked_days
 				if include_holidays_in_total_working_days:
-					self.absent_days -= len(holidays)
 					for holiday in holidays:
 						if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1 }):
 							self.payment_days += 1
