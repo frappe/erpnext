@@ -45,7 +45,7 @@ erpnext.PointOfSale.Controller = class {
 			{
 				fieldname: "opening_amount", fieldtype: "Currency",
 				in_list_view: 1, label: "Opening Amount",
-				options: "company:company_currency", 
+				options: "company:company_currency",
 				change: function () {
 					dialog.fields_dict.balance_details.df.data.some(d => {
 						if (d.idx == this.doc.idx) {
@@ -134,7 +134,7 @@ erpnext.PointOfSale.Controller = class {
 	set_opening_entry_status() {
 		this.page.set_title_sub(
 			`<span class="indicator orange">
-				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
+				<a class="text-muted" href="/desk/Form/POS%20Opening%20Entry/${this.pos_opening}">
 					Opened at ${moment(this.pos_opening_time).format("Do MMMM, h:mma")}
 				</a>
 			</span>`);
@@ -199,7 +199,7 @@ erpnext.PointOfSale.Controller = class {
 
 		if (this.frm.doc.items.length == 0) {
 			frappe.show_alert({
-				message:__("You must add atleast one item to save it as draft."), 
+				message:__("You must add atleast one item to save it as draft."),
 				indicator:'red'
 			});
 			frappe.utils.play_sound("error");
@@ -208,7 +208,7 @@ erpnext.PointOfSale.Controller = class {
 
 		this.frm.save(undefined, undefined, undefined, () => {
 			frappe.show_alert({
-				message:__("There was an error saving the document."), 
+				message:__("There was an error saving the document."),
 				indicator:'red'
 			});
 			frappe.utils.play_sound("error");
@@ -256,7 +256,7 @@ erpnext.PointOfSale.Controller = class {
 
 				cart_item_clicked: (item_code, batch_no, uom) => {
 					const item_row = this.frm.doc.items.find(
-						i => i.item_code === item_code 
+						i => i.item_code === item_code
 							&& i.uom === uom
 							&& (!batch_no || (batch_no && i.batch_no === batch_no))
 					);
@@ -429,7 +429,7 @@ erpnext.PointOfSale.Controller = class {
 		})
 	}
 
-	
+
 
 	toggle_recent_order_list(show) {
 		this.toggle_components(!show);
@@ -539,7 +539,7 @@ erpnext.PointOfSale.Controller = class {
 					const qty_needed = field === 'qty' ? value * item_row.conversion_factor : item_row.qty * value;
 					await this.check_stock_availability(item_row, qty_needed, this.frm.doc.set_warehouse);
 				}
-				
+
 				if (this.is_current_item_being_edited(item_row) || item_selected_from_selector) {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
 					this.update_cart_html(item_row);
@@ -577,7 +577,7 @@ erpnext.PointOfSale.Controller = class {
 
 				this.check_serial_batch_selection_needed(item_row) && this.edit_item_details_of(item_row);
 				this.update_cart_html(item_row);
-			}	
+			}
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -588,7 +588,7 @@ erpnext.PointOfSale.Controller = class {
 	get_item_from_frm(item_code, batch_no, uom) {
 		const has_batch_no = batch_no;
 		return this.frm.doc.items.find(
-			i => i.item_code === item_code 
+			i => i.item_code === item_code
 				&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 				&& (i.uom === uom)
 		);
@@ -617,7 +617,7 @@ erpnext.PointOfSale.Controller = class {
 		const no_serial_selected = !item_row.serial_no;
 		const no_batch_selected = !item_row.batch_no;
 
-		if ((serialized && no_serial_selected) || (batched && no_batch_selected) || 
+		if ((serialized && no_serial_selected) || (batched && no_batch_selected) ||
 			(serialized && batched && (no_batch_selected || no_serial_selected))) {
 			return true;
 		}

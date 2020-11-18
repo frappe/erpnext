@@ -85,7 +85,7 @@ frappe.ui.form.on("Item", {
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__('This Item is a Variant of {0} (Template).',
-				[`<a href="#Form/Item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
+				[`<a href="/desk/Form/Item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
 		}
 
 		if (frappe.defaults.get_default("item_naming_by")!="Naming Series" || frm.doc.variant_of) {
@@ -649,7 +649,7 @@ $.extend(erpnext.item, {
 					if (r.message) {
 						var variant = r.message;
 						frappe.msgprint_dialog = frappe.msgprint(__("Item Variant {0} already exists with same attributes",
-							[repl('<a href="#Form/Item/%(item_encoded)s" class="strong variant-click">%(item)s</a>', {
+							[repl('<a href="/desk/Form/Item/%(item_encoded)s" class="strong variant-click">%(item)s</a>', {
 								item_encoded: encodeURIComponent(variant),
 								item: variant
 							})]
