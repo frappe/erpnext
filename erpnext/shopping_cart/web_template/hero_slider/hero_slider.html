@@ -14,7 +14,7 @@
 	{%- if title or subtitle -%}
 	<div class="carousel-body container d-flex {{ align_class }}">
 		<div class="carousel-content align-self-center">
-			{%- if title -%}<h2 class="{{ heading_class }}">{{ title }}</h2>{%- endif -%}
+			{%- if title -%}<h1 class="{{ heading_class }}">{{ title }}</h1>{%- endif -%}
 			{%- if subtitle -%}<p class="text-muted mt-2">{{ subtitle }}</p>{%- endif -%}
 			{%- if action -%}
 			<a href="{{ action }}" class="btn btn-primary mt-3">
