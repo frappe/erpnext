@@ -15,10 +15,10 @@ app_logo_url = '/assets/erpnext/images/erp-icon.svg'
 
 develop_version = '13.x.x-develop'
 
-app_include_js = "assets/js/erpnext.min.js"
-app_include_css = "assets/css/erpnext.css"
-web_include_js = "assets/js/erpnext-web.min.js"
-web_include_css = "assets/css/erpnext-web.css"
+app_include_js = "/assets/js/erpnext.min.js"
+app_include_css = "/assets/css/erpnext.css"
+web_include_js = "/assets/js/erpnext-web.min.js"
+web_include_css = "/assets/css/erpnext-web.css"
 
 doctype_js = {
 	"Address": "public/js/address.js",
@@ -307,6 +307,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.collect_project_status",
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
 		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
+		"erpnext.erpnext_integrations.connectors.shopify_connection.sync_old_orders",
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",

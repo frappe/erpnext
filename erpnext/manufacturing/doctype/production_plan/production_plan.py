@@ -219,12 +219,16 @@ class ProductionPlan(Document):
 			filters = {'docstatus': 0, 'production_plan': ("=", self.name)}):
 			frappe.delete_doc('Work Order', d.name)
 
-	def set_status(self):
+	def set_status(self, close=None):
 		self.status = {
 			0: 'Draft',
 			1: 'Submitted',
 			2: 'Cancelled'
 		}.get(self.docstatus)
+
+		if close:
+			self.db_set('status', 'Closed')
+			return
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
@@ -234,6 +238,9 @@ class ProductionPlan(Document):
 		if self.status != 'Completed':
 			self.update_ordered_status()
 			self.update_requested_status()
+
+		if close is not None:
+			self.db_set('status', self.status)
 
 	def update_ordered_status(self):
 		update_status = False
@@ -564,6 +571,8 @@ def get_sales_orders(self):
 		so_filter += " and so.customer = %(customer)s"
 	if self.project:
 		so_filter += " and so.project = %(project)s"
+	if self.sales_order_status:
+		so_filter += "and so.status = %(sales_order_status)s"
 
 	if self.item_code:
 		item_filter += " and so_item.item_code = %(item)s"
@@ -587,8 +596,8 @@ def get_sales_orders(self):
 			"customer": self.customer,
 			"project": self.project,
 			"item": self.item_code,
-			"company": self.company
-
+			"company": self.company,
+			"sales_order_status": self.sales_order_status
 		}, as_dict=1)
 	return open_so
 
