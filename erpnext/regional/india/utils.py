@@ -136,12 +136,8 @@ def test_method():
 	'''test function'''
 	return 'overridden'
 
-@frappe.whitelist()
 def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
-	if isinstance(party_details, string_types):
-		party_details = json.loads(party_details)
-		party_details = frappe._dict(party_details)
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		address_name = party_details.shipping_address_name or party_details.customer_address
@@ -175,11 +171,11 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Customer')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges') and return_taxes:
+		if party_details.get('taxes_and_charges'):
 			return party_details
 
 		if not party_details.company_gstin:
-			return
+			return party_details
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
@@ -187,15 +183,15 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges') and return_taxes:
+		if party_details.get('taxes_and_charges'):
 			return party_details
 
 		if not party_details.supplier_gstin:
-			return
+			return party_details
 
-	if not party_details.place_of_supply: return
+	if not party_details.place_of_supply: return party_details
 
-	if not party_details.company_gstin: return
+	if not party_details.company_gstin: return party_details
 
 	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
 		and party_details.company_gstin[:2] != party_details.place_of_supply[:2]) or (doctype in ("Purchase Invoice",
@@ -205,7 +201,7 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 		default_tax = get_tax_template(master_doctype, company, 0, party_details.company_gstin[:2])
 
 	if not default_tax:
-		return
+		return party_details
 	party_details["taxes_and_charges"] = default_tax
 	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
