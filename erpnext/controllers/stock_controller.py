@@ -243,8 +243,8 @@ class StockController(AccountsController):
 
 	def delete_auto_created_batches(self):
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
-		def set_auto_created_batch_to_none(batch_no):
   
+		def set_auto_created_batch_to_none(batch_no):
 			for item in filter(lambda x: x.batch_no == batch_no, self.items):
 				item.batch_no = None
 				item.db_set("batch_no", None)
