@@ -11,9 +11,11 @@ from __future__ import unicode_literals
 
 import json
 import frappe
-from frappe import _
 from six import string_types
-from erpnext.regional.germany.utils.datev.datev_csv import download_csv_files_as_zip, get_datev_csv
+
+from frappe import _
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.regional.germany.utils.datev.datev_csv import zip_and_download, get_datev_csv
 from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
 
 COLUMNS = [
@@ -92,25 +94,44 @@ COLUMNS = [
 
 def execute(filters=None):
 	"""Entry point for frappe."""
-	validate(filters)
-	return COLUMNS, get_transactions(filters, as_dict=0)
+	data = []
+	if filters and validate(filters):
+		data = get_transactions(filters, as_dict=0)
+
+	return COLUMNS, data
 
 
 def validate(filters):
 	"""Make sure all mandatory filters and settings are present."""
-	if not filters.get('company'):
+	company = filters.get('company')
+	if not company:
 		frappe.throw(_('<b>Company</b> is a mandatory filter.'))
 
-	if not filters.get('from_date'):
+	from_date = filters.get('from_date')
+	if not from_date:
 		frappe.throw(_('<b>From Date</b> is a mandatory filter.'))
 
-	if not filters.get('to_date'):
+	to_date = filters.get('to_date')
+	if not to_date:
 		frappe.throw(_('<b>To Date</b> is a mandatory filter.'))
 
-	try:
-		frappe.get_doc('DATEV Settings', filters.get('company'))
-	except frappe.DoesNotExistError:
-		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
+	validate_fiscal_year(from_date, to_date, company)
+
+	if not frappe.db.exists('DATEV Settings', filters.get('company')):
+		frappe.log_error(_('Please create {} for Company {}.').format(
+			'<a href="desk#List/DATEV%20Settings/List">{}</a>'.format(_('DATEV Settings')),
+			frappe.bold(filters.get('company'))
+		))
+		return False
+
+	return True
+
+
+def validate_fiscal_year(from_date, to_date, company):
+	from_fiscal_year = get_fiscal_year(date=from_date, company=company)
+	to_fiscal_year = get_fiscal_year(date=to_date, company=company)
+	if from_fiscal_year != to_fiscal_year:
+		frappe.throw(_('Dates {} and {} are not in the same fiscal year.').format(from_date, to_date))
 
 
 def get_transactions(filters, as_dict=1):
@@ -317,17 +338,24 @@ def download_datev_csv(filters):
 		filters = json.loads(filters)
 
 	validate(filters)
+	company = filters.get('company')
+
+	fiscal_year = get_fiscal_year(date=filters.get('from_date'), company=company)
+	filters['fiscal_year_start'] = fiscal_year[1]
 
 	# set chart of accounts used
-	coa = frappe.get_value('Company', filters.get('company'), 'chart_of_accounts')
+	coa = frappe.get_value('Company', company, 'chart_of_accounts')
 	filters['skr'] = '04' if 'SKR04' in coa else ('03' if 'SKR03' in coa else '')
+
+	filters['account_number_length'] = frappe.get_value('DATEV Settings', company, 'account_number_length')
 
 	transactions = get_transactions(filters)
 	account_names = get_account_names(filters)
 	customers = get_customers(filters)
 	suppliers = get_suppliers(filters)
 
-	download_csv_files_as_zip([
+	zip_name = '{} DATEV.zip'.format(frappe.utils.datetime.date.today())
+	zip_and_download(zip_name, [
 		{
 			'file_name': 'EXTF_Buchungsstapel.csv',
 			'csv_data': get_datev_csv(transactions, filters, csv_class=Transactions)
