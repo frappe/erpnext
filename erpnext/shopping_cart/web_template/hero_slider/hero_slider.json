@@ -5,35 +5,56 @@
  "doctype": "Web Template",
  "fields": [
   {
-   "__unsaved": 1,
+   "fieldname": "slider_name",
+   "fieldtype": "Data",
+   "label": "Slider Name",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "show_indicators",
+   "fieldtype": "Check",
+   "label": "Show Indicators",
+   "reqd": 0
+  },
+  {
+   "default": "1",
+   "fieldname": "show_controls",
+   "fieldtype": "Check",
+   "label": "Show Controls",
+   "reqd": 0
+  },
+  {
+   "fieldname": "slide_1",
+   "fieldtype": "Section Break",
+   "label": "Slide 1",
+   "reqd": 0
+  },
+  {
    "fieldname": "slide_1_image",
    "fieldtype": "Attach Image",
    "label": "Image",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_1_title",
    "fieldtype": "Data",
    "label": "Title",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_1_subtitle",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Subtitle",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_1_primary_action_label",
    "fieldtype": "Data",
    "label": "Primary Action Label",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_1_primary_action",
    "fieldtype": "Data",
    "label": "Primary Action",
@@ -41,44 +62,71 @@
   },
   {
    "__unsaved": 1,
+   "fieldname": "slide_1_content_align",
+   "fieldtype": "Select",
+   "label": "Content Align",
+   "options": "Left\nCentre\nRight",
+   "reqd": 0
+  },
+  {
+   "__unsaved": 1,
+   "fieldname": "slide_1_theme",
+   "fieldtype": "Select",
+   "label": "Slide Theme",
+   "options": "Dark\nLight",
+   "reqd": 0
+  },
+  {
    "fieldname": "slide_2",
    "fieldtype": "Section Break",
    "label": "Slide 2",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_2_image",
    "fieldtype": "Attach Image",
    "label": "Image ",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_2_title",
    "fieldtype": "Data",
    "label": "Title ",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_2_subtitle",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Subtitle ",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_2_primary_action_label",
    "fieldtype": "Data",
    "label": "Primary Action Label ",
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "slide_2_primary_action",
    "fieldtype": "Data",
    "label": "Primary Action ",
+   "reqd": 0
+  },
+  {
+   "__unsaved": 1,
+   "default": "Left",
+   "fieldname": "slide_2_content_align",
+   "fieldtype": "Select",
+   "label": "Content Align",
+   "options": "Left\nCentre\nRight",
+   "reqd": 0
+  },
+  {
+   "__unsaved": 1,
+   "fieldname": "slide_2_theme",
+   "fieldtype": "Select",
+   "label": "Slide Theme",
+   "options": "Dark\nLight",
    "reqd": 0
   },
   {
@@ -94,7 +142,7 @@
    "__unsaved": 1,
    "fieldname": "slide_3_image",
    "fieldtype": "Attach Image",
-   "label": "Image ",
+   "label": "Image",
    "reqd": 0
   },
   {
@@ -102,15 +150,15 @@
    "__unsaved": 1,
    "fieldname": "slide_3_title",
    "fieldtype": "Data",
-   "label": "Title ",
+   "label": "Title",
    "reqd": 0
   },
   {
    "__islocal": 1,
    "__unsaved": 1,
    "fieldname": "slide_3_subtitle",
-   "fieldtype": "Data",
-   "label": "Subtitle ",
+   "fieldtype": "Small Text",
+   "label": "Subtitle",
    "reqd": 0
   },
   {
@@ -118,7 +166,7 @@
    "__unsaved": 1,
    "fieldname": "slide_3_primary_action_label",
    "fieldtype": "Data",
-   "label": "Primary Action Label ",
+   "label": "Primary Action Label",
    "reqd": 0
   },
   {
@@ -126,12 +174,156 @@
    "__unsaved": 1,
    "fieldname": "slide_3_primary_action",
    "fieldtype": "Data",
-   "label": "Primary Action ",
+   "label": "Primary Action",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_3_content_align",
+   "fieldtype": "Select",
+   "label": "Content Align",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_3_theme",
+   "fieldtype": "Select",
+   "label": "Slide Theme",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4",
+   "fieldtype": "Section Break",
+   "label": "Slide 4",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4_image",
+   "fieldtype": "Attach Image",
+   "label": "Image",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4_title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4_subtitle",
+   "fieldtype": "Small Text",
+   "label": "Subtitle",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4_primary_action_label",
+   "fieldtype": "Data",
+   "label": "Primary Action Label",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4_primary_action",
+   "fieldtype": "Data",
+   "label": "Primary Action",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4_content_align",
+   "fieldtype": "Select",
+   "label": "Content Align",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_4_theme",
+   "fieldtype": "Select",
+   "label": "Slide Theme",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5",
+   "fieldtype": "Section Break",
+   "label": "Slide 5",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5_image",
+   "fieldtype": "Attach Image",
+   "label": "Image",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5_title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5_subtitle",
+   "fieldtype": "Small Text",
+   "label": "Subtitle",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5_primary_action_label",
+   "fieldtype": "Data",
+   "label": "Primary Action Label",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5_primary_action",
+   "fieldtype": "Data",
+   "label": "Primary Action",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5_content_align",
+   "fieldtype": "Select",
+   "label": "Content Align",
+   "reqd": 0
+  },
+  {
+   "__islocal": 1,
+   "__unsaved": 1,
+   "fieldname": "slide_5_theme",
+   "fieldtype": "Select",
+   "label": "Slide Theme",
    "reqd": 0
   }
  ],
  "idx": 0,
- "modified": "2020-11-17 15:23:48.584868",
+ "modified": "2020-11-18 17:09:31.323198",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Hero Slider",
