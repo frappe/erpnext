@@ -40,6 +40,7 @@
   "insurance_loss_no",
   "col_break_insurance2",
   "insurance_surveyor",
+  "insurance_surveyor_company",
   "section_break0",
   "notes",
   "section_break_18",
@@ -562,11 +563,19 @@
    "fieldtype": "Link",
    "label": "Insurance Surveyor",
    "options": "Insurance Surveyor"
+  },
+  {
+   "fetch_from": "insurance_surveyor.insurance_surveyor_company",
+   "fetch_if_empty": 1,
+   "fieldname": "insurance_surveyor_company",
+   "fieldtype": "Link",
+   "label": "Insurance Surveyor Company",
+   "options": "Insurance Surveyor Company"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2020-11-08 18:24:02.766605",
+ "modified": "2020-11-19 17:02:53.895169",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

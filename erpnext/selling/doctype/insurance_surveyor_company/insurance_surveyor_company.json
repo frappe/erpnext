@@ -1,36 +1,26 @@
 {
  "allow_rename": 1,
- "autoname": "field:insurance_surveyor_name",
- "creation": "2020-11-01 22:21:47.907549",
+ "autoname": "field:insurance_surveyor_company",
+ "creation": "2020-11-19 16:57:22.261806",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "insurance_surveyor_name",
   "insurance_surveyor_company"
  ],
  "fields": [
   {
    "allow_in_quick_entry": 1,
-   "fieldname": "insurance_surveyor_name",
-   "fieldtype": "Data",
-   "label": "Insurance Surveyor Name",
-   "unique": 1
-  },
-  {
-   "allow_in_quick_entry": 1,
    "fieldname": "insurance_surveyor_company",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
+   "fieldtype": "Data",
    "label": "Insurance Surveyor Company",
-   "options": "Insurance Surveyor Company"
+   "unique": 1
   }
  ],
- "modified": "2020-11-19 16:57:55.002451",
+ "modified": "2020-11-19 16:57:22.261806",
  "modified_by": "Administrator",
  "module": "Selling",
- "name": "Insurance Surveyor",
+ "name": "Insurance Surveyor Company",
  "owner": "Administrator",
  "permissions": [
   {
