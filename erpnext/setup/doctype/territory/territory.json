@@ -121,7 +121,7 @@
  "icon": "fa fa-map-marker",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-08-15 13:08:46.261998",
+ "modified": "2020-11-19 14:33:25.677152",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
@@ -156,6 +156,13 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   },
   {
    "read": 1,
