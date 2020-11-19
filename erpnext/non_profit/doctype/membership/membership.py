@@ -70,7 +70,7 @@ class Membership(Document):
 		settings = frappe.get_doc("Membership Settings")
 
 		if not member.customer:
-			frappe.throw(_("No customer linked to member {}", [member.name]))
+			frappe.throw(_("No customer linked to member {0}").format(frappe.bold(self.member)))
 
 		if not settings.debit_account:
 			frappe.throw(_("You need to set <b>Debit Account</b> in Membership Settings"))
