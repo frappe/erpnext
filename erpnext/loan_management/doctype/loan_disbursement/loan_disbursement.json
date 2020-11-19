@@ -26,19 +26,24 @@
   {
    "fieldname": "against_loan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Against Loan ",
-   "options": "Loan"
+   "options": "Loan",
+   "reqd": 1
   },
   {
    "fieldname": "disbursement_date",
    "fieldtype": "Date",
-   "label": "Disbursement Date"
+   "label": "Disbursement Date",
+   "reqd": 1
   },
   {
    "fieldname": "disbursed_amount",
    "fieldtype": "Currency",
    "label": "Disbursed Amount",
-   "options": "Company:company:default_currency"
+   "non_negative": 1,
+   "options": "Company:company:default_currency",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -53,17 +58,21 @@
    "fetch_from": "against_loan.company",
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fetch_from": "against_loan.applicant",
    "fieldname": "applicant",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
    "label": "Applicant",
    "options": "applicant_type",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -102,9 +111,11 @@
    "fetch_from": "against_loan.applicant_type",
    "fieldname": "applicant_type",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Applicant Type",
    "options": "Employee\nMember\nCustomer",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "bank_account",
@@ -117,9 +128,10 @@
    "fieldtype": "Column Break"
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-29 05:20:41.629911",
+ "modified": "2020-11-06 10:04:30.882322",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",
