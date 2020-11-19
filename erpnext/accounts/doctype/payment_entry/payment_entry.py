@@ -958,12 +958,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		exchange_rate = get_exchange_rate(party_account_currency,
 			company_currency, ref_doc.posting_date)
 
-	print('total_amount')
-	print(total_amount)
-	print('outstanding_amount')
-	print(outstanding_amount)
-	print('exchange_rate')
-	print(exchange_rate)
 	return frappe._dict({
 		"due_date": ref_doc.get("due_date"),
 		"total_amount": total_amount,
