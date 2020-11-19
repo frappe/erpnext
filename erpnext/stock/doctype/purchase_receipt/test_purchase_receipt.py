@@ -42,6 +42,30 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.db.set_value('UOM', '_Test UOM', 'must_be_whole_number', 1)
 
 	def test_make_purchase_invoice(self):
+		if not frappe.db.exists('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice'):
+			frappe.get_doc({
+				'doctype': 'Payment Terms Template',
+				'template_name': '_Test Payment Terms Template For Purchase Invoice',
+				'allocate_payment_based_on_payment_terms': 1,
+				'terms': [
+					{
+						'doctype': 'Payment Terms Template Detail',
+						'invoice_portion': 50.00,
+						'credit_days_based_on': 'Day(s) after invoice date',
+						'credit_days': 00
+					},
+					{
+						'doctype': 'Payment Terms Template Detail',
+						'invoice_portion': 50.00,
+						'credit_days_based_on': 'Day(s) after invoice date',
+						'credit_days': 30
+					}]
+			}).insert()
+
+		template = frappe.db.get_value('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice')
+		old_template_in_supplier = frappe.db.get_value("Supplier", "_Test Supplier", "payment_terms")
+		frappe.db.set_value("Supplier", "_Test Supplier", "payment_terms", template)
+
 		pr = make_purchase_receipt(do_not_save=True)
 		self.assertRaises(frappe.ValidationError, make_purchase_invoice, pr.name)
 		pr.submit()
@@ -51,9 +75,22 @@ class TestPurchaseReceipt(unittest.TestCase):
 		self.assertEqual(pi.doctype, "Purchase Invoice")
 		self.assertEqual(len(pi.get("items")), len(pr.get("items")))
 
-		# modify rate
+		# test maintaining same rate throughout purchade cycle
 		pi.get("items")[0].rate = 200
 		self.assertRaises(frappe.ValidationError, frappe.get_doc(pi).submit)
+
+		# test if payment terms are fetched and set in PI
+		self.assertEqual(pi.payment_terms_template, template)
+		self.assertEqual(pi.payment_schedule[0].payment_amount, flt(pi.grand_total)/2)
+		self.assertEqual(pi.payment_schedule[0].invoice_portion, 50)
+		self.assertEqual(pi.payment_schedule[1].payment_amount, flt(pi.grand_total)/2)
+		self.assertEqual(pi.payment_schedule[1].invoice_portion, 50)
+
+		# teardown
+		pi.delete() # draft PI
+		pr.cancel()
+		frappe.db.set_value("Supplier", "_Test Supplier", "payment_terms", old_template_in_supplier)
+		frappe.get_doc('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice').delete()
 
 	def test_purchase_receipt_no_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')

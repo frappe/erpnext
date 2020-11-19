@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:09",
@@ -414,7 +415,8 @@
   {
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
-   "label": "Company Address"
+   "label": "Company Address",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -1266,7 +1268,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-08 11:22:09.056684",
+ "modified": "2020-11-19 11:22:09.056684",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",
