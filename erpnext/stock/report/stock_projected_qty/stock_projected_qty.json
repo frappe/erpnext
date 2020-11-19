@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:31.660069",
+ "modified": "2020-11-19 11:55:31.794046",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Projected Qty",
@@ -28,6 +28,9 @@
   },
   {
    "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
   },
   {
    "role": "Purchase User"

@@ -453,7 +453,7 @@
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2020-10-31 02:19:46.374835",
+ "modified": "2020-11-19 11:56:03.644717",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -489,6 +489,18 @@
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
   }
  ],
  "search_fields": "item_code",
