@@ -3,10 +3,15 @@ from __future__ import unicode_literals
 applies_to_fields = [
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
 		"insert_after": "sec_applies_to", "in_standard_filter": 1},
+	{"label": "Vehicle Owner", "fieldname": "vehicle_owner", "fieldtype": "Link", "options": "Customer",
+		"insert_after": "applies_to_item", "in_standard_filter": 1, "fetch_from": "applies_to_vehicle.vehicle_owner"},
 	{"label": "License Plate", "fieldname": "vehicle_license_plate", "fieldtype": "Data", "no_copy": 0,
 		"insert_after": "col_break_applies_to", "read_only": 0, "fetch_from": "applies_to_vehicle.license_plate"},
+	{"label": "Vehicle Owner Name", "fieldname": "vehicle_owner_name", "fieldtype": "Data",
+		"insert_after": "applies_to_item_name", "fetch_from": "vehicle_owner.customer_name", "read_only": 1,
+		"depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner"},
 	{"label": "", "fieldname": "col_break_vehicle_1", "fieldtype": "Column Break",
-		"insert_after": "applies_to_item_name"},
+		"insert_after": "vehicle_owner_name"},
 	{"label": "Chassis No", "fieldname": "vehicle_chassis_no", "fieldtype": "Data", "no_copy": 0,
 		"insert_after": "col_break_vehicle_1", "read_only": 0, "fetch_from": "applies_to_vehicle.chassis_no"},
 	{"label": "Engine No", "fieldname": "vehicle_engine_no", "fieldtype": "Data", "no_copy": 0,
@@ -43,6 +48,11 @@ common_properties = [
 
 	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
 		{"fieldname": "sec_applies_to", "property": "label", "value": "Vehicle Details"}],
+
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
+		{"fieldname": "customer", "property": "label", "value": "Customer (User)"}],
+	[('Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Project'),
+		{"fieldname": "customer_name", "property": "label", "value": "Customer Name (User)"}],
 
 	[('Sales Invoice', 'Project'),
 		{"fieldname": "sec_insurance", "property": "hidden", "value": 0}],

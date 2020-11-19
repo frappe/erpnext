@@ -17,6 +17,9 @@
   "column_break_7",
   "sales_order",
   "warehouse",
+  "customer_details_section",
+  "vehicle_owner",
+  "vehicle_owner_name",
   "column_break_10",
   "customer",
   "customer_name",
@@ -101,7 +104,7 @@
   {
    "fieldname": "vehicle_details",
    "fieldtype": "Section Break",
-   "label": "Details"
+   "label": "Vehicle Details"
   },
   {
    "fieldname": "last_odometer",
@@ -367,7 +370,7 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Customer",
+   "label": "Customer (User)",
    "no_copy": 1,
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
@@ -382,7 +385,7 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_preview": 1,
-   "label": "Customer Name",
+   "label": "Customer Name (User)",
    "no_copy": 1,
    "oldfieldname": "customer_name",
    "oldfieldtype": "Data",
@@ -532,10 +535,31 @@
    "fieldname": "insurance_end_date",
    "fieldtype": "Date",
    "label": "Insurance End Date"
+  },
+  {
+   "fieldname": "customer_details_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Details"
+  },
+  {
+   "fieldname": "vehicle_owner",
+   "fieldtype": "Link",
+   "label": "Vehicle Owner",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner",
+   "fetch_from": "vehicle_owner.customer_name",
+   "fieldname": "vehicle_owner_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Owner Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "image_field": "image",
- "modified": "2020-11-08 18:17:26.083515",
+ "modified": "2020-11-19 17:29:14.643563",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
