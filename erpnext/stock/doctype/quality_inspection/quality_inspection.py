@@ -4,14 +4,19 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.model.mapper import get_mapped_doc
+from frappe import _
+from frappe.utils import flt
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template \
 	import get_template_details
-from frappe.model.mapper import get_mapped_doc
 
 class QualityInspection(Document):
 	def validate(self):
 		if not self.readings and self.item_code:
 			self.get_item_specification_details()
+
+		if self.readings:
+			self.set_status_based_on_acceptance_formula()
 
 	def get_item_specification_details(self):
 		if not self.quality_inspection_template:
@@ -26,6 +31,7 @@ class QualityInspection(Document):
 			child = self.append('readings', {})
 			child.specification = d.specification
 			child.value = d.value
+			child.acceptance_formula = d.acceptance_formula
 			child.status = "Accepted"
 
 	def get_quality_inspection_template(self):
@@ -57,6 +63,29 @@ class QualityInspection(Document):
 				where t1.parent = %s and t1.item_code = %s and t1.parent = t2.name"""
 				.format(parent_doc=self.reference_type, child_doc=doctype),
 				(quality_inspection, self.modified, self.reference_name, self.item_code))
+
+	def set_status_based_on_acceptance_formula(self):
+		for reading in self.readings:
+			if not reading.acceptance_formula: continue
+
+			condition = reading.acceptance_formula
+			data = {}
+			for i in range(1, 11):
+				field = "reading_" + str(i)
+				data[field] = flt(reading.get(field)) or 0
+
+			try:
+				result = frappe.safe_eval(condition, None, data)
+				reading.status = "Accepted" if result else "Rejected"
+			except SyntaxError:
+				frappe.throw(_("Row #{0}: Acceptance Criteria Formula is incorrect.").format(reading.idx),
+					title=_("Invalid Formula"))
+			except NameError as e:
+				field = frappe.bold(e.args[0].split()[1])
+				frappe.throw(_("Row #{0}: {1} is not a valid reading field. Please refer to the field description.")
+					.format(reading.idx, field),
+					title=_("Invalid Formula"))
+
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
