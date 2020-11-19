@@ -236,7 +236,7 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 		if tax_category.gst_state == number_state_mapping[state_code] or \
 	 		(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
-				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
+				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
 
 def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
@@ -516,6 +516,9 @@ def get_address_details(data, doc, company_address, billing_address):
 		data.transType = 1
 		data.actualToStateCode = data.toStateCode
 		shipping_address = billing_address
+	
+	if doc.gst_category == 'SEZ':
+		data.toStateCode = 99
 
 	return data
 

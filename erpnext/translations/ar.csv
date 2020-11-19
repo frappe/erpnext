@@ -4238,7 +4238,6 @@ Download as JSON,تنزيل باسم Json,
 End date can not be less than start date,تاريخ النهاية لا يمكن أن يكون اقل من تاريخ البدء\n<br>\nEnd Date can not be less than Start Date,
 For Default Supplier (Optional),للمورد الافتراضي (اختياري),
 From date cannot be greater than To date,(من تاريخ) لا يمكن أن يكون أكبر (الي التاريخ),
-Get items from,الحصول على البنود من,
 Group by,المجموعة حسب,
 In stock,في المخزن,
 Item name,اسم السلعة,
@@ -8549,7 +8548,6 @@ Purchase Order Trends,اتجهات امر الشراء,
 Purchase Receipt Trends,شراء اتجاهات الإيصال,
 Purchase Register,سجل شراء,
 Quotation Trends,مؤشرات المناقصة,
-Quoted Item Comparison,مقارنة بند المناقصة,
 Received Items To Be Billed,العناصر الواردة إلى أن توصف,
 Qty to Order,الكمية للطلب,
 Requested Items To Be Transferred,العناصر المطلوبة على أن يتم تحويلها,
@@ -9834,3 +9832,9 @@ The item referenced by {0} - {1} is already invoiced,العنصر المشار �
 Therapy Session overlaps with {0},تتداخل جلسة العلاج مع {0},
 Therapy Sessions Overlapping,جلسات العلاج متداخلة,
 Therapy Plans,خطط العلاج,
+"Item Code, warehouse, quantity are required on row {0}",مطلوب رمز الصنف والمستودع والكمية في الصف {0},
+Get Items from Material Requests against this Supplier,الحصول على عناصر من طلبات المواد ضد هذا المورد,
+Enable European Access,تمكين الوصول الأوروبي,
+Creating Purchase Order ...,إنشاء أمر شراء ...,
+"Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.",حدد موردًا من الموردين الافتراضيين للعناصر أدناه. عند التحديد ، سيتم إجراء طلب الشراء مقابل العناصر التي تنتمي إلى المورد المحدد فقط.,
+Row #{}: You must select {} serial numbers for item {}.,الصف # {}: يجب تحديد {} الأرقام التسلسلية للعنصر {}.,
