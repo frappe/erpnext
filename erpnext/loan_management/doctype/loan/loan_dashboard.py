@@ -13,7 +13,7 @@ def get_data():
 				'items': ['Loan Security Pledge', 'Loan Security Shortfall', 'Loan Disbursement']
 			},
 			{
-				'items': ['Loan Repayment', 'Loan Interest Accrual', 'Loan Security Unpledge']
+				'items': ['Loan Repayment', 'Loan Interest Accrual', 'Loan Write Off', 'Loan Security Unpledge']
 			}
 		]
 	}
