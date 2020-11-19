@@ -129,7 +129,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 					{qi_condition} {cond} {mcond}
 					ORDER BY item_code limit {start}, {page_len}
 				""".format(doc=filters.get('from'),
-					parent=filters.get('parent'), cond = cond, mcond = mcond, start = start,
+					cond = cond, mcond = mcond, start = start,
 					page_len = page_len, qi_condition = qi_condition),
 					{'parent': filters.get('parent'), 'txt': "%%%s%%" % txt})
 
@@ -141,7 +141,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 					{qi_condition} {cond} {mcond}
 					ORDER BY production_item
 					LIMIT {start}, {page_len}
-				""".format(doc=filters.get("from"), reference_name=filters.get('reference_name'),
+				""".format(doc=filters.get("from"),
 					cond = cond, mcond = mcond, start = start,
 					page_len = page_len, qi_condition = qi_condition),
 					{'reference_name': filters.get('reference_name'), 'txt': "%%%s%%" % txt})

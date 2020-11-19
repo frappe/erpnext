@@ -33,12 +33,12 @@ frappe.ui.form.on('Job Card', {
 
 		frm.set_query("quality_inspection", function() {
 			return {
-				query:"erpnext.stock.doctype.quality_inspection.quality_inspection.quality_inspection_query",
+				query: "erpnext.stock.doctype.quality_inspection.quality_inspection.quality_inspection_query",
 				filters: {
-					'item_code': frm.doc.production_item,
-					'reference_name': frm.doc.name
+					"item_code": frm.doc.production_item,
+					"reference_name": frm.doc.name
 				}
-			}
+			};
 		});
 
 		frm.trigger("toggle_operation_number");
