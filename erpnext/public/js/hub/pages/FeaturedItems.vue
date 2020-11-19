@@ -33,7 +33,8 @@ export default {
 
 			// Constants
 			page_title: __('Your Featured Items'),
-            empty_state_message: __('No featured items yet. Got to your <a href="#marketplace/published-items">Published Items</a> and feature up to eight items that you want to highlight to your customers.')
+			empty_state_message: __('No featured items yet. Got to your {0} and feature up to eight items that you want to highlight to your customers.',
+				[`<a href="#marketplace/published-items">${__("Published Items")}</a>`])
 		};
 	},
 	created() {
