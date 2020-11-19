@@ -310,7 +310,7 @@ export default {
 					return this.get_item_details();
 				})
 				.then(() => {
-					frappe.show_alert(__('${0} Updated', [this.item.item_name]));
+					frappe.show_alert(__('{0} Updated', [this.item.item_name]));
 				});
 		},
 
