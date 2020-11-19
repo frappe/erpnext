@@ -29,14 +29,9 @@ def execute():
 		'Quotation', 'Supplier Quotation'
 	]
 
-	new_item_fields = [
-		'item_tax_detail',
-	]
-	new_item_fields += ['base_' + f for f in new_item_fields]
-	new_item_fields = set(new_item_fields)
-
 	# Calculate and update database
 	for dt in doctypes:
+		print(dt + " Started")
 		docnames = frappe.get_all(dt)
 		for dn in docnames:
 			dn = dn.name
@@ -44,8 +39,6 @@ def execute():
 			calculate_taxes_and_totals(doc)
 
 			for item in doc.items:
-				item_fields = set([f.fieldname for f in item.meta.fields])
-				fields_to_update = list(new_item_fields.intersection(item_fields))
-				values_to_update = [item.get(f) for f in fields_to_update]
-				update_dict = dict(zip(fields_to_update, values_to_update))
-				frappe.db.set_value(dt + " Item", item.name, update_dict, None, update_modified=False)
+				frappe.db.set_value(dt + " Item", item.name, "item_tax_detail", item.item_tax_detail, update_modified=False)
+
+			doc.clear_cache()
