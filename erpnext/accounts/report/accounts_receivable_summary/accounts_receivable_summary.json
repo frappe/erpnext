@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 2,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:29.506957",
+ "modified": "2020-11-19 12:20:27.589144",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Receivable Summary",
@@ -25,6 +25,9 @@
   },
   {
    "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
   }
  ]
 }
