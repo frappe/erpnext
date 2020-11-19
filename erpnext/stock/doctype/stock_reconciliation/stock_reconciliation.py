@@ -191,7 +191,7 @@ class StockReconciliation(StockController):
 
 		sl_entries = []
 
-		serialized_items = False
+		serialized_items = []
 		for row in self.items:
 			item = frappe.get_cached_doc("Item", row.item_code)
 			if not (item.has_serial_no):
@@ -229,27 +229,29 @@ class StockReconciliation(StockController):
 				sl_entries.append(sle_data)
 
 			else:
-				serialized_items = True
+				serialized_items.append(row.item_code)
 
 		if serialized_items:
-			self.get_sle_for_serialized_items(sl_entries)
+			self.get_sle_for_serialized_items(sl_entries, serialized_items)
 
 		if sl_entries:
 			allow_negative_stock = frappe.get_cached_value("Stock Settings", None, "allow_negative_stock")
 			self.make_sl_entries(sl_entries, allow_negative_stock=allow_negative_stock)
 
-	def get_sle_for_serialized_items(self, sl_entries):
-		self.issue_existing_serial_and_batch(sl_entries)
-		self.add_new_serial_and_batch(sl_entries)
-		self.update_valuation_rate_for_serial_no()
+	def get_sle_for_serialized_items(self, sl_entries, serialized_items=[]):
+		self.issue_existing_serial_and_batch(sl_entries, serialized_items)
+		self.add_new_serial_and_batch(sl_entries, serialized_items)
+		self.update_valuation_rate_for_serial_no(serialized_items)
 
 		if sl_entries:
 			sl_entries = self.merge_similar_item_serial_nos(sl_entries)
 
-	def issue_existing_serial_and_batch(self, sl_entries):
+	def issue_existing_serial_and_batch(self, sl_entries, serialized_items=[]):
 		from erpnext.stock.stock_ledger import get_stock_ledger_entries
 
 		for row in self.items:
+			if row.item_code not in serialized_items: continue
+
 			serial_nos = get_serial_nos(row.serial_no) or []
 
 			# To issue existing serial nos
@@ -303,8 +305,10 @@ class StockReconciliation(StockController):
 
 					sl_entries.append(new_args)
 
-	def add_new_serial_and_batch(self, sl_entries):
+	def add_new_serial_and_batch(self, sl_entries, serialized_items=[]):
 		for row in self.items:
+			if row.item_code not in serialized_items: continue
+
 			if row.qty:
 				args = self.get_sle_for_items(row)
 
@@ -316,9 +320,9 @@ class StockReconciliation(StockController):
 
 				sl_entries.append(args)
 
-	def update_valuation_rate_for_serial_no(self):
+	def update_valuation_rate_for_serial_no(self, serialized_items=[]):
 		for d in self.items:
-			if not d.serial_no: continue
+			if d.item_code not in serialized_items: continue
 
 			serial_nos = get_serial_nos(d.serial_no)
 			self.update_valuation_rate_for_serial_nos(d, serial_nos)
@@ -372,7 +376,16 @@ class StockReconciliation(StockController):
 			where voucher_type=%s and voucher_no=%s""", (self.doctype, self.name))
 
 		sl_entries = []
-		self.get_sle_for_serialized_items(sl_entries)
+
+		serialized_items = []
+
+		for row in self.items:
+			has_serial_no = frappe.get_cached_value("Item", row.item_code, "has_serial_no")
+			if has_serial_no:
+				serialized_items.append(row.item_code)
+
+		if serialized_items:
+			self.get_sle_for_serialized_items(sl_entries, serialized_items)
 
 		if sl_entries:
 			sl_entries.reverse()

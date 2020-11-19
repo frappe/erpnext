@@ -29,20 +29,31 @@ class PlaidConnector():
 		response = self.client.Item.public_token.exchange(public_token)
 		access_token = response["access_token"]
 		return access_token
-
-	def get_link_token(self):
-		token_request = {
+	
+	def get_token_request(self, update_mode=False):
+		args = {
 			"client_name": self.client_name,
-			"client_id": self.settings.plaid_client_id,
-			"secret": self.settings.plaid_secret,
-			"products": self.products,
 			# only allow Plaid-supported languages and countries (LAST: Sep-19-2020)
 			"language": frappe.local.lang if frappe.local.lang in ["en", "fr", "es", "nl"] else "en",
-			"country_codes": ["US", "CA", "FR", "IE", "NL", "ES", "GB"],
+			"country_codes": ["US", "CA", "ES", "FR", "GB", "IE", "NL"],
 			"user": {
 				"client_user_id": frappe.generate_hash(frappe.session.user, length=32)
 			}
 		}
+
+		if update_mode:
+			args["access_token"] = self.access_token
+		else:
+			args.update({
+				"client_id": self.settings.plaid_client_id,
+				"secret": self.settings.plaid_secret,
+				"products": self.products,
+			})
+		
+		return args
+
+	def get_link_token(self, update_mode=False):
+		token_request = self.get_token_request(update_mode)
 
 		try:
 			response = self.client.LinkToken.create(token_request)
