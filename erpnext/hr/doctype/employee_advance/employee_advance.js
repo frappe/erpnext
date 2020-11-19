@@ -188,19 +188,7 @@ frappe.ui.form.on('Employee Advance', {
 			company_currency = erpnext.get_currency(frm.doc.company);
 		}
 		if(from_currency != company_currency) {
-			frappe.call({
-				method: "erpnext.setup.utils.get_exchange_rate",
-				args: {
-					from_currency: from_currency,
-					to_currency: company_currency,
-				},
-				callback: function(r) {
-					frm.set_value("exchange_rate", flt(r.message));
-					frm.set_df_property('exchange_rate', 'hidden', 0);
-					frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-						+ " = [?] " + company_currency);
-				}
-			});
+			frm.events.set_exchange_rate(frm, from_currency, company_currency)
 		} else {
 			frm.set_value("exchange_rate", 1.0);
 			frm.set_df_property('exchange_rate', 'hidden', 1);
@@ -208,4 +196,20 @@ frappe.ui.form.on('Employee Advance', {
 		}
 		frm.refresh_fields();
 	},
+
+	set_exchange_rate: function(frm, from_currency, company_currency) {
+		frappe.call({
+			method: "erpnext.setup.utils.get_exchange_rate",
+			args: {
+				from_currency: from_currency,
+				to_currency: company_currency,
+			},
+			callback: function(r) {
+				frm.set_value("exchange_rate", flt(r.message));
+				frm.set_df_property('exchange_rate', 'hidden', 0);
+				frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+					+ " = [?] " + company_currency);
+			}
+		});
+	}
 });
