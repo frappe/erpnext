@@ -29,6 +29,8 @@ def execute():
 		'Quotation', 'Supplier Quotation'
 	]
 
+	frappe.db.auto_commit_on_many_writes = True
+
 	# Calculate and update database
 	for dt in doctypes:
 		print(dt + " Started")
