@@ -31,8 +31,30 @@ def reconcile(bank_transaction, payment_doctype, payment_name):
 	if (payment_doctype == 'Payment Entry' and payment_entry.unallocated_amount-1 > transaction.unallocated_amount):
 		frappe.throw(_("This Payment Entry's unallocated_amount is greater than this bank transactions's unallocated_amount"))
 
-	if (payment_doctype == 'Journal Entry' and payment_entry.total_amount-1 > transaction.unallocated_amount):
-		frappe.throw(_("This Journal Entry's total_amount is greater than this bank transactions's unallocated_amount"))
+	if (payment_doctype == 'Journal Entry'):
+		# Nedd to take multi currency into consideration
+		if payment_entry.multi_currency:
+			sql = """
+				SELECT
+					if(jea.debit_in_account_currency > 0, jea.debit_in_account_currency, jea.credit_in_account_currency) AS 'amount'
+				FROM
+					`tabJournal Entry Account` AS jea
+						LEFT JOIN
+					`tabJournal Entry` AS je ON jea.parent = je.name
+				WHERE
+					je.name = '{journal_entry_name}'
+					AND jea.account = '{account}'
+			""".format(journal_entry_name=payment_name, account=account)
+			result = frappe.db.sql(sql, as_dict=1)
+			# frappe.errprint(result)
+			if result and len(result) == 1:
+				if result[0]['amount'] > transaction.unallocated_amount:
+					frappe.throw(_("This Journal Entry's amount in account currency is greater than this bank transactions's unallocated_amount"))
+			else:
+				frappe.throw(_("Find multiple accounts entry in this journal entry, please contact Andy to resolve this!"))
+		else:
+			if payment_entry.total_amount-1 > transaction.unallocated_amount:
+				frappe.throw(_("This Journal Entry's total_amount is greater than this bank transactions's unallocated_amount"))
 
 	add_payment_to_transaction(transaction, payment_entry, gl_entry)
 
