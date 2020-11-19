@@ -8,7 +8,7 @@ from frappe.utils import getdate, nowdate, flt, cint, cstr
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import get_tax_accounts
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from frappe.desk.query_report import group_report_data
-from six import iteritems
+from six import iteritems, string_types
 
 class SalesPurchaseDetailsReport(object):
 	def __init__(self, filters=None):
@@ -428,8 +428,9 @@ class SalesPurchaseDetailsReport(object):
 			conditions.append("i.cost_center in %(cost_center)s")
 
 		if self.filters.get("project"):
-			projects = cstr(self.filters.get("project")).strip()
-			self.filters.project = [d.strip() for d in projects.split(',') if d]
+			if isinstance(self.filters.project, string_types):
+				self.filters.project = cstr(self.filters.get("project")).strip()
+				self.filters.project = [d.strip() for d in self.filters.project.split(',') if d]
 			conditions.append("i.project in %(project)s" if frappe.get_meta(self.filters.doctype + " Item").has_field("project")
 				else "s.project in %(project)s")
 
