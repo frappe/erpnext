@@ -150,7 +150,7 @@ def get_place_of_supply(party_details, doctype):
 			return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 @frappe.whitelist()
-def get_regional_address_details(party_details, doctype, company, return_taxes=None):
+def get_regional_address_details(party_details, doctype, company):
 	if isinstance(party_details, string_types):
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
