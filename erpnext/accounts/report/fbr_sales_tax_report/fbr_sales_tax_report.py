@@ -183,7 +183,6 @@ class FBRInvoiceWiseTaxes(object):
 				"fieldname": "extra_tax",
 				"options": "Company:company:default_currency",
 				"width": 110,
-				"hide_for_export": 1
 			},
 			{
 				"label": _("ST Withheld at Source"),
