@@ -15,10 +15,10 @@ app_logo_url = '/assets/erpnext/images/erp-icon.svg'
 
 develop_version = '13.x.x-develop'
 
-app_include_js = "assets/js/erpnext.min.js"
-app_include_css = "assets/css/erpnext.css"
-web_include_js = "assets/js/erpnext-web.min.js"
-web_include_css = "assets/css/erpnext-web.css"
+app_include_js = "/assets/js/erpnext.min.js"
+app_include_css = "/assets/css/erpnext.css"
+web_include_js = "/assets/js/erpnext-web.min.js"
+web_include_css = "/assets/css/erpnext-web.css"
 
 doctype_js = {
 	"Address": "public/js/address.js",
@@ -250,7 +250,11 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	"Purchase Invoice": {
-		"validate": "erpnext.regional.india.utils.update_grand_total_for_rcm"
+		"validate": [
+			"erpnext.regional.india.utils.update_grand_total_for_rcm",
+			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
+			"erpnext.regional.united_arab_emirates.utils.validate_returns"
+			]
 	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
@@ -307,6 +311,7 @@ scheduler_events = {
 		"erpnext.projects.doctype.project.project.collect_project_status",
 		"erpnext.hr.doctype.shift_type.shift_type.process_auto_attendance_for_all_shifts",
 		"erpnext.support.doctype.issue.issue.set_service_level_agreement_variance",
+		"erpnext.erpnext_integrations.connectors.shopify_connection.sync_old_orders",
 	],
 	"daily": [
 		"erpnext.stock.reorder_item.reorder_item",
@@ -390,7 +395,8 @@ regional_overrides = {
 		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries'
 	},
 	'United Arab Emirates': {
-		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
+		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data',
+		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.united_arab_emirates.utils.make_regional_gl_entries',
 	},
 	'Saudi Arabia': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data'
