@@ -516,6 +516,9 @@ def get_address_details(data, doc, company_address, billing_address):
 		data.transType = 1
 		data.actualToStateCode = data.toStateCode
 		shipping_address = billing_address
+	
+	if doc.gst_category == 'SEZ':
+		data.toStateCode = 99
 
 	return data
 
