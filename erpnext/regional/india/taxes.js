@@ -31,8 +31,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				args: {
 					party_details: JSON.stringify(party_details),
 					doctype: frm.doc.doctype,
-					company: frm.doc.company,
-					return_taxes: 1
+					company: frm.doc.company
 				},
 				callback: function(r) {
 					if(r.message) {
