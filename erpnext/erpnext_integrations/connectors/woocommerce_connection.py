@@ -354,9 +354,11 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 			"qty": item.get("quantity"),
 			"rate": rate['price_list_rate'],
 			"warehouse": woocommerce_settings.warehouse,
-			"is_stock_item": found_item.is_stock_item
+			"is_stock_item": found_item.is_stock_item,
+			"is_paediatric": True or False
 		}
 	"""
+
 	# Proceed to invoice
 	for item in edited_line_items:
 		if item["is_stock_item"] == 1: # only check if it maintains stock
@@ -381,7 +383,18 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 				item_tax = (item['rate'] * tax_rate) * item["qty"]
 
 			if item["item_group"] == "Tests" and invoice_sending_option == "send receipt to patient":
+				## need to check if is_paediatric
+				if item["item_code"] == "OAT1" and item["is_paediatric"]:
+					extra_test_kit = "GPCollecter"
+					invoice_doc.append("items", {
+						"item_code": extra_test_kit,
+						"qty": 1,
+					})
+				
 				test_kit = frappe.db.get_value("Item", item['item_code'], "test_kit")
+				
+				# pdb.set_trace()
+				## append it to sales invoice
 				if test_kit:
 					invoice_doc.append("items", {
 						"item_code": test_kit,
@@ -422,15 +435,42 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 	for item in line_items:
 		sku = item.get("sku")
 
+
+
 		# check sku
 		if not sku:
 			frappe.throw("SKU is missing!")
 		
+		# if we detect the sku is "GPKITPD", we ignore it
+		if sku == "GPKITPD":
+			continue
+
 		# check if the item with the sku exist
 		if frappe.db.exists("Item", {"name": sku}):
 			found_item = frappe.get_doc("Item", {"name": sku})
 		else:
 			frappe.throw("Item: {} is not found!").format(sku)
+
+
+		# hard code part:
+		# 1. if detect the sku is "OAT1", then we need to change the item_code to "" postpond
+		""" item.meta_data: 
+		{
+			Key :  'paediatric'
+			Value : 'true'
+		}
+		"""
+		is_paediatric = False
+		if sku == "OAT1":
+			item_meta_data = item.get('meta_data')
+			for meta_data in item_meta_data:
+				if meta_data.get('key') == "paediatric" and meta_data.get('value') == "true":
+					is_paediatric = True
+
+
+
+
+
 
 		validated_item = {
 			"item_code": found_item.item_code,
@@ -441,7 +481,8 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 			"qty": item.get("quantity"),
 			"rate": item.get("price"),
 			"warehouse": woocommerce_settings.warehouse,
-			"is_stock_item": found_item.is_stock_item
+			"is_stock_item": found_item.is_stock_item,
+			"is_paediatric": is_paediatric
 		}
 
 		# check if item is out of stock
