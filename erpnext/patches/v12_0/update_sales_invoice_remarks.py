@@ -1,5 +1,4 @@
 from __future__ import unicode_literals
-from mmap import PAGESIZE
 import frappe
 
 from frappe import _
@@ -31,5 +30,3 @@ def execute():
         
         for entry in gl_entry_list:
             frappe.db.set_value('GL Entry', entry.name, 'remarks', remarks)
-
-    
