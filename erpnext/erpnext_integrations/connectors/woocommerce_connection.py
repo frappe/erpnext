@@ -385,7 +385,7 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 			if item["item_group"] == "Tests" and invoice_sending_option == "send receipt to patient":
 				## need to check if is_paediatric
 				if item["item_code"] == "OAT1" and item["is_paediatric"]:
-					extra_test_kit = "GPCollecter"
+					extra_test_kit = "GPPDBag"
 					invoice_doc.append("items", {
 						"item_code": extra_test_kit,
 						"qty": 1,
