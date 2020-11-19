@@ -229,8 +229,10 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Row #{0}: Expense Account not set for Item {1}. Please set an Expense Account in the Items table")
-				.format(item.idx, frappe.bold(item.item_code)), title=_("Expense Account Missing"))
+			msg = _("Please set an Expense Account in the Items table")
+			frappe.throw(_("Row #{0}: Expense Account not set for the Item {1}. {2}")
+				.format(item.idx, frappe.bold(item.item_code), msg), title=_("Expense Account Missing"))
+
 		else:
 			is_expense_account = frappe.db.get_value("Account",
 				item.get("expense_account"), "report_type")=="Profit and Loss"
@@ -245,15 +247,16 @@ class StockController(AccountsController):
 		for d in self.items:
 			if not d.batch_no: continue
 
-			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
-			if serial_nos:
-				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
-
 			d.batch_no = None
 			d.db_set("batch_no", None)
 
 		for data in frappe.get_all("Batch",
 			{'reference_name': self.name, 'reference_doctype': self.doctype}):
+
+			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': data.name})]
+			if serial_nos:
+				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
+
 			frappe.delete_doc("Batch", data.name)
 
 	def get_sl_entries(self, d, args):
