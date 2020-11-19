@@ -80,7 +80,7 @@ class calculate_taxes_and_totals(object):
 				taxes = _get_item_tax_template(args, item_taxes + item_group_taxes, for_validate=True)
 
 				if item.item_tax_template not in taxes:
-					frappe.throw(_("Row {0}: Invalid Item Tax Template for item {1}").format(
+					frappe.msgprint(_("Row {0}: Invalid Item Tax Template for item {1}").format(
 						item.idx, frappe.bold(item.item_code)
 					))
 
