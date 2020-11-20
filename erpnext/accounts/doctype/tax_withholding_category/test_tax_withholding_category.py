@@ -7,6 +7,7 @@ import frappe
 import unittest
 from frappe.utils import today
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 test_dependencies = ["Supplier Group"]
 
@@ -103,17 +104,20 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 
 	def test_single_threshold_tds_with_previous_vouchers_and_no_tds(self):
 		invoices = []
-		frappe.db.set_value("Supplier", "Test TDS Supplier2", "tax_withholding_category", "Single Threshold TDS")
-		pi = create_purchase_invoice(supplier="Test TDS Supplier2")
+		doc = create_supplier(supplier_name = "Test TDS Supplier ABC",
+			tax_withholding_category="Single Threshold TDS")
+		supplier = doc.name
+
+		pi = create_purchase_invoice(supplier=supplier)
 		pi.submit()
 		invoices.append(pi)
 
 		# TDS not applied
-		pi = create_purchase_invoice(supplier="Test TDS Supplier2", do_not_apply_tds=True)
+		pi = create_purchase_invoice(supplier=supplier, do_not_apply_tds=True)
 		pi.submit()
 		invoices.append(pi)
 
-		pi = create_purchase_invoice(supplier="Test TDS Supplier2")
+		pi = create_purchase_invoice(supplier=supplier)
 		pi.submit()
 		invoices.append(pi)
 
