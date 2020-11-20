@@ -349,7 +349,9 @@ def close_or_unclose_purchase_orders(names, status):
 	frappe.local.message_log = []
 
 def set_missing_values(source, target):
+	from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 	target.ignore_pricing_rule = 1
+	target.items = apply_putaway_rule(target.items, target.company)
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
 
