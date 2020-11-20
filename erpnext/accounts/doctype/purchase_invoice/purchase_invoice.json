@@ -22,6 +22,15 @@
   "posting_time",
   "set_posting_time",
   "amended_from",
+  "payment_info",
+  "credit_to",
+  "party_account_currency",
+  "is_opening",
+  "against_expense_account",
+  "column_break_63",
+  "status",
+  "inter_company_invoice_reference",
+  "remarks",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -142,15 +151,6 @@
   "column_break_112",
   "select_print_heading",
   "language",
-  "more_info",
-  "credit_to",
-  "party_account_currency",
-  "is_opening",
-  "against_expense_account",
-  "column_break_63",
-  "status",
-  "inter_company_invoice_reference",
-  "remarks",
   "subscription_section",
   "from_date",
   "to_date",
@@ -1157,15 +1157,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text",
-   "print_hide": 1
-  },
-  {
    "fieldname": "credit_to",
    "fieldtype": "Link",
    "label": "Credit To",
@@ -1291,10 +1282,10 @@
    "fieldtype": "Column Break"
   },
   {
-    "fieldname": "project",
-    "fieldtype": "Link",
-    "label": "Project",
-    "options": "Project"
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
   },
   {
    "fieldname": "tax_withholding_category",
@@ -1303,12 +1294,22 @@
    "label": "Tax Withholding Category",
    "options": "Tax Withholding Category",
    "print_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "payment_info",
+   "fieldtype": "Section Break",
+   "label": "Payment Information",
+   "oldfieldtype": "Section Break",
+   "options": "fa fa-file-text",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2020-09-21 12:22:09.164068",
+ "modified": "2020-11-20 18:22:26.891569",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
