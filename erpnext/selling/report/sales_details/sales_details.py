@@ -287,6 +287,9 @@ class SalesPurchaseDetailsReport(object):
 				totals['date'] = data[0].get('date')
 				totals['stin'] = data[0].get('stin')
 
+				projects = set([d.get('project') for d in data if d.get('project')])
+				totals['project'] = ", ".join(projects)
+
 			if 'item_code' in grouped_by:
 				totals['group_doctype'] = "Item Group"
 				totals['group'] = data[0].get('item_group')
