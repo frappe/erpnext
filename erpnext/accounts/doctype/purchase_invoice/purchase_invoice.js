@@ -115,6 +115,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					date_field: "posting_date",
 					setters: {
 						supplier: me.frm.doc.supplier || undefined,
+						bill_no: undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,

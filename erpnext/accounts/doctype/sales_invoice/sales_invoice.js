@@ -199,6 +199,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					target: me.frm,
 					setters: {
 						customer: me.frm.doc.customer || undefined,
+						project: me.frm.doc.project || undefined,
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -224,6 +225,12 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						options: 'Customer',
 						fieldname: 'party_name',
 						default: me.frm.doc.customer,
+					},{
+						fieldtype: 'Link',
+						label: __('Project'),
+						options: 'Project',
+						fieldname: 'project',
+						default: me.frm.doc.project || undefined,
 					}],
 					get_query_filters: {
 						docstatus: 1,
@@ -244,7 +251,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 					target: me.frm,
 					date_field: "posting_date",
 					setters: {
-						customer: me.frm.doc.customer || undefined
+						customer: me.frm.doc.customer || undefined,
+						project: me.frm.doc.project || undefined,
 					},
 					get_query: function() {
 						var filters = {

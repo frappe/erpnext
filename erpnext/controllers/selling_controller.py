@@ -88,7 +88,7 @@ class SellingController(StockController):
 				fetch_payment_terms_template=fetch_payment_terms_template,
 				has_stin=self.get("has_stin"),
 				party_address=self.customer_address, shipping_address=self.shipping_address_name)
-			if not self.meta.get_field("sales_team"):
+			if not self.meta.get_field("sales_team") and "sales_team" in party_details:
 				party_details.pop("sales_team")
 			self.update_if_missing(party_details)
 

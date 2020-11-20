@@ -248,6 +248,12 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								fieldtype: "Link",
 								options: "Customer",
 								default: me.frm.doc.customer || undefined
+							},{
+								fieldtype: 'Link',
+								label: __('Project'),
+								options: 'Project',
+								fieldname: 'project',
+								default: me.frm.doc.project || undefined,
 							}
 						],
 						get_query_filters: {

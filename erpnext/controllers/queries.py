@@ -330,7 +330,7 @@ def get_project_name(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, filters, as_dict):
-	fields = get_fields("Delivery Note", ["name", "customer", "posting_date"])
+	fields = get_fields("Delivery Note", ["name", "customer", "posting_date", "project"])
 
 	return frappe.db.sql("""
 		select %(fields)s
