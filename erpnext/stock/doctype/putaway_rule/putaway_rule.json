@@ -55,7 +55,7 @@
    "reqd": 1
   },
   {
-   "default": "item_code.stock_uom",
+   "fetch_from": "item_code.stock_uom",
    "fieldname": "stock_uom",
    "fieldtype": "Link",
    "label": "Stock UOM",
@@ -86,7 +86,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-10 17:06:27.151335",
+ "modified": "2020-11-12 11:20:52.765163",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Putaway Rule",
