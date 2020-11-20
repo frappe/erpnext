@@ -46,7 +46,6 @@ class TestTherapyPlan(unittest.TestCase):
 		for entry in frappe.get_all('Therapy Session'):
 			doc = frappe.get_doc('Therapy Session', entry.name)
 			doc.cancel()
-			doc.delete()
 
 
 def create_therapy_plan(template=None):

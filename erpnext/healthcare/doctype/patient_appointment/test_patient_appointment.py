@@ -77,7 +77,6 @@ class TestPatientAppointment(unittest.TestCase):
 	def tearDown(self):
 		for entry in frappe.get_all('Patient Appointment'):
 			cancel_appointment(entry.name)
-			frappe.delete_doc('Patient Appointment', entry.name)
 
 
 def create_healthcare_docs():
