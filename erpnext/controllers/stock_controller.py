@@ -227,9 +227,9 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Row #{0}: Expense Account not set for Item {1}. Please set an Expense \
-				Account in the Items table").format(item.idx, frappe.bold(item.item_code)),
-				title=_("Expense Account Missing"))
+			msg = _("Please set an Expense Account in the Items table")
+			frappe.throw(_("Row #{0}: Expense Account not set for the Item {1}. {2}")
+				.format(item.idx, frappe.bold(item.item_code), msg), title=_("Expense Account Missing"))
 
 		else:
 			is_expense_account = frappe.db.get_value("Account",
@@ -242,11 +242,12 @@ class StockController(AccountsController):
 					_(self.doctype), self.name, item.get("item_code")))
 
 	def delete_auto_created_batches(self):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 		for d in self.items:
 			if not d.batch_no: continue
 
-			serial_nos = get_serial_nos(d.serial_no)
+			serial_nos = [sr.name for sr in frappe.get_all("Serial No",
+				{'batch_no': d.batch_no, 'status': 'Inactive'})]
+
 			if serial_nos:
 				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
 
