@@ -358,28 +358,24 @@
   {
    "fieldname": "service_provider",
    "fieldtype": "Data",
-   "label": "Service Provider",
-   "read_only": 1
+   "label": "Service Provider"
   },
   {
    "fieldname": "shipment_id",
    "fieldtype": "Data",
-   "label": "Shipment ID",
-   "read_only": 1
+   "label": "Shipment ID"
   },
   {
    "fieldname": "shipment_amount",
    "fieldtype": "Currency",
    "label": "Shipment Amount",
-   "precision": "2",
-   "read_only": 1
+   "precision": "2"
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nSubmitted\nBooked\nCancelled\nCompleted",
-   "read_only": 1
+   "options": "Draft\nSubmitted\nBooked\nCancelled\nCompleted"
   },
   {
    "fieldname": "tracking_url",
@@ -391,27 +387,23 @@
   {
    "fieldname": "carrier",
    "fieldtype": "Data",
-   "label": "Carrier",
-   "read_only": 1
+   "label": "Carrier"
   },
   {
    "fieldname": "carrier_service",
    "fieldtype": "Data",
-   "label": "Carrier Service",
-   "read_only": 1
+   "label": "Carrier Service"
   },
   {
    "fieldname": "awb_number",
    "fieldtype": "Data",
-   "label": "AWB Number",
-   "read_only": 1
+   "label": "AWB Number"
   },
   {
    "fieldname": "tracking_status",
    "fieldtype": "Select",
    "label": "Tracking Status",
-   "options": "\nIn Progress\nDelivered\nReturned\nLost",
-   "read_only": 1
+   "options": "\nIn Progress\nDelivered\nReturned\nLost"
   },
   {
    "fieldname": "tracking_status_info",
@@ -468,7 +460,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-29 13:59:50.241744",
+ "modified": "2020-11-20 16:19:06.157106",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",
