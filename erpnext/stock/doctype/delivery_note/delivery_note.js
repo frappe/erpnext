@@ -26,9 +26,11 @@ frappe.ui.form.on("Delivery Note", {
 					return "green";
 				}
 			} else {
-				if (!doc.billed_qty) {
+				if (!doc.completed_qty) {
 					return "orange";
-				} else if (doc.billed_qty < doc.qty) {
+				} else if (doc.returned_qty >= doc.qty) {
+					return "blue";
+				} else if (doc.completed_qty < doc.qty) {
 					return "yellow";
 				} else {
 					return "green";
