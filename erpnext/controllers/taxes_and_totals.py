@@ -922,6 +922,10 @@ def get_itemised_tax(taxes, with_tax_account=False):
 		if item_tax_map:
 			for item_code, tax_data in item_tax_map.items():
 				itemised_tax.setdefault(item_code, frappe._dict())
+				itemised_tax[item_code].setdefault(tax.description, frappe._dict(dict(
+					tax_rate=0,
+					tax_amount=0
+				)))
 
 				tax_rate = 0.0
 				tax_amount = 0.0
@@ -932,10 +936,8 @@ def get_itemised_tax(taxes, with_tax_account=False):
 				else:
 					tax_rate = flt(tax_data)
 
-				itemised_tax[item_code][tax.description] = frappe._dict(dict(
-					tax_rate = tax_rate,
-					tax_amount = tax_amount
-				))
+				itemised_tax[item_code][tax.description].tax_rate = tax_rate
+				itemised_tax[item_code][tax.description].tax_amount += tax_amount
 
 				if with_tax_account:
 					itemised_tax[item_code][tax.description].tax_account = tax.account_head
