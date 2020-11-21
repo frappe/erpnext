@@ -52,6 +52,13 @@ def validate_gstin_for_india(doc, method):
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
 
+def validate_tax_category(doc, method):
+	if doc.get('gst_state') and frappe.db.get_value('Tax category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
+		if doc.is_inter_state:
+			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
+		else:
+			frappe.throw(_("Intra State tax category for GST State {0} already exists").format(doc.gst_state))
+
 def update_gst_category(doc, method):
 	for link in doc.links:
 		if link.link_doctype in ['Customer', 'Supplier']:
@@ -523,7 +530,7 @@ def get_address_details(data, doc, company_address, billing_address):
 		data.transType = 1
 		data.actualToStateCode = data.toStateCode
 		shipping_address = billing_address
-	
+
 	if doc.gst_category == 'SEZ':
 		data.toStateCode = 99
 
