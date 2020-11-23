@@ -75,7 +75,14 @@
 		background-color: var(--gray-50);
 	}
 
+	.sticky-element {
+		position: sticky;
+		top: -1px;
+		z-index: 1;
+	}
+
 	> .items-selector {
+		@extend .pos-card;
 		grid-column: span 6 / span 6;
 		display: flex;
 		flex-direction: column;
@@ -83,12 +90,10 @@
 		overflow-x: hidden;
 
 		> .filter-section {
+			@extend .sticky-element;
 			display: grid;
 			grid-template-columns: repeat(12, minmax(0, 1fr));
 			background-color: var(--fg-color);
-			position: sticky;
-			top: -1px;
-			z-index: 1;
 			padding: var(--padding-lg);
 			padding-bottom: var(--padding-sm);
 			align-items: center;
@@ -124,6 +129,10 @@
 				@extend .pointer-no-select;
 				border-radius: var(--border-radius-md);
 				box-shadow: var(--shadow-base);
+
+				&:hover {
+					transform: scale(1.02, 1.02);
+				}
 				
 				.item-display {
 					display: flex;
@@ -180,14 +189,13 @@
 			> .customer-field {
 				display: flex;
 				align-items: center;
+				padding-top: var(--padding-xs);
 			}
 
 			> .customer-details {
+				@extend .sticky-element;
 				display: flex;
 				flex-direction: column;
-				position: sticky;
-				top: -1px;
-				z-index: 1;
 				background-color: var(--fg-color);
 
 				> .header {
@@ -263,6 +271,7 @@
 					display: grid;
 					grid-template-columns: repeat(2, minmax(0, 1fr));
 					margin-top: var(--margin-sm);
+					gap: var(--padding-sm);
 				}
 
 				> .transactions-label {
@@ -445,7 +454,7 @@
 							padding: 3px var(--padding-sm);
 							border-radius: var(--border-radius-sm);
 							background-color: var(--green-100);
-							color: var(--green-700);
+							color: var(--dark-green-500);
 							font-size: var(--text-sm);
 							font-weight: 700;
 						}
@@ -462,19 +471,14 @@
 
 					> .taxes-container {
 						display: none;
-						align-items: center;
-						justify-content: space-between;
+						flex-direction: column;
 						padding: var(--padding-sm) 0px;
 						font-weight: 500;
 						font-size: var(--text-md);
 
-						> .tax-label {
+						> .tax-row {
 							display: flex;
-							align-items: center;
-
-							> .tax-desc {
-								margin-left: var(--margin-md);
-							}
+							justify-content: space-between;
 						}
 					}
 
@@ -702,7 +706,7 @@
 				padding: 3px var(--padding-sm);
 				border-radius: var(--border-radius-sm);
 				background-color: var(--green-100);
-				color: var(--green-700);
+				color: var(--dark-green-500);
 				font-size: var(--text-sm);
 				font-weight: 700;
 			}
@@ -849,6 +853,219 @@
 				display: none;
 			}
 		}
+	}
 
+	> .past-order-list {
+		@extend .pos-card;
+		grid-column: span 4 / span 4;
+		display: none;
+		flex-direction: column;
+		overflow-y: scroll;
+		overflow-x: hidden;
+
+		> .filter-section {
+			@extend .sticky-element;
+			display: flex;
+			flex-direction: column;
+			background-color: var(--fg-color);
+			padding: var(--padding-lg);
+
+			> .search-field {
+				width: 100%;
+				display: flex;
+				align-items: center;
+				margin-top: var(--margin-sm);
+				margin-bottom: var(--margin-xs);
+			}
+
+			> .status-field {
+				width: 100%;
+				display: flex;
+				align-items: center;
+			}
+		}
+
+		> .invoices-container {
+			padding: var(--padding-lg);
+			padding-top: 0px;
+		}
+	}
+
+	> .past-order-summary {
+		// @extend .pos-card;
+		display: none;
+		grid-column: span 6 / span 6;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: var(--padding-lg);
+
+		> .no-summary-placeholder {
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			width: 100%;
+			height: 100%;
+			background-color: var(--gray-50);
+			font-weight: 500;
+			border-radius: var(--border-radius-md);
+		}
+
+		> .invoice-summary-wrapper {
+			@extend .pos-card;
+			display: none;
+			position: relative;
+			width: 31rem;
+			height: 100%;
+
+			> .abs-container {
+				position: absolute;
+				display: flex;
+				flex-direction: column;
+				width: 100%;
+				height: 100%;
+				padding: var(--padding-lg);
+
+				> .upper-section {
+					display: flex;
+					justify-content: space-between;
+					width: 100%;
+					margin-bottom: var(--margin-md);
+
+					> .left-section {
+						display: flex;
+						flex-direction: column;
+						align-items: flex-start;
+						justify-content: flex-end;
+						padding-right: var(--padding-sm);
+
+						> .customer-name {
+							font-size: var(--text-2xl);
+							font-weight: 700;
+						}
+
+						> .customer-email {
+							font-size: var(--text-md);
+							font-weight: 500;
+							color: var(--gray-600);
+						}
+
+						> .cashier {
+							font-size: var(--text-md);
+							font-weight: 500;
+							color: var(--gray-600);
+							margin-top: auto;
+						}
+					}
+
+					> .right-section {
+						display: flex;
+						flex-direction: column;
+						align-items: flex-end;
+						justify-content: space-between;
+
+						> .paid-amount {
+							font-size: var(--text-2xl);
+							font-weight: 700;
+						}
+
+						> .invoice-name {
+							font-size: var(--text-md);
+							font-weight: 500;
+							color: var(--gray-600);
+							margin-bottom: var(--margin-sm);
+						}
+					}
+				}
+
+				> .summary-container {
+					display: flex;
+					flex-direction: column;
+					border-radius: var(--border-radius-md);
+					background-color: var(--gray-50);
+					margin: var(--margin-md) 0px;
+
+					> .summary-row-wrapper {
+						display: flex;
+						align-items: center;
+						justify-content: space-between;
+						padding: var(--padding-sm) var(--padding-md);
+						// border-bottom: 1px solid var(--gray-300);
+					}
+
+					> .taxes-wrapper {
+						display: flex;
+						flex-direction: column;
+						padding: var(--padding-sm) var(--padding-md);
+						// border-bottom: 1px solid var(--gray-300);
+
+						> .tax-row {
+							display: flex;
+							justify-content: space-between;
+						}
+					}
+
+					> .item-row-wrapper {
+						display: flex;
+						align-items: center;
+						padding: var(--padding-sm) var(--padding-md);
+						// border-bottom: 1px solid var(--gray-300);
+
+						> .item-name {
+							@extend .nowrap;
+							font-weight: 500;
+							margin-right: var(--margin-md);
+						}
+	
+						> .item-qty {
+							font-weight: 500;
+							margin-left: auto;
+						}
+	
+						> .item-rate-disc {
+							display: flex;
+							text-align: right;
+							margin-left: var(--margin-md);
+	
+							> .item-disc {
+								color: var(--dark-green-500);
+							}
+	
+							> .item-rate {
+								font-weight: 500;
+								margin-left: var(--margin-md);
+							}
+						}
+					}
+
+					> .grand-total {
+						// font-size: var(--text-lg);
+						font-weight: 700;
+						padding: var(--padding-md);
+					}
+
+					> .payments {
+						font-weight: 700;
+					}
+				}
+
+
+				> .summary-btns {
+					display: flex;
+					justify-content: space-between;
+
+					> .summary-btn {
+						flex: 1;
+						margin: 0px var(--margin-xs);
+					}
+
+					> .new-btn {
+						background-color: var(--blue-500);
+						color:white;
+						font-weight: 500;
+					}
+				}
+			}
+		}
 	}
 }

@@ -159,7 +159,7 @@ erpnext.PointOfSale.ItemCart = class {
 		});
 
 		this.$customer_section.on('click', '.customer-display', function(e) {
-			if ($(this).find('.reset-customer-btn').length == 0) return;
+			if ($(e.target).closest('.reset-customer-btn').length) return;
 
 			const show = me.$cart_container.is(':visible');
 			me.toggle_customer_info(show);
@@ -495,20 +495,17 @@ erpnext.PointOfSale.ItemCart = class {
 		if (taxes.length) {
 			const currency = this.events.get_frm().doc.currency;
 			this.$totals_section.find('.taxes-container').css('display', 'flex').html(
-				`<div class="tax-label">
-					<div>Tax Charges</div>
-					<div class="tax-desc">
-					${
-						taxes.map((t, i) => {
-							let margin_left = '';
-							if (i !== 0) margin_left = '10px';
-							const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
-							return `<span style="margin-left: ${margin_left}">${description}</span>`
-						}).join('')
-					}
-					</div>
-				</div>
-				<div class="">${format_currency(value, currency)}</div>`
+				`${
+					taxes.map((t, i) => {
+						const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+						return `<div class="tax-row">
+									<div class="tax-label">
+										${description}
+									</div>
+									<div class="tax-value">${format_currency(value, currency)}</div>
+								</div>`
+					}).join('')
+				}`
 			)
 		} else {
 			this.$totals_section.find('.taxes-container').css('display', 'none').html('');
@@ -926,11 +923,12 @@ erpnext.PointOfSale.ItemCart = class {
 
 			res.forEach(invoice => {
 				const posting_datetime = moment(invoice.posting_date+" "+invoice.posting_time).format("Do MMMM, h:mma");
-				let indicator_color = '';
-
-				if (in_list(['Paid', 'Consolidated'], invoice.status)) (indicator_color = 'green');
-				if (invoice.status === 'Draft') (indicator_color = 'red');
-				if (invoice.status === 'Return') (indicator_color = 'grey');
+				let indicator_color = {
+					'Paid': 'green',
+					'Draft': 'red',
+					'Return': 'gray',
+					'Consolidated': 'blue'
+				};
 
 				transaction_container.append(
 					`<div class="invoice-wrapper" data-invoice-name="${escape(invoice.name)}">
@@ -943,8 +941,9 @@ erpnext.PointOfSale.ItemCart = class {
 								${format_currency(invoice.grand_total, invoice.currency, 0) || 0}
 							</div>
 							<div class="invoice-status">
-								<span class="indicator ${indicator_color}" />
-								${invoice.status}
+								<span class="indicator-pill whitespace-nowrap ${indicator_color[invoice.status]}">
+									<span>${invoice.status}</span>
+								</span>
 							</div>
 						</div>
 					</div>
