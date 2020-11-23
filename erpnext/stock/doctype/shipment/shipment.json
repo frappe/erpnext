@@ -30,14 +30,6 @@
   "delivery_contact_name",
   "delivery_contact_email",
   "delivery_contact",
-  "notification_details_section",
-  "pickup_from_send_shipping_notification",
-  "pickup_from_subscribe_to_status_updates",
-  "shipment_notification_subscription",
-  "column_break_27",
-  "delivery_to_send_shipping_notification",
-  "delivery_to_subscribe_to_status_updates",
-  "shipment_status_update_subscription",
   "parcels_section",
   "shipment_parcel",
   "parcel_template",
@@ -225,40 +217,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "notification_details_section",
-   "fieldtype": "Section Break",
-   "label": "Notification Details"
-  },
-  {
-   "default": "0",
-   "fieldname": "pickup_from_send_shipping_notification",
-   "fieldtype": "Check",
-   "label": "Send shipping notification"
-  },
-  {
-   "default": "0",
-   "fieldname": "pickup_from_subscribe_to_status_updates",
-   "fieldtype": "Check",
-   "label": "Subscribe to status updates"
-  },
-  {
-   "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "fieldname": "delivery_to_send_shipping_notification",
-   "fieldtype": "Check",
-   "label": "Send shipping notification"
-  },
-  {
-   "default": "0",
-   "fieldname": "delivery_to_subscribe_to_status_updates",
-   "fieldtype": "Check",
-   "label": "Subscribe to status updates"
-  },
-  {
    "fieldname": "parcels_section",
    "fieldtype": "Section Break",
    "label": "Parcels"
@@ -438,18 +396,6 @@
    "options": "Shipment Delivery Note"
   },
   {
-   "fieldname": "shipment_notification_subscription",
-   "fieldtype": "Table",
-   "label": "Shipment Notification Subscription",
-   "options": "Shipment Notification Subscription"
-  },
-  {
-   "fieldname": "shipment_status_update_subscription",
-   "fieldtype": "Table",
-   "label": "Shipment Status Update Subscription",
-   "options": "Shipment Status Update Subscription"
-  },
-  {
    "depends_on": "eval:doc.pickup_from_type === 'Company'",
    "fieldname": "pickup_contact_person",
    "fieldtype": "Link",
@@ -460,7 +406,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-23 16:26:28.132608",
+ "modified": "2020-11-23 17:00:51.600965",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",
