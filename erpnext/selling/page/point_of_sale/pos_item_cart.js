@@ -170,7 +170,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 			me.toggle_item_highlight(this);
 
-			const payment_section_hidden = me.$totals_section.find('.edit-cart-btn').hasClass('d-none');
+			const payment_section_hidden = !me.$totals_section.find('.edit-cart-btn').is(':visible');
 			if (!payment_section_hidden) {
 				// payment section is visible
 				// edit cart first and then open item details section
@@ -239,7 +239,7 @@ erpnext.PointOfSale.ItemCart = class {
 		frappe.ui.keys.add_shortcut({
 			shortcut: "ctrl+enter",
 			action: () => this.$component.find(".checkout-btn").click(),
-			condition: () => this.$component.is(":visible") && this.$totals_section.find('.edit-cart-btn').hasClass('d-none'),
+			condition: () => this.$component.is(":visible") && !this.$totals_section.find('.edit-cart-btn').is(':visible'),
 			description: __("Checkout Order / Submit Order / New Order"),
 			ignore_inputs: true,
 			page: cur_page.page.page
@@ -247,8 +247,9 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$component.find(".edit-cart-btn").attr("title", `${ctrl_label}+E`);
 		frappe.ui.keys.on("ctrl+e", () => {
 			const item_cart_visible = this.$component.is(":visible");
-			if (item_cart_visible && this.$totals_section.find('.checkout-btn').hasClass('d-none')) {
-				this.$component.find(".edit-cart-btn").click()
+			const checkout_btn_invisible = !this.$totals_section.find('.checkout-btn').is('visible');
+			if (item_cart_visible && checkout_btn_invisible) {
+				this.$component.find(".edit-cart-btn").click();
 			}
 		});
 		this.$component.find(".add-discount-wrapper").attr("title", `${ctrl_label}+D`);
@@ -638,6 +639,9 @@ erpnext.PointOfSale.ItemCart = class {
 	scroll_to_item($item) {
 		if ($item.length === 0) return;
 		const scrollTop = $item.offset().top - this.$cart_items_wrapper.offset().top + this.$cart_items_wrapper.scrollTop();
+		console.log($item.offset());
+		console.log(this.$cart_items_wrapper.offset());
+		console.log(scrollTop);
 		this.$cart_items_wrapper.animate({ scrollTop });
 	}
 	

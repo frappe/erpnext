@@ -277,21 +277,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		this.$summary_btns.children().last().removeClass('mr-4');
 	}
 
-	show_summary_placeholder() {
-		this.$summary_wrapper.css('display', 'none');
-		this.$component.find('.no-summary-placeholder').css('display', 'flex');
-	}
-
-	switch_to_post_submit_summary() {
-		// switch place holder with summary container
-		this.$component.find('.no-summary-placeholder').css('display', 'none');
-		this.$summary_wrapper.css('display', 'flex');
-	}
-
-	switch_to_recent_invoice_summary() {
-		// switch place holder with summary container
-		this.$component.find('.no-summary-placeholder').css('display', 'none');
-		this.$summary_wrapper.css('display', 'flex');
+	toggle_summary_placeholder(show) {
+		if (show) {
+			this.$summary_wrapper.css('display', 'none');
+			this.$component.find('.no-summary-placeholder').css('display', 'flex');
+		} else {
+			this.$summary_wrapper.css('display', 'flex');
+			this.$component.find('.no-summary-placeholder').css('display', 'none');
+		}
 	}
 
 	get_condition_btn_map(after_submission) {
@@ -308,12 +301,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	load_summary_of(doc, after_submission=false) {
 		this.$summary_wrapper.removeClass("d-none");
 
-		// after_submission ?
-		// 	this.switch_to_post_submit_summary() : this.switch_to_recent_invoice_summary();
+		this.toggle_summary_placeholder(false)
 
 		this.doc = doc;
 
-		this.attach_basic_info(doc);
+		this.attach_document_info(doc);
 
 		this.attach_items_info(doc);
 
@@ -326,7 +318,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		this.add_summary_btns(condition_btns_map);
 	}
 
-	attach_basic_info(doc) {
+	attach_document_info(doc) {
 		frappe.db.get_value('Customer', this.doc.customer, 'email_id').then(({ message }) => {
 			this.customer_email = message.email_id || '';
 			const upper_section_dom = this.get_upper_section_html(doc);

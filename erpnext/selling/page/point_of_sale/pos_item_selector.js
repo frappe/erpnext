@@ -248,8 +248,12 @@ erpnext.PointOfSale.ItemSelector = class {
 	
 	resize_selector(minimize) {
 		minimize ? 
-		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') : 
+		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
 		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(12, minmax(0, 1fr))');
+
+		minimize ? 
+		this.$component.find('.search-field').css('margin', 'var(--margin-sm) 0px') :
+		this.$component.find('.search-field').css('margin', '0px var(--margin-sm)');
 
 		minimize ?
 		this.$component.css('grid-column', 'span 2 / span 2') :

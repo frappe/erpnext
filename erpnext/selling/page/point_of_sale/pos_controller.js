@@ -388,7 +388,7 @@ erpnext.PointOfSale.Controller = class {
 						this.order_summary.load_summary_of(doc);
 					});
 				},
-				reset_summary: () => this.order_summary.show_summary_placeholder()
+				reset_summary: () => this.order_summary.toggle_summary_placeholder(true)
 			}
 		})
 	}
