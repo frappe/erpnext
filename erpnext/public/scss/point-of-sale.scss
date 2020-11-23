@@ -270,13 +270,14 @@
 				> .customer-fields-container {
 					display: grid;
 					grid-template-columns: repeat(2, minmax(0, 1fr));
-					margin-top: var(--margin-sm);
-					gap: var(--padding-sm);
+					margin-top: var(--margin-md);
+					column-gap: var(--padding-sm);
+					row-gap: var(--padding-xs);
 				}
 
 				> .transactions-label {
 					@extend .label;
-					margin-top: var(--margin-sm);
+					margin-top: var(--margin-md);
 					margin-bottom: var(--margin-sm);
 				}
 			}
@@ -579,13 +580,12 @@
 		> .invoice-name-date {
 			display: flex;
 			flex-direction: column;
-			justify-content: flex-end;
+			justify-content: space-around;
 
 			> .invoice-name {
 				@extend .nowrap;
 				font-size: var(--text-md);
 				font-weight: 700;
-				margin-bottom: var(--margin-xs);
 			}
 
 			> .invoice-date {
