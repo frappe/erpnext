@@ -42,6 +42,9 @@ class PutawayRule(Document):
 			frappe.throw(_("Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} qty.")
 				.format(self.item_code, frappe.bold(balance_qty)), title=_("Insufficient Capacity"))
 
+		if not self.capacity:
+			frappe.throw(_("Capacity must be greater than 0"), title=_("Invalid"))
+
 @frappe.whitelist()
 def get_ordered_putaway_rules(item_code, company):
 	"""Returns an ordered list of putaway rules to apply on an item."""
@@ -137,10 +140,26 @@ def apply_putaway_rule(items, company):
 			items_not_accomodated.append([item.item_code, pending_qty])
 
 	if items_not_accomodated:
-		msg = _("The following Items, having Putaway Rules, could not be accomodated:") + "<br><br><ul><li>"
-		formatted_item_qty = [entry[0] + " : " + str(entry[1]) for entry in items_not_accomodated]
-		msg += "</li><li>".join(formatted_item_qty)
-		msg += "</li></ul>"
+		msg = _("The following Items, having Putaway Rules, could not be accomodated:") + "<br><br>"
+		formatted_item_rows = ""
+
+		for entry in items_not_accomodated:
+			item_link = frappe.utils.get_link_to_form("Item", entry[0])
+			formatted_item_rows += """
+				<td>{0}</td>
+				<td>{1}</td>
+			</tr>""".format(item_link, frappe.bold(entry[1]))
+
+		msg += """
+			<table class="table">
+				<thead>
+					<td>{0}</td>
+					<td>{1}</td>
+				</thead>
+				{2}
+			</table>
+		""".format(_("Item"), _("Unassigned Qty"), formatted_item_rows)
+
 		frappe.msgprint(msg, title=_("Insufficient Capacity"), is_minimizable=True, wide=True)
 
 	return updated_table if updated_table else items
