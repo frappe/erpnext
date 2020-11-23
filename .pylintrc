@@ -1,1 +1,5 @@
+[MESSAGES CONTROL]
 disable=access-member-before-definition
+
+[FORMAT]
+indent-string='\t'
