@@ -7,89 +7,19 @@ from datetime import date, timedelta
 
 import frappe
 import unittest
-from erpnext.stock.doctype.shipment.shipment import fetch_shipping_rates
-from erpnext.stock.doctype.shipment.shipment import create_shipment
-from erpnext.stock.doctype.shipment.shipment import update_tracking
+from erpnext.stock.doctype.delivery_note.delivery_note import make_shipment
 
 class TestShipment(unittest.TestCase):
-	pass
-
-	def test_shipment_booking(self):
-		shipment = create_test_shipment()
-		try:
-			shipment.submit()
-		except:
-			frappe.throw('Error occurred on submit shipment')
-		doc, rate, tracking_data = make_shipment_transaction(shipment)
-		if doc and rate and tracking_data:
-			self.assertEqual(doc.service_provider, rate.get('service_provider'))
-			self.assertEqual(doc.shipment_amount, rate.get('actual_price'))
-			self.assertEqual(doc.carrier, rate.get('carrier'))
-			self.assertEqual(doc.tracking_status, tracking_data.get('tracking_status'))
-			self.assertEqual(doc.tracking_url, tracking_data.get('tracking_url'))
-
 	def test_shipment_from_delivery_note(self):
 		delivery_note = create_test_delivery_note()
-		try:
-			delivery_note.submit()
-		except:
-			frappe.throw('An error occurred.')
-		
+		delivery_note.submit()
 		shipment = create_test_shipment([ delivery_note ])
-		try:
-			shipment.submit()
-		except:
-			frappe.throw('Error occurred on submit shipment')
-		doc, rate, tracking_data = make_shipment_transaction(shipment)
-		if doc and rate and tracking_data:
-			self.assertEqual(doc.service_provider, rate.get('service_provider'))
-			self.assertEqual(doc.shipment_amount, rate.get('actual_price'))
-			self.assertEqual(doc.carrier, rate.get('carrier'))
-			self.assertEqual(doc.tracking_status, tracking_data.get('tracking_status'))
-			self.assertEqual(doc.tracking_url, tracking_data.get('tracking_url'))
-
-		
-
-def make_shipment_transaction(shipment):
-	shipment_parcel = convert_shipmet_parcel(shipment.shipment_parcel)
-	shipment_rates = fetch_shipping_rates(shipment.pickup_from_type, shipment.delivery_to_type, 
-		shipment.pickup_address_name, shipment.delivery_address_name,
-		shipment_parcel, shipment.description_of_content,
-		shipment.pickup_date, shipment.value_of_goods,
-		pickup_contact_name=shipment.pickup_contact_name,
-		delivery_contact_name=shipment.delivery_contact_name
-	)
-	if len(shipment_rates) > 0:
-		# We are taking the first shipment rate
-		rate = shipment_rates[0]
-		new_shipment = create_shipment(
-			shipment=shipment.name,
-			pickup_from_type=shipment.pickup_from_type,
-			delivery_to_type=shipment.delivery_to_type,
-			pickup_address_name=shipment.pickup_address_name,
-			delivery_address_name=shipment.delivery_address_name,
-			shipment_parcel=shipment_parcel,
-			description_of_content=shipment.description_of_content,
-			pickup_date=shipment.pickup_date,
-			pickup_contact_name=shipment.pickup_contact_name,
-			delivery_contact_name=shipment.delivery_contact_name,
-			value_of_goods=shipment.value_of_goods,
-			service_data=json.dumps(rate),
-			shipment_notific_email=None,
-			tracking_notific_email=None,
-			delivery_notes=None
-		)
-		service_provider = rate.get('service_provider')
-		shipment_id = new_shipment.get('shipment_id')
-		tracking_data = update_tracking(
-			shipment.name,
-			service_provider,
-			shipment_id,
-			delivery_notes=None
-		)
-		doc = frappe.get_doc('Shipment', shipment.name)
-		return doc, rate, tracking_data
-	return None, None, None
+		shipment.submit()
+		second_shipment = make_shipment(delivery_note.name)
+		self.assertEqual(second_shipment.value_of_goods, delivery_note.grand_total)
+		self.assertEqual(second_shipment.grand_total, delivery_note.grand_total)
+		self.assertEqual(len(second_shipment.shipment_delivery_note), 1)
+		self.assertEqual(second_shipment.shipment_delivery_note[0].delivery_note, delivery_note.name)
 
 def create_test_delivery_note():
 	company = get_shipment_company()
@@ -316,18 +246,3 @@ def create_shipment_item(item_name, company_name):
 	except:
 		frappe.throw('An error occurred.')
 	return item
-
-
-def convert_shipmet_parcel(shipmet_parcel):
-	data = []
-	for parcel in shipmet_parcel:
-		data.append(
-			{
-				"length": parcel.length,
-				"width": parcel.width,
-				"height": parcel.height,
-				"weight": parcel.weight,
-				"count": parcel.count
-			}
-		)
-	return json.dumps(data)

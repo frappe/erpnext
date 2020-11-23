@@ -619,6 +619,7 @@ def make_shipment(source_name, target_doc=None):
 				"name": "prevdoc_detail_docname",
 				"parent": "prevdoc_docname",
 				"parenttype": "prevdoc_doctype",
+				"base_amount": "grand_total"
 			}
 		}
 	}, target_doc, postprocess)
