@@ -5,6 +5,6 @@ frappe.listview_settings['Putaway Rule'] = {
 			return [__("Disabled"), "darkgrey", "disable,=,1"];
 		} else {
 			return [__("Active"), "blue", "disable,=,0"];
-		};
+		}
 	}
 };
