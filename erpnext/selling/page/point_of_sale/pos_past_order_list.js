@@ -14,17 +14,13 @@ erpnext.PointOfSale.PastOrderList = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<section class="col-span-4 flex flex-col shadow rounded past-order-list bg-white mx-h-70 h-100 d-none">
-				<div class="flex flex-col rounded w-full scroll-y">
-					<div class="filter-section flex flex-col p-8 pb-2 bg-white sticky z-100">
-						<div class="search-field flex items-center text-grey"></div>
-						<div class="status-field flex items-center text-grey text-bold"></div>
-					</div>
-					<div class="flex flex-1 flex-col p-8 pt-2">
-						<div class="text-grey mb-6">RECENT ORDERS</div>
-						<div class="invoices-container rounded border grid grid-cols-1"></div>					
-					</div>
+			`<section class="past-order-list">
+				<div class="filter-section">
+					<div class="label">Recent Orders</div>
+					<div class="search-field"></div>
+					<div class="status-field"></div>
 				</div>
+				<div class="invoices-container"></div>
 			</section>`
 		);
 
@@ -77,10 +73,6 @@ erpnext.PointOfSale.PastOrderList = class {
 		this.status_field.set_value('Draft');
 	}
 
-	toggle_component(show) {
-		show ? this.$component.removeClass('d-none') && this.refresh_list() : this.$component.addClass('d-none');
-	}
-
 	refresh_list() {
 		frappe.dom.freeze();
 		this.events.reset_summary();
@@ -106,23 +98,26 @@ erpnext.PointOfSale.PastOrderList = class {
 	get_invoice_html(invoice) {
 		const posting_datetime = moment(invoice.posting_date+" "+invoice.posting_time).format("Do MMMM, h:mma");
 		return (
-			`<div class="invoice-wrapper flex p-4 justify-between border-b-grey pointer no-select" data-invoice-name="${escape(invoice.name)}">
-				<div class="flex flex-col justify-end">
-					<div class="text-dark-grey text-bold overflow-hidden whitespace-nowrap mb-2">${invoice.name}</div>
-					<div class="flex items-center">
-						<div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
-							<svg class="mr-2" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
-								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-							</svg>
-							${invoice.customer}
-						</div>
+			`<div class="invoice-wrapper" data-invoice-name="${escape(invoice.name)}">
+				<div class="invoice-name-date">
+					<div class="invoice-name">${invoice.name}</div>
+					<div class="invoice-date">
+						<svg class="mr-2" width="12" height="12" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+						</svg>
+						${invoice.customer}
 					</div>
 				</div>
-				<div class="flex flex-col text-right">
-					<div class="f-shrink-0 text-lg text-dark-grey text-bold ml-4">${format_currency(invoice.grand_total, invoice.currency, 0) || 0}</div>
-					<div class="f-shrink-0 text-grey ml-4">${posting_datetime}</div>
+				<div class="invoice-total-status">
+					<div class="invoice-total">${format_currency(invoice.grand_total, invoice.currency, 0) || 0}</div>
+					<div class="invoice-date">${posting_datetime}</div>
 				</div>
-			</div>`
+			</div>
+			<div class="seperator"></div>`
 		);
+	}
+
+	toggle_component(show) {
+		show ? this.$component.css('display', 'flex') && this.refresh_list() : this.$component.css('display', 'none');
 	}
 };

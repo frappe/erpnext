@@ -17,7 +17,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<section class="pos-card items-selector">
+			`<section class="items-selector">
 				<div class="filter-section">
 					<div class="label">All Items</div>
 					<div class="search-field"></div>

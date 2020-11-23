@@ -190,7 +190,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	toggle_recent_order() {
-		const show = this.recent_order_list.$component.hasClass('d-none');
+		const show = this.recent_order_list.$component.is(':hidden');
 		this.toggle_recent_order_list(show);
 	}
 
