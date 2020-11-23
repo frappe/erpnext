@@ -135,8 +135,8 @@ erpnext.PointOfSale.Payment = class {
 			// if clicked element doesn't have .mode-of-payment class then return
 			if (!$(e.target).is(mode_clicked)) return;
 
-			// const scrollRight = mode_clicked.offset().right - me.$payment_modes.offset().right + me.$payment_modes.scrollRight();
-			// me.$payment_modes.animate({ scrollRight });
+			const scrollLeft = mode_clicked.offset().left - me.$payment_modes.offset().left + me.$payment_modes.scrollLeft();
+			me.$payment_modes.animate({ scrollLeft });
 
 			const mode = mode_clicked.attr('data-mode');
 
