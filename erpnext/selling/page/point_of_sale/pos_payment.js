@@ -19,17 +19,17 @@ erpnext.PointOfSale.Payment = class {
 	prepare_dom() {
 		this.wrapper.append(
 			`<section class="payment-container">
-				<div class="section-label payment-section">
-					Payment Method
-					<span class="ml-2 collapse-indicator mb-1" style="display: inline;">
-						<svg class="icon icon-sm" style=""><use class="mb-1" href="#icon-down"></use></svg>
-					</span>
-				</div>
+				<div class="section-label payment-section">Payment Method</div>
 				<div class="payment-modes"></div>
-				<div class="invoice-fields-section"></div>
+				<div class="fields-numpad-container">
+					<div class="fields-section">
+						<div class="section-label">Additional Information</div>
+						<div class="invoice-fields"></div>
+					</div>
+					<div class="number-pad"></div>
+				</div>
 				<div class="totals-section">
 					<div class="totals"></div>
-					<div class="number-pad"></div>
 				</div>
 				<div class="submit-order-btn">Complete Order</div>
 			</section>`
@@ -39,7 +39,7 @@ erpnext.PointOfSale.Payment = class {
 		this.$totals_section = this.$component.find('.totals-section');
 		this.$totals = this.$component.find('.totals');
 		this.$numpad = this.$component.find('.number-pad');
-		this.$invoice_fields_section = this.$component.find('.invoice-fields-section');
+		this.$invoice_fields_section = this.$component.find('.fields-section');
 	}
 
 	make_invoice_fields_control() {
@@ -47,15 +47,6 @@ erpnext.PointOfSale.Payment = class {
 			const fields = doc.invoice_fields;
 			if (!fields.length) return;
 
-			this.$invoice_fields_section.html(
-				`<div class="section-label">
-					Additional Information
-					<span class="ml-2 collapse-indicator mb-1" style="display: inline;">
-						<svg class="icon icon-sm" style=""><use class="mb-1" href="#icon-down"></use></svg>
-					</span>
-				</div>
-				<div class="invoice-fields"></div>`
-			);
 			this.$invoice_fields = this.$invoice_fields_section.find('.invoice-fields');
 			const frm = this.events.get_frm();
 
@@ -153,7 +144,6 @@ erpnext.PointOfSale.Payment = class {
 				// clicked one is selected then unselect it
 				mode_clicked.removeClass('border-primary');
 				me.selected_mode = '';
-				me.toggle_numpad(false);
 			} else {
 				// clicked one is not selected then select it
 				mode_clicked.addClass('border-primary');
@@ -161,13 +151,14 @@ erpnext.PointOfSale.Payment = class {
 				mode_clicked.find('.cash-shortcuts').css('display', 'grid');
 				me.$payment_modes.find(`.${mode}-amount`).css('display', 'none');
 				me.$payment_modes.find(`.${mode}-name`).css('display', 'inline');
-				me.toggle_numpad(true);
 
 				me.selected_mode = me[`${mode}_control`];
 				const doc = me.events.get_frm().doc;
 				me.selected_mode?.$input?.get(0).focus();
 				const current_value = me.selected_mode?.get_value()
 				!current_value && doc.grand_total > doc.paid_amount ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
+
+				me.numpad_value = '';
 			}
 		})
 
@@ -231,19 +222,6 @@ erpnext.PointOfSale.Payment = class {
 				this[`${mode}_control`].set_value(default_mop.amount);
 			}
 		});
-
-		this.$component.on('click', '.invoice-fields-section', function(e) {
-			if ($(e.target).closest('.invoice-fields').length) return;
-
-			me.$payment_modes.css('display', 'none');
-			me.$invoice_fields.css('display', 'grid');
-			me.toggle_numpad(false);
-		});
-		this.$component.on('click', '.payment-section', () => {
-			this.$invoice_fields.css('display', 'none');
-			this.$payment_modes.css('display', 'flex');
-			this.toggle_numpad(true);
-		})
 	}
 
 	attach_shortcuts() {
