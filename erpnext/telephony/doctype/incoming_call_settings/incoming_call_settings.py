@@ -3,8 +3,59 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-# import frappe
+import frappe
 from frappe.model.document import Document
+from datetime import datetime
 
 class IncomingCallSettings(Document):
-	pass
+	def validate(self):
+		"""List of validations
+		* Make sure that to time slot is ahead of from time slot in call schedule
+		* Make sure that no overlapping timeslots for a given day
+		"""
+		self.validate_call_schedule_timeslot(self.call_handling_schedule)
+		self.validate_call_schedule_overlaps(self.call_handling_schedule)
+
+	def validate_call_schedule_timeslot(self, schedule):
+		"""	Make sure that to time slot is ahead of from time slot.
+		"""
+		errors = []
+		for record in schedule:
+			from_time = self.time_to_seconds(record.from_time)
+			to_time = self.time_to_seconds(record.to_time)
+			if from_time >= to_time:
+				errors.append(
+					f'Call Schedule Row {record.idx}: To time slot should always be ahead of From time slot.'
+				)
+
+		if errors:
+			frappe.throw('<br/>'.join(errors))
+
+	def validate_call_schedule_overlaps(self, schedule):
+		"""Check if any time slots are overlapped in a day schedule.
+		"""
+		week_days = set([each.day_of_week for each in schedule])
+
+		for day in week_days:
+			timeslots = [[record.from_time, record.to_time] for record in schedule if record.day_of_week==day]
+
+			# convert time in timeslot into an integer represents number of seconds
+			timeslots = list(map(lambda seq: list(map(self.time_to_seconds, seq)), timeslots))
+			if len(timeslots) < 2: continue
+
+			for i in range(1, len(timeslots)):
+				if self.check_timeslots_overlap(timeslots[i-1], timeslots[i]):
+					frappe.throw(f"Please fix overlapping time slots for {day}.")
+
+	@staticmethod
+	def check_timeslots_overlap(ts1, ts2):
+		if (ts1[0] < ts2[0] and ts1[1] <= ts2[0]) or (ts1[0] >= ts2[1] and ts1[1] > ts2[1]):
+			return False
+		return True
+
+	@staticmethod
+	def time_to_seconds(time: str) -> int:
+		"""Convert time string of format HH:MM:SS into seconds
+		"""
+		date_time = datetime.strptime(time, "%H:%M:%S")
+		return date_time - datetime(1900, 1, 1)
