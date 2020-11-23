@@ -914,7 +914,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 			if (!res.length) {
 				transaction_container.html(
-					`<div class="text-center">No recent transactions found</div>`
+					`<div class="no-transactions-placeholder">No recent transactions found</div>`
 				)
 				return;
 			};
@@ -951,7 +951,7 @@ erpnext.PointOfSale.ItemCart = class {
 					<div class="seperator"></div>`
 				)
 			});
-		})
+		});
 	}
 
 	load_invoice() {

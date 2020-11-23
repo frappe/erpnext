@@ -281,6 +281,19 @@
 					margin-bottom: var(--margin-sm);
 				}
 			}
+
+			> .customer-transactions {
+				height: 100%;
+
+				> .no-transactions-placeholder {
+					height: 100%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					background-color: var(--gray-50);
+					border-radius: var(--border-radius-md);
+				}
+			}
 		}
 
 		> .cart-container {
@@ -900,7 +913,7 @@
 				width: 100%;
 				display: flex;
 				align-items: center;
-				margin-top: var(--margin-sm);
+				margin-top: var(--margin-md);
 				margin-bottom: var(--margin-xs);
 			}
 
@@ -1022,7 +1035,7 @@
 					> .taxes-wrapper {
 						display: flex;
 						flex-direction: column;
-						// padding: var(--padding-sm) var(--padding-md);
+						padding: 0px var(--padding-md);
 						// border-bottom: 1px solid var(--gray-300);
 
 						> .tax-row {
