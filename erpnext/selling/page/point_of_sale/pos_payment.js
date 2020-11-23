@@ -1,5 +1,3 @@
-{% include "erpnext/selling/page/point_of_sale/pos_number_pad.js" %}
-
 erpnext.PointOfSale.Payment = class {
 	constructor({ events, wrapper }) {
 		this.wrapper = wrapper;
@@ -153,13 +151,12 @@ erpnext.PointOfSale.Payment = class {
 				me.$payment_modes.find(`.${mode}-amount`).css('display', 'none');
 				me.$payment_modes.find(`.${mode}-name`).css('display', 'inline');
 
-				me.selected_mode = me[`${mode}_control`];
 				const doc = me.events.get_frm().doc;
-				me.selected_mode?.$input?.get(0).focus();
-				const current_value = me.selected_mode?.get_value()
-				!current_value && doc.grand_total > doc.paid_amount ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
-
-				me.numpad_value = '';
+				me.selected_mode = me[`${mode}_control`];
+				me.selected_mode && me.selected_mode.$input.get(0).focus();
+				const current_value = me.selected_mode ? me.selected_mode.get_value() : undefined;
+				!current_value && doc.grand_total > doc.paid_amount && me.selected_mode ? 
+					me.selected_mode.set_value(doc.grand_total - doc.paid_amount) : '';
 			}
 		})
 
