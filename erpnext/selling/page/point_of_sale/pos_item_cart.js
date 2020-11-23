@@ -639,9 +639,6 @@ erpnext.PointOfSale.ItemCart = class {
 	scroll_to_item($item) {
 		if ($item.length === 0) return;
 		const scrollTop = $item.offset().top - this.$cart_items_wrapper.offset().top + this.$cart_items_wrapper.scrollTop();
-		console.log($item.offset());
-		console.log(this.$cart_items_wrapper.offset());
-		console.log(scrollTop);
 		this.$cart_items_wrapper.animate({ scrollTop });
 	}
 	
