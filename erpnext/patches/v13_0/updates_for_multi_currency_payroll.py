@@ -37,6 +37,18 @@ def execute():
 		},
 		{
 		'module':'Payroll',
+		'doctype':'Employee Tax Exemption Declaration'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Employee Tax Exemption Proof Submission'
+		},
+		{
+		'module':'Payroll',
+		'doctype':'Income Tax Slab'
+		},
+		{
+		'module':'Payroll',
 		'doctype':'Payroll Entry'
 		},
 		{
@@ -55,54 +67,120 @@ def execute():
 		'module':'Payroll',
 		'doctype':'Salary Slip'
 		},
+	]
+
+	base_keys = [
 		{
-		'module':'Payroll',
-		'doctype':'Income Tax Slab'
+			"base_key": "base_hour_rate",
+			"key": "hour_rate"
+		},
+		{
+			"base_key": "base_gross_pay",
+			"key": "gross_pay"
+		},
+		{
+			"base_key": "base_total_deduction",
+			"key": "total_deduction"
+		},
+		{
+			"base_key": "base_net_pay",
+			"key": "net_pay"
+		},
+		{
+			"base_key": "base_rounded_total",
+			"key": "rounded_total"
+		},
+		{
+			"base_key": "base_total_in_words",
+			"key": "total_in_words"
 		},
 	]
 
 	for item in doctype_list:
 		frappe.reload_doc(item['module'], 'doctype', item['doctype'])
-	
-	for item in doctype_list:
-		if item['doctype'] != 'Income Tax Slab':
-			all_doc = frappe.get_all(item['doctype'])
-			if all_doc:
-				for record in all_doc:
-					if item['doctype'] in ['Payroll Entry', 'Salary Structure']:
-						company = frappe.db.get_value(item['doctype'], record, 'company')
-					else:
-						employee = frappe.db.get_value(item['doctype'], record, 'employee')
-						company = frappe.db.get_value('Employee', employee, 'company')
-					currency = frappe.db.get_value('Company', company, 'default_currency')
-					if item['doctype'] == 'Employee Incentive':
-						if not frappe.db.get_value(item['doctype'], record, 'company'):
-							frappe.db.set_value(item['doctype'], record, 'company', company)
+		all_doc = frappe.get_all(item['doctype'])
+		if all_doc:
+			for record in all_doc:
+				if item['doctype'] in [
+					'Employee Advance', 
+					'Leave Encashment', 
+					'Employee Benefit Application',
+					'Employee Benefit Claim', 
+					'Employee Incentive'
+					]:
+
 					if not frappe.db.get_value(item['doctype'], record, 'currency'):
-						frappe.db.set_value(item['doctype'], record, 'currency', currency)
-					if item['doctype'] in ['Employee Advance', 'Payroll Entry', 'Salary Slip']:
-						if not frappe.db.get_value(item['doctype'], record, 'exchange_rate'):
-							frappe.db.set_value(item['doctype'], record, 'exchange_rate', '1'))
-					if item['doctype'] in ['Payroll Entry', 'Salary Structure Assignment']:
-						if not frappe.db.get_value(item['doctype'], record, 'payroll_payable_account'):
-							frappe.db.set_value(item['doctype'], record, 'payroll_payable_account', frappe.db.get_value('Company', company, 'default_payroll_payable_account')))
-					if item['doctype'] in ['Salary Structure', 'Salary Structure Assignment']:
-						if frappe.db.get_value(item['doctype'], record, 'income_tax_slab'):
-							if not frappe.db.get_value('Income Tax Slab', frappe.db.get_value(item['doctype'], record, 'income_tax_slab'), 'currency'):
-								frappe.db.set_value('Income Tax Slab', frappe.db.get_value(item['doctype'], record, 'income_tax_slab'), 'currency', currency)
+						frappe.db.set_value(
+							item['doctype'], record, 'currency', frappe.db.get_value(
+								'Company', frappe.db.get_value(
+									'Employee', frappe.db.get_value(
+										item['doctype'], record, 'employee'
+									), 'company'
+								), 'default_currency'
+							)
+						)
+
+				if item['doctype'] == 'Employee Advance':
+
+					if not frappe.db.get_value('Employee Advance', record, 'exchange_rate'):
+						frappe.db.set_value('Employee Advance', record, 'exchange_rate', 1)
+
+				if item['doctype'] in [
+					'Additional Salary', 
+					'Employee Tax Exemption Declaration', 
+					'Employee Tax Exemption Proof Submission', 
+					'Income Tax Slab', 
+					'Payroll Entry', 
+					'Retention Bonus', 
+					'Salary Structure', 
+					'Salary Structure Assignment', 
+					'Salary Slip'
+					]:
+
+					if not frappe.db.get_value(item['doctype'], record, 'currency'):
+						frappe.db.set_value(
+							item['doctype'], record, 'currency', frappe.db.get_value(
+								'Company', frappe.db.get_value(
+									item['doctype'], record, 'company'
+								), 'default_currency'
+							)
+						)
+
+				if item['doctype'] == 'Employee Incentive':
+					if not frappe.db.get_value('Employee Incentive', record, 'company'):
+						frappe.db.set_value(
+							'Employee Incentive', record, 'company', frappe.db.get_value(
+								'Employee', frappe.db.get_value(
+									'Employee Incentive', record, 'employee'
+								), 'company'
+							)
+						)
+
+				if item['doctype'] in ['Payroll Entry', 'Salary Slip']:
+					if not frappe.db.get_value(item['doctype'], record, 'exchange_rate'):
+						frappe.db.set_value(item['doctype'], record, 'exchange_rate', 1)
+
 					if item['doctype'] == 'Salary Slip':
 						update_base('Salary Slip', record)
 
+				if item['doctype'] in ['Salary Structure Assignment', 'Payroll Entry']:
+
+					if not frappe.db.get_value(item['doctype'], record, 'payroll_payable_account'):
+						payroll_payable_account = frappe.db.get_value(
+								'Company', frappe.db.get_value(
+									item['doctype'], record, 'company'
+								), 'default_payable_account'
+							)
+
+						if not payroll_payable_account:
+							payroll_payable_account = frappe.db.get_value("Account",
+							{"account_name": _("Payroll Payable"), "company": frappe.db.get_value(
+									item['doctype'], record, 'company'
+								), "is_group": 0})
+
+						frappe.db.set_value(item['doctype'], record, 'payroll_payable_account', payroll_payable_account)
+
 def update_base(doctype, record):
-	if not frappe.db.get_value(doctype, record, 'base_hour_rate'):
-		frappe.db.set_value(doctype, record, 'base_hour_rate', frappe.db.get_value(doctype, record, 'hour_rate'))
-	if not frappe.db.get_value(doctype, record, 'base_gross_pay'):
-		frappe.db.set_value(doctype, record, 'base_gross_pay', frappe.db.get_value(doctype, record, 'gross_pay'))
-	if not frappe.db.get_value(doctype, record, 'base_total_deduction'):
-		frappe.db.set_value(doctype, record, 'base_total_deduction', frappe.db.get_value(doctype, record, 'total_deduction'))
-	if not frappe.db.get_value(doctype, record, 'base_net_pay'):
-		frappe.db.set_value(doctype, record, 'base_net_pay', frappe.db.get_value(doctype, record, 'net_pay'))
-	if not frappe.db.get_value(doctype, record, 'base_rounded_total'):
-		frappe.db.set_value(doctype, record, 'base_rounded_total', frappe.db.get_value(doctype, record, 'rounded_total'))
-	if not frappe.db.get_value(doctype, record, 'base_total_in_words'):
-		frappe.db.set_value(doctype, record, 'base_total_in_words', frappe.db.get_value(doctype, record, 'total_in_words'))
+	for item in base_keys:
+		if not frappe.db.get_value(doctype, record, item['base_key']):
+			frappe.db.set_value(doctype, record, item['base_key'], frappe.db.get_value(doctype, record, item['key']))
