@@ -2,7 +2,6 @@
 # Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-import json
 from datetime import date, timedelta
 
 import frappe
@@ -222,10 +221,7 @@ def create_material_receipt(item, company):
 		}
 	)
 	stock.insert()
-	try:
-		stock.submit()
-	except:
-		frappe.throw('An error occurred.')
+	stock.submit()
 	
 
 def create_shipment_item(item_name, company_name):
@@ -241,8 +237,5 @@ def create_shipment_item(item_name, company_name):
 			"default_warehouse": 'Stores - SC'
 		}
 	)
-	try:
-		item.insert()
-	except:
-		frappe.throw('An error occurred.')
+	item.insert()
 	return item
