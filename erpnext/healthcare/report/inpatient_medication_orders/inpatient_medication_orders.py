@@ -8,8 +8,9 @@ from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_
 def execute(filters=None):
 	columns = get_columns()
 	data = get_data(filters)
+	chart = get_chart_data(data)
 
-	return columns, data
+	return columns, data, None, chart
 
 def get_columns():
 	return [
@@ -98,7 +99,7 @@ def get_columns():
 def get_data(filters):
 	conditions = ''
 	if filters.get('company'):
-		conditions += " parent.company = %(company)s".format(company=frappe.db.escape(filters.get('company')))
+		conditions += " AND parent.company = %(company)s".format(company=frappe.db.escape(filters.get('company')))
 	if filters.get('patient'):
 		conditions += " AND parent.patient = %(patient)s".format(patient=filters.get('patient'))
 	if not filters.get('show_completed_orders'):
@@ -112,7 +113,9 @@ def get_data(filters):
 		FROM `tabInpatient Medication Order` parent
 		INNER JOIN `tabInpatient Medication Order Entry` child
 		ON child.parent = parent.name
-		WHERE {conditions}
+		WHERE
+			parent.docstatus = 1
+			{conditions}
 	""".format(conditions=conditions), filters, as_dict=1)
 
 	data = get_inpatient_details(data)
@@ -130,3 +133,38 @@ def get_inpatient_details(data):
 def get_inpatient_medication_entry(order_entry):
 	return frappe.db.get_value('Inpatient Medication Entry Detail', {'against_imoe': order_entry}, 'parent')
 
+def get_chart_data(data):
+	if not data:
+		return None
+
+	labels = ["Pending", "Completed"]
+	datasets = []
+
+	status_wise_data = {
+		"Pending": 0,
+		"Completed": 0
+	}
+
+	for d in data:
+		if d.is_completed:
+			status_wise_data['Completed'] += 1
+		else:
+			status_wise_data['Pending'] += 1
+
+	datasets.append({
+		'name': 'Inpatient Medication Order Status',
+		'values': [status_wise_data.get("Pending"), status_wise_data.get("Completed")]
+	})
+
+	chart = {
+		"data": {
+			'labels': labels,
+			'datasets': datasets
+		},
+		"type": "donut",
+		"height": 300
+	}
+
+	chart["fieldtype"] = "Data"
+
+	return chart
