@@ -747,7 +747,8 @@
 
 		> .payment-modes {
 			display: flex;
-			margin-bottom: var(--margin-md);
+			padding-bottom: var(--padding-sm);
+			margin-bottom: var(--margin-xs);
 			overflow-x: scroll;
 			overflow-y: hidden;
 
@@ -803,10 +804,37 @@
 			}
 		}
 
-		.invoice-fields {
-			display: none;
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-			column-gap: var(--padding-md);
+		> .fields-numpad-container {
+			display: flex;
+			flex: 1;
+
+			> .fields-section {
+				flex: 1;
+			}
+			
+			> .number-pad {
+				flex: 1;
+				display: flex;
+				justify-content: flex-end;
+				align-items: flex-end;
+
+				.numpad-container {
+					display: grid;
+					grid-template-columns: repeat(3, minmax(0, 1fr));
+					gap: var(--margin-md);
+					margin-bottom: var(--margin-md);
+			
+					> .numpad-btn {
+						@extend .pointer-no-select;
+						border-radius: var(--border-radius-md);
+						display: flex;
+						align-items: center;
+						justify-content: center;
+						padding: var(--padding-md);
+						box-shadow: var(--shadow-sm);
+					}
+				}
+			}
 		}
 
 		> .totals-section {
