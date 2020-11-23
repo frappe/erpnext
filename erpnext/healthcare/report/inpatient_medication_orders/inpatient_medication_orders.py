@@ -1,0 +1,132 @@
+# Copyright (c) 2013, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+import frappe
+from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+
+def execute(filters=None):
+	columns = get_columns()
+	data = get_data(filters)
+
+	return columns, data
+
+def get_columns():
+	return [
+		{
+			"fieldname": "patient",
+			"fieldtype": "Link",
+			"label": "Patient",
+			"options": "Patient",
+			"width": 200
+		},
+		{
+			"fieldname": "healthcare_service_unit",
+			"fieldtype": "Link",
+			"label": "Healthcare Service Unit",
+			"options": "Healthcare Service Unit",
+			"width": 150
+		},
+		{
+			"fieldname": "drug",
+			"fieldtype": "Link",
+			"label": "Drug Code",
+			"options": "Item",
+			"width": 150
+		},
+		{
+			"fieldname": "drug_name",
+			"fieldtype": "Data",
+			"label": "Drug Name",
+			"width": 150
+		},
+		{
+			"fieldname": "dosage",
+			"fieldtype": "Link",
+			"label": "Dosage",
+			"options": "Prescription Dosage",
+			"width": 80
+		},
+		{
+			"fieldname": "dosage_form",
+			"fieldtype": "Link",
+			"label": "Dosage Form",
+			"options": "Dosage Form",
+			"width": 100
+		},
+		{
+			"fieldname": "date",
+			"fieldtype": "Date",
+			"label": "Date",
+			"width": 100
+		},
+		{
+			"fieldname": "time",
+			"fieldtype": "Time",
+			"label": "Time",
+			"width": 100
+		},
+		{
+			"fieldname": "is_completed",
+			"fieldtype": "Check",
+			"label": "Is Order Completed",
+			"width": 100
+		},
+		{
+			"fieldname": "healthcare_practitioner",
+			"fieldtype": "Link",
+			"label": "Healthcare Practitioner",
+			"options": "Healthcare Practitioner",
+			"width": 200
+		},
+		{
+			"fieldname": "inpatient_medication_entry",
+			"fieldtype": "Link",
+			"label": "Inpatient Medication Entry",
+			"options": "Inpatient Medication Entry",
+			"width": 200
+		},
+		{
+			"fieldname": "inpatient_record",
+			"fieldtype": "Link",
+			"label": "Inpatient Record",
+			"options": "Inpatient Record",
+			"width": 200
+		}
+	]
+
+def get_data(filters):
+	conditions = ''
+	if filters.get('company'):
+		conditions += " parent.company = %(company)s".format(company=frappe.db.escape(filters.get('company')))
+	if filters.get('patient'):
+		conditions += " AND parent.patient = %(patient)s".format(patient=filters.get('patient'))
+	if not filters.get('show_completed_orders'):
+		conditions += " AND child.is_completed = 0"
+
+	data = frappe.db.sql("""
+		SELECT
+			parent.patient, parent.inpatient_record, parent.practitioner,
+			child.drug, child.drug_name, child.dosage, child.dosage_form,
+			child.date, child.time, child.is_completed, child.name
+		FROM `tabInpatient Medication Order` parent
+		INNER JOIN `tabInpatient Medication Order Entry` child
+		ON child.parent = parent.name
+		WHERE {conditions}
+	""".format(conditions=conditions), filters, as_dict=1)
+
+	data = get_inpatient_details(data)
+
+	return data
+
+def get_inpatient_details(data):
+	for entry in data:
+		entry['healthcare_service_unit'] = get_current_healthcare_service_unit(entry.inpatient_record)
+		if entry.is_completed:
+			entry['inpatient_medication_entry'] = get_inpatient_medication_entry(entry.name)
+
+	return data
+
+def get_inpatient_medication_entry(order_entry):
+	return frappe.db.get_value('Inpatient Medication Entry Detail', {'against_imoe': order_entry}, 'parent')
+
