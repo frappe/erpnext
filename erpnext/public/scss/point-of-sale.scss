@@ -446,17 +446,15 @@
 							width: 100%;
 						}
 
-						> .discount-icon {
+						.discount-icon {
 							margin-right: var(--margin-sm);
 						}
 
-						> .edit-discount-btn {
-							padding: 3px var(--padding-sm);
-							border-radius: var(--border-radius-sm);
-							background-color: var(--green-100);
+						.edit-discount-btn {
+							display: flex;
+							align-items: center;
+							font-weight: 500;
 							color: var(--dark-green-500);
-							font-size: var(--text-sm);
-							font-weight: 700;
 						}
 					}
 
@@ -472,13 +470,13 @@
 					> .taxes-container {
 						display: none;
 						flex-direction: column;
-						padding: var(--padding-sm) 0px;
 						font-weight: 500;
 						font-size: var(--text-md);
 
 						> .tax-row {
 							display: flex;
 							justify-content: space-between;
+							line-height: var(--text-3xl);
 						}
 					}
 
@@ -996,13 +994,14 @@
 					> .taxes-wrapper {
 						display: flex;
 						flex-direction: column;
-						padding: var(--padding-sm) var(--padding-md);
+						// padding: var(--padding-sm) var(--padding-md);
 						// border-bottom: 1px solid var(--gray-300);
 
 						> .tax-row {
 							display: flex;
 							justify-content: space-between;
 							font-size: var(--text-md);
+							line-height: var(--text-3xl);
 						}
 					}
 
