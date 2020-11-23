@@ -97,12 +97,12 @@ def get_columns():
 	]
 
 def get_data(filters):
-	conditions = ''
-	if filters.get('company'):
-		conditions += " AND parent.company = %(company)s".format(company=frappe.db.escape(filters.get('company')))
-	if filters.get('patient'):
-		conditions += " AND parent.patient = %(patient)s".format(patient=filters.get('patient'))
-	if not filters.get('show_completed_orders'):
+	conditions = ""
+	if filters.get("company"):
+		conditions += " AND parent.company = %(company)s".format(company=frappe.db.escape(filters.get("company")))
+	if filters.get("patient"):
+		conditions += " AND parent.patient = %(patient)s".format(patient=filters.get("patient"))
+	if not filters.get("show_completed_orders"):
 		conditions += " AND child.is_completed = 0"
 
 	data = frappe.db.sql("""
@@ -124,14 +124,14 @@ def get_data(filters):
 
 def get_inpatient_details(data):
 	for entry in data:
-		entry['healthcare_service_unit'] = get_current_healthcare_service_unit(entry.inpatient_record)
+		entry["healthcare_service_unit"] = get_current_healthcare_service_unit(entry.inpatient_record)
 		if entry.is_completed:
-			entry['inpatient_medication_entry'] = get_inpatient_medication_entry(entry.name)
+			entry["inpatient_medication_entry"] = get_inpatient_medication_entry(entry.name)
 
 	return data
 
 def get_inpatient_medication_entry(order_entry):
-	return frappe.db.get_value('Inpatient Medication Entry Detail', {'against_imoe': order_entry}, 'parent')
+	return frappe.db.get_value("Inpatient Medication Entry Detail", {"against_imoe": order_entry}, "parent")
 
 def get_chart_data(data):
 	if not data:
@@ -147,19 +147,19 @@ def get_chart_data(data):
 
 	for d in data:
 		if d.is_completed:
-			status_wise_data['Completed'] += 1
+			status_wise_data["Completed"] += 1
 		else:
-			status_wise_data['Pending'] += 1
+			status_wise_data["Pending"] += 1
 
 	datasets.append({
-		'name': 'Inpatient Medication Order Status',
-		'values': [status_wise_data.get("Pending"), status_wise_data.get("Completed")]
+		"name": "Inpatient Medication Order Status",
+		"values": [status_wise_data.get("Pending"), status_wise_data.get("Completed")]
 	})
 
 	chart = {
 		"data": {
-			'labels': labels,
-			'datasets': datasets
+			"labels": labels,
+			"datasets": datasets
 		},
 		"type": "donut",
 		"height": 300
