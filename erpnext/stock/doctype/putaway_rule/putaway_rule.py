@@ -7,7 +7,7 @@ import frappe
 import copy
 from collections import defaultdict
 from frappe import _
-from frappe.utils import flt, nowdate
+from frappe.utils import flt, floor, nowdate
 from frappe.model.document import Document
 from erpnext.stock.utils import get_stock_balance
 
@@ -38,14 +38,14 @@ class PutawayRule(Document):
 
 	def validate_capacity(self):
 		balance_qty = get_stock_balance(self.item_code, self.warehouse, nowdate())
-		if flt(self.capacity) < flt(balance_qty):
+		if flt(self.stock_capacity) < flt(balance_qty):
 			frappe.throw(_("Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} qty.")
 				.format(self.item_code, frappe.bold(balance_qty)), title=_("Insufficient Capacity"))
 
 @frappe.whitelist()
 def get_ordered_putaway_rules(item_code, company):
 	"""Returns an ordered list of putaway rules to apply on an item."""
-	rules = frappe.get_all("Putaway Rule", fields=["name", "capacity", "priority", "warehouse"],
+	rules = frappe.get_all("Putaway Rule", fields=["name", "stock_capacity", "priority", "warehouse"],
 		filters={"item_code": item_code, "company": company, "disable": 0},
 		order_by="priority asc, capacity desc")
 
@@ -54,8 +54,7 @@ def get_ordered_putaway_rules(item_code, company):
 
 	for rule in rules:
 		balance_qty = get_stock_balance(rule.item_code, rule.warehouse, nowdate())
-		free_space = flt(rule.capacity) - flt(balance_qty)
-
+		free_space = flt(rule.stock_capacity) - flt(balance_qty)
 		if free_space > 0:
 			rule["free_space"] = free_space
 		else:
@@ -64,7 +63,7 @@ def get_ordered_putaway_rules(item_code, company):
 	if not rules:
 		# After iterating through rules, if no rules are left
 		# then there is not enough space left in any rule
-		True, None
+		return True, None
 
 	rules = sorted(rules, key = lambda i: (i['priority'], -i['free_space']))
 	return False, rules
@@ -79,15 +78,33 @@ def apply_putaway_rule(items, company):
 	items_not_accomodated, updated_table = [], []
 	item_wise_rules = defaultdict(list)
 
+	def add_row(item, to_allocate, warehouse):
+		new_updated_table_row = copy.deepcopy(item)
+		new_updated_table_row.name = ''
+		new_updated_table_row.idx = 1 if not updated_table else flt(updated_table[-1].idx) + 1
+		new_updated_table_row.qty = to_allocate
+		new_updated_table_row.warehouse = warehouse
+		updated_table.append(new_updated_table_row)
+
 	for item in items:
-		item_qty, item_code = flt(item.qty), item.item_code
-		if not item_qty: continue
+		conversion = flt(item.conversion_factor)
+		uom_must_be_whole_number = frappe.db.get_value('UOM', item.uom, 'must_be_whole_number')
+		pending_qty, pending_stock_qty, item_code = flt(item.qty), flt(item.stock_qty), item.item_code
+
+		if not pending_qty:
+			add_row(item, pending_qty, item.warehouse)
+			continue
 
 		at_capacity, rules = get_ordered_putaway_rules(item_code, company)
 
 		if not rules:
 			if at_capacity:
-				items_not_accomodated.append([item_code, item_qty])
+				# rules available, but no free space
+				add_row(item, pending_qty, '')
+				items_not_accomodated.append([item_code, pending_qty])
+			else:
+				# no rules to apply
+				add_row(item, pending_qty, item.warehouse)
 			continue
 
 		# maintain item wise rules, to handle if item is entered twice
@@ -96,31 +113,28 @@ def apply_putaway_rule(items, company):
 			item_wise_rules[item_code] = rules
 
 		for rule in item_wise_rules[item_code]:
-			# it gets split if rule has lesser qty
-			# if rule_qty >= pending_qty => allocate pending_qty in row
-			# if rule_qty < pending_qty => allocate rule_qty in row and check for next rule
-			if item_qty > 0 and rule.free_space:
-				to_allocate = flt(rule.free_space) if item_qty >= flt(rule.free_space) else item_qty
-				new_updated_table_row = copy.deepcopy(item)
-				new_updated_table_row.name = ''
-				new_updated_table_row.idx = 1 if not updated_table else flt(updated_table[-1].idx) + 1
-				new_updated_table_row.qty = to_allocate
-				new_updated_table_row.warehouse = rule.warehouse
-				updated_table.append(new_updated_table_row)
+			if pending_stock_qty > 0 and rule.free_space:
+				stock_qty_to_allocate = flt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty
+				qty_to_allocate = stock_qty_to_allocate / (conversion or 1)
 
-				item_qty -= to_allocate
-				rule["free_space"] -= to_allocate
-				if item_qty == 0: break
+				if uom_must_be_whole_number:
+					qty_to_allocate = floor(qty_to_allocate)
+					stock_qty_to_allocate = qty_to_allocate * conversion
 
-		# if pending qty after applying rules, add row without warehouse
-		if item_qty > 0:
-			added_row = copy.deepcopy(item)
-			added_row.name = ''
-			new_updated_table_row.idx = 1 if not updated_table else flt(updated_table[-1].idx) + 1
-			added_row.qty = item_qty
-			added_row.warehouse = ''
-			updated_table.append(added_row)
-			items_not_accomodated.append([item.item_code, item_qty])
+				if not qty_to_allocate: break
+
+				add_row(item, qty_to_allocate, rule.warehouse)
+
+				pending_stock_qty -= stock_qty_to_allocate
+				pending_qty -= qty_to_allocate
+				rule["free_space"] -= stock_qty_to_allocate
+
+				if not pending_stock_qty: break
+
+		# if pending qty after applying all rules, add row without warehouse
+		if pending_stock_qty > 0:
+			add_row(item, pending_qty, '')
+			items_not_accomodated.append([item.item_code, pending_qty])
 
 	if items_not_accomodated:
 		msg = _("The following Items, having Putaway Rules, could not be accomodated:") + "<br><br><ul><li>"

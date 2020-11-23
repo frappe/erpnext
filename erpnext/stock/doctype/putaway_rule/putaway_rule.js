@@ -11,7 +11,32 @@ frappe.ui.form.on('Putaway Rule', {
 				}
 			};
 		});
+	},
+
+	uom: function(frm) {
+		if(frm.doc.item_code && frm.doc.uom) {
+			return frm.call({
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
+				args: {
+					item_code: frm.doc.item_code,
+					uom: frm.doc.uom
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						let stock_capacity = flt(frm.doc.capacity) * flt(r.message.conversion_factor);
+						frm.set_value('conversion_factor', r.message.conversion_factor);
+						frm.set_value('stock_capacity', stock_capacity);
+					}
+				}
+			});
+		}
+	},
+
+	capacity: function(frm) {
+		let stock_capacity = flt(frm.doc.capacity) * flt(frm.doc.conversion_factor);
+		frm.set_value('stock_capacity', stock_capacity);
 	}
+
 	// refresh: function(frm) {
 
 	// }
