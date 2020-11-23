@@ -12,12 +12,7 @@ erpnext.PointOfSale.Controller = class {
 		this.wrapper = $(wrapper).find('.layout-main-section');
 		this.page = wrapper.page;
 
-		this.load_assets();
-	}
-
-	load_assets() {
-		// after loading assets first check if opening entry has been made
-		frappe.require(['assets/erpnext/css/pos.css'], this.check_opening_entry.bind(this));
+		this.check_opening_entry();
 	}
 
 	fetch_opening_entry() {
