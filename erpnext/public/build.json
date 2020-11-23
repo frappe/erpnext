@@ -56,5 +56,15 @@
 		"stock/dashboard/item_dashboard.html",
 		"stock/dashboard/item_dashboard_list.html",
 		"stock/dashboard/item_dashboard.js"
+	],
+	"js/point-of-sale.min.js": [
+		"selling/page/point_of_sale/pos_item_selector.js",
+		"selling/page/point_of_sale/pos_item_cart.js",
+		"selling/page/point_of_sale/pos_item_details.js",
+		"selling/page/point_of_sale/pos_number_pad.js",
+		"selling/page/point_of_sale/pos_payment.js",
+		"selling/page/point_of_sale/pos_past_order_list.js",
+		"selling/page/point_of_sale/pos_past_order_summary.js",
+		"selling/page/point_of_sale/pos_controller.js"
 	]
 }

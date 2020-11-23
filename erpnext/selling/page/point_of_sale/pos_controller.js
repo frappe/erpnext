@@ -1,12 +1,3 @@
-{% include "erpnext/selling/page/point_of_sale/onscan.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_item_selector.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_item_cart.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_item_details.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_payment.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_number_pad.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_past_order_list.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_past_order_summary.js" %}
-
 erpnext.PointOfSale.Controller = class {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
@@ -31,6 +22,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	create_opening_voucher() {
+		const me = this;
 		const table_fields = [
 			{
 				fieldname: "mode_of_payment", fieldtype: "Link",
@@ -88,7 +80,7 @@ erpnext.PointOfSale.Controller = class {
 					fields: table_fields
 				}
 			],
-			primary_action: async ({ company, pos_profile, balance_details }) => {
+			primary_action: async function({ company, pos_profile, balance_details }) {
 				if (!balance_details.length) {
 					frappe.show_alert({
 						message: __("Please add Mode of payments and opening balance details."),
@@ -98,7 +90,7 @@ erpnext.PointOfSale.Controller = class {
 				}
 				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
 				const res = await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze:true });
-				!res.exc && this.prepare_app_defaults(res.message);
+				!res.exc && me.prepare_app_defaults(res.message);
 				dialog.hide();
 			},
 			primary_action_label: __('Submit')

@@ -1,3 +1,5 @@
+import onScan from 'onscan.js';
+
 erpnext.PointOfSale.ItemSelector = class {
 	constructor({ frm, wrapper, events, pos_profile }) {
 		this.wrapper = wrapper;
@@ -46,7 +48,8 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	get_items({start = 0, page_length = 40, search_value=''}) {
-		const price_list = this.events.get_frm().doc?.selling_price_list || this.price_list;
+		const doc = this.events.get_frm().doc;
+		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
 
 		!item_group && (item_group = this.parent_item_group);
@@ -104,6 +107,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	make_search_bar() {
 		const me = this;
+		const doc = me.events.get_frm().doc;
 		this.$component.find('.search-field').html('');
 		this.$component.find('.item-group-field').html('');
 
@@ -131,7 +135,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					return {
 						query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
 						filters: {
-							pos_profile: me.events.get_frm().doc?.pos_profile
+							pos_profile: doc ? doc.pos_profile : ''
 						}
 					}
 				},
@@ -145,6 +149,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	bind_events() {
 		const me = this;
+		window.onScan = onScan;
 		onScan.attachTo(document, {
 			onScan: (sScancode) => {
 				if (this.search_field && this.$component.is(':visible')) {
