@@ -62,7 +62,7 @@ erpnext.PointOfSale.PastOrderList = class {
 				options: `Draft\nPaid\nConsolidated\nReturn`,
 				placeholder: __('Filter by invoice status'),
 				onchange: function() {
-					me.refresh_list(me.search_field.get_value(), this.value);
+					if (me.$component.is(':visible')) me.refresh_list();
 				}
 			},
 			parent: this.$component.find('.status-field'),
