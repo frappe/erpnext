@@ -44,6 +44,17 @@
   "employee_designation",
   "user",
   "sample",
+<<<<<<< HEAD
+=======
+  "sb_source",
+  "source",
+  "column_break_37",
+  "referring_practitioner",
+  "insurance_section",
+  "insurance_subscription",
+  "column_break_41",
+  "insurance_company",
+>>>>>>> e5193d677a... fix:Insurance - set Insurance field in service doctypes
   "sb_normal",
   "lab_test_html",
   "normal_test_items",
@@ -590,11 +601,34 @@
    "fieldname": "more_information_section",
    "fieldtype": "Section Break",
    "label": "More Information"
+  },
+  {
+   "fieldname": "insurance_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_subscription.insurance_company",
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "insurance_subscription",
+   "fieldtype": "Link",
+   "label": "Insurance Subscription",
+   "options": "Healthcare Insurance Subscription"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-01 20:01:55.611050",
+ "modified": "2021-05-02 11:01:55.611050",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

@@ -137,6 +137,14 @@ frappe.ui.form.on('Patient Appointment', {
 				create_vital_signs(frm);
 			}, __('Create'));
 		}
+		frm.set_query('insurance_subscription', function(){
+			return{
+				filters:{
+					'patient': frm.doc.patient,
+					'docstatus': 1
+				}
+			};
+		});
 	},
 
 	patient: function(frm) {

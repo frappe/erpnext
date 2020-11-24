@@ -34,6 +34,32 @@ frappe.ui.form.on('Inpatient Record', {
 		} else {
 			frm.set_df_property('btn_transfer', 'hidden', 0);
 		}
+
+		frm.set_query('referring_practitioner', function() {
+			if (frm.doc.source == 'External Referral') {
+				return {
+					filters: {
+						'healthcare_practitioner_type': 'External'
+					}
+				};
+			}
+			else {
+				return {
+					filters: {
+						'healthcare_practitioner_type': 'Internal'
+					}
+				};
+			}
+		});
+
+		frm.set_query('insurance_subscription', function() {
+			return {
+				filters: {
+					'patient': frm.doc.patient,
+					'docstatus': 1
+				}
+			};
+		});
 	},
 	btn_transfer: function(frm) {
 		transfer_patient_dialog(frm);

@@ -29,6 +29,8 @@
   "column_break_16",
   "patient_email",
   "patient_mobile",
+  "marital_status",
+  "occupation",
   "inpatient_record",
   "inpatient_status",
   "order_source_section",
@@ -58,6 +60,10 @@
   "column_break_91",
   "order_description",
   "patient_instructions",
+  "insurance_section",
+  "insurance_subscription",
+  "column_break_26",
+  "insurance_company",
   "medical_code_section",
   "medical_code_standard",
   "medical_code",
@@ -493,6 +499,29 @@
    "read_only": 1
   },
   {
+   "fieldname": "insurance_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "fieldname": "insurance_subscription",
+   "fieldtype": "Link",
+   "label": "Insurance Subscription",
+   "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_subscription.insurance_company",
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company",
+   "read_only": 1
+  },
+  {
    "depends_on": "eval:!doc.as_needed && doc.order_doctype===\"Medication\";",
    "fieldname": "period",
    "fieldtype": "Link",
@@ -528,7 +557,7 @@
    "link_fieldname": "healthcare_service_order"
   }
  ],
- "modified": "2021-04-30 16:04:12.671393",
+ "modified": "2021-05-02 11:04:12.671393",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",

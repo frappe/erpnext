@@ -34,6 +34,14 @@
   "physical_examination",
   "diagnosis",
   "diagnosis_in_print",
+  "sb_source",
+  "source",
+  "column_break_27",
+  "referring_practitioner",
+  "insurance_section",
+  "insurance_subscription",
+  "column_break_35",
+  "insurance_company",
   "codification",
   "codification_table",
   "sb_drug_prescription",
@@ -283,8 +291,8 @@
    "no_copy": 1,
    "options": "Appointment Type",
    "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
+   "report_hide": 1,
+   "reqd": 1
   },
   {
    "fetch_from": "practitioner.department",
@@ -324,11 +332,102 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "sb_source",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Source",
+   "options": "Direct\nReferral\nExternal Referral",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "referring_practitioner",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Referring Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "radiology_procedure_prescription",
+   "fieldtype": "Table",
+   "label": "Radiology Procedure",
+   "options": "Radiology Procedure Prescription"
+  },
+  {
+   "fieldname": "radiology_procedures_section",
+   "fieldtype": "Section Break",
+   "label": "Radiology Orders"
+  },
+  {
+   "fieldname": "patient_vitals_summary_section",
+   "fieldtype": "Section Break",
+   "label": "Patient Vitals Summary"
+  },
+  {
+   "fieldname": "patient_vitals",
+   "fieldtype": "HTML",
+   "label": "Patient Vitals"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "patient.triage",
+   "fieldname": "triage",
+   "fieldtype": "Link",
+   "label": "Triage",
+   "options": "Triage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "diet_recommendation_section",
+   "fieldtype": "Section Break",
+   "label": "Diet Recommendation"
+  },
+  {
+   "fieldname": "diet_recommendation",
+   "fieldtype": "Table",
+   "label": "Diet Recommendation",
+   "options": "Diet Recommendation"
+  },
+  {
+   "fieldname": "insurance_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "fieldname": "insurance_subscription",
+   "fieldtype": "Link",
+   "label": "Insurance Subscription",
+   "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_subscription.insurance_company",
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 10:39:00.783119",
+ "modified": "2020-05-02 11:39:00.783119",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

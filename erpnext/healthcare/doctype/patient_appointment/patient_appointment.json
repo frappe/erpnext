@@ -36,6 +36,15 @@
   "appointment_date",
   "appointment_time",
   "appointment_datetime",
+  "practitioner_availability",
+  "sb_source",
+  "source",
+  "column_break_30",
+  "referring_practitioner",
+  "insurance_section",
+  "insurance_subscription",
+  "column_break_49",
+  "insurance_company",
   "section_break_16",
   "mode_of_payment",
   "billing_item",
@@ -76,6 +85,7 @@
    "ignore_user_permissions": 1,
    "label": "Appointment Type",
    "options": "Appointment Type",
+   "reqd": 1,
    "set_only_once": 1
   },
   {
@@ -346,10 +356,143 @@
    "fieldtype": "Data",
    "label": "Practitioner Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "sb_source",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Source",
+   "options": "Direct\nReferral\nExternal Referral",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.procedure_template && !doc.therapy_type",
+   "fieldname": "radiology_examination_template",
+   "fieldtype": "Link",
+   "label": "Radiology Examination Template",
+   "options": "Radiology Examination Template"
+  },
+  {
+   "fieldname": "radiology_procedure_prescription",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Radiology Procedure Prescription",
+   "options": "Radiology Procedure Prescription",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.procedure_template && doc.__islocal && doc.patient",
+   "fieldname": "get_ordered_radiology_procedures",
+   "fieldtype": "Button",
+   "label": "Get Ordered Radiology Procedures"
+  },
+  {
+   "depends_on": "eval: !doc.procedure_template && doc.patient",
+   "fetch_from": "service_unit.modality_type",
+   "fetch_if_empty": 1,
+   "fieldname": "modality_type",
+   "fieldtype": "Link",
+   "label": "Modality Type",
+   "options": "Modality Type",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.modality_type && doc.patient",
+   "fetch_from": "service_unit.modality_name",
+   "fieldname": "modality",
+   "fieldtype": "Data",
+   "label": "Modality",
+   "read_only": 1
+  },
+  {
+   "fieldname": "practitioner_availability",
+   "fieldtype": "Link",
+   "label": "Practitioner Availability",
+   "options": "Practitioner Availability",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient.triage",
+   "fieldname": "triage",
+   "fieldtype": "Link",
+   "label": "Triage",
+   "options": "Triage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_referral",
+   "fieldtype": "Link",
+   "label": "Patient Referral",
+   "options": "Patient Referral",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.patient",
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "emergency_section",
+   "fieldtype": "Section Break",
+   "label": "Emergency"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "triage",
+   "fetch_from": "triage.color",
+   "fieldname": "color",
+   "fieldtype": "Color",
+   "label": "Color"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "insurance_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance "
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_subscription.insurance_company",
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "insurance_subscription",
+   "fieldtype": "Link",
+   "label": "Insurance Subscription",
+   "options": "Healthcare Insurance Subscription"
   }
  ],
  "links": [],
- "modified": "2021-02-08 13:13:15.116833",
+ "modified": "2021-05-02 06:53:39.770467",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

@@ -57,6 +57,14 @@ frappe.ui.form.on('Lab Test', {
 			});
 		}
 
+		frm.set_query('insurance_subscription', function() {
+			return {
+				filters: {
+					'patient': frm.doc.patient,
+					'docstatus': 1
+				}
+			};
+		});
 	}
 });
 
