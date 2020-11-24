@@ -237,6 +237,9 @@ doc_events = {
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
+	"Tax Category": {
+		"validate": "erpnext.regional.india.utils.validate_tax_category"
+	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
