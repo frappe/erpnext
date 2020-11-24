@@ -44,17 +44,16 @@
   "employee_designation",
   "user",
   "sample",
-<<<<<<< HEAD
-=======
   "sb_source",
   "source",
   "column_break_37",
   "referring_practitioner",
   "insurance_section",
   "insurance_subscription",
+  "insurance_claim",
   "column_break_41",
   "insurance_company",
->>>>>>> e5193d677a... fix:Insurance - set Insurance field in service doctypes
+  "claim_status",
   "sb_normal",
   "lab_test_html",
   "normal_test_items",
@@ -624,6 +623,22 @@
    "fieldtype": "Link",
    "label": "Insurance Subscription",
    "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,

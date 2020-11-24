@@ -28,8 +28,10 @@
   "referring_practitioner",
   "insurance_section",
   "insurance_subscription",
+  "insurance_claim",
   "column_break_23",
   "insurance_company",
+  "claim_status",
   "references",
   "admission_encounter",
   "admission_practitioner",
@@ -487,6 +489,20 @@
    "fieldtype": "Link",
    "label": "Insurance Subscription",
    "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,

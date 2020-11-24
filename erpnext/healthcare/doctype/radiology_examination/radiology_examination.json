@@ -1,0 +1,312 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2020-08-06 08:22:07.287099",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "title",
+  "appointment",
+  "appointment_details_html",
+  "patient",
+  "patient_name",
+  "inpatient_record",
+  "patient_details_html",
+  "column_break_11",
+  "company",
+  "practitioner",
+  "radiology_examination_template",
+  "medical_department",
+  "service_unit",
+  "radiology_procedure_prescription",
+  "modality_type",
+  "modality",
+  "source_section",
+  "source",
+  "column_break_16",
+  "referring_practitioner",
+  "insurance_section",
+  "insurance_subscription",
+  "insurance_claim",
+  "column_break_24",
+  "insurance_company",
+  "claim_status",
+  "section_break_17",
+  "start_date",
+  "start_time",
+  "column_break_23",
+  "notes",
+  "invoiced",
+  "amended_from",
+  "radiology_report_section",
+  "tc_name",
+  "terms"
+ ],
+ "fields": [
+  {
+   "fieldname": "appointment_details_html",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient.inpatient_record",
+   "fieldname": "inpatient_record",
+   "fieldtype": "Link",
+   "label": "Inpatient Record",
+   "options": "Inpatient Record",
+   "read_only": 1
+  },
+  {
+   "fieldname": "patient_details_html",
+   "fieldtype": "HTML",
+   "label": "Patient Details "
+  },
+  {
+   "default": "Direct",
+   "fieldname": "source",
+   "fieldtype": "Select",
+   "label": "Source",
+   "options": "\nDirect\nReferral\nExternal Referral",
+   "reqd": 1
+  },
+  {
+   "fieldname": "referring_practitioner",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "ignore_user_permissions": 1,
+   "label": "Referring Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "default": "Today",
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Date"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Time",
+   "label": "Time"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "practitioner",
+   "fieldtype": "Link",
+   "label": "Healthcare Practitioner",
+   "options": "Healthcare Practitioner"
+  },
+  {
+   "fieldname": "medical_department",
+   "fieldtype": "Link",
+   "label": "Medical Department",
+   "options": "Medical Department"
+  },
+  {
+   "fetch_from": "radiology_procedure.modality_type",
+   "fetch_if_empty": 1,
+   "fieldname": "modality_type",
+   "fieldtype": "Link",
+   "label": "Modality Type",
+   "options": "Modality Type",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "service_unit.modality_name",
+   "fieldname": "modality",
+   "fieldtype": "Data",
+   "label": "Modality",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Notes"
+  },
+  {
+   "fieldname": "service_unit",
+   "fieldtype": "Link",
+   "label": "Service Unit",
+   "options": "Healthcare Service Unit",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "invoiced",
+   "fieldtype": "Check",
+   "label": "Invoiced",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Radiology Examination",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "radiology_examination_template",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Radiology Examination Template",
+   "options": "Radiology Examination Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "radiology_procedure_prescription",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Radiology Procedure Prescription",
+   "no_copy": 1,
+   "options": "Radiology Procedure Prescription",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "HLC-RE-.YYYY.-",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "source_section",
+   "fieldtype": "Section Break",
+   "label": "Source"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "appointment",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Appointment",
+   "options": "Patient Appointment"
+  },
+  {
+   "fieldname": "radiology_report_section",
+   "fieldtype": "Section Break",
+   "label": "Radiology Report"
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms and Conditions",
+   "options": "Terms and Conditions"
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions Details"
+  },
+  {
+   "fieldname": "insurance_section",
+   "fieldtype": "Section Break",
+   "label": "Insurance"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "insurance_subscription.insurance_company",
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "insurance_subscription",
+   "fieldtype": "Link",
+   "label": "Insurance Subscription",
+   "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-11-09 10:39:26.371666",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Radiology Examination",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "title",
+ "track_changes": 1
+}

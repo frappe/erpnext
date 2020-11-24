@@ -36,8 +36,10 @@
   "referring_practitioner",
   "insurance_section",
   "insurance_subscription",
+  "insurance_claim",
   "column_break_31",
   "insurance_company",
+  "claim_status",
   "consumables_section",
   "consume_stock",
   "warehouse",
@@ -342,6 +344,22 @@
    "fieldtype": "Link",
    "label": "Insurance Subscription",
    "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,

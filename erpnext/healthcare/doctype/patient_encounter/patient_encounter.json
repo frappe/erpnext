@@ -40,8 +40,10 @@
   "referring_practitioner",
   "insurance_section",
   "insurance_subscription",
+  "insurance_claim",
   "column_break_35",
   "insurance_company",
+  "claim_status",
   "codification",
   "codification_table",
   "sb_drug_prescription",
@@ -421,7 +423,22 @@
    "fieldname": "insurance_company",
    "fieldtype": "Link",
    "label": "Insurance Company",
-   "options": "Healthcare Insurance Company",
+   "options": "Healthcare Insurance Company"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
    "read_only": 1
   }
  ],

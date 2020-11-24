@@ -43,8 +43,10 @@
   "referring_practitioner",
   "insurance_section",
   "insurance_subscription",
+  "insurance_claim",
   "column_break_49",
   "insurance_company",
+  "claim_status",
   "section_break_16",
   "mode_of_payment",
   "billing_item",
@@ -489,6 +491,20 @@
    "fieldtype": "Link",
    "label": "Insurance Subscription",
    "options": "Healthcare Insurance Subscription"
+  },
+  {
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
+   "read_only": 1
   }
  ],
  "links": [],

@@ -539,6 +539,22 @@
    "fieldname": "occurrence_time",
    "fieldtype": "Time",
    "label": "Occurrence Time"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
