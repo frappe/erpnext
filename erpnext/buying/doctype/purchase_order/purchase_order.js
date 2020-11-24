@@ -28,6 +28,15 @@ frappe.ui.form.on("Purchase Order", {
 			}
 		});
 
+		frm.set_query("taxes_and_charges", function() {
+			return {
+				filters: [
+					['Sales Taxes and Charges Template', 'company', '=', frm.doc.company],
+					['Sales Taxes and Charges Template', 'docstatus', '!=', 2]
+				]
+			};
+		});
+
 	},
 
 	onload: function(frm) {
