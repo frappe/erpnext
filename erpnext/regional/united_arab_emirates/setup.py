@@ -12,13 +12,9 @@ from erpnext.payroll.doctype.gratuity_rule.gratuity_rule import get_gratuity_rul
 def setup(company=None, patch=True):
 	make_custom_fields()
 	add_print_formats()
-<<<<<<< HEAD
 	add_custom_roles_for_reports()
 	add_permissions()
-	create_standard_documents()
-=======
 	create_gratuity_rule()
->>>>>>> test: gratuity
 
 	if company:
 		create_sales_tax(company)

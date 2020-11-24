@@ -6,15 +6,16 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, make_earning_salary_component
 from erpnext.payroll.doctype.gratuity.gratuity import get_last_salary_slip
 from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
 from frappe.utils import getdate, add_days, get_datetime, flt
 
-
+test_dependencies = ["Salary Component", "Salary Slip"]
 class TestGratuity(unittest.TestCase):
 	def setUp(self):
+		make_earning_salary_component()
 		frappe.db.sql("DELETE FROM `tabGratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
@@ -168,15 +169,9 @@ def create_employee_and_get_last_salary_slip():
 	else:
 		salary_slip = get_last_salary_slip(employee)
 
-	#just to see what going on travis will remove this
-	print(frappe.db.get_value("Employee", "test_employee@salary.com", "company"))
-	print(frappe.db.get_value("Employee", "test_employee@salary.com", "holiday_list"))
-
 	if not frappe.db.get_value("Employee", "test_employee@salary.com", "holiday_list"):
 		from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_holiday_list
 		make_holiday_list()
 		frappe.db.set_value("Company", '_Test Company', "default_holiday_list", "Salary Slip Test Holiday List")
-
-	print(frappe.db.get_value("Employee", "test_employee@salary.com", "holiday_list"))
 
 	return employee, salary_slip

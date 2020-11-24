@@ -21,6 +21,7 @@ from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_ta
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
 		setup_test()
+
 	def tearDown(self):
 		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
