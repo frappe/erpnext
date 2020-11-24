@@ -277,6 +277,15 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(salary_slip.gross_pay, 78000)
 		self.assertEqual(salary_slip.base_gross_pay, 78000*70)
 
+		# Clear data
+		salary_slip.cancel()
+		salary_slip.delete()
+
+		salary_structure.cancel()
+		salary_structure.delete()
+
+		emp_doc = frappe.get_doc("Employee", applicant)
+		emp_doc.delete()
 
 	def test_tax_for_payroll_period(self):
 		data = {}

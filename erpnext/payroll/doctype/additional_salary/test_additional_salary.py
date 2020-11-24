@@ -16,6 +16,13 @@ class TestAdditionalSalary(unittest.TestCase):
 	def setUp(self):
 		setup_test()
 
+	def tearDown(self):
+		for dt in ["Salary Slip", "Additional Salary", "Salary Structure", "Holiday List"]:
+			frappe.db.sql("delete from `tab%s`" % dt)
+
+		emp_doc = frappe.get_doc("Employee", {"employee_name":"test_additional@salary.com"})
+		emp_doc.delete()
+
 	def test_recurring_additional_salary(self):
 		amount = 0
 		salary_component = None
@@ -32,8 +39,6 @@ class TestAdditionalSalary(unittest.TestCase):
 
 		self.assertEqual(amount, add_sal.amount)
 		self.assertEqual(salary_component, add_sal.salary_component)
-
-
 
 def get_additional_salary(emp_id):
 	create_salary_component("Recurring Salary Component")
