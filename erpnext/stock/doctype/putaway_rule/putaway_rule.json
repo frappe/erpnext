@@ -68,6 +68,7 @@
    "default": "1",
    "fieldname": "priority",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Priority"
   },
   {
@@ -107,7 +108,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-23 19:25:50.948068",
+ "modified": "2020-11-24 16:20:18.306671",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Putaway Rule",
