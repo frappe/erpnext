@@ -469,7 +469,7 @@ frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 						$.each(frm.doc["items"] || [], function(i, row) {
 							if(r.message) {
 								frappe.model.set_value(row.doctype, row.name, "cost_center", r.message);
-								frappe.msgprint(__("Cost Center For Item with Item Code '"+row.item_name+"' has been Changed to "+ r.message));
+								frappe.msgprint(__("Cost Center For Item with Item Code {0} has been Changed to {1}", [row.item_name, r.message]));
 							}
 						})
 					}
