@@ -110,7 +110,7 @@ def get_data(filters):
 		WHERE
 			parent.docstatus = 1
 			{conditions}
-		ORDER BY date
+		ORDER BY date, time
 	""".format(conditions=conditions), values, as_dict=1)
 
 	data = get_inpatient_details(data, filters.get("service_unit"))
@@ -150,6 +150,8 @@ def get_inpatient_details(data, service_unit):
 
 		if service_unit and entry.healthcare_service_unit and service_unit != entry.healthcare_service_unit:
 			service_unit_filtered_data.append(entry)
+
+		entry.pop("name", None)
 
 	for entry in service_unit_filtered_data:
 		data.remove(entry)
