@@ -97,13 +97,7 @@ def get_columns():
 	]
 
 def get_data(filters):
-	conditions = ""
-	if filters.get("company"):
-		conditions += " AND parent.company = %(company)s".format(company=frappe.db.escape(filters.get("company")))
-	if filters.get("patient"):
-		conditions += " AND parent.patient = %(patient)s".format(patient=filters.get("patient"))
-	if not filters.get("show_completed_orders"):
-		conditions += " AND child.is_completed = 0"
+	conditions, values = get_conditions(filters)
 
 	data = frappe.db.sql("""
 		SELECT
@@ -116,17 +110,49 @@ def get_data(filters):
 		WHERE
 			parent.docstatus = 1
 			{conditions}
-	""".format(conditions=conditions), filters, as_dict=1)
+		ORDER BY date
+	""".format(conditions=conditions), values, as_dict=1)
 
-	data = get_inpatient_details(data)
+	data = get_inpatient_details(data, filters.get("service_unit"))
 
 	return data
 
-def get_inpatient_details(data):
+def get_conditions(filters):
+	conditions = ""
+	values = dict()
+
+	if filters.get("company"):
+		conditions += " AND parent.company = %(company)s"
+		values["company"] = filters.get("company")
+
+	if filters.get("from_date") and filters.get("to_date"):
+		conditions += " AND child.date BETWEEN %(from_date)s and %(to_date)s"
+		values["from_date"] = filters.get("from_date")
+		values["to_date"] = filters.get("to_date")
+
+	if filters.get("patient"):
+		conditions += " AND parent.patient = %(patient)s"
+		values["patient"] = filters.get("patient")
+
+	if not filters.get("show_completed_orders"):
+		conditions += " AND child.is_completed = 0"
+
+	return conditions, values
+
+
+def get_inpatient_details(data, service_unit):
+	service_unit_filtered_data = []
+
 	for entry in data:
 		entry["healthcare_service_unit"] = get_current_healthcare_service_unit(entry.inpatient_record)
 		if entry.is_completed:
 			entry["inpatient_medication_entry"] = get_inpatient_medication_entry(entry.name)
+
+		if service_unit and entry.healthcare_service_unit and service_unit != entry.healthcare_service_unit:
+			service_unit_filtered_data.append(entry)
+
+	for entry in service_unit_filtered_data:
+		data.remove(entry)
 
 	return data
 
