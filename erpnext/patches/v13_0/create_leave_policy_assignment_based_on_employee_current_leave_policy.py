@@ -6,35 +6,37 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-    employees_with_leave_policy = frappe.db.sql("SELECT name, leave_policy FROM `tabEmployee` WHERE leave_policy IS NOT NULL and leave_policy != ''", as_dict = 1)
+    if "leave_policy" in frappe.db.get_table_columns("Employee"):
+        employees_with_leave_policy = frappe.db.sql("SELECT name, leave_policy FROM `tabEmployee` WHERE leave_policy IS NOT NULL and leave_policy != ''", as_dict = 1)
 
-    employee_with_assignment = []
-    leave_policy =[]
+        employee_with_assignment = []
+        leave_policy =[]
 
-    #for employee
+        #for employee
 
-    for employee in employees_with_leave_policy:
-        alloc = frappe.db.exists("Leave Allocation", {"employee":employee.name, "leave_policy": employee.leave_policy, "docstatus": 1})
-        if not alloc:
-            create_assignment(employee.name, employee.leave_policy)
+        for employee in employees_with_leave_policy:
+            alloc = frappe.db.exists("Leave Allocation", {"employee":employee.name, "leave_policy": employee.leave_policy, "docstatus": 1})
+            if not alloc:
+                create_assignment(employee.name, employee.leave_policy)
 
-        employee_with_assignment.append(employee.name)
-        leave_policy.append(employee.leave_policy)
+            employee_with_assignment.append(employee.name)
+            leave_policy.append(employee.leave_policy)
 
 
-    employee_grade_with_leave_policy = frappe.db.sql("SELECT name, default_leave_policy FROM `tabEmployee Grade` WHERE default_leave_policy IS NOT NULL and default_leave_policy != ''", as_dict = 1)
+    if "default_leave_policy" in frappe.db.get_table_columns("Employee"):
+        employee_grade_with_leave_policy = frappe.db.sql("SELECT name, default_leave_policy FROM `tabEmployee Grade` WHERE default_leave_policy IS NOT NULL and default_leave_policy!=''", as_dict = 1)
 
-    #for whole employee Grade
+        #for whole employee Grade
 
-    for grade in employee_grade_with_leave_policy:
-        employees = get_employee_with_grade(grade.name)
-        for employee in employees:
+        for grade in employee_grade_with_leave_policy:
+            employees = get_employee_with_grade(grade.name)
+            for employee in employees:
 
-            if employee not in employee_with_assignment: #Will ensure no duplicate
-                alloc = frappe.db.exists("Leave Allocation", {"employee":employee.name, "leave_policy": grade.default_leave_policy, "docstatus": 1})
-                if not alloc:
-                    create_assignment(employee.name, grade.default_leave_policy)
-                leave_policy.append(grade.default_leave_policy)
+                if employee not in employee_with_assignment: #Will ensure no duplicate
+                    alloc = frappe.db.exists("Leave Allocation", {"employee":employee.name, "leave_policy": grade.default_leave_policy, "docstatus": 1})
+                    if not alloc:
+                        create_assignment(employee.name, grade.default_leave_policy)
+                    leave_policy.append(grade.default_leave_policy)
 
     #for old Leave allocation and leave policy from allocation, which may got updated in employee grade.
     leave_allocations = frappe.db.sql("SELECT leave_policy, leave_period, employee FROM `tabLeave Allocation` WHERE leave_policy IS NOT NULL and leave_policy != '' and docstatus = 1 ", as_dict = 1)
