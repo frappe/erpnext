@@ -53,7 +53,7 @@ def validate_gstin_for_india(doc, method):
 				.format(doc.gst_state_number))
 
 def validate_tax_category(doc, method):
-	if doc.get('gst_state') and frappe.db.get_value('Tax category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
+	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
 		if doc.is_inter_state:
 			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
 		else:
@@ -93,8 +93,7 @@ def validate_gstin_check_digit(gstin, label='GSTIN'):
 		total += digit
 		factor = 2 if factor == 1 else 1
 	if gstin[-1] != code_point_chars[((mod - (total % mod)) % mod)]:
-		frappe.throw(_("""Invalid {0}! The check digit validation has failed.
-			Please ensure you've typed the {0} correctly.""").format(label))
+		frappe.throw(_("""Invalid {0}! The check digit validation has failed. Please ensure you've typed the {0} correctly.""").format(label))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
