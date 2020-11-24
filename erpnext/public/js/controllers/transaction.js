@@ -209,14 +209,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		if(this.frm.fields_dict.taxes_and_charges) {
+		if (this.frm.fields_dict.taxes_and_charges) {
 			this.frm.set_query("taxes_and_charges", function() {
 				return {
 					filters: [
 						['Sales Taxes and Charges Template', 'company', '=', me.frm.doc.company],
 						['Sales Taxes and Charges Template', 'docstatus', '!=', 2]
 					]
-				}
+				};
 			});
 		}
 
