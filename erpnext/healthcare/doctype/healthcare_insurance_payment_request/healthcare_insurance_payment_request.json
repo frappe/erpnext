@@ -1,0 +1,129 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "beta": 1,
+ "creation": "2020-10-26 08:51:17.061748",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "insurance_company",
+  "insurance_company_name",
+  "column_break_4",
+  "posting_date_type",
+  "from_date",
+  "to_date",
+  "section_break_8",
+  "healthcare_insurance_payment_request_item",
+  "section_break_10",
+  "total_claim_amount",
+  "company",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "HIC-PAY-REQ-.YYYY.-"
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company"
+  },
+  {
+   "fetch_from": "insurance_company.insurance_company_name",
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "label": "Insurance Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date_type",
+   "fieldtype": "Select",
+   "label": "Posting Date Type",
+   "options": "Claim Posting Date\nSales Invoice  Posting Date"
+  },
+  {
+   "default": "Today",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "default": "Today",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "healthcare_insurance_payment_request_item",
+   "fieldtype": "Table",
+   "label": "Healthcare Insurance Payment Request Item",
+   "options": "Healthcare Insurance Payment Request Item"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_claim_amount",
+   "fieldtype": "Currency",
+   "label": "Total Claim Amount"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Healthcare Insurance Payment Request",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-11-09 09:08:33.588897",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Insurance Payment Request",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1
+}

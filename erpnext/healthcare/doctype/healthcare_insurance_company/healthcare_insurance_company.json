@@ -1,0 +1,166 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "allow_import": 1,
+ "allow_rename": 1,
+ "autoname": "naming_series:",
+ "beta": 1,
+ "creation": "2020-10-16 08:41:43.197991",
+ "description": "Healthcare Insurance Company",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "insurance_company_name",
+  "column_break_3",
+  "company",
+  "customer",
+  "address_and_contacts_section",
+  "address_html",
+  "website",
+  "column_break_9",
+  "contact_html",
+  "accounts_section",
+  "insurance_company_receivable_account",
+  "column_break_14",
+  "rejected_claims_account"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "HIC-",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Insurance Company Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fieldname": "address_and_contacts_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contacts",
+   "options": "fa fa-map-marker"
+  },
+  {
+   "fieldname": "address_html",
+   "fieldtype": "HTML",
+   "label": "Address HTML",
+   "read_only": 1
+  },
+  {
+   "fieldname": "website",
+   "fieldtype": "Data",
+   "label": "Website"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_html",
+   "fieldtype": "HTML",
+   "label": "Contact HTML"
+  },
+  {
+   "fieldname": "accounts_section",
+   "fieldtype": "Section Break",
+   "label": "Accounts"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rejected_claims_account",
+   "fieldtype": "Link",
+   "label": "Rejected Claims Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "insurance_company_receivable_account",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Insurance Company Receivable Account",
+   "options": "Account",
+   "reqd": 1
+  }
+ ],
+ "links": [],
+ "modified": "2020-11-09 09:00:52.473103",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Insurance Company",
+ "name_case": "Title Case",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Healthcare",
+ "search_fields": "insurance_company_name,customer",
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "title_field": "insurance_company_name",
+ "track_changes": 1,
+ "track_seen": 1
+}

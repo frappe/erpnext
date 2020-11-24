@@ -1,0 +1,82 @@
+{
+ "actions": [],
+ "beta": 1,
+ "creation": "2020-10-26 08:50:24.587112",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "patient",
+  "insurance_claim",
+  "healthcare_service_type",
+  "service_template",
+  "sales_invoice",
+  "discount",
+  "claim_coverage",
+  "claim_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "insurance_claim",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Insurance Claim",
+   "options": "Healthcare Insurance Claim"
+  },
+  {
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice"
+  },
+  {
+   "fieldname": "claim_coverage",
+   "fieldtype": "Percent",
+   "label": "Claim Coverage"
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Patient",
+   "options": "Patient"
+  },
+  {
+   "fieldname": "healthcare_service_type",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "service_template",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Service Template",
+   "options": "healthcare_service_type"
+  },
+  {
+   "fieldname": "discount",
+   "fieldtype": "Percent",
+   "label": "Discount"
+  },
+  {
+   "fieldname": "claim_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Claim Amount"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2020-10-27 11:27:32.456371",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Insurance Payment Request Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

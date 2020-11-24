@@ -1,0 +1,319 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "beta": 1,
+ "creation": "2020-10-16 11:57:57.744562",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "patient",
+  "patient_name",
+  "column_break_4",
+  "insurance_subscription",
+  "insurance_company",
+  "claim_details_section",
+  "mode_of_claim_approval",
+  "claim_posting_date",
+  "column_break_10",
+  "claim_status",
+  "approval_validity_end_date",
+  "service_and_item_details_section",
+  "healthcare_service_type",
+  "service_template",
+  "service_doctype",
+  "column_break_17",
+  "service_item",
+  "medical_code",
+  "rate_and_coverage_details_section",
+  "price_list_rate",
+  "quantity",
+  "amount",
+  "column_break_24",
+  "discount",
+  "coverage",
+  "coverage_amount",
+  "billing_details_section",
+  "sales_invoice",
+  "sales_invoice_posting_date",
+  "column_break_31",
+  "billing_date",
+  "billing_amount",
+  "amended_from",
+  "referance_section",
+  "service_billed_jv"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "options": "CL-.YYYY.-",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "patient",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Patient",
+   "options": "Patient",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_subscription",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Insurance Subscription",
+   "options": "Healthcare Insurance Subscription",
+   "reqd": 1
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Insurance Company",
+   "options": "Healthcare Insurance Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "claim_details_section",
+   "fieldtype": "Section Break",
+   "label": "Claim Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "mode_of_claim_approval",
+   "fieldtype": "Select",
+   "label": "Mode of Claim Approval",
+   "options": "\nElectronic\nManual\nAutomatic"
+  },
+  {
+   "fieldname": "claim_posting_date",
+   "fieldtype": "Date",
+   "label": "Claim Posting Date"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "claim_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Claim Status",
+   "options": "\nPending\nApproved\nRejected\nInvoiced"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "approval_validity_end_date",
+   "fieldtype": "Date",
+   "label": "Approval Validity End Date"
+  },
+  {
+   "fieldname": "service_and_item_details_section",
+   "fieldtype": "Section Break",
+   "label": "Service And Item Details"
+  },
+  {
+   "fieldname": "healthcare_service_type",
+   "fieldtype": "Link",
+   "label": "Healthcare Service Type",
+   "options": "DocType"
+  },
+  {
+   "fieldname": "service_template",
+   "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "label": "Service Template",
+   "options": "healthcare_service_type"
+  },
+  {
+   "fieldname": "service_doctype",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Service DocType",
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "service_item",
+   "fieldtype": "Link",
+   "label": "Service Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "medical_code",
+   "fieldtype": "Data",
+   "label": "Medical Code"
+  },
+  {
+   "fieldname": "rate_and_coverage_details_section",
+   "fieldtype": "Section Break",
+   "label": "Rate and Coverage Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "price_list_rate",
+   "fieldtype": "Currency",
+   "label": "Price List Rate"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "label": " Quantity"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "discount",
+   "fieldtype": "Percent",
+   "label": "Discount "
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "coverage",
+   "fieldtype": "Percent",
+   "label": "Coverage"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "coverage_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Coverage Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing_details_section",
+   "fieldtype": "Section Break",
+   "label": "Billing Details"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_invoice",
+   "fieldtype": "Link",
+   "label": "Sales Invoice",
+   "options": "Sales Invoice",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "sales_invoice_posting_date",
+   "fieldtype": "Date",
+   "label": "Sales Invoice Posting Date",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "billing_date",
+   "fieldtype": "Date",
+   "label": "Billing Date ",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "billing_amount",
+   "fieldtype": "Data",
+   "label": "Billing Amount",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Healthcare Insurance Claim",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "referance_section",
+   "fieldtype": "Section Break",
+   "label": "Referance"
+  },
+  {
+   "fieldname": "service_billed_jv",
+   "fieldtype": "Link",
+   "label": "Service Billed JV",
+   "options": "Journal Entry",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2020-11-24 06:23:46.515760",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Healthcare Insurance Claim",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1,
+ "track_seen": 1
+}
