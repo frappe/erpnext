@@ -876,7 +876,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			},
 			{
 				"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 4","item_name":"_Test Item",
-				"qty":250,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos", "name": po.supplied_items[1].name
+				"qty":250,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"
 			},
 		]
 
@@ -884,6 +884,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		rm_item_string = json.dumps(rm_items)
 		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
 		se.submit()
+
+		# Test po_detail field has value or not
+		for item_row in se.items:
+			self.assertEqual(item_row.po_detail, po.supplied_items[item_row.idx - 1].name)
 
 		po_doc = frappe.get_doc("Purchase Order", po.name)
 		for row in po_doc.supplied_items:

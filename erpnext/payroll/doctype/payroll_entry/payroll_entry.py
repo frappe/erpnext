@@ -344,9 +344,13 @@ class PayrollEntry(Document):
 		employees_to_mark_attendance = []
 		days_in_payroll, days_holiday, days_attendance_marked = 0, 0, 0
 		for employee_detail in self.employees:
-			days_holiday = self.get_count_holidays_of_employee(employee_detail.employee)
-			days_attendance_marked = self.get_count_employee_attendance(employee_detail.employee)
-			days_in_payroll = date_diff(self.end_date, self.start_date) + 1
+			employee_joining_date = frappe.db.get_value("Employee", employee_detail.employee, 'date_of_joining')
+			start_date = self.start_date
+			if employee_joining_date > getdate(self.start_date):
+				start_date = employee_joining_date
+			days_holiday = self.get_count_holidays_of_employee(employee_detail.employee, start_date)
+			days_attendance_marked = self.get_count_employee_attendance(employee_detail.employee, start_date)
+			days_in_payroll = date_diff(self.end_date, start_date) + 1
 			if days_in_payroll > days_holiday + days_attendance_marked:
 				employees_to_mark_attendance.append({
 					"employee": employee_detail.employee,
@@ -354,22 +358,25 @@ class PayrollEntry(Document):
 					})
 		return employees_to_mark_attendance
 
-	def get_count_holidays_of_employee(self, employee):
+	def get_count_holidays_of_employee(self, employee, start_date):
 		holiday_list = get_holiday_list_for_employee(employee)
 		holidays = 0
 		if holiday_list:
 			days = frappe.db.sql("""select count(*) from tabHoliday where
 				parent=%s and holiday_date between %s and %s""", (holiday_list,
-				self.start_date, self.end_date))
+				start_date, self.end_date))
 			if days and days[0][0]:
 				holidays = days[0][0]
 		return holidays
 
-	def get_count_employee_attendance(self, employee):
+	def get_count_employee_attendance(self, employee, start_date):
 		marked_days = 0
-		attendances = frappe.db.sql("""select count(*) from tabAttendance where
-			employee=%s and docstatus=1 and attendance_date between %s and %s""",
-			(employee, self.start_date, self.end_date))
+		attendances = frappe.get_all("Attendance",
+				fields = ["count(*)"],
+				filters = {
+					"employee": employee,
+					"attendance_date": ('between', [start_date, self.end_date])
+				}, as_list=1)
 		if attendances and attendances[0][0]:
 			marked_days = attendances[0][0]
 		return marked_days
