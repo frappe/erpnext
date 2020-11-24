@@ -23,6 +23,7 @@
   "healthcare_service_type",
   "service_template",
   "service_doctype",
+  "create_coverage",
   "column_break_17",
   "service_item",
   "medical_code",
@@ -82,6 +83,8 @@
    "reqd": 1
   },
   {
+   "fetch_from": "insurance_subscription.insurance_company",
+   "fetch_if_empty": 1,
    "fieldname": "insurance_company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -159,7 +162,8 @@
    "fieldname": "service_item",
    "fieldtype": "Link",
    "label": "Service Item",
-   "options": "Item"
+   "options": "Item",
+   "reqd": 1
   },
   {
    "fieldname": "medical_code",
@@ -272,12 +276,18 @@
    "label": "Service Billed JV",
    "options": "Journal Entry",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "create_coverage",
+   "fieldtype": "Check",
+   "label": "Create Coverage"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-24 06:23:46.515760",
+ "modified": "2020-11-24 12:01:49.025970",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Claim",
