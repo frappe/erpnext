@@ -17,6 +17,7 @@ class PutawayRule(Document):
 		self.validate_warehouse_and_company()
 		self.validate_capacity()
 		self.validate_priority()
+		self.set_stock_capacity()
 
 	def validate_duplicate_rule(self):
 		existing_rule = frappe.db.exists("Putaway Rule", {"item_code": self.item_code, "warehouse": self.warehouse})
@@ -45,10 +46,13 @@ class PutawayRule(Document):
 		if not self.capacity:
 			frappe.throw(_("Capacity must be greater than 0"), title=_("Invalid"))
 
+	def set_stock_capacity(self):
+		self.stock_capacity = (flt(self.conversion_factor) or 1) * flt(self.capacity)
+
 @frappe.whitelist()
 def get_ordered_putaway_rules(item_code, company):
 	"""Returns an ordered list of putaway rules to apply on an item."""
-	rules = frappe.get_all("Putaway Rule", fields=["name", "stock_capacity", "priority", "warehouse"],
+	rules = frappe.get_all("Putaway Rule", fields=["name", "item_code", "stock_capacity", "priority", "warehouse"],
 		filters={"item_code": item_code, "company": company, "disable": 0},
 		order_by="priority asc, capacity desc")
 
@@ -86,6 +90,7 @@ def apply_putaway_rule(items, company):
 		new_updated_table_row.name = ''
 		new_updated_table_row.idx = 1 if not updated_table else flt(updated_table[-1].idx) + 1
 		new_updated_table_row.qty = to_allocate
+		new_updated_table_row.stock_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
 		new_updated_table_row.warehouse = warehouse
 		updated_table.append(new_updated_table_row)
 

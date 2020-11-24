@@ -14,7 +14,7 @@ frappe.ui.form.on('Putaway Rule', {
 	},
 
 	uom: function(frm) {
-		if(frm.doc.item_code && frm.doc.uom) {
+		if (frm.doc.item_code && frm.doc.uom) {
 			return frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
 				args: {
@@ -22,7 +22,7 @@ frappe.ui.form.on('Putaway Rule', {
 					uom: frm.doc.uom
 				},
 				callback: function(r) {
-					if(!r.exc) {
+					if (!r.exc) {
 						let stock_capacity = flt(frm.doc.capacity) * flt(r.message.conversion_factor);
 						frm.set_value('conversion_factor', r.message.conversion_factor);
 						frm.set_value('stock_capacity', stock_capacity);
