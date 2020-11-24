@@ -712,14 +712,13 @@ class StockEntry(StockController):
 					"actual_qty": flt(d.transfer_qty),
 					"incoming_rate": flt(d.valuation_rate)
 				})
-				if cstr(d.s_warehouse) or d.name == finished_item_row.name:
+				if cstr(d.s_warehouse) or (finished_item_row and d.name == finished_item_row.name):
 					sle.recalculate_rate = 1
 
 				sl_entries.append(sle)
 
 		if self.docstatus == 2:
 			sl_entries.reverse()
-
 		self.make_sl_entries(sl_entries)
 
 	def get_gl_entries(self, warehouse_account):

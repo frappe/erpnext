@@ -16,7 +16,6 @@ class Bin(Document):
 	def update_stock(self, args, allow_negative_stock=False, via_landed_cost_voucher=False):
 		'''Called from erpnext.stock.utils.update_bin'''
 		self.update_qty(args)
-
 		if args.get("actual_qty") or args.get("voucher_type") == "Stock Reconciliation":
 			from erpnext.stock.stock_ledger import update_entries_after, update_qty_in_future_sle
 

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import nowdate, nowtime, flt
+from frappe.utils import today, nowtime, flt, add_days
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.utils import get_incoming_rate
 from erpnext import set_perpetual_inventory
@@ -16,6 +16,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, repost_future_sle
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import create_landed_cost_voucher
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import BackDatedStockTransaction
 
 class TestStockLedgerEntry(unittest.TestCase):
 	def setUp(self):
@@ -316,6 +317,36 @@ class TestStockLedgerEntry(unittest.TestCase):
 		pr1.cancel()
 		lcv.cancel()
 		pr.cancel()
+
+	def test_back_dated_entry_not_allowed(self):
+		# Back dated stock transactions are only allowed to stock managers
+		frappe.db.set_value("Stock Settings", None,
+			"role_allowed_to_create_edit_back_dated_transactions", "Stock Manager")
+		
+		# Set User with Stock User role but not Stock Manager
+		frappe.set_user("test@example.com")
+		user = frappe.get_doc("User", "test@example.com")
+		user.add_roles("Stock User")
+		user.remove_roles("Stock Manager")
+
+		stock_entry_on_today = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
+		back_dated_se_1 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
+			posting_date=add_days(today(), -1), do_not_submit=True)
+
+		# Block back-dated entry
+		self.assertRaises(BackDatedStockTransaction, back_dated_se_1.submit)
+
+		user.add_roles("Stock Manager")
+
+		# Back dated entry allowed to Stock Manager
+		back_dated_se_2 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
+			posting_date=add_days(today(), -1))
+
+		back_dated_se_2.cancel()
+		stock_entry_on_today.cancel()
+
+		frappe.db.set_value("Stock Settings", None, "role_allowed_to_create_edit_back_dated_transactions", None)
+		frappe.set_user("Administrator")
 
 
 def create_repack_entry(**args):

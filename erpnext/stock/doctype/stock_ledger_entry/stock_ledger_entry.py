@@ -10,8 +10,10 @@ from frappe.model.document import Document
 from datetime import date
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
 from erpnext.accounts.utils import get_fiscal_year
+from frappe.core.doctype.role.role import get_users
 
 class StockFreezeError(frappe.ValidationError): pass
+class BackDatedStockTransaction(frappe.ValidationError): pass
 
 exclude_from_linked_with = True
 
@@ -142,24 +144,28 @@ class StockLedgerEntry(Document):
 		is_group_warehouse(self.warehouse)
 
 	def validate_with_last_transaction_posting_time(self):
-		return
-		last_transaction_time = frappe.db.sql("""
-			select MAX(timestamp(posting_date, posting_time)) as posting_time
-			from `tabStock Ledger Entry`
-			where docstatus = 1 and item_code = %s
-			and warehouse = %s""", (self.item_code, self.warehouse))[0][0]
+		authorized_role = frappe.db.get_single_value("Stock Settings", "role_allowed_to_create_edit_back_dated_transactions")
+		if authorized_role:
+			authorized_users = get_users(authorized_role)
+			if authorized_users and frappe.session.user not in authorized_users:
+				last_transaction_time = frappe.db.sql("""
+					select MAX(timestamp(posting_date, posting_time)) as posting_time
+					from `tabStock Ledger Entry`
+					where docstatus = 1 and item_code = %s
+					and warehouse = %s""", (self.item_code, self.warehouse))[0][0]
 
-		cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
+				cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
 
-		if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
-			msg = _("Last Stock Transaction for item {0} under warehouse {1} was on {2}.").format(frappe.bold(self.item_code),
-				frappe.bold(self.warehouse), frappe.bold(last_transaction_time))
+				if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
+					msg = _("Last Stock Transaction for item {0} under warehouse {1} was on {2}.").format(frappe.bold(self.item_code),
+						frappe.bold(self.warehouse), frappe.bold(last_transaction_time))
 
-			msg += "<br><br>" + _("Stock Transactions for Item {0} under warehouse {1} cannot be posted before this time.").format(
-				frappe.bold(self.item_code), frappe.bold(self.warehouse))
+					msg += "<br><br>" + _("You are not authorized to make/edit Stock Transactions for Item {0} under warehouse {1} before this time.").format(
+						frappe.bold(self.item_code), frappe.bold(self.warehouse))
 
-			msg += "<br><br>" + _("Please remove this item and try to submit again or update the posting time.")
-			frappe.throw(msg, title=_("Backdated Stock Entry"))
+					msg += "<br><br>" + _("Please contact any of the following users to {} this transaction.")
+					msg += "<br>" + "<br>".join(authorized_users)
+					frappe.throw(msg, BackDatedStockTransaction, title=_("Backdated Stock Entry"))
 
 	def validate_future_posting(self):
 		if date_diff(self.posting_date, getdate()) > 0:
