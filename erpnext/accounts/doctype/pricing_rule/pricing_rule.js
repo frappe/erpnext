@@ -97,7 +97,7 @@ frappe.ui.form.on('Pricing Rule', {
 				</td></tr>
 			</table>`;
 
-		frm.set_df_property('pricing_rule_help', 'options', help_content, "help_content");
+		frm.set_df_property('pricing_rule_help', 'options', help_content);
 		frm.events.set_options_for_applicable_for(frm);
 		frm.trigger("toggle_reqd_apply_on");
 	},
