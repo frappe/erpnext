@@ -109,9 +109,16 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(salary_structure_assignment.variable, 200)
 
 	def test_multi_currency_salary_structure(self):
-		make_employee("test_muti_currency_employee@salary.com")
+		employee = make_employee("test_muti_currency_employee@salary.com")
 		sal_struct = make_salary_structure("Salary Structure Multi Currency", "Monthly", currency='USD')
 		self.assertEqual(sal_struct.currency, 'USD')
+
+		# Clear data
+		sal_struct.cancel()
+		sal_struct.delete()
+
+		emp_doc = frappe.get_doc("Employee", employee)
+		emp_doc.delete()
 
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
 	test_tax=False, company=None, currency=erpnext.get_default_currency()):

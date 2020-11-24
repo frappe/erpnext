@@ -45,13 +45,17 @@ class TestLoan(unittest.TestCase):
 		create_loan_security_price("Test Security 2", 250, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
 
 		self.applicant1 = make_employee("robert_loan@loan.com")
-		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant1, currency='INR')
+		salary_structure = make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant1, currency='INR')
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)
 
 		self.applicant2 = frappe.db.get_value("Customer", {'name': '_Test Loan Customer'}, 'name')
 
 		create_loan(self.applicant1, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
+
+		# Clear data
+		salary_structure.cancel()
+		salary_structure.delete()
 
 	def test_loan(self):
 		loan = frappe.get_doc("Loan", {"applicant":self.applicant1})

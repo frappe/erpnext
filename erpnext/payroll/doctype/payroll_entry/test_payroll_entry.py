@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 import unittest
 import erpnext
 import frappe
-import random
 from dateutil.relativedelta import relativedelta
 from erpnext.accounts.utils import get_fiscal_year, getdate, nowdate
 from frappe.utils import add_months, flt
@@ -41,7 +40,6 @@ class TestPayrollEntry(unittest.TestCase):
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
 			make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account=company_doc.default_payroll_payable_account,
 				currency=company_doc.default_currency)
-
 
 	def test_multi_currency_payroll_entry(self): # pylint: disable=no-self-use
 		company = erpnext.get_default_company()
@@ -80,6 +78,25 @@ class TestPayrollEntry(unittest.TestCase):
 
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_debit)
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_credit)
+
+		# Clear data
+		payroll_je_doc.cancel()
+		payroll_je_doc.delete()
+
+		payroll_entry.cancel()
+		payroll_entry.delete()
+
+		salary_slip.cancel()
+		salary_slip.delete()
+
+		salary_structure_assignment.cancel()
+		salary_structure_assignment.delete()
+
+		salary_structure.cancel()
+		salary_structure.delete()
+
+		emp_doc = frappe.get_doc("Employee", employee)
+		emp_doc.delete()
 
 	def test_payroll_entry_with_employee_cost_center(self): # pylint: disable=no-self-use
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
