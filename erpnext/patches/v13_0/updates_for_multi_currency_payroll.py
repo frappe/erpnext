@@ -1,7 +1,7 @@
 # Copyright (c) 2019, Frappe and Contributors
 # License: GNU General Public License v3. See license.txt
 
-import frappe, erpnext
+import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
@@ -100,7 +100,6 @@ def execute():
 			'Income Tax Slab', 'Retention Bonus', 'Salary Structure']
 
 		for dt in doctypes_for_currency:
-			print(dt)
 			frappe.db.sql("""update `tab{doctype}` set currency = %s where company=%s"""
 				.format(doctype=dt), (company_currency, company))
 
