@@ -1,7 +1,17 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.provide('erpnext.accounts.dimensions');
+
 frappe.ui.form.on('Shipping Rule', {
+	onload: function(frm) {
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+	},
+
 	refresh: function(frm) {
 		frm.set_query("account", function() {
 			return {
