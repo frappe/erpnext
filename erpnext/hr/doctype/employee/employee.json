@@ -57,7 +57,6 @@
   "column_break_45",
   "shift_request_approver",
   "attendance_and_leave_details",
-  "leave_policy",
   "attendance_device_id",
   "column_break_44",
   "holiday_list",
@@ -410,14 +409,6 @@
    "oldfieldname": "branch",
    "oldfieldtype": "Link",
    "options": "Branch"
-  },
-  {
-   "fetch_from": "grade.default_leave_policy",
-   "fetch_if_empty": 1,
-   "fieldname": "leave_policy",
-   "fieldtype": "Link",
-   "label": "Leave Policy",
-   "options": "Leave Policy"
   },
   {
    "description": "Applicable Holiday List",
@@ -822,7 +813,7 @@
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-10-16 14:41:10.580897",
+ "modified": "2020-10-16 15:02:04.283657",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
