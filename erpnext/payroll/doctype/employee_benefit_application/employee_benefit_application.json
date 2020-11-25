@@ -17,6 +17,7 @@
   "date",
   "payroll_period",
   "department",
+  "company",
   "amended_from",
   "section_break_4",
   "employee_benefits",
@@ -130,11 +131,19 @@
    "options": "Currency",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-24 19:35:37.250360",
+ "modified": "2020-11-25 11:49:05.095101",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Application",

@@ -13,6 +13,7 @@
   "column_break_3",
   "claim_date",
   "currency",
+  "company",
   "benefit_type_and_amount",
   "earning_component",
   "max_amount_eligible",
@@ -132,11 +133,19 @@
    "options": "Currency",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-23 11:58:09.049030",
+ "modified": "2020-11-25 11:49:56.097352",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Claim",
