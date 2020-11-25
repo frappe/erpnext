@@ -4,6 +4,7 @@
 import frappe
 from frappe import _
 from frappe.model.utils.rename_field import rename_field
+from frappe import _
 
 def execute():
 
