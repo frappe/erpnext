@@ -77,18 +77,18 @@ class PayrollEntry(Document):
 		self.set('employees', [])
 		employees = self.get_emp_list()
 		if not employees:
-			error_msg = _("No employees found for the mentioned criteria - Company: {0}, Currency: {1}, Payroll Payable Account: {2}").format(
+			error_msg = _("No employees found for the mentioned criteria:<br>Company: {0}<br> Currency: {1}<br>Payroll Payable Account: {2}").format(
 				frappe.bold(self.company), frappe.bold(self.currency), frappe.bold(self.payroll_payable_account))
 			if self.branch:
-				error_msg += _(", Branch: {0}").format(frappe.bold(self.branch))
+				error_msg += "<br>" + _("Branch: {0}").format(frappe.bold(self.branch))
 			if self.department:
-				error_msg += _(", Department: {0}").format(frappe.bold(self.department))
+				error_msg += "<br>" + _("Department: {0}").format(frappe.bold(self.department))
 			if self.designation:
-				error_msg += _(", Designation: {0}").format(frappe.bold(self.designation))
+				error_msg += "<br>" + _("Designation: {0}").format(frappe.bold(self.designation))
 			if self.start_date:
-				error_msg += _(", Start date: {0}").format(frappe.bold(self.start_date))
+				error_msg += "<br>" + _("Start date: {0}").format(frappe.bold(self.start_date))
 			if self.end_date:
-				error_msg += _(", End date: {0}").format(frappe.bold(self.end_date))
+				error_msg += "<br>" + _("End date: {0}").format(frappe.bold(self.end_date))
 			frappe.throw(error_msg, title=_("No employees found"))
 
 		for d in employees:
