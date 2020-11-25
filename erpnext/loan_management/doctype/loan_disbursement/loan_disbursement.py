@@ -171,10 +171,10 @@ def get_total_pledged_security_value(loan):
 	return security_value
 
 @frappe.whitelist()
-def get_disbursal_amount(loan):
-	loan_details = frappe.get_all("Loan", fields = ["loan_amount", "disbursed_amount", "total_payment",
-		"total_principal_paid", "total_interest_payable", "status", "is_term_loan", "is_secured_loan"],
-		filters= { "name": loan })[0]
+def get_disbursal_amount(loan, on_current_security_price=0):
+	loan_details = frappe.get_value("Loan", loan, ["loan_amount", "disbursed_amount", "total_payment",
+		"total_principal_paid", "total_interest_payable", "status", "is_term_loan", "is_secured_loan",
+		"maximum_loan_amount"], as_dict=1)
 
 	if loan_details.is_secured_loan and frappe.get_all('Loan Security Shortfall', filters={'loan': loan,
 		'status': 'Pending'}):
@@ -188,8 +188,11 @@ def get_disbursal_amount(loan):
 			- flt(loan_details.total_principal_paid)
 
 	security_value = 0.0
-	if loan_details.is_secured_loan:
+	if loan_details.is_secured_loan and on_current_security_price:
 		security_value = get_total_pledged_security_value(loan)
+
+	if loan_details.is_secured_loan and not on_current_security_price:
+		security_value = flt(loan_details.maximum_loan_amount)
 
 	if not security_value and not loan_details.is_secured_loan:
 		security_value = flt(loan_details.loan_amount)
