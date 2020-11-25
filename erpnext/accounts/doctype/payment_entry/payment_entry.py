@@ -292,9 +292,10 @@ class PaymentEntry(AccountsController):
 					no_oustanding_refs.setdefault(d.reference_doctype, []).append(d)
 
 		for k, v in no_oustanding_refs.items():
-			frappe.msgprint(_("{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.<br><br>\
-					If this is undesirable please cancel the corresponding Payment Entry.")
-				.format(k, frappe.bold(", ".join([d.reference_name for d in v])), frappe.bold("negative outstanding amount")),
+			frappe.msgprint(_(
+				"""{} - {} now have {} as they had no outstanding amount left before submitting the Payment Entry.<br><br>
+					If this is undesirable please cancel the corresponding Payment Entry.""").format(
+						k, frappe.bold(", ".join([d.reference_name for d in v])), frappe.bold("negative outstanding amount")),
 				title=_("Warning"), indicator="orange")
 
 

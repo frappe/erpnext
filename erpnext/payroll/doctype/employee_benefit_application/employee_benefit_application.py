@@ -33,8 +33,8 @@ class EmployeeBenefitApplication(Document):
 					benefit_given = get_sal_slip_total_benefit_given(self.employee, payroll_period, component = benefit.earning_component)
 					benefit_claim_remining = benefit_claimed - benefit_given
 					if benefit_claimed > 0 and benefit_claim_remining > benefit.amount:
-						frappe.throw(_("An amount of {0} already claimed for the component {1},\
-						 set the amount equal or greater than {2}").format(benefit_claimed, benefit.earning_component, benefit_claim_remining))
+						frappe.throw(_("An amount of {0} already claimed for the component {1}, set the amount equal or greater than {2}").format(
+							benefit_claimed, benefit.earning_component, benefit_claim_remining))
 
 	def validate_remaining_benefit_amount(self):
 		# check salary structure earnings have flexi component (sum of max_benefit_amount)
@@ -62,11 +62,11 @@ class EmployeeBenefitApplication(Document):
 			if pro_rata_amount == 0  and non_pro_rata_amount == 0:
 				frappe.throw(_("Please add the remaining benefits {0} to any of the existing component").format(self.remaining_benefit))
 			elif non_pro_rata_amount > 0 and non_pro_rata_amount < rounded(self.remaining_benefit):
-				frappe.throw(_("You can claim only an amount of {0}, the rest amount {1} should be in the application \
-				as pro-rata component").format(non_pro_rata_amount, self.remaining_benefit - non_pro_rata_amount))
+				frappe.throw(_("You can claim only an amount of {0}, the rest amount {1} should be in the application as pro-rata component").format(
+					non_pro_rata_amount, self.remaining_benefit - non_pro_rata_amount))
 			elif non_pro_rata_amount == 0:
-				frappe.throw(_("Please add the remaining benefits {0} to the application as \
-				pro-rata component").format(self.remaining_benefit))
+				frappe.throw(_("Please add the remaining benefits {0} to the application as pro-rata component").format(
+					self.remaining_benefit))
 
 	def validate_max_benefit_for_component(self):
 		if self.employee_benefits:

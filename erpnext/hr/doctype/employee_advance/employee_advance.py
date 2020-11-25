@@ -214,3 +214,13 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 	})
 
 	return je.as_dict()
+
+def get_voucher_type(mode_of_payment=None):
+	voucher_type = "Cash Entry"
+
+	if mode_of_payment:
+		mode_of_payment_type = frappe.get_cached_value('Mode of Payment', mode_of_payment, 'type')
+		if mode_of_payment_type == "Bank":
+			voucher_type = "Bank Entry"
+
+	return voucher_type
