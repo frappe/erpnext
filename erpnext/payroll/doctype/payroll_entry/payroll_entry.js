@@ -3,6 +3,8 @@
 
 var in_progress = false;
 
+frappe.provide("erpnext.accounts.dimensions");
+
 frappe.ui.form.on('Payroll Entry', {
 	onload: function (frm) {
 		if (!frm.doc.posting_date) {
@@ -17,6 +19,8 @@ frappe.ui.form.on('Payroll Entry', {
 				}
 			};
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -122,6 +126,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	department: function (frm) {
