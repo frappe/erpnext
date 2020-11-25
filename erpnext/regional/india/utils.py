@@ -143,8 +143,9 @@ def set_transporter_address(doc, method=None):
 
 	transporter_address = frappe.db.get_value("Dynamic Link", {
 		'link_doctype': 'Supplier',
-		'link_name': doc.transporter,
-		'parenttype': 'Address'}, "parent")
+		'link_name': doc.get('transporter'),
+		'parenttype': 'Address'
+	}, "parent")
 
 	if not transporter_address:
 		doc.transporter_address = ""
