@@ -173,66 +173,28 @@ def create_return_through_additional_salary(doc):
 	return additional_salary
 
 @frappe.whitelist()
-def make_return_entry(employee, company, employee_advance_name, return_amount,  advance_account, mode_of_payment=None):
-	return_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
-	if not return_account:
+def make_return_entry(employee, company, employee_advance_name, return_amount,  advance_account, currency, exchange_rate, mode_of_payment=None):
+	bank_cash_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
+	if not bank_cash_account:
 		frappe.throw(_("Please set a Default Cash Account in Company defaults"))
 	
 	advance_account_currency = frappe.db.get_value('Account', advance_account, 'account_currency')
-
-	employee_advance_doc = frappe.get_doc("Employee Advance", employee_advance_name)
-
-	advance_amount, advance_exchange_rate = get_advance_amount_and_advance_exchange_rate(advance_account_currency, return_amount, employee_advance_doc)
-
-	returning_amount, returning_exchange_rate = get_returning_amount_and_returning_exchange_rate(return_account, return_amount, employee_advance_doc)
-
-	multi_currency = 0
-	if advance_account_currency != return_account.account_currency:
-		multi_currency = 1
-
-	mode_of_payment_type = ''
-	if mode_of_payment:
-		mode_of_payment_type = frappe.get_cached_value('Mode of Payment', mode_of_payment, 'type')
-		if mode_of_payment_type not in ["Cash", "Bank"]:
-			# if mode of payment is General then it unset the type
-			mode_of_payment_type = None
-
-	return get_je_dict(mode_of_payment_type, company, employee_advance_name, multi_currency, advance_account, 
-		advance_amount, advance_exchange_rate, advance_account_currency, employee, return_account, returning_amount, returning_exchange_rate)
-
-def get_advance_amount_and_advance_exchange_rate(advance_account_currency, return_amount, employee_advance_doc):
-	if advance_account_currency != employee_advance_doc.currency:
-		advance_amount = flt(return_amount) * flt(employee_advance_doc.exchange_rate)
-		advance_exchange_rate = 1
-	else:
-		advance_amount = return_amount
-		advance_exchange_rate = employee_advance_doc.exchange_rate
-	return advance_amount, advance_exchange_rate
-
-def get_returning_amount_and_returning_exchange_rate(return_account, return_amount, employee_advance_doc):
-	if return_account.account_currency != employee_advance_doc.currency:
-		returning_amount = flt(return_amount) * flt(employee_advance_doc.exchange_rate)
-		returning_exchange_rate = 1
-	else:
-		returning_amount = return_amount
-		returning_exchange_rate = employee_advance_doc.exchange_rate
-	return returning_amount, returning_exchange_rate
-
-def get_je_dict(mode_of_payment_type, company, employee_advance_name, multi_currency, advance_account, advance_amount, 
-	advance_exchange_rate, advance_account_currency, employee, return_account, returning_amount, returning_exchange_rate):
+	
 	je = frappe.new_doc('Journal Entry')
 	je.posting_date = nowdate()
-	# if mode of payment is Bank then voucher type is Bank Entry
-	je.voucher_type = '{} Entry'.format(mode_of_payment_type) if mode_of_payment_type else 'Cash Entry'
+	je.voucher_type = get_voucher_type(mode_of_payment)
 	je.company = company
 	je.remark = 'Return against Employee Advance: ' + employee_advance_name
-	je.multi_currency = multi_currency
+	je.multi_currency = 1 if advance_account_currency != bank_cash_account.account_currency else 0
+
+	advance_account_amount = flt(return_amount) if advance_account_currency==currency \
+		else flt(return_amount) * flt(exchange_rate)
 
 	je.append('accounts', {
 		'account': advance_account,
-		'credit_in_account_currency': advance_amount,
+		'credit_in_account_currency': advance_account_amount,
 		'account_currency': advance_account_currency,
-		'exchange_rate': advance_exchange_rate,
+		'exchange_rate': flt(exchange_rate) if advance_account_currency == currency else 1,
 		'reference_type': 'Employee Advance',
 		'reference_name': employee_advance_name,
 		'party_type': 'Employee',
@@ -240,12 +202,25 @@ def get_je_dict(mode_of_payment_type, company, employee_advance_name, multi_curr
 		'is_advance': 'Yes'
 	})
 
+	bank_amount = flt(return_amount) if bank_cash_account.account_currency==currency \
+		else flt(return_amount) * flt(exchange_rate)
+
 	je.append("accounts", {
-		"account": return_account.account,
-		"debit_in_account_currency": returning_amount,
-		"account_currency": return_account.account_currency,
-		"account_type": return_account.account_type,
-		"exchange_rate": returning_exchange_rate
+		"account": bank_cash_account.account,
+		"debit_in_account_currency": bank_amount,
+		"account_currency": bank_cash_account.account_currency,
+		"account_type": bank_cash_account.account_type,
+		"exchange_rate": flt(exchange_rate) if bank_cash_account.account_currency == currency else 1
 	})
 
 	return je.as_dict()
+
+def get_voucher_type(mode_of_payment=None):
+	voucher_type = "Cash Entry"
+
+	if mode_of_payment:
+		mode_of_payment_type = frappe.get_cached_value('Mode of Payment', mode_of_payment, 'type')
+		if mode_of_payment_type == "Bank":
+			voucher_type = "Bank Entry"
+
+	return voucher_type
