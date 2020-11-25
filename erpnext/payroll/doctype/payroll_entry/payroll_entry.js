@@ -153,8 +153,7 @@ frappe.ui.form.on('Payroll Entry', {
 		var company_currency;
 		if (!frm.doc.company) {
 			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
-		}
-		else {
+		} else {
 			company_currency = erpnext.get_currency(frm.doc.company);
 		}
 		if (frm.doc.currency) {

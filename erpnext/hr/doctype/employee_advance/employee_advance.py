@@ -198,7 +198,7 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 			mode_of_payment_type = None
 
 	return get_je_dict(mode_of_payment_type, company, employee_advance_name, multi_currency, advance_account, 
-		advance_amount, advance_account_currency, employee, return_account, returning_amount, returning_exchange_rate)
+		advance_amount, advance_exchange_rate, advance_account_currency, employee, return_account, returning_amount, returning_exchange_rate)
 
 def get_advance_amount_and_advance_exchange_rate(advance_account_currency, return_amount, employee_advance_doc):
 	if advance_account_currency != employee_advance_doc.currency:
@@ -219,7 +219,7 @@ def get_returning_amount_and_returning_exchange_rate(return_account, return_amou
 	return returning_amount, returning_exchange_rate
 
 def get_je_dict(mode_of_payment_type, company, employee_advance_name, multi_currency, advance_account, advance_amount, 
-	advance_account_currency, employee, return_account, returning_amount, returning_exchange_rate):
+	advance_exchange_rate, advance_account_currency, employee, return_account, returning_amount, returning_exchange_rate):
 	je = frappe.new_doc('Journal Entry')
 	je.posting_date = nowdate()
 	# if mode of payment is Bank then voucher type is Bank Entry

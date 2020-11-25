@@ -36,7 +36,7 @@ frappe.ui.form.on('Salary Structure Assignment', {
 					"company": frm.doc.company,
 					"root_type": "Liability",
 					"is_group": 0,
-					"account_currency": ["in",[frm.doc.currency, company_currency]],
+					"account_currency": ["in", [frm.doc.currency, company_currency]],
 				}
 			}
 		});

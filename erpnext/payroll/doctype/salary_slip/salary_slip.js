@@ -91,9 +91,8 @@ frappe.ui.form.on("Salary Slip", {
 		if (frm.doc.docstatus === 0) {
 			if (frm.doc.currency) {
 				var from_currency = frm.doc.currency;
-				if(from_currency != company_currency) {
+				if (from_currency != company_currency) {
 					frm.events.hide_loan_section(frm);
-					debugger;
 					frappe.call({
 						method: "erpnext.setup.utils.get_exchange_rate",
 						args: {
@@ -150,8 +149,8 @@ frappe.ui.form.on("Salary Slip", {
 		frm.trigger("toggle_fields")
 
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "variable_based_on_taxable_salary"];
-		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
-		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
+		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields, false);
+		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
 		calculate_totals(frm);
 		frm.trigger("set_dynamic_labels");
 	},
@@ -195,7 +194,7 @@ frappe.ui.form.on("Salary Slip", {
 				method: 'get_emp_and_working_day_details',
 				doc: frm.doc,
 				callback: function(r) {
-					if (r.message){
+					if (r.message) {
 						frm.fields_dict.absent_days.set_description(__("Unmarked Days is treated as {0}. You can can change this in {1}", [r.message, frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true)]));
 					}
 					frm.refresh();
@@ -241,7 +240,7 @@ frappe.ui.form.on('Salary Detail', {
 
 	salary_component: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if(child.salary_component){
+		if (child.salary_component) {
 			frappe.call({
 				method: "frappe.client.get",
 				args: {
@@ -249,14 +248,13 @@ frappe.ui.form.on('Salary Detail', {
 					name: child.salary_component
 				},
 				callback: function(data) {
-					if(data.message){
+					if (data.message) {
 						var result = data.message;
 						frappe.model.set_value(cdt, cdn, 'condition', result.condition);
 						frappe.model.set_value(cdt, cdn, 'amount_based_on_formula', result.amount_based_on_formula);
-						if(result.amount_based_on_formula === 1){
+						if (result.amount_based_on_formula === 1) {
 							frappe.model.set_value(cdt, cdn, 'formula', result.formula);
-						}
-						else{
+						} else {
 							frappe.model.set_value(cdt, cdn, 'amount', result.amount);
 						}
 						frappe.model.set_value(cdt, cdn, 'statistical_component', result.statistical_component);
@@ -275,10 +273,9 @@ frappe.ui.form.on('Salary Detail', {
 
 	amount_based_on_formula: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		if(child.amount_based_on_formula === 1){
+		if (child.amount_based_on_formula === 1) {
 			frappe.model.set_value(cdt, cdn, 'amount', null);
-		}
-		else{
+		} else {
 			frappe.model.set_value(cdt, cdn, 'formula', null);
 		}
 	}

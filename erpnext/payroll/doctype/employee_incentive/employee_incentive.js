@@ -11,10 +11,10 @@ frappe.ui.form.on('Employee Incentive', {
 			};
 		});
 
-		if(!frm.doc.currency) return;
+		if (!frm.doc.currency) return;
 		frm.set_query("salary_component", function() {
 			return {
-				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
+				query: "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
 				filters: {type: "earning", currency: frm.doc.currency, company: frm.doc.company}
 			};
 		});
@@ -35,15 +35,15 @@ frappe.ui.form.on('Employee Incentive', {
 	set_company: function(frm) {
 		frappe.call({
 			method: "frappe.client.get_value",
-			args:{
+			args: {
 				doctype: "Employee",
 				fieldname: "company",
-				filters:{
+				filters: {
 					name: frm.doc.employee
 				}
 			},
 			callback: function(data) {
-				if(data.message){
+				if (data.message) {
 					frm.set_value("company", data.message.company);
 				}
 			}
@@ -57,7 +57,7 @@ frappe.ui.form.on('Employee Incentive', {
 				employee: frm.doc.employee,
 			},
 			callback: function(r) {
-				if(r.message) {
+				if (r.message) {
 					frm.set_value('currency', r.message);
 					frm.refresh_fields();
 				}

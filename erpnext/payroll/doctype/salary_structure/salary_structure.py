@@ -202,8 +202,8 @@ def get_employees(salary_structure):
 		filters={'salary_structure': salary_structure, 'docstatus': 1}, fields=['employee'])
 
 	if not employees:
-		frappe.throw(_("There's no Employee with Salary Structure: {0}. \
-			Assign {1} to an Employee to preview Salary Slip").format(salary_structure, salary_structure))
+		frappe.throw(_("There's no Employee with Salary Structure: {0}. Assign {1} to an Employee to preview Salary Slip").format(
+			salary_structure, salary_structure))
 
 	return list(set([d.employee for d in employees]))
 
@@ -213,7 +213,6 @@ def get_earning_deduction_components(doctype, txt, searchfield, start, page_len,
 	if len(filters) < 3:
 		return {}
 
-	currency_list = []
 	return frappe.db.sql("""
 		select t1.salary_component
 		from `tabSalary Component` t1, `tabSalary Component Account` t2

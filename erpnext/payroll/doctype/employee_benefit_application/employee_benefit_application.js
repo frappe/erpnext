@@ -51,7 +51,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 					employee: frm.doc.employee,
 				},
 				callback: function(r) {
-					if(r.message) {
+					if (r.message) {
 						frm.set_value('currency', r.message);
 						frm.refresh_fields();
 					}
@@ -62,7 +62,7 @@ frappe.ui.form.on('Employee Benefit Application', {
 
 	payroll_period: function(frm) {
 		var method, args;
-		if(frm.doc.employee && frm.doc.date && frm.doc.payroll_period){
+		if (frm.doc.employee && frm.doc.date && frm.doc.payroll_period) {
 			method = "erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application.get_max_benefits_remaining";
 			args = {
 				employee: frm.doc.employee,
@@ -82,8 +82,8 @@ var get_max_benefits=function(frm, method, args) {
 		method: method,
 		args: args,
 		callback: function (data) {
-			if(!data.exc){
-				if(data.message){
+			if (!data.exc) {
+				if (data.message) {
 					frm.set_value("max_benefits", data.message);
 				} else {
 					frm.set_value("max_benefits", 0);
@@ -110,11 +110,11 @@ var calculate_all = function(doc) {
 	if (doc.max_benefits === 0) {
 		doc.employee_benefits = [];
 	} else {
-		for(var i = 0; i < tbl.length; i++){
-			if(cint(tbl[i].amount) > 0) {
+		for (var i = 0; i < tbl.length; i++) {
+			if (cint(tbl[i].amount) > 0) {
 				total_amount += flt(tbl[i].amount);
 			}
-			if(tbl[i].pay_against_benefit_claim != 1){
+			if (tbl[i].pay_against_benefit_claim != 1) {
 				pro_rata_dispensed_amount += flt(tbl[i].amount);
 			}
 		}

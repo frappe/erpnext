@@ -54,7 +54,7 @@ frappe.ui.form.on('Leave Encashment', {
 				employee: frm.doc.employee,
 			},
 			callback: function(r) {
-				if(r.message) {
+				if (r.message) {
 					frm.set_value('currency', r.message);
 					frm.refresh_fields();
 				}
