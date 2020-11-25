@@ -331,7 +331,7 @@
   {
    "depends_on": "price_list_rate",
    "fieldname": "discount_percentage",
-   "fieldtype": "Float",
+   "fieldtype": "Percent",
    "label": "Discount (%) on Price List Rate with Margin",
    "oldfieldname": "adj_rate",
    "oldfieldtype": "Float",
@@ -1179,7 +1179,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-11-02 14:05:42.856937",
+ "modified": "2020-11-25 13:47:51.136314",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

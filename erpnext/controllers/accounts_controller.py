@@ -33,7 +33,7 @@ print_total_fields_from_items = [
 	('total_alt_uom_qty', 'alt_uom_qty'),
 
 	('total', 'amount'),
-	('tax_exclusive_total', 'tax_exlcusive_amount'),
+	('tax_exclusive_total', 'tax_exclusive_amount'),
 	('net_total', 'net_amount'),
 	('taxable_total', 'taxable_amount'),
 
