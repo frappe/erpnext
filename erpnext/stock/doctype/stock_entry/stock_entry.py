@@ -500,7 +500,7 @@ class StockEntry(StockController):
 				return flt(outgoing_items_cost / total_fg_qty)
 
 	def get_basic_rate_for_manufactured_item(self, finished_item_qty, outgoing_items_cost=0):
-		scrap_items_cost = sum([flt(d.basic_amount) for d in items if d.is_scrap_item])
+		scrap_items_cost = sum([flt(d.basic_amount) for d in self.get("items") if d.is_scrap_item])
 
 		# Get raw materials cost from BOM if multiple material consumption entries
 		if frappe.db.get_single_value("Manufacturing Settings", "material_consumption"):

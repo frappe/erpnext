@@ -368,18 +368,18 @@ class BuyingController(StockController):
 					for batch_data in batches_qty:
 						qty = batch_data['qty']
 						raw_material.batch_no = batch_data['batch']
-						self.append_raw_material_to_be_backflushed(raw_material, qty)
+						self.append_raw_material_to_be_backflushed(item, raw_material, qty)
 				else:
-					self.append_raw_material_to_be_backflushed(raw_material, qty)
+					self.append_raw_material_to_be_backflushed(item, raw_material, qty)
 
-	def append_raw_material_to_be_backflushed(self, raw_material_data, qty):
+	def append_raw_material_to_be_backflushed(self, fg_item_row, raw_material_data, qty):
 		rm = self.append('supplied_items', {})
 		rm.update(raw_material_data)
 
 		if not rm.main_item_code:
-			rm.main_item_code = fg_item_doc.item_code
+			rm.main_item_code = fg_item_row.item_code
 
-		rm.reference_name = fg_item_doc.name
+		rm.reference_name = fg_item_row.name
 		rm.required_qty = qty
 		rm.consumed_qty = qty
 

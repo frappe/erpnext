@@ -213,7 +213,6 @@
    "label": "Allow Material Transfer from Purchase Receipt to Purchase Invoice"
   },
   {
-   "default": "0",
    "description": "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",
    "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
    "fieldtype": "Link",
@@ -235,7 +234,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-11-23 15:26:54.225608",
+ "modified": "2020-11-23 22:26:54.225608",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

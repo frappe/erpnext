@@ -28,6 +28,9 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		set_perpetual_inventory(0, "_Test Company with perpetual inventory")
 
+	def tearDown(self):
+		set_perpetual_inventory(1, "_Test Company with perpetual inventory")
+
 	def test_item_cost_reposting(self):
 		company = "_Test Company with perpetual inventory"
 

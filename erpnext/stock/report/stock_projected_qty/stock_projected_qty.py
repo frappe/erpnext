@@ -5,9 +5,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt, today
-from erpnext.stock.utils import update_included_uom_in_report
+from erpnext.stock.utils import update_included_uom_in_report, is_reposting_item_valuation_in_progress
 
 def execute(filters=None):
+	is_reposting_item_valuation_in_progress()
 	filters = frappe._dict(filters or {})
 	include_uom = filters.get("include_uom")
 	columns = get_columns()
