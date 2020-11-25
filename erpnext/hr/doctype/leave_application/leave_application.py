@@ -130,8 +130,7 @@ class LeaveApplication(Document):
 		if self.status == "Approved":
 			for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 				date = dt.strftime("%Y-%m-%d")
-				status = "Half Day" if getdate(date) == getdate(self.half_day_date) else "On Leave"
-
+				status = "Half Day" if self.half_day_date and getdate(date) == getdate(self.half_day_date) else "On Leave"
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
 					attendance_date = date, docstatus = ('!=', 2)))
 
@@ -293,7 +292,8 @@ class LeaveApplication(Document):
 	def set_half_day_date(self):
 		if self.from_date == self.to_date and self.half_day == 1:
 			self.half_day_date = self.from_date
-		elif self.half_day == 0:
+
+		if self.half_day == 0:
 			self.half_day_date = None
 
 	def notify_employee(self):

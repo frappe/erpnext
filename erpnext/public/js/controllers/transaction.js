@@ -209,6 +209,17 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
+		if (this.frm.fields_dict.taxes_and_charges) {
+			this.frm.set_query("taxes_and_charges", function() {
+				return {
+					filters: [
+						['company', '=', me.frm.doc.company],
+						['docstatus', '!=', 2]
+					]
+				};
+			});
+		}
+
 	},
 	onload: function() {
 		var me = this;

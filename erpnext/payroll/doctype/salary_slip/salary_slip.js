@@ -13,12 +13,12 @@ frappe.ui.form.on("Salary Slip", {
 			];
 		});
 
-		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function(){
+		frm.fields_dict["timesheets"].grid.get_field("time_sheet").get_query = function() {
 			return {
 				filters: {
 					employee: frm.doc.employee
 				}
-			}
+			};
 		};
 
 		frm.set_query("salary_component", "earnings", function() {
@@ -26,7 +26,7 @@ frappe.ui.form.on("Salary Slip", {
 				filters: {
 					type: "earning"
 				}
-			}
+			};
 		});
 
 		frm.set_query("salary_component", "deductions", function() {
@@ -34,18 +34,18 @@ frappe.ui.form.on("Salary Slip", {
 				filters: {
 					type: "deduction"
 				}
-			}
+			};
 		});
 
 		frm.set_query("employee", function() {
-			return{
+			return {
 				query: "erpnext.controllers.queries.employee_query"
-			}
+			};
 		});
 	},
 
-	start_date: function(frm){
-		if(frm.doc.start_date){
+	start_date: function(frm) {
+		if (frm.doc.start_date) {
 			frm.trigger("set_end_date");
 		}
 	},
@@ -54,7 +54,7 @@ frappe.ui.form.on("Salary Slip", {
 		frm.events.get_emp_and_working_day_details(frm);
 	},
 
-	set_end_date: function(frm){
+	set_end_date: function(frm) {
 		frappe.call({
 			method: 'erpnext.payroll.doctype.payroll_entry.payroll_entry.get_end_date',
 			args: {
@@ -66,12 +66,12 @@ frappe.ui.form.on("Salary Slip", {
 					frm.set_value('end_date', r.message.end_date);
 				}
 			}
-		})
+		});
 	},
 
 	company: function(frm) {
 		var company = locals[':Company'][frm.doc.company];
-		if(!frm.doc.letter_head && company.default_letter_head) {
+		if (!frm.doc.letter_head && company.default_letter_head) {
 			frm.set_value('letter_head', company.default_letter_head);
 		}
 		frm.trigger("set_dynamic_labels");
@@ -146,7 +146,7 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	refresh: function(frm) {
-		frm.trigger("toggle_fields")
+		frm.trigger("toggle_fields");
 
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "variable_based_on_taxable_salary"];
 		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields, false);
@@ -169,12 +169,12 @@ frappe.ui.form.on("Salary Slip", {
 		frm.events.get_emp_and_working_day_details(frm);
 	},
 
-	leave_without_pay: function(frm){
+	leave_without_pay: function(frm) {
 		if (frm.doc.employee && frm.doc.start_date && frm.doc.end_date) {
 			return frappe.call({
 				method: 'process_salary_based_on_working_days',
 				doc: frm.doc,
-				callback: function(r, rt) {
+				callback: function() {
 					frm.refresh();
 				}
 			});
@@ -194,7 +194,7 @@ frappe.ui.form.on("Salary Slip", {
 				method: 'get_emp_and_working_day_details',
 				doc: frm.doc,
 				callback: function(r) {
-					if (r.message) {
+					if (r.message[1] !== "Leave" && r.message[0]) {
 						frm.fields_dict.absent_days.set_description(__("Unmarked Days is treated as {0}. You can can change this in {1}", [r.message, frappe.utils.get_form_link("Payroll Settings", "Payroll Settings", true)]));
 					}
 					frm.refresh();
