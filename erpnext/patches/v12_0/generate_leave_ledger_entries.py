@@ -43,7 +43,7 @@ def generate_application_leave_ledger_entries():
 
 	for application in leave_applications:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Application', 'transaction_name': application.name}):
-			frappe.get_doc("Leave Application", application.name).create_leave_ledger_entry()
+			frappe.get_doc("Leave Application", application.name).create_leave_ledger_entry(holiday_list_required=False)
 
 def generate_encashment_leave_ledger_entries():
 	''' fix ledger entries for missing leave encashment transaction '''
