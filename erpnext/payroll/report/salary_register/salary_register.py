@@ -25,10 +25,10 @@ def execute(filters=None):
 		row = [ss.name, ss.employee, ss.employee_name, doj_map.get(ss.employee), ss.branch, ss.department, ss.designation,
 			ss.company, ss.start_date, ss.end_date, ss.leave_without_pay, ss.payment_days]
 
-		if not ss.branch == None: columns[3] = columns[3].replace('-1','120')
-		if not ss.department == None: columns[4] = columns[4].replace('-1','120')
-		if not ss.designation == None: columns[5] = columns[5].replace('-1','120')
-		if not ss.leave_without_pay == None: columns[9] = columns[9].replace('-1','130')
+		if ss.branch is not None: columns[3] = columns[3].replace('-1','120')
+		if ss.department is not None: columns[4] = columns[4].replace('-1','120')
+		if ss.designation is not None: columns[5] = columns[5].replace('-1','120')
+		if ss.leave_without_pay is not None: columns[9] = columns[9].replace('-1','130')
 
 
 		for e in earning_types:
