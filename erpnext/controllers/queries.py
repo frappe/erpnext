@@ -499,16 +499,17 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
 	dimension_filters = get_dimension_filter_map()
 	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
-	group_condition = ''
-	company_condition = ''
+	query_filters = []
 
 	meta = frappe.get_meta(doctype)
-
 	if meta.is_tree:
-		group_condition = 'and is_group = 0 '
+		query_filters.append(['is_group', '=', 0])
 
 	if meta.has_field('company'):
-		company_condition = 'and company = %s ' % (frappe.db.escape(filters.get('company')))
+		query_filters.append(['company', '=', filters.get('company')])
+
+	if txt:
+		query_filters.append([searchfield, 'LIKE', "%%%s%%" % txt])
 
 	if dimension_filters:
 		if dimension_filters['allow_or_restrict'] == 'Allow':
@@ -521,25 +522,12 @@ def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters)
 		else:
 			dimensions = tuple(dimension_filters['allowed_dimensions'])
 
-		result = frappe.db.sql("""SELECT name from `tab{doctype}` where
-			name {query_selector} {restricted}
-			{group_condition} {company_condition}
-			and {key} LIKE %(txt)s""".format(
-			doctype=doctype, query_selector=query_selector, restricted=dimensions,
-			group_condition = group_condition,
-			company_condition = company_condition,
-			key=searchfield), {
-				'txt': '%' + txt + '%'
-		})
+		query_filters.append(['name', query_selector, dimensions])
 
-		return result
-	else:
-		return frappe.db.sql("""
-			SELECT name from `tab{doctype}` where
-			{key} LIKE %(txt)s {group_condition} {company_condition}"""
-			.format(doctype=doctype, key=searchfield,
-			group_condition=group_condition, company_condition=company_condition),
-			{ 'txt': '%' + txt + '%'})
+	output = frappe.get_all(doctype, filters=query_filters)
+	result = [d.name for d in output]
+
+	return [(d,) for d in set(result)]
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
