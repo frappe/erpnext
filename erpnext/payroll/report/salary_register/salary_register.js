@@ -40,7 +40,8 @@ frappe.query_reports["Salary Register"] = {
 			"fieldtype": "Link",
 			"options": "Company",
 			"default": frappe.defaults.get_user_default("Company"),
-			"width": "100px"
+			"width": "100px",
+			"reqd": 1
 		},
 		{
 			"fieldname":"docstatus",

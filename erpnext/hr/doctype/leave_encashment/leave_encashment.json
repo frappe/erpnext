@@ -12,6 +12,7 @@
   "employee",
   "employee_name",
   "department",
+  "company",
   "column_break_4",
   "leave_type",
   "leave_allocation",
@@ -142,11 +143,19 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-20 17:44:14.590652",
+ "modified": "2020-11-25 11:56:06.777241",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Encashment",

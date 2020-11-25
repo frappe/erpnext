@@ -9,11 +9,9 @@ from frappe import _
 def execute(filters=None):
 	if not filters: filters = {}
 	currency = None
-	company_currency = None
 	if filters.get('currency'):
 		currency = filters.get('currency')
-	if filters.get("company"):
-		company_currency = erpnext.get_company_currency(filters.get("company"))
+	company_currency = erpnext.get_company_currency(filters.get("company"))
 	salary_slips = get_salary_slips(filters, company_currency)
 	if not salary_slips: return [], []
 
@@ -27,10 +25,10 @@ def execute(filters=None):
 		row = [ss.name, ss.employee, ss.employee_name, doj_map.get(ss.employee), ss.branch, ss.department, ss.designation,
 			ss.company, ss.start_date, ss.end_date, ss.leave_without_pay, ss.payment_days]
 
-		if not ss.branch == None:columns[3] = columns[3].replace('-1','120')
-		if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
-		if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
-		if not ss.leave_without_pay  == None: columns[9] = columns[9].replace('-1','130')
+		if not ss.branch == None: columns[3] = columns[3].replace('-1','120')
+		if not ss.department == None: columns[4] = columns[4].replace('-1','120')
+		if not ss.designation == None: columns[5] = columns[5].replace('-1','120')
+		if not ss.leave_without_pay == None: columns[9] = columns[9].replace('-1','130')
 
 
 		for e in earning_types:
@@ -50,7 +48,7 @@ def execute(filters=None):
 			row += [flt(ss.total_deduction) * flt(ss.exchange_rate), flt(ss.net_pay) * flt(ss.exchange_rate)]
 		else:
 			row += [ss.total_deduction, ss.net_pay]
-
+		row.append(currency or company_currency)
 		data.append(row)
 
 	return columns, data
@@ -58,10 +56,19 @@ def execute(filters=None):
 def get_columns(salary_slips):
 	"""
 	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140",
-		_("Date of Joining") + "::80", _("Branch") + ":Link/Branch:120", _("Department") + ":Link/Department:120",
-		_("Designation") + ":Link/Designation:120", _("Company") + ":Link/Company:120", _("Start Date") + "::80",
-		_("End Date") + "::80", _("Leave Without Pay") + ":Float:130", _("Payment Days") + ":Float:120"
+		_("Salary Slip ID") + ":Link/Salary Slip:150",
+		_("Employee") + ":Link/Employee:120",
+		_("Employee Name") + "::140",
+		_("Date of Joining") + "::80",
+		_("Branch") + ":Link/Branch:120",
+		_("Department") + ":Link/Department:120",
+		_("Designation") + ":Link/Designation:120",
+		_("Company") + ":Link/Company:120",
+		_("Start Date") + "::80",
+		_("End Date") + "::80",
+		_("Leave Without Pay") + ":Float:130",
+		_("Payment Days") + ":Float:120",
+		_("Currency") + ":Link/Currency:80"
 	]
 	"""
 	columns = [

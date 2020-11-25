@@ -187,7 +187,6 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -202,7 +201,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-22 03:48:09.386149",
+ "modified": "2020-11-25 12:01:55.980721",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",

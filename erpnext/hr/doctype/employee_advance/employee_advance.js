@@ -132,7 +132,9 @@ frappe.ui.form.on('Employee Advance', {
 				'employee_advance_name': frm.doc.name,
 				'return_amount': flt(frm.doc.paid_amount - frm.doc.claimed_amount),
 				'advance_account': frm.doc.advance_account,
-				'mode_of_payment': frm.doc.mode_of_payment
+				'mode_of_payment': frm.doc.mode_of_payment,
+				'currency': frm.doc.currency,
+				'exchange_rate': frm.doc.exchange_rate
 			},
 			callback: function(r) {
 				const doclist = frappe.model.sync(r.message);
