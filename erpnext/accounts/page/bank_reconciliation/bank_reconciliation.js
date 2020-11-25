@@ -167,9 +167,7 @@ erpnext.accounts.bankTransactionUpload = class bankTransactionUpload {
 			})
 		}
 		catch(err) {
-			let msg = __(`Your file could not be processed by ERPNext.
-						<br>It should be a standard CSV or XLSX file.
-						<br>The headers should be in the first row.`)
+			let msg = __('Your file could not be processed by ERPNext.<br>It should be a standard CSV or XLSX file.<br>The headers should be in the first row.')
 			frappe.throw(msg)
 		}
 
