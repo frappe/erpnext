@@ -223,7 +223,7 @@ var calculate_totals = function(frm) {
 			}
 		});
 	}
-}
+};
 
 frappe.ui.form.on('Salary Detail', {
 	amount: function(frm) {
