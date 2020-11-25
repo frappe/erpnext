@@ -961,9 +961,9 @@ class SalarySlip(TransactionBase):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
 			total_amount = amounts['interest_amount'] + amounts['payable_principal_amount']
 			if payment.total_payment > total_amount:
-				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2}
-					against loan {3}""").format(payment.idx, frappe.bold(payment.total_payment),
-					frappe.bold(total_amount), frappe.bold(payment.loan)))
+				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2} against loan {3}""")
+					.format(payment.idx, frappe.bold(payment.total_payment),
+						frappe.bold(total_amount), frappe.bold(payment.loan)))
 
 			self.total_interest_amount += payment.interest_amount
 			self.total_principal_amount += payment.principal_amount
