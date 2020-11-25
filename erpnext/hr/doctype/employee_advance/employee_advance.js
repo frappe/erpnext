@@ -24,7 +24,7 @@ frappe.ui.form.on('Employee Advance', {
 					"root_type": "Asset",
 					"is_group": 0,
 					"company": frm.doc.company,
-					"account_currency": ["in",[frm.doc.currency, company_currency]],
+					"account_currency": ["in", [frm.doc.currency, company_currency]],
 				}
 			};
 		});
@@ -158,7 +158,7 @@ frappe.ui.form.on('Employee Advance', {
 				"posting_date": frm.doc.posting_date
 			},
 			callback: function(r) {
-				frm.set_value("pending_amount",r.message);
+				frm.set_value("pending_amount", r.message);
 			}
 		});
 	},
@@ -170,7 +170,7 @@ frappe.ui.form.on('Employee Advance', {
 				employee: frm.doc.employee,
 			},
 			callback: function(r) {
-				if(r.message) {
+				if (r.message) {
 					frm.set_value('currency', r.message);
 					frm.refresh_fields();
 				}
@@ -183,12 +183,11 @@ frappe.ui.form.on('Employee Advance', {
 		var company_currency;
 		if (!frm.doc.company) {
 			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
-		}
-		else {
+		} else {
 			company_currency = erpnext.get_currency(frm.doc.company);
 		}
-		if(from_currency != company_currency) {
-			frm.events.set_exchange_rate(frm, from_currency, company_currency)
+		if (from_currency != company_currency) {
+			frm.events.set_exchange_rate(frm, from_currency, company_currency);
 		} else {
 			frm.set_value("exchange_rate", 1.0);
 			frm.set_df_property('exchange_rate', 'hidden', 1);

@@ -19,14 +19,14 @@ frappe.ui.form.on('Employee Benefit Claim', {
 					employee: frm.doc.employee,
 				},
 				callback: function(r) {
-					if(r.message) {
+					if (r.message) {
 						frm.set_value('currency', r.message);
 						frm.set_df_property('currency', 'hidden', 0);
 					}
 				}
 			});
 		}
-		if (!frm.doc.earning_component){
+		if (!frm.doc.earning_component) {
 			frm.doc.max_amount_eligible = null;
 			frm.doc.claimed_amount = null;
 		}
