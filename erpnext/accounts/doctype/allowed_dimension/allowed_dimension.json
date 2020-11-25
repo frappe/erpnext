@@ -22,7 +22,6 @@
    "fieldname": "dimension_value",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
-   "label": "Applicable Dimension",
    "options": "accounting_dimension",
    "show_days": 1,
    "show_seconds": 1
@@ -31,7 +30,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-16 17:41:50.422843",
+ "modified": "2020-11-23 09:56:19.744200",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Allowed Dimension",
