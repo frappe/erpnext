@@ -33,6 +33,7 @@
   "is_earned_leave",
   "earned_leave_frequency",
   "column_break_22",
+  "based_on_date_of_joining",
   "rounding"
  ],
  "fields": [
@@ -189,6 +190,13 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_earned_leave",
+   "description": "If checked, leave will be granted on the day of joining every month.",
+   "fieldname": "based_on_date_of_joining",
+   "fieldtype": "Check",
+   "label": "Based On Date Of Joining"
+  },
+  {
    "depends_on": "eval:doc.is_lwp == 0",
    "fieldname": "is_ppl",
    "fieldtype": "Check",
@@ -205,7 +213,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2020-08-26 14:04:54.318687",
+ "modified": "2020-10-15 15:49:47.555105",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
