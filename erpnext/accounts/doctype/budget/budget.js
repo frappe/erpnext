@@ -1,5 +1,6 @@
 // Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on('Budget', {
 	onload: function(frm) {
@@ -11,7 +12,7 @@ frappe.ui.form.on('Budget', {
 					is_group: 0
 				}
 			}
-		})
+		});
 
 		frm.set_query("monthly_distribution", function() {
 			return {
@@ -19,7 +20,9 @@ frappe.ui.form.on('Budget', {
 					fiscal_year: frm.doc.fiscal_year
 				}
 			}
-		})
+		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {

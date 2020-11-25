@@ -2,11 +2,21 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.hr");
+frappe.provide("erpnext.accounts.dimensions");
 
-erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
-	expense_type: function(doc, cdt, cdn) {
+frappe.ui.form.on('Expense Claim', {
+	onload: function(frm) {
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+	},
+});
+
+frappe.ui.form.on('Expense Claim Detail', {
+	expense_type: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
-		if(!doc.company) {
+		if(!frm.doc.company) {
 			d.expense_type = "";
 			frappe.msgprint(__("Please set the Company"));
 			this.frm.refresh_fields();
@@ -20,7 +30,7 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account_and_cost_center",
 			args: {
 				"expense_claim_type": d.expense_type,
-				"company": doc.company
+				"company": frm.doc.company
 			},
 			callback: function(r) {
 				if (r.message) {
@@ -31,8 +41,6 @@ erpnext.hr.ExpenseClaimController = frappe.ui.form.Controller.extend({
 		});
 	}
 });
-
-$.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
 
 cur_frm.add_fetch('employee', 'company', 'company');
 cur_frm.add_fetch('employee','employee_name','employee_name');

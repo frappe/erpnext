@@ -14,6 +14,30 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 		if (frm.doc.company) {
 			frm.trigger('setup_company_filters');
 		}
+
+		frappe.realtime.on('opening_invoice_creation_progress', data => {
+			if (!frm.doc.import_in_progress) {
+				frm.dashboard.reset();
+				frm.doc.import_in_progress = true;
+			}
+			if (data.user != frappe.session.user) return;
+			if (data.count == data.total) {
+				setTimeout((title) => {
+					frm.doc.import_in_progress = false;
+					frm.clear_table("invoices");
+					frm.refresh_fields();
+					frm.page.clear_indicator();
+					frm.dashboard.hide_progress(title);
+					frappe.msgprint(__("Opening {0} Invoice created", [frm.doc.invoice_type]));
+				}, 1500, data.title);
+				return;
+			}
+
+			frm.dashboard.show_progress(data.title, (data.count / data.total) * 100, data.message);
+			frm.page.set_indicator(__('In Progress'), 'orange');
+		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -83,6 +107,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				}
 			})
 		}
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	invoice_type: function(frm) {
