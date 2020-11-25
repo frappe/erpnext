@@ -31,6 +31,16 @@ frappe.ui.form.on('Job Card', {
 			}
 		}
 
+		frm.set_query("quality_inspection", function() {
+			return {
+				query: "erpnext.stock.doctype.quality_inspection.quality_inspection.quality_inspection_query",
+				filters: {
+					"item_code": frm.doc.production_item,
+					"reference_name": frm.doc.name
+				}
+			};
+		});
+
 		frm.trigger("toggle_operation_number");
 
 		if (frm.doc.docstatus == 0 && (frm.doc.for_quantity > frm.doc.total_completed_qty || !frm.doc.for_quantity)

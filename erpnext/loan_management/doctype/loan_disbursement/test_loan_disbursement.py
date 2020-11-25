@@ -8,9 +8,10 @@ from frappe.utils import (nowdate, add_days, get_datetime, get_first_day, get_la
 from erpnext.loan_management.doctype.loan.test_loan import (create_loan_type, create_loan_security_pledge, create_repayment_entry, create_loan_application,
 	make_loan_disbursement_entry, create_loan_accounts, create_loan_security_type, create_loan_security, create_demand_loan, create_loan_security_price)
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_demand_loans
-from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year
+from erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual import days_in_year, get_per_day_interest
 from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
 
 class TestLoanDisbursement(unittest.TestCase):
 
@@ -60,8 +61,7 @@ class TestLoanDisbursement(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, make_loan_disbursement_entry, loan.name,
 			500000, first_date)
 
-		repayment_entry = create_repayment_entry(loan.name, self.applicant, add_days(get_last_day(nowdate()), 5),
-			"Regular Payment", 611095.89)
+		repayment_entry = create_repayment_entry(loan.name, self.applicant, add_days(get_last_day(nowdate()), 5), 611095.89)
 
 		repayment_entry.submit()
 		loan.reload()
@@ -69,3 +69,50 @@ class TestLoanDisbursement(unittest.TestCase):
 		# After repayment loan disbursement entry should go through
 		make_loan_disbursement_entry(loan.name, 500000, disbursement_date=add_days(last_date, 16))
 
+		# check for disbursement accrual
+		loan_interest_accrual = frappe.db.get_value('Loan Interest Accrual', {'loan': loan.name,
+			'accrual_type': 'Disbursement'})
+
+		self.assertTrue(loan_interest_accrual)
+
+	def test_loan_topup_with_additional_pledge(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		self.assertEquals(loan.loan_amount, 1000000)
+
+		first_date = '2019-10-01'
+		last_date = '2019-10-30'
+
+		# Disbursed 10,00,000 amount
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
+		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
+		amounts = calculate_amounts(loan.name, add_days(last_date, 1))
+
+		previous_interest = amounts['interest_amount']
+
+		pledge1 = [{
+			"loan_security": "Test Security 1",
+			"qty": 2000.00
+		}]
+
+		create_loan_security_pledge(self.applicant, pledge1, loan=loan.name)
+
+		# Topup 500000
+		make_loan_disbursement_entry(loan.name, 500000, disbursement_date=add_days(last_date, 1))
+		process_loan_interest_accrual_for_demand_loans(posting_date = add_days(last_date, 15))
+		amounts = calculate_amounts(loan.name, add_days(last_date, 15))
+
+		per_day_interest = get_per_day_interest(1500000, 13.5, '2019-10-30')
+		interest = per_day_interest * 15
+
+		self.assertEquals(amounts['pending_principal_amount'], 1500000)
+		self.assertEquals(amounts['interest_amount'], flt(interest + previous_interest, 2))
