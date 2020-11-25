@@ -2,10 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Accounting Dimension Filter', {
+	refresh: function(frm, cdt, cdn) {
+		if (frm.doc.accounting_dimension) {
+			frm.set_df_property('dimensions', 'label', frm.doc.accounting_dimension, cdn, 'dimension_value');
+		}
+	},
 	onload: function(frm) {
 		frm.set_query('applicable_on_account', 'accounts', function() {
 			return {
-				filters : {
+				filters: {
 					'company': frm.doc.company
 				}
 			};

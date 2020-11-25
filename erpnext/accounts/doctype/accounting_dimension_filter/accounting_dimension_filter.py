@@ -29,19 +29,18 @@ class AccountingDimensionFilter(Document):
 					account.idx, frappe.bold(account.applicable_on_account), frappe.bold(self.accounting_dimension)))
 
 def get_dimension_filter_map():
-	filters = frappe.db.sql(
-		""" SELECT
-				a.applicable_on_account, d.dimension_value, p.accounting_dimension,
-				p.allow_or_restrict, a.is_mandatory
-			FROM
-				`tabApplicable On Account` a, `tabAllowed Dimension` d,
-				`tabAccounting Dimension Filter` p
-			WHERE
-				p.name = a.parent
-				AND p.disabled = 0
-				AND p.name = d.parent
-
-		""", as_dict=1)
+	filters = frappe.db.sql("""
+		SELECT
+			a.applicable_on_account, d.dimension_value, p.accounting_dimension,
+			p.allow_or_restrict, a.is_mandatory
+		FROM
+			`tabApplicable On Account` a, `tabAllowed Dimension` d,
+			`tabAccounting Dimension Filter` p
+		WHERE
+			p.name = a.parent
+			AND p.disabled = 0
+			AND p.name = d.parent
+	""", as_dict=1)
 
 	dimension_filter_map = {}
 
