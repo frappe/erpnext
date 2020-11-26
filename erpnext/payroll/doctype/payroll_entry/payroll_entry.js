@@ -176,17 +176,6 @@ frappe.ui.form.on('Payroll Entry', {
 				frm.set_df_property('exchange_rate', 'hidden', 1);
 				frm.set_df_property("exchange_rate", "description", "" );
 			}
-			// 	cur_frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-			// 	+ " = [?] " + company_currency);
-			// 	cur_frm.set_df_property("exchange_rate", "hidden", 0);
-			// 	frm.set_value('exchange_rate', null);
-			// }
-			// else {
-			// 	cur_frm.set_df_property("exchange_rate", "description", "");
-			// 	cur_frm.set_df_property("exchange_rate", "hidden", 1);
-			// 	frm.doc.exchange_rate = 1;
-
-			// }
 		}
 	},
 

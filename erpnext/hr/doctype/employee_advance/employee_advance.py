@@ -109,30 +109,16 @@ def make_bank_entry(dt, dn):
 
 	advance_account_currency = frappe.db.get_value('Account', doc.advance_account, 'account_currency')
 
-	if advance_account_currency != doc.currency:
-		advance_amount = flt(doc.advance_amount) * flt(doc.exchange_rate)
-		advance_exchange_rate = 1
-	else:
-		advance_amount = doc.advance_amount
-		advance_exchange_rate = doc.exchange_rate
+	advance_amount, advance_exchange_rate = get_advance_amount_advance_exchange_rate(advance_account_currency,doc )
 
-	if payment_account.account_currency != doc.currency:
-		paying_amount = flt(doc.advance_amount) * flt(doc.exchange_rate)
-		paying_exchange_rate = 1
-	else:
-		paying_amount = doc.advance_amount
-		paying_exchange_rate = doc.exchange_rate
-
-	multi_currency = 0
-	if advance_account_currency != payment_account.account_currency:
-		multi_currency = 1
+	paying_amount, paying_exchange_rate = get_paying_amount_paying_exchange_rate(payment_account, doc)
 
 	je = frappe.new_doc("Journal Entry")
 	je.posting_date = nowdate()
 	je.voucher_type = 'Bank Entry'
 	je.company = doc.company
 	je.remark = 'Payment against Employee Advance: ' + dn + '\n' + doc.purpose
-	je.multi_currency = multi_currency
+	je.multi_currency = 1 if advance_account_currency != payment_account.account_currency else 0
 
 	je.append("accounts", {
 		"account": doc.advance_account,
@@ -157,6 +143,24 @@ def make_bank_entry(dt, dn):
 	})
 
 	return je.as_dict()
+
+def get_advance_amount_advance_exchange_rate(advance_account_currency, doc):
+	if advance_account_currency != doc.currency:
+		advance_amount = flt(doc.advance_amount) * flt(doc.exchange_rate)
+		advance_exchange_rate = 1
+	else:
+		advance_amount = doc.advance_amount
+		advance_exchange_rate = doc.exchange_rate
+
+	return advance_amount, advance_exchange_rate
+
+def get_paying_amount_paying_exchange_rate(payment_account, doc):
+	if payment_account.account_currency != doc.currency:
+		paying_amount = flt(doc.advance_amount) * flt(doc.exchange_rate)
+		paying_exchange_rate = 1
+	else:
+		paying_amount = doc.advance_amount
+		paying_exchange_rate = doc.exchange_rate
 
 @frappe.whitelist()
 def create_return_through_additional_salary(doc):

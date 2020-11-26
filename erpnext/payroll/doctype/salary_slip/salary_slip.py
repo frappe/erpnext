@@ -1098,6 +1098,9 @@ class SalarySlip(TransactionBase):
 				for deduction in self.deductions:
 					self.total_deduction += flt(deduction.amount)
 			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
+		self.set_base_totals()
+
+	def set_base_totals(self):
 		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
 		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
 		self.rounded_total = rounded(self.net_pay)

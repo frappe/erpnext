@@ -100,8 +100,6 @@ class EmployeeBenefitApplication(Document):
 		if application:
 			frappe.throw(_("Employee {0} already submited an apllication {1} for the payroll period {2}").format(self.employee, application, self.payroll_period))
 
-	# def assign
-
 @frappe.whitelist()
 def get_max_benefits(employee, on_date):
 	sal_struct = get_assigned_salary_structure(employee, on_date)
