@@ -230,7 +230,8 @@ def get_pending_medication_orders(entry):
 
 	for doc in data:
 		inpatient_record = doc.inpatient_record
-		doc['service_unit'] = get_current_healthcare_service_unit(inpatient_record)
+		if inpatient_record:
+			doc['service_unit'] = get_current_healthcare_service_unit(inpatient_record)
 
 		if entry.service_unit and doc.service_unit != entry.service_unit:
 			to_remove.append(doc)
