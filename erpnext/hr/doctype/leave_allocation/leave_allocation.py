@@ -82,7 +82,7 @@ class LeaveAllocation(Document):
 			frappe.msgprint(_("{0} already allocated for Employee {1} for period {2} to {3}")
 				.format(self.leave_type, self.employee, formatdate(self.from_date), formatdate(self.to_date)))
 
-			frappe.throw(_('Reference') + ': <a href="#Form/Leave Allocation/{0}">{0}</a>'
+			frappe.throw(_('Reference') + ': <a href="/app/Form/Leave Allocation/{0}">{0}</a>'
 				.format(leave_allocation[0][0]), OverlapError)
 
 	def validate_back_dated_allocation(self):

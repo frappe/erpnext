@@ -198,7 +198,7 @@ erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callb
 			freeze: true,
 			callback: function(r) {
 				frappe.show_alert(__('Stock Entry {0} created',
-					['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
+					['<a href="/desk/Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
 				dialog.hide();
 				callback(r);
 			},

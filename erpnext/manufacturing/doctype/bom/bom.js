@@ -134,7 +134,7 @@ frappe.ui.form.on("BOM", {
 			frm.set_intro(__('This is a Template BOM and will be used to make the work order for {0} of the item {1}',
 				[
 					`<a class="variants-intro">variants</a>`,
-					`<a href="#Form/Item/${frm.doc.item}">${frm.doc.item}</a>`,
+					`<a href="/desk/Form/Item/${frm.doc.item}">${frm.doc.item}</a>`,
 				]), true);
 
 			frm.$wrapper.find(".variants-intro").on("click", () => {
