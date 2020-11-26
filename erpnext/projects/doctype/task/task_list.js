@@ -26,7 +26,7 @@ frappe.listview_settings['Task'] = {
 	},
 	gantt_custom_popup_html: function(ganttobj, task) {
 		var html = `<h5><a style="text-decoration:underline"\
-			href="#Form/Task/${ganttobj.id}""> ${ganttobj.name} </a></h5>`;
+			href="/desk/Form/Task/${ganttobj.id}""> ${ganttobj.name} </a></h5>`;
 
 		if(task.project) html += `<p>Project: ${task.project}</p>`;
 		html += `<p>Progress: ${ganttobj.progress}</p>`;

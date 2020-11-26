@@ -1,23 +1,9 @@
-{% include "erpnext/selling/page/point_of_sale/onscan.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_item_selector.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_item_cart.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_item_details.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_payment.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_number_pad.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_past_order_list.js" %}
-{% include "erpnext/selling/page/point_of_sale/pos_past_order_summary.js" %}
-
 erpnext.PointOfSale.Controller = class {
 	constructor(wrapper) {
 		this.wrapper = $(wrapper).find('.layout-main-section');
 		this.page = wrapper.page;
 
-		this.load_assets();
-	}
-
-	load_assets() {
-		// after loading assets first check if opening entry has been made
-		frappe.require(['assets/erpnext/css/pos.css'], this.check_opening_entry.bind(this));
+		this.check_opening_entry();
 	}
 
 	fetch_opening_entry() {
@@ -36,6 +22,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	create_opening_voucher() {
+		const me = this;
 		const table_fields = [
 			{
 				fieldname: "mode_of_payment", fieldtype: "Link",
@@ -45,7 +32,7 @@ erpnext.PointOfSale.Controller = class {
 			{
 				fieldname: "opening_amount", fieldtype: "Currency",
 				in_list_view: 1, label: "Opening Amount",
-				options: "company:company_currency", 
+				options: "company:company_currency",
 				change: function () {
 					dialog.fields_dict.balance_details.df.data.some(d => {
 						if (d.idx == this.doc.idx) {
@@ -93,7 +80,7 @@ erpnext.PointOfSale.Controller = class {
 					fields: table_fields
 				}
 			],
-			primary_action: async ({ company, pos_profile, balance_details }) => {
+			primary_action: async function({ company, pos_profile, balance_details }) {
 				if (!balance_details.length) {
 					frappe.show_alert({
 						message: __("Please add Mode of payments and opening balance details."),
@@ -103,7 +90,7 @@ erpnext.PointOfSale.Controller = class {
 				}
 				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
 				const res = await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze:true });
-				!res.exc && this.prepare_app_defaults(res.message);
+				!res.exc && me.prepare_app_defaults(res.message);
 				dialog.hide();
 			},
 			primary_action_label: __('Submit')
@@ -134,7 +121,7 @@ erpnext.PointOfSale.Controller = class {
 	set_opening_entry_status() {
 		this.page.set_title_sub(
 			`<span class="indicator orange">
-				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
+				<a class="text-muted" href="/desk/Form/POS%20Opening%20Entry/${this.pos_opening}">
 					Opened at ${moment(this.pos_opening_time).format("Do MMMM, h:mma")}
 				</a>
 			</span>`);
@@ -157,10 +144,10 @@ erpnext.PointOfSale.Controller = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<div class="app grid grid-cols-10 pt-8 gap-6"></div>`
+			`<div class="point-of-sale-app"></div>`
 		);
 
-		this.$components_wrapper = this.wrapper.find('.app');
+		this.$components_wrapper = this.wrapper.find('.point-of-sale-app');
 	}
 
 	prepare_components() {
@@ -190,7 +177,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	toggle_recent_order() {
-		const show = this.recent_order_list.$component.hasClass('d-none');
+		const show = this.recent_order_list.$component.is(':hidden');
 		this.toggle_recent_order_list(show);
 	}
 
@@ -199,7 +186,7 @@ erpnext.PointOfSale.Controller = class {
 
 		if (this.frm.doc.items.length == 0) {
 			frappe.show_alert({
-				message:__("You must add atleast one item to save it as draft."), 
+				message:__("You must add atleast one item to save it as draft."),
 				indicator:'red'
 			});
 			frappe.utils.play_sound("error");
@@ -208,7 +195,7 @@ erpnext.PointOfSale.Controller = class {
 
 		this.frm.save(undefined, undefined, undefined, () => {
 			frappe.show_alert({
-				message:__("There was an error saving the document."), 
+				message:__("There was an error saving the document."),
 				indicator:'red'
 			});
 			frappe.utils.play_sound("error");
@@ -256,7 +243,7 @@ erpnext.PointOfSale.Controller = class {
 
 				cart_item_clicked: (item_code, batch_no, uom) => {
 					const item_row = this.frm.doc.items.find(
-						i => i.item_code === item_code 
+						i => i.item_code === item_code
 							&& i.uom === uom
 							&& (!batch_no || (batch_no && i.batch_no === batch_no))
 					);
@@ -356,10 +343,10 @@ erpnext.PointOfSale.Controller = class {
 
 				toggle_other_sections: (show) => {
 					if (show) {
-						this.item_details.$component.hasClass('d-none') ? '' : this.item_details.$component.addClass('d-none');
-						this.item_selector.$component.addClass('d-none');
+						this.item_details.$component.is(':visible') ? this.item_details.$component.css('display', 'none') : '';
+						this.item_selector.$component.css('display', 'none');
 					} else {
-						this.item_selector.$component.removeClass('d-none');
+						this.item_selector.$component.css('display', 'flex');
 					}
 				},
 
@@ -388,7 +375,7 @@ erpnext.PointOfSale.Controller = class {
 						this.order_summary.load_summary_of(doc);
 					});
 				},
-				reset_summary: () => this.order_summary.show_summary_placeholder()
+				reset_summary: () => this.order_summary.toggle_summary_placeholder(true)
 			}
 		})
 	}
@@ -429,7 +416,7 @@ erpnext.PointOfSale.Controller = class {
 		})
 	}
 
-	
+
 
 	toggle_recent_order_list(show) {
 		this.toggle_components(!show);
@@ -539,7 +526,7 @@ erpnext.PointOfSale.Controller = class {
 					const qty_needed = field === 'qty' ? value * item_row.conversion_factor : item_row.qty * value;
 					await this.check_stock_availability(item_row, qty_needed, this.frm.doc.set_warehouse);
 				}
-				
+
 				if (this.is_current_item_being_edited(item_row) || item_selected_from_selector) {
 					await frappe.model.set_value(item_row.doctype, item_row.name, field, value);
 					this.update_cart_html(item_row);
@@ -577,7 +564,7 @@ erpnext.PointOfSale.Controller = class {
 
 				this.check_serial_batch_selection_needed(item_row) && this.edit_item_details_of(item_row);
 				this.update_cart_html(item_row);
-			}	
+			}
 		} catch (error) {
 			console.log(error);
 		} finally {
@@ -588,7 +575,7 @@ erpnext.PointOfSale.Controller = class {
 	get_item_from_frm(item_code, batch_no, uom) {
 		const has_batch_no = batch_no;
 		return this.frm.doc.items.find(
-			i => i.item_code === item_code 
+			i => i.item_code === item_code
 				&& (!has_batch_no || (has_batch_no && i.batch_no === batch_no))
 				&& (i.uom === uom)
 		);
@@ -617,7 +604,7 @@ erpnext.PointOfSale.Controller = class {
 		const no_serial_selected = !item_row.serial_no;
 		const no_batch_selected = !item_row.batch_no;
 
-		if ((serialized && no_serial_selected) || (batched && no_batch_selected) || 
+		if ((serialized && no_serial_selected) || (batched && no_batch_selected) ||
 			(serialized && batched && (no_batch_selected || no_serial_selected))) {
 			return true;
 		}

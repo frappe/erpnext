@@ -25,7 +25,7 @@ frappe.ui.form.on('Course Scheduling Tool', {
 							<thead><tr><th>${__("Course")}</th><th>${__("Date")}</th></tr></thead>
 							<tbody>
 								${course_schedules.map(
-									c => `<tr><td><a href="#Form/Course Schedule/${c.name}">${c.name}</a></td>
+									c => `<tr><td><a href="/desk/Form/Course Schedule/${c.name}">${c.name}</a></td>
 									<td>${c.schedule_date}</td></tr>`
 								).join('')}
 							</tbody>
