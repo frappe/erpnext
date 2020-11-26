@@ -54,6 +54,8 @@
   "col_break_warehouse",
   "supplier_warehouse",
   "before_items_section",
+  "items_section",
+  "filter_items_by_supplier",
   "scan_barcode",
   "items_col_break",
   "set_warehouse",
@@ -1100,13 +1102,19 @@
   {
    "fieldname": "items_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.supplier",
+   "fieldname": "filter_items_by_supplier",
+   "fieldtype": "Check",
+   "label": "Filter Items by Supplier"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-10-30 13:58:14.697921",
+ "modified": "2020-11-26 01:06:33.139484",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

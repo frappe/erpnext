@@ -34,6 +34,7 @@
   "plc_conversion_rate",
   "ignore_pricing_rule",
   "items_section",
+  "filter_items_by_supplier",
   "items",
   "link_to_mrs",
   "pricing_rule_details",
@@ -802,13 +803,19 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "label": "Valid Till"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.supplier",
+   "fieldname": "filter_items_by_supplier",
+   "fieldtype": "Check",
+   "label": "Filter Items by Supplier"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-10-30 13:58:33.043971",
+ "modified": "2020-11-26 01:02:42.652295",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",
