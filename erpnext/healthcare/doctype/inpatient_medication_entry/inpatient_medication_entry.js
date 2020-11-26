@@ -29,6 +29,29 @@ frappe.ui.form.on('Inpatient Medication Entry', {
 				}
 			};
 		});
+
+		if (frm.doc.__islocal || frm.doc.docstatus !== 0)
+			return;
+
+		frm.add_custom_button(__('Make Stock Entry'), function() {
+			frappe.call({
+				method: 'erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry.make_difference_stock_entry',
+				args: {	docname: frm.doc.name },
+				freeze: true,
+				callback: function(r) {
+					if (r.message) {
+						var doclist = frappe.model.sync(r.message);
+						frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
+					} else {
+						frappe.msgprint({
+							title: __('No Drug Shortage'),
+							message: __('All the drugs are available with sufficient qty to process this Inpatient Medication Entry.'),
+							indicator: 'green'
+						});
+					}
+				}
+			})
+		});
 	},
 
 	patient: function(frm) {
