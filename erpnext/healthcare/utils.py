@@ -832,11 +832,11 @@ def update_patient_email_and_phone_numbers(contact, method):
 
 
 def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
-	from erpnext.healthcare.doctype.healthcare_service_insurance_coverage.healthcare_service_insurance_coverage import check_insurance_on_service, get_insurance_coverage_details
-	if check_insurance_on_service(service, doc.insurance_subscription):
+	from erpnext.healthcare.doctype.healthcare_service_insurance_coverage.healthcare_service_insurance_coverage import get_service_insurance_coverage_details
+	insurance_details = get_service_insurance_coverage_details(service_doctype, service, billing_item, doc.insurance_subscription)
+	if insurance_details:
 		insurance_subscription = frappe.get_doc('Healthcare Insurance Subscription', doc.insurance_subscription)
 		price_list_rate = get_insurance_price_list_rate(insurance_subscription.healthcare_insurance_coverage_plan, insurance_subscription.insurance_company, billing_item)
-		coverage, discount, is_auto_approval = get_insurance_coverage_details(insurance_subscription.healthcare_insurance_coverage_plan, service)
 		insurance_claim = frappe.new_doc('Healthcare Insurance Claim')
 		insurance_claim.patient = doc.patient
 		insurance_claim.reference_dt = doc.doctype
@@ -845,19 +845,19 @@ def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
 		insurance_claim.insurance_company = doc.insurance_company
 		insurance_claim.healthcare_service_type = service_doctype
 		insurance_claim.service_template = service
-		insurance_claim.claim_status = 'Approved' if is_auto_approval else 'Pending'
-		insurance_claim.mode_of_claim_approval = 'Automatic' if is_auto_approval else ''
+		insurance_claim.claim_status = 'Approved' if insurance_details.is_auto_approval else 'Pending'
+		insurance_claim.mode_of_claim_approval = 'Automatic' if insurance_details.is_auto_approval else ''
 		insurance_claim.claim_posting_date = nowdate()
 		insurance_claim.quantity = qty
 		insurance_claim.service_doctype = doc.doctype
 		insurance_claim.service_item = billing_item
-		insurance_claim.discount = discount
+		insurance_claim.discount = insurance_details.discount
 		insurance_claim.price_list_rate = price_list_rate
 		insurance_claim.amount = float(price_list_rate) * float(qty)
 		if insurance_claim.discount and float(insurance_claim.discount) > 0:
 			insurance_claim.discount_amount = float(insurance_claim.price_list_rate) * float(insurance_claim.discount) * 0.01
 			insurance_claim.amount = float(price_list_rate - insurance_claim.discount_amount) * float(qty)
-		insurance_claim.coverage = coverage
+		insurance_claim.coverage = insurance_details.coverage
 		insurance_claim.coverage_amount = float(insurance_claim.amount) * 0.01 * float(insurance_claim.coverage)
 		insurance_claim.save(ignore_permissions=True)
 		insurance_claim.submit()
