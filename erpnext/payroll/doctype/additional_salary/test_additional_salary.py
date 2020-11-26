@@ -17,11 +17,8 @@ class TestAdditionalSalary(unittest.TestCase):
 		setup_test()
 
 	def tearDown(self):
-		for dt in ["Salary Slip", "Additional Salary", "Salary Structure", "Holiday List"]:
+		for dt in ["Salary Slip", "Additional Salary", "Salary Structure Assignment", "Salary Structure", "Holiday List"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
-
-		emp_doc = frappe.get_doc("Employee", {"employee_name":"test_additional@salary.com"})
-		emp_doc.delete()
 
 	def test_recurring_additional_salary(self):
 		amount = 0

@@ -53,10 +53,7 @@ class TestPayrollEntry(unittest.TestCase):
 		salary_structure = make_salary_structure("_Test Multi Currency Salary Structure", "Monthly", company=company, currency='USD')
 		salary_structure_assignment = create_salary_structure_assignment(employee, salary_structure.name, company=company)
 		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""",(frappe.db.get_value("Employee", {"user_id": "test_muti_currency_employee@payroll.com"})))
-		salary_slip = make_employee_salary_slip("test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure")
-		salary_slip.exchange_rate = 70
-		salary_slip.calculate_net_pay()
-		salary_slip.db_update()
+		salary_slip = get_salary_slip("test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure")
 		dates = get_start_end_dates('Monthly', nowdate())
 		payroll_entry = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, 
 			payable_account=company_doc.default_payroll_payable_account, currency='USD', exchange_rate=70)
@@ -78,25 +75,6 @@ class TestPayrollEntry(unittest.TestCase):
 
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_debit)
 		self.assertEqual(salary_slip.base_net_pay, payment_entry[0].total_credit)
-
-		# Clear data
-		payroll_je_doc.cancel()
-		payroll_je_doc.delete()
-
-		payroll_entry.cancel()
-		payroll_entry.delete()
-
-		salary_slip.cancel()
-		salary_slip.delete()
-
-		salary_structure_assignment.cancel()
-		salary_structure_assignment.delete()
-
-		salary_structure.cancel()
-		salary_structure.delete()
-
-		emp_doc = frappe.get_doc("Employee", employee)
-		emp_doc.delete()
 
 	def test_payroll_entry_with_employee_cost_center(self): # pylint: disable=no-self-use
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
@@ -239,7 +217,6 @@ def make_payroll_entry(**args):
 	payroll_entry.create_salary_slips()
 	payroll_entry.submit_salary_slips()
 	if payroll_entry.get_sal_slip_list(ss_status = 1):
-		print('inside')
 		payroll_entry.make_payment_entry()
 
 	return payroll_entry
@@ -275,3 +252,11 @@ def make_holiday(holiday_list_name):
 		}).insert()
 
 	return holiday_list_name
+
+def get_salary_slip(user, period, salary_structure):
+	salary_slip = make_employee_salary_slip(user, period, salary_structure)
+	salary_slip.exchange_rate = 70
+	salary_slip.calculate_net_pay()
+	salary_slip.db_update()
+
+	return salary_slip

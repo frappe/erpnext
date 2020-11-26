@@ -246,6 +246,7 @@ class TestSalarySlip(unittest.TestCase):
 			penalty_income_account='Penalty Income Account - _TC')
 
 		make_salary_structure("Test Loan Repayment Salary Structure", "Monthly", employee=applicant, currency='INR')
+		frappe.db.sql("""delete from `tabLoan""")
 		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()
@@ -285,6 +286,7 @@ class TestSalarySlip(unittest.TestCase):
 	def test_multi_currency_salary_slip(self):
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 		applicant = make_employee("test_multi_currency_salary_slip@salary.com", company="_Test Company")
+		frappe.db.sql("""delete from `tabSalary Structure` where name='Test Multi Currency Salary Slip'""")
 		salary_structure = make_salary_structure("Test Multi Currency Salary Slip", "Monthly", employee=applicant, company="_Test Company", currency='USD')
 		salary_slip = make_salary_slip(salary_structure.name, employee = applicant)
 		salary_slip.exchange_rate = 70
@@ -292,16 +294,6 @@ class TestSalarySlip(unittest.TestCase):
 
 		self.assertEqual(salary_slip.gross_pay, 78000)
 		self.assertEqual(salary_slip.base_gross_pay, 78000*70)
-
-		# Clear data
-		salary_slip.cancel()
-		salary_slip.delete()
-
-		salary_structure.cancel()
-		salary_structure.delete()
-
-		emp_doc = frappe.get_doc("Employee", applicant)
-		emp_doc.delete()
 
 	def test_tax_for_payroll_period(self):
 		data = {}
@@ -605,7 +597,8 @@ def create_exemption_declaration(employee, payroll_period):
 		"doctype": "Employee Tax Exemption Declaration",
 		"employee": employee,
 		"payroll_period": payroll_period,
-		"company": erpnext.get_default_company()
+		"company": erpnext.get_default_company(),
+		"currency": erpnext.get_default_currency()
 	})
 	declaration.append("declarations", {
 		"exemption_sub_category": "_Test Sub Category",
@@ -620,7 +613,8 @@ def create_proof_submission(employee, payroll_period, amount):
 		"doctype": "Employee Tax Exemption Proof Submission",
 		"employee": employee,
 		"payroll_period": payroll_period.name,
-		"submission_date": submission_date
+		"submission_date": submission_date,
+		"currency": erpnext.get_default_currency()
 	})
 	proof_submission.append("tax_exemption_proofs", {
 		"exemption_sub_category": "_Test Sub Category",
@@ -637,13 +631,13 @@ def create_benefit_claim(employee, payroll_period, amount, component):
 		"employee": employee,
 		"claimed_amount": amount,
 		"claim_date": claim_date,
-		"earning_component": component
+		"earning_component": component,
+		"currency": erpnext.get_default_currency()
 	}).submit()
 	return claim_date
 
-def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False):
-	if frappe.db.exists("Income Tax Slab", "Tax Slab: " + payroll_period.name):
-		return
+def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False, currency=erpnext.get_default_currency()):
+	frappe.db.sql("""delete from `tabIncome Tax Slab`""")
 
 	slabs = [
 		{
@@ -666,6 +660,7 @@ def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption =
 	income_tax_slab = frappe.new_doc("Income Tax Slab")
 	income_tax_slab.name = "Tax Slab: " + payroll_period.name
 	income_tax_slab.effective_from = effective_date or add_days(payroll_period.start_date, -2)
+	income_tax_slab.currency = currency
 
 	if allow_tax_exemption:
 		income_tax_slab.allow_tax_exemption = 1
@@ -716,7 +711,8 @@ def create_additional_salary(employee, payroll_period, amount):
 		"salary_component": "Performance Bonus",
 		"payroll_date": salary_date,
 		"amount": amount,
-		"type": "Earning"
+		"type": "Earning",
+		"currency": erpnext.get_default_currency()
 	}).submit()
 	return salary_date
 

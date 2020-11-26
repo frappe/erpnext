@@ -113,13 +113,6 @@ class TestSalaryStructure(unittest.TestCase):
 		sal_struct = make_salary_structure("Salary Structure Multi Currency", "Monthly", currency='USD')
 		self.assertEqual(sal_struct.currency, 'USD')
 
-		# Clear data
-		sal_struct.cancel()
-		sal_struct.delete()
-
-		emp_doc = frappe.get_doc("Employee", employee)
-		emp_doc.delete()
-
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
 	test_tax=False, company=None, currency=erpnext.get_default_currency()):
 	if test_tax:
@@ -157,7 +150,7 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""",(employee))
 
 	payroll_period = create_payroll_period()
-	create_tax_slab(payroll_period, allow_tax_exemption=True)
+	create_tax_slab(payroll_period, allow_tax_exemption=True, currency=currency)
 
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
 	salary_structure_assignment.employee = employee

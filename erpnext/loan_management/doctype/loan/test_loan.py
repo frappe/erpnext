@@ -53,10 +53,6 @@ class TestLoan(unittest.TestCase):
 
 		create_loan(self.applicant1, "Personal Loan", 280000, "Repay Over Number of Periods", 20)
 
-		# Clear data
-		salary_structure.cancel()
-		salary_structure.delete()
-
 	def test_loan(self):
 		loan = frappe.get_doc("Loan", {"applicant":self.applicant1})
 		self.assertEquals(loan.monthly_repayment_amount, 15052)

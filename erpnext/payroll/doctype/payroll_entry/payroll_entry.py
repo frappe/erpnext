@@ -138,7 +138,8 @@ class PayrollEntry(Document):
 				"deduct_tax_for_unclaimed_employee_benefits": self.deduct_tax_for_unclaimed_employee_benefits,
 				"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
 				"payroll_entry": self.name,
-				"exchange_rate": self.exchange_rate
+				"exchange_rate": self.exchange_rate,
+				"currency": self.currency
 			})
 			if len(emp_list) > 30:
 				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)

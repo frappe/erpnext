@@ -17,22 +17,6 @@ class TestLoanApplication(unittest.TestCase):
 		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant, currency='INR')
 		self.create_loan_application()
 
-	def tearDown(self):
-		loan_application = frappe.get_doc("Loan Application", {"applicant":self.applicant})
-		loan_application.cancel()
-		loan_application.delete()
-
-		salary_structure = frappe.get_doc("Salary Structure", {"name": "Test Salary Structure Loan"})
-		salary_structure.cancel()
-		salary_structure.delete()
-
-		emp_doc = frappe.get_doc("Employee", {"employee_name":"kate_loan@loan.com"})
-		emp_doc.delete()
-
-		loan_type = frappe.get_doc("Loan Type", "Home Loan")
-		loan_type.cancel()
-		loan_type.delete()
-
 	def create_loan_application(self):
 		loan_application = frappe.new_doc("Loan Application")
 		loan_application.update({

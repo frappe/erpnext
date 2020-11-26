@@ -52,9 +52,6 @@ class TestLeaveEncashment(unittest.TestCase):
 		for dt in ["Leave Period", "Leave Allocation", "Leave Ledger Entry", "Additional Salary", "Leave Encashment", "Salary Structure", "Leave Policy"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
 
-		emp_doc = frappe.get_doc("Employee", self.employee)
-		emp_doc.delete()
-
 	def test_leave_balance_value_and_amount(self):
 		frappe.db.sql('''delete from `tabLeave Encashment`''')
 		leave_encashment = frappe.get_doc(dict(

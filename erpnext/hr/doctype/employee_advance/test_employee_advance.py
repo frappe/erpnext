@@ -27,19 +27,6 @@ class TestEmployeeAdvance(unittest.TestCase):
 		journal_entry1 = make_payment_entry(advance)
 		self.assertRaises(EmployeeAdvanceOverPayment, journal_entry1.submit)
 
-		# Clear data
-		journal_entry1.cancel()
-		journal_entry1.delete()
-
-		journal_entry.cancel()
-		journal_entry.delete()
-
-		advance.cancel()
-		advance.delete()
-
-		emp_doc = frappe.get_doc("Employee", employee_name)
-		emp_doc.delete()
-
 def make_payment_entry(advance):
 	journal_entry = frappe.get_doc(make_bank_entry("Employee Advance", advance.name))
 	journal_entry.cheque_no = "123123"

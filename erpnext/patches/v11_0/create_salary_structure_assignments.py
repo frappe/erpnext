@@ -42,6 +42,7 @@ def execute():
 				from_date = joining_date
 			elif relieving_date and getdate(from_date) > relieving_date:
 				continue
+			company_currency = frappe.db.get_value('Company', d.company, 'default_currency')
 
 			s = frappe.new_doc("Salary Structure Assignment")
 			s.employee = d.employee
@@ -52,6 +53,7 @@ def execute():
 			s.base = d.get("base")
 			s.variable = d.get("variable")
 			s.company = d.company
+			s.currency = company_currency
 
 			# to migrate the data of the old employees
 			s.flags.old_employee = True
