@@ -83,7 +83,7 @@ class StockEntry(StockController):
 		self.set_incoming_rate()
 		self.validate_serialized_batch()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		self.calculate_rate_and_amount()
 
 	def on_submit(self):
 
