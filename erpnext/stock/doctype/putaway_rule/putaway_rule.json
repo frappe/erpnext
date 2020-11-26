@@ -1,6 +1,6 @@
 {
  "actions": [],
- "autoname": "format:{item_code}-{warehouse}",
+ "autoname": "PUT-.####",
  "creation": "2020-11-09 11:39:46.489501",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -90,12 +90,14 @@
    "fieldname": "uom",
    "fieldtype": "Link",
    "label": "UOM",
+   "no_copy": 1,
    "options": "UOM"
   },
   {
    "fieldname": "stock_capacity",
    "fieldtype": "Float",
    "label": "Capacity in Stock UOM",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -103,12 +105,13 @@
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
    "label": "Conversion Factor",
+   "no_copy": 1,
    "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-24 16:20:18.306671",
+ "modified": "2020-11-25 20:39:19.973437",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Putaway Rule",
@@ -152,5 +155,6 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "item_code",
  "track_changes": 1
 }

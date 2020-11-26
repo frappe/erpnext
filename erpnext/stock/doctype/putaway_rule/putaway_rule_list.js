@@ -6,5 +6,13 @@ frappe.listview_settings['Putaway Rule'] = {
 		} else {
 			return [__("Active"), "blue", "disable,=,0"];
 		}
-	}
+	},
+
+	reports: [
+		{
+			name: 'Warehouse Capacity Summary',
+			report_type: 'Page',
+			route: 'warehouse-capacity-summary'
+		}
+	]
 };
