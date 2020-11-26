@@ -79,20 +79,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		this.frm.set_query("item_code", "items", function() {
-			if (me.frm.doc.is_subcontracted == "Yes") {
-				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters:{ 'is_sub_contracted_item': 1 }
-				}
-			}
-			else {
-				return{
-					query: "erpnext.controllers.queries.item_query",
-					filters: {'is_purchase_item': 1}
-				}
-			}
+			return me.get_item_query(me.frm.doc);
 		});
-
 
 		this.frm.set_query("manufacturer", "items", function(doc, cdt, cdn) {
 			const row = locals[cdt][cdn];
@@ -121,6 +109,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 
 		this._super();
+	},
+
+	filter_items_by_supplier: function() {
+		this.set_item_query();
 	},
 
 	supplier: function() {
@@ -198,6 +190,41 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 	rejected_qty: function(doc, cdt, cdn) {
 		this.calculate_accepted_qty(doc, cdt, cdn)
+	},
+
+	set_item_query: function() {
+		var me = this;
+		this.frm.fields_dict.items.grid.set_custom_query = function () {
+			me.frm.set_query("item_code", "items", function (doc) {
+				return me.get_item_query(doc);
+			});
+		}
+
+		this.frm.set_query("item_code", "items", function (doc) {
+			return me.get_item_query(doc);
+		});
+	},
+
+	get_item_query: function (doc) {
+		if (doc.supplier && doc.filter_items_by_supplier) {
+			return {
+				query: "erpnext.controllers.queries.item_supplier_query",
+				filters: {
+					'supplier': doc.supplier,
+					'is_purchase_item': 1
+				}
+			}
+		} else if (me.frm.doc.is_subcontracted == "Yes") {
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: { 'is_sub_contracted_item': 1 }
+			}
+		} else {
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: { 'is_purchase_item': 1 }
+			}
+		}
 	},
 
 	calculate_accepted_qty: function(doc, cdt, cdn){
