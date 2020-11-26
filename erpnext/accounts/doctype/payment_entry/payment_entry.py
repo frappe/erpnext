@@ -910,11 +910,11 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 	company_currency = ref_doc.get("company_currency") or erpnext.get_company_currency(ref_doc.company)
 
 	if reference_doctype in ['Fees', 'Dunning', 'Journal Entry']:
-		total_amount, outstanding_amount, exchange_rate = self.get_amounts_based_on_reference_doctype(
+		total_amount, outstanding_amount, exchange_rate = get_amounts_based_on_reference_doctype(
 			reference_doctype, ref_doc, party_account_currency, company_currency, reference_name)
 
 	elif reference_doctype != "Journal Entry" and ref_doc.doctype in ['Expense Claim', 'Employee Advance']:
-		total_amount, outstanding_amount, exchange_rate, bill_no = self.get_amounts_based_on_ref_doc(
+		total_amount, outstanding_amount, exchange_rate, bill_no = get_amounts_based_on_ref_doc(
 			reference_doctype, ref_doc, party_account_currency, company_currency)
 
 	else:
@@ -930,84 +930,84 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		"bill_no": bill_no
 	})
 
-	def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_account_currency, company_currency, reference_name):
-		total_amount, outstanding_amount, exchange_rate = None
-		if reference_doctype == "Fees":
-			total_amount = ref_doc.get("grand_total")
+def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_account_currency, company_currency, reference_name):
+	total_amount, outstanding_amount, exchange_rate = None
+	if reference_doctype == "Fees":
+		total_amount = ref_doc.get("grand_total")
+		exchange_rate = 1
+		outstanding_amount = ref_doc.get("outstanding_amount")
+	elif reference_doctype == "Dunning":
+		total_amount = ref_doc.get("dunning_amount")
+		exchange_rate = 1
+		outstanding_amount = ref_doc.get("dunning_amount")
+	elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
+		total_amount = ref_doc.get("total_amount")
+		if ref_doc.multi_currency:
+			exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+		else:
 			exchange_rate = 1
-			outstanding_amount = ref_doc.get("outstanding_amount")
-		elif reference_doctype == "Dunning":
-			total_amount = ref_doc.get("dunning_amount")
-			exchange_rate = 1
-			outstanding_amount = ref_doc.get("dunning_amount")
-		elif reference_doctype == "Journal Entry" and ref_doc.docstatus == 1:
-			total_amount = ref_doc.get("total_amount")
-			if ref_doc.multi_currency:
-				exchange_rate = get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
-			else:
-				exchange_rate = 1
-				outstanding_amount = get_outstanding_on_journal_entry(reference_name)
+			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 
-		return total_amount, outstanding_amount, exchange_rate
+	return total_amount, outstanding_amount, exchange_rate
 
-	def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_currency, company_currency):
-		total_amount, outstanding_amount, exchange_rate = None
-		if ref_doc.doctype == "Expense Claim":
-				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
-		elif ref_doc.doctype == "Employee Advance":
-			total_amount, exchange_rate = self.get_total_amount_exchange_rate_for_employee_advance(ref_doc)
-			
-		if not total_amount:
-			total_amount, exchange_rate = self.get_total_amount_exchange_rate_base_on_currency(
-				party_account_currency, company_currency, ref_doc)
+def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_currency, company_currency):
+	total_amount, outstanding_amount, exchange_rate = None
+	if ref_doc.doctype == "Expense Claim":
+			total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
+	elif ref_doc.doctype == "Employee Advance":
+		total_amount, exchange_rate = get_total_amount_exchange_rate_for_employee_advance(ref_doc)
+		
+	if not total_amount:
+		total_amount, exchange_rate = get_total_amount_exchange_rate_base_on_currency(
+			party_account_currency, company_currency, ref_doc)
 
-		if not exchange_rate:
-			# Get the exchange rate from the original ref doc
-			# or get it based on the posting date of the ref doc
-			exchange_rate = ref_doc.get("conversion_rate") or \
-				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
+	if not exchange_rate:
+		# Get the exchange rate from the original ref doc
+		# or get it based on the posting date of the ref doc
+		exchange_rate = ref_doc.get("conversion_rate") or \
+			get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		outstanding_amount, exchange_rate, bill_no = self.get_bill_no_and_update_amounts(
-			reference_doctype, ref_doc, exchange_rate, party_account_currency, company_currency)
+	outstanding_amount, exchange_rate, bill_no = get_bill_no_and_update_amounts(
+		reference_doctype, ref_doc, exchange_rate, party_account_currency, company_currency)
 
-		return total_amount, outstanding_amount, exchange_rate, bill_no
+	return total_amount, outstanding_amount, exchange_rate, bill_no
 
-	def get_total_amount_exchange_rate_for_employee_advance(ref_doc):
-		total_amount = ref_doc.advance_amount
-		exchange_rate = ref_doc.get("exchange_rate")
+def get_total_amount_exchange_rate_for_employee_advance(ref_doc):
+	total_amount = ref_doc.advance_amount
+	exchange_rate = ref_doc.get("exchange_rate")
+	if party_account_currency != ref_doc.currency:
+		total_amount = flt(total_amount) * flt(exchange_rate)
+
+	return total_amount, exchange_rate
+
+def get_total_amount_exchange_rate_base_on_currency(party_account_currency, company_currency, ref_doc):
+	exchange_rate = None
+	if party_account_currency == company_currency:
+		total_amount = ref_doc.base_grand_total
+		exchange_rate = 1
+	else:
+		total_amount = ref_doc.grand_total
+
+	return total_amount, exchange_rate
+
+def get_bill_no_and_update_amounts(reference_doctype, ref_doc, exchange_rate, party_account_currency, company_currency):
+	outstanding_amount, bill_no = None
+	if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
+		outstanding_amount = ref_doc.get("outstanding_amount")
+		bill_no = ref_doc.get("bill_no")
+	elif reference_doctype == "Expense Claim":
+		outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) + flt(ref_doc.get("total_taxes_and_charges"))\
+			- flt(ref_doc.get("total_amount_reimbursed")) - flt(ref_doc.get("total_advance_amount"))
+	elif reference_doctype == "Employee Advance":
+		outstanding_amount = (flt(ref_doc.advance_amount) - flt(ref_doc.paid_amount))
 		if party_account_currency != ref_doc.currency:
-			total_amount = flt(total_amount) * flt(exchange_rate)
+			outstanding_amount = flt(outstanding_amount) * flt(exchange_rate)
+			if party_account_currency == company_currency:
+				exchange_rate = 1
+	else:
+		outstanding_amount = flt(total_amount) - flt(ref_doc.advance_paid)
 
-		return total_amount, exchange_rate
-
-	def get_total_amount_exchange_rate_base_on_currency(party_account_currency, company_currency, ref_doc):
-		exchange_rate = None
-		if party_account_currency == company_currency:
-			total_amount = ref_doc.base_grand_total
-			exchange_rate = 1
-		else:
-			total_amount = ref_doc.grand_total
-
-		return total_amount, exchange_rate
-
-	def get_bill_no_and_update_amounts(reference_doctype, ref_doc, exchange_rate, party_account_currency, company_currency):
-		outstanding_amount, bill_no = None
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
-			outstanding_amount = ref_doc.get("outstanding_amount")
-			bill_no = ref_doc.get("bill_no")
-		elif reference_doctype == "Expense Claim":
-			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) + flt(ref_doc.get("total_taxes_and_charges"))\
-				- flt(ref_doc.get("total_amount_reimbursed")) - flt(ref_doc.get("total_advance_amount"))
-		elif reference_doctype == "Employee Advance":
-			outstanding_amount = (flt(ref_doc.advance_amount) - flt(ref_doc.paid_amount))
-			if party_account_currency != ref_doc.currency:
-				outstanding_amount = flt(outstanding_amount) * flt(exchange_rate)
-				if party_account_currency == company_currency:
-					exchange_rate = 1
-		else:
-			outstanding_amount = flt(total_amount) - flt(ref_doc.advance_paid)
-
-		return outstanding_amount, exchange_rate, bill_no
+	return outstanding_amount, exchange_rate, bill_no
 
 
 @frappe.whitelist()
@@ -1105,7 +1105,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		pe.set_amounts()
 	return pe
 
-def get_bank_cash_account():
+def get_bank_cash_account(doc, bank_account):
 	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
 		account=bank_account)
 
