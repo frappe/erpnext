@@ -400,9 +400,6 @@ class StockEntry(StockController):
 					+ self.work_order + ":" + ", ".join(other_ste), DuplicateEntryForWorkOrderError)
 
 	def set_incoming_rate(self):
-		if self.purpose == "Repack":
-			self.set_basic_rate_for_finished_goods()
-
 		for d in self.items:
 			if d.s_warehouse:
 				args = self.get_args_for_incoming_rate(d)
@@ -413,6 +410,9 @@ class StockEntry(StockController):
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company)
+
+		if self.purpose in ("Repack", "Manufacture"):
+			self.set_basic_rate_for_finished_goods()
 
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
@@ -922,7 +922,7 @@ class StockEntry(StockController):
 					if not self.fg_completed_qty:
 						frappe.throw(_("Manufacturing Quantity is mandatory"))
 
-					item_dict = self.get_bom_raw_materials(self.fg_completed_qty)
+					item_dict = self.get_bom_raw_materials(flt(self.fg_completed_qty) + flt(self.scrap_qty))
 
 					#Get PO Supplied Items Details
 					if self.purchase_order and self.purpose == "Send to Subcontractor":
@@ -1009,11 +1009,11 @@ class StockEntry(StockController):
 			}
 		}, bom_no = self.bom_no)
 
-	def get_bom_raw_materials(self, qty):
+	def get_bom_raw_materials(self, qty, scrap_qty=0):
 		from erpnext.manufacturing.doctype.bom.bom import get_bom_items_as_dict
 
 		# item dict = { item_code: {qty, description, stock_uom} }
-		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty,
+		item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=qty + scrap_qty,
 			fetch_exploded = self.use_multi_level_bom, fetch_qty_in_stock_uom=False)
 
 		used_alternative_items = get_used_alternative_items(work_order = self.work_order)

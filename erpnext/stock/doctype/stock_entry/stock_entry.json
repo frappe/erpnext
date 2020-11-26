@@ -33,6 +33,7 @@
   "bom_no",
   "column_break_26",
   "fg_completed_qty",
+  "scrap_qty",
   "cb1",
   "use_multi_level_bom",
   "get_items",
@@ -664,12 +665,18 @@
    "label": "Target Warehouse Type Allowed",
    "options": "Warehouse Type",
    "read_only": 1
+  },
+  {
+   "depends_on": "from_bom",
+   "fieldname": "scrap_qty",
+   "fieldtype": "Float",
+   "label": "Scrap Qty"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2020-10-31 02:19:45.522566",
+ "modified": "2020-11-23 21:24:08.429957",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

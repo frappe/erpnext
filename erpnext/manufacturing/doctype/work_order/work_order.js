@@ -401,7 +401,12 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	before_submit: function(frm) {
-		frm.toggle_reqd(["fg_warehouse", "wip_warehouse"], true);
+		frm.toggle_reqd("fg_warehouse", true);
+
+		if (!frm.doc.skip_transfer) {
+			frm.toggle_reqd("wip_warehouse", true);
+		}
+
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
 			frm.doc.operations && frm.doc.operations.length > 0);
@@ -603,14 +608,28 @@ erpnext.work_order = {
 
 	show_prompt_for_qty_input: function(frm, purpose) {
 		let max = this.get_max_transferable_qty(frm, purpose);
-		return new Promise((resolve, reject) => {
-			frappe.prompt({
+
+		let fields = [
+			{
 				fieldtype: 'Float',
 				label: __('Qty for {0}', [purpose]),
 				fieldname: 'qty',
 				description: __('Max: {0}', [max]),
 				default: max
-			}, data => {
+			}
+		];
+
+		if (purpose === "Manufacture") {
+			fields.push({
+				fieldtype: 'Check',
+				label: __('Scrap Remaining'),
+				fieldname: 'scrap_remaining',
+				default: 1
+			})
+		}
+
+		return new Promise((resolve, reject) => {
+			frappe.prompt(fields, data => {
 				max += (max * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
 
 				if (data.qty > max) {
@@ -629,6 +648,7 @@ erpnext.work_order = {
 				return frappe.xcall('erpnext.manufacturing.doctype.work_order.work_order.make_stock_entry', {
 					'work_order_id': frm.doc.name,
 					'purpose': purpose,
+					'scrap_remaining': data.scrap_remaining,
 					'qty': data.qty
 				});
 			}).then(stock_entry => {
