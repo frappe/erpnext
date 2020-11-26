@@ -51,7 +51,7 @@ class TestPayrollEntry(unittest.TestCase):
 
 		company_doc = frappe.get_doc('Company', company)
 		salary_structure = make_salary_structure("_Test Multi Currency Salary Structure", "Monthly", company=company, currency='USD')
-		salary_structure_assignment = create_salary_structure_assignment(employee, salary_structure.name, company=company)
+		create_salary_structure_assignment(employee, salary_structure.name, company=company)
 		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""",(frappe.db.get_value("Employee", {"user_id": "test_muti_currency_employee@payroll.com"})))
 		salary_slip = get_salary_slip("test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure")
 		dates = get_start_end_dates('Monthly', nowdate())

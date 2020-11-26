@@ -974,9 +974,9 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 	def get_total_amount_exchange_rate_for_employee_advance(ref_doc):
 		total_amount = ref_doc.advance_amount
-			exchange_rate = ref_doc.get("exchange_rate")
-			if party_account_currency != ref_doc.currency:
-				total_amount = flt(total_amount) * flt(exchange_rate)
+		exchange_rate = ref_doc.get("exchange_rate")
+		if party_account_currency != ref_doc.currency:
+			total_amount = flt(total_amount) * flt(exchange_rate)
 
 		return total_amount, exchange_rate
 

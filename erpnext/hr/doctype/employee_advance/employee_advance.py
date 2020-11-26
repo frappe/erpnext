@@ -162,6 +162,8 @@ def get_paying_amount_paying_exchange_rate(payment_account, doc):
 		paying_amount = doc.advance_amount
 		paying_exchange_rate = doc.exchange_rate
 
+	return paying_amount, paying_exchange_rate
+
 @frappe.whitelist()
 def create_return_through_additional_salary(doc):
 	import json
