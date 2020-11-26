@@ -364,7 +364,7 @@ class LeaveApplication(Document):
 			except frappe.OutgoingEmailError:
 				pass
 
-	def create_leave_ledger_entry(self, submit=True, holiday_list_required=True):
+	def create_leave_ledger_entry(self, submit=True):
 		if self.status != 'Approved' and submit:
 			return
 
@@ -381,7 +381,7 @@ class LeaveApplication(Document):
 				from_date=self.from_date,
 				to_date=self.to_date,
 				is_lwp=lwp,
-				holiday_list=get_holiday_list_for_employee(self.employee, holiday_list_required)
+				holiday_list=get_holiday_list_for_employee(self.employee)
 			)
 			create_leave_ledger_entry(self, args, submit)
 
