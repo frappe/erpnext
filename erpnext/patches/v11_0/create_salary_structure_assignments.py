@@ -33,6 +33,13 @@ def execute():
 			AND employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')
 		""".format(cols), as_dict=1)
 
+	all_companies = frappe.db.get_all("Company", fields=["name", "default_currency", "default_payable_account"])
+	for d in all_companies:
+		company = d.name
+		company_currency = d.default_currency
+
+		frappe.db.sql("""update `tabSalary Structure` set currency = %s where company=%s""", (company_currency, company))
+
 	for d in ss_details:
 		try:
 			joining_date, relieving_date = frappe.db.get_value("Employee", d.employee,
