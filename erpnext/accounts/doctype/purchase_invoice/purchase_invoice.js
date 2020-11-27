@@ -15,6 +15,16 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				return (doc.qty<=doc.received_qty) ? "green" : "orange";
 			});
 		}
+
+		this.frm.set_query("inter_company_account", function() {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				}
+			};
+		});
 	},
 
 	company: function() {

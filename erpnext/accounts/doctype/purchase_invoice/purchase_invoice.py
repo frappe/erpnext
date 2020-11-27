@@ -102,6 +102,7 @@ class PurchaseInvoice(BuyingController):
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
+		self.set_inter_company_account()
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -371,6 +372,26 @@ class PurchaseInvoice(BuyingController):
 						where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
 				})
 
+	def set_inter_company_account(self):
+		"""
+			Set intercompany account for inter warehouse transactions
+			This account will be used in case billing company and internal supplier's
+			representation company is same
+		"""
+
+		if self.is_internal_transfer() and not self.inter_company_account:
+			self.inter_company_account = frappe.get_cached_value('Company', self.company, 'default_inter_company_account')
+
+	def is_internal_transfer(self):
+		"""
+			It will an internal transfer if its an internal supplier and representation
+			company is same as billing company
+		"""
+		if self.is_internal_supplier and (self.represents_company == self.company):
+			return True
+
+		return False
+
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:
 			for item in self.get("items"):
@@ -444,6 +465,7 @@ class PurchaseInvoice(BuyingController):
 			self.get_asset_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
+		self.make_internal_transfer_gl_entries(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
@@ -469,211 +491,212 @@ class PurchaseInvoice(BuyingController):
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 
-		if grand_total:
-			# Didnot use base_grand_total to book rounding loss gle
-			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
-				self.precision("grand_total"))
-			gl_entries.append(
-				self.get_gl_dict({
-					"account": self.credit_to,
-					"party_type": "Supplier",
-					"party": self.supplier,
-					"due_date": self.due_date,
-					"against": self.against_expense_account,
-					"credit": grand_total_in_company_currency,
-					"credit_in_account_currency": grand_total_in_company_currency \
-						if self.party_account_currency==self.company_currency else grand_total,
-					"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
-					"against_voucher_type": self.doctype,
-					"project": self.project,
-					"cost_center": self.cost_center
-				}, self.party_account_currency, item=self)
-			)
+		if grand_total and not self.is_internal_transfer():
+				# Didnot use base_grand_total to book rounding loss gle
+				grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
+					self.precision("grand_total"))
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.credit_to,
+						"party_type": "Supplier",
+						"party": self.supplier,
+						"due_date": self.due_date,
+						"against": self.against_expense_account,
+						"credit": grand_total_in_company_currency,
+						"credit_in_account_currency": grand_total_in_company_currency \
+							if self.party_account_currency==self.company_currency else grand_total,
+						"against_voucher": self.return_against if cint(self.is_return) and self.return_against else self.name,
+						"against_voucher_type": self.doctype,
+						"project": self.project,
+						"cost_center": self.cost_center
+					}, self.party_account_currency, item=self)
+				)
 
 	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
-		stock_items = self.get_stock_items()
-		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
-		if self.update_stock and self.auto_accounting_for_stock:
-			warehouse_account = get_warehouse_account_map(self.company)
+		if not self.is_internal_transfer():
+			stock_items = self.get_stock_items()
+			expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+			if self.update_stock and self.auto_accounting_for_stock:
+				warehouse_account = get_warehouse_account_map(self.company)
 
-		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
+			landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 
-		voucher_wise_stock_value = {}
-		if self.update_stock:
-			for d in frappe.get_all('Stock Ledger Entry',
-				fields = ["voucher_detail_no", "stock_value_difference"], filters={'voucher_no': self.name}):
-				voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
+			voucher_wise_stock_value = {}
+			if self.update_stock:
+				for d in frappe.get_all('Stock Ledger Entry',
+					fields = ["voucher_detail_no", "stock_value_difference"], filters={'voucher_no': self.name}):
+					voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
 
-		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
-			if d.category in ('Valuation', 'Total and Valuation')
-			and flt(d.base_tax_amount_after_discount_amount)]
+			valuation_tax_accounts = [d.account_head for d in self.get("taxes")
+				if d.category in ('Valuation', 'Total and Valuation')
+				and flt(d.base_tax_amount_after_discount_amount)]
 
-		for item in self.get("items"):
-			if flt(item.base_net_amount):
-				account_currency = get_account_currency(item.expense_account)
-				if item.item_code:
-					asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
+			for item in self.get("items"):
+				if flt(item.base_net_amount):
+					account_currency = get_account_currency(item.expense_account)
+					if item.item_code:
+						asset_category = frappe.get_cached_value("Item", item.item_code, "asset_category")
 
-				if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
-					# warehouse account
-					warehouse_debit_amount = self.make_stock_adjustment_entry(gl_entries,
-						item, voucher_wise_stock_value, account_currency)
+					if self.update_stock and self.auto_accounting_for_stock and item.item_code in stock_items:
+						# warehouse account
+						warehouse_debit_amount = self.make_stock_adjustment_entry(gl_entries,
+							item, voucher_wise_stock_value, account_currency)
 
-					if item.from_warehouse:
+						if item.from_warehouse:
 
-						gl_entries.append(self.get_gl_dict({
-							"account":  warehouse_account[item.warehouse]['account'],
-							"against": warehouse_account[item.from_warehouse]["account"],
-							"cost_center": item.cost_center,
-							"project": item.project or self.project,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"debit": warehouse_debit_amount,
-						}, warehouse_account[item.warehouse]["account_currency"], item=item))
-
-						# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
-						gl_entries.append(self.get_gl_dict({
-							"account":  warehouse_account[item.from_warehouse]['account'],
-							"against": warehouse_account[item.warehouse]["account"],
-							"cost_center": item.cost_center,
-							"project": item.project or self.project,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"debit": -1 * flt(item.base_net_amount, item.precision("base_net_amount")),
-						}, warehouse_account[item.from_warehouse]["account_currency"], item=item))
-
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": item.expense_account,
-								"against": self.supplier,
-								"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
-								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"cost_center": item.cost_center,
-								"project": item.project
-							}, account_currency, item=item)
-						)
-
-					else:
-						gl_entries.append(
-							self.get_gl_dict({
-								"account": item.expense_account,
-								"against": self.supplier,
-								"debit": warehouse_debit_amount,
-								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"cost_center": item.cost_center,
-								"project": item.project or self.project
-							}, account_currency, item=item)
-						)
-
-					# Amount added through landed-cost-voucher
-					if landed_cost_entries:
-						for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
 							gl_entries.append(self.get_gl_dict({
-								"account": account,
+								"account":  warehouse_account[item.warehouse]['account'],
+								"against": warehouse_account[item.from_warehouse]["account"],
+								"cost_center": item.cost_center,
+								"project": item.project or self.project,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"debit": warehouse_debit_amount,
+							}, warehouse_account[item.warehouse]["account_currency"], item=item))
+
+							# Intentionally passed negative debit amount to avoid incorrect GL Entry validation
+							gl_entries.append(self.get_gl_dict({
+								"account":  warehouse_account[item.from_warehouse]['account'],
+								"against": warehouse_account[item.warehouse]["account"],
+								"cost_center": item.cost_center,
+								"project": item.project or self.project,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"debit": -1 * flt(item.base_net_amount, item.precision("base_net_amount")),
+							}, warehouse_account[item.from_warehouse]["account_currency"], item=item))
+
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": item.expense_account,
+									"against": self.supplier,
+									"debit": flt(item.base_net_amount, item.precision("base_net_amount")),
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"cost_center": item.cost_center,
+									"project": item.project
+								}, account_currency, item=item)
+							)
+
+						else:
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": item.expense_account,
+									"against": self.supplier,
+									"debit": warehouse_debit_amount,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+
+						# Amount added through landed-cost-voucher
+						if landed_cost_entries:
+							for account, amount in iteritems(landed_cost_entries[(item.item_code, item.name)]):
+								gl_entries.append(self.get_gl_dict({
+									"account": account,
+									"against": item.expense_account,
+									"cost_center": item.cost_center,
+									"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+									"credit": flt(amount),
+									"project": item.project or self.project
+								}, item=item))
+
+						# sub-contracting warehouse
+						if flt(item.rm_supp_cost):
+							supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
+							if not supplier_warehouse_account:
+								frappe.throw(_("Please set account in Warehouse {0}")
+									.format(self.supplier_warehouse))
+							gl_entries.append(self.get_gl_dict({
+								"account": supplier_warehouse_account,
 								"against": item.expense_account,
 								"cost_center": item.cost_center,
+								"project": item.project or self.project,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"credit": flt(amount),
+								"credit": flt(item.rm_supp_cost)
+							}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
+
+					elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
+						expense_account = (item.expense_account
+							if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
+
+						if not item.is_fixed_asset:
+							amount = flt(item.base_net_amount, item.precision("base_net_amount"))
+						else:
+							amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
+
+						auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
+
+						if auto_accounting_for_non_stock_items:
+							service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
+
+							if item.purchase_receipt:
+								# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
+								expense_booked_in_pr = frappe.db.get_value('GL Entry', {'is_cancelled': 0,
+									'voucher_type': 'Purchase Receipt', 'voucher_no': item.purchase_receipt, 'voucher_detail_no': item.pr_detail,
+									'account':service_received_but_not_billed_account}, ['name'])
+
+								if expense_booked_in_pr:
+									expense_account = service_received_but_not_billed_account
+
+						gl_entries.append(self.get_gl_dict({
+								"account": expense_account,
+								"against": self.supplier,
+								"debit": amount,
+								"cost_center": item.cost_center,
+								"project": item.project or self.project
+							}, account_currency, item=item))
+
+						# If asset is bought through this document and not linked to PR
+						if self.update_stock and item.landed_cost_voucher_amount:
+							expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
+							# Amount added through landed-cost-voucher
+							gl_entries.append(self.get_gl_dict({
+								"account": expenses_included_in_asset_valuation,
+								"against": expense_account,
+								"cost_center": item.cost_center,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"credit": flt(item.landed_cost_voucher_amount),
 								"project": item.project or self.project
 							}, item=item))
 
-					# sub-contracting warehouse
-					if flt(item.rm_supp_cost):
-						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
-						if not supplier_warehouse_account:
-							frappe.throw(_("Please set account in Warehouse {0}")
-								.format(self.supplier_warehouse))
-						gl_entries.append(self.get_gl_dict({
-							"account": supplier_warehouse_account,
-							"against": item.expense_account,
-							"cost_center": item.cost_center,
-							"project": item.project or self.project,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(item.rm_supp_cost)
-						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
+							gl_entries.append(self.get_gl_dict({
+								"account": expense_account,
+								"against": expenses_included_in_asset_valuation,
+								"cost_center": item.cost_center,
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"debit": flt(item.landed_cost_voucher_amount),
+								"project": item.project or self.project
+							}, item=item))
 
-				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
-					expense_account = (item.expense_account
-						if (not item.enable_deferred_expense or self.is_return) else item.deferred_expense_account)
-
-					if not item.is_fixed_asset:
-						amount = flt(item.base_net_amount, item.precision("base_net_amount"))
-					else:
-						amount = flt(item.base_net_amount + item.item_tax_amount, item.precision("base_net_amount"))
-
-					auto_accounting_for_non_stock_items = cint(frappe.db.get_value('Company', self.company, 'enable_perpetual_inventory_for_non_stock_items'))
-
-					if auto_accounting_for_non_stock_items:
-						service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
-
-						if item.purchase_receipt:
-							# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-							expense_booked_in_pr = frappe.db.get_value('GL Entry', {'is_cancelled': 0,
-								'voucher_type': 'Purchase Receipt', 'voucher_no': item.purchase_receipt, 'voucher_detail_no': item.pr_detail,
-								'account':service_received_but_not_billed_account}, ['name'])
-
-							if expense_booked_in_pr:
-								expense_account = service_received_but_not_billed_account
-
-					gl_entries.append(self.get_gl_dict({
-							"account": expense_account,
-							"against": self.supplier,
-							"debit": amount,
-							"cost_center": item.cost_center,
-							"project": item.project or self.project
-						}, account_currency, item=item))
-
-					# If asset is bought through this document and not linked to PR
-					if self.update_stock and item.landed_cost_voucher_amount:
-						expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
-						# Amount added through landed-cost-voucher
-						gl_entries.append(self.get_gl_dict({
-							"account": expenses_included_in_asset_valuation,
-							"against": expense_account,
-							"cost_center": item.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"credit": flt(item.landed_cost_voucher_amount),
-							"project": item.project or self.project
-						}, item=item))
-
-						gl_entries.append(self.get_gl_dict({
-							"account": expense_account,
-							"against": expenses_included_in_asset_valuation,
-							"cost_center": item.cost_center,
-							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-							"debit": flt(item.landed_cost_voucher_amount),
-							"project": item.project or self.project
-						}, item=item))
-
-						# update gross amount of asset bought through this document
-						assets = frappe.db.get_all('Asset',
-							filters={ 'purchase_invoice': self.name, 'item_code': item.item_code }
-						)
-						for asset in assets:
-							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
-							frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
-
-			if self.auto_accounting_for_stock and self.is_opening == "No" and \
-				item.item_code in stock_items and item.item_tax_amount:
-					# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
-					if item.purchase_receipt and valuation_tax_accounts:
-						negative_expense_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
-							where voucher_type='Purchase Receipt' and voucher_no=%s and account in %s""",
-							(item.purchase_receipt, valuation_tax_accounts))
-
-						if not negative_expense_booked_in_pr:
-							gl_entries.append(
-								self.get_gl_dict({
-									"account": self.stock_received_but_not_billed,
-									"against": self.supplier,
-									"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
-									"remarks": self.remarks or "Accounting Entry for Stock",
-									"cost_center": self.cost_center,
-									"project": item.project or self.project
-								}, item=item)
+							# update gross amount of asset bought through this document
+							assets = frappe.db.get_all('Asset',
+								filters={ 'purchase_invoice': self.name, 'item_code': item.item_code }
 							)
+							for asset in assets:
+								frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
+								frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
 
-							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
-								item.precision("item_tax_amount"))
+				if self.auto_accounting_for_stock and self.is_opening == "No" and \
+					item.item_code in stock_items and item.item_tax_amount:
+						# Post reverse entry for Stock-Received-But-Not-Billed if it is booked in Purchase Receipt
+						if item.purchase_receipt and valuation_tax_accounts:
+							negative_expense_booked_in_pr = frappe.db.sql("""select name from `tabGL Entry`
+								where voucher_type='Purchase Receipt' and voucher_no=%s and account in %s""",
+								(item.purchase_receipt, valuation_tax_accounts))
+
+							if not negative_expense_booked_in_pr:
+								gl_entries.append(
+									self.get_gl_dict({
+										"account": self.stock_received_but_not_billed,
+										"against": self.supplier,
+										"debit": flt(item.item_tax_amount, item.precision("item_tax_amount")),
+										"remarks": self.remarks or "Accounting Entry for Stock",
+										"cost_center": self.cost_center,
+										"project": item.project or self.project
+									}, item=item)
+								)
+
+								self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
+									item.precision("item_tax_amount"))
 
 	def get_asset_gl_entry(self, gl_entries):
 		arbnb_account = self.get_company_default("asset_received_but_not_billed")
@@ -827,7 +850,8 @@ class PurchaseInvoice(BuyingController):
 					}, account_currency, item=tax)
 				)
 			# accumulate valuation tax
-			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount):
+			if self.is_opening == "No" and tax.category in ("Valuation", "Valuation and Total") and flt(tax.base_tax_amount_after_discount_amount) \
+				and not self.is_internal_transfer():
 				if self.auto_accounting_for_stock and not tax.cost_center:
 					frappe.throw(_("Cost Center is required in row {0} in Taxes table for type {1}").format(tax.idx, _(tax.category)))
 				valuation_tax.setdefault(tax.name, 0)
@@ -871,8 +895,19 @@ class PurchaseInvoice(BuyingController):
 							"against": self.supplier,
 							"credit": valuation_tax[tax.name],
 							"remarks": self.remarks or "Accounting Entry for Stock"
-						}, item=tax)
-					)
+						}, item=tax))
+
+	def make_internal_transfer_gl_entries(self, gl_entries):
+		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
+			account_currency = get_account_currency(self.inter_company_account)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.inter_company_account,
+					"against": self.supplier,
+					"credit": flt(self.total_taxes_and_charges),
+					"credit_in_account_currency": flt(self.base_total_taxes_and_charges),
+					"cost_center": self.cost_center
+				}, account_currency, item=self))
 
 	def make_payment_gl_entries(self, gl_entries):
 		# Make Cash GL Entries
@@ -1088,7 +1123,9 @@ class PurchaseInvoice(BuyingController):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and due_date < nowdate:
+				if self.is_internal_transfer():
+					self.status = 'Internal Transfer'
+				elif outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
 				elif outstanding_amount > 0 and due_date >= nowdate:
 					self.status = "Unpaid"
