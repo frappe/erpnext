@@ -30,7 +30,7 @@ frappe.ui.form.on('Inpatient Medication Entry', {
 			};
 		});
 
-		if (frm.doc.__islocal || frm.doc.docstatus !== 0)
+		if (frm.doc.__islocal || frm.doc.docstatus !== 0 || !frm.doc.update_stock)
 			return;
 
 		frm.add_custom_button(__('Make Stock Entry'), function() {
