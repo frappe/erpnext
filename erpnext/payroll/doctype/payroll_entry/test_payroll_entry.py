@@ -105,7 +105,7 @@ class TestPayrollEntry(unittest.TestCase):
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
-			pe = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account=company_doc.default_payroll_payable_account,
+			pe = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account="_Test Payroll Payable - _TC",
 				currency=company_doc.default_currency, department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
 			je = frappe.db.get_value("Salary Slip", {"payroll_entry": pe.name}, "journal_entry")
 			je_entries = frappe.db.sql("""
