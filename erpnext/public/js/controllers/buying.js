@@ -218,8 +218,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var is_negative_qty = false;
 		for(var i = 0; i<fieldnames.length; i++) {
 			if(item[fieldnames[i]] < 0){
-				frappe.msgprint(__("Row #{0}: {1} can not be negative for item {2}",
-					[item.idx,__(frappe.meta.get_label(cdt, fieldnames[i], cdn)), item.item_code]));
+				frappe.msgprint(__("Row #{0}: {1} can not be negative for item {2}", [item.idx,__(frappe.meta.get_label(cdt, fieldnames[i], cdn)), item.item_code]));
 				is_negative_qty = true;
 				break;
 			}
@@ -276,7 +275,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 		this.frm.add_custom_button(__("Product Bundle"), function() {
 			erpnext.buying.get_items_from_product_bundle(me.frm);
-		}, __("Get items from"));
+		}, __("Get Items From"));
 	},
 
 	shipping_address: function(){
