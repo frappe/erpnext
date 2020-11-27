@@ -33,7 +33,7 @@ def execute():
 			AND employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')
 		""".format(cols), as_dict=1)
 
-	all_companies = frappe.db.get_all("Company", fields=["name", "default_currency", "default_payable_account"])
+	all_companies = frappe.db.get_all("Company", fields=["name", "default_currency"])
 	for d in all_companies:
 		company = d.name
 		company_currency = d.default_currency

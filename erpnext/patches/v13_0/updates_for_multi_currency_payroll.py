@@ -77,7 +77,7 @@ def execute():
 	for dt in ['Employee Incentive', 'Leave Encashment', 'Employee Benefit Application', 'Employee Benefit Claim']:
 		frappe.db.sql("""
 			update `tab{doctype}`
-			set company = (select company from tabEmployee where name=`tabEmployee Incentive`.employee)
+			set company = (select company from tabEmployee where name=`tab{doctype}`.employee)
 		""".format(doctype=dt))
 
 	# update exchange rate for employee advance
