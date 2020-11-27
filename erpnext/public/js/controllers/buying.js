@@ -210,7 +210,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 	get_item_query: function (doc) {
 		if (doc.supplier && doc.filter_items_by_supplier) {
 			return {
-				query: "erpnext.controllers.queries.item_supplier_query",
+				query: "erpnext.controllers.queries.supplier_item_query",
 				filters: {
 					'supplier': doc.supplier,
 					'is_purchase_item': 1
