@@ -1,22 +1,29 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-02-22 01:27:43",
  "doctype": "DocType",
  "editable_grid": 1,
+ "engine": "InnoDB",
  "field_order": [
   "specification",
   "value",
+  "status",
+  "column_break_4",
+  "acceptance_formula",
+  "section_break_3",
   "reading_1",
   "reading_2",
   "reading_3",
+  "column_break_10",
   "reading_4",
   "reading_5",
   "reading_6",
+  "column_break_14",
   "reading_7",
   "reading_8",
   "reading_9",
-  "reading_10",
-  "status"
+  "reading_10"
  ],
  "fields": [
   {
@@ -124,15 +131,40 @@
    "oldfieldname": "status",
    "oldfieldtype": "Select",
    "options": "Accepted\nRejected"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Simple Python formula based on numeric Readings.<br> Example 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\nExample 2: <b>(reading_1 + reading_2) / 2 &lt; 10</b>",
+   "fieldname": "acceptance_formula",
+   "fieldtype": "Code",
+   "label": "Acceptance Criteria Formula"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2019-07-11 18:48:12.667404",
+ "links": [],
+ "modified": "2020-11-16 16:34:29.947856",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Reading",
  "owner": "Administrator",
  "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
  "track_changes": 1
 }

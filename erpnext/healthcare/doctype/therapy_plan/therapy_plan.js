@@ -13,43 +13,42 @@ frappe.ui.form.on('Therapy Plan', {
 	refresh: function(frm) {
 		if (!frm.doc.__islocal) {
 			frm.trigger('show_progress_for_therapies');
-		}
-
-		if (!frm.doc.__islocal && frm.doc.status != 'Completed') {
-			let therapy_types = (frm.doc.therapy_plan_details || []).map(function(d){ return d.therapy_type });
-			const fields = [{
-				fieldtype: 'Link',
-				label: __('Therapy Type'),
-				fieldname: 'therapy_type',
-				options: 'Therapy Type',
-				reqd: 1,
-				get_query: function() {
-					return {
-						filters: { 'therapy_type': ['in', therapy_types]}
+			if (frm.doc.status != 'Completed') {
+				let therapy_types = (frm.doc.therapy_plan_details || []).map(function(d){ return d.therapy_type; });
+				const fields = [{
+					fieldtype: 'Link',
+					label: __('Therapy Type'),
+					fieldname: 'therapy_type',
+					options: 'Therapy Type',
+					reqd: 1,
+					get_query: function() {
+						return {
+							filters: { 'therapy_type': ['in', therapy_types]}
+						};
 					}
-				}
-			}];
+				}];
 
-			frm.add_custom_button(__('Therapy Session'), function() {
-				frappe.prompt(fields, data => {
-					frappe.call({
-						method: 'erpnext.healthcare.doctype.therapy_plan.therapy_plan.make_therapy_session',
-						args: {
-							therapy_plan: frm.doc.name,
-							patient: frm.doc.patient,
-							therapy_type: data.therapy_type,
-							company: frm.doc.company
-						},
-						freeze: true,
-						callback: function(r) {
-							if (r.message) {
-								frappe.model.sync(r.message);
-								frappe.set_route('Form', r.message.doctype, r.message.name);
+				frm.add_custom_button(__('Therapy Session'), function() {
+					frappe.prompt(fields, data => {
+						frappe.call({
+							method: 'erpnext.healthcare.doctype.therapy_plan.therapy_plan.make_therapy_session',
+							args: {
+								therapy_plan: frm.doc.name,
+								patient: frm.doc.patient,
+								therapy_type: data.therapy_type,
+								company: frm.doc.company
+							},
+							freeze: true,
+							callback: function(r) {
+								if (r.message) {
+									frappe.model.sync(r.message);
+									frappe.set_route('Form', r.message.doctype, r.message.name);
+								}
 							}
-						}
-					});
-				}, __('Select Therapy Type'), __('Create'));
-			}, __('Create'));
+						});
+					}, __('Select Therapy Type'), __('Create'));
+				}, __('Create'));
+			}
 
 			if (frm.doc.therapy_plan_template && !frm.doc.invoiced) {
 				frm.add_custom_button(__('Sales Invoice'), function() {

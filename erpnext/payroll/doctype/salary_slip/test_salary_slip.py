@@ -13,6 +13,8 @@ from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
+from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_tax_exemption_declaration \
 	import create_payroll_period, create_exemption_category
 
@@ -93,14 +95,27 @@ class TestSalarySlip(unittest.TestCase):
 
 		make_leave_application(emp_id, first_sunday, add_days(first_sunday, 3), "Leave Without Pay")
 
+		leave_type_ppl = create_leave_type(leave_type_name="Test Partially Paid Leave", is_ppl = 1)
+		leave_type_ppl.save()
+
+		alloc = create_leave_allocation(
+			employee = emp_id, from_date = add_days(first_sunday, 4),
+			to_date = add_days(first_sunday, 10), new_leaves_allocated = 3,
+			leave_type = "Test Partially Paid Leave")
+		alloc.save()
+		alloc.submit()
+
+		#two day leave ppl with fraction_of_daily_salary_per_leave = 0.5 equivalent to single day lwp
+		make_leave_application(emp_id, add_days(first_sunday, 4), add_days(first_sunday, 5), "Test Partially Paid Leave")
+
 		ss = make_employee_salary_slip("test_for_attendance@salary.com", "Monthly")
 
-		self.assertEqual(ss.leave_without_pay, 3)
+		self.assertEqual(ss.leave_without_pay, 4)
 
 		days_in_month = no_of_days[0]
 		no_of_holidays = no_of_days[1]
 
-		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 3)
+		self.assertEqual(ss.payment_days, days_in_month - no_of_holidays - 4)
 
 		#Gross pay calculation based on attendances
 		gross_pay = 78000 - ((78000 / (days_in_month - no_of_holidays)) * flt(ss.leave_without_pay))
