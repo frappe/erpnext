@@ -1,0 +1,46 @@
+{
+ "actions": [],
+ "creation": "2020-11-25 13:40:23.054469",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "document_type",
+  "select_fields",
+  "selected_fields"
+ ],
+ "fields": [
+  {
+   "fieldname": "document_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Document Type",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "fieldname": "select_fields",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Select Fields"
+  },
+  {
+   "fieldname": "selected_fields",
+   "fieldtype": "Code",
+   "label": "selected_fields"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2020-11-25 14:19:33.637543",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Patient History Custom Document Type",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
