@@ -913,11 +913,11 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 		total_amount, outstanding_amount, exchange_rate = get_amounts_based_on_reference_doctype(
 			reference_doctype, ref_doc, party_account_currency, company_currency, reference_name)
 
-	elif reference_doctype != "Journal Entry" and ref_doc.doctype in ['Expense Claim', 'Employee Advance']:
+	elif (reference_doctype != "Journal Entry"):
 		total_amount, outstanding_amount, exchange_rate, bill_no = get_amounts_based_on_ref_doc(
 			reference_doctype, ref_doc, party_account_currency, company_currency)
 
-	else:
+	if not exchange_rate:
 		# Get the exchange rate based on the posting date of the ref doc
 		exchange_rate = get_exchange_rate(party_account_currency,
 			company_currency, ref_doc.posting_date)
