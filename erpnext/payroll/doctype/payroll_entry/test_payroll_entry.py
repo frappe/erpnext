@@ -91,29 +91,30 @@ class TestPayrollEntry(unittest.TestCase):
 
 		frappe.db.sql("""delete from `tabEmployee` where employee_name='test_employee1@example.com' """)
 		frappe.db.sql("""delete from `tabEmployee` where employee_name='test_employee2@example.com' """)
-		frappe.db.sql("""delete from `tabSalary Structure` where employee_name='_Test Salary Structure 1' """)
-		frappe.db.sql("""delete from `tabSalary Structure` where employee_name='_Test Salary Structure 2' """)
+		frappe.db.sql("""delete from `tabSalary Structure` where name='_Test Salary Structure 1' """)
+		frappe.db.sql("""delete from `tabSalary Structure` where name='_Test Salary Structure 2' """)
 
 		employee1 = make_employee("test_employee1@example.com", payroll_cost_center="_Test Cost Center - _TC",
 			department="cc - _TC", company="_Test Company")
 		employee2 = make_employee("test_employee2@example.com", payroll_cost_center="_Test Cost Center 2 - _TC",
 			department="cc - _TC", company="_Test Company")
-		company_doc = frappe.get_doc('Company', '_Test Company')
 
-		if company_doc.default_currency and company_doc.default_currency != '_Test Payroll Payable - _TC':
-			if not frappe.db.exists("Account", "_Test Payroll Payable - _TC"):
+		if not frappe.db.exists("Account", "_Test Payroll Payable - _TC"):
 				create_account(account_name="_Test Payroll Payable",
 					company="_Test Company", parent_account="Current Liabilities - _TC")
-			frappe.db.set_value("Company", "_Test Company", "default_payroll_payable_account",
-				"_Test Payroll Payable - _TC")
 
-		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=company_doc.default_currency)
-		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=company_doc.default_currency)
+		if not frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") or \
+			frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") != "_Test Payroll Payable - _TC":
+				frappe.db.set_value("Company", "_Test Company", "default_payroll_payable_account",
+					"_Test Payroll Payable - _TC")
+
+		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=frappe.db.get_value("Company", "_Test Company", "default_currency"))
+		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=frappe.db.get_value("Company", "_Test Company", "default_currency"))
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
 			pe = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account="_Test Payroll Payable - _TC",
-				currency=company_doc.default_currency, department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
+				currency=frappe.db.get_value("Company", "_Test Company", "default_currency"), department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
 			je = frappe.db.get_value("Salary Slip", {"payroll_entry": pe.name}, "journal_entry")
 			je_entries = frappe.db.sql("""
 				select account, cost_center, debit, credit
