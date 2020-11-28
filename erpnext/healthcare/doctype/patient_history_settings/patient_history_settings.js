@@ -73,13 +73,10 @@ frappe.ui.form.on('Patient History Settings', {
 });
 
 frappe.ui.form.on('Patient History Custom Document Type', {
-	select_fields: function(frm) {
-		let doc = frm.selected_doc;
-
-		if (!doc.document_type)
-			frappe.throw(__('Select the Document Type first.'))
-
-		frm.events.field_selector(frm, doc);
+	add_edit_fields: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.document_type) {
+			frm.events.field_selector(frm, row);
+		}
 	}
-
 });

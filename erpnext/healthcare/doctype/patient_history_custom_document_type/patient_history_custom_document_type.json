@@ -6,7 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "document_type",
-  "select_fields",
+  "date_fieldname",
+  "add_edit_fields",
   "selected_fields"
  ],
  "fields": [
@@ -19,21 +20,28 @@
    "reqd": 1
   },
   {
-   "fieldname": "select_fields",
-   "fieldtype": "Button",
-   "in_list_view": 1,
-   "label": "Select Fields"
-  },
-  {
    "fieldname": "selected_fields",
    "fieldtype": "Code",
    "label": "selected_fields"
+  },
+  {
+   "fieldname": "add_edit_fields",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Add / Edit Fields"
+  },
+  {
+   "fieldname": "date_fieldname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Date Fieldname",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-25 14:19:33.637543",
+ "modified": "2020-11-28 19:04:48.323164",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient History Custom Document Type",
