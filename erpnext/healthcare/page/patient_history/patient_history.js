@@ -16,6 +16,8 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 			fieldtype: "Link",
 			options: "Patient",
 			fieldname: "patient",
+			placeholder: __('Select Patient'),
+			only_select: true,
 			change: function(){
 				if(pid != patient.get_value() && patient.get_value()){
 					me.start = 0;
@@ -27,7 +29,6 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 				pid = patient.get_value();
 			}
 		},
-		only_input: true,
 	});
 	patient.refresh();
 
@@ -120,7 +121,11 @@ var add_to_records = function(me, data){
 				data[i].imgsrc = false;
 			}
 			var time_line_heading = data[i].practitioner ? `${data[i].practitioner} ` : ``;
-			time_line_heading += data[i].reference_doctype + " - "+ data[i].reference_name;
+			time_line_heading += data[i].reference_doctype + " - " +
+				`<a onclick="frappe.set_route('Form', '${data[i].reference_doctype}', '${data[i].reference_name}');">
+					${data[i].reference_name}
+				</a>`
+
 			details += `<li data-toggle='pill' class='patient_doc_menu'
 			data-doctype='${data[i].reference_doctype}' data-docname='${data[i].reference_name}'>
 			<div class='col-sm-12 d-flex border-bottom py-3'>`;
@@ -135,7 +140,7 @@ var add_to_records = function(me, data){
 			}
 			details += `<div class='d-flex flex-column width-full'>
 					<div>
-						`+time_line_heading+` on
+						`+time_line_heading+`
 							<span>
 								${data[i].date_sep}
 							</span>
@@ -172,11 +177,11 @@ var add_date_separator = function(data) {
 
 	var diff = frappe.datetime.get_day_diff(frappe.datetime.get_today(), frappe.datetime.obj_to_str(date));
 	if(diff < 1) {
-		var pdate = 'Today';
+		var pdate = __('Today');
 	} else if(diff < 2) {
-		pdate = 'Yesterday';
+		pdate = __('Yesterday');
 	} else {
-		pdate = frappe.datetime.global_date_format(date);
+		pdate = __('on ') + frappe.datetime.global_date_format(date);
 	}
 	data.date_sep = pdate;
 	return data;
@@ -227,7 +232,7 @@ var show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 		},
 		callback: function(r) {
 			if (r.message){
-				var show_chart_btns_html = "<div style='padding-top:5px;'><a class='btn btn-default btn-xs btn-show-chart' \
+				var show_chart_btns_html = "<div style='padding-top:10px;'><a class='btn btn-default btn-xs btn-show-chart' \
 				data-show-chart-id='bp' data-pts='mmHg' data-title='Blood Pressure'>Blood Pressure</a>\
 				<a class='btn btn-default btn-xs btn-show-chart' data-show-chart-id='pulse_rate' \
 				data-pts='per Minutes' data-title='Respiratory/Pulse Rate'>Respiratory/Pulse Rate</a>\
