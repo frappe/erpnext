@@ -6,7 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "document_type",
-  "select_fields",
+  "add_edit_fields",
   "selected_fields"
  ],
  "fields": [
@@ -20,21 +20,21 @@
    "reqd": 1
   },
   {
-   "fieldname": "select_fields",
-   "fieldtype": "Button",
-   "in_list_view": 1,
-   "label": "Select Fields"
-  },
-  {
    "fieldname": "selected_fields",
    "fieldtype": "Code",
    "label": "Selected Fields"
+  },
+  {
+   "fieldname": "add_edit_fields",
+   "fieldtype": "Button",
+   "in_list_view": 1,
+   "label": "Add / Edit Fields"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-25 14:19:53.708991",
+ "modified": "2020-11-28 18:57:30.446348",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient History Standard Document Type",
