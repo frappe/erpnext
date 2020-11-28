@@ -371,10 +371,11 @@ class SellingController(StockController):
 		self.make_sl_entries(sl_entries)
 
 	def set_po_nos(self):
-		if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
-			self.set_pos_for_sales_invoice()
-		if self.doctype == 'Delivery Note' and hasattr(self, "items"):
-			self.set_pos_for_delivery_note()
+		if not self.po_no:
+			if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
+				self.set_pos_for_sales_invoice()
+			if self.doctype == 'Delivery Note' and hasattr(self, "items"):
+				self.set_pos_for_delivery_note()
 
 	def set_pos_for_sales_invoice(self):
 		po_nos = []
