@@ -2058,7 +2058,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-11-19 16:59:16.098380",
+ "modified": "2020-11-28 15:13:56.245502",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2129,6 +2129,7 @@
   },
   {
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
