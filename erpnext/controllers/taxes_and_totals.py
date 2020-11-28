@@ -453,7 +453,10 @@ class calculate_taxes_and_totals(object):
 				else tax.tax_amount
 
 			if tax.charge_type == "Actual" or not weighted_distrubution_tax_on_net_total.get(tax.idx):
-				current_tax_amount = item.net_amount*actual / self.doc.net_total if self.doc.net_total else 0.0
+				if self.doc.net_total:
+					current_tax_amount = actual * item.net_amount / self.doc.net_total
+				else:
+					current_tax_amount = actual * item.qty / self.doc.total_qty if self.doc.total_qty else 0
 			else:
 				tax_on_net_amount = (tax_rate / 100.0) * item.net_amount
 				tax_on_net_total = weighted_distrubution_tax_on_net_total.get(tax.idx)

@@ -295,7 +295,7 @@ class PurchaseReceipt(BuyingController):
 					}, warehouse_account[d.warehouse]["account_currency"], item=d))
 
 					# stock received but not billed
-					if valuation_net_amount:
+					if valuation_net_amount or valuation_item_tax_amount:
 						gl_entries.append(self.get_gl_dict({
 							"account": stock_rbnb,
 							"against": warehouse_account[d.warehouse]["account"],
