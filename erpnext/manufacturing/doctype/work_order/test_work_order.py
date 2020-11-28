@@ -319,6 +319,29 @@ class TestWorkOrder(unittest.TestCase):
 
 		allow_overproduction("overproduction_percentage_for_work_order", 0)
 
+	def test_finished_good_valuation_rate(self):
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=2)
+		test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=10, basic_rate=5000.0)
+		test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=10, basic_rate=1000.0)
+
+		ste_doc = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 2))
+		ste_doc.submit()
+
+		ste_doc = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		ste_doc.save()
+
+		self.assertEquals(ste_doc.total_incoming_value, ste_doc.total_outgoing_value)
+
+		for row in ste_doc.items:
+			if row.t_warehouse and not row.s_warehouse:
+				row.valuation_rate = 120
+		ste_doc.save()
+
+		self.assertEquals(ste_doc.total_incoming_value, ste_doc.total_outgoing_value)
+
 	def test_over_production_for_sales_order(self):
 		so = make_sales_order(item_code="_Test FG Item", qty=2)
 
