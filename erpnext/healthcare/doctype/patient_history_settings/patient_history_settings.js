@@ -40,7 +40,8 @@ frappe.ui.form.on('Patient History Settings', {
 				if (field) {
 					selected_fields.push({
 						label: field.label,
-						fieldname: field.fieldname
+						fieldname: field.fieldname,
+						fieldtype: field.fieldtype
 					});
 				}
 			}
@@ -58,7 +59,8 @@ frappe.ui.form.on('Patient History Settings', {
 		frappe.model.with_doctype(document_type, () => {
 			// get doctype fields
 			frappe.get_doc('DocType', document_type).fields.forEach(field => {
-				if (!in_list(frappe.model.no_value_type, field.fieldtype) && !field.hidden) {
+				if (!in_list(frappe.model.no_value_type, field.fieldtype) ||
+					in_list(frappe.model.table_fields, field.fieldtype) && !field.hidden) {
 					multiselect_fields.push({
 						label: field.label,
 						value: field.fieldname,

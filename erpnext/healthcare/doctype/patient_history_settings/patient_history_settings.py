@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import cstr
 from frappe.model.document import Document
 
 class PatientHistorySettings(Document):
@@ -21,3 +22,53 @@ class PatientHistorySettings(Document):
 			if field.fieldtype not in ['Date', 'Datetime']:
 				frappe.throw(_('Row #{0}: Field {1} in Document Type {2} is not a Date / Datetime field.').format(
 					entry.idx, frappe.bold(entry.date_fieldname), frappe.bold(entry.document_type)))
+
+
+def create_medical_record(doc, method=None):
+	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
+		frappe.db.get_value('Doctype', doc.doctype, 'module') != 'Healthcare':
+		return
+
+	subject = set_subject_field(doc)
+	date_field = get_date_field(doc.doctype)
+	medical_record = frappe.new_doc('Patient Medical Record')
+	medical_record.patient = doc.patient
+	medical_record.subject = subject
+	medical_record.status = 'Open'
+	medical_record.communication_date = doc.get(date_field)
+	medical_record.reference_doctype = doc.doctype
+	medical_record.reference_name = doc.name
+	medical_record.reference_owner = doc.owner
+	medical_record.save(ignore_permissions=True)
+
+
+def set_subject_field(doc):
+	from frappe.utils.formatters import format_value
+
+	meta = frappe.get_meta(doc.doctype)
+	subject = ''
+	patient_history_fields = get_patient_history_fields(doc)
+
+	for entry in patient_history_fields:
+		fieldname = entry.get('fieldname')
+		if doc.get(fieldname):
+			formated_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
+			subject += frappe.bold(_(entry.get('label')) + ': ') + cstr(formated_value)
+			subject += '<br>'
+
+	return subject
+
+
+def get_date_field(doctype):
+	return frappe.db.get_value('Patient History Custom Document Type',
+		{ 'document_type': doctype }, 'date_fieldname')
+
+
+def get_patient_history_fields(doc):
+	import json
+	patient_history_fields = frappe.db.get_value('Patient History Custom Document Type',
+		{ 'document_type': doc.doctype }, 'selected_fields')
+
+	if patient_history_fields:
+		return json.loads(patient_history_fields)
+
