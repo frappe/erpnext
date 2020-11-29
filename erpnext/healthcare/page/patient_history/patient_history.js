@@ -20,14 +20,16 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 			placeholder: __('Select Patient'),
 			only_select: true,
 			change: function(){
-				if (pid != patient.get_value() && patient.get_value()) {
+				let patient_id = patient.get_value();
+				if (pid != patient_id && patient_id) {
 					me.start = 0;
 					me.page.main.find('.patient_documents_list').html('');
-					get_documents(patient.get_value(), me);
-					show_patient_info(patient.get_value(), me);
-					show_patient_vital_charts(patient.get_value(), me, 'bp', 'mmHg', 'Blood Pressure');
+					setup_filters(patient_id, me)
+					get_documents(patient_id, me);
+					show_patient_info(patient_id, me);
+					show_patient_vital_charts(patient_id, me, 'bp', 'mmHg', 'Blood Pressure');
 				}
-				pid = patient.get_value();
+				pid = patient_id;
 			}
 		},
 	});
@@ -93,14 +95,48 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 	});
 };
 
-let get_documents = function(patient, me) {
+let setup_filters = function(patient, me) {
+	frappe.xcall(
+		'erpnext.healthcare.page.patient_history.patient_history.get_patient_history_doctypes'
+	).then(document_types => {
+		let doctype_filter = frappe.ui.form.make_control({
+			parent: $('.doctype-filter'),
+			df: {
+				fieldtype: 'MultiSelectList',
+				fieldname: 'document_type',
+				placeholder: __('Select Document Type'),
+				input_class: 'input-xs',
+				change: () => {
+					me.start = 0;
+					me.page.main.find('.patient_documents_list').html('');
+					get_documents(patient, me, doctype_filter.get_value());
+				},
+				get_data: () => {
+					return document_types.map(document_type => {
+						return {
+							description: document_type,
+							value: document_type
+						};
+					});
+				},
+			}
+		});
+		doctype_filter.refresh();
+	})
+}
+
+let get_documents = function(patient, me, document_types="") {
+	let filters = {
+		name: patient,
+		start: me.start,
+		page_length: 20
+	};
+	if (document_types)
+		filters['document_types'] = document_types;
+
 	frappe.call({
 		'method': 'erpnext.healthcare.page.patient_history.patient_history.get_feed',
-		args: {
-			name: patient,
-			start: me.start,
-			page_length: 20
-		},
+		args: filters,
 		callback: function(r) {
 			let data = r.message;
 			if (data.length) {
