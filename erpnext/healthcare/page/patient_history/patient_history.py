@@ -9,13 +9,9 @@ from frappe.utils import cint
 from erpnext.healthcare.utils import render_docs_as_html
 
 @frappe.whitelist()
-def get_feed(name, document_types=None, start=0, page_length=20):
+def get_feed(name, document_types=None, date_range=None, start=0, page_length=20):
 	"""get feed"""
-	filters = {'patient': name}
-	if document_types:
-		document_types = json.loads(document_types)
-		if len(document_types):
-			filters['reference_doctype'] = ['IN', document_types]
+	filters = get_filters(name, document_types, date_range)
 
 	result = frappe.db.get_all('Patient Medical Record',
 		fields=['name', 'owner', 'creation',
@@ -27,6 +23,25 @@ def get_feed(name, document_types=None, start=0, page_length=20):
 	)
 
 	return result
+
+
+def get_filters(name, document_types=None, date_range=None):
+	filters = {'patient': name}
+	if document_types:
+		document_types = json.loads(document_types)
+		if len(document_types):
+			filters['reference_doctype'] = ['IN', document_types]
+
+	if date_range:
+		try:
+			date_range = json.loads(date_range)
+			if date_range:
+				filters['creation'] = ['between', [date_range[0], date_range[1]]]
+		except json.decoder.JSONDecodeError:
+			pass
+
+	return filters
+
 
 @frappe.whitelist()
 def get_feed_for_dt(doctype, docname):
@@ -42,6 +57,7 @@ def get_feed_for_dt(doctype, docname):
 	)
 
 	return result
+
 
 @frappe.whitelist()
 def get_patient_history_doctypes():

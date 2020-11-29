@@ -109,7 +109,7 @@ let setup_filters = function(patient, me) {
 				change: () => {
 					me.start = 0;
 					me.page.main.find('.patient_documents_list').html('');
-					get_documents(patient, me, doctype_filter.get_value());
+					get_documents(patient, me, doctype_filter.get_value(), date_range_field.get_value());
 				},
 				get_data: () => {
 					return document_types.map(document_type => {
@@ -122,10 +122,29 @@ let setup_filters = function(patient, me) {
 			}
 		});
 		doctype_filter.refresh();
-	})
+
+		let date_range_field = frappe.ui.form.make_control({
+			df: {
+				fieldtype: 'DateRange',
+				fieldname: 'date_range',
+				placeholder: __('Date Range'),
+				input_class: 'input-xs',
+				change: () => {
+					let selected_date_range = date_range_field.get_value();
+					if (selected_date_range && selected_date_range.length === 2) {
+						me.start = 0;
+						me.page.main.find('.patient_documents_list').html('');
+						get_documents(patient, me, doctype_filter.get_value(), selected_date_range);
+					}
+				}
+			},
+			parent: $('.date-filter')
+		});
+		date_range_field.refresh();
+	});
 }
 
-let get_documents = function(patient, me, document_types="") {
+let get_documents = function(patient, me, document_types="", selected_date_range="") {
 	let filters = {
 		name: patient,
 		start: me.start,
@@ -133,6 +152,8 @@ let get_documents = function(patient, me, document_types="") {
 	};
 	if (document_types)
 		filters['document_types'] = document_types;
+	if (selected_date_range)
+		filters['date_range'] = selected_date_range;
 
 	frappe.call({
 		'method': 'erpnext.healthcare.page.patient_history.patient_history.get_feed',
