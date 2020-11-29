@@ -339,8 +339,7 @@ class JournalEntry(AccountsController):
 						currency=account_currency)
 
 				if flt(voucher_total) < (flt(order.advance_paid) + total):
-					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
+					frappe.throw(_("Advance paid against {0} {1} cannot be greater than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""

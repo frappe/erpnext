@@ -998,7 +998,7 @@ def make_purchase_invoice(**args):
 		'expense_account': args.expense_account or '_Test Account Cost for Goods Sold - _TC',
 		"conversion_factor": 1.0,
 		"serial_no": args.serial_no,
-		"stock_uom": "_Test UOM",
+		"stock_uom": args.uom or "_Test UOM",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"project": args.project,
 		"rejected_warehouse": args.rejected_warehouse or "",
@@ -1040,7 +1040,8 @@ def make_purchase_invoice_against_cost_center(**args):
 	pi.is_return = args.is_return
 	pi.credit_to = args.return_against or "Creditors - _TC"
 	pi.is_subcontracted = args.is_subcontracted or "No"
-	pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
+	if args.supplier_warehouse: 
+		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
