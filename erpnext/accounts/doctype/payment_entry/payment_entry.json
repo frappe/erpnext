@@ -24,15 +24,12 @@
   "party_bank_account",
   "contact_person",
   "contact_email",
-  "tds_details_section",
-  "apply_tax_withholding_amount",
-  "column_break_20",
-  "tax_withholding_category",
   "payment_accounts_section",
   "party_balance",
   "paid_from",
   "paid_from_account_currency",
   "paid_from_account_balance",
+  "advance_tax_account",
   "column_break_18",
   "paid_to",
   "paid_to_account_currency",
@@ -45,8 +42,10 @@
   "base_paid_amount_after_tax",
   "column_break_21",
   "received_amount",
+  "received_amount_after_tax",
   "target_exchange_rate",
   "base_received_amount",
+  "base_received_amount_after_tax",
   "section_break_14",
   "get_outstanding_invoice",
   "references",
@@ -61,6 +60,10 @@
   "taxes_and_charges_section",
   "purchase_taxes_and_charges_template",
   "sales_taxes_and_charges_template",
+  "column_break_55",
+  "apply_tax_withholding_amount",
+  "tax_withholding_category",
+  "section_break_56",
   "taxes",
   "base_total_taxes_and_charges",
   "total_taxes_and_charges",
@@ -732,14 +735,6 @@
    "label": "Custom Remarks"
   },
   {
-   "depends_on": "eval: doc.payment_type == 'Pay' && doc.party_type == 'Supplier'",
-   "fieldname": "tds_details_section",
-   "fieldtype": "Section Break",
-   "label": "TDS Details",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
    "depends_on": "eval:doc.apply_tax_withholding_amount",
    "fieldname": "tax_withholding_category",
    "fieldtype": "Link",
@@ -750,15 +745,10 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.party_type == 'Supplier'",
    "fieldname": "apply_tax_withholding_amount",
    "fieldtype": "Check",
    "label": "Apply Tax Withholding Amount",
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break",
    "show_days": 1,
    "show_seconds": 1
   },
@@ -829,6 +819,44 @@
    "fieldtype": "Currency",
    "label": "Paid Amount After Tax (Company Currency)",
    "options": "Company:company:default_currency",
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_56",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "advance_tax_account",
+   "fieldtype": "Link",
+   "label": "Advance Tax Account",
+   "options": "Account",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "received_amount_after_tax",
+   "fieldtype": "Currency",
+   "label": "Received Amount After Tax",
+   "options": "paid_to_account_currency",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "base_received_amount_after_tax",
+   "fieldtype": "Currency",
+   "label": "Received Amount After Tax (Company Currency)",
+   "options": "Company:company:default_currency",
    "show_days": 1,
    "show_seconds": 1
   }
@@ -836,7 +864,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-25 20:50:14.896628",
+ "modified": "2020-11-29 20:03:57.772062",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
