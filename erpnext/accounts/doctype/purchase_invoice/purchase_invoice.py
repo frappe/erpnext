@@ -456,6 +456,8 @@ class PurchaseInvoice(BuyingController):
 		self.make_tax_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
+		self.allocate_advance_taxes(gl_entries)
+
 		gl_entries = make_regional_gl_entries(gl_entries, self)
 
 		gl_entries = merge_similar_entries(gl_entries)
@@ -899,6 +901,46 @@ class PurchaseInvoice(BuyingController):
 					"cost_center": self.cost_center
 				}, account_currency, item=self))
 
+	def allocate_advance_taxes(self, gl_entries):
+		tax_map = self.get_tax_map()
+		for pe in self.get('advances'):
+			pe = frappe.get_doc('Payment Entry', pe.reference_name)
+			for tax in pe.get('taxes'):
+				account_currency = get_account_currency(tax.account_head)
+				dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+				rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+
+				unallocated_amount = tax.tax_amount - tax.allocated_amount
+				if tax_map.get(tax.account_head):
+					amount = tax_map.get(tax.account_head)
+					if amount < unallocated_amount:
+						unallocated_amount = amount
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": tax.account_head,
+							"against": self.supplier,
+							dr_or_cr: unallocated_amount,
+							dr_or_cr + "_in_account_currency": unallocated_amount \
+								if account_currency==self.company_currency \
+								else unallocated_amount,
+							'cost_center': tax.cost_center
+						}, account_currency, item=tax))
+
+					gl_entries.append(
+						self.get_gl_dict({
+							"account": pe.advance_tax_account,
+							"against": self.supplier,
+							rev_dr_cr: unallocated_amount,
+							rev_dr_cr + "_in_account_currency": unallocated_amount \
+								if account_currency==self.company_currency \
+								else unallocated_amount,
+							'cost_center': tax.cost_center
+						}, account_currency, item=tax))
+
+					frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount + unallocated_amount)
+					tax_map[tax.account_head] -= unallocated_amount
+
 	def make_payment_gl_entries(self, gl_entries):
 		# Make Cash GL Entries
 		if cint(self.is_paid) and self.cash_bank_account and self.paid_amount:
@@ -1088,10 +1130,10 @@ class PurchaseInvoice(BuyingController):
 
 		accounts = []
 		for d in self.taxes:
-			if d.account_head == tax_withholding_details.get("account_head") and not d.is_advance_tax:
+			if d.account_head == tax_withholding_details.get("account_head"):
 				d.update(tax_withholding_details)
-			if not d.is_advance_tax:
-				accounts.append(d.account_head)
+
+			accounts.append(d.account_head)
 
 		if not accounts or tax_withholding_details.get("account_head") not in accounts:
 			self.append("taxes", tax_withholding_details)
