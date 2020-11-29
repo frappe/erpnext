@@ -14,7 +14,8 @@ def get_feed(name, document_types=None, start=0, page_length=20):
 	filters = {'patient': name}
 	if document_types:
 		document_types = json.loads(document_types)
-		filters['reference_doctype'] = ['IN', document_types]
+		if len(document_types):
+			filters['reference_doctype'] = ['IN', document_types]
 
 	result = frappe.db.get_all('Patient Medical Record',
 		fields=['name', 'owner', 'creation',
