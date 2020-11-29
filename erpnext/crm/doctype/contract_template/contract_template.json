@@ -23,8 +23,7 @@
   {
    "fieldname": "contract_terms",
    "fieldtype": "Text Editor",
-   "label": "Contract Terms and Conditions",
-   "read_only": 1
+   "label": "Contract Terms and Conditions"
   },
   {
    "fieldname": "sb_fulfilment",
@@ -45,7 +44,7 @@
   }
  ],
  "links": [],
- "modified": "2020-06-03 00:24:58.179816",
+ "modified": "2020-11-11 17:49:44.879363",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract Template",

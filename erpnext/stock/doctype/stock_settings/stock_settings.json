@@ -217,7 +217,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 10:33:29.147682",
+ "modified": "2020-11-23 15:26:54.225608",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -235,5 +235,6 @@
  ],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }
