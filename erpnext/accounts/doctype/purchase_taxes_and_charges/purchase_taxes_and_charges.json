@@ -28,8 +28,7 @@
   "base_tax_amount",
   "base_total",
   "base_tax_amount_after_discount_amount",
-  "item_wise_tax_detail",
-  "is_advance_tax"
+  "item_wise_tax_detail"
  ],
  "fields": [
   {
@@ -250,22 +249,12 @@
    "fieldtype": "Column Break",
    "show_days": 1,
    "show_seconds": 1
-  },
-  {
-   "default": "0",
-   "fieldname": "is_advance_tax",
-   "fieldtype": "Check",
-   "hidden": 1,
-   "label": "Is Advance Tax",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-25 18:24:43.487567",
+ "modified": "2020-11-29 19:11:58.826078",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Taxes and Charges",

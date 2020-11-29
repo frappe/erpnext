@@ -45,6 +45,14 @@ frappe.ui.form.on("Purchase Order", {
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	apply_tds: function(frm) {
+		if (!frm.doc.apply_tds) {
+			frm.set_value("tax_withholding_category", '');
+		} else {
+			frm.set_value("tax_withholding_category", frm.supplier_tds);
+		}
 	}
 });
 

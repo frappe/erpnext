@@ -700,12 +700,42 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
+			self.update_allocated_advance_taxes()
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self)
 
 		elif self.doctype in ["Sales Order", "Purchase Order"]:
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_advance_payment_on_cancelation_of_order'):
 				unlink_ref_doc_from_payment_entries(self)
+
+	def get_tax_map(self):
+		tax_map = {}
+		for tax in self.get('taxes'):
+			tax_map.setdefault(tax.account_head, 0.0)
+			tax_map[tax.account_head] += tax.tax_amount
+
+		return tax_map
+
+	def update_allocated_advance_taxes(self):
+		if self.get('advances'):
+			tax_accounts = [d.account_head for d in self.get('taxes')]
+			allocated_tax_map = frappe._dict(frappe.get_all('GL Entry', fields=['account', 'sum(credit - debit)'],
+				filters={'voucher_no': self.name, 'account': ('in', tax_accounts)},
+				group_by='account', as_list=1))
+
+			tax_map = self.get_tax_map()
+
+			for pe in self.get('advances'):
+				pe = frappe.get_doc('Payment Entry', pe.reference_name)
+				for tax in pe.get('taxes'):
+					allocated_amount = tax_map.get(tax.account_head) - allocated_tax_map.get(tax.account_head)
+					if allocated_amount > tax.tax_amount:
+						allocated_amount = tax.tax_amount
+
+					if allocated_amount:
+						frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount - allocated_amount)
+						tax_map[tax.account_head] -= allocated_amount
+						allocated_tax_map[tax.account_head] -= allocated_amount
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_allowance_for
