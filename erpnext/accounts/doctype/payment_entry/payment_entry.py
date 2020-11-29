@@ -940,7 +940,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				total_amount = ref_doc.grand_total
 		if not exchange_rate:
 			# Get the exchange rate from the original ref doc
-			# or get it based on the posting date of the ref doc
+			# or get it based on the posting date of the ref doc.
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 		if reference_doctype in ("Sales Invoice", "Purchase Invoice"):
