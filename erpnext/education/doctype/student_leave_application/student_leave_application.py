@@ -6,11 +6,14 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from datetime import timedelta
-from frappe.utils import get_link_to_form, getdate
+from frappe.utils import get_link_to_form, getdate, date_diff, flt
+from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 from frappe.model.document import Document
 
 class StudentLeaveApplication(Document):
 	def validate(self):
+		self.validate_holiday_list()
 		self.validate_duplicate()
 		self.validate_from_to_dates('from_date', 'to_date')
 
@@ -39,9 +42,18 @@ class StudentLeaveApplication(Document):
 			frappe.throw(_('Leave application {0} already exists against the student {1}')
 				.format(link, frappe.bold(self.student)), title=_('Duplicate Entry'))
 
+	def validate_holiday_list(self):
+		holiday_list = get_holiday_list()
+		self.total_leave_days = get_number_of_leave_days(self.from_date, self.to_date, holiday_list)
+
 	def update_attendance(self):
+		holiday_list = get_holiday_list()
+
 		for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 			date = dt.strftime('%Y-%m-%d')
+
+			if is_holiday(holiday_list, date):
+				continue
 
 			attendance = frappe.db.exists('Student Attendance', {
 				'student': self.student,
@@ -89,3 +101,19 @@ class StudentLeaveApplication(Document):
 def daterange(start_date, end_date):
 	for n in range(int ((end_date - start_date).days)+1):
 		yield start_date + timedelta(n)
+
+def get_number_of_leave_days(from_date, to_date, holiday_list):
+	number_of_days = date_diff(to_date, from_date) + 1
+
+	holidays = frappe.db.sql("""
+		SELECT
+			COUNT(DISTINCT holiday_date)
+		FROM `tabHoliday` h1,`tabHoliday List` h2
+		WHERE
+			h1.parent = h2.name and
+			h1.holiday_date between %s and %s and
+			h2.name = %s""", (from_date, to_date, holiday_list))[0][0]
+
+	number_of_days = flt(number_of_days) - flt(holidays)
+
+	return number_of_days

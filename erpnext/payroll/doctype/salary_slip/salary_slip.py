@@ -136,8 +136,8 @@ class SalarySlip(TransactionBase):
 				self.salary_slip_based_on_timesheet = self._salary_structure_doc.salary_slip_based_on_timesheet or 0
 				self.set_time_sheet()
 				self.pull_sal_struct()
-				consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, "consider_unmarked_attendance_as") or "Present"
-				return consider_unmarked_attendance_as
+				payroll_based_on, consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, ["payroll_based_on","consider_unmarked_attendance_as"])
+				return [payroll_based_on, consider_unmarked_attendance_as]
 
 	def set_time_sheet(self):
 		if self.salary_slip_based_on_timesheet:
@@ -210,10 +210,10 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set Payroll based on in Payroll settings"))
 
 		if payroll_based_on == "Attendance":
-			actual_lwp, absent = self.calculate_lwp_and_absent_days_based_on_attendance(holidays)
+			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(holidays)
 			self.absent_days = absent
 		else:
-			actual_lwp = self.calculate_lwp_based_on_leave_application(holidays, working_days)
+			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(holidays, working_days)
 
 		if not lwp:
 			lwp = actual_lwp
@@ -240,7 +240,6 @@ class SalarySlip(TransactionBase):
 				self.absent_days += unmarked_days #will be treated as absent
 				self.payment_days -= unmarked_days
 				if include_holidays_in_total_working_days:
-					self.absent_days -= len(holidays)
 					for holiday in holidays:
 						if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1 }):
 							self.payment_days += 1
@@ -301,7 +300,7 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
-	def calculate_lwp_based_on_leave_application(self, holidays, working_days):
+	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
 		holidays = "','".join(holidays)
 		daily_wages_fraction_for_half_day = \
@@ -312,10 +311,12 @@ class SalarySlip(TransactionBase):
 			leave = frappe.db.sql("""
 				SELECT t1.name,
 					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
-					THEN t1.half_day else 0 END
+					THEN t1.half_day else 0 END,
+					t2.is_ppl,
+					t2.fraction_of_daily_salary_per_leave
 				FROM `tabLeave Application` t1, `tabLeave Type` t2
 				WHERE t2.name = t1.leave_type
-				AND t2.is_lwp = 1
+				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
 				AND t1.docstatus = 1
 				AND t1.employee = %(employee)s
 				AND ifnull(t1.salary_slip, '') = ''
@@ -328,19 +329,35 @@ class SalarySlip(TransactionBase):
 				""".format(holidays), {"employee": self.employee, "dt": dt})
 
 			if leave:
+				equivalent_lwp_count = 0
 				is_half_day_leave = cint(leave[0][1])
-				lwp += (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+				is_partially_paid_leave = cint(leave[0][2])
+				fraction_of_daily_salary_per_leave = flt(leave[0][3])
+
+				equivalent_lwp_count =  (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+
+				if is_partially_paid_leave:
+					equivalent_lwp_count *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+
+				lwp += equivalent_lwp_count
 
 		return lwp
 
-	def calculate_lwp_and_absent_days_based_on_attendance(self, holidays):
+	def calculate_lwp_ppl_and_absent_days_based_on_attendance(self, holidays):
 		lwp = 0
 		absent = 0
 
 		daily_wages_fraction_for_half_day = \
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
-		lwp_leave_types = dict(frappe.get_all("Leave Type", {"is_lwp": 1}, ["name", "include_holiday"], as_list=1))
+		leave_types = frappe.get_all("Leave Type",
+			or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
+			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"])
+
+		leave_type_map = {}
+		for leave_type in leave_types:
+			leave_type_map[leave_type.name] = leave_type
+
 		attendances = frappe.db.sql('''
 			SELECT attendance_date, status, leave_type
 			FROM `tabAttendance`
@@ -352,21 +369,30 @@ class SalarySlip(TransactionBase):
 		''', values=(self.employee, self.start_date, self.end_date), as_dict=1)
 
 		for d in attendances:
-			if d.status in ('Half Day', 'On Leave') and d.leave_type and d.leave_type not in lwp_leave_types:
+			if d.status in ('Half Day', 'On Leave') and d.leave_type and d.leave_type not in leave_type_map.keys():
 				continue
 
 			if formatdate(d.attendance_date, "yyyy-mm-dd") in holidays:
 				if d.status == "Absent" or \
-					(d.leave_type and d.leave_type in lwp_leave_types and not lwp_leave_types[d.leave_type]):
+					(d.leave_type and d.leave_type in leave_type_map.keys() and not leave_type_map[d.leave_type]['include_holiday']):
 						continue
 
+			if d.leave_type:
+				fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type]["fraction_of_daily_salary_per_leave"]
+
 			if d.status == "Half Day":
-				lwp += (1 - daily_wages_fraction_for_half_day)
-			elif d.status == "On Leave" and d.leave_type in lwp_leave_types:
-				lwp += 1
+				equivalent_lwp =  (1 - daily_wages_fraction_for_half_day)
+
+				if d.leave_type in leave_type_map.keys() and leave_type_map[d.leave_type]["is_ppl"]:
+					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+				lwp += equivalent_lwp
+			elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
+				equivalent_lwp = 1
+				if leave_type_map[d.leave_type]["is_ppl"]:
+					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+				lwp += equivalent_lwp
 			elif d.status == "Absent":
 				absent += 1
-
 		return lwp, absent
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
@@ -950,9 +976,8 @@ class SalarySlip(TransactionBase):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
 			total_amount = amounts['interest_amount'] + amounts['payable_principal_amount']
 			if payment.total_payment > total_amount:
-				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2}
-					against loan {3}""").format(payment.idx, frappe.bold(payment.total_payment),
-					frappe.bold(total_amount), frappe.bold(payment.loan)))
+				frappe.throw(_("Row {0}: Paid amount {1} is greater than pending accrued amount {2}against loan {3}").format(
+					payment.idx, frappe.bold(payment.total_payment),frappe.bold(total_amount), frappe.bold(payment.loan)))
 
 			self.total_interest_amount += payment.interest_amount
 			self.total_principal_amount += payment.principal_amount
