@@ -17,6 +17,7 @@ from erpnext.accounts.party import get_party_account_currency
 from six import string_types
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_party, update_linked_doc,\
 	unlink_inter_company_doc
 
@@ -39,10 +40,17 @@ class PurchaseOrder(BuyingController):
 			'percent_join_field': 'material_request'
 		}]
 
+	def onload(self):
+		supplier_tds = frappe.db.get_value("Supplier", self.supplier, "tax_withholding_category")
+		self.set_onload("supplier_tds", supplier_tds)
+
 	def validate(self):
 		super(PurchaseOrder, self).validate()
 
 		self.set_status()
+
+		# apply tax withholding only if checked and applicable
+		self.set_tax_withholding()
 
 		self.validate_supplier()
 		self.validate_schedule_date()
@@ -86,6 +94,33 @@ class PurchaseOrder(BuyingController):
 
 		if cint(frappe.db.get_single_value('Buying Settings', 'maintain_same_rate')):
 			self.validate_rate_with_reference_doc([["Supplier Quotation", "supplier_quotation", "supplier_quotation_item"]])
+
+	def set_tax_withholding(self):
+		if not self.apply_tds:
+			return
+
+		tax_withholding_details = get_party_tax_withholding_details(self, self.tax_withholding_category)
+
+		if not tax_withholding_details:
+			return
+
+		accounts = []
+		for d in self.taxes:
+			if d.account_head == tax_withholding_details.get("account_head"):
+				d.update(tax_withholding_details)
+			accounts.append(d.account_head)
+
+		if not accounts or tax_withholding_details.get("account_head") not in accounts:
+			self.append("taxes", tax_withholding_details)
+
+		to_remove = [d for d in self.taxes
+			if not d.tax_amount and d.account_head == tax_withholding_details.get("account_head")]
+
+		for d in to_remove:
+			self.remove(d)
+
+		# calculate totals again after applying TDS
+		self.calculate_taxes_and_totals()
 
 	def validate_supplier(self):
 		prevent_po = frappe.db.get_value("Supplier", self.supplier, 'prevent_pos')

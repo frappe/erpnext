@@ -39,6 +39,14 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+	},
+
+	apply_tds: function(frm) {
+		if (!frm.doc.apply_tds) {
+			frm.set_value("tax_withholding_category", '');
+		} else {
+			frm.set_value("tax_withholding_category", frm.supplier_tds);
+		}
 	}
 });
 

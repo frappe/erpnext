@@ -12,6 +12,7 @@
   "account_head",
   "col_break_1",
   "description",
+  "included_in_paid_amount",
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
@@ -20,9 +21,11 @@
   "section_break_9",
   "tax_amount",
   "total",
+  "allocated_amount",
   "column_break_13",
   "base_tax_amount",
-  "base_total"
+  "base_total",
+  "base_allocated_amount"
  ],
  "fields": [
   {
@@ -185,12 +188,36 @@
    "reqd": 1,
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "included_in_paid_amount",
+   "fieldtype": "Check",
+   "label": "Included In Paid Amount",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "label": "Allocated Amount",
+   "options": "currency",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "base_allocated_amount",
+   "fieldtype": "Currency",
+   "label": "Allocated Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-27 20:02:34.734260",
+ "modified": "2020-11-29 19:06:14.666460",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Advance Taxes and Charges",

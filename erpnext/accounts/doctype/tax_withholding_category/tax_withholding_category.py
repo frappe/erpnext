@@ -33,14 +33,14 @@ def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
 	if not suppliers:
 		suppliers.append(ref_doc.supplier)
 
-	fy = get_fiscal_year(ref_doc.posting_date, company=ref_doc.company)
+	fy = get_fiscal_year(ref_doc.get('posting_date') or ref_doc.get('transaction_date'), company=ref_doc.company)
 	tax_details = get_tax_withholding_details(tax_withholding_category, fy[0], ref_doc.company)
 	if not tax_details:
 		frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
 			.format(tax_withholding_category, ref_doc.company))
 
 	tds_amount = get_tds_amount(suppliers, ref_doc.net_total, ref_doc.company,
-		tax_details, fy,  ref_doc.posting_date, pan_no)
+		tax_details, fy,  ref_doc.get('posting_date') or ref_doc.get('transaction_date'), pan_no)
 
 	tax_row = get_tax_row(tax_details, tds_amount)
 
