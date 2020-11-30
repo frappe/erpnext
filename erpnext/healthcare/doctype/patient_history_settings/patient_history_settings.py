@@ -51,10 +51,16 @@ def set_subject_field(doc):
 
 	for entry in patient_history_fields:
 		fieldname = entry.get('fieldname')
-		if doc.get(fieldname):
-			formated_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
-			subject += frappe.bold(_(entry.get('label')) + ': ') + cstr(formated_value)
-			subject += '<br>'
+		if entry.get('fieldtype') == 'Table' and doc.get(fieldname):
+			formatted_value = get_formatted_value_for_table_field(doc.get(fieldname), meta.get_field(fieldname))
+			subject += frappe.bold(_(entry.get('label')) + ': ') + '<br>' + cstr(formatted_value)
+
+		else:
+			if doc.get(fieldname):
+				formatted_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
+				subject += frappe.bold(_(entry.get('label')) + ': ') + cstr(formatted_value)
+
+		subject += '<br>'
 
 	return subject
 
@@ -72,3 +78,27 @@ def get_patient_history_fields(doc):
 	if patient_history_fields:
 		return json.loads(patient_history_fields)
 
+
+def get_formatted_value_for_table_field(items, df):
+	child_meta = frappe.get_meta(df.options)
+
+	table_head = ''
+	table_row = ''
+	html = ''
+	create_head = True
+	for item in items:
+		table_row += '<tr>'
+		for cdf in child_meta.fields:
+			if cdf.in_list_view:
+				if create_head:
+					table_head += '<td>' + cdf.label + '</td>'
+				if item.get(cdf.fieldname):
+					table_row += '<td>' + str(item.get(cdf.fieldname)) + '</td>'
+				else:
+					table_row += '<td></td>'
+		create_head = False
+		table_row += '</tr>'
+
+	html += "<table class='table table-condensed table-bordered'>" + table_head +  table_row + '</table>'
+
+	return html
