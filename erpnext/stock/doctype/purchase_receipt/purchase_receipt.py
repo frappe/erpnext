@@ -550,19 +550,17 @@ def update_billing_percentage(pr_doc, update_modified=True):
 	# Update Billing % based on pending accepted qty
 	total_amount, total_billed_amount = 0, 0
 	for item in pr_doc.items:
-		returned_qty = frappe.db.sql("""
-			select sum(abs(child.qty)) as qty
-			from
-				`tabPurchase Receipt Item` child,
-				`tabPurchase Receipt` parent
-			where
-				child.parent = parent.name
-				and parent.docstatus = 1
-				and parent.is_return = 1
-				and child.purchase_receipt_item = %(row_name)s
-			""", {"row_name": item.name})
-		returned_qty = returned_qty[0][0] if returned_qty else 0
+		return_data = frappe.db.get_list("Purchase Receipt",
+			fields = [
+				"sum(abs(`tabPurchase Receipt Item`.qty)) as qty"
+			],
+			filters = [
+				["Purchase Receipt", "docstatus", "=", 1],
+				["Purchase Receipt", "is_return", "=", 1],
+				["Purchase Receipt Item", "purchase_receipt_item", "=", item.name]
+		])
 
+		returned_qty = return_data[0].qty if return_data else 0
 		returned_amount = flt(returned_qty) * flt(item.rate)
 		pending_amount = flt(item.amount) - returned_amount
 		total_billable_amount = pending_amount if item.billed_amt <= pending_amount else item.billed_amt
