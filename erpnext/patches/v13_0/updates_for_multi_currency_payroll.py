@@ -84,14 +84,14 @@ def execute():
 	frappe.db.sql("update `tabEmployee Advance` set exchange_rate=1")
 
 	# get all companies and it's currency
-	all_companies = frappe.db.get_all("Company", fields=["name", "default_currency", "default_payable_account"])
+	all_companies = frappe.db.get_all("Company", fields=["name", "default_currency", "default_payroll_payable_account"])
 	for d in all_companies:
 		company = d.name
 		company_currency = d.default_currency
-		default_payable_account = d.default_payable_account
+		default_payroll_payable_account = d.default_payroll_payable_account
 
-		if not default_payable_account:
-			default_payable_account = frappe.db.get_value("Account",
+		if not default_payroll_payable_account:
+			default_payroll_payable_account = frappe.db.get_value("Account",
 				{"account_name": _("Payroll Payable"), "company": company, "is_group": 0})
 
 		# update currency in following doctypes based on company currency
@@ -111,7 +111,7 @@ def execute():
 				exchange_rate = 1,
 				payroll_payable_account=%s
 			where company=%s
-		""", (company_currency, default_payable_account, company))
+		""", (company_currency, default_payroll_payable_account, company))
 
 		# update fields in Salary Structure Assignment
 		frappe.db.sql("""
@@ -119,7 +119,7 @@ def execute():
 			set currency = %s,
 				payroll_payable_account=%s
 			where company=%s
-		""", (company_currency, default_payable_account, company))
+		""", (company_currency, default_payroll_payable_account, company))
 
 		# update fields in Salary Slip
 		frappe.db.sql("""
