@@ -312,9 +312,12 @@ class SellingController(StockController):
 				sales_order.update_reserved_qty(so_item_rows)
 
 	def set_incoming_rate(self):
+		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+			return
+
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
-			if not cint(self.is_return):
+			if not cint(self.get("is_return")):
 				# Get incoming rate based on original item cost based on valuation method
 				d.incoming_rate = get_incoming_rate({
 					"item_code": d.item_code,
@@ -327,8 +330,8 @@ class SellingController(StockController):
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"allow_zero_valuation": d.get("allow_zero_valuation")
-				})
-			elif self.return_against:
+				}, raise_error_if_no_rate=False)
+			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
 				# based on original item cost as per valuation method
 				d.incoming_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)

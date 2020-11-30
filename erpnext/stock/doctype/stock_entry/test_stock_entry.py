@@ -722,7 +722,7 @@ class TestStockEntry(unittest.TestCase):
 		make_stock_entry(item_code="_Test Item 2", target="_Test Warehouse - _TC", qty=50, basic_rate=20)
 
 		item_quantity = {
-			'_Test Item': 10.0,
+			'_Test Item': 2.0,
 			'_Test Item 2': 12.0,
 			'_Test Serialized Item With Series': 6.0
 		}
