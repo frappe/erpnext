@@ -299,12 +299,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	load_summary_of(doc, after_submission=false) {
-		this.toggle_summary_placeholder(false)
-
 		after_submission ?
-			this.$summary_wrapper.css('grid-column', 'span 10 / span 10') :
-			this.$summary_wrapper.css('grid-column', 'span 6 / span 6')
-
+			this.$component.css('grid-column', 'span 10 / span 10') :
+			this.$component.css('grid-column', 'span 6 / span 6')
+		
+		this.toggle_summary_placeholder(false)
+		
 		this.doc = doc;
 
 		this.attach_document_info(doc);
