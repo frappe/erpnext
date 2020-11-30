@@ -5,6 +5,7 @@ from frappe.utils import nowdate
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
 from erpnext.loan_management.doctype.loan.loan import make_repayment_entry
+from erpnext.loan_management.doctype.loan_repayment.loan_repayment import get_accrued_interest_entries
 from frappe.model.naming import make_autoname
 
 def execute():
@@ -100,25 +101,32 @@ def execute():
 			process_loan_interest_accrual_for_term_loans(posting_date=nowdate(), loan_type=loan_type,
 				loan=loan.name)
 
-			payments = frappe.db.sql(''' SELECT j.name, a.credit, a.credit_in_account_currency, j.posting_date
-				FROM `tabJournal Entry` j, `tabJournal Entry Account` a
-				WHERE a.parent = j.name and a.reference_type='Loan' and a.reference_name = %s
-				and a.account = %s and j.docstatus = 1
-			''', (loan.name, loan.loan_account), as_dict=1)
+			accrued_entries = get_accrued_interest_entries(loan.name)
+			total_principal, total_interest = frappe.db.get_value('Repayment Schedule', fields=['sum(principal_amount) as total_principal',
+				'sum(interest_amount) as total_interest'], filters={'is_paid': 1, 'parent': loan.name})
 
-			for payment in payments:
-				if payment.credit_in_account_currency:
-					repayment_entry = make_repayment_entry(loan.name, loan.loan_applicant_type, loan.applicant,
-						loan_type, loan.company)
+			for entry in accrued_entries:
+				interest_paid = 0
+				principal_paid = 0
 
-					repayment_entry.amount_paid = payment.credit_in_account_currency
-					repayment_entry.posting_date = payment.posting_date
-					repayment_entry.save()
-					repayment_entry.submit()
+				if total_interest > entry.interest_amount:
+					interest_paid = entry.interest_amount
+				else:
+					interest_paid = total_interest
 
-					jv = frappe.get_doc('Journal Entry', payment.name)
-					jv.flags.ignore_links = True
-					jv.cancel()
+				if total_principal > entry.payable_principal_amount:
+					principal_paid = entry.payable_principal_amount
+				else:
+					principal_paid = total_principal
+
+				frappe.db.sql(""" UPDATE `tabLoan Interest Accrual`
+					SET paid_principal_amount = `paid_principal_amount` + %s,
+						paid_interest_amount = `paid_interest_amount` + %s
+					WHERE name = %s""",
+					(principal_paid, interest_paid, entry.name))
+
+				total_principal -= principal_paid
+				total_interest -= interest_paid
 
 def create_loan_type(loan, loan_type_name, penalty_account):
 	loan_type_doc = frappe.new_doc('Loan Type')
