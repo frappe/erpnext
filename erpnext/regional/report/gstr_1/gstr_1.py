@@ -151,6 +151,7 @@ class Gstr1Report(object):
 				{select_columns}
 			from `tab{doctype}`
 			where docstatus = 1 {where_conditions}
+			and is_opening = 'No'
 			order by posting_date desc
 			""".format(select_columns=self.select_columns, doctype=self.doctype,
 				where_conditions=conditions), self.filters, as_dict=1)
