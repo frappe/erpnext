@@ -31,12 +31,9 @@ function groupBy(items, key){
 	return obj;
 }
 
-function checkTimeSlotOverlap(timeslot_1, timeslot_2){
+function checkTimeSlotOverlap(ts1, ts2){
 	/// Timeslot is a an array of length 2 ex: [from_time, to_time]
 	/// time in timeslot is an integer represents number of seconds.
-	let ts1 = numberSort(timeslot_1);
-	let ts2 = numberSort(timeslot_2);
-
 	if ((ts1[0] < ts2[0] && ts1[1] <= ts2[0]) || (ts1[0] >= ts2[1] && ts1[1] > ts2[1])){
 		return false;
 	}

@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from datetime import datetime
+from typing import Tuple
 
 class IncomingCallSettings(Document):
 	def validate(self):
@@ -16,7 +17,7 @@ class IncomingCallSettings(Document):
 		self.validate_call_schedule_timeslot(self.call_handling_schedule)
 		self.validate_call_schedule_overlaps(self.call_handling_schedule)
 
-	def validate_call_schedule_timeslot(self, schedule):
+	def validate_call_schedule_timeslot(self, schedule: list):
 		"""	Make sure that to time slot is ahead of from time slot.
 		"""
 		errors = []
@@ -31,16 +32,16 @@ class IncomingCallSettings(Document):
 		if errors:
 			frappe.throw('<br/>'.join(errors))
 
-	def validate_call_schedule_overlaps(self, schedule):
+	def validate_call_schedule_overlaps(self, schedule: list):
 		"""Check if any time slots are overlapped in a day schedule.
 		"""
 		week_days = set([each.day_of_week for each in schedule])
 
 		for day in week_days:
-			timeslots = [[record.from_time, record.to_time] for record in schedule if record.day_of_week==day]
+			timeslots = [(record.from_time, record.to_time) for record in schedule if record.day_of_week==day]
 
 			# convert time in timeslot into an integer represents number of seconds
-			timeslots = list(map(lambda seq: list(map(self.time_to_seconds, seq)), timeslots))
+			timeslots = sorted(map(lambda seq: tuple(map(self.time_to_seconds, seq)), timeslots))
 			if len(timeslots) < 2: continue
 
 			for i in range(1, len(timeslots)):
@@ -48,7 +49,7 @@ class IncomingCallSettings(Document):
 					frappe.throw(f"Please fix overlapping time slots for {day}.")
 
 	@staticmethod
-	def check_timeslots_overlap(ts1, ts2):
+	def check_timeslots_overlap(ts1: Tuple[int, int], ts2: Tuple[int, int]) -> bool:
 		if (ts1[0] < ts2[0] and ts1[1] <= ts2[0]) or (ts1[0] >= ts2[1] and ts1[1] > ts2[1]):
 			return False
 		return True
