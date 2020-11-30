@@ -92,7 +92,7 @@ def execute():
 
 		if not default_payroll_payable_account:
 			default_payroll_payable_account = frappe.db.get_value("Account",
-				{"account_name": _("Payroll Payable"), "company": company, "is_group": 0})
+				{"account_name": _("Payroll Payable"), "company": company, "account_currency": company_currency, "is_group": 0})
 
 		# update currency in following doctypes based on company currency
 		doctypes_for_currency = ['Employee Advance', 'Leave Encashment', 'Employee Benefit Application',
