@@ -26,11 +26,11 @@ class PatientHistorySettings(Document):
 
 
 def create_medical_record(doc, method=None):
-	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
-		frappe.db.get_value('Doctype', doc.doctype, 'module') != 'Healthcare':
+	medical_record_required = validate_medical_record_required(doc)
+	if not medical_record_required:
 		return
 
-	if doc.doctype not in get_patient_history_doctypes():
+	if frappe.db.exists('Patient Medical Record', { 'reference_name': doc.name }):
 		return
 
 	subject = set_subject_field(doc)
@@ -44,6 +44,30 @@ def create_medical_record(doc, method=None):
 	medical_record.reference_name = doc.name
 	medical_record.reference_owner = doc.owner
 	medical_record.save(ignore_permissions=True)
+
+
+def update_medical_record(doc, method=None):
+	medical_record_required = validate_medical_record_required(doc)
+	if not medical_record_required:
+		return
+
+	medical_record_id = frappe.db.exists('Patient Medical Record', { 'reference_name': doc.name })
+
+	if medical_record_id:
+		subject = set_subject_field(doc)
+		frappe.db.set_value('Patient Medical Record', medical_record_id[0][0], 'subject', subject)
+	else:
+		create_medical_record(doc)
+
+
+def delete_medical_record(doc, method=None):
+	medical_record_required = validate_medical_record_required(doc)
+	if not medical_record_required:
+		return
+
+	record = frappe.db.exists('Patient Medical Record', { 'reference_name': doc.name })
+	if record:
+		frappe.delete_doc('Patient Medical Record', record, force=1)
 
 
 def set_subject_field(doc):
@@ -114,3 +138,14 @@ def get_patient_history_config_dt(doctype):
 		return 'Patient History Custom Document Type'
 	else:
 		return 'Patient History Standard Document Type'
+
+
+def validate_medical_record_required(doc):
+	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
+		frappe.db.get_value('Doctype', doc.doctype, 'module') != 'Healthcare':
+		return False
+
+	if doc.doctype not in get_patient_history_doctypes():
+		return False
+
+	return True
