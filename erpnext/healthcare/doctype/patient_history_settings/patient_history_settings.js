@@ -14,7 +14,11 @@ frappe.ui.form.on('Patient History Settings', {
 	},
 
 	field_selector: function(frm, doc, standard=1) {
-		let document_fields = (JSON.parse(doc.selected_fields)).map(f => f.fieldname);
+		let document_fields = [];
+		if (doc.selected_fields)
+			document_fields = (JSON.parse(doc.selected_fields)).map(f => f.fieldname);
+
+		let doctype_fields = frm.events.get_doctype_fields(frm, doc.document_type, document_fields);
 		let d = new frappe.ui.Dialog({
 			title: __('{0} Fields', [__(doc.document_type)]),
 			fields: [
@@ -22,7 +26,7 @@ frappe.ui.form.on('Patient History Settings', {
 					label: __('Select Fields'),
 					fieldtype: 'MultiCheck',
 					fieldname: 'fields',
-					options: frm.events.get_doctype_fields(frm, doc.document_type, document_fields),
+					options: doctype_fields,
 					columns: 2
 				}
 			]
@@ -49,7 +53,7 @@ frappe.ui.form.on('Patient History Settings', {
 			if (standard)
 				doctype = 'Patient History Standard Document Type';
 
-
+			d.refresh();
 			frappe.model.set_value(doctype, doc.name, 'selected_fields', JSON.stringify(selected_fields));
 			d.hide();
 		});
@@ -82,7 +86,7 @@ frappe.ui.form.on('Patient History Custom Document Type', {
 	add_edit_fields: function(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.document_type) {
-			frm.events.field_selector(frm, row, standard=0);
+			frm.events.field_selector(frm, row, 0);
 		}
 	}
 });
