@@ -58,7 +58,7 @@ class ShopifySettings(unittest.TestCase):
 		}).save(ignore_permissions=True)
 
 		self.shopify_settings = shopify_settings
-	
+
 	def test_order(self):
 		### Create Customer ###
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_customer.json")) as shopify_customer:
@@ -75,7 +75,7 @@ class ShopifySettings(unittest.TestCase):
 		with open (os.path.join(os.path.dirname(__file__), "test_data", "shopify_order.json")) as shopify_order:
 			shopify_order = json.load(shopify_order)
 
-		create_order(shopify_order.get("order"), self.shopify_settings, "_Test Company")
+		create_order(shopify_order.get("order"), self.shopify_settings, False, company="_Test Company")
 
 		sales_order = frappe.get_doc("Sales Order", {"shopify_order_id": cstr(shopify_order.get("order").get("id"))})
 
