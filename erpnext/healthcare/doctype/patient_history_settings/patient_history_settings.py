@@ -7,6 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cstr
 from frappe.model.document import Document
+from erpnext.healthcare.page.patient_history.patient_history import get_patient_history_doctypes
 
 class PatientHistorySettings(Document):
 	def validate(self):
@@ -27,6 +28,9 @@ class PatientHistorySettings(Document):
 def create_medical_record(doc, method=None):
 	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
 		frappe.db.get_value('Doctype', doc.doctype, 'module') != 'Healthcare':
+		return
+
+	if doc.doctype not in get_patient_history_doctypes():
 		return
 
 	subject = set_subject_field(doc)
@@ -66,14 +70,15 @@ def set_subject_field(doc):
 
 
 def get_date_field(doctype):
-	return frappe.db.get_value('Patient History Custom Document Type',
-		{ 'document_type': doctype }, 'date_fieldname')
+	dt = get_patient_history_config_dt(doctype)
+
+	return frappe.db.get_value(dt, { 'document_type': doctype }, 'date_fieldname')
 
 
 def get_patient_history_fields(doc):
 	import json
-	patient_history_fields = frappe.db.get_value('Patient History Custom Document Type',
-		{ 'document_type': doc.doctype }, 'selected_fields')
+	dt = get_patient_history_config_dt(doc.doctype)
+	patient_history_fields = frappe.db.get_value(dt, { 'document_type': doc.doctype }, 'selected_fields')
 
 	if patient_history_fields:
 		return json.loads(patient_history_fields)
@@ -99,6 +104,13 @@ def get_formatted_value_for_table_field(items, df):
 		create_head = False
 		table_row += '</tr>'
 
-	html += "<table class='table table-condensed table-bordered'>" + table_head +  table_row + '</table>'
+	html += "<table class='table table-condensed table-bordered'>" + table_head +  table_row + "</table>"
 
 	return html
+
+
+def get_patient_history_config_dt(doctype):
+	if frappe.db.get_value('DocType', doctype, 'custom'):
+		return 'Patient History Custom Document Type'
+	else:
+		return 'Patient History Standard Document Type'
