@@ -254,7 +254,7 @@ let add_to_records = function(me, data) {
 };
 
 let add_date_separator = function(data) {
-	let date = frappe.datetime.str_to_obj(data.creation);
+	let date = frappe.datetime.str_to_obj(data.communication_date);
 	let pdate = '';
 	let diff = frappe.datetime.get_day_diff(frappe.datetime.get_today(), frappe.datetime.obj_to_str(date));
 
