@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "document_type",
+  "date_fieldname",
   "add_edit_fields",
   "selected_fields"
  ],
@@ -29,12 +30,20 @@
    "fieldtype": "Button",
    "in_list_view": 1,
    "label": "Add / Edit Fields"
+  },
+  {
+   "fieldname": "date_fieldname",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Date Fieldname",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-28 18:57:30.446348",
+ "modified": "2020-11-30 12:15:14.940935",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient History Standard Document Type",
