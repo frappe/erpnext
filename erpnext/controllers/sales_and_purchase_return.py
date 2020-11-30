@@ -206,35 +206,26 @@ def get_already_returned_items(doc):
 def get_returned_qty_map_for_row(row_name, doctype):
 	child_doctype = doctype + " Item"
 	reference_field = frappe.scrub(child_doctype) if doctype == "Purchase Receipt" else "dn_detail"
-	reference_field = "child." + reference_field
-	columns = ""
+
+	fields = [
+		"sum(abs(`tab{0}`.qty)) as qty".format(child_doctype),
+		"sum(abs(`tab{0}`.stock_qty)) as stock_qty".format(child_doctype)
+	]
 
 	if doctype == "Purchase Receipt":
-		columns += ", sum(abs(child.rejected_qty)) as rejected_qty, \
-			sum(abs(child.received_qty)) as received_qty, \
-			sum(abs(child.received_stock_qty)) as received_stock_qty"
+		fields += [
+			"sum(abs(`tab{0}`.rejected_qty)) as rejected_qty".format(child_doctype),
+			"sum(abs(`tab{0}`.received_qty)) as received_qty".format(child_doctype),
+			"sum(abs(`tab{0}`.received_stock_qty)) as received_stock_qty".format(child_doctype)
+		]
 
-	data = frappe.db.sql("""
-		select
-			sum(abs(child.qty)) as qty,
-			sum(abs(child.stock_qty)) as stock_qty,
-			%(columns)s
-		from
-			`tab{0}` child, `tab{1}` parent
-		where
-			child.parent = parent.name
-			and parent.docstatus = 1
-			and parent.is_return = 1
-			and {2} = %(row_name)s
-		""".format(child_doctype, doctype, reference_field),
-		{
-			"row_name": row_name,
-			"columns": columns,
-			"child_doctype": child_doctype,
-			"doctype": doctype,
-			"reference_field": reference_field
-		},
-		as_dict=1)
+	data = frappe.db.get_list(doctype,
+		fields = fields,
+		filters = [
+			[doctype, "docstatus", "=", 1],
+			[doctype, "is_return", "=", 1],
+			[child_doctype, reference_field, "=", row_name]
+	])
 
 	return data[0]
 
