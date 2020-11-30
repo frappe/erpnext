@@ -13,7 +13,7 @@ frappe.ui.form.on('Patient History Settings', {
 		});
 	},
 
-	field_selector: function(frm, doc) {
+	field_selector: function(frm, doc, standard=1) {
 		let document_fields = (JSON.parse(doc.selected_fields)).map(f => f.fieldname);
 		let d = new frappe.ui.Dialog({
 			title: __('{0} Fields', [__(doc.document_type)]),
@@ -45,8 +45,12 @@ frappe.ui.form.on('Patient History Settings', {
 					});
 				}
 			}
+			let doctype = 'Patient History Custom Document Type';
+			if (standard)
+				doctype = 'Patient History Standard Document Type';
 
-			frappe.model.set_value('Patient History Custom Document Type', doc.name, 'selected_fields', JSON.stringify(selected_fields));
+
+			frappe.model.set_value(doctype, doc.name, 'selected_fields', JSON.stringify(selected_fields));
 			d.hide();
 		});
 
@@ -75,6 +79,15 @@ frappe.ui.form.on('Patient History Settings', {
 });
 
 frappe.ui.form.on('Patient History Custom Document Type', {
+	add_edit_fields: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.document_type) {
+			frm.events.field_selector(frm, row, standard=0);
+		}
+	}
+});
+
+frappe.ui.form.on('Patient History Standard Document Type', {
 	add_edit_fields: function(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.document_type) {
