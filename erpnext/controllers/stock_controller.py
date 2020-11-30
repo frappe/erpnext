@@ -103,8 +103,8 @@ class StockController(AccountsController):
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
 						# expense account/ target_warehouse / source_warehouse
-						if item_row.get('target_warehouse') or item_row.get('from_warehouse'):
-							warehouse = item_row.get('target_warehouse') or item_row.get('from_warehouse')
+						if item_row.get('target_warehouse'):
+							warehouse = item_row.get('target_warehouse')
 							expense_account = warehouse_account[warehouse]["account"]
 						else:
 							expense_account = item_row.expense_account

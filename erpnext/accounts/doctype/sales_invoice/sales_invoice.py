@@ -579,7 +579,12 @@ class SalesInvoice(SellingController):
 		"""
 
 		if self.is_internal_transfer() and not self.inter_company_account:
-			self.inter_company_account = frappe.get_cached_value('Company', self.company, 'default_inter_company_account')
+			inter_company_account = frappe.get_cached_value('Company', self.company, 'default_inter_company_account')
+
+			if not inter_company_account:
+				msg = _("Please select inter-company account or add default inter-company account for company {0}").format(
+						frappe.bold(self.company))
+				frappe.throw(msg)
 
 	def is_internal_transfer(self):
 		"""
@@ -845,27 +850,28 @@ class SalesInvoice(SellingController):
 
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
-		if not self.is_internal_transfer():
-			for item in self.get("items"):
-				if flt(item.base_net_amount, item.precision("base_net_amount")):
-					if item.is_fixed_asset:
-						asset = frappe.get_doc("Asset", item.asset)
+		for item in self.get("items"):
+			if flt(item.base_net_amount, item.precision("base_net_amount")):
+				if item.is_fixed_asset:
+					asset = frappe.get_doc("Asset", item.asset)
 
-						if (len(asset.finance_books) > 1 and not item.finance_book
-							and asset.finance_books[0].finance_book):
-							frappe.throw(_("Select finance book for the item {0} at row {1}")
-								.format(item.item_code, item.idx))
+					if (len(asset.finance_books) > 1 and not item.finance_book
+						and asset.finance_books[0].finance_book):
+						frappe.throw(_("Select finance book for the item {0} at row {1}")
+							.format(item.item_code, item.idx))
 
-						fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
-							item.base_net_amount, item.finance_book)
+					fixed_asset_gl_entries = get_gl_entries_on_asset_disposal(asset,
+						item.base_net_amount, item.finance_book)
 
-						for gle in fixed_asset_gl_entries:
-							gle["against"] = self.customer
-							gl_entries.append(self.get_gl_dict(gle, item=item))
+					for gle in fixed_asset_gl_entries:
+						gle["against"] = self.customer
+						gl_entries.append(self.get_gl_dict(gle, item=item))
 
-						asset.db_set("disposal_date", self.posting_date)
-						asset.set_status("Sold" if self.docstatus==1 else None)
-					else:
+					asset.db_set("disposal_date", self.posting_date)
+					asset.set_status("Sold" if self.docstatus==1 else None)
+				else:
+					# Do not book income for transfer within same company
+					if not self.is_internal_transfer():
 						income_account = (item.income_account
 							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
