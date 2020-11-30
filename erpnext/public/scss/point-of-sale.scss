@@ -1067,6 +1067,7 @@
 							display: flex;
 							text-align: right;
 							margin-left: var(--margin-md);
+							justify-content: flex-end;
 	
 							> .item-disc {
 								color: var(--dark-green-500);
