@@ -18,7 +18,27 @@ frappe.ui.form.on('Patient History Settings', {
 		if (doc.selected_fields)
 			document_fields = (JSON.parse(doc.selected_fields)).map(f => f.fieldname);
 
-		let doctype_fields = frm.events.get_doctype_fields(frm, doc.document_type, document_fields);
+		frm.call({
+			method: 'get_doctype_fields',
+			doc: frm.doc,
+			args: {
+				document_type: doc.document_type,
+				fields: document_fields
+			},
+			freeze: true,
+			callback: function(r) {
+				if (r.message) {
+					let doctype = 'Patient History Custom Document Type';
+					if (standard)
+						doctype = 'Patient History Standard Document Type';
+
+					frm.events.show_field_selector_dialog(frm, doc, doctype, r.message);
+				}
+			}
+		});
+	},
+
+	show_field_selector_dialog: function(frm, doc, doctype, doc_fields) {
 		let d = new frappe.ui.Dialog({
 			title: __('{0} Fields', [__(doc.document_type)]),
 			fields: [
@@ -26,7 +46,7 @@ frappe.ui.form.on('Patient History Settings', {
 					label: __('Select Fields'),
 					fieldtype: 'MultiCheck',
 					fieldname: 'fields',
-					options: doctype_fields,
+					options: doc_fields,
 					columns: 2
 				}
 			]
@@ -49,9 +69,6 @@ frappe.ui.form.on('Patient History Settings', {
 					});
 				}
 			}
-			let doctype = 'Patient History Custom Document Type';
-			if (standard)
-				doctype = 'Patient History Standard Document Type';
 
 			d.refresh();
 			frappe.model.set_value(doctype, doc.name, 'selected_fields', JSON.stringify(selected_fields));
@@ -59,26 +76,6 @@ frappe.ui.form.on('Patient History Settings', {
 		});
 
 		d.show();
-	},
-
-	get_doctype_fields(frm, document_type, fields) {
-		let multiselect_fields = [];
-
-		frappe.model.with_doctype(document_type, () => {
-			// get doctype fields
-			frappe.get_doc('DocType', document_type).fields.forEach(field => {
-				if (!in_list(frappe.model.no_value_type, field.fieldtype) ||
-					in_list(frappe.model.table_fields, field.fieldtype) && !field.hidden) {
-					multiselect_fields.push({
-						label: field.label,
-						value: field.fieldname,
-						checked: in_list(fields, field.fieldname)
-					});
-				}
-			});
-		});
-
-		return multiselect_fields;
 	}
 });
 
