@@ -137,7 +137,7 @@
    "reqd": 1
   },
   {
-   "depends_on": "salary_structure",
+   "depends_on": "employee",
    "fieldname": "payroll_payable_account",
    "fieldtype": "Link",
    "label": "Payroll Payable Account",
@@ -146,7 +146,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-05 16:59:04.831473",
+ "modified": "2020-11-30 18:07:48.251311",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",

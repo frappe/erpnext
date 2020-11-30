@@ -63,5 +63,14 @@ frappe.ui.form.on('Salary Structure Assignment', {
 		else{
 			frm.set_value("company", null);
 		}
+	},
+
+	company: function(frm) {
+		debugger;
+		if (frm.doc.company) {
+			frappe.db.get_value("Company", frm.doc.company, "default_payroll_payable_account", (r) => {
+				frm.set_value("payroll_payable_account", r.default_payroll_payable_account);
+			})
+		}
 	}
 });
