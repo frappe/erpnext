@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import _
 from frappe.utils import cstr
 from frappe.model.document import Document
@@ -23,6 +24,21 @@ class PatientHistorySettings(Document):
 			if field.fieldtype not in ['Date', 'Datetime']:
 				frappe.throw(_('Row #{0}: Field {1} in Document Type {2} is not a Date / Datetime field.').format(
 					entry.idx, frappe.bold(entry.date_fieldname), frappe.bold(entry.document_type)))
+
+	def get_doctype_fields(self, document_type, fields):
+		multicheck_fields = []
+		doc_fields = frappe.get_meta(document_type).fields
+
+		for field in doc_fields:
+			if field.fieldtype not in frappe.model.no_value_fields or \
+				field.fieldtype in frappe.model.table_fields and not field.hidden:
+				multicheck_fields.append({
+					'label': field.label,
+					'value': field.fieldname,
+					'checked': 1 if field.fieldname in fields else 0
+				})
+
+		return multicheck_fields
 
 
 def create_medical_record(doc, method=None):
@@ -100,7 +116,6 @@ def get_date_field(doctype):
 
 
 def get_patient_history_fields(doc):
-	import json
 	dt = get_patient_history_config_dt(doc.doctype)
 	patient_history_fields = frappe.db.get_value(dt, { 'document_type': doc.doctype }, 'selected_fields')
 
