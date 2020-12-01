@@ -675,7 +675,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							apply_discount_after_taxes: item.apply_discount_after_taxes,
 							allow_zero_valuation_rate: item.allow_zero_valuation_rate,
 							tax_category: me.frm.doc.tax_category,
-							item_tax_template: item.item_tax_template,
 							child_docname: item.name,
 						}
 					},
