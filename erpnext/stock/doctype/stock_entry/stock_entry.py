@@ -12,6 +12,7 @@ from erpnext.stock.get_item_details import get_bin_details, get_default_cost_cen
 	get_reserved_qty_for_so, get_hide_item_code
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
+from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
@@ -800,6 +801,7 @@ class StockEntry(StockController):
 		item = item[0]
 		item_group_defaults = get_item_group_defaults(item.name, self.company)
 		brand_defaults = get_brand_defaults(item.name, self.company)
+		item_source_defaults = get_item_source_defaults(item.name, self.company)
 
 		ret = frappe._dict({
 			'uom'			      	: item.stock_uom,
@@ -808,7 +810,7 @@ class StockEntry(StockController):
 			'image'					: item.image,
 			'item_name' 		  	: item.item_name,
 			'hide_item_code'		: get_hide_item_code(args, item),
-			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, brand_defaults, company=self.company),
+			'cost_center'			: get_default_cost_center(args, item, item_group_defaults, brand_defaults, item_source_defaults, company=self.company),
 			'qty'					: args.get("qty"),
 			'transfer_qty'			: args.get('qty'),
 			'conversion_factor'		: 1,

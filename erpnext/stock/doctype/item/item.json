@@ -1067,12 +1067,11 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "default": "Local",
    "fieldname": "item_source",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Item Source",
-   "options": "Local\nImported"
+   "options": "Item Source"
   },
   {
    "fieldname": "default_supplier",
@@ -1191,7 +1190,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-11-30 13:51:30.031906",
+ "modified": "2020-12-01 18:56:32.070285",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
