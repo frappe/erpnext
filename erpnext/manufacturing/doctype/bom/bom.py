@@ -169,7 +169,7 @@ class BOM(WebsiteGenerator):
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: flt(rate) * (flt(self.conversion_rate) or 1),
-			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture'], 0),
+			 'include_item_in_manufacturing': cint(args.get('transfer_for_manufacture')),
 			 'sourced_by_supplier'		: args.get('sourced_by_supplier', 0)
 		}
 
