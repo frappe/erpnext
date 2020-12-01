@@ -99,7 +99,10 @@ class calculate_taxes_and_totals(object):
 	def calculate_item_values(self):
 		if not self.discount_amount_applied:
 			for item in self.doc.get("items"):
-				self.doc.round_floats_in(item)
+				exclude_round_fieldnames = []
+				if item.margin_type == "Percentage":
+					exclude_round_fieldnames.append('margin_rate_or_amount')
+				self.doc.round_floats_in(item, excluding=exclude_round_fieldnames)
 
 				if item.discount_percentage == 100:
 					item.rate = 0.0
