@@ -34,6 +34,7 @@ class JournalEntry(AccountsController):
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
+		self.validate_debit_credit_amount()
 		self.validate_total_debit_and_credit()
 		self.validate_against_jv()
 		self.validate_reference_doc()
@@ -339,8 +340,7 @@ class JournalEntry(AccountsController):
 						currency=account_currency)
 
 				if flt(voucher_total) < (flt(order.advance_paid) + total):
-					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
+					frappe.throw(_("Advance paid against {0} {1} cannot be greater than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
@@ -368,6 +368,11 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
 			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
+
+	def validate_debit_credit_amount(self):
+		for d in self.get('accounts'):
+			if not flt(d.debit) and not flt(d.credit):
+				frappe.throw(_("Row {0}: Both Debit and Credit values cannot be zero").format(d.idx))
 
 	def validate_total_debit_and_credit(self):
 		self.set_total_debit_credit()
