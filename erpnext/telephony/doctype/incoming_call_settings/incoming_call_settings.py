@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from datetime import datetime
 from typing import Tuple
+from frappe import _
 
 class IncomingCallSettings(Document):
 	def validate(self):
