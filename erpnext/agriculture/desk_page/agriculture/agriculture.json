@@ -38,6 +38,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Crop",
@@ -47,6 +48,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Crop Cycle",
@@ -56,6 +58,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Location",
@@ -72,6 +75,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Plant Analysis",
@@ -81,6 +85,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Soil Analysis",
@@ -90,6 +95,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Water Analysis",
@@ -99,6 +105,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Soil Texture",
@@ -108,6 +115,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Weather",
@@ -117,6 +125,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Agriculture Analysis Criteria",
@@ -133,6 +142,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Disease",
@@ -142,6 +152,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Fertilizer",
@@ -151,7 +162,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:42.501139",
+ "modified": "2020-12-01 12:33:59.698335",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Agriculture",

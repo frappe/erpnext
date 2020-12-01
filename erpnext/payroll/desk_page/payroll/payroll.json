@@ -48,6 +48,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Component",
@@ -57,6 +58,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Structure",
@@ -66,6 +68,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Structure Assignment",
@@ -75,6 +78,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payroll Entry",
@@ -84,6 +88,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Slip",
@@ -100,6 +105,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payroll Period",
@@ -109,6 +115,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Income Tax Slab",
@@ -118,6 +125,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Other Income",
@@ -127,6 +135,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Declaration",
@@ -136,6 +145,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Proof Submission",
@@ -145,6 +155,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Category",
@@ -154,6 +165,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Sub Category",
@@ -170,6 +182,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Additional Salary",
@@ -179,6 +192,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Retention Bonus",
@@ -188,6 +202,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Incentive",
@@ -197,6 +212,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Benefit Application",
@@ -206,6 +222,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Benefit Claim",
@@ -222,6 +239,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Salary Register",
@@ -231,6 +249,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Salary Payments Based On Payment Mode",
@@ -240,6 +259,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Salary Payments via ECS",
@@ -249,6 +269,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Income Tax Deductions",
@@ -258,6 +279,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Professional Tax Deductions",
@@ -267,6 +289,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Provident Fund Deductions",
@@ -276,6 +299,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Payroll Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Bank Remittance",
@@ -285,7 +309,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:40.644642",
+ "modified": "2020-12-01 12:34:01.478995",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll",

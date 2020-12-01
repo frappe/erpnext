@@ -54,6 +54,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Customer",
@@ -63,6 +64,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Customer",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quotation",
@@ -72,6 +74,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Customer",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Order",
@@ -81,6 +84,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Customer",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Invoice",
@@ -90,6 +94,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Customer",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Blanket Order",
@@ -99,6 +104,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Partner",
@@ -108,6 +114,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Customer",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Person",
@@ -124,6 +131,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item",
@@ -133,6 +141,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Price List",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Price",
@@ -142,6 +151,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Price List",
@@ -151,6 +161,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Group",
@@ -160,6 +171,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Product Bundle",
@@ -169,6 +181,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Promotional Scheme",
@@ -178,6 +191,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Pricing Rule",
@@ -187,6 +201,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Shipping Rule",
@@ -196,6 +211,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Coupon Code",
@@ -212,6 +228,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Selling Settings",
@@ -221,6 +238,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Terms and Conditions Template",
@@ -230,6 +248,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Taxes and Charges Template",
@@ -239,6 +258,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Lead Source",
@@ -248,6 +268,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Customer Group",
@@ -257,6 +278,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Contact",
@@ -266,6 +288,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Address",
@@ -275,6 +298,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Territory",
@@ -284,6 +308,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Campaign",
@@ -300,6 +325,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Analytics",
@@ -309,6 +335,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Order Analysis",
@@ -318,6 +345,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Funnel",
@@ -327,6 +355,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Order Trends",
@@ -336,6 +365,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Quotation",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Quotation Trends",
@@ -345,6 +375,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Customer",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Customer Acquisition and Loyalty",
@@ -354,6 +385,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Inactive Customers",
@@ -363,6 +395,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Person-wise Transaction Summary",
@@ -372,6 +405,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item-wise Sales History",
@@ -388,6 +422,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Lead",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Lead Details",
@@ -397,6 +432,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Address",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Customer Addresses And Contacts",
@@ -406,6 +442,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Available Stock for Packing Items",
@@ -415,6 +452,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Pending SO Items For Purchase Request",
@@ -424,6 +462,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Delivery Note",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Delivery Note Trends",
@@ -433,6 +472,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Invoice Trends",
@@ -442,6 +482,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Customer",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Customer Credit Balance",
@@ -451,6 +492,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Customer",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Customers Without Any Sales Transactions",
@@ -460,6 +502,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Customer",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Partners Commission",
@@ -469,6 +512,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Territory Target Variance Based On Item Group",
@@ -478,6 +522,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Person Target Variance Based On Item Group",
@@ -487,6 +532,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Partner Target Variance Based On Item Group",
@@ -496,7 +542,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:38.357500",
+ "modified": "2020-12-01 12:34:03.259945",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling",

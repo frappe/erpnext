@@ -53,6 +53,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Type",
@@ -62,6 +63,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Application",
@@ -71,6 +73,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan",
@@ -87,6 +90,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Grant Application",
@@ -103,6 +107,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Member",
@@ -112,6 +117,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Membership",
@@ -121,6 +127,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Membership Type",
@@ -130,6 +137,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Membership Settings",
@@ -146,6 +154,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Volunteer",
@@ -155,6 +164,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Volunteer Type",
@@ -171,6 +181,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Chapter",
@@ -187,6 +198,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Donor",
@@ -196,6 +208,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Donor Type",
@@ -205,7 +218,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:42.271279",
+ "modified": "2020-12-01 12:33:59.867233",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",

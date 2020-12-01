@@ -108,6 +108,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Company",
@@ -117,6 +118,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Chart of Accounts",
@@ -126,6 +128,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Accounts Settings",
@@ -135,6 +138,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Fiscal Year",
@@ -144,6 +148,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Accounting Dimension",
@@ -153,6 +158,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Finance Book",
@@ -162,6 +168,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Accounting Period",
@@ -171,6 +178,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payment Term",
@@ -187,6 +195,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Journal Entry",
@@ -196,6 +205,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Journal Entry Template",
@@ -205,6 +215,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "General Ledger",
@@ -214,6 +225,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Customer Ledger Summary",
@@ -223,6 +235,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Supplier Ledger Summary",
@@ -239,6 +252,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Invoice",
@@ -248,6 +262,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Customer",
@@ -257,6 +272,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payment Entry",
@@ -266,6 +282,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payment Request",
@@ -275,6 +292,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Accounts Receivable",
@@ -284,6 +302,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Accounts Receivable Summary",
@@ -293,6 +312,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Register",
@@ -302,6 +322,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item-wise Sales Register",
@@ -311,6 +332,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Order Analysis",
@@ -320,6 +342,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Delivered Items To Be Billed",
@@ -336,6 +359,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Invoice",
@@ -345,6 +369,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier",
@@ -354,6 +379,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payment Entry",
@@ -363,6 +389,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Accounts Payable",
@@ -372,6 +399,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Accounts Payable Summary",
@@ -381,6 +409,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Register",
@@ -390,6 +419,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item-wise Purchase Register",
@@ -399,6 +429,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Order Analysis",
@@ -408,6 +439,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Received Items To Be Billed",
@@ -424,6 +456,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Trial Balance for Party",
@@ -433,6 +466,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Journal Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Payment Period Based On Invoice Date",
@@ -442,6 +476,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Partners Commission",
@@ -451,6 +486,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Customer",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Customer Credit Balance",
@@ -460,6 +496,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Payment Summary",
@@ -469,6 +506,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Address",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Address And Contacts",
@@ -478,6 +516,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "DATEV Export",
@@ -494,6 +533,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Trial Balance",
@@ -503,6 +543,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Profit and Loss Statement",
@@ -512,6 +553,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Balance Sheet",
@@ -521,6 +563,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Cash Flow",
@@ -530,6 +573,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Consolidated Financial Statement",
@@ -546,6 +590,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Currency",
@@ -555,6 +600,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Currency Exchange",
@@ -564,6 +610,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Exchange Rate Revaluation",
@@ -580,6 +627,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payment Gateway Account",
@@ -589,6 +637,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Terms and Conditions Template",
@@ -598,6 +647,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Mode of Payment",
@@ -614,6 +664,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Bank",
@@ -623,6 +674,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Bank Account",
@@ -632,6 +684,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Bank Clearance",
@@ -641,6 +694,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Bank Reconciliation",
@@ -650,6 +704,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Bank Reconciliation Statement",
@@ -659,6 +714,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Bank Statement Transaction Entry",
@@ -668,6 +724,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Bank Statement Settings",
@@ -684,6 +741,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Subscription Plan",
@@ -693,6 +751,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Subscription",
@@ -702,6 +761,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Subscription Settings",
@@ -718,6 +778,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "GST Settings",
@@ -727,6 +788,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "GST HSN Code",
@@ -736,6 +798,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "GSTR-1",
@@ -745,6 +808,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "GSTR-2",
@@ -754,6 +818,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "GSTR 3B Report",
@@ -763,6 +828,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "GST Sales Register",
@@ -772,6 +838,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "GST Purchase Register",
@@ -781,6 +848,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "GST Itemised Sales Register",
@@ -790,6 +858,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "GST Itemised Purchase Register",
@@ -799,6 +868,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "C-Form",
@@ -808,6 +878,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Lower Deduction Certificate",
@@ -824,6 +895,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Shareholder",
@@ -833,6 +905,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Share Transfer",
@@ -842,6 +915,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Share Transfer",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Share Ledger",
@@ -851,6 +925,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Share Transfer",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Share Balance",
@@ -867,6 +942,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Chart of Cost Centers",
@@ -876,6 +952,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Budget",
@@ -885,6 +962,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Accounting Dimension",
@@ -894,6 +972,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Cost Center",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Budget Variance Report",
@@ -903,6 +982,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Monthly Distribution",
@@ -919,6 +999,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Opening Invoice Creation Tool",
@@ -928,6 +1009,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Chart of Accounts Importer",
@@ -937,6 +1019,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Period Closing Voucher",
@@ -953,6 +1036,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sales Taxes and Charges Template",
@@ -962,6 +1046,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Taxes and Charges Template",
@@ -971,6 +1056,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Tax Template",
@@ -980,6 +1066,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Tax Category",
@@ -989,6 +1076,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Tax Rule",
@@ -998,6 +1086,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Tax Withholding Category",
@@ -1014,6 +1103,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Gross Profit",
@@ -1023,6 +1113,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Profitability Analysis",
@@ -1032,6 +1123,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Invoice Trends",
@@ -1041,6 +1133,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Invoice",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Invoice Trends",
@@ -1050,7 +1143,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:37.583879",
+ "modified": "2020-12-01 12:34:03.892648",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",

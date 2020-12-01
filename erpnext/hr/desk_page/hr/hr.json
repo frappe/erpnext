@@ -103,6 +103,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee",
@@ -112,6 +113,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employment Type",
@@ -121,6 +123,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Branch",
@@ -130,6 +133,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Department",
@@ -139,6 +143,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Designation",
@@ -148,6 +153,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Grade",
@@ -157,6 +163,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Group",
@@ -166,6 +173,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Health Insurance",
@@ -182,6 +190,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Job Applicant",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Onboarding",
@@ -191,6 +200,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Skill Map",
@@ -200,6 +210,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Promotion",
@@ -209,6 +220,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Transfer",
@@ -218,6 +230,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Separation",
@@ -227,6 +240,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Onboarding Template",
@@ -236,6 +250,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Separation Template",
@@ -252,6 +267,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Shift Type",
@@ -261,6 +277,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Shift Request",
@@ -270,6 +287,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Shift Assignment",
@@ -286,6 +304,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Leave Application",
@@ -295,6 +314,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Leave Allocation",
@@ -304,6 +324,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Leave Type",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Leave Policy",
@@ -313,6 +334,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Leave Period",
@@ -322,6 +344,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Leave Type",
@@ -331,6 +354,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Holiday List",
@@ -340,6 +364,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Compensatory Leave Request",
@@ -349,6 +374,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Leave Encashment",
@@ -358,6 +384,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Leave Block List",
@@ -367,6 +394,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Leave Application",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Employee Leave Balance",
@@ -383,6 +411,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Structure",
@@ -392,6 +421,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Salary Structure, Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Structure Assignment",
@@ -401,6 +431,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payroll Entry",
@@ -410,6 +441,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Slip",
@@ -419,6 +451,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Payroll Period",
@@ -428,6 +461,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Income Tax Slab",
@@ -437,6 +471,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Salary Component",
@@ -446,6 +481,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Additional Salary",
@@ -455,6 +491,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Retention Bonus",
@@ -464,6 +501,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Incentive",
@@ -473,6 +511,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Salary Register",
@@ -489,6 +528,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Attendance Tool",
@@ -498,6 +538,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Attendance",
@@ -507,6 +548,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Attendance Request",
@@ -516,6 +558,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Upload Attendance",
@@ -525,6 +568,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Checkin",
@@ -534,6 +578,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Attendance",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Monthly Attendance Sheet",
@@ -550,6 +595,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Expense Claim",
@@ -559,6 +605,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Advance",
@@ -575,6 +622,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "HR Settings",
@@ -584,6 +632,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Daily Work Summary Group",
@@ -593,6 +642,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Team Updates",
@@ -609,6 +659,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Vehicle",
@@ -618,6 +669,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Vehicle Log",
@@ -627,6 +679,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Vehicle",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Vehicle Expenses",
@@ -643,6 +696,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Job Opening",
@@ -652,6 +706,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Job Applicant",
@@ -661,6 +716,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Job Offer",
@@ -670,6 +726,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Staffing Plan",
@@ -686,6 +743,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Application",
@@ -695,6 +753,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan",
@@ -704,6 +763,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Type",
@@ -720,6 +780,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Training Program",
@@ -729,6 +790,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Training Event",
@@ -738,6 +800,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Training Result",
@@ -747,6 +810,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Training Feedback",
@@ -763,6 +827,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Employee Birthday",
@@ -772,6 +837,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Employees working on a holiday",
@@ -788,6 +854,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Appraisal",
@@ -797,6 +864,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Appraisal Template",
@@ -806,6 +874,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Energy Point Rule",
@@ -815,6 +884,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Energy Point Log",
@@ -831,6 +901,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Declaration",
@@ -840,6 +911,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Proof Submission",
@@ -849,6 +921,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee, Payroll Period",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Other Income",
@@ -858,6 +931,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Benefit Application",
@@ -867,6 +941,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Benefit Claim",
@@ -876,6 +951,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Category",
@@ -885,6 +961,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Employee",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Employee Tax Exemption Sub Category",
@@ -894,7 +971,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:43.807222",
+ "modified": "2020-12-01 12:33:58.806820",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",

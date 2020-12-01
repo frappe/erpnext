@@ -68,6 +68,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item",
@@ -77,6 +78,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Group",
@@ -86,6 +88,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Product Bundle",
@@ -95,6 +98,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Price List",
@@ -104,6 +108,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Price",
@@ -113,6 +118,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Shipping Rule",
@@ -122,6 +128,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Pricing Rule",
@@ -131,6 +138,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Alternative",
@@ -140,6 +148,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Manufacturer",
@@ -149,6 +158,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Customs Tariff Number",
@@ -165,6 +175,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Material Request",
@@ -174,6 +185,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Stock Entry",
@@ -183,6 +195,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Customer",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Delivery Note",
@@ -192,6 +205,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Supplier",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Receipt",
@@ -201,6 +215,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Pick List",
@@ -210,6 +225,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Delivery Trip",
@@ -226,6 +242,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Stock Ledger",
@@ -235,6 +252,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Stock Balance",
@@ -244,6 +262,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Stock Projected Qty",
@@ -253,6 +272,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Stock Summary",
@@ -262,6 +282,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Stock Ageing",
@@ -271,6 +292,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item Price Stock",
@@ -287,6 +309,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Stock Settings",
@@ -296,6 +319,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Warehouse",
@@ -305,6 +329,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Unit of Measure (UOM)",
@@ -314,6 +339,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Variant Settings",
@@ -323,6 +349,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Brand",
@@ -332,6 +359,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Attribute",
@@ -341,6 +369,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "UOM Conversion Factor",
@@ -357,6 +386,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Serial No",
@@ -366,6 +396,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Batch",
@@ -375,6 +406,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Installation Note",
@@ -384,6 +416,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Serial No",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Serial No Service Contract Expiry",
@@ -393,6 +426,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Serial No",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Serial No Status",
@@ -402,6 +436,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Serial No",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Serial No Warranty Expiry",
@@ -418,6 +453,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Stock Reconciliation",
@@ -427,6 +463,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Landed Cost Voucher",
@@ -436,6 +473,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Packing Slip",
@@ -445,6 +483,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Inspection",
@@ -454,6 +493,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Inspection Template",
@@ -463,6 +503,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quick Stock Balance",
@@ -479,6 +520,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Item Price",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item-wise Price List Rate",
@@ -488,6 +530,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Stock Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Stock Analytics",
@@ -497,6 +540,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Stock Qty vs Serial No Count",
@@ -506,6 +550,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Delivery Note",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Delivery Note Trends",
@@ -515,6 +560,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Receipt",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Receipt Trends",
@@ -524,6 +570,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Sales Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Sales Order Analysis",
@@ -533,6 +580,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Order Analysis",
@@ -542,6 +590,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Bin",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item Shortage Report",
@@ -551,6 +600,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Batch",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Batch-Wise Balance History",
@@ -567,6 +617,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Material Request",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Requested Items To Be Transferred",
@@ -576,6 +627,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Stock Ledger Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Batch Item Expiry Status",
@@ -585,6 +637,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Price List",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item Prices",
@@ -594,6 +647,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Itemwise Recommended Reorder Level",
@@ -603,6 +657,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item Variant Details",
@@ -612,6 +667,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Subcontracted Raw Materials To Be Transferred",
@@ -621,6 +677,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Purchase Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Subcontracted Item To Be Received",
@@ -630,6 +687,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Stock Ledger Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Stock and Account Value Comparison",
@@ -639,7 +697,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:38.783880",
+ "modified": "2020-12-01 12:34:02.711315",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",

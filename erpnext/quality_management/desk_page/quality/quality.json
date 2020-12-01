@@ -43,6 +43,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Goal",
@@ -52,6 +53,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Procedure",
@@ -61,6 +63,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Tree of Procedures",
@@ -77,6 +80,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Feedback",
@@ -86,6 +90,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Feedback Template",
@@ -102,6 +107,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Meeting",
@@ -118,6 +124,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Non Conformance",
@@ -127,6 +134,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Review",
@@ -136,6 +144,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quality Action",
@@ -145,7 +154,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:37.174448",
+ "modified": "2020-12-01 12:34:04.570323",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",

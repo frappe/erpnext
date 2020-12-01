@@ -43,6 +43,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Project",
@@ -52,6 +53,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Task",
@@ -61,6 +63,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Project Template",
@@ -70,6 +73,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Project Type",
@@ -79,6 +83,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Project",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Project Update",
@@ -95,6 +100,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Timesheet",
@@ -104,6 +110,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Activity Type",
@@ -113,6 +120,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Activity Type",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Activity Cost",
@@ -129,6 +137,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Timesheet",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Daily Timesheet Summary",
@@ -138,6 +147,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Project",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Project wise Stock Tracking",
@@ -147,6 +157,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Project",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Project Billing Summary",
@@ -156,7 +167,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:41.526145",
+ "modified": "2020-12-01 12:34:00.578885",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
