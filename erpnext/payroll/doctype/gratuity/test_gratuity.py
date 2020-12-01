@@ -6,16 +6,18 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, make_earning_salary_component
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import make_employee_salary_slip, make_earning_salary_component, \
+	make_deduction_salary_component
 from erpnext.payroll.doctype.gratuity.gratuity import get_last_salary_slip
 from erpnext.regional.united_arab_emirates.setup import create_gratuity_rule
 from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account
 from frappe.utils import getdate, add_days, get_datetime, flt
 
-test_dependencies = ["Salary Component", "Salary Slip"]
+test_dependencies = ["Salary Component", "Salary Slip", "Account"]
 class TestGratuity(unittest.TestCase):
 	def setUp(self):
-		make_earning_salary_component()
+		make_earning_salary_component(setup=True, test_tax=True, company_list=['_Test Company'])
+		make_deduction_salary_component(setup=True, test_tax=True, company_list=['_Test Company'])
 		frappe.db.sql("DELETE FROM `tabGratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
@@ -39,14 +41,11 @@ class TestGratuity(unittest.TestCase):
 		employee_total_workings_days = (get_datetime(relieving_date) - get_datetime(date_of_joining)).days
 
 		experience = employee_total_workings_days/rule.total_working_days_per_year
-
 		gratuity.reload()
-
 		from math import floor
-
 		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
-		#amount Calculation 6
+		#amount Calculation
 		component_amount = frappe.get_list("Salary Detail",
 		filters={
 			"docstatus": 1,
@@ -80,7 +79,7 @@ class TestGratuity(unittest.TestCase):
 		gratuity.payroll_date = getdate()
 		gratuity.expense_account = "Payment Account - _TC"
 		gratuity.payable_account = payable_account
-		gratuity.mode_of_payment = "Cheque"
+		gratuity.mode_of_payment = "Cash"
 
 		gratuity.save()
 		gratuity.submit()
@@ -97,7 +96,7 @@ class TestGratuity(unittest.TestCase):
 
 		self.assertEqual(floor(experience), gratuity.current_work_experience)
 
-		#amount Calculation 6
+		#amount Calculation
 		component_amount = frappe.get_list("Salary Detail",
 		filters={
 			"docstatus": 1,
@@ -150,13 +149,29 @@ def get_gratuity_rule(name):
 	return rule
 
 def set_mode_of_payment_account():
-	mode_of_payment = frappe.get_doc("Mode of Payment", "Cheque")
+	if not frappe.db.exists("Account", "Payment Account - _TC"):
+		mode_of_payment = create_account()
+	else:
+		mode_of_payment = frappe.get_doc("Mode of Payment", "Cash")
+
 	mode_of_payment.accounts = []
 	mode_of_payment.append("accounts", {
 		"company": "_Test Company",
 		"default_account": "_Test Bank - _TC"
 	})
 	mode_of_payment.save()
+
+def create_account():
+	return frappe.get_doc({
+			"doctype": "Account",
+			"company": "_Test Company",
+			"account_name": "Payment Account",
+			"root_type": "Asset",
+			"report_type": "Balance Sheet",
+			"currency": "INR",
+			"parent_account": "Bank Accounts - _TC",
+			"account_type": "Bank",
+		}).insert(ignore_permissions=True)
 
 def create_employee_and_get_last_salary_slip():
 	employee = make_employee("test_employee@salary.com", company='_Test Company')
