@@ -815,13 +815,6 @@ $.extend(erpnext.item, {
 					options: "UOM",
 					default: frm.doc.alt_uom,
 					description: __('Will update Contents UOM in all transactions')
-				},
-				{
-					label: __("New Per Unit"),
-					fieldname: "alt_uom_size",
-					fieldtype: "Float",
-					default: frm.doc.alt_uom_size,
-					description: __('Will NOT update Per Unit and Contents Qty in transactions')
 				}
 			],
 		});
