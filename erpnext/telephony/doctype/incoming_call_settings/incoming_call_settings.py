@@ -26,7 +26,7 @@ class IncomingCallSettings(Document):
 			to_time = self.time_to_seconds(record.to_time)
 			if from_time >= to_time:
 				errors.append(
-					f'Call Schedule Row {record.idx}: To time slot should always be ahead of From time slot.'
+					_('Call Schedule Row {0}: To time slot should always be ahead of From time slot.').format(record.idx)
 				)
 
 		if errors:
@@ -46,7 +46,7 @@ class IncomingCallSettings(Document):
 
 			for i in range(1, len(timeslots)):
 				if self.check_timeslots_overlap(timeslots[i-1], timeslots[i]):
-					frappe.throw(f"Please fix overlapping time slots for {day}.")
+					frappe.throw(_('Please fix overlapping time slots for {0}.').format(day))
 
 	@staticmethod
 	def check_timeslots_overlap(ts1: Tuple[int, int], ts2: Tuple[int, int]) -> bool:
