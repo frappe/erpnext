@@ -197,7 +197,7 @@ def merge_pos_invoices(pos_invoices=[], closing_entry={}):
 	invoices = pos_invoices or closing_entry.pos_transactions or get_all_unconsolidated_invoices()
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
-	if len(invoices) >= 1 and closing_entry:
+	if len(invoices) >= 10 and closing_entry:
 		enqueue_create_merge_logs(invoice_by_customer, closing_entry)
 		closing_entry.set_status(update=True, status='Queued')
 	else:
