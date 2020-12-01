@@ -1,21 +1,4 @@
 {
- "cards": [
-  {
-   "hidden": 0,
-   "label": "Crops & Lands",
-   "links": "[\n    {\n        \"label\": \"Crop\",\n        \"name\": \"Crop\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Crop Cycle\",\n        \"name\": \"Crop Cycle\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Location\",\n        \"name\": \"Location\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    }\n]"
-  },
-  {
-   "hidden": 0,
-   "label": "Analytics",
-   "links": "[\n    {\n        \"label\": \"Plant Analysis\",\n        \"name\": \"Plant Analysis\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Soil Analysis\",\n        \"name\": \"Soil Analysis\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Water Analysis\",\n        \"name\": \"Water Analysis\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Soil Texture\",\n        \"name\": \"Soil Texture\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Weather\",\n        \"name\": \"Weather\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Agriculture Analysis Criteria\",\n        \"name\": \"Agriculture Analysis Criteria\",\n        \"type\": \"doctype\"\n    }\n]"
-  },
-  {
-   "hidden": 0,
-   "label": "Diseases & Fertilizers",
-   "links": "[\n    {\n        \"label\": \"Disease\",\n        \"name\": \"Disease\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Fertilizer\",\n        \"name\": \"Fertilizer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    }\n]"
-  }
- ],
  "category": "Domains",
  "charts": [],
  "creation": "2020-03-02 17:23:34.339274",
@@ -162,7 +145,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 12:33:59.698335",
+ "modified": "2020-12-01 13:38:38.477493",
  "modified_by": "Administrator",
  "module": "Agriculture",
  "name": "Agriculture",
