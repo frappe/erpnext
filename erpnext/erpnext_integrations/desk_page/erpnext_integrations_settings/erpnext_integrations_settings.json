@@ -1,11 +1,4 @@
 {
- "cards": [
-  {
-   "hidden": 0,
-   "label": "Integrations Settings",
-   "links": "[\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Woocommerce Settings\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Shopify Settings\",\n\t\t\"description\": \"Connect Shopify with ERPNext\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Amazon MWS Settings\",\n\t\t\"description\": \"Connect Amazon with ERPNext\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Plaid Settings\",\n\t\t\"description\": \"Connect your bank accounts to ERPNext\"\n\t},\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Exotel Settings\",\n\t\t\"description\": \"Connect your Exotel Account to ERPNext and track call logs\"\n    }\n]"
-  }
- ],
  "category": "Modules",
  "charts": [],
  "creation": "2020-07-31 10:38:54.021237",
@@ -78,7 +71,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 12:34:05.074849",
+ "modified": "2020-12-01 13:38:34.732552",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations Settings",

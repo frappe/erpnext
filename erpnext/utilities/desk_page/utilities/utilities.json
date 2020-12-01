@@ -1,11 +1,4 @@
 {
- "cards": [
-  {
-   "hidden": 0,
-   "label": "Video",
-   "links": "[\n    {\n        \"description\": \"Video\",\n        \"label\": \"Video\",\n        \"name\": \"Video\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Video settings\",\n        \"label\": \"Video Settings\",\n        \"name\": \"Video Settings\",\n        \"type\": \"doctype\"\n    }\n]"
-  }
- ],
  "category": "Modules",
  "charts": [],
  "creation": "2020-09-10 12:21:22.335307",
@@ -47,7 +40,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 12:34:02.280074",
+ "modified": "2020-12-01 13:38:36.711884",
  "modified_by": "Administrator",
  "module": "Utilities",
  "name": "Utilities",

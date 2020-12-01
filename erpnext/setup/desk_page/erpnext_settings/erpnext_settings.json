@@ -1,5 +1,4 @@
 {
- "cards": [],
  "category": "Modules",
  "charts": [],
  "creation": "2020-03-12 14:47:51.166455",
@@ -15,7 +14,7 @@
  "is_standard": 1,
  "label": "ERPNext Settings",
  "links": [],
- "modified": "2020-12-01 12:34:00.741011",
+ "modified": "2020-12-01 13:38:37.759596",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "ERPNext Settings",

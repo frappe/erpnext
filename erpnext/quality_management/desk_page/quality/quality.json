@@ -1,26 +1,4 @@
 {
- "cards": [
-  {
-   "hidden": 0,
-   "label": "Goal and Procedure",
-   "links": "[\n    {\n        \"description\": \"Quality Goal.\",\n        \"label\": \"Quality Goal\",\n        \"name\": \"Quality Goal\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Quality Procedure.\",\n        \"label\": \"Quality Procedure\",\n        \"name\": \"Quality Procedure\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Tree of Quality Procedures.\",\n        \"icon\": \"fa fa-sitemap\",\n        \"label\": \"Tree of Procedures\",\n        \"name\": \"Quality Procedure\",\n        \"route\": \"#Tree/Quality Procedure\",\n        \"type\": \"doctype\"\n    }\n]"
-  },
-  {
-   "hidden": 0,
-   "label": "Feedback",
-   "links": "[\n    {\n        \"description\": \"Quality Feedback\",\n        \"label\": \"Quality Feedback\",\n        \"name\": \"Quality Feedback\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Quality Feedback Template\",\n        \"label\": \"Quality Feedback Template\",\n        \"name\": \"Quality Feedback Template\",\n        \"type\": \"doctype\"\n    }\n]"
-  },
-  {
-   "hidden": 0,
-   "label": "Meeting",
-   "links": "[\n    {\n        \"description\": \"Quality Meeting\",\n        \"label\": \"Quality Meeting\",\n        \"name\": \"Quality Meeting\",\n        \"type\": \"doctype\"\n    }\n]"
-  },
-  {
-   "hidden": 0,
-   "label": "Review and Action",
-   "links": "[\n    {\n        \"description\": \"Non Conformance\",\n        \"label\": \"Non Conformance\",\n        \"name\": \"Non Conformance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Quality Review\",\n        \"label\": \"Quality Review\",\n        \"name\": \"Quality Review\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Quality Action\",\n        \"label\": \"Quality Action\",\n        \"name\": \"Quality Action\",\n        \"type\": \"doctype\"\n    }\n]"
-  }
- ],
  "category": "Modules",
  "charts": [],
  "creation": "2020-03-02 15:49:28.632014",
@@ -154,7 +132,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 12:34:04.570323",
+ "modified": "2020-12-01 13:38:35.120213",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
