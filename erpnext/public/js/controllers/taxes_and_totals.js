@@ -109,13 +109,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		var me = this;
 		if (!this.discount_amount_applied) {
 			$.each(this.frm.doc["items"] || [], function(i, item) {
+				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
+
 				var exclude_round_fieldnames = [];
-				if (item.margin_type === "Percentage") {
+				if (has_margin_field && item.margin_type === "Percentage") {
 					exclude_round_fieldnames.push('margin_rate_or_amount');
 				}
 				frappe.model.round_floats_in(item, null, exclude_round_fieldnames);
 
-				var has_margin_field = frappe.meta.has_field(item.doctype, 'margin_type');
 				var rate_before_discount;
 
 				if(has_margin_field && flt(item.rate_with_margin)) {

@@ -99,8 +99,10 @@ class calculate_taxes_and_totals(object):
 	def calculate_item_values(self):
 		if not self.discount_amount_applied:
 			for item in self.doc.get("items"):
+				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
+
 				exclude_round_fieldnames = []
-				if item.margin_type == "Percentage":
+				if has_margin_field and item.margin_type == "Percentage":
 					exclude_round_fieldnames.append('margin_rate_or_amount')
 				self.doc.round_floats_in(item, excluding=exclude_round_fieldnames)
 
@@ -113,8 +115,6 @@ class calculate_taxes_and_totals(object):
 						item.discount_amount = item.price_list_rate * (item.discount_percentage / 100.0)
 					elif item.discount_amount and item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
-
-				has_margin_field = item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']
 
 				if has_margin_field:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
