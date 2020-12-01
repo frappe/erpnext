@@ -46,6 +46,13 @@ frappe.ui.form.on("Item", {
 			}, __("View"));
 		}
 
+		const cant_change_fields = (frm.doc.__onload && frm.doc.__onload.cant_change_fields) || [];
+		if(frm.has_perm("write") && (cant_change_fields.includes('stock_uom') || cant_change_fields.includes('alt_uom'))) {
+			frm.add_custom_button(__("Unit of Measure"), function () {
+				erpnext.item.change_uom(frm);
+			}, __("Change"))
+		}
+
 		if (!frm.doc.is_fixed_asset) {
 			erpnext.item.make_dashboard(frm);
 		}
@@ -112,7 +119,6 @@ frappe.ui.form.on("Item", {
 		const alt_uom_readonly = (!frm.doc.__islocal && frm.doc.alt_uom && flt(frm.doc.alt_uom_size)) ? 1 : 0;
 		frm.set_df_property('alt_uom_size', 'read_only', alt_uom_readonly);
 
-		const cant_change_fields = (frm.doc.__onload && frm.doc.__onload.cant_change_fields) || [];
 		cant_change_fields.forEach((fieldname) => {
 			frm.set_df_property(fieldname, 'read_only', 1);
 		});
@@ -788,6 +794,59 @@ $.extend(erpnext.item, {
 			frm.toggle_display("attributes", false);
 		}
 		frm.layout.refresh_sections();
+	},
+
+	change_uom: function (frm) {
+		var dialog = new frappe.ui.Dialog({
+			title: "Edit UOM",
+			fields: [
+				{
+					label:__("New Default UOM"),
+					fieldname: "stock_uom",
+					fieldtype: "Link",
+					options: "UOM",
+					default: frm.doc.stock_uom,
+					description: __('Will update Default UOM in all transactions and prices')
+				},
+				{
+					label:__("New Contents UOM"),
+					fieldname: "alt_uom",
+					fieldtype: "Link",
+					options: "UOM",
+					default: frm.doc.alt_uom,
+					description: __('Will update Contents UOM in all transactions')
+				},
+				{
+					label: __("New Per Unit"),
+					fieldname: "alt_uom_size",
+					fieldtype: "Float",
+					default: frm.doc.alt_uom_size,
+					description: __('Will NOT update Per Unit and Contents Qty in transactions')
+				}
+			],
+		});
+
+		dialog.set_primary_action(__("Update"), function() {
+			var values = dialog.get_values();
+			frappe.call({
+				method: "erpnext.stock.doctype.item.item.change_uom",
+				freeze: 1,
+				args: {
+					"item_code": frm.doc.name,
+					"stock_uom": cstr(values.stock_uom),
+					"alt_uom": cstr(values.alt_uom),
+					"alt_uom_size": cstr(values.alt_uom_size),
+				},
+				callback: function(r) {
+					if (!r.exc) {
+						frm.reload_doc();
+					}
+					dialog.hide();
+				}
+			});
+		});
+
+		dialog.show();
 	}
 });
 

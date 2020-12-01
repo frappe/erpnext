@@ -1054,7 +1054,7 @@ class Item(WebsiteGenerator):
 
 			if before_save_values:
 				for field in self._cant_change_fields:
-					if has_changed(field) and self.check_if_cant_change_field(field):
+					if has_changed(field) and not self.flags.get('force_allow_change', {}).get(field) and self.check_if_cant_change_field(field):
 						frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}")
 							.format(self.name, frappe.bold(self.meta.get_label(field))))
 
@@ -1384,6 +1384,96 @@ def get_override_naming_by(item_group_name=None, brand_name=None, validate_item_
 		"override_naming_by": override_naming_by,
 		"override_naming_series": override_naming_series
 	})
+
+@frappe.whitelist()
+def change_uom(item_code, stock_uom=None, alt_uom=None, alt_uom_size=None):
+	item = frappe.get_doc("Item", item_code)
+	item.check_permission('write')
+
+	alt_uom_size = flt(alt_uom_size, item.precision('alt_uom_size'))
+	alt_uom = cstr(alt_uom)
+
+	change_stock_uom = stock_uom and stock_uom != item.stock_uom
+	change_alt_uom = alt_uom != item.alt_uom
+	change_alt_uom_size = (alt_uom or item.alt_uom) and alt_uom_size and alt_uom_size != flt(item.alt_uom_size, item.precision('alt_uom_size'))
+
+	if not change_stock_uom and not change_alt_uom and not change_alt_uom_size:
+		frappe.throw(_("Nothing to change"))
+
+	one_uom_dts = ['Bin', 'Stock Ledger Entry',
+		'Product Bundle Item', 'Packed Item',
+		'Purchase Receipt Item Supplied', 'Purchase Order Item Supplied',
+		'Item Price', 'Pricing Rule Item Code',
+		'Production Plan Item', 'Job Card Item', 'BOM', 'BOM Scrap Item', 'BOM Explosion Item', 'Work Order',
+		'Material Request Plan Item']
+	two_uom_dts = ['Pick List Item', 'Request for Quotation Item', 'Material Request Item', 'BOM Item']
+	three_uom_dts = ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item',
+		'Supplier Quotation Item', 'Purchase Order Item', 'Purchase Receipt Item', 'Purchase Invoice Item',
+		'Stock Entry Detail']
+
+	all_dts = one_uom_dts + two_uom_dts + three_uom_dts
+
+	args = {'item_code': item_code,
+		'stock_uom': stock_uom, 'old_stock_uom': item.stock_uom,
+		'alt_uom': alt_uom, 'alt_uom_size': alt_uom_size,
+		'modified': frappe.utils.now(), 'user': frappe.session.user}
+
+	non_standard_item_field = {
+		"Purchase Receipt Item Supplied": "rm_item_code",
+		"Purchase Order Item Supplied": "rm_item_code",
+		"Work Order": "production_item",
+		"BOM": "item"
+	}
+
+	for dt in all_dts:
+		item_field = non_standard_item_field.get(dt) or 'item_code'
+
+		if change_stock_uom and frappe.get_meta(dt).has_field('stock_uom'):
+			frappe.db.sql("""update `tab{0}`
+				set stock_uom = %(stock_uom)s, modified = %(modified)s, modified_by = %(user)s
+				where {1} = %(item_code)s""".format(dt, item_field), args)
+
+		if change_stock_uom and frappe.get_meta(dt).has_field('uom'):
+			frappe.db.sql("""update `tab{0}`
+				set uom = %(stock_uom)s, modified = %(modified)s, modified_by = %(user)s
+				where {1} = %(item_code)s and uom = %(old_stock_uom)s""".format(dt, item_field), args)
+
+		if change_alt_uom and frappe.get_meta(dt).has_field('alt_uom'):
+			frappe.db.sql("""update `tab{0}`
+				set alt_uom = %(alt_uom)s, modified = %(modified)s, modified_by = %(user)s
+				where {1} = %(item_code)s""".format(dt, item_field), args)
+
+	def change_uom_in_table(old_uom, new_uom):
+		if new_uom:
+			from_uoms = [d for d in item.uom_conversion_graph if d.from_uom == old_uom]
+			to_uoms = [d for d in item.uom_conversion_graph if d.to_uom == old_uom]
+			for d in from_uoms:
+				d.from_uom = new_uom
+			for d in to_uoms:
+				d.to_uom = new_uom
+
+	if change_stock_uom:
+		change_uom_in_table(item.stock_uom, stock_uom)
+		item.stock_uom = stock_uom
+	if change_alt_uom:
+		change_uom_in_table(item.alt_uom, alt_uom)
+		item.alt_uom = alt_uom
+	if change_alt_uom_size:
+		uom_conversion_row = [d for d in item.uom_conversion_graph if {d.from_uom, d.to_uom} == {item.stock_uom, item.alt_uom}]
+		for d in uom_conversion_row:
+			d.from_qty = 1.0
+			d.from_uom = item.stock_uom
+			d.to_qty = alt_uom_size
+			d.to_uom = item.alt_uom
+
+		item.alt_uom_size = alt_uom_size
+
+	item.flags.force_allow_change = {
+		"stock_uom": change_stock_uom,
+		"alt_uom": change_alt_uom,
+		"alt_uom_size": change_alt_uom or change_alt_uom_size
+	}
+	item.save()
 
 def update_variants(variants, template, publish_progress=True):
 	count=0
