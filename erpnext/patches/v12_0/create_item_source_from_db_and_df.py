@@ -6,6 +6,8 @@ import frappe
 from frappe.utils import cstr
 
 def execute():
+	frappe.reload_doc("setup", "doctype", "item_source")
+
 	to_create = []
 
 	item_meta = frappe.get_meta("Item")
