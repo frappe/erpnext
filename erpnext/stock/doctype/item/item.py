@@ -1443,21 +1443,28 @@ def change_uom(item_code, stock_uom=None, alt_uom=None, alt_uom_size=None):
 				set alt_uom = %(alt_uom)s, modified = %(modified)s, modified_by = %(user)s
 				where {1} = %(item_code)s""".format(dt, item_field), args)
 
-	def change_uom_in_table(old_uom, new_uom):
+	def get_uom_rows_to_update(old_uom, new_uom):
 		if new_uom:
-			from_uoms = [d for d in item.uom_conversion_graph if d.from_uom == old_uom]
-			to_uoms = [d for d in item.uom_conversion_graph if d.to_uom == old_uom]
-			for d in from_uoms:
-				d.from_uom = new_uom
-			for d in to_uoms:
-				d.to_uom = new_uom
+			from_uoms = [(d, 'from_uom', new_uom) for d in item.uom_conversion_graph if d.from_uom == old_uom]
+			to_uoms = [(d, 'to_uom', new_uom) for d in item.uom_conversion_graph if d.to_uom == old_uom]
+			return from_uoms + to_uoms
+		else:
+			return []
+
+	uom_rows_to_update = []
+	if change_stock_uom:
+		uom_rows_to_update += get_uom_rows_to_update(item.stock_uom, stock_uom)
+	if change_alt_uom:
+		uom_rows_to_update += get_uom_rows_to_update(item.alt_uom, alt_uom)
+
+	for d, fieldname, value in uom_rows_to_update:
+		d.set(fieldname, value)
 
 	if change_stock_uom:
-		change_uom_in_table(item.stock_uom, stock_uom)
 		item.stock_uom = stock_uom
 	if change_alt_uom:
-		change_uom_in_table(item.alt_uom, alt_uom)
 		item.alt_uom = alt_uom
+
 	if change_alt_uom_size:
 		uom_conversion_row = [d for d in item.uom_conversion_graph if {d.from_uom, d.to_uom} == {item.stock_uom, item.alt_uom}]
 		for d in uom_conversion_row:
