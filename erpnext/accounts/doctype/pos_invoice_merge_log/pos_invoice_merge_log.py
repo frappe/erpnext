@@ -5,10 +5,13 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
-from frappe.model.document import Document
 from frappe.model.mapper import map_doc
 from frappe.model import default_fields
+from frappe.model.document import Document
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.scheduler import is_scheduler_inactive
+from frappe.core.page.background_jobs.background_jobs import get_info
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 
 from six import iteritems
 
@@ -169,7 +172,7 @@ class POSInvoiceMergeLog(Document):
 			doc.set_status(update=True)
 			doc.save()
 
-def get_all_invoices():
+def get_all_unconsolidated_invoices():
 	filters = {
 		'consolidated_invoice': [ 'in', [ '', None ]],
 		'status': ['not in', ['Consolidated']],
@@ -180,7 +183,7 @@ def get_all_invoices():
 	
 	return pos_invoices
 
-def get_invoices_customer_map(pos_invoices):
+def get_invoice_customer_map(pos_invoices):
 	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }
 	pos_invoice_customer_map = {}
 	for invoice in pos_invoices:
@@ -190,20 +193,53 @@ def get_invoices_customer_map(pos_invoices):
 	
 	return pos_invoice_customer_map
 
-def merge_pos_invoices(pos_invoices=[]):
-	if not pos_invoices:
-		pos_invoices = get_all_invoices()
-	
-	pos_invoice_map = get_invoices_customer_map(pos_invoices)
-	create_merge_logs(pos_invoice_map)
+def merge_pos_invoices(pos_invoices=[], closing_entry={}):
+	invoices = pos_invoices or closing_entry.pos_transactions or get_all_unconsolidated_invoices()
+	invoice_by_customer = get_invoice_customer_map(invoices)
 
-def create_merge_logs(pos_invoice_customer_map):
-	for customer, invoices in iteritems(pos_invoice_customer_map):
+	if len(invoices) >= 1 and closing_entry:
+		enqueue_create_merge_logs(invoice_by_customer, closing_entry)
+		closing_entry.set_status(update=True, status='Queued')
+	else:
+		create_merge_logs(invoice_by_customer, closing_entry)
+
+def create_merge_logs(invoice_by_customer, closing_entry={}):
+	for customer, invoices in iteritems(invoice_by_customer):
 		merge_log = frappe.new_doc('POS Invoice Merge Log')
 		merge_log.posting_date = getdate(nowdate())
 		merge_log.customer = customer
+		merge_log.pos_closing_entry = closing_entry.get('name', None)
 
 		merge_log.set('pos_invoices', invoices)
 		merge_log.save(ignore_permissions=True)
 		merge_log.submit()
+	
+	if closing_entry:
+		closing_entry.set_status(update=True, status='Submitted')
+		closing_entry.update_opening_entry()
 
+def enqueue_create_merge_logs(invoice_by_customer, closing_entry):
+	check_scheduler_status()
+
+	job_name = closing_entry.get("name")
+	if not job_already_enqueued(job_name):
+		enqueue(
+			create_merge_logs,
+			queue="long",
+			timeout=10000,
+			event="creating_merge_logs",
+			job_name=job_name,
+			closing_entry=closing_entry,
+			invoice_by_customer=invoice_by_customer,
+			now=0
+		)
+		frappe.msgprint(_('POS Invoices will be merged in a background process'), alert=1)
+
+def check_scheduler_status():
+	if is_scheduler_inactive() and not frappe.flags.in_test:
+		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
+
+def job_already_enqueued(job_name):
+	enqueued_jobs = [d.get("job_name") for d in get_info()]
+	if job_name in enqueued_jobs:
+		return True

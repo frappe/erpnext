@@ -13,7 +13,6 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 class TestPOSClosingEntry(unittest.TestCase):
 	def test_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
-
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
