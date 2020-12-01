@@ -644,8 +644,7 @@ erpnext.PointOfSale.Controller = class {
 			})
 		} else if (available_qty < qty_needed) {
 			frappe.show_alert({
-				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.',
-					[bold_item_code, bold_warehouse, bold_available_qty]),
+				message: __('Stock quantity not enough for Item Code: {0} under warehouse {1}. Available quantity {2}.', [bold_item_code, bold_warehouse, bold_available_qty]),
 				indicator: 'orange'
 			});
 			frappe.utils.play_sound("error");
