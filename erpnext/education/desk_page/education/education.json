@@ -93,6 +93,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student",
@@ -102,6 +103,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Instructor",
@@ -111,6 +113,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Guardian",
@@ -120,6 +123,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Group",
@@ -129,6 +133,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Log",
@@ -145,6 +150,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Program",
@@ -154,6 +160,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Course",
@@ -163,6 +170,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Topic",
@@ -172,6 +180,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Room",
@@ -188,6 +197,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Article",
@@ -197,6 +207,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Video",
@@ -206,6 +217,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quiz",
@@ -222,6 +234,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Education Settings",
@@ -231,6 +244,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Category",
@@ -240,6 +254,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Batch Name",
@@ -249,6 +264,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Grading Scale",
@@ -258,6 +274,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Academic Term",
@@ -267,6 +284,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Academic Year",
@@ -283,6 +301,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Applicant",
@@ -292,6 +311,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Admission",
@@ -301,6 +321,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Program Enrollment",
@@ -310,6 +331,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Course Enrollment",
@@ -326,6 +348,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Fee Structure",
@@ -335,6 +358,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Fee Category",
@@ -344,6 +368,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Fee Schedule",
@@ -353,6 +378,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Fees",
@@ -362,6 +388,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Fees",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Student Fee Collection Report",
@@ -371,6 +398,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Fees",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Program wise Fee Collection Report",
@@ -387,6 +415,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Course Schedule",
@@ -396,6 +425,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Course Scheduling Tool",
@@ -412,6 +442,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Attendance",
@@ -421,6 +452,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Leave Application",
@@ -430,6 +462,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Student Attendance",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Student Monthly Attendance Sheet",
@@ -439,6 +472,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Student Attendance",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Absent Student Report",
@@ -448,6 +482,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Student Attendance",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Student Batch-Wise Attendance",
@@ -464,6 +499,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Course Enrollment",
@@ -473,6 +509,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Course Activity",
@@ -482,6 +519,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Quiz Activity",
@@ -498,6 +536,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Assessment Plan",
@@ -507,6 +546,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Assessment Group",
@@ -516,6 +556,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Assessment Result",
@@ -525,6 +566,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Assessment Criteria",
@@ -541,6 +583,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Assessment Result",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Course wise Assessment Report",
@@ -550,6 +593,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Assessment Result",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Final Assessment Grades",
@@ -559,6 +603,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Assessment Plan",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Assessment Plan Status",
@@ -568,6 +613,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Report Generation Tool",
@@ -584,6 +630,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Attendance Tool",
@@ -593,6 +640,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Assessment Result Tool",
@@ -602,6 +650,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Student Group Creation Tool",
@@ -611,6 +660,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Program Enrollment Tool",
@@ -620,6 +670,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Course Scheduling Tool",
@@ -636,6 +687,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Program Enrollment",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Student and Guardian Contact Details",
@@ -645,7 +697,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:40.981880",
+ "modified": "2020-12-01 12:34:01.016251",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education",

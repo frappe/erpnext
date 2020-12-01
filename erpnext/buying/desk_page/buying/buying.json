@@ -70,6 +70,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Material Request",
@@ -79,6 +80,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Supplier",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Order",
@@ -88,6 +90,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Supplier",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Invoice",
@@ -97,6 +100,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Supplier",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Request for Quotation",
@@ -106,6 +110,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, Supplier",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier Quotation",
@@ -122,6 +127,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item",
@@ -131,6 +137,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Price",
@@ -140,6 +147,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Price List",
@@ -149,6 +157,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Product Bundle",
@@ -158,6 +167,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item Group",
@@ -167,6 +177,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Promotional Scheme",
@@ -176,6 +187,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Pricing Rule",
@@ -192,6 +204,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Buying Settings",
@@ -201,6 +214,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Purchase Taxes and Charges Template",
@@ -210,6 +224,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Terms and Conditions Template",
@@ -226,6 +241,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier",
@@ -235,6 +251,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier Group",
@@ -244,6 +261,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Contact",
@@ -253,6 +271,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Address",
@@ -269,6 +288,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier Scorecard",
@@ -278,6 +298,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier Scorecard Variable",
@@ -287,6 +308,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier Scorecard Criteria",
@@ -296,6 +318,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Supplier Scorecard Standing",
@@ -312,6 +335,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Analytics",
@@ -321,6 +345,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Order Analysis",
@@ -330,6 +355,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Supplier-Wise Sales Analytics",
@@ -339,6 +365,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Items to Order and Receive",
@@ -348,6 +375,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Order Trends",
@@ -357,6 +385,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Procurement Tracker",
@@ -373,6 +402,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Items To Be Requested",
@@ -382,6 +412,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Item-wise Purchase History",
@@ -391,6 +422,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Receipt Trends",
@@ -400,6 +432,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Purchase Invoice Trends",
@@ -409,6 +442,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Subcontracted Raw Materials To Be Transferred",
@@ -418,6 +452,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Subcontracted Item To Be Received",
@@ -427,6 +462,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Supplier Quotation Comparison",
@@ -436,6 +472,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Material Requests for which Supplier Quotations are not created",
@@ -445,6 +482,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Supplier Addresses And Contacts",
@@ -461,6 +499,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Import Supplier Invoice",
@@ -470,7 +509,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:43.304970",
+ "modified": "2020-12-01 12:33:59.349265",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying",

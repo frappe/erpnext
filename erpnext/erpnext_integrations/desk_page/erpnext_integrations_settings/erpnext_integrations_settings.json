@@ -28,6 +28,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Woocommerce Settings",
@@ -37,6 +38,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Shopify Settings",
@@ -46,6 +48,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Amazon MWS Settings",
@@ -55,6 +58,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Plaid Settings",
@@ -64,6 +68,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Exotel Settings",
@@ -73,7 +78,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:36.389137",
+ "modified": "2020-12-01 12:34:05.074849",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "ERPNext Integrations Settings",

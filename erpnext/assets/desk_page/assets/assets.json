@@ -43,6 +43,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset",
@@ -52,6 +53,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Location",
@@ -61,6 +63,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Category",
@@ -70,6 +73,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Movement",
@@ -86,6 +90,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance Team",
@@ -95,6 +100,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Asset Maintenance Team",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance",
@@ -104,6 +110,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Asset Maintenance",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance Log",
@@ -113,6 +120,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Asset",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Value Adjustment",
@@ -122,6 +130,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Asset",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Repair",
@@ -138,6 +147,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Asset",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Asset Depreciation Ledger",
@@ -147,6 +157,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Asset",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Asset Depreciations and Balances",
@@ -156,6 +167,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Asset Maintenance",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Asset Maintenance",
@@ -165,7 +177,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:41.714472",
+ "modified": "2020-12-01 12:34:00.417242",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Assets",

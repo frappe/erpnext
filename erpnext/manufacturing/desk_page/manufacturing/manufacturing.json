@@ -52,6 +52,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Item, BOM",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Work Order",
@@ -61,6 +62,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item, BOM",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Production Plan",
@@ -70,6 +72,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Stock Entry",
@@ -79,6 +82,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Job Card",
@@ -88,6 +92,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Downtime Entry",
@@ -104,6 +109,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Item",
@@ -113,6 +119,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Item",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Bill of Materials",
@@ -122,6 +129,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Workstation",
@@ -131,6 +139,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Operation",
@@ -140,6 +149,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Routing",
@@ -156,6 +166,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "Work Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Production Planning Report",
@@ -165,6 +176,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Work Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Work Order Summary",
@@ -174,6 +186,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Quality Inspection",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Quality Inspection Summary",
@@ -183,6 +196,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Downtime Entry",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Downtime Analysis",
@@ -192,6 +206,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Job Card",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Job Card Summary",
@@ -201,6 +216,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "BOM",
    "hidden": 0,
    "is_query_report": 1,
    "label": "BOM Search",
@@ -210,6 +226,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "BOM",
    "hidden": 0,
    "is_query_report": 1,
    "label": "BOM Stock Report",
@@ -219,6 +236,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "Work Order",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Production Analytics",
@@ -228,6 +246,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "BOM",
    "hidden": 0,
    "is_query_report": 1,
    "label": "BOM Operations Time",
@@ -244,6 +263,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "BOM Update Tool",
@@ -253,6 +273,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "BOM Comparison Tool",
@@ -269,6 +290,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Manufacturing Settings",
@@ -278,7 +300,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:44.426761",
+ "modified": "2020-12-01 12:33:58.367406",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",

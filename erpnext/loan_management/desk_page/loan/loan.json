@@ -48,6 +48,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Type",
@@ -57,6 +58,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Application",
@@ -66,6 +68,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan",
@@ -82,6 +85,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Process Loan Security Shortfall",
@@ -91,6 +95,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Process Loan Interest Accrual",
@@ -107,6 +112,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Disbursement",
@@ -116,6 +122,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Repayment",
@@ -125,6 +132,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Write Off",
@@ -134,6 +142,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Interest Accrual",
@@ -150,6 +159,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Security Type",
@@ -159,6 +169,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Security Price",
@@ -168,6 +179,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Security",
@@ -177,6 +189,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Security Pledge",
@@ -186,6 +199,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Security Unpledge",
@@ -195,6 +209,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loan Security Shortfall",
@@ -211,6 +226,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Loan Repayment and Closure",
@@ -220,6 +236,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 1,
    "label": "Loan Security Status",
@@ -229,7 +246,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:39.173544",
+ "modified": "2020-12-01 12:34:02.390976",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

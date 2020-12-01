@@ -38,6 +38,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Point-of-Sale Profile",
@@ -47,6 +48,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "POS Settings",
@@ -63,6 +65,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loyalty Program",
@@ -72,6 +75,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "Loyalty Point Entry",
@@ -88,6 +92,7 @@
    "type": "Card Break"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "POS Opening Entry",
@@ -97,6 +102,7 @@
    "type": "Link"
   },
   {
+   "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
    "label": "POS Closing Entry",
@@ -106,7 +112,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-11-17 13:18:39.383674",
+ "modified": "2020-12-01 12:34:02.171186",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Retail",
