@@ -137,6 +137,8 @@ def get_items(filters):
 	else:
 		if filters.get("brand"):
 			conditions.append("item.brand=%(brand)s")
+		if filters.get("item_source"):
+			conditions.append("item.item_source=%(item_source)s")
 		if filters.get("item_group"):
 			conditions.append(get_item_group_condition(filters.get("item_group")))
 

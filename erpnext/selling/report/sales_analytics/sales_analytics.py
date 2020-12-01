@@ -111,8 +111,7 @@ class Analytics(object):
 			if include_sales_person else ""
 
 		include_supplier = self.filters.tree_type == "Supplier Group" or self.filters.supplier_group
-		supplier_table = ", `tabSupplier` sup" if include_supplier else ""
-		supplier_condition = "and sup.name = s.supplier" if include_supplier else ""
+		supplier_join = "inner join `tabSupplier` sup on sup.name = s.supplier" if include_supplier else ""
 
 		is_opening_condition = "and s.is_opening != 'Yes'" if self.filters.doctype in ['Sales Invoice', 'Purchase Invoice']\
 			else ""
@@ -129,10 +128,13 @@ class Analytics(object):
 				{entity_name_field}
 				{value_field} as value_field,
 				s.{date_field}
-			from 
-				`tab{doctype} Item` i, `tab{doctype}` s {supplier_table} {sales_team_join}
-			where i.parent = s.name and s.docstatus = 1 {supplier_condition}
-				and s.company = %(company)s and s.{date_field} between %(from_date)s and %(to_date)s
+			from `tab{doctype} Item` i
+			inner join `tab{doctype}` s on i.parent = s.name
+			left join `tabItem` im on im.name = i.item_code
+			{supplier_join}
+			{sales_team_join}
+			where s.docstatus = 1 and s.company = %(company)s
+				and s.{date_field} between %(from_date)s and %(to_date)s
 				{is_opening_condition} {filter_conditions}
 		""".format(
 			entity_field=entity_field,
@@ -141,8 +143,7 @@ class Analytics(object):
 			date_field=self.date_field,
 			doctype=self.filters.doctype,
 			sales_team_join=sales_team_join,
-			supplier_table=supplier_table,
-			supplier_condition=supplier_condition,
+			supplier_join=supplier_join,
 			is_opening_condition=is_opening_condition,
 			filter_conditions=self.get_conditions()
 		), self.filters, as_dict=1)
@@ -195,11 +196,14 @@ class Analytics(object):
 
 		if self.filters.get("item_group"):
 			lft, rgt = frappe.db.get_value("Item Group", self.filters.item_group, ["lft", "rgt"])
-			conditions.append("""i.item_group in (select name from `tabItem Group`
+			conditions.append("""im.item_group in (select name from `tabItem Group`
 					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
 		if self.filters.get("brand"):
-			conditions.append("i.brand=%(brand)s")
+			conditions.append("im.brand=%(brand)s")
+
+		if self.filters.get("item_source"):
+			conditions.append("im.item_source=%(item_source)s")
 
 		if self.filters.get("territory"):
 			lft, rgt = frappe.db.get_value("Territory", self.filters.territory, ["lft", "rgt"])

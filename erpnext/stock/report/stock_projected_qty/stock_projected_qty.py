@@ -31,6 +31,9 @@ def execute(filters=None):
 
 		if filters.brand and filters.brand != item.brand:
 			continue
+
+		if filters.item_source and filters.item_source != item.item_source:
+			continue
 			
 		elif filters.item_group and filters.item_group != item.item_group:
 			continue
@@ -171,7 +174,7 @@ def get_item_map(item_code, include_uom):
 		cf_join = "left join `tabUOM Conversion Detail` ucd on ucd.parent=item.name and ucd.uom=%(include_uom)s"
 
 	items = frappe.db.sql("""
-		select item.name, item.item_name, item.description, item.item_group, item.brand,
+		select item.name, item.item_name, item.description, item.item_group, item.brand, item.item_source,
 		item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
 		from `tabItem` item
 		{cf_join}

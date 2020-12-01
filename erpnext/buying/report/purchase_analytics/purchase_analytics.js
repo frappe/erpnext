@@ -94,6 +94,12 @@ frappe.query_reports["Purchase Analytics"] = {
 			options: "Brand"
 		},
 		{
+			fieldname: "item_source",
+			label: __("Item Source"),
+			fieldtype: "Link",
+			options: "Item Source"
+		},
+		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
 			"fieldtype": "MultiSelectList",
