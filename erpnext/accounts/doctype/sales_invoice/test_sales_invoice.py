@@ -34,11 +34,13 @@ class TestSalesInvoice(unittest.TestCase):
 
 	@classmethod
 	def setUpClass(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
 		unlink_payment_on_cancel_of_invoice()
 
 	@classmethod
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
 
 	def test_timestamp_change(self):
 		w = frappe.copy_doc(test_records[0])
@@ -690,7 +692,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
-		make_pos_profile()
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
@@ -746,7 +749,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get('payments')[0].amount, -1000)
 
 	def test_pos_change_amount(self):
-		make_pos_profile()
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
 			item_code= "_Test FG Item",warehouse= "Stores - TCP1", cost_center= "Main - TCP1")
