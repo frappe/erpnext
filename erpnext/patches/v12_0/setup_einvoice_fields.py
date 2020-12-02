@@ -31,6 +31,14 @@ def execute():
 	add_permissions()
 	add_print_formats()
 
-	frappe.db.set_value('Custom Field', { 'fieldname': 'mode_of_transport' }, 'default', '')
-	frappe.db.set_value('Custom Field', { 'fieldname': 'vehicle_no' }, 'depends_on', 'eval:doc.mode_of_transport == "Road"')
-	frappe.db.set_value('Custom Field', { 'fieldname': 'ewaybill' }, 'depends_on', 'eval:((doc.docstatus === 1 || doc.ewaybill) && doc.eway_bill_cancelled === 0)')
+	t = {
+		'mode_of_transport': [{'default': None}],
+		'ewaybill': [
+			{'depends_on': 'eval:((doc.docstatus === 1 || doc.ewaybill) && doc.eway_bill_cancelled === 0)'}
+		]
+	}
+
+	for field, conditions in t.items():
+		for c in conditions:
+			[(prop, value)] = c.items()
+			frappe.db.set_value('Custom Field', { 'fieldname': field }, prop, value)
