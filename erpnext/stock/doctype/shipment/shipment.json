@@ -234,6 +234,7 @@
    "options": "Shipment Parcel Template"
   },
   {
+   "depends_on": "eval:doc.docstatus !== 1\n",
    "fieldname": "add_template",
    "fieldtype": "Button",
    "label": "Add Template"
@@ -262,6 +263,7 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "pickup_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -269,12 +271,14 @@
    "reqd": 1
   },
   {
+   "allow_on_submit": 1,
    "default": "09:00",
    "fieldname": "pickup_from",
    "fieldtype": "Time",
    "label": "Pickup from"
   },
   {
+   "allow_on_submit": 1,
    "default": "17:00",
    "fieldname": "pickup_to",
    "fieldtype": "Time",
@@ -316,57 +320,77 @@
   {
    "fieldname": "service_provider",
    "fieldtype": "Data",
-   "label": "Service Provider"
+   "label": "Service Provider",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "shipment_id",
    "fieldtype": "Data",
-   "label": "Shipment ID"
+   "label": "Shipment ID",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "shipment_amount",
    "fieldtype": "Currency",
    "label": "Shipment Amount",
-   "precision": "2"
+   "no_copy": 1,
+   "precision": "2",
+   "print_hide": 1
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "Draft\nSubmitted\nBooked\nCancelled\nCompleted"
+   "no_copy": 1,
+   "options": "Draft\nSubmitted\nBooked\nCancelled\nCompleted",
+   "print_hide": 1
   },
   {
    "fieldname": "tracking_url",
    "fieldtype": "Small Text",
    "hidden": 1,
    "label": "Tracking URL",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
    "fieldname": "carrier",
    "fieldtype": "Data",
-   "label": "Carrier"
+   "label": "Carrier",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "carrier_service",
    "fieldtype": "Data",
-   "label": "Carrier Service"
+   "label": "Carrier Service",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "awb_number",
    "fieldtype": "Data",
-   "label": "AWB Number"
+   "label": "AWB Number",
+   "no_copy": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "tracking_status",
    "fieldtype": "Select",
    "label": "Tracking Status",
-   "options": "\nIn Progress\nDelivered\nReturned\nLost"
+   "no_copy": 1,
+   "options": "\nIn Progress\nDelivered\nReturned\nLost",
+   "print_hide": 1
   },
   {
    "fieldname": "tracking_status_info",
    "fieldtype": "Data",
    "label": "Tracking Status Info",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -406,7 +430,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-23 17:00:51.600965",
+ "modified": "2020-12-02 15:43:44.607039",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",

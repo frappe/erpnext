@@ -13,6 +13,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 class Shipment(Document):
 	def validate(self):
 		self.validate_weight()
+		self.set_value_of_goods()
 		if self.docstatus == 0:
 			self.status = 'Draft'
 
@@ -30,6 +31,12 @@ class Shipment(Document):
 		for parcel in self.shipment_parcel:
 			if flt(parcel.weight) <= 0:
 				frappe.throw(_('Parcel weight cannot be 0'))
+
+	def set_value_of_goods(self):
+		value_of_goods = 0
+		for entry in self.get("shipment_delivery_note"):
+			value_of_goods += flt(entry.get("grand_total"))
+		self.value_of_goods = value_of_goods if value_of_goods else self.value_of_goods
 
 @frappe.whitelist()
 def get_address_name(ref_doctype, docname):
