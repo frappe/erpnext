@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2018-04-12 06:32:04.582486",
@@ -175,6 +176,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "contract_template.requires_fulfilment",
    "fieldname": "requires_fulfilment",
    "fieldtype": "Check",
    "label": "Requires Fulfilment"
@@ -247,7 +249,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-30 06:56:07.257932",
+ "modified": "2020-12-02 21:12:44.118155",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
