@@ -6,9 +6,8 @@ import frappe
 import json
 from six import iteritems
 from frappe import _, scrub
-from frappe.utils import getdate, flt
+from frappe.utils import getdate, flt, add_to_date, add_days
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.stock.report.stock_analytics.stock_analytics import get_period_date_ranges
 
 def execute(filters=None):
 	return IssueAnalytics(filters).run()
@@ -17,7 +16,7 @@ class IssueAnalytics(object):
 	def __init__(self, filters=None):
 		"""Issue Analytics Report"""
 		self.filters = frappe._dict(filters or {})
-		self.periodic_daterange = get_period_date_ranges(self.filters)
+		self.get_period_date_ranges()
 
 	def run(self):
 		self.get_columns()
@@ -65,7 +64,7 @@ class IssueAnalytics(object):
 				'width': 200
 			})
 
-		for entry, end_date in self.periodic_daterange:
+		for end_date in self.periodic_daterange:
 			period = self.get_period(end_date)
 			self.columns.append({
 				'label': _(period),
@@ -73,6 +72,13 @@ class IssueAnalytics(object):
 				'fieldtype': 'Int',
 				'width': 120
 			})
+
+		self.columns.append({
+			'label': _('Total'),
+			'fieldname': 'total',
+			'fieldtype': 'Int',
+			'width': 120
+		})
 
 	def get_data(self):
 		self.get_issues()
@@ -95,6 +101,40 @@ class IssueAnalytics(object):
 			period += ' ' + str(date.year)
 
 		return period
+
+	def get_period_date_ranges(self):
+		from dateutil.relativedelta import relativedelta, MO
+		from_date, to_date = getdate(self.filters.from_date), getdate(self.filters.to_date)
+
+		increment = {
+			'Monthly': 1,
+			'Quarterly': 3,
+			'Half-Yearly': 6,
+			'Yearly': 12
+		}.get(self.filters.range, 1)
+
+		if self.filters.range in ['Monthly', 'Quarterly']:
+			from_date = from_date.replace(day=1)
+		elif self.filters.range == 'Yearly':
+			from_date = get_fiscal_year(from_date)[1]
+		else:
+			from_date = from_date + relativedelta(from_date, weekday=MO(-1))
+
+		self.periodic_daterange = []
+		for dummy in range(1, 53):
+			if self.filters.range == 'Weekly':
+				period_end_date = add_days(from_date, 6)
+			else:
+				period_end_date = add_to_date(from_date, months=increment, days=-1)
+
+			if period_end_date > to_date:
+				period_end_date = to_date
+
+			self.periodic_daterange.append(period_end_date)
+
+			from_date = add_days(period_end_date, 1)
+			if period_end_date == to_date:
+				break
 
 	def get_issues(self):
 		filters = self.get_common_filters()
@@ -138,7 +178,7 @@ class IssueAnalytics(object):
 				row = {'priority': entity}
 
 			total = 0
-			for entry, end_date in self.periodic_daterange:
+			for end_date in self.periodic_daterange:
 				period = self.get_period(end_date)
 				amount = flt(period_data.get(period, 0.0))
 				row[scrub(period)] = amount
@@ -171,7 +211,7 @@ class IssueAnalytics(object):
 
 	def get_chart_data(self):
 		length = len(self.columns)
-		labels = [d.get('label') for d in self.columns[1:length]]
+		labels = [d.get('label') for d in self.columns[1:length-1]]
 		self.chart = {
 			'data': {
 				'labels': labels,

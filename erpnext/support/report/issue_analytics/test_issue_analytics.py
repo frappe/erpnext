@@ -1,0 +1,205 @@
+from __future__ import unicode_literals
+import unittest
+import frappe
+import datetime
+from frappe.utils import getdate, add_months
+from erpnext.support.report.issue_analytics.issue_analytics import execute
+from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
+from erpnext.support.doctype.issue.test_issue import make_issue, create_customer
+from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
+
+months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
+
+class TestIssueAnalytics(unittest.TestCase):
+	def setUp(self):
+		frappe.db.sql("delete from `tabIssue`")
+		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
+		current_month_date = getdate()
+		last_month_date = add_months(current_month_date, -1)
+		self.current_month = str(months[current_month_date.month - 1]).lower()
+		self.last_month = str(months[last_month_date.month - 1]).lower()
+		create_service_level_agreements_for_issues()
+		create_issue_types()
+		create_records()
+
+	def test_customer_wise_analytics(self):
+		filters = {
+			'company': '_Test Company',
+			'based_on': 'Customer',
+			'from_date': add_months(getdate(), -1),
+			'to_date': getdate(),
+			'range': 'Monthly'
+		}
+
+		report = execute(filters)
+
+		expected_data = [
+			{
+				'customer': '__Test Customer 2',
+				self.last_month: 1.0,
+				self.current_month: 0.0,
+				'total': 1.0
+			},
+			{
+				'customer': '__Test Customer 1',
+				self.last_month: 0.0,
+				self.current_month: 1.0,
+				'total': 1.0
+			},
+			{
+				'customer': '__Test Customer',
+				self.last_month: 1.0,
+				self.current_month: 1.0,
+				'total': 2.0
+			}
+		]
+
+		self.assertEqual(expected_data, report[1]) # rows
+		self.assertEqual(len(report[0]), 4) # cols
+
+	def test_issue_type_wise_analytics(self):
+		filters = {
+			'company': '_Test Company',
+			'based_on': 'Issue Type',
+			'from_date': add_months(getdate(), -1),
+			'to_date': getdate(),
+			'range': 'Monthly'
+		}
+
+		report = execute(filters)
+
+		expected_data = [
+			{
+				'issue_type': 'Discomfort',
+				self.last_month: 1.0,
+				self.current_month: 0.0,
+				'total': 1.0
+			},
+			{
+				'issue_type': 'Service Request',
+				self.last_month: 0.0,
+				self.current_month: 1.0,
+				'total': 1.0
+			},
+			{
+				'issue_type': 'Bug',
+				self.last_month: 1.0,
+				self.current_month: 1.0,
+				'total': 2.0
+			}
+		]
+
+		self.assertEqual(expected_data, report[1]) # rows
+		self.assertEqual(len(report[0]), 4) # cols
+
+	def test_issue_priority_wise_analytics(self):
+		filters = {
+			'company': '_Test Company',
+			'based_on': 'Issue Priority',
+			'from_date': add_months(getdate(), -1),
+			'to_date': getdate(),
+			'range': 'Monthly'
+		}
+
+		report = execute(filters)
+
+		expected_data = [
+			{
+				'priority': 'Medium',
+				self.last_month: 1.0,
+				self.current_month: 1.0,
+				'total': 2.0
+			},
+			{
+				'priority': 'Low',
+				self.last_month: 1.0,
+				self.current_month: 0.0,
+				'total': 1.0
+			},
+			{
+				'priority': 'High',
+				self.last_month: 0.0,
+				self.current_month: 1.0,
+				'total': 1.0
+			}
+		]
+
+		self.assertEqual(expected_data, report[1]) # rows
+		self.assertEqual(len(report[0]), 4) # cols
+
+	def test_assignment_wise_analytics(self):
+		filters = {
+			'company': '_Test Company',
+			'based_on': 'Assigned To',
+			'from_date': add_months(getdate(), -1),
+			'to_date': getdate(),
+			'range': 'Monthly'
+		}
+
+		report = execute(filters)
+
+		expected_data = [
+			{
+				'user': 'test@example.com',
+				self.last_month: 1.0,
+				self.current_month: 1.0,
+				'total': 2.0
+			},
+			{
+				'user': 'test1@example.com',
+				self.last_month: 2.0,
+				self.current_month: 1.0,
+				'total': 3.0
+			}
+		]
+
+		self.assertEqual(expected_data, report[1]) # rows
+		self.assertEqual(len(report[0]), 4) # cols
+
+
+def create_issue_types():
+	for entry in ['Bug', 'Service Request', 'Discomfort']:
+		if not frappe.db.exists('Issue Type', entry):
+			frappe.get_doc({
+				'doctype': 'Issue Type',
+				'__newname': entry
+			}).insert()
+
+
+def create_records():
+	from frappe.desk.form.assign_to import add as add_assignment
+
+	create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
+	create_customer("__Test Customer 1", "_Test SLA Customer Group", "__Test SLA Territory")
+	create_customer("__Test Customer 2", "_Test SLA Customer Group", "__Test SLA Territory")
+
+	current_month_date = getdate()
+	last_month_date = add_months(current_month_date, -1)
+
+	issue = make_issue(current_month_date, "__Test Customer", 2, "High", "Bug")
+	add_assignment({
+		"assign_to": ["test@example.com"],
+		"doctype": "Issue",
+		"name": issue.name
+	})
+
+	issue = make_issue(last_month_date, "__Test Customer", 2, "Low", "Bug")
+	add_assignment({
+		"assign_to": ["test1@example.com"],
+		"doctype": "Issue",
+		"name": issue.name
+	})
+
+	issue = make_issue(current_month_date, "__Test Customer 1", 2, "Medium", "Service Request")
+	add_assignment({
+		"assign_to": ["test1@example.com"],
+		"doctype": "Issue",
+		"name": issue.name
+	})
+
+	issue = make_issue(last_month_date, "__Test Customer 2", 2, "Medium", "Discomfort")
+	add_assignment({
+		"assign_to": ["test@example.com", "test1@example.com"],
+		"doctype": "Issue",
+		"name": issue.name
+	})
