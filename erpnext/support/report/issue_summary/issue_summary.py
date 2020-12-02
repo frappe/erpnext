@@ -6,16 +6,13 @@ import frappe
 import json
 from six import iteritems
 from frappe import _, scrub
-from frappe.utils import getdate, flt
-from erpnext.accounts.utils import get_fiscal_year
-from erpnext.stock.report.stock_analytics.stock_analytics import get_period_date_ranges
+from frappe.utils import flt
 
 def execute(filters=None):
 	return IssueSummary(filters).run()
 
 class IssueSummary(object):
 	def __init__(self, filters=None):
-		"""Issue Summary Report"""
 		self.filters = frappe._dict(filters or {})
 
 	def run(self):
@@ -152,7 +149,6 @@ class IssueSummary(object):
 			elif self.filters.based_on == 'Issue Priority':
 				row = {'priority': entity}
 
-			total = 0
 			for status in self.statuses:
 				count = flt(data.get(status, 0.0))
 				row[scrub(status)] = count
