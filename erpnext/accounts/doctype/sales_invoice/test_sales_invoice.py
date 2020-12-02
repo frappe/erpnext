@@ -690,7 +690,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
-		make_pos_profile()
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
@@ -773,7 +774,8 @@ class TestSalesInvoice(unittest.TestCase):
 
 
 	def test_pos_change_amount(self):
-		make_pos_profile()
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
