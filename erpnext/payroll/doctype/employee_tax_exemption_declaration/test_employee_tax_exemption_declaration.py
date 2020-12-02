@@ -22,6 +22,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company": erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
@@ -39,6 +40,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
@@ -54,6 +56,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
@@ -70,6 +73,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
