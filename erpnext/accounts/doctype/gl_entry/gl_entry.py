@@ -11,7 +11,7 @@ from frappe.model.meta import get_field_precision
 from erpnext.accounts.party import validate_party_gle_currency, validate_party_frozen_disabled
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.utils import get_fiscal_year
-from erpnext.exceptions import InvalidAccountCurrency, InvalidAccountDimension, MandatoryDimension
+from erpnext.exceptions import InvalidAccountCurrency, InvalidAccountDimensionError, MandatoryAccountDimensionError
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
 from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
 from six import iteritems
@@ -101,16 +101,16 @@ class GLEntry(Document):
 			if self.account == account:
 				if value['is_mandatory'] and not self.get(dimension):
 					frappe.throw(_("{0} is mandatory for account {1}").format(
-						frappe.bold(frappe.unscrub(dimension)), frappe.bold(self.account)), MandatoryDimension)
+						frappe.bold(frappe.unscrub(dimension)), frappe.bold(self.account)), MandatoryAccountDimensionError)
 
 				if value['allow_or_restrict'] == 'Allow':
 					if self.get(dimension) and self.get(dimension) not in value['allowed_dimensions']:
 						frappe.throw(_("Invalid value {0} for account {1}").format(
-							frappe.bold(self.get(dimension)), frappe.bold(self.account)), InvalidAccountDimension)
+							frappe.bold(self.get(dimension)), frappe.bold(self.account)), InvalidAccountDimensionError)
 				else:
 					if self.get(dimension) and self.get(dimension) in value['allowed_dimensions']:
 						frappe.throw(_("Invalid value {0} for account {1}").format(
-							frappe.bold(self.get(dimension)), frappe.bold(self.account)), InvalidAccountDimension)
+							frappe.bold(self.get(dimension)), frappe.bold(self.account)), InvalidAccountDimensionError)
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
