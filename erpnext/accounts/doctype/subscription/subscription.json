@@ -13,6 +13,7 @@
   "cancelation_date",
   "trial_period_start",
   "trial_period_end",
+  "generate_new_invoices_past_due_date",
   "column_break_11",
   "current_invoice_start",
   "current_invoice_end",
@@ -183,8 +184,7 @@
    "fieldname": "invoices",
    "fieldtype": "Table",
    "label": "Invoices",
-   "options": "Subscription Invoice",
-   "read_only": 1
+   "options": "Subscription Invoice"
   },
   {
    "collapsible": 1,
@@ -195,9 +195,16 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "New invoices will be generated as per schedule even if current invoices are unpaid or past due date",
+   "fieldname": "generate_new_invoices_past_due_date",
+   "fieldtype": "Check",
+   "label": "Generate New Invoices Past Due Date"
   }
  ],
- "modified": "2020-08-27 23:30:02.504042",
+ "modified": "2020-11-29 22:46:14.879289",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
