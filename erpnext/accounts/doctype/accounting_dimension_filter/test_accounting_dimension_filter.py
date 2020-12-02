@@ -7,7 +7,7 @@ import frappe
 import unittest
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import create_dimension, disable_dimension
-from erpnext.exceptions import InvalidAccountDimension, MandatoryDimension
+from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
 class TestAccountingDimensionFilter(unittest.TestCase):
 	def setUp(self):
@@ -20,7 +20,7 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 		si.location = 'Block 1'
 		si.save()
 
-		self.assertRaises(InvalidAccountDimension, si.submit)
+		self.assertRaises(InvalidAccountDimensionError, si.submit)
 
 	def test_mandatory_dimension_validation(self):
 		si = create_sales_invoice(do_not_save=1)
@@ -31,7 +31,7 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 		si.items[0].cost_center = '_Test Cost Center 2 - _TC'
 		si.save()
 
-		self.assertRaises(MandatoryDimension, si.submit)
+		self.assertRaises(MandatoryAccountDimensionError, si.submit)
 
 	def tearDown(self):
 		disable_dimension_filter()
