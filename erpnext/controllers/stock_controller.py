@@ -52,7 +52,7 @@ class StockController(AccountsController):
 						frappe.throw(_("Row #{0}: Serial No {1} does not belong to Batch {2}")
 							.format(d.idx, serial_no_data.name, d.batch_no))
 
-			if d.qty > 0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
+			if flt(d.qty) > 0.0 and d.get("batch_no") and self.get("posting_date") and self.docstatus < 2:
 				expiry_date = frappe.get_cached_value("Batch", d.get("batch_no"), "expiry_date")
 
 				if expiry_date and getdate(expiry_date) < getdate(self.posting_date):
@@ -229,8 +229,10 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Row #{0}: Expense Account not set for Item {1}. Please set an Expense Account in the Items table")
-				.format(item.idx, frappe.bold(item.item_code)), title=_("Expense Account Missing"))
+			msg = _("Please set an Expense Account in the Items table")
+			frappe.throw(_("Row #{0}: Expense Account not set for the Item {1}. {2}")
+				.format(item.idx, frappe.bold(item.item_code), msg), title=_("Expense Account Missing"))
+
 		else:
 			is_expense_account = frappe.db.get_value("Account",
 				item.get("expense_account"), "report_type")=="Profit and Loss"
@@ -245,7 +247,9 @@ class StockController(AccountsController):
 		for d in self.items:
 			if not d.batch_no: continue
 
-			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			serial_nos = [sr.name for sr in frappe.get_all("Serial No",
+				{'batch_no': d.batch_no, 'status': 'Inactive'})]
+
 			if serial_nos:
 				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
 

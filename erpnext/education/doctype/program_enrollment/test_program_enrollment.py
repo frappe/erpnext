@@ -24,3 +24,12 @@ class TestProgramEnrollment(unittest.TestCase):
 		self.assertTrue("_Test Course 1" in course_enrollments.keys())
 		self.assertTrue("_Test Course 2" in course_enrollments.keys())
 		frappe.db.rollback()
+
+	def tearDown(self):
+		for entry in frappe.db.get_all("Course Enrollment"):
+			frappe.delete_doc("Course Enrollment", entry.name)
+
+		for entry in frappe.db.get_all("Program Enrollment"):
+			doc = frappe.get_doc("Program Enrollment", entry.name)
+			doc.cancel()
+			doc.delete()

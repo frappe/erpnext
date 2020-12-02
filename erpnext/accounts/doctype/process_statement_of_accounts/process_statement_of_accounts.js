@@ -92,7 +92,7 @@ frappe.ui.form.on('Process Statement Of Accounts', {
 							frm.refresh_field('customers');
 						}
 						else{
-							frappe.msgprint('No Customers found with selected options.');
+							frappe.throw('No Customers found with selected options.');
 						}
 					}
 				}

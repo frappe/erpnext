@@ -12,21 +12,22 @@
 {% endblock %}
 
 {% block header_actions %}
-	<div class="dropdown">
-		<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
-			<span>{{ _('Actions') }}</span>
-			<b class="caret"></b>
-		</button>
-		<ul class="dropdown-menu dropdown-menu-right" role="menu">
-			{% if doc.doctype == 'Purchase Order' %}
-			<a class="dropdown-item" href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}" data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}</a>
-			{% endif %}
-			<a class="dropdown-item" href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}'
-				target="_blank" rel="noopener noreferrer">
-				{{ _("Print") }}
-			</a>
-		</ul>
-	</div>
+<div class="dropdown">
+	<button class="btn btn-outline-secondary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+		<span>{{ _('Actions') }}</span>
+		<b class="caret"></b>
+	</button>
+	<ul class="dropdown-menu dropdown-menu-right" role="menu">
+		{% if doc.doctype == 'Purchase Order' %}
+		<a class="dropdown-item" href="/api/method/erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice_from_portal?purchase_order_name={{ doc.name }}" data-action="make_purchase_invoice">{{ _("Make Purchase Invoice") }}</a>
+		{% endif %}
+		<a class="dropdown-item" href='/printview?doctype={{ doc.doctype}}&name={{ doc.name }}&format={{ print_format }}'
+			target="_blank" rel="noopener noreferrer">
+			{{ _("Print") }}
+		</a>
+	</ul>
+</div>
+
 {% endblock %}
 
 {% block page_content %}
@@ -42,10 +43,10 @@
 		</span>
 	</div>
 	<div class="col-6 text-muted text-right small">
-		{{ frappe.utils.formatdate(doc.transaction_date, 'medium') }}
+		{{ frappe.utils.format_date(doc.transaction_date, 'medium') }}
 		{% if doc.valid_till %}
 		<p>
-		{{ _("Valid Till") }}: {{ frappe.utils.formatdate(doc.valid_till, 'medium') }}
+		{{ _("Valid Till") }}: {{ frappe.utils.format_date(doc.valid_till, 'medium') }}
 		</p>
 		{% endif %}
 	</div>
