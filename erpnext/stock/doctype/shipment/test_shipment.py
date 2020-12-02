@@ -16,7 +16,6 @@ class TestShipment(unittest.TestCase):
 		shipment.submit()
 		second_shipment = make_shipment(delivery_note.name)
 		self.assertEqual(second_shipment.value_of_goods, delivery_note.grand_total)
-		self.assertEqual(second_shipment.grand_total, delivery_note.grand_total)
 		self.assertEqual(len(second_shipment.shipment_delivery_note), 1)
 		self.assertEqual(second_shipment.shipment_delivery_note[0].delivery_note, delivery_note.name)
 
@@ -49,7 +48,7 @@ def create_test_delivery_note():
 	return delivery_note
 
 
-def create_test_shipment(delivery_notes=[]):
+def create_test_shipment(delivery_notes = None):
 	company = get_shipment_company()
 	company_address = get_shipment_company_address(company.name)
 	customer = get_shipment_customer()
@@ -74,7 +73,7 @@ def create_test_shipment(delivery_notes=[]):
 	shipment.pickup_to = '17:00'
 	shipment.description_of_content = 'unit test entry'
 	for delivery_note in delivery_notes:
-		shipment.append('shipment_delivery_notes', 
+		shipment.append('shipment_delivery_note', 
 			{
 				"delivery_note": delivery_note.name
 			}
@@ -229,7 +228,7 @@ def create_shipment_item(item_name, company_name):
 	item.item_name = item_name
 	item.item_code = item_name
 	item.item_group = 'All Item Groups'
-	item.opening_stock = 'Nos'
+	item.stock_uom = 'Nos'
 	item.standard_rate = 50
 	item.append('item_defaults',
 		{
