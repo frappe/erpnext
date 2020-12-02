@@ -1,10 +1,8 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-import datetime
 from frappe.utils import getdate, add_months
 from erpnext.support.report.issue_analytics.issue_analytics import execute
-from erpnext.support.doctype.issue_priority.test_issue_priority import make_priorities
 from erpnext.support.doctype.issue.test_issue import make_issue, create_customer
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
 
