@@ -137,8 +137,7 @@ def get_gratuity_rule(name):
 	rule = frappe.db.exists("Gratuity Rule", name)
 	if not rule:
 		create_gratuity_rule()
-	else:
-		rule = frappe.get_doc("Gratuity Rule", name)
+	rule = frappe.get_doc("Gratuity Rule", name)
 	rule.applicable_earnings_component = []
 	rule.append("applicable_earnings_component", {
 		"salary_component": "Basic Salary"
