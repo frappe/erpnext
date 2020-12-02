@@ -9,18 +9,25 @@ from erpnext.support.doctype.service_level_agreement.test_service_level_agreemen
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 class TestIssueAnalytics(unittest.TestCase):
-	def setUp(self):
+	def test_issue_analytics(self):
 		frappe.db.sql("delete from `tabIssue`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
+
 		current_month_date = getdate()
 		last_month_date = add_months(current_month_date, -1)
 		self.current_month = str(months[current_month_date.month - 1]).lower()
 		self.last_month = str(months[last_month_date.month - 1]).lower()
+
 		create_service_level_agreements_for_issues()
 		create_issue_types()
 		create_records()
 
-	def test_customer_wise_analytics(self):
+		self.compare_result_for_customer()
+		self.compare_result_for_issue_type()
+		self.compare_result_for_issue_priority()
+		self.compare_result_for_assignment()
+
+	def compare_result_for_customer(self):
 		filters = {
 			'company': '_Test Company',
 			'based_on': 'Customer',
@@ -55,7 +62,7 @@ class TestIssueAnalytics(unittest.TestCase):
 		self.assertEqual(expected_data, report[1]) # rows
 		self.assertEqual(len(report[0]), 4) # cols
 
-	def test_issue_type_wise_analytics(self):
+	def compare_result_for_issue_type(self):
 		filters = {
 			'company': '_Test Company',
 			'based_on': 'Issue Type',
@@ -90,7 +97,7 @@ class TestIssueAnalytics(unittest.TestCase):
 		self.assertEqual(expected_data, report[1]) # rows
 		self.assertEqual(len(report[0]), 4) # cols
 
-	def test_issue_priority_wise_analytics(self):
+	def compare_result_for_issue_priority(self):
 		filters = {
 			'company': '_Test Company',
 			'based_on': 'Issue Priority',
@@ -125,7 +132,7 @@ class TestIssueAnalytics(unittest.TestCase):
 		self.assertEqual(expected_data, report[1]) # rows
 		self.assertEqual(len(report[0]), 4) # cols
 
-	def test_assignment_wise_analytics(self):
+	def compare_result_for_assignment(self):
 		filters = {
 			'company': '_Test Company',
 			'based_on': 'Assigned To',
