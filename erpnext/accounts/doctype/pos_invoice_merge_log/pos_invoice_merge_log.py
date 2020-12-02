@@ -194,7 +194,7 @@ def get_invoice_customer_map(pos_invoices):
 	return pos_invoice_customer_map
 
 def merge_pos_invoices(pos_invoices=[], closing_entry={}):
-	invoices = pos_invoices or closing_entry.pos_transactions or get_all_unconsolidated_invoices()
+	invoices = pos_invoices or closing_entry.get('pos_transactions') or get_all_unconsolidated_invoices()
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 10 and closing_entry:
