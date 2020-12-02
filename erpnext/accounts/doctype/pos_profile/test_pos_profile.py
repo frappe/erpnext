@@ -30,7 +30,6 @@ class TestPOSProfile(unittest.TestCase):
 		frappe.db.sql("delete from `tabPOS Profile`")
 
 def make_pos_profile(**args):
-	frappe.db.sql("delete from `tabPOS Payment Method`")
 	frappe.db.sql("delete from `tabPOS Profile`")
 
 	args = frappe._dict(args)
