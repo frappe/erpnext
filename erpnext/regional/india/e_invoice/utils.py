@@ -71,10 +71,7 @@ def get_trans_details(invoice):
 	))
 
 def get_doc_details(invoice):
-	if invoice.doctype == 'Purchase Invoice' and invoice.is_return:
-		invoice_type = 'DBN'
-	else:
-		invoice_type = 'CRN' if invoice.is_return else 'INV'
+	invoice_type = 'CRN' if invoice.is_return else 'INV'
 
 	invoice_name = invoice.name
 	invoice_date = format_date(invoice.posting_date, 'dd/mm/yyyy')
@@ -89,7 +86,7 @@ def get_party_details(address_name):
 	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 	gstin = address.get('gstin')
 
-	gstin_details = GSPConnector.get_gstin_details(gstin)
+	gstin_details = get_gstin_details(gstin)
 	legal_name = gstin_details.get('LegalName')
 	trade_name = gstin_details.get('TradeName')
 	location = gstin_details.get('AddrLoc') or address.get('city')
@@ -98,7 +95,7 @@ def get_party_details(address_name):
 	address_line1 = '{} {}'.format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
 	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
 	email_id = address.get('email_id')
-	phone = address.get('phone')
+	phone = address.get('phone').replace(" ", "")[-10:] # get last 10 digit
 	if state_code == 97:
 		pincode = 999999
 
@@ -107,6 +104,23 @@ def get_party_details(address_name):
 		pincode=pincode, state_code=state_code, address_line1=address_line1,
 		address_line2=address_line2, email=email_id, phone=phone
 	))
+
+def get_gstin_details(gstin):
+	if not hasattr(frappe.local, 'gstin_cache'):
+		frappe.local.gstin_cache = {}
+
+	key = gstin
+	details = frappe.local.gstin_cache.get(key)
+	if details:
+		return details
+
+	details = frappe.cache().hget('gstin_cache', key)
+	if details:
+		frappe.local.gstin_cache[key] = details
+		return details
+	
+	if not details:
+		return GSPConnector.get_gstin_details(gstin)
 
 def get_overseas_address_details(address_name):
 	address_title, address_line1, address_line2, city, phone, email_id = frappe.db.get_value(
@@ -180,9 +194,9 @@ def get_value_details(invoice):
 
 	value_details = frappe._dict(dict())
 	value_details.base_net_total = abs(invoice.base_net_total)
-	value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount > 0 else 0
+	value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount and invoice.discount_amount > 0 else 0
 	# discount amount cannnot be -ve in an e-invoice, so if -ve include discount in round_off
-	value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount < 0 else 0)
+	value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount and invoice.discount_amount < 0 else 0)
 	disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
 	value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else invoice.base_rounded_total
 	value_details.grand_total = abs(invoice.grand_total) if disable_rounded else invoice.rounded_total
@@ -293,11 +307,7 @@ def make_einvoice(invoice):
 			"Errors: ", json.dumps(errors, default=str, indent=4)
 		])
 		frappe.log_error(title="E Invoice Validation Failed", message=message)
-		if len(errors) > 1:
-			li = ['<li>'+ d +'</li>' for d in errors]
-			frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=_('E Invoice Validation Failed'))
-		else:
-			frappe.throw(errors[0], title=_('E Invoice Validation Failed'))
+		frappe.throw(errors, title=_('E Invoice Validation Failed'), as_list=1)
 
 	return einvoice
 
@@ -421,21 +431,9 @@ class GSPConnector():
 	
 	@staticmethod
 	def get_gstin_details(gstin):
-		'''fetch or get cached GSTIN details'''
-
-		if not hasattr(frappe.local, 'gstin_cache'):
-			frappe.local.gstin_cache = {}
+		'''fetch and cache GSTIN details'''
 
 		key = gstin
-		details = frappe.local.gstin_cache.get(key)
-		if details:
-			return details
-
-		details = frappe.cache().hget('gstin_cache', key)
-		if details:
-			frappe.local.gstin_cache[key] = details
-			return details
-		
 		gsp_connector = GSPConnector()
 		details = gsp_connector.fetch_gstin_details(gstin)
 
