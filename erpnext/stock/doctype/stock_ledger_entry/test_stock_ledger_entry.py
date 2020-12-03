@@ -5,14 +5,13 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import today, nowtime, flt, add_days
+from frappe.utils import today, nowtime, add_days
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext.stock.utils import get_incoming_rate
 from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation
 from erpnext.stock.doctype.item.test_item import make_item
-from erpnext.stock.stock_ledger import get_previous_sle, repost_future_sle
+from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.landed_cost_voucher.test_landed_cost_voucher import create_landed_cost_voucher
 from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
@@ -35,7 +34,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		company = "_Test Company with perpetual inventory"
 
 		# _Test Item for Reposting at Stores warehouse on 10-04-2020: Qty = 50, Rate = 100
-		reco1 = create_stock_reconciliation(
+		create_stock_reconciliation(
 			item_code="_Test Item for Reposting",
 			warehouse="Stores - TCP1",
 			qty=50,
@@ -46,7 +45,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		)
 
 		# _Test Item for Reposting at FG warehouse on 20-04-2020: Qty = 10, Rate = 200
-		reco2 = create_stock_reconciliation(
+		create_stock_reconciliation(
 			item_code="_Test Item for Reposting",
 			warehouse="Finished Goods - TCP1",
 			qty=10,
@@ -57,7 +56,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		)
 
 		# _Test Item for Reposting trasnferred from Stores to FG warehouse on 30-04-2020
-		transfer1 = make_stock_entry(
+		make_stock_entry(
 			item_code="_Test Item for Reposting",
 			source="Stores - TCP1",
 			target="Finished Goods - TCP1",
@@ -88,7 +87,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(finished_item_sle.get("valuation_rate"), 540)
 
 		# Reconciliation for _Test Item for Reposting at Stores on 12-04-2020: Qty = 50, Rate = 150
-		reco3 = create_stock_reconciliation(
+		create_stock_reconciliation(
 			item_code="_Test Item for Reposting",
 			warehouse="Stores - TCP1",
 			qty=50,
@@ -98,7 +97,6 @@ class TestStockLedgerEntry(unittest.TestCase):
 			posting_date='2020-04-12'
 		)
 
-		# repost_future_sle("Stock Reconciliation", reco3.name)
 
 		# Check valuation rate of finished goods warehouse after back-dated entry at Stores
 		target_wh_sle = get_previous_sle({
@@ -289,7 +287,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		rm_item_code="_Test Item for Reposting"
 		subcontracted_item = "_Test Subcontracted Item for Reposting"
 
-		bom = make_bom(item = subcontracted_item, raw_materials =[rm_item_code], currency="INR")
+		make_bom(item = subcontracted_item, raw_materials =[rm_item_code], currency="INR")
 		
 		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100
 		pr = make_purchase_receipt(company=company, posting_date='2020-04-10',

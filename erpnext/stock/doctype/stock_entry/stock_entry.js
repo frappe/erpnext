@@ -510,14 +510,18 @@ frappe.ui.form.on('Stock Entry', {
 
 	calculate_amount: function(frm) {
 		frm.events.calculate_total_additional_costs(frm);
-
+		let total_basic_amount = 0;
 		if (in_list(["Repack", "Manufacture"], frm.doc.purpose)) {
-			const total_basic_amount = frappe.utils.sum(
-				(frm.doc.items || []).map(function(i) { return i.is_finished_item ? flt(i.basic_amount) : 0; })
+			total_basic_amount = frappe.utils.sum(
+				(frm.doc.items || []).map(function(i) {
+					return i.is_finished_item ? flt(i.basic_amount) : 0;
+				})
 			);
 		} else {
-			const total_basic_amount = frappe.utils.sum(
-				(frm.doc.items || []).map(function(i) { return i.t_warehouse ? flt(i.basic_amount) : 0; })
+			total_basic_amount = frappe.utils.sum(
+				(frm.doc.items || []).map(function(i) {
+					return i.t_warehouse ? flt(i.basic_amount) : 0;
+				})
 			);
 		}
 		

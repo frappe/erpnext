@@ -7,7 +7,7 @@ frappe.ui.form.on('Repost Item Valuation', {
 			let filters = {
 				'is_group': 0
 			};
-			if(frm.doc.company) filters['company'] = frm.doc.company;
+			if (frm.doc.company) filters['company'] = frm.doc.company;
 			return {filters: filters};
 		});
 
