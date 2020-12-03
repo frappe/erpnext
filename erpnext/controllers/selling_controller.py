@@ -374,6 +374,7 @@ class SellingController(StockController):
 		if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
 			if for_validate and self.po_no:
 				return
+			self.set_pos_for_sales_invoice()
 		if self.doctype == 'Delivery Note' and hasattr(self, "items"):
 			if for_validate and self.po_no:
 				return
