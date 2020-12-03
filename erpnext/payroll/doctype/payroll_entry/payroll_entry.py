@@ -542,7 +542,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 					title = _("Creating Salary Slips..."))
 		else:
 			salary_slip_name = frappe.db.sql(
-				'''SELECT 
+				'''SELECT
 						name
 					FROM `tabSalary Slip`
 					WHERE company=%s

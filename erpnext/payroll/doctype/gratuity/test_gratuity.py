@@ -26,15 +26,7 @@ class TestGratuity(unittest.TestCase):
 
 		rule = get_gratuity_rule("Rule Under Unlimited Contract on termination (UAE)")
 
-		gratuity = frappe.new_doc("Gratuity")
-		gratuity.employee = employee
-		gratuity.posting_date = getdate()
-		gratuity.gratuity_rule = rule.name
-		gratuity.pay_via_salary_slip = 1
-		gratuity.salary_component = "Performance Bonus"
-		gratuity.payroll_date = getdate()
-		gratuity.save()
-		gratuity.submit()
+		gratuity = create_gratuity(pay_via_salary_slip = 1, employee=employee, rule=rule.name)
 
 		#work experience calculation
 		date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
@@ -69,20 +61,8 @@ class TestGratuity(unittest.TestCase):
 		employee, sal_slip = create_employee_and_get_last_salary_slip()
 		rule = get_gratuity_rule("Rule Under Limited Contract (UAE)")
 		set_mode_of_payment_account()
-		payable_account = get_payable_account("_Test Company")
 
-		gratuity = frappe.new_doc("Gratuity")
-		gratuity.employee = employee
-		gratuity.posting_date = getdate()
-		gratuity.gratuity_rule = rule.name
-		gratuity.pay_via_salary_slip = 0
-		gratuity.payroll_date = getdate()
-		gratuity.expense_account = "Payment Account - _TC"
-		gratuity.payable_account = payable_account
-		gratuity.mode_of_payment = "Cash"
-
-		gratuity.save()
-		gratuity.submit()
+		gratuity = create_gratuity(expense_account = 'Payment Account - _TC', mode_of_payment='Cash', employee=employee)
 
 		#work experience calculation
 		date_of_joining, relieving_date = frappe.db.get_value('Employee', employee, ['date_of_joining', 'relieving_date'])
@@ -127,7 +107,7 @@ class TestGratuity(unittest.TestCase):
 		gratuity.reload()
 
 		self.assertEqual(gratuity.status, "Paid")
-		self.assertEqual(gratuity.paid_amount, flt(gratuity.amount, 2))
+		self.assertEqual(flt(gratuity.paid_amount,2), flt(gratuity.amount, 2))
 
 	def tearDown(self):
 		frappe.db.sql("DELETE FROM `tabGratuity`")
@@ -147,11 +127,32 @@ def get_gratuity_rule(name):
 
 	return rule
 
+def create_gratuity(**args):
+	if args:
+		args = frappe._dict(args)
+	gratuity = frappe.new_doc("Gratuity")
+	gratuity.employee = args.employee
+	gratuity.posting_date = getdate()
+	gratuity.gratuity_rule = args.rule or "Rule Under Limited Contract (UAE)"
+	gratuity.pay_via_salary_slip = args.pay_via_salary_slip or 0
+	if gratuity.pay_via_salary_slip:
+		gratuity.payroll_date = getdate()
+		gratuity.salary_component = "Performance Bonus"
+	else:
+		gratuity.expense_account =  args.expense_account or 'Payment Account - _TC'
+		gratuity.payable_account = args.payable_account or get_payable_account("_Test Company")
+		gratuity.mode_of_payment = args.mode_of_payment or 'Cash'
+
+	gratuity.save()
+	gratuity.submit()
+
+	return gratuity
+
 def set_mode_of_payment_account():
 	if not frappe.db.exists("Account", "Payment Account - _TC"):
 		mode_of_payment = create_account()
-	else:
-		mode_of_payment = frappe.get_doc("Mode of Payment", "Cash")
+
+	mode_of_payment = frappe.get_doc("Mode of Payment", "Cash")
 
 	mode_of_payment.accounts = []
 	mode_of_payment.append("accounts", {
