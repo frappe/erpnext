@@ -6,8 +6,8 @@ frappe.ui.form.on("Issue", {
 				filters: {
 					"disabled": 0
 				}
-			}
-		});	
+			};
+		});
 
 		frappe.db.get_value("Support Settings", {name: "Support Settings"},
 			["allow_resetting_service_level_agreement", "track_service_level_agreement"], (r) => {
