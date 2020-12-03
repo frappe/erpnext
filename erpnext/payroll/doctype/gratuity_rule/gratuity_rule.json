@@ -27,7 +27,7 @@
    "fieldname": "calculate_gratuity_amount_based_on",
    "fieldtype": "Select",
    "in_list_view": 1,
-   "label": "Calculate Gratuity Amount Based on",
+   "label": "Calculate Gratuity Amount Based On",
    "options": "Current Slab\nSum of all previous slabs",
    "reqd": 1
   },
@@ -67,7 +67,7 @@
    "default": "365",
    "fieldname": "total_working_days_per_year",
    "fieldtype": "Int",
-   "label": "Total Working Days Per Year"
+   "label": "Total working Days Per Year"
   },
   {
    "fieldname": "minimum_year_for_gratuity",
@@ -77,7 +77,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-27 14:04:31.617621",
+ "modified": "2020-12-03 17:08:27.891535",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Gratuity Rule",
