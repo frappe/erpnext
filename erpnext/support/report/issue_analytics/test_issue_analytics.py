@@ -209,3 +209,5 @@ def create_records():
 		"doctype": "Issue",
 		"name": issue.name
 	})
+
+	print('records', frappe.get_all('Issue'))
