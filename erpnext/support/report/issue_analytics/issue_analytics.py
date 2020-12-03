@@ -149,6 +149,7 @@ class IssueAnalytics(object):
 			fields=[self.field_map.get(self.filters.based_on), 'name', 'opening_date'],
 			filters=filters
 		)
+		print('entries', self.entries)
 
 	def get_common_filters(self):
 		filters = {}

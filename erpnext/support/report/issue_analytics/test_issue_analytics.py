@@ -37,6 +37,7 @@ class TestIssueAnalytics(unittest.TestCase):
 		}
 
 		report = execute(filters)
+		print('report', report)
 
 		expected_data = [
 			{
