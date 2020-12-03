@@ -42,7 +42,10 @@ export default {
 	computed: {
 		page_title() {
 			return this.items.length
-				? __(`Results for "${this.search_value}" ${this.category !== 'All'? `in category ${this.category}` : ''}`)
+				? __('Results for "{0}" {1}', [
+					this.search_value,
+					this.category !== 'All' ? __('in category {0}', [this.category]) : ''
+				  ])
 				: __('No Items found.');
 		}
 	},
