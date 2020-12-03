@@ -12,8 +12,6 @@ class TestMapper(unittest.TestCase):
 	def test_map_docs(self):
 		'''Test mapping of multiple source docs on a single target doc'''
 
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
-
 		make_test_records("Item")
 		items = ['_Test Item', '_Test Item 2', '_Test FG Item']
 
@@ -30,8 +28,6 @@ class TestMapper(unittest.TestCase):
 		src_items = item_list_1 + item_list_2 + item_list_3
 		self.assertEqual(set([d for d in src_items]),
 			set([d.item_code for d in updated_so.items]))
-
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
 
 
 	def make_quotation(self, item_list, customer):

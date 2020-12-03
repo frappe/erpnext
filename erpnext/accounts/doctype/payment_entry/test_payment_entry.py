@@ -16,13 +16,6 @@ test_dependencies = ["Item"]
 
 
 class TestPaymentEntry(unittest.TestCase):
-
-	def setUp(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
-
-	def tearDown(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
-
 	def test_payment_entry_against_order(self):
 		so = make_sales_order()
 		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Cash - _TC")

@@ -17,13 +17,11 @@ class TestShoppingCart(unittest.TestCase):
 		Shopping Cart == Quotation
 	"""
 	def setUp(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
 		frappe.set_user("Administrator")
 		create_test_contact_and_address()
 		self.enable_shopping_cart()
 
 	def tearDown(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
 		frappe.set_user("Administrator")
 		self.disable_shopping_cart()
 

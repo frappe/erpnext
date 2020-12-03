@@ -14,13 +14,6 @@ import json
 test_dependencies = ["Territory", "Customer Group", "Supplier Group", "Item"]
 
 class TestGSTR3BReport(unittest.TestCase):
-
-	def setUp(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
-
-	def tearDown(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
-
 	def test_gstr_3b_report(self):
 
 		month_number_mapping = {

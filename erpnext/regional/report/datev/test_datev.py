@@ -132,7 +132,6 @@ def make_datev_settings(company):
 
 class TestDatev(TestCase):
 	def setUp(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
 		self.company = make_company("_Test GmbH", "_TG")
 		self.customer = make_customer_with_account("_Test Kunde GmbH", self.company)
 		self.filters = {
@@ -185,9 +184,6 @@ class TestDatev(TestCase):
 
 		si.save()
 		si.submit()
-
-	def tearDown(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
 
 	def test_columns(self):
 		def is_subset(get_data, allowed_keys):

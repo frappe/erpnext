@@ -14,11 +14,9 @@ from erpnext.healthcare.doctype.lab_test_template.lab_test_template import make_
 
 class TestPricingRule(unittest.TestCase):
 	def setUp(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
 		delete_existing_pricing_rules()
 
 	def tearDown(self):
-		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
 		delete_existing_pricing_rules()
 
 	def test_pricing_rule_for_discount(self):
