@@ -42,7 +42,7 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
-		self.set_po_nos()
+		self.set_po_nos(for_validate=True)
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
@@ -370,20 +370,26 @@ class SellingController(StockController):
 						}))
 		self.make_sl_entries(sl_entries)
 
-	def set_po_nos(self):
-		if self.doctype == 'Sales Invoice' and hasattr(self, "items") and not self.po_no:
+	def set_po_nos(self, for_validate=False):
+		if for_validate and self.po_no:
+			return
+		if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
 			self.set_pos_for_sales_invoice()
-		if self.doctype == 'Delivery Note' and hasattr(self, "items") and not self.po_no:
+		if self.doctype == 'Delivery Note' and hasattr(self, "items"):
 			self.set_pos_for_delivery_note()
 
 	def set_pos_for_sales_invoice(self):
 		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
 		self.get_po_nos('Sales Order', 'sales_order', po_nos)
 		self.get_po_nos('Delivery Note', 'delivery_note', po_nos)
 		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
 
 	def set_pos_for_delivery_note(self):
 		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
 		self.get_po_nos('Sales Order', 'against_sales_order', po_nos)
 		self.get_po_nos('Sales Invoice', 'against_sales_invoice', po_nos)
 		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
