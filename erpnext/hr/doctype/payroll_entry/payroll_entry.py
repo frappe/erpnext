@@ -406,9 +406,12 @@ class PayrollEntry(Document):
 
 	def get_count_employee_attendance(self, employee, start_date):
 		marked_days = 0
-		attendances = frappe.db.sql("""select count(*) from tabAttendance where
-			employee=%s and docstatus=1 and attendance_date between %s and %s""",
-			(employee, start_date, self.end_date))
+		attendances = frappe.get_all("Attendance",
+				fields = ["count(*)"],
+				filters = {
+					"employee": employee,
+					"attendance_date": ('between', [start_date, self.end_date])
+				}, as_list=1)
 		if attendances and attendances[0][0]:
 			marked_days = attendances[0][0]
 		return marked_days
