@@ -11,6 +11,13 @@ from erpnext.accounts.doctype.accounting_period.accounting_period import Overlap
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 class TestAccountingPeriod(unittest.TestCase):
+
+	def setUp(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
+
+	def tearDown(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
+
     def test_overlap(self):
         ap1 = create_accounting_period(start_date = "2018-04-01",
             end_date = "2018-06-30", company = "Wind Power LLC")

@@ -14,9 +14,13 @@ from erpnext.stock.doctype.purchase_receipt.purchase_receipt import make_purchas
 
 class TestAsset(unittest.TestCase):
 	def setUp(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
 		set_depreciation_settings_in_company()
 		create_asset_data()
 		frappe.db.sql("delete from `tabTax Rule`")
+
+	def tearDown(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
 
 	def test_purchase_asset(self):
 		pr = make_purchase_receipt(item_code="Macbook Pro",

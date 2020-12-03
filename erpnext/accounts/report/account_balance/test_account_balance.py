@@ -7,6 +7,13 @@ from erpnext.accounts.report.account_balance.account_balance import execute
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 class TestAccountBalance(unittest.TestCase):
+
+	def setUp(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
+
+	def tearDown(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
+
 	def test_account_balance(self):
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")

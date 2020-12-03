@@ -8,6 +8,13 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
 class TestAccountsReceivable(unittest.TestCase):
+
+	def setUp(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
+
+	def tearDown(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
+
 	def test_accounts_receivable(self):
 		frappe.db.sql("delete from `tabSales Invoice` where company='_Test Company 2'")
 		frappe.db.sql("delete from `tabGL Entry` where company='_Test Company 2'")

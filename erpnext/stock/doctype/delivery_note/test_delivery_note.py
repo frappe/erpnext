@@ -25,7 +25,11 @@ from erpnext.stock.doctype.item.test_item import create_item
 
 class TestDeliveryNote(unittest.TestCase):
 	def setUp(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
 		set_perpetual_inventory(0)
+
+	def tearDown(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
 
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)

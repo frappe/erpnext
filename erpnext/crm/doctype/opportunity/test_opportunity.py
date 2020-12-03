@@ -11,6 +11,13 @@ import unittest
 test_records = frappe.get_test_records('Opportunity')
 
 class TestOpportunity(unittest.TestCase):
+
+	def setUp(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
+
+	def tearDown(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
+
 	def test_opportunity_status(self):
 		doc = make_opportunity(with_items=0)
 		quotation = make_quotation(doc.name)

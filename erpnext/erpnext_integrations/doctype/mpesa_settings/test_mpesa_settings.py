@@ -9,6 +9,13 @@ from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_settings import p
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 
 class TestMpesaSettings(unittest.TestCase):
+
+	def setUp(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 0)
+
+	def tearDown(self):
+		frappe.db.set_value("Selling Settings", None, "validate_selling_price", 1)
+
 	def test_creation_of_payment_gateway(self):
 		create_mpesa_settings(payment_gateway_name="_Test")
 
