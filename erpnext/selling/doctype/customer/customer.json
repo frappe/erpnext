@@ -20,6 +20,7 @@
   "territory",
   "image",
   "disabled",
+  "is_insurance_company",
   "column_break_9",
   "tax_id",
   "tax_cnic",
@@ -27,20 +28,21 @@
   "more_info",
   "customer_details",
   "column_break_45",
+  "gender",
+  "website",
+  "language",
+  "column_break_24",
+  "tax_status",
+  "tax_overseas_cnic",
+  "passport_no",
   "default_currency",
   "default_price_list",
   "so_not_required",
   "dn_not_required",
-  "column_break_13",
-  "gender",
-  "language",
-  "website",
-  "column_break_24",
   "industry",
   "market_segment",
   "is_internal_customer",
   "represents_company",
-  "is_insurance_company",
   "allowed_to_transact_section",
   "companies",
   "address_contacts",
@@ -215,6 +217,7 @@
    "default": "0",
    "fieldname": "is_internal_customer",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Is Internal Customer"
   },
   {
@@ -382,12 +385,14 @@
   {
    "fieldname": "market_segment",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Market Segment",
    "options": "Market Segment"
   },
   {
    "fieldname": "industry",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Industry",
    "options": "Industry Type"
   },
@@ -492,10 +497,6 @@
    "label": "STRN"
   },
   {
-   "fieldname": "column_break_13",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_24",
    "fieldtype": "Column Break"
   },
@@ -515,12 +516,14 @@
    "default": "0",
    "fieldname": "so_not_required",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Sales Invoice Creation Without Sales Order"
   },
   {
    "default": "0",
    "fieldname": "dn_not_required",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Allow Sales Invoice Creation Without Delivery Note"
   },
   {
@@ -528,12 +531,30 @@
    "fieldname": "is_insurance_company",
    "fieldtype": "Check",
    "label": "Is Insurance Company"
+  },
+  {
+   "fieldname": "tax_status",
+   "fieldtype": "Select",
+   "label": "Filer / Non Filer",
+   "options": "\nFiler\nNon Filer"
+  },
+  {
+   "fieldname": "tax_overseas_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Overseas CNIC Number"
+  },
+  {
+   "fieldname": "passport_no",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Passport Number"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-11-01 22:29:44.880535",
+ "modified": "2020-12-04 01:00:12.357069",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
