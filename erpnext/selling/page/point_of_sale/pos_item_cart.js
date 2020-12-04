@@ -791,9 +791,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.$cart_container.css('display', 'none');
 			this.$customer_section.css({
 				'height': '100%',
-				'padding-top': '0px',
-				'overflow-x': 'hidden',
-				'overflow-y': 'scroll'
+				'padding-top': '0px'
 			});
 			this.$customer_section.find('.customer-details').html(
 				`<div class="header">
@@ -829,9 +827,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.$cart_container.css('display', 'flex');
 			this.$customer_section.css({
 				'height': '',
-				'padding-top': '',
-				'overflow-x': '',
-				'overflow-y': ''
+				'padding-top': ''
 			});
 
 			this.update_customer_section();

@@ -118,28 +118,11 @@ erpnext.PointOfSale.Controller = class {
 		this.make_app();
 	}
 
-	set_opening_entry_status() {
-		this.page.set_title_sub(
-			`<span class="indicator orange">
-				<a class="text-muted" href="/desk/Form/POS%20Opening%20Entry/${this.pos_opening}">
-					Opened at ${moment(this.pos_opening_time).format("Do MMMM, h:mma")}
-				</a>
-			</span>`);
-	}
-
 	make_app() {
-		return frappe.run_serially([
-			() => frappe.dom.freeze(),
-			() => {
-				this.set_opening_entry_status();
-				this.prepare_dom();
-				this.prepare_components();
-				this.prepare_menu();
-			},
-			() => this.make_new_invoice(),
-			() => frappe.dom.unfreeze(),
-			() => this.page.set_title(__('Point of Sale')),
-		]);
+		this.prepare_dom();
+		this.prepare_components();
+		this.prepare_menu();
+		this.make_new_invoice();
 	}
 
 	prepare_dom() {
@@ -416,8 +399,6 @@ erpnext.PointOfSale.Controller = class {
 		})
 	}
 
-
-
 	toggle_recent_order_list(show) {
 		this.toggle_components(!show);
 		this.recent_order_list.toggle_component(show);
@@ -434,10 +415,12 @@ erpnext.PointOfSale.Controller = class {
 
 	make_new_invoice() {
 		return frappe.run_serially([
+			() => frappe.dom.freeze(),
 			() => this.make_sales_invoice_frm(),
 			() => this.set_pos_profile_data(),
 			() => this.set_pos_profile_status(),
 			() => this.cart.load_invoice(),
+			() => frappe.dom.unfreeze()
 		]);
 	}
 
@@ -492,16 +475,6 @@ erpnext.PointOfSale.Controller = class {
 		if (!this.frm.doc.company) return;
 
 		return this.frm.trigger("set_pos_data");
-	}
-
-	raise_exception_for_pos_profile() {
-		setTimeout(() => frappe.set_route('List', 'POS Profile'), 2000);
-		frappe.throw(__("POS Profile is required to use Point-of-Sale"));
-	}
-
-	set_invoice_status() {
-		const [status, indicator] = frappe.listview_settings["POS Invoice"].get_indicator(this.frm.doc);
-		this.page.set_indicator(status, indicator);
 	}
 
 	set_pos_profile_status() {
