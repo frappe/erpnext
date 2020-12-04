@@ -12,7 +12,6 @@
   "basic_info",
   "naming_series",
   "customer_type",
-  "salutation",
   "customer_name",
   "lead_name",
   "column_break0",
@@ -45,21 +44,37 @@
   "represents_company",
   "allowed_to_transact_section",
   "companies",
+  "sec_primary_address_and_contact",
+  "primary_address",
+  "address_line1",
+  "address_line2",
+  "col_break41",
+  "city",
+  "state",
+  "column_break_43",
+  "country",
+  "customer_primary_address",
+  "pincode",
+  "primary_contact_section",
+  "email_id",
+  "salutation",
+  "column_break_51",
+  "mobile_no",
+  "contact_first_name",
+  "column_break_50",
+  "phone_no",
+  "contact_middle_name",
+  "column_break_53",
+  "customer_primary_contact",
+  "contact_last_name",
   "address_contacts",
   "address_html",
-  "column_break1",
+  "column_break_54",
   "contact_html",
   "sales_team_section",
   "account_manager",
   "sales_team",
   "customer_pos_id",
-  "primary_address_and_contact_detail",
-  "customer_primary_contact",
-  "mobile_no",
-  "email_id",
-  "column_break_26",
-  "customer_primary_address",
-  "primary_address",
   "default_receivable_accounts",
   "default_bank_account",
   "tax_category",
@@ -96,7 +111,6 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:doc.customer_type!='Company'",
    "fieldname": "salutation",
    "fieldtype": "Link",
    "label": "Salutation",
@@ -193,7 +207,6 @@
    "reqd": 1
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "in_standard_filter": 1,
@@ -264,10 +277,11 @@
    "options": "Language"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_contacts",
    "fieldtype": "Section Break",
-   "label": "Address and Contact",
+   "label": "More Address and Contacts",
    "options": "fa fa-map-marker"
   },
   {
@@ -282,11 +296,6 @@
    "label": "Website"
   },
   {
-   "fieldname": "column_break1",
-   "fieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
    "fieldname": "contact_html",
    "fieldtype": "HTML",
    "label": "Contact HTML",
@@ -294,37 +303,24 @@
    "read_only": 1
   },
   {
-   "description": "Select, to make the customer searchable with these fields",
-   "fieldname": "primary_address_and_contact_detail",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Primary Address and Contact Detail"
-  },
-  {
-   "description": "Reselect, if the chosen contact is edited after save",
    "fieldname": "customer_primary_contact",
    "fieldtype": "Link",
    "label": "Customer Primary Contact",
    "options": "Contact"
   },
   {
-   "fetch_from": "customer_primary_contact.mobile_no",
    "fieldname": "mobile_no",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Mobile No"
   },
   {
-   "fetch_from": "customer_primary_contact.email_id",
    "fieldname": "email_id",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Email Id"
   },
   {
-   "fieldname": "column_break_26",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Reselect, if the chosen address is edited after save",
    "fieldname": "customer_primary_address",
    "fieldtype": "Link",
    "label": "Customer Primary Address",
@@ -332,7 +328,9 @@
   },
   {
    "fieldname": "primary_address",
-   "fieldtype": "Text",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "in_standard_filter": 1,
    "label": "Primary Address",
    "read_only": 1
   },
@@ -483,14 +481,12 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
    "in_standard_filter": 1,
    "label": "CNIC"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "tax_strn",
    "fieldtype": "Data",
    "in_standard_filter": 1,
@@ -549,12 +545,99 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Passport Number"
+  },
+  {
+   "fieldname": "address_line1",
+   "fieldtype": "Data",
+   "label": "Address Line 1"
+  },
+  {
+   "fieldname": "address_line2",
+   "fieldtype": "Data",
+   "label": "Address Line 2"
+  },
+  {
+   "fieldname": "city",
+   "fieldtype": "Data",
+   "label": "City"
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Data",
+   "label": "Province"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "pincode",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Postal Code"
+  },
+  {
+   "fieldname": "phone_no",
+   "fieldtype": "Data",
+   "label": "Phone No"
+  },
+  {
+   "fieldname": "column_break_54",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sec_primary_address_and_contact",
+   "fieldtype": "Section Break",
+   "label": "Primary Address"
+  },
+  {
+   "fieldname": "primary_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Primary Contact",
+   "width": "50%"
+  },
+  {
+   "fieldname": "column_break_50",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "contact_first_name",
+   "fieldtype": "Data",
+   "label": "First Name"
+  },
+  {
+   "fieldname": "contact_middle_name",
+   "fieldtype": "Data",
+   "label": "Middle Name"
+  },
+  {
+   "fieldname": "contact_last_name",
+   "fieldtype": "Data",
+   "label": "Last Name"
+  },
+  {
+   "fieldname": "col_break41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_51",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-12-04 01:00:12.357069",
+ "modified": "2020-12-04 23:52:10.093248",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -645,7 +728,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer_name,customer_group,territory, mobile_no,primary_address",
+ "search_fields": "customer_name,customer_group,territory, mobile_no, phone_no, email_id, primary_address",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",

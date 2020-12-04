@@ -77,17 +77,32 @@ frappe.ui.form.on("Customer", {
 	customer_primary_address: function(frm){
 		if(frm.doc.customer_primary_address){
 			frappe.call({
-				method: 'frappe.contacts.doctype.address.address.get_address_display',
+				method: 'erpnext.selling.doctype.customer.customer.get_primary_address_details',
 				args: {
-					"address_dict": frm.doc.customer_primary_address
+					"address_name": frm.doc.customer_primary_address
 				},
 				callback: function(r) {
-					frm.set_value("primary_address", r.message);
+					$.each(r.message || {}, (k, v) => {
+						frm.set_value(k, v);
+					})
 				}
 			});
 		}
-		if(!frm.doc.customer_primary_address){
-			frm.set_value("primary_address", "");
+	},
+
+	customer_primary_contact: function(frm){
+		if(frm.doc.customer_primary_contact){
+			frappe.call({
+				method: 'erpnext.selling.doctype.customer.customer.get_primary_contact_details',
+				args: {
+					"contact_name": frm.doc.customer_primary_contact
+				},
+				callback: function(r) {
+					$.each(r.message || {}, (k, v) => {
+						frm.set_value(k, v);
+					})
+				}
+			});
 		}
 	},
 
@@ -97,13 +112,6 @@ frappe.ui.form.on("Customer", {
 		}
 		else {
 			frm.toggle_reqd("represents_company", false);
-		}
-	},
-
-	customer_primary_contact: function(frm){
-		if(!frm.doc.customer_primary_contact){
-			frm.set_value("mobile_no", "");
-			frm.set_value("email_id", "");
 		}
 	},
 

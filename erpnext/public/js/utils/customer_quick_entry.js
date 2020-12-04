@@ -14,8 +14,32 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	get_variant_fields: function() {
 		var variant_fields = [{
 			fieldtype: "Section Break",
+			label: __("Identification & Tax Id"),
+		},
+		{
+			label: __("Tax Id"),
+			fieldname: "tax_id",
+			fieldtype: "Data"
+		},
+		{
+			fieldtype: "Column Break"
+		},
+		{
+			label: __("CNIC"),
+			fieldname: "tax_cnic",
+			fieldtype: "Data"
+		},
+		{
+			fieldtype: "Column Break"
+		},
+		{
+			label: __("STRN"),
+			fieldname: "tax_strn",
+			fieldtype: "Data"
+		},
+		{
+			fieldtype: "Section Break",
 			label: __("Primary Contact Details"),
-			collapsible: 1
 		},
 		{
 			label: __("Email Id"),
@@ -31,9 +55,16 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			fieldtype: "Data"
 		},
 		{
+			fieldtype: "Column Break"
+		},
+		{
+			label: __("Phone Number"),
+			fieldname: "phone_no",
+			fieldtype: "Data"
+		},
+		{
 			fieldtype: "Section Break",
 			label: __("Primary Address Details"),
-			collapsible: 1
 		},
 		{
 			label: __("Address Line 1"),

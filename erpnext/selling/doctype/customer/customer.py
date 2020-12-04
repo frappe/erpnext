@@ -6,13 +6,33 @@ import frappe
 from frappe.model.naming import set_name_by_naming_series
 from frappe import _, msgprint, throw
 import frappe.defaults
-from frappe.utils import flt, cint, cstr, today
+from frappe.utils import flt, cint, cstr, today, clean_whitespace
 from frappe.desk.reportview import build_match_conditions, get_filters_cond
 from erpnext.utilities.transaction_base import TransactionBase
 from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, get_timeline_data # keep this
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
+from frappe.contacts.doctype.contact.contact import get_default_contact
+from frappe.contacts.doctype.address.address import get_default_address, get_address_display
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
+
+primary_address_fields = [
+	{'customer_field': 'address_line1', 'address_field': 'address_line1'},
+	{'customer_field': 'address_line2', 'address_field': 'address_line2'},
+	{'customer_field': 'city', 'address_field': 'city'},
+	{'customer_field': 'state', 'address_field': 'state'},
+	{'customer_field': 'country', 'address_field': 'country'},
+	{'customer_field': 'pincode', 'address_field': 'pincode'},
+]
+primary_contact_fields = [
+	{'customer_field': 'salutation', 'contact_field': 'salutation'},
+	{'customer_field': 'contact_first_name', 'contact_field': 'first_name', 'default_from': 'customer_name'},
+	{'customer_field': 'contact_middle_name', 'contact_field': 'middle_name'},
+	{'customer_field': 'contact_last_name', 'contact_field': 'last_name'},
+	{'customer_field': 'mobile_no', 'contact_field': 'mobile_no', 'custom_setter': 1},
+	{'customer_field': 'phone_no', 'contact_field': 'phone', 'custom_setter': 1},
+	{'customer_field': 'email_id', 'contact_field': 'email_id', 'custom_setter': 1}
+]
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -48,6 +68,7 @@ class Customer(TransactionBase):
 		self.update_lead_status()
 
 	def validate(self):
+		self.customer_name = clean_whitespace(self.customer_name)
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
 		validate_party_accounts(self)
@@ -84,8 +105,8 @@ class Customer(TransactionBase):
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
-		self.create_primary_contact()
-		self.create_primary_address()
+		self.update_primary_contact()
+		self.update_primary_address()
 
 		if self.flags.old_lead != self.lead_name:
 			self.update_lead_status()
@@ -101,17 +122,129 @@ class Customer(TransactionBase):
 			update_linked_doctypes('Customer', self.name, 'Customer Group',
 				self.customer_group, ignore_doctypes)
 
-	def create_primary_contact(self):
-		if not self.customer_primary_contact and not self.lead_name:
-			if self.mobile_no or self.email_id:
-				contact = make_contact(self)
-				self.db_set('customer_primary_contact', contact.name)
-				self.db_set('mobile_no', self.mobile_no)
-				self.db_set('email_id', self.email_id)
+	def update_primary_contact(self):
+		if self.lead_name and self.flags.is_new_doc:
+			return
 
-	def create_primary_address(self):
-		if self.flags.is_new_doc and self.get('address_line1'):
-			make_address(self)
+		push_or_pull = None
+
+		if not self.customer_primary_contact:
+			self.customer_primary_contact = get_default_contact("Customer", self.name)
+			push_or_pull = "pull"
+
+		contact = None
+		data_provided = any([self.get(d['customer_field']) for d in primary_contact_fields])
+
+		if not self.customer_primary_contact and data_provided:
+			contact = make_contact(self)
+			push_or_pull = "pull"
+
+		elif self.customer_primary_contact:
+			contact = frappe.get_doc("Contact", self.customer_primary_contact)
+			if not push_or_pull:
+				push_or_pull = "push" if data_provided else "pull"
+
+		if contact:
+			if self.flags.pull_contact or push_or_pull == "pull":
+				to_set = {'customer_primary_contact': contact.name}
+				for d in primary_contact_fields:
+					to_set[d['customer_field']] = contact.get(d['contact_field'])
+
+				self.db_set(to_set, notify=cint(self.flags.pull_contact))
+
+			elif push_or_pull == "push":
+				data_changed = any([cstr(self.get(d['customer_field'])) != cstr(contact.get(d['contact_field']))
+					for d in primary_contact_fields])
+
+				if data_changed:
+					for field in primary_contact_fields:
+						if not field.get('custom_setter'):
+							value = self.get(field['customer_field'])
+							if not value and field.get('default_from'):
+								value = self.get(field.get('default_from'))
+
+							contact.set(field['contact_field'], value)
+
+					if cstr(self.get('email_id')) != cstr(contact.get('email_id')):
+						primary_row = [d for d in contact.email_ids if d.is_primary]
+						primary_row = primary_row[0] if primary_row else None
+						if self.get('email_id'):
+							if primary_row:
+								primary_row.email_id = self.email_id
+							else:
+								contact.add_email(self.email_id, is_primary=1)
+						else:
+							contact.remove(primary_row)
+
+					if cstr(self.get('phone_no')) != cstr(contact.get('phone')):
+						primary_row = [d for d in contact.phone_nos if d.is_primary_phone]
+						primary_row = primary_row[0] if primary_row else None
+						if self.get('phone_no'):
+							if primary_row:
+								primary_row.phone = self.phone_no
+							else:
+								contact.add_phone(self.phone_no, is_primary_phone=1)
+						else:
+							contact.remove(primary_row)
+
+					if cstr(self.get('mobile_no')) != cstr(contact.get('mobile_no')):
+						primary_row = [d for d in contact.phone_nos if d.is_primary_mobile_no]
+						primary_row = primary_row[0] if primary_row else None
+						if self.get('mobile_no'):
+							if primary_row:
+								primary_row.phone = self.mobile_no
+							else:
+								contact.add_phone(self.mobile_no, is_primary_mobile_no=1)
+						else:
+							contact.remove(primary_row)
+
+					contact.flags.from_linked_document = ("Customer", self.name)
+					contact.save(ignore_permissions=True)
+
+	def update_primary_address(self):
+		push_or_pull = None
+
+		if not self.customer_primary_address:
+			self.customer_primary_address = get_default_address("Customer", self.name)
+			push_or_pull = "pull"
+
+		address = None
+		data_provided = any([self.get(d['customer_field']) for d in primary_address_fields])
+
+		if not self.customer_primary_address and data_provided and self.address_line1:
+			address = make_address(self)
+			push_or_pull = "pull"
+
+		elif self.customer_primary_address:
+			address = frappe.get_doc("Address", self.customer_primary_address)
+			if not push_or_pull:
+				push_or_pull = "push" if data_provided else "pull"
+
+		if address:
+			if self.flags.pull_address or push_or_pull == "pull":
+				to_set = {'customer_primary_address': address.name, 'primary_address': get_address_display(address.as_dict())}
+				for d in primary_address_fields:
+					to_set[d['customer_field']] = address.get(d['address_field'])
+
+				self.db_set(to_set, notify=cint(self.flags.pull_address))
+
+			elif push_or_pull == "push":
+				self.db_set('primary_address', get_address_display(address.as_dict()))
+
+				data_changed = any([cstr(self.get(d['customer_field'])) != cstr(address.get(d['address_field']))
+					for d in primary_address_fields])
+
+				if data_changed:
+					for field in primary_address_fields:
+						if not field.get('custom_setter'):
+							value = self.get(field['customer_field'])
+							if not value and field.get('default_from'):
+								value = self.get(field.get('default_from'))
+
+							address.set(field['address_field'], value)
+
+					address.flags.from_linked_document = ("Customer", self.name)
+					address.save(ignore_permissions=True)
 
 	def update_lead_status(self):
 		'''If Customer created from Lead, update lead status to "Converted"
@@ -448,6 +581,8 @@ def make_contact(args, is_primary_contact=1):
 		contact.add_email(args.get('email_id'), is_primary=True)
 	if args.get('mobile_no'):
 		contact.add_phone(args.get('mobile_no'), is_primary_mobile_no=True)
+	if args.get('phone_no'):
+		contact.add_phone(args.get('phone_no'), is_primary_phone=True)
 	contact.insert()
 
 	return contact
@@ -493,3 +628,22 @@ def get_customer_primary_contact(doctype, txt, searchfield, start, page_len, fil
 			'customer': customer,
 			'txt': '%%%s%%' % txt
 		})
+
+
+@frappe.whitelist()
+def get_primary_address_details(address_name):
+	doc = frappe.get_doc("Address", address_name)
+	out = {'primary_address': get_address_display(doc.as_dict())}
+	for field in primary_address_fields:
+		out[field['customer_field']] = doc.get(field['address_field'])
+
+	return out
+
+@frappe.whitelist()
+def get_primary_contact_details(contact_name):
+	doc = frappe.get_doc("Contact", contact_name)
+	out = {}
+	for field in primary_contact_fields:
+		out[field['customer_field']] = doc.get(field['contact_field'])
+
+	return out
