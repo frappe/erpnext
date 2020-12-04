@@ -58,6 +58,7 @@ class Customer(TransactionBase):
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
+		self.validate_internal_customer()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -81,6 +82,11 @@ class Customer(TransactionBase):
 			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
 			if not is_company_account:
 				frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
+
+	def validate_internal_customer(self):
+		if self.is_internal_customer and frappe.db.get_value('Customer', {"represents_company": self.represents_company}, "name"):
+			frappe.throw(_("Internal Customer for company {0} already exists").format(
+				frappe.bold(self.represents_company)))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()

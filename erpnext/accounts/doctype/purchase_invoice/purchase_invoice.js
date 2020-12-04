@@ -16,7 +16,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			});
 		}
 
-		this.frm.set_query("inter_company_account", function() {
+		this.frm.set_query("unrealized_profit_loss_account", function() {
 			return {
 				filters: {
 					company: doc.company,

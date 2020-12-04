@@ -580,7 +580,7 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
-		frm.set_query("inter_company_account", function() {
+		frm.set_query("unrealized_profit_loss_account", function() {
 			return {
 				filters: {
 					company: frm.doc.company,

@@ -152,7 +152,7 @@
   "is_opening",
   "against_expense_account",
   "column_break_63",
-  "inter_company_account",
+  "unrealized_profit_loss_account",
   "status",
   "inter_company_invoice_reference",
   "is_internal_supplier",
@@ -1342,9 +1342,9 @@
   },
   {
    "depends_on": "eval:doc.is_internal_supplier",
-   "fieldname": "inter_company_account",
+   "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
-   "label": "Inter Company Account",
+   "label": "Unrealized Profit / Loss Account",
    "options": "Account"
   },
   {
@@ -1360,7 +1360,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-27 19:47:04.827315",
+ "modified": "2020-11-29 19:47:04.827315",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
