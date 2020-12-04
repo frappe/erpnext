@@ -11,15 +11,20 @@ from frappe.custom.doctype.property_setter.property_setter import make_property_
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import get_temporary_opening_account
 
 class TestOpeningInvoiceCreationTool(unittest.TestCase):
-	def make_invoices(self, invoice_type="Sales", company=None):
+	def setUp(self):
+		if not frappe.db.exists("Company", "_Test Opening Invoice Company"):
+			make_company()
+
+	def make_invoices(self, invoice_type="Sales", company=None, party_1=None, party_2=None):
 		doc = frappe.get_single("Opening Invoice Creation Tool")
-		args = get_opening_invoice_creation_dict(invoice_type=invoice_type, company=company)
+		args = get_opening_invoice_creation_dict(invoice_type=invoice_type, company=company,
+			party_1=party_1, party_2=party_2)
 		doc.update(args)
 		return doc.make_invoices()
 
 	def test_opening_sales_invoice_creation(self):
 		property_setter = make_property_setter("Sales Invoice", "update_stock", "default", 1, "Check")
-		invoices = self.make_invoices()
+		invoices = self.make_invoices(company="_Test Opening Invoice Company")
 
 		self.assertEqual(len(invoices), 2)
 		expected_value = {
@@ -45,7 +50,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 				self.assertEqual(si.get(field, ""), expected_value[invoice_idx][field_idx])
 
 	def test_opening_purchase_invoice_creation(self):
-		invoices = self.make_invoices(invoice_type="Purchase")
+		invoices = self.make_invoices(invoice_type="Purchase", company="_Test Opening Invoice Company")
 
 		self.assertEqual(len(invoices), 2)
 		expected_value = {
@@ -56,9 +61,11 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 		self.check_expected_values(invoices, expected_value, invoice_type="Purchase", )
 
 	def test_opening_sales_invoice_creation_with_missing_debit_account(self):
-		company = make_company()
-		old_default_receivable_account = frappe.db.get_value("Company", company.name, "default_receivable_account")
-		frappe.db.set_value("Company", company.name, "default_receivable_account", "")
+		company = "_Test Opening Invoice Company"
+		party_1, party_2 = make_customer("Customer A"), make_customer("Customer B")
+
+		old_default_receivable_account = frappe.db.get_value("Company", company, "default_receivable_account")
+		frappe.db.set_value("Company", company, "default_receivable_account", "")
 
 		if not frappe.db.exists("Cost Center", "_Test Opening Invoice Company - _TOIC"):
 			cc = frappe.get_doc({"doctype": "Cost Center", "cost_center_name": "_Test Opening Invoice Company",
@@ -68,18 +75,16 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 				"company": "_Test Opening Invoice Company", "parent_cost_center": cc.name})
 			cc2.insert()
 
-		frappe.db.set_value("Company", company.name, "cost_center", "Main - _TOIC")
+		frappe.db.set_value("Company", company, "cost_center", "Main - _TOIC")
 
-		self.make_invoices(company="_Test Opening Invoice Company")
+		self.make_invoices(company="_Test Opening Invoice Company", party_1=party_1, party_2=party_2)
 
 		# Check if missing debit account error raised
 		error_log = frappe.db.exists("Error Log", {"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]})
 		self.assertTrue(error_log)
 
 		# teardown
-		frappe.db.set_value("Company", company.name, "default_receivable_account", old_default_receivable_account)
-		company.delete()
-		frappe.get_doc("Error Log", error_log).delete()
+		frappe.db.set_value("Company", company, "default_receivable_account", old_default_receivable_account)
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
@@ -92,7 +97,7 @@ def get_opening_invoice_creation_dict(**args):
 			{
 				"qty": 1.0,
 				"outstanding_amount": 300,
-				"party": "_Test {0}".format(party),
+				"party": args.get("party_1") or "_Test {0}".format(party),
 				"item_name": "Opening Item",
 				"due_date": "2016-09-10",
 				"posting_date": "2016-09-05",
@@ -101,7 +106,7 @@ def get_opening_invoice_creation_dict(**args):
 			{
 				"qty": 2.0,
 				"outstanding_amount": 250,
-				"party": "_Test {0} 1".format(party),
+				"party": args.get("party_2") or "_Test {0} 1".format(party),
 				"item_name": "Opening Item",
 				"due_date": "2016-09-10",
 				"posting_date": "2016-09-05",
@@ -124,3 +129,18 @@ def make_company():
 	company.country = "India"
 	company.insert()
 	return company
+
+def make_customer(customer=None):
+	customer_name = customer or "Opening Customer"
+	customer = frappe.get_doc({
+		"doctype": "Customer",
+		"customer_name": customer_name,
+		"customer_group": "All Customer Groups",
+		"customer_type": "Company",
+		"territory": "All Territories"
+	})
+	if not frappe.db.exists("Customer", customer_name):
+		customer.insert(ignore_permissions=True)
+		return customer.name
+	else:
+		return frappe.db.exists("Customer", customer_name)
