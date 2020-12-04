@@ -12,6 +12,7 @@ from erpnext.regional.india import number_state_mapping
 from six import string_types
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_account_currency
+from frappe.model.utils import get_fetch_values
 
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
@@ -155,6 +156,8 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
 
+	update_party_details(party_details, doctype)
+
 	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
 
 	if is_internal_transfer(party_details, doctype):
@@ -203,6 +206,11 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 
 	if return_taxes:
 		return party_details
+
+def update_party_details(party_details, doctype):
+	for address_field in ['shipping_address', 'company_address', 'supplier_address', 'shipping_address_name', 'customer_address']:
+		if party_details.get(address_field):
+			party_details.update(get_fetch_values(doctype, address_field, party_details.get(address_field)))
 
 def is_internal_transfer(party_details, doctype):
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
