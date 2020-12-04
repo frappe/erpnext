@@ -533,9 +533,6 @@ def get_address_details(data, doc, company_address, billing_address):
 	if doc.gst_category == 'SEZ':
 		data.toStateCode = 99
 
-	if doc.gst_category == 'SEZ':
-		data.toStateCode = 99
-
 	return data
 
 def get_item_list(data, doc):
