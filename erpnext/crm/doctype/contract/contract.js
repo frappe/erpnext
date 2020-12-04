@@ -11,7 +11,7 @@ frappe.ui.form.on("Contract", {
 					doc: frm.doc
 				},
 				callback: function(r) {
-					if(r && r.message){
+					if (r && r.message) {
 						frm.set_value("contract_terms", r.message.contract_terms);
 						
 						// Populate the fulfilment terms table from a contract template, if any
