@@ -7,6 +7,7 @@ import unittest
 from frappe.utils import random_string, nowdate
 from erpnext.hr.doctype.expense_claim.expense_claim import make_bank_entry
 from erpnext.accounts.doctype.account.test_account import create_account
+from erpnext.hr.doctype.employee.test_employee import make_employee
 
 test_records = frappe.get_test_records('Expense Claim')
 test_dependencies = ['Employee']
@@ -126,6 +127,9 @@ def generate_taxes():
 
 def make_expense_claim(payable_account, amount, sanctioned_amount, company, account, project=None, task_name=None, do_not_submit=False, taxes=None):
 	employee = frappe.db.get_value("Employee", {"status": "Active"})
+	if not employee:
+		employee = make_employee("test_employee@expense_claim.com", company=company)
+
 	currency, cost_center = frappe.db.get_value('Company', company, ['default_currency', 'cost_center'])
 	expense_claim = {
 		 "doctype": "Expense Claim",

@@ -177,7 +177,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 
 	get_form_fields(item) {
-		const fields = ['qty', 'uom', 'rate', 'price_list_rate', 'discount_percentage', 'warehouse', 'actual_qty'];
+		const fields = ['qty', 'uom', 'rate', 'conversion_factor', 'discount_percentage', 'warehouse', 'actual_qty', 'price_list_rate'];
 		if (item.has_serial_no) fields.push('serial_no');
 		if (item.has_batch_no) fields.push('batch_no');
 		return fields;
@@ -208,7 +208,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		const me = this;
 		if (this.rate_control) {
 			this.rate_control.df.onchange = function() {
-				if (this.value) {
+				if (this.value || flt(this.value) === 0) {
 					me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
 						const item_row = frappe.get_doc(me.doctype, me.name);
 						const doc = me.events.get_frm().doc;
@@ -234,24 +234,22 @@ erpnext.PointOfSale.ItemDetails = class {
 							})
 						} else if (available_qty === 0) {
 							me.warehouse_control.set_value('');
-							frappe.throw(__(`Item Code: ${me.item_row.item_code.bold()} is not available under warehouse ${this.value.bold()}.`));
+							const bold_item_code = me.item_row.item_code.bold();
+							const bold_warehouse = this.value.bold();
+							frappe.throw(
+								__('Item Code: {0} is not available under warehouse {1}.', [bold_item_code, bold_warehouse])
+							);
 						}
 						me.actual_qty_control.set_value(available_qty);
 					});
 				}
 			}
-			this.warehouse_control.refresh();
-		}
-
-		if (this.discount_percentage_control) {
-			this.discount_percentage_control.df.onchange = function() {
-				if (this.value) {
-					me.events.form_updated(me.doctype, me.name, 'discount_percentage', this.value).then(() => {
-						const item_row = frappe.get_doc(me.doctype, me.name);
-						me.rate_control.set_value(item_row.rate);
-					});
+			this.warehouse_control.df.get_query = () => {
+				return {
+					filters: { company: this.events.get_frm().doc.company }
 				}
-			}
+			};
+			this.warehouse_control.refresh();
 		}
 
 		if (this.serial_no_control) {
@@ -270,7 +268,8 @@ erpnext.PointOfSale.ItemDetails = class {
 					query: 'erpnext.controllers.queries.get_batch_no',
 					filters: {
 						item_code: me.item_row.item_code,
-						warehouse: me.item_row.warehouse
+						warehouse: me.item_row.warehouse,
+						posting_date: me.events.get_frm().doc.posting_date
 					}
 				}
 			};
@@ -287,8 +286,20 @@ erpnext.PointOfSale.ItemDetails = class {
 				me.events.set_value_in_current_cart_item('uom', this.value);
 				me.events.form_updated(me.doctype, me.name, 'uom', this.value);
 				me.current_item.uom = this.value;
+				
+				const item_row = frappe.get_doc(me.doctype, me.name);
+				me.conversion_factor_control.df.read_only = (item_row.stock_uom == this.value);
+				me.conversion_factor_control.refresh();
 			}
 		}
+
+		frappe.model.on("POS Invoice Item", "*", (fieldname, value, item_row) => {
+			const field_control = me[`${fieldname}_control`];
+			if (field_control) {
+				field_control.set_value(value);
+				cur_pos.update_cart_html(item_row);
+			}
+		});
 	}
 	
 	async auto_update_batch_no() {
@@ -337,6 +348,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 
 	attach_shortcuts() {
+		this.wrapper.find('.close-btn').attr("title", "Esc");
 		frappe.ui.keys.on("escape", () => {
 			const item_details_visible = this.$component.is(":visible");
 			if (item_details_visible) {
@@ -358,15 +370,19 @@ erpnext.PointOfSale.ItemDetails = class {
 	
 	bind_auto_serial_fetch_event() {
 		this.$form_container.on('click', '.auto-fetch-btn', () => {
-			this.batch_no_control.set_value('');
+			this.batch_no_control && this.batch_no_control.set_value('');
 			let qty = this.qty_control.get_value();
+			let conversion_factor = this.conversion_factor_control.get_value();
+			let expiry_date = this.item_row.has_batch_no ? this.events.get_frm().doc.posting_date : "";
+
 			let numbers = frappe.call({
 				method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
 				args: {
-					qty,
+					qty: qty * conversion_factor,
 					item_code: this.current_item.item_code,
 					warehouse: this.warehouse_control.get_value() || '',
 					batch_nos: this.current_item.batch_no || '',
+					posting_date: expiry_date,
 					for_doctype: 'POS Invoice'
 				}
 			});
@@ -376,10 +392,14 @@ erpnext.PointOfSale.ItemDetails = class {
 				let records_length = auto_fetched_serial_numbers.length;
 				if (!records_length) {
 					const warehouse = this.warehouse_control.get_value().bold();
-					frappe.msgprint(__(`Serial numbers unavailable for Item ${this.current_item.item_code.bold()} 
-						under warehouse ${warehouse}. Please try changing warehouse.`));
+					const item_code = this.current_item.item_code.bold();
+					frappe.msgprint(
+						__('Serial numbers unavailable for Item {0} under warehouse {1}. Please try changing warehouse.', [item_code, warehouse])
+					);
 				} else if (records_length < qty) {
-					frappe.msgprint(`Fetched only ${records_length} available serial numbers.`);
+					frappe.msgprint(
+						__('Fetched only {0} available serial numbers.', [records_length])
+					);
 					this.qty_control.set_value(records_length);
 				}
 				numbers = auto_fetched_serial_numbers.join(`\n`);
