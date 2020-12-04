@@ -155,7 +155,7 @@ frappe.ui.form.on("Issue", {
 
 	timeline_refresh: function(frm) {
 		// create button for "Help Article"
-		if(frappe.model.can_create("Help Article")) {
+		if (frappe.model.can_create("Help Article")) {
 			// Removing Help Article button if exists to avoid multiple occurance
 			frm.timeline.wrapper.find('.comment-header .asset-details .btn-add-to-kb').remove();
 			$('<button class="btn btn-xs btn-link btn-add-to-kb text-muted hidden-xs pull-right">'+
@@ -181,7 +181,7 @@ frappe.ui.form.on("Issue", {
 					var dialog = new frappe.ui.Dialog({
 						title: __("Split Issue"),
 						fields: [
-							{fieldname: "subject", fieldtype: "Data", reqd:1, label: __("Subject"), description: __("All communications including and above this shall be moved into the new Issue")}
+							{fieldname: "subject", fieldtype: "Data", reqd: 1, label: __("Subject"), description: __("All communications including and above this shall be moved into the new Issue")}
 						],
 						primary_action_label: __("Split"),
 						primary_action: function() {
