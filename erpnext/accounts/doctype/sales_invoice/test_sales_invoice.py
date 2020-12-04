@@ -1571,7 +1571,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-	
+
 	def test_sales_invoice_with_project_link(self):
 		from erpnext.projects.doctype.project.test_project import make_project
 
@@ -1605,9 +1605,9 @@ class TestSalesInvoice(unittest.TestCase):
 			debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", sales_invoice.name, as_dict=1)
-		
+
 		self.assertTrue(gl_entries)
-		
+
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["project"], gle.project)
 
@@ -1778,6 +1778,60 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def test_internal_transfer_gl_entry(self):
+		## Create internal transfer account
+		account = create_account(account_name="Unrealized Profit",
+			parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
+
+		frappe.db.set_value('Company', '_Test Company with perpetual inventory',
+			'unrealized_profit_loss_account', account)
+
+		customer = create_internal_customer("_Test Internal Customer 2", "_Test Company with perpetual inventory",
+			"_Test Company with perpetual inventory")
+
+		create_internal_supplier("_Test Internal Supplier 2", "_Test Company with perpetual inventory",
+			"_Test Company with perpetual inventory")
+
+		si = create_sales_invoice(
+			company = "_Test Company with perpetual inventory",
+			customer = customer,
+			debit_to = "Debtors - TCP1",
+			warehouse = "Stores - TCP1",
+			income_account = "Sales - TCP1",
+			expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1",
+			currency = "INR",
+			do_not_save = 1
+		)
+
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.update_stock = 1
+		si.items[0].target_warehouse = 'Work In Progress - TCP1'
+		add_taxes(si)
+		si.save()
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.company = '_Test Company with perpetual inventory'
+		target_doc.items[0].warehouse = 'Finished Goods - TCP1'
+		add_taxes(target_doc)
+		target_doc.save()
+		target_doc.submit()
+
+		si_gl_entries = [
+			["_Test Account Excise Duty - TCP1", 0.0, 12.0, nowdate()],
+			["Unrealized Profit - TCP1", 12.0, 0.0, nowdate()]
+		]
+
+		check_gl_entries(self, si.name, si_gl_entries, add_days(nowdate(), -1))
+
+		pi_gl_entries = [
+			["_Test Account Excise Duty - TCP1", 12.0 , 0.0, nowdate()],
+			["Unrealized Profit - TCP1", 0.0, 12.0, nowdate()]
+		]
+
+		check_gl_entries(self, target_doc.name, pi_gl_entries, add_days(nowdate(), -1))
 
 	def test_eway_bill_json(self):
 		if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
@@ -2037,4 +2091,55 @@ def get_taxes_and_charges():
 	"parentfield": "taxes",
 	"rate": 2,
 	"row_id": 1
-   }]
+	}]
+
+def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
+	if not frappe.db.exists("Customer", customer_name):
+		customer = frappe.get_doc({
+			"customer_group": "_Test Customer Group",
+			"customer_name": customer_name,
+			"customer_type": "Individual",
+			"doctype": "Customer",
+			"territory": "_Test Territory",
+			"is_internal_customer": 1,
+			"represents_company": represents_company
+		})
+
+		customer.append("companies", {
+			"company": allowed_to_interact_with
+		})
+
+		customer.insert()
+	else:
+		customer = frappe.db.get_value("Customer", customer_name)
+
+	return customer
+
+def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):
+	if not frappe.db.exists("Supplier", supplier_name):
+		supplier = frappe.get_doc({
+			"supplier_group": "_Test Supplier Group",
+			"supplier_name": supplier_name,
+			"doctype": "Supplier",
+			"is_internal_supplier": 1,
+			"represents_company": represents_company
+		})
+
+		supplier.append("companies", {
+			"company": allowed_to_interact_with
+		})
+
+		supplier.insert()
+	else:
+		supplier = frappe.db.exists("Supplier", supplier_name)
+
+	return supplier
+
+def add_taxes(doc):
+	doc.append('taxes', {
+		'account_head': '_Test Account Excise Duty - TCP1',
+		"charge_type": "On Net Total",
+		"cost_center": "Main - TCP1",
+		"description": "Excise Duty",
+		"rate": 12
+	})
