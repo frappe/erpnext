@@ -831,7 +831,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=[], tar
 
 	for supplier in suppliers:
 		po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
-		if len(po) == 0:
+		if len(po) == 0 or any( item.get("delivered_by_supplier") == 1 for item in selected_items):
 			doc = get_mapped_doc("Sales Order", source_name, {
 				"Sales Order": {
 					"doctype": "Purchase Order",
