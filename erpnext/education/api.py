@@ -7,7 +7,7 @@ import frappe
 import json
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from frappe.utils import flt, cstr
+from frappe.utils import flt, cstr, getdate
 from frappe.email.doctype.email_group.email_group import add_subscribers
 
 def get_course(program):
@@ -66,6 +66,13 @@ def mark_attendance(students_present, students_absent, course_schedule=None, stu
 	:param student_group: Student Group.
 	:param date: Date.
 	"""
+
+	if student_group:
+		academic_year = frappe.db.get_value('Student Group', student_group, 'academic_year')
+		if academic_year:
+			year_start_date, year_end_date = frappe.db.get_value('Academic Year', academic_year, ['year_start_date', 'year_end_date'])
+			if getdate(date) < getdate(year_start_date) or getdate(date) > getdate(year_end_date):
+				frappe.throw(_('Attendance cannot be marked outside of Academic Year {0}').format(academic_year))
 
 	present = json.loads(students_present)
 	absent = json.loads(students_absent)
