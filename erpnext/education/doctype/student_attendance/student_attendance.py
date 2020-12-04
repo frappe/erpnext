@@ -6,8 +6,10 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _
-from frappe.utils import get_link_to_form, getdate
+from frappe.utils import get_link_to_form, getdate, formatdate
+from erpnext import get_default_company
 from erpnext.education.api import get_student_group_students
+from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 
 class StudentAttendance(Document):
 	def validate(self):
@@ -17,6 +19,7 @@ class StudentAttendance(Document):
 		self.set_student_group()
 		self.validate_student()
 		self.validate_duplication()
+		self.validate_is_holiday()
 
 	def set_date(self):
 		if self.course_schedule:
@@ -78,3 +81,18 @@ class StudentAttendance(Document):
 			record = get_link_to_form('Student Attendance', attendance_record)
 			frappe.throw(_('Student Attendance record {0} already exists against the Student {1}')
 				.format(record, frappe.bold(self.student)), title=_('Duplicate Entry'))
+
+	def validate_is_holiday(self):
+		holiday_list = get_holiday_list()
+		if is_holiday(holiday_list, self.date):
+			frappe.throw(_('Attendance cannot be marked for {0} as it is a holiday.').format(
+				frappe.bold(formatdate(self.date))))
+
+def get_holiday_list(company=None):
+	if not company:
+		company = get_default_company() or frappe.get_all('Company')[0].name
+
+	holiday_list = frappe.get_cached_value('Company', company,  'default_holiday_list')
+	if not holiday_list:
+		frappe.throw(_('Please set a default Holiday List for Company {0}').format(frappe.bold(get_default_company())))
+	return holiday_list
