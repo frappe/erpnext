@@ -32,7 +32,7 @@ export default {
 			item_id_fieldname: 'name',
 
 			// Constants
-			empty_state_message: __(`No items in this category yet.`),
+			empty_state_message: __('No items in this category yet.'),
 
 			search_value: '',
 

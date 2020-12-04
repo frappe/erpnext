@@ -796,7 +796,7 @@ def get_children(doctype, parent, company, is_root=False):
 
 	return acc
 
-def create_payment_gateway_account(gateway):
+def create_payment_gateway_account(gateway, payment_channel="Email"):
 	from erpnext.setup.setup_wizard.operations.company_setup import create_bank_account
 
 	company = frappe.db.get_value("Global Defaults", None, "default_company")
@@ -831,7 +831,8 @@ def create_payment_gateway_account(gateway):
 			"is_default": 1,
 			"payment_gateway": gateway,
 			"payment_account": bank_account.name,
-			"currency": bank_account.account_currency
+			"currency": bank_account.account_currency,
+			"payment_channel": payment_channel
 		}).insert(ignore_permissions=True)
 
 	except frappe.DuplicateEntryError:
