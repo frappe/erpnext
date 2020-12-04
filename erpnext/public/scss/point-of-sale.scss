@@ -75,22 +75,14 @@
 		background-color: var(--gray-50);
 	}
 
-	.sticky-element {
-		position: sticky;
-		top: -1px;
-		z-index: 1;
-	}
-
 	> .items-selector {
 		@extend .pos-card;
 		grid-column: span 6 / span 6;
 		display: flex;
 		flex-direction: column;
-		overflow-y: scroll;
-		overflow-x: hidden;
+		overflow: hidden;
 
 		> .filter-section {
-			@extend .sticky-element;
 			display: grid;
 			grid-template-columns: repeat(12, minmax(0, 1fr));
 			background-color: var(--fg-color);
@@ -124,6 +116,14 @@
 			gap: var(--margin-lg);
 			padding: var(--padding-lg);
 			padding-top: var(--padding-xs);
+			overflow-y: scroll;
+			overflow-x: hidden;
+
+			&:after {
+				content: "";
+				display: block;
+				height: 1px;
+			}
 
 			> .item-wrapper {
 				@extend .pointer-no-select;
@@ -185,6 +185,7 @@
 			display: flex;
 			flex-direction: column;
 			padding: var(--padding-md) var(--padding-lg);
+			overflow: hidden;
 
 			> .customer-field {
 				display: flex;
@@ -193,7 +194,6 @@
 			}
 
 			> .customer-details {
-				@extend .sticky-element;
 				display: flex;
 				flex-direction: column;
 				background-color: var(--fg-color);
@@ -284,6 +284,11 @@
 
 			> .customer-transactions {
 				height: 100%;
+				overflow-x: hidden;
+				overflow-y: scroll;
+				margin-right: -12px;
+				padding-right: 12px;
+				margin-left: -10px;
 
 				> .no-transactions-placeholder {
 					height: 100%;
@@ -899,11 +904,9 @@
 		grid-column: span 4 / span 4;
 		display: none;
 		flex-direction: column;
-		overflow-y: scroll;
-		overflow-x: hidden;
+		overflow: hidden;
 
 		> .filter-section {
-			@extend .sticky-element;
 			display: flex;
 			flex-direction: column;
 			background-color: var(--fg-color);
@@ -927,17 +930,17 @@
 		> .invoices-container {
 			padding: var(--padding-lg);
 			padding-top: 0px;
+			overflow-x: hidden;
+			overflow-y: scroll;
 		}
 	}
 
 	> .past-order-summary {
-		// @extend .pos-card;
 		display: none;
 		grid-column: span 6 / span 6;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
-		// padding: var(--padding-lg);
 
 		> .no-summary-placeholder {
 			display: flex;
@@ -1029,14 +1032,12 @@
 						align-items: center;
 						justify-content: space-between;
 						padding: var(--padding-sm) var(--padding-md);
-						// border-bottom: 1px solid var(--gray-300);
 					}
 
 					> .taxes-wrapper {
 						display: flex;
 						flex-direction: column;
 						padding: 0px var(--padding-md);
-						// border-bottom: 1px solid var(--gray-300);
 
 						> .tax-row {
 							display: flex;
@@ -1050,7 +1051,6 @@
 						display: flex;
 						align-items: center;
 						padding: var(--padding-sm) var(--padding-md);
-						// border-bottom: 1px solid var(--gray-300);
 
 						> .item-name {
 							@extend .nowrap;
@@ -1081,9 +1081,7 @@
 					}
 
 					> .grand-total {
-						// font-size: var(--text-lg);
 						font-weight: 700;
-						// padding: var(--padding-md);
 					}
 
 					> .payments {
