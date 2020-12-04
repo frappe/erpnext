@@ -13,7 +13,7 @@ from erpnext.controllers.item_variant import (ItemVariantExistsError,
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from frappe import _, msgprint
 from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
-						  now_datetime, random_string, strip, get_link_to_form)
+						  now_datetime, random_string, strip, get_link_to_form, clean_whitespace)
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
@@ -90,7 +90,7 @@ class Item(WebsiteGenerator):
 				set_name_by_naming_series(self)
 				self.item_code = self.name
 		elif self.item_naming_by == "Item Code":
-			self.item_code = self.clean_name(self.item_code)
+			self.item_code = clean_whitespace(self.item_code)
 			self.name = self.item_code
 		elif self.item_naming_by == "Item Name":
 			self.validate_item_name()
@@ -696,15 +696,11 @@ class Item(WebsiteGenerator):
 				else:
 					check_list.append(d.item_tax_template)
 
-	@staticmethod
-	def clean_name(name):
-		return strip(cstr(name)).replace(r'/\s\s+/g', ' ')
-
 	def validate_item_name(self):
 		if not self.item_name:
 			self.item_name = self.item_code
 
-		self.item_name = self.clean_name(self.item_name)
+		self.item_name = clean_whitespace(self.item_name)
 
 	def validate_barcode(self):
 		from stdnum import ean

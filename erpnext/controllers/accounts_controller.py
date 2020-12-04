@@ -6,7 +6,7 @@ import frappe, erpnext
 import json
 from frappe import _, throw, scrub
 from frappe.utils import (today, flt, cint, fmt_money, formatdate, cstr,
-	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
+	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form, clean_whitespace)
 from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
 from erpnext.setup.utils import get_exchange_rate
@@ -895,10 +895,7 @@ class AccountsController(TransactionBase):
 	def clean_remarks(self):
 		for f in ['remarks', 'remark', 'user_remark', 'user_remarks']:
 			if self.meta.has_field(f):
-				cleaned_remarks = cstr(self.get(f)).strip()
-				cleaned_remarks = re.sub(r'\n\s*\n', '\n', cleaned_remarks)
-				cleaned_remarks = re.sub(r' +', ' ', cleaned_remarks)
-				self.set(f, cleaned_remarks)
+				self.set(f, clean_whitespace(self.get(f)))
 
 	def delink_advance_entries(self, linked_doc_name):
 		total_allocated_amount = 0

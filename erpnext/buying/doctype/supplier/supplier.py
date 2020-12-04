@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.defaults
 from frappe import msgprint, _
+from frappe.utils import clean_whitespace
 from frappe.model.naming import set_name_by_naming_series
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from erpnext.utilities.transaction_base import TransactionBase
@@ -47,6 +48,8 @@ class Supplier(TransactionBase):
 		if frappe.defaults.get_global_default('supp_master_name') == 'Naming Series':
 			if not self.naming_series:
 				msgprint(_("Series is mandatory"), raise_exception=1)
+
+		self.supplier_name = clean_whitespace(self.supplier_name)
 
 		from erpnext.accounts.party import validate_ntn_cnic_strn
 		validate_ntn_cnic_strn(self.tax_id, self.tax_cnic, self.tax_strn)
