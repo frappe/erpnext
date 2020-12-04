@@ -202,8 +202,8 @@ class PurchaseInvoice(BuyingController):
 				["Purchase Receipt", "purchase_receipt", "pr_detail"]
 			])
 
-	def validate_warehouse(self):
-		if self.update_stock:
+	def validate_warehouse(self, for_validate=True):
+		if self.update_stock and for_validate:
 			for d in self.get('items'):
 				if not d.warehouse:
 					frappe.throw(_("Warehouse required at Row No {0}, please set default warehouse for the item {1} for the company {2}").
@@ -229,7 +229,7 @@ class PurchaseInvoice(BuyingController):
 
 		if self.update_stock:
 			self.validate_item_code()
-			self.validate_warehouse()
+			self.validate_warehouse(for_validate)
 			if auto_accounting_for_stock:
 				warehouse_account = get_warehouse_account_map(self.company)
 
@@ -379,13 +379,15 @@ class PurchaseInvoice(BuyingController):
 			representation company is same
 		"""
 
-		if self.is_internal_transfer() and not self.inter_company_account:
-			inter_company_account = frappe.get_cached_value('Company', self.company, 'default_inter_company_account')
+		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
+			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
 
-			if not inter_company_account:
+			if not unrealized_profit_loss_account:
 				msg = _("Please select inter-company account or add default inter-company account for company {0}").format(
 						frappe.bold(self.company))
 				frappe.throw(msg)
+
+			self.unrealized_profit_loss_account = unrealized_profit_loss_account
 
 	def is_internal_transfer(self):
 		"""
@@ -902,10 +904,10 @@ class PurchaseInvoice(BuyingController):
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
-			account_currency = get_account_currency(self.inter_company_account)
+			account_currency = get_account_currency(self.unrealized_profit_loss_account)
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": self.inter_company_account,
+					"account": self.unrealized_profit_loss_account,
 					"against": self.supplier,
 					"credit": flt(self.total_taxes_and_charges),
 					"credit_in_account_currency": flt(self.base_total_taxes_and_charges),

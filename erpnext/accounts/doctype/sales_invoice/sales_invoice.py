@@ -578,13 +578,15 @@ class SalesInvoice(SellingController):
 			representation company is same
 		"""
 
-		if self.is_internal_transfer() and not self.inter_company_account:
-			inter_company_account = frappe.get_cached_value('Company', self.company, 'default_inter_company_account')
+		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
+			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
 
-			if not inter_company_account:
-				msg = _("Please select inter-company account or add default inter-company account for company {0}").format(
+			if not unrealized_profit_loss_account:
+				msg = _("Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}").format(
 						frappe.bold(self.company))
 				frappe.throw(msg)
+
+			self.unrealized_profit_loss_account = unrealized_profit_loss_account
 
 	def is_internal_transfer(self):
 		"""
@@ -838,10 +840,10 @@ class SalesInvoice(SellingController):
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
-			account_currency = get_account_currency(self.inter_company_account)
+			account_currency = get_account_currency(self.unrealized_profit_loss_account)
 			gl_entries.append(
 				self.get_gl_dict({
-					"account": self.inter_company_account,
+					"account": self.unrealized_profit_loss_account,
 					"against": self.customer,
 					"debit": flt(self.total_taxes_and_charges),
 					"debit_in_account_currency": flt(self.base_total_taxes_and_charges),

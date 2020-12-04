@@ -48,7 +48,7 @@
   "write_off_account",
   "exchange_gain_loss_account",
   "unrealized_exchange_gain_loss_account",
-  "default_inter_company_account",
+  "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
   "default_payable_account",
@@ -729,9 +729,9 @@
    "options": "Warehouse"
   },
   {
-   "fieldname": "default_inter_company_account",
+   "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
-   "label": "Default Inter Company Account",
+   "label": "Unrealized Profit / Loss Account",
    "options": "Account"
   }
  ],
@@ -740,7 +740,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-11-26 18:20:48.184507",
+ "modified": "2020-12-03 12:27:27.085094",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
