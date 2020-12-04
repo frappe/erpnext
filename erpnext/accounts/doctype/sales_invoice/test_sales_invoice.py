@@ -1562,7 +1562,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
-	
+
 	def test_sales_invoice_with_project_link(self):
 		from erpnext.projects.doctype.project.test_project import make_project
 
@@ -1596,9 +1596,9 @@ class TestSalesInvoice(unittest.TestCase):
 			debit_in_account_currency, credit_in_account_currency
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
 			order by account asc""", sales_invoice.name, as_dict=1)
-		
+
 		self.assertTrue(gl_entries)
-		
+
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["project"], gle.project)
 
@@ -2028,4 +2028,57 @@ def get_taxes_and_charges():
 	"parentfield": "taxes",
 	"rate": 2,
 	"row_id": 1
-   }]
+	}]
+
+def create_internal_customer(customer_name, represents_company, allowed_to_interact_with):
+	if not frappe.db.exists("Customer", customer_name):
+		customer = frappe.get_doc({
+			"customer_group": "_Test Customer Group",
+			"customer_name": customer_name,
+			"customer_type": "Individual",
+			"doctype": "Customer",
+			"territory": "_Test Territory",
+			"is_internal_customer": 1,
+			"represents_company": represents_company
+		})
+
+		customer.append("companies", {
+			"company": allowed_to_interact_with
+		})
+
+		customer.insert()
+		customer_name = customer.name
+	else:
+		customer_name = frappe.db.get_value("Customer", customer_name)
+
+	return customer_name
+
+def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):
+	if not frappe.db.exists("Supplier", supplier_name):
+		supplier = frappe.get_doc({
+			"supplier_group": "_Test Supplier Group",
+			"supplier_name": supplier_name,
+			"doctype": "Supplier",
+			"is_internal_supplier": 1,
+			"represents_company": represents_company
+		})
+
+		supplier.append("companies", {
+			"company": allowed_to_interact_with
+		})
+
+		supplier.insert()
+		supplier_name = supplier.name
+	else:
+		supplier_name = frappe.db.exists("Supplier", supplier_name)
+
+	return supplier_name
+
+def add_taxes(doc):
+	doc.append('taxes', {
+		'account_head': '_Test Account Excise Duty - TCP1',
+		"charge_type": "On Net Total",
+		"cost_center": "Main - TCP1",
+		"description": "Excise Duty",
+		"rate": 12
+	})
