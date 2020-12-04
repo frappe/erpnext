@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2020-01-24 15:29:29.933693",
@@ -279,8 +280,7 @@
    "fieldtype": "Check",
    "label": "Is Return (Credit Note)",
    "no_copy": 1,
-   "print_hide": 1,
-   "set_only_once": 1
+   "print_hide": 1
   },
   {
    "fieldname": "column_break1",
@@ -461,7 +461,7 @@
   },
   {
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
    "read_only": 1
@@ -1579,10 +1579,9 @@
   }
  ],
  "icon": "fa fa-file-text",
- "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-07 12:43:09.138720",
+ "modified": "2020-10-30 13:56:51.056083",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
