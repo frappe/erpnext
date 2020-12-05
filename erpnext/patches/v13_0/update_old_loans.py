@@ -101,32 +101,34 @@ def execute():
 			process_loan_interest_accrual_for_term_loans(posting_date=nowdate(), loan_type=loan_type,
 				loan=loan.name)
 
-			accrued_entries = get_accrued_interest_entries(loan.name)
-			total_principal, total_interest = frappe.db.get_value('Repayment Schedule', fields=['sum(principal_amount) as total_principal',
-				'sum(interest_amount) as total_interest'], filters={'is_paid': 1, 'parent': loan.name})
 
-			for entry in accrued_entries:
-				interest_paid = 0
-				principal_paid = 0
+			if frappe.db.has_column('Repayment Schedule', 'paid'):
+				total_principal, total_interest = frappe.db.get_value('Repayment Schedule', {'paid': 1, 'parent': loan.name},
+					['sum(principal_amount) as total_principal', 'sum(interest_amount) as total_interest'])
 
-				if total_interest > entry.interest_amount:
-					interest_paid = entry.interest_amount
-				else:
-					interest_paid = total_interest
+				accrued_entries = get_accrued_interest_entries(loan.name)
+				for entry in accrued_entries:
+					interest_paid = 0
+					principal_paid = 0
 
-				if total_principal > entry.payable_principal_amount:
-					principal_paid = entry.payable_principal_amount
-				else:
-					principal_paid = total_principal
+					if total_interest > entry.interest_amount:
+						interest_paid = entry.interest_amount
+					else:
+						interest_paid = total_interest
 
-				frappe.db.sql(""" UPDATE `tabLoan Interest Accrual`
-					SET paid_principal_amount = `paid_principal_amount` + %s,
-						paid_interest_amount = `paid_interest_amount` + %s
-					WHERE name = %s""",
-					(principal_paid, interest_paid, entry.name))
+					if total_principal > entry.payable_principal_amount:
+						principal_paid = entry.payable_principal_amount
+					else:
+						principal_paid = total_principal
 
-				total_principal -= principal_paid
-				total_interest -= interest_paid
+					frappe.db.sql(""" UPDATE `tabLoan Interest Accrual`
+						SET paid_principal_amount = `paid_principal_amount` + %s,
+							paid_interest_amount = `paid_interest_amount` + %s
+						WHERE name = %s""",
+						(principal_paid, interest_paid, entry.name))
+
+					total_principal -= principal_paid
+					total_interest -= interest_paid
 
 def create_loan_type(loan, loan_type_name, penalty_account):
 	loan_type_doc = frappe.new_doc('Loan Type')
