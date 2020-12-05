@@ -364,6 +364,26 @@ class PaymentEntry(AccountsController):
 			self.status = 'Submitted'
 		else:
 			self.status = 'Draft'
+	
+	def get_total_deductions_in_company_currency(self):
+		deductions = []
+		for d in self.get("deductions"):
+			account_currency = get_account_currency(d.account)
+			if account_currency == self.company_currency:
+				deductions.append(flt(d.amount))
+			else:
+				exchange_rate = get_exchange_rate(
+					account_currency, self.company_currency, self.posting_date
+				)
+				if self.payment_type == "Receive" \
+					and account_currency == self.paid_from_account_currency:
+						exchange_rate = self.source_exchange_rate
+				elif self.payment_type == "Pay" \
+					and account_currency == self.paid_to_account_currency:
+						exchange_rate = self.target_exchange_rate
+				amount_in_company_currency = flt(flt(d.amount) * flt(exchange_rate), self.precision("base_paid_amount"))
+				deductions.append(amount_in_company_currency)
+		return sum(deductions)
 
 	def set_amounts(self):
 		self.set_amounts_in_company_currency()
@@ -398,7 +418,7 @@ class PaymentEntry(AccountsController):
 	def set_unallocated_amount(self):
 		self.unallocated_amount = 0
 		if self.party:
-			total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+			total_deductions = self.get_total_deductions_in_company_currency()
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount + total_deductions \
 				and self.total_allocated_amount < self.paid_amount + (total_deductions / self.source_exchange_rate):
@@ -423,7 +443,7 @@ class PaymentEntry(AccountsController):
 		else:
 			self.difference_amount = self.base_paid_amount - flt(self.base_received_amount)
 
-		total_deductions = sum([flt(d.amount) for d in self.get("deductions")])
+		total_deductions = self.get_total_deductions_in_company_currency()
 
 		self.difference_amount = flt(self.difference_amount - total_deductions,
 			self.precision("difference_amount"))
@@ -494,8 +514,9 @@ class PaymentEntry(AccountsController):
 
 		for d in self.get("deductions"):
 			if d.amount:
+				account_currency = get_account_currency(d.account)
 				remarks.append(_("Amount {0} {1} deducted against {2}")
-					.format(self.company_currency, d.amount, d.account))
+					.format(account_currency, d.amount, d.account))
 
 		self.set("remarks", "\n".join(remarks))
 
@@ -586,8 +607,21 @@ class PaymentEntry(AccountsController):
 		for d in self.get("deductions"):
 			if d.amount:
 				account_currency = get_account_currency(d.account)
+
 				if account_currency != self.company_currency:
-					frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
+					exchange_rate = get_exchange_rate(
+						account_currency, self.company_currency, self.posting_date
+					)
+					if self.payment_type == "Receive" \
+						and account_currency == self.paid_from_account_currency:
+							exchange_rate = self.source_exchange_rate
+					elif self.payment_type == "Pay" \
+						and account_currency == self.paid_to_account_currency:
+							exchange_rate = self.target_exchange_rate
+
+					debit_in_company_currency = flt(flt(d.amount) * flt(exchange_rate), self.precision("base_paid_amount"))
+				else:
+					debit_in_company_currency = d.amount
 
 				gl_entries.append(
 					self.get_gl_dict({
@@ -595,7 +629,7 @@ class PaymentEntry(AccountsController):
 						"account_currency": account_currency,
 						"against": self.party or self.paid_from,
 						"debit_in_account_currency": d.amount,
-						"debit": d.amount,
+						"debit": debit_in_company_currency,
 						"cost_center": d.cost_center
 					}, item=d)
 				)
