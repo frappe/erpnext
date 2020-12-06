@@ -553,7 +553,7 @@ class TallyMigration(Document):
 			self.publish(_("Reading Day Book Data"), 2, 5)
 			day_book_data = self.get_collection(self.day_book_data)
 
-			self.publish(_("Processing Outstanding Vouchers"), 4, 5)
+			self.publish(_("Processing Vouchers"), 4, 5)
 			vouchers, invalid_vouchers = self.get_vouchers(day_book_data)
 
 			self.publish(_("Done"), 5, 5)
@@ -845,9 +845,4 @@ class TallyMigration(Document):
 		data = data or self.status
 		message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
 		frappe.log_error(title="Tally Migration Error", message=message)
-		frappe.db.commit()
-	
-	def tally_cleanup(self):
-		for d in ['Sales Invoice', 'Purchase Invoice', 'Journal Entry', 'GL Entry']:
-			frappe.db.sql(f"delete from `tab{d}`")
 		frappe.db.commit()
