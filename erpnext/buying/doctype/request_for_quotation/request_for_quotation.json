@@ -1,5 +1,5 @@
 {
- "actions": "",
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2016-02-25 01:24:07.224790",
@@ -12,25 +12,26 @@
   "vendor",
   "column_break1",
   "transaction_date",
+  "status",
+  "amended_from",
   "suppliers_section",
   "suppliers",
-  "get_suppliers_button",
   "items_section",
   "items",
-  "link_to_mrs",
   "supplier_response_section",
+  "salutation",
+  "subject",
+  "col_break_email_1",
   "email_template",
+  "preview",
+  "sec_break_email_2",
   "message_for_supplier",
   "terms_section_break",
   "tc_name",
   "terms",
   "printing_settings",
   "select_print_heading",
-  "letter_head",
-  "more_info",
-  "status",
-  "column_break3",
-  "amended_from"
+  "letter_head"
  ],
  "fields": [
   {
@@ -78,6 +79,7 @@
    "width": "50%"
   },
   {
+   "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -94,15 +96,10 @@
   {
    "fieldname": "suppliers",
    "fieldtype": "Table",
-   "label": "Supplier Detail",
+   "label": "Suppliers",
    "options": "Request for Quotation Supplier",
    "print_hide": 1,
    "reqd": 1
-  },
-  {
-   "fieldname": "get_suppliers_button",
-   "fieldtype": "Button",
-   "label": "Get Suppliers"
   },
   {
    "fieldname": "items_section",
@@ -120,14 +117,9 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)",
-   "fieldname": "link_to_mrs",
-   "fieldtype": "Button",
-   "label": "Link to Material Requests"
-  },
-  {
    "fieldname": "supplier_response_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Email Details"
   },
   {
    "fieldname": "email_template",
@@ -137,6 +129,9 @@
    "print_hide": 1
   },
   {
+   "allow_on_submit": 1,
+   "fetch_from": "email_template.response",
+   "fetch_if_empty": 1,
    "fieldname": "message_for_supplier",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -198,14 +193,6 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "more_info",
-   "fieldtype": "Section Break",
-   "label": "More Information",
-   "oldfieldtype": "Section Break",
-   "options": "fa fa-file-text"
-  },
-  {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
@@ -219,10 +206,6 @@
    "search_index": 1
   },
   {
-   "fieldname": "column_break3",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
@@ -230,12 +213,46 @@
    "options": "Request for Quotation",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "email_template.subject",
+   "fetch_if_empty": 1,
+   "fieldname": "subject",
+   "fieldtype": "Data",
+   "label": "Subject",
+   "print_hide": 1
+  },
+  {
+   "description": "Select a greeting for the receiver. E.g. Mr., Ms., etc.",
+   "fieldname": "salutation",
+   "fieldtype": "Link",
+   "label": "Salutation",
+   "no_copy": 1,
+   "options": "Salutation",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "col_break_email_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.docstatus==1",
+   "fieldname": "preview",
+   "fieldtype": "Button",
+   "label": "Preview Email"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "sec_break_email_2",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 14:37:21.140194",
+ "modified": "2020-11-05 22:04:29.017134",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation",

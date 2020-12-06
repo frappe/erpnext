@@ -2,6 +2,21 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Routing', {
+	refresh: function(frm) {
+		frm.trigger("display_sequence_id_column");
+	},
+
+	onload: function(frm) {
+		frm.trigger("display_sequence_id_column");
+	},
+
+	display_sequence_id_column: function(frm) {
+		frappe.meta.get_docfield("BOM Operation", "sequence_id",
+			frm.doc.name).in_list_view = true;
+
+		frm.fields_dict.operations.grid.refresh();
+	},
+
 	calculate_operating_cost: function(frm, child) {
 		const operating_cost = flt(flt(child.hour_rate) * flt(child.time_in_mins) / 60, 2);
 		frappe.model.set_value(child.doctype, child.name, "operating_cost", operating_cost);

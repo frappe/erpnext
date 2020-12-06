@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import json
-from frappe.utils import getdate, get_time
+from frappe.utils import getdate, get_time, flt
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
 import datetime
@@ -45,7 +45,7 @@ class PatientAppointment(Document):
 
 	def validate_overlaps(self):
 		end_time = datetime.datetime.combine(getdate(self.appointment_date), get_time(self.appointment_time)) \
-			 + datetime.timedelta(minutes=float(self.duration))
+			 + datetime.timedelta(minutes=flt(self.duration))
 
 		overlaps = frappe.db.sql("""
 		select

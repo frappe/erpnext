@@ -205,11 +205,11 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 13:51:37.177231",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
- "owner": "ashwini@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "cancel": 1,

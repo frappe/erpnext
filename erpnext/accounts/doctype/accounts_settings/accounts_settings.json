@@ -40,7 +40,7 @@
  "fields": [
   {
    "default": "1",
-   "description": "If enabled, the system will post accounting entries for inventory automatically.",
+   "description": "If enabled, the system will post accounting entries for inventory automatically",
    "fieldname": "auto_accounting_for_stock",
    "fieldtype": "Check",
    "hidden": 1,
@@ -48,23 +48,23 @@
    "label": "Make Accounting Entry For Every Stock Movement"
   },
   {
-   "description": "Accounting entry frozen up to this date, nobody can do / modify entry except role specified below.",
+   "description": "Accounting entries are frozen up to this date. Nobody can create or modify entries except users with the role specified below",
    "fieldname": "acc_frozen_upto",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Accounts Frozen Upto"
+   "label": "Accounts Frozen Till Date"
   },
   {
    "description": "Users with this role are allowed to set frozen accounts and create / modify accounting entries against frozen accounts",
    "fieldname": "frozen_accounts_modifier",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Role Allowed to Set Frozen Accounts & Edit Frozen Entries",
+   "label": "Role Allowed to Set Frozen Accounts and Edit Frozen Entries",
    "options": "Role"
   },
   {
    "default": "Billing Address",
-   "description": "Address used to determine Tax Category in transactions.",
+   "description": "Address used to determine Tax Category in transactions",
    "fieldname": "determine_address_tax_category_from",
    "fieldtype": "Select",
    "label": "Determine Address Tax Category From",
@@ -75,7 +75,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "description": "Role that is allowed to submit transactions that exceed credit limits set.",
+   "description": "This role is allowed to submit transactions that exceed credit limits",
    "fieldname": "credit_controller",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -104,7 +104,7 @@
    "default": "1",
    "fieldname": "unlink_advance_payment_on_cancelation_of_order",
    "fieldtype": "Check",
-   "label": "Unlink Advance Payment on Cancelation of Order"
+   "label": "Unlink Advance Payment on Cancellation of Order"
   },
   {
    "default": "1",
@@ -127,7 +127,7 @@
    "default": "0",
    "fieldname": "show_inclusive_tax_in_print",
    "fieldtype": "Check",
-   "label": "Show Inclusive Tax In Print"
+   "label": "Show Inclusive Tax in Print"
   },
   {
    "fieldname": "column_break_12",
@@ -165,7 +165,7 @@
   },
   {
    "default": "0",
-   "description": "Only select if you have setup Cash Flow Mapper documents",
+   "description": "Only select this if you have set up the Cash Flow Mapper documents",
    "fieldname": "use_custom_cash_flow",
    "fieldtype": "Check",
    "label": "Use Custom Cash Flow Format"
@@ -177,7 +177,7 @@
    "label": "Automatically Fetch Payment Terms"
   },
   {
-   "description": "Percentage you are allowed to bill more against the amount ordered. For example: If the order value is $100 for an item and tolerance is set as 10% then you are allowed to bill for $110.",
+   "description": "The percentage you are allowed to bill more against the amount ordered. For example, if the order value is $100 for an item and tolerance is set as 10%, then you are allowed to bill up to $110 ",
    "fieldname": "over_billing_allowance",
    "fieldtype": "Currency",
    "label": "Over Billing Allowance (%)"
@@ -199,7 +199,7 @@
   },
   {
    "default": "0",
-   "description": "If this is unchecked direct GL Entries will be created to book Deferred Revenue/Expense",
+   "description": "If this is unchecked, direct GL entries will be created to book deferred revenue or expense",
    "fieldname": "book_deferred_entries_via_journal_entry",
    "fieldtype": "Check",
    "label": "Book Deferred Entries Via Journal Entry"
@@ -214,7 +214,7 @@
   },
   {
    "default": "Days",
-   "description": "If \"Months\" is selected then fixed amount will be booked as deferred revenue or expense for each month irrespective of number of days in a month. Will be prorated if deferred revenue or expense is not booked for an entire month.",
+   "description": "If \"Months\" is selected, a fixed amount will be booked as deferred revenue or expense for each month irrespective of the number of days in a month. It will be prorated if deferred revenue or expense is not booked for an entire month",
    "fieldname": "book_deferred_entries_based_on",
    "fieldtype": "Select",
    "label": "Book Deferred Entries Based On",
@@ -223,9 +223,10 @@
  ],
  "icon": "icon-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-03 20:13:26.043092",
+ "modified": "2020-10-13 11:32:52.268826",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

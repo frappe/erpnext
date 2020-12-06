@@ -48,11 +48,11 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2019-12-11 13:38:59.534034",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Type",
- "owner": "harshada@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "create": 1,

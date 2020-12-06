@@ -32,8 +32,7 @@ class TestAssetMovement(unittest.TestCase):
 			"next_depreciation_date": "2020-12-31",
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 10
 		})
 
 		if asset.docstatus == 0:
@@ -82,8 +81,7 @@ class TestAssetMovement(unittest.TestCase):
 			"next_depreciation_date": "2020-12-31",
 			"depreciation_method": "Straight Line",
 			"total_number_of_depreciations": 3,
-			"frequency_of_depreciation": 10,
-			"depreciation_start_date": "2020-06-06"
+			"frequency_of_depreciation": 10
 		})
 		if asset.docstatus == 0:
 			asset.submit()

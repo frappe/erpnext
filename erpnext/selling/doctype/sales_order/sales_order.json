@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
@@ -1460,7 +1461,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-31 14:13:17.962015",
+ "modified": "2020-10-30 13:59:18.628077",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1534,7 +1535,7 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
- "title_field": "customer",
+ "title_field": "customer_name",
  "track_changes": 1,
  "track_seen": 1
 }

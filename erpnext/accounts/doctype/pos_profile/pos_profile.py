@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
-from frappe.utils import cint, now
+from frappe.utils import cint, now, get_link_to_form
 from six import iteritems
 from frappe.model.document import Document
 
@@ -13,7 +13,7 @@ class POSProfile(Document):
 		self.validate_default_profile()
 		self.validate_all_link_fields()
 		self.validate_duplicate_groups()
-		self.check_default_payment()
+		self.validate_payment_methods()
 
 	def validate_default_profile(self):
 		for row in self.applicable_for_users:
@@ -52,14 +52,33 @@ class POSProfile(Document):
 		if len(customer_groups) != len(set(customer_groups)):
 			frappe.throw(_("Duplicate customer group found in the cutomer group table"), title = "Duplicate Customer Group")
 
-	def check_default_payment(self):
-		if self.payments:
-			default_mode_of_payment = [d.default for d in self.payments if d.default]
-			if not default_mode_of_payment:
-				frappe.throw(_("Set default mode of payment"))
+	def validate_payment_methods(self):
+		if not self.payments:
+			frappe.throw(_("Payment methods are mandatory. Please add at least one payment method."))
 
-			if len(default_mode_of_payment) > 1:
-				frappe.throw(_("Multiple default mode of payment is not allowed"))
+		default_mode = [d.default for d in self.payments if d.default]
+		if not default_mode:
+			frappe.throw(_("Please select a default mode of payment"))
+
+		if len(default_mode) > 1:
+			frappe.throw(_("You can only select one mode of payment as default"))
+		
+		invalid_modes = []
+		for d in self.payments:
+			account = frappe.db.get_value(
+				"Mode of Payment Account", 
+				{"parent": d.mode_of_payment, "company": self.company},
+				"default_account"
+			)
+			if not account:
+				invalid_modes.append(get_link_to_form("Mode of Payment", d.mode_of_payment))
+
+		if invalid_modes:
+			if invalid_modes == 1:
+				msg = _("Please set default Cash or Bank account in Mode of Payment {}")
+			else:
+				msg = _("Please set default Cash or Bank account in Mode of Payments {}")
+			frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
 
 	def on_update(self):
 		self.set_defaults()
@@ -99,10 +118,6 @@ def get_child_nodes(group_type, root):
 	lft, rgt = frappe.db.get_value(group_type, root, ["lft", "rgt"])
 	return frappe.db.sql(""" Select name, lft, rgt from `tab{tab}` where
 			lft >= {lft} and rgt <= {rgt} order by lft""".format(tab=group_type, lft=lft, rgt=rgt), as_dict=1)
-
-@frappe.whitelist()
-def get_series():
-	return frappe.get_meta("POS Invoice").get_field("naming_series").options or "s"
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

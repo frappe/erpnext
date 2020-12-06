@@ -5,7 +5,7 @@
         <p>ERP made simple</p>
     </p>
 
-[![Build Status](https://travis-ci.com/frappe/erpnext.svg)](https://travis-ci.com/frappe/erpnext)
+[![Build Status](https://api.travis-ci.com/frappe/erpnext.svg?branch=develop)](https://travis-ci.com/frappe/erpnext)
 [![Open Source Helpers](https://www.codetriage.com/frappe/erpnext/badges/users.svg)](https://www.codetriage.com/frappe/erpnext)
 [![Coverage Status](https://coveralls.io/repos/github/frappe/erpnext/badge.svg?branch=develop)](https://coveralls.io/github/frappe/erpnext?branch=develop)
 
@@ -16,7 +16,7 @@
 ERPNext as a monolith includes the following areas for managing businesses:
 
 1. [Accounting](https://erpnext.com/open-source-accounting)
-1. [Inventory](https://erpnext.com/distribution/inventory-management-system)
+1. [Warehouse Management](https://erpnext.com/distribution/warehouse-management-system)
 1. [CRM](https://erpnext.com/open-source-crm)
 1. [Sales](https://erpnext.com/open-source-sales-purchase)
 1. [Purchase](https://erpnext.com/open-source-sales-purchase)

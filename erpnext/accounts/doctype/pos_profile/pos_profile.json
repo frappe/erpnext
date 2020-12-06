@@ -8,13 +8,13 @@
  "field_order": [
   "disabled",
   "section_break_2",
-  "naming_series",
   "customer",
   "company",
   "country",
   "column_break_9",
   "update_stock",
   "ignore_pricing_rule",
+  "hide_unavailable_items",
   "warehouse",
   "campaign",
   "company_address",
@@ -58,17 +58,6 @@
   {
    "fieldname": "section_break_2",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "[Select]",
-   "reqd": 1
   },
   {
    "fieldname": "customer",
@@ -302,28 +291,36 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
-   "mandatory_depends_on": "update_stock",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
-  },
-  {
-   "default": "0",
-   "fieldname": "update_stock",
-   "fieldtype": "Check",
-   "label": "Update Stock"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "default": "0",
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule"
+  },
+  {
+   "default": "1",
+   "fieldname": "update_stock",
+   "fieldtype": "Check",
+   "label": "Update Stock",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_unavailable_items",
+   "fieldtype": "Check",
+   "label": "Hide Unavailable Items"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-06-29 12:20:30.977272",
+ "modified": "2020-10-29 13:18:38.795925",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
