@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "status",
+  "master_data_section",
   "master_data",
   "is_master_data_processed",
   "is_master_data_imported",
@@ -22,6 +23,7 @@
   "default_cost_center",
   "day_book_section",
   "day_book_data",
+  "trial_balance_report",
   "column_break_27",
   "is_day_book_data_processed",
   "is_day_book_data_imported",
@@ -30,8 +32,9 @@
   "hide_resolved_errors",
   "error_log_html",
   "masters",
-  "payload_length",
+  "vouchers",
   "is_chart_of_accounts_imported",
+  "is_opening_balances_imported",
   "error_log"
  ],
  "fields": [
@@ -184,13 +187,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "payload_length",
-   "fieldtype": "Int",
-   "hidden": 1,
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "default": "[]",
    "fieldname": "error_log",
    "fieldtype": "Long Text",
@@ -199,6 +195,8 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
+   "collapsible_depends_on": "error_log_html",
    "depends_on": "eval:(doc.error_log != \"[]\")",
    "fieldname": "error_log_section",
    "fieldtype": "Section Break",
@@ -213,12 +211,37 @@
    "fieldname": "hide_resolved_errors",
    "fieldtype": "Check",
    "label": "Hide Resolved Errors"
+  },
+  {
+   "fieldname": "trial_balance_report",
+   "fieldtype": "Attach",
+   "label": "Trial Balance Report"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_opening_balances_imported",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "vouchers",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:!doc.is_master_data_imported",
+   "fieldname": "master_data_section",
+   "fieldtype": "Section Break",
+   "label": "Master Data Import"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-17 18:40:20.064902",
+ "modified": "2020-12-06 23:02:21.581018",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

@@ -72,7 +72,7 @@ frappe.ui.form.on("Tally Migration", {
 			if (frm.doc.is_day_book_data_processed) {
 				if (frm.doc.status != "Importing Day Book Data" && !unresolved_errors) {
 					const label = !error_log.length ? __("Import Day Book Data") : __("Resume Import");
-					frm.events.add_button(frm, lable, "import_day_book_data");
+					frm.events.add_button(frm, label, "import_day_book_data");
 				}
 			} else {
 				if (frm.doc.status != "Processing Day Book Data") {
