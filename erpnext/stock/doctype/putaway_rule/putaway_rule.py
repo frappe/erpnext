@@ -5,11 +5,14 @@
 from __future__ import unicode_literals
 import frappe
 import copy
+import json
 from collections import defaultdict
+from six import string_types
 from frappe import _
-from frappe.utils import flt, floor, nowdate
+from frappe.utils import flt, floor, nowdate, cint
 from frappe.model.document import Document
 from erpnext.stock.utils import get_stock_balance
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class PutawayRule(Document):
 	def validate(self):
@@ -52,70 +55,50 @@ class PutawayRule(Document):
 	def set_stock_capacity(self):
 		self.stock_capacity = (flt(self.conversion_factor) or 1) * flt(self.capacity)
 
-def get_ordered_putaway_rules(item_code, company):
-	"""Returns an ordered list of putaway rules to apply on an item."""
-	rules = frappe.get_all("Putaway Rule",
-		fields=["name", "item_code", "stock_capacity", "priority", "warehouse"],
-		filters={"item_code": item_code, "company": company, "disable": 0},
-		order_by="priority asc, capacity desc")
-
-	if not rules:
-		return False, None
-
-	for rule in rules:
-		balance_qty = get_stock_balance(rule.item_code, rule.warehouse, nowdate())
-		free_space = flt(rule.stock_capacity) - flt(balance_qty)
-		if free_space > 0:
-			rule["free_space"] = free_space
-		else:
-			del rule
-
-	if not rules:
-		# After iterating through rules, if no rules are left
-		# then there is not enough space left in any rule
-		return True, None
-
-	rules = sorted(rules, key = lambda i: (i['priority'], -i['free_space']))
-	return False, rules
+@frappe.whitelist()
+def get_putaway_capacity(rule):
+	stock_capacity, item_code, warehouse = frappe.db.get_value("Putaway Rule", rule,
+		["stock_capacity", "item_code", "warehouse"])
+	balance_qty = get_stock_balance(item_code, warehouse, nowdate())
+	free_space = flt(stock_capacity) - flt(balance_qty)
+	return free_space if free_space > 0 else 0
 
 @frappe.whitelist()
-def apply_putaway_rule(items, company):
+def apply_putaway_rule(doctype, items, company):
 	""" Applies Putaway Rule on line items.
 
 		items: List of Purchase Receipt Item objects
 		company: Company in the Purchase Receipt
 	"""
+	if isinstance(items, string_types):
+		items = json.loads(items)
+
 	items_not_accomodated, updated_table = [], []
 	item_wise_rules = defaultdict(list)
 
-	def add_row(item, to_allocate, warehouse):
-		new_updated_table_row = copy.deepcopy(item)
-		new_updated_table_row.name = ''
-		new_updated_table_row.idx = 1 if not updated_table else flt(updated_table[-1].idx) + 1
-		new_updated_table_row.qty = to_allocate
-		new_updated_table_row.stock_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
-		new_updated_table_row.warehouse = warehouse
-		updated_table.append(new_updated_table_row)
-
 	for item in items:
-		conversion = flt(item.conversion_factor)
-		uom_must_be_whole_number = frappe.db.get_value('UOM', item.uom, 'must_be_whole_number')
-		pending_qty, pending_stock_qty, item_code = flt(item.qty), flt(item.stock_qty), item.item_code
+		if isinstance(item, dict):
+			item = frappe._dict(item)
 
-		if not pending_qty:
-			add_row(item, pending_qty, item.warehouse)
+		source_warehouse = item.get("s_warehouse")
+		serial_nos = get_serial_nos(item.get("serial_no"))
+		conversion = flt(item.conversion_factor) or 1
+		pending_qty, item_code = flt(item.qty), item.item_code
+		pending_stock_qty = flt(item.transfer_qty) if doctype == "Stock Entry" else flt(item.stock_qty)
+		if not pending_qty or not item_code:
+			updated_table = add_row(item, pending_qty, item.warehouse, updated_table)
 			continue
 
-		at_capacity, rules = get_ordered_putaway_rules(item_code, company)
+		uom_must_be_whole_number = frappe.db.get_value('UOM', item.uom, 'must_be_whole_number')
+
+		at_capacity, rules = get_ordered_putaway_rules(item_code, company, source_warehouse=source_warehouse)
 
 		if not rules:
+			warehouse = item.warehouse
 			if at_capacity:
-				# rules available, but no free space
-				add_row(item, pending_qty, '')
+				warehouse = '' # rules available, but no free space
 				items_not_accomodated.append([item_code, pending_qty])
-			else:
-				# no rules to apply
-				add_row(item, pending_qty, item.warehouse)
+			updated_table = add_row(item, pending_qty, warehouse, updated_table)
 			continue
 
 		# maintain item wise rules, to handle if item is entered twice
@@ -126,7 +109,7 @@ def apply_putaway_rule(items, company):
 		for rule in item_wise_rules[item_code]:
 			if pending_stock_qty > 0 and rule.free_space:
 				stock_qty_to_allocate = flt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty
-				qty_to_allocate = stock_qty_to_allocate / (conversion or 1)
+				qty_to_allocate = stock_qty_to_allocate / (conversion)
 
 				if uom_must_be_whole_number:
 					qty_to_allocate = floor(qty_to_allocate)
@@ -134,7 +117,8 @@ def apply_putaway_rule(items, company):
 
 				if not qty_to_allocate: break
 
-				add_row(item, qty_to_allocate, rule.warehouse)
+				updated_table = add_row(item, qty_to_allocate, rule.warehouse, updated_table,
+					rule.name, serial_nos=serial_nos)
 
 				pending_stock_qty -= stock_qty_to_allocate
 				pending_qty -= qty_to_allocate
@@ -144,15 +128,71 @@ def apply_putaway_rule(items, company):
 
 		# if pending qty after applying all rules, add row without warehouse
 		if pending_stock_qty > 0:
-			add_row(item, pending_qty, '')
+			# updated_table = add_row(item, pending_qty, '', updated_table, serial_nos=serial_nos)
 			items_not_accomodated.append([item.item_code, pending_qty])
 
 	if items_not_accomodated:
-		format_unassigned_items_error(items_not_accomodated)
+		show_unassigned_items_message(items_not_accomodated)
 
 	return updated_table if updated_table else items
 
-def format_unassigned_items_error(items_not_accomodated):
+def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
+	"""Returns an ordered list of putaway rules to apply on an item."""
+	filters = {
+		"item_code": item_code,
+		"company": company,
+		"disable": 0
+	}
+	if source_warehouse:
+		filters.update({"warehouse": ["!=", source_warehouse]})
+
+	rules = frappe.get_all("Putaway Rule",
+		fields=["name", "item_code", "stock_capacity", "priority", "warehouse"],
+		filters=filters,
+		order_by="priority asc, capacity desc")
+
+	if not rules:
+		return False, None
+
+	vacant_rules = []
+	for rule in rules:
+		balance_qty = get_stock_balance(rule.item_code, rule.warehouse, nowdate())
+		free_space = flt(rule.stock_capacity) - flt(balance_qty)
+		if free_space > 0:
+			rule["free_space"] = free_space
+			vacant_rules.append(rule)
+
+	if not vacant_rules:
+		# After iterating through rules, if no rules are left
+		# then there is not enough space left in any rule
+		return True, None
+
+	vacant_rules = sorted(vacant_rules, key = lambda i: (i['priority'], -i['free_space']))
+
+	return False, vacant_rules
+
+def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=None):
+	new_updated_table_row = copy.deepcopy(item)
+	new_updated_table_row.idx = 1 if not updated_table else cint(updated_table[-1].idx) + 1
+	new_updated_table_row.name = "New " + str(item.doctype) + " " + str(new_updated_table_row.idx)
+	new_updated_table_row.qty = to_allocate
+	new_updated_table_row.stock_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
+	if item.doctype == "Stock Entry Detail":
+		new_updated_table_row.t_warehouse = warehouse
+	else:
+		new_updated_table_row.warehouse = warehouse
+		new_updated_table_row.rejected_qty = 0
+		new_updated_table_row.received_qty = to_allocate
+
+	if rule:
+		new_updated_table_row.putaway_rule = rule
+	if serial_nos:
+		new_updated_table_row.serial_no = get_serial_nos_to_allocate(serial_nos, to_allocate)
+
+	updated_table.append(new_updated_table_row)
+	return updated_table
+
+def show_unassigned_items_message(items_not_accomodated):
 	msg = _("The following Items, having Putaway Rules, could not be accomodated:") + "<br><br>"
 	formatted_item_rows = ""
 
@@ -174,3 +214,10 @@ def format_unassigned_items_error(items_not_accomodated):
 	""".format(_("Item"), _("Unassigned Qty"), formatted_item_rows)
 
 	frappe.msgprint(msg, title=_("Insufficient Capacity"), is_minimizable=True, wide=True)
+
+def get_serial_nos_to_allocate(serial_nos, to_allocate):
+	if serial_nos:
+		allocated_serial_nos = serial_nos[0: cint(to_allocate)]
+		serial_nos[:] = serial_nos[cint(to_allocate):] # pop out allocated serial nos and modify list
+		return "\n".join(allocated_serial_nos) if allocated_serial_nos else ""
+	else: return ""
