@@ -808,7 +808,7 @@ class TestSalesOrder(unittest.TestCase):
 
 		self.assertEqual(so.customer, po.customer)
 		self.assertEqual(po.items[0].sales_order, so.name)
-		self.assertEqual(po.items[0].item_code, po_item.item_code)
+		self.assertEqual(po.items[0].item_code, po_item1.item_code)
 		#test po_item length
 		self.assertEqual(len(po.items), 1)
 
