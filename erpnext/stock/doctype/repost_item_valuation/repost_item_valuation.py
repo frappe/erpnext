@@ -30,14 +30,12 @@ class RepostItemValuation(Document):
 
 def repost(doc):
 	try:
-		print("in progress")
 		doc.set_status('In Progress')
 		repost_sl_entries(doc)
 		repost_gl_entries(doc)
 		doc.set_status('Completed')
 		frappe.db.commit()
 	except Exception:
-		print("failed")
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		print(traceback)
@@ -50,12 +48,12 @@ def repost_sl_entries(doc):
 		repost_future_sle(voucher_type=doc.voucher_type, voucher_no=doc.voucher_no,
 			allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
 	else:
-		repost_future_sle(args=[{
+		repost_future_sle(args=[frappe._dict({
 			"item_code": doc.item_code,
 			"warehouse": doc.warehouse,
 			"posting_date": doc.posting_date,
 			"posting_time": doc.posting_time
-		}], allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
+		})], allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
 
 def repost_gl_entries(doc):
 	if doc.based_on == 'Transaction':

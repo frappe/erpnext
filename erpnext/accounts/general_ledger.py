@@ -186,9 +186,10 @@ def validate_account_for_perpetual_inventory(gl_map):
 				db_or_cr_stock_adjustment_account = ('debit_in_account_currency' if diff < 0 else 'credit_in_account_currency')
 
 				journal_entry_args = {
-				'accounts':[
-					{'account': account, db_or_cr_warehouse_account : abs(diff)},
-					{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff) }]
+					'accounts':[
+						{'account': account, db_or_cr_warehouse_account : abs(diff)},
+						{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff)}
+					]
 				}
 
 				frappe.msgprint(msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),

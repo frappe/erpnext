@@ -439,9 +439,11 @@ class PurchaseInvoice(BuyingController):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if self.auto_accounting_for_stock:
 			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
+			self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		else:
 			self.stock_received_but_not_billed = None
-		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+			self.expenses_included_in_valuation = None
+		
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
 

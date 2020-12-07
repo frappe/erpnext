@@ -7,7 +7,7 @@ import unittest
 import frappe
 from frappe.utils import flt
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import set_perpetual_inventory, get_gl_entries, test_records as pr_test_records, make_purchase_receipt
+	import get_gl_entries, test_records as pr_test_records, make_purchase_receipt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 

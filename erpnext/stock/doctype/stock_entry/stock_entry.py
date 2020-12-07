@@ -454,7 +454,7 @@ class StockEntry(StockController):
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 
-			if not d.basic_rate:
+			if not d.basic_rate and not d.allow_zero_valuation_rate:
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
 					self.doctype, self.name, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company,

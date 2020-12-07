@@ -10,7 +10,6 @@ from frappe.model.dynamic_links import get_dynamic_link_map
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry, get_qty_after_transaction
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import unlink_payment_on_cancel_of_invoice
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 from erpnext.exceptions import InvalidAccountCurrency, InvalidCurrency
 from erpnext.stock.doctype.serial_no.serial_no import SerialNoWarehouseError
 from frappe.model.naming import make_autoname
@@ -659,7 +658,6 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_sales_invoice_gl_entry_without_perpetual_inventory(self):
 		si = frappe.copy_doc(test_records[1])
-		set_perpetual_inventory(0, si.company)
 		si.insert()
 		si.submit()
 
@@ -815,7 +813,6 @@ class TestSalesInvoice(unittest.TestCase):
 		frappe.db.sql("delete from `tabPOS Profile`")
 
 	def test_pos_si_without_payment(self):
-		set_perpetual_inventory()
 		make_pos_profile()
 
 		pos = copy.deepcopy(test_records[1])
@@ -829,9 +826,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, si.submit)
 
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
-		set_perpetual_inventory()
-
-		si = frappe.get_doc(test_records[1])
+		si = create_sales_invoice(company="_Test Company with perpetual inventory", do_no_save=True)
 		si.get("items")[0].item_code = None
 		si.insert()
 		si.submit()
@@ -842,24 +837,16 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			[si.debit_to, 630.0, 0.0],
-			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
-			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
-			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
+			[si.debit_to, 100.0, 0.0],
+			[test_records[1]["items"][0]["income_account"], 0.0, 100.0]
 		])
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account][0], gle.account)
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
-		set_perpetual_inventory(0)
-
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_non_stock_item(self):
-		set_perpetual_inventory()
-		si = frappe.get_doc(test_records[1])
-		si.get("items")[0].item_code = "_Test Non Stock Item"
-		si.insert()
-		si.submit()
+		si = create_sales_invoice(item="_Test Non Stock Item")
 
 		gl_entries = frappe.db.sql("""select account, debit, credit
 			from `tabGL Entry` where voucher_type='Sales Invoice' and voucher_no=%s
@@ -867,17 +854,14 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			[si.debit_to, 630.0, 0.0],
-			[test_records[1]["items"][0]["income_account"], 0.0, 500.0],
-			[test_records[1]["taxes"][0]["account_head"], 0.0, 80.0],
-			[test_records[1]["taxes"][1]["account_head"], 0.0, 50.0],
+			[si.debit_to, 100.0, 0.0],
+			[test_records[1]["items"][0]["income_account"], 0.0, 100.0]
 		])
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account][0], gle.account)
 			self.assertEqual(expected_values[gle.account][1], gle.debit)
 			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
-		set_perpetual_inventory(0)
 
 	def _insert_purchase_receipt(self):
 		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import test_records \
@@ -1106,7 +1090,6 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.grand_total, 859.43)
 
 	def test_multi_currency_gle(self):
-		set_perpetual_inventory(0)
 		si = create_sales_invoice(customer="_Test Customer USD", debit_to="_Test Receivable USD - _TC",
 			currency="USD", conversion_rate=50)
 

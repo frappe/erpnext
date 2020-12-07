@@ -7,6 +7,7 @@ from frappe.utils import cint, nowdate
 from frappe import throw, _
 from frappe.utils.nestedset import NestedSet
 from erpnext.stock import get_warehouse_account
+from erpnext.stock.utils import get_stock_value_on
 from frappe.contacts.address_and_contact import load_address_and_contact
 
 class Warehouse(NestedSet):
@@ -28,7 +29,6 @@ class Warehouse(NestedSet):
 			if account:
 				self.set_onload('account', account)
 		load_address_and_contact(self)
-
 
 	def on_update(self):
 		self.update_nsm_model()

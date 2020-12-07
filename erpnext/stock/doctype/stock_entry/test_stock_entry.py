@@ -6,7 +6,6 @@ import frappe, unittest
 import frappe.defaults
 from frappe.utils import flt, nowdate, nowtime
 from erpnext.stock.doctype.serial_no.serial_no import *
-from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.stock_ledger_entry.stock_ledger_entry import StockFreezeError
 from erpnext.stock.stock_ledger import get_previous_sle
 from frappe.permissions import add_user_permission, remove_user_permission
@@ -32,7 +31,6 @@ def get_sle(**args):
 class TestStockEntry(unittest.TestCase):
 	def tearDown(self):
 		frappe.set_user("Administrator")
-		set_perpetual_inventory(0)
 
 	def test_fifo(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
@@ -213,7 +211,6 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_repack_no_change_in_valuation(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(0, company)
 
 		make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=50, basic_rate=100)
 		make_stock_entry(item_code="_Test Item Home Desktop 100", target="_Test Warehouse - _TC",
@@ -234,8 +231,6 @@ class TestStockEntry(unittest.TestCase):
 			from `tabGL Entry` where voucher_type='Stock Entry' and voucher_no=%s
 			order by account desc""", repack.name, as_dict=1)
 		self.assertFalse(gl_entries)
-
-		set_perpetual_inventory(0, repack.company)
 
 	def test_repack_with_additional_costs(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
@@ -474,7 +469,6 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_warehouse_company_validation(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse 2 - _TC1', 'company')
-		set_perpetual_inventory(0, company)
 		frappe.get_doc("User", "test2@example.com")\
 			.add_roles("Sales User", "Sales Manager", "Stock User", "Stock Manager")
 		frappe.set_user("test2@example.com")
@@ -500,7 +494,7 @@ class TestStockEntry(unittest.TestCase):
 
 		st1 = frappe.copy_doc(test_records[0])
 		st1.company = "_Test Company 1"
-		set_perpetual_inventory(0, st1.company)
+
 		frappe.set_user("test@example.com")
 		st1.get("items")[0].t_warehouse="_Test Warehouse 2 - _TC1"
 		self.assertRaises(frappe.PermissionError, st1.insert)
@@ -759,8 +753,8 @@ class TestStockEntry(unittest.TestCase):
 		"company":"_Test Company with perpetual inventory",
 		"items":[
 			{
-				"item_code":"Basil Leaves",
-				"description":"Basil Leaves",
+				"item_code":"_Test Item",
+				"description":"_Test Item",
 				"qty": 1,
 				"basic_rate": 0,
 				"uom":"Nos",
@@ -769,8 +763,8 @@ class TestStockEntry(unittest.TestCase):
 				"cost_center": "Main - TCP1"
 			 },
 			 {
-				"item_code":"Basil Leaves",
-				"description":"Basil Leaves",
+				"item_code":"_Test Item",
+				"description":"_Test Item",
 				"qty": 2,
 				"basic_rate": 0,
 				"uom":"Nos",
