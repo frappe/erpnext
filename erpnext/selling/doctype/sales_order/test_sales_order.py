@@ -791,10 +791,11 @@ class TestSalesOrder(unittest.TestCase):
 			},
 			{
 				"item_code": po_item2.item_code,
-				"warehouse": "_Test Warehouse - _TC",
+				"warehouse": "",
 				"qty": 2,
-				"rate": 300,
-				"conversion_factor": 1.0
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
 			}
 		]
 
