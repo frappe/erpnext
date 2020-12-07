@@ -103,10 +103,6 @@ class TallyMigration(Document):
 		content = file.get_content()
 		return json.loads(content)
 
-	def set_account_defaults(self):
-		self.default_cost_center, self.default_round_off_account = frappe.db.get_value("Company", self.erpnext_company, ["cost_center", "round_off_account"])
-		self.default_warehouse = frappe.db.get_value("Stock Settings", "Stock Settings", "default_warehouse")
-
 	def _process_master_data(self):
 		def get_coa_customers_suppliers(collection):
 			root_type_map = {
@@ -197,58 +193,71 @@ class TallyMigration(Document):
 						if pincode in pincodes:
 							return city, state
 				return "", ""
-
-			customers, suppliers, addresses = [], [], []
-			for account in collection.find_all("LEDGER"):
-				party_type = None
-				links = []
-				if account.NAME.string.strip() in customer_ledgers:
-					party_type = "Customer"
-					customers.append({
+			
+			def get_party_doc(party_type, party, account):
+				if party_type == "Customer":
+					return {
 						"doctype": party_type,
-						"customer_name": account.NAME.string.strip(),
+						"customer_name": party,
 						"tax_id": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
 						"customer_group": "All Customer Groups",
 						"territory": "All Territories",
 						"customer_type": "Individual",
-					})
-					links.append({"link_doctype": party_type, "link_name": account["NAME"]})
-
-				if account.NAME.string.strip() in supplier_ledgers:
-					party_type = "Supplier"
-					suppliers.append({
+					}
+				else:
+					return {
 						"doctype": party_type,
-						"supplier_name": account.NAME.string.strip(),
+						"supplier_name": party,
 						"pan": account.INCOMETAXNUMBER.string.strip() if account.INCOMETAXNUMBER else None,
 						"supplier_group": "All Supplier Groups",
 						"supplier_type": "Individual",
-					})
-					links.append({"link_doctype": party_type, "link_name": account["NAME"]})
+					}
+
+			def get_address_doc(account, links):
+				tally_state = account.LEDSTATENAME.string.strip().title().replace('&', 'and') if account.LEDSTATENAME else ""
+				pincode = account.PINCODE.string.strip() if account.PINCODE else ""
+				city, pincode_state = "", ""
+				if pincode:
+					pincode = str(pincode).replace("-", "").replace(" ", "")
+					city, pincode_state = get_city_state_from_pincode(cint(pincode))
+
+				address = "\n".join([a.string.strip() for a in account.find_all("ADDRESS")])
+				return {
+					"doctype": "Address",
+					"address_line1": address[:140].strip(),
+					"address_line2": address[140:].strip(),
+					"country": account.COUNTRYNAME.string.strip() if account.COUNTRYNAME else None,
+					"phone": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
+					"gstin": account.PARTYGSTIN.string.strip() if account.PARTYGSTIN else None,
+					"state": (pincode_state or tally_state).title(),
+					"gst_state": (pincode_state or tally_state).title(),
+					"pincode": pincode,
+					"city": city,
+					"links": links,
+					"flags": { "ignore_mandatory": True }
+				}
+
+			customers, suppliers, addresses = [], [], []
+			for account in collection.find_all("LEDGER"):
+				party, party_type, links = None, None, []
+				party = account.NAME.string.strip()
+
+				if party in customer_ledgers:
+					party_type = "Customer"
+					customer_doc = get_party_doc(party_type, party, account)
+					customers.append(customer_doc)
+					links.append({"link_doctype": party_type, "link_name": party})
+
+				if party in supplier_ledgers:
+					party_type = "Supplier"
+					supplier_doc = get_party_doc(party_type, party, account)
+					suppliers.append(supplier_doc)
+					links.append({"link_doctype": party_type, "link_name": party})
 
 				if party_type:
-					address = "\n".join([a.string.strip() for a in account.find_all("ADDRESS")])
-					tally_state = account.LEDSTATENAME.string.strip().title().replace('&', 'and') if account.LEDSTATENAME else ""
+					address_doc = get_address_doc(account, links)
+					addresses.append(address_doc)
 
-					pincode = account.PINCODE.string.strip() if account.PINCODE else ""
-					city, pincode_state = "", ""
-					if pincode:
-						pincode = str(pincode).replace("-", "").replace(" ", "")
-						city, pincode_state = get_city_state_from_pincode(cint(pincode))
-
-					addresses.append({
-						"doctype": "Address",
-						"address_line1": address[:140].strip(),
-						"address_line2": address[140:].strip(),
-						"country": account.COUNTRYNAME.string.strip() if account.COUNTRYNAME else None,
-						"phone": account.LEDGERPHONE.string.strip() if account.LEDGERPHONE else None,
-						"gstin": account.PARTYGSTIN.string.strip() if account.PARTYGSTIN else None,
-						"state": (pincode_state or tally_state).title(),
-						"gst_state": (pincode_state or tally_state).title(),
-						"pincode": pincode,
-						"city": city,
-						"links": links,
-						"flags": { "ignore_mandatory": True }
-					})
 			return customers, suppliers, addresses
 
 		def get_item_groups(collection):
@@ -302,20 +311,20 @@ class TallyMigration(Document):
 			self.publish(_("Processing Party Addresses"), 2, 4)
 			customers, suppliers, addresses = get_parties_addresses(collection, customer_ledgers, supplier_ledgers)
 
-			self.publish(_("Processing Items, UOMs and Groups"), 3, 4)
+			self.publish(_("Processing Items, Groups and UOMs"), 3, 4)
 			items, uoms = get_stock_items_uoms(collection)
 			item_groups = get_item_groups(collection)
 
 			data = uoms + item_groups + items + customers + suppliers + addresses
 
-			coa = self.dump_processed_data(chart_of_accounts, filename="chart_of_accounts")
-			masters = self.dump_processed_data(data, filename="masters")
+			coa_file = self.dump_processed_data(chart_of_accounts, filename="chart_of_accounts")
+			master_file = self.dump_processed_data(data, filename="masters")
+
+			self.update_field("chart_of_accounts", coa_file)
+			self.update_field("masters", master_file)
+			self.update_field("is_master_data_processed", 1)
 
 			self.publish(_("Done"), 4, 4)
-
-			self.update_field("chart_of_accounts", coa)
-			self.update_field("masters", masters)
-			self.update_field("is_master_data_processed", 1)
 
 		except:
 			self.publish(_("Process Failed"), -1, 4)
@@ -336,19 +345,18 @@ class TallyMigration(Document):
 		company.validate()
 		frappe.local.flags.ignore_chart_of_accounts = False
 
-		self.update_field("is_chart_of_accounts_imported", 1)
-
 	def _import_master_data(self):
 		try:
 			if not self.is_chart_of_accounts_imported:
 				self.publish(_("Importing Chart of Accounts"), 0, 100)
 				self.import_coa()
+				self.update_field("is_chart_of_accounts_imported", 1)
 
 			masters = self.fetch_processed_data(self.masters)
 			self.enqueue_import(masters)
 
 		except:
-			self.publish(_("Process Failed"), -1, progress_total)
+			self.publish(_("Process Failed"), -1, 100)
 			frappe.db.rollback()
 			self.log()
 
@@ -356,7 +364,8 @@ class TallyMigration(Document):
 			self.set_status()
 	
 	def after_master_data_import(self):
-		self.set_account_defaults()
+		self.default_cost_center, self.default_round_off_account = frappe.db.get_value("Company", self.erpnext_company, ["cost_center", "round_off_account"])
+		self.default_warehouse = frappe.db.get_value("Stock Settings", "Stock Settings", "default_warehouse")
 		self.update_field("is_master_data_imported", 1)
 
 	def get_opening_entry(self, trial_balance_report):
@@ -487,10 +496,12 @@ class TallyMigration(Document):
 				qty, uom = "1", frappe.db.get_value("Item", item_code, "stock_uom")
 			items.append({
 				"item_code": item_code,
+				"item_name": item_name,
 				"description": item_code,
 				"qty": qty.strip(),
 				"uom": uom.strip().title(),
 				"conversion_factor": 1,
+				"rate": entry.RATE.string.strip().split("/")[0],
 				"price_list_rate": entry.RATE.string.strip().split("/")[0],
 				"cost_center": self.default_cost_center,
 				"warehouse": self.default_warehouse,
@@ -504,11 +515,15 @@ class TallyMigration(Document):
 		for entry in ledger_entries:
 			if entry.ISPARTYLEDGER.string.strip() == "No":
 				tax_account = encode_company_abbr(entry.LEDGERNAME.string.strip(), self.erpnext_company)
+				tax_amount = Decimal(entry.AMOUNT.string.strip()) if entry.AMOUNT else 0
 				taxes.append({
 					"charge_type": "Actual",
+					"category": "Total",
+					"add_deduct_tax": "Add",
 					"account_head": tax_account,
 					"description": tax_account,
-					"tax_amount": str(abs(entry.AMOUNT.string.strip())),
+					"rate": 0,
+					"tax_amount": str(abs(tax_amount)),
 					"cost_center": self.default_cost_center,
 				})
 		return taxes
@@ -542,6 +557,9 @@ class TallyMigration(Document):
 
 		return vouchers, invalid_vouchers
 
+	def log_invalid_vouchers(self, vouchers):
+		[self.log(d) for d in vouchers]
+
 	def _process_day_book_data(self):
 		try:
 			self.publish(_("Reading Trial Balance Report"), 1, 5)
@@ -556,16 +574,15 @@ class TallyMigration(Document):
 			self.publish(_("Processing Vouchers"), 4, 5)
 			vouchers, invalid_vouchers = self.get_vouchers(day_book_data)
 
-			self.publish(_("Done"), 5, 5)
-			data = [opening_entry] + vouchers
-			vouchers = self.dump_processed_data(data, filename="vouchers")
+			self.log_invalid_vouchers(invalid_vouchers)
 
-			self.update_field("vouchers", vouchers)
+			data = [opening_entry] + vouchers
+			voucher_file = self.dump_processed_data(data, filename="vouchers")
+
+			self.update_field("vouchers", voucher_file)
 			self.update_field("is_day_book_data_processed", 1)
 
-			if invalid_vouchers:
-				for d in invalid_vouchers:
-					self.log(d)
+			self.publish(_("Done"), 5, 5)
 
 		except:
 			self.publish(_("Process Failed"), -1, 5)
@@ -574,6 +591,48 @@ class TallyMigration(Document):
 
 		finally:
 			self.set_status()
+	
+	def adjust_difference_with_temporary_opening(self, jv):
+		total_debit = sum([Decimal(d["debit_in_account_currency"]) for d in jv.get("accounts")])
+		total_credit = sum([Decimal(d["credit_in_account_currency"]) for d in jv.get("accounts")])
+
+		difference = flt(total_debit - total_credit, 2)
+		if difference:
+			temporary_opening_acc = encode_company_abbr("Temporary Opening", self.erpnext_company)
+			if not frappe.db.exists("Account", temporary_opening_acc):
+				frappe.get_doc({
+					"doctype": "Account",
+					"company": self.erpnext_company,
+					"account_name": "Temporary Opening",
+					"account_type": "Temporary",
+					"is_group": 0,
+					"report_type": "Balance Sheet",
+					"root_type": "Asset",
+					"parent_account": encode_company_abbr("Application of Funds (Assets)", self.erpnext_company)
+				}).insert()
+
+			row = {
+				"account": temporary_opening_acc,
+				"cost_center": self.default_cost_center
+			}
+			amount = Decimal(difference)
+			cr_or_dr = "debit_in_account_currency" if amount < 0 else "credit_in_account_currency"
+			row[cr_or_dr] = str(abs(amount))
+			jv.get('accounts').append(row)
+
+		return jv
+	
+	def import_opening_balances(self, entry):
+		try:
+			entry = self.adjust_difference_with_temporary_opening(entry)
+			jv = frappe.get_doc(entry)
+			jv.insert()
+			jv.submit()
+			self.update_field("is_opening_balances_imported", 1)
+		except:
+			frappe.db.rollback()
+			self.log(entry)
+			raise
 
 	def _import_day_book_data(self):
 		def create_fiscal_years(vouchers):
@@ -669,60 +728,12 @@ class TallyMigration(Document):
 			self.enqueue_import(vouchers[1:])
 
 		except:
-			self.publish(_("Process Failed"), -1, 1)
+			self.publish(_("Process Failed"), -1, 100)
 			frappe.db.rollback()
 			self.log()
 
 		finally:
 			self.set_status()
-	
-	def adjust_difference_with_temporary_opening(self, jv):
-		total_debit = sum([Decimal(d["debit_in_account_currency"]) for d in jv.get("accounts")])
-		total_credit = sum([Decimal(d["credit_in_account_currency"]) for d in jv.get("accounts")])
-
-		difference = flt(total_debit - total_credit, 2)
-		if difference:
-			temporary_opening_acc = encode_company_abbr("Temporary Opening", self.erpnext_company)
-			if not frappe.db.exists("Account", temporary_opening_acc):
-				frappe.get_doc({
-					"doctype": "Account",
-					"company": self.erpnext_company,
-					"account_name": "Temporary Opening",
-					"account_type": "Temporary",
-					"is_group": 0,
-					"report_type": "Balance Sheet",
-					"root_type": "Asset",
-					"parent_account": encode_company_abbr("Application of Funds (Assets)", self.erpnext_company)
-				}).insert()
-
-			row = {
-				"account": temporary_opening_acc,
-				"cost_center": self.default_cost_center
-			}
-			amount = Decimal(difference)
-			cr_or_dr = "debit_in_account_currency" if amount < 0 else "credit_in_account_currency"
-			row[cr_or_dr] = str(abs(amount))
-			jv.get('accounts').append(row)
-
-		return jv
-	
-	def import_opening_balances(self, entry):
-		try:
-			entry = self.adjust_difference_with_temporary_opening(entry)
-			jv = frappe.get_doc(entry)
-			jv.insert()
-			jv.submit()
-			self.update_field("is_opening_balances_imported", 1)
-		except:
-			frappe.db.rollback()
-			self.log(entry)
-			raise
-
-	def get_dependencies(self, doctype):
-		return {
-			"Item": set(("UOM", "Item Group")),
-			"Address": set(("Customer", "Supplier"))
-		}.get(doctype, set())
 	
 	def enqueue_import(self, payload):
 		total = len(payload)
@@ -738,12 +749,18 @@ class TallyMigration(Document):
 				start=index+1, is_last=is_last
 			)
 	
+	def get_dependencies(self, doctype):
+		return {
+			"Item": set(("UOM", "Item Group")),
+			"Address": set(("Customer", "Supplier"))
+		}.get(doctype, set())
+	
 	def start_import(self, data, start, is_last):
 		frappe.flags.in_migrate = True
 		chunk = data[start: start + CHUNK_SIZE]
 
 		error_log = json.loads(self.error_log)
-		error_log = [d for d in error_log if d["status"] == "Failed"]
+		failed_log = [d for d in error_log if d["status"] == "Failed"]
 		progress_total = len(data)
 		skipped_docs = []
 
@@ -751,9 +768,10 @@ class TallyMigration(Document):
 			try:
 				doctype = doc['doctype']
 				dependent_on = self.get_dependencies(doctype)
-				errored_doctypes = set([d["doc"]["doctype"] for d in error_log])
+				failed_doctypes = set([d["doc"]["doctype"] for d in failed_log])
 
-				if dependent_on & errored_doctypes:
+				if dependent_on & failed_doctypes:
+					 # if curr doctype is dependent on failed doctype then skip
 					skipped_docs.append(doc)
 					self.publish(_("Skipping {}").format(doctype), i + 1, progress_total)
 					continue
@@ -781,27 +799,31 @@ class TallyMigration(Document):
 		self.update_field("error_log", json.dumps(error_log))
 
 		if is_last:
-			if not self.is_master_data_imported:
-				remaining_masters = self.dump_processed_data(skipped_docs, "masters")
-				self.update_field("masters", remaining_masters)
-
-				if not skipped_docs and not error_log:
-					self.publish(_("Master Data Import Complete"), 1, 1)
-					self.after_master_data_import()
-				else:
-					self.publish(_("Resolve Errors and Try Again"), 1, 1)
-
-			else:
-				remaining_vouchers = self.dump_processed_data(skipped_docs, "vouchers")
-				self.update_field("vouchers", remaining_vouchers)
-
-				if not skipped_docs and not error_log:
-					self.publish(_("Day Book Data Import Complete"), 1, 1)
-					self.after_day_book_data_import()
-				else:
-					self.publish(_("Resolve Errors and Try Again"), 1, 1)
+			self.finish_import(skipped_docs, error_log)
 
 		frappe.flags.in_migrate = False
+
+	def finish_import(self, skipped_docs, error_log):
+		failed_log = [d for d in error_log if d["status"] == "Failed"]
+		if not self.is_master_data_imported:
+			remaining_masters = self.dump_processed_data(skipped_docs, "masters")
+			self.update_field("masters", remaining_masters)
+
+			if not skipped_docs and not failed_log:
+				self.publish(_("Master Data Import Complete"), 1, 1)
+				self.after_master_data_import()
+			else:
+				self.publish(_("Resolve Errors and Try Again"), -1, 1)
+
+		else:
+			remaining_vouchers = self.dump_processed_data(skipped_docs, "vouchers")
+			self.update_field("vouchers", remaining_vouchers)
+
+			if not skipped_docs and not failed_log:
+				self.publish(_("Day Book Data Import Complete"), 1, 1)
+				self.after_day_book_data_import()
+			else:
+				self.publish(_("Resolve Errors and Try Again"), -1, 1)
 	
 	def publish(self, message, progress, total):
 		frappe.publish_realtime("tally_migration_progress_update", {
@@ -809,8 +831,7 @@ class TallyMigration(Document):
 			"progress": progress,
 			"total": total,
 			"user": frappe.session.user,
-			"message": message,
-			"docname": self.name
+			"message": message
 		})
 	
 	def set_status(self, status=""):

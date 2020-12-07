@@ -100,7 +100,7 @@ erpnext.utils.get_party_details = function(frm, method, args, callback) {
 				frm.supplier_tds = r.message.supplier_tds;
 				frm.updating_party_details = true;
 				frappe.run_serially([
-					() => frm.set_value(r.message),
+					() => frm.set_value(r.message, undefined, true),
 					() => {
 						frm.updating_party_details = false;
 						if (callback) callback();

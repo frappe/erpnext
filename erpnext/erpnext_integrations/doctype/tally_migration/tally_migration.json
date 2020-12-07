@@ -81,9 +81,11 @@
    "label": "Accounts"
   },
   {
+   "depends_on": "eval:doc.is_day_book_data_processed != 1",
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
    "label": "Default Warehouse",
+   "mandatory_depends_on": "eval:doc.is_master_data_imported === 1",
    "options": "Warehouse"
   },
   {
@@ -91,9 +93,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "eval:doc.is_day_book_data_processed != 1",
    "fieldname": "default_cost_center",
    "fieldtype": "Link",
    "label": "Default Cost Center",
+   "mandatory_depends_on": "eval:doc.is_master_data_imported === 1",
    "options": "Cost Center"
   },
   {
@@ -150,9 +154,11 @@
    "read_only_depends_on": "eval:doc.is_master_data_processed==1"
   },
   {
+   "depends_on": "eval:doc.is_day_book_data_processed != 1",
    "fieldname": "default_round_off_account",
    "fieldtype": "Link",
    "label": "Default Round Off Account",
+   "mandatory_depends_on": "eval:doc.is_master_data_imported === 1",
    "options": "Account"
   },
   {
@@ -196,7 +202,7 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "error_log_html",
+   "collapsible_depends_on": "eval:doc.error_log != \"[]\"",
    "depends_on": "eval:(doc.error_log != \"[]\")",
    "fieldname": "error_log_section",
    "fieldtype": "Section Break",
@@ -241,7 +247,7 @@
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-06 23:02:21.581018",
+ "modified": "2020-12-07 13:02:08.159634",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",
