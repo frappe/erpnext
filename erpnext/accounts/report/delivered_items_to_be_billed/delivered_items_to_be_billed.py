@@ -14,11 +14,93 @@ def execute(filters=None):
 
 def get_column():
 	return [
-		_("Delivery Note") + ":Link/Delivery Note:120", _("Status") + "::120", _("Date") + ":Date:100",
-		_("Suplier") + ":Link/Customer:120", _("Customer Name") + "::120",
-		_("Project") + ":Link/Project:120", _("Item Code") + ":Link/Item:120",
-		_("Amount") + ":Currency:100", _("Billed Amount") + ":Currency:100", _("Pending Amount") + ":Currency:100",
-		_("Item Name") + "::120", _("Description") + "::120", _("Company") + ":Link/Company:120",
+		{
+			"label": _("Delivery Note"),
+			"fieldname": "name",
+			"fieldtype": "Link",
+			"options": "Delivery Note",
+			"width": 160
+		},
+		{
+			"label": _("Date"),
+			"fieldname": "date",
+			"fieldtype": "Date",
+			"width": 100
+		},
+		{
+			"label": _("Customer"),
+			"fieldname": "customer",
+			"fieldtype": "Link",
+			"options": "Customer",
+			"width": 120
+		},
+		{
+			"label": _("Customer Name"),
+			"fieldname": "customer_name",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"label": _("Item Code"),
+			"fieldname": "item_code",
+			"fieldtype": "Link",
+			"options": "Item",
+			"width": 120
+		},
+		{
+			"label": _("Amount"),
+			"fieldname": "amount",
+			"fieldtype": "Currency",
+			"width": 100,
+			"options": "Company:company:default_currency"
+		},
+		{
+			"label": _("Billed Amount"),
+			"fieldname": "billed_amount",
+			"fieldtype": "Currency",
+			"width": 100,
+			"options": "Company:company:default_currency"
+		},
+		{
+			"label": _("Returned Amount"),
+			"fieldname": "returned_amount",
+			"fieldtype": "Currency",
+			"width": 120,
+			"options": "Company:company:default_currency"
+		},
+		{
+			"label": _("Pending Amount"),
+			"fieldname": "pending_amount",
+			"fieldtype": "Currency",
+			"width": 120,
+			"options": "Company:company:default_currency"
+		},
+		{
+			"label": _("Item Name"),
+			"fieldname": "item_name",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"label": _("Description"),
+			"fieldname": "description",
+			"fieldtype": "Data",
+			"width": 120
+		},
+		{
+			"label": _("Project"),
+			"fieldname": "project",
+			"fieldtype": "Link",
+			"options": "Project",
+			"width": 120
+		},
+		{
+			"label": _("Company"),
+			"fieldname": "company",
+			"fieldtype": "Link",
+			"options": "Company",
+			"width": 120
+		}
 	]
 
 def get_args():
