@@ -176,7 +176,6 @@
   },
   {
    "default": "0",
-   "fetch_from": "contract_template.requires_fulfilment",
    "fieldname": "requires_fulfilment",
    "fieldtype": "Check",
    "label": "Requires Fulfilment"
@@ -249,7 +248,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-02 21:12:44.118155",
+ "modified": "2020-12-07 11:15:58.385521",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
