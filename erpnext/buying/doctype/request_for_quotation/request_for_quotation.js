@@ -290,11 +290,17 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 				dialog.show();
 			}, __("Get Items From"));
 
+			// Link Material Requests
+			this.frm.add_custom_button(__('Link to Material Requests'),
+				function() {
+					erpnext.buying.link_to_mrs(me.frm);
+				}, __("Tools"));
+
 			// Get Suppliers
 			this.frm.add_custom_button(__('Get Suppliers'),
 				function() {
 					me.get_suppliers_button(me.frm);
-				});
+				}, __("Tools"));
 		}
 	},
 

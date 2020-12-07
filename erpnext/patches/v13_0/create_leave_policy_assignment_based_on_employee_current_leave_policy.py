@@ -52,6 +52,8 @@ def create_assignment(employee, leave_policy, leave_period=None, allocation_exis
     if leave_period:
         filters["leave_period"] = leave_period
 
+    frappe.reload_doc('hr', 'doctype', 'leave_policy_assignment')
+
     if not frappe.db.exists("Leave Policy Assignment" , filters):
         lpa = frappe.new_doc("Leave Policy Assignment")
         lpa.employee = employee
