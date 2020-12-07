@@ -1515,6 +1515,9 @@ class POSItems {
 	}
 
 	get_items({start = 0, page_length = 40, search_value='', item_group=this.parent_item_group}={}) {
+		if (!this.frm.doc.pos_profile)
+			return;
+
 		const price_list = this.frm.doc.selling_price_list;
 		return new Promise(res => {
 			frappe.call({
