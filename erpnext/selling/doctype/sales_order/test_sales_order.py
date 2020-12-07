@@ -804,22 +804,24 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 
 		# create po for only one item
-		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
-		po.submit()
+		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
+		po1.submit()
 
-		self.assertEqual(so.customer, po.customer)
-		self.assertEqual(po.items[0].sales_order, so.name)
-		self.assertEqual(po.items[0].item_code, po_item1.item_code)
-		#test po_item length
-		self.assertEqual(len(po.items), 1)
+		self.assertEqual(so.customer, po1.customer)
+		self.assertEqual(po1.items[0].sales_order, so.name)
+		self.assertEqual(po1.items[0].item_code, po_item1.item_code)
+		#test po item length
+		self.assertEqual(len(po1.items), 1)
 
 		# create po for remaining item
-		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])
-		po.submit()
+		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])
+		po2.submit()
 
 		# teardown
 		so_update_status("Draft", so.name)
-		po.cancel()
+
+		po1.cancel()
+		po2.cancel()
 		so.load_from_db()
 		so.cancel()
 
