@@ -10,8 +10,6 @@ from six import string_types
 import json
 
 class ContractTemplate(Document):
-	pass
-	
 	def validate(self):
 		if self.contract_terms:
 			validate_template(self.contract_terms)
