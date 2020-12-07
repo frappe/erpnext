@@ -641,7 +641,8 @@ class calculate_taxes_and_totals(object):
 		if default_mode_of_payment:
 			self.doc.append('payments', {
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
-				'amount': total_amount_to_pay
+				'amount': total_amount_to_pay,
+				'default': 1
 			})
 		else:
 			self.doc.is_pos = 0
