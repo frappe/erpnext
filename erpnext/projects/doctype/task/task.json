@@ -12,6 +12,7 @@
   "issue",
   "type",
   "is_group",
+  "is_template",
   "column_break0",
   "status",
   "priority",
@@ -22,9 +23,11 @@
   "sb_timeline",
   "exp_start_date",
   "expected_time",
+  "start",
   "column_break_11",
   "exp_end_date",
   "progress",
+  "duration",
   "is_milestone",
   "sb_details",
   "description",
@@ -360,6 +363,22 @@
    "label": "Completed By",
    "no_copy": 1,
    "options": "User"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_template",
+   "fieldtype": "Check",
+   "label": "Is Template"
+  },
+  {
+   "fieldname": "start",
+   "fieldtype": "Int",
+   "label": "Begin On (Days)"
+  },
+  {
+   "fieldname": "duration",
+   "fieldtype": "Int",
+   "label": "Duration (Days)"
   }
  ],
  "icon": "fa fa-check",
@@ -367,7 +386,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-07-03 12:36:04.960457",
+ "modified": "2020-12-07 13:26:53.614689",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
