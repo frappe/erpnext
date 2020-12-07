@@ -147,6 +147,11 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_credit_to_acc(self):
+		if not self.credit_to:
+			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
+			if not self.credit_to:
+				self.raise_missing_debit_credit_account_error("Supplier", self.supplier)
+
 		account = frappe.db.get_value("Account", self.credit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
@@ -1032,7 +1037,9 @@ class PurchaseInvoice(BuyingController):
 				updated_pr += update_billed_amount_based_on_po(d.po_detail, update_modified)
 
 		for pr in set(updated_pr):
-			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
+			from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
+			pr_doc = frappe.get_doc("Purchase Receipt", pr)
+			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None
