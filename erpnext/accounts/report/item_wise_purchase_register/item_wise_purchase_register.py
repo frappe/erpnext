@@ -8,7 +8,7 @@ from frappe.utils import flt
 from erpnext.accounts.report.item_wise_sales_register.item_wise_sales_register import (get_tax_accounts,
 	get_grand_total, add_total_row, get_display_value, get_group_by_and_display_fields, add_sub_total_row,
 	get_group_by_conditions)
-from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import get_item_details, get_customer_details
+from erpnext.selling.report.item_wise_sales_history.item_wise_sales_history import get_item_details
 
 def execute(filters=None):
 	return _execute(filters)
