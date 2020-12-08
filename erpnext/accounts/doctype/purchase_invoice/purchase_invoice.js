@@ -99,6 +99,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					target: me.frm,
 					setters: {
 						supplier: me.frm.doc.supplier || undefined,
+						schedule_date: undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -107,16 +108,16 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 						company: me.frm.doc.company
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 			this.frm.add_custom_button(__('Purchase Receipt'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 					source_doctype: "Purchase Receipt",
 					target: me.frm,
-					date_field: "posting_date",
 					setters: {
 						supplier: me.frm.doc.supplier || undefined,
+						posting_date: undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -125,7 +126,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 						is_return: 0
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 
