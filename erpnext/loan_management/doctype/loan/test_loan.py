@@ -19,6 +19,7 @@ from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpled
 from erpnext.loan_management.doctype.loan_application.loan_application import create_pledge
 from erpnext.loan_management.doctype.loan_disbursement.loan_disbursement import get_disbursal_amount
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
 class TestLoan(unittest.TestCase):
 	def setUp(self):
@@ -44,6 +45,7 @@ class TestLoan(unittest.TestCase):
 		create_loan_security_price("Test Security 2", 250, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
 
 		self.applicant1 = make_employee("robert_loan@loan.com")
+		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant1, currency='INR')
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)
 
