@@ -138,7 +138,8 @@ class TestDatev(TestCase):
 		self.filters = {
 			"company": self.company.name,
 			"from_date": today(),
-			"to_date": today()
+			"to_date": today(),
+			"temporary_against_account_number": "9999"
 		}
 
 		make_datev_settings(self.company)
