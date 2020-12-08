@@ -5,4 +5,13 @@ frappe.ui.form.on('Project Template', {
 	// refresh: function(frm) {
 
 	// }
+	setup: function (frm) {
+		me.frm.set_query("task", "tasks", function (doc, cdt, cdn) {
+			return {
+				filters: {
+					"is_template": 1
+				}
+			}
+		});
+	}
 });
