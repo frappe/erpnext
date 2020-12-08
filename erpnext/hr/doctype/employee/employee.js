@@ -94,6 +94,12 @@ frappe.ui.form.on('Employee',{
 				frm.set_value("user_id", r.message)
 			}
 		});
-	}
+	},
+	tax_id: function(frm) {
+		erpnext.utils.format_ntn(frm, "tax_id");
+	},
+	tax_cnic: function(frm) {
+		erpnext.utils.format_cnic(frm, "tax_cnic");
+	},
 });
 cur_frm.cscript = new erpnext.hr.EmployeeController({frm: cur_frm});

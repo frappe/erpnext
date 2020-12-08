@@ -82,6 +82,10 @@
   "date_of_issue",
   "valid_upto",
   "place_of_issue",
+  "tax_cnic",
+  "cnic_date_of_issue",
+  "cnic_valid_upto",
+  "tax_id",
   "column_break6",
   "marital_status",
   "blood_group",
@@ -775,13 +779,33 @@
    "fieldtype": "Link",
    "label": "Leave Approver",
    "options": "User"
+  },
+  {
+   "fieldname": "cnic_date_of_issue",
+   "fieldtype": "Date",
+   "label": "CNIC Date of Issue"
+  },
+  {
+   "fieldname": "cnic_valid_upto",
+   "fieldtype": "Date",
+   "label": "CNIC Valid upto"
+  },
+  {
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "label": "CNIC"
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax Id"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-08-24 14:29:21.813560",
- "modified_by": "Administrator",
+ "modified": "2020-12-07 18:26:45.343746",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",
