@@ -517,26 +517,3 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 
 	dialog.show();
 }
-
-erpnext.apply_putaway_rule = (frm) => {
-	if (!frm.doc.company) {
-		frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")})
-	}
-	if (!frm.doc.items.length) return;
-
-	frappe.call({
-		method: "erpnext.stock.doctype.putaway_rule.putaway_rule.apply_putaway_rule",
-		args: {
-			items: frm.doc.items,
-			company: frm.doc.company
-		},
-		callback: (result) => {
-			if(!result.exc) {
-				if(result.message) {
-					frm.doc.items = result.message;
-					frm.get_field("items").refresh();
-				}
-			}
-		}
-	});
-}

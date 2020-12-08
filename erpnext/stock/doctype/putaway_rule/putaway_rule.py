@@ -64,7 +64,7 @@ def get_putaway_capacity(rule):
 	return free_space if free_space > 0 else 0
 
 @frappe.whitelist()
-def apply_putaway_rule(doctype, items, company):
+def apply_putaway_rule(doctype, items, company, sync=None):
 	""" Applies Putaway Rule on line items.
 
 		items: List of Purchase Receipt Item objects
@@ -82,7 +82,7 @@ def apply_putaway_rule(doctype, items, company):
 
 		source_warehouse = item.get("s_warehouse")
 		serial_nos = get_serial_nos(item.get("serial_no"))
-		conversion = flt(item.conversion_factor) or 1
+		item.conversion_factor = flt(item.conversion_factor) or 1
 		pending_qty, item_code = flt(item.qty), item.item_code
 		pending_stock_qty = flt(item.transfer_qty) if doctype == "Stock Entry" else flt(item.stock_qty)
 		if not pending_qty or not item_code:
@@ -109,11 +109,11 @@ def apply_putaway_rule(doctype, items, company):
 		for rule in item_wise_rules[item_code]:
 			if pending_stock_qty > 0 and rule.free_space:
 				stock_qty_to_allocate = flt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty
-				qty_to_allocate = stock_qty_to_allocate / (conversion)
+				qty_to_allocate = stock_qty_to_allocate / item.conversion_factor
 
 				if uom_must_be_whole_number:
 					qty_to_allocate = floor(qty_to_allocate)
-					stock_qty_to_allocate = qty_to_allocate * conversion
+					stock_qty_to_allocate = qty_to_allocate * item.conversion_factor
 
 				if not qty_to_allocate: break
 
@@ -124,17 +124,19 @@ def apply_putaway_rule(doctype, items, company):
 				pending_qty -= qty_to_allocate
 				rule["free_space"] -= stock_qty_to_allocate
 
-				if not pending_stock_qty: break
+				if not pending_stock_qty > 0: break
 
 		# if pending qty after applying all rules, add row without warehouse
 		if pending_stock_qty > 0:
-			# updated_table = add_row(item, pending_qty, '', updated_table, serial_nos=serial_nos)
 			items_not_accomodated.append([item.item_code, pending_qty])
 
 	if items_not_accomodated:
 		show_unassigned_items_message(items_not_accomodated)
 
-	return updated_table if updated_table else items
+	items[:] = updated_table if updated_table else items # modify items table
+
+	if sync and json.loads(sync): # sync with client side
+		return items
 
 def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
 	"""Returns an ordered list of putaway rules to apply on an item."""
@@ -174,12 +176,14 @@ def get_ordered_putaway_rules(item_code, company, source_warehouse=None):
 def add_row(item, to_allocate, warehouse, updated_table, rule=None, serial_nos=None):
 	new_updated_table_row = copy.deepcopy(item)
 	new_updated_table_row.idx = 1 if not updated_table else cint(updated_table[-1].idx) + 1
-	new_updated_table_row.name = "New " + str(item.doctype) + " " + str(new_updated_table_row.idx)
+	new_updated_table_row.name = None
 	new_updated_table_row.qty = to_allocate
-	new_updated_table_row.stock_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
+
 	if item.doctype == "Stock Entry Detail":
 		new_updated_table_row.t_warehouse = warehouse
+		new_updated_table_row.transfer_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
 	else:
+		new_updated_table_row.stock_qty = flt(to_allocate) * flt(new_updated_table_row.conversion_factor)
 		new_updated_table_row.warehouse = warehouse
 		new_updated_table_row.rejected_qty = 0
 		new_updated_table_row.received_qty = to_allocate

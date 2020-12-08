@@ -47,7 +47,7 @@ class StockEntry(StockController):
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 
 		if self.get("items") and apply_rule:
-			self.items = apply_putaway_rule(self.doctype, self.get("items"), self.company)
+			apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
 	def validate(self):
 		self.pro_doc = frappe._dict()

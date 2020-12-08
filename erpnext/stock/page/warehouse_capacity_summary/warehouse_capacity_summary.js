@@ -10,8 +10,8 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 	page.company_field = page.add_field({
 		fieldname: 'company',
 		label: __('Company'),
-		fieldtype:'Link',
-		options:'Company',
+		fieldtype: 'Link',
+		options: 'Company',
 		reqd: 1,
 		default: frappe.defaults.get_default("company"),
 		change: function() {
@@ -23,8 +23,8 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 	page.warehouse_field = page.add_field({
 		fieldname: 'warehouse',
 		label: __('Warehouse'),
-		fieldtype:'Link',
-		options:'Warehouse',
+		fieldtype: 'Link',
+		options: 'Warehouse',
 		change: function() {
 			page.capacity_dashboard.start = 0;
 			page.capacity_dashboard.refresh();
@@ -34,8 +34,8 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 	page.item_field = page.add_field({
 		fieldname: 'item_code',
 		label: __('Item'),
-		fieldtype:'Link',
-		options:'Item',
+		fieldtype: 'Link',
+		options: 'Item',
 		change: function() {
 			page.capacity_dashboard.start = 0;
 			page.capacity_dashboard.refresh();
@@ -45,8 +45,8 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 	page.parent_warehouse_field = page.add_field({
 		fieldname: 'parent_warehouse',
 		label: __('Parent Warehouse'),
-		fieldtype:'Link',
-		options:'Warehouse',
+		fieldtype: 'Link',
+		options: 'Warehouse',
 		get_query: function() {
 			return {
 				filters: {
@@ -67,8 +67,8 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 			sort_order: 'desc',
 			options: [
 				{fieldname: 'stock_capacity', label: __('Capacity (Stock UOM)')},
-				{fieldname: 'percent_occupied', label:__('% Occupied')},
-				{fieldname: 'actual_qty', label:__('Balance Qty (Stock ')}
+				{fieldname: 'percent_occupied', label: __('% Occupied')},
+				{fieldname: 'actual_qty', label: __('Balance Qty (Stock ')}
 			]
 		},
 		change: function(sort_by, sort_order) {
@@ -90,14 +90,14 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 			sort_order: 'desc',
 			method: 'erpnext.stock.dashboard.warehouse_capacity_dashboard.get_data',
 			template: 'warehouse_capacity_summary'
-		})
+		});
 
 		page.capacity_dashboard.before_refresh = function() {
 			this.item_code = page.item_field.get_value();
 			this.warehouse = page.warehouse_field.get_value();
 			this.parent_warehouse = page.parent_warehouse_field.get_value();
 			this.company = page.company_field.get_value();
-		}
+		};
 
 		page.capacity_dashboard.refresh();
 
@@ -105,16 +105,16 @@ frappe.pages['warehouse-capacity-summary'].on_page_load = function(wrapper) {
 			page.main.on('click', 'a[data-type="'+ doctype.toLowerCase() +'"]', function() {
 				var name = $(this).attr('data-name');
 				var field = page[doctype.toLowerCase() + '_field'];
-				if(field.get_value()===name) {
-					frappe.set_route('Form', doctype, name)
+				if (field.get_value()===name) {
+					frappe.set_route('Form', doctype, name);
 				} else {
 					field.set_input(name);
 					page.capacity_dashboard.refresh();
 				}
 			});
-		}
+		};
 
 		setup_click('Item');
 		setup_click('Warehouse');
 	});
-}
+};

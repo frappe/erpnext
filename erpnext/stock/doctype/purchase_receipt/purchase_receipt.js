@@ -214,7 +214,7 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 	},
 
 	apply_putaway_rule: function() {
-		// if (this.frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(this.frm);
+		if (this.frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(this.frm);
 	}
 
 });
