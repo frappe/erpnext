@@ -51,8 +51,18 @@ class LeaveAllocation(Document):
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
+		if self.leave_policy_assignment:
+			self.update_leave_policy_assignments_when_no_allocations_left()
 		if self.carry_forward:
 			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
+
+	def update_leave_policy_assignments_when_no_allocations_left(self):
+		allocations = frappe.db.get_list("Leave Allocation", filters = {
+			"docstatus": 1,
+			"leave_policy_assignment": self.leave_policy_assignment
+		})
+		if len(allocations) == 0:
+			frappe.db.set_value("Leave Policy Assignment", self.leave_policy_assignment ,"leaves_allocated", 0)
 
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:

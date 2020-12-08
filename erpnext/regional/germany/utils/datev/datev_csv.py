@@ -106,7 +106,7 @@ def get_header(filters, csv_class):
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
 		frappe.utils.formatdate(filters.get('fiscal_year_start'), 'yyyyMMdd'),
 		# N = Length of account numbers (Sachkontenlänge)
-		datev_settings.get('account_number_length', '4'),
+		str(filters.get('account_number_length', 4)),
 		# O = Transaction batch start date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('from_date'), 'yyyyMMdd') if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# P = Transaction batch end date (YYYYMMDD)
