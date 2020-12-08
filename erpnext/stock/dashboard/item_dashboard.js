@@ -30,8 +30,8 @@ erpnext.stock.ItemDashboard = Class.extend({
 			let company = unescape($(this).attr('data-company'));
 			frappe.db.get_value('Putaway Rule',
 				{'item_code': item, 'warehouse': warehouse, 'company': company}, 'name', (r) => {
-				frappe.set_route("Form", "Putaway Rule", r.name);
-			});
+					frappe.set_route("Form", "Putaway Rule", r.name);
+				});
 		});
 
 		function handle_move_add(element, action) {
@@ -88,7 +88,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 			start: this.start,
 			sort_by: this.sort_by,
 			sort_order: this.sort_order
-		}
+		};
 
 		var me = this;
 		frappe.call({
@@ -104,10 +104,12 @@ erpnext.stock.ItemDashboard = Class.extend({
 			this.max_count = 0;
 			this.result.empty();
 		}
+
+		let context = "";
 		if (this.page_name === "warehouse-capacity-summary") {
-			var context = this.get_capacity_dashboard_data(data);
+			context = this.get_capacity_dashboard_data(data);
 		} else {
-			var context = this.get_item_dashboard_data(data, this.max_count, true);
+			context = this.get_item_dashboard_data(data, this.max_count, true);
 		}
 
 		this.max_count = this.max_count;
@@ -152,7 +154,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 		});
 
 		let can_write = 0;
-		if(frappe.boot.user.can_write.indexOf("Stock Entry")>=0){
+		if (frappe.boot.user.can_write.indexOf("Stock Entry") >= 0) {
 			can_write = 1;
 		}
 
@@ -165,23 +167,23 @@ erpnext.stock.ItemDashboard = Class.extend({
 	},
 
 	get_capacity_dashboard_data: function(data) {
-		if(!data) data = [];
+		if (!data) data = [];
 
 		data.forEach(function(d) {
 			d.color =  d.percent_occupied >=80 ? "#f8814f" : "#2490ef";
 		});
 
 		let can_write = 0;
-		if(frappe.boot.user.can_write.indexOf("Putaway Rule")>=0){
+		if (frappe.boot.user.can_write.indexOf("Putaway Rule") >= 0) {
 			can_write = 1;
 		}
 
 		return {
 			data: data,
 			can_write: can_write,
-		}
+		};
 	}
-})
+});
 
 erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callback) {
 	var dialog = new frappe.ui.Dialog({

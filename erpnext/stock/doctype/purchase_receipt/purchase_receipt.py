@@ -87,7 +87,7 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule:
-			self.items = apply_putaway_rule(self.doctype, self.get("items"), self.company)
+			apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
 	def validate(self):
 		self.validate_posting_time()
