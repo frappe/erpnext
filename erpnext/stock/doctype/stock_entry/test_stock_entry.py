@@ -727,12 +727,15 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_customer_provided_parts_se(self):
 		create_item('CUST-0987', is_customer_provided_item = 1, customer = '_Test Customer', is_purchase_item = 0)
-		se = make_stock_entry(item_code='CUST-0987', purpose = 'Material Receipt', qty=4, to_warehouse = "_Test Warehouse - _TC")
+		se = make_stock_entry(item_code='CUST-0987', purpose = 'Material Receipt',
+			qty=4, to_warehouse = "_Test Warehouse - _TC")
 		self.assertEqual(se.get("items")[0].allow_zero_valuation_rate, 1)
 		self.assertEqual(se.get("items")[0].amount, 0)
 
 	def test_gle_for_opening_stock_entry(self):
-		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1", company="_Test Company with perpetual inventory",qty=50, basic_rate=100, expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
+		mr = make_stock_entry(item_code="_Test Item", target="Stores - TCP1",
+			company="_Test Company with perpetual inventory", qty=50, basic_rate=100,
+			expense_account="Stock Adjustment - TCP1", is_opening="Yes", do_not_save=True)
 
 		self.assertRaises(OpeningEntryAccountError, mr.save)
 

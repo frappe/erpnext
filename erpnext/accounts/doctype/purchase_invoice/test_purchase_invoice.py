@@ -254,10 +254,10 @@ class TestPurchaseInvoice(unittest.TestCase):
 			order by account asc""", pi.name, as_dict=1)
 		self.assertTrue(gl_entries)
 
-		expected_values = sorted([
-			["_Test Payable - _TCP1", 0, 500],
-			["_Test Account Cost for Goods Sold - _TCP1", 500.0, 0],
-		])
+		expected_values = [
+			["_Test Account Cost for Goods Sold - TCP1", 250.0, 0],
+			["Creditors - TCP1", 0, 250]
+		]
 
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[i][0], gle.account)
@@ -448,7 +448,9 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
 			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
-		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2)
+		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, 
+			company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
+			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
 
 		# check gl entries for return
@@ -459,8 +461,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = {
-			"Creditors - _TCP1": [100.0, 0.0],
-			"Stock Received But Not Billed - _TCP1": [0.0, 100.0],
+			"Creditors - TCP1": [100.0, 0.0],
+			"Stock Received But Not Billed - TCP1": [0.0, 100.0],
 		}
 
 		for gle in gl_entries:

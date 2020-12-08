@@ -298,13 +298,14 @@ class update_entries_after(object):
 		# Get updated incoming/outgoing rate from transaction
 		if sle.recalculate_rate:
 			rate = self.get_incoming_outgoing_rate_from_transaction(sle)
-			
+
 			if flt(sle.actual_qty) >= 0:
 				sle.incoming_rate = rate
 			else:
 				sle.outgoing_rate = rate
 
 	def get_incoming_outgoing_rate_from_transaction(self, sle):
+		rate = 0
 		# Material Transfer, Repack, Manufacturing
 		if sle.voucher_type == "Stock Entry":
 			rate = frappe.db.get_value("Stock Entry Detail", sle.voucher_detail_no, "valuation_rate")
@@ -322,8 +323,17 @@ class update_entries_after(object):
 				# check in item table
 				item_code, incoming_rate = frappe.db.get_value(sle.voucher_type + " Item",
 					sle.voucher_detail_no, ["item_code", rate_field])
+
 				if item_code == sle.item_code:
 					rate = incoming_rate
+				else:
+					if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+						ref_doctype = "Packed Item"
+					else:
+						ref_doctype = "Purchase Receipt Item Supplied"
+	
+					rate = frappe.db.get_value(ref_doctype, {"parent_detail_docname": sle.voucher_detail_no,
+						"item_code": sle.item_code}, rate_field)
 
 		return rate
 

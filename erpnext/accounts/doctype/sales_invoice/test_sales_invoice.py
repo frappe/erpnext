@@ -826,7 +826,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, si.submit)
 
 	def test_sales_invoice_gl_entry_with_perpetual_inventory_no_item_code(self):
-		si = create_sales_invoice(company="_Test Company with perpetual inventory", do_no_save=True)
+		si = create_sales_invoice(company="_Test Company with perpetual inventory", debit_to = "Debtors - TCP1",
+			income_account="Sales - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 		si.get("items")[0].item_code = None
 		si.insert()
 		si.submit()
@@ -837,8 +838,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gl_entries)
 
 		expected_values = dict((d[0], d) for d in [
-			[si.debit_to, 100.0, 0.0],
-			[test_records[1]["items"][0]["income_account"], 0.0, 100.0]
+			["Debtors - TCP1", 100.0, 0.0],
+			["Sales - TCP1", 0.0, 100.0]
 		])
 		for i, gle in enumerate(gl_entries):
 			self.assertEqual(expected_values[gle.account][0], gle.account)
@@ -1759,6 +1760,11 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.items[0].update({
+			"expense_account": "Cost of Goods Sold - _TC1",
+			"cost_center": "Main - _TC1",
+			"warehouse": "Stores - _TC1"
+		})
 		target_doc.submit()
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
@@ -1974,14 +1980,19 @@ def create_sales_invoice(**args):
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
+		"item_name": args.item_name or "_Test Item",
+		"description": args.description or "_Test Item",
 		"gst_hsn_code": "999800",
 		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"qty": args.qty or 1,
+		"uom": args.uom or "Nos",
+		"stock_uom": args.uom or "Nos",
 		"rate": args.rate if args.get("rate") is not None else 100,
 		"income_account": args.income_account or "Sales - _TC",
 		"expense_account": args.expense_account or "Cost of Goods Sold - _TC",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
-		"serial_no": args.serial_no
+		"serial_no": args.serial_no,
+		"conversion_factor": 1
 	})
 
 	if not args.do_not_save:

@@ -733,8 +733,9 @@
    "depends_on": "returned_qty",
    "fieldname": "returned_qty",
    "fieldtype": "Float",
-   "label": "Returned Qty in Stock UOM",
-  },{
+   "label": "Returned Qty in Stock UOM"
+  },
+  {
    "fieldname": "incoming_rate",
    "fieldtype": "Currency",
    "label": "Incoming Rate",
@@ -747,7 +748,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-23 19:59:27.119856",
+ "modified": "2020-12-07 19:59:27.119856",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
