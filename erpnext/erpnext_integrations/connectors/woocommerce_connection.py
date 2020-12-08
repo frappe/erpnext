@@ -296,10 +296,10 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 			"description": "Handling Fee",
 			"uom": "Unit",
 			"qty": 1,
-			"rate": shipping_total,
+			"rate": shipping_total + shipping_tax,
 			"warehouse": woocommerce_settings.warehouse
 		})
-		addTaxDetails("Actual", invoice_doc, shipping_tax, "Handling Fee tax", woocommerce_settings.tax_account)
+		add_tax_on_net_total(invoice_doc, "Handling Fee tax", woocommerce_settings.tax_account, rate=10, included_in_print_rate=1)
 
 	else: # test_order = 0
 		# Add shipping fee according to the total 
@@ -499,6 +499,16 @@ def backorder_validation(line_items, customer_code, woocommerce_settings, discou
 		create_backorder_doc_flag = 1
 	return new_line_items, create_backorder_doc_flag
 
+def add_tax_on_net_total(sales_invoice, desc, tax_account_head, rate=None, included_in_print_rate=0):
+	tax_dict = {
+		"charge_type":"On Net Total",
+		"account_head": tax_account_head,
+		"rate": rate,
+		"description": desc
+	}
+	if included_in_print_rate:
+		tax_dict['included_in_print_rate'] = included_in_print_rate
+	sales_invoice.append("taxes", tax_dict)
 
 def addTaxDetails(charge_type, sales_invoice, tax_amount, desc, tax_account_head, rate=None, included_in_print_rate=0):
 	tax_dict = {
