@@ -85,8 +85,7 @@ frappe.ui.form.on('Clinical Procedure', {
 								callback: function(r) {
 									if (r.message) {
 										frappe.show_alert({
-											message:  __('Stock Entry {0} created',
-												['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
+											message: __('Stock Entry {0} created', ['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
 											indicator: 'green'
 										});
 									}
@@ -105,8 +104,7 @@ frappe.ui.form.on('Clinical Procedure', {
 						callback: function(r) {
 							if (!r.exc) {
 								if (r.message == 'insufficient stock') {
-									let msg = __('Stock quantity to start the Procedure is not available in the Warehouse {0}. Do you want to record a Stock Entry?',
-										[frm.doc.warehouse.bold()]);
+									let msg = __('Stock quantity to start the Procedure is not available in the Warehouse {0}. Do you want to record a Stock Entry?', [frm.doc.warehouse.bold()]);
 									frappe.confirm(
 										msg,
 										function() {
