@@ -14,10 +14,12 @@
   "payroll_settings",
   "include_holidays_in_total_working_days",
   "disable_rounded_total",
+  "do_not_consider_absent_as_lwp",
   "max_working_hours_against_timesheet",
   "column_break_11",
   "email_salary_slip_to_employee",
   "encrypt_salary_slips_in_emails",
+  "consider_lwp_as_deduction",
   "password_policy",
   "leave_settings",
   "leave_approval_notification_template",
@@ -168,13 +170,26 @@
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
    "label": "Disable Rounded Total"
+  },
+  {
+   "default": "0",
+   "description": "If checked, absent is not considered as LWP",
+   "fieldname": "do_not_consider_absent_as_lwp",
+   "fieldtype": "Check",
+   "label": "Do not consider absent as LWP"
+  },
+  {
+   "default": "0",
+   "fieldname": "consider_lwp_as_deduction",
+   "fieldtype": "Check",
+   "label": "Consider LWP as Deduction"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-10-02 22:25:24.270879",
- "modified_by": "Administrator",
+ "modified": "2020-12-04 16:22:08.140438",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "HR Settings",
  "owner": "Administrator",

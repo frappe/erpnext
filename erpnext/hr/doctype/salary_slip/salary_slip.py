@@ -276,6 +276,24 @@ class SalarySlip(TransactionBase):
 
 			if leave:
 				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+
+		if not cint(frappe.db.get_value("HR Settings", None, "do_not_consider_absent_as_lwp")):
+			absent = frappe.db.sql("""
+				SELECT sum(CASE
+					WHEN t1.status = 'Half Day' THEN 0.5
+					WHEN t1.status = 'Absent' THEN 1
+					ELSE 0 END)
+				FROM `tabAttendance` as t1
+				WHERE t1.docstatus = 1
+				AND ifnull(leave_application, '') = ''
+				AND employee = %(employee)s
+				AND attendance_date between %(st_dt)s AND %(end_dt)s
+				and attendance_date not in ('{0}')
+			""".format(holidays), {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
+
+			absent_days = flt(absent[0][0]) if absent else 0
+			lwp += absent_days
+
 		return lwp
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
@@ -674,6 +692,10 @@ class SalarySlip(TransactionBase):
 		})
 
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
+		payment_days = flt(self.payment_days)
+		if frappe.db.get_value("HR Settings", None, "consider_lwp_as_deduction"):
+			payment_days += self.leave_without_pay
+
 		amount, additional_amount = row.amount, row.additional_amount
 		if (self.salary_structure and
 			cint(row.depends_on_payment_days) and cint(self.total_working_days) and
@@ -681,12 +703,12 @@ class SalarySlip(TransactionBase):
 				getdate(self.start_date) < joining_date or
 				getdate(self.end_date) > relieving_date
 			)):
-			additional_amount = flt((flt(row.additional_amount) * flt(self.payment_days)
+			additional_amount = flt((flt(row.additional_amount) * flt(payment_days)
 				/ cint(self.total_working_days)), row.precision("additional_amount"))
-			amount = flt((flt(row.default_amount) * flt(self.payment_days)
+			amount = flt((flt(row.default_amount) * flt(payment_days)
 				/ cint(self.total_working_days)), row.precision("amount")) + additional_amount
 
-		elif not self.payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
+		elif not payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
 			amount = flt(row.default_amount) + flt(row.additional_amount)
