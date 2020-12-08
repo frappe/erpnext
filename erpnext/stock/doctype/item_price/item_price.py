@@ -54,7 +54,8 @@ class ItemPrice(Document):
 			"valid_upto",
 			"packing_unit",
 			"customer",
-			"supplier",]:
+			"supplier",
+			"batch_no"]:
 			if self.get(field):
 				conditions += " and {0} = %({0})s ".format(field)
 			else:
@@ -68,7 +69,7 @@ class ItemPrice(Document):
 			self.as_dict(),)
 
 		if price_list_rate:
-			frappe.throw(_("Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty, and Dates."), ItemPriceDuplicateItem,)
+			frappe.throw(_("Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."), ItemPriceDuplicateItem,)
 
 	def before_save(self):
 		if self.selling:
