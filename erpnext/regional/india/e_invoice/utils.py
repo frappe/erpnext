@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import os
 import re
 import jwt
+import sys
 import json
 import base64
 import frappe
@@ -361,11 +362,12 @@ def validate_einvoice(validations, einvoice, errors=[]):
 	
 	return errors
 
-class ResponseFailure(Exception): pass
+class RequestFailed(Exception): pass
 
 class GSPConnector():
-	def __init__(self, doctype, docname):
+	def __init__(self, doctype=None, docname=None):
 		self.credentials = frappe.get_cached_doc('E Invoice Settings')
+		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
 
 		self.base_url = 'https://gsp.adaequare.com/'
 		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
@@ -375,14 +377,31 @@ class GSPConnector():
 		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
 		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
 		self.generate_ewaybill_url = self.base_url + 'test/enriched/ei/api/ewaybill'
-
-		self.invoice = frappe.get_cached_doc(doctype, docname)
 	
 	def get_auth_token(self):
 		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
 			self.fetch_auth_token()
 		
 		return self.credentials.auth_token
+	
+	def make_request(self, request_type, url, headers=None, data=None):
+		function = make_post_request if request_type == 'post' else make_get_request
+		res = function(url, headers=headers, data=data)
+		self.log_request(url, headers, data, res)
+		return res
+	
+	def log_request(self, url, headers, data, res):
+		headers.update({ 'password': self.credentials.password })
+		request_log = frappe.get_doc({
+			"doctype": "E Invoice Request Log",
+			"user": frappe.session.user,
+			"reference_invoice": self.invoice.name if self.invoice else None,
+			"url": url,
+			"headers": json.dumps(headers, indent=4) if headers else None,
+			"data": json.dumps(data, indent=4) if data else None,
+			"response": json.dumps(res, indent=4) if res else None
+		})
+		request_log.insert(ignore_permissions=True)
 
 	def fetch_auth_token(self):
 		headers = {
@@ -391,7 +410,7 @@ class GSPConnector():
 		}
 		res = {}
 		try:
-			res = make_post_request(self.authenticate_url, headers=headers)
+			res = self.make_request('post', self.authenticate_url, headers)
 			self.credentials.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
 			self.credentials.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
 			self.credentials.save()
@@ -409,20 +428,20 @@ class GSPConnector():
 			'authorization': self.get_auth_token(),
 			'requestid': str(base64.b64encode(os.urandom(18))),
 		}
-	
+
 	def fetch_gstin_details(self, gstin):
 		headers = self.get_headers()
 
 		try:
 			params = '?gstin={gstin}'.format(gstin=gstin)
-			res = make_get_request(self.gstin_details_url + params, headers=headers)
+			res = self.make_request('get', self.gstin_details_url + params, headers)
 			if res.get('success'):
 				return res.get('result')
 			else:
 				self.log_error(res)
-				raise ResponseFailure
+				raise RequestFailed
 		
-		except ResponseFailure:
+		except RequestFailed:
 			self.raise_error()
 
 		except Exception:
@@ -432,6 +451,8 @@ class GSPConnector():
 	@staticmethod
 	def get_gstin_details(gstin):
 		'''fetch and cache GSTIN details'''
+		if not hasattr(frappe.local, 'gstin_cache'):
+			frappe.local.gstin_cache = {}
 
 		key = gstin
 		gsp_connector = GSPConnector()
@@ -447,7 +468,7 @@ class GSPConnector():
 		data = json.dumps(einvoice)
 
 		try:
-			res = make_post_request(self.generate_irn_url, headers=headers, data=data)
+			res = self.make_request('post', self.generate_irn_url, headers, data)
 			if res.get('success'):
 				self.set_einvoice_data(res.get('result'))
 
@@ -457,12 +478,15 @@ class GSPConnector():
 				irn_details = self.get_irn_details(irn)
 				if irn_details:
 					self.set_einvoice_data(irn_details)
+				else:
+					raise RequestFailed('IRN has already been generated for the invoice but cannot fetch details for the it. \
+						Contact ERPNext support to resolve the issue.')
 
 			else:
 				self.log_error(res)
-				raise ResponseFailure
+				raise RequestFailed
 		
-		except ResponseFailure:
+		except RequestFailed:
 			self.raise_error()
 
 		except Exception:
@@ -474,14 +498,14 @@ class GSPConnector():
 
 		try:
 			params = '?irn={irn}'.format(irn=irn)
-			res = make_get_request(self.irn_details_url + params, headers=headers)
+			res = self.make_request('get', self.irn_details_url + params, headers)
 			if res.get('success'):
 				return res.get('result')
 			else:
 				self.log_error(res)
-				raise ResponseFailure
+				raise RequestFailed
 		
-		except ResponseFailure:
+		except RequestFailed:
 			self.raise_error()
 
 		except Exception:
@@ -497,7 +521,7 @@ class GSPConnector():
 		})
 
 		try:
-			res = make_post_request(self.cancel_irn_url, headers=headers, data=data)
+			res = self.make_request('post', self.cancel_irn_url, headers, data)
 			if res.get('success'):
 				self.invoice.irn_cancelled = 1
 				self.invoice.flags.updater_reference = {
@@ -509,9 +533,9 @@ class GSPConnector():
 
 			else:
 				self.log_error(res)
-				raise ResponseFailure
+				raise RequestFailed
 		
-		except ResponseFailure:
+		except RequestFailed:
 			self.raise_error()
 
 		except Exception:
@@ -536,7 +560,7 @@ class GSPConnector():
 		})
 
 		try:
-			res = make_post_request(self.generate_ewaybill_url, headers=headers, data=data)
+			res = self.make_request('post', self.generate_ewaybill_url, headers, data)
 			if res.get('success'):
 				self.invoice.ewaybill = res.get('result').get('EwbNo')
 				self.invoice.eway_bill_cancelled = 0
@@ -550,9 +574,9 @@ class GSPConnector():
 
 			else:
 				self.log_error(res)
-				raise ResponseFailure
+				raise RequestFailed
 
-		except ResponseFailure:
+		except RequestFailed:
 			self.raise_error()
 
 		except Exception:
@@ -569,7 +593,7 @@ class GSPConnector():
 		})
 
 		try:
-			res = make_post_request(self.cancel_ewaybill_url, headers=headers, data=data)
+			res = self.make_request('post', self.cancel_ewaybill_url, headers, data)
 			if res.get('success'):
 				self.invoice.ewaybill = ''
 				self.invoice.eway_bill_cancelled = 1
@@ -582,9 +606,9 @@ class GSPConnector():
 
 			else:
 				self.log_error(res)
-				raise ResponseFailure
+				raise RequestFailed
 
-		except ResponseFailure:
+		except RequestFailed:
 			self.raise_error()
 
 		except Exception:
@@ -595,13 +619,22 @@ class GSPConnector():
 		if not isinstance(data, dict):
 			data = json.loads(data)
 
-		message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
+		seperator = "--" * 50
+		err_tb = traceback.format_exc()
+		err_msg = str(sys.exc_info()[1])
+		data = json.dumps(data, default=str, indent=4)
+
+		message = "\n".join([
+			"Error", err_msg, seperator,
+			"Data:", data, seperator,
+			"Exception:", err_tb
+		])
 		frappe.log_error(title="E Invoicing Error", message=message)
 	
 	def raise_error(self, raise_exception=False):
-		link_to_error_list = '<a href="desk#List/{0}">{1}</a>'.format('Error Log', 'Error Log')
+		link_to_error_list = '<a href="desk#List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
 		frappe.msgprint(
-			_('An error occurred while making API request. Please check {} for more information.').format(link_to_error_list),
+			_('An error occurred while making e-invoicing request. Please check {} for more information.').format(link_to_error_list),
 			title=_('E Invoice Request Failed'),
 			raise_exception=raise_exception,
 			indicator='red'
