@@ -302,7 +302,9 @@ class PayrollEntry(Document):
 				jv_name = journal_entry.name
 				self.update_salary_slip_status(jv_name = jv_name)
 			except Exception as e:
-				frappe.msgprint(e)
+				if type(e) in (str, list, tuple):
+					frappe.msgprint(e)
+				raise
 
 		return jv_name
 
