@@ -126,7 +126,8 @@ def make_datev_settings(company):
 			"doctype": "DATEV Settings",
 			"client": company.name,
 			"client_number": "12345",
-			"consultant_number": "67890"
+			"consultant_number": "67890",
+			"temporary_against_account_number": "9999"
 		}).insert()
 
 
