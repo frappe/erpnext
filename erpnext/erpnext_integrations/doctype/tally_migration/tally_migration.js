@@ -40,6 +40,7 @@ frappe.ui.form.on("Tally Migration", {
 					frm.reload_doc();
 					frappe.dom.unfreeze();
 					progress_chart && frm.dashboard.hide_progress(data.title);
+					frm.percentage = percentage;
 					frm.trigger("show_after_import_message");
 				}, 1000);
 			}
@@ -111,6 +112,13 @@ frappe.ui.form.on("Tally Migration", {
 				indicator: "orange",
 				title: __("Partial Success")
 			});
+		} else if (frm.percentage < 0) {
+			const error_log_link = `<a href='desk#List/Error%20Log/List?method=Tally%20Migration%20Error'>Error Log</a>`
+			frappe.msgprint({
+				message: __("You had errors while processing / importing data. Please check {0} for more information.", [error_log_link]),
+				indicator: "orange",
+				title: __("Partial Success")
+			});
 		}
 	},
 
@@ -152,7 +160,7 @@ frappe.ui.form.on("Tally Migration", {
 				const indicator_color = err.status == 'Failed' ? 'red' : err.status == 'Pending' ? 'orange' : 'green';
 				const actions = err.status == 'Failed' ? 
 					`${skip_document} ${create_document}` : 
-					err.status == 'Pending' ? `${skip_document} ${mark_as_created} ${create_document}` : ``;
+					err.status == 'Pending' ? `${skip_document} ${mark_as_created} <br> ${create_document}` : ``;
 
 				return `
 					<tr>

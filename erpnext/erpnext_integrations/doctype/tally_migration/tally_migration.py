@@ -496,7 +496,7 @@ class TallyMigration(Document):
 				qty, uom = "1", frappe.db.get_value("Item", item_code, "stock_uom")
 			items.append({
 				"item_code": item_code,
-				"item_name": item_name,
+				"item_name": item_code,
 				"description": item_code,
 				"qty": qty.strip(),
 				"uom": uom.strip().title(),
@@ -678,6 +678,7 @@ class TallyMigration(Document):
 			}).insert()
 
 		def before_day_book_data_import():
+			self.update_field("error_log", "[]")
 			creditors = encode_company_abbr(self.tally_creditors_account, self.erpnext_company)
 			debtors = encode_company_abbr(self.tally_debtors_account, self.erpnext_company)
 
@@ -759,10 +760,10 @@ class TallyMigration(Document):
 		frappe.flags.in_migrate = True
 		chunk = data[start: start + CHUNK_SIZE]
 
+		skipped_docs = self.fetch_processed_data(self.skipped_docs)
 		error_log = json.loads(self.error_log)
 		failed_log = [d for d in error_log if d["status"] == "Failed"]
 		progress_total = len(data)
-		skipped_docs = []
 
 		for i, doc in enumerate(chunk, start=start):
 			try:
@@ -797,19 +798,23 @@ class TallyMigration(Document):
 				error_log.append({ "doc": doc, "error": error, "status": "Failed" })
 
 		self.update_field("error_log", json.dumps(error_log))
+		if skipped_docs:
+			remaining_docs = self.dump_processed_data(skipped_docs, "skipped_docs")
+			self.update_field("skipped_docs", remaining_docs)
 
 		if is_last:
-			self.finish_import(skipped_docs, error_log)
+			remaining_docs = self.dump_processed_data(skipped_docs, "skipped_docs")
+			self.update_field("skipped_docs", remaining_docs)
+			self.finish_import(skipped_docs)
 
 		frappe.flags.in_migrate = False
 
 	def finish_import(self, skipped_docs, error_log):
-		failed_log = [d for d in error_log if d["status"] == "Failed"]
 		if not self.is_master_data_imported:
 			remaining_masters = self.dump_processed_data(skipped_docs, "masters")
 			self.update_field("masters", remaining_masters)
 
-			if not skipped_docs and not failed_log:
+			if not skipped_docs:
 				self.publish(_("Master Data Import Complete"), 1, 1)
 				self.after_master_data_import()
 			else:
@@ -819,7 +824,7 @@ class TallyMigration(Document):
 			remaining_vouchers = self.dump_processed_data(skipped_docs, "vouchers")
 			self.update_field("vouchers", remaining_vouchers)
 
-			if not skipped_docs and not failed_log:
+			if not skipped_docs:
 				self.publish(_("Day Book Data Import Complete"), 1, 1)
 				self.after_day_book_data_import()
 			else:
@@ -864,6 +869,15 @@ class TallyMigration(Document):
 
 	def log(self, data=None):
 		data = data or self.status
-		message = "\n".join(["Data:", json.dumps(data, default=str, indent=4), "--" * 50, "\nException:", traceback.format_exc()])
+		tb = traceback.format_exc()
+		error_msg = frappe.bold(str(sys.exc_info()[1]))
+
+		message = "\n".join([
+			f"Error: {error_msg}",
+			"--" * 50,
+			"Data:", json.dumps(data, default=str, indent=4),
+			"--" * 50,
+			"\nException:", tb
+		])
 		frappe.log_error(title="Tally Migration Error", message=message)
 		frappe.db.commit()

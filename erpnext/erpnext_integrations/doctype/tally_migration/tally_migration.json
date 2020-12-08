@@ -16,23 +16,22 @@
   "tally_creditors_account",
   "tally_debtors_account",
   "erpnext_company",
-  "accounts_section",
-  "default_warehouse",
-  "default_round_off_account",
-  "column_break_21",
-  "default_cost_center",
   "day_book_section",
   "day_book_data",
-  "trial_balance_report",
-  "column_break_27",
   "is_day_book_data_processed",
   "is_day_book_data_imported",
-  "chart_of_accounts",
+  "default_round_off_account",
+  "column_break_21",
+  "trial_balance_report",
+  "default_warehouse",
+  "default_cost_center",
   "error_log_section",
   "hide_resolved_errors",
   "error_log_html",
+  "chart_of_accounts",
   "masters",
   "vouchers",
+  "skipped_docs",
   "is_chart_of_accounts_imported",
   "is_opening_balances_imported",
   "error_log"
@@ -72,13 +71,6 @@
    "label": "Tally Debtors Account",
    "read_only_depends_on": "eval:doc.is_master_data_processed==1",
    "reqd": 1
-  },
-  {
-   "depends_on": "is_master_data_imported",
-   "description": "The accounts are set by the system automatically but do confirm these defaults",
-   "fieldname": "accounts_section",
-   "fieldtype": "Section Break",
-   "label": "Accounts"
   },
   {
    "depends_on": "eval:doc.is_day_book_data_processed != 1",
@@ -129,16 +121,12 @@
    "read_only": 1
   },
   {
-   "depends_on": "is_master_data_imported",
+   "depends_on": "eval:doc.is_master_data_imported",
    "fieldname": "day_book_section",
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
-   "description": "Day Book Data exported from Tally that consists of all historic transactions",
+   "description": "Consists of transactions happened after date of migration",
    "fieldname": "day_book_data",
    "fieldtype": "Attach",
    "in_list_view": 1,
@@ -219,6 +207,7 @@
    "label": "Hide Resolved Errors"
   },
   {
+   "description": "Consists of closing balance of all ledgers until date of migration",
    "fieldname": "trial_balance_report",
    "fieldtype": "Attach",
    "label": "Trial Balance Report"
@@ -242,12 +231,18 @@
    "fieldname": "master_data_section",
    "fieldtype": "Section Break",
    "label": "Master Data Import"
+  },
+  {
+   "fieldname": "skipped_docs",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-07 13:02:08.159634",
+ "modified": "2020-12-08 11:43:48.370945",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",
