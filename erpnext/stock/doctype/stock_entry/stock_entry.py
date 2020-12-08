@@ -83,7 +83,7 @@ class StockEntry(StockController):
 		self.set_incoming_rate()
 		self.validate_serialized_batch()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		self.calculate_rate_and_amount()
 
 	def on_submit(self):
 
@@ -117,6 +117,7 @@ class StockEntry(StockController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.delete_auto_created_batches()
+		self.delete_linked_stock_entry()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -159,6 +160,12 @@ class StockEntry(StockController):
 		if self.job_card and self.purpose != 'Material Transfer for Manufacture':
 			frappe.throw(_("For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry")
 				.format(self.job_card))
+
+	def delete_linked_stock_entry(self):
+		if self.purpose == "Send to Warehouse":
+			for d in frappe.get_all("Stock Entry", filters={"docstatus": 0,
+				"outgoing_stock_entry": self.name, "purpose": "Receive at Warehouse"}):
+				frappe.delete_doc("Stock Entry", d.name)
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -1113,7 +1120,10 @@ class StockEntry(StockController):
 				for d in backflushed_materials.get(item.item_code):
 					if d.get(item.warehouse):
 						if (qty > req_qty):
-							qty-= d.get(item.warehouse)
+							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+
+			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
+				qty = frappe.utils.ceil(qty)
 
 			if qty > 0:
 				self.add_to_stock_entry_detail({
@@ -1194,8 +1204,6 @@ class StockEntry(StockController):
 		return item_dict
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
-		cost_center = frappe.db.get_value("Company", self.company, 'cost_center')
-
 		for d in item_dict:
 			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
 
@@ -1206,9 +1214,10 @@ class StockEntry(StockController):
 			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
-			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
+			se_child.cost_center = (item_dict[d].get("cost_center") or
+				get_default_cost_center(item_dict[d], company = self.company))
 
 			for field in ["idx", "po_detail", "original_item",
 				"expense_account", "description", "item_name"]:

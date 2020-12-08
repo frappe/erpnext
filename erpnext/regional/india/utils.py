@@ -4,7 +4,7 @@ from frappe import _
 import erpnext
 from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words
 from erpnext.regional.india import states, state_numbers
-from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
+from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount, calculate_outstanding_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
 from erpnext.hr.utils import get_salary_assignment
 from erpnext.hr.doctype.salary_structure.salary_structure import make_salary_slip
@@ -218,10 +218,9 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 
 	for tax_category in tax_categories:
 		if tax_category.gst_state == number_state_mapping[state_code] or \
-	 		(not default_tax and not tax_category.gst_state):
+			(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
-				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
-
+				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
 
 def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
@@ -501,6 +500,9 @@ def get_address_details(data, doc, company_address, billing_address):
 		data.transType = 1
 		data.actualToStateCode = data.toStateCode
 		shipping_address = billing_address
+	
+	if doc.gst_category == 'SEZ':
+		data.toStateCode = 99
 
 	return data
 
@@ -690,16 +692,14 @@ def update_totals(gst_tax, base_gst_tax, doc):
 	doc.grand_total -= gst_tax
 
 	if doc.meta.get_field("rounded_total"):
-		if doc.is_rounded_total_disabled():
-			doc.outstanding_amount = doc.grand_total
-		else:
+		if not doc.is_rounded_total_disabled():
 			doc.rounded_total = round_based_on_smallest_currency_fraction(doc.grand_total,
 				doc.currency, doc.precision("rounded_total"))
 
 			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
 				doc.precision("rounding_adjustment"))
 
-			doc.outstanding_amount = doc.rounded_total or doc.grand_total
+		calculate_outstanding_amount(doc)
 
 	doc.in_words = money_in_words(doc.grand_total, doc.currency)
 	doc.base_in_words = money_in_words(doc.base_grand_total, erpnext.get_company_currency(doc.company))
