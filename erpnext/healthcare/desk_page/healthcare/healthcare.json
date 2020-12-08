@@ -43,7 +43,7 @@
   {
    "hidden": 0,
    "label": "Reports",
-   "links": "[\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": true,\n\t\t\"name\": \"Patient Appointment Analytics\",\n\t\t\"doctype\": \"Patient Appointment\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": true,\n\t\t\"name\": \"Lab Test Report\",\n\t\t\"doctype\": \"Lab Test\",\n\t\t\"label\": \"Lab Test Report\"\n\t}\n]"
+   "links": "[\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": true,\n\t\t\"name\": \"Patient Appointment Analytics\",\n\t\t\"doctype\": \"Patient Appointment\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": true,\n\t\t\"name\": \"Lab Test Report\",\n\t\t\"doctype\": \"Lab Test\",\n\t\t\"label\": \"Lab Test Report\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": true,\n\t\t\"name\": \"Inpatient Medication Orders\",\n\t\t\"doctype\": \"Inpatient Medication Order\",\n\t\t\"label\": \"Inpatient Medication Orders\"\n\t}\n]"
   }
  ],
  "category": "Domains",
@@ -65,7 +65,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Healthcare",
- "modified": "2020-09-10 15:37:23.666787",
+ "modified": "2020-11-23 23:00:48.764377",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare",
