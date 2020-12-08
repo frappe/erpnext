@@ -680,6 +680,9 @@ def get_item_price(args, item_code, ignore_party=False):
 		else:
 			conditions += "and (customer is null or customer = '') and (supplier is null or supplier = '')"
 
+	if args.get('batch_no'):
+		conditions += "and batch_no = %(batch_no)s"
+
 	if args.get('transaction_date'):
 		conditions += """ and %(transaction_date)s between
 			ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')"""
@@ -709,6 +712,7 @@ def get_price_list_rate_for(args, item_code):
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
 			"posting_date": args.get('posting_date'),
+			"batch_no": args.get('batch_no')
 	}
 
 	item_price_data = 0
