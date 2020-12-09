@@ -55,16 +55,34 @@ class Project(Document):
 
 			# create tasks from template
 			for task in template.tasks:
-				frappe.get_doc(dict(
-					doctype = 'Task',
-					subject = task.subject,
-					project = self.name,
-					status = 'Open',
-					exp_start_date = add_days(self.expected_start_date, task.start),
-					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
-					description = task.description,
-					task_weight = task.task_weight
-				)).insert()
+				template_task_details = frappe.get_doc("Task", task.task)
+				project_task = self.create_task_from_template(template_task_details)
+				
+				if template_task_details.depends_on:
+					for child_task in template_task_details.depends_on:
+						child_task_details = frappe.get_doc("Task",child_task.task)
+						self.create_task_from_template(child_task_details, project_task)
+
+	def create_task_from_template(self, task_details, project_task=None):
+		doc = frappe.get_doc(dict(
+				doctype = 'Task',
+				subject = task_details.subject,
+				project = self.name,
+				status = 'Open',
+				exp_start_date = add_days(self.expected_start_date, task_details.start),
+				exp_end_date = add_days(self.expected_start_date, task_details.start + task_details.duration),
+				description = task_details.description,
+				task_weight = task_details.task_weight,
+				type = task_details.type,
+				issue = task_details.issue,
+				is_group = task_details.is_group
+			))
+		if task_details.parent_task and project_task:
+			doc.parent_task = project_task.name
+		if not task_details.is_group:
+			doc.depends_on = task_details.depends_on
+		doc.insert()
+		return doc
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
