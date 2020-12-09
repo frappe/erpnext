@@ -34,6 +34,10 @@ def get_data():
 				'label': _('Returns & Backorder & Web'),
 				'items': ['Sales Invoice','Backorder', 'Integration Request']
 			},
+			{
+				'label': _('Testing'),
+				'items': ['Sample']
+			},
 			# {
 			# 	'label': _('Subscription'),
 			# 	'items': ['Auto Repeat']
