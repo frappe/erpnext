@@ -27,8 +27,8 @@ class TestProject(unittest.TestCase):
 		project = get_project("Test Project with Templ - no parent and dependend tasks", template)
 		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
 
-		self.assertEqual(task[0].subject, 'Test Temp Task with no parent and dependency')
-		self.assertEqual(getdate(task[0].exp_end_date), add_days(nowdate() + 0 + 3))
+		self.assertEqual(tasks[0].subject, 'Test Temp Task with no parent and dependency')
+		self.assertEqual(getdate(tasks[0].exp_end_date), add_days(nowdate() + 0 + 3))
 		self.assertEqual(len(tasks), 1)
 
 	def test_project_template_having_parent_child_tasks(self):
@@ -48,18 +48,17 @@ class TestProject(unittest.TestCase):
 		template = make_project_template("Test Project Template  - tasks with parent-child", [task1, task2, task3])
 		project = get_project("Test Project with Templ - tasks with parent-child", template)
 		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
+		print(tasks, type(tasks), len(tasks))
+		self.assertEqual(tasks[0].subject, 'Test Temp Task parent')
+		self.assertEqual(getdate(tasks[0].exp_end_date), add_days(nowdate()+ 1 + 1))
 
-		self.assertEqual(task[0].subject, 'Test Temp Task parent')
-		self.assertEqual(getdate(task[0].exp_end_date), add_days(nowdate()+ 1 + 1))
-		print(task[0].depends_on)
+		self.assertEqual(tasks[1].subject, 'Test Temp Task child 1')
+		self.assertEqual(getdate(tasks[1].exp_end_date), add_days(nowdate()+ 1 + 3))
+		self.assertEqual(tasks[1].parent_task, tasks[0].name)
 
-		self.assertEqual(task[1].subject, 'Test Temp Task child 1')
-		self.assertEqual(getdate(task[1].exp_end_date), add_days(nowdate()+ 1 + 3))
-		self.assertEqual(task[1].parent_task, task[0].name)
-
-		self.assertEqual(task[2].subject, 'Test Temp Task child 2')
-		self.assertEqual(getdate(task[2].exp_end_date), add_days(nowdate()+ 2 + 3))
-		self.assertEqual(task[2].parent_task, task[0].name)
+		self.assertEqual(tasks[2].subject, 'Test Temp Task child 2')
+		self.assertEqual(getdate(tasks[2].exp_end_date), add_days(nowdate()+ 2 + 3))
+		self.assertEqual(tasks[2].parent_task, tasks[0].name)
 
 		self.assertEqual(len(tasks), 3)
 
@@ -78,12 +77,12 @@ class TestProject(unittest.TestCase):
 		project = get_project("Test Project with Templ - tasks with parent-child", template)
 		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
 
-		self.assertEqual(task[0].subject, 'Test Temp Task for dependency')
-		self.assertEqual(getdate(task[0].exp_end_date), add_days(nowdate()+ 3 + 1))
+		self.assertEqual(tasks[0].subject, 'Test Temp Task for dependency')
+		self.assertEqual(getdate(tasks[0].exp_end_date), add_days(nowdate()+ 3 + 1))
 
-		self.assertEqual(task[1].subject, 'Test Temp Task with dependency')
-		self.assertEqual(getdate(task[1].exp_end_date), add_days(nowdate()+ 2 + 2))
-		self.assertEqual(task[1].depends_on, task[0].name)
+		self.assertEqual(tasks[1].subject, 'Test Temp Task with dependency')
+		self.assertEqual(getdate(tasks[1].exp_end_date), add_days(nowdate()+ 2 + 2))
+		self.assertEqual(tasks[1].depends_on, tasks[0].name)
 
 		self.assertEqual(len(tasks), 2)
 
