@@ -2050,9 +2050,10 @@ erpnext.apply_putaway_rule = (frm) => {
 
 				let items =  result.message;
 				items.forEach((row) => {
-					delete row["name"];
+					delete row["name"]; // dont overwrite name from server side
 					let child = frm.add_child("items");
 					Object.assign(child, row);
+					frm.script_manager.trigger("qty", child.doctype, child.name);
 				});
 				frm.get_field("items").grid.refresh();
 			}

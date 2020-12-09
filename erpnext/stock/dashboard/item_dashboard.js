@@ -69,7 +69,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 
 		// more
 		this.content.find('.btn-more').on('click', function() {
-			me.start += this.page_length;
+			me.start += me.page_length;
 			me.refresh();
 		});
 
