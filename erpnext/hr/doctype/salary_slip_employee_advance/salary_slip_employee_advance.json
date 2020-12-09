@@ -1,0 +1,49 @@
+{
+ "creation": "2020-12-08 18:39:43.520410",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_advance",
+  "total_advance",
+  "balance_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee_advance",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Advance",
+   "options": "Employee Advance",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "total_advance",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Advance",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "balance_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Balance Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-12-08 19:00:25.712415",
+ "modified_by": "furqan.790@outlook.com",
+ "module": "HR",
+ "name": "Salary Slip Employee Advance",
+ "owner": "furqan.790@outlook.com",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
