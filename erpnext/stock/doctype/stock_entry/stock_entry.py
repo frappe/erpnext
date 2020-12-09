@@ -42,7 +42,7 @@ class StockEntry(StockController):
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
 
-	def before_save(self):
+	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
 

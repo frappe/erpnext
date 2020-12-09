@@ -83,7 +83,7 @@ class PurchaseReceipt(BuyingController):
 				}
 			])
 
-	def before_save(self):
+	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 
 		if self.get("items") and self.apply_putaway_rule:

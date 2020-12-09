@@ -9,8 +9,8 @@ from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt
 from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 class TestPutawayRule(unittest.TestCase):
 	def setUp(self):
@@ -42,17 +42,15 @@ class TestPutawayRule(unittest.TestCase):
 		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=warehouse_2, capacity=300,
 			uom="Kg", priority=2)
 
-		po = create_purchase_order(item_code="_Rice", qty=300)
-		self.assertEqual(len(po.items), 1)
-
-		pr = make_purchase_receipt(po.name)
+		pr = make_purchase_receipt(item_code="_Rice", qty=300, apply_putaway_rule=1,
+			do_not_submit=1)
 		self.assertEqual(len(pr.items), 2)
 		self.assertEqual(pr.items[0].qty, 200)
 		self.assertEqual(pr.items[0].warehouse, warehouse_1)
 		self.assertEqual(pr.items[1].qty, 100)
 		self.assertEqual(pr.items[1].warehouse, warehouse_2)
 
-		po.cancel()
+		pr.delete()
 		rule_1.delete()
 		rule_2.delete()
 
@@ -70,10 +68,8 @@ class TestPutawayRule(unittest.TestCase):
 		# out of 500 kg capacity, occupy 100 kg in warehouse_1
 		stock_receipt = make_stock_entry(item_code="_Rice", target=warehouse_1, qty=100, basic_rate=50)
 
-		po = create_purchase_order(item_code="_Rice", qty=700)
-		self.assertEqual(len(po.items), 1)
-
-		pr = make_purchase_receipt(po.name)
+		pr = make_purchase_receipt(item_code="_Rice", qty=700, apply_putaway_rule=1,
+			do_not_submit=1)
 		self.assertEqual(len(pr.items), 2)
 		self.assertEqual(pr.items[0].qty, 500)
 		# warehouse_2 has 500 kg free space, it is given priority
@@ -82,8 +78,8 @@ class TestPutawayRule(unittest.TestCase):
 		# warehouse_1 has 400 kg free space, it is given less priority
 		self.assertEqual(pr.items[1].warehouse, warehouse_1)
 
-		po.cancel()
 		stock_receipt.cancel()
+		pr.delete()
 		rule_1.delete()
 		rule_2.delete()
 
@@ -97,21 +93,14 @@ class TestPutawayRule(unittest.TestCase):
 		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=warehouse_2, capacity=200,
 			uom="Kg")
 
-		po = create_purchase_order(item_code="_Rice", qty=350)
-		self.assertEqual(len(po.items), 1)
-
-		pr = make_purchase_receipt(po.name)
-
-		self.assertEqual(len(pr.items), 3)
+		pr = make_purchase_receipt(item_code="_Rice", qty=350, apply_putaway_rule=1,
+			do_not_submit=1)
+		self.assertEqual(len(pr.items), 2)
 		self.assertEqual(pr.items[0].qty, 200)
 		self.assertEqual(pr.items[0].warehouse, warehouse_2)
 		self.assertEqual(pr.items[1].qty, 100)
 		self.assertEqual(pr.items[1].warehouse, warehouse_1)
-		# extra qty has no warehouse assigned
-		self.assertEqual(pr.items[2].qty, 50)
-		self.assertEqual(pr.items[2].warehouse, '')
-
-		po.cancel()
+		pr.delete()
 		rule_1.delete()
 		rule_2.delete()
 
@@ -135,24 +124,19 @@ class TestPutawayRule(unittest.TestCase):
 			uom="Bag")
 		self.assertEqual(rule_2.stock_capacity, 4000)
 
+		# populate 'Rack 1' with 1 Bag, making the free space 2 Bags
 		stock_receipt = make_stock_entry(item_code="_Rice", target=warehouse_1, qty=1000, basic_rate=50)
 
-		po = create_purchase_order(item_code="_Rice", qty=6, do_not_save=True)
-		po.items[0].uom = "Bag"
-		po.save()
-		po.submit()
-
-		self.assertEqual(po.items[0].stock_qty, 6000)
-
-		pr = make_purchase_receipt(po.name)
+		pr = make_purchase_receipt(item_code="_Rice", qty=6, uom="Bag", stock_uom="Kg",
+			conversion_factor=1000, apply_putaway_rule=1, do_not_submit=1)
 		self.assertEqual(len(pr.items), 2)
 		self.assertEqual(pr.items[0].qty, 4)
 		self.assertEqual(pr.items[0].warehouse, warehouse_2)
 		self.assertEqual(pr.items[1].qty, 2)
 		self.assertEqual(pr.items[1].warehouse, warehouse_1)
 
-		po.cancel()
 		stock_receipt.cancel()
+		pr.delete()
 		rule_1.delete()
 		rule_2.delete()
 
@@ -180,24 +164,15 @@ class TestPutawayRule(unittest.TestCase):
 		self.assertEqual(rule_2.stock_capacity, 500)
 		# total capacity is 1500 Kg
 
-		po = create_purchase_order(item_code="_Rice", qty=2, do_not_save=True)
-		# PO for 2 Bags (2000 Kg)
-		po.items[0].uom = "Bag"
-		po.save()
-		po.submit()
-
-		self.assertEqual(po.items[0].stock_qty, 2000)
-
-		pr = make_purchase_receipt(po.name)
-		self.assertEqual(len(pr.items), 2)
+		pr = make_purchase_receipt(item_code="_Rice", qty=2, uom="Bag", stock_uom="Kg",
+			conversion_factor=1000, apply_putaway_rule=1, do_not_submit=1)
+		self.assertEqual(len(pr.items), 1)
 		self.assertEqual(pr.items[0].qty, 1)
 		self.assertEqual(pr.items[0].warehouse, warehouse_1)
 		# leftover space was for 500 kg (0.5 Bag)
 		# Since Bag is a whole UOM, 1(out of 2) Bag will be unassigned
-		self.assertEqual(pr.items[1].qty, 1)
-		self.assertEqual(pr.items[1].warehouse, '')
 
-		po.cancel()
+		pr.delete()
 		rule_1.delete()
 		rule_2.delete()
 
@@ -208,38 +183,58 @@ class TestPutawayRule(unittest.TestCase):
 
 		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=warehouse_1, capacity=200,
 			uom="Kg")
-		rule_2 = create_putaway_rule(item_code="_Rice", warehouse=warehouse_2, capacity=100,
-			uom="Kg", priority=2)
-		# total capacity is 300 Kg
+		# total capacity is 200 Kg
 
-		po = create_purchase_order(item_code="_Rice", qty=200, rate=100, do_not_save=True)
-		po.append("items", {
-			"item_code":"_Rice",
+		pr = make_purchase_receipt(item_code="_Rice", qty=100, apply_putaway_rule=1,
+			do_not_submit=1)
+		pr.append("items", {
+			"item_code": "_Rice",
 			"warehouse": "_Test Warehouse - _TC",
-			"qty": 300,
-			"rate": 120,
-			"schedule_date": add_days(nowdate(), 1),
-		})
-		po.save()
-		po.submit()
-		# PO for 500 Kg (two rows of same item, different rates)
-		self.assertEqual(len(po.items), 2)
-
-		pr = make_purchase_receipt(po.name)
-		self.assertEqual(len(pr.items), 3)
-		self.assertEqual(pr.items[0].qty, 200)
+			"qty": 200,
+			"uom": "Kg",
+			"stock_uom": "Kg",
+			"stock_qty": 200,
+			"received_qty": 200,
+			"rate": 100,
+			"conversion_factor": 1.0,
+		}) # same item entered again in PR but with different rate
+		pr.save()
+		self.assertEqual(len(pr.items), 2)
+		self.assertEqual(pr.items[0].qty, 100)
 		self.assertEqual(pr.items[0].warehouse, warehouse_1)
-		# same rules applied to second item row
+		self.assertEqual(pr.items[0].putaway_rule, rule_1.name)
+		# same rule applied to second item row
 		# with previous assignment considered
-		self.assertEqual(pr.items[1].qty, 100)
-		self.assertEqual(pr.items[1].warehouse, warehouse_2)
-		# unassigned 200 Kg
-		self.assertEqual(pr.items[2].qty, 200)
-		self.assertEqual(pr.items[2].warehouse, '')
+		self.assertEqual(pr.items[1].qty, 100) # 100 unassigned in second row from 200
+		self.assertEqual(pr.items[1].warehouse, warehouse_1)
+		self.assertEqual(pr.items[1].putaway_rule, rule_1.name)
 
-		po.cancel()
+		pr.delete()
 		rule_1.delete()
-		rule_2.delete()
+
+	def test_validate_over_receipt_in_warehouse(self):
+		"""Test if overreceipt is blocked in the presence of putaway rules."""
+		warehouse_1 = frappe.db.get_value("Warehouse", {"warehouse_name": "Rack 1"})
+		warehouse_2 = frappe.db.get_value("Warehouse", {"warehouse_name": "Rack 2"})
+
+		rule_1 = create_putaway_rule(item_code="_Rice", warehouse=warehouse_1, capacity=200,
+			uom="Kg")
+
+		pr = make_purchase_receipt(item_code="_Rice", qty=300, apply_putaway_rule=1,
+			do_not_submit=1)
+		self.assertEqual(len(pr.items), 1)
+		self.assertEqual(pr.items[0].qty, 200) # 100 is unassigned fro 300 Kg
+		self.assertEqual(pr.items[0].warehouse, warehouse_1)
+		self.assertEqual(pr.items[0].putaway_rule, rule_1.name)
+
+		# force overreceipt and disable apply putaway rule in PR
+		pr.items[0].qty = 300
+		pr.items[0].stock_qty = 300
+		pr.apply_putaway_rule = 0
+		self.assertRaises(frappe.ValidationError, pr.save)
+
+		pr.delete()
+		rule_1.delete()
 
 def create_putaway_rule(**args):
 	args = frappe._dict(args)
