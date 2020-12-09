@@ -256,7 +256,7 @@ class TestBatch(unittest.TestCase):
 
 	def test_batch_wise_item_price(self):
 		if not frappe.db.get_value('Item', '_Test Batch Price Item'):
-			doc = frappe.get_doc({
+			frappe.get_doc({
 				'doctype': 'Item',
 				'is_stock_item': 1,
 				'item_code': '_Test Batch Price Item',
