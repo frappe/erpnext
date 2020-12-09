@@ -1985,7 +1985,7 @@ def make_sales_invoice_for_ewaybill():
 		address.save()
 	
 	if not frappe.db.exists('Supplier', '_Test Transporter'):
-		supplier = frappe.get_doc({
+		frappe.get_doc({
 			"doctype": "Supplier",
 			"supplier_name": "_Test Transporter",
 			"country": "India",
