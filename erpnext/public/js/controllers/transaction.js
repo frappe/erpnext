@@ -509,10 +509,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			show_batch_dialog = 1;
 		}
 		// clear barcode if setting item (else barcode will take priority)
-		if(this.frm.from_barcode == 0) {
+		if (this.frm.from_barcode == 0) {
 			item.barcode = null;
 		}
-		this.frm.from_barcode = this.frm.from_barcode - 1 >= 0 ? this.frm.from_barcode - 1 : 0
+		this.frm.from_barcode = this.frm.from_barcode - 1 >= 0 ? this.frm.from_barcode - 1 : 0;
 
 
 		if(item.item_code || item.barcode || item.serial_no) {
