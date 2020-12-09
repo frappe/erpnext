@@ -13,7 +13,6 @@ import frappe
 import traceback
 from frappe import _, bold
 from pyqrcode import create as qrcreate
-from frappe.model.document import Document
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
 from frappe.utils.data import cstr, cint, formatdate as format_date, flt, time_diff_in_seconds, now_datetime, add_to_date
@@ -89,7 +88,6 @@ def get_party_details(address_name):
 
 	gstin_details = get_gstin_details(gstin)
 	legal_name = gstin_details.get('LegalName')
-	trade_name = gstin_details.get('TradeName')
 	location = gstin_details.get('AddrLoc') or address.get('city')
 	state_code = gstin_details.get('StateCode')
 	pincode = gstin_details.get('AddrPncd')
@@ -585,7 +583,6 @@ class GSPConnector():
 	
 	def cancel_eway_bill(self, eway_bill, reason, remark):
 		headers = self.get_headers()
-		doctype = 'Sales Invoice'
 		data = json.dumps({
 			'ewbNo': eway_bill,
 			'cancelRsnCode': reason,

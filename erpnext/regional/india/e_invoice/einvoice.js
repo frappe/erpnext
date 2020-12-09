@@ -3,7 +3,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 		refresh(frm) {
 			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
 			const supply_type = frm.doc.gst_category;
-			const valid_supply_type = ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type)
+			const valid_supply_type = ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type);
 
 			if (!einvoicing_enabled || !valid_supply_type) return;
 
@@ -13,7 +13,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				if (!frm.custom_buttons[label]) {
 					frm.add_custom_button(label, action, __('E Invoicing'));
 				}
-			}
+			};
 
 			if (ewaybill && irn) {
 				frm.set_df_property('ewaybill', 'read_only', 1);
@@ -26,7 +26,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						args: { doctype, docname: name },
 						freeze: true,
 						callback: () => frm.reload_doc()
-					})
+					});
 				};
 
 				add_custom_button(__("Generate IRN"), action);
@@ -35,7 +35,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			if (docstatus == 1 && irn && !irn_cancelled && !ewaybill) {
 				const fields = [
 					{
-						"label" : "Reason",
+						"label": "Reason",
 						"fieldname": "reason",
 						"fieldtype": "Select",
 						"reqd": 1,
@@ -95,7 +95,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 								freeze: true,
 								callback: () => frm.reload_doc() || d.hide(),
 								error: () => d.hide()
-							})
+							});
 						},
 						primary_action_label: __('Submit')
 					});
@@ -108,7 +108,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			if (docstatus == 1 && irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
 				const fields = [
 					{
-						"label" : "Reason",
+						"label": "Reason",
 						"fieldname": "reason",
 						"fieldtype": "Select",
 						"reqd": 1,
@@ -140,7 +140,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 								freeze: true,
 								callback: () => frm.reload_doc() || d.hide(),
 								error: () => d.hide()
-							})
+							});
 						},
 						primary_action_label: __('Submit')
 					});
@@ -149,8 +149,8 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				add_custom_button(__("Cancel E-Way Bill"), action);
 			}
 		}
-	})
-}
+	});
+};
 
 const get_ewaybill_fields = (frm) => {
 	return [
@@ -236,4 +236,4 @@ const get_ewaybill_fields = (frm) => {
 			'default': frm.doc.gst_vehicle_type
 		}
 	];
-}
+};
