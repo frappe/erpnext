@@ -49,7 +49,10 @@ frappe.ui.form.on("Task", {
 			},
 			callback: function (r) {
 				if (r.message.length > 0) {
-					frappe.msgprint(__(`Cannot convert it to non-group. The following child Tasks exist: ${r.message.join(", ")}.`));
+					let message = __('Cannot convert Task to non-group because the following child Tasks exist: {0}.',
+						[r.message.join(", ")]
+					);
+					frappe.msgprint(message);
 					frm.reload_doc();
 				}
 			}
