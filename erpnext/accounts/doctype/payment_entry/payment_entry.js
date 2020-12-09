@@ -12,9 +12,10 @@ frappe.ui.form.on('Payment Entry', {
 
 	setup: function(frm) {
 		frm.set_query("paid_from", function() {
+			frm.events.validate_company(frm);
+
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -23,13 +24,16 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+
 		frm.set_query("party_type", function() {
+			frm.events.validate_company(frm);
 			return{
 				filters: {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
 				}
 			}
 		});
+
 		frm.set_query("party_bank_account", function() {
 			return {
 				filters: {
@@ -39,6 +43,7 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+
 		frm.set_query("bank_account", function() {
 			return {
 				filters: {
@@ -46,6 +51,7 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+
 		frm.set_query("contact_person", function() {
 			if (frm.doc.party) {
 				return {
@@ -57,10 +63,12 @@ frappe.ui.form.on('Payment Entry', {
 				};
 			}
 		});
+
 		frm.set_query("paid_to", function() {
+			frm.events.validate_company(frm);
+
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -147,6 +155,12 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+	},
+
+	validate_company: (frm) => {
+		if (!frm.doc.company){
+			frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")});
+		}
 	},
 
 	company: function(frm) {

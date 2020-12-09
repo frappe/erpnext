@@ -17,14 +17,17 @@ def execute(filters=None):
 
 	data = []
 	for item, item_dict in iteritems(item_details):
+		earliest_age, latest_age = 0, 0
 
 		fifo_queue = sorted(filter(_func, item_dict["fifo_queue"]), key=_func)
 		details = item_dict["details"]
-		if not fifo_queue or (not item_dict.get("total_qty")): continue
+		if not fifo_queue: continue
 
 		average_age = get_average_age(fifo_queue, to_date)
-		earliest_age = date_diff(to_date, fifo_queue[0][1])
-		latest_age = date_diff(to_date, fifo_queue[-1][1])
+
+		if fifo_queue:
+			earliest_age = date_diff(to_date, fifo_queue[0][1])
+			latest_age = date_diff(to_date, fifo_queue[-1][1])
 
 		row = [details.name, details.item_name,
 			details.description, details.item_group, details.brand]
@@ -147,7 +150,8 @@ def get_fifo_queue(filters, sle=None):
 		item_details.setdefault(key, {"details": d, "fifo_queue": []})
 		fifo_queue = item_details[key]["fifo_queue"]
 
-		transferred_item_details.setdefault((d.voucher_no, d.name), [])
+		transferred_item_key = (d.voucher_no, d.name, d.warehouse)
+		transferred_item_details.setdefault(transferred_item_key, [])
 
 		if d.voucher_type == "Stock Reconciliation":
 			d.actual_qty = flt(d.qty_after_transaction) - flt(item_details[key].get("qty_after_transaction", 0))
@@ -155,10 +159,10 @@ def get_fifo_queue(filters, sle=None):
 		serial_no_list = get_serial_nos(d.serial_no) if d.serial_no else []
 
 		if d.actual_qty > 0:
-			if transferred_item_details.get((d.voucher_no, d.name)):
-				batch = transferred_item_details[(d.voucher_no, d.name)][0]
+			if transferred_item_details.get(transferred_item_key):
+				batch = transferred_item_details[transferred_item_key][0]
 				fifo_queue.append(batch)
-				transferred_item_details[((d.voucher_no, d.name))].pop(0)
+				transferred_item_details[transferred_item_key].pop(0)
 			else:
 				if serial_no_list:
 					for serial_no in serial_no_list:
@@ -182,11 +186,11 @@ def get_fifo_queue(filters, sle=None):
 						# if batch qty > 0
 						# not enough or exactly same qty in current batch, clear batch
 						qty_to_pop -= flt(batch[0])
-						transferred_item_details[(d.voucher_no, d.name)].append(fifo_queue.pop(0))
+						transferred_item_details[transferred_item_key].append(fifo_queue.pop(0))
 					else:
 						# all from current batch
 						batch[0] = flt(batch[0]) - qty_to_pop
-						transferred_item_details[(d.voucher_no, d.name)].append([qty_to_pop, batch[1]])
+						transferred_item_details[transferred_item_key].append([qty_to_pop, batch[1]])
 						qty_to_pop = 0
 
 		item_details[key]["qty_after_transaction"] = d.qty_after_transaction

@@ -246,22 +246,26 @@ class StatusUpdater(Document):
 				if not args.get("second_source_extra_cond"):
 					args["second_source_extra_cond"] = ""
 
-				args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
+				args['second_source_condition'] = frappe.db.sql(""" select ifnull((select sum(%(second_source_field)s)
 					from `tab%(second_source_dt)s`
 					where `%(second_join_field)s`="%(detail_id)s"
-					and (`tab%(second_source_dt)s`.docstatus=1) %(second_source_extra_cond)s), 0) """ % args
+					and (`tab%(second_source_dt)s`.docstatus=1)
+					%(second_source_extra_cond)s), 0) """ % args)[0][0]
 
 			if args['detail_id']:
 				if not args.get("extra_cond"): args["extra_cond"] = ""
 
-				frappe.db.sql("""update `tab%(target_dt)s`
-					set %(target_field)s = (
+				args["source_dt_value"] = frappe.db.sql("""
 						(select ifnull(sum(%(source_field)s), 0)
 							from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
 							and (docstatus=1 %(cond)s) %(extra_cond)s)
-						%(second_source_condition)s
-					)
-					%(update_modified)s
+				""" % args)[0][0] or 0.0
+
+				if args['second_source_condition']:
+					args["source_dt_value"] += flt(args['second_source_condition'])
+
+				frappe.db.sql("""update `tab%(target_dt)s`
+					set %(target_field)s = %(source_dt_value)s %(update_modified)s
 					where name='%(detail_id)s'""" % args)
 
 	def _update_percent_field_in_targets(self, args, update_modified=True):

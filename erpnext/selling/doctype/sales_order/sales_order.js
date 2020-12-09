@@ -148,7 +148,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 					// sales invoice
 					if(flt(doc.per_billed, 6) < 100) {
-						this.frm.add_custom_button(__('Invoice'), () => me.make_sales_invoice(), __('Create'));
+						this.frm.add_custom_button(__('Sales Invoice'), () => me.make_sales_invoice(), __('Create'));
 					}
 
 					// material request
@@ -169,7 +169,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					}
 
 					// project
-					if(flt(doc.per_delivered, 2) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
+					if(flt(doc.per_delivered, 2) < 100) {
 							this.frm.add_custom_button(__('Project'), () => this.make_project(), __('Create'));
 					}
 
@@ -542,19 +542,26 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	make_purchase_order: function(){
+		let pending_items = this.frm.doc.items.some((item) =>{
+			let pending_qty = flt(item.stock_qty) - flt(item.ordered_qty);
+			return pending_qty > 0;
+		})
+		if(!pending_items){
+			frappe.throw({message: __("Purchase Order already created for all Sales Order items"), title: __("Note")});
+		}
+
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
-			title: __("For Supplier"),
+			title: __("Select Items"),
 			fields: [
-				{"fieldtype": "Link", "label": __("Supplier"), "fieldname": "supplier", "options":"Supplier",
-				 "description": __("Leave the field empty to make purchase orders for all suppliers"),
-					"get_query": function () {
-						return {
-							query:"erpnext.selling.doctype.sales_order.sales_order.get_supplier",
-							filters: {'parent': me.frm.doc.name}
-						}
-					}},
-					{fieldname: 'items_for_po', fieldtype: 'Table', label: 'Select Items',
+				{
+					"fieldtype": "Check",
+					"label": __("Against Default Supplier"),
+					"fieldname": "against_default_supplier",
+					"default": 0
+				},
+				{
+					fieldname: 'items_for_po', fieldtype: 'Table', label: 'Select Items',
 					fields: [
 						{
 							fieldtype:'Data',
@@ -572,8 +579,8 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						},
 						{
 							fieldtype:'Float',
-							fieldname:'qty',
-							label: __('Quantity'),
+							fieldname:'pending_qty',
+							label: __('Pending Qty'),
 							read_only: 1,
 							in_list_view:1
 						},
@@ -582,60 +589,97 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							read_only:1,
 							fieldname:'uom',
 							label: __('UOM'),
+							in_list_view:1,
+						},
+						{
+							fieldtype:'Data',
+							fieldname:'supplier',
+							label: __('Supplier'),
+							read_only:1,
 							in_list_view:1
-						}
-					],
-					data: cur_frm.doc.items,
-					get_data: function() {
-						return cur_frm.doc.items
-					}
-				},
-
-				{"fieldtype": "Button", "label": __('Create Purchase Order'), "fieldname": "make_purchase_order", "cssClass": "btn-primary"},
-			]
-		});
-
-		dialog.fields_dict.make_purchase_order.$input.click(function() {
-			var args = dialog.get_values();
-			let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children()
-			if(selected_items.length == 0) {
-				frappe.throw({message: 'Please select Item form Table', title: __('Message'), indicator:'blue'})
-			}
-			let selected_items_list = []
-			for(let i in selected_items){
-				selected_items_list.push(selected_items[i].item_code)
-			}
-			dialog.hide();
-			return frappe.call({
-				type: "GET",
-				method: "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order",
-				args: {
-					"source_name": me.frm.doc.name,
-					"for_supplier": args.supplier,
-					"selected_items": selected_items_list
-				},
-				freeze: true,
-				callback: function(r) {
-					if(!r.exc) {
-						// var args = dialog.get_values();
-						if (args.supplier){
-							var doc = frappe.model.sync(r.message);
-							frappe.set_route("Form", r.message.doctype, r.message.name);
-						}
-						else{
-							frappe.route_options = {
-								"sales_order": me.frm.doc.name
-							}
-							frappe.set_route("List", "Purchase Order");
-						}
-					}
+						},
+					]
 				}
-			})
+			],
+			primary_action_label: 'Create Purchase Order',
+			primary_action (args) {
+				if (!args) return;
+
+				let selected_items = dialog.fields_dict.items_for_po.grid.get_selected_children();
+				if(selected_items.length == 0) {
+					frappe.throw({message: 'Please select Items from the Table', title: __('Items Required'), indicator:'blue'})
+				}
+
+				dialog.hide();
+
+				var method = args.against_default_supplier ? "make_purchase_order_for_default_supplier" : "make_purchase_order"
+				return frappe.call({
+					method: "erpnext.selling.doctype.sales_order.sales_order." + method,
+					freeze: true,
+					freeze_message: __("Creating Purchase Order ..."),
+					args: {
+						"source_name": me.frm.doc.name,
+						"selected_items": selected_items
+					},
+					freeze: true,
+					callback: function(r) {
+						if(!r.exc) {
+							if (!args.against_default_supplier) {
+								frappe.model.sync(r.message);
+								frappe.set_route("Form", r.message.doctype, r.message.name);
+							}
+							else {
+								frappe.route_options = {
+									"sales_order": me.frm.doc.name
+								}
+								frappe.set_route("List", "Purchase Order");
+							}
+						}
+					}
+				})
+			}
 		});
-		dialog.get_field("items_for_po").grid.only_sortable()
-		dialog.get_field("items_for_po").refresh()
+
+		dialog.fields_dict["against_default_supplier"].df.onchange = () => set_po_items_data(dialog);
+
+		function set_po_items_data (dialog) {
+			var against_default_supplier = dialog.get_value("against_default_supplier");
+			var items_for_po = dialog.get_value("items_for_po");
+
+			if (against_default_supplier) {
+				let items_with_supplier = items_for_po.filter((item) => item.supplier)
+
+				dialog.fields_dict["items_for_po"].df.data = items_with_supplier;
+				dialog.get_field("items_for_po").refresh();
+			} else {
+				let po_items = [];
+				me.frm.doc.items.forEach(d => {
+					let pending_qty = (flt(d.stock_qty) - flt(d.ordered_qty)) / flt(d.conversion_factor);
+					if (pending_qty > 0) {
+						po_items.push({
+							"doctype": "Sales Order Item",
+							"name": d.name,
+							"item_name": d.item_name,
+							"item_code": d.item_code,
+							"pending_qty": pending_qty,
+							"uom": d.uom,
+							"supplier": d.supplier
+						});
+					}
+				});
+
+				dialog.fields_dict["items_for_po"].df.data = po_items;
+				dialog.get_field("items_for_po").refresh();
+			}
+		}
+
+		set_po_items_data(dialog);
+		dialog.get_field("items_for_po").grid.only_sortable();
+		dialog.get_field("items_for_po").refresh();
+		dialog.wrapper.find('.grid-heading-row .grid-row-check').click();
 		dialog.show();
 	},
+
 	hold_sales_order: function(){
 		var me = this;
 		var d = new frappe.ui.Dialog({

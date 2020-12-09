@@ -158,7 +158,7 @@ class GSTR3BReport(Document):
 
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_det", ["Registered Regular"])
 		self.prepare_data("Sales Invoice", outward_supply_tax_amounts, "sup_details", "osup_zero", ["SEZ", "Deemed Export", "Overseas"])
-		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Unregistered", "Overseas"], reverse_charge="Y")
+		self.prepare_data("Purchase Invoice", inward_supply_tax_amounts, "sup_details", "isup_rev", ["Unregistered", "Overseas", "Registered Regular"], reverse_charge="Y")
 		self.report_dict["sup_details"]["osup_nil_exmp"]["txval"] = flt(self.get_nil_rated_supply_value(), 2)
 		self.set_itc_details(itc_details)
 
@@ -192,19 +192,20 @@ class GSTR3BReport(Document):
 		for d in self.report_dict["itc_elg"]["itc_avl"]:
 
 			itc_type = itc_type_map.get(d["ty"])
-			gst_category = ["Registered Regular"]
 
 			if d["ty"] == 'ISRC':
-				reverse_charge = "Y"
+				reverse_charge = ["Y"]
 				itc_type = 'All Other ITC'
-				gst_category = ['Unregistered', 'Overseas']
+				gst_category = ['Unregistered', 'Overseas', 'Registered Regular']
 			else:
-				reverse_charge = "N"
+				gst_category = ['Unregistered', 'Overseas', 'Registered Regular']
+				reverse_charge = ["N", "Y"]
 
 			for account_head in self.account_heads:
 				for category in gst_category:
-					for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
-						d[key[0]] += flt(itc_details.get((category, itc_type, reverse_charge, account_head.get(key[1])), {}).get("amount"), 2)
+					for charge_type in reverse_charge:
+						for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
+							d[key[0]] += flt(itc_details.get((category, itc_type, charge_type, account_head.get(key[1])), {}).get("amount"), 2)
 
 			for key in ['iamt', 'camt', 'samt', 'csamt']:
 				net_itc[key] += flt(d[key], 2)
@@ -253,7 +254,7 @@ class GSTR3BReport(Document):
 	def get_total_taxable_value(self, doctype, reverse_charge):
 
 		return frappe._dict(frappe.db.sql("""
-			select gst_category, sum(net_total) as total
+			select gst_category, sum(base_net_total) as total
 			from `tab{doctype}`
 			where docstatus = 1 and month(posting_date) = %s
 			and year(posting_date) = %s and reverse_charge = %s
@@ -264,7 +265,8 @@ class GSTR3BReport(Document):
 
 	def get_itc_details(self):
 		itc_amount = frappe.db.sql("""
-			select s.gst_category, sum(t.tax_amount_after_discount_amount) as tax_amount, t.account_head, s.eligibility_for_itc, s.reverse_charge
+			select s.gst_category, sum(t.base_tax_amount_after_discount_amount) as tax_amount,
+			t.account_head, s.eligibility_for_itc, s.reverse_charge
 			from `tabPurchase Invoice` s , `tabPurchase Taxes and Charges` t
 			where s.docstatus = 1 and t.parent = s.name
 			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s
@@ -388,7 +390,7 @@ class GSTR3BReport(Document):
 			tax_template = 'Purchase Taxes and Charges'
 
 		tax_amounts = frappe.db.sql("""
-			select s.gst_category, sum(t.tax_amount_after_discount_amount) as tax_amount, t.account_head
+			select s.gst_category, sum(t.base_tax_amount_after_discount_amount) as tax_amount, t.account_head
 			from `tab{doctype}` s , `tab{template}` t
 			where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
 			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s

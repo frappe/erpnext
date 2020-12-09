@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "ACC-SUB-.YYYY.-.#####",
  "creation": "2017-07-18 17:50:43.967266",
  "doctype": "DocType",
@@ -14,6 +13,7 @@
   "cancelation_date",
   "trial_period_start",
   "trial_period_end",
+  "generate_new_invoices_past_due_date",
   "column_break_11",
   "current_invoice_start",
   "current_invoice_end",
@@ -195,10 +195,16 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "New invoices will be generated as per schedule even if current invoices are unpaid or past due date",
+   "fieldname": "generate_new_invoices_past_due_date",
+   "fieldtype": "Check",
+   "label": "Generate New Invoices Past Due Date"
   }
  ],
- "links": [],
- "modified": "2020-01-27 14:37:32.845173",
+ "modified": "2020-11-29 22:46:14.879289",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",

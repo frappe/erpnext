@@ -159,6 +159,7 @@ frappe.ui.form.on('Production Plan', {
 	get_sales_orders: function(frm) {
 		frappe.call({
 			method: "get_open_sales_orders",
+			freeze: true,
 			doc: frm.doc,
 			callback: function(r) {
 				refresh_field("sales_orders");
@@ -169,6 +170,7 @@ frappe.ui.form.on('Production Plan', {
 	get_material_request: function(frm) {
 		frappe.call({
 			method: "get_pending_material_requests",
+			freeze: true,
 			doc: frm.doc,
 			callback: function() {
 				refresh_field('material_requests');
@@ -188,7 +190,7 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	get_items_for_mr: function(frm) {
-		const set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom', 
+		const set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom',
 			'min_order_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'material_request_type'];
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
@@ -219,7 +221,7 @@ frappe.ui.form.on('Production Plan', {
 
 	download_materials_required: function(frm) {
 		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
-		open_url_post(frappe.request.url, { cmd: get_template_url, production_plan: frm.doc.name });
+		open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc });
 	},
 
 	show_progress: function(frm) {

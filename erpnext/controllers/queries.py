@@ -613,9 +613,12 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 	if not taxes:
 		return frappe.db.sql(""" SELECT name FROM `tabItem Tax Template` """)
 	else:
+		valid_from = filters.get('valid_from')
+		valid_from = valid_from[1] if isinstance(valid_from, list) else valid_from
+
 		args = {
 			'item_code': filters.get('item_code'),
-			'posting_date': filters.get('valid_from'),
+			'posting_date': valid_from,
 			'tax_category': filters.get('tax_category')
 		}
 

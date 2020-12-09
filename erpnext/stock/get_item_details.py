@@ -385,6 +385,11 @@ def get_item_warehouse(item, args, overwrite_warehouse, defaults={}):
 	else:
 		warehouse = args.get('warehouse')
 
+	if not warehouse:
+		default_warehouse = frappe.db.get_single_value("Stock Settings", "default_warehouse")
+		if frappe.db.get_value("Warehouse", default_warehouse, "company") == args.company:
+			return default_warehouse
+
 	return warehouse
 
 def update_barcode_value(out):
@@ -522,22 +527,39 @@ def get_default_deferred_account(args, item, fieldname=None):
 	else:
 		return None
 
-def get_default_cost_center(args, item, item_group, brand, company=None):
+def get_default_cost_center(args, item=None, item_group=None, brand=None, company=None):
 	cost_center = None
+
+	if not company and args.get("company"):
+		company = args.get("company")
+
 	if args.get('project'):
 		cost_center = frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
 
-	if not cost_center:
+	if not cost_center and (item and item_group and brand):
 		if args.get('customer'):
 			cost_center = item.get('selling_cost_center') or item_group.get('selling_cost_center') or brand.get('selling_cost_center')
 		else:
 			cost_center = item.get('buying_cost_center') or item_group.get('buying_cost_center') or brand.get('buying_cost_center')
 
-	cost_center = cost_center or args.get("cost_center")
+	elif not cost_center and args.get("item_code") and company:
+		for method in ["get_item_defaults", "get_item_group_defaults", "get_brand_defaults"]:
+			path = "erpnext.stock.get_item_details.{0}".format(method)
+			data = frappe.get_attr(path)(args.get("item_code"), company)
+
+			if data and (data.selling_cost_center or data.buying_cost_center):
+				return data.selling_cost_center or data.buying_cost_center
+
+	if not cost_center and args.get("cost_center"):
+		cost_center = args.get("cost_center")
 
 	if (company and cost_center
 		and frappe.get_cached_value("Cost Center", cost_center, "company") != company):
 		return None
+
+	if not cost_center and company:
+		cost_center = frappe.get_cached_value("Company",
+			company, "cost_center")
 
 	return cost_center
 

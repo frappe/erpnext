@@ -11,8 +11,6 @@ def execute():
 	frappe.reload_doc("HR", "doctype", "Leave Ledger Entry")
 	frappe.reload_doc("HR", "doctype", "Leave Encashment")
 	frappe.reload_doc("HR", "doctype", "Leave Type")
-	if frappe.db.a_row_exists("Leave Ledger Entry"):
-		return
 
 	if not frappe.get_meta("Leave Allocation").has_field("unused_leaves"):
 		frappe.reload_doc("HR", "doctype", "Leave Allocation")
@@ -36,8 +34,7 @@ def generate_allocation_ledger_entries():
 
 	for allocation in allocation_list:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation', 'transaction_name': allocation.name}):
-			allocation.update(dict(doctype="Leave Allocation"))
-			allocation_obj = frappe.get_doc(allocation)
+			allocation_obj = frappe.get_doc("Leave Allocation", allocation)
 			allocation_obj.create_leave_ledger_entry()
 
 def generate_application_leave_ledger_entries():
@@ -46,8 +43,7 @@ def generate_application_leave_ledger_entries():
 
 	for application in leave_applications:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Application', 'transaction_name': application.name}):
-			application.update(dict(doctype="Leave Application"))
-			frappe.get_doc(application).create_leave_ledger_entry()
+			frappe.get_doc("Leave Application", application.name).create_leave_ledger_entry()
 
 def generate_encashment_leave_ledger_entries():
 	''' fix ledger entries for missing leave encashment transaction '''
@@ -55,8 +51,7 @@ def generate_encashment_leave_ledger_entries():
 
 	for encashment in leave_encashments:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment', 'transaction_name': encashment.name}):
-			encashment.update(dict(doctype="Leave Encashment"))
-			frappe.get_doc(encashment).create_leave_ledger_entry()
+			frappe.get_doc("Leave Encashment", encashment).create_leave_ledger_entry()
 
 def generate_expiry_allocation_ledger_entries():
 	''' fix ledger entries for missing leave allocation transaction '''
@@ -65,24 +60,16 @@ def generate_expiry_allocation_ledger_entries():
 
 	for allocation in allocation_list:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Allocation', 'transaction_name': allocation.name, 'is_expired': 1}):
-			allocation.update(dict(doctype="Leave Allocation"))
-			allocation_obj = frappe.get_doc(allocation)
+			allocation_obj = frappe.get_doc("Leave Allocation", allocation)
 			if allocation_obj.to_date <= getdate(today()):
 				expire_allocation(allocation_obj)
 
 def get_allocation_records():
-	return frappe.get_all("Leave Allocation", filters={
-		"docstatus": 1
-		}, fields=['name', 'employee', 'leave_type', 'new_leaves_allocated',
-			'unused_leaves', 'from_date', 'to_date', 'carry_forward'
-		], order_by='to_date ASC')
+	return frappe.get_all("Leave Allocation", filters={"docstatus": 1},
+		fields=['name'], order_by='to_date ASC')
 
 def get_leaves_application_records():
-	return frappe.get_all("Leave Application", filters={
-		"docstatus": 1
-		}, fields=['name', 'employee', 'leave_type', 'total_leave_days', 'from_date', 'to_date'])
+	return frappe.get_all("Leave Application", filters={"docstatus": 1}, fields=['name'])
 
 def get_leave_encashment_records():
-	return frappe.get_all("Leave Encashment", filters={
-		"docstatus": 1
-		}, fields=['name', 'employee', 'leave_type', 'encashable_days', 'encashment_date'])
+	return frappe.get_all("Leave Encashment", filters={"docstatus": 1}, fields=['name'])

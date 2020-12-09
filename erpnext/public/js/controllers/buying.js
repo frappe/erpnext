@@ -508,7 +508,7 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 						var d = frm.add_child("items");
 						var item = r.message[i];
 						for ( var key in  item) {
-							if ( !is_null(item[key]) ) {
+							if ( !is_null(item[key]) && key !== "doctype" ) {
 								d[key] = item[key];
 							}
 						}

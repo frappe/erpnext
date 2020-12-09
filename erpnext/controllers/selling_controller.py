@@ -10,6 +10,7 @@ from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 from erpnext.controllers.stock_controller import StockController
 
@@ -41,7 +42,7 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
-		self.set_po_nos()
+		self.set_po_nos(for_validate=True)
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
@@ -53,10 +54,10 @@ class SellingController(StockController):
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
-		self.set_missing_lead_customer_details()
+		self.set_missing_lead_customer_details(for_validate=for_validate)
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
-	def set_missing_lead_customer_details(self):
+	def set_missing_lead_customer_details(self, for_validate=False):
 		customer, lead = None, None
 		if getattr(self, "customer", None):
 			customer = self.customer
@@ -92,6 +93,11 @@ class SellingController(StockController):
 			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
+
+		if self.get('taxes_and_charges') and not self.get('taxes') and not for_validate:
+			taxes = get_taxes_and_charges('Sales Taxes and Charges Template', self.taxes_and_charges)
+			for tax in taxes:
+				self.append('taxes', tax)
 
 	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
@@ -358,14 +364,36 @@ class SellingController(StockController):
 						}))
 		self.make_sl_entries(sl_entries)
 
-	def set_po_nos(self):
-		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
-			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
-			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
-			if sales_orders:
-				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				if po_nos and po_nos[0].get('po_no'):
-					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+	def set_po_nos(self, for_validate=False):
+		if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
+			if for_validate and self.po_no:
+				return
+			self.set_pos_for_sales_invoice()
+		if self.doctype == 'Delivery Note' and hasattr(self, "items"):
+			if for_validate and self.po_no:
+				return
+			self.set_pos_for_delivery_note()
+
+	def set_pos_for_sales_invoice(self):
+		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
+		self.get_po_nos('Sales Order', 'sales_order', po_nos)
+		self.get_po_nos('Delivery Note', 'delivery_note', po_nos)
+		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
+
+	def set_pos_for_delivery_note(self):
+		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
+		self.get_po_nos('Sales Order', 'against_sales_order', po_nos)
+		self.get_po_nos('Sales Invoice', 'against_sales_invoice', po_nos)
+		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
+
+	def get_po_nos(self, ref_doctype, ref_fieldname, po_nos):
+		doc_list = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
+		if doc_list:
+			po_nos += [d.po_no for d in frappe.get_all(ref_doctype, 'po_no', filters = {'name': ('in', doc_list)}) if d.get('po_no')]
 
 	def set_gross_profit(self):
 		if self.doctype == "Sales Order":

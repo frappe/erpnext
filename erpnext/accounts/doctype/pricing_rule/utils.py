@@ -31,13 +31,19 @@ apply_on_table = {
 }
 
 def get_pricing_rules(args, doc=None):
-	pricing_rules = []
-	values =  {}
+	pricing_rules_all = []
+	values = {}
 
 	for apply_on in ['Item Code', 'Item Group', 'Brand']:
-		pricing_rules.extend(_get_pricing_rules(apply_on, args, values))
-		if pricing_rules and not apply_multiple_pricing_rules(pricing_rules):
-			break
+		pricing_rules_all.extend(_get_pricing_rules(apply_on, args, values))
+
+	# removing duplicate pricing rule
+	pricing_rules_name = []
+	pricing_rules = []
+	for p in pricing_rules_all:
+		if p['name'] not in pricing_rules_name:
+			pricing_rules_name.append(p['name'])
+			pricing_rules.append(p)
 
 	rules = []
 
@@ -323,9 +329,10 @@ def apply_internal_priority(pricing_rules, field_set, args):
 	filtered_rules = []
 	for field in field_set:
 		if args.get(field):
-			# filter function always returns a filter object even if empty
-			# list conversion is necessary to check for an empty result
-			filtered_rules = list(filter(lambda x: x.get(field)==args.get(field), pricing_rules))
+			for rule in pricing_rules:
+				if rule.get(field) == args.get(field):
+					filtered_rules = [rule]
+					break
 			if filtered_rules: break
 
 	return filtered_rules or pricing_rules
@@ -446,6 +453,9 @@ def apply_pricing_rule_on_transaction(doc):
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty,
 			doc.total, pricing_rules)
 
+		if not pricing_rules:
+			remove_free_item(doc)
+
 		for d in pricing_rules:
 			if d.price_or_product_discount == 'Price':
 				if d.apply_discount_on:
@@ -469,6 +479,12 @@ def apply_pricing_rule_on_transaction(doc):
 				get_product_discount_rule(d, item_details, doc=doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
+				doc.calculate_taxes_and_totals()
+
+def remove_free_item(doc):
+	for d in doc.items:
+		if d.is_free_item:
+			doc.remove(d)
 
 def get_applied_pricing_rules(pricing_rules):
 	if pricing_rules:
@@ -481,7 +497,7 @@ def get_applied_pricing_rules(pricing_rules):
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	free_item = pricing_rule.free_item
-	if pricing_rule.same_item:
+	if pricing_rule.same_item and pricing_rule.get("apply_on") != 'Transaction':
 		free_item = item_details.item_code or args.item_code
 
 	if not free_item:
@@ -510,13 +526,17 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	if item_details.get("parenttype") == 'Sales Order':
 		item_details.free_item_data['delivery_date'] = doc.delivery_date if doc else today()
 
-	company = args.get('company') or doc.company
-	item_details.free_item_data['income_account'] = get_default_income_account(
-		args=args,
-		item=get_item_defaults(free_item, company),
-		item_group=get_item_group_defaults(free_item, company),
-		brand=get_brand_defaults(free_item, company),
-	)
+	company = doc.company
+	if args and args.get("company"):
+		company = args.get("company")
+
+	if args:
+		item_details.free_item_data['income_account'] = get_default_income_account(
+			args=args,
+			item=get_item_defaults(free_item, company),
+			item_group=get_item_group_defaults(free_item, company),
+			brand=get_brand_defaults(free_item, company),
+		)
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
 	if pricing_rule_args.get('item_code'):

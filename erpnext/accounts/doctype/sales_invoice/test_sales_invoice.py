@@ -690,7 +690,8 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertFalse(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
-		make_pos_profile()
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
@@ -714,8 +715,67 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.pos_gl_entry(si, pos, 50)
 
+	def test_pos_returns_without_repayment(self):
+		pos_profile = make_pos_profile()
+
+		pos = create_sales_invoice(qty = 10, do_not_save=True)
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 500})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500})
+		pos.insert()
+		pos.submit()
+
+		pos_return = create_sales_invoice(is_return=1,
+			return_against=pos.name, qty=-5, do_not_save=True)
+
+		pos_return.is_pos = 1
+		pos_return.pos_profile = pos_profile.name
+
+		pos_return.insert()
+		pos_return.submit()
+
+		self.assertFalse(pos_return.is_pos)
+		self.assertFalse(pos_return.get('payments'))
+
+	def test_pos_returns_with_repayment(self):
+		pos_profile = make_pos_profile()
+
+		pos_profile.append('payments', {
+			'default': 1,
+			'mode_of_payment': 'Cash',
+			'amount': 0.0
+		})
+
+		pos_profile.save()
+
+		pos = create_sales_invoice(qty = 10, do_not_save=True)
+
+		pos.is_pos = 1
+		pos.pos_profile = pos_profile.name
+
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 500})
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 500})
+		pos.insert()
+		pos.submit()
+
+		pos_return = create_sales_invoice(is_return=1,
+			return_against=pos.name, qty=-5, do_not_save=True)
+
+		pos_return.is_pos = 1
+		pos_return.pos_profile = pos_profile.name
+		pos_return.insert()
+		pos_return.submit()
+
+		self.assertEqual(pos_return.get('payments')[0].amount, -500)
+		pos_profile.payments = []
+		pos_profile.save()
+
+
 	def test_pos_change_amount(self):
-		make_pos_profile()
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 
@@ -737,7 +797,8 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_make_pos_invoice(self):
 		from erpnext.accounts.doctype.sales_invoice.pos import make_invoice
 
-		pos_profile = make_pos_profile()
+		pos_profile = make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",supplier_warehouse= "Work In Progress - TCP1", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
 		pos = create_sales_invoice(company= "_Test Company with perpetual inventory", debit_to="Debtors - TCP1", item_code= "_Test FG Item", warehouse="Stores - TCP1", income_account = "Sales - TCP1", expense_account = "Cost of Goods Sold - TCP1", cost_center = "Main - TCP1", do_not_save=True)
 

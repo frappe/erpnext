@@ -13,6 +13,7 @@ from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_ord
 from erpnext.buying.doctype.purchase_order.purchase_order import make_purchase_receipt, make_rm_stock_entry
 import unittest
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError
 
 class TestItemAlternative(unittest.TestCase):
 	def setUp(self):
@@ -110,8 +111,11 @@ def make_items():
 		if not frappe.db.exists('Item', item_code):
 			create_item(item_code)
 
-	create_stock_reconciliation(item_code="Test FG A RW 1",
-		warehouse='_Test Warehouse - _TC', qty=10, rate=2000)
+	try:
+		create_stock_reconciliation(item_code="Test FG A RW 1",
+			warehouse='_Test Warehouse - _TC', qty=10, rate=2000)
+	except EmptyStockReconciliationItemsError:
+		pass
 
 	if frappe.db.exists('Item', 'Test FG A RW 1'):
 		doc = frappe.get_doc('Item', 'Test FG A RW 1')

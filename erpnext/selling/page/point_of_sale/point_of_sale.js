@@ -449,8 +449,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 
 			$(this.frm.msgbox.body).find('.btn-primary').on('click', () => {
 				this.frm.msgbox.hide();
-				const frm = this.events.get_frm();
-				frm.doc = this.doc;
+				const frm = this.frm;
 				frm.print_preview.lang_code = frm.doc.language;
 				frm.print_preview.printit(true);
 			});
@@ -688,8 +687,8 @@ erpnext.pos.PointOfSale = class PointOfSale {
 				if(this.frm.doc.docstatus != 1 ){
 					await this.frm.save();
 				}
-				const frm = this.events.get_frm();
-				frm.doc = this.doc;
+
+				const frm = this.frm;
 				frm.print_preview.lang_code = frm.doc.language;
 				frm.print_preview.printit(true);
 			});
@@ -948,8 +947,12 @@ class POSCart {
 					}
 				},
 				onchange: () => {
-					this.events.on_customer_change(this.customer_field.get_value());
-					this.events.get_loyalty_details();
+					let customer = this.customer_field.get_value();
+					frappe.db.get_value("Customer", customer, "language", (r) => {
+						this.frm.doc.language = r ? r.language : "en-US";
+						this.events.on_customer_change(customer);
+						this.events.get_loyalty_details();
+					});
 				}
 			},
 			parent: this.wrapper.find('.customer-field'),
@@ -1512,6 +1515,9 @@ class POSItems {
 	}
 
 	get_items({start = 0, page_length = 40, search_value='', item_group=this.parent_item_group}={}) {
+		if (!this.frm.doc.pos_profile)
+			return;
+
 		const price_list = this.frm.doc.selling_price_list;
 		return new Promise(res => {
 			frappe.call({

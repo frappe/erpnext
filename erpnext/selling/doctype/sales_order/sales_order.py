@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import frappe.utils
-from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form
+from frappe.utils import cstr, flt, getdate, cint, nowdate, add_days, get_link_to_form, strip_html
 from frappe import _
 from six import string_types
 from frappe.model.utils import get_fetch_values
@@ -443,25 +443,19 @@ class SalesOrder(SellingController):
 		for item in self.items:
 			if item.ensure_delivery_based_on_produced_serial_no:
 				if item.item_code in normal_items:
-					frappe.throw(_("Cannot ensure delivery by Serial No as \
-					Item {0} is added with and without Ensure Delivery by \
-					Serial No.").format(item.item_code))
+					frappe.throw(_("Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No.").format(item.item_code))
 				if item.item_code not in reserved_items:
 					if not frappe.get_cached_value("Item", item.item_code, "has_serial_no"):
-						frappe.throw(_("Item {0} has no Serial No. Only serilialized items \
-						can have delivery based on Serial No").format(item.item_code))
+						frappe.throw(_("Item {0} has no Serial No. Only serilialized items can have delivery based on Serial No").format(item.item_code))
 					if not frappe.db.exists("BOM", {"item": item.item_code, "is_active": 1}):
-						frappe.throw(_("No active BOM found for item {0}. Delivery by \
-						Serial No cannot be ensured").format(item.item_code))
+						frappe.throw(_("No active BOM found for item {0}. Delivery by Serial No cannot be ensured").format(item.item_code))
 				reserved_items.append(item.item_code)
 			else:
 				normal_items.append(item.item_code)
 
 			if not item.ensure_delivery_based_on_produced_serial_no and \
 				item.item_code in reserved_items:
-				frappe.throw(_("Cannot ensure delivery by Serial No as \
-				Item {0} is added with and without Ensure Delivery by \
-				Serial No.").format(item.item_code))
+				frappe.throw(_("Cannot ensure delivery by Serial No as Item {0} is added with and without Ensure Delivery by Serial No.").format(item.item_code))
 
 def get_list_context(context=None):
 	from erpnext.controllers.website_list_for_contact import get_list_context
@@ -785,7 +779,9 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order(source_name, for_supplier=None, selected_items=[], target_doc=None):
+def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
+	if not selected_items: return
+
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
@@ -822,24 +818,21 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 
 	def update_item(source, target, source_parent):
 		target.schedule_date = source.delivery_date
-		target.qty = flt(source.qty) - flt(source.ordered_qty)
-		target.stock_qty = (flt(source.qty) - flt(source.ordered_qty)) * flt(source.conversion_factor)
+		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
+		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
 		target.project = source_parent.project
 
-	suppliers =[]
-	if for_supplier:
-		suppliers.append(for_supplier)
-	else:
-		sales_order = frappe.get_doc("Sales Order", source_name)
-		for item in sales_order.items:
-			if item.supplier and item.supplier not in suppliers:
-				suppliers.append(item.supplier)
+	suppliers = [item.get('supplier') for item in selected_items if item.get('supplier') and item.get('supplier')]
+	suppliers = list(set(suppliers))
+
+	items_to_map = [item.get('item_code') for item in selected_items if item.get('item_code') and item.get('item_code')]
+	items_to_map = list(set(items_to_map))
 
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
 	for supplier in suppliers:
-		po =frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
+		po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
 		if len(po) == 0:
 			doc = get_mapped_doc("Sales Order", source_name, {
 				"Sales Order": {
@@ -850,7 +843,9 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 						"contact_mobile",
 						"contact_email",
 						"contact_person",
-						"taxes_and_charges"
+						"taxes_and_charges",
+						"shipping_address",
+						"terms"
 					],
 					"validation": {
 						"docstatus": ["=", 1]
@@ -869,55 +864,94 @@ def make_purchase_order(source_name, for_supplier=None, selected_items=[], targe
 					"field_no_map": [
 						"rate",
 						"price_list_rate",
-						"item_tax_template"
+						"item_tax_template",
+						"discount_percentage",
+						"discount_amount",
+						"pricing_rules"
 					],
 					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.qty and doc.supplier == supplier and doc.item_code in selected_items
+					"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in items_to_map
 				}
 			}, target_doc, set_missing_values)
-			if not for_supplier:
-				doc.insert()
+
+			doc.insert()
 		else:
 			suppliers =[]
 	if suppliers:
-		if not for_supplier:
-			frappe.db.commit()
+		frappe.db.commit()
 		return doc
 	else:
-		frappe.msgprint(_("PO already created for all sales order items"))
-
+		frappe.msgprint(_("Purchase Order already created for all Sales Order items"))
 
 @frappe.whitelist()
-@frappe.validate_and_sanitize_search_inputs
-def get_supplier(doctype, txt, searchfield, start, page_len, filters):
-	supp_master_name = frappe.defaults.get_user_default("supp_master_name")
-	if supp_master_name == "Supplier Name":
-		fields = ["name", "supplier_group"]
-	else:
-		fields = ["name", "supplier_name", "supplier_group"]
-	fields = ", ".join(fields)
+def make_purchase_order(source_name, selected_items=None, target_doc=None):
+	if not selected_items: return
 
-	return frappe.db.sql("""select {field} from `tabSupplier`
-		where docstatus < 2
-			and ({key} like %(txt)s
-				or supplier_name like %(txt)s)
-			and name in (select supplier from `tabSales Order Item` where parent = %(parent)s)
-			and name not in (select supplier from `tabPurchase Order` po inner join `tabPurchase Order Item` poi
-			     on po.name=poi.parent where po.docstatus<2 and poi.sales_order=%(parent)s)
-		order by
-			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
-			if(locate(%(_txt)s, supplier_name), locate(%(_txt)s, supplier_name), 99999),
-			name, supplier_name
-		limit %(start)s, %(page_len)s """.format(**{
-			'field': fields,
-			'key': frappe.db.escape(searchfield)
-		}), {
-			'txt': "%%%s%%" % txt,
-			'_txt': txt.replace("%", ""),
-			'start': start,
-			'page_len': page_len,
-			'parent': filters.get('parent')
-		})
+	if isinstance(selected_items, string_types):
+		selected_items = json.loads(selected_items)
+
+	items_to_map = [item.get('item_code') for item in selected_items if item.get('item_code') and item.get('item_code')]
+	items_to_map = list(set(items_to_map))
+
+	def set_missing_values(source, target):
+		target.supplier = ""
+		target.apply_discount_on = ""
+		target.additional_discount_percentage = 0.0
+		target.discount_amount = 0.0
+		target.inter_company_order_reference = ""
+		target.customer = ""
+		target.customer_name = ""
+		target.run_method("set_missing_values")
+		target.run_method("calculate_taxes_and_totals")
+
+	def update_item(source, target, source_parent):
+		target.schedule_date = source.delivery_date
+		target.qty = flt(source.qty) - (flt(source.ordered_qty) / flt(source.conversion_factor))
+		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
+		target.project = source_parent.project
+
+	# po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
+	doc = get_mapped_doc("Sales Order", source_name, {
+		"Sales Order": {
+			"doctype": "Purchase Order",
+			"field_no_map": [
+				"address_display",
+				"contact_display",
+				"contact_mobile",
+				"contact_email",
+				"contact_person",
+				"taxes_and_charges",
+				"shipping_address",
+				"terms"
+			],
+			"validation": {
+				"docstatus": ["=", 1]
+			}
+		},
+		"Sales Order Item": {
+			"doctype": "Purchase Order Item",
+			"field_map":  [
+				["name", "sales_order_item"],
+				["parent", "sales_order"],
+				["stock_uom", "stock_uom"],
+				["uom", "uom"],
+				["conversion_factor", "conversion_factor"],
+				["delivery_date", "schedule_date"]
+			],
+			"field_no_map": [
+				"rate",
+				"price_list_rate",
+				"item_tax_template",
+				"discount_percentage",
+				"discount_amount",
+				"supplier",
+				"pricing_rules"
+			],
+			"postprocess": update_item,
+			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map
+		}
+	}, target_doc, set_missing_values)
+	return doc
 
 @frappe.whitelist()
 def make_work_orders(items, sales_order, company, project=None):
@@ -994,15 +1028,20 @@ def make_raw_material_request(items, company, sales_order, project=None):
 	))
 	for item in raw_materials:
 		item_doc = frappe.get_cached_doc('Item', item.get('item_code'))
+
 		schedule_date = add_days(nowdate(), cint(item_doc.lead_time_days))
-		material_request.append('items', {
-		'item_code': item.get('item_code'),
-		'qty': item.get('quantity'),
-		'schedule_date': schedule_date,
-		'warehouse': item.get('warehouse'),
-		'sales_order': sales_order,
-		'project': project
+		row = material_request.append('items', {
+			'item_code': item.get('item_code'),
+			'qty': item.get('quantity'),
+			'schedule_date': schedule_date,
+			'warehouse': item.get('warehouse'),
+			'sales_order': sales_order,
+			'project': project
 		})
+
+		if not (strip_html(item.get("description")) and strip_html(item_doc.description)):
+			row.description = item_doc.item_name or item.get('item_code')
+
 	material_request.insert()
 	material_request.flags.ignore_permissions = 1
 	material_request.run_method("set_missing_values")

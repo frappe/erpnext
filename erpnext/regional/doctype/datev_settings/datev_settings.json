@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "client",
+  "account_number_length",
   "column_break_2",
   "client_number",
   "section_break_4",
@@ -57,9 +58,16 @@
   {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "4",
+   "fieldname": "account_number_length",
+   "fieldtype": "Int",
+   "label": "Account Number Length",
+   "reqd": 1
   }
  ],
- "modified": "2020-04-15 12:59:57.786506",
+ "modified": "2020-10-03 16:52:35.903867",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "DATEV Settings",
