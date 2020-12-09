@@ -37,16 +37,24 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 						source_doctype: "Material Request",
 						target: me.frm,
 						setters: {
-							company: me.frm.doc.company
+							schedule_date: undefined,
+							status: undefined
 						},
 						get_query_filters: {
 							material_request_type: "Purchase",
 							docstatus: 1,
 							status: ["!=", "Stopped"],
-							per_ordered: ["<", 99.99]
+							per_ordered: ["<", 99.99],
+							company: me.frm.doc.company
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
+
+			// Link Material Requests
+			this.frm.add_custom_button(__('Link to Material Requests'),
+				function() {
+					erpnext.buying.link_to_mrs(me.frm);
+				}, __("Tools"));
 
 			this.frm.add_custom_button(__("Request for Quotation"),
 			function() {
@@ -58,16 +66,16 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 					source_doctype: "Request for Quotation",
 					target: me.frm,
 					setters: {
-						company: me.frm.doc.company,
 						transaction_date: null
 					},
 					get_query_filters: {
-						supplier: me.frm.doc.supplier
+						supplier: me.frm.doc.supplier,
+						company: me.frm.doc.company
 					},
 					get_query_method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_rfq_containing_supplier"
 
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 		}
 	},
 
