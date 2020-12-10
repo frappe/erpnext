@@ -149,26 +149,28 @@ def create_sales_invoice(shopify_order, shopify_settings, so, old_order_sync=Fal
 		si.shopify_order_number = shopify_order.get("name")
 		si.set_posting_time = 1
 		si.posting_date = posting_date
+		si.due_date = posting_date
 		si.naming_series = shopify_settings.sales_invoice_series or "SI-Shopify-"
 		si.flags.ignore_mandatory = True
 		set_cost_center(si.items, shopify_settings.cost_center)
 		si.insert(ignore_mandatory=True)
 		si.submit()
-		make_payament_entry_against_sales_invoice(si, shopify_settings)
+		make_payament_entry_against_sales_invoice(si, shopify_settings, posting_date)
 		frappe.db.commit()
 
 def set_cost_center(items, cost_center):
 	for item in items:
 		item.cost_center = cost_center
 
-def make_payament_entry_against_sales_invoice(doc, shopify_settings):
+def make_payament_entry_against_sales_invoice(doc, shopify_settings, posting_date=None):
 	from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
-	payemnt_entry = get_payment_entry(doc.doctype, doc.name, bank_account=shopify_settings.cash_bank_account)
-	payemnt_entry.flags.ignore_mandatory = True
-	payemnt_entry.reference_no = doc.name
-	payemnt_entry.reference_date = nowdate()
-	payemnt_entry.insert(ignore_permissions=True)
-	payemnt_entry.submit()
+	payment_entry = get_payment_entry(doc.doctype, doc.name, bank_account=shopify_settings.cash_bank_account)
+	payment_entry.flags.ignore_mandatory = True
+	payment_entry.reference_no = doc.name
+	payment_entry.posting_date = posting_date or nowdate()
+	payment_entry.reference_date = posting_date or nowdate()
+	payment_entry.insert(ignore_permissions=True)
+	payment_entry.submit()
 
 def create_delivery_note(shopify_order, shopify_settings, so):
 	if not cint(shopify_settings.sync_delivery_note):
