@@ -529,7 +529,7 @@ class WorkOrder(Document):
 					and (entry.purpose = "Material Consumption for Manufacture"
 					or entry.purpose = "Manufacture")
 					and entry.docstatus = 1
-					and detail.parent = entry.name
+					and detail.parent = entry.name and IFNULL(t_warehouse, "") = ""
 					and (detail.item_code = %(item)s or detail.original_item = %(item)s)''', {
 						'name': self.name,
 						'item': d.item_code
