@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 import frappe
 import unittest
+from six import string_types
 from frappe.utils import getdate, nowdate, add_days
 
 from erpnext.projects.doctype.task.task import CircularReferenceError
@@ -97,7 +98,40 @@ class TestTask(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
 
+	def test_task_depends_on(self):
+		task_1 = create_task("_Test Main Task 1")
+		task_2 = create_task("_Test Main Task 2")
+		task_3 = create_task("_Test Main Task 3")
+		dependent = create_task("_Test Dependent Task", depends_on=[task_1.name, task_2.name])
+
+		self.assertEqual(dependent.depends_on_tasks, "{0},{1}".format(task_1.name, task_2.name))
+
+		# Add another task
+		dependent.append("depends_on", {
+			"task": task_3.name
+		})
+		dependent.save()
+		self.assertEqual(dependent.depends_on_tasks, "{0},{1},{2}".format(task_1.name, task_2.name, task_3.name))
+
+		# test remove doc
+		frappe.delete_doc("Task Depends On", dependent.depends_on[2].name)
+		dependent.load_from_db()
+		
+		# This will run validate
+		dependent.save()
+
+		self.assertEqual(dependent.depends_on_tasks, "{0},{1}".format(task_1.name, task_2.name))
+
+
 def create_task(subject, start=None, end=None, depends_on=None, project=None, save=True):
+	project = project or "_Test Project"
+	
+	if not frappe.db.exists("Project", project):
+		project_doc = frappe.new_doc("Project")
+		project_doc.project_name = project
+		project_doc.status = "Open"
+		project_doc.save()
+
 	if not frappe.db.exists("Task", subject):
 		task = frappe.new_doc('Task')
 		task.status = "Open"
@@ -110,11 +144,18 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None, sa
 	else:
 		task = frappe.get_doc("Task", subject)
 
-	if depends_on:
+	if not depends_on:
+		return task
+	
+	if isinstance(depends_on, string_types):
+		depends_on = [depends_on]
+
+	for task_name in depends_on:
 		task.append("depends_on", {
-			"task": depends_on
+			"task": task_name
 		})
-		if save:
-			task.save()
+
+	if save:
+		task.save()
 
 	return task
