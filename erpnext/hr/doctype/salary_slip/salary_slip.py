@@ -953,6 +953,7 @@ class SalarySlip(TransactionBase):
 		self.pull_emp_details()
 		self.get_leave_details(for_preview=for_preview)
 		self.calculate_net_pay()
+		self.get_pending_advances()
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
@@ -963,6 +964,22 @@ class SalarySlip(TransactionBase):
 	def process_salary_based_on_leave(self, lwp=0):
 		self.get_leave_details(lwp=lwp)
 		self.calculate_net_pay()
+
+	def get_pending_advances(self):
+		pending_advances = frappe.db.sql("""
+			select name as employee_advance, paid_amount as total_advance, balance_amount
+			from `tabEmployee Advance`
+			where docstatus=1 and employee=%s and posting_date and posting_date BETWEEN %s AND %s  and  balance_amount > 0
+			order by posting_date
+		""", [self.employee, self.start_date, self.end_date], as_dict=1)
+
+		self.advances
+		for data in pending_advances:
+			self.append('advances', {
+				'employee_advance': data.employee_advance,
+				'total_advance': data.total_advance,
+				'balance_amount': data.balance_amount
+			})
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`

@@ -51,11 +51,14 @@
   "total_deduction",
   "loan_repayment",
   "loans",
+  "advances_section",
+  "advances",
   "section_break_43",
   "total_principal_amount",
   "total_interest_amount",
   "column_break_45",
   "total_loan_repayment",
+  "total_advance_amount",
   "net_pay_info",
   "net_pay",
   "column_break_53",
@@ -368,7 +371,7 @@
    "depends_on": "total_loan_repayment",
    "fieldname": "loan_repayment",
    "fieldtype": "Section Break",
-   "label": "Loan repayment"
+   "label": "Loan Repayment"
   },
   {
    "fieldname": "loans",
@@ -413,7 +416,7 @@
   {
    "fieldname": "net_pay_info",
    "fieldtype": "Section Break",
-   "label": "net pay info"
+   "label": "Net Pay Info"
   },
   {
    "description": "Gross Pay - Total Deduction - Loan Repayment",
@@ -463,6 +466,26 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "total_advance_amount",
+   "fieldtype": "Currency",
+   "label": "Total Advance Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "advances_section",
+   "fieldtype": "Section Break",
+   "label": "Total Advance Adjustment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "advances",
+   "fieldtype": "Table",
+   "label": "Employee Advance",
+   "options": "Salary Slip Employee Advance"
+  },
+  {
    "fetch_from": "employee.tax_id",
    "fieldname": "tax_id",
    "fieldtype": "Data",
@@ -480,7 +503,7 @@
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2020-12-07 18:22:36.139457",
+ "modified": "2020-12-10 14:34:35.375186",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Salary Slip",
