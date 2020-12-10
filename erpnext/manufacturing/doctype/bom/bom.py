@@ -76,6 +76,7 @@ class BOM(WebsiteGenerator):
 		self.set_routing_operations()
 		self.validate_operations()
 		self.calculate_cost()
+		self.update_stock_qty()
 		self.update_cost(update_parent=False, from_child_bom=True, save=False)
 
 	def get_context(self, context):
@@ -84,8 +85,6 @@ class BOM(WebsiteGenerator):
 	def on_update(self):
 		frappe.cache().hdel('bom_children', self.name)
 		self.check_recursion()
-		self.update_stock_qty()
-		self.update_exploded_items()
 
 	def on_submit(self):
 		self.manage_default_bom()
@@ -170,8 +169,8 @@ class BOM(WebsiteGenerator):
 			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
 			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
 			 'base_rate'	: flt(rate) * (flt(self.conversion_rate) or 1),
-			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture']) or 0,
-			 'sourced_by_supplier'		: args['sourced_by_supplier'] or 0
+			 'include_item_in_manufacturing': cint(args.get('transfer_for_manufacture')),
+			 'sourced_by_supplier'		: args.get('sourced_by_supplier', 0)
 		}
 
 		return ret_item
@@ -237,7 +236,8 @@ class BOM(WebsiteGenerator):
 			self.calculate_cost()
 		if save:
 			self.db_update()
-		self.update_exploded_items()
+
+		self.update_exploded_items(save=save)
 
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
@@ -318,8 +318,6 @@ class BOM(WebsiteGenerator):
 				m.uom = m.stock_uom
 				m.qty = m.stock_qty
 
-			m.db_update()
-
 	def validate_uom_is_interger(self):
 		from erpnext.utilities.transaction_base import validate_uom_is_integer
 		validate_uom_is_integer(self, "uom", "qty", "BOM Item")
@@ -371,15 +369,6 @@ class BOM(WebsiteGenerator):
 
 		if raise_exception:
 			frappe.throw(_("BOM recursion: {0} cannot be parent or child of {1}").format(self.name, self.name))
-
-	def update_cost_and_exploded_items(self, bom_list=[]):
-		bom_list = self.traverse_tree(bom_list)
-		for bom in bom_list:
-			bom_obj = frappe.get_doc("BOM", bom)
-			bom_obj.check_recursion(bom_list=bom_list)
-			bom_obj.update_exploded_items()
-
-		return bom_list
 
 	def traverse_tree(self, bom_list=None):
 		def _get_children(bom_no):
@@ -472,10 +461,10 @@ class BOM(WebsiteGenerator):
 			d.rate = rate
 			d.amount = (d.stock_qty or d.qty) * rate
 
-	def update_exploded_items(self):
+	def update_exploded_items(self, save=True):
 		""" Update Flat BOM, following will be correct data"""
 		self.get_exploded_items()
-		self.add_exploded_items()
+		self.add_exploded_items(save=save)
 
 	def get_exploded_items(self):
 		""" Get all raw materials including items from child bom"""
@@ -544,10 +533,12 @@ class BOM(WebsiteGenerator):
 				'sourced_by_supplier': d.get('sourced_by_supplier', 0)
 			}))
 
-	def add_exploded_items(self):
+	def add_exploded_items(self, save=True):
 		"Add items to Flat BOM table"
-		frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
 		self.set('exploded_items', [])
+
+		if save:
+			frappe.db.sql("""delete from `tabBOM Explosion Item` where parent=%s""", self.name)
 
 		for d in sorted(self.cur_exploded_items, key=itemgetter(0)):
 			ch = self.append('exploded_items', {})
@@ -556,7 +547,9 @@ class BOM(WebsiteGenerator):
 			ch.amount = flt(ch.stock_qty) * flt(ch.rate)
 			ch.qty_consumed_per_unit = flt(ch.stock_qty) / flt(self.quantity)
 			ch.docstatus = self.docstatus
-			ch.db_insert()
+
+			if save:
+				ch.db_insert()
 
 	def validate_bom_links(self):
 		if not self.is_active:

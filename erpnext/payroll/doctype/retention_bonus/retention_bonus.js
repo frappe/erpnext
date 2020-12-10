@@ -18,5 +18,22 @@ frappe.ui.form.on('Retention Bonus', {
 				}
 			};
 		});
+	},
+
+	employee: function(frm) {
+		if (frm.doc.employee) {
+			frappe.call({
+				method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+				args: {
+					employee: frm.doc.employee,
+				},
+				callback: function(r) {
+					if (r.message) {
+						frm.set_value('currency', r.message);
+						frm.refresh_fields();
+					}
+				}
+			});
+		}
 	}
 });
