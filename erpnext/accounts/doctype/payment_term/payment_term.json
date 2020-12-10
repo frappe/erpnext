@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "payment_term_name",
+  "payment_amount_type",
   "invoice_portion",
   "mode_of_payment",
   "column_break_3",
@@ -46,11 +47,11 @@
    "fieldname": "due_date_based_on",
    "fieldtype": "Select",
    "label": "Due Date Based On",
-   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+   "options": "Day(s) after invoice date\nDay(s) before delivery date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
   },
   {
    "bold": 1,
-   "depends_on": "eval:in_list(['Day(s) after invoice date', 'Day(s) after the end of the invoice month'], doc.due_date_based_on)",
+   "depends_on": "eval:in_list(['Day(s) after invoice date', 'Day(s) after the end of the invoice month', 'Day(s) before delivery date'], doc.due_date_based_on)",
    "fieldname": "credit_days",
    "fieldtype": "Int",
    "label": "Credit Days"
@@ -70,9 +71,18 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "default": "Percentage",
+   "fieldname": "payment_amount_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Payment Amount Type",
+   "options": "Percentage\nAmount\nRemaining Amount",
+   "reqd": 1
   }
  ],
- "modified": "2020-03-03 15:42:14.354752",
+ "modified": "2020-12-08 00:52:48.217040",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Term",

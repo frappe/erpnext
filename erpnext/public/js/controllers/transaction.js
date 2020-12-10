@@ -2214,6 +2214,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: {
 					terms_template: doc.payment_terms_template,
 					posting_date: posting_date,
+					delivery_date: doc.delivery_date,
 					grand_total: doc.rounded_total || doc.grand_total,
 					bill_date: doc.bill_date
 				},

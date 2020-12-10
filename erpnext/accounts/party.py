@@ -76,6 +76,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	party_details.tax_id = billing_party_doc.get('tax_id')
 	party_details.tax_cnic = billing_party_doc.get('tax_cnic')
 	party_details.tax_strn = billing_party_doc.get('tax_strn')
+	party_details.tax_status = billing_party_doc.get('tax_status')
 	party_details["taxes_and_charges"] = set_taxes(billing_party_doc.name, party_type, posting_date, company,
 		customer_group=billing_party_doc.get('customer_group'), supplier_group=billing_party_doc.get('supplier_group'),
 		tax_category=billing_party_doc.get('tax_category'),

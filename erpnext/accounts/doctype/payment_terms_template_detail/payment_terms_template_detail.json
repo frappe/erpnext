@@ -6,7 +6,9 @@
  "field_order": [
   "payment_term",
   "description",
+  "payment_amount_type",
   "invoice_portion",
+  "payment_amount",
   "due_date_based_on",
   "credit_days",
   "credit_months",
@@ -25,7 +27,6 @@
    "columns": 2,
    "fieldname": "description",
    "fieldtype": "Small Text",
-   "in_list_view": 1,
    "label": "Description"
   },
   {
@@ -43,7 +44,7 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Due Date Based On",
-   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month",
+   "options": "Day(s) after invoice date\nDay(s) before delivery date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month",
    "reqd": 1
   },
   {
@@ -67,10 +68,23 @@
    "fieldtype": "Link",
    "label": "Mode of Payment",
    "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "payment_amount_type",
+   "fieldtype": "Select",
+   "label": "Payment Amount Type",
+   "options": "Percentage\nAmount\nRemaining Amount"
+  },
+  {
+   "depends_on": "eval:doc.payment_amount_type == \"Amount\"",
+   "fieldname": "payment_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Payment Amount"
   }
  ],
  "istable": 1,
- "modified": "2020-03-03 15:41:15.785721",
+ "modified": "2020-12-08 01:22:27.695448",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template Detail",

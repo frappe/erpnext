@@ -17,12 +17,25 @@ class PaymentTermsTemplate(Document):
 		self.check_duplicate_terms()
 
 	def validate_invoice_portion(self):
-		total_portion = 0
-		for term in self.terms:
-			total_portion += flt(term.get('invoice_portion', 0))
+		payment_amount_types = list(set([d.payment_amount_type for d in self.terms]))
 
-		if flt(total_portion, 2) != 100.00:
-			frappe.msgprint(_('Combined invoice portion must equal 100%'), raise_exception=1, indicator='red')
+		if len(payment_amount_types) == 1 and payment_amount_types[0] == "Percentage":
+			total_portion = 0
+			for term in self.terms:
+				total_portion += flt(term.get('invoice_portion', 0))
+
+			if flt(total_portion, 2) != 100.00:
+				frappe.msgprint(_('Combined invoice portion must equal 100%'), raise_exception=1, indicator='red')
+
+		if 'Amount' in payment_amount_types:
+			if 'Percentage' in payment_amount_types:
+				frappe.throw(_("Payment Amount Type 'Percentage' cannot be selected if 'Amount' is selected"))
+
+			for i, term in enumerate(self.terms):
+				last_row = i == len(self.terms) - 1
+				if term.payment_amount_type == "Remaining Amount" and not last_row:
+					frappe.throw(_("Row {0}: Payment Amount Type 'Remaining Amount' can only be set for the last row"))
+
 
 	def validate_credit_days(self):
 		for term in self.terms:

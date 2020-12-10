@@ -75,7 +75,8 @@ data = {
 		{"doctype": "Item", "fieldname": "is_vehicle", "property": "in_standard_filter", "value": 1},
 		{"doctype": "Customer", "fieldname": "is_insurance_company", "property": "in_standard_filter", "value": 1},
 		{"doctype": "Sales Invoice", "fieldname": "bill_to", "property": "hidden", "value": 0},
-		{"doctype": "Delivery Note", "fieldname": "received_by_type", "property": "default", "value": "Employee"}
+		{"doctype": "Delivery Note", "fieldname": "received_by_type", "property": "default", "value": "Employee"},
+		{"doctype": "Payment Terms Template", "fieldname": "include_in_vehicle_booking", "property": "hidden", "value": 0},
 	],
 	'custom_fields': {
 		"Sales Invoice": applies_to_fields + service_person_fields,

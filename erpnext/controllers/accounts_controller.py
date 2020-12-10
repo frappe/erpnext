@@ -72,14 +72,14 @@ class AccountsController(TransactionBase):
 
 	def ensure_supplier_is_not_blocked(self):
 		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
-		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order']
+		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order']
 		supplier = None
 		supplier_name = None
 
 		if is_buying_invoice or is_supplier_payment:
 			supplier_name = self.supplier if is_buying_invoice else self.party
 			supplier = frappe.get_doc('Supplier', supplier_name)
-		elif self.doctype in ['Purchase Invoice', 'Purchase Order']:
+		elif self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order']:
 			supplier_name = self.supplier
 			is_buying_invoice = True
 		elif self.doctype == 'Landed Cost Voucher' and self.party_type == 'Supplier':
@@ -277,11 +277,11 @@ class AccountsController(TransactionBase):
 		if self.get('is_pos'): return
 
 		from erpnext.accounts.party import validate_due_date
-		if self.doctype == "Sales Invoice":
+		if self.doctype in ("Sales Invoice", "Vehicle Booking Order"):
 			if not self.due_date:
 				frappe.throw(_("Due Date is mandatory"))
 
-			validate_due_date(self.posting_date, self.due_date,
+			validate_due_date(self.get('posting_date') or self.get('transaction_date'), self.due_date,
 				"Customer", self.customer, self.company, self.payment_terms_template)
 		elif self.doctype == "Purchase Invoice":
 			validate_due_date(self.bill_date or self.posting_date, self.due_date,
@@ -1130,25 +1130,36 @@ class AccountsController(TransactionBase):
 		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
 		date = self.get("due_date")
 		due_date = date or posting_date
-		grand_total = self.get("rounded_total") or self.grand_total
+		grand_total = self.get("rounded_total") or self.get('grand_total') or self.get('invoice_total')
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			grand_total = grand_total - flt(self.write_off_amount)
 
 		if self.get("total_advance"):
 			grand_total -= self.get("total_advance")
 
+		remaining_amount = grand_total
+
 		if not self.get("payment_schedule"):
 			if self.get("payment_terms_template"):
-				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total)
+				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total, delivery_date=self.get('delivery_date'))
 				for item in data:
 					self.append("payment_schedule", item)
 			else:
 				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total)
 				self.append("payment_schedule", data)
-		else:
-			for d in self.get("payment_schedule"):
-				if d.invoice_portion:
-					d.payment_amount = flt(grand_total * flt(d.invoice_portion) / 100, d.precision('payment_amount'))
+
+		for d in self.get("payment_schedule"):
+			if d.payment_amount_type == "Remaining Amount":
+				d.payment_amount = flt(remaining_amount, d.precision('payment_amount'))
+			elif d.payment_amount_type == "Amount":
+				d.payment_amount = flt(min(d.payment_amount, grand_total), d.precision('payment_amount'))
+			else:
+				d.payment_amount = flt(grand_total * flt(d.invoice_portion) / 100, d.precision('payment_amount'))
+
+			remaining_amount -= d.payment_amount
+
+			if d.payment_amount_type in ("Amount", "Remaining Amount"):
+				d.invoice_portion = flt(d.payment_amount / grand_total * 100) if grand_total else 0
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
@@ -1162,9 +1173,9 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Sales Invoice' and self.is_pos: return
 
 		for d in self.get("payment_schedule"):
-			if self.doctype == "Sales Order" and getdate(d.due_date) < getdate(self.transaction_date):
-				frappe.throw(_("Row {0}: Due Date in the Payment Terms table cannot be before Posting Date").format(d.idx))
-			elif d.due_date in dates:
+			if self.doctype in ("Sales Order", "Vehicle Booking Order") and getdate(d.due_date) < getdate(self.transaction_date):
+				frappe.throw(_("Row {0}: Due Date in the Payment Terms table cannot be before Transaction Date").format(d.idx))
+			if d.due_date in dates:
 				li.append(_("{0} in row {1}").format(d.due_date, d.idx))
 			dates.append(d.due_date)
 
@@ -1175,19 +1186,22 @@ class AccountsController(TransactionBase):
 	def validate_payment_schedule_amount(self):
 		if self.doctype == 'Sales Invoice' and self.is_pos: return
 
+		rounding_fieldname = "invoice_total" if self.doctype == "Vehicle Booking Order" else "grand_total"
+
 		if self.get("payment_schedule"):
 			total = 0
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
-			total = flt(total, self.precision("grand_total"))
+			total = flt(total, self.precision(rounding_fieldname))
 
-			grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
+			grand_total = flt(self.get("rounded_total") or self.get('grand_total') or self.get('invoice_total'),
+				self.precision(rounding_fieldname))
 			if self.get("total_advance"):
 				grand_total -= self.get("total_advance")
 
 			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 				grand_total = grand_total - flt(self.write_off_amount)
-			if total != flt(grand_total, self.precision("grand_total")):
+			if total != flt(grand_total, self.precision(rounding_fieldname)):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
@@ -1504,34 +1518,50 @@ def update_invoice_status():
 
 
 @frappe.whitelist()
-def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_date=None):
+def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_date=None, delivery_date=None):
 	if not terms_template:
 		return
 
-	terms_doc = frappe.get_doc("Payment Terms Template", terms_template)
+	terms_doc = frappe.get_cached_doc("Payment Terms Template", terms_template)
 
 	schedule = []
+	remaining_amount = flt(grand_total)
 	for d in terms_doc.get("terms"):
-		term_details = get_payment_term_details(d, posting_date, grand_total, bill_date)
+		term_details = get_payment_term_details(d, posting_date, grand_total, bill_date, delivery_date=delivery_date,
+			remaining_amount=remaining_amount)
+
+		remaining_amount -= term_details.payment_amount
 		schedule.append(term_details)
 
 	return schedule
 
 
 @frappe.whitelist()
-def get_payment_term_details(term, posting_date=None, grand_total=None, bill_date=None):
+def get_payment_term_details(term, posting_date=None, grand_total=None, bill_date=None, delivery_date=None,
+		remaining_amount=0):
 	term_details = frappe._dict()
 	if isinstance(term, text_type):
-		term = frappe.get_doc("Payment Term", term)
+		term = frappe.get_cached_doc("Payment Term", term)
 	else:
 		term_details.payment_term = term.payment_term
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
-	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
+
+	term_details.payment_amount_type = term.payment_amount_type or "Percentage"
+	if term_details.payment_amount_type == "Amount":
+		term_details.payment_amount = min(term.payment_amount, flt(grand_total))
+	elif term_details.payment_amount_type == "Remaining Amount":
+		term_details.payment_amount = flt(remaining_amount)
+	else:
+		term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
+
+	if term_details.payment_amount_type in ("Amount", "Remaining Amount"):
+		term_details.invoice_portion = flt(term_details.payment_amount / flt(grand_total) * 100) if grand_total else 0
+
 	if bill_date:
-		term_details.due_date = get_due_date(term, bill_date)
+		term_details.due_date = get_due_date(term, bill_date, delivery_date=delivery_date)
 	elif posting_date:
-		term_details.due_date = get_due_date(term, posting_date)
+		term_details.due_date = get_due_date(term, posting_date, delivery_date=delivery_date)
 
 	if getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date
@@ -1540,15 +1570,18 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, bill_dat
 	return term_details
 
 
-def get_due_date(term, posting_date=None, bill_date=None):
+def get_due_date(term, posting_date=None, bill_date=None, delivery_date=None):
 	due_date = None
 	date = bill_date or posting_date
+	delivery_date = delivery_date or date
 	if term.due_date_based_on == "Day(s) after invoice date":
 		due_date = add_days(date, term.credit_days)
 	elif term.due_date_based_on == "Day(s) after the end of the invoice month":
 		due_date = add_days(get_last_day(date), term.credit_days)
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
 		due_date = add_months(get_last_day(date), term.credit_months)
+	elif term.due_date_based_on == "Day(s) before delivery date":
+		due_date = add_days(delivery_date, term.credit_days * -1)
 	return due_date
 
 

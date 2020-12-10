@@ -1,0 +1,46 @@
+{
+ "creation": "2020-12-06 21:16:08.840232",
+ "description": "Settings for Vehicles Module",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "engine": "InnoDB",
+ "field_order": [
+  "booking_price_list",
+  "company_contact"
+ ],
+ "fields": [
+  {
+   "fieldname": "booking_price_list",
+   "fieldtype": "Link",
+   "label": "Default Booking Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "company_contact",
+   "fieldtype": "Link",
+   "label": "Contact for Booking against Your Company",
+   "options": "Contact"
+  }
+ ],
+ "icon": "fa fa-cog",
+ "issingle": 1,
+ "modified": "2020-12-06 21:24:01.688999",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicles Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
