@@ -638,11 +638,7 @@ class StockEntry(StockController):
 			if any([d.item_code for d in self.items if (d.is_finished_item and d.t_warehouse)]):
 				return
 
-			finished_item = None
-			if self.work_order:
-				finished_item = frappe.db.get_value("Work Order", self.work_order, "production_item")
-			elif self.bom_no:
-				finished_item = frappe.db.get_value("BOM", self.bom_no, "item")
+			finished_item = self.get_finished_item()
 
 			for d in self.items:
 				if d.t_warehouse and not d.s_warehouse:
@@ -653,6 +649,15 @@ class StockEntry(StockController):
 				else:
 					d.is_finished_item = 0
 					d.is_scrap_item = 0
+
+	def get_finished_item(self):
+		finished_item = None
+		if self.work_order:
+			finished_item = frappe.db.get_value("Work Order", self.work_order, "production_item")
+		elif self.bom_no:
+			finished_item = frappe.db.get_value("BOM", self.bom_no, "item")
+
+		return finished_item
 
 	def validate_finished_goods(self):
 		"""validation: finished good quantity should be same as manufacturing quantity"""
@@ -686,14 +691,30 @@ class StockEntry(StockController):
 
 	def update_stock_ledger(self):
 		sl_entries = []
+		finished_item_row = self.get_finished_item_row()
 
+		# make sl entries for source warehouse first
+		self.get_sle_for_source_warehouse(sl_entries, finished_item_row)
+
+		# SLE for target warehouse
+		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
+		
+		# reverse sl entries if cancel
+		if self.docstatus == 2:
+			sl_entries.reverse()
+
+		self.make_sl_entries(sl_entries)
+
+	def get_finished_item_row(self):
 		finished_item_row = None
 		if self.purpose in ("Manufacture", "Repack"):
 			for d in self.get('items'):
 				if d.is_finished_item:
 					finished_item_row = d
 
-		# make sl entries for source warehouse first, then do for target warehouse
+		return finished_item_row
+
+	def get_sle_for_source_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get('items'):
 			if cstr(d.s_warehouse):
 				sle = self.get_sl_entries(d, {
@@ -703,12 +724,12 @@ class StockEntry(StockController):
 				})
 				if cstr(d.t_warehouse):
 					sle.dependant_sle_voucher_detail_no = d.name
-				elif finished_item_row and (finished_item_row.item_code != d.item_code or finished_item_row.warehouse != d.warehouse):
+				elif finished_item_row and (finished_item_row.item_code != d.item_code or finished_item_row.t_warehouse != d.s_warehouse):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
 					
 				sl_entries.append(sle)
-
-
+	
+	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get('items'):
 			if cstr(d.t_warehouse):
 				sle = self.get_sl_entries(d, {
@@ -720,10 +741,6 @@ class StockEntry(StockController):
 					sle.recalculate_rate = 1
 
 				sl_entries.append(sle)
-
-		if self.docstatus == 2:
-			sl_entries.reverse()
-		self.make_sl_entries(sl_entries)
 
 	def get_gl_entries(self, warehouse_account):
 		gl_entries = super(StockEntry, self).get_gl_entries(warehouse_account)

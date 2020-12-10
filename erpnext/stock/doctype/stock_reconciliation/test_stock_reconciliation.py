@@ -86,7 +86,8 @@ class TestStockReconciliation(unittest.TestCase):
 		se1.cancel()
 
 	def test_get_items(self):
-		create_warehouse("_Test Warehouse Group 1", {"is_group": 1, "company": "_Test Company"})
+		create_warehouse("_Test Warehouse Group 1", 
+			{"is_group": 1, "company": "_Test Company", "parent_warehouse": "All Warehouses - _TC"})
 		create_warehouse("_Test Warehouse Ledger 1",
 			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC", "company": "_Test Company"})
 

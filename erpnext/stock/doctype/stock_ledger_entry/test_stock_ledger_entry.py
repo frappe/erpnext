@@ -55,7 +55,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 			posting_date='2020-04-20'
 		)
 
-		# _Test Item for Reposting trasnferred from Stores to FG warehouse on 30-04-2020
+		# _Test Item for Reposting transferred from Stores to FG warehouse on 30-04-2020
 		make_stock_entry(
 			item_code="_Test Item for Reposting",
 			source="Stores - TCP1",
@@ -278,6 +278,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		rm_item_code="_Test Item for Reposting"
 		subcontracted_item = "_Test Subcontracted Item for Reposting"
 
+		frappe.db.set_value("Buying Settings", None, "backflush_raw_materials_of_subcontract_based_on", "BOM")
 		make_bom(item = subcontracted_item, raw_materials =[rm_item_code], currency="INR")
 		
 		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100

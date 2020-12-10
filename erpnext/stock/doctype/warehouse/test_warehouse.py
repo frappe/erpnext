@@ -61,15 +61,16 @@ class TestWarehouse(unittest.TestCase):
 		frappe.rename_doc("Warehouse", "Test Warehouse for Renaming 3 - TCP1", "Test - Warehouse - Company")
 
 	def test_warehouse_merging(self):
-		create_warehouse("Test Warehouse for Merging 1", company="_Test Company with perpetual inventory",
+		company = "_Test Company with perpetual inventory"
+		create_warehouse("Test Warehouse for Merging 1", company=company,
 			properties={"parent_warehouse": "All Warehouses - TCP1"})
-		create_warehouse("Test Warehouse for Merging 2", company="_Test Company with perpetual inventory",
+		create_warehouse("Test Warehouse for Merging 2", company=company,
 			properties={"parent_warehouse": "All Warehouses - TCP1"})
 
 		make_stock_entry(item_code="_Test Item", target="Test Warehouse for Merging 1 - TCP1",
-			qty=1, rate=100)
+			qty=1, rate=100, company=company)
 		make_stock_entry(item_code="_Test Item", target="Test Warehouse for Merging 2 - TCP1",
-			qty=1, rate=100)
+			qty=1, rate=100, company=company)
 
 		existing_bin_qty = (
 			cint(frappe.db.get_value("Bin",
