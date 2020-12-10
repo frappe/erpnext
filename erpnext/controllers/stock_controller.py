@@ -70,7 +70,6 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
-
 		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 		for item_row in voucher_details:
 			sle_list = sle_map.get(item_row.name)
@@ -125,7 +124,7 @@ class StockController(AccountsController):
 		if warehouse_with_no_account:
 			for wh in warehouse_with_no_account:
 				if frappe.db.get_value("Warehouse", wh, "company"):
-					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in  the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
+					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
 
 		return process_gl_map(gl_list)
 
@@ -397,7 +396,8 @@ class StockController(AccountsController):
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
 			"voucher_type": self.doctype,
-			"voucher_no": self.name
+			"voucher_no": self.name,
+			"company": self.company
 		})
 		if check_if_future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
@@ -446,6 +446,8 @@ def create_repost_item_valuation_entry(args):
 	repost_entry.warehouse = args.warehouse
 	repost_entry.posting_date = args.posting_date
 	repost_entry.posting_time = args.posting_time
+	repost_entry.company = args.company
 	repost_entry.allow_zero_rate = args.allow_zero_rate
+	repost_entry.flags.ignore_links = True
 	repost_entry.save()
 	repost_entry.submit()

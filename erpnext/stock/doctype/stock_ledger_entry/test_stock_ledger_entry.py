@@ -138,7 +138,6 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(stock_value_difference, -200)
 
 		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-		# repost_future_sle("Purchase Receipt", pr.name)
 
 		outgoing_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
 			"voucher_no": return_pr.name}, ["outgoing_rate", "stock_value_difference"])
@@ -182,10 +181,6 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		# Landed Cost Voucher to update the rate of incoming Purchase Return: Additional cost = 50
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-
-		# Repost future SLE for Purchase Receipt
-		# repost_future_sle("Purchase Receipt", pr.name)
-
 
 		# check outgoing_rate for DN after reposting
 		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
@@ -251,10 +246,6 @@ class TestStockLedgerEntry(unittest.TestCase):
 		# Landed Cost Voucher to update the rate of incoming Purchase Return: Additional cost = 50
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
-		# Repost future SLE for Purchase Receipt
-		# repost_future_sle("Purchase Receipt", pr.name)
-
-
 		# check outgoing_rate for DN after reposting
 		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
 			"voucher_no": dn.name}, "stock_value_difference") / 20)
@@ -302,10 +293,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		# Update raw material's valuation via LCV, Additional cost = 50
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
-
-		# Repost future SLE for Purchase Receipt
-		# repost_future_sle("Purchase Receipt", pr.name)
-
+		
 		pr1.reload()
 		self.assertEqual(pr1.items[0].valuation_rate, 125)
 

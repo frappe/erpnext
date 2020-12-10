@@ -65,12 +65,13 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 	if not args and voucher_type and voucher_no:
 		sl_entries = frappe.db.get_all("Stock Ledger Entry",
 			filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-			fields=["item_code", "warehouse"],
-			order_by="creation asc")
+			fields=["item_code", "warehouse", "posting_date", "posting_time"],
+			order_by="creation asc",
+			group_by="item_code, warehouse")
 	elif args:
 		sl_entries = args
 	
-	distinct_item_warehouses = list(set([(d.item_code, d.warehouse) for d in sl_entries]))
+	distinct_item_warehouses = [(d.item_code, d.warehouse) for d in sl_entries]
 
 	i = 0
 	while i < len(sl_entries):
@@ -172,7 +173,6 @@ class update_entries_after(object):
 			# includes current entry!
 			args = self.data[self.args.warehouse].previous_sle \
 				or frappe._dict({"item_code": self.item_code, "warehouse": self.args.warehouse})
-
 			entries_to_fix = list(self.get_sle_after_datetime(args))
 
 			i = 0

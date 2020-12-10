@@ -3,21 +3,32 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe.model.document import Document
+from frappe.utils import cint
 from erpnext.stock.stock_ledger import repost_future_sle
 from erpnext.accounts.utils import update_gl_entries_after
 
 class RepostItemValuation(Document):
 	def validate(self):
 		self.set_status()
+		self.reset_field_values()
+		self.set_company()
 
+	def reset_field_values(self):
 		if self.based_on == 'Transaction':
 			self.item_code = None
 			self.warehouse = None
 		else:
 			self.voucher_type = None
 			self.voucher_no = None
+
+	def set_company(self):
+		if not self.company:
+			if self.voucher_type and self.voucher_no:
+				self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
+			elif self.warehouse:
+				self.company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
 	
 	def set_status(self, status=None):
 		if not status:
@@ -56,6 +67,9 @@ def repost_sl_entries(doc):
 		})], allow_negative_stock=doc.allow_negative_stock, via_landed_cost_voucher=doc.via_landed_cost_voucher)
 
 def repost_gl_entries(doc):
+	if not cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
+		return
+
 	if doc.based_on == 'Transaction':
 		ref_doc = frappe.get_doc(doc.voucher_type, doc.voucher_no)
 		items, warehouses = ref_doc.get_items_and_warehouses()

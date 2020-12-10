@@ -261,6 +261,10 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
+		
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+		
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":

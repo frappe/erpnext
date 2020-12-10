@@ -119,6 +119,7 @@ class StockEntry(StockController):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 		self.make_gl_entries_on_cancel()
+		self.repost_future_sle_and_gle()
 		self.update_cost_in_project()
 		self.update_transferred_qty()
 		self.update_quality_inspection()

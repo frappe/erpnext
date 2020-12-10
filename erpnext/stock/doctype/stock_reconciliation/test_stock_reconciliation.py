@@ -12,7 +12,8 @@ from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError, get_items
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.utils import get_stock_balance, get_incoming_rate, get_available_serial_nos, get_stock_value_on
+from erpnext.stock.utils import get_stock_balance, get_incoming_rate, \
+	get_available_serial_nos, get_stock_value_on, get_valuation_method
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class TestStockReconciliation(unittest.TestCase):
@@ -28,10 +29,11 @@ class TestStockReconciliation(unittest.TestCase):
 		self._test_reco_sle_gle("Moving Average")
 
 	def _test_reco_sle_gle(self, valuation_method):
-		insert_existing_sle(warehouse='Stores - TCP1')
+		se1, se2, se3 = insert_existing_sle(warehouse='Stores - TCP1')
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 		# [[qty, valuation_rate, posting_date,
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
+		
 		input_data = [
 			[50, 1000, "2012-12-26", "12:00"],
 			[25, 900, "2012-12-26", "12:00"],
@@ -80,10 +82,14 @@ class TestStockReconciliation(unittest.TestCase):
 
 				stock_reco.cancel()
 
+		se3.cancel()
+		se2.cancel()
+		se1.cancel()
+
 	def test_get_items(self):
-		create_warehouse("_Test Warehouse Group 1", {"is_group": 1})
+		create_warehouse("_Test Warehouse Group 1", {"is_group": 1, "company": "_Test Company"})
 		create_warehouse("_Test Warehouse Ledger 1",
-			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC"})
+			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC", "company": "_Test Company"})
 
 		create_item("_Test Stock Reco Item", is_stock_item=1, valuation_rate=100,
 			warehouse="_Test Warehouse Ledger 1 - _TC", opening_stock=100)
@@ -191,14 +197,16 @@ class TestStockReconciliation(unittest.TestCase):
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
 
-	make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
+	se1 = make_stock_entry(posting_date="2012-12-15", posting_time="02:00", item_code="_Test Item",
 		target=warehouse, qty=10, basic_rate=700)
 
-	make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
+	se2 = make_stock_entry(posting_date="2012-12-25", posting_time="03:00", item_code="_Test Item",
 		source=warehouse, qty=15)
 
-	make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
+	se3 = make_stock_entry(posting_date="2013-01-05", posting_time="07:00", item_code="_Test Item",
 		target=warehouse, qty=15, basic_rate=1200)
+
+	return se1, se2, se3
 
 def create_batch_or_serial_no_items():
 	create_warehouse("_Test Warehouse for Stock Reco1",
@@ -251,6 +259,10 @@ def create_stock_reconciliation(**args):
 	return sr
 
 def set_valuation_method(item_code, valuation_method):
+	existing_valuation_method = get_valuation_method(item_code)
+	if valuation_method == existing_valuation_method:
+		return
+
 	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
 
 	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}, fields=["name", "is_group"]):

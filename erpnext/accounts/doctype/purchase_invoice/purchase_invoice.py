@@ -999,6 +999,10 @@ class PurchaseInvoice(BuyingController):
 			self.delete_auto_created_batches()
 
 		self.make_gl_entries_on_cancel()
+		
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+		
 		self.update_project()
 		frappe.db.set(self, 'status', 'Cancelled')
 

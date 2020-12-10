@@ -162,7 +162,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 			# Always use current date to get stock and account balance as there can future entries for
 			# other items
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
-				getdate(), gl_map[0].company)
+				gl_map[0].posting_date, gl_map[0].company)
 
 			if gl_map[0].voucher_type=="Journal Entry":
 				# In case of Journal Entry, there are no corresponding SL entries,
