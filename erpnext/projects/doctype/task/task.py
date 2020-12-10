@@ -73,11 +73,7 @@ class Task(NestedSet):
 			self.progress = 100
 
 	def update_depends_on(self):
-		depends_on_tasks = self.depends_on_tasks or ""
-		for d in self.depends_on:
-			if d.task and not d.task in depends_on_tasks:
-				depends_on_tasks += d.task + ","
-		self.depends_on_tasks = depends_on_tasks
+		self.depends_on_tasks = ",".join([d.task for d in self.depends_on])
 
 	def update_nsm_model(self):
 		frappe.utils.nestedset.update_nsm(self)
