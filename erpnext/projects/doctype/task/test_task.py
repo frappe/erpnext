@@ -104,11 +104,12 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None, pa
 		task.subject = subject
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
-		task.project = project or "_Test Project"
-		task.is_template = is_template,
+		task.project = project
+		task.is_template = is_template
 		task.start = begin
-		task.duration = duration,
+		task.duration = duration
 		task.is_group = is_group
+		task.parent_task = parent_task
 		if save:
 			task.save()
 	else:
@@ -120,5 +121,4 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None, pa
 		})
 		if save:
 			task.save()
-
 	return task
