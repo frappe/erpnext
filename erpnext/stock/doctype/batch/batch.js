@@ -19,8 +19,8 @@ frappe.ui.form.on('Batch', {
 					'item_code': frm.doc.item,
 					'selling': 1
 				}
-			}
-		})
+			};
+		});
 	},
 	refresh: (frm) => {
 		if(!frm.is_new()) {
