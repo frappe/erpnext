@@ -9,6 +9,7 @@ import unittest
 test_dependencies = ["Customer", "Supplier"]
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import get_temporary_opening_account
+from erpnext.controllers.accounts_controller import AccountMissingError
 
 class TestOpeningInvoiceCreationTool(unittest.TestCase):
 	def setUp(self):
@@ -77,11 +78,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 
 		frappe.db.set_value("Company", company, "cost_center", "Main - _TOIC")
 
-		self.make_invoices(company="_Test Opening Invoice Company", party_1=party_1, party_2=party_2)
-
-		# Check if missing debit account error raised
-		error_log = frappe.db.exists("Error Log", {"error": ["like", "%erpnext.controllers.accounts_controller.AccountMissingError%"]})
-		self.assertTrue(error_log)
+		self.assertRaises(AccountMissingError, self.make_invoices, company="_Test Opening Invoice Company", party_1=party_1, party_2=party_2)
 
 		# teardown
 		frappe.db.set_value("Company", company, "default_receivable_account", old_default_receivable_account)
