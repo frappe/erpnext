@@ -5,6 +5,7 @@ from frappe import _
 
 import pdb
 import requests
+from datetime import datetime 
 
 from frappe.utils.background_jobs import enqueue
 from frappe.desk.doctype.tag.tag import DocTags
@@ -48,6 +49,7 @@ def pre_process_payload(meta_data, billing):
 	patient_name = ""
 	delivery_option = ""
 	invoice_sending_option = ""
+	patient_dob = ""
 	for meta in meta_data:
 		if meta["key"] == "user_practitioner":
 			if "-" in meta["value"]:
@@ -63,6 +65,8 @@ def pre_process_payload(meta_data, billing):
 		# 	nab_reference_id = meta["value"]
 		elif meta["key"] == "pos_patient":
 			patient_name = meta["value"]
+		elif meta["key"] == "patient_dob":
+			patient_dob = meta["value"]
 		elif meta["key"] == "invoice_sending_option":
 			invoice_sending_option = meta["value"]
 		elif meta["key"] == "_pos_order_type":
@@ -80,8 +84,10 @@ def pre_process_payload(meta_data, billing):
 		"temporary_delivery_address_line_5": billing.get('email')
 	}
 
-	
-	return customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address
+	# convert date format 03/07/1985
+	patient_dob = datetime.strptime(patient_dob, "%d/%m/%Y").strftime("%Y-%m-%d")
+
+	return customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address, patient_dob
 
 def validate_customer_code_erpnext(customer_code):
 	if not customer_code :
@@ -141,7 +147,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 	}
 
 	# pre-process to parse payload (parameter: meta_data, billing)
-	customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address = pre_process_payload(order.get('meta_data'), order.get('billing'))
+	customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address, patient_dob = pre_process_payload(order.get('meta_data'), order.get('billing'))
 
 	# Validate customer code, output payment_category and accepts_backorders 
 	payment_category, accepts_backorders = validate_customer_code_erpnext(customer_code)
@@ -157,7 +163,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 			# We don't need to use the backorder flag for test order
 			test_order = 1
 			invoice_sending_option = "send receipt to patient" # this need to be added so that test kit is added for this type of orders
-			new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order)
+			new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, "Pay before Dispatch", woocommerce_settings, order_type= "Patient Order", temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order, patient_dob=patient_dob)
 
 		elif pos_order_type == "patient_product_order":
 			# Cannot handle that for now as we need to check if the patient account exist or not in ERPNext
@@ -176,7 +182,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 				if pos_order_type == "self":
 					new_invoice, customer_accepts_backorder = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, test_order=test_order)
 				else:
-					new_invoice, patient_invoice_doc = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order)
+					new_invoice, patient_invoice_doc = create_sales_invoice(edited_line_items, order, customer_code, payment_category, woocommerce_settings, order_type=order_type, temp_address=temp_address, delivery_option=delivery_option, invoice_sending_option=invoice_sending_option, test_order=test_order, patient_dob=patient_dob)
 					customer_accepts_backorder = 1
 
 			elif pos_order_type == "practitioner_order":
@@ -208,7 +214,7 @@ def _order(woocommerce_settings, *args, **kwargs):
 		frappe.throw(frappe.get_traceback())
 
 
-def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None, invoice_sending_option=None, test_order=0):
+def create_sales_invoice(edited_line_items, order, customer_code, payment_category,  woocommerce_settings, order_type=None, temp_address=None, delivery_option=None, invoice_sending_option=None, test_order=0, patient_dob=""):
 	#Set Basic Info
 	date_created = order.get("date_created").split("T")[0]
 	customer_note = order.get('customer_note')
@@ -225,7 +231,8 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 		"transaction_date":date_created,
 		"po_date":date_created,
 		"company": woocommerce_settings.company,
-		"payment_category": payment_category
+		"payment_category": payment_category,
+		"patient_dob": patient_dob
 	}
 	if order_type:
 		if order_type == "Self Test":
@@ -296,7 +303,7 @@ def create_sales_invoice(edited_line_items, order, customer_code, payment_catego
 			"description": "Handling Fee",
 			"uom": "Unit",
 			"qty": 1,
-			"rate": shipping_total + shipping_tax,
+			"rate": str(float(shipping_total) + float(shipping_tax)),
 			"warehouse": woocommerce_settings.warehouse
 		})
 		add_tax_on_net_total(invoice_doc, "Handling Fee tax", woocommerce_settings.tax_account, rate=10, included_in_print_rate=1)
