@@ -9,8 +9,7 @@ import frappe.model
 from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 from frappe.utils import cint, flt, today, nowdate, add_days, getdate
 import frappe.defaults
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import test_records as pr_test_records, make_purchase_receipt, get_taxes
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt, get_taxes
 from erpnext.controllers.accounts_controller import get_payment_terms
 from erpnext.exceptions import InvalidCurrency
 from erpnext.stock.doctype.stock_entry.test_stock_entry import get_qty_after_transaction

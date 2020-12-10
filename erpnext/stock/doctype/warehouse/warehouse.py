@@ -7,7 +7,6 @@ from frappe.utils import cint, nowdate
 from frappe import throw, _
 from frappe.utils.nestedset import NestedSet
 from erpnext.stock import get_warehouse_account
-from erpnext.stock.utils import get_stock_value_on
 from frappe.contacts.address_and_contact import load_address_and_contact
 
 class Warehouse(NestedSet):

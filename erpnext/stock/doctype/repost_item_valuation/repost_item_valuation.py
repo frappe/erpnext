@@ -39,13 +39,19 @@ class RepostItemValuation(Document):
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=frappe.flags.in_test, doc=self)
 
+	def restart_reposting(self):
+		self.set_status('Queued')
+		frappe.enqueue(repost, timeout=1800, queue='long',
+			job_name='repost_sle', now=True, doc=self)
+
 def repost(doc):
 	try:
 		doc.set_status('In Progress')
+		frappe.db.commit()
+
 		repost_sl_entries(doc)
 		repost_gl_entries(doc)
 		doc.set_status('Completed')
-		frappe.db.commit()
 	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
@@ -53,6 +59,8 @@ def repost(doc):
 		frappe.log_error(traceback)
 		frappe.db.set_value(doc.doctype, doc.name, 'error_log', traceback)
 		doc.set_status('Failed')
+	finally:
+		frappe.db.commit()
 
 def repost_sl_entries(doc):
 	if doc.based_on == 'Transaction':

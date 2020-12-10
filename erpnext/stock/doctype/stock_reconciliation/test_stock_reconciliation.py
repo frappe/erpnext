@@ -12,8 +12,7 @@ from erpnext.stock.stock_ledger import get_previous_sle, update_entries_after
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import EmptyStockReconciliationItemsError, get_items
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
 from erpnext.stock.doctype.item.test_item import create_item
-from erpnext.stock.utils import get_stock_balance, get_incoming_rate, \
-	get_available_serial_nos, get_stock_value_on, get_valuation_method
+from erpnext.stock.utils import get_incoming_rate, get_stock_value_on, get_valuation_method
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class TestStockReconciliation(unittest.TestCase):

@@ -15,7 +15,7 @@ jobs:
   include:
   - name: "Python 3.6 Server Side Test"
     python: 3.6
-    script: bench --verbose --site test_site run-tests --app erpnext --coverage
+    script: bench --site test_site run-tests --app erpnext --coverage
 
   - name: "Python 3.6 Patch Test"
     python: 3.6

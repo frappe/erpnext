@@ -29,5 +29,24 @@ frappe.ui.form.on('Repost Item Valuation', {
 				};
 			});
 		}
+	},
+	refresh: function(frm) {
+		if(frm.doc.status == "Failed") {
+			frm.add_custom_button(__('Restart'), function () {
+				frm.trigger("restart_reposting");
+			}).addClass("btn-primary");
+		}
+	},
+
+	restart_reposting: function(frm) {
+		frappe.call({
+			method: "restart_reposting",
+			doc: frm.doc,
+			callback: function(r) {
+				if(!r.exc) {
+					frm.refresh();
+				}
+			}
+		});
 	}
 });

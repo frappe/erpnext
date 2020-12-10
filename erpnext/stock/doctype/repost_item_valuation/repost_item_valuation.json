@@ -28,7 +28,6 @@
    "depends_on": "eval:doc.based_on=='Item and Warehouse'",
    "fieldname": "item_code",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Item Code",
    "mandatory_depends_on": "eval:doc.based_on=='Item and Warehouse'",
    "options": "Item"
@@ -37,19 +36,19 @@
    "depends_on": "eval:doc.based_on=='Item and Warehouse'",
    "fieldname": "warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Warehouse",
    "mandatory_depends_on": "eval:doc.based_on=='Item and Warehouse'",
    "options": "Warehouse"
   },
   {
+   "fetch_from": "voucher_no.posting_date",
    "fieldname": "posting_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Posting Date",
    "reqd": 1
   },
   {
+   "fetch_from": "voucher_no.posting_time",
    "fieldname": "posting_time",
    "fieldtype": "Time",
    "label": "Posting Time"
@@ -58,6 +57,8 @@
    "default": "Queued",
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "options": "Queued\nIn Progress\nCompleted\nFailed",
@@ -100,6 +101,8 @@
    "depends_on": "eval:doc.based_on=='Transaction'",
    "fieldname": "voucher_type",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Voucher Type",
    "mandatory_depends_on": "eval:doc.based_on=='Transaction'",
    "options": "DocType"
@@ -108,6 +111,8 @@
    "depends_on": "eval:doc.based_on=='Transaction'",
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Voucher No",
    "mandatory_depends_on": "eval:doc.based_on=='Transaction'",
    "options": "voucher_type"
@@ -142,7 +147,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-28 12:32:45.722101",
+ "modified": "2020-12-10 07:52:12.476589",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Repost Item Valuation",
