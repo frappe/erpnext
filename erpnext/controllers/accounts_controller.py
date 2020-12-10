@@ -1191,7 +1191,7 @@ class AccountsController(TransactionBase):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
-		if self.meta.get_field("calculate_tax_on_company_currency") and cint(self.get("calculate_tax_on_company_currency")):
+		if self.meta.get_field("calculate_tax_on_company_currency") and cint(self.get("calculate_tax_on_company_currency")) and self.currency != self.company_currency:
 			return True
 		if self.meta.get_field("disable_rounded_total"):
 			return self.disable_rounded_total

@@ -1511,6 +1511,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.calculate_taxes_and_totals();
 	},
 
+	disable_rounded_total: function () {
+		this.calculate_taxes_and_totals();
+	},
+
 	ignore_pricing_rule: function() {
 		if(this.frm.doc.ignore_pricing_rule) {
 			var me = this;
