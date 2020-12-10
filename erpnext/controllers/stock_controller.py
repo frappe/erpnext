@@ -229,9 +229,9 @@ class StockController(AccountsController):
 
 	def check_expense_account(self, item):
 		if not item.get("expense_account"):
-			frappe.throw(_("Row #{0}: Expense Account not set for Item {1}. Please set an Expense \
-				Account in the Items table").format(item.idx, frappe.bold(item.item_code)),
-				title=_("Expense Account Missing"))
+			msg = _("Please set an Expense Account in the Items table")
+			frappe.throw(_("Row #{0}: Expense Account not set for the Item {1}. {2}")
+				.format(item.idx, frappe.bold(item.item_code), msg), title=_("Expense Account Missing"))
 
 		else:
 			is_expense_account = frappe.db.get_value("Account",
@@ -247,7 +247,9 @@ class StockController(AccountsController):
 		for d in self.items:
 			if not d.batch_no: continue
 
-			serial_nos = [sr.name for sr in frappe.get_all("Serial No", {'batch_no': d.batch_no})]
+			serial_nos = [sr.name for sr in frappe.get_all("Serial No",
+				{'batch_no': d.batch_no, 'status': 'Inactive'})]
+
 			if serial_nos:
 				frappe.db.set_value("Serial No", { 'name': ['in', serial_nos] }, "batch_no", None)
 
@@ -338,11 +340,15 @@ class StockController(AccountsController):
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):
+		target_ref_field = "amount"
+		if self.doctype == "Delivery Note":
+			target_ref_field = "amount - (returned_qty * rate)"
+
 		self._update_percent_field({
 			"target_dt": self.doctype + " Item",
 			"target_parent_dt": self.doctype,
 			"target_parent_field": "per_billed",
-			"target_ref_field": "amount",
+			"target_ref_field": target_ref_field,
 			"target_field": "billed_amt",
 			"name": self.name,
 		}, update_modified)

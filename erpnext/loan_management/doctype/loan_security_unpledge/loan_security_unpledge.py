@@ -42,18 +42,20 @@ class LoanSecurityUnpledge(Document):
 				"valid_upto": (">=", get_datetime())
 			}, as_list=1))
 
-		total_payment, principal_paid, interest_payable = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
-			'total_interest_payable'])
+		total_payment, principal_paid, interest_payable, written_off_amount = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
+			'total_interest_payable', 'written_off_amount'])
 
-		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid)
+		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount)
 		security_value = 0
 
 		for security in self.securities:
 			pledged_qty = pledge_qty_map.get(security.loan_security, 0)
 			if security.qty > pledged_qty:
-				frappe.throw(_("""Row {0}: {1} {2} of {3} is pledged against Loan {4}.
-					You are trying to unpledge more""").format(security.idx, pledged_qty, security.uom,
-					frappe.bold(security.loan_security), frappe.bold(self.loan)))
+				msg = _("Row {0}: {1} {2} of {3} is pledged against Loan {4}.").format(security.idx, pledged_qty, security.uom,
+					frappe.bold(security.loan_security), frappe.bold(self.loan))
+				msg += "<br>"
+				msg += _("You are trying to unpledge more.")
+				frappe.throw(msg, title=_("Loan Security Unpledge Error"))
 
 			qty_after_unpledge = pledged_qty - security.qty
 			ltv_ratio = ltv_ratio_map.get(security.loan_security_type)
@@ -65,10 +67,18 @@ class LoanSecurityUnpledge(Document):
 			security_value += qty_after_unpledge * current_price
 
 		if not security_value and flt(pending_principal_amount, 2) > 0:
-			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
+			self._throw(security_value, pending_principal_amount, ltv_ratio)
 
 		if security_value and flt(pending_principal_amount/security_value) * 100 > ltv_ratio:
-			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
+			self._throw(security_value, pending_principal_amount, ltv_ratio)
+
+	def _throw(self, security_value, pending_principal_amount, ltv_ratio):
+		msg = _("Loan Security Value after unpledge is {0}").format(frappe.bold(security_value))
+		msg += '<br>'
+		msg += _("Pending principal amount is {0}").format(frappe.bold(flt(pending_principal_amount, 2)))
+		msg += '<br>'
+		msg += _("Loan To Security Value ratio must always be {0}").format(frappe.bold(ltv_ratio))
+		frappe.throw(msg, title=_("Loan To Value ratio breach"))
 
 	def on_update_after_submit(self):
 		self.approve()

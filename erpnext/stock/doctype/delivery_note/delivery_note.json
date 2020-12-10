@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:09",
@@ -132,6 +133,7 @@
   "per_installed",
   "installation_status",
   "column_break_89",
+  "per_returned",
   "excise_page",
   "instructions",
   "subscription_section",
@@ -413,7 +415,8 @@
   {
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
-   "label": "Company Address"
+   "label": "Company Address",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -1097,7 +1100,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nTo Bill\nCompleted\nCancelled\nClosed",
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1249,13 +1252,22 @@
    "fieldtype": "Link",
    "label": "Inter Company Reference",
    "options": "Purchase Receipt"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_returned",
+   "fieldtype": "Percent",
+   "label": "% Returned",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-03 23:18:47.739997",
+ "modified": "2020-11-30 12:54:45.407289",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

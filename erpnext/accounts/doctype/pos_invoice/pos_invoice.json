@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2020-01-24 15:29:29.933693",
@@ -1580,7 +1581,7 @@
  "icon": "fa fa-file-text",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-28 16:51:24.641755",
+ "modified": "2020-10-30 13:56:51.056083",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
