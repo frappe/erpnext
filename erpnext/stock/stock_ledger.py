@@ -786,7 +786,7 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=None):
 		or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
 
 	if args.actual_qty < 0 and not allow_negative_stock:
-		sle = self.get_future_sle_with_negative_qty(args)
+		sle = get_future_sle_with_negative_qty(args)
 		if sle:
 			message = _("{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.").format(
 				abs(sle[0]["qty_after_transaction"]),
