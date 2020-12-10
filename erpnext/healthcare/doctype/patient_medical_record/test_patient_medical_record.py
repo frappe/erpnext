@@ -6,11 +6,13 @@ import unittest
 import frappe
 from frappe.utils import nowdate
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_encounter, create_healthcare_docs, create_appointment
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 class TestPatientMedicalRecord(unittest.TestCase):
 	def setUp(self):
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		make_pos_profile()
 
 	def test_medical_record(self):
 		patient, medical_department, practitioner = create_healthcare_docs()

@@ -61,3 +61,11 @@ def create_mode_of_payment(gateway, payment_type="General"):
 			}]
 		})
 		mode_of_payment.insert(ignore_permissions=True)
+
+def get_tracking_url(carrier, tracking_number):
+	# Return the formatted Tracking URL.
+	tracking_url = ''
+	url_reference = frappe.get_value('Parcel Service', carrier, 'url_reference')
+	if url_reference:
+		tracking_url = frappe.render_template(url_reference, {'tracking_number': tracking_number})
+	return tracking_url
