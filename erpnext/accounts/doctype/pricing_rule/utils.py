@@ -457,6 +457,9 @@ def apply_pricing_rule_on_transaction(doc):
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty,
 			doc.total, pricing_rules)
 
+		if not pricing_rules:
+			remove_free_item(doc)
+
 		for d in pricing_rules:
 			if d.price_or_product_discount == 'Price':
 				if d.apply_discount_on:
@@ -480,6 +483,12 @@ def apply_pricing_rule_on_transaction(doc):
 				get_product_discount_rule(d, item_details, doc=doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
+				doc.calculate_taxes_and_totals()
+
+def remove_free_item(doc):
+	for d in doc.items:
+		if d.is_free_item:
+			doc.remove(d)
 
 def get_applied_pricing_rules(pricing_rules):
 	if pricing_rules:
@@ -492,7 +501,7 @@ def get_applied_pricing_rules(pricing_rules):
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	free_item = pricing_rule.free_item
-	if pricing_rule.same_item:
+	if pricing_rule.same_item and pricing_rule.get("apply_on") != 'Transaction':
 		free_item = item_details.item_code or args.item_code
 
 	if not free_item:

@@ -497,6 +497,10 @@ class BuyingController(StockController):
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
 
+				if self.doctype=="Purchase Receipt" and d.meta.get_field("received_stock_qty"):
+					# Set Received Qty in Stock UOM
+					d.received_stock_qty = flt(d.received_qty) * flt(d.conversion_factor, d.precision("conversion_factor"))
+
 	def validate_purchase_return(self):
 		for d in self.get("items"):
 			if self.is_return and flt(d.rejected_qty) != 0:
