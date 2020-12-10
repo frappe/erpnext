@@ -9,30 +9,30 @@
   "naming_series",
   "work_order",
   "bom_no",
-  "workstation",
-  "operation",
-  "operation_row_number",
   "column_break_4",
   "posting_date",
   "company",
-  "remarks",
   "production_section",
   "production_item",
   "item_name",
   "for_quantity",
-  "quality_inspection",
-  "wip_warehouse",
   "column_break_12",
-  "employee",
-  "employee_name",
-  "status",
+  "wip_warehouse",
+  "quality_inspection",
   "project",
+  "operation_section_section",
+  "operation",
+  "operation_row_number",
+  "column_break_18",
+  "workstation",
+  "section_break_21",
+  "sub_operations",
   "timing_detail",
   "time_logs",
   "section_break_13",
   "total_completed_qty",
-  "total_time_in_mins",
   "column_break_15",
+  "total_time_in_mins",
   "section_break_8",
   "items",
   "more_information",
@@ -40,7 +40,9 @@
   "sequence_id",
   "transferred_qty",
   "requested_qty",
+  "status",
   "column_break_20",
+  "remarks",
   "barcode",
   "job_started",
   "started_time",
@@ -118,13 +120,6 @@
    "label": "Timing Detail"
   },
   {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Employee",
-   "options": "Employee"
-  },
-  {
    "allow_bulk_edit": 1,
    "fieldname": "time_logs",
    "fieldtype": "Table",
@@ -133,9 +128,11 @@
   },
   {
    "fieldname": "section_break_13",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_border": 1
   },
   {
+   "default": "0",
    "fieldname": "total_completed_qty",
    "fieldtype": "Float",
    "label": "Total Completed Qty",
@@ -251,12 +248,7 @@
    "reqd": 1
   },
   {
-   "fetch_from": "employee.employee_name",
-   "fieldname": "employee_name",
-   "fieldtype": "Read Only",
-   "label": "Employee Name"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "production_section",
    "fieldtype": "Section Break",
    "label": "Production"
@@ -314,11 +306,33 @@
    "label": "Quality Inspection",
    "no_copy": 1,
    "options": "Quality Inspection"
+  },
+  {
+   "allow_bulk_edit": 1,
+   "fieldname": "sub_operations",
+   "fieldtype": "Table",
+   "label": "Sub Operations",
+   "options": "Job Card Operation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "operation_section_section",
+   "fieldtype": "Section Break",
+   "label": "Operation Section"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-19 18:26:50.531664",
+ "modified": "2020-12-14 15:14:05.566271",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

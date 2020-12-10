@@ -1430,6 +1430,38 @@ class StockEntry(StockController):
 				material_requests.append(material_request)
 				frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
 
+	def set_serial_no_batch_for_finished_good(self):
+		args = {}
+		if self.pro_doc.serial_no or self.pro_doc.batch_no:
+			self.get_serial_nos_for_fg(args)
+
+		for row in self.items:
+			if not row.s_warehouse and row.t_warehouse and row.item_code == self.pro_doc.production_item:
+				row.batch_no = self.pro_doc.batch_no
+				if args.get("serial_no"):
+					print(args.get("serial_no"))
+					row.serial_no = '\n'.join(args["serial_no"][0: cint(row.qty)])
+
+	def get_serial_nos_for_fg(self, args):
+		fields = ["`tabStock Entry`.`name`", "`tabStock Entry Detail`.`qty`",
+			"`tabStock Entry Detail`.`serial_no`", "`tabStock Entry Detail`.`batch_no`"]
+
+		filters = [["Stock Entry","work_order","=",self.work_order], ["Stock Entry","purpose","=","Manufacture"],
+			["Stock Entry","docstatus","=",1], ["Stock Entry Detail","item_code","=",self.pro_doc.production_item]]
+
+		stock_entries = frappe.get_all("Stock Entry", fields=fields, filters=filters)
+
+		if self.pro_doc.serial_no:
+			args["serial_no"] = self.get_available_serial_nos(stock_entries)
+
+	def get_available_serial_nos(self, stock_entries):
+		used_serial_nos = []
+		for row in stock_entries:
+			if row.serial_no:
+				used_serial_nos.extend(get_serial_nos(row.serial_no))
+
+		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
+
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
 	if isinstance(items, string_types):
