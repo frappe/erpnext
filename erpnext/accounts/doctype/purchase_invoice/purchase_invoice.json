@@ -1328,13 +1328,30 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Unrealized Profit / Loss account for intra-company transfers",
+   "fieldname": "unrealized_profit_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealized Profit / Loss Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Company which internal supplier represents",
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-03 12:46:01.411074",
+ "modified": "2020-12-11 12:46:12.796378",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

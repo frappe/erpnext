@@ -1941,13 +1941,38 @@
    "hide_seconds": 1,
    "label": "Is Internal Customer",
    "read_only": 1
+  },
+  {
+   "fetch_from": "company.tax_id",
+   "fieldname": "company_tax_id",
+   "fieldtype": "Data",
+   "label": "Company Tax ID",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.is_internal_customer",
+   "description": "Unrealized Profit / Loss account for intra-company transfers",
+   "fieldname": "unrealized_profit_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealized Profit / Loss Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.is_internal_customer",
+   "description": "Company which internal customer represents",
+   "fetch_from": "customer.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-18 05:07:16.725974",
+ "modified": "2020-12-11 12:48:31.769958",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
