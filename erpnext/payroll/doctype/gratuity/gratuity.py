@@ -33,7 +33,6 @@ class Gratuity(AccountsController):
 		make_gl_entries(gl_entries, cancel)
 
 	def get_gl_entries(self):
-		print(self.payable_account, self.expense_account)
 		gl_entry = []
 		# payable entry
 		if self.amount:
@@ -57,7 +56,7 @@ class Gratuity(AccountsController):
 					"account": self.expense_account,
 					"debit": self.amount,
 					"debit_in_account_currency": self.amount,
-					"against": self.employee,
+					"against": self.payable_account,
 					"cost_center": self.cost_center
 				}, item=self)
 			)
