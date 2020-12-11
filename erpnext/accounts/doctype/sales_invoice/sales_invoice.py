@@ -1548,6 +1548,26 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			if currency:
 				target_doc.currency = currency
 
+	item_field_map = {
+		"doctype": target_doctype + " Item",
+		"field_no_map": [
+			"income_account",
+			"expense_account",
+			"cost_center",
+			"warehouse"
+		]
+	}
+
+	if source_doc.get('update_stock'):
+		item_field_map.update({
+			'field_map': {
+				source_document_warehouse_field: target_document_warehouse_field,
+				'batch_no': 'batch_no',
+				'serial_no': 'serial_no'
+			}
+		})
+
+
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": target_doctype,
@@ -1619,22 +1639,22 @@ def update_multi_mode_option(doc, pos_profile):
 
 	for pos_payment_method in pos_profile.get('payments'):
 		pos_payment_method = pos_payment_method.as_dict()
-		
+
 		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
 		payment_mode[0].default = pos_payment_method.default
 		append_payment(payment_mode[0])
 
 def get_all_mode_of_payments(doc):
 	return frappe.db.sql("""
-		select mpa.default_account, mpa.parent, mp.type as type 
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
+		select mpa.default_account, mpa.parent, mp.type as type
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
 	{'company': doc.company}, as_dict=1)
 
 def get_mode_of_payment_info(mode_of_payment, company):
 	return frappe.db.sql("""
-		select mpa.default_account, mpa.parent, mp.type as type 
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
+		select mpa.default_account, mpa.parent, mp.type as type
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
 	(company, mode_of_payment), as_dict=1)
 
