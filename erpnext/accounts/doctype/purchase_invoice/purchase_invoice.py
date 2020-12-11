@@ -102,7 +102,6 @@ class PurchaseInvoice(BuyingController):
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
-		self.set_inter_company_account()
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -371,33 +370,6 @@ class PurchaseInvoice(BuyingController):
 					'extra_cond': """ and exists (select name from `tabPurchase Invoice`
 						where name=`tabPurchase Invoice Item`.parent and update_stock=1 and is_return=1)"""
 				})
-
-	def set_inter_company_account(self):
-		"""
-			Set intercompany account for inter warehouse transactions
-			This account will be used in case billing company and internal customer's
-			representation company is same
-		"""
-
-		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
-			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
-
-			if not unrealized_profit_loss_account:
-				msg = _("Please select inter-company account or add default inter-company account for company {0}").format(
-						frappe.bold(self.company))
-				frappe.throw(msg)
-
-			self.unrealized_profit_loss_account = unrealized_profit_loss_account
-
-	def is_internal_transfer(self):
-		"""
-			It will an internal transfer if its an internal supplier and representation
-			company is same as billing company
-		"""
-		if self.is_internal_supplier and (self.represents_company == self.company):
-			return True
-
-		return False
 
 	def validate_purchase_receipt_if_update_stock(self):
 		if self.update_stock:

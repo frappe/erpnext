@@ -404,7 +404,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			# form a list of emails and names to show to the user
 			credit_controller_users_formatted = [get_formatted_email(user).replace("<", "(").replace(">", ")") for user in credit_controller_users]
 			if not credit_controller_users_formatted:
-				frappe.throw(_("Please contact your administrator to extend the credit limits for {0}.".format(customer)))
+				frappe.throw(_("Please contact your administrator to extend the credit limits for {0}.").format(customer))
 
 			message = """Please contact any of the following users to extend the credit limits for {0}:
 				<br><br><ul><li>{1}</li></ul>""".format(customer, '<li>'.join(credit_controller_users_formatted))
