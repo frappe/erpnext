@@ -212,7 +212,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
 			raise_error_if_no_rate=raise_error_if_no_rate)
 
-	return in_rate
+	return flt(in_rate)
 
 def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""

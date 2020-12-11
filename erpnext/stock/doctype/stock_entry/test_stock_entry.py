@@ -693,6 +693,9 @@ class TestStockEntry(unittest.TestCase):
 		self.assertRaises(frappe.ValidationError, repack.submit)
 
 	def test_material_consumption(self):
+		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", "0")
+
 		from erpnext.manufacturing.doctype.work_order.work_order \
 			import make_stock_entry as _make_stock_entry
 		bom_no = frappe.db.get_value("BOM", {"item": "_Test FG Item 2",
@@ -707,7 +710,8 @@ class TestStockEntry(unittest.TestCase):
 			"qty": 4.0,
 			"stock_uom": "_Test UOM",
 			"wip_warehouse": "_Test Warehouse - _TC",
-			"additional_operating_cost": 1000
+			"additional_operating_cost": 1000,
+			"use_multi_level_bom": 1
 		})
 		work_order.insert()
 		work_order.submit()
