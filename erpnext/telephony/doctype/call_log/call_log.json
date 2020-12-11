@@ -137,12 +137,11 @@
    "read_only": 1
   }
  ],
- "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-08-25 17:08:34.085731",
+ "modified": "2020-11-25 14:32:44.407815",
  "modified_by": "Administrator",
- "module": "Communication",
+ "module": "Telephony",
  "name": "Call Log",
  "owner": "Administrator",
  "permissions": [

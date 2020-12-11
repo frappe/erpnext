@@ -14,7 +14,6 @@
   "column_break_9",
   "update_stock",
   "ignore_pricing_rule",
-  "hide_unavailable_items",
   "warehouse",
   "campaign",
   "company_address",
@@ -23,6 +22,9 @@
   "section_break_11",
   "payments",
   "section_break_14",
+  "hide_images",
+  "hide_unavailable_items",
+  "auto_add_item_to_cart",
   "item_groups",
   "column_break_16",
   "customer_groups",
@@ -124,7 +126,8 @@
   },
   {
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Configuration"
   },
   {
    "description": "Only show Items from these Item Groups",
@@ -314,13 +317,25 @@
    "fieldname": "hide_unavailable_items",
    "fieldtype": "Check",
    "label": "Hide Unavailable Items"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_images",
+   "fieldtype": "Check",
+   "label": "Hide Images"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_add_item_to_cart",
+   "fieldtype": "Check",
+   "label": "Automatically Add Filtered Item To Cart"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-29 13:18:38.795925",
+ "modified": "2020-12-10 13:59:28.877572",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

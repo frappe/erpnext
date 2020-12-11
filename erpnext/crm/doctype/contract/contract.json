@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2018-04-12 06:32:04.582486",
@@ -247,7 +248,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-03-30 06:56:07.257932",
+ "modified": "2020-12-07 11:15:58.385521",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract",
