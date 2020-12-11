@@ -177,8 +177,8 @@ def validate_account_for_perpetual_inventory(gl_map):
 					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
 
 				diff = flt(stock_bal - account_bal, precision)
-				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses.").format(
-					stock_bal, account_bal, frappe.bold(account))
+				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses on {3}.").format(
+					stock_bal, account_bal, frappe.bold(account), gl_map[0].posting_date)
 				error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))
 				stock_adjustment_account = frappe.db.get_value("Company",gl_map[0].company,"stock_adjustment_account")
 

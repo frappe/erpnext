@@ -928,7 +928,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 		if expected_gle:
 			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
 				_delete_gl_entries(voucher_type, voucher_no)
-				voucher_obj.make_gl_entries(gl_entries=expected_gle)
+				voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 

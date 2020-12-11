@@ -18,7 +18,7 @@ from erpnext.stock.utils import get_bin
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
-
+from erpnext.accounts.general_ledger import process_gl_map
 import json
 
 from six import string_types, itervalues, iteritems
@@ -786,7 +786,7 @@ class StockEntry(StockController):
 						"credit": -1 * amount # put it as negative credit instead of debit purposefully
 					}, item=d))
 
-		return gl_entries
+		return process_gl_map(gl_entries)
 
 	def update_work_order(self):
 		def _validate_work_order(pro_doc):
