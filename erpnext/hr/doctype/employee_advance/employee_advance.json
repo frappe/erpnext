@@ -25,6 +25,7 @@
   "purpose",
   "column_break_11",
   "advance_amount",
+  "deduct_from_salary",
   "paid_amount",
   "returned_amount",
   "claimed_amount",
@@ -230,11 +231,17 @@
    "label": "Due Advance Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "deduct_from_salary",
+   "fieldtype": "Check",
+   "label": "Deduct from Salary"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:04.175386",
- "modified_by": "Administrator",
+ "modified": "2020-12-10 14:55:15.062121",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Employee Advance",
  "owner": "Administrator",
