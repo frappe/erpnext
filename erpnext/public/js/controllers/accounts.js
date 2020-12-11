@@ -43,7 +43,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 		}
 	},
 	refresh: function (frm) {
-		if (frm.doc.docstatus === 0) {
+		if (frm.doc.docstatus === 0 && frm.fields_dict.taxes) {
 			frm.fields_dict.taxes.grid.add_custom_button(__("Set Manual Distribution"), function() {
 				if (frm.focused_tax_dn) {
 					frm.cscript.set_manual_distribution(frm.doc, frm.cscript.tax_table, frm.focused_tax_dn);
