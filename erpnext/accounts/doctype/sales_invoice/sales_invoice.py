@@ -1340,6 +1340,7 @@ class SalesInvoice(SellingController):
 				self.status = 'Draft'
 			return
 
+		previous_status = self.status
 		precision = self.precision("outstanding_amount")
 		outstanding_amount = flt(self.outstanding_amount, precision)
 		due_date = getdate(self.due_date)
@@ -1372,6 +1373,8 @@ class SalesInvoice(SellingController):
 					self.status = "Submitted"
 			else:
 				self.status = "Draft"
+
+		self.add_status_comment(previous_status)
 
 		if update:
 			self.db_set('status', self.status, update_modified=update_modified)

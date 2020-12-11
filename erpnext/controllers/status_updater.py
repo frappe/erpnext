@@ -151,12 +151,14 @@ class StatusUpdater(Document):
 					self.status = s[0]
 					break
 
-			if self.status != _status and self.status not in ("Cancelled", "Partially Ordered",
-																"Ordered", "Issued", "Transferred"):
-				self.add_comment("Label", _(self.status))
+			self.add_status_comment(_status)
 
 			if update:
 				self.db_set('status', self.status, update_modified = update_modified)
+
+	def add_status_comment(self, previous_status):
+		if self.status != previous_status and self.status not in ("Cancelled", "Partially Ordered", "Ordered", "Issued", "Transferred", "Draft"):
+			self.add_comment("Label", _(self.status))
 
 	def validate_qty(self):
 		"""Validates qty at row level"""
