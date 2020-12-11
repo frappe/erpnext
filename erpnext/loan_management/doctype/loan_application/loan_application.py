@@ -127,6 +127,7 @@ def create_loan(source_name, target_doc=None, submit=0):
 		target_doc.loan_account = account_details.loan_account
 		target_doc.interest_income_account = account_details.interest_income_account
 		target_doc.penalty_income_account = account_details.penalty_income_account
+		target_doc.loan_application = source_name
 
 
 	doclist = get_mapped_doc("Loan Application", source_name, {

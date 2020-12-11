@@ -779,7 +779,9 @@ def get_events(start, end, filters=None):
 	return data
 
 @frappe.whitelist()
-def make_purchase_order_for_default_supplier(source_name, selected_items=[], target_doc=None):
+def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
+	if not selected_items: return
+
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
@@ -830,7 +832,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=[], tar
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
 	for supplier in suppliers:
-		doc = get_mapped_doc("Sales Order", source_name, {
+    doc = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
 				"doctype": "Purchase Order",
 				"field_no_map": [
@@ -875,7 +877,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=[], tar
 		return doc
 
 @frappe.whitelist()
-def make_purchase_order(source_name, selected_items=[], target_doc=None):
+def make_purchase_order(source_name, selected_items=None, target_doc=None):
+	if not selected_items: return
+
 	if isinstance(selected_items, string_types):
 		selected_items = json.loads(selected_items)
 
@@ -910,7 +914,8 @@ def make_purchase_order(source_name, selected_items=[], target_doc=None):
 				"contact_email",
 				"contact_person",
 				"taxes_and_charges",
-				"shipping_address"
+				"shipping_address",
+				"terms"
 			],
 			"validation": {
 				"docstatus": ["=", 1]
@@ -930,7 +935,10 @@ def make_purchase_order(source_name, selected_items=[], target_doc=None):
 				"rate",
 				"price_list_rate",
 				"item_tax_template",
-				"supplier"
+				"discount_percentage",
+				"discount_amount",
+				"supplier",
+				"pricing_rules"
 			],
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.item_code in items_to_map
