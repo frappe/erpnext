@@ -55,10 +55,10 @@ def repost(doc):
 	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
-		print(traceback)
 		frappe.log_error(traceback)
 		frappe.db.set_value(doc.doctype, doc.name, 'error_log', traceback)
 		doc.set_status('Failed')
+		raise
 	finally:
 		frappe.db.commit()
 
