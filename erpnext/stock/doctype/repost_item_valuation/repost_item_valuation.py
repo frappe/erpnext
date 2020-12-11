@@ -24,11 +24,10 @@ class RepostItemValuation(Document):
 			self.voucher_no = None
 
 	def set_company(self):
-		if not self.company:
-			if self.voucher_type and self.voucher_no:
-				self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
-			elif self.warehouse:
-				self.company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
+		if self.voucher_type and self.voucher_no:
+			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
+		elif self.warehouse:
+			self.company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
 	
 	def set_status(self, status=None):
 		if not status:
