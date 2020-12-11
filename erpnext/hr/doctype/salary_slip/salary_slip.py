@@ -340,6 +340,7 @@ class SalarySlip(TransactionBase):
 			self.add_employee_benefits(payroll_period)
 		else:
 			self.add_tax_components(payroll_period)
+			self.add_advance_deduction_component()
 
 		self.set_component_amounts_based_on_payment_days(component_type)
 
@@ -448,6 +449,12 @@ class SalarySlip(TransactionBase):
 			tax_amount = self.calculate_variable_based_on_taxable_salary(d, payroll_period)
 			tax_row = self.get_salary_slip_row(d)
 			self.update_component_row(tax_row, tax_amount, "deductions")
+
+	def add_advance_deduction_component(self):
+		advance_amount = self.total_advance_amount
+		component = frappe.db.get_all('Salary Component', {'is_advance_deduction_component': 1}, ['name'], as_list=0)[0]
+		advance_row = self.get_salary_slip_row(cstr(component.name))
+		self.update_component_row(advance_row, advance_amount, "deductions")
 
 	def update_component_row(self, struct_row, amount, key, overwrite=1):
 		component_row = None
@@ -952,8 +959,8 @@ class SalarySlip(TransactionBase):
 			self.get_date_details()
 		self.pull_emp_details()
 		self.get_leave_details(for_preview=for_preview)
-		self.calculate_net_pay()
 		self.get_pending_advances()
+		self.calculate_net_pay()
 
 	def pull_emp_details(self):
 		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
@@ -973,13 +980,19 @@ class SalarySlip(TransactionBase):
 			order by posting_date
 		""", [self.employee, self.start_date, self.end_date], as_dict=1)
 
-		self.advances
+		total_pending_advance = 0
 		for data in pending_advances:
-			self.append('advances', {
-				'employee_advance': data.employee_advance,
-				'total_advance': data.total_advance,
-				'balance_amount': data.balance_amount
-			})
+			emp_adv = frappe.get_doc("Employee Advance", data.employee_advance)
+			deduct_from_salary = emp_adv.deduct_from_salary
+			if deduct_from_salary:
+				self.append('advances', {
+					'employee_advance': data.employee_advance,
+					'total_advance': data.total_advance,
+					'balance_amount': data.balance_amount
+				})
+				total_pending_advance += data.total_advance
+
+		self.total_advance_amount = total_pending_advance
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`

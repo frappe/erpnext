@@ -22,6 +22,7 @@
   "statistical_component",
   "do_not_include_in_total",
   "disabled",
+  "is_advance_deduction_component",
   "flexible_benefits",
   "is_flexible_benefit",
   "max_benefit_amount",
@@ -230,11 +231,17 @@
    "fieldname": "exempted_from_income_tax",
    "fieldtype": "Check",
    "label": "Exempted from Income Tax"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_advance_deduction_component",
+   "fieldtype": "Check",
+   "label": "Is Advance Deduction Component"
   }
  ],
  "icon": "fa fa-flag",
- "modified": "2020-04-28 15:46:45.252945",
- "modified_by": "Administrator",
+ "modified": "2020-12-11 18:36:10.027963",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Salary Component",
  "owner": "Administrator",
