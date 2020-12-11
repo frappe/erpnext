@@ -830,52 +830,45 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=[], tar
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
 	for supplier in suppliers:
-		po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
-		if len(po) == 0 or any( item.get("delivered_by_supplier") == 1 for item in selected_items):
-			doc = get_mapped_doc("Sales Order", source_name, {
-				"Sales Order": {
-					"doctype": "Purchase Order",
-					"field_no_map": [
-						"address_display",
-						"contact_display",
-						"contact_mobile",
-						"contact_email",
-						"contact_person",
-						"taxes_and_charges",
-						"shipping_address"
-					],
-					"validation": {
-						"docstatus": ["=", 1]
-					}
-				},
-				"Sales Order Item": {
-					"doctype": "Purchase Order Item",
-					"field_map":  [
-						["name", "sales_order_item"],
-						["parent", "sales_order"],
-						["stock_uom", "stock_uom"],
-						["uom", "uom"],
-						["conversion_factor", "conversion_factor"],
-						["delivery_date", "schedule_date"]
-			 		],
-					"field_no_map": [
-						"rate",
-						"price_list_rate",
-						"item_tax_template"
-					],
-					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in items_to_map
+		doc = get_mapped_doc("Sales Order", source_name, {
+			"Sales Order": {
+				"doctype": "Purchase Order",
+				"field_no_map": [
+					"address_display",
+					"contact_display",
+					"contact_mobile",
+					"contact_email",
+					"contact_person",
+					"taxes_and_charges",
+					"shipping_address"
+				],
+				"validation": {
+					"docstatus": ["=", 1]
 				}
-			}, target_doc, set_missing_values)
+			},
+			"Sales Order Item": {
+				"doctype": "Purchase Order Item",
+				"field_map":  [
+					["name", "sales_order_item"],
+					["parent", "sales_order"],
+					["stock_uom", "stock_uom"],
+					["uom", "uom"],
+					["conversion_factor", "conversion_factor"],
+					["delivery_date", "schedule_date"]
+				],
+				"field_no_map": [
+					"rate",
+					"price_list_rate",
+					"item_tax_template"
+				],
+				"postprocess": update_item,
+				"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in items_to_map
+			}
+		}, target_doc, set_missing_values)
 
-			doc.insert()
-		else:
-			suppliers =[]
-	if suppliers:
+		doc.insert()
 		frappe.db.commit()
 		return doc
-	else:
-		frappe.msgprint(_("Purchase Order already created for all Sales Order items"))
 
 @frappe.whitelist()
 def make_purchase_order(source_name, selected_items=[], target_doc=None):
