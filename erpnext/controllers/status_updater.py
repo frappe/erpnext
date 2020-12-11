@@ -249,8 +249,8 @@ class StatusUpdater(Document):
 			args['second_source_condition'] = ""
 			if args.get('second_source_dt') and args.get('second_source_field') \
 					and args.get('second_join_field'):
-				if not args.get("second_source_extra_cond"):
-					args["second_source_extra_cond"] = ""
+				if not args.get('second_source_extra_cond'):
+					args['second_source_extra_cond'] = ""
 
 				args['second_source_condition'] = """ + ifnull((select sum(%(second_source_field)s)
 					from `tab%(second_source_dt)s`
@@ -258,12 +258,22 @@ class StatusUpdater(Document):
 					and (`tab%(second_source_dt)s`.docstatus=1) %(second_source_extra_cond)s FOR UPDATE), 0)""" % args
 
 			if args['detail_id']:
-				if not args.get("extra_cond"): args["extra_cond"] = ""
+				if not args.get('extra_cond'): args['extra_cond'] = ""
+
+				# initialize source table
+				source_doctype = {'source_dt': args.get('source_dt')}
+				args['source_table'] = "`tab%(source_dt)s`" % source_doctype
+
+				# if table to update (target) and source table are the same
+				# derive the source table to avoid SQL errors
+				if args.get('source_dt') == args.get('target_dt'):
+					args['source_table'] = "(select * from `tab%(source_dt)s`) as source" % source_doctype
 
 				frappe.db.sql("""update `tab%(target_dt)s`
 					set %(target_field)s = (
 						(select ifnull(sum(%(source_field)s), 0)
-							from `tab%(source_dt)s` where `%(join_field)s`="%(detail_id)s"
+							from %(source_table)s
+							where `%(join_field)s`="%(detail_id)s"
 							and (docstatus=1 %(cond)s) %(extra_cond)s)
 						%(second_source_condition)s
 					)
