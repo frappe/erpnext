@@ -34,7 +34,7 @@ class EmployeeAdvance(StatusUpdater):
 			frappe.throw(_("Advance account currency should be same as company currency {0}")
 				.format(company_currency))
 
-	def set_total_advance_paid(self):
+	def set_payment_and_claimed_amount(self, update=False):
 		payments = frappe.db.sql("""
 			select ifnull(sum(debit), 0) as paid_amount, ifnull(sum(credit), 0) as returned_amount
 			from `tabGL Entry`
@@ -45,15 +45,6 @@ class EmployeeAdvance(StatusUpdater):
 				and voucher_type != 'Expense Claim'
 		""", {"name": self.name, "party": self.employee}, as_dict=1)[0]
 
-		if flt(payments.paid_amount) > self.advance_amount:
-			frappe.throw(_("Paid Amount cannot be greater than requested advance amount"), EmployeeAdvanceOverPayment)
-
-		self.db_set("paid_amount", payments.paid_amount)
-		self.db_set("returned_amount", payments.returned_amount)
-		self.set_status(update=True)
-		self.notify_update()
-
-	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
 			select ifnull(sum(credit), 0)
 			from `tabGL Entry`
@@ -64,8 +55,17 @@ class EmployeeAdvance(StatusUpdater):
 				and voucher_type = 'Expense Claim'
 		""", (self.name, self.employee))[0][0] or 0
 
-		self.db_set("claimed_amount", flt(claimed_amount))
-		self.set_status(update=True)
+		if flt(payments.paid_amount) > self.advance_amount:
+			frappe.throw(_("Paid Amount cannot be greater than requested advance amount"), EmployeeAdvanceOverPayment)
+
+		values = {
+			"paid_amount": payments.paid_amount,
+			"returned_amount": payments.returned_amount,
+			"claimed_amount": flt(claimed_amount)
+		}
+		self.update(values)
+		if update:
+			self.db_set(values)
 
 @frappe.whitelist()
 def get_due_advance_amount(employee, posting_date):

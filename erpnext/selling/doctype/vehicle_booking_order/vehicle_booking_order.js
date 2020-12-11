@@ -13,6 +13,16 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.set_customer_is_company_label();
 		this.set_dynamic_link();
+
+		if (this.frm.doc.docstatus === 1) {
+			if (flt(this.frm.doc.customer_outstanding) > 0) {
+				this.frm.add_custom_button(__('Customer Payment'), () => this.make_payment_entry('Customer'), __('Create'));
+			}
+			if (flt(this.frm.doc.supplier_outstanding) > 0) {
+				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Create'));
+			}
+		}
+		this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 	},
 
 	onload: function () {
@@ -194,6 +204,23 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					}
 				}
 			})
+		}
+	},
+
+	make_payment_entry: function(party_type) {
+		if (['Customer', 'Supplier'].includes(party_type)) {
+			return frappe.call({
+				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+				args: {
+					"dt": cur_frm.doc.doctype,
+					"dn": cur_frm.doc.name,
+					"party_type": party_type
+				},
+				callback: function (r) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			});
 		}
 	},
 });

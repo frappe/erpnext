@@ -98,18 +98,7 @@ class JournalEntry(AccountsController):
 		return self.pay_to_recd_from or self.accounts[0].account
 
 	def update_advance_paid(self):
-		order_dts = ("Employee Advance",)
-
-		advance_paid = frappe._dict()
-		for d in self.get("accounts"):
-			if d.reference_type in order_dts:
-				advance_paid.setdefault(d.reference_type, []).append(d.reference_name)
-			elif d.original_reference_type in order_dts:
-				advance_paid.setdefault(d.original_reference_type, []).append(d.original_reference_name)
-
-		for voucher_type, order_list in iteritems(advance_paid):
-			for voucher_no in list(set(order_list)):
-				frappe.get_doc(voucher_type, voucher_no).set_total_advance_paid()
+		pass
 
 	def validate_inter_company_accounts(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:

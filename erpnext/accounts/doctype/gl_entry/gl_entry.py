@@ -230,6 +230,13 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
 		else:
 			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
+	elif voucher_type == "Vehicle Booking Order" and party_type in ("Customer", "Supplier"):
+		include_original_references = True
+		fieldname = "customer_advance" if party_type == "Customer" else "supplier_advance"
+		if party_type == "Customer":
+			dr_or_cr = "credit_in_account_currency - debit_in_account_currency"
+		else:
+			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
 	else:
 		return
 
@@ -242,6 +249,12 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 		dr_or_cr=dr_or_cr, include_original_references=include_original_references)
 	ref_doc = frappe.get_doc(voucher_type, voucher_no)
 	ref_doc.db_set(fieldname, bal)
+
+	if voucher_type == "Vehicle Booking Order":
+		ref_doc.set_payment_status(update=True)
+	if voucher_type == "Employee Advance":
+		ref_doc.set_payment_and_claimed_amount(update=True)
+
 	ref_doc.set_status(update=True)
 	ref_doc.notify_update()
 

@@ -4,8 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 from frappe import _
-from frappe.utils import cint, flt, getdate
+from frappe.utils import cint, flt, getdate, today
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from erpnext.accounts.party import set_contact_details
 from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier
@@ -31,6 +32,7 @@ class VehicleBookingOrder(AccountsController):
 
 		self.validate_customer()
 		self.validate_vehicle_item()
+		self.validate_party_accounts()
 
 		self.set_title()
 		self.clean_remarks()
@@ -41,11 +43,14 @@ class VehicleBookingOrder(AccountsController):
 
 		self.validate_payment_schedule()
 
+		self.set_payment_status()
+		self.set_status()
+
 	def on_submit(self):
-		pass
+		self.set_status()
 
 	def on_cancel(self):
-		pass
+		self.set_status()
 
 	def set_title(self):
 		self.title = self.company if self.customer_is_company else self.customer_name
@@ -78,8 +83,9 @@ class VehicleBookingOrder(AccountsController):
 		self.invoice_total = flt(self.vehicle_amount + self.fni_amount,
 			self.precision('invoice_total'))
 
-		self.customer_outstanding = self.invoice_total - flt(self.customer_advance)
-		self.supplier_outstanding = self.invoice_total - flt(self.supplier_advance)
+		if self.docstatus == 0:
+			self.customer_advance = 0
+			self.supplier_advance = 0
 
 	def validate_amounts(self):
 		for field in ['vehicle_amount', 'invoice_total']:
@@ -97,6 +103,100 @@ class VehicleBookingOrder(AccountsController):
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()
+
+	def validate_party_accounts(self):
+		company_currency = erpnext.get_company_currency(self.company)
+		receivable_currency, receivable_type = frappe.db.get_value('Account', self.receivable_account, ['account_currency', 'account_type'])
+		payable_currency, payable_type = frappe.db.get_value('Account', self.payable_account, ['account_currency', 'account_type'])
+
+		if company_currency != receivable_currency:
+			frappe.throw(_("Receivable account currency should be same as company currency {0}")
+				.format(company_currency))
+		if company_currency != payable_currency:
+			frappe.throw(_("Payable account currency should be same as company currency {0}")
+				.format(company_currency))
+		if receivable_type != 'Receivable':
+			frappe.throw(_("Receivable Account must be of type Receivable"))
+		if payable_type != 'Payable':
+			frappe.throw(_("Payable Account must be of type Payable"))
+
+	def set_payment_status(self, update=False):
+		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
+		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance, self.precision('supplier_outstanding'))
+
+		if self.customer_outstanding < 0:
+			frappe.throw(_("Customer Advance Received cannot be greater than the Invoice Total"))
+		if self.supplier_outstanding < 0:
+			frappe.throw(_("Supplier Advance Paid cannot be greater than the Invoice Total"))
+
+		if self.customer_outstanding > 0:
+			if getdate(today()) > getdate(self.due_date):
+				self.customer_payment_status = "Overdue"
+			elif self.customer_advance == 0:
+				self.customer_payment_status = "Unpaid"
+			else:
+				self.customer_payment_status = "Partially Paid"
+		else:
+			self.customer_payment_status = "Paid"
+
+		if self.supplier_outstanding > 0:
+			if getdate(today()) > getdate(self.due_date):
+				self.supplier_payment_status = "Overdue"
+			elif self.supplier_advance == 0:
+				self.supplier_payment_status = "Unpaid"
+			else:
+				self.supplier_payment_status = "Partially Paid"
+		else:
+			self.supplier_payment_status = "Paid"
+
+		if update:
+			self.db_set({
+				'customer_outstanding': self.customer_outstanding,
+				'supplier_outstanding': self.supplier_outstanding,
+				'customer_payment_status': self.customer_payment_status,
+				'supplier_payment_status': self.supplier_payment_status,
+			})
+
+	def set_status(self, update=False, status=None, update_modified=True):
+		if self.is_new():
+			if self.get('amended_from'):
+				self.status = 'Draft'
+			return
+
+		previous_status = self.status
+
+		if self.docstatus == 2:
+			self.status = "Cancelled"
+
+		elif self.docstatus == 1:
+			if self.customer_outstanding > 0 or self.supplier_outstanding > 0:
+				if self.customer_advance > self.supplier_advance:
+					self.status = "To Deposit Payment"
+				else:
+					self.status = "To Receive Payment"
+
+			elif self.delivery_status == "To Receive":
+				self.status = "To Receive Vehicle"
+
+			elif self.invoice_status == "To Receive":
+				self.status = "To Receive Invoice"
+
+			elif self.delivery_status == "To Deliver":
+				self.status = "To Deliver Vehicle"
+
+			elif self.invoice_status == "To Deliver":
+				self.status = "To Deliver Invoice"
+
+			else:
+				self.status = "Completed"
+
+		else:
+			self.status = "Draft"
+
+		self.add_status_comment(previous_status)
+
+		if update:
+			self.db_set('status', self.status, update_modified=update_modified)
 
 
 @frappe.whitelist()

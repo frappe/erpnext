@@ -57,10 +57,10 @@
   "color_actual",
   "pricing_section",
   "vehicle_amount",
-  "column_break_59",
   "fni_amount",
   "column_break_62",
   "invoice_total",
+  "in_words",
   "additional_charges_section",
   "registration_amount",
   "column_break_70",
@@ -88,14 +88,16 @@
   "more_info",
   "supplier",
   "supplier_name",
-  "buying_transaction_type",
-  "col_break_15",
   "price_list",
+  "col_break_15",
   "selling_transaction_type",
+  "buying_transaction_type",
   "column_break_20",
+  "receivable_account",
+  "payable_account",
+  "column_break_89",
   "fni_item_code",
-  "status",
-  "in_words"
+  "status"
  ],
  "fields": [
   {
@@ -127,6 +129,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Booking Date",
+   "no_copy": 1,
    "reqd": 1,
    "search_index": 1
   },
@@ -296,6 +299,7 @@
    "label": "Sales Team"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "sales_team",
    "fieldtype": "Table",
    "label": "Sales Team",
@@ -405,6 +409,7 @@
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "label": "Delivery Date",
+   "no_copy": 1,
    "reqd": 1
   },
   {
@@ -427,6 +432,7 @@
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Payment Due Date",
+   "no_copy": 1,
    "reqd": 1
   },
   {
@@ -485,14 +491,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_59",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_62",
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "additional_charges_section",
    "fieldtype": "Section Break",
    "label": "Additional Charges"
@@ -503,6 +506,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "payment_terms_template",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Schedule"
@@ -514,7 +518,6 @@
    "options": "Payment Schedule"
   },
   {
-   "collapsible": 1,
    "fieldname": "status_section",
    "fieldtype": "Section Break",
    "label": "Status"
@@ -526,7 +529,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nTo Receive Customer Payment\nTo Deposit Supplier Payment\nTo Receive Vehicle\nTo Receive Invoice\nTo Deliver Vehicle\nTo Deliver Invoice\nCompleted\nCancelled",
+   "no_copy": 1,
+   "options": "Draft\nTo Receive Payment\nTo Deposit Payment\nTo Receive Vehicle\nTo Receive Invoice\nTo Deliver Vehicle\nTo Deliver Invoice\nCompleted\nCancelled",
    "read_only": 1,
    "reqd": 1
   },
@@ -536,6 +540,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Customer Payment Status",
+   "no_copy": 1,
    "options": "Unpaid\nPartially Paid\nOverdue\nPaid",
    "read_only": 1,
    "reqd": 1
@@ -546,6 +551,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Supplier Payment Status",
+   "no_copy": 1,
    "options": "Unpaid\nPartially Paid\nOverdue\nPaid",
    "read_only": 1,
    "reqd": 1
@@ -560,6 +566,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Delivery Status",
+   "no_copy": 1,
    "options": "To Receive\nTo Deliver\nDelivered",
    "read_only": 1,
    "reqd": 1
@@ -570,6 +577,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Invoice Status",
+   "no_copy": 1,
    "options": "To Receive\nTo Deliver\nDelivered",
    "read_only": 1,
    "reqd": 1
@@ -614,6 +622,7 @@
    "fieldname": "customer_advance",
    "fieldtype": "Currency",
    "label": "Customer Advance Received",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -622,6 +631,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Customer Outstanding",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -629,6 +639,7 @@
    "fieldname": "supplier_advance",
    "fieldtype": "Currency",
    "label": "Supplier Advance Paid",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -636,6 +647,7 @@
    "fieldname": "supplier_outstanding",
    "fieldtype": "Currency",
    "label": "Supplier Outstanding",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -647,31 +659,53 @@
    "fieldname": "vehicle_received_date",
    "fieldtype": "Date",
    "label": "Vehicle Received Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "vehicle_delivered_date",
    "fieldtype": "Date",
    "label": "Vehicle Delivered Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "invoice_received_date",
    "fieldtype": "Date",
    "label": "Invoice Received Date",
+   "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "invoice_delivery_date",
    "fieldtype": "Date",
    "label": "Invoice Delivery Date",
+   "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "receivable_account",
+   "fieldtype": "Link",
+   "label": "Receivable Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "payable_account",
+   "fieldtype": "Link",
+   "label": "Payable Account",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_89",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-12-10 18:01:09.720067",
+ "modified": "2020-12-11 13:54:18.294549",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",
