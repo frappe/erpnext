@@ -408,6 +408,15 @@ class Subscription(Document):
 			else:
 				self.set_status_grace_period()
 
+			if getdate() > getdate(self.current_invoice_end):
+				self.update_subscription_period(add_days(self.current_invoice_end, 1))
+
+			# Generate invoices periodically even if current invoice are unpaid
+			if self.generate_new_invoices_past_due_date and not self.is_current_invoice_generated() and (self.is_postpaid_to_invoice()
+				or self.is_prepaid_to_invoice()):
+				prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
+				self.generate_invoice(prorate)
+
 	@staticmethod
 	def is_not_outstanding(invoice):
 		"""

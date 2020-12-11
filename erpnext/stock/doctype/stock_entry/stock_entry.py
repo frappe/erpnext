@@ -83,7 +83,7 @@ class StockEntry(StockController):
 		self.set_incoming_rate()
 		self.validate_serialized_batch()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		self.calculate_rate_and_amount()
 
 	def on_submit(self):
 
@@ -117,6 +117,7 @@ class StockEntry(StockController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.delete_auto_created_batches()
+		self.delete_linked_stock_entry()
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -159,6 +160,12 @@ class StockEntry(StockController):
 		if self.job_card and self.purpose != 'Material Transfer for Manufacture':
 			frappe.throw(_("For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry")
 				.format(self.job_card))
+
+	def delete_linked_stock_entry(self):
+		if self.purpose == "Send to Warehouse":
+			for d in frappe.get_all("Stock Entry", filters={"docstatus": 0,
+				"outgoing_stock_entry": self.name, "purpose": "Receive at Warehouse"}):
+				frappe.delete_doc("Stock Entry", d.name)
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
@@ -1003,26 +1010,22 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "required_qty", "consumed_qty"]
+			fields=["item_code", "required_qty", "consumed_qty", "transferred_qty"]
 			)
 
+		work_order_qty = wo.material_transferred_for_manufacturing or wo.qty
 		for item in wo_items:
-			qty = item.required_qty
-
 			item_account_details = get_item_defaults(item.item_code, self.company)
 			# Take into account consumption if there are any.
-			if self.purpose == 'Manufacture':
-				req_qty_each = flt(item.required_qty / wo.qty)
-				if (flt(item.consumed_qty) != 0):
-					remaining_qty = flt(item.consumed_qty) - (flt(wo.produced_qty) * req_qty_each)
-					exhaust_qty = req_qty_each * wo.produced_qty
-					if remaining_qty > exhaust_qty :
-						if (remaining_qty/(req_qty_each * flt(self.fg_completed_qty))) >= 1:
-							qty =0
-						else:
-							qty = (req_qty_each * flt(self.fg_completed_qty)) - remaining_qty
-				else:
-					qty = req_qty_each * flt(self.fg_completed_qty)
+
+			wo_item_qty = item.transferred_qty or item.required_qty
+
+			req_qty_each = (
+				(flt(wo_item_qty) - flt(item.consumed_qty)) /
+					(flt(work_order_qty) - flt(wo.produced_qty))
+			)
+
+			qty = req_qty_each * flt(self.fg_completed_qty)
 
 			if qty > 0:
 				self.add_to_stock_entry_detail({
@@ -1108,12 +1111,14 @@ class StockEntry(StockController):
 					else:
 						qty = req_qty_each * flt(self.fg_completed_qty)
 
-
 			elif backflushed_materials.get(item.item_code):
 				for d in backflushed_materials.get(item.item_code):
 					if d.get(item.warehouse):
 						if (qty > req_qty):
 							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
+
+						if consumed_qty:
+							qty -= consumed_qty
 
 			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
 				qty = frappe.utils.ceil(qty)

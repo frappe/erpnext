@@ -10,6 +10,7 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 
 class OperationMismatchError(frappe.ValidationError): pass
+class JobCardCancelError(frappe.ValidationError): pass
 
 class JobCard(Document):
 	def validate(self):
@@ -110,39 +111,54 @@ class JobCard(Document):
 		for_quantity, time_in_mins = 0, 0
 		from_time_list, to_time_list = [], []
 
-		field = "operation_id"
 		data = frappe.get_all('Job Card',
 			fields = ["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
-			filters = {"docstatus": 1, "work_order": self.work_order, field: self.get(field)})
+			filters = {"docstatus": 1, "work_order": self.work_order, "operation_id": self.operation_id})
 
 		if data and len(data) > 0:
-			for_quantity = data[0].completed_qty
-			time_in_mins = data[0].time_in_mins
+			for_quantity = flt(data[0].completed_qty)
+			time_in_mins = flt(data[0].time_in_mins)
 
-		if self.get(field):
-			time_data = frappe.db.sql("""
+		wo = frappe.get_doc('Work Order', self.work_order)
+		if self.operation_id:
+			self.validate_produced_quantity(for_quantity, wo)
+			self.update_work_order_data(for_quantity, time_in_mins, wo)
+
+	def validate_produced_quantity(self, for_quantity, wo):
+		if self.docstatus < 2: return
+
+		if wo.produced_qty > for_quantity:
+			first_part_msg = (_("The {0} {1} is used to calculate the valuation cost for the finished good {2}.")
+				.format(frappe.bold(_("Job Card")), frappe.bold(self.name), frappe.bold(self.production_item)))
+
+			second_part_msg = (_("Kindly cancel the Manufacturing Entries first against the work order {0}.")
+				.format(frappe.bold(get_link_to_form("Work Order", self.work_order))))
+
+			frappe.throw(_("{0} {1}").format(first_part_msg, second_part_msg),
+				JobCardCancelError, title = _("Error"))
+
+	def update_work_order_data(self, for_quantity, time_in_mins, wo):
+		time_data = frappe.db.sql("""
 				SELECT
 					min(from_time) as start_time, max(to_time) as end_time
 				FROM `tabJob Card` jc, `tabJob Card Time Log` jctl
 				WHERE
 					jctl.parent = jc.name and jc.work_order = %s
-					and jc.{0} = %s and jc.docstatus = 1
-			""".format(field), (self.work_order, self.get(field)), as_dict=1)
+					and jc.operation_id = %s and jc.docstatus = 1
+			""", (self.work_order, self.operation_id), as_dict=1)
 
-			wo = frappe.get_doc('Work Order', self.work_order)
+		for data in wo.operations:
+			if data.get("name") == self.operation_id:
+				data.completed_qty = for_quantity
+				data.actual_operation_time = time_in_mins
+				data.actual_start_time = time_data[0].start_time if time_data else None
+				data.actual_end_time = time_data[0].end_time if time_data else None
 
-			for data in wo.operations:
-				if data.get("name") == self.get(field):
-					data.completed_qty = for_quantity
-					data.actual_operation_time = time_in_mins
-					data.actual_start_time = time_data[0].start_time if time_data else None
-					data.actual_end_time = time_data[0].end_time if time_data else None
-
-			wo.flags.ignore_validate_update_after_submit = True
-			wo.update_operation_status()
-			wo.calculate_operating_cost()
-			wo.set_actual_dates()
-			wo.save()
+		wo.flags.ignore_validate_update_after_submit = True
+		wo.update_operation_status()
+		wo.calculate_operating_cost()
+		wo.set_actual_dates()
+		wo.save()
 
 	def set_transferred_qty(self, update_status=False):
 		if not self.items:
@@ -224,17 +240,19 @@ def get_operation_details(work_order, operation):
 
 @frappe.whitelist()
 def get_operations(doctype, txt, searchfield, start, page_len, filters):
-	if filters.get("work_order"):
-		args = {"parent": filters.get("work_order")}
-		if txt:
-			args["operation"] = ("like", "%{0}%".format(txt))
+	if not filters.get("work_order"):
+		frappe.msgprint(_("Please select a Work Order first."))
+		return []
+	args = {"parent": filters.get("work_order")}
+	if txt:
+		args["operation"] = ("like", "%{0}%".format(txt))
 
-		return frappe.get_all("Work Order Operation",
-			filters = args,
-			fields = ["distinct operation as operation"],
-			limit_start = start,
-			limit_page_length = page_len,
-			order_by="idx asc", as_list=1)
+	return frappe.get_all("Work Order Operation",
+		filters = args,
+		fields = ["distinct operation as operation"],
+		limit_start = start,
+		limit_page_length = page_len,
+		order_by="idx asc", as_list=1)
 
 @frappe.whitelist()
 def make_material_request(source_name, target_doc=None):
