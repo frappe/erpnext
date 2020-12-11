@@ -50,15 +50,19 @@ class SalarySlip(TransactionBase):
 
 		self.calculate_net_pay()
 
-		company_currency = erpnext.get_company_currency(self.company)
-		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
-		self.total_in_words = money_in_words(total, company_currency)
-
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
+
+	def set_net_total_in_words(self):
+		doc_currency = self.currency
+		company_currency = erpnext.get_company_currency(self.company)
+		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
+		base_total = self.base_net_pay if self.is_rounding_total_disabled() else self.base_rounded_total
+		self.total_in_words = money_in_words(total, doc_currency)
+		self.base_total_in_words = money_in_words(base_total, company_currency)
 
 	def on_submit(self):
 		if self.net_pay < 0:
@@ -182,6 +186,7 @@ class SalarySlip(TransactionBase):
 		if self.salary_slip_based_on_timesheet:
 			self.salary_structure = self._salary_structure_doc.name
 			self.hour_rate = self._salary_structure_doc.hour_rate
+			self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
 			self.total_working_hours = sum([d.working_hours or 0.0 for d in self.timesheets]) or 0.0
 			wages_amount = self.hour_rate * self.total_working_hours
 
@@ -417,15 +422,22 @@ class SalarySlip(TransactionBase):
 		if self.salary_structure:
 			self.calculate_component_amounts("earnings")
 		self.gross_pay = self.get_component_totals("earnings")
+		self.base_gross_pay = flt(flt(self.gross_pay) * flt(self.exchange_rate), self.precision('base_gross_pay'))
 
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
 		self.total_deduction = self.get_component_totals("deductions")
+		self.base_total_deduction = flt(flt(self.total_deduction) * flt(self.exchange_rate), self.precision('base_total_deduction'))
 
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay)
+		self.base_net_pay = flt(flt(self.net_pay) * flt(self.exchange_rate), self.precision('base_net_pay'))
+		self.base_rounded_total = flt(rounded(self.base_net_pay), self.precision('base_net_pay'))
+		if self.hour_rate:
+			self.base_hour_rate = flt(flt(self.hour_rate) * flt(self.exchange_rate), self.precision('base_hour_rate'))
+		self.set_net_total_in_words()
 
 	def calculate_component_amounts(self, component_type):
 		if not getattr(self, '_salary_structure_doc', None):
@@ -976,8 +988,9 @@ class SalarySlip(TransactionBase):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
 			total_amount = amounts['interest_amount'] + amounts['payable_principal_amount']
 			if payment.total_payment > total_amount:
-				frappe.throw(_("Row {0}: Paid amount {1} is greater than pending accrued amount {2}against loan {3}").format(
-					payment.idx, frappe.bold(payment.total_payment),frappe.bold(total_amount), frappe.bold(payment.loan)))
+				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2} against loan {3}""")
+					.format(payment.idx, frappe.bold(payment.total_payment),
+						frappe.bold(total_amount), frappe.bold(payment.loan)))
 
 			self.total_interest_amount += payment.interest_amount
 			self.total_principal_amount += payment.principal_amount
@@ -1071,6 +1084,46 @@ class SalarySlip(TransactionBase):
 	def process_salary_based_on_working_days(self):
 		self.get_working_days_details(lwp=self.leave_without_pay)
 		self.calculate_net_pay()
+
+	def set_totals(self):
+		self.gross_pay = 0
+		if self.salary_slip_based_on_timesheet == 1:
+			self.calculate_total_for_salary_slip_based_on_timesheet()
+		else:
+			self.total_deduction = 0
+			if self.earnings:
+				for earning in self.earnings:
+					self.gross_pay += flt(earning.amount)
+			if self.deductions:
+				for deduction in self.deductions:
+					self.total_deduction += flt(deduction.amount)
+			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
+		self.set_base_totals()
+
+	def set_base_totals(self):
+		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
+		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
+		self.rounded_total = rounded(self.net_pay)
+		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
+		self.base_rounded_total = rounded(self.base_net_pay)
+		self.set_net_total_in_words()
+
+	#calculate total working hours, earnings based on hourly wages and totals
+	def calculate_total_for_salary_slip_based_on_timesheet(self):
+		if self.timesheets:
+			for timesheet in self.timesheets:
+				if timesheet.working_hours:
+					self.total_working_hours += timesheet.working_hours
+
+		wages_amount = self.total_working_hours * self.hour_rate
+		self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
+		salary_component = frappe.db.get_value('Salary Structure', {'name': self.salary_structure}, 'salary_component')
+		if self.earnings:
+			for i, earning in enumerate(self.earnings):
+				if earning.salary_component == salary_component:
+					self.earnings[i].amount = wages_amount
+				self.gross_pay += self.earnings[i].amount
+		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
