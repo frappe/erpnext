@@ -7,6 +7,7 @@ import frappe
 import unittest
 from frappe.utils import today
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
 test_dependencies = ["Supplier Group"]
 
@@ -101,6 +102,32 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		for d in invoices:
 			d.cancel()
 
+	def test_single_threshold_tds_with_previous_vouchers_and_no_tds(self):
+		invoices = []
+		doc = create_supplier(supplier_name = "Test TDS Supplier ABC",
+			tax_withholding_category="Single Threshold TDS")
+		supplier = doc.name
+
+		pi = create_purchase_invoice(supplier=supplier)
+		pi.submit()
+		invoices.append(pi)
+
+		# TDS not applied
+		pi = create_purchase_invoice(supplier=supplier, do_not_apply_tds=True)
+		pi.submit()
+		invoices.append(pi)
+
+		pi = create_purchase_invoice(supplier=supplier)
+		pi.submit()
+		invoices.append(pi)
+
+		self.assertEqual(pi.taxes_and_charges_deducted, 2000)
+		self.assertEqual(pi.grand_total, 8000)
+
+		# delete invoices to avoid clashing
+		for d in invoices:
+			d.cancel()
+
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
 	item = frappe.get_doc('Item', {'item_name': 'TDS Item'})
@@ -109,7 +136,7 @@ def create_purchase_invoice(**args):
 	pi = frappe.get_doc({
 		"doctype": "Purchase Invoice",
 		"posting_date": today(),
-		"apply_tds": 1,
+		"apply_tds": 0 if args.do_not_apply_tds else 1,
 		"supplier": args.supplier,
 		"company": '_Test Company',
 		"taxes_and_charges": "",

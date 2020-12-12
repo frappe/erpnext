@@ -15,8 +15,7 @@ REQUIRED_FIELDS = {
 		},
 		{
 			"field_name": "taxes",
-			"regulation": "§ 14 Abs. 4 Nr. 8 UStG",
-			"condition": "not exempt_from_sales_tax"
+			"regulation": "§ 14 Abs. 4 Nr. 8 UStG"
 		},
 		{
 			"field_name": "customer_address",
