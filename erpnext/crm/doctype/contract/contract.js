@@ -1,23 +1,31 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-cur_frm.add_fetch("contract_template", "contract_terms", "contract_terms");
-cur_frm.add_fetch("contract_template", "requires_fulfilment", "requires_fulfilment");
-
-// Add fulfilment terms from contract template into contract
 frappe.ui.form.on("Contract", {
 	contract_template: function (frm) {
-		// Populate the fulfilment terms table from a contract template, if any
 		if (frm.doc.contract_template) {
-			frappe.model.with_doc("Contract Template", frm.doc.contract_template, function () {
-				var tabletransfer = frappe.model.get_doc("Contract Template", frm.doc.contract_template);
-
-				frm.doc.fulfilment_terms = [];
-				$.each(tabletransfer.fulfilment_terms, function (index, row) {
-					var d = frm.add_child("fulfilment_terms");
-					d.requirement = row.requirement;
-					frm.refresh_field("fulfilment_terms");
-				});
+			frappe.call({
+				method: 'erpnext.crm.doctype.contract_template.contract_template.get_contract_template',
+				args: {
+					template_name: frm.doc.contract_template,
+					doc: frm.doc
+				},
+				callback: function(r) {
+					if (r && r.message) {
+						let contract_template = r.message.contract_template;
+						frm.set_value("contract_terms", r.message.contract_terms);
+						frm.set_value("requires_fulfilment", contract_template.requires_fulfilment);
+						
+						if (frm.doc.requires_fulfilment) {
+							// Populate the fulfilment terms table from a contract template, if any
+							r.message.contract_template.fulfilment_terms.forEach(element => {
+								let d = frm.add_child("fulfilment_terms");
+								d.requirement = element.requirement;
+							});
+							frm.refresh_field("fulfilment_terms");
+						}		
+					}
+				}
 			});
 		}
 	}
