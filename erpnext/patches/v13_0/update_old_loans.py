@@ -23,12 +23,14 @@ def execute():
 	frappe.reload_doc('accounts', 'doctype', 'journal_entry_account')
 
 	updated_loan_types = []
+	loans_to_close = []
 
 	# Update old loan status as closed
-	loans_list = frappe.db.sql("""SELECT distinct parent from `tabRepayment Schedule`
-		where paid = 0 and docstatus = 1""", as_dict=1)
+	if frappe.db.has_column('Repayment Schedule', 'paid'):
+		loans_list = frappe.db.sql("""SELECT distinct parent from `tabRepayment Schedule`
+			where paid = 0 and docstatus = 1""", as_dict=1)
 
-	loans_to_close = [d.parent for d in loans_list]
+		loans_to_close = [d.parent for d in loans_list]
 
 	if loans_to_close:
 		frappe.db.sql("UPDATE `tabLoan` set status = 'Closed' where name not in (%s)" % (', '.join(['%s'] * len(loans_to_close))), tuple(loans_to_close))
