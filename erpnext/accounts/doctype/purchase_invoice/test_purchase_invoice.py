@@ -623,7 +623,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		self.assertEqual(len(pi.get("supplied_items")), 2)
 
 		rm_supp_cost = sum([d.amount for d in pi.get("supplied_items")])
-		self.assertEqual(pi.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
+		self.assertEqual(flt(pi.get("items")[0].rm_supp_cost, 2), flt(rm_supp_cost, 2))
 
 	def test_rejected_serial_no(self):
 		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,
