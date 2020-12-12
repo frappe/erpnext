@@ -974,7 +974,7 @@ class SalarySlip(TransactionBase):
 
 	def get_pending_advances(self):
 		pending_advances = frappe.db.sql("""
-			select name as employee_advance, paid_amount as total_advance, balance_amount
+			select name as employee_advance, paid_amount as total_advance, balance_amount, posting_date, advance_account
 			from `tabEmployee Advance`
 			where docstatus=1 and employee=%s and posting_date and posting_date BETWEEN %s AND %s  and  balance_amount > 0
 			order by posting_date
@@ -988,7 +988,9 @@ class SalarySlip(TransactionBase):
 				self.append('advances', {
 					'employee_advance': data.employee_advance,
 					'total_advance': data.total_advance,
-					'balance_amount': data.balance_amount
+					'balance_amount': data.balance_amount,
+					"posting_date": data.posting_date,
+					"advance_account": data.advance_account
 				})
 				total_pending_advance += data.total_advance
 
