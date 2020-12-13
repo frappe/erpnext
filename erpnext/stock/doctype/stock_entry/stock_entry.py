@@ -120,6 +120,7 @@ class StockEntry(StockController):
 		self.update_transferred_qty()
 		self.update_quality_inspection()
 		self.delete_auto_created_batches()
+		self.delete_linked_stock_entry()
 
 		if self.purpose == 'Material Transfer' and self.add_to_transit:
 			self.set_material_request_transfer_status('Not Started')
@@ -151,6 +152,12 @@ class StockEntry(StockController):
 		if self.job_card and self.purpose != 'Material Transfer for Manufacture':
 			frappe.throw(_("For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry")
 				.format(self.job_card))
+
+	def delete_linked_stock_entry(self):
+		if self.purpose == "Send to Warehouse":
+			for d in frappe.get_all("Stock Entry", filters={"docstatus": 0,
+				"outgoing_stock_entry": self.name, "purpose": "Receive at Warehouse"}):
+				frappe.delete_doc("Stock Entry", d.name)
 
 	def set_transfer_qty(self):
 		for item in self.get("items"):
