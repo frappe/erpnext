@@ -94,7 +94,9 @@ def get_party_details(address_name):
 	address_line1 = '{} {}'.format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
 	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
 	email_id = address.get('email_id')
-	phone = address.get('phone').replace(" ", "")[-10:] # get last 10 digit
+	phone = address.get('phone')
+	# get last 10 digit 
+	phone = phone.replace(" ", "")[-10:] if phone else ''
 	if state_code == 97:
 		pincode = 999999
 
@@ -179,7 +181,7 @@ def get_item_list(invoice):
 					item.cgst_amount += abs(item_tax_detail[1])
 		
 		item.total_value = abs(
-			item.base_amount + item.igst_amount + item.sgst_amount +
+			item.taxable_value + item.igst_amount + item.sgst_amount +
 			item.cgst_amount + item.cess_amount + item.cess_nadv_amount + item.other_charges
 		)
 		einv_item = item_schema.format(item=item)
@@ -197,8 +199,8 @@ def get_value_details(invoice):
 	# discount amount cannnot be -ve in an e-invoice, so if -ve include discount in round_off
 	value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount and invoice.discount_amount < 0 else 0)
 	disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
-	value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else invoice.base_rounded_total
-	value_details.grand_total = abs(invoice.grand_total) if disable_rounded else invoice.rounded_total
+	value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else abs(invoice.base_rounded_total)
+	value_details.grand_total = abs(invoice.grand_total) if disable_rounded else abs(invoice.rounded_total)
 	value_details.total_cgst_amt = 0
 	value_details.total_sgst_amt = 0
 	value_details.total_igst_amt = 0
@@ -301,12 +303,16 @@ def make_einvoice(invoice):
 	errors = validate_einvoice(validations, einvoice)
 	if errors:
 		message = "\n".join([
-			"E Invoice: ", json.dumps(einvoice, default=str, indent=4),
+			"E Invoice: ", json.dumps(einvoice, indent=4),
 			"-" * 50,
-			"Errors: ", json.dumps(errors, default=str, indent=4)
+			"Errors: ", json.dumps(errors, indent=4)
 		])
 		frappe.log_error(title="E Invoice Validation Failed", message=message)
-		frappe.throw(errors, title=_('E Invoice Validation Failed'), as_list=1)
+		if len(errors) > 1:
+			li = ['<li>'+ d +'</li>' for d in errors]
+			frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=_('E Invoice Validation Failed'))
+		else:
+			frappe.throw(errors[0], title=_('E Invoice Validation Failed'))
 
 	return einvoice
 
@@ -396,7 +402,7 @@ class GSPConnector():
 			"reference_invoice": self.invoice.name if self.invoice else None,
 			"url": url,
 			"headers": json.dumps(headers, indent=4) if headers else None,
-			"data": json.dumps(data, indent=4) if data else None,
+			"data": json.dumps(data, indent=4) if isinstance(data, dict) else data,
 			"response": json.dumps(res, indent=4) if res else None
 		})
 		request_log.insert(ignore_permissions=True)
@@ -463,7 +469,7 @@ class GSPConnector():
 	def generate_irn(self):
 		headers = self.get_headers()
 		einvoice = make_einvoice(self.invoice)
-		data = json.dumps(einvoice)
+		data = json.dumps(einvoice, indent=4)
 
 		try:
 			res = self.make_request('post', self.generate_irn_url, headers, data)
@@ -516,7 +522,7 @@ class GSPConnector():
 			'Irn': irn,
 			'Cnlrsn': reason,
 			'Cnlrem': remark
-		})
+		}, indent=4)
 
 		try:
 			res = self.make_request('post', self.cancel_irn_url, headers, data)
@@ -555,7 +561,7 @@ class GSPConnector():
 			'TrnDocNo': eway_bill_details.document_name,
 			'VehNo': eway_bill_details.vehicle_no,
 			'VehType': eway_bill_details.vehicle_type
-		})
+		}, indent=4)
 
 		try:
 			res = self.make_request('post', self.generate_ewaybill_url, headers, data)
@@ -587,7 +593,7 @@ class GSPConnector():
 			'ewbNo': eway_bill,
 			'cancelRsnCode': reason,
 			'cancelRmrk': remark
-		})
+		}, indent=4)
 
 		try:
 			res = self.make_request('post', self.cancel_ewaybill_url, headers, data)
@@ -680,6 +686,11 @@ class GSPConnector():
 		self.invoice.flags.ignore_validate_update_after_submit = True
 		self.invoice.flags.ignore_validate = True
 		self.invoice.save()
+
+@frappe.whitelist()
+def get_einvoice(doctype, docname):
+	invoice = frappe.get_doc(doctype, docname)
+	return make_einvoice(invoice)
 
 @frappe.whitelist()
 def generate_irn(doctype, docname):

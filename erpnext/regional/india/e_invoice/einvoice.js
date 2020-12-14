@@ -22,11 +22,14 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			if (docstatus == 0 && !irn && !__unsaved) {
 				const action = () => {
 					frappe.call({
-						method: 'erpnext.regional.india.e_invoice.utils.generate_irn',
+						method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
 						args: { doctype, docname: name },
 						freeze: true,
-						callback: () => frm.reload_doc()
-					});
+						callback: (res) => {
+							const einvoice = res.message;
+							show_einvoice_preview(frm, einvoice);
+						}
+					})
 				};
 
 				add_custom_button(__("Generate IRN"), action);
@@ -236,4 +239,70 @@ const get_ewaybill_fields = (frm) => {
 			'default': frm.doc.gst_vehicle_type
 		}
 	];
+};
+
+const request_irn_generation = (frm, dialog) => {
+	frappe.call({
+		method: 'erpnext.regional.india.e_invoice.utils.generate_irn',
+		args: { doctype: frm.doc.doctype, docname: frm.doc.name },
+		freeze: true,
+		callback: () => frm.reload_doc() || dialog.hide(),
+		error: () => dialog.hide()
+	});
+}
+
+const get_preview_dialog = (frm, action) => {
+	return new frappe.ui.Dialog({
+		title: __("E Invoice Preview"),
+		wide: 1,
+		fields: [
+			{ 
+				"label": "Preview",
+				"fieldname": "preview_html",
+				"fieldtype": "HTML"
+			}
+		],
+		primary_action: () => action(frm),
+		primary_action_label: __('Generate IRN')
+	});
+}
+
+const show_einvoice_preview = (frm, einvoice) => {
+	const preview_dialog = get_preview_dialog(frm, request_irn_generation);
+
+	// initialize empty e-invoice fields
+	einvoice.Irn = einvoice.AckNo = einvoice.AckDate =  '';
+	frm.doc.signed_einvoice = JSON.stringify(einvoice);
+
+	// initialize preview wrapper
+	const $preview_wrapper = preview_dialog.get_field("preview_html").$wrapper;
+	$preview_wrapper.html(
+		`<div>
+			<div class="print-preview">
+				<div class="print-format"></div>
+			</div>
+			<div class="page-break-message text-muted text-center text-medium margin-top"></div>
+		</div>`
+	);
+
+	frappe.call({
+		method: "frappe.www.printview.get_html_and_style",
+		args: {
+			doc: frm.doc,
+			print_format: "GST E-Invoice",
+			no_letterhead: 1
+		},
+		callback: function (r) {
+			if (!r.exc) {
+				$preview_wrapper.find(".print-format").html(r.message.html);
+				const style = `
+					.print-format { font-size: 7.0pt; box-shadow: 0px 0px 5px rgba(0,0,0,0.2); padding: 0.30in; min-height: 80vh; }
+					.print-preview { min-height: 0px; }
+					.modal-dialog { width: 650px; }
+				`
+				frappe.dom.set_style(style, "custom-print-style");
+				preview_dialog.show();
+			}
+		}
+	});
 };
