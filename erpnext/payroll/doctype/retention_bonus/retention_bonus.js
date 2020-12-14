@@ -5,7 +5,7 @@ frappe.ui.form.on('Retention Bonus', {
 	setup: function(frm) {
 		frm.set_query("employee", function() {
 			if (!frm.doc.company) {
-				frappe.msgprint(__("Please Select Company First"))
+				frappe.msgprint(__("Please Select Company First"));
 			}
 			return {
 				filters: {
