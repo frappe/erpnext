@@ -64,11 +64,14 @@ def get_putaway_capacity(rule):
 	return free_space if free_space > 0 else 0
 
 @frappe.whitelist()
-def apply_putaway_rule(doctype, items, company, sync=None):
+def apply_putaway_rule(doctype, items, company, sync=None, purpose=None):
 	""" Applies Putaway Rule on line items.
 
-		items: List of Purchase Receipt Item objects
-		company: Company in the Purchase Receipt
+		items: List of Purchase Receipt/Stock Entry Items
+		company: Company in the Purchase Receipt/Stock Entry
+		doctype: Doctype to apply rule on
+		purpose: Purpose of Stock Entry
+		sync (optional): Sync with client side only for client side calls
 	"""
 	if isinstance(items, string_types):
 		items = json.loads(items)
@@ -82,31 +85,36 @@ def apply_putaway_rule(doctype, items, company, sync=None):
 
 		source_warehouse = item.get("s_warehouse")
 		serial_nos = get_serial_nos(item.get("serial_no"))
-		item.conversion_factor = flt(item.conversion_factor) or 1
+		item.conversion_factor = flt(item.conversion_factor) or 1.0
 		pending_qty, item_code = flt(item.qty), item.item_code
 		pending_stock_qty = flt(item.transfer_qty) if doctype == "Stock Entry" else flt(item.stock_qty)
-		if not pending_qty or not item_code:
-			updated_table = add_row(item, pending_qty, item.warehouse, updated_table)
-			continue
-
 		uom_must_be_whole_number = frappe.db.get_value('UOM', item.uom, 'must_be_whole_number')
+
+		if not pending_qty or not item_code:
+			updated_table = add_row(item, pending_qty, source_warehouse or item.warehouse, updated_table)
+			continue
 
 		at_capacity, rules = get_ordered_putaway_rules(item_code, company, source_warehouse=source_warehouse)
 
 		if not rules:
-			warehouse = item.warehouse
+			warehouse = source_warehouse or item.warehouse
 			if at_capacity:
-				warehouse = '' # rules available, but no free space
+				# rules available, but no free space
 				items_not_accomodated.append([item_code, pending_qty])
-			updated_table = add_row(item, pending_qty, warehouse, updated_table)
+			else:
+				updated_table = add_row(item, pending_qty, warehouse, updated_table)
 			continue
 
-		# maintain item wise rules, to handle if item is entered twice
+		# maintain item/item-warehouse wise rules, to handle if item is entered twice
 		# in the table, due to different price, etc.
-		if not item_wise_rules[item_code]:
-			item_wise_rules[item_code] = rules
+		key = item_code
+		if doctype == "Stock Entry" and purpose == "Material Transfer" and source_warehouse:
+			key = (item_code, source_warehouse)
 
-		for rule in item_wise_rules[item_code]:
+		if not item_wise_rules[key]:
+			item_wise_rules[key] = rules
+
+		for rule in item_wise_rules[key]:
 			if pending_stock_qty > 0 and rule.free_space:
 				stock_qty_to_allocate = flt(rule.free_space) if pending_stock_qty >= flt(rule.free_space) else pending_stock_qty
 				qty_to_allocate = stock_qty_to_allocate / item.conversion_factor
