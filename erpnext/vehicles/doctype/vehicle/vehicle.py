@@ -35,6 +35,7 @@ class Vehicle(Document):
 
 	def on_update(self):
 		self.update_vehicle_serial_no()
+		self.update_vehicle_booking_order()
 
 	def validate(self):
 		self.validate_item()
@@ -68,6 +69,13 @@ class Vehicle(Document):
 
 				self.update_reference_from_serial_no(serial_no_doc)
 				self.db_update()
+
+	def update_vehicle_booking_order(self):
+		orders = frappe.get_all("Vehicle Booking Order", filters={"docstatus": ['<', 2], "vehicle": self.name})
+		for d in orders:
+			doc = frappe.get_doc("Vehicle Booking Order", d.name)
+			doc.set_vehicle_details(update=True)
+			doc.notify_update()
 
 	def validate_item(self):
 		item = frappe.get_cached_doc("Item", self.item_code)

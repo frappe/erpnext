@@ -384,7 +384,7 @@ def check_if_advance_entry_modified(args):
 					je.name = jea.parent and jea.account = %(account)s and je.docstatus=1
 					and je.name = %(voucher_no)s and jea.name = %(voucher_detail_no)s
 					and jea.party_type = %(party_type)s and jea.party = %(party)s
-					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order', 'Employee Advance')
+					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order', 'Employee Advance', 'Vehicle Booking Order')
 					and jea.{dr_or_cr} = %(unadjusted_amount)s""".format(dr_or_cr=args.dr_or_cr), args)
 		else:
 			if erpnext.get_party_account_type(args.party_type) == 'Receivable':
@@ -411,7 +411,7 @@ def check_if_advance_entry_modified(args):
 					pe.name = pref.parent and pe.docstatus = 1
 					and pe.name = %(voucher_no)s and pref.name = %(voucher_detail_no)s
 					and pe.party_type = %(party_type)s and pe.party = %(party)s and pe.{0} = %(account)s
-					and pref.reference_doctype in ('Sales Order', 'Purchase Order', 'Employee Advance')
+					and pref.reference_doctype in ('Sales Order', 'Purchase Order', 'Employee Advance', 'Vehicle Booking Order')
 					and pref.allocated_amount = %(unadjusted_amount)s
 			""".format(party_account_field), args)
 		else:

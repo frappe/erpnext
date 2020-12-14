@@ -16,6 +16,7 @@
   "po_date",
   "column_break1",
   "remarks",
+  "vehicle_booking_order",
   "is_return",
   "reopen_order",
   "return_against",
@@ -1656,12 +1657,20 @@
    "fieldtype": "Dynamic Link",
    "label": "Received By",
    "options": "received_by_type"
+  },
+  {
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "label": "Vehicle Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-11-04 00:36:05.259674",
+ "modified": "2020-12-12 00:00:31.098515",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

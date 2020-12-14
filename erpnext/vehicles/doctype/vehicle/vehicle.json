@@ -10,19 +10,19 @@
   "naming_series",
   "image",
   "item_code",
-  "item_name",
-  "column_break_3",
   "item_group",
+  "column_break_3",
+  "item_name",
   "brand",
   "column_break_7",
-  "sales_order",
   "warehouse",
+  "sales_order",
   "customer_details_section",
-  "vehicle_owner",
-  "vehicle_owner_name",
-  "column_break_10",
   "customer",
   "customer_name",
+  "column_break_10",
+  "vehicle_owner",
+  "vehicle_owner_name",
   "vehicle_details",
   "license_plate",
   "color",
@@ -40,14 +40,6 @@
   "insurance_start_date",
   "column_break_23",
   "insurance_end_date",
-  "additional_details",
-  "fuel_type",
-  "uom",
-  "column_break_30",
-  "carbon_check_date",
-  "column_break_21",
-  "wheels",
-  "doors",
   "purchase_details",
   "column_break2",
   "purchase_document_type",
@@ -90,6 +82,7 @@
    "options": "V-"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "license_plate",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -98,15 +91,18 @@
    "unique": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "vehicle_details",
    "fieldtype": "Section Break",
    "label": "Vehicle Details"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "last_odometer",
    "fieldtype": "Int",
    "label": "Odometer Value (Last)",
@@ -114,10 +110,12 @@
    "set_only_once": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "chassis_no",
    "fieldtype": "Data",
    "label": "Chassis No"
@@ -129,63 +127,33 @@
    "options": "Employee"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "insurance_details",
    "fieldtype": "Section Break",
    "label": "Insurance Details"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "insurance_company",
    "fieldtype": "Link",
    "label": "Insurance Company",
    "options": "Customer"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "additional_details",
-   "fieldtype": "Section Break",
-   "label": "Additional Details"
-  },
-  {
-   "fieldname": "fuel_type",
-   "fieldtype": "Select",
-   "label": "Fuel Type",
-   "options": "Petrol\nDiesel\nNatural Gas\nElectric"
-  },
-  {
-   "fieldname": "uom",
-   "fieldtype": "Link",
-   "label": "Fuel UOM",
-   "options": "UOM"
-  },
-  {
-   "fieldname": "carbon_check_date",
-   "fieldtype": "Date",
-   "label": "Last Carbon Check"
-  },
-  {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
-  },
-  {
+   "allow_in_quick_entry": 1,
    "fieldname": "color",
    "fieldtype": "Link",
    "label": "Color",
    "options": "Vehicle Color"
   },
   {
-   "fieldname": "wheels",
-   "fieldtype": "Int",
-   "label": "Wheels"
-  },
-  {
-   "fieldname": "doors",
-   "fieldtype": "Int",
-   "label": "Doors"
-  },
-  {
+   "allow_in_quick_entry": 1,
+   "fetch_from": "vehicle_booking_order.item_code",
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -195,6 +163,7 @@
    "set_only_once": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "depends_on": "eval:doc.item_name != doc.item_code",
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
@@ -227,15 +196,6 @@
    "options": "Warehouse",
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "sales_order",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "in_preview": 1,
-   "in_standard_filter": 1,
-   "label": "Sales Order",
-   "options": "Sales Order"
   },
   {
    "fetch_from": "item_code.brand",
@@ -365,6 +325,7 @@
    "width": "50%"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -375,10 +336,10 @@
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
    "options": "Customer",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "bold": 1,
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
@@ -478,24 +439,24 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "column_break_23",
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "engine_no",
    "fieldtype": "Data",
    "label": "Engine No"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "column_break_30",
    "fieldtype": "Column Break"
   },
   {
@@ -511,6 +472,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"
   },
@@ -522,26 +484,31 @@
    "label": "Image"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "insurance_policy_no",
    "fieldtype": "Data",
    "label": "Insurance Policy No"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "insurance_start_date",
    "fieldtype": "Date",
    "label": "Insurance Start Date"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "insurance_end_date",
    "fieldtype": "Date",
    "label": "Insurance End Date"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "customer_details_section",
    "fieldtype": "Section Break",
    "label": "Customer Details"
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "vehicle_owner",
    "fieldtype": "Link",
    "label": "Vehicle Owner",
@@ -549,6 +516,7 @@
    "options": "Customer"
   },
   {
+   "allow_in_quick_entry": 1,
    "depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner",
    "fetch_from": "vehicle_owner.customer_name",
    "fieldname": "vehicle_owner_name",
@@ -556,10 +524,17 @@
    "label": "Vehicle Owner Name",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "read_only": 1
   }
  ],
  "image_field": "image",
- "modified": "2020-11-19 17:29:14.643563",
+ "modified": "2020-12-12 14:41:33.006887",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
@@ -636,6 +611,7 @@
    "share": 1
   }
  ],
+ "quick_entry": 1,
  "search_fields": "item_code, item_name, customer, license_plate, chassis_no, engine_no, warehouse",
  "show_name_in_global_search": 1,
  "show_preview_popup": 1,

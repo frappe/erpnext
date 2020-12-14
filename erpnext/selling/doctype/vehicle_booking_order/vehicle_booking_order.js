@@ -5,7 +5,13 @@ frappe.provide("erpnext.selling");
 
 erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	setup: function () {
-
+		this.frm.custom_make_buttons = {
+			'Delivery Note': 'Deliver Vehicle',
+			'Sales Invoice': 'Deliver Invoice',
+			'Purchase Order': 'Purchase Order',
+			'Purchase Invoice': 'Receive Invoice',
+			'Purchase Receipt': 'Receive Vehicle',
+		}
 	},
 
 	refresh: function () {
@@ -13,16 +19,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.set_customer_is_company_label();
 		this.set_dynamic_link();
-
-		if (this.frm.doc.docstatus === 1) {
-			if (flt(this.frm.doc.customer_outstanding) > 0) {
-				this.frm.add_custom_button(__('Customer Payment'), () => this.make_payment_entry('Customer'), __('Create'));
-			}
-			if (flt(this.frm.doc.supplier_outstanding) > 0) {
-				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Create'));
-			}
-		}
-		this.frm.page.set_inner_btn_group_as_primary(__('Create'));
+		this.add_create_buttons();
 	},
 
 	onload: function () {
@@ -30,14 +27,62 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	setup_queries: function () {
+		var me = this;
+
+		this.frm.set_query('customer', erpnext.queries.customer);
 		this.frm.set_query('contact_person', erpnext.queries.contact_query);
 		this.frm.set_query('customer_address', erpnext.queries.address_query);
+
 		this.frm.set_query("item_code", function() {
 			return erpnext.queries.item({"is_vehicle": 1, "include_item_in_vehicle_booking": 1});
 		});
+
 		this.frm.set_query("payment_terms_template", function() {
 			return {filters: {"include_in_vehicle_booking": 1}};
 		});
+
+		this.frm.set_query("vehicle", function() {
+			return {filters: {"item_code": me.frm.doc.item_code}};
+		});
+	},
+
+	add_create_buttons: function () {
+		if (this.frm.doc.docstatus === 1) {
+			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.supplier_outstanding) > 0;
+
+			if (flt(this.frm.doc.customer_outstanding) > 0) {
+				this.frm.add_custom_button(__('Customer Payment'), () => this.make_payment_entry('Customer'), __('Payment'));
+			}
+			if (flt(this.frm.doc.supplier_outstanding) > 0) {
+				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Payment'));
+			}
+
+			if (this.frm.doc.delivery_status === "To Receive") {
+				this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Purchase Receipt'));
+			} else if (this.frm.doc.delivery_status === "To Deliver") {
+				this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Delivery Note'));
+			}
+
+			if (this.frm.doc.delivery_status !== "To Receive") {
+				if (this.frm.doc.invoice_status === "To Receive") {
+					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Purchase Invoice'));
+				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
+					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Sales Invoice'));
+				}
+			}
+
+			if (unpaid) {
+				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
+			} else if (this.frm.doc.status === "To Receive Vehicle") {
+				this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
+			} else if (this.frm.doc.status === "To Receive Invoice") {
+				this.frm.custom_buttons[__('Receive Invoice')] && this.frm.custom_buttons[__('Receive Invoice')].addClass('btn-primary');
+			} else if (this.frm.doc.status === "To Deliver Vehicle") {
+				this.frm.custom_buttons[__('Deliver Vehicle')] && this.frm.custom_buttons[__('Deliver Vehicle')].addClass('btn-primary');
+			} else if (this.frm.doc.status === "To Deliver Invoice") {
+				this.frm.custom_buttons[__('Deliver Invoice')] && this.frm.custom_buttons[__('Deliver Invoice')].addClass('btn-primary');
+			}
+		}
 	},
 
 	company: function () {
@@ -147,11 +192,19 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	calculate_taxes_and_totals: function () {
 		frappe.model.round_floats_in(this.frm.doc, ['vehicle_amount', 'fni_amount']);
 
+		if (!this.frm.doc.fni_item_code) {
+			this.frm.doc.fni_amount = 0;
+		}
+
 		this.frm.doc.invoice_total = flt(this.frm.doc.vehicle_amount + this.frm.doc.fni_amount,
 			precision('invoice_total'));
 
-		this.frm.doc.customer_outstanding = this.frm.doc.invoice_total - flt(this.frm.doc.customer_advance);
-		this.frm.doc.supplier_outstanding = this.frm.doc.invoice_total - flt(this.frm.doc.supplier_advance);
+		if (this.frm.doc.docstatus === 0) {
+			this.frm.doc.customer_advance = 0;
+			this.frm.doc.supplier_advance = 0;
+			this.frm.doc.customer_outstanding = this.frm.doc.invoice_total;
+			this.frm.doc.supplier_outstanding = this.frm.doc.invoice_total;
+		}
 
 		this.frm.refresh_fields();
 	},
@@ -222,6 +275,25 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				}
 			});
 		}
+	},
+
+	make_next_document: function(doctype) {
+		if (!doctype)
+			return;
+
+		return frappe.call({
+			method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_next_document",
+			args: {
+				"vehicle_booking_order": this.frm.doc.name,
+				"doctype": doctype
+			},
+			callback: function (r) {
+				if (!r.exc) {
+					var doclist = frappe.model.sync(r.message);
+					frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+				}
+			}
+		});
 	},
 });
 

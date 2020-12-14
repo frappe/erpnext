@@ -251,7 +251,7 @@ def update_outstanding_amt(voucher_type, voucher_no, account, party_type, party,
 	ref_doc.db_set(fieldname, bal)
 
 	if voucher_type == "Vehicle Booking Order":
-		ref_doc.set_payment_status(update=True)
+		ref_doc.update_payment_status(update=True)
 	if voucher_type == "Employee Advance":
 		ref_doc.set_payment_and_claimed_amount(update=True)
 

@@ -48,13 +48,14 @@
   "item_group",
   "brand",
   "column_break_33",
+  "vehicle_color",
   "color_1",
   "color_2",
   "color_3",
   "column_break_39",
+  "vehicle",
   "vehicle_chassis_no",
   "vehicle_engine_no",
-  "color_actual",
   "pricing_section",
   "vehicle_amount",
   "fni_amount",
@@ -81,10 +82,13 @@
   "delivery_status",
   "vehicle_received_date",
   "vehicle_delivered_date",
+  "supplier_delivery_note",
   "column_break_74",
   "invoice_status",
   "invoice_received_date",
-  "invoice_delivery_date",
+  "invoice_delivered_date",
+  "bill_no",
+  "bill_date",
   "more_info",
   "supplier",
   "supplier_name",
@@ -314,9 +318,10 @@
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Vehicle Item Code",
+   "label": "Vehicle Item Code (Variant)",
    "options": "Item",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
@@ -353,15 +358,18 @@
    "fieldname": "color_1",
    "fieldtype": "Link",
    "label": "Color (1st Priority)",
-   "options": "Vehicle Color"
+   "options": "Vehicle Color",
+   "reqd": 1
   },
   {
+   "depends_on": "color_1",
    "fieldname": "color_2",
    "fieldtype": "Link",
    "label": "Color (2nd Priority)",
    "options": "Vehicle Color"
   },
   {
+   "depends_on": "color_2",
    "fieldname": "color_3",
    "fieldtype": "Link",
    "label": "Color (3rd Priority)",
@@ -372,19 +380,18 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "vehicle.chassis_no",
    "fieldname": "vehicle_chassis_no",
-   "fieldtype": "Read Only",
-   "label": "Chassis No"
+   "fieldtype": "Data",
+   "label": "Chassis No",
+   "read_only": 1
   },
   {
+   "fetch_from": "vehicle.engine_no",
    "fieldname": "vehicle_engine_no",
-   "fieldtype": "Read Only",
-   "label": "Engine No"
-  },
-  {
-   "fieldname": "color_actual",
-   "fieldtype": "Read Only",
-   "label": "Color (Actual)"
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "read_only": 1
   },
   {
    "fieldname": "warehouse",
@@ -532,7 +539,8 @@
    "no_copy": 1,
    "options": "Draft\nTo Receive Payment\nTo Deposit Payment\nTo Receive Vehicle\nTo Receive Invoice\nTo Deliver Vehicle\nTo Deliver Invoice\nCompleted\nCancelled",
    "read_only": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "default": "Unpaid",
@@ -627,6 +635,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "customer_outstanding",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -636,6 +645,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "supplier_advance",
    "fieldtype": "Currency",
    "label": "Supplier Advance Paid",
@@ -644,6 +654,7 @@
    "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "supplier_outstanding",
    "fieldtype": "Currency",
    "label": "Supplier Outstanding",
@@ -677,13 +688,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "invoice_delivery_date",
-   "fieldtype": "Date",
-   "label": "Invoice Delivery Date",
-   "no_copy": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "receivable_account",
    "fieldtype": "Link",
    "label": "Receivable Account",
@@ -700,12 +704,56 @@
   {
    "fieldname": "column_break_89",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "vehicle.color",
+   "fieldname": "vehicle_color",
+   "fieldtype": "Link",
+   "label": "Color (Actual)",
+   "options": "Vehicle Color",
+   "read_only": 1
+  },
+  {
+   "fieldname": "invoice_delivered_date",
+   "fieldtype": "Date",
+   "label": "Invoice Delivered Date",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier_delivery_note",
+   "fieldtype": "Data",
+   "label": "Supplier Delivery Note",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bill_no",
+   "fieldtype": "Data",
+   "label": "Supplier Invoice No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bill_date",
+   "fieldtype": "Date",
+   "label": "Supplier Invoice Date",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-12-11 13:54:18.294549",
+ "modified": "2020-12-13 03:13:08.288954",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",

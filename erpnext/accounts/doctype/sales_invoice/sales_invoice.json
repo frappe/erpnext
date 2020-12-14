@@ -18,6 +18,7 @@
   "has_stin",
   "column_break_21",
   "remarks",
+  "vehicle_booking_order",
   "is_return",
   "return_against",
   "reopen_order",
@@ -2053,12 +2054,20 @@
    "fieldtype": "Link",
    "label": "Insurance Surveyor Company",
    "options": "Insurance Surveyor Company"
+  },
+  {
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "label": "Vehicle Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-11-28 15:13:56.245502",
+ "modified": "2020-12-12 00:00:43.036683",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
