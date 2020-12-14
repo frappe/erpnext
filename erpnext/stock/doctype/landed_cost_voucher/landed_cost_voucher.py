@@ -9,6 +9,7 @@ from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 
 class LandedCostVoucher(Document):
 	def get_items_from_purchase_receipts(self):
@@ -39,12 +40,13 @@ class LandedCostVoucher(Document):
 
 	def validate(self):
 		self.check_mandatory()
+		self.set_exchange_rate()
+		self.set_amounts_in_company_currency()
 		if not self.get("items"):
 			self.get_items_from_purchase_receipts()
 		else:
 			self.validate_applicable_charges_for_item()
 		self.validate_purchase_receipts()
-		self.validate_expense_accounts()
 		self.set_total_taxes_and_charges()
 
 	def check_mandatory(self):
@@ -73,16 +75,25 @@ class LandedCostVoucher(Document):
 				frappe.throw(_("Row {0}: Cost center is required for an item {1}")
 					.format(item.idx, item.item_code))
 
-	def validate_expense_accounts(self):
-		company_currency = erpnext.get_company_currency(self.company)
-		for account in self.taxes:
-			if get_account_currency(account.expense_account) != company_currency:
-				frappe.throw(msg=_(""" Row {0}: Expense account currency should be same as company's default currency.
-					Please select expense account with account currency as {1}""")
-					.format(account.idx, frappe.bold(company_currency)), title=_("Invalid Account Currency"))
-
 	def set_total_taxes_and_charges(self):
-		self.total_taxes_and_charges = sum([flt(d.amount) for d in self.get("taxes")])
+		self.total_taxes_and_charges = sum([flt(d.base_amount) for d in self.get("taxes")])
+
+	def set_exchange_rate(self):
+		company_currency = erpnext.get_company_currency(self.company)
+		for d in self.get('taxes'):
+			if d.account_currency == company_currency:
+				d.exchange_rate = 1
+			elif not d.exchange_rate or d.exchange_rate == 1 or self.posting_date:
+				d.exchange_rate = get_exchange_rate(self.posting_date, account=d.expense_account,
+					account_currency=d.account_currency, company=self.company)
+
+			if not d.exchange_rate:
+				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
+
+	def set_amounts_in_company_currency(self):
+		for d in self.get('taxes'):
+			d.amount = flt(d.amount, d.precision("amount"))
+			d.base_amount = flt(d.amount * flt(d.exchange_rate), d.precision("base_amount"))
 
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()

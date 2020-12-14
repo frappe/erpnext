@@ -32,9 +32,8 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 
 		this.frm.set_query("expense_account", "taxes", function() {
 			return {
-				query: "erpnext.controllers.queries.tax_account_query",
 				filters: {
-					"account_type": ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"],
+					"account_type": ['in', ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"]],
 					"company": me.frm.doc.company
 				}
 			};
@@ -97,7 +96,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	set_total_taxes_and_charges: function() {
 		var total_taxes_and_charges = 0.0;
 		$.each(this.frm.doc.taxes || [], function(i, d) {
-			total_taxes_and_charges += flt(d.amount)
+			total_taxes_and_charges += flt(d.base_amount)
 		});
 		cur_frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
 	},
@@ -134,7 +133,58 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	items_remove: () => {
 		this.trigger('set_applicable_charges_for_item');
 	}
-
 });
 
 cur_frm.script_manager.make(erpnext.stock.LandedCostVoucher);
+
+frappe.ui.form.on('Landed Cost Voucher', {
+	set_account_currency: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.expense_account) {
+			frappe.db.get_value('Account', row.expense_account, 'account_currency', function(value) {
+				frappe.model.set_value(cdt, cdn, "account_currency", value.account_currency);
+				frm.events.set_exchange_rate(frm, cdt, cdn);
+			});
+		}
+	},
+
+	set_exchange_rate: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		let company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
+
+		if(row.account_currency == company_currency) {
+			row.exchange_rate = 1;
+		} else if (!row.exchange_rate || row.exchange_rate == 1) {
+			frappe.call({
+				method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
+				args: {
+					posting_date: frm.doc.posting_date,
+					account: row.expense_account,
+					account_currency: row.account_currency,
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if(r.message) {
+						frappe.model.set_value(cdt, cdn, "exchange_rate", r.message);
+					}
+				}
+			})
+		}
+	},
+
+	set_base_amount: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "base_amount",
+			flt(flt(row.amount)*row.exchange_rate, precision("base_amount", row)));
+	}
+})
+
+frappe.ui.form.on('Landed Cost Taxes and Charges', {
+	expense_account: function(frm, cdt, cdn) {
+		frm.events.set_account_currency(frm, cdt, cdn);
+	},
+
+	amount: function(frm, cdt, cdn) {
+		frm.events.set_base_amount(frm, cdt, cdn);
+	}
+});
