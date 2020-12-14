@@ -85,7 +85,6 @@ class TestLeaveEncashment(unittest.TestCase):
 		)).insert()
 
 		leave_encashment.submit()
-		leave_encashment.reload()
 
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_encashment.name))
 
@@ -96,7 +95,6 @@ class TestLeaveEncashment(unittest.TestCase):
 
 		# check if leave ledger entry is deleted on cancellation
 
-		frappe.db.sql("Delete from `tabAdditional Salary` WHERE ref_docname = %s", (leave_encashment.name) )
-
 		leave_encashment.cancel()
+		frappe.db.sql("Delete from `tabAdditional Salary` WHERE ref_docname = %s", (leave_encashment.name) )
 		self.assertFalse(frappe.db.exists("Leave Ledger Entry", {'transaction_name':leave_encashment.name}))
