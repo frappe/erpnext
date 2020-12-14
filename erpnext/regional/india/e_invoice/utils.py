@@ -307,11 +307,7 @@ def make_einvoice(invoice):
 			"Errors: ", json.dumps(errors, indent=4)
 		])
 		frappe.log_error(title="E Invoice Validation Failed", message=message)
-		if len(errors) > 1:
-			li = ['<li>'+ d +'</li>' for d in errors]
-			frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=_('E Invoice Validation Failed'))
-		else:
-			frappe.throw(errors[0], title=_('E Invoice Validation Failed'))
+		frappe.throw(errors, title=_('E Invoice Validation Failed'), as_list=1)
 
 	return einvoice
 
