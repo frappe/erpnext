@@ -46,14 +46,14 @@
   },
   {
    "fieldname": "advance_account",
-   "fieldtype": "Data",
-   "hidden": 1,
+   "fieldtype": "Link",
    "label": "Advance Account",
+   "options": "Account",
    "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2020-12-11 19:38:29.146904",
+ "modified": "2020-12-14 13:50:37.483745",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Salary Slip Employee Advance",

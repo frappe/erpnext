@@ -973,26 +973,19 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 	def get_pending_advances(self):
+		self.advances = []
+
 		pending_advances = frappe.db.sql("""
 			select name as employee_advance, paid_amount as total_advance, balance_amount, posting_date, advance_account
 			from `tabEmployee Advance`
-			where docstatus=1 and employee=%s and posting_date and posting_date BETWEEN %s AND %s  and  balance_amount > 0
+			where docstatus=1 and employee=%s and posting_date <= %s and deduct_from_salary = 1 and balance_amount > 0
 			order by posting_date
-		""", [self.employee, self.start_date, self.end_date], as_dict=1)
+		""", [self.employee, self.end_date], as_dict=1)
 
 		total_pending_advance = 0
 		for data in pending_advances:
-			emp_adv = frappe.get_doc("Employee Advance", data.employee_advance)
-			deduct_from_salary = emp_adv.deduct_from_salary
-			if deduct_from_salary:
-				self.append('advances', {
-					'employee_advance': data.employee_advance,
-					'total_advance': data.total_advance,
-					'balance_amount': data.balance_amount,
-					"posting_date": data.posting_date,
-					"advance_account": data.advance_account
-				})
-				total_pending_advance += data.total_advance
+			self.append('advances', data)
+			total_pending_advance += data.total_advance
 
 		self.total_advance_amount = total_pending_advance
 

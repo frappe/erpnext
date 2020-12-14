@@ -77,6 +77,7 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company();
 		frm.trigger("toggle_fields")
 
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "variable_based_on_taxable_salary"];
