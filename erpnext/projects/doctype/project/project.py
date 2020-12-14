@@ -55,11 +55,13 @@ class Project(Document):
 
 			# create tasks from template
 			project_tasks = []
+			tmp_task_details = []
 			for task in template.tasks:
 				template_task_details = frappe.get_doc("Task", task.task)
+				tmp_task_details.append(template_task_details)
 				project_tasks.append(self.create_task_from_template(template_task_details))
 				
-			#self.dependency_mapping(template.tasks, project_tasks)
+			self.dependency_mapping(tmp_task_details, project_tasks)
 
 	def create_task_from_template(self, task_details):
 		return frappe.get_doc(dict(
@@ -78,16 +80,33 @@ class Project(Document):
 				duration = task_details.duration
 			)).insert()
 
-	""" def dependency_mapping(self, template_tasks, project_tasks):
+	def dependency_mapping(self, template_tasks, project_tasks):
 		for tmp_task in template_tasks:
 			for prj_task in project_tasks:
 				if tmp_task.subject == prj_task.subject:
-					if tmp_task.depends_on and not prj_task.depends_on:
-						for child_task in tmp_task.depends_on:
-							child_task_detai
-						prj_task.depends_on = tmp_task.depends_on
-					 """
+					self.check_depends_on_value(tmp_task, prj_task, project_tasks)
+					self.check_for_parent_tasks(tmp_task, prj_task, project_tasks)
 
+	def check_depends_on_value(self, tmp_task, prj_task, project_tasks):
+		if tmp_task.depends_on and not prj_task.depends_on:
+			for child_task in tmp_task.depends_on:
+				child_task_subject = frappe.db.get_value("Task", child_task.task, "subject")
+				corresponding_prj_task = list(filter(lambda x: x.subject == child_task_subject, project_tasks))
+				if len(corresponding_prj_task):
+					prj_task.append("depends_on",{
+						"task": corresponding_prj_task[0].name
+					})
+					prj_task.save()
+
+	def check_for_parent_tasks(self, tmp_task, prj_task, project_tasks):
+		if tmp_task.parent_task and not prj_task.parent_task:
+			parent_task_subject = frappe.db.get_value("Task", tmp_task.parent_task, "subject")
+			corresponding_prj_task = list(filter(lambda x: x.subject == parent_task_subject, project_tasks))
+			if len(corresponding_prj_task):
+				prj_task.parent_task = corresponding_prj_task[0].name
+				print(prj_task.name, prj_task.parent_task, corresponding_prj_task[0].name)
+				prj_task.save()
+				print(prj_task.name, corresponding_prj_task[0].name)
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True
