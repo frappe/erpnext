@@ -312,8 +312,8 @@ class PayrollEntry(Document):
 
 		cond = self.get_filter_condition()
 		salary_slip_name_list = frappe.db.sql(""" select t1.name from `tabSalary Slip` t1
-			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
-			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_list = True)
+			where t1.docstatus = 1 and t1.payroll_entry = %s and start_date >= %s and end_date <= %s %s
+			""" % ('%s', '%s', '%s', cond), (self.name, self.start_date, self.end_date), as_list = True)
 
 		if salary_slip_name_list and len(salary_slip_name_list) > 0:
 			salary_slip_total = 0
@@ -542,7 +542,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 					title = _("Creating Salary Slips..."))
 		else:
 			salary_slip_name = frappe.db.sql(
-				'''SELECT 
+				'''SELECT
 						name
 					FROM `tabSalary Slip`
 					WHERE company=%s
