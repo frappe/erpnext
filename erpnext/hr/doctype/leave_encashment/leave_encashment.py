@@ -47,6 +47,9 @@ class LeaveEncashment(Document):
 		additional_salary.ref_docname = self.name
 		additional_salary.submit()
 
+		# Link Additional Salary in Leave Encashment
+		frappe.db.set_value("Leave Encashment", self.name, "additional_salary", additional_salary.name)
+
 		# Set encashed leaves in Allocation
 		frappe.db.set_value("Leave Allocation", self.leave_allocation, "total_leaves_encashed",
 				frappe.db.get_value('Leave Allocation', self.leave_allocation, 'total_leaves_encashed') + self.encashable_days)
