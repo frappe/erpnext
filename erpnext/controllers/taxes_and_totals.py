@@ -531,16 +531,6 @@ class calculate_taxes_and_totals(object):
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
 
 		if self.doc.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			grand_total = self.doc.rounded_total or self.doc.grand_total
-			if self.doc.party_account_currency == self.doc.currency:
-				total_amount_to_pay = flt(grand_total - self.doc.total_advance
-					- flt(self.doc.write_off_amount), self.doc.precision("grand_total"))
-			else:
-				total_amount_to_pay = flt(flt(grand_total *
-					self.doc.conversion_rate, self.doc.precision("grand_total")) - self.doc.total_advance
-						- flt(self.doc.base_write_off_amount), self.doc.precision("grand_total"))
-
-			self.doc.round_floats_in(self.doc, ["paid_amount"])
 			change_amount = 0
 
 			if self.doc.doctype == "Sales Invoice" and not self.doc.get('is_return'):
@@ -549,14 +539,10 @@ class calculate_taxes_and_totals(object):
 				change_amount = self.doc.change_amount \
 					if self.doc.party_account_currency == self.doc.currency else self.doc.base_change_amount
 
-			paid_amount = self.doc.paid_amount \
-				if self.doc.party_account_currency == self.doc.currency else self.doc.base_paid_amount
-
-			self.doc.outstanding_amount = flt(total_amount_to_pay - flt(paid_amount) + flt(change_amount),
-				self.doc.precision("outstanding_amount"))
+			calculate_outstanding_amount(self.doc, change_amount)
 
 			if self.doc.doctype == 'Sales Invoice' and self.doc.get('is_pos') and self.doc.get('is_return'):
-			 	self.update_paid_amount_for_return(total_amount_to_pay)
+				self.update_paid_amount_for_return(self.doc.total_amount_to_pay)
 
 	def calculate_paid_amount(self):
 
@@ -751,3 +737,20 @@ def get_rounded_tax_amount(itemised_tax, precision):
 	for taxes in itemised_tax.values():
 		for tax_account in taxes:
 			taxes[tax_account]["tax_amount"] = flt(taxes[tax_account]["tax_amount"], precision)
+
+def calculate_outstanding_amount(doc, change_amount=None):
+	grand_total = doc.rounded_total or doc.grand_total
+	if doc.party_account_currency == doc.currency:
+		doc.total_amount_to_pay = flt(grand_total - doc.total_advance
+			- flt(doc.write_off_amount), doc.precision("grand_total"))
+	else:
+		doc.total_amount_to_pay = flt(flt(grand_total *
+			doc.conversion_rate, doc.precision("grand_total")) - doc.total_advance
+				- flt(doc.base_write_off_amount), doc.precision("grand_total"))
+
+	doc.round_floats_in(doc, ["paid_amount"])
+	paid_amount = doc.paid_amount \
+		if doc.party_account_currency == doc.currency else doc.base_paid_amount
+
+	doc.outstanding_amount = flt(doc.total_amount_to_pay - flt(paid_amount) + flt(change_amount),
+		doc.precision("outstanding_amount"))

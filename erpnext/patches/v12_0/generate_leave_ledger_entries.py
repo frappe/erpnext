@@ -51,7 +51,7 @@ def generate_encashment_leave_ledger_entries():
 
 	for encashment in leave_encashments:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment', 'transaction_name': encashment.name}):
-			frappe.get_doc("Leave Enchashment", encashment).create_leave_ledger_entry()
+			frappe.get_doc("Leave Encashment", encashment).create_leave_ledger_entry()
 
 def generate_expiry_allocation_ledger_entries():
 	''' fix ledger entries for missing leave allocation transaction '''

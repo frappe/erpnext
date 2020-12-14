@@ -71,29 +71,41 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
-			frm.add_custom_button(__('Create Tax Template'), function() {
-				frm.trigger("make_default_tax_template");
-			});
+			if (frm.has_perm('write')) {
+				frm.add_custom_button(__('Create Tax Template'), function() {
+					frm.trigger("make_default_tax_template");
+				});
+			}
+			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
+				frm.add_custom_button(__('Cost Centers'), function() {
+					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Cost Centers'), function() {
-				frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name})
-			}, __("View"));
+			if (frappe.perm.has_perm("Account", 0, 'read')) {
+				frm.add_custom_button(__('Chart of Accounts'), function() {
+					frappe.set_route('Tree', 'Account', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Chart of Accounts'), function() {
-				frappe.set_route('Tree', 'Account', {'company': frm.doc.name})
-			}, __("View"));
 
-			frm.add_custom_button(__('Sales Tax Template'), function() {
-				frappe.set_route('List', 'Sales Taxes and Charges Template', {'company': frm.doc.name});
-			}, __("View"));
+			if (frappe.perm.has_perm("Sales Taxes and Charges Template", 0, 'read')) {
+				frm.add_custom_button(__('Sales Tax Template'), function() {
+					frappe.set_route('List', 'Sales Taxes and Charges Template', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Purchase Tax Template'), function() {
-				frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
-			}, __("View"));
+			if (frappe.perm.has_perm("Purchase Taxes and Charges Template", 0, 'read')) {
+				frm.add_custom_button(__('Purchase Tax Template'), function() {
+					frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Default Tax Template'), function() {
-				frm.trigger("make_default_tax_template");
-			}, __('Create'));
+			if (frm.has_perm('write')) {
+				frm.add_custom_button(__('Default Tax Template'), function() {
+					frm.trigger("make_default_tax_template");
+				}, __('Create'));
+			}
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
