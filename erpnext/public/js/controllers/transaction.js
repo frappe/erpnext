@@ -2030,7 +2030,7 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 	});
 }
 
-erpnext.apply_putaway_rule = (frm) => {
+erpnext.apply_putaway_rule = (frm, purpose=null) => {
 	if (!frm.doc.company) {
 		frappe.throw({message: __("Please select a Company first."), title: __("Mandatory")});
 	}
@@ -2042,7 +2042,8 @@ erpnext.apply_putaway_rule = (frm) => {
 			doctype: frm.doctype,
 			items: frm.doc.items,
 			company: frm.doc.company,
-			sync: true
+			sync: true,
+			purpose: purpose
 		},
 		callback: (result) => {
 			if (!result.exc && result.message) {
