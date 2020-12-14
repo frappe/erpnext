@@ -401,6 +401,7 @@ class GSPConnector():
 			"response": json.dumps(res, indent=4) if res else None
 		})
 		request_log.insert(ignore_permissions=True)
+		frappe.db.commit()
 
 	def fetch_auth_token(self):
 		headers = {
@@ -482,11 +483,11 @@ class GSPConnector():
 						Contact ERPNext support to resolve the issue.')
 
 			else:
-				self.log_error(res)
 				raise RequestFailed
 		
 		except RequestFailed:
-			self.raise_error()
+			errors = self.sanitize_error_message(res.get('message'))
+			self.raise_error(errors=errors)
 
 		except Exception:
 			self.log_error(data)
@@ -501,11 +502,11 @@ class GSPConnector():
 			if res.get('success'):
 				return res.get('result')
 			else:
-				self.log_error(res)
 				raise RequestFailed
 		
 		except RequestFailed:
-			self.raise_error()
+			errors = self.sanitize_error_message(res.get('message'))
+			self.raise_error(errors=errors)
 
 		except Exception:
 			self.log_error()
@@ -531,11 +532,11 @@ class GSPConnector():
 				self.update_invoice()
 
 			else:
-				self.log_error(res)
 				raise RequestFailed
 		
 		except RequestFailed:
-			self.raise_error()
+			errors = self.sanitize_error_message(res.get('message'))
+			self.raise_error(errors=errors)
 
 		except Exception:
 			self.log_error(data)
@@ -572,11 +573,11 @@ class GSPConnector():
 				self.update_invoice()
 
 			else:
-				self.log_error(res)
 				raise RequestFailed
 
 		except RequestFailed:
-			self.raise_error()
+			errors = self.sanitize_error_message(res.get('message'))
+			self.raise_error(errors=errors)
 
 		except Exception:
 			self.log_error(data)
@@ -603,15 +604,37 @@ class GSPConnector():
 				self.update_invoice()
 
 			else:
-				self.log_error(res)
 				raise RequestFailed
 
 		except RequestFailed:
-			self.raise_error()
+			errors = self.sanitize_error_message(res.get('message'))
+			self.raise_error(errors=errors)
 
 		except Exception:
 			self.log_error(data)
 			self.raise_error(True)
+	
+	def sanitize_error_message(self, message):
+		'''
+			message = '2174 : For inter-state transaction, CGST and SGST amounts are not applicable; only IGST amount is applicable,
+						3095 : Supplier GSTIN is inactive'
+			we search for string between ':' to extract error messages
+			errors = [
+				': For inter-state transaction, CGST and SGST amounts are not applicable; only IGST amount is applicable, 3095 ',
+				': Test'
+			]
+			then we trim down the message by looping over errors
+		'''
+		errors = re.findall(': [^:]+', message)
+		for idx, e in enumerate(errors):
+			# remove colons
+			errors[idx] = errors[idx].replace(':', '').strip()
+			# if not last
+			if idx != len(errors) - 1:
+				# remove last 7 chars eg: ', 3095 '
+				errors[idx] = errors[idx][:-6]
+
+		return errors
 
 	def log_error(self, data={}):
 		if not isinstance(data, dict):
@@ -620,23 +643,27 @@ class GSPConnector():
 		seperator = "--" * 50
 		err_tb = traceback.format_exc()
 		err_msg = str(sys.exc_info()[1])
-		data = json.dumps(data, default=str, indent=4)
+		data = json.dumps(data, indent=4)
 
 		message = "\n".join([
 			"Error", err_msg, seperator,
 			"Data:", data, seperator,
 			"Exception:", err_tb
 		])
-		frappe.log_error(title="E Invoicing Error", message=message)
+		frappe.log_error(title=_('E Invoice Request Failed'), message=message)
 	
-	def raise_error(self, raise_exception=False):
-		link_to_error_list = '<a href="desk#List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
-		frappe.msgprint(
-			_('An error occurred while making e-invoicing request. Please check {} for more information.').format(link_to_error_list),
-			title=_('E Invoice Request Failed'),
-			raise_exception=raise_exception,
-			indicator='red'
-		)
+	def raise_error(self, raise_exception=False, errors=[]):
+		title = _('E Invoice Request Failed')
+		if errors:
+			frappe.throw(errors, title=title, as_list=1)
+		else:
+			link_to_error_list = '<a href="desk#List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
+			frappe.msgprint(
+				_('An error occurred while making e-invoicing request. Please check {} for more information.').format(link_to_error_list),
+				title=title,
+				raise_exception=raise_exception,
+				indicator='red'
+			)
 	
 	def set_einvoice_data(self, res):
 		enc_signed_invoice = res.get('SignedInvoice')
