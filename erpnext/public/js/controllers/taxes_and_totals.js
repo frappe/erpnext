@@ -609,6 +609,15 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.calculate_outstanding_amount(update_paid_amount);
 	},
 
+	is_internal_invoice: function() {
+		if (['Sales Invoice', 'Purchase Invoice'].includes(this.frm.doc.doctype)) {
+			if (this.frm.doc.company === this.frm.doc.represents_company) {
+				return true;
+			}
+		}
+		return false;
+	},
+
 	calculate_outstanding_amount: function(update_paid_amount) {
 		// NOTE:
 		// paid_amount and write_off_amount is only for POS/Loyalty Point Redemption Invoice
@@ -617,7 +626,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			this.calculate_paid_amount();
 		}
 
-		if(this.frm.doc.is_return || this.frm.doc.docstatus > 0) return;
+		if (this.frm.doc.is_return || (this.frm.doc.docstatus > 0) || this.is_internal_invoice()) return;
 
 		frappe.model.round_floats_in(this.frm.doc, ["grand_total", "total_advance", "write_off_amount"]);
 
