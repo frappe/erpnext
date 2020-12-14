@@ -225,7 +225,7 @@ def build_tree_from_json(chart_template, chart_data=None):
 
 			account['parent_account'] = parent
 			account['expandable'] = True if identify_is_group(child) else False
-			account['value'] = (child.get('account_number') + ' - ' + account_name) \
+			account['value'] = (cstr(child.get('account_number')).strip() + ' - ' + account_name) \
 				if child.get('account_number') else account_name
 			accounts.append(account)
 			_import_accounts(child, account['value'])

@@ -3,15 +3,15 @@
 
 frappe.ui.form.on('Student', {
 	setup: function(frm) {
-		frm.add_fetch("guardian", "guardian_name", "guardian_name");
-		frm.add_fetch("student", "title", "full_name");
-		frm.add_fetch("student", "gender", "gender");
-		frm.add_fetch("student", "date_of_birth", "date_of_birth");
+		frm.add_fetch('guardian', 'guardian_name', 'guardian_name');
+		frm.add_fetch('student', 'title', 'full_name');
+		frm.add_fetch('student', 'gender', 'gender');
+		frm.add_fetch('student', 'date_of_birth', 'date_of_birth');
 
-		frm.set_query("student", "siblings", function(doc, cdt, cdn) {
+		frm.set_query('student', 'siblings', function(doc) {
 			return {
-				"filters": {
-					"name": ["!=", doc.name]
+				'filters': {
+					'name': ['!=', doc.name]
 				}
 			};
 		})
@@ -25,6 +25,12 @@ frappe.ui.form.on('Student', {
 					{party_type:'Student', party:frm.doc.name});
 			});
 		}
+
+		frappe.db.get_value('Education Settings', {name: 'Education Settings'}, 'user_creation_skip', (r) => {
+			if (cint(r.user_creation_skip) !== 1) {
+				frm.set_df_property('student_email_id', 'reqd', 1);
+			}
+		});
 	}
 });
 

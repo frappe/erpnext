@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+frappe.provide('erpnext.accounts.dimensions');
+
 erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	setup: function() {
 		this._super();
@@ -106,6 +108,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if(!item.warehouse && frm.doc.set_warehouse) {
 					item.warehouse = frm.doc.set_warehouse;
 				}
+
+				erpnext.accounts.dimensions.copy_dimension_from_first_row(frm, cdt, cdn, 'items');
 			}
 		});
 
@@ -156,16 +160,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				return {
 					filters: filters
-				};
-			});
-		}
-		if (this.frm.fields_dict["items"].grid.get_field("cost_center")) {
-			this.frm.set_query("cost_center", "items", function(doc) {
-				return {
-					filters: {
-						"company": doc.company,
-						"is_group": 0
-					}
 				};
 			});
 		}
@@ -417,7 +411,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var taxes_and_charges_field = frappe.meta.get_docfield(me.frm.doc.doctype, "taxes_and_charges",
 			me.frm.doc.name);
 
-		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes) {
+		if (!this.frm.doc.taxes_and_charges && this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
 			return;
 		}
 
@@ -651,7 +645,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
 					child.charge_type = "On Net Total";
 					child.account_head = tax;
-					child.rate = rate;
+					child.rate = 0;
 				}
 			});
 		}
@@ -1049,14 +1043,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(item.item_code && item.uom) {
 			return this.frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",
-				child: item,
 				args: {
 					item_code: item.item_code,
 					uom: item.uom
 				},
 				callback: function(r) {
 					if(!r.exc) {
-						me.conversion_factor(me.frm.doc, cdt, cdn);
+						frappe.model.set_value(cdt, cdn, 'conversion_factor', r.message.conversion_factor);
 					}
 				}
 			});
@@ -1834,7 +1827,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	set_query_for_item_tax_template: function(doc, cdt, cdn) {
-
 		var item = frappe.get_doc(cdt, cdn);
 		if(!item.item_code) {
 			frappe.throw(__("Please enter Item Code to get item taxes"));
@@ -1842,7 +1834,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			let filters = {
 				'item_code': item.item_code,
-				'valid_from': doc.transaction_date || doc.bill_date || doc.posting_date,
+				'valid_from': ["<=", doc.transaction_date || doc.bill_date || doc.posting_date],
 				'item_group': item.item_group,
 			}
 

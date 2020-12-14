@@ -15,7 +15,22 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				return (doc.qty<=doc.received_qty) ? "green" : "orange";
 			});
 		}
+
+		this.frm.set_query("unrealized_profit_loss_account", function() {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				}
+			};
+		});
 	},
+
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+
 	onload: function() {
 		this._super();
 
@@ -25,6 +40,14 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
 		}
+
+		// Trigger supplier event on load if supplier is available
+		// The reason for this is PI can be created from PR or PO and supplier is pre populated
+		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
+			this.frm.trigger('supplier');
+		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function(doc) {
@@ -135,6 +158,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}
 			});
 		}
+
+		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
 	},
 
 	unblock_invoice: function() {
@@ -492,15 +517,6 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
-
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
 	},
 
 	onload: function(frm) {

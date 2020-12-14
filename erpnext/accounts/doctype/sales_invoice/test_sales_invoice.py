@@ -206,10 +206,19 @@ class TestSalesInvoice(unittest.TestCase):
 			"rate": 14,
 			'included_in_print_rate': 1
 		})
+		si.append("taxes", {
+			"charge_type": "On Item Quantity",
+			"account_head": "_Test Account Education Cess - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "CESS",
+			"rate": 5,
+			'included_in_print_rate': 1
+		})
 		si.insert()
 
 		# with inclusive tax
-		self.assertEqual(si.net_total, 4385.96)
+		self.assertEqual(si.items[0].net_amount, 3947.368421052631)
+		self.assertEqual(si.net_total, 3947.37)
 		self.assertEqual(si.grand_total, 5000)
 
 		si.reload()
@@ -222,8 +231,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		# with inclusive tax and additional discount
-		self.assertEqual(si.net_total, 4285.96)
-		self.assertEqual(si.grand_total, 4885.99)
+		self.assertEqual(si.net_total, 3847.37)
+		self.assertEqual(si.grand_total, 4886)
 
 		si.reload()
 
@@ -235,7 +244,7 @@ class TestSalesInvoice(unittest.TestCase):
 		si.save()
 
 		# with inclusive tax and additional discount
-		self.assertEqual(si.net_total, 4298.25)
+		self.assertEqual(si.net_total, 3859.65)
 		self.assertEqual(si.grand_total, 4900.00)
 
 	def test_sales_invoice_discount_amount(self):
@@ -1769,6 +1778,60 @@ class TestSalesInvoice(unittest.TestCase):
 
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
+
+	def test_internal_transfer_gl_entry(self):
+		## Create internal transfer account
+		account = create_account(account_name="Unrealized Profit",
+			parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
+
+		frappe.db.set_value('Company', '_Test Company with perpetual inventory',
+			'unrealized_profit_loss_account', account)
+
+		customer = create_internal_customer("_Test Internal Customer 2", "_Test Company with perpetual inventory",
+			"_Test Company with perpetual inventory")
+
+		create_internal_supplier("_Test Internal Supplier 2", "_Test Company with perpetual inventory",
+			"_Test Company with perpetual inventory")
+
+		si = create_sales_invoice(
+			company = "_Test Company with perpetual inventory",
+			customer = customer,
+			debit_to = "Debtors - TCP1",
+			warehouse = "Stores - TCP1",
+			income_account = "Sales - TCP1",
+			expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1",
+			currency = "INR",
+			do_not_save = 1
+		)
+
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.update_stock = 1
+		si.items[0].target_warehouse = 'Work In Progress - TCP1'
+		add_taxes(si)
+		si.save()
+		si.submit()
+
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.company = '_Test Company with perpetual inventory'
+		target_doc.items[0].warehouse = 'Finished Goods - TCP1'
+		add_taxes(target_doc)
+		target_doc.save()
+		target_doc.submit()
+
+		si_gl_entries = [
+			["_Test Account Excise Duty - TCP1", 0.0, 12.0, nowdate()],
+			["Unrealized Profit - TCP1", 12.0, 0.0, nowdate()]
+		]
+
+		check_gl_entries(self, si.name, si_gl_entries, add_days(nowdate(), -1))
+
+		pi_gl_entries = [
+			["_Test Account Excise Duty - TCP1", 12.0 , 0.0, nowdate()],
+			["Unrealized Profit - TCP1", 0.0, 12.0, nowdate()]
+		]
+
+		check_gl_entries(self, target_doc.name, pi_gl_entries, add_days(nowdate(), -1))
 
 	def test_eway_bill_json(self):
 		if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):

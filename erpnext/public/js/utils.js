@@ -194,15 +194,21 @@ $.extend(erpnext.utils, {
 	add_dimensions: function(report_name, index) {
 		let filters = frappe.query_reports[report_name].filters;
 
-		erpnext.dimension_filters.forEach((dimension) => {
-			let found = filters.some(el => el.fieldname === dimension['fieldname']);
+		frappe.call({
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			callback: function(r) {
+				let accounting_dimensions = r.message[0];
+				accounting_dimensions.forEach((dimension) => {
+					let found = filters.some(el => el.fieldname === dimension['fieldname']);
 
-			if (!found) {
-				filters.splice(index, 0 ,{
-					"fieldname": dimension["fieldname"],
-					"label": __(dimension["label"]),
-					"fieldtype": "Link",
-					"options": dimension["document_type"]
+					if (!found) {
+						filters.splice(index, 0 ,{
+							"fieldname": dimension["fieldname"],
+							"label": __(dimension["label"]),
+							"fieldtype": "Link",
+							"options": dimension["document_type"]
+						});
+					}
 				});
 			}
 		});
@@ -452,6 +458,9 @@ erpnext.utils.update_child_items = function(opts) {
 	const frm = opts.frm;
 	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
 	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
+	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
+	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
+
 	this.data = [];
 	const fields = [{
 		fieldtype:'Data',
@@ -467,19 +476,48 @@ erpnext.utils.update_child_items = function(opts) {
 		disabled: 0,
 		label: __('Item Code')
 	}, {
+		fieldtype:'Link',
+		fieldname:'uom',
+		options: 'UOM',
+		read_only: 0,
+		label: __('UOM'),
+		reqd: 1,
+		onchange: function () {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
+				args: { item_code: this.doc.item_code, uom: this.value },
+				callback: r => {
+					if(!r.exc) {
+						if (this.doc.conversion_factor == r.message.conversion_factor) return;
+
+						const docname = this.doc.docname;
+						dialog.fields_dict.trans_items.df.data.some(doc => {
+							if (doc.docname == docname) {
+								doc.conversion_factor = r.message.conversion_factor;
+								dialog.fields_dict.trans_items.grid.refresh();
+								return true;
+							}
+						})
+					}
+				}
+			});
+		}
+	}, {
 		fieldtype:'Float',
 		fieldname:"qty",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
-		label: __('Qty')
+		label: __('Qty'),
+		precision: get_precision("qty")
 	}, {
 		fieldtype:'Currency',
 		fieldname:"rate",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
-		label: __('Rate')
+		label: __('Rate'),
+		precision: get_precision("rate")
 	}];
 
 	if (frm.doc.doctype == 'Sales Order' || frm.doc.doctype == 'Purchase Order' ) {
@@ -494,7 +532,8 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldtype: 'Float',
 			fieldname: "conversion_factor",
 			in_list_view: 1,
-			label: __("Conversion Factor")
+			label: __("Conversion Factor"),
+			precision: get_precision('conversion_factor')
 		})
 	}
 
@@ -506,7 +545,7 @@ erpnext.utils.update_child_items = function(opts) {
 				fieldtype: "Table",
 				label: "Items",
 				cannot_add_rows: cannot_add_row,
-				in_place_edit: true,
+				in_place_edit: false,
 				reqd: 1,
 				data: this.data,
 				get_data: () => {
@@ -546,6 +585,7 @@ erpnext.utils.update_child_items = function(opts) {
 			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
+			"uom": d.uom
 		});
 		this.data = dialog.fields_dict.trans_items.df.data;
 		dialog.fields_dict.trans_items.grid.refresh();
@@ -649,6 +689,7 @@ erpnext.utils.map_current_doc = function(opts) {
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
 			get_query: opts.get_query,
+			add_filters_group: 1,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){
@@ -668,9 +709,13 @@ erpnext.utils.map_current_doc = function(opts) {
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
-	if(doc && doc.item_name && doc.item_name !== value) {
-		return value? value + ': ' + doc.item_name: doc.item_name;
+	if (doc && value && doc.item_name && doc.item_name !== value) {
+		return value + ': ' + doc.item_name;
+	} else if (!value && doc.doctype && doc.item_name) {
+		// format blank value in child table
+		return doc.item_name;
 	} else {
+		// if value is blank in report view or item code and name are the same, return as is
 		return value;
 	}
 }

@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 frappe.provide("erpnext.asset");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on('Asset', {
 	onload: function(frm) {
@@ -32,13 +33,11 @@ frappe.ui.form.on('Asset', {
 			};
 		});
 
-		frm.set_query("cost_center", function() {
-			return {
-				"filters": {
-					"company": frm.doc.company,
-				}
-			};
-		});
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	setup: function(frm) {
@@ -252,13 +251,6 @@ frappe.ui.form.on('Asset', {
 		})
 	},
 
-	available_for_use_date: function(frm) {
-		$.each(frm.doc.finance_books || [], function(i, d) {
-			if(!d.depreciation_start_date) d.depreciation_start_date = frm.doc.available_for_use_date;
-		});
-		refresh_field("finance_books");
-	},
-
 	is_existing_asset: function(frm) {
 		frm.trigger("toggle_reference_doc");
 		// frm.toggle_reqd("next_depreciation_date", (!frm.doc.is_existing_asset && frm.doc.calculate_depreciation));
@@ -438,6 +430,15 @@ frappe.ui.form.on('Asset Finance Book', {
 		}
 
 		frappe.flags.dont_change_rate = false;
+	},
+
+	depreciation_start_date: function(frm, cdt, cdn) {
+		const book = locals[cdt][cdn];
+		if (frm.doc.available_for_use_date && book.depreciation_start_date == frm.doc.available_for_use_date) {
+			frappe.msgprint(__(`Depreciation Posting Date should not be equal to Available for Use Date.`));
+			book.depreciation_start_date = "";
+			frm.refresh_field("finance_books");
+		}
 	}
 });
 

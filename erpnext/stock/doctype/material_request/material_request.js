@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 // eslint-disable-next-line
+frappe.provide("erpnext.accounts.dimensions");
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
 frappe.ui.form.on('Material Request', {
@@ -66,6 +67,12 @@ frappe.ui.form.on('Material Request', {
 				filters: {'company': doc.company}
 			};
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	onload_post_render: function(frm) {
@@ -280,7 +287,8 @@ frappe.ui.form.on('Material Request', {
 				fieldname:'default_supplier',
 				fieldtype: 'Link',
 				options: 'Supplier',
-				description: __('Select a Supplier from the Default Supplier List of the items below.'),
+				description: __('Select a Supplier from the Default Suppliers of the items below. \
+					On selection, a Purchase Order will be made against items belonging to the selected Supplier only.'),
 				get_query: () => {
 					return{
 						query: "erpnext.stock.doctype.material_request.material_request.get_default_supplier_query",

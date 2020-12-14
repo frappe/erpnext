@@ -15,15 +15,6 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	erpnext.queries.setup_queries(frm, "Warehouse", function() {
 		return erpnext.queries.warehouse(frm.doc);
 	});
-
-	frm.call({
-		method: "erpnext.accounts.doctype.pos_profile.pos_profile.get_series",
-		callback: function(r) {
-			if(!r.exc) {
-				set_field_options("naming_series", r.message);
-			}
-		}
-	});
 });
 
 frappe.ui.form.on('POS Profile', {
@@ -57,6 +48,8 @@ frappe.ui.form.on('POS Profile', {
 				}
 			};
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -67,6 +60,7 @@ frappe.ui.form.on('POS Profile', {
 
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	toggle_display_account_head: function(frm) {

@@ -58,6 +58,7 @@ class Customer(TransactionBase):
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
+		self.validate_internal_customer()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -81,6 +82,11 @@ class Customer(TransactionBase):
 			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
 			if not is_company_account:
 				frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
+
+	def validate_internal_customer(self):
+		if self.is_internal_customer and frappe.db.get_value('Customer', {"represents_company": self.represents_company}, "name"):
+			frappe.throw(_("Internal Customer for company {0} already exists").format(
+				frappe.bold(self.represents_company)))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -132,7 +138,7 @@ class Customer(TransactionBase):
 				address = frappe.get_doc('Address', address_name.get('name'))
 				if not address.has_link('Customer', self.name):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
-					address.save()
+					address.save(ignore_permissions=self.flags.ignore_permissions)
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
 
@@ -150,7 +156,7 @@ class Customer(TransactionBase):
 					contact = frappe.get_doc('Contact', contact_name.get('name'))
 					if not contact.has_link('Customer', self.name):
 						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-						contact.save()
+						contact.save(ignore_permissions=self.flags.ignore_permissions)
 
 			else:
 				lead.lead_name = lead.lead_name.lstrip().split(" ")
@@ -183,6 +189,14 @@ class Customer(TransactionBase):
 
 	def validate_credit_limit_on_change(self):
 		if self.get("__islocal") or not self.credit_limits:
+			return
+
+		past_credit_limits = [d.credit_limit
+			for d in frappe.db.get_all("Customer Credit Limit", filters={'parent': self.name}, fields=["credit_limit"], order_by="company")]
+
+		current_credit_limits = [d.credit_limit for d in sorted(self.credit_limits, key=lambda k: k.company)]
+
+		if past_credit_limits == current_credit_limits:
 			return
 
 		company_record = []
@@ -393,7 +407,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 				frappe.throw(_("Please contact your administrator to extend the credit limits for {0}.").format(customer))
 
 			message = """Please contact any of the following users to extend the credit limits for {0}:
-				<br><br><ul><li>{1}</li></ul>""".format(customer, '<li>'.join(credit_controller_users))
+				<br><br><ul><li>{1}</li></ul>""".format(customer, '<li>'.join(credit_controller_users_formatted))
 
 			# if the current user does not have permissions to override credit limit,
 			# prompt them to send out an email to the controller users
@@ -418,7 +432,7 @@ def send_emails(args):
 	subject = (_("Credit limit reached for customer {0}").format(args.get('customer')))
 	message = (_("Credit limit has been crossed for customer {0} ({1}/{2})")
 			.format(args.get('customer'), args.get('customer_outstanding'), args.get('credit_limit')))
-	frappe.sendmail(recipients=[args.get('credit_controller_users_list')], subject=subject, message=message)
+	frappe.sendmail(recipients=args.get('credit_controller_users_list'), subject=subject, message=message)
 
 def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=False, cost_center=None):
 	# Outstanding based on GL Entries

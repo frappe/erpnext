@@ -4,7 +4,7 @@
 frappe.ui.form.on('Shift Type', {
 	refresh: function(frm) {
 		frm.add_custom_button(
-			'Mark Auto Attendance',
+			'Mark Attendance',
 			() => frm.call({
 				doc: frm.doc,
 				method: 'process_auto_attendance',

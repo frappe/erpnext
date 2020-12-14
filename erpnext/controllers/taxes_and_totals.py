@@ -9,6 +9,7 @@ from frappe.utils import cint, flt, round_based_on_smallest_currency_fraction
 from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 from erpnext.stock.get_item_details import _get_item_tax_template
+from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
@@ -161,8 +162,9 @@ class calculate_taxes_and_totals(object):
 		for item in self.doc.get("items"):
 			item_tax_map = self._load_item_tax_rate(item.item_tax_rate)
 			cumulated_tax_fraction = 0
+			total_inclusive_tax_amount_per_qty = 0
 			for i, tax in enumerate(self.doc.get("taxes")):
-				tax.tax_fraction_for_current_item = self.get_current_tax_fraction(tax, item_tax_map)
+				tax.tax_fraction_for_current_item, inclusive_tax_amount_per_qty = self.get_current_tax_fraction(tax, item_tax_map)
 
 				if i==0:
 					tax.grand_total_fraction_for_current_item = 1 + tax.tax_fraction_for_current_item
@@ -172,9 +174,12 @@ class calculate_taxes_and_totals(object):
 						+ tax.tax_fraction_for_current_item
 
 				cumulated_tax_fraction += tax.tax_fraction_for_current_item
+				total_inclusive_tax_amount_per_qty += inclusive_tax_amount_per_qty * flt(item.qty)
 
-			if cumulated_tax_fraction and not self.discount_amount_applied and item.qty:
-				item.net_amount = flt(item.amount / (1 + cumulated_tax_fraction))
+			if not self.discount_amount_applied and item.qty and (cumulated_tax_fraction or total_inclusive_tax_amount_per_qty):
+				amount = flt(item.amount) - total_inclusive_tax_amount_per_qty
+
+				item.net_amount = flt(amount / (1 + cumulated_tax_fraction))
 				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate"))
 				item.discount_percentage = flt(item.discount_percentage,
 					item.precision("discount_percentage"))
@@ -190,6 +195,7 @@ class calculate_taxes_and_totals(object):
 			from tax inclusive amount
 		"""
 		current_tax_fraction = 0
+		inclusive_tax_amount_per_qty = 0
 
 		if cint(tax.included_in_print_rate):
 			tax_rate = self._get_tax_rate(tax, item_tax_map)
@@ -205,9 +211,14 @@ class calculate_taxes_and_totals(object):
 				current_tax_fraction = (tax_rate / 100.0) * \
 					self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_fraction_for_current_item
 
-		if getattr(tax, "add_deduct_tax", None):
-			current_tax_fraction *= -1.0 if (tax.add_deduct_tax == "Deduct") else 1.0
-		return current_tax_fraction
+			elif tax.charge_type == "On Item Quantity":
+				inclusive_tax_amount_per_qty = flt(tax_rate)
+
+		if getattr(tax, "add_deduct_tax", None) and tax.add_deduct_tax == "Deduct":
+			current_tax_fraction *= -1.0
+			inclusive_tax_amount_per_qty *= -1.0
+
+		return current_tax_fraction, inclusive_tax_amount_per_qty
 
 	def _get_tax_rate(self, tax, item_tax_map):
 		if tax.account_head in item_tax_map:
@@ -321,7 +332,7 @@ class calculate_taxes_and_totals(object):
 			current_tax_amount = (tax_rate / 100.0) * \
 				self.doc.get("taxes")[cint(tax.row_id) - 1].grand_total_for_current_item
 		elif tax.charge_type == "On Item Quantity":
-			current_tax_amount = tax_rate * item.stock_qty
+			current_tax_amount = tax_rate * item.qty
 
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
@@ -472,7 +483,7 @@ class calculate_taxes_and_totals(object):
 			actual_taxes_dict = {}
 
 			for tax in self.doc.get("taxes"):
-				if tax.charge_type == "Actual":
+				if tax.charge_type in ["Actual", "On Item Quantity"]:
 					tax_amount = self.get_tax_amount_if_for_valuation_or_deduction(tax.tax_amount, tax)
 					actual_taxes_dict.setdefault(tax.idx, tax_amount)
 				elif tax.row_id in actual_taxes_dict:
@@ -508,6 +519,17 @@ class calculate_taxes_and_totals(object):
 			if self.doc.docstatus == 0:
 				self.calculate_outstanding_amount()
 
+	def is_internal_invoice(self):
+		"""
+			Checks if its an internal transfer invoice
+			and decides if to calculate any out standing amount or not
+		"""
+
+		if self.doc.doctype in ('Sales Invoice', 'Purchase Invoice') and self.doc.is_internal_transfer():
+			return True
+
+		return False
+
 	def calculate_outstanding_amount(self):
 		# NOTE:
 		# write_off_amount is only for POS Invoice
@@ -515,7 +537,8 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype == "Sales Invoice":
 			self.calculate_paid_amount()
 
-		if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos'): return
+		if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos') or \
+			self.is_internal_invoice(): return
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
@@ -597,16 +620,19 @@ class calculate_taxes_and_totals(object):
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
-				for d in json.loads(item.pricing_rules):
+				has_margin = False
+				for d in get_applied_pricing_rules(item.pricing_rules):
 					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
-					if (pricing_rule.margin_type == 'Amount' and pricing_rule.currency == self.doc.currency)\
+					if (pricing_rule.margin_type in ['Amount', 'Percentage'] and pricing_rule.currency == self.doc.currency)\
 							or (pricing_rule.margin_type == 'Percentage'):
 						item.margin_type = pricing_rule.margin_type
 						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-					else:
-						item.margin_type = None
-						item.margin_rate_or_amount = 0.0
+						has_margin = True
+
+				if not has_margin:
+					item.margin_type = None
+					item.margin_rate_or_amount = 0.0
 
 			if item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100

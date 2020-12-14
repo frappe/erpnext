@@ -7,6 +7,7 @@ cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
@@ -75,7 +76,7 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	print_without_amount: function(frm) {
@@ -130,12 +131,18 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			if (this.frm.doc.docstatus===0) {
 				this.frm.add_custom_button(__('Sales Order'),
 					function() {
+						if (!me.frm.doc.customer) {
+							frappe.throw({
+								title: __("Mandatory"),
+								message: __("Please Select a Customer")
+							});
+						}
 						erpnext.utils.map_current_doc({
 							method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
 							source_doctype: "Sales Order",
 							target: me.frm,
 							setters: {
-								customer: me.frm.doc.customer || undefined,
+								customer: me.frm.doc.customer,
 							},
 							get_query_filters: {
 								docstatus: 1,
@@ -299,6 +306,7 @@ frappe.ui.form.on('Delivery Note', {
 
 	company: function(frm) {
 		frm.trigger("unhide_account_head");
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	unhide_account_head: function(frm) {

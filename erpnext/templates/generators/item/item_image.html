@@ -23,7 +23,7 @@
 	})
 </script>
 {% else %}
-{{ product_image(website_image or image or 'no-image.jpg') }}
+{{ product_image(website_image or image or 'no-image.jpg', alt=website_image_alt or item_name) }}
 {% endif %}
 
 <!-- Simple image preview -->

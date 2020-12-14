@@ -143,7 +143,7 @@ def get_conditions(filters):
 	conditions = ""
 
 	if filters.get("company"):
-		conditions += " AND par.company=%s" % frappe.db.escape(filters.get('company'))
+		conditions += " AND parent.company=%s" % frappe.db.escape(filters.get('company'))
 
 	if filters.get("cost_center") or filters.get("project"):
 		conditions += """
@@ -151,10 +151,10 @@ def get_conditions(filters):
 			""" % (frappe.db.escape(filters.get('cost_center')), frappe.db.escape(filters.get('project')))
 
 	if filters.get("from_date"):
-		conditions += " AND par.transaction_date>='%s'" % filters.get('from_date')
+		conditions += " AND parent.transaction_date>='%s'" % filters.get('from_date')
 
 	if filters.get("to_date"):
-		conditions += " AND par.transaction_date<='%s'" % filters.get('to_date')
+		conditions += " AND parent.transaction_date<='%s'" % filters.get('to_date')
 	return conditions
 
 def get_data(filters):
@@ -198,21 +198,23 @@ def get_mapped_mr_details(conditions):
 	mr_records = {}
 	mr_details = frappe.db.sql("""
 		SELECT
-			par.transaction_date,
-			par.per_ordered,
-			par.owner,
+			parent.transaction_date,
+			parent.per_ordered,
+			parent.owner,
 			child.name,
 			child.parent,
 			child.amount,
 			child.qty,
 			child.item_code,
 			child.uom,
-			par.status
-		FROM `tabMaterial Request` par, `tabMaterial Request Item` child
+			parent.status,
+			child.project,
+			child.cost_center
+		FROM `tabMaterial Request` parent, `tabMaterial Request Item` child
 		WHERE
-			par.per_ordered>=0
-			AND par.name=child.parent
-			AND par.docstatus=1
+			parent.per_ordered>=0
+			AND parent.name=child.parent
+			AND parent.docstatus=1
 			{conditions}
 		""".format(conditions=conditions), as_dict=1) #nosec
 
@@ -232,7 +234,9 @@ def get_mapped_mr_details(conditions):
 				status=record.status,
 				actual_cost=0,
 				purchase_order_amt=0,
-				purchase_order_amt_in_company_currency=0
+				purchase_order_amt_in_company_currency=0,
+				project = record.project,
+				cost_center = record.cost_center
 			)
 			procurement_record_against_mr.append(procurement_record_details)
 	return mr_records, procurement_record_against_mr
@@ -280,16 +284,16 @@ def get_po_entries(conditions):
 			child.amount,
 			child.base_amount,
 			child.schedule_date,
-			par.transaction_date,
-			par.supplier,
-			par.status,
-			par.owner
-		FROM `tabPurchase Order` par, `tabPurchase Order Item` child
+			parent.transaction_date,
+			parent.supplier,
+			parent.status,
+			parent.owner
+		FROM `tabPurchase Order` parent, `tabPurchase Order Item` child
 		WHERE
-			par.docstatus = 1
-			AND par.name = child.parent
-			AND par.status not in  ("Closed","Completed","Cancelled")
+			parent.docstatus = 1
+			AND parent.name = child.parent
+			AND parent.status not in  ("Closed","Completed","Cancelled")
 			{conditions}
 		GROUP BY
-			par.name, child.item_code
+			parent.name, child.item_code
 		""".format(conditions=conditions), as_dict=1) #nosec

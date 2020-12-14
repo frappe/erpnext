@@ -19,7 +19,7 @@ class AccountingDimension(Document):
 
 	def validate(self):
 		if self.document_type in core_doctypes_list + ('Accounting Dimension', 'Project',
-				'Cost Center', 'Accounting Dimension Detail') :
+				'Cost Center', 'Accounting Dimension Detail', 'Company') :
 
 			msg = _("Not allowed to create accounting dimension for {0}").format(self.document_type)
 			frappe.throw(msg)
@@ -203,7 +203,7 @@ def get_dimension_with_children(doctype, dimension):
 	return all_dimensions
 
 @frappe.whitelist()
-def get_dimension_filters():
+def get_dimensions(with_cost_center_and_project=False):
 	dimension_filters = frappe.db.sql("""
 		SELECT label, fieldname, document_type
 		FROM `tabAccounting Dimension`
@@ -213,6 +213,18 @@ def get_dimension_filters():
 	default_dimensions = frappe.db.sql("""SELECT p.fieldname, c.company, c.default_dimension
 		FROM `tabAccounting Dimension Detail` c, `tabAccounting Dimension` p
 		WHERE c.parent = p.name""", as_dict=1)
+
+	if with_cost_center_and_project:
+		dimension_filters.extend([
+			{
+				'fieldname': 'cost_center',
+				'document_type': 'Cost Center'
+			},
+			{
+				'fieldname': 'project',
+				'document_type': 'Project'
+			}
+		])
 
 	default_dimensions_map = {}
 	for dimension in default_dimensions:

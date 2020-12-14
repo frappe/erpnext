@@ -27,6 +27,7 @@
   "enable_checkout",
   "payment_success_url",
   "column_break_11",
+  "save_quotations_as_draft",
   "payment_gateway_account"
  ],
  "fields": [
@@ -172,7 +173,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-03 19:32:27.958221",
+ "modified": "2020-08-02 18:21:43.873303",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Shopping Cart Settings",

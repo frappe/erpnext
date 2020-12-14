@@ -13,6 +13,7 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
+  "add_to_transit",
   "work_order",
   "purchase_order",
   "delivery_note_no",
@@ -116,11 +117,12 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.purpose == 'Receive at Warehouse'",
+   "depends_on": "eval:doc.purpose == 'Material Transfer'",
    "fieldname": "outgoing_stock_entry",
    "fieldtype": "Link",
    "label": "Stock Entry (Outward GIT)",
-   "options": "Stock Entry"
+   "options": "Stock Entry",
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -132,7 +134,7 @@
    "label": "Purpose",
    "oldfieldname": "purpose",
    "oldfieldtype": "Select",
-   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nSend to Warehouse\nReceive at Warehouse",
+   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
    "read_only": 1
   },
   {
@@ -630,13 +632,21 @@
   {
    "fieldname": "print_settings_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.purpose=='Material Transfer' && !doc.outgoing_stock_entry",
+   "fieldname": "add_to_transit",
+   "fieldtype": "Check",
+   "label": "Add to Transit",
+   "no_copy": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-23 12:56:52.881752",
+ "modified": "2020-08-11 19:10:07.954981",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

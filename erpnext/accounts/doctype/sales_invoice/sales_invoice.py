@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate, get_link_to_form
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from frappe.model.mapper import get_mapped_doc
@@ -89,6 +89,7 @@ class SalesInvoice(SellingController):
 		self.set_income_account_for_fixed_assets()
 		self.validate_item_cost_centers()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
+		self.set_inter_company_account()
 
 		if cint(self.is_pos):
 			self.validate_pos()
@@ -428,7 +429,7 @@ class SalesInvoice(SellingController):
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
-			for fieldname in ('naming_series', 'currency', 'letter_head', 'tc_name',
+			for fieldname in ('currency', 'letter_head', 'tc_name',
 				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
 				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (not for_validate) or (for_validate and not self.get(fieldname)):
@@ -479,14 +480,14 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			frappe.throw(_("Please ensure {} account is a Balance Sheet account. \
-					You can change the parent account to a Balance Sheet account or select a different account.")
-				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
+			msg = _("Please ensure {} account is a Balance Sheet account. ").format(frappe.bold("Debit To"))
+			msg += _("You can change the parent account to a Balance Sheet account or select a different account.")
+			frappe.throw(msg, title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			frappe.throw(_("Please ensure {} account is a Receivable account. \
-					Change the account type to Receivable or select a different account.")
-				.format(frappe.bold("Debit To")), title=_("Invalid Account"))
+			msg = _("Please ensure {} account is a Receivable account. ").format(frappe.bold("Debit To"))
+			msg += _("Change the account type to Receivable or select a different account.")
+			frappe.throw(msg, title=_("Invalid Account"))
 
 		self.party_account_currency = account.account_currency
 
@@ -570,9 +571,37 @@ class SalesInvoice(SellingController):
 			if not res:
 				throw(_("Customer {0} does not belong to project {1}").format(self.customer,self.project))
 
+	def set_inter_company_account(self):
+		"""
+			Set intercompany account for inter warehouse transactions
+			This account will be used in case billing company and internal customer's
+			representation company is same
+		"""
+
+		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
+			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
+
+			if not unrealized_profit_loss_account:
+				msg = _("Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}").format(
+						frappe.bold(self.company))
+				frappe.throw(msg)
+
+			self.unrealized_profit_loss_account = unrealized_profit_loss_account
+
+	def is_internal_transfer(self):
+		"""
+			It will an internal transfer if its an internal customer and representation
+			company is same as billing company
+		"""
+		if self.is_internal_customer and (self.represents_company == self.company):
+			return True
+
+		return False
+
 	def validate_pos(self):
 		if self.is_return:
-			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(self.grand_total) > \
+			invoice_total = self.rounded_total or self.grand_total
+			if flt(self.paid_amount) + flt(self.write_off_amount) - flt(invoice_total) > \
 				1.0/(10.0**(self.precision("grand_total") + 1.0)):
 					frappe.throw(_("Paid amount + Write Off Amount can not be greater than Grand Total"))
 
@@ -750,6 +779,7 @@ class SalesInvoice(SellingController):
 		self.make_customer_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
+		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
 
@@ -769,7 +799,7 @@ class SalesInvoice(SellingController):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
-		if grand_total:
+		if grand_total and not self.is_internal_transfer():
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
@@ -808,6 +838,18 @@ class SalesInvoice(SellingController):
 					}, account_currency, item=tax)
 				)
 
+	def make_internal_transfer_gl_entries(self, gl_entries):
+		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
+			account_currency = get_account_currency(self.unrealized_profit_loss_account)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.unrealized_profit_loss_account,
+					"against": self.customer,
+					"debit": flt(self.total_taxes_and_charges),
+					"debit_in_account_currency": flt(self.base_total_taxes_and_charges),
+					"cost_center": self.cost_center
+				}, account_currency, item=self))
+
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("items"):
@@ -830,22 +872,24 @@ class SalesInvoice(SellingController):
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
 				else:
-					income_account = (item.income_account
-						if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
+					# Do not book income for transfer within same company
+					if not self.is_internal_transfer():
+						income_account = (item.income_account
+							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
-					account_currency = get_account_currency(income_account)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": income_account,
-							"against": self.customer,
-							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
-							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
-								if account_currency==self.company_currency
-								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center,
-							"project": item.project or self.project
-						}, account_currency, item=item)
-					)
+						account_currency = get_account_currency(income_account)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": income_account,
+								"against": self.customer,
+								"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
+								"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+									if account_currency==self.company_currency
+									else flt(item.net_amount, item.precision("net_amount"))),
+								"cost_center": item.cost_center,
+								"project": item.project or self.project
+							}, account_currency, item=item)
+						)
 
 		# expense account gl entries
 		if cint(self.update_stock) and \
@@ -1140,8 +1184,10 @@ class SalesInvoice(SellingController):
 			where redeem_against=%s''', (lp_entry[0].name), as_dict=1)
 		if against_lp_entry:
 			invoice_list = ", ".join([d.invoice for d in against_lp_entry])
-			frappe.throw(_('''{} can't be cancelled since the Loyalty Points earned has been redeemed.
-				First cancel the {} No {}''').format(self.doctype, self.doctype, invoice_list))
+			frappe.throw(
+				_('''{} can't be cancelled since the Loyalty Points earned has been redeemed. First cancel the {} No {}''')
+				.format(self.doctype, self.doctype, invoice_list)
+			)
 		else:
 			frappe.db.sql('''delete from `tabLoyalty Point Entry` where invoice=%s''', (self.name))
 			# Set loyalty program
@@ -1255,7 +1301,9 @@ class SalesInvoice(SellingController):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
+				if self.is_internal_transfer():
+					self.status = 'Internal Transfer'
+				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
 					self.status = "Overdue and Discounted"
 				elif outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
@@ -1372,7 +1420,7 @@ def get_bank_cash_account(mode_of_payment, company):
 		{"parent": mode_of_payment, "company": company}, "default_account")
 	if not account:
 		frappe.throw(_("Please set default Cash or Bank account in Mode of Payment {0}")
-			.format(mode_of_payment))
+			.format(get_link_to_form("Mode of Payment", mode_of_payment)), title=_("Missing Account"))
 	return {
 		"account": account
 	}
@@ -1519,9 +1567,13 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	if doctype in ["Sales Invoice", "Sales Order"]:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Purchase Invoice" if doctype == "Sales Invoice" else "Purchase Order"
+		source_document_warehouse_field = 'target_warehouse'
+		target_document_warehouse_field = 'from_warehouse'
 	else:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
+		source_document_warehouse_field = 'from_warehouse'
+		target_document_warehouse_field = 'target_warehouse'
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
@@ -1576,15 +1628,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"taxes_and_charges"
 			]
 		},
-		doctype +" Item": {
-			"doctype": target_doctype + " Item",
-			"field_no_map": [
-				"income_account",
-				"expense_account",
-				"cost_center",
-				"warehouse"
-			]
-		}
+		doctype +" Item": item_field_map
 
 	}, target_doc, set_missing_values)
 
@@ -1632,17 +1676,24 @@ def update_multi_mode_option(doc, pos_profile):
 		payment.type = payment_mode.type
 
 	doc.set('payments', [])
-	if not pos_profile or not pos_profile.get('payments'):
-		for payment_mode in get_all_mode_of_payments(doc):
-			append_payment(payment_mode)
-		return
-
+	invalid_modes = []
 	for pos_payment_method in pos_profile.get('payments'):
 		pos_payment_method = pos_payment_method.as_dict()
 
 		payment_mode = get_mode_of_payment_info(pos_payment_method.mode_of_payment, doc.company)
+		if not payment_mode:
+			invalid_modes.append(get_link_to_form("Mode of Payment", pos_payment_method.mode_of_payment))
+			continue
+
 		payment_mode[0].default = pos_payment_method.default
 		append_payment(payment_mode[0])
+
+	if invalid_modes:
+		if invalid_modes == 1:
+			msg = _("Please set default Cash or Bank account in Mode of Payment {}")
+		else:
+			msg = _("Please set default Cash or Bank account in Mode of Payments {}")
+		frappe.throw(msg.format(", ".join(invalid_modes)), title=_("Missing Account"))
 
 def get_all_mode_of_payments(doc):
 	return frappe.db.sql("""

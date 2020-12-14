@@ -3,6 +3,8 @@
 
 var in_progress = false;
 
+frappe.provide("erpnext.accounts.dimensions");
+
 frappe.ui.form.on('Payroll Entry', {
 	onload: function (frm) {
 		if (!frm.doc.posting_date) {
@@ -17,6 +19,8 @@ frappe.ui.form.on('Payroll Entry', {
 				}
 			};
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -112,21 +116,6 @@ frappe.ui.form.on('Payroll Entry', {
 					"company": frm.doc.company
 				}
 			};
-		}),
-		frm.set_query("cost_center", function () {
-			return {
-				filters: {
-					"is_group": 0,
-					company: frm.doc.company
-				}
-			};
-		}),
-		frm.set_query("project", function () {
-			return {
-				filters: {
-					company: frm.doc.company
-				}
-			};
 		});
 	},
 
@@ -137,6 +126,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	department: function (frm) {
@@ -213,7 +203,7 @@ frappe.ui.form.on('Payroll Entry', {
 				},
 				doc: frm.doc,
 				freeze: true,
-				freeze_message: 'Validating Employee Attendance...'
+				freeze_message: __('Validating Employee Attendance...')
 			});
 		}else{
 			frm.fields_dict.attendance_detail_html.html("");
@@ -237,7 +227,7 @@ const submit_salary_slip = function (frm) {
 				callback: function() {frm.events.refresh(frm);},
 				doc: frm.doc,
 				freeze: true,
-				freeze_message: 'Submitting Salary Slips and creating Journal Entry...'
+				freeze_message: __('Submitting Salary Slips and creating Journal Entry...')
 			});
 		},
 		function() {

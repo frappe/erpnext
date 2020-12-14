@@ -25,6 +25,7 @@
   "default_selling_terms",
   "default_buying_terms",
   "default_warehouse_for_sales_return",
+  "default_in_transit_warehouse",
   "column_break_10",
   "country",
   "create_chart_of_accounts_based_on",
@@ -45,10 +46,9 @@
   "round_off_account",
   "round_off_cost_center",
   "write_off_account",
-  "discount_allowed_account",
-  "discount_received_account",
   "exchange_gain_loss_account",
   "unrealized_exchange_gain_loss_account",
+  "unrealized_profit_loss_account",
   "column_break0",
   "allow_account_creation_against_child_company",
   "default_payable_account",
@@ -242,7 +242,7 @@
   {
    "fieldname": "default_warehouse_for_sales_return",
    "fieldtype": "Link",
-   "label": "Default warehouse for Sales Return",
+   "label": "Default Warehouse for Sales Return",
    "options": "Warehouse"
   },
   {
@@ -342,18 +342,6 @@
    "fieldname": "write_off_account",
    "fieldtype": "Link",
    "label": "Write Off Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "discount_allowed_account",
-   "fieldtype": "Link",
-   "label": "Discount Allowed Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "discount_received_account",
-   "fieldtype": "Link",
-   "label": "Discount Received Account",
    "options": "Account"
   },
   {
@@ -733,6 +721,18 @@
    "fieldname": "enable_perpetual_inventory_for_non_stock_items",
    "fieldtype": "Check",
    "label": "Enable Perpetual Inventory For Non Stock Items"
+  },
+  {
+   "fieldname": "default_in_transit_warehouse",
+   "fieldtype": "Link",
+   "label": "Default In Transit Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "unrealized_profit_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealized Profit / Loss Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -740,7 +740,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-06-24 12:45:31.462195",
+ "modified": "2020-12-03 12:27:27.085094",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
