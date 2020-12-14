@@ -246,13 +246,12 @@ const request_irn_generation = (frm, dialog) => {
 		method: 'erpnext.regional.india.e_invoice.utils.generate_irn',
 		args: { doctype: frm.doc.doctype, docname: frm.doc.name },
 		freeze: true,
-		callback: () => frm.reload_doc() || dialog.hide(),
-		error: () => dialog.hide()
+		callback: () => frm.reload_doc()
 	});
 }
 
 const get_preview_dialog = (frm, action) => {
-	return new frappe.ui.Dialog({
+	const dialog = new frappe.ui.Dialog({
 		title: __("Preview"),
 		wide: 1,
 		fields: [
@@ -262,16 +261,17 @@ const get_preview_dialog = (frm, action) => {
 				"fieldtype": "HTML"
 			}
 		],
-		primary_action: () => action(frm),
+		primary_action: () => action(frm) || dialog.hide(),
 		primary_action_label: __('Generate IRN')
 	});
+	return dialog;
 }
 
 const show_einvoice_preview = (frm, einvoice) => {
 	const preview_dialog = get_preview_dialog(frm, request_irn_generation);
 
-	// initialize empty e-invoice fields
-	einvoice.Irn = einvoice.AckNo = ''; einvoice.AckDate = frappe.datetime.nowdate();
+	// initialize e-invoice fields
+	einvoice["Irn"] = einvoice["AckNo"] = ''; einvoice["AckDt"] = frappe.datetime.nowdate();
 	frm.doc.signed_einvoice = JSON.stringify(einvoice);
 
 	// initialize preview wrapper
