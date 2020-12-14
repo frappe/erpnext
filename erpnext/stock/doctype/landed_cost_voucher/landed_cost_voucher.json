@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "naming_series:",
  "creation": "2014-07-11 11:33:42.547339",
  "doctype": "DocType",
@@ -7,6 +8,9 @@
  "field_order": [
   "naming_series",
   "company",
+  "column_break_2",
+  "posting_date",
+  "section_break_5",
   "purchase_receipts",
   "purchase_receipt_items",
   "get_items_from_purchase_receipts",
@@ -86,7 +90,7 @@
   {
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
-   "label": "Total Taxes and Charges",
+   "label": "Total Taxes and Charges (Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1,
    "reqd": 1
@@ -119,11 +123,29 @@
    "fieldname": "landed_cost_help",
    "fieldtype": "HTML",
    "label": "Landed Cost Help"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "icon": "icon-usd",
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2019-11-21 15:34:10.846093",
+ "links": [],
+ "modified": "2020-12-13 23:18:47.442466",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Voucher",
