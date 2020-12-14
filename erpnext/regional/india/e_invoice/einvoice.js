@@ -253,7 +253,7 @@ const request_irn_generation = (frm, dialog) => {
 
 const get_preview_dialog = (frm, action) => {
 	return new frappe.ui.Dialog({
-		title: __("E Invoice Preview"),
+		title: __("Preview"),
 		wide: 1,
 		fields: [
 			{ 
@@ -271,7 +271,7 @@ const show_einvoice_preview = (frm, einvoice) => {
 	const preview_dialog = get_preview_dialog(frm, request_irn_generation);
 
 	// initialize empty e-invoice fields
-	einvoice.Irn = einvoice.AckNo = einvoice.AckDate =  '';
+	einvoice.Irn = einvoice.AckNo = ''; einvoice.AckDate = frappe.datetime.nowdate();
 	frm.doc.signed_einvoice = JSON.stringify(einvoice);
 
 	// initialize preview wrapper
@@ -296,9 +296,9 @@ const show_einvoice_preview = (frm, einvoice) => {
 			if (!r.exc) {
 				$preview_wrapper.find(".print-format").html(r.message.html);
 				const style = `
-					.print-format { font-size: 7.0pt; box-shadow: 0px 0px 5px rgba(0,0,0,0.2); padding: 0.30in; min-height: 80vh; }
+					.print-format { box-shadow: 0px 0px 5px rgba(0,0,0,0.2); padding: 0.30in; min-height: 80vh; }
 					.print-preview { min-height: 0px; }
-					.modal-dialog { width: 650px; }
+					.modal-dialog { width: 720px; }
 				`
 				frappe.dom.set_style(style, "custom-print-style");
 				preview_dialog.show();
