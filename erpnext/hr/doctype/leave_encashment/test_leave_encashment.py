@@ -85,6 +85,7 @@ class TestLeaveEncashment(unittest.TestCase):
 		)).insert()
 
 		leave_encashment.submit()
+		leave_encashment.reload()
 
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_encashment.name))
 
