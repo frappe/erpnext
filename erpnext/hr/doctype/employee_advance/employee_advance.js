@@ -21,7 +21,7 @@ frappe.ui.form.on('Employee Advance', {
 			let company_currency = erpnext.get_currency(frm.doc.company);
 			let currencies = [company_currency];
 			if (frm.doc.currency && (frm.doc.currency != company_currency)) {
-				currencies.push(frm.doc.currency)
+				currencies.push(frm.doc.currency);
 			}
 
 			return {
