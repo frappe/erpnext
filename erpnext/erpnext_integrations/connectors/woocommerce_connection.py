@@ -85,7 +85,8 @@ def pre_process_payload(meta_data, billing):
 	}
 
 	# convert date format 03/07/1985
-	patient_dob = datetime.strptime(patient_dob, "%d/%m/%Y").strftime("%Y-%m-%d")
+	if patient_dob:
+		patient_dob = datetime.strptime(patient_dob, "%d/%m/%Y").strftime("%Y-%m-%d")
 
 	return customer_code, pos_order_type, patient_name, invoice_sending_option, delivery_option, temp_address, patient_dob
 
