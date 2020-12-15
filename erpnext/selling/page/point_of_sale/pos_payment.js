@@ -168,10 +168,8 @@ erpnext.PointOfSale.Payment = class {
 				me.toggle_numpad(true);
 
 				me.selected_mode = me[`${mode}_control`];
-				const doc = me.events.get_frm().doc;
-				me.selected_mode?.$input?.get(0).focus();
-				const current_value = me.selected_mode?.get_value()
-				!current_value && doc.grand_total > doc.paid_amount ? me.selected_mode?.set_value(doc.grand_total - doc.paid_amount) : '';
+				me.selected_mode && me.selected_mode.$input.get(0).focus();
+				me.auto_set_remaining_amount()
 			}
 		})
 
@@ -248,6 +246,15 @@ erpnext.PointOfSale.Payment = class {
 			this.$payment_modes.toggleClass('d-none');
 			this.toggle_numpad(true);
 		})
+	}
+
+	auto_set_remaining_amount() {
+		const doc = this.events.get_frm().doc;
+		const remaining_amount = doc.grand_total - doc.paid_amount;
+		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
+		if (!current_value && remaining_amount > 0 && this.selected_mode) {
+			this.selected_mode.set_value(remaining_amount);
+		}
 	}
 
 	attach_shortcuts() {
@@ -370,9 +377,11 @@ erpnext.PointOfSale.Payment = class {
 					fieldtype: 'Currency',
 					placeholder: __('Enter {0} amount.', [p.mode_of_payment]),
 					onchange: function() {
-						if (this.value || this.value == 0) {
-							frappe.model.set_value(p.doctype, p.name, 'amount', flt(this.value))
-								.then(() => me.update_totals_section());
+						const current_value = frappe.model.get_value(p.doctype, p.name, 'amount');
+						if (current_value != this.value) {
+							frappe.model
+								.set_value(p.doctype, p.name, 'amount', flt(this.value))
+								.then(() => me.update_totals_section())
 
 							const formatted_currency = format_currency(this.value, currency);
 							me.$payment_modes.find(`.${mode}-amount`).html(formatted_currency);
