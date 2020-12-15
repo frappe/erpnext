@@ -83,6 +83,7 @@ class Project(Document):
 	def dependency_mapping(self, template_tasks, project_tasks):
 		for tmp_task in template_tasks:
 			prj_task = list(filter(lambda x: x.subject == tmp_task.subject, project_tasks))[0]
+			prj_task = frappe.get_doc("Task", prj_task.name)
 			self.check_depends_on_value(tmp_task, prj_task, project_tasks)
 			self.check_for_parent_tasks(tmp_task, prj_task, project_tasks)
 
@@ -95,7 +96,6 @@ class Project(Document):
 					prj_task.append("depends_on",{
 						"task": corresponding_prj_task[0].name
 					})
-					print(prj_task.name)
 					prj_task.save()
 
 	def check_for_parent_tasks(self, tmp_task, prj_task, project_tasks):
