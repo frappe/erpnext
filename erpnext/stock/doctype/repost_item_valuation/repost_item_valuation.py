@@ -60,6 +60,16 @@ def repost(doc):
 		doc.set_status('Failed')
 		raise
 	finally:
+		if cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance('Stock In Hand - TCP1',
+			doc.posting_date, doc.company)
+			if account_bal != stock_bal:
+				print("-"*30)
+				print(doc.company, doc.posting_date)
+				print(account_bal, stock_bal, warehouse_list)
+				print("-"*30)
+				raise
+
 		frappe.db.commit()
 
 def repost_sl_entries(doc):
@@ -87,13 +97,3 @@ def repost_gl_entries(doc):
 
 	update_gl_entries_after(doc.posting_date, doc.posting_time,
 		warehouses, items, company=doc.company)
-
-	account_bal, stock_bal, warehouse_list = get_stock_and_account_balance('Stock In Hand - TCP1',
-		doc.posting_date, doc.company)
-	if account_bal != stock_bal:
-		print("-"*30)
-		print(doc.company, doc.posting_date)
-		print(account_bal, stock_bal, warehouse_list)
-		print("-"*30)
-		raise
-
