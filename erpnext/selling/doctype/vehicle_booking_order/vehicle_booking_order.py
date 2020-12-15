@@ -17,11 +17,12 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
 from erpnext.accounts.doctype.transaction_type.transaction_type import get_transaction_type_defaults
 from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
 from six import string_types
 import json
 
 force_fields = ['customer_name', 'item_name', 'item_group', 'brand', 'address_display',
-	'contact_display', 'contact_email', 'contact_mobile', 'contact_phone']
+	'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'withholding_tax_amount']
 
 class VehicleBookingOrder(AccountsController):
 	def validate(self):
@@ -115,12 +116,12 @@ class VehicleBookingOrder(AccountsController):
 					self.set(k, v)
 
 	def calculate_taxes_and_totals(self):
-		self.round_floats_in(self, ['vehicle_amount', 'fni_amount'])
+		self.round_floats_in(self, ['vehicle_amount', 'fni_amount', 'withholding_tax_amount'])
 
 		if not self.fni_item_code:
 			self.fni_amount = 0
 
-		self.invoice_total = flt(self.vehicle_amount + self.fni_amount,
+		self.invoice_total = flt(self.vehicle_amount + self.fni_amount + self.withholding_tax_amount,
 			self.precision('invoice_total'))
 
 		if self.docstatus == 0:
@@ -364,6 +365,9 @@ def get_customer_details(args):
 
 	set_contact_details(out, party, party_type)
 
+	if args.item_code:
+		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
+
 	return out
 
 
@@ -405,14 +409,16 @@ def get_item_details(args):
 	out.price_list = get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
 		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
 
-	if out.price_list:
-		out.update(get_vehicle_price(item.name, out.price_list, args.transaction_date))
+	if args.customer:
+		args.tax_status = frappe.get_cached_value("Customer", args.customer, "tax_status")
+	if out.vehicle_price_list:
+		out.update(get_vehicle_price(item.name, out.vehicle_price_list, args.transaction_date, args.tax_status, args.company))
 
 	return out
 
 
 @frappe.whitelist()
-def get_vehicle_price(item_code, price_list, transaction_date):
+def get_vehicle_price(item_code, price_list, transaction_date, tax_status, company):
 	if not item_code:
 		frappe.throw(_("Vehicle Item Code is mandatory"))
 	if not price_list:
@@ -432,7 +438,9 @@ def get_vehicle_price(item_code, price_list, transaction_date):
 	vehicle_item_price = vehicle_item_price[0][1] if vehicle_item_price else 0
 	out.vehicle_amount = flt(vehicle_item_price)
 
-	out.fni_item_code = item.fni_item_code
+	out.withholding_tax_amount = get_withholding_tax_amount(transaction_date, item_code, tax_status, company)
+
+	out.fni_item_code = item.get('fni_item_code')
 	if out.fni_item_code:
 		fni_item_price = get_item_price(item_price_args, item.fni_item_code, ignore_party=True)
 		fni_item_price = fni_item_price[0][1] if fni_item_price else 0

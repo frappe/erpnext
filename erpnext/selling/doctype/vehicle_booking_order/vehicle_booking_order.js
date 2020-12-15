@@ -141,6 +141,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.calculate_taxes_and_totals();
 	},
 
+	withholding_tax_amount: function () {
+		this.calculate_taxes_and_totals();
+	},
+
 	fni_amount: function () {
 		this.calculate_taxes_and_totals();
 	},
@@ -155,7 +159,9 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					args: {
 						company: me.frm.doc.company,
 						customer: me.frm.doc.customer,
-						company_is_customer: me.frm.doc.company_is_customer
+						company_is_customer: me.frm.doc.company_is_customer,
+						item_code: me.frm.doc.item_code,
+						transaction_date: me.frm.doc.transaction_date
 					}
 				},
 				callback: function (r) {
@@ -190,13 +196,13 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	calculate_taxes_and_totals: function () {
-		frappe.model.round_floats_in(this.frm.doc, ['vehicle_amount', 'fni_amount']);
+		frappe.model.round_floats_in(this.frm.doc, ['vehicle_amount', 'fni_amount', 'withholding_tax_amount']);
 
 		if (!this.frm.doc.fni_item_code) {
 			this.frm.doc.fni_amount = 0;
 		}
 
-		this.frm.doc.invoice_total = flt(this.frm.doc.vehicle_amount + this.frm.doc.fni_amount,
+			this.frm.doc.invoice_total = flt(this.frm.doc.vehicle_amount + this.frm.doc.fni_amount + this.frm.doc.withholding_tax_amount,
 			precision('invoice_total'));
 
 		if (this.frm.doc.docstatus === 0) {

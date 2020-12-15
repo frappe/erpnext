@@ -43,11 +43,11 @@
   "asset_category",
   "asset_naming_series",
   "vehicle_details_section",
-  "commission_item_code",
+  "vehicle_engine_capacity",
   "column_break_35",
-  "fni_item_code",
   "column_break_37",
   "include_item_in_vehicle_booking",
+  "commission_item_code",
   "section_break_31",
   "purchase_uom",
   "sales_uom",
@@ -1198,6 +1198,7 @@
    "label": "Vehicle Details"
   },
   {
+   "depends_on": "include_item_in_vehicle_booking",
    "fieldname": "commission_item_code",
    "fieldtype": "Link",
    "label": "Commission Item Code",
@@ -1208,12 +1209,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "fni_item_code",
-   "fieldtype": "Link",
-   "label": "Freight and Insurance Item Code",
-   "options": "Item"
-  },
-  {
    "fieldname": "column_break_37",
    "fieldtype": "Column Break"
   },
@@ -1222,6 +1217,11 @@
    "fieldname": "include_item_in_vehicle_booking",
    "fieldtype": "Check",
    "label": "Include Item in Vehicle Booking"
+  },
+  {
+   "fieldname": "vehicle_engine_capacity",
+   "fieldtype": "Int",
+   "label": "Engine Capacity (CC)"
   }
  ],
  "has_web_view": 1,
@@ -1229,7 +1229,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-12-06 01:18:10.821666",
+ "modified": "2020-12-14 16:37:20.982463",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
