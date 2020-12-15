@@ -582,6 +582,7 @@ def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progr
 		else:
 			try:
 				ss_obj.submit()
+				ss_obj.db_set("payroll_entry", payroll_entry.name)
 				submitted_ss.append(ss_obj)
 			except frappe.ValidationError:
 				not_submitted_ss.append(ss[0])
