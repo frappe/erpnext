@@ -49,10 +49,10 @@ class TestProject(unittest.TestCase):
 		if not task3:
 			task3 = create_task(subject="Test Temp Task child 2", parent_task=task1.name, is_template=1, begin=2, duration=3)
 
-		template = make_project_template("Test Project Template  - tasks with parent-child", [task1])
+		template = make_project_template("Test Project Template  - tasks with parent-child", [task1, task2, task3])
 		project = get_project("Test Project with Templ - tasks with parent-child", template)
 		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
-		print(tasks[0].duration)
+
 		self.assertEqual(tasks[0].subject, 'Test Temp Task parent')
 		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, tasks[0]))
 
