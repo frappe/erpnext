@@ -55,7 +55,11 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual([d.debit, d.credit], expected_gl_entries.get(d.account))
 
 	def test_gl_entries_with_perpetual_inventory(self):
-		pi = make_purchase_invoice(company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1", get_taxes_and_charges=True, qty=10)
+		pi = make_purchase_invoice(company="_Test Company with perpetual inventory",
+			warehouse= "Stores - TCP1", cost_center = "Main - TCP1",
+			expense_account ="_Test Account Cost for Goods Sold - TCP1",
+			get_taxes_and_charges=True, qty=10)
+
 		self.assertTrue(cint(erpnext.is_perpetual_inventory_enabled(pi.company)), 1)
 
 		self.check_gle_for_pi(pi.name)

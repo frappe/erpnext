@@ -5,9 +5,8 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import today, nowtime, add_days
+from frappe.utils import today, add_days
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
-from erpnext import set_perpetual_inventory
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation \
 	import create_stock_reconciliation
 from erpnext.stock.doctype.item.test_item import make_item
@@ -25,63 +24,61 @@ class TestStockLedgerEntry(unittest.TestCase):
 		frappe.db.sql("delete from `tabStock Ledger Entry` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
 		frappe.db.sql("delete from `tabBin` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
 
-		set_perpetual_inventory(0, "_Test Company with perpetual inventory")
-
-	def tearDown(self):
-		set_perpetual_inventory(1, "_Test Company with perpetual inventory")
-
 	def test_item_cost_reposting(self):
-		company = "_Test Company with perpetual inventory"
+		company = "_Test Company"
 
 		# _Test Item for Reposting at Stores warehouse on 10-04-2020: Qty = 50, Rate = 100
 		create_stock_reconciliation(
 			item_code="_Test Item for Reposting",
-			warehouse="Stores - TCP1",
+			warehouse="Stores - _TC",
 			qty=50,
 			rate=100,
 			company=company,
-			expense_account = "Stock Adjustment - TCP1",
-			posting_date='2020-04-10'
+			expense_account = "Stock Adjustment - _TC",
+			posting_date='2020-04-10',
+			posting_time='14:00'
 		)
 
 		# _Test Item for Reposting at FG warehouse on 20-04-2020: Qty = 10, Rate = 200
 		create_stock_reconciliation(
 			item_code="_Test Item for Reposting",
-			warehouse="Finished Goods - TCP1",
+			warehouse="Finished Goods - _TC",
 			qty=10,
 			rate=200,
 			company=company,
-			expense_account = "Stock Adjustment - TCP1",
-			posting_date='2020-04-20'
+			expense_account = "Stock Adjustment - _TC",
+			posting_date='2020-04-20',
+			posting_time='14:00'
 		)
 
 		# _Test Item for Reposting transferred from Stores to FG warehouse on 30-04-2020
 		make_stock_entry(
 			item_code="_Test Item for Reposting",
-			source="Stores - TCP1",
-			target="Finished Goods - TCP1",
+			source="Stores - _TC",
+			target="Finished Goods - _TC",
 			company=company,
 			qty=10,
-			expense_account="Stock Adjustment - TCP1",
-			posting_date='2020-04-30'
+			expense_account="Stock Adjustment - _TC",
+			posting_date='2020-04-30',
+			posting_time='14:00'
 		)
 		target_wh_sle = get_previous_sle({
 			"item_code": "_Test Item for Reposting",
-			"warehouse": "Finished Goods - TCP1",
+			"warehouse": "Finished Goods - _TC",
 			"posting_date": '2020-04-30',
-			"posting_time": nowtime()
+			"posting_time": '14:00'
 		})
 
 		self.assertEqual(target_wh_sle.get("valuation_rate"), 150)
 
 		# Repack entry on 5-5-2020
-		repack = create_repack_entry(company=company, posting_date='2020-05-05')
+		repack = create_repack_entry(company=company, posting_date='2020-05-05', posting_time='14:00')
 
 		finished_item_sle = get_previous_sle({
 			"item_code": "_Test Finished Item for Reposting",
-			"warehouse": "Finished Goods - TCP1",
+			"warehouse": "Finished Goods - _TC",
 			"posting_date": '2020-05-05',
-			"posting_time": nowtime()
+			"posting_time": '14:00'
 		})
 		self.assertEqual(finished_item_sle.get("incoming_rate"), 540)
 		self.assertEqual(finished_item_sle.get("valuation_rate"), 540)
@@ -89,21 +86,22 @@ class TestStockLedgerEntry(unittest.TestCase):
 		# Reconciliation for _Test Item for Reposting at Stores on 12-04-2020: Qty = 50, Rate = 150
 		create_stock_reconciliation(
 			item_code="_Test Item for Reposting",
-			warehouse="Stores - TCP1",
+			warehouse="Stores - _TC",
 			qty=50,
 			rate=150,
 			company=company,
-			expense_account = "Stock Adjustment - TCP1",
-			posting_date='2020-04-12'
+			expense_account = "Stock Adjustment - _TC",
+			posting_date='2020-04-12',
+			posting_time='14:00'
 		)
 
 
 		# Check valuation rate of finished goods warehouse after back-dated entry at Stores
 		target_wh_sle = get_previous_sle({
 			"item_code": "_Test Item for Reposting",
-			"warehouse": "Finished Goods - TCP1",
+			"warehouse": "Finished Goods - _TC",
 			"posting_date": '2020-04-30',
-			"posting_time": nowtime()
+			"posting_time": '14:00'
 		})
 		self.assertEqual(target_wh_sle.get("incoming_rate"), 150)
 		self.assertEqual(target_wh_sle.get("valuation_rate"), 175)
@@ -111,9 +109,9 @@ class TestStockLedgerEntry(unittest.TestCase):
 		# Check valuation rate of repacked item after back-dated entry at Stores
 		finished_item_sle = get_previous_sle({
 			"item_code": "_Test Finished Item for Reposting",
-			"warehouse": "Finished Goods - TCP1",
+			"warehouse": "Finished Goods - _TC",
 			"posting_date": '2020-05-05',
-			"posting_time": nowtime()
+			"posting_time": '14:00'
 		})
 		self.assertEqual(finished_item_sle.get("incoming_rate"), 790)
 		self.assertEqual(finished_item_sle.get("valuation_rate"), 790)
@@ -124,11 +122,11 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(repack.items[1].get("basic_rate"), 750)
 
 	def test_purchase_return_valuation_reposting(self):
-		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", posting_date='2020-04-10',
-			warehouse="Stores - TCP1", item_code="_Test Item for Reposting", qty=5, rate=100)
+		pr = make_purchase_receipt(company="_Test Company", posting_date='2020-04-10',
+			warehouse="Stores - _TC", item_code="_Test Item for Reposting", qty=5, rate=100)
 
-		return_pr = make_purchase_receipt(company="_Test Company with perpetual inventory", posting_date='2020-04-15', 
-			warehouse="Stores - TCP1", item_code="_Test Item for Reposting", is_return=1, return_against=pr.name, qty=-2)
+		return_pr = make_purchase_receipt(company="_Test Company", posting_date='2020-04-15', 
+			warehouse="Stores - _TC", item_code="_Test Item for Reposting", is_return=1, return_against=pr.name, qty=-2)
 
 		# check sle
 		outgoing_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Purchase Receipt",
@@ -146,16 +144,16 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(stock_value_difference, -220)
 
 	def test_sales_return_valuation_reposting(self):
-		company = "_Test Company with perpetual inventory"
+		company = "_Test Company"
 		item_code="_Test Item for Reposting"
 
 		# Purchase Return: Qty = 5, Rate = 100
 		pr = make_purchase_receipt(company=company, posting_date='2020-04-10',
-			warehouse="Stores - TCP1", item_code=item_code, qty=5, rate=100)
+			warehouse="Stores - _TC", item_code=item_code, qty=5, rate=100)
 
 		#Delivery Note: Qty = 5, Rate = 150
-		dn = create_delivery_note(item_code=item_code, qty=5, rate=150, warehouse="Stores - TCP1",
-			company=company, expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+		dn = create_delivery_note(item_code=item_code, qty=5, rate=150, warehouse="Stores - _TC",
+			company=company, expense_account="Cost of Goods Sold - _TC", cost_center="Main - _TC")
 
 		# check outgoing_rate for DN
 		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
@@ -166,7 +164,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		# Return Entry: Qty = -2, Rate = 150
 		return_dn = create_delivery_note(is_return=1, return_against=dn.name, item_code=item_code, qty=-2, rate=150,
-			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+			company=company, warehouse="Stores - _TC", expense_account="Cost of Goods Sold - _TC", cost_center="Main - _TC")
 
 		# check incoming rate for Return entry
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
@@ -208,18 +206,18 @@ class TestStockLedgerEntry(unittest.TestCase):
 		pr.cancel()
 
 	def test_reposting_of_sales_return_for_packed_item(self):
-		company = "_Test Company with perpetual inventory"
+		company = "_Test Company"
 		packed_item_code="_Test Item for Reposting"
 		bundled_item = "_Test Bundled Item for Reposting"
 		create_product_bundle_item(bundled_item, [[packed_item_code, 4]])
 
 		# Purchase Return: Qty = 50, Rate = 100
 		pr = make_purchase_receipt(company=company, posting_date='2020-04-10',
-			warehouse="Stores - TCP1", item_code=packed_item_code, qty=50, rate=100)
+			warehouse="Stores - _TC", item_code=packed_item_code, qty=50, rate=100)
 
 		#Delivery Note: Qty = 5, Rate = 150
-		dn = create_delivery_note(item_code=bundled_item, qty=5, rate=150, warehouse="Stores - TCP1",
-			company=company, expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+		dn = create_delivery_note(item_code=bundled_item, qty=5, rate=150, warehouse="Stores - _TC",
+			company=company, expense_account="Cost of Goods Sold - _TC", cost_center="Main - _TC")
 
 		# check outgoing_rate for DN
 		outgoing_rate = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Delivery Note",
@@ -230,7 +228,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		# Return Entry: Qty = -2, Rate = 150
 		return_dn = create_delivery_note(is_return=1, return_against=dn.name, item_code=bundled_item, qty=-2, rate=150,
-			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+			company=company, warehouse="Stores - _TC", expense_account="Cost of Goods Sold - _TC", cost_center="Main - _TC")
 
 		# check incoming rate for Return entry
 		incoming_rate, stock_value_difference = frappe.db.get_value("Stock Ledger Entry",
@@ -274,7 +272,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 	def test_sub_contracted_item_costing(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-		company = "_Test Company with perpetual inventory"
+		company = "_Test Company"
 		rm_item_code="_Test Item for Reposting"
 		subcontracted_item = "_Test Subcontracted Item for Reposting"
 
@@ -283,11 +281,11 @@ class TestStockLedgerEntry(unittest.TestCase):
 		
 		# Purchase raw materials on supplier warehouse: Qty = 50, Rate = 100
 		pr = make_purchase_receipt(company=company, posting_date='2020-04-10',
-			warehouse="Stores - TCP1", item_code=rm_item_code, qty=10, rate=100)
+			warehouse="Stores - _TC", item_code=rm_item_code, qty=10, rate=100)
 
 		# Purchase Receipt for subcontracted item
 		pr1 = make_purchase_receipt(company=company, posting_date='2020-04-20',
-			warehouse="Finished Goods - TCP1", supplier_warehouse="Stores - TCP1",
+			warehouse="Finished Goods - _TC", supplier_warehouse="Stores - _TC",
 			item_code=subcontracted_item, qty=10, rate=20, is_subcontracted="Yes")
 
 		self.assertEqual(pr1.items[0].valuation_rate, 120)
@@ -348,20 +346,24 @@ def create_repack_entry(**args):
 	repack.set_posting_time = 1
 	repack.append("items", {
 		"item_code": "_Test Item for Reposting",
-		"s_warehouse": "Stores - TCP1",
+		"s_warehouse": "Stores - _TC",
 		"qty": 5,
-		"conversion_factor": 1
+		"conversion_factor": 1,
+		"expense_account": "Stock Adjustment - _TC",
+		"cost_center": "Main - _TC"
 	})
 
 	repack.append("items", {
 		"item_code": "_Test Finished Item for Reposting",
-		"t_warehouse": "Finished Goods - TCP1",
+		"t_warehouse": "Finished Goods - _TC",
 		"qty": 1,
-		"conversion_factor": 1
+		"conversion_factor": 1,
+		"expense_account": "Stock Adjustment - _TC",
+		"cost_center": "Main - _TC"
 	})
 
 	repack.append("additional_costs", {
-		"expense_account": "Freight and Forwarding Charges - TCP1",
+		"expense_account": "Freight and Forwarding Charges - _TC",
 		"description": "transport cost",
 		"amount": 40
 	})

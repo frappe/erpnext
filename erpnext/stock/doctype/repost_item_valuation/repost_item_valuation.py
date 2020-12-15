@@ -7,7 +7,7 @@ import frappe, erpnext
 from frappe.model.document import Document
 from frappe.utils import cint
 from erpnext.stock.stock_ledger import repost_future_sle
-from erpnext.accounts.utils import update_gl_entries_after, get_stock_and_account_balance
+from erpnext.accounts.utils import update_gl_entries_after
 
 
 class RepostItemValuation(Document):

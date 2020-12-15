@@ -105,6 +105,7 @@ class TestJournalEntry(unittest.TestCase):
 
 		if account_bal == stock_bal:
 			self.assertRaises(StockAccountInvalidTransaction, jv.submit)
+			frappe.db.rollback()
 		else:
 			jv.submit()
 			jv.cancel()
