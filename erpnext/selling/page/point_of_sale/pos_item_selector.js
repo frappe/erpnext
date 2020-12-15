@@ -1,14 +1,16 @@
 import onScan from 'onscan.js';
 
 erpnext.PointOfSale.ItemSelector = class {
-	constructor({ frm, wrapper, events, pos_profile }) {
+	constructor({ frm, wrapper, events, pos_profile, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.pos_profile = pos_profile;
-		
+		this.hide_images = settings.hide_images;
+		this.auto_add_item = settings.auto_add_item_to_cart;
+
 		this.inti_component();
 	}
-	
+
 	inti_component() {
 		this.prepare_dom();
 		this.make_search_bar();
@@ -28,8 +30,9 @@ erpnext.PointOfSale.ItemSelector = class {
 				<div class="items-container"></div>
 			</section>`
 		);
-		
+
 		this.$component = this.wrapper.find('.items-selector');
+		this.$items_container = this.$component.find('.items-container');
 	}
 
 	async load_items_data() {
@@ -53,7 +56,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		let { item_group, pos_profile } = this;
 
 		!item_group && (item_group = this.parent_item_group);
-		
+
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
@@ -63,7 +66,6 @@ erpnext.PointOfSale.ItemSelector = class {
 
 
 	render_item_list(items) {
-		this.$items_container = this.$component.find('.items-container');
 		this.$items_container.html('');
 
 		items.forEach(item => {
@@ -73,14 +75,15 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	get_item_html(item) {
+		const me = this;
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 
 		function get_item_image_html() {
-			if (item_image) {
-				return `<div class="item-display">
-							<img src="${item_image}" alt="${frappe.get_abbr(item.item_name)}">
-						</div>`;
+			if (!me.hide_images && item_image) {
+				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
+							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
+						</div>`
 			} else {
 				return `<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
 			}
@@ -166,7 +169,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
-			
+
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
@@ -204,6 +207,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			ignore_inputs: true,
 			page: cur_page.page.page
 		});
+
 		// for selecting the last filtered item on search
 		frappe.ui.keys.on("enter", () => {
 			const selector_is_visible = this.$component.is(':visible');
@@ -225,7 +229,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		});
 	}
-	
+
 	filter_items({ search_term='' }={}) {
 		if (search_term) {
 			search_term = search_term.toLowerCase();
@@ -236,6 +240,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				const items = this.search_index[search_term];
 				this.items = items;
 				this.render_item_list(items);
+				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
 				return;
 			}
 		}
@@ -248,15 +253,20 @@ erpnext.PointOfSale.ItemSelector = class {
 				}
 				this.items = items;
 				this.render_item_list(items);
+				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
 			});
 	}
-	
+
+	add_filtered_item_to_cart() {
+		this.$items_container.find(".item-wrapper").click();
+	}
+
 	resize_selector(minimize) {
-		minimize ? 
+		minimize ?
 		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
 		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(12, minmax(0, 1fr))');
 
-		minimize ? 
+		minimize ?
 		this.$component.find('.search-field').css('margin', 'var(--margin-sm) 0px') :
 		this.$component.find('.search-field').css('margin', '0px var(--margin-sm)');
 

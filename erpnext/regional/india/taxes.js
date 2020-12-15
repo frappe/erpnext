@@ -19,6 +19,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				'shipping_address': frm.doc.shipping_address || '',
 				'shipping_address_name': frm.doc.shipping_address_name || '',
 				'customer_address': frm.doc.customer_address || '',
+				'supplier_address': frm.doc.supplier_address,
 				'customer': frm.doc.customer,
 				'supplier': frm.doc.supplier,
 				'supplier_gstin': frm.doc.supplier_gstin,
@@ -31,12 +32,12 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				args: {
 					party_details: JSON.stringify(party_details),
 					doctype: frm.doc.doctype,
-					company: frm.doc.company,
-					return_taxes: 1
+					company: frm.doc.company
 				},
 				callback: function(r) {
 					if(r.message) {
 						frm.set_value('taxes_and_charges', r.message.taxes_and_charges);
+						frm.set_value('place_of_supply', r.message.place_of_supply);
 					} else if (frm.doc.is_internal_supplier || frm.doc.is_internal_customer) {
 						frm.set_value('taxes_and_charges', '');
 						frm.set_value('taxes', []);

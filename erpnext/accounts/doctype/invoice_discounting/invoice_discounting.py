@@ -137,11 +137,12 @@ class InvoiceDiscounting(AccountsController):
 			"cost_center": erpnext.get_default_cost_center(self.company)
 		})
 
-		je.append("accounts", {
-			"account": self.bank_charges_account,
-			"debit_in_account_currency": flt(self.bank_charges),
-			"cost_center": erpnext.get_default_cost_center(self.company)
-		})
+		if self.bank_charges:
+			je.append("accounts", {
+				"account": self.bank_charges_account,
+				"debit_in_account_currency": flt(self.bank_charges),
+				"cost_center": erpnext.get_default_cost_center(self.company)
+			})
 
 		je.append("accounts", {
 			"account": self.short_term_loan,
