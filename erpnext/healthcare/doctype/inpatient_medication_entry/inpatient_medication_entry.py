@@ -142,25 +142,32 @@ class InpatientMedicationEntry(Document):
 		return orders, order_entry_map
 
 	def check_stock_qty(self):
-		from erpnext.stock.stock_ledger import NegativeStockError
+		drug_shortage = get_drug_shortage_map(self.medication_orders, self.warehouse)
 
-		drug_availability = dict()
-		for d in self.medication_orders:
-			if not drug_availability.get(d.drug_code):
-				drug_availability[d.drug_code] = 0
-			drug_availability[d.drug_code] += flt(d.dosage)
+		if drug_shortage:
+			message = _('Quantity not available for the following items in warehouse {0}. ').format(frappe.bold(self.warehouse))
+			message += _('Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.')
 
-		for drug, dosage in drug_availability.items():
-			available_qty = get_latest_stock_qty(drug, self.warehouse)
+			formatted_item_rows = ''
 
-			# validate qty
-			if flt(available_qty) < flt(dosage):
-				frappe.throw(_('Quantity not available for {0} in warehouse {1}').format(
-					frappe.bold(drug), frappe.bold(self.warehouse))
-					+ '<br><br>' + _('Available quantity is {0}, you need {1}').format(
-					frappe.bold(available_qty), frappe.bold(dosage))
-					+ '<br><br>' + _('Please enable Allow Negative Stock in Stock Settings or create Stock Entry to proceed.'),
-					NegativeStockError, title=_('Insufficient Stock'))
+			for drug, shortage_qty in drug_shortage.items():
+				item_link = get_link_to_form('Item', drug)
+				formatted_item_rows += """
+					<td>{0}</td>
+					<td>{1}</td>
+				</tr>""".format(item_link, frappe.bold(shortage_qty))
+
+			message += """
+				<table class='table'>
+					<thead>
+						<th>{0}</th>
+						<th>{1}</th>
+					</thead>
+					{2}
+				</table>
+			""".format(_('Drug Code'), _('Shortage Qty'), formatted_item_rows)
+
+			frappe.throw(message, title=_('Insufficient Stock'), is_minimizable=True, wide=True)
 
 	def make_stock_entry(self):
 		stock_entry = frappe.new_doc('Stock Entry')
@@ -223,7 +230,8 @@ def get_pending_medication_orders(entry):
 
 	for doc in data:
 		inpatient_record = doc.inpatient_record
-		doc['service_unit'] = get_current_healthcare_service_unit(inpatient_record)
+		if inpatient_record:
+			doc['service_unit'] = get_current_healthcare_service_unit(inpatient_record)
 
 		if entry.service_unit and doc.service_unit != entry.service_unit:
 			to_remove.append(doc)
@@ -274,4 +282,57 @@ def get_filters(entry):
 
 def get_current_healthcare_service_unit(inpatient_record):
 	ip_record = frappe.get_doc('Inpatient Record', inpatient_record)
-	return ip_record.inpatient_occupancies[-1].service_unit
+	if ip_record.inpatient_occupancies:
+		return ip_record.inpatient_occupancies[-1].service_unit
+	return
+
+
+def get_drug_shortage_map(medication_orders, warehouse):
+	"""
+		Returns a dict like { drug_code: shortage_qty }
+	"""
+	drug_requirement = dict()
+	for d in medication_orders:
+		if not drug_requirement.get(d.drug_code):
+			drug_requirement[d.drug_code] = 0
+		drug_requirement[d.drug_code] += flt(d.dosage)
+
+	drug_shortage = dict()
+	for drug, required_qty in drug_requirement.items():
+		available_qty = get_latest_stock_qty(drug, warehouse)
+		if flt(required_qty) > flt(available_qty):
+			drug_shortage[drug] = flt(flt(required_qty) - flt(available_qty))
+
+	return drug_shortage
+
+
+@frappe.whitelist()
+def make_difference_stock_entry(docname):
+	doc = frappe.get_doc('Inpatient Medication Entry', docname)
+	drug_shortage = get_drug_shortage_map(doc.medication_orders, doc.warehouse)
+
+	if not drug_shortage:
+		return None
+
+	stock_entry = frappe.new_doc('Stock Entry')
+	stock_entry.purpose = 'Material Transfer'
+	stock_entry.set_stock_entry_type()
+	stock_entry.to_warehouse = doc.warehouse
+	stock_entry.company = doc.company
+	cost_center = frappe.get_cached_value('Company',  doc.company,  'cost_center')
+	expense_account = get_account(None, 'expense_account', 'Healthcare Settings', doc.company)
+
+	for drug, shortage_qty in drug_shortage.items():
+		se_child = stock_entry.append('items')
+		se_child.item_code = drug
+		se_child.item_name = frappe.db.get_value('Item', drug, 'stock_uom')
+		se_child.uom = frappe.db.get_value('Item', drug, 'stock_uom')
+		se_child.stock_uom = se_child.uom
+		se_child.qty = flt(shortage_qty)
+		se_child.t_warehouse = doc.warehouse
+		# in stock uom
+		se_child.conversion_factor = 1
+		se_child.cost_center = cost_center
+		se_child.expense_account = expense_account
+
+	return stock_entry

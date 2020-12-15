@@ -580,6 +580,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("unrealized_profit_loss_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
@@ -664,12 +674,12 @@ frappe.ui.form.on('Sales Invoice', {
 		};
 	},
 	// When multiple companies are set up. in case company name is changed set default company address
-	company:function(frm){
-		if (frm.doc.company)
-		{
+	company: function(frm){
+		if (frm.doc.company) {
 			frappe.call({
-				method:"erpnext.setup.doctype.company.company.get_default_company_address",
-				args:{name:frm.doc.company, existing_address: frm.doc.company_address},
+				method: "erpnext.setup.doctype.company.company.get_default_company_address",
+				args: {name:frm.doc.company, existing_address: frm.doc.company_address || ""},
+				debounce: 2000,
 				callback: function(r){
 					if (r.message){
 						frm.set_value("company_address",r.message)
