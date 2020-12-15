@@ -79,16 +79,16 @@ class TestProject(unittest.TestCase):
 		if not task2:
 			task2 = create_task(subject="Test Temp Task with dependency", depends_on=task1.name, is_template=1, begin=2, duration=2)
 		
-		template = make_project_template("Test Project with Templ - dependent tasks", [task2])
-		project = get_project("Test Project with Templ - tasks with parent-child", template)
+		template = make_project_template("Test Project with Templ - dependent tasks", [task1, task2])
+		project = get_project("Test Project with Templ - dependent tasks", template)
 		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
 
-		self.assertEqual(tasks[0].subject, 'Test Temp Task with dependency')
-		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, tasks[0]))
-		self.assertEqual(tasks[0].depends_on, tasks[1].name)
+		self.assertEqual(tasks[1].subject, 'Test Temp Task with dependency')
+		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, tasks[1]))
+		self.assertTrue(tasks[1].depends_on_tasks.find(tasks[0].name) >= 0 )
 
-		self.assertEqual(tasks[1].subject, 'Test Temp Task for dependency')
-		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, tasks[1]) )
+		self.assertEqual(tasks[0].subject, 'Test Temp Task for dependency')
+		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, tasks[0]) )
 
 		self.assertEqual(len(tasks), 2)
 
