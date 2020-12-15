@@ -7,7 +7,8 @@ import frappe, erpnext
 from frappe.model.document import Document
 from frappe.utils import cint
 from erpnext.stock.stock_ledger import repost_future_sle
-from erpnext.accounts.utils import update_gl_entries_after
+from erpnext.accounts.utils import update_gl_entries_after, get_stock_and_account_balance
+
 
 class RepostItemValuation(Document):
 	def validate(self):
@@ -59,6 +60,15 @@ def repost(doc):
 		doc.set_status('Failed')
 		raise
 	finally:
+		if cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance('Stock In Hand - TCP1',
+				doc.posting_date, doc.company)
+			if account_bal != stock_bal:
+				print("-"*30)
+				print(doc.company, doc.posting_date)
+				print(account_bal, stock_bal, warehouse_list)
+				print("-"*30)
+
 		frappe.db.commit()
 
 def repost_sl_entries(doc):
