@@ -36,6 +36,16 @@ class RepostItemValuation(Document):
 		self.db_set('status', status)
 
 	def on_submit(self):
+		if cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance('Stock In Hand - TCP1',
+			self.posting_date, self.company)
+			if account_bal != stock_bal:
+				print("-"*30)
+				print(self.company, self.posting_date)
+				print(account_bal, stock_bal, warehouse_list)
+				print("-"*30)
+				raise
+
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=frappe.flags.in_test, doc=self)
 
@@ -60,16 +70,6 @@ def repost(doc):
 		doc.set_status('Failed')
 		raise
 	finally:
-		if cint(erpnext.is_perpetual_inventory_enabled(doc.company)):
-			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance('Stock In Hand - TCP1',
-			doc.posting_date, doc.company)
-			if account_bal != stock_bal:
-				print("-"*30)
-				print(doc.company, doc.posting_date)
-				print(account_bal, stock_bal, warehouse_list)
-				print("-"*30)
-				raise
-
 		frappe.db.commit()
 
 def repost_sl_entries(doc):
