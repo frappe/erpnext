@@ -639,7 +639,9 @@ def set_tax_withholding_category(company):
 				fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
 				if not fy_exist:
 					doc.append("rates", d.get('rates')[0])
-
+					
+			doc.flags.ignore_permissions = True
+			doc.flags.ignore_mandatory = True
 			doc.save()
 
 def set_tds_account(docs, company):
