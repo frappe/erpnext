@@ -417,7 +417,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:38.131999",
+ "modified": "2020-12-16 10:24:52.088466",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
@@ -444,11 +444,6 @@
    "label": "Sales Invoice",
    "link_to": "Sales Invoice",
    "type": "DocType"
-  },
-  {
-   "label": "Dashboard",
-   "link_to": "dashboard",
-   "type": "Page"
   },
   {
    "label": "Leaderboard",
