@@ -48,7 +48,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Manufacturing",
- "modified": "2020-06-30 18:40:04.454826",
+ "modified": "2020-12-16 12:52:54.919244",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing",
@@ -116,10 +116,10 @@
    "type": "Report"
   },
   {
-    "label": "Dashboard",
-    "link_to": "Manufacturing",
-    "restrict_to_domain": "Manufacturing",
-    "type": "Dashboard"
-   } 
+   "label": "Dashboard",
+   "link_to": "Manufacturing",
+   "restrict_to_domain": "Manufacturing",
+   "type": "Dashboard"
+  }
  ]
 }

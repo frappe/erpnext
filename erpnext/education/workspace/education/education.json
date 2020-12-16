@@ -84,7 +84,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Education",
- "modified": "2020-07-27 19:35:18.832694",
+ "modified": "2020-12-16 12:52:54.919244",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education",
@@ -95,7 +95,7 @@
  "restrict_to_domain": "Education",
  "shortcuts": [
   {
-   "color": "#cef6d1",
+   "color": "green",
    "format": "{} Active",
    "label": "Student",
    "link_to": "Student",
@@ -103,7 +103,7 @@
    "type": "DocType"
   },
   {
-   "color": "#cef6d1",
+   "color": "green",
    "format": "{} Active",
    "label": "Instructor",
    "link_to": "Instructor",
@@ -124,7 +124,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ffe8cd",
+   "color": "yellow",
    "format": "{} Unpaid",
    "label": "Fees",
    "link_to": "Fees",

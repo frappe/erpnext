@@ -34,7 +34,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Quality",
- "modified": "2020-10-27 16:28:54.138055",
+ "modified": "2020-12-16 12:52:54.919244",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality",
@@ -59,7 +59,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ff8989",
+   "color": "red",
    "doc_view": "",
    "format": "{} Open",
    "label": "Quality Review",
@@ -68,7 +68,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ff8989",
+   "color": "red",
    "doc_view": "",
    "format": "{} Open",
    "label": "Quality Action",
@@ -77,7 +77,7 @@
    "type": "DocType"
   },
   {
-   "color": "#ff8989",
+   "color": "red",
    "doc_view": "",
    "format": "{} Open",
    "label": "Non Conformance",
