@@ -14,7 +14,9 @@
   "section_break_4",
   "accounts",
   "column_break_6",
-  "dimensions"
+  "dimensions",
+  "section_break_10",
+  "dimension_filter_help"
  ],
  "fields": [
   {
@@ -89,11 +91,24 @@
    "reqd": 1,
    "show_days": 1,
    "show_seconds": 1
+  },
+  {
+   "fieldname": "dimension_filter_help",
+   "fieldtype": "HTML",
+   "label": "Dimension Filter Help",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-24 12:34:42.458713",
+ "modified": "2020-12-16 15:27:23.659285",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension Filter",
