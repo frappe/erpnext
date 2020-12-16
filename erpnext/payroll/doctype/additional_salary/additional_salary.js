@@ -12,14 +12,6 @@ frappe.ui.form.on('Additional Salary', {
 				}
 			};
 		});
-
-		if (!frm.doc.currency) return;
-		frm.set_query("salary_component", function() {
-			return {
-				query: "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
-				filters: {currency: frm.doc.currency, company: frm.doc.company}
-			};
-		});
 	},
 
 	employee: function(frm) {

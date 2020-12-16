@@ -575,6 +575,25 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0
+				}
+			};
+		});
+
+		frm.set_query("unrealized_profit_loss_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
