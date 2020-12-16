@@ -5,10 +5,10 @@ from frappe import _
 
 def get_data():
 	return {
-		'fieldname': 'issue',
+		'fieldname': 'reference_docname',
 		'transactions': [
 			{
-				'label': _('Activity'),
+				'label': _('Task'),
 				'items': ['Task']
 			}
 		]

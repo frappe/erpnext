@@ -9,8 +9,8 @@
  "field_order": [
   "subject",
   "project",
-  "issue",
-  "type",
+  "reference_doctype",
+  "reference_docname",
   "is_group",
   "column_break0",
   "status",
@@ -74,18 +74,6 @@
    "options": "Project",
    "remember_last_selected_value": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "issue",
-   "fieldtype": "Link",
-   "label": "Issue",
-   "options": "Issue"
-  },
-  {
-   "fieldname": "type",
-   "fieldtype": "Link",
-   "label": "Type",
-   "options": "Task Type"
   },
   {
    "bold": 1,
@@ -360,14 +348,27 @@
    "label": "Completed By",
    "no_copy": 1,
    "options": "User"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Select",
+   "label": "Reference Document Type",
+   "options": "Issue\nEmployee Issue"
+  },
+  {
+   "fieldname": "reference_docname",
+   "fieldtype": "Dynamic Link",
+   "label": "Reference Document",
+   "options": "reference_doctype"
   }
  ],
  "icon": "fa fa-check",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-07-03 12:36:04.960457",
+ "modified": "2020-12-15 14:36:32.981470",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

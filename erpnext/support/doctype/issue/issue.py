@@ -480,7 +480,10 @@ def is_holiday(date, holidays):
 def make_task(source_name, target_doc=None):
 	return get_mapped_doc("Issue", source_name, {
 		"Issue": {
-			"doctype": "Task"
+			"doctype": "Task",
+			"field_map": {
+				'name': "reference_docname"
+			},
 		}
 	}, target_doc)
 

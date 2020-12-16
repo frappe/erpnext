@@ -740,7 +740,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2020-12-03 12:27:27.085094",
+ "modified": "2020-12-31 14:31:19.493825",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -765,8 +765,8 @@
    "role": "Accounts User"
   },
   {
-   "read": 1,
-   "role": "Employee"
+   "role": "Employee",
+   "select": 1
   },
   {
    "read": 1,

@@ -197,6 +197,7 @@
    "label": "Based On Date Of Joining"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.is_lwp == 0",
    "fieldname": "is_ppl",
    "fieldtype": "Check",
@@ -213,7 +214,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2020-10-15 15:49:47.555105",
+ "modified": "2020-12-31 15:14:07.445507",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
@@ -242,8 +243,8 @@
    "write": 1
   },
   {
-   "read": 1,
-   "role": "Employee"
+   "role": "Employee",
+   "select": 1
   }
  ],
  "sort_field": "modified",

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "prompt",
  "creation": "2018-04-13 16:22:52.954783",
  "doctype": "DocType",
@@ -130,7 +131,8 @@
    "depends_on": "enable_auto_attendance",
    "fieldname": "auto_attendance_settings_section",
    "fieldtype": "Section Break",
-   "label": "Auto Attendance Settings"
+   "label": "Auto Attendance Settings",
+   "permlevel": 1
   },
   {
    "depends_on": "enable_auto_attendance",
@@ -143,7 +145,8 @@
    "description": "Mark attendance based on 'Employee Checkin' for Employees assigned to this shift.",
    "fieldname": "enable_auto_attendance",
    "fieldtype": "Check",
-   "label": "Enable Auto Attendance"
+   "label": "Enable Auto Attendance",
+   "permlevel": 1
   },
   {
    "description": "Attendance will be marked automatically only after this date.",
@@ -158,7 +161,9 @@
    "label": "Last Sync of Checkin"
   }
  ],
- "modified": "2019-07-30 01:05:24.660666",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2020-12-31 14:54:39.023332",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Type",
@@ -173,6 +178,7 @@
    "read": 1,
    "report": 1,
    "role": "HR Manager",
+   "select": 1,
    "share": 1,
    "write": 1
   },
@@ -183,12 +189,38 @@
    "read": 1,
    "report": 1,
    "role": "Employee",
+   "select": 1,
    "share": 1
   },
   {
    "create": 1,
    "email": 1,
    "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "select": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
    "print": 1,
    "read": 1,
    "report": 1,

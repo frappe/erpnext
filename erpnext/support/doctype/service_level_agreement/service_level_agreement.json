@@ -34,6 +34,8 @@
   {
    "fieldname": "service_level",
    "fieldtype": "Data",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Service Level",
@@ -42,17 +44,23 @@
   {
    "fieldname": "holiday_list",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Holiday List",
    "options": "Holiday List",
    "reqd": 1
   },
   {
    "fieldname": "column_break_2",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "fieldname": "employee_group",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Employee Group",
@@ -61,40 +69,54 @@
   {
    "fieldname": "agreement_details_section",
    "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Agreement Details"
   },
   {
    "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "start_date",
    "fieldtype": "Date",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Start Date"
   },
   {
    "depends_on": "eval: !doc.default_contract",
    "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "end_date",
    "fieldtype": "Date",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "End Date"
   },
   {
    "collapsible": 1,
    "fieldname": "response_and_resolution_time_section",
    "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Response and Resolution Time"
   },
   {
    "collapsible": 1,
    "fieldname": "support_and_resolution_section_break",
    "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Support Hours"
   },
   {
    "fieldname": "support_and_resolution",
    "fieldtype": "Table",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Support and Resolution",
    "options": "Service Day",
    "reqd": 1
@@ -102,6 +124,8 @@
   {
    "fieldname": "priorities",
    "fieldtype": "Table",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Priorities",
    "options": "Service Level Priority",
    "reqd": 1
@@ -110,16 +134,22 @@
    "default": "1",
    "fieldname": "active",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Active",
    "read_only": 1
   },
   {
    "fieldname": "column_break_10",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "fieldname": "entity",
    "fieldtype": "Dynamic Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Entity",
@@ -129,11 +159,15 @@
    "depends_on": "eval: !doc.default_service_level_agreement",
    "fieldname": "entity_section",
    "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Entity"
   },
   {
    "fieldname": "entity_type",
    "fieldtype": "Select",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "in_standard_filter": 1,
    "label": "Entity Type",
    "options": "\nCustomer\nCustomer Group\nTerritory"
@@ -142,21 +176,29 @@
    "default": "1",
    "fieldname": "enable",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Enable"
   },
   {
    "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "default_service_level_agreement",
    "fieldtype": "Check",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Default Service Level Agreement"
   },
   {
    "fieldname": "default_priority",
    "fieldtype": "Link",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Default Priority",
    "options": "Issue Priority",
    "read_only": 1
@@ -164,17 +206,22 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break",
-   "hide_border": 1
+   "hide_border": 1,
+   "hide_days": 1,
+   "hide_seconds": 1
   },
   {
    "fieldname": "pause_sla_on",
    "fieldtype": "Table",
+   "hide_days": 1,
+   "hide_seconds": 1,
    "label": "Pause SLA On",
    "options": "Pause SLA On Status"
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-06-10 12:30:15.050785",
+ "modified": "2020-12-16 12:34:57.448727",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "Service Level Agreement",
@@ -200,7 +247,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Support Team",
    "share": 1,
    "write": 1
   }

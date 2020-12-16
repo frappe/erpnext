@@ -82,7 +82,7 @@
  "icon": "fa fa-calendar",
  "idx": 1,
  "links": [],
- "modified": "2020-11-05 12:16:53.081573",
+ "modified": "2020-12-16 13:01:55.995365",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Fiscal Year",
@@ -114,10 +114,6 @@
   {
    "read": 1,
    "role": "Stock User"
-  },
-  {
-   "read": 1,
-   "role": "Employee"
   }
  ],
  "show_name_in_global_search": 1,

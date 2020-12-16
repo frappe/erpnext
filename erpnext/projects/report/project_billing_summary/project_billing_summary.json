@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2019-06-13 15:54:55.255947",
+ "modified": "2019-12-15 15:54:55.255947",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project Billing Summary",
@@ -25,9 +25,6 @@
   },
   {
    "role": "Manufacturing User"
-  },
-  {
-   "role": "Employee"
   },
   {
    "role": "Accounts User"

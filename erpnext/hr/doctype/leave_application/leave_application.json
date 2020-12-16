@@ -216,6 +216,7 @@
    "fieldtype": "Link",
    "label": "Salary Slip",
    "options": "Salary Slip",
+   "permlevel": 1,
    "print_hide": 1
   },
   {
@@ -250,7 +251,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-05-18 13:00:41.577327",
+ "modified": "2020-12-15 18:42:01.726268",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Application",
