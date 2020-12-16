@@ -78,7 +78,7 @@ class Gstr1Report(object):
 				place_of_supply = invoice_details.get("place_of_supply")
 				ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
 
-				b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin),{
+				b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin, inv),{
 					"place_of_supply": "",
 					"ecommerce_gstin": "",
 					"rate": "",
@@ -90,7 +90,7 @@ class Gstr1Report(object):
 					"invoice_value": invoice_details.get("base_grand_total"),
 				})
 
-				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
+				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin, inv))
 				row["place_of_supply"] = place_of_supply
 				row["ecommerce_gstin"] = ecommerce_gstin
 				row["rate"] = rate
@@ -151,6 +151,7 @@ class Gstr1Report(object):
 				{select_columns}
 			from `tab{doctype}`
 			where docstatus = 1 {where_conditions}
+			and is_opening = 'No'
 			order by posting_date desc
 			""".format(select_columns=self.select_columns, doctype=self.doctype,
 				where_conditions=conditions), self.filters, as_dict=1)
