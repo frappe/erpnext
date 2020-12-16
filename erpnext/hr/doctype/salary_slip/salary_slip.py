@@ -911,10 +911,11 @@ class SalarySlip(TransactionBase):
 			doc = frappe.get_doc("Loan", loan.name)
 
 			#setting repayment schedule and updating total amount to pay
-			repayment_status = 1 if doc.docstatus == 1 else 0
+			repayment_status = 1 if self.docstatus == 1 else 0 #24151
 			frappe.db.set_value("Repayment Schedule", loan.repayment_name, "paid", repayment_status)
 			doc.reload()
 			doc.update_total_amount_paid()
+			doc.reload() #24150
 			doc.set_status()
 
 	def set_status(self, status=None):
