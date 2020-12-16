@@ -299,12 +299,12 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	}
 
 	load_summary_of(doc, after_submission=false) {
-		this.toggle_summary_placeholder(false)
-
 		after_submission ?
-			this.$summary_wrapper.css('grid-column', 'span 10 / span 10') :
-			this.$summary_wrapper.css('grid-column', 'span 6 / span 6')
-
+			this.$component.css('grid-column', 'span 10 / span 10') :
+			this.$component.css('grid-column', 'span 6 / span 6')
+		
+		this.toggle_summary_placeholder(false)
+		
 		this.doc = doc;
 
 		this.attach_document_info(doc);
@@ -333,7 +333,23 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		doc.items.forEach((item, i) => {
 			const item_dom = this.get_item_html(doc, item);
 			this.$items_container.append(item_dom);
+			this.set_dynamic_rate_header_width();
 		});
+	}
+
+	set_dynamic_rate_header_width() {
+		const rate_cols = Array.from(this.$items_container.find(".item-rate-disc"));
+		this.$items_container.find(".item-rate-disc").css("width", "");
+		let max_width = rate_cols.reduce((max_width, elm) => {
+			if ($(elm).width() > max_width)
+				max_width = $(elm).width();
+			return max_width;
+		}, 0);
+
+		max_width += 1;
+		if (max_width == 1) max_width = "";
+
+		this.$items_container.find(".item-rate-disc").css("width", max_width);
 	}
 
 	attach_payments_info(doc) {

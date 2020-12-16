@@ -75,7 +75,7 @@ class Company(NestedSet):
 
 	def validate_default_accounts(self):
 		accounts = [
-			["Default Bank Account", "default_bank_account"], ["Default Cash  Account", "default_cash_account"],
+			["Default Bank Account", "default_bank_account"], ["Default Cash Account", "default_cash_account"],
 			["Default Receivable Account", "default_receivable_account"], ["Default Payable Account", "default_payable_account"],
 			["Default Expense Account", "default_expense_account"], ["Default Income Account", "default_income_account"],
 			["Stock Received But Not Billed Account", "stock_received_but_not_billed"], ["Stock Adjustment Account", "stock_adjustment_account"],

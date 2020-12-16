@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -167,6 +168,7 @@
    "bold": 1,
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
@@ -1105,7 +1107,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-30 11:39:37.388249",
+ "modified": "2020-12-03 16:46:44.229351",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
