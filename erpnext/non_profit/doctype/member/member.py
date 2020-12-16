@@ -59,7 +59,7 @@ class Member(Document):
 			frappe.msgprint(_("A customer is already linked to this Member"))
 		cust = create_customer(frappe._dict({
 			'fullname': self.member_name,
-			'email': self.email_id or self.user,
+			'email': self.email_id or self.email,
 			'phone': None
 		}))
 
