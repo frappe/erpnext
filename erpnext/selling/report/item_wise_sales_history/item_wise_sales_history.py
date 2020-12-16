@@ -10,8 +10,8 @@ from frappe.utils.nestedset import get_descendants_of
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
 	if filters.from_date > filters.to_date:
-		frappe.throw(_('From Date cannot be greater than To Date'))
-	
+		frappe.throw(_("From Date cannot be greater than To Date"))
+
 	columns = get_columns(filters)
 	data = get_data(filters)
 
@@ -148,14 +148,16 @@ def get_data(filters):
 	company_list.append(filters.get("company"))
 
 	customer_details = get_customer_details()
+	item_details = get_item_details()
 	sales_order_records = get_sales_order_details(company_list, filters)
 
 	for record in sales_order_records:
 		customer_record = customer_details.get(record.customer)
+		item_record = item_details.get(record.item_code)
 		row = {
 			"item_code": record.item_code,
-			"item_name": record.item_name,
-			"item_group": record.item_group,
+			"item_name": item_record.item_name,
+			"item_group": item_record.item_group,
 			"description": record.description,
 			"quantity": record.qty,
 			"uom": record.uom,
@@ -196,8 +198,8 @@ def get_conditions(filters):
 	return conditions
 
 def get_customer_details():
-	details = frappe.get_all('Customer',
-		fields=['name', 'customer_name', "customer_group"])
+	details = frappe.get_all("Customer",
+		fields=["name", "customer_name", "customer_group"])
 	customer_details = {}
 	for d in details:
 		customer_details.setdefault(d.name, frappe._dict({
@@ -206,15 +208,25 @@ def get_customer_details():
 		}))
 	return customer_details
 
+def get_item_details():
+	details = frappe.db.get_all("Item",
+		fields=["item_code", "item_name", "item_group"])
+	item_details = {}
+	for d in details:
+		item_details.setdefault(d.item_code, frappe._dict({
+			"item_name": d.item_name,
+			"item_group": d.item_group
+		}))
+	return item_details
+
 def get_sales_order_details(company_list, filters):
 	conditions = get_conditions(filters)
 
 	return frappe.db.sql("""
 		SELECT
-			so_item.item_code, so_item.item_name, so_item.item_group,
-			so_item.description, so_item.qty, so_item.uom,
-			so_item.base_rate, so_item.base_amount, so.name,
-			so.transaction_date, so.customer, so.territory,
+			so_item.item_code, so_item.description, so_item.qty,
+			so_item.uom, so_item.base_rate, so_item.base_amount,
+			so.name, so.transaction_date, so.customer,so.territory,
 			so.project, so_item.delivered_qty,
 			so_item.billed_amt, so.company
 		FROM
