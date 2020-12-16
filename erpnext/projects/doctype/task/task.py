@@ -94,7 +94,7 @@ class Task(NestedSet):
     def update_depends_on(self):
         depends_on_tasks = self.depends_on_tasks or ""
         for d in self.depends_on:
-            if d.task and not d.task in depends_on_tasks:
+            if d.task and d.task not in depends_on_tasks:
                 depends_on_tasks += d.task + ","
         self.depends_on_tasks = depends_on_tasks
 
@@ -180,7 +180,7 @@ class Task(NestedSet):
     def populate_depends_on(self):
         if self.parent_task:
             parent = frappe.get_doc('Task', self.parent_task)
-            if not self.name in [row.task for row in parent.depends_on]:
+            if self.name not in [row.task for row in parent.depends_on]:
                 parent.append("depends_on", {
                     "doctype": "Task Depends On",
                     "task": self.name,

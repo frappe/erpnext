@@ -106,16 +106,17 @@ def get_project(name, template):
 
 def make_project(args):
 	args = frappe._dict(args)
-	if args.project_template_name:
-		template = make_project_template(args.project_template_name)
 
 	project = frappe.get_doc(dict(
 		doctype = 'Project',
 		project_name = args.project_name,
 		status = 'Open',
-		project_template = template.name,
 		expected_start_date = args.start_date
 	))
+
+	if args.project_template_name:
+		template = make_project_template(args.project_template_name)
+		project.project_template = template.name
 
 	if not frappe.db.exists("Project", args.project_name):
 		project.insert()
