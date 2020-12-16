@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, add_days
+from frappe.utils import flt, add_days, get_link_to_form
 from frappe.utils import get_datetime_str, nowdate
 from erpnext import get_default_company
 
@@ -125,6 +125,18 @@ def enable_all_roles_and_domains():
 	frappe.get_single('Domain Settings').set_active_domains(\
 		[d.name for d in domains])
 	add_all_roles_to('Administrator')
+
+def add_roles_for_ess(doc, method):
+	if doc.is_ess_user:
+		roles = frappe.get_all("Role", filters= {"is_ess_role":1})
+		for role in roles:
+			doc.append("roles", {"role": role.name})
+		validate_roles_for_ess(doc, [role.name for role in roles])
+
+def validate_roles_for_ess(doc, roles):
+	for role in doc.roles:
+		if role.role not in roles:
+			frappe.throw(_("Role: {0} is not applicable for Employee Self Service").format(get_link_to_form("Role", role.role)))
 
 
 def insert_record(records):

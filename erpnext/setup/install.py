@@ -9,7 +9,7 @@ from .default_success_action import get_default_success_action
 from frappe import _
 from frappe.utils import cint
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
-from frappe.custom.doctype.custom_field.custom_field import create_custom_field
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
@@ -28,6 +28,7 @@ def after_install():
 	create_default_energy_point_rules()
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
+	create_custom_field_for_ess()
 	frappe.db.commit()
 
 
@@ -158,3 +159,28 @@ def add_standard_navbar_items():
 		})
 
 	navbar_settings.save()
+
+def create_custom_field_for_ess():
+	custom_fields = {
+		'User': [{
+			'label': _("Applicable for Employee Self Service"),
+			'fieldname': 'is_ess_user',
+			'fieldtype': 'Check',
+			'default': 0,
+			'insert_after': 'time_zone'
+		}],
+		'Role': [{
+			'label': _("Applicable for Employee Self Service"),
+			'fieldname': 'is_ess_role',
+			'fieldtype': 'Check',
+			'default': 0,
+			'insert_after': 'restrict_to_domain'
+		}]
+	}
+
+	create_custom_fields(custom_fields, update=True, ignore_validate = False)
+
+	frappe.reload_doc("core", "doctype", 'user')
+	frappe.reload_doc("core", "doctype", 'role')
+
+	frappe.db.set_value("Role", "Employee", 'is_ess_role', 1)
