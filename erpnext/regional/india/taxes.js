@@ -12,6 +12,9 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 		tax_category: function(frm) {
 			frm.trigger('get_tax_template');
 		},
+		customer_address: function(frm) {
+			frm.trigger('get_tax_template');
+		},
 		get_tax_template: function(frm) {
 			if (!frm.doc.company) return;
 
