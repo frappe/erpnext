@@ -8,7 +8,7 @@
   {
    "hidden": 0,
    "label": "Stock Transactions",
-   "links": "[\n     {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Material Request\",\n        \"name\": \"Material Request\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Stock Entry\",\n        \"name\": \"Stock Entry\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"label\": \"Delivery Note\",\n        \"name\": \"Delivery Note\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Supplier\"\n        ],\n        \"label\": \"Purchase Receipt\",\n        \"name\": \"Purchase Receipt\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Pick List\",\n        \"name\": \"Pick List\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Delivery Trip\",\n        \"name\": \"Delivery Trip\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n     {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Material Request\",\n        \"name\": \"Material Request\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Stock Entry\",\n        \"name\": \"Stock Entry\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Customer\"\n        ],\n        \"label\": \"Delivery Note\",\n        \"name\": \"Delivery Note\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\",\n            \"Supplier\"\n        ],\n        \"label\": \"Purchase Receipt\",\n        \"name\": \"Purchase Receipt\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Item\"\n        ],\n        \"label\": \"Pick List\",\n        \"name\": \"Pick List\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Shipment\",\n        \"name\": \"Shipment\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Delivery Trip\",\n        \"name\": \"Delivery Trip\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -58,7 +58,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Stock",
- "modified": "2020-10-07 18:40:17.130207",
+ "modified": "2020-12-02 15:47:41.532942",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
