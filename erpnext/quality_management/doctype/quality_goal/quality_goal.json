@@ -76,7 +76,7 @@
    "link_fieldname": "goal"
   }
  ],
- "modified": "2020-10-27 15:57:59.368605",
+ "modified": "2020-12-15 17:38:44.545823",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Goal",
@@ -102,9 +102,18 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality User",
+   "share": 1
   }
  ],
  "sort_field": "modified",

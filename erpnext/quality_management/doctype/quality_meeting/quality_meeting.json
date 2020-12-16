@@ -50,7 +50,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-10-27 16:36:45.657883",
+ "modified": "2020-12-15 17:35:03.322332",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",
@@ -76,9 +76,18 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "All",
+   "role": "Quality Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Quality User",
+   "share": 1
   }
  ],
  "quick_entry": 1,
