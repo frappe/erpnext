@@ -7,12 +7,14 @@ import frappe
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter
 from frappe.utils import nowdate, add_days
 from frappe.utils.make_random import get_random
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 class TestPatientAppointment(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("""delete from `tabPatient Appointment`""")
 		frappe.db.sql("""delete from `tabFee Validity`""")
 		frappe.db.sql("""delete from `tabPatient Encounter`""")
+		make_pos_profile()
 
 	def test_status(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
