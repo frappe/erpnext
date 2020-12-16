@@ -75,62 +75,66 @@ frappe.query_reports["Purchase Analytics"] = {
 		return Object.assign(options, {
 			checkboxColumn: true,
 			events: {
-				onCheckRow: function(data) {
+				onCheckRow: function (data) {
+					if (!data) return;
+
+					const data_doctype = $(
+						data[2].html
+					)[0].attributes.getNamedItem("data-doctype").value;
+					const tree_type = frappe.query_report.filters[0].value;
+					if (data_doctype != tree_type) return;
+
 					row_name = data[2].content;
 					length = data.length;
 
-					var tree_type = frappe.query_report.filters[0].value;
+					if (tree_type == "Supplier" || tree_type == "Item") {
+						row_values = data
+							.slice(4, length - 1)
+							.map(function (column) {
+								return column.content;
+							});
+					} else {
+						row_values = data
+							.slice(3, length - 1)
+							.map(function (column) {
+								return column.content;
+							});
+					}
 
-					if(tree_type == "Supplier" || tree_type == "Item") {
-						row_values = data.slice(4,length-1).map(function (column) {
-							return column.content;
-						})
-					}
-					else {
-						row_values = data.slice(3,length-1).map(function (column) {
-							return column.content;
-						})
-					}
-
-					entry  = {
-						'name':row_name,
-						'values':row_values
-					}
+					entry = {
+						name: row_name,
+						values: row_values,
+					};
 
 					let raw_data = frappe.query_report.chart.data;
 					let new_datasets = raw_data.datasets;
 
-					var found = false;
+					let found = false;
 
-					for(var i=0; i < new_datasets.length;i++){
-						if(new_datasets[i].name == row_name){
+					for (let i = 0; i < new_datasets.length; i++) {
+						if (new_datasets[i].name == row_name) {
 							found = true;
-							new_datasets.splice(i,1);
+							new_datasets.splice(i, 1);
 							break;
 						}
 					}
 
-					if(!found){
+					if (!found) {
 						new_datasets.push(entry);
 					}
-
 					let new_data = {
 						labels: raw_data.labels,
-						datasets: new_datasets
-					}
-
-					setTimeout(() => {
-						frappe.query_report.chart.update(new_data)
-					},500)
-
-
-					setTimeout(() => {
-						frappe.query_report.chart.draw(true);
-					}, 1000)
+						datasets: new_datasets,
+					};
+					chart_options = {
+						data: new_data,
+						type: "line",
+					};
+					frappe.query_report.render_chart(chart_options);
 
 					frappe.query_report.raw_chart_data = new_data;
 				},
-			}
+			},
 		});
 	}
 }
