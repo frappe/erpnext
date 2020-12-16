@@ -32,7 +32,7 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
-		self.set_po_nos()
+		self.set_po_nos(for_validate=True)
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
@@ -360,20 +360,28 @@ class SellingController(StockController):
 						}))
 		self.make_sl_entries(sl_entries)
 
-	def set_po_nos(self):
+	def set_po_nos(self, for_validate=False):
 		if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
+			if for_validate and self.po_no:
+				return
 			self.set_pos_for_sales_invoice()
 		if self.doctype == 'Delivery Note' and hasattr(self, "items"):
+			if for_validate and self.po_no:
+				return
 			self.set_pos_for_delivery_note()
 
 	def set_pos_for_sales_invoice(self):
 		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
 		self.get_po_nos('Sales Order', 'sales_order', po_nos)
 		self.get_po_nos('Delivery Note', 'delivery_note', po_nos)
 		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
 
 	def set_pos_for_delivery_note(self):
 		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
 		self.get_po_nos('Sales Order', 'against_sales_order', po_nos)
 		self.get_po_nos('Sales Invoice', 'against_sales_invoice', po_nos)
 		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
@@ -406,26 +414,26 @@ class SellingController(StockController):
 			return
 
 		for d in self.get('items'):
-			if self.doctype == "Sales Invoice":
-				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
-				f = [d.item_code, d.description, d.sales_order or d.delivery_note]
+			if self.doctype in ["POS Invoice","Sales Invoice"]:
+				stock_items = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
+				non_stock_items = [d.item_code, d.description, d.sales_order or d.delivery_note]
 			elif self.doctype == "Delivery Note":
-				e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-				f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
+				stock_items = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
+				non_stock_items = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 			elif self.doctype in ["Sales Order", "Quotation"]:
-				e = [d.item_code, d.description, d.warehouse, '']
-				f = [d.item_code, d.description]
+				stock_items = [d.item_code, d.description, d.warehouse, '']
+				non_stock_items = [d.item_code, d.description]
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				if e in check_list:
+				if stock_items in check_list:
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
-					check_list.append(e)
+					check_list.append(stock_items)
 			else:
-				if f in chk_dupl_itm:
+				if non_stock_items in chk_dupl_itm:
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
-					chk_dupl_itm.append(f)
+					chk_dupl_itm.append(non_stock_items)
 
 	def validate_target_warehouse(self):
 		items = self.get("items") + (self.get("packed_items") or [])

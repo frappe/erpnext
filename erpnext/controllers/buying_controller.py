@@ -32,6 +32,7 @@ class BuyingController(StockController):
 		self.validate_items()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
+		self.update_tax_category_for_internal_transfer()
 		self.validate_warehouse()
 		self.validate_from_warehouse()
 		self.set_supplier_address()
@@ -84,13 +85,23 @@ class BuyingController(StockController):
 
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
-			tax_for_valuation = [d for d in self.get("taxes")
+			msg = _('Tax Category has been changed to "Total" because all the Items are non-stock items')
+			self.update_tax_category(msg)
+
+	def update_tax_category_for_internal_transfer(self):
+		if self.doctype == 'Purchase Invoice' and self.is_internal_transfer():
+			msg = _('Tax Category has been changed to "Total" as its an internal purchase.')
+			self.update_tax_category(msg)
+
+	def update_tax_category(self, msg):
+		tax_for_valuation = [d for d in self.get("taxes")
 				if d.category in ["Valuation", "Valuation and Total"]]
 
-			if tax_for_valuation:
-				for d in tax_for_valuation:
-					d.category = 'Total'
-				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
+		if tax_for_valuation:
+			for d in tax_for_valuation:
+				d.category = 'Total'
+
+			msgprint(msg)
 
 	def validate_asset_return(self):
 		if self.doctype not in ['Purchase Receipt', 'Purchase Invoice'] or not self.is_return:
@@ -486,6 +497,10 @@ class BuyingController(StockController):
 				if not d.conversion_factor and d.item_code:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+
+				if self.doctype=="Purchase Receipt" and d.meta.get_field("received_stock_qty"):
+					# Set Received Qty in Stock UOM
+					d.received_stock_qty = flt(d.received_qty) * flt(d.conversion_factor, d.precision("conversion_factor"))
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):

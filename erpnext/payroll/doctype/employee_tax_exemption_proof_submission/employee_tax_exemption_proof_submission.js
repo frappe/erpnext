@@ -54,5 +54,9 @@ frappe.ui.form.on('Employee Tax Exemption Proof Submission', {
 				});
 			});
 		}
+	},
+
+	currency: function(frm) {
+		frm.refresh_fields();
 	}
 });
