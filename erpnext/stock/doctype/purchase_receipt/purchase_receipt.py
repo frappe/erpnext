@@ -279,12 +279,15 @@ class PurchaseReceipt(BuyingController):
 					# Amount added through landed-cost-voucher
 					if d.landed_cost_voucher_amount and landed_cost_entries:
 						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
+							account_currency = get_account_currency(account)
 							gl_entries.append(self.get_gl_dict({
 								"account": account,
+								"account_currency": account_currency,
 								"against": warehouse_account[d.warehouse]["account"],
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"credit": flt(amount),
+								"credit": flt(amount["base_amount"]),
+								"credit_in_account_currency": flt(amount["amount"]),
 								"project": d.project
 							}, item=d))
 
@@ -729,9 +732,16 @@ def get_item_account_wise_additional_cost(purchase_document):
 			if item.receipt_document == purchase_document:
 				for account in landed_cost_voucher_doc.taxes:
 					item_account_wise_cost.setdefault((item.item_code, item.purchase_receipt_item), {})
-					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, 0.0)
-					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account] += \
+					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)].setdefault(account.expense_account, {
+						"amount": 0.0,
+						"base_amount": 0.0
+					})
+
+					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account]["amount"] += \
 						account.amount * item.get(based_on_field) / total_item_cost
+
+					item_account_wise_cost[(item.item_code, item.purchase_receipt_item)][account.expense_account]["base_amount"] += \
+						account.base_amount * item.get(based_on_field) / total_item_cost
 
 	return item_account_wise_cost
 
