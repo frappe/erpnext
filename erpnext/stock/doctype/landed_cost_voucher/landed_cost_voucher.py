@@ -40,14 +40,17 @@ class LandedCostVoucher(Document):
 
 	def validate(self):
 		self.check_mandatory()
+		self.validate_purchase_receipts()
+		self.set_account_currency()
 		self.set_exchange_rate()
 		self.set_amounts_in_company_currency()
+		self.set_total_taxes_and_charges()
 		if not self.get("items"):
 			self.get_items_from_purchase_receipts()
-		else:
-			self.validate_applicable_charges_for_item()
-		self.validate_purchase_receipts()
-		self.set_total_taxes_and_charges()
+
+		self.set_applicable_charges_on_item()
+		self.validate_applicable_charges_for_item()
+
 
 	def check_mandatory(self):
 		if not self.get("purchase_receipts"):
@@ -77,6 +80,33 @@ class LandedCostVoucher(Document):
 
 	def set_total_taxes_and_charges(self):
 		self.total_taxes_and_charges = sum([flt(d.base_amount) for d in self.get("taxes")])
+
+	def set_applicable_charges_on_item(self):
+		if self.get('taxes'):
+			total_item_cost = 0.0
+			total_charges = 0.0
+			item_count = 0
+			based_on_field = frappe.scrub(self.distribute_charges_based_on)
+
+			for item in self.get('items'):
+				total_item_cost += item.get(based_on_field)
+
+			for item in self.get('items'):
+				item.applicable_charges = flt(flt(item.get(based_on_field)) * flt(self.total_taxes_and_charges) / flt(total_item_cost),
+					item.precision('applicable_charges'))
+				total_charges += item.applicable_charges
+				item_count += 1
+
+				if total_charges != self.total_taxes_and_charges:
+					diff = self.total_taxes_and_charges - total_charges
+					self.get('items')[item_count - 1].applicable_charges += diff
+
+	def set_account_currency(self):
+		company_currency = erpnext.get_company_currency(self.company)
+		for d in self.get('taxes'):
+			if not d.account_currency:
+				account_currency = frappe.db.get_value('Account', d.expense_account, 'account_currency')
+				d.account_currency = account_currency or company_currency
 
 	def set_exchange_rate(self):
 		company_currency = erpnext.get_company_currency(self.company)
