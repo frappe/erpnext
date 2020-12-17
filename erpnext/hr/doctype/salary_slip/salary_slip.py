@@ -340,7 +340,6 @@ class SalarySlip(TransactionBase):
 			self.add_employee_benefits(payroll_period)
 		else:
 			self.add_tax_components(payroll_period)
-			self.add_advance_deduction_component()
 
 		self.set_component_amounts_based_on_payment_days(component_type)
 
@@ -449,12 +448,6 @@ class SalarySlip(TransactionBase):
 			tax_amount = self.calculate_variable_based_on_taxable_salary(d, payroll_period)
 			tax_row = self.get_salary_slip_row(d)
 			self.update_component_row(tax_row, tax_amount, "deductions")
-
-	def add_advance_deduction_component(self):
-		advance_amount = self.total_advance_amount
-		component = frappe.db.get_all('Salary Component', {'is_advance_deduction_component': 1}, ['name'], as_list=0)[0]
-		advance_row = self.get_salary_slip_row(cstr(component.name))
-		self.update_component_row(advance_row, advance_amount, "deductions")
 
 	def update_component_row(self, struct_row, amount, key, overwrite=1):
 		component_row = None

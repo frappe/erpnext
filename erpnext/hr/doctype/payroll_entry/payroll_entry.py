@@ -204,9 +204,9 @@ class PayrollEntry(Document):
 	def get_salary_components(self, component_type):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
 		if salary_slips:
-			salary_components = frappe.db.sql("""select sd.salary_component, sd.amount, sd.parentfield
-				from `tabSalary Detail` sd, `tabSalary Component` sc 
-				where sd.salary_component = sc.name and sc.is_advance_deduction_component <> 1 and sd.parentfield = '%s' and sd.parent in (%s)""" %
+			salary_components = frappe.db.sql("""select salary_component, amount, parentfield
+				from `tabSalary Detail`
+				where parentfield = '%s' and parent in (%s)""" %
 				(component_type, ', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=True)
 			return salary_components
 
