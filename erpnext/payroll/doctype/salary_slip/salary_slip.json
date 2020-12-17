@@ -69,6 +69,7 @@
   "net_pay_info",
   "net_pay",
   "base_net_pay",
+  "year_to_date",
   "column_break_53",
   "rounded_total",
   "base_rounded_total",
@@ -578,13 +579,18 @@
   {
    "fieldname": "column_break_69",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-21 23:02:59.400249",
+ "modified": "2020-12-17 21:51:19.612940",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
