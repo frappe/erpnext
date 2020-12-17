@@ -35,6 +35,9 @@ class SalarySlip(TransactionBase):
 	def autoname(self):
 		self.name = make_autoname(self.series)
 
+	def before_save(self):
+		self.compute_year_to_date()
+
 	def validate(self):
 		self.status = self.get_status()
 		self.validate_dates()
@@ -1124,6 +1127,26 @@ class SalarySlip(TransactionBase):
 					self.earnings[i].amount = wages_amount
 				self.gross_pay += self.earnings[i].amount
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
+
+	def compute_year_to_date(self):
+		year_to_date = 0
+		fiscal_year = frappe.get_list('Fiscal Year',
+						fields = ['year','year_start_date','year_end_date'],
+						filters= {'year_start_date' : ['<=', self.start_date],
+									'year_end_date' : ['>=', self.end_date]
+						})[0]
+		salary_slips_from_current_fiscal_year = frappe.get_list('Salary Slip',
+						fields = ['employee_name', 'start_date', 'end_date', 'net_pay'],
+						filters = {'employee_name' : self.employee_name,
+									'start_date' : ['>=', fiscal_year.year_start_date],
+									'end_date' : ['<=', fiscal_year.year_end_date]
+						})
+
+		for salary_slip in salary_slips_from_current_fiscal_year:
+			year_to_date += salary_slip.net_pay
+
+		year_to_date += self.net_pay
+		self.year_to_date = year_to_date
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
