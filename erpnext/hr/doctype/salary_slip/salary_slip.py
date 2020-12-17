@@ -519,6 +519,10 @@ class SalarySlip(TransactionBase):
 			self.start_date, tax_slab.allow_tax_exemption)
 		previous_total_paid_taxes = self.get_tax_paid_in_period(payroll_period.start_date, self.start_date, tax_component)
 
+		opening_tax_details = self.get_opening_income_tax_details(payroll_period)
+		previous_taxable_earnings += opening_tax_details.taxable_earnings
+		previous_total_paid_taxes += opening_tax_details.deducted_amount
+
 		# get taxable_earnings for current period (all days)
 		current_taxable_earnings = self.get_taxable_earnings(tax_slab.allow_tax_exemption)
 		future_structured_taxable_earnings = current_taxable_earnings.taxable_earnings * (math.ceil(remaining_sub_periods) - 1)
@@ -649,6 +653,16 @@ class SalarySlip(TransactionBase):
 		})[0][0])
 
 		return total_tax_paid
+
+	def get_opening_income_tax_details(self, payroll_period):
+		opening_tax_details = frappe.db.sql("""
+			select
+				ifnull(sum(deducted_amount), 0) as deducted_amount,
+				ifnull(sum(taxable_earnings), 0) as taxable_earnings
+			from `tabEmployee Opening Income Tax`
+			where payroll_period = %s and employee = %s and docstatus = 1
+		""", [payroll_period.name, self.employee], as_dict=1)
+		return opening_tax_details[0]
 
 	def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
 		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
@@ -797,12 +811,12 @@ class SalarySlip(TransactionBase):
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
 				continue
 			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
+				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
 				continue
 			if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
+				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
 			elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
-				tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * .01
+				tax_amount += (slab.to_amount - slab.from_amount) * slab.percent_deduction * .01
 
 		# other taxes and charges on income tax
 		for d in tax_slab.other_taxes_and_charges:
