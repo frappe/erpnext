@@ -10,32 +10,36 @@
   "naming_series",
   "employee",
   "employee_name",
+  "column_break_5",
+  "purpose",
+  "deduct_from_salary",
   "column_break_4",
   "amended_from",
   "company",
   "posting_date",
   "department",
   "section_break_account",
-  "mode_of_payment",
-  "cost_center",
-  "column_break_10",
   "project",
+  "column_break_16",
   "task",
+  "column_break_10",
+  "cost_center",
+  "column_break_20",
+  "mode_of_payment",
   "section_break_8",
-  "purpose",
-  "column_break_11",
   "advance_amount",
-  "deduct_from_salary",
   "paid_amount",
+  "column_break_22",
   "returned_amount",
   "claimed_amount",
+  "column_break_11",
   "salary_deduction_amount",
   "balance_amount",
   "section_break_7",
   "advance_account",
+  "due_advance_amount",
   "column_break_18",
-  "status",
-  "due_advance_amount"
+  "status"
  ],
  "fields": [
   {
@@ -251,10 +255,26 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-12-14 18:38:45.471929",
+ "modified": "2020-12-15 18:18:16.201060",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Employee Advance",
