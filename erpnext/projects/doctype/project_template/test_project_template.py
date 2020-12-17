@@ -10,19 +10,6 @@ from erpnext.projects.doctype.task.test_task import create_task
 class TestProjectTemplate(unittest.TestCase):
 	pass
 
-def get_project_template(project_template_name="Test Project Template", project_tasks=[]):
-	if not frappe.db.exists('Project Template', project_template_name):
-		frappe.get_doc(dict(
-			doctype = 'Project Template',
-			name = project_template_name,
-			tasks = project_tasks or [
-				create_task(subject="_Test Template Task 1", is_template=1, begin=0, duration=3),
-				create_task(subject="_Test Template Task 2", is_template=1, begin=0, duration=2)
-			]
-		)).insert()
-
-	return frappe.get_doc('Project Template', project_template_name)
-
 def make_project_template(project_template_name, project_tasks=[]):
 	if not frappe.db.exists('Project Template', project_template_name):
 		project_tasks = project_tasks or [
