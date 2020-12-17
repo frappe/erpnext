@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import cint, flt, getdate, today
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
-from erpnext.accounts.party import set_contact_details
+from erpnext.accounts.party import set_contact_details, get_party_account
 from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -23,6 +23,9 @@ import json
 
 force_fields = ['customer_name', 'item_name', 'item_group', 'brand', 'address_display',
 	'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'withholding_tax_amount']
+
+force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_type',
+	'receivable_account', 'payable_account']
 
 class VehicleBookingOrder(AccountsController):
 	def validate(self):
@@ -42,6 +45,7 @@ class VehicleBookingOrder(AccountsController):
 
 		self.calculate_taxes_and_totals()
 		self.validate_amounts()
+		self.validate_taxes_and_charges_accounts()
 		self.set_total_in_words()
 
 		self.validate_payment_schedule()
@@ -94,14 +98,14 @@ class VehicleBookingOrder(AccountsController):
 					.format(self.vehicle, existing_booking))
 
 	def set_missing_values(self, for_validate=False):
-		customer_details = get_customer_details(self.as_dict())
+		customer_details = get_customer_details(self.as_dict(), get_withholding_tax=False)
 		for k, v in customer_details.items():
-			if not self.get(k) or k in force_fields:
+			if not self.get(k) or k in force_fields or (v and k in force_if_not_empty_fields):
 				self.set(k, v)
 
 		item_details = get_item_details(self.as_dict())
 		for k, v in item_details.items():
-			if not self.get(k) or k in force_fields:
+			if not self.get(k) or k in force_fields or (v and k in force_if_not_empty_fields):
 				self.set(k, v)
 
 		self.set_vehicle_details()
@@ -117,9 +121,6 @@ class VehicleBookingOrder(AccountsController):
 
 	def calculate_taxes_and_totals(self):
 		self.round_floats_in(self, ['vehicle_amount', 'fni_amount', 'withholding_tax_amount'])
-
-		if not self.fni_item_code:
-			self.fni_amount = 0
 
 		self.invoice_total = flt(self.vehicle_amount + self.fni_amount + self.withholding_tax_amount,
 			self.precision('invoice_total'))
@@ -162,6 +163,12 @@ class VehicleBookingOrder(AccountsController):
 			frappe.throw(_("Receivable Account must be of type Receivable"))
 		if payable_type != 'Payable':
 			frappe.throw(_("Payable Account must be of type Payable"))
+
+	def validate_taxes_and_charges_accounts(self):
+		if self.fni_amount and not self.fni_account:
+			frappe.throw(_("Freight and Insurance Amount is set but account is not provided"))
+		if self.withholding_tax_amount and not self.withholding_tax_account:
+			frappe.throw(_("Withholding Tax Amount is set but account is not provided"))
 
 	def update_payment_status(self, update=False):
 		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
@@ -328,7 +335,7 @@ class VehicleBookingOrder(AccountsController):
 
 
 @frappe.whitelist()
-def get_customer_details(args):
+def get_customer_details(args, get_withholding_tax=True):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -365,9 +372,29 @@ def get_customer_details(args):
 
 	set_contact_details(out, party, party_type)
 
-	if args.item_code:
-		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
+	vehicles_settings = frappe.get_cached_doc("Vehicles Settings", None)
 
+	out.selling_transaction_type = vehicles_settings.selling_transaction_type_company if args.customer_is_company \
+		else vehicles_settings.selling_transaction_type_customer
+	out.buying_transaction_type = vehicles_settings.buying_transaction_type_company if args.customer_is_company \
+		else vehicles_settings.buying_transaction_type_customer
+
+	out.receivable_account = get_party_account("Customer", None if args.customer_is_company else args.customer,
+		args.company, transaction_type=out.selling_transaction_type)
+	out.payable_account = get_party_account("Supplier", args.supplier,
+		args.company, transaction_type=out.buying_transaction_type)
+
+	selling_vehicle_booking_defaults = get_transaction_type_defaults(out.selling_transaction_type, args.company,
+		fieldname='vehicle_booking_defaults')
+	buying_vehicle_booking_defaults = get_transaction_type_defaults(out.buying_transaction_type, args.company,
+		fieldname='vehicle_booking_defaults')
+
+	out.fni_account = buying_vehicle_booking_defaults.get('fni_account') or selling_vehicle_booking_defaults.get('fni_account')
+	out.withholding_tax_account = buying_vehicle_booking_defaults.get('withholding_tax_account') or \
+		selling_vehicle_booking_defaults.get('withholding_tax_account')
+
+	if get_withholding_tax and args.item_code:
+		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
 	return out
 
 
@@ -406,43 +433,47 @@ def get_item_details(args):
 	out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
 		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
 
-	out.price_list = get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
+	out.vehicle_price_list = get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
 		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
+
+	fni_price_list_settings = frappe.get_cached_value("Vehicles Settings", None, "fni_price_list")
+	if fni_price_list_settings:
+		out.fni_price_list = fni_price_list_settings
 
 	if args.customer:
 		args.tax_status = frappe.get_cached_value("Customer", args.customer, "tax_status")
 	if out.vehicle_price_list:
-		out.update(get_vehicle_price(item.name, out.vehicle_price_list, args.transaction_date, args.tax_status, args.company))
+		out.update(get_vehicle_price(item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status, args.company))
 
 	return out
 
 
-@frappe.whitelist()
-def get_vehicle_price(item_code, price_list, transaction_date, tax_status, company):
+def get_vehicle_price(item_code, vehicle_price_list, fni_price_list, transaction_date, tax_status, company):
 	if not item_code:
 		frappe.throw(_("Vehicle Item Code is mandatory"))
-	if not price_list:
-		frappe.throw(_("Price List is mandatory for Vehicle Price"))
+	if not vehicle_price_list:
+		frappe.throw(_("Vehicle Price List is mandatory for Vehicle Price"))
 
 	transaction_date = getdate(transaction_date)
 	item = frappe.get_cached_doc("Item", item_code)
 
 	out = frappe._dict()
-	item_price_args = {
-		"price_list": price_list,
+	vehicle_price_args = {
+		"price_list": vehicle_price_list,
 		"transaction_date": transaction_date,
 		"uom": item.stock_uom
 	}
 
-	vehicle_item_price = get_item_price(item_price_args, item_code, ignore_party=True)
+	vehicle_item_price = get_item_price(vehicle_price_args, item_code, ignore_party=True)
 	vehicle_item_price = vehicle_item_price[0][1] if vehicle_item_price else 0
 	out.vehicle_amount = flt(vehicle_item_price)
 
 	out.withholding_tax_amount = get_withholding_tax_amount(transaction_date, item_code, tax_status, company)
 
-	out.fni_item_code = item.get('fni_item_code')
-	if out.fni_item_code:
-		fni_item_price = get_item_price(item_price_args, item.fni_item_code, ignore_party=True)
+	if fni_price_list:
+		fni_price_args = vehicle_price_args.copy()
+		fni_price_args['price_list'] = fni_price_list
+		fni_item_price = get_item_price(fni_price_args, item_code, ignore_party=True)
 		fni_item_price = fni_item_price[0][1] if fni_item_price else 0
 		out.fni_amount = flt(fni_item_price)
 	else:
@@ -462,7 +493,7 @@ def get_default_price_list(item, args, item_defaults, item_group_defaults, brand
 		)
 
 		if not price_list:
-			price_list = frappe.get_cached_value("Vehicles Settings", None, "booking_price_list")
+			price_list = frappe.get_cached_value("Vehicles Settings", None, "vehicle_price_list")
 		if not price_list:
 			price_list = frappe.get_cached_value("Buying Settings", None, "buying_price_list")
 		if not price_list:
@@ -505,15 +536,12 @@ def get_purchase_receipt(source):
 
 	target = frappe.new_doc("Purchase Receipt")
 
-	vehicle_item, fni_item = set_next_document_values(source, target, 'buying')
-	prev_doc, prev_vehicle_item, prev_fni_item = get_previous_doc("Purchase Order", source)
+	vehicle_item = set_next_document_values(source, target, 'buying')
+	prev_doc, prev_vehicle_item = get_previous_doc("Purchase Order", source)
 
 	if prev_vehicle_item:
 		vehicle_item.purchase_order = prev_vehicle_item.parent
 		vehicle_item.purchase_order_item = prev_vehicle_item.name
-	if fni_item and prev_fni_item:
-		fni_item.purchase_order = prev_fni_item.parent
-		fni_item.purchase_order_item = prev_fni_item.name
 
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
@@ -525,8 +553,8 @@ def get_purchase_invoice(source):
 
 	target = frappe.new_doc("Purchase Invoice")
 
-	vehicle_item, fni_item = set_next_document_values(source, target, 'buying')
-	prev_doc, prev_vehicle_item, prev_fni_item = get_previous_doc("Purchase Receipt", source)
+	vehicle_item = set_next_document_values(source, target, 'buying')
+	prev_doc, prev_vehicle_item = get_previous_doc("Purchase Receipt", source)
 
 	if not prev_doc:
 		frappe.throw(_("Cannot make Purchase Invoice against Vehicle Booking Order before making Purchase Receipt"))
@@ -534,9 +562,6 @@ def get_purchase_invoice(source):
 	if prev_vehicle_item:
 		vehicle_item.purchase_receipt = prev_vehicle_item.parent
 		vehicle_item.pr_detail = prev_vehicle_item.name
-	if fni_item and prev_fni_item:
-		fni_item.purchase_receipt = prev_fni_item.parent
-		fni_item.pr_detail = prev_fni_item.name
 
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
@@ -558,8 +583,8 @@ def get_sales_invoice(source):
 
 	target = frappe.new_doc("Sales Invoice")
 
-	vehicle_item, fni_item = set_next_document_values(source, target, 'selling')
-	prev_doc, prev_vehicle_item, prev_fni_item = get_previous_doc("Delivery Note", source)
+	vehicle_item = set_next_document_values(source, target, 'selling')
+	prev_doc, prev_vehicle_item = get_previous_doc("Delivery Note", source)
 
 	if not prev_doc:
 		frappe.throw(_("Cannot make Sales Invoice against Vehicle Booking Order before making Delivery Note"))
@@ -567,9 +592,6 @@ def get_sales_invoice(source):
 	if prev_vehicle_item:
 		vehicle_item.delivery_note = prev_vehicle_item.parent
 		vehicle_item.dn_detail = prev_vehicle_item.name
-	if fni_item and prev_fni_item:
-		fni_item.delivery_note = prev_fni_item.parent
-		fni_item.dn_detail = prev_fni_item.name
 
 	target.run_method("set_missing_values")
 	target.run_method("calculate_taxes_and_totals")
@@ -585,20 +607,17 @@ def check_if_doc_exists(doctype, vehicle_booking_order):
 def get_previous_doc(doctype, source):
 	prev_docname = frappe.db.get_value(doctype, {"vehicle_booking_order": source.name, "docstatus": 1})
 	if not prev_docname:
-		return None, None, None
+		return None, None
 
 	prev_doc = frappe.get_doc(doctype, prev_docname)
 
 	vehicle_item = prev_doc.get('items', filters={'item_code': source.item_code})
 	vehicle_item = vehicle_item[0] if vehicle_item else None
 
-	fni_item = prev_doc.get('items', filters={'item_code': source.fni_item_code}) if source.fni_item_code else None
-	fni_item = fni_item[0] if fni_item else None
-
 	if not vehicle_item:
 		frappe.throw(_("{0} {1} does not have Vehicle Item {2}").format(doctype, prev_docname, source.item_name or source.item_code))
 
-	return prev_doc, vehicle_item, fni_item
+	return prev_doc, vehicle_item
 
 
 def set_next_document_values(source, target, buying_or_selling):
@@ -609,11 +628,11 @@ def set_next_document_values(source, target, buying_or_selling):
 	if buying_or_selling == "buying":
 		target.supplier = source.supplier
 		target.transaction_type = source.buying_transaction_type
-		target.buying_price_list = source.price_list
+		target.buying_price_list = source.vehicle_price_list
 	else:
 		target.customer = source.customer
 		target.transaction_type = source.selling_transaction_type
-		target.selling_price_list = source.price_list
+		target.selling_price_list = source.vehicle_price_list
 		target.customer_address = source.customer_address
 		target.contact_person = source.contact_person
 
@@ -621,6 +640,11 @@ def set_next_document_values(source, target, buying_or_selling):
 			target.append('sales_team', {
 				'sales_person': d.sales_person, 'allocated_percentage': d.allocated_percentage
 			})
+
+	if target.meta.has_field('debit_to'):
+		target.debit_to = source.receivable_account
+	if target.meta.has_field('credit_to'):
+		target.debit_to = source.payable_account
 
 	vehicle_item = target.append('items')
 	vehicle_item.item_code = source.item_code
@@ -630,13 +654,23 @@ def set_next_document_values(source, target, buying_or_selling):
 	vehicle_item.rate = source.vehicle_amount
 	vehicle_item.discount_percentage = 0
 
-	fni_item = None
 	if source.fni_amount:
-		fni_item = target.append('items')
-		fni_item.item_code = source.fni_item_code
-		fni_item.qty = 1
-		fni_item.price_list_rate = source.fni_amount
-		fni_item.rate = source.fni_amount
-		fni_item.discount_percentage = 0
+		add_taxes_and_charges_row(target, source.fni_account, source.fni_amount)
+	if source.withholding_tax_amount:
+		add_taxes_and_charges_row(target, source.withholding_tax_account, source.withholding_tax_amount)
 
-	return vehicle_item, fni_item
+	return vehicle_item
+
+
+def add_taxes_and_charges_row(target, account, amount):
+	row = target.append('taxes')
+
+	row.charge_type = 'Actual'
+	row.account_head = account
+	row.tax_amount = amount
+
+	if row.meta.has_field('category'):
+		row.category = 'Valuation and Total'
+
+	if row.meta.has_field('add_deduct_tax'):
+		row.add_deduct_tax = 'Add'

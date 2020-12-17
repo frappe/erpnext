@@ -76,11 +76,12 @@
   "tax_strn",
   "provincial_strn",
   "column_break_67",
+  "tax_status",
   "sales_tax_account",
   "service_tax_account",
-  "extra_tax_account",
   "column_break_61",
   "further_tax_account",
+  "extra_tax_account",
   "advance_tax_account",
   "column_break_64",
   "selling_apply_discount_after_taxes",
@@ -876,13 +877,20 @@
   {
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Filer",
+   "fieldname": "tax_status",
+   "fieldtype": "Select",
+   "label": "Income Tax Status",
+   "options": "\nFiler\nNon Filer"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2020-10-03 14:12:20.777244",
+ "modified": "2020-12-15 13:32:31.535371",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

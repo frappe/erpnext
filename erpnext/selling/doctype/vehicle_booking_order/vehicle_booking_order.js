@@ -44,6 +44,13 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.frm.set_query("vehicle", function() {
 			return {filters: {"item_code": me.frm.doc.item_code}};
 		});
+
+		this.frm.set_query("selling_transaction_type", function() {
+			return {filters: {"selling": 1}};
+		});
+		this.frm.set_query("buying_transaction_type", function() {
+			return {filters: {"buying": 1}};
+		});
 	},
 
 	add_create_buttons: function () {
@@ -123,9 +130,9 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 						customer: me.frm.doc.customer,
 						supplier: me.frm.doc.supplier,
 						tranasction_date: me.frm.doc.transaction_date,
-						selling_tranction_type: me.frm.doc.selling_tranction_type,
-						buying_tranction_type: me.frm.doc.buying_tranction_type,
-						price_list: me.frm.doc.price_list
+						selling_transaction_type: me.frm.doc.selling_transaction_type,
+						buying_transaction_type: me.frm.doc.buying_transaction_type,
+						vehicle_price_list: me.frm.doc.vehicle_price_list
 					}
 				},
 				callback: function (r) {
@@ -198,11 +205,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	calculate_taxes_and_totals: function () {
 		frappe.model.round_floats_in(this.frm.doc, ['vehicle_amount', 'fni_amount', 'withholding_tax_amount']);
 
-		if (!this.frm.doc.fni_item_code) {
-			this.frm.doc.fni_amount = 0;
-		}
-
-			this.frm.doc.invoice_total = flt(this.frm.doc.vehicle_amount + this.frm.doc.fni_amount + this.frm.doc.withholding_tax_amount,
+		this.frm.doc.invoice_total = flt(this.frm.doc.vehicle_amount + this.frm.doc.fni_amount + this.frm.doc.withholding_tax_amount,
 			precision('invoice_total'));
 
 		if (this.frm.doc.docstatus === 0) {

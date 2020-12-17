@@ -5,26 +5,76 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
-  "booking_price_list",
-  "company_contact"
+  "vehicle_price_list",
+  "fni_price_list",
+  "column_break_3",
+  "company_contact",
+  "section_break_5",
+  "selling_transaction_type_company",
+  "buying_transaction_type_company",
+  "column_break_8",
+  "selling_transaction_type_customer",
+  "buying_transaction_type_customer"
  ],
  "fields": [
-  {
-   "fieldname": "booking_price_list",
-   "fieldtype": "Link",
-   "label": "Default Booking Price List",
-   "options": "Price List"
-  },
   {
    "fieldname": "company_contact",
    "fieldtype": "Link",
    "label": "Contact for Booking against Your Company",
    "options": "Contact"
+  },
+  {
+   "fieldname": "fni_price_list",
+   "fieldtype": "Link",
+   "label": "Freight and Insurance Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "vehicle_price_list",
+   "fieldtype": "Link",
+   "label": "Vehicle Booking Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "selling_transaction_type_company",
+   "fieldtype": "Link",
+   "label": "Selling Transaction Type (Company Vehicle)",
+   "options": "Transaction Type"
+  },
+  {
+   "fieldname": "buying_transaction_type_company",
+   "fieldtype": "Link",
+   "label": "Buying Transaction Type (Company Vehicle)",
+   "options": "Transaction Type"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "selling_transaction_type_customer",
+   "fieldtype": "Link",
+   "label": "Selling Transaction Type (Customer Vehicle)",
+   "options": "Transaction Type"
+  },
+  {
+   "fieldname": "buying_transaction_type_customer",
+   "fieldtype": "Link",
+   "label": "Buying Transaction Type (Customer Vehicle)",
+   "options": "Transaction Type"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2020-12-06 21:24:01.688999",
+ "modified": "2020-12-15 12:21:51.844431",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

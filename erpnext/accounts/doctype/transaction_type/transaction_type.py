@@ -18,11 +18,11 @@ class TransactionType(Document):
 
 
 @frappe.whitelist()
-def get_transaction_type_defaults(transaction_type, company):
+def get_transaction_type_defaults(transaction_type, company, fieldname='item_defaults'):
 	if transaction_type:
 		tranction_type_doc = frappe.get_cached_doc("Transaction Type", transaction_type)
 		if tranction_type_doc:
-			for d in tranction_type_doc.item_defaults or []:
+			for d in tranction_type_doc.get(fieldname) or []:
 				if d.company == company:
 					row = copy.deepcopy(d.as_dict())
 					row.pop("name")

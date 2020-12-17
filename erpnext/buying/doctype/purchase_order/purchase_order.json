@@ -15,6 +15,7 @@
   "order_confirmation_date",
   "column_break1",
   "remarks",
+  "vehicle_booking_order",
   "proforma_bill_no",
   "proforma_bill_date",
   "column_break_28",
@@ -1528,12 +1529,20 @@
    "fieldname": "update_item_prices",
    "fieldtype": "Button",
    "label": "Update Price List"
+  },
+  {
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "label": "Vehicle Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-10-31 02:19:44.185579",
+ "modified": "2020-12-15 17:29:02.499945",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

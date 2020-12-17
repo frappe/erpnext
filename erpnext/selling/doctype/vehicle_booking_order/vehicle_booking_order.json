@@ -62,6 +62,7 @@
   "column_break_62",
   "withholding_tax_amount",
   "invoice_total",
+  "column_break_56",
   "in_words",
   "additional_charges_section",
   "registration_amount",
@@ -91,18 +92,21 @@
   "bill_no",
   "bill_date",
   "more_info",
-  "supplier",
-  "supplier_name",
-  "price_list",
+  "vehicle_price_list",
+  "fni_price_list",
   "col_break_15",
   "selling_transaction_type",
   "buying_transaction_type",
-  "column_break_20",
+  "column_break_89",
+  "supplier",
+  "supplier_name",
+  "status",
+  "accounting_details_section",
   "receivable_account",
   "payable_account",
-  "column_break_89",
-  "fni_item_code",
-  "status"
+  "column_break_20",
+  "fni_account",
+  "withholding_tax_account"
  ],
  "fields": [
   {
@@ -275,7 +279,7 @@
    "fetch_from": "customer.tax_status",
    "fieldname": "tax_status",
    "fieldtype": "Select",
-   "label": "Filer / Non Filer",
+   "label": "Income Tax Status",
    "options": "\nFiler\nNon Filer",
    "read_only": 1
   },
@@ -485,20 +489,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "price_list",
-   "fieldtype": "Link",
-   "label": "Price List",
-   "options": "Price List",
-   "reqd": 1
-  },
-  {
-   "fieldname": "fni_item_code",
-   "fieldtype": "Link",
-   "label": "Freight and Insurance Item Code",
-   "options": "Item",
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_62",
    "fieldtype": "Column Break"
   },
@@ -691,6 +681,7 @@
   {
    "fieldname": "receivable_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Receivable Account",
    "options": "Account",
    "reqd": 1
@@ -698,6 +689,7 @@
   {
    "fieldname": "payable_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Payable Account",
    "options": "Account",
    "reqd": 1
@@ -757,12 +749,49 @@
    "label": "Withholding Tax Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_price_list",
+   "fieldtype": "Link",
+   "label": "Vehicle Price List",
+   "options": "Price List",
+   "reqd": 1
+  },
+  {
+   "fieldname": "fni_price_list",
+   "fieldtype": "Link",
+   "label": "Freight and Insurance Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_56",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "accounting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
+  },
+  {
+   "fieldname": "fni_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Freight and Insurance Account",
+   "options": "Account"
+  },
+  {
+   "fieldname": "withholding_tax_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Withholding Tax Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-12-14 23:09:22.694369",
+ "modified": "2020-12-15 17:14:57.417105",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",

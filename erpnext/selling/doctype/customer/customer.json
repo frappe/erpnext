@@ -531,7 +531,7 @@
   {
    "fieldname": "tax_status",
    "fieldtype": "Select",
-   "label": "Filer / Non Filer",
+   "label": "Income Tax Status",
    "options": "\nFiler\nNon Filer"
   },
   {
@@ -637,7 +637,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-12-04 23:52:10.093248",
+ "modified": "2020-12-15 13:16:00.796024",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -728,7 +728,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer_name,customer_group,territory, mobile_no, phone_no, email_id, primary_address",
+ "search_fields": "customer_name,customer_group,territory,mobile_no, phone_no, email_id, tax_id, tax_cnic, tax_strn",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
