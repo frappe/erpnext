@@ -8,7 +8,8 @@
   "employee_advance",
   "total_advance",
   "balance_amount",
-  "advance_account"
+  "advance_account",
+  "allocated_amount"
  ],
  "fields": [
   {
@@ -50,10 +51,18 @@
    "label": "Advance Account",
    "options": "Account",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "allocated_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Allocated Amount",
+   "options": "Company:company:default_currency"
   }
  ],
  "istable": 1,
- "modified": "2020-12-14 13:50:37.483745",
+ "modified": "2020-12-17 14:25:26.191252",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Salary Slip Employee Advance",

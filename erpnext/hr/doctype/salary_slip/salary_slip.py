@@ -326,6 +326,14 @@ class SalarySlip(TransactionBase):
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
+
+		if self.advances:
+			for d in self.advances:
+				d.allocated_amount = min(d.balance_amount, self.net_pay)
+				self.net_pay -= d.allocated_amount
+
+		self.total_advance_amount = sum([d.allocated_amount for d in self.advances])
+
 		self.rounded_total = rounded(self.net_pay)
 
 	def calculate_component_amounts(self, component_type):
@@ -979,8 +987,6 @@ class SalarySlip(TransactionBase):
 		for data in pending_advances:
 			self.append('advances', data)
 			total_pending_advance += data.total_advance
-
-		self.total_advance_amount = total_pending_advance
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
