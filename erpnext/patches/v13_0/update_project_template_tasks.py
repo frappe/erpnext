@@ -5,10 +5,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-    frappe.reload_doctype("Project Template")
-    templates = frappe.get_list("Project Template", fields = ["name"])
-    for template_name in templates:
+    for template_name in frappe.db.sql(""" select name from `tabProject Template` """, as_dict=1):
         template = frappe.get_doc("Project Template", template_name.name)
+        print(template.tasks)
         replace_tasks = False
         new_tasks = []
         for task in template.tasks:
