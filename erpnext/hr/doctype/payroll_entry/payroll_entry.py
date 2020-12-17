@@ -184,7 +184,8 @@ class PayrollEntry(Document):
 		"""
 
 		cond = self.get_filter_condition()
-		return frappe.db.sql("""select t1.employee, ead.employee_advance,  ead.advance_account, ead.balance_amount
+		return frappe.db.sql("""
+			select t1.employee, ead.employee_advance,  ead.advance_account, ead.balance_amount, ead.allocated_amount
 			from 
 				`tabSalary Slip` t1, `tabSalary Slip Employee Advance` ead
 			where
@@ -309,16 +310,19 @@ class PayrollEntry(Document):
 				payable_amount -= flt(data.total_payment, precision)
 
 			for data in advance_details:
-				payable_amount -= flt(data.balance_amount, precision)
-				accounts.append({
-					"account": data.advance_account,
-					"party": data.employee,
-					"party_type": "Employee",
-					"reference_type": "Employee Advance",
-					"credit_in_account_currency": data.balance_amount,
-					"reference_name": data.employee_advance,
-					"cost_center": self.cost_center
-				})
+				allocated_amount = flt(data.allocated_amount, precision)
+				payable_amount -= allocated_amount
+
+				if allocated_amount:
+					accounts.append({
+						"account": data.advance_account,
+						"party": data.employee,
+						"party_type": "Employee",
+						"reference_type": "Employee Advance",
+						"credit_in_account_currency": allocated_amount,
+						"reference_name": data.employee_advance,
+						"cost_center": self.cost_center
+					})
 
 			accounts.append({
 				"account": default_payroll_payable_account,
