@@ -31,7 +31,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 0) {
-			if(!frm.is_new()) {
+			if (!frm.is_new()) {
 				frm.page.clear_primary_action();
 				frm.add_custom_button(__("Get Employees"),
 					function() {
@@ -61,33 +61,33 @@ frappe.ui.form.on('Payroll Entry', {
 			doc: frm.doc,
 			method: 'fill_employee_details',
 		}).then(r => {
-			if (r.docs && r.docs[0].employees){
+			if (r.docs && r.docs[0].employees) {
 				frm.employees = r.docs[0].employees;
 				frm.dirty();
 				frm.save();
 				frm.refresh();
-				if(r.docs[0].validate_attendance){
+				if (r.docs[0].validate_attendance) {
 					render_employee_attendance(frm, r.message);
 				}
 			}
-		})
+		});
 	},
 
 	create_salary_slips: function(frm) {
 		frm.call({
 			doc: frm.doc,
 			method: "create_salary_slips",
-			callback: function(r) {
+			callback: function() {
 				frm.refresh();
 				frm.toolbar.refresh();
 			}
-		})
+		});
 	},
 
 	add_context_buttons: function(frm) {
-		if(frm.doc.salary_slips_submitted || (frm.doc.__onload && frm.doc.__onload.submitted_ss)) {
+		if (frm.doc.salary_slips_submitted || (frm.doc.__onload && frm.doc.__onload.submitted_ss)) {
 			frm.events.add_bank_entry_button(frm);
-		} else if(frm.doc.salary_slips_created) {
+		} else if (frm.doc.salary_slips_created) {
 			frm.add_custom_button(__("Submit Salary Slip"), function() {
 				submit_salary_slip(frm);
 			}).addClass("btn-primary");
@@ -192,9 +192,9 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	start_date: function (frm) {
-		if(!in_progress && frm.doc.start_date){
+		if (!in_progress && frm.doc.start_date) {
 			frm.trigger("set_end_date");
-		}else{
+		} else {
 			// reset flag
 			in_progress = false;
 		}
@@ -228,7 +228,7 @@ frappe.ui.form.on('Payroll Entry', {
 		}
 	},
 
-	set_end_date: function(frm){
+	set_end_date: function(frm) {
 		frappe.call({
 			method: 'erpnext.payroll.doctype.payroll_entry.payroll_entry.get_end_date',
 			args: {
@@ -243,9 +243,9 @@ frappe.ui.form.on('Payroll Entry', {
 		});
 	},
 
-	validate_attendance: function(frm){
-		if(frm.doc.validate_attendance && frm.doc.employees){
-			frappe.call({
+	validate_attendance: function(frm) {
+		if (frm.doc.validate_attendance && frm.doc.employees) {
+			frappe.call ({
 				method: 'validate_employee_attendance',
 				args: {},
 				callback: function(r) {
@@ -255,7 +255,7 @@ frappe.ui.form.on('Payroll Entry', {
 				freeze: true,
 				freeze_message: __('Validating Employee Attendance...')
 			});
-		}else{
+		} else {
 			frm.fields_dict.attendance_detail_html.html("");
 		}
 	},
@@ -274,14 +274,16 @@ const submit_salary_slip = function (frm) {
 			frappe.call({
 				method: 'submit_salary_slips',
 				args: {},
-				callback: function() {frm.events.refresh(frm);},
+				callback: function() {
+					frm.events.refresh(frm);
+				},
 				doc: frm.doc,
 				freeze: true,
 				freeze_message: __('Submitting Salary Slips and creating Journal Entry...')
 			});
 		},
 		function() {
-			if(frappe.dom.freeze_count) {
+			if (frappe.dom.freeze_count) {
 				frappe.dom.unfreeze();
 				frm.events.refresh(frm);
 			}
@@ -316,4 +318,4 @@ let render_employee_attendance = function(frm, data) {
 			data: data
 		})
 	);
-}
+};
