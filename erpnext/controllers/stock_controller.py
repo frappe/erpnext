@@ -77,7 +77,7 @@ class StockController(AccountsController):
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
-						# from warehouse account/ target warehouse account
+						# from warehouse account
 
 						self.check_expense_account(item_row)
 
@@ -92,9 +92,16 @@ class StockController(AccountsController):
 
 							sle = self.update_stock_ledger_entries(sle)
 
+						# expense account/ target_warehouse / source_warehouse
+						if item_row.get('target_warehouse'):
+							warehouse = item_row.get('target_warehouse')
+							expense_account = warehouse_account[warehouse]["account"]
+						else:
+							expense_account = item_row.expense_account
+
 						gl_list.append(self.get_gl_dict({
 							"account": warehouse_account[sle.warehouse]["account"],
-							"against": item_row.expense_account,
+							"against": expense_account,
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get('project'),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
@@ -102,9 +109,8 @@ class StockController(AccountsController):
 							"is_opening": item_row.get("is_opening") or self.get("is_opening") or "No",
 						}, warehouse_account[sle.warehouse]["account_currency"], item=item_row))
 
-						# expense account
 						gl_list.append(self.get_gl_dict({
-							"account": item_row.expense_account,
+							"account": expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
 							"project": item_row.project or self.get('project'),
