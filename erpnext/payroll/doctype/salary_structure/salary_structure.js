@@ -55,17 +55,17 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	set_earning_deduction_component: function(frm) {
-		if(!frm.doc.currency && !frm.doc.company) return;
+		if(!frm.doc.company) return;
 		frm.set_query("salary_component", "earnings", function() {
 			return {
 				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
-				filters: {type: "earning", currency: frm.doc.currency, company: frm.doc.company}
+				filters: {type: "earning", company: frm.doc.company}
 			};
 		});
 		frm.set_query("salary_component", "deductions", function() {
 			return {
 				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
-				filters: {type: "deduction", currency: frm.doc.currency, company: frm.doc.company}
+				filters: {type: "deduction", company: frm.doc.company}
 			};
 		});
 	},
@@ -74,7 +74,6 @@ frappe.ui.form.on('Salary Structure', {
 	currency: function(frm) {
 		calculate_totals(frm.doc);
 		frm.trigger("set_dynamic_labels")
-		frm.trigger('set_earning_deduction_component');
 		frm.refresh()
 	},
 
