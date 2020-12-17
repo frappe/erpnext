@@ -521,6 +521,22 @@ class TestPricingRule(unittest.TestCase):
 		frappe.get_doc("Item Price", {"item_code": "Water Flask"}).delete()
 		item.delete()
 
+	def test_pricing_rule_for_transaction(self):
+		make_item("Water Flask 1")
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		make_pricing_rule(selling=1, min_qty=5, price_or_product_discount="Product",
+			apply_on="Transaction", free_item="Water Flask 1", free_qty=1, free_item_rate=10)
+
+		si = create_sales_invoice(qty=5, do_not_submit=True)
+		self.assertEquals(len(si.items), 2)
+		self.assertEquals(si.items[1].rate, 10)
+
+		si1 = create_sales_invoice(qty=2, do_not_submit=True)
+		self.assertEquals(len(si1.items), 1)
+
+		for doc in [si, si1]:
+			doc.delete()
+
 def make_pricing_rule(**args):
 	args = frappe._dict(args)
 
@@ -539,20 +555,23 @@ def make_pricing_rule(**args):
 		"rate_or_discount": args.rate_or_discount or "Discount Percentage",
 		"discount_percentage": args.discount_percentage or 0.0,
 		"rate": args.rate or 0.0,
-		"margin_type": args.margin_type,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
 		"condition": args.condition or '',
 		"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0
 	})
 
-	if args.get("priority"):
-		doc.priority = args.get("priority")
+	for field in ["free_item", "free_qty", "free_item_rate", "priority",
+		"margin_type", "price_or_product_discount"]:
+		if args.get(field):
+			doc.set(field, args.get(field))
 
 	apply_on = doc.apply_on.replace(' ', '_').lower()
 	child_table = {'Item Code': 'items', 'Item Group': 'item_groups', 'Brand': 'brands'}
-	doc.append(child_table.get(doc.apply_on), {
-		apply_on: args.get(apply_on) or "_Test Item"
-	})
+
+	if doc.apply_on != "Transaction":
+		doc.append(child_table.get(doc.apply_on), {
+			apply_on: args.get(apply_on) or "_Test Item"
+		})
 
 	doc.insert(ignore_permissions=True)
 	if args.get(apply_on) and apply_on != "item_code":
