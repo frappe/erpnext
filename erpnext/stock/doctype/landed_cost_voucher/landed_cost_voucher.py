@@ -193,8 +193,8 @@ class LandedCostVoucher(Document):
 				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: item.receipt_document,
 					'item_code': item.item_code }, fields=['name', 'docstatus'])
 				if not docs or len(docs) != item.qty:
-					frappe.throw(_('There are not enough asset created or linked to {0}. \
-						Please create or link {1} Assets with respective document.').format(item.receipt_document, item.qty))
+					frappe.throw(_('There are not enough asset created or linked to {0}. Please create or link {1} Assets with respective document.').format(
+						item.receipt_document, item.qty))
 				if docs:
 					for d in docs:
 						if d.docstatus == 1:

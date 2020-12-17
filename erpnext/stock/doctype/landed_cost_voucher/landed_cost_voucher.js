@@ -174,7 +174,7 @@ frappe.ui.form.on('Landed Cost Voucher', {
 					}
 				}
 			});
-		};
+		}
 	},
 
 	set_base_amount: function(frm, cdt, cdn) {
