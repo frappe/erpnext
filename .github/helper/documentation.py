@@ -21,8 +21,8 @@ def docs_link_exists(body):
 			if word.startswith('http') and uri_validator(word):
 				parsed_url = urlparse(word)
 				if parsed_url.netloc == "github.com":
-					_, org, repo, _type, ref = parsed_url.path.split('/')
-					if org == "frappe" and repo in docs_repos:
+					parts = parsed_url.path.split('/')
+					if len(parts) == 5 and parts[1] == "frappe" and parts[2] in docs_repos:
 						return True
 
 
