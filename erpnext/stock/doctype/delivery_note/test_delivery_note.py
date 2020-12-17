@@ -57,7 +57,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		sle = frappe.get_doc("Stock Ledger Entry", {"voucher_type": "Delivery Note", "voucher_no": dn.name})
 
-		self.assertEqual(sle.stock_value_difference, -1*stock_queue[0][1])
+		self.assertEqual(sle.stock_value_difference, flt(-1*stock_queue[0][1]))
 
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
@@ -442,8 +442,14 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.status, "To Bill")
 		self.assertEqual(dn.per_billed, 0)
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn.po_no, so.po_no)
+
 		si = make_sales_invoice(dn.name)
 		si.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn.po_no, si.po_no)
 
 		dn.load_from_db()
 		self.assertEqual(dn.get("items")[0].billed_amt, 200)
@@ -461,6 +467,9 @@ class TestDeliveryNote(unittest.TestCase):
 		si.insert()
 		si.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, si.po_no)
+
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		dn1 = make_delivery_note(so.name)
@@ -468,6 +477,9 @@ class TestDeliveryNote(unittest.TestCase):
 		dn1.posting_time = "10:00"
 		dn1.get("items")[0].qty = 2
 		dn1.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, dn1.po_no)
 
 		self.assertEqual(dn1.get("items")[0].billed_amt, 200)
 		self.assertEqual(dn1.per_billed, 100)
@@ -478,6 +490,9 @@ class TestDeliveryNote(unittest.TestCase):
 		dn2.posting_time = "08:00"
 		dn2.get("items")[0].qty = 4
 		dn2.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, dn2.po_no)
 
 		dn1.load_from_db()
 		self.assertEqual(dn1.get("items")[0].billed_amt, 100)
@@ -502,8 +517,14 @@ class TestDeliveryNote(unittest.TestCase):
 		dn1.get("items")[0].qty = 2
 		dn1.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn1.po_no, so.po_no)
+
 		si1 = make_sales_invoice(dn1.name)
 		si1.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn1.po_no, si1.po_no)
 
 		dn1.load_from_db()
 		self.assertEqual(dn1.per_billed, 100)
@@ -512,10 +533,16 @@ class TestDeliveryNote(unittest.TestCase):
 		si2.get("items")[0].qty = 4
 		si2.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(si2.po_no, so.po_no)
+
 		dn2 = make_delivery_note(so.name)
 		dn2.posting_time = "08:00"
 		dn2.get("items")[0].qty = 5
 		dn2.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn2.po_no, so.po_no)
 
 		dn1.load_from_db()
 		self.assertEqual(dn1.get("items")[0].billed_amt, 200)
@@ -536,8 +563,14 @@ class TestDeliveryNote(unittest.TestCase):
 		si = make_sales_invoice(so.name)
 		si.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, si.po_no)
+
 		dn = make_delivery_note(si.name)
 		dn.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn.po_no, si.po_no)
 
 		self.assertEqual(dn.get("items")[0].billed_amt, 1000)
 		self.assertEqual(dn.per_billed, 100)

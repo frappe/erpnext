@@ -172,8 +172,11 @@ class Employee(NestedSet):
 			)
 			if reports_to:
 				link_to_employees = [frappe.utils.get_link_to_form('Employee', employee.name, label=employee.employee_name) for employee in reports_to]
-				throw(_("Employee status cannot be set to 'Left' as following employees are currently reporting to this employee:&nbsp;")
-					+ ', '.join(link_to_employees), EmployeeLeftValidationError)
+				message = _("The following employees are currently still reporting to {0}:").format(frappe.bold(self.employee_name))
+				message += "<br><br><ul><li>" + "</li><li>".join(link_to_employees)
+				message += "</li></ul><br>"
+				message += _("Please make sure the employees above report to another Active employee.")
+				throw(message, EmployeeLeftValidationError, _("Cannot Relieve Employee"))
 			if not self.relieving_date:
 				throw(_("Please enter relieving date."))
 
@@ -206,7 +209,7 @@ class Employee(NestedSet):
 
 	def validate_preferred_email(self):
 		if self.prefered_contact_email and not self.get(scrub(self.prefered_contact_email)):
-			frappe.msgprint(_("Please enter " + self.prefered_contact_email))
+			frappe.msgprint(_("Please enter {0}").format(self.prefered_contact_email))
 
 	def validate_onboarding_process(self):
 		employee_onboarding = frappe.get_all("Employee Onboarding",
@@ -407,7 +410,11 @@ def get_employee_emails(employee_list):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
-	filters = [['company', '=', company]]
+
+	filters = [['status', '!=', 'Left']]
+	if company and company != 'All Companies':
+		filters.append(['company', '=', company])
+
 	fields = ['name as value', 'employee_name as title']
 
 	if is_root:
