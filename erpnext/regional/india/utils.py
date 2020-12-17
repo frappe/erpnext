@@ -53,7 +53,7 @@ def validate_gstin_for_india(doc, method):
 				.format(doc.gst_state_number))
 
 def validate_tax_category(doc, method):
-	if doc.get('gst_state') and frappe.db.get_value('Tax category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
+	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
 		if doc.is_inter_state:
 			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
 		else:
