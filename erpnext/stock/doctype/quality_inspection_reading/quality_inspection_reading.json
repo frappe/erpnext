@@ -7,21 +7,30 @@
  "engine": "InnoDB",
  "field_order": [
   "specification",
-  "value",
   "status",
+  "value",
+  "value_based",
   "column_break_4",
+  "formula_based_criteria",
   "acceptance_formula",
+  "min_value",
+  "max_value",
+  "mean_value",
   "section_break_3",
+  "reading_value",
+  "section_break_14",
+  "single_reading",
+  "section_break_12",
   "reading_1",
   "reading_2",
   "reading_3",
-  "column_break_10",
   "reading_4",
+  "column_break_10",
   "reading_5",
   "reading_6",
-  "column_break_14",
   "reading_7",
   "reading_8",
+  "column_break_14",
   "reading_9",
   "reading_10"
  ],
@@ -38,10 +47,11 @@
   },
   {
    "columns": 2,
+   "depends_on": "eval:(!doc.formula_based_criteria && doc.value_based)",
    "fieldname": "value",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Acceptance Criteria",
+   "label": "Acceptance Criteria Value",
    "oldfieldname": "value",
    "oldfieldtype": "Data"
   },
@@ -56,6 +66,7 @@
   },
   {
    "columns": 1,
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_2",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -65,6 +76,7 @@
   },
   {
    "columns": 1,
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_3",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -73,6 +85,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_4",
    "fieldtype": "Data",
    "label": "Reading 4",
@@ -80,6 +93,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_5",
    "fieldtype": "Data",
    "label": "Reading 5",
@@ -87,6 +101,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_6",
    "fieldtype": "Data",
    "label": "Reading 6",
@@ -94,6 +109,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_7",
    "fieldtype": "Data",
    "label": "Reading 7",
@@ -101,6 +117,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_8",
    "fieldtype": "Data",
    "label": "Reading 8",
@@ -108,6 +125,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_9",
    "fieldtype": "Data",
    "label": "Reading 9",
@@ -115,6 +133,7 @@
    "oldfieldtype": "Data"
   },
   {
+   "depends_on": "eval:!doc.single_reading",
    "fieldname": "reading_10",
    "fieldtype": "Data",
    "label": "Reading 10",
@@ -133,15 +152,18 @@
    "options": "Accepted\nRejected"
   },
   {
+   "depends_on": "value_based",
    "fieldname": "section_break_3",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Value Based Inspection"
   },
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
   {
-   "description": "Simple Python formula based on numeric Readings.<br> Example 1: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\nExample 2: <b>(reading_1 + reading_2) / 2 &lt; 10</b>",
+   "depends_on": "formula_based_criteria",
+   "description": "Simple Python formula applied on Reading fields.<br> Numeric eg.: <b>reading_1 &gt; 0.2 and reading_1 &lt; 0.5</b><br>\nValue based eg.:  <b>reading_value in (\"A\", \"B\", \"C)</b>",
    "fieldname": "acceptance_formula",
    "fieldtype": "Code",
    "label": "Acceptance Criteria Formula"
@@ -153,12 +175,69 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "formula_based_criteria",
+   "fieldtype": "Check",
+   "label": "Formula Based Criteria"
+  },
+  {
+   "depends_on": "eval:(!doc.formula_based_criteria && !doc.single_reading && !doc.value_based)",
+   "fieldname": "mean_value",
+   "fieldtype": "Float",
+   "label": "Mean Value"
+  },
+  {
+   "default": "0",
+   "fieldname": "single_reading",
+   "fieldtype": "Check",
+   "label": "Single Reading"
+  },
+  {
+   "depends_on": "eval:!doc.value_based",
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break",
+   "hide_border": 1
+  },
+  {
+   "depends_on": "eval:(!doc.formula_based_criteria && !doc.value_based)",
+   "description": "Applied on each reading.",
+   "fieldname": "min_value",
+   "fieldtype": "Float",
+   "label": "Minimum Value"
+  },
+  {
+   "depends_on": "eval:(!doc.formula_based_criteria && !doc.value_based)",
+   "description": "Applied on each reading.",
+   "fieldname": "max_value",
+   "fieldtype": "Float",
+   "label": "Maximum Value"
+  },
+  {
+   "default": "0",
+   "description": "Non-numeric Inspection.",
+   "fieldname": "value_based",
+   "fieldtype": "Check",
+   "label": "Value Based"
+  },
+  {
+   "depends_on": "value_based",
+   "fieldname": "reading_value",
+   "fieldtype": "Data",
+   "label": "Reading Value"
+  },
+  {
+   "depends_on": "eval:!doc.value_based",
+   "fieldname": "section_break_14",
+   "fieldtype": "Section Break",
+   "label": "Numeric Inspection"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-16 16:34:29.947856",
+ "modified": "2020-12-18 21:02:04.865777",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Reading",
