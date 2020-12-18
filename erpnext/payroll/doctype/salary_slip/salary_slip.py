@@ -50,6 +50,7 @@ class SalarySlip(TransactionBase):
 
 		self.calculate_net_pay()
 		self.compute_year_to_date()
+		self.compute_month_to_date()
 
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
@@ -1138,8 +1139,7 @@ class SalarySlip(TransactionBase):
 						fields = ['employee_name', 'start_date', 'end_date', 'net_pay'],
 						filters = {'employee_name' : self.employee_name,
 									'start_date' : ['>=', payroll_period.start_date],
-									'end_date' : ['<=', payroll_period.end_date],
-									'name' : ['!=', self.name]
+									'end_date' : ['<', self.start_date]
 						})
 
 		for salary_slip in salary_slips_from_current_payroll_period:
@@ -1147,6 +1147,22 @@ class SalarySlip(TransactionBase):
 
 		year_to_date += self.net_pay
 		self.year_to_date = year_to_date
+
+	def compute_month_to_date(self):
+		month_to_date = 0
+		date = datetime.datetime.strptime(self.start_date,"%Y-%m-%d")
+		first_day_of_the_month = "1-" + str(date.month) + "-" + str(date.year)
+		salary_slips_from_this_month = frappe.get_list('Salary Slip',
+						fields = ['employee_name', 'start_date', 'net_pay'],
+						filters = {'employee_name' : self.employee_name,
+									'start_date' : ['>=', first_day_of_the_month],
+									'end_date' : ['<', self.start_date]
+						})
+		for salary_slip in salary_slips_from_this_month:
+			month_to_date += salary_slip.net_pay
+
+		month_to_date += self.net_pay
+		self.month_to_date = month_to_date
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
