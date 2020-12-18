@@ -73,6 +73,7 @@
   "column_break_53",
   "rounded_total",
   "base_rounded_total",
+  "month_to_date",
   "section_break_55",
   "total_in_words",
   "column_break_69",
@@ -583,14 +584,21 @@
   {
    "fieldname": "year_to_date",
    "fieldtype": "Currency",
-   "label": "Year To Date"
+   "label": "Year To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "month_to_date",
+   "fieldtype": "Currency",
+   "label": "Month To Date"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-17 21:51:19.612940",
+ "modified": "2020-12-18 23:23:10.484574",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
