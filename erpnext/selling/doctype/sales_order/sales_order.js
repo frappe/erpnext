@@ -436,7 +436,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					callback: function(r) {
 						if(r.message) {
 							frappe.msgprint(__('Material Request {0} submitted.',
-							['<a href="/desk/Form/Material Request/'+r.message.name+'">' + r.message.name+ '</a>']));
+							['<a href="/app/material-request/'+r.message.name+'">' + r.message.name+ '</a>']));
 						}
 						d.hide();
 						me.frm.reload_doc();
