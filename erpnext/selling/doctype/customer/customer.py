@@ -77,8 +77,7 @@ class Customer(TransactionBase):
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
 
-		from erpnext.accounts.party import validate_ntn_cnic_strn
-		validate_ntn_cnic_strn(self.tax_id, self.tax_cnic, self.tax_strn)
+		self.validate_tax_id()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -102,6 +101,15 @@ class Customer(TransactionBase):
 			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
 			if not is_company_account:
 				frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
+
+	def validate_tax_id(self):
+		from erpnext.accounts.party import validate_ntn_cnic_strn, validate_duplicate_tax_id
+		validate_ntn_cnic_strn(self.tax_id, self.tax_cnic, self.tax_strn)
+
+		exclude = None if self.is_new() else self.name
+		validate_duplicate_tax_id("Customer", "tax_id", self.tax_id, exclude=exclude, throw=False)
+		validate_duplicate_tax_id("Customer", "tax_cnic", self.tax_cnic, exclude=exclude, throw=False)
+		validate_duplicate_tax_id("Customer", "tax_strn", self.tax_strn, exclude=exclude, throw=False)
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
