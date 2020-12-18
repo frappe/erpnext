@@ -35,9 +35,6 @@ class SalarySlip(TransactionBase):
 	def autoname(self):
 		self.name = make_autoname(self.series)
 
-	def before_save(self):
-		self.compute_year_to_date()
-
 	def validate(self):
 		self.status = self.get_status()
 		self.validate_dates()
@@ -52,6 +49,7 @@ class SalarySlip(TransactionBase):
 			self.get_working_days_details(lwp = self.leave_without_pay)
 
 		self.calculate_net_pay()
+		self.compute_year_to_date()
 
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
@@ -1130,19 +1128,21 @@ class SalarySlip(TransactionBase):
 
 	def compute_year_to_date(self):
 		year_to_date = 0
-		fiscal_year = frappe.get_list('Fiscal Year',
-						fields = ['year','year_start_date','year_end_date'],
-						filters= {'year_start_date' : ['<=', self.start_date],
-									'year_end_date' : ['>=', self.end_date]
+		payroll_period = frappe.get_list('Payroll Period',
+						fields = ['start_date','end_date','company'],
+						filters= {'start_date' : ['<=', self.start_date],
+									'end_date' : ['>=', self.end_date],
+									'company' : self.company
 						})[0]
-		salary_slips_from_current_fiscal_year = frappe.get_list('Salary Slip',
+		salary_slips_from_current_payroll_period = frappe.get_list('Salary Slip',
 						fields = ['employee_name', 'start_date', 'end_date', 'net_pay'],
 						filters = {'employee_name' : self.employee_name,
-									'start_date' : ['>=', fiscal_year.year_start_date],
-									'end_date' : ['<=', fiscal_year.year_end_date]
+									'start_date' : ['>=', payroll_period.start_date],
+									'end_date' : ['<=', payroll_period.end_date],
+									'name' : ['!=', self.name]
 						})
 
-		for salary_slip in salary_slips_from_current_fiscal_year:
+		for salary_slip in salary_slips_from_current_payroll_period:
 			year_to_date += salary_slip.net_pay
 
 		year_to_date += self.net_pay
