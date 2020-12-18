@@ -905,7 +905,7 @@ class AccountsController(TransactionBase):
 				# from creating a sales invoice if sales order is already created
 
 	def clean_remarks(self):
-		for f in ['remarks', 'remark', 'user_remark', 'user_remarks']:
+		for f in ['remarks', 'remark', 'user_remark', 'user_remarks', 'cheque_no', 'reference_no']:
 			if self.meta.has_field(f):
 				self.set(f, clean_whitespace(self.get(f)))
 
