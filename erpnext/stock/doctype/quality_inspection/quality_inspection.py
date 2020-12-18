@@ -6,7 +6,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, cint
 from erpnext.stock.doctype.quality_inspection_template.quality_inspection_template \
 	import get_template_details
 
@@ -16,7 +16,7 @@ class QualityInspection(Document):
 			self.get_item_specification_details()
 
 		if self.readings:
-			self.set_status_based_on_acceptance_formula()
+			self.inspect_and_set_status()
 
 	def get_item_specification_details(self):
 		if not self.quality_inspection_template:
@@ -29,9 +29,7 @@ class QualityInspection(Document):
 		parameters = get_template_details(self.quality_inspection_template)
 		for d in parameters:
 			child = self.append('readings', {})
-			child.specification = d.specification
-			child.value = d.value
-			child.acceptance_formula = d.acceptance_formula
+			child.update(d)
 			child.status = "Accepted"
 
 	def get_quality_inspection_template(self):
@@ -76,28 +74,84 @@ class QualityInspection(Document):
 				""".format(parent_doc=self.reference_type, child_doc=doctype),
 					(quality_inspection, self.modified, self.reference_name, self.item_code))
 
-	def set_status_based_on_acceptance_formula(self):
+	def inspect_and_set_status(self):
 		for reading in self.readings:
-			if not reading.acceptance_formula: continue
+			if reading.formula_based_criteria:
+				self.set_status_based_on_acceptance_formula(reading)
+			else:
+				self.set_status_based_on_acceptance_values(reading)
 
-			condition = reading.acceptance_formula
-			data = {}
+	def set_status_based_on_acceptance_values(self, reading):
+		if cint(reading.value_based):
+			result = reading.get("reading_value") == reading.get("value")
+		else:
+			# numeric readings
+			if cint(reading.single_reading):
+				reading_1 = flt(reading.get("reading_1"))
+				result =  flt(reading.get("min_value")) <= reading_1 <= flt(reading.get("max_value"))
+			else:
+				result = self.min_max_criteria_passed(reading) and self.mean_criteria_passed(reading)
+
+		reading.status = "Accepted" if result else "Rejected"
+
+	def min_max_criteria_passed(self, reading):
+		"""Determine whether all readings fall in the acceptable range."""
+		for i in range(1, 11):
+			reading_field = reading.get("reading_" + str(i))
+			if reading_field is not None:
+				result = flt(reading.get("min_value")) <= flt(reading_field) <= flt(reading.get("max_value"))
+				if not result: return False
+		return True
+
+	def mean_criteria_passed(self, reading):
+		"""Determine whether mean of all readings is acceptable."""
+		if reading.get("mean_value"):
+			from statistics import mean
+			readings_list = []
+
 			for i in range(1, 11):
-				field = "reading_" + str(i)
-				data[field] = flt(reading.get(field)) or 0
+				reading_value = reading.get("reading_" + str(i))
+				if reading_value is not None:
+					readings_list.append(flt(reading_value))
 
-			try:
-				result = frappe.safe_eval(condition, None, data)
-				reading.status = "Accepted" if result else "Rejected"
-			except SyntaxError:
-				frappe.throw(_("Row #{0}: Acceptance Criteria Formula is incorrect.").format(reading.idx),
-					title=_("Invalid Formula"))
-			except NameError as e:
-				field = frappe.bold(e.args[0].split()[1])
-				frappe.throw(_("Row #{0}: {1} is not a valid reading field. Please refer to the field description.")
-					.format(reading.idx, field),
-					title=_("Invalid Formula"))
+			actual_mean = mean(readings_list) if readings_list else 0
+			return True if actual_mean == reading.get("mean_value") else False
 
+		return True # no mean value, nothing to check
+
+	def set_status_based_on_acceptance_formula(self, reading):
+		if not reading.acceptance_formula:
+			frappe.throw(_("Row #{0}: Acceptance Criteria Formula is required.").format(reading.idx),
+				title=_("Missing Formula"))
+
+		condition = reading.acceptance_formula
+		data = self.get_formula_evaluation_data(reading)
+
+		try:
+			result = frappe.safe_eval(condition, None, data)
+			reading.status = "Accepted" if result else "Rejected"
+		except NameError as e:
+			field = frappe.bold(e.args[0].split()[1])
+			frappe.throw(_("Row #{0}: {1} is not a valid reading field. Please refer to the field description.")
+				.format(reading.idx, field),
+				title=_("Invalid Formula"))
+		except Exception:
+			frappe.throw(_("Row #{0}: Acceptance Criteria Formula is incorrect.").format(reading.idx),
+				title=_("Invalid Formula"))
+
+	def get_formula_evaluation_data(self, reading):
+		data = {}
+		if cint(reading.value_based):
+			data = {"reading_value": reading.get("reading_value")}
+		else:
+			# numeric readings
+			data = {"reading_1": flt(reading.get("reading_1"))}
+			if not cint(reading.single_reading):
+				# if multiple numeric readings add all readings to data
+				for i in range(2, 11):
+					field = "reading_" + str(i)
+					data[field] = flt(reading.get(field))
+		return data
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
