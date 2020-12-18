@@ -303,7 +303,8 @@ $.extend(erpnext.utils, {
 				value = value.slice(0, 7) + "-" + value.slice(7);
 			}
 
-			frm.set_value(fieldname, value);
+			frm.doc[fieldname] = value;
+			frm.refresh_field(fieldname);
 		}
 	},
 
@@ -320,7 +321,8 @@ $.extend(erpnext.utils, {
 				value = value.slice(0, 5) + "-" + value.slice(5);
 			}
 
-			frm.set_value(fieldname, value);
+			frm.doc[fieldname] = value;
+			frm.refresh_field(fieldname);
 		}
 	},
 
@@ -343,7 +345,23 @@ $.extend(erpnext.utils, {
 				value = value.slice(0, 2) + "-" + value.slice(2);
 			}
 
-			frm.set_value(fieldname, value);
+			frm.doc[fieldname] = value;
+			frm.refresh_field(fieldname);
+		}
+	},
+
+	validate_duplicate_tax_id: function (frm, fieldname) {
+		let value = frm.doc[fieldname];
+		if (value) {
+			frappe.call({
+				method: "erpnext.accounts.party.validate_duplicate_tax_id",
+				args: {
+					doctype: frm.doctype,
+					fieldname: fieldname,
+					value: value,
+					exclude: frm.is_new() ? null : frm.doc.name
+				}
+			});
 		}
 	},
 

@@ -32,11 +32,12 @@ frappe.ui.form.on("Purchase Receipt", {
 
 		frm.set_indicator_formatter('item_code', function(doc) {
 			if (doc.docstatus === 1) {
-				if (!doc.completed_qty) {
+				var completed_qty = flt(doc.billed_qty) + flt(doc.returned_qty);
+				if (!completed_qty) {
 					return "orange";
 				} else if (doc.returned_qty >= doc.qty) {
 					return "blue";
-				} else if (doc.completed_qty < doc.qty) {
+				} else if (doc.billed_qty < doc.qty) {
 					return "yellow";
 				} else {
 					return "green";
