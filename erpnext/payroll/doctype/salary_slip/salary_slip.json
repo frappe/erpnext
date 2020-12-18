@@ -591,14 +591,16 @@
   {
    "fieldname": "month_to_date",
    "fieldtype": "Currency",
-   "label": "Month To Date"
+   "label": "Month To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-18 23:23:10.484574",
+ "modified": "2020-12-18 23:57:41.042954",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
