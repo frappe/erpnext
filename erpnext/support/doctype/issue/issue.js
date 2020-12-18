@@ -189,10 +189,7 @@ frappe.ui.form.on("Issue", {
 								subject: dialog.fields_dict.subject.value,
 								communication_id: e.currentTarget.closest(".timeline-item").getAttribute("data-name")
 							}, (r) => {
-								let url = window.location.href
-								let arr = url.split("/");
-								let result = arr[0] + "//" + arr[2]
-								frappe.msgprint(`New issue created: <a href="${result}//desk/Form/Issue/${r.message}">${r.message}</a>`)
+								frappe.msgprint(`New issue created: <a href="/app/issue/${r.message}">${r.message}</a>`)
 								frm.reload_doc();
 								dialog.hide();
 							});
