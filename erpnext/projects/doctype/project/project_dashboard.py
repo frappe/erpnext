@@ -37,7 +37,7 @@ def get_data():
 			},
 			{
 				'label': _('Reference'),
-				'items': ['Warranty Claim']
+				'items': ['Warranty Claim', 'Vehicle Log']
 			},
 		]
 	}

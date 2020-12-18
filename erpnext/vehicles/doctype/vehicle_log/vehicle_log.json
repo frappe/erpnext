@@ -9,13 +9,13 @@
   "vehicle_section",
   "naming_series",
   "vehicle",
-  "employee",
+  "project",
   "column_break_4",
+  "item_code",
+  "item_name",
   "column_break_7",
-  "model",
-  "brand",
-  "odometer_reading",
   "date",
+  "odometer_reading",
   "odometer",
   "column_break_12",
   "last_odometer",
@@ -25,6 +25,7 @@
   "column_break_15",
   "supplier",
   "invoice",
+  "employee",
   "service_details",
   "service_detail",
   "amended_from"
@@ -46,15 +47,11 @@
    "set_only_once": 1
   },
   {
-   "fetch_from": "license_plate.employee",
-   "fetch_if_empty": 1,
    "fieldname": "employee",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Employee",
-   "options": "Employee",
-   "reqd": 1
+   "options": "Employee"
   },
   {
    "fieldname": "column_break_4",
@@ -65,34 +62,25 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "vehicle.model",
-   "fieldname": "model",
-   "fieldtype": "Data",
-   "label": "Model",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "vehicle.brand",
-   "fieldname": "brand",
-   "fieldtype": "Data",
-   "label": "Make",
-   "read_only": 1
-  },
-  {
    "fieldname": "odometer_reading",
    "fieldtype": "Section Break",
    "label": "Odometer Reading"
   },
   {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Date",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "odometer",
    "fieldtype": "Int",
-   "label": "Current Odometer value ",
+   "in_list_view": 1,
+   "label": "Current Odometer Reading",
    "reqd": 1
   },
   {
@@ -100,10 +88,9 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "vehicle.last_odometer",
    "fieldname": "last_odometer",
    "fieldtype": "Int",
-   "label": "last Odometer Value ",
+   "label": "Last Odometer Reading",
    "read_only": 1,
    "reqd": 1
   },
@@ -167,11 +154,35 @@
    "in_standard_filter": 1,
    "label": "Vehicle",
    "options": "Vehicle",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Project",
+   "options": "Project",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "vehicle.item_code",
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Vehicle Item Code",
+   "options": "Item",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Item Name",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2020-10-11 03:24:19.654708",
+ "modified": "2020-12-18 01:50:42.320675",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Log",
@@ -192,7 +203,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "date",
  "sort_order": "DESC",
  "track_changes": 1
 }

@@ -25,12 +25,12 @@
   "vehicle_owner_name",
   "vehicle_details",
   "license_plate",
-  "color",
+  "unregistered",
   "column_break_8",
   "chassis_no",
   "engine_no",
   "column_break_16",
-  "employee",
+  "color",
   "last_odometer",
   "insurance_details",
   "insurance_company",
@@ -70,6 +70,7 @@
   "more_info",
   "status",
   "column_break_60",
+  "employee",
   "company"
  ],
  "fields": [
@@ -83,12 +84,12 @@
   },
   {
    "allow_in_quick_entry": 1,
+   "depends_on": "eval:!doc.unregistered",
    "fieldname": "license_plate",
    "fieldtype": "Data",
    "in_preview": 1,
    "label": "License Plate",
-   "no_copy": 1,
-   "unique": 1
+   "no_copy": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -105,7 +106,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "last_odometer",
    "fieldtype": "Int",
-   "label": "Odometer Value (Last)",
+   "label": "Odometer Reading (Last)",
    "no_copy": 1,
    "set_only_once": 1
   },
@@ -531,10 +532,19 @@
    "label": "Sales Order",
    "options": "Sales Order",
    "read_only": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "0",
+   "depends_on": "eval:!doc.license_plate || doc.unregistered",
+   "fieldname": "unregistered",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Is Unregistered"
   }
  ],
  "image_field": "image",
- "modified": "2020-12-12 14:41:33.006887",
+ "modified": "2020-12-18 00:05:33.837331",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

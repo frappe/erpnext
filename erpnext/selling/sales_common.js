@@ -599,7 +599,7 @@ frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 	if (frm.doc.project) {
 		frappe.call({
 			method: 'erpnext.projects.doctype.project.project.get_project_details',
-			args: {project_name: frm.doc.project},
+			args: {project_name: frm.doc.project, doctype: frm.doc.doctype},
 			callback: function (r) {
 				if (!r.exc) {
 					$.each(r.message, function(fieldname, value) {

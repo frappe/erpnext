@@ -5,23 +5,44 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, cstr
-from frappe.model.mapper import get_mapped_doc
+from frappe.utils import cint, flt, getdate
 from frappe.model.document import Document
+from erpnext.vehicles.doctype.vehicle.vehicle import get_vehicle_odometer
 
 class VehicleLog(Document):
 	def validate(self):
-		if flt(self.odometer) < flt(self.last_odometer):
-			frappe.throw(_("Current Odometer Value should be greater than Last Odometer Value {0}").format(self.last_odometer))
+		if getdate(self.date) > getdate():
+			frappe.throw(_("Vehicle Log Date cannot be in the future"))
+
+		self.last_odometer = get_vehicle_odometer(self.vehicle, self.date)
+
+		if cint(self.odometer) < cint(self.last_odometer):
+			frappe.throw(_("Current Odometer Reading {0} km cannot be less than Last Odometer Reading {1} km")
+				.format(frappe.bold(self.get_formatted('odometer')), frappe.bold(self.get_formatted('last_odometer'))))
 
 	def on_submit(self):
-		frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", self.odometer)
+		self.update_vehicle_odometer()
+		self.update_project_odometer()
 
 	def on_cancel(self):
-		distance_travelled = self.odometer - self.last_odometer
-		if(distance_travelled > 0):
-			updated_odometer_value = int(frappe.db.get_value("Vehicle", self.vehicle, "last_odometer")) - distance_travelled
-			frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", updated_odometer_value)
+		self.update_vehicle_odometer()
+		self.update_project_odometer()
+
+	def update_vehicle_odometer(self):
+		odometer = get_vehicle_odometer(self.vehicle)
+		frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", odometer)
+
+	def update_project_odometer(self):
+		from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
+
+		if self.project and frappe.get_meta("Project").has_field("applies_to_vehicle") and 'Vehicles' in frappe.get_active_domains():
+			vehicle = frappe.db.get_value("Project", self.project, "applies_to_vehicle")
+			if vehicle:
+				first_odometer, last_odometer = get_project_odometer(self.project, vehicle)
+				frappe.db.set_value("Project", self.project, {
+					"vehicle_first_odometer": first_odometer,
+					"vehicle_last_odometer": last_odometer
+				}, None)
 
 @frappe.whitelist()
 def make_expense_claim(docname):
@@ -46,3 +67,20 @@ def make_expense_claim(docname):
 		"amount": claim_amount
 	})
 	return exp_claim.as_dict()
+
+
+@frappe.whitelist()
+def make_odometer_log(vehicle, odometer, date=None, project=None):
+	if not vehicle:
+		frappe.throw(_("Vehicle is not provided to make Vehicle Odometer Log"))
+
+	date = getdate(date)
+
+	doc = frappe.new_doc("Vehicle Log")
+	doc.vehicle = vehicle
+	doc.date = date
+	doc.odometer = cint(odometer)
+	doc.project = project
+
+	doc.save()
+	doc.submit()

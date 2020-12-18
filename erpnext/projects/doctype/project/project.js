@@ -95,6 +95,15 @@ frappe.ui.form.on("Project", {
 
 			frm.trigger('show_dashboard');
 		}
+
+		if (frm.fields_dict.vehicle_first_odometer && frm.fields_dict.vehicle_last_odometer) {
+			var first_odometer_read_only = cint(frm.doc.vehicle_first_odometer);
+			var last_odometer_read_only = !cint(frm.doc.vehicle_first_odometer) || cint(frm.doc.vehicle_last_odometer) !== cint(frm.doc.vehicle_first_odometer);
+			frm.set_df_property("vehicle_first_odometer", "read_only", first_odometer_read_only);
+			frm.set_df_property("vehicle_last_odometer", "read_only", last_odometer_read_only);
+		}
+
+
 		frm.events.set_buttons(frm);
 	},
 

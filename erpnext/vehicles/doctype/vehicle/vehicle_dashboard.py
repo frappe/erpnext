@@ -18,7 +18,7 @@ def get_data():
 			},
 			{
 				'label': ['Reference'],
-				'items': ['Vehicle Booking Order', 'Serial No']
+				'items': ['Vehicle Booking Order', 'Vehicle Log']
 			},
 		]
 	}

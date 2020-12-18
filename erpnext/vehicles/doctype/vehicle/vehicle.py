@@ -37,9 +37,14 @@ class Vehicle(Document):
 		self.update_vehicle_serial_no()
 		self.update_vehicle_booking_order()
 
+		self.db_set("last_odometer", get_vehicle_odometer(self.name))
+
 	def validate(self):
 		self.validate_item()
+		self.validate_vehicle_id()
+
 		self.update_reference_from_serial_no()
+
 		self.copy_image_from_item()
 		self.set_status()
 
@@ -86,6 +91,21 @@ class Vehicle(Document):
 		self.item_name = item.item_name
 		self.brand = item.brand
 		self.warranty_period = item.warranty_period
+
+	def validate_vehicle_id(self):
+		import re
+
+		if self.unregistered:
+			self.license_plate = ""
+
+		self.chassis_no = re.sub(r"\s+", "", cstr(self.chassis_no).upper())
+		self.engine_no = re.sub(r"\s+", "", cstr(self.engine_no).upper())
+		self.license_plate = re.sub(r"\s+", "", cstr(self.license_plate).upper())
+
+		exclude = None if self.is_new() else self.name
+		validate_duplicate_vehicle('chassis_no', self.chassis_no, exclude=exclude, throw=True)
+		validate_duplicate_vehicle('engine_no', self.engine_no, exclude=exclude, throw=True)
+		validate_duplicate_vehicle('license_plate', self.license_plate, exclude=exclude, throw=True)
 
 	def update_reference_from_serial_no(self, serial_no_doc=None):
 		if not serial_no_doc:
@@ -343,3 +363,56 @@ def create_vehicle_from_so(sales_order, to_reserve_qty_map=None):
 	else:
 		links = [frappe.utils.get_link_to_form('Vehicle', d.name) for d in vehicles_created]
 		frappe.msgprint(_("Reserved Vehicles created: {0}").format(", ".join(links)))
+
+
+@frappe.whitelist()
+def validate_duplicate_vehicle(fieldname, value, exclude=None, throw=False):
+	if not value:
+		return
+
+	meta = frappe.get_meta("Vehicle")
+	if not fieldname or not meta.has_field(fieldname):
+		frappe.throw(_("Invalid fieldname {0}").format(fieldname))
+
+	label = _(meta.get_field(fieldname).label)
+
+	filters = {fieldname: value}
+	if exclude:
+		filters['name'] = ['!=', exclude]
+
+	duplicates = frappe.db.get_all("Vehicle", filters=filters)
+	duplicate_names = [d.name for d in duplicates]
+	if duplicates:
+		frappe.msgprint(_("{0} {1} is already set in Vehicle: {2}").format(label, frappe.bold(value),
+			", ".join([frappe.utils.get_link_to_form("Vehicle", name) for name in duplicate_names])),
+			raise_exception=throw, indicator='red' if throw else 'orange')
+
+
+@frappe.whitelist()
+def get_vehicle_odometer(vehicle, date=None, project=None, ascending=False):
+	if not vehicle:
+		frappe.throw(_("Vehicle not provided"))
+
+	filters = {
+		"vehicle": vehicle,
+		"docstatus": 1,
+		"date": ['<=', date]
+	}
+
+	if project:
+		filters['project'] = project
+	if date:
+		filters['date'] = ['<=', getdate(date)]
+
+	asc_or_desc = "asc" if ascending else "desc"
+	order_by = "date {0}, creation {0}".format(asc_or_desc)
+
+	odometer = frappe.get_all("Vehicle Log", filters=filters, fields=['odometer'], order_by=order_by, limit_page_length=1)
+
+	return cint(odometer[0].odometer) if odometer else 0
+
+
+def get_project_odometer(project, vehicle):
+	first_odometer = get_vehicle_odometer(vehicle, project=project, ascending=True)
+	last_odometer = get_vehicle_odometer(vehicle, project=project, ascending=False)
+	return first_odometer, last_odometer
