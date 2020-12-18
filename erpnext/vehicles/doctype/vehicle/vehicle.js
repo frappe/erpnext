@@ -33,39 +33,16 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 	},
 
 	chassis_no: function () {
-		this.format_vehicle_id('chassis_no');
-		this.validate_duplicate_vehicle('chassis_no');
+		erpnext.utils.format_vehicle_id(this.frm, 'chassis_no');
+		erpnext.utils.validate_duplicate_vehicle(this.frm.doc, 'chassis_no');
 	},
 	engine_no: function () {
-		this.format_vehicle_id('engine_no');
-		this.validate_duplicate_vehicle('engine_no');
+		erpnext.utils.format_vehicle_id(this.frm, 'engine_no');
+		erpnext.utils.validate_duplicate_vehicle(this.frm.doc, 'engine_no');
 	},
 	license_plate: function () {
-		this.format_vehicle_id('license_plate');
-		this.validate_duplicate_vehicle('license_plate');
-	},
-
-	format_vehicle_id: function (fieldname) {
-		let value = this.frm.doc[fieldname];
-		if (value) {
-			value = cstr(value).replace(/\s+/g, "").toUpperCase();
-			this.frm.doc[fieldname] = value;
-			this.frm.refresh_field(fieldname);
-		}
-	},
-
-	validate_duplicate_vehicle: function (fieldname) {
-		let value = this.frm.doc[fieldname];
-		if (value) {
-			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle.vehicle.validate_duplicate_vehicle",
-				args: {
-					fieldname: fieldname,
-					value: value,
-					exclude: this.frm.is_new() ? null : this.frm.doc.name
-				}
-			});
-		}
+		erpnext.utils.format_vehicle_id(this.frm, 'license_plate');
+		erpnext.utils.validate_duplicate_vehicle(this.frm.doc, 'license_plate');
 	},
 });
 

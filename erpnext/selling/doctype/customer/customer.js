@@ -166,14 +166,14 @@ frappe.ui.form.on("Customer", {
 
 	tax_id: function(frm) {
 		erpnext.utils.format_ntn(frm, "tax_id");
-		erpnext.utils.validate_duplicate_tax_id(frm, "tax_id");
+		erpnext.utils.validate_duplicate_tax_id(frm.doc, "tax_id");
 	},
 	tax_cnic: function(frm) {
 		erpnext.utils.format_cnic(frm, "tax_cnic");
-		erpnext.utils.validate_duplicate_tax_id(frm, "tax_cnic");
+		erpnext.utils.validate_duplicate_tax_id(frm.doc, "tax_cnic");
 	},
 	tax_strn: function(frm) {
 		erpnext.utils.format_strn(frm, "tax_strn");
-		erpnext.utils.validate_duplicate_tax_id(frm, "tax_strn");
+		erpnext.utils.validate_duplicate_tax_id(frm.doc, "tax_strn");
 	},
 });

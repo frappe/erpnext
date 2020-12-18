@@ -103,7 +103,6 @@
    "label": "Vehicle Details"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "last_odometer",
    "fieldtype": "Int",
    "label": "Odometer Reading (Last)",
@@ -158,7 +157,7 @@
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Item Code",
+   "label": "Vehicle Item Code",
    "options": "Item",
    "reqd": 1,
    "set_only_once": 1
@@ -169,7 +168,7 @@
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Item Name",
+   "label": "Vehicle Item Name",
    "read_only": 1
   },
   {
@@ -544,7 +543,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2020-12-18 00:05:33.837331",
+ "modified": "2020-12-18 16:11:32.863794",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

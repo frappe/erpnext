@@ -150,7 +150,6 @@
    "fieldname": "vehicle",
    "fieldtype": "Link",
    "in_global_search": 1,
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Vehicle",
    "options": "Vehicle",
@@ -160,6 +159,7 @@
   {
    "fieldname": "project",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Project",
    "options": "Project",
@@ -182,7 +182,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-12-18 01:50:42.320675",
+ "modified": "2020-12-18 16:15:18.500189",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Log",

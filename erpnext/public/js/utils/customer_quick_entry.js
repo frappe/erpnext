@@ -9,6 +9,35 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 	render_dialog: function() {
 		this.mandatory = this.mandatory.concat(this.get_variant_fields());
 		this._super();
+		this.init_post_render_dialog_operations();
+	},
+
+	init_post_render_dialog_operations: function () {
+		var me = this;
+
+		me.dialog.fields_dict["tax_id"].df.onchange = () => {
+			var value = me.dialog.get_value('tax_id');
+			value = erpnext.utils.get_formatted_ntn(value);
+			me.dialog.doc.tax_id = value;
+			me.dialog.get_field('tax_id').refresh();
+			erpnext.utils.validate_duplicate_tax_id(me.dialog.doc, "tax_id");
+		};
+
+		me.dialog.fields_dict["tax_cnic"].df.onchange = () => {
+			var value = me.dialog.get_value('tax_cnic');
+			value = erpnext.utils.get_formatted_cnic(value);
+			me.dialog.doc.tax_cnic = value;
+			me.dialog.get_field('tax_cnic').refresh();
+			erpnext.utils.validate_duplicate_tax_id(me.dialog.doc, "tax_cnic");
+		};
+
+		me.dialog.fields_dict["tax_strn"].df.onchange = () => {
+			var value = me.dialog.get_value('tax_strn');
+			value = erpnext.utils.get_formatted_strn(value);
+			me.dialog.doc.tax_strn = value;
+			me.dialog.get_field('tax_strn').refresh();
+			erpnext.utils.validate_duplicate_tax_id(me.dialog.doc, "tax_strn");
+		};
 	},
 
 	get_variant_fields: function() {
