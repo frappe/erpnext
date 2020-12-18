@@ -6,7 +6,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "vehicle_color"
+  "vehicle_color",
+  "color_code"
  ],
  "fields": [
   {
@@ -17,9 +18,17 @@
    "label": "Vehicle Color",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "color_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Color Code",
+   "no_copy": 1
   }
  ],
- "modified": "2020-11-08 17:47:32.790229",
+ "modified": "2020-12-18 23:38:15.811602",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Color",
