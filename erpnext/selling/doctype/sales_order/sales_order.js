@@ -8,7 +8,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
