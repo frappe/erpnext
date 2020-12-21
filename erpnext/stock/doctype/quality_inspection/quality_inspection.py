@@ -79,45 +79,26 @@ class QualityInspection(Document):
 			if reading.formula_based_criteria:
 				self.set_status_based_on_acceptance_formula(reading)
 			else:
+				# if not formula based check acceptance values set
 				self.set_status_based_on_acceptance_values(reading)
 
 	def set_status_based_on_acceptance_values(self, reading):
-		if cint(reading.value_based):
+		if cint(reading.non_numeric):
 			result = reading.get("reading_value") == reading.get("value")
 		else:
 			# numeric readings
-			if cint(reading.single_reading):
-				reading_1 = flt(reading.get("reading_1"))
-				result =  flt(reading.get("min_value")) <= reading_1 <= flt(reading.get("max_value"))
-			else:
-				result = self.min_max_criteria_passed(reading) and self.mean_criteria_passed(reading)
+			result = self.min_max_criteria_passed(reading)
 
 		reading.status = "Accepted" if result else "Rejected"
 
 	def min_max_criteria_passed(self, reading):
 		"""Determine whether all readings fall in the acceptable range."""
 		for i in range(1, 11):
-			reading_field = reading.get("reading_" + str(i))
-			if reading_field is not None:
-				result = flt(reading.get("min_value")) <= flt(reading_field) <= flt(reading.get("max_value"))
+			reading_value = reading.get("reading_" + str(i))
+			if reading_value is not None and reading_value.strip():
+				result = flt(reading.get("min_value")) <= flt(reading_value) <= flt(reading.get("max_value"))
 				if not result: return False
 		return True
-
-	def mean_criteria_passed(self, reading):
-		"""Determine whether mean of all readings is acceptable."""
-		if reading.get("mean_value"):
-			from statistics import mean
-			readings_list = []
-
-			for i in range(1, 11):
-				reading_value = reading.get("reading_" + str(i))
-				if reading_value is not None:
-					readings_list.append(flt(reading_value))
-
-			actual_mean = mean(readings_list) if readings_list else 0
-			return True if actual_mean == reading.get("mean_value") else False
-
-		return True # no mean value, nothing to check
 
 	def set_status_based_on_acceptance_formula(self, reading):
 		if not reading.acceptance_formula:
@@ -141,17 +122,29 @@ class QualityInspection(Document):
 
 	def get_formula_evaluation_data(self, reading):
 		data = {}
-		if cint(reading.value_based):
+		if cint(reading.non_numeric):
 			data = {"reading_value": reading.get("reading_value")}
 		else:
 			# numeric readings
-			data = {"reading_1": flt(reading.get("reading_1"))}
-			if not cint(reading.single_reading):
-				# if multiple numeric readings add all readings to data
-				for i in range(2, 11):
-					field = "reading_" + str(i)
-					data[field] = flt(reading.get(field))
+			for i in range(1, 11):
+				field = "reading_" + str(i)
+				data[field] = flt(reading.get(field))
+			data["mean"] = self.calculate_mean(reading)
+
 		return data
+
+	def calculate_mean(self, reading):
+		"""Calculate mean of all non-empty readings."""
+		from statistics import mean
+		readings_list = []
+
+		for i in range(1, 11):
+			reading_value = reading.get("reading_" + str(i))
+			if reading_value is not None and reading_value.strip():
+				readings_list.append(flt(reading_value))
+
+		actual_mean = mean(readings_list) if readings_list else 0
+		return actual_mean
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
