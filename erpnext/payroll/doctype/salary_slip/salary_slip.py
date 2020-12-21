@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate, get_first_day
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -1150,8 +1150,7 @@ class SalarySlip(TransactionBase):
 
 	def compute_month_to_date(self):
 		month_to_date = 0
-		date = datetime.datetime.strptime(self.start_date,"%Y-%m-%d")
-		first_day_of_the_month = "1-" + str(date.month) + "-" + str(date.year)
+		first_day_of_the_month = get_first_day(self.start_date)
 		salary_slips_from_this_month = frappe.get_list('Salary Slip',
 						fields = ['employee_name', 'start_date', 'net_pay'],
 						filters = {'employee_name' : self.employee_name,
