@@ -187,19 +187,21 @@ frappe.ui.form.on('POS Invoice', {
 	},
 
 	request_for_payment: function (frm) {
+		if (!frm.doc.contact_mobile) {
+			frappe.throw(__('Please enter mobile number first.'));
+		}
+		frm.dirty();
 		frm.save().then(() => {
-			frappe.dom.freeze();
-			frappe.call({
-				method: 'create_payment_request',
-				doc: frm.doc,
-			})
+			frappe.dom.freeze(__('Waiting for payment...'));
+			frappe
+				.call({
+					method: 'create_payment_request',
+					doc: frm.doc
+				})
 				.fail(() => {
 					frappe.dom.unfreeze();
-					frappe.msgprint('Payment request failed');
+					frappe.msgprint(__('Payment request failed'));
 				})
-				.then(() => {
-					frappe.msgprint('Payment request sent successfully');
-				});
 		});
 	}
 });

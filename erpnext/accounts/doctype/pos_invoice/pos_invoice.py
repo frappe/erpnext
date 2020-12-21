@@ -362,11 +362,12 @@ class POSInvoice(SalesInvoice):
 				if not self.contact_mobile:
 					frappe.throw(_("Please enter the phone number first"))
 
-				payment_gateway = frappe.db.get_value("Payment Gateway Account", {
+				payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
 					"payment_account": pay.account,
-				})
+				}, ["name"])
+
 				record = {
-					"payment_gateway": payment_gateway,
+					"payment_gateway_account": payment_gateway_account,
 					"dt": "POS Invoice",
 					"dn": self.name,
 					"payment_request_type": "Inward",
@@ -374,7 +375,8 @@ class POSInvoice(SalesInvoice):
 					"party": self.customer,
 					"mode_of_payment": pay.mode_of_payment,
 					"recipient_id": self.contact_mobile,
-					"submit_doc": True
+					"submit_doc": True,
+					"return_doc": True
 				}
 
 				return make_payment_request(**record)

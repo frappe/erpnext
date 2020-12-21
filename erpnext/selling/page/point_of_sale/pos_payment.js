@@ -173,23 +173,17 @@ erpnext.PointOfSale.Payment = class {
 			}
 		})
 
-		frappe.realtime.on("process_phone_payment", function(data) {
-			frappe.dom.unfreeze();
-			cur_frm.reload_doc();
-			let message = data["ResultDesc"];
-			let title = __("Payment Failed");
-
-			if (data["ResultCode"] == 0) {
-				title = __("Payment Received");
-				$('.btn.btn-xs.btn-default[data-fieldname=request_for_payment]').html(`Payment Received`)
-				me.events.submit_invoice();
+		frappe.ui.form.on('POS Invoice', 'contact_mobile', (frm) => {
+			const contact = frm.doc.contact_mobile;
+			const request_button = $(this.request_for_payment_field.$input[0]);
+			if (contact) {
+				request_button.removeClass('btn-default').addClass('btn-primary');
+			} else {
+				request_button.removeClass('btn-primary').addClass('btn-default');
 			}
-
-			frappe.msgprint({
-				"message": message,
-				"title": title
-			});
 		});
+
+		this.setup_listener_for_payments();
 
 		this.$payment_modes.on('click', '.shortcut', function(e) {
 			const value = $(this).attr('data-value');
@@ -246,6 +240,32 @@ erpnext.PointOfSale.Payment = class {
 			this.$payment_modes.toggleClass('d-none');
 			this.toggle_numpad(true);
 		})
+	}
+
+	setup_listener_for_payments() {
+		frappe.realtime.on("process_phone_payment", (data) => {
+			const doc = this.events.get_frm().doc;
+			const { response, amount, success, failure_message } = data;
+			let message, title;
+
+			if (success) {
+				title = __("Payment Received");
+				if (amount >= doc.grand_total) {
+					frappe.dom.unfreeze();
+					message = __("Payment of {0} received successfully.", [format_currency(amount, doc.currency, 0)]);
+					this.events.submit_invoice();
+					cur_frm.reload_doc();
+
+				} else {
+					message = __("Payment of {0} received successfully. Waiting for other requests to complete...", [format_currency(amount, doc.currency, 0)]);
+				}
+			} else if (failure_message) {
+				message = failure_message;
+				title = __("Payment Failed");
+			}
+
+			frappe.msgprint({ "message": message, "title": title });
+		});
 	}
 
 	auto_set_remaining_amount() {
