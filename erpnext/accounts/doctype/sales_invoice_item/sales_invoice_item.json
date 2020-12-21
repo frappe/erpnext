@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-06-04 11:02:19",
  "doctype": "DocType",
@@ -51,6 +52,7 @@
   "column_break_24",
   "base_net_rate",
   "base_net_amount",
+  "incoming_rate",
   "drop_ship",
   "delivered_by_supplier",
   "accounting",
@@ -792,20 +794,28 @@
    "options": "Project"
   },
   {
-    "depends_on": "eval:parent.update_stock == 1",
-    "fieldname": "sales_invoice_item",
-    "fieldtype": "Data",
-    "ignore_user_permissions": 1,
-    "label": "Sales Invoice Item",
-    "no_copy": 1,
-    "print_hide": 1,
-    "read_only": 1
-   }
+   "depends_on": "eval:parent.update_stock == 1",
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "ignore_user_permissions": 1,
+   "label": "Sales Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "incoming_rate",
+   "fieldtype": "Currency",
+   "label": "Incoming Rate",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-08-20 11:24:41.749986",
+ "modified": "2020-09-23 19:59:04.879322",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
