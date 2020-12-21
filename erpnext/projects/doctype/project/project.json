@@ -27,6 +27,7 @@
   "customer_details_section",
   "customer",
   "column_break_14",
+  "bill_to",
   "sales_order",
   "sec_applies_to",
   "applies_to_item",
@@ -571,11 +572,18 @@
    "fieldtype": "Link",
    "label": "Insurance Surveyor Company",
    "options": "Insurance Surveyor Company"
+  },
+  {
+   "fieldname": "bill_to",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Bill To",
+   "options": "Customer"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2020-11-19 17:02:53.895169",
+ "modified": "2020-12-21 22:12:29.635823",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",

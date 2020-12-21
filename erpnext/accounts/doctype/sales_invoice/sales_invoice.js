@@ -275,6 +275,8 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	customer: function () {
+		var me = this;
+
 		this.frm.set_value("bill_to", this.frm.doc.customer);
 
 		if(this.frm.doc.customer) {

@@ -535,7 +535,7 @@ def get_project_details(project_name, doctype):
 
 	out = {}
 	fieldnames = [
-		'customer', 'applies_to_vehicle',
+		'customer', 'bill_to', 'applies_to_vehicle',
 		'service_advisor', 'service_manager',
 		'insurance_company', 'insurance_loss_no', 'insurance_policy_no', 'insurance_surveyor', 'insurance_surveyor_company'
 	]

@@ -52,6 +52,7 @@ frappe.ui.form.on("Project", {
 		};
 
 		frm.set_query('customer', 'erpnext.controllers.queries.customer_query');
+		frm.set_query('bill_to', 'erpnext.controllers.queries.customer_query');
 
 		frm.set_query("user", "users", function () {
 			return {
