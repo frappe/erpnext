@@ -397,7 +397,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "label": "Mobile No",
    "read_only": 1
   },
@@ -405,7 +405,6 @@
    "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Contact Email",
    "options": "Email",
    "print_hide": 1,
@@ -1258,7 +1257,7 @@
    "allow_on_submit": 1,
    "fieldname": "contact_phone",
    "fieldtype": "Data",
-   "label": "Phone",
+   "label": "Phone No",
    "read_only": 1
   },
   {
@@ -1684,7 +1683,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-11-04 00:14:47.082022",
+ "modified": "2020-12-21 16:43:40.634432",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

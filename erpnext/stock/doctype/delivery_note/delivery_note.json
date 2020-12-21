@@ -52,6 +52,7 @@
   "contact_person",
   "contact_display",
   "contact_mobile",
+  "contact_phone",
   "contact_email",
   "territory",
   "col_break21",
@@ -403,7 +404,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
@@ -411,8 +412,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
-   "hidden": 1,
+   "fieldtype": "Data",
    "label": "Mobile No",
    "read_only": 1
   },
@@ -420,7 +420,6 @@
    "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Contact Email",
    "options": "Email",
    "print_hide": 1,
@@ -1665,12 +1664,19 @@
    "no_copy": 1,
    "options": "Vehicle Booking Order",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone No",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
- "modified": "2020-12-12 00:00:31.098515",
+ "modified": "2020-12-21 16:41:49.418937",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

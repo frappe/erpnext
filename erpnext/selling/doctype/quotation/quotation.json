@@ -48,6 +48,7 @@
   "contact_display",
   "contact_email",
   "contact_mobile",
+  "contact_phone",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -318,7 +319,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Contact",
    "read_only": 1
@@ -326,7 +327,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "label": "Mobile No",
    "read_only": 1
   },
@@ -334,7 +335,6 @@
    "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Contact Email",
    "options": "Email",
    "print_hide": 1,
@@ -1294,13 +1294,20 @@
   {
    "fieldname": "more_info_cb_2",
    "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone No",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2020-11-04 00:14:57.236406",
+ "modified": "2020-12-21 16:45:29.494814",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

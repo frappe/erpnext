@@ -72,6 +72,7 @@
   "contact_person",
   "contact_display",
   "contact_mobile",
+  "contact_phone",
   "contact_email",
   "column_break_65",
   "company_address",
@@ -488,15 +489,14 @@
   {
    "allow_on_submit": 1,
    "fieldname": "contact_display",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "label": "Contact",
    "read_only": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
-   "hidden": 1,
+   "fieldtype": "Data",
    "label": "Mobile No",
    "read_only": 1
   },
@@ -504,7 +504,6 @@
    "allow_on_submit": 1,
    "fieldname": "contact_email",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Contact Email",
    "options": "Email",
    "print_hide": 1,
@@ -2062,12 +2061,19 @@
    "no_copy": 1,
    "options": "Vehicle Booking Order",
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "contact_phone",
+   "fieldtype": "Data",
+   "label": "Phone No",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2020-12-12 00:00:43.036683",
+ "modified": "2020-12-21 16:39:08.358529",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
