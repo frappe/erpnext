@@ -17,78 +17,79 @@ class TestProject(unittest.TestCase):
 		""" 
 		Test Action: Basic Test of a Project created from template. The template has a single task.
 		"""
-		frappe.db.sql('delete from tabTask where project = "Test Project with Templ - no parent and dependend tasks"')
-		frappe.delete_doc('Project', 'Test Project with Templ - no parent and dependend tasks')
+		project_name = "Test Project with Template - No Parent and Dependend Tasks"
+		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.delete_doc('Project', project_name)
 
-		task1 = task_exists("Test Temp Task with no parent and dependency")
+		task1 = task_exists("Test Template Task with No Parent and Dependency")
 		if not task1:
-			task1 = create_task(subject="Test Temp Task with no parent and dependency", is_template=1, begin=5, duration=3)
+			task1 = create_task(subject="Test Template Task with No Parent and Dependency", is_template=1, begin=5, duration=3)
 
-		template = make_project_template("Test Project Template - no parent and dependend tasks", [task1])
-		project = get_project("Test Project with Templ - no parent and dependend tasks", template)
-		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
+		template = make_project_template("Test Project Template - No Parent and Dependend Tasks", [task1])
+		project = get_project(project_name, template)
+		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks'], dict(project=project.name), order_by='creation asc')
 
-		self.assertEqual(tasks[0].subject, 'Test Temp Task with no parent and dependency')
-		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, tasks[0]))
+		self.assertEqual(tasks[0].subject, 'Test Template Task with No Parent and Dependency')
+		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 5, 3))
 		self.assertEqual(len(tasks), 1)
 
 	def test_project_template_having_parent_child_tasks(self):
+		project_name = "Test Project with Template - Tasks with Parent-Child Relation"
+		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
+		frappe.delete_doc('Project', project_name)
 
-		frappe.db.sql('delete from tabTask where project = "Test Project with Templ - tasks with parent-child"')
-		frappe.delete_doc('Project', 'Test Project with Templ - tasks with parent-child')
-
-		task1 = task_exists("Test Temp Task parent")
+		task1 = task_exists("Test Template Task Parent")
 		if not task1:
-			task1 = create_task(subject="Test Temp Task parent", is_group=1, is_template=1, begin=1, duration=1)
+			task1 = create_task(subject="Test Template Task Parent", is_group=1, is_template=1, begin=1, duration=1)
 
-		task2 = task_exists("Test Temp Task child 1")
+		task2 = task_exists("Test Template Task Child 1")
 		if not task2:
-			task2 = create_task(subject="Test Temp Task child 1", parent_task=task1.name, is_template=1, begin=1, duration=3)
+			task2 = create_task(subject="Test Template Task Child 1", parent_task=task1.name, is_template=1, begin=1, duration=3)
 		
-		task3 = task_exists("Test Temp Task child 2")
+		task3 = task_exists("Test Template Task Child 2")
 		if not task3:
-			task3 = create_task(subject="Test Temp Task child 2", parent_task=task1.name, is_template=1, begin=2, duration=3)
+			task3 = create_task(subject="Test Template Task Child 2", parent_task=task1.name, is_template=1, begin=2, duration=3)
 
-		template = make_project_template("Test Project Template  - tasks with parent-child", [task1, task2, task3])
-		project = get_project("Test Project with Templ - tasks with parent-child", template)
-		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
+		template = make_project_template("Test Project Template  - Tasks with Parent-Child Relation", [task1, task2, task3])
+		project = get_project(project_name, template)
+		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name'], dict(project=project.name), order_by='creation asc')
 
-		self.assertEqual(tasks[0].subject, 'Test Temp Task parent')
-		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, tasks[0]))
+		self.assertEqual(tasks[0].subject, 'Test Template Task Parent')
+		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 1))
 
-		self.assertEqual(tasks[1].subject, 'Test Temp Task child 1')
-		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, tasks[1]))
+		self.assertEqual(tasks[1].subject, 'Test Template Task Child 1')
+		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, 1, 3))
 		self.assertEqual(tasks[1].parent_task, tasks[0].name)
 
-		self.assertEqual(tasks[2].subject, 'Test Temp Task child 2')
-		self.assertEqual(getdate(tasks[2].exp_end_date), calculate_end_date(project, tasks[2]))
+		self.assertEqual(tasks[2].subject, 'Test Template Task Child 2')
+		self.assertEqual(getdate(tasks[2].exp_end_date), calculate_end_date(project, 2, 3))
 		self.assertEqual(tasks[2].parent_task, tasks[0].name)
 
 		self.assertEqual(len(tasks), 3)
 
 	def test_project_template_having_dependent_tasks(self):
+		project_name = "Test Project with Template - Dependent Tasks"
+		frappe.db.sql(""" delete from tabTask where project = %s  """, project_name)
+		frappe.delete_doc('Project', project_name)
 
-		frappe.db.sql('delete from tabTask where project = "Test Project with Templ - dependent tasks"')
-		frappe.delete_doc('Project', 'Test Project with Templ - dependent tasks')
-
-		task1 = task_exists("Test Temp Task for dependency")
+		task1 = task_exists("Test Template Task for Dependency")
 		if not task1:
-			task1 = create_task(subject="Test Temp Task for dependency", is_template=1, begin=3, duration=1)
+			task1 = create_task(subject="Test Template Task for Dependency", is_template=1, begin=3, duration=1)
 
-		task2 = task_exists("Test Temp Task with dependency")
+		task2 = task_exists("Test Template Task with Dependency")
 		if not task2:
-			task2 = create_task(subject="Test Temp Task with dependency", depends_on=task1.name, is_template=1, begin=2, duration=2)
+			task2 = create_task(subject="Test Template Task with Dependency", depends_on=task1.name, is_template=1, begin=2, duration=2)
 		
-		template = make_project_template("Test Project with Templ - dependent tasks", [task1, task2])
-		project = get_project("Test Project with Templ - dependent tasks", template)
-		tasks = frappe.get_all('Task', '*', dict(project=project.name), order_by='creation asc')
+		template = make_project_template("Test Project with Template - Dependent Tasks", [task1, task2])
+		project = get_project(project_name, template)
+		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name'], dict(project=project.name), order_by='creation asc')
 
-		self.assertEqual(tasks[1].subject, 'Test Temp Task with dependency')
-		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, tasks[1]))
+		self.assertEqual(tasks[1].subject, 'Test Template Task with Dependency')
+		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, 2, 2))
 		self.assertTrue(tasks[1].depends_on_tasks.find(tasks[0].name) >= 0 )
 
-		self.assertEqual(tasks[0].subject, 'Test Temp Task for dependency')
-		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, tasks[0]) )
+		self.assertEqual(tasks[0].subject, 'Test Template Task for Dependency')
+		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 3, 1) )
 
 		self.assertEqual(len(tasks), 2)
 
@@ -129,5 +130,5 @@ def task_exists(subject):
 		return False
 	return frappe.get_doc("Task", result[0].name)
 
-def calculate_end_date(project, task):
-	return getdate(add_days(project.expected_start_date, task.start + task.duration))
+def calculate_end_date(project, start, duration):
+	return getdate(add_days(project.expected_start_date, start + duration))

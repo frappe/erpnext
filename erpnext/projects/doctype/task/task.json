@@ -371,11 +371,13 @@
    "label": "Is Template"
   },
   {
+   "depends_on": "is_template",
    "fieldname": "start",
    "fieldtype": "Int",
    "label": "Begin On (Days)"
   },
   {
+   "depends_on": "is_template",
    "fieldname": "duration",
    "fieldtype": "Int",
    "label": "Duration (Days)"
@@ -386,7 +388,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-12-07 13:26:53.614689",
+ "modified": "2020-12-21 11:59:24.196834",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",
