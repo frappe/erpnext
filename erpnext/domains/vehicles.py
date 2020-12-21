@@ -39,9 +39,9 @@ project_last_odometer.update({"label": "Odometer Reading (Last)", "fetch_from": 
 
 service_person_fields = [
 	{"label": "Service Advisor", "fieldname": "service_advisor", "fieldtype": "Link", "options": "Employee",
-		"insert_after": "more_info_cb_2", "in_standard_filter": 1},
+		"insert_after": "more_info_cb_2", "in_standard_filter": 1, "ignore_user_permissions": 1},
 	{"label": "Service Manager", "fieldname": "service_manager", "fieldtype": "Link", "options": "Employee",
-		"insert_after": "service_advisor", "in_standard_filter": 1},
+		"insert_after": "service_advisor", "in_standard_filter": 1, "ignore_user_permissions": 1},
 ]
 
 for d in applies_to_fields:
