@@ -37,14 +37,16 @@ class StockReconciliation(StockController):
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.make_gl_entries()
+		self.repost_future_sle_and_gle()
 
 		from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit
 		update_serial_nos_after_submit(self, "items")
 
 	def on_cancel(self):
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 		self.make_sle_on_cancel()
 		self.make_gl_entries_on_cancel()
+		self.repost_future_sle_and_gle()
 
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
