@@ -21,7 +21,7 @@ from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
 		super(SalarySlip, self).__init__(*args, **kwargs)
-		self.series = 'Sal Slip/{0}/.#####'.format(self.employee)
+		self.series = 'Sal Slip/{0}/.###'.format(self.employee)
 		self.whitelisted_globals = {
 			"int": int,
 			"float": float,
@@ -329,7 +329,7 @@ class SalarySlip(TransactionBase):
 
 		if self.advances:
 			for d in self.advances:
-				d.allocated_amount = min(d.balance_amount, self.net_pay)
+				d.allocated_amount = min(d.balance_amount, self.net_pay) if self.net_pay > 0 else 0
 				self.net_pay -= d.allocated_amount
 
 		self.total_advance_amount = sum([d.allocated_amount for d in self.advances])
@@ -978,8 +978,9 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 	def pull_emp_details(self):
-		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
+		emp = frappe.db.get_value("Employee", self.employee, ["salary_mode", "bank_name", "bank_ac_no"], as_dict=1)
 		if emp:
+			self.salary_mode = emp.salary_mode
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
 

@@ -40,7 +40,10 @@
   "total_working_hours",
   "hour_rate",
   "section_break_26",
+  "salary_mode",
+  "col_break_37",
   "bank_name",
+  "column_break_37",
   "bank_account_no",
   "section_break_32",
   "earning_deduction",
@@ -109,11 +112,12 @@
   {
    "fetch_from": "employee.department",
    "fieldname": "department",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Department",
    "oldfieldname": "department",
    "oldfieldtype": "Link",
+   "options": "Department",
    "read_only": 1
   },
   {
@@ -281,6 +285,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "fetch_from": "employee.bank_name",
    "fieldname": "bank_name",
    "fieldtype": "Data",
    "label": "Bank Name",
@@ -487,7 +492,8 @@
    "fieldname": "advances",
    "fieldtype": "Table",
    "label": "Employee Advance",
-   "options": "Salary Slip Employee Advance"
+   "options": "Salary Slip Employee Advance",
+   "read_only": 1
   },
   {
    "fetch_from": "employee.tax_id",
@@ -533,12 +539,27 @@
   {
    "fieldname": "column_break_66",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.salary_mode",
+   "fieldname": "salary_mode",
+   "fieldtype": "Data",
+   "label": "Salary Mode",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_37",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2020-12-17 16:02:50.772901",
+ "modified": "2020-12-21 14:34:08.162915",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Salary Slip",

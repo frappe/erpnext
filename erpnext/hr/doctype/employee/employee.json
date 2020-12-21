@@ -64,6 +64,7 @@
   "default_shift",
   "salary_information",
   "salary_mode",
+  "column_break_56",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -848,12 +849,16 @@
   {
    "fieldname": "column_break_107",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_56",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-12-15 17:38:30.351263",
+ "modified": "2020-12-21 14:31:18.324236",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Employee",
