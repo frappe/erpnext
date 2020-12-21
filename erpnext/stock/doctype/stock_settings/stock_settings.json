@@ -28,7 +28,9 @@
   "inter_warehouse_transfer_settings_section",
   "allow_from_dn",
   "allow_from_pr",
-  "freeze_stock_entries",
+  "control_historical_stock_transactions_section",
+  "role_allowed_to_create_edit_back_dated_transactions",
+  "column_break_26",
   "stock_frozen_upto",
   "stock_frozen_upto_days",
   "stock_auth_role",
@@ -82,7 +84,7 @@
    "options": "FIFO\nMoving Average"
   },
   {
-   "description": "Percentage you are allowed to receive or deliver more against the quantity ordered. For example: If you have ordered 100 units. and your Allowance is 10% then you are allowed to receive 110 units.",
+   "description": "The percentage you are allowed to receive or deliver more against the quantity ordered. For example, if you have ordered 100 units, and your Allowance is 10%, then you are allowed to receive 110 units.",
    "fieldname": "over_delivery_receipt_allowance",
    "fieldtype": "Float",
    "label": "Over Delivery/Receipt Allowance (%)"
@@ -91,7 +93,7 @@
    "default": "Stop",
    "fieldname": "action_if_quality_inspection_is_not_submitted",
    "fieldtype": "Select",
-   "label": "Action if Quality inspection is not submitted",
+   "label": "Action If Quality Inspection Is Not Submitted",
    "options": "Stop\nWarn"
   },
   {
@@ -114,7 +116,7 @@
    "default": "0",
    "fieldname": "auto_insert_price_list_rate_if_missing",
    "fieldtype": "Check",
-   "label": "Auto insert Price List rate if missing"
+   "label": "Auto Insert Price List Rate If Missing"
   },
   {
    "default": "0",
@@ -130,13 +132,13 @@
    "default": "1",
    "fieldname": "automatically_set_serial_nos_based_on_fifo",
    "fieldtype": "Check",
-   "label": "Automatically Set Serial Nos based on FIFO"
+   "label": "Automatically Set Serial Nos Based on FIFO"
   },
   {
    "default": "1",
    "fieldname": "set_qty_in_transactions_based_on_serial_no_input",
    "fieldtype": "Check",
-   "label": "Set Qty in Transactions based on Serial No Input"
+   "label": "Set Qty in Transactions Based on Serial No Input"
   },
   {
    "fieldname": "auto_material_request",
@@ -147,33 +149,32 @@
    "default": "0",
    "fieldname": "auto_indent",
    "fieldtype": "Check",
-   "label": "Raise Material Request when stock reaches re-order level"
+   "label": "Raise Material Request When Stock Reaches Re-order Level"
   },
   {
    "default": "0",
    "fieldname": "reorder_email_notify",
    "fieldtype": "Check",
-   "label": "Notify by Email on creation of automatic Material Request"
+   "label": "Notify by Email on Creation of Automatic Material Request"
   },
   {
-   "fieldname": "freeze_stock_entries",
-   "fieldtype": "Section Break",
-   "label": "Freeze Stock Entries"
-  },
-  {
+   "description": "No stock transactions can be created or modified before this date.",
    "fieldname": "stock_frozen_upto",
    "fieldtype": "Date",
    "label": "Stock Frozen Upto"
   },
   {
+   "description": "Stock transactions that are older than the mentioned days cannot be modified.",
    "fieldname": "stock_frozen_upto_days",
    "fieldtype": "Int",
-   "label": "Freeze Stocks Older Than [Days]"
+   "label": "Freeze Stocks Older Than (Days)"
   },
   {
+   "depends_on": "eval:(doc.stock_frozen_upto || doc.stock_frozen_upto_days)",
+   "description": "The users with this Role are allowed to create/modify a stock transaction, even though the transaction is frozen.",
    "fieldname": "stock_auth_role",
    "fieldtype": "Link",
-   "label": "Role Allowed to edit frozen stock",
+   "label": "Role Allowed to Edit Frozen Stock",
    "options": "Role"
   },
   {
@@ -203,20 +204,37 @@
    "default": "0",
    "fieldname": "allow_from_dn",
    "fieldtype": "Check",
-   "label": "Allow Material Transfer From Delivery Note and Sales Invoice"
+   "label": "Allow Material Transfer from Delivery Note to Sales Invoice"
   },
   {
    "default": "0",
    "fieldname": "allow_from_pr",
    "fieldtype": "Check",
-   "label": "Allow Material Transfer From Purchase Receipt and Purchase Invoice"
+   "label": "Allow Material Transfer from Purchase Receipt to Purchase Invoice"
+  },
+  {
+   "description": "If mentioned, the system will allow only the users with this Role to create or modify any stock transaction earlier than the latest stock transaction for a specific item and warehouse. If set as blank, it allows all users to create/edit back-dated transactions.",
+   "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Create/Edit Back-dated Transactions",
+   "options": "User"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "control_historical_stock_transactions_section",
+   "fieldtype": "Section Break",
+   "label": "Control Historical Stock Transactions"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-06-20 11:39:15.344112",
+ "modified": "2020-11-23 22:26:54.225608",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
@@ -234,5 +252,6 @@
  ],
  "quick_entry": 1,
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }

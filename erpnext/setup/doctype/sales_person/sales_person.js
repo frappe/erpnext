@@ -5,8 +5,7 @@ frappe.ui.form.on('Sales Person', {
 	refresh: function(frm) {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var info = frm.doc.__onload.dashboard_info;
-			frm.dashboard.add_indicator(__('Total Contribution Amount: {0}',
-				[format_currency(info.allocated_amount, info.currency)]), 'blue');
+			frm.dashboard.add_indicator(__('Total Contribution Amount: {0}', [format_currency(info.allocated_amount, info.currency)]), 'blue');
 		}
 	},
 

@@ -161,7 +161,10 @@ erpnext.setup.slides_settings = [
 						if(r.message){
 							exist = r.message;
 							me.get_field("bank_account").set_value("");
-							frappe.msgprint(__(`Account ${me.values.bank_account} already exists, enter a different name for your bank account`));
+							let message = __('Account {0} already exists. Please enter a different name for your bank account.',
+								[me.values.bank_account]
+							);
+							frappe.msgprint(message);
 						}
 					}
 				});
@@ -309,7 +312,6 @@ erpnext.setup.fiscal_years = {
 	"Hong Kong": ["04-01", "03-31"],
 	"India": ["04-01", "03-31"],
 	"Iran": ["06-23", "06-22"],
-	"Italy": ["07-01", "06-30"],
 	"Myanmar": ["04-01", "03-31"],
 	"New Zealand": ["04-01", "03-31"],
 	"Pakistan": ["07-01", "06-30"],

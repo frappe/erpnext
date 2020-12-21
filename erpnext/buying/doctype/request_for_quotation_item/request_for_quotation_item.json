@@ -27,10 +27,11 @@
   "stock_qty",
   "warehouse_and_reference",
   "warehouse",
-  "project_name",
   "col_break4",
   "material_request",
   "material_request_item",
+  "section_break_24",
+  "project_name",
   "section_break_23",
   "page_break"
  ],
@@ -161,7 +162,7 @@
   {
    "fieldname": "project_name",
    "fieldtype": "Link",
-   "label": "Project Name",
+   "label": "Project",
    "options": "Project",
    "print_hide": 1
   },
@@ -249,11 +250,18 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-06-12 19:10:36.333441",
+ "modified": "2020-09-24 17:26:46.276934",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Request for Quotation Item",

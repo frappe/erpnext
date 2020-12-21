@@ -126,6 +126,7 @@
   "write_off_cost_center",
   "advances_section",
   "allocate_advances_automatically",
+  "adjust_advance_taxes",
   "get_advances",
   "advances",
   "payment_schedule_section",
@@ -151,9 +152,11 @@
   "is_opening",
   "against_expense_account",
   "column_break_63",
+  "unrealized_profit_loss_account",
   "status",
   "inter_company_invoice_reference",
   "is_internal_supplier",
+  "represents_company",
   "remarks",
   "subscription_section",
   "from_date",
@@ -361,6 +364,7 @@
    "fieldname": "bill_date",
    "fieldtype": "Date",
    "label": "Supplier Invoice Date",
+   "no_copy": 1,
    "oldfieldname": "bill_date",
    "oldfieldtype": "Date",
    "print_hide": 1
@@ -1221,7 +1225,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled",
+   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled\nInternal Transfer",
    "print_hide": 1
   },
   {
@@ -1328,13 +1332,37 @@
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
+  },
+  {
+   "default": "0",
+   "description": "Taxes paid while advance payment will be adjusted against this invoice",
+   "fieldname": "adjust_advance_taxes",
+   "fieldtype": "Check",
+   "label": "Adjust Advance Taxes"
+  },
+  {
+   "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Unrealized Profit / Loss account for intra-company transfers",
+   "fieldname": "unrealized_profit_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealized Profit / Loss Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Company which internal supplier represents",
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-03 23:20:04.466153",
+ "modified": "2020-12-11 12:46:12.796378",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -10,11 +10,11 @@
  "is_skipped": 0,
  "modified": "2020-05-14 17:40:28.410447",
  "modified_by": "Administrator",
- "name": "Chart Of Accounts",
+ "name": "Chart of Accounts",
  "owner": "Administrator",
  "path": "Tree/Account",
  "reference_document": "Account",
  "show_full_form": 0,
- "title": "Review Chart Of Accounts",
+ "title": "Review Chart of Accounts",
  "validate_action": 0
 }

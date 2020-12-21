@@ -539,7 +539,7 @@ erpnext.utils.update_child_items = function(opts) {
 				fieldtype: "Table",
 				label: "Items",
 				cannot_add_rows: cannot_add_row,
-				in_place_edit: true,
+				in_place_edit: false,
 				reqd: 1,
 				data: this.data,
 				get_data: () => {
@@ -703,9 +703,13 @@ erpnext.utils.map_current_doc = function(opts) {
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
-	if(doc && doc.item_name && doc.item_name !== value) {
-		return value? value + ': ' + doc.item_name: doc.item_name;
+	if (doc && value && doc.item_name && doc.item_name !== value) {
+		return value + ': ' + doc.item_name;
+	} else if (!value && doc.doctype && doc.item_name) {
+		// format blank value in child table
+		return doc.item_name;
 	} else {
+		// if value is blank in report view or item code and name are the same, return as is
 		return value;
 	}
 }

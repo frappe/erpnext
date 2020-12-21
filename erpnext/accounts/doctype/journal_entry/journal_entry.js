@@ -210,7 +210,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
 				frappe.model.set_default_values(jvd);
 			});
-			var posting_date = this.frm.posting_date;
+			var posting_date = this.frm.doc.posting_date;
 			if(!this.frm.doc.amended_from) this.frm.set_value('posting_date', posting_date || frappe.datetime.get_today());
 		}
 	},
