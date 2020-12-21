@@ -15,13 +15,13 @@ class ClosedAccountingPeriod(frappe.ValidationError): pass
 class StockAccountInvalidTransaction(frappe.ValidationError): pass
 class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 
-def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes'):
+def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
-				save_entries(gl_map, adv_adj, update_outstanding)
+				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
 			else:
 				frappe.throw(_("Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction."))
 		else:
@@ -119,8 +119,9 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 		if same_head:
 			return e
 
-def save_entries(gl_map, adv_adj, update_outstanding):
-	validate_cwip_accounts(gl_map)
+def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
+	if not from_repost:
+		validate_cwip_accounts(gl_map)
 
 	round_off_debit_credit(gl_map)
 
@@ -128,24 +129,24 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 		check_freezing_date(gl_map[0]["posting_date"], adv_adj)
 
 	for entry in gl_map:
-		make_entry(entry, adv_adj, update_outstanding)
+		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
-		# check against budget
-		validate_expense_against_budget(entry)
-
-	validate_account_for_perpetual_inventory(gl_map)
+	if not from_repost:
+		validate_account_for_perpetual_inventory(gl_map)
 
 
-def make_entry(args, adv_adj, update_outstanding):
+def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
+	gle.flags.from_repost = from_repost
 	gle.insert()
-	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
+	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
 	gle.submit()
 
 	# check against budget
-	validate_expense_against_budget(args)
+	if not from_repost:
+		validate_expense_against_budget(args)
 
 def validate_account_for_perpetual_inventory(gl_map):
 	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
@@ -161,7 +162,7 @@ def validate_account_for_perpetual_inventory(gl_map):
 			# Always use current date to get stock and account balance as there can future entries for
 			# other items
 			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
-				getdate(), gl_map[0].company)
+				gl_map[0].posting_date, gl_map[0].company)
 
 			if gl_map[0].voucher_type=="Journal Entry":
 				# In case of Journal Entry, there are no corresponding SL entries,
@@ -176,8 +177,8 @@ def validate_account_for_perpetual_inventory(gl_map):
 					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
 
 				diff = flt(stock_bal - account_bal, precision)
-				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses.").format(
-					stock_bal, account_bal, frappe.bold(account))
+				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses on {3}.").format(
+					stock_bal, account_bal, frappe.bold(account), gl_map[0].posting_date)
 				error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))
 				stock_adjustment_account = frappe.db.get_value("Company",gl_map[0].company,"stock_adjustment_account")
 
@@ -185,9 +186,10 @@ def validate_account_for_perpetual_inventory(gl_map):
 				db_or_cr_stock_adjustment_account = ('debit_in_account_currency' if diff < 0 else 'credit_in_account_currency')
 
 				journal_entry_args = {
-				'accounts':[
-					{'account': account, db_or_cr_warehouse_account : abs(diff)},
-					{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff) }]
+					'accounts':[
+						{'account': account, db_or_cr_warehouse_account : abs(diff)},
+						{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff)}
+					]
 				}
 
 				frappe.msgprint(msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
