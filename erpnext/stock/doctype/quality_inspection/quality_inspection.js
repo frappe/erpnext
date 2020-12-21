@@ -10,18 +10,18 @@ frappe.ui.form.on("Quality Inspection", {
 				filters: {
 					"item": frm.doc.item_code
 				}
-			}
+			};
 		});
 
 		// Serial No based on item_code
 		frm.set_query("item_serial_no", function() {
-			var filters = {};
+			let filters = {};
 			if (frm.doc.item_code) {
 				filters = {
 					'item_code': frm.doc.item_code
-				}
+				};
 			}
-			return { filters: filters }
+			return { filters: filters };
 		});
 
 		// item code based on GRN/DN
@@ -75,4 +75,4 @@ frappe.ui.form.on("Quality Inspection", {
 			});
 		}
 	},
-})
+});
