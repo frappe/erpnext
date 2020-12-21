@@ -305,7 +305,7 @@ frappe.ui.form.on("Work Order", {
 		}
 		message = title;
 		// pending qty
-		if(!frm.doc.skip_transfer){
+		if(!frm.doc.skip_transfer) {
 			var pending_complete = frm.doc.material_transferred_for_manufacturing - frm.doc.produced_qty;
 			if(pending_complete) {
 				var width = ((pending_complete / frm.doc.qty * 100) - added_min);
@@ -536,9 +536,9 @@ erpnext.work_order = {
 
 			let remainined_items = frm.doc.required_items.filter(d => d.transferred_qty > d.consumed_qty);
 			if (!frm.doc.skip_transfer && remainined_items && remainined_items.length > 0) {
-				frm.add_custom_button(__("Excess Material Return"), () => {
+				frm.add_custom_button(__("Non Consumed Materials"), () => {
 					erpnext.work_order.make_se(frm, "Material Transfer for Manufacture", true);
-				}, __("Create"));
+				}, __("Return"));
 			}
 
 			const show_start_btn = (frm.doc.skip_transfer

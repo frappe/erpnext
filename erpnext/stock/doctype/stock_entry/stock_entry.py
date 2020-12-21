@@ -532,8 +532,9 @@ class StockEntry(StockController):
 
 		# Get raw materials cost from BOM if multiple material consumption entries
 		if frappe.db.get_single_value("Manufacturing Settings", "material_consumption", cache=True):
-			bom_items = self.get_bom_raw_materials(finished_item_qty)
-			outgoing_items_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
+			self.set_work_order_details()
+			wo_items = self.wo_doc.required_items
+			outgoing_items_cost = sum([flt(row.required_qty)*flt(row.rate) for row in wo_items])
 
 		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
 
@@ -1077,8 +1078,15 @@ class StockEntry(StockController):
 
 	def set_scrap_materials(self):
 		bom_doc = frappe.get_cached_doc("BOM", self.bom_no)
+
+		tot_qty = bom_doc.get("quantity")
+		if self.wo_doc and self.wo_doc.get("scrap_items"):
+			bom_doc = self.wo_doc
+			tot_qty = bom_doc.get("qty")
+
+		print(tot_qty)
 		for row in (bom_doc.get("scrap_items") or []):
-			qty = (flt(self.fg_completed_qty) * flt(row.stock_qty)) / flt(bom_doc.quantity)
+			qty = (flt(self.fg_completed_qty) * flt(row.stock_qty)) / flt(tot_qty)
 
 			args = {
 				"qty": qty, "transfer_qty": qty, "description": row.description,

@@ -44,6 +44,8 @@
   "column_break_33",
   "hour_rate",
   "for_operation",
+  "section_break_30",
+  "scrap_items",
   "more_information",
   "operation_id",
   "sequence_id",
@@ -392,11 +394,21 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
+  },
+  {
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scrap_items",
+   "fieldtype": "Table",
+   "label": "Scrap Items",
+   "options": "Work Order Scrap Item"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-16 15:59:32.766484",
+ "modified": "2021-05-16 15:59:32.766484",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

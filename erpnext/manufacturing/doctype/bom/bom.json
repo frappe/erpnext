@@ -97,11 +97,9 @@
    "fetch_from": "item.image",
    "fieldname": "image",
    "fieldtype": "Attach Image",
-   "hidden": 1,
    "label": "Image",
    "options": "image",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fetch_from": "item.stock_uom",

@@ -42,6 +42,8 @@
   "scrap_warehouse",
   "required_items_section",
   "required_items",
+  "section_break_30",
+  "scrap_items",
   "time",
   "planned_start_date",
   "planned_end_date",
@@ -270,13 +272,12 @@
   },
   {
    "fieldname": "required_items_section",
-   "fieldtype": "Section Break",
-   "label": "Required Items"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "required_items",
    "fieldtype": "Table",
-   "label": "Required Items",
+   "label": "Required Raw Materials",
    "no_copy": 1,
    "options": "Work Order Item",
    "print_hide": 1
@@ -549,7 +550,17 @@
    "fieldtype": "Currency",
    "label": "Corrective Operation Cost",
    "no_copy": 1,
-   "print_hide": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_30",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "scrap_items",
+   "fieldtype": "Table",
+   "label": "Scrap Items",
+   "options": "Work Order Scrap Item",
    "read_only": 1
   },
   {

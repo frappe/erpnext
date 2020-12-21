@@ -28,6 +28,7 @@ class JobCard(Document):
 		self.validate_sequence_id()
 		self.get_sub_operations()
 		self.update_sub_operation_status()
+		self.set_operation_for_scrap_items()
 
 	def get_sub_operations(self):
 		if self.operation:
@@ -527,6 +528,11 @@ class JobCard(Document):
 			if row.status != "Completed" and row.completed_qty < current_operation_qty:
 				frappe.throw(_("{0}, complete the operation {1} before the operation {2}.")
 					.format(message, bold(row.operation), bold(self.operation)), OperationSequenceError)
+
+	def set_operation_for_scrap_items(self):
+		if self.scrap_items:
+			for row in self.scrap_items:
+				row.operation = self.operation
 
 
 @frappe.whitelist()

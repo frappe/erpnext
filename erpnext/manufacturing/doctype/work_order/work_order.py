@@ -105,10 +105,10 @@ class WorkOrder(Document):
 			wip_warehouse = frappe.bold(self.wip_warehouse)
 			materials = ', '.join(non_consumed_materials)
 			if len(non_consumed_materials) > 1:
-				frappe.throw(_("The materials {0} are present in the warehouse {1}, transfer them back to store.")
+				frappe.throw(_("The materials {0} are present in the WIP warehouse {1}, return them back to store.")
 					.format(materials, wip_warehouse), title=_("Cannot Stop Work Order"))
 			else:
-				frappe.throw(_("The material {0} is present in the warehouse {1}, transfer them back to store.")
+				frappe.throw(_("The material {0} is present in the WIP warehouse {1}, return them back to store.")
 					.format(materials, wip_warehouse), title=_("Cannot Stop Work Order"))
 
 	def check_sales_order_on_hold_or_close(self):
@@ -614,6 +614,19 @@ class WorkOrder(Document):
 			if not d.time_in_mins > 0:
 				print(self.bom_no, self.production_item)
 				frappe.throw(_("Operation Time must be greater than 0 for Operation {0}").format(d.operation))
+
+	def set_scrap_items(self):
+		job_cards = frappe.get_all("Job Card", filters={"docstatus": 1, "work_order": self.name})
+		if not job_cards: return
+
+		job_cards = [d.name for d in job_cards]
+
+		frappe.db.sql(""" delete from `tabWork Order Scrap Item` where parent = %s and parenttype = 'Work Order' """, (self.name))
+		for row in frappe.get_all("Work Order Scrap Item",
+			fields = ["item_code", "item_name", "description", "stock_qty", "stock_uom", "operation"],
+			filters={"parent": ("in", job_cards), "parenttype": "Job Card"}):
+			d = self.append("scrap_items", row)
+			d.db_update()
 
 	def update_required_items(self, se_doc=None):
 		"""

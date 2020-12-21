@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Work Order Consumed Materials"] = {
+frappe.query_reports["Work Order Wise Consumed Materials"] = {
 	"filters": [
 		{
 			label: __("Company"),
