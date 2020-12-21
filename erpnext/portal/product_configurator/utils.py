@@ -2,6 +2,7 @@ import frappe
 import numpy as np
 from frappe.utils import cint
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 
 def get_field_filter_data():
 	product_settings = get_product_settings()
@@ -249,7 +250,8 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 
 	optional_attributes = item_cache.get_optional_attributes()
 	exact_match = []
-	allow_items_not_in_stock = False
+	shopping_cart_settings = get_shopping_cart_settings()
+	allow_items_not_in_stock = cint(shopping_cart_settings.allow_items_not_in_stock)
 	# search for exact match if all selected attributes are required attributes
 	if len(selected_attributes.keys()) >= (len(attribute_list) - len(optional_attributes)):
 		item_attribute_value_map = item_cache.get_item_attribute_value_map()
@@ -264,7 +266,6 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 	if exact_match:
 		data = get_product_info_for_website(exact_match[0])
 		product_info = data.product_info
-		allow_items_not_in_stock = cint(data.cart_settings.allow_items_not_in_stock)
 		if not data.cart_settings.show_price:
 			product_info = None
 	else:

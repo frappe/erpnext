@@ -164,7 +164,7 @@ def get_stock_ledger_entries(filters, items):
 		select
 			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
 			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
-			sle.item_code as name, sle.voucher_no
+			sle.item_code as name, sle.voucher_no, sle.stock_value
 		from
 			`tabStock Ledger Entry` sle force index (posting_sort_index)
 		where sle.docstatus < 2 %s %s
@@ -196,7 +196,7 @@ def get_item_warehouse_map(filters, sle):
 		else:
 			qty_diff = flt(d.actual_qty)
 
-		value_diff = flt(d.stock_value_difference)
+		value_diff = flt(d.stock_value) - flt(qty_dict.bal_val)
 
 		if d.posting_date < from_date:
 			qty_dict.opening_qty += qty_diff
