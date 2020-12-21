@@ -7,6 +7,8 @@ import frappe
 import unittest, copy, time
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
+from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 
 class TestPOSInvoice(unittest.TestCase):
 	def test_timestamp_change(self):
@@ -221,29 +223,29 @@ class TestPOSInvoice(unittest.TestCase):
 		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
 		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
-		se = make_serialized_item(company='_Test Company with perpetual inventory',
-			target_warehouse="Stores - TCP1", cost_center='Main - TCP1', expense_account='Cost of Goods Sold - TCP1')
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
 
 		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
 
-		pos = create_pos_invoice(company='_Test Company with perpetual inventory', debit_to='Debtors - TCP1',
-			account_for_change_amount='Cash - TCP1', warehouse='Stores - TCP1', income_account='Sales - TCP1',
-			expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1',
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
 			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
 
 		pos.get("items")[0].serial_no = serial_nos[0]
-		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 1000})
+		pos.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
 
 		pos.insert()
 		pos.submit()
 
-		pos2 = create_pos_invoice(company='_Test Company with perpetual inventory', debit_to='Debtors - TCP1',
-			account_for_change_amount='Cash - TCP1', warehouse='Stores - TCP1', income_account='Sales - TCP1',
-			expense_account='Cost of Goods Sold - TCP1', cost_center='Main - TCP1',
+		pos2 = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
 			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
 
 		pos2.get("items")[0].serial_no = serial_nos[0]
-		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - TCP1', 'amount': 1000})
+		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
 
 		self.assertRaises(frappe.ValidationError, pos2.insert)
 
@@ -286,6 +288,119 @@ class TestPOSInvoice(unittest.TestCase):
 		after_redeem_lp_details = get_loyalty_program_details_with_points(inv.customer, company=inv.company, loyalty_program=inv.loyalty_program)
 		self.assertEqual(after_redeem_lp_details.loyalty_points, 9)
 
+	def test_merging_into_sales_invoice_with_discount(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		test_user, pos_profile = init_user_and_profile()
+		pos_inv = create_pos_invoice(rate=300, additional_discount_percentage=10, do_not_submit=1)
+		pos_inv.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 270
+		})
+		pos_inv.submit()
+
+		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3200
+		})
+		pos_inv2.submit()
+
+		merge_pos_invoices()
+
+		pos_inv.load_from_db()
+		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
+		self.assertEqual(rounded_total, 3470)
+		frappe.set_user("Administrator")
+
+	def test_merging_into_sales_invoice_with_discount_and_inclusive_tax(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		test_user, pos_profile = init_user_and_profile()
+		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 300
+		})
+		pos_inv.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		pos_inv.submit()
+
+		pos_inv2 = create_pos_invoice(rate=300, qty=2, do_not_submit=1)
+		pos_inv2.additional_discount_percentage = 10
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 540
+		})
+		pos_inv2.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		pos_inv2.submit()
+
+		merge_pos_invoices()
+
+		pos_inv.load_from_db()
+		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
+		self.assertEqual(rounded_total, 840)
+		frappe.set_user("Administrator")
+
+	def test_merging_with_validate_selling_price(self):
+		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+
+		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
+			frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 1)
+
+		make_purchase_receipt(item_code="_Test Item", warehouse="_Test Warehouse - _TC", qty=1, rate=300)
+		frappe.db.sql("delete from `tabPOS Invoice`")
+		test_user, pos_profile = init_user_and_profile()
+		pos_inv = create_pos_invoice(rate=300, do_not_submit=1)
+		pos_inv.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 300
+		})
+		pos_inv.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		self.assertRaises(frappe.ValidationError, pos_inv.submit)
+
+		pos_inv2 = create_pos_invoice(rate=400, do_not_submit=1)
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 400
+		})
+		pos_inv2.append('taxes', {
+			"charge_type": "On Net Total",
+			"account_head": "_Test Account Service Tax - _TC",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Service Tax",
+			"rate": 14,
+			'included_in_print_rate': 1
+		})
+		pos_inv2.submit()
+
+		merge_pos_invoices()
+
+		pos_inv2.load_from_db()
+		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv2.consolidated_invoice, "rounded_total")
+		self.assertEqual(rounded_total, 400)
+		frappe.set_user("Administrator")
+		frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 0)
+
 def create_pos_invoice(**args):
 	args = frappe._dict(args)
 	pos_profile = None
@@ -294,11 +409,10 @@ def create_pos_invoice(**args):
 		pos_profile.save()
 
 	pos_inv = frappe.new_doc("POS Invoice")
+	pos_inv.update(args)
 	pos_inv.update_stock = 1
 	pos_inv.is_pos = 1
 	pos_inv.pos_profile = args.pos_profile or pos_profile.name
-
-	pos_inv.set_missing_values()
 
 	if args.posting_date:
 		pos_inv.set_posting_time = 1
@@ -312,6 +426,8 @@ def create_pos_invoice(**args):
 	pos_inv.currency=args.currency or "INR"
 	pos_inv.conversion_rate = args.conversion_rate or 1
 	pos_inv.account_for_change_amount = args.account_for_change_amount or "Cash - _TC"
+
+	pos_inv.set_missing_values()
 
 	pos_inv.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

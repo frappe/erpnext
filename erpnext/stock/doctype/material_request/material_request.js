@@ -90,7 +90,7 @@ frappe.ui.form.on('Material Request', {
 	make_custom_buttons: function(frm) {
 		if (frm.doc.docstatus==0) {
 			frm.add_custom_button(__("Bill of Materials"),
-				() => frm.events.get_items_from_bom(frm), __("Get items from"));
+				() => frm.events.get_items_from_bom(frm), __("Get Items From"));
 		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.status != 'Stopped') {
@@ -147,7 +147,7 @@ frappe.ui.form.on('Material Request', {
 
 		if (frm.doc.docstatus===0) {
 			frm.add_custom_button(__('Sales Order'), () => frm.events.get_items_from_sales_order(frm),
-				__("Get items from"));
+				__("Get Items From"));
 		}
 
 		if (frm.doc.docstatus == 1 && frm.doc.status == 'Stopped') {
@@ -173,7 +173,8 @@ frappe.ui.form.on('Material Request', {
 			source_doctype: "Sales Order",
 			target: frm,
 			setters: {
-				customer: frm.doc.customer || undefined
+				customer: frm.doc.customer || undefined,
+				delivery_date: undefined,
 			},
 			get_query_filters: {
 				docstatus: 1,
@@ -280,7 +281,7 @@ frappe.ui.form.on('Material Request', {
 				fieldname:'default_supplier',
 				fieldtype: 'Link',
 				options: 'Supplier',
-				description: __('Select a Supplier from the Default Supplier List of the items below.'),
+				description: __('Select a Supplier from the Default Suppliers of the items below. On selection, a Purchase Order will be made against items belonging to the selected Supplier only.'),
 				get_query: () => {
 					return{
 						query: "erpnext.stock.doctype.material_request.material_request.get_default_supplier_query",

@@ -58,6 +58,7 @@ class Customer(TransactionBase):
 		self.set_loyalty_program()
 		self.check_customer_group_change()
 		self.validate_default_bank_account()
+		self.validate_internal_customer()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -81,6 +82,11 @@ class Customer(TransactionBase):
 			is_company_account = frappe.db.get_value('Bank Account', self.default_bank_account, 'is_company_account')
 			if not is_company_account:
 				frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
+
+	def validate_internal_customer(self):
+		if self.is_internal_customer and frappe.db.get_value('Customer', {"represents_company": self.represents_company}, "name"):
+			frappe.throw(_("Internal Customer for company {0} already exists").format(
+				frappe.bold(self.represents_company)))
 
 	def on_update(self):
 		self.validate_name_with_customer_group()
@@ -132,7 +138,7 @@ class Customer(TransactionBase):
 				address = frappe.get_doc('Address', address_name.get('name'))
 				if not address.has_link('Customer', self.name):
 					address.append('links', dict(link_doctype='Customer', link_name=self.name))
-					address.save()
+					address.save(ignore_permissions=self.flags.ignore_permissions)
 
 			lead = frappe.db.get_value("Lead", self.lead_name, ["organization_lead", "lead_name", "email_id", "phone", "mobile_no", "gender", "salutation"], as_dict=True)
 
@@ -150,7 +156,7 @@ class Customer(TransactionBase):
 					contact = frappe.get_doc('Contact', contact_name.get('name'))
 					if not contact.has_link('Customer', self.name):
 						contact.append('links', dict(link_doctype='Customer', link_name=self.name))
-						contact.save()
+						contact.save(ignore_permissions=self.flags.ignore_permissions)
 
 			else:
 				lead.lead_name = lead.lead_name.lstrip().split(" ")
@@ -398,7 +404,7 @@ def check_credit_limit(customer, company, ignore_outstanding_sales_order=False, 
 			# form a list of emails and names to show to the user
 			credit_controller_users_formatted = [get_formatted_email(user).replace("<", "(").replace(">", ")") for user in credit_controller_users]
 			if not credit_controller_users_formatted:
-				frappe.throw(_("Please contact your administrator to extend the credit limits for {0}.".format(customer)))
+				frappe.throw(_("Please contact your administrator to extend the credit limits for {0}.").format(customer))
 
 			message = """Please contact any of the following users to extend the credit limits for {0}:
 				<br><br><ul><li>{1}</li></ul>""".format(customer, '<li>'.join(credit_controller_users_formatted))

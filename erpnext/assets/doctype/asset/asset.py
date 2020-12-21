@@ -131,7 +131,7 @@ class Asset(AccountsController):
 
 	def validate_gross_and_purchase_amount(self):
 		if self.is_existing_asset: return
-		
+
 		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:
 			frappe.throw(_("Gross Purchase Amount should be {} to purchase amount of one single Asset. {}\
 				Please do not book expense of multiple assets against one single Asset.")
@@ -466,50 +466,63 @@ class Asset(AccountsController):
 
 	def validate_make_gl_entry(self):
 		purchase_document = self.get_purchase_document()
-		asset_bought_with_invoice = purchase_document == self.purchase_invoice
-		fixed_asset_account, cwip_account = self.get_asset_accounts()
-		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
-		# check if expense already has been booked in case of cwip was enabled after purchasing asset
-		expense_booked = False
-		cwip_booked = False
-
-		if asset_bought_with_invoice:
-			expense_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, fixed_asset_account), as_dict=1)
-		else:
-			cwip_booked = frappe.db.sql("""SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s""",
-				(purchase_document, cwip_account), as_dict=1)
-
-		if cwip_enabled and (expense_booked or not cwip_booked):
-			# if expense has already booked from invoice or cwip is booked from receipt
+		if not purchase_document:
 			return False
-		elif not cwip_enabled and (not expense_booked or cwip_booked):
-			# if cwip is disabled but expense hasn't been booked yet
-			return True
-		elif cwip_enabled:
-			# default condition
-			return True
+
+		asset_bought_with_invoice = (purchase_document == self.purchase_invoice)
+		fixed_asset_account = self.get_fixed_asset_account()
+		
+		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
+		cwip_account = self.get_cwip_account(cwip_enabled=cwip_enabled)
+
+		query = """SELECT name FROM `tabGL Entry` WHERE voucher_no = %s and account = %s"""
+		if asset_bought_with_invoice:
+			# with invoice purchase either expense or cwip has been booked
+			expense_booked = frappe.db.sql(query, (purchase_document, fixed_asset_account), as_dict=1)
+			if expense_booked:
+				# if expense is already booked from invoice then do not make gl entries regardless of cwip enabled/disabled
+				return False
+
+			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+			if cwip_booked:
+				# if cwip is booked from invoice then make gl entries regardless of cwip enabled/disabled
+				return True
+		else:
+			# with receipt purchase either cwip has been booked or no entries have been made
+			if not cwip_account:
+				# if cwip account isn't available do not make gl entries
+				return False
+
+			cwip_booked = frappe.db.sql(query, (purchase_document, cwip_account), as_dict=1)
+			# if cwip is not booked from receipt then do not make gl entries
+			# if cwip is booked from receipt then make gl entries
+			return cwip_booked
 
 	def get_purchase_document(self):
 		asset_bought_with_invoice = self.purchase_invoice and frappe.db.get_value('Purchase Invoice', self.purchase_invoice, 'update_stock')
 		purchase_document = self.purchase_invoice if asset_bought_with_invoice else self.purchase_receipt
 
 		return purchase_document
+	
+	def get_fixed_asset_account(self):
+		return get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
+	
+	def get_cwip_account(self, cwip_enabled=False):
+		cwip_account = None
+		try:
+			cwip_account = get_asset_account("capital_work_in_progress_account", self.name, self.asset_category, self.company)
+		except:
+			# if no cwip account found in category or company and "cwip is enabled" then raise else silently pass
+			if cwip_enabled:
+				raise
 
-	def get_asset_accounts(self):
-		fixed_asset_account = get_asset_category_account('fixed_asset_account', asset=self.name,
-					asset_category = self.asset_category, company = self.company)
-
-		cwip_account = get_asset_account("capital_work_in_progress_account",
-			self.name, self.asset_category, self.company)
-
-		return fixed_asset_account, cwip_account
+		return cwip_account
 
 	def make_gl_entries(self):
 		gl_entries = []
 
 		purchase_document = self.get_purchase_document()
-		fixed_asset_account, cwip_account = self.get_asset_accounts()
+		fixed_asset_account, cwip_account = self.get_fixed_asset_account(), self.get_cwip_account()
 
 		if (purchase_document and self.purchase_receipt_amount and self.available_for_use_date <= nowdate()):
 
@@ -561,14 +574,18 @@ class Asset(AccountsController):
 			return 100 * (1 - flt(depreciation_rate, float_precision))
 
 def update_maintenance_status():
-	assets = frappe.get_all('Asset', filters = {'docstatus': 1, 'maintenance_required': 1})
+	assets = frappe.get_all(
+		"Asset", filters={"docstatus": 1, "maintenance_required": 1}
+	)
 
 	for asset in assets:
 		asset = frappe.get_doc("Asset", asset.name)
-		if frappe.db.exists('Asset Maintenance Task', {'parent': asset.name, 'next_due_date': today()}):
-			asset.set_status('In Maintenance')
-		if frappe.db.exists('Asset Repair', {'asset_name': asset.name, 'repair_status': 'Pending'}):
-			asset.set_status('Out of Order')
+		if frappe.db.exists("Asset Repair", {"asset_name": asset.name, "repair_status": "Pending"}):
+			asset.set_status("Out of Order")
+		elif frappe.db.exists("Asset Maintenance Task", {"parent": asset.name, "next_due_date": today()}):
+			asset.set_status("In Maintenance")
+		else:
+			asset.set_status()
 
 def make_post_gl_entry():
 

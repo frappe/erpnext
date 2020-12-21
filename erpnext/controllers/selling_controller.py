@@ -3,15 +3,17 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, cstr, comma_or
+from frappe.utils import cint, flt, cstr, comma_or, get_link_to_form
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.stock.doctype.item.item import set_item_default
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.controllers.accounts_controller import get_taxes_and_charges
 
 from erpnext.controllers.stock_controller import StockController
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 
 class SellingController(StockController):
 	def __setup__(self):
@@ -41,22 +43,23 @@ class SellingController(StockController):
 		self.validate_max_discount()
 		self.validate_selling_price()
 		self.set_qty_as_per_stock_uom()
-		self.set_po_nos()
+		self.set_po_nos(for_validate=True)
 		self.set_gross_profit()
 		set_default_income_account_for_item(self)
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
+		self.set_incoming_rate()
 
 	def set_missing_values(self, for_validate=False):
 
 		super(SellingController, self).set_missing_values(for_validate)
 
 		# set contact and address details for customer, if they are not mentioned
-		self.set_missing_lead_customer_details()
+		self.set_missing_lead_customer_details(for_validate=for_validate)
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
-	def set_missing_lead_customer_details(self):
+	def set_missing_lead_customer_details(self, for_validate=False):
 		customer, lead = None, None
 		if getattr(self, "customer", None):
 			customer = self.customer
@@ -93,6 +96,11 @@ class SellingController(StockController):
 			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
 				company=self.company))
+
+		if self.get('taxes_and_charges') and not self.get('taxes') and not for_validate:
+			taxes = get_taxes_and_charges('Sales Taxes and Charges Template', self.taxes_and_charges)
+			for tax in taxes:
+				self.append('taxes', tax)
 
 	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
@@ -167,22 +175,26 @@ class SellingController(StockController):
 
 	def validate_selling_price(self):
 		def throw_message(idx, item_name, rate, ref_rate_field):
-			frappe.throw(_("""Row #{}: Selling rate for item {} is lower than its {}. Selling rate should be atleast {}""")
-				.format(idx, item_name, ref_rate_field, rate))
+			bold_net_rate = frappe.bold("net rate")
+			msg = (_("""Row #{}: Selling rate for item {} is lower than its {}. Selling {} should be atleast {}""")
+						.format(idx, frappe.bold(item_name), frappe.bold(ref_rate_field), bold_net_rate, frappe.bold(rate)))
+			msg += "<br><br>"
+			msg += (_("""You can alternatively disable selling price validation in {} to bypass this validation.""")
+						.format(get_link_to_form("Selling Settings", "Selling Settings")))
+			frappe.throw(msg, title=_("Invalid Selling Price"))
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			return
-
 		if hasattr(self, "is_return") and self.is_return:
 			return
 
 		for it in self.get("items"):
 			if not it.item_code:
 				continue
-
+			
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
-			last_purchase_rate_in_sales_uom = last_purchase_rate / (it.conversion_factor or 1)
-			if flt(it.base_rate) < flt(last_purchase_rate_in_sales_uom):
+			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
+			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
 				throw_message(it.idx, frappe.bold(it.item_name), last_purchase_rate_in_sales_uom, "last purchase rate")
 
 			last_valuation_rate = frappe.db.sql("""
@@ -191,8 +203,8 @@ class SellingController(StockController):
 				ORDER BY posting_date DESC, posting_time DESC, creation DESC LIMIT 1
 				""", (it.item_code, it.warehouse))
 			if last_valuation_rate:
-				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] / (it.conversion_factor or 1)
-				if is_stock_item and flt(it.base_rate) < flt(last_valuation_rate_in_sales_uom) \
+				last_valuation_rate_in_sales_uom = last_valuation_rate[0][0] * (it.conversion_factor or 1)
+				if is_stock_item and flt(it.base_net_rate) < flt(last_valuation_rate_in_sales_uom) \
 					and not self.get('is_internal_customer'):
 					throw_message(it.idx, frappe.bold(it.item_name), last_valuation_rate_in_sales_uom, "valuation rate")
 
@@ -220,7 +232,8 @@ class SellingController(StockController):
 							'voucher_type': self.doctype,
 							'allow_zero_valuation': d.allow_zero_valuation_rate,
 							'sales_invoice_item': d.get("sales_invoice_item"),
-							'delivery_note_item': d.get("dn_detail")
+							'dn_detail': d.get("dn_detail"),
+							'incoming_rate': p.incoming_rate
 						}))
 			else:
 				il.append(frappe._dict({
@@ -238,7 +251,8 @@ class SellingController(StockController):
 					'voucher_type': self.doctype,
 					'allow_zero_valuation': d.allow_zero_valuation_rate,
 					'sales_invoice_item': d.get("sales_invoice_item"),
-					'delivery_note_item': d.get("dn_detail")
+					'dn_detail': d.get("dn_detail"),
+					'incoming_rate': d.incoming_rate
 				}))
 		return il
 
@@ -297,77 +311,119 @@ class SellingController(StockController):
 
 				sales_order.update_reserved_qty(so_item_rows)
 
+	def set_incoming_rate(self):
+		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+			return
+
+		items = self.get("items") + (self.get("packed_items") or [])
+		for d in items:
+			if not cint(self.get("is_return")):
+				# Get incoming rate based on original item cost based on valuation method
+				d.incoming_rate = get_incoming_rate({
+					"item_code": d.item_code,
+					"warehouse": d.warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time,
+					"qty": -1*flt(d.qty),
+					"serial_no": d.serial_no,
+					"company": self.company,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"allow_zero_valuation": d.get("allow_zero_valuation")
+				}, raise_error_if_no_rate=False)
+			elif self.get("return_against"):
+				# Get incoming rate of return entry from reference document
+				# based on original item cost as per valuation method
+				d.incoming_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)
+
 	def update_stock_ledger(self):
 		self.update_reserved_qty()
 
 		sl_entries = []
+		# Loop over items and packed items table
 		for d in self.get_item_list():
 			if frappe.get_cached_value("Item", d.item_code, "is_stock_item") == 1 and flt(d.qty):
 				if flt(d.conversion_factor)==0.0:
 					d.conversion_factor = get_conversion_factor(d.item_code, d.uom).get("conversion_factor") or 1.0
-				return_rate = 0
-				if cint(self.is_return) and self.return_against and self.docstatus==1:
-					against_document_no = (d.get("sales_invoice_item")
-						if self.doctype == "Sales Invoice" else d.get("delivery_note_item"))
 
-					return_rate = self.get_incoming_rate_for_return(d.item_code,
-						self.return_against, against_document_no)
-
-				# On cancellation or if return entry submission, make stock ledger entry for
+				# On cancellation or return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==1)
 					or (cint(self.is_return) and self.docstatus==2)):
-						sl_entries.append(self.get_sl_entries(d, {
-							"actual_qty": -1*flt(d.qty),
-							"incoming_rate": return_rate
-						}))
+						sl_entries.append(self.get_sle_for_source_warehouse(d))
 
 				if d.target_warehouse:
-					target_warehouse_sle = self.get_sl_entries(d, {
-						"actual_qty": flt(d.qty),
-						"warehouse": d.target_warehouse
-					})
-
-					if self.docstatus == 1:
-						if not cint(self.is_return):
-							args = frappe._dict({
-								"item_code": d.item_code,
-								"warehouse": d.warehouse,
-								"posting_date": self.posting_date,
-								"posting_time": self.posting_time,
-								"qty": -1*flt(d.qty),
-								"serial_no": d.serial_no,
-								"company": d.company,
-								"voucher_type": d.voucher_type,
-								"voucher_no": d.name,
-								"allow_zero_valuation": d.allow_zero_valuation
-							})
-							target_warehouse_sle.update({
-								"incoming_rate": get_incoming_rate(args)
-							})
-						else:
-							target_warehouse_sle.update({
-								"outgoing_rate": return_rate
-							})
-					sl_entries.append(target_warehouse_sle)
+					sl_entries.append(self.get_sle_for_target_warehouse(d))
 
 				if d.warehouse and ((not cint(self.is_return) and self.docstatus==2)
 					or (cint(self.is_return) and self.docstatus==1)):
-						sl_entries.append(self.get_sl_entries(d, {
-							"actual_qty": -1*flt(d.qty),
-							"incoming_rate": return_rate
-						}))
+						sl_entries.append(self.get_sle_for_source_warehouse(d))
+
 		self.make_sl_entries(sl_entries)
 
-	def set_po_nos(self):
-		if self.doctype in ("Delivery Note", "Sales Invoice") and hasattr(self, "items"):
-			ref_fieldname = "against_sales_order" if self.doctype == "Delivery Note" else "sales_order"
-			sales_orders = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
-			if sales_orders:
-				po_nos = frappe.get_all('Sales Order', 'po_no', filters = {'name': ('in', sales_orders)})
-				if po_nos and po_nos[0].get('po_no'):
-					self.po_no = ', '.join(list(set([d.po_no for d in po_nos if d.po_no])))
+	def get_sle_for_source_warehouse(self, item_row):
+		sle = self.get_sl_entries(item_row, {
+			"actual_qty": -1*flt(item_row.qty),
+			"incoming_rate": item_row.incoming_rate,
+			"recalculate_rate": cint(self.is_return)
+		})
+		if item_row.target_warehouse and not cint(self.is_return):
+			sle.dependant_sle_voucher_detail_no = item_row.name
+
+		return sle
+
+	def get_sle_for_target_warehouse(self, item_row):
+		sle = self.get_sl_entries(item_row, {
+			"actual_qty": flt(item_row.qty),
+			"warehouse": item_row.target_warehouse
+		})
+
+		if self.docstatus == 1:
+			if not cint(self.is_return):
+				sle.update({
+					"incoming_rate": item_row.incoming_rate,
+					"recalculate_rate": 1
+				})
+			else:
+				sle.update({
+					"outgoing_rate": item_row.incoming_rate
+				})
+				if item_row.warehouse:
+					sle.dependant_sle_voucher_detail_no = item_row.name
+			
+		return sle
+
+	def set_po_nos(self, for_validate=False):
+		if self.doctype == 'Sales Invoice' and hasattr(self, "items"):
+			if for_validate and self.po_no:
+				return
+			self.set_pos_for_sales_invoice()
+		if self.doctype == 'Delivery Note' and hasattr(self, "items"):
+			if for_validate and self.po_no:
+				return
+			self.set_pos_for_delivery_note()
+
+	def set_pos_for_sales_invoice(self):
+		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
+		self.get_po_nos('Sales Order', 'sales_order', po_nos)
+		self.get_po_nos('Delivery Note', 'delivery_note', po_nos)
+		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
+
+	def set_pos_for_delivery_note(self):
+		po_nos = []
+		if self.po_no:
+			po_nos.append(self.po_no)
+		self.get_po_nos('Sales Order', 'against_sales_order', po_nos)
+		self.get_po_nos('Sales Invoice', 'against_sales_invoice', po_nos)
+		self.po_no = ', '.join(list(set(x.strip() for x in ','.join(po_nos).split(','))))
+
+	def get_po_nos(self, ref_doctype, ref_fieldname, po_nos):
+		doc_list = list(set([d.get(ref_fieldname) for d in self.items if d.get(ref_fieldname)]))
+		if doc_list:
+			po_nos += [d.po_no for d in frappe.get_all(ref_doctype, 'po_no', filters = {'name': ('in', doc_list)}) if d.get('po_no')]
 
 	def set_gross_profit(self):
 		if self.doctype in ["Sales Order", "Quotation"]:
@@ -392,26 +448,26 @@ class SellingController(StockController):
 			return
 
 		for d in self.get('items'):
-			if self.doctype == "Sales Invoice":
-				e = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
-				f = [d.item_code, d.description, d.sales_order or d.delivery_note]
+			if self.doctype in ["POS Invoice","Sales Invoice"]:
+				stock_items = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
+				non_stock_items = [d.item_code, d.description, d.sales_order or d.delivery_note]
 			elif self.doctype == "Delivery Note":
-				e = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
-				f = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
+				stock_items = [d.item_code, d.description, d.warehouse, d.against_sales_order or d.against_sales_invoice, d.batch_no or '']
+				non_stock_items = [d.item_code, d.description, d.against_sales_order or d.against_sales_invoice]
 			elif self.doctype in ["Sales Order", "Quotation"]:
-				e = [d.item_code, d.description, d.warehouse, '']
-				f = [d.item_code, d.description]
+				stock_items = [d.item_code, d.description, d.warehouse, '']
+				non_stock_items = [d.item_code, d.description]
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
-				if e in check_list:
+				if stock_items in check_list:
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
-					check_list.append(e)
+					check_list.append(stock_items)
 			else:
-				if f in chk_dupl_itm:
+				if non_stock_items in chk_dupl_itm:
 					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
 				else:
-					chk_dupl_itm.append(f)
+					chk_dupl_itm.append(non_stock_items)
 
 	def validate_target_warehouse(self):
 		items = self.get("items") + (self.get("packed_items") or [])

@@ -1,8 +1,10 @@
 erpnext.PointOfSale.ItemSelector = class {
-	constructor({ frm, wrapper, events, pos_profile }) {
+	constructor({ frm, wrapper, events, pos_profile, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.pos_profile = pos_profile;
+		this.hide_images = settings.hide_images;
+		this.auto_add_item = settings.auto_add_item_to_cart;
 		
 		this.inti_component();
 	}
@@ -26,13 +28,14 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="flex flex-1 flex-col p-8 pt-2">
 						<div class="text-grey mb-6">ALL ITEMS</div>
 						<div class="items-container grid grid-cols-4 gap-8">
-						</div>					
+						</div>
 					</div>
 				</div>
 			</section>`
 		);
 		
 		this.$component = this.wrapper.find('.items-selector');
+		this.$items_container = this.$component.find('.items-container');
 	}
 
 	async load_items_data() {
@@ -65,7 +68,6 @@ erpnext.PointOfSale.ItemSelector = class {
 
 
 	render_item_list(items) {
-		this.$items_container = this.$component.find('.items-container');
 		this.$items_container.html('');
 
 		items.forEach(item => {
@@ -75,13 +77,14 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	get_item_html(item) {
+		const me = this;
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
-		const indicator_color = actual_qty > 10 ? "green" : actual_qty !== 0 ? "orange" : "red";
+		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 
 		function get_item_image_html() {
-			if (item_image) {
+			if (!me.hide_images && item_image) {
 				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
-							<img class="h-full" src="${item_image}" alt="${item_image}" style="object-fit: cover;">
+							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
 						</div>`
 			} else {
 				return `<div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-grey-100">
@@ -184,16 +187,26 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	attach_shortcuts() {
-		frappe.ui.keys.on("ctrl+i", () => {
-			const selector_is_visible = this.$component.is(':visible');
-			if (!selector_is_visible) return;
-			this.search_field.set_focus();
+		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
+		this.search_field.parent.attr("title", `${ctrl_label}+I`);
+		frappe.ui.keys.add_shortcut({
+			shortcut: "ctrl+i",
+			action: () => this.search_field.set_focus(),
+			condition: () => this.$component.is(':visible'),
+			description: __("Focus on search input"),
+			ignore_inputs: true,
+			page: cur_page.page.page
 		});
-		frappe.ui.keys.on("ctrl+g", () => {
-			const selector_is_visible = this.$component.is(':visible');
-			if (!selector_is_visible) return;
-			this.item_group_field.set_focus();
+		this.item_group_field.parent.attr("title", `${ctrl_label}+G`);
+		frappe.ui.keys.add_shortcut({
+			shortcut: "ctrl+g",
+			action: () => this.item_group_field.set_focus(),
+			condition: () => this.$component.is(':visible'),
+			description: __("Focus on Item Group filter"),
+			ignore_inputs: true,
+			page: cur_page.page.page
 		});
+
 		// for selecting the last filtered item on search
 		frappe.ui.keys.on("enter", () => {
 			const selector_is_visible = this.$component.is(':visible');
@@ -226,6 +239,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				const items = this.search_index[search_term];
 				this.items = items;
 				this.render_item_list(items);
+				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
 				return;
 			}
 		}
@@ -238,7 +252,12 @@ erpnext.PointOfSale.ItemSelector = class {
 				}
 				this.items = items;
 				this.render_item_list(items);
+				this.auto_add_item && this.items.length == 1 && this.add_filtered_item_to_cart();
 			});
+	}
+
+	add_filtered_item_to_cart() {
+		this.$items_container.find(".item-wrapper").click();
 	}
 	
 	resize_selector(minimize) {
