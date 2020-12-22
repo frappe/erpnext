@@ -23,6 +23,7 @@
  ],
  "fields": [
   {
+   "depends_on": "eval:doc.__islocal",
    "fieldname": "department_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -124,8 +125,8 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-03-18 18:26:05.966022",
- "modified_by": "Administrator",
+ "modified": "2020-12-21 14:46:47.331809",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Department",
  "nsm_parent_field": "parent_department",

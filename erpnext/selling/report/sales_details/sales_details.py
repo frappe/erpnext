@@ -137,7 +137,7 @@ class SalesPurchaseDetailsReport(object):
 			supplier_join=supplier_join,
 			is_opening_condition=is_opening_condition,
 			filter_conditions=filter_conditions
-		), self.filters, as_dict=1, debug=1)
+		), self.filters, as_dict=1)
 
 		if self.filters.party_type == "Customer" and "Group by Customer" in [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]:
 			additional_customer_info = frappe.db.sql("""
