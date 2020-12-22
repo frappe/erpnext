@@ -8,26 +8,33 @@
  "engine": "InnoDB",
  "field_order": [
   "item_code",
-  "serial_no",
-  "batch_no",
   "warehouse",
   "posting_date",
   "posting_time",
+  "column_break_6",
   "voucher_type",
   "voucher_no",
   "voucher_detail_no",
+  "dependant_sle_voucher_detail_no",
+  "recalculate_rate",
+  "section_break_11",
   "actual_qty",
+  "qty_after_transaction",
   "incoming_rate",
   "outgoing_rate",
-  "stock_uom",
-  "qty_after_transaction",
+  "column_break_17",
   "valuation_rate",
   "stock_value",
   "stock_value_difference",
   "stock_queue",
-  "project",
+  "section_break_21",
   "company",
+  "stock_uom",
+  "project",
+  "batch_no",
+  "column_break_26",
   "fiscal_year",
+  "serial_no",
   "is_cancelled",
   "to_rename"
  ],
@@ -50,7 +57,6 @@
   {
    "fieldname": "serial_no",
    "fieldtype": "Long Text",
-   "in_list_view": 1,
    "label": "Serial No",
    "print_width": "100px",
    "read_only": 1,
@@ -59,7 +65,6 @@
   {
    "fieldname": "batch_no",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Batch No",
    "oldfieldname": "batch_no",
    "oldfieldtype": "Data",
@@ -119,6 +124,7 @@
    "fieldname": "voucher_no",
    "fieldtype": "Dynamic Link",
    "in_filter": 1,
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Voucher No",
    "oldfieldname": "voucher_no",
@@ -142,6 +148,7 @@
    "fieldname": "actual_qty",
    "fieldtype": "Float",
    "in_filter": 1,
+   "in_list_view": 1,
    "label": "Actual Quantity",
    "oldfieldname": "actual_qty",
    "oldfieldtype": "Currency",
@@ -152,6 +159,7 @@
   {
    "fieldname": "incoming_rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Incoming Rate",
    "oldfieldname": "incoming_rate",
    "oldfieldtype": "Currency",
@@ -217,13 +225,11 @@
   {
    "fieldname": "stock_queue",
    "fieldtype": "Text",
-   "hidden": 1,
    "label": "Stock Queue (FIFO)",
    "oldfieldname": "fcfs_stack",
    "oldfieldtype": "Text",
    "print_hide": 1,
-   "read_only": 1,
-   "report_hide": 1
+   "read_only": 1
   },
   {
    "fieldname": "project",
@@ -269,14 +275,48 @@
    "hidden": 1,
    "label": "To Rename",
    "search_index": 1
+  },
+  {
+   "fieldname": "dependant_sle_voucher_detail_no",
+   "fieldtype": "Data",
+   "label": "Dependant SLE Voucher Detail No"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "recalculate_rate",
+   "fieldtype": "Check",
+   "label": "Recalculate Incoming/Outgoing Rate",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-04-23 05:57:03.985520",
+ "modified": "2020-09-07 11:10:35.318872",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",
