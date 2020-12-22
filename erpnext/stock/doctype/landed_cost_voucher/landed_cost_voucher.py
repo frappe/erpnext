@@ -92,14 +92,14 @@ class LandedCostVoucher(Document):
 				total_item_cost += item.get(based_on_field)
 
 			for item in self.get('items'):
-				item.applicable_charges = flt(flt(item.get(based_on_field)) * flt(self.total_taxes_and_charges) / flt(total_item_cost),
+				item.applicable_charges = flt(flt(item.get(based_on_field)) * (flt(self.total_taxes_and_charges) / flt(total_item_cost)),
 					item.precision('applicable_charges'))
 				total_charges += item.applicable_charges
 				item_count += 1
 
-				if total_charges != self.total_taxes_and_charges:
-					diff = self.total_taxes_and_charges - total_charges
-					self.get('items')[item_count - 1].applicable_charges += diff
+			if total_charges != self.total_taxes_and_charges:
+				diff = self.total_taxes_and_charges - total_charges
+				self.get('items')[item_count - 1].applicable_charges += diff
 
 	def set_account_currency(self):
 		company_currency = erpnext.get_company_currency(self.company)

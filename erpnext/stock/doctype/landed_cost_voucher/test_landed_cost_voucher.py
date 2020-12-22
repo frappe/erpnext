@@ -163,8 +163,8 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, 123.22)
 
-		self.assertEqual(lcv.items[0].applicable_charges, 41.07)
-		self.assertEqual(lcv.items[2].applicable_charges, 41.08)
+		self.assertEqual(flt(lcv.items[0].applicable_charges, 2), 41.07)
+		self.assertEqual(flt(lcv.items[2].applicable_charges, 2), 41.08)
 
 	def test_multiple_landed_cost_voucher_against_pr(self):
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
