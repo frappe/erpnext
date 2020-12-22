@@ -162,7 +162,7 @@ class LandedCostVoucher(Document):
 			doc.set_landed_cost_voucher_amount()
 
 			# set valuation amount in pr item
-			doc.update_valuation_rate("items")
+			doc.update_valuation_rate(reset_outgoing_rate=False)
 
 			# db_update will update and save landed_cost_voucher_amount and voucher_amount in PR
 			for item in doc.get("items"):
@@ -184,6 +184,7 @@ class LandedCostVoucher(Document):
 			doc.docstatus = 1
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			doc.make_gl_entries()
+			doc.repost_future_sle_and_gle()
 
 	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
 		for item in self.get('items'):
