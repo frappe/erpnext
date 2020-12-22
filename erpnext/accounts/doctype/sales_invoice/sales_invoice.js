@@ -199,7 +199,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						company: me.frm.doc.company
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 	},
 
 	quotation_btn: function() {
@@ -223,7 +223,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						company: me.frm.doc.company
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 	},
 
 	delivery_note_btn: function() {
@@ -251,7 +251,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 						};
 					}
 				});
-			}, __("Get items from"));
+			}, __("Get Items From"));
 	},
 
 	tc_name: function() {
@@ -580,6 +580,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("unrealized_profit_loss_account", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Sales Return',
@@ -812,10 +822,10 @@ frappe.ui.form.on('Sales Invoice', {
 			if (cint(frm.doc.docstatus==0) && cur_frm.page.current_view_name!=="pos" && !frm.doc.is_return) {
 				frm.add_custom_button(__('Healthcare Services'), function() {
 					get_healthcare_services_to_invoice(frm);
-				},"Get items from");
+				},"Get Items From");
 				frm.add_custom_button(__('Prescriptions'), function() {
 					get_drugs_to_invoice(frm);
-				},"Get items from");
+				},"Get Items From");
 			}
 		}
 		else {
@@ -1080,7 +1090,7 @@ var get_drugs_to_invoice = function(frm) {
 				description:'Quantity will be calculated only for items which has "Nos" as UoM. You may change as required for each invoice item.',
 				get_query: function(doc) {
 					return {
-						filters: { 
+						filters: {
 							patient: dialog.get_value("patient"),
 							company: frm.doc.company,
 							docstatus: 1

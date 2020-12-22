@@ -50,15 +50,19 @@ class SalarySlip(TransactionBase):
 
 		self.calculate_net_pay()
 
-		company_currency = erpnext.get_company_currency(self.company)
-		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
-		self.total_in_words = money_in_words(total, company_currency)
-
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
 			if self.salary_slip_based_on_timesheet and (self.total_working_hours > int(max_working_hours)):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
+
+	def set_net_total_in_words(self):
+		doc_currency = self.currency
+		company_currency = erpnext.get_company_currency(self.company)
+		total = self.net_pay if self.is_rounding_total_disabled() else self.rounded_total
+		base_total = self.base_net_pay if self.is_rounding_total_disabled() else self.base_rounded_total
+		self.total_in_words = money_in_words(total, doc_currency)
+		self.base_total_in_words = money_in_words(base_total, company_currency)
 
 	def on_submit(self):
 		if self.net_pay < 0:
@@ -136,8 +140,8 @@ class SalarySlip(TransactionBase):
 				self.salary_slip_based_on_timesheet = self._salary_structure_doc.salary_slip_based_on_timesheet or 0
 				self.set_time_sheet()
 				self.pull_sal_struct()
-				consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, "consider_unmarked_attendance_as") or "Present"
-				return consider_unmarked_attendance_as
+				payroll_based_on, consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, ["payroll_based_on","consider_unmarked_attendance_as"])
+				return [payroll_based_on, consider_unmarked_attendance_as]
 
 	def set_time_sheet(self):
 		if self.salary_slip_based_on_timesheet:
@@ -182,6 +186,7 @@ class SalarySlip(TransactionBase):
 		if self.salary_slip_based_on_timesheet:
 			self.salary_structure = self._salary_structure_doc.name
 			self.hour_rate = self._salary_structure_doc.hour_rate
+			self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
 			self.total_working_hours = sum([d.working_hours or 0.0 for d in self.timesheets]) or 0.0
 			wages_amount = self.hour_rate * self.total_working_hours
 
@@ -210,10 +215,10 @@ class SalarySlip(TransactionBase):
 			frappe.throw(_("Please set Payroll based on in Payroll settings"))
 
 		if payroll_based_on == "Attendance":
-			actual_lwp, absent = self.calculate_lwp_and_absent_days_based_on_attendance(holidays)
+			actual_lwp, absent = self.calculate_lwp_ppl_and_absent_days_based_on_attendance(holidays)
 			self.absent_days = absent
 		else:
-			actual_lwp = self.calculate_lwp_based_on_leave_application(holidays, working_days)
+			actual_lwp = self.calculate_lwp_or_ppl_based_on_leave_application(holidays, working_days)
 
 		if not lwp:
 			lwp = actual_lwp
@@ -240,7 +245,6 @@ class SalarySlip(TransactionBase):
 				self.absent_days += unmarked_days #will be treated as absent
 				self.payment_days -= unmarked_days
 				if include_holidays_in_total_working_days:
-					self.absent_days -= len(holidays)
 					for holiday in holidays:
 						if not frappe.db.exists("Attendance", {"employee": self.employee, "attendance_date": holiday, "docstatus": 1 }):
 							self.payment_days += 1
@@ -301,7 +305,7 @@ class SalarySlip(TransactionBase):
 
 		return holidays
 
-	def calculate_lwp_based_on_leave_application(self, holidays, working_days):
+	def calculate_lwp_or_ppl_based_on_leave_application(self, holidays, working_days):
 		lwp = 0
 		holidays = "','".join(holidays)
 		daily_wages_fraction_for_half_day = \
@@ -312,10 +316,12 @@ class SalarySlip(TransactionBase):
 			leave = frappe.db.sql("""
 				SELECT t1.name,
 					CASE WHEN (t1.half_day_date = %(dt)s or t1.to_date = t1.from_date)
-					THEN t1.half_day else 0 END
+					THEN t1.half_day else 0 END,
+					t2.is_ppl,
+					t2.fraction_of_daily_salary_per_leave
 				FROM `tabLeave Application` t1, `tabLeave Type` t2
 				WHERE t2.name = t1.leave_type
-				AND t2.is_lwp = 1
+				AND (t2.is_lwp = 1 or t2.is_ppl = 1)
 				AND t1.docstatus = 1
 				AND t1.employee = %(employee)s
 				AND ifnull(t1.salary_slip, '') = ''
@@ -328,19 +334,35 @@ class SalarySlip(TransactionBase):
 				""".format(holidays), {"employee": self.employee, "dt": dt})
 
 			if leave:
+				equivalent_lwp_count = 0
 				is_half_day_leave = cint(leave[0][1])
-				lwp += (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+				is_partially_paid_leave = cint(leave[0][2])
+				fraction_of_daily_salary_per_leave = flt(leave[0][3])
+
+				equivalent_lwp_count =  (1 - daily_wages_fraction_for_half_day) if is_half_day_leave else 1
+
+				if is_partially_paid_leave:
+					equivalent_lwp_count *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+
+				lwp += equivalent_lwp_count
 
 		return lwp
 
-	def calculate_lwp_and_absent_days_based_on_attendance(self, holidays):
+	def calculate_lwp_ppl_and_absent_days_based_on_attendance(self, holidays):
 		lwp = 0
 		absent = 0
 
 		daily_wages_fraction_for_half_day = \
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
-		lwp_leave_types = dict(frappe.get_all("Leave Type", {"is_lwp": 1}, ["name", "include_holiday"], as_list=1))
+		leave_types = frappe.get_all("Leave Type",
+			or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
+			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"])
+
+		leave_type_map = {}
+		for leave_type in leave_types:
+			leave_type_map[leave_type.name] = leave_type
+
 		attendances = frappe.db.sql('''
 			SELECT attendance_date, status, leave_type
 			FROM `tabAttendance`
@@ -352,21 +374,30 @@ class SalarySlip(TransactionBase):
 		''', values=(self.employee, self.start_date, self.end_date), as_dict=1)
 
 		for d in attendances:
-			if d.status in ('Half Day', 'On Leave') and d.leave_type and d.leave_type not in lwp_leave_types:
+			if d.status in ('Half Day', 'On Leave') and d.leave_type and d.leave_type not in leave_type_map.keys():
 				continue
 
 			if formatdate(d.attendance_date, "yyyy-mm-dd") in holidays:
 				if d.status == "Absent" or \
-					(d.leave_type and d.leave_type in lwp_leave_types and not lwp_leave_types[d.leave_type]):
+					(d.leave_type and d.leave_type in leave_type_map.keys() and not leave_type_map[d.leave_type]['include_holiday']):
 						continue
 
+			if d.leave_type:
+				fraction_of_daily_salary_per_leave = leave_type_map[d.leave_type]["fraction_of_daily_salary_per_leave"]
+
 			if d.status == "Half Day":
-				lwp += (1 - daily_wages_fraction_for_half_day)
-			elif d.status == "On Leave" and d.leave_type in lwp_leave_types:
-				lwp += 1
+				equivalent_lwp =  (1 - daily_wages_fraction_for_half_day)
+
+				if d.leave_type in leave_type_map.keys() and leave_type_map[d.leave_type]["is_ppl"]:
+					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+				lwp += equivalent_lwp
+			elif d.status == "On Leave" and d.leave_type and d.leave_type in leave_type_map.keys():
+				equivalent_lwp = 1
+				if leave_type_map[d.leave_type]["is_ppl"]:
+					equivalent_lwp *= fraction_of_daily_salary_per_leave if fraction_of_daily_salary_per_leave else 1
+				lwp += equivalent_lwp
 			elif d.status == "Absent":
 				absent += 1
-
 		return lwp, absent
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
@@ -391,15 +422,22 @@ class SalarySlip(TransactionBase):
 		if self.salary_structure:
 			self.calculate_component_amounts("earnings")
 		self.gross_pay = self.get_component_totals("earnings")
+		self.base_gross_pay = flt(flt(self.gross_pay) * flt(self.exchange_rate), self.precision('base_gross_pay'))
 
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
 		self.total_deduction = self.get_component_totals("deductions")
+		self.base_total_deduction = flt(flt(self.total_deduction) * flt(self.exchange_rate), self.precision('base_total_deduction'))
 
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay)
+		self.base_net_pay = flt(flt(self.net_pay) * flt(self.exchange_rate), self.precision('base_net_pay'))
+		self.base_rounded_total = flt(rounded(self.base_net_pay), self.precision('base_net_pay'))
+		if self.hour_rate:
+			self.base_hour_rate = flt(flt(self.hour_rate) * flt(self.exchange_rate), self.precision('base_hour_rate'))
+		self.set_net_total_in_words()
 
 	def calculate_component_amounts(self, component_type):
 		if not getattr(self, '_salary_structure_doc', None):
@@ -950,9 +988,9 @@ class SalarySlip(TransactionBase):
 			amounts = calculate_amounts(payment.loan, self.posting_date, "Regular Payment")
 			total_amount = amounts['interest_amount'] + amounts['payable_principal_amount']
 			if payment.total_payment > total_amount:
-				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2}
-					against loan {3}""").format(payment.idx, frappe.bold(payment.total_payment),
-					frappe.bold(total_amount), frappe.bold(payment.loan)))
+				frappe.throw(_("""Row {0}: Paid amount {1} is greater than pending accrued amount {2} against loan {3}""")
+					.format(payment.idx, frappe.bold(payment.total_payment),
+						frappe.bold(total_amount), frappe.bold(payment.loan)))
 
 			self.total_interest_amount += payment.interest_amount
 			self.total_principal_amount += payment.principal_amount
@@ -1046,6 +1084,46 @@ class SalarySlip(TransactionBase):
 	def process_salary_based_on_working_days(self):
 		self.get_working_days_details(lwp=self.leave_without_pay)
 		self.calculate_net_pay()
+
+	def set_totals(self):
+		self.gross_pay = 0
+		if self.salary_slip_based_on_timesheet == 1:
+			self.calculate_total_for_salary_slip_based_on_timesheet()
+		else:
+			self.total_deduction = 0
+			if self.earnings:
+				for earning in self.earnings:
+					self.gross_pay += flt(earning.amount)
+			if self.deductions:
+				for deduction in self.deductions:
+					self.total_deduction += flt(deduction.amount)
+			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
+		self.set_base_totals()
+
+	def set_base_totals(self):
+		self.base_gross_pay = flt(self.gross_pay) * flt(self.exchange_rate)
+		self.base_total_deduction = flt(self.total_deduction) * flt(self.exchange_rate)
+		self.rounded_total = rounded(self.net_pay)
+		self.base_net_pay = flt(self.net_pay) * flt(self.exchange_rate)
+		self.base_rounded_total = rounded(self.base_net_pay)
+		self.set_net_total_in_words()
+
+	#calculate total working hours, earnings based on hourly wages and totals
+	def calculate_total_for_salary_slip_based_on_timesheet(self):
+		if self.timesheets:
+			for timesheet in self.timesheets:
+				if timesheet.working_hours:
+					self.total_working_hours += timesheet.working_hours
+
+		wages_amount = self.total_working_hours * self.hour_rate
+		self.base_hour_rate = flt(self.hour_rate) * flt(self.exchange_rate)
+		salary_component = frappe.db.get_value('Salary Structure', {'name': self.salary_structure}, 'salary_component')
+		if self.earnings:
+			for i, earning in enumerate(self.earnings):
+				if earning.salary_component == salary_component:
+					self.earnings[i].amount = wages_amount
+				self.gross_pay += self.earnings[i].amount
+		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`

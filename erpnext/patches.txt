@@ -450,7 +450,6 @@ erpnext.patches.v8_9.set_member_party_type
 erpnext.patches.v9_0.add_user_to_child_table_in_pos_profile
 erpnext.patches.v9_0.set_schedule_date_for_material_request_and_purchase_order
 erpnext.patches.v9_0.student_admission_childtable_migrate
-erpnext.patches.v9_0.fix_subscription_next_date #2017-10-23
 erpnext.patches.v9_0.add_healthcare_domain
 erpnext.patches.v9_0.set_variant_item_description
 erpnext.patches.v9_0.set_uoms_in_variant_field
@@ -632,7 +631,7 @@ execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_source')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_field')
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
-erpnext.patches.v12_0.generate_leave_ledger_entries #27-08-2020
+erpnext.patches.v12_0.generate_leave_ledger_entries #04-11-2020
 execute:frappe.delete_doc_if_exists("Report", "Loan Repayment")
 erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
 erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
@@ -691,6 +690,7 @@ erpnext.patches.v13_0.update_old_loans
 erpnext.patches.v12_0.set_serial_no_status #2020-05-21
 erpnext.patches.v12_0.update_price_list_currency_in_bom
 execute:frappe.reload_doctype('Dashboard')
+execute:frappe.reload_doc('desk', 'doctype', 'number_card_link')
 execute:frappe.delete_doc_if_exists('Dashboard', 'Accounts')
 erpnext.patches.v13_0.update_actual_start_and_end_date_in_wo
 erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes #2020-05-25
@@ -730,3 +730,13 @@ erpnext.patches.v13_0.rename_issue_doctype_fields
 erpnext.patches.v13_0.change_default_pos_print_format
 erpnext.patches.v13_0.set_youtube_video_id
 erpnext.patches.v13_0.print_uom_after_quantity_patch
+erpnext.patches.v13_0.set_payment_channel_in_payment_gateway_account
+erpnext.patches.v13_0.create_healthcare_custom_fields_in_stock_entry_detail
+erpnext.patches.v13_0.updates_for_multi_currency_payroll
+erpnext.patches.v13_0.update_reason_for_resignation_in_employee
+erpnext.patches.v13_0.update_custom_fields_for_shopify
+execute:frappe.delete_doc("Report", "Quoted Item Comparison")
+erpnext.patches.v13_0.updates_for_multi_currency_payroll
+erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_leave_policy
+erpnext.patches.v13_0.add_po_to_global_search
+erpnext.patches.v13_0.update_returned_qty_in_pr_dn

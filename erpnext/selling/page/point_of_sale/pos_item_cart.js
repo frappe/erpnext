@@ -1,8 +1,10 @@
 erpnext.PointOfSale.ItemCart = class {
-	constructor({ wrapper, events }) {
+	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.customer_info = undefined;
+		this.hide_images = settings.hide_images;
+		this.allowed_customer_groups = settings.customer_groups;
 		
 		this.init_component();
 	}
@@ -32,6 +34,7 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="customer-section rounded flex flex-col m-8 mb-0"></div>`
 		)
 		this.$customer_section = this.$component.find('.customer-section');
+		this.make_customer_selector();
 	}
 	
 	reset_customer_selector() {
@@ -223,6 +226,8 @@ erpnext.PointOfSale.ItemCart = class {
 	attach_shortcuts() {
 		for (let row of this.number_pad.keys) {
 			for (let btn of row) {
+				if (typeof btn !== 'string') continue; // do not make shortcuts for numbers
+
 				let shortcut_key = `ctrl+${frappe.scrub(String(btn))[0]}`;
 				if (btn === 'Delete') shortcut_key = 'ctrl+backspace';
 				if (btn === 'Remove') shortcut_key = 'shift+ctrl+backspace'
@@ -232,6 +237,10 @@ erpnext.PointOfSale.ItemCart = class {
 				const fieldname = this.number_pad.fieldnames[btn] ? this.number_pad.fieldnames[btn] : 
 					typeof btn === 'string' ? frappe.scrub(btn) : btn;
 
+				let shortcut_label = shortcut_key.split('+').map(frappe.utils.to_title_case).join('+');
+				shortcut_label = frappe.utils.is_mac() ? shortcut_label.replace('Ctrl', '⌘') : shortcut_label;
+				this.$numpad_section.find(`.numpad-btn[data-button-value="${fieldname}"]`).attr("title", shortcut_label);
+
 				frappe.ui.keys.on(`${shortcut_key}`, () => {
 					const cart_is_visible = this.$component.is(":visible");
 					if (cart_is_visible && this.item_is_selected && this.$numpad_section.is(":visible")) {
@@ -240,12 +249,36 @@ erpnext.PointOfSale.ItemCart = class {
 				})
 			}
 		}
-
-		frappe.ui.keys.on("ctrl+enter", () => {
-			const cart_is_visible = this.$component.is(":visible");
-			const payment_section_hidden = this.$totals_section.find('.edit-cart-btn').hasClass('d-none');
-			if (cart_is_visible && payment_section_hidden) {
-				this.$component.find(".checkout-btn").click();
+		const ctrl_label = frappe.utils.is_mac() ? '⌘' : 'Ctrl';
+		this.$component.find(".checkout-btn").attr("title", `${ctrl_label}+Enter`);
+		frappe.ui.keys.add_shortcut({
+			shortcut: "ctrl+enter",
+			action: () => this.$component.find(".checkout-btn").click(),
+			condition: () => this.$component.is(":visible") && this.$totals_section.find('.edit-cart-btn').hasClass('d-none'),
+			description: __("Checkout Order / Submit Order / New Order"),
+			ignore_inputs: true,
+			page: cur_page.page.page
+		});
+		this.$component.find(".edit-cart-btn").attr("title", `${ctrl_label}+E`);
+		frappe.ui.keys.on("ctrl+e", () => {
+			const item_cart_visible = this.$component.is(":visible");
+			if (item_cart_visible && this.$totals_section.find('.checkout-btn').hasClass('d-none')) {
+				this.$component.find(".edit-cart-btn").click()
+			}
+		});
+		this.$component.find(".add-discount").attr("title", `${ctrl_label}+D`);
+		frappe.ui.keys.add_shortcut({
+			shortcut: "ctrl+d",
+			action: () => this.$component.find(".add-discount").click(),
+			condition: () => this.$add_discount_elem.is(":visible"),
+			description: __("Add Order Discount"),
+			ignore_inputs: true,
+			page: cur_page.page.page
+		});
+		frappe.ui.keys.on("escape", () => {
+			const item_cart_visible = this.$component.is(":visible");
+			if (item_cart_visible && this.discount_field && this.discount_field.parent.is(":visible")) {
+				this.discount_field.set_value(0);
 			}
 		});
 	}
@@ -272,7 +305,7 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$customer_section.html(`<div class="customer-search-field flex flex-1 items-center"></div>`);
 		const me = this;
 		const query = { query: 'erpnext.controllers.queries.customer_query' };
-		const allowed_customer_group = this.events.get_allowed_customer_group() || [];
+		const allowed_customer_group = this.allowed_customer_groups || [];
 		if (allowed_customer_group.length) {
 			query.filters = {
 				customer_group: ['in', allowed_customer_group]
@@ -343,8 +376,7 @@ erpnext.PointOfSale.ItemCart = class {
 	show_discount_control() {
 		this.$add_discount_elem.removeClass("pr-4 pl-4");
 		this.$add_discount_elem.html(
-			`<div class="add-dicount-field flex flex-1 items-center"></div>
-			<div class="submit-field flex items-center"></div>`
+			`<div class="add-discount-field flex flex-1 items-center"></div>`
 		);
 		const me = this;
 
@@ -354,14 +386,18 @@ erpnext.PointOfSale.ItemCart = class {
 				fieldtype: 'Data',
 				placeholder: __('Enter discount percentage.'),
 				onchange: function() {
-					if (this.value || this.value == 0) {
-						const frm = me.events.get_frm();
+					const frm = me.events.get_frm();
+					if (this.value.length || this.value === 0) {
 						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', flt(this.value));
 						me.hide_discount_control(this.value);
+					} else {
+						frappe.model.set_value(frm.doc.doctype, frm.doc.name, 'additional_discount_percentage', 0);
+						me.$add_discount_elem.html(`+ Add Discount`);
+						me.discount_field = undefined;
 					}
 				},
 			},
-			parent: this.$add_discount_elem.find('.add-dicount-field'),
+			parent: this.$add_discount_elem.find('.add-discount-field'),
 			render_input: true,
 		});
 		this.discount_field.toggle_label(false);
@@ -369,20 +405,28 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	hide_discount_control(discount) {
-		this.$add_discount_elem.addClass('pr-4 pl-4');
-		this.$add_discount_elem.html(
-			`<svg class="mr-2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" 
-				stroke-linecap="round" stroke-linejoin="round">
-				<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
-			</svg> 
-			<div class="edit-discount p-1 pr-3 pl-3 text-dark-grey rounded w-fit bg-green-200 mb-2">
-				${String(discount).bold()}% off
-			</div>
-			`
-		);
+		if (!discount) {
+			this.$add_discount_elem.removeClass("pr-4 pl-4");
+			this.$add_discount_elem.html(
+				`<div class="add-discount-field flex flex-1 items-center"></div>`
+			);
+		} else {
+			this.$add_discount_elem.addClass('pr-4 pl-4');
+			this.$add_discount_elem.html(
+				`<svg class="mr-2" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" 
+					stroke-linecap="round" stroke-linejoin="round">
+					<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+				</svg> 
+				<div class="edit-discount p-1 pr-3 pl-3 text-dark-grey rounded w-fit bg-green-200 mb-2">
+					${String(discount).bold()}% off
+				</div>
+				`
+			);
+		}
 	}
 	
 	update_customer_section() {
+		const me = this;
 		const { customer, email_id='', mobile_no='', image } = this.customer_info || {};
 
 		if (customer) {
@@ -420,7 +464,7 @@ erpnext.PointOfSale.ItemCart = class {
 		}
 
 		function get_customer_image() {
-			if (image) {
+			if (!me.hide_images && image) {
 				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200">
 							<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">
 						</div>`
@@ -475,19 +519,20 @@ erpnext.PointOfSale.ItemCart = class {
 			const currency = this.events.get_frm().doc.currency;
 			this.$totals_section.find('.taxes').html(
 				`<div class="flex items-center justify-between h-16 pr-8 pl-8 border-b-grey">
-					<div class="flex">
+					<div class="flex overflow-hidden whitespace-nowrap">
 						<div class="text-md text-dark-grey text-bold w-fit">Tax Charges</div>
-						<div class="flex ml-6 text-dark-grey">
+						<div class="flex ml-4 text-dark-grey">
 						${	
 							taxes.map((t, i) => {
 								let margin_left = '';
 								if (i !== 0) margin_left = 'ml-2';
-								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${t.description}</span>`
+								const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+								return `<span class="border-grey p-1 pl-2 pr-2 rounded ${margin_left}">${description}</span>`
 							}).join('')
 						}
 						</div>
 					</div>
-					<div class="flex flex-col text-right">
+					<div class="flex flex-col text-right f-shrink-0 ml-4">
 						<div class="text-md text-dark-grey text-bold">${format_currency(value, currency)}</div>
 					</div>
 				</div>`
