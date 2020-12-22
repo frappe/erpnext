@@ -13,6 +13,7 @@ from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from frappe.model.document import Document
+from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 
 class Project(Document):
 	def get_feed(self):
@@ -69,14 +70,29 @@ class Project(Document):
 				subject = task_details.subject,
 				project = self.name,
 				status = 'Open',
-				exp_start_date = add_days(self.expected_start_date, task_details.start),
-				exp_end_date = add_days(self.expected_start_date, task_details.start + task_details.duration),
+				exp_start_date = self.calculate_start_date(task_details),
+				exp_end_date = self.calculate_end_date(task_details),
 				description = task_details.description,
 				task_weight = task_details.task_weight,
 				type = task_details.type,
 				issue = task_details.issue,
 				is_group = task_details.is_group
 			)).insert()
+
+	def calculate_start_date(self, task_details):
+		self.start_date = add_days(self.expected_start_date, task_details.start)
+		self.start_date = self.update_if_holiday(self.start_date)
+		return self.start_date
+
+	def calculate_end_date(self, task_details):
+		self.end_date = add_days(self.start_date, task_details.duration)
+		return self.update_if_holiday(self.end_date)
+
+	def update_if_holiday(self, date):
+		holiday_list = self.holiday_list or get_holiday_list()
+		while is_holiday(holiday_list, date):
+			date = add_days(date, 1)
+		return date
 
 	def dependency_mapping(self, template_tasks, project_tasks):
 		for template_task in template_tasks:

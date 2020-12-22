@@ -14,9 +14,6 @@ from frappe.utils import getdate, nowdate, add_days
 
 class TestProject(unittest.TestCase):
 	def test_project_with_template_having_no_parent_and_depend_tasks(self):
-		""" 
-		Test Action: Basic Test of a Project created from template. The template has a single task.
-		"""
 		project_name = "Test Project with Template - No Parent and Dependend Tasks"
 		frappe.db.sql(""" delete from tabTask where project = %s """, project_name)
 		frappe.delete_doc('Project', project_name)
