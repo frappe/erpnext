@@ -37,14 +37,7 @@ def validate_regional(doc):
 
 	for field in required_fields:
 		condition = field.get("condition")
-		condition_true = True
-		try:
-			condition_true = frappe.safe_eval(condition, doc.as_dict())
-		except:
-			# invalid condition should not result in an error
-			pass
-
-		if condition and not condition_true:
+		if condition and not frappe.safe_eval(condition, doc.as_dict()):
 			continue
 
 		field_name = field.get("field_name")
