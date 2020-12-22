@@ -372,12 +372,13 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$form_container.on('click', '.auto-fetch-btn', () => {
 			this.batch_no_control && this.batch_no_control.set_value('');
 			let qty = this.qty_control.get_value();
+			let conversion_factor = this.conversion_factor_control.get_value();
 			let expiry_date = this.item_row.has_batch_no ? this.events.get_frm().doc.posting_date : "";
 
 			let numbers = frappe.call({
 				method: "erpnext.stock.doctype.serial_no.serial_no.auto_fetch_serial_number",
 				args: {
-					qty,
+					qty: qty * conversion_factor,
 					item_code: this.current_item.item_code,
 					warehouse: this.warehouse_control.get_value() || '',
 					batch_nos: this.current_item.batch_no || '',

@@ -28,9 +28,13 @@
   "uom",
   "stock_uom",
   "conversion_factor",
-  "stock_qty",
   "retain_sample",
   "sample_quantity",
+  "tracking_section",
+  "received_stock_qty",
+  "stock_qty",
+  "col_break_tracking_section",
+  "returned_qty",
   "rate_and_amount",
   "price_list_rate",
   "discount_percentage",
@@ -526,7 +530,7 @@
   {
    "fieldname": "stock_qty",
    "fieldtype": "Float",
-   "label": "Accepted Qty as per Stock UOM",
+   "label": "Accepted Qty in Stock UOM",
    "oldfieldname": "stock_qty",
    "oldfieldtype": "Currency",
    "print_hide": 1,
@@ -834,12 +838,35 @@
    "collapsible": 1,
    "fieldname": "image_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "tracking_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break_tracking_section",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "returned_qty",
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "label": "Returned Qty in Stock UOM",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "received_stock_qty",
+   "fieldtype": "Float",
+   "label": "Received Qty in Stock UOM",
+   "print_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-04-28 19:01:21.154963",
+ "modified": "2020-12-07 10:00:38.204294",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
