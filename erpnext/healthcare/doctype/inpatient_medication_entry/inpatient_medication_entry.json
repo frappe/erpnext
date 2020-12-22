@@ -67,6 +67,7 @@
   },
   {
    "collapsible": 1,
+   "collapsible_depends_on": "eval: doc.__islocal",
    "fieldname": "filters_section",
    "fieldtype": "Section Break",
    "label": "Filters"
@@ -93,6 +94,7 @@
    "options": "Patient"
   },
   {
+   "depends_on": "eval:!doc.patient",
    "fieldname": "service_unit",
    "fieldtype": "Link",
    "label": "Healthcare Service Unit",
@@ -178,7 +180,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-30 23:40:45.528715",
+ "modified": "2020-11-03 13:22:37.820707",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Entry",

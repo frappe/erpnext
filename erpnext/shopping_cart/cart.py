@@ -96,9 +96,7 @@ def place_order():
 def request_for_quotation():
 	quotation = _get_cart_quotation()
 	quotation.flags.ignore_permissions = True
-	quotation.save()
-	if not get_shopping_cart_settings().save_quotations_as_draft:
-		quotation.submit()
+	quotation.submit()
 	return quotation.name
 
 @frappe.whitelist()
@@ -345,7 +343,7 @@ def _set_price_list(cart_settings, quotation=None):
 	selling_price_list = None
 
 	# check if default customer price list exists
-	if party_name:
+	if party_name and frappe.db.exists("Customer", party_name):
 		selling_price_list = get_default_price_list(frappe.get_doc("Customer", party_name))
 
 	# check default price list in shopping cart

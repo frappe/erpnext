@@ -74,7 +74,7 @@ class CallPopup {
 				'click': () => {
 					const call_summary = this.dialog.get_value('call_summary');
 					if (!call_summary) return;
-					frappe.xcall('erpnext.communication.doctype.call_log.call_log.add_call_summary', {
+					frappe.xcall('erpnext.telephony.doctype.call_log.call_log.add_call_summary', {
 						'call_log': this.call_log.name,
 						'summary': call_summary,
 					}).then(() => {
