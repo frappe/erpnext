@@ -52,7 +52,7 @@ class TestProject(unittest.TestCase):
 
 		template = make_project_template("Test Project Template  - Tasks with Parent-Child Relation", [task1, task2, task3])
 		project = get_project(project_name, template)
-		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name'], dict(project=project.name), order_by='creation asc')
+		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name', 'parent_task'], dict(project=project.name), order_by='creation asc')
 
 		self.assertEqual(tasks[0].subject, 'Test Template Task Parent')
 		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 1))
