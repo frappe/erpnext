@@ -26,8 +26,8 @@ def validate_einvoice_fields(doc):
 	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction: return
 
 	if doc.docstatus == 0 and doc._action == 'save':
-		if doc.irn:
-			frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
+		# if doc.irn:
+		# 	frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
 		if len(doc.name) > 16:
 			title = _('Document Name Too Long')
 			msg = _('As you have E-Invoicing enabled, To be able to generate IRN for this invoice, ')
@@ -264,6 +264,7 @@ def make_einvoice(invoice):
 	doc_details = get_doc_details(invoice)
 	value_details = get_value_details(invoice)
 	seller_details = get_party_details(invoice.company_address)
+	seller_details.update({ 'pincode': '504273' })
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
@@ -372,8 +373,9 @@ class RequestFailed(Exception): pass
 
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
-		self.credentials = frappe.get_cached_doc('E Invoice Settings')
+		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
 		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
+		self.credentials = self.get_credentials()
 
 		self.base_url = 'https://gsp.adaequare.com/'
 		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
@@ -384,11 +386,25 @@ class GSPConnector():
 		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
 		self.generate_ewaybill_url = self.base_url + 'test/enriched/ei/api/ewaybill'
 	
+	def get_credentials(self):
+		if self.invoice:
+			gstin = self.get_seller_gstin()
+			credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
+		else:
+			credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
+		return credentials
+	
+	def get_seller_gstin(self):
+		gstin = self.invoice.company_gstin or frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
+		if not gstin:
+			frappe.throw(_('Cannot retrieve Company GSTIN. Please select company address with valid GSTIN.'))
+		return gstin
+	
 	def get_auth_token(self):
-		if time_diff_in_seconds(self.credentials.token_expiry, now_datetime()) < 150.0:
+		if time_diff_in_seconds(self.e_invoice_settings.token_expiry, now_datetime()) < 150.0:
 			self.fetch_auth_token()
 		
-		return self.credentials.auth_token
+		return self.e_invoice_settings.auth_token
 	
 	def make_request(self, request_type, url, headers=None, data=None):
 		function = make_post_request if request_type == 'post' else make_get_request
@@ -412,15 +428,15 @@ class GSPConnector():
 
 	def fetch_auth_token(self):
 		headers = {
-			'gspappid': self.credentials.client_id,
-			'gspappsecret': self.credentials.client_secret
+			'gspappid': frappe.conf.einvoice_client_id,
+			'gspappsecret': frappe.conf.einvoice_client_secret
 		}
 		res = {}
 		try:
 			res = self.make_request('post', self.authenticate_url, headers)
-			self.credentials.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
-			self.credentials.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
-			self.credentials.save()
+			self.e_invoice_settings.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
+			self.e_invoice_settings.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
+			self.e_invoice_settings.save()
 
 		except Exception:
 			self.log_error(res)
