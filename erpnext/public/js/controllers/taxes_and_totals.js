@@ -211,6 +211,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			item.item_tax_detail = {}
+			item.item_taxes_and_charges = 0;
 		});
 	},
 

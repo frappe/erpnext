@@ -8,36 +8,44 @@
   "posting_date",
   "employee",
   "employee_name",
+  "joining_date",
+  "column_break1",
   "department",
   "designation",
   "branch",
-  "column_break1",
-  "status",
+  "tax_cnic",
+  "tax_id",
+  "column_break_10",
+  "company",
   "journal_entry",
   "payroll_entry",
-  "company",
-  "letter_head",
+  "amended_from",
   "section_break_10",
   "salary_slip_based_on_timesheet",
+  "timesheets",
+  "section_break_20",
   "start_date",
   "end_date",
-  "column_break_15",
-  "salary_structure",
   "payroll_frequency",
+  "column_break_15",
   "total_working_days",
   "leave_without_pay",
   "payment_days",
+  "column_break_26",
+  "salary_structure",
+  "deduct_tax_for_unclaimed_employee_benefits",
+  "deduct_tax_for_unsubmitted_tax_exemption_proof",
   "hourly_wages",
-  "timesheets",
   "column_break_20",
   "total_working_hours",
   "hour_rate",
   "section_break_26",
+  "salary_mode",
+  "col_break_37",
   "bank_name",
+  "column_break_37",
   "bank_account_no",
   "section_break_32",
-  "deduct_tax_for_unclaimed_employee_benefits",
-  "deduct_tax_for_unsubmitted_tax_exemption_proof",
   "earning_deduction",
   "earning",
   "earnings",
@@ -49,18 +57,23 @@
   "total_deduction",
   "loan_repayment",
   "loans",
+  "advances_section",
+  "advances",
   "section_break_43",
   "total_principal_amount",
   "total_interest_amount",
   "column_break_45",
   "total_loan_repayment",
+  "total_advance_amount",
   "net_pay_info",
   "net_pay",
   "column_break_53",
   "rounded_total",
-  "section_break_55",
   "total_in_words",
-  "amended_from"
+  "more_information_section",
+  "status",
+  "column_break_66",
+  "letter_head"
  ],
  "fields": [
   {
@@ -85,15 +98,16 @@
    "search_index": 1
   },
   {
+   "depends_on": "eval:doc.employee != doc.employee_name",
    "fetch_from": "employee.employee_name",
    "fieldname": "employee_name",
-   "fieldtype": "Read Only",
+   "fieldtype": "Data",
    "in_global_search": 1,
    "in_list_view": 1,
    "label": "Employee Name",
    "oldfieldname": "employee_name",
    "oldfieldtype": "Data",
-   "reqd": 1
+   "read_only": 1
   },
   {
    "fetch_from": "employee.department",
@@ -110,10 +124,12 @@
    "depends_on": "eval:doc.designation",
    "fetch_from": "employee.designation",
    "fieldname": "designation",
-   "fieldtype": "Read Only",
+   "fieldtype": "Link",
    "label": "Designation",
    "oldfieldname": "designation",
-   "oldfieldtype": "Link"
+   "oldfieldtype": "Link",
+   "options": "Designation",
+   "read_only": 1
   },
   {
    "fetch_from": "employee.branch",
@@ -173,6 +189,7 @@
    "print_hide": 1
   },
   {
+   "depends_on": "salary_slip_based_on_timesheet",
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
   },
@@ -268,6 +285,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "fetch_from": "employee.bank_name",
    "fieldname": "bank_name",
    "fieldtype": "Data",
    "label": "Bank Name",
@@ -366,7 +384,7 @@
    "depends_on": "total_loan_repayment",
    "fieldname": "loan_repayment",
    "fieldtype": "Section Break",
-   "label": "Loan repayment"
+   "label": "Loan Repayment"
   },
   {
    "fieldname": "loans",
@@ -411,7 +429,7 @@
   {
    "fieldname": "net_pay_info",
    "fieldtype": "Section Break",
-   "label": "net pay info"
+   "label": "Net Pay Info"
   },
   {
    "description": "Gross Pay - Total Deduction - Loan Repayment",
@@ -436,10 +454,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "section_break_55",
-   "fieldtype": "Section Break"
-  },
-  {
    "description": "Net Pay (in words) will be visible once you save the Salary Slip.",
    "fieldname": "total_in_words",
    "fieldtype": "Data",
@@ -459,13 +473,94 @@
    "options": "Salary Slip",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_advance_amount",
+   "fieldtype": "Currency",
+   "label": "Total Advance Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "advances_section",
+   "fieldtype": "Section Break",
+   "label": "Total Advance Adjustment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "advances",
+   "fieldtype": "Table",
+   "label": "Employee Advance",
+   "options": "Salary Slip Employee Advance",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.tax_id",
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Tax Id",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.tax_cnic",
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.date_of_joining",
+   "fieldname": "joining_date",
+   "fieldtype": "Date",
+   "label": "Date of Joining",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_66",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.salary_mode",
+   "fieldname": "salary_mode",
+   "fieldtype": "Data",
+   "label": "Salary Mode",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_37",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2020-03-03 15:37:11.221939",
- "modified_by": "Administrator",
+ "modified": "2020-12-21 14:34:08.162915",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Salary Slip",
  "owner": "Administrator",

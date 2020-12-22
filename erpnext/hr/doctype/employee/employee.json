@@ -12,23 +12,26 @@
   "basic_information",
   "employee",
   "naming_series",
-  "salutation",
   "first_name",
   "middle_name",
   "last_name",
   "employee_name",
-  "image",
   "column_break1",
+  "salutation",
+  "gender",
+  "date_of_birth",
+  "image",
+  "column_break_12",
   "company",
   "status",
   "employee_number",
   "employment_type",
-  "gender",
-  "date_of_birth",
   "date_of_joining",
   "emergency_contact_details",
   "emergency_phone_number",
+  "column_break_21",
   "person_to_be_contacted",
+  "column_break_24",
   "relation",
   "erpnext_user",
   "user_id",
@@ -37,27 +40,31 @@
   "employment_details",
   "job_applicant",
   "scheduled_confirmation_date",
+  "column_break_33",
+  "contract_end_date",
   "final_confirmation_date",
   "col_break_22",
-  "contract_end_date",
   "notice_number_of_days",
   "date_of_retirement",
   "job_profile",
   "department",
+  "grade",
+  "column_break_41",
   "designation",
   "reports_to",
   "column_break_31",
-  "grade",
   "branch",
   "attendance_and_leave_details",
   "leave_policy",
+  "holiday_list",
+  "column_break_49",
+  "leave_approver",
   "attendance_device_id",
   "column_break_44",
-  "holiday_list",
   "default_shift",
-  "leave_approver",
   "salary_information",
   "salary_mode",
+  "column_break_56",
   "bank_name",
   "bank_ac_no",
   "health_insurance_section",
@@ -67,26 +74,33 @@
   "cell_number",
   "prefered_contact_email",
   "prefered_email",
-  "company_email",
   "personal_email",
-  "unsubscribed",
+  "company_email",
   "column_break4",
   "permanent_accommodation_type",
   "permanent_address",
+  "unsubscribed",
+  "column_break_71",
   "current_accommodation_type",
   "current_address",
   "sb53",
   "bio",
   "personal_details",
+  "tax_cnic",
+  "cnic_date_of_issue",
+  "cnic_valid_upto",
+  "tax_id",
+  "column_break_81",
   "passport_number",
   "date_of_issue",
-  "valid_upto",
   "place_of_issue",
+  "valid_upto",
   "column_break6",
-  "marital_status",
   "blood_group",
-  "family_background",
+  "marital_status",
   "health_details",
+  "column_break_87",
+  "family_background",
   "educational_qualification",
   "education",
   "previous_work_experience",
@@ -97,10 +111,11 @@
   "resignation_letter_date",
   "relieving_date",
   "reason_for_leaving",
+  "exit_interview_details",
   "leave_encashed",
   "encashment_date",
-  "exit_interview_details",
   "held_on",
+  "column_break_107",
   "reason_for_resignation",
   "new_workplace",
   "feedback",
@@ -669,7 +684,7 @@
   },
   {
    "fieldname": "reason_for_leaving",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Reason for Leaving",
    "oldfieldname": "reason_for_leaving",
    "oldfieldtype": "Data"
@@ -692,7 +707,6 @@
   {
    "fieldname": "exit_interview_details",
    "fieldtype": "Column Break",
-   "label": "Exit Interview Details",
    "oldfieldname": "col_brk6",
    "oldfieldtype": "Column Break",
    "width": "50%"
@@ -700,7 +714,7 @@
   {
    "fieldname": "held_on",
    "fieldtype": "Date",
-   "label": "Held On",
+   "label": "Exit Interview Held On",
    "oldfieldname": "held_on",
    "oldfieldtype": "Date"
   },
@@ -775,13 +789,77 @@
    "fieldtype": "Link",
    "label": "Leave Approver",
    "options": "User"
+  },
+  {
+   "fieldname": "cnic_date_of_issue",
+   "fieldtype": "Date",
+   "label": "CNIC Date of Issue"
+  },
+  {
+   "fieldname": "cnic_valid_upto",
+   "fieldtype": "Date",
+   "label": "CNIC Valid upto"
+  },
+  {
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "label": "CNIC"
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "label": "Tax Id"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_24",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_49",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_71",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_81",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_87",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_107",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_56",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-08-24 14:29:21.813560",
- "modified_by": "Administrator",
+ "modified": "2020-12-21 14:31:18.324236",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",

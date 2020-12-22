@@ -21,7 +21,7 @@ from erpnext.hr.doctype.employee_benefit_claim.employee_benefit_claim import get
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
 		super(SalarySlip, self).__init__(*args, **kwargs)
-		self.series = 'Sal Slip/{0}/.#####'.format(self.employee)
+		self.series = 'Sal Slip/{0}/.###'.format(self.employee)
 		self.whitelisted_globals = {
 			"int": int,
 			"float": float,
@@ -276,6 +276,24 @@ class SalarySlip(TransactionBase):
 
 			if leave:
 				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
+
+		if not cint(frappe.get_cached_value("HR Settings", None, "do_not_consider_absent_as_lwp")):
+			absent = frappe.db.sql("""
+				SELECT sum(CASE
+					WHEN t1.status = 'Half Day' THEN 0.5
+					WHEN t1.status = 'Absent' THEN 1
+					ELSE 0 END)
+				FROM `tabAttendance` as t1
+				WHERE t1.docstatus = 1
+				AND ifnull(leave_application, '') = ''
+				AND employee = %(employee)s
+				AND attendance_date between %(st_dt)s AND %(end_dt)s
+				and attendance_date not in ('{0}')
+			""".format(holidays), {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
+
+			absent_days = flt(absent[0][0]) if absent else 0
+			lwp += absent_days
+
 		return lwp
 
 	def add_earning_for_hourly_wages(self, doc, salary_component, amount):
@@ -308,6 +326,14 @@ class SalarySlip(TransactionBase):
 		self.set_loan_repayment()
 
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
+
+		if self.advances:
+			for d in self.advances:
+				d.allocated_amount = min(d.balance_amount, self.net_pay) if self.net_pay > 0 else 0
+				self.net_pay -= d.allocated_amount
+
+		self.total_advance_amount = sum([d.allocated_amount for d in self.advances])
+
 		self.rounded_total = rounded(self.net_pay)
 
 	def calculate_component_amounts(self, component_type):
@@ -493,6 +519,10 @@ class SalarySlip(TransactionBase):
 			self.start_date, tax_slab.allow_tax_exemption)
 		previous_total_paid_taxes = self.get_tax_paid_in_period(payroll_period.start_date, self.start_date, tax_component)
 
+		opening_tax_details = self.get_opening_income_tax_details(payroll_period)
+		previous_taxable_earnings += opening_tax_details.taxable_earnings
+		previous_total_paid_taxes += opening_tax_details.deducted_amount
+
 		# get taxable_earnings for current period (all days)
 		current_taxable_earnings = self.get_taxable_earnings(tax_slab.allow_tax_exemption)
 		future_structured_taxable_earnings = current_taxable_earnings.taxable_earnings * (math.ceil(remaining_sub_periods) - 1)
@@ -624,6 +654,16 @@ class SalarySlip(TransactionBase):
 
 		return total_tax_paid
 
+	def get_opening_income_tax_details(self, payroll_period):
+		opening_tax_details = frappe.db.sql("""
+			select
+				ifnull(sum(deducted_amount), 0) as deducted_amount,
+				ifnull(sum(taxable_earnings), 0) as taxable_earnings
+			from `tabEmployee Opening Income Tax`
+			where payroll_period = %s and employee = %s and docstatus = 1
+		""", [payroll_period.name, self.employee], as_dict=1)
+		return opening_tax_details[0]
+
 	def get_taxable_earnings(self, allow_tax_exemption=False, based_on_payment_days=0):
 		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
@@ -674,6 +714,10 @@ class SalarySlip(TransactionBase):
 		})
 
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
+		payment_days = flt(self.payment_days)
+		if frappe.get_cached_value("HR Settings", None, "consider_lwp_as_deduction"):
+			payment_days += self.leave_without_pay
+
 		amount, additional_amount = row.amount, row.additional_amount
 		if (self.salary_structure and
 			cint(row.depends_on_payment_days) and cint(self.total_working_days) and
@@ -681,12 +725,12 @@ class SalarySlip(TransactionBase):
 				getdate(self.start_date) < joining_date or
 				getdate(self.end_date) > relieving_date
 			)):
-			additional_amount = flt((flt(row.additional_amount) * flt(self.payment_days)
+			additional_amount = flt((flt(row.additional_amount) * flt(payment_days)
 				/ cint(self.total_working_days)), row.precision("additional_amount"))
-			amount = flt((flt(row.default_amount) * flt(self.payment_days)
+			amount = flt((flt(row.default_amount) * flt(payment_days)
 				/ cint(self.total_working_days)), row.precision("amount")) + additional_amount
 
-		elif not self.payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
+		elif not payment_days and not self.salary_slip_based_on_timesheet and cint(row.depends_on_payment_days):
 			amount, additional_amount = 0, 0
 		elif not row.amount:
 			amount = flt(row.default_amount) + flt(row.additional_amount)
@@ -767,12 +811,12 @@ class SalarySlip(TransactionBase):
 			if slab.condition and not self.eval_tax_slab_condition(slab.condition, data):
 				continue
 			if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
+				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
 				continue
 			if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
-				tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction *.01
+				tax_amount += (annual_taxable_earning - slab.from_amount) * slab.percent_deduction *.01
 			elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
-				tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * .01
+				tax_amount += (slab.to_amount - slab.from_amount) * slab.percent_deduction * .01
 
 		# other taxes and charges on income tax
 		for d in tax_slab.other_taxes_and_charges:
@@ -930,17 +974,34 @@ class SalarySlip(TransactionBase):
 			self.get_date_details()
 		self.pull_emp_details()
 		self.get_leave_details(for_preview=for_preview)
+		self.get_pending_advances()
 		self.calculate_net_pay()
 
 	def pull_emp_details(self):
-		emp = frappe.db.get_value("Employee", self.employee, ["bank_name", "bank_ac_no"], as_dict=1)
+		emp = frappe.db.get_value("Employee", self.employee, ["salary_mode", "bank_name", "bank_ac_no"], as_dict=1)
 		if emp:
+			self.salary_mode = emp.salary_mode
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
 
 	def process_salary_based_on_leave(self, lwp=0):
 		self.get_leave_details(lwp=lwp)
 		self.calculate_net_pay()
+
+	def get_pending_advances(self):
+		self.advances = []
+
+		pending_advances = frappe.db.sql("""
+			select name as employee_advance, paid_amount as total_advance, balance_amount, posting_date, advance_account
+			from `tabEmployee Advance`
+			where docstatus=1 and employee=%s and posting_date <= %s and deduct_from_salary = 1 and balance_amount > 0
+			order by posting_date
+		""", [self.employee, self.end_date], as_dict=1)
+
+		total_pending_advance = 0
+		for data in pending_advances:
+			self.append('advances', data)
+			total_pending_advance += data.total_advance
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`

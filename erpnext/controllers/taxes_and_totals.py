@@ -199,6 +199,7 @@ class calculate_taxes_and_totals(object):
 
 		for item in self.doc.get("items"):
 			item.item_tax_detail = {}
+			item.item_taxes_and_charges = 0
 
 	def determine_exclusive_rate(self):
 		for item in self.doc.get("items"):

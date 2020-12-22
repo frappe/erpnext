@@ -17,7 +17,7 @@ class PayrollEntry(Document):
     			return
 
 		# check if salary slips were manually submitted
-		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1}, ['name'])
+		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1})
 		if cint(entries) == len(self.employees):
     			self.set_onload("submitted_ss", True)
 
@@ -30,8 +30,15 @@ class PayrollEntry(Document):
 				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
 
 	def on_cancel(self):
-		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
-			where payroll_entry=%s """, (self.name)))
+		ss = frappe.db.sql("""select name, journal_entry from `tabSalary Slip`
+			where payroll_entry=%s""", (self.name), as_dict=1)
+
+		salary_slips = [d.name for d in ss]
+		journal_entries = list(set([d.journal_entry for d in ss if d.journal_entry]))
+
+		frappe.delete_doc("Salary Slip", salary_slips)
+		for jv in journal_entries:
+			frappe.get_doc("Journal Entry", jv).cancel()
 
 	def get_emp_list(self):
 		"""
@@ -170,6 +177,20 @@ class PayrollEntry(Document):
 				t1.docstatus = 1 and t1.name = eld.parent and start_date >= %s and end_date <= %s %s
 			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True) or []
 
+	def get_advance_details(self):
+		"""
+			Get advance details from submitted salary slip based on selected criteria
+		"""
+
+		cond = self.get_filter_condition()
+		return frappe.db.sql("""
+			select t1.employee, ead.employee_advance,  ead.advance_account, ead.balance_amount, ead.allocated_amount
+			from 
+				`tabSalary Slip` t1, `tabSalary Slip Employee Advance` ead
+			where
+				t1.docstatus = 1 and t1.name = ead.parent and  start_date >= %s and end_date <= %s %s
+			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_dict=True) or []
+
 	def get_salary_component_account(self, salary_component):
 		account = frappe.db.get_value("Salary Component Account",
 			{"parent": salary_component, "company": self.company}, "default_account")
@@ -184,7 +205,8 @@ class PayrollEntry(Document):
 		salary_slips = self.get_sal_slip_list(ss_status = 1, as_dict = True)
 		if salary_slips:
 			salary_components = frappe.db.sql("""select salary_component, amount, parentfield
-				from `tabSalary Detail` where parentfield = '%s' and parent in (%s)""" %
+				from `tabSalary Detail`
+				where parentfield = '%s' and parent in (%s)""" %
 				(component_type, ', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=True)
 			return salary_components
 
@@ -226,6 +248,7 @@ class PayrollEntry(Document):
 		deductions = self.get_salary_component_total(component_type = "deductions") or {}
 		default_payroll_payable_account = self.get_default_payroll_payable_account()
 		loan_details = self.get_loan_details()
+		advance_details = self.get_advance_details()
 		jv_name = ""
 		precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
 
@@ -285,7 +308,21 @@ class PayrollEntry(Document):
 					})
 				payable_amount -= flt(data.total_payment, precision)
 
-			# Payable amount
+			for data in advance_details:
+				allocated_amount = flt(data.allocated_amount, precision)
+				payable_amount -= allocated_amount
+
+				if allocated_amount:
+					accounts.append({
+						"account": data.advance_account,
+						"party": data.employee,
+						"party_type": "Employee",
+						"reference_type": "Employee Advance",
+						"credit_in_account_currency": allocated_amount,
+						"reference_name": data.employee_advance,
+						"cost_center": self.cost_center
+					})
+
 			accounts.append({
 				"account": default_payroll_payable_account,
 				"credit_in_account_currency": flt(payable_amount, precision),
@@ -297,12 +334,10 @@ class PayrollEntry(Document):
 			journal_entry.title = default_payroll_payable_account
 			journal_entry.save()
 
-			try:
-				journal_entry.submit()
-				jv_name = journal_entry.name
-				self.update_salary_slip_status(jv_name = jv_name)
-			except Exception as e:
-				frappe.msgprint(e)
+			jv_name = journal_entry.name
+			self.update_salary_slip_status(jv_name = jv_name)
+
+			journal_entry.submit()
 
 		return jv_name
 

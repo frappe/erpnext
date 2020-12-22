@@ -995,7 +995,6 @@ class AccountsController(TransactionBase):
 
 	def group_items_by_item_tax_and_item_group(self):
 		grouped = OrderedDict()
-		tax_copy_fields = ['name', 'idx', 'account_head', 'description', 'charge_type', 'row_id']
 
 		for item in self.items:
 			group_data = grouped.setdefault(cstr(item.item_tax_template), frappe._dict({"items": []}))
@@ -1010,39 +1009,7 @@ class AccountsController(TransactionBase):
 				group_data[group_field] = sum([flt(d.get(item_field)) for d in group_data['items']])
 				group_data["base_" + group_field] = group_data[group_field] * self.conversion_rate
 
-			# initialize tax rows for item tax template group
-			group_data.taxes = OrderedDict()
-			for tax in self.taxes:
-				new_tax_row = frappe._dict({k:v for (k, v) in tax.as_dict().items() if k in tax_copy_fields})
-				new_tax_row.tax_amount_after_discount_amount = 0
-				new_tax_row.total = 0
-
-				group_data.taxes[tax.name] = new_tax_row
-
-			# sum up tax amounts
-			for item in group_data['items']:
-				item_tax_detail = json.loads(item.item_tax_detail or '{}')
-				for tax_row_name, tax_amount in item_tax_detail.items():
-					group_data.taxes[tax_row_name].tax_amount_after_discount_amount += flt(tax_amount)
-
-			# calculate total after taxes
-			for i, tax in enumerate(group_data.taxes.values()):
-				if i == 0:
-					tax.total = group_data.taxable_total + tax.tax_amount_after_discount_amount
-				else:
-					tax.total = list(group_data.taxes.values())[i-1].total + tax.tax_amount_after_discount_amount
-
-			# calculate tax rates
-			for i, tax in enumerate(group_data.taxes.values()):
-				if tax.charge_type in ('On Previous Row Total', 'On Previous Row Amount'):
-					fieldname = 'total' if tax.charge_type == 'On Previous Row Total' else 'tax_amount_after_discount_amount'
-					prev_row_taxable = list(group_data.taxes.values())[cint(tax.row_id)-1].get(fieldname)
-					tax.rate = (tax.tax_amount_after_discount_amount / prev_row_taxable) * 100 if prev_row_taxable else 0
-				else:
-					tax.rate = (tax.tax_amount_after_discount_amount / group_data.taxable_total) * 100 if group_data.taxable_total\
-						else 0
-
-			group_data.taxes = list(group_data.taxes.values())
+			self.calculate_taxes_for_group(group_data)
 
 		# reset item index
 		item_idx = 1
@@ -1067,6 +1034,8 @@ class AccountsController(TransactionBase):
 				group_data[group_field] = sum([flt(d.get(item_field)) for d in group_data['items']])
 				group_data["base_" + group_field] = group_data[group_field] * self.conversion_rate
 
+			self.calculate_taxes_for_group(group_data)
+
 		# Sort by Item Group Order
 		out = OrderedDict()
 		price_list_settings = frappe.get_cached_doc("Price List Settings", None)
@@ -1080,6 +1049,44 @@ class AccountsController(TransactionBase):
 			out[item_group] = grouped[item_group]
 
 		return out
+
+	def calculate_taxes_for_group(self, group_data):
+		tax_copy_fields = ['name', 'idx', 'account_head', 'description', 'charge_type', 'row_id']
+
+		# initialize tax rows for item tax template group
+		group_data.taxes = OrderedDict()
+		for tax in self.taxes:
+			new_tax_row = frappe._dict({k:v for (k, v) in tax.as_dict().items() if k in tax_copy_fields})
+			new_tax_row.tax_amount_after_discount_amount = 0
+			new_tax_row.total = 0
+
+			group_data.taxes[tax.name] = new_tax_row
+
+		# sum up tax amounts
+		for item in group_data['items']:
+			item_tax_detail = json.loads(item.item_tax_detail or '{}')
+			for tax_row_name, tax_amount in item_tax_detail.items():
+				group_data.taxes[tax_row_name].tax_amount_after_discount_amount += flt(tax_amount)
+
+		# calculate total after taxes
+		for i, tax in enumerate(group_data.taxes.values()):
+			if i == 0:
+				tax.total = group_data.taxable_total + tax.tax_amount_after_discount_amount
+			else:
+				tax.total = list(group_data.taxes.values())[i-1].total + tax.tax_amount_after_discount_amount
+
+		# calculate tax rates
+		for i, tax in enumerate(group_data.taxes.values()):
+			if tax.charge_type in ('On Previous Row Total', 'On Previous Row Amount'):
+				fieldname = 'total' if tax.charge_type == 'On Previous Row Total' else 'tax_amount_after_discount_amount'
+				prev_row_taxable = list(group_data.taxes.values())[cint(tax.row_id)-1].get(fieldname)
+				tax.rate = (tax.tax_amount_after_discount_amount / prev_row_taxable) * 100 if prev_row_taxable else 0
+			else:
+				tax.rate = (tax.tax_amount_after_discount_amount / group_data.taxable_total) * 100 if group_data.taxable_total\
+					else 0
+
+		group_data.taxes = list(group_data.taxes.values())
+
 
 	def get_gl_entries_for_print(self):
 		if self.docstatus == 1:

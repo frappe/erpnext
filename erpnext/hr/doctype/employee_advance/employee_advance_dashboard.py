@@ -14,8 +14,8 @@ def get_data():
 				'items': ['Payment Entry', 'Journal Entry']
 			},
 			{
-				'label': ['Claims'],
-				'items': ['Expense Claim']
+				'label': ['Adjustments'],
+				'items': ['Expense Claim', 'Salary Slip']
 			}
 		]
 	}

@@ -101,6 +101,7 @@ status_map = {
 		["Unpaid", "eval:self.docstatus==1"],
 		["Unclaimed", "eval:self.paid_amount and self.paid_amount == self.advance_amount and self.docstatus==1"],
 		["Claimed", "eval:self.paid_amount and self.balance_amount == 0 and self.docstatus==1"],
+		["Deducted from Salary", "eval:self.paid_amount and self.salary_deduction_amount and self.balance_amount == 0 and self.docstatus==1"],
 		["Cancelled", "eval:self.docstatus==2"],
 	],
 	"Expense Claim": [

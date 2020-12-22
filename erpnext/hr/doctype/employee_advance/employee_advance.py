@@ -45,6 +45,21 @@ class EmployeeAdvance(StatusUpdater):
 				and voucher_type != 'Expense Claim'
 		""", {"name": self.name, "party": self.employee}, as_dict=1)[0]
 
+		salary_deduction = frappe.db.sql("""
+			select sum(gle.credit-gle.debit)
+			from `tabGL Entry` gle
+			where gle.against_voucher_type = 'Employee Advance'
+				and gle.against_voucher = %s
+				and gle.party_type = 'Employee'
+				and gle.party = %s
+				and gle.voucher_type = 'Journal Entry'
+				and exists(select ss.name from `tabSalary Slip` ss
+					where ss.journal_entry = gle.voucher_no and ss.docstatus=1)
+		""", (self.name, self.employee))
+		salary_deduction = flt(salary_deduction[0][0]) if salary_deduction else 0
+
+		payments.returned_amount -= salary_deduction
+
 		claimed_amount = frappe.db.sql("""
 			select ifnull(sum(credit), 0)
 			from `tabGL Entry`
@@ -61,6 +76,7 @@ class EmployeeAdvance(StatusUpdater):
 		values = {
 			"paid_amount": payments.paid_amount,
 			"returned_amount": payments.returned_amount,
+			"salary_deduction_amount": salary_deduction,
 			"claimed_amount": flt(claimed_amount)
 		}
 		self.update(values)
