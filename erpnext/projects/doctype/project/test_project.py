@@ -8,7 +8,7 @@ test_records = frappe.get_test_records('Project')
 test_ignore = ["Sales Order"]
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
-from erpnext.projects.doctype.project.project import set_project_status, update_if_holiday
+from erpnext.projects.doctype.project.project import update_if_holiday
 from erpnext.projects.doctype.task.test_task import create_task
 from frappe.utils import getdate, nowdate, add_days
 
