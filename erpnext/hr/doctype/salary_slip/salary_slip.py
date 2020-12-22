@@ -277,7 +277,7 @@ class SalarySlip(TransactionBase):
 			if leave:
 				lwp = cint(leave[0][1]) and (lwp + 0.5) or (lwp + 1)
 
-		if not cint(frappe.db.get_value("HR Settings", None, "do_not_consider_absent_as_lwp")):
+		if not cint(frappe.get_cached_value("HR Settings", None, "do_not_consider_absent_as_lwp")):
 			absent = frappe.db.sql("""
 				SELECT sum(CASE
 					WHEN t1.status = 'Half Day' THEN 0.5
@@ -715,7 +715,7 @@ class SalarySlip(TransactionBase):
 
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		payment_days = flt(self.payment_days)
-		if frappe.db.get_value("HR Settings", None, "consider_lwp_as_deduction"):
+		if frappe.get_cached_value("HR Settings", None, "consider_lwp_as_deduction"):
 			payment_days += self.leave_without_pay
 
 		amount, additional_amount = row.amount, row.additional_amount

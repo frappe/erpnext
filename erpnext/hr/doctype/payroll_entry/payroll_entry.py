@@ -34,12 +34,11 @@ class PayrollEntry(Document):
 			where payroll_entry=%s""", (self.name), as_dict=1)
 
 		salary_slips = [d.name for d in ss]
-		journal_entries = list(set([d.journal_entry for d in ss]))
+		journal_entries = list(set([d.journal_entry for d in ss if d.journal_entry]))
 
 		frappe.delete_doc("Salary Slip", salary_slips)
 		for jv in journal_entries:
-			if jv:
-				frappe.get_doc("Journal Entry", jv).cancel()
+			frappe.get_doc("Journal Entry", jv).cancel()
 
 	def get_emp_list(self):
 		"""
