@@ -214,14 +214,16 @@ frappe.ui.form.on('Salary Slip Timesheet', {
 });
 
 var calculate_totals = function(frm) {
-	if (frm.doc.earnings || frm.doc.deductions) {
-		frappe.call({
-			method: "set_totals",
-			doc: frm.doc,
-			callback: function() {
-				frm.refresh_fields();
-			}
-		});
+	if (frm.doc.docstatus === 0) {
+		if (frm.doc.earnings || frm.doc.deductions) {
+			frappe.call({
+				method: "set_totals",
+				doc: frm.doc,
+				callback: function() {
+					frm.refresh_fields();
+				}
+			});
+		}
 	}
 };
 
