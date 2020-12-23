@@ -19,7 +19,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				frm.set_df_property('ewaybill', 'read_only', 1);
 			}
 
-			if (docstatus == 0 && !irn && !__unsaved) {
+			if (!irn && !__unsaved) {
 				const action = () => {
 					frappe.call({
 						method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
@@ -35,7 +35,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				add_custom_button(__("Generate IRN"), action);
 			}
 
-			if (docstatus == 1 && irn && !irn_cancelled && !ewaybill) {
+			if (irn && !irn_cancelled && !ewaybill) {
 				const fields = [
 					{
 						"label": "Reason",
@@ -108,7 +108,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				add_custom_button(__("Generate E-Way Bill"), action);
 			}
 
-			if (docstatus == 1 && irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
+			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
 				const fields = [
 					{
 						"label": "Reason",
