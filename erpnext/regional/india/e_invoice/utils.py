@@ -26,8 +26,8 @@ def validate_einvoice_fields(doc):
 	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction: return
 
 	if doc.docstatus == 0 and doc._action == 'save':
-		# if doc.irn:
-		# 	frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
+		if doc.irn:
+			frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
 		if len(doc.name) > 16:
 			title = _('Document Name Too Long')
 			msg = _('As you have E-Invoicing enabled, To be able to generate IRN for this invoice, ')
