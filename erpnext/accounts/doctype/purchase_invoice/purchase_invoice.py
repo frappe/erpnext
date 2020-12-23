@@ -471,7 +471,7 @@ class PurchaseInvoice(BuyingController):
 		else:
 			self.stock_received_but_not_billed = None
 			self.expenses_included_in_valuation = None
-		
+
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
 
@@ -485,7 +485,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
-		
+
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_payment_gl_entries(gl_entries)
@@ -508,7 +508,7 @@ class PurchaseInvoice(BuyingController):
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
 
 		if grand_total and not self.is_internal_transfer():
-				# Didnot use base_grand_total to book rounding loss gle
+				# Did not use base_grand_total to book rounding loss gle
 				grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 					self.precision("grand_total"))
 				gl_entries.append(
@@ -539,8 +539,8 @@ class PurchaseInvoice(BuyingController):
 		voucher_wise_stock_value = {}
 		if self.update_stock:
 			for d in frappe.get_all('Stock Ledger Entry',
-				fields = ["voucher_detail_no", "stock_value_difference"], filters={'voucher_no': self.name}):
-				voucher_wise_stock_value.setdefault(d.voucher_detail_no, d.stock_value_difference)
+				fields = ["voucher_detail_no", "stock_value_difference", "warehouse"], filters={'voucher_no': self.name}):
+				voucher_wise_stock_value.setdefault((d.voucher_detail_no, d.warehouse), d.stock_value_difference)
 
 		valuation_tax_accounts = [d.account_head for d in self.get("taxes")
 			if d.category in ('Valuation', 'Total and Valuation')
@@ -823,10 +823,10 @@ class PurchaseInvoice(BuyingController):
 
 		# Stock ledger value is not matching with the warehouse amount
 		if (self.update_stock and voucher_wise_stock_value.get(item.name) and
-			warehouse_debit_amount != flt(voucher_wise_stock_value.get(item.name), net_amt_precision)):
+			warehouse_debit_amount != flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)):
 
 			cost_of_goods_sold_account = self.get_company_default("default_expense_account")
-			stock_amount = flt(voucher_wise_stock_value.get(item.name), net_amt_precision)
+			stock_amount = flt(voucher_wise_stock_value.get((item.name, item.warehouse)), net_amt_precision)
 			stock_adjustment_amt = warehouse_debit_amount - stock_amount
 
 			gl_entries.append(
@@ -1027,10 +1027,10 @@ class PurchaseInvoice(BuyingController):
 			self.delete_auto_created_batches()
 
 		self.make_gl_entries_on_cancel()
-		
+
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
-		
+
 		self.update_project()
 		frappe.db.set(self, 'status', 'Cancelled')
 

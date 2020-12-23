@@ -72,7 +72,7 @@ class StockController(AccountsController):
 		warehouse_with_no_account = []
 		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 		for item_row in voucher_details:
-			sle_list = sle_map.get(item_row.name)
+			sle_list = sle_map.get((item_row.name, item_row.warehouse))
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
@@ -216,7 +216,7 @@ class StockController(AccountsController):
 		""", (self.doctype, self.name), as_dict=True)
 
 		for sle in stock_ledger_entries:
-				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
+				stock_ledger.setdefault((sle.voucher_detail_no, sle.warehouse), []).append(sle)
 		return stock_ledger
 
 	def make_batches(self, warehouse_field):

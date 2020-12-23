@@ -44,7 +44,6 @@ class BuyingController(StockController):
 		self.validate_items()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
-		self.update_tax_category_for_internal_transfer()
 		self.validate_warehouse()
 		self.validate_from_warehouse()
 		self.set_supplier_address()
@@ -66,6 +65,8 @@ class BuyingController(StockController):
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate()
+
+		self.set_out_going_rate()
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
@@ -98,11 +99,6 @@ class BuyingController(StockController):
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
 			msg = _('Tax Category has been changed to "Total" because all the Items are non-stock items')
-			self.update_tax_category(msg)
-
-	def update_tax_category_for_internal_transfer(self):
-		if self.doctype == 'Purchase Invoice' and self.is_internal_transfer():
-			msg = _('Tax Category has been changed to "Total" as its an internal purchase.')
 			self.update_tax_category(msg)
 
 	def update_tax_category(self, msg):
@@ -224,6 +220,32 @@ class BuyingController(StockController):
 			else:
 				item.valuation_rate = 0.0
 
+	def set_out_going_rate(self):
+		if self.doctype not in ("Purchase Receipt", "Purchase Invoice"):
+			return
+
+		items = self.get("items")
+		for d in items:
+			if not cint(self.get("is_return")) and d.get("target_warehouse"):
+				# Get outgoing rate based on original item cost based on valuation method
+				d.outgoing_rate = get_incoming_rate({
+					"item_code": d.item_code,
+					"warehouse": d.target_warehouse,
+					"posting_date": self.posting_date,
+					"posting_time": self.posting_time,
+					"qty": -1 * flt(d.qty),
+					"serial_no": d.serial_no,
+					"company": self.company,
+					"voucher_type": self.doctype,
+					"voucher_no": self.name,
+					"allow_zero_valuation": d.get("allow_zero_valuation")
+				}, raise_error_if_no_rate=False)
+
+			elif self.get("return_against"):
+				# Get incoming rate of return entry from reference document
+				# based on original item cost as per valuation method
+				d.outgoing_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)
+
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
 		supplied_items_cost = 0.0
 		for d in self.get("supplied_items"):
@@ -243,7 +265,7 @@ class BuyingController(StockController):
 
 				d.amount = flt(flt(d.consumed_qty) * flt(d.rate), d.precision("amount"))
 				supplied_items_cost += flt(d.amount)
-		
+
 		return supplied_items_cost
 
 	def validate_for_subcontracting(self):
@@ -559,6 +581,7 @@ class BuyingController(StockController):
 						from_warehouse_sle = self.get_sl_entries(d, {
 							"actual_qty": -1 * pr_qty,
 							"warehouse": d.from_warehouse,
+							"outgoing_rate": d.outgoing_rate,
 							"dependant_sle_voucher_detail_no": d.name
 						})
 
@@ -569,10 +592,8 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
-						outgoing_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)
-
 						sle.update({
-							"outgoing_rate": outgoing_rate,
+							"outgoing_rate": d.outgoing_rate,
 							"recalculate_rate": 1
 						})
 						if d.from_warehouse:
