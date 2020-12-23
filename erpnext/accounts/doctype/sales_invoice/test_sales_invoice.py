@@ -688,7 +688,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
-		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
@@ -745,7 +745,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get('payments')[0].amount, -1000)
 
 	def test_pos_change_amount(self):
-		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
@@ -1770,59 +1770,59 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(target_doc.company, "_Test Company 1")
 		self.assertEqual(target_doc.supplier, "_Test Internal Supplier")
 
-	# def test_internal_transfer_gl_entry(self):
-	# 	## Create internal transfer account
-	# 	account = create_account(account_name="Unrealized Profit",
-	# 		parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
+	def test_internal_transfer_gl_entry(self):
+		## Create internal transfer account
+		account = create_account(account_name="Unrealized Profit",
+			parent_account="Current Liabilities - TCP1", company="_Test Company with perpetual inventory")
 
-	# 	frappe.db.set_value('Company', '_Test Company with perpetual inventory',
-	# 		'unrealized_profit_loss_account', account)
+		frappe.db.set_value('Company', '_Test Company with perpetual inventory',
+			'unrealized_profit_loss_account', account)
 
-	# 	customer = create_internal_customer("_Test Internal Customer 2", "_Test Company with perpetual inventory",
-	# 		"_Test Company with perpetual inventory")
+		customer = create_internal_customer("_Test Internal Customer 2", "_Test Company with perpetual inventory",
+			"_Test Company with perpetual inventory")
 
-	# 	create_internal_supplier("_Test Internal Supplier 2", "_Test Company with perpetual inventory",
-	# 		"_Test Company with perpetual inventory")
+		create_internal_supplier("_Test Internal Supplier 2", "_Test Company with perpetual inventory",
+			"_Test Company with perpetual inventory")
 
-	# 	si = create_sales_invoice(
-	# 		company = "_Test Company with perpetual inventory",
-	# 		customer = customer,
-	# 		debit_to = "Debtors - TCP1",
-	# 		warehouse = "Stores - TCP1",
-	# 		income_account = "Sales - TCP1",
-	# 		expense_account = "Cost of Goods Sold - TCP1",
-	# 		cost_center = "Main - TCP1",
-	# 		currency = "INR",
-	# 		do_not_save = 1
-	# 	)
+		si = create_sales_invoice(
+			company = "_Test Company with perpetual inventory",
+			customer = customer,
+			debit_to = "Debtors - TCP1",
+			warehouse = "Stores - TCP1",
+			income_account = "Sales - TCP1",
+			expense_account = "Cost of Goods Sold - TCP1",
+			cost_center = "Main - TCP1",
+			currency = "INR",
+			do_not_save = 1
+		)
 
-	# 	si.selling_price_list = "_Test Price List Rest of the World"
-	# 	si.update_stock = 1
-	# 	si.items[0].target_warehouse = 'Work In Progress - TCP1'
-	# 	add_taxes(si)
-	# 	si.save()
-	# 	si.submit()
+		si.selling_price_list = "_Test Price List Rest of the World"
+		si.update_stock = 1
+		si.items[0].target_warehouse = 'Work In Progress - TCP1'
+		add_taxes(si)
+		si.save()
+		si.submit()
 
-	# 	target_doc = make_inter_company_transaction("Sales Invoice", si.name)
-	# 	target_doc.company = '_Test Company with perpetual inventory'
-	# 	target_doc.items[0].warehouse = 'Finished Goods - TCP1'
-	# 	add_taxes(target_doc)
-	# 	target_doc.save()
-	# 	target_doc.submit()
+		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
+		target_doc.company = '_Test Company with perpetual inventory'
+		target_doc.items[0].warehouse = 'Finished Goods - TCP1'
+		add_taxes(target_doc)
+		target_doc.save()
+		target_doc.submit()
 
-	# 	si_gl_entries = [
-	# 		["_Test Account Excise Duty - TCP1", 0.0, 12.0, nowdate()],
-	# 		["Unrealized Profit - TCP1", 12.0, 0.0, nowdate()]
-	# 	]
+		si_gl_entries = [
+			["_Test Account Excise Duty - TCP1", 0.0, 12.0, nowdate()],
+			["Unrealized Profit - TCP1", 12.0, 0.0, nowdate()]
+		]
 
-	# 	check_gl_entries(self, si.name, si_gl_entries, add_days(nowdate(), -1))
+		check_gl_entries(self, si.name, si_gl_entries, add_days(nowdate(), -1))
 
-	# 	pi_gl_entries = [
-	# 		["_Test Account Excise Duty - TCP1", 12.0 , 0.0, nowdate()],
-	# 		["Unrealized Profit - TCP1", 0.0, 12.0, nowdate()]
-	# 	]
+		pi_gl_entries = [
+			["_Test Account Excise Duty - TCP1", 12.0 , 0.0, nowdate()],
+			["Unrealized Profit - TCP1", 0.0, 12.0, nowdate()]
+		]
 
-	# 	check_gl_entries(self, target_doc.name, pi_gl_entries, add_days(nowdate(), -1))
+		check_gl_entries(self, target_doc.name, pi_gl_entries, add_days(nowdate(), -1))
 
 	def test_eway_bill_json(self):
 		if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):

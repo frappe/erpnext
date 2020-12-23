@@ -191,7 +191,7 @@ class SellingController(StockController):
 		for it in self.get("items"):
 			if not it.item_code:
 				continue
-			
+
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
 			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
@@ -331,6 +331,12 @@ class SellingController(StockController):
 					"voucher_no": self.name,
 					"allow_zero_valuation": d.get("allow_zero_valuation")
 				}, raise_error_if_no_rate=False)
+
+				# For internal transfers use incoming rate as the valuation rate
+				if self.get('is_internal_customer') and d.get('target_warehouse'):
+					d.rate = d.incoming_rate
+					frappe.msgprint(_("Row {0}: Item rate updated as the valuation rate since its an internal transfer").format(d.idx))
+
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
 				# based on original item cost as per valuation method
@@ -391,7 +397,7 @@ class SellingController(StockController):
 				})
 				if item_row.warehouse:
 					sle.dependant_sle_voucher_detail_no = item_row.name
-			
+
 		return sle
 
 	def set_po_nos(self, for_validate=False):
