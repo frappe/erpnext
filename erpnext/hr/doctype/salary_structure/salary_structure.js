@@ -140,9 +140,9 @@ frappe.ui.form.on('Salary Structure', {
 					var values = d.get_values();
 					if(!values) return;
 					var print_format;
-					frm.doc.salary_slip_based_on_timesheet ?
-						print_format="Salary Slip based on Timesheet" :
-						print_format="Salary Slip Standard";
+					if (frm.doc.salary_slip_based_on_timesheet) {
+						print_format="Salary Slip based on Timesheet";
+					}
 
 					frappe.call({
 						method: "erpnext.hr.doctype.salary_structure.salary_structure.make_salary_slip",
