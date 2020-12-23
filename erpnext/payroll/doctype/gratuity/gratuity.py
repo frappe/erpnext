@@ -116,7 +116,7 @@ def calculate_work_experience(employee, gratuity_rule):
 	employee_total_workings_days = calculate_employee_total_workings_days(employee, date_of_joining, relieving_date)
 
 	current_work_experience = employee_total_workings_days/total_working_days_per_year or 1
-	current_work_experience = get_work_experience_using_method(method, current_work_experience, minimum_year_for_gratuity)
+	current_work_experience = get_work_experience_using_method(method, current_work_experience, minimum_year_for_gratuity, employee)
 	return current_work_experience
 
 def calculate_employee_total_workings_days(employee, date_of_joining, relieving_date ):
@@ -132,7 +132,7 @@ def calculate_employee_total_workings_days(employee, date_of_joining, relieving_
 
 	return employee_total_workings_days
 
-def get_work_experience_using_method(method, current_work_experience, minimum_year_for_gratuity):
+def get_work_experience_using_method(method, current_work_experience, minimum_year_for_gratuity, employee):
 	if method == "Round off Work Experience":
 		current_work_experience = round(current_work_experience)
 	else:
@@ -174,7 +174,7 @@ def calculate_gratuity_amount(employee, gratuity_rule, experience):
 		if calculate_gratuity_amount_based_on == "Current Slab":
 			slab_found, gratuity_amount = calculate_amount_based_on_current_slab(slab.from_year, slab.to_year,
 				experience, total_applicable_components_amount, slab.fraction_of_applicable_earnings)
-			if slab_found == True:
+			if slab_found:
 					break
 
 		elif calculate_gratuity_amount_based_on == "Sum of all previous slabs":
