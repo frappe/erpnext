@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "transaction_type_name",
+  "disabled",
   "selling",
   "buying",
   "column_break_3",
@@ -162,9 +163,15 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
   }
  ],
- "modified": "2020-10-16 22:54:28.702690",
+ "modified": "2020-12-23 12:43:56.042156",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",
