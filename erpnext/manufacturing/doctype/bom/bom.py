@@ -163,6 +163,21 @@ class BOM(WebsiteGenerator):
 		frappe.cache().hdel('bom_children', self.name)
 		self.check_recursion()
 
+	def on_submit(self):
+		self.manage_default_bom()
+
+	def on_cancel(self):
+		frappe.db.set(self, "is_active", 0)
+		frappe.db.set(self, "is_default", 0)
+
+		# check if used in any other bom
+		self.validate_bom_links()
+		self.manage_default_bom()
+
+	def on_update_after_submit(self):
+		self.validate_bom_links()
+		self.manage_default_bom()
+
 	def get_item_det(self, item_code):
 		item = get_item_details(item_code)
 
@@ -294,7 +309,7 @@ class BOM(WebsiteGenerator):
 			if save:
 				d.db_update()
 
-		if self.docstatus == 0:
+		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
 			self.calculate_cost(update_hour_rate)
 		if save:
@@ -305,7 +320,7 @@ class BOM(WebsiteGenerator):
 		# update parent BOMs
 		if self.total_cost != existing_bom_cost and update_parent:
 			parent_boms = frappe.db.sql_list("""select distinct parent from `tabBOM Item`
-				where bom_no = %s and docstatus=0 and parenttype='BOM'""", self.name)
+				where bom_no = %s and docstatus=1 and parenttype='BOM'""", self.name)
 
 			for bom in parent_boms:
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
@@ -331,21 +346,19 @@ class BOM(WebsiteGenerator):
 			check the current one as default if it the only bom for the selected item,
 			update default bom in item master
 		"""
-		default_bom = frappe.get_cached_value("Item", self.item, "default_bom")
-		if (default_bom and self.is_default and self.is_active and default_bom == self.name):
-			return
-
 		if self.is_default and self.is_active:
 			from frappe.model.utils import set_default
 			set_default(self, "item")
-			if default_bom != self.name:
+			item = frappe.get_doc("Item", self.item)
+			if item.default_bom != self.name:
 				frappe.db.set_value('Item', self.item, 'default_bom', self.name)
-		elif (not frappe.db.exists(dict(doctype='BOM', docstatus=0, item=self.item, is_default=1))
-			and self.is_active):
-			self.is_default = 1
+		elif not frappe.db.exists(dict(doctype='BOM', docstatus=1, item=self.item, is_default=1)) \
+			and self.is_active:
+			frappe.db.set(self, "is_default", 1)
 		else:
-			self.is_default = 0
-			if default_bom == self.name:
+			frappe.db.set(self, "is_default", 0)
+			item = frappe.get_doc("Item", self.item)
+			if item.default_bom == self.name:
 				frappe.db.set_value('Item', self.item, 'default_bom', None)
 
 	def clear_operations(self):
@@ -594,7 +607,7 @@ class BOM(WebsiteGenerator):
 			WHERE
 				bom_item.parent = bom.name
 				AND bom.name = %s
-				AND bom.docstatus = 0
+				AND bom.docstatus = 1
 		""", bom_no, as_dict = 1)
 
 		for d in child_fb_items:
@@ -630,9 +643,9 @@ class BOM(WebsiteGenerator):
 	def validate_bom_links(self):
 		if not self.is_active:
 			act_pbom = frappe.db.sql("""select distinct bom_item.parent from `tabBOM Item` bom_item
-				where bom_item.bom_no = %s and bom_item.docstatus = 0 and bom_item.parenttype='BOM'
+				where bom_item.bom_no = %s and bom_item.docstatus = 1 and bom_item.parenttype='BOM'
 				and exists (select * from `tabBOM` where name = bom_item.parent
-					and docstatus < 2 and is_active = 1)""", self.name)
+					and docstatus = 1 and is_active = 1)""", self.name)
 
 			if act_pbom and act_pbom[0][0]:
 				frappe.throw(_("Cannot deactivate or cancel BOM as it is linked with other BOMs"))
@@ -826,6 +839,9 @@ def validate_bom_no(item, bom_no):
 	bom = frappe.get_doc("BOM", bom_no)
 	if not bom.is_active:
 		frappe.throw(_("BOM {0} must be active").format(bom_no))
+	if bom.docstatus != 1:
+		if not getattr(frappe.flags, "in_test", False):
+			frappe.throw(_("BOM {0} must be submitted").format(bom_no))
 
 	if item:
 		rm_item_exists = False

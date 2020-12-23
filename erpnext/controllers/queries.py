@@ -280,7 +280,7 @@ def bom(doctype, txt, searchfield, start, page_len, filters):
 
 	return frappe.db.sql("""select {fields}
 		from tabBOM
-		where tabBOM.docstatus < 2
+		where tabBOM.docstatus = 1
 			and tabBOM.is_active=1
 			and tabBOM.`{key}` like %(txt)s
 			{fcond} {mcond}

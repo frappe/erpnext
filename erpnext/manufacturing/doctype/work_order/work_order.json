@@ -44,14 +44,6 @@
   "required_items",
   "section_break_30",
   "scrap_items",
-  "time",
-  "planned_start_date",
-  "planned_end_date",
-  "expected_delivery_date",
-  "column_break_13",
-  "actual_start_date",
-  "actual_end_date",
-  "lead_time",
   "operations_section",
   "transfer_material_against",
   "operations",
@@ -62,6 +54,17 @@
   "column_break_24",
   "corrective_operation_cost",
   "total_operating_cost",
+  "raw_material_cost",
+  "total_cost",
+  "cost_per_unit",
+  "time",
+  "planned_start_date",
+  "planned_end_date",
+  "expected_delivery_date",
+  "column_break_13",
+  "actual_start_date",
+  "actual_end_date",
+  "lead_time",
   "more_info",
   "description",
   "stock_uom",
@@ -349,10 +352,11 @@
    "options": "Work Order Operation"
   },
   {
+   "collapsible": 1,
    "depends_on": "operations",
    "fieldname": "section_break_22",
    "fieldtype": "Section Break",
-   "label": "Operation Cost"
+   "label": "Total Cost"
   },
   {
    "fieldname": "planned_operating_cost",
@@ -381,11 +385,13 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "total_operating_cost",
    "fieldtype": "Currency",
    "label": "Total Operating Cost",
    "no_copy": 1,
    "options": "Company:company:default_currency",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -570,7 +576,32 @@
     "no_copy": 1,
     "print_hide": 1,
     "read_only": 1
-   }
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "raw_material_cost",
+   "fieldtype": "Currency",
+   "label": "Raw Materials Cost",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "total_cost",
+   "fieldtype": "Currency",
+   "label": "Total Cost (Operation + Raw Material)",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "cost_per_unit",
+   "fieldtype": "Currency",
+   "label": "Cost Per Unit",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
  ],
  "icon": "fa fa-cogs",
  "idx": 1,

@@ -540,14 +540,14 @@ def make_rm_stock_entry(purchase_order, rm_items):
 						"po_detail": rm_item_data.get("name"),
 						"item_code": rm_item_code,
 						"item_name": rm_item_data["item_name"],
-						"description": item_wh.get(rm_item_code, {}).get('description', ""),
-						'qty': rm_item_data["qty"],
-						's_warehouse': rm_item_data["warehouse"],
-						't_warehouse': purchase_order.supplier_warehouse,
-						'stock_uom': rm_item_data["stock_uom"],
-						'uom': rm_item_data["stock_uom"],
-						'subcontracted_item': rm_item_data["item_code"],
-						'allow_alternative_item': item_wh.get(rm_item_code, {}).get('allow_alternative_item')
+						"description": item_wh.get(rm_item_code, {}).get("description", ""),
+						"qty": rm_item_data["qty"],
+						"s_warehouse": rm_item_data["warehouse"],
+						"t_warehouse": purchase_order.supplier_warehouse,
+						"stock_uom": rm_item_data["stock_uom"],
+						"uom": rm_item_data["stock_uom"],
+						"subcontracted_item": rm_item_data["item_code"],
+						"allow_alternative_item": item_wh.get(rm_item_code, {}).get("allow_alternative_item")
 					})
 
 					stock_entry.add_items(args)

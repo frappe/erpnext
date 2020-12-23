@@ -46,7 +46,7 @@ class WorkOrder(Document):
 		self.validate_sales_order()
 		self.set_default_warehouse()
 		self.validate_warehouse_belongs_to_company()
-		self.calculate_operating_cost()
+		self.calculate_total_cost()
 		self.validate_qty()
 		self.validate_operation_time()
 		self.status = self.get_status()
@@ -131,6 +131,20 @@ class WorkOrder(Document):
 		for wh in warehouses:
 			validate_warehouse_company(wh, self.company)
 
+	def calculate_total_cost(self):
+		self.calculate_raw_material_cost()
+		self.calculate_operating_cost()
+
+		self.total_cost = flt(self.raw_material_cost) + flt(self.total_operating_cost)
+
+		if self.total_cost:
+			self.cost_per_unit = self.total_cost / self.qty
+
+	def calculate_raw_material_cost(self):
+		self.raw_material_cost = 0.0
+		for row in self.get("required_items"):
+			self.raw_material_cost += row.amount
+
 	def calculate_operating_cost(self):
 		self.planned_operating_cost, self.actual_operating_cost = 0.0, 0.0
 		for d in self.get("operations"):
@@ -140,8 +154,8 @@ class WorkOrder(Document):
 			self.planned_operating_cost += flt(d.planned_operating_cost)
 			self.actual_operating_cost += flt(d.actual_operating_cost)
 
-		variable_cost = self.actual_operating_cost if self.actual_operating_cost \
-			else self.planned_operating_cost
+		variable_cost = (self.actual_operating_cost if self.actual_operating_cost
+			else self.planned_operating_cost)
 
 		self.total_operating_cost = (flt(self.additional_operating_cost)
 			+ flt(variable_cost) + flt(self.corrective_operation_cost))
@@ -527,7 +541,7 @@ class WorkOrder(Document):
 		for d in self.get("operations"):
 			d.time_in_mins = flt(d.time_in_mins) * (flt(self.qty) / flt(d.batch_size))
 
-		self.calculate_operating_cost()
+		self.calculate_total_cost()
 
 	def get_holidays(self, workstation):
 		holiday_list = frappe.db.get_value("Workstation", workstation, "holiday_list")

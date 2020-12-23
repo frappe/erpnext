@@ -536,7 +536,7 @@ class StockEntry(StockController):
 			wo_items = self.wo_doc.required_items
 			outgoing_items_cost = sum([flt(row.required_qty)*flt(row.rate) for row in wo_items])
 
-		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
+		return flt(flt(outgoing_items_cost - scrap_items_cost) / flt(finished_item_qty))
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank

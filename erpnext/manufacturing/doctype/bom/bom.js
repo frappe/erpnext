@@ -59,7 +59,7 @@ frappe.ui.form.on("BOM", {
 				filters: {
 					'item': d.item_code,
 					'is_active': 1,
-					'docstatus': 0
+					'docstatus': 1
 				}
 			};
 		});
@@ -93,7 +93,7 @@ frappe.ui.form.on("BOM", {
 			});
 		}
 
-		if (!frm.is_new()) {
+		if (frm.doc.docstatus != 0) {
 			frm.add_custom_button(__("Work Order"), function() {
 				frm.trigger("make_work_order");
 			}, __("Create"));
@@ -326,7 +326,7 @@ frappe.ui.form.on("BOM", {
 			args: {
 				update_parent: true,
 				from_child_bom:false,
-				save: frm.doc.docstatus === 0 ? true : false
+				save: frm.doc.docstatus === 1 ? true : false
 			},
 			callback: function(r) {
 				refresh_field("items");

@@ -412,7 +412,7 @@ class JobCard(Document):
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status()
-		wo.calculate_operating_cost()
+		wo.calculate_total_cost()
 		wo.set_actual_dates()
 		wo.save()
 

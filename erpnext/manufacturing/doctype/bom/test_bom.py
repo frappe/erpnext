@@ -219,6 +219,7 @@ class TestBOM(unittest.TestCase):
 		})
 		bom.insert(ignore_permissions=True)
 		bom.update_cost()
+		bom.submit()
 
 		# test that sourced_by_supplier rate is zero even after updating cost
 		self.assertEqual(bom.items[2].rate, 0)

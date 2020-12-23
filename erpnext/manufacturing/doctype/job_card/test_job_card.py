@@ -13,7 +13,7 @@ from erpnext.manufacturing.doctype.job_card.job_card import OperationMismatchErr
 class TestJobCard(unittest.TestCase):
 	def test_job_card(self):
 		data = frappe.get_cached_value('BOM',
-			{'is_active': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
+			{'docstatus': 1, 'is_active': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
 
 		if data:
 			bom, bom_item = data
@@ -36,7 +36,7 @@ class TestJobCard(unittest.TestCase):
 
 	def test_job_card_with_different_work_station(self):
 		data = frappe.get_cached_value('BOM',
-			{'is_active': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
+			{'docstatus': 1, 'is_active': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
 
 		if data:
 			bom, bom_item = data
