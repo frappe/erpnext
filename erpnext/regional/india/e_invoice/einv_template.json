@@ -1,11 +1,11 @@
 {{
     "Version": "1.1",
     "TranDtls": {{
-        "TaxSch": "{trans_details.tax_scheme}",
-        "SupTyp": "{trans_details.supply_type}",
-        "RegRev": "{trans_details.reverse_charge}",
-        "EcmGstin": "{trans_details.ecom_gstin}",
-        "IgstOnIntra": "{trans_details.igst_on_intra}"
+        "TaxSch": "{transaction_details.tax_scheme}",
+        "SupTyp": "{transaction_details.supply_type}",
+        "RegRev": "{transaction_details.reverse_charge}",
+        "EcmGstin": "{transaction_details.ecom_gstin}",
+        "IgstOnIntra": "{transaction_details.igst_on_intra}"
     }},
     "DocDtls": {{
         "Typ": "{doc_details.invoice_type}",
@@ -59,16 +59,16 @@
         {item_list}
     ],
     "ValDtls": {{
-        "AssVal": "{value_details.base_net_total}",
-        "CgstVal": "{value_details.total_cgst_amt}",
-        "SgstVal": "{value_details.total_sgst_amt}",
-        "IgstVal": "{value_details.total_igst_amt}",
-        "CesVal": "{value_details.total_cess_amt}",
-        "Discount": "{value_details.invoice_discount_amt}",
-        "RndOffAmt": "{value_details.round_off}",
-        "OthChrg": "{value_details.total_other_charges}",
-        "TotInvVal": "{value_details.base_grand_total}",
-        "TotInvValFc": "{value_details.grand_total}"
+        "AssVal": "{invoice_value_details.base_net_total}",
+        "CgstVal": "{invoice_value_details.total_cgst_amt}",
+        "SgstVal": "{invoice_value_details.total_sgst_amt}",
+        "IgstVal": "{invoice_value_details.total_igst_amt}",
+        "CesVal": "{invoice_value_details.total_cess_amt}",
+        "Discount": "{invoice_value_details.invoice_discount_amt}",
+        "RndOffAmt": "{invoice_value_details.round_off}",
+        "OthChrg": "{invoice_value_details.total_other_charges}",
+        "TotInvVal": "{invoice_value_details.base_grand_total}",
+        "TotInvValFc": "{invoice_value_details.grand_total}"
     }},
     "PayDtls": {{
         "Nm": "{payment_details.payee_name}",

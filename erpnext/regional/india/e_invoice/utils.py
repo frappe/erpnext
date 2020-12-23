@@ -29,15 +29,7 @@ def validate_einvoice_fields(doc):
 		if doc.irn:
 			frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
 		if len(doc.name) > 16:
-			title = _('Document Name Too Long')
-			msg = _('As you have E-Invoicing enabled, To be able to generate IRN for this invoice, ')
-			msg += _('document name {} exceed 16 letters. ').format(bold(_('should not')))
-			msg += '<br><br>'
-			msg += _('You must {} your {} in order to have document name of {} length 16. ').format(
-				bold(_('modify')), bold(_('naming series')), bold(_('maximum'))
-			)
-			msg += _('Please account for ammended document names too. ')
-			frappe.throw(msg, title=title)
+			raise_document_name_too_long_error()
 
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
@@ -45,12 +37,23 @@ def validate_einvoice_fields(doc):
 	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
 		frappe.throw(_('You must cancel IRN before cancelling the document.'), title=_('Cancel Not Allowed'))
 
+def raise_document_name_too_long_error():
+	title = _('Document ID Too Long')
+	msg = _('As you have E-Invoicing enabled, to be able to generate IRN for this invoice, ')
+	msg += _('document id {} exceed 16 letters. ').format(bold(_('should not')))
+	msg += '<br><br>'
+	msg += _('You must {} your {} in order to have document id of {} length 16. ').format(
+		bold(_('modify')), bold(_('naming series')), bold(_('maximum'))
+	)
+	msg += _('Please account for ammended documents too. ')
+	frappe.throw(msg, title=title)
+
 def read_json(name):
 	file_path = os.path.join(os.path.dirname(__file__), '{name}.json'.format(name=name))
 	with open(file_path, 'r') as f:
 		return cstr(f.read())
 
-def get_trans_details(invoice):
+def get_transaction_details(invoice):
 	supply_type = ''
 	if invoice.gst_category == 'Registered Regular': supply_type = 'B2B'
 	elif invoice.gst_category == 'SEZ': supply_type = 'SEZWOP'
@@ -59,10 +62,8 @@ def get_trans_details(invoice):
 
 	if not supply_type: 
 		rr, sez, overseas, export = bold('Registered Regular'), bold('SEZ'), bold('Overseas'), bold('Deemed Export')
-		frappe.throw(
-			_('GST category should be one of {}, {}, {}, {}').format(rr, sez, overseas, export),
-			title=_('Invalid Supply Type')
-		)
+		frappe.throw(_('GST category should be one of {}, {}, {}, {}').format(rr, sez, overseas, export),
+			title=_('Invalid Supply Type'))
 
 	return frappe._dict(dict(
 		tax_scheme='GST',
@@ -97,7 +98,9 @@ def get_party_details(address_name):
 	phone = address.get('phone')
 	# get last 10 digit 
 	phone = phone.replace(" ", "")[-10:] if phone else ''
+
 	if state_code == 97:
+		# according to einvoice standard
 		pincode = 999999
 
 	return frappe._dict(dict(
@@ -136,90 +139,104 @@ def get_overseas_address_details(address_name):
 
 def get_item_list(invoice):
 	item_list = []
-	gst_accounts = get_gst_accounts(invoice.company)
-	gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
 
 	for d in invoice.items:
-		item_schema = read_json('einv_item_template')
+		einvoice_item_schema = read_json('einv_item_template')
 		item = frappe._dict({})
 		item.update(d.as_dict())
+
 		item.sr_no = d.idx
-		item.description = d.item_name
-		item.is_service_item = 'N' if frappe.db.get_value('Item', d.item_code, 'is_stock_item') else 'Y'
-		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
-		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 		item.qty = abs(item.qty)
+		item.description = d.item_name
+		item.taxable_value = abs(item.base_net_amount)
+		item.discount_amount = abs(item.discount_amount * item.qty)
 		item.unit_rate = abs(item.base_price_list_rate) if item.discount_amount else abs(item.base_net_rate)
 		item.gross_amount = abs(item.unit_rate * item.qty)
-		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.taxable_value = abs(item.base_net_amount)
 
-		for attr in [
-			'tax_rate', 'cess_rate', 'cess_nadv_amount',
-			'cgst_amount',  'sgst_amount', 'igst_amount',
-			'cess_amount', 'cess_nadv_amount', 'other_charges'
-			]:
-			item[attr] = 0
+		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
+		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
+		item.is_service_item = 'N' if frappe.db.get_value('Item', d.item_code, 'is_stock_item') else 'Y'
 
-		for t in invoice.taxes:
-			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
-			if t.account_head in gst_accounts_list:
-				if t.account_head in gst_accounts.cess_account:
-					if t.charge_type == 'On Item Quantity':
-						item.cess_nadv_amount += abs(item_tax_detail[1])
-					else:
-						item.cess_rate += item_tax_detail[0]
-						item.cess_amount += abs(item_tax_detail[1])
-				elif t.account_head in gst_accounts.igst_account:
-					item.tax_rate += item_tax_detail[0]
-					item.igst_amount += abs(item_tax_detail[1])
-				elif t.account_head in gst_accounts.sgst_account:
-					item.tax_rate += item_tax_detail[0]
-					item.sgst_amount += abs(item_tax_detail[1])
-				elif t.account_head in gst_accounts.cgst_account:
-					item.tax_rate += item_tax_detail[0]
-					item.cgst_amount += abs(item_tax_detail[1])
+		item = update_item_taxes(invoice, item)
 		
 		item.total_value = abs(
 			item.taxable_value + item.igst_amount + item.sgst_amount +
 			item.cgst_amount + item.cess_amount + item.cess_nadv_amount + item.other_charges
 		)
-		einv_item = item_schema.format(item=item)
+		einv_item = einvoice_item_schema.format(item=item)
 		item_list.append(einv_item)
 
 	return ', '.join(item_list)
 
-def get_value_details(invoice):
+def update_item_taxes(invoice, item):
 	gst_accounts = get_gst_accounts(invoice.company)
 	gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
 
-	value_details = frappe._dict(dict())
-	value_details.base_net_total = abs(invoice.base_net_total)
-	value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount and invoice.discount_amount > 0 else 0
+	for attr in [
+		'tax_rate', 'cess_rate', 'cess_nadv_amount',
+		'cgst_amount',  'sgst_amount', 'igst_amount',
+		'cess_amount', 'cess_nadv_amount', 'other_charges'
+		]:
+		item[attr] = 0
+
+	for t in invoice.taxes:
+		item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
+		if t.account_head in gst_accounts_list:
+			if t.account_head in gst_accounts.cess_account:
+				if t.charge_type == 'On Item Quantity':
+					item.cess_nadv_amount += abs(item_tax_detail[1])
+				else:
+					item.cess_rate += item_tax_detail[0]
+					item.cess_amount += abs(item_tax_detail[1])
+			elif t.account_head in gst_accounts.igst_account:
+				item.tax_rate += item_tax_detail[0]
+				item.igst_amount += abs(item_tax_detail[1])
+			elif t.account_head in gst_accounts.sgst_account:
+				item.tax_rate += item_tax_detail[0]
+				item.sgst_amount += abs(item_tax_detail[1])
+			elif t.account_head in gst_accounts.cgst_account:
+				item.tax_rate += item_tax_detail[0]
+				item.cgst_amount += abs(item_tax_detail[1])
+	
+	return item
+
+def get_invoice_value_details(invoice):
+	invoice_value_details = frappe._dict(dict())
+	invoice_value_details.base_net_total = abs(invoice.base_net_total)
+	invoice_value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount and invoice.discount_amount > 0 else 0
 	# discount amount cannnot be -ve in an e-invoice, so if -ve include discount in round_off
-	value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount and invoice.discount_amount < 0 else 0)
+	invoice_value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount and invoice.discount_amount < 0 else 0)
 	disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
-	value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else abs(invoice.base_rounded_total)
-	value_details.grand_total = abs(invoice.grand_total) if disable_rounded else abs(invoice.rounded_total)
-	value_details.total_cgst_amt = 0
-	value_details.total_sgst_amt = 0
-	value_details.total_igst_amt = 0
-	value_details.total_cess_amt = 0
-	value_details.total_other_charges = 0
+	invoice_value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else abs(invoice.base_rounded_total)
+	invoice_value_details.grand_total = abs(invoice.grand_total) if disable_rounded else abs(invoice.rounded_total)
+	
+	invoice_value_details = update_invoice_taxes(invoice, invoice_value_details)
+	
+	return invoice_value_details
+
+def update_invoice_taxes(invoice, invoice_value_details):
+	gst_accounts = get_gst_accounts(invoice.company)
+	gst_accounts_list = [d for accounts in gst_accounts.values() for d in accounts if d]
+
+	invoice_value_details.total_cgst_amt = 0
+	invoice_value_details.total_sgst_amt = 0
+	invoice_value_details.total_igst_amt = 0
+	invoice_value_details.total_cess_amt = 0
+	invoice_value_details.total_other_charges = 0
 	for t in invoice.taxes:
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
-				value_details.total_cess_amt += abs(t.base_tax_amount_after_discount_amount)
+				invoice_value_details.total_cess_amt += abs(t.base_tax_amount_after_discount_amount)
 			elif t.account_head in gst_accounts.igst_account:
-				value_details.total_igst_amt += abs(t.base_tax_amount_after_discount_amount)
+				invoice_value_details.total_igst_amt += abs(t.base_tax_amount_after_discount_amount)
 			elif t.account_head in gst_accounts.sgst_account:
-				value_details.total_sgst_amt += abs(t.base_tax_amount_after_discount_amount)
+				invoice_value_details.total_sgst_amt += abs(t.base_tax_amount_after_discount_amount)
 			elif t.account_head in gst_accounts.cgst_account:
-				value_details.total_cgst_amt += abs(t.base_tax_amount_after_discount_amount)
+				invoice_value_details.total_cgst_amt += abs(t.base_tax_amount_after_discount_amount)
 		else:
-			value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
+			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
 	
-	return value_details
+	return invoice_value_details
 
 def get_payment_details(invoice):
 	payee_name = invoice.company
@@ -259,10 +276,10 @@ def get_eway_bill_details(invoice):
 def make_einvoice(invoice):
 	schema = read_json('einv_template')
 
-	trans_details = get_trans_details(invoice)
+	transaction_details = get_transaction_details(invoice)
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
-	value_details = get_value_details(invoice)
+	invoice_value_details = get_invoice_value_details(invoice)
 	seller_details = get_party_details(invoice.company_address)
 
 	if invoice.gst_category == 'Overseas':
@@ -290,9 +307,9 @@ def make_einvoice(invoice):
 	dispatch_details = period_details = export_details = frappe._dict({})
 
 	einvoice = schema.format(
-		trans_details=trans_details, doc_details=doc_details, dispatch_details=dispatch_details,
+		transaction_details=transaction_details, doc_details=doc_details, dispatch_details=dispatch_details,
 		seller_details=seller_details, buyer_details=buyer_details, shipping_details=shipping_details,
-		item_list=item_list, value_details=value_details, payment_details=payment_details,
+		item_list=item_list, invoice_value_details=invoice_value_details, payment_details=payment_details,
 		period_details=period_details, prev_doc_details=prev_doc_details,
 		export_details=export_details, eway_bill_details=eway_bill_details
 	)
@@ -406,8 +423,11 @@ class GSPConnector():
 		return self.e_invoice_settings.auth_token
 	
 	def make_request(self, request_type, url, headers=None, data=None):
-		function = make_post_request if request_type == 'post' else make_get_request
-		res = function(url, headers=headers, data=data)
+		if request_type == 'post':
+			res = make_post_request(url, headers=headers, data=data)
+		else:
+			res = make_get_request(url, headers=headers, data=data)
+
 		self.log_request(url, headers, data, res)
 		return res
 	
@@ -495,7 +515,8 @@ class GSPConnector():
 				self.set_einvoice_data(res.get('result'))
 
 			elif '2150' in res.get('message'):
-				# IRN already generated
+				# IRN already generated but not updated in invoice
+				# Extract the IRN from the response description and fetch irn details
 				irn = res.get('result')[0].get('Desc').get('Irn')
 				irn_details = self.get_irn_details(irn)
 				if irn_details:
@@ -638,9 +659,10 @@ class GSPConnector():
 	
 	def sanitize_error_message(self, message):
 		'''
+			On validation errors, response message looks something like this:
 			message = '2174 : For inter-state transaction, CGST and SGST amounts are not applicable; only IGST amount is applicable,
 						3095 : Supplier GSTIN is inactive'
-			we search for string between ':' to extract error messages
+			we search for string between ':' to extract the error messages
 			errors = [
 				': For inter-state transaction, CGST and SGST amounts are not applicable; only IGST amount is applicable, 3095 ',
 				': Test'
