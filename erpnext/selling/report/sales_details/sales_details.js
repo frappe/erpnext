@@ -21,10 +21,10 @@ frappe.query_reports["Sales Details"] = {
 			reqd: 1
 		},
 		{
-			fieldname: "order_type",
-			label: __("Order Type"),
-			fieldtype: "Select",
-			options: "\nSales\nMaintenance\nShopping Cart"
+			fieldname: "transaction_type",
+			label: __("Transaction Type"),
+			fieldtype: "Link",
+			options: "Transaction Type"
 		},
 		{
 			fieldname: "qty_field",

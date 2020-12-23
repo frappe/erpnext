@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "transaction_type_name",
+  "disabled",
   "selling",
   "buying",
   "column_break_3",
@@ -166,6 +167,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
    "fieldname": "vehicle_booking_defaults_section",
    "fieldtype": "Section Break",
    "hidden": 1,
@@ -178,7 +185,7 @@
    "options": "Vehicle Booking Default"
   }
  ],
- "modified": "2020-12-15 16:31:16.385673",
+ "modified": "2020-12-23 12:43:56.042156",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",

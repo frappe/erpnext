@@ -211,7 +211,7 @@ class SalarySlip(TransactionBase):
 			frappe.msgprint(_("Leave Without Pay does not match with approved Leave Application records"))
 
 		self.total_working_days = working_days
-		self.leave_without_pay = lwp
+		self.leave_without_pay = flt(lwp)
 
 		payment_days = flt(self.get_payment_days(joining_date, relieving_date)) - flt(lwp)
 		self.payment_days = payment_days > 0 and payment_days or 0
@@ -716,7 +716,7 @@ class SalarySlip(TransactionBase):
 	def get_amount_based_on_payment_days(self, row, joining_date, relieving_date):
 		payment_days = flt(self.payment_days)
 		if frappe.get_cached_value("HR Settings", None, "consider_lwp_as_deduction"):
-			payment_days += self.leave_without_pay
+			payment_days += flt(self.leave_without_pay)
 
 		amount, additional_amount = row.amount, row.additional_amount
 		if (self.salary_structure and
