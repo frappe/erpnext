@@ -21,6 +21,12 @@ frappe.query_reports["Purchase Details"] = {
 			reqd: 1
 		},
 		{
+			fieldname: "transaction_type",
+			label: __("Transaction Type"),
+			fieldtype: "Link",
+			options: "Transaction Type"
+		},
+		{
 			fieldname: "qty_field",
 			label: __("Quantity Type"),
 			fieldtype: "Select",

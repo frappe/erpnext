@@ -296,10 +296,12 @@ class SalesPurchaseDetailsReport(object):
 			if 'item_code' in grouped_by:
 				totals['group_doctype'] = "Item Group"
 				totals['group'] = data[0].get('item_group')
+				totals['item_name'] = data[0].get('item_name')
 
 			if group_field == 'party':
 				totals['group_doctype'] = data[0].get("party_group_dt")
 				totals['group'] = data[0].get("party_group")
+				totals['party_name'] = data[0].get("party_name")
 
 				if self.filters.party_type == "Customer":
 					details = self.additional_customer_info.get(group_value, frappe._dict())
@@ -431,6 +433,9 @@ class SalesPurchaseDetailsReport(object):
 
 		if self.filters.get("order_type"):
 			conditions.append("s.order_type=%(order_type)s")
+
+		if self.filters.get("transaction_type"):
+			conditions.append("s.transaction_type=%(transaction_type)s")
 
 		if self.filters.get("cost_center"):
 			self.filters.cost_center = get_cost_centers_with_children(self.filters.get("cost_center"))
