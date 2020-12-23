@@ -264,7 +264,6 @@ def make_einvoice(invoice):
 	doc_details = get_doc_details(invoice)
 	value_details = get_value_details(invoice)
 	seller_details = get_party_details(invoice.company_address)
-	seller_details.update({ 'pincode': '504273' })
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
