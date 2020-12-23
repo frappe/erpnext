@@ -2110,10 +2110,11 @@ def create_internal_customer(customer_name, represents_company, allowed_to_inter
 		})
 
 		customer.insert()
+		customer_name = customer.name
 	else:
-		customer = frappe.db.get_value("Customer", customer_name)
+		customer_name = frappe.db.get_value("Customer", customer_name)
 
-	return customer
+	return customer_name
 
 def create_internal_supplier(supplier_name, represents_company, allowed_to_interact_with):
 	if not frappe.db.exists("Supplier", supplier_name):
@@ -2130,10 +2131,11 @@ def create_internal_supplier(supplier_name, represents_company, allowed_to_inter
 		})
 
 		supplier.insert()
+		supplier_name = supplier.name
 	else:
-		supplier = frappe.db.exists("Supplier", supplier_name)
+		supplier_name = frappe.db.exists("Supplier", supplier_name)
 
-	return supplier
+	return supplier_name
 
 def add_taxes(doc):
 	doc.append('taxes', {

@@ -1334,14 +1334,8 @@
    "options": "Project"
   },
   {
-   "default": "0",
-   "description": "Taxes paid while advance payment will be adjusted against this invoice",
-   "fieldname": "adjust_advance_taxes",
-   "fieldtype": "Check",
-   "label": "Adjust Advance Taxes"
-  },
-  {
    "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Profit / Loss Account",
@@ -1349,6 +1343,7 @@
   },
   {
    "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Company which internal supplier represents",
    "fetch_from": "supplier.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
@@ -1360,7 +1355,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-29 19:47:04.827315",
+ "modified": "2020-12-11 12:46:12.796378",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

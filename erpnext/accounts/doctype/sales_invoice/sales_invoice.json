@@ -1954,6 +1954,7 @@
   },
   {
    "depends_on": "eval:doc.is_internal_customer",
+   "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Profit / Loss Account",
@@ -1961,6 +1962,7 @@
   },
   {
    "depends_on": "eval:doc.is_internal_customer",
+   "description": "Company which internal customer represents",
    "fetch_from": "customer.represents_company",
    "fieldname": "represents_company",
    "fieldtype": "Link",
@@ -1973,7 +1975,7 @@
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-29 18:48:15.012300",
+ "modified": "2020-12-11 12:48:31.769958",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
