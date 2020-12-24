@@ -15,7 +15,7 @@
 </div>
 {%- endmacro -%}
 
-<div class="section-with-cards">
+<div class="section-with-cards product-category-section">
 	{%- if title -%}
 	<h2 class="section-title">{{ title }}</h2>
 	{%- endif -%}
@@ -37,17 +37,4 @@
 </div>
 
 <style>
-	.card-grid {
-		display: grid;
-		grid-gap: 15px;
-		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));;
-	}
-
-	.card {
-		border: none;
-	}
-
-	.card:hover {
-		box-shadow: 0px 16px 45px 6px rgba(0, 0, 0, 0.08), 0px 8px 10px -10px rgba(0, 0, 0, 0.04);
-	}
 </style>

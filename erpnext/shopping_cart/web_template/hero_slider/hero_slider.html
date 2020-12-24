@@ -46,11 +46,11 @@
 			{%- set primary_action_label = values['slide_' + index + '_primary_action_label'] -%}
 			{%- set align = values['slide_' + index + '_content_align'] -%}
 			{%- set theme = values['slide_' + index + '_theme'] -%}
-			
+
 			{%- if image -%}
 				{{ slide(image, title, subtitle, primary_action, primary_action_label, index, align, theme) }}
 			{%- endif -%}
-		
+
 		{%- endfor -%}
 	</div>
 	{%- if show_controls -%}
@@ -82,31 +82,4 @@
 </script>
 
 <style>
-	.carousel-control {
-		height: 42px;
-		width: 42px;
-		display: flex;
-		align-items: center;
-    	justify-content: center;
-	    background: white;
-	    box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.08), 0px 1px 2px 1px rgba(0, 0, 0, 0.06);
-	    border-radius: 100px;
-	}
-
-	.carousel-control-prev,
-	.carousel-control-next {
-		opacity: 1;
-	}
-
-	.carousel-body {
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		bottom: 0;
-	}
-
-	.carousel-content {
-		max-width: 400px;
-	}
 </style>
