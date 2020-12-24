@@ -180,7 +180,7 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
-		
+
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
@@ -262,10 +262,10 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
-		
+
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
-		
+
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
@@ -1628,7 +1628,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			'field_map': {
 				source_document_warehouse_field: target_document_warehouse_field,
 				'batch_no': 'batch_no',
-				'serial_no': 'serial_no'
+				'serial_no': 'serial_no',
+				'name': 'sales_invoice_item'
 			}
 		})
 

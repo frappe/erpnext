@@ -66,8 +66,6 @@ class BuyingController(StockController):
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
 			self.update_valuation_rate()
 
-		self.set_out_going_rate()
-
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
 
@@ -220,31 +218,39 @@ class BuyingController(StockController):
 			else:
 				item.valuation_rate = 0.0
 
-	def set_out_going_rate(self):
+	def set_incoming_rate(self):
 		if self.doctype not in ("Purchase Receipt", "Purchase Invoice"):
 			return
 
+		ref_doctype = 'Delivery Note Item' if self.doctype == 'Purchase Receipt' else 'Sales Invoice Item'
+
 		items = self.get("items")
 		for d in items:
-			if not cint(self.get("is_return")) and d.get("target_warehouse"):
+			if not cint(self.get("is_return")) and d.get("from_warehouse"):
 				# Get outgoing rate based on original item cost based on valuation method
-				d.outgoing_rate = get_incoming_rate({
-					"item_code": d.item_code,
-					"warehouse": d.target_warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-					"qty": -1 * flt(d.qty),
-					"serial_no": d.serial_no,
-					"company": self.company,
-					"voucher_type": self.doctype,
-					"voucher_no": self.name,
-					"allow_zero_valuation": d.get("allow_zero_valuation")
-				}, raise_error_if_no_rate=False)
 
-			elif self.get("return_against"):
-				# Get incoming rate of return entry from reference document
-				# based on original item cost as per valuation method
-				d.outgoing_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)
+				if not d.get('sales_invoice_item'):
+					outgoing_rate = get_incoming_rate({
+						"item_code": d.item_code,
+						"warehouse": d.from_warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"qty": -1 * flt(d.stock_qty),
+						"serial_no": d.serial_no,
+						"company": self.company,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"allow_zero_valuation": d.get("allow_zero_valuation")
+					}, raise_error_if_no_rate=False)
+
+					rate = flt(outgoing_rate * d.conversion_factor)
+				else:
+					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), 'rate')
+
+				if rate != d.rate:
+					frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
+						.format(d.idx), alert=1)
+					d.rate = rate
 
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
 		supplied_items_cost = 0.0
@@ -581,7 +587,8 @@ class BuyingController(StockController):
 						from_warehouse_sle = self.get_sl_entries(d, {
 							"actual_qty": -1 * pr_qty,
 							"warehouse": d.from_warehouse,
-							"outgoing_rate": d.outgoing_rate,
+							"outgoing_rate": d.rate,
+							"recalculate_rate": 1,
 							"dependant_sle_voucher_detail_no": d.name
 						})
 
@@ -592,8 +599,10 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
+						outgoing_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)
+
 						sle.update({
-							"outgoing_rate": d.outgoing_rate,
+							"outgoing_rate": outgoing_rate,
 							"recalculate_rate": 1
 						})
 						if d.from_warehouse:

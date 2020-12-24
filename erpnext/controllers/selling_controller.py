@@ -49,7 +49,6 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
-		self.set_incoming_rate()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -324,7 +323,7 @@ class SellingController(StockController):
 					"warehouse": d.warehouse,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
-					"qty": -1*flt(d.qty),
+					"qty": -1*flt(d.stock_qty),
 					"serial_no": d.serial_no,
 					"company": self.company,
 					"voucher_type": self.doctype,
@@ -334,8 +333,9 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.get('is_internal_customer') and d.get('target_warehouse'):
-					d.rate = d.incoming_rate
-					frappe.msgprint(_("Row {0}: Item rate updated as the valuation rate since its an internal transfer").format(d.idx))
+					d.rate = flt(d.incoming_rate * d.conversion_factor)
+					frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
+						.format(d.idx), alert=1)
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
