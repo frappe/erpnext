@@ -365,8 +365,8 @@ def has_serial_no_exists(sn, sle):
 			status = True
 
 		# If status is receipt then system will allow to in-ward the delivered serial no
-		if (status and sle.voucher_type == 'Stock Entry' and
-			frappe.db.get_value('Stock Entry', sle.voucher_no, 'purpose') == 'Material Receipt'):
+		if (status and sle.voucher_type == "Stock Entry" and frappe.db.get_value("Stock Entry",
+			sle.voucher_no, "purpose") in ("Material Receipt", "Material Transfer")):
 			status = False
 
 	return status
