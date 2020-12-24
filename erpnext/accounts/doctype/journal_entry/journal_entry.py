@@ -6,10 +6,12 @@ import frappe, erpnext, json
 from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.utils import get_balance_on, get_account_currency
+from erpnext.accounts.utils import get_balance_on, \
+	get_account_currency, check_if_stock_and_account_balance_synced
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting \
+	import get_party_account_based_on_invoice_discounting
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 
 from six import string_types, iteritems
@@ -46,6 +48,8 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
+		check_if_stock_and_account_balance_synced(self.posting_date,
+			self.company, self.doctype, self.name)
 		if not self.title:
 			self.title = self.get_title()
 

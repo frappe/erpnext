@@ -585,24 +585,6 @@ def fix_total_debit_credit():
 				(dr_or_cr, dr_or_cr, '%s', '%s', '%s', dr_or_cr),
 				(d.diff, d.voucher_type, d.voucher_no))
 
-def get_stock_and_account_balance(account=None, posting_date=None, company=None):
-	if not posting_date: posting_date = nowdate()
-
-	warehouse_account = get_warehouse_account_map(company)
-
-	account_balance = get_balance_on(account, posting_date, in_account_currency=False, ignore_account_permission=True)
-
-	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
-		if wh_details.account == account and not wh_details.is_group]
-
-	total_stock_value = 0.0
-	for warehouse in related_warehouses:
-		value = get_stock_value_on(warehouse, posting_date)
-		total_stock_value += value
-
-	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
-	return flt(account_balance, precision), flt(total_stock_value, precision), related_warehouses
-
 def get_currency_precision():
 	precision = cint(frappe.db.get_default("currency_precision"))
 	if not precision:
@@ -984,3 +966,92 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle):
 			matched = False
 			break
 	return matched
+
+def check_if_stock_and_account_balance_synced(posting_date, company, voucher_type=None, voucher_no=None):
+	if not cint(erpnext.is_perpetual_inventory_enabled(company)):
+		return
+
+	accounts = get_stock_accounts(voucher_type, voucher_no)
+	stock_adjustment_account = frappe.db.get_value("Company", company, "stock_adjustment_account")
+
+	for account in accounts:
+		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
+			posting_date, company)
+
+		if voucher_type=="Journal Entry" and account_bal == stock_bal:
+			frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+				.format(account), StockAccountInvalidTransaction)
+
+		elif abs(account_bal - stock_bal) > 0.1:
+			precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
+				currency=frappe.get_cached_value('Company',  company,  "default_currency"))
+
+			diff = flt(stock_bal - account_bal, precision)
+
+			error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses as on {3}.").format(
+				stock_bal, account_bal, frappe.bold(account), gl_map[0].posting_date)
+			error_resolution = _("Please create an adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))			
+
+			frappe.msgprint(
+				msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
+				raise_exception=StockValueAndAccountBalanceOutOfSync,
+				title=_('Values Out Of Sync'),
+				primary_action={
+					'label': _('Make Journal Entry'),
+					'client_action': 'erpnext.route_to_adjustment_jv',
+					'args': get_journal_entry(account, stock_adjustment_account, diff)
+				})
+
+def get_stock_accounts(company, voucher_type=None, voucher_no=None):
+	stock_accounts = frappe.db.get_list("Account", {
+		"account_type": "Stock",
+		"company": company,
+		"is_group": 0
+	})
+	if voucher_type and voucher_no:
+		if voucher_type == "Journal Entry":
+			stock_accounts = frappe.db.get_list("Journal Entry Account", {
+				"parent": voucher_no,
+				"account": ["in", stock_accounts]
+			}, "account")
+
+		else:
+			stock_accounts = frappe.db.get_list("GL Entry", {
+				"voucher_type": voucher_type,
+				"voucher_no": voucher_no,
+				"account": ["in", stock_accounts]
+			}, "account")
+
+	return stock_accounts
+
+def get_stock_and_account_balance(account=None, posting_date=None, company=None):
+	if not posting_date: posting_date = nowdate()
+
+	warehouse_account = get_warehouse_account_map(company)
+
+	account_balance = get_balance_on(account, posting_date, in_account_currency=False, ignore_account_permission=True)
+
+	related_warehouses = [wh for wh, wh_details in warehouse_account.items()
+		if wh_details.account == account and not wh_details.is_group]
+
+	total_stock_value = 0.0
+	for warehouse in related_warehouses:
+		value = get_stock_value_on(warehouse, posting_date)
+		total_stock_value += value
+
+	precision = frappe.get_precision("Journal Entry Account", "debit_in_account_currency")
+	return flt(account_balance, precision), flt(total_stock_value, precision), related_warehouses
+
+def get_journal_entry(account, stock_adjustment_account, amount):
+	db_or_cr_warehouse_account =('credit_in_account_currency' if amount < 0 else 'debit_in_account_currency')
+	db_or_cr_stock_adjustment_account = ('debit_in_account_currency' if amount < 0 else 'credit_in_account_currency')
+
+	return {
+		'accounts':[{
+			'account': account,
+			db_or_cr_warehouse_account: abs(amount)
+		}, {
+			'account': stock_adjustment_account,
+			db_or_cr_stock_adjustment_account : abs(amount)
+		}]
+	}
