@@ -389,14 +389,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		var frm = this.frm;
 
 		var rows;
-		var checked_rows = frm.fields_dict.items.grid.grid_rows.filter(row => row.doc.__checked );
+		var checked_rows = frm.fields_dict.items.grid.grid_rows.filter(row => row.doc.__checked);
 		if (checked_rows.length) {
 			rows = checked_rows;
 		} else {
 			rows = frm.fields_dict.items.grid.grid_rows;
 		}
 
-		rows = frm.fields_dict.items.grid.grid_rows
+		rows = rows
 			.filter(row => row.doc.item_code && (row.doc.price_list_rate || row.doc.rate))
 			.map(function(row) { return {
 				item_code: row.doc.item_code,
@@ -1061,6 +1061,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.set_value("conversion_rate", 1.0);
 		}
 		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
+			this.frm.doc.plc_conversion_rate &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
