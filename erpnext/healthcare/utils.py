@@ -32,7 +32,7 @@ def get_healthcare_services_to_invoice(patient, company):
 def validate_customer_created(patient):
 	if not frappe.db.get_value('Patient', patient.name, 'customer'):
 		msg = _("Please set a Customer linked to the Patient")
-		msg +=  " <b><a href='#Form/Patient/{0}'>{0}</a></b>".format(patient.name)
+		msg +=  " <b><a href='/app/Form/Patient/{0}'>{0}</a></b>".format(patient.name)
 		frappe.throw(msg, title=_('Customer Not Found'))
 
 
@@ -169,7 +169,7 @@ def get_clinical_procedures_to_invoice(patient, company):
 			service_item = get_healthcare_service_item('clinical_procedure_consumable_item')
 			if not service_item:
 				msg = _('Please Configure Clinical Procedure Consumable Item in ')
-				msg += '''<b><a href='#Form/Healthcare Settings'>Healthcare Settings</a></b>'''
+				msg += '''<b><a href='/app/Form/Healthcare Settings'>Healthcare Settings</a></b>'''
 				frappe.throw(msg, title=_('Missing Configuration'))
 
 			clinical_procedures_to_invoice.append({
@@ -324,7 +324,7 @@ def throw_config_service_item(is_inpatient):
 		service_item_label = _('Inpatient Visit Charge Item')
 
 	msg = _(('Please Configure {0} in ').format(service_item_label) \
-		+ '''<b><a href='#Form/Healthcare Settings'>Healthcare Settings</a></b>''')
+		+ '''<b><a href='/app/Form/Healthcare Settings'>Healthcare Settings</a></b>''')
 	frappe.throw(msg, title=_('Missing Configuration'))
 
 
@@ -334,7 +334,7 @@ def throw_config_practitioner_charge(is_inpatient, practitioner):
 		charge_name = _('Inpatient Visit Charge')
 
 	msg = _(('Please Configure {0} for Healthcare Practitioner').format(charge_name) \
-		+ ''' <b><a href='#Form/Healthcare Practitioner/{0}'>{0}</a></b>'''.format(practitioner))
+		+ ''' <b><a href='/app/Form/Healthcare Practitioner/{0}'>{0}</a></b>'''.format(practitioner))
 	frappe.throw(msg, title=_('Missing Configuration'))
 
 
@@ -654,6 +654,6 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 		><div class='col-md-12 col-sm-12'>" \
 		+ section_html + html +'</div></div>'
 	if doc_html:
-		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='#Form/%s/%s'></a></div>" %(doctype, docname) + doc_html + '</div>'
+		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='/app/Form/%s/%s'></a></div>" %(doctype, docname) + doc_html + '</div>'
 
 	return {'html': doc_html}

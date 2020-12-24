@@ -74,7 +74,7 @@ class CallPopup {
 				'click': () => {
 					const call_summary = this.dialog.get_value('call_summary');
 					if (!call_summary) return;
-					frappe.xcall('erpnext.communication.doctype.call_log.call_log.add_call_summary', {
+					frappe.xcall('erpnext.telephony.doctype.call_log.call_log.add_call_summary', {
 						'call_log': this.call_log.name,
 						'summary': call_summary,
 					}).then(() => {
@@ -85,7 +85,7 @@ class CallPopup {
 								<br>
 								<a
 									class="text-small text-muted"
-									href="#Form/Call Log/${this.call_log.name}">
+									href="/app/call-log/${this.call_log.name}">
 									${__('View call log')}
 								</a>
 							`,
@@ -167,7 +167,7 @@ class CallPopup {
 				const issue_field = this.dialog.get_field("last_issue");
 				issue_field.set_value(issue.subject);
 				issue_field.$wrapper.append(`
-					<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
+					<a class="text-medium" href="/app/issue?customer=${issue.customer}">
 						${__('View all issues from {0}', [issue.customer])}
 					</a>
 				`);

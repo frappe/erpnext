@@ -16,35 +16,36 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<section class="col-span-4 flex shadow rounded item-details bg-white mx-h-70 h-100 d-none"></section>`
+			`<section class="item-details-container"></section>`
 		)
 
-		this.$component = this.wrapper.find('.item-details');
+		this.$component = this.wrapper.find('.item-details-container');
 	}
 
 	init_child_components() {
 		this.$component.html(
-			`<div class="details-container flex flex-col p-8 rounded w-full">
-				<div class="flex justify-between mb-2">
-					<div class="text-grey">ITEM DETAILS</div>
-					<div class="close-btn text-grey hover-underline pointer no-select">Close</div>
+			`<div class="item-details-header">
+				<div class="label">Item Details</div>
+				<div class="close-btn">
+					<svg width="32" height="32" viewBox="0 0 14 14" fill="none">
+						<path d="M4.93764 4.93759L7.00003 6.99998M9.06243 9.06238L7.00003 6.99998M7.00003 6.99998L4.93764 9.06238L9.06243 4.93759" stroke="#8D99A6"/>
+					</svg>
 				</div>
-				<div class="item-defaults flex">
-					<div class="flex-1 flex flex-col justify-end mr-4 mb-2">
-						<div class="item-name text-xl font-weight-450"></div>
-						<div class="item-description text-md-0 text-grey-200"></div>
-						<div class="item-price text-xl font-bold"></div>
-					</div>
-					<div class="item-image flex items-center justify-center w-46 h-46 bg-light-grey rounded ml-4 text-6xl text-grey-100"></div>
+			</div>
+			<div class="item-display">
+				<div class="item-name-desc-price">
+					<div class="item-name"></div>
+					<div class="item-desc"></div>
+					<div class="item-price"></div>
 				</div>
-				<div class="discount-section flex items-center"></div>
-				<div class="text-grey mt-4 mb-6">STOCK DETAILS</div>
-				<div class="form-container grid grid-cols-2 row-gap-2 col-gap-4 grid-auto-row"></div>
-			</div>`
+				<div class="item-image"></div>
+			</div>
+			<div class="discount-section"></div>
+			<div class="form-container"></div>`
 		)
 
 		this.$item_name = this.$component.find('.item-name');
-		this.$item_description = this.$component.find('.item-description');
+		this.$item_description = this.$component.find('.item-desc');
 		this.$item_price = this.$component.find('.item-price');
 		this.$item_image = this.$component.find('.item-image');
 		this.$form_container = this.$component.find('.form-container');
@@ -52,7 +53,7 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 
 	toggle_item_details_section(item) {
-		const { item_code, batch_no, uom } = this.current_item; 
+		const { item_code, batch_no, uom } = this.current_item;
 		const item_code_is_same = item && item_code === item.item_code;
 		const batch_is_same = item && batch_no == item.batch_no;
 		const uom_is_same = item && uom === item.uom;
@@ -104,11 +105,11 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 	
 	render_dom(item) {
-		let { item_code ,item_name, description, image, price_list_rate } = item;
+		let { item_name, description, image, price_list_rate } = item;
 
 		function get_description_html() {
 			if (description) {
-				description = description.indexOf('...') === -1 && description.length > 75 ? description.substr(0, 73) + '...' : description;
+				description = description.indexOf('...') === -1 && description.length > 140 ? description.substr(0, 139) + '...' : description;
 				return description;
 			}
 			return ``;
@@ -118,11 +119,9 @@ erpnext.PointOfSale.ItemDetails = class {
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
 		if (image) {
-			this.$item_image.html(
-				`<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">`
-			);
+			this.$item_image.html(`<img src="${image}" alt="${image}">`);
 		} else {
-			this.$item_image.html(frappe.get_abbr(item_code));
+			this.$item_image.html(`<div class="item-abbr">${frappe.get_abbr(item_name)}</div>`);
 		}
 
 	}
@@ -130,12 +129,8 @@ erpnext.PointOfSale.ItemDetails = class {
 	render_discount_dom(item) {
 		if (item.discount_percentage) {
 			this.$dicount_section.html(
-				`<div class="text-grey line-through mr-4 text-md mb-2">
-					${format_currency(item.price_list_rate, this.currency)}
-				</div>
-				<div class="p-1 pr-3 pl-3 rounded w-fit text-bold bg-green-200 mb-2">
-					${item.discount_percentage}% off
-				</div>`
+				`<div class="item-rate">${format_currency(item.price_list_rate, this.currency)}</div>
+				<div class="item-discount">${item.discount_percentage}% off</div>`
 			)
 			this.$item_price.html(format_currency(item.rate, this.currency));
 		} else {
@@ -149,9 +144,7 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		fields_to_display.forEach((fieldname, idx) => {
 			this.$form_container.append(
-				`<div class="">
-					<div class="item_detail_field ${fieldname}-control" data-fieldname="${fieldname}"></div>
-				</div>`
+				`<div class="${fieldname}-control" data-fieldname="${fieldname}"></div>`
 			)
 
 			const field_meta = this.item_meta.fields.find(df => df.fieldname === fieldname);
@@ -185,22 +178,15 @@ erpnext.PointOfSale.ItemDetails = class {
 
 	make_auto_serial_selection_btn(item) {
 		if (item.has_serial_no) {
-			this.$form_container.append(
-				`<div class="grid-filler no-select"></div>`
-			)
 			if (!item.has_batch_no) {
 				this.$form_container.append(
 					`<div class="grid-filler no-select"></div>`
 				)	
 			}
 			this.$form_container.append(
-				`<div class="auto-fetch-btn bg-grey-100 border border-grey text-bold rounded pt-3 pb-3 pl-6 pr-8 text-grey pointer no-select mt-2"
-						style="height: 3.3rem">
-					Auto Fetch Serial Numbers
-				</div>`
+				`<div class="btn btn-sm btn-secondary auto-fetch-btn">Auto Fetch Serial Numbers</div>`
 			)
-			this.$form_container.find('.serial_no-control').find('textarea').css('height', '9rem');
-			this.$form_container.find('.serial_no-control').parent().addClass('row-span-2');
+			this.$form_container.find('.serial_no-control').find('textarea').css('height', '6rem');
 		}
 	}
 	
@@ -294,8 +280,13 @@ erpnext.PointOfSale.ItemDetails = class {
 		}
 
 		frappe.model.on("POS Invoice Item", "*", (fieldname, value, item_row) => {
-			const field_control = me[`${fieldname}_control`];
-			if (field_control) {
+			const field_control = this[`${fieldname}_control`];
+			const { item_code, batch_no, uom } = this.current_item; 
+			const item_code_is_same = item_code === item_row.item_code;
+			const batch_is_same = batch_no == item_row.batch_no;
+			const uom_is_same = uom === item_row.uom;
+
+			if (field_control && item_code_is_same && batch_is_same && uom_is_same) {
 				field_control.set_value(value);
 				cur_pos.update_cart_html(item_row);
 			}
@@ -409,6 +400,6 @@ erpnext.PointOfSale.ItemDetails = class {
 	}
 
 	toggle_component(show) {
-		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
+		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
 	}
 }

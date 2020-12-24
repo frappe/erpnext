@@ -860,7 +860,7 @@ class Item(WebsiteGenerator):
 
 		rows = ''
 		for docname, attr_list in not_included.items():
-			link = "<a href='#Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
+			link = "<a href='/app/Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
 			rows += table_row(link, body(attr_list))
 
 		error_description = _('The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template.')
@@ -977,15 +977,20 @@ class Item(WebsiteGenerator):
 		# For "Is Stock Item", following doctypes is important
 		# because reserved_qty, ordered_qty and requested_qty updated from these doctypes
 		if field == "is_stock_item":
-			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item"]
+			linked_doctypes += ["Sales Order Item", "Purchase Order Item", "Material Request Item", "Product Bundle"]
 
 		for doctype in linked_doctypes:
+			filters={"item_code": self.name, "docstatus": 1}
+
+			if doctype == "Product Bundle":
+				filters={"new_item_code": self.name}
+
 			if doctype in ("Purchase Invoice Item", "Sales Invoice Item",):
 				# If Invoice has Stock impact, only then consider it.
 				if self.stock_ledger_created():
 					return True
 
-			elif frappe.db.get_value(doctype, filters={"item_code": self.name, "docstatus": 1}):
+			elif frappe.db.get_value(doctype, filters):
 				return True
 
 	def validate_auto_reorder_enabled_in_stock_settings(self):

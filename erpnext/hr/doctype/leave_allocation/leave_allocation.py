@@ -51,8 +51,18 @@ class LeaveAllocation(Document):
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
+		if self.leave_policy_assignment:
+			self.update_leave_policy_assignments_when_no_allocations_left()
 		if self.carry_forward:
 			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
+
+	def update_leave_policy_assignments_when_no_allocations_left(self):
+		allocations = frappe.db.get_list("Leave Allocation", filters = {
+			"docstatus": 1,
+			"leave_policy_assignment": self.leave_policy_assignment
+		})
+		if len(allocations) == 0:
+			frappe.db.set_value("Leave Policy Assignment", self.leave_policy_assignment ,"leaves_allocated", 0)
 
 	def validate_period(self):
 		if date_diff(self.to_date, self.from_date) <= 0:
@@ -82,7 +92,7 @@ class LeaveAllocation(Document):
 			frappe.msgprint(_("{0} already allocated for Employee {1} for period {2} to {3}")
 				.format(self.leave_type, self.employee, formatdate(self.from_date), formatdate(self.to_date)))
 
-			frappe.throw(_('Reference') + ': <a href="#Form/Leave Allocation/{0}">{0}</a>'
+			frappe.throw(_('Reference') + ': <a href="/app/Form/Leave Allocation/{0}">{0}</a>'
 				.format(leave_allocation[0][0]), OverlapError)
 
 	def validate_back_dated_allocation(self):

@@ -25,14 +25,13 @@ erpnext.PointOfSale.NumberPad = class {
 					const fieldname = fieldnames && fieldnames[number] ? 
 						fieldnames[number] : typeof number === 'string' ? frappe.scrub(number) : number;
 
-						return a2 + `<div class="numpad-btn pointer no-select rounded ${class_to_append}
-							flex items-center justify-center h-16 text-md border-grey border" data-button-value="${fieldname}">${number}</div>`
+						return a2 + `<div class="numpad-btn ${class_to_append}" data-button-value="${fieldname}">${number}</div>`
 				}, '')
 			}, '');
 		}
 
 		this.wrapper.html(
-			`<div class="grid grid-cols-${cols} gap-4">
+			`<div class="numpad-container">
 				${get_keys()}
 			</div>`
 		)
