@@ -442,6 +442,7 @@ class StockEntry(StockController):
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate)
+		finished_item_qty = sum([d.transfer_qty for d in self.items if d.is_finished_item])
 
 		# Set basic rate for incoming items
 		for d in self.get('items'):
@@ -451,7 +452,7 @@ class StockEntry(StockController):
 				d.basic_rate = 0.0
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
-					d.basic_rate = self.get_basic_rate_for_manufactured_item(d.transfer_qty, outgoing_items_cost)
+					d.basic_rate = self.get_basic_rate_for_manufactured_item(finished_item_qty, outgoing_items_cost)
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 
@@ -666,7 +667,7 @@ class StockEntry(StockController):
 		production_item, wo_qty = frappe.db.get_value("Work Order",
 			self.work_order, ["production_item", "qty"])
 
-		number_of_finished_items = 0
+		finished_items = []
 		for d in self.get('items'):
 			if d.is_finished_item:
 				if d.item_code != production_item:
@@ -675,9 +676,9 @@ class StockEntry(StockController):
 				elif flt(d.transfer_qty) > flt(self.fg_completed_qty):
 					frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 						format(d.idx, d.transfer_qty, self.fg_completed_qty))
-				number_of_finished_items += 1
+				finished_items.append(d.item_code)
 
-		if number_of_finished_items > 1:
+		if len(set(finished_items)) > 1:
 			frappe.throw(_("Multiple items cannot be marked as finished item"))
 
 		if self.purpose == "Manufacture":
