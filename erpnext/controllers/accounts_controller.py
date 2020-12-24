@@ -75,6 +75,7 @@ class AccountsController(TransactionBase):
 		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
+		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()

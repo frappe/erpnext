@@ -89,6 +89,7 @@
   "po_detail",
   "purchase_receipt",
   "pr_detail",
+  "sales_invoice_item",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -787,12 +788,20 @@
    "fieldtype": "Currency",
    "label": "Outgoing Rate",
    "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "label": "Sales Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-23 17:30:57.458876",
+ "modified": "2020-12-24 12:09:53.611463",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

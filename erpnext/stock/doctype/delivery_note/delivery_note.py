@@ -637,7 +637,7 @@ def make_shipment(source_name, target_doc=None):
 			}
 		}
 	}, target_doc, postprocess)
-	
+
 	return doclist
 
 @frappe.whitelist()
@@ -714,7 +714,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		doctype +" Item": {
 			"doctype": target_doctype + " Item",
 			"field_map": {
-				source_document_warehouse_field: target_document_warehouse_field
+				source_document_warehouse_field: target_document_warehouse_field,
+				'name': 'delivery_note_item'
 			},
 			"field_no_map": [
 				"warehouse"

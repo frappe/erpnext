@@ -41,7 +41,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 			if sle.get("actual_qty") or sle.get("voucher_type")=="Stock Reconciliation":
 				sle_doc = make_entry(sle, allow_negative_stock, via_landed_cost_voucher)
-			
+
 			args = sle_doc.as_dict()
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
 
@@ -65,7 +65,7 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negative_stock=False, via_landed_cost_voucher=False):
 	if not args and voucher_type and voucher_no:
 		args = get_args_for_voucher(voucher_type, voucher_no)
-	
+
 	distinct_item_warehouses = [(d.item_code, d.warehouse) for d in args]
 
 	i = 0
@@ -80,7 +80,7 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 		for item_wh, new_sle in iteritems(obj.new_items):
 			if item_wh not in distinct_item_warehouses:
 				args.append(new_sle)
-		
+
 		i += 1
 
 def get_args_for_voucher(voucher_type, voucher_no):
@@ -127,7 +127,7 @@ class update_entries_after(object):
 		self.initialize_previous_data(self.args)
 
 		self.build()
-	
+
 	def get_precision(self):
 		company_base_currency = frappe.get_cached_value('Company',  self.company,  "default_currency")
 		self.precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"),
@@ -213,13 +213,13 @@ class update_entries_after(object):
 		# includes current entry!
 		args = self.data[self.args.warehouse].previous_sle \
 			or frappe._dict({"item_code": self.item_code, "warehouse": self.args.warehouse})
-		
+
 		return list(self.get_sle_after_datetime(args))
 
 	def get_dependent_entries_to_fix(self, entries_to_fix, sle):
 		dependant_sle = get_sle_by_voucher_detail_no(sle.dependant_sle_voucher_detail_no,
 			excluded_sle=sle.name)
-		
+
 		if not dependant_sle:
 			return
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse == self.args.warehouse:
@@ -251,7 +251,7 @@ class update_entries_after(object):
 
 		# Get dynamic incoming/outgoing rate
 		self.get_dynamic_incoming_outgoing_rate(sle)
-		
+
 		if sle.serial_no:
 			self.get_serialized_values(sle)
 			self.wh_data.qty_after_transaction += flt(sle.actual_qty)
@@ -329,7 +329,7 @@ class update_entries_after(object):
 				rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code, voucher_detail_no=sle.voucher_detail_no)
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
-					rate_field = "valuation_rate" 
+					rate_field = "valuation_rate"
 				else:
 					rate_field = "incoming_rate"
 
@@ -344,7 +344,7 @@ class update_entries_after(object):
 						ref_doctype = "Packed Item"
 					else:
 						ref_doctype = "Purchase Receipt Item Supplied"
-	
+
 					rate = frappe.db.get_value(ref_doctype, {"parent_detail_docname": sle.voucher_detail_no,
 						"item_code": sle.item_code}, rate_field)
 
@@ -374,8 +374,22 @@ class update_entries_after(object):
 		stock_entry.db_update()
 		for d in stock_entry.items:
 			d.db_update()
-	
+
 	def update_rate_on_delivery_and_sales_return(self, sle, outgoing_rate):
+		if frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'is_internal_customer'):
+			frappe.db.set_value(doctype + " Item", voucher_detail_no, "rate", rate)
+			update_taxes_and_totals(sle.voucher_type, sle.voucher_no, outgoing_rate)
+
+			purchase_doctype = 'Purchase Invoice' if sle.voucher_type == 'Sales Invoice' else 'Purchase Receipt'
+			ref_field = frappe.scrub(sle.voucher_type + ' Item')
+
+			purchase_document_list = frappe.db.get_all(purchase_doctype, {'inter_company_invoice_reference':
+				sle.voucher_no}, ['name'], as_dict=1)
+
+			for d in purchase_document_list:
+				frappe.db.set_value(purchase_doctype + ' Item', {ref_field: sle.voucher_detail_no}, 'rate', outgoing_rate)
+				update_taxes_and_totals(purchase_doctype, d.name, outgoing_rate)
+
 		# Update item's incoming rate on transaction
 		item_code = frappe.db.get_value(sle.voucher_type + " Item", sle.voucher_detail_no, "item_code")
 		if item_code == sle.item_code:
@@ -385,6 +399,13 @@ class update_entries_after(object):
 			frappe.db.set_value("Packed Item",
 				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
 				"incoming_rate", outgoing_rate)
+
+	def update_taxes_and_totals(doctype, docname, rate):
+		ref_doc = frappe.get_doc(doctype, docname)
+		ref_doc.calculate_taxes_and_totals()
+		ref_doc.db_update()
+		for d in ref_doc.items:
+			d.db_update()
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
@@ -488,6 +509,7 @@ class update_entries_after(object):
 				else:
 					self.wh_data.valuation_rate = sle.outgoing_rate
 
+			print(self.wh_data.valuation_rate, "$#$#$#$#")
 		else:
 			if flt(self.wh_data.qty_after_transaction) >= 0 and sle.outgoing_rate:
 				self.wh_data.valuation_rate = sle.outgoing_rate
@@ -631,7 +653,7 @@ class update_entries_after(object):
 				frappe.throw(message, NegativeStockError, title='Insufficient Stock')
 			else:
 				raise NegativeStockError(message)
-	
+
 	def update_bin(self):
 		# update bin for each warehouse
 		for warehouse, data in iteritems(self.data):
@@ -766,7 +788,7 @@ def update_qty_in_future_sle(args, allow_negative_stock=None):
 	frappe.db.sql("""
 		update `tabStock Ledger Entry`
 		set qty_after_transaction = qty_after_transaction + {qty}
-		where 
+		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
 			and voucher_no != %(voucher_no)s
@@ -794,7 +816,7 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=None):
 				frappe.get_desk_link('Warehouse', args.warehouse),
 				sle[0]["posting_date"], sle[0]["posting_time"],
 				frappe.get_desk_link(sle[0]["voucher_type"], sle[0]["voucher_no"]))
-						
+
 			frappe.throw(message, NegativeStockError, title='Insufficient Stock')
 
 def get_future_sle_with_negative_qty(args):
@@ -803,7 +825,7 @@ def get_future_sle_with_negative_qty(args):
 			qty_after_transaction, posting_date, posting_time,
 			voucher_type, voucher_no
 		from `tabStock Ledger Entry`
-		where 
+		where
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
 			and voucher_no != %(voucher_no)s
