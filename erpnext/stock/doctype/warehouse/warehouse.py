@@ -29,7 +29,6 @@ class Warehouse(NestedSet):
 				self.set_onload('account', account)
 		load_address_and_contact(self)
 
-
 	def on_update(self):
 		self.update_nsm_model()
 
