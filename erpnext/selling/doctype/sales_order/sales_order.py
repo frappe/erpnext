@@ -14,7 +14,6 @@ from erpnext.stock.stock_balance import update_bin_qty, get_reserved_qty
 from frappe.desk.notifications import clear_doctype_notifications
 from frappe.contacts.doctype.address.address import get_company_address
 from erpnext.controllers.selling_controller import SellingController
-from frappe.automation.doctype.auto_repeat.auto_repeat import get_next_schedule_date
 from erpnext.selling.doctype.customer.customer import check_credit_limit
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -418,8 +417,7 @@ class SalesOrder(SellingController):
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 
 		def _get_delivery_date(ref_doc_delivery_date, red_doc_transaction_date, transaction_date):
-			delivery_date = get_next_schedule_date(ref_doc_delivery_date,
-				auto_repeat_doc.frequency, auto_repeat_doc.start_date, cint(auto_repeat_doc.repeat_on_day))
+			delivery_date = auto_repeat_doc.get_next_schedule_date(schedule_date=ref_doc_delivery_date)
 
 			if delivery_date <= transaction_date:
 				delivery_date_diff = frappe.utils.date_diff(ref_doc_delivery_date, red_doc_transaction_date)
