@@ -4,10 +4,11 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
 			const supply_type = frm.doc.gst_category;
 			const valid_supply_type = ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type);
+			const company_transaction = frm.doc.billing_address_gstin == frm.doc.company_gstin;
 
-			if (!einvoicing_enabled || !valid_supply_type) return;
+			if (!einvoicing_enabled || !valid_supply_type || company_transaction) return;
 
-			const { doctype, docstatus, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
+			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
 
 			const add_custom_button = (label, action) => {
 				if (!frm.custom_buttons[label]) {
@@ -29,7 +30,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							const einvoice = res.message;
 							show_einvoice_preview(frm, einvoice);
 						}
-					})
+					});
 				};
 
 				add_custom_button(__("Generate IRN"), action);
@@ -241,14 +242,14 @@ const get_ewaybill_fields = (frm) => {
 	];
 };
 
-const request_irn_generation = (frm, dialog) => {
+const request_irn_generation = (frm) => {
 	frappe.call({
 		method: 'erpnext.regional.india.e_invoice.utils.generate_irn',
 		args: { doctype: frm.doc.doctype, docname: frm.doc.name },
 		freeze: true,
 		callback: () => frm.reload_doc()
 	});
-}
+};
 
 const get_preview_dialog = (frm, action) => {
 	const dialog = new frappe.ui.Dialog({
@@ -265,7 +266,7 @@ const get_preview_dialog = (frm, action) => {
 		primary_action_label: __('Generate IRN')
 	});
 	return dialog;
-}
+};
 
 const show_einvoice_preview = (frm, einvoice) => {
 	const preview_dialog = get_preview_dialog(frm, request_irn_generation);
@@ -298,8 +299,8 @@ const show_einvoice_preview = (frm, einvoice) => {
 				const style = `
 					.print-format { box-shadow: 0px 0px 5px rgba(0,0,0,0.2); padding: 0.30in; min-height: 80vh; }
 					.print-preview { min-height: 0px; }
-					.modal-dialog { width: 720px; }
-				`
+					.modal-dialog { width: 720px; }`;
+
 				frappe.dom.set_style(style, "custom-print-style");
 				preview_dialog.show();
 			}
