@@ -21,6 +21,8 @@ class TestPatientAppointment(unittest.TestCase):
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 0)
 		appointment = create_appointment(patient, practitioner, nowdate())
 		self.assertEquals(appointment.status, 'Open')
+		create_therapy_session(appointment)
+		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2))
 		self.assertEquals(appointment.status, 'Scheduled')
 		create_encounter(appointment)
@@ -122,6 +124,46 @@ def create_encounter(appointment):
 		encounter.save()
 		encounter.submit()
 		return encounter
+
+def create_therapy_session(appointment):
+	if appointment:
+		session = frappe.new_doc('Therapy Session')
+		session.appointment = appointment.name
+		session.patient = appointment.patient
+		session.practitioner = appointment.practitioner
+		session.company = appointment.company
+		session.therapy_plan = create_therapy_plan(appointment.patient, appointment.appointment_date)
+		session.therapy_type = create_therapy_plan_type()
+		session.duration = appointment.duration
+		session.start_date = appointment.appointment_date
+		session.save()
+		session.submit()
+		return session
+
+def create_therapy_plan(patient, date):
+	if frappe.db.exists('Therapy Plan', '_Test Therapy Plan'):
+		return '_Test Therapy Plan'
+	therapy_plan = frappe.new_doc('Therapy Plan')
+	therapy_plan.patient = patient
+	therapy_plan.start_date = date
+	therapy_plan.append('therapy_plan_details', {
+		'therapy_type': create_therapy_plan_type(),
+		'no_of_sessions': 2,
+		'sessions_completed': 0
+	})
+	therapy_plan.save()
+	return therapy_plan.name
+
+def create_therapy_plan_type():
+	if frappe.db.exists('Therapy Type', '_Test Therapy Type'):
+		return '_Test Therapy Type'
+	therapy_type = frappe.new_doc('Therapy Type')
+	therapy_type.therapy_type = '_Test Therapy Type'
+	therapy_type.item_code = '_Test Therapy Type'
+	therapy_type.item_name = '_Test Therapy Type'
+	therapy_type.item_group = 'Services'
+	therapy_type.save()
+	return therapy_type.name
 
 def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0):
 	item = create_healthcare_service_items()
