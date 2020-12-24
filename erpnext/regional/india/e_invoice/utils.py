@@ -734,7 +734,7 @@ class GSPConnector():
 
 		_file = frappe.new_doc('File')
 		_file.update({
-			'file_name': f'QRCode_{docname}.png',
+			'file_name': 'QRCode_{}.png'.format(docname),
 			'attached_to_doctype': doctype,
 			'attached_to_name': docname,
 			'content': 'qrcode',
