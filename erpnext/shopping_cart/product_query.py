@@ -19,8 +19,6 @@ class ProductQuery:
 	"""
 
 	def __init__(self):
-		"""Summary
-		"""
 		self.settings = frappe.get_doc("Products Settings")
 		self.cart_settings = frappe.get_doc("Shopping Cart Settings")
 		self.page_length = self.settings.products_per_page or 20
