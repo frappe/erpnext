@@ -317,6 +317,7 @@ class Item(WebsiteGenerator):
 		context.search_link = '/product_search'
 
 		context.parents = get_parent_item_groups(self.item_group)
+		context.body_class = "product-page"
 
 		self.set_variant_context(context)
 		self.set_attribute_context(context)

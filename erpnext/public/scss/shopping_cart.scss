@@ -1,5 +1,9 @@
 @import "frappe/public/scss/desk/variables";
-@import "frappe/public/scss/mixins";
+@import "frappe/public/scss/desk/mixins";
+
+body.product-page {
+	background: var(--gray-50);
+}
 
 .carousel-control {
 	height: 42px;
@@ -50,6 +54,11 @@
 		height: 360px;
 		align-items: center;
 		justify-content: center;
+
+		&:hover {
+			box-shadow: 0px 16px 60px rgba(0, 0, 0, 0.08), 0px 8px 30px -20px rgba(0, 0, 0, 0.04);
+			transition: box-shadow 400ms;
+		}
 	}
 
 	// .card-body {
@@ -81,6 +90,10 @@
 		display: -webkit-box;
 		-webkit-line-clamp: 6;
 		-webkit-box-orient: vertical;
+
+		p {
+			margin-bottom: 0.5rem;
+		}
 	}
 
 	.product-category {
@@ -141,7 +154,7 @@
 	}
 }
 
-.product-page {
+.product-container {
 	@include card($padding: var(--padding-md));
 	min-height: 70vh;
 
