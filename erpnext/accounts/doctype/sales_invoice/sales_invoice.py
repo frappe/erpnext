@@ -179,6 +179,9 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+		
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
@@ -258,6 +261,10 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
+		
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+		
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
@@ -279,7 +286,7 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
 
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -405,6 +412,8 @@ class SalesInvoice(SellingController):
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
+			if not pos_profile:
+				frappe.throw(_("No POS Profile found. Please create a New POS Profile first"))
 			self.pos_profile = pos_profile.get('name')
 
 		pos = {}
@@ -472,6 +481,11 @@ class SalesInvoice(SellingController):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
 
 	def validate_debit_to_acc(self):
+		if not self.debit_to:
+			self.debit_to = get_party_account("Customer", self.customer, self.company)
+			if not self.debit_to:
+				self.raise_missing_debit_credit_account_error("Customer", self.customer)
+
 		account = frappe.get_cached_value("Account", self.debit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
@@ -715,22 +729,20 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, gl_entries=None):
-		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
+		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
 			if self.docstatus == 1:
-				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False)
+				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 			elif self.docstatus == 2:
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -751,6 +763,7 @@ class SalesInvoice(SellingController):
 		self.make_customer_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
+		self.make_internal_transfer_gl_entries(gl_entries)
 
 		self.make_item_gl_entries(gl_entries)
 
@@ -770,7 +783,7 @@ class SalesInvoice(SellingController):
 		# Checked both rounding_adjustment and rounded_total
 		# because rounded_total had value even before introcution of posting GLE based on rounded total
 		grand_total = self.rounded_total if (self.rounding_adjustment and self.rounded_total) else self.grand_total
-		if grand_total:
+		if grand_total and not self.is_internal_transfer():
 			# Didnot use base_grand_total to book rounding loss gle
 			grand_total_in_company_currency = flt(grand_total * self.conversion_rate,
 				self.precision("grand_total"))
@@ -809,6 +822,18 @@ class SalesInvoice(SellingController):
 					}, account_currency, item=tax)
 				)
 
+	def make_internal_transfer_gl_entries(self, gl_entries):
+		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
+			account_currency = get_account_currency(self.unrealized_profit_loss_account)
+			gl_entries.append(
+				self.get_gl_dict({
+					"account": self.unrealized_profit_loss_account,
+					"against": self.customer,
+					"debit": flt(self.total_taxes_and_charges),
+					"debit_in_account_currency": flt(self.base_total_taxes_and_charges),
+					"cost_center": self.cost_center
+				}, account_currency, item=self))
+
 	def make_item_gl_entries(self, gl_entries):
 		# income account gl entries
 		for item in self.get("items"):
@@ -831,22 +856,24 @@ class SalesInvoice(SellingController):
 					asset.db_set("disposal_date", self.posting_date)
 					asset.set_status("Sold" if self.docstatus==1 else None)
 				else:
-					income_account = (item.income_account
-						if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
+					# Do not book income for transfer within same company
+					if not self.is_internal_transfer():
+						income_account = (item.income_account
+							if (not item.enable_deferred_revenue or self.is_return) else item.deferred_revenue_account)
 
-					account_currency = get_account_currency(income_account)
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": income_account,
-							"against": self.customer,
-							"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
-							"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
-								if account_currency==self.company_currency
-								else flt(item.net_amount, item.precision("net_amount"))),
-							"cost_center": item.cost_center,
-							"project": item.project or self.project
-						}, account_currency, item=item)
-					)
+						account_currency = get_account_currency(income_account)
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": income_account,
+								"against": self.customer,
+								"credit": flt(item.base_net_amount, item.precision("base_net_amount")),
+								"credit_in_account_currency": (flt(item.base_net_amount, item.precision("base_net_amount"))
+									if account_currency==self.company_currency
+									else flt(item.net_amount, item.precision("net_amount"))),
+								"cost_center": item.cost_center,
+								"project": item.project or self.project
+							}, account_currency, item=item)
+						)
 
 		# expense account gl entries
 		if cint(self.update_stock) and \
@@ -1258,7 +1285,9 @@ class SalesInvoice(SellingController):
 			if self.docstatus == 2:
 				status = "Cancelled"
 			elif self.docstatus == 1:
-				if outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
+				if self.is_internal_transfer():
+					self.status = 'Internal Transfer'
+				elif outstanding_amount > 0 and due_date < nowdate and self.is_discounted and discountng_status=='Disbursed':
 					self.status = "Overdue and Discounted"
 				elif outstanding_amount > 0 and due_date < nowdate:
 					self.status = "Overdue"
@@ -1523,9 +1552,13 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	if doctype in ["Sales Invoice", "Sales Order"]:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Purchase Invoice" if doctype == "Sales Invoice" else "Purchase Order"
+		source_document_warehouse_field = 'target_warehouse'
+		target_document_warehouse_field = 'from_warehouse'
 	else:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Sales Invoice" if doctype == "Purchase Invoice" else "Sales Order"
+		source_document_warehouse_field = 'from_warehouse'
+		target_document_warehouse_field = 'target_warehouse'
 
 	validate_inter_company_transaction(source_doc, doctype)
 	details = get_inter_company_details(source_doc, doctype)
@@ -1552,6 +1585,26 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			if currency:
 				target_doc.currency = currency
 
+	item_field_map = {
+		"doctype": target_doctype + " Item",
+		"field_no_map": [
+			"income_account",
+			"expense_account",
+			"cost_center",
+			"warehouse"
+		]
+	}
+
+	if source_doc.get('update_stock'):
+		item_field_map.update({
+			'field_map': {
+				source_document_warehouse_field: target_document_warehouse_field,
+				'batch_no': 'batch_no',
+				'serial_no': 'serial_no'
+			}
+		})
+
+
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": target_doctype,
@@ -1560,15 +1613,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				"taxes_and_charges"
 			]
 		},
-		doctype +" Item": {
-			"doctype": target_doctype + " Item",
-			"field_no_map": [
-				"income_account",
-				"expense_account",
-				"cost_center",
-				"warehouse"
-			]
-		}
+		doctype +" Item": item_field_map
 
 	}, target_doc, set_missing_values)
 
