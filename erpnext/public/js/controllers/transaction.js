@@ -1061,6 +1061,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			this.frm.set_value("conversion_rate", 1.0);
 		}
 		if(this.frm.doc.currency === this.frm.doc.price_list_currency &&
+			this.frm.doc.plc_conversion_rate &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
