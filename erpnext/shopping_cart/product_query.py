@@ -56,7 +56,7 @@ class ProductQuery:
 					fields=self.fields,
 					filters=[
 						*self.filters,
-						["Item Variant Attribute", "attribute", "=", attribute],`
+						["Item Variant Attribute", "attribute", "=", attribute],
 						["Item Variant Attribute", "attribute_value", "in", values],
 					],
 					or_filters=self.or_filters,
