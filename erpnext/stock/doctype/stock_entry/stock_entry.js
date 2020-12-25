@@ -1,6 +1,8 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.stock");
+{% include 'erpnext/stock/landed_taxes_and_charges_common.js' %};
+
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
@@ -86,15 +88,6 @@ frappe.ui.form.on('Stock Entry', {
 			}
 		});
 
-		frm.set_query("expense_account", "additional_costs", function() {
-			return {
-				query: "erpnext.controllers.queries.tax_account_query",
-				filters: {
-					"account_type": ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"],
-					"company": frm.doc.company
-				}
-			};
-		});
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 	},
@@ -524,7 +517,7 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			);
 		}
-		
+
 		for (let i in frm.doc.items) {
 			let item = frm.doc.items[i];
 
@@ -547,7 +540,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	calculate_total_additional_costs: function(frm) {
 		const total_additional_costs = frappe.utils.sum(
-			(frm.doc.additional_costs || []).map(function(c) { return flt(c.amount); })
+			(frm.doc.additional_costs || []).map(function(c) { return flt(c.base_amount); })
 		);
 
 		frm.set_value("total_additional_costs",
@@ -716,8 +709,18 @@ var validate_sample_quantity = function(frm, cdt, cdn) {
 };
 
 frappe.ui.form.on('Landed Cost Taxes and Charges', {
-	amount: function(frm) {
-		frm.events.calculate_amount(frm);
+	amount: function(frm, cdt, cdn) {
+		frm.events.set_base_amount(frm, cdt, cdn);
+
+		// Adding this check because same table in used in LCV
+		// This causes an error if you try to post an LCV immediately after a Stock Entry
+		if (frm.doc.doctype == 'Stock Entry') {
+			frm.events.calculate_amount(frm);
+		}
+	},
+
+	expense_account: function(frm, cdt, cdn) {
+		frm.events.set_account_currency(frm, cdt, cdn);
 	}
 });
 
