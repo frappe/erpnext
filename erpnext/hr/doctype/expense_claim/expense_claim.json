@@ -38,6 +38,8 @@
   "grand_total",
   "outstanding_amount",
   "section_break_16",
+  "currency",
+  "conversion_rate",
   "title",
   "email_id",
   "accounting_details",
@@ -408,13 +410,28 @@
    "oldfieldtype": "Table",
    "options": "Expense Claim Item",
    "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-07 19:04:06.268867",
+ "modified": "2020-12-25 23:17:26.422453",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

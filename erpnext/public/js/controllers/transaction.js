@@ -688,7 +688,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					let child = frappe.model.add_child(me.frm.doc, "taxes");
 					child.charge_type = "On Net Total";
 					child.account_head = tax;
-					child.rate = 0;
+
+					// price list rate not required for Expense Claim
+					if (me.frm.doc.doctype === "Expense Claim")
+						child.rate = rate;
+					else
+						child.rate = 0;
 				}
 			});
 		}

@@ -17,9 +17,11 @@
   "amount",
   "rate",
   "qty",
+  "item_tax_template",
   "accounting_dimensions_section",
   "cost_center",
-  "dimension_col_break"
+  "dimension_col_break",
+  "item_tax_rate"
  ],
  "fields": [
   {
@@ -131,12 +133,29 @@
    "fieldtype": "Float",
    "label": "Qty",
    "read_only": 1
+  },
+  {
+   "fieldname": "item_tax_template",
+   "fieldtype": "Link",
+   "label": "Item Tax Template",
+   "options": "Item Tax Template",
+   "print_hide": 1
+  },
+  {
+   "description": "Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges",
+   "fieldname": "item_tax_rate",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Item Tax Rate",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-11-07 19:03:53.015650",
+ "modified": "2020-12-25 22:48:16.410377",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Item",
