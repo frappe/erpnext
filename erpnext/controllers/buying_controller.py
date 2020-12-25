@@ -241,7 +241,7 @@ class BuyingController(StockController):
 					if rate > 0:
 						d.rate = rate
 
-				d.amount = flt(d.consumed_qty) * flt(d.rate)
+				d.amount = flt(flt(d.consumed_qty) * flt(d.rate), d.precision("amount"))
 				supplied_items_cost += flt(d.amount)
 		
 		return supplied_items_cost
