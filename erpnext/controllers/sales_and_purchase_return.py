@@ -204,6 +204,8 @@ def get_already_returned_items(doc):
 	return items
 
 def get_returned_qty_map_for_row(row_name, doctype):
+	if doctype == "POS Invoice": return {}
+
 	child_doctype = doctype + " Item"
 	reference_field = "dn_detail" if doctype == "Delivery Note" else frappe.scrub(child_doctype)
 
