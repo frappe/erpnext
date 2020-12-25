@@ -76,7 +76,6 @@ frappe.query_reports["Sales Analytics"] = {
 			events: {
 				onCheckRow: function (data) {
 					if (!data) return;
-
 					const data_doctype = $(
 						data[2].html
 					)[0].attributes.getNamedItem("data-doctype").value;
@@ -114,17 +113,15 @@ frappe.query_reports["Sales Analytics"] = {
 					let raw_data = frappe.query_report.chart.data;
 					let new_datasets = raw_data.datasets;
 
-					let found = false;
-
-					for (let i = 0; i < new_datasets.length; i++) {
-						if (new_datasets[i].name == row_name) {
-							found = true;
-							new_datasets.splice(i, 1);
-							break;
+					let element_found = new_datasets.some((element, index, array)=>{
+						if(element.name == row_name){
+							array.splice(index, 1)
+							return true
 						}
-					}
+						return false
+					})
 
-					if (!found) {
+					if (!element_found) {
 						new_datasets.push(entry);
 					}
 

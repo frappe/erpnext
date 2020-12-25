@@ -87,9 +87,15 @@ frappe.query_reports["Purchase Analytics"] = {
 					row_name = data[2].content;
 					length = data.length;
 
-					if (tree_type == "Supplier" || tree_type == "Item") {
+					if (tree_type == "Supplier") {
 						row_values = data
 							.slice(4, length - 1)
+							.map(function (column) {
+								return column.content;
+							});
+					} else if (tree_type == "Item") {
+						row_values = data
+							.slice(5, length - 1)
 							.map(function (column) {
 								return column.content;
 							});
@@ -109,17 +115,15 @@ frappe.query_reports["Purchase Analytics"] = {
 					let raw_data = frappe.query_report.chart.data;
 					let new_datasets = raw_data.datasets;
 
-					let found = false;
-
-					for (let i = 0; i < new_datasets.length; i++) {
-						if (new_datasets[i].name == row_name) {
-							found = true;
-							new_datasets.splice(i, 1);
-							break;
+					let element_found = new_datasets.some((element, index, array)=>{
+						if(element.name == row_name){
+							array.splice(index, 1)
+							return true
 						}
-					}
+						return false
+					})
 
-					if (!found) {
+					if (!element_found) {
 						new_datasets.push(entry);
 					}
 					let new_data = {
