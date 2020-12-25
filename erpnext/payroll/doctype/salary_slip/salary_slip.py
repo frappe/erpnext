@@ -711,6 +711,7 @@ class SalarySlip(TransactionBase):
 		# get remaining numbers of sub-period (period for which one salary is processed)
 		remaining_sub_periods = get_period_factor(self.employee,
 			self.start_date, self.end_date, self.payroll_frequency, payroll_period)[1]
+
 		# get taxable_earnings, paid_taxes for previous period
 		previous_taxable_earnings = self.get_taxable_earnings_for_prev_period(payroll_period.start_date,
 			self.start_date, tax_slab.allow_tax_exemption)
@@ -870,8 +871,16 @@ class SalarySlip(TransactionBase):
 
 			if earning.is_tax_applicable:
 				if additional_amount:
-					taxable_earnings += (amount - additional_amount)
-					additional_income += additional_amount
+					if not earning.is_recurring_additional_salary:
+						taxable_earnings += (amount - additional_amount)
+						additional_income += additional_amount
+					else:
+						to_date = frappe.db.get_value("Additional Salary", earning.additional_salary, 'to_date')
+						period = (getdate(to_date).month - getdate(self.start_date).month) + 1
+						if period > 0:
+							taxable_earnings += (amount - additional_amount) * period
+							additional_income += additional_amount * period
+
 					if earning.deduct_full_tax_on_selected_payroll_date:
 						additional_income_with_full_tax += additional_amount
 					continue
