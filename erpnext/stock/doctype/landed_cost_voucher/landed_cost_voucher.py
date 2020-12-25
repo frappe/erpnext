@@ -9,7 +9,7 @@ from frappe.model.meta import get_field_precision
 from frappe.model.document import Document
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 from erpnext.accounts.doctype.account.account import get_account_currency
-from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
+from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 
 class LandedCostVoucher(Document):
 	def get_items_from_purchase_receipts(self):
@@ -41,9 +41,7 @@ class LandedCostVoucher(Document):
 	def validate(self):
 		self.check_mandatory()
 		self.validate_purchase_receipts()
-		self.set_account_currency()
-		self.set_exchange_rate()
-		self.set_amounts_in_company_currency()
+		init_landed_taxes_and_totals(self)
 		self.set_total_taxes_and_charges()
 		if not self.get("items"):
 			self.get_items_from_purchase_receipts()
@@ -100,30 +98,6 @@ class LandedCostVoucher(Document):
 			if total_charges != self.total_taxes_and_charges:
 				diff = self.total_taxes_and_charges - total_charges
 				self.get('items')[item_count - 1].applicable_charges += diff
-
-	def set_account_currency(self):
-		company_currency = erpnext.get_company_currency(self.company)
-		for d in self.get('taxes'):
-			if not d.account_currency:
-				account_currency = frappe.db.get_value('Account', d.expense_account, 'account_currency')
-				d.account_currency = account_currency or company_currency
-
-	def set_exchange_rate(self):
-		company_currency = erpnext.get_company_currency(self.company)
-		for d in self.get('taxes'):
-			if d.account_currency == company_currency:
-				d.exchange_rate = 1
-			elif not d.exchange_rate or d.exchange_rate == 1 or self.posting_date:
-				d.exchange_rate = get_exchange_rate(self.posting_date, account=d.expense_account,
-					account_currency=d.account_currency, company=self.company)
-
-			if not d.exchange_rate:
-				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
-
-	def set_amounts_in_company_currency(self):
-		for d in self.get('taxes'):
-			d.amount = flt(d.amount, d.precision("amount"))
-			d.base_amount = flt(d.amount * flt(d.exchange_rate), d.precision("base_amount"))
 
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()

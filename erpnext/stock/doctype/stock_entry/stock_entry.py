@@ -19,6 +19,7 @@ from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 from erpnext.accounts.general_ledger import process_gl_map
+from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 import json
 
 from six import string_types, itervalues, iteritems
@@ -186,7 +187,7 @@ class StockEntry(StockController):
 					and (sed.t_warehouse is null or sed.t_warehouse = '')""", self.project, as_list=1)
 
 			amount = amount[0][0] if amount else 0
-			additional_costs = frappe.db.sql(""" select ifnull(sum(sed.amount), 0)
+			additional_costs = frappe.db.sql(""" select ifnull(sum(sed.base_amount), 0)
 				from
 					`tabStock Entry` se, `tabLanded Cost Taxes and Charges` sed
 				where
@@ -431,6 +432,7 @@ class StockEntry(StockController):
 
 	def calculate_rate_and_amount(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		self.set_basic_rate(reset_outgoing_rate, raise_error_if_no_rate)
+		init_landed_taxes_and_totals(self)
 		self.distribute_additional_costs()
 		self.update_valuation_rate()
 		self.set_total_incoming_outgoing_value()
@@ -518,7 +520,7 @@ class StockEntry(StockController):
 		if not any([d.item_code for d in self.items if d.t_warehouse]):
 			self.additional_costs = []
 
-		self.total_additional_costs = sum([flt(t.amount) for t in self.get("additional_costs")])
+		self.total_additional_costs = sum([flt(t.base_amount) for t in self.get("additional_costs")])
 
 		if self.purpose in ("Repack", "Manufacture"):
 			incoming_items_cost = sum([flt(t.basic_amount) for t in self.get("items") if t.is_finished_item])
@@ -698,7 +700,7 @@ class StockEntry(StockController):
 
 		# SLE for target warehouse
 		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-		
+
 		# reverse sl entries if cancel
 		if self.docstatus == 2:
 			sl_entries.reverse()
@@ -726,9 +728,9 @@ class StockEntry(StockController):
 					sle.dependant_sle_voucher_detail_no = d.name
 				elif finished_item_row and (finished_item_row.item_code != d.item_code or finished_item_row.t_warehouse != d.s_warehouse):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
-					
+
 				sl_entries.append(sle)
-	
+
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get('items'):
 			if cstr(d.t_warehouse):
@@ -758,12 +760,18 @@ class StockEntry(StockController):
 			for d in self.get("items"):
 				if d.t_warehouse:
 					item_account_wise_additional_cost.setdefault((d.item_code, d.name), {})
-					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, 0.0)
+					item_account_wise_additional_cost[(d.item_code, d.name)].setdefault(t.expense_account, {
+						"amount": 0.0,
+						"base_amount": 0.0
+					})
 
 					multiply_based_on = d.basic_amount if total_basic_amount else d.qty
 
-					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account] += \
+					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]["amount"] += \
 						flt(t.amount * multiply_based_on) / divide_based_on
+
+					item_account_wise_additional_cost[(d.item_code, d.name)][t.expense_account]["base_amount"] += \
+						flt(t.base_amount * multiply_based_on) / divide_based_on
 
 		if item_account_wise_additional_cost:
 			for d in self.get("items"):
@@ -775,7 +783,8 @@ class StockEntry(StockController):
 						"against": d.expense_account,
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": amount
+						"credit_in_account_currency": flt(amount["amount"]),
+						"credit": flt(amount["base_amount"])
 					}, item=d))
 
 					gl_entries.append(self.get_gl_dict({
@@ -783,7 +792,7 @@ class StockEntry(StockController):
 						"against": account,
 						"cost_center": d.cost_center,
 						"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-						"credit": -1 * amount # put it as negative credit instead of debit purposefully
+						"credit": -1 * amount['base_amount'] # put it as negative credit instead of debit purposefully
 					}, item=d))
 
 		return process_gl_map(gl_entries)
