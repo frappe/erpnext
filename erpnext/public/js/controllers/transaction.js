@@ -106,6 +106,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				if(!item.warehouse && frm.doc.set_warehouse) {
 					item.warehouse = frm.doc.set_warehouse;
 				}
+
+				if(!item.target_warehouse && frm.doc.set_target_warehouse) {
+					item.target_warehouse = frm.doc.set_target_warehouse;
+				}
+
+				if(!item.from_warehouse && frm.doc.set_from_warehouse) {
+					item.from_warehouse = frm.doc.set_from_warehouse;
+				}
 			}
 		});
 
@@ -1964,6 +1972,14 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	set_warehouse: function() {
 		this.autofill_warehouse(this.frm.doc.items, "warehouse", this.frm.doc.set_warehouse);
+	},
+
+	set_target_warehouse: function() {
+		this.autofill_warehouse(this.frm.doc.items, "target_warehouse", this.frm.doc.set_target_warehouse);
+	},
+
+	set_from_warehouse: function() {
+		this.autofill_warehouse(this.frm.doc.items, "from_warehouse", this.frm.doc.set_from_warehouse);
 	},
 
 	autofill_warehouse : function (child_table, warehouse_field, warehouse) {

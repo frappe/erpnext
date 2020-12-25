@@ -56,7 +56,6 @@
   "column_break_32",
   "base_net_rate",
   "base_net_amount",
-  "outgoing_rate",
   "valuation_rate",
   "item_tax_amount",
   "rm_supp_cost",
@@ -865,12 +864,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "outgoing_rate",
-   "fieldtype": "Currency",
-   "label": "Outgoing Rate",
-   "read_only": 1
-  },
-  {
    "fieldname": "delivery_note_item",
    "fieldtype": "Data",
    "label": "Delivery Note Item",
@@ -882,7 +875,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-24 12:10:46.943722",
+ "modified": "2020-12-25 22:33:12.057271",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",
