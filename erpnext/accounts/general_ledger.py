@@ -136,6 +136,9 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
 	gle.submit()
 
+	if not from_repost:
+		validate_expense_against_budget(args)
+
 def validate_cwip_accounts(gl_map):
 	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
 
