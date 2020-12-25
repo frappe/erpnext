@@ -47,6 +47,7 @@
   "set_warehouse",
   "rejected_warehouse",
   "col_break_warehouse",
+  "set_from_warehouse",
   "is_subcontracted",
   "supplier_warehouse",
   "items_section",
@@ -1114,13 +1115,21 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.is_internal_supplier",
+   "description": "Sets 'From Warehouse' in each row of the items table.",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 12:54:23.278500",
+ "modified": "2020-12-25 23:15:01.451518",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
