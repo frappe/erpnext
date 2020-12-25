@@ -9,10 +9,7 @@ from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
-
 class ClosedAccountingPeriod(frappe.ValidationError): pass
-class StockAccountInvalidTransaction(frappe.ValidationError): pass
-class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 
 def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
 	if gl_map:

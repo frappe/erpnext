@@ -6,7 +6,7 @@ import frappe, erpnext, json
 from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.utils import get_balance_on, \
+from erpnext.accounts.utils import get_balance_on, get_stock_accounts, get_stock_and_account_balance, \
 	get_account_currency, check_if_stock_and_account_balance_synced
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
@@ -15,6 +15,8 @@ from erpnext.accounts.doctype.invoice_discounting.invoice_discounting \
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 
 from six import string_types, iteritems
+
+class StockAccountInvalidTransaction(frappe.ValidationError): pass
 
 class JournalEntry(AccountsController):
 	def __init__(self, *args, **kwargs):
@@ -48,8 +50,7 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
-		check_if_stock_and_account_balance_synced(self.posting_date,
-			self.company, self.doctype, self.name)
+		self.validate_stock_accounts()
 		if not self.title:
 			self.title = self.get_title()
 
@@ -61,6 +62,8 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		check_if_stock_and_account_balance_synced(self.posting_date,
+			self.company, self.doctype, self.name)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -99,6 +102,16 @@ class JournalEntry(AccountsController):
 			if account_currency == previous_account_currency:
 				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
+	
+	def validate_stock_accounts(self):
+		stock_accounts = get_stock_accounts(self.company, self.doctype, self.name)
+		for account in stock_accounts:
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
+				self.posting_date, self.company)
+
+			if account_bal == stock_bal:
+				frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+					.format(account), StockAccountInvalidTransaction)
 
 	def update_inter_company_jv(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
