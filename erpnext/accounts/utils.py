@@ -12,11 +12,12 @@ from frappe.utils import formatdate, get_number_format_info
 from six import iteritems
 # imported to enable erpnext.accounts.utils.get_account_currency
 from erpnext.accounts.doctype.account.account import get_account_currency
+from frappe.model.meta import get_field_precision
 
 from erpnext.stock.utils import get_stock_value_on
 from erpnext.stock import get_warehouse_account_map
 
-
+class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 class FiscalYearError(frappe.ValidationError): pass
 
 @frappe.whitelist()
@@ -885,12 +886,6 @@ def get_coa(doctype, parent, is_root, chart=None):
 
 	return accounts
 
-def get_stock_accounts(company):
-	return frappe.get_all("Account", filters = {
-		"account_type": "Stock",
-		"company": company
-	})
-
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
@@ -971,26 +966,23 @@ def check_if_stock_and_account_balance_synced(posting_date, company, voucher_typ
 	if not cint(erpnext.is_perpetual_inventory_enabled(company)):
 		return
 
-	accounts = get_stock_accounts(voucher_type, voucher_no)
+	accounts = get_stock_accounts(company, voucher_type, voucher_no)
 	stock_adjustment_account = frappe.db.get_value("Company", company, "stock_adjustment_account")
 
 	for account in accounts:
 		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
 			posting_date, company)
 
-		if voucher_type=="Journal Entry" and account_bal == stock_bal:
-			frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
-				.format(account), StockAccountInvalidTransaction)
-
-		elif abs(account_bal - stock_bal) > 0.1:
+		if abs(account_bal - stock_bal) > 0.1:
 			precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
 				currency=frappe.get_cached_value('Company',  company,  "default_currency"))
 
 			diff = flt(stock_bal - account_bal, precision)
 
 			error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses as on {3}.").format(
-				stock_bal, account_bal, frappe.bold(account), gl_map[0].posting_date)
-			error_resolution = _("Please create an adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))			
+				stock_bal, account_bal, frappe.bold(account), posting_date)
+			error_resolution = _("Please create an adjustment Journal Entry for amount {0} on {1}")\
+				.format(frappe.bold(diff), frappe.bold(posting_date))			
 
 			frappe.msgprint(
 				msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
@@ -1003,24 +995,24 @@ def check_if_stock_and_account_balance_synced(posting_date, company, voucher_typ
 				})
 
 def get_stock_accounts(company, voucher_type=None, voucher_no=None):
-	stock_accounts = frappe.db.get_list("Account", {
+	stock_accounts = [d.name for d in frappe.db.get_all("Account", {
 		"account_type": "Stock",
 		"company": company,
 		"is_group": 0
-	})
+	})]
 	if voucher_type and voucher_no:
 		if voucher_type == "Journal Entry":
-			stock_accounts = frappe.db.get_list("Journal Entry Account", {
+			stock_accounts = [d.account for d in frappe.db.get_all("Journal Entry Account", {
 				"parent": voucher_no,
 				"account": ["in", stock_accounts]
-			}, "account")
+			}, "account")]
 
 		else:
-			stock_accounts = frappe.db.get_list("GL Entry", {
+			stock_accounts = [d.account for d in frappe.db.get_all("GL Entry", {
 				"voucher_type": voucher_type,
 				"voucher_no": voucher_no,
 				"account": ["in", stock_accounts]
-			}, "account")
+			}, "account")]
 
 	return stock_accounts
 

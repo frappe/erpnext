@@ -9,6 +9,7 @@ from frappe.utils import cint, get_link_to_form
 from erpnext.stock.stock_ledger import repost_future_sle
 from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
 from frappe.utils.user import get_users_with_role
+from frappe import _
 class RepostItemValuation(Document):
 	def validate(self):
 		self.set_status()
