@@ -381,11 +381,13 @@ frappe.ui.form.on("Expense Claim", {
 frappe.ui.form.on("Expense Claim Item", {
 	claimed_amount: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
-		frappe.model.set_value(cdt, cdn, 'amount', child.claimed_amount);
-		frappe.model.set_value(cdt, cdn, 'rate', child.claimed_amount);
+		frappe.model.set_value(cdt, cdn, "rate", child.claimed_amount);
+		frappe.model.set_value(cdt, cdn, "amount", child.claimed_amount);
 	},
 
 	amount: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+		frappe.model.set_value(cdt, cdn, "rate", child.amount);
 		cur_frm.cscript.calculate_total(frm.doc, cdt, cdn);
 		frm.trigger("get_taxes");
 	},
