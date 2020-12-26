@@ -149,7 +149,7 @@ class GLEntry(Document):
 		account_currency = get_account_currency(self.account)
 
 		if not self.account_currency:
-			self.account_currency = company_currency
+			self.account_currency = account_currency or company_currency
 
 		if account_currency != self.account_currency:
 			frappe.throw(_("{0} {1}: Accounting Entry for {2} can only be made in currency: {3}")
