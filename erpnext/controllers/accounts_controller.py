@@ -110,12 +110,12 @@ class AccountsController(TransactionBase):
 			self.set_inter_company_account()
 
 		validate_regional(self)
-		
+
 		validate_einvoice_fields(self)
 
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
-	
+
 	def before_cancel(self):
 		validate_einvoice_fields(self)
 
@@ -450,6 +450,8 @@ class AccountsController(TransactionBase):
 		if gl_dict.account and self.doctype not in ["Journal Entry",
 			"Period Closing Voucher", "Payment Entry", "Purchase Receipt", "Purchase Invoice", "Stock Entry"]:
 			self.validate_account_currency(gl_dict.account, account_currency)
+
+		if gl_dict.account and self.doctype not in ["Journal Entry", "Period Closing Voucher", "Payment Entry"]:
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"),
 											self.company_currency)
 
