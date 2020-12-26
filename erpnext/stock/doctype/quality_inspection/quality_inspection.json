@@ -73,7 +73,7 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nPurchase Receipt\nPurchase Invoice\nDelivery Note\nSales Invoice\nStock Entry",
+   "options": "\nPurchase Receipt\nPurchase Invoice\nDelivery Note\nSales Invoice\nStock Entry\nJob Card",
    "reqd": 1
   },
   {
@@ -236,7 +236,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-12 16:11:31.910508",
+ "modified": "2020-11-19 17:06:05.409963",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",
@@ -257,7 +257,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "search_fields": "item_code, report_date, reference_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

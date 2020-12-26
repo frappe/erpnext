@@ -8,13 +8,8 @@ import unittest
 
 from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError, get_batch_no
 from frappe.utils import cint, flt
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
 
 class TestBatch(unittest.TestCase):
-
-	def setUp(self):
-		set_perpetual_inventory(0)
-
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
 			"doctype": "Batch",
@@ -256,3 +251,18 @@ class TestBatch(unittest.TestCase):
 			batch.insert()
 
 		return batch
+
+def make_new_batch(**args):
+	args = frappe._dict(args)
+
+	try:
+		batch = frappe.get_doc({
+			"doctype": "Batch",
+			"batch_id": args.batch_id,
+			"item": args.item_code,
+		}).insert()
+
+	except frappe.DuplicateEntryError:
+		batch = frappe.get_doc("Batch", args.batch_id)
+
+	return batch

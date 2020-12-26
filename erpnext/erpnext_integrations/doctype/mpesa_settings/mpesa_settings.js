@@ -9,6 +9,7 @@ frappe.ui.form.on('Mpesa Settings', {
 	refresh: function(frm) {
 		frappe.realtime.on("refresh_mpesa_dashboard", function(){
 			frm.reload_doc();
+			frm.events.setup_account_balance_html(frm);
 		});
 	},
 

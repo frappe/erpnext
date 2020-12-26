@@ -10,11 +10,11 @@
   "applicant_type",
   "applicant",
   "loan_type",
-  "payment_type",
   "column_break_3",
   "company",
   "posting_date",
   "is_term_loan",
+  "rate_of_interest",
   "payment_details_section",
   "due_date",
   "pending_principal_amount",
@@ -31,6 +31,7 @@
   "column_break_21",
   "reference_date",
   "principal_amount_paid",
+  "total_interest_paid",
   "repayment_details",
   "amended_from"
  ],
@@ -96,15 +97,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Regular Payment",
-   "fieldname": "payment_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Payment Type",
-   "options": "\nRegular Payment\nLoan Closure",
-   "reqd": 1
-  },
-  {
    "fieldname": "payable_amount",
    "fieldtype": "Currency",
    "label": "Payable Amount",
@@ -116,6 +108,7 @@
    "fieldname": "amount_paid",
    "fieldtype": "Currency",
    "label": "Amount Paid",
+   "non_negative": 1,
    "options": "Company:company:default_currency",
    "reqd": 1
   },
@@ -195,6 +188,7 @@
    "fieldtype": "Currency",
    "hidden": 1,
    "label": "Principal Amount Paid",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -217,11 +211,27 @@
    "hidden": 1,
    "label": "Repayment Details",
    "options": "Loan Repayment Detail"
+  },
+  {
+   "fieldname": "total_interest_paid",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Total Interest Paid",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "loan_type.rate_of_interest",
+   "fieldname": "rate_of_interest",
+   "fieldtype": "Percent",
+   "label": "Rate Of Interest",
+   "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-16 09:40:15.581165",
+ "modified": "2020-11-05 10:06:58.792841",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
