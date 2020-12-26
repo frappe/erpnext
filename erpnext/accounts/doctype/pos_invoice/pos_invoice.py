@@ -39,6 +39,7 @@ class POSInvoice(SalesInvoice):
 		self.validate_serialised_or_batched_item()
 		self.validate_stock_availablility()
 		self.validate_return_items_qty()
+		self.validate_non_stock_items()
 		self.set_status()
 		self.set_account_for_mode_of_payment()
 		self.validate_pos()
@@ -173,6 +174,14 @@ class POSInvoice(SalesInvoice):
 							_("Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}")
 							.format(d.idx, bold_serial_no, bold_return_against)
 						)
+	
+	def validate_non_stock_items(self):
+		for d in self.get("items"):
+			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
+			if not is_stock_item:
+				frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice. ").format(
+					d.idx, frappe.bold(d.item_code)
+				), title=_("Invalid Item"))
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
@@ -441,3 +450,18 @@ def make_merge_log(invoices):
 
 	if merge_log.get('pos_invoices'):
 		return merge_log.as_dict()
+
+def add_return_modes(doc, pos_profile):
+	def append_payment(payment_mode):
+		payment = doc.append('payments', {})
+		payment.default = payment_mode.default
+		payment.mode_of_payment = payment_mode.parent
+		payment.account = payment_mode.default_account
+		payment.type = payment_mode.type
+
+	for pos_payment_method in pos_profile.get('payments'):
+		pos_payment_method = pos_payment_method.as_dict()
+		mode_of_payment = pos_payment_method.mode_of_payment
+		if pos_payment_method.allow_in_returns and not [d for d in doc.get('payments') if d.mode_of_payment == mode_of_payment]:
+			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
+			append_payment(payment_mode[0])

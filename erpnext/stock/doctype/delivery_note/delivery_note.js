@@ -15,6 +15,7 @@ frappe.ui.form.on("Delivery Note", {
 			'Installation Note': 'Installation Note',
 			'Sales Invoice': 'Invoice',
 			'Stock Entry': 'Return',
+			'Shipment': 'Shipment'
 		},
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
@@ -151,11 +152,16 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 								project: me.frm.doc.project || undefined,
 							}
 						})
-					}, __("Get items from"));
+					}, __("Get Items From"));
 			}
 		}
 
 		if (!doc.is_return && doc.status!="Closed") {
+			if(doc.docstatus == 1) {
+				this.frm.add_custom_button(__('Shipment'), function() {
+					me.make_shipment() }, __('Create'));
+			}
+
 			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
 				this.frm.add_custom_button(__('Installation Note'), function() {
 					me.make_installation_note() }, __('Create'));
@@ -218,6 +224,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
 			}, __('Create'))
 		}
+	},
+
+	make_shipment: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_shipment",
+			frm: this.frm
+		})
 	},
 
 	make_sales_invoice: function() {

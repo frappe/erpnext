@@ -345,15 +345,25 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 	if ((pricing_rule.margin_type in ['Amount', 'Percentage'] and pricing_rule.currency == args.currency)
 			or (pricing_rule.margin_type == 'Percentage')):
 		item_details.margin_type = pricing_rule.margin_type
-		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		item_details.has_margin = True
+
+		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
+			item_details.margin_rate_or_amount += pricing_rule.margin_rate_or_amount
+		else:
+			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 
 	if pricing_rule.rate_or_discount == 'Rate':
 		pricing_rule_rate = 0.0
 		if pricing_rule.currency == args.currency:
 			pricing_rule_rate = pricing_rule.rate
+
+		if pricing_rule_rate:
+			# Override already set price list rate (from item price)
+			# if pricing_rule_rate > 0
+			item_details.update({
+				"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1),
+			})
 		item_details.update({
-			"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1),
 			"discount_percentage": 0.0
 		})
 
