@@ -963,9 +963,9 @@ class AccountsController(TransactionBase):
 			It will an internal transfer if its an internal customer and representation
 			company is same as billing company
 		"""
-		if self.doctype == 'Sales Invoice':
+		if self.doctype in ('Sales Invoice', 'Delivery Note'):
 			internal_party_field = 'is_internal_customer'
-		else:
+		elif self.doctype in ('Purchase Invoice', 'Purchase Invoice Item'):
 			internal_party_field = 'is_internal_supplier'
 
 		if self.get(internal_party_field) and (self.represents_company == self.company):
