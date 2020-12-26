@@ -1,8 +1,10 @@
 erpnext.PointOfSale.ItemCart = class {
-	constructor({ wrapper, events }) {
+	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.customer_info = undefined;
+		this.hide_images = settings.hide_images;
+		this.allowed_customer_groups = settings.customer_groups;
 		
 		this.init_component();
 	}
@@ -32,6 +34,7 @@ erpnext.PointOfSale.ItemCart = class {
 			`<div class="customer-section rounded flex flex-col m-8 mb-0"></div>`
 		)
 		this.$customer_section = this.$component.find('.customer-section');
+		this.make_customer_selector();
 	}
 	
 	reset_customer_selector() {
@@ -302,7 +305,7 @@ erpnext.PointOfSale.ItemCart = class {
 		this.$customer_section.html(`<div class="customer-search-field flex flex-1 items-center"></div>`);
 		const me = this;
 		const query = { query: 'erpnext.controllers.queries.customer_query' };
-		const allowed_customer_group = this.events.get_allowed_customer_group() || [];
+		const allowed_customer_group = this.allowed_customer_groups || [];
 		if (allowed_customer_group.length) {
 			query.filters = {
 				customer_group: ['in', allowed_customer_group]
@@ -423,6 +426,7 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 	
 	update_customer_section() {
+		const me = this;
 		const { customer, email_id='', mobile_no='', image } = this.customer_info || {};
 
 		if (customer) {
@@ -460,7 +464,7 @@ erpnext.PointOfSale.ItemCart = class {
 		}
 
 		function get_customer_image() {
-			if (image) {
+			if (!me.hide_images && image) {
 				return `<div class="icon flex items-center justify-center w-12 h-12 rounded bg-light-grey mr-4 text-grey-200">
 							<img class="h-full" src="${image}" alt="${image}" style="object-fit: cover;">
 						</div>`
