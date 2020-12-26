@@ -117,6 +117,7 @@
   "source",
   "column_break5",
   "is_internal_customer",
+  "represents_company",
   "inter_company_reference",
   "per_billed",
   "customer_group",
@@ -1261,13 +1262,22 @@
    "oldfieldtype": "Link",
    "options": "Warehouse",
    "print_hide": 1
+  },
+  {
+   "description": "Company which internal customer represents.",
+   "fetch_from": "customer.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-25 23:11:46.584226",
+ "modified": "2020-12-26 17:07:59.194403",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

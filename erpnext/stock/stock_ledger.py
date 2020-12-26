@@ -377,14 +377,14 @@ class update_entries_after(object):
 
 	def update_rate_on_delivery_and_sales_return(self, sle, outgoing_rate):
 		if frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'is_internal_customer'):
-			frappe.db.set_value(doctype + " Item", voucher_detail_no, "rate", rate)
+			frappe.db.set_value(sle.voucher_type + " Item", sle.voucher_detail_no, "rate", outgoing_rate)
 			update_taxes_and_totals(sle.voucher_type, sle.voucher_no, outgoing_rate)
 
 			purchase_doctype = 'Purchase Invoice' if sle.voucher_type == 'Sales Invoice' else 'Purchase Receipt'
 			ref_field = frappe.scrub(sle.voucher_type + ' Item')
 
 			purchase_document_list = frappe.db.get_all(purchase_doctype, {'inter_company_invoice_reference':
-				sle.voucher_no}, ['name'], as_dict=1)
+				sle.voucher_no}, ['name'])
 
 			for d in purchase_document_list:
 				frappe.db.set_value(purchase_doctype + ' Item', {ref_field: sle.voucher_detail_no}, 'rate', outgoing_rate)
@@ -399,13 +399,6 @@ class update_entries_after(object):
 			frappe.db.set_value("Packed Item",
 				{"parent_detail_docname": sle.voucher_detail_no, "item_code": sle.item_code},
 				"incoming_rate", outgoing_rate)
-
-	def update_taxes_and_totals(doctype, docname, rate):
-		ref_doc = frappe.get_doc(doctype, docname)
-		ref_doc.calculate_taxes_and_totals()
-		ref_doc.db_update()
-		for d in ref_doc.items:
-			d.db_update()
 
 	def update_rate_on_purchase_receipt(self, sle, outgoing_rate):
 		if frappe.db.exists(sle.voucher_type + " Item", sle.voucher_detail_no):
@@ -508,8 +501,6 @@ class update_entries_after(object):
 					self.wh_data.valuation_rate = new_stock_value / new_stock_qty
 				else:
 					self.wh_data.valuation_rate = sle.outgoing_rate
-
-			print(self.wh_data.valuation_rate, "$#$#$#$#")
 		else:
 			if flt(self.wh_data.qty_after_transaction) >= 0 and sle.outgoing_rate:
 				self.wh_data.valuation_rate = sle.outgoing_rate
@@ -666,6 +657,13 @@ class update_entries_after(object):
 			})
 			bin_doc.flags.via_stock_ledger_entry = True
 			bin_doc.save(ignore_permissions=True)
+
+def update_taxes_and_totals(doctype, docname, rate):
+	ref_doc = frappe.get_doc(doctype, docname)
+	ref_doc.calculate_taxes_and_totals()
+	ref_doc.db_update()
+	for d in ref_doc.items:
+		d.db_update()
 
 def get_previous_sle(args, for_update=False):
 	"""

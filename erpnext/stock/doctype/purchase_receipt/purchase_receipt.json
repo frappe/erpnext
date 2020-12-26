@@ -115,6 +115,7 @@
   "per_returned",
   "is_internal_supplier",
   "inter_company_reference",
+  "represents_company",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
@@ -1123,13 +1124,21 @@
    "fieldtype": "Link",
    "label": "Set From Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-25 23:15:01.451518",
+ "modified": "2020-12-26 17:10:00.798835",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

@@ -235,7 +235,7 @@ class BuyingController(StockController):
 						"warehouse": d.from_warehouse,
 						"posting_date": self.posting_date,
 						"posting_time": self.posting_time,
-						"qty": -1 * flt(d.stock_qty),
+						"qty": -1 * flt(d.get('stock_qty')),
 						"serial_no": d.serial_no,
 						"company": self.company,
 						"voucher_type": self.doctype,

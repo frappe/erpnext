@@ -103,15 +103,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		frappe.ui.form.on(this.frm.doctype + " Item", {
 			items_add: function(frm, cdt, cdn) {
 				var item = frappe.get_doc(cdt, cdn);
-				if(!item.warehouse && frm.doc.set_warehouse) {
+				if (!item.warehouse && frm.doc.set_warehouse) {
 					item.warehouse = frm.doc.set_warehouse;
 				}
 
-				if(!item.target_warehouse && frm.doc.set_target_warehouse) {
+				if (!item.target_warehouse && frm.doc.set_target_warehouse) {
 					item.target_warehouse = frm.doc.set_target_warehouse;
 				}
 
-				if(!item.from_warehouse && frm.doc.set_from_warehouse) {
+				if (!item.from_warehouse && frm.doc.set_from_warehouse) {
 					item.from_warehouse = frm.doc.set_from_warehouse;
 				}
 			}

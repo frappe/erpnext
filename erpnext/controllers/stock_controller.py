@@ -23,6 +23,7 @@ class StockController(AccountsController):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.validate_internal_transfer()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if self.docstatus == 2:
@@ -72,7 +73,13 @@ class StockController(AccountsController):
 		warehouse_with_no_account = []
 		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 		for item_row in voucher_details:
-			sle_list = sle_map.get((item_row.name, item_row.warehouse))
+
+			if self.doctype == 'Stock Entry':
+				warehouse_field = 's_warehouse'
+			else:
+				warehouse_field = 'warehouse'
+
+			sle_list = sle_map.get((item_row.name, item_row.get(warehouse_field)))
 			if sle_list:
 				for sle in sle_list:
 					if warehouse_account.get(sle.warehouse):
@@ -390,6 +397,40 @@ class StockController(AccountsController):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
+
+	def validate_internal_transfer(self):
+		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Purchase Invoice', 'Purchase Receipt') \
+			and self.is_internal_transfer():
+			self.validate_in_transit_warehouses()
+			self.validate_multi_currency()
+			self.validate_packed_items()
+			self.validate_inter_company_reference()
+
+	def validate_in_transit_warehouses(self):
+		if self.doctype in ('Sales Invoice', 'Delivery Note'):
+			for item in self.get('items'):
+				if not item.target_warehouse:
+					frappe.throw(_("Row {0}: Target Warehouse is mandatory for internal transfers"))
+
+		if self.doctype in ('Purchase Invoice', 'Purchase Receipt'):
+			for item in self.get('items'):
+				if not item.from_warehouse:
+					frappe.throw(_("Row {0}: From Warehouse is mandatory for internal transfers"))
+
+	def validate_multi_currency(self):
+		if self.currency != self.company_currency:
+			frappe.throw(_("Internal transfers can only be done in company's default currency"))
+
+	def validate_packed_items(self):
+		if self.doctype in ('Sales Invoice', 'Delivery Note Item') and self.get('packed_items'):
+			frappe.throw(_("Packed Items cannot be transferred internally"))
+
+	def validate_inter_company_reference(self):
+		if self.doctype in ('Purchase Invoice', 'Purchase Receipt'):
+			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')):
+				msg = _("Internal Sale or Delivery Reference needed for internal purchase")
+				msg += _("Please create purchase from the internal sale or delivery document itself")
+				frappe.throw(msg)
 
 	def repost_future_sle_and_gle(self):
 		args = frappe._dict({
