@@ -28,7 +28,8 @@
    "fieldname": "max_amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Max Exemption Amount"
+   "label": "Max Exemption Amount",
+   "options": "currency"
   },
   {
    "default": "1",
@@ -38,7 +39,7 @@
   }
  ],
  "links": [],
- "modified": "2020-06-22 23:18:08.254645",
+ "modified": "2020-12-26 13:09:23.829509",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Sub Category",
