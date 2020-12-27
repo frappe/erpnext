@@ -723,7 +723,9 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"doctype": target_doctype + " Item",
 			"field_map": {
 				source_document_warehouse_field: target_document_warehouse_field,
-				'name': 'delivery_note_item'
+				'name': 'delivery_note_item',
+				'batch_no': 'batch_no',
+				'serial_no': 'serial_no'
 			},
 			"field_no_map": [
 				"warehouse"

@@ -407,15 +407,15 @@ class StockController(AccountsController):
 			self.validate_inter_company_reference()
 
 	def validate_in_transit_warehouses(self):
-		if self.doctype in ('Sales Invoice', 'Delivery Note'):
+		if (self.doctype == 'Sales Invoice' and self.get('update_stock')) or self.doctype == 'Delivery Note':
 			for item in self.get('items'):
 				if not item.target_warehouse:
-					frappe.throw(_("Row {0}: Target Warehouse is mandatory for internal transfers"))
+					frappe.throw(_("Row {0}: Target Warehouse is mandatory for internal transfers").format(item.idx))
 
-		if self.doctype in ('Purchase Invoice', 'Purchase Receipt'):
+		if (self.doctype == 'Purchase Invoice' and self.get('update_stock')) or self.doctype == 'Purchase Receipt':
 			for item in self.get('items'):
 				if not item.from_warehouse:
-					frappe.throw(_("Row {0}: From Warehouse is mandatory for internal transfers"))
+					frappe.throw(_("Row {0}: From Warehouse is mandatory for internal transfers").format(item.idx))
 
 	def validate_multi_currency(self):
 		if self.currency != self.company_currency:
@@ -428,9 +428,9 @@ class StockController(AccountsController):
 	def validate_inter_company_reference(self):
 		if self.doctype in ('Purchase Invoice', 'Purchase Receipt'):
 			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')):
-				msg = _("Internal Sale or Delivery Reference needed for internal purchase")
-				msg += _("Please create purchase from the internal sale or delivery document itself")
-				frappe.throw(msg)
+				msg = _("Internal Sale or Delivery Reference missing. ")
+				msg += _("Please create purchase from internal sale or delivery document itself")
+				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
 
 	def repost_future_sle_and_gle(self):
 		args = frappe._dict({

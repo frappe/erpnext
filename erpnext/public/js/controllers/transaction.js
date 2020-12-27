@@ -655,7 +655,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: item_args
 			},
 			callback: function(r) {
-				frappe.model.set_value(item.doctype, item.name, 'rate', r.message);
+				frappe.model.set_value(item.doctype, item.name, 'rate', r.message * item.conversion_factor);
 			}
 		});
 	},

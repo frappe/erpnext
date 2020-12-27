@@ -381,13 +381,13 @@ class update_entries_after(object):
 			update_taxes_and_totals(sle.voucher_type, sle.voucher_no, outgoing_rate)
 
 			purchase_doctype = 'Purchase Invoice' if sle.voucher_type == 'Sales Invoice' else 'Purchase Receipt'
-			ref_field = frappe.scrub(sle.voucher_type + ' Item')
+			ref_doc_field = frappe.scrub(sle.voucher_type + ' Item')
 
-			purchase_document_list = frappe.db.get_all(purchase_doctype, {'inter_company_invoice_reference':
-				sle.voucher_no}, ['name'])
+			reference_field = 'inter_company_invoice_reference' if purchase_doctype == 'Purchase Invoice' else 'inter_company_reference'
+			purchase_document_list = frappe.db.get_all(purchase_doctype, {reference_field: sle.voucher_no}, ['name'])
 
 			for d in purchase_document_list:
-				frappe.db.set_value(purchase_doctype + ' Item', {ref_field: sle.voucher_detail_no}, 'rate', outgoing_rate)
+				frappe.db.set_value(purchase_doctype + ' Item', {ref_doc_field: sle.voucher_detail_no}, 'rate', outgoing_rate)
 				update_taxes_and_totals(purchase_doctype, d.name, outgoing_rate)
 
 		# Update item's incoming rate on transaction

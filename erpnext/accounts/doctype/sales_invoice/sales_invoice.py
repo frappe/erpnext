@@ -1600,6 +1600,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			currency = frappe.db.get_value('Supplier', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
+			target_doc.is_internal_supplier = 1
+			target_doc.ignore_pricing_rule = 1
 			target_doc.buying_price_list = source_doc.selling_price_list
 
 			if currency:
@@ -1620,7 +1622,11 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"expense_account",
 			"cost_center",
 			"warehouse"
-		]
+		],
+		"field_map": {
+			'rate': 'rate',
+			'name': 'sales_invoice_item'
+		}
 	}
 
 	if source_doc.get('update_stock'):
@@ -1629,7 +1635,6 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				source_document_warehouse_field: target_document_warehouse_field,
 				'batch_no': 'batch_no',
 				'serial_no': 'serial_no',
-				'name': 'sales_invoice_item'
 			}
 		})
 

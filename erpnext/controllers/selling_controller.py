@@ -333,9 +333,11 @@ class SellingController(StockController):
 
 				# For internal transfers use incoming rate as the valuation rate
 				if self.get('is_internal_customer') and d.get('target_warehouse'):
-					d.rate = flt(d.incoming_rate * d.conversion_factor)
-					frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
-						.format(d.idx), alert=1)
+					rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
+					if d.rate != rate:
+						d.rate = rate
+						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
+							.format(d.idx), alert=1)
 
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
