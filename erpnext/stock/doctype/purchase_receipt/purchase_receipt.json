@@ -1088,7 +1088,9 @@
    "fieldname": "inter_company_reference",
    "fieldtype": "Link",
    "label": "Inter Company Reference",
+   "no_copy": 1,
    "options": "Delivery Note",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1138,7 +1140,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-26 17:10:00.798835",
+ "modified": "2020-12-26 20:49:39.106049",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

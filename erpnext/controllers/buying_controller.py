@@ -243,7 +243,7 @@ class BuyingController(StockController):
 						"allow_zero_valuation": d.get("allow_zero_valuation")
 					}, raise_error_if_no_rate=False)
 
-					rate = flt(outgoing_rate * d.conversion_factor)
+					rate = flt(outgoing_rate * d.conversion_factor, d.precision('rate'))
 				else:
 					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), 'rate')
 
