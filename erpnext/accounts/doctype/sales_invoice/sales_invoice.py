@@ -1630,14 +1630,11 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}
 
 	if source_doc.get('update_stock'):
-		item_field_map.update({
-			'field_map': {
-				source_document_warehouse_field: target_document_warehouse_field,
-				'batch_no': 'batch_no',
-				'serial_no': 'serial_no',
-			}
+		item_field_map["field_map"].update({
+			source_document_warehouse_field: target_document_warehouse_field,
+			'batch_no': 'batch_no',
+			'serial_no': 'serial_no'
 		})
-
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {

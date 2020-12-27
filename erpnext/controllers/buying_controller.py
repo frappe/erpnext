@@ -229,7 +229,7 @@ class BuyingController(StockController):
 			if not cint(self.get("is_return")) and d.get("from_warehouse"):
 				# Get outgoing rate based on original item cost based on valuation method
 
-				if not d.get('sales_invoice_item'):
+				if not d.get(frappe.scrub(ref_doctype)):
 					outgoing_rate = get_incoming_rate({
 						"item_code": d.item_code,
 						"warehouse": d.from_warehouse,
