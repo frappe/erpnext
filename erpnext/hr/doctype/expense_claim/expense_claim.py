@@ -37,22 +37,28 @@ class ExpenseClaim(AccountsController):
 			self.project = frappe.db.get_value("Task", self.task, "project")
 
 	def set_status(self):
-		self.status = {
-			"0": "Draft",
-			"1": "Submitted",
-			"2": "Cancelled"
-		}[cstr(self.docstatus or 0)]
+		if self.is_new():
+			if self.get("amended_from"):
+				self.status = "Draft"
+			return
 
-		paid_amount = flt(self.total_amount_reimbursed) + flt(self.total_advance_amount)
-		precision = self.precision("grand_total")
-		if (self.is_paid or (flt(self.total_sanctioned_amount) > 0
-			and flt(self.grand_total, precision) ==  flt(paid_amount, precision))) \
-			and self.docstatus == 1 and self.approval_status == 'Approved':
-				self.status = "Paid"
-		elif flt(self.total_sanctioned_amount) > 0 and self.docstatus == 1 and self.approval_status == 'Approved':
-			self.status = "Unpaid"
-		elif self.docstatus == 1 and self.approval_status == 'Rejected':
-			self.status = 'Rejected'
+		precision = self.precision("outstanding_amount")
+		outstanding_amount = flt(self.outstanding_amount, precision)
+
+		if self.docstatus == 2:
+			self.status = "Cancelled"
+		elif self.docstatus == 1:
+			if self.approval_status == "Approved":
+				if self.is_paid or outstanding_amount <= 0:
+					self.status = "Paid"
+				elif outstanding_amount > 0:
+					self.status = "Unpaid"
+				else:
+					self.status = "Submitted"
+			elif self.approval_status == "Rejected":
+				self.status = "Rejected"
+		else:
+			self.status = "Draft"
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
