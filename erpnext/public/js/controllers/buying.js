@@ -195,10 +195,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this._super(doc, cdt, cdn);
 	},
 
-	batch_no: function(doc, cdt, cdn) {
-		this._super(doc, cdt, cdn);
-	},
-
 	received_qty: function(doc, cdt, cdn) {
 		this.calculate_accepted_qty(doc, cdt, cdn)
 	},
