@@ -83,7 +83,7 @@ class StockEntry(StockController):
 		self.set_incoming_rate()
 		self.validate_serialized_batch()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount()
+		self.calculate_rate_and_amount(update_finished_item_rate=False)
 
 	def on_submit(self):
 
@@ -460,7 +460,7 @@ class StockEntry(StockController):
 					scrap_material_cost += flt(d.basic_amount)
 
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
-		if (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
+		if number_of_fg_items == 1 or update_finished_item_rate:
 			self.set_basic_rate_for_finished_goods(raw_material_cost, scrap_material_cost)
 
 	def get_args_for_incoming_rate(self, item):
