@@ -27,6 +27,8 @@
   "auto_add_item_to_cart",
   "item_groups",
   "column_break_16",
+  "allow_rate_change",
+  "allow_discount_change",
   "customer_groups",
   "section_break_16",
   "print_format",
@@ -329,13 +331,25 @@
    "fieldname": "auto_add_item_to_cart",
    "fieldtype": "Check",
    "label": "Automatically Add Filtered Item To Cart"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_rate_change",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_discount_change",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Discount"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-10 13:59:28.877572",
+ "modified": "2020-12-28 19:28:28.298563",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

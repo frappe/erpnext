@@ -1,7 +1,9 @@
 erpnext.PointOfSale.ItemDetails = class {
-	constructor({ wrapper, events }) {
+	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
+		this.allow_rate_change = settings.allow_rate_change;
+		this.allow_discount_change = settings.allow_discount_change;
 		this.current_item = {};
 
 		this.init_component();
@@ -207,17 +209,27 @@ erpnext.PointOfSale.ItemDetails = class {
 	bind_custom_control_change_event() {
 		const me = this;
 		if (this.rate_control) {
-			this.rate_control.df.onchange = function() {
-				if (this.value || flt(this.value) === 0) {
-					me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
-						const item_row = frappe.get_doc(me.doctype, me.name);
-						const doc = me.events.get_frm().doc;
-
-						me.$item_price.html(format_currency(item_row.rate, doc.currency));
-						me.render_discount_dom(item_row);
-					});
+			if (this.allow_rate_change) {
+				this.rate_control.df.onchange = function() {
+					if (this.value || flt(this.value) === 0) {
+						me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
+							const item_row = frappe.get_doc(me.doctype, me.name);
+							const doc = me.events.get_frm().doc;
+	
+							me.$item_price.html(format_currency(item_row.rate, doc.currency));
+							me.render_discount_dom(item_row);
+						});
+					}
 				}
+			} else {
+				this.rate_control.df.read_only = 1
 			}
+			this.rate_control.refresh();
+		}
+
+		if (this.discount_percentage_control && !this.allow_discount_change) {
+			this.discount_percentage_control.df.read_only = 1
+			this.discount_percentage_control.refresh();
 		}
 
 		if (this.warehouse_control) {

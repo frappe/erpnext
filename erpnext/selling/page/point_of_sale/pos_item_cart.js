@@ -5,6 +5,8 @@ erpnext.PointOfSale.ItemCart = class {
 		this.customer_info = undefined;
 		this.hide_images = settings.hide_images;
 		this.allowed_customer_groups = settings.customer_groups;
+		this.allow_rate_change = settings.allow_rate_change;
+		this.allow_discount_change = settings.allow_discount_change;
 		
 		this.init_component();
 	}
@@ -702,14 +704,26 @@ erpnext.PointOfSale.ItemCart = class {
 	on_numpad_event($btn) {
 		const current_action = $btn.attr('data-button-value');
 		const action_is_field_edit = ['qty', 'discount_percentage', 'rate'].includes(current_action);
-
-		this.highlight_numpad_btn($btn, current_action);
+		const action_is_allowed = action_is_field_edit ? (
+			(current_action == 'rate' && this.allow_rate_change) ||
+			(current_action == 'discount_percentage' && this.allow_discount_change) ||
+			(current_action == 'qty')) : true;
 
 		const action_is_pressed_twice = this.prev_action === current_action;
 		const first_click_event = !this.prev_action;
 		const field_to_edit_changed = this.prev_action && this.prev_action != current_action;
 
 		if (action_is_field_edit) {
+			if (!action_is_allowed) {
+				const label = current_action == 'rate' ? 'Rate'.bold() : 'Discount'.bold();
+				const message = __('Editing {0} is not allowed as per POS Profile settings', [label]);
+				frappe.show_alert({
+					indicator: 'red',
+					message: message
+				});
+				frappe.utils.play_sound("error");
+				return;
+			}
 
 			if (first_click_event || field_to_edit_changed) {
 				this.prev_action = current_action;
@@ -753,6 +767,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.numpad_value = current_action;
 		}
 
+		this.highlight_numpad_btn($btn, current_action);
 		this.events.numpad_event(this.numpad_value, this.prev_action);
 	}
 	

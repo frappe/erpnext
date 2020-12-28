@@ -124,9 +124,8 @@ erpnext.PointOfSale.Controller = class {
 		});
 
 		frappe.db.get_doc("POS Profile", this.pos_profile).then((profile) => {
+			Object.assign(this.settings, profile);
 			this.settings.customer_groups = profile.customer_groups.map(group => group.customer_group);
-			this.settings.hide_images = profile.hide_images;
-			this.settings.auto_add_item_to_cart = profile.auto_add_item_to_cart;
 			this.make_app();
 		});
 	}
@@ -281,6 +280,7 @@ erpnext.PointOfSale.Controller = class {
 	init_item_details() {
 		this.item_details = new erpnext.PointOfSale.ItemDetails({
 			wrapper: this.$components_wrapper,
+			settings: this.settings,
 			events: {
 				get_frm: () => this.frm,
 
