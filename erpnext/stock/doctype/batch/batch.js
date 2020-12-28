@@ -11,7 +11,7 @@ frappe.ui.form.on('Batch', {
 					'has_batch_no': 1
 				}
 			}
-		}
+		};
 
 		frm.set_query('selling_price', function() {
 			return {
