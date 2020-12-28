@@ -259,11 +259,16 @@ class StockEntry(StockController):
 								item_code.append(item.item_code)
 
 	def validate_fg_completed_qty(self):
+		item_wise_qty = {}
 		if self.purpose == "Manufacture" and self.work_order:
 			for d in self.items:
-				if d.is_finished_item and d.qty != self.fg_completed_qty:
-					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
-						.format(d.qty, self.fg_completed_qty))
+				if d.is_finished_item:
+					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
+
+		for item_code, qty_list in iteritems(item_wise_qty):
+			if self.fg_completed_qty != sum(qty_list):
+				frappe.throw(_("The finished product {0} quantity {1} and For Quantity {2} cannot be different")
+					.format(frappe.bold(item_code), frappe.bold(sum(qty_list)), frappe.bold(self.fg_completed_qty)))
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
@@ -319,7 +324,7 @@ class StockEntry(StockController):
 
 			if self.purpose == "Manufacture":
 				if validate_for_manufacture:
-					if d.bom_no:
+					if d.is_finished_item or d.is_scrap_item:
 						d.s_warehouse = None
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
@@ -699,7 +704,7 @@ class StockEntry(StockController):
 
 		# SLE for target warehouse
 		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-		
+
 		# reverse sl entries if cancel
 		if self.docstatus == 2:
 			sl_entries.reverse()
@@ -727,9 +732,9 @@ class StockEntry(StockController):
 					sle.dependant_sle_voucher_detail_no = d.name
 				elif finished_item_row and (finished_item_row.item_code != d.item_code or finished_item_row.t_warehouse != d.s_warehouse):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
-					
+
 				sl_entries.append(sle)
-	
+
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get('items'):
 			if cstr(d.t_warehouse):
