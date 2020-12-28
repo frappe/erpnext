@@ -20,8 +20,8 @@ frappe.ui.form.on('Project Template Task', {
 	task: function (frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		frappe.db.get_value("Task", row.task, "subject", (value) => {
-				row.subject = value.subject;
-				refresh_field("tasks");
-			});
+			row.subject = value.subject;
+			refresh_field("tasks");
+		});
 	}
-})
+});
