@@ -4,59 +4,108 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
-from frappe import _
+from frappe import _, scrub
+
 
 def execute(filters=None):
 	if not filters: filters = {}
 	salary_slips = get_salary_slips(filters)
 	if not salary_slips: return [], []
 
-	columns, earning_types, ded_types = get_columns(salary_slips)
+	columns = get_columns(salary_slips)
 	ss_earning_map = get_ss_earning_map(salary_slips)
 	ss_ded_map = get_ss_ded_map(salary_slips)
 	doj_map = get_employee_doj_map()
 
 	data = []
+
 	for ss in salary_slips:
-		row = [ss.name, ss.employee, ss.employee_name, doj_map.get(ss.employee), ss.branch, ss.department, ss.designation,
-			ss.company, ss.start_date, ss.end_date, ss.leave_without_pay, ss.payment_days]
+		row = frappe._dict({
+				"salary_slip_id": ss.name,
+				"employee": ss.employee,
+				"employee_name": ss.employee_name,
+				"date_of_joining": doj_map.get(ss.employee),
+				"branch": ss.branch,
+				"department": ss.department,
+				"designation": ss.designation,
+				"company": ss.company,
+				"start_date": ss.start_date,
+				"end_date": ss.end_date,
+				"leave_without_pay": ss.leave_without_pay,
+				"payment_days": ss.payment_days,
+				"gross_pay": ss.gross_pay,
+				"loan_repayment": ss.total_loan_repayment if ss.total_loan_repayment else None,
+				"advance_deduction": ss.total_advance_amount if ss.total_advance_amount else None,
+				"total_deduction": ss.total_deduction + ss.total_loan_repayment + ss.total_advance_amount,
+				"net_pay": ss.net_pay})
 
-		if not ss.branch == None:columns[3] = columns[3].replace('-1','120')
-		if not ss.department  == None: columns[4] = columns[4].replace('-1','120')
-		if not ss.designation  == None: columns[5] = columns[5].replace('-1','120')
-		if not ss.leave_without_pay  == None: columns[9] = columns[9].replace('-1','130')
-
-
-		for e in earning_types:
-			row.append(ss_earning_map.get(ss.name, {}).get(e))
-
-		row += [ss.gross_pay]
-
-		for d in ded_types:
-			row.append(ss_ded_map.get(ss.name, {}).get(d))
-
-		row.append(ss.total_loan_repayment)
-
-		row += [ss.total_deduction, ss.net_pay]
+		for c in columns:
+			if c.get("isEarning"):
+				row.setdefault(c.get("fieldname"), ss_earning_map.get(ss.name, {}).get(c.get("label")))
+			elif c.get("isDeduction"):
+				row.setdefault(c.get("fieldname"), ss_ded_map.get(ss.name, {}).get(c.get("label")))
 
 		data.append(row)
 
 	return columns, data
 
+
 def get_columns(salary_slips):
-	"""
+	branch = department = designation = leave_without_pay = loan_repayment = advance_deduction = False
+	for ss in salary_slips:
+		if ss.get('branch'): branch = True
+		if ss.get('department'): department = True
+		if ss.get('designation'): designation = True
+		if ss.get('leave_without_pay'): leave_without_pay = True
+		if ss.get('total_loan_repayment'): loan_repayment = True
+		if ss.get('total_advance_amount'): advance_deduction = True
+
 	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140",
-		_("Date of Joining") + "::80", _("Branch") + ":Link/Branch:120", _("Department") + ":Link/Department:120",
-		_("Designation") + ":Link/Designation:120", _("Company") + ":Link/Company:120", _("Start Date") + "::80",
-		_("End Date") + "::80", _("Leave Without Pay") + ":Float:130", _("Payment Days") + ":Float:120"
-	]
-	"""
-	columns = [
-		_("Salary Slip ID") + ":Link/Salary Slip:150",_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140",
-		_("Date of Joining") + "::80", _("Branch") + ":Link/Branch:-1", _("Department") + ":Link/Department:-1",
-		_("Designation") + ":Link/Designation:-1", _("Company") + ":Link/Company:120", _("Start Date") + "::80",
-		_("End Date") + "::80", _("Leave Without Pay") + ":Float:-1", _("Payment Days") + ":Float:120"
+		{
+			"label": _("Salary Slip ID"), "fieldtype": "Link", "fieldname": "salary_slip_id","options": "Salary Slip",
+			"width": 230
+		},
+		{
+			"label": _("Employee"),"fieldtype": "Link", "fieldname": "employee", "options": "Employee","width": 120
+		}
+		]
+
+	if not frappe.get_cached_value("HR Settings", None, "emp_created_by") == "Full Name":
+		columns = columns + [
+			{
+				"label": _("Employee Name"), "fieldtype": "Data", "fieldname": "employee_name", "width": 140
+			},
+		]
+
+	columns = columns + [
+		{
+			"label": _("Date of Joining"), "fieldtype": "Date", "fieldname": "date_of_joining", "width": 120
+		},
+		{
+			"label": _("Branch"), "fieldtype": "Link", "fieldname": "branch", "options": "Branch", "width": 120,
+			"filter": branch
+		},
+		{
+			"label": _("Department"), "fieldtype": "Link", "fieldname": "department", "options": "Department",
+			"width": 100, "filter": department
+		},
+		{
+			"label": _("Designation"), "fieldtype": "Link", "fieldname": "designation", "options": "Designation",
+			"width": 100, "filter": designation
+		},
+		{
+			"label": _("Start Date"), "fieldtype": "Date", "fieldname": "start_date", "width": 80
+		},
+		{
+			"label": _("End Date"), "fieldtype": "Date", "fieldname": "end_date", "width": 80
+		},
+		{
+			"label": _("Leave Without Pay"), "fieldtype": "Float", "fieldname": "leave_without_pay", "width": 130,
+			"filter": leave_without_pay
+		},
+		{
+			"label": _("Payment Days"), "fieldtype": "Float", "fieldname": "payment_days", "width": 100
+		}
 	]
 
 	salary_components = {_("Earning"): [], _("Deduction"): []}
@@ -67,11 +116,41 @@ def get_columns(salary_slips):
 		(', '.join(['%s']*len(salary_slips))), tuple([d.name for d in salary_slips]), as_dict=1):
 		salary_components[_(component.type)].append(component.salary_component)
 
-	columns = columns + [(e + ":Currency:120") for e in salary_components[_("Earning")]] + \
-		[_("Gross Pay") + ":Currency:120"] + [(d + ":Currency:120") for d in salary_components[_("Deduction")]] + \
-		[_("Loan Repayment") + ":Currency:120", _("Total Deduction") + ":Currency:120", _("Net Pay") + ":Currency:120"]
+	columns = columns + \
+	[
+		{"label": _(e), "fieldtype": "Float", "fieldname": scrub(e), "isEarning": 1, "width": 120}
+		for e in salary_components[_("Earning")]
+	] + \
+	[
+		{
+			"label": _("Gross Pay"), "fieldtype": "Currency",
+			"fieldname": "gross_pay", "width": 120
+		}
+	] + \
+	[
+		{"label": _(d), "fieldtype": "Float", "fieldname": scrub(d), "isDeduction": 1, "width": 120}
+		for d in salary_components[_("Deduction")]
+	] + \
+	[
+		{
+			"label": _("Loan Repayment"), "fieldtype": "Currency",
+			"fieldname": "loan_repayment", "width": 120, "filter": loan_repayment
+		},
+		{
+			"label": _("Advance Deduction"), "fieldtype": "Currency",
+			"fieldname": "advance_deduction", "width": 120, "filter": advance_deduction
+		},
+		{
+			"label": _("Total Deduction"), "fieldtype": "Currency",
+			"fieldname": "total_deduction", "width": 120
+		},							{
+			"label": _("Net Pay"), "fieldtype": "Currency",
+			"fieldname": "net_pay", "width": 120
+		}
+	]
+	columns = [c for c in columns if c.get('filter') != False]
+	return columns
 
-	return columns, salary_components[_("Earning")], salary_components[_("Deduction")]
 
 def get_salary_slips(filters):
 	filters.update({"from_date": filters.get("from_date"), "to_date":filters.get("to_date")})
@@ -80,6 +159,7 @@ def get_salary_slips(filters):
 		order by employee""" % conditions, filters, as_dict=1)
 
 	return salary_slips or []
+
 
 def get_conditions(filters):
 	conditions = ""
@@ -95,6 +175,7 @@ def get_conditions(filters):
 
 	return conditions, filters
 
+
 def get_employee_doj_map():
 	return	frappe._dict(frappe.db.sql("""
 				SELECT
@@ -102,6 +183,7 @@ def get_employee_doj_map():
 					date_of_joining
 				FROM `tabEmployee`
 				"""))
+
 
 def get_ss_earning_map(salary_slips):
 	ss_earnings = frappe.db.sql("""select parent, salary_component, amount
@@ -114,6 +196,7 @@ def get_ss_earning_map(salary_slips):
 		ss_earning_map[d.parent][d.salary_component] = flt(d.amount)
 
 	return ss_earning_map
+
 
 def get_ss_ded_map(salary_slips):
 	ss_deductions = frappe.db.sql("""select parent, salary_component, amount
