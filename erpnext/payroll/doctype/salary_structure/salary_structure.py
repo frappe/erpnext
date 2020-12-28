@@ -210,7 +210,7 @@ def get_employees(salary_structure):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_earning_deduction_components(doctype, txt, searchfield, start, page_len, filters):
-	if len(filters) < 3:
+	if len(filters) < 2:
 		return {}
 
 	return frappe.db.sql("""

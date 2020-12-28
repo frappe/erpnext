@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import flt, get_time
 from frappe.model.document import Document
 from erpnext.accounts.party import get_party_shipping_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
@@ -13,6 +13,7 @@ from frappe.contacts.doctype.contact.contact import get_default_contact
 class Shipment(Document):
 	def validate(self):
 		self.validate_weight()
+		self.validate_pickup_time()
 		self.set_value_of_goods()
 		if self.docstatus == 0:
 			self.status = 'Draft'
@@ -31,6 +32,10 @@ class Shipment(Document):
 		for parcel in self.shipment_parcel:
 			if flt(parcel.weight) <= 0:
 				frappe.throw(_('Parcel weight cannot be 0'))
+
+	def validate_pickup_time(self):
+		if self.pickup_from and self.pickup_to and get_time(self.pickup_to) < get_time(self.pickup_from):
+			frappe.throw(_("Pickup To time should be greater than Pickup From time"))
 
 	def set_value_of_goods(self):
 		value_of_goods = 0
