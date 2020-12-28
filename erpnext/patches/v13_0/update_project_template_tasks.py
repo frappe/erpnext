@@ -6,6 +6,8 @@ import frappe
 
 def execute():
     frappe.reload_doc("projects", "doctype", "project_template")
+    frappe.reload_doc("projects", "doctype", "project_template_task")
+    frappe.reload_doc("projects", "doctype", "project_template")
     for template_name in frappe.db.sql(""" 
         select 
             name 
