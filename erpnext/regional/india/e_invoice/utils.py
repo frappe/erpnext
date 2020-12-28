@@ -206,9 +206,8 @@ def get_invoice_value_details(invoice):
 	invoice_value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount and invoice.discount_amount > 0 else 0
 	# discount amount cannnot be -ve in an e-invoice, so if -ve include discount in round_off
 	invoice_value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount and invoice.discount_amount < 0 else 0)
-	disable_rounded = frappe.db.get_single_value('Global Defaults', 'disable_rounded_total')
-	invoice_value_details.base_grand_total = abs(invoice.base_grand_total) if disable_rounded else abs(invoice.base_rounded_total)
-	invoice_value_details.grand_total = abs(invoice.grand_total) if disable_rounded else abs(invoice.rounded_total)
+	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
+	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
 	
 	invoice_value_details = update_invoice_taxes(invoice, invoice_value_details)
 	
