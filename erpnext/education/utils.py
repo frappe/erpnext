@@ -219,6 +219,7 @@ def get_quiz(quiz_name, course):
 	try:
 		quiz = frappe.get_doc("Quiz", quiz_name)
 		questions = quiz.get_questions()
+		duration = quiz.duration
 	except:
 		frappe.throw(_("Quiz {0} does not exist").format(quiz_name))
 		return None
@@ -232,7 +233,11 @@ def get_quiz(quiz_name, course):
 		} for question in questions]
 
 	if has_super_access():
-		return {'questions': questions, 'activity': None}
+		return {
+			'questions': questions,
+			'activity': None,
+			'duration':duration
+			}
 
 	student = get_current_student()
 	course_enrollment = get_enrollment("course", course, student.name)
