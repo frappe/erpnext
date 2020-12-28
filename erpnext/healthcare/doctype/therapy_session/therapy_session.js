@@ -24,7 +24,7 @@ frappe.ui.form.on('Therapy Session', {
 
 			return {
 				filters: {
-					'status': ["in", ["Open", "Scheduled"]]
+					'status': ['in', ['Open', 'Scheduled']]
 				}
 			};
 		});
