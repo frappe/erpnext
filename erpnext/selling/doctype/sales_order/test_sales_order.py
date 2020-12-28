@@ -441,6 +441,7 @@ class TestSalesOrder(unittest.TestCase):
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
 
+		frappe.set_user("Administrator")
 		workflow = make_sales_order_workflow()
 		so = make_sales_order(item_code= "_Test Item", qty=1, rate=150, do_not_submit=1)
 		apply_workflow(so, 'Approve')
@@ -1063,6 +1064,7 @@ def make_sales_order(**args):
 	so.company = args.company or "_Test Company"
 	so.customer = args.customer or "_Test Customer"
 	so.currency = args.currency or "INR"
+	so.po_no = args.po_no or '12345'
 	if args.selling_price_list:
 		so.selling_price_list = args.selling_price_list
 

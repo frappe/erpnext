@@ -1334,6 +1334,13 @@
    "options": "Project"
   },
   {
+   "default": "0",
+   "description": "Taxes paid while advance payment will be adjusted against this invoice",
+   "fieldname": "adjust_advance_taxes",
+   "fieldtype": "Check",
+   "label": "Adjust Advance Taxes"
+  },
+  {
    "depends_on": "eval:doc.is_internal_supplier",
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",

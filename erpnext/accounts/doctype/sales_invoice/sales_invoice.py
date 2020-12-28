@@ -180,6 +180,9 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+		
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
@@ -259,6 +262,10 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
+		
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+		
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
@@ -280,7 +287,7 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
 
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -406,6 +413,8 @@ class SalesInvoice(SellingController):
 		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
+			if not pos_profile:
+				frappe.throw(_("No POS Profile found. Please create a New POS Profile first"))
 			self.pos_profile = pos_profile.get('name')
 
 		pos = {}
@@ -473,6 +482,11 @@ class SalesInvoice(SellingController):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
 
 	def validate_debit_to_acc(self):
+		if not self.debit_to:
+			self.debit_to = get_party_account("Customer", self.customer, self.company)
+			if not self.debit_to:
+				self.raise_missing_debit_credit_account_error("Customer", self.customer)
+
 		account = frappe.get_cached_value("Account", self.debit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
@@ -743,22 +757,20 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, gl_entries=None):
-		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
+		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
 			if self.docstatus == 1:
-				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False)
+				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 			elif self.docstatus == 2:
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -1446,6 +1458,7 @@ def make_delivery_note(source_name, target_doc=None):
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source_doc, target_doc, source_parent):

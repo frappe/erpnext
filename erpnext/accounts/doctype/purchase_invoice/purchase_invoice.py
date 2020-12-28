@@ -148,6 +148,11 @@ class PurchaseInvoice(BuyingController):
 			throw(_("Conversion rate cannot be 0 or 1"))
 
 	def validate_credit_to_acc(self):
+		if not self.credit_to:
+			self.credit_to = get_party_account("Supplier", self.supplier, self.company)
+			if not self.credit_to:
+				self.raise_missing_debit_credit_account_error("Supplier", self.supplier)
+
 		account = frappe.db.get_value("Account", self.credit_to,
 			["account_type", "report_type", "account_currency"], as_dict=True)
 
@@ -433,10 +438,13 @@ class PurchaseInvoice(BuyingController):
 		# this sequence because outstanding may get -negative
 		self.make_gl_entries()
 
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
 		self.update_project()
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
-	def make_gl_entries(self, gl_entries=None):
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
@@ -444,7 +452,7 @@ class PurchaseInvoice(BuyingController):
 			update_outstanding = "No" if (cint(self.is_paid) or self.write_off_account) else "Yes"
 
 			if self.docstatus == 1:
-				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False)
+				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 			elif self.docstatus == 2:
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -459,9 +467,11 @@ class PurchaseInvoice(BuyingController):
 		self.auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if self.auto_accounting_for_stock:
 			self.stock_received_but_not_billed = self.get_company_default("stock_received_but_not_billed")
+			self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		else:
 			self.stock_received_but_not_billed = None
-		self.expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
+			self.expenses_included_in_valuation = None
+		
 		self.negative_expense_to_be_booked = 0.0
 		gl_entries = []
 
@@ -475,7 +485,7 @@ class PurchaseInvoice(BuyingController):
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
-
+		
 		gl_entries = merge_similar_entries(gl_entries)
 
 		self.make_payment_gl_entries(gl_entries)
@@ -1017,11 +1027,15 @@ class PurchaseInvoice(BuyingController):
 			self.delete_auto_created_batches()
 
 		self.make_gl_entries_on_cancel()
+		
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+		
 		self.update_project()
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		unlink_inter_company_doc(self.doctype, self.name, self.inter_company_invoice_reference)
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def update_project(self):
 		project_list = []
@@ -1072,7 +1086,9 @@ class PurchaseInvoice(BuyingController):
 				updated_pr += update_billed_amount_based_on_po(d.po_detail, update_modified)
 
 		for pr in set(updated_pr):
-			frappe.get_doc("Purchase Receipt", pr).update_billing_percentage(update_modified=update_modified)
+			from erpnext.stock.doctype.purchase_receipt.purchase_receipt import update_billing_percentage
+			pr_doc = frappe.get_doc("Purchase Receipt", pr)
+			update_billing_percentage(pr_doc, update_modified=update_modified)
 
 	def on_recurring(self, reference_doc, auto_repeat_doc):
 		self.due_date = None

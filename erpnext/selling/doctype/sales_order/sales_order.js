@@ -8,7 +8,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
@@ -236,7 +236,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 							status: ["!=", "Lost"]
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 		}
 
 		this.order_type(doc);
@@ -326,8 +326,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 								callback: function(r) {
 									if(r.message) {
 										frappe.msgprint({
-											message: __('Work Orders Created: {0}',
-												[r.message.map(function(d) {
+											message: __('Work Orders Created: {0}', [r.message.map(function(d) {
 													return repl('<a href="#Form/Work Order/%(name)s">%(name)s</a>', {name:d})
 												}).join(', ')]),
 											indicator: 'green'

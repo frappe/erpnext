@@ -62,6 +62,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 			`tabItem` item {bin_join_selection}
 		WHERE
 			item.disabled = 0
+			AND item.is_stock_item = 1
 			AND item.has_variants = 0
 			AND item.is_sales_item = 1
 			AND item.is_fixed_asset = 0
