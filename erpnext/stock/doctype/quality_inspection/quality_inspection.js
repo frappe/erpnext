@@ -51,6 +51,7 @@ frappe.ui.form.on("Quality Inspection", {
 				};
 			}
 		});
+	},
 
 	refresh: function(frm) {
 		// Ignore cancellation of reference doctype on cancel all.
