@@ -75,54 +75,40 @@ class TestJournalEntry(unittest.TestCase):
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
 			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher
+			frappe.db.set_value("Accounts Settings", "Accounts Settings",
+				"unlink_advance_payment_on_cancelation_of_order", 0)
 			submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 			self.assertRaises(frappe.LinkExistsError, submitted_voucher.cancel)
 
 	def test_jv_against_stock_account(self):
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-		set_perpetual_inventory()
+		company = "_Test Company with perpetual inventory"
+		stock_account = get_inventory_account(company)
 
-		jv = frappe.copy_doc({
-			"cheque_date": nowdate(),
-			"cheque_no": "33",
-			"company": "_Test Company with perpetual inventory",
-			"doctype": "Journal Entry",
-			"accounts": [
-			{
-				"account": "Debtors - TCP1",
-				"party_type": "Customer",
-				"party": "_Test Customer",
-				"credit_in_account_currency": 400.0,
-				"debit_in_account_currency": 0.0,
-				"doctype": "Journal Entry Account",
-				"parentfield": "accounts",
-				"cost_center": "Main - TCP1"
-			},
-			{
-				"account": "_Test Bank - TCP1",
-				"credit_in_account_currency": 0.0,
-				"debit_in_account_currency": 400.0,
-				"doctype": "Journal Entry Account",
-				"parentfield": "accounts",
-				"cost_center": "Main - TCP1"
-			}
-			],
-			"naming_series": "_T-Journal Entry-",
-			"posting_date": nowdate(),
-			"user_remark": "test",
-			"voucher_type": "Bank Entry"
-			})
-
-		jv.get("accounts")[0].update({
-			"account": get_inventory_account('_Test Company with perpetual inventory'),
-			"company": "_Test Company with perpetual inventory",
-			"party_type": None,
-			"party": None
+		jv = frappe.new_doc("Journal Entry")
+		jv.company = company
+		jv.posting_date = nowdate()
+		jv.append("accounts", {
+			"account": stock_account,
+			"cost_center": "Main - TCP1",
+			"debit_in_account_currency": 100
 		})
+		
+		jv.append("accounts", {
+			"account": "Stock Adjustment - TCP1",
+			"credit_in_account_currency": 100,
+			"cost_center": "Main - TCP1",
+		})
+		jv.insert()
 
-		self.assertRaises(StockAccountInvalidTransaction, jv.submit)
-		jv.cancel()
-		set_perpetual_inventory(0)
+		from erpnext.accounts.utils import get_stock_and_account_balance
+		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(stock_account, nowdate(), company)
+
+		if account_bal == stock_bal:
+			self.assertRaises(StockAccountInvalidTransaction, jv.submit)
+			frappe.db.rollback()
+		else:
+			jv.submit()
+			jv.cancel()
 
 	def test_multi_currency(self):
 		jv = make_journal_entry("_Test Bank USD - _TC",
