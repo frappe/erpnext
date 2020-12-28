@@ -408,7 +408,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 				show_description(row_to_modify.idx, row_to_modify.item_code);
 
-				this.frm.from_barcode = true;
+				this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
 				frappe.model.set_value(row_to_modify.doctype, row_to_modify.name, {
 					item_code: data.item_code,
 					qty: (row_to_modify.qty || 0) + 1
@@ -492,7 +492,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			d.item_code = "";
 		}
 
-		this.frm.from_barcode = true;
+		this.frm.from_barcode = this.frm.from_barcode ? this.frm.from_barcode + 1 : 1;
 		this.item_code(doc, cdt, cdn);
 	},
 
@@ -509,11 +509,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			show_batch_dialog = 1;
 		}
 		// clear barcode if setting item (else barcode will take priority)
-		if(!this.frm.from_barcode) {
+		if (this.frm.from_barcode == 0) {
 			item.barcode = null;
 		}
+		this.frm.from_barcode = this.frm.from_barcode - 1 >= 0 ? this.frm.from_barcode - 1 : 0;
 
-		this.frm.from_barcode = false;
+
 		if(item.item_code || item.barcode || item.serial_no) {
 			if(!this.validate_company_and_party()) {
 				this.frm.fields_dict["items"].grid.grid_rows[item.idx - 1].remove();
@@ -1103,11 +1104,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	batch_no: function(doc, cdt, cdn) {
-		let item = frappe.get_doc(cdt, cdn);
-		this.apply_price_list(item, true);
-	},
-
 	toggle_conversion_factor: function(item) {
 		// toggle read only property for conversion factor field if the uom and stock uom are same
 		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
@@ -1412,7 +1408,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"pricing_rules": d.pricing_rules,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
-					"batch_no": d.batch_no,
 					"price_list_rate": d.price_list_rate,
 					"conversion_factor": d.conversion_factor || 1.0
 				});
