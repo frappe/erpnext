@@ -760,7 +760,7 @@ class TallyMigration(Document):
 		frappe.flags.in_migrate = True
 		chunk = data[start: start + CHUNK_SIZE]
 
-		skipped_docs = self.fetch_processed_data(self.skipped_docs)
+		skipped_docs = self.fetch_processed_data(self.skipped_docs) if self.skipped_docs else []
 		error_log = json.loads(self.error_log)
 		failed_log = [d for d in error_log if d["status"] == "Failed"]
 		progress_total = len(data)
@@ -809,7 +809,7 @@ class TallyMigration(Document):
 
 		frappe.flags.in_migrate = False
 
-	def finish_import(self, skipped_docs, error_log):
+	def finish_import(self, skipped_docs):
 		if not self.is_master_data_imported:
 			remaining_masters = self.dump_processed_data(skipped_docs, "masters")
 			self.update_field("masters", remaining_masters)
