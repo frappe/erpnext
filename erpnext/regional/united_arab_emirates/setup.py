@@ -148,7 +148,7 @@ def add_custom_roles_for_reports():
 def add_permissions():
 	"""Add Permissions for UAE VAT Settings and UAE VAT Account."""
 	for doctype in ('UAE VAT Settings', 'UAE VAT Account'):
-		add_permission(doctype, 'All', 0)
+
 		for role in ('Accounts Manager', 'Accounts User', 'System Manager'):
 			add_permission(doctype, role, 0)
 			update_permission_property(doctype, role, 0, 'write', 1)
