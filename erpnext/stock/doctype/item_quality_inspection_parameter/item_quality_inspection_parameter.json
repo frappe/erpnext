@@ -18,11 +18,12 @@
  "fields": [
   {
    "fieldname": "specification",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Parameter",
    "oldfieldname": "specification",
    "oldfieldtype": "Data",
+   "options": "Quality Inspection Parameter",
    "print_width": "200px",
    "reqd": 1,
    "width": "100px"
@@ -79,7 +80,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-21 11:37:55.387677",
+ "modified": "2020-12-28 17:41:04.350225",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Quality Inspection Parameter",
