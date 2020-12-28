@@ -4,6 +4,7 @@
 cur_frm.cscript.refresh = cur_frm.cscript.inspection_type;
 
 frappe.ui.form.on("Quality Inspection", {
+
 	setup: function(frm) {
 		frm.set_query("batch_no", function() {
 			return {
@@ -50,6 +51,10 @@ frappe.ui.form.on("Quality Inspection", {
 				};
 			}
 		});
+
+	refresh: function(frm) {
+		// Ignore cancellation of reference doctype on cancel all.
+		frm.ignore_doctypes_on_cancel_all = [frm.doc.reference_type];
 	},
 
 	item_code: function(frm) {
