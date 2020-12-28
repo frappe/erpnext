@@ -69,6 +69,10 @@ erpnext.PointOfSale.Controller = class {
 				dialog.fields_dict.balance_details.grid.refresh();
 			});
 		}
+		const pos_profile_query = {
+			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+			filters: { company: frappe.defaults.get_default('company') }
+		}
 		const dialog = new frappe.ui.Dialog({
 			title: __('Create POS Opening Entry'),
 			static: true,
@@ -80,6 +84,7 @@ erpnext.PointOfSale.Controller = class {
 				{
 					fieldtype: 'Link', label: __('POS Profile'),
 					options: 'POS Profile', fieldname: 'pos_profile', reqd: 1,
+					get_query: () => pos_profile_query,
 					onchange: () => fetch_pos_payment_methods()
 				},
 				{
