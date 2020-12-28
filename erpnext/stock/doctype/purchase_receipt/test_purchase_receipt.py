@@ -575,7 +575,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1,
 			serial_no=serial_no, basic_rate=100, do_not_submit=True)
-		self.assertRaises(SerialNoDuplicateError, se.submit)
+		se.submit()
 
 		dn.cancel()
 		pr1.cancel()
