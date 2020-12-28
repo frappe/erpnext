@@ -376,19 +376,19 @@ class update_entries_after(object):
 			d.db_update()
 
 	def update_rate_on_delivery_and_sales_return(self, sle, outgoing_rate):
-		if frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'is_internal_customer'):
-			frappe.db.set_value(sle.voucher_type + " Item", sle.voucher_detail_no, "rate", outgoing_rate)
-			update_taxes_and_totals(sle.voucher_type, sle.voucher_no, outgoing_rate)
+		# if frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'is_internal_customer'):
+		# 	frappe.db.set_value(sle.voucher_type + " Item", sle.voucher_detail_no, "rate", outgoing_rate)
+		# 	update_taxes_and_totals(sle.voucher_type, sle.voucher_no, outgoing_rate)
 
-			purchase_doctype = 'Purchase Invoice' if sle.voucher_type == 'Sales Invoice' else 'Purchase Receipt'
-			ref_doc_field = frappe.scrub(sle.voucher_type + ' Item')
+		# 	purchase_doctype = 'Purchase Invoice' if sle.voucher_type == 'Sales Invoice' else 'Purchase Receipt'
+		# 	ref_doc_field = frappe.scrub(sle.voucher_type + ' Item')
 
-			reference_field = 'inter_company_invoice_reference' if purchase_doctype == 'Purchase Invoice' else 'inter_company_reference'
-			purchase_document_list = frappe.db.get_all(purchase_doctype, {reference_field: sle.voucher_no}, ['name'])
+		# 	reference_field = 'inter_company_invoice_reference' if purchase_doctype == 'Purchase Invoice' else 'inter_company_reference'
+		# 	purchase_document_list = frappe.db.get_all(purchase_doctype, {reference_field: sle.voucher_no}, ['name'])
 
-			for d in purchase_document_list:
-				frappe.db.set_value(purchase_doctype + ' Item', {ref_doc_field: sle.voucher_detail_no}, 'rate', outgoing_rate)
-				update_taxes_and_totals(purchase_doctype, d.name, outgoing_rate)
+		# 	for d in purchase_document_list:
+		# 		frappe.db.set_value(purchase_doctype + ' Item', {ref_doc_field: sle.voucher_detail_no}, 'rate', outgoing_rate)
+		# 		update_taxes_and_totals(purchase_doctype, d.name, outgoing_rate)
 
 		# Update item's incoming rate on transaction
 		item_code = frappe.db.get_value(sle.voucher_type + " Item", sle.voucher_detail_no, "item_code")
@@ -658,12 +658,12 @@ class update_entries_after(object):
 			bin_doc.flags.via_stock_ledger_entry = True
 			bin_doc.save(ignore_permissions=True)
 
-def update_taxes_and_totals(doctype, docname, rate):
-	ref_doc = frappe.get_doc(doctype, docname)
-	ref_doc.calculate_taxes_and_totals()
-	ref_doc.db_update()
-	for d in ref_doc.items:
-		d.db_update()
+# def update_taxes_and_totals(doctype, docname, rate):
+# 	ref_doc = frappe.get_doc(doctype, docname)
+# 	ref_doc.calculate_taxes_and_totals()
+# 	ref_doc.db_update()
+# 	for d in ref_doc.items:
+# 		d.db_update()
 
 def get_previous_sle(args, for_update=False):
 	"""
