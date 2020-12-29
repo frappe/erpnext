@@ -13,6 +13,8 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
 from six.moves.urllib.parse import quote
+from erpnext.shopping_cart.product_query import ProductQuery
+from erpnext.shopping_cart.filters import ProductFiltersBuilder
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -70,18 +72,33 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		context.page_length = cint(frappe.db.get_single_value('Products Settings', 'products_per_page')) or 6
 		context.search_link = '/product_search'
 
-		start = int(frappe.form_dict.start or 0)
-		if start < 0:
-			start = 0
+		if frappe.form_dict:
+			search = frappe.form_dict.search
+			field_filters = frappe.parse_json(frappe.form_dict.field_filters)
+			attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
+		else:
+			search = None
+			attribute_filters = None
+			field_filters = {}
+
+		if not field_filters:
+			field_filters = {}
+
+		# Ensure the query remains within current item group
+		field_filters['item_group'] = self.name
+
+		engine = ProductQuery()
+		context.items = engine.query(attribute_filters, field_filters, search)
+
+		filter_engine = ProductFiltersBuilder(self.name)
+
+		context.field_filters = filter_engine.get_field_filters()
+		context.attribute_filters = filter_engine.get_attribute_fitlers()
+
 		context.update({
-			"items": get_product_list_for_group(product_group = self.name, start=start,
-				limit=context.page_length + 1, search=frappe.form_dict.get("search")),
 			"parents": get_parent_item_groups(self.parent_item_group),
 			"title": self.name
 		})
-
-		if self.slideshow:
-			context.update(get_slideshow(self))
 
 		return context
 
