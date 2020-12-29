@@ -170,6 +170,7 @@
    "fieldname": "slide_3_theme",
    "fieldtype": "Select",
    "label": "Slide Theme",
+   "options": "Dark\nLight",
    "reqd": 0
   },
   {
@@ -218,6 +219,7 @@
    "fieldname": "slide_4_theme",
    "fieldtype": "Select",
    "label": "Slide Theme",
+   "options": "Dark\nLight",
    "reqd": 0
   },
   {
@@ -266,11 +268,12 @@
    "fieldname": "slide_5_theme",
    "fieldtype": "Select",
    "label": "Slide Theme",
+   "options": "Dark\nLight",
    "reqd": 0
   }
  ],
- "idx": 0,
- "modified": "2020-11-18 17:09:31.323198",
+ "idx": 2,
+ "modified": "2020-12-29 12:30:02.794994",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Hero Slider",
