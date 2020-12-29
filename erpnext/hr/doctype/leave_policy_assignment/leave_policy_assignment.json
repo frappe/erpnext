@@ -111,7 +111,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-15 15:18:15.227848",
+ "modified": "2020-12-17 16:27:20.311060",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Policy Assignment",
@@ -127,6 +127,7 @@
    "report": 1,
    "role": "HR Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -139,6 +140,7 @@
    "report": 1,
    "role": "HR User",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
@@ -151,6 +153,7 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],
