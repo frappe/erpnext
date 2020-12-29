@@ -661,10 +661,6 @@ def create_benefit_claim(employee, payroll_period, amount, component):
 	return claim_date
 
 def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False, currency=None):
-	# frappe.db.sql("""delete from `tabIncome Tax Slab`""")
-
-	print(payroll_period.name, effective_date)
-
 	if not currency:
 		currency = erpnext.get_default_currency()
 
