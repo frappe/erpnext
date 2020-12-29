@@ -107,12 +107,12 @@ class GLEntry(Document):
 
 				if value['allow_or_restrict'] == 'Allow':
 					if self.get(dimension) and self.get(dimension) not in value['allowed_dimensions']:
-						frappe.throw(_("Invalid value {0} for account {1}").format(
-							frappe.bold(self.get(dimension)), frappe.bold(self.account)), InvalidAccountDimensionError)
+						frappe.throw(_("Invalid value {0} for {1} against account {2}").format(
+							frappe.bold(self.get(dimension)), frappe.bold(frappe.unscrub(dimension)), frappe.bold(self.account)), InvalidAccountDimensionError)
 				else:
 					if self.get(dimension) and self.get(dimension) in value['allowed_dimensions']:
-						frappe.throw(_("Invalid value {0} for account {1}").format(
-							frappe.bold(self.get(dimension)), frappe.bold(self.account)), InvalidAccountDimensionError)
+						frappe.throw(_("Invalid value {0} for {1} against account {2}").format(
+							frappe.bold(self.get(dimension)), frappe.bold(frappe.unscrub(dimension)), frappe.bold(self.account)), InvalidAccountDimensionError)
 
 	def check_pl_account(self):
 		if self.is_opening=='Yes' and \
