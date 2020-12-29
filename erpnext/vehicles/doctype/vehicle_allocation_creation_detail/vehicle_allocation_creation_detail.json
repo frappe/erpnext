@@ -1,0 +1,90 @@
+{
+ "creation": "2020-12-28 15:10:17.718670",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sr_no",
+  "code",
+  "delivery_period_str",
+  "vehicle_color",
+  "booking_price",
+  "delivery_period_link"
+ ],
+ "fields": [
+  {
+   "columns": 1,
+   "fieldname": "sr_no",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Sr #",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Allocation Code",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "booking_price",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Booking Price"
+  },
+  {
+   "columns": 2,
+   "fieldname": "delivery_period_str",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Delivery Period (Sheet)"
+  },
+  {
+   "columns": 2,
+   "fieldname": "delivery_period_link",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Delivery Period (System)",
+   "options": "Vehicle Allocation Period",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "vehicle_color",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Color",
+   "options": "Vehicle Color"
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "issingle": 1,
+ "modified": "2020-12-29 12:38:45.756120",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Allocation Creation Detail",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Vehicles",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -9,7 +9,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Item",
-					"label": _("Vehicle Item/Variant"),
+					"label": _("Vehicle Item (Variant)"),
 					"description": _("Vehicle Item/Variant List"),
 					"onboard": 1,
 					"route_options": {
@@ -31,6 +31,24 @@ def get_data():
 					"type": "doctype",
 					"name": "Vehicle Booking Order",
 					"onboard": 1
+				},
+			]
+		},
+		{
+			"label": _("Allocation"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation",
+					"onboard": 1
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation Creation Tool",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation Period",
 				},
 			]
 		},

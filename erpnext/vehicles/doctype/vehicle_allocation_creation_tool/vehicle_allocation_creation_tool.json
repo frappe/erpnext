@@ -1,0 +1,130 @@
+{
+ "creation": "2020-12-28 15:02:54.302735",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "item_code",
+  "item_name",
+  "column_break_6",
+  "supplier",
+  "supplier_name",
+  "column_break_13",
+  "allocation_period",
+  "is_additional",
+  "section_break_10",
+  "determine_delivery_periods",
+  "allocation_detail"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle Item Code",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Vehicle Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "allocation_period",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Allocation Period",
+   "options": "Vehicle Allocation Period",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_additional",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Is Additional Allocation"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "allocation_detail",
+   "fieldtype": "Table",
+   "label": "Allocation List",
+   "options": "Vehicle Allocation Creation Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "determine_delivery_periods",
+   "fieldtype": "Button",
+   "label": "Determine System Delivery Period"
+  }
+ ],
+ "hide_toolbar": 1,
+ "icon": "fa fa-file-text",
+ "issingle": 1,
+ "modified": "2020-12-28 22:33:52.495545",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Allocation Creation Tool",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Sales Manager",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "write": 1
+  }
+ ],
+ "restrict_to_domain": "Vehicles",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

@@ -14,7 +14,9 @@
   "buying_transaction_type_company",
   "column_break_8",
   "selling_transaction_type_customer",
-  "buying_transaction_type_customer"
+  "buying_transaction_type_customer",
+  "section_break_11",
+  "vehicle_allocation_periodicity"
  ],
  "fields": [
   {
@@ -70,11 +72,22 @@
    "fieldtype": "Link",
    "label": "Buying Transaction Type (Customer Vehicle)",
    "options": "Transaction Type"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "Monthly",
+   "fieldname": "vehicle_allocation_periodicity",
+   "fieldtype": "Select",
+   "label": "Vehicle Allocation Periodicity",
+   "options": "Monthly\nManual"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2020-12-15 12:21:51.844431",
+ "modified": "2020-12-28 14:06:19.554359",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

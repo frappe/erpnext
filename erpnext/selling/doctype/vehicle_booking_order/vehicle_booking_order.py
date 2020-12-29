@@ -448,6 +448,26 @@ def get_item_details(args):
 	return out
 
 
+@frappe.whitelist()
+def get_vehicle_default_supplier(item_code, company):
+	if not company:
+		frappe.throw(_("Company is mandatory"))
+	if not item_code:
+		frappe.throw(_("Vehicle Item Code is mandatory"))
+
+	item = frappe.get_cached_doc("Item", item_code)
+
+	item_defaults = get_item_defaults(item.name, company)
+	item_group_defaults = get_item_group_defaults(item.name, company)
+	brand_defaults = get_brand_defaults(item.name, company)
+	item_source_defaults = get_item_source_defaults(item.name, company)
+
+	default_supplier = get_default_supplier(frappe._dict({"item_code": item_code, "company": company}),
+		item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
+
+	return default_supplier
+
+
 def get_vehicle_price(item_code, vehicle_price_list, fni_price_list, transaction_date, tax_status, company):
 	if not item_code:
 		frappe.throw(_("Vehicle Item Code is mandatory"))
