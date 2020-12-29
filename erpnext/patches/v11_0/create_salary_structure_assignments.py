@@ -8,8 +8,8 @@ from frappe.utils import getdate
 from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import DuplicateAssignment
 
 def execute():
-	frappe.reload_doc('Payroll', 'doctype', 'salary_structure')
-	frappe.reload_doc("Payroll", "doctype", "salary_structure_assignment")
+	frappe.reload_doc('Payroll', 'doctype', 'Salary Structure')
+	frappe.reload_doc("Payroll", "doctype", "Salary Structure Assignment")
 	frappe.db.sql("""
 		delete from `tabSalary Structure Assignment`
 		where salary_structure in (select name from `tabSalary Structure` where is_active='No' or docstatus!=1)
@@ -33,6 +33,13 @@ def execute():
 			AND employee in (select name from `tabEmployee` where ifNull(status, '') != 'Left')
 		""".format(cols), as_dict=1)
 
+	all_companies = frappe.db.get_all("Company", fields=["name", "default_currency"])
+	for d in all_companies:
+		company = d.name
+		company_currency = d.default_currency
+
+		frappe.db.sql("""update `tabSalary Structure` set currency = %s where company=%s""", (company_currency, company))
+
 	for d in ss_details:
 		try:
 			joining_date, relieving_date = frappe.db.get_value("Employee", d.employee,
@@ -42,6 +49,7 @@ def execute():
 				from_date = joining_date
 			elif relieving_date and getdate(from_date) > relieving_date:
 				continue
+			company_currency = frappe.db.get_value('Company', d.company, 'default_currency')
 
 			s = frappe.new_doc("Salary Structure Assignment")
 			s.employee = d.employee
@@ -52,6 +60,7 @@ def execute():
 			s.base = d.get("base")
 			s.variable = d.get("variable")
 			s.company = d.company
+			s.currency = company_currency
 
 			# to migrate the data of the old employees
 			s.flags.old_employee = True

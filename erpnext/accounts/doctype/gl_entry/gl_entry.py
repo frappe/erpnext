@@ -30,20 +30,22 @@ class GLEntry(Document):
 		self.pl_must_have_cost_center()
 		self.validate_cost_center()
 
-		self.check_pl_account()
-		self.validate_party()
-		self.validate_currency()
+		if not self.flags.from_repost:
+			self.check_pl_account()
+			self.validate_party()
+			self.validate_currency()
 
-	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes'):
-		self.validate_account_details(adv_adj)
-		self.validate_dimensions_for_pl_and_bs()
+	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
+		if not from_repost:
+			self.validate_account_details(adv_adj)
+			self.validate_dimensions_for_pl_and_bs()
 
 		validate_frozen_account(self.account, adv_adj)
 		validate_balance_type(self.account, adv_adj)
 
 		# Update outstanding amt on against voucher
 		if self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice', 'Fees'] \
-			and self.against_voucher and update_outstanding == 'Yes':
+			and self.against_voucher and update_outstanding == 'Yes' and not from_repost:
 				update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 					self.against_voucher)
 
@@ -106,8 +108,8 @@ class GLEntry(Document):
 			from tabAccount where name=%s""", self.account, as_dict=1)[0]
 
 		if ret.is_group==1:
-			frappe.throw(_('''{0} {1}: Account {2} is a Group Account and group accounts cannot be used in
-				transactions''').format(self.voucher_type, self.voucher_no, self.account))
+			frappe.throw(_('''{0} {1}: Account {2} is a Group Account and group accounts cannot be used in transactions''')
+				.format(self.voucher_type, self.voucher_no, self.account))
 
 		if ret.docstatus==2:
 			frappe.throw(_("{0} {1}: Account {2} is inactive")
@@ -136,8 +138,8 @@ class GLEntry(Document):
 				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
 
 		if self.cost_center and _check_is_group():
-			frappe.throw(_("""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot
-				be used in transactions""").format(self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)))
+			frappe.throw(_("""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot be used in transactions""")
+				.format(self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)))
 
 	def validate_party(self):
 		validate_party_frozen_disabled(self.party_type, self.party)
