@@ -321,7 +321,7 @@
    "fieldname": "total_advance_amount",
    "fieldtype": "Currency",
    "label": "Total Advance Amount",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -378,7 +378,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Outstanding Amount",
-   "options": "currency",
+   "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
@@ -514,7 +514,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-29 10:58:45.942863",
+ "modified": "2020-12-29 15:07:29.662751",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

@@ -261,7 +261,7 @@ frappe.ui.form.on("Expense Claim", {
 		let grand_total = flt(frm.doc.total) + flt(frm.doc.total_taxes_and_charges);
 		frm.set_value("grand_total", grand_total);
 
-		let outstanding_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.total_amount_reimbursed);
+		let outstanding_amount = flt(frm.doc.base_grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.base_total_amount_reimbursed);
 		frm.set_value("outstanding_amount", outstanding_amount);
 		frm.refresh_fields();
 	},

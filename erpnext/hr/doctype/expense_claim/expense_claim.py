@@ -230,14 +230,14 @@ class ExpenseClaim(BuyingController):
 
 	def set_amounts_in_company_currency(self):
 		"""set values in base currency"""
-		fields = ["total_claimed_amount", "total_amount_reimbursed", "total_amount"]
+		fields = ["total_claimed_amount", "total_amount_reimbursed", "total"]
 		for f in fields:
 			val = flt(flt(self.get(f), self.precision(f)) * self.conversion_rate, self.precision("base_" + f))
 			self.set("base_" + f, val)
 
 	def set_grand_total_and_outstanding_amount(self):
 		self.grand_total = flt(self.total) + flt(self.total_taxes_and_charges)
-		self.outstanding_amount = flt(self.grand_total) - flt(self.total_advance_amount) - flt(self.total_amount_reimbursed)
+		self.outstanding_amount = flt(self.base_grand_total) - flt(self.total_advance_amount) - flt(self.base_total_amount_reimbursed)
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
