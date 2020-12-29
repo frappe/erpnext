@@ -547,7 +547,7 @@ erpnext.PointOfSale.ItemCart = class {
 	get_cart_item({ item_code, batch_no, uom }) {
 		const batch_attr = `[data-batch-no="${escape(batch_no)}"]`;
 		const item_code_attr = `[data-item-code="${escape(item_code)}"]`;
-		const uom_attr = `[data-uom=${escape(uom)}]`;
+		const uom_attr = `[data-uom="${escape(uom)}"]`;
 
 		const item_selector = batch_no ? 
 			`.cart-item-wrapper${batch_attr}${uom_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}`;
