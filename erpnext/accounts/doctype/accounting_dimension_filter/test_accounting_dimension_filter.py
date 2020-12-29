@@ -17,14 +17,14 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 	def test_allowed_dimension_validation(self):
 		si = create_sales_invoice(do_not_save=1)
 		si.items[0].cost_center = 'Main - _TC'
-		si.location = 'Block 1'
+		si.department = 'Accounts - _TC'
 		si.save()
 
 		self.assertRaises(InvalidAccountDimensionError, si.submit)
 
 	def test_mandatory_dimension_validation(self):
 		si = create_sales_invoice(do_not_save=1)
-		si.location = 'Block 1'
+		si.department = ''
 
 		# Test with no department for Sales Account
 		si.items[0].department = ''
@@ -71,7 +71,7 @@ def create_accounting_dimension_filter():
 			}],
 			'dimensions': [{
 				'accounting_dimension': 'Department',
-				'dimension_value': '_Test Department - _TC'
+				'dimension_value': 'Accounts - _TC'
 			}]
 		}).insert()
 	else:
