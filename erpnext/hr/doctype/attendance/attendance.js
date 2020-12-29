@@ -4,7 +4,7 @@
 
 frappe.ui.form.on("Attendance", {
 	setup: function(frm) {
-		frm.set_query("remaining_half_day_status", function(){
+		frm.set_query("remaining_half_day_status", function() {
 			return {
 				filters: {
 					is_half_day: 0,

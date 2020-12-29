@@ -11,8 +11,9 @@ from erpnext.hr.utils import create_standard_attendance_status
 
 class TestShiftRequest(unittest.TestCase):
 	def setUp(self):
-		create_shift_type()
+		frappe.db.sql("delete from `tabAttendance Status`")
 		create_standard_attendance_status()
+		create_shift_type()
 		for doctype in ["Shift Request", "Shift Assignment"]:
 			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
 

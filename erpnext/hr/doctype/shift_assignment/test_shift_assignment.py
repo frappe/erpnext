@@ -12,8 +12,9 @@ class TestShiftAssignment(unittest.TestCase):
 
 	def setUp(self):
 		frappe.db.sql("delete from `tabShift Assignment`")
-		create_shift_type()
+		frappe.db.sql("delete from `tabAttendance Status`")
 		create_standard_attendance_status()
+		create_shift_type()
 
 	def test_make_shift_assignment(self):
 		shift_assignment = frappe.get_doc({

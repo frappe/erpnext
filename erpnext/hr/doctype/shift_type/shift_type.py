@@ -19,6 +19,8 @@ from erpnext.hr.utils import get_applicable_status, get_attendance_statues
 class ShiftType(Document):
 	def validate(self):
 		statuses = get_attendance_statues()
+		print("--------------------->>>")
+		print(statuses)
 		check_hd_status = check_p_status = check_a_status = 0
 		for status in statuses:
 			if status.is_half_day:
@@ -27,7 +29,6 @@ class ShiftType(Document):
 				check_p_status = 1
 			if not status.is_present and not status.is_leave and not status.is_half_day:
 				check_a_status = 1
-
 		if not(check_a_status and check_hd_status and check_p_status):
 			frappe.throw(_("Please set Applicable Status for Employee Checkin in Attendance Status"))
 

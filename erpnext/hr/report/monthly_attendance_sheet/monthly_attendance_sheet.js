@@ -5,19 +5,19 @@
 frappe.query_reports["Monthly Attendance Sheet"] = {
 	"filters": [
 		{
-			"fieldname":"from_date",
+			"fieldname": "from_date",
 			"label": __("From date"),
 			"fieldtype": "Date",
 			"reqd": 1
 		},
 		{
-			"fieldname":"to_date",
+			"fieldname": "to_date",
 			"label": __("To date"),
 			"fieldtype": "Date",
 			"reqd": 1
 		},
 		{
-			"fieldname":"employee",
+			"fieldname": "employee",
 			"label": __("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee",
@@ -31,7 +31,7 @@ frappe.query_reports["Monthly Attendance Sheet"] = {
 			}
 		},
 		{
-			"fieldname":"company",
+			"fieldname": "company",
 			"label": __("Company"),
 			"fieldtype": "Link",
 			"options": "Company",

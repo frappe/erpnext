@@ -3,8 +3,8 @@
 cur_frm.add_fetch('employee', 'company', 'company');
 
 frappe.ui.form.on('Attendance Request', {
-	setup: function(frm){
-		frm.set_query( "status", function() {
+	setup: function (frm) {
+		frm.set_query("status", function () {
 			return {
 				filters: {
 					"is_leave": 0
@@ -12,7 +12,7 @@ frappe.ui.form.on('Attendance Request', {
 			};
 		});
 
-		frm.set_query("remaining_half_day_status", function(){
+		frm.set_query("remaining_half_day_status", function () {
 			return {
 				filters: {
 					is_half_day: 0,

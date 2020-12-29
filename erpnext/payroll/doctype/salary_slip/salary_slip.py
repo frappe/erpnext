@@ -360,9 +360,9 @@ class SalarySlip(TransactionBase):
 		daily_wages_fraction_for_half_day = \
 			flt(frappe.db.get_value("Payroll Settings", None, "daily_wages_fraction_for_half_day")) or 0.5
 
-		leave_types = dict(frappe.get_all("Leave Type",
+		leave_types = frappe.get_all("Leave Type",
 			or_filters=[["is_ppl", "=", 1], ["is_lwp", "=", 1]],
-			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"]))
+			fields =["name", "is_lwp", "is_ppl", "fraction_of_daily_salary_per_leave", "include_holiday"])
 
 		leave_type_map = {}
 		for leave_type in leave_types:
