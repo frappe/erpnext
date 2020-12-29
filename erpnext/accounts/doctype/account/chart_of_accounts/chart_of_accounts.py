@@ -167,10 +167,8 @@ def build_account_tree(tree, parent, all_accounts):
 
 	# build a subtree for each child
 	for child in children:
-		# start new subtree
 		tree[child.account_name] = {}
 
-		# assign account_type and root_type
 		if child.account_number:
 			tree[child.account_name]["account_number"] = child.account_number
 		if child.account_type:
@@ -179,6 +177,8 @@ def build_account_tree(tree, parent, all_accounts):
 			tree[child.account_name]["account_currency"] = child.account_currency
 		if child.tax_rate:
 			tree[child.account_name]["tax_rate"] = child.tax_rate
+		if child.is_group:
+			tree[child.account_name]["is_group"] = child.is_group
 		if not parent:
 			tree[child.account_name]["root_type"] = child.root_type
 
