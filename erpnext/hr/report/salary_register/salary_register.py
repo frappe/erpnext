@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import flt
 from frappe import _, scrub
+from frappe.desk.query_report import group_report_data
 
 
 def execute(filters=None):
@@ -47,7 +48,36 @@ def execute(filters=None):
 
 		data.append(row)
 
-	return columns, data
+	grouped_data = get_grouped_data(columns, data, filters)
+	return columns, grouped_data
+
+
+def get_grouped_data(columns, data, filters):
+	group_by = []
+	for i in range(2):
+		group_label = filters.get("group_by_" + str(i + 1), "").replace("Group by ", "")
+
+		if not group_label or group_label == "Ungrouped":
+			continue
+		else:
+			group_field = scrub(group_label)
+		group_by.append(group_field)
+
+	if not group_by:
+		return data
+
+	exclude_columns = ['payment_days']
+	total_fields = [c['fieldname'] for c in columns if c['fieldtype'] in ['Float', 'Currency', 'Int']
+					and c['fieldname'] not in exclude_columns]
+
+	def postprocess_group(group_object, grouped_by):
+		if not group_object.group_field:
+			group_object.totals['salary_slip_id'] = "'Total'"
+			#group_object.totals['item_code'] = "'Total'"
+		else:
+			group_object.totals['salary_slip_id'] = "'{0}: {1}'".format(group_object.group_label, group_object.group_value)
+
+	return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group)
 
 
 def get_columns(salary_slips):
