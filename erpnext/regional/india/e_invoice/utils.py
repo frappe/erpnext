@@ -146,12 +146,12 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.qty = abs(item.qty)
-		item.description = d.item_name
-		item.taxable_value = abs(item.base_net_amount)
 		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.unit_rate = abs(item.base_price_list_rate) if item.discount_amount else abs(item.base_net_rate)
-		item.gross_amount = abs(item.unit_rate * item.qty)
+		item.description = d.item_name
+		item.qty = abs(item.qty)
+		item.unit_rate = abs(item.base_net_amount / item.qty)
+		item.gross_amount = abs(item.base_net_amount)
+		item.taxable_value = abs(item.base_net_amount)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
@@ -364,7 +364,8 @@ def validate_einvoice(validations, einvoice, errors=[]):
 			einvoice[fieldname] = str(value)
 		elif value_type == 'number':
 			is_integer = '.' not in str(field_validation.get('maximum'))
-			einvoice[fieldname] = flt(value, 2) if not is_integer else cint(value)
+			precision = 3 if '.999' in str(field_validation.get('maximum')) else 2
+			einvoice[fieldname] = flt(value, precision) if not is_integer else cint(value)
 			value = einvoice[fieldname]
 
 		max_length = field_validation.get('maxLength')
