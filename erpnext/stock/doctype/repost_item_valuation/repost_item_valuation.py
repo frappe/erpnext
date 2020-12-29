@@ -5,11 +5,11 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.model.document import Document
-from frappe.utils import cint
+from frappe.utils import cint, get_link_to_form
 from erpnext.stock.stock_ledger import repost_future_sle
-from erpnext.accounts.utils import update_gl_entries_after
-
-
+from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
+from frappe.utils.user import get_users_with_role
+from frappe import _
 class RepostItemValuation(Document):
 	def validate(self):
 		self.set_status()
@@ -51,12 +51,20 @@ def repost(doc):
 
 		repost_sl_entries(doc)
 		repost_gl_entries(doc)
+		check_if_stock_and_account_balance_synced(doc.posting_date, doc.company)
+
 		doc.set_status('Completed')
 	except Exception:
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		frappe.log_error(traceback)
-		frappe.db.set_value(doc.doctype, doc.name, 'error_log', traceback)
+
+		message = frappe.message_log.pop()
+		if traceback:
+			message += "<br>" + "Traceback: <br>" + traceback
+		frappe.db.set_value(doc.doctype, doc.name, 'error_log', message)
+
+		notify_error_to_stock_managers(doc)
 		doc.set_status('Failed')
 		raise
 	finally:
@@ -87,3 +95,18 @@ def repost_gl_entries(doc):
 
 	update_gl_entries_after(doc.posting_date, doc.posting_time,
 		warehouses, items, company=doc.company)
+
+def notify_error_to_stock_managers(doc, traceback):
+	recipients = get_users_with_role("Stock Manager")
+	if not recipients:
+		get_users_with_role("System Manager")
+	
+	subject = _("Error while reposting item valuation")
+	message = (_("Hi,") + "<br>"
+		+ _("An error has been appeared while reposting item valuation via {0}")
+			.format(get_link_to_form(doc.doctype, doc.name)) + "<br>"
+		+ _("Please check the error message and take necessary actions to fix the error and then restart the reposting again.")
+	)
+	frappe.sendmail(recipients=recipients, subject=subject, message=message)
+
+
