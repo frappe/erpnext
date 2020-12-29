@@ -21,9 +21,6 @@ class AssetValueAdjustment(Document):
 		self.reschedule_depreciations(self.new_asset_value)
 
 	def on_cancel(self):
-		if self.journal_entry:
-			frappe.throw(_("Cancel the journal entry {0} first").format(self.journal_entry))
-
 		self.reschedule_depreciations(self.current_asset_value)
 
 	def validate_date(self):
