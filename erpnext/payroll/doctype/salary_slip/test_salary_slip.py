@@ -290,6 +290,35 @@ class TestSalarySlip(unittest.TestCase):
 		self.assertEqual(salary_slip.gross_pay, 78000)
 		self.assertEqual(salary_slip.base_gross_pay, 78000*70)
 
+	def test_year_to_date_computation(self):
+		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
+
+		applicant = make_employee("test_ytd@salary.com", company="_Test Company")
+
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company",
+			start_date=getdate("2019-04-01"), end_date=getdate("2020-03-31"))
+
+		create_tax_slab(payroll_period, allow_tax_exemption=True, currency="INR", effective_date=getdate("2019-04-01"))
+
+		salary_structure = make_salary_structure("Monthly Salary Structure Test for Salary Slip YTD",
+			"Monthly", employee=applicant, company="_Test Company", currency="INR", payroll_period=payroll_period)
+
+		# clear salary slip for this employee
+		frappe.db.sql("DELETE FROM `tabSalary Slip` where employee_name = 'test_ytd@salary.com'")
+
+		create_salary_slips_for_payroll_period(applicant, salary_structure.name,
+			payroll_period, deduct_random=False)
+
+		salary_slips = frappe.get_all('Salary Slip', fields=['year_to_date'], filters={'employee_name':
+			'test_ytd@salary.com'}, order_by = 'posting_date')
+
+		net_pay = 70026.00
+		month = 1
+		for slip in salary_slips:
+			year_to_date = month * net_pay
+			self.assertEqual(slip.year_to_date, year_to_date)
+			month += 1
+
 	def test_tax_for_payroll_period(self):
 		data = {}
 		# test the impact of tax exemption declaration, tax exemption proof submission
@@ -631,8 +660,13 @@ def create_benefit_claim(employee, payroll_period, amount, component):
 	}).submit()
 	return claim_date
 
-def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False, currency=erpnext.get_default_currency()):
-	frappe.db.sql("""delete from `tabIncome Tax Slab`""")
+def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption = False, dont_submit = False, currency=None):
+	# frappe.db.sql("""delete from `tabIncome Tax Slab`""")
+
+	print(payroll_period.name, effective_date)
+
+	if not currency:
+		currency = erpnext.get_default_currency()
 
 	slabs = [
 		{
@@ -652,26 +686,32 @@ def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption =
 		}
 	]
 
-	income_tax_slab = frappe.new_doc("Income Tax Slab")
-	income_tax_slab.name = "Tax Slab: " + payroll_period.name
-	income_tax_slab.effective_from = effective_date or add_days(payroll_period.start_date, -2)
-	income_tax_slab.currency = currency
+	income_tax_slab_name = frappe.db.get_value("Income Tax Slab", "Tax Slab: " + payroll_period.name)
+	if not income_tax_slab_name:
+		income_tax_slab = frappe.new_doc("Income Tax Slab")
+		income_tax_slab.name = "Tax Slab: " + payroll_period.name
+		income_tax_slab.effective_from = effective_date or add_days(payroll_period.start_date, -2)
+		income_tax_slab.currency = currency
 
-	if allow_tax_exemption:
-		income_tax_slab.allow_tax_exemption = 1
-		income_tax_slab.standard_tax_exemption_amount = 50000
+		if allow_tax_exemption:
+			income_tax_slab.allow_tax_exemption = 1
+			income_tax_slab.standard_tax_exemption_amount = 50000
 
-	for item in slabs:
-		income_tax_slab.append("slabs", item)
+		for item in slabs:
+			income_tax_slab.append("slabs", item)
 
-	income_tax_slab.append("other_taxes_and_charges", {
-		"description": "cess",
-		"percent": 4
-	})
+		income_tax_slab.append("other_taxes_and_charges", {
+			"description": "cess",
+			"percent": 4
+		})
 
-	income_tax_slab.save()
-	if not dont_submit:
-		income_tax_slab.submit()
+		income_tax_slab.save()
+		if not dont_submit:
+			income_tax_slab.submit()
+
+		return income_tax_slab.name
+	else:
+		return income_tax_slab_name
 
 def create_salary_slips_for_payroll_period(employee, salary_structure, payroll_period, deduct_random=True):
 	deducted_dates = []
