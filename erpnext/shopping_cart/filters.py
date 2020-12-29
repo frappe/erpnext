@@ -55,21 +55,4 @@ class ProductFiltersBuilder:
 			frappe.get_doc('Item Attribute', attribute) for attribute in attributes
 		]
 
-		print(attribute_docs)
-
-		# # mark attribute values as checked if they are present in the request url
-		# if frappe.form_dict:
-		# 	for attr in attribute_docs:
-		# 		if attr.name in frappe.form_dict:
-		# 			value = frappe.form_dict[attr.name]
-		# 			if value:
-		# 				enabled_values = value.split(',')
-		# 			else:
-		# 				enabled_values = []
-
-		# 			for v in enabled_values:
-		# 				for item_attribute_row in attr.item_attribute_values:
-		# 					if v == item_attribute_row.attribute_value:
-		# 						item_attribute_row.checked = True
-
 		return attribute_docs
