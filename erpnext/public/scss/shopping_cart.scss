@@ -1,5 +1,5 @@
 @import "frappe/public/scss/desk/variables";
-@import "frappe/public/scss/desk/mixins";
+@import "frappe/public/scss/common/mixins";
 
 body.product-page {
 	background: var(--gray-50);
@@ -37,15 +37,15 @@ body.product-page {
 	border: none;
 }
 
-.card-grid {
-	display: grid;
-	grid-gap: 15px;
-	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));;
-}
-
 .product-category-section {
 	.card:hover {
 		box-shadow: 0px 16px 45px 6px rgba(0, 0, 0, 0.08), 0px 8px 10px -10px rgba(0, 0, 0, 0.04);
+	}
+
+	.card-grid {
+		display: grid;
+		grid-gap: 15px;
+		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));;
 	}
 }
 
@@ -114,6 +114,7 @@ body.product-page {
 	}
 }
 
+[data-doctype="Item Group"],
 #page-all-products {
 	.page-header {
 		font-size: 20px;
@@ -217,3 +218,8 @@ body.product-page {
 	}
 }
 
+.item-group-slideshow {
+	.item-group-description {
+		max-width: 800px;
+	}
+}
