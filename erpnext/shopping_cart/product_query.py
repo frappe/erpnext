@@ -58,13 +58,12 @@ class ProductQuery:
 						["Item Variant Attribute", "attribute_value", "in", values],
 					],
 					or_filters=self.or_filters,
-					limit=self.page_length
 				)
 
 				items_dict = {item.name: item for item in items}
 				# TODO: Replace Variants by their parent templates
 
-				all_items.append(set(items.keys()))
+				all_items.append(set(items_dict.keys()))
 
 			result = [items_dict.get(item) for item in list(set.intersection(*all_items))]
 		else:
