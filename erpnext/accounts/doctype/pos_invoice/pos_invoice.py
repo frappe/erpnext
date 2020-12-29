@@ -78,7 +78,7 @@ class POSInvoice(SalesInvoice):
 						mode_of_payment=pay.mode_of_payment, status="Paid"),
 					fieldname="grand_total")
 
-				if pay.amount != paid_amt:
+				if paid_amt and pay.amount != paid_amt:
 					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
 	def validate_stock_availablility(self):
