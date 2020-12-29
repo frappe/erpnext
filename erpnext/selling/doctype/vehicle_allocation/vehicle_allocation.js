@@ -12,4 +12,21 @@ frappe.ui.form.on('Vehicle Allocation', {
 			return erpnext.queries.item({"is_vehicle": 1, "include_item_in_vehicle_booking": 1});
 		});
 	},
+
+	item_code: function (frm) {
+		if (frm.doc.item_code && frm.doc.company) {
+			return frappe.call({
+				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_vehicle_default_supplier",
+				args: {
+					item_code: frm.doc.item_code,
+					company: frm.doc.company
+				},
+				callback: function (r) {
+					if (r.message) {
+						frm.set_value("supplier", r.message);
+					}
+				}
+			});
+		}
+	}
 });
