@@ -17,29 +17,38 @@
   "approval_status",
   "posting_date",
   "is_paid",
+  "currency_sb",
+  "currency",
+  "conversion_rate",
   "expense_details",
   "items",
   "section_break_12",
-  "total_claimed_amount",
+  "base_total_claimed_amount",
+  "base_total",
+  "base_total_amount_reimbursed",
   "column_break_13",
-  "total_sanctioned_amount",
+  "total_claimed_amount",
+  "total",
   "total_amount_reimbursed",
   "sb1",
   "taxes_and_charges",
   "taxes",
   "transactions_section",
+  "base_taxes_and_charges_added",
+  "base_taxes_and_charges_deducted",
+  "base_total_taxes_and_charges",
+  "column_break_28",
+  "taxes_and_charges_added",
+  "taxes_and_charges_deducted",
   "total_taxes_and_charges",
-  "column_break_17",
+  "section_break_24",
+  "base_grand_total",
+  "column_break_36",
+  "grand_total",
+  "total_advance_amount",
+  "outstanding_amount",
   "advance_payments",
   "advances",
-  "section_break_24",
-  "total_advance_amount",
-  "section_break_26",
-  "grand_total",
-  "outstanding_amount",
-  "section_break_16",
-  "currency",
-  "conversion_rate",
   "title",
   "email_id",
   "accounting_details",
@@ -128,18 +137,7 @@
    "no_copy": 1,
    "oldfieldname": "total_claimed_amount",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
-   "read_only": 1,
-   "width": "160px"
-  },
-  {
-   "fieldname": "total_sanctioned_amount",
-   "fieldtype": "Currency",
-   "label": "Total Sanctioned Amount",
-   "no_copy": 1,
-   "oldfieldname": "total_sanctioned_amount",
-   "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1,
    "width": "160px"
   },
@@ -202,7 +200,7 @@
    "in_list_view": 1,
    "label": "Total Amount Reimbursed",
    "no_copy": 1,
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -323,7 +321,7 @@
    "fieldname": "total_advance_amount",
    "fieldtype": "Currency",
    "label": "Total Advance Amount",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -343,10 +341,6 @@
    "options": "Purchase Taxes and Charges"
   },
   {
-   "fieldname": "section_break_16",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "transactions_section",
    "fieldtype": "Section Break",
    "hide_border": 1
@@ -356,18 +350,14 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Grand Total",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "total_taxes_and_charges",
    "fieldtype": "Currency",
    "label": "Total Taxes and Charges",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -381,11 +371,6 @@
   },
   {
    "fieldname": "section_break_24",
-   "fieldtype": "Section Break",
-   "hide_border": 1
-  },
-  {
-   "fieldname": "section_break_26",
    "fieldtype": "Section Break"
   },
   {
@@ -393,7 +378,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Outstanding Amount",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -412,26 +397,124 @@
    "reqd": 1
   },
   {
-   "default": "1",
-   "fieldname": "conversion_rate",
-   "fieldtype": "Float",
-   "label": "Exchange Rate",
-   "precision": "9",
-   "print_hide": 1
-  },
-  {
+   "default": "Company:company:default_currency",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_total_claimed_amount",
+   "fieldtype": "Currency",
+   "label": "Total Claimed Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_amount_reimbursed",
+   "fieldtype": "Currency",
+   "label": "Total Amount Reimbursed (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_taxes_and_charges_added",
+   "fieldtype": "Currency",
+   "label": "Taxes and Charges Added (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_taxes_and_charges_deducted",
+   "fieldtype": "Currency",
+   "label": "Taxes and Charges Deducted (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_taxes_and_charges",
+   "fieldtype": "Currency",
+   "label": "Total Taxes and Charges (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "taxes_and_charges_added",
+   "fieldtype": "Currency",
+   "label": "Taxes and Charges Added",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "taxes_and_charges_deducted",
+   "fieldtype": "Currency",
+   "label": "Taxes and Charges Deducted",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "currency_sb",
+   "fieldtype": "Section Break",
+   "label": "Currency"
+  },
+  {
+   "depends_on": "currency",
+   "fieldname": "conversion_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_total",
+   "fieldtype": "Currency",
+   "label": "Total Sanctioned Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Total Sanctioned Amount",
+   "no_copy": 1,
+   "oldfieldname": "total_sanctioned_amount",
+   "oldfieldtype": "Currency",
+   "options": "currency",
+   "read_only": 1,
+   "width": "160px"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-25 23:17:26.422453",
+ "modified": "2020-12-29 10:58:45.942863",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

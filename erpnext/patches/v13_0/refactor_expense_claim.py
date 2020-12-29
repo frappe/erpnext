@@ -37,6 +37,7 @@ def execute():
 		rename_field('Expense Claim Item', 'expense_item', 'item_code')
 		rename_field('Expense Claim Item', 'amount', 'claimed_amount')
 		rename_field('Expense Claim Item', 'sanctioned_amount', 'amount')
+		rename_field('Expense Claim', 'total_sanctioned_amount', 'total_amount')
 		frappe.db.sql("""
 			UPDATE `tabExpense Claim Item`
 			SET parentfield='items'

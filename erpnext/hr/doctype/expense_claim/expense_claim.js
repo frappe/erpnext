@@ -53,8 +53,8 @@ cur_frm.cscript.clear_sanctioned = function(doc) {
 		val[i].amount ='';
 	}
 
-	doc.total_sanctioned_amount = '';
-	refresh_many(['amount', 'total_sanctioned_amount']);
+	doc.total = '';
+	refresh_many(['amount', 'total']);
 };
 
 cur_frm.cscript.refresh = function(doc) {
@@ -104,11 +104,10 @@ cur_frm.cscript.validate = function(doc) {
 
 cur_frm.cscript.calculate_total = function(doc){
 	doc.total_claimed_amount = 0;
-	doc.total_sanctioned_amount = 0;
 	$.each((doc.items || []), function(i, d) {
 		doc.total_claimed_amount += d.claimed_amount;
-		doc.total_sanctioned_amount += d.amount;
 	});
+	this.set_in_company_currency(this.frm.doc, ["total_claimed_amount"])
 };
 
 cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
@@ -234,6 +233,7 @@ frappe.ui.form.on("Expense Claim", {
 
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
+		frm.events.set_dynamic_currency_labels(frm);
 
 		if(frm.doc.docstatus > 0 && frm.doc.approval_status !== "Rejected") {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -250,7 +250,7 @@ frappe.ui.form.on("Expense Claim", {
 		}
 
 		if (frm.doc.docstatus===1 && !cint(frm.doc.is_paid) && cint(frm.doc.grand_total) > 0
-				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total_sanctioned_amount))
+				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total))
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__('Payment'),
 				function() { frm.events.make_payment_entry(frm); }, __('Create'));
@@ -258,7 +258,7 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	calculate_grand_total_and_outstanding_amount: function(frm) {
-		let grand_total = flt(frm.doc.total_sanctioned_amount) + flt(frm.doc.total_taxes_and_charges);
+		let grand_total = flt(frm.doc.total) + flt(frm.doc.total_taxes_and_charges);
 		frm.set_value("grand_total", grand_total);
 
 		let outstanding_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.total_amount_reimbursed);
@@ -319,7 +319,78 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	employee: function(frm) {
-		frm.events.get_advances(frm);
+		if (frm.doc.employee) {
+			frappe.run_serially([
+				() => 	frm.trigger("get_employee_currency"),
+				() => 	frm.trigger("get_employee_advances")
+			]);
+		}
+	},
+
+	get_employee_currency: function(frm) {
+		frappe.call({
+			method: "erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment.get_employee_currency",
+			args: {
+				employee: frm.doc.employee,
+			},
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value("currency", r.message);
+					frm.refresh_fields();
+				}
+			}
+		});
+	},
+
+	currency: function(frm) {
+		let from_currency = frm.doc.currency;
+		let company_currency;
+		if (!frm.doc.company) {
+			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+		} else {
+			company_currency = erpnext.get_currency(frm.doc.company);
+		}
+
+		if (from_currency != company_currency) {
+			frm.events.set_exchange_rate(frm, from_currency, company_currency);
+			frm.events.set_dynamic_currency_labels(frm);
+		} else {
+			frm.set_value("conversion_rate", 1.0);
+			frm.set_df_property("conversion_rate", "hidden", 1);
+			frm.set_df_property("conversion_rate", "description", "" );
+		}
+		frm.refresh_fields();
+	},
+
+	set_exchange_rate: function(frm, from_currency, company_currency) {
+		frappe.call({
+			method: "erpnext.setup.utils.get_exchange_rate",
+			args: {
+				from_currency: from_currency,
+				to_currency: company_currency,
+			},
+			callback: function(r) {
+				frm.set_value("conversion_rate", flt(r.message));
+				frm.set_df_property("conversion_rate", "hidden", 0);
+				frm.set_df_property("conversion_rate", "description", "1 " + frm.doc.currency
+					+ " = [?] " + company_currency);
+			}
+		});
+	},
+
+	set_dynamic_currency_labels: function(frm) {
+		let from_currency = frm.doc.currency;
+		let company_currency;
+		if (!frm.doc.company) {
+			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+		} else {
+			company_currency = erpnext.get_currency(frm.doc.company);
+		}
+
+		if (from_currency != company_currency) {
+			frm.set_currency_labels(["base_total_claimed_amount", "base_total", "base_total_amount_reimbursed"], company_currency);
+			frm.set_currency_labels(["total_claimed_amount", "total", "total_amount_reimbursed"], from_currency);
+		}
 	},
 
 	cost_center: function(frm) {
@@ -337,20 +408,8 @@ frappe.ui.form.on("Expense Claim", {
 			}
 		});
 	},
-	get_taxes: function(frm) {
-		if(frm.doc.taxes) {
-			frappe.call({
-				method: "calculate_taxes",
-				doc: frm.doc,
-				callback: () => {
-					refresh_field("taxes");
-					frm.trigger("update_employee_advance_claimed_amount");
-				}
-			});
-		}
-	},
 
-	get_advances: function(frm) {
+	get_employee_advances: function(frm) {
 		frappe.model.clear_table(frm.doc, "advances");
 		if (frm.doc.employee) {
 			return frappe.call({
@@ -389,8 +448,8 @@ frappe.ui.form.on("Expense Claim Item", {
 		var child = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "rate", child.amount);
 		cur_frm.cscript.calculate_total(frm.doc, cdt, cdn);
-		frm.trigger("get_taxes");
 	},
+
 	cost_center: function(frm, cdt, cdn) {
 		erpnext.utils.copy_value_in_all_rows(frm.doc, cdt, cdn, "items", "cost_center");
 	}
@@ -425,42 +484,5 @@ frappe.ui.form.on("Expense Claim Advance", {
 				}
 			});
 		}
-	}
-});
-
-frappe.ui.form.on("Expense Taxes and Charges", {
-	account_head: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		if(child.account_head && !child.description) {
-			// set description from account head
-			child.description = child.account_head.split(' - ').slice(0, -1).join(' - ');
-			refresh_field("taxes");
-		}
-	},
-
-	calculate_total_tax: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		child.total = flt(frm.doc.total_sanctioned_amount) + flt(child.tax_amount);
-		frm.trigger("calculate_tax_amount", cdt, cdn);
-	},
-
-	calculate_tax_amount: function(frm) {
-		frm.doc.total_taxes_and_charges = 0;
-		(frm.doc.taxes || []).forEach(function(d) {
-			frm.doc.total_taxes_and_charges += d.tax_amount;
-		});
-		frm.trigger("calculate_grand_total_and_outstanding_amount");
-	},
-
-	rate: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		if(!child.claimed_amount) {
-			child.tax_amount = flt(frm.doc.total_sanctioned_amount) * (flt(child.rate)/100);
-		}
-		frm.trigger("calculate_total_tax", cdt, cdn);
-	},
-
-	tax_amount: function(frm, cdt, cdn) {
-		frm.trigger("calculate_total_tax", cdt, cdn);
 	}
 });

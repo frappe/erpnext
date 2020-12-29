@@ -10,14 +10,14 @@ from erpnext.hr.utils import set_employee_name
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
-from erpnext.controllers.accounts_controller import AccountsController
+from erpnext.controllers.buying_controller import BuyingController
 from frappe.utils.csvutils import getlink
 from erpnext.accounts.utils import get_account_currency
 
 class InvalidExpenseApproverError(frappe.ValidationError): pass
 class ExpenseApproverIdentityError(frappe.ValidationError): pass
 
-class ExpenseClaim(AccountsController):
+class ExpenseClaim(BuyingController):
 	def onload(self):
 		self.get("__onload").make_payment_via_journal_entry = frappe.db.get_single_value('Accounts Settings',
 			'make_payment_via_journal_entry')
@@ -26,11 +26,11 @@ class ExpenseClaim(AccountsController):
 		self.validate_advances()
 		self.validate_sanctioned_amount()
 		self.calculate_total_amount()
+		self.set_amounts_in_company_currency()
 		set_employee_name(self)
 		self.set_expense_account(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
-		self.calculate_taxes()
 		self.set_grand_total_and_outstanding_amount()
 		self.set_status()
 		if self.task and not self.project:
@@ -104,21 +104,23 @@ class ExpenseClaim(AccountsController):
 			frappe.get_doc("Project", self.project).update_project()
 
 	def make_gl_entries(self, cancel=False):
-		if flt(self.total_sanctioned_amount) > 0:
+		if flt(self.total) > 0:
 			gl_entries = self.get_gl_entries()
 			make_gl_entries(gl_entries, cancel)
 
 	def get_gl_entries(self):
 		gl_entry = []
 		self.validate_account_details()
+		payable_account_currency = get_account_currency(self.payable_account)
 
 		# payable entry
 		if self.grand_total:
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": self.payable_account,
-					"credit": self.grand_total,
-					"credit_in_account_currency": self.grand_total,
+					"credit": self.base_grand_total,
+					"credit_in_account_currency": (self.base_grand_total
+						if payable_account_currency == self.company_currency else self.grand_total),
 					"against": ",".join([d.default_account for d in self.items]),
 					"party_type": "Employee",
 					"party": self.employee,
@@ -130,11 +132,13 @@ class ExpenseClaim(AccountsController):
 
 		# expense entries
 		for data in self.items:
+			account_currency = get_account_currency(data.default_account)
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": data.default_account,
-					"debit": data.amount,
-					"debit_in_account_currency": data.amount,
+					"debit": data.base_amount,
+					"debit_in_account_currency": (data.base_amount
+						if account_currency == self.company_currency else data.amount),
 					"against": self.employee,
 					"cost_center": data.cost_center or self.cost_center
 				}, item=data)
@@ -159,11 +163,13 @@ class ExpenseClaim(AccountsController):
 		if self.is_paid and self.grand_total:
 			# payment entry
 			payment_account = get_bank_cash_account(self.mode_of_payment, self.company).get("account")
+			account_currency = get_account_currency(payment_account)
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": payment_account,
-					"credit": self.grand_total,
-					"credit_in_account_currency": self.grand_total,
+					"credit": self.base_grand_total,
+					"credit_in_account_currency": (self.base_grand_total
+						if account_currency == self.company_currency else self.grand_total),
 					"against": self.employee
 				}, item=self)
 			)
@@ -174,8 +180,9 @@ class ExpenseClaim(AccountsController):
 					"party_type": "Employee",
 					"party": self.employee,
 					"against": payment_account,
-					"debit": self.grand_total,
-					"debit_in_account_currency": self.grand_total,
+					"debit": self.base_grand_total,
+					"debit_in_account_currency": (self.base_grand_total
+						if payable_account_currency == self.company_currency else self.grand_total),
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 				}, item=self)
@@ -186,16 +193,21 @@ class ExpenseClaim(AccountsController):
 	def add_tax_gl_entries(self, gl_entries):
 		# tax table gl entries
 		for tax in self.get("taxes"):
+			account_currency = get_account_currency(tax.account_head)
+			dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+
 			gl_entries.append(
 				self.get_gl_dict({
 					"account": tax.account_head,
-					"debit": tax.tax_amount,
-					"debit_in_account_currency": tax.tax_amount,
 					"against": self.employee,
-					"cost_center": self.cost_center,
+					dr_or_cr: tax.base_tax_amount,
+					dr_or_cr + "_in_account_currency": tax.base_tax_amount \
+						if account_currency == self.company_currency \
+						else tax.tax_amount,
+					"cost_center": tax.cost_center,
 					"against_voucher_type": self.doctype,
 					"against_voucher": self.name
-				}, item=tax)
+				}, account_currency, item=tax)
 			)
 
 	def validate_account_details(self):
@@ -210,25 +222,21 @@ class ExpenseClaim(AccountsController):
 
 	def calculate_total_amount(self):
 		self.total_claimed_amount = 0
-		self.total_sanctioned_amount = 0
 		for d in self.get('items'):
 			if self.approval_status == 'Rejected':
 				d.amount = 0.0
 
 			self.total_claimed_amount += flt(d.claimed_amount)
-			self.total_sanctioned_amount += flt(d.amount)
 
-	def calculate_taxes(self):
-		self.total_taxes_and_charges = 0
-		for tax in self.taxes:
-			if tax.rate:
-				tax.tax_amount = flt(self.total_sanctioned_amount) * flt(tax.rate/100)
-
-			tax.total = flt(tax.tax_amount) + flt(self.total_sanctioned_amount)
-			self.total_taxes_and_charges += flt(tax.tax_amount)
+	def set_amounts_in_company_currency(self):
+		"""set values in base currency"""
+		fields = ["total_claimed_amount", "total_amount_reimbursed", "total_amount"]
+		for f in fields:
+			val = flt(flt(self.get(f), self.precision(f)) * self.conversion_rate, self.precision("base_" + f))
+			self.set("base_" + f, val)
 
 	def set_grand_total_and_outstanding_amount(self):
-		self.grand_total = flt(self.total_sanctioned_amount) + flt(self.total_taxes_and_charges)
+		self.grand_total = flt(self.total) + flt(self.total_taxes_and_charges)
 		self.outstanding_amount = flt(self.grand_total) - flt(self.total_advance_amount) - flt(self.total_amount_reimbursed)
 
 	def update_task(self):
@@ -257,8 +265,8 @@ class ExpenseClaim(AccountsController):
 			if flt(self.total_advance_amount, precision) > flt(self.total_claimed_amount, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total claimed amount"))
 
-			if self.total_sanctioned_amount \
-					and flt(self.total_advance_amount, precision) > flt(self.total_sanctioned_amount, precision):
+			if self.total \
+					and flt(self.total_advance_amount, precision) > flt(self.total, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
 	def validate_sanctioned_amount(self):
@@ -272,7 +280,6 @@ class ExpenseClaim(AccountsController):
 				expense.default_account = get_expense_claim_account(expense.item_code, self.company)["account"]
 
 def update_reimbursed_amount(doc, jv=None):
-
 	condition = ""
 
 	if jv:
@@ -283,11 +290,10 @@ def update_reimbursed_amount(doc, jv=None):
 		and party = %s {condition}""".format(condition=condition), #nosec
 		(doc.name, doc.employee) ,as_dict=1)[0].amt
 
-	doc.total_amount_reimbursed = amt
-	frappe.db.set_value("Expense Claim", doc.name , "total_amount_reimbursed", amt)
-
+	doc.db_set("total_amount_reimbursed", amt)
+	doc.set_amounts_in_company_currency()
 	doc.set_status()
-	frappe.db.set_value("Expense Claim", doc.name , "status", doc.status)
+	doc.db_set("status", doc.status)
 
 @frappe.whitelist()
 def make_bank_entry(dt, dn):
@@ -298,7 +304,7 @@ def make_bank_entry(dt, dn):
 	if not default_bank_cash_account:
 		default_bank_cash_account = get_default_bank_cash_account(expense_claim.company, "Cash")
 
-	payable_amount = flt(expense_claim.total_sanctioned_amount) \
+	payable_amount = flt(expense_claim.total) \
 		- flt(expense_claim.total_amount_reimbursed) - flt(expense_claim.total_advance_amount)
 
 	je = frappe.new_doc("Journal Entry")
