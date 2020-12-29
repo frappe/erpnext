@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _dict
 
 class ProductFiltersBuilder:
 	def __init__(self, item_group=None):
@@ -55,4 +56,24 @@ class ProductFiltersBuilder:
 			frappe.get_doc('Item Attribute', attribute) for attribute in attributes
 		]
 
-		return attribute_docs
+		valid_attributes = []
+
+		for attr_doc in attribute_docs:
+			selected_attributes = []
+			for attr in attr_doc.item_attribute_values:
+				filters= [
+					["Item Variant Attribute", "attribute", "=", attr.parent],
+					["Item Variant Attribute", "attribute_value", "=", attr.attribute_value]
+				]
+				if self.item_group:
+					filters.append(["item_group", "=", self.item_group])
+
+				if frappe.db.get_all("Item", filters, limit=1):
+					selected_attributes.append(attr)
+
+			if selected_attributes:
+				valid_attributes.append(
+					_dict(item_attribute_values=selected_attributes)
+				)
+
+		return valid_attributes
