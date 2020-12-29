@@ -26,6 +26,9 @@
   "slideshow",
   "description",
   "website_specifications",
+  "website_filters_section",
+  "filter_fields",
+  "filter_attributes",
   "lft",
   "rgt",
   "old_parent"
@@ -180,6 +183,23 @@
    "options": "Item Group",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "website_filters_section",
+   "fieldtype": "Section Break",
+   "label": "Website Filters"
+  },
+  {
+   "fieldname": "filter_fields",
+   "fieldtype": "Table",
+   "label": "Item Fields",
+   "options": "Website Filter Field"
+  },
+  {
+   "fieldname": "filter_attributes",
+   "fieldtype": "Table",
+   "label": "Attributes",
+   "options": "Website Attribute"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -188,7 +208,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-03-18 18:10:34.383363",
+ "modified": "2020-12-29 14:04:26.075008",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
