@@ -12,6 +12,9 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 		tax_category: function(frm) {
 			frm.trigger('get_tax_template');
 		},
+		customer_address: function(frm) {
+			frm.trigger('get_tax_template');
+		},
 		get_tax_template: function(frm) {
 			if (!frm.doc.company) return;
 
@@ -19,6 +22,7 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				'shipping_address': frm.doc.shipping_address || '',
 				'shipping_address_name': frm.doc.shipping_address_name || '',
 				'customer_address': frm.doc.customer_address || '',
+				'supplier_address': frm.doc.supplier_address,
 				'customer': frm.doc.customer,
 				'supplier': frm.doc.supplier,
 				'supplier_gstin': frm.doc.supplier_gstin,

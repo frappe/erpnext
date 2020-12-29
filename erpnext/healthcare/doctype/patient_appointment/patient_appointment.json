@@ -23,9 +23,9 @@
   "procedure_template",
   "get_procedure_from_encounter",
   "procedure_prescription",
+  "therapy_plan",
   "therapy_type",
   "get_prescribed_therapies",
-  "therapy_plan",
   "practitioner",
   "practitioner_name",
   "department",
@@ -284,7 +284,7 @@
    "report_hide": 1
   },
   {
-   "depends_on": "eval:doc.patient;",
+   "depends_on": "eval:doc.patient && doc.therapy_plan;",
    "fieldname": "therapy_type",
    "fieldtype": "Link",
    "label": "Therapy",
@@ -292,17 +292,16 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:doc.patient && doc.__islocal;",
+   "depends_on": "eval:doc.patient && doc.therapy_plan && doc.__islocal;",
    "fieldname": "get_prescribed_therapies",
    "fieldtype": "Button",
    "label": "Get Prescribed Therapies"
   },
   {
-   "depends_on": "eval: doc.patient && doc.therapy_type",
+   "depends_on": "eval: doc.patient;",
    "fieldname": "therapy_plan",
    "fieldtype": "Link",
    "label": "Therapy Plan",
-   "mandatory_depends_on": "eval: doc.patient && doc.therapy_type",
    "options": "Therapy Plan"
   },
   {
@@ -348,7 +347,7 @@
   }
  ],
  "links": [],
- "modified": "2020-05-21 03:04:21.400893",
+ "modified": "2020-12-16 13:16:58.578503",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
