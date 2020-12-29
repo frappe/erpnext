@@ -6,7 +6,7 @@ import frappe
 
 class ProductQuery:
 	"""Query engine for product listing
-	
+
 	Attributes:
 	    cart_settings (Document): Settings for Cart
 	    fields (list): Fields to fetch in query
@@ -28,19 +28,19 @@ class ProductQuery:
 
 	def query(self, attributes=None, fields=None, search_term=None, start=0):
 		"""Summary
-		
+
 		Args:
 		    attributes (dict, optional): Item Attribute filters
 		    fields (dict, optional): Field level filters
 		    search_term (str, optional): Search term to lookup
 		    start (int, optional): Page start
-		
+
 		Returns:
 		    list: List of results with set fields
 		"""
 		if fields: self.build_fields_filters(fields)
 		if search_term: self.build_search_filters(search_term)
-		
+
 		result = []
 
 		if attributes:
@@ -74,14 +74,14 @@ class ProductQuery:
 
 	def build_fields_filters(self, filters):
 		"""Build filters for field values
-		
+
 		Args:
 		    filters (dict): Filters
 		"""
 		for field, values in filters.items():
 			if not values:
 				continue
-			
+
 			if isinstance(values, list):
 				# If value is a list use `IN` query
 				self.filters.append([field, 'IN', values])
@@ -91,7 +91,7 @@ class ProductQuery:
 
 	def build_search_filters(self, search_term):
 		"""Query search term in specified fields
-		
+
 		Args:
 		    search_term (str): Search candidate
 		"""
