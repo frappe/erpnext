@@ -386,15 +386,15 @@ class GSPConnector():
 		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
 		self.credentials = self.get_credentials()
 
-		self.base_url = 'https://gsp.adaequare.com/'
-		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
-		self.gstin_details_url = self.base_url + 'test/enriched/ei/api/master/gstin'
-		self.generate_irn_url = self.base_url + 'test/enriched/ei/api/invoice'
-		self.irn_details_url = self.base_url + 'test/enriched/ei/api/invoice/irn'
-		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
-		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
-		self.generate_ewaybill_url = self.base_url + 'test/enriched/ei/api/ewaybill'
-	
+		self.base_url = 'https://gsp.adaequare.com'
+		self.authenticate_url = self.base_url + '/gsp/authenticate?grant_type=token'
+		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
+		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
+		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
+		self.cancel_irn_url = self.base_url + '/enriched/ei/api/invoice/cancel'
+		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
+		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
+
 	def get_credentials(self):
 		if self.invoice:
 			gstin = self.get_seller_gstin()
