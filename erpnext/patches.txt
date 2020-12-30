@@ -711,6 +711,7 @@ erpnext.patches.v13_0.delete_old_sales_reports
 execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll #22-06-2020
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-2020
+execute:frappe.reload_doc("regional", "doctype", "e_invoice_settings")
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v13_0.loyalty_points_entry_for_pos_invoice #22-07-2020
 erpnext.patches.v12_0.add_taxjar_integration_field
@@ -732,6 +733,7 @@ erpnext.patches.v13_0.set_youtube_video_id
 erpnext.patches.v13_0.print_uom_after_quantity_patch
 erpnext.patches.v13_0.set_payment_channel_in_payment_gateway_account
 erpnext.patches.v13_0.create_healthcare_custom_fields_in_stock_entry_detail
+erpnext.patches.v12_0.setup_einvoice_fields #2020-12-02
 erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
 erpnext.patches.v13_0.update_custom_fields_for_shopify

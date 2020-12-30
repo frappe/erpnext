@@ -6,7 +6,7 @@ import frappe, erpnext
 from frappe.utils import cint, flt, cstr, get_link_to_form, today, getdate
 from frappe import _
 import frappe.defaults
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, check_if_stock_and_account_balance_synced
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -402,6 +402,14 @@ class StockController(AccountsController):
 
 		if check_if_future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
+		elif not is_reposting_pending():
+			check_if_stock_and_account_balance_synced(self.posting_date,
+				self.company, self.doctype, self.name)
+
+def is_reposting_pending():
+	return frappe.db.exists("Repost Item Valuation",
+		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
+
 
 def check_if_future_sle_exists(args):
 	sl_entries = frappe.db.get_all("Stock Ledger Entry",

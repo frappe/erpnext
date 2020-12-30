@@ -69,9 +69,13 @@
   "net_pay_info",
   "net_pay",
   "base_net_pay",
+  "year_to_date",
+  "base_year_to_date",
   "column_break_53",
   "rounded_total",
   "base_rounded_total",
+  "month_to_date",
+  "base_month_to_date",
   "section_break_55",
   "total_in_words",
   "column_break_69",
@@ -578,13 +582,41 @@
   {
    "fieldname": "column_break_69",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "month_to_date",
+   "fieldtype": "Currency",
+   "label": "Month To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_month_to_date",
+   "fieldtype": "Currency",
+   "label": "Month To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-21 23:02:59.400249",
+ "modified": "2020-12-21 23:43:44.959840",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
