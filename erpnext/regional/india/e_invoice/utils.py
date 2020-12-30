@@ -386,15 +386,40 @@ class GSPConnector():
 		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
 		self.credentials = self.get_credentials()
 
+		url_dict = {
+			'staging_gstin_details_url': 'test/enriched/ei/api/master/gstin',
+			'live_gstin_details_url': 'enriched/ei/api/master/gstin',
+			'staging_generate_irn_url': 'test/enriched/ei/api/invoice',
+			'live_generate_irn_url': 'enriched/ei/api/invoice',
+			'staging_irn_details_url': 'test/enriched/ei/api/invoice/irn',
+			'live_irn_details_url': 'enriched/ei/api/invoice/irn',
+			'staging_cancel_irn_url': 'test/enriched/ei/api/invoice/cancel',
+			'live_cancel_irn_url': 'enriched/ei/api/invoice/cancel',
+			'staging_cancel_ewaybill_url': 'test/enriched/ei/api/ewayapi',
+			'live_cancel_ewaybill_url': 'enriched/ei/api/ewayapi',
+			'staging_generate_ewaybill_url': 'test/enriched/ei/api/ewaybill',
+			'live_generate_ewaybill_url': 'enriched/ei/api/ewaybill'
+			}
+
 		self.base_url = 'https://gsp.adaequare.com/'
 		self.authenticate_url = self.base_url + 'gsp/authenticate?grant_type=token'
-		self.gstin_details_url = self.base_url + 'test/enriched/ei/api/master/gstin'
-		self.generate_irn_url = self.base_url + 'test/enriched/ei/api/invoice'
-		self.irn_details_url = self.base_url + 'test/enriched/ei/api/invoice/irn'
-		self.cancel_irn_url = self.base_url + 'test/enriched/ei/api/invoice/cancel'
-		self.cancel_ewaybill_url = self.base_url + '/test/enriched/ei/api/ewayapi'
-		self.generate_ewaybill_url = self.base_url + 'test/enriched/ei/api/ewaybill'
-	
+		
+		if self.e_invoice_settings.staging:
+			self.gstin_details_url = self.base_url + url_dict['staging_gstin_details_url']
+			self.generate_irn_url = self.base_url + url_dict['staging_generate_irn_url']
+			self.irn_details_url = self.base_url + url_dict['staging_irn_details_url']
+			self.cancel_irn_url = self.base_url + url_dict['staging_cancel_irn_url']
+			self.cancel_ewaybill_url = self.base_url + url_dict['staging_cancel_ewaybill_url']
+			self.generate_ewaybill_url = self.base_url + url_dict['staging_generate_ewaybill_url']
+
+		else:
+			self.gstin_details_url = self.base_url + url_dict['live_gstin_details_url']
+			self.generate_irn_url = self.base_url + url_dict['live_generate_irn_url']
+			self.irn_details_url = self.base_url + url_dict['live_irn_details_url']
+			self.cancel_irn_url = self.base_url + url_dict['live_cancel_irn_url']
+			self.cancel_ewaybill_url = self.base_url + url_dict['live_cancel_ewaybill_url']
+			self.generate_ewaybill_url = self.base_url + url_dict['live_generate_ewaybill_url']
+
 	def get_credentials(self):
 		if self.invoice:
 			gstin = self.get_seller_gstin()

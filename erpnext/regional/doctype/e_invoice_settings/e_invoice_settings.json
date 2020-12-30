@@ -6,6 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "enable",
+  "column_break_2",
+  "staging",
   "section_break_2",
   "credentials",
   "auth_token",
@@ -41,12 +43,23 @@
    "label": "Credentials",
    "mandatory_depends_on": "enable",
    "options": "E Invoice User"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "enable",
+   "fieldname": "staging",
+   "fieldtype": "Check",
+   "label": "Staging"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-12-22 15:34:57.280044",
+ "modified": "2020-12-30 18:07:52.132248",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",
