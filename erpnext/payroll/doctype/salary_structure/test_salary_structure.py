@@ -154,9 +154,8 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 
 	if not payroll_period:
 		payroll_period = create_payroll_period()
-		income_tax_slab = create_tax_slab(payroll_period, allow_tax_exemption=True, currency=currency)
-	else:
-		income_tax_slab = frappe.db.get_value('Income Tax Slab', "Tax Slab: " + payroll_period.name)
+
+	income_tax_slab = create_tax_slab(payroll_period, allow_tax_exemption=True, currency=currency)
 
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
 	salary_structure_assignment.employee = employee
