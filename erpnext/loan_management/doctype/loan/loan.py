@@ -280,10 +280,10 @@ def make_loan_write_off(loan, company=None, posting_date=None, amount=0, as_dict
 		return write_off
 
 @frappe.whitelist()
-def unpledge_security(loan=None, loan_security_pledge=None, as_dict=0, save=0, submit=0, approve=0):
-	# if loan is passed it will be considered as full unpledge
+def unpledge_security(loan=None, loan_security_pledge=None, security_map=None, as_dict=0, save=0, submit=0, approve=0):
+	# if no security_map is passed it will be considered as full unpledge
 	if loan:
-		pledge_qty_map = get_pledged_security_qty(loan)
+		pledge_qty_map = security_map or get_pledged_security_qty(loan)
 		loan_doc = frappe.get_doc('Loan', loan)
 		unpledge_request = create_loan_security_unpledge(pledge_qty_map, loan_doc.name, loan_doc.company,
 			loan_doc.applicant_type, loan_doc.applicant)
