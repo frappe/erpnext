@@ -1,7 +1,7 @@
 {% extends "templates/web.html" %}
 
 {% block header %}
-<h2 class="mb-6">{{ name }}</h2>
+<!-- <h2>{{ title }}</h2> -->
 {% endblock header %}
 
 {% block script %}
@@ -12,15 +12,22 @@
 <div class="item-group-content" itemscope itemtype="http://schema.org/Product">
 	<div class="item-group-slideshow">
 		{% if slideshow %}<!-- slideshow -->
-		{% include "templates/includes/slideshow.html" %}
+			{{ web_block(
+				"Hero Slider",
+				values=slideshow,
+				add_container=0,
+				add_top_padding=0,
+				add_bottom_padding=0,
+			) }}
 		{% endif %}
+		<h2 class="mt-3">{{ title }}</h2>
 		{% if description %}<!-- description -->
-		<div class="item-group-description" itemprop="description">{{ description or ""}}</div>
+		<div class="item-group-description text-muted mb-5" itemprop="description">{{ description or ""}}</div>
 		{% endif %}
 	</div>
-	<div class="row mt-5">
+	<div class="row">
 		<div class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
-			<div class="row">
+			<div class="row products-list">
 				{% if items %}
 					{% for item in items %}
 						{% include "erpnext/www/all-products/item_row.html" %}

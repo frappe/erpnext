@@ -24,6 +24,7 @@
   "route",
   "weightage",
   "slideshow",
+  "website_title",
   "description",
   "website_specifications",
   "website_filters_section",
@@ -200,6 +201,11 @@
    "fieldtype": "Table",
    "label": "Attributes",
    "options": "Website Attribute"
+  },
+  {
+   "fieldname": "website_title",
+   "fieldtype": "Data",
+   "label": "Title"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -208,7 +214,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-12-29 14:04:26.075008",
+ "modified": "2020-12-30 12:57:38.876956",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",

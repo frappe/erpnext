@@ -222,4 +222,8 @@ body.product-page {
 	.item-group-description {
 		max-width: 800px;
 	}
+
+	.carousel-inner.rounded-carousel {
+		border-radius: $card-border-radius;
+	}
 }

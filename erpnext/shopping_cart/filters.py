@@ -73,7 +73,10 @@ class ProductFiltersBuilder:
 
 			if selected_attributes:
 				valid_attributes.append(
-					_dict(item_attribute_values=selected_attributes)
+					_dict(
+						item_attribute_values=selected_attributes,
+						name=attr_doc.name
+					)
 				)
 
 		return valid_attributes

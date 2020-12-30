@@ -37,7 +37,7 @@
 		{%- endfor -%}
 	</ol>
 	{%- endif -%}
-	<div id="{{ slider_name }}423243" class="carousel-inner">
+	<div class="carousel-inner {{ resolve_class({'rounded-carousel': rounded }) }}">
 		{%- for index in ['1', '2', '3', '4', '5'] -%}
 			{%- set image = values['slide_' + index + '_image'] -%}
 			{%- set title = values['slide_' + index + '_title'] -%}
