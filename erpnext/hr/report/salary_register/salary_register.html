@@ -1,17 +1,35 @@
+<style>
+	th, td {font-size: 8px}
+</style>
+
+
+{% function print_group(data, group) { %}
 {%
 	var report_columns = report.get_columns_for_print();
+	report_columns = report_columns.filter(d => d.fieldname != 'salary_slip_id');
 %}
-<div style="margin-bottom: 7px;" class="text-center">
-	{%= frappe.boot.letter_heads[filters.letter_head || frappe.defaults.get_default("letter_head")].header %}
-</div>
 <h2 class="text-center">{%= __(report.report_name) %}</h2>
-<h5 class="text-center">{{ __("From") }} {%= filters.from_date %} {{ __("to") }} {%= filters.to_date %}</h5>
+
+<h4 class="text-center">
+	{% if (filters.department || group.department) { %}
+		{%= group.department %}
+	{% } else if (filters.branch || group.branch) { %}
+		{%= filters.branch || group.branch %}
+	{% } else if (filters.designation || group.designation) { %}
+		{%= filters.designation || group.designation %}
+	{% } %}
+</h4>
+<h5 class="text-center">{{ __("From") }} {%= frappe.datetime.global_date_format(filters.from_date) %} {{ __("to") }} {%= frappe.datetime.global_date_format(filters.to_date) %}</h5>
+{% if (data && data.length && data[0].total_working_days && !report_columns.filter(d=>d.fieldname == 'total_working_days').length) %}
+	<h5 class="text-center">Working Days: {{ data[0].total_working_days }}</h5>
+{% } %}
 <hr>
 <table class="table table-bordered">
 	<thead>
 		<tr>
-			{% for(var i=1, l=report_columns.length; i<l; i++) { %}
-				<th class="text-right">{%= report_columns[i].label %}</th>
+			{% for(var i=0, l=report_columns.length; i<l; i++) { %}
+			{% var text_rightSet = new Set(['Float', 'Currency', 'Int']); %}
+				<th class="{% if text_rightSet.has(report_columns[i].fieldtype) %}text-right{% endif %}">{%= report_columns[i].label %}</th>
 			{% } %}
 		</tr>
 	</thead>
@@ -21,11 +39,15 @@
 				var row = data[j];
 			%}
 			<tr>
-				{% for(var i=1, l=report_columns.length; i<l; i++) { %}
-					<td class="text-right">
+				{% for(var i=0, l=report_columns.length; i<l; i++) { %}
+				{% var text_rightSet = new Set(['Float', 'Currency', 'Int']); %}
+					<td class="{% if text_rightSet.has(report_columns[i].fieldtype) %}text-right{% endif %}"
+						style="{% if (!row.salary_slip_id) { %}font-weight: bold; {% } %}">
 						{% var fieldname = report_columns[i].fieldname; %}
 						{% if (report_columns[i].fieldtype=='Currency' && !isNaN(row[fieldname])) { %}
 							{%= format_currency(row[fieldname]) %}
+						{% } else if (report_columns[i].fieldtype=='Date') { %}
+							{%= frappe.datetime.str_to_user(row[fieldname]) %}
 						{% } else { %}
 							{% if (!is_null(row[fieldname])) { %}
 								{%= row[fieldname] %}
@@ -38,3 +60,6 @@
 	</tbody>
 </table>
 <p class="text-right text-muted">{{ __("Printed On") }} {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+{% } %}
+
+{{ frappe.utils.print_report_groups(original_data, print_group, print_settings.page_break_groups, _p) }}
