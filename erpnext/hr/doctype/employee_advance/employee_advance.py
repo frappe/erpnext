@@ -76,8 +76,8 @@ class EmployeeAdvance(Document):
 
 
 	def update_claimed_amount(self):
-		claimed_amount = frappe.db.sql("""
-			SELECT sum(ifnull(allocated_amount, 0))
+		details = frappe.db.sql("""
+			SELECT sum(ifnull(allocated_amount, 0)), ec.conversion_rate
 			FROM `tabExpense Claim Advance` eca, `tabExpense Claim` ec
 			WHERE
 				eca.employee_advance = %s
@@ -85,7 +85,11 @@ class EmployeeAdvance(Document):
 				AND ec.name = eca.parent
 				AND ec.docstatus=1
 				AND eca.allocated_amount > 0
-		""", self.name)[0][0] or 0
+		""", self.name)
+		claimed_amount = details[0][0] or 0
+		conversion_rate = details[0][1] or 1
+
+		claimed_amount = flt(claimed_amount) / flt(conversion_rate)
 
 		frappe.db.set_value("Employee Advance", self.name, "claimed_amount", flt(claimed_amount))
 		self.reload()
@@ -183,9 +187,9 @@ def make_return_entry(employee, company, employee_advance_name, return_amount,  
 	bank_cash_account = get_default_bank_cash_account(company, account_type='Cash', mode_of_payment = mode_of_payment)
 	if not bank_cash_account:
 		frappe.throw(_("Please set a Default Cash Account in Company defaults"))
-	
+
 	advance_account_currency = frappe.db.get_value('Account', advance_account, 'account_currency')
-	
+
 	je = frappe.new_doc('Journal Entry')
 	je.posting_date = nowdate()
 	je.voucher_type = get_voucher_type(mode_of_payment)
