@@ -71,23 +71,23 @@ def guess_delivery_period(period_str, start_date):
 
 	# Rename short form to full form
 	rename_map = {
-		"Jan": "January",
-		"Feb": "February",
-		"Mar": "March",
-		"Apr": "April",
-		"Jun": "June",
-		"Jul": "July",
-		"Aug": "August",
-		"Sep": "September",
-		"Sept": "September",
-		"Oct": "October",
-		"Nov": "November",
-		"Dec": "December",
+		"jan": "January",
+		"feb": "February",
+		"mar": "March",
+		"apr": "April",
+		"jun": "June",
+		"jul": "July",
+		"aug": "August",
+		"sep": "September",
+		"sept": "September",
+		"oct": "October",
+		"nov": "November",
+		"dec": "December",
 	}
 
 	original_period_str = period_str
-	if period_str in rename_map:
-		period_str = rename_map[period_str]
+	if period_str.lower() in rename_map:
+		period_str = rename_map[period_str.lower()]
 
 	# Make sure a valid month is provided
 	if period_str not in allowed:
