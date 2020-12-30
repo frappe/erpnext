@@ -21,7 +21,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	website = frappe._dict(
 		condition_field = "show_in_website",
 		template = "templates/generators/item_group.html",
-		no_cache = 1
+		no_cache = 1,
+		no_breadcrumbs = 1
 	)
 
 	def autoname(self):
@@ -99,6 +100,29 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			"parents": get_parent_item_groups(self.parent_item_group),
 			"title": self.name
 		})
+
+		if self.slideshow:
+			values = {
+				'show_indicators': 1,
+				'show_controls': 0,
+				'rounded': 1,
+				'slider_name': self.slideshow
+			}
+			slideshow = frappe.get_doc("Website Slideshow", self.slideshow)
+			slides = slideshow.get({"doctype":"Website Slideshow Item"})
+			for index, slide in enumerate(slides):
+				values[f"slide_{index + 1}_image"] = slide.image
+				values[f"slide_{index + 1}_title"] = slide.heading
+				values[f"slide_{index + 1}_subtitle"] = slide.description
+				values[f"slide_{index + 1}_theme"] = slide.theme or "Light"
+				values[f"slide_{index + 1}_content_align"] = slide.content_align or "Centre"
+				values[f"slide_{index + 1}_primary_action_label"] = slide.label
+				values[f"slide_{index + 1}_primary_action"] = slide.url
+
+			context.slideshow = values
+
+		context.breadcrumbs = 0
+		context.title = self.website_title or self.name
 
 		return context
 
