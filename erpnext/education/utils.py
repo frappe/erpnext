@@ -375,6 +375,7 @@ def check_quiz_completion(quiz, enrollment_name):
 	status = False if quiz.max_attempts == 0 else bool(len(attempts) >= quiz.max_attempts)
 	score = None
 	result = None
+	time_taken = None
 	if attempts:
 		if quiz.grading_basis == 'Last Highest Score':
 			attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
