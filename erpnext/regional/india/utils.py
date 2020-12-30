@@ -211,8 +211,7 @@ def get_regional_address_details(party_details, doctype, company):
 	party_details["taxes_and_charges"] = default_tax
 	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
-	if return_taxes:
-		return party_details
+	return party_details
 
 def update_party_details(party_details, doctype):
 	for address_field in ['shipping_address', 'company_address', 'supplier_address', 'shipping_address_name', 'customer_address']:
