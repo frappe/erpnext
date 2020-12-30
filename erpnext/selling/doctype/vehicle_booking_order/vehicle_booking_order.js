@@ -34,7 +34,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.frm.set_query('customer_address', erpnext.queries.address_query);
 
 		this.frm.set_query("item_code", function() {
-			return erpnext.queries.item({"is_vehicle": 1, "include_item_in_vehicle_booking": 1});
+			return erpnext.queries.item({"is_vehicle": 1, "include_in_vehicle_booking": 1});
 		});
 
 		this.frm.set_query("payment_terms_template", function() {

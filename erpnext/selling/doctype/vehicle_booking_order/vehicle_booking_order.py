@@ -527,9 +527,9 @@ def validate_vehicle_item(item):
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
 	if not item.is_vehicle:
-		frappe.throw(_("{0} is not a Vehicle Item").format(item.item_name))
-	if not item.include_item_in_vehicle_booking:
-		frappe.throw(_("Vehicle Item {0} is not allowed for Vehicle Booking").format(item.item_name))
+		frappe.throw(_("{0} is not a Vehicle Item").format(item.item_name or item.name))
+	if not item.include_in_vehicle_booking:
+		frappe.throw(_("Vehicle Item {0} is not allowed for Vehicle Booking").format(item.item_name or item.name))
 
 
 @frappe.whitelist()

@@ -175,7 +175,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2020-12-29 12:41:51.198933",
+ "modified": "2020-12-30 01:15:02.440590",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Allocation",
@@ -242,7 +242,7 @@
   }
  ],
  "restrict_to_domain": "Vehicles",
- "search_fields": "item_code, item_name, sr_no, code, allocation_period, delivery_period",
+ "search_fields": "allocation_period, delivery_period",
  "sort_order": "DESC",
  "timeline_field": "item_code",
  "title_field": "title",

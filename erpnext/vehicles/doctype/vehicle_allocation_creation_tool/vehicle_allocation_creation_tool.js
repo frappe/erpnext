@@ -10,7 +10,7 @@ frappe.ui.form.on('Vehicle Allocation Creation Tool', {
 
 	onload: function(frm) {
 		frm.set_query("item_code", function() {
-			return erpnext.queries.item({"is_vehicle": 1, "include_item_in_vehicle_booking": 1});
+			return erpnext.queries.item({"is_vehicle": 1, "include_in_vehicle_booking": 1, "vehicle_allocation_required": 1});
 		});
 	},
 

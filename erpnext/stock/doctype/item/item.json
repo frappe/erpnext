@@ -46,7 +46,9 @@
   "vehicle_engine_capacity",
   "column_break_35",
   "column_break_37",
-  "include_item_in_vehicle_booking",
+  "include_in_vehicle_booking",
+  "vehicle_allocation_required",
+  "exempt_from_vehicle_witholding_tax",
   "commission_item_code",
   "section_break_31",
   "purchase_uom",
@@ -1198,7 +1200,7 @@
    "label": "Vehicle Details"
   },
   {
-   "depends_on": "include_item_in_vehicle_booking",
+   "depends_on": "include_in_vehicle_booking",
    "fieldname": "commission_item_code",
    "fieldtype": "Link",
    "label": "Commission Item Code",
@@ -1214,14 +1216,26 @@
   },
   {
    "default": "0",
-   "fieldname": "include_item_in_vehicle_booking",
+   "fieldname": "include_in_vehicle_booking",
    "fieldtype": "Check",
-   "label": "Include Item in Vehicle Booking"
+   "label": "Include in Vehicle Booking"
   },
   {
    "fieldname": "vehicle_engine_capacity",
    "fieldtype": "Int",
    "label": "Engine Capacity (CC)"
+  },
+  {
+   "default": "0",
+   "fieldname": "exempt_from_vehicle_witholding_tax",
+   "fieldtype": "Check",
+   "label": "Exempt From Vehicle Witholding Tax"
+  },
+  {
+   "default": "0",
+   "fieldname": "vehicle_allocation_required",
+   "fieldtype": "Check",
+   "label": "Vehicle Allocation Required"
   }
  ],
  "has_web_view": 1,
@@ -1229,7 +1243,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-12-14 16:37:20.982463",
+ "modified": "2020-12-30 17:11:41.100808",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -11,12 +11,21 @@ from six import string_types
 
 class VehicleAllocation(Document):
 	def validate(self):
+		self.validate_vehicle_item()
 		self.validate_duplicate()
 		self.validate_period()
 		self.set_title()
 
 	def set_title(self):
 		self.title = get_allocation_title(self)
+
+	def validate_vehicle_item(self):
+		from erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
+
+		item = frappe.get_cached_doc("Item", self.item_code)
+		validate_vehicle_item(item)
+		if not item.vehicle_allocation_required:
+			frappe.throw(_("{0} does not require Vehicle Allocations").format(item.item_name or item.name))
 
 	def validate_period(self):
 		allocation_from_date = frappe.get_cached_value("Vehicle Allocation Period", self.allocation_period, "from_date")
