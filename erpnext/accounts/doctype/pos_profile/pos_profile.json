@@ -25,10 +25,12 @@
   "hide_images",
   "hide_unavailable_items",
   "auto_add_item_to_cart",
-  "item_groups",
   "column_break_16",
   "allow_rate_change",
   "allow_discount_change",
+  "section_break_23",
+  "item_groups",
+  "column_break_25",
   "customer_groups",
   "section_break_16",
   "print_format",
@@ -343,13 +345,22 @@
    "fieldname": "allow_discount_change",
    "fieldtype": "Check",
    "label": "Allow User to Edit Discount"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-28 19:28:28.298563",
+ "modified": "2020-12-30 17:38:15.731328",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
