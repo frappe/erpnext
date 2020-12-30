@@ -93,7 +93,8 @@ def validate_gstin_check_digit(gstin, label='GSTIN'):
 		total += digit
 		factor = 2 if factor == 1 else 1
 	if gstin[-1] != code_point_chars[((mod - (total % mod)) % mod)]:
-		frappe.throw(_("""Invalid {0}! The check digit validation has failed. Please ensure you've typed the {0} correctly.""").format(label))
+		frappe.throw(_("""Invalid {0}! The check digit validation has failed.
+			Please ensure you've typed the {0} correctly.""").format(label))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
@@ -168,7 +169,7 @@ def get_regional_address_details(party_details, doctype, company):
 	if is_internal_transfer(party_details, doctype):
 		party_details.taxes_and_charges = ''
 		party_details.taxes = ''
-		return party_details
+		return
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
@@ -176,11 +177,11 @@ def get_regional_address_details(party_details, doctype, company):
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Customer')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges'):
+		if party_details.get('taxes_and_charges') and return_taxes:
 			return party_details
 
 		if not party_details.company_gstin:
-			return party_details
+			return
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
@@ -188,15 +189,15 @@ def get_regional_address_details(party_details, doctype, company):
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges'):
+		if party_details.get('taxes_and_charges') and return_taxes:
 			return party_details
 
 		if not party_details.supplier_gstin:
-			return party_details
+			return
 
-	if not party_details.place_of_supply: return party_details
+	if not party_details.place_of_supply: return
 
-	if not party_details.company_gstin: return party_details
+	if not party_details.company_gstin: return
 
 	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
 		and party_details.company_gstin[:2] != party_details.place_of_supply[:2]) or (doctype in ("Purchase Invoice",
@@ -206,11 +207,12 @@ def get_regional_address_details(party_details, doctype, company):
 		default_tax = get_tax_template(master_doctype, company, 0, party_details.company_gstin[:2])
 
 	if not default_tax:
-		return party_details
+		return
 	party_details["taxes_and_charges"] = default_tax
 	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
-	return party_details
+	if return_taxes:
+		return party_details
 
 def update_party_details(party_details, doctype):
 	for address_field in ['shipping_address', 'company_address', 'supplier_address', 'shipping_address_name', 'customer_address']:
@@ -249,7 +251,7 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 		if tax_category.gst_state == number_state_mapping[state_code] or \
 			(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
-				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
+				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
 
 def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
@@ -529,9 +531,6 @@ def get_address_details(data, doc, company_address, billing_address):
 		data.transType = 1
 		data.actualToStateCode = data.toStateCode
 		shipping_address = billing_address
-
-	if doc.gst_category == 'SEZ':
-		data.toStateCode = 99
 
 	if doc.gst_category == 'SEZ':
 		data.toStateCode = 99

@@ -678,3 +678,4 @@ erpnext.patches.v12_0.update_state_code_for_daman_and_diu
 erpnext.patches.v12_0.rename_lost_reason_detail
 erpnext.patches.v12_0.update_leave_application_status
 erpnext.patches.v12_0.update_payment_entry_status
+erpnext.patches.v12_0.setup_einvoice_fields #2020-12-02

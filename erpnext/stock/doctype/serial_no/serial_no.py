@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.model.naming import make_autoname
-from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate
+from frappe.utils import cint, cstr, flt, add_days, nowdate, getdate, get_link_to_form
 from erpnext.stock.get_item_details import get_reserved_qty_for_so
 
 from frappe import _, ValidationError
@@ -238,7 +238,7 @@ def validate_serial_no(sle, item_det):
 			for serial_no in serial_nos:
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.db.get_value("Serial No", serial_no, ["name", "item_code", "batch_no", "sales_order",
-						"delivery_document_no", "delivery_document_type", "warehouse",
+						"delivery_document_no", "delivery_document_type", "warehouse", "purchase_document_type",
 						"purchase_document_no", "company"], as_dict=1)
 
 					if sr.item_code!=sle.item_code:
@@ -246,9 +246,10 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("Serial No {0} does not belong to Item {1}").format(serial_no,
 								sle.item_code), SerialNoItemError)
 
-					if cint(sle.actual_qty) > 0 and has_duplicate_serial_no(sr, sle):
-						frappe.throw(_("Serial No {0} has already been received").format(serial_no),
-							SerialNoDuplicateError)
+					if cint(sle.actual_qty) > 0 and has_serial_no_exists(sr, sle):
+						doc_name = frappe.bold(get_link_to_form(sr.purchase_document_type, sr.purchase_document_no))
+						frappe.throw(_("Serial No {0} has already been received in the {1} #{2}")
+							.format(frappe.bold(serial_no), sr.purchase_document_type, doc_name), SerialNoDuplicateError)
 
 					if (sr.delivery_document_no and sle.voucher_type not in ['Stock Entry', 'Stock Reconciliation']
 						and sle.voucher_type == sr.delivery_document_type):
@@ -339,7 +340,7 @@ def validate_so_serial_no(sr, sales_order,):
 		only deliver reserved {1} against {0}. Serial No {2} cannot
 		be delivered""").format(sales_order, sr.item_code, sr.name))
 
-def has_duplicate_serial_no(sn, sle):
+def has_serial_no_exists(sn, sle):
 	if (sn.warehouse and not sle.skip_serial_no_validaiton
 		and sle.voucher_type != 'Stock Reconciliation'):
 		return True
@@ -349,12 +350,13 @@ def has_duplicate_serial_no(sn, sle):
 
 	status = False
 	if sn.purchase_document_no:
-		if sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and \
-			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]:
+		if (sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and
+			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]):
 			status = True
 
-		if status and sle.voucher_type == 'Stock Entry' and \
-			frappe.db.get_value('Stock Entry', sle.voucher_no, 'purpose') != 'Material Receipt':
+		# If status is receipt then system will allow to in-ward the delivered serial no
+		if (status and sle.voucher_type == 'Stock Entry' and frappe.db.get_value('Stock Entry',
+			sle.voucher_no, 'purpose') in ("Material Receipt", "Material Transfer")):
 			status = False
 
 	return status
@@ -408,7 +410,7 @@ def auto_make_serial_nos(args):
 		if is_new:
 			created_numbers.append(sr.name)
 
-	form_links = list(map(lambda d: frappe.utils.get_link_to_form('Serial No', d), created_numbers))
+	form_links = list(map(lambda d: get_link_to_form('Serial No', d), created_numbers))
 	if len(form_links) == 1:
 		frappe.msgprint(_("Serial No {0} created").format(form_links[0]))
 	elif len(form_links) > 0:
