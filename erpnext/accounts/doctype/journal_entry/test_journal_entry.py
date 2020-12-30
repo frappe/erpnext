@@ -6,7 +6,7 @@ import unittest, frappe
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
-from erpnext.accounts.general_ledger import StockAccountInvalidTransaction
+from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
@@ -84,24 +84,30 @@ class TestJournalEntry(unittest.TestCase):
 		company = "_Test Company with perpetual inventory"
 		stock_account = get_inventory_account(company)
 
+		from erpnext.accounts.utils import get_stock_and_account_balance
+		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(stock_account, nowdate(), company)
+		diff = flt(account_bal) - flt(stock_bal)
+
+		if not diff:
+			diff = 100
+
 		jv = frappe.new_doc("Journal Entry")
 		jv.company = company
 		jv.posting_date = nowdate()
 		jv.append("accounts", {
 			"account": stock_account,
 			"cost_center": "Main - TCP1",
-			"debit_in_account_currency": 100
+			"debit_in_account_currency": 0 if diff > 0 else abs(diff),
+			"credit_in_account_currency": diff if diff > 0 else 0
 		})
 		
 		jv.append("accounts", {
 			"account": "Stock Adjustment - TCP1",
-			"credit_in_account_currency": 100,
 			"cost_center": "Main - TCP1",
+			"debit_in_account_currency": diff if diff > 0 else 0,
+			"credit_in_account_currency": 0 if diff > 0 else abs(diff)
 		})
 		jv.insert()
-
-		from erpnext.accounts.utils import get_stock_and_account_balance
-		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(stock_account, nowdate(), company)
 
 		if account_bal == stock_bal:
 			self.assertRaises(StockAccountInvalidTransaction, jv.submit)
