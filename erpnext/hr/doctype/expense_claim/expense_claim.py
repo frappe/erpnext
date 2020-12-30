@@ -31,7 +31,8 @@ class ExpenseClaim(BuyingController):
 		self.set_expense_account(validate=True)
 		self.set_payable_account()
 		self.set_cost_center()
-		self.set_grand_total_and_outstanding_amount()
+		self.set_grand_total()
+		self.set_outstanding_amount()
 		self.set_status()
 		if self.task and not self.project:
 			self.project = frappe.db.get_value("Task", self.task, "project")
@@ -232,8 +233,10 @@ class ExpenseClaim(BuyingController):
 			val = flt(flt(self.get(f), self.precision(f)) * self.conversion_rate, self.precision("base_" + f))
 			self.set("base_" + f, val)
 
-	def set_grand_total_and_outstanding_amount(self):
+	def set_grand_total(self):
 		self.grand_total = flt(self.total) + flt(self.total_taxes_and_charges)
+
+	def set_outstanding_amount(self):
 		self.outstanding_amount = flt(self.base_grand_total) - flt(self.total_advance_amount) - flt(self.base_total_amount_reimbursed)
 
 	def update_task(self):
@@ -292,8 +295,15 @@ def update_reimbursed_amount(doc, jv=None):
 		and party = %s {condition}""".format(condition=condition), #nosec
 		(doc.name, doc.employee) ,as_dict=1)[0].amt
 
-	doc.db_set("total_amount_reimbursed", amt)
-	doc.set_amounts_in_company_currency()
+	doc.db_set("base_total_amount_reimbursed", amt)
+
+	total_amount_reimbursed = flt(flt(doc.base_total_amount_reimbursed, doc.precision("base_total_amount_reimbursed"))
+		/ doc.conversion_rate, doc.precision("total_amount_reimbursed"))
+	doc.db_set("total_amount_reimbursed", total_amount_reimbursed)
+
+	doc.set_outstanding_amount()
+	doc.db_set("outstanding_amount", doc.outstanding_amount)
+
 	doc.set_status()
 	doc.db_set("status", doc.status)
 

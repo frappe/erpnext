@@ -926,7 +926,11 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			outstanding_amount = get_outstanding_on_journal_entry(reference_name)
 	elif reference_doctype != "Journal Entry":
 		if ref_doc.doctype == "Expense Claim":
-				total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
+			if party_account_currency == company_currency:
+				total_amount = ref_doc.base_grand_total
+				exchange_rate = 1
+			else:
+				total_amount = ref_doc.grand_total
 		elif ref_doc.doctype == "Employee Advance":
 			total_amount = ref_doc.advance_amount
 			exchange_rate = ref_doc.get("exchange_rate")
@@ -947,8 +951,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			outstanding_amount = ref_doc.get("outstanding_amount")
 			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":
-			outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) + flt(ref_doc.get("total_taxes_and_charges"))\
-				- flt(ref_doc.get("total_amount_reimbursed")) - flt(ref_doc.get("total_advance_amount"))
+			outstanding_amount = flt(ref_doc.outstanding_amount)
 		elif reference_doctype == "Employee Advance":
 			outstanding_amount = (flt(ref_doc.advance_amount) - flt(ref_doc.paid_amount))
 			if party_account_currency != ref_doc.currency:
@@ -993,10 +996,10 @@ def get_amounts_based_on_reference_doctype(reference_doctype, ref_doc, party_acc
 def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_currency, company_currency):
 	total_amount, outstanding_amount, exchange_rate = None
 	if ref_doc.doctype == "Expense Claim":
-			total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
+			total_amount = flt(ref_doc.grand_total)
 	elif ref_doc.doctype == "Employee Advance":
 		total_amount, exchange_rate = get_total_amount_exchange_rate_for_employee_advance(party_account_currency, ref_doc)
-		
+
 	if not total_amount:
 		total_amount, exchange_rate = get_total_amount_exchange_rate_base_on_currency(
 			party_account_currency, company_currency, ref_doc)
@@ -1036,8 +1039,7 @@ def get_bill_no_and_update_amounts(reference_doctype, ref_doc, total_amount, exc
 		outstanding_amount = ref_doc.get("outstanding_amount")
 		bill_no = ref_doc.get("bill_no")
 	elif reference_doctype == "Expense Claim":
-		outstanding_amount = flt(ref_doc.get("total_sanctioned_amount")) + flt(ref_doc.get("total_taxes_and_charges"))\
-			- flt(ref_doc.get("total_amount_reimbursed")) - flt(ref_doc.get("total_advance_amount"))
+		outstanding_amount = ref_doc.outstanding_amount
 	elif reference_doctype == "Employee Advance":
 		outstanding_amount = (flt(ref_doc.advance_amount) - flt(ref_doc.paid_amount))
 		if party_account_currency != ref_doc.currency:
@@ -1207,9 +1209,11 @@ def set_grand_total_and_outstanding_amount(party_amount, dt, party_account_curre
 			grand_total = doc.rounded_total or doc.grand_total
 		outstanding_amount = doc.outstanding_amount
 	elif dt in ("Expense Claim"):
-		grand_total = doc.total_sanctioned_amount + doc.total_taxes_and_charges
-		outstanding_amount = doc.grand_total \
-			- doc.total_amount_reimbursed
+		if party_account_currency == doc.company_currency:
+			grand_total = doc.base_grand_total
+		else:
+			grand_total = doc.grand_total
+		outstanding_amount = doc.outstanding_amount
 	elif dt == "Employee Advance":
 		grand_total = flt(doc.advance_amount)
 		outstanding_amount = flt(doc.advance_amount) - flt(doc.paid_amount)
