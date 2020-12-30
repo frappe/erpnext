@@ -259,11 +259,16 @@ class StockEntry(StockController):
 								item_code.append(item.item_code)
 
 	def validate_fg_completed_qty(self):
+		item_wise_qty = {}
 		if self.purpose == "Manufacture" and self.work_order:
 			for d in self.items:
-				if d.is_finished_item and d.qty != self.fg_completed_qty:
-					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
-						.format(d.qty, self.fg_completed_qty))
+				if d.is_finished_item:
+					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
+
+		for item_code, qty_list in iteritems(item_wise_qty):
+			if self.fg_completed_qty != sum(qty_list):
+				frappe.throw(_("The finished product {0} quantity {1} and For Quantity {2} cannot be different")
+					.format(frappe.bold(item_code), frappe.bold(sum(qty_list)), frappe.bold(self.fg_completed_qty)))
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
@@ -319,7 +324,7 @@ class StockEntry(StockController):
 
 			if self.purpose == "Manufacture":
 				if validate_for_manufacture:
-					if d.bom_no:
+					if d.is_finished_item or d.is_scrap_item:
 						d.s_warehouse = None
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
@@ -442,6 +447,7 @@ class StockEntry(StockController):
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate)
+		finished_item_qty = sum([d.transfer_qty for d in self.items if d.is_finished_item])
 
 		# Set basic rate for incoming items
 		for d in self.get('items'):
@@ -451,7 +457,7 @@ class StockEntry(StockController):
 				d.basic_rate = 0.0
 			elif d.is_finished_item:
 				if self.purpose == "Manufacture":
-					d.basic_rate = self.get_basic_rate_for_manufactured_item(d.transfer_qty, outgoing_items_cost)
+					d.basic_rate = self.get_basic_rate_for_manufactured_item(finished_item_qty, outgoing_items_cost)
 				elif self.purpose == "Repack":
 					d.basic_rate = self.get_basic_rate_for_repacked_items(d.transfer_qty, outgoing_items_cost)
 
@@ -666,7 +672,7 @@ class StockEntry(StockController):
 		production_item, wo_qty = frappe.db.get_value("Work Order",
 			self.work_order, ["production_item", "qty"])
 
-		number_of_finished_items = 0
+		finished_items = []
 		for d in self.get('items'):
 			if d.is_finished_item:
 				if d.item_code != production_item:
@@ -675,9 +681,9 @@ class StockEntry(StockController):
 				elif flt(d.transfer_qty) > flt(self.fg_completed_qty):
 					frappe.throw(_("Quantity in row {0} ({1}) must be same as manufactured quantity {2}"). \
 						format(d.idx, d.transfer_qty, self.fg_completed_qty))
-				number_of_finished_items += 1
+				finished_items.append(d.item_code)
 
-		if number_of_finished_items > 1:
+		if len(set(finished_items)) > 1:
 			frappe.throw(_("Multiple items cannot be marked as finished item"))
 
 		if self.purpose == "Manufacture":
@@ -698,7 +704,7 @@ class StockEntry(StockController):
 
 		# SLE for target warehouse
 		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-		
+
 		# reverse sl entries if cancel
 		if self.docstatus == 2:
 			sl_entries.reverse()
@@ -726,9 +732,9 @@ class StockEntry(StockController):
 					sle.dependant_sle_voucher_detail_no = d.name
 				elif finished_item_row and (finished_item_row.item_code != d.item_code or finished_item_row.t_warehouse != d.s_warehouse):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
-					
+
 				sl_entries.append(sle)
-	
+
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get('items'):
 			if cstr(d.t_warehouse):
