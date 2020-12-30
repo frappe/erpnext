@@ -62,7 +62,7 @@
 			{{_('Back to Course')}}
 		</a>
 	</div>
-	<div>
+	<div class="lms-title">
 		<h2>{{ content.name }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h2>
 	</div>
 {% endmacro %}
@@ -169,14 +169,51 @@
 			const next_url = '/lms/course?name={{ course }}&program={{ program }}'
 			{% endif %}
 			frappe.ready(() => {
-				const quiz = new Quiz(document.getElementById('quiz-wrapper'), {
-					name: '{{ content.name }}',
-					course: '{{ course }}',
-					program: '{{ program }}',
-					quiz_exit_button: quiz_exit_button,
-					next_url: next_url
-				})
-				window.quiz = quiz;
+				{% if content.is_time_bound %}
+					var duration = get_duration("{{content.duration}}")
+					var d = frappe.msgprint({
+						title: __('Important Notice'),
+						indicator: "red",
+						message: __(`This is a Time-Bound Quiz. <br><br>
+						A timer for <b>${duration}</b> will start, once you click on <b>Proceed</b>. <br><br>
+						If you fail to submit before the time is up, the Quiz will be submitted automatically.`),
+						primary_action: {
+							label: __("Proceed"),
+							action: () => {
+								create_quiz();
+								d.hide();
+        					}
+						},
+						secondary_action: {
+							action: () => {
+								d.hide();
+								window.location.href = "/lms/course?name={{ course }}&program={{ program }}";
+							},
+							label: __("Go Back"),
+						}
+					});
+				{% else %}
+					create_quiz();
+				{% endif %}
+				function create_quiz() {
+					const quiz = new Quiz(document.getElementById('quiz-wrapper'), {
+						name: '{{ content.name }}',
+						course: '{{ course }}',
+						program: '{{ program }}',
+						quiz_exit_button: quiz_exit_button,
+						next_url: next_url
+					})
+					window.quiz = quiz;
+				}
+				function get_duration(seconds){
+					var hours = append_zero(Math.floor(seconds / 3600));
+					var minutes = append_zero(Math.floor(seconds % 3600 / 60));
+					var seconds = append_zero(Math.floor(seconds % 3600 % 60));
+					return `${hours}:${minutes}:${seconds}`;
+				}
+				function append_zero(time) {
+					return time > 9 ? time : "0" + time;
+				}
 			})
 		{% endif  %}
 

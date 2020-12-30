@@ -194,7 +194,7 @@ def add_activity(course, content_type, content, program):
 		return enrollment.add_activity(content_type, content)
 
 @frappe.whitelist()
-def evaluate_quiz(quiz_response, quiz_name, course, program):
+def evaluate_quiz(quiz_response, quiz_name, course, program, time_taken):
 	import json
 
 	student = get_current_student()
@@ -209,7 +209,8 @@ def evaluate_quiz(quiz_response, quiz_name, course, program):
 	if student:
 		enrollment = get_or_create_course_enrollment(course, program)
 		if quiz.allowed_attempt(enrollment, quiz_name):
-			enrollment.add_quiz_activity(quiz_name, quiz_response, result, score, status)
+			print("in")
+			enrollment.add_quiz_activity(quiz_name, quiz_response, result, score, status, time_taken)
 			return {'result': result, 'score': score, 'status': status}
 		else:
 			return None
@@ -241,8 +242,12 @@ def get_quiz(quiz_name, course):
 
 	student = get_current_student()
 	course_enrollment = get_enrollment("course", course, student.name)
-	status, score, result = check_quiz_completion(quiz, course_enrollment)
-	return {'questions': questions, 'activity': {'is_complete': status, 'score': score, 'result': result}}
+	status, score, result, time_taken = check_quiz_completion(quiz, course_enrollment)
+	return {
+		'questions': questions, 
+		'activity': {'is_complete': status, 'score': score, 'result': result, 'time_taken': time_taken},
+		'duration': quiz.duration
+		}
 
 def get_topic_progress(topic, course_name, program):
 	"""
@@ -366,7 +371,7 @@ def check_content_completion(content_name, content_type, enrollment_name):
 		return False
 
 def check_quiz_completion(quiz, enrollment_name):
-	attempts = frappe.get_all("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status"])
+	attempts = frappe.get_all("Quiz Activity", filters={'enrollment': enrollment_name, 'quiz': quiz.name}, fields=["name", "activity_date", "score", "status", "time_taken"])
 	status = False if quiz.max_attempts == 0 else bool(len(attempts) >= quiz.max_attempts)
 	score = None
 	result = None
@@ -375,6 +380,7 @@ def check_quiz_completion(quiz, enrollment_name):
 			attempts = sorted(attempts, key = lambda i: int(i.score), reverse=True)
 		score = attempts[0]['score']
 		result = attempts[0]['status']
+		time_taken = attempts[0]['time_taken']
 		if result == 'Pass':
 			status = True
-	return status, score, result
+	return status, score, result, time_taken

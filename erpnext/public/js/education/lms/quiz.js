@@ -20,6 +20,20 @@ class Quiz {
 	}
 
 	make(data) {
+		if (data.duration) {
+			const timer_display = document.createElement("div");
+			timer_display.classList.add("lms-timer", "float-right", "font-weight-bold")
+			document.getElementsByClassName("lms-title")[0].appendChild(timer_display);
+			if (!data.activity?.is_complete) {
+				this.set_timer(data.duration);
+				this.is_time_bound = true;
+				this.time_taken = 0;
+			}
+			else if (data.activity?.is_complete && data.activity?.time_taken) {
+				this.calculate_and_display_time(data.activity.time_taken, this, "Time Taken - ");
+
+			}
+		}
 		data.questions.forEach(question_data => {
 			let question_wrapper = document.createElement('div');
 			let question = new Question({
@@ -43,6 +57,38 @@ class Quiz {
 		else {
 			this.make_actions();
 		}
+		window.addEventListener('beforeunload', (event) => {
+			event.preventDefault();
+			event.returnValue = '';
+		});
+	}
+
+	set_timer(duration) {
+		this.time_left = duration;
+		var self = this;
+		this.calculate_and_display_time(this.time_left, self, "Time Left - ");
+		this.timer = setInterval(function () {
+			self.time_left -= 1;
+			self.time_taken += 1;
+			self.calculate_and_display_time(self.time_left, self, "Time Left - ");
+			if (!self.time_left) {
+				clearInterval(self.timer);
+				self.submit();
+			}
+		}, 1000);
+	}
+
+	calculate_and_display_time(seconds, self, text) {
+		var timer_display = document.getElementsByClassName("lms-timer")[0]
+		var hours = self.append_zero(Math.floor(seconds / 3600));
+		var minutes = self.append_zero(Math.floor(seconds % 3600 / 60));
+		var seconds = self.append_zero(Math.floor(seconds % 3600 % 60));
+		timer_display.innerText = "";
+		timer_display.innerText = text + hours + ":" + minutes + ":" + seconds;
+	}
+
+	append_zero(time) {
+		return time > 9 ? time : "0" + time;
 	}
 
 	make_actions() {
@@ -57,6 +103,10 @@ class Quiz {
 	}
 
 	submit() {
+		if (this.is_time_bound) {
+			clearInterval(this.timer);
+			this.calculate_and_display_time(this.time_taken, this, "Time Taken - ");
+		}
 		this.submit_btn.innerText = 'Evaluating..'
 		this.submit_btn.disabled = true
 		this.disable()
@@ -64,7 +114,8 @@ class Quiz {
 			quiz_name: this.name,
 			quiz_response: this.get_selected(),
 			course: this.course,
-			program: this.program
+			program: this.program,
+			time_taken: this.is_time_bound ? this.time_taken : ""
 		}).then(res => {
 			this.submit_btn.remove()
 			if (!res.message) {
@@ -157,7 +208,7 @@ class Question {
 			return input;
 		}
 
-		let make_label = function(name, value) {
+		let make_label = function (name, value) {
 			let label = document.createElement('label');
 			label.classList.add('form-check-label');
 			label.htmlFor = name;
@@ -173,7 +224,7 @@ class Question {
 			option_div.appendChild(input)
 			option_div.appendChild(label)
 			wrapper.appendChild(option_div)
-			return {input: input, ...option}
+			return { input: input, ...option }
 		}
 
 		let options_wrapper = document.createElement('div')
