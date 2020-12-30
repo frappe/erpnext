@@ -203,7 +203,7 @@ erpnext.PointOfSale.ItemCart = class {
 			me.events.checkout();
 			me.toggle_checkout_btn(false);
 
-			me.$add_discount_elem.removeClass("d-none");
+			me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
 		});
 
 		this.$totals_section.on('click', '.edit-cart-btn', () => {
