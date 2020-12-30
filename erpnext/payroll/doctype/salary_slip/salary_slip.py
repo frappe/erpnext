@@ -1163,7 +1163,7 @@ class SalarySlip(TransactionBase):
 				'end_date' : ['<', self.start_date]
 			})
 
-		year_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
+		month_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
 
 		month_to_date += self.net_pay
 		self.month_to_date = month_to_date
