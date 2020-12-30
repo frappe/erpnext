@@ -118,9 +118,8 @@ class ExpenseClaim(BuyingController):
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": self.payable_account,
-					"credit": self.base_grand_total,
-					"credit_in_account_currency": (self.base_grand_total
-						if payable_account_currency == self.company_currency else self.grand_total),
+					"credit": self.outstanding_amount,
+					"credit_in_account_currency": self.outstanding_amount,
 					"against": ",".join([d.default_account for d in self.items]),
 					"party_type": "Employee",
 					"party": self.employee,
@@ -167,9 +166,8 @@ class ExpenseClaim(BuyingController):
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": payment_account,
-					"credit": self.base_grand_total,
-					"credit_in_account_currency": (self.base_grand_total
-						if account_currency == self.company_currency else self.grand_total),
+					"credit": self.outstanding_amount,
+					"credit_in_account_currency": self.outstanding_amount,
 					"against": self.employee
 				}, item=self)
 			)
@@ -180,9 +178,8 @@ class ExpenseClaim(BuyingController):
 					"party_type": "Employee",
 					"party": self.employee,
 					"against": payment_account,
-					"debit": self.base_grand_total,
-					"debit_in_account_currency": (self.base_grand_total
-						if payable_account_currency == self.company_currency else self.grand_total),
+					"debit": self.outstanding_amount,
+					"debit_in_account_currency": self.outstanding_amount,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 				}, item=self)
@@ -248,11 +245,16 @@ class ExpenseClaim(BuyingController):
 		self.total_advance_amount = 0
 		for d in self.get("advances"):
 			ref_doc = frappe.db.get_value("Employee Advance", d.employee_advance,
-				["posting_date", "paid_amount", "claimed_amount", "advance_account"], as_dict=1)
+				["posting_date", "paid_amount", "claimed_amount", "advance_account",
+				"currency", "exchange_rate"], as_dict=1)
+
+			paid_amount = flt(ref_doc.paid_amount) * flt(ref_doc.exchange_rate)
+			claimed_amount = flt(ref_doc.claimed_amount) * flt(ref_doc.exchange_rate)
+
 			d.posting_date = ref_doc.posting_date
 			d.advance_account = ref_doc.advance_account
-			d.advance_paid = ref_doc.paid_amount
-			d.unclaimed_amount = flt(ref_doc.paid_amount) - flt(ref_doc.claimed_amount)
+			d.advance_paid = paid_amount
+			d.unclaimed_amount = paid_amount - claimed_amount
 
 			if d.allocated_amount and flt(d.allocated_amount) > flt(d.unclaimed_amount):
 				frappe.throw(_("Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2}")
@@ -262,11 +264,11 @@ class ExpenseClaim(BuyingController):
 
 		if self.total_advance_amount:
 			precision = self.precision("total_advance_amount")
-			if flt(self.total_advance_amount, precision) > flt(self.total_claimed_amount, precision):
+			if flt(self.total_advance_amount, precision) > flt(self.base_total_claimed_amount, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total claimed amount"))
 
 			if self.total \
-					and flt(self.total_advance_amount, precision) > flt(self.total, precision):
+					and flt(self.total_advance_amount, precision) > flt(self.base_total, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
 	def validate_sanctioned_amount(self):
@@ -366,7 +368,7 @@ def get_advances(employee, advance_id=None):
 
 	return frappe.db.sql("""
 		select
-			name, posting_date, paid_amount, claimed_amount, advance_account
+			name, currency, exchange_rate, posting_date, paid_amount, claimed_amount, advance_account
 		from
 			`tabEmployee Advance`
 		where {0}

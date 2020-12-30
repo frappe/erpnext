@@ -101,7 +101,7 @@
    "label": "Claimed Amount",
    "oldfieldname": "claim_amount",
    "oldfieldtype": "Currency",
-   "options": "Company:company:default_currency",
+   "options": "currency",
    "print_width": "150px",
    "reqd": 1,
    "width": "150px"
@@ -173,7 +173,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-29 11:03:12.063898",
+ "modified": "2020-12-30 11:36:19.687735",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Item",
