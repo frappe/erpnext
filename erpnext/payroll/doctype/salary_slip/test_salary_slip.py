@@ -9,7 +9,7 @@ import calendar
 import random
 from erpnext.accounts.utils import get_fiscal_year
 from frappe.utils.make_random import get_random
-from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_day, get_last_day
+from frappe.utils import getdate, nowdate, add_days, add_months, flt, get_first_day, get_last_day, cstr
 from erpnext.payroll.doctype.salary_structure.salary_structure import make_salary_slip
 from erpnext.payroll.doctype.payroll_entry.payroll_entry import get_month_details
 from erpnext.hr.doctype.employee.test_employee import make_employee
@@ -240,8 +240,7 @@ class TestSalarySlip(unittest.TestCase):
 			interest_income_account='Interest Income Account - _TC',
 			penalty_income_account='Penalty Income Account - _TC')
 
-		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company",
-			start_date=getdate("2019-04-01"), end_date=getdate("2020-03-31"))
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
 
 		make_salary_structure("Test Loan Repayment Salary Structure", "Monthly", employee=applicant, currency='INR',
 			payroll_period=payroll_period)
@@ -300,8 +299,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		applicant = make_employee("test_ytd@salary.com", company="_Test Company")
 
-		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company",
-			start_date=getdate("2019-04-01"), end_date=getdate("2020-03-31"))
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
 
 		create_tax_slab(payroll_period, allow_tax_exemption=True, currency="INR", effective_date=getdate("2019-04-01"),
 			company="_Test Company")
@@ -666,6 +664,9 @@ def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption =
 	if not currency:
 		currency = erpnext.get_default_currency()
 
+	if company:
+		currency = erpnext.get_company_currency(company)
+
 	slabs = [
 		{
 			"from_amount": 250000,
@@ -684,15 +685,12 @@ def create_tax_slab(payroll_period, effective_date = None, allow_tax_exemption =
 		}
 	]
 
-	income_tax_slab_name = frappe.db.get_value("Income Tax Slab", "Tax Slab: " + payroll_period.name)
+	income_tax_slab_name = frappe.db.get_value("Income Tax Slab", {"currency": currency})
 	if not income_tax_slab_name:
 		income_tax_slab = frappe.new_doc("Income Tax Slab")
-		income_tax_slab.name = "Tax Slab: " + payroll_period.name
+		income_tax_slab.name = "Tax Slab: " + payroll_period.name + " " + cstr(currency)
 		income_tax_slab.effective_from = effective_date or add_days(payroll_period.start_date, -2)
-
-		if company:
-			income_tax_slab.company = company
-
+		income_tax_slab.company = company or ''
 		income_tax_slab.currency = currency
 
 		if allow_tax_exemption:
