@@ -196,9 +196,9 @@ def update_item_taxes(invoice, item):
 					item.cess_amount += abs(item_tax_amount_after_discount)
 
 			for tax_type in ['igst', 'cgst', 'sgst']:
-				if t.account_head in gst_accounts[f'{tax_type}_account']:
+				if t.account_head in gst_accounts['{}_account'.format(tax_type)]:
 					item.tax_rate += item_tax_rate
-					item[f'{tax_type}_amount'] += abs(item_tax_amount)
+					item['{}_amount'.format(tax_type)] += abs(item_tax_amount)
 
 	return item
 
@@ -230,8 +230,8 @@ def update_invoice_taxes(invoice, invoice_value_details):
 				invoice_value_details.total_cess_amt += abs(t.base_tax_amount_after_discount_amount)
 			
 			for tax_type in ['igst', 'cgst', 'sgst']:
-				if t.account_head in gst_accounts[f'{tax_type}_account']:
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount)
+				if t.account_head in gst_accounts['{}_account'.format(tax_type)]:
+					invoice_value_details['total_{}_amt'.format(tax_type)] += abs(t.base_tax_amount)
 		else:
 			invoice_value_details.total_other_charges += abs(t.base_tax_amount)
 	
