@@ -180,15 +180,15 @@ class WorkOrder(Document):
 			status = 'Draft'
 		elif self.docstatus==1:
 			if status != 'Stopped':
-				stock_entries = frappe._dict(frappe.db.sql("""select purpose, sum(fg_completed_qty)
+				stock_entries = frappe._dict(frappe.db.sql("""select purpose, sum(fg_completed_qty + scrap_qty)
 					from `tabStock Entry` where work_order=%s and docstatus=1
 					group by purpose""", self.name))
 
 				status = "Not Started"
 				if stock_entries:
 					status = "In Process"
-					produced_qty = stock_entries.get("Manufacture")
-					if flt(produced_qty) >= flt(self.qty):
+					completed_qty = stock_entries.get("Manufacture")
+					if flt(completed_qty) >= flt(self.qty):
 						status = "Completed"
 		else:
 			status = 'Cancelled'
@@ -219,6 +219,12 @@ class WorkOrder(Document):
 
 			self.db_set(fieldname, qty)
 
+			if fieldname == "produced_qty" and purpose == "Manufacture":
+				scrap_qty = flt(frappe.db.sql("""select sum(scrap_qty)
+					from `tabStock Entry` where work_order=%s and docstatus=1
+					and purpose=%s""", (self.name, purpose))[0][0])
+				self.db_set('scrap_qty', scrap_qty)
+
 			from erpnext.selling.doctype.sales_order.sales_order import update_produced_qty_in_so_item
 
 			if self.sales_order and self.sales_order_item:
@@ -240,7 +246,7 @@ class WorkOrder(Document):
 		production_plan.run_method("update_produced_qty", produced_qty, self.production_plan_item)
 
 	def on_submit(self):
-		if not self.wip_warehouse:
+		if not self.wip_warehouse and not self.skip_transfer:
 			frappe.throw(_("Work-in-Progress Warehouse is required before Submit"))
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
@@ -656,7 +662,7 @@ def set_work_order_ops(name):
 	po.save()
 
 @frappe.whitelist()
-def make_stock_entry(work_order_id, purpose, qty=None):
+def make_stock_entry(work_order_id, purpose, qty=None, scrap_remaining=False):
 	work_order = frappe.get_doc("Work Order", work_order_id)
 	if not frappe.db.get_value("Warehouse", work_order.wip_warehouse, "is_group") \
 			and not work_order.skip_transfer:
@@ -672,6 +678,7 @@ def make_stock_entry(work_order_id, purpose, qty=None):
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(work_order.qty) - flt(work_order.produced_qty))
+	stock_entry.scrap_qty = max(0, flt(work_order.qty) - flt(work_order.produced_qty) - flt(qty)) if scrap_remaining and qty else 0
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value('BOM',
 			work_order.bom_no, 'inspection_required')
