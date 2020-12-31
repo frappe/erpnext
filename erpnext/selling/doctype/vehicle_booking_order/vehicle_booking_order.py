@@ -712,7 +712,7 @@ def set_next_document_values(source, target, buying_or_selling):
 	if target.meta.has_field('debit_to'):
 		target.debit_to = source.receivable_account
 	if target.meta.has_field('credit_to'):
-		target.debit_to = source.payable_account
+		target.credit_to = source.payable_account
 
 	vehicle_item = target.append('items')
 	vehicle_item.item_code = source.item_code
