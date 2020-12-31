@@ -10,7 +10,7 @@ frappe.ui.form.on('Batch', {
 					'is_stock_item': 1,
 					'has_batch_no': 1
 				}
-			}
+			};
 		};
 
 		frm.set_query('selling_price', function() {
