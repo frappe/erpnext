@@ -105,7 +105,7 @@ class SalesPurchaseDetailsReport(object):
 				i.item_code, i.item_name,
 				i.{qty_field} as qty,
 				i.uom, i.stock_uom, i.alt_uom,
-				i.brand, i.item_group,
+				i.brand, im.item_group,
 				{amount_fields} {party_group_field} {territory_field} {sales_person_field} {contribution_field}
 				{cost_center_field} {project_field}
 				{stin_field}
@@ -469,7 +469,7 @@ class SalesPurchaseDetailsReport(object):
 			]
 
 			group_list = [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]
-			if "Group by Transaction" not in group_list and "Group by Item" not in group_list:
+			if "Group by Transaction" not in group_list:
 				columns.append({
 					"label": _(self.filters.doctype),
 					"fieldtype": "Link",
