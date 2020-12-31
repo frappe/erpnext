@@ -88,7 +88,7 @@ def get_party_details(address_name):
 	gstin = address.get('gstin')
 
 	gstin_details = get_gstin_details(gstin)
-	legal_name = gstin_details.get('LegalName')
+	legal_name = gstin_details.get('LegalName') or gstin_details.get('TradeName')
 	location = gstin_details.get('AddrLoc') or address.get('city')
 	state_code = gstin_details.get('StateCode')
 	pincode = gstin_details.get('AddrPncd')
