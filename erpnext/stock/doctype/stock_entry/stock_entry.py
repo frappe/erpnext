@@ -512,7 +512,7 @@ class StockEntry(StockController):
 			bom_items = self.get_bom_raw_materials(finished_item_qty)
 			outgoing_items_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
-		return flt(outgoing_items_cost - scrap_items_cost)
+		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
 
 	def distribute_additional_costs(self):
 		# If no incoming items, set additional costs blank
@@ -699,7 +699,7 @@ class StockEntry(StockController):
 
 		# SLE for target warehouse
 		self.get_sle_for_target_warehouse(sl_entries, finished_item_row)
-		
+
 		# reverse sl entries if cancel
 		if self.docstatus == 2:
 			sl_entries.reverse()
@@ -727,9 +727,9 @@ class StockEntry(StockController):
 					sle.dependant_sle_voucher_detail_no = d.name
 				elif finished_item_row and (finished_item_row.item_code != d.item_code or finished_item_row.t_warehouse != d.s_warehouse):
 					sle.dependant_sle_voucher_detail_no = finished_item_row.name
-					
+
 				sl_entries.append(sle)
-	
+
 	def get_sle_for_target_warehouse(self, sl_entries, finished_item_row):
 		for d in self.get('items'):
 			if cstr(d.t_warehouse):
