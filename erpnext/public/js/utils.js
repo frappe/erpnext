@@ -202,7 +202,7 @@ $.extend(erpnext.utils, {
 					let found = filters.some(el => el.fieldname === dimension['fieldname']);
 
 					if (!found) {
-						filters.splice(index, 0 ,{
+						filters.splice(index, 0, {
 							"fieldname": dimension["fieldname"],
 							"label": __(dimension["label"]),
 							"fieldtype": "Link",

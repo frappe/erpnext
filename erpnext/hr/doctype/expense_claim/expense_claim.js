@@ -16,7 +16,7 @@ frappe.ui.form.on('Expense Claim', {
 frappe.ui.form.on('Expense Claim Detail', {
 	expense_type: function(frm, cdt, cdn) {
 		var d = locals[cdt][cdn];
-		if(!frm.doc.company) {
+		if (!frm.doc.company) {
 			d.expense_type = "";
 			frappe.msgprint(__("Please set the Company"));
 			this.frm.refresh_fields();

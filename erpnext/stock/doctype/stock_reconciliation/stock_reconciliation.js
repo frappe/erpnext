@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.stock");
-frappe.provide("erpnext.accounts.dimensions")
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
 	onload: function(frm) {
