@@ -223,7 +223,9 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
 				} else {
 					row = this.frm.doc.items.find(i => i.batch_no === batch_no);
-					frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
+					if (row) {
+						frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
+					}
 				}
 
 				if (!row) {
@@ -272,7 +274,9 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
 					} else {
 						row = this.frm.doc.items.find(i => i.batch_no === batch_no);
-						frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
+						if (row) {
+							frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
+						}
 					}
 					const values = {
 						'qty': serial_no.length,
