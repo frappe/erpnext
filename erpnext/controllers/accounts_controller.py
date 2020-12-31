@@ -942,6 +942,12 @@ class AccountsController(TransactionBase):
 			if item.get('serial_no'):
 				group_item_serial_nos += filter(lambda s: s, item.serial_no.split('\n'))
 
+			group_item_tax_detail = group_item.setdefault('item_tax_detail', {})
+			item_tax_detail = json.loads(item.item_tax_detail or '{}')
+			for tax_row_name, tax_amount in item_tax_detail.items():
+				group_item_tax_detail.setdefault(tax_row_name, 0)
+				group_item_tax_detail[tax_row_name] += flt(tax_amount)
+
 		# Calculate average rates and get serial nos string
 		for group_item in group_item_data.values():
 			if group_item.qty:
@@ -952,6 +958,7 @@ class AccountsController(TransactionBase):
 					group_item[target] = 0
 
 			group_item.serial_no = '\n'.join(group_item.serial_no)
+			group_item.item_tax_detail = json.dumps(group_item.item_tax_detail)
 
 		# Calculate company currenct values
 		for group_item in group_item_data.values():
