@@ -108,6 +108,16 @@ $.extend(erpnext.queries, {
 		return { query: "erpnext.controllers.queries.employee_query" }
 	},
 
+	vehicle_allocation_period: function (searchfield, filters) {
+		if (!filters || !filters.item_code) {
+			frappe.throw(__("Please set Vehicle Item first"))
+		}
+
+		var args = { query: "erpnext.controllers.queries.vehicle_allocation_period_query", searchfield: searchfield };
+		if(filters) args["filters"] = filters;
+		return args;
+	},
+
 	warehouse: function(doc, get_warehouse_filters) {
 		let filters = [
 			["Warehouse", "company", "in", ["", cstr(doc.company)]],

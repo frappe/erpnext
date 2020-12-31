@@ -15,6 +15,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
+from erpnext.selling.doctype.vehicle_allocation.vehicle_allocation import get_allocation_title
 from erpnext.accounts.doctype.transaction_type.transaction_type import get_transaction_type_defaults
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
@@ -39,6 +40,7 @@ class VehicleBookingOrder(AccountsController):
 		self.validate_vehicle_item()
 		self.validate_vehicle()
 		self.validate_party_accounts()
+		self.validate_allocation()
 
 		self.set_title()
 		self.clean_remarks()
@@ -58,6 +60,8 @@ class VehicleBookingOrder(AccountsController):
 	def before_submit(self):
 		if not self.vehicle:
 			frappe.throw(_("Please create or set a Vehicle document before submitting"))
+
+		self.validate_allocation_required()
 
 	def on_submit(self):
 		self.set_status()
@@ -89,13 +93,57 @@ class VehicleBookingOrder(AccountsController):
 		if self.vehicle:
 			vehicle_item_code = frappe.db.get_value("Vehicle", self.vehicle, "item_code")
 			if vehicle_item_code != self.item_code:
-				frappe.throw(_("Vehicle {0} is not {1}").format(self.vehicle, self.item_name or self.item_code))
+				frappe.throw(_("Vehicle {0} is not {1}").format(self.vehicle, frappe.bold(self.item_name or self.item_code)))
 
-			existing_booking = frappe.get_all("Vehicle Booking Order", filters={"docstatus": 1, "vehicle": self.vehicle})
+			existing_filters = {"docstatus": 1, "vehicle": self.vehicle}
+			if not self.is_new():
+				existing_filters['name'] = ['!=', self.name]
+
+			existing_booking = frappe.get_all("Vehicle Booking Order", filters=existing_filters, limit=1)
 			existing_booking = existing_booking[0].name if existing_booking else None
 			if existing_booking:
 				frappe.throw(_("Cannot select Vehicle {0} because it is already ordered in {1}")
 					.format(self.vehicle, existing_booking))
+
+	def validate_allocation(self):
+		if self.vehicle_allocation:
+			allocation_doc = frappe.get_doc("Vehicle Allocation", self.vehicle_allocation)
+
+			self.allocation_title = get_allocation_title(allocation_doc)
+
+			if allocation_doc.docstatus != 1:
+				frappe.throw(_("Vehicle Allocation {0} ({1}) is not submitted")
+					.format(self.allocation_title, self.vehicle_allocation))
+
+			if allocation_doc.item_code != self.item_code:
+				frappe.throw(_("Vehicle Allocation {0} ({1}) Vehicle Item {2} does not match Vehicle Booking Order Vehicle Item {3}")
+					.format(self.allocation_title, self.vehicle_allocation,
+						frappe.bold(allocation_doc.item_name or allocation_doc.item_code),
+						frappe.bold(self.item_name or self.item_code)))
+
+			if allocation_doc.supplier != self.supplier:
+				frappe.throw(_("Vehicle Allocation {0} ({1}) Supplier {2} does not match Vehicle Booking Order Supplier {3}")
+					.format(self.allocation_title, self.vehicle_allocation,
+						frappe.bold(allocation_doc.supplier_name or allocation_doc.supplier),
+						frappe.bold(self.supplier_name or self.supplier)))
+
+			existing_filters = {"docstatus": 1, "vehicle_allocation": self.vehicle_allocation}
+			if not self.is_new():
+				existing_filters['name'] = ['!=', self.name]
+
+			existing_booking = frappe.get_all("Vehicle Booking Order", filters=existing_filters, limit=1)
+			existing_booking = existing_booking[0].name if existing_booking else None
+			if existing_booking:
+				frappe.throw(_("Cannot select Vehicle Allocation {0} ({1}) because it is already ordered in {2}")
+					.format(self.allocation_title, self.vehicle_allocation, existing_booking))
+
+		else:
+			self.allocation_title = ""
+
+	def validate_allocation_required(self):
+		required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
+		if required and not self.vehicle_allocation:
+			frappe.throw(_("Vehicle Allocation is required for {0}").format(self.item_name or self.item_code))
 
 	def set_missing_values(self, for_validate=False):
 		customer_details = get_customer_details(self.as_dict(), get_withholding_tax=False)

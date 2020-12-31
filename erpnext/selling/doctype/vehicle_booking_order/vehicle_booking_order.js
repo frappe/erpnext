@@ -51,6 +51,33 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.frm.set_query("buying_transaction_type", function() {
 			return {filters: {"buying": 1}};
 		});
+
+		this.frm.set_query("allocation_period", function () {
+			return erpnext.queries.vehicle_allocation_period('allocation_period', {
+				item_code: me.frm.doc.item_code,
+				supplier: me.frm.doc.supplier,
+				delivery_period: me.frm.doc.delivery_period
+			});
+		});
+		this.frm.set_query("delivery_period", function () {
+			return erpnext.queries.vehicle_allocation_period('delivery_period', {
+				item_code: me.frm.doc.item_code,
+				supplier: me.frm.doc.supplier,
+				allocation_period: me.frm.doc.allocation_period
+			});
+		});
+
+		this.frm.set_query("vehicle_allocation", function() {
+			return {
+				filters: {
+					item_code: me.frm.doc.item_code,
+					supplier: me.frm.doc.supplier,
+					allocation_period: me.frm.doc.allocation_period,
+					delivery_period: me.frm.doc.delivery_period
+				}
+			};
+		});
+	},
 	},
 
 	add_create_buttons: function () {
@@ -224,6 +251,25 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 	delivery_date: function () {
 		this.frm.trigger('payment_terms_template');
+	},
+
+	vehicle_allocation: function () {
+		var me = this;
+		if (this.frm.doc.vehicle_allocation) {
+			frappe.call({
+				method: "erpnext.selling.doctype.vehicle_allocation.vehicle_allocation.get_allocation_title",
+				args: {
+					vehicle_allocation: this.frm.doc.vehicle_allocation,
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.set_value("allocation_title", r.message);
+					}
+				}
+			});
+		} else {
+			me.frm.set_value("allocation_title", "");
+		}
 	},
 
 	payment_terms_template: function() {

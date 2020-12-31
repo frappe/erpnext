@@ -672,6 +672,40 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		return [(d,) for d in set(taxes)]
 
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def vehicle_allocation_period_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+
+	query = """select
+			`tabVehicle Allocation Period`.name,
+			CONCAT('Available Allocations: ', '<b>', count(`tabVehicle Allocation Period`.name), '</b>')
+		from `tabVehicle Allocation Period`
+		inner join `tabVehicle Allocation`
+			on `tabVehicle Allocation`.`{searchfield}` = `tabVehicle Allocation Period`.name
+		left join `tabVehicle Booking Order`
+			on `tabVehicle Booking Order`.vehicle_allocation = `tabVehicle Allocation`.name and `tabVehicle Booking Order`.docstatus = 1
+		where
+			`tabVehicle Allocation Period`.name like {txt}
+			and `tabVehicle Allocation`.docstatus = 1
+			and `tabVehicle Booking Order`.name is null
+			{fcond} {mcond}
+		group by `tabVehicle Allocation Period`.name
+		order by `tabVehicle Allocation Period`.from_date asc
+		limit {start}, {page_len}
+		""".format(
+			searchfield=searchfield,
+			fcond=get_filters_cond("Vehicle Allocation", filters, conditions).replace('%', '%%'),
+			mcond=get_match_cond(doctype),
+			start=start,
+			page_len=page_len,
+			txt=frappe.db.escape('%{0}%'.format(txt))
+		)
+
+	res = frappe.db.sql(query)
+	return res
+
+
 def get_fields(doctype, fields=[]):
 	meta = frappe.get_meta(doctype)
 	fields.extend(meta.get_search_fields())
