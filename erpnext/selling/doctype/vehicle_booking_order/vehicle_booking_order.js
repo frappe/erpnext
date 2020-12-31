@@ -20,6 +20,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.set_customer_is_company_label();
 		this.set_dynamic_link();
 		this.setup_vehicle_route_options();
+		this.setup_allocation_route_options();
 		this.add_create_buttons();
 	},
 
@@ -54,29 +55,44 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		});
 
 		this.frm.set_query("allocation_period", function () {
-			return erpnext.queries.vehicle_allocation_period('allocation_period', {
+			var filters = {
 				item_code: me.frm.doc.item_code,
-				supplier: me.frm.doc.supplier,
-				delivery_period: me.frm.doc.delivery_period
-			});
+				supplier: me.frm.doc.supplier
+			}
+			if (me.frm.doc.delivery_period) {
+				filters['delivery_period'] = me.frm.doc.delivery_period;
+			}
+			return erpnext.queries.vehicle_allocation_period('allocation_period', filters);
 		});
 		this.frm.set_query("delivery_period", function () {
-			return erpnext.queries.vehicle_allocation_period('delivery_period', {
-				item_code: me.frm.doc.item_code,
-				supplier: me.frm.doc.supplier,
-				allocation_period: me.frm.doc.allocation_period
-			});
+			if (me.frm.doc.vehicle_allocation_required) {
+				var filters = {
+					item_code: me.frm.doc.item_code,
+					supplier: me.frm.doc.supplier
+				}
+				if (me.frm.doc.allocation_period) {
+					filters['allocation_period'] = me.frm.doc.allocation_period;
+				}
+				return erpnext.queries.vehicle_allocation_period('delivery_period', filters);
+			} else if (me.frm.doc.transaction_date) {
+				return {
+					filters: {to_date: [">=", me.frm.doc.transaction_date]}
+				}
+			}
 		});
 
 		this.frm.set_query("vehicle_allocation", function() {
-			return {
-				filters: {
-					item_code: me.frm.doc.item_code,
-					supplier: me.frm.doc.supplier,
-					allocation_period: me.frm.doc.allocation_period,
-					delivery_period: me.frm.doc.delivery_period
-				}
-			};
+			var filters = {
+				item_code: me.frm.doc.item_code,
+				supplier: me.frm.doc.supplier,
+			}
+			if (me.frm.doc.allocation_period) {
+				filters['allocation_period'] = me.frm.doc.allocation_period;
+			}
+			if (me.frm.doc.delivery_period) {
+				filters['delivery_period'] = me.frm.doc.delivery_period;
+			}
+			return {filters: filters};
 		});
 	},
 
@@ -92,6 +108,22 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			}
 		}
 	},
+
+	setup_allocation_route_options: function() {
+		var me = this;
+
+		var allocation_field = me.frm.get_docfield("vehicle_allocation");
+
+		allocation_field.get_route_options_for_new_doc = function() {
+			return {
+				"company": me.frm.doc.company,
+				"item_code": me.frm.doc.item_code,
+				"item_name": me.frm.doc.item_name,
+				"supplier": me.frm.doc.supplier,
+				"allocation_period": me.frm.doc.allocation_period,
+				"delivery_period": me.frm.doc.delivery_period
+			}
+		}
 	},
 
 	add_create_buttons: function () {
@@ -178,10 +210,18 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				},
 				callback: function (r) {
 					if (!r.exc) {
+						me.frm.set_value("vehicle_allocation", null);
 						me.frm.trigger('vehicle_amount');
 					}
 				}
 			});
+		}
+	},
+
+	vehicle_allocation_required: function () {
+		if (!this.frm.doc.vehicle_allocation_required) {
+			this.frm.set_value("vehicle_allocation", null);
+			this.frm.set_value("allocation_period", null);
 		}
 	},
 
@@ -256,6 +296,8 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			this.frm.doc.supplier_outstanding = this.frm.doc.invoice_total;
 		}
 
+		this.frm.doc.in_words = "";
+
 		this.frm.refresh_fields();
 	},
 
@@ -269,20 +311,47 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 	vehicle_allocation: function () {
 		var me = this;
-		if (this.frm.doc.vehicle_allocation) {
+		if (me.frm.doc.vehicle_allocation) {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_allocation.vehicle_allocation.get_allocation_title",
+				method: "erpnext.selling.doctype.vehicle_allocation.vehicle_allocation.get_allocation_details",
 				args: {
 					vehicle_allocation: this.frm.doc.vehicle_allocation,
 				},
 				callback: function (r) {
-					if (!r.exc) {
-						me.frm.set_value("allocation_title", r.message);
+					if (r.message && !r.exc) {
+						if (r.message.delivery_period) {
+							me.frm.doc.delivery_period = r.message.delivery_period;
+							delete r.message['delivery_period'];
+						}
+
+						me.frm.set_value(r.message);
 					}
 				}
 			});
 		} else {
 			me.frm.set_value("allocation_title", "");
+		}
+	},
+
+	delivery_period: function () {
+		var me = this;
+
+		if (me.frm.doc.delivery_period) {
+			me.frm.set_value("vehicle_allocation", null);
+
+			frappe.db.get_value("Vehicle Allocation Period", me.frm.doc.delivery_period, "to_date", function (r) {
+				if (r) {
+					me.frm.set_value("delivery_date", r.to_date);
+				}
+			});
+		}
+	},
+
+	allocation_period: function () {
+		var me = this;
+
+		if (me.frm.doc.allocation_period) {
+			me.frm.set_value("vehicle_allocation", null);
 		}
 	},
 

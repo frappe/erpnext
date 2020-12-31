@@ -41,6 +41,7 @@ class VehicleBookingOrder(AccountsController):
 		self.validate_vehicle()
 		self.validate_party_accounts()
 		self.validate_allocation()
+		self.validate_delivery_date()
 
 		self.set_title()
 		self.clean_remarks()
@@ -106,9 +107,16 @@ class VehicleBookingOrder(AccountsController):
 					.format(self.vehicle, existing_booking))
 
 	def validate_allocation(self):
+		required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
+		if not required:
+			self.allocation_period = ""
+			self.vehicle_allocation = ""
+
 		if self.vehicle_allocation:
 			allocation_doc = frappe.get_doc("Vehicle Allocation", self.vehicle_allocation)
 
+			self.allocation_period = allocation_doc.allocation_period
+			self.delivery_period = allocation_doc.delivery_period
 			self.allocation_title = get_allocation_title(allocation_doc)
 
 			if allocation_doc.docstatus != 1:
@@ -139,6 +147,20 @@ class VehicleBookingOrder(AccountsController):
 
 		else:
 			self.allocation_title = ""
+
+	def validate_delivery_date(self):
+		delivery_date = getdate(self.delivery_date)
+
+		if delivery_date < getdate(self.transaction_date):
+			frappe.throw(_("Delivery Due Date cannot be before Booking Date"))
+
+		if self.delivery_period:
+			from_date, to_date = frappe.get_cached_value("Vehicle Allocation Period", self.delivery_period,
+				['from_date', 'to_date'])
+
+			if delivery_date > getdate(to_date) or delivery_date < getdate(from_date):
+				frappe.throw(_("Delivery Due Date must be within Delivery Period {0} if Delivery Period is selected")
+					.format(self.delivery_period))
 
 	def validate_allocation_required(self):
 		required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")

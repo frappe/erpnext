@@ -153,6 +153,7 @@
    "search_index": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "default": "0",
    "fieldname": "is_additional",
    "fieldtype": "Check",
@@ -175,7 +176,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2020-12-30 01:15:02.440590",
+ "modified": "2020-12-31 13:11:12.896604",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Allocation",
@@ -241,6 +242,7 @@
    "role": "Sales User (Read Only)"
   }
  ],
+ "quick_entry": 1,
  "restrict_to_domain": "Vehicles",
  "search_fields": "allocation_period, delivery_period",
  "sort_order": "DESC",

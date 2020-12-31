@@ -11,16 +11,14 @@
   "title",
   "naming_series",
   "company",
-  "customer_is_company",
   "customer",
   "customer_name",
+  "customer_is_company",
   "column_break_6",
   "payment_terms_template",
-  "due_date",
   "column_break_9",
   "amended_from",
   "transaction_date",
-  "delivery_date",
   "section_break_30",
   "sales_team",
   "customer_details_section",
@@ -58,9 +56,12 @@
   "vehicle_chassis_no",
   "vehicle_engine_no",
   "allocation_details_section",
-  "allocation_period",
   "delivery_period",
+  "delivery_date",
   "column_break_53",
+  "allocation_period",
+  "due_date",
+  "column_break_55",
   "vehicle_allocation",
   "allocation_title",
   "pricing_section",
@@ -427,7 +428,7 @@
   {
    "fieldname": "delivery_date",
    "fieldtype": "Date",
-   "label": "Delivery Date",
+   "label": "Delivery Due Date",
    "no_copy": 1,
    "reqd": 1
   },
@@ -800,11 +801,10 @@
   {
    "fieldname": "allocation_details_section",
    "fieldtype": "Section Break",
-   "label": "Allocation Details"
+   "label": "Delivery / Allocation Details"
   },
   {
    "depends_on": "vehicle_allocation_required",
-   "fetch_from": "vehicle_allocation.allocation_period",
    "fieldname": "allocation_period",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -812,7 +812,6 @@
    "options": "Vehicle Allocation Period"
   },
   {
-   "fetch_from": "vehicle_allocation.delivery_period",
    "fieldname": "delivery_period",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -849,12 +848,16 @@
    "hidden": 1,
    "label": "Vehicle Allocation Required",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-12-30 21:05:42.382027",
+ "modified": "2020-12-31 19:02:57.429711",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",

@@ -59,6 +59,23 @@ class VehicleAllocation(Document):
 @frappe.whitelist()
 def get_allocation_title(vehicle_allocation):
 	if isinstance(vehicle_allocation, string_types):
-		vehicle_allocation = frappe.db.get_value("Vehicle Allocation", vehicle_allocation, ['code', 'sr_no'], as_dict=1)
+		vehicle_allocation = frappe.db.get_value("Vehicle Allocation", vehicle_allocation,
+			['code', 'sr_no'], as_dict=1)
 
 	return "{0} - {1}".format(vehicle_allocation.sr_no, vehicle_allocation.code)
+
+
+@frappe.whitelist()
+def get_allocation_details(vehicle_allocation):
+	if isinstance(vehicle_allocation, string_types):
+		vehicle_allocation = frappe.get_doc("Vehicle Allocation", vehicle_allocation)
+
+	out = frappe._dict()
+	out.allocation_period = vehicle_allocation.allocation_period
+	out.delivery_period = vehicle_allocation.delivery_period
+	out.allocation_title = get_allocation_title(vehicle_allocation)
+
+	if out.delivery_period:
+		out.delivery_date = frappe.get_cached_value("Vehicle Allocation Period", out.delivery_period, "to_date")
+
+	return out
