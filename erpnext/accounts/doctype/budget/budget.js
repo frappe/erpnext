@@ -11,7 +11,7 @@ frappe.ui.form.on('Budget', {
 					report_type: "Profit and Loss",
 					is_group: 0
 				}
-			}
+			};
 		});
 
 		frm.set_query("monthly_distribution", function() {
@@ -19,7 +19,7 @@ frappe.ui.form.on('Budget', {
 				filters: {
 					fiscal_year: frm.doc.fiscal_year
 				}
-			}
+			};
 		});
 
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);

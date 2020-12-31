@@ -15,9 +15,9 @@ frappe.ui.form.on("Fees", {
 	},
 
 	onload: function(frm){
-		frm.set_query("academic_term",function(){
+		frm.set_query("academic_term",function() {
 			return{
-				"filters":{
+				"filters": {
 					"academic_year": (frm.doc.academic_year)
 				}
 			};
