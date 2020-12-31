@@ -31,6 +31,13 @@ frappe.query_reports["Salary Register"] = {
 			"default": frappe.defaults.get_user_default("Company")
 		},
 		{
+			"fieldname": "group_by_1",
+			"label": __("Group By Level 1"),
+			"fieldtype": "Select",
+			"options": ["Ungrouped", "Group by Department", "Group by Designation", "Group by Branch"],
+			"default": "Ungrouped"
+		},
+		{
 			"fieldname":"docstatus",
 			"label":__("Document Status"),
 			"fieldtype":"Select",

@@ -247,7 +247,6 @@
    "options": "Gender"
   },
   {
-   "description": "You can enter any date manually",
    "fieldname": "date_of_birth",
    "fieldtype": "Date",
    "label": "Date of Birth",
@@ -374,6 +373,7 @@
   {
    "fieldname": "department",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Department",
    "oldfieldname": "department",
@@ -385,6 +385,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Designation",
    "oldfieldname": "designation",
    "oldfieldtype": "Link",
@@ -512,6 +513,7 @@
    "description": "Provide Email Address registered in company",
    "fieldname": "company_email",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Company Email",
    "oldfieldname": "company_email",
    "oldfieldtype": "Data",
@@ -520,6 +522,7 @@
   {
    "fieldname": "personal_email",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Personal Email",
    "options": "Email"
   },
@@ -764,6 +767,7 @@
   {
    "fieldname": "attendance_device_id",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Attendance Device ID (Biometric/RF tag ID)",
    "no_copy": 1,
    "unique": 1
@@ -803,6 +807,7 @@
   {
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "CNIC"
   },
   {
@@ -858,7 +863,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-12-21 14:31:18.324236",
+ "modified": "2020-12-31 13:47:01.185533",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Employee",

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
+from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr, clean_whitespace
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -61,6 +61,9 @@ class Employee(NestedSet):
 					"Employee", self.name, existing_user_id)
 
 	def set_employee_name(self):
+		self.first_name = clean_whitespace(self.first_name)
+		self.middle_name = clean_whitespace(self.middle_name)
+		self.last_name = clean_whitespace(self.last_name)
 		self.employee_name = ' '.join(filter(lambda x: x, [self.first_name, self.middle_name, self.last_name]))
 
 	def validate_user_details(self):
