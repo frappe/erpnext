@@ -104,7 +104,7 @@ frappe.ui.form.on("Project", {
 			frm.set_df_property("vehicle_last_odometer", "read_only", last_odometer_read_only);
 		}
 
-
+		frm.events.setup_vehicle_route_options(frm);
 		frm.events.set_buttons(frm);
 	},
 
@@ -179,6 +179,18 @@ frappe.ui.form.on("Project", {
 					});
 				}, __("Make"));
 			});
+		}
+	},
+
+	setup_vehicle_route_options: function(frm) {
+		var vehicle_field = frm.get_docfield("applies_to_vehicle");
+		if (vehicle_field) {
+			vehicle_field.get_route_options_for_new_doc = function () {
+				return {
+					"item_code": frm.doc.applies_to_item,
+					"item_name": frm.doc.applies_to_item_name
+				}
+			}
 		}
 	},
 

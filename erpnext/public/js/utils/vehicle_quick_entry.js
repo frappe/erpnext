@@ -57,6 +57,7 @@ frappe.ui.form.VehicleQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				me.dialog.set_value('item_name', '');
 			}
 		};
+		me.dialog.fields_dict["item_code"].df.onchange();
 
 		me.dialog.get_field("insurance_company").get_query = function () {
 			return {

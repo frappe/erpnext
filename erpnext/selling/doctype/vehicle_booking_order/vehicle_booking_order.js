@@ -19,6 +19,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.set_customer_is_company_label();
 		this.set_dynamic_link();
+		this.setup_vehicle_route_options();
 		this.add_create_buttons();
 	},
 
@@ -77,6 +78,19 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				}
 			};
 		});
+	},
+
+	setup_vehicle_route_options: function() {
+		var me = this;
+
+		var vehicle_field = me.frm.get_docfield("vehicle");
+
+		vehicle_field.get_route_options_for_new_doc = function() {
+			return {
+				"item_code": me.frm.doc.item_code,
+				"item_name": me.frm.doc.item_name
+			}
+		}
 	},
 	},
 
