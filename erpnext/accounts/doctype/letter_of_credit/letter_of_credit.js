@@ -4,9 +4,13 @@
 frappe.ui.form.on('Letter of Credit', {
 	refresh: function(frm) {
 		// custom buttons
-		frm.add_custom_button(__('Accounting Ledger'), function() {
-			frappe.set_route('query-report', 'General Ledger',
-				{party_type:'Letter of Credit', party:frm.doc.name});
+		frm.add_custom_button(__('Accounting Ledger'), function () {
+			frappe.set_route('query-report', 'General Ledger', {
+				party_type: 'Letter of Credit',
+				party: frm.doc.name,
+				from_date: frappe.defaults.get_user_default("year_start_date"),
+				to_date: frappe.defaults.get_user_default("year_end_date")
+			});
 		});
 	}
 });

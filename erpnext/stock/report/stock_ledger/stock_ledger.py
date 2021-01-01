@@ -43,6 +43,7 @@ def execute(filters=None):
 			"uom": item_detail.alt_uom or item_detail.stock_uom if filters.qty_field == "Contents Qty" else item_detail.stock_uom,
 			"actual_qty": sle.actual_qty * alt_uom_size,
 			"qty_after_transaction": sle.qty_after_transaction * alt_uom_size,
+			"stock_value_difference": sle.stock_value_difference,
 			"voucher_type": sle.voucher_type,
 			"voucher_no": sle.voucher_no,
 			"batch_no": sle.batch_no,
@@ -83,7 +84,6 @@ def get_columns(filters, show_amounts=True):
 		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 150, "hide_if_filtered": 1},
 		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150, "hide_if_filtered": 1},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
-		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100, "hide_if_filtered": 1},
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 60, "convertible": "qty"},
@@ -94,6 +94,8 @@ def get_columns(filters, show_amounts=True):
 		columns += [
 			{"label": _("In/Out Rate"), "fieldname": "transaction_rate", "fieldtype": "Currency", "width": 100,
 				"options": "Company:company:default_currency", "convertible": "rate"},
+			{"label": _("In/Out Amount"), "fieldname": "stock_value_difference", "fieldtype": "Currency", "width": 100,
+				"options": "Company:company:default_currency"},
 			{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 100,
 				"options": "Company:company:default_currency", "convertible": "rate"},
 			{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
@@ -104,6 +106,7 @@ def get_columns(filters, show_amounts=True):
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
 		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100, "hide_if_filtered": 1},
+		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
 

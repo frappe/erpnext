@@ -57,12 +57,12 @@ erpnext.stock.StockController = frappe.ui.form.Controller.extend({
 					voucher_no: me.frm.doc.name,
 					from_date: me.frm.doc.posting_date,
 					to_date: me.frm.doc.posting_date,
-					company: me.frm.doc.company
+					company: me.frm.doc.company,
+					group_by: "Ungrouped"
 				};
 				frappe.set_route("query-report", "Stock Ledger");
 			}, __("View"));
 		}
-
 	},
 
 	show_general_ledger: function() {
