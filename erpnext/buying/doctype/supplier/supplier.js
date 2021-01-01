@@ -63,13 +63,17 @@ frappe.ui.form.on("Supplier", {
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function () {
-				frappe.set_route('query-report', 'General Ledger',
-					{ party_type: 'Supplier', party: frm.doc.name });
-			}, __("View"));
+				frappe.set_route('query-report', 'General Ledger', {
+					party_type: 'Supplier',
+					party: frm.doc.name,
+					from_date: frappe.defaults.get_user_default("year_start_date"),
+					to_date: frappe.defaults.get_user_default("year_end_date")
+				});
+			});
 
 			frm.add_custom_button(__('Accounts Payable'), function () {
 				frappe.set_route('query-report', 'Accounts Payable', { supplier: frm.doc.name });
-			}, __("View"));
+			});
 
 			frm.add_custom_button(__('Bank Account'), function () {
 				erpnext.utils.make_bank_account(frm.doc.doctype, frm.doc.name);

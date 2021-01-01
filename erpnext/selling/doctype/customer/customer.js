@@ -136,8 +136,12 @@ frappe.ui.form.on("Customer", {
 
 			// custom buttons
 			frm.add_custom_button(__('Accounting Ledger'), function() {
-				frappe.set_route('query-report', 'General Ledger',
-					{party_type:'Customer', party:frm.doc.name});
+				frappe.set_route('query-report', 'General Ledger', {
+					party_type: 'Customer',
+					party: frm.doc.name,
+					from_date: frappe.defaults.get_user_default("year_start_date"),
+					to_date: frappe.defaults.get_user_default("year_end_date")
+				});
 			});
 
 			frm.add_custom_button(__('Accounts Receivable'), function() {
