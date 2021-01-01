@@ -735,4 +735,3 @@ erpnext.patches.v13_0.create_healthcare_custom_fields_in_stock_entry_detail
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
 erpnext.patches.v13_0.update_custom_fields_for_shopify
 execute:frappe.delete_doc("Report", "Quoted Item Comparison")
-erpnext.patches.v12_0.update_sales_invoice_remarks
