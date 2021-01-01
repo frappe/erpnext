@@ -318,7 +318,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		year_to_date = 0
 		for slip in salary_slips:
-			year_to_date += slip.net_pay
+			year_to_date += flt(slip.net_pay)
 			self.assertEqual(slip.year_to_date, year_to_date)
 
 	def test_tax_for_payroll_period(self):
