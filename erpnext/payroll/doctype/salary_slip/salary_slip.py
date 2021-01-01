@@ -431,10 +431,9 @@ class SalarySlip(TransactionBase):
 			self.calculate_component_amounts("deductions")
 		
 		self.set_loan_repayment()
-		self.set_net_pay()
 		self.set_component_amounts_based_on_payment_days()
-
-		
+		self.set_net_pay()
+	
 	def set_net_pay(self):
 		self.total_deduction = self.get_component_totals("deductions")
 		self.base_total_deduction = flt(flt(self.total_deduction) * flt(self.exchange_rate), self.precision('base_total_deduction'))
@@ -1098,17 +1097,17 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 	def set_totals(self):
-		self.gross_pay = 0
+		self.gross_pay = 0.0
 		if self.salary_slip_based_on_timesheet == 1:
 			self.calculate_total_for_salary_slip_based_on_timesheet()
 		else:
-			self.total_deduction = 0
+			self.total_deduction = 0.0
 			if self.earnings:
 				for earning in self.earnings:
-					self.gross_pay += flt(earning.amount)
+					self.gross_pay += flt(earning.amount, earning.precision("amount"))
 			if self.deductions:
 				for deduction in self.deductions:
-					self.total_deduction += flt(deduction.amount)
+					self.total_deduction += flt(deduction.amount, deduction.precision("amount"))
 			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
 		self.set_base_totals()
 
