@@ -43,7 +43,7 @@ def execute(filters=None):
 			"uom": item_detail.alt_uom or item_detail.stock_uom if filters.qty_field == "Contents Qty" else item_detail.stock_uom,
 			"actual_qty": sle.actual_qty * alt_uom_size,
 			"qty_after_transaction": sle.qty_after_transaction * alt_uom_size,
-			"sle.stock_value_difference": sle.sle.stock_value_difference,
+			"stock_value_difference": sle.stock_value_difference,
 			"voucher_type": sle.voucher_type,
 			"voucher_no": sle.voucher_no,
 			"batch_no": sle.batch_no,
