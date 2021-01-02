@@ -787,7 +787,7 @@ class calculate_taxes_and_totals(object):
 
 		rate_with_margin = 0.0
 		base_rate_with_margin = 0.0
-		if item.price_list_rate:
+		if flt(item.price_list_rate):
 			if item.pricing_rules and not self.doc.ignore_pricing_rule:
 				for d in get_applied_pricing_rules(item.pricing_rules):
 					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
@@ -799,6 +799,13 @@ class calculate_taxes_and_totals(object):
 					else:
 						item.margin_type = None
 						item.margin_rate_or_amount = 0.0
+
+			if item.margin_type and flt(item.rate) > flt(item.price_list_rate):
+				margin_amount = flt(item.rate) - flt(item.price_list_rate)
+				if item.margin_type == "Amount":
+					item.margin_rate_or_amount = margin_amount
+				elif item.margin_type == "Percentage":
+					item.margin_rate_or_amount = margin_amount / flt(item.price_list_rate) * 100
 
 			if item.margin_type and item.margin_rate_or_amount:
 				margin_value = item.margin_rate_or_amount if item.margin_type == 'Amount' else flt(item.price_list_rate) * flt(item.margin_rate_or_amount) / 100
