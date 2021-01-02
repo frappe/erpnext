@@ -319,10 +319,13 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
-						if (r.message.delivery_period) {
-							me.frm.doc.delivery_period = r.message.delivery_period;
-							delete r.message['delivery_period'];
-						}
+						$.each(['delivery_period', 'allocation_period'], function (i, fn) {
+							if (r.message[fn]) {
+								me.frm.doc[fn] = r.message[fn];
+								me.frm.refresh_field(fn);
+								delete r.message[fn];
+							}
+						});
 
 						me.frm.set_value(r.message);
 					}
