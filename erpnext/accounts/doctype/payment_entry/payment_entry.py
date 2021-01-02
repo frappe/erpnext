@@ -1042,7 +1042,8 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 
 
 @frappe.whitelist()
-def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None, is_advance_return=False, party_type=None):
+def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=None, is_advance_return=False,
+		party_type=None, mode_of_payment=None):
 	doc = frappe.get_doc(dt, dn)
 	if dt in ("Sales Order", "Purchase Order") and flt(doc.per_billed, 2) > 0:
 		frappe.throw(_("Can only make payment against unbilled {0}").format(dt))
@@ -1129,11 +1130,11 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		outstanding_amount = grand_total - flt(doc.advance_paid)
 
 	# bank or cash
-	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=doc.get("mode_of_payment"),
+	bank = get_default_bank_cash_account(doc.company, "Bank", mode_of_payment=mode_of_payment or doc.get("mode_of_payment"),
 		account=bank_account)
 
 	if not bank:
-		bank = get_default_bank_cash_account(doc.company, "Cash", mode_of_payment=doc.get("mode_of_payment"),
+		bank = get_default_bank_cash_account(doc.company, "Cash", mode_of_payment=mode_of_payment or doc.get("mode_of_payment"),
 			account=bank_account)
 
 	paid_amount = received_amount = 0
@@ -1159,7 +1160,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.cost_center = doc.get("cost_center")
 	pe.project = doc.get("project")
 	pe.posting_date = nowdate()
-	pe.mode_of_payment = doc.get("mode_of_payment")
+	pe.mode_of_payment = mode_of_payment or doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get('bill_to') or doc.get(scrub(party_type)) or doc.get("party")
 	pe.contact_person = doc.get("contact_person")

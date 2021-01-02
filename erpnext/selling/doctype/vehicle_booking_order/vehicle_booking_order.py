@@ -235,10 +235,11 @@ class VehicleBookingOrder(AccountsController):
 			frappe.throw(_("Payable Account must be of type Payable"))
 
 	def validate_taxes_and_charges_accounts(self):
-		if self.fni_amount and not self.fni_account:
-			frappe.throw(_("Freight and Insurance Amount is set but account is not provided"))
-		if self.withholding_tax_amount and not self.withholding_tax_account:
-			frappe.throw(_("Withholding Tax Amount is set but account is not provided"))
+		pass
+		# if self.fni_amount and not self.fni_account:
+		# 	frappe.throw(_("Freight and Insurance Amount is set but account is not provided"))
+		# if self.withholding_tax_amount and not self.withholding_tax_account:
+		# 	frappe.throw(_("Withholding Tax Amount is set but account is not provided"))
 
 	def update_payment_status(self, update=False):
 		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
@@ -454,14 +455,19 @@ def get_customer_details(args, get_withholding_tax=True):
 	out.payable_account = get_party_account("Supplier", args.supplier,
 		args.company, transaction_type=out.buying_transaction_type)
 
-	selling_vehicle_booking_defaults = get_transaction_type_defaults(out.selling_transaction_type, args.company,
-		fieldname='vehicle_booking_defaults')
-	buying_vehicle_booking_defaults = get_transaction_type_defaults(out.buying_transaction_type, args.company,
-		fieldname='vehicle_booking_defaults')
+	if out.selling_transaction_type:
+		out.selling_mode_of_payment = frappe.get_cached_value("Transaction Type", out.selling_transaction_type, "mode_of_payment")
+	if out.buying_transaction_type:
+		out.buying_mode_of_payment = frappe.get_cached_value("Transaction Type", out.buying_transaction_type, "mode_of_payment")
 
-	out.fni_account = buying_vehicle_booking_defaults.get('fni_account') or selling_vehicle_booking_defaults.get('fni_account')
-	out.withholding_tax_account = buying_vehicle_booking_defaults.get('withholding_tax_account') or \
-		selling_vehicle_booking_defaults.get('withholding_tax_account')
+	# selling_vehicle_booking_defaults = get_transaction_type_defaults(out.selling_transaction_type, args.company,
+	# 	fieldname='vehicle_booking_defaults')
+	# buying_vehicle_booking_defaults = get_transaction_type_defaults(out.buying_transaction_type, args.company,
+	# 	fieldname='vehicle_booking_defaults')
+	#
+	# out.fni_account = buying_vehicle_booking_defaults.get('fni_account') or selling_vehicle_booking_defaults.get('fni_account')
+	# out.withholding_tax_account = buying_vehicle_booking_defaults.get('withholding_tax_account') or \
+	# 	selling_vehicle_booking_defaults.get('withholding_tax_account')
 
 	if get_withholding_tax and args.item_code:
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
@@ -741,13 +747,14 @@ def set_next_document_values(source, target, buying_or_selling):
 	vehicle_item.qty = 1
 	vehicle_item.vehicle = source.vehicle
 	vehicle_item.price_list_rate = source.vehicle_amount
-	vehicle_item.rate = source.vehicle_amount
-	vehicle_item.discount_percentage = 0
+	vehicle_item.rate = source.invoice_total
+	vehicle_item.margin_type = "Amount"
+	# vehicle_item.discount_percentage = 0
 
-	if source.fni_amount:
-		add_taxes_and_charges_row(target, source.fni_account, source.fni_amount)
-	if source.withholding_tax_amount:
-		add_taxes_and_charges_row(target, source.withholding_tax_account, source.withholding_tax_amount)
+	# if source.fni_amount:
+	# 	add_taxes_and_charges_row(target, source.fni_account, source.fni_amount)
+	# if source.withholding_tax_amount:
+	# 	add_taxes_and_charges_row(target, source.withholding_tax_account, source.withholding_tax_amount)
 
 	return vehicle_item
 

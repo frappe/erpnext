@@ -113,8 +113,8 @@
   "receivable_account",
   "payable_account",
   "column_break_20",
-  "fni_account",
-  "withholding_tax_account"
+  "selling_mode_of_payment",
+  "buying_mode_of_payment"
  ],
  "fields": [
   {
@@ -785,20 +785,6 @@
    "label": "Accounting Details"
   },
   {
-   "fieldname": "fni_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Freight and Insurance Account",
-   "options": "Account"
-  },
-  {
-   "fieldname": "withholding_tax_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Withholding Tax Account",
-   "options": "Account"
-  },
-  {
    "fieldname": "allocation_details_section",
    "fieldtype": "Section Break",
    "label": "Delivery / Allocation Details"
@@ -852,12 +838,25 @@
   {
    "fieldname": "column_break_55",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "selling_mode_of_payment",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Mode of Payment (Selling)",
+   "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "buying_mode_of_payment",
+   "fieldtype": "Link",
+   "label": "Mode of Payment (Buying)",
+   "options": "Mode of Payment"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2020-12-31 19:02:57.429711",
+ "modified": "2021-01-02 12:56:36.633088",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",
