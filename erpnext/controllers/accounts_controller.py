@@ -133,6 +133,10 @@ class AccountsController(TransactionBase):
 			pos_check_field = "is_pos" if self.doctype=="Sales Invoice" else "is_paid"
 			if cint(self.allocate_advances_automatically) and not cint(self.get(pos_check_field)):
 				self.set_advances()
+
+			if not cint(self.get(pos_check_field)) and not self.is_return:
+				self.validate_advance_entries()
+
 		elif self.doctype in ['Landed Cost Voucher'] and cint(self.allocate_advances_automatically):
 			self.set_advances()
 
@@ -162,7 +166,6 @@ class AccountsController(TransactionBase):
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()
-		self.validate_advance_entries()
 
 	def validate_non_invoice_documents_schedule(self):
 		self.set_payment_schedule()
