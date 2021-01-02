@@ -518,7 +518,8 @@ def make_sales_invoice(source_name, target_doc=None):
 			"doctype": "Sales Invoice",
 			"field_map": {
 				"is_return": "is_return",
-				"remarks": "remarks"
+				"remarks": "remarks",
+				"vehicle_booking_order": "vehicle_booking_order",
 			},
 			"validation": {
 				"docstatus": ["=", 1]
