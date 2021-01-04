@@ -72,7 +72,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	if not doc or (doc.get('doctype') not in ('Sales Invoice', 'Purchase Invoice') and doc.get('is_return') == 0):
+	if not doc or cint(doc.get('is_return')) == 0:
 		# get price list rate only if the invoice is not a credit or debit note
 		get_price_list_rate(args, item, out)
 
