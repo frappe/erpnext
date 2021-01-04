@@ -92,8 +92,8 @@ def get_party_details(address_name):
 	location = gstin_details.get('AddrLoc') or address.get('city')
 	state_code = gstin_details.get('StateCode')
 	pincode = gstin_details.get('AddrPncd')
-	address_line1 = '{} {}'.format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
-	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
+	address_line1 = '{} {}'.format(gstin_details.get('AddrBno') or "", gstin_details.get('AddrFlno') or "")
+	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm') or "", gstin_details.get('AddrSt') or "")
 
 	if state_code == 97:
 		# according to einvoice standard
