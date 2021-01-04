@@ -23,22 +23,24 @@ erpnext.accounts.dimensions = {
 	},
 
 	setup_filters(frm, doctype) {
-		this.accounting_dimensions.forEach((dimension) => {
-			frappe.model.with_doctype(dimension['document_type'], () => {
-				let parent_fields = [];
-				frappe.meta.get_docfields(doctype).forEach((df) => {
-					if (df.fieldtype === 'Link' && df.options === 'Account') {
-						parent_fields.push(df.fieldname);
-					} else if (df.fieldtype === 'Table') {
-						this.setup_child_filters(frm, df.options, df.fieldname, dimension['fieldname']);
-					}
+		if (this.accounting_dimensions) {
+			this.accounting_dimensions.forEach((dimension) => {
+				frappe.model.with_doctype(dimension['document_type'], () => {
+					let parent_fields = [];
+					frappe.meta.get_docfields(doctype).forEach((df) => {
+						if (df.fieldtype === 'Link' && df.options === 'Account') {
+							parent_fields.push(df.fieldname);
+						} else if (df.fieldtype === 'Table') {
+							this.setup_child_filters(frm, df.options, df.fieldname, dimension['fieldname']);
+						}
 
-					if (frappe.meta.has_field(doctype, dimension['fieldname'])) {
-						this.setup_account_filters(frm, dimension['fieldname'], parent_fields);
-					}
+						if (frappe.meta.has_field(doctype, dimension['fieldname'])) {
+							this.setup_account_filters(frm, dimension['fieldname'], parent_fields);
+						}
+					});
 				});
 			});
-		});
+		}
 	},
 
 	setup_child_filters(frm, doctype, parentfield, dimension) {
@@ -91,7 +93,7 @@ erpnext.accounts.dimensions = {
 	},
 
 	copy_dimension_from_first_row(frm, cdt, cdn, fieldname) {
-		if (frappe.meta.has_field(frm.doctype, fieldname)) {
+		if (frappe.meta.has_field(frm.doctype, fieldname) && this.accounting_dimensions) {
 			this.accounting_dimensions.forEach((dimension) => {
 				let row = frappe.get_doc(cdt, cdn);
 				frm.script_manager.copy_from_first_row(fieldname, row, [dimension['fieldname']]);
