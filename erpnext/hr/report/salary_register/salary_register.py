@@ -209,7 +209,10 @@ def get_conditions(filters):
 	doc_status = {"Draft": 0, "Submitted": 1, "Cancelled": 2}
 
 	if filters.get("docstatus"):
-		conditions += "docstatus = {0}".format(doc_status[filters.get("docstatus")])
+		if filters.get("docstatus") == "Draft and Submitted":
+			conditions += "docstatus < 2"
+		else:
+			conditions += "docstatus = {0}".format(doc_status[filters.get("docstatus")])
 
 	if filters.get("from_date"): conditions += " and start_date >= %(from_date)s"
 	if filters.get("to_date"): conditions += " and end_date <= %(to_date)s"

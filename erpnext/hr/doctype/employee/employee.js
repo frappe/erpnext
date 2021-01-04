@@ -16,6 +16,7 @@ erpnext.hr.EmployeeController = frappe.ui.form.Controller.extend({
 
 	refresh: function() {
 		var me = this;
+		erpnext.hide_company();
 		erpnext.toggle_naming_series();
 	},
 
