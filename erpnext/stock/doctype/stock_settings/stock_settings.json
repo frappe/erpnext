@@ -217,7 +217,7 @@
    "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
    "fieldtype": "Link",
    "label": "Role Allowed to Create/Edit Back-dated Transactions",
-   "options": "User"
+   "options": "Role"
   },
   {
    "fieldname": "column_break_26",
@@ -234,7 +234,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-11-23 22:26:54.225608",
+ "modified": "2020-12-29 12:53:31.162247",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
