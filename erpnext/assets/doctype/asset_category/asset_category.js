@@ -50,6 +50,5 @@ frappe.ui.form.on('Asset Category', {
 				}
 			};
 		});
-
 	}
 });
