@@ -30,6 +30,8 @@ class LoanSecurityUnpledge(Document):
 					d.idx, frappe.bold(d.loan_security)))
 
 	def validate_unpledge_qty(self):
+		from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import get_ltv_ratio
+
 		pledge_qty_map = get_pledged_security_qty(self.loan)
 
 		ltv_ratio_map = frappe._dict(frappe.get_all("Loan Security Type",
@@ -47,6 +49,8 @@ class LoanSecurityUnpledge(Document):
 
 		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount)
 		security_value = 0
+		unpledge_qty_map = {}
+		ltv_ratio = 0
 
 		for security in self.securities:
 			pledged_qty = pledge_qty_map.get(security.loan_security, 0)
@@ -57,13 +61,15 @@ class LoanSecurityUnpledge(Document):
 				msg += _("You are trying to unpledge more.")
 				frappe.throw(msg, title=_("Loan Security Unpledge Error"))
 
-			qty_after_unpledge = pledged_qty - security.qty
-			ltv_ratio = ltv_ratio_map.get(security.loan_security_type)
+			unpledge_qty_map.setdefault(security.loan_security, 0)
+			unpledge_qty_map[security.loan_security] += security.qty
 
-			current_price = loan_security_price_map.get(security.loan_security)
-			if not current_price:
-				frappe.throw(_("No valid Loan Security Price found for {0}").format(frappe.bold(security.loan_security)))
+		for security in pledge_qty_map:
+			if not ltv_ratio:
+				ltv_ratio = get_ltv_ratio(security)
 
+			qty_after_unpledge = pledge_qty_map.get(security, 0) - unpledge_qty_map.get(security, 0)
+			current_price = loan_security_price_map.get(security)
 			security_value += qty_after_unpledge * current_price
 
 		if not security_value and flt(pending_principal_amount, 2) > 0:

@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate, get_first_day
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -18,6 +18,7 @@ from erpnext.payroll.doctype.payroll_period.payroll_period import get_period_fac
 from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_application import get_benefit_component_amount
 from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
+from erpnext.accounts.utils import get_fiscal_year
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -49,6 +50,8 @@ class SalarySlip(TransactionBase):
 			self.get_working_days_details(lwp = self.leave_without_pay)
 
 		self.calculate_net_pay()
+		self.compute_year_to_date()
+		self.compute_month_to_date()
 
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
@@ -1124,6 +1127,46 @@ class SalarySlip(TransactionBase):
 					self.earnings[i].amount = wages_amount
 				self.gross_pay += self.earnings[i].amount
 		self.net_pay = flt(self.gross_pay) - flt(self.total_deduction)
+
+	def compute_year_to_date(self):
+		year_to_date = 0
+		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
+
+		if payroll_period:
+			period_start_date = payroll_period.start_date
+			period_end_date = payroll_period.end_date
+		else:
+			# get dates based on fiscal year if no payroll period exists
+			fiscal_year = get_fiscal_year(date=self.start_date, company=self.company, as_dict=1)
+			period_start_date = fiscal_year.year_start_date
+			period_end_date = fiscal_year.year_end_date
+
+		salary_slip_sum = frappe.get_list('Salary Slip',
+			fields = ['sum(net_pay) as sum'],
+			filters = {'employee_name' : self.employee_name,
+				'start_date' : ['>=', period_start_date],
+				'end_date' : ['<', period_end_date]})
+
+
+		year_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
+
+		year_to_date += self.net_pay
+		self.year_to_date = year_to_date
+
+	def compute_month_to_date(self):
+		month_to_date = 0
+		first_day_of_the_month = get_first_day(self.start_date)
+		salary_slip_sum = frappe.get_list('Salary Slip',
+			fields = ['sum(net_pay) as sum'],
+			filters = {'employee_name' : self.employee_name,
+				'start_date' : ['>=', first_day_of_the_month],
+				'end_date' : ['<', self.start_date]
+			})
+
+		month_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
+
+		month_to_date += self.net_pay
+		self.month_to_date = month_to_date
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
