@@ -113,7 +113,8 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldname":"show_amounts_in_print",
 			"label": __("Print with Amounts"),
 			"fieldtype": "Check",
-			"default": 0
+			"default": 0,
+			on_change: function() { return false; }
 		}
 	]
 }
