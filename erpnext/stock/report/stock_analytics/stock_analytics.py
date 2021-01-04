@@ -7,9 +7,11 @@ from frappe import _, scrub
 from frappe.utils import getdate, flt
 from erpnext.stock.report.stock_balance.stock_balance import (get_items, get_stock_ledger_entries, get_item_details)
 from erpnext.accounts.utils import get_fiscal_year
+from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 from six import iteritems
 
 def execute(filters=None):
+	is_reposting_item_valuation_in_progress()
 	filters = frappe._dict(filters or {})
 	columns = get_columns(filters)
 	data = get_data(filters)

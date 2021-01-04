@@ -107,9 +107,17 @@ class AccountsController(TransactionBase):
 			else:
 				self.validate_deferred_start_and_end_date()
 
+			self.set_inter_company_account()
+
 		validate_regional(self)
+		
+		validate_einvoice_fields(self)
+
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+	
+	def before_cancel(self):
+		validate_einvoice_fields(self)
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
@@ -932,6 +940,38 @@ class AccountsController(TransactionBase):
 		else:
 			return frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
 
+	def set_inter_company_account(self):
+		"""
+			Set intercompany account for inter warehouse transactions
+			This account will be used in case billing company and internal customer's
+			representation company is same
+		"""
+
+		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
+			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
+
+			if not unrealized_profit_loss_account:
+				msg = _("Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}").format(
+						frappe.bold(self.company))
+				frappe.throw(msg)
+
+			self.unrealized_profit_loss_account = unrealized_profit_loss_account
+
+	def is_internal_transfer(self):
+		"""
+			It will an internal transfer if its an internal customer and representation
+			company is same as billing company
+		"""
+		if self.doctype == 'Sales Invoice':
+			internal_party_field = 'is_internal_customer'
+		else:
+			internal_party_field = 'is_internal_supplier'
+
+		if self.get(internal_party_field) and (self.represents_company == self.company):
+			return True
+
+		return False
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
@@ -1483,4 +1523,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
 	pass
