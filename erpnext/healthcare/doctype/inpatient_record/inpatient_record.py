@@ -158,7 +158,7 @@ def discharge_patient(inpatient_record):
 
 
 def validate_inpatient_invoicing(inpatient_record):
-	if frappe.db.get_default("allow_discharge_despite_unbilled_services"):
+	if frappe.db.get_single_value("Healthcare Settings", "allow_discharge_despite_unbilled_services"):
 		return
 
 	pending_invoices = get_pending_invoices(inpatient_record)
