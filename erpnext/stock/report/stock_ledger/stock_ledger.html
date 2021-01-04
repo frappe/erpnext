@@ -12,6 +12,12 @@
 	vertical-align: middle !important;
 }
 </style>
+{%
+	var report_columns = report.get_columns_for_print();
+	var transaction_rate_exist = report_columns.filter(d=>d.fieldname == 'transaction_rate').length;
+	var stock_value_difference_exist = report_columns.filter(d=>d.fieldname == 'stock_value_difference').length;
+
+%}
 
 {% function print_group(data, group) { %}
 <h2 class="text-center" style="margin-top:0;">{%= __("Stock Ledger") %}</h2>
@@ -53,6 +59,10 @@
 			<th class="text-center">{%= __("UOM") %}</th>
 			<th class="text-center">{%= __("Qty") %}</th>
 			<th class="text-center">{%= __("Balance Qty") %}</th>
+			{% if(transaction_rate_exist && stock_value_difference_exist && filters.show_amounts_in_print) { %}
+				<th class="text-center">{%= __("In/Out Rate") %}</th>
+				<th class="text-center">{%= __("In/Out Amount") %}</th>
+			{% }%}
 		</tr>
 	</thead>
 	<tbody>
@@ -88,7 +98,10 @@
 				<td class="text-center">{%= data[i].uom %}</td>
 				<td class="text-right text-nowrap">{%= data[i].actual_qty ? format_number(data[i].actual_qty) : "" %}</td>
 				<td class="text-right text-nowrap">{%= format_number(data[i].qty_after_transaction) %}</td>
-			</tr>
+				{% if(transaction_rate_exist && stock_value_difference_exist  && filters.show_amounts_in_print) { %}
+					<td class="text-right text-nowrap">{%= format_currency(data[i].transaction_rate) %}</td>
+					<td class="text-right text-nowrap">{%= format_currency(data[i].stock_value_difference) %}</td></tr>
+				{% } %}
 		{% } %}
 	</tbody>
 </table>

@@ -108,6 +108,12 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldtype": "Select",
 			"options": "Ungrouped\nGroup by Item-Warehouse\nGroup by Item\nGroup by Warehouse\nGroup by Item Group\nGroup by Brand\nGroup by Party\nGroup by Voucher",
 			"default": "Group by Item-Warehouse"
+		},
+		{
+			"fieldname":"show_amounts_in_print",
+			"label": __("Print with Amounts"),
+			"fieldtype": "Check",
+			"default": 0
 		}
 	]
 }
