@@ -126,12 +126,18 @@ def create_quality_inspection(**args):
 	qa.inspected_by = frappe.session.user
 	qa.status = args.status or "Accepted"
 
-	readings = args.readings or {"specification": "Size", "min_value": 0, "max_value": 10}
+	if not args.readings:
+		create_quality_inspection_parameter("Size")
+		readings = {"specification": "Size", "min_value": 0, "max_value": 10}
+	else:
+		readings = args.readings
+
 	if args.status == "Rejected":
 		readings["reading_1"] = "12" # status is auto set in child on save
 
 	if isinstance(readings, list):
 		for entry in readings:
+			create_quality_inspection_parameter(entry["specification"])
 			qa.append("readings", entry)
 	else:
 		qa.append("readings", readings)
@@ -142,3 +148,11 @@ def create_quality_inspection(**args):
 			qa.submit()
 
 	return qa
+
+def create_quality_inspection_parameter(parameter):
+	if not frappe.db.exists("Quality Inspection Parameter", parameter):
+		frappe.get_doc({
+			"doctype": "Quality Inspection Parameter",
+			"parameter": parameter,
+			"description": parameter
+		}).insert()
