@@ -30,7 +30,7 @@ class Quiz {
 				this.time_taken = 0;
 			}
 			else if (data.activity?.is_complete && data.activity?.time_taken) {
-				this.calculate_and_display_time(data.activity.time_taken, this, "Time Taken - ");
+				this.calculate_and_display_time(data.activity.time_taken, "Time Taken - ");
 
 			}
 		}
@@ -66,11 +66,11 @@ class Quiz {
 	set_timer(duration) {
 		this.time_left = duration;
 		var self = this;
-		this.calculate_and_display_time(this.time_left, self, "Time Left - ");
+		this.calculate_and_display_time(this.time_left, "Time Left - ");
 		this.timer = setInterval(function () {
 			self.time_left -= 1;
 			self.time_taken += 1;
-			self.calculate_and_display_time(self.time_left, self, "Time Left - ");
+			self.calculate_and_display_time(self.time_left, "Time Left - ");
 			if (!self.time_left) {
 				clearInterval(self.timer);
 				self.submit();
@@ -78,12 +78,11 @@ class Quiz {
 		}, 1000);
 	}
 
-	calculate_and_display_time(seconds, self, text) {
+	calculate_and_display_time(seconds, text) {
 		var timer_display = document.getElementsByClassName("lms-timer")[0]
-		var hours = self.append_zero(Math.floor(seconds / 3600));
-		var minutes = self.append_zero(Math.floor(seconds % 3600 / 60));
-		var seconds = self.append_zero(Math.floor(seconds % 3600 % 60));
-		timer_display.innerText = "";
+		var hours = this.append_zero(Math.floor(seconds / 3600));
+		var minutes = this.append_zero(Math.floor(seconds % 3600 / 60));
+		var seconds = this.append_zero(Math.floor(seconds % 3600 % 60));
 		timer_display.innerText = text + hours + ":" + minutes + ":" + seconds;
 	}
 
@@ -105,7 +104,7 @@ class Quiz {
 	submit() {
 		if (this.is_time_bound) {
 			clearInterval(this.timer);
-			this.calculate_and_display_time(this.time_taken, this, "Time Taken - ");
+			this.calculate_and_display_time(this.time_taken, "Time Taken - ");
 		}
 		this.submit_btn.innerText = 'Evaluating..'
 		this.submit_btn.disabled = true

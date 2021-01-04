@@ -209,7 +209,6 @@ def evaluate_quiz(quiz_response, quiz_name, course, program, time_taken):
 	if student:
 		enrollment = get_or_create_course_enrollment(course, program)
 		if quiz.allowed_attempt(enrollment, quiz_name):
-			print("in")
 			enrollment.add_quiz_activity(quiz_name, quiz_response, result, score, status, time_taken)
 			return {'result': result, 'score': score, 'status': status}
 		else:
@@ -222,7 +221,7 @@ def get_quiz(quiz_name, course):
 		questions = quiz.get_questions()
 		duration = quiz.duration
 	except:
-		frappe.throw(_("Quiz {0} does not exist").format(quiz_name))
+		frappe.throw(_("Quiz {0} does not exist").format(quiz_name), frappe.DoesNotExistError)
 		return None
 
 	questions = [{

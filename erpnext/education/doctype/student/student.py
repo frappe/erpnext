@@ -114,7 +114,7 @@ class Student(Document):
 					status = check_content_completion(content.name, content.doctype, course_enrollment_name)
 					progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status})
 				elif content.doctype == 'Quiz':
-					status, score, result = check_quiz_completion(content, course_enrollment_name)
+					status, score, result, time_taken = check_quiz_completion(content, course_enrollment_name)
 					progress.append({'content': content.name, 'content_type': content.doctype, 'is_complete': status, 'score': score, 'result': result})
 		return progress
 
