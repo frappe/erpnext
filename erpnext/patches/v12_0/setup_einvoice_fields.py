@@ -8,6 +8,7 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc("custom", "doctype", "custom_field")
 	frappe.reload_doc("regional", "doctype", "e_invoice_settings")
 	custom_fields = {
 		'Sales Invoice': [

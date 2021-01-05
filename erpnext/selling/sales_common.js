@@ -399,10 +399,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 	},
 
-	batch_no: function(doc, cdt, cdn) {
-		this._super(doc, cdt, cdn);
-	},
-
 	qty: function(doc, cdt, cdn) {
 		this._super(doc, cdt, cdn);
 
