@@ -22,16 +22,14 @@ class Quiz {
 	make(data) {
 		if (data.duration) {
 			const timer_display = document.createElement("div");
-			timer_display.classList.add("lms-timer", "float-right", "font-weight-bold")
+			timer_display.classList.add("lms-timer", "float-right", "font-weight-bold");
 			document.getElementsByClassName("lms-title")[0].appendChild(timer_display);
 			if (data.activity && !data.activity.is_complete) {
 				this.set_timer(data.duration);
 				this.is_time_bound = true;
 				this.time_taken = 0;
-			}
-			else if (data.activity && data.activity.is_complete && data.activity.time_taken) {
+			} else if (data.activity && data.activity.is_complete && data.activity.time_taken) {
 				this.calculate_and_display_time(data.activity.time_taken, "Time Taken - ");
-
 			}
 		}
 		data.questions.forEach(question_data => {
@@ -78,11 +76,11 @@ class Quiz {
 		}, 1000);
 	}
 
-	calculate_and_display_time(seconds, text) {
-		var timer_display = document.getElementsByClassName("lms-timer")[0]
-		var hours = this.append_zero(Math.floor(seconds / 3600));
-		var minutes = this.append_zero(Math.floor(seconds % 3600 / 60));
-		var seconds = this.append_zero(Math.floor(seconds % 3600 % 60));
+	calculate_and_display_time(second, text) {
+		var timer_display = document.getElementsByClassName("lms-timer")[0];
+		var hours = this.append_zero(Math.floor(second / 3600));
+		var minutes = this.append_zero(Math.floor(second % 3600 / 60));
+		var seconds = this.append_zero(Math.floor(second % 3600 % 60));
 		timer_display.innerText = text + hours + ":" + minutes + ":" + seconds;
 	}
 
@@ -216,14 +214,14 @@ class Question {
 		}
 
 		let make_option = function (wrapper, option) {
-			let option_div = document.createElement('div')
-			option_div.classList.add('form-check', 'pb-1')
+			let option_div = document.createElement('div');
+			option_div.classList.add('form-check', 'pb-1');
 			let input = make_input(option.name, option.option);
 			let label = make_label(option.name, option.option);
-			option_div.appendChild(input)
-			option_div.appendChild(label)
-			wrapper.appendChild(option_div)
-			return { input: input, ...option }
+			option_div.appendChild(input);
+			option_div.appendChild(label);
+			wrapper.appendChild(option_div);
+			return { input: input, ...option };
 		}
 
 		let options_wrapper = document.createElement('div')
