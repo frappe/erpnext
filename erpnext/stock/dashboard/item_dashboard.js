@@ -163,7 +163,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 			max_count: max_count,
 			can_write:can_write,
 			show_item: show_item || false
-		}
+		};
 	},
 
 	get_capacity_dashboard_data: function(data) {
