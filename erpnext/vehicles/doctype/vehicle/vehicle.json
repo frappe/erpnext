@@ -69,6 +69,7 @@
   "amc_expiry_date",
   "more_info",
   "status",
+  "is_booked",
   "column_break_60",
   "employee",
   "company"
@@ -540,10 +541,19 @@
    "fieldtype": "Check",
    "in_standard_filter": 1,
    "label": "Is Unregistered"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_booked",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Is Booked",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "image_field": "image",
- "modified": "2020-12-18 16:11:32.863794",
+ "modified": "2021-01-05 17:54:24.764296",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

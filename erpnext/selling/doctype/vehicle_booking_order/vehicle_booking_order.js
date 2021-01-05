@@ -19,8 +19,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		erpnext.hide_company();
 		this.set_customer_is_company_label();
 		this.set_dynamic_link();
-		this.setup_vehicle_route_options();
-		this.setup_allocation_route_options();
+		this.setup_route_options();
 		this.add_create_buttons();
 	},
 
@@ -43,9 +42,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			return {filters: {"include_in_vehicle_booking": 1}};
 		});
 
-		this.frm.set_query("vehicle", function() {
-			return {filters: {"item_code": me.frm.doc.item_code}};
-		});
+		this.frm.set_query("vehicle", () => me.vehicle_query());
 
 		this.frm.set_query("selling_transaction_type", function() {
 			return {filters: {"selling": 1}};
@@ -101,33 +98,39 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	setup_vehicle_route_options: function() {
-		var me = this;
-
-		var vehicle_field = me.frm.get_docfield("vehicle");
-
-		vehicle_field.get_route_options_for_new_doc = function() {
-			return {
-				"item_code": me.frm.doc.item_code,
-				"item_name": me.frm.doc.item_name
+	vehicle_query: function () {
+		return {
+			filters: {
+				item_code: this.frm.doc.item_code,
+				delivery_document_no: ['is', 'not set'],
+				is_booked: 0
 			}
+		};
+	},
+
+	setup_route_options: function () {
+		var vehicle_field = this.frm.get_docfield("vehicle");
+		var allocation_field = this.frm.get_docfield("vehicle_allocation");
+		
+		vehicle_field.get_route_options_for_new_doc = () => this.vehicle_route_options();
+		allocation_field.get_route_options_for_new_doc = () => this.allocation_route_options();
+	},
+
+	vehicle_route_options: function() {
+		return {
+			"item_code": this.frm.doc.item_code,
+			"item_name": this.frm.doc.item_name
 		}
 	},
 
-	setup_allocation_route_options: function() {
-		var me = this;
-
-		var allocation_field = me.frm.get_docfield("vehicle_allocation");
-
-		allocation_field.get_route_options_for_new_doc = function() {
-			return {
-				"company": me.frm.doc.company,
-				"item_code": me.frm.doc.item_code,
-				"item_name": me.frm.doc.item_name,
-				"supplier": me.frm.doc.supplier,
-				"allocation_period": me.frm.doc.allocation_period,
-				"delivery_period": me.frm.doc.delivery_period
-			}
+	allocation_route_options: function() {
+		return {
+			"company": this.frm.doc.company,
+			"item_code": this.frm.doc.item_code,
+			"item_name": this.frm.doc.item_name,
+			"supplier": this.frm.doc.supplier,
+			"allocation_period": this.frm.doc.allocation_period,
+			"delivery_period": this.frm.doc.delivery_period
 		}
 	},
 
@@ -142,10 +145,12 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Payment'));
 			}
 
-			if (this.frm.doc.delivery_status === "To Receive") {
-				this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Purchase Receipt'));
-			} else if (this.frm.doc.delivery_status === "To Deliver") {
-				this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Delivery Note'));
+			if (this.frm.doc.vehicle) {
+				if (this.frm.doc.delivery_status === "To Receive") {
+					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Purchase Receipt'));
+				} else if (this.frm.doc.delivery_status === "To Deliver") {
+					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Delivery Note'));
+				}
 			}
 
 			if (this.frm.doc.delivery_status !== "To Receive") {
@@ -154,6 +159,11 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
 					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Sales Invoice'));
 				}
+			}
+
+			if (this.frm.doc.delivery_status === "To Receive") {
+				var select_vehicle_label = this.frm.doc.vehicle ? "Reselect Vehicle" : "Select Vehicle";
+				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle());
 			}
 
 			if (unpaid) {
@@ -441,6 +451,48 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				}
 			}
 		});
+	},
+
+	select_vehicle: function () {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Select Vehicle"),
+			fields: [
+				{
+					label: __("Vehicle"), fieldname: "vehicle", fieldtype: "Link", options: "Vehicle", reqd: 1,
+					onchange: () => {
+						let vehicle = dialog.get_value('vehicle');
+						if (vehicle) {
+							frappe.db.get_value("Vehicle", vehicle, ['color', 'chassis_no', 'engine_no'], (r) => {
+								if (r) {
+									dialog.set_values(r);
+								}
+							});
+						}
+					}, get_query: () => me.vehicle_query(), get_route_options_for_new_doc: () => me.vehicle_route_options()
+				},
+				{label: __("Chassis No"), fieldname: "chassis_no", fieldtype: "Data", read_only: 1},
+				{label: __("Engine No"), fieldname: "engine_no", fieldtype: "Data", read_only: 1},
+				{label: __("Color"), fieldname: "color", fieldtype: "Link", options: "Vehicle Color", read_only: 1},
+			]
+		});
+
+		dialog.set_primary_action(__("Update"), function () {
+			frappe.call({
+				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_vehicle_in_booking",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					vehicle: dialog.get_value('vehicle')
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		});
+		dialog.show();
 	},
 });
 
