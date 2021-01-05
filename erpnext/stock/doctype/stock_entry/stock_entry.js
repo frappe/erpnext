@@ -322,11 +322,12 @@ frappe.ui.form.on('Stock Entry', {
 			method: "erpnext.stock.get_item_details.get_serial_no",
 			args: {"args": args},
 			callback: function(r) {
-				if (!r.exe && r.message){
+				if (!r.exe && r.message) {
 					frappe.model.set_value(cdt, cdn, "serial_no", r.message);
-				}
-				if (callback) {
-					callback();
+
+					if (callback) {
+						callback();
+					}
 				}
 			}
 		});
@@ -736,6 +737,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 
+	fg_completed_qty: function() {
+		this.get_items();
+	},
+
 	get_items: function() {
 		var me = this;
 		if(!this.frm.doc.fg_completed_qty || !this.frm.doc.bom_no)
@@ -745,6 +750,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 			// if work order / bom is mentioned, get items
 			return this.frm.call({
 				doc: me.frm.doc,
+				freeze: true,
 				method: "get_items",
 				callback: function(r) {
 					if(!r.exc) refresh_field("items");

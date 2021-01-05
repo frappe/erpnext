@@ -23,6 +23,8 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
+class AccountMissingError(frappe.ValidationError): pass
+
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
 class AccountsController(TransactionBase):
@@ -106,8 +108,14 @@ class AccountsController(TransactionBase):
 				self.validate_deferred_start_and_end_date()
 
 		validate_regional(self)
+		
+		validate_einvoice_fields(self)
+
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+	
+	def before_cancel(self):
+		validate_einvoice_fields(self)
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
@@ -710,6 +718,21 @@ class AccountsController(TransactionBase):
 			self._abbr = frappe.db.get_value('Company',  self.company,  "abbr")
 
 		return self._abbr
+
+	def raise_missing_debit_credit_account_error(self, party_type, party):
+		"""Raise an error if debit to/credit to account does not exist."""
+		db_or_cr = frappe.bold("Debit To") if self.doctype == "Sales Invoice" else frappe.bold("Credit To")
+		rec_or_pay = "Receivable" if self.doctype == "Sales Invoice" else "Payable"
+
+		link_to_party = frappe.utils.get_link_to_form(party_type, party)
+		link_to_company = frappe.utils.get_link_to_form("Company", self.company)
+
+		message = _("{0} Account not found against Customer {1}.").format(db_or_cr, frappe.bold(party) or '')
+		message += "<br>" + _("Please set one of the following:") + "<br>"
+		message += "<br><ul><li>" + _("'Account' in the Accounting section of Customer {0}").format(link_to_party) + "</li>"
+		message += "<li>" + _("'Default {0} Account' in Company {1}").format(rec_or_pay, link_to_company) + "</li></ul>"
+
+		frappe.throw(message, title=_("Account Missing"), exc=AccountMissingError)
 
 	def validate_party(self):
 		party_type, party = self.get_party()
@@ -1405,4 +1428,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
 	pass

@@ -539,7 +539,8 @@ def make_purchase_invoice(source_name, target_doc=None):
 			"doctype": "Purchase Invoice",
 			"field_map": {
 				"supplier_warehouse":"supplier_warehouse",
-				"is_return": "is_return"
+				"is_return": "is_return",
+				"bill_date": "bill_date"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
