@@ -29,7 +29,7 @@ class Quiz {
 				this.is_time_bound = true;
 				this.time_taken = 0;
 			}
-			else if (data.activity?.is_complete && data.activity?.time_taken) {
+			else if (data.activity && data.activity.is_complete && data.activity.time_taken) {
 				this.calculate_and_display_time(data.activity.time_taken, "Time Taken - ");
 
 			}
