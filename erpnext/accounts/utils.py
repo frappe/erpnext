@@ -601,8 +601,15 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 
 	if linked_jv:
 		frappe.db.sql("""update `tabJournal Entry Account`
-			set reference_type=null, reference_name = null,
-			modified=%s, modified_by=%s
+			set reference_type=original_reference_type, reference_name=original_reference_name,
+				modified=%s, modified_by=%s
+			where reference_type=%s and reference_name=%s
+				and ifnull(original_reference_type, '') != '' and ifnull(original_reference_name, '') != ''
+			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
+
+		frappe.db.sql("""update `tabJournal Entry Account`
+			set reference_type=null, reference_name=null,
+				modified=%s, modified_by=%s
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
@@ -610,25 +617,33 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 		frappe.msgprint(_("Journal Entries {0} are un-linked").format(", ".join(msg_jv_list)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
-	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
+	linked_pe = frappe.db.sql_list("""select distinct parent from `tabPayment Entry Reference`
 		where reference_doctype=%s and reference_name=%s and docstatus < 2""", (ref_type, ref_no))
 
 	if linked_pe:
-		frappe.db.sql("""update `tabPayment Entry Reference`
-			set allocated_amount=0, modified=%s, modified_by=%s
-			where reference_doctype=%s and reference_name=%s
-			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
-
 		for pe in linked_pe:
 			pe_doc = frappe.get_doc("Payment Entry", pe)
+
+			prefs = pe_doc.get('references', filters={"reference_doctype": ref_type, "reference_name": ref_no})
+			for pref in prefs:
+				if pref.original_reference_doctype and pref.original_reference_name\
+						and (pref.original_reference_doctype, pref.original_reference_name) != (pref.reference_doctype, pref.reference_name):
+					pref.reference_doctype = pref.original_reference_doctype
+					pref.reference_name = pref.original_reference_name
+				else:
+					pref.allocated_amount = 0
+
+				pref.db_set({
+					'reference_doctype': pref.reference_doctype,
+					'reference_name': pref.reference_name,
+					'allocated_amount': pref.allocated_amount
+				})
+
 			pe_doc.set_total_allocated_amount()
 			pe_doc.set_unallocated_amount()
 			pe_doc.clear_unallocated_reference_document_rows()
 
-			frappe.db.sql("""update `tabPayment Entry` set total_allocated_amount=%s,
-				base_total_allocated_amount=%s, unallocated_amount=%s, modified=%s, modified_by=%s
-				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount,
-					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
+			pe_doc.db_update()
 
 		msg_pe_list = ["<a href='#Form/Payment Entry/{0}'>{0}</a>".format(jv) for jv in list(set(linked_pe))]
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format(", ".join(msg_pe_list)))
