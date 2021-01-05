@@ -30,7 +30,7 @@ class VehicleLog(Document):
 
 	def update_vehicle_odometer(self):
 		odometer = get_vehicle_odometer(self.vehicle)
-		frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", odometer)
+		frappe.db.set_value("Vehicle", self.vehicle, "last_odometer", odometer, notify=True)
 
 	def update_project_odometer(self):
 		from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
@@ -42,7 +42,7 @@ class VehicleLog(Document):
 				frappe.db.set_value("Project", self.project, {
 					"vehicle_first_odometer": first_odometer,
 					"vehicle_last_odometer": last_odometer
-				}, None)
+				}, None, notify=True)
 
 @frappe.whitelist()
 def make_expense_claim(docname):
