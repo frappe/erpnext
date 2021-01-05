@@ -669,7 +669,7 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	update_selector_value_in_cart_item(selector, value, item) {
 		const $item_to_update = this.get_cart_item(item);
-		$item_to_update.attr(`data-${selector}`, value);
+		$item_to_update.attr(`data-${selector}`, escape(value));
 	}
 
 	toggle_checkout_btn(show_checkout) {

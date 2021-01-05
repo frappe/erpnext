@@ -259,11 +259,9 @@ erpnext.PointOfSale.Controller = class {
 				get_frm: () => this.frm,
 
 				cart_item_clicked: (item_code, batch_no, uom) => {
-					const item_row = this.frm.doc.items.find(
-						i => i.item_code === item_code 
-							&& i.uom === uom
-							&& (!batch_no || (batch_no && i.batch_no === batch_no))
-					);
+					const search_field = batch_no ? 'batch_no' : 'item_code';
+					const search_value = batch_no || item_code;
+					const item_row = this.frm.doc.items.find(i => i[search_field] === search_value && i.uom === uom);
 					this.item_details.toggle_item_details_section(item_row);
 				},
 
