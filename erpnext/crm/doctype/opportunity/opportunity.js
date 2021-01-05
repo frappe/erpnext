@@ -24,6 +24,12 @@ frappe.ui.form.on("Opportunity", {
 			frm.trigger('set_contact_link');
 		}
 	},
+	contact_date: function(frm) {
+		if(frm.doc.contact_date < frappe.datetime.now_datetime()){
+			frm.set_value("contact_date", "");
+			frappe.throw(__("Next follow up date should be greater than now."))
+		}
+	},
 
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
