@@ -8,6 +8,7 @@ import erpnext
 from frappe import _
 from frappe.utils import cint, flt, getdate, today
 from frappe.model.utils import get_fetch_values
+from frappe.model.naming import set_name_by_naming_series
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from erpnext.accounts.party import set_contact_details, get_party_account
 from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier
@@ -29,6 +30,10 @@ force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_typ
 	'receivable_account', 'payable_account']
 
 class VehicleBookingOrder(AccountsController):
+	def autoname(self):
+		if self.meta.has_field('booking_number'):
+			set_name_by_naming_series(self, 'booking_number')
+
 	def validate(self):
 		if self.get("_action") != "update_after_submit":
 			self.set_missing_values(for_validate=True)

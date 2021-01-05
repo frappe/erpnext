@@ -16,6 +16,7 @@
   "customer_is_company",
   "column_break_6",
   "payment_terms_template",
+  "booking_number",
   "column_break_9",
   "amended_from",
   "transaction_date",
@@ -851,12 +852,20 @@
    "fieldtype": "Link",
    "label": "Mode of Payment (Buying)",
    "options": "Mode of Payment"
+  },
+  {
+   "fieldname": "booking_number",
+   "fieldtype": "Int",
+   "hidden": 1,
+   "label": "Booking Number",
+   "no_copy": 1,
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-01-02 12:56:36.633088",
+ "modified": "2021-01-05 10:35:50.013516",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",
