@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.model.document import Document
 from dateutil.relativedelta import relativedelta
-from frappe.utils import cint, flt, nowdate, add_days, getdate, fmt_money, add_to_date, DATE_FORMAT, date_diff
+from frappe.utils import cint, flt, add_days, getdate, add_to_date, DATE_FORMAT, date_diff, comma_and
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
@@ -19,15 +19,25 @@ class PayrollEntry(Document):
 		# check if salary slips were manually submitted
 		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1}, ['name'])
 		if cint(entries) == len(self.employees):
-    			self.set_onload("submitted_ss", True)
+				self.set_onload("submitted_ss", True)
 
 	def on_submit(self):
 		self.create_salary_slips()
 
 	def before_submit(self):
+		self.validate_employee_details()
 		if self.validate_attendance:
 			if self.validate_employee_attendance():
 				frappe.throw(_("Cannot Submit, Employees left to mark attendance"))
+
+	def validate_employee_details(self):
+		emp_with_sal_slip = []
+		for employee_details in self.employees:
+			if frappe.db.exists("Salary Slip", {"employee": employee_details.employee, "start_date": self.start_date, "end_date": self.end_date, "docstatus": 1}):
+				emp_with_sal_slip.append(employee_details.employee)
+
+		if len(emp_with_sal_slip):
+			frappe.throw(_("Salary Slip already exists for {0} ").format(comma_and(emp_with_sal_slip)))
 
 	def on_cancel(self):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
@@ -71,7 +81,16 @@ class PayrollEntry(Document):
 					and t2.docstatus = 1
 			%s order by t2.from_date desc
 			""" % cond, {"sal_struct": tuple(sal_struct), "from_date": self.end_date, "payroll_payable_account": self.payroll_payable_account}, as_dict=True)
+
+			emp_list = self.remove_payrolled_employees(emp_list)
 			return emp_list
+
+	def remove_payrolled_employees(self, emp_list):
+		for employee_details in emp_list:
+			if frappe.db.exists("Salary Slip", {"employee": employee_details.employee, "start_date": self.start_date, "end_date": self.end_date, "docstatus": 1}):
+				emp_list.remove(employee_details)
+
+		return emp_list
 
 	def fill_employee_details(self):
 		self.set('employees', [])
@@ -542,7 +561,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 					title = _("Creating Salary Slips..."))
 		else:
 			salary_slip_name = frappe.db.sql(
-				'''SELECT 
+				'''SELECT
 						name
 					FROM `tabSalary Slip`
 					WHERE company=%s
