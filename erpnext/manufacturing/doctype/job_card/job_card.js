@@ -240,7 +240,7 @@ frappe.ui.form.on('Job Card', {
 				frm.reload_doc();
 				frm.trigger("make_dashboard");
 			}
-		});
+		})
 	},
 
 	update_sub_operation: function(frm, args) {

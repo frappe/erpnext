@@ -7,6 +7,7 @@ import frappe
 import datetime
 import json
 from frappe import _, bold
+from six import string_types
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate,
@@ -58,6 +59,8 @@ class JobCard(Document):
 
 				if d.completed_qty and not self.sub_operations:
 					self.total_completed_qty += d.completed_qty
+		else:
+			self.total_completed_qty = 0.0
 
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 

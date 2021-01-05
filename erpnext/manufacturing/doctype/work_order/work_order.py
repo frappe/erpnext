@@ -38,6 +38,7 @@ class WorkOrder(Document):
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def validate(self):
+		self.set("batches", [])
 		self.validate_production_item()
 		if self.bom_no:
 			validate_bom_no(self.production_item, self.bom_no)
