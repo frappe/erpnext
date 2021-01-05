@@ -11,6 +11,7 @@
   "employee",
   "employee_name",
   "department",
+  "supplier",
   "column_break_5",
   "expense_approver",
   "status",
@@ -337,7 +338,7 @@
   {
    "fieldname": "taxes",
    "fieldtype": "Table",
-   "label": "Purchase Taxes and Charges",
+   "label": "Expense Taxes and Charges",
    "options": "Purchase Taxes and Charges"
   },
   {
@@ -384,7 +385,7 @@
   {
    "fieldname": "taxes_and_charges",
    "fieldtype": "Link",
-   "label": "Purchase Taxes and Charges Template",
+   "label": "Expense Taxes and Charges Template",
    "options": "Purchase Taxes and Charges Template"
   },
   {
@@ -508,13 +509,19 @@
    "options": "currency",
    "read_only": 1,
    "width": "160px"
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "label": "Supplier",
+   "options": "Supplier"
   }
  ],
  "icon": "fa fa-money",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-29 15:07:29.662751",
+ "modified": "2020-12-30 15:37:23.853872",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
