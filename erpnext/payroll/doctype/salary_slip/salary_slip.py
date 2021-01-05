@@ -1145,7 +1145,9 @@ class SalarySlip(TransactionBase):
 			fields = ['sum(net_pay) as sum'],
 			filters = {'employee_name' : self.employee_name,
 				'start_date' : ['>=', period_start_date],
-				'end_date' : ['<', period_end_date]})
+				'end_date' : ['<', period_end_date],
+				'name': ['!=', self.name]
+			})
 
 
 		year_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
@@ -1160,7 +1162,8 @@ class SalarySlip(TransactionBase):
 			fields = ['sum(net_pay) as sum'],
 			filters = {'employee_name' : self.employee_name,
 				'start_date' : ['>=', first_day_of_the_month],
-				'end_date' : ['<', self.start_date]
+				'end_date' : ['<', self.start_date],
+				'name': ['!=', self.name]
 			})
 
 		month_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
