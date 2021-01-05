@@ -711,6 +711,7 @@ erpnext.patches.v13_0.delete_old_sales_reports
 execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll #22-06-2020
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-2020
+execute:frappe.reload_doc("regional", "doctype", "e_invoice_settings")
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v13_0.loyalty_points_entry_for_pos_invoice #22-07-2020
 erpnext.patches.v12_0.add_taxjar_integration_field
@@ -742,3 +743,4 @@ erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_l
 erpnext.patches.v13_0.add_po_to_global_search
 erpnext.patches.v13_0.update_returned_qty_in_pr_dn
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
+erpnext.patches.v13_0.set_company_in_leave_ledger_entry
