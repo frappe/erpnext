@@ -70,9 +70,11 @@ class VehicleBookingOrder(AccountsController):
 		self.validate_allocation_required()
 
 	def on_submit(self):
+		self.update_allocation_status()
 		self.set_status()
 
 	def on_cancel(self):
+		self.update_allocation_status()
 		self.set_status()
 
 	def onload(self):
@@ -152,6 +154,11 @@ class VehicleBookingOrder(AccountsController):
 
 		else:
 			self.allocation_title = ""
+
+	def update_allocation_status(self):
+		if self.vehicle_allocation:
+			is_booked = cint(self.docstatus == 1)
+			frappe.db.set_value("Vehicle Allocation", self.vehicle_allocation, 'is_booked', is_booked)
 
 	def validate_delivery_date(self):
 		delivery_date = getdate(self.delivery_date)

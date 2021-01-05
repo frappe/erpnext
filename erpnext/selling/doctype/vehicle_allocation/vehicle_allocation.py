@@ -16,6 +16,9 @@ class VehicleAllocation(Document):
 		self.validate_period()
 		self.set_title()
 
+	def before_submit(self):
+		self.is_booked = 0
+
 	def set_title(self):
 		self.title = get_allocation_title(self)
 

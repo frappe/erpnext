@@ -25,7 +25,9 @@
   "delivery_period",
   "column_break_17",
   "booking_price",
-  "vehicle_color"
+  "vehicle_color",
+  "status_section",
+  "is_booked"
  ],
  "fields": [
   {
@@ -172,11 +174,26 @@
    "fieldtype": "Link",
    "label": "Vehicle Color",
    "options": "Vehicle Color"
+  },
+  {
+   "fieldname": "status_section",
+   "fieldtype": "Section Break",
+   "label": "Status"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_booked",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Is Booked",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2020-12-31 13:11:12.896604",
+ "modified": "2021-01-05 14:44:24.378632",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Allocation",
