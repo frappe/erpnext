@@ -498,6 +498,7 @@ class StockEntry(StockController):
 				d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 				if not d.t_warehouse:
 					outgoing_items_cost += flt(d.basic_amount)
+
 		return outgoing_items_cost
 
 	def get_args_for_incoming_rate(self, item):
@@ -854,6 +855,7 @@ class StockEntry(StockController):
 				pro_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
+					pro_doc.update_batch_qty()
 
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
@@ -1076,18 +1078,45 @@ class StockEntry(StockController):
 			# in case of BOM
 			to_warehouse = item.get("default_warehouse")
 
+		args = {
+			"to_warehouse": to_warehouse,
+			"from_warehouse": "",
+			"qty": self.fg_completed_qty,
+			"item_name": item.item_name,
+			"description": item.description,
+			"stock_uom": item.stock_uom,
+			"expense_account": item.get("expense_account"),
+			"cost_center": item.get("buying_cost_center"),
+			"is_finished_item": 1
+		}
+
+		if self.work_order and self.pro_doc.batches:
+			self.set_batchwise_finished_goods(args, item)
+		else:
+			self.add_finisged_goods(args, item)
+
+	def set_batchwise_finished_goods(self, args, item):
+		qty = flt(self.fg_completed_qty)
+		for row in self.pro_doc.batches:
+			batch_qty = flt(row.qty) - flt(row.produced_qty)
+			if not batch_qty: continue
+
+			if qty <=0:
+				break
+
+			fg_qty = batch_qty
+			if batch_qty >= qty:
+				fg_qty = qty
+
+			qty -= batch_qty
+			args["qty"] = fg_qty
+			args["batch_no"] = row.batch_no
+
+			self.add_finisged_goods(args, item)
+
+	def add_finisged_goods(self, args, item):
 		self.add_to_stock_entry_detail({
-			item.name: {
-				"to_warehouse": to_warehouse,
-				"from_warehouse": "",
-				"qty": self.fg_completed_qty,
-				"item_name": item.item_name,
-				"description": item.description,
-				"stock_uom": item.stock_uom,
-				"expense_account": item.get("expense_account"),
-				"cost_center": item.get("buying_cost_center"),
-				"is_finished_item": 1
-			}
+			item.name: args
 		}, bom_no = self.bom_no)
 
 	def get_bom_raw_materials(self, qty):
@@ -1523,6 +1552,36 @@ class StockEntry(StockController):
 			if material_request and material_request not in material_requests:
 				material_requests.append(material_request)
 				frappe.db.set_value('Material Request', material_request, 'transfer_status', status)
+
+	def set_serial_no_batch_for_finished_good(self):
+		args = {}
+		if self.pro_doc.serial_no or self.pro_doc.batch_no:
+			self.get_serial_nos_for_fg(args)
+
+		for row in self.items:
+			if row.is_finished_item and row.item_code == self.pro_doc.production_item:
+				if args.get("serial_no"):
+					row.serial_no = '\n'.join(args["serial_no"][0: cint(row.qty)])
+
+	def get_serial_nos_for_fg(self, args):
+		fields = ["`tabStock Entry`.`name`", "`tabStock Entry Detail`.`qty`",
+			"`tabStock Entry Detail`.`serial_no`", "`tabStock Entry Detail`.`batch_no`"]
+
+		filters = [["Stock Entry","work_order","=",self.work_order], ["Stock Entry","purpose","=","Manufacture"],
+			["Stock Entry","docstatus","=",1], ["Stock Entry Detail","item_code","=",self.pro_doc.production_item]]
+
+		stock_entries = frappe.get_all("Stock Entry", fields=fields, filters=filters)
+
+		if self.pro_doc.serial_no:
+			args["serial_no"] = self.get_available_serial_nos(stock_entries)
+
+	def get_available_serial_nos(self, stock_entries):
+		used_serial_nos = []
+		for row in stock_entries:
+			if row.serial_no:
+				used_serial_nos.extend(get_serial_nos(row.serial_no))
+
+		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):

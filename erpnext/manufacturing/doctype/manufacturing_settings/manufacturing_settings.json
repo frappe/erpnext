@@ -26,7 +26,9 @@
   "column_break_16",
   "overproduction_percentage_for_work_order",
   "other_settings_section",
-  "update_bom_costs_automatically"
+  "update_bom_costs_automatically",
+  "column_break_23",
+  "make_serial_no_batch_from_work_order"
  ],
  "fields": [
   {
@@ -155,13 +157,24 @@
   {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "System will automatically create the serial numbers / batch for the Finished Good on submission of work order",
+   "fieldname": "make_serial_no_batch_from_work_order",
+   "fieldtype": "Check",
+   "label": "Make Serial No / Batch from Work Order"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 10:55:43.996581",
+ "modified": "2020-12-08 13:37:40.325838",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
