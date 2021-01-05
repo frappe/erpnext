@@ -27,6 +27,7 @@ class CapacityError(frappe.ValidationError): pass
 class StockOverProductionError(frappe.ValidationError): pass
 class OperationTooLongError(frappe.ValidationError): pass
 class ItemHasVariantError(frappe.ValidationError): pass
+class SerialNoQtyError(frappe.ValidationError): pass
 
 from six import string_types
 
@@ -42,7 +43,6 @@ class WorkOrder(Document):
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
 
 	def validate(self):
-		self.set("batches", [])
 		self.validate_production_item()
 		if self.bom_no:
 			validate_bom_no(self.production_item, self.bom_no)
@@ -281,10 +281,12 @@ class WorkOrder(Document):
 			"make_serial_no_batch_from_work_order")): return
 
 		if self.has_batch_no:
-			self.set("batches", [])
 			self.create_batch_for_finished_good()
 
-		args = {"item_code": self.production_item}
+		args = {
+			"item_code": self.production_item,
+			"work_order": self.name
+		}
 
 		if self.has_serial_no:
 			self.make_serial_nos(args)
@@ -305,29 +307,29 @@ class WorkOrder(Document):
 				qty = total_qty
 				total_qty = 0
 
-			batch = make_batch(self.production_item)
-			self.append("batches", {
-				"batch_no": batch,
-				"qty": qty,
-			})
+			make_batch(frappe._dict({
+				"item": self.production_item,
+				"qty_to_produce": qty,
+				"reference_doctype": self.doctype,
+				"reference_name": self.name
+			}))
 
 	def delete_auto_created_batch_and_serial_no(self):
-		if self.serial_no:
-			for d in get_serial_nos(self.serial_no):
-				frappe.delete_doc("Serial No", d)
+		for row in frappe.get_all("Serial No", filters = {"work_order": self.name}):
+			frappe.delete_doc("Serial No", row.name)
+			self.db_set("serial_no", "")
 
-		for row in self.batches:
-			batch_no = row.batch_no
-			row.db_set("batch_no", None)
-			frappe.delete_doc("Batch", batch_no)
+		for row in frappe.get_all("Batch", filters = {"reference_name": self.name}):
+			frappe.delete_doc("Batch", row.name)
 
 	def make_serial_nos(self, args):
 		serial_no_series = frappe.get_cached_value("Item", self.production_item, "serial_no_series")
 		if serial_no_series:
 			self.serial_no = get_auto_serial_nos(serial_no_series, self.qty)
-		elif self.serial_no:
-			args.update({"serial_no": self.serial_no, "actual_qty": self.qty, "batch_no": self.batch_no})
-			self.serial_no = auto_make_serial_nos(args)
+
+		if self.serial_no:
+			args.update({"serial_no": self.serial_no, "actual_qty": self.qty})
+			auto_make_serial_nos(args)
 
 		serial_nos_length = len(get_serial_nos(self.serial_no))
 		if serial_nos_length != self.qty:
@@ -341,6 +343,7 @@ class WorkOrder(Document):
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
 
 		for index, row in enumerate(self.operations):
+			if row.skip_job_card: continue
 			qty = self.qty
 			i=0
 			while qty > 0:
@@ -493,7 +496,7 @@ class WorkOrder(Document):
 			select
 				operation, description, workstation, idx,
 				base_hour_rate as hour_rate, time_in_mins,
-				"Pending" as status, parent as bom, batch_size, sequence_id
+				"Pending" as status, parent as bom, batch_size, sequence_id, skip_job_card
 			from
 				`tabBOM Operation`
 			where
@@ -755,14 +758,16 @@ class WorkOrder(Document):
 		bom.set_bom_material_details()
 		return bom
 
-	def update_batch_qty(self):
-		if self.has_batch_no and self.batches:
-			for row in self.batches:
-				qty = frappe.get_all("Stock Entry Detail", fields = ["sum(transfer_qty)"],
-					filters = {"docstatus": 1, "batch_no": row.batch_no, "is_finished_item": 1}, as_list=1)
+	def update_batch_produced_qty(self, stock_entry_doc):
+		if not cint(frappe.db.get_single_value("Manufacturing Settings",
+			"make_serial_no_batch_from_work_order")): return
 
-				if qty:
-					frappe.db.set_value("Work Order Batch", row.name, "produced_qty", flt(qty[0][0]))
+		for row in stock_entry_doc.items:
+			if row.batch_no and (row.is_finished_item or row.is_scrap_item):
+				qty = frappe.get_all("Stock Entry Detail", filters = {"batch_no": row.batch_no},
+					or_conditions= {"is_finished_item": 1, "is_scrap_item": 1}, fields = ["sum(qty)"])[0][0]
+
+				frappe.db.set_value("Batch", row.batch_no, "produced_qty", qty)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

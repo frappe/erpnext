@@ -855,7 +855,7 @@ class StockEntry(StockController):
 				pro_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					pro_doc.run_method("update_planned_qty")
-					pro_doc.update_batch_qty()
+					pro_doc.update_batch_produced_qty(self)
 
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
@@ -1090,14 +1090,21 @@ class StockEntry(StockController):
 			"is_finished_item": 1
 		}
 
-		if self.work_order and self.pro_doc.batches:
+		if self.work_order and self.pro_doc.has_batch_no:
 			self.set_batchwise_finished_goods(args, item)
 		else:
 			self.add_finisged_goods(args, item)
 
 	def set_batchwise_finished_goods(self, args, item):
 		qty = flt(self.fg_completed_qty)
-		for row in self.pro_doc.batches:
+		filters = {"reference_name": self.pro_doc.name,
+			"reference_doctype": self.pro_doc.doctype,
+			"qty_to_produce": (">", 0)
+		}
+
+		fields = ["qty_to_produce as qty", "produced_qty", "name"]
+
+		for row in frappe.get_all("Batch", filters = filters, fields = fields):
 			batch_qty = flt(row.qty) - flt(row.produced_qty)
 			if not batch_qty: continue
 
@@ -1110,7 +1117,7 @@ class StockEntry(StockController):
 
 			qty -= batch_qty
 			args["qty"] = fg_qty
-			args["batch_no"] = row.batch_no
+			args["batch_no"] = row.name
 
 			self.add_finisged_goods(args, item)
 
@@ -1555,7 +1562,7 @@ class StockEntry(StockController):
 
 	def set_serial_no_batch_for_finished_good(self):
 		args = {}
-		if self.pro_doc.serial_no or self.pro_doc.batch_no:
+		if self.pro_doc.serial_no:
 			self.get_serial_nos_for_fg(args)
 
 		for row in self.items:
