@@ -180,8 +180,8 @@ class VehicleBookingOrder(AccountsController):
 
 	def validate_allocation_required(self):
 		required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
-		if required and not self.vehicle_allocation:
-			frappe.throw(_("Vehicle Allocation is required for {0}").format(self.item_name or self.item_code))
+		if required and not self.delivery_period:
+			frappe.throw(_("Delivery Period is required for allocation of {0}").format(self.item_name or self.item_code))
 
 	def set_missing_values(self, for_validate=False):
 		customer_details = get_customer_details(self.as_dict(), get_withholding_tax=False)
@@ -742,6 +742,8 @@ def get_previous_doc(doctype, source):
 def set_next_document_values(source, target, buying_or_selling):
 	if not source.vehicle and target.doctype != 'Purchase Order':
 		frappe.throw(_("Please set Vehicle first"))
+	if source.vehicle_allocation_required and not source.vehicle_allocation and target.doctype != 'Purchase Order':
+		frappe.throw(_("Please set Vehicle Allocation first"))
 
 	target.vehicle_booking_order = source.name
 	target.company = source.company
@@ -831,6 +833,48 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 	update_vehicle_booked(vehicle, 1)
 	if previous_vehicle:
 		update_vehicle_booked(previous_vehicle, 0)
+
+	frappe.msgprint(_("Vehicle Changed Successfully"), indicator='green', alert=True)
+
+
+@frappe.whitelist()
+def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
+	if not vehicle_allocation:
+		frappe.throw(_("Vehicle Allocation not provided"))
+
+	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
+
+	if vbo_doc.docstatus != 1:
+		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
+
+	if not vbo_doc.vehicle_allocation_required:
+		frappe.throw(_("Vehicle Allocation is not required in {0}").format(vehicle_booking_order))
+
+	if vehicle_allocation == vbo_doc.vehicle_allocation:
+		frappe.throw(_("Vehicle Allocation {0} is already selected in {1}").format(vehicle_allocation, vehicle_booking_order))
+
+	if vbo_doc.delivery_status != 'To Receive':
+		frappe.throw(_("Cannot change Vehicle Allocation in Vehicle Booking Order {0} because Vehicle is already received")
+			.format(frappe.bold(vehicle_booking_order)))
+
+	previous_allocation = vbo_doc.vehicle_allocation
+
+	vbo_doc.vehicle_allocation = vehicle_allocation
+	vbo_doc.validate_allocation()
+
+	if vbo_doc.delivery_period != vbo_doc._doc_before_save.delivery_period:
+		frappe.throw(_("Delivery Period must be the same in the new Vehicle Allocation"))
+
+	vbo_doc.db_update()
+	vbo_doc.notify_update()
+	vbo_doc.save_version()
+
+	update_allocation_booked(vehicle_allocation, 1)
+	if previous_allocation:
+		update_allocation_booked(previous_allocation, 0)
+
+	frappe.msgprint(_("Allocation Changed Successfully"), indicator='green', alert=True)
 
 
 def update_vehicle_booked(vehicle, is_booked):

@@ -82,20 +82,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			}
 		});
 
-		this.frm.set_query("vehicle_allocation", function() {
-			var filters = {
-				item_code: me.frm.doc.item_code,
-				supplier: me.frm.doc.supplier,
-				is_booked: 0
-			}
-			if (me.frm.doc.allocation_period) {
-				filters['allocation_period'] = me.frm.doc.allocation_period;
-			}
-			if (me.frm.doc.delivery_period) {
-				filters['delivery_period'] = me.frm.doc.delivery_period;
-			}
-			return {filters: filters};
-		});
+		this.frm.set_query("vehicle_allocation", () => me.allocation_query());
 	},
 
 	vehicle_query: function () {
@@ -106,6 +93,22 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				is_booked: 0
 			}
 		};
+	},
+
+	allocation_query: function(ignore_allocation_period) {
+		var filters = {
+			item_code: this.frm.doc.item_code,
+			supplier: this.frm.doc.supplier,
+			is_booked: 0,
+			docstatus: 1
+		}
+		if (!ignore_allocation_period && this.frm.doc.allocation_period) {
+			filters['allocation_period'] = this.frm.doc.allocation_period;
+		}
+		if (this.frm.doc.delivery_period) {
+			filters['delivery_period'] = this.frm.doc.delivery_period;
+		}
+		return {filters: filters};
 	},
 
 	setup_route_options: function () {
@@ -162,7 +165,12 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			}
 
 			if (this.frm.doc.delivery_status === "To Receive") {
-				var select_vehicle_label = this.frm.doc.vehicle ? "Reselect Vehicle" : "Select Vehicle";
+				if (this.frm.doc.vehicle_allocation_required) {
+					var select_allocation_label = this.frm.doc.vehicle ? "Change Allocation" : "Select Allocation";
+					this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation());
+				}
+
+				var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
 				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle());
 			}
 
@@ -483,6 +491,48 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					vehicle: dialog.get_value('vehicle')
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		});
+		dialog.show();
+	},
+
+	select_allocation: function () {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Select Allocation"),
+			fields: [
+				{
+					label: __("Vehicle Allocation"), fieldname: "vehicle_allocation", fieldtype: "Link", options: "Vehicle Allocation", reqd: 1,
+					onchange: () => {
+						let allocation = dialog.get_value('vehicle_allocation');
+						if (allocation) {
+							frappe.db.get_value("Vehicle Allocation", allocation, ['title', 'allocation_period', 'delivery_period'], (r) => {
+								if (r) {
+									dialog.set_values(r);
+								}
+							});
+						}
+					}, get_query: () => me.allocation_query(true), get_route_options_for_new_doc: () => me.allocation_route_options()
+				},
+				{label: __("Allocation Code / Sr #"), fieldname: "title", fieldtype: "Data", read_only: 1},
+				{label: __("Delivery Period"), fieldname: "delivery_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
+				{label: __("Allocation Period"), fieldname: "allocation_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
+			]
+		});
+
+		dialog.set_primary_action(__("Update"), function () {
+			frappe.call({
+				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_allocation_in_booking",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					vehicle_allocation: dialog.get_value('vehicle_allocation')
 				},
 				callback: function (r) {
 					if (!r.exc) {
