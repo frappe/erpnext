@@ -11,6 +11,7 @@
   "workstation",
   "description",
   "col_break1",
+  "skip_job_card",
   "hour_rate",
   "time_in_mins",
   "operating_cost",
@@ -117,6 +118,13 @@
    "fieldname": "sequence_id",
    "fieldtype": "Int",
    "label": "Sequence ID"
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "0",
+   "fieldname": "skip_job_card",
+   "fieldtype": "Check",
+   "label": "Skip Job Card"
   }
  ],
  "idx": 1,
