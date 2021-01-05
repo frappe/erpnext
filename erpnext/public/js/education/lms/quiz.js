@@ -24,7 +24,7 @@ class Quiz {
 			const timer_display = document.createElement("div");
 			timer_display.classList.add("lms-timer", "float-right", "font-weight-bold")
 			document.getElementsByClassName("lms-title")[0].appendChild(timer_display);
-			if (!data.activity?.is_complete) {
+			if (data.activity && !data.activity.is_complete) {
 				this.set_timer(data.duration);
 				this.is_time_bound = true;
 				this.time_taken = 0;
