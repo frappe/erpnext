@@ -234,6 +234,7 @@ frappe.ui.form.on("Expense Claim", {
 	refresh: function(frm) {
 		frm.trigger("toggle_fields");
 		frm.events.set_dynamic_currency_labels(frm);
+		frm.events.toggle_currency_fields(frm);
 
 		if(frm.doc.docstatus > 0 && frm.doc.approval_status !== "Rejected") {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
@@ -261,7 +262,7 @@ frappe.ui.form.on("Expense Claim", {
 		let grand_total = flt(frm.doc.total) + flt(frm.doc.total_taxes_and_charges);
 		frm.set_value("grand_total", grand_total);
 
-		let outstanding_amount = flt(frm.doc.base_grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.base_total_amount_reimbursed);
+		let outstanding_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.total_amount_reimbursed);
 		frm.set_value("outstanding_amount", outstanding_amount);
 		frm.refresh_fields();
 	},
@@ -363,6 +364,7 @@ frappe.ui.form.on("Expense Claim", {
 		if (from_currency != company_currency) {
 			frm.events.set_exchange_rate(frm, from_currency, company_currency);
 			frm.events.set_dynamic_currency_labels(frm);
+			frm.events.toggle_currency_fields(frm);
 		} else {
 			frm.set_value("conversion_rate", 1.0);
 			frm.set_df_property("conversion_rate", "hidden", 1);
@@ -399,12 +401,26 @@ frappe.ui.form.on("Expense Claim", {
 		if (from_currency != company_currency) {
 			frm.set_currency_labels(["base_total_claimed_amount", "base_total", "base_total_amount_reimbursed",
 				"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "base_total_taxes_and_charges",
-				"base_grand_total", "total_advance_amount", "outstanding_amount"], company_currency);
+				"base_grand_total"], company_currency);
 
 			frm.set_currency_labels(["total_claimed_amount", "total", "total_amount_reimbursed",
 				"taxes_and_charges_added", "taxes_and_charges_deducted", "total_taxes_and_charges",
-				"grand_total"], from_currency);
+				"grand_total", "total_advance_amount", "outstanding_amount"], from_currency);
 		}
+	},
+
+	toggle_currency_fields: function(frm) {
+		let from_currency = frm.doc.currency;
+		let company_currency;
+		if (!frm.doc.company) {
+			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+		} else {
+			company_currency = erpnext.get_currency(frm.doc.company);
+		}
+
+		frm.toggle_display("base_total_claimed_amount", (from_currency != company_currency));
+		frm.toggle_display("base_total_amount_reimbursed", (from_currency != company_currency));
+		frm.refresh_fields();
 	},
 
 	cost_center: function(frm) {
@@ -435,22 +451,12 @@ frappe.ui.form.on("Expense Claim", {
 
 					if(r.message) {
 						$.each(r.message, function(i, d) {
-							let company_currency = erpnext.get_currency(frm.doc.company);
-							let paid_amount, claimed_amount;
-							if (company_currency !== d.currency) {
-								paid_amount = flt(d.paid_amount) * flt(d.conversion_rate);
-								claimed_amount = flt(d.claimed_amount) * flt(d.conversion_rate);
-							} else {
-								paid_amount = flt(d.paid_amount);
-								claimed_amount = flt(d.claimed_amount);
-							}
-
-							var row = frappe.model.add_child(frm.doc, "Expense Claim Advance", "advances");
+							let row = frappe.model.add_child(frm.doc, "Expense Claim Advance", "advances");
 							row.employee_advance = d.name;
 							row.posting_date = d.posting_date;
 							row.advance_account = d.advance_account;
-							row.advance_paid = paid_amount;
-							row.unclaimed_amount = flt(paid_amount) - flt(claimed_amount);
+							row.advance_paid = d.paid_amount;
+							row.unclaimed_amount = flt(d.paid_amount) - flt(d.claimed_amount);
 							row.allocated_amount = 0;
 						});
 						refresh_field("advances");
@@ -497,23 +503,14 @@ frappe.ui.form.on("Expense Claim Advance", {
 				},
 				callback: function(r, rt) {
 					if(r.message) {
-						let company_currency = erpnext.get_currency(frm.doc.company);
-						let paid_amount, claimed_amount;
-						let conversion_rate = r.message[0].exchange_rate;
-						if (company_currency !== r.message[0].currency) {
-							paid_amount = flt(r.message[0].paid_amount) * flt(conversion_rate);
-							claimed_amount = flt(r.message[0].claimed_amount) * flt(conversion_rate);
-						} else {
-							paid_amount = flt(r.message[0].paid_amount);
-							claimed_amount = flt(r.message[0].claimed_amount);
-						}
-
 						child.employee_advance = r.message[0].name;
 						child.posting_date = r.message[0].posting_date;
 						child.advance_account = r.message[0].advance_account;
-						child.advance_paid = paid_amount;
-						child.unclaimed_amount = flt(paid_amount) - flt(claimed_amount);
-						child.allocated_amount = flt(paid_amount) - flt(claimed_amount);
+
+						child.advance_paid = r.message[0].paid_amount;
+						child.unclaimed_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+						child.allocated_amount = flt(r.message[0].paid_amount) - flt(r.message[0].claimed_amount);
+
 						refresh_field("advances");
 						frm.trigger("calculate_total_advance");
 						frm.trigger("calculate_grand_total_and_outstanding_amount");

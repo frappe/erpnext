@@ -76,8 +76,8 @@ class EmployeeAdvance(Document):
 
 
 	def update_claimed_amount(self):
-		details = frappe.db.sql("""
-			SELECT sum(ifnull(allocated_amount, 0)), ec.conversion_rate
+		claimed_amount = frappe.db.sql("""
+			SELECT sum(ifnull(allocated_amount, 0))
 			FROM `tabExpense Claim Advance` eca, `tabExpense Claim` ec
 			WHERE
 				eca.employee_advance = %s
@@ -85,11 +85,7 @@ class EmployeeAdvance(Document):
 				AND ec.name = eca.parent
 				AND ec.docstatus=1
 				AND eca.allocated_amount > 0
-		""", self.name)
-		claimed_amount = details[0][0] or 0
-		conversion_rate = details[0][1] or 1
-
-		claimed_amount = flt(claimed_amount) / flt(conversion_rate)
+		""", self.name)[0][0] or 0
 
 		frappe.db.set_value("Employee Advance", self.name, "claimed_amount", flt(claimed_amount))
 		self.reload()

@@ -113,14 +113,17 @@ class ExpenseClaim(BuyingController):
 		gl_entry = []
 		self.validate_account_details()
 		payable_account_currency = get_account_currency(self.payable_account)
+		outstanding_amount_in_company_currency = flt(self.outstanding_amount * self.conversion_rate,
+					self.precision("outstanding_amount"))
 
 		# payable entry
 		if self.grand_total:
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": self.payable_account,
-					"credit": self.outstanding_amount,
-					"credit_in_account_currency": self.outstanding_amount,
+					"credit": outstanding_amount_in_company_currency,
+					"credit_in_account_currency": outstanding_amount_in_company_currency \
+						if payable_account_currency==self.company_currency else self.outstanding_amount,
 					"against": ",".join([d.default_account for d in self.items]),
 					"party_type": "Employee",
 					"party": self.employee,
@@ -131,25 +134,31 @@ class ExpenseClaim(BuyingController):
 			)
 
 		# expense entries
-		for data in self.items:
-			account_currency = get_account_currency(data.default_account)
+		for item in self.items:
+			account_currency = get_account_currency(item.default_account)
 			gl_entry.append(
 				self.get_gl_dict({
-					"account": data.default_account,
-					"debit": data.base_amount,
-					"debit_in_account_currency": (data.base_amount
-						if account_currency == self.company_currency else data.amount),
+					"account": item.default_account,
+					"debit": flt(item.base_amount, item.precision("base_amount")),
+					"debit_in_account_currency": (flt(item.base_amount, item.precision("base_amount"))
+						if account_currency==self.company_currency
+						else flt(item.amount, item.precision("amount"))),
 					"against": self.employee,
-					"cost_center": data.cost_center or self.cost_center
-				}, item=data)
+					"cost_center": item.cost_center or self.cost_center
+				}, item=item)
 			)
 
 		for data in self.advances:
+			account_currency = get_account_currency(data.advance_account)
+			allocated_amount = flt(data.allocated_amount * self.conversion_rate,
+					data.precision("allocated_amount"))
+
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": data.advance_account,
-					"credit": data.allocated_amount,
-					"credit_in_account_currency": data.allocated_amount,
+					"credit": allocated_amount,
+					"credit_in_account_currency": allocated_amount \
+						if account_currency == self.company_currency else data.allocated_amount,
 					"against": ",".join([d.default_account for d in self.items]),
 					"party_type": "Employee",
 					"party": self.employee,
@@ -237,7 +246,7 @@ class ExpenseClaim(BuyingController):
 		self.grand_total = flt(self.total) + flt(self.total_taxes_and_charges)
 
 	def set_outstanding_amount(self):
-		self.outstanding_amount = flt(self.base_grand_total) - flt(self.total_advance_amount) - flt(self.base_total_amount_reimbursed)
+		self.outstanding_amount = flt(self.grand_total) - flt(self.total_advance_amount) - flt(self.total_amount_reimbursed)
 
 	def update_task(self):
 		task = frappe.get_doc("Task", self.task)
@@ -248,16 +257,12 @@ class ExpenseClaim(BuyingController):
 		self.total_advance_amount = 0
 		for d in self.get("advances"):
 			ref_doc = frappe.db.get_value("Employee Advance", d.employee_advance,
-				["posting_date", "paid_amount", "claimed_amount", "advance_account",
-				"currency", "exchange_rate"], as_dict=1)
-
-			paid_amount = flt(ref_doc.paid_amount) * flt(ref_doc.exchange_rate)
-			claimed_amount = flt(ref_doc.claimed_amount) * flt(ref_doc.exchange_rate)
+				["posting_date", "paid_amount", "claimed_amount", "advance_account"], as_dict=1)
 
 			d.posting_date = ref_doc.posting_date
 			d.advance_account = ref_doc.advance_account
-			d.advance_paid = paid_amount
-			d.unclaimed_amount = paid_amount - claimed_amount
+			d.advance_paid = ref_doc.paid_amount
+			d.unclaimed_amount = flt(ref_doc.paid_amount) - flt(ref_doc.claimed_amount)
 
 			if d.allocated_amount and flt(d.allocated_amount) > flt(d.unclaimed_amount):
 				frappe.throw(_("Row {0}# Allocated amount {1} cannot be greater than unclaimed amount {2}")
@@ -267,11 +272,11 @@ class ExpenseClaim(BuyingController):
 
 		if self.total_advance_amount:
 			precision = self.precision("total_advance_amount")
-			if flt(self.total_advance_amount, precision) > flt(self.base_total_claimed_amount, precision):
+			if flt(self.total_advance_amount, precision) > flt(self.total_claimed_amount, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total claimed amount"))
 
 			if self.total \
-					and flt(self.total_advance_amount, precision) > flt(self.base_total, precision):
+					and flt(self.total_advance_amount, precision) > flt(self.total, precision):
 				frappe.throw(_("Total advance amount cannot be greater than total sanctioned amount"))
 
 	def validate_sanctioned_amount(self):
@@ -378,7 +383,7 @@ def get_advances(employee, advance_id=None):
 
 	return frappe.db.sql("""
 		select
-			name, currency, exchange_rate, posting_date, paid_amount, claimed_amount, advance_account
+			name, posting_date, paid_amount, claimed_amount, advance_account
 		from
 			`tabEmployee Advance`
 		where {0}
