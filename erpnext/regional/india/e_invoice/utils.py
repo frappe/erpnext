@@ -157,9 +157,10 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.description = d.item_name
+		item.description = d.item_name.replace('"', '\\"')
+
 		item.qty = abs(item.qty)
+		item.discount_amount = abs(item.discount_amount * item.qty)
 		item.unit_rate = abs(item.base_amount / item.qty)
 		item.gross_amount = abs(item.base_amount)
 		item.taxable_value = abs(item.base_amount)
@@ -167,6 +168,7 @@ def get_item_list(invoice):
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 		item.is_service_item = 'N' if frappe.db.get_value('Item', d.item_code, 'is_stock_item') else 'Y'
+		item.serial_no = ""
 
 		item = update_item_taxes(invoice, item)
 		
@@ -283,7 +285,25 @@ def get_eway_bill_details(invoice):
 		vehicle_type=vehicle_type[invoice.gst_vehicle_type]
 	))
 
+def validate_mandatory_fields(invoice):
+	if not invoice.company_address:
+		frappe.throw(_('Company Address is mandatory to fetch company GSTIN details.'), title=_('Missing Fields'))
+	if not invoice.customer_address:
+		frappe.throw(_('Customer Address is mandatory to fetch customer GSTIN details.'), title=_('Missing Fields'))
+	if not frappe.db.get_value('Address', invoice.company_address, 'gstin'):
+		frappe.throw(
+			_('GSTIN is mandatory to fetch company GSTIN details. Please enter GSTIN in selected company address.'),
+			title=_('Missing Fields')
+		)
+	if not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
+		frappe.throw(
+			_('GSTIN is mandatory to fetch customer GSTIN details. Please enter GSTIN in selected customer address.'),
+			title=_('Missing Fields')
+		)
+
 def make_einvoice(invoice):
+	validate_mandatory_fields(invoice)
+
 	schema = read_json('einv_template')
 
 	transaction_details = get_transaction_details(invoice)
@@ -362,7 +382,7 @@ def validate_einvoice(validations, einvoice, errors=[]):
 					# remove empty dicts
 					einvoice.pop(fieldname, None)
 			continue
-		
+
 		# convert to int or str
 		if value_type == 'string':
 			einvoice[fieldname] = str(value)
