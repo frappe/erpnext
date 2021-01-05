@@ -70,6 +70,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					item_code: me.frm.doc.item_code,
 					supplier: me.frm.doc.supplier
 				}
+
+				if (me.frm.doc.transaction_date) {
+					filters['transaction_date'] = me.frm.doc.transaction_date;
+				}
 				if (me.frm.doc.allocation_period) {
 					filters['allocation_period'] = me.frm.doc.allocation_period;
 				}
@@ -85,6 +89,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			var filters = {
 				item_code: me.frm.doc.item_code,
 				supplier: me.frm.doc.supplier,
+				is_booked: 0
 			}
 			if (me.frm.doc.allocation_period) {
 				filters['allocation_period'] = me.frm.doc.allocation_period;
