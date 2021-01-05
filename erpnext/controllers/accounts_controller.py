@@ -121,7 +121,7 @@ class AccountsController(TransactionBase):
 	
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
-		if frappe.db.get_single_value('Accounts Settings', 'delete_linked_entries'):
+		if frappe.db.get_single_value('Accounts Settings', 'delete_linked_ledger_entries'):
 			frappe.db.sql("delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name))
 			frappe.db.sql("delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name))
 
