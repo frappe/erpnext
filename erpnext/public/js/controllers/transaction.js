@@ -1104,11 +1104,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	batch_no: function(doc, cdt, cdn) {
-		let item = frappe.get_doc(cdt, cdn);
-		this.apply_price_list(item, true);
-	},
-
 	toggle_conversion_factor: function(item) {
 		// toggle read only property for conversion factor field if the uom and stock uom are same
 		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
@@ -1413,7 +1408,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"pricing_rules": d.pricing_rules,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
-					"batch_no": d.batch_no,
 					"price_list_rate": d.price_list_rate,
 					"conversion_factor": d.conversion_factor || 1.0
 				});
