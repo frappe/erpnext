@@ -742,3 +742,4 @@ erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_leave_policy
 erpnext.patches.v13_0.add_po_to_global_search
 erpnext.patches.v13_0.update_returned_qty_in_pr_dn
+erpnext.patches.v13_0.set_company_in_leave_ledger_entry
