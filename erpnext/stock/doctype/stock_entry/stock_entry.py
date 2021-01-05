@@ -460,7 +460,7 @@ class StockEntry(StockController):
 					scrap_material_cost += flt(d.basic_amount)
 
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
-		if (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
+		if number_of_fg_items == 1 or update_finished_item_rate:
 			self.set_basic_rate_for_finished_goods(raw_material_cost, scrap_material_cost)
 
 	def get_args_for_incoming_rate(self, item):
@@ -488,6 +488,8 @@ class StockEntry(StockController):
 
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
+				if d.set_basic_rate_manually: continue
+
 				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
 					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
 
@@ -499,7 +501,7 @@ class StockEntry(StockController):
 					if raw_material_cost and self.purpose == "Manufacture":
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
-					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
+					elif self.purpose == "Repack" and total_fg_qty:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
 						d.basic_amount = d.basic_rate * flt(d.qty)
 
