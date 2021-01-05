@@ -34,7 +34,9 @@ frappe.ui.form.on("Item", {
 			}, __("View"));
 			frm.add_custom_button(__("Ledger"), function() {
 				frappe.route_options = {
-					"item_code": frm.doc.name
+					"item_code": frm.doc.name,
+					"from_date": frappe.defaults.get_user_default("year_start_date"),
+					"to_date": frappe.defaults.get_user_default("year_end_date")
 				}
 				frappe.set_route("query-report", "Stock Ledger");
 			}, __("View"));
