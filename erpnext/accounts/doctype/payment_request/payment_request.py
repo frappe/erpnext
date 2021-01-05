@@ -96,7 +96,22 @@ class PaymentRequest(Document):
 			payment_gateway=self.payment_gateway
 		)
 		controller.validate_transaction_currency(self.currency)
+		frappe.flags.in_test = 1
 		controller.request_for_payment(**payment_record)
+		frappe.flags.in_test = 0
+		# from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_payment_callback_payload
+		# from erpnext.erpnext_integrations.doctype.mpesa_settings.mpesa_settings import verify_transaction
+		# integration_req_ids = frappe.get_all("Integration Request", filters={
+		# 	'reference_doctype': self.doctype,
+		# 	'reference_docname': self.name,
+		# }, pluck="name")
+		# for i in range(len(integration_req_ids)):
+		# 	callback_response = get_payment_callback_payload(
+		# 		Amount=150,
+		# 		CheckoutRequestID=integration_req_ids[i],
+		# 		MpesaReceiptNumber=frappe.utils.random_string(5)
+		# 	)
+		# 	verify_transaction(**callback_response)
 
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
@@ -354,8 +369,8 @@ def make_payment_request(**args):
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True
 
+		pr.insert(ignore_permissions=True)
 		if args.submit_doc:
-			pr.insert(ignore_permissions=True)
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":

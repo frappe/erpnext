@@ -202,6 +202,19 @@ frappe.ui.form.on('POS Invoice', {
 					frappe.dom.unfreeze();
 					frappe.msgprint(__('Payment request failed'));
 				})
+				.then(({ message }) => {
+					const payment_request_name = message.name;
+					setTimeout(() => {
+						frappe.db.get_value('Payment Request', payment_request_name, 'status').then(({ message }) => {
+							if (message.status != 'Paid') {
+								frappe.msgprint({
+									message: __('Payment Request took too long to respond. Please try requesting for payment again.'),
+									title: __('Request Timeout')
+								});
+							}
+						});
+					}, 180000);
+				});
 		});
 	}
 });

@@ -362,24 +362,48 @@ class POSInvoice(SalesInvoice):
 				if not self.contact_mobile:
 					frappe.throw(_("Please enter the phone number first"))
 
-				payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
-					"payment_account": pay.account,
-				}, ["name"])
+				pay_req = self.get_existing_payment_request(pay)
+				if not pay_req:
+					pay_req = self.get_new_payment_request(pay)
+					pay_req.submit()
+				else:
+					pay_req.request_phone_payment()
 
-				record = {
-					"payment_gateway_account": payment_gateway_account,
-					"dt": "POS Invoice",
-					"dn": self.name,
-					"payment_request_type": "Inward",
-					"party_type": "Customer",
-					"party": self.customer,
-					"mode_of_payment": pay.mode_of_payment,
-					"recipient_id": self.contact_mobile,
-					"submit_doc": True,
-					"return_doc": True
-				}
+				return pay_req
+	
+	def get_new_payment_request(self, mop):
+		payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
+			"payment_account": mop.account,
+		}, ["name"])
 
-				return make_payment_request(**record)
+		args = {
+			"dt": "POS Invoice",
+			"dn": self.name,
+			"recipient_id": self.contact_mobile,
+			"mode_of_payment": mop.mode_of_payment,
+			"payment_gateway_account": payment_gateway_account,
+			"payment_request_type": "Inward",
+			"party_type": "Customer",
+			"party": self.customer,
+			"return_doc": True
+		}
+		return make_payment_request(**args)
+
+	def get_existing_payment_request(self, pay):
+		payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
+			"payment_account": pay.account,
+		}, ["name"])
+
+		args = {
+			'doctype': 'Payment Request',
+			'reference_doctype': 'POS Invoice',
+			'reference_name': self.name,
+			'payment_gateway_account': payment_gateway_account,
+			'email_to': self.contact_mobile
+		}
+		pr = frappe.db.exists(args)
+		if pr:
+			return frappe.get_doc('Payment Request', pr[0][0])
 
 @frappe.whitelist()
 def get_stock_availability(item_code, warehouse):

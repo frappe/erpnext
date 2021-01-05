@@ -88,7 +88,8 @@ class MpesaSettings(Document):
 			req_name = getattr(response, global_id)
 			error = None
 
-		create_request_log(request_dict, "Host", "Mpesa", req_name, error)
+		if not frappe.db.exists('Integration Request', req_name):
+			create_request_log(request_dict, "Host", "Mpesa", req_name, error)
 
 		if error:
 			frappe.throw(_(getattr(response, "errorMessage")), title=_("Transaction Error"))
