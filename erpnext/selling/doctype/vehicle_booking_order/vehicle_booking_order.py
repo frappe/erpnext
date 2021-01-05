@@ -113,8 +113,8 @@ class VehicleBookingOrder(AccountsController):
 					.format(self.vehicle, existing_booking))
 
 	def validate_allocation(self):
-		required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
-		if not required:
+		self.vehicle_allocation_required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
+		if not self.vehicle_allocation_required:
 			self.allocation_period = ""
 			self.vehicle_allocation = ""
 
@@ -805,6 +805,7 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 		frappe.throw(_("Vehicle not provided"))
 
 	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
 
 	if vbo_doc.docstatus != 1:
 		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
@@ -825,6 +826,7 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 
 	vbo_doc.db_update()
 	vbo_doc.notify_update()
+	vbo_doc.save_version()
 
 	update_vehicle_booked(vehicle, 1)
 	if previous_vehicle:
