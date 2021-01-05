@@ -309,3 +309,10 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 	message = "Serial Nos" if len(serial_nos) > 1 else "Serial No"
 	frappe.throw(_("There is no batch found against the {0}: {1}")
 		.format(message, serial_no_link))
+
+def make_batch(item_code):
+	if frappe.db.get_value("Item", item_code, "has_batch_no"):
+		doc = frappe.new_doc("Batch")
+		doc.item = item_code
+		doc.save()
+		return doc.name

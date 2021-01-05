@@ -4,12 +4,13 @@
 
 from __future__ import unicode_literals
 import frappe
-import datetime
+import datetime, json
 from frappe import _, bold
+from six import string_types
 from frappe.model.mapper import get_mapped_doc
 from frappe.model.document import Document
 from frappe.utils import (flt, cint, time_diff_in_hours, get_datetime, getdate,
-	get_time, add_to_date, time_diff, add_days, get_datetime_str, get_link_to_form)
+	get_time, add_to_date, time_diff, add_days, get_datetime_str, get_link_to_form, time_diff_in_seconds)
 
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
 
@@ -25,9 +26,20 @@ class JobCard(Document):
 		self.set_status()
 		self.validate_operation_id()
 		self.validate_sequence_id()
+		self.get_sub_operations()
+		self.update_sub_operation_status()
+
+	def get_sub_operations(self):
+		if self.operation:
+			self.sub_operations = []
+			for row in frappe.get_all("Sub Operation",
+				filters = {"parent": self.operation}, fields=["operation"]):
+				self.append("sub_operations", {
+					"sub_operation": row.operation,
+					"status": "Pending"
+				})
 
 	def validate_time_logs(self):
-		self.total_completed_qty = 0.0
 		self.total_time_in_mins = 0.0
 
 		if self.get('time_logs'):
@@ -46,6 +58,8 @@ class JobCard(Document):
 
 				if d.completed_qty:
 					self.total_completed_qty += d.completed_qty
+		else:
+			self.total_completed_qty = 0.0
 
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
@@ -57,7 +71,7 @@ class JobCard(Document):
 				self.workstation, 'production_capacity') or 1
 			validate_overlap_for = " and jc.workstation = %(workstation)s "
 
-		if self.employee:
+		if args.get("employee"):
 			# override capacity for employee
 			production_capacity = 1
 			validate_overlap_for = " and jc.employee = %(employee)s "
@@ -80,7 +94,7 @@ class JobCard(Document):
 				"to_time": args.to_time,
 				"name": args.name or "No Name",
 				"parent": args.parent or "No Name",
-				"employee": self.employee,
+				"employee": args.get("employee"),
 				"workstation": self.workstation
 			}, as_dict=True)
 
@@ -157,6 +171,66 @@ class JobCard(Document):
 			start_date = add_days(start_date, 1)
 			row.planned_start_time = datetime.datetime.combine(start_date,
 				get_time(workstation_doc.working_hours[0].start_time))
+
+	def add_time_log(self, args):
+		last_row = []
+		if self.time_logs and len(self.time_logs) > 0:
+			last_row = self.time_logs[-1]
+
+		self.reset_timer_value(args)
+		if last_row and args.get("complete_time"):
+			last_row.update({
+				"to_time": get_datetime(args.get("complete_time")),
+				"operation": args.get("sub_operation"),
+				"completed_qty": args.get("completed_qty") or 0.0
+			})
+		elif args.get("start_time"):
+			self.append("time_logs", {
+				"from_time": get_datetime(args.get("start_time")),
+				"employee": args.get("employee"),
+				"operation": args.get("sub_operation"),
+				"completed_qty": 0.0
+			})
+
+		if self.status == "On Hold":
+			self.current_time = time_diff_in_seconds(last_row.to_time, last_row.from_time)
+
+		self.save()
+
+	def reset_timer_value(self, args):
+		self.started_time = None
+
+		if args.get("status") in ["Work In Progress", "Complete"]:
+			self.current_time = 0.0
+
+			if args.get("status") == "Work In Progress":
+				self.started_time = get_datetime(args.get("start_time"))
+
+		if args.get("status") == "Resume Job":
+			args["status"] = "Work In Progress"
+
+		if args.get("status"):
+			self.status = args.get("status")
+
+	def update_sub_operation_status(self):
+		if not (self.sub_operations and self.time_logs): return
+
+		operation_wise_completed_time = {}
+		for time_log in self.time_logs:
+			if time_log.operation not in operation_wise_completed_time:
+				operation_wise_completed_time.setdefault(time_log.operation,
+					frappe._dict({"status": "Pending", "completed_time": 0.0}))
+
+			op_row = operation_wise_completed_time[time_log.operation]
+			op_row.status = "Work In Progress" if not time_log.time_in_mins else "Complete"
+			if time_log.time_in_mins:
+				op_row.completed_time += time_log.time_in_mins
+
+		for row in self.sub_operations:
+			operation_deatils = operation_wise_completed_time.get(row.sub_operation)
+			if operation_deatils:
+				row.status = operation_deatils.status
+				row.completed_time = operation_deatils.completed_time
 
 	def update_time_logs(self, row):
 		self.append("time_logs", {
@@ -375,6 +449,17 @@ class JobCard(Document):
 			if row.status != "Completed" and row.completed_qty < current_operation_qty:
 				frappe.throw(_("{0}, complete the operation {1} before the operation {2}.")
 					.format(message, bold(row.operation), bold(self.operation)), OperationSequenceError)
+
+
+@frappe.whitelist()
+def make_time_log(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+	doc = frappe.get_doc("Job Card", args.job_card_id)
+	doc.validate_sequence_id()
+	doc.add_time_log(args)
 
 @frappe.whitelist()
 def get_operation_details(work_order, operation):
