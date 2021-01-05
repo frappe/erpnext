@@ -483,6 +483,13 @@ def get_customer_details(args, get_withholding_tax=True):
 
 	if get_withholding_tax and args.item_code:
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
+
+	if args.item_code and (out.buying_transaction_type or out.selling_transaction_type):
+		item = frappe.get_cached_doc("Item", args.item_code)
+		transaction_type_defaults = get_transaction_type_defaults(out.buying_transaction_type or out.selling_transaction_type, args.company)
+		out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True,
+			transaction_type_defaults=transaction_type_defaults)
+
 	return out
 
 
