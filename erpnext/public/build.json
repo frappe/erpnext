@@ -23,6 +23,7 @@
 		"public/js/queries.js",
 		"public/js/sms_manager.js",
 		"public/js/utils/party.js",
+		"public/js/utils/bundling.js",
 		"public/js/templates/address_list.html",
 		"public/js/templates/contact_list.html",
 		"public/js/controllers/stock_controller.js",

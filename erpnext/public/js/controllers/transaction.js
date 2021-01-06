@@ -245,6 +245,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
+		if (this.frm.doc.__onload && this.frm.doc.__onload.enable_dynamic_bundling) {
+			erpnext.bundling.setup_bundling(this.frm.doc.doctype);
+		}
 	},
 	onload: function() {
 		var me = this;
