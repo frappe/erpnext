@@ -355,6 +355,12 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	delivery_date: function () {
+		if (this.frm.doc.delivery_date) {
+			this.frm.set_value('due_date', this.frm.doc.delivery_date);
+		}
+	},
+
+	due_date: function () {
 		this.frm.trigger('payment_terms_template');
 	},
 
