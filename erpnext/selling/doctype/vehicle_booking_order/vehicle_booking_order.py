@@ -24,7 +24,7 @@ from six import string_types
 import json
 
 force_fields = [
-	'customer_name', 'financer_name', 'lessee_name',
+	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
 	'item_name', 'item_group', 'brand',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no'
@@ -85,6 +85,7 @@ class VehicleBookingOrder(AccountsController):
 		self.set_vehicle_details()
 
 	def before_print(self):
+		super(VehicleBookingOrder, self).before_print()
 		self.set_vehicle_details()
 
 	def set_title(self):
@@ -96,6 +97,14 @@ class VehicleBookingOrder(AccountsController):
 
 		if self.customer:
 			self.validate_party()
+
+		if self.financer and not self.finance_type:
+			frappe.throw(_("Finance Type is mandatory if Financer is set"))
+		if not self.financer:
+			self.finance_type = ""
+
+		if self.finance_type and self.finance_type not in ['Financed', 'Leased']:
+			frappe.throw(_("Finance Type must be either 'Financed' or 'Leased'"))
 
 	def validate_vehicle_item(self):
 		item = frappe.get_cached_doc("Item", self.item_code)
@@ -475,12 +484,27 @@ def get_customer_details(args, get_withholding_tax=True):
 		out.customer_name = party.customer_name
 
 	if financer:
-		out.lessee_name = out.customer_name
+		args.finance_type = args.finance_type or 'Financed'
 		out.financer_name = financer.customer_name
-		out.customer_name = "{0} HPA {1}".format(out.customer_name, financer.customer_name)
+		out.lessee_name = out.customer_name if args.finance_type == 'Leased' else None
+
+		if args.finance_type == 'Financed':
+			out.customer_name = "{0} HPA {1}".format(out.customer_name, financer.customer_name)
 	else:
 		out.lessee_name = None
 		out.financer_name = None
+
+	# Customer Category
+	if party.get('customer_type') == "Individual":
+		if args.financer:
+			out.customer_category = "Lease" if args.finance_type == "Leased" else "Financing"
+		else:
+			out.customer_category = "Individual"
+	else:
+		if args.financer:
+			out.customer_category = "Corporate Lease" if args.finance_type == "Leased" else "Corporate Financing"
+		else:
+			out.customer_category = "Corporate"
 
 	# Tax IDs
 	out.tax_id = financer.get('tax_id') if financer else party.get('tax_id')

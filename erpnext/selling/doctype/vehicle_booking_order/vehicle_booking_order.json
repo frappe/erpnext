@@ -12,10 +12,11 @@
   "naming_series",
   "company",
   "customer",
-  "financer",
   "customer_name",
   "lessee_name",
+  "financer",
   "financer_name",
+  "finance_type",
   "customer_is_company",
   "column_break_6",
   "booking_number",
@@ -26,6 +27,7 @@
   "section_break_30",
   "sales_team",
   "customer_details_section",
+  "customer_category",
   "tax_id",
   "tax_cnic",
   "tax_overseas_cnic",
@@ -883,12 +885,25 @@
    "fieldtype": "Data",
    "label": "Financer Name",
    "read_only": 1
+  },
+  {
+   "depends_on": "financer",
+   "fieldname": "finance_type",
+   "fieldtype": "Select",
+   "label": "Finance Type",
+   "options": "\nFinanced\nLeased"
+  },
+  {
+   "fieldname": "customer_category",
+   "fieldtype": "Data",
+   "label": "Customer Category",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-01-06 13:53:25.667825",
+ "modified": "2021-01-07 01:35:11.879327",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",
