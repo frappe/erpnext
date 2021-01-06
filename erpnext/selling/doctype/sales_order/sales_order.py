@@ -830,7 +830,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
 	for supplier in suppliers:
-    	doc = get_mapped_doc("Sales Order", source_name, {
+		doc = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
 				"doctype": "Purchase Order",
 				"field_no_map": [
