@@ -345,7 +345,19 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	customer_address: function() {
-		erpnext.utils.get_address_display(this.frm, 'customer_address', 'address_display');
+		var me = this;
+
+		frappe.call({
+			method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_address_details",
+			args: {
+				address: cstr(this.frm.doc.customer_address),
+			},
+			callback: function (r) {
+				if (r.message && !r.exc) {
+					me.frm.set_value(r.message);
+				}
+			}
+		});
 	},
 
 	contact_person: function() {

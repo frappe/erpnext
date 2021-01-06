@@ -23,6 +23,8 @@ from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_t
 from six import string_types
 import json
 
+address_fields = ['address_line1', 'address_line2', 'city', 'state']
+
 force_fields = [
 	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
 	'item_name', 'item_group', 'brand',
@@ -30,6 +32,7 @@ force_fields = [
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no'
 	'withholding_tax_amount'
 ]
+force_fields += address_fields
 
 force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_type',
 	'receivable_account', 'payable_account']
@@ -522,7 +525,12 @@ def get_customer_details(args, get_withholding_tax=True):
 		out.customer_address = get_default_address("Customer", financer.name) if financer\
 			else get_default_address(party_type, party_name)
 
-	out.address_display = get_address_display(out.customer_address) if out.customer_address else None
+	if out.customer_address:
+		out.update(get_address_details(out.customer_address))
+	else:
+		out.address_display = None
+		for f in address_fields:
+			out[f] = None
 
 	# Contact
 	if financer:
@@ -570,6 +578,18 @@ def get_customer_details(args, get_withholding_tax=True):
 
 	return out
 
+
+@frappe.whitelist()
+def get_address_details(address):
+	out = frappe._dict()
+
+	address_dict = frappe.db.get_value("Address", address, "*", as_dict=True, cache=True) or {}
+	out.address_display = get_address_display(address_dict)
+
+	for f in address_fields:
+		out[f] = address_dict.get(f)
+
+	return out
 
 @frappe.whitelist()
 def get_item_details(args):
@@ -836,6 +856,9 @@ def set_next_document_values(source, target, buying_or_selling):
 
 		if source.financer and target.meta.has_field('bill_to'):
 			target.bill_to = source.financer
+		if target.meta.has_field('has_stin'):
+			target.has_stin = 0
+
 		for d in source.sales_team:
 			target.append('sales_team', {
 				'sales_person': d.sales_person, 'allocated_percentage': d.allocated_percentage
