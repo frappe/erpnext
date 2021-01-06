@@ -48,8 +48,8 @@ class LoanSecurityUnpledge(Document):
 			'total_interest_payable', 'written_off_amount', 'disbursed_amount', 'status'], as_dict=1)
 
 		if loan_details.status == 'Disbursed':
-			pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.interest_payable) \
-				- flt(loan_details.principal_paid) - flt(loan_details.written_off_amount)
+			pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
+				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
 		else:
 			pending_principal_amount = flt(loan_details.disbursed_amount) - flt(loan_details.total_interest_payable) \
 				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
