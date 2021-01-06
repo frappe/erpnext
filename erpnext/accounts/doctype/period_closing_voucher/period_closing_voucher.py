@@ -54,6 +54,8 @@ class PeriodClosingVoucher(AccountsController):
 		net_pl_balance = 0
 		dimension_fields = ['t1.cost_center']
 
+		accounting_dimensions = get_accounting_dimensions()
+
 		dimension_filters, default_dimensions = get_dimension_filters()
 		for dimension in dimension_filters:
 			dimension_fields.append('t1.{0}'.format(dimension.fieldname))
