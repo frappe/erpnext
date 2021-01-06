@@ -23,8 +23,13 @@ from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_t
 from six import string_types
 import json
 
-force_fields = ['customer_name', 'item_name', 'item_group', 'brand', 'address_display',
-	'contact_display', 'contact_email', 'contact_mobile', 'contact_phone', 'withholding_tax_amount']
+force_fields = [
+	'customer_name', 'financer_name', 'lessee_name',
+	'item_name', 'item_group', 'brand',
+	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no'
+	'withholding_tax_amount'
+]
 
 force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_type',
 	'receivable_account', 'payable_account']
@@ -433,6 +438,8 @@ def get_customer_details(args, get_withholding_tax=True):
 		frappe.throw(_("Company is mandatory"))
 	if not args.customer and not args.customer_is_company:
 		frappe.throw(_("Customer is mandatory"))
+	if args.customer and args.financer and args.customer == args.financer:
+		frappe.throw(_("Customer and Financer cannot be the same"))
 
 	out = frappe._dict()
 
@@ -440,27 +447,51 @@ def get_customer_details(args, get_withholding_tax=True):
 		out.customer = None
 		out.customer_name = args.company
 
+	# Determine company or customer and financer
 	party_type = "Company" if args.customer_is_company else "Customer"
 	party_name = args.company if args.customer_is_company else args.customer
 	party = frappe.get_cached_doc(party_type, party_name)
+	financer = frappe.get_cached_doc("Customer", args.financer) if args.financer else frappe._dict()
 
+	# Customer and Financer Name
 	if party_type == "Customer":
 		out.customer_name = party.customer_name
 
-	out.tax_id = party.get('tax_id')
-	out.tax_cnic = party.get('tax_cnic')
-	out.tax_strn = party.get('tax_strn')
-	out.tax_status = party.get('tax_status')
-	out.tax_overseas_cnic = party.get('tax_overseas_cnic')
-	out.passport_no = party.get('passport_no')
+	if financer:
+		out.lessee_name = out.customer_name
+		out.financer_name = financer.customer_name
+		out.customer_name = "{0} HPA {1}".format(out.customer_name, financer.customer_name)
+	else:
+		out.lessee_name = None
+		out.financer_name = None
 
-	out.customer_address = args.customer_address or get_default_address(party_type, party_name)
+	# Tax IDs
+	out.tax_id = financer.get('tax_id') if financer else party.get('tax_id')
+	out.tax_cnic = financer.get('tax_cnic') if financer else party.get('tax_cnic')
+	out.tax_strn = financer.get('tax_strn') if financer else party.get('tax_strn')
+	out.tax_overseas_cnic = financer.get('tax_overseas_cnic') if financer else party.get('tax_overseas_cnic')
+	out.passport_no = financer.get('passport_no') if financer else party.get('passport_no')
+	out.tax_status = party.get('tax_status')
+
+	# Address
+	out.customer_address = args.customer_address
+	if args.customer_address:
+		out.customer_address = args.customer_address
+	else:
+		out.customer_address = get_default_address("Customer", financer.name) if financer\
+			else get_default_address(party_type, party_name)
+
 	out.address_display = get_address_display(out.customer_address) if out.customer_address else None
 
-	set_contact_details(out, party, party_type)
+	# Contact
+	if financer:
+		set_contact_details(out, financer, "Customer")
+	else:
+		set_contact_details(out, party, party_type)
 
 	vehicles_settings = frappe.get_cached_doc("Vehicles Settings", None)
 
+	# Transaction Type
 	out.selling_transaction_type = vehicles_settings.selling_transaction_type_company if args.customer_is_company \
 		else vehicles_settings.selling_transaction_type_customer
 	out.buying_transaction_type = vehicles_settings.buying_transaction_type_company if args.customer_is_company \
@@ -485,9 +516,11 @@ def get_customer_details(args, get_withholding_tax=True):
 	# out.withholding_tax_account = buying_vehicle_booking_defaults.get('withholding_tax_account') or \
 	# 	selling_vehicle_booking_defaults.get('withholding_tax_account')
 
+	# Withholding Tax
 	if get_withholding_tax and args.item_code:
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
 
+	# Warehouse
 	if args.item_code and (out.buying_transaction_type or out.selling_transaction_type):
 		item = frappe.get_cached_doc("Item", args.item_code)
 		transaction_type_defaults = get_transaction_type_defaults(out.buying_transaction_type or out.selling_transaction_type, args.company)
@@ -760,6 +793,8 @@ def set_next_document_values(source, target, buying_or_selling):
 		target.customer_address = source.customer_address
 		target.contact_person = source.contact_person
 
+		if source.financer and target.meta.has_field('bill_to'):
+			target.bill_to = source.financer
 		for d in source.sales_team:
 			target.append('sales_team', {
 				'sales_person': d.sales_person, 'allocated_percentage': d.allocated_percentage

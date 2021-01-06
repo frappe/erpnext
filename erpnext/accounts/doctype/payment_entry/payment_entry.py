@@ -279,6 +279,9 @@ class PaymentEntry(AccountsController):
 						party_type_field = "party_type" if d.reference_doctype=="Landed Cost Voucher" else ""
 
 						ref_party = ref_doc.get("bill_to") or ref_doc.get(party_field)
+						if d.reference_doctype == "Vehicle Booking Order" and self.party_type == "Customer" and ref_doc.get('financer'):
+							ref_party = ref_doc.get('financer')
+
 						if self.party != ref_party or (party_type_field and self.party_type != ref_doc.get(party_type_field)):
 							frappe.throw(_("{0} {1} is not associated with {2} {3} for payments")
 								.format(d.reference_doctype, d.reference_name, self.party_type, self.party))
@@ -852,16 +855,21 @@ def get_outstanding_vehicle_booking_orders(party_type, party, party_account, fil
 	outstanding_field = "customer_outstanding" if party_type == "Customer" else "supplier_outstanding"
 	account_field = "receivable_account" if party_type == "Customer" else "payable_account"
 
+	if party_type == "Customer":
+		party_condition = "(({0} = %(party)s and ifnull(financer, '') = '') or financer = %(party)s)".format(party_field)
+	else:
+		party_condition = "{0} = %(party)s".format(party_field)
+
 	advances = frappe.db.sql("""
 		select
 			transaction_date as posting_date, 'Vehicle Booking Order' as voucher_type, name as voucher_no,
 			invoice_total as invoice_amount, customer_outstanding as outstanding_amount, due_date
 		from `tabVehicle Booking Order`
-		where {party_field} = %s and {account_field} = %s and docstatus = 1 and {outstanding_field} != 0
+		where {party_condition} and {account_field} = %(account)s and docstatus = 1 and {outstanding_field} != 0
 		order by transaction_date, name
 	""".format(**{
-		'party_field': party_field, 'account_field': account_field, 'outstanding_field': outstanding_field
-	}), [party, party_account], as_dict=1)
+		'party_condition': party_condition, 'account_field': account_field, 'outstanding_field': outstanding_field
+	}), {"party": party, "account": party_account}, as_dict=1)
 
 	return advances or []
 
@@ -1163,6 +1171,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.mode_of_payment = mode_of_payment or doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get('bill_to') or doc.get(scrub(party_type)) or doc.get("party")
+	if dt == "Vehicle Booking Order" and party_type == "Customer" and doc.get('financer'):
+		pe.party = doc.get('financer')
 	pe.contact_person = doc.get("contact_person")
 	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()

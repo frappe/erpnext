@@ -199,6 +199,11 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.get_customer_details();
 	},
 
+	financer: function () {
+		this.get_customer_details();
+		this.set_dynamic_link();
+	},
+
 	customer_is_company: function () {
 		if (this.frm.doc.customer_is_company) {
 			this.frm.doc.customer = "";
@@ -271,6 +276,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 						company: me.frm.doc.company,
 						customer: me.frm.doc.customer,
 						company_is_customer: me.frm.doc.company_is_customer,
+						financer: me.frm.doc.financer,
 						item_code: me.frm.doc.item_code,
 						transaction_date: me.frm.doc.transaction_date
 					}
@@ -291,10 +297,22 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	set_dynamic_link: function () {
+		var fieldname;
+		var doctype;
+		if (this.frm.doc.financer) {
+			fieldname = 'financer';
+			doctype = 'Customer';
+		} else if (this.frm.doc.customer_is_company) {
+			fieldname = 'company';
+			doctype = 'Company';
+		} else {
+			fieldname = 'customer';
+			doctype = 'Customer';
+		}
 		frappe.dynamic_link = {
 			doc: this.frm.doc,
-			fieldname: this.frm.doc.customer_is_company ? 'company' : 'customer',
-			doctype: this.frm.doc.customer_is_company ? 'Company' : 'Customer'
+			fieldname: fieldname,
+			doctype: doctype
 		};
 	},
 
