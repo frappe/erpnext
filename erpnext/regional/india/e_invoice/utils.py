@@ -15,7 +15,7 @@ from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date
+from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
@@ -84,26 +84,32 @@ def get_doc_details(invoice):
 	))
 
 def get_party_details(address_name):
-	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
-	gstin = address.get('gstin')
+	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 
-	gstin_details = get_gstin_details(gstin)
-	legal_name = gstin_details.get('LegalName') or gstin_details.get('TradeName')
-	location = gstin_details.get('AddrLoc') or address.get('city')
-	state_code = gstin_details.get('StateCode')
-	pincode = gstin_details.get('AddrPncd')
-	address_line1 = '{} {}'.format(gstin_details.get('AddrBno') or "", gstin_details.get('AddrFlno') or "")
-	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm') or "", gstin_details.get('AddrSt') or "")
+	if (not d.gstin
+		or not d.city
+		or not d.pincode
+		or not d.address_title
+		or not d.address_line1
+		or not d.gst_state_number):
 
-	if state_code == 97:
+		frappe.throw(
+			msg=_('Address lines, city, pincode, gstin is mandatory for address {}. Please set them and try again.').format(
+				get_link_to_form('Address', address_name)
+			),
+			title=_('Missing Address Fields')
+		)
+
+	if d.gst_state_number == 97:
 		# according to einvoice standard
 		pincode = 999999
 
 	return frappe._dict(dict(
-		gstin=gstin, legal_name=legal_name,
-		location=location, pincode=pincode,
-		state_code=state_code, address_line1=address_line1,
-		address_line2=address_line2
+		gstin=d.gstin, legal_name=d.address_title,
+		location=d.city, pincode=d.pincode,
+		state_code=d.gst_state_number,
+		address_line1=d.address_line1,
+		address_line2=d.address_line2
 	))
 
 def get_gstin_details(gstin):
@@ -124,14 +130,22 @@ def get_gstin_details(gstin):
 		return GSPConnector.get_gstin_details(gstin)
 
 def get_overseas_address_details(address_name):
-	address_title, address_line1, address_line2, city, phone, email_id = frappe.db.get_value(
-		'Address', address_name, ['address_title', 'address_line1', 'address_line2', 'city', 'phone', 'email_id']
+	address_title, address_line1, address_line2, city = frappe.db.get_value(
+		'Address', address_name, ['address_title', 'address_line1', 'address_line2', 'city']
 	)
 
+	if not address_title or not address_line1 or not city:
+		frappe.throw(
+			msg=_('Address lines and city is mandatory for address {}. Please set them and try again.').format(
+				get_link_to_form('Address', address_name)
+			),
+			title=_('Missing Address Fields')
+		)
+
 	return frappe._dict(dict(
-		gstin='URP', legal_name=address_title, address_line1=address_line1,
-		address_line2=address_line2, email=email_id, phone=phone,
-		pincode=999999, state_code=96, place_of_supply=96, location=city
+		gstin='URP', legal_name=address_title, location=city,
+		address_line1=address_line1, address_line2=address_line2,
+		pincode=999999, state_code=96, place_of_supply=96
 	))
 
 def get_item_list(invoice):
