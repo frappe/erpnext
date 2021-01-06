@@ -345,9 +345,27 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			this.frm.doc.supplier_outstanding = this.frm.doc.invoice_total;
 		}
 
+		this.calculate_contribution();
+
 		this.frm.doc.in_words = "";
 
 		this.frm.refresh_fields();
+	},
+
+	allocated_percentage: function () {
+		this.calculate_taxes_and_totals();
+	},
+
+	calculate_contribution: function() {
+		var me = this;
+		$.each(this.frm.doc.sales_team || [], function(i, sales_person) {
+			frappe.model.round_floats_in(sales_person);
+			if(sales_person.allocated_percentage) {
+				sales_person.allocated_amount = flt(
+					me.frm.doc.invoice_total * sales_person.allocated_percentage / 100.0,
+					precision("allocated_amount", sales_person));
+			}
+		});
 	},
 
 	transaction_date: function () {

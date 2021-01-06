@@ -402,7 +402,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	calculate_contribution: function() {
 		var me = this;
-		$.each(this.frm.doc.doctype.sales_team || [], function(i, sales_person) {
+		$.each(this.frm.doc.sales_team || [], function(i, sales_person) {
 			frappe.model.round_floats_in(sales_person);
 			if(sales_person.allocated_percentage) {
 				sales_person.allocated_amount = flt(

@@ -222,6 +222,23 @@ class VehicleBookingOrder(AccountsController):
 			self.customer_outstanding = self.invoice_total
 			self.supplier_outstanding = self.invoice_total
 
+		self.calculate_contribution()
+
+	def calculate_contribution(self):
+		total = 0.0
+		sales_team = self.get("sales_team", [])
+		for sales_person in sales_team:
+			self.round_floats_in(sales_person)
+
+			sales_person.allocated_amount = flt(
+				self.invoice_total * sales_person.allocated_percentage / 100.0,
+				self.precision("allocated_amount", sales_person))
+
+			total += sales_person.allocated_percentage
+
+		if sales_team and total != 100.0:
+			frappe.throw(_("Total allocated percentage for sales team should be 100"))
+
 	def validate_amounts(self):
 		for field in ['vehicle_amount', 'invoice_total']:
 			self.validate_value(field, '>', 0)
