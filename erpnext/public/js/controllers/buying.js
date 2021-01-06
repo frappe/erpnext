@@ -191,7 +191,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 			item.received_stock_qty = flt(item.conversion_factor, precision("conversion_factor", item)) * flt(item.received_qty);
 		}
-
 		this._super(doc, cdt, cdn);
 	},
 
@@ -211,6 +210,22 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 		item.qty = flt(item.received_qty - item.rejected_qty, precision("qty", item));
 		this.qty(doc, cdt, cdn);
+	},
+
+	rate: function(doc,cdt,cdn) {
+		this.calculate_stock_uom_rate(doc, cdt, cdn);
+		this._super(doc, cdt, cdn);
+	},
+
+	conversion_factor: function(doc,cdt,cdn) {
+		this.calculate_stock_uom_rate(doc, cdt, cdn);
+		this._super(doc, cdt, cdn);
+	},
+
+	calculate_stock_uom_rate: function(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		item.stock_uom_rate = item.rate/item.conversion_factor;
+		refresh_field("stock_uom_rate", item.name, item.parentfield);
 	},
 
 	validate_negative_quantity: function(cdt, cdn, item, fieldnames){
