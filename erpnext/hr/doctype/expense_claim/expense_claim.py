@@ -172,12 +172,16 @@ class ExpenseClaim(BuyingController):
 		if self.is_paid and self.grand_total:
 			# payment entry
 			payment_account = get_bank_cash_account(self.mode_of_payment, self.company).get("account")
-			account_currency = get_account_currency(payment_account)
+			payable_account_currency = get_account_currency(payment_account)
+			outstanding_amount_in_company_currency = flt(self.outstanding_amount * self.conversion_rate,
+					self.precision("outstanding_amount"))
+
 			gl_entry.append(
 				self.get_gl_dict({
 					"account": payment_account,
-					"credit": self.outstanding_amount,
-					"credit_in_account_currency": self.outstanding_amount,
+					"credit": outstanding_amount_in_company_currency,
+					"credit_in_account_currency": outstanding_amount_in_company_currency \
+						if payable_account_currency==self.company_currency else self.outstanding_amount,
 					"against": self.employee
 				}, item=self)
 			)
@@ -188,8 +192,9 @@ class ExpenseClaim(BuyingController):
 					"party_type": "Employee",
 					"party": self.employee,
 					"against": payment_account,
-					"debit": self.outstanding_amount,
-					"debit_in_account_currency": self.outstanding_amount,
+					"debit": outstanding_amount_in_company_currency,
+					"debit_in_account_currency": outstanding_amount_in_company_currency \
+						if payable_account_currency==self.company_currency else self.outstanding_amount,
 					"against_voucher": self.name,
 					"against_voucher_type": self.doctype,
 				}, item=self)
