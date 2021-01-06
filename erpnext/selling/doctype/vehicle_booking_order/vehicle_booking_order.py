@@ -893,6 +893,10 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 		frappe.throw(_("Cannot change Vehicle Allocation in Vehicle Booking Order {0} because Vehicle is already received")
 			.format(frappe.bold(vehicle_booking_order)))
 
+	if flt(vbo_doc.supplier_advance):
+		frappe.throw(_("Cannot change Vehicle Allocation in Vehicle Booking Order {0}  because Supplier Payment has already been made")
+			.format(frappe.bold(vehicle_booking_order)))
+
 	previous_allocation = vbo_doc.vehicle_allocation
 
 	vbo_doc.vehicle_allocation = vehicle_allocation

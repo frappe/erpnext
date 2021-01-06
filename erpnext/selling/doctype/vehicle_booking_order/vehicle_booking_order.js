@@ -164,20 +164,28 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				}
 			}
 
-			if (this.frm.doc.delivery_status === "To Receive") {
+			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
+			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Allocation" : "Select Allocation";
+			if (this.frm.doc.delivery_status === "To Receive" && !this.frm.doc.supplier_advance) {
 				if (this.frm.doc.vehicle_allocation_required) {
-					var select_allocation_label = this.frm.doc.vehicle ? "Change Allocation" : "Select Allocation";
 					this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation());
 				}
 
-				var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
 				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle());
+			}
+
+			if (this.frm.doc.vehicle_allocation_required && !this.frm.doc.vehicle_allocation) {
+				this.frm.custom_buttons[__(select_allocation_label)] && this.frm.custom_buttons[__(select_allocation_label)].addClass('btn-primary');
 			}
 
 			if (unpaid) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
 			} else if (this.frm.doc.status === "To Receive Vehicle") {
-				this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
+				if (this.frm.doc.vehicle) {
+					this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
+				} else {
+					this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
+				}
 			} else if (this.frm.doc.status === "To Receive Invoice") {
 				this.frm.custom_buttons[__('Receive Invoice')] && this.frm.custom_buttons[__('Receive Invoice')].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Deliver Vehicle") {

@@ -1073,6 +1073,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	elif dt == "Vehicle Booking Order" and not party_type:
 		frappe.throw(_("Party Type is mandatory for Vehicle Booking Order"))
 
+	if dt == "Vehicle Booking Order" and party_type == "Supplier" and doc.vehicle_allocation_required and not doc.vehicle_allocation:
+		frappe.throw(_("Please set Vehicle Allocation first"))
+
 	# party account
 	if dt == "Sales Invoice":
 		party_account = get_party_account_based_on_invoice_discounting(dn) or doc.debit_to
