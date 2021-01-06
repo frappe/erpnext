@@ -429,11 +429,11 @@ class SalarySlip(TransactionBase):
 
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
-		
+
 		self.set_loan_repayment()
 		self.set_component_amounts_based_on_payment_days()
 		self.set_net_pay()
-	
+
 	def set_net_pay(self):
 		self.total_deduction = self.get_component_totals("deductions")
 		self.base_total_deduction = flt(flt(self.total_deduction) * flt(self.exchange_rate), self.precision('base_total_deduction'))
@@ -1154,9 +1154,9 @@ class SalarySlip(TransactionBase):
 			filters = {'employee_name' : self.employee_name,
 				'start_date' : ['>=', period_start_date],
 				'end_date' : ['<', period_end_date],
-				'name': ['!=', self.name]
+				'name': ['!=', self.name],
+				'docstatus': 1
 			})
-
 
 		year_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
 
@@ -1171,7 +1171,8 @@ class SalarySlip(TransactionBase):
 			filters = {'employee_name' : self.employee_name,
 				'start_date' : ['>=', first_day_of_the_month],
 				'end_date' : ['<', self.start_date],
-				'name': ['!=', self.name]
+				'name': ['!=', self.name],
+				'docstatus': 1
 			})
 
 		month_to_date = flt(salary_slip_sum[0].sum) if salary_slip_sum else 0.0
