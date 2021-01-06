@@ -300,11 +300,11 @@ def update_reimbursed_amount(doc, jv=None):
 		and party = %s {condition}""".format(condition=condition), #nosec
 		(doc.name, doc.employee) ,as_dict=1)[0].amt
 
-	doc.db_set("base_total_amount_reimbursed", amt)
+	doc.db_set("total_amount_reimbursed", amt)
 
-	total_amount_reimbursed = flt(flt(doc.base_total_amount_reimbursed, doc.precision("base_total_amount_reimbursed"))
-		/ doc.conversion_rate, doc.precision("total_amount_reimbursed"))
-	doc.db_set("total_amount_reimbursed", total_amount_reimbursed)
+	base_total_amount_reimbursed = flt(flt(doc.total_amount_reimbursed, doc.precision("total_amount_reimbursed")) *
+		doc.conversion_rate, doc.precision("total_amount_reimbursed"))
+	doc.db_set("base_total_amount_reimbursed", base_total_amount_reimbursed)
 
 	doc.set_outstanding_amount()
 	doc.db_set("outstanding_amount", doc.outstanding_amount)
@@ -392,24 +392,36 @@ def get_advances(employee, advance_id=None):
 
 @frappe.whitelist()
 def get_expense_claim(
-	employee_name, company, employee_advance_name, posting_date, paid_amount, claimed_amount):
-	default_payable_account = frappe.get_cached_value('Company',  company,  "default_payable_account")
-	default_cost_center = frappe.get_cached_value('Company',  company,  'cost_center')
+	employee_name, company, employee_advance_name, posting_date, paid_amount, claimed_amount, currency, exchange_rate):
+	default_payable_account = frappe.get_cached_value("Company", company, "default_expense_claim_payable_account")
+	if not default_payable_account:
+		default_payable_account = frappe.get_cached_value("Company", company, "default_payable_account")
 
-	expense_claim = frappe.new_doc('Expense Claim')
+	default_cost_center = frappe.get_cached_value("Company",  company,  "cost_center")
+	payable_account_currency = get_account_currency(default_payable_account)
+
+	expense_claim = frappe.new_doc("Expense Claim")
 	expense_claim.company = company
 	expense_claim.employee = employee_name
 	expense_claim.payable_account = default_payable_account
 	expense_claim.cost_center = default_cost_center
 	expense_claim.is_paid = 1 if flt(paid_amount) else 0
+	expense_claim.currency = currency if currency == payable_account_currency else payable_account_currency
+	expense_claim.conversion_rate = flt(exchange_rate) if payable_account_currency == currency else 1
+
+	paid_amount = flt(paid_amount) if payable_account_currency==currency \
+		else flt(paid_amount) * flt(exchange_rate)
+	claimed_amount = flt(claimed_amount) if payable_account_currency==currency \
+		else flt(claimed_amount) * flt(exchange_rate)
+
 	expense_claim.append(
-		'advances',
+		"advances",
 		{
-			'employee_advance': employee_advance_name,
-			'posting_date': posting_date,
-			'advance_paid': flt(paid_amount),
-			'unclaimed_amount': flt(paid_amount) - flt(claimed_amount),
-			'allocated_amount': flt(paid_amount) - flt(claimed_amount)
+			"employee_advance": employee_advance_name,
+			"posting_date": posting_date,
+			"advance_paid": flt(paid_amount),
+			"unclaimed_amount": flt(paid_amount) - flt(claimed_amount),
+			"allocated_amount": flt(paid_amount) - flt(claimed_amount)
 		}
 	)
 
