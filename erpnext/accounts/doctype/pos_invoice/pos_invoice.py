@@ -295,7 +295,9 @@ class POSInvoice(SalesInvoice):
 						self.set(fieldname, profile.get(fieldname))
 
 			if self.customer:
-				customer_price_list, customer_group = frappe.db.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_price_list, customer_group, customer_currency = frappe.db.get_value(
+					"Customer", self.customer, ['default_price_list', 'customer_group', 'default_currency']
+				)
 				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
 				selling_price_list = customer_price_list or customer_group_price_list or profile.get('selling_price_list')
 			else:
@@ -303,6 +305,8 @@ class POSInvoice(SalesInvoice):
 
 			if selling_price_list:
 				self.set('selling_price_list', selling_price_list)
+			if customer_currency != profile.get('currency'):
+				self.set('currency', customer_currency)
 
 			# set pos values in items
 			for item in self.get("items"):
