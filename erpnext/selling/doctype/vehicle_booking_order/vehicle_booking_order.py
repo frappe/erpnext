@@ -85,14 +85,19 @@ class VehicleBookingOrder(AccountsController):
 		self.set_status()
 
 	def onload(self):
-		self.set_vehicle_details()
+		if self.docstatus == 0:
+			self.set_missing_values(for_validate=True)
+			self.calculate_taxes_and_totals()
+		elif self.docstatus == 1:
+			self.set_vehicle_details()
 
 	def before_print(self):
 		super(VehicleBookingOrder, self).before_print()
-		self.set_vehicle_details()
+		if self.docstatus == 1:
+			self.set_vehicle_details()
 
 	def set_title(self):
-		self.title = self.company if self.customer_is_company else self.customer_name
+		self.title = self.customer_name
 
 	def validate_customer(self):
 		if not self.customer and not self.customer_is_company:
@@ -474,25 +479,28 @@ def get_customer_details(args, get_withholding_tax=True):
 
 	if args.customer_is_company:
 		out.customer = None
-		out.customer_name = args.company
 
 	# Determine company or customer and financer
 	party_type = "Company" if args.customer_is_company else "Customer"
 	party_name = args.company if args.customer_is_company else args.customer
 	party = frappe.get_cached_doc(party_type, party_name)
 	financer = frappe.get_cached_doc("Customer", args.financer) if args.financer else frappe._dict()
+	args.finance_type = args.finance_type or 'Financed' if financer else None
 
 	# Customer and Financer Name
 	if party_type == "Customer":
 		out.customer_name = party.customer_name
+	else:
+		out.customer_name = args.company
 
 	if financer:
-		args.finance_type = args.finance_type or 'Financed'
 		out.financer_name = financer.customer_name
-		out.lessee_name = out.customer_name if args.finance_type == 'Leased' else None
+		out.lessee_name = out.customer_name
 
 		if args.finance_type == 'Financed':
 			out.customer_name = "{0} HPA {1}".format(out.customer_name, financer.customer_name)
+		elif args.finance_type == 'Leased':
+			out.customer_name = financer.customer_name
 	else:
 		out.lessee_name = None
 		out.financer_name = None
@@ -500,29 +508,31 @@ def get_customer_details(args, get_withholding_tax=True):
 	# Customer Category
 	if party.get('customer_type') == "Individual":
 		if args.financer:
-			out.customer_category = "Lease" if args.finance_type == "Leased" else "Financing"
+			out.customer_category = "Lease" if args.finance_type == "Leased" else "Finance"
 		else:
 			out.customer_category = "Individual"
 	else:
 		if args.financer:
-			out.customer_category = "Corporate Lease" if args.finance_type == "Leased" else "Corporate Financing"
+			out.customer_category = "Corporate Lease" if args.finance_type == "Leased" else "Finance"
 		else:
 			out.customer_category = "Corporate"
 
+	use_financer_contact = financer and args.finance_type == "Leased"
+
 	# Tax IDs
 	out.tax_id = financer.get('tax_id') if financer else party.get('tax_id')
-	out.tax_cnic = financer.get('tax_cnic') if financer else party.get('tax_cnic')
 	out.tax_strn = financer.get('tax_strn') if financer else party.get('tax_strn')
-	out.tax_overseas_cnic = financer.get('tax_overseas_cnic') if financer else party.get('tax_overseas_cnic')
-	out.passport_no = financer.get('passport_no') if financer else party.get('passport_no')
-	out.tax_status = party.get('tax_status')
+
+	out.tax_cnic = party.get('tax_cnic')
+	out.tax_overseas_cnic = party.get('tax_overseas_cnic')
+	out.passport_no = party.get('passport_no')
+
+	out.tax_status = financer.get('tax_status') if use_financer_contact else party.get('tax_status')
 
 	# Address
 	out.customer_address = args.customer_address
-	if args.customer_address:
-		out.customer_address = args.customer_address
-	else:
-		out.customer_address = get_default_address("Customer", financer.name) if financer\
+	if not out.customer_address:
+		out.customer_address = get_default_address("Customer", financer.name) if use_financer_contact\
 			else get_default_address(party_type, party_name)
 
 	if out.customer_address:
@@ -533,7 +543,7 @@ def get_customer_details(args, get_withholding_tax=True):
 			out[f] = None
 
 	# Contact
-	if financer:
+	if use_financer_contact:
 		set_contact_details(out, financer, "Customer")
 	else:
 		set_contact_details(out, party, party_type)

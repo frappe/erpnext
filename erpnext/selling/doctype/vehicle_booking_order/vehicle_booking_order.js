@@ -222,6 +222,8 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	finance_type: function () {
+		this.set_dynamic_link();
+
 		if (this.frm.doc.finance_type) {
 			this.get_customer_details();
 		}
@@ -327,7 +329,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	set_dynamic_link: function () {
 		var fieldname;
 		var doctype;
-		if (this.frm.doc.financer) {
+		if (this.frm.doc.financer && this.frm.doc.finance_type === "Leased") {
 			fieldname = 'financer';
 			doctype = 'Customer';
 		} else if (this.frm.doc.customer_is_company) {
