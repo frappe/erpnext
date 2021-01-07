@@ -19,6 +19,7 @@ $.extend(erpnext.bundling, {
 
 		frappe.ui.form.on(doctype + " Item", {
 			items_move: function(frm, cdt, cdn) {
+				erpnext.bundling.items_move_arrangement(frm);
 				erpnext.bundling.validate_bundle_states(frm);
 				erpnext.bundling.render_bundle_icons(frm);
 			},
@@ -31,6 +32,41 @@ $.extend(erpnext.bundling, {
 				erpnext.bundling.render_bundle_icons(frm);
 			}
 		});
+	},
+
+	items_move_arrangement: function (frm) {
+		let items = frm.doc.items;
+		for(let i=0; i < items.length; i++) {
+			let item = items[i];
+			let item_prev = i > 0 ? items[i - 1] : null;
+			let item_prev_of_prev = i > 0 ? items[i - 2] : null;
+			let item_next = i < items.length - 1 ? items[i + 1] : null;
+			let item_next_of_next = i < items.length - 1 ? items[i + 2] : null;
+			let is_last = i === items.length - 1;
+
+			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item_next.bundling_state == "Continue") && item.bundling_state == "Terminate" ) {
+				let temp_state = item.bundling_state;
+				item.bundling_state = item_next.bundling_state;
+				item_next.bundling_state = temp_state;
+			}
+			if (item_prev && item_next && (item_prev.bundling_state == "Start" && item.bundling_state == "Terminate") &&  item_next.bundling_state == "Continue") {
+				let temp_state = item.bundling_state;
+				item.bundling_state = item_next.bundling_state;
+				item_next.bundling_state = temp_state;
+			}
+			if ((!item_prev || item_prev.bundling_state != "Continue" ) && (!item_prev_of_prev || item_prev_of_prev.bundling_state!="Continue") && item_next_of_next && item_next && (item_next_of_next.bundling_state == "Continue" && item_next.bundling_state == "Start" ) && item.bundling_state == "Terminate") {
+				item.bundling_state = item_next.bundling_state;
+				item_next.bundling_state = "Continue";
+			}
+			if (item_prev && (item.bundling_state == "Continue" && item_prev.bundling_state == "Continue") && (!item_next || item_next.bundling_state == "Continue" || item_next.bundling_state == "")) {
+				if (item_next) {
+
+					item_next.bundling_state = "Terminate";
+				} else {
+					item.bundling_state = "Terminate";
+				}
+			}
+		}
 	},
 
 	setup_bundle_buttons: function(frm) {
@@ -141,27 +177,23 @@ $.extend(erpnext.bundling, {
 		for(let i=0; i < items.length; i++) {
 			let item = items[i];
 			let item_prev = i > 0 ? items[i - 1] : null;
+			let item_prev_of_prev = i > 0 ? items[i - 2] : null;
 			let item_next = i < items.length - 1 ? items[i + 1] : null;
+			let item_next_of_next = i < items.length - 1 ? items[i + 2] : null;
 			let is_last = i === items.length - 1;
-
-			// if ((!item_prev || item_prev.bundling_state !== "Start") && item.bundling_state === "Terminate" ) {
-			// 	item.bundling_state = ""
-			// }
 
 			if (["Start", "Continue"].includes(item.bundling_state) && !is_last) {
 				if (bundle_start == null) {
 					bundle_start = i;
-					// debugger;
 				}
-			} else {
-				// debugger;
+			}
+			else {
 				if (bundle_start != null) {
 					let bundle_end = item.bundling_state === "Terminate" ? i : i - 1;
 					bundles.push({bundle_start, bundle_end});
 					bundle_start = null;
-					// debugger;
 				}
-				if ((!item_prev || item_prev.bundling_state !== "Start") && item.bundling_state === "Terminate" ) {
+				else if ((!item_prev || item_prev.bundling_state !== "Start") && ["Terminate", "Continue"].includes(item.bundling_state)) {
 					item.bundling_state = ""
 				}
 			}
