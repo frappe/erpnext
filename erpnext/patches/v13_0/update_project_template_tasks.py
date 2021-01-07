@@ -8,6 +8,8 @@ def execute():
     frappe.reload_doc("projects", "doctype", "project_template")
     frappe.reload_doc("projects", "doctype", "project_template_task")
     frappe.reload_doc("projects", "doctype", "project_template")
+    frappe.reload_doc("projects", "doctype", "task")
+
     for template_name in frappe.db.sql(""" 
         select 
             name 
@@ -30,11 +32,14 @@ def execute():
                     description = task.description,
                     is_template = 1
                 )).insert()
-                new_tasks.append(new_task.name)
+                print(new_task)
+                new_tasks.append(new_task)
         if replace_tasks:
             template.tasks = []
             for tsk in new_tasks:
+                print(tsk.name, tsk.subject)
                 template.append("tasks", {
-                    "task": tsk
+                    "task": tsk.name,
+                    "subject": tsk.subject
                 })  
             template.save()
