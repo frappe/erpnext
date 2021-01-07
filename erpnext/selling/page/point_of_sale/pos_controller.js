@@ -699,14 +699,14 @@ erpnext.PointOfSale.Controller = class {
 		frappe.dom.freeze();
 		const { doctype, name, current_item } = this.item_details;
 
-		frappe.model.set_value(doctype, name, 'qty', 0);
-
-		this.frm.script_manager.trigger('qty', doctype, name).then(() => {
-			frappe.model.clear_doc(doctype, name);
-			this.update_cart_html(current_item, true);
-			this.item_details.toggle_item_details_section(undefined);
-			frappe.dom.unfreeze();
-		})
+		frappe.model.set_value(doctype, name, 'qty', 0)
+			.then(() => {
+				frappe.model.clear_doc(doctype, name);
+				this.update_cart_html(current_item, true);
+				this.item_details.toggle_item_details_section(undefined);
+				frappe.dom.unfreeze();
+			})
+			.catch(e => console.log(e));
 	}
 }
 
