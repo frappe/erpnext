@@ -789,7 +789,6 @@ class AccountsController(TransactionBase):
 				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
 				if (party_account_currency
-						and party_account_currency != self.company_currency
 						and self.currency != party_account_currency):
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
 								 .format(party_type, party, party_account_currency), InvalidCurrency)
@@ -858,7 +857,7 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 
-		if party_account_currency == self.company_currency:
+		if party_account_currency == self.company_currency and party_account_currency == self.currency:
 			grand_total = self.get("base_rounded_total") or self.base_grand_total
 		else:
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -919,7 +918,7 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
 
-			if party_account_currency == self.company_currency:
+			if party_account_currency == self.company_currency and party_account_currency == self.currency:
 				total = flt(total, self.precision("base_grand_total"))
 				grand_total = flt(self.get("base_rounded_total") or self.base_grand_total, self.precision('base_grand_total'))
 			else:
