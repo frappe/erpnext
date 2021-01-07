@@ -34,10 +34,10 @@ class MpesaSettings(Document):
 
 	def request_for_payment(self, **kwargs):
 		args = frappe._dict(kwargs)
-		request_amounts = self.split_grand_total_according_to_transaction_limit(args)
+		request_amounts = self.split_request_amount_according_to_transaction_limit(args)
 
 		for amount in request_amounts:
-			args.grand_total = amount
+			args.request_amount = amount
 			if frappe.flags.in_test:
 				from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_payment_request_response_payload
 				response = frappe._dict(get_payment_request_response_payload(amount))
@@ -46,19 +46,19 @@ class MpesaSettings(Document):
 
 			self.handle_api_response("CheckoutRequestID", args, response)
 
-	def split_grand_total_according_to_transaction_limit(self, args):
-		grand_total = args.grand_total
-		if grand_total > self.transaction_limit:
+	def split_request_amount_according_to_transaction_limit(self, args):
+		request_amount = args.request_amount
+		if request_amount > self.transaction_limit:
 			# make multiple requests
 			request_amounts = []
-			requests_to_be_made = frappe.utils.ceil(grand_total / self.transaction_limit) # 480/150 = ceil(3.2) = 4
+			requests_to_be_made = frappe.utils.ceil(request_amount / self.transaction_limit) # 480/150 = ceil(3.2) = 4
 			for i in range(requests_to_be_made):
 				amount = self.transaction_limit
 				if i == requests_to_be_made - 1:
-					amount = grand_total - (self.transaction_limit * i) # for 4th request, 480 - (150 * 3) = 30
+					amount = request_amount - (self.transaction_limit * i) # for 4th request, 480 - (150 * 3) = 30
 				request_amounts.append(amount)
 		else:
-			request_amounts = [grand_total]
+			request_amounts = [request_amount]
 		
 		return request_amounts
 

@@ -109,22 +109,76 @@ class TestMpesaSettings(unittest.TestCase):
 		integration_requests = []
 		for i in range(len(integration_req_ids)):
 			callback_response = get_payment_callback_payload(
-				Amount=150,
-				CheckoutRequestID=id1,
-				MpesaReceiptNumber=mpesa_receipt_numbers[0]
+				Amount=500,
+				CheckoutRequestID=integration_req_ids[i],
+				MpesaReceiptNumber=mpesa_receipt_numbers[i]
 			)
 			# handle response manually
 			verify_transaction(**callback_response)
 			# test completion of integration request
 			integration_request = frappe.get_doc("Integration Request", integration_req_ids[i])
 			self.assertEquals(integration_request.status, "Completed")
-			integration_requests.append(integration_requests)
+			integration_requests.append(integration_request)
 
 		# check receipt number once all the integration requests are completed
 		pos_invoice.reload()
 		self.assertEquals(pos_invoice.mpesa_receipt_number, ', '.join(mpesa_receipt_numbers))
 
 		[d.delete() for d in integration_requests]
+		pr.reload()
+		pr.cancel()
+		pr.delete()
+		pos_invoice.delete()
+	
+	def test_processing_of_only_one_succes_callback_payload(self):
+		create_mpesa_settings(payment_gateway_name="Payment")
+		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
+		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
+		frappe.db.set_value("Mpesa Settings", "Payment", "transaction_limit", "500")
+
+		pos_invoice = create_pos_invoice(do_not_submit=1)
+		pos_invoice.append("payments", {'mode_of_payment': 'Mpesa-Payment', 'account': mpesa_account, 'amount': 1000})
+		pos_invoice.contact_mobile = "093456543894"
+		pos_invoice.currency = "KES"
+		pos_invoice.save()
+
+		pr = pos_invoice.create_payment_request()
+		# test payment request creation
+		self.assertEquals(pr.payment_gateway, "Mpesa-Payment")
+
+		# submitting payment request creates integration requests with random id
+		integration_req_ids = frappe.get_all("Integration Request", filters={
+			'reference_doctype': pr.doctype,
+			'reference_docname': pr.name,
+		}, pluck="name")
+
+		# create random receipt nos and send it as response to callback handler
+		mpesa_receipt_numbers = [frappe.utils.random_string(5) for d in integration_req_ids]
+
+		callback_response = get_payment_callback_payload(
+			Amount=500,
+			CheckoutRequestID=integration_req_ids[0],
+			MpesaReceiptNumber=mpesa_receipt_numbers[0]
+		)
+		# handle response manually
+		verify_transaction(**callback_response)
+		# test completion of integration request
+		integration_request = frappe.get_doc("Integration Request", integration_req_ids[0])
+		self.assertEquals(integration_request.status, "Completed")
+
+		# now one request is completed
+		# second integration request fails
+		# now retrying payment request should make only one integration request again
+		pr = pos_invoice.create_payment_request()
+		new_integration_req_ids = frappe.get_all("Integration Request", filters={
+			'reference_doctype': pr.doctype,
+			'reference_docname': pr.name,
+			'name': ['not in', integration_req_ids]
+		}, pluck="name")
+
+		self.assertEquals(len(new_integration_req_ids), 1)
+
+		frappe.db.sql("delete from `tabIntegration Request` where integration_request_service = 'Mpesa'")
 		pr.reload()
 		pr.cancel()
 		pr.delete()
