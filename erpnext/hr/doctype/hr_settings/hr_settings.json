@@ -23,7 +23,6 @@
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
   "restrict_backdated_leave_application",
-  "automatically_allocate_leaves_based_on_leave_policy",
   "hiring_settings",
   "check_vacancies"
  ],
@@ -155,7 +154,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-26 10:52:56.192773",
+ "modified": "2021-05-11 10:52:56.192773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

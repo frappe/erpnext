@@ -10,12 +10,19 @@ from frappe.utils import getdate, date_diff, comma_and, formatdate, get_datetime
 from math import ceil
 import json
 from six import string_types
+from frappe.utils import comma_and
 
 class LeavePolicyAssignment(Document):
 
 	def validate(self):
 		self.validate_policy_assignment_overlap()
 		self.set_dates()
+
+	def on_submit(self):
+		self.grant_leave_alloc_for_employee()
+
+	def get_allocation(self):
+		return frappe.get_all("Leave Allocation", filters = {"leave_policy_assignment": self.name})
 
 	def set_dates(self):
 		if self.assignment_based_on == "Leave Period":
@@ -24,17 +31,18 @@ class LeavePolicyAssignment(Document):
 			self.effective_from = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 	def validate_policy_assignment_overlap(self):
-		leave_policy_assignments = frappe.get_all("Leave Policy Assignment", filters = {
-			"employee": self.employee,
-			"name": ("!=", self.name),
-			"docstatus": 1,
-			"effective_to": (">=", self.effective_from),
-			"effective_from": ("<=", self.effective_to)
-		})
+		if self.docstatus == 1:
+			leave_policy_assignments = frappe.get_all("Leave Policy Assignment", filters = {
+				"employee": self.employee,
+				"name": ("!=", self.name),
+				"docstatus": 1,
+				"effective_to": (">=", self.effective_from),
+				"effective_from": ("<=", self.effective_to)
+			})
 
-		if len(leave_policy_assignments):
-			frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
-				.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
+			if len(leave_policy_assignments):
+				frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
+					.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
 
 	@frappe.whitelist()
 	def grant_leave_alloc_for_employee(self):
@@ -132,22 +140,6 @@ class LeavePolicyAssignment(Document):
 
 
 @frappe.whitelist()
-def grant_leave_for_multiple_employees(leave_policy_assignments):
-	leave_policy_assignments = json.loads(leave_policy_assignments)
-	not_granted = []
-	for assignment in leave_policy_assignments:
-		try:
-			frappe.get_doc("Leave Policy Assignment", assignment).grant_leave_alloc_for_employee()
-		except Exception:
-			not_granted.append(assignment)
-
-		if len(not_granted):
-			msg = _("Leave not Granted for Assignments:")+ bold(comma_and(not_granted)) + _(". Please Check documents")
-		else:
-			msg = _("Leave granted Successfully")
-	frappe.msgprint(msg)
-
-@frappe.whitelist()
 def create_assignment_for_multiple_employees(employees, data):
 
 	if isinstance(employees, string_types):
@@ -166,28 +158,17 @@ def create_assignment_for_multiple_employees(employees, data):
 		assignment.effective_to = getdate(data.effective_to) or None
 		assignment.leave_period = data.leave_period or None
 		assignment.carry_forward = data.carry_forward
-
 		assignment.save()
-		assignment.submit()
+		try:
+			assignment.submit()
+		except frappe.exceptions.ValidationError:
+			continue
+
+		frappe.db.commit()
+
 		docs_name.append(assignment.name)
+
 	return docs_name
-
-
-def automatically_allocate_leaves_based_on_leave_policy():
-	today = getdate()
-	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_single_value(
-		'HR Settings', 'automatically_allocate_leaves_based_on_leave_policy'
-	)
-
-	pending_assignments = frappe.get_list(
-		"Leave Policy Assignment",
-		filters = {"docstatus": 1, "leaves_allocated": 0, "effective_from": today}
-	)
-
-	if len(pending_assignments) and automatically_allocate_leaves_based_on_leave_policy:
-		for assignment in pending_assignments:
-			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
-
 
 def get_leave_type_details():
 	leave_type_details = frappe._dict()
