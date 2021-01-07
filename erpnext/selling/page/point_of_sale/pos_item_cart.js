@@ -481,11 +481,11 @@ erpnext.PointOfSale.ItemCart = class {
 	update_totals_section(frm) {
 		if (!frm) frm = this.events.get_frm();
 
-		this.render_net_total(frm.doc.base_net_total);
-		this.render_grand_total(frm.doc.base_grand_total);
+		this.render_net_total(frm.doc.net_total);
+		this.render_grand_total(frm.doc.grand_total);
 
 		const taxes = frm.doc.taxes.map(t => { return { description: t.description, rate: t.rate }})
-		this.render_taxes(frm.doc.base_total_taxes_and_charges, taxes);
+		this.render_taxes(frm.doc.total_taxes_and_charges, taxes);
 	}
 	
 	render_net_total(value) {
