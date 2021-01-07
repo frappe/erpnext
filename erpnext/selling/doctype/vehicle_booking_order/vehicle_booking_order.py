@@ -29,6 +29,7 @@ force_fields = [
 	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
 	'item_name', 'item_group', 'brand',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'father_name', 'husband_name',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no'
 	'withholding_tax_amount'
 ]
@@ -528,6 +529,10 @@ def get_customer_details(args, get_withholding_tax=True):
 	out.passport_no = party.get('passport_no')
 
 	out.tax_status = financer.get('tax_status') if use_financer_contact else party.get('tax_status')
+
+	# Additional information from custom fields
+	out.father_name = party.get('father_name')
+	out.husband_name = party.get('husband_name')
 
 	# Address
 	out.customer_address = args.customer_address
