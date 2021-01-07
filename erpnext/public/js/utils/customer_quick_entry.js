@@ -67,6 +67,14 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			fieldtype: "Data"
 		},
 		{
+			fieldtype: "Column Break"
+		},
+		{
+			label: __("Income Tax Status"),
+			fieldname: "tax_status",
+			fieldtype: "Select"
+		},
+		{
 			fieldtype: "Section Break",
 			label: __("Primary Contact Details"),
 		},
