@@ -24,6 +24,7 @@
   "tax_id",
   "tax_cnic",
   "tax_strn",
+  "tax_status",
   "more_info",
   "customer_details",
   "column_break_45",
@@ -31,7 +32,6 @@
   "website",
   "language",
   "column_break_24",
-  "tax_status",
   "tax_overseas_cnic",
   "passport_no",
   "default_currency",
@@ -531,7 +531,7 @@
   {
    "fieldname": "tax_status",
    "fieldtype": "Select",
-   "label": "Filer / Non Filer",
+   "label": "Income Tax Status",
    "options": "\nFiler\nNon Filer"
   },
   {
@@ -637,7 +637,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2020-12-13 16:43:17.696252",
+ "modified": "2021-01-07 22:01:17.145605",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
