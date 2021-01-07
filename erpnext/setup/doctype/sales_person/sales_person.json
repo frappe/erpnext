@@ -80,6 +80,7 @@
   {
    "fieldname": "employee",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Employee",
    "options": "Employee"
   },
@@ -143,7 +144,7 @@
  "icon": "icon-user",
  "idx": 1,
  "is_tree": 1,
- "modified": "2020-10-03 14:12:31.899882",
+ "modified": "2021-01-07 18:18:05.325687",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Sales Person",
