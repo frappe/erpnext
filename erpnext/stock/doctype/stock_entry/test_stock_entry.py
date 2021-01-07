@@ -179,22 +179,20 @@ class TestStockEntry(unittest.TestCase):
 	def test_material_transfer_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
-		create_stock_reconciliation(qty=100, rate=100)
-
 		mtn = make_stock_entry(item_code="_Test Item", source="Stores - TCP1",
-			target="Finished Goods - TCP1", qty=45)
+			target="Finished Goods - TCP1", qty=45, company=company)
 
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
 			[["_Test Item", "Stores - TCP1", -45.0], ["_Test Item", "Finished Goods - TCP1", 45.0]])
 
-		stock_in_hand_account = get_inventory_account(mtn.company, mtn.get("items")[0].s_warehouse)
+		source_warehouse_account = get_inventory_account(mtn.company, mtn.get("items")[0].s_warehouse)
 
-		fixed_asset_account = get_inventory_account(mtn.company, mtn.get("items")[0].t_warehouse)
+		target_warehouse_account = get_inventory_account(mtn.company, mtn.get("items")[0].t_warehouse)
 
-		if stock_in_hand_account == fixed_asset_account:
+		if source_warehouse_account == target_warehouse_account:
 			# no gl entry as both source and target warehouse has linked to same account.
 			self.assertFalse(frappe.db.sql("""select * from `tabGL Entry`
-				where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name))
+				where voucher_type='Stock Entry' and voucher_no=%s""", mtn.name, as_dict=1))
 
 		else:
 			stock_value_diff = abs(frappe.db.get_value("Stock Ledger Entry", {"voucher_type": "Stock Entry",
@@ -202,8 +200,8 @@ class TestStockEntry(unittest.TestCase):
 
 			self.check_gl_entries("Stock Entry", mtn.name,
 				sorted([
-					[stock_in_hand_account, 0.0, stock_value_diff],
-					[fixed_asset_account, stock_value_diff, 0.0],
+					[source_warehouse_account, 0.0, stock_value_diff],
+					[target_warehouse_account, stock_value_diff, 0.0],
 				])
 			)
 
@@ -754,37 +752,37 @@ class TestStockEntry(unittest.TestCase):
 
 	def test_total_basic_amount_zero(self):
 		se = frappe.get_doc({"doctype":"Stock Entry",
-		"purpose":"Material Receipt",
-		"stock_entry_type":"Material Receipt",
-		"posting_date": nowdate(),
-		"company":"_Test Company with perpetual inventory",
-		"items":[
-			{
-				"item_code":"_Test Item",
-				"description":"_Test Item",
-				"qty": 1,
-				"basic_rate": 0,
-				"uom":"Nos",
-				"t_warehouse": "Stores - TCP1",
-				"allow_zero_valuation_rate": 1,
-				"cost_center": "Main - TCP1"
-			 },
-			 {
-				"item_code":"_Test Item",
-				"description":"_Test Item",
-				"qty": 2,
-				"basic_rate": 0,
-				"uom":"Nos",
-				"t_warehouse": "Stores - TCP1",
-				"allow_zero_valuation_rate": 1,
-				"cost_center": "Main - TCP1"
-			 },
-			 ],
-		"additional_costs":[
-			{"expense_account":"Miscellaneous Expenses - TCP1",
-			"amount":100,
-			"description": "miscellanous"}
-			]
+			"purpose":"Material Receipt",
+			"stock_entry_type":"Material Receipt",
+			"posting_date": nowdate(),
+			"company":"_Test Company with perpetual inventory",
+			"items":[
+				{
+					"item_code":"_Test Item",
+					"description":"_Test Item",
+					"qty": 1,
+					"basic_rate": 0,
+					"uom":"Nos",
+					"t_warehouse": "Stores - TCP1",
+					"allow_zero_valuation_rate": 1,
+					"cost_center": "Main - TCP1"
+				},
+				{
+					"item_code":"_Test Item",
+					"description":"_Test Item",
+					"qty": 2,
+					"basic_rate": 0,
+					"uom":"Nos",
+					"t_warehouse": "Stores - TCP1",
+					"allow_zero_valuation_rate": 1,
+					"cost_center": "Main - TCP1"
+				},
+			],
+			"additional_costs":[
+				{"expense_account":"Miscellaneous Expenses - TCP1",
+				"amount":100,
+				"description": "miscellanous"
+			}]
 		})
 		se.insert()
 		se.submit()
