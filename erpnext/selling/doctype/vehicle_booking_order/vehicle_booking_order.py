@@ -30,8 +30,8 @@ force_fields = [
 	'item_name', 'item_group', 'brand',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'father_name', 'husband_name',
-	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no'
-	'withholding_tax_amount'
+	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no',
+	'withholding_tax_amount', 'exempt_from_vehicle_withholding_tax'
 ]
 force_fields += address_fields
 
@@ -582,6 +582,8 @@ def get_customer_details(args, get_withholding_tax=True):
 
 	# Withholding Tax
 	if get_withholding_tax and args.item_code:
+		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
+
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
 
 	# Warehouse
@@ -641,7 +643,7 @@ def get_item_details(args):
 	out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
 		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
 
-	out.vehicle_price_list = get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
+	out.vehicle_price_list = args.vehicle_price_list or get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
 		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
 
 	fni_price_list_settings = frappe.get_cached_value("Vehicles Settings", None, "fni_price_list")
@@ -650,6 +652,9 @@ def get_item_details(args):
 
 	if args.customer:
 		args.tax_status = frappe.get_cached_value("Customer", args.customer, "tax_status")
+
+	out.exempt_from_vehicle_withholding_tax = cint(item.exempt_from_vehicle_withholding_tax)
+
 	if out.vehicle_price_list:
 		out.update(get_vehicle_price(item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status, args.company))
 

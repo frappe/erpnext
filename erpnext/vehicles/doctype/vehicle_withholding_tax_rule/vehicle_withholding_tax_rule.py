@@ -105,7 +105,7 @@ def get_withholding_tax_amount(date, item_code, tax_status, company):
 		return 0
 
 	engine_capacity, exempt = frappe.get_cached_value("Item", item_code,
-		["vehicle_engine_capacity", "exempt_from_vehicle_witholding_tax"])
+		["vehicle_engine_capacity", "exempt_from_vehicle_withholding_tax"])
 
 	if exempt:
 		return 0

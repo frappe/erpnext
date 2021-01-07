@@ -48,7 +48,7 @@
   "column_break_37",
   "include_in_vehicle_booking",
   "vehicle_allocation_required",
-  "exempt_from_vehicle_witholding_tax",
+  "exempt_from_vehicle_withholding_tax",
   "commission_item_code",
   "section_break_31",
   "purchase_uom",
@@ -1227,15 +1227,15 @@
   },
   {
    "default": "0",
-   "fieldname": "exempt_from_vehicle_witholding_tax",
-   "fieldtype": "Check",
-   "label": "Exempt From Vehicle Witholding Tax"
-  },
-  {
-   "default": "0",
    "fieldname": "vehicle_allocation_required",
    "fieldtype": "Check",
    "label": "Vehicle Allocation Required"
+  },
+  {
+   "default": "0",
+   "fieldname": "exempt_from_vehicle_withholding_tax",
+   "fieldtype": "Check",
+   "label": "Exempt From Vehicle Withholding Tax"
   }
  ],
  "has_web_view": 1,
@@ -1243,7 +1243,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-12-30 17:11:41.100808",
+ "modified": "2021-01-07 22:26:27.285355",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

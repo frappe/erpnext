@@ -56,6 +56,7 @@
   "item_group",
   "brand",
   "vehicle_allocation_required",
+  "exempt_from_vehicle_withholding_tax",
   "column_break_33",
   "vehicle_color",
   "color_1",
@@ -927,12 +928,21 @@
    "fieldtype": "Data",
    "label": "Province",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.exempt_from_vehicle_withholding_tax",
+   "fieldname": "exempt_from_vehicle_withholding_tax",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Exempt From Vehicle Withholding Tax",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-01-07 01:59:13.235946",
+ "modified": "2021-01-07 22:27:03.310586",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",
