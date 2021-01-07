@@ -54,6 +54,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -173,7 +174,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-30 11:36:19.687735",
+ "modified": "2021-01-06 21:23:22.651669",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Item",

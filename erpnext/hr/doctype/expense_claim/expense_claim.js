@@ -4,22 +4,23 @@
 frappe.provide("erpnext.hr");
 frappe.provide("erpnext.accounts.dimensions");
 frappe.provide("erpnext.accounts");
-{% include 'erpnext/public/js/controllers/buying.js' %};
+{% include "erpnext/public/js/controllers/buying.js" %};
 
 erpnext.hr.ExpenseClaimController = erpnext.buying.BuyingController.extend({
 	item_code: function(doc, cdt, cdn) {
 		this._super(doc, cdt, cdn);
 		let d = locals[cdt][cdn];
+
 		if (!doc.company) {
 			d.item_code = "";
 			frappe.msgprint(__("Please set the Company"));
 			this.frm.refresh_fields();
 			return;
 		}
-
 		if (!d.item_code) {
 			return;
 		}
+
 		return frappe.call({
 			method: "erpnext.hr.doctype.expense_claim.expense_claim.get_expense_claim_account_and_cost_center",
 			args: {
@@ -36,37 +37,16 @@ erpnext.hr.ExpenseClaimController = erpnext.buying.BuyingController.extend({
 	}
 });
 
-cur_frm.add_fetch('employee', 'company', 'company');
-cur_frm.add_fetch('employee','employee_name','employee_name');
-cur_frm.add_fetch('item_code','description','description');
-
-cur_frm.cscript.onload = function(doc) {
-	if (doc.__islocal) {
-		cur_frm.set_value("posting_date", frappe.datetime.get_today());
-		cur_frm.cscript.clear_sanctioned(doc);
-	}
-};
-
-cur_frm.cscript.clear_sanctioned = function(doc) {
-	var val = doc.items || [];
-	for(var i = 0; i<val.length; i++){
-		val[i].amount ='';
-	}
-
-	doc.total = '';
-	refresh_many(['amount', 'total']);
-};
+$.extend(cur_frm.cscript, new erpnext.hr.ExpenseClaimController({frm: cur_frm}));
 
 cur_frm.cscript.refresh = function(doc) {
-	cur_frm.cscript.set_help(doc);
-
-	if(!doc.__islocal) {
+	if (!doc.__islocal) {
 
 		if (doc.docstatus===1) {
 			/* eslint-disable */
 			// no idea how `me` works here
-			var entry_doctype, entry_reference_doctype, entry_reference_name;
-			if(doc.__onload.make_payment_via_journal_entry){
+			let entry_doctype, entry_reference_doctype, entry_reference_name;
+			if (doc.__onload.make_payment_via_journal_entry) {
 				entry_doctype = "Journal Entry";
 				entry_reference_doctype = "Journal Entry Account.reference_type";
 				entry_reference_name = "Journal Entry.reference_name";
@@ -77,7 +57,7 @@ cur_frm.cscript.refresh = function(doc) {
 			}
 
 			if (cint(doc.total_amount_reimbursed) > 0 && frappe.model.can_read(entry_doctype)) {
-				cur_frm.add_custom_button(__('Bank Entries'), function() {
+				cur_frm.add_custom_button(__("Bank Entries"), function() {
 					frappe.route_options = {
 						party_type: "Employee",
 						party: doc.employee,
@@ -91,71 +71,12 @@ cur_frm.cscript.refresh = function(doc) {
 	}
 };
 
-cur_frm.cscript.set_help = function(doc) {
-	cur_frm.set_intro("");
-	if(doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
-		cur_frm.set_intro(__("Fill the form and save it"));
-	}
-};
-
-cur_frm.cscript.validate = function(doc) {
-	cur_frm.cscript.calculate_total(doc);
-};
-
-cur_frm.cscript.calculate_total = function(doc){
-	doc.total_claimed_amount = 0;
-	$.each((doc.items || []), function(i, d) {
-		doc.total_claimed_amount += d.claimed_amount;
-	});
-	this.set_in_company_currency(this.frm.doc, ["total_claimed_amount"])
-};
-
-cur_frm.cscript.calculate_total_amount = function(doc,cdt,cdn){
-	cur_frm.cscript.calculate_total(doc,cdt,cdn);
-};
-
-cur_frm.fields_dict['cost_center'].get_query = function(doc) {
-	return {
-		filters: {
-			"company": doc.company
-		}
-	}
-};
-
-erpnext.expense_claim = {
-	set_title: function(frm) {
-		if (!frm.doc.task) {
-			frm.set_value("title", frm.doc.employee_name);
-		}
-		else {
-			frm.set_value("title", frm.doc.employee_name + " for "+ frm.doc.task);
-		}
-	}
-};
-
 frappe.ui.form.on("Expense Claim", {
-	setup: function(frm) {
-		frm.add_fetch("company", "cost_center", "cost_center");
-		frm.add_fetch("company", "default_expense_claim_payable_account", "payable_account");
-
-		frm.set_query("employee_advance", "advances", function() {
+	refresh: function(frm) {
+		frm.set_query("employee", function() {
 			return {
-				filters: [
-					['docstatus', '=', 1],
-					['employee', '=', frm.doc.employee],
-					['paid_amount', '>', 0],
-					['paid_amount', '>', 'claimed_amount']
-				]
+				query: "erpnext.controllers.queries.employee_query"
 			};
-		});
-
-		frm.set_query("item_code", "items", function() {
-			return {
-				filters: {
-					"disabled": 0,
-					"is_stock_item": 0
-				}
-			}
 		});
 
 		frm.set_query("expense_approver", function() {
@@ -168,23 +89,46 @@ frappe.ui.form.on("Expense Claim", {
 			};
 		});
 
-		frm.set_query("account_head", "taxes", function() {
+		frm.set_query("item_code", "items", function() {
 			return {
-				filters: [
-					['company', '=', frm.doc.company],
-					['account_type', 'in', ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]]
-				]
-			};
+				filters: {
+					"disabled": 0,
+					"is_stock_item": 0
+				}
+			}
 		});
 
-<<<<<<< HEAD
-=======
 		frm.set_query("cost_center", "items", function() {
 			return {
 				filters: {
 					"company": frm.doc.company,
 					"is_group": 0
 				}
+			};
+		});
+
+		frm.set_query("employee_advance", "advances", function() {
+			return {
+				filters: [
+					["docstatus", "=", 1],
+					["employee", "=", frm.doc.employee],
+					["paid_amount", ">", 0]
+				]
+			};
+		});
+
+<<<<<<< HEAD
+<<<<<<< HEAD
+=======
+		frm.set_query("cost_center", "items", function() {
+=======
+		frm.set_query("account_head", "taxes", function() {
+>>>>>>> refactor: client side code
+			return {
+				filters: [
+					["company", "=", frm.doc.company],
+					["account_type", "in", ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation"]]
+				]
 			};
 		});
 
@@ -203,19 +147,30 @@ frappe.ui.form.on("Expense Claim", {
 		frm.set_query("task", function() {
 			return {
 				filters: {
-					'project': frm.doc.project
+					"project": frm.doc.project
 				}
 			};
 		});
 
-		frm.set_query("employee", function() {
+		frm.fields_dict.cost_center.get_query = function(doc) {
 			return {
-				query: "erpnext.controllers.queries.employee_query"
-			};
-		});
+				filters: {
+					"company": doc.company
+				}
+			}
+		};
+
+		frm.toggle_reqd("mode_of_payment", frm.doc.is_paid);
+		frm.trigger("update_currency_fields");
+		frm.trigger("setup_custom_buttons");
 	},
 
 	onload: function(frm) {
+		if (frm.doc.__islocal) {
+			frm.set_value("posting_date", frappe.datetime.get_today());
+			frm.trigger("clear_sanctioned");
+		}
+
 		if (frm.doc.docstatus == 0) {
 			return frappe.call({
 				method: "erpnext.hr.doctype.leave_application.leave_application.get_mandatory_approval",
@@ -229,103 +184,6 @@ frappe.ui.form.on("Expense Claim", {
 				}
 			});
 		}
-	},
-
-	refresh: function(frm) {
-		frm.trigger("toggle_fields");
-		frm.events.set_dynamic_currency_labels(frm);
-		frm.events.toggle_currency_fields(frm);
-
-		if(frm.doc.docstatus > 0 && frm.doc.approval_status !== "Rejected") {
-			frm.add_custom_button(__('Accounting Ledger'), function() {
-				frappe.route_options = {
-					voucher_no: frm.doc.name,
-					company: frm.doc.company,
-					from_date: frm.doc.posting_date,
-					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
-					group_by: '',
-					show_cancelled_entries: frm.doc.docstatus === 2
-				};
-				frappe.set_route("query-report", "General Ledger");
-			}, __("View"));
-		}
-
-		if (frm.doc.docstatus===1 && !cint(frm.doc.is_paid) && cint(frm.doc.grand_total) > 0
-				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total))
-				&& frappe.model.can_create("Payment Entry")) {
-			frm.add_custom_button(__('Payment'),
-				function() { frm.events.make_payment_entry(frm); }, __('Create'));
-		}
-	},
-
-	calculate_grand_total_and_outstanding_amount: function(frm) {
-		let grand_total = flt(frm.doc.total) + flt(frm.doc.total_taxes_and_charges);
-		frm.set_value("grand_total", grand_total);
-
-		let outstanding_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.total_amount_reimbursed);
-		frm.set_value("outstanding_amount", outstanding_amount);
-		frm.refresh_fields();
-	},
-
-	calculate_total_advance: function(frm) {
-		let total_advance_amount = 0;
-		$.each(frm.doc.advances, (_i, d) => {
-			total_advance_amount += flt(d.allocated_amount);
-		})
-
-		frm.set_value("total_advance_amount", total_advance_amount);
-	},
-
-	grand_total: function(frm) {
-		frm.trigger("update_employee_advance_claimed_amount");
-	},
-
-	update_employee_advance_claimed_amount: function(frm) {
-		let amount_to_be_allocated = frm.doc.grand_total;
-		$.each(frm.doc.advances || [], function(i, advance){
-			if (amount_to_be_allocated >= advance.unclaimed_amount){
-				advance.allocated_amount = frm.doc.advances[i].unclaimed_amount;
-				amount_to_be_allocated -= advance.allocated_amount;
-			} else {
-				advance.allocated_amount = amount_to_be_allocated;
-				amount_to_be_allocated = 0;
-			}
-			frm.refresh_field("advances");
-		});
-	},
-
-	make_payment_entry: function(frm) {
-		var method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
-		if(frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
-			method = "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry";
-		}
-		return frappe.call({
-			method: method,
-			args: {
-				"dt": frm.doc.doctype,
-				"dn": frm.doc.name
-			},
-			callback: function(r) {
-				var doclist = frappe.model.sync(r.message);
-				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
-			}
-		});
-	},
-
-	is_paid: function(frm) {
-		frm.trigger("toggle_fields");
-	},
-
-	toggle_fields: function(frm) {
-		frm.toggle_reqd("mode_of_payment", frm.doc.is_paid);
-	},
-
-	employee_name: function(frm) {
-		erpnext.expense_claim.set_title(frm);
-	},
-
-	task: function(frm) {
-		erpnext.expense_claim.set_title(frm);
 	},
 
 	employee: function(frm) {
@@ -353,6 +211,10 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	currency: function(frm) {
+		frm.trigger("update_currency_fields");
+	},
+
+	update_currency_fields: function(frm) {
 		let from_currency = frm.doc.currency;
 		let company_currency;
 		if (!frm.doc.company) {
@@ -363,13 +225,14 @@ frappe.ui.form.on("Expense Claim", {
 
 		if (from_currency != company_currency) {
 			frm.events.set_exchange_rate(frm, from_currency, company_currency);
-			frm.events.set_dynamic_currency_labels(frm);
-			frm.events.toggle_currency_fields(frm);
 		} else {
 			frm.set_value("conversion_rate", 1.0);
 			frm.set_df_property("conversion_rate", "hidden", 1);
 			frm.set_df_property("conversion_rate", "description", "" );
 		}
+
+		frm.events.set_dynamic_currency_labels(frm, from_currency, company_currency);
+		frm.events.toggle_currency_fields(frm, from_currency, company_currency);
 		frm.refresh_fields();
 	},
 
@@ -389,15 +252,7 @@ frappe.ui.form.on("Expense Claim", {
 		});
 	},
 
-	set_dynamic_currency_labels: function(frm) {
-		let from_currency = frm.doc.currency;
-		let company_currency;
-		if (!frm.doc.company) {
-			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
-		} else {
-			company_currency = erpnext.get_currency(frm.doc.company);
-		}
-
+	set_dynamic_currency_labels: function(frm, from_currency, company_currency) {
 		if (from_currency != company_currency) {
 			frm.set_currency_labels(["base_total_claimed_amount", "base_total", "base_total_amount_reimbursed",
 				"base_taxes_and_charges_added", "base_taxes_and_charges_deducted", "base_total_taxes_and_charges",
@@ -409,34 +264,151 @@ frappe.ui.form.on("Expense Claim", {
 		}
 	},
 
-	toggle_currency_fields: function(frm) {
-		let from_currency = frm.doc.currency;
-		let company_currency;
-		if (!frm.doc.company) {
-			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
-		} else {
-			company_currency = erpnext.get_currency(frm.doc.company);
-		}
-
+	toggle_currency_fields: function(frm, from_currency, company_currency) {
 		frm.toggle_display("base_total_claimed_amount", (from_currency != company_currency));
 		frm.toggle_display("base_total_amount_reimbursed", (from_currency != company_currency));
 		frm.refresh_fields();
+	},
+
+	setup_custom_buttons: function(frm) {
+		if (frm.doc.docstatus > 0 && frm.doc.approval_status !== "Rejected") {
+			frm.add_custom_button(__("Accounting Ledger"), function() {
+				frappe.route_options = {
+					voucher_no: frm.doc.name,
+					company: frm.doc.company,
+					from_date: frm.doc.posting_date,
+					to_date: moment(frm.doc.modified).format("YYYY-MM-DD"),
+					group_by: "",
+					show_cancelled_entries: frm.doc.docstatus === 2
+				};
+				frappe.set_route("query-report", "General Ledger");
+			}, __("View"));
+		}
+
+		if (frm.doc.docstatus===1 && !cint(frm.doc.is_paid) && cint(frm.doc.grand_total) > 0
+				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total))
+				&& frappe.model.can_create("Payment Entry")) {
+			frm.add_custom_button(__("Payment"),
+				function() { frm.events.make_payment_entry(frm); }, __("Create"));
+		}
+	},
+
+	validate: function(frm) {
+		frm.trigger("calculate_totals");
+		frm.trigger("set_child_cost_center");
+	},
+
+	calculate_totals: function(frm) {
+		let total_claimed_amount = 0;
+		$.each((frm.doc.items || []), function(_i, d) {
+			total_claimed_amount += flt(d.claimed_amount);
+		});
+		let base_total_claimed_amount = flt((flt(total_claimed_amount) * frm.doc.conversion_rate),
+			precision("base_total_claimed_amount"));
+
+		frm.set_value({
+			"total_claimed_amount": total_claimed_amount,
+			"base_total_claimed_amount": base_total_claimed_amount
+		});
 	},
 
 	cost_center: function(frm) {
 		frm.events.set_child_cost_center(frm);
 	},
 
-	validate: function(frm) {
-		frm.events.set_child_cost_center(frm);
-	},
-
 	set_child_cost_center: function(frm){
 		(frm.doc.items || []).forEach(function(d) {
-			if (!d.cost_center){
+			if (!d.cost_center) {
 				d.cost_center = frm.doc.cost_center;
 			}
 		});
+	},
+
+	clear_sanctioned: function(frm) {
+		$.each((frm.doc.items || []), function(_i, d) {
+			d.amount = "";
+		});
+
+		frm.doc.total = "";
+		refresh_many(["amount", "total"]);
+	},
+
+	set_help: function(frm) {
+		frm.set_intro("");
+		if (frm.doc.__islocal && !in_list(frappe.user_roles, "HR User")) {
+			frm.set_intro(__("Fill the form and save it"));
+		}
+	},
+
+	update_employee_advance_claimed_amount: function(frm) {
+		let amount_to_be_allocated = frm.doc.grand_total;
+		$.each(frm.doc.advances || [], function(i, advance) {
+			if (amount_to_be_allocated >= advance.unclaimed_amount) {
+				advance.allocated_amount = frm.doc.advances[i].unclaimed_amount;
+				amount_to_be_allocated -= advance.allocated_amount;
+			} else {
+				advance.allocated_amount = amount_to_be_allocated;
+				amount_to_be_allocated = 0;
+			}
+		});
+
+		frm.refresh_field("advances");
+		frm.trigger("calculate_total_advance");
+	},
+
+	calculate_total_advance: function(frm) {
+		let total_advance_amount = 0;
+		$.each(frm.doc.advances, (_i, d) => {
+			total_advance_amount += flt(d.allocated_amount);
+		})
+
+		frm.set_value("total_advance_amount", total_advance_amount);
+		frm.trigger("calculate_outstanding_amount");
+	},
+
+	calculate_outstanding_amount: function(frm) {
+		let outstanding_amount = flt(frm.doc.grand_total) - flt(frm.doc.total_advance_amount) - flt(frm.doc.total_amount_reimbursed);
+		frm.set_value("outstanding_amount", outstanding_amount);
+		frm.refresh_fields();
+	},
+
+	make_payment_entry: function(frm) {
+		let method = "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry";
+		if (frm.doc.__onload && frm.doc.__onload.make_payment_via_journal_entry) {
+			method = "erpnext.hr.doctype.expense_claim.expense_claim.make_bank_entry";
+		}
+		return frappe.call({
+			method: method,
+			args: {
+				"dt": frm.doc.doctype,
+				"dn": frm.doc.name
+			},
+			callback: function(r) {
+				let doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
+	is_paid: function(frm) {
+		frm.toggle_reqd("mode_of_payment", frm.doc.is_paid);
+	},
+
+	employee_name: function(frm) {
+		frm.trigger("set_title");
+	},
+
+	task: function(frm) {
+		frm.trigger("set_title");
+	},
+
+	set_title: function(frm) {
+		if (!frm.doc.task) {
+			frm.set_value("title", frm.doc.employee_name);
+		}
+		else {
+			frm.set_value("title", __("{0} for {1}", [frm.doc.employee_name, frm.doc.task]));
+		}
 	},
 
 	get_employee_advances: function(frm) {
@@ -470,15 +442,17 @@ frappe.ui.form.on("Expense Claim", {
 
 frappe.ui.form.on("Expense Claim Item", {
 	claimed_amount: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
+		let child = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "rate", child.claimed_amount);
 		frappe.model.set_value(cdt, cdn, "amount", child.claimed_amount);
 	},
 
 	amount: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
+		let child = locals[cdt][cdn];
 		frappe.model.set_value(cdt, cdn, "rate", child.amount);
-		cur_frm.cscript.calculate_total(frm.doc, cdt, cdn);
+		frm.trigger("calculate_totals");
+		frm.trigger("calculate_grand_total");
+		frm.trigger("update_employee_advance_claimed_amount")
 	},
 
 	cost_center: function(frm, cdt, cdn) {
@@ -488,13 +462,12 @@ frappe.ui.form.on("Expense Claim Item", {
 
 frappe.ui.form.on("Expense Claim Advance", {
 	employee_advance: function(frm, cdt, cdn) {
-		var child = locals[cdt][cdn];
-		if(!frm.doc.employee){
-			frappe.msgprint(__('Select an employee to get the employee advance.'));
+		let child = locals[cdt][cdn];
+		if (!frm.doc.employee) {
+			frappe.msgprint(__("Select an employee to get the employee advance."));
 			frm.doc.advances = [];
 			refresh_field("advances");
-		}
-		else {
+		} else {
 			return frappe.call({
 				method: "erpnext.hr.doctype.expense_claim.expense_claim.get_advances",
 				args: {
@@ -502,7 +475,7 @@ frappe.ui.form.on("Expense Claim Advance", {
 					advance_id: child.employee_advance
 				},
 				callback: function(r, rt) {
-					if(r.message) {
+					if (r.message) {
 						child.employee_advance = r.message[0].name;
 						child.posting_date = r.message[0].posting_date;
 						child.advance_account = r.message[0].advance_account;
@@ -513,10 +486,13 @@ frappe.ui.form.on("Expense Claim Advance", {
 
 						refresh_field("advances");
 						frm.trigger("calculate_total_advance");
-						frm.trigger("calculate_grand_total_and_outstanding_amount");
 					}
 				}
 			});
 		}
+	},
+
+	allocated_amount: function(frm, cdt, cdn) {
+		frm.trigger("calculate_total_advance");
 	}
 });
