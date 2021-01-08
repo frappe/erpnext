@@ -95,7 +95,9 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 
 	format_data(transactions) {
 		this.transactions = [];
+		if (transactions[0]){
 		this.currency = transactions[0]["currency"];
+	}
 		this.transaction_dt_map = {};
 		let length;
 		transactions.forEach((row) => {
