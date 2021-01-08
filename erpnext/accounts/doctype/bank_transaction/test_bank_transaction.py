@@ -18,7 +18,7 @@ class TestBankTransaction(unittest.TestCase):
 	def setUp(self):
 		make_pos_profile()
 		add_transactions()
-		add_payments()
+		add_vouchers()
 
 	def tearDown(self):
 		for bt in frappe.get_all("Bank Transaction"):
@@ -194,7 +194,7 @@ def add_transactions():
 
 	frappe.flags.test_bank_transactions_created = True
 
-def add_payments():
+def add_vouchers():
 	if frappe.flags.test_payments_created:
 		return
 
