@@ -40,7 +40,7 @@ class TestBankTransaction(unittest.TestCase):
 	def test_linked_payments(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"))
 		linked_payments = get_linked_payments(bank_transaction.name, ['payment_entry', 'exact_match'])
-		self.assertTrue(linked_payments[0].party == "Conrad Electronic")
+		self.assertTrue(linked_payments[0][6] == "Conrad Electronic")
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
@@ -63,7 +63,7 @@ class TestBankTransaction(unittest.TestCase):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"))
 		linked_payments = get_linked_payments(bank_transaction.name, ['payment_entry', 'exact_match'])
 		print(linked_payments)
-		self.assertTrue(linked_payments[0].paid_amount)
+		self.assertTrue(linked_payments[0][3])
 
 	# Check error if already reconciled
 	def test_already_reconciled(self):

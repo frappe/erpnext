@@ -240,15 +240,26 @@ def get_linked_payments(bank_transaction, document_types = None):
 def check_matching(bank_account, company, transaction, document_types):
 
 	subquery = get_subquery(bank_account, company, transaction, document_types)
-	query = get_query(subquery)
+	# query = get_query(subquery)
 
 	if transaction.deposit > 0:
 		currency_field = "paid_to_account_currency as currency"  
 	else:
 		currency_field = "paid_from_account_currency as currency"
 
-	matching_vouchers = frappe.db.sql(query,
-		{
+	# matching_vouchers = frappe.db.sql(query,
+	# 	{
+	# 		"amount": transaction.unallocated_amount,
+	# 		"payment_type" : "Receive" if transaction.deposit > 0 else "Pay",
+	# 		"currency_field" : currency_field,
+	# 		"reference_no": transaction.reference_number,
+	# 		"party_type": transaction.party_type,
+	# 		"party": transaction.party,
+	# 		"bank_account":  bank_account
+	# 	},
+	# 	as_dict=True,
+	# )
+	filters = {
 			"amount": transaction.unallocated_amount,
 			"payment_type" : "Receive" if transaction.deposit > 0 else "Pay",
 			"currency_field" : currency_field,
@@ -256,10 +267,17 @@ def check_matching(bank_account, company, transaction, document_types):
 			"party_type": transaction.party_type,
 			"party": transaction.party,
 			"bank_account":  bank_account
-		},
-		as_dict=True,
-	)
-	return matching_vouchers
+		}
+
+	matching_vouchers = []
+	for query in subquery:
+		matching_vouchers.extend(
+			frappe.db.sql(query, filters, debug=True)
+		)
+
+	print(matching_vouchers)
+
+	return sorted(matching_vouchers, key = lambda x: x[0]) if matching_vouchers else []
 
 def get_subquery(bank_account, company, transaction, document_types):
 	amount_condition = "=" if "exact_match" in document_types else "<="
@@ -268,32 +286,33 @@ def get_subquery(bank_account, company, transaction, document_types):
 
 	if "payment_entry" in document_types:
 		pe_amount_matching = get_pe_amount_matching_query(amount_condition, account_from_to)
-		pe_reference_no_matching = get_pe_reference_no_matching_query(amount_condition, account_from_to)
-		pe_party_matching = get_pe_party_matching_query(amount_condition, account_from_to)
-		subqueries.extend([pe_amount_matching, pe_party_matching, pe_reference_no_matching])
+		# pe_reference_no_matching = get_pe_reference_no_matching_query(amount_condition, account_from_to)
+		# pe_party_matching = get_pe_party_matching_query(amount_condition, account_from_to)
+		subqueries.extend([pe_amount_matching])
 
 	if "journal_entry" in document_types:
 		je_amount_matching = get_je_amount_matching_query(amount_condition, transaction)
-		je_reference_no_matching = get_je_reference_no_matching_query(amount_condition, transaction)
-		subqueries.extend([je_amount_matching, je_reference_no_matching])
+		# je_reference_no_matching = get_je_reference_no_matching_query(amount_condition, transaction)
+		subqueries.extend([je_amount_matching])
 
 	if transaction.deposit > 0 and "sales_invoice" in document_types:
 		si_amount_matching =  get_si_amount_matching_query(amount_condition)
-		si_party_matching =  get_si_party_matching_query(amount_condition)
-		subqueries.extend([si_amount_matching, si_party_matching])
+		# si_party_matching =  get_si_party_matching_query(amount_condition)
+		subqueries.extend([si_amount_matching])
 
 	if transaction.withdrawal > 0:
 		if "purchase_invoice" in document_types:
 			pi_amount_matching = get_pi_amount_matching_query(amount_condition)
-			pi_party_matching = get_pi_party_matching_query(amount_condition)
-			subqueries.extend([pi_amount_matching, pi_party_matching])
+			# pi_party_matching = get_pi_party_matching_query(amount_condition)
+			subqueries.extend([pi_amount_matching])
 
 		if "expense_claim" in document_types:
 			ec_amount_matching = get_ec_amount_matching_query(bank_account, company, amount_condition)
-			ec_party_matching = get_ec_party_matching_query(bank_account, company, amount_condition)
-			subqueries.extend([ec_amount_matching, ec_party_matching])
+			# ec_party_matching = get_ec_party_matching_query(bank_account, company, amount_condition)
+			subqueries.extend([ec_amount_matching])
 
-	return " UNION ALL ".join(subqueries)
+	# return 
+	return subqueries
 
 def get_query(subquery):
 	return """SELECT
@@ -305,8 +324,18 @@ def get_query(subquery):
 def get_pe_amount_matching_query(amount_condition, account_from_to):
 	return  f"""
 	SELECT
-		'Payment Entry' as doctype, name, paid_amount, reference_no, reference_date,
-		party, party_type, posting_date, %(currency_field)s
+		(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
+		+ CASE WHEN (party_type = %(party_type)s AND party = %(party)s ) THEN 1 ELSE 0  END
+		+ 1 ) AS rank,
+		'Payment Entry' as doctype, 
+		name, 
+		paid_amount,
+		reference_no,
+		reference_date,
+		party, 
+		party_type,
+		posting_date,
+		%(currency_field)s
 	FROM
 		`tabPayment Entry`
 	WHERE
@@ -321,42 +350,42 @@ def get_pe_amount_matching_query(amount_condition, account_from_to):
 	# payment_type
 	# currency_field
 
-def get_pe_reference_no_matching_query(amount_condition, account_from_to): 
-	return f"""
-	SELECT
-		'Payment Entry' as doctype, name, paid_amount, reference_no, reference_date,
-		party, party_type, posting_date, %(currency_field)s
-	FROM
-		`tabPayment Entry`
-	WHERE
-		paid_amount {amount_condition} %(amount)s 
-		AND reference_no = %(reference_no)s 
-		AND docstatus = 1 
-		AND payment_type IN (%(payment_type)s, 'Internal Transfer') 
-		AND ifnull(clearance_date, '') = "" 
-		AND {account_from_to} = %(bank_account)s
-	"""
+# def get_pe_reference_no_matching_query(amount_condition, account_from_to): 
+# 	return f"""
+# 	SELECT
+# 		'Payment Entry' as doctype, name, paid_amount, reference_no, reference_date,
+# 		party, party_type, posting_date, %(currency_field)s
+# 	FROM
+# 		`tabPayment Entry`
+# 	WHERE
+# 		paid_amount {amount_condition} %(amount)s 
+# 		AND reference_no = %(reference_no)s 
+# 		AND docstatus = 1 
+# 		AND payment_type IN (%(payment_type)s, 'Internal Transfer') 
+# 		AND ifnull(clearance_date, '') = "" 
+# 		AND {account_from_to} = %(bank_account)s
+# 	"""
 
 	# transaction.reference_number
 	# payment_type
 	# currency_field
 
-def get_pe_party_matching_query(amount_condition, account_from_to):
-	return  f"""
-		SELECT
-			'Payment Entry' as doctype, name, paid_amount, reference_no, reference_date,
-			party, party_type, posting_date, %(currency_field)s
-		FROM
-			`tabPayment Entry`
-		WHERE
-			paid_amount {amount_condition} %(amount)s 
-			AND party_type = %(party_type)s 
-			AND party = %(party)s 
-			AND docstatus = 1 
-			AND payment_type IN (%(payment_type)s, 'Internal Transfer') 
-			AND ifnull(clearance_date, '') = "" 
-			AND {account_from_to} = %(bank_account)s
-	"""
+# def get_pe_party_matching_query(amount_condition, account_from_to):
+# 	return  f"""
+# 		SELECT
+# 			'Payment Entry' as doctype, name, paid_amount, reference_no, reference_date,
+# 			party, party_type, posting_date, %(currency_field)s
+# 		FROM
+# 			`tabPayment Entry`
+# 		WHERE
+# 			paid_amount {amount_condition} %(amount)s 
+# 			AND party_type = %(party_type)s 
+# 			AND party = %(party)s 
+# 			AND docstatus = 1 
+# 			AND payment_type IN (%(payment_type)s, 'Internal Transfer') 
+# 			AND ifnull(clearance_date, '') = "" 
+# 			AND {account_from_to} = %(bank_account)s
+# 	"""
 	# party_type
 	# party
 	# bank_account
@@ -366,9 +395,17 @@ def get_je_amount_matching_query(amount_condition, transaction):
 	return f"""
 
 		SELECT
-			'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
-			jea.account_currency as currency, je.pay_to_recd_from as party, je.cheque_date as reference_date,
-			jea.{cr_or_dr}_in_account_currency as paid_amount, jea.party_type
+			(CASE WHEN je.cheque_no=%(reference_no)s THEN 1 ELSE 0 END
+			+ 1) AS rank ,
+			'Journal Entry' as doctype, 
+			je.name, 
+			jea.{cr_or_dr}_in_account_currency as paid_amount, 
+			je.cheque_no as reference_no,
+			je.cheque_date as reference_date, 
+			je.pay_to_recd_from as party, 
+			jea.party_type, 
+			je.posting_date, 
+			jea.account_currency as currency
 		FROM
 			`tabJournal Entry Account` as jea
 		JOIN
@@ -384,27 +421,27 @@ def get_je_amount_matching_query(amount_condition, transaction):
 	# bank_account
 	# amount
 
-def get_je_reference_no_matching_query(amount_condition, transaction):
-	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
-	return f"""
+# def get_je_reference_no_matching_query(amount_condition, transaction):
+# 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
+# 	return f"""
 
-		SELECT
-			'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
-			jea.account_currency as currency, je.pay_to_recd_from as party, je.cheque_date as reference_date,
-			jea.{cr_or_dr}_in_account_currency as paid_amount, jea.party_type
-		FROM
-			`tabJournal Entry Account` as jea
-		JOIN
-			`tabJournal Entry` as je
-		ON
-			jea.parent = je.name
-		WHERE
-			(je.clearance_date is null or je.clearance_date='0000-00-00')
-			AND jea.account = %(bank_account)s
-			AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
-			AND je.cheque_no = %(reference_no)s 
-			AND je.docstatus = 1
-	"""
+# 		SELECT
+# 			'Journal Entry' as doctype, je.name, je.posting_date, je.cheque_no as reference_no,
+# 			jea.account_currency as currency, je.pay_to_recd_from as party, je.cheque_date as reference_date,
+# 			jea.{cr_or_dr}_in_account_currency as paid_amount, jea.party_type
+# 		FROM
+# 			`tabJournal Entry Account` as jea
+# 		JOIN
+# 			`tabJournal Entry` as je
+# 		ON
+# 			jea.parent = je.name
+# 		WHERE
+# 			(je.clearance_date is null or je.clearance_date='0000-00-00')
+# 			AND jea.account = %(bank_account)s
+# 			AND jea.{cr_or_dr}_in_account_currency {amount_condition} %(amount)s
+# 			AND je.cheque_no = %(reference_no)s 
+# 			AND je.docstatus = 1
+# 	"""
 	# bank_account
 	# amount
 	# reference_no
@@ -412,9 +449,18 @@ def get_je_reference_no_matching_query(amount_condition, transaction):
 def get_si_amount_matching_query(amount_condition):
 	return f"""
 		SELECT
-			'Sales Invoice' as doctype, si.name, si.customer as party,
-			si.posting_date, sip.amount as paid_amount, si.currency,
-			'' as reference_date, '' as reference_no, 'Customer' as party_type
+			( CASE WHEN si.customer = %(party)s  THEN 1 ELSE 0  END
+			+ 1 ) AS rank,
+			'Sales Invoice' as doctype, 
+			si.name, 
+			sip.amount as paid_amount, 
+			'' as reference_no, 
+			'' as reference_date, 
+			si.customer as party,
+			'Customer' as party_type,
+			si.posting_date, 
+			si.currency
+
 		FROM
 			`tabSales Invoice Payment` as sip
 		JOIN
@@ -430,53 +476,62 @@ def get_si_amount_matching_query(amount_condition):
 	# bank_account
 	# amount
 
-def get_si_party_matching_query(amount_condition):
-	return f"""
-		SELECT
-			'Sales Invoice' as doctype, si.name, si.customer as party,
-			si.posting_date, sip.amount as paid_amount, si.currency,
-			'' as reference_date, '' as reference_no, 'Customer' as party_type
-		FROM
-			`tabSales Invoice Payment` as sip
-		JOIN
-			`tabSales Invoice` as si
-		ON
-			sip.parent = si.name
-		WHERE
-			(sip.clearance_date is null or sip.clearance_date='0000-00-00')
-			AND sip.account = %(bank_account)s
-			AND sip.amount {amount_condition} %(amount)s
-			AND si.customer = %(party)s 
-			AND si.docstatus = 1
-	"""
+# def get_si_party_matching_query(amount_condition):
+# 	return f"""
+# 		SELECT
+# 			'Sales Invoice' as doctype, si.name, si.customer as party,
+# 			si.posting_date, sip.amount as paid_amount, si.currency,
+# 			'' as reference_date, '' as reference_no, 'Customer' as party_type
+# 		FROM
+# 			`tabSales Invoice Payment` as sip
+# 		JOIN
+# 			`tabSales Invoice` as si
+# 		ON
+# 			sip.parent = si.name
+# 		WHERE
+# 			(sip.clearance_date is null or sip.clearance_date='0000-00-00')
+# 			AND sip.account = %(bank_account)s
+# 			AND sip.amount {amount_condition} %(amount)s
+# 			AND si.customer = %(party)s 
+# 			AND si.docstatus = 1
+# 	"""
 
 	# bank_account
 	# amount
 	# party
 
-def get_pi_party_matching_query(amount_condition):
-	return f"""
-		SELECT 
-			'Purchase Invoice' as doctype, name, paid_amount, supplier as party, posting_date, currency ,
-			'' as reference_date, '' as reference_no, 'Supplier' as party_type
-		FROM 
-			`tabPurchase Invoice`
-		WHERE
-			paid_amount {amount_condition} %(amount)s 
-			AND docstatus = 1 
-			AND is_paid = 1 
-			AND ifnull(clearance_date, '') = "" 
-			AND supplier = %(party)s 
-			AND cash_bank_account  = %(bank_account)s
-	"""
+# def get_pi_party_matching_query(amount_condition):
+# 	return f"""
+# 		SELECT 
+# 			'Purchase Invoice' as doctype, name, paid_amount, supplier as party, posting_date, currency ,
+# 			'' as reference_date, '' as reference_no, 'Supplier' as party_type
+# 		FROM 
+# 			`tabPurchase Invoice`
+# 		WHERE
+# 			paid_amount {amount_condition} %(amount)s 
+# 			AND docstatus = 1 
+# 			AND is_paid = 1 
+# 			AND ifnull(clearance_date, '') = "" 
+# 			AND supplier = %(party)s 
+# 			AND cash_bank_account  = %(bank_account)s
+# 	"""
 	# amount
 	# bank_account
 
 def get_pi_amount_matching_query(amount_condition):
 	return f"""
 		SELECT 
-			'Purchase Invoice' as doctype, name, paid_amount, supplier as party, posting_date, currency ,
-			'' as reference_date, '' as reference_no, 'Supplier' as party_type
+			( CASE WHEN supplier = %(party)s THEN 1 ELSE 0 END
+			+ 1 ) AS rank,
+			'Purchase Invoice' as doctype, 
+			name, 
+			paid_amount, 
+			'' as reference_no, 
+			'' as reference_date, 
+			supplier as party, 
+			'Supplier' as party_type,
+			posting_date, 
+			currency
 		FROM 
 			`tabPurchase Invoice`
 		WHERE
@@ -496,9 +551,19 @@ def get_ec_amount_matching_query(bank_account, company, amount_condition):
 	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
 	company_currency = get_company_currency(company)
 	return f"""
-		SELECT 'Expense Claim' as doctype, name, total_sanctioned_amount as paid_amount,
-				employee as party, posting_date, '{company_currency}' as currency,
-				'' as reference_date, '' as reference_no, 'Employee' as party_type
+	
+		SELECT
+			( CASE WHEN employee = %(party)s THEN 1 ELSE 0 END
+			+ 1 ) AS rank,
+			'Expense Claim' as doctype, 
+			name, 
+			total_sanctioned_amount as paid_amount,
+			'' as reference_no, 
+			'' as reference_date, 
+			employee as party, 
+			'Employee' as party_type,
+			posting_date, 
+			'{company_currency}' as currency
 		FROM
 			`tabExpense Claim`
 		WHERE	
@@ -510,23 +575,23 @@ def get_ec_amount_matching_query(bank_account, company, amount_condition):
 	"""
 	# amount
 
-def get_ec_party_matching_query(bank_account, company, amount_condition): 
-	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
-			filters={"default_account": bank_account}, fields=["parent"])]
-	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
-	company_currency = get_company_currency(company)
-	return f"""
-		SELECT 'Expense Claim' as doctype, name, total_sanctioned_amount as paid_amount,
-				employee as party, posting_date, '{company_currency}' as currency,
-				'' as reference_date, '' as reference_no, 'Employee' as party_type
-		FROM
-			`tabExpense Claim`
-		WHERE	
-			total_sanctioned_amount {amount_condition} %(amount)s 
-			AND docstatus = 1 
-			AND is_paid = 1 
-			AND ifnull(clearance_date, '') = "" 
-			AND mode_of_payment in {mode_of_payments} 
-			AND employee = %(party)s
+# def get_ec_party_matching_query(bank_account, company, amount_condition): 
+# 	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
+# 			filters={"default_account": bank_account}, fields=["parent"])]
+# 	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
+# 	company_currency = get_company_currency(company)
+# 	return f"""
+# 		SELECT 'Expense Claim' as doctype, name, total_sanctioned_amount as paid_amount,
+# 				employee as party, posting_date, '{company_currency}' as currency,
+# 				'' as reference_date, '' as reference_no, 'Employee' as party_type
+# 		FROM
+# 			`tabExpense Claim`
+# 		WHERE	
+# 			total_sanctioned_amount {amount_condition} %(amount)s 
+# 			AND docstatus = 1 
+# 			AND is_paid = 1 
+# 			AND ifnull(clearance_date, '') = "" 
+# 			AND mode_of_payment in {mode_of_payments} 
+# 			AND employee = %(party)s
 
-	"""	
+# 	"""	
