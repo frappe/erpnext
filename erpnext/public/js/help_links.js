@@ -234,7 +234,7 @@ frappe.help.help_links['company'] = [
 
 //Accounts
 
-frappe.help.help_links['space/Accounts'] = [
+frappe.help.help_links['accounts'] = [
 	{ label: 'Introduction to Accounts', url: docsUrl + 'user/manual/en/accounts/' },
 	{ label: 'Chart of Accounts', url: docsUrl + 'user/manual/en/accounts/chart-of-accounts.html' },
 	{ label: 'Multi Currency Accounting', url: docsUrl + 'user/manual/en/accounts/multi-currency-accounting' },
