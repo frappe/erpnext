@@ -365,6 +365,7 @@ class StockEntry(StockController):
 			"overproduction_percentage_for_work_order"))
 
 		for d in prod_order.get("operations"):
+			if d.skip_job_card: continue
 			total_completed_qty = flt(self.fg_completed_qty) + flt(prod_order.produced_qty)
 			completed_qty = d.completed_qty + (allowance_percentage/100 * d.completed_qty)
 			if total_completed_qty > flt(completed_qty):
@@ -1104,7 +1105,7 @@ class StockEntry(StockController):
 
 		fields = ["qty_to_produce as qty", "produced_qty", "name"]
 
-		for row in frappe.get_all("Batch", filters = filters, fields = fields):
+		for row in frappe.get_all("Batch", filters = filters, fields = fields, order_by="creation asc"):
 			batch_qty = flt(row.qty) - flt(row.produced_qty)
 			if not batch_qty: continue
 
