@@ -41,6 +41,7 @@ class JobCard(Document):
 
 	def validate_time_logs(self):
 		self.total_time_in_mins = 0.0
+		self.total_completed_qty = 0.0
 
 		if self.get('time_logs'):
 			for d in self.get('time_logs'):
@@ -58,8 +59,6 @@ class JobCard(Document):
 
 				if d.completed_qty:
 					self.total_completed_qty += d.completed_qty
-		else:
-			self.total_completed_qty = 0.0
 
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
@@ -256,12 +255,14 @@ class JobCard(Document):
 
 			if self.get('operation') == d.operation:
 				self.append('items', {
-					'item_code': d.item_code,
-					'source_warehouse': d.source_warehouse,
-					'uom': frappe.db.get_value("Item", d.item_code, 'stock_uom'),
-					'item_name': d.item_name,
-					'description': d.description,
-					'required_qty': (d.required_qty * flt(self.for_quantity)) / doc.qty
+					"item_code": d.item_code,
+					"source_warehouse": d.source_warehouse,
+					"uom": frappe.db.get_value("Item", d.item_code, 'stock_uom'),
+					"item_name": d.item_name,
+					"description": d.description,
+					"required_qty": (d.required_qty * flt(self.for_quantity)) / doc.qty,
+					"rate": d.rate,
+					"amount": d.amount
 				})
 
 	def on_submit(self):
@@ -439,7 +440,8 @@ class JobCard(Document):
 
 		data = frappe.get_all("Work Order Operation",
 			fields = ["operation", "status", "completed_qty"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id)},
+			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id),
+				"skip_job_card": 0},
 			order_by = "sequence_id, idx")
 
 		message = "Job Card {0}: As per the sequence of the operations in the work order {1}".format(bold(self.name),
