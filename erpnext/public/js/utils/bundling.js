@@ -44,26 +44,49 @@ $.extend(erpnext.bundling, {
 			let item_next_of_next = i < items.length - 1 ? items[i + 2] : null;
 			let is_last = i === items.length - 1;
 
-			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item_next.bundling_state == "Continue") && item.bundling_state == "Terminate" ) {
-				let temp_state = item.bundling_state;
-				item.bundling_state = item_next.bundling_state;
-				item_next.bundling_state = temp_state;
-			}
-			if (item_prev && item_next && (item_prev.bundling_state == "Start" && item.bundling_state == "Terminate") &&  item_next.bundling_state == "Continue") {
-				let temp_state = item.bundling_state;
-				item.bundling_state = item_next.bundling_state;
-				item_next.bundling_state = temp_state;
-			}
-			if ((!item_prev || item_prev.bundling_state != "Continue" ) && (!item_prev_of_prev || item_prev_of_prev.bundling_state!="Continue") && item_next_of_next && item_next && (item_next_of_next.bundling_state == "Continue" && item_next.bundling_state == "Start" ) && item.bundling_state == "Terminate") {
-				item.bundling_state = item_next.bundling_state;
-				item_next.bundling_state = "Continue";
-			}
-			if (item_prev && (item.bundling_state == "Continue" && item_prev.bundling_state == "Continue") && (!item_next || item_next.bundling_state == "Continue" || item_next.bundling_state == "")) {
-				if (item_next) {
-
-					item_next.bundling_state = "Terminate";
+			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Terminate" && item_next.bundling_state == "Continue")  ) {
+				//CTC
+				if (item_next_of_next && (item_next_of_next.bundling_state == "Start")){
+					continue;
 				} else {
-					item.bundling_state = "Terminate";
+					let temp_state = item.bundling_state;
+					item.bundling_state = item_next.bundling_state;
+					item_next.bundling_state = temp_state;
+				}
+			}
+			if (item_prev && item_next && (item_prev.bundling_state == "Terminate" && item.bundling_state == "Start" && item_next.bundling_state == "Continue")) {
+				//TSC
+				let temp_state = item.bundling_state;
+				item.bundling_state = item_prev.bundling_state;
+				item_prev.bundling_state = temp_state;
+			}
+			if (item_prev && item_next && (item_prev.bundling_state == "Start" && item.bundling_state == "Terminate" && item_next.bundling_state == "Continue")) {
+				//STC
+				let temp_state = item.bundling_state;
+				item.bundling_state = item_next.bundling_state;
+				item_next.bundling_state = temp_state;
+			}
+			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Start" && item_next.bundling_state == "Continue")) {
+				//CSC
+				let temp_state = item.bundling_state;
+				item.bundling_state = item_prev.bundling_state;
+				item_prev.bundling_state = temp_state;
+			}
+			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Start" && item_next.bundling_state == "Terminate")) {
+				//CST
+				let temp_state = item.bundling_state;
+				item.bundling_state = item_prev.bundling_state;
+				// item_prev.bundling_state = temp_state;
+			}
+			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Terminate" && item_next.bundling_state == "Start")) {
+				//CTS
+				if (item_next_of_next && (item_next_of_next.bundling_state == "Start" || item_next_of_next.bundling_state == "Continue")) {
+					continue;
+				}
+				else {
+					let temp_state = item.bundling_state;
+					item.bundling_state = item_next.bundling_state;
+					item_next.bundling_state = temp_state;
 				}
 			}
 		}
