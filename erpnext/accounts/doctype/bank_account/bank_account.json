@@ -86,6 +86,7 @@
   },
   {
    "default": "0",
+   "description": "Setting the account as a Company Account is necessary for Bank Reconciliation",
    "fieldname": "is_company_account",
    "fieldtype": "Check",
    "label": "Is Company Account"
@@ -207,7 +208,7 @@
   }
  ],
  "links": [],
- "modified": "2020-07-17 13:59:50.795412",
+ "modified": "2020-10-23 16:48:06.303658",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Account",
