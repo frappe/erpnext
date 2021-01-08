@@ -36,11 +36,7 @@ frappe.ui.form.on('Bank Statement Import', {
 						: __('Updating {0} of {1}, {2}', message_args);
 			}
 			if (data.skipping) {
-				message = __('Skipping {0} of {1}, {2}', [
-					data.current,
-					data.total,
-					eta_message
-				]);
+				message = __('Skipping {0} of {1}, {2}', [ data.current,data.total, eta_message ]);
 			}
 			frm.dashboard.show_progress(__('Import Progress'), percent, message);
 			frm.page.set_indicator(__('In Progress'), 'orange');
@@ -408,7 +404,8 @@ frappe.ui.form.on('Bank Statement Import', {
 				let html = '';
 				if (log.success) {
 					if (frm.doc.import_type === 'Insert New Records') {
-						html = __('Successfully imported {0}', [
+						html = __(
+							'Successfully imported {0}', [
 							`<span class="underline">${frappe.utils.get_form_link(
 								frm.doc.reference_doctype,
 								log.docname,
@@ -416,7 +413,8 @@ frappe.ui.form.on('Bank Statement Import', {
 							)}<span>`
 						]);
 					} else {
-						html = __('Successfully updated {0}', [
+						html = __(
+							'Successfully updated {0}', [
 							`<span class="underline">${frappe.utils.get_form_link(
 								frm.doc.reference_doctype,
 								log.docname,
