@@ -5,10 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
-from frappe.model.document import Document
-from frappe.model.mapper import map_doc
 from frappe.model import default_fields
+from frappe.model.document import Document
+from frappe.model.mapper import map_doc, map_child_doc
+from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 
 from six import iteritems
 
@@ -111,7 +111,8 @@ class POSInvoiceMergeLog(Document):
 						i.qty = i.qty + item.qty
 				if not found:
 					item.rate = item.net_rate
-					items.append(item)
+					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
+					items.append(si_item)
 			
 			for tax in doc.get('taxes'):
 				found = False
