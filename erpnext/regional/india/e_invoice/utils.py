@@ -322,7 +322,10 @@ def make_einvoice(invoice):
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
-		shipping_details = get_party_details(invoice.shipping_address_name)
+		if invoice.gst_category == 'Overseas':
+			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
+		else:
+			shipping_details = get_party_details(invoice.shipping_address_name)
 	
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
