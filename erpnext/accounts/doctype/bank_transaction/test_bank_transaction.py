@@ -39,7 +39,7 @@ class TestBankTransaction(unittest.TestCase):
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"))
-		linked_payments = get_linked_payments(bank_transaction.name, ['purchase_invoice', 'exact_match'])
+		linked_payments = get_linked_payments(bank_transaction.name, ['payment_entry', 'exact_match'])
 		self.assertTrue(linked_payments[0].party == "Conrad Electronic")
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
