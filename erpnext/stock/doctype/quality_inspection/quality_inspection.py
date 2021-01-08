@@ -53,8 +53,11 @@ class QualityInspection(Document):
 
 		if self.reference_type and self.reference_name:
 			conditions = ""
-			if self.batch_no:
+			if self.batch_no and self.docstatus == 1:
 				conditions += " and t1.batch_no = '%s'"%(self.batch_no)
+
+			if self.docstatus == 2: # if cancel, then remove qi link wherever same name
+				conditions += " and t1.quality_inspection = '%s'"%(self.name)
 
 			frappe.db.sql("""
 				UPDATE
