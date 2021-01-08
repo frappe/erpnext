@@ -325,7 +325,7 @@ class PurchaseReceipt(BuyingController):
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
 						warehouse_with_no_account.append(d.warehouse)
-			elif d.item_code not in stock_items and flt(d.qty) and auto_accounting_for_non_stock_items:
+			elif d.item_code not in stock_items and not d.is_fixed_asset and flt(d.qty) and auto_accounting_for_non_stock_items:
 
 				service_received_but_not_billed_account = self.get_company_default("service_received_but_not_billed")
 				credit_currency = get_account_currency(service_received_but_not_billed_account)
@@ -408,7 +408,7 @@ class PurchaseReceipt(BuyingController):
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-
+		
 		return process_gl_map(gl_entries)
 
 	def get_asset_gl_entry(self, gl_entries):

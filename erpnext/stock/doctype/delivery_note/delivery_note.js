@@ -15,6 +15,7 @@ frappe.ui.form.on("Delivery Note", {
 			'Installation Note': 'Installation Note',
 			'Sales Invoice': 'Invoice',
 			'Stock Entry': 'Return',
+			'Shipment': 'Shipment'
 		},
 		frm.set_indicator_formatter('item_code',
 			function(doc) {

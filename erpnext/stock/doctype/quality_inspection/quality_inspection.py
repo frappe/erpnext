@@ -69,11 +69,24 @@ class QualityInspection(Document):
 				doctype = 'Stock Entry Detail'
 
 			if self.reference_type and self.reference_name:
+				conditions = ""
+				if self.batch_no and self.docstatus == 1:
+					conditions += " and t1.batch_no = '%s'"%(self.batch_no)
+
+				if self.docstatus == 2: # if cancel, then remove qi link wherever same name
+					conditions += " and t1.quality_inspection = '%s'"%(self.name)
+
 				frappe.db.sql("""
-					UPDATE `tab{child_doc}` t1, `tab{parent_doc}` t2
-					SET t1.quality_inspection = %s, t2.modified = %s
-					WHERE t1.parent = %s and t1.item_code = %s and t1.parent = t2.name
-				""".format(parent_doc=self.reference_type, child_doc=doctype),
+					UPDATE
+						`tab{child_doc}` t1, `tab{parent_doc}` t2
+					SET
+						t1.quality_inspection = %s, t2.modified = %s
+					WHERE
+						t1.parent = %s
+						and t1.item_code = %s
+						and t1.parent = t2.name
+						{conditions}
+				""".format(parent_doc=self.reference_type, child_doc=doctype, conditions=conditions),
 					(quality_inspection, self.modified, self.reference_name, self.item_code))
 
 	def set_status_based_on_acceptance_formula(self):
