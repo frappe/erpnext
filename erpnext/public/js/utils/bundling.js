@@ -45,7 +45,6 @@ $.extend(erpnext.bundling, {
 			let is_last = i === items.length - 1;
 
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Terminate" && item_next.bundling_state == "Continue")  ) {
-				//CTC
 				if (item_next_of_next && (item_next_of_next.bundling_state == "Start")){
 					continue;
 				} else {
@@ -55,31 +54,26 @@ $.extend(erpnext.bundling, {
 				}
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Terminate" && item.bundling_state == "Start" && item_next.bundling_state == "Continue")) {
-				//TSC
 				let temp_state = item.bundling_state;
 				item.bundling_state = item_prev.bundling_state;
 				item_prev.bundling_state = temp_state;
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Start" && item.bundling_state == "Terminate" && item_next.bundling_state == "Continue")) {
-				//STC
 				let temp_state = item.bundling_state;
 				item.bundling_state = item_next.bundling_state;
 				item_next.bundling_state = temp_state;
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Start" && item_next.bundling_state == "Continue")) {
-				//CSC
 				let temp_state = item.bundling_state;
 				item.bundling_state = item_prev.bundling_state;
 				item_prev.bundling_state = temp_state;
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Start" && item_next.bundling_state == "Terminate")) {
-				//CST
 				let temp_state = item.bundling_state;
 				item.bundling_state = item_prev.bundling_state;
 				// item_prev.bundling_state = temp_state;
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Terminate" && item_next.bundling_state == "Start")) {
-				//CTS
 				if (item_next_of_next && (item_next_of_next.bundling_state == "Start" || item_next_of_next.bundling_state == "Continue")) {
 					continue;
 				}
@@ -233,7 +227,6 @@ $.extend(erpnext.bundling, {
 				erpnext.bundling.set_bundle_states(frm, "bundle", bundle_items);
 			}
 		});
-		console.log(bundles);
 
 		return false;
 	}
