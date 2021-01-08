@@ -59,8 +59,6 @@ class JobCard(Document):
 
 				if d.completed_qty and not self.sub_operations:
 					self.total_completed_qty += d.completed_qty
-		else:
-			self.total_completed_qty = 0.0
 
 			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
 
@@ -512,7 +510,8 @@ class JobCard(Document):
 
 		data = frappe.get_all("Work Order Operation",
 			fields = ["operation", "status", "completed_qty"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id)},
+			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id),
+				"skip_job_card": 0},
 			order_by = "sequence_id, idx")
 
 		message = "Job Card {0}: As per the sequence of the operations in the work order {1}".format(bold(self.name),

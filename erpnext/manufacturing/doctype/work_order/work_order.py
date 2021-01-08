@@ -747,7 +747,6 @@ class WorkOrder(Document):
 		return bom
 
 	def update_batch_produced_qty(self, stock_entry_doc):
-<<<<<<< HEAD
 		if not cint(frappe.db.get_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order")):
 			return
 
@@ -757,17 +756,6 @@ class WorkOrder(Document):
 					or_filters= {"is_finished_item": 1, "is_scrap_item": 1}, fields = ["sum(qty)"], as_list=1)[0][0]
 
 				frappe.db.set_value("Batch", row.batch_no, "produced_qty", flt(qty))
-=======
-		if not cint(frappe.db.get_single_value("Manufacturing Settings",
-			"make_serial_no_batch_from_work_order")): return
-
-		for row in stock_entry_doc.items:
-			if row.batch_no and (row.is_finished_item or row.is_scrap_item):
-				qty = frappe.get_all("Stock Entry Detail", filters = {"batch_no": row.batch_no},
-					or_conditions= {"is_finished_item": 1, "is_scrap_item": 1}, fields = ["sum(qty)"])[0][0]
-
-				frappe.db.set_value("Batch", row.batch_no, "produced_qty", qty)
->>>>>>> fcab53b238... fix: skip job card
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -1041,8 +1029,12 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		'company': work_order.company,
 		'sequence_id': row.get("sequence_id"),
 		'wip_warehouse': work_order.wip_warehouse,
+<<<<<<< HEAD
 		'hour_rate': row.get("hour_rate"),
 		'serial_no': row.get("serial_no")
+=======
+		"hour_rate": row.get("hour_rate")
+>>>>>>> c878389050... fix: or condition filter in the get_all
 	})
 
 	if work_order.transfer_material_against == 'Job Card' and not work_order.skip_transfer:
