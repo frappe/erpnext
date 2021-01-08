@@ -35,7 +35,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			callback: (r) => {
 				if (r.message) {
 					this.bank_transaction = r.message;
-					r.message.payment_entry=1
+					r.message.payment_entry = 1;
 					this.dialog.set_values(r.message);
 					this.dialog.show();
 				}
@@ -287,10 +287,10 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				get_query: () => {
 					return {
 						filters: {
-							"is_group": 0,
-							"company": this.company
-						}
-					}
+							is_group: 0,
+							company: this.company,
+						},
+					};
 				},
 			},
 			{
@@ -303,9 +303,12 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				get_query: function () {
 					return {
 						filters: {
-							"name": ["in", Object.keys(frappe.boot.party_account_types)],
-						}
-					}
+							name: [
+								"in",
+								Object.keys(frappe.boot.party_account_types),
+							],
+						},
+					};
 				},
 			},
 			{
@@ -401,7 +404,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	}
 
 	reconciliation_dialog_primary_action(values) {
-		const me = this;
 		if (values.action == "Match") this.match(values);
 		if (
 			values.action == "Create" &&
@@ -416,7 +418,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 		else if (values.action == "Update") this.update_transaction(values);
 	}
 
-	match(values) {
+	match() {
 		var selected_map = this.datatable.rowmanager.checkMap;
 		let rows = [];
 		selected_map.forEach((val, index) => {

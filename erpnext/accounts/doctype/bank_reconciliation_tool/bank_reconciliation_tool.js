@@ -24,18 +24,18 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					method:
 						"erpnext.accounts.doctype.bank_statement_import.bank_statement_import.upload_bank_statement",
 					args: {
-						dt: me.frm.doc.doctype,
-						dn: me.frm.doc.name,
-						company: me.frm.doc.company,
-						bank_account: me.frm.doc.bank_account,
+						dt: frm.doc.doctype,
+						dn: frm.doc.name,
+						company: frm.doc.company,
+						bank_account: frm.doc.bank_account,
 					},
 					callback: function (r) {
 						if (!r.exc) {
 							var doc = frappe.model.sync(r.message);
 							frappe.set_route(
 								"Form",
-								r.message.doctype,
-								r.message.name
+								doc[0].doctype,
+								doc[0].name
 							);
 						}
 					},

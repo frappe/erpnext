@@ -95,9 +95,9 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 
 	format_data(transactions) {
 		this.transactions = [];
-		if (transactions[0]){
-		this.currency = transactions[0]["currency"];
-	}
+		if (transactions[0]) {
+			this.currency = transactions[0]["currency"];
+		}
 		this.transaction_dt_map = {};
 		let length;
 		transactions.forEach((row) => {
@@ -162,12 +162,15 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 	}
 
 	update_dt_cards(bank_transaction) {
-		const transaction_index = this.transaction_dt_map[bank_transaction.name];
-		if (bank_transaction.unallocated_amount > 0){
-			this.transactions[transaction_index] = this.format_row(bank_transaction)
-		}
-		else{
-			this.transactions.splice(transaction_index,1)
+		const transaction_index = this.transaction_dt_map[
+			bank_transaction.name
+		];
+		if (bank_transaction.unallocated_amount > 0) {
+			this.transactions[transaction_index] = this.format_row(
+				bank_transaction
+			);
+		} else {
+			this.transactions.splice(transaction_index, 1);
 		}
 		this.datatable.refresh(this.transactions, this.columns);
 		// this.make_dt();

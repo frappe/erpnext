@@ -5,21 +5,10 @@
 from __future__ import unicode_literals
 import json
 
-import difflib
-import openpyxl
-from openpyxl.styles import Font
-from openpyxl.utils import get_column_letter
-from six import string_types, iteritems
-
 import frappe
-from frappe.core.doctype.data_import.importer import Importer, ImportFile
 from frappe.model.document import Document
 from frappe import _
 from frappe.utils import flt
-from frappe.utils.background_jobs import enqueue
-from frappe.core.page.background_jobs.background_jobs import get_info
-from frappe.utils.scheduler import is_scheduler_inactive
-from frappe.utils.xlsxutils import handle_html, ILLEGAL_CHARACTERS_RE
 
 from erpnext import get_company_currency
 from erpnext.accounts.utils import get_balance_on
@@ -269,7 +258,6 @@ def check_matching(bank_account, company, transaction, document_types):
 			"bank_account":  bank_account
 		},
 		as_dict=True,
-		debug=True
 	)
 	return matching_vouchers
 
@@ -542,5 +530,3 @@ def get_ec_party_matching_query(bank_account, company, amount_condition):
 			AND employee = %(party)s
 
 	"""	
-	# amount
-	# party

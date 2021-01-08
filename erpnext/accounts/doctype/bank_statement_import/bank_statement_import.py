@@ -3,23 +3,18 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import os
 import csv
 import json
 import re
 
-import difflib
 import openpyxl
 from openpyxl.styles import Font
 from openpyxl.utils import get_column_letter
-from six import string_types, iteritems
+from six import string_types
 
 import frappe
-from frappe.model.document import Document
 from frappe.core.doctype.data_import.importer import Importer, ImportFile
-from frappe.core.doctype.data_import.exporter import Exporter
 from frappe.utils.background_jobs import enqueue
-from frappe.utils.csvutils import validate_google_sheets_url
 from frappe.utils.xlsxutils import handle_html, ILLEGAL_CHARACTERS_RE
 from frappe import _
 
