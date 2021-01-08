@@ -83,7 +83,7 @@ class POSInvoiceMergeLog(Document):
 
 		credit_note.is_consolidated = 1
 		# TODO: return could be against multiple sales invoice which could also have been consolidated?
-		credit_note.return_against = self.consolidated_invoice
+		# credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
 		credit_note.submit()
 		self.consolidated_credit_note = credit_note.name
