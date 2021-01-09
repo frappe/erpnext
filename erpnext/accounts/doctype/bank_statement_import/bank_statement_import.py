@@ -46,16 +46,9 @@ class BankStatementImport(DataImport):
 		self.validate_google_sheets_url()
 
 	def start_import(self):
+
 		from frappe.core.page.background_jobs.background_jobs import get_info
 		from frappe.utils.scheduler import is_scheduler_inactive
-
-		bank = frappe.get_doc("Bank", self.bank)
-		for d in bank.bank_transaction_mapping:
-			d.delete()
-		for d in json.loads(self.template_options)["column_to_field_map"].items():
-			bank.append("bank_transaction_mapping", {"bank_transaction_field":  d[1] ,"file_field": d[0]} )
-		bank.save()
-
 
 		if is_scheduler_inactive() and not frappe.flags.in_test:
 			frappe.throw(
@@ -74,6 +67,8 @@ class BankStatementImport(DataImport):
 				data_import=self.name,
 				bank_account=self.bank_account,
 				import_file_path=self.import_file,
+				bank=self.bank,
+				template_options=self.template_options,
 				now=frappe.conf.developer_mode or frappe.flags.in_test,
 			)
 			return True
@@ -95,39 +90,18 @@ def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
 	data_import.export_errored_rows()
 
-def start_import(data_import, bank_account, import_file_path):
+def start_import(data_import, bank_account, import_file_path, bank, template_options):
 	"""This method runs in background job"""
+
+	update_mapping_db(bank, template_options)
+
 	data_import = frappe.get_doc("Bank Statement Import", data_import)
 
 	import_file = ImportFile("Bank Transaction", file = import_file_path, import_type="Insert New Records")
 	data = import_file.raw_data
 
-	bank_account_loc = None
-
-	if "Bank Account" not in data[0]:
-		data[0].append("Bank Account")
-	else:
-		for loc, header in enumerate(data[0]):
-			if header == "Bank Account":
-				bank_account_loc = loc
-
-	for row in data[1:]:
-		if bank_account_loc:
-			row[bank_account_loc] = bank_account
-		else:
-			row.append(bank_account)
-
-	full_file_path = import_file.file_doc.get_full_path()
-	parts = import_file.file_doc.get_extension()
-	extension = parts[1]
-	extension = extension.lstrip(".")
-
-	if extension == "csv":
-		with open(full_file_path, 'w', newline='') as file:
-			writer = csv.writer(file)
-			writer.writerows(data)
-	elif extension == "xlsx" or "xls":
-		write_xlsx(data, "trans", file_path = full_file_path)
+	add_bank_account(data, bank_account)
+	write_files(import_file, data)
 
 	try:
 		i = Importer(data_import.reference_doctype, data_import=data_import)
@@ -141,7 +115,46 @@ def start_import(data_import, bank_account, import_file_path):
 
 	frappe.publish_realtime("data_import_refresh", {"data_import": data_import.name})
 
+def update_mapping_db(bank, template_options):
+	bank = frappe.get_doc("Bank", bank)
+	for d in bank.bank_transaction_mapping:
+		d.delete()
+
+	for d in json.loads(template_options)["column_to_field_map"].items():
+		bank.append("bank_transaction_mapping", {"bank_transaction_field":  d[1] ,"file_field": d[0]} )
+
+	bank.save()
+
+def add_bank_account(data, bank_account):
+	bank_account_loc = None
+	if "Bank Account" not in data[0]:
+		data[0].append("Bank Account")
+	else:
+		for loc, header in enumerate(data[0]):
+			if header == "Bank Account":
+				bank_account_loc = loc
+
+	for row in data[1:]:
+		if bank_account_loc:
+			row[bank_account_loc] = bank_account
+		else:
+			row.append(bank_account)
+
+def write_files(import_file, data):
+	full_file_path = import_file.file_doc.get_full_path()
+	parts = import_file.file_doc.get_extension()
+	extension = parts[1]
+	extension = extension.lstrip(".")
+
+	if extension == "csv":
+		with open(full_file_path, 'w', newline='') as file:
+			writer = csv.writer(file)
+			writer.writerows(data)
+	elif extension == "xlsx" or "xls":
+		write_xlsx(data, "trans", file_path = full_file_path)
+
 def write_xlsx(data, sheet_name, wb=None, column_widths=None, file_path=None):
+	# from xlsx utils with changes
 	column_widths = column_widths or []
 	if wb is None:
 		wb = openpyxl.Workbook(write_only=True)
