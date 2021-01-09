@@ -178,8 +178,8 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
 			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Allocation" : "Select Allocation";
-			if (this.frm.doc.delivery_status === "To Receive" && !this.frm.doc.supplier_advance) {
-				if (this.frm.doc.vehicle_allocation_required) {
+			if (this.frm.doc.delivery_status === "To Receive") {
+				if (this.frm.doc.vehicle_allocation_required && !this.frm.doc.supplier_advance) {
 					this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation());
 				}
 
