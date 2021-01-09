@@ -163,11 +163,12 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			if self.party_type == "Letter of Credit":
-				self.party_name = self.party
-			else:
-				_party_name = "title" if self.party_type == "Student" else scrub(self.party_type) + "_name"
-				self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
+			if not self.party_name:
+				if self.party_type == "Letter of Credit":
+					self.party_name = self.party
+				else:
+					_party_name = "title" if self.party_type == "Student" else scrub(self.party_type) + "_name"
+					self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
 
 		if self.party:
 			if not self.get("party_balance"):
@@ -1179,6 +1180,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.contact_person = doc.get("contact_person")
 	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()
+
+	if dt == "Vehicle Booking Order" and party_type == "Customer":
+		pe.party_name = doc.get('customer_name')
 
 	pe.paid_from = party_account if payment_type=="Receive" else bank.account
 	pe.paid_to = party_account if payment_type=="Pay" else bank.account
