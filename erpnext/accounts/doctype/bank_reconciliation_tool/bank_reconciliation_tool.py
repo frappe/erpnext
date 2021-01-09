@@ -94,10 +94,10 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 	accounts = []
 	accounts.append({
 			"account": second_account,
-			"debit_in_account_currency": bank_transaction.deposit
+			"credit_in_account_currency": bank_transaction.deposit
 				if  bank_transaction.deposit > 0 
 				else 0,
-			"credit_in_account_currency":bank_transaction.withdrawal
+			"debit_in_account_currency":bank_transaction.withdrawal
 				if  bank_transaction.withdrawal > 0
 				else 0,
 			"party_type":party_type,
@@ -107,10 +107,10 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 	accounts.append({
 			"account": company_account,
 			"bank_account": bank_transaction.bank_account,
-			"debit_in_account_currency": bank_transaction.withdrawal
+			"credit_in_account_currency": bank_transaction.withdrawal
 				if  bank_transaction.withdrawal > 0
 				else 0,
-			"credit_in_account_currency":bank_transaction.deposit
+			"debit_in_account_currency":bank_transaction.deposit
 				if  bank_transaction.deposit > 0
 				else 0,
 		})
@@ -149,7 +149,7 @@ def create_payment_entry_bts( bank_transaction, reference_number, reference_date
 
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	paid_amount = bank_transaction.unallocated_amount
-	payment_type = "Receive" if bank_transaction.withdrawal > 0 else "Pay"
+	payment_type = "Receive" if bank_transaction.deposit > 0 else "Pay"
 
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
 	company = frappe.get_value("Account", company_account, "company")
@@ -205,13 +205,6 @@ def reconcile_vouchers(bank_transaction, vouchers):
 
 	for voucher in vouchers:
 		gl_entry = frappe.get_doc("GL Entry", dict(account=account, voucher_type=voucher['payment_doctype'], voucher_no=voucher['payment_name']))
-
-		if transaction.withdrawal > 0 and gl_entry.credit > 0:
-			frappe.throw(_("The selected payment entry should be linked with a debtor bank transaction"))
-
-		if transaction.deposit > 0 and gl_entry.debit > 0:
-			frappe.throw(_("The selected payment entry should be linked with a creditor bank transaction"))
-
 		gl_amount, transaction_amount = (gl_entry.credit, transaction.deposit) if gl_entry.credit > 0 else (gl_entry.debit, transaction.withdrawal)
 		allocated_amount = gl_amount if gl_amount <= transaction_amount else transaction_amount
 

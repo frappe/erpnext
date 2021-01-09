@@ -148,8 +148,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: __("Action"),
 				fieldname: "action",
 				fieldtype: "Select",
-				options: `Match\nCreate\nUpdate`,
-				default: "Match",
+				options: `Match against Voucher\nCreate Voucher\nUpdate Bank Transaction`,
+				default: "Match against Voucher",
 			},
 			{
 				fieldname: "column_break_4",
@@ -161,13 +161,13 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Select",
 				options: `Payment Entry\nJournal Entry`,
 				default: "Payment Entry",
-				depends_on: "eval:doc.action=='Create'",
+				depends_on: "eval:doc.action=='Create Voucher'",
 			},
 			{
 				fieldtype: "Section Break",
 				fieldname: "section_break_1",
 				label: __("Filters"),
-				depends_on: "eval:doc.action=='Match'",
+				depends_on: "eval:doc.action=='Match against Voucher'",
 			},
 			{
 				fieldtype: "Check",
@@ -218,7 +218,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Section Break",
 				fieldname: "section_break_1",
 				label: __("Select Vouchers to Match"),
-				depends_on: "eval:doc.action=='Match'",
+				depends_on: "eval:doc.action=='Match against Voucher'",
 			},
 			{
 				fieldtype: "HTML",
@@ -228,13 +228,13 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Section Break",
 				fieldname: "details",
 				label: "Details",
-				depends_on: "eval:doc.action!='Match'",
+				depends_on: "eval:doc.action!='Match against Voucher'",
 			},
 			{
 				fieldname: "reference_number",
 				fieldtype: "Data",
 				label: "Reference Number",
-				mandatory_depends_on: "eval:doc.action=='Create'",
+				mandatory_depends_on: "eval:doc.action=='Create Voucher'",
 			},
 			{
 				default: "Today",
@@ -242,14 +242,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Date",
 				label: "Posting Date",
 				reqd: 1,
-				depends_on: "eval:doc.action=='Create'",
+				depends_on: "eval:doc.action=='Create Voucher'",
 			},
 			{
 				fieldname: "reference_date",
 				fieldtype: "Date",
 				label: "Cheque/Reference Date",
-				mandatory_depends_on: "eval:doc.action=='Create'",
-				depends_on: "eval:doc.action=='Create'",
+				mandatory_depends_on: "eval:doc.action=='Create Voucher'",
+				depends_on: "eval:doc.action=='Create Voucher'",
 				reqd: 1,
 			},
 			{
@@ -257,7 +257,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Link",
 				label: "Mode of Payment",
 				options: "Mode of Payment",
-				depends_on: "eval:doc.action=='Create'",
+				depends_on: "eval:doc.action=='Create Voucher'",
 			},
 			{
 				fieldname: "column_break_7",
@@ -271,9 +271,9 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				options:
 					"Journal Entry\nInter Company Journal Entry\nBank Entry\nCash Entry\nCredit Card Entry\nDebit Note\nCredit Note\nContra Entry\nExcise Entry\nWrite Off Entry\nOpening Entry\nDepreciation Entry\nExchange Rate Revaluation\nDeferred Revenue\nDeferred Expense",
 				depends_on:
-					"eval:doc.action=='Create' &&  doc.document_type=='Journal Entry'",
+					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Journal Entry'",
 				mandatory_depends_on:
-					"eval:doc.action=='Create' &&  doc.document_type=='Journal Entry'",
+					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Journal Entry'",
 			},
 			{
 				fieldname: "second_account",
@@ -281,9 +281,9 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Account",
 				options: "Account",
 				depends_on:
-					"eval:doc.action=='Create' &&  doc.document_type=='Journal Entry'",
+					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Journal Entry'",
 				mandatory_depends_on:
-					"eval:doc.action=='Create' &&  doc.document_type=='Journal Entry'",
+					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Journal Entry'",
 				get_query: () => {
 					return {
 						filters: {
@@ -299,7 +299,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Party Type",
 				options: "DocType",
 				mandatory_depends_on:
-					"eval:doc.action=='Create' &&  doc.document_type=='Payment Entry'",
+					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Payment Entry'",
 				get_query: function () {
 					return {
 						filters: {
@@ -317,7 +317,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Party",
 				options: "party_type",
 				mandatory_depends_on:
-					"eval:doc.action=='Create' && doc.document_type=='Payment Entry'",
+					"eval:doc.action=='Create Voucher' && doc.document_type=='Payment Entry'",
 			},
 			{
 				fieldname: "project",
@@ -325,7 +325,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Project",
 				options: "Project",
 				depends_on:
-					"eval:doc.action=='Create' && doc.document_type=='Payment Entry'",
+					"eval:doc.action=='Create Voucher' && doc.document_type=='Payment Entry'",
 			},
 			{
 				fieldname: "cost_center",
@@ -333,7 +333,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Cost Center",
 				options: "Cost Center",
 				depends_on:
-					"eval:doc.action=='Create' && doc.document_type=='Payment Entry'",
+					"eval:doc.action=='Create Voucher' && doc.document_type=='Payment Entry'",
 			},
 			{
 				fieldtype: "Section Break",
@@ -404,18 +404,18 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	}
 
 	reconciliation_dialog_primary_action(values) {
-		if (values.action == "Match") this.match(values);
+		if (values.action == "Match against Voucher") this.match(values);
 		if (
-			values.action == "Create" &&
+			values.action == "Create Voucher" &&
 			values.document_type == "Payment Entry"
 		)
 			this.add_payment_entry(values);
 		if (
-			values.action == "Create" &&
+			values.action == "Create Voucher" &&
 			values.document_type == "Journal Entry"
 		)
 			this.add_journal_entry(values);
-		else if (values.action == "Update") this.update_transaction(values);
+		else if (values.action == "Update Bank Transaction") this.update_transaction(values);
 	}
 
 	match() {
@@ -440,6 +440,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				vouchers: vouchers,
 			},
 			callback: (response) => {
+				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " matched"
+				frappe.show_alert(alert_string)
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
@@ -462,6 +464,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				cost_center: values.cost_center,
 			},
 			callback: (response) => {
+				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " added as Payment Entry"
+				frappe.show_alert(alert_string)
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
@@ -484,6 +488,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				second_account: values.second_account,
 			},
 			callback: (response) => {
+				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " added as Journal Entry"
+				frappe.show_alert(alert_string)
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
@@ -501,6 +507,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				party: values.party,
 			},
 			callback: (response) => {
+				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " updated"
+				frappe.show_alert(alert_string) 
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
