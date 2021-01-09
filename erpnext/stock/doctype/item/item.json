@@ -46,7 +46,6 @@
   "vehicle_engine_capacity",
   "column_break_35",
   "column_break_37",
-  "include_in_vehicle_booking",
   "vehicle_allocation_required",
   "exempt_from_vehicle_withholding_tax",
   "commission_item_code",
@@ -64,6 +63,7 @@
   "column_break_41",
   "is_sales_item",
   "is_purchase_item",
+  "include_in_vehicle_booking",
   "include_item_in_manufacturing",
   "allow_alternative_item",
   "hide_in_price_list",
@@ -1227,12 +1227,14 @@
   },
   {
    "default": "0",
+   "depends_on": "include_in_vehicle_booking",
    "fieldname": "vehicle_allocation_required",
    "fieldtype": "Check",
    "label": "Vehicle Allocation Required"
   },
   {
    "default": "0",
+   "depends_on": "include_in_vehicle_booking",
    "fieldname": "exempt_from_vehicle_withholding_tax",
    "fieldtype": "Check",
    "label": "Exempt From Vehicle Withholding Tax"
@@ -1243,7 +1245,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-01-07 22:26:27.285355",
+ "modified": "2021-01-09 12:58:16.668784",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

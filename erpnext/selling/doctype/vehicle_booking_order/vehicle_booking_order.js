@@ -84,6 +84,17 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		});
 
 		this.frm.set_query("vehicle_allocation", () => me.allocation_query());
+
+		this.frm.set_query("additional_item_code", "additional_items", function(doc) {
+			var filters = {'include_in_vehicle_booking': 1, 'is_vehicle': 0};
+			if (doc.item_code) {
+				filters.applicable_to_item = doc.item_code;
+			}
+			return {
+				query: "erpnext.controllers.queries.item_query",
+				filters: filters
+			}
+		});
 	},
 
 	vehicle_query: function () {
