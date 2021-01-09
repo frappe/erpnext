@@ -222,7 +222,11 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		applicable_to_item = filters.get('applicable_to_item')
 		del filters['applicable_to_item']
 
-		if frappe.get_cached_value("Stock Settings", None, "filter_items_by_applicable_to"):
+		force_applicable_to = filters.get('force_applicable_to')
+		if force_applicable_to:
+			del filters['force_applicable_to']
+
+		if force_applicable_to or frappe.get_cached_value("Stock Settings", None, "filter_items_by_applicable_to"):
 			variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
 			if variant_of:
 				all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
