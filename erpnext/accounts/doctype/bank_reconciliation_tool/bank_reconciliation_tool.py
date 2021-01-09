@@ -252,7 +252,7 @@ def check_matching(bank_account, company, transaction, document_types):
 	matching_vouchers = []
 	for query in subquery:
 		matching_vouchers.extend(
-			frappe.db.sql(query, filters, debug=True)
+			frappe.db.sql(query, filters,)
 		)
 
 	return sorted(matching_vouchers, key = lambda x: x[0]) if matching_vouchers else []
