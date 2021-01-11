@@ -362,6 +362,27 @@ class TestLoan(unittest.TestCase):
 		unpledge_request.load_from_db()
 		self.assertEqual(unpledge_request.docstatus, 1)
 
+	def test_santined_loan_security_unpledge(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		self.assertEquals(loan.loan_amount, 1000000)
+
+		unpledge_map = {'Test Security 1': 4000}
+		unpledge_request = unpledge_security(loan=loan.name, security_map = unpledge_map, save=1)
+		unpledge_request.submit()
+		unpledge_request.status = 'Approved'
+		unpledge_request.save()
+		unpledge_request.submit()
+
 	def test_disbursal_check_with_shortfall(self):
 		pledges = [{
 			"loan_security": "Test Security 2",

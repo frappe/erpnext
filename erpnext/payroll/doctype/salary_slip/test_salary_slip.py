@@ -318,7 +318,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		year_to_date = 0
 		for slip in salary_slips:
-			year_to_date += slip.net_pay
+			year_to_date += flt(slip.net_pay)
 			self.assertEqual(slip.year_to_date, year_to_date)
 
 	def test_tax_for_payroll_period(self):
@@ -585,14 +585,6 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 			"amount": 200,
 			"exempted_from_income_tax": 1
 
-		},
-		{
-			"salary_component": 'TDS',
-			"abbr":'T',
-			"type": "Deduction",
-			"depends_on_payment_days": 0,
-			"variable_based_on_taxable_salary": 1,
-			"round_to_the_nearest_integer": 1
 		}
 	]
 	if not test_tax:
@@ -601,6 +593,15 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 			"abbr":'T',
 			"condition": 'employment_type=="Intern"',
 			"type": "Deduction",
+			"round_to_the_nearest_integer": 1
+		})
+	else:
+		data.append({
+			"salary_component": 'TDS',
+			"abbr":'T',
+			"type": "Deduction",
+			"depends_on_payment_days": 0,
+			"variable_based_on_taxable_salary": 1,
 			"round_to_the_nearest_integer": 1
 		})
 	if setup or test_tax:
