@@ -17,6 +17,8 @@
   "enable_free_follow_ups",
   "max_visits",
   "valid_days",
+  "inpatient_settings_section",
+  "allow_discharge_despite_unbilled_services",
   "healthcare_service_items",
   "inpatient_visit_charge_item",
   "op_consulting_charge_item",
@@ -302,11 +304,22 @@
    "fieldname": "enable_free_follow_ups",
    "fieldtype": "Check",
    "label": "Enable Free Follow-ups"
+  },
+  {
+   "fieldname": "inpatient_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Inpatient Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_discharge_despite_unbilled_services",
+   "fieldtype": "Check",
+   "label": "Allow Discharge Despite Unbilled Healthcare Services"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-07-08 15:17:21.543218",
+ "modified": "2021-01-04 10:19:22.329272",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",
