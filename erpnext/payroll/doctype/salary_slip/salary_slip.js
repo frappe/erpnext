@@ -151,7 +151,6 @@ frappe.ui.form.on("Salary Slip", {
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "variable_based_on_taxable_salary"];
 		frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields, false);
 		frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields, false);
-		calculate_totals(frm);
 		frm.trigger("set_dynamic_labels");
 	},
 
@@ -214,14 +213,16 @@ frappe.ui.form.on('Salary Slip Timesheet', {
 });
 
 var calculate_totals = function(frm) {
-	if (frm.doc.earnings || frm.doc.deductions) {
-		frappe.call({
-			method: "set_totals",
-			doc: frm.doc,
-			callback: function() {
-				frm.refresh_fields();
-			}
-		});
+	if (frm.doc.docstatus === 0) {
+		if (frm.doc.earnings || frm.doc.deductions) {
+			frappe.call({
+				method: "set_totals",
+				doc: frm.doc,
+				callback: function() {
+					frm.refresh_fields();
+				}
+			});
+		}
 	}
 };
 
