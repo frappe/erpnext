@@ -21,6 +21,7 @@
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
   "restrict_backdated_leave_application",
+  "automatically_allocate_leaves_based_on_leave_policy",
   "hiring_settings",
   "check_vacancies"
  ],
@@ -41,7 +42,7 @@
    "description": "Employee records are created using the selected field",
    "fieldname": "emp_created_by",
    "fieldtype": "Select",
-   "label": "Employee Records to Be Created By",
+   "label": "Employee Records to be created by",
    "options": "Naming Series\nEmployee Number\nFull Name"
   },
   {
@@ -117,7 +118,7 @@
    "default": "0",
    "fieldname": "restrict_backdated_leave_application",
    "fieldtype": "Check",
-   "label": "Restrict Backdated Leave Applications"
+   "label": "Restrict Backdated Leave Application"
   },
   {
    "depends_on": "eval:doc.restrict_backdated_leave_application == 1",
@@ -125,13 +126,19 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Create Backdated Leave Application",
    "options": "Role"
+  },
+  {
+   "default": "0",
+   "fieldname": "automatically_allocate_leaves_based_on_leave_policy",
+   "fieldtype": "Check",
+   "label": "Automatically Allocate Leaves Based On Leave Policy"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 11:49:46.168027",
+ "modified": "2020-08-27 14:30:28.995324",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
