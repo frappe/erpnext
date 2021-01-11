@@ -11,7 +11,8 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Payment Entry': 'party',
 			'Quotation': 'party_name',
-			'Opportunity': 'party_name'
+			'Opportunity': 'party_name',
+			'Medical Objects': 'customer_id'
 		},
 		'dynamic_links': {
 			'party_name': ['Customer', 'quotation_to']
@@ -45,6 +46,10 @@ def get_data():
 				'label': _('Statements'),
 				'items': ['Customer Statements']
 			},
+			{
+				'label': 'Testing DB',
+				'items': ['Medical Objects']
+			}
 			# {
 			# 	'label': _('Subscriptions'),
 			# 	'items': ['Subscription']
