@@ -43,7 +43,14 @@ class TherapySession(Document):
 		self.update_sessions_count_in_therapy_plan()
 		insert_session_medical_record(self)
 
+	def on_update(self):
+		if self.appointment:
+			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Closed')
+
 	def on_cancel(self):
+		if self.appointment:
+			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
+
 		self.update_sessions_count_in_therapy_plan(on_cancel=True)
 
 	def update_sessions_count_in_therapy_plan(self, on_cancel=False):
