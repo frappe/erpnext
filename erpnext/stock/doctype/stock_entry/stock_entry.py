@@ -488,6 +488,8 @@ class StockEntry(StockController):
 
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
+				if d.set_basic_rate_manually: continue
+
 				if (d.transfer_qty and (d.bom_no or d.t_warehouse)
 					and (getattr(self, "pro_doc", frappe._dict()).scrap_warehouse != d.t_warehouse)):
 
@@ -499,7 +501,7 @@ class StockEntry(StockController):
 					if raw_material_cost and self.purpose == "Manufacture":
 						d.basic_rate = flt((raw_material_cost - scrap_material_cost) / flt(d.transfer_qty), d.precision("basic_rate"))
 						d.basic_amount = flt((raw_material_cost - scrap_material_cost), d.precision("basic_amount"))
-					elif self.purpose == "Repack" and total_fg_qty and not d.set_basic_rate_manually:
+					elif self.purpose == "Repack" and total_fg_qty:
 						d.basic_rate = flt(raw_material_cost) / flt(total_fg_qty)
 						d.basic_amount = d.basic_rate * flt(d.qty)
 
@@ -1010,7 +1012,7 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "required_qty", "consumed_qty", "transferred_qty"]
+			fields=["item_code", "required_qty", "consumed_qty", "transferred_qty", "source_warehouse"]
 			)
 
 		work_order_qty = wo.material_transferred_for_manufacturing or wo.qty
@@ -1028,9 +1030,13 @@ class StockEntry(StockController):
 			qty = req_qty_each * flt(self.fg_completed_qty)
 
 			if qty > 0:
+				from_warehouse = wo.wip_warehouse
+				if wo.skip_transfer and not wo.from_wip_warehouse:
+					from_warehouse = item.source_warehouse
+
 				self.add_to_stock_entry_detail({
 					item.item_code: {
-						"from_warehouse": wo.wip_warehouse,
+						"from_warehouse": from_warehouse,
 						"to_warehouse": "",
 						"qty": qty,
 						"item_name": item.item_name,
