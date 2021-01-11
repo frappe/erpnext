@@ -238,6 +238,7 @@
   },
   {
    "fetch_from": "employee.company",
+   "fetch_if_empty": 1,
    "fieldname": "company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -266,6 +267,7 @@
   },
   {
    "fetch_from": "company.default_expense_claim_payable_account",
+   "fetch_if_empty": 1,
    "fieldname": "payable_account",
    "fieldtype": "Link",
    "label": "Payable Account",
@@ -274,6 +276,7 @@
   },
   {
    "fetch_from": "company.cost_center",
+   "fetch_if_empty": 1,
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "label": "Cost Center",
@@ -524,7 +527,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-06 21:44:40.225255",
+ "modified": "2021-01-11 13:26:49.835316",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",
