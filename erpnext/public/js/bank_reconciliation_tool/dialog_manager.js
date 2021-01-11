@@ -64,14 +64,14 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				if (data && data.length > 0) {
 					proposals_wrapper.show();
 					data.forEach((row) => {
-						const reference_date = row[4]
-							? row[4]
+						const reference_date = row[5]
+							? row[5]
 							: row[8];
 						this.data.push([
 							row[1],
 							row[2],
 							reference_date,
-							format_currency(3, row[9]),
+							format_currency(row[3], row[9]),
 							row[6],
 							row[4],
 						]);

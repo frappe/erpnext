@@ -234,15 +234,10 @@ def check_matching(bank_account, company, transaction, document_types):
 
 	subquery = get_queries(bank_account, company, transaction, document_types)
 
-	if transaction.deposit > 0:
-		currency_field = "paid_to_account_currency as currency"  
-	else:
-		currency_field = "paid_from_account_currency as currency"
 
 	filters = {
 			"amount": transaction.unallocated_amount,
 			"payment_type" : "Receive" if transaction.deposit > 0 else "Pay",
-			"currency_field" : currency_field,
 			"reference_no": transaction.reference_number,
 			"party_type": transaction.party_type,
 			"party": transaction.party,
@@ -255,7 +250,7 @@ def check_matching(bank_account, company, transaction, document_types):
 			frappe.db.sql(query, filters,)
 		)
 
-	return sorted(matching_vouchers, key = lambda x: x[0]) if matching_vouchers else []
+	return sorted(matching_vouchers, key = lambda x: x[0], reverse=True) if matching_vouchers else []
 
 def get_queries(bank_account, company, transaction, document_types):
 	amount_condition = "=" if "exact_match" in document_types else "<="
@@ -263,7 +258,7 @@ def get_queries(bank_account, company, transaction, document_types):
 	queries = []
 
 	if "payment_entry" in document_types:
-		pe_amount_matching = get_pe_matching_query(amount_condition, account_from_to)
+		pe_amount_matching = get_pe_matching_query(amount_condition, account_from_to, transaction)
 		queries.extend([pe_amount_matching])
 
 	if "journal_entry" in document_types:
@@ -285,7 +280,11 @@ def get_queries(bank_account, company, transaction, document_types):
 
 	return queries
 
-def get_pe_matching_query(amount_condition, account_from_to):
+def get_pe_matching_query(amount_condition, account_from_to, transaction):
+	if transaction.deposit > 0:
+		currency_field = "paid_to_account_currency as currency"
+	else:
+		currency_field = "paid_from_account_currency as currency"
 	return  f"""
 	SELECT
 		(CASE WHEN reference_no=%(reference_no)s THEN 1 ELSE 0 END
@@ -299,7 +298,7 @@ def get_pe_matching_query(amount_condition, account_from_to):
 		party,
 		party_type,
 		posting_date,
-		%(currency_field)s
+		{currency_field}
 	FROM
 		`tabPayment Entry`
 	WHERE
