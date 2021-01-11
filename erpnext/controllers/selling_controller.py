@@ -311,7 +311,7 @@ class SellingController(StockController):
 				sales_order.update_reserved_qty(so_item_rows)
 
 	def set_incoming_rate(self):
-		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+		if self.doctype not in ("Delivery Note", "Sales Invoice", "Sales Order"):
 			return
 
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -321,10 +321,10 @@ class SellingController(StockController):
 				d.incoming_rate = get_incoming_rate({
 					"item_code": d.item_code,
 					"warehouse": d.warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
+					"posting_date": self.get('posting_date') or self.get('transaction_date'),
+					"posting_time": self.get('posting_time'),
 					"qty": -1 * flt(d.get('stock_qty') or d.get('actual_qty')),
-					"serial_no": d.serial_no,
+					"serial_no": d.get('serial_no'),
 					"company": self.company,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
@@ -332,10 +332,12 @@ class SellingController(StockController):
 				}, raise_error_if_no_rate=False)
 
 				# For internal transfers use incoming rate as the valuation rate
-				if self.get('is_internal_customer') and d.get('target_warehouse'):
+				if self.get('is_internal_customer'):
 					rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
 					if d.rate != rate:
 						d.rate = rate
+						d.discount_percentage = 0
+						d.discount_amount = 0
 						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
 							.format(d.idx), alert=1)
 
