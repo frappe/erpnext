@@ -32,12 +32,11 @@ def execute():
                     description = task.description,
                     is_template = 1
                 )).insert()
-                print(new_task)
                 new_tasks.append(new_task)
+
         if replace_tasks:
             template.tasks = []
             for tsk in new_tasks:
-                print(tsk.name, tsk.subject)
                 template.append("tasks", {
                     "task": tsk.name,
                     "subject": tsk.subject
