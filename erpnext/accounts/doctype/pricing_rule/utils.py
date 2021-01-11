@@ -452,8 +452,9 @@ def get_qty_amount_data_for_cumulative(pr_doc, doc, items=[]):
 	return [sum_qty, sum_amt]
 
 def apply_pricing_rule_on_transaction(doc):
-	conditions = "apply_on = 'Transaction'"
-
+	conditions = "apply_on = 'Transaction' and `tabPricing Rule`.selling=1"
+	if "Purchase" in doc.doctype:
+		conditions="apply_on = 'Transaction' and `tabPricing Rule`.buying=1"
 	values = {}
 	conditions = get_other_conditions(conditions, values, doc)
 
