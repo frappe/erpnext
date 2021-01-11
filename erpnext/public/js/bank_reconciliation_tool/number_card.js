@@ -7,7 +7,7 @@ erpnext.accounts.bank_reconciliation.NumberCardManager = class NumberCardManager
 	}
 
 	make_cards() {
-		this.$reconciliation_tool_cards.empty()
+		this.$reconciliation_tool_cards.empty();
 		this.$cards = [];
 		this.$summary = $(`<div class="report-summary"></div>`)
 			.hide()

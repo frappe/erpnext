@@ -64,9 +64,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				if (data && data.length > 0) {
 					proposals_wrapper.show();
 					data.forEach((row) => {
-						const reference_date = row[5]
-							? row[5]
-							: row[8];
+						const reference_date = row[5] ? row[5] : row[8];
 						this.data.push([
 							row[1],
 							row[2],
@@ -415,7 +413,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			values.document_type == "Journal Entry"
 		)
 			this.add_journal_entry(values);
-		else if (values.action == "Update Bank Transaction") this.update_transaction(values);
+		else if (values.action == "Update Bank Transaction")
+			this.update_transaction(values);
 	}
 
 	match() {
@@ -440,8 +439,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				vouchers: vouchers,
 			},
 			callback: (response) => {
-				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " matched"
-				frappe.show_alert(alert_string)
+				const alert_string =
+					"Bank Transaction " +
+					this.bank_transaction.name +
+					" matched";
+				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
@@ -464,8 +466,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				cost_center: values.cost_center,
 			},
 			callback: (response) => {
-				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " added as Payment Entry"
-				frappe.show_alert(alert_string)
+				const alert_string =
+					"Bank Transaction " +
+					this.bank_transaction.name +
+					" added as Payment Entry";
+				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
@@ -488,8 +493,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				second_account: values.second_account,
 			},
 			callback: (response) => {
-				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " added as Journal Entry"
-				frappe.show_alert(alert_string)
+				const alert_string =
+					"Bank Transaction " +
+					this.bank_transaction.name +
+					" added as Journal Entry";
+				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
@@ -507,8 +515,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				party: values.party,
 			},
 			callback: (response) => {
-				const alert_string = "Bank Transaction " + this.bank_transaction.name +  " updated"
-				frappe.show_alert(alert_string) 
+				const alert_string =
+					"Bank Transaction " +
+					this.bank_transaction.name +
+					" updated";
+				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
 			},
