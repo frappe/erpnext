@@ -83,26 +83,6 @@ class TestBankTransaction(unittest.TestCase):
 			"amount":bank_transaction.unallocated_amount}])
 		self.assertRaises(frappe.ValidationError, reconcile_vouchers, bank_transaction=bank_transaction.name, vouchers=vouchers)
 
-	# Raise an error if creditor transaction vs creditor payment
-	def test_invalid_creditor_reconcilation(self):
-		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="I2015000011 VD/000002514 ATWWXXX AT4701345000003510057 Bio"))
-		payment = frappe.get_doc("Payment Entry", dict(party="Conrad Electronic", paid_amount=690))
-		vouchers = json.dumps([{
-			"payment_doctype":"Payment Entry",
-			"payment_name":payment.name,
-			"amount":bank_transaction.unallocated_amount}])
-		self.assertRaises(frappe.ValidationError, reconcile_vouchers, bank_transaction=bank_transaction.name, vouchers=vouchers)
-
-	# Raise an error if debitor transaction vs debitor payment
-	def test_invalid_debitor_reconcilation(self):
-		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"))
-		payment = frappe.get_doc("Payment Entry", dict(party="Fayva", paid_amount=109080))
-		vouchers = json.dumps([{
-			"payment_doctype":"Payment Entry",
-			"payment_name":payment.name,
-			"amount":bank_transaction.unallocated_amount}])
-		self.assertRaises(frappe.ValidationError, reconcile_vouchers, bank_transaction=bank_transaction.name, vouchers=vouchers)
-
 	# Raise an error if debitor transaction vs debitor payment
 	def test_clear_sales_invoice(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="I2015000011 VD/000002514 ATWWXXX AT4701345000003510057 Bio"))
