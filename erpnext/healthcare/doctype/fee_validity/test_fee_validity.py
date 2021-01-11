@@ -7,6 +7,7 @@ import frappe
 import unittest
 from frappe.utils import nowdate, add_days
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_appointment, create_healthcare_service_items
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 test_dependencies = ["Company"]
 
@@ -15,6 +16,7 @@ class TestFeeValidity(unittest.TestCase):
 		frappe.db.sql("""delete from `tabPatient Appointment`""")
 		frappe.db.sql("""delete from `tabFee Validity`""")
 		frappe.db.sql("""delete from `tabPatient`""")
+		make_pos_profile()
 
 	def test_fee_validity(self):
 		item = create_healthcare_service_items()

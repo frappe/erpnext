@@ -15,8 +15,7 @@ REQUIRED_FIELDS = {
 		},
 		{
 			"field_name": "taxes",
-			"regulation": "§ 14 Abs. 4 Nr. 8 UStG",
-			"condition": "not exempt_from_sales_tax"
+			"regulation": "§ 14 Abs. 4 Nr. 8 UStG"
 		},
 		{
 			"field_name": "customer_address",
@@ -49,9 +48,6 @@ def validate_regional(doc):
 
 def missing(field_label, regulation):
 	"""Notify the user that a required field is missing."""
-	context = 'Specific for Germany. Example: Remember to set Company Tax ID. It is required by § 14 Abs. 4 Nr. 2 UStG.'
-	msgprint(_('Remember to set {field_label}. It is required by {regulation}.', context=context).format(
-			field_label=frappe.bold(_(field_label)),
-			regulation=regulation
-		)
-	)
+	translated_msg = _('Remember to set {field_label}. It is required by {regulation}.', context='Specific for Germany. Example: Remember to set Company Tax ID. It is required by § 14 Abs. 4 Nr. 2 UStG.') # noqa: E501
+	formatted_msg = translated_msg.format(field_label=frappe.bold(_(field_label)), regulation=regulation)
+	msgprint(formatted_msg)

@@ -84,9 +84,6 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 			cur_frm.fields_dict.suppliers.grid.grid_rows[0].toggle_view();
 		},
 		() => frappe.timeout(1),
-		() => {
-			frappe.click_check('No Quote');
-		},
 		() => frappe.timeout(1),
 		() => {
 			cur_frm.cur_grid.toggle_view();
@@ -125,7 +122,6 @@ QUnit.test("Test: Request for Quotation", function (assert) {
 		() => frappe.timeout(1),
 		() => {
 			assert.ok(cur_frm.fields_dict.suppliers.grid.grid_rows[1].doc.quote_status == "Received");
-			assert.ok(cur_frm.fields_dict.suppliers.grid.grid_rows[0].doc.no_quote == 1);
 		},
 		() => done()
 	]);

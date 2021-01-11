@@ -41,20 +41,6 @@ frappe.ui.form.on('Salary Structure', {
 
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet)
 
-		frm.set_query("salary_component", "earnings", function() {
-			return {
-				filters: {
-					type: "earning"
-				}
-			}
-		});
-		frm.set_query("salary_component", "deductions", function() {
-			return {
-				filters: {
-					type: "deduction"
-				}
-			}
-		});
 		frm.set_query("payment_account", function () {
 			var account_types = ["Bank", "Cash"];
 			return {
@@ -65,9 +51,47 @@ frappe.ui.form.on('Salary Structure', {
 				}
 			};
 		});
+		frm.trigger('set_earning_deduction_component');
+	},
+
+	set_earning_deduction_component: function(frm) {
+		if(!frm.doc.company) return;
+		frm.set_query("salary_component", "earnings", function() {
+			return {
+				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
+				filters: {type: "earning", company: frm.doc.company}
+			};
+		});
+		frm.set_query("salary_component", "deductions", function() {
+			return {
+				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
+				filters: {type: "deduction", company: frm.doc.company}
+			};
+		});
+	},
+
+
+	currency: function(frm) {
+		calculate_totals(frm.doc);
+		frm.trigger("set_dynamic_labels")
+		frm.refresh()
+	},
+
+	set_dynamic_labels: function(frm) {
+		frm.set_currency_labels(["net_pay","hour_rate", "leave_encashment_amount_per_day", "max_benefits", "total_earning",
+			"total_deduction"], frm.doc.currency);
+
+		frm.set_currency_labels(["amount", "additional_amount", "tax_on_flexible_benefit", "tax_on_additional_salary"],
+			frm.doc.currency, "earnings");
+
+		frm.set_currency_labels(["amount", "additional_amount", "tax_on_flexible_benefit", "tax_on_additional_salary"],
+			frm.doc.currency, "deductions");
+
+		frm.refresh_fields();
 	},
 
 	refresh: function(frm) {
+		frm.trigger("set_dynamic_labels")
 		frm.trigger("toggle_fields");
 		frm.fields_dict['earnings'].grid.set_column_disp("default_amount", false);
 		frm.fields_dict['deductions'].grid.set_column_disp("default_amount", false);
@@ -101,10 +125,12 @@ frappe.ui.form.on('Salary Structure', {
 			fields: [
 				{fieldname: "sec_break", fieldtype: "Section Break", label: __("Filter Employees By (Optional)")},
 				{fieldname: "company", fieldtype: "Link", options: "Company", label: __("Company"), default: frm.doc.company, read_only:1},
+				{fieldname: "currency", fieldtype: "Link", options: "Currency", label: __("Currency"), default: frm.doc.currency, read_only:1},
 				{fieldname: "grade", fieldtype: "Link", options: "Employee Grade", label: __("Employee Grade")},
 				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
 				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
-                {fieldname:"employee", fieldtype: "Link", options: "Employee", label: __("Employee")},
+				{fieldname:"employee", fieldtype: "Link", options: "Employee", label: __("Employee")},
+				{fieldname:"payroll_payable_account", fieldtype: "Link", options: "Account", filters: {"company": frm.doc.company, "root_type": "Liability", "is_group": 0, "account_currency": frm.doc.currency}, label: __("Payroll Payable Account")},
 				{fieldname:'base_variable', fieldtype:'Section Break'},
 				{fieldname:'from_date', fieldtype:'Date', label: __('From Date'), "reqd": 1},
 				{fieldname:'income_tax_slab', fieldtype:'Link', label: __('Income Tax Slab'), options: 'Income Tax Slab'},

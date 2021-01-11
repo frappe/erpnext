@@ -137,7 +137,8 @@ class TestProductionPlan(unittest.TestCase):
 			'from_date': so.transaction_date,
 			'to_date': so.transaction_date,
 			'customer': so.customer,
-			'item_code': item
+			'item_code': item,
+			'sales_order_status': so.status
 		})
 		sales_orders = get_sales_orders(pln) or {}
 		sales_orders = [d.get('name') for d in sales_orders if d.get('name') == sales_order]
@@ -237,7 +238,9 @@ def make_bom(**args):
 		'item': args.item,
 		'currency': args.currency or 'USD',
 		'quantity': args.quantity or 1,
-		'company': args.company or '_Test Company'
+		'company': args.company or '_Test Company',
+		'routing': args.routing,
+		'with_operations': args.with_operations or 0
 	})
 
 	for item in args.raw_materials:
