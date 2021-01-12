@@ -110,7 +110,7 @@ def generate_stk_push(**kwargs):
 		mobile_number = sanitize_mobile_number(args.sender)
 
 		response = connector.stk_push(business_shortcode=mpesa_settings.till_number,
-			passcode=mpesa_settings.get_password("online_passkey"), amount=args.grand_total,
+			passcode=mpesa_settings.get_password("online_passkey"), amount=args.request_amount,
 			callback_url=callback_url, reference_code=mpesa_settings.till_number,
 			phone_number=mobile_number, description="POS Payment")
 
