@@ -679,6 +679,38 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
+def vehicle_allocation_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+
+	fields = get_fields("Vehicle Allocation", ['name', 'title'])
+	fields[1] = "CONCAT('<b>', title, '</b>')"
+	searchfields = frappe.get_meta("Vehicle Allocation").get_search_fields()
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+
+	return frappe.db.sql("""
+		select {fields}
+		from `tabVehicle Allocation`
+		where ({scond}) {fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, title), locate(%(_txt)s, title), 99999),
+			sr_no
+		limit %(start)s, %(page_len)s
+	""".format(**{
+		'fields': ", ".join(fields),
+		'key': searchfield,
+		'scond': searchfields,
+		'fcond': get_filters_cond("Vehicle Allocation", filters, conditions).replace('%', '%%'),
+		'mcond': get_match_cond(doctype)
+	}), {
+		'txt': "%%%s%%" % txt,
+		'_txt': txt.replace("%", ""),
+		'start': start,
+		'page_len': page_len
+	})
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def vehicle_allocation_period_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 

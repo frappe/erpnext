@@ -120,7 +120,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.delivery_period) {
 			filters['delivery_period'] = this.frm.doc.delivery_period;
 		}
-		return {filters: filters};
+		return {
+			query: "erpnext.controllers.queries.vehicle_allocation_query",
+			filters: filters
+		};
 	},
 
 	setup_route_options: function () {
