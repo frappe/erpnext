@@ -42,7 +42,8 @@
 		"public/js/hub/hub_factory.js",
 		"public/js/call_popup/call_popup.js",
 		"public/js/utils/dimension_tree_filter.js",
-		"public/js/telephony.js"
+		"public/js/telephony.js",
+		"public/js/templates/call_link.html"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",
