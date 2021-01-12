@@ -40,8 +40,8 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
-  "is_free_item",
   "stock_uom_rate",
+  "is_free_item",
   "section_break_29",
   "net_rate",
   "net_amount",
@@ -731,7 +731,7 @@
   {
    "fieldname": "stock_uom_rate",
    "fieldtype": "Currency",
-   "label": "Rate of Stock UOM",
+   "label": "Rate (Stock UOM)",
    "read_only": 1
   }
  ],
@@ -739,7 +739,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-05 23:50:50.201932",
+ "modified": "2021-01-12 17:54:50.624071",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
