@@ -260,11 +260,7 @@ erpnext.PointOfSale.ItemSelector = class {
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
 	}
-<<<<<<< HEAD
-
-=======
 	
->>>>>>> develop
 	resize_selector(minimize) {
 		minimize ?
 		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
