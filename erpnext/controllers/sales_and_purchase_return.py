@@ -365,3 +365,45 @@ def make_return_doc(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None, item_row=None, voucher_detail_no=None):
+	if not return_against:
+		return_against = frappe.get_cached_value(voucher_type, voucher_no, "return_against")
+
+	return_against_item_field = get_return_against_item_fields(voucher_type)
+
+	filters = get_filters(voucher_type, voucher_no, voucher_detail_no,
+		return_against, item_code, return_against_item_field, item_row)
+
+	if voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+		select_field = "incoming_rate"
+	else:
+		select_field = "abs(stock_value_difference / actual_qty)"
+
+	return flt(frappe.db.get_value("Stock Ledger Entry", filters, select_field))
+
+def get_return_against_item_fields(voucher_type):
+	return_against_item_fields = {
+		"Purchase Receipt": "purchase_receipt_item",
+		"Purchase Invoice": "purchase_invoice_item",
+		"Delivery Note": "dn_detail",
+		"Sales Invoice": "sales_invoice_item"
+	}
+	return return_against_item_fields[voucher_type]
+
+def get_filters(voucher_type, voucher_no, voucher_detail_no, return_against, item_code, return_against_item_field, item_row):
+	filters = {
+		"voucher_type": voucher_type,
+		"voucher_no": return_against,
+		"item_code": item_code
+	}
+
+	if item_row:
+		reference_voucher_detail_no = item_row.get(return_against_item_field)
+	else:
+		reference_voucher_detail_no = frappe.db.get_value(voucher_type + " Item", voucher_detail_no, return_against_item_field)
+
+	if reference_voucher_detail_no:
+		filters["voucher_detail_no"] = reference_voucher_detail_no
+
+	return filters
