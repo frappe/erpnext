@@ -5,7 +5,7 @@ erpnext.PointOfSale.ItemCart = class {
 		this.customer_info = undefined;
 		this.hide_images = settings.hide_images;
 		this.allowed_customer_groups = settings.customer_groups;
-
+		
 		this.init_component();
 	}
 
@@ -416,6 +416,7 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	update_customer_section() {
+		const me = this;
 		const { customer, email_id='', mobile_no='', image } = this.customer_info || {};
 
 		if (customer) {
