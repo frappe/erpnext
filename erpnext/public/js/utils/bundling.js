@@ -42,10 +42,11 @@ $.extend(erpnext.bundling, {
 			let item_prev_of_prev = i > 0 ? items[i - 2] : null;
 			let item_next = i < items.length - 1 ? items[i + 1] : null;
 			let item_next_of_next = i < items.length - 1 ? items[i + 2] : null;
-			let is_last = i === items.length - 1;
+			let is_continue = false;
 
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Terminate" && item_next.bundling_state == "Continue")  ) {
-				if (item_next_of_next && (item_next_of_next.bundling_state == "Start")){
+				is_continue = item_next_of_next && (item_next_of_next.bundling_state != "" && item_next_of_next.bundling_state != "Start" && item_next_of_next.bundling_state != "Continue");
+				if (is_continue){
 					continue;
 				} else {
 					let temp_state = item.bundling_state;
@@ -54,32 +55,49 @@ $.extend(erpnext.bundling, {
 				}
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Terminate" && item.bundling_state == "Start" && item_next.bundling_state == "Continue")) {
-				let temp_state = item.bundling_state;
-				item.bundling_state = item_prev.bundling_state;
-				item_prev.bundling_state = temp_state;
+				is_continue = item_prev_of_prev && item_prev_of_prev.bundling_state == "Continue";
+				if (is_continue) {
+					continue;
+				} else {
+					let temp_state = item.bundling_state;
+					item.bundling_state = item_prev.bundling_state;
+					item_prev.bundling_state = temp_state;
+				}
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Start" && item.bundling_state == "Terminate" && item_next.bundling_state == "Continue")) {
-				let temp_state = item.bundling_state;
-				item.bundling_state = item_next.bundling_state;
-				item_next.bundling_state = temp_state;
+				if (is_continue) {
+					continue;
+				} else {
+					let temp_state = item.bundling_state;
+					item.bundling_state = item_next.bundling_state;
+					item_next.bundling_state = temp_state;
+				}
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Start" && item_next.bundling_state == "Continue")) {
-				let temp_state = item.bundling_state;
-				item.bundling_state = item_prev.bundling_state;
-				item_prev.bundling_state = temp_state;
+				if (is_continue) {
+					continue;
+				} else {
+					let temp_state = item.bundling_state;
+					item.bundling_state = item_prev.bundling_state;
+					item_prev.bundling_state = temp_state;
+				}
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Start" && item_next.bundling_state == "Terminate")) {
-				let temp_state = item.bundling_state;
-				item.bundling_state = item_prev.bundling_state;
-				// item_prev.bundling_state = temp_state;
+				if (is_continue) {
+					continue;
+				} else {
+					let temp_state = item.bundling_state;
+					item.bundling_state = item_prev.bundling_state;
+				}
 			}
 			if (item_prev && item_next && (item_prev.bundling_state == "Continue" && item.bundling_state == "Terminate" && item_next.bundling_state == "Start")) {
-				if (item_next_of_next && (item_next_of_next.bundling_state == "Start" || item_next_of_next.bundling_state == "Continue")) {
+				is_continue = item_next_of_next && (item_next_of_next.bundling_state == "Continue" || item_next_of_next.bundling_state == "Terminate");
+				if (is_continue) {
 					continue;
 				}
 				else {
 					let temp_state = item.bundling_state;
-					item.bundling_state = item_next.bundling_state;
+					item.bundling_state = item_prev.bundling_state;
 					item_next.bundling_state = temp_state;
 				}
 			}
