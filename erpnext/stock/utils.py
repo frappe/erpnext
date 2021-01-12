@@ -63,6 +63,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 		SELECT item_code, stock_value, name, warehouse
 		FROM `tabStock Ledger Entry` sle
 		WHERE posting_date <= %s {0}
+			and is_cancelled = 0
 		ORDER BY timestamp(posting_date, posting_time) DESC, creation DESC
 	""".format(condition), values, as_dict=1)
 
@@ -211,7 +212,7 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
 			raise_error_if_no_rate=raise_error_if_no_rate)
 
-	return in_rate
+	return flt(in_rate)
 
 def get_avg_purchase_rate(serial_nos):
 	"""get average value of serial numbers"""
@@ -376,3 +377,9 @@ def get_incoming_outgoing_rate_for_cancel(item_code, voucher_type, voucher_no, v
 	outgoing_rate = outgoing_rate[0][0] if outgoing_rate else 0.0
 
 	return outgoing_rate
+
+def is_reposting_item_valuation_in_progress():
+	reposting_in_progress = frappe.db.exists("Repost Item Valuation",
+		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
+	if reposting_in_progress:
+		frappe.msgprint(_("Item valuation reposting in progress. Report might show incorrect item valuation."), alert=1)
