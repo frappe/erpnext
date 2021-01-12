@@ -247,7 +247,6 @@ class SalesInvoice(SellingController):
 		self.check_if_consolidated_invoice()
 		self.update_time_sheet(None)
 
-
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()
 

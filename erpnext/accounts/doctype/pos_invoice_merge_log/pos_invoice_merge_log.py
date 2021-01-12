@@ -69,7 +69,7 @@ class POSInvoiceMergeLog(Document):
 	def on_cancel(self):
 		pos_invoice_docs = [frappe.get_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
 
-		self.update_pos_invoices(pos_invoice_docs, on_cancel=True)
+		self.update_pos_invoices(pos_invoice_docs)
 		self.cancel_linked_invoices()
 
 	def process_merging_into_sales_invoice(self, data):
@@ -168,10 +168,10 @@ class POSInvoiceMergeLog(Document):
 
 		return sales_invoice
 	
-	def update_pos_invoices(self, invoice_docs, sales_invoice='', credit_note='', on_cancel=False):
+	def update_pos_invoices(self, invoice_docs, sales_invoice='', credit_note=''):
 		for doc in invoice_docs:
 			doc.load_from_db()
-			doc.update({ 'consolidated_invoice': None if on_cancel else (credit_note if doc.is_return else sales_invoice) })
+			doc.update({ 'consolidated_invoice': None if self.docstatus==2 else (credit_note if doc.is_return else sales_invoice) })
 			doc.set_status(update=True)
 			doc.save()
 
@@ -241,16 +241,15 @@ def create_merge_logs(invoice_by_customer, closing_entry={}):
 		closing_entry.set_status(update=True, status='Submitted')
 		closing_entry.update_opening_entry()
 
-	frappe.throw('test')
-
 def cancel_merge_logs(merge_logs, closing_entry={}):
 	for log in merge_logs:
 		merge_log = frappe.get_doc('POS Invoice Merge Log', log)
+		merge_log.flags.ignore_permissions = True
 		merge_log.cancel()
 
 	if closing_entry:
 		closing_entry.set_status(update=True, status='Cancelled')
-		closing_entry.update_opening_entry(on_cancel=True)
+		closing_entry.update_opening_entry(for_cancel=True)
 
 def enqueue_job(job, invoice_by_customer, closing_entry):
 	check_scheduler_status()

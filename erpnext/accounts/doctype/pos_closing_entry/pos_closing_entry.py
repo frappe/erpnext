@@ -70,9 +70,9 @@ class POSClosingEntry(StatusUpdater):
 	def on_cancel(self):
 		unconsolidate_pos_invoices(closing_entry=self)
 
-	def update_opening_entry(self, on_cancel=False):
+	def update_opening_entry(self, for_cancel=False):
 		opening_entry = frappe.get_doc("POS Opening Entry", self.pos_opening_entry)
-		opening_entry.pos_closing_entry = self.name if not on_cancel else None
+		opening_entry.pos_closing_entry = self.name if not for_cancel else None
 		opening_entry.set_status()
 		opening_entry.save()
 
