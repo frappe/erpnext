@@ -14,9 +14,8 @@ import frappe
 from erpnext.setup.doctype.item_group.item_group import get_child_item_groups
 from erpnext.stock.doctype.warehouse.warehouse import get_child_warehouses
 from erpnext.stock.get_item_details import get_conversion_factor
-from frappe import _, throw
-from frappe.utils import cint, flt, get_datetime, get_link_to_form, getdate, today
-
+from frappe import _, bold
+from frappe.utils import cint, flt, get_link_to_form, getdate, today, fmt_money
 
 class MultiplePricingRuleConflict(frappe.ValidationError): pass
 
@@ -37,9 +36,12 @@ def get_pricing_rules(args, doc=None):
 
 	rules = []
 
+	pricing_rules = filter_pricing_rule_based_on_condition(pricing_rules, doc)
+
 	if not pricing_rules: return []
 
 	if apply_multiple_pricing_rules(pricing_rules):
+		pricing_rules = sorted_by_priority(pricing_rules)
 		for pricing_rule in pricing_rules:
 			pricing_rule = filter_pricing_rules(args, pricing_rule, doc)
 			if pricing_rule:
@@ -50,6 +52,37 @@ def get_pricing_rules(args, doc=None):
 			rules.append(pricing_rule)
 
 	return rules
+
+def sorted_by_priority(pricing_rules):
+	# If more than one pricing rules, then sort by priority
+	pricing_rules_list = []
+	pricing_rule_dict = {}
+	for pricing_rule in pricing_rules:
+		if not pricing_rule.get("priority"): continue
+
+		pricing_rule_dict.setdefault(cint(pricing_rule.get("priority")), []).append(pricing_rule)
+
+	for key in sorted(pricing_rule_dict):
+		pricing_rules_list.append(pricing_rule_dict.get(key))
+
+	return pricing_rules_list or pricing_rules
+
+def filter_pricing_rule_based_on_condition(pricing_rules, doc=None):
+	filtered_pricing_rules = []
+	if doc:
+		for pricing_rule in pricing_rules:
+			if pricing_rule.condition:
+				try:
+					if frappe.safe_eval(pricing_rule.condition, None, doc.as_dict()):
+						filtered_pricing_rules.append(pricing_rule)
+				except:
+					pass
+			else:
+				filtered_pricing_rules.append(pricing_rule)
+	else:
+		filtered_pricing_rules = pricing_rules
+
+	return filtered_pricing_rules
 
 def _get_pricing_rules(apply_on, args, values):
 	apply_on_field = frappe.scrub(apply_on)
@@ -131,7 +164,15 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 			frappe.throw(_("Invalid {0}").format(args.get(field)))
 
 		parent_groups = frappe.db.sql_list("""select name from `tab%s`
-			where lft<=%s and rgt>=%s""" % (parenttype, '%s', '%s'), (lft, rgt))
+			where lft>=%s and rgt<=%s""" % (parenttype, '%s', '%s'), (lft, rgt))
+
+		if parenttype in ["Customer Group", "Item Group", "Territory"]:
+			parent_field = "parent_{0}".format(frappe.scrub(parenttype))
+			root_name = frappe.db.get_list(parenttype,
+				{"is_group": 1, parent_field: ("is", "not set")}, "name", as_list=1)
+
+			if root_name and root_name[0][0]:
+				parent_groups.append(root_name[0][0])
 
 		if parent_groups:
 			if allow_blank: parent_groups.append('')
@@ -265,12 +306,13 @@ def validate_quantity_and_amount_for_suggestion(args, qty, amount, item_code, tr
 			fieldname = field
 
 	if fieldname:
-		msg = _("""If you {0} {1} quantities of the item <b>{2}</b>, the scheme <b>{3}</b>
-			will be applied on the item.""").format(type_of_transaction, args.get(fieldname), item_code, args.rule_description)
+		msg = (_("If you {0} {1} quantities of the item {2}, the scheme {3} will be applied on the item.")
+			.format(type_of_transaction, args.get(fieldname), bold(item_code), bold(args.rule_description)))
 
 		if fieldname in ['min_amt', 'max_amt']:
-			msg = _("""If you {0} {1} worth item <b>{2}</b>, the scheme <b>{3}</b> will be applied on the item.
-				""").format(frappe.fmt_money(type_of_transaction, args.get(fieldname)), item_code, args.rule_description)
+			msg = (_("If you {0} {1} worth item {2}, the scheme {3} will be applied on the item.")
+				.format(type_of_transaction, fmt_money(args.get(fieldname), currency=args.get("currency")),
+					bold(item_code), bold(args.rule_description)))
 
 		frappe.msgprint(msg)
 
@@ -423,6 +465,9 @@ def apply_pricing_rule_on_transaction(doc):
 		pricing_rules = filter_pricing_rules_for_qty_amount(doc.total_qty,
 			doc.total, pricing_rules)
 
+		if not pricing_rules:
+			remove_free_item(doc)
+
 		for d in pricing_rules:
 			if d.price_or_product_discount == 'Price':
 				if d.apply_discount_on:
@@ -446,6 +491,12 @@ def apply_pricing_rule_on_transaction(doc):
 				get_product_discount_rule(d, item_details, doc=doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
+				doc.calculate_taxes_and_totals()
+
+def remove_free_item(doc):
+	for d in doc.items:
+		if d.is_free_item:
+			doc.remove(d)
 
 def get_applied_pricing_rules(pricing_rules):
 	if pricing_rules:
@@ -458,7 +509,7 @@ def get_applied_pricing_rules(pricing_rules):
 
 def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	free_item = pricing_rule.free_item
-	if pricing_rule.same_item:
+	if pricing_rule.same_item and pricing_rule.get("apply_on") != 'Transaction':
 		free_item = item_details.item_code or args.item_code
 
 	if not free_item:

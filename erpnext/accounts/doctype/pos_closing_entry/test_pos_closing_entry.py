@@ -45,7 +45,7 @@ class TestPOSClosingEntry(unittest.TestCase):
 		frappe.set_user("Administrator")
 		frappe.db.sql("delete from `tabPOS Profile`")
 
-def init_user_and_profile():
+def init_user_and_profile(**args):
 	user = 'test@example.com'
 	test_user = frappe.get_doc('User', user)
 
@@ -53,7 +53,7 @@ def init_user_and_profile():
 	test_user.add_roles(*roles)
 	frappe.set_user(user)
 
-	pos_profile = make_pos_profile()
+	pos_profile = make_pos_profile(**args)
 	pos_profile.append('applicable_for_users', {
 		'default': 1,
 		'user': user

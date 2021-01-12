@@ -219,12 +219,16 @@ class ProductionPlan(Document):
 			filters = {'docstatus': 0, 'production_plan': ("=", self.name)}):
 			frappe.delete_doc('Work Order', d.name)
 
-	def set_status(self):
+	def set_status(self, close=None):
 		self.status = {
 			0: 'Draft',
 			1: 'Submitted',
 			2: 'Cancelled'
 		}.get(self.docstatus)
+
+		if close:
+			self.db_set('status', 'Closed')
+			return
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
@@ -234,6 +238,9 @@ class ProductionPlan(Document):
 		if self.status != 'Completed':
 			self.update_ordered_status()
 			self.update_requested_status()
+
+		if close is not None:
+			self.db_set('status', self.status)
 
 	def update_ordered_status(self):
 		update_status = False
@@ -322,12 +329,13 @@ class ProductionPlan(Document):
 		work_orders = []
 		bom_data = {}
 
-		get_sub_assembly_items(item.get("bom_no"), bom_data)
+		get_sub_assembly_items(item.get("bom_no"), bom_data, item.get("qty"))
 
 		for key, data in bom_data.items():
 			data.update({
-				'qty': data.get("stock_qty") * item.get("qty"),
+				'qty': data.get("stock_qty"),
 				'production_plan': self.name,
+				'use_multi_level_bom': item.get("use_multi_level_bom"),
 				'company': self.company,
 				'fg_warehouse': item.get("fg_warehouse"),
 				'update_consumed_material_cost_in_project': 0
@@ -381,7 +389,6 @@ class ProductionPlan(Document):
 					"transaction_date": nowdate(),
 					"status": "Draft",
 					"company": self.company,
-					"requested_by": frappe.session.user,
 					'material_request_type': material_request_type,
 					'customer': item_doc.customer or ''
 				})
@@ -564,6 +571,8 @@ def get_sales_orders(self):
 		so_filter += " and so.customer = %(customer)s"
 	if self.project:
 		so_filter += " and so.project = %(project)s"
+	if self.sales_order_status:
+		so_filter += "and so.status = %(sales_order_status)s"
 
 	if self.item_code:
 		item_filter += " and so_item.item_code = %(item)s"
@@ -587,8 +596,8 @@ def get_sales_orders(self):
 			"customer": self.customer,
 			"project": self.project,
 			"item": self.item_code,
-			"company": self.company
-
+			"company": self.company,
+			"sales_order_status": self.sales_order_status
 		}, as_dict=1)
 	return open_so
 
@@ -735,10 +744,12 @@ def get_items_for_material_requests(doc, warehouses=None):
 		mr_items = new_mr_items
 
 	if not mr_items:
-		frappe.msgprint(_("""As raw materials projected quantity is more than required quantity,
-			there is no need to create material request for the warehouse {0}.
-			Still if you want to make material request,
-			kindly enable <b>Ignore Existing Projected Quantity</b> checkbox""").format(doc.get('for_warehouse')))
+		to_enable = frappe.bold(_("Ignore Existing Projected Quantity"))
+		warehouse = frappe.bold(doc.get('for_warehouse'))
+		message = _("As there are sufficient raw materials, Material Request is not required for Warehouse {0}.").format(warehouse) + "<br><br>"
+		message += _(" If you still want to proceed, please enable {0}.").format(to_enable)
+
+		frappe.msgprint(message, title=_("Note"))
 
 	return mr_items
 
@@ -782,7 +793,7 @@ def get_item_data(item_code):
 #		"description": item_details.get("description")
 	}
 
-def get_sub_assembly_items(bom_no, bom_data):
+def get_sub_assembly_items(bom_no, bom_data, to_produce_qty):
 	data = get_children('BOM', parent = bom_no)
 	for d in data:
 		if d.expandable:
@@ -799,6 +810,6 @@ def get_sub_assembly_items(bom_no, bom_data):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += d.stock_qty / d.parent_bom_qty
+			bom_item["stock_qty"] += (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 
-			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)
+			get_sub_assembly_items(bom_item.get("bom_no"), bom_data, bom_item["stock_qty"])

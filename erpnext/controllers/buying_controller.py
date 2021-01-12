@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt,cint, cstr, getdate
-
+from six import iteritems
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.buying.utils import validate_for_items, update_last_purchase_rate
@@ -16,6 +16,8 @@ from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.controllers.stock_controller import StockController
+from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
+from erpnext.stock.utils import get_incoming_rate
 
 class BuyingController(StockController):
 	def __setup__(self):
@@ -42,6 +44,7 @@ class BuyingController(StockController):
 		self.validate_items()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
+		self.update_tax_category_for_internal_transfer()
 		self.validate_warehouse()
 		self.validate_from_warehouse()
 		self.set_supplier_address()
@@ -62,7 +65,7 @@ class BuyingController(StockController):
 			self.set_landed_cost_voucher_amount()
 
 		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
-			self.update_valuation_rate("items")
+			self.update_valuation_rate()
 
 	def set_missing_values(self, for_validate=False):
 		super(BuyingController, self).set_missing_values(for_validate)
@@ -94,13 +97,23 @@ class BuyingController(StockController):
 
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
-			tax_for_valuation = [d for d in self.get("taxes")
+			msg = _('Tax Category has been changed to "Total" because all the Items are non-stock items')
+			self.update_tax_category(msg)
+
+	def update_tax_category_for_internal_transfer(self):
+		if self.doctype == 'Purchase Invoice' and self.is_internal_transfer():
+			msg = _('Tax Category has been changed to "Total" as its an internal purchase.')
+			self.update_tax_category(msg)
+
+	def update_tax_category(self, msg):
+		tax_for_valuation = [d for d in self.get("taxes")
 				if d.category in ["Valuation", "Valuation and Total"]]
 
-			if tax_for_valuation:
-				for d in tax_for_valuation:
-					d.category = 'Total'
-				msgprint(_('Tax Category has been changed to "Total" because all the Items are non-stock items'))
+		if tax_for_valuation:
+			for d in tax_for_valuation:
+				d.category = 'Total'
+
+			msgprint(msg)
 
 	def validate_asset_return(self):
 		if self.doctype not in ['Purchase Receipt', 'Purchase Invoice'] or not self.is_return:
@@ -112,8 +125,8 @@ class BuyingController(StockController):
 			"docstatus": 1
 		})]
 		if self.is_return and len(not_cancelled_asset):
-			frappe.throw(_("{} has submitted assets linked to it. You need to cancel the assets to create purchase return.".format(self.return_against)),
-				title=_("Not Allowed"))
+			frappe.throw(_("{} has submitted assets linked to it. You need to cancel the assets to create purchase return.")
+				.format(self.return_against), title=_("Not Allowed"))
 
 	def get_asset_items(self):
 		if self.doctype not in ['Purchase Order', 'Purchase Invoice', 'Purchase Receipt']:
@@ -166,7 +179,7 @@ class BuyingController(StockController):
 			self.in_words = money_in_words(amount, self.currency)
 
 	# update valuation rate
-	def update_valuation_rate(self, parentfield):
+	def update_valuation_rate(self, reset_outgoing_rate=True):
 		"""
 			item_tax_amount is the total tax amount applied on that item
 			stored for valuation
@@ -177,7 +190,7 @@ class BuyingController(StockController):
 
 		stock_and_asset_items_qty, stock_and_asset_items_amount = 0, 0
 		last_item_idx = 1
-		for d in self.get(parentfield):
+		for d in self.get("items"):
 			if d.item_code and d.item_code in stock_and_asset_items:
 				stock_and_asset_items_qty += flt(d.qty)
 				stock_and_asset_items_amount += flt(d.base_net_amount)
@@ -187,7 +200,7 @@ class BuyingController(StockController):
 			if d.category in ["Valuation", "Valuation and Total"]])
 
 		valuation_amount_adjustment = total_valuation_amount
-		for i, item in enumerate(self.get(parentfield)):
+		for i, item in enumerate(self.get("items")):
 			if item.item_code and item.qty and item.item_code in stock_and_asset_items:
 				item_proportion = flt(item.base_net_amount) / stock_and_asset_items_amount if stock_and_asset_items_amount \
 					else flt(item.qty) / stock_and_asset_items_qty
@@ -205,15 +218,33 @@ class BuyingController(StockController):
 					item.conversion_factor = get_conversion_factor(item.item_code, item.uom).get("conversion_factor") or 1.0
 
 				qty_in_stock_uom = flt(item.qty * item.conversion_factor)
-				rm_supp_cost = flt(item.rm_supp_cost) if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else 0.0
-
-				landed_cost_voucher_amount = flt(item.landed_cost_voucher_amount) \
-					if self.doctype in ["Purchase Receipt", "Purchase Invoice"] else 0.0
-
-				item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + rm_supp_cost
-					 + landed_cost_voucher_amount) / qty_in_stock_uom)
+				item.rm_supp_cost = self.get_supplied_items_cost(item.name, reset_outgoing_rate)
+				item.valuation_rate = ((item.base_net_amount + item.item_tax_amount + item.rm_supp_cost
+					 + flt(item.landed_cost_voucher_amount)) / qty_in_stock_uom)
 			else:
 				item.valuation_rate = 0.0
+
+	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
+		supplied_items_cost = 0.0
+		for d in self.get("supplied_items"):
+			if d.reference_name == item_row_id:
+				if reset_outgoing_rate and frappe.db.get_value('Item', d.rm_item_code, 'is_stock_item'):
+					rate = get_incoming_rate({
+						"item_code": d.rm_item_code,
+						"warehouse": self.supplier_warehouse,
+						"posting_date": self.posting_date,
+						"posting_time": self.posting_time,
+						"qty": -1 * d.consumed_qty,
+						"serial_no": d.serial_no
+					})
+
+					if rate > 0:
+						d.rate = rate
+
+				d.amount = flt(flt(d.consumed_qty) * flt(d.rate), d.precision("amount"))
+				supplied_items_cost += flt(d.amount)
+		
+		return supplied_items_cost
 
 	def validate_for_subcontracting(self):
 		if not self.is_subcontracted and self.sub_contracted_items:
@@ -298,10 +329,10 @@ class BuyingController(StockController):
 					title=_("Limit Crossed"))
 
 			transferred_batch_qty_map = get_transferred_batch_qty_map(item.purchase_order, item.item_code)
-			backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
+			# backflushed_batch_qty_map = get_backflushed_batch_qty_map(item.purchase_order, item.item_code)
 
 			for raw_material in transferred_raw_materials + non_stock_items:
-				rm_item_key = '{}{}'.format(raw_material.rm_item_code, item.purchase_order)
+				rm_item_key = (raw_material.rm_item_code, item.item_code, item.purchase_order)
 				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
 
 				consumed_qty = raw_material_data.get('qty', 0)
@@ -330,8 +361,10 @@ class BuyingController(StockController):
 					set_serial_nos(raw_material, consumed_serial_nos, qty)
 
 				if raw_material.batch_nos:
+					backflushed_batch_qty_map = raw_material_data.get('consumed_batch', {})
+
 					batches_qty = get_batches_with_qty(raw_material.rm_item_code, raw_material.main_item_code,
-						qty, transferred_batch_qty_map, backflushed_batch_qty_map)
+						qty, transferred_batch_qty_map, backflushed_batch_qty_map, item.purchase_order)
 					for batch_data in batches_qty:
 						qty = batch_data['qty']
 						raw_material.batch_no = batch_data['batch']
@@ -339,30 +372,16 @@ class BuyingController(StockController):
 				else:
 					self.append_raw_material_to_be_backflushed(item, raw_material, qty)
 
-	def append_raw_material_to_be_backflushed(self, fg_item_doc, raw_material_data, qty):
+	def append_raw_material_to_be_backflushed(self, fg_item_row, raw_material_data, qty):
 		rm = self.append('supplied_items', {})
 		rm.update(raw_material_data)
 
+		if not rm.main_item_code:
+			rm.main_item_code = fg_item_row.item_code
+
+		rm.reference_name = fg_item_row.name
 		rm.required_qty = qty
 		rm.consumed_qty = qty
-
-		if not raw_material_data.get('non_stock_item'):
-			from erpnext.stock.utils import get_incoming_rate
-			rm.rate = get_incoming_rate({
-				"item_code": raw_material_data.rm_item_code,
-				"warehouse": self.supplier_warehouse,
-				"posting_date": self.posting_date,
-				"posting_time": self.posting_time,
-				"qty": -1 * qty,
-				"serial_no": rm.serial_no
-			})
-
-			if not rm.rate:
-				rm.rate = get_valuation_rate(raw_material_data.rm_item_code, self.supplier_warehouse,
-					self.doctype, self.name, currency=self.company_currency, company=self.company)
-
-		rm.amount = qty * flt(rm.rate)
-		fg_item_doc.rm_supp_cost += rm.amount
 
 	def update_raw_materials_supplied_based_on_bom(self, item, raw_material_table):
 		exploded_item = 1
@@ -372,7 +391,7 @@ class BuyingController(StockController):
 		bom_items = get_items_from_bom(item.item_code, item.bom, exploded_item)
 
 		used_alternative_items = []
-		if self.doctype == 'Purchase Receipt' and item.purchase_order:
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and item.purchase_order:
 			used_alternative_items = get_used_alternative_items(purchase_order = item.purchase_order)
 
 		raw_materials_cost = 0
@@ -389,7 +408,7 @@ class BuyingController(StockController):
 					reserve_warehouse = None
 
 			conversion_factor = item.conversion_factor
-			if (self.doctype == 'Purchase Receipt' and item.purchase_order and
+			if (self.doctype in ["Purchase Receipt", "Purchase Invoice"] and item.purchase_order and
 				bom_item.item_code in used_alternative_items):
 				alternative_item_data = used_alternative_items.get(bom_item.item_code)
 				bom_item.item_code = alternative_item_data.item_code
@@ -417,9 +436,7 @@ class BuyingController(StockController):
 			rm.rm_item_code = bom_item.item_code
 			rm.stock_uom = bom_item.stock_uom
 			rm.required_qty = required_qty
-			if self.doctype == "Purchase Order" and not rm.reserve_warehouse:
-				rm.reserve_warehouse = reserve_warehouse
-
+			rm.rate = bom_item.rate
 			rm.conversion_factor = conversion_factor
 
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"]:
@@ -427,29 +444,8 @@ class BuyingController(StockController):
 				rm.description = bom_item.description
 				if item.batch_no and frappe.db.get_value("Item", rm.rm_item_code, "has_batch_no") and not rm.batch_no:
 					rm.batch_no = item.batch_no
-
-			# get raw materials rate
-			if self.doctype == "Purchase Receipt":
-				from erpnext.stock.utils import get_incoming_rate
-				rm.rate = get_incoming_rate({
-					"item_code": bom_item.item_code,
-					"warehouse": self.supplier_warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-					"qty": -1 * required_qty,
-					"serial_no": rm.serial_no
-				})
-				if not rm.rate:
-					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse,
-						self.doctype, self.name, currency=self.company_currency, company = self.company)
-			else:
-				rm.rate = bom_item.rate
-
-			rm.amount = required_qty * flt(rm.rate)
-			raw_materials_cost += flt(rm.amount)
-
-		if self.doctype in ("Purchase Receipt", "Purchase Invoice"):
-			item.rm_supp_cost = raw_materials_cost
+			elif not rm.reserve_warehouse:
+				rm.reserve_warehouse = reserve_warehouse
 
 	def cleanup_raw_materials_supplied(self, parent_items, raw_material_table):
 		"""Remove all those child items which are no longer present in main item table"""
@@ -490,6 +486,10 @@ class BuyingController(StockController):
 				if not d.conversion_factor and d.item_code:
 					frappe.throw(_("Row {0}: Conversion Factor is mandatory").format(d.idx))
 				d.stock_qty = flt(d.qty) * flt(d.conversion_factor)
+
+				if self.doctype=="Purchase Receipt" and d.meta.get_field("received_stock_qty"):
+					# Set Received Qty in Stock UOM
+					d.received_stock_qty = flt(d.received_qty) * flt(d.conversion_factor, d.precision("conversion_factor"))
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):
@@ -558,7 +558,8 @@ class BuyingController(StockController):
 						or (cint(self.is_return) and self.docstatus==2)):
 						from_warehouse_sle = self.get_sl_entries(d, {
 							"actual_qty": -1 * pr_qty,
-							"warehouse": d.from_warehouse
+							"warehouse": d.from_warehouse,
+							"dependant_sle_voucher_detail_no": d.name
 						})
 
 						sl_entries.append(from_warehouse_sle)
@@ -568,28 +569,20 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
-						filters = {
-							"voucher_type": self.doctype,
-							"voucher_no": self.return_against,
-							"item_code": d.item_code
-						}
-
-						if (self.doctype == "Purchase Invoice" and self.update_stock
-							and d.get("purchase_invoice_item")):
-							filters["voucher_detail_no"] = d.purchase_invoice_item
-						elif self.doctype == "Purchase Receipt" and d.get("purchase_receipt_item"):
-							filters["voucher_detail_no"] = d.purchase_receipt_item
-
-						original_incoming_rate = frappe.db.get_value("Stock Ledger Entry", filters, "incoming_rate")
+						outgoing_rate = get_rate_for_return(self.doctype, self.name, d.item_code, self.return_against, item_row=d)
 
 						sle.update({
-							"outgoing_rate": original_incoming_rate
+							"outgoing_rate": outgoing_rate,
+							"recalculate_rate": 1
 						})
+						if d.from_warehouse:
+							sle.dependant_sle_voucher_detail_no = d.name
 					else:
 						val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
 						incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
 						sle.update({
-							"incoming_rate": incoming_rate
+							"incoming_rate": incoming_rate,
+							"recalculate_rate": 1 if (self.is_subcontracted and d.bom) or d.from_warehouse else 0
 						})
 					sl_entries.append(sle)
 
@@ -597,7 +590,8 @@ class BuyingController(StockController):
 						or (cint(self.is_return) and self.docstatus==1)):
 						from_warehouse_sle = self.get_sl_entries(d, {
 							"actual_qty": -1 * pr_qty,
-							"warehouse": d.from_warehouse
+							"warehouse": d.from_warehouse,
+							"recalculate_rate": 1
 						})
 
 						sl_entries.append(from_warehouse_sle)
@@ -645,6 +639,7 @@ class BuyingController(StockController):
 					"item_code": d.rm_item_code,
 					"warehouse": self.supplier_warehouse,
 					"actual_qty": -1*flt(d.consumed_qty),
+					"dependant_sle_voucher_detail_no": d.reference_name
 				}))
 
 	def on_submit(self):
@@ -792,8 +787,8 @@ class BuyingController(StockController):
 							asset.set(field, None)
 							asset.supplier = None
 						if asset.docstatus == 1 and delete_asset:
-							frappe.throw(_('Cannot cancel this document as it is linked with submitted asset {0}.\
-								Please cancel the it to continue.').format(frappe.utils.get_link_to_form('Asset', asset.name)))
+							frappe.throw(_('Cannot cancel this document as it is linked with submitted asset {0}. Please cancel it to continue.')
+								.format(frappe.utils.get_link_to_form('Asset', asset.name)))
 
 					asset.flags.ignore_validate_update_after_submit = True
 					asset.flags.ignore_mandatory = True
@@ -836,6 +831,7 @@ class BuyingController(StockController):
 		else:
 			validate_item_type(self, "is_purchase_item", "purchase")
 
+
 def get_items_from_bom(item_code, bom, exploded_item=1):
 	doctype = "BOM Item" if not exploded_item else "BOM Explosion Item"
 
@@ -847,6 +843,7 @@ def get_items_from_bom(item_code, bom, exploded_item=1):
 		where
 			t2.parent = t1.name and t1.item = %s
 			and t1.docstatus = 1 and t1.is_active = 1 and t1.name = %s
+			and t2.sourced_by_supplier = 0
 			and t2.item_code = t3.name""".format(doctype),
 			(item_code, bom), as_dict=1)
 
@@ -872,7 +869,7 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 			AND se.purpose='Send to Subcontractor'
 			AND se.purchase_order = %s
 			AND IFNULL(sed.t_warehouse, '') != ''
-			AND sed.subcontracted_item = %s
+			AND IFNULL(sed.subcontracted_item, '') in ('', %s)
 		GROUP BY sed.item_code, sed.subcontracted_item
 	"""
 	raw_materials = frappe.db.multisql({
@@ -889,38 +886,48 @@ def get_subcontracted_raw_materials_from_se(purchase_order, fg_item):
 	return raw_materials
 
 def get_backflushed_subcontracted_raw_materials(purchase_orders):
-	common_query = """
-		SELECT
-			CONCAT(prsi.rm_item_code, pri.purchase_order) AS item_key,
-			SUM(prsi.consumed_qty) AS qty,
-			{serial_no_concat_syntax} AS serial_nos,
-			{batch_no_concat_syntax} AS batch_nos
-		FROM `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pri, `tabPurchase Receipt Item Supplied` prsi
-		WHERE
-			pr.name = pri.parent
-			AND pr.name = prsi.parent
-			AND pri.purchase_order IN %s
-			AND pri.item_code = prsi.main_item_code
-			AND pr.docstatus = 1
-		GROUP BY prsi.rm_item_code, pri.purchase_order
-	"""
+	purchase_receipts = frappe.get_all("Purchase Receipt Item",
+		fields = ["purchase_order", "item_code", "name", "parent"],
+		filters={"docstatus": 1, "purchase_order": ("in", list(purchase_orders))})
 
-	backflushed_raw_materials = frappe.db.multisql({
-		'mariadb': common_query.format(
-			serial_no_concat_syntax="GROUP_CONCAT(prsi.serial_no)",
-			batch_no_concat_syntax="GROUP_CONCAT(prsi.batch_no)"
-		),
-		'postgres': common_query.format(
-			serial_no_concat_syntax="STRING_AGG(prsi.serial_no, ',')",
-			batch_no_concat_syntax="STRING_AGG(prsi.batch_no, ',')"
-		)
-	}, (purchase_orders, ), as_dict=1)
+	distinct_purchase_receipts = {}
+	for pr in purchase_receipts:
+		key = (pr.purchase_order, pr.item_code, pr.parent)
+		distinct_purchase_receipts.setdefault(key, []).append(pr.name)
 
 	backflushed_raw_materials_map = frappe._dict()
-	for item in backflushed_raw_materials:
-		backflushed_raw_materials_map.setdefault(item.item_key, item)
+	for args, references in iteritems(distinct_purchase_receipts):
+		purchase_receipt_supplied_items = get_supplied_items(args[1], args[2], references)
+
+		for data in purchase_receipt_supplied_items:
+			pr_key = (data.rm_item_code, data.main_item_code, args[0])
+			if pr_key not in backflushed_raw_materials_map:
+				backflushed_raw_materials_map.setdefault(pr_key, frappe._dict({
+					"qty": 0.0,
+					"serial_no": [],
+					"batch_no": [],
+					"consumed_batch": {}
+				}))
+
+			row = backflushed_raw_materials_map.get(pr_key)
+			row.qty += data.consumed_qty
+
+			for field in ["serial_no", "batch_no"]:
+				if data.get(field):
+					row[field].append(data.get(field))
+
+			if data.get("batch_no"):
+				if data.get("batch_no") in row.consumed_batch:
+					row.consumed_batch[data.get("batch_no")] += data.consumed_qty
+				else:
+					row.consumed_batch[data.get("batch_no")] = data.consumed_qty
 
 	return backflushed_raw_materials_map
+
+def get_supplied_items(item_code, purchase_receipt, references):
+	return frappe.get_all("Purchase Receipt Item Supplied",
+		fields=["rm_item_code", "main_item_code", "consumed_qty", "serial_no", "batch_no"],
+		filters={"main_item_code": item_code, "parent": purchase_receipt, "reference_name": ("in", references)})
 
 def get_asset_item_details(asset_items):
 	asset_items_data = {}
@@ -1003,14 +1010,15 @@ def get_transferred_batch_qty_map(purchase_order, fg_item):
 		SELECT
 			sed.batch_no,
 			SUM(sed.qty) AS qty,
-			sed.item_code
+			sed.item_code,
+			sed.subcontracted_item
 		FROM `tabStock Entry` se,`tabStock Entry Detail` sed
 		WHERE
 			se.name = sed.parent
 			AND se.docstatus=1
 			AND se.purpose='Send to Subcontractor'
 			AND se.purchase_order = %s
-			AND sed.subcontracted_item = %s
+			AND ifnull(sed.subcontracted_item, '') in ('', %s)
 			AND sed.batch_no IS NOT NULL
 		GROUP BY
 			sed.batch_no,
@@ -1018,8 +1026,10 @@ def get_transferred_batch_qty_map(purchase_order, fg_item):
 	""", (purchase_order, fg_item), as_dict=1)
 
 	for batch_data in transferred_batches:
-		transferred_batch_qty_map.setdefault((batch_data.item_code, fg_item), {})
-		transferred_batch_qty_map[(batch_data.item_code, fg_item)][batch_data.batch_no] = batch_data.qty
+		key = ((batch_data.item_code, fg_item)
+			if batch_data.subcontracted_item else (batch_data.item_code, purchase_order))
+		transferred_batch_qty_map.setdefault(key, {})
+		transferred_batch_qty_map[key][batch_data.batch_no] = batch_data.qty
 
 	return transferred_batch_qty_map
 
@@ -1056,10 +1066,11 @@ def get_backflushed_batch_qty_map(purchase_order, fg_item):
 
 	return backflushed_batch_qty_map
 
-def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty_map, backflushed_batch_qty_map):
+def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty_map, backflushed_batches, po):
 	# Returns available batches to be backflushed based on requirements
 	transferred_batches = transferred_batch_qty_map.get((item_code, fg_item), {})
-	backflushed_batches = backflushed_batch_qty_map.get((item_code, fg_item), {})
+	if not transferred_batches:
+		transferred_batches = transferred_batch_qty_map.get((item_code, po), {})
 
 	available_batches = []
 
