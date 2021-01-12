@@ -5,8 +5,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import flt, time_diff_in_hours, now, add_months, cint, today
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from frappe.utils import flt, now, add_months, cint, today, add_to_date
 from erpnext.manufacturing.doctype.work_order.work_order import (make_stock_entry,
 	ItemHasVariantError, stop_unstop, StockOverProductionError, OverProductionError, CapacityError)
 from erpnext.stock.doctype.stock_entry import test_stock_entry
@@ -15,10 +14,10 @@ from erpnext.selling.doctype.sales_order.test_sales_order import make_sales_orde
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
+from erpnext.manufacturing.doctype.job_card.job_card import JobCardCancelError
 
 class TestWorkOrder(unittest.TestCase):
 	def setUp(self):
-		set_perpetual_inventory(0)
 		self.warehouse = '_Test Warehouse 2 - _TC'
 		self.item = '_Test Item'
 
@@ -193,6 +192,42 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(cint(bin1_on_end_production.projected_qty),
 			cint(bin1_on_end_production.projected_qty))
 
+	def test_backflush_qty_for_overpduction_manufacture(self):
+		cancel_stock_entry = []
+		allow_overproduction("overproduction_percentage_for_work_order", 30)
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=100)
+		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=120, basic_rate=5000.0)
+		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=240, basic_rate=1000.0)
+
+		cancel_stock_entry.extend([ste1.name, ste2.name])
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 60))
+		s.submit()
+		cancel_stock_entry.append(s.name)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 60))
+		s.submit()
+		cancel_stock_entry.append(s.name)
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 60))
+		s.submit()
+		cancel_stock_entry.append(s.name)
+
+		s1 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 50))
+		s1.submit()
+		cancel_stock_entry.append(s1.name)
+
+		self.assertEqual(s1.items[0].qty, 50)
+		self.assertEqual(s1.items[1].qty, 100)
+		cancel_stock_entry.reverse()
+		for ste in cancel_stock_entry:
+			doc = frappe.get_doc("Stock Entry", ste)
+			doc.cancel()
+
+		allow_overproduction("overproduction_percentage_for_work_order", 0)
+
 	def test_reserved_qty_for_stopped_production(self):
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target= self.warehouse, qty=100, basic_rate=100)
@@ -335,21 +370,49 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(ste.total_additional_costs, 1000)
 
 	def test_job_card(self):
+		stock_entries = []
 		data = frappe.get_cached_value('BOM',
 			{'docstatus': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
 
-		if data:
-			frappe.db.set_value("Manufacturing Settings",
-				None, "disable_capacity_planning", 0)
+		bom, bom_item = data
 
-			bom, bom_item = data
+		bom_doc = frappe.get_doc('BOM', bom)
+		work_order = make_wo_order_test_record(item=bom_item, qty=1,
+			bom_no=bom, source_warehouse="_Test Warehouse - _TC")
 
-			bom_doc = frappe.get_doc('BOM', bom)
-			work_order = make_wo_order_test_record(item=bom_item, qty=1, bom_no=bom)
-			self.assertTrue(work_order.planned_end_date)
+		for row in work_order.required_items:
+			stock_entry_doc = test_stock_entry.make_stock_entry(item_code=row.item_code,
+				target="_Test Warehouse - _TC", qty=row.required_qty, basic_rate=100)
+			stock_entries.append(stock_entry_doc)
 
-			job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name})
-			self.assertEqual(len(job_cards), len(bom_doc.operations))
+		ste = frappe.get_doc(make_stock_entry(work_order.name, "Material Transfer for Manufacture", 1))
+		ste.submit()
+		stock_entries.append(ste)
+
+		job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name})
+		self.assertEqual(len(job_cards), len(bom_doc.operations))
+
+		for i, job_card in enumerate(job_cards):
+			doc = frappe.get_doc("Job Card", job_card)
+			doc.append("time_logs", {
+				"from_time": now(),
+				"hours": i,
+				"to_time": add_to_date(now(), i),
+				"completed_qty": doc.for_quantity
+			})
+			doc.submit()
+
+		ste1 = frappe.get_doc(make_stock_entry(work_order.name, "Manufacture", 1))
+		ste1.submit()
+		stock_entries.append(ste1)
+
+		for job_card in job_cards:
+			doc = frappe.get_doc("Job Card", job_card)
+			self.assertRaises(JobCardCancelError, doc.cancel)
+
+		stock_entries.reverse()
+		for stock_entry in stock_entries:
+			stock_entry.cancel()
 
 	def test_capcity_planning(self):
 		frappe.db.set_value("Manufacturing Settings", None, {
@@ -406,6 +469,86 @@ class TestWorkOrder(unittest.TestCase):
 		self.assertEqual(len(ste.items), 1)
 		ste1 = frappe.get_doc(make_stock_entry(wo.name, "Manufacture", 1))
 		self.assertEqual(len(ste1.items), 3)
+
+	def test_cost_center_for_manufacture(self):
+		wo_order = make_wo_order_test_record()
+		ste = make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
+		self.assertEquals(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
+
+	def test_operation_time_with_batch_size(self):
+		fg_item = "Test Batch Size Item For BOM"
+		rm1 = "Test Batch Size Item RM 1 For BOM"
+
+		for item in ["Test Batch Size Item For BOM", "Test Batch Size Item RM 1 For BOM"]:
+			make_item(item, {
+				"include_item_in_manufacturing": 1,
+				"is_stock_item": 1
+			})
+
+		bom_name = frappe.db.get_value("BOM",
+			{"item": fg_item, "is_active": 1, "with_operations": 1}, "name")
+
+		if not bom_name:
+			bom = make_bom(item=fg_item, rate=1000, raw_materials = [rm1], do_not_save=True)
+			bom.with_operations = 1
+			bom.append("operations", {
+				"operation": "_Test Operation 1",
+				"workstation": "_Test Workstation 1",
+				"description": "Test Data",
+				"operating_cost": 100,
+				"time_in_mins": 40,
+				"batch_size": 5
+			})
+
+			bom.save()
+			bom.submit()
+			bom_name = bom.name
+
+		work_order = make_wo_order_test_record(item=fg_item,
+			planned_start_date=now(), qty=1, do_not_save=True)
+
+		work_order.set_work_order_operations()
+		work_order.save()
+		self.assertEqual(work_order.operations[0].time_in_mins, 8.0)
+
+		work_order1 = make_wo_order_test_record(item=fg_item,
+			planned_start_date=now(), qty=5, do_not_save=True)
+
+		work_order1.set_work_order_operations()
+		work_order1.save()
+		self.assertEqual(work_order1.operations[0].time_in_mins, 40.0)
+
+	def test_partial_material_consumption(self):
+		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 1)
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
+
+		ste_cancel_list = []
+		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=20, basic_rate=5000.0)
+		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=20, basic_rate=1000.0)
+
+		ste_cancel_list.extend([ste1, ste2])
+
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 4))
+		s.submit()
+		ste_cancel_list.append(s)
+
+		ste1 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		ste1.submit()
+		ste_cancel_list.append(ste1)
+
+		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Material Consumption for Manufacture", 2))
+		self.assertEquals(ste3.fg_completed_qty, 2)
+
+		expected_qty = {"_Test Item": 2, "_Test Item Home Desktop 100": 4}
+		for row in ste3.items:
+			self.assertEquals(row.qty, expected_qty.get(row.item_code))
+
+		for ste_doc in ste_cancel_list:
+			ste_doc.cancel()
+
+		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}

@@ -19,6 +19,7 @@
   "column_break2",
   "from_date",
   "to_date",
+  "sales_order_status",
   "sales_orders_detail",
   "get_sales_orders",
   "sales_orders",
@@ -275,7 +276,7 @@
    "fieldtype": "Select",
    "label": "Status",
    "no_copy": 1,
-   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nStopped\nCancelled\nMaterial Requested",
+   "options": "\nDraft\nSubmitted\nNot Started\nIn Process\nCompleted\nClosed\nCancelled\nMaterial Requested",
    "print_hide": 1,
    "read_only": 1
   },
@@ -301,12 +302,20 @@
    "label": "Warehouses",
    "options": "Production Plan Material Request Warehouse",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.get_items_from == \"Sales Order\"",
+   "fieldname": "sales_order_status",
+   "fieldtype": "Select",
+   "label": "Sales Order Status",
+   "options": "\nTo Deliver and Bill\nTo Bill\nTo Deliver"
   }
  ],
  "icon": "fa fa-calendar",
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-02-03 00:25:25.934202",
+ "modified": "2020-11-10 18:01:54.991970",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

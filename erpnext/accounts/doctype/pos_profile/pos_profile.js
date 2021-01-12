@@ -15,15 +15,6 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	erpnext.queries.setup_queries(frm, "Warehouse", function() {
 		return erpnext.queries.warehouse(frm.doc);
 	});
-
-	frm.call({
-		method: "erpnext.accounts.doctype.pos_profile.pos_profile.get_series",
-		callback: function(r) {
-			if(!r.exc) {
-				set_field_options("naming_series", r.message);
-			}
-		}
-	});
 });
 
 frappe.ui.form.on('POS Profile', {
@@ -41,6 +32,15 @@ frappe.ui.form.on('POS Profile', {
 				filters: {
 					account_type: ['in', ["Cash", "Bank"]]
 				}
+			};
+		});
+
+		frm.set_query("taxes_and_charges", function() {
+			return {
+				filters: [
+					['Sales Taxes and Charges Template', 'company', '=', frm.doc.company],
+					['Sales Taxes and Charges Template', 'docstatus', '!=', 2]
+				]
 			};
 		});
 

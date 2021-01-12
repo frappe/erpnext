@@ -90,9 +90,9 @@
   },
   {
    "fieldname": "currency",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Currency",
-   "options": "USD\nINR"
+   "options": "Currency"
   },
   {
    "fieldname": "amount",
@@ -126,7 +126,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-07-31 13:57:02.328995",
+ "modified": "2020-09-19 14:28:11.532696",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",

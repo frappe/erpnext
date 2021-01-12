@@ -8,7 +8,6 @@
  "field_order": [
   "disabled",
   "section_break_2",
-  "naming_series",
   "customer",
   "company",
   "country",
@@ -23,6 +22,9 @@
   "section_break_11",
   "payments",
   "section_break_14",
+  "hide_images",
+  "hide_unavailable_items",
+  "auto_add_item_to_cart",
   "item_groups",
   "column_break_16",
   "customer_groups",
@@ -58,17 +60,6 @@
   {
    "fieldname": "section_break_2",
    "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "[Select]",
-   "reqd": 1
   },
   {
    "fieldname": "customer",
@@ -135,7 +126,8 @@
   },
   {
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Configuration"
   },
   {
    "description": "Only show Items from these Item Groups",
@@ -302,28 +294,48 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
-   "mandatory_depends_on": "update_stock",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
-  },
-  {
-   "default": "0",
-   "fieldname": "update_stock",
-   "fieldtype": "Check",
-   "label": "Update Stock"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "default": "0",
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule"
+  },
+  {
+   "default": "1",
+   "fieldname": "update_stock",
+   "fieldtype": "Check",
+   "label": "Update Stock",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_unavailable_items",
+   "fieldtype": "Check",
+   "label": "Hide Unavailable Items"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_images",
+   "fieldtype": "Check",
+   "label": "Hide Images"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_add_item_to_cart",
+   "fieldtype": "Check",
+   "label": "Automatically Add Filtered Item To Cart"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-06-29 12:20:30.977272",
+ "modified": "2020-12-10 13:59:28.877572",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

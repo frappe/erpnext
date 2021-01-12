@@ -9,11 +9,13 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.page.bank_reconciliation.bank_reconciliation import reconcile, get_linked_payments
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 test_dependencies = ["Item", "Cost Center"]
 
 class TestBankTransaction(unittest.TestCase):
 	def setUp(self):
+		make_pos_profile()
 		add_transactions()
 		add_payments()
 
@@ -26,6 +28,9 @@ class TestBankTransaction(unittest.TestCase):
 		# Delete directly in DB to avoid validation errors for countries not allowing deletion
 		frappe.db.sql("""delete from `tabPayment Entry Reference`""")
 		frappe.db.sql("""delete from `tabPayment Entry`""")
+
+		# Delete POS Profile
+		frappe.db.sql("delete from `tabPOS Profile`")
 
 		frappe.flags.test_bank_transactions_created = False
 		frappe.flags.test_payments_created = False
@@ -91,15 +96,11 @@ class TestBankTransaction(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value("Bank Transaction", bank_transaction.name, "unallocated_amount"), 0)
 		self.assertTrue(frappe.db.get_value("Sales Invoice Payment", dict(parent=payment.name), "clearance_date") is not None)
 
-def add_transactions():
-	if frappe.flags.test_bank_transactions_created:
-		return
-
-	frappe.set_user("Administrator")
+def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
 	try:
 		frappe.get_doc({
 			"doctype": "Bank",
-			"bank_name":"Citi Bank",
+			"bank_name":bank_name,
 		}).insert()
 	except frappe.DuplicateEntryError:
 		pass
@@ -108,11 +109,18 @@ def add_transactions():
 		frappe.get_doc({
 			"doctype": "Bank Account",
 			"account_name":"Checking Account",
-			"bank": "Citi Bank",
-			"account": "_Test Bank - _TC"
+			"bank": bank_name,
+			"account": account_name
 		}).insert()
 	except frappe.DuplicateEntryError:
 		pass
+
+def add_transactions():
+	if frappe.flags.test_bank_transactions_created:
+		return
+
+	frappe.set_user("Administrator")
+	create_bank_account()
 
 	doc = frappe.get_doc({
 		"doctype": "Bank Transaction",

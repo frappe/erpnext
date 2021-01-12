@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 import frappe
 import json
 import copy
+import re
+
 from frappe import throw, _
 from frappe.utils import flt, cint, getdate
-
 from frappe.model.document import Document
 
 from six import string_types
@@ -30,6 +31,7 @@ class PricingRule(Document):
 		self.validate_max_discount()
 		self.validate_price_list_with_currency()
 		self.validate_dates()
+		self.validate_condition()
 
 		if not self.margin_type: self.margin_rate_or_amount = 0.0
 
@@ -57,6 +59,15 @@ class PricingRule(Document):
 
 		if self.price_or_product_discount == 'Price' and not self.rate_or_discount:
 			throw(_("Rate or Discount is required for the price discount."), frappe.MandatoryError)
+
+		if self.apply_discount_on_rate:
+			if not self.priority:
+				throw(_("As the field {0} is enabled, the field {1} is mandatory.")
+					.format(frappe.bold("Apply Discount on Discounted Rate"), frappe.bold("Priority")))
+
+			if self.priority and cint(self.priority) == 1:
+				throw(_("As the field {0} is enabled, the value of the field {1} should be more than 1.")
+					.format(frappe.bold("Apply Discount on Discounted Rate"), frappe.bold("Priority")))
 
 	def validate_applicable_for_selling_or_buying(self):
 		if not self.selling and not self.buying:
@@ -140,6 +151,10 @@ class PricingRule(Document):
 		if self.valid_from and self.valid_upto and getdate(self.valid_from) > getdate(self.valid_upto):
 			frappe.throw(_("Valid from date must be less than valid upto date"))
 
+	def validate_condition(self):
+		if self.condition and ("=" in self.condition) and re.match("""[\w\.:_]+\s*={1}\s*[\w\.@'"]+""", self.condition):
+			frappe.throw(_("Invalid condition expression"))
+
 #--------------------------------------------------------------------------------
 
 @frappe.whitelist()
@@ -220,12 +235,11 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 
 	item_details = frappe._dict({
 		"doctype": args.doctype,
+		"has_margin": False,
 		"name": args.name,
 		"parent": args.parent,
 		"parenttype": args.parenttype,
-		"child_docname": args.get('child_docname'),
-		"discount_percentage_on_rate": [],
-		"discount_amount_on_rate": []
+		"child_docname": args.get('child_docname')
 	})
 
 	if args.ignore_pricing_rule or not args.item_code:
@@ -272,6 +286,10 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 					apply_price_discount_rule(pricing_rule, item_details, args)
 				else:
 					get_product_discount_rule(pricing_rule, item_details, args, doc)
+
+		if not item_details.get("has_margin"):
+			item_details.margin_type = None
+			item_details.margin_rate_or_amount = 0.0
 
 		item_details.has_pricing_rule = 1
 
@@ -324,20 +342,28 @@ def get_pricing_rule_details(args, pricing_rule):
 def apply_price_discount_rule(pricing_rule, item_details, args):
 	item_details.pricing_rule_for = pricing_rule.rate_or_discount
 
-	if ((pricing_rule.margin_type == 'Amount' and pricing_rule.currency == args.currency)
+	if ((pricing_rule.margin_type in ['Amount', 'Percentage'] and pricing_rule.currency == args.currency)
 			or (pricing_rule.margin_type == 'Percentage')):
 		item_details.margin_type = pricing_rule.margin_type
-		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
-	else:
-		item_details.margin_type = None
-		item_details.margin_rate_or_amount = 0.0
+		item_details.has_margin = True
+
+		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
+			item_details.margin_rate_or_amount += pricing_rule.margin_rate_or_amount
+		else:
+			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 
 	if pricing_rule.rate_or_discount == 'Rate':
 		pricing_rule_rate = 0.0
 		if pricing_rule.currency == args.currency:
 			pricing_rule_rate = pricing_rule.rate
+
+		if pricing_rule_rate:
+			# Override already set price list rate (from item price)
+			# if pricing_rule_rate > 0
+			item_details.update({
+				"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1),
+			})
 		item_details.update({
-			"price_list_rate": pricing_rule_rate * args.get("conversion_factor", 1),
 			"discount_percentage": 0.0
 		})
 
@@ -345,23 +371,15 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 		if pricing_rule.rate_or_discount != apply_on: continue
 
 		field = frappe.scrub(apply_on)
-		if pricing_rule.apply_discount_on_rate:
-			discount_field = "{0}_on_rate".format(field)
-			item_details[discount_field].append(pricing_rule.get(field, 0))
+		if pricing_rule.apply_discount_on_rate and item_details.get("discount_percentage"):
+			# Apply discount on discounted rate
+			item_details[field] += ((100 - item_details[field]) * (pricing_rule.get(field, 0) / 100))
 		else:
 			if field not in item_details:
 				item_details.setdefault(field, 0)
 
 			item_details[field] += (pricing_rule.get(field, 0)
 				if pricing_rule else args.get(field, 0))
-
-def set_discount_amount(rate, item_details):
-	for field in ['discount_percentage_on_rate', 'discount_amount_on_rate']:
-		for d in item_details.get(field):
-			dis_amount = (rate * d / 100
-				if field == 'discount_percentage_on_rate' else d)
-			rate -= dis_amount
-			item_details.rate = rate
 
 def remove_pricing_rule_for_item(pricing_rules, item_details, item_code=None):
 	from erpnext.accounts.doctype.pricing_rule.utils import (get_applied_pricing_rules,

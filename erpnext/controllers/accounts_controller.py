@@ -7,6 +7,7 @@ import json
 from frappe import _, throw
 from frappe.utils import (today, flt, cint, fmt_money, formatdate,
 	getdate, add_days, add_months, get_last_day, nowdate, get_link_to_form)
+from frappe.model.workflow import get_workflow_name, is_transition_condition_satisfied, WorkflowPermissionError
 from erpnext.stock.get_item_details import get_conversion_factor, get_item_details
 from erpnext.setup.utils import get_exchange_rate
 from erpnext.accounts.utils import get_fiscal_years, validate_fiscal_year, get_account_currency
@@ -19,8 +20,10 @@ from erpnext.accounts.doctype.pricing_rule.utils import (apply_pricing_rule_on_t
 from erpnext.exceptions import InvalidCurrency
 from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-from erpnext.stock.get_item_details import get_item_warehouse
+from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+
+class AccountMissingError(frappe.ValidationError): pass
 
 force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
 
@@ -104,9 +107,17 @@ class AccountsController(TransactionBase):
 			else:
 				self.validate_deferred_start_and_end_date()
 
+			self.set_inter_company_account()
+
 		validate_regional(self)
+		
+		validate_einvoice_fields(self)
+
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+	
+	def before_cancel(self):
+		validate_einvoice_fields(self)
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
@@ -262,6 +273,7 @@ class AccountsController(TransactionBase):
 			if self.doctype == "Quotation" and self.quotation_to == "Customer" and parent_dict.get("party_name"):
 				parent_dict.update({"customer": parent_dict.get("party_name")})
 
+			self.pricing_rules = []
 			for item in self.get("items"):
 				if item.get("item_code"):
 					args = parent_dict.copy()
@@ -300,6 +312,7 @@ class AccountsController(TransactionBase):
 
 					if ret.get("pricing_rules"):
 						self.apply_pricing_rule_on_items(item, ret)
+						self.set_pricing_rule_details(item, ret)
 
 			if self.doctype == "Purchase Invoice":
 				self.set_expense_account(for_validate)
@@ -321,6 +334,9 @@ class AccountsController(TransactionBase):
 					if item.get('discount_amount'):
 						item.rate = item.price_list_rate - item.discount_amount
 
+				if item.get("apply_discount_on_discounted_rate") and pricing_rule_args.get("rate"):
+					item.rate = pricing_rule_args.get("rate")
+
 			elif pricing_rule_args.get('free_item_data'):
 				apply_pricing_rule_for_free_items(self, pricing_rule_args.get('free_item_data'))
 
@@ -333,6 +349,18 @@ class AccountsController(TransactionBase):
 
 						frappe.msgprint(_("Row {0}: user has not applied the rule {1} on the item {2}")
 							.format(item.idx, frappe.bold(title), frappe.bold(item.item_code)))
+
+	def set_pricing_rule_details(self, item_row, args):
+		pricing_rules = get_applied_pricing_rules(args.get("pricing_rules"))
+		if not pricing_rules: return
+
+		for pricing_rule in pricing_rules:
+			self.append("pricing_rules", {
+				"pricing_rule": pricing_rule,
+				"item_code": item_row.item_code,
+				"child_docname": item_row.name,
+				"rule_applied": True
+			})
 
 	def set_taxes(self):
 		if not self.meta.get_field("taxes"):
@@ -604,8 +632,6 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			if self.is_return: return
-
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self)
 
@@ -718,6 +744,21 @@ class AccountsController(TransactionBase):
 			self._abbr = frappe.db.get_value('Company',  self.company,  "abbr")
 
 		return self._abbr
+
+	def raise_missing_debit_credit_account_error(self, party_type, party):
+		"""Raise an error if debit to/credit to account does not exist."""
+		db_or_cr = frappe.bold("Debit To") if self.doctype == "Sales Invoice" else frappe.bold("Credit To")
+		rec_or_pay = "Receivable" if self.doctype == "Sales Invoice" else "Payable"
+
+		link_to_party = frappe.utils.get_link_to_form(party_type, party)
+		link_to_company = frappe.utils.get_link_to_form("Company", self.company)
+
+		message = _("{0} Account not found against Customer {1}.").format(db_or_cr, frappe.bold(party) or '')
+		message += "<br>" + _("Please set one of the following:") + "<br>"
+		message += "<br><ul><li>" + _("'Account' in the Accounting section of Customer {0}").format(link_to_party) + "</li>"
+		message += "<li>" + _("'Default {0} Account' in Company {1}").format(rec_or_pay, link_to_company) + "</li></ul>"
+
+		frappe.throw(message, title=_("Account Missing"), exc=AccountMissingError)
 
 	def validate_party(self):
 		party_type, party = self.get_party()
@@ -899,6 +940,38 @@ class AccountsController(TransactionBase):
 		else:
 			return frappe.db.get_single_value("Global Defaults", "disable_rounded_total")
 
+	def set_inter_company_account(self):
+		"""
+			Set intercompany account for inter warehouse transactions
+			This account will be used in case billing company and internal customer's
+			representation company is same
+		"""
+
+		if self.is_internal_transfer() and not self.unrealized_profit_loss_account:
+			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
+
+			if not unrealized_profit_loss_account:
+				msg = _("Please select Unrealized Profit / Loss account or add default Unrealized Profit / Loss account account for company {0}").format(
+						frappe.bold(self.company))
+				frappe.throw(msg)
+
+			self.unrealized_profit_loss_account = unrealized_profit_loss_account
+
+	def is_internal_transfer(self):
+		"""
+			It will an internal transfer if its an internal customer and representation
+			company is same as billing company
+		"""
+		if self.doctype == 'Sales Invoice':
+			internal_party_field = 'is_internal_customer'
+		else:
+			internal_party_field = 'is_internal_supplier'
+
+		if self.get(internal_party_field) and (self.represents_company == self.company):
+			return True
+
+		return False
+
 @frappe.whitelist()
 def get_tax_rate(account_head):
 	return frappe.db.get_value("Account", account_head, ["tax_rate", "account_name"], as_dict=True)
@@ -947,8 +1020,10 @@ def validate_conversion_rate(currency, conversion_rate, conversion_rate_label, c
 	company_currency = frappe.get_cached_value('Company',  company,  "default_currency")
 
 	if not conversion_rate:
-		throw(_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.").format(
-			conversion_rate_label, currency, company_currency))
+		throw(
+			_("{0} is mandatory. Maybe Currency Exchange record is not created for {1} to {2}.")
+			.format(conversion_rate_label, currency, company_currency)
+		)
 
 
 def validate_taxes_and_charges(tax):
@@ -1157,6 +1232,43 @@ def get_supplier_block_status(party_name):
 	}
 	return info
 
+def set_child_tax_template_and_map(item, child_item, parent_doc):
+	args = {
+			'item_code': item.item_code,
+			'posting_date': parent_doc.transaction_date,
+			'tax_category': parent_doc.get('tax_category'),
+			'company': parent_doc.get('company')
+		}
+
+	child_item.item_tax_template = _get_item_tax_template(args, item.taxes)
+	if child_item.get("item_tax_template"):
+		child_item.item_tax_rate = get_item_tax_map(parent_doc.get('company'), child_item.item_tax_template, as_json=True)
+
+def add_taxes_from_tax_template(child_item, parent_doc):
+	add_taxes_from_item_tax_template = frappe.db.get_single_value("Accounts Settings", "add_taxes_from_item_tax_template")
+
+	if child_item.get("item_tax_rate") and add_taxes_from_item_tax_template:
+		tax_map = json.loads(child_item.get("item_tax_rate"))
+		for tax_type in tax_map:
+			tax_rate = flt(tax_map[tax_type])
+			taxes = parent_doc.get('taxes') or []
+			# add new row for tax head only if missing
+			found = any(tax.account_head == tax_type for tax in taxes)
+			if not found:
+				tax_row = parent_doc.append("taxes", {})
+				tax_row.update({
+					"description" : str(tax_type).split(' - ')[0],
+					"charge_type" : "On Net Total",
+					"account_head" : tax_type,
+					"rate" : tax_rate
+				})
+				if parent_doc.doctype == "Purchase Order":
+					tax_row.update({
+						"category" : "Total",
+						"add_deduct_tax" : "Add"
+					})
+				tax_row.db_insert()
+
 def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
 	"""
 	Returns a Sales Order Item child item containing the default values
@@ -1168,8 +1280,11 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
-	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
-	child_item.uom = item.stock_uom
+	child_item.uom = trans_item.get("uom") or item.stock_uom
+	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
+	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
+	set_child_tax_template_and_map(item, child_item, p_doc)
+	add_taxes_from_tax_template(child_item, p_doc)
 	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
 	if not child_item.warehouse:
 		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
@@ -1188,13 +1303,16 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.item_name = item.item_name
 	child_item.description = item.description
 	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
-	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or get_conversion_factor(item.item_code, item.stock_uom).get("conversion_factor") or 1.0
-	child_item.uom = item.stock_uom
+	child_item.uom = trans_item.get("uom") or item.stock_uom
+	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
+	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
 	child_item.base_rate = 1 # Initiallize value will update in parent validation
 	child_item.base_amount = 1 # Initiallize value will update in parent validation
+	set_child_tax_template_and_map(item, child_item, p_doc)
+	add_taxes_from_tax_template(child_item, p_doc)
 	return child_item
 
-def check_and_delete_children(parent, data):
+def validate_and_delete_children(parent, data):
 	deleted_children = []
 	updated_item_names = [d.get("docname") for d in data]
 	for item in parent.items:
@@ -1221,18 +1339,40 @@ def check_and_delete_children(parent, data):
 
 @frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
-	def check_permissions(doc, perm_type='create'):
+	def check_doc_permissions(doc, perm_type='create'):
 		try:
 			doc.check_permission(perm_type)
-		except:
-			action = "add" if perm_type == 'create' else "update"
-			frappe.throw(_("You do not have permissions to {} items in a Sales Order.").format(action), title=_("Insufficient Permissions"))
+		except frappe.PermissionError:
+			actions = { 'create': 'add', 'write': 'update'}
+
+			frappe.throw(_("You do not have permissions to {} items in a {}.")
+				.format(actions[perm_type], parent_doctype), title=_("Insufficient Permissions"))
+
+	def validate_workflow_conditions(doc):
+		workflow = get_workflow_name(doc.doctype)
+		if not workflow:
+			return
+
+		workflow_doc = frappe.get_doc("Workflow", workflow)
+		current_state = doc.get(workflow_doc.workflow_state_field)
+		roles = frappe.get_roles()
+
+		transitions = []
+		for transition in workflow_doc.transitions:
+			if transition.next_state == current_state and transition.allowed in roles:
+				if not is_transition_condition_satisfied(transition, doc):
+					continue
+				transitions.append(transition.as_dict())
+
+		if not transitions:
+			frappe.throw(
+				_("You are not allowed to update as per the conditions set in {} Workflow.").format(get_link_to_form("Workflow", workflow)),
+				title=_("Insufficient Permissions")
+			)
 
 	def get_new_child_item(item_row):
-		if parent_doctype == "Sales Order":
-			return set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_row)
-		if parent_doctype == "Purchase Order":
-			return set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, item_row)
+		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
+		return new_child_function(parent_doctype, parent_doctype_name, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
@@ -1246,21 +1386,23 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	sales_doctypes = ['Sales Order', 'Sales Invoice', 'Delivery Note', 'Quotation']
 	parent = frappe.get_doc(parent_doctype, parent_doctype_name)
 
-	check_and_delete_children(parent, data)
+	check_doc_permissions(parent, 'write')
+	validate_and_delete_children(parent, data)
 
 	for d in data:
 		new_child_flag = False
 		if not d.get("docname"):
 			new_child_flag = True
-			check_permissions(parent, 'create')
+			check_doc_permissions(parent, 'create')
 			child_item = get_new_child_item(d)
 		else:
-			check_permissions(parent, 'write')
+			check_doc_permissions(parent, 'write')
 			child_item = frappe.get_doc(parent_doctype + ' Item', d.get("docname"))
 
 			prev_rate, new_rate = flt(child_item.get("rate")), flt(d.get("rate"))
 			prev_qty, new_qty = flt(child_item.get("qty")), flt(d.get("qty"))
 			prev_con_fac, new_con_fac = flt(child_item.get("conversion_factor")), flt(d.get("conversion_factor"))
+			prev_uom, new_uom = child_item.get("uom"), d.get("uom")
 
 			if parent_doctype == 'Sales Order':
 				prev_date, new_date = child_item.get("delivery_date"), d.get("delivery_date")
@@ -1269,27 +1411,35 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 			rate_unchanged = prev_rate == new_rate
 			qty_unchanged = prev_qty == new_qty
+			uom_unchanged = prev_uom == new_uom
 			conversion_factor_unchanged = prev_con_fac == new_con_fac
 			date_unchanged = prev_date == new_date if prev_date and new_date else False # in case of delivery note etc
-			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and date_unchanged:
+			if rate_unchanged and qty_unchanged and conversion_factor_unchanged and uom_unchanged and date_unchanged:
 				continue
 
 		validate_quantity(child_item, d)
 
 		child_item.qty = flt(d.get("qty"))
-		precision = child_item.precision("rate") or 2
+		rate_precision = child_item.precision("rate") or 2
+		conv_fac_precision = child_item.precision("conversion_factor") or 2
+		qty_precision = child_item.precision("qty") or 2
 
-		if flt(child_item.billed_amt, precision) > flt(flt(d.get("rate")) * flt(d.get("qty")), precision):
+		if flt(child_item.billed_amt, rate_precision) > flt(flt(d.get("rate"), rate_precision) * flt(d.get("qty"), qty_precision), rate_precision):
 			frappe.throw(_("Row #{0}: Cannot set Rate if amount is greater than billed amount for Item {1}.")
 						 .format(child_item.idx, child_item.item_code))
 		else:
-			child_item.rate = flt(d.get("rate"))
+			child_item.rate = flt(d.get("rate"), rate_precision)
 
 		if d.get("conversion_factor"):
 			if child_item.stock_uom == child_item.uom:
 				child_item.conversion_factor = 1
 			else:
-				child_item.conversion_factor = flt(d.get('conversion_factor'))
+				child_item.conversion_factor = flt(d.get('conversion_factor'), conv_fac_precision)
+
+		if d.get("uom"):
+			child_item.uom = d.get("uom")
+			conversion_factor = flt(get_conversion_factor(child_item.item_code, child_item.uom).get("conversion_factor"))
+			child_item.conversion_factor = flt(d.get('conversion_factor'), conv_fac_precision) or conversion_factor
 
 		if d.get("delivery_date") and parent_doctype == 'Sales Order':
 			child_item.delivery_date = d.get('delivery_date')
@@ -1356,11 +1506,16 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 		parent.update_receiving_percentage()
 		if parent.is_subcontracted == "Yes":
 			parent.update_reserved_qty_for_subcontract()
+			parent.create_raw_materials_supplied("supplied_items")
+			parent.save()
 	else:
 		parent.update_reserved_qty()
 		parent.update_project()
 		parent.update_prevdoc_status('submit')
 		parent.update_delivery_status()
+
+	parent.reload()
+	validate_workflow_conditions(parent)
 
 	parent.update_blanket_order()
 	parent.update_billing_percentage()
@@ -1368,4 +1523,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
 	pass

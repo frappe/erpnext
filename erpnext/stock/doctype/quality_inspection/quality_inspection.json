@@ -73,7 +73,8 @@
    "fieldname": "reference_type",
    "fieldtype": "Select",
    "label": "Reference Type",
-   "options": "\nPurchase Receipt\nPurchase Invoice\nDelivery Note\nSales Invoice\nStock Entry"
+   "options": "\nPurchase Receipt\nPurchase Invoice\nDelivery Note\nSales Invoice\nStock Entry\nJob Card",
+   "reqd": 1
   },
   {
    "fieldname": "reference_name",
@@ -84,7 +85,8 @@
    "label": "Reference Name",
    "oldfieldname": "purchase_receipt_no",
    "oldfieldtype": "Link",
-   "options": "reference_type"
+   "options": "reference_type",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_7",
@@ -134,6 +136,7 @@
    "width": "50%"
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -141,6 +144,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.description",
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description",
@@ -231,9 +235,10 @@
  ],
  "icon": "fa fa-search",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-26 17:50:25.068222",
+ "modified": "2020-12-18 19:59:55.710300",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection",
@@ -254,7 +259,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "search_fields": "item_code, report_date, reference_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
