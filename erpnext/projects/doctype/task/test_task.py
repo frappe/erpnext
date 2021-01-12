@@ -97,14 +97,19 @@ class TestTask(unittest.TestCase):
 
 		self.assertEqual(frappe.db.get_value("Task", task.name, "status"), "Overdue")
 
-def create_task(subject, start=None, end=None, depends_on=None, project=None, save=True):
+def create_task(subject, start=None, end=None, depends_on=None, project=None, parent_task=None, is_group=0, is_template=0, begin=0, duration=0, save=True):
 	if not frappe.db.exists("Task", subject):
 		task = frappe.new_doc('Task')
 		task.status = "Open"
 		task.subject = subject
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
-		task.project = project or "_Test Project"
+		task.project = project or None if is_template else "_Test Project"
+		task.is_template = is_template
+		task.start = begin
+		task.duration = duration
+		task.is_group = is_group
+		task.parent_task = parent_task
 		if save:
 			task.save()
 	else:
@@ -116,5 +121,4 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None, sa
 		})
 		if save:
 			task.save()
-
 	return task
