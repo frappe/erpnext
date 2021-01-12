@@ -11,8 +11,11 @@
   "column_break0",
   "posting_date",
   "payroll_frequency",
-  "column_break1",
   "company",
+  "column_break1",
+  "currency",
+  "exchange_rate",
+  "payroll_payable_account",
   "section_break_8",
   "branch",
   "department",
@@ -126,8 +129,7 @@
    "fieldname": "employees",
    "fieldtype": "Table",
    "label": "Employee Details",
-   "options": "Payroll Employee Detail",
-   "read_only": 1
+   "options": "Payroll Employee Detail"
   },
   {
    "fieldname": "section_break_13",
@@ -257,12 +259,37 @@
   {
    "fieldname": "column_break_33",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Currency",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate",
+   "precision": "9",
+   "reqd": 1
+  },
+  {
+   "depends_on": "company",
+   "fieldname": "payroll_payable_account",
+   "fieldtype": "Link",
+   "label": "Payroll Payable Account",
+   "options": "Account",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 20:06:06.953904",
+ "modified": "2020-12-17 15:13:17.766210",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Entry",

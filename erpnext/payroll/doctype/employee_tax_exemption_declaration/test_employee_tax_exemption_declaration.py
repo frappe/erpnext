@@ -22,6 +22,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company": erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
@@ -39,6 +40,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
@@ -54,6 +56,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
@@ -70,6 +73,7 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 			"employee": frappe.get_value("Employee", {"user_id":"employee@taxexepmtion.com"}, "name"),
 			"company":  erpnext.get_default_company(),
 			"payroll_period": "_Test Payroll Period",
+			"currency": erpnext.get_default_currency(),
 			"declarations": [
 				dict(exemption_sub_category = "_Test Sub Category",
 					exemption_category = "_Test Category",
@@ -82,19 +86,21 @@ class TestEmployeeTaxExemptionDeclaration(unittest.TestCase):
 
 		self.assertEqual(declaration.total_exemption_amount, 100000)
 
-def create_payroll_period():
-	if not frappe.db.exists("Payroll Period", "_Test Payroll Period"):
+def create_payroll_period(**args):
+	args = frappe._dict(args)
+	name = args.name or "_Test Payroll Period"
+	if not frappe.db.exists("Payroll Period", name):
 		from datetime import date
 		payroll_period = frappe.get_doc(dict(
 			doctype = 'Payroll Period',
-			name = "_Test Payroll Period",
-			company =  erpnext.get_default_company(),
-			start_date = date(date.today().year, 1, 1),
-			end_date = date(date.today().year, 12, 31)
+			name = name,
+			company =  args.company or erpnext.get_default_company(),
+			start_date = args.start_date or date(date.today().year, 1, 1),
+			end_date = args.end_date or date(date.today().year, 12, 31)
 		)).insert()
 		return payroll_period
 	else:
-		return frappe.get_doc("Payroll Period", "_Test Payroll Period")
+		return frappe.get_doc("Payroll Period", name)
 
 def create_exemption_category():
 	if not frappe.db.exists("Employee Tax Exemption Category", "_Test Category"):

@@ -237,6 +237,9 @@ doc_events = {
 	"Website Settings": {
 		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
 	},
+	"Tax Category": {
+		"validate": "erpnext.regional.india.utils.validate_tax_category"
+	},
 	"Sales Invoice": {
 		"on_submit": [
 			"erpnext.regional.create_transaction_log",
@@ -268,11 +271,11 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information",
+		"after_insert": "erpnext.telephony.doctype.call_log.call_log.set_caller_information",
 		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
 	},
 	"Lead": {
-		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
+		"after_insert": "erpnext.telephony.doctype.call_log.call_log.set_caller_information"
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
@@ -344,14 +347,16 @@ scheduler_events = {
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
+		"erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment.automatically_allocate_leaves_based_on_leave_policy",
 		"erpnext.hr.utils.generate_leave_encashment",
+		"erpnext.hr.utils.allocate_earned_leaves",
+		"erpnext.hr.utils.grant_leaves_automatically",
 		"erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead"
 	],
 	"monthly_long": [
 		"erpnext.accounts.deferred_revenue.process_deferred_accounting",
-		"erpnext.hr.utils.allocate_earned_leaves",
 		"erpnext.loan_management.doctype.loan_interest_accrual.loan_interest_accrual.process_loan_interest_accrual_for_demand_loans"
 	]
 }
@@ -392,7 +397,8 @@ regional_overrides = {
 		'erpnext.accounts.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
-		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries'
+		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries',
+		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data',
@@ -436,42 +442,43 @@ global_search_doctypes = {
 		{"doctype": "Sales Order", "index": 8},
 		{"doctype": "Quotation", "index": 9},
 		{"doctype": "Work Order", "index": 10},
-		{"doctype": "Purchase Receipt", "index": 11},
-		{"doctype": "Purchase Invoice", "index": 12},
-		{"doctype": "Delivery Note", "index": 13},
-		{"doctype": "Stock Entry", "index": 14},
-		{"doctype": "Material Request", "index": 15},
-		{"doctype": "Delivery Trip", "index": 16},
-		{"doctype": "Pick List", "index": 17},
-		{"doctype": "Salary Slip", "index": 18},
-		{"doctype": "Leave Application", "index": 19},
-		{"doctype": "Expense Claim", "index": 20},
-		{"doctype": "Payment Entry", "index": 21},
-		{"doctype": "Lead", "index": 22},
-		{"doctype": "Opportunity", "index": 23},
-		{"doctype": "Item Price", "index": 24},
-		{"doctype": "Purchase Taxes and Charges Template", "index": 25},
-		{"doctype": "Sales Taxes and Charges", "index": 26},
-		{"doctype": "Asset", "index": 27},
-		{"doctype": "Project", "index": 28},
-		{"doctype": "Task", "index": 29},
-		{"doctype": "Timesheet", "index": 30},
-		{"doctype": "Issue", "index": 31},
-		{"doctype": "Serial No", "index": 32},
-		{"doctype": "Batch", "index": 33},
-		{"doctype": "Branch", "index": 34},
-		{"doctype": "Department", "index": 35},
-		{"doctype": "Employee Grade", "index": 36},
-		{"doctype": "Designation", "index": 37},
-		{"doctype": "Job Opening", "index": 38},
-		{"doctype": "Job Applicant", "index": 39},
-		{"doctype": "Job Offer", "index": 40},
-		{"doctype": "Salary Structure Assignment", "index": 41},
-		{"doctype": "Appraisal", "index": 42},
-		{"doctype": "Loan", "index": 43},
-		{"doctype": "Maintenance Schedule", "index": 44},
-		{"doctype": "Maintenance Visit", "index": 45},
-		{"doctype": "Warranty Claim", "index": 46},
+		{"doctype": "Purchase Order", "index": 11},
+		{"doctype": "Purchase Receipt", "index": 12},
+		{"doctype": "Purchase Invoice", "index": 13},
+		{"doctype": "Delivery Note", "index": 14},
+		{"doctype": "Stock Entry", "index": 15},
+		{"doctype": "Material Request", "index": 16},
+		{"doctype": "Delivery Trip", "index": 17},
+		{"doctype": "Pick List", "index": 18},
+		{"doctype": "Salary Slip", "index": 19},
+		{"doctype": "Leave Application", "index": 20},
+		{"doctype": "Expense Claim", "index": 21},
+		{"doctype": "Payment Entry", "index": 22},
+		{"doctype": "Lead", "index": 23},
+		{"doctype": "Opportunity", "index": 24},
+		{"doctype": "Item Price", "index": 25},
+		{"doctype": "Purchase Taxes and Charges Template", "index": 26},
+		{"doctype": "Sales Taxes and Charges", "index": 27},
+		{"doctype": "Asset", "index": 28},
+		{"doctype": "Project", "index": 29},
+		{"doctype": "Task", "index": 30},
+		{"doctype": "Timesheet", "index": 31},
+		{"doctype": "Issue", "index": 32},
+		{"doctype": "Serial No", "index": 33},
+		{"doctype": "Batch", "index": 34},
+		{"doctype": "Branch", "index": 35},
+		{"doctype": "Department", "index": 36},
+		{"doctype": "Employee Grade", "index": 37},
+		{"doctype": "Designation", "index": 38},
+		{"doctype": "Job Opening", "index": 39},
+		{"doctype": "Job Applicant", "index": 40},
+		{"doctype": "Job Offer", "index": 41},
+		{"doctype": "Salary Structure Assignment", "index": 42},
+		{"doctype": "Appraisal", "index": 43},
+		{"doctype": "Loan", "index": 44},
+		{"doctype": "Maintenance Schedule", "index": 45},
+		{"doctype": "Maintenance Visit", "index": 46},
+		{"doctype": "Warranty Claim", "index": 47},
 	],
 	"Healthcare": [
 		{'doctype': 'Patient', 'index': 1},
