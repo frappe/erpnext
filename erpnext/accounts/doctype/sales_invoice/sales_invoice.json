@@ -1955,8 +1955,15 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-10-30 13:57:45.086303",
+ "links": [
+  {
+   "custom": 1,
+   "group": "Reference",
+   "link_doctype": "POS Invoice",
+   "link_fieldname": "consolidated_invoice"
+  }
+ ],
+ "modified": "2021-01-12 12:16:15.192520",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -58,6 +58,9 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+	
+	def before_cancel(self):
+		pass
 
 	def on_cancel(self):
 		# run on cancel method of selling controller

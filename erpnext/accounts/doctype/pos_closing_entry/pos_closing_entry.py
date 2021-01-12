@@ -9,7 +9,7 @@ from frappe import _
 from frappe.utils import get_datetime, flt
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices, job_already_enqueued
+from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices, unconsolidate_pos_invoices
 
 class POSClosingEntry(StatusUpdater):
 	def validate(self):
@@ -65,11 +65,14 @@ class POSClosingEntry(StatusUpdater):
 			{"data": self, "currency": currency})
 	
 	def on_submit(self):
-		merge_pos_invoices(closing_entry=self)
+		consolidate_pos_invoices(closing_entry=self)
 	
-	def update_opening_entry(self):
+	def on_cancel(self):
+		unconsolidate_pos_invoices(closing_entry=self)
+
+	def update_opening_entry(self, on_cancel=False):
 		opening_entry = frappe.get_doc("POS Opening Entry", self.pos_opening_entry)
-		opening_entry.pos_closing_entry = self.name
+		opening_entry.pos_closing_entry = self.name if not on_cancel else None
 		opening_entry.set_status()
 		opening_entry.save()
 

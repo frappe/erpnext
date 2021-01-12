@@ -199,8 +199,13 @@
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-12-01 20:02:16.170909",
+ "links": [
+  {
+   "link_doctype": "POS Invoice Merge Log",
+   "link_fieldname": "pos_closing_entry"
+  }
+ ],
+ "modified": "2021-01-12 12:21:05.388650",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

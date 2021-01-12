@@ -64,7 +64,13 @@ class POSInvoiceMergeLog(Document):
 
 		self.save() # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 
-		self.update_pos_invoices(sales_invoice, credit_note)
+		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
+
+	def on_cancel(self):
+		pos_invoice_docs = [frappe.get_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
+
+		self.update_pos_invoices(pos_invoice_docs, on_cancel=True)
+		self.cancel_linked_invoices()
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
@@ -162,15 +168,19 @@ class POSInvoiceMergeLog(Document):
 
 		return sales_invoice
 	
-	def update_pos_invoices(self, sales_invoice, credit_note):
-		for d in self.pos_invoices:
-			doc = frappe.get_doc('POS Invoice', d.pos_invoice)
-			if not doc.is_return:
-				doc.update({'consolidated_invoice': sales_invoice})
-			else:
-				doc.update({'consolidated_invoice': credit_note})
+	def update_pos_invoices(self, invoice_docs, sales_invoice='', credit_note='', on_cancel=False):
+		for doc in invoice_docs:
+			doc.load_from_db()
+			doc.update({ 'consolidated_invoice': None if on_cancel else (credit_note if doc.is_return else sales_invoice) })
 			doc.set_status(update=True)
 			doc.save()
+
+	def cancel_linked_invoices(self):
+		for si_name in [self.consolidated_invoice, self.consolidated_credit_note]:
+			if not si_name: continue
+			si = frappe.get_doc('Sales Invoice', si_name)
+			si.flags.ignore_validate = True
+			si.cancel()
 
 def get_all_unconsolidated_invoices():
 	filters = {
@@ -193,15 +203,28 @@ def get_invoice_customer_map(pos_invoices):
 	
 	return pos_invoice_customer_map
 
-def merge_pos_invoices(pos_invoices=[], closing_entry={}):
+def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
 	invoices = pos_invoices or closing_entry.get('pos_transactions') or get_all_unconsolidated_invoices()
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
-	if len(invoices) >= 10 and closing_entry:
-		enqueue_create_merge_logs(invoice_by_customer, closing_entry)
+	if len(invoices) >= 5 and closing_entry:
+		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
 		closing_entry.set_status(update=True, status='Queued')
 	else:
 		create_merge_logs(invoice_by_customer, closing_entry)
+
+def unconsolidate_pos_invoices(closing_entry):
+	merge_logs = frappe.get_all(
+		'POS Invoice Merge Log',
+		filters={ 'pos_closing_entry': closing_entry.name },
+		pluck='name'
+	)
+
+	if len(merge_logs) >= 5:
+		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
+		closing_entry.set_status(update=True, status='Queued')
+	else:
+		cancel_merge_logs(merge_logs, closing_entry)
 
 def create_merge_logs(invoice_by_customer, closing_entry={}):
 	for customer, invoices in iteritems(invoice_by_customer):
@@ -218,22 +241,39 @@ def create_merge_logs(invoice_by_customer, closing_entry={}):
 		closing_entry.set_status(update=True, status='Submitted')
 		closing_entry.update_opening_entry()
 
-def enqueue_create_merge_logs(invoice_by_customer, closing_entry):
+	frappe.throw('test')
+
+def cancel_merge_logs(merge_logs, closing_entry={}):
+	for log in merge_logs:
+		merge_log = frappe.get_doc('POS Invoice Merge Log', log)
+		merge_log.cancel()
+
+	if closing_entry:
+		closing_entry.set_status(update=True, status='Cancelled')
+		closing_entry.update_opening_entry(on_cancel=True)
+
+def enqueue_job(job, invoice_by_customer, closing_entry):
 	check_scheduler_status()
 
 	job_name = closing_entry.get("name")
 	if not job_already_enqueued(job_name):
 		enqueue(
-			create_merge_logs,
+			job,
 			queue="long",
 			timeout=10000,
-			event="creating_merge_logs",
+			event="processing_merge_logs",
 			job_name=job_name,
 			closing_entry=closing_entry,
 			invoice_by_customer=invoice_by_customer,
-			now=0
+			now=frappe.conf.developer_mode or frappe.flags.in_test
 		)
-		frappe.msgprint(_('POS Invoices will be merged in a background process'), alert=1)
+
+		if job == create_merge_logs:
+			msg = _('POS Invoices will be consolidated in a background process')
+		else:
+			msg = _('POS Invoices will be unconsolidated in a background process')
+
+		frappe.msgprint(msg, alert=1)
 
 def check_scheduler_status():
 	if is_scheduler_inactive() and not frappe.flags.in_test:
