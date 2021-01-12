@@ -33,7 +33,7 @@ frappe.query_reports["Expense Claim Summary"] = {
 			"fieldname": "status",
 			"label": __("Status"),
 			"fieldtype": "Select",
-			"options": "\nDraft\nPaid\nUnpaid\nClaimed\nCancelled"
+			"options": "\nDraft\nPaid\nUnpaid\nRejected\nCancelled"
 		},
 		{
 			"fieldname": "approval_status",

@@ -1,5 +1,5 @@
 {
- "add_total_row": 0,
+ "add_total_row": 1,
  "columns": [],
  "creation": "2021-01-11 14:43:07.404978",
  "disable_prepared_report": 0,
@@ -10,7 +10,7 @@
  "idx": 0,
  "is_standard": "Yes",
  "json": "{}",
- "modified": "2021-01-11 14:50:03.823700",
+ "modified": "2021-01-12 12:20:46.593349",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim Summary",
