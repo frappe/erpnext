@@ -725,6 +725,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		args.update(item_data)
 
 		args["rate"] = get_bom_item_rate({
+			"company": wo_doc.company,
 			"item_code": args.get("item_code"),
 			"qty": args.get("required_qty"),
 			"uom": args.get("stock_uom"),
