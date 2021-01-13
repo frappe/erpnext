@@ -419,9 +419,9 @@ def get_invoice_income_map(invoice_list):
 
 def get_internal_invoice_map(invoice_list):
 	unrealized_amount_details = frappe.db.sql("""SELECT name, unrealized_profit_loss_account,
-		sum(base_net_total) as amount from `tabSales Invoice` where name in (%s)
+		base_net_total as amount from `tabSales Invoice` where name in (%s)
 		and is_internal_customer = 1 and company = represents_company""" %
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1, debug=1)
 
 	internal_invoice_map = {}
 	for d in unrealized_amount_details:
