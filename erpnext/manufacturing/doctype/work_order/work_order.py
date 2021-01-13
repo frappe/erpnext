@@ -456,10 +456,10 @@ class WorkOrder(Document):
 
 			if data and len(data):
 				dates = [d.posting_datetime for d in data]
-				self.actual_start_date = min(dates)
+				self.db_set('actual_start_date', min(dates))
 
 				if self.status == "Completed":
-					self.actual_end_date = max(dates)
+					self.db_set('actual_end_date', max(dates))
 
 		self.set_lead_time()
 
