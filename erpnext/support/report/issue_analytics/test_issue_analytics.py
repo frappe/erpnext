@@ -5,19 +5,22 @@ from frappe.utils import getdate, add_months
 from erpnext.support.report.issue_analytics.issue_analytics import execute
 from erpnext.support.doctype.issue.test_issue import make_issue, create_customer
 from erpnext.support.doctype.service_level_agreement.test_service_level_agreement import create_service_level_agreements_for_issues
+from frappe.desk.form.assign_to import add as add_assignment
 
 months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
 
 class TestIssueAnalytics(unittest.TestCase):
-	def test_issue_analytics(self):
-		frappe.db.sql("delete from `tabIssue`")
+	@classmethod
+	def setUpClass(self):
+		frappe.db.sql("delete from `tabIssue` where company='_Test Company'")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 
 		current_month_date = getdate()
 		last_month_date = add_months(current_month_date, -1)
-		self.current_month = str(months[current_month_date.month - 1]).lower()
-		self.last_month = str(months[last_month_date.month - 1]).lower()
+		self.current_month = str(months[current_month_date.month - 1]).lower() + '_' + str(current_month_date.year)
+		self.last_month = str(months[last_month_date.month - 1]).lower() + '_' + str(last_month_date.year)
 
+	def test_issue_analytics(self):
 		create_service_level_agreements_for_issues()
 		create_issue_types()
 		create_records()
@@ -172,8 +175,6 @@ def create_issue_types():
 
 
 def create_records():
-	from frappe.desk.form.assign_to import add as add_assignment
-
 	create_customer("__Test Customer", "_Test SLA Customer Group", "__Test SLA Territory")
 	create_customer("__Test Customer 1", "_Test SLA Customer Group", "__Test SLA Territory")
 	create_customer("__Test Customer 2", "_Test SLA Customer Group", "__Test SLA Territory")
