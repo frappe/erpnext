@@ -9,6 +9,7 @@
   "abbr",
   "column_break_3",
   "amount",
+  "year_to_date",
   "section_break_5",
   "additional_salary",
   "statistical_component",
@@ -226,11 +227,19 @@
   {
    "fieldname": "column_break_24",
    "fieldtype": "Column Break"
+  },
+  {
+   "description": "Total amount spent on this salary component from the beginning of the year (payroll or fiscal) to the current payroll date.",
+   "fieldname": "year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-11-25 13:12:41.081106",
+ "modified": "2021-01-13 17:33:19.184195",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Detail",
