@@ -77,11 +77,13 @@ def get_appointments_to_invoice(patient, company):
 
 
 def get_encounters_to_invoice(patient, company):
+	if not isinstance(patient, str):
+		patient = patient.name
 	encounters_to_invoice = []
 	encounters = frappe.get_list(
 		'Patient Encounter',
 		fields=['*'],
-		filters={'patient': patient.name, 'company': company, 'invoiced': False, 'docstatus': 1}
+		filters={'patient': patient, 'company': company, 'invoiced': False, 'docstatus': 1}
 	)
 	if encounters:
 		for encounter in encounters:
