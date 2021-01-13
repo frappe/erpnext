@@ -620,7 +620,7 @@ def set_tax_withholding_category(company):
 	except FiscalYearError:
 		pass
 
-	docs = get_tds_details(accounts, fiscal_year=None)
+	docs = get_tds_details(accounts, fiscal_year)
 	
 	for d in docs:
 		try:
