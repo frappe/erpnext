@@ -90,6 +90,10 @@ def get_encounters_to_invoice(patient, company):
 				income_account = None
 				service_item = None
 				if encounter.practitioner:
+					if encounter.inpatient_record and \
+						frappe.db.get_single_value('Healthcare Settings', 'do_not_bill_inpatient_encounters'):
+						continue
+
 					service_item, practitioner_charge = get_service_item_and_practitioner_charge(encounter)
 					income_account = get_income_account(encounter.practitioner, encounter.company)
 
