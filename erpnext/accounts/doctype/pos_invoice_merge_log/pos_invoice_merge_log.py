@@ -148,6 +148,7 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('taxes', taxes)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
+		invoice.taxes_and_charges = None
 
 		return invoice
 	
