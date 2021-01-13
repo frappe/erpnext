@@ -494,7 +494,7 @@
   },
   {
    "default": "0",
-   "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
+   "depends_on": "eval:in_list([\"Repack\", \"Manufacture\"], parent.purpose) && doc.t_warehouse",
    "fieldname": "set_basic_rate_manually",
    "fieldtype": "Check",
    "label": "Set Basic Rate Manually"
@@ -502,7 +502,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-09-04 12:12:35.668198",
+ "modified": "2021-01-05 15:05:04.891447",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

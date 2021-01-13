@@ -322,11 +322,12 @@ frappe.ui.form.on('Stock Entry', {
 			method: "erpnext.stock.get_item_details.get_serial_no",
 			args: {"args": args},
 			callback: function(r) {
-				if (!r.exe && r.message){
+				if (!r.exe && r.message) {
 					frappe.model.set_value(cdt, cdn, "serial_no", r.message);
-				}
-				if (callback) {
-					callback();
+
+					if (callback) {
+						callback();
+					}
 				}
 			}
 		});
