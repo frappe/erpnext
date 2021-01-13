@@ -2,7 +2,7 @@ frappe.provide("frappe.treeview_settings")
 
 frappe.treeview_settings["Account"] = {
 	breadcrumb: "Accounts",
-	title: __("Chart Of Accounts"),
+	title: __("Chart of Accounts"),
 	get_tree_root: false,
 	filters: [
 		{
@@ -14,6 +14,9 @@ frappe.treeview_settings["Account"] = {
 			on_change: function() {
 				var me = frappe.treeview_settings['Account'].treeview;
 				var company = me.page.fields_dict.company.get_value();
+				if (!company) {
+					frappe.throw(__("Please set a Company"));
+				}
 				frappe.call({
 					method: "erpnext.accounts.doctype.account.account.get_root_company",
 					args: {
@@ -94,7 +97,7 @@ frappe.treeview_settings["Account"] = {
 		treeview.page.add_inner_button(__("Journal Entry"), function() {
 			frappe.new_doc('Journal Entry', {company: get_company()});
 		}, __('Create'));
-		treeview.page.add_inner_button(__("New Company"), function() {
+		treeview.page.add_inner_button(__("Company"), function() {
 			frappe.new_doc('Company');
 		}, __('Create'));
 

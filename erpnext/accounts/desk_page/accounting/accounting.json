@@ -13,17 +13,17 @@
   {
    "hidden": 0,
    "label": "Accounts Receivable",
-   "links": "[\n    {\n        \"description\": \"Bills raised to Customers.\",\n        \"label\": \"Sales Invoice\",\n        \"name\": \"Sales Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Customer database.\",\n        \"label\": \"Customer\",\n        \"name\": \"Customer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Payment Request\",\n        \"label\": \"Payment Request\",\n        \"name\": \"Payment Request\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable\",\n        \"name\": \"Accounts Receivable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable Summary\",\n        \"name\": \"Accounts Receivable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Register\",\n        \"name\": \"Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Sales Register\",\n        \"name\": \"Item-wise Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Ordered Items To Be Billed\",\n        \"name\": \"Ordered Items To Be Billed\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Delivered Items To Be Billed\",\n        \"name\": \"Delivered Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Bills raised to Customers.\",\n        \"label\": \"Sales Invoice\",\n        \"name\": \"Sales Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Customer database.\",\n        \"label\": \"Customer\",\n        \"name\": \"Customer\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Payment Request\",\n        \"label\": \"Payment Request\",\n        \"name\": \"Payment Request\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable\",\n        \"name\": \"Accounts Receivable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Receivable Summary\",\n        \"name\": \"Accounts Receivable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Register\",\n        \"name\": \"Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Sales Register\",\n        \"name\": \"Item-wise Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Order\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Order Analysis\",\n        \"name\": \"Sales Order Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Delivered Items To Be Billed\",\n        \"name\": \"Delivered Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
    "label": "Accounts Payable",
-   "links": "[\n    {\n        \"description\": \"Bills raised by Suppliers.\",\n        \"label\": \"Purchase Invoice\",\n        \"name\": \"Purchase Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Supplier database.\",\n        \"label\": \"Supplier\",\n        \"name\": \"Supplier\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable\",\n        \"name\": \"Accounts Payable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable Summary\",\n        \"name\": \"Accounts Payable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Register\",\n        \"name\": \"Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase Register\",\n        \"name\": \"Item-wise Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Order Items To Be Billed\",\n        \"name\": \"Purchase Order Items To Be Billed\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Received Items To Be Billed\",\n        \"name\": \"Received Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"description\": \"Bills raised by Suppliers.\",\n        \"label\": \"Purchase Invoice\",\n        \"name\": \"Purchase Invoice\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Supplier database.\",\n        \"label\": \"Supplier\",\n        \"name\": \"Supplier\",\n        \"onboard\": 1,\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Bank/Cash transactions against party or for internal transfer\",\n        \"label\": \"Payment Entry\",\n        \"name\": \"Payment Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable\",\n        \"name\": \"Accounts Payable\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Accounts Payable Summary\",\n        \"name\": \"Accounts Payable Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Register\",\n        \"name\": \"Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Item-wise Purchase Register\",\n        \"name\": \"Item-wise Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Order\"\n        ],\n        \"doctype\": \"Purchase Order\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Order Analysis\",\n        \"name\": \"Purchase Order Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Received Items To Be Billed\",\n        \"name\": \"Received Items To Be Billed\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
    "label": "Reports",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Trial Balance for Party\",\n        \"name\": \"Trial Balance for Party\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Payment Period Based On Invoice Date\",\n        \"name\": \"Payment Period Based On Invoice Date\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Partners Commission\",\n        \"name\": \"Sales Partners Commission\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Customer\"\n        ],\n        \"doctype\": \"Customer\",\n        \"is_query_report\": true,\n        \"label\": \"Customer Credit Balance\",\n        \"name\": \"Customer Credit Balance\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Payment Summary\",\n        \"name\": \"Sales Payment Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Address\"\n        ],\n        \"doctype\": \"Address\",\n        \"is_query_report\": true,\n        \"label\": \"Address And Contacts\",\n        \"name\": \"Address And Contacts\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Trial Balance for Party\",\n        \"name\": \"Trial Balance for Party\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Payment Period Based On Invoice Date\",\n        \"name\": \"Payment Period Based On Invoice Date\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Partners Commission\",\n        \"name\": \"Sales Partners Commission\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Customer\"\n        ],\n        \"doctype\": \"Customer\",\n        \"is_query_report\": true,\n        \"label\": \"Customer Credit Balance\",\n        \"name\": \"Customer Credit Balance\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Payment Summary\",\n        \"name\": \"Sales Payment Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Address\"\n        ],\n        \"doctype\": \"Address\",\n        \"is_query_report\": true,\n        \"label\": \"Address And Contacts\",\n        \"name\": \"Address And Contacts\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"DATEV Export\",\n        \"name\": \"DATEV\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -43,12 +43,7 @@
   {
    "hidden": 0,
    "label": "Bank Statement",
-   "links": "[\n    {\n        \"label\": \"Bank\",\n        \"name\": \"Bank\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Account\",\n        \"name\": \"Bank Account\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Transaction Entry\",\n        \"name\": \"Bank Statement Transaction Entry\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Statement Settings\",\n        \"name\": \"Bank Statement Settings\",\n        \"type\": \"doctype\"\n    }\n]"
-  },
-  {
-   "hidden": 0,
-   "links": "[\n    {\n        \"description\": \"Match non-linked Invoices and Payments.\",\n        \"label\": \"Match Payments with Invoices\",\n        \"name\": \"Payment Reconciliation\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Update bank payment dates with journals.\",\n        \"label\": \"Update Bank Clearance Dates\",\n        \"name\": \"Bank Clearance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Invoice Discounting\",\n        \"name\": \"Invoice Discounting\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Reconciliation Statement\",\n        \"name\": \"Bank Reconciliation Statement\",\n        \"type\": \"report\"\n    },\n    {\n        \"icon\": \"fa fa-bar-chart\",\n        \"label\": \"Bank Reconciliation\",\n        \"name\": \"bank-reconciliation\",\n        \"type\": \"page\"\n    },\n    {\n        \"dependencies\": [\n            \"Journal Entry\"\n        ],\n        \"doctype\": \"Journal Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Clearance Summary\",\n        \"name\": \"Bank Clearance Summary\",\n        \"type\": \"report\"\n    },\n    {\n        \"label\": \"Bank Guarantee\",\n        \"name\": \"Bank Guarantee\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"description\": \"Setup cheque dimensions for printing\",\n        \"label\": \"Cheque Print Template\",\n        \"name\": \"Cheque Print Template\",\n        \"type\": \"doctype\"\n    }\n]",
-   "title": "Banking and Payments"
+   "links": "[\n    {\n        \"label\": \"Bank\",\n        \"name\": \"Bank\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Account\",\n        \"name\": \"Bank Account\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Clearance\",\n        \"name\": \"Bank Clearance\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"Bank Reconciliation\",\n        \"name\": \"bank-reconciliation\",\n        \"type\": \"page\"\n    },\n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Bank Reconciliation Statement\",\n        \"name\": \"Bank Reconciliation Statement\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -58,7 +53,7 @@
   {
    "hidden": 0,
    "label": "Goods and Services Tax (GST India)",
-   "links": "[\n    {\n        \"label\": \"GST Settings\",\n        \"name\": \"GST Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"GST HSN Code\",\n        \"name\": \"GST HSN Code\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GSTR-1\",\n        \"name\": \"GSTR-1\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GSTR-2\",\n        \"name\": \"GSTR-2\",\n        \"type\": \"report\"\n    },\n    {\n        \"label\": \"GSTR 3B Report\",\n        \"name\": \"GSTR 3B Report\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Sales Register\",\n        \"name\": \"GST Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Purchase Register\",\n        \"name\": \"GST Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Itemised Sales Register\",\n        \"name\": \"GST Itemised Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Itemised Purchase Register\",\n        \"name\": \"GST Itemised Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"country\": \"India\",\n        \"description\": \"C-Form records\",\n        \"label\": \"C-Form\",\n        \"name\": \"C-Form\",\n        \"type\": \"doctype\"\n    }\n]"
+   "links": "[\n    {\n        \"label\": \"GST Settings\",\n        \"name\": \"GST Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"label\": \"GST HSN Code\",\n        \"name\": \"GST HSN Code\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GSTR-1\",\n        \"name\": \"GSTR-1\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GSTR-2\",\n        \"name\": \"GSTR-2\",\n        \"type\": \"report\"\n    },\n    {\n        \"label\": \"GSTR 3B Report\",\n        \"name\": \"GSTR 3B Report\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Sales Register\",\n        \"name\": \"GST Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Purchase Register\",\n        \"name\": \"GST Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Itemised Sales Register\",\n        \"name\": \"GST Itemised Sales Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"is_query_report\": true,\n        \"label\": \"GST Itemised Purchase Register\",\n        \"name\": \"GST Itemised Purchase Register\",\n        \"type\": \"report\"\n    },\n    {\n        \"country\": \"India\",\n        \"description\": \"C-Form records\",\n        \"label\": \"C-Form\",\n        \"name\": \"C-Form\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"country\": \"India\",\n        \"label\": \"Lower Deduction Certificate\",\n        \"name\": \"Lower Deduction Certificate\",\n        \"type\": \"doctype\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -84,13 +79,18 @@
    "hidden": 0,
    "label": "Profitability",
    "links": "[\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Gross Profit\",\n        \"name\": \"Gross Profit\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"GL Entry\"\n        ],\n        \"doctype\": \"GL Entry\",\n        \"is_query_report\": true,\n        \"label\": \"Profitability Analysis\",\n        \"name\": \"Profitability Analysis\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Invoice\"\n        ],\n        \"doctype\": \"Sales Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Sales Invoice Trends\",\n        \"name\": \"Sales Invoice Trends\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Purchase Invoice\"\n        ],\n        \"doctype\": \"Purchase Invoice\",\n        \"is_query_report\": true,\n        \"label\": \"Purchase Invoice Trends\",\n        \"name\": \"Purchase Invoice Trends\",\n        \"type\": \"report\"\n    }\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Value-Added Tax (VAT UAE)",
+   "links": "[\n    {\n        \"country\": \"United Arab Emirates\",\n        \"label\": \"UAE VAT Settings\",\n        \"name\": \"UAE VAT Settings\",\n        \"type\": \"doctype\"\n    },\n    {\n        \"country\": \"United Arab Emirates\",\n        \"is_query_report\": true,\n        \"label\": \"UAE VAT 201\",\n        \"name\": \"UAE VAT 201\",\n        \"type\": \"report\"\n    }\n\n]"
   }
  ],
  "category": "Modules",
  "charts": [
   {
-   "chart_name": "Bank Balance",
-   "label": "Bank Balance"
+   "chart_name": "Profit and Loss",
+   "label": "Profit and Loss"
   }
  ],
  "creation": "2020-03-02 15:41:59.515192",
@@ -99,21 +99,32 @@
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "Accounting",
- "modified": "2020-04-29 12:17:34.844397",
+ "modified": "2020-11-11 18:35:11.542909",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting",
+ "onboarding": "Accounts",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "shortcuts": [
   {
-   "label": "Account",
+   "label": "Chart Of Accounts",
    "link_to": "Account",
+   "type": "DocType"
+  },
+  {
+   "label": "Sales Invoice",
+   "link_to": "Sales Invoice",
+   "type": "DocType"
+  },
+  {
+   "label": "Purchase Invoice",
+   "link_to": "Purchase Invoice",
    "type": "DocType"
   },
   {
@@ -137,14 +148,14 @@
    "type": "Report"
   },
   {
-   "label": "Profit and Loss Statement",
-   "link_to": "Profit and Loss Statement",
-   "type": "Report"
-  },
-  {
    "label": "Trial Balance",
    "link_to": "Trial Balance",
    "type": "Report"
+  },
+  {
+   "label": "Dashboard",
+   "link_to": "Accounts",
+   "type": "Dashboard"
   }
  ]
 }

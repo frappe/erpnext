@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-09 23:42:46.592075",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-28 21:07:11.461172",
+ "modified_by": "Administrator",
+ "name": "Create and Send Quotation",
+ "owner": "Administrator",
+ "reference_document": "Quotation",
+ "show_full_form": 1,
+ "title": "Create and Send Quotation",
+ "validate_action": 1
+}

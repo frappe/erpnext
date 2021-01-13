@@ -3,37 +3,31 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import math
 import frappe
 from frappe import _
-import math
 from frappe.utils import time_diff_in_hours, rounded
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
 
 @frappe.whitelist()
-def get_healthcare_services_to_invoice(patient):
+def get_healthcare_services_to_invoice(patient, company):
 	patient = frappe.get_doc('Patient', patient)
+	items_to_invoice = []
 	if patient:
 		validate_customer_created(patient)
-		items_to_invoice = []
-		patient_appointments = frappe.get_list(
-			'Patient Appointment',
-			fields='*',
-			filters={'patient': patient.name, 'invoiced': 0},
-			order_by='appointment_date'
-		)
-		if patient_appointments:
-			items_to_invoice = get_fee_validity(patient_appointments)
+		# Customer validated, build a list of billable services
+		items_to_invoice += get_appointments_to_invoice(patient, company)
+		items_to_invoice += get_encounters_to_invoice(patient, company)
+		items_to_invoice += get_lab_tests_to_invoice(patient, company)
+		items_to_invoice += get_clinical_procedures_to_invoice(patient, company)
+		items_to_invoice += get_inpatient_services_to_invoice(patient, company)
+		items_to_invoice += get_therapy_plans_to_invoice(patient, company)
+		items_to_invoice += get_therapy_sessions_to_invoice(patient, company)
 
-		encounters = get_encounters_to_invoice(patient)
-		lab_tests = get_lab_tests_to_invoice(patient)
-		clinical_procedures = get_clinical_procedures_to_invoice(patient)
-		inpatient_services = get_inpatient_services_to_invoice(patient)
-		therapy_sessions = get_therapy_sessions_to_invoice(patient)
-
-		items_to_invoice += encounters + lab_tests + clinical_procedures + inpatient_services + therapy_sessions
 		return items_to_invoice
+
 
 def validate_customer_created(patient):
 	if not frappe.db.get_value('Patient', patient.name, 'customer'):
@@ -41,45 +35,53 @@ def validate_customer_created(patient):
 		msg +=  " <b><a href='#Form/Patient/{0}'>{0}</a></b>".format(patient.name)
 		frappe.throw(msg, title=_('Customer Not Found'))
 
-def get_fee_validity(patient_appointments):
-	if not frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups'):
-		return []
 
-	items_to_invoice = []
+def get_appointments_to_invoice(patient, company):
+	appointments_to_invoice = []
+	patient_appointments = frappe.get_list(
+			'Patient Appointment',
+			fields = '*',
+			filters = {'patient': patient.name, 'company': company, 'invoiced': 0, 'status': ['not in', 'Cancelled']},
+			order_by = 'appointment_date'
+		)
+
 	for appointment in patient_appointments:
+		# Procedure Appointments
 		if appointment.procedure_template:
 			if frappe.db.get_value('Clinical Procedure Template', appointment.procedure_template, 'is_billable'):
-				items_to_invoice.append({
+				appointments_to_invoice.append({
 					'reference_type': 'Patient Appointment',
 					'reference_name': appointment.name,
 					'service': appointment.procedure_template
 				})
+		# Consultation Appointments, should check fee validity
 		else:
-			fee_validity = frappe.db.exists('Fee Validity Reference', {'appointment': appointment.name})
-			if not fee_validity:
-				practitioner_charge = 0
-				income_account = None
-				service_item = None
-				if appointment.practitioner:
-					service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment)
-					income_account = get_income_account(appointment.practitioner, appointment.company)
-				items_to_invoice.append({
-					'reference_type': 'Patient Appointment',
-					'reference_name': appointment.name,
-					'service': service_item,
-					'rate': practitioner_charge,
-					'income_account': income_account
-				})
+			if frappe.db.get_single_value('Healthcare Settings', 'enable_free_follow_ups') and \
+				frappe.db.exists('Fee Validity Reference', {'appointment': appointment.name}):
+					continue # Skip invoicing, fee validty present
+			practitioner_charge = 0
+			income_account = None
+			service_item = None
+			if appointment.practitioner:
+				service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment)
+				income_account = get_income_account(appointment.practitioner, appointment.company)
+			appointments_to_invoice.append({
+				'reference_type': 'Patient Appointment',
+				'reference_name': appointment.name,
+				'service': service_item,
+				'rate': practitioner_charge,
+				'income_account': income_account
+			})
 
-	return items_to_invoice
+	return appointments_to_invoice
 
 
-def get_encounters_to_invoice(patient):
+def get_encounters_to_invoice(patient, company):
 	encounters_to_invoice = []
 	encounters = frappe.get_list(
 		'Patient Encounter',
 		fields=['*'],
-		filters={'patient': patient.name, 'invoiced': False, 'docstatus': 1}
+		filters={'patient': patient.name, 'company': company, 'invoiced': False, 'docstatus': 1}
 	)
 	if encounters:
 		for encounter in encounters:
@@ -102,12 +104,12 @@ def get_encounters_to_invoice(patient):
 	return encounters_to_invoice
 
 
-def get_lab_tests_to_invoice(patient):
+def get_lab_tests_to_invoice(patient, company):
 	lab_tests_to_invoice = []
 	lab_tests = frappe.get_list(
 		'Lab Test',
 		fields=['name', 'template'],
-		filters={'patient': patient.name, 'invoiced': False, 'docstatus': 1}
+		filters={'patient': patient.name, 'company': company, 'invoiced': False, 'docstatus': 1}
 	)
 	for lab_test in lab_tests:
 		item, is_billable = frappe.get_cached_value('Lab Test Template', lab_test.template, ['item', 'is_billable'])
@@ -143,12 +145,12 @@ def get_lab_tests_to_invoice(patient):
 	return lab_tests_to_invoice
 
 
-def get_clinical_procedures_to_invoice(patient):
+def get_clinical_procedures_to_invoice(patient, company):
 	clinical_procedures_to_invoice = []
 	procedures = frappe.get_list(
 		'Clinical Procedure',
 		fields='*',
-		filters={'patient': patient.name, 'invoiced': False}
+		filters={'patient': patient.name, 'company': company, 'invoiced': False}
 	)
 	for procedure in procedures:
 		if not procedure.appointment:
@@ -204,7 +206,7 @@ def get_clinical_procedures_to_invoice(patient):
 	return clinical_procedures_to_invoice
 
 
-def get_inpatient_services_to_invoice(patient):
+def get_inpatient_services_to_invoice(patient, company):
 	services_to_invoice = []
 	inpatient_services = frappe.db.sql(
 		'''
@@ -214,10 +216,11 @@ def get_inpatient_services_to_invoice(patient):
 				`tabInpatient Record` ip, `tabInpatient Occupancy` io
 			WHERE
 				ip.patient=%s
+				and ip.company=%s
 				and io.parent=ip.name
 				and io.left=1
 				and io.invoiced=0
-		''', (patient.name), as_dict=1)
+		''', (patient.name, company), as_dict=1)
 
 	for inpatient_occupancy in inpatient_services:
 		service_unit_type = frappe.db.get_value('Healthcare Service Unit', inpatient_occupancy.service_unit, 'service_unit_type')
@@ -244,12 +247,44 @@ def get_inpatient_services_to_invoice(patient):
 	return services_to_invoice
 
 
-def get_therapy_sessions_to_invoice(patient):
+def get_therapy_plans_to_invoice(patient, company):
+	therapy_plans_to_invoice = []
+	therapy_plans = frappe.get_list(
+		'Therapy Plan',
+		fields=['therapy_plan_template', 'name'],
+		filters={
+			'patient': patient.name,
+			'invoiced': 0,
+			'company': company,
+			'therapy_plan_template': ('!=', '')
+		}
+	)
+	for plan in therapy_plans:
+		therapy_plans_to_invoice.append({
+			'reference_type': 'Therapy Plan',
+			'reference_name': plan.name,
+			'service': frappe.db.get_value('Therapy Plan Template', plan.therapy_plan_template, 'linked_item')
+		})
+
+	return therapy_plans_to_invoice
+
+
+def get_therapy_sessions_to_invoice(patient, company):
 	therapy_sessions_to_invoice = []
+	therapy_plans = frappe.db.get_all('Therapy Plan', {'therapy_plan_template': ('!=', '')})
+	therapy_plans_created_from_template = []
+	for entry in therapy_plans:
+		therapy_plans_created_from_template.append(entry.name)
+
 	therapy_sessions = frappe.get_list(
 		'Therapy Session',
 		fields='*',
-		filters={'patient': patient.name, 'invoiced': False}
+		filters={
+			'patient': patient.name,
+			'invoiced': 0,
+			'company': company,
+			'therapy_plan': ('not in', therapy_plans_created_from_template)
+		}
 	)
 	for therapy in therapy_sessions:
 		if not therapy.appointment:
@@ -366,8 +401,8 @@ def validate_invoiced_on_submit(item):
 	else:
 		is_invoiced = frappe.db.get_value(item.reference_dt, item.reference_dn, 'invoiced')
 	if is_invoiced:
-		frappe.throw(_('The item referenced by {0} - {1} is already invoiced'\
-		).format(item.reference_dt, item.reference_dn))
+		frappe.throw(_('The item referenced by {0} - {1} is already invoiced').format(
+			item.reference_dt, item.reference_dn))
 
 
 def manage_prescriptions(invoiced, ref_dt, ref_dn, dt, created_check_field):
@@ -396,6 +431,7 @@ def check_fee_validity(appointment):
 
 def manage_fee_validity(appointment):
 	fee_validity = check_fee_validity(appointment)
+
 	if fee_validity:
 		if appointment.status == 'Cancelled' and fee_validity.visited > 0:
 			fee_validity.visited -= 1
@@ -509,10 +545,10 @@ def get_children(doctype, parent, company, is_root=False):
 def get_patient_vitals(patient, from_date=None, to_date=None):
 	if not patient: return
 
-	vitals = frappe.db.get_all('Vital Signs', {
+	vitals = frappe.db.get_all('Vital Signs', filters={
 			'docstatus': 1,
 			'patient': patient
-		}, order_by='signs_date, signs_time')
+		}, order_by='signs_date, signs_time', fields=['*'])
 
 	if len(vitals):
 		return vitals

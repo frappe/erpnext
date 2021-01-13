@@ -36,7 +36,7 @@ class PaymentRequest(Document):
 			ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 			if (hasattr(ref_doc, "order_type") \
 					and getattr(ref_doc, "order_type") != "Shopping Cart"):
-				ref_amount = get_amount(ref_doc)
+				ref_amount = get_amount(ref_doc, self.payment_account)
 
 				if existing_payment_request_amount + flt(self.grand_total)> ref_amount:
 					frappe.throw(_("Total Payment Request amount cannot be greater than {0} amount")
@@ -69,17 +69,31 @@ class PaymentRequest(Document):
 		elif self.payment_request_type == 'Inward':
 			self.db_set('status', 'Requested')
 
-		send_mail = self.payment_gateway_validation()
+		send_mail = self.payment_gateway_validation() if self.payment_gateway else None
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
 		if (hasattr(ref_doc, "order_type") and getattr(ref_doc, "order_type") == "Shopping Cart") \
 			or self.flags.mute_email:
 			send_mail = False
 
-		if send_mail:
+		if send_mail and self.payment_channel != "Phone":
 			self.set_payment_request_url()
 			self.send_email()
 			self.make_communication_entry()
+
+		elif self.payment_channel == "Phone":
+			controller = get_payment_gateway_controller(self.payment_gateway)
+			payment_record = dict(
+				reference_doctype="Payment Request",
+				reference_docname=self.name,
+				payment_reference=self.reference_name,
+				grand_total=self.grand_total,
+				sender=self.email_to,
+				currency=self.currency,
+				payment_gateway=self.payment_gateway
+			)
+			controller.validate_transaction_currency(self.currency)
+			controller.request_for_payment(**payment_record)
 
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
@@ -105,13 +119,14 @@ class PaymentRequest(Document):
 			return False
 
 	def set_payment_request_url(self):
-		if self.payment_account:
+		if self.payment_account and self.payment_channel != "Phone":
 			self.payment_url = self.get_payment_url()
 
 		if self.payment_url:
 			self.db_set('payment_url', self.payment_url)
 
-		if self.payment_url or not self.payment_gateway_account:
+		if self.payment_url or not self.payment_gateway_account \
+			or (self.payment_gateway_account and self.payment_channel == "Phone"):
 			self.db_set('status', 'Initiated')
 
 	def get_payment_url(self):
@@ -140,13 +155,14 @@ class PaymentRequest(Document):
 		})
 
 	def set_as_paid(self):
-		if frappe.session.user == "Guest":
-			frappe.set_user("Administrator")
+		if self.payment_channel == "Phone":
+			self.db_set("status", "Paid")
 
-		payment_entry = self.create_payment_entry()
-		self.make_invoice()
+		else:
+			payment_entry = self.create_payment_entry()
+			self.make_invoice()
 
-		return payment_entry
+			return payment_entry
 
 	def create_payment_entry(self, submit=True):
 		"""create entry"""
@@ -154,7 +170,7 @@ class PaymentRequest(Document):
 
 		ref_doc = frappe.get_doc(self.reference_doctype, self.reference_name)
 
-		if self.reference_doctype == "Sales Invoice":
+		if self.reference_doctype in ["Sales Invoice", "POS Invoice"]:
 			party_account = ref_doc.debit_to
 		elif self.reference_doctype == "Purchase Invoice":
 			party_account = ref_doc.credit_to
@@ -169,8 +185,8 @@ class PaymentRequest(Document):
 		else:
 			party_amount = self.grand_total
 
-		payment_entry = get_payment_entry(self.reference_doctype, self.reference_name,
-			party_amount=party_amount, bank_account=self.payment_account, bank_amount=bank_amount)
+		payment_entry = get_payment_entry(self.reference_doctype, self.reference_name, party_amount=party_amount,
+			bank_account=self.payment_account, bank_amount=bank_amount)
 
 		payment_entry.update({
 			"reference_no": self.name,
@@ -254,11 +270,11 @@ class PaymentRequest(Document):
 
 		if status in ["Authorized", "Completed"]:
 			redirect_to = None
-			self.run_method("set_as_paid")
+			self.set_as_paid()
 
 			# if shopping cart enabled and in session
 			if (shopping_cart_settings.enabled and hasattr(frappe.local, "session")
-				and frappe.local.session.user != "Guest"):
+				and frappe.local.session.user != "Guest") and self.payment_channel != "Phone":
 
 				success_url = shopping_cart_settings.payment_success_url
 				if success_url:
@@ -283,15 +299,15 @@ def make_payment_request(**args):
 	args = frappe._dict(args)
 
 	ref_doc = frappe.get_doc(args.dt, args.dn)
-	grand_total = get_amount(ref_doc)
+	gateway_account = get_gateway_details(args) or frappe._dict()
+
+	grand_total = get_amount(ref_doc, gateway_account.get("payment_account"))
 	if args.loyalty_points and args.dt == "Sales Order":
 		from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 		loyalty_amount = validate_loyalty_points(ref_doc, int(args.loyalty_points))
 		frappe.db.set_value("Sales Order", args.dn, "loyalty_points", int(args.loyalty_points), update_modified=False)
 		frappe.db.set_value("Sales Order", args.dn, "loyalty_amount", loyalty_amount, update_modified=False)
 		grand_total = grand_total - loyalty_amount
-
-	gateway_account = get_gateway_details(args) or frappe._dict()
 
 	bank_account = (get_party_bank_account(args.get('party_type'), args.get('party'))
 		if args.get('party_type') else '')
@@ -317,9 +333,11 @@ def make_payment_request(**args):
 			"payment_gateway_account": gateway_account.get("name"),
 			"payment_gateway": gateway_account.get("payment_gateway"),
 			"payment_account": gateway_account.get("payment_account"),
+			"payment_channel": gateway_account.get("payment_channel"),
 			"payment_request_type": args.get("payment_request_type"),
 			"currency": ref_doc.currency,
 			"grand_total": grand_total,
+			"mode_of_payment": args.mode_of_payment,
 			"email_to": args.recipient_id or ref_doc.owner,
 			"subject": _("Payment Request for {0}").format(args.dn),
 			"message": gateway_account.get("message") or get_dummy_message(ref_doc),
@@ -347,7 +365,7 @@ def make_payment_request(**args):
 
 	return pr.as_dict()
 
-def get_amount(ref_doc):
+def get_amount(ref_doc, payment_account=None):
 	"""get amount based on doctype"""
 	dt = ref_doc.doctype
 	if dt in ["Sales Order", "Purchase Order"]:
@@ -359,6 +377,12 @@ def get_amount(ref_doc):
 		else:
 			grand_total = flt(ref_doc.outstanding_amount) / ref_doc.conversion_rate
 
+	elif dt == "POS Invoice":
+		for pay in ref_doc.payments:
+			if pay.type == "Phone" and pay.account == payment_account:
+				grand_total = pay.amount
+				break
+
 	elif dt == "Fees":
 		grand_total = ref_doc.outstanding_amount
 
@@ -369,6 +393,10 @@ def get_amount(ref_doc):
 		frappe.throw(_("Payment Entry is already created"))
 
 def get_existing_payment_request_amount(ref_dt, ref_dn):
+	"""
+	Get the existing payment request which are unpaid or partially paid for payment channel other than Phone
+	and get the summation of existing paid payment request for Phone payment channel.
+	"""
 	existing_payment_request_amount = frappe.db.sql("""
 		select sum(grand_total)
 		from `tabPayment Request`
@@ -376,7 +404,9 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 			reference_doctype = %s
 			and reference_name = %s
 			and docstatus = 1
-			and status != 'Paid'
+			and (status != 'Paid'
+			or (payment_channel = 'Phone'
+				and status = 'Paid'))
 	""", (ref_dt, ref_dn))
 	return flt(existing_payment_request_amount[0][0]) if existing_payment_request_amount else 0
 

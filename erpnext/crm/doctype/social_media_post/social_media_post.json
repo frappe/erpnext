@@ -30,24 +30,32 @@
    "fieldname": "text",
    "fieldtype": "Small Text",
    "label": "Tweet",
-   "mandatory_depends_on": "eval:doc.twitter ==1"
+   "mandatory_depends_on": "eval:doc.twitter ==1",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
-   "label": "Image"
+   "label": "Image",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "twitter",
    "fieldtype": "Check",
-   "label": "Twitter"
+   "label": "Twitter",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "default": "0",
    "fieldname": "linkedin",
    "fieldtype": "Check",
-   "label": "LinkedIn"
+   "label": "LinkedIn",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "amended_from",
@@ -56,13 +64,17 @@
    "no_copy": 1,
    "options": "Social Media Post",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.twitter ==1",
    "fieldname": "content",
    "fieldtype": "Section Break",
-   "label": "Twitter"
+   "label": "Twitter",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -70,7 +82,9 @@
    "fieldtype": "Select",
    "label": "Post Status",
    "options": "\nScheduled\nPosted\nError",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -78,7 +92,9 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Twitter Post Id",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
@@ -86,68 +102,89 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "LinkedIn Post Id",
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "campaign_name",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Campaign",
-   "options": "Campaign"
+   "options": "Campaign",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break",
-   "label": "Share On"
+   "label": "Share On",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "tweet_preview",
-   "fieldtype": "HTML"
+   "fieldtype": "HTML",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
    "depends_on": "eval:doc.linkedin==1",
    "fieldname": "linkedin_section",
    "fieldtype": "Section Break",
-   "label": "LinkedIn"
+   "label": "LinkedIn",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "collapsible": 1,
    "fieldname": "attachments_section",
    "fieldtype": "Section Break",
-   "label": "Attachments"
+   "label": "Attachments",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "linkedin_post",
    "fieldtype": "Text",
    "label": "Post",
-   "mandatory_depends_on": "eval:doc.linkedin ==1"
+   "mandatory_depends_on": "eval:doc.linkedin ==1",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "column_break_15",
-   "fieldtype": "Column Break"
+   "fieldtype": "Column Break",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "allow_on_submit": 1,
    "fieldname": "scheduled_time",
    "fieldtype": "Datetime",
    "label": "Scheduled Time",
-   "read_only_depends_on": "eval:doc.post_status == \"Posted\""
+   "read_only_depends_on": "eval:doc.post_status == \"Posted\"",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-21 15:10:04.953713",
+ "modified": "2020-06-14 10:31:33.961381",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -157,6 +194,35 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales Manager",
+   "share": 1,
+   "submit": 1,
    "write": 1
   }
  ],

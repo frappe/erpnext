@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "LS-.{applicant}.-.#####",
  "creation": "2019-08-29 18:48:51.371674",
  "doctype": "DocType",
@@ -6,10 +7,10 @@
  "engine": "InnoDB",
  "field_order": [
   "loan_details_section",
-  "loan_application",
-  "loan",
   "applicant_type",
   "applicant",
+  "loan",
+  "loan_application",
   "column_break_3",
   "company",
   "pledge_time",
@@ -20,6 +21,10 @@
   "total_security_value",
   "column_break_11",
   "maximum_loan_value",
+  "more_information_section",
+  "reference_no",
+  "column_break_18",
+  "description",
   "amended_from"
  ],
  "fields": [
@@ -55,15 +60,13 @@
    "fieldname": "loan",
    "fieldtype": "Link",
    "label": "Loan",
-   "options": "Loan",
-   "read_only": 1
+   "options": "Loan"
   },
   {
    "fieldname": "loan_application",
    "fieldtype": "Link",
    "label": "Loan Application",
-   "options": "Loan Application",
-   "read_only": 1
+   "options": "Loan Application"
   },
   {
    "fieldname": "total_security_value",
@@ -130,10 +133,34 @@
    "label": "Applicant Type",
    "options": "Employee\nMember\nCustomer",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "reference_no",
+   "fieldtype": "Data",
+   "label": "Reference No"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2019-10-10 13:22:53.297519",
+ "links": [],
+ "modified": "2020-09-04 22:38:19.894488",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",

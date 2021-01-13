@@ -8,6 +8,7 @@ import unittest
 from frappe.utils import nowdate
 from erpnext.hr.doctype.employee_onboarding.employee_onboarding import make_employee
 from erpnext.hr.doctype.employee_onboarding.employee_onboarding import IncompleteTaskError
+from erpnext.hr.doctype.job_offer.test_job_offer import create_job_offer
 
 class TestEmployeeOnboarding(unittest.TestCase):
 	def test_employee_onboarding_incomplete_task(self):
@@ -15,8 +16,13 @@ class TestEmployeeOnboarding(unittest.TestCase):
 			frappe.delete_doc('Employee Onboarding', {'employee_name': 'Test Researcher'})
 		_set_up()
 		applicant = get_job_applicant()
+
+		job_offer = create_job_offer(job_applicant=applicant.name)
+		job_offer.submit()
+
 		onboarding = frappe.new_doc('Employee Onboarding')
 		onboarding.job_applicant = applicant.name
+		onboarding.job_offer = job_offer.name
 		onboarding.company = '_Test Company'
 		onboarding.designation = 'Researcher'
 		onboarding.append('activities', {

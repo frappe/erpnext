@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-27 11:17:31.119312",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 1,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-20 11:17:31.119312",
+ "modified_by": "Administrator",
+ "name": "Create Leave Type",
+ "owner": "Administrator",
+ "reference_document": "Leave Type",
+ "show_full_form": 1,
+ "title": "Create Leave Type",
+ "validate_action": 0
+}

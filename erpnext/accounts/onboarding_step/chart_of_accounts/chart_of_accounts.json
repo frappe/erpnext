@@ -1,0 +1,20 @@
+{
+ "action": "Go to Page",
+ "creation": "2020-05-13 19:58:20.928127",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-14 17:40:28.410447",
+ "modified_by": "Administrator",
+ "name": "Chart of Accounts",
+ "owner": "Administrator",
+ "path": "Tree/Account",
+ "reference_document": "Account",
+ "show_full_form": 0,
+ "title": "Review Chart of Accounts",
+ "validate_action": 0
+}

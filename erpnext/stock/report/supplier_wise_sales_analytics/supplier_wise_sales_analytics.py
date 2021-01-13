@@ -21,7 +21,7 @@ def execute(filters=None):
 			for cd in consumed_details.get(item_code):
 
 				if (cd.voucher_no not in material_transfer_vouchers):
-					if cd.voucher_type=="Delivery Note":
+					if cd.voucher_type in ["Delivery Note", "Sales Invoice"]:
 						delivered_qty += abs(flt(cd.actual_qty))
 						delivered_amount += abs(flt(cd.stock_value_difference))
 					elif cd.voucher_type!="Delivery Note":

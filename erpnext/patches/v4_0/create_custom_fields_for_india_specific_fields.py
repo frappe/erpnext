@@ -8,7 +8,7 @@ from frappe.custom.doctype.custom_field.custom_field import create_custom_field_
 def execute():
 	frappe.reload_doc("stock", "doctype", "purchase_receipt")
 	frappe.reload_doc("hr", "doctype", "employee")
-	frappe.reload_doc("hr", "doctype", "salary_slip")
+	frappe.reload_doc("Payroll", "doctype", "salary_slip")
 
 	india_specific_fields = {
 		"Purchase Receipt": [{

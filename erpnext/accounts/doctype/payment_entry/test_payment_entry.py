@@ -460,11 +460,8 @@ class TestPaymentEntry(unittest.TestCase):
 		outstanding_amount = flt(frappe.db.get_value("Sales Invoice", si.name, "outstanding_amount"))
 		self.assertEqual(outstanding_amount, 0)
 
-	def test_payment_entry_against_sales_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_payment_entry_against_sales_invoice_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -499,39 +496,8 @@ class TestPaymentEntry(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
-	def test_payment_entry_against_sales_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-		si =  create_sales_invoice(debit_to="Debtors - _TC")
-
-		pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
-
-		pe.reference_no = "112211-2"
-		pe.reference_date = nowdate()
-		pe.paid_to = "_Test Bank - _TC"
-		pe.paid_amount = si.grand_total
-		pe.insert()
-		pe.submit()
-
-		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""", pe.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
-
-		for gle in gl_entries:
-			self.assertEqual(gle.cost_center, None)
-
-	def test_payment_entry_against_purchase_invoice_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_payment_entry_against_purchase_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -566,40 +532,9 @@ class TestPaymentEntry(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-
-	def test_payment_entry_against_purchase_invoice_for_disable_allow_cost_center_in_entry_of_bs_account(self):
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
-		pi =  make_purchase_invoice(credit_to="Creditors - _TC")
-
-		pe = get_payment_entry("Purchase Invoice", pi.name, bank_account="_Test Bank - _TC")
-
-		pe.reference_no = "112222-2"
-		pe.reference_date = nowdate()
-		pe.paid_from = "_Test Bank - _TC"
-		pe.paid_amount = pi.grand_total
-		pe.insert()
-		pe.submit()
-
-		gl_entries = frappe.db.sql("""select account, cost_center, account_currency, debit, credit,
-			debit_in_account_currency, credit_in_account_currency
-			from `tabGL Entry` where voucher_type='Payment Entry' and voucher_no=%s
-			order by account asc""", pe.name, as_dict=1)
-
-		self.assertTrue(gl_entries)
-
-		for gle in gl_entries:
-			self.assertEqual(gle.cost_center, None)
-
-	def test_payment_entry_account_and_party_balance_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_payment_entry_account_and_party_balance_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 
@@ -629,9 +564,6 @@ class TestPaymentEntry(unittest.TestCase):
 		self.assertEqual(expected_account_balance, account_balance)
 		self.assertEqual(expected_party_balance, party_balance)
 		self.assertEqual(expected_party_account_balance, party_account_balance)
-
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
 
 def create_payment_terms_template():
 

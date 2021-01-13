@@ -5,8 +5,8 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc('hr', 'doctype', 'salary_slip_loan')
-	frappe.reload_doc('hr', 'doctype', 'salary_slip')
+	frappe.reload_doc('Payroll', 'doctype', 'salary_slip_loan')
+	frappe.reload_doc('Payroll', 'doctype', 'salary_slip')
 
 	for data in frappe.db.sql(""" select name,
 			start_date, end_date, total_loan_repayment

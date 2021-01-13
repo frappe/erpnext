@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-06-01 11:54:54.823796",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-06-01 11:54:54.823796",
+ "modified_by": "Administrator",
+ "name": "Create Income Tax Slab",
+ "owner": "Administrator",
+ "reference_document": "Income Tax Slab",
+ "show_full_form": 1,
+ "title": "Create Income Tax Slab",
+ "validate_action": 1
+}

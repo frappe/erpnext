@@ -55,6 +55,7 @@ frappe.ready(function() {
 	shopping_cart.show_shoppingcart_dropdown();
 	shopping_cart.set_cart_count();
 	shopping_cart.bind_dropdown_cart_buttons();
+	shopping_cart.show_cart_navbar();
 });
 
 $.extend(shopping_cart, {
@@ -177,4 +178,12 @@ $.extend(shopping_cart, {
 
 	},
 
+	show_cart_navbar: function () {
+		frappe.call({
+			method: "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.is_cart_enabled",
+			callback: function(r) {
+				$(".shopping-cart").toggleClass('hidden', r.message ? false : true);
+			}
+		});
+	}
 });

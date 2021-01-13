@@ -1,10 +1,14 @@
 {% extends "templates/web.html" %}
 
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
 {% block header %}<h1>{{ name }}</h1>{% endblock %}
 
 {% block page_content %}
 <div class="item-group-content" itemscope itemtype="http://schema.org/Product">
-	<div>
+	<div class="item-group-slideshow">
 		{% if slideshow %}<!-- slideshow -->
 		{% include "templates/includes/slideshow.html" %}
 		{% endif %}

@@ -45,6 +45,16 @@ frappe.ui.form.on('Therapy Type', {
 
 	medical_department: function(frm) {
 		mark_change_in_item(frm);
+	},
+
+	medical_code: function(frm) {
+		frm.set_query("medical_code", function() {
+			return {
+				filters: {
+					medical_code_standard: frm.doc.medical_code_standard
+				}
+			};
+		});
 	}
 });
 

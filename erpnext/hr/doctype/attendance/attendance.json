@@ -19,11 +19,15 @@
   "attendance_date",
   "company",
   "department",
-  "shift",
   "attendance_request",
-  "amended_from",
+  "details_section",
+  "shift",
+  "in_time",
+  "out_time",
+  "column_break_18",
   "late_entry",
-  "early_exit"
+  "early_exit",
+  "amended_from"
  ],
  "fields": [
   {
@@ -172,17 +176,40 @@
    "fieldname": "early_exit",
    "fieldtype": "Check",
    "label": "Early Exit"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "depends_on": "shift",
+   "fieldname": "in_time",
+   "fieldtype": "Datetime",
+   "label": "In Time",
+   "read_only": 1
+  },
+  {
+   "depends_on": "shift",
+   "fieldname": "out_time",
+   "fieldtype": "Datetime",
+   "label": "Out Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-ok",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-11 11:40:14.319496",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Attendance",
- "owner": "ashwini@webnotestech.com",
+ "owner": "Administrator",
  "permissions": [
   {
    "cancel": 1,

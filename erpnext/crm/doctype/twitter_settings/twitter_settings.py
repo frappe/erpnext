@@ -31,13 +31,13 @@ class TwitterSettings(Document):
 
 		try:
 			auth.get_access_token(oauth_verifier)
-			api = self.get_api()
+			api = self.get_api(auth.access_token, auth.access_token_secret)
 			user = api.me()
 			profile_pic = (user._json["profile_image_url"]).replace("_normal","")
 
 			frappe.db.set_value(self.doctype, self.name, {
-				"oauth_token" : auth.access_token,
-				"oauth_secret" : auth.access_token_secret,
+				"access_token" : auth.access_token,
+				"access_token_secret" : auth.access_token_secret,
 				"account_name" : user._json["screen_name"],
 				"profile_pic" : profile_pic,
 				"session_status" : "Active"
@@ -49,11 +49,11 @@ class TwitterSettings(Document):
 			frappe.msgprint(_("Error! Failed to get access token."))
 			frappe.throw(_('Invalid Consumer Key or Consumer Secret Key'))
 
-	def get_api(self):
+	def get_api(self, access_token, access_token_secret):
 		# authentication of consumer key and secret 
 		auth = tweepy.OAuthHandler(self.consumer_key, self.get_password(fieldname="consumer_secret")) 
 		# authentication of access token and secret 
-		auth.set_access_token(self.oauth_token, self.get_password(fieldname="oauth_secret")) 
+		auth.set_access_token(access_token, access_token_secret) 
 
 		return tweepy.API(auth)
 
@@ -67,13 +67,13 @@ class TwitterSettings(Document):
 	
 	def upload_image(self, media):
 		media = get_file_path(media)
-		api = self.get_api()
+		api = self.get_api(self.access_token, self.access_token_secret)
 		media = api.media_upload(media)
 
 		return media.media_id
 
 	def send_tweet(self, text, media_id=None):
-		api = self.get_api()
+		api = self.get_api(self.access_token, self.access_token_secret)
 		try:
 			if media_id:
 				response = api.update_status(status = text, media_ids = [media_id])

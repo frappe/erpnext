@@ -1,0 +1,19 @@
+{
+ "action": "Go to Page",
+ "creation": "2020-06-04 16:34:29.664917",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-06-04 16:34:29.664917",
+ "modified_by": "Administrator",
+ "name": "Payroll Settings",
+ "owner": "Administrator",
+ "path": "#Form/Payroll Settings",
+ "show_full_form": 0,
+ "title": "Payroll Settings",
+ "validate_action": 1
+}

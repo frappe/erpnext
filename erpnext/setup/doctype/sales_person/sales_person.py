@@ -5,13 +5,16 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, get_root_of
 from erpnext import get_default_currency
 
 class SalesPerson(NestedSet):
 	nsm_parent_field = 'parent_sales_person'
 
 	def validate(self):
+		if not self.parent_sales_person:
+			self.parent_sales_person = get_root_of("Sales Person")
+
 		for d in self.get('targets') or []:
 			if not flt(d.target_qty) and not flt(d.target_amount):
 				frappe.throw(_("Either target qty or target amount is mandatory."))

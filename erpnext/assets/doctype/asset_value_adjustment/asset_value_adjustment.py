@@ -8,23 +8,21 @@ from frappe import _
 from frappe.utils import flt, getdate, cint, date_diff, formatdate
 from erpnext.assets.doctype.asset.depreciation import get_depreciation_accounts
 from frappe.model.document import Document
+from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_checks_for_pl_and_bs_accounts
 
 class AssetValueAdjustment(Document):
 	def validate(self):
 		self.validate_date()
-		self.set_difference_amount()
 		self.set_current_asset_value()
+		self.set_difference_amount()
 
 	def on_submit(self):
 		self.make_depreciation_entry()
 		self.reschedule_depreciations(self.new_asset_value)
 
 	def on_cancel(self):
-		if self.journal_entry:
-			frappe.throw(_("Cancel the journal entry {0} first").format(self.journal_entry))
-
 		self.reschedule_depreciations(self.current_asset_value)
-	
+
 	def validate_date(self):
 		asset_purchase_date = frappe.db.get_value('Asset', self.asset, 'purchase_date')
 		if getdate(self.date) < getdate(asset_purchase_date):
@@ -52,18 +50,35 @@ class AssetValueAdjustment(Document):
 		je.posting_date = self.date
 		je.company = self.company
 		je.remark = "Depreciation Entry against {0} worth {1}".format(self.asset, self.difference_amount)
+		je.finance_book = self.finance_book
 
-		je.append("accounts", {
+		credit_entry = {
 			"account": accumulated_depreciation_account,
 			"credit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center
-		})
+		}
 
-		je.append("accounts", {
+		debit_entry = {
 			"account": depreciation_expense_account,
 			"debit_in_account_currency": self.difference_amount,
 			"cost_center": depreciation_cost_center or self.cost_center
-		})
+		}
+
+		accounting_dimensions = get_checks_for_pl_and_bs_accounts()
+
+		for dimension in accounting_dimensions:
+			if dimension.get('mandatory_for_bs'):
+				credit_entry.update({
+					dimension['fieldname']: self.get(dimension['fieldname']) or dimension.get('default_dimension')
+				})
+
+			if dimension.get('mandatory_for_pl'):
+				debit_entry.update({
+					dimension['fieldname']: self.get(dimension['fieldname']) or dimension.get('default_dimension')
+				})
+
+		je.append("accounts", credit_entry)
+		je.append("accounts", debit_entry)
 
 		je.flags.ignore_permissions = True
 		je.submit()

@@ -6,8 +6,8 @@ def execute():
 	company = frappe.get_all('Company', filters = {'country': 'India'})
 	if not company:
 		return
-	frappe.reload_doc("hr", "doctype", "Employee Tax Exemption Declaration")
-	frappe.reload_doc("hr", "doctype", "Employee Tax Exemption Proof Submission")
+	frappe.reload_doc("Payroll", "doctype", "Employee Tax Exemption Declaration")
+	frappe.reload_doc("Payroll", "doctype", "Employee Tax Exemption Proof Submission")
 	frappe.reload_doc("hr", "doctype", "Employee Grade")
 	frappe.reload_doc("hr", "doctype", "Leave Policy")
 

@@ -111,7 +111,7 @@ def get_gle_map(filters):
 	# {"purchase_invoice": list of dict of all gle created for this invoice}
 	gle_map = {}
 	gle = frappe.db.get_all('GL Entry',\
-		{"voucher_no": ["in", [d.get("name") for d in filters["invoices"]]]},
+		{"voucher_no": ["in", [d.get("name") for d in filters["invoices"]]], 'is_cancelled': 0},
 		["fiscal_year", "credit", "debit", "account", "voucher_no", "posting_date"])
 
 	for d in gle:

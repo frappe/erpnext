@@ -28,14 +28,19 @@
   "vouchers",
   "accounts_section",
   "default_warehouse",
-  "round_off_account",
+  "default_round_off_account",
   "column_break_21",
   "default_cost_center",
   "day_book_section",
   "day_book_data",
   "column_break_27",
   "is_day_book_data_processed",
-  "is_day_book_data_imported"
+  "is_day_book_data_imported",
+  "import_log_section",
+  "failed_import_log",
+  "fixed_errors_log",
+  "failed_import_preview",
+  "fixed_error_log_preview"
  ],
  "fields": [
   {
@@ -57,6 +62,7 @@
    "fieldname": "tally_creditors_account",
    "fieldtype": "Data",
    "label": "Tally Creditors Account",
+   "read_only_depends_on": "eval:doc.is_master_data_processed==1",
    "reqd": 1
   },
   {
@@ -69,6 +75,7 @@
    "fieldname": "tally_debtors_account",
    "fieldtype": "Data",
    "label": "Tally Debtors Account",
+   "read_only_depends_on": "eval:doc.is_master_data_processed==1",
    "reqd": 1
   },
   {
@@ -92,7 +99,7 @@
    "fieldname": "erpnext_company",
    "fieldtype": "Data",
    "label": "ERPNext Company",
-   "read_only_depends_on": "eval:doc.is_master_data_processed == 1"
+   "read_only_depends_on": "eval:doc.is_master_data_processed==1"
   },
   {
    "fieldname": "processed_files_section",
@@ -136,6 +143,7 @@
   },
   {
    "depends_on": "is_master_data_imported",
+   "description": "The accounts are set by the system automatically but do confirm these defaults",
    "fieldname": "accounts_section",
    "fieldtype": "Section Break",
    "label": "Accounts"
@@ -145,12 +153,6 @@
    "fieldtype": "Link",
    "label": "Default Warehouse",
    "options": "Warehouse"
-  },
-  {
-   "fieldname": "round_off_account",
-   "fieldtype": "Link",
-   "label": "Round Off Account",
-   "options": "Account"
   },
   {
    "fieldname": "column_break_21",
@@ -212,11 +214,47 @@
    "fieldname": "default_uom",
    "fieldtype": "Link",
    "label": "Default UOM",
-   "options": "UOM"
+   "options": "UOM",
+   "read_only_depends_on": "eval:doc.is_master_data_imported==1"
+  },
+  {
+   "default": "[]",
+   "fieldname": "failed_import_log",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "options": "JSON"
+  },
+  {
+   "fieldname": "failed_import_preview",
+   "fieldtype": "HTML",
+   "label": "Failed Import Log"
+  },
+  {
+   "fieldname": "import_log_section",
+   "fieldtype": "Section Break",
+   "label": "Import Log"
+  },
+  {
+   "fieldname": "default_round_off_account",
+   "fieldtype": "Link",
+   "label": "Default Round Off Account",
+   "options": "Account"
+  },
+  {
+   "default": "[]",
+   "fieldname": "fixed_errors_log",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "options": "JSON"
+  },
+  {
+   "fieldname": "fixed_error_log_preview",
+   "fieldtype": "HTML",
+   "label": "Fixed Error Log"
   }
  ],
  "links": [],
- "modified": "2020-04-16 13:03:28.894919",
+ "modified": "2020-04-28 00:29:18.039826",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Tally Migration",

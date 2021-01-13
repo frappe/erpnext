@@ -12,7 +12,6 @@
  "engine": "InnoDB",
  "field_order": [
   "healthcare_service_unit_name",
-  "parent_healthcare_service_unit",
   "is_group",
   "service_unit_type",
   "allow_appointments",
@@ -20,8 +19,10 @@
   "inpatient_occupancy",
   "occupancy_status",
   "column_break_9",
-  "warehouse",
   "company",
+  "warehouse",
+  "tree_details_section",
+  "parent_healthcare_service_unit",
   "lft",
   "rgt",
   "old_parent"
@@ -51,7 +52,6 @@
    "depends_on": "eval:doc.inpatient_occupancy != 1 && doc.allow_appointments != 1",
    "fieldname": "is_group",
    "fieldtype": "Check",
-   "in_list_view": 1,
    "label": "Is Group"
   },
   {
@@ -63,12 +63,12 @@
    "options": "Healthcare Service Unit Type"
   },
   {
-   "bold": 1,
    "default": "0",
    "depends_on": "eval:doc.is_group != 1 && doc.inpatient_occupancy != 1",
    "fetch_from": "service_unit_type.allow_appointments",
    "fieldname": "allow_appointments",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Allow Appointments",
    "no_copy": 1,
    "read_only": 1
@@ -90,6 +90,7 @@
    "fetch_from": "service_unit_type.inpatient_occupancy",
    "fieldname": "inpatient_occupancy",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Inpatient Occupancy",
    "no_copy": 1,
    "read_only": 1,
@@ -101,7 +102,7 @@
    "fieldtype": "Select",
    "label": "Occupancy Status",
    "no_copy": 1,
-   "options": "\nVacant\nOccupied",
+   "options": "Vacant\nOccupied",
    "read_only": 1
   },
   {
@@ -157,10 +158,16 @@
    "options": "Healthcare Service Unit",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "tree_details_section",
+   "fieldtype": "Section Break",
+   "label": "Tree Details"
   }
  ],
  "links": [],
- "modified": "2020-03-26 16:13:08.675952",
+ "modified": "2020-05-20 18:26:56.065543",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit",

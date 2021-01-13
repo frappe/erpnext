@@ -18,41 +18,6 @@ frappe.query_reports["Accounts Payable"] = {
 			"default": frappe.datetime.get_today()
 		},
 		{
-			"fieldname":"ageing_based_on",
-			"label": __("Ageing Based On"),
-			"fieldtype": "Select",
-			"options": 'Posting Date\nDue Date\nSupplier Invoice Date',
-			"default": "Due Date"
-		},
-		{
-			"fieldname":"range1",
-			"label": __("Ageing Range 1"),
-			"fieldtype": "Int",
-			"default": "30",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range2",
-			"label": __("Ageing Range 2"),
-			"fieldtype": "Int",
-			"default": "60",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range3",
-			"label": __("Ageing Range 3"),
-			"fieldtype": "Int",
-			"default": "90",
-			"reqd": 1
-		},
-		{
-			"fieldname":"range4",
-			"label": __("Ageing Range 4"),
-			"fieldtype": "Int",
-			"default": "120",
-			"reqd": 1
-		},
-		{
 			"fieldname":"finance_book",
 			"label": __("Finance Book"),
 			"fieldtype": "Link",
@@ -87,6 +52,41 @@ frappe.query_reports["Accounts Payable"] = {
 					frappe.query_report.set_filter_value('tax_id', "");
 				}
 			}
+		},
+		{
+			"fieldname":"ageing_based_on",
+			"label": __("Ageing Based On"),
+			"fieldtype": "Select",
+			"options": 'Posting Date\nDue Date\nSupplier Invoice Date',
+			"default": "Due Date"
+		},
+		{
+			"fieldname":"range1",
+			"label": __("Ageing Range 1"),
+			"fieldtype": "Int",
+			"default": "30",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range2",
+			"label": __("Ageing Range 2"),
+			"fieldtype": "Int",
+			"default": "60",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range3",
+			"label": __("Ageing Range 3"),
+			"fieldtype": "Int",
+			"default": "90",
+			"reqd": 1
+		},
+		{
+			"fieldname":"range4",
+			"label": __("Ageing Range 4"),
+			"fieldtype": "Int",
+			"default": "120",
+			"reqd": 1
 		},
 		{
 			"fieldname":"payment_terms_template",
@@ -135,12 +135,5 @@ frappe.query_reports["Accounts Payable"] = {
 	}
 }
 
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["Accounts Payable"].filters.splice(9, 0 ,{
-		"fieldname": dimension["fieldname"],
-		"label": __(dimension["label"]),
-		"fieldtype": "Link",
-		"options": dimension["document_type"]
-	});
-});
+erpnext.utils.add_dimensions('Accounts Payable', 9);
 

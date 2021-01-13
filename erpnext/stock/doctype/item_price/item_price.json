@@ -172,7 +172,7 @@
    "default": "Today",
    "fieldname": "valid_from",
    "fieldtype": "Date",
-   "label": "Valid From "
+   "label": "Valid From"
   },
   {
    "default": "0",
@@ -187,7 +187,7 @@
   {
    "fieldname": "valid_upto",
    "fieldtype": "Date",
-   "label": "Valid Upto "
+   "label": "Valid Upto"
   },
   {
    "fieldname": "section_break_24",
@@ -208,7 +208,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2020-02-28 14:21:25.580331",
+ "modified": "2020-07-06 22:31:32.943475",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Price",

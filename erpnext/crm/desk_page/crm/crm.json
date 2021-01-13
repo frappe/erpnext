@@ -8,7 +8,7 @@
   {
    "hidden": 0,
    "label": "Reports",
-   "links": "[\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Lead Details\",\n        \"name\": \"Lead Details\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"icon\": \"fa fa-bar-chart\",\n        \"label\": \"Sales Funnel\",\n        \"name\": \"sales-funnel\",\n        \"onboard\": 1,\n        \"type\": \"page\"\n    },\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Prospects Engaged But Not Converted\",\n        \"name\": \"Prospects Engaged But Not Converted\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Opportunity\"\n        ],\n        \"doctype\": \"Opportunity\",\n        \"is_query_report\": true,\n        \"label\": \"Minutes to First Response for Opportunity\",\n        \"name\": \"Minutes to First Response for Opportunity\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Order\"\n        ],\n        \"doctype\": \"Sales Order\",\n        \"is_query_report\": true,\n        \"label\": \"Inactive Customers\",\n        \"name\": \"Inactive Customers\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Campaign Efficiency\",\n        \"name\": \"Campaign Efficiency\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Lead Owner Efficiency\",\n        \"name\": \"Lead Owner Efficiency\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Lead Details\",\n        \"name\": \"Lead Details\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"icon\": \"fa fa-bar-chart\",\n        \"label\": \"Sales Funnel\",\n        \"name\": \"sales-funnel\",\n        \"onboard\": 1,\n        \"type\": \"page\"\n    },\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Prospects Engaged But Not Converted\",\n        \"name\": \"Prospects Engaged But Not Converted\",\n        \"onboard\": 1,\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Opportunity\"\n        ],\n        \"doctype\": \"Opportunity\",\n        \"is_query_report\": true,\n        \"label\": \"First Response Time for Opportunity\",\n        \"name\": \"First Response Time for Opportunity\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Sales Order\"\n        ],\n        \"doctype\": \"Sales Order\",\n        \"is_query_report\": true,\n        \"label\": \"Inactive Customers\",\n        \"name\": \"Inactive Customers\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Campaign Efficiency\",\n        \"name\": \"Campaign Efficiency\",\n        \"type\": \"report\"\n    },\n    {\n        \"dependencies\": [\n            \"Lead\"\n        ],\n        \"doctype\": \"Lead\",\n        \"is_query_report\": true,\n        \"label\": \"Lead Owner Efficiency\",\n        \"name\": \"Lead Owner Efficiency\",\n        \"type\": \"report\"\n    }\n]"
   },
   {
    "hidden": 0,
@@ -27,26 +27,32 @@
   }
  ],
  "category": "Modules",
- "charts": [],
+ "charts": [
+  {
+   "chart_name": "Territory Wise Sales"
+  }
+ ],
  "creation": "2020-01-23 14:48:30.183272",
  "developer_mode_only": 0,
  "disable_user_customization": 0,
  "docstatus": 0,
  "doctype": "Desk Page",
  "extends_another_page": 0,
- "icon": "",
+ "hide_custom": 0,
  "idx": 0,
  "is_standard": 1,
  "label": "CRM",
- "modified": "2020-04-27 22:32:26.682911",
+ "modified": "2020-08-11 18:55:18.238900",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "CRM",
+ "onboarding": "CRM",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,
  "shortcuts": [
   {
+   "color": "#ffe8cd",
    "format": "{} Open",
    "label": "Lead",
    "link_to": "Lead",
@@ -54,6 +60,7 @@
    "type": "DocType"
   },
   {
+   "color": "#cef6d1",
    "format": "{} Assigned",
    "label": "Opportunity",
    "link_to": "Opportunity",
@@ -69,6 +76,11 @@
    "label": "Sales Analytics",
    "link_to": "Sales Analytics",
    "type": "Report"
+  },
+  {
+   "label": "Dashboard",
+   "link_to": "CRM",
+   "type": "Dashboard"
   }
  ]
 }

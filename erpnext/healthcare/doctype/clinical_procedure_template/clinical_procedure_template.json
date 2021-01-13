@@ -21,6 +21,9 @@
   "is_billable",
   "rate",
   "medical_department",
+  "medical_coding_section",
+  "medical_code_standard",
+  "medical_code",
   "consumables",
   "consume_stock",
   "items",
@@ -46,7 +49,6 @@
    "fieldname": "item_code",
    "fieldtype": "Data",
    "label": "Item Code",
-   "options": "Item",
    "read_only_depends_on": "eval: !doc.__islocal ",
    "reqd": 1
   },
@@ -173,10 +175,29 @@
    "no_copy": 1,
    "options": "Item",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "medical_coding_section",
+   "fieldtype": "Section Break",
+   "label": "Medical Coding"
+  },
+  {
+   "fieldname": "medical_code_standard",
+   "fieldtype": "Link",
+   "label": "Medical Code Standard",
+   "options": "Medical Code Standard"
+  },
+  {
+   "depends_on": "medical_code_standard",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code"
   }
  ],
  "links": [],
- "modified": "2020-02-28 14:16:13.184981",
+ "modified": "2020-06-29 14:12:27.158130",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",

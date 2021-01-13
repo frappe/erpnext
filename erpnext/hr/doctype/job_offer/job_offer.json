@@ -30,7 +30,6 @@
   {
    "fieldname": "job_applicant",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Job Applicant",
    "options": "Job Applicant",
    "print_hide": 1,
@@ -161,7 +160,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-31 02:40:33.650728",
+ "modified": "2020-06-25 00:56:24.756395",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Offer",

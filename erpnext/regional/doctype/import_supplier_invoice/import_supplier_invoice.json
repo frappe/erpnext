@@ -1,5 +1,4 @@
 {
- "actions": [],
  "creation": "2019-10-15 12:33:21.845329",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -92,8 +91,7 @@
    "label": "Upload XML Invoices"
   }
  ],
- "links": [],
- "modified": "2019-12-10 16:37:26.793398",
+ "modified": "2020-05-25 21:32:49.064579",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Import Supplier Invoice",

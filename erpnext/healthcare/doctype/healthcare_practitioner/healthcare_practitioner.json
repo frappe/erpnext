@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
@@ -51,17 +50,20 @@
    "fieldname": "first_name",
    "fieldtype": "Data",
    "label": "First Name",
+   "no_copy": 1,
    "reqd": 1
   },
   {
    "fieldname": "middle_name",
    "fieldtype": "Data",
-   "label": "Middle Name (Optional)"
+   "label": "Middle Name (Optional)",
+   "no_copy": 1
   },
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
-   "label": "Last Name"
+   "label": "Last Name",
+   "no_copy": 1
   },
   {
    "fieldname": "image",
@@ -226,6 +228,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Full Name",
+   "no_copy": 1,
    "read_only": 1,
    "search_index": 1
   },
@@ -233,6 +236,7 @@
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "label": "Series",
+   "no_copy": 1,
    "options": "HLC-PRAC-.YYYY.-",
    "report_hide": 1,
    "set_only_once": 1

@@ -1,0 +1,40 @@
+{
+ "actions": [],
+ "creation": "2016-06-14 19:22:29.811658",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "time_sheet",
+  "working_hours"
+ ],
+ "fields": [
+  {
+   "fieldname": "time_sheet",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Time Sheet",
+   "options": "Timesheet",
+   "reqd": 1
+  },
+  {
+   "fieldname": "working_hours",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Working Hours",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-06-22 23:27:43.463532",
+ "modified_by": "Administrator",
+ "module": "Payroll",
+ "name": "Salary Slip Timesheet",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

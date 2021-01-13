@@ -25,7 +25,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 
 	if not filters: filters = []
 
-	if doctype in ['Supplier Quotation', 'Purchase Invoice']:
+	if doctype in ['Supplier Quotation', 'Purchase Invoice', 'Quotation']:
 		filters.append((doctype, 'docstatus', '<', 2))
 	else:
 		filters.append((doctype, 'docstatus', '=', 1))
@@ -155,7 +155,7 @@ def has_website_permission(doc, ptype, user, verbose=False):
 		return frappe.db.exists(doctype, get_customer_filter(doc, customers))
 	elif suppliers:
 		fieldname = 'suppliers' if doctype == 'Request for Quotation' else 'supplier'
-		return frappe.db.exists(doctype, filters={
+		return frappe.db.exists(doctype, {
 			'name': doc.name,
 			fieldname: ["in", suppliers]
 		})

@@ -15,24 +15,14 @@ frappe.ui.form.on("POS Profile", "onload", function(frm) {
 	erpnext.queries.setup_queries(frm, "Warehouse", function() {
 		return erpnext.queries.warehouse(frm.doc);
 	});
-
-	frm.call({
-		method: "erpnext.accounts.doctype.pos_profile.pos_profile.get_series",
-		callback: function(r) {
-			if(!r.exc) {
-				set_field_options("naming_series", r.message);
-			}
-		}
-	});
 });
 
 frappe.ui.form.on('POS Profile', {
 	setup: function(frm) {
-		frm.set_query("print_format_for_online", function() {
+		frm.set_query("print_format", function() {
 			return {
 				filters: [
-					['Print Format', 'doc_type', '=', 'Sales Invoice'],
-					['Print Format', 'print_format_type', '=', 'Jinja'],
+					['Print Format', 'doc_type', '=', 'POS Invoice']
 				]
 			};
 		});
@@ -45,14 +35,13 @@ frappe.ui.form.on('POS Profile', {
 			};
 		});
 
-		frm.set_query("print_format", function() {
-			return { filters: { doc_type: "Sales Invoice", print_format_type: "JS"} };
-		});
-
-		frappe.db.get_value('POS Settings', 'POS Settings', 'use_pos_in_offline_mode', (r) => {
-			const is_offline = r && cint(r.use_pos_in_offline_mode)
-			frm.toggle_display('offline_pos_section', is_offline);
-			frm.toggle_display('print_format_for_online', !is_offline);
+		frm.set_query("taxes_and_charges", function() {
+			return {
+				filters: [
+					['Sales Taxes and Charges Template', 'company', '=', frm.doc.company],
+					['Sales Taxes and Charges Template', 'docstatus', '!=', 2]
+				]
+			};
 		});
 
 		frm.set_query('company_address', function(doc) {

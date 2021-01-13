@@ -17,7 +17,6 @@ class LoanSecurityUnpledge(Document):
 		self.validate_unpledge_qty()
 
 	def on_cancel(self):
-		self.update_loan_security_pledge(cancel=1)
 		self.update_loan_status(cancel=1)
 		self.db_set('status', 'Requested')
 
@@ -31,6 +30,8 @@ class LoanSecurityUnpledge(Document):
 					d.idx, frappe.bold(d.loan_security)))
 
 	def validate_unpledge_qty(self):
+		from erpnext.loan_management.doctype.loan_security_shortfall.loan_security_shortfall import get_ltv_ratio
+
 		pledge_qty_map = get_pledged_security_qty(self.loan)
 
 		ltv_ratio_map = frappe._dict(frappe.get_all("Loan Security Type",
@@ -43,31 +44,59 @@ class LoanSecurityUnpledge(Document):
 				"valid_upto": (">=", get_datetime())
 			}, as_list=1))
 
-		loan_amount, principal_paid = frappe.get_value("Loan", self.loan, ['loan_amount', 'total_principal_paid'])
-		pending_principal_amount = loan_amount - principal_paid
+		loan_details = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
+			'total_interest_payable', 'written_off_amount', 'disbursed_amount', 'status'], as_dict=1)
+
+		if loan_details.status == 'Disbursed':
+			pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
+				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
+		else:
+			pending_principal_amount = flt(loan_details.disbursed_amount) - flt(loan_details.total_interest_payable) \
+				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
+
 		security_value = 0
+		unpledge_qty_map = {}
+		ltv_ratio = 0
 
 		for security in self.securities:
-			pledged_qty = pledge_qty_map.get(security.loan_security)
-
+			pledged_qty = pledge_qty_map.get(security.loan_security, 0)
 			if security.qty > pledged_qty:
-				frappe.throw(_("""Row {0}: {1} {2} of {3} is pledged against Loan {4}.
-					You are trying to unpledge more""").format(security.idx, pledged_qty, security.uom,
-					frappe.bold(security.loan_security), frappe.bold(self.loan)))
+				msg = _("Row {0}: {1} {2} of {3} is pledged against Loan {4}.").format(security.idx, pledged_qty, security.uom,
+					frappe.bold(security.loan_security), frappe.bold(self.loan))
+				msg += "<br>"
+				msg += _("You are trying to unpledge more.")
+				frappe.throw(msg, title=_("Loan Security Unpledge Error"))
 
-			qty_after_unpledge = pledged_qty - security.qty
-			ltv_ratio = ltv_ratio_map.get(security.loan_security_type)
+			unpledge_qty_map.setdefault(security.loan_security, 0)
+			unpledge_qty_map[security.loan_security] += security.qty
 
-			security_value += qty_after_unpledge * loan_security_price_map.get(security.loan_security)
+		for security in pledge_qty_map:
+			if not ltv_ratio:
+				ltv_ratio = get_ltv_ratio(security)
 
-		if not security_value and pending_principal_amount > 0:
-			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
+			qty_after_unpledge = pledge_qty_map.get(security, 0) - unpledge_qty_map.get(security, 0)
+			current_price = loan_security_price_map.get(security)
+			security_value += qty_after_unpledge * current_price
 
-		if security_value and (pending_principal_amount/security_value) * 100 > ltv_ratio:
-			frappe.throw("Cannot Unpledge, loan to value ratio is breaching")
+		if not security_value and flt(pending_principal_amount, 2) > 0:
+			self._throw(security_value, pending_principal_amount, ltv_ratio)
+
+		if security_value and flt(pending_principal_amount/security_value) * 100 > ltv_ratio:
+			self._throw(security_value, pending_principal_amount, ltv_ratio)
+
+	def _throw(self, security_value, pending_principal_amount, ltv_ratio):
+		msg = _("Loan Security Value after unpledge is {0}").format(frappe.bold(security_value))
+		msg += '<br>'
+		msg += _("Pending principal amount is {0}").format(frappe.bold(flt(pending_principal_amount, 2)))
+		msg += '<br>'
+		msg += _("Loan To Security Value ratio must always be {0}").format(frappe.bold(ltv_ratio))
+		frappe.throw(msg, title=_("Loan To Value ratio breach"))
 
 	def on_update_after_submit(self):
-		if self.status == "Approved":
+		self.approve()
+
+	def approve(self):
+		if self.status == "Approved" and not self.unpledge_time:
 			self.update_loan_status()
 			self.db_set('unpledge_time', get_datetime())
 

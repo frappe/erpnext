@@ -80,7 +80,7 @@ def get_attendance_count(student, academic_year, academic_term=None):
 		from_date, to_date = frappe.db.get_value("Academic Term", academic_term, ["term_start_date", "term_end_date"])
 	if from_date and to_date:
 		attendance = dict(frappe.db.sql('''select status, count(student) as no_of_days
-			from `tabStudent Attendance` where student = %s
+			from `tabStudent Attendance` where student = %s and docstatus = 1
 			and date between %s and %s group by status''',
 			(student, from_date, to_date)))
 		if "Absent" not in attendance.keys():

@@ -30,6 +30,7 @@ class TestTaxes(unittest.TestCase):
         self.item_tax_template = frappe.get_doc({
             'doctype': 'Item Tax Template',
             'title': uuid4(),
+            'company': self.company.name,
             'taxes': [
                 {
                     'tax_type': self.account.name,

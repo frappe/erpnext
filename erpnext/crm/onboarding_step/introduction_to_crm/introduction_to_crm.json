@@ -1,0 +1,19 @@
+{
+ "action": "Watch Video",
+ "creation": "2020-05-09 23:37:08.926812",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-14 17:28:16.448676",
+ "modified_by": "Administrator",
+ "name": "Introduction to CRM",
+ "owner": "Administrator",
+ "show_full_form": 0,
+ "title": "Introduction to CRM",
+ "validate_action": 1,
+ "video_url": "https://www.youtube.com/watch?v=o9XCSZHJfpA"
+}

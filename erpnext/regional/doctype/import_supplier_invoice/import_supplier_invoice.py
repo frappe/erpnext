@@ -58,13 +58,14 @@ class ImportSupplierInvoice(Document):
 				"naming_series": self.invoice_series,
 				"document_type": line.TipoDocumento.text,
 				"bill_date": get_datetime_str(line.Data.text),
-				"invoice_no": line.Numero.text,
+				"bill_no": line.Numero.text,
 				"total_discount": 0,
 				"items": [],
 				"buying_price_list": self.default_buying_price_list
 			}
 
-			if not invoices_args.get("invoice_no", ''): return
+			if not invoices_args.get("bill_no", ''):
+				frappe.throw(_("Numero has not set in the XML file"))
 
 			supp_dict = get_supplier_details(file_content)
 			invoices_args["destination_code"] = get_destination_code_from_file(file_content)
@@ -249,7 +250,7 @@ def create_supplier(supplier_group, args):
 
 		return existing_supplier_name
 	else:
-		
+
 		new_supplier = frappe.new_doc("Supplier")
 		new_supplier.supplier_name = re.sub('&amp', '&', args.supplier)
 		new_supplier.supplier_group = supplier_group

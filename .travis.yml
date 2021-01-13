@@ -1,6 +1,5 @@
-dist: trusty
-
 language: python
+dist: trusty
 
 git:
   depth: 1
@@ -14,20 +13,9 @@ addons:
 
 jobs:
   include:
-  - name: "Python 2.7 Server Side Test"
-    python: 2.7
-    script: bench --site test_site run-tests --app erpnext --coverage
-
   - name: "Python 3.6 Server Side Test"
     python: 3.6
     script: bench --site test_site run-tests --app erpnext --coverage
-
-  - name: "Python 2.7 Patch Test"
-    python: 2.7
-    before_script:
-      - wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz
-      - bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz
-    script: bench --site test_site migrate
 
   - name: "Python 3.6 Patch Test"
     python: 3.6
@@ -40,8 +28,7 @@ install:
   - cd ~
   - nvm install 10
 
-  - git clone https://github.com/frappe/bench --depth 1
-  - pip install -e ./bench
+  - pip install frappe-bench
 
   - git clone https://github.com/frappe/frappe --branch $TRAVIS_BRANCH --depth 1
   - bench init --skip-assets --frappe-path ~/frappe --python $(which python) frappe-bench

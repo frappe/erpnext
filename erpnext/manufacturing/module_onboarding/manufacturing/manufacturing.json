@@ -1,0 +1,56 @@
+{
+ "allow_roles": [
+  {
+   "role": "Manufacturing User"
+  },
+  {
+   "role": "Manufacturing Manager"
+  },
+  {
+   "role": "Item Manager"
+  },
+  {
+   "role": "Stock User"
+  }
+ ],
+ "creation": "2020-05-05 16:37:08.238935",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/manufacturing",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-07-08 14:05:56.197563",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Manufacturing",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Warehouse"
+  },
+  {
+   "step": "Workstation"
+  },
+  {
+   "step": "Operation"
+  },
+  {
+   "step": "Create Product"
+  },
+  {
+   "step": "Create Raw Materials"
+  },
+  {
+   "step": "Create BOM"
+  },
+  {
+   "step": "Work Order"
+  },
+  {
+   "step": "Explore Manufacturing Settings"
+  }
+ ],
+ "subtitle": "Products, Raw Materials, BOM, Work Order, and more.",
+ "success_message": "Manufacturing module is all set up!",
+ "title": "Let's Set Up the Manufacturing Module."
+}

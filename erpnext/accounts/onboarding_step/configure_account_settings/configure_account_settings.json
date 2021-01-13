@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-14 17:53:00.876946",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 1,
+ "is_skipped": 0,
+ "modified": "2020-05-14 18:06:25.212923",
+ "modified_by": "Administrator",
+ "name": "Configure Account Settings",
+ "owner": "Administrator",
+ "reference_document": "Accounts Settings",
+ "show_full_form": 1,
+ "title": "Configure Account Settings",
+ "validate_action": 1
+}

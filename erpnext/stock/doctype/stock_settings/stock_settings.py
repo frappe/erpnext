@@ -55,7 +55,7 @@ class StockSettings(Document):
 			""")
 
 			if sle:
-				frappe.throw(_("Can't change valuation method, as there are transactions against some items which does not have it's own valuation method"))
+				frappe.throw(_("Can't change the valuation method, as there are transactions against some items which do not have its own valuation method"))
 
 	def validate_clean_description_html(self):
 		if int(self.clean_description_html or 0) \

@@ -1,6 +1,8 @@
 {
+ "actions": [],
  "creation": "2019-05-26 00:10:00.248885",
  "doctype": "DocType",
+ "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "process_description",
@@ -8,6 +10,7 @@
  ],
  "fields": [
   {
+   "columns": 8,
    "fieldname": "process_description",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -18,12 +21,14 @@
    "fieldname": "procedure",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Child Procedure",
+   "label": "Sub Procedure",
    "options": "Quality Procedure"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-05-26 22:05:49.007189",
+ "links": [],
+ "modified": "2020-10-27 13:55:11.252945",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure Process",

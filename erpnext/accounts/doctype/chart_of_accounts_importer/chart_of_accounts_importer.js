@@ -94,8 +94,7 @@ frappe.ui.form.on('Chart of Accounts Importer', {
 				callback: function(r) {
 					if(r.message===false) {
 						frm.set_value("company", "");
-						frappe.throw(__(`Transactions against the company already exist!
-							Chart Of accounts can be imported for company with no transactions`));
+						frappe.throw(__("Transactions against the Company already exist! Chart of Accounts can only be imported for a Company with no transactions."));
 					} else {
 						frm.trigger("refresh");
 					}
@@ -135,7 +134,7 @@ var create_import_button = function(frm) {
 			callback: function(r) {
 				if(!r.exc) {
 					clearInterval(frm.page["interval"]);
-					frm.page.set_indicator(__('Import Successfull'), 'blue');
+					frm.page.set_indicator(__('Import Successful'), 'blue');
 					create_reset_button(frm);
 				}
 			}

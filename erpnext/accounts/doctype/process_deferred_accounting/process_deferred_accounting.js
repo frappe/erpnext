@@ -12,6 +12,20 @@ frappe.ui.form.on('Process Deferred Accounting', {
 		});
 	},
 
+	type: function(frm) {
+		if (frm.doc.company && frm.doc.type) {
+			frm.set_query("account", function() {
+				return {
+					filters: {
+						'company': frm.doc.company,
+						'root_type': frm.doc.type === 'Income' ? 'Liability' : 'Asset',
+						'is_group': 0
+					}
+				};
+			});
+		}
+	},
+
 	validate: function() {
 		return new Promise((resolve) => {
 			return frappe.db.get_single_value('Accounts Settings', 'automatically_process_deferred_accounting_entry')

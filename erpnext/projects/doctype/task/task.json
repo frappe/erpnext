@@ -12,6 +12,7 @@
   "issue",
   "type",
   "is_group",
+  "is_template",
   "column_break0",
   "status",
   "priority",
@@ -22,9 +23,11 @@
   "sb_timeline",
   "exp_start_date",
   "expected_time",
+  "start",
   "column_break_11",
   "exp_end_date",
   "progress",
+  "duration",
   "is_milestone",
   "sb_details",
   "description",
@@ -112,7 +115,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Open\nWorking\nPending Review\nOverdue\nCompleted\nCancelled"
+   "options": "Open\nWorking\nPending Review\nOverdue\nTemplate\nCompleted\nCancelled"
   },
   {
    "fieldname": "priority",
@@ -183,7 +186,8 @@
   {
    "fieldname": "progress",
    "fieldtype": "Percent",
-   "label": "% Progress"
+   "label": "% Progress",
+   "no_copy": 1
   },
   {
    "default": "0",
@@ -324,6 +328,7 @@
    "options": "Department"
   },
   {
+   "fetch_from": "project.company",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
@@ -356,7 +361,26 @@
    "fieldname": "completed_by",
    "fieldtype": "Link",
    "label": "Completed By",
+   "no_copy": 1,
    "options": "User"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_template",
+   "fieldtype": "Check",
+   "label": "Is Template"
+  },
+  {
+   "depends_on": "is_template",
+   "fieldname": "start",
+   "fieldtype": "Int",
+   "label": "Begin On (Days)"
+  },
+  {
+   "depends_on": "is_template",
+   "fieldname": "duration",
+   "fieldtype": "Int",
+   "label": "Duration (Days)"
   }
  ],
  "icon": "fa fa-check",
@@ -364,7 +388,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 5,
- "modified": "2020-03-18 18:08:44.153211",
+ "modified": "2020-12-28 11:32:58.714991",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Task",

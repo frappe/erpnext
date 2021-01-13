@@ -87,6 +87,7 @@ def generate_fee(fee_schedule):
 						}
 					}
 				})
+				fees_doc.posting_date = doc.posting_date
 				fees_doc.student = student.student
 				fees_doc.student_name = student.student_name
 				fees_doc.program = student.program

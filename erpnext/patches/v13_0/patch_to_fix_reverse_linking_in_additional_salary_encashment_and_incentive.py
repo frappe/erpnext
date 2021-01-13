@@ -6,8 +6,10 @@ def execute():
 	if not frappe.db.table_exists("Additional Salary"):
 		return
 
-	for doctype in ("Additional Salary", "Leave Encashment", "Employee Incentive", "Salary Detail"):
-		frappe.reload_doc("hr", "doctype", doctype)
+	for doctype in ("Additional Salary", "Employee Incentive", "Salary Detail"):
+		frappe.reload_doc("Payroll", "doctype", doctype)
+
+	frappe.reload_doc("hr", "doctype", "Leave Encashment")
 
 	additional_salaries = frappe.get_all("Additional Salary",
 		fields = ['name', "salary_slip", "type", "salary_component"],

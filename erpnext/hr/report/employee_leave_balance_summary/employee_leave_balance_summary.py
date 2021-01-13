@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import flt
 from erpnext.hr.doctype.leave_application.leave_application \
-	import get_leave_balance_on, get_leaves_for_period
+	import get_leave_details
 
 from erpnext.hr.report.employee_leave_balance.employee_leave_balance \
 	import get_department_leave_approver_map
@@ -61,14 +61,14 @@ def get_data(filters, leave_types):
 
 		if (len(leave_approvers) and user in leave_approvers) or (user in ["Administrator", employee.user_id]) or ("HR Manager" in frappe.get_roles(user)):
 			row = [employee.name, employee.employee_name, employee.department]
-
+			available_leave = get_leave_details(employee.name, filters.date)
 			for leave_type in leave_types:
-
+				remaining = 0
+				if leave_type in available_leave["leave_allocation"]:
 				# opening balance
-				opening = get_leave_balance_on(employee.name, leave_type, filters.date)
+					remaining = available_leave["leave_allocation"][leave_type]['remaining_leaves']
 
-
-				row += [opening]
+				row += [remaining]
 
 			data.append(row)
 

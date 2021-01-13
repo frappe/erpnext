@@ -82,3 +82,9 @@
 .place-order-container {
 	text-align: right;
 }
+
+.kb-card {
+	.card-body > .card-title {
+		line-height: 1.3;
+	}
+}

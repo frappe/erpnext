@@ -20,31 +20,36 @@ def get_columns():
 			"label": _("Territory"),
 			"fieldname": "territory",
 			"fieldtype": "Link",
-			"options": "Territory"
+			"options": "Territory",
+			"width": 150
 		},
 		{
 			"label": _("Opportunity Amount"),
 			"fieldname": "opportunity_amount",
 			"fieldtype": "Currency",
-			"options": currency
+			"options": currency,
+			"width": 150
 		},
 		{
 			"label": _("Quotation Amount"),
 			"fieldname": "quotation_amount",
 			"fieldtype": "Currency",
-			"options": currency
+			"options": currency,
+			"width": 150
 		},
 		{
 			"label": _("Order Amount"),
 			"fieldname": "order_amount",
 			"fieldtype": "Currency",
-			"options": currency
+			"options": currency,
+			"width": 150
 		},
 		{
 			"label": _("Billing Amount"),
 			"fieldname": "billing_amount",
 			"fieldtype": "Currency",
-			"options": currency
+			"options": currency,
+			"width": 150
 		}
 	]
 
@@ -62,8 +67,7 @@ def get_data(filters=None):
 			territory_opportunities = list(filter(lambda x: x.territory == territory.name, opportunities))
 		t_opportunity_names = []
 		if territory_opportunities:
-			t_opportunity_names = [t.name for t in territory_opportunities] 
-
+			t_opportunity_names = [t.name for t in territory_opportunities]
 		territory_quotations = []
 		if t_opportunity_names and quotations:
 			territory_quotations = list(filter(lambda x: x.opportunity in t_opportunity_names, quotations))
@@ -76,7 +80,7 @@ def get_data(filters=None):
 			list(filter(lambda x: x.quotation in t_quotation_names, sales_orders))
 		t_order_names = []
 		if territory_orders:
-			t_order_names = [t.name for t in territory_orders] 
+			t_order_names = [t.name for t in territory_orders]
 
 		territory_invoices = list(filter(lambda x: x.sales_order in t_order_names, sales_invoices)) if t_order_names and sales_invoices else []
 
@@ -96,12 +100,12 @@ def get_opportunities(filters):
 
 	if filters.get('transaction_date'):
 		conditions = " WHERE transaction_date between {0} and {1}".format(
-			frappe.db.escape(filters['transaction_date'][0]), 
+			frappe.db.escape(filters['transaction_date'][0]),
 			frappe.db.escape(filters['transaction_date'][1]))
-	
+
 	if filters.company:
 		if conditions:
-			conditions += " AND" 
+			conditions += " AND"
 		else:
 			conditions += " WHERE"
 		conditions += " company = %(company)s"
@@ -115,7 +119,7 @@ def get_opportunities(filters):
 def get_quotations(opportunities):
 	if not opportunities:
 		return []
-	
+
 	opportunity_names = [o.name for o in opportunities]
 
 	return frappe.db.sql("""
@@ -155,5 +159,5 @@ def _get_total(doclist, amount_field="base_grand_total"):
 	total = 0
 	for doc in doclist:
 		total += doc.get(amount_field, 0)
-	
+
 	return total

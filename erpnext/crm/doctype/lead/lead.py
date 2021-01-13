@@ -22,14 +22,12 @@ class Lead(SellingController):
 		load_address_and_contact(self)
 
 	def before_insert(self):
-		self.address_doc = self.create_address()
+		if self.address_title and self.address_type:
+			self.address_doc = self.create_address()
 		self.contact_doc = self.create_contact()
 
 	def after_insert(self):
 		self.update_links()
-		# after the address and contact are created, flush the field values
-		# to avoid inconsistent reporting in case the documents are changed
-		self.flush_address_and_contact_fields()
 
 	def validate(self):
 		self.set_lead_name()
@@ -114,10 +112,12 @@ class Lead(SellingController):
 	def set_lead_name(self):
 		if not self.lead_name:
 			# Check for leads being created through data import
-			if not self.company_name and not self.flags.ignore_mandatory:
+			if not self.company_name and not self.email_id and not self.flags.ignore_mandatory:
 				frappe.throw(_("A Lead requires either a person's name or an organization's name"))
-
-			self.lead_name = self.company_name
+			elif self.company_name:
+				self.lead_name = self.company_name
+			else:
+				self.lead_name = self.email_id.split("@")[0]
 
 	def set_title(self):
 		if self.organization_lead:
@@ -133,15 +133,6 @@ class Lead(SellingController):
 		# do not create an address if no fields are available,
 		# skipping country since the system auto-sets it from system defaults
 		address = frappe.new_doc("Address")
-
-		mandatory_fields = [ df.fieldname for df in address.meta.fields if df.reqd ]
-
-		if not all([self.get(field) for field in mandatory_fields]):
-			frappe.msgprint(_('Missing mandatory fields in address. \
-				{0} to create address' ).format("<a href='desk#Form/Address/New Address 1' \
-				> Click here </a>"),
-				alert=True, indicator='yellow')
-			return
 
 		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
 		address.update({info_field: self.get(info_field) for info_field in info_fields})
@@ -191,7 +182,7 @@ class Lead(SellingController):
 
 	def update_links(self):
 		# update address links
-		if self.address_doc:
+		if hasattr(self, 'address_doc'):
 			self.address_doc.append("links", {
 				"link_doctype": "Lead",
 				"link_name": self.name,
@@ -207,14 +198,6 @@ class Lead(SellingController):
 				"link_title": self.lead_name
 			})
 			self.contact_doc.save()
-
-	def flush_address_and_contact_fields(self):
-		fields = ['address_type', 'address_line1', 'address_line2', 'address_title',
-			'city', 'county', 'country', 'fax', 'pincode', 'state']
-
-		for field in fields:
-			self.set(field, None)
-
 
 @frappe.whitelist()
 def make_customer(source_name, target_doc=None):
@@ -374,3 +357,8 @@ def get_lead_with_phone_number(number):
 	lead = leads[0].name if leads else None
 
 	return lead
+
+def daily_open_lead():
+	leads = frappe.get_all("Lead", filters = [["contact_date", "Between", [nowdate(), nowdate()]]])
+	for lead in leads:
+		frappe.db.set_value("Lead", lead.name, "status", "Open")

@@ -1,0 +1,20 @@
+{
+ "creation": "2020-07-14 18:17:54.727946",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Patient",
+ "filters_json": "[[\"Patient\",\"status\",\"=\",\"Active\",false]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Total Patients",
+ "modified": "2020-07-22 13:26:02.643534",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Total Patients",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Daily",
+ "type": "Document Type"
+}

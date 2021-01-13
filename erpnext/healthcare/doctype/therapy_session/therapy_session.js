@@ -9,9 +9,32 @@ frappe.ui.form.on('Therapy Session', {
 			{fieldname: 'counts_completed', columns: 1},
 			{fieldname: 'assistance_level', columns: 1}
 		];
+
+		frm.set_query('service_unit', function() {
+			return {
+				filters: {
+					'is_group': false,
+					'allow_appointments': true,
+					'company': frm.doc.company
+				}
+			};
+		});
+
+		frm.set_query('appointment', function() {
+
+			return {
+				filters: {
+					'status': ['in', ['Open', 'Scheduled']]
+				}
+			};
+		});
 	},
 
 	refresh: function(frm) {
+		if (frm.doc.therapy_plan) {
+			frm.trigger('filter_therapy_types');
+		}
+
 		if (!frm.doc.__islocal) {
 			frm.dashboard.add_indicator(__('Counts Targeted: {0}', [frm.doc.total_counts_targeted]), 'blue');
 			frm.dashboard.add_indicator(__('Counts Completed: {0}', [frm.doc.total_counts_completed]),
@@ -26,13 +49,41 @@ frappe.ui.form.on('Therapy Session', {
 				})
 			}, 'Create');
 
-			frm.add_custom_button(__('Sales Invoice'), function() {
-				frappe.model.open_mapped_doc({
-					method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.invoice_therapy_session',
-					frm: frm,
-				})
-			}, 'Create');
+			frappe.db.get_value('Therapy Plan', {'name': frm.doc.therapy_plan}, 'therapy_plan_template', (r) => {
+				if (r && !r.therapy_plan_template) {
+					frm.add_custom_button(__('Sales Invoice'), function() {
+						frappe.model.open_mapped_doc({
+							method: 'erpnext.healthcare.doctype.therapy_session.therapy_session.invoice_therapy_session',
+							frm: frm,
+						});
+					}, 'Create');
+				}
+			});
 		}
+	},
+
+	therapy_plan: function(frm) {
+		if (frm.doc.therapy_plan) {
+			frm.trigger('filter_therapy_types');
+		}
+	},
+
+	filter_therapy_types: function(frm) {
+		frappe.call({
+			'method': 'frappe.client.get',
+			args: {
+				doctype: 'Therapy Plan',
+				name: frm.doc.therapy_plan
+			},
+			callback: function(data) {
+				let therapy_types = (data.message.therapy_plan_details || []).map(function(d){ return d.therapy_type; });
+				frm.set_query('therapy_type', function() {
+					return {
+						filters: { 'therapy_type': ['in', therapy_types]}
+					};
+				});
+			}
+		});
 	},
 
 	patient: function(frm) {
@@ -82,23 +133,12 @@ frappe.ui.form.on('Therapy Session', {
 						'start_date': data.message.appointment_date,
 						'start_time': data.message.appointment_time,
 						'service_unit': data.message.service_unit,
-						'company': data.message.company
+						'company': data.message.company,
+						'duration': data.message.duration
 					};
 					frm.set_value(values);
 				}
 			});
-		} else {
-			let values = {
-				'patient': '',
-				'therapy_type': '',
-				'therapy_plan': '',
-				'practitioner': '',
-				'department': '',
-				'start_date': '',
-				'start_time': '',
-				'service_unit': '',
-			};
-			frm.set_value(values);
 		}
 	},
 

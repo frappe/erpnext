@@ -12,9 +12,10 @@ frappe.ui.form.on('Payment Entry', {
 
 	setup: function(frm) {
 		frm.set_query("paid_from", function() {
+			frm.events.validate_company(frm);
+
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -23,29 +24,35 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+
 		frm.set_query("party_type", function() {
+			frm.events.validate_company(frm);
 			return{
-				"filters": {
+				filters: {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
 				}
 			}
 		});
+
 		frm.set_query("party_bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":0,
+					is_company_account: 0,
 					party_type: frm.doc.party_type,
 					party: frm.doc.party
 				}
 			}
 		});
+
 		frm.set_query("bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":1
+					is_company_account: 1,
+					company: frm.doc.company
 				}
 			}
 		});
+
 		frm.set_query("contact_person", function() {
 			if (frm.doc.party) {
 				return {
@@ -57,10 +64,12 @@ frappe.ui.form.on('Payment Entry', {
 				};
 			}
 		});
+
 		frm.set_query("paid_to", function() {
+			frm.events.validate_company(frm);
+
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -90,7 +99,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("reference_doctype", "references", function() {
 			if (frm.doc.party_type=="Customer") {
-				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry"];
+				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"];
 			} else if (frm.doc.party_type=="Supplier") {
 				var doctypes = ["Purchase Order", "Purchase Invoice", "Journal Entry"];
 			} else if (frm.doc.party_type=="Employee") {
@@ -125,7 +134,7 @@ frappe.ui.form.on('Payment Entry', {
 			const child = locals[cdt][cdn];
 			const filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
-				'Purchase Order', 'Expense Claim', 'Fees'];
+				'Purchase Order', 'Expense Claim', 'Fees', 'Dunning'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				filters[doc.party_type.toLowerCase()] = doc.party;
@@ -147,6 +156,12 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
 		frm.events.show_general_ledger(frm);
+	},
+
+	validate_company: (frm) => {
+		if (!frm.doc.company){
+			frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")});
+		}
 	},
 
 	company: function(frm) {
@@ -172,8 +187,8 @@ frappe.ui.form.on('Payment Entry', {
 		frm.toggle_display("base_paid_amount", frm.doc.paid_from_account_currency != company_currency);
 
 		frm.toggle_display("base_received_amount", (
-			frm.doc.paid_to_account_currency != company_currency 
-			&& frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency 
+			frm.doc.paid_to_account_currency != company_currency
+			&& frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency
 			&& frm.doc.base_paid_amount != frm.doc.base_received_amount
 		));
 
@@ -234,14 +249,15 @@ frappe.ui.form.on('Payment Entry', {
 	},
 
 	show_general_ledger: function(frm) {
-		if(frm.doc.docstatus==1) {
+		if(frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
+					"to_date": moment(frm.doc.modified).format('YYYY-MM-DD'),
 					"company": frm.doc.company,
-					group_by: ""
+					"group_by": "",
+					"show_cancelled_entries": frm.doc.docstatus === 2
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, "fa fa-table");
@@ -341,7 +357,7 @@ frappe.ui.form.on('Payment Entry', {
 							() => {
 								frm.set_party_account_based_on_party = false;
 								if (r.message.bank_account) {
-									frm.set_value("party_bank_account", r.message.bank_account);
+									frm.set_value("bank_account", r.message.bank_account);
 								}
 							}
 						]);
@@ -385,6 +401,8 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_account_currency_and_balance: function(frm, account, currency_field,
 			balance_field, callback_function) {
+
+		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		if (frm.doc.posting_date && account) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
@@ -411,6 +429,14 @@ frappe.ui.form.on('Payment Entry', {
 
 									if(!frm.doc.paid_amount && frm.doc.received_amount)
 										frm.events.received_amount(frm);
+
+									if (frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency
+										&& frm.doc.paid_amount != frm.doc.received_amount) {
+											if (company_currency != frm.doc.paid_from_account_currency &&
+												frm.doc.payment_type == "Pay") {
+													frm.doc.paid_amount = frm.doc.received_amount;
+												}
+										}
 								}
 							},
 							() => {
@@ -862,10 +888,10 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			if(frm.doc.party_type=="Customer" &&
-				!in_list(["Sales Order", "Sales Invoice", "Journal Entry"], row.reference_doctype)
+				!in_list(["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"], row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "reference_doctype", null);
-				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice or Journal Entry", [row.idx]));
+				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Journal Entry or Dunning", [row.idx]));
 				return false;
 			}
 

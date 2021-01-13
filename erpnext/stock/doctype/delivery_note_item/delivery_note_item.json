@@ -25,7 +25,10 @@
   "col_break2",
   "uom",
   "conversion_factor",
+  "stock_qty_sec_break",
   "stock_qty",
+  "stock_qty_col_break",
+  "returned_qty",
   "section_break_17",
   "price_list_rate",
   "base_price_list_rate",
@@ -53,6 +56,7 @@
   "base_net_rate",
   "base_net_amount",
   "billed_amt",
+  "incoming_rate",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -82,6 +86,7 @@
   "accounting_dimensions_section",
   "cost_center",
   "dimension_col_break",
+  "project",
   "section_break_72",
   "page_break"
  ],
@@ -211,7 +216,7 @@
   {
    "fieldname": "stock_qty",
    "fieldtype": "Float",
-   "label": "Qty as per Stock UOM",
+   "label": "Qty in Stock UOM",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -702,6 +707,12 @@
    "fieldtype": "Column Break"
   },
   {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
    "fieldname": "dn_detail",
    "fieldtype": "Data",
    "hidden": 1,
@@ -709,12 +720,35 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "stock_qty_sec_break",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stock_qty_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "returned_qty",
+   "fieldname": "returned_qty",
+   "fieldtype": "Float",
+   "label": "Returned Qty in Stock UOM"
+  },
+  {
+   "fieldname": "incoming_rate",
+   "fieldtype": "Currency",
+   "label": "Incoming Rate",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-05 14:18:33.131672",
+ "modified": "2020-12-07 19:59:27.119856",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

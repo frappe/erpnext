@@ -22,10 +22,18 @@ def get_template():
 
 	args = frappe.local.form_dict
 
+	if getdate(args.from_date) > getdate(args.to_date):
+		frappe.throw(_("To Date should be greater than From Date"))
+
 	w = UnicodeWriter()
 	w = add_header(w)
 
-	w = add_data(w, args)
+	try:
+		w = add_data(w, args)
+	except Exception as e:
+		frappe.clear_messages()
+		frappe.respond_as_web_page("Holiday List Missing", html=e)
+		return
 
 	# write out response as a type csv
 	frappe.response['result'] = cstr(w.getvalue())

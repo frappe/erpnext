@@ -13,15 +13,16 @@ frappe.ui.form.on("Journal Entry", {
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
 
-		if(frm.doc.docstatus==1) {
+		if(frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Ledger'), function() {
 				frappe.route_options = {
 					"voucher_no": frm.doc.name,
 					"from_date": frm.doc.posting_date,
-					"to_date": frm.doc.posting_date,
+					"to_date": moment(frm.doc.modified).format('YYYY-MM-DD'),
 					"company": frm.doc.company,
 					"finance_book": frm.doc.finance_book,
-					"group_by_voucher": 0
+					"group_by": '',
+					"show_cancelled_entries": frm.doc.docstatus === 2
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __('View'));
@@ -209,7 +210,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			$.each(this.frm.doc.accounts || [], function(i, jvd) {
 				frappe.model.set_default_values(jvd);
 			});
-			var posting_date = this.frm.posting_date;
+			var posting_date = this.frm.doc.posting_date;
 			if(!this.frm.doc.amended_from) this.frm.set_value('posting_date', posting_date || frappe.datetime.get_today());
 		}
 	},
@@ -278,7 +279,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 			// payroll entry
 			if(jvd.reference_type==="Payroll Entry") {
 				return {
-					query: "erpnext.hr.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
+					query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.get_payroll_entries_for_jv",
 				};
 			}
 
@@ -637,20 +638,12 @@ $.extend(erpnext.journal_entry, {
 		return { filters: filters };
 	},
 
-	reverse_journal_entry: function(frm) {
-		var me = frm.doc;
-		for(var i=0; i<me.accounts.length; i++) {
-			me.accounts[i].credit += me.accounts[i].debit;
-			me.accounts[i].debit = me.accounts[i].credit - me.accounts[i].debit;
-			me.accounts[i].credit -= me.accounts[i].debit;
-			me.accounts[i].credit_in_account_currency = me.accounts[i].credit;
-			me.accounts[i].debit_in_account_currency = me.accounts[i].debit;
-			me.accounts[i].reference_type = "Journal Entry";
-			me.accounts[i].reference_name = me.name
-		}
-		frm.copy_doc();
-		cur_frm.reload_doc();
-	}
+	reverse_journal_entry: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.journal_entry.journal_entry.make_reverse_journal_entry",
+			frm: cur_frm
+		})
+	},
 });
 
 $.extend(erpnext.journal_entry, {

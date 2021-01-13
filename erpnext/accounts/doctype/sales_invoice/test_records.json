@@ -3,6 +3,7 @@
   "company": "_Test Company",
   "conversion_rate": 1.0,
   "currency": "INR",
+  "cost_center": "_Test Cost Center - _TC",
   "customer": "_Test Customer",
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
@@ -16,7 +17,8 @@
     "description": "138-CMS Shoe",
     "doctype": "Sales Invoice Item",
     "income_account": "Sales - _TC",
-  	"expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "item_code": "138-CMS Shoe",
     "item_name": "138-CMS Shoe",
     "parentfield": "items",
     "qty": 1.0,
@@ -37,7 +39,8 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 6
    },
    {
@@ -45,7 +48,8 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 6.36
    }
   ],
@@ -76,6 +80,7 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
   "items": [
    {
     "amount": 500.0,
@@ -107,7 +112,8 @@
     "charge_type": "On Net Total",
     "description": "VAT",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 16
    },
    {
@@ -115,7 +121,8 @@
     "charge_type": "On Net Total",
     "description": "Service Tax",
     "doctype": "Sales Taxes and Charges",
-    "parentfield": "taxes",
+	"parentfield": "taxes",
+	"cost_center": "_Test Cost Center - _TC",
     "rate": 10
    }
   ],
@@ -132,6 +139,7 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
   "items": [
    {
     "cost_center": "_Test Cost Center - _TC",
@@ -259,6 +267,7 @@
   "customer_name": "_Test Customer",
   "debit_to": "_Test Receivable - _TC",
   "doctype": "Sales Invoice",
+  "cost_center": "_Test Cost Center - _TC",
   "items": [
    {
     "cost_center": "_Test Cost Center - _TC",

@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint
+from frappe.utils import cint, flt
 from frappe import _
 
 from frappe.model.document import Document
@@ -11,11 +11,11 @@ from frappe.model.document import Document
 class AppraisalTemplate(Document):
 	def validate(self):
 		self.check_total_points()
-		
-	def check_total_points(self):	
+
+	def check_total_points(self):
 		total_points = 0
 		for d in self.get("goals"):
-			total_points += int(d.per_weightage or 0)
+			total_points += flt(d.per_weightage)
 
 		if cint(total_points) != 100:
 			frappe.throw(_("Sum of points for all goals should be 100. It is {0}").format(total_points))

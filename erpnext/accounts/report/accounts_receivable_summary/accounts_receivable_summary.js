@@ -111,7 +111,12 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"fieldname":"based_on_payment_terms",
 			"label": __("Based On Payment Terms"),
 			"fieldtype": "Check",
-		}
+		},
+		{
+			"fieldname":"show_future_payments",
+			"label": __("Show Future Payments"),
+			"fieldtype": "Check",
+		},
 	],
 
 	onload: function(report) {
@@ -122,11 +127,4 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 	}
 }
 
-erpnext.dimension_filters.forEach((dimension) => {
-	frappe.query_reports["Accounts Receivable Summary"].filters.splice(9, 0 ,{
-		"fieldname": dimension["fieldname"],
-		"label": __(dimension["label"]),
-		"fieldtype": "Link",
-		"options": dimension["document_type"]
-	});
-});
+erpnext.utils.add_dimensions('Accounts Receivable Summary', 9);
