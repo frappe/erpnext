@@ -159,10 +159,10 @@ class TestBudget(unittest.TestCase):
 
 		budget = make_budget(budget_against="Cost Center")
 		month = now_datetime().month
-		if month > 10:
-			month = 10
+		if month > 9:
+			month = 9
 
-		for i in range(month):
+		for i in range(month+1):
 			jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
 				"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date=nowdate(), submit=True)
 
@@ -181,10 +181,10 @@ class TestBudget(unittest.TestCase):
 
 		budget = make_budget(budget_against="Project")
 		month = now_datetime().month
-		if month > 10:
-			month = 10
+		if month > 9:
+			month = 9
 
-		for i in range(month):
+		for i in range(month + 1):
 			jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
 				"_Test Bank - _TC", 20000, "_Test Cost Center - _TC", posting_date=nowdate(), submit=True, project="_Test Project")
 
