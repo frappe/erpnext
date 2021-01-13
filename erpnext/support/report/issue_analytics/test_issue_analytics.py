@@ -37,7 +37,6 @@ class TestIssueAnalytics(unittest.TestCase):
 		}
 
 		report = execute(filters)
-		print('report', report)
 
 		expected_data = [
 			{
@@ -209,5 +208,3 @@ def create_records():
 		"doctype": "Issue",
 		"name": issue.name
 	})
-
-	print('records', frappe.get_all('Issue'))

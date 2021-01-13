@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2014-07-11 11:51:00.453717",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -31,16 +32,19 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Expense Account",
+   "mandatory_depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
    "options": "Account",
-   "reqd": 1
+   "print_hide": 1
   }
  ],
  "istable": 1,
- "modified": "2019-09-30 18:28:32.070655",
+ "links": [],
+ "modified": "2020-12-04 00:22:14.373312",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Landed Cost Taxes and Charges",

@@ -519,6 +519,17 @@ class calculate_taxes_and_totals(object):
 			if self.doc.docstatus == 0:
 				self.calculate_outstanding_amount()
 
+	def is_internal_invoice(self):
+		"""
+			Checks if its an internal transfer invoice
+			and decides if to calculate any out standing amount or not
+		"""
+
+		if self.doc.doctype in ('Sales Invoice', 'Purchase Invoice') and self.doc.is_internal_transfer():
+			return True
+
+		return False
+
 	def calculate_outstanding_amount(self):
 		# NOTE:
 		# write_off_amount is only for POS Invoice
@@ -526,7 +537,8 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype == "Sales Invoice":
 			self.calculate_paid_amount()
 
-		if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos'): return
+		if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos') or \
+			self.is_internal_invoice(): return
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
@@ -641,7 +653,8 @@ class calculate_taxes_and_totals(object):
 		if default_mode_of_payment:
 			self.doc.append('payments', {
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
-				'amount': total_amount_to_pay
+				'amount': total_amount_to_pay,
+				'default': 1
 			})
 		else:
 			self.doc.is_pos = 0

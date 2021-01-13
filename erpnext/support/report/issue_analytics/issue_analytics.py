@@ -150,7 +150,6 @@ class IssueAnalytics(object):
 			filters=filters,
 			debug=1
 		)
-		print('entries', filters, self.entries)
 
 	def get_common_filters(self):
 		filters = {}
