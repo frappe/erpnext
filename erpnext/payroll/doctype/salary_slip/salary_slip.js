@@ -138,11 +138,11 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	change_grid_labels: function(frm) {
-		frm.set_currency_labels(["amount", "default_amount", "additional_amount", "tax_on_flexible_benefit",
-			"tax_on_additional_salary"], frm.doc.currency, "earnings");
+		let fields = ["amount", "year_to_date", "default_amount", "additional_amount", "tax_on_flexible_benefit",
+		"tax_on_additional_salary"];
 
-		frm.set_currency_labels(["amount", "default_amount", "additional_amount", "tax_on_flexible_benefit",
-			"tax_on_additional_salary"], frm.doc.currency, "deductions");
+		frm.set_currency_labels(fields, frm.doc.currency, "earnings");
+		frm.set_currency_labels(fields, frm.doc.currency, "deductions");
 	},
 
 	refresh: function(frm) {
