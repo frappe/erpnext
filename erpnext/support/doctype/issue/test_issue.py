@@ -146,7 +146,8 @@ def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=
 		"priority": priority,
 		"creation": creation,
 		"opening_date": creation,
-		"service_level_agreement_creation": creation
+		"service_level_agreement_creation": creation,
+		"company": "_Test Company"
 	}).insert(ignore_permissions=True)
 
 	return issue
