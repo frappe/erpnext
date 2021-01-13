@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter, cancel_appointment
+from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter
 from frappe.utils import nowdate, add_days
 from frappe.utils.make_random import get_random
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
@@ -75,10 +75,6 @@ class TestPatientAppointment(unittest.TestCase):
 		# check invoice cancelled
 		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
 		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'status'), 'Cancelled')
-
-	def tearDown(self):
-		for entry in frappe.get_all('Patient Appointment'):
-			cancel_appointment(entry.name)
 
 
 def create_healthcare_docs():

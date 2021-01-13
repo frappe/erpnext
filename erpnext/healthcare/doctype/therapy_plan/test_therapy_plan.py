@@ -42,11 +42,6 @@ class TestTherapyPlan(unittest.TestCase):
 		therapy_plan_template_amt = frappe.db.get_value('Therapy Plan Template', template, 'total_amount')
 		self.assertEquals(si.items[0].amount, therapy_plan_template_amt)
 
-	def tearDown(self):
-		for entry in frappe.get_all('Therapy Session'):
-			doc = frappe.get_doc('Therapy Session', entry.name)
-			doc.cancel()
-
 
 def create_therapy_plan(template=None):
 	patient = create_patient()
