@@ -1631,9 +1631,13 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		],
 		"field_map": {
 			'rate': 'rate',
-			'name': target_detail_field
 		}
 	}
+
+	if self.doctype in ["Sales Invoice", "Sales Order"]:
+		item_field_map["field_map"].update({
+			"name": target_detail_field
+		})
 
 	if source_doc.get('update_stock'):
 		item_field_map["field_map"].update({
