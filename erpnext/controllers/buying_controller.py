@@ -237,11 +237,11 @@ class BuyingController(StockController):
 				if not d.get(frappe.scrub(ref_doctype)):
 					outgoing_rate = get_incoming_rate({
 						"item_code": d.item_code,
-						"warehouse": d.from_warehouse,
-						"posting_date": self.posting_date,
-						"posting_time": self.posting_time,
+						"warehouse": d.get('from_warehouse'),
+						"posting_date": self.get('posting_date') or self.get('transation_date'),
+						"posting_time": self.get('posting_time'),
 						"qty": -1 * flt(d.get('stock_qty')),
-						"serial_no": d.serial_no,
+						"serial_no": d.get('serial_no'),
 						"company": self.company,
 						"voucher_type": self.doctype,
 						"voucher_no": self.name,
