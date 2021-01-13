@@ -12,7 +12,8 @@ def get_data():
 			'Payment Entry': 'party',
 			'Quotation': 'party_name',
 			'Opportunity': 'party_name',
-			'Medical Objects': 'customer_id'
+			'Medical Objects': 'customer_id',
+			'Sample': 'practitioner_id'
 		},
 		'dynamic_links': {
 			'party_name': ['Customer', 'quotation_to']
@@ -48,7 +49,7 @@ def get_data():
 			},
 			{
 				'label': 'Testing DB',
-				'items': ['Medical Objects']
+				'items': ['Medical Objects', 'Sample']
 			}
 			# {
 			# 	'label': _('Subscriptions'),
