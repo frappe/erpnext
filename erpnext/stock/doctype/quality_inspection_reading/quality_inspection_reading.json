@@ -137,7 +137,7 @@
    "label": "Status",
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "Accepted\nRejected"
+   "options": "\nAccepted\nRejected"
   },
   {
    "depends_on": "non_numeric",
@@ -215,7 +215,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-07 21:56:40.235579",
+ "modified": "2021-01-07 22:16:53.978410",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Reading",
