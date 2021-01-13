@@ -550,7 +550,12 @@ class SalesInvoice(SellingController):
 		self.against_income_account = ','.join(against_acc)
 
 	def add_remarks(self):
-		if not self.remarks: self.remarks = 'No Remarks'
+		if not self.remarks:
+			if self.po_no and self.po_date:
+				self.remarks = _("Against Customer Order {0} dated {1}").format(self.po_no,
+					formatdate(self.po_date))
+			else:
+				self.remarks = _("No Remarks")
 
 	def validate_auto_set_posting_time(self):
 		# Don't auto set the posting date and time if invoice is amended
@@ -1580,6 +1585,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	if doctype in ["Sales Invoice", "Sales Order"]:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Purchase Invoice" if doctype == "Sales Invoice" else "Purchase Order"
+		target_detail_field = "sales_invoice_item" if doctype == "Sales Invoice" else "sales_order_item"
 		source_document_warehouse_field = 'target_warehouse'
 		target_document_warehouse_field = 'from_warehouse'
 	else:
@@ -1625,7 +1631,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		],
 		"field_map": {
 			'rate': 'rate',
-			'name': 'sales_invoice_item'
+			'name': target_detail_field
 		}
 	}
 

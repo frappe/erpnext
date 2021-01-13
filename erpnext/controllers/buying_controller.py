@@ -219,14 +219,19 @@ class BuyingController(StockController):
 				item.valuation_rate = 0.0
 
 	def set_incoming_rate(self):
-		if self.doctype not in ("Purchase Receipt", "Purchase Invoice"):
+		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
 			return
 
-		ref_doctype = 'Delivery Note Item' if self.doctype == 'Purchase Receipt' else 'Sales Invoice Item'
+		ref_doctype_map = {
+			"Purchase Order": "Sales Order Item",
+			"Purchase Receipt": "Delivery Note Item",
+			"Purchase Invoice": "Purchase Invoice Item",
+		}
 
+		ref_doctype = ref_doctype_map.get(self.doctype)
 		items = self.get("items")
 		for d in items:
-			if not cint(self.get("is_return")) and d.get("from_warehouse"):
+			if not cint(self.get("is_return")):
 				# Get outgoing rate based on original item cost based on valuation method
 
 				if not d.get(frappe.scrub(ref_doctype)):
