@@ -417,15 +417,19 @@ class RequestFailed(Exception): pass
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
 		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
+		sandbox_mode = self.e_invoice_settings.sandbox_mode
+
 		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
 		self.credentials = self.get_credentials()
 
-		self.base_url = 'https://gsp.adaequare.com'
-		self.authenticate_url = self.base_url + '/gsp/authenticate?grant_type=token'
-		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
-		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
-		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
+		# authenticate url is same for sandbox & live
+		self.authenticate_url = 'https://gsp.adaequare.com/gsp/authenticate?grant_type=token'
+		self.base_url = 'https://gsp.adaequare.com' if not sandbox_mode else 'https://gsp.adaequare.com/test'
+
 		self.cancel_irn_url = self.base_url + '/enriched/ei/api/invoice/cancel'
+		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
+		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
+		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
 		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
