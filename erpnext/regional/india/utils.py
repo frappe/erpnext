@@ -48,6 +48,9 @@ def validate_gstin_for_india(doc, method):
 		validate_gstin_check_digit(doc.gstin)
 		set_gst_state_and_state_number(doc)
 
+		if not doc.gst_state:
+			frappe.throw(_("Please Enter GST state"))
+
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
