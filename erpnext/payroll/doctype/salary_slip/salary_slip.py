@@ -577,7 +577,7 @@ class SalarySlip(TransactionBase):
 					'default_amount': amount if not struct_row.get("is_additional_component") else 0,
 					'depends_on_payment_days' : struct_row.depends_on_payment_days,
 					'salary_component' : struct_row.salary_component,
-					'abbr' : struct_row.abbr,
+					'abbr' : struct_row.abbr or struct_row.get("salary_component_abbr"),
 					'additional_salary': additional_salary,
 					'do_not_include_in_total' : struct_row.do_not_include_in_total,
 					'is_tax_applicable': struct_row.is_tax_applicable,
