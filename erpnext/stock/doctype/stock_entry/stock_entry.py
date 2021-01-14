@@ -1115,7 +1115,10 @@ class StockEntry(StockController):
 							else:
 								qty = (req_qty_each * flt(self.fg_completed_qty)) - remaining_qty
 					else:
-						qty = req_qty_each * flt(self.fg_completed_qty)
+						if self.flags.backflush_based_on == "Material Transferred for Manufacture":
+							qty = (item.qty/trans_qty) * flt(self.fg_completed_qty)
+						else:
+							qty = req_qty_each * flt(self.fg_completed_qty)
 
 			elif backflushed_materials.get(item.item_code):
 				for d in backflushed_materials.get(item.item_code):
@@ -1123,7 +1126,8 @@ class StockEntry(StockController):
 						if (qty > req_qty):
 							qty = (qty/trans_qty) * flt(self.fg_completed_qty)
 
-						if consumed_qty:
+						if consumed_qty and frappe.db.get_single_value("Manufacturing Settings",
+							"material_consumption"):
 							qty -= consumed_qty
 
 			if cint(frappe.get_cached_value('UOM', item.stock_uom, 'must_be_whole_number')):
@@ -1247,9 +1251,8 @@ class StockEntry(StockController):
 				mreq_item = frappe.db.get_value("Material Request Item",
 					{"name": item.material_request_item, "parent": item.material_request},
 					["item_code", "warehouse", "idx"], as_dict=True)
-				if mreq_item.item_code != item.item_code or \
-				mreq_item.warehouse != (item.s_warehouse if self.purpose== "Material Issue" else item.t_warehouse):
-					frappe.throw(_("Item or Warehouse for row {0} does not match Material Request").format(item.idx),
+				if mreq_item.item_code != item.item_code:
+					frappe.throw(_("Item for row {0} does not match Material Request").format(item.idx),
 						frappe.MappingMismatchError)
 
 	def validate_batch(self):

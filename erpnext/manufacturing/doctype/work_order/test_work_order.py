@@ -526,7 +526,6 @@ class TestWorkOrder(unittest.TestCase):
 		ste1.submit()
 		ste_cancel_list.append(ste1)
 
-		print(wo_order.name)
 		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Material Consumption for Manufacture", 2))
 		self.assertEquals(ste3.fg_completed_qty, 2)
 
@@ -538,6 +537,48 @@ class TestWorkOrder(unittest.TestCase):
 			ste_doc.cancel()
 
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
+
+	def test_extra_material_transfer(self):
+		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
+		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on",
+			"Material Transferred for Manufacture")
+
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
+
+		ste_cancel_list = []
+		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=20, basic_rate=5000.0)
+		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=20, basic_rate=1000.0)
+
+		ste_cancel_list.extend([ste1, ste2])
+
+		itemwise_qty = {}
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 4))
+		for row in s.items:
+			row.qty = row.qty + 2
+			itemwise_qty.setdefault(row.item_code, row.qty)
+
+		s.submit()
+		ste_cancel_list.append(s)
+
+		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		for ste_row in ste3.items:
+			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
+				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+
+		ste3.submit()
+		ste_cancel_list.append(ste3)
+
+		ste2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		for ste_row in ste2.items:
+			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
+				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+
+		for ste_doc in ste_cancel_list:
+			ste_doc.cancel()
+
+		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
