@@ -97,14 +97,12 @@ def set_subject_field(doc):
 		fieldname = entry.get('fieldname')
 		if entry.get('fieldtype') == 'Table' and doc.get(fieldname):
 			formatted_value = get_formatted_value_for_table_field(doc.get(fieldname), meta.get_field(fieldname))
-			subject += frappe.bold(_(entry.get('label')) + ': ') + '<br>' + cstr(formatted_value)
+			subject += frappe.bold(_(entry.get('label')) + ': ') + '<br>' + cstr(formatted_value) + '<br>'
 
 		else:
 			if doc.get(fieldname):
 				formatted_value = format_value(doc.get(fieldname), meta.get_field(fieldname), doc)
-				subject += frappe.bold(_(entry.get('label')) + ': ') + cstr(formatted_value)
-
-		subject += '<br>'
+				subject += frappe.bold(_(entry.get('label')) + ': ') + cstr(formatted_value) + '<br>'
 
 	return subject
 
