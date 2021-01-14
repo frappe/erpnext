@@ -21,6 +21,7 @@ class BankReconciliationTool(Document):
 
 @frappe.whitelist()
 def get_bank_transactions(bank_account, from_date = None, to_date = None):
+	# returns bank transactions for a bank account
 	filters = []
 	filters.append(['bank_account', '=', bank_account])
 	filters.append(['docstatus', '=', 1])
@@ -40,6 +41,7 @@ def get_bank_transactions(bank_account, from_date = None, to_date = None):
 
 @frappe.whitelist()
 def get_account_balance(bank_account, till_date):
+	# returns account balance till the specified date
 	account = frappe.db.get_value('Bank Account', bank_account, 'account')
 	filters = frappe._dict({
 		"account": account,
@@ -65,6 +67,7 @@ def get_account_balance(bank_account, till_date):
 
 @frappe.whitelist()
 def update_bank_transaction(bank_transaction, reference_number, party_type=None, party=None):
+	# updates bank transaction based on the new parameters provided by the user from Vouchers
 	bank_transaction_name = bank_transaction
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_transaction.reference_number = reference_number
@@ -84,6 +87,7 @@ def update_bank_transaction(bank_transaction, reference_number, party_type=None,
 
 @frappe.whitelist()
 def create_journal_entry_bts( bank_transaction, reference_number, reference_date, posting_date, entry_type,
+	# Create a new journal entry based on the bank transaction
 	second_account, mode_of_payment=None, party_type=None, party=None):
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
@@ -146,7 +150,7 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 @frappe.whitelist()
 def create_payment_entry_bts( bank_transaction, reference_number, reference_date, party_type, party, posting_date,
 	mode_of_payment=None, project=None, cost_center=None):
-
+	# Create a new payment entry based on the bank transaction
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	paid_amount = bank_transaction.unallocated_amount
 	payment_type = "Receive" if bank_transaction.deposit > 0 else "Pay"
@@ -187,6 +191,7 @@ def create_payment_entry_bts( bank_transaction, reference_number, reference_date
 
 @frappe.whitelist()
 def reconcile_vouchers(bank_transaction, vouchers):
+	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	if transaction.unallocated_amount == 0:
@@ -220,6 +225,7 @@ def reconcile_vouchers(bank_transaction, vouchers):
 
 @frappe.whitelist()
 def get_linked_payments(bank_transaction, document_types = None):
+	# get all matching payments for a bank transaction
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	bank_account = frappe.db.get_values(
 		"Bank Account", 
@@ -231,10 +237,8 @@ def get_linked_payments(bank_transaction, document_types = None):
 	return matching
 
 def check_matching(bank_account, company, transaction, document_types):
-
+	# combine all types of vocuhers
 	subquery = get_queries(bank_account, company, transaction, document_types)
-
-
 	filters = {
 			"amount": transaction.unallocated_amount,
 			"payment_type" : "Receive" if transaction.deposit > 0 else "Pay",
@@ -253,6 +257,7 @@ def check_matching(bank_account, company, transaction, document_types):
 	return sorted(matching_vouchers, key = lambda x: x[0], reverse=True) if matching_vouchers else []
 
 def get_queries(bank_account, company, transaction, document_types):
+	# get queries to get matching vouchers
 	amount_condition = "=" if "exact_match" in document_types else "<="
 	account_from_to = "paid_to" if transaction.deposit > 0 else "paid_from"
 	queries = []
@@ -281,6 +286,7 @@ def get_queries(bank_account, company, transaction, document_types):
 	return queries
 
 def get_pe_matching_query(amount_condition, account_from_to, transaction):
+	# get matching payment entries query
 	if transaction.deposit > 0:
 		currency_field = "paid_to_account_currency as currency"
 	else:
@@ -311,6 +317,7 @@ def get_pe_matching_query(amount_condition, account_from_to, transaction):
 
 
 def get_je_matching_query(amount_condition, transaction):
+	# get matching journal entry query
 	cr_or_dr = "credit" if transaction.withdrawal > 0 else "debit"
 	return f"""
 
@@ -341,6 +348,7 @@ def get_je_matching_query(amount_condition, transaction):
 
 
 def get_si_matching_query(amount_condition):
+	# get matchin sales invoice query
 	return f"""
 		SELECT
 			( CASE WHEN si.customer = %(party)s  THEN 1 ELSE 0  END
@@ -368,6 +376,7 @@ def get_si_matching_query(amount_condition):
 	"""
 
 def get_pi_matching_query(amount_condition):
+	# get matching purchase invoice query
 	return f"""
 		SELECT
 			( CASE WHEN supplier = %(party)s THEN 1 ELSE 0 END
@@ -392,6 +401,7 @@ def get_pi_matching_query(amount_condition):
 	"""
 
 def get_ec_matching_query(bank_account, company, amount_condition): 
+	# get matching Expense Claim query
 	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
 			filters={"default_account": bank_account}, fields=["parent"])]
 	mode_of_payments = '(\'' + '\', \''.join(mode_of_payments) + '\' )'
