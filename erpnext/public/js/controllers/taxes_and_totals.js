@@ -758,7 +758,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if(!this.frm.doc.apply_discount_on)
 				frappe.throw(__("Please select Apply Discount On"));
 
-			if(this.frm.doc.items.filter(d => cint(d.apply_discount_after_taxes)).length) {
+			if(this.frm.doc.items.filter(d => cint(d.apply_discount_after_taxes)).length && (this.frm.doc.taxes || []).filter(d => d.tax_amount).length) {
 				this.frm.doc.discount_amount = this.frm.doc.additional_discount_percentage = 0;
 				this.frm.refresh_fields(['discount_amount', 'additional_discount_percentage']);
 				frappe.msgprint(__("Additional Discount is not allowed when discount is applied after taxes. Removing Additional Discount."));

@@ -614,7 +614,7 @@ class calculate_taxes_and_totals(object):
 			if not self.doc.apply_discount_on:
 				frappe.throw(_("Please select Apply Discount On"))
 
-			if [d for d in self.doc.items if cint(d.apply_discount_after_taxes)]:
+			if [d for d in self.doc.items if cint(d.apply_discount_after_taxes)] and [d for d in self.doc.taxes if d.tax_amount]:
 				frappe.throw(_("Additional Discount is not allowed when discount is applied after taxes."))
 
 			self.doc.base_discount_amount = flt(self.doc.discount_amount * self.doc.conversion_rate,

@@ -1374,7 +1374,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				cur_frm.toggle_display(fname, show_exclusive && (me.frm.doc.currency != company_currency), true);
 		});
 
-		var apply_discount_after_taxes = (cur_frm.doc.items || []).filter(d => cint(d.apply_discount_after_taxes)).length;
+		var apply_discount_after_taxes = (cur_frm.doc.items || []).filter(d => cint(d.apply_discount_after_taxes)).length
+			&& (cur_frm.doc.taxes || []).filter(d => d.tax_amount).length;
 		var show_net = cint(cur_frm.doc.discount_amount) || apply_discount_after_taxes || show_exclusive;
 
 		if(frappe.meta.get_docfield(cur_frm.doctype, "net_total"))
