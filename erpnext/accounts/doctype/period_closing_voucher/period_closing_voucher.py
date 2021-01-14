@@ -99,7 +99,7 @@ class PeriodClosingVoucher(AccountsController):
 			gl_entries.append(gl_entry)
 
 		from erpnext.accounts.general_ledger import make_gl_entries
-		make_gl_entries(gl_entries)
+		make_gl_entries(gl_entries, from_period_closing_voucher=True)
 
 	def get_pl_balances(self, dimension_fields):
 		"""Get balance for pl accounts"""

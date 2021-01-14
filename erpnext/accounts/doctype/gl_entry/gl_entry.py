@@ -137,7 +137,8 @@ class GLEntry(Document):
 			frappe.throw(_("{0} {1}: Cost Center {2} does not belong to Company {3}")
 				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
 
-		if self.cost_center and _check_is_group():
+		if not self.flags.from_repost and not self.flags.from_period_closing_voucher \
+			and self.cost_center and _check_is_group():
 			frappe.throw(_("""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot be used in transactions""")
 				.format(self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)))
 
