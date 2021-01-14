@@ -30,14 +30,16 @@ class TestTask(unittest.TestCase):
 		})
 
 	def test_reschedule_dependent_task(self):
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
+
 		task1 = create_task("_Test Task 1", nowdate(), add_days(nowdate(), 10))
 
 		task2 = create_task("_Test Task 2", add_days(nowdate(), 11), add_days(nowdate(), 15), task1.name)
-		task2.get("depends_on")[0].project = "_Test Project"
+		task2.get("depends_on")[0].project = project
 		task2.save()
 
 		task3 = create_task("_Test Task 3", add_days(nowdate(), 11), add_days(nowdate(), 15), task2.name)
-		task3.get("depends_on")[0].project = "_Test Project"
+		task3.get("depends_on")[0].project = project
 		task3.save()
 
 		task1.update({
@@ -104,7 +106,7 @@ def create_task(subject, start=None, end=None, depends_on=None, project=None, pa
 		task.subject = subject
 		task.exp_start_date = start or nowdate()
 		task.exp_end_date = end or nowdate()
-		task.project = project or None if is_template else "_Test Project"
+		task.project = project or None if is_template else frappe.get_value("Project", {"project_name": "_Test Project"})
 		task.is_template = is_template
 		task.start = begin
 		task.duration = duration
