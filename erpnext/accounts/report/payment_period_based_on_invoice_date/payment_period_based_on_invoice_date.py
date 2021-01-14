@@ -136,19 +136,19 @@ def get_columns(filters):
 		},
 		{
 			"fieldname": "range1",
-			"label": _("0-30"),
+			"label": "0-30",
 			"fieldtype": "Currency",
 			"width": 140
 		},
 		{
 			"fieldname": "range2",
-			"label": _("30-60"),
+			"label": "30-60",
 			"fieldtype": "Currency",
 			"width": 140
 		},
 		{
 			"fieldname": "range3",
-			"label": _("60-90"),
+			"label": "60-90",
 			"fieldtype": "Currency",
 			"width": 140
 		},
