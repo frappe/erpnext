@@ -58,8 +58,8 @@ frappe.ui.form.on("Purchase Order Item", {
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	setup: function() {
 		this.frm.custom_make_buttons = {
-			'Purchase Receipt': 'Receipt',
-			'Purchase Invoice': 'Invoice',
+			'Purchase Receipt': 'Purchase Receipt',
+			'Purchase Invoice': 'Purchase Invoice',
 			'Stock Entry': 'Material to Supplier',
 			'Payment Entry': 'Payment',
 		}
