@@ -296,7 +296,7 @@ class BuyingController(StockController):
 				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
 
 				consumed_qty = raw_material_data.get('qty', 0)
-				consumed_serial_nos = raw_material_data.get('serial_nos', '')
+				consumed_serial_nos = raw_material_data.get('serial_no', '')
 				consumed_batch_nos = raw_material_data.get('batch_nos', '')
 
 				transferred_qty = raw_material.qty
