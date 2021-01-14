@@ -12,7 +12,7 @@ from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment imp
 class TestPatientHistorySettings(unittest.TestCase):
 	def setUp(self):
 		dt = create_custom_doctype()
-		settings = frappe.get_single('Patient History Settings')
+		settings = frappe.get_single("Patient History Settings")
 		settings.append("custom_doctypes", {
 			"document_type": dt.name,
 			"date_fieldname": "date",
@@ -40,12 +40,12 @@ class TestPatientHistorySettings(unittest.TestCase):
 		doc = create_doc(patient)
 
 		# check for medical record
-		medical_rec = frappe.db.exists('Patient Medical Record', {'status': 'Open', 'reference_name': doc.name})
+		medical_rec = frappe.db.exists("Patient Medical Record", {"status": "Open", "reference_name": doc.name})
 		self.assertTrue(medical_rec)
 
-		medical_rec = frappe.get_doc('Patient Medical Record', medical_rec)
+		medical_rec = frappe.get_doc("Patient Medical Record", medical_rec)
 		expected_subject = "<b>Date: </b>{0}<br><b>Rating: </b>3<br><b>Feedback: </b>Test Patient History Settings<br>".format(
-			getdate().strftime("%d-%m-%Y"))
+			frappe.utils.format_date(getdate()))
 		self.assertEqual(medical_rec.subject, expected_subject)
 		self.assertEqual(medical_rec.patient, patient)
 		self.assertEqual(medical_rec.communication_date, getdate())
