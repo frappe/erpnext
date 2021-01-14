@@ -721,6 +721,24 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.calculate_taxes_and_totals(false);
 	},
 
+	update_stock: function() {
+		let me = this;
+		if (['Delivery Note', 'Sales Invoice'].includes(me.frm.doc.doctype)) {
+			if (this.frm.doc.is_internal_customer && this.frm.doc.company === this.frm.doc.represents_company) {
+				frappe.db.get_value('Company', this.frm.doc.company, 'default_in_transit_warehouse', function(value) {
+					me.frm.set_value('set_target_warehouse', value.default_in_transit_warehouse);
+				});
+			}
+		}
+		if (['Purchase Receipt', 'Purchase Invoice'].includes(me.frm.doc.doctype)) {
+			if (this.frm.doc.is_internal_supplier && this.frm.doc.company === this.frm.doc.represents_company) {
+				frappe.db.get_value('Company', this.frm.doc.company, 'default_in_transit_warehouse', function(value) {
+					me.frm.set_value('set_from_warehouse', value.default_in_transit_warehouse);
+				});
+			}
+		}
+	},
+
 	company: function() {
 		var me = this;
 		var set_pricing = function() {

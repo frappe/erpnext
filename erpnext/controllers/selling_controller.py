@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, cstr, comma_or, get_link_to_form
+from frappe.utils import cint, flt, cstr, comma_or, get_link_to_form, nowtime
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
@@ -322,7 +322,7 @@ class SellingController(StockController):
 					"item_code": d.item_code,
 					"warehouse": d.warehouse,
 					"posting_date": self.get('posting_date') or self.get('transaction_date'),
-					"posting_time": self.get('posting_time'),
+					"posting_time": self.get('posting_time') or nowtime(),
 					"qty": -1 * flt(d.get('stock_qty') or d.get('actual_qty')),
 					"serial_no": d.get('serial_no'),
 					"company": self.company,
@@ -332,7 +332,7 @@ class SellingController(StockController):
 				}, raise_error_if_no_rate=False)
 
 				# For internal transfers use incoming rate as the valuation rate
-				if self.get('is_internal_customer'):
+				if self.is_internal_transfer():
 					rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
 					if d.rate != rate:
 						d.rate = rate

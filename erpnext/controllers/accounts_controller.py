@@ -111,12 +111,12 @@ class AccountsController(TransactionBase):
 			self.set_inter_company_account()
 
 		validate_regional(self)
-		
+
 		validate_einvoice_fields(self)
 
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
-	
+
 	def before_cancel(self):
 		validate_einvoice_fields(self)
 
@@ -963,9 +963,9 @@ class AccountsController(TransactionBase):
 			It will an internal transfer if its an internal customer and representation
 			company is same as billing company
 		"""
-		if self.doctype in ('Sales Invoice', 'Delivery Note'):
+		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Sales Order'):
 			internal_party_field = 'is_internal_customer'
-		elif self.doctype in ('Purchase Invoice', 'Purchase Receipt'):
+		elif self.doctype in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
 			internal_party_field = 'is_internal_supplier'
 
 		if self.get(internal_party_field) and (self.represents_company == self.company):

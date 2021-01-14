@@ -1562,7 +1562,7 @@ def validate_inter_company_transaction(doc, doctype):
 	details = get_inter_company_details(doc, doctype)
 	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"] else doc.buying_price_list
 	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
-	if not valid_price_list:
+	if not valid_price_list and not doc.is_internal_transfer():
 		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
 
 	party = details.get("party")
@@ -1636,7 +1636,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	if doctype in ["Sales Invoice", "Sales Order"]:
 		item_field_map["field_map"].update({
-			"name": target_detail_field
+			"name": target_detail_field,
 		})
 
 	if source_doc.get('update_stock'):
@@ -1650,8 +1650,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
+			"set_target_warehouse": "set_from_warehouse",
 			"field_no_map": [
-				"taxes_and_charges"
+				"taxes_and_charges",
+				"set_warehouse"
 			]
 		},
 		doctype +" Item": item_field_map
