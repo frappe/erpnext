@@ -61,13 +61,13 @@ def get_columns(filters):
 	return [
 		{
 			"fieldname": "payment_document",
-			"label": _("Payment Document"),
+			"label": _("Payment Document Type"),
 			"fieldtype": "Data",
 			"width": 100
 		},
 		{
 			"fieldname": "payment_entry",
-			"label": _("Payment Entry"),
+			"label": _("Payment Document"),
 			"fieldtype": "Dynamic Link",
 			"options": "payment_document",
 			"width": 160
@@ -83,7 +83,7 @@ def get_columns(filters):
 			"label": _("Party"),
 			"fieldtype": "Dynamic Link",
 			"options": "party_type",
-			"width": 120
+			"width": 160
 		},
 		{
 			"fieldname": "posting_date",
@@ -114,19 +114,19 @@ def get_columns(filters):
 			"fieldname": "debit",
 			"label": _("Debit"),
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 140
 		},
 		{
 			"fieldname": "credit",
 			"label": _("Credit"),
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 140
 		},
 		{
 			"fieldname": "remarks",
 			"label": _("Remarks"),
 			"fieldtype": "Data",
-			"width": 120
+			"width": 200
 		},
 		{
 			"fieldname": "age",
@@ -138,25 +138,25 @@ def get_columns(filters):
 			"fieldname": "range1",
 			"label": _("0-30"),
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 140
 		},
 		{
 			"fieldname": "range2",
 			"label": _("30-60"),
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 140
 		},
 		{
 			"fieldname": "range3",
 			"label": _("60-90"),
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 140
 		},
 		{
 			"fieldname": "range4",
 			"label": _("90 Above"),
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 140
 		},
 			{
 			"fieldname": "delay_in_payment",
