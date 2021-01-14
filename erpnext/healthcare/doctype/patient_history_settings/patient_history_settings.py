@@ -156,8 +156,8 @@ def get_patient_history_config_dt(doctype):
 
 
 def validate_medical_record_required(doc):
-	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard or \
-		frappe.db.get_value('Doctype', doc.doctype, 'module') != 'Healthcare':
+	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard \
+		or doc.meta.module != 'Healthcare':
 		return False
 
 	if doc.doctype not in get_patient_history_doctypes():

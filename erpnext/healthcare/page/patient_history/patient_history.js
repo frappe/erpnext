@@ -19,7 +19,7 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 			fieldname: 'patient',
 			placeholder: __('Select Patient'),
 			only_select: true,
-			change: function(){
+			change: function() {
 				let patient_id = patient.get_value();
 				if (pid != patient_id && patient_id) {
 					me.start = 0;
