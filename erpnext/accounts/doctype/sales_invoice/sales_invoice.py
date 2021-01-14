@@ -1581,6 +1581,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.is_internal_supplier = 1
 			target_doc.ignore_pricing_rule = 1
 			target_doc.buying_price_list = source_doc.selling_price_list
+			target_doc.shipping_address = source_doc.customer_address
 
 			if currency:
 				target_doc.currency = currency
@@ -1625,7 +1626,8 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"set_target_warehouse": "set_from_warehouse",
 			"field_no_map": [
 				"taxes_and_charges",
-				"set_warehouse"
+				"set_warehouse",
+				"shipping_address"
 			]
 		},
 		doctype +" Item": item_field_map
