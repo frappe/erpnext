@@ -15,7 +15,7 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 	if not filters: filters = frappe._dict({})
 
 	invoice_list = get_invoices(filters, additional_query_columns)
-	columns, income_accounts, tax_accounts = get_columns(invoice_list, additional_table_columns)
+	columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts = get_columns(invoice_list, additional_table_columns)
 
 	if not invoice_list:
 		msgprint(_("No record found"))
@@ -82,12 +82,10 @@ def _execute(filters, additional_table_columns=None, additional_query_columns=No
 			})
 
 		# Add amount in unrealized account
-		if inv.is_internal_customer and inv.company == inv.represents_company:
-			internal_invoice_details = internal_invoice_map.get(inv.name)
-			if internal_invoice_details:
-				row.update({
-					frappe.scrub(internal_invoice_details['account']): internal_invoice_details['amount']
-				})
+		for account in unrealized_profit_loss_accounts:
+			row.update({
+				frappe.scrub(account): flt(internal_invoice_map.get((inv.name, account)))
+			})
 
 		# net total
 		row.update({'net_total': base_net_total or inv.base_net_total})
@@ -334,7 +332,7 @@ def get_columns(invoice_list, additional_table_columns):
 	columns = columns + income_columns + unrealized_profit_loss_account_columns + \
 		net_total_column + tax_columns + total_columns
 
-	return columns, income_accounts, tax_accounts
+	return columns, income_accounts, tax_accounts, unrealized_profit_loss_accounts
 
 def get_conditions(filters):
 	conditions = ""
@@ -421,15 +419,12 @@ def get_internal_invoice_map(invoice_list):
 	unrealized_amount_details = frappe.db.sql("""SELECT name, unrealized_profit_loss_account,
 		base_net_total as amount from `tabSales Invoice` where name in (%s)
 		and is_internal_customer = 1 and company = represents_company""" %
-		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1, debug=1)
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
 
 	internal_invoice_map = {}
 	for d in unrealized_amount_details:
 		if d.unrealized_profit_loss_account:
-			internal_invoice_map.setdefault(d.name, {
-				'account': d.unrealized_profit_loss_account,
-				'amount': d.amount
-			})
+			internal_invoice_map.setdefault((d.name, d.unrealized_profit_loss_account), d.amount)
 
 	return internal_invoice_map
 

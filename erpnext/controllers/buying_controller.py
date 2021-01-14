@@ -252,10 +252,13 @@ class BuyingController(StockController):
 				else:
 					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), 'rate')
 
-				if rate != d.rate:
-					frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
-						.format(d.idx), alert=1)
-					d.rate = rate
+				if self.is_internal_transfer():
+					if rate != d.rate:
+						d.rate = rate
+						d.discount_percentage = 0
+						d.discount_amount = 0
+						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
+							.format(d.idx), alert=1)
 
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
 		supplied_items_cost = 0.0
