@@ -446,7 +446,7 @@ class Subscription(Document):
 		if not self.generate_invoice_at_period_start:
 			return False
 
-		if self.is_new_subscription():
+		if self.is_new_subscription() and getdate() >= getdate(self.current_invoice_start):
 			return True
 
 		# Check invoice dates and make sure it doesn't have outstanding invoices
