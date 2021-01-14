@@ -6,13 +6,22 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe import _
-from frappe.utils import cstr
+from frappe.utils import cstr, cint
 from frappe.model.document import Document
 from erpnext.healthcare.page.patient_history.patient_history import get_patient_history_doctypes
 
 class PatientHistorySettings(Document):
 	def validate(self):
+		self.validate_submittable_doctypes()
 		self.validate_date_fieldnames()
+
+	def validate_submittable_doctypes(self):
+		for entry in self.custom_doctypes:
+			if not cint(frappe.db.get_value('DocType', entry.document_type, 'is_submittable')):
+				msg = _('Row #{0}: Document Type {1} is not submittable. ').format(
+					entry.idx, frappe.bold(entry.document_type))
+				msg += _('Patient Medical Record can only be created for submittable document types.')
+				frappe.throw(msg)
 
 	def validate_date_fieldnames(self):
 		for entry in self.custom_doctypes:
@@ -155,10 +164,17 @@ def get_patient_history_config_dt(doctype):
 
 def validate_medical_record_required(doc):
 	if frappe.flags.in_patch or frappe.flags.in_install or frappe.flags.in_setup_wizard \
-		or doc.meta.module != 'Healthcare':
+		or get_module(doc) != 'Healthcare':
 		return False
 
 	if doc.doctype not in get_patient_history_doctypes():
 		return False
 
 	return True
+
+def get_module(doc):
+	module = doc.meta.module
+	if not module:
+		module = frappe.db.get_value('DocType', doc.doctype, 'module')
+
+	return module

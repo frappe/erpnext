@@ -7,7 +7,8 @@ frappe.ui.form.on('Patient History Settings', {
 			return {
 				filters: {
 					custom: 1,
-					module: 'Healthcare'
+					is_submittable: 1,
+					module: 'Healthcare',
 				}
 			};
 		});
