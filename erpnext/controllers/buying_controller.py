@@ -225,7 +225,7 @@ class BuyingController(StockController):
 		ref_doctype_map = {
 			"Purchase Order": "Sales Order Item",
 			"Purchase Receipt": "Delivery Note Item",
-			"Purchase Invoice": "Purchase Invoice Item",
+			"Purchase Invoice": "Sales Invoice Item",
 		}
 
 		ref_doctype = ref_doctype_map.get(self.doctype)
