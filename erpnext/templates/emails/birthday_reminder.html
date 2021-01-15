@@ -1,0 +1,16 @@
+<div class="gray-container text-center">
+	<div>
+		{% for person in birthday_persons %}
+		<span class="avatar avatar-small " title="Mitali">
+			<span class="avatar-frame standard-image" style="{% if person.image %}background-image: url({{person.image}}); {% endif %}  margin-right: 5px;"
+				title={{person.name}}>
+				{% if not person.image %} {{ person.name[:1] }} {% endif %}
+			</span>
+		</span>
+		{% endfor %}
+	</div>
+	<div style="margin-top: 15px">
+		<span>{{ reminder_text }}</span>
+		<p class="text-muted">{{ message }}</p>
+	</div>
+</div>
