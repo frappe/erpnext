@@ -418,6 +418,11 @@ erpnext.PointOfSale.Controller = class {
 						() => this.item_selector.toggle_component(true)
 					]);
 				},
+				delete_order: (name) => {
+					frappe.model.delete_doc(this.frm.doc.doctype, name, () => {
+						this.recent_order_list.refresh_list();
+					});
+				},
 				new_order: () => {
 					frappe.run_serially([
 						() => frappe.dom.freeze(),
