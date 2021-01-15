@@ -154,7 +154,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			if (this.item.serial_no) {
 				this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
 			}
-
+			
 			if (this.has_batch && !this.has_serial_no && d.batch_no) {
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
@@ -220,7 +220,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 
 				if (i !== 0 && !this.batch_exists(batch_no)) {
 					row = this.frm.add_child("items", { ...this.item });
-					frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
 				} else {
 					row = this.frm.doc.items.find(i => i.batch_no === batch_no);
 				}
@@ -232,7 +231,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.map_row_values(row, batch, 'batch_no',
 					'selected_qty', this.values.warehouse);
 			});
-		}
+		} 
 	},
 
 	update_serial_no_item() {
@@ -251,7 +250,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				filters: { 'name': ["in", selected_serial_nos]},
 				fields: ["batch_no", "name"]
 			}).then((data) => {
-				// data = [{batch_no: 'batch-1', name: "SR-001"},
+				// data = [{batch_no: 'batch-1', name: "SR-001"}, 
 				// 	{batch_no: 'batch-2', name: "SR-003"}, {batch_no: 'batch-2', name: "SR-004"}]
 				const batch_serial_map = data.reduce((acc, d) => {
 					if (!acc[d['batch_no']]) acc[d['batch_no']] = [];
@@ -337,8 +336,6 @@ erpnext.SerialNoBatchSelector = Class.extend({
 						},
 						change: function () {
 							const batch_no = this.get_value();
-							let val = this.get_value();
-
 							if (!batch_no) {
 								this.grid_row.on_grid_fields_dict
 									.available_qty.set_value(0);

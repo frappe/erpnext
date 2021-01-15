@@ -326,8 +326,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				});
 			}
 		})
-
-		me.apply_price_list(item, true);
 	},
 
 	set_dynamic_labels: function() {
@@ -399,6 +397,10 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
 				this.set_batch_number(cdt, cdn);
 			}
+	},
+
+	batch_no: function(doc, cdt, cdn) {
+		this._super(doc, cdt, cdn);
 	},
 
 	qty: function(doc, cdt, cdn) {
