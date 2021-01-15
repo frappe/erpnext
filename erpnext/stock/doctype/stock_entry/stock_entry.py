@@ -60,7 +60,7 @@ class StockEntry(StockController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse()
-		self.validate_for_maintenance()
+		self.validate_customer_provided_entry()
 		self.validate_work_order()
 		self.validate_bom()
 		self.validate_finished_goods()
@@ -141,6 +141,9 @@ class StockEntry(StockController):
 
 		if ste_type_doc.is_opening:
 			self.is_opening = ste_type_doc.is_opening
+
+		if ste_type_doc.customer_provided:
+			self.customer_provided = cint(ste_type_doc.customer_provided == "Yes")
 
 		self.source_warehouse_type = ste_type_doc.source_warehouse_type
 		self.target_warehouse_type = ste_type_doc.target_warehouse_type
@@ -337,11 +340,11 @@ class StockEntry(StockController):
 			if cstr(d.s_warehouse) == cstr(d.t_warehouse) and not self.purpose == "Material Transfer for Manufacture":
 				frappe.throw(_("Source and target warehouse cannot be same for row {0}").format(d.idx))
 
-	def validate_for_maintenance(self):
+	def validate_customer_provided_entry(self):
 		if self.purpose not in ('Material Receipt', 'Material Issue'):
-			self.for_maintenance = 0
+			self.customer_provided = 0
 
-		if not self.for_maintenance:
+		if not self.customer_provided:
 			self.customer = self.customer_name = self.customer_address = None
 		if not self.customer_address and not self.supplier_address:
 			self.address_display = None
@@ -498,7 +501,7 @@ class StockEntry(StockController):
 
 					scrap_material_cost += flt(d.basic_amount)
 
-			if self.for_maintenance:
+			if self.customer_provided:
 				d.basic_rate = 0
 				d.basic_amount = 0
 				d.allow_zero_valuation_rate = 1
@@ -1602,7 +1605,7 @@ def get_warehouse_details(args):
 		})
 		ret = {
 			"actual_qty" : get_previous_sle(args).get("qty_after_transaction") or 0,
-			"basic_rate" : get_incoming_rate(args) if not args.get('for_maintenance') else 0
+			"basic_rate" : get_incoming_rate(args) if not args.get('customer_provided') else 0
 		}
 	return ret
 
