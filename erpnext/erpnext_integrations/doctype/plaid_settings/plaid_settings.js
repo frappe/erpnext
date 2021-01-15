@@ -27,9 +27,9 @@ frappe.ui.form.on('Plaid Settings', {
 							title: __("Sync Started"),
 							message: __("The sync has started in the background, please check the {0} list for new records.", [bank_transaction_link]),
 							alert: 1
-						})
+						});
 					}
-				})
+				});
 			}).addClass("btn-primary");
 		}
 	}
