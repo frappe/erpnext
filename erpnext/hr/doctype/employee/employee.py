@@ -310,7 +310,7 @@ def get_birthday_reminder_text_and_message(birthday_persons):
 		birthday_person_text += " & {}".format(last_person)
 
 	reminder_text = "Today is {0}'s birthday 🎉".format(birthday_person_text)
-	message = "A friendly reminder of an important date for our team. Everyone, let’s congratulate {0} their birthday".format(birthday_person_text)
+	message = "A friendly reminder of an important date for our team. Everyone, let’s congratulate {0} their birthday.".format(birthday_person_text)
 
 	return reminder_text, message
 
