@@ -55,12 +55,12 @@ class StockEntry(StockController):
 		self.validate_vehicle_item()
 		self.validate_item()
 		self.validate_customer_provided_item()
+		self.validate_customer_provided_entry()
 		self.validate_qty()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse()
-		self.validate_customer_provided_entry()
 		self.validate_work_order()
 		self.validate_bom()
 		self.validate_finished_goods()
@@ -349,6 +349,10 @@ class StockEntry(StockController):
 		if not self.customer_address and not self.supplier_address:
 			self.address_display = None
 
+		if self.customer_provided:
+			for d in self.items:
+				d.allow_zero_valuation_rate = 1
+
 	def validate_work_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"):
 			# check if work order is entered
@@ -473,6 +477,10 @@ class StockEntry(StockController):
 		fg_basic_rate = 0.0
 
 		for d in self.get('items'):
+			if self.customer_provided and not d.s_warehouse:
+				d.basic_rate = 0
+				d.basic_amount = 0
+
 			if d.t_warehouse: fg_basic_rate = flt(d.basic_rate)
 			args = self.get_args_for_incoming_rate(d)
 
@@ -500,11 +508,6 @@ class StockEntry(StockController):
 				if getattr(self, "pro_doc", frappe._dict()).scrap_warehouse == d.t_warehouse:
 
 					scrap_material_cost += flt(d.basic_amount)
-
-			if self.customer_provided:
-				d.basic_rate = 0
-				d.basic_amount = 0
-				d.allow_zero_valuation_rate = 1
 
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
 		if self.purpose == "Repack" or (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
