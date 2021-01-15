@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.utils import cint
 from frappe.model.document import Document
 
 class StockEntryType(Document):
@@ -22,5 +23,8 @@ def get_stock_entry_type_details(stock_entry_type):
 		out.is_opening = doc.is_opening
 		if doc.posting_date:
 			out.posting_date = doc.posting_date
+
+	if doc.customer_provided:
+		out.customer_provided = cint(doc.customer_provided == "Yes")
 
 	return out

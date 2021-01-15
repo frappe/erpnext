@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "purpose",
+  "customer_provided",
   "column_break_2",
   "disabled",
   "section_break_4",
@@ -77,9 +78,15 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Posting Date"
+  },
+  {
+   "fieldname": "customer_provided",
+   "fieldtype": "Select",
+   "label": "Provided By Customer",
+   "options": "\nNo\nYes"
   }
  ],
- "modified": "2020-10-10 16:14:07.805734",
+ "modified": "2021-01-15 15:35:10.565651",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",

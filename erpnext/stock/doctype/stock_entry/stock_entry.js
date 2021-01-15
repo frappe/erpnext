@@ -294,7 +294,7 @@ frappe.ui.form.on('Stock Entry', {
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
 
-	for_maintenance: function(frm) {
+	customer_provided: function(frm) {
 		frm.cscript.toggle_related_fields(frm.doc);
 	},
 
@@ -375,7 +375,7 @@ frappe.ui.form.on('Stock Entry', {
 		}
 		item.alt_uom_qty = flt(flt(item.transfer_qty) * flt(item.alt_uom_size), precision("alt_uom_qty", item));
 
-		if (cint(frm.doc.for_maintenance)) {
+		if (cint(frm.doc.customer_provided)) {
 			frappe.model.set_value(cdt, cdn, 'basic_rate', 0.0);
 			frm.events.calculate_basic_amount(frm, item);
 		} else {
@@ -424,7 +424,7 @@ frappe.ui.form.on('Stock Entry', {
 						'company': frm.doc.company,
 						'voucher_type': frm.doc.doctype,
 						'voucher_no': child.name,
-						'for_maintenance': cint(frm.doc.for_maintenance),
+						'customer_provided': cint(frm.doc.customer_provided),
 						'allow_zero_valuation': 1
 					}
 				},
@@ -523,7 +523,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 	basic_rate: function(frm, cdt, cdn) {
 		var item = locals[cdt][cdn];
 
-		if (cint(frm.doc.for_maintenance)) {
+		if (cint(frm.doc.customer_provided)) {
 			item.basic_rate = 0;
 		}
 
@@ -580,7 +580,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'qty'			: d.qty,
 				'voucher_type'		: frm.doc.doctype,
 				'voucher_no'		: d.name,
-				'for_maintenance'	: cint(frm.doc.for_maintenance),
+				'customer_provided'	: cint(frm.doc.customer_provided),
 				'allow_zero_valuation': 1,
 			};
 
@@ -935,14 +935,14 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 		this.frm.cscript.toggle_enable_bom();
 
-		var for_maintenance = in_list(['Material Receipt', 'Material Issue'], doc.purpose) && cint(doc.for_maintenance);
-		this.frm.toggle_reqd("customer", for_maintenance);
+		var customer_provided = in_list(['Material Receipt', 'Material Issue'], doc.purpose) && cint(doc.customer_provided);
+		this.frm.toggle_reqd("customer", customer_provided);
 
 		if (doc.purpose == 'Send to Subcontractor') {
 			doc.customer = doc.customer_name = doc.customer_address =
 				doc.delivery_note_no = doc.sales_invoice_no = null;
 		} else {
-			if (!for_maintenance) {
+			if (!customer_provided) {
 				doc.customer = doc.customer_name = doc.customer_address =
 					doc.delivery_note_no = doc.sales_invoice_no = null;
 			}
