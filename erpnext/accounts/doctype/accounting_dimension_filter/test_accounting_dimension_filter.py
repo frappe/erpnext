@@ -13,6 +13,7 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 	def setUp(self):
 		create_dimension()
 		create_accounting_dimension_filter()
+		self.invoice_list = []
 
 	def test_allowed_dimension_validation(self):
 		si = create_sales_invoice(do_not_save=1)
@@ -22,6 +23,7 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 		si.save()
 
 		self.assertRaises(InvalidAccountDimensionError, si.submit)
+		self.invoice_list.append(si)
 
 	def test_mandatory_dimension_validation(self):
 		si = create_sales_invoice(do_not_save=1)
@@ -34,10 +36,16 @@ class TestAccountingDimensionFilter(unittest.TestCase):
 		si.save()
 
 		self.assertRaises(MandatoryAccountDimensionError, si.submit)
+		self.invoice_list.append(si)
 
 	def tearDown(self):
 		disable_dimension_filter()
 		disable_dimension()
+
+		for si in self.invoice_list:
+			si.load_from_db()
+			if si.docstatus == 1:
+				si.cancel()
 
 def create_accounting_dimension_filter():
 	if not frappe.db.get_value('Accounting Dimension Filter',
