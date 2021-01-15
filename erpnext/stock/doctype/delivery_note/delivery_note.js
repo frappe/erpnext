@@ -14,7 +14,7 @@ frappe.ui.form.on("Delivery Note", {
 		frm.custom_make_buttons = {
 			'Packing Slip': 'Packing Slip',
 			'Installation Note': 'Installation Note',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Stock Entry': 'Return',
 			'Shipment': 'Shipment'
 		},

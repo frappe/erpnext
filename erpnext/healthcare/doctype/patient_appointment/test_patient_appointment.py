@@ -23,8 +23,10 @@ class TestPatientAppointment(unittest.TestCase):
 		self.assertEquals(appointment.status, 'Open')
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2))
 		self.assertEquals(appointment.status, 'Scheduled')
-		create_encounter(appointment)
+		encounter = create_encounter(appointment)
 		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
+		encounter.cancel()
+		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Open')
 
 	def test_start_encounter(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
