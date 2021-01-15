@@ -7,7 +7,7 @@ import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.india import states
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 from frappe.utils import today
 
 def setup(company=None, patch=True):
@@ -274,10 +274,20 @@ def make_custom_fields(update=True):
 			'print_hide': 1
 		},
 		{
+			'fieldname': 'transporter_name',
+			'label': 'Transporter Name',
+			'fieldtype': 'Data',
+			'insert_after': 'transporter',
+			'fetch_from': 'transporter.name',
+			'read_only': 1,
+			'print_hide': 1,
+			'translatable': 0
+		},
+		{
 			'fieldname': 'gst_transporter_id',
 			'label': 'GST Transporter ID',
 			'fieldtype': 'Data',
-			'insert_after': 'transporter',
+			'insert_after': 'transporter_name',
 			'fetch_from': 'transporter.gst_transporter_id',
 			'print_hide': 1,
 			'translatable': 0
@@ -319,11 +329,18 @@ def make_custom_fields(update=True):
 			'insert_after': 'distance'
 		},
 		{
-			'fieldname': 'transporter_name',
-			'label': 'Transporter Name',
-			'fieldtype': 'Data',
+			'fieldname': 'transporter_address',
+			'label': 'Transporter Address Name',
+			'fieldtype': 'Link',
 			'insert_after': 'transporter_col_break',
-			'fetch_from': 'transporter.name',
+			'options': 'Address',
+			'print_hide': 1
+		},
+		{
+			'fieldname': 'transporter_address_display',
+			'label': 'Transporter Address Preview',
+			'fieldtype': 'Small Text',
+			'insert_after': 'transporter_address',
 			'read_only': 1,
 			'print_hide': 1,
 			'translatable': 0
@@ -333,7 +350,8 @@ def make_custom_fields(update=True):
 			'label': 'Mode of Transport',
 			'fieldtype': 'Select',
 			'options': '\nRoad\nAir\nRail\nShip',
-			'insert_after': 'transporter_name',
+			'default': 'Road',
+			'insert_after': 'transporter_address_display',
 			'print_hide': 1,
 			'translatable': 0
 		},
@@ -567,13 +585,18 @@ def set_salary_components(docs):
 
 def set_tax_withholding_category(company):
 	accounts = []
+	fiscal_year = None
 	abbr = frappe.get_value("Company", company, "abbr")
 	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
 
 	if company and tds_account:
 		accounts = [dict(company=company, account=tds_account)]
 
-	fiscal_year = get_fiscal_year(today(), company=company)[0]
+	try:
+		fiscal_year = get_fiscal_year(today(), verbose=0, company=company)[0]
+	except FiscalYearError:
+		pass
+
 	docs = get_tds_details(accounts, fiscal_year)
 
 	for d in docs:
@@ -588,11 +611,14 @@ def set_tax_withholding_category(company):
 			if accounts:
 				doc.append("accounts", accounts[0])
 
-			# if fiscal year don't match with any of the already entered data, append rate row
-			fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
-			if not fy_exist:
-				doc.append("rates", d.get('rates')[0])
-
+			if fiscal_year:
+				# if fiscal year don't match with any of the already entered data, append rate row
+				fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
+				if not fy_exist:
+					doc.append("rates", d.get('rates')[0])
+					
+			doc.flags.ignore_permissions = True
+			doc.flags.ignore_mandatory = True
 			doc.save()
 
 def set_tds_account(docs, company):
