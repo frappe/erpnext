@@ -707,7 +707,7 @@ class PurchaseInvoice(BuyingController):
 							frappe.db.set_value("Asset", asset.name, "gross_purchase_amount", flt(item.valuation_rate))
 							frappe.db.set_value("Asset", asset.name, "purchase_receipt_amount", flt(item.valuation_rate))
 
-			if self.auto_accounting_for_stock and self.is_opening == "No" and \
+			if self.auto_accounting_for_stock and self.is_opening == "No" and not self.update_stock and \
 				item.item_code in stock_items and item.item_tax_amount:
 						gl_entries.append(
 							self.get_gl_dict({
