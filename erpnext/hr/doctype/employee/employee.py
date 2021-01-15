@@ -320,7 +320,7 @@ def send_birthday_reminder(recipients, reminder_text, birthday_persons, message)
 		subject=_("Birthday Reminder"),
 		template="birthday_reminder",
 		args=dict(
-			reminder_text=reminder,
+			reminder_text=reminder_text,
 			birthday_persons=birthday_persons,
 			message=message,
 		),
