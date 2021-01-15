@@ -269,10 +269,9 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							'qty', this.values.warehouse);
 					} else if (!this.batch_exists(batch_no)) {
 						row = this.frm.add_child("items", { ...this.item });
-						frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
+						row.batch_no = batch_no;
 					} else {
 						row = this.frm.doc.items.find(i => i.batch_no === batch_no);
-						frappe.model.set_value(row.doctype, row.name, 'batch_no', batch_no);
 					}
 					const values = {
 						'qty': serial_no.length,
