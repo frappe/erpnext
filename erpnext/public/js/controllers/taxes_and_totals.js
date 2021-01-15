@@ -327,7 +327,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.base_total_before_discount = this.frm.doc.total_before_discount = 0.0;
 		this.frm.doc.base_tax_exclusive_total_before_discount = this.frm.doc.tax_exclusive_total_before_discount = 0.0;
 		this.frm.doc.base_tax_exclusive_total_discount = this.frm.doc.tax_exclusive_total_discount = 0.0;
-		this.frm.doc.base_total_discount_after_taxes = this.frm.doc.total_discount_after_taxes = 0.0;
 
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total_qty += item.qty;
@@ -349,17 +348,15 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			me.frm.doc.tax_exclusive_total_discount += item.tax_exclusive_total_discount;
 			me.frm.doc.base_tax_exclusive_total_discount += item.base_tax_exclusive_total_discount;
 
-			if (cint(item.apply_discount_after_taxes)) {
-				me.frm.doc.total_discount_after_taxes += item.tax_exclusive_total_discount;
-				me.frm.doc.base_total_discount_after_taxes += item.base_tax_exclusive_total_discount;
-			}
-
 			me.frm.doc.taxable_total += item.taxable_amount;
 			me.frm.doc.base_taxable_total += item.base_taxable_amount;
 
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
 		});
+
+		this.frm.doc.total_discount_after_taxes = this.frm.doc.taxable_total - this.frm.doc.net_total;
+		this.frm.doc.base_total_discount_after_taxes = this.frm.doc.base_taxable_total - this.frm.doc.base_net_total;
 
 		frappe.model.round_floats_in(this.frm.doc, ["total", "base_total", "net_total", "base_net_total",
 			"taxable_total", "base_taxable_total",
@@ -461,8 +458,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					// adjust Discount Amount loss in last tax iteration
 					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied
 						&& me.frm.doc.apply_discount_on == "Grand Total" && me.frm.doc.discount_amount) {
-						me.frm.doc.rounding_adjustment = flt(me.frm.doc.total_after_taxes -
-							flt(me.frm.doc.discount_amount) - tax.total, precision("rounding_adjustment"));
+						var new_grand_total = me.frm.doc.grand_total - flt(me.frm.doc.discount_amount);
+						var calculated_grand_total = me.frm.doc.net_total + frappe.utils.sum((me.frm.doc.taxes || []).map(d => d.tax_amount_after_discount_amount));
+						me.frm.doc.rounding_adjustment = flt(new_grand_total - calculated_grand_total, precision("rounding_adjustment"));
 					}
 				}
 			});
@@ -758,12 +756,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			if(!this.frm.doc.apply_discount_on)
 				frappe.throw(__("Please select Apply Discount On"));
 
-			if(this.frm.doc.items.filter(d => cint(d.apply_discount_after_taxes)).length && (this.frm.doc.taxes || []).filter(d => d.tax_amount).length) {
-				this.frm.doc.discount_amount = this.frm.doc.additional_discount_percentage = 0;
-				this.frm.refresh_fields(['discount_amount', 'additional_discount_percentage']);
-				frappe.msgprint(__("Additional Discount is not allowed when discount is applied after taxes. Removing Additional Discount."));
-			}
-
 			this.frm.doc.base_discount_amount = flt(this.frm.doc.discount_amount * this.frm.doc.conversion_rate,
 				precision("base_discount_amount"));
 
@@ -772,12 +764,17 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			// calculate item amount after Discount Amount
 			if (total_for_discount_amount) {
 				$.each(this.frm.doc["items"] || [], function(i, item) {
-					distributed_amount = flt(me.frm.doc.discount_amount) * item.net_amount / total_for_discount_amount;
-					
+					var net_or_inclusive = me.get_item_amount_for_discount_amount(item);
+
+					distributed_amount = flt(me.frm.doc.discount_amount) * net_or_inclusive / total_for_discount_amount;
+
 					item.net_amount = flt(item.net_amount - distributed_amount,
 						precision("base_amount", item));
-					item.taxable_amount = item.net_amount
 					net_total += item.net_amount;
+
+					if (!cint(item.apply_discount_after_taxes)) {
+						item.taxable_amount = item.net_amount;
+					}
 
 					// discount amount rounding loss adjustment if no taxes
 					if ((!(me.frm.doc.taxes || []).length || total_for_discount_amount==me.frm.doc.net_total || (me.frm.doc.apply_discount_on == "Net Total"))
@@ -788,7 +785,10 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 							precision("net_amount", item));
 					}
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
-					item.taxable_rate = item.net_rate
+
+					if (!cint(item.apply_discount_after_taxes)) {
+						item.taxable_rate = item.net_rate
+					}
 					me.set_in_company_currency(item, ["net_rate", "net_amount", "taxable_rate", "taxable_amount"]);
 				});
 
@@ -820,7 +820,34 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				if (value) total_actual_tax += value;
 			});
 
-			return flt(this.frm.doc.total_after_taxes - total_actual_tax, precision("grand_total"));
+			return flt(this.frm.doc.grand_total - total_actual_tax, precision("grand_total"));
+		}
+	},
+
+	get_item_amount_for_discount_amount: function(item) {
+		if(this.frm.doc.apply_discount_on == "Net Total" || !cint(item.apply_discount_after_taxes)) {
+			return item.net_amount;
+		} else {
+			var item_tax_detail = JSON.parse(item.item_tax_detail || '{}');
+			var total_actual_tax = 0.0;
+			var actual_taxes_dict = {};
+
+			$.each(this.frm.doc["taxes"] || [], function(i, tax) {
+				if (in_list(["Actual", "Weighted Distribution", "Manual", "On Item Quantity"], tax.charge_type)) {
+					var tax_amount = (tax.category == "Valuation") ? 0.0 : flt(item_tax_detail[tax.name]);
+					tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
+					actual_taxes_dict[tax.idx] = tax_amount;
+				} else if (actual_taxes_dict[tax.row_id] !== null) {
+					var actual_tax_amount = flt(actual_taxes_dict[tax.row_id]) * flt(tax.rate) / 100;
+					actual_taxes_dict[tax.idx] = actual_tax_amount;
+				}
+			});
+
+			$.each(actual_taxes_dict, function(key, value) {
+				if (value) total_actual_tax += value;
+			});
+
+			return flt(item.tax_inclusive_amount - total_actual_tax);
 		}
 	},
 

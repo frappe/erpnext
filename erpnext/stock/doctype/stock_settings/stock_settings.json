@@ -16,6 +16,7 @@
   "show_barcode_field",
   "clean_description_html",
   "filter_items_by_applicable_to",
+  "enable_dynamic_bundling",
   "section_break_7",
   "restrict_amounts_in_report_to_role",
   "restrict_negative_stock_to_role",
@@ -210,13 +211,19 @@
    "fieldname": "filter_items_by_applicable_to",
    "fieldtype": "Check",
    "label": "Filter Items in Transactions by Applicable To Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_dynamic_bundling",
+   "fieldtype": "Check",
+   "label": "Enable Dynamic Bundling"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-11-03 00:02:44.175087",
- "modified_by": "Administrator",
+ "modified": "2020-12-31 14:42:48.698728",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Stock",
  "name": "Stock Settings",
  "owner": "Administrator",

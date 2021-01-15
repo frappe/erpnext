@@ -28,6 +28,14 @@ from collections import OrderedDict
 force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules",
 	"allow_zero_valuation_rate", "has_batch_no", "has_serial_no", "is_vehicle")
 
+merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
+	'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
+	'item_taxes_and_charges', 'tax_inclusive_amount']
+
+merge_items_rate_fields = [('rate', 'amount'), ('taxable_rate', 'taxable_amount'), ('net_rate', 'net_amount'),
+	('discount_amount', 'total_discount'), ('price_list_rate', 'amount_before_discount'),
+	('tax_inclusive_rate', 'tax_inclusive_amount'), ('weight_per_unit', 'total_weight')]
+
 print_total_fields_from_items = [
 	('total_qty', 'qty'),
 	('total_alt_uom_qty', 'alt_uom_qty'),
@@ -69,6 +77,12 @@ class AccountsController(TransactionBase):
 							 "Purchase Invoice", "Sales Invoice")
 			if self.doctype in relevant_docs:
 				self.set_payment_schedule()
+
+		self.set_onload("enable_dynamic_bundling", self.dynamic_bundling_enabled())
+
+	def dynamic_bundling_enabled(self):
+		return self.doctype in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'] and\
+			frappe.get_cached_value('Stock Settings', None, "enable_dynamic_bundling")
 
 	def ensure_supplier_is_not_blocked(self):
 		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
@@ -194,6 +208,9 @@ class AccountsController(TransactionBase):
 
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
+			if self.dynamic_bundling_enabled():
+				self.merge_bundled_items()
+
 			if self.get("group_same_items"):
 				self.group_similar_items()
 
@@ -927,19 +944,79 @@ class AccountsController(TransactionBase):
 		frappe.db.set_value(self.doctype, self.name, "total_advance",
 							total_allocated_amount, update_modified=False)
 
+	def merge_bundled_items(self):
+		bundles = {}
+		item_meta = frappe.get_meta(self.doctype + " Item")
+		count = 0
+
+		copy_fields = ['qty', 'stock_qty', 'alt_uom_qty']
+
+		sum_fields = merge_items_sum_fields.copy()
+		sum_fields = [f for f in sum_fields if f not in copy_fields]
+		sum_fields += ['tax_exclusive_' + f for f in sum_fields if item_meta.has_field('tax_exclusive_' + f)]
+
+		rate_fields = merge_items_rate_fields.copy()
+		rate_fields += [('tax_exclusive_' + t, 'tax_exclusive_' + s) for t, s in rate_fields
+			if item_meta.has_field('tax_exclusive_' + t) and item_meta.has_field('tax_exclusive_' + s)]
+
+		base_fields = [('base_' + f, f) for f in sum_fields if item_meta.has_field('base_' + f)]
+		base_fields += [('base_' + t, t) for t, s in rate_fields if item_meta.has_field('base_' + t)]
+		base_fields += [('base_' + f, f) for f in copy_fields if item_meta.has_field('base_' + f)]
+
+		# Sum amounts
+		in_bundle = 0
+		for item in self.items:
+			if item.get('bundling_state') == 'Start':
+				in_bundle = item.idx
+
+			if not in_bundle or item.get('bundling_state') == 'Start':
+				new_bundle = frappe._dict()
+				for f in copy_fields:
+					new_bundle[f] = item.get(f)
+				bundles[item.idx] = new_bundle
+
+			group_item = bundles[in_bundle or item.idx]
+
+			if item.get('bundling_state') == 'Terminate':
+				in_bundle = 0
+
+			self.merge_similar_item_aggregate(item, group_item, sum_fields)
+
+		# Calculate average rates and get serial nos string
+		for group_item in bundles.values():
+			self.merge_similar_items_postprocess(group_item, rate_fields)
+
+		# Calculate company currency values
+		for group_item in bundles.values():
+			for target, source in base_fields:
+				group_item[target] = group_item.get(source, 0) * self.conversion_rate
+
+		# Remove duplicates and set aggregated values
+		to_remove = []
+		for item in self.items:
+			if item.idx in bundles.keys():
+				count += 1
+				item.update(bundles[item.idx])
+				del bundles[item.idx]
+				item.idx = count
+			else:
+				to_remove.append(item)
+
+		for item in to_remove:
+			self.remove(item)
+
+		self.total_qty = sum([d.qty for d in self.items])
+		self.total_alt_uom_qty = sum([d.alt_uom_qty for d in self.items])
+
 	def group_similar_items(self):
 		group_item_data = {}
 		item_meta = frappe.get_meta(self.doctype + " Item")
 		count = 0
 
-		sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
-			'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
-			'item_taxes_and_charges', 'tax_inclusive_amount']
+		sum_fields = merge_items_sum_fields.copy()
 		sum_fields += ['tax_exclusive_' + f for f in sum_fields if item_meta.has_field('tax_exclusive_' + f)]
 
-		rate_fields = [('rate', 'amount'), ('taxable_rate', 'taxable_amount'), ('net_rate', 'net_amount'),
-			('discount_amount', 'total_discount'), ('price_list_rate', 'amount_before_discount'),
-			('tax_inclusive_rate', 'tax_inclusive_amount'), ('weight_per_unit', 'total_weight')]
+		rate_fields = merge_items_rate_fields.copy()
 		rate_fields += [('tax_exclusive_' + t, 'tax_exclusive_' + s) for t, s in rate_fields
 			if item_meta.has_field('tax_exclusive_' + t) and item_meta.has_field('tax_exclusive_' + s)]
 
@@ -950,30 +1027,11 @@ class AccountsController(TransactionBase):
 		for item in self.items:
 			group_key = (cstr(item.item_code), cstr(item.item_name), item.uom)
 			group_item = group_item_data.setdefault(group_key, frappe._dict())
-			for f in sum_fields:
-				group_item[f] = group_item.get(f, 0) + flt(item.get(f))
-
-			group_item_serial_nos = group_item.setdefault('serial_no', [])
-			if item.get('serial_no'):
-				group_item_serial_nos += filter(lambda s: s, item.serial_no.split('\n'))
-
-			group_item_tax_detail = group_item.setdefault('item_tax_detail', {})
-			item_tax_detail = json.loads(item.item_tax_detail or '{}')
-			for tax_row_name, tax_amount in item_tax_detail.items():
-				group_item_tax_detail.setdefault(tax_row_name, 0)
-				group_item_tax_detail[tax_row_name] += flt(tax_amount)
+			self.merge_similar_item_aggregate(item, group_item, sum_fields)
 
 		# Calculate average rates and get serial nos string
 		for group_item in group_item_data.values():
-			if group_item.qty:
-				for target, source in rate_fields:
-					group_item[target] = flt(group_item[source]) / flt(group_item.qty)
-			else:
-				for target, source in rate_fields:
-					group_item[target] = 0
-
-			group_item.serial_no = '\n'.join(group_item.serial_no)
-			group_item.item_tax_detail = json.dumps(group_item.item_tax_detail)
+			self.merge_similar_items_postprocess(group_item, rate_fields)
 
 		# Calculate company currenct values
 		for group_item in group_item_data.values():
@@ -1002,6 +1060,34 @@ class AccountsController(TransactionBase):
 
 		for item in duplicate_list:
 			self.remove(item)
+
+	def merge_similar_item_aggregate(self, item, group_item, sum_fields):
+		for f in sum_fields:
+			group_item[f] = group_item.get(f, 0) + flt(item.get(f))
+
+		group_item_serial_nos = group_item.setdefault('serial_no', [])
+		if item.get('serial_no'):
+			group_item_serial_nos += filter(lambda s: s, item.serial_no.split('\n'))
+
+		group_item_tax_detail = group_item.setdefault('item_tax_detail', {})
+		item_tax_detail = json.loads(item.item_tax_detail or '{}')
+		for tax_row_name, tax_amount in item_tax_detail.items():
+			group_item_tax_detail.setdefault(tax_row_name, 0)
+			group_item_tax_detail[tax_row_name] += flt(tax_amount)
+
+	def merge_similar_items_postprocess(self, group_item, rate_fields):
+		if group_item.qty:
+			for target, source in rate_fields:
+				group_item[target] = flt(group_item[source]) / flt(group_item.qty)
+		else:
+			for target, source in rate_fields:
+				group_item[target] = 0
+
+		group_item.serial_no = '\n'.join(group_item.serial_no)
+		group_item.item_tax_detail = json.dumps(group_item.item_tax_detail)
+
+		group_item.discount_percentage = group_item.total_discount / group_item.amount_before_discount * 100\
+			if group_item.amount_before_discount else group_item.discount_percentage
 
 	def group_items_by_item_tax_and_item_group(self):
 		grouped = OrderedDict()

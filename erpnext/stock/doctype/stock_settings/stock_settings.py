@@ -33,6 +33,9 @@ class StockSettings(Document):
 		self.cant_change_valuation_method()
 		self.validate_clean_description_html()
 
+		if self.enable_dynamic_bundling:
+			make_bundling_fields()
+
 	def validate_warehouses(self):
 		warehouse_fields = ["default_warehouse", "sample_retention_warehouse"]
 		for field in warehouse_fields:
@@ -67,3 +70,26 @@ def clean_all_descriptions():
 			clean_description = clean_html(item.description)
 		if item.description != clean_description:
 			frappe.db.set_value('Item', item.name, 'description', clean_description)
+
+def make_bundling_fields():
+	from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+
+	df = {
+		'label': 'Bundling State',
+		'fieldname': 'bundling_state',
+		'fieldtype': 'Select',
+		'options': "\nStart\nContinue\nTerminate",
+		'hidden': 1,
+		'report_hide': 1,
+		'print_hide': 1,
+		'insert_after': 'item_code'
+	}
+
+	custom_fields = {
+		'Quotation Item': [df],
+		'Sales Order Item': [df],
+		'Delivery Note Item': [df],
+		'Sales Invoice Item': [df],
+	}
+
+	create_custom_fields(custom_fields)

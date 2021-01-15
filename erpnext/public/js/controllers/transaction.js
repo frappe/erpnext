@@ -245,6 +245,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
+		if (this.frm.doc.__onload && this.frm.doc.__onload.enable_dynamic_bundling) {
+			erpnext.bundling.setup_bundling(this.frm.doc.doctype);
+		}
 	},
 	onload: function() {
 		var me = this;
@@ -1384,14 +1387,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(frappe.meta.get_docfield(cur_frm.doctype, "base_net_total"))
 			cur_frm.toggle_display("base_net_total", (show_net && (me.frm.doc.currency != company_currency)), true);
 
-		$.each(["apply_discount_on", "additional_discount_percentage", "discount_amount"], function(i, fname) {
-			if(frappe.meta.get_docfield(cur_frm.doctype, fname))
-				cur_frm.toggle_display(fname, !apply_discount_after_taxes, true);
-		});
-
 		$.each(["base_discount_amount"], function(i, fname) {
 			if(frappe.meta.get_docfield(cur_frm.doctype, fname))
-				cur_frm.toggle_display(fname, !apply_discount_after_taxes && (me.frm.doc.currency != company_currency), true);
+				cur_frm.toggle_display(fname, me.frm.doc.currency != company_currency, true);
 		});
 	},
 
