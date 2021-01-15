@@ -666,24 +666,13 @@ def get_item_price(args, item_code, ignore_party=False):
 		:param item_code: str, Item Doctype field item_code
 	"""
 
-	selling_doctypes = ['Sales Invoice', 'Delivery Note', 'Sales Invoice Item',
-		'Delivery Note Item']
-
-	# check for selling price in batch
-	if args.get('doctype') in selling_doctypes and args.get('batch_no'):
-		batch_selling_price = frappe.get_value('Batch', args.get('batch_no'), 'selling_price')
-		if batch_selling_price:
-			item_price = frappe.get_value('Item Price', batch_selling_price, ['name', 'price_list_rate', 'uom',
-				'valid_from', 'valid_upto'], as_dict=1)
-
-			if is_valid_item_price(item_price, args.get('posting_date')):
-				return [[item_price.name, item_price.price_list_rate, item_price.uom]]
-
 	args['item_code'] = item_code
 
 	conditions = """where item_code=%(item_code)s
 		and price_list=%(price_list)s
 		and ifnull(uom, '') in ('', %(uom)s)"""
+
+	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
 
 	if not ignore_party:
 		if args.get("customer"):
@@ -703,16 +692,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by valid_from desc, uom desc """.format(conditions=conditions), args)
-
-def is_valid_item_price(item_price, posting_date):
-	if item_price.valid_upto and getdate(posting_date) <= getdate(valid_upto):
-		return True
-
-	if getdate(posting_date) >= getdate(item_price.valid_from):
-		return True
-
-	return False
+		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -731,8 +711,7 @@ def get_price_list_rate_for(args, item_code):
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
 			"posting_date": args.get('posting_date'),
-			"batch_no": args.get('batch_no'),
-			"doctype": args.get('doctype')
+			"batch_no": args.get('batch_no')
 	}
 
 	item_price_data = 0

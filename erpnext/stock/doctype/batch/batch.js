@@ -12,15 +12,6 @@ frappe.ui.form.on('Batch', {
 				}
 			}
 		}
-
-		frm.set_query('selling_price', function() {
-			return {
-				filters: {
-					'item_code': frm.doc.item,
-					'selling': 1
-				}
-			}
-		})
 	},
 	refresh: (frm) => {
 		if(!frm.is_new()) {

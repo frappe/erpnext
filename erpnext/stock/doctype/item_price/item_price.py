@@ -54,22 +54,22 @@ class ItemPrice(Document):
 			"valid_upto",
 			"packing_unit",
 			"customer",
-			"supplier"]:
+			"supplier",
+			"batch_no"]:
 			if self.get(field):
 				conditions += " and {0} = %({0})s ".format(field)
 			else:
 				conditions += "and (isnull({0}) or {0} = '')".format(field)
 
-		price_list_rates = frappe.db.sql("""
-				select name, price_list_rate
+		price_list_rate = frappe.db.sql("""
+				select price_list_rate
 				from `tabItem Price`
 				{conditions}
-			""".format(conditions=conditions), self.as_dict(), as_dict=1)
+			""".format(conditions=conditions),
+			self.as_dict(),)
 
-		if price_list_rates:
-			for item_price in price_list_rates:
-				if not frappe.get_value('Batch', {'selling_price': item_price.name}):
-					frappe.throw(_("Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, UOM, Qty, and Dates."), ItemPriceDuplicateItem,)
+		if price_list_rate:
+			frappe.throw(_("Item Price appears multiple times based on Price List, Supplier/Customer, Currency, Item, Batch, UOM, Qty, and Dates."), ItemPriceDuplicateItem,)
 
 	def before_save(self):
 		if self.selling:

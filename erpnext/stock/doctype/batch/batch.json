@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "field:batch_id",
  "creation": "2013-03-05 14:50:38",
@@ -20,7 +19,6 @@
   "batch_qty",
   "stock_uom",
   "expiry_date",
-  "selling_price",
   "source",
   "supplier",
   "column_break_9",
@@ -34,9 +32,7 @@
    "default": "0",
    "fieldname": "disabled",
    "fieldtype": "Check",
-   "label": "Disabled",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Disabled"
   },
   {
    "depends_on": "eval:doc.__islocal",
@@ -48,8 +44,6 @@
    "oldfieldname": "batch_id",
    "oldfieldtype": "Data",
    "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1,
    "unique": 1
   },
   {
@@ -60,17 +54,13 @@
    "oldfieldname": "item",
    "oldfieldtype": "Link",
    "options": "Item",
-   "reqd": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "reqd": 1
   },
   {
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
-   "label": "image",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "image"
   },
   {
    "depends_on": "eval:doc.parent_batch",
@@ -78,78 +68,58 @@
    "fieldtype": "Link",
    "label": "Parent Batch",
    "options": "Batch",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
-   "label": "Manufacturing Date",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Manufacturing Date"
   },
   {
    "fieldname": "column_break_3",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "expiry_date",
    "fieldtype": "Date",
    "label": "Expiry Date",
    "oldfieldname": "expiry_date",
-   "oldfieldtype": "Date",
-   "show_days": 1,
-   "show_seconds": 1
+   "oldfieldtype": "Date"
   },
   {
    "fieldname": "source",
    "fieldtype": "Section Break",
-   "label": "Source",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Source"
   },
   {
    "fieldname": "supplier",
    "fieldtype": "Link",
    "label": "Supplier",
    "options": "Supplier",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "column_break_9",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "reference_doctype",
    "fieldtype": "Link",
    "label": "Source Document Type",
    "options": "DocType",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "reference_name",
    "fieldtype": "Dynamic Link",
    "label": "Source Document Name",
    "options": "reference_doctype",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "description",
@@ -157,22 +127,16 @@
    "label": "Batch Description",
    "oldfieldname": "description",
    "oldfieldtype": "Small Text",
-   "show_days": 1,
-   "show_seconds": 1,
    "width": "300px"
   },
   {
    "fieldname": "sb_disabled",
-   "fieldtype": "Section Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "sb_batch",
    "fieldtype": "Section Break",
-   "label": "Batch Details",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Batch Details"
   },
   {
    "fetch_from": "item.item_name",
@@ -180,18 +144,14 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Item Name",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fieldname": "batch_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Batch Quantity",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "fetch_from": "item.stock_uom",
@@ -199,25 +159,14 @@
    "fieldtype": "Link",
    "label": "Batch UOM",
    "options": "UOM",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
-  },
-  {
-   "fieldname": "selling_price",
-   "fieldtype": "Link",
-   "label": "Selling Price",
-   "options": "Item Price",
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   }
  ],
  "icon": "fa fa-archive",
  "idx": 1,
  "image_field": "image",
- "links": [],
  "max_attachments": 5,
- "modified": "2020-12-09 19:57:46.592638",
+ "modified": "2020-09-18 17:26:09.703215",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",

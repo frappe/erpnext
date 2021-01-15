@@ -106,10 +106,6 @@ class Batch(Document):
 	def onload(self):
 		self.image = frappe.db.get_value('Item', self.item, 'image')
 
-	def before_insert(self):
-		if not self.selling_price:
-			self.selling_price = get_item_price(self.item)
-
 	def after_delete(self):
 		revert_series_if_last(get_batch_naming_series(), self.name)
 
@@ -313,10 +309,3 @@ def validate_serial_no_with_batch(serial_nos, item_code):
 	message = "Serial Nos" if len(serial_nos) > 1 else "Serial No"
 	frappe.throw(_("There is no batch found against the {0}: {1}")
 		.format(message, serial_no_link))
-
-def get_item_price(item_code):
-	item_price = frappe.get_all('Item Price', fields=['name'],
-		filters={'item_code': item_code, 'selling': 1}, order_by='valid_from desc, uom desc')
-
-	if item_price:
-		return item_price[0].name
