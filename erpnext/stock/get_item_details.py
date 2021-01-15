@@ -706,7 +706,7 @@ def get_item_price(args, item_code, ignore_party=False):
 		order by valid_from desc, uom desc """.format(conditions=conditions), args)
 
 def is_valid_item_price(item_price, posting_date):
-	if item_price.valid_upto and getdate(posting_date) <= getdate(item_price.valid_upto):
+	if item_price.valid_upto and getdate(posting_date) <= getdate(valid_upto):
 		return True
 
 	if getdate(posting_date) >= getdate(item_price.valid_from):
