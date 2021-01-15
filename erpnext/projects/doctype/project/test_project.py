@@ -42,7 +42,7 @@ class TestProject(unittest.TestCase):
 		task2 = task_exists("Test Template Task Child 1")
 		if not task2:
 			task2 = create_task(subject="Test Template Task Child 1", parent_task=task1.name, is_template=1, begin=1, duration=3)
-		
+
 		task3 = task_exists("Test Template Task Child 2")
 		if not task3:
 			task3 = create_task(subject="Test Template Task Child 2", parent_task=task1.name, is_template=1, begin=2, duration=3)
@@ -76,7 +76,7 @@ class TestProject(unittest.TestCase):
 		task2 = task_exists("Test Template Task with Dependency")
 		if not task2:
 			task2 = create_task(subject="Test Template Task with Dependency", depends_on=task1.name, is_template=1, begin=2, duration=2)
-		
+
 		template = make_project_template("Test Project with Template - Dependent Tasks", [task1, task2])
 		project = get_project(project_name, template)
 		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name'], dict(project=project.name), order_by='creation asc')
@@ -105,6 +105,9 @@ def get_project(name, template):
 def make_project(args):
 	args = frappe._dict(args)
 
+	if args.project_name and frappe.db.exists("Project", {"project_name": args.project_name}):
+		return frappe.get_doc("Project", {"project_name": args.project_name})
+
 	project = frappe.get_doc(dict(
 		doctype = 'Project',
 		project_name = args.project_name,
@@ -116,8 +119,7 @@ def make_project(args):
 		template = make_project_template(args.project_template_name)
 		project.project_template = template.name
 
-	if not frappe.db.exists("Project", args.project_name):
-		project.insert()
+	project.insert()
 
 	return project
 

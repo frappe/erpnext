@@ -78,11 +78,13 @@ def get_appointments_to_invoice(patient, company):
 
 
 def get_encounters_to_invoice(patient, company):
+	if not isinstance(patient, str):
+		patient = patient.name
 	encounters_to_invoice = []
 	encounters = frappe.get_list(
 		'Patient Encounter',
 		fields=['*'],
-		filters={'patient': patient.name, 'company': company, 'invoiced': False, 'docstatus': 1}
+		filters={'patient': patient, 'company': company, 'invoiced': False, 'docstatus': 1}
 	)
 	if encounters:
 		for encounter in encounters:
@@ -91,6 +93,10 @@ def get_encounters_to_invoice(patient, company):
 				income_account = None
 				service_item = None
 				if encounter.practitioner:
+					if encounter.inpatient_record and \
+						frappe.db.get_single_value('Healthcare Settings', 'do_not_bill_inpatient_encounters'):
+						continue
+
 					service_item, practitioner_charge = get_service_item_and_practitioner_charge(encounter)
 					income_account = get_income_account(encounter.practitioner, encounter.company)
 
