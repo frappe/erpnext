@@ -216,7 +216,7 @@ class StockReconciliation(StockController):
 				if row.qty and not row.valuation_rate:
 					frappe.throw(_("Valuation Rate required for Item {0} at row {1}").format(row.item_code, row.idx))
 
-				if ((previous_sle and row.qty == previous_sle.get("qty_after_transaction")
+				if (not item.has_batch_no and (previous_sle and row.qty == previous_sle.get("qty_after_transaction")
 					and (row.valuation_rate == previous_sle.get("valuation_rate") or row.qty == 0))
 					or (not previous_sle and not row.qty)):
 						continue
