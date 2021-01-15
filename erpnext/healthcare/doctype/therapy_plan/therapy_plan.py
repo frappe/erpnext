@@ -47,7 +47,7 @@ class TherapyPlan(Document):
 
 
 @frappe.whitelist()
-def make_therapy_session(therapy_plan, patient, therapy_type, company):
+def make_therapy_session(therapy_plan, patient, therapy_type, company, appointment=None):
 	therapy_type = frappe.get_doc('Therapy Type', therapy_type)
 
 	therapy_session = frappe.new_doc('Therapy Session')
@@ -58,6 +58,7 @@ def make_therapy_session(therapy_plan, patient, therapy_type, company):
 	therapy_session.duration = therapy_type.default_duration
 	therapy_session.rate = therapy_type.rate
 	therapy_session.exercises = therapy_type.exercises
+	therapy_session.appointment = appointment
 
 	if frappe.flags.in_test:
 		therapy_session.start_date = today()
