@@ -757,7 +757,7 @@ class GSPConnector():
 			'label': _('IRN Generated')
 		}
 		self.update_invoice()
-	
+
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
@@ -768,7 +768,7 @@ class GSPConnector():
 			'file_name': 'QRCode_{}.png'.format(docname.replace('/', '-')),
 			'attached_to_doctype': doctype,
 			'attached_to_name': docname,
-			'content': 'qrcode',
+			'content': str(base64.b64encode(os.urandom(64))),
 			'is_private': 1
 		})
 		_file.insert()
