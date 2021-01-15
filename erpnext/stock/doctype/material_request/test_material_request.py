@@ -12,9 +12,6 @@ from erpnext.stock.doctype.material_request.material_request \
 from erpnext.stock.doctype.item.test_item import create_item
 
 class TestMaterialRequest(unittest.TestCase):
-	def setUp(self):
-		erpnext.set_perpetual_inventory(0)
-
 	def test_make_purchase_order(self):
 		mr = frappe.copy_doc(test_records[0]).insert()
 
