@@ -129,6 +129,7 @@ frappe.ui.form.on("Work Order", {
 
 	refresh: function(frm) {
 		erpnext.toggle_naming_series();
+		erpnext.hide_company();
 		erpnext.work_order.set_custom_buttons(frm);
 		frm.set_intro("");
 
