@@ -11,7 +11,7 @@
  "icon": "loan",
  "idx": 0,
  "is_standard": 1,
- "label": "Loan",
+ "label": "Loan Management",
  "links": [
   {
    "hidden": 0,
@@ -219,10 +219,10 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:36.597212",
+ "modified": "2021-01-12 11:27:56.079724",
  "modified_by": "Administrator",
  "module": "Loan Management",
- "name": "Loan",
+ "name": "Loan Management",
  "owner": "Administrator",
  "pin_to_bottom": 0,
  "pin_to_top": 0,

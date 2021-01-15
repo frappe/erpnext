@@ -118,6 +118,15 @@ erpnext.PointOfSale.Controller = class {
 		});
 	}
 
+	set_opening_entry_status() {
+		this.page.set_title_sub(
+			`<span class="indicator orange">
+				<a class="text-muted" href="#Form/POS%20Opening%20Entry/${this.pos_opening}">
+					Opened at ${moment(this.pos_opening_time).format("Do MMMM, h:mma")}
+				</a>
+			</span>`);
+	}
+
 	make_app() {
 		this.prepare_dom();
 		this.prepare_components();
