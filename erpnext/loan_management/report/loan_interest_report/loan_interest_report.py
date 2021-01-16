@@ -15,6 +15,7 @@ def execute(filters=None):
 def get_columns(filters):
 	columns = [
 		{"label": _("Loan"), "fieldname": "loan", "fieldtype": "Link", "options": "Loan", "width": 160},
+		{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 160},
 		{"label": _("Applicant Type"), "fieldname": "applicant_type", "options": "DocType", "width": 100},
 		{"label": _("Applicant Name"), "fieldname": "applicant_name", "fieldtype": "Dynamic Link", "options": "applicant_type", "width": 150},
 		{"label": _("Loan Type"), "fieldname": "loan_type", "fieldtype": "Link", "options": "Loan Type", "width": 100},
@@ -37,7 +38,7 @@ def get_active_loan_details(filters):
 	loan_details = frappe.get_all("Loan",
 		fields=["name as loan", "applicant_type", "applicant as applicant_name", "loan_type",
 		"disbursed_amount", "rate_of_interest", "total_payment", "total_principal_paid",
-		"total_interest_payable", "written_off_amount"],
+		"total_interest_payable", "written_off_amount", "status"],
 		filters={"status": ("!=", "Closed")})
 
 	loan_list = [d.loan for d in loan_details]
@@ -70,7 +71,7 @@ def get_interest_accruals(loans):
 	current_month_start = get_first_day(getdate())
 
 	interest_accruals = frappe.get_all("Loan Interest Accrual",
-		fields=["loan", "interest_amount", "posting_date", "penalty"],
+		fields=["loan", "interest_amount", "posting_date", "penalty_amount"],
 		filters={"loan": ("in", loans)})
 
 	for entry in interest_accruals:
