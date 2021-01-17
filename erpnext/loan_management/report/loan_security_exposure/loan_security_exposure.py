@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 from frappe import _
 from frappe.utils import get_datetime, flt
 from six import iteritems
@@ -23,10 +24,11 @@ def get_columns(filters):
 		{"label": _("Loan Security Type"), "fieldname": "loan_security_type", "fieldtype": "Link", "options": "Loan Security Type", "width": 120},
 		{"label": _("Disabled"), "fieldname": "disabled", "fieldtype": "Check", "width": 80},
 		{"label": _("Total Qty"), "fieldname": "total_qty", "fieldtype": "Float", "width": 100},
-		{"label": _("Latest Price"), "fieldname": "latest_price", "fieldtype": "Currency", "options": "Currency", "width": 100},
-		{"label": _("Current Value"), "fieldname": "current_value", "fieldtype": "Currency", "options": "Currency", "width": 100},
+		{"label": _("Latest Price"), "fieldname": "latest_price", "fieldtype": "Currency", "options": "currency", "width": 100},
+		{"label": _("Current Value"), "fieldname": "current_value", "fieldtype": "Currency", "options": "currency", "width": 100},
 		{"label": _("% Of Total Portfolio"), "fieldname": "portfolio_percent", "fieldtype": "Percentage", "width": 100},
 		{"label": _("Pledged Applicant Count"), "fieldname": "pledged_applicant_count", "fieldtype": "Percentage", "width": 100},
+		{"label": _("Currency"), "fieldname": "currency", "fieldtype": "Currency", "options": "Currency", "hidden": 1, "width": 100},
 	]
 
 	return columns
@@ -35,6 +37,7 @@ def get_data(filters):
 	data = []
 	loan_security_details = get_loan_security_details(filters)
 	current_pledges, total_portfolio_value = get_company_wise_loan_security_details(filters, loan_security_details)
+	currency = erpnext.get_company_currency(filters.get('company'))
 
 	for security, value in iteritems(current_pledges):
 		row = {}
@@ -43,8 +46,9 @@ def get_data(filters):
 		row.update({
 			'total_qty': value['qty'],
 			'current_value': current_value,
-			'portfolio_percent': current_value * 100 / total_portfolio_value,
-			'pledged_applicant_count': value['applicant_count']
+			'portfolio_percent': flt(current_value * 100 / total_portfolio_value, 2),
+			'pledged_applicant_count': value['applicant_count'],
+			'currency': currency
 		})
 
 		data.append(row)

@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import erpnext
 from frappe import _
 from frappe.utils import get_datetime, flt
 from six import iteritems
@@ -24,9 +25,10 @@ def get_columns(filters):
 		{"label": _("Loan Security Type"), "fieldname": "loan_security_type", "fieldtype": "Link", "options": "Loan Security Type", "width": 120},
 		{"label": _("Disabled"), "fieldname": "disabled", "fieldtype": "Check", "width": 80},
 		{"label": _("Total Qty"), "fieldname": "total_qty", "fieldtype": "Float", "width": 100},
-		{"label": _("Latest Price"), "fieldname": "latest_price", "fieldtype": "Currency", "options": "Currency", "width": 100},
-		{"label": _("Current Value"), "fieldname": "current_value", "fieldtype": "Currency", "options": "Currency", "width": 100},
-		{"label": _("% Of Applicant Portfolio"), "fieldname": "portfolio_percent", "fieldtype": "Percentage", "width": 100}
+		{"label": _("Latest Price"), "fieldname": "latest_price", "fieldtype": "Currency", "options": "currency", "width": 100},
+		{"label": _("Current Value"), "fieldname": "current_value", "fieldtype": "Currency", "options": "currency", "width": 100},
+		{"label": _("% Of Applicant Portfolio"), "fieldname": "portfolio_percent", "fieldtype": "Percentage", "width": 100},
+		{"label": _("Currency"), "fieldname": "currency", "fieldtype": "Currency", "options": "Currency", "hidden": 1, "width": 100},
 	]
 
 	return columns
@@ -34,7 +36,10 @@ def get_columns(filters):
 def get_data(filters):
 	data = []
 	loan_security_details = get_loan_security_details(filters)
-	pledge_values, total_value_map, applicant_type_map = get_applicant_wise_total_loan_security_qty(loan_security_details)
+	pledge_values, total_value_map, applicant_type_map = get_applicant_wise_total_loan_security_qty(filters,
+		loan_security_details)
+
+	currency = erpnext.get_company_currency(filters.get('company'))
 
 	for key, qty in iteritems(pledge_values):
 		row = {}
@@ -43,9 +48,10 @@ def get_data(filters):
 		row.update({
 			'applicant_type': applicant_type_map.get(key[0]),
 			'applicant_name': key[0],
-			'total_qty':  qty,
+			'total_qty': qty,
 			'current_value': current_value,
-			'portfolio_percent': current_value * 100 / total_value_map.get(key[0])
+			'portfolio_percent': flt(current_value * 100 / total_value_map.get(key[0]), 2),
+			'currency': currency
 		})
 
 		data.append(row)
@@ -73,19 +79,24 @@ def get_loan_security_details(filters):
 
 	return security_detail_map
 
-def get_applicant_wise_total_loan_security_qty(loan_security_details):
+def get_applicant_wise_total_loan_security_qty(filters, loan_security_details):
 	current_pledges = {}
 	total_value_map = {}
 	applicant_type_map = {}
 	applicant_wise_unpledges = {}
+	conditions = ""
+
+	if filters.get('company'):
+		conditions = "AND company = %(company)s"
 
 	unpledges = frappe.db.sql("""
 		SELECT up.applicant, u.loan_security, sum(u.qty) as qty
 		FROM `tabLoan Security Unpledge` up, `tabUnpledge` u
 		WHERE u.parent = up.name
 		AND up.status = 'Approved'
+		{conditions}
 		GROUP BY up.applicant, u.loan_security
-	""", as_dict=1)
+	""".format(conditions=conditions), filters, as_dict=1)
 
 	for unpledge in unpledges:
 		applicant_wise_unpledges.setdefault((unpledge.applicant, unpledge.loan_security), unpledge.qty)
@@ -95,8 +106,9 @@ def get_applicant_wise_total_loan_security_qty(loan_security_details):
 		FROM `tabLoan Security Pledge` lp, `tabPledge`p
 		WHERE p.parent = lp.name
 		AND lp.status = 'Pledged'
+		{conditions}
 		GROUP BY lp.applicant, p.loan_security
-	""", as_dict=1)
+	""".format(conditions=conditions), filters, as_dict=1)
 
 	for security in pledges:
 		current_pledges.setdefault((security.applicant, security.loan_security), security.qty)
