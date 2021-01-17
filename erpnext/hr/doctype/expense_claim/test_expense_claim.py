@@ -20,35 +20,36 @@ class TestExpenseClaim(unittest.TestCase):
 		frappe.db.sql("""delete from `tabProject` where name = "_Test Project 1" """)
 		frappe.db.sql("update `tabExpense Claim` set project = '', task = ''")
 
-		frappe.get_doc({
+		project = frappe.get_doc({
 			"project_name": "_Test Project 1",
 			"doctype": "Project"
-		}).save()
+		})
+		project.save()
 
 		task = frappe.get_doc(dict(
 			doctype = 'Task',
 			subject = '_Test Project Task 1',
 			status = 'Open',
-			project = '_Test Project 1'
+			project = project.name
 		)).insert()
 
 		task_name = task.name
 		payable_account = get_payable_account(company_name)
 
-		make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", "_Test Project 1", task_name)
+		make_expense_claim(payable_account, 300, 200, company_name, "Travel Expenses - _TC4", project.name, task_name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_expense_claim"), 200)
 
-		expense_claim2 = make_expense_claim(payable_account, 600, 500, company_name, "Travel Expenses - _TC4","_Test Project 1", task_name)
+		expense_claim2 = make_expense_claim(payable_account, 600, 500, company_name, "Travel Expenses - _TC4", project.name, task_name)
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 700)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 700)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_expense_claim"), 700)
 
 		expense_claim2.cancel()
 
 		self.assertEqual(frappe.db.get_value("Task", task_name, "total_expense_claim"), 200)
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project 1", "total_expense_claim"), 200)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_expense_claim"), 200)
 
 	def test_expense_claim_status(self):
 		payable_account = get_payable_account(company_name)
