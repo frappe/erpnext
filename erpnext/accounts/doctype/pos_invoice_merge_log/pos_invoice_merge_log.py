@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from frappe.model.document import Document
-from frappe.model.mapper import map_doc
+from frappe.model.mapper import map_doc, map_child_doc
 from frappe.model import default_fields
 
 from six import iteritems
@@ -26,7 +26,7 @@ class POSInvoiceMergeLog(Document):
 		for d in self.pos_invoices:
 			status, docstatus, is_return, return_against = frappe.db.get_value(
 				'POS Invoice', d.pos_invoice, ['status', 'docstatus', 'is_return', 'return_against'])
-			
+
 			bold_pos_invoice = frappe.bold(d.pos_invoice)
 			bold_status = frappe.bold(status)
 			if docstatus != 1:
@@ -55,7 +55,7 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice, credit_note = "", ""
 		if sales:
 			sales_invoice = self.process_merging_into_sales_invoice(sales)
-		
+
 		if returns:
 			credit_note = self.process_merging_into_credit_note(returns)
 
@@ -65,7 +65,7 @@ class POSInvoiceMergeLog(Document):
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
-		
+
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
 		sales_invoice.is_consolidated = 1
@@ -89,19 +89,19 @@ class POSInvoiceMergeLog(Document):
 		self.consolidated_credit_note = credit_note.name
 
 		return credit_note.name
-	
+
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes = [], [], []
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
-			
+
 			if doc.redeem_loyalty_points:
 				invoice.loyalty_redemption_account = doc.loyalty_redemption_account
 				invoice.loyalty_redemption_cost_center = doc.loyalty_redemption_cost_center
 				loyalty_points_sum += doc.loyalty_points
 				loyalty_amount_sum += doc.loyalty_amount
-			
+
 			for item in doc.get('items'):
 				found = False
 				for i in items:
@@ -109,10 +109,13 @@ class POSInvoiceMergeLog(Document):
 						i.uom == item.uom and i.net_rate == item.net_rate):
 						found = True
 						i.qty = i.qty + item.qty
+
 				if not found:
 					item.rate = item.net_rate
-					items.append(item)
-			
+					item.price_list_rate = 0
+					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
+					items.append(si_item)
+
 			for tax in doc.get('taxes'):
 				found = False
 				for t in taxes:
@@ -149,7 +152,7 @@ class POSInvoiceMergeLog(Document):
 		invoice.discount_amount = 0.0
 
 		return invoice
-	
+
 	def get_new_sales_invoice(self):
 		sales_invoice = frappe.new_doc('Sales Invoice')
 		sales_invoice.customer = self.customer
@@ -158,7 +161,7 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.posting_date = getdate(nowdate())
 
 		return sales_invoice
-	
+
 	def update_pos_invoices(self, sales_invoice, credit_note):
 		for d in self.pos_invoices:
 			doc = frappe.get_doc('POS Invoice', d.pos_invoice)
@@ -177,7 +180,7 @@ def get_all_invoices():
 	}
 	pos_invoices = frappe.db.get_all('POS Invoice', filters=filters,
 		fields=["name as pos_invoice", 'posting_date', 'grand_total', 'customer'])
-	
+
 	return pos_invoices
 
 def get_invoices_customer_map(pos_invoices):
@@ -187,13 +190,13 @@ def get_invoices_customer_map(pos_invoices):
 		customer = invoice.get('customer')
 		pos_invoice_customer_map.setdefault(customer, [])
 		pos_invoice_customer_map[customer].append(invoice)
-	
+
 	return pos_invoice_customer_map
 
 def merge_pos_invoices(pos_invoices=[]):
 	if not pos_invoices:
 		pos_invoices = get_all_invoices()
-	
+
 	pos_invoice_map = get_invoices_customer_map(pos_invoices)
 	create_merge_logs(pos_invoice_map)
 
