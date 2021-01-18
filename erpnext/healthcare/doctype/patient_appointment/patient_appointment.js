@@ -31,14 +31,14 @@ frappe.ui.form.on('Patient Appointment', {
 			};
 		});
 
-		frm.set_query('service_unit', function(){
+		frm.set_query('service_unit', function() {
 			return {
+				query: 'erpnext.controllers.queries.get_healthcare_service_units',
 				filters: {
-					'is_group': false,
-					'allow_appointments': true,
-					'company': frm.doc.company
+					company: frm.doc.company,
+					inpatient_record: frm.doc.inpatient_record
 				}
-			};
+			}
 		});
 
 		frm.set_query('therapy_plan', function() {
