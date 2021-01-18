@@ -1342,9 +1342,6 @@ class StockEntry(StockController):
 						frappe.MappingMismatchError)
 				elif self.purpose == "Material Transfer" and self.add_to_transit:
 					continue
-				elif mreq_item.warehouse != (item.s_warehouse if self.purpose == "Material Issue" else item.t_warehouse):
-					frappe.throw(_("Warehouse for row {0} does not match Material Request").format(item.idx),
-						frappe.MappingMismatchError)
 
 	def validate_batch(self):
 		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Send to Subcontractor"]:
