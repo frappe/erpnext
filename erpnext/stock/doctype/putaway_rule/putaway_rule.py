@@ -44,7 +44,7 @@ class PutawayRule(Document):
 		stock_uom = frappe.db.get_value("Item", self.item_code, "stock_uom")
 		balance_qty = get_stock_balance(self.item_code, self.warehouse, nowdate())
 
-		if flt(self.stock_capacity) < flt(balance_qty) and self.get('__islocal'):
+		if flt(self.stock_capacity) < flt(balance_qty):
 			frappe.throw(_("Warehouse Capacity for Item '{0}' must be greater than the existing stock level of {1} {2}.")
 				.format(self.item_code, frappe.bold(balance_qty), stock_uom),
 				title=_("Insufficient Capacity"))
@@ -56,7 +56,7 @@ class PutawayRule(Document):
 		self.stock_capacity = (flt(self.conversion_factor) or 1) * flt(self.capacity)
 
 @frappe.whitelist()
-def get_putaway_capacity(rule):
+def get_available_putaway_capacity(rule):
 	stock_capacity, item_code, warehouse = frappe.db.get_value("Putaway Rule", rule,
 		["stock_capacity", "item_code", "warehouse"])
 	balance_qty = get_stock_balance(item_code, warehouse, nowdate())

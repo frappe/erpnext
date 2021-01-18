@@ -86,7 +86,7 @@ class PurchaseReceipt(BuyingController):
 	def before_validate(self):
 		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
 
-		if self.get("items") and self.apply_putaway_rule:
+		if self.get("items") and self.apply_putaway_rule and not self.get("is_return"):
 			apply_putaway_rule(self.doctype, self.get("items"), self.company)
 
 	def validate(self):
@@ -415,7 +415,7 @@ class PurchaseReceipt(BuyingController):
 		if warehouse_with_no_account:
 			frappe.msgprint(_("No accounting entries for the following warehouses") + ": \n" +
 				"\n".join(warehouse_with_no_account))
-		
+
 		return process_gl_map(gl_entries)
 
 	def get_asset_gl_entry(self, gl_entries):
