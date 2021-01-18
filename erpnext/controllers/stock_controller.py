@@ -396,38 +396,54 @@ class StockController(AccountsController):
 	def validate_putaway_capacity(self):
 		# if over receipt is attempted while 'apply putaway rule' is disabled
 		# and if rule was applied on the transaction, validate it.
-		from erpnext.stock.doctype.putaway_rule.putaway_rule import get_putaway_capacity
-		valid_doctype = self.doctype in ("Purchase Receipt", "Stock Entry")
-		rule_applied = any(item.get("putaway_rule") for item in self.get("items"))
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import get_available_putaway_capacity
+		valid_doctype = self.doctype in ("Purchase Receipt", "Stock Entry", "Purchase Invoice",
+			"Stock Reconciliation")
 
-		if valid_doctype and rule_applied and not self.apply_putaway_rule:
+		if self.doctype == "Purchase Invoice" and self.get("update_stock") == 0:
+			valid_doctype = False
+
+		if valid_doctype:
 			rule_map = defaultdict(dict)
 			for item in self.get("items"):
-				if item.get("putaway_rule"):
-					rule = item.get("putaway_rule")
-					disabled = frappe.db.get_value("Putaway Rule", rule, "disable")
-					if disabled: return # dont validate for disabled rule
-					stock_qty = flt(item.transfer_qty) if self.doctype == "Stock Entry" else flt(item.stock_qty)
-					warehouse_field = "t_warehouse" if self.doctype == "Stock Entry" else "warehouse"
-					if not rule_map[rule]:
-						rule_map[rule]["warehouse"] = item.get(warehouse_field)
-						rule_map[rule]["item"] = item.get("item_code")
-						rule_map[rule]["qty_put"] = 0
-						rule_map[rule]["capacity"] = get_putaway_capacity(rule)
-					rule_map[rule]["qty_put"] += flt(stock_qty)
+				warehouse_field = "t_warehouse" if self.doctype == "Stock Entry" else "warehouse"
+				rule = frappe.db.get_value("Putaway Rule",
+					{
+						"item_code": item.get("item_code"),
+						"warehouse": item.get(warehouse_field)
+					},
+					["name", "disable"], as_dict=True)
+				if rule:
+					if rule.get("disabled"): continue # dont validate for disabled rule
+
+					if self.doctype == "Stock Reconciliation":
+						stock_qty = flt(item.qty)
+					else:
+						stock_qty = flt(item.transfer_qty) if self.doctype == "Stock Entry" else flt(item.stock_qty)
+
+					rule_name = rule.get("name")
+					if not rule_map[rule_name]:
+						rule_map[rule_name]["warehouse"] = item.get(warehouse_field)
+						rule_map[rule_name]["item"] = item.get("item_code")
+						rule_map[rule_name]["qty_put"] = 0
+						rule_map[rule_name]["capacity"] = get_available_putaway_capacity(rule_name)
+					rule_map[rule_name]["qty_put"] += flt(stock_qty)
 
 			for rule, values in rule_map.items():
 				if flt(values["qty_put"]) > flt(values["capacity"]):
-					message = _("{0} qty of Item {1} is being received into Warehouse {2} with capacity {3}.") \
-						.format(
-							frappe.bold(values["qty_put"]), frappe.bold(values["item"]),
-							frappe.bold(values["warehouse"]), frappe.bold(values["capacity"])
-						)
-					message += "<br><br>"
-					rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
-					message += _(" Please adjust the qty or edit {0} to proceed.").format(rule_link)
+					message = self.prepare_over_receipt_message(rule, values)
 					frappe.throw(msg=message, title=_("Over Receipt"))
-			return rule_map
+
+	def prepare_over_receipt_message(self, rule, values):
+		message = _("{0} qty of Item {1} is being received into Warehouse {2} with capacity {3}.") \
+			.format(
+				frappe.bold(values["qty_put"]), frappe.bold(values["item"]),
+				frappe.bold(values["warehouse"]), frappe.bold(values["capacity"])
+			)
+		message += "<br><br>"
+		rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
+		message += _(" Please adjust the qty or edit {0} to proceed.").format(rule_link)
+		return message
 
 	def repost_future_sle_and_gle(self):
 		args = frappe._dict({
