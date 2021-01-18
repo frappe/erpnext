@@ -782,7 +782,7 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-01-09 04:23:55.611366",
+ "modified": "2020-01-09 05:23:55.611366",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
@@ -824,7 +824,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "search_fields": "employee_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
