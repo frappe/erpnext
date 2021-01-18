@@ -21,7 +21,6 @@ frappe.ui.form.on('Bank', {
 			frm.set_df_property('address_and_contact', 'hidden', 0);
 			frappe.contacts.render_address_and_contact(frm);
 		}
-	},
 		if (frm.doc.plaid_access_token) {
 			frm.add_custom_button(__('Refresh Plaid Link'), () => {
 				new erpnext.integrations.refreshPlaidLink(frm.doc.plaid_access_token);
@@ -123,4 +122,3 @@ erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
 		frappe.show_alert({ message: __('Plaid Link Updated'), indicator: 'green' });
 	}
 };
-
