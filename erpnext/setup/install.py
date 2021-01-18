@@ -8,9 +8,11 @@ from erpnext.accounts.doctype.cash_flow_mapper.default_cash_flow_mapper import D
 from .default_success_action import get_default_success_action
 from frappe import _
 from frappe.utils import cint
+from frappe.installer import update_site_config
 from frappe.desk.page.setup_wizard.setup_wizard import add_all_roles_to
 from frappe.custom.doctype.custom_field.custom_field import create_custom_field
 from erpnext.setup.default_energy_point_rules import get_default_energy_point_rules
+from six import iteritems
 
 default_mail_footer = """<div style="padding: 7px; text-align: right; color: #888"><small>Sent via
 	<a style="color: #888" href="http://erpnext.org">ERPNext</a></div>"""
@@ -29,6 +31,7 @@ def after_install():
 	add_company_to_session_defaults()
 	add_standard_navbar_items()
 	add_app_name()
+	add_non_standard_user_types()
 	frappe.db.commit()
 
 
@@ -164,3 +167,69 @@ def add_standard_navbar_items():
 
 def add_app_name():
 	frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
+
+def add_non_standard_user_types():
+	user_types = get_user_types_data()
+
+	user_type_limit = {}
+	for user_type, data in iteritems(user_types):
+		user_type_limit.setdefault(frappe.scrub(user_type), 10)
+
+	update_site_config('user_type_doctype_limit', user_type_limit)
+
+	for user_type, data in iteritems(user_types):
+		create_custom_role(data)
+		create_user_type(user_type, data)
+
+def get_user_types_data():
+	return {
+		'ESS User': {
+			'role': 'ESS User',
+			'apply_user_permission_on': 'Employee',
+			'user_id_field': 'user_id',
+			'doctypes': {
+				'Salary Slip': ['read'],
+				'Employee': ['read', 'write'],
+				'Timesheet': ['read', 'write', 'create'],
+				'Expense Claim': ['read', 'write', 'create'],
+				'Leave Application': ['read', 'write', 'create'],
+				'Attendance Request': ['read', 'write', 'create'],
+				'Compensatory Leave Request': ['read', 'write', 'create'],
+				'Employee Tax Exemption Declaration': ['read', 'write', 'create'],
+				'Employee Tax Exemption Proof Submission': ['read', 'write', 'create'],
+			}
+		}
+	}
+
+def create_custom_role(data):
+	if data.get('role') and not frappe.db.exists('Role', data.get('role')):
+		frappe.get_doc({
+			'doctype': 'Role',
+			'role_name': data.get('role'),
+			'desk_access': 1,
+			'is_custom': 1
+		}).insert(ignore_permissions=True)
+
+def create_user_type(user_type, data):
+	if frappe.db.exists('User Type', user_type):
+		doc = frappe.get_cached_doc('User Type', user_type)
+		doc.user_doctypes = []
+	else:
+		doc = frappe.new_doc('User Type')
+		doc.update({
+			'name': user_type,
+			'role': data.get('role'),
+			'user_id_field': data.get('user_id_field'),
+			'apply_user_permission_on': data.get('apply_user_permission_on')
+		})
+
+	create_role_permissions_for_doctype(doc, data)
+	doc.save(ignore_permissions=True)
+
+def create_role_permissions_for_doctype(doc, data):
+	for doctype, perms in iteritems(data.get('doctypes')):
+		args = {'document_type': doctype}
+		for perm in perms:
+			args[perm] = 1
+
+		doc.append('user_doctypes', args)
