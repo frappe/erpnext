@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 from frappe import _
-from frappe.utils import flt, get_first_day, getdate
+from frappe.utils import flt, getdate, add_days
 
 
 def execute(filters=None):
@@ -22,13 +22,13 @@ def get_columns(filters):
 		{"label": _("Loan Type"), "fieldname": "loan_type", "fieldtype": "Link", "options": "Loan Type", "width": 100},
 		{"label": _("Sanctioned Amount"), "fieldname": "sanctioned_amount", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Disbursed Amount"), "fieldname": "disbursed_amount", "fieldtype": "Currency", "options": "currency", "width": 120},
-		{"label": _("Interest For The Month"), "fieldname": "month_interest", "fieldtype": "Currency", "options": "currency", "width": 120},
-		{"label": _("Penalty For The Month"), "fieldname": "penalty", "fieldtype": "Currency", "options": "currency", "width": 120},
+		{"label": _("Penalty Amount"), "fieldname": "penalty", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Accrued Interest"), "fieldname": "accrued_interest", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Total Repayment"), "fieldname": "total_repayment", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Principal Outstanding"), "fieldname": "principal_outstanding", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Interest Outstanding"), "fieldname": "interest_outstanding", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Total Outstanding"), "fieldname": "total_outstanding", "fieldtype": "Currency", "options": "currency", "width": 120},
+		{"label": _("Undue Booked Interest"), "fieldname": "undue_interest", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Interest %"), "fieldname": "rate_of_interest", "fieldtype": "Percent", "width": 100},
 		{"label": _("Penalty Interest %"), "fieldname": "penalty_interest", "fieldtype": "Percent", "width": 100},
 		{"label": _("Currency"), "fieldname": "currency", "fieldtype": "Currency", "options": "Currency", "hidden": 1, "width": 100},
@@ -62,11 +62,11 @@ def get_active_loan_details(filters):
 			"principal_outstanding": flt(loan.total_payment) - flt(loan.total_principal_paid) \
 				- flt(loan.total_interest_payable) - flt(loan.written_off_amount),
 			"total_repayment": flt(payments.get(loan.loan)),
-			"month_interest": flt(accrual_map.get(loan.loan, {}).get("month_interest")),
 			"accrued_interest": flt(accrual_map.get(loan.loan, {}).get("accrued_interest")),
 			"interest_outstanding": flt(accrual_map.get(loan.loan, {}).get("interest_outstanding")),
 			"penalty": flt(accrual_map.get(loan.loan, {}).get("penalty")),
 			"penalty_interest": penal_interest_rate_map.get(loan.loan_type),
+			"undue_interest": flt(accrual_map.get(loan.loan, {}).get("undue_interest")),
 			"currency": currency
 		})
 
@@ -85,26 +85,38 @@ def get_payments(loans):
 
 def get_interest_accruals(loans):
 	accrual_map = {}
-	current_month_start = get_first_day(getdate())
 
 	interest_accruals = frappe.get_all("Loan Interest Accrual",
 		fields=["loan", "interest_amount", "posting_date", "penalty_amount",
-		"paid_interest_amount"], filters={"loan": ("in", loans)}, order_by="posting_date")
+		"paid_interest_amount", "accrual_type"], filters={"loan": ("in", loans)}, order_by="posting_date desc")
 
 	for entry in interest_accruals:
 		accrual_map.setdefault(entry.loan, {
-			"month_interest": 0.0,
 			"accrued_interest": 0.0,
-			"interest_outstanding": 0.0
+			"undue_interest": 0.0,
+			"interest_outstanding": 0.0,
+			"last_accrual_date": '',
+			"due_date": ''
 		})
 
-		if getdate(entry.posting_date) < getdate(current_month_start):
-			accrual_map[entry.loan]["accrued_interest"] += entry.interest_amount
-		else:
-			accrual_map[entry.loan]["month_interest"] += entry.interest_amount
+		if entry.accrual_type == 'Regular':
+			if not accrual_map[entry.loan]['due_date']:
+				accrual_map[entry.loan]['due_date'] = add_days(entry.posting_date, 1)
+			if not accrual_map[entry.loan]['last_accrual_date']:
+				accrual_map[entry.loan]['last_accrual_date'] = entry.posting_date
 
-		accrual_map[entry.loan]["interest_outstanding"] += entry.interest_amount - entry.paid_interest_amount
-		accrual_map[entry.loan]["penalty"] = entry.penalty_amount
+		due_date = accrual_map[entry.loan]['due_date']
+		last_accrual_date = accrual_map[entry.loan]['last_accrual_date']
+
+		if due_date and getdate(entry.posting_date) < getdate(due_date):
+			accrual_map[entry.loan]["interest_outstanding"] += entry.interest_amount - entry.paid_interest_amount
+		else:
+			accrual_map[entry.loan]['undue_interest'] += entry.interest_amount - entry.paid_interest_amount
+
+		accrual_map[entry.loan]["accrued_interest"] += entry.interest_amount
+
+		if last_accrual_date and getdate(entry.posting_date) == last_accrual_date:
+			accrual_map[entry.loan]["penalty"] = entry.penalty_amount
 
 	return accrual_map
 
