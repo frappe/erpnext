@@ -215,7 +215,7 @@ frappe.ui.form.on('POS Invoice', {
 							} else if (frappe.dom.freeze_count != 0) {
 								frappe.dom.unfreeze();
 								cur_frm.reload_doc();
-								cur_pos.payments.events.submit_invoice();
+								cur_pos.payment.events.submit_invoice();
 
 								frappe.show_alert({
 									message: __("Payment of {0} received successfully.", [format_currency(message.grand_total, frm.doc.currency, 0)]),
@@ -223,7 +223,7 @@ frappe.ui.form.on('POS Invoice', {
 								});
 							}
 						});
-					}, 90000);
+					}, 60000);
 				});
 		});
 	}
