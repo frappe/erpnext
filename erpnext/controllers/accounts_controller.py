@@ -282,6 +282,7 @@ class AccountsController(TransactionBase):
 					args["doctype"] = self.doctype
 					args["name"] = self.name
 					args["child_docname"] = item.name
+					args["ignore_pricing_rule"] = self.ignore_pricing_rule
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")

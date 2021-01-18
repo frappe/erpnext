@@ -111,6 +111,7 @@ class POSInvoiceMergeLog(Document):
 						i.qty = i.qty + item.qty
 				if not found:
 					item.rate = item.net_rate
+					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
 					items.append(si_item)
 			
@@ -149,6 +150,7 @@ class POSInvoiceMergeLog(Document):
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
 		invoice.taxes_and_charges = None
+		invoice.ignore_pricing_rule = 1
 
 		return invoice
 	
