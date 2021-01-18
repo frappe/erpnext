@@ -101,7 +101,7 @@ let get_age = function (birth) {
 	let age = new Date();
 	age.setTime(ageMS);
 	let years = age.getFullYear() - 1970;
-	return years + ' Year(s) ' + age.getMonth() + ' Month(s) ' + age.getDate() + ' Day(s)';
+	return `${years} ${__('Years(s)')} ${age.getMonth()} ${__('Month(s)')} ${age.getDate()} ${__('Day(s)')}`;
 };
 
 let create_vital_signs = function (frm) {
