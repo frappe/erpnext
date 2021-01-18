@@ -59,7 +59,6 @@ def get_data(filters):
 	return data
 
 def get_loan_security_details(filters):
-	update_time = get_datetime()
 	security_detail_map = {}
 
 	loan_security_price_map = frappe._dict(frappe.db.sql("""
