@@ -206,19 +206,20 @@ frappe.ui.form.on('POS Invoice', {
 					const payment_request_name = message.name;
 					setTimeout(() => {
 						frappe.db.get_value('Payment Request', payment_request_name, ['status', 'grand_total']).then(({ message }) => {
-							frappe.dom.unfreeze();
 							if (message.status != 'Paid') {
+								frappe.dom.unfreeze();
 								frappe.msgprint({
 									message: __('Payment Request took too long to respond. Please try requesting for payment again.'),
 									title: __('Request Timeout')
 								});
 							} else if (frappe.dom.freeze_count != 0) {
-								cur_pos.payments.events.submit_invoice();
+								frappe.dom.unfreeze();
 								cur_frm.reload_doc();
+								cur_pos.payments.events.submit_invoice();
 
-								frappe.msgprint({
+								frappe.show_alert({
 									message: __("Payment of {0} received successfully.", [format_currency(message.grand_total, frm.doc.currency, 0)]),
-									title: __("Payment Received")
+									indicator: 'green'
 								});
 							}
 						});
