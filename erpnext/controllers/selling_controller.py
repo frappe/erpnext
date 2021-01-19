@@ -233,7 +233,7 @@ class SellingController(StockController):
 							'allow_zero_valuation': d.allow_zero_valuation_rate,
 							'sales_invoice_item': d.get("sales_invoice_item"),
 							'dn_detail': d.get("dn_detail"),
-							'incoming_rate': p.incoming_rate
+							'incoming_rate': p.get("incoming_rate")
 						}))
 			else:
 				il.append(frappe._dict({
@@ -252,7 +252,7 @@ class SellingController(StockController):
 					'allow_zero_valuation': d.allow_zero_valuation_rate,
 					'sales_invoice_item': d.get("sales_invoice_item"),
 					'dn_detail': d.get("dn_detail"),
-					'incoming_rate': d.incoming_rate
+					'incoming_rate': d.get("incoming_rate")
 				}))
 		return il
 
