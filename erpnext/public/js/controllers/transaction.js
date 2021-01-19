@@ -601,8 +601,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 											.then((value) => {
 												if (value) {
 													frappe.flags.hide_serial_batch_dialog = true;
-											}
-										});
+												}
+											});
 								},
 								() => {
 									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
