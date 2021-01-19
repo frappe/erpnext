@@ -1573,17 +1573,17 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 
 		sales_invoice = create_sales_invoice(do_not_save=1)
-		sales_invoice.items[0].project = item_project.project_name
-		sales_invoice.project = project.project_name
+		sales_invoice.items[0].project = item_project.name
+		sales_invoice.project = project.name
 
 		sales_invoice.submit()
 
 		expected_values = {
 			"Debtors - _TC": {
-				"project": project.project_name
+				"project": project.name
 			},
 			"Sales - _TC": {
-				"project": item_project.project_name
+				"project": item_project.name
 			}
 		}
 
