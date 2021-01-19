@@ -2,12 +2,13 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:project_name",
+ "autoname": "naming_series:",
  "creation": "2013-03-07 11:55:07",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "project_name",
   "status",
   "project_type",
@@ -440,13 +441,24 @@
    "fieldtype": "Text",
    "label": "Message",
    "mandatory_depends_on": "collect_progress"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "PROJ-.####",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
+ "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 4,
- "modified": "2020-04-08 22:11:14.552615",
+ "modified": "2020-09-02 11:54:01.223620",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -488,5 +500,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "customer",
+ "title_field": "project_name",
  "track_seen": 1
 }
