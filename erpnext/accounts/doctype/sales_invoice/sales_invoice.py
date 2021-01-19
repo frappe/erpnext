@@ -21,6 +21,8 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from frappe.model.utils import get_fetch_values
+from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -1609,7 +1611,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.is_internal_supplier = 1
 			target_doc.ignore_pricing_rule = 1
 			target_doc.buying_price_list = source_doc.selling_price_list
-			target_doc.shipping_address = source_doc.customer_address
+
+			# Invert Addresses
+			update_address(target_doc, 'supplier_address', 'address_display', source_doc.company_address)
+			update_address(target_doc, 'shipping_address', 'shipping_address_display', source_doc.customer_address)
 
 			if currency:
 				target_doc.currency = currency
@@ -1618,6 +1623,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
+
+			update_address(target_doc, 'company_address', 'company_address_display', source_doc.supplier_address)
+			update_address(target_doc, 'shipping_address_name', 'shipping_address', source_doc.shipping_address)
+			update_address(target_doc, 'customer_address', 'address_display', source_doc.shipping_address)
 
 			if currency:
 				target_doc.currency = currency
@@ -1663,6 +1672,15 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def update_address(doc, address_field, address_display_field, address_name):
+	doc.set(address_field, address_name)
+	fetch_values = get_fetch_values(doc.doctype, address_field, address_name)
+
+	for key, value in fetch_values.items():
+		doc.set(key, value)
+
+	doc.set(address_display_field, get_address_display(doc.get(address_field)))
 
 @frappe.whitelist()
 def get_loyalty_programs(customer):
