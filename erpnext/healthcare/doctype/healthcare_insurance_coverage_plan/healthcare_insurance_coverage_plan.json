@@ -36,6 +36,7 @@
   {
    "fieldname": "insurance_company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Insurance Company",
    "options": "Healthcare Insurance Company"
   },
@@ -60,12 +61,14 @@
   {
    "fieldname": "price_list",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Price List",
    "options": "Price List"
   }
  ],
  "links": [],
- "modified": "2020-11-09 09:50:44.504232",
+ "modified": "2021-01-19 15:31:17.157787",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Coverage Plan",

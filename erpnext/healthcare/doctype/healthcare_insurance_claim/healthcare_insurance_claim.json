@@ -101,12 +101,14 @@
    "allow_on_submit": 1,
    "fieldname": "mode_of_claim_approval",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Mode of Claim Approval",
    "options": "\nElectronic\nManual\nAutomatic"
   },
   {
    "fieldname": "claim_posting_date",
    "fieldtype": "Date",
+   "in_standard_filter": 1,
    "label": "Claim Posting Date"
   },
   {
@@ -117,7 +119,6 @@
    "allow_on_submit": 1,
    "fieldname": "claim_status",
    "fieldtype": "Select",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Claim Status",
    "options": "\nPending\nApproved\nRejected\nInvoiced"
@@ -136,6 +137,7 @@
   {
    "fieldname": "healthcare_service_type",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Healthcare Service Type",
    "options": "DocType"
   },
@@ -143,6 +145,7 @@
    "fieldname": "service_template",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Service Template",
    "options": "healthcare_service_type"
   },
@@ -226,6 +229,7 @@
    "allow_on_submit": 1,
    "fieldname": "sales_invoice",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Sales Invoice",
    "options": "Sales Invoice",
    "read_only": 1
@@ -287,7 +291,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-24 12:01:49.025970",
+ "modified": "2021-01-19 15:56:18.544176",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Claim",
@@ -324,6 +328,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "patient_name",
  "track_changes": 1,
  "track_seen": 1
 }

@@ -11,7 +11,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
-  "is_active",
+  "title",
   "patient_details_section",
   "patient",
   "patient_name",
@@ -40,12 +40,6 @@
    "set_only_once": 1
   },
   {
-   "default": "1",
-   "fieldname": "is_active",
-   "fieldtype": "Check",
-   "label": "Is Active"
-  },
-  {
    "fieldname": "patient_details_section",
    "fieldtype": "Section Break",
    "label": "Patient Details"
@@ -53,7 +47,6 @@
   {
    "fieldname": "patient",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
@@ -63,12 +56,14 @@
    "fetch_from": "patient.patient_name",
    "fieldname": "patient_name",
    "fieldtype": "Data",
-   "label": "Patient Name"
+   "label": "Patient Name",
+   "read_only": 1
   },
   {
    "fieldname": "age_html",
    "fieldtype": "HTML",
-   "label": "Age"
+   "label": "Age",
+   "read_only": 1
   },
   {
    "fetch_from": "patient.mobile",
@@ -86,20 +81,23 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "read_only": 1
   },
   {
    "fetch_from": "patient.sex",
    "fieldname": "gender",
    "fieldtype": "Link",
    "label": "Gender",
-   "options": "Gender"
+   "options": "Gender",
+   "read_only": 1
   },
   {
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
-   "options": "Country"
+   "options": "Country",
+   "read_only": 1
   },
   {
    "fieldname": "insurance_details_section",
@@ -109,7 +107,6 @@
   {
    "fieldname": "insurance_company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Insurance Company",
    "options": "Healthcare Insurance Company",
@@ -131,7 +128,8 @@
    "fieldname": "subscription_end_date",
    "fieldtype": "Date",
    "in_list_view": 1,
-   "label": "Subscription End Date"
+   "label": "Subscription End Date",
+   "reqd": 1
   },
   {
    "fieldname": "healthcare_insurance_coverage_plan",
@@ -155,13 +153,20 @@
    "fetch_from": "insurance_company.insurance_company_name",
    "fieldname": "insurance_company_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Insurance Company Name"
+   "label": "Insurance Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-09 09:16:40.806934",
+ "modified": "2021-01-19 14:21:57.110208",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Subscription",
@@ -251,10 +256,12 @@
    "write": 1
   }
  ],
+ "quick_entry": 1,
  "restrict_to_domain": "Healthcare",
  "search_fields": "patient_name,insurance_company_name",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }

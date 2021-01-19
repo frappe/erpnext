@@ -4,6 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.utils import getdate, nowdate
 from frappe.model.document import Document
 
@@ -11,6 +12,7 @@ class HealthcareInsuranceSubscription(Document):
 	def validate(self):
 		self.validate_insurance_company()
 		self.validate_subscription_overlap()
+		self.set_title()
 
 	def validate_insurance_company(self):
 		contract = frappe.db.exists('Healthcare Insurance Contract',
@@ -36,3 +38,6 @@ class HealthcareInsuranceSubscription(Document):
 		if insurance_subscription:
 			frappe.throw(_('Patient {0} has already subscribed coverage plan {1} this period').format(frappe.bold(self.patient),
 				frappe.bold(self.healthcare_insurance_coverage_plan)), title=_('Not Allowed'))
+
+	def set_title(self):
+		self.title = _('{0} with {1}').format(self.patient_name or self.patient, self.insurance_company_name or self.insurance_company)

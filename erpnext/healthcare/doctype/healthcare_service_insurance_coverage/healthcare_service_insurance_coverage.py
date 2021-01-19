@@ -11,6 +11,7 @@ from frappe.model.document import Document
 class HealthcareServiceInsuranceCoverage(Document):
 	def validate(self):
 		self.validate_service_overlap()
+		self.set_title()
 
 	def validate_service_overlap(self):
 		filters = {'healthcare_insurance_coverage_plan': self.healthcare_insurance_coverage_plan, 'is_active': 1}
@@ -31,6 +32,15 @@ class HealthcareServiceInsuranceCoverage(Document):
 		service_insurance_coverages = frappe.db.exists('Healthcare Service Insurance Coverage', filters)
 		if service_insurance_coverages:
 			frappe.throw(_('Service/Item activated  this coverage plan {0}').format(frappe.bold(self.healthcare_insurance_coverage_plan)), title=_('Not Allowed'))
+	def set_title(self):
+		if self.coverage_based_on == 'Service' and self.healthcare_service_template:
+			self.title = _('{0} - {1} - {2}').format(self.coverage_based_on, self.healthcare_service, self.healthcare_service_template)
+		elif self.coverage_based_on == 'Medical Code' and self.medical_code:
+			self.title = _('{0} - {1}').format(self.coverage_based_on , self.medical_code)
+		elif self.coverage_based_on == 'Item' and self.item:
+			self.title = _('{0} - {1}').format(self.coverage_based_on , self.item)
+		elif self.coverage_based_on == 'Item Group' and self.item_group:
+			self.title = _('{0} - {1}').format(self.coverage_based_on , self.item_group)
 
 def get_service_insurance_coverage_details(service_doctype, service, service_item, insurance_subscription):
 	valid_date = nowdate()
@@ -45,8 +55,7 @@ def get_service_insurance_coverage_details(service_doctype, service, service_ite
 										filters={
 											'healthcare_insurance_coverage_plan': insurance_subscription.healthcare_insurance_coverage_plan,
 											'is_active': 1,
-											'start_date':("<=", getdate(valid_date)),
-											'end_date':(">=", getdate(valid_date))
+											'start_date':("<=", getdate(valid_date))
 										}, fields= ['name', 'healthcare_service_template','item', 'medical_code', 'item_group'])
 			if healthcare_service_coverage_list:
 				if any((healthcare_service_coverage['healthcare_service_template'] == service) for healthcare_service_coverage in healthcare_service_coverage_list):

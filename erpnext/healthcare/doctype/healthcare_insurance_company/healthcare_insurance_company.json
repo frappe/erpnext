@@ -98,6 +98,7 @@
   {
    "fieldname": "rejected_claims_account",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Rejected Claims Account",
    "options": "Account",
    "reqd": 1
@@ -112,7 +113,7 @@
   }
  ],
  "links": [],
- "modified": "2020-11-09 09:00:52.473103",
+ "modified": "2021-01-19 14:04:13.813892",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Company",

@@ -75,12 +75,16 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Start Date",
    "reqd": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "End Date",
    "reqd": 1
   },
@@ -102,7 +106,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-09 09:03:23.669948",
+ "modified": "2021-01-19 14:08:27.852969",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Contract",
@@ -155,6 +159,7 @@
  "restrict_to_domain": "Healthcare",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "insurance_company_name",
  "track_changes": 1,
  "track_seen": 1
 }

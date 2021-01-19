@@ -9,10 +9,12 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "title",
   "is_active",
   "section_break_3",
   "coverage_based_on",
   "healthcare_insurance_coverage_plan",
+  "insurance_coverage_plan_name",
   "column_break_3",
   "healthcare_service",
   "healthcare_service_template",
@@ -60,7 +62,6 @@
   {
    "fieldname": "healthcare_insurance_coverage_plan",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Healthcare Insurance Coverage Plan",
    "options": "Healthcare Insurance Coverage Plan",
@@ -74,6 +75,7 @@
   {
    "fieldname": "coverage",
    "fieldtype": "Percent",
+   "in_list_view": 1,
    "label": "Coverage"
   },
   {
@@ -107,11 +109,14 @@
   {
    "fieldname": "start_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Start Date"
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
+   "in_standard_filter": 1,
    "label": "End Date"
   },
   {
@@ -124,6 +129,7 @@
   {
    "fieldname": "coverage_based_on",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Coverage Based on ",
    "options": "Service\nItem\nItem Group\nMedical Code"
   },
@@ -158,11 +164,27 @@
    "fieldtype": "Link",
    "label": "Item Group",
    "options": "Item Group"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "healthcare_insurance_coverage_plan.coverage_plan_name",
+   "fieldname": "insurance_coverage_plan_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Insurance Coverage Plan Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-25 17:26:33.929999",
+ "modified": "2021-01-19 15:55:45.775112",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Insurance Coverage",
@@ -179,10 +201,23 @@
    "role": "System Manager",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "share": 1,
+   "write": 1
   }
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }
