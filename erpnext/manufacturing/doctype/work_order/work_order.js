@@ -242,13 +242,13 @@ frappe.ui.form.on("Work Order", {
 			if(data.completed_qty != frm.doc.qty) {
 				pending_qty = frm.doc.qty - flt(data.completed_qty);
 
-				if (pending_qty && !data.skip_job_card) {
+				if (pending_qty) {
 					dialog.fields_dict.operations.df.data.push({
 						'name': data.name,
 						'operation': data.operation,
 						'workstation': data.workstation,
 						'qty': pending_qty,
-						'pending_qty': pending_qty,
+						'pending_qty': pending_qty
 					});
 				}
 			}

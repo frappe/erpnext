@@ -58,6 +58,7 @@
   "actual_operating_cost",
   "additional_operating_cost",
   "column_break_24",
+  "corrective_operation_cost",
   "total_operating_cost",
   "more_info",
   "description",
@@ -534,6 +535,16 @@
    "fieldname": "batch_size",
    "fieldtype": "Float",
    "label": "Batch Size"
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "From Corrective Job Card",
+   "fieldname": "corrective_operation_cost",
+   "fieldtype": "Currency",
+   "label": "Corrective Operation Cost",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",

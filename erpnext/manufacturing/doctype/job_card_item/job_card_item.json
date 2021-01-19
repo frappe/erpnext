@@ -102,7 +102,7 @@
    "fieldtype": "Float",
    "label": "Transferred Qty",
    "no_copy": 1,
-   "print_hide": 1,
+   "print_hide": 1
   },
   {
    "fieldname": "rate",
