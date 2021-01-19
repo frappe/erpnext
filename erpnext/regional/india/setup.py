@@ -7,7 +7,7 @@ import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.india import states
-from erpnext.accounts.utils import get_fiscal_year
+from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 from frappe.utils import today
 
 def setup(company=None, patch=True):
@@ -629,15 +629,20 @@ def set_salary_components(docs):
 
 def set_tax_withholding_category(company):
 	accounts = []
+	fiscal_year = None
 	abbr = frappe.get_value("Company", company, "abbr")
 	tds_account = frappe.get_value("Account", 'TDS Payable - {0}'.format(abbr), 'name')
 
 	if company and tds_account:
 		accounts = [dict(company=company, account=tds_account)]
 
-	fiscal_year = get_fiscal_year(today(), company=company)[0]
-	docs = get_tds_details(accounts, fiscal_year)
+	try:
+		fiscal_year = get_fiscal_year(today(), verbose=0, company=company)[0]
+	except FiscalYearError:
+		pass
 
+	docs = get_tds_details(accounts, fiscal_year)
+	
 	for d in docs:
 		try:
 			doc = frappe.get_doc(d)
@@ -650,11 +655,14 @@ def set_tax_withholding_category(company):
 			if accounts:
 				doc.append("accounts", accounts[0])
 
-			# if fiscal year don't match with any of the already entered data, append rate row
-			fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
-			if not fy_exist:
-				doc.append("rates", d.get('rates')[0])
-
+			if fiscal_year:
+				# if fiscal year don't match with any of the already entered data, append rate row
+				fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
+				if not fy_exist:
+					doc.append("rates", d.get('rates')[0])
+					
+			doc.flags.ignore_permissions = True
+			doc.flags.ignore_mandatory = True
 			doc.save()
 
 def set_tds_account(docs, company):
