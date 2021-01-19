@@ -23,7 +23,7 @@
   {
    "hidden": 0,
    "label": "Reports",
-   "links": "[\n    {\n        \"doctype\": \"Loan Repayment\",\n        \"is_query_report\": true,\n        \"label\": \"Loan Repayment and Closure\",\n        \"name\": \"Loan Repayment and Closure\",\n        \"route\": \"#query-report/Loan Repayment and Closure\",\n        \"type\": \"report\"\n    },\n    {\n        \"doctype\": \"Loan Security Pledge\",\n        \"is_query_report\": true,\n        \"label\": \"Loan Security Status\",\n        \"name\": \"Loan Security Status\",\n        \"route\": \"#query-report/Loan Security Status\",\n        \"type\": \"report\"\n    }\n]"
+   "links": "[\n    {\n        \"doctype\": \"Loan Repayment\",\n        \"is_query_report\": true,\n        \"label\": \"Loan Repayment and Closure\",\n        \"name\": \"Loan Repayment and Closure\",\n        \"route\": \"#query-report/Loan Repayment and Closure\",\n        \"type\": \"report\"\n    },\n    {\n        \"doctype\": \"Loan Security Pledge\",\n        \"is_query_report\": true,\n        \"label\": \"Loan Security Status\",\n        \"name\": \"Loan Security Status\",\n        \"route\": \"#query-report/Loan Security Status\",\n        \"type\": \"report\"\n    },\n    {\n        \"doctype\": \"Loan Interest Accrual\",\n        \"is_query_report\": true,\n        \"label\": \"Loan Interest Report\",\n        \"name\": \"Loan Interest Report\",\n        \"route\": \"#query-report/Loan Interest Report\",\n        \"type\": \"report\"\n    },\n    {\n        \"doctype\": \"Loan Security\",\n        \"is_query_report\": true,\n        \"label\": \"Loan Security Exposure\",\n        \"name\": \"Loan Security Exposure\",\n        \"route\": \"#query-report/Loan Security Exposure\",\n        \"type\": \"report\"\n    },\n    {\n        \"doctype\": \"Loan Security\",\n        \"is_query_report\": true,\n        \"label\": \"Applicant-Wise Loan Security Exposure\",\n        \"name\": \"Applicant-Wise Loan Security Exposure\",\n        \"route\": \"#query-report/Applicant-Wise Loan Security Exposure\",\n        \"type\": \"report\"\n    }\n]"
   }
  ],
  "category": "Modules",
@@ -38,7 +38,7 @@
  "idx": 0,
  "is_standard": 1,
  "label": "Loan",
- "modified": "2020-10-17 12:59:50.336085",
+ "modified": "2021-01-17 07:21:22.092184",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

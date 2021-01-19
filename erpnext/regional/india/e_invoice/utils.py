@@ -15,7 +15,7 @@ from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date
+from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
@@ -84,29 +84,32 @@ def get_doc_details(invoice):
 	))
 
 def get_party_details(address_name):
-	address = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
-	gstin = address.get('gstin')
+	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 
-	gstin_details = get_gstin_details(gstin)
-	legal_name = gstin_details.get('LegalName') or gstin_details.get('TradeName')
-	location = gstin_details.get('AddrLoc') or address.get('city')
-	state_code = gstin_details.get('StateCode')
-	pincode = gstin_details.get('AddrPncd')
-	address_line1 = '{} {}'.format(gstin_details.get('AddrBno'), gstin_details.get('AddrFlno'))
-	address_line2 = '{} {}'.format(gstin_details.get('AddrBnm'), gstin_details.get('AddrSt'))
-	email_id = address.get('email_id')
-	phone = address.get('phone')
-	# get last 10 digit 
-	phone = phone.replace(" ", "")[-10:] if phone else ''
+	if (not d.gstin
+		or not d.city
+		or not d.pincode
+		or not d.address_title
+		or not d.address_line1
+		or not d.gst_state_number):
 
-	if state_code == 97:
+		frappe.throw(
+			msg=_('Address lines, city, pincode, gstin is mandatory for address {}. Please set them and try again.').format(
+				get_link_to_form('Address', address_name)
+			),
+			title=_('Missing Address Fields')
+		)
+
+	if d.gst_state_number == 97:
 		# according to einvoice standard
 		pincode = 999999
 
 	return frappe._dict(dict(
-		gstin=gstin, legal_name=legal_name, location=location,
-		pincode=pincode, state_code=state_code, address_line1=address_line1,
-		address_line2=address_line2, email=email_id, phone=phone
+		gstin=d.gstin, legal_name=d.address_title,
+		location=d.city, pincode=d.pincode,
+		state_code=d.gst_state_number,
+		address_line1=d.address_line1,
+		address_line2=d.address_line2
 	))
 
 def get_gstin_details(gstin):
@@ -127,14 +130,22 @@ def get_gstin_details(gstin):
 		return GSPConnector.get_gstin_details(gstin)
 
 def get_overseas_address_details(address_name):
-	address_title, address_line1, address_line2, city, phone, email_id = frappe.db.get_value(
-		'Address', address_name, ['address_title', 'address_line1', 'address_line2', 'city', 'phone', 'email_id']
+	address_title, address_line1, address_line2, city = frappe.db.get_value(
+		'Address', address_name, ['address_title', 'address_line1', 'address_line2', 'city']
 	)
 
+	if not address_title or not address_line1 or not city:
+		frappe.throw(
+			msg=_('Address lines and city is mandatory for address {}. Please set them and try again.').format(
+				get_link_to_form('Address', address_name)
+			),
+			title=_('Missing Address Fields')
+		)
+
 	return frappe._dict(dict(
-		gstin='URP', legal_name=address_title, address_line1=address_line1,
-		address_line2=address_line2, email=email_id, phone=phone,
-		pincode=999999, state_code=96, place_of_supply=96, location=city
+		gstin='URP', legal_name=address_title, location=city,
+		address_line1=address_line1, address_line2=address_line2,
+		pincode=999999, state_code=96, place_of_supply=96
 	))
 
 def get_item_list(invoice):
@@ -146,9 +157,10 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.description = d.item_name
+		item.description = d.item_name.replace('"', '\\"')
+
 		item.qty = abs(item.qty)
+		item.discount_amount = abs(item.discount_amount * item.qty)
 		item.unit_rate = abs(item.base_amount / item.qty)
 		item.gross_amount = abs(item.base_amount)
 		item.taxable_value = abs(item.base_amount)
@@ -156,6 +168,7 @@ def get_item_list(invoice):
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
 		item.is_service_item = 'N' if frappe.db.get_value('Item', d.item_code, 'is_stock_item') else 'Y'
+		item.serial_no = ""
 
 		item = update_item_taxes(invoice, item)
 		
@@ -205,8 +218,8 @@ def update_item_taxes(invoice, item):
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
 	invoice_value_details.base_total = abs(invoice.base_total)
-	invoice_value_details.invoice_discount_amt = invoice.discount_amount
-	invoice_value_details.round_off = invoice.rounding_adjustment
+	invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
 	
@@ -272,7 +285,25 @@ def get_eway_bill_details(invoice):
 		vehicle_type=vehicle_type[invoice.gst_vehicle_type]
 	))
 
+def validate_mandatory_fields(invoice):
+	if not invoice.company_address:
+		frappe.throw(_('Company Address is mandatory to fetch company GSTIN details.'), title=_('Missing Fields'))
+	if not invoice.customer_address:
+		frappe.throw(_('Customer Address is mandatory to fetch customer GSTIN details.'), title=_('Missing Fields'))
+	if not frappe.db.get_value('Address', invoice.company_address, 'gstin'):
+		frappe.throw(
+			_('GSTIN is mandatory to fetch company GSTIN details. Please enter GSTIN in selected company address.'),
+			title=_('Missing Fields')
+		)
+	if not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
+		frappe.throw(
+			_('GSTIN is mandatory to fetch customer GSTIN details. Please enter GSTIN in selected customer address.'),
+			title=_('Missing Fields')
+		)
+
 def make_einvoice(invoice):
+	validate_mandatory_fields(invoice)
+
 	schema = read_json('einv_template')
 
 	transaction_details = get_transaction_details(invoice)
@@ -291,7 +322,10 @@ def make_einvoice(invoice):
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
-		shipping_details = get_party_details(invoice.shipping_address_name)
+		if invoice.gst_category == 'Overseas':
+			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
+		else:
+			shipping_details = get_party_details(invoice.shipping_address_name)
 	
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -351,7 +385,7 @@ def validate_einvoice(validations, einvoice, errors=[]):
 					# remove empty dicts
 					einvoice.pop(fieldname, None)
 			continue
-		
+
 		# convert to int or str
 		if value_type == 'string':
 			einvoice[fieldname] = str(value)
@@ -383,15 +417,19 @@ class RequestFailed(Exception): pass
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
 		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
+		sandbox_mode = self.e_invoice_settings.sandbox_mode
+
 		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
 		self.credentials = self.get_credentials()
 
-		self.base_url = 'https://gsp.adaequare.com'
-		self.authenticate_url = self.base_url + '/gsp/authenticate?grant_type=token'
-		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
-		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
-		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
+		# authenticate url is same for sandbox & live
+		self.authenticate_url = 'https://gsp.adaequare.com/gsp/authenticate?grant_type=token'
+		self.base_url = 'https://gsp.adaequare.com' if not sandbox_mode else 'https://gsp.adaequare.com/test'
+
 		self.cancel_irn_url = self.base_url + '/enriched/ei/api/invoice/cancel'
+		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
+		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
+		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
 		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
@@ -727,7 +765,7 @@ class GSPConnector():
 
 		_file = frappe.new_doc('File')
 		_file.update({
-			'file_name': f'QRCode_{docname}.png',
+			'file_name': 'QRCode_{}.png'.format(docname.replace('/', '-')),
 			'attached_to_doctype': doctype,
 			'attached_to_name': docname,
 			'content': 'qrcode',
