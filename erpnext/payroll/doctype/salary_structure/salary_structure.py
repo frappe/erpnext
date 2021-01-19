@@ -216,7 +216,7 @@ def get_earning_deduction_components(doctype, txt, searchfield, start, page_len,
 	return frappe.db.sql("""
 		select t1.salary_component
 		from `tabSalary Component` t1, `tabSalary Component Account` t2
-		where t1.salary_component = t2.parent
+		where t1.name = t2.parent
 		and t1.type = %s 
 		and t2.company = %s
 		order by salary_component
