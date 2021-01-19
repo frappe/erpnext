@@ -9,7 +9,6 @@
   "operation",
   "bom",
   "column_break_4",
-  "skip_job_card",
   "description",
   "sequence_id",
   "col_break1",
@@ -201,19 +200,12 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "skip_job_card",
-   "fieldtype": "Check",
-   "label": "Skip Job Card"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-08 17:42:05.372163",
+ "modified": "2021-01-12 14:48:31.061286",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Operation",

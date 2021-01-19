@@ -178,18 +178,27 @@ class JobCard(Document):
 
 		self.reset_timer_value(args)
 		if last_row and args.get("complete_time"):
-			last_row.update({
-				"to_time": get_datetime(args.get("complete_time")),
-				"operation": args.get("sub_operation"),
-				"completed_qty": args.get("completed_qty") or 0.0
-			})
+			for row in self.time_logs:
+				if not row.to_time:
+					row.update({
+						"to_time": get_datetime(args.get("complete_time")),
+						"operation": args.get("sub_operation"),
+						"completed_qty": args.get("completed_qty") or 0.0
+					})
 		elif args.get("start_time"):
-			self.append("time_logs", {
-				"from_time": get_datetime(args.get("start_time")),
-				"employee": args.get("employee"),
-				"operation": args.get("sub_operation"),
-				"completed_qty": 0.0
-			})
+			employees = args.employees
+			print(args)
+			if isinstance(employees, string_types):
+				employees = json.loads(employees)
+
+			for name in employees:
+				print(name.get('employee'))
+				self.append("time_logs", {
+					"from_time": get_datetime(args.get("start_time")),
+					"employee": name.get('employee'),
+					"operation": args.get("sub_operation"),
+					"completed_qty": 0.0
+				})
 
 		if self.status == "On Hold":
 			self.current_time = time_diff_in_seconds(last_row.to_time, last_row.from_time)
@@ -300,9 +309,23 @@ class JobCard(Document):
 			time_in_mins = flt(data[0].time_in_mins)
 
 		wo = frappe.get_doc('Work Order', self.work_order)
-		if self.operation_id:
+
+		if self.is_corrective_job_card:
+			self.update_corrective_in_work_order(wo)
+
+		elif self.operation_id:
 			self.validate_produced_quantity(for_quantity, wo)
 			self.update_work_order_data(for_quantity, time_in_mins, wo)
+
+	def update_corrective_in_work_order(self, wo):
+		wo.corrective_operation_cost = 0.0
+		for row in frappe.get_all('Job Card', fields = ['total_time_in_mins', 'hour_rate'],
+			filters = {'is_corrective_job_card': 1, 'docstatus': 1, 'work_order': self.work_order}):
+			wo.corrective_operation_cost += flt(row.total_time_in_mins) * flt(row.hour_rate)
+
+		wo.calculate_operating_cost()
+		wo.flags.ignore_validate_update_after_submit = True
+		wo.save()
 
 	def validate_produced_quantity(self, for_quantity, wo):
 		if self.docstatus < 2: return
@@ -346,7 +369,8 @@ class JobCard(Document):
 	def get_current_operation_data(self):
 		return frappe.get_all('Job Card',
 			fields = ["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
-			filters = {"docstatus": 1, "work_order": self.work_order, "operation_id": self.operation_id})
+			filters = {"docstatus": 1, "work_order": self.work_order, "operation_id": self.operation_id,
+				"is_corrective_job_card": 0})
 
 	def set_transferred_qty_in_job_card(self, ste_doc):
 		for row in ste_doc.items:
@@ -429,6 +453,8 @@ class JobCard(Document):
 				.format(bold(self.operation), work_order), OperationMismatchError)
 
 	def validate_sequence_id(self):
+		if self.is_corrective_job_card: return
+
 		if not (self.work_order and self.sequence_id): return
 
 		current_operation_qty = 0.0
@@ -440,8 +466,7 @@ class JobCard(Document):
 
 		data = frappe.get_all("Work Order Operation",
 			fields = ["operation", "status", "completed_qty"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id),
-				"skip_job_card": 0},
+			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id)},
 			order_by = "sequence_id, idx")
 
 		message = "Job Card {0}: As per the sequence of the operations in the work order {1}".format(bold(self.name),
@@ -598,3 +623,26 @@ def get_job_details(start, end, filters=None):
 			events.append(job_card_data)
 
 	return events
+
+@frappe.whitelist()
+def make_corrective_job_card(source_name, operation=None, for_operation=None, target_doc=None):
+	def set_missing_values(source, target):
+		target.is_corrective_job_card = 1
+		target.operation = operation
+		target.for_operation = for_operation
+
+		target.set('time_logs', [])
+		target.get_sub_operations()
+		target.get_required_items()
+		target.validate_time_logs()
+
+	doclist = get_mapped_doc("Job Card", source_name, {
+		"Job Card": {
+			"doctype": "Job Card",
+			"field_map": {
+				"name": "for_job_card",
+			},
+		}
+	}, target_doc, set_missing_values)
+
+	return doclist

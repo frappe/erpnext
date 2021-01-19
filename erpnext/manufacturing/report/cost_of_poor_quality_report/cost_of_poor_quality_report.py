@@ -14,23 +14,33 @@ def execute(filters=None):
 
 	return columns, data
 
-def get_data(filters):
+def get_data(report_filters):
 	data = []
-	operations = frappe.get_all("Operation", filters = {"cost_of_poor_quality_operation": 1})
+	operations = frappe.get_all("Operation", filters = {"is_corrective_operation": 1})
 	if operations:
 		operations = [d.name for d in operations]
 		fields = ["production_item as item_code", "item_name", "work_order", "operation",
 			"workstation", "total_time_in_mins", "name", "hour_rate"]
 
+		filters = get_filters(report_filters, operations)
+
 		job_cards = frappe.get_all("Job Card", fields = fields,
-			filters = {"docstatus": 1, "operation": ("in", operations)})
+			filters = filters)
 
 		for row in job_cards:
 			row.operating_cost = flt(row.hour_rate) * (flt(row.total_time_in_mins) / 60.0)
-			update_raw_material_cost(row, filters)
-			update_time_details(row, filters, data)
+			update_raw_material_cost(row, report_filters)
+			update_time_details(row, report_filters, data)
 
 	return data
+
+def get_filters(report_filters, operations):
+	filters = {"docstatus": 1, "operation": ("in", operations), "is_corrective_job_card": 1}
+	for field in ["name", "work_order", "operation", "workstation", "company"]:
+		if report_filters.get(field):
+			filters[field] = report_filters.get(field)
+
+	return filters
 
 def update_raw_material_cost(row, filters):
 	row.rm_cost = 0.0
@@ -43,8 +53,10 @@ def update_time_details(row, filters, data):
 		"operation": "", "workstation":"", "operating_cost": "", "rm_cost": "", "total_time_in_mins": ""})
 
 	i=0
-	for time_log in frappe.get_all("Job Card Time Log", fields = ["from_time", "to_time", "time_in_mins"],
-		filters={"parent": row.name, "docstatus": 1}):
+	for time_log in frappe.get_all("Job Card Time Log",
+		fields = ["from_time", "to_time", "time_in_mins"],
+		filters={"parent": row.name, "docstatus": 1,
+			"from_time": (">=", filters.from_date), "to_time": ("<=", filters.to_date)}):
 
 		if i==0:
 			i += 1

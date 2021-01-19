@@ -33,9 +33,14 @@
   "total_completed_qty",
   "column_break_15",
   "total_time_in_mins",
-  "hour_rate",
   "section_break_8",
   "items",
+  "corrective_operation_section",
+  "for_job_card",
+  "is_corrective_job_card",
+  "column_break_33",
+  "hour_rate",
+  "for_operation",
   "more_information",
   "operation_id",
   "sequence_id",
@@ -331,14 +336,48 @@
    "hide_border": 1
   },
   {
+   "depends_on": "is_corrective_job_card",
    "fieldname": "hour_rate",
    "fieldtype": "Currency",
    "label": "Hour Rate"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "is_corrective_job_card",
+   "fieldname": "corrective_operation_section",
+   "fieldtype": "Section Break",
+   "label": "Corrective Operation"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_corrective_job_card",
+   "fieldtype": "Check",
+   "label": "Is Corrective Job Card",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "for_job_card",
+   "fieldtype": "Link",
+   "label": "For Job Card",
+   "options": "Job Card",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "for_job_card.operation",
+   "fetch_if_empty": 1,
+   "fieldname": "for_operation",
+   "fieldtype": "Link",
+   "label": "For Operation",
+   "options": "Operation"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-11 12:09:00.452032",
+ "modified": "2021-02-03 20:36:51.826944",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

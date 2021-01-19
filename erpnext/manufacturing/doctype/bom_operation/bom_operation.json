@@ -11,7 +11,6 @@
   "workstation",
   "description",
   "col_break1",
-  "skip_job_card",
   "hour_rate",
   "time_in_mins",
   "operating_cost",
@@ -118,20 +117,13 @@
    "fieldname": "sequence_id",
    "fieldtype": "Int",
    "label": "Sequence ID"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "skip_job_card",
-   "fieldtype": "Check",
-   "label": "Skip Job Card"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-05 14:29:11.887888",
+ "modified": "2021-01-12 14:48:09.596843",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",

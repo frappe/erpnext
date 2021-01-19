@@ -10,7 +10,7 @@
  "field_order": [
   "workstation",
   "data_2",
-  "cost_of_poor_quality_operation",
+  "is_corrective_operation",
   "job_card_section",
   "create_job_card_based_on_batch_size",
   "column_break_6",
@@ -78,13 +78,6 @@
    "label": "Create Job Card based on Batch Size"
   },
   {
-   "default": "0",
-   "description": "Cost of poor quality operation",
-   "fieldname": "cost_of_poor_quality_operation",
-   "fieldtype": "Check",
-   "label": "Is COPQ Operation"
-  },
-  {
    "collapsible": 1,
    "fieldname": "job_card_section",
    "fieldtype": "Section Break",
@@ -93,12 +86,18 @@
   {
    "fieldname": "column_break_6",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_corrective_operation",
+   "fieldtype": "Check",
+   "label": "Is Corrective Operation"
   }
  ],
  "icon": "fa fa-wrench",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-24 14:25:03.428303",
+ "modified": "2021-01-12 15:09:23.593338",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Operation",

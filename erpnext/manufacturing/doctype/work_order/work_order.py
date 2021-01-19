@@ -130,7 +130,9 @@ class WorkOrder(Document):
 
 		variable_cost = self.actual_operating_cost if self.actual_operating_cost \
 			else self.planned_operating_cost
-		self.total_operating_cost = flt(self.additional_operating_cost) + flt(variable_cost)
+
+		self.total_operating_cost = (flt(self.additional_operating_cost)
+			+ flt(variable_cost) + flt(self.corrective_operation_cost))
 
 	def validate_work_order_against_so(self):
 		# already ordered qty
@@ -343,7 +345,6 @@ class WorkOrder(Document):
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
 
 		for index, row in enumerate(self.operations):
-			if row.skip_job_card: continue
 			qty = self.qty
 			i=0
 			while qty > 0:
@@ -357,6 +358,7 @@ class WorkOrder(Document):
 					qty -= row.batch_size
 				elif qty > 0:
 					job_card_qty = qty
+					qty = 0
 
 				if job_card_qty > 0:
 					self.prepare_data_for_job_card(row, job_card_qty, index,
@@ -496,7 +498,7 @@ class WorkOrder(Document):
 			select
 				operation, description, workstation, idx,
 				base_hour_rate as hour_rate, time_in_mins,
-				"Pending" as status, parent as bom, batch_size, sequence_id, skip_job_card
+				"Pending" as status, parent as bom, batch_size, sequence_id
 			from
 				`tabBOM Operation`
 			where
