@@ -38,7 +38,7 @@ frappe.ui.form.on('Patient Appointment', {
 					company: frm.doc.company,
 					inpatient_record: frm.doc.inpatient_record
 				}
-			}
+			};
 		});
 
 		frm.set_query('therapy_plan', function() {

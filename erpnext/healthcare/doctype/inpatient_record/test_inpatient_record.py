@@ -142,11 +142,15 @@ def create_inpatient(patient):
 	return inpatient_record
 
 
-def get_healthcare_service_unit():
-	service_unit = get_random("Healthcare Service Unit", filters={"inpatient_occupancy": 1})
+def get_healthcare_service_unit(unit_name=None):
+	if not unit_name:
+		service_unit = get_random("Healthcare Service Unit", filters={"inpatient_occupancy": 1})
+	else:
+		service_unit = frappe.db.exists("Healthcare Service Unit", {"healthcare_service_unit_name": unit_name})
+
 	if not service_unit:
 		service_unit = frappe.new_doc("Healthcare Service Unit")
-		service_unit.healthcare_service_unit_name = "Test Service Unit Ip Occupancy"
+		service_unit.healthcare_service_unit_name = unit_name or "Test Service Unit Ip Occupancy"
 		service_unit.company = "_Test Company"
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1

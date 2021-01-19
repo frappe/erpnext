@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter
-from frappe.utils import nowdate, add_days
+from frappe.utils import nowdate, add_days, now_datetime
 from frappe.utils.make_random import get_random
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
@@ -78,6 +78,61 @@ class TestPatientAppointment(unittest.TestCase):
 		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
 		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'status'), 'Cancelled')
 
+	def test_appointment_booking_for_admission_service_unit(self):
+		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
+		from erpnext.healthcare.doctype.lab_test.test_lab_test import create_patient_encounter
+		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import \
+			create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
+
+		frappe.db.sql("""delete from `tabInpatient Record`""")
+		patient, medical_department, practitioner = create_healthcare_docs()
+		patient = create_patient()
+		# Schedule Admission
+		ip_record = create_inpatient(patient)
+		ip_record.expected_length_of_stay = 0
+		ip_record.save(ignore_permissions = True)
+
+		# Admit
+		service_unit = get_healthcare_service_unit('Test Service Unit Ip Occupancy')
+		admit_patient(ip_record, service_unit, now_datetime())
+
+		appointment = create_appointment(patient, practitioner, nowdate(), service_unit=service_unit)
+		self.assertEqual(appointment.service_unit, service_unit)
+
+		# Discharge
+		schedule_discharge(frappe.as_json({'patient': patient}))
+		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
+		mark_invoiced_inpatient_occupancy(ip_record1)
+		discharge_patient(ip_record1)
+
+	def test_invalid_healthcare_service_unit_validation(self):
+		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
+		from erpnext.healthcare.doctype.lab_test.test_lab_test import create_patient_encounter
+		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import \
+			create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
+
+		frappe.db.sql("""delete from `tabInpatient Record`""")
+		patient, medical_department, practitioner = create_healthcare_docs()
+		patient = create_patient()
+		# Schedule Admission
+		ip_record = create_inpatient(patient)
+		ip_record.expected_length_of_stay = 0
+		ip_record.save(ignore_permissions = True)
+
+		# Admit
+		service_unit = get_healthcare_service_unit('Test Service Unit Ip Occupancy')
+		admit_patient(ip_record, service_unit, now_datetime())
+
+		appointment_service_unit = get_healthcare_service_unit('Test Service Unit Ip Occupancy for Appointment')
+		appointment = create_appointment(patient, practitioner, nowdate(), service_unit=appointment_service_unit, save=0)
+		self.assertRaises(frappe.exceptions.ValidationError, appointment.save)
+
+		# Discharge
+		schedule_discharge(frappe.as_json({'patient': patient}))
+		ip_record1 = frappe.get_doc("Inpatient Record", ip_record.name)
+		mark_invoiced_inpatient_occupancy(ip_record1)
+		discharge_patient(ip_record1)
+
 
 def create_healthcare_docs():
 	patient = create_patient()
@@ -125,7 +180,7 @@ def create_encounter(appointment):
 		encounter.submit()
 		return encounter
 
-def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0):
+def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0, service_unit=None, save=1):
 	item = create_healthcare_service_items()
 	frappe.db.set_value('Healthcare Settings', None, 'inpatient_visit_charge_item', item)
 	frappe.db.set_value('Healthcare Settings', None, 'op_consulting_charge_item', item)
@@ -136,12 +191,15 @@ def create_appointment(patient, practitioner, appointment_date, invoice=0, proce
 	appointment.appointment_date = appointment_date
 	appointment.company = '_Test Company'
 	appointment.duration = 15
+	if service_unit:
+		appointment.service_unit = service_unit
 	if invoice:
 		appointment.mode_of_payment = 'Cash'
 		appointment.paid_amount = 500
 	if procedure_template:
 		appointment.procedure_template = create_clinical_procedure_template().get('name')
-	appointment.save(ignore_permissions=True)
+	if save:
+		appointment.save(ignore_permissions=True)
 	return appointment
 
 def create_healthcare_service_items():
