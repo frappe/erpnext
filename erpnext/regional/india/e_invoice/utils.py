@@ -217,7 +217,10 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
-	invoice_value_details.base_total = abs(invoice.base_net_total)
+	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+		invoice_value_details.base_total = abs(invoice.base_total)
+	else:
+		invoice_value_details.base_total = abs(invoice.base_net_total)
 	invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
