@@ -510,8 +510,7 @@ class JobCard(Document):
 
 		data = frappe.get_all("Work Order Operation",
 			fields = ["operation", "status", "completed_qty"],
-			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id),
-				"skip_job_card": 0},
+			filters={"docstatus": 1, "parent": self.work_order, "sequence_id": ('<', self.sequence_id)},
 			order_by = "sequence_id, idx")
 
 		message = "Job Card {0}: As per the sequence of the operations in the work order {1}".format(bold(self.name),

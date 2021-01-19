@@ -341,7 +341,6 @@ class WorkOrder(Document):
 		plan_days = cint(manufacturing_settings_doc.capacity_planning_for_days) or 30
 
 		for index, row in enumerate(self.operations):
-			if row.skip_job_card: continue
 			qty = self.qty
 			while qty > 0:
 				qty = split_qty_based_on_batch_size(self, row, qty)
@@ -1029,12 +1028,8 @@ def create_job_card(work_order, row, enable_capacity_planning=False, auto_create
 		'company': work_order.company,
 		'sequence_id': row.get("sequence_id"),
 		'wip_warehouse': work_order.wip_warehouse,
-<<<<<<< HEAD
 		'hour_rate': row.get("hour_rate"),
 		'serial_no': row.get("serial_no")
-=======
-		"hour_rate": row.get("hour_rate")
->>>>>>> c878389050... fix: or condition filter in the get_all
 	})
 
 	if work_order.transfer_material_against == 'Job Card' and not work_order.skip_transfer:
