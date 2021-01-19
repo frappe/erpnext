@@ -15,7 +15,6 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.model.utils import get_fetch_values
 from frappe.utils import cint, flt
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import update_address
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -665,7 +664,8 @@ def make_inter_company_purchase_receipt(source_name, target_doc=None):
 	return make_inter_company_transaction("Delivery Note", source_name, target_doc)
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
-	from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_company_transaction, get_inter_company_details
+	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_transaction,
+		get_inter_company_details, update_address)
 
 	if doctype == 'Delivery Note':
 		source_doc = frappe.get_doc(doctype, source_name)
