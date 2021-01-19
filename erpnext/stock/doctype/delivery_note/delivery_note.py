@@ -598,6 +598,9 @@ def make_shipment(source_name, target_doc=None):
 				pickup_contact_display += '<br>' + user.mobile_no
 		target.pickup_contact = pickup_contact_display
 
+		# As we are using session user details in the pickup_contact then pickup_contact_person will be session user
+		target.pickup_contact_person = frappe.session.user
+
 		contact = frappe.db.get_value("Contact", source.contact_person, ['email_id', 'phone', 'mobile_no'], as_dict=1)
 		delivery_contact_display = '{}'.format(source.contact_display)
 		if contact:
@@ -609,6 +612,13 @@ def make_shipment(source_name, target_doc=None):
 				delivery_contact_display += '<br>' + contact.mobile_no
 		target.delivery_contact = delivery_contact_display
 
+		if source.shipping_address_name:
+			target.delivery_address_name = source.shipping_address_name
+			target.delivery_address = source.shipping_address
+		elif source.customer_address:
+			target.delivery_address_name = source.customer_address
+			target.delivery_address = source.address_display
+
 	doclist = get_mapped_doc("Delivery Note", source_name, 	{
 		"Delivery Note": {
 			"doctype": "Shipment",
@@ -617,9 +627,7 @@ def make_shipment(source_name, target_doc=None):
 				"company": "pickup_company",
 				"company_address": "pickup_address_name",
 				"company_address_display": "pickup_address",
-				"address_display": "delivery_address",
 				"customer": "delivery_customer",
-				"shipping_address_name": "delivery_address_name",
 				"contact_person": "delivery_contact_name",
 				"contact_email": "delivery_contact_email"
 			},
@@ -637,7 +645,7 @@ def make_shipment(source_name, target_doc=None):
 			}
 		}
 	}, target_doc, postprocess)
-	
+
 	return doclist
 
 @frappe.whitelist()
