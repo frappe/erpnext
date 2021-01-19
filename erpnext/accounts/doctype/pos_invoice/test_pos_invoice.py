@@ -212,7 +212,7 @@ class TestPOSInvoice(unittest.TestCase):
 			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
 			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
 
-		pos.get("items")[0].serial_no = serial_nos[0] + "/n" + serial_nos[1]
+		pos.get("items")[0].serial_no = serial_nos[0]
 		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 1000, 'default': 1})
 
 		pos.insert()
