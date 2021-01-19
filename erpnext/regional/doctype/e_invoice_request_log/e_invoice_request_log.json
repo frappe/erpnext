@@ -24,9 +24,8 @@
   },
   {
    "fieldname": "reference_invoice",
-   "fieldtype": "Link",
-   "label": "Reference Invoice",
-   "options": "Sales Invoice"
+   "fieldtype": "Data",
+   "label": "Reference Invoice"
   },
   {
    "fieldname": "headers",
@@ -64,7 +63,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-24 21:09:38.882866",
+ "modified": "2021-01-13 12:06:57.253111",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Request Log",

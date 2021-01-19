@@ -218,8 +218,8 @@ def update_item_taxes(invoice, item):
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
 	invoice_value_details.base_total = abs(invoice.base_total)
-	invoice_value_details.invoice_discount_amt = invoice.discount_amount
-	invoice_value_details.round_off = invoice.rounding_adjustment
+	invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
 	
@@ -322,7 +322,10 @@ def make_einvoice(invoice):
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
-		shipping_details = get_party_details(invoice.shipping_address_name)
+		if invoice.gst_category == 'Overseas':
+			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
+		else:
+			shipping_details = get_party_details(invoice.shipping_address_name)
 	
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -414,15 +417,19 @@ class RequestFailed(Exception): pass
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
 		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
+		sandbox_mode = self.e_invoice_settings.sandbox_mode
+
 		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
 		self.credentials = self.get_credentials()
 
-		self.base_url = 'https://gsp.adaequare.com'
-		self.authenticate_url = self.base_url + '/gsp/authenticate?grant_type=token'
-		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
-		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
-		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
+		# authenticate url is same for sandbox & live
+		self.authenticate_url = 'https://gsp.adaequare.com/gsp/authenticate?grant_type=token'
+		self.base_url = 'https://gsp.adaequare.com' if not sandbox_mode else 'https://gsp.adaequare.com/test'
+
 		self.cancel_irn_url = self.base_url + '/enriched/ei/api/invoice/cancel'
+		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
+		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
+		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
 		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
@@ -758,7 +765,7 @@ class GSPConnector():
 
 		_file = frappe.new_doc('File')
 		_file.update({
-			'file_name': f'QRCode_{docname}.png',
+			'file_name': 'QRCode_{}.png'.format(docname.replace('/', '-')),
 			'attached_to_doctype': doctype,
 			'attached_to_name': docname,
 			'content': 'qrcode',
