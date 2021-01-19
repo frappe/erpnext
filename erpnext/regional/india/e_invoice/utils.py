@@ -19,6 +19,7 @@ from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
+	generate_irn_only_on_submission = cint(frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "generate_irn_only_on_submission"))
 	invalid_doctype = doc.doctype not in ['Sales Invoice']
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
@@ -31,7 +32,7 @@ def validate_einvoice_fields(doc):
 		if len(doc.name) > 16:
 			raise_document_name_too_long_error()
 
-	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
+	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn and not generate_irn_only_on_submission:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
 
 	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
@@ -430,7 +431,7 @@ class GSPConnector():
 		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
 		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
 		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
-		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
+		self.cancel_ewaybill_url = self.base_url + '/enriched/ewb/ewayapi?action=CANEWB'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
 	def get_credentials(self):
@@ -518,9 +519,13 @@ class GSPConnector():
 			self.raise_error()
 
 		except Exception:
-			self.log_error()
-			self.raise_error(True)
-	
+			if '401' in str(sys.exc_info()[1]):
+				self.fetch_auth_token()
+				self.fetch_gstin_details(gstin)
+			else:
+				self.log_error()
+				self.raise_error(True)
+
 	@staticmethod
 	def get_gstin_details(gstin):
 		'''fetch and cache GSTIN details'''
@@ -564,8 +569,12 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error(data)
-			self.raise_error(True)
+			if '401' in str(sys.exc_info()[1]):
+				self.fetch_auth_token()
+				self.generate_irn()
+			else:
+				self.log_error(data)
+				self.raise_error(True)
 	
 	def get_irn_details(self, irn):
 		headers = self.get_headers()
@@ -583,8 +592,12 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error()
-			self.raise_error(True)
+			if '401' in str(sys.exc_info()[1]):
+				self.fetch_auth_token()
+				self.get_irn_details(irn)
+			else:
+				self.log_error()
+				self.raise_error(True)
 	
 	def cancel_irn(self, irn, reason, remark):
 		headers = self.get_headers()
@@ -613,9 +626,13 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error(data)
-			self.raise_error(True)
-	
+			if '401' in str(sys.exc_info()[1]):
+				self.fetch_auth_token()
+				self.cancel_irn(irn, reason, remark)
+			else:
+				self.log_error(data)
+				self.raise_error(True)
+
 	def generate_eway_bill(self, **kwargs):
 		args = frappe._dict(kwargs)
 
@@ -654,8 +671,12 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error(data)
-			self.raise_error(True)
+			if '401' in str(sys.exc_info()[1]):
+				self.fetch_auth_token()
+				self.generate_eway_bill(**kwargs)
+			else:
+				self.log_error(data)
+				self.raise_error(True)
 	
 	def cancel_eway_bill(self, eway_bill, reason, remark):
 		headers = self.get_headers()
@@ -664,7 +685,8 @@ class GSPConnector():
 			'cancelRsnCode': reason,
 			'cancelRmrk': remark
 		}, indent=4)
-
+		headers["username"] = headers["user_name"]
+		del headers["user_name"]
 		try:
 			res = self.make_request('post', self.cancel_ewaybill_url, headers, data)
 			if res.get('success'):
@@ -685,8 +707,12 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error(data)
-			self.raise_error(True)
+			if '401' in str(sys.exc_info()[1]):
+				self.fetch_auth_token()
+				self.cancel_eway_bill(eway_bill, reason, remark)
+			else:
+				self.log_error(data)
+				self.raise_error(True)
 	
 	def sanitize_error_message(self, message):
 		'''
