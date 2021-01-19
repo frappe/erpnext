@@ -33,7 +33,8 @@
   "principal_amount_paid",
   "total_interest_paid",
   "repayment_details",
-  "amended_from"
+  "amended_from",
+  "payment_type"
  ],
  "fields": [
   {
@@ -226,12 +227,17 @@
    "fieldtype": "Percent",
    "label": "Rate Of Interest",
    "read_only": 1
+  },
+  {
+   "fieldname": "payment_type",
+   "fieldtype": "Data",
+   "label": "Payment Type"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-05 10:06:58.792841",
+ "modified": "2021-01-19 21:12:55.000834",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
