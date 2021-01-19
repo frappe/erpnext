@@ -80,7 +80,6 @@ class TestPatientAppointment(unittest.TestCase):
 
 	def test_appointment_booking_for_admission_service_unit(self):
 		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-		from erpnext.healthcare.doctype.lab_test.test_lab_test import create_patient_encounter
 		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import \
 			create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
 
@@ -107,7 +106,6 @@ class TestPatientAppointment(unittest.TestCase):
 
 	def test_invalid_healthcare_service_unit_validation(self):
 		from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
-		from erpnext.healthcare.doctype.lab_test.test_lab_test import create_patient_encounter
 		from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import \
 			create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
 
