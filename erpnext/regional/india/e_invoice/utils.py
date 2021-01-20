@@ -523,7 +523,7 @@ class GSPConnector():
 			self.raise_error()
 
 		except Exception:
-			if '401' in str(sys.exc_info()[1]):
+			if '401 Client Error' in str(sys.exc_info()[1]):
 				self.fetch_auth_token()
 				self.fetch_gstin_details(gstin)
 			else:
@@ -573,7 +573,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			if '401' in str(sys.exc_info()[1]):
+			if '401 Client Error' in str(sys.exc_info()[1]):
 				self.fetch_auth_token()
 				self.generate_irn()
 			else:
@@ -596,7 +596,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			if '401' in str(sys.exc_info()[1]):
+			if '401 Client Error' in str(sys.exc_info()[1]):
 				self.fetch_auth_token()
 				self.get_irn_details(irn)
 			else:
@@ -630,7 +630,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			if '401' in str(sys.exc_info()[1]):
+			if '401 Client Error' in str(sys.exc_info()[1]):
 				self.fetch_auth_token()
 				self.cancel_irn(irn, reason, remark)
 			else:
@@ -675,7 +675,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			if '401' in str(sys.exc_info()[1]):
+			if '401 Client Error' in str(sys.exc_info()[1]):
 				self.fetch_auth_token()
 				self.generate_eway_bill(**kwargs)
 			else:
@@ -711,7 +711,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			if '401' in str(sys.exc_info()[1]):
+			if '401 Client Error' in str(sys.exc_info()[1]):
 				self.fetch_auth_token()
 				self.cancel_eway_bill(eway_bill, reason, remark)
 			else:
