@@ -476,7 +476,7 @@ class GSPConnector():
 			"data": json.dumps(data, indent=4) if isinstance(data, dict) else data,
 			"response": json.dumps(res, indent=4) if res else None
 		})
-		request_log.insert(ignore_permissions=True)
+		request_log.save(ignore_permissions=True)
 		frappe.db.commit()
 
 	def fetch_auth_token(self):
@@ -489,7 +489,8 @@ class GSPConnector():
 			res = self.make_request('post', self.authenticate_url, headers)
 			self.e_invoice_settings.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
 			self.e_invoice_settings.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
-			self.e_invoice_settings.save()
+			self.e_invoice_settings.save(ignore_permissions=True)
+			self.e_invoice_settings.reload()
 
 		except Exception:
 			self.log_error(res)
