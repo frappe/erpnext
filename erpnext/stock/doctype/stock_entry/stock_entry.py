@@ -260,11 +260,16 @@ class StockEntry(StockController):
 								item_code.append(item.item_code)
 
 	def validate_fg_completed_qty(self):
+		item_wise_qty = {}
 		if self.purpose == "Manufacture" and self.work_order:
 			for d in self.items:
-				if d.is_finished_item and d.qty != self.fg_completed_qty:
-					frappe.throw(_("Finished product quantity <b>{0}</b> and For Quantity <b>{1}</b> cannot be different")
-						.format(d.qty, self.fg_completed_qty))
+				if d.is_finished_item:
+					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
+
+		for item_code, qty_list in iteritems(item_wise_qty):
+			if self.fg_completed_qty != sum(qty_list):
+				frappe.throw(_("The finished product {0} quantity {1} and For Quantity {2} cannot be different")
+					.format(frappe.bold(item_code), frappe.bold(sum(qty_list)), frappe.bold(self.fg_completed_qty)))
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
@@ -320,7 +325,7 @@ class StockEntry(StockController):
 
 			if self.purpose == "Manufacture":
 				if validate_for_manufacture:
-					if d.bom_no:
+					if d.is_finished_item or d.is_scrap_item:
 						d.s_warehouse = None
 						if not d.t_warehouse:
 							frappe.throw(_("Target warehouse is mandatory for row {0}").format(d.idx))
@@ -1337,9 +1342,6 @@ class StockEntry(StockController):
 						frappe.MappingMismatchError)
 				elif self.purpose == "Material Transfer" and self.add_to_transit:
 					continue
-				elif mreq_item.warehouse != (item.s_warehouse if self.purpose == "Material Issue" else item.t_warehouse):
-					frappe.throw(_("Warehouse for row {0} does not match Material Request").format(item.idx),
-						frappe.MappingMismatchError)
 
 	def validate_batch(self):
 		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Send to Subcontractor"]:

@@ -493,6 +493,41 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				'company': filters.get("company", "")
 			})
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters):
+	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
+	dimension_filters = get_dimension_filter_map()
+	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
+	query_filters = []
+
+	meta = frappe.get_meta(doctype)
+	if meta.is_tree:
+		query_filters.append(['is_group', '=', 0])
+
+	if meta.has_field('company'):
+		query_filters.append(['company', '=', filters.get('company')])
+
+	if txt:
+		query_filters.append([searchfield, 'LIKE', "%%%s%%" % txt])
+
+	if dimension_filters:
+		if dimension_filters['allow_or_restrict'] == 'Allow':
+			query_selector = 'in'
+		else:
+			query_selector = 'not in'
+
+		if len(dimension_filters['allowed_dimensions']) == 1:
+			dimensions = tuple(dimension_filters['allowed_dimensions'] * 2)
+		else:
+			dimensions = tuple(dimension_filters['allowed_dimensions'])
+
+		query_filters.append(['name', query_selector, dimensions])
+
+	output = frappe.get_all(doctype, filters=query_filters)
+	result = [d.name for d in output]
+
+	return [(d,) for d in set(result)]
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
