@@ -6,7 +6,7 @@ import frappe, erpnext
 import frappe.defaults
 from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate, get_link_to_form
 from frappe import _, msgprint, throw
-from erpnext.accounts.party import get_party_account, get_due_date
+from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
@@ -1618,6 +1618,11 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 			if currency:
 				target_doc.currency = currency
+
+			update_taxes(target_doc, party=target_doc.supplier, party_type='Supplier', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.supplier_address,
+				company_address=target_doc.shipping_address)
+
 		else:
 			currency = frappe.db.get_value('Customer', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
@@ -1630,6 +1635,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 			if currency:
 				target_doc.currency = currency
+
+			update_taxes(target_doc, party=target_doc.customer, party_type='Customer', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.customer_address,
+				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
 
 	item_field_map = {
 		"doctype": target_doctype + " Item",
@@ -1672,6 +1681,18 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def update_taxes(doc, party=None, party_type=None, company=None, doctype=None, party_address=None,
+	company_address=None, shipping_address_name=None, master_doctype=None):
+	# Update Party Details
+	party_details = get_party_details(party=party, party_type=party_type, company=company,
+		doctype=doctype, party_address=party_address, company_address=company_address,
+		shipping_address=shipping_address_name)
+
+	# Update taxes and charges if any
+	doc.taxes_and_charges = party_details.get('taxes_and_charges')
+	if party_details.get('taxes'):
+		doc.set('taxes', party_details.get('taxes'))
 
 def update_address(doc, address_field, address_display_field, address_name):
 	doc.set(address_field, address_name)
