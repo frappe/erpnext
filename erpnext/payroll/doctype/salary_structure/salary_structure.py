@@ -217,8 +217,12 @@ def get_earning_deduction_components(doctype, txt, searchfield, start, page_len,
 		select t1.salary_component
 		from `tabSalary Component` t1, `tabSalary Component Account` t2
 		where (t1.name = t2.parent
-		and t1.type = %s 
-		and t2.company = %s)
-		or (t1.statistical_component = 1)
+		and t1.type = %(type)s
+		and t2.company = %(company)s)
+		or (t1.type = %(type)s
+		and t1.statistical_component = 1)
 		order by salary_component
-	""", (filters['type'], filters['company']))
+	""",{
+		"type": filters['type'],
+		"company": filters['company']
+	})
