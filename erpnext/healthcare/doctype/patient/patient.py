@@ -58,7 +58,14 @@ class Patient(Document):
 		if self.dob:
 			born = getdate(self.dob)
 			age = dateutil.relativedelta.relativedelta(getdate(), born)
-			age_str = str(age.years) + " year(s) " + str(age.months) + " month(s) " + str(age.days) + " day(s)"
+			age_str = "{years} {years_label} {months} {months_label} {days} {days_label}".format(
+				years = age.years,
+				years_label = _("Years(s)"),
+				months = age.months,
+				months_label = _("Month(s)"),
+				days = age.days,
+				days_label = _("Day(s)")
+			)
 		return age_str
 
 	def invoice_patient_registration(self):

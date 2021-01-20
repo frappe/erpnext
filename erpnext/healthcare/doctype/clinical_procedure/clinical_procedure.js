@@ -308,7 +308,7 @@ var calculate_age = function(birth) {
 	var age = new Date();
 	age.setTime(ageMS);
 	var years =  age.getFullYear() - 1970;
-	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
+	return `${years} ${__('Years(s)')} ${age.getMonth()} ${__('Month(s)')} ${age.getDate()} ${__('Day(s)')}`;
 };
 
 // List Stock items
