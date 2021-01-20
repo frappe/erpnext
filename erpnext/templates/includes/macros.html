@@ -90,6 +90,10 @@
 	<div class="card {{ align_items_class }}">
 		{% if image %}
 		<img class="card-img" src="{{ image }}" alt="{{ title }}">
+		{% else %}
+		<div class="card-img-top no-image">
+			{{ frappe.utils.get_abbr(title) }}
+		</div>
 		{% endif %}
 		{{ item_card_body(title, description, url, rate, category, is_featured, align) }}
 	</div>

@@ -137,13 +137,15 @@
 		</script>
 	</div>
 </div>
-<div class="row">
-	<div class="col-12">
+<div class="row product-paging-area mt-5">
+	<div class="col-3">
+	</div>
+	<div class="col-9 text-right">
 		{% if frappe.form_dict.start|int > 0 %}
-		<button class="btn btn-outline-secondary btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</button>
+		<button class="btn btn-default btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</button>
 		{% endif %}
 		{% if items|length >= page_length %}
-		<button class="btn btn-outline-secondary btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
+		<button class="btn btn-default btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
 		{% endif %}
 	</div>
 </div>
