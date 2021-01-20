@@ -179,7 +179,7 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
-		
+
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
@@ -261,10 +261,10 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
-		
+
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
-		
+
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
@@ -551,7 +551,7 @@ class SalesInvoice(SellingController):
 	def add_remarks(self):
 		if not self.remarks:
 			if self.po_no and self.po_date:
-				self.remarks = _("Against Customer Order {0} dated {1}").format(self.po_no, 
+				self.remarks = _("Against Customer Order {0} dated {1}").format(self.po_no,
 					formatdate(self.po_date))
 			else:
 				self.remarks = _("No Remarks")
@@ -1699,6 +1699,7 @@ def get_mode_of_payment_info(mode_of_payment, company):
 		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
 	(company, mode_of_payment), as_dict=1)
 
+@frappe.whitelist()
 def create_dunning(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount
