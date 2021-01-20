@@ -6,14 +6,14 @@ import unittest
 import frappe
 import erpnext
 from erpnext.non_profit.doctype.member.member import create_member
-from frappe.utils import nowdate, getdate, add_months
+from frappe.utils import nowdate, add_months
 from erpnext.stock.doctype.item.test_item import create_item
 
 class TestMembership(unittest.TestCase):
 	def setUp(self):
 		# Get default company
 		company = frappe.get_doc("Company", erpnext.get_default_company())
-		
+
 		# update membership settings
 		settings = frappe.get_doc("Membership Settings")
 		# Enable razorpay
@@ -58,11 +58,11 @@ class TestMembership(unittest.TestCase):
 		# Should work fine
 		make_membership(self.member, { "from_date": nowdate() })
 		make_membership(self.member, { "from_date": add_months(nowdate(), 1) })
-		
+
 		from frappe.utils.user import add_role
 		add_role("test@example.com", "Non Profit Manager")
 		frappe.set_user("test@example.com")
-		
+
 		# create next membership with expiry not within 30 days
 		self.assertRaises(frappe.ValidationError, make_membership, self.member, {
 			"from_date": add_months(nowdate(), 2),
@@ -70,7 +70,7 @@ class TestMembership(unittest.TestCase):
 
 		frappe.set_user("Administrator")
 		# create the same membership but as administrator
-		new_entry = make_membership(self.member, {
+		make_membership(self.member, {
 			"from_date": add_months(nowdate(), 2),
 			"to_date": add_months(nowdate(), 3),
 		})
