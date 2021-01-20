@@ -665,7 +665,7 @@ def make_inter_company_purchase_receipt(source_name, target_doc=None):
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_transaction,
-		get_inter_company_details, update_address)
+		get_inter_company_details, update_address, update_taxes)
 
 	if doctype == 'Delivery Note':
 		source_doc = frappe.get_doc(doctype, source_name)
@@ -705,6 +705,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			# Invert the address on target doc creation
 			update_address(target_doc, 'supplier_address', 'address_display', source_doc.company_address)
 			update_address(target_doc, 'shipping_address', 'shipping_address_display', source_doc.customer_address)
+
+			update_taxes(target_doc, party=target_doc.supplier, party_type='Supplier', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.supplier_address,
+				company_address=target_doc.shipping_address)
 		else:
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
@@ -717,6 +721,10 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			update_address(target_doc, 'company_address', 'company_address_display', source_doc.supplier_address)
 			update_address(target_doc, 'shipping_address_name', 'shipping_address', source_doc.shipping_address)
 			update_address(target_doc, 'customer_address', 'address_display', source_doc.shipping_address)
+
+			update_taxes(target_doc, party=target_doc.customer, party_type='Customer', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.customer_address,
+				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
