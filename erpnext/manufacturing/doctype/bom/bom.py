@@ -224,7 +224,7 @@ class BOM(WebsiteGenerator):
 							"plc_conversion_rate": 1,
 							"ignore_party": True
 						})
-						item_doc = frappe.get_doc("Item", arg.get("item_code"))
+						item_doc = frappe.get_cached_doc("Item", arg.get("item_code"))
 						out = frappe._dict()
 						get_price_list_rate(args, item_doc, out)
 						rate = out.price_list_rate
