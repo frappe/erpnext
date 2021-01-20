@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import frappe
+from erpnext.shopping_cart.product_info import get_product_info_for_website
 
 class ProductQuery:
 	"""Query engine for product listing
@@ -21,7 +22,7 @@ class ProductQuery:
 		self.settings = frappe.get_doc("Products Settings")
 		self.cart_settings = frappe.get_doc("Shopping Cart Settings")
 		self.page_length = self.settings.products_per_page or 20
-		self.fields = ['name', 'item_name', 'website_image', 'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description', 'description', 'route']
+		self.fields = ['name', 'item_name', 'item_code', 'website_image', 'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description', 'description', 'route']
 		self.filters = [['show_in_website', '=', 1]]
 		self.or_filters = []
 
@@ -57,6 +58,8 @@ class ProductQuery:
 						["Item Variant Attribute", "attribute_value", "in", values],
 					],
 					or_filters=self.or_filters,
+					start=start,
+					limit=self.page_length
 				)
 
 				items_dict = {item.name: item for item in items}
@@ -66,7 +69,11 @@ class ProductQuery:
 
 			result = [items_dict.get(item) for item in list(set.intersection(*all_items))]
 		else:
-			result = frappe.get_all("Item", fields=self.fields, filters=self.filters, or_filters=self.or_filters, limit=self.page_length)
+			result = frappe.get_all("Item", fields=self.fields, filters=self.filters, or_filters=self.or_filters, start=start, limit=self.page_length)
+
+		for item in result:
+			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
+			item.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
 
 		return result
 

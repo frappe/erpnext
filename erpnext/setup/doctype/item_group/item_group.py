@@ -77,10 +77,12 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			search = frappe.form_dict.search
 			field_filters = frappe.parse_json(frappe.form_dict.field_filters)
 			attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
+			start = frappe.parse_json(frappe.form_dict.start)
 		else:
 			search = None
 			attribute_filters = None
 			field_filters = {}
+			start = 0
 
 		if not field_filters:
 			field_filters = {}
@@ -89,7 +91,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		field_filters['item_group'] = self.name
 
 		engine = ProductQuery()
-		context.items = engine.query(attribute_filters, field_filters, search)
+		context.items = engine.query(attribute_filters, field_filters, search, start)
 
 		filter_engine = ProductFiltersBuilder(self.name)
 
