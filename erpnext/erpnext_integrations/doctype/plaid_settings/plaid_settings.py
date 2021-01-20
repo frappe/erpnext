@@ -230,7 +230,6 @@ def automatic_synchronization():
 	if settings.enabled == 1 and settings.automatic_sync == 1:
 		enqueue_synchronization()
 
-
 @frappe.whitelist()
 def enqueue_synchronization():
 	plaid_accounts = frappe.get_all("Bank Account",
@@ -243,3 +242,8 @@ def enqueue_synchronization():
 			bank=plaid_account.bank,
 			bank_account=plaid_account.name
 		)
+
+@frappe.whitelist()
+def get_link_token_for_update(access_token):
+	plaid = PlaidConnector(access_token)
+	return plaid.get_link_token(update_mode=True)
