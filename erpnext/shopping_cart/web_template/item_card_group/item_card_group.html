@@ -26,7 +26,7 @@
 				{%- set item = frappe.get_doc("Item", item) -%}
 				{{ item_card(
 					item.item_name, item.image, item.route, item.description,
-					item.standard_rate, item.item_group, values['card_' + index + '_featured'],
+					None, item.item_group, values['card_' + index + '_featured'],
 					True, "Center"
 				) }}
 			{%- endif -%}
