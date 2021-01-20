@@ -284,13 +284,13 @@ def trigger_razorpay_subscription(*args, **kwargs):
 
 def notify_failure(log):
 	try:
-		content = _("""
+		content = """
 			Dear System Manager,
 			Razorpay webhook for creating renewing membership subscription failed due to some reason.
 			Please check the following error log linked below
 			Error Log: {0}
 			Regards, Administrator
-		""").format(get_link_to_form("Error Log", log.name))
+		""".format(get_link_to_form("Error Log", log.name))
 
 		sendmail_to_system_managers("[Important] [ERPNext] Razorpay membership webhook failed , please check.", content)
 	except:

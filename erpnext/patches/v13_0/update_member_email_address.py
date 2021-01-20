@@ -3,10 +3,11 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe.model.utils.rename_field import rename_field
 
 def execute():
 	"""add value to email_id column from email"""
-	
+
 	if frappe.db.has_column("Member", "email"):
 		# Get all members
 		for member in frappe.db.get_all("Member", pluck="name"):
@@ -17,3 +18,5 @@ def execute():
 
 				# Set the value for it
 				frappe.db.set_value("Member", member, "email_id", email)
+
+	rename_field("Membership Settings", "enable_auto_invoicing", "enable_invoicing")
