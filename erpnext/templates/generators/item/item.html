@@ -3,6 +3,9 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block breadcrumbs %}
+<div class="item-breadcrumbs small text-muted">
+	{% include "templates/includes/breadcrumbs.html" %}
+</div>
 {% endblock %}
 
 {% block page_content %}
