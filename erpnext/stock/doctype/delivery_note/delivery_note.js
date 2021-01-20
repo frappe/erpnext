@@ -7,14 +7,16 @@ cur_frm.add_fetch('customer', 'tax_id', 'tax_id');
 
 frappe.provide("erpnext.stock");
 frappe.provide("erpnext.stock.delivery_note");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Delivery Note", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
 			'Packing Slip': 'Packing Slip',
 			'Installation Note': 'Installation Note',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Stock Entry': 'Return',
+			'Shipment': 'Shipment'
 		},
 		frm.set_indicator_formatter('item_code',
 			function(doc) {
@@ -75,7 +77,7 @@ frappe.ui.form.on("Delivery Note", {
 			}
 		});
 
-
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	print_without_amount: function(frm) {
@@ -156,6 +158,11 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 		}
 
 		if (!doc.is_return && doc.status!="Closed") {
+			if(doc.docstatus == 1) {
+				this.frm.add_custom_button(__('Shipment'), function() {
+					me.make_shipment() }, __('Create'));
+			}
+
 			if(flt(doc.per_installed, 2) < 100 && doc.docstatus==1)
 				this.frm.add_custom_button(__('Installation Note'), function() {
 					me.make_installation_note() }, __('Create'));
@@ -218,6 +225,13 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				erpnext.utils.make_subscription(doc.doctype, doc.name)
 			}, __('Create'))
 		}
+	},
+
+	make_shipment: function() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.stock.doctype.delivery_note.delivery_note.make_shipment",
+			frm: this.frm
+		})
 	},
 
 	make_sales_invoice: function() {
@@ -305,6 +319,7 @@ frappe.ui.form.on('Delivery Note', {
 
 	company: function(frm) {
 		frm.trigger("unhide_account_head");
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	unhide_account_head: function(frm) {

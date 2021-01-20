@@ -81,7 +81,6 @@ def check_for_ltv_shortfall(process_loan_security_shortfall):
 				process_loan_security_shortfall)
 
 def create_loan_security_shortfall(loan, loan_amount, security_value, shortfall_amount, process_loan_security_shortfall):
-
 	existing_shortfall = frappe.db.get_value("Loan Security Shortfall", {"loan": loan, "status": "Pending"}, "name")
 
 	if existing_shortfall:
