@@ -456,6 +456,15 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 			"options": "Currency",
 			"hidden": 1
 		})
+
+	if periodicity != "Yearly":
+		if not accumulated_values:
+			columns.append({
+				"fieldname": "total",
+				"label": _("Total"),
+				"fieldtype": "Currency",
+				"width": 150
+			})
 	for period in period_list:
 		columns.append({
 			"fieldname": period.key,
@@ -464,13 +473,5 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 			"options": "currency",
 			"width": 150
 		})
-	if periodicity!="Yearly":
-		if not accumulated_values:
-			columns.append({
-				"fieldname": "total",
-				"label": _("Total"),
-				"fieldtype": "Currency",
-				"width": 150
-			})
 
 	return columns
