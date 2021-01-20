@@ -8,7 +8,6 @@
   "enable",
   "section_break_2",
   "sandbox_mode",
-  "generate_irn_only_on_submission",
   "credentials",
   "auth_token",
   "token_expiry"
@@ -49,18 +48,12 @@
    "fieldname": "sandbox_mode",
    "fieldtype": "Check",
    "label": "Sandbox Mode"
-  },
-  {
-   "default": "0",
-   "fieldname": "generate_irn_only_on_submission",
-   "fieldtype": "Check",
-   "label": "Generate IRN Only on Submission"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-01-19 12:08:41.469413",
+ "modified": "2021-01-13 12:04:49.449199",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",

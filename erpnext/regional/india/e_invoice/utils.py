@@ -20,7 +20,6 @@ from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
-	generate_irn_only_on_submission = cint(frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "generate_irn_only_on_submission"))
 	invalid_doctype = doc.doctype not in ['Sales Invoice']
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
@@ -33,7 +32,7 @@ def validate_einvoice_fields(doc):
 		if len(doc.name) > 16:
 			raise_document_name_too_long_error()
 
-	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn and not generate_irn_only_on_submission:
+	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
 
 	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:

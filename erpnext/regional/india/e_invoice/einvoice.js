@@ -17,26 +17,22 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			};
 
 			if (!irn && !__unsaved) {
-				frappe.db.get_single_value("E Invoice Settings", "generate_irn_only_on_submission").then(val => {
-					if ((val === 1  && frm.doc.docstatus == 1) || (!val)){
-						const action = () => {
-							if(frm.doc.__unsaved) {
-								frappe.throw(__('Please save the document to generate IRN.'));
-							}
-							frappe.call({
-								method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
-								args: { doctype, docname: name },
-								freeze: true,
-								callback: (res) => {
-									const einvoice = res.message;
-									show_einvoice_preview(frm, einvoice);
-								}
-							});
-						};
-
-						add_custom_button(__("Generate IRN"), action);
+				const action = () => {
+					if (frm.doc.__unsaved) {
+						frappe.throw(__('Please save the document to generate IRN.'));
 					}
-				});
+					frappe.call({
+						method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
+						args: { doctype, docname: name },
+						freeze: true,
+						callback: (res) => {
+							const einvoice = res.message;
+							show_einvoice_preview(frm, einvoice);
+						}
+					});
+				};
+
+				add_custom_button(__("Generate IRN"), action);
 			}
 
 			if (irn && !irn_cancelled && !ewaybill) {
