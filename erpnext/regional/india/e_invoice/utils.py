@@ -163,9 +163,9 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.unit_rate = abs(item.base_amount / item.qty)
-		item.gross_amount = abs(item.base_amount)
-		item.taxable_value = abs(item.base_amount)
+		item.unit_rate = abs(item.base_net_amount / item.qty)
+		item.gross_amount = abs(item.base_net_amount)
+		item.taxable_value = abs(item.base_net_amount)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
@@ -200,7 +200,7 @@ def update_item_taxes(invoice, item):
 		if t.account_head in gst_accounts_list:
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
-			item_tax_amount = (item_tax_rate / 100) * item.base_amount
+			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
 
 			if t.account_head in gst_accounts.cess_account:
 				item_tax_amount_after_discount = item_tax_detail[1]
@@ -219,7 +219,10 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
-	invoice_value_details.base_total = abs(invoice.base_total)
+	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+		invoice_value_details.base_total = abs(invoice.base_total)
+	else:
+		invoice_value_details.base_total = abs(invoice.base_net_total)
 	invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
@@ -475,7 +478,7 @@ class GSPConnector():
 			"data": json.dumps(data, indent=4) if isinstance(data, dict) else data,
 			"response": json.dumps(res, indent=4) if res else None
 		})
-		request_log.insert(ignore_permissions=True)
+		request_log.save(ignore_permissions=True)
 		frappe.db.commit()
 
 	def fetch_auth_token(self):
@@ -488,7 +491,8 @@ class GSPConnector():
 			res = self.make_request('post', self.authenticate_url, headers)
 			self.e_invoice_settings.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
 			self.e_invoice_settings.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
-			self.e_invoice_settings.save()
+			self.e_invoice_settings.save(ignore_permissions=True)
+			self.e_invoice_settings.reload()
 
 		except Exception:
 			self.log_error(res)
@@ -784,7 +788,7 @@ class GSPConnector():
 			'label': _('IRN Generated')
 		}
 		self.update_invoice()
-	
+
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
