@@ -772,10 +772,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 						precision("base_amount", item));
 					net_total += item.net_amount;
 
-					if (!cint(item.apply_discount_after_taxes)) {
-						item.taxable_amount = item.net_amount;
-					}
-
 					// discount amount rounding loss adjustment if no taxes
 					if ((!(me.frm.doc.taxes || []).length || total_for_discount_amount==me.frm.doc.net_total || (me.frm.doc.apply_discount_on == "Net Total"))
 							&& i == (me.frm.doc.items || []).length - 1) {
@@ -787,7 +783,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : 0;
 
 					if (!cint(item.apply_discount_after_taxes)) {
-						item.taxable_rate = item.net_rate
+						item.taxable_amount = item.net_amount;
+						item.taxable_rate = item.net_rate;
 					}
 					me.set_in_company_currency(item, ["net_rate", "net_amount", "taxable_rate", "taxable_amount"]);
 				});
