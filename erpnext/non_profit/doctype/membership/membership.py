@@ -63,7 +63,7 @@ class Membership(Document):
 			self.generate_invoice(with_payment_entry=settings.make_payment_entry, save=True)
 
 
-	def generate_invoice(self, save=True):
+	def generate_invoice(self, save=True, with_payment_entry=False):
 		if not (self.paid or self.currency or self.amount):
 			frappe.throw(_("The payment for this membership is not paid. To generate invoice fill the payment details"))
 
@@ -140,7 +140,7 @@ class Membership(Document):
 			frappe.sendmail(**email_args)
 
 	def generate_and_send_invoice(self):
-		invoice = self.generate_invoice(False)
+		invoice = self.generate_invoice(save=False)
 		self.send_acknowlement()
 
 def make_invoice(membership, member, plan, settings):
