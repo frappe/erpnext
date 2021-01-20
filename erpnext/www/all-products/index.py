@@ -12,11 +12,13 @@ def get_context(context):
 		search = frappe.form_dict.search
 		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
 		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
+		start = frappe.parse_json(frappe.form_dict.start)
 	else:
 		search = field_filters = attribute_filters = None
+		start = 0
 
 	engine = ProductQuery()
-	context.items = engine.query(attribute_filters, field_filters, search)
+	context.items = engine.query(attribute_filters, field_filters, search, start)
 
 	product_settings = get_product_settings()
 	filter_engine = ProductFiltersBuilder()
