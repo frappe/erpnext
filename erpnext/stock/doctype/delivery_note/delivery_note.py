@@ -665,7 +665,7 @@ def make_inter_company_purchase_receipt(source_name, target_doc=None):
 
 def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	from erpnext.accounts.doctype.sales_invoice.sales_invoice import (validate_inter_company_transaction,
-		get_inter_company_details, update_address, update_taxes)
+		get_inter_company_details, update_address, update_taxes, set_purchase_references)
 
 	if doctype == 'Delivery Note':
 		source_doc = frappe.get_doc(doctype, source_name)
@@ -683,6 +683,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		set_purchase_references(target)
 
 		if target.doctype == 'Purchase Receipt':
 			master_doctype = 'Purchase Taxes and Charges Template'
@@ -726,7 +727,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 				doctype=target_doc.doctype, party_address=target_doc.customer_address,
 				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
 
-	doclist = get_mapped_doc(doctype, source_name,	{
+	doclist = get_mapped_doc(doctype, source_name, {
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,

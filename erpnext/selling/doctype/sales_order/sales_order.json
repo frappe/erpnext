@@ -1105,7 +1105,8 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Inter Company Order Reference",
-   "options": "Purchase Order"
+   "options": "Purchase Order",
+   "read_only": 1
   },
   {
    "description": "Track this Sales Order against any Project",
@@ -1471,14 +1472,15 @@
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-10 20:49:51.118079",
+ "modified": "2021-01-20 23:40:39.929296",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

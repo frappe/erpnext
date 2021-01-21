@@ -399,7 +399,6 @@ class StockController(AccountsController):
 			self.validate_in_transit_warehouses()
 			self.validate_multi_currency()
 			self.validate_packed_items()
-			self.validate_inter_company_reference()
 
 	def validate_in_transit_warehouses(self):
 		if (self.doctype == 'Sales Invoice' and self.get('update_stock')) or self.doctype == 'Delivery Note':
@@ -419,13 +418,6 @@ class StockController(AccountsController):
 	def validate_packed_items(self):
 		if self.doctype in ('Sales Invoice', 'Delivery Note Item') and self.get('packed_items'):
 			frappe.throw(_("Packed Items cannot be transferred internally"))
-
-	def validate_inter_company_reference(self):
-		if self.doctype in ('Purchase Invoice', 'Purchase Receipt'):
-			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')):
-				msg = _("Internal Sale or Delivery Reference missing. ")
-				msg += _("Please create purchase from internal sale or delivery document itself")
-				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
 
 	def repost_future_sle_and_gle(self):
 		args = frappe._dict({
