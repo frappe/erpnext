@@ -116,7 +116,29 @@ frappe.query_reports["Stock Ledger"] = {
 			"default": 0,
 			on_change: function() { return false; }
 		}
-	]
+	],
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (['actual_qty', 'stock_value_difference'].includes(column.fieldname)) {
+			if (flt(value) > 0) {
+				style['color'] = 'green';
+			} else if (flt(value) < 0) {
+				style['color'] = 'red';
+			}
+		}
+		if (['qty_after_transaction', 'stock_value', 'valuation_rate'].includes(column.fieldname)) {
+			if (flt(value) < 0) {
+				style['background-color'] = 'pink';
+				style['font-weight'] = 'bold';
+			}
+		}
+		if (column.fieldname == 'qty_after_transaction' && !flt(value)) {
+			style['color'] = '#00009a';
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
 }
 
 // $(function() {

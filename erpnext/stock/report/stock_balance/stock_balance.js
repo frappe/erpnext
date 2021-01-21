@@ -110,16 +110,30 @@ frappe.query_reports["Stock Balance"] = {
 		},
 	],
 
-	"formatter": function (value, row, column, data, default_formatter) {
-		value = default_formatter(value, row, column, data);
+	formatter: function (value, row, column, data, default_formatter) {
+		var style = {};
 
-		if (column.fieldname == "out_qty" && data && data.out_qty > 0) {
-			value = "<span style='color:red'>" + value + "</span>";
-		}
-		else if (column.fieldname == "in_qty" && data && data.in_qty > 0) {
-			value = "<span style='color:green'>" + value + "</span>";
+		if (["out_qty", "out_val"].includes(column.fieldname) && flt(value) > 0) {
+			style['color'] = 'red';
+		} else if (["in_qty", "in_val"].includes(column.fieldname) && flt(value) > 0) {
+			style['color'] = 'green';
 		}
 
-		return value;
+		if (column.fieldname == "bal_qty") {
+			style['font-weight'] = 'bold';
+		}
+		if (["bal_qty", "bal_val"].includes(column.fieldname)) {
+			if (flt(value) > 0) {
+				style['color'] = '#004509';
+			} else if (value === 0) {
+				style['color'] = '#00009a';
+			}
+		}
+
+		if (["bal_qty", "bal_val", "opening_qty", "opening_val"].includes(column.fieldname) && flt(value) < 0) {
+			style['background-color'] = 'pink';
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
 	}
 };

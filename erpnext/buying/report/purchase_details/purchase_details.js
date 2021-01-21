@@ -155,5 +155,16 @@ frappe.query_reports["Purchase Details"] = {
 			fieldtype: "Check"
 		},
 	],
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (['qty', 'net_amount', 'base_net_amount', 'grand_total', 'base_grand_total'].includes(column.fieldname)) {
+			if (flt(value) < 0) {
+				style['color'] = 'red';
+			}
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
 	"initial_depth": 1
 }
