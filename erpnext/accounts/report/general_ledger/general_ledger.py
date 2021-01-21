@@ -395,7 +395,7 @@ def get_columns(filters, accounting_dimensions):
 		{
 			"label": _("Ref No"),
 			"fieldname": "reference_no",
-			"width": 80
+			"width": 70
 		},
 		{
 			"label": _("Account"),
@@ -408,7 +408,7 @@ def get_columns(filters, accounting_dimensions):
 		{
 			"label": _("Party Type"),
 			"fieldname": "party_type",
-			"width": 100,
+			"width": 70,
 			"hide_if_filtered": 1
 		},
 		{
