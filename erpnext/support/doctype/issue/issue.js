@@ -196,29 +196,29 @@ frappe.ui.form.on("Issue", {
 		}
 
 		// create button for "Help Article"
-		if (frappe.model.can_create("Help Article")) {
-			// Removing Help Article button if exists to avoid multiple occurrence
-			frm.timeline.wrapper.find('.action-btn .btn-add-to-kb').remove();
+		// if (frappe.model.can_create("Help Article")) {
+		// 	// Removing Help Article button if exists to avoid multiple occurrence
+		// 	frm.timeline.wrapper.find('.action-btn .btn-add-to-kb').remove();
 
-			let help_article = $(`
-				<a class="action-btn btn-add-to-kb" title="${__('Help Article')}">
-					${frappe.utils.icon('solid-info', 'sm')}
-				</a>
-			`);
+		// 	let help_article = $(`
+		// 		<a class="action-btn btn-add-to-kb" title="${__('Help Article')}">
+		// 			${frappe.utils.icon('solid-info', 'sm')}
+		// 		</a>
+		// 	`);
 
-			let communication_box = frm.timeline.wrapper.find('.timeline-item[data-doctype="Communication"]');
-			communication_box.find('.actions').prepend(help_article);
-			if (!frm.timeline.wrapper.data("help-article-event-attached")) {
-				frm.timeline.wrapper.on('click', '.btn-add-to-kb', function () {
-					const content = $(this).parents('.timeline-item[data-doctype="Communication"]:first').find(".content").html();
-					const doc = frappe.model.get_new_doc("Help Article");
-					doc.title = frm.doc.subject;
-					doc.content = content;
-					frappe.set_route("Form", "Help Article", doc.name);
-				});
-			}
-			frm.timeline.wrapper.data("help-article-event-attached", true);
-		}
+		// 	let communication_box = frm.timeline.wrapper.find('.timeline-item[data-doctype="Communication"]');
+		// 	communication_box.find('.actions').prepend(help_article);
+		// 	if (!frm.timeline.wrapper.data("help-article-event-attached")) {
+		// 		frm.timeline.wrapper.on('click', '.btn-add-to-kb', function () {
+		// 			const content = $(this).parents('.timeline-item[data-doctype="Communication"]:first').find(".content").html();
+		// 			const doc = frappe.model.get_new_doc("Help Article");
+		// 			doc.title = frm.doc.subject;
+		// 			doc.content = content;
+		// 			frappe.set_route("Form", "Help Article", doc.name);
+		// 		});
+		// 	}
+		// 	frm.timeline.wrapper.data("help-article-event-attached", true);
+		// }
 	},
 });
 
