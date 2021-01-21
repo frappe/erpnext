@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 from frappe.model.document import Document
 import frappe
+from frappe import _
 
 class MembershipType(Document):
 	def validate(self):
