@@ -308,3 +308,12 @@ def get_plan_from_razorpay_id(plan_id):
 		return plan[0]["name"]
 	except:
 		return None
+
+
+def set_expired_status():
+	frappe.db.sql("""
+		UPDATE
+			`tabMembership` SET `status` = 'Expired'
+		WHERE
+			`status` not in ('Cancelled') AND `to_date` < %s
+		""", (nowdate()))
