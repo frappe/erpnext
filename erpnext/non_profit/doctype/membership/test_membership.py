@@ -33,7 +33,7 @@ class TestMembership(unittest.TestCase):
 		plan.membership_type = "_rzpy_test_milythm"
 		plan.amount = 100
 		plan.razorpay_plan_id = "_rzpy_test_milythm"
-		plan.linked_item = create_item("_Test Item for Non Profit Membership").name
+		plan.linked_item = create_item("_Test Item for Non Profit Membership", is_stock_item=0).name
 		plan.insert()
 
 		# make test member
