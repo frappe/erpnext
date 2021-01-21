@@ -9,6 +9,9 @@ frappe.ui.form.on('Membership', {
 	},
 
 	refresh: function(frm) {
+		if (frm.doc.__islocal)
+			return;
+
 		!frm.doc.invoice && frm.add_custom_button("Generate Invoice", () => {
 			frm.call({
 				doc: frm.doc,
