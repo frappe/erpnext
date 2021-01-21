@@ -18,7 +18,11 @@ class Membership(Document):
 	def validate(self):
 		if not self.member or not frappe.db.exists("Member", self.member):
 			# for web forms
-			self.create_member_from_website_user()
+			user_type = frappe.db.get_value("User", frappe.session.user, "user_type")
+			if user_type == "Website User":
+				self.create_member_from_website_user()
+			else:
+				frappe.throw(_("Please select a Member"))
 
 		self.validate_membership_period()
 
