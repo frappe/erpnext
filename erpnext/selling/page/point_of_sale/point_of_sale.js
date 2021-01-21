@@ -155,7 +155,7 @@ erpnext.pos.PointOfSale = class PointOfSale {
 					var me = this;
 					if (this.frm.doc.customer) {
 						frappe.call({
-							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details",
+							method: "erpnext.accounts.doctype.loyalty_program.loyalty_program.get_loyalty_program_details_with_points",
 							args: {
 								"customer": me.frm.doc.customer,
 								"expiry_date": me.frm.doc.posting_date,

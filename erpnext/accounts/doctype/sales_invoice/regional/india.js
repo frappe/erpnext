@@ -14,6 +14,16 @@ frappe.ui.form.on("Sales Invoice", {
 			};
 		});
 
+		frm.set_query('transporter_address', function (doc) {
+			return {
+				query: 'frappe.contacts.doctype.address.address.address_query',
+				filters: {
+					link_doctype: 'Supplier',
+					link_name: doc.transporter
+				}
+			}
+		});
+
 		frm.set_query('driver', function(doc) {
 			return {
 				filters: {
