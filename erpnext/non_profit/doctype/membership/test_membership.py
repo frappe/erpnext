@@ -28,12 +28,15 @@ class TestMembership(unittest.TestCase):
 		settings.save()
 
 		# make test plan
-		plan = frappe.new_doc("Membership Type")
-		plan.membership_type = "_rzpy_test_milythm"
-		plan.amount = 100
-		plan.razorpay_plan_id = "_rzpy_test_milythm"
-		plan.linked_item = create_item("_Test Item for Non Profit Membership").name
-		plan.insert()
+		if not frappe.db.exists("Membership Type", "_rzpy_test_milythm"):
+			plan = frappe.new_doc("Membership Type")
+			plan.membership_type = "_rzpy_test_milythm"
+			plan.amount = 100
+			plan.razorpay_plan_id = "_rzpy_test_milythm"
+			plan.linked_item = create_item("_Test Item for Non Profit Membership").name
+			plan.insert()
+		else:
+			plan = frappe.get_doc("Membership Type", "_rzpy_test_milythm")
 
 		# make test member
 		self.member_doc = create_member(frappe._dict({
@@ -42,7 +45,7 @@ class TestMembership(unittest.TestCase):
 				'plan_id': plan.name
 		}))
 		self.member_doc.make_customer_and_link()
-		self.member = "self.member_doc.name"
+		self.member = self.member_doc.name
 
 	def test_auto_generate_invoice_and_payment_entry(self):
 		entry = make_membership(self.member)
