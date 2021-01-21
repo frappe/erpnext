@@ -29,7 +29,7 @@ class RepostItemValuation(Document):
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
 		elif self.warehouse:
 			self.company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
-	
+
 	def set_status(self, status=None):
 		if not status:
 			status = 'Queued'
@@ -64,7 +64,7 @@ def repost(doc):
 			message += "<br>" + "Traceback: <br>" + traceback
 		frappe.db.set_value(doc.doctype, doc.name, 'error_log', message)
 
-		notify_error_to_stock_managers(doc)
+		notify_error_to_stock_managers(doc, traceback)
 		doc.set_status('Failed')
 		raise
 	finally:
@@ -100,7 +100,7 @@ def notify_error_to_stock_managers(doc, traceback):
 	recipients = get_users_with_role("Stock Manager")
 	if not recipients:
 		get_users_with_role("System Manager")
-	
+
 	subject = _("Error while reposting item valuation")
 	message = (_("Hi,") + "<br>"
 		+ _("An error has been appeared while reposting item valuation via {0}")
