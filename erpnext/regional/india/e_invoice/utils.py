@@ -215,10 +215,15 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
-	invoice_value_details.base_net_total = abs(invoice.base_net_total)
-	invoice_value_details.invoice_discount_amt = invoice.discount_amount if invoice.discount_amount and invoice.discount_amount > 0 else 0
-	# discount amount cannnot be -ve in an e-invoice, so if -ve include discount in round_off
-	invoice_value_details.round_off = invoice.rounding_adjustment - (invoice.discount_amount if invoice.discount_amount and invoice.discount_amount < 0 else 0)
+
+	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+		invoice_value_details.base_total = abs(invoice.base_total)
+	else:
+		invoice_value_details.base_total = abs(invoice.base_net_total)
+
+	# since tax already considers discount amount
+	invoice_value_details.invoice_discount_amt = 0 # invoice.base_discount_amount
+	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
 	
@@ -239,12 +244,10 @@ def update_invoice_taxes(invoice, invoice_value_details):
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
 				invoice_value_details.total_cess_amt += abs(t.base_tax_amount_after_discount_amount)
-			elif t.account_head in gst_accounts.igst_account:
-				invoice_value_details.total_igst_amt += abs(t.base_tax_amount_after_discount_amount)
-			elif t.account_head in gst_accounts.sgst_account:
-				invoice_value_details.total_sgst_amt += abs(t.base_tax_amount_after_discount_amount)
-			elif t.account_head in gst_accounts.cgst_account:
-				invoice_value_details.total_cgst_amt += abs(t.base_tax_amount_after_discount_amount)
+			
+			for tax_type in ['igst', 'cgst', 'sgst']:
+				if t.account_head in gst_accounts[f'{tax_type}_account']:
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount_after_discount_amount)
 		else:
 			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
 	
