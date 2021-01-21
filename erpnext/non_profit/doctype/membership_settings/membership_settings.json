@@ -126,6 +126,7 @@
   {
    "default": "0",
    "depends_on": "eval:doc.enable_invoicing",
+   "description": "Auto creates Payment Entry for Sales Invoices created for Membership from web forms.",
    "fieldname": "make_payment_entry",
    "fieldtype": "Check",
    "label": "Make Payment Entry"
@@ -150,7 +151,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-11-09 12:28:49.972434",
+ "modified": "2021-01-21 19:57:53.213286",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership Settings",
