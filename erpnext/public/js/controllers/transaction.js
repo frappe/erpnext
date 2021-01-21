@@ -235,7 +235,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			};
 
-			this.frm.trigger('set_internal_warehouses');
+			this.frm.trigger('set_default_internal_warehouse');
 
 			return frappe.run_serially([
 				() => set_value('currency', currency),
@@ -733,7 +733,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.calculate_taxes_and_totals(false);
 	},
 
-	set_internal_warehouses: function() {
+	update_stock: function() {
+		this.frm.trigger('set_default_internal_warehouse');
+	},
+
+	set_default_internal_warehouse: function() {
 		let me = this;
 		if ((this.frm.doc.doctype === 'Sales Invoice' && me.frm.doc.update_stock)
 			|| this.frm.doc.doctype == 'Delivery Note') {
