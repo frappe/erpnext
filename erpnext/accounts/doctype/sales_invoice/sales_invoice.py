@@ -1601,6 +1601,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		set_purchase_references(target)
 
 	def update_details(source_doc, target_doc, source_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
@@ -1681,6 +1682,90 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def set_purchase_references(doc):
+	# add internal PO or PR links if any
+	if doc.is_internal_transfer():
+		if doc.doctype == 'Purchase Receipt':
+			so_item_map = get_delivery_note_details(doc.inter_company_invoice_reference)
+
+			if so_item_map:
+				pd_item_map, parent_child_map, warehouse_map = \
+					get_pd_details('Purchase Order Item', so_item_map, 'sales_order_item')
+
+				update_pr_items(doc, so_item_map, pd_item_map, parent_child_map, warehouse_map)
+
+		elif doc.doctype == 'Purchase Invoice':
+			dn_item_map, so_item_map = get_sales_invoice_details(doc.inter_company_invoice_reference)
+			# First check for Purchase receipt
+			if list(dn_item_map.values()):
+				pd_item_map, parent_child_map, warehouse_map = \
+					get_pd_details('Purchase Receipt Item', dn_item_map, 'delivery_note_item')
+
+				update_pi_items(doc, 'pr_detail', 'purchase_receipt',
+					dn_item_map, pd_item_map, parent_child_map, warehouse_map)
+
+			if list(so_item_map.values()):
+				pd_item_map, parent_child_map, warehouse_map = \
+					get_pd_details('Purchase Order Item', so_item_map, 'sales_order_item')
+
+				update_pi_items(doc, 'po_detail', 'purchase_order',
+					so_item_map, pd_item_map, parent_child_map, warehouse_map)
+
+def update_pi_items(doc, detail_field, parent_field, sales_item_map,
+	purchase_item_map, parent_child_map, warehouse_map):
+	for item in doc.get('items'):
+		item.set(detail_field, purchase_item_map.get(sales_item_map.get(item.sales_invoice_item)))
+		item.set(parent_field, parent_child_map.get(sales_item_map.get(item.sales_invoice_item)))
+		if doc.update_stock:
+			item.warehouse = warehouse_map.get(sales_item_map.get(item.sales_invoice_item))
+
+def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, warehouse_map):
+	for item in doc.get('items'):
+		item.purchase_order_item = purchase_item_map.get(sales_item_map.get(item.delivery_note_item))
+		item.warehouse = warehouse_map.get(sales_item_map.get(item.delivery_note_item))
+		item.purchase_order = parent_child_map.get(sales_item_map.get(item.delivery_note_item))
+
+def get_delivery_note_details(internal_reference):
+	so_item_map = {}
+
+	si_item_details = frappe.get_all('Delivery Note Item', fields=['name', 'so_detail'],
+		filters={'parent': internal_reference})
+
+	for d in si_item_details:
+		so_item_map.setdefault(d.name, d.so_detail)
+
+	return so_item_map
+
+def get_sales_invoice_details(internal_reference):
+	dn_item_map = {}
+	so_item_map = {}
+
+	si_item_details = frappe.get_all('Sales Invoice Item', fields=['name', 'so_detail',
+		'dn_detail'], filters={'parent': internal_reference})
+
+	for d in si_item_details:
+		if d.dn_detail:
+			dn_item_map.setdefault(d.name, d.dn_detail)
+		if d.so_detail:
+			so_item_map.setdefault(d.name, d.so_detail)
+
+	return dn_item_map, so_item_map
+
+def get_pd_details(doctype, sd_detail_map, sd_detail_field):
+	pd_item_map = {}
+	accepted_warehouse_map = {}
+	parent_child_map = {}
+
+	pd_item_details = frappe.get_all(doctype,
+		fields=[sd_detail_field, 'name', 'warehouse', 'parent'], filters={sd_detail_field: ('in', list(sd_detail_map.values()))})
+
+	for d in pd_item_details:
+		pd_item_map.setdefault(d.get(sd_detail_field), d.name)
+		parent_child_map.setdefault(d.get(sd_detail_field), d.parent)
+		accepted_warehouse_map.setdefault(d.get(sd_detail_field), d.warehouse)
+
+	return pd_item_map, parent_child_map, accepted_warehouse_map
 
 def update_taxes(doc, party=None, party_type=None, company=None, doctype=None, party_address=None,
 	company_address=None, shipping_address_name=None, master_doctype=None):

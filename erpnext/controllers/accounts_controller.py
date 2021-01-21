@@ -75,6 +75,8 @@ class AccountsController(TransactionBase):
 		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
+		self.validate_inter_company_reference()
+
 		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
@@ -206,6 +208,14 @@ class AccountsController(TransactionBase):
 			if date_field and self.get(date_field):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company,
 									 self.meta.get_label(date_field), self)
+
+	def validate_inter_company_reference(self):
+		if self.is_internal_transfer() and self.doctype in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
+			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')
+				or self.get('inter_company_order_reference')):
+				msg = _("Internal Sale or Delivery Reference missing. ")
+				msg += _("Please create purchase from internal sale or delivery document itself")
+				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
 
 	def validate_due_date(self):
 		if self.get('is_pos'): return

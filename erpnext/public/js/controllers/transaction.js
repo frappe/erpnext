@@ -235,6 +235,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			};
 
+			this.frm.trigger('set_internal_warehouses');
+
 			return frappe.run_serially([
 				() => set_value('currency', currency),
 				() => set_value('price_list_currency', currency),
@@ -731,16 +733,19 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.calculate_taxes_and_totals(false);
 	},
 
-	update_stock: function() {
+	set_internal_warehouses: function() {
 		let me = this;
-		if (['Delivery Note', 'Sales Invoice'].includes(me.frm.doc.doctype)) {
+		if ((this.frm.doc.doctype === 'Sales Invoice' && me.frm.doc.update_stock)
+			|| this.frm.doc.doctype == 'Delivery Note') {
 			if (this.frm.doc.is_internal_customer && this.frm.doc.company === this.frm.doc.represents_company) {
 				frappe.db.get_value('Company', this.frm.doc.company, 'default_in_transit_warehouse', function(value) {
 					me.frm.set_value('set_target_warehouse', value.default_in_transit_warehouse);
 				});
 			}
 		}
-		if (['Purchase Receipt', 'Purchase Invoice'].includes(me.frm.doc.doctype)) {
+
+		if ((this.frm.doc.doctype === 'Purchase Invoice' && me.frm.doc.update_stock)
+			|| this.frm.doc.doctype == 'Purchase Receipt') {
 			if (this.frm.doc.is_internal_supplier && this.frm.doc.company === this.frm.doc.represents_company) {
 				frappe.db.get_value('Company', this.frm.doc.company, 'default_in_transit_warehouse', function(value) {
 					me.frm.set_value('set_from_warehouse', value.default_in_transit_warehouse);
@@ -835,7 +840,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			in_list(['Purchase Order', 'Purchase Receipt', 'Purchase Invoice'], this.frm.doctype)) {
 			erpnext.utils.get_shipping_address(this.frm, function(){
 				set_party_account(set_pricing);
-			})
+			});
 
 			// Get default company billing address in Purchase Invoice, Order and Receipt
 			frappe.call({
