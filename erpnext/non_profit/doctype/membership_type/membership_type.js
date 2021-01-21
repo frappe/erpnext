@@ -16,7 +16,7 @@ frappe.ui.form.on('Membership Type', {
 				filters: {
 					is_stock_item: 0
 				}
-			}
-		})
+			};
+		});
 	}
 });
