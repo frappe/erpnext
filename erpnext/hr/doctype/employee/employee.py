@@ -332,13 +332,28 @@ def send_birthday_reminder(recipients, reminder_text, birthday_persons, message)
 def get_employees_who_are_born_today():
 	"""Get all employee born today & group them based on their company"""
 	from collections import defaultdict
-	employees_born_today = frappe.db.sql("""
-		SELECT `personal_email`, `company`, `company_email`, `user_id`, `employee_name` as 'name', `image`
-		FROM `tabEmployee`
-		WHERE DAY(date_of_birth) = DAY(CURDATE())
-			AND MONTH(date_of_birth) = MONTH(CURDATE())
-			AND `status` = 'Active'
-	""", as_dict=1)
+	employees_born_today = frappe.db.multisql({
+		"mariadb": """
+			SELECT `personal_email`, `company`, `company_email`, `user_id`, `employee_name` AS 'name', `image`
+			FROM `tabEmployee`
+			WHERE
+				DAY(date_of_birth) = DAY(%(today)s)
+			AND
+				MONTH(date_of_birth) = MONTH(%(today)s)
+			AND
+				`status` = 'Active'
+		""",
+		"postgres": """
+			SELECT "personal_email", "company", "company_email", "user_id", "employee_name" AS 'name', "image"
+			FROM "tabEmployee"
+			WHERE
+				DATE_PART('day', "date_of_birth") = date_part('day', %(today)s)
+			AND
+				DATE_PART('month', "date_of_birth") = date_part('month', %(today)s)
+			AND
+				"status" = 'Active'
+		""",
+	}, dict(today=today()), as_dict=1)
 
 	grouped_employees = defaultdict(lambda: [])
 
