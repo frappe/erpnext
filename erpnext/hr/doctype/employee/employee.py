@@ -307,10 +307,12 @@ def get_birthday_reminder_text_and_message(birthday_persons):
 		person_names = [d['name'] for d in birthday_persons]
 		last_person = person_names[-1]
 		birthday_person_text = ", ".join(person_names[:-1])
-		birthday_person_text += " & {}".format(last_person)
+		birthday_person_text = _("{} & {}").format(birthday_person_text, last_person)
 
-	reminder_text = "Today is {0}'s birthday 🎉".format(birthday_person_text)
-	message = "A friendly reminder of an important date for our team. Everyone, let’s congratulate {0} their birthday.".format(birthday_person_text)
+	reminder_text = _("Today is {0}'s birthday 🎉").format(birthday_person_text)
+	message = _("A friendly reminder of an important date for our team.")
+	message += "<br>"
+	message += _("Everyone, let’s congratulate {0} on their birthday.").format(birthday_person_text)
 
 	return reminder_text, message
 
