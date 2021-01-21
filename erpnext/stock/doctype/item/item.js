@@ -81,7 +81,7 @@ frappe.ui.form.on("Item", {
 				}, __('Create'));
 			}
 
-			frm.page.set_inner_btn_group_as_primary(__('Create'));
+			// frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__('This Item is a Variant of {0} (Template).',
