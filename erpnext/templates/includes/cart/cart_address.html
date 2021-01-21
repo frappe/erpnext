@@ -63,7 +63,6 @@ frappe.ready(() => {
 	});
 
 	$('.btn-new-address').click(() => {
-		console.log('clicked');
 		const d = new frappe.ui.Dialog({
 			title: __('New Address'),
 			fields: [
@@ -177,12 +176,5 @@ frappe.ready(() => {
 	function toggle_billing_address_section(flag) {
 		$('[data-section="billing-address"]').toggle(flag);
 	}
-
-	$('.btn-change-address').click(() => {
-		// const d = new frappe.ui.Dialog({
-		// })
-
-		// d.show();
-	});
 });
 </script>
