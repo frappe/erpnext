@@ -217,11 +217,14 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
+
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(invoice.base_total)
 	else:
 		invoice_value_details.base_total = abs(invoice.base_net_total)
-	invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+
+	# since tax already considers discount amount
+	invoice_value_details.invoice_discount_amt = 0 # invoice.base_discount_amount
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
@@ -247,9 +250,9 @@ def update_invoice_taxes(invoice, invoice_value_details):
 			
 			for tax_type in ['igst', 'cgst', 'sgst']:
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount)
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount_after_discount_amount)
 		else:
-			invoice_value_details.total_other_charges += abs(t.base_tax_amount)
+			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
 	
 	return invoice_value_details
 
