@@ -1921,22 +1921,20 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertTrue(item['AssAmt'], item['TotAmt'] - item['Discount'])
 			self.assertTrue(item['TotItemVal'], item['AssAmt'] + item['CgstAmt'] + item['SgstAmt'] + item['IgstAmt'])
 
-		value_details = einvoice['ValDtls']
-
 		self.assertEqual(einvoice['Version'], '1.1')
-		self.assertEqual(value_details['AssVal'], total_item_ass_value)
-		self.assertEqual(value_details['CgstVal'], total_item_cgst_value)
-		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
-		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
+		self.assertEqual(einvoice['ValDtls']['AssVal'], total_item_ass_value)
+		self.assertEqual(einvoice['ValDtls']['CgstVal'], total_item_cgst_value)
+		self.assertEqual(einvoice['ValDtls']['SgstVal'], total_item_sgst_value)
+		self.assertEqual(einvoice['ValDtls']['IgstVal'], total_item_igst_value)
 
 		calculated_invoice_value = \
-			value_details['AssVal'] + value_details['CgstVal'] \
-			+ value_details['SgstVal'] + value_details['IgstVal'] \
-			+ value_details['OthChrg'] - value_details['Discount']
+			einvoice['ValDtls']['AssVal'] + einvoice['ValDtls']['CgstVal'] \
+			+ einvoice['ValDtls']['SgstVal'] + einvoice['ValDtls']['IgstVal'] \
+			+ einvoice['ValDtls']['OthChrg'] - einvoice['ValDtls']['Discount']
 
-		self.assertTrue(value_details['TotInvVal'] - calculated_invoice_value < 0.1)
+		self.assertTrue(einvoice['ValDtls']['TotInvVal'] - calculated_invoice_value < 0.1)
 
-		self.assertEqual(value_details['TotInvVal'], si.base_grand_total)
+		self.assertEqual(einvoice['ValDtls']['TotInvVal'], si.base_grand_total)
 		self.assertTrue(einvoice['EwbDtls'])
 
 def make_test_address_for_ewaybill():
