@@ -7,7 +7,6 @@ import frappe
 import erpnext
 from erpnext.non_profit.doctype.member.member import create_member
 from frappe.utils import nowdate, add_months
-from erpnext.stock.doctype.item.test_item import create_item
 
 class TestMembership(unittest.TestCase):
 	def setUp(self):
@@ -33,7 +32,7 @@ class TestMembership(unittest.TestCase):
 		plan.membership_type = "_rzpy_test_milythm"
 		plan.amount = 100
 		plan.razorpay_plan_id = "_rzpy_test_milythm"
-		plan.linked_item = create_item("_Test Item for Non Profit Membership", is_stock_item=0).name
+		plan.linked_item = create_item("_Test Item for Non Profit Membership").name
 		plan.insert()
 
 		# make test member
@@ -93,3 +92,17 @@ def make_membership(member, payload={}):
 	membership = frappe.get_doc(data)
 	membership.insert(ignore_permissions=True, ignore_if_duplicate=True)
 	return membership
+
+def create_item(item_code):
+	if not frappe.db.exists("Item", item_code):
+		item = frappe.new_doc("Item")
+		item.item_code = item_code
+		item.item_name = item_code
+		item.stock_uom = "Nos"
+		item.description = item_code
+		item.item_group = "All Item Groups"
+		item.is_stock_item = 0
+		item.save()
+	else:
+		item = frappe.get_doc("Item", item_code)
+	return item
