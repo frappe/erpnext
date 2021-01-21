@@ -13,7 +13,7 @@
 				class="avatar-frame standard-image"
 				style="{{ css_style or '' }}"
 				title="{{ person.name }}">
-				{{ person.name[:1] }}
+				{{ frappe.utils.get_abbr(person.name) }}
 			</span>
 			{% endif %}
 		{% endfor %}
