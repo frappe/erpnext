@@ -210,7 +210,10 @@ class AccountsController(TransactionBase):
 									 self.meta.get_label(date_field), self)
 
 	def validate_inter_company_reference(self):
-		if self.is_internal_transfer() and self.doctype in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
+		if self.doctype not in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
+			return
+
+		if self.is_internal_transfer():
 			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')
 				or self.get('inter_company_order_reference')):
 				msg = _("Internal Sale or Delivery Reference missing. ")
