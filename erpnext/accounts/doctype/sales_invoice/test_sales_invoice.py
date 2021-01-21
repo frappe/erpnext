@@ -1861,23 +1861,6 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_einvoice_json(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice
 
-		customer_gstin = '27AACCM7806M1Z3'
-		customer_gstin_dtls = {
-			'LegalName': '_Test Customer', 'TradeName': '_Test Customer', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '410038', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		company_gstin = '27AAECE4835E1ZR'
-		company_gstin_dtls = {
-			'LegalName': '_Test Company', 'TradeName': '_Test Company', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '401108', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		# set cache gstin details to avoid fetching details which will require connection to GSP servers
-		frappe.local.gstin_cache = {}
-		frappe.local.gstin_cache[customer_gstin] = customer_gstin_dtls
-		frappe.local.gstin_cache[company_gstin] = company_gstin_dtls
-
 		si = make_sales_invoice_for_ewaybill()
 		si.naming_series = 'INV-2020-.#####'
 		si.items = []
@@ -1930,12 +1913,12 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
 		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
 
-		self.assertEqual(
-			value_details['TotInvVal'],
-			value_details['AssVal'] + value_details['CgstVal']
-			+ value_details['SgstVal'] + value_details['IgstVal']
+		calculated_invoice_value = \
+			value_details['AssVal'] + value_details['CgstVal'] \
+			+ value_details['SgstVal'] + value_details['IgstVal'] \
 			+ value_details['OthChrg'] - value_details['Discount']
-		)
+
+		self.assertTrue(value_details['TotInvVal'] - calculated_invoice_value < 0.1)
 
 		self.assertEqual(value_details['TotInvVal'], si.base_grand_total)
 		self.assertTrue(einvoice['EwbDtls'])
