@@ -497,9 +497,9 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get('items'):
 			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
-			d.amount = flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty"))
+			d.amount = flt(d.rate) * flt(d.qty)
 			d.base_amount = d.amount * flt(self.conversion_rate)
-			d.qty_consumed_per_unit = flt(d.stock_qty, d.precision("stock_qty")) \
+			d.qty_consumed_per_unit = flt(d.stock_qty) \
 				/ flt(self.quantity, self.precision("quantity"))
 
 			total_rm_cost += d.amount
