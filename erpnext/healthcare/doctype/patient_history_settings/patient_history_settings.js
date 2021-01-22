@@ -53,6 +53,14 @@ frappe.ui.form.on('Patient History Settings', {
 			]
 		});
 
+		d.$body.prepend(`
+			<div class="columns-search">
+				<input type="text" placeholder="${__('Search')}" data-element="search" class="form-control input-xs">
+			</div>`
+		);
+
+		frappe.utils.setup_search(d.$body, '.unit-checkbox', '.label-area');
+
 		d.set_primary_action(__('Save'), () => {
 			let values = d.get_values().fields;
 
