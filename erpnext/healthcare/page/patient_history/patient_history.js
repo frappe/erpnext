@@ -10,6 +10,7 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 	frappe.breadcrumbs.add('Healthcare');
 	let pid = '';
 	page.main.html(frappe.render_template('patient_history', {}));
+	page.main.find('.header-separator').hide();
 
 	let patient = frappe.ui.form.make_control({
 		parent: page.main.find('.patient'),
@@ -96,6 +97,7 @@ frappe.pages['patient_history'].on_page_load = function(wrapper) {
 };
 
 let setup_filters = function(patient, me) {
+	$('.doctype-filter').empty();
 	frappe.xcall(
 		'erpnext.healthcare.page.patient_history.patient_history.get_patient_history_doctypes'
 	).then(document_types => {
@@ -123,6 +125,7 @@ let setup_filters = function(patient, me) {
 		});
 		doctype_filter.refresh();
 
+		$('.date-filter').empty();
 		let date_range_field = frappe.ui.form.make_control({
 			df: {
 				fieldtype: 'DateRange',
@@ -389,9 +392,11 @@ let show_patient_vital_charts = function(patient, me, btn_show_id, pts, title) {
 						formatTooltipY: d => d + ' ' + pts,
 					}
 				});
+				me.page.main.find('.header-separator').show();
 			} else {
 				me.page.main.find('.patient_vital_charts').html('');
 				me.page.main.find('.show_chart_btns').html('');
+				me.page.main.find('.header-separator').hide();
 			}
 		}
 	});
