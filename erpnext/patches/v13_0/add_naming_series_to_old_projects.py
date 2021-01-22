@@ -17,8 +17,8 @@ def execute():
 
 	for entry in projects:
 		# need to save the doc so that users can edit old projects
-		 doc = frappe.get_doc("Project", entry.name)
-		 if not doc.naming_series:
+		doc = frappe.get_doc("Project", entry.name)
+		if not doc.naming_series:
 			doc.naming_series = "PROJ-.####"
 			doc.save()
 
