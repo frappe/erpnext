@@ -65,8 +65,8 @@ class BOM(WebsiteGenerator):
 		self.set_bom_material_details()
 		self.validate_materials()
 		self.validate_operations()
-		self.calculate_cost()
 		self.update_cost(update_parent=False, from_child_bom=True, save=False)
+		self.calculate_cost()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -268,9 +268,11 @@ class BOM(WebsiteGenerator):
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
-			self.calculate_cost()
+
+		self.calculate_cost()
 		if save:
 			self.db_update()
+			self.notify_update()
 		self.update_exploded_items()
 
 		# update parent BOMs
