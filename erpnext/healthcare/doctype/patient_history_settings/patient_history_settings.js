@@ -66,21 +66,24 @@ frappe.ui.form.on('Patient History Settings', {
 
 			let selected_fields = [];
 
-			for (let idx in values) {
-				let value = values[idx];
+			frappe.model.with_doctype(doc.document_type, function() {
+				for (let idx in values) {
+					let value = values[idx];
 
-				let field = frappe.meta.get_docfield(doc.document_type, value);
-				if (field) {
-					selected_fields.push({
-						label: field.label,
-						fieldname: field.fieldname,
-						fieldtype: field.fieldtype
-					});
+					let field = frappe.get_meta(doc.document_type).fields.filter((df) => df.fieldname == value)[0];
+					if (field) {
+						selected_fields.push({
+							label: field.label,
+							fieldname: field.fieldname,
+							fieldtype: field.fieldtype
+						});
+					}
 				}
-			}
 
-			d.refresh();
-			frappe.model.set_value(doctype, doc.name, 'selected_fields', JSON.stringify(selected_fields));
+				d.refresh();
+				frappe.model.set_value(doctype, doc.name, 'selected_fields', JSON.stringify(selected_fields));
+			})
+
 			d.hide();
 		});
 
