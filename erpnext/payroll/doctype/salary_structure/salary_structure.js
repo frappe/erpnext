@@ -70,6 +70,9 @@ frappe.ui.form.on('Salary Structure', {
 		});
 	},
 
+	company: function(frm) {
+		frm.trigger('set_earning_deduction_component');
+	},
 
 	currency: function(frm) {
 		calculate_totals(frm.doc);
@@ -117,6 +120,7 @@ frappe.ui.form.on('Salary Structure', {
 		fields_read_only.forEach(function(field) {
 			frappe.meta.get_docfield("Salary Detail", field, frm.doc.name).read_only = 1;
 		});
+		frm.trigger('set_earning_deduction_component');
 	},
 
 	assign_to_employees:function (frm) {
