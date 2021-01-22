@@ -10,10 +10,12 @@ def execute():
 	frappe.reload_doc("projects", "doctype", "task")
 
 	# Update property setter status if any
-	property_setter_doc = frappe.get_doc('Property Setter', {'doc_type': 'Task',
+	property_setter = frappe.db.get_value('Property Setter', {'doc_type': 'Task',
 		'field_name': 'status', 'property': 'options'})
 
-	if property_setter_doc:
+	if property_setter:
+		property_setter_doc = frappe.get_doc('Property Setter', {'doc_type': 'Task',
+			'field_name': 'status', 'property': 'options'})
 		property_setter_doc.value += "\nTemplate"
 		property_setter_doc.save()
 
