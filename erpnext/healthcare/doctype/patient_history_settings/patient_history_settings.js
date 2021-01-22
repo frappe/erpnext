@@ -85,10 +85,33 @@ frappe.ui.form.on('Patient History Settings', {
 		});
 
 		d.show();
+	},
+
+	get_date_field_for_dt: function(frm, row) {
+		frm.call({
+			method: 'get_date_field_for_dt',
+			doc: frm.doc,
+			args: {
+				document_type: row.document_type
+			},
+			callback: function(data) {
+				if (data.message) {
+					frappe.model.set_value('Patient History Custom Document Type',
+						row.name, 'date_fieldname', data.message);
+				}
+			}
+		});
 	}
 });
 
 frappe.ui.form.on('Patient History Custom Document Type', {
+	document_type: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+		if (row.document_type) {
+			frm.events.get_date_field_for_dt(frm, row);
+		}
+	},
+
 	add_edit_fields: function(frm, cdt, cdn) {
 		let row = locals[cdt][cdn];
 		if (row.document_type) {
