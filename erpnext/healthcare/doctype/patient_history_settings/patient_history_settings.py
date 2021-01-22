@@ -49,6 +49,14 @@ class PatientHistorySettings(Document):
 
 		return multicheck_fields
 
+	def get_date_field_for_dt(self, document_type):
+		meta = frappe.get_meta(document_type)
+		date_fields = meta.get('fields', {
+			'fieldtype': ['in', ['Date', 'Datetime']]
+		})
+
+		if date_fields:
+			return date_fields[0].get('fieldname')
 
 def create_medical_record(doc, method=None):
 	medical_record_required = validate_medical_record_required(doc)
