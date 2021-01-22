@@ -26,6 +26,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			};
 		});
 	},
+
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+
 	onload: function() {
 		this._super();
 
@@ -41,6 +46,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
 			this.frm.trigger('supplier');
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function(doc) {
@@ -511,15 +518,6 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
-
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
 	},
 
 	onload: function(frm) {
