@@ -89,7 +89,9 @@
 <div class="col-sm-{{ col_size }} item-card">
 	<div class="card {{ align_items_class }}">
 		{% if image %}
-		<img class="card-img" src="{{ image }}" alt="{{ title }}">
+		<div class="card-img-container">
+			<img class="card-img" src="{{ image }}" alt="{{ title }}">
+		</div>
 		{% else %}
 		<div class="card-img-top no-image">
 			{{ frappe.utils.get_abbr(title) }}
