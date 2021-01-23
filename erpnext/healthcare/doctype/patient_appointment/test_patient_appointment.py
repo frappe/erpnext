@@ -208,6 +208,7 @@ def create_healthcare_service_items():
 	item.item_name = 'Consulting Charges'
 	item.item_group = 'Services'
 	item.is_stock_item = 0
+	item.stock_uom = 'Nos'
 	item.save()
 	return item.name
 
