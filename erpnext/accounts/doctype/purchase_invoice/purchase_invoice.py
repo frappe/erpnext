@@ -182,7 +182,8 @@ class PurchaseInvoice(BuyingController):
 		self.set_expense_account(for_validate=True)
 		self.set_against_expense_account()
 		self.validate_write_off_account()
-		self.validate_multiple_billing("Purchase Receipt", "pr_detail", "qty", "items")
+		if frappe.get_cached_value("Accounts Settings", None, "validate_over_billing_in_purchase_invoice"):
+			self.validate_multiple_billing("Purchase Receipt", "pr_detail", "amount", "items")
 		self.create_remarks()
 		self.set_status()
 		self.set_title()

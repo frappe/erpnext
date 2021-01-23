@@ -11,6 +11,8 @@
   "frozen_accounts_modifier",
   "determine_address_tax_category_from",
   "over_billing_allowance",
+  "validate_over_billing_in_sales_invoice",
+  "validate_over_billing_in_purchase_invoice",
   "column_break_4",
   "restrict_unlink_payments_to_role",
   "credit_controller",
@@ -202,12 +204,24 @@
    "fieldname": "allow_invoicing_without_updating_stock",
    "fieldtype": "Check",
    "label": "Allow Creating Invoices Without Updating Stock"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_over_billing_in_sales_invoice",
+   "fieldtype": "Check",
+   "label": "Validate Over Billing in Sales Invoice"
+  },
+  {
+   "default": "0",
+   "fieldname": "validate_over_billing_in_purchase_invoice",
+   "fieldtype": "Check",
+   "label": "Validate Over Billing in Purchase Invoice"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-03-11 13:09:26.235848",
+ "modified": "2021-01-23 11:46:26.200226",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

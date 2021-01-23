@@ -136,11 +136,45 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				}
 				item.total_discount = flt(item.amount_before_discount - item.amount, precision("total_discount", item));
 
+				var has_depreciation_field = frappe.meta.has_field(item.doctype, 'depreciation_amount');
+				if (has_depreciation_field) {
+					item.depreciation_amount = flt(item.amount_before_discount * flt(item.depreciation_percentage) / 100,
+						precision("depreciation_amount", item));
+					me.set_in_company_currency(item, ['depreciation_amount']);
+				}
+
+				if (me.frm.doc.doctype === "Sales Invoice") {
+					item.amount_before_depreciation = item.amount_before_discount;
+					me.set_in_company_currency(item, ['amount_before_depreciation']);
+
+					if (me.frm.doc.depreciation_type) {
+						var depreciation_on_discount = flt(item.total_discount * flt(item.depreciation_percentage) / 100,
+							precision("amount", item));
+						var depreciation_adjusted_discount = item.total_discount - depreciation_on_discount;
+
+						if (me.frm.doc.depreciation_type === "After Depreciation Amount") {
+							item.amount_before_discount = flt(item.amount_before_discount - item.depreciation_amount,
+								precision("amount_before_discount", item));
+							item.amount = flt(item.amount_before_discount - depreciation_adjusted_discount, precision("amount", item));
+						} else {
+							item.amount_before_discount = flt(item.depreciation_amount, precision("amount_before_discount", item));
+							item.amount = flt(item.amount_before_discount - depreciation_on_discount, precision("amount", item));
+						}
+
+						item.total_discount = flt(item.amount_before_discount - item.amount, precision("total_discount", item));
+					}
+
+					item.tax_exclusive_depreciation_amount = item.depreciation_amount;
+					item.tax_exclusive_amount_before_depreciation = item.amount_before_depreciation;
+				}
+
 				item.taxable_rate = cint(item.apply_discount_after_taxes) ? rate_before_discount : item.rate;
 				item.taxable_amount = cint(item.apply_discount_after_taxes) ? item.amount_before_discount : item.amount;
+				item.taxable_rate = item.qty ? flt(item.taxable_amount / item.qty, precision("taxable_rate", item)) : item.taxable_rate;
 
 				item.net_rate = item.rate;
 				item.net_amount = item.amount;
+				item.net_rate = item.qty ? flt(item.net_amount / item.qty, precision("net_rate", item)) : item.net_rate;
 
 				item.item_taxes_and_charges = 0;
 				item.tax_inclusive_amount = 0;
@@ -248,15 +282,24 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			if(item.cumulated_tax_fraction && !me.discount_amount_applied) {
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction));
-				item.tax_exclusive_rate = item.qty ? flt(item.tax_exclusive_amount / item.qty)
-					: flt(item.rate / (1 + item.cumulated_tax_fraction));
+				item.tax_exclusive_rate = !item.qty || item.depreciation_percentage
+					? flt(item.rate / (1 + item.cumulated_tax_fraction))
+					: flt(item.tax_exclusive_amount / item.qty);
 
 				item.tax_exclusive_amount_before_discount = flt(item.amount_before_discount / (1 + item.cumulated_tax_fraction));
 				item.tax_exclusive_total_discount = flt(item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount,
 					precision("tax_exclusive_amount_before_discount", item));
 
+				if (me.frm.doc.doctype === "Sales Invoice") {
+					item.tax_exclusive_amount_before_depreciation = flt(item.amount_before_depreciation / (1 + item.cumulated_tax_fraction));
+					item.tax_exclusive_depreciation_amount = flt(item.tax_exclusive_amount_before_depreciation * flt(item.depreciation_percentage) / 100,
+						precision("tax_exclusive_depreciation_amount", item));
+
+					me.set_in_company_currency(item, ["tax_exclusive_amount_before_depreciation", "tax_exclusive_depreciation_amount"]);
+				}
+
 				if (item.qty) {
-					item.tax_exclusive_price_list_rate = flt(item.tax_exclusive_amount_before_discount / item.qty);
+					item.tax_exclusive_price_list_rate = flt((item.tax_exclusive_amount_before_depreciation || item.tax_exclusive_amount_before_discount) / item.qty);
 				} else if (item.price_list_rate) {
 					item.tax_exclusive_price_list_rate = flt(item.price_list_rate / (1 + item.cumulated_tax_fraction));
 				} else {
@@ -328,6 +371,17 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.frm.doc.base_tax_exclusive_total_before_discount = this.frm.doc.tax_exclusive_total_before_discount = 0.0;
 		this.frm.doc.base_tax_exclusive_total_discount = this.frm.doc.tax_exclusive_total_discount = 0.0;
 
+		var has_depreciation_field = frappe.meta.has_field(this.frm.doc.doctype, 'total_depreciation');
+		if (has_depreciation_field) {
+			this.frm.doc.base_total_depreciation = this.frm.doc.total_depreciation = 0.0;
+		}
+		var has_depreciation_adjustment = this.frm.doc.doctype === "Sales Invoice";
+		if (has_depreciation_adjustment) {
+			this.frm.doc.base_total_before_depreciation = this.frm.doc.total_before_depreciation = 0.0;
+			this.frm.doc.base_tax_exclusive_total_before_depreciation = this.frm.doc.tax_exclusive_total_before_depreciation = 0.0;
+			this.frm.doc.base_tax_exclusive_total_depreciation = this.frm.doc.tax_exclusive_total_depreciation = 0.0;
+		}
+
 		$.each(this.frm.doc["items"] || [], function(i, item) {
 			me.frm.doc.total_qty += item.qty;
 			me.frm.doc.total_alt_uom_qty += item.alt_uom_qty;
@@ -353,6 +407,21 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			me.frm.doc.net_total += item.net_amount;
 			me.frm.doc.base_net_total += item.base_net_amount;
+
+			if (has_depreciation_field) {
+				me.frm.doc.total_depreciation += item.depreciation_amount;
+				me.frm.doc.base_total_depreciation += item.base_depreciation_amount;
+			}
+			if (has_depreciation_adjustment) {
+				me.frm.doc.total_before_depreciation += item.amount_before_depreciation;
+				me.frm.doc.base_total_before_depreciation += item.base_amount_before_depreciation;
+
+				me.frm.doc.tax_exclusive_total_before_depreciation += item.tax_exclusive_amount_before_depreciation;
+				me.frm.doc.base_tax_exclusive_total_before_depreciation += item.base_tax_exclusive_amount_before_depreciation;
+
+				me.frm.doc.tax_exclusive_total_depreciation += item.tax_exclusive_depreciation_amount;
+				me.frm.doc.base_tax_exclusive_total_depreciation += item.base_tax_exclusive_depreciation_amount;
+			}
 		});
 
 		this.frm.doc.total_discount_after_taxes = this.frm.doc.taxable_total - this.frm.doc.net_total;

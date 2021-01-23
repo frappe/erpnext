@@ -135,11 +135,41 @@ class calculate_taxes_and_totals(object):
 				item.amount = flt(item.rate * item.qty,	item.precision("amount"))
 				item.total_discount = flt(item.amount_before_discount - item.amount, item.precision("total_discount"))
 
+				has_depreciation_field = item.meta.has_field('depreciation_amount')
+				if has_depreciation_field:
+					item.depreciation_amount = flt(item.amount_before_discount * flt(item.depreciation_percentage) / 100,
+						item.precision("depreciation_amount"))
+					self._set_in_company_currency(item, ['depreciation_amount'])
+
+				if self.doc.doctype == "Sales Invoice":
+					item.amount_before_depreciation = item.amount_before_discount
+					self._set_in_company_currency(item, ['amount_before_depreciation'])
+
+					if self.doc.depreciation_type:
+						depreciation_on_discount = flt(item.total_discount * flt(item.depreciation_percentage) / 100,
+							item.precision("amount"))
+						depreciation_adjusted_discount = item.total_discount - depreciation_on_discount
+
+						if self.doc.depreciation_type == "After Depreciation Amount":
+							item.amount_before_discount = flt(item.amount_before_discount - item.depreciation_amount,
+								item.precision("amount_before_discount"))
+							item.amount = flt(item.amount_before_discount - depreciation_adjusted_discount, item.precision("amount"))
+						else:
+							item.amount_before_discount = flt(item.depreciation_amount, item.precision("amount_before_discount"))
+							item.amount = flt(item.amount_before_discount - depreciation_on_discount, item.precision("amount"))
+
+						item.total_discount = flt(item.amount_before_discount - item.amount, item.precision("total_discount"))
+
+					item.tax_exclusive_depreciation_amount = item.depreciation_amount
+					item.tax_exclusive_amount_before_depreciation = item.amount_before_depreciation
+
 				item.taxable_rate = rate_before_discount if cint(item.apply_discount_after_taxes) else item.rate
 				item.taxable_amount = item.amount_before_discount if cint(item.apply_discount_after_taxes) else item.amount
+				item.taxable_rate = flt(item.taxable_amount / item.qty, item.precision("taxable_rate")) if item.qty else item.taxable_rate
 
 				item.net_rate = item.rate
 				item.net_amount = item.amount
+				item.net_rate = flt(item.net_amount / item.qty, item.precision("net_rate")) if item.qty else item.net_rate
 
 				item.item_taxes_and_charges = 0
 				item.tax_inclusive_amount = 0
@@ -226,15 +256,22 @@ class calculate_taxes_and_totals(object):
 
 			if item.cumulated_tax_fraction and not self.discount_amount_applied:
 				item.tax_exclusive_amount = flt(item.amount / (1 + item.cumulated_tax_fraction))
-				item.tax_exclusive_rate = flt(item.tax_exclusive_amount / item.qty) if item.qty \
-					else flt(item.rate / (1 + item.cumulated_tax_fraction))
+				item.tax_exclusive_rate = flt(item.rate / (1 + item.cumulated_tax_fraction))\
+					if not item.qty or item.get('depreciation_percentage') else flt(item.tax_exclusive_amount / item.qty)
 
 				item.tax_exclusive_amount_before_discount = flt(item.amount_before_discount / (1 + item.cumulated_tax_fraction))
 				item.tax_exclusive_total_discount = flt(item.tax_exclusive_amount_before_discount - item.tax_exclusive_amount,
 					item.precision("tax_exclusive_total_discount"))
 
+				if self.doc.doctype == "Sales Invoice":
+					item.tax_exclusive_amount_before_depreciation = flt(item.amount_before_depreciation / (1 + item.cumulated_tax_fraction))
+					item.tax_exclusive_depreciation_amount = flt(item.tax_exclusive_amount_before_depreciation * flt(item.depreciation_percentage) / 100,
+						item.precision("tax_exclusive_depreciation_amount"))
+
+					self._set_in_company_currency(item, ["tax_exclusive_amount_before_depreciation", "tax_exclusive_depreciation_amount"])
+
 				if item.qty:
-					item.tax_exclusive_price_list_rate = flt(item.tax_exclusive_amount_before_discount / item.qty)
+					item.tax_exclusive_price_list_rate = flt((item.get('tax_exclusive_amount_before_depreciation') or item.tax_exclusive_amount_before_discount) / item.qty)
 				elif item.price_list_rate:
 					item.tax_exclusive_price_list_rate = flt(item.price_list_rate / (1 + item.cumulated_tax_fraction))
 				else:
@@ -304,6 +341,16 @@ class calculate_taxes_and_totals(object):
 		self.doc.base_tax_exclusive_total_before_discount = self.doc.tax_exclusive_total_before_discount = 0.0
 		self.doc.base_tax_exclusive_total_discount = self.doc.tax_exclusive_total_discount = 0.0
 
+		has_depreciation_field = self.doc.meta.has_field('total_depreciation')
+		if has_depreciation_field:
+			self.doc.base_total_depreciation = self.doc.total_depreciation = 0.0
+
+		has_depreciation_adjustment = self.doc.doctype == "Sales Invoice"
+		if has_depreciation_adjustment:
+			self.doc.base_total_before_depreciation = self.doc.total_before_depreciation = 0.0
+			self.doc.base_tax_exclusive_total_before_depreciation = self.doc.tax_exclusive_total_before_depreciation = 0.0
+			self.doc.base_tax_exclusive_total_depreciation = self.doc.tax_exclusive_total_depreciation = 0.0
+
 		for item in self.doc.get("items"):
 			self.doc.total_qty += item.qty
 			self.doc.total_alt_uom_qty += item.alt_uom_qty
@@ -329,6 +376,20 @@ class calculate_taxes_and_totals(object):
 
 			self.doc.net_total += item.net_amount
 			self.doc.base_net_total += item.base_net_amount
+
+			if has_depreciation_field:
+				self.doc.total_depreciation += item.depreciation_amount
+				self.doc.base_total_depreciation += item.base_depreciation_amount
+
+			if has_depreciation_adjustment:
+				self.doc.total_before_depreciation += item.amount_before_depreciation
+				self.doc.base_total_before_depreciation += item.base_amount_before_depreciation
+
+				self.doc.tax_exclusive_total_before_depreciation += item.tax_exclusive_amount_before_depreciation
+				self.doc.base_tax_exclusive_total_before_depreciation += item.base_tax_exclusive_amount_before_depreciation
+
+				self.doc.tax_exclusive_total_depreciation += item.tax_exclusive_depreciation_amount
+				self.doc.base_tax_exclusive_total_depreciation += item.base_tax_exclusive_depreciation_amount
 
 		self.doc.total_discount_after_taxes = self.doc.taxable_total - self.doc.net_total
 		self.doc.base_total_discount_after_taxes = self.doc.base_taxable_total - self.doc.base_net_total

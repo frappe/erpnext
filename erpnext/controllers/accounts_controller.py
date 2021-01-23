@@ -30,7 +30,8 @@ force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "is_fixed_as
 
 merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',
 	'amount', 'taxable_amount', 'net_amount', 'total_discount', 'amount_before_discount',
-	'item_taxes_and_charges', 'tax_inclusive_amount']
+	'item_taxes_and_charges', 'tax_inclusive_amount',
+	'amount_before_depreciation', 'depreciation_amount']
 
 merge_items_rate_fields = [('rate', 'amount'), ('taxable_rate', 'taxable_amount'), ('net_rate', 'net_amount'),
 	('discount_amount', 'total_discount'), ('price_list_rate', 'amount_before_discount'),
@@ -49,6 +50,11 @@ print_total_fields_from_items = [
 	('tax_exclusive_total_discount', 'tax_exclusive_total_discount'),
 	('total_before_discount', 'amount_before_discount'),
 	('tax_exclusive_total_before_discount', 'tax_exclusive_amount_before_discount'),
+
+	('total_depreciation', 'depreciation_amount'),
+	('tax_exclusive_total_depreciation', 'tax_exclusive_depreciation_amount'),
+	('total_before_depreciation', 'amount_before_depreciation'),
+	('tax_exclusive_total_before_depreciation', 'tax_exclusive_amount_before_depreciation'),
 
 	('grand_total', 'tax_inclusive_amount'),
 	('total_taxes_and_charges', 'item_taxes_and_charges'),
@@ -1078,6 +1084,10 @@ class AccountsController(TransactionBase):
 	def merge_similar_items_postprocess(self, group_item, rate_fields):
 		if group_item.qty:
 			for target, source in rate_fields:
+				if target == "price_list_rate" and group_item.get('amount_before_depreciation'):
+					source = 'amount_before_depreciation'
+				if target == "tax_exclusive_price_list_rate" and group_item.get('tax_exclusive_amount_before_depreciation'):
+					source = 'tax_exclusive_amount_before_depreciation'
 				group_item[target] = flt(group_item[source]) / flt(group_item.qty)
 		else:
 			for target, source in rate_fields:
@@ -1088,6 +1098,10 @@ class AccountsController(TransactionBase):
 
 		group_item.discount_percentage = group_item.total_discount / group_item.amount_before_discount * 100\
 			if group_item.amount_before_discount else group_item.discount_percentage
+
+		if self.doctype == "Sales Invoice":
+			group_item.depreciation_percentage = group_item.depreciation_amount / group_item.amount_before_depreciation * 100\
+				if group_item.amount_before_depreciation else group_item.depreciation_percentage
 
 	def group_items_by_item_tax_and_item_group(self):
 		grouped = OrderedDict()

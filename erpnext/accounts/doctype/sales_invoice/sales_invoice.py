@@ -52,7 +52,7 @@ class SalesInvoice(SellingController):
 			'keyword': 'Billed',
 			'overflow_type': 'billing',
 			'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
-				and (is_return=0 or reopen_order=1))"""
+				and (is_return=0 or reopen_order=1) and depreciation_type != 'Depreciation Amount Only')"""
 		},
 		{
 			'source_dt': 'Sales Invoice Item',
@@ -207,7 +207,8 @@ class SalesInvoice(SellingController):
 		self.set_against_income_account()
 		self.validate_c_form()
 		self.validate_time_sheets_are_submitted()
-		self.validate_multiple_billing("Delivery Note", "dn_detail", "qty", "items")
+		if frappe.get_cached_value("Accounts Settings", None, "validate_over_billing_in_sales_invoice"):
+			self.validate_multiple_billing("Delivery Note", "dn_detail", "amount", "items")
 		if not self.is_return:
 			self.validate_serial_numbers()
 		self.update_packing_list()

@@ -243,6 +243,16 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
+	depreciation_percentage: function () {
+		if (this.frm.doc.docstatus === 0) {
+			this.calculate_taxes_and_totals();
+		}
+	},
+
+	depreciation_type: function () {
+		this.calculate_taxes_and_totals();
+	},
+
 	discount_percentage: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		item.discount_amount = 0.0;

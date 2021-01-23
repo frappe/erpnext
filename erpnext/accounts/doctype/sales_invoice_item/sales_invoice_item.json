@@ -39,6 +39,7 @@
   "section_break_17",
   "price_list_rate",
   "base_price_list_rate",
+  "depreciation_percentage",
   "column_break_32",
   "margin_type",
   "margin_rate_or_amount",
@@ -57,9 +58,13 @@
   "amount",
   "base_amount",
   "column_break_49",
+  "amount_before_depreciation",
+  "base_amount_before_depreciation",
   "amount_before_discount",
   "base_amount_before_discount",
   "column_break_52",
+  "depreciation_amount",
+  "base_depreciation_amount",
   "total_discount",
   "base_total_discount",
   "tax_exclusive_amounts_section",
@@ -76,9 +81,13 @@
   "tax_exclusive_amount",
   "base_tax_exclusive_amount",
   "column_break_68",
+  "tax_exclusive_amount_before_depreciation",
+  "base_tax_exclusive_amount_before_depreciation",
   "tax_exclusive_amount_before_discount",
   "base_tax_exclusive_amount_before_discount",
   "column_break_71",
+  "tax_exclusive_depreciation_amount",
+  "base_tax_exclusive_depreciation_amount",
   "tax_exclusive_total_discount",
   "base_tax_exclusive_total_discount",
   "tax_inclusive_amounts_section",
@@ -1212,11 +1221,84 @@
    "hidden": 1,
    "label": "Is Vehicle",
    "read_only": 1
+  },
+  {
+   "fieldname": "depreciation_percentage",
+   "fieldtype": "Percent",
+   "label": "Depreciation (%)"
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "depreciation_amount",
+   "fieldtype": "Currency",
+   "label": "Depreciation Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "base_depreciation_amount",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Depreciation Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "amount_before_depreciation",
+   "fieldtype": "Currency",
+   "label": "Amount Before Depreciation",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "base_amount_before_depreciation",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Amount Before Depreciation (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "tax_exclusive_depreciation_amount",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Depreciation Amount",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "base_tax_exclusive_depreciation_amount",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Tax Exclusive Depreciation Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "tax_exclusive_amount_before_depreciation",
+   "fieldtype": "Currency",
+   "label": "Tax Exclusive Amount Before Depreciation",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "depreciation_percentage",
+   "fieldname": "base_tax_exclusive_amount_before_depreciation",
+   "fieldtype": "Currency",
+   "force_currency_symbol": 1,
+   "label": "Tax Exclusive Amount Before Depreciation (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-11-02 13:42:41.662803",
+ "modified": "2021-01-22 14:56:49.520583",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
