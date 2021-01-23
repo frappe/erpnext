@@ -210,14 +210,19 @@ def get_employees(salary_structure):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_earning_deduction_components(doctype, txt, searchfield, start, page_len, filters):
-	if len(filters) < 3:
+	if len(filters) < 2:
 		return {}
 
 	return frappe.db.sql("""
 		select t1.salary_component
 		from `tabSalary Component` t1, `tabSalary Component Account` t2
-		where t1.salary_component = t2.parent
-		and t1.type = %s 
-		and t2.company = %s
+		where (t1.name = t2.parent
+		and t1.type = %(type)s
+		and t2.company = %(company)s)
+		or (t1.type = %(type)s
+		and t1.statistical_component = 1)
 		order by salary_component
-	""", (filters['type'], filters['company']) )
+	""",{
+		"type": filters['type'],
+		"company": filters['company']
+	})

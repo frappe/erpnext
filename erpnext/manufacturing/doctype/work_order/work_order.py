@@ -456,10 +456,10 @@ class WorkOrder(Document):
 
 			if data and len(data):
 				dates = [d.posting_datetime for d in data]
-				self.actual_start_date = min(dates)
+				self.db_set('actual_start_date', min(dates))
 
 				if self.status == "Completed":
-					self.actual_end_date = max(dates)
+					self.db_set('actual_end_date', max(dates))
 
 		self.set_lead_time()
 
@@ -725,6 +725,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		args.update(item_data)
 
 		args["rate"] = get_bom_item_rate({
+			"company": wo_doc.company,
 			"item_code": args.get("item_code"),
 			"qty": args.get("required_qty"),
 			"uom": args.get("stock_uom"),

@@ -15,7 +15,22 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				return (doc.qty<=doc.received_qty) ? "green" : "orange";
 			});
 		}
+
+		this.frm.set_query("unrealized_profit_loss_account", function() {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				}
+			};
+		});
 	},
+
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+
 	onload: function() {
 		this._super();
 
@@ -31,6 +46,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
 			this.frm.trigger('supplier');
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function(doc) {
@@ -488,7 +505,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Purchase Invoice': 'Debit Note',
+			'Purchase Invoice': 'Return / Debit Note',
 			'Payment Entry': 'Payment'
 		}
 
@@ -501,15 +518,6 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
-
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
 	},
 
 	onload: function(frm) {

@@ -49,6 +49,12 @@ class Supplier(TransactionBase):
 				msgprint(_("Series is mandatory"), raise_exception=1)
 
 		validate_party_accounts(self)
+		self.validate_internal_supplier()
+
+	def validate_internal_supplier(self):
+		if self.is_internal_supplier and frappe.db.get_value("Supplier", {"represents_company": self.represents_company}, "name"):
+			frappe.throw(_("Internal Supplier for company {0} already exists").format(
+				frappe.bold(self.represents_company)))
 
 	def on_trash(self):
 		delete_contact_and_address('Supplier', self.name)
