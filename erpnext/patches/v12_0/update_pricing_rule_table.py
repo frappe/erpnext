@@ -6,6 +6,22 @@ from erpnext.accounts.doctype.pricing_rule.utils import update_pricing_rule_tabl
 
 def execute():
 	frappe.reload_doc("accounts", "doctype", "pricing_rule_detail")
+	frappe.reload_doc('selling', 'doctype', 'quotation')
+	frappe.reload_doc('selling', 'doctype', 'quotation_item')
+	frappe.reload_doc('selling', 'doctype', 'sales_order')
+	frappe.reload_doc('selling', 'doctype', 'sales_order_item')
+	frappe.reload_doc('stock', 'doctype', 'delivery_note')
+	frappe.reload_doc('stock', 'doctype', 'delivery_note_item')
+	frappe.reload_doc('accounts', 'doctype', 'sales_invoice')
+	frappe.reload_doc('accounts', 'doctype', 'sales_invoice_item')
+	frappe.reload_doc('buying', 'doctype', 'supplier_quotation')
+	frappe.reload_doc('buying', 'doctype', 'supplier_quotation_item')
+	frappe.reload_doc('buying', 'doctype', 'purchase_order')
+	frappe.reload_doc('buying', 'doctype', 'purchase_order_item')
+	frappe.reload_doc('stock', 'doctype', 'purchase_receipt')
+	frappe.reload_doc('stock', 'doctype', 'purchase_receipt_item')
+	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice')
+	frappe.reload_doc('accounts', 'doctype', 'purchase_invoice_item')
 
 	doctypes = [
 		'Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice',
