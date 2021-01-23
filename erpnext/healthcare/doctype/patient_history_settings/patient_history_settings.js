@@ -82,7 +82,7 @@ frappe.ui.form.on('Patient History Settings', {
 
 				d.refresh();
 				frappe.model.set_value(doctype, doc.name, 'selected_fields', JSON.stringify(selected_fields));
-			})
+			});
 
 			d.hide();
 		});
