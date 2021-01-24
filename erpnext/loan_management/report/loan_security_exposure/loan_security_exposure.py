@@ -24,6 +24,7 @@ def get_columns(filters):
 		{"label": _("Disabled"), "fieldname": "disabled", "fieldtype": "Check", "width": 80},
 		{"label": _("Total Qty"), "fieldname": "total_qty", "fieldtype": "Float", "width": 100},
 		{"label": _("Latest Price"), "fieldname": "latest_price", "fieldtype": "Currency", "options": "currency", "width": 100},
+		{"label": _("Price Valid Upto"), "fieldname": "price_valid_upto", "fieldtype": "Datetime", "width": 100},
 		{"label": _("Current Value"), "fieldname": "current_value", "fieldtype": "Currency", "options": "currency", "width": 100},
 		{"label": _("% Of Total Portfolio"), "fieldname": "portfolio_percent", "fieldtype": "Percentage", "width": 100},
 		{"label": _("Pledged Applicant Count"), "fieldname": "pledged_applicant_count", "fieldtype": "Percentage", "width": 100},
@@ -40,13 +41,16 @@ def get_data(filters):
 
 	for security, value in iteritems(current_pledges):
 		row = {}
-		current_value = flt(value['qty'] * loan_security_details.get(security)['latest_price'])
+		current_value = flt(value.get('qty', 0) * loan_security_details.get(security, {}).get('latest_price', 0))
+		valid_upto = loan_security_details.get(security, {}).get('valid_upto')
+
 		row.update(loan_security_details.get(security))
 		row.update({
-			'total_qty': value['qty'],
+			'total_qty': value.get('qty'),
 			'current_value': current_value,
+			'price_valid_upto': valid_upto,
 			'portfolio_percent': flt(current_value * 100 / total_portfolio_value, 2),
-			'pledged_applicant_count': value['applicant_count'],
+			'pledged_applicant_count': value.get('applicant_count'),
 			'currency': currency
 		})
 
