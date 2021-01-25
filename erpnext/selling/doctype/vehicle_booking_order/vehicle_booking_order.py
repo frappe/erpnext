@@ -288,7 +288,7 @@ class VehicleBookingOrder(AccountsController):
 	def validate_amounts(self):
 		for field in ['vehicle_amount', 'invoice_total']:
 			self.validate_value(field, '>', 0)
-		for field in ['fni_amount', 'registration_amount', 'margin_amount', 'discount_amount']:
+		for field in ['fni_amount']:
 			self.validate_value(field, '>=', 0)
 
 	def set_total_in_words(self):
