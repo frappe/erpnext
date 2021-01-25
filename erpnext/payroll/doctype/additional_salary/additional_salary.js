@@ -53,7 +53,7 @@ frappe.ui.form.on('Additional Salary', {
 		if (!frm.doc.company) return;
 		frm.set_query("salary_component", function() {
 			return {
-				filters: {type: ["in",["earning", "deduction"]], company: frm.doc.company}
+				filters: {type: ["in", ["earning", "deduction"]], company: frm.doc.company}
 			};
 		});
 	},

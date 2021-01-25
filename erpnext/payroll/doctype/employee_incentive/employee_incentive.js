@@ -44,7 +44,6 @@ frappe.ui.form.on('Employee Incentive', {
 	},
 
 	set_earning_component: function(frm) {
-		debugger;
 		if (!frm.doc.company) return;
 		frm.set_query("salary_component", function() {
 			return {
