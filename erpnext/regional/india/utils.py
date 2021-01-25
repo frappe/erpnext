@@ -769,3 +769,28 @@ def make_regional_gl_entries(gl_entries, doc):
 				)
 
 	return gl_entries
+
+def apply_regional_tax_laws(doc):
+	country = frappe.get_cached_value('Company', doc.company, 'country')
+
+	if country != 'India':
+		return
+
+	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
+		return
+
+	gst_accounts = get_gst_accounts(doc.company)
+	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+		+ gst_accounts.get('igst_account')
+
+	for tax in doc.get('taxes'):
+		if tax.account_head in gst_account_list:
+			# Round Of both amounts as no discount applied
+			if tax.base_tax_amount == tax.base_tax_amount_after_discount_amount:
+				tax.tax_amount = flt(tax.tax_amount, 0)
+				tax.base_tax_amount = flt(tax.base_tax_amount, 0)
+
+			# Payable tax has to be rounded hence round of base_tax_amount_after_discount_amount
+			tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, 0)
+			tax.base_tax_amount_after_discount_amount = flt(tax.base_tax_amount_after_discount_amount, 0)
+

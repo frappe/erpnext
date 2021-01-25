@@ -296,6 +296,8 @@ class calculate_taxes_and_totals(object):
 								- flt(self.doc.discount_amount) - tax.total,
 								self.doc.precision("rounding_adjustment"))
 
+		apply_regional_tax_laws(self.doc)
+
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
 		# if tax/charges is for deduction, multiply by -1
@@ -696,6 +698,10 @@ def get_itemised_tax_breakup_html(doc):
 		)
 	)
 
+# Use for localized taxes
+@erpnext.allow_regional
+def apply_regional_tax_laws(doc):
+	pass
 
 @erpnext.allow_regional
 def update_itemised_tax_data(doc):
