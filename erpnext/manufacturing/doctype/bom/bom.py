@@ -65,8 +65,8 @@ class BOM(WebsiteGenerator):
 		self.set_bom_material_details()
 		self.validate_materials()
 		self.validate_operations()
-		self.calculate_cost()
 		self.update_cost(update_parent=False, from_child_bom=True, save=False)
+		self.calculate_cost()
 
 	def get_context(self, context):
 		context.parents = [{'name': 'boms', 'title': _('All BOMs') }]
@@ -224,7 +224,7 @@ class BOM(WebsiteGenerator):
 							"plc_conversion_rate": 1,
 							"ignore_party": True
 						})
-						item_doc = frappe.get_doc("Item", arg.get("item_code"))
+						item_doc = frappe.get_cached_doc("Item", arg.get("item_code"))
 						out = frappe._dict()
 						get_price_list_rate(args, item_doc, out)
 						rate = out.price_list_rate
@@ -268,9 +268,11 @@ class BOM(WebsiteGenerator):
 
 		if self.docstatus == 1:
 			self.flags.ignore_validate_update_after_submit = True
-			self.calculate_cost()
+
+		self.calculate_cost()
 		if save:
 			self.db_update()
+			self.notify_update()
 		self.update_exploded_items()
 
 		# update parent BOMs
@@ -282,7 +284,7 @@ class BOM(WebsiteGenerator):
 				frappe.get_doc("BOM", bom).update_cost(from_child_bom=True)
 
 		if not from_child_bom:
-			frappe.msgprint(_("Cost Updated"))
+			frappe.msgprint(_("Cost Updated"), alert=True)
 
 	def update_parent_cost(self):
 		if self.total_cost:
@@ -497,9 +499,9 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get('items'):
 			d.base_rate = flt(d.rate) * flt(self.conversion_rate)
-			d.amount = flt(d.rate, d.precision("rate")) * flt(d.qty, d.precision("qty"))
+			d.amount = flt(d.rate) * flt(d.qty)
 			d.base_amount = d.amount * flt(self.conversion_rate)
-			d.qty_consumed_per_unit = flt(d.stock_qty, d.precision("stock_qty")) \
+			d.qty_consumed_per_unit = flt(d.stock_qty) \
 				/ flt(self.quantity, self.precision("quantity"))
 
 			total_rm_cost += d.amount

@@ -66,7 +66,7 @@
    "default": "0",
    "fieldname": "price_not_uom_dependent",
    "fieldtype": "Check",
-   "label": "Price Not UOM Dependent"
+   "label": "Prices Independent of UOM"
   },
   {
    "fieldname": "column_break_3",
@@ -82,7 +82,7 @@
  "icon": "fa fa-tags",
  "idx": 1,
  "max_attachments": 1,
- "modified": "2020-10-03 14:12:26.734276",
+ "modified": "2021-01-20 18:50:09.739428",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Price List",

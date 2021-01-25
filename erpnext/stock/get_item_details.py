@@ -1185,7 +1185,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	price_list_details = get_price_list_details(args.price_list)
 
 	price_list_currency = price_list_details.get("currency")
-	price_list_uom_dependant = price_list_details.get("price_list_uom_dependant")
+	price_list_uom_dependant = not price_list_details.get("price_not_uom_dependent")
 
 	plc_conversion_rate = args.plc_conversion_rate
 	company_currency = get_company_currency(args.company)
