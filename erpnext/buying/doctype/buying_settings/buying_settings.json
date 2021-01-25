@@ -12,6 +12,7 @@
   "po_required",
   "pr_required",
   "maintain_same_rate",
+  "update_buying_prices_on_submission_of_purchase_order",
   "allow_multiple_items",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
@@ -88,12 +89,18 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "update_buying_prices_on_submission_of_purchase_order",
+   "fieldtype": "Check",
+   "label": "Update Prices on Submission of Purchase Order"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-10-03 14:12:20.594059",
+ "modified": "2021-01-25 12:15:34.361989",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
