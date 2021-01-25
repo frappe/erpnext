@@ -60,6 +60,8 @@ class SalarySlip(TransactionBase):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
 
+		# frappe.throw("Hello")
+
 	def set_net_total_in_words(self):
 		doc_currency = self.currency
 		company_currency = erpnext.get_company_currency(self.company)
@@ -464,7 +466,7 @@ class SalarySlip(TransactionBase):
 		for struct_row in self._salary_structure_doc.get(component_type):
 			amount = self.eval_condition_and_formula(struct_row, data)
 			if amount and struct_row.statistical_component == 0:
-				self.update_component_row(struct_row, amount, component_type)
+				self.update_component_row(struct_row, amount, component_type, is_salary_structure_component = 1)
 
 	def get_data_for_eval(self):
 		'''Returns data for evaluating formula'''
@@ -566,12 +568,39 @@ class SalarySlip(TransactionBase):
 			tax_row = self.get_salary_slip_row(d)
 			self.update_component_row(tax_row, tax_amount, "deductions")
 
-	def update_component_row(self, struct_row, amount, key, overwrite=1, additional_salary = ''):
-		component_row = None
+	def update_component_row(self, struct_row, amount, key, overwrite=1, additional_salary = '', is_salary_structure_component=0):
+		component_row  = None
+		additional_salary_row  = None
+		overwrite_component = None
+		overwritten = 0
+		component_found = False
+
+		overwritten_components = self.get_overwritten_components(key)
+		if struct_row.salary_component in overwritten_components and (is_salary_structure_component or (struct_row.get("is_additional_component") and overwrite)):
+			return
+
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
-				component_row = d
-		if not component_row or (struct_row.get("is_additional_component") and not overwrite):
+				if additional_salary == d.additional_salary and d.overwritten == 1:
+					return
+
+				if struct_row.get("is_additional_component") and d.additional_salary == additional_salary and not overwrite:
+					additional_salary_row = d
+					component_found = True
+				elif struct_row.get("is_additional_component") and not d.additional_salary and overwrite:
+					overwrite_component = d
+					overwritten = overwrite
+					component_found = True
+				else:
+					component_row = d
+
+		if overwrite_component:
+			component_row = overwrite_component
+
+		if additional_salary_row:
+			component_row =  additional_salary_row
+
+		if not component_row or ((not component_found) and struct_row.get("is_additional_component")):
 			if amount:
 				self.append(key, {
 					'amount': amount,
@@ -586,13 +615,15 @@ class SalarySlip(TransactionBase):
 					'variable_based_on_taxable_salary': struct_row.variable_based_on_taxable_salary,
 					'deduct_full_tax_on_selected_payroll_date': struct_row.deduct_full_tax_on_selected_payroll_date,
 					'additional_amount': amount if struct_row.get("is_additional_component") else 0,
-					'exempted_from_income_tax': struct_row.exempted_from_income_tax
+					'exempted_from_income_tax': struct_row.exempted_from_income_tax,
+					'overwritten': overwritten
 				})
 		else:
 			if struct_row.get("is_additional_component"):
 				if overwrite:
 					component_row.additional_amount = amount - component_row.get("default_amount", 0)
 					component_row.additional_salary = additional_salary
+					component_row.overwritten = overwritten
 				else:
 					component_row.additional_amount = amount
 
@@ -603,6 +634,9 @@ class SalarySlip(TransactionBase):
 
 			component_row.amount = amount
 			component_row.deduct_full_tax_on_selected_payroll_date = struct_row.deduct_full_tax_on_selected_payroll_date
+
+	def get_overwritten_components(self, key):
+		return [ele.salary_component for ele in self.get(key) if ele.overwritten == 1]
 
 	def calculate_variable_based_on_taxable_salary(self, tax_component, payroll_period):
 		if not payroll_period:
