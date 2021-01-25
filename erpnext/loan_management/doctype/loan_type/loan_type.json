@@ -144,17 +144,17 @@
   },
   {
    "allow_on_submit": 1,
-   "description": "Pending amount that will be automatically ignored on loan closure request ",
+   "description": "Loan Write Off will be automatically created on loan closure request if pending amount is below this limit",
    "fieldname": "write_off_amount",
    "fieldtype": "Currency",
-   "label": "Write Off Amount ",
+   "label": "Auto Write Off Amount ",
    "options": "Company:company:default_currency"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-26 07:13:55.029811",
+ "modified": "2021-01-17 06:51:26.082879",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",

@@ -18,6 +18,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1)
 		encounter = create_encounter(appointment)
+
 		# check for encounter
 		medical_rec = frappe.db.exists('Patient Medical Record', {'status': 'Open', 'reference_name': encounter.name})
 		self.assertTrue(medical_rec)

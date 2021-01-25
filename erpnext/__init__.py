@@ -132,16 +132,10 @@ def allow_regional(fn):
 
 	return caller
 
-def get_last_membership():
+def get_last_membership(member):
 	'''Returns last membership if exists'''
 	last_membership = frappe.get_all('Membership', 'name,to_date,membership_type',
-		dict(member=frappe.session.user, paid=1), order_by='to_date desc', limit=1)
+		dict(member=member, paid=1), order_by='to_date desc', limit=1)
 
-	return last_membership and last_membership[0]
-
-def is_member():
-	'''Returns true if the user is still a member'''
-	last_membership = get_last_membership()
-	if last_membership and getdate(last_membership.to_date) > getdate():
-		return True
-	return False
+	if last_membership:
+		return last_membership[0]

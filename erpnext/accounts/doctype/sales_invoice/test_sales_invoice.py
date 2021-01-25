@@ -688,7 +688,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
-		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
@@ -745,7 +745,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get('payments')[0].amount, -1000)
 
 	def test_pos_change_amount(self):
-		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
@@ -1573,17 +1573,17 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 
 		sales_invoice = create_sales_invoice(do_not_save=1)
-		sales_invoice.items[0].project = item_project.project_name
-		sales_invoice.project = project.project_name
+		sales_invoice.items[0].project = item_project.name
+		sales_invoice.project = project.name
 
 		sales_invoice.submit()
 
 		expected_values = {
 			"Debtors - _TC": {
-				"project": project.project_name
+				"project": project.name
 			},
 			"Sales - _TC": {
-				"project": item_project.project_name
+				"project": item_project.name
 			}
 		}
 
@@ -1841,7 +1841,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
-	
+
 	def test_einvoice_submission_without_irn(self):
 		# init
 		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 1)
@@ -1857,26 +1857,9 @@ class TestSalesInvoice(unittest.TestCase):
 		# reset
 		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 0)
 		frappe.flags.country = country
-	
+
 	def test_einvoice_json(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice
-
-		customer_gstin = '27AACCM7806M1Z3'
-		customer_gstin_dtls = {
-			'LegalName': '_Test Customer', 'TradeName': '_Test Customer', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '410038', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		company_gstin = '27AAECE4835E1ZR'
-		company_gstin_dtls = {
-			'LegalName': '_Test Company', 'TradeName': '_Test Company', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '401108', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		# set cache gstin details to avoid fetching details which will require connection to GSP servers
-		frappe.local.gstin_cache = {}
-		frappe.local.gstin_cache[customer_gstin] = customer_gstin_dtls
-		frappe.local.gstin_cache[company_gstin] = company_gstin_dtls
 
 		si = make_sales_invoice_for_ewaybill()
 		si.naming_series = 'INV-2020-.#####'
@@ -1930,12 +1913,12 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
 		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
 
-		self.assertEqual(
-			value_details['TotInvVal'],
-			value_details['AssVal'] + value_details['CgstVal']
-			+ value_details['SgstVal'] + value_details['IgstVal']
+		calculated_invoice_value = \
+			value_details['AssVal'] + value_details['CgstVal'] \
+			+ value_details['SgstVal'] + value_details['IgstVal'] \
 			+ value_details['OthChrg'] - value_details['Discount']
-		)
+
+		self.assertTrue(value_details['TotInvVal'] - calculated_invoice_value < 0.1)
 
 		self.assertEqual(value_details['TotInvVal'], si.base_grand_total)
 		self.assertTrue(einvoice['EwbDtls'])

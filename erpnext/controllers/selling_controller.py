@@ -191,7 +191,7 @@ class SellingController(StockController):
 		for it in self.get("items"):
 			if not it.item_code:
 				continue
-			
+
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
 			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
@@ -233,7 +233,7 @@ class SellingController(StockController):
 							'allow_zero_valuation': d.allow_zero_valuation_rate,
 							'sales_invoice_item': d.get("sales_invoice_item"),
 							'dn_detail': d.get("dn_detail"),
-							'incoming_rate': p.incoming_rate
+							'incoming_rate': p.get("incoming_rate")
 						}))
 			else:
 				il.append(frappe._dict({
@@ -252,7 +252,7 @@ class SellingController(StockController):
 					'allow_zero_valuation': d.allow_zero_valuation_rate,
 					'sales_invoice_item': d.get("sales_invoice_item"),
 					'dn_detail': d.get("dn_detail"),
-					'incoming_rate': d.incoming_rate
+					'incoming_rate': d.get("incoming_rate")
 				}))
 		return il
 
@@ -391,7 +391,7 @@ class SellingController(StockController):
 				})
 				if item_row.warehouse:
 					sle.dependant_sle_voucher_detail_no = item_row.name
-			
+
 		return sle
 
 	def set_po_nos(self, for_validate=False):
