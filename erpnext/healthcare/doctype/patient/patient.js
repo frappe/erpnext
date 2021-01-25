@@ -50,7 +50,7 @@ frappe.ui.form.on('Patient', {
 			$(frm.fields_dict['age_html'].wrapper).html('');
 		}
 		if(frm.doc.dob){
-			$(frm.fields_dict['age_html'].wrapper).html('AGE : ' + get_age(frm.doc.dob));
+			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${get_age(frm.doc.dob)}`);
 		}
 	}
 });
@@ -65,7 +65,7 @@ frappe.ui.form.on('Patient', 'dob', function(frm) {
 		}
 		else {
 			let age_str = get_age(frm.doc.dob);
-			$(frm.fields_dict['age_html'].wrapper).html('AGE : ' + age_str);
+			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${age_str}`);
 		}
 	}
 	else {
