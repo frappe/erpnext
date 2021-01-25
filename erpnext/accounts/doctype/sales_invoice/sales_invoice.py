@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate, get_link_to_form
+from frappe.utils import cint, flt, getdate, add_days, cstr, nowdate, get_link_to_form, formatdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date
 from frappe.model.mapper import get_mapped_doc
@@ -179,7 +179,10 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
-		
+
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
@@ -261,10 +264,10 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
-		
+
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
-		
+
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
@@ -549,7 +552,12 @@ class SalesInvoice(SellingController):
 		self.against_income_account = ','.join(against_acc)
 
 	def add_remarks(self):
-		if not self.remarks: self.remarks = 'No Remarks'
+		if not self.remarks:
+			if self.po_no and self.po_date:
+				self.remarks = _("Against Customer Order {0} dated {1}").format(self.po_no,
+					formatdate(self.po_date))
+			else:
+				self.remarks = _("No Remarks")
 
 	def validate_auto_set_posting_time(self):
 		# Don't auto set the posting date and time if invoice is amended
@@ -1694,6 +1702,7 @@ def get_mode_of_payment_info(mode_of_payment, company):
 		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
 	(company, mode_of_payment), as_dict=1)
 
+@frappe.whitelist()
 def create_dunning(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount

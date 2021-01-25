@@ -22,6 +22,7 @@ frappe.ui.form.on('Patient Appointment', {
 				filters: {'status': 'Active'}
 			};
 		});
+
 		frm.set_query('practitioner', function() {
 			return {
 				filters: {
@@ -29,15 +30,26 @@ frappe.ui.form.on('Patient Appointment', {
 				}
 			};
 		});
-		frm.set_query('service_unit', function(){
+
+		frm.set_query('service_unit', function() {
 			return {
+				query: 'erpnext.controllers.queries.get_healthcare_service_units',
 				filters: {
-					'is_group': false,
-					'allow_appointments': true,
-					'company': frm.doc.company
+					company: frm.doc.company,
+					inpatient_record: frm.doc.inpatient_record
 				}
 			};
 		});
+
+		frm.set_query('therapy_plan', function() {
+			return {
+				filters: {
+					'patient': frm.doc.patient
+				}
+			};
+		});
+
+		frm.trigger('set_therapy_type_filter');
 
 		if (frm.is_new()) {
 			frm.page.set_primary_action(__('Check Availability'), function() {
@@ -133,6 +145,24 @@ frappe.ui.form.on('Patient Appointment', {
 			frm.set_value('patient_sex', '');
 			frm.set_value('patient_age', '');
 			frm.set_value('inpatient_record', '');
+		}
+	},
+
+	therapy_plan: function(frm) {
+		frm.trigger('set_therapy_type_filter');
+	},
+
+	set_therapy_type_filter: function(frm) {
+		if (frm.doc.therapy_plan) {
+			frm.call('get_therapy_types').then(r => {
+				frm.set_query('therapy_type', function() {
+					return {
+						filters: {
+							'name': ['in', r.message]
+						}
+					};
+				});
+			});
 		}
 	},
 

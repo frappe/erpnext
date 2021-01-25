@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.stock");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on('Stock Entry', {
 	setup: function(frm) {
@@ -97,6 +98,7 @@ frappe.ui.form.on('Stock Entry', {
 		});
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -312,6 +314,8 @@ frappe.ui.form.on('Stock Entry', {
 				frm.set_value("letter_head", company_doc.default_letter_head);
 			}
 			frm.trigger("toggle_display_account_head");
+
+			erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 		}
 	},
 
@@ -524,7 +528,6 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			);
 		}
-		
 		for (let i in frm.doc.items) {
 			let item = frm.doc.items[i];
 
@@ -675,7 +678,13 @@ frappe.ui.form.on('Stock Entry Detail', {
 						});
 						refresh_field("items");
 
-						if (!d.serial_no) {
+						let no_batch_serial_number_value = !d.serial_no;
+						if (d.has_batch_no && !d.has_serial_no) {
+							// check only batch_no for batched item
+							no_batch_serial_number_value = !d.batch_no;
+						}
+
+						if (no_batch_serial_number_value) {
 							erpnext.stock.select_batch_and_serial_no(frm, d);
 						}
 					}
