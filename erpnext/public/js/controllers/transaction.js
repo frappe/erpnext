@@ -2025,3 +2025,35 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 		}, show_dialog);
 	});
 }
+
+erpnext.apply_putaway_rule = (frm, purpose=null) => {
+	if (!frm.doc.company) {
+		frappe.throw({message: __("Please select a Company first."), title: __("Mandatory")});
+	}
+	if (!frm.doc.items.length) return;
+
+	frappe.call({
+		method: "erpnext.stock.doctype.putaway_rule.putaway_rule.apply_putaway_rule",
+		args: {
+			doctype: frm.doctype,
+			items: frm.doc.items,
+			company: frm.doc.company,
+			sync: true,
+			purpose: purpose
+		},
+		callback: (result) => {
+			if (!result.exc && result.message) {
+				frm.clear_table("items");
+
+				let items =  result.message;
+				items.forEach((row) => {
+					delete row["name"]; // dont overwrite name from server side
+					let child = frm.add_child("items");
+					Object.assign(child, row);
+					frm.script_manager.trigger("qty", child.doctype, child.name);
+				});
+				frm.get_field("items").grid.refresh();
+			}
+		}
+	});
+};

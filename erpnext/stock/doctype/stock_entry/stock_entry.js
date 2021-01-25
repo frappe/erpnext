@@ -577,8 +577,12 @@ frappe.ui.form.on('Stock Entry', {
 				}
 			});
 		}
+	},
+
+	apply_putaway_rule: function (frm) {
+		if (frm.doc.apply_putaway_rule) erpnext.apply_putaway_rule(frm, frm.doc.purpose);
 	}
-})
+});
 
 frappe.ui.form.on('Stock Entry Detail', {
 	qty: function(frm, cdt, cdn) {
