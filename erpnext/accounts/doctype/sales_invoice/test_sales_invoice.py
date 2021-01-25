@@ -1924,10 +1924,10 @@ class TestSalesInvoice(unittest.TestCase):
 		value_details = einvoice['ValDtls']
 
 		self.assertEqual(einvoice['Version'], '1.1')
-		self.assertEqual(value_details['AssVal'], total_item_ass_value)
-		self.assertEqual(value_details['CgstVal'], total_item_cgst_value)
-		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
-		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
+		self.assertTrue(abs(value_details['AssVal'] - total_item_ass_value) <= 1)
+		self.assertTrue(abs(value_details['CgstVal'] - total_item_cgst_value) <= 1)
+		self.assertTrue(abs(value_details['SgstVal'] - total_item_sgst_value) <= 1)
+		self.assertTrue(abs(value_details['IgstVal'] - total_item_igst_value) <= 1)
 
 		calculated_invoice_value = \
 			value_details['AssVal'] + value_details['CgstVal'] \
