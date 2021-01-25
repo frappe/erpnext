@@ -807,6 +807,36 @@ class AccountsController(TransactionBase):
 						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 							.format(item.item_code, item.idx, max_allowed_amt))
 
+	def update_item_prices(self):
+		from erpnext.stock.get_item_details import get_price_list_rate, process_args
+		from erpnext.stock.report.item_prices.item_prices import _set_item_pl_rate
+
+		parent_dict = frappe._dict({})
+		for fieldname in self.meta.get_valid_columns():
+			parent_dict[fieldname] = self.get(fieldname)
+
+		if self.doctype in ["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]:
+			document_type = "{} Item".format(self.doctype)
+			parent_dict.update({"document_type": document_type})
+
+		for item in self.get("items"):
+			if item.get("item_code"):
+				args = parent_dict.copy()
+				args.update(item.as_dict())
+				args = process_args(args)
+
+				args["doctype"] = self.doctype
+				args["name"] = self.name
+
+				if not args.get("transaction_date"):
+					args["transaction_date"] = args.get("posting_date")
+
+				item_price_data = frappe._dict()
+				get_price_list_rate(args, frappe.get_cached_doc("Item", item.item_code), item_price_data)
+
+				if flt(item.price_list_rate) and abs(flt(item_price_data.price_list_rate) - flt(item.price_list_rate)) > 0.005:
+					_set_item_pl_rate(args["transaction_date"], item.item_code, self.buying_price_list, flt(item.price_list_rate), item.uom, item.conversion_factor)
+
 	def get_company_default(self, fieldname):
 		from erpnext.accounts.utils import get_company_default
 		return get_company_default(self.company, fieldname)
