@@ -58,113 +58,108 @@ def validate_filters(filters):
 				.format(filters.payment_type, filters.party_type))
 
 def get_columns(filters):
-	return [
-		{
+	columns = [{
+			"label": _("Payment Document"),
 			"fieldname": "payment_document",
-			"label": _("Payment Document Type"),
-			"fieldtype": "Data",
 			"width": 100
 		},
 		{
+			"label": _("Payment Entry"),
 			"fieldname": "payment_entry",
-			"label": _("Payment Document"),
 			"fieldtype": "Dynamic Link",
 			"options": "payment_document",
-			"width": 160
+			"width": 140
 		},
 		{
-			"fieldname": "party_type",
 			"label": _("Party Type"),
-			"fieldtype": "Data",
-			"width": 100
+			"fieldname": "party_type",
+			"width": 120
 		},
 		{
-			"fieldname": "party",
 			"label": _("Party"),
 			"fieldtype": "Dynamic Link",
+			"fieldname": "party",
 			"options": "party_type",
-			"width": 160
+			"width": 140
 		},
 		{
-			"fieldname": "posting_date",
 			"label": _("Posting Date"),
+			"fieldname": "posting_date",
 			"fieldtype": "Date",
 			"width": 100
 		},
 		{
-			"fieldname": "invoice",
 			"label": _("Invoice"),
+			"options": "Purchase Invoice",
 			"fieldtype": "Link",
-			"options": "Purchase Invoice" if filters.get("payment_type") == _("Outgoing") else "Sales Invoice",
-			"width": 160
+			"fieldname": "invoice",
+			"width": 140
 		},
 		{
-			"fieldname": "invoice_posting_date",
 			"label": _("Invoice Posting Date"),
+			"fieldname": "invoice_posting_date",
 			"fieldtype": "Date",
 			"width": 100
 		},
 		{
-			"fieldname": "due_date",
 			"label": _("Payment Due Date"),
+			"fieldname": "payment_due_date",
 			"fieldtype": "Date",
 			"width": 100
 		},
 		{
-			"fieldname": "debit",
 			"label": _("Debit"),
+			"fieldname": "debit",
 			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "credit",
-			"label": _("Credit"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "remarks",
-			"label": _("Remarks"),
-			"fieldtype": "Data",
-			"width": 200
-		},
-		{
-			"fieldname": "age",
-			"label": _("Age"),
-			"fieldtype": "Int",
-			"width": 50
-		},
-		{
-			"fieldname": "range1",
-			"label": _("0-30"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "range2",
-			"label": _("30-60"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "range3",
-			"label": _("60-90"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-		{
-			"fieldname": "range4",
-			"label": _("90 Above"),
-			"fieldtype": "Currency",
-			"width": 140
-		},
-			{
-			"fieldname": "delay_in_payment",
-			"label": _("Delay in payment (Days)"),
-			"fieldtype": "Int",
 			"width": 100
-		}
-	]
+		},
+		{
+			"label": _("Credit"),
+			"fieldname": "credit",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": _("Remarks"),
+			"fieldname": "remarks",
+			"width": 100
+		},
+		{
+			"label": _("Age"),
+			"fieldname": "age",
+			"fieldtype": "Int",
+			"width": 40
+		},
+		{
+			"label": "0-30",
+			"fieldname": "0-30",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": "30-60",
+			"fieldname": "30-60",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": "60-90",
+			"fieldname": "60-90",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": _("90-Above"),
+			"fieldname": "90_above",
+			"fieldtype": "Currency",
+			"width": 100
+		},
+		{
+			"label": _("Delay in payment (Days)"),
+			"fieldname": "delay_in_payment_days",
+			"width": 150
+		}]
+	return columns
 
 def get_conditions(filters):
 	conditions = []
