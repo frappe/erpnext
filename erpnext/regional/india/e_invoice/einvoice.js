@@ -18,6 +18,9 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			if (!irn && !__unsaved) {
 				const action = () => {
+					if (frm.doc.__unsaved) {
+						frappe.throw(__('Please save the document to generate IRN.'));
+					}
 					frappe.call({
 						method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
 						args: { doctype, docname: name },

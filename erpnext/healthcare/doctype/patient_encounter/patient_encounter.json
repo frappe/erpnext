@@ -210,7 +210,7 @@
   {
    "fieldname": "drug_prescription",
    "fieldtype": "Table",
-   "label": "Items",
+   "label": "Drug Prescription",
    "options": "Drug Prescription"
   },
   {
@@ -328,7 +328,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-16 21:00:08.644531",
+ "modified": "2020-11-30 10:39:00.783119",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
