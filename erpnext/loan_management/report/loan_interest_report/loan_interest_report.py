@@ -6,6 +6,8 @@ import frappe
 import erpnext
 from frappe import _
 from frappe.utils import flt, getdate, add_days
+from erpnext.loan_management.report.applicant_wise_loan_security_exposure.applicant_wise_loan_security_exposure \
+	 import get_loan_security_details
 
 
 def execute(filters=None):
@@ -31,6 +33,7 @@ def get_columns(filters):
 		{"label": _("Undue Booked Interest"), "fieldname": "undue_interest", "fieldtype": "Currency", "options": "currency", "width": 120},
 		{"label": _("Interest %"), "fieldname": "rate_of_interest", "fieldtype": "Percent", "width": 100},
 		{"label": _("Penalty Interest %"), "fieldname": "penalty_interest", "fieldtype": "Percent", "width": 100},
+		{"label": _("Loan To Value Ratio"), "fieldname": "loan_to_value", "fieldtype": "Percent", "width": 100},
 		{"label": _("Currency"), "fieldname": "currency", "fieldtype": "Currency", "options": "Currency", "hidden": 1, "width": 100},
 	]
 
@@ -50,6 +53,9 @@ def get_active_loan_details(filters):
 
 	loan_list = [d.loan for d in loan_details]
 
+	current_pledges = get_loan_wise_pledges(filters)
+	loan_wise_security_value = get_loan_wise_security_value(filters, current_pledges)
+
 	sanctioned_amount_map = get_sanctioned_amount_map()
 	penal_interest_rate_map = get_penal_interest_rate_map()
 	payments = get_payments(loan_list)
@@ -67,11 +73,15 @@ def get_active_loan_details(filters):
 			"penalty": flt(accrual_map.get(loan.loan, {}).get("penalty")),
 			"penalty_interest": penal_interest_rate_map.get(loan.loan_type),
 			"undue_interest": flt(accrual_map.get(loan.loan, {}).get("undue_interest")),
+			"loan_to_value": 0.0,
 			"currency": currency
 		})
 
 		loan['total_outstanding'] = loan['principal_outstanding'] + loan['interest_outstanding'] \
 			+ loan['penalty']
+
+		if loan_wise_security_value.get(loan.loan):
+			loan['loan_to_value'] = (loan['principal_outstanding'] * 100) / loan_wise_security_value.get(loan.loan)
 
 	return loan_details
 
@@ -122,3 +132,52 @@ def get_interest_accruals(loans):
 
 def get_penal_interest_rate_map():
 	return frappe._dict(frappe.get_all("Loan Type", fields=["name", "penalty_interest_rate"], as_list=1))
+
+def get_loan_wise_pledges(filters):
+	loan_wise_unpledges = {}
+	current_pledges = {}
+
+	conditions = ""
+
+	if filters.get('company'):
+		conditions = "AND company = %(company)s"
+
+	unpledges = frappe.db.sql("""
+		SELECT up.loan, u.loan_security, sum(u.qty) as qty
+		FROM `tabLoan Security Unpledge` up, `tabUnpledge` u
+		WHERE u.parent = up.name
+		AND up.status = 'Approved'
+		{conditions}
+		GROUP BY up.loan
+	""".format(conditions=conditions), filters, as_dict=1)
+
+	for unpledge in unpledges:
+		loan_wise_unpledges.setdefault((unpledge.loan, unpledge.loan_security), unpledge.qty)
+
+	pledges = frappe.db.sql("""
+		SELECT lp.loan, p.loan_security, sum(p.qty) as qty
+		FROM `tabLoan Security Pledge` lp, `tabPledge`p
+		WHERE p.parent = lp.name
+		AND lp.status = 'Pledged'
+		{conditions}
+		GROUP BY lp.loan
+	""".format(conditions=conditions), filters, as_dict=1)
+
+	for security in pledges:
+		current_pledges.setdefault((security.loan, security.loan_security), security.qty)
+		current_pledges[(security.loan, security.loan_security)] -= \
+			loan_wise_unpledges.get((security.loan, security.loan_security), 0.0)
+
+	return current_pledges
+
+def get_loan_wise_security_value(filters, current_pledges):
+	loan_security_details = get_loan_security_details(filters)
+	loan_wise_security_value = {}
+
+	for key in current_pledges:
+		qty = current_pledges.get(key)
+		loan_wise_security_value.setdefault(key[0], 0.0)
+		loan_wise_security_value[key[0]] += \
+			flt(qty * loan_security_details.get(key[1], {}).get('latest_price', 0))
+
+	return loan_wise_security_value
