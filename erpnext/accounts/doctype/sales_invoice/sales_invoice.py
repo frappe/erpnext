@@ -1776,8 +1776,7 @@ def update_taxes(doc, party=None, party_type=None, company=None, doctype=None, p
 
 	# Update taxes and charges if any
 	doc.taxes_and_charges = party_details.get('taxes_and_charges')
-	if party_details.get('taxes'):
-		doc.set('taxes', party_details.get('taxes'))
+	doc.set('taxes', party_details.get('taxes'))
 
 def update_address(doc, address_field, address_display_field, address_name):
 	doc.set(address_field, address_name)
