@@ -1921,18 +1921,18 @@ class TestSalesInvoice(unittest.TestCase):
 			self.assertTrue(item['AssAmt'], item['TotAmt'] - item['Discount'])
 			self.assertTrue(item['TotItemVal'], item['AssAmt'] + item['CgstAmt'] + item['SgstAmt'] + item['IgstAmt'])
 
-		value_details = einvoice.get('ValDtls')
+		value_details = einvoice['ValDtls']
 
 		self.assertEqual(einvoice['Version'], '1.1')
-		self.assertEqual(value_details.get('AssVal'), total_item_ass_value)
-		self.assertEqual(value_details.get('CgstVal'), total_item_cgst_value)
-		self.assertEqual(value_details.get('SgstVal'), total_item_sgst_value)
-		self.assertEqual(value_details.get('IgstVal'), total_item_igst_value)
+		self.assertEqual(value_details['AssVal'], total_item_ass_value)
+		self.assertEqual(value_details['CgstVal'], total_item_cgst_value)
+		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
+		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
 
 		calculated_invoice_value = \
-			value_details.get('AssVal') + value_details.get('CgstVal') \
-			+ value_details.get('SgstVal') + value_details.get('IgstVal') \
-			+ value_details.get('OthChrg') - value_details.get('Discount')
+			value_details['AssVal'] + value_details['CgstVal'] \
+			+ value_details['SgstVal'] + value_details['IgstVal'] \
+			+ value_details['OthChrg'] - value_details['Discount']
 
 		self.assertTrue(value_details.get('TotInvVal') - calculated_invoice_value < 0.1)
 
