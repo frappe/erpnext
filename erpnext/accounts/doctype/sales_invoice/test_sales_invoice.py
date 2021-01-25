@@ -1934,9 +1934,7 @@ class TestSalesInvoice(unittest.TestCase):
 			+ value_details['SgstVal'] + value_details['IgstVal'] \
 			+ value_details['OthChrg'] - value_details['Discount']
 
-		self.assertTrue(value_details.get('TotInvVal') - calculated_invoice_value < 0.1)
-
-		self.assertEqual(value_details.get('TotInvVal'), si.base_grand_total)
+		self.assertTrue(abs(value_details['TotInvVal'] - calculated_invoice_value) <= 1)
 		self.assertTrue(einvoice['EwbDtls'])
 
 def make_test_address_for_ewaybill():
