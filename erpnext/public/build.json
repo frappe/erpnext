@@ -55,6 +55,8 @@
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",
 		"stock/dashboard/item_dashboard_list.html",
-		"stock/dashboard/item_dashboard.js"
+		"stock/dashboard/item_dashboard.js",
+		"stock/page/warehouse_capacity_summary/warehouse_capacity_summary.html",
+		"stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html"
 	]
 }
