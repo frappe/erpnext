@@ -522,6 +522,16 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		}
 	},
 
+	tc_name: function() {
+		var me = this;
+
+		erpnext.utils.get_terms(this.frm.doc.tc_name, this.frm.doc, function(r) {
+			if(!r.exc) {
+				me.frm.set_value("terms", r.message);
+			}
+		});
+	},
+
 	make_payment_entry: function(party_type) {
 		if (['Customer', 'Supplier'].includes(party_type)) {
 			return frappe.call({

@@ -20,6 +20,7 @@ from erpnext.selling.doctype.vehicle_allocation.vehicle_allocation import get_al
 from erpnext.accounts.doctype.transaction_type.transaction_type import get_transaction_type_defaults
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
+from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import get_terms_and_conditions
 from six import string_types
 import json
 
@@ -65,6 +66,7 @@ class VehicleBookingOrder(AccountsController):
 		self.validate_taxes_and_charges_accounts()
 		self.set_total_in_words()
 
+		self.get_terms_and_conditions()
 		self.validate_payment_schedule()
 
 		self.update_payment_status()
@@ -301,6 +303,10 @@ class VehicleBookingOrder(AccountsController):
 		self.set_payment_schedule()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()
+
+	def get_terms_and_conditions(self):
+		if self.tc_name:
+			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
 
 	def validate_party_accounts(self):
 		company_currency = erpnext.get_company_currency(self.company)
@@ -685,6 +691,9 @@ def get_item_details(args):
 
 	if out.vehicle_price_list:
 		out.update(get_vehicle_price(item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status, args.company))
+
+	if not args.tc_name:
+		out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
 
 	return out
 

@@ -106,6 +106,9 @@
   "invoice_delivered_date",
   "bill_no",
   "bill_date",
+  "terms_section_break",
+  "tc_name",
+  "terms",
   "more_info",
   "vehicle_price_list",
   "fni_price_list",
@@ -913,12 +916,30 @@
    "fieldtype": "Table",
    "label": "Additional Items",
    "options": "Vehicle Booking Additional Item"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "terms_section_break",
+   "fieldtype": "Section Break",
+   "label": "Terms and Conditions"
+  },
+  {
+   "fieldname": "tc_name",
+   "fieldtype": "Link",
+   "label": "Terms",
+   "options": "Terms and Conditions",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "terms",
+   "fieldtype": "Text Editor",
+   "label": "Terms and Conditions Details"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-01-09 13:26:35.813212",
+ "modified": "2021-01-26 22:33:52.489847",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",
