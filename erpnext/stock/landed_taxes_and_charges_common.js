@@ -30,7 +30,9 @@ document_list.forEach((doctype) => {
 
 			if (row.account_currency == company_currency) {
 				row.exchange_rate = 1;
+				frm.set_df_property('taxes', 'hidden', 1, row.name, 'exchange_rate');
 			} else if (!row.exchange_rate || row.exchange_rate == 1) {
+				frm.set_df_property('taxes', 'hidden', 0, row.name, 'exchange_rate');
 				frappe.call({
 					method: "erpnext.accounts.doctype.journal_entry.journal_entry.get_exchange_rate",
 					args: {
@@ -46,6 +48,8 @@ document_list.forEach((doctype) => {
 					}
 				});
 			}
+
+			frm.refresh_field('taxes');
 		},
 
 		set_base_amount: function(frm, cdt, cdn) {
