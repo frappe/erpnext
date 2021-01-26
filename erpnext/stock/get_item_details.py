@@ -591,6 +591,14 @@ def get_default_supplier(args, item, item_group, brand, item_source, transaction
 		or transaction_type.get("default_supplier"))
 
 
+def get_default_terms(args, item, item_group, brand, item_source, transaction_type):
+	return (transaction_type.get("default_terms")
+		or item.get("default_terms")
+		or item_source.get("default_terms")
+		or brand.get("default_terms")
+		or item_group.get("default_terms"))
+
+
 def get_default_apply_discount_after_taxes(args, item, item_group, brand, item_source, transaction_type):
 	fieldname = "selling_apply_discount_after_taxes" if args.get('doctype') in sales_doctypes or args.get('customer') \
 		else "buying_apply_discount_after_taxes"

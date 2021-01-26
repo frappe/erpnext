@@ -11,7 +11,7 @@ from frappe.model.utils import get_fetch_values
 from frappe.model.naming import set_name_by_naming_series
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from erpnext.accounts.party import set_contact_details, get_party_account
-from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier
+from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier, get_default_terms
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
@@ -693,7 +693,10 @@ def get_item_details(args):
 		out.update(get_vehicle_price(item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status, args.company))
 
 	if not args.tc_name:
-		out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
+		out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
+			transaction_type_defaults)
+		if not out.tc_name:
+			out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
 
 	return out
 

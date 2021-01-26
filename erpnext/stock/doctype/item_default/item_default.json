@@ -6,6 +6,7 @@
  "field_order": [
   "company",
   "default_warehouse",
+  "default_terms",
   "column_break_3",
   "default_price_list",
   "allow_zero_valuation_rate",
@@ -124,10 +125,16 @@
    "fieldtype": "Select",
    "label": "Apply Discount After Taxes For Sales",
    "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "default_terms",
+   "fieldtype": "Link",
+   "label": "Default Terms and Conditions",
+   "options": "Terms and Conditions"
   }
  ],
  "istable": 1,
- "modified": "2020-12-04 16:12:29.464737",
+ "modified": "2021-01-26 23:10:24.683436",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",
