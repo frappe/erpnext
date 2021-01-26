@@ -530,7 +530,8 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					"dt": this.frm.doc.doctype,
 					"dn": this.frm.doc.name,
 					"party_type": party_type,
-					"mode_of_payment": party_type === "Customer" ? this.frm.doc.selling_mode_of_payment : this.frm.doc.buying_mode_of_payment
+					"mode_of_payment": party_type === "Customer" ? this.frm.doc.selling_mode_of_payment : this.frm.doc.buying_mode_of_payment,
+					"bank_amount": 0
 				},
 				callback: function (r) {
 					var doclist = frappe.model.sync(r.message);

@@ -1151,7 +1151,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	paid_amount = received_amount = 0
 	if party_account_currency == bank.account_currency:
-		paid_amount = received_amount = abs(outstanding_amount)
+		if bank_amount:
+			paid_amount = received_amount = flt(bank_amount)
+		else:
+			paid_amount = received_amount = abs(outstanding_amount)
 	elif payment_type == "Receive":
 		paid_amount = abs(outstanding_amount)
 		if bank_amount:
@@ -1216,7 +1219,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 				"due_date": doc.get("due_date"),
 				'total_amount': grand_total,
 				'outstanding_amount': outstanding_amount,
-				'allocated_amount': outstanding_amount
+				'allocated_amount': flt(bank_amount) or outstanding_amount
 			})
 
 	pe.setup_party_account_field()
