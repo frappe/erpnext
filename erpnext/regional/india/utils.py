@@ -684,6 +684,21 @@ def get_gst_accounts(company, account_wise=False):
 
 	return gst_accounts
 
+@frappe.whitelist()
+def get_info_for_gst_round_off():
+	gst_accounts = []
+	gst_settings = frappe.get_doc("GST Settings")
+	round_off_gst_values = gst_settings.round_off_gst_values
+
+	for account in gst_settings.get('gst_accounts'):
+		for fieldname in ('cgst_account', 'sgst_account', 'igst_account'):
+			gst_accounts.append(account.get(fieldname))
+
+	return {
+		'round_off_gst_values': round_off_gst_values,
+		'gst_accounts': gst_accounts
+	}
+
 def update_grand_total_for_rcm(doc, method):
 	country = frappe.get_cached_value('Company', doc.company, 'country')
 

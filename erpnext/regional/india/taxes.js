@@ -47,7 +47,25 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 					}
 				}
 			});
+		},
+		apply_regional_tax_laws_for_india: function(frm) {
+			frappe.call({
+				"method": "erpnext.regional.india.utils.get_info_for_gst_round_off",
+				"callback": function(r) {
+					console.log(r);
+					if (r.message.round_off_gst_values) {
+						$.each(frm.doc.taxes || [], function(i, row) {
+							if (r.message.gst_accounts.includes(row.account_head)) {
+								row.tax_amount = flt(row.tax_amount, 0);
+								row.base_tax_amount = flt(row.base_tax_amount, 0);
+								row.tax_amount_after_discount_amount = flt(row.tax_amount_after_discount_amount, 0);
+								row.base_tax_amount_after_discount_amount = flt(row.base_tax_amount_after_discount_amount, 0);
+							}
+						});
+						frm.refresh_field('taxes');
+					}
+				}
+			});
 		}
 	});
 };
-

@@ -76,9 +76,13 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
 		this.calculate_taxes();
-		this.manipulate_grand_total_for_inclusive_tax();
-		this.calculate_totals();
-		this._cleanup();
+
+		frappe.run_serially([
+			() => this.apply_regional_tax_laws(),
+			() => this.manipulate_grand_total_for_inclusive_tax(),
+			() => this.calculate_totals(),
+			() => this._cleanup()
+		]);
 	},
 
 	validate_conversion_rate: function() {
@@ -318,6 +322,14 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				}
 			});
 		});
+	},
+
+	apply_regional_tax_laws: function() {
+		let me = this;
+		frappe.db.get_value("Company", me.frm.doc.company, 'country').then(val => {
+			let trigger = 'apply_regional_tax_laws_for_' + frappe.scrub(val.message.country);
+			me.frm.trigger(trigger);
+		})
 	},
 
 	set_cumulative_total: function(row_idx, tax) {
