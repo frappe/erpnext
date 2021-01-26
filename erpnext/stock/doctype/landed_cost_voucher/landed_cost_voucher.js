@@ -101,25 +101,27 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		var me = this;
 
 		if(this.frm.doc.taxes.length) {
-
 			var total_item_cost = 0.0;
 			var based_on = this.frm.doc.distribute_charges_based_on.toLowerCase();
-			$.each(this.frm.doc.items || [], function(i, d) {
-				total_item_cost += flt(d[based_on])
-			});
 
-			var total_charges = 0.0;
-			$.each(this.frm.doc.items || [], function(i, item) {
-				item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
-				item.applicable_charges = flt(item.applicable_charges, precision("applicable_charges", item))
-				total_charges += item.applicable_charges
-			});
+			if (based_on != 'distribute manually') {
+				$.each(this.frm.doc.items || [], function(i, d) {
+					total_item_cost += flt(d[based_on])
+				});
 
-			if (total_charges != this.frm.doc.total_taxes_and_charges){
-				var diff = this.frm.doc.total_taxes_and_charges - flt(total_charges)
-				this.frm.doc.items.slice(-1)[0].applicable_charges += diff
+				var total_charges = 0.0;
+				$.each(this.frm.doc.items || [], function(i, item) {
+					item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
+					item.applicable_charges = flt(item.applicable_charges, precision("applicable_charges", item))
+					total_charges += item.applicable_charges
+				});
+
+				if (total_charges != this.frm.doc.total_taxes_and_charges){
+					var diff = this.frm.doc.total_taxes_and_charges - flt(total_charges)
+					this.frm.doc.items.slice(-1)[0].applicable_charges += diff
+				}
+				refresh_field("items");
 			}
-			refresh_field("items");
 		}
 	},
 	distribute_charges_based_on: function (frm) {

@@ -80,7 +80,7 @@ class LandedCostVoucher(Document):
 		self.total_taxes_and_charges = sum([flt(d.base_amount) for d in self.get("taxes")])
 
 	def set_applicable_charges_on_item(self):
-		if self.get('taxes'):
+		if self.get('taxes') and self.distribute_charges_based_on != 'Distribute Manually':
 			total_item_cost = 0.0
 			total_charges = 0.0
 			item_count = 0
@@ -102,7 +102,11 @@ class LandedCostVoucher(Document):
 	def validate_applicable_charges_for_item(self):
 		based_on = self.distribute_charges_based_on.lower()
 
-		total = sum([flt(d.get(based_on)) for d in self.get("items")])
+		if based_on != 'distribute manually':
+			total = sum([flt(d.get(based_on)) for d in self.get("items")])
+		else:
+			# consider for proportion while distributing manually
+			total = sum([flt(d.get('applicable_charges')) for d in self.get("items")])
 
 		if not total:
 			frappe.throw(_("Total {0} for all items is zero, may be you should change 'Distribute Charges Based On'").format(based_on))
