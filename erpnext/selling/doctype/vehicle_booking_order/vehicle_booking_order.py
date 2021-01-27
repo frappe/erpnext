@@ -467,9 +467,18 @@ class VehicleBookingOrder(AccountsController):
 		elif self.docstatus == 1:
 			if self.customer_outstanding > 0 or self.supplier_outstanding > 0:
 				if self.customer_advance > self.supplier_advance:
-					self.status = "To Deposit Payment"
+					if self.vehicle_allocation_required and not self.vehicle_allocation:
+						self.status = "To Assign Allocation"
+					else:
+						self.status = "To Deposit Payment"
 				else:
 					self.status = "To Receive Payment"
+
+			elif self.vehicle_allocation_required and not self.vehicle_allocation:
+				self.status = "To Assign Allocation"
+
+			elif not self.vehicle:
+				self.status = "To Assign Vehicle"
 
 			elif self.delivery_status == "To Receive":
 				self.status = "To Receive Vehicle"
@@ -985,6 +994,7 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 	vbo_doc.validate_vehicle()
 	vbo_doc.set_vehicle_details()
 
+	vbo_doc.set_status()
 	vbo_doc.db_update()
 	vbo_doc.notify_update()
 	vbo_doc.save_version()
@@ -1029,6 +1039,7 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 	if vbo_doc.delivery_period != vbo_doc._doc_before_save.delivery_period:
 		frappe.throw(_("Delivery Period must be the same in the new Vehicle Allocation"))
 
+	vbo_doc.set_status()
 	vbo_doc.db_update()
 	vbo_doc.notify_update()
 	vbo_doc.save_version()
