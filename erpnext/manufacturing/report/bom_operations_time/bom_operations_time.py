@@ -20,7 +20,7 @@ def get_data(filters):
 			bomps.operation, bomps.workstation, bomps.time_in_mins
 		FROM `tabBOM` bom, `tabBOM Operation` bomps
 		WHERE
-			bom.docstatus < 2 and bom.is_active = 1 and bom.name = bomps.parent
+			bom.docstatus = 1 and bom.is_active = 1 and bom.name = bomps.parent
 		""", as_dict=1):
 		row = get_args()
 		if d.name not in bom_data:

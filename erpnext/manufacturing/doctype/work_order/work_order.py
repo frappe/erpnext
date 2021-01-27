@@ -807,7 +807,7 @@ class WorkOrder(Document):
 		for d in self.required_items:
 			bom.append('items', {
 				'item_code': d.item_code,
-				'qty': d.qty,
+				'qty': d.required_qty,
 				'source_warehouse': d.source_warehouse
 			})
 

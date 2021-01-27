@@ -210,10 +210,6 @@ class StockEntry(StockController):
 		stock_items = self.get_stock_items()
 		serialized_items = self.get_serialized_items()
 		for item in self.get("items"):
-			if not self.is_return and flt(item.qty) and flt(item.qty) < 0:
-				frappe.throw(_("Row {0}: The item {1}, quantity must be positive number")
-					.format(item.idx, frappe.bold(item.item_code)))
-
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
@@ -1007,8 +1003,8 @@ class StockEntry(StockController):
 			if row.transferred_qty > row.required_qty:
 				transferred_qty = row.transferred_qty
 
-			qty = ((transferred_qty - row.consumed_qty)
-				* flt(self.fg_completed_qty)) / remain_qty_to_produce
+			qty = ((flt(transferred_qty) - flt(row.consumed_qty))
+				* flt(self.fg_completed_qty)) / (flt(remain_qty_to_produce) or 1)
 
 			if self.is_return and not qty:
 				qty = transferred_qty - row.consumed_qty
@@ -1084,7 +1080,6 @@ class StockEntry(StockController):
 			bom_doc = self.wo_doc
 			tot_qty = bom_doc.get("qty")
 
-		print(tot_qty)
 		for row in (bom_doc.get("scrap_items") or []):
 			qty = (flt(self.fg_completed_qty) * flt(row.stock_qty)) / flt(tot_qty)
 
