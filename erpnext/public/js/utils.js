@@ -491,7 +491,7 @@ erpnext.utils.update_child_items = function(opts) {
 								dialog.fields_dict.trans_items.grid.refresh();
 								return true;
 							}
-						})
+						});
 					}
 				}
 			});
