@@ -18,6 +18,17 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		create_records()
 		create_tax_with_holding_category()
 
+	def tearDown(self):
+		frappe.db.sql('delete from `tabPurchase Invoice` where supplier = "Test TDS Supplier"')
+		frappe.db.sql('delete from `tabPurchase Invoice` where supplier = "Test TDS Supplier1"')
+		frappe.db.sql('delete from `tabPurchase Invoice` where supplier = "Test TDS Supplier2"')
+		frappe.db.sql('delete from `tabPurchase Invoice` where supplier = "Test TDS Supplier ABC"')
+
+		frappe.db.sql('delete from `tabGL Entry` where party = "Test TDS Supplier"')
+		frappe.db.sql('delete from `tabGL Entry` where party = "Test TDS Supplier1"')
+		frappe.db.sql('delete from `tabGL Entry` where party = "Test TDS Supplier2"')
+		frappe.db.sql('delete from `tabGL Entry` where party = "Test TDS Supplier ABC"')
+
 	def test_cumulative_threshold_tds(self):
 		frappe.db.set_value("Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS")
 		invoices = []
