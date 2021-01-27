@@ -522,6 +522,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							company: me.frm.doc.company,
 							order_type: me.frm.doc.order_type,
 							is_pos: cint(me.frm.doc.is_pos),
+							is_return: cint(me.frm.doc.is_return),
 							is_subcontracted: me.frm.doc.is_subcontracted,
 							transaction_date: me.frm.doc.transaction_date || me.frm.doc.posting_date,
 							ignore_pricing_rule: me.frm.doc.ignore_pricing_rule,

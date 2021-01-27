@@ -1877,23 +1877,6 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_einvoice_json(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice
 
-		customer_gstin = '27AACCM7806M1Z3'
-		customer_gstin_dtls = {
-			'LegalName': '_Test Customer', 'TradeName': '_Test Customer', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '410038', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		company_gstin = '27AAECE4835E1ZR'
-		company_gstin_dtls = {
-			'LegalName': '_Test Company', 'TradeName': '_Test Company', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '401108', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		# set cache gstin details to avoid fetching details which will require connection to GSP servers
-		frappe.local.gstin_cache = {}
-		frappe.local.gstin_cache[customer_gstin] = customer_gstin_dtls
-		frappe.local.gstin_cache[company_gstin] = company_gstin_dtls
-
 		si = make_sales_invoice_for_ewaybill()
 		si.naming_series = 'INV-2020-.#####'
 		si.items = []
@@ -1941,19 +1924,17 @@ class TestSalesInvoice(unittest.TestCase):
 		value_details = einvoice['ValDtls']
 
 		self.assertEqual(einvoice['Version'], '1.1')
-		self.assertEqual(value_details['AssVal'], total_item_ass_value)
-		self.assertEqual(value_details['CgstVal'], total_item_cgst_value)
-		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
-		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
+		self.assertTrue(abs(value_details['AssVal'] - total_item_ass_value) <= 1)
+		self.assertTrue(abs(value_details['CgstVal'] - total_item_cgst_value) <= 1)
+		self.assertTrue(abs(value_details['SgstVal'] - total_item_sgst_value) <= 1)
+		self.assertTrue(abs(value_details['IgstVal'] - total_item_igst_value) <= 1)
 
-		self.assertEqual(
-			value_details['TotInvVal'],
-			value_details['AssVal'] + value_details['CgstVal']
-			+ value_details['SgstVal'] + value_details['IgstVal']
+		calculated_invoice_value = \
+			value_details['AssVal'] + value_details['CgstVal'] \
+			+ value_details['SgstVal'] + value_details['IgstVal'] \
 			+ value_details['OthChrg'] - value_details['Discount']
-		)
 
-		self.assertEqual(value_details['TotInvVal'], si.base_grand_total)
+		self.assertTrue(abs(value_details['TotInvVal'] - calculated_invoice_value) <= 1)
 		self.assertTrue(einvoice['EwbDtls'])
 
 def make_test_address_for_ewaybill():
@@ -2065,27 +2046,6 @@ def make_sales_invoice_for_ewaybill():
 	})
 
 	return si
-
-	def test_item_tax_validity(self):
-		item = frappe.get_doc("Item", "_Test Item 2")
-
-		if item.taxes:
-			item.taxes = []
-			item.save()
-
-		item.append("taxes", {
-			"item_tax_template": "_Test Item Tax Template 1",
-			"valid_from": add_days(nowdate(), 1)
-		})
-
-		item.save()
-
-		sales_invoice = create_sales_invoice(item = "_Test Item 2", do_not_save=1)
-		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1"
-		self.assertRaises(frappe.ValidationError, sales_invoice.save)
-
-		item.taxes = []
-		item.save()
 
 def create_sales_invoice(**args):
 	si = frappe.new_doc("Sales Invoice")
