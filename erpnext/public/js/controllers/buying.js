@@ -212,22 +212,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.qty(doc, cdt, cdn);
 	},
 
-	rate: function(doc,cdt,cdn) {
-		this.calculate_stock_uom_rate(doc, cdt, cdn);
-		this._super(doc, cdt, cdn);
-	},
-
-	conversion_factor: function(doc,cdt,cdn) {
-		this.calculate_stock_uom_rate(doc, cdt, cdn);
-		this._super(doc, cdt, cdn);
-	},
-
-	calculate_stock_uom_rate: function(doc, cdt, cdn) {
-		let item = frappe.get_doc(cdt, cdn);
-		item.stock_uom_rate = item.rate/item.conversion_factor;
-		refresh_field("stock_uom_rate", item.name, item.parentfield);
-	},
-
 	validate_negative_quantity: function(cdt, cdn, item, fieldnames){
 		if(!item || !fieldnames) { return }
 

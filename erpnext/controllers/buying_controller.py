@@ -43,7 +43,6 @@ class BuyingController(StockController):
 
 		self.validate_items()
 		self.set_qty_as_per_stock_uom()
-		self.set_rate_of_stock_uom()
 		self.validate_stock_or_nonstock_items()
 		self.update_tax_category_for_internal_transfer()
 		self.validate_warehouse()
@@ -491,11 +490,6 @@ class BuyingController(StockController):
 				if self.doctype=="Purchase Receipt" and d.meta.get_field("received_stock_qty"):
 					# Set Received Qty in Stock UOM
 					d.received_stock_qty = flt(d.received_qty) * flt(d.conversion_factor, d.precision("conversion_factor"))
-
-	def set_rate_of_stock_uom(self):
-		if self.doctype in ["Purchase Receipt", "Purchase Invoice", "Purchase Order"]:
-			for d in self.get("items"):
-				d.stock_uom_rate = d.rate / d.conversion_factor
 
 	def validate_purchase_return(self):
 		for d in self.get("items"):

@@ -23,6 +23,7 @@ class StockController(AccountsController):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.set_rate_of_stock_uom()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
 		if self.docstatus == 2:
@@ -390,6 +391,11 @@ class StockController(AccountsController):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
+
+	def set_rate_of_stock_uom(self):
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice", "Purchase Order", "Sales Invoice", "Sales Order", "Delivery Note", "Quotation"]:
+			for d in self.get("items"):
+				d.stock_uom_rate = d.rate / d.conversion_factor
 
 	def repost_future_sle_and_gle(self):
 		args = frappe._dict({

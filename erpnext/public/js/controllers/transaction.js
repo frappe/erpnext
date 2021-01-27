@@ -36,9 +36,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 			item.base_rate_with_margin = item.rate_with_margin * flt(frm.doc.conversion_rate);
 
+
 			cur_frm.cscript.set_gross_profit(item);
 			cur_frm.cscript.calculate_taxes_and_totals();
-
+			cur_frm.cscript.calculate_stock_uom_rate(frm, cdt, cdn);
 		});
 
 
@@ -1082,6 +1083,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				}
 			});
 		}
+		me.calculate_stock_uom_rate(doc, cdt, cdn);
 	},
 
 	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate) {
@@ -1102,6 +1104,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);
 			}
+			this.calculate_stock_uom_rate(doc, cdt, cdn);
 		}
 	},
 
@@ -1117,9 +1120,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	qty: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
 		this.conversion_factor(doc, cdt, cdn, true);
+		this.calculate_stock_uom_rate(doc, cdt, cdn);
 		this.apply_pricing_rule(item, true);
 	},
 
+	calculate_stock_uom_rate: function(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		item.stock_uom_rate = item.rate/item.conversion_factor;	
+		refresh_field("stock_uom_rate", item.name, item.parentfield);
+	},
 	service_stop_date: function(frm, cdt, cdn) {
 		var child = locals[cdt][cdn];
 
