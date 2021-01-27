@@ -53,6 +53,10 @@ def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
 		frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
 			.format(tax_withholding_category, ref_doc.company))
 
+	if party_type == 'Customer' and not tax_details.cumulative_threshold:
+		frappe.throw(_('Tax Withholding Category {} against Company {} for Customer {} should have Cumulative Threshold value.')
+			.format(tax_withholding_category, ref_doc.company, party))
+
 	tax_amount = get_tax_amount(
 		party_type, parties,
 		ref_doc, tax_details,
@@ -145,7 +149,7 @@ def get_tax_amount(party_type, parties, ref_doc, tax_details, fiscal_year_detail
 			tax_amount = grand_total * tax_details.rate / 100 if grand_total > 0 else 0
 		else:
 			#  if no tcs has been charged in FY,
-			# then (prev invoices + advances) value crossing the threshold are chargeable
+			# then chargeable value is "prev invoices + advances" value which cross the threshold
 			tax_amount = get_tcs_amount(
 				parties, ref_doc, tax_details,
 				fiscal_year_details, vouchers, advance_vouchers
@@ -253,13 +257,13 @@ def get_tcs_amount(parties, ref_doc, tax_details, fiscal_year_details, vouchers,
 		'voucher_type': 'Sales Invoice',
 	}, 'sum(credit)') or 0.0
 
-	current_invoice_total = get_invoice_total_without_tcs(ref_doc, tax_details)
-	chargeable_amt = current_invoice_total + invoiced_amt + advance_amt - credit_note_amt
-
-	threshold = tax_details.get('threshold', 0)
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
 
-	if ((threshold and chargeable_amt >= threshold) or (cumulative_threshold and chargeable_amt >= cumulative_threshold)):
+	current_invoice_total = get_invoice_total_without_tcs(ref_doc, tax_details)
+	total_invoiced_amt = current_invoice_total + invoiced_amt + advance_amt - credit_note_amt
+
+	if ((cumulative_threshold and total_invoiced_amt >= cumulative_threshold)):
+		chargeable_amt = total_invoiced_amt - cumulative_threshold
 		tcs_amount = chargeable_amt * tax_details.rate / 100 if chargeable_amt > 0 else 0
 
 	return tcs_amount

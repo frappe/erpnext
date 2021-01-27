@@ -140,13 +140,13 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 
 		# create another invoice whose total when added to previously created invoice,
 		# surpasses cumulative threshhold
-		si = create_sales_invoice(customer = "Test TCS Customer")
+		si = create_sales_invoice(customer = "Test TCS Customer", rate=12000)
 		si.submit()
 
 		# assert tax collection on total invoice amount created until now
 		tcs_charged = sum([d.base_tax_amount for d in si.taxes if d.account_head == 'TCS - _TC'])
-		self.assertEqual(tcs_charged, 3000)
-		self.assertEqual(si.grand_total, 13000)
+		self.assertEqual(tcs_charged, 200)
+		self.assertEqual(si.grand_total, 12200)
 		invoices.append(si)
 
 		# TCS is already collected once, so going forward system will collect TCS on every invoice
