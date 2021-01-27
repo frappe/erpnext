@@ -72,11 +72,11 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		self.set_original_reference()
 
 	def before_submit(self):
 		self.validate_is_advance()
 		self.set_remarks()
-		self.set_original_reference()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -513,9 +513,10 @@ class PaymentEntry(AccountsController):
 		self.set("remarks", "\n".join(remarks))
 
 	def set_original_reference(self, unset=False):
-		for d in self.references:
-			d.original_reference_doctype = "" if unset else d.reference_doctype
-			d.original_reference_name = "" if unset else d.reference_name
+		if self.docstatus == 0:
+			for d in self.references:
+				d.original_reference_doctype = None if unset else d.reference_doctype
+				d.original_reference_name = None if unset else d.reference_name
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		if self.payment_type in ("Receive", "Pay") and not self.get("party_account_field"):

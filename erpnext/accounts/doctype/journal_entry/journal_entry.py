@@ -58,6 +58,7 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
+		self.set_original_reference()
 
 		if not self.title:
 			self.title = self.get_title()
@@ -68,7 +69,6 @@ class JournalEntry(AccountsController):
 
 		self.validate_cheque_info()
 		self.create_remarks()
-		self.set_original_reference()
 
 	def on_submit(self):
 		self.check_credit_limit()
@@ -539,9 +539,10 @@ class JournalEntry(AccountsController):
 		self.remark = "\n".join(r) if r else "" # User Remarks is not mandatory
 
 	def set_original_reference(self, unset=False):
-		for d in self.accounts:
-			d.original_reference_type = "" if unset else d.reference_type
-			d.original_reference_name = "" if unset else d.reference_name
+		if self.docstatus == 0:
+			for d in self.accounts:
+				d.original_reference_type = None if unset else d.reference_type
+				d.original_reference_name = None if unset else d.reference_name
 
 	def set_print_format_fields(self):
 		bank_amount = party_amount = total_amount = 0.0
