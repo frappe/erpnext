@@ -11,6 +11,7 @@ import json
 import base64
 import frappe
 import traceback
+import io
 from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.integrations.utils import make_post_request, make_get_request
@@ -217,11 +218,14 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
+
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(invoice.base_total)
 	else:
 		invoice_value_details.base_total = abs(invoice.base_net_total)
-	invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+
+	# since tax already considers discount amount
+	invoice_value_details.invoice_discount_amt = 0 # invoice.base_discount_amount
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
@@ -247,9 +251,9 @@ def update_invoice_taxes(invoice, invoice_value_details):
 			
 			for tax_type in ['igst', 'cgst', 'sgst']:
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount)
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount_after_discount_amount)
 		else:
-			invoice_value_details.total_other_charges += abs(t.base_tax_amount)
+			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
 	
 	return invoice_value_details
 
@@ -433,7 +437,7 @@ class GSPConnector():
 		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
 		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
 		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
-		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
+		self.cancel_ewaybill_url = self.base_url + '/enriched/ewb/ewayapi?action=CANEWB'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
 	def get_credentials(self):
@@ -524,7 +528,7 @@ class GSPConnector():
 		except Exception:
 			self.log_error()
 			self.raise_error(True)
-	
+
 	@staticmethod
 	def get_gstin_details(gstin):
 		'''fetch and cache GSTIN details'''
@@ -619,7 +623,7 @@ class GSPConnector():
 		except Exception:
 			self.log_error(data)
 			self.raise_error(True)
-	
+
 	def generate_eway_bill(self, **kwargs):
 		args = frappe._dict(kwargs)
 
@@ -668,7 +672,8 @@ class GSPConnector():
 			'cancelRsnCode': reason,
 			'cancelRmrk': remark
 		}, indent=4)
-
+		headers["username"] = headers["user_name"]
+		del headers["user_name"]
 		try:
 			res = self.make_request('post', self.cancel_ewaybill_url, headers, data)
 			if res.get('success'):
@@ -766,21 +771,21 @@ class GSPConnector():
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
 		docname = self.invoice.name
+		filename = 'QRCode_{}.png'.format(docname).replace(os.path.sep, "__")
 
-		_file = frappe.new_doc('File')
-		_file.update({
-			'file_name': 'QRCode_{}.png'.format(docname.replace('/', '-')),
-			'attached_to_doctype': doctype,
-			'attached_to_name': docname,
-			'content': str(base64.b64encode(os.urandom(64))),
-			'is_private': 1
-		})
-		_file.insert()
-		frappe.db.commit()
+		qr_image = io.BytesIO()
 		url = qrcreate(qrcode, error='L')
-		abs_file_path = os.path.abspath(_file.get_full_path())
-		url.png(abs_file_path, scale=2, quiet_zone=1)
-
+		url.png(qr_image, scale=2, quiet_zone=1)
+		_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": filename,
+			"attached_to_doctype": doctype,
+			"attached_to_name": docname,
+			"attached_to_field": "qrcode_image",
+			"is_private": 1,
+			"content": qr_image.getvalue()})
+		_file.save()
+		frappe.db.commit()
 		self.invoice.qrcode_image = _file.file_url
 	
 	def update_invoice(self):
