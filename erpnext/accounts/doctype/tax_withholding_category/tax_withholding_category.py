@@ -104,31 +104,30 @@ def get_lower_deduction_certificate(fiscal_year, pan_no):
 def get_tax_amount(party_type, parties, ref_doc, tax_details, fiscal_year_details, pan_no=None):
 	fiscal_year = fiscal_year_details[0]
 
-	vouchers = get_invoice_vouchers(parties, fiscal_year, ref_doc.company, party_type=party_type) or [""]
+	vouchers = get_invoice_vouchers(parties, fiscal_year, ref_doc.company, party_type=party_type)
 	advance_vouchers = get_advance_vouchers(parties, fiscal_year, ref_doc.company, party_type=party_type)
-	tax_vouchers = vouchers + advance_vouchers
+	taxable_vouchers = vouchers + advance_vouchers
 
 	tax_deducted = 0
-	dr_or_cr = 'credit' if party_type == 'Supplier' else 'debit'
-	if tax_vouchers:
+	if taxable_vouchers:
+		# check if tds / tcs is already charged on taxable vouchers
 		filters = {
-			dr_or_cr: ['>', 0],
-			'account': tax_details.account_head,
+			'is_cancelled': 0,
+			'credit': ['>', 0],
 			'fiscal_year': fiscal_year,
-			'voucher_no': ['in', tax_vouchers],
-			'is_cancelled': 0
+			'account': tax_details.account_head,
+			'voucher_no': ['in', taxable_vouchers],
 		}
-		field = "sum({})".format(dr_or_cr)
+		field = "sum(credit)"
 
 		tax_deducted = frappe.db.get_value('GL Entry', filters, field) or 0.0
 
 	tax_amount = 0
+	posting_date = ref_doc.posting_date
 	if party_type == 'Supplier':
-		net_total = ref_doc.net_total
-		posting_date = ref_doc.posting_date
 		ldc = get_lower_deduction_certificate(fiscal_year, pan_no)
-
 		if tax_deducted:
+			net_total = ref_doc.net_total
 			if ldc:
 				tax_amount = get_tds_amount_from_ldc(ldc, parties, fiscal_year, pan_no, tax_details, posting_date, net_total)
 			else:
@@ -137,6 +136,19 @@ def get_tax_amount(party_type, parties, ref_doc, tax_details, fiscal_year_detail
 			tax_amount = get_tds_amount(
 				ldc, parties, ref_doc, tax_details,
 				fiscal_year_details, vouchers
+			)
+
+	elif party_type == 'Customer':
+		if tax_deducted:
+			grand_total = get_invoice_total_without_tcs(ref_doc, tax_details)
+			# if already tcs is charged, then (net total + gst amount) of invoice is chargeable
+			tax_amount = grand_total * tax_details.rate / 100 if grand_total > 0 else 0
+		else:
+			#  if no tcs has been charged in FY,
+			# then (prev invoices + advances) value crossing the threshold are chargeable
+			tax_amount = get_tcs_amount(
+				parties, ref_doc, tax_details,
+				fiscal_year_details, vouchers, advance_vouchers
 			)
 
 	return tax_amount
@@ -154,7 +166,7 @@ def get_invoice_vouchers(parties, fiscal_year, company, party_type='Supplier'):
 		'is_cancelled': 0
 	}
 
-	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck="voucher_no")
+	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck="voucher_no") or [""]
 
 def get_advance_vouchers(parties, fiscal_year=None, company=None, from_date=None, to_date=None, party_type='Supplier'):
 	# for advance vouchers, debit and credit is reversed
@@ -162,10 +174,11 @@ def get_advance_vouchers(parties, fiscal_year=None, company=None, from_date=None
 
 	filters = {
 		dr_or_cr: ['>', 0],
+		'is_opening': 'No',
+		'is_cancelled': 0,
 		'party_type': party_type,
 		'party': ['in', parties],
-		'is_opening': 'No',
-		'is_cancelled': 0
+		'against_voucher': ['is', 'not set']
 	}
 
 	if fiscal_year:
@@ -175,7 +188,7 @@ def get_advance_vouchers(parties, fiscal_year=None, company=None, from_date=None
 	if from_date and to_date:
 		filters['posting_date'] = ['between', (from_date, to_date)]
 
-	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck='voucher_no')
+	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck='voucher_no') or [""]
 
 def get_tds_amount(ldc, parties, ref_doc, tax_details, fiscal_year_details, vouchers):
 	tds_amount = 0
@@ -209,6 +222,53 @@ def get_tds_amount(ldc, parties, ref_doc, tax_details, fiscal_year_details, vouc
 			tds_amount = supp_credit_amt * tax_details.rate / 100 if supp_credit_amt > 0 else 0
 
 	return tds_amount
+
+def get_tcs_amount(parties, ref_doc, tax_details, fiscal_year_details, vouchers, adv_vouchers):
+	tcs_amount = 0
+	fiscal_year, _, _ = fiscal_year_details
+
+	# sum of debit entries made from sales invoices
+	invoiced_amt = frappe.db.get_value('GL Entry', {
+		'is_cancelled': 0,
+		'party': ['in', parties],
+		'company': ref_doc.company,
+		'voucher_no': ['in', vouchers],
+	}, 'sum(debit)') or 0.0
+
+	# sum of credit entries made from PE / JV with unset 'against voucher'
+	advance_amt = frappe.db.get_value('GL Entry', {
+		'is_cancelled': 0,
+		'party': ['in', parties],
+		'company': ref_doc.company,
+		'voucher_no': ['in', adv_vouchers],
+	}, 'sum(credit)') or 0.0
+
+	# sum of credit entries made from sales invoice
+	credit_note_amt = frappe.db.get_value('GL Entry', {
+		'is_cancelled': 0,
+		'credit': ['>', 0],
+		'party': ['in', parties],
+		'fiscal_year': fiscal_year,
+		'company': ref_doc.company,
+		'voucher_type': 'Sales Invoice',
+	}, 'sum(credit)') or 0.0
+
+	current_invoice_total = get_invoice_total_without_tcs(ref_doc, tax_details)
+	chargeable_amt = current_invoice_total + invoiced_amt + advance_amt - credit_note_amt
+
+	threshold = tax_details.get('threshold', 0)
+	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
+
+	if ((threshold and chargeable_amt >= threshold) or (cumulative_threshold and chargeable_amt >= cumulative_threshold)):
+		tcs_amount = chargeable_amt * tax_details.rate / 100 if chargeable_amt > 0 else 0
+
+	return tcs_amount
+
+def get_invoice_total_without_tcs(ref_doc, tax_details):
+	tcs_tax_row = [d for d in ref_doc.taxes if d.account_head == tax_details.account_head]
+	tcs_tax_row_amount = tcs_tax_row[0].base_tax_amount if tcs_tax_row else 0
+
+	return ref_doc.grand_total - tcs_tax_row_amount
 
 def get_tds_amount_from_ldc(ldc, parties, fiscal_year, pan_no, tax_details, posting_date, net_total):
 	tds_amount = 0
