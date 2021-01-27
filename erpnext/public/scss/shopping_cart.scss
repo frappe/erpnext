@@ -460,6 +460,10 @@ body.product-page {
 		font-weight: 500;
 	}
 
+	.card-body {
+		max-width: 80%;
+	}
+
 	.card-text {
 		font-size: var(--text-md);
 		color: var(--gray-700);
