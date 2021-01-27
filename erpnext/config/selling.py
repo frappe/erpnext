@@ -1,12 +1,23 @@
 from __future__ import unicode_literals
+import frappe
 from frappe import _
 
 def get_data():
-	return [
+	vbo_link = []
+	if 'Vehicles' in frappe.get_active_domains():
+		vbo_link.append({
+			"type": "doctype",
+			"name": "Vehicle Booking Order",
+			"description": _("Vehicle Bookings from Customers."),
+			"onboard": 1,
+			"dependencies": ["Item", "Customer"],
+		})
+
+	out = [
 		{
 			"label": _("Sales Transactions"),
 			"icon": "fa fa-star",
-			"items": [
+			"items": vbo_link + [
 				{
 					"type": "doctype",
 					"name": "Sales Order",
@@ -17,7 +28,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Delivery Note",
-					"onboard": 1,
 					"dependencies": ["Item", "Customer"],
 				},
 				{
@@ -31,12 +41,6 @@ def get_data():
 					"name": "Quotation",
 					"description": _("Quotes to Leads or Customers."),
 					"onboard": 1,
-					"dependencies": ["Item", "Customer"],
-				},
-				{
-					"type": "doctype",
-					"name": "Blanket Order",
-					"description": _("Blanket Orders from Costumers."),
 					"dependencies": ["Item", "Customer"],
 				},
 			]
@@ -99,12 +103,54 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Item Attribute",
+				},
+				{
+					"type": "doctype",
 					"name": "Product Bundle",
 					"description": _("Bundle items at time of sale."),
 					"dependencies": ["Item"],
 				},
 			]
-		},
+		}
+	]
+
+	if 'Vehicles' in frappe.get_active_domains():
+		out.append({
+			"label": _("Vehicles"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Item",
+					"label": _("Vehicle Item (Variant)"),
+					"description": _("Vehicle Item/Variant List"),
+					"onboard": 1,
+					"route_options": {
+						"is_vehicle": 1
+					}
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle",
+					"description": _("Vehicle List."),
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation Creation Tool",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation Period",
+				},
+			]
+		})
+
+	out += [
 		{
 			"label": _("Price List"),
 			"items": [
@@ -359,3 +405,5 @@ def get_data():
 		},
 		
 	]
+
+	return out
