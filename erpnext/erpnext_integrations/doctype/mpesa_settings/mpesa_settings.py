@@ -36,11 +36,12 @@ class MpesaSettings(Document):
 		args = frappe._dict(kwargs)
 		request_amounts = self.split_request_amount_according_to_transaction_limit(args)
 
-		for amount in request_amounts:
+		for i, amount in enumerate(request_amounts):
 			args.request_amount = amount
 			if frappe.flags.in_test:
 				from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_payment_request_response_payload
-				response = frappe._dict(get_payment_request_response_payload(amount))
+				checkout_id = f"{args.reference_docname}-{i}"
+				response = frappe._dict(get_payment_request_response_payload(amount, checkout_id))
 			else:
 				response = frappe._dict(generate_stk_push(**args))
 
