@@ -18,6 +18,9 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		create_records()
 		create_tax_with_holding_category()
 
+	def tearDown(self):
+		cancel_invoices()
+
 	def test_cumulative_threshold_tds(self):
 		frappe.db.set_value("Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS")
 		invoices = []
@@ -160,6 +163,23 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		#delete invoices to avoid clashing
 		for d in invoices:
 			d.cancel()
+
+def cancel_invoices():
+	purchase_invoices = frappe.get_all("Purchase Invoice", {
+		'supplier': ['in', ['Test TDS Supplier', 'Test TDS Supplier1', 'Test TDS Supplier2']],
+		'docstatus': 1
+	}, pluck="name")
+
+	sales_invoices = frappe.get_all("Sales Invoice", {
+		'customer': 'Test TCS Customer',
+		'docstatus': 1
+	}, pluck="name")
+
+	for d in purchase_invoices:
+		frappe.get_doc('Purchase Invoice', d).cancel()
+	
+	for d in sales_invoices:
+		frappe.get_doc('Sales Invoice', d).cancel()
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
