@@ -42,6 +42,14 @@ class StockEntry(StockController):
 		for item in self.get("items"):
 			item.update(get_bin_details(item.item_code, item.s_warehouse))
 
+	def before_validate(self):
+		from erpnext.stock.doctype.putaway_rule.putaway_rule import apply_putaway_rule
+		apply_rule = self.apply_putaway_rule and (self.purpose in ["Material Transfer", "Material Receipt"])
+
+		if self.get("items") and apply_rule:
+			apply_putaway_rule(self.doctype, self.get("items"), self.company,
+				purpose=self.purpose)
+
 	def validate(self):
 		self.pro_doc = frappe._dict()
 		if self.work_order:
@@ -79,6 +87,7 @@ class StockEntry(StockController):
 		self.validate_serialized_batch()
 		self.set_actual_qty()
 		self.calculate_rate_and_amount()
+		self.validate_putaway_capacity()
 
 	def on_submit(self):
 		self.update_stock_ledger()
@@ -1333,9 +1342,6 @@ class StockEntry(StockController):
 						frappe.MappingMismatchError)
 				elif self.purpose == "Material Transfer" and self.add_to_transit:
 					continue
-				elif mreq_item.warehouse != (item.s_warehouse if self.purpose == "Material Issue" else item.t_warehouse):
-					frappe.throw(_("Warehouse for row {0} does not match Material Request").format(item.idx),
-						frappe.MappingMismatchError)
 
 	def validate_batch(self):
 		if self.purpose in ["Material Transfer for Manufacture", "Manufacture", "Repack", "Send to Subcontractor"]:

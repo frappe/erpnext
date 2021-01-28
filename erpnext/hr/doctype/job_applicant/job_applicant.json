@@ -11,15 +11,24 @@
  "field_order": [
   "applicant_name",
   "email_id",
+  "phone_number",
+  "country",
   "status",
   "column_break_3",
   "job_title",
   "source",
   "source_name",
+  "applicant_rating",
   "section_break_6",
   "notes",
   "cover_letter",
-  "resume_attachment"
+  "resume_attachment",
+  "resume_link",
+  "section_break_16",
+  "currency",
+  "column_break_18",
+  "lower_range",
+  "upper_range"
  ],
  "fields": [
   {
@@ -91,12 +100,65 @@
    "fieldtype": "Data",
    "label": "Notes",
    "read_only": 1
+  },
+  {
+   "fieldname": "phone_number",
+   "fieldtype": "Data",
+   "label": "Phone Number",
+   "options": "Phone"
+  },
+  {
+   "fieldname": "country",
+   "fieldtype": "Link",
+   "label": "Country",
+   "options": "Country"
+  },
+  {
+   "fieldname": "resume_link",
+   "fieldtype": "Data",
+   "label": "Resume Link"
+  },
+  {
+   "fieldname": "applicant_rating",
+   "fieldtype": "Rating",
+   "in_list_view": 1,
+   "label": "Applicant Rating"
+  },
+  {
+   "fieldname": "section_break_16",
+   "fieldtype": "Section Break",
+   "label": "Salary Expectation"
+  },
+  {
+   "fieldname": "lower_range",
+   "fieldtype": "Currency",
+   "label": "Lower Range",
+   "options": "currency",
+   "precision": "0"
+  },
+  {
+   "fieldname": "upper_range",
+   "fieldtype": "Currency",
+   "label": "Upper Range",
+   "options": "currency",
+   "precision": "0"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency"
   }
  ],
  "icon": "fa fa-user",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-01-13 16:19:39.113330",
+ "modified": "2020-09-18 12:39:02.557563",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Applicant",

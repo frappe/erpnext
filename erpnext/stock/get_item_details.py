@@ -674,6 +674,8 @@ def get_item_price(args, item_code, ignore_party=False):
 		and price_list=%(price_list)s
 		and ifnull(uom, '') in ('', %(uom)s)"""
 
+	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
+
 	if not ignore_party:
 		if args.get("customer"):
 			conditions += " and customer=%(customer)s"
@@ -692,7 +694,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by valid_from desc, uom desc """.format(conditions=conditions), args)
+		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -711,6 +713,7 @@ def get_price_list_rate_for(args, item_code):
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
 			"posting_date": args.get('posting_date'),
+			"batch_no": args.get('batch_no')
 	}
 
 	item_price_data = 0
