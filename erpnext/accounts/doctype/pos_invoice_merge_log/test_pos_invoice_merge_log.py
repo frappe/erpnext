@@ -7,7 +7,7 @@ import frappe
 import unittest
 from erpnext.accounts.doctype.pos_invoice.test_pos_invoice import create_pos_invoice
 from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
 from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
 
 class TestPOSInvoiceMergeLog(unittest.TestCase):
@@ -34,7 +34,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		})
 		pos_inv3.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv.consolidated_invoice))
@@ -79,7 +79,7 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 		pos_inv_cn.paid_amount = -300
 		pos_inv_cn.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv.load_from_db()
 		self.assertTrue(frappe.db.exists("Sales Invoice", pos_inv.consolidated_invoice))
