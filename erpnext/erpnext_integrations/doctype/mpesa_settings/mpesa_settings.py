@@ -40,8 +40,7 @@ class MpesaSettings(Document):
 			args.request_amount = amount
 			if frappe.flags.in_test:
 				from erpnext.erpnext_integrations.doctype.mpesa_settings.test_mpesa_settings import get_payment_request_response_payload
-				checkout_id = f"{args.reference_docname}-{i}"
-				response = frappe._dict(get_payment_request_response_payload(amount, checkout_id))
+				response = frappe._dict(get_payment_request_response_payload(amount))
 			else:
 				response = frappe._dict(generate_stk_push(**args))
 

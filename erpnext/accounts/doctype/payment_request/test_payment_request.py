@@ -45,7 +45,8 @@ class TestPaymentRequest(unittest.TestCase):
 
 	def test_payment_request_linkings(self):
 		so_inr = make_sales_order(currency="INR")
-		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com")
+		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com",
+			payment_gateway_account="_Test Gateway - INR")
 
 		self.assertEqual(pr.reference_doctype, "Sales Order")
 		self.assertEqual(pr.reference_name, so_inr.name)
@@ -54,7 +55,8 @@ class TestPaymentRequest(unittest.TestCase):
 		conversion_rate = get_exchange_rate("USD", "INR")
 
 		si_usd = create_sales_invoice(currency="USD", conversion_rate=conversion_rate)
-		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com")
+		pr = make_payment_request(dt="Sales Invoice", dn=si_usd.name, recipient_id="saurabh@erpnext.com",
+			payment_gateway_account="_Test Gateway - USD")
 
 		self.assertEqual(pr.reference_doctype, "Sales Invoice")
 		self.assertEqual(pr.reference_name, si_usd.name)
@@ -68,7 +70,7 @@ class TestPaymentRequest(unittest.TestCase):
 
 		so_inr = make_sales_order(currency="INR")
 		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com",
-			mute_email=1, payment_gateway_account="_Test Gateway", submit_doc=1, return_doc=1)
+			mute_email=1, payment_gateway_account="_Test Gateway - INR", submit_doc=1, return_doc=1)
 		pe = pr.set_as_paid()
 
 		so_inr = frappe.get_doc("Sales Order", so_inr.name)
@@ -85,8 +87,8 @@ class TestPaymentRequest(unittest.TestCase):
 
 		expected_gle = dict((d[0], d) for d in [
 			["_Test Receivable USD - _TC", 0, 5000, si_usd.name],
-			[pr.payment_account, 6290.0, 0, None],
-			["_Test Exchange Gain/Loss - _TC", 0, 1290, None]
+			[pr.payment_account, 6000.0, 0, None],
+			["_Test Exchange Gain/Loss - _TC", 0, 1000, None]
 		])
 
 		gl_entries = frappe.db.sql("""select account, debit, credit, against_voucher

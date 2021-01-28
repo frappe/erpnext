@@ -61,11 +61,16 @@ class TestMpesaSettings(unittest.TestCase):
 		# test payment request creation
 		self.assertEquals(pr.payment_gateway, "Mpesa-Payment")
 
-		checkout_id = f"{pr.name}-0"
-		callback_response = get_payment_callback_payload(CheckoutRequestID=checkout_id)
+		# submitting payment request creates integration requests with random id
+		integration_req_ids = frappe.get_all("Integration Request", filters={
+			'reference_doctype': pr.doctype,
+			'reference_docname': pr.name,
+		}, pluck="name")
+
+		callback_response = get_payment_callback_payload(Amount=500, CheckoutRequestID=integration_req_ids[0])
 		verify_transaction(**callback_response)
 		# test creation of integration request
-		integration_request = frappe.get_doc("Integration Request", checkout_id)
+		integration_request = frappe.get_doc("Integration Request", integration_req_ids[0])
 
 		# test integration request creation and successful update of the status on receiving callback response
 		self.assertTrue(integration_request)
@@ -273,8 +278,10 @@ def get_test_account_balance_response():
 	}
 		}
 
-def get_payment_request_response_payload(Amount=500, CheckoutRequestID="ws_CO_061020201133231972"):
+def get_payment_request_response_payload(Amount=500):
 	"""Response received after successfully calling the stk push process request API."""
+
+	CheckoutRequestID = frappe.utils.random_string(10)
 
 	return {
 		"MerchantRequestID": "8071-27184008-1",
