@@ -265,6 +265,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			this.$summary_wrapper.addClass('d-none');
 		});
 
+		this.$summary_container.on('click', '.delete-btn', () => {
+			this.events.delete_order(this.doc.name);
+			this.show_summary_placeholder();
+			// this.toggle_component(false);
+			// this.$component.find('.no-summary-placeholder').removeClass('d-none');
+			// this.$summary_wrapper.addClass('d-none');
+		});
+
 		this.$summary_container.on('click', '.new-btn', () => {
 			this.events.new_order();
 			this.toggle_component(false);
@@ -401,7 +409,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			return [{ condition: true, visible_btns: ['Print Receipt', 'Email Receipt', 'New Order'] }];
 
 		return [
-			{ condition: this.doc.docstatus === 0, visible_btns: ['Edit Order'] },
+			{ condition: this.doc.docstatus === 0, visible_btns: ['Edit Order', 'Delete Order'] },
 			{ condition: !this.doc.is_return && this.doc.docstatus === 1, visible_btns: ['Print Receipt', 'Email Receipt', 'Return']},
 			{ condition: this.doc.is_return && this.doc.docstatus === 1, visible_btns: ['Print Receipt', 'Email Receipt']}
 		];
