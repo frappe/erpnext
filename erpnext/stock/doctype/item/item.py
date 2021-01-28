@@ -672,13 +672,14 @@ class Item(WebsiteGenerator):
 		if not records: return
 		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
 
-		msg = _("The items {0} and {1} are present in the following {2} : <br>"
-			.format(frappe.bold(old_name), frappe.bold(new_name), document))
+		msg = _("The items {0} and {1} are present in the following {2} : ").format(
+			frappe.bold(old_name), frappe.bold(new_name), document)
 
+		msg += '<br>'
 		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
 
-		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
-			.format(frappe.bold(old_name)))
+		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}").format(
+			frappe.bold(old_name)))
 
 		frappe.throw(_(msg), title=_("Merge not allowed"))
 
