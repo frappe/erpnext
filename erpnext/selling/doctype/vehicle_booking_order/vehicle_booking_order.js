@@ -182,10 +182,13 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
 			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Allocation" : "Select Allocation";
 			if (this.frm.doc.delivery_status === "To Receive") {
-				if (this.frm.doc.vehicle_allocation_required && !this.frm.doc.supplier_advance) {
-					this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation());
+				if (!this.frm.doc.supplier_advance) {
+					if (this.frm.doc.vehicle_allocation_required) {
+						this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation());
+					}
 				}
 
+				this.frm.add_custom_button(__("Update Customer Details"), () => this.update_customer_details());
 				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle());
 			}
 
@@ -652,6 +655,26 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			});
 		});
 		dialog.show();
+	},
+
+	update_customer_details: function () {
+		var me = this;
+
+		frappe.confirm(__('Are you sure you want to update details from Customer Master(s)? This may change the Invoice Total.'),
+			function() {
+				frappe.call({
+					method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_customer_details_in_booking",
+					args: {
+						vehicle_booking_order: me.frm.doc.name,
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
+			}
+		)
 	},
 });
 

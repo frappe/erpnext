@@ -64,7 +64,6 @@ class VehicleBookingOrder(AccountsController):
 		self.calculate_taxes_and_totals()
 		self.validate_amounts()
 		self.validate_taxes_and_charges_accounts()
-		self.set_total_in_words()
 
 		self.get_terms_and_conditions()
 		self.validate_payment_schedule()
@@ -267,10 +266,12 @@ class VehicleBookingOrder(AccountsController):
 		if self.docstatus == 0:
 			self.customer_advance = 0
 			self.supplier_advance = 0
-			self.customer_outstanding = self.invoice_total
-			self.supplier_outstanding = self.invoice_total
+
+		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
+		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance, self.precision('supplier_outstanding'))
 
 		self.calculate_contribution()
+		self.set_total_in_words()
 
 	def calculate_contribution(self):
 		total = 0.0
@@ -290,7 +291,7 @@ class VehicleBookingOrder(AccountsController):
 	def validate_amounts(self):
 		for field in ['vehicle_amount', 'invoice_total']:
 			self.validate_value(field, '>', 0)
-		for field in ['fni_amount']:
+		for field in ['fni_amount', 'withholding_tax_amount', 'customer_outstanding', 'supplier_outstanding']:
 			self.validate_value(field, '>=', 0)
 
 	def set_total_in_words(self):
@@ -995,6 +996,7 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 	vbo_doc.set_vehicle_details()
 
 	vbo_doc.set_status()
+	vbo_doc.set_user_and_timestamp()
 	vbo_doc.db_update()
 	vbo_doc.notify_update()
 	vbo_doc.save_version()
@@ -1040,6 +1042,7 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 		frappe.throw(_("Delivery Period must be the same in the new Vehicle Allocation"))
 
 	vbo_doc.set_status()
+	vbo_doc.set_user_and_timestamp()
 	vbo_doc.db_update()
 	vbo_doc.notify_update()
 	vbo_doc.save_version()
@@ -1049,6 +1052,44 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 		update_allocation_booked(previous_allocation, 0)
 
 	frappe.msgprint(_("Allocation Changed Successfully"), indicator='green', alert=True)
+
+
+@frappe.whitelist()
+def update_customer_details_in_booking(vehicle_booking_order):
+	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
+
+	if vbo_doc.docstatus != 1:
+		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
+
+	if vbo_doc.delivery_status != 'To Receive':
+		frappe.throw(_("Cannot update Customer Details in Vehicle Booking Order {0} because Vehicle is already received")
+			.format(frappe.bold(vehicle_booking_order)))
+
+	customer_details = get_customer_details(vbo_doc.as_dict(), get_withholding_tax=True)
+	for k, v in customer_details.items():
+		if not vbo_doc.get(k) or k in force_fields:
+			vbo_doc.set(k, v)
+
+	vbo_doc.validate_customer()
+	vbo_doc.calculate_taxes_and_totals()
+	vbo_doc.validate_payment_schedule()
+	vbo_doc.update_payment_status()
+	vbo_doc.validate_amounts()
+
+	vbo_doc.set_status()
+
+	vbo_doc.set_user_and_timestamp()
+	vbo_doc.db_update()
+	for d in vbo_doc.sales_team:
+		d.db_update()
+	for d in vbo_doc.payment_schedule:
+		d.db_update()
+
+	vbo_doc.notify_update()
+	vbo_doc.save_version()
+
+	frappe.msgprint(_("Customer Details Updated Successfully"), indicator='green', alert=True)
 
 
 def update_vehicle_booked(vehicle, is_booked):
