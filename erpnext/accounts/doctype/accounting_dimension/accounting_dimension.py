@@ -66,6 +66,7 @@ def make_dimension_in_accounting_doctypes(doc):
 			"fieldtype": "Link",
 			"options": doc.document_type,
 			"insert_after": insert_after_field,
+			"ignore_user_permissions": 1,
 			"owner": "Administrator"
 		}
 
