@@ -21,6 +21,7 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "apply_putaway_rule",
   "is_return",
   "return_against",
   "section_addresses",
@@ -1109,6 +1110,12 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
   },
   {
    "depends_on": "eval:!doc.__islocal",

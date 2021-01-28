@@ -599,8 +599,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
 												if (r.message &&
-													(r.message.has_batch_no || r.message.has_serial_no)) {
+												(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
+												}
+											});
+								},
+								() => {
+									// check if batch serial selector is disabled or not
+									if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog)
+										return frappe.db.get_single_value('Stock Settings', 'disable_serial_no_and_batch_selector')
+											.then((value) => {
+												if (value) {
+													frappe.flags.hide_serial_batch_dialog = true;
 												}
 											});
 								},
@@ -1134,6 +1144,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	batch_no: function(doc, cdt, cdn) {
+		let item = frappe.get_doc(cdt, cdn);
+		this.apply_price_list(item, true);
+	},
+
 	toggle_conversion_factor: function(item) {
 		// toggle read only property for conversion factor field if the uom and stock uom are same
 		if(this.frm.get_field('items').grid.fields_map.conversion_factor) {
@@ -1438,6 +1453,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					"pricing_rules": d.pricing_rules,
 					"warehouse": d.warehouse,
 					"serial_no": d.serial_no,
+					"batch_no": d.batch_no,
 					"price_list_rate": d.price_list_rate,
 					"conversion_factor": d.conversion_factor || 1.0
 				});
@@ -2068,3 +2084,35 @@ erpnext.show_serial_batch_selector = function (frm, d, callback, on_close, show_
 		}, show_dialog);
 	});
 }
+
+erpnext.apply_putaway_rule = (frm, purpose=null) => {
+	if (!frm.doc.company) {
+		frappe.throw({message: __("Please select a Company first."), title: __("Mandatory")});
+	}
+	if (!frm.doc.items.length) return;
+
+	frappe.call({
+		method: "erpnext.stock.doctype.putaway_rule.putaway_rule.apply_putaway_rule",
+		args: {
+			doctype: frm.doctype,
+			items: frm.doc.items,
+			company: frm.doc.company,
+			sync: true,
+			purpose: purpose
+		},
+		callback: (result) => {
+			if (!result.exc && result.message) {
+				frm.clear_table("items");
+
+				let items =  result.message;
+				items.forEach((row) => {
+					delete row["name"]; // dont overwrite name from server side
+					let child = frm.add_child("items");
+					Object.assign(child, row);
+					frm.script_manager.trigger("qty", child.doctype, child.name);
+				});
+				frm.get_field("items").grid.refresh();
+			}
+		}
+	});
+};
