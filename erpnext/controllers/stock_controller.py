@@ -24,6 +24,7 @@ class StockController(AccountsController):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 
 	def make_gl_entries(self, gl_entries=None, from_repost=False):
@@ -74,6 +75,7 @@ class StockController(AccountsController):
 		warehouse_with_no_account = []
 		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
 		for item_row in voucher_details:
+
 			sle_list = sle_map.get(item_row.name)
 			if sle_list:
 				for sle in sle_list:
@@ -218,7 +220,7 @@ class StockController(AccountsController):
 		""", (self.doctype, self.name), as_dict=True)
 
 		for sle in stock_ledger_entries:
-				stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
+			stock_ledger.setdefault(sle.voucher_detail_no, []).append(sle)
 		return stock_ledger
 
 	def make_batches(self, warehouse_field):
@@ -392,6 +394,32 @@ class StockController(AccountsController):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
+
+	def validate_internal_transfer(self):
+		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Purchase Invoice', 'Purchase Receipt') \
+			and self.is_internal_transfer():
+			self.validate_in_transit_warehouses()
+			self.validate_multi_currency()
+			self.validate_packed_items()
+
+	def validate_in_transit_warehouses(self):
+		if (self.doctype == 'Sales Invoice' and self.get('update_stock')) or self.doctype == 'Delivery Note':
+			for item in self.get('items'):
+				if not item.target_warehouse:
+					frappe.throw(_("Row {0}: Target Warehouse is mandatory for internal transfers").format(item.idx))
+
+		if (self.doctype == 'Purchase Invoice' and self.get('update_stock')) or self.doctype == 'Purchase Receipt':
+			for item in self.get('items'):
+				if not item.from_warehouse:
+					frappe.throw(_("Row {0}: From Warehouse is mandatory for internal transfers").format(item.idx))
+
+	def validate_multi_currency(self):
+		if self.currency != self.company_currency:
+			frappe.throw(_("Internal transfers can only be done in company's default currency"))
+
+	def validate_packed_items(self):
+		if self.doctype in ('Sales Invoice', 'Delivery Note Item') and self.get('packed_items'):
+			frappe.throw(_("Packed Items cannot be transferred internally"))
 
 	def validate_putaway_capacity(self):
 		# if over receipt is attempted while 'apply putaway rule' is disabled

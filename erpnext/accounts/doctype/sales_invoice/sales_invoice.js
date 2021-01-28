@@ -130,16 +130,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.set_default_print_format();
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
-			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
-				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
-				var internal = customer.is_internal_customer;
-				var disabled = customer.disabled;
-				if (internal == 1 && disabled == 0) {
-					me.frm.add_custom_button("Inter Company Invoice", function() {
-						me.make_inter_company_invoice();
-					}, __('Create'));
-				}
-			});
+			let internal = me.frm.doc.is_internal_customer;
+			if (internal) {
+				let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Invoice" :
+					"Inter Company Purchase Invoice";
+
+				me.frm.add_custom_button(button_label, function() {
+					me.make_inter_company_invoice();
+				}, __('Create'));
+			}
 		}
 	},
 
