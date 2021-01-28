@@ -171,7 +171,7 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if is_internal_transfer(party_details, doctype):
 		party_details.taxes_and_charges = ''
-		party_details.taxes = ''
+		party_details.taxes = []
 		return party_details
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
