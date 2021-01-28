@@ -589,8 +589,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
 											.then((r) => {
 												if (r.message &&
-													(r.message.has_batch_no || r.message.has_serial_no)) {
+												(r.message.has_batch_no || r.message.has_serial_no)) {
 													frappe.flags.hide_serial_batch_dialog = false;
+												}
+											});
+								},
+								() => {
+									// check if batch serial selector is disabled or not
+									if (show_batch_dialog && !frappe.flags.hide_serial_batch_dialog)
+										return frappe.db.get_single_value('Stock Settings', 'disable_serial_no_and_batch_selector')
+											.then((value) => {
+												if (value) {
+													frappe.flags.hide_serial_batch_dialog = true;
 												}
 											});
 								},
