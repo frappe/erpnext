@@ -164,16 +164,16 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
-						frappe.model.with_doc("Supplier", me.frm.doc.supplier, () => {
-							let supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
-							let internal = supplier.is_internal_supplier;
-							let disabled = supplier.disabled;
-							if (internal === 1 && disabled === 0) {
-								me.frm.add_custom_button("Inter Company Order", function() {
-									me.make_inter_company_order(me.frm);
-								}, __('Create'));
-							}
-						});
+						let internal = me.frm.doc.is_internal_supplier;
+						if (internal) {
+							let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Sales Order" :
+								"Inter Company Sales Order";
+
+							me.frm.add_custom_button(button_label, function() {
+								me.make_inter_company_order(me.frm);
+							}, __('Create'));
+						}
+
 					}
 				}
 
@@ -381,7 +381,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						material_request_type: "Purchase",
 						docstatus: 1,
 						status: ["!=", "Stopped"],
-						per_ordered: ["<", 99.99],
+						per_ordered: ["<", 100],
 						company: me.frm.doc.company
 					}
 				})
