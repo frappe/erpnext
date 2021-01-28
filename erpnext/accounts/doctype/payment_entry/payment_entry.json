@@ -704,7 +704,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-01-08 13:46:38.694647",
+ "modified": "2021-01-28 14:26:21.228362",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -738,6 +738,22 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Payments User",
    "share": 1,
    "submit": 1,
    "write": 1

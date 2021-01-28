@@ -583,7 +583,7 @@
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2020-12-21 22:12:29.635823",
+ "modified": "2021-01-28 14:37:29.506685",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -599,6 +599,24 @@
    "role": "Projects User",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
   },
   {
    "permlevel": 1,
