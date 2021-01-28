@@ -5,11 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.model.mapper import map_doc
 from frappe.model import default_fields
 from frappe.model.document import Document
 from frappe.utils import flt, getdate, nowdate
 from frappe.utils.background_jobs import enqueue
+from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
 
@@ -92,7 +92,7 @@ class POSInvoiceMergeLog(Document):
 
 		credit_note.is_consolidated = 1
 		# TODO: return could be against multiple sales invoice which could also have been consolidated?
-		credit_note.return_against = self.consolidated_invoice
+		# credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
 		credit_note.submit()
 		self.consolidated_credit_note = credit_note.name
@@ -120,7 +120,9 @@ class POSInvoiceMergeLog(Document):
 						i.qty = i.qty + item.qty
 				if not found:
 					item.rate = item.net_rate
-					items.append(item)
+					item.price_list_rate = 0
+					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
+					items.append(si_item)
 			
 			for tax in doc.get('taxes'):
 				found = False
@@ -156,6 +158,8 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('taxes', taxes)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
+		invoice.taxes_and_charges = None
+		invoice.ignore_pricing_rule = 1
 
 		return invoice
 	
