@@ -12,22 +12,22 @@ from erpnext.accounts.utils import get_fiscal_year
 class TaxWithholdingCategory(Document):
 	pass
 
-def get_party_details(ref_doc):
+def get_party_details(inv):
 	party_type, party = '', ''
 
-	if ref_doc.doctype == 'Sales Invoice':
+	if inv.doctype == 'Sales Invoice':
 		party_type = 'Customer'
-		party = ref_doc.customer
+		party = inv.customer
 	else:
 		party_type = 'Supplier'
-		party = ref_doc.supplier
+		party = inv.supplier
 	
 	return party_type, party
 
-def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
+def get_party_tax_withholding_details(inv, tax_withholding_category=None):
 	pan_no = ''
 	parties = []
-	party_type, party = get_party_details(ref_doc)
+	party_type, party = get_party_details(inv)
 
 	if not tax_withholding_category:
 		tax_withholding_category, pan_no = frappe.db.get_value(party_type, party, ['tax_withholding_category', 'pan'])
@@ -46,24 +46,28 @@ def get_party_tax_withholding_details(ref_doc, tax_withholding_category=None):
 	if not parties:
 		parties.append(party)
 
-	fiscal_year = get_fiscal_year(ref_doc.posting_date, company=ref_doc.company)
-	tax_details = get_tax_withholding_details(tax_withholding_category, fiscal_year[0], ref_doc.company)
+	fiscal_year = get_fiscal_year(inv.posting_date, company=inv.company)
+	tax_details = get_tax_withholding_details(tax_withholding_category, fiscal_year[0], inv.company)
 
 	if not tax_details:
 		frappe.throw(_('Please set associated account in Tax Withholding Category {0} against Company {1}')
-			.format(tax_withholding_category, ref_doc.company))
+			.format(tax_withholding_category, inv.company))
 
 	if party_type == 'Customer' and not tax_details.cumulative_threshold:
+		# TCS is only chargeable on sum of invoiced value
 		frappe.throw(_('Tax Withholding Category {} against Company {} for Customer {} should have Cumulative Threshold value.')
-			.format(tax_withholding_category, ref_doc.company, party))
+			.format(tax_withholding_category, inv.company, party))
 
-	tax_amount = get_tax_amount(
+	tax_amount, tax_deducted = get_tax_amount(
 		party_type, parties,
-		ref_doc, tax_details,
+		inv, tax_details,
 		fiscal_year, pan_no
 	)
 
-	tax_row = get_tax_row(tax_details, tax_amount)
+	if party_type == 'Supplier':
+		tax_row = get_tax_row_for_tds(tax_details, tax_amount)
+	else:
+		tax_row = get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted)
 
 	return tax_row
 
@@ -90,14 +94,44 @@ def get_tax_withholding_rates(tax_withholding, fiscal_year):
 
 	frappe.throw(_("No Tax Withholding data found for the current Fiscal Year."))
 
-def get_tax_row(tax_details, tax_amount):
+def get_tax_row_for_tcs(inv, tax_details, tax_amount, tax_deducted):
+	row = {
+		"category": "Total",
+		"charge_type": "Actual",
+		"tax_amount": tax_amount,
+		"description": tax_details.description,
+		"account_head": tax_details.account_head
+	}
+
+	if tax_deducted:
+		# TCS already deducted on previous invoices
+		# So, TCS will be calculated by 'Previous Row Total'
+
+		taxes_excluding_tcs = [d for d in inv.taxes if d.account_head != tax_details.account_head]
+		if taxes_excluding_tcs:
+			# chargeable amount is the total amount after other charges are applied
+			row.update({
+				"charge_type": "On Previous Row Total",
+				"row_id": len(taxes_excluding_tcs),
+				"rate": tax_details.rate
+			})
+		else:
+			# if only TCS is to be charged, then net total is chargeable amount
+			row.update({
+				"charge_type": "On Net Total",
+				"rate": tax_details.rate
+			})
+
+	return row
+
+def get_tax_row_for_tds(tax_details, tax_amount):
 	return {
 		"category": "Total",
-		"add_deduct_tax": "Deduct",
 		"charge_type": "Actual",
-		"account_head": tax_details.account_head,
+		"tax_amount": tax_amount,
+		"add_deduct_tax": "Deduct",
 		"description": tax_details.description,
-		"tax_amount": tax_amount
+		"account_head": tax_details.account_head
 	}
 
 def get_lower_deduction_certificate(fiscal_year, pan_no):
@@ -105,57 +139,46 @@ def get_lower_deduction_certificate(fiscal_year, pan_no):
 	if ldc_name:
 		return frappe.get_doc('Lower Deduction Certificate', ldc_name)
 
-def get_tax_amount(party_type, parties, ref_doc, tax_details, fiscal_year_details, pan_no=None):
+def get_tax_amount(party_type, parties, inv, tax_details, fiscal_year_details, pan_no=None):
 	fiscal_year = fiscal_year_details[0]
 
-	vouchers = get_invoice_vouchers(parties, fiscal_year, ref_doc.company, party_type=party_type)
-	advance_vouchers = get_advance_vouchers(parties, fiscal_year, ref_doc.company, party_type=party_type)
+	vouchers = get_invoice_vouchers(parties, fiscal_year, inv.company, party_type=party_type)
+	advance_vouchers = get_advance_vouchers(parties, fiscal_year, inv.company, party_type=party_type)
 	taxable_vouchers = vouchers + advance_vouchers
 
 	tax_deducted = 0
 	if taxable_vouchers:
-		# check if tds / tcs is already charged on taxable vouchers
-		filters = {
-			'is_cancelled': 0,
-			'credit': ['>', 0],
-			'fiscal_year': fiscal_year,
-			'account': tax_details.account_head,
-			'voucher_no': ['in', taxable_vouchers],
-		}
-		field = "sum(credit)"
-
-		tax_deducted = frappe.db.get_value('GL Entry', filters, field) or 0.0
+		tax_deducted = get_deducted_tax(taxable_vouchers, fiscal_year, tax_details)
 
 	tax_amount = 0
-	posting_date = ref_doc.posting_date
+	posting_date = inv.posting_date
 	if party_type == 'Supplier':
 		ldc = get_lower_deduction_certificate(fiscal_year, pan_no)
 		if tax_deducted:
-			net_total = ref_doc.net_total
+			net_total = inv.net_total
 			if ldc:
 				tax_amount = get_tds_amount_from_ldc(ldc, parties, fiscal_year, pan_no, tax_details, posting_date, net_total)
 			else:
 				tax_amount = net_total * tax_details.rate / 100 if net_total > 0 else 0
 		else:
 			tax_amount = get_tds_amount(
-				ldc, parties, ref_doc, tax_details,
+				ldc, parties, inv, tax_details,
 				fiscal_year_details, vouchers
 			)
 
 	elif party_type == 'Customer':
 		if tax_deducted:
-			grand_total = get_invoice_total_without_tcs(ref_doc, tax_details)
-			# if already tcs is charged, then (net total + gst amount) of invoice is chargeable
-			tax_amount = grand_total * tax_details.rate / 100 if grand_total > 0 else 0
+			# if already TCS is charged, then amount will be calculated based on 'Previous Row Total'
+			tax_amount = 0
 		else:
-			#  if no tcs has been charged in FY,
+			#  if no TCS has been charged in FY,
 			# then chargeable value is "prev invoices + advances" value which cross the threshold
 			tax_amount = get_tcs_amount(
-				parties, ref_doc, tax_details,
+				parties, inv, tax_details,
 				fiscal_year_details, vouchers, advance_vouchers
 			)
 
-	return tax_amount
+	return tax_amount, tax_deducted
 
 def get_invoice_vouchers(parties, fiscal_year, company, party_type='Supplier'):
 	dr_or_cr = 'credit' if party_type == 'Supplier' else 'debit'
@@ -194,7 +217,20 @@ def get_advance_vouchers(parties, fiscal_year=None, company=None, from_date=None
 
 	return frappe.get_all('GL Entry', filters=filters, distinct=1, pluck='voucher_no') or [""]
 
-def get_tds_amount(ldc, parties, ref_doc, tax_details, fiscal_year_details, vouchers):
+def get_deducted_tax(taxable_vouchers, fiscal_year, tax_details):
+	# check if TDS / TCS account is already charged on taxable vouchers
+	filters = {
+		'is_cancelled': 0,
+		'credit': ['>', 0],
+		'fiscal_year': fiscal_year,
+		'account': tax_details.account_head,
+		'voucher_no': ['in', taxable_vouchers],
+	}
+	field = "sum(credit)"
+
+	return frappe.db.get_value('GL Entry', filters, field) or 0.0
+
+def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, vouchers):
 	tds_amount = 0
 
 	supp_credit_amt = frappe.db.get_value('Purchase Invoice', {
@@ -207,9 +243,9 @@ def get_tds_amount(ldc, parties, ref_doc, tax_details, fiscal_year_details, vouc
 	}, 'sum(credit_in_account_currency)') or 0.0
 
 	supp_credit_amt += supp_jv_credit_amt
-	supp_credit_amt += ref_doc.net_total
+	supp_credit_amt += inv.net_total
 
-	debit_note_amount = get_debit_note_amount(parties, fiscal_year_details, ref_doc.company)
+	debit_note_amount = get_debit_note_amount(parties, fiscal_year_details, inv.company)
 	supp_credit_amt -= debit_note_amount
 
 	threshold = tax_details.get('threshold', 0)
@@ -218,7 +254,7 @@ def get_tds_amount(ldc, parties, ref_doc, tax_details, fiscal_year_details, vouc
 	if ((threshold and supp_credit_amt >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
-			ref_doc.posting_date, tax_deducted,
+			inv.posting_date, tax_deducted,
 			net_total, ldc.certificate_limit
 		):
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
@@ -227,7 +263,7 @@ def get_tds_amount(ldc, parties, ref_doc, tax_details, fiscal_year_details, vouc
 
 	return tds_amount
 
-def get_tcs_amount(parties, ref_doc, tax_details, fiscal_year_details, vouchers, adv_vouchers):
+def get_tcs_amount(parties, inv, tax_details, fiscal_year_details, vouchers, adv_vouchers):
 	tcs_amount = 0
 	fiscal_year, _, _ = fiscal_year_details
 
@@ -235,7 +271,7 @@ def get_tcs_amount(parties, ref_doc, tax_details, fiscal_year_details, vouchers,
 	invoiced_amt = frappe.db.get_value('GL Entry', {
 		'is_cancelled': 0,
 		'party': ['in', parties],
-		'company': ref_doc.company,
+		'company': inv.company,
 		'voucher_no': ['in', vouchers],
 	}, 'sum(debit)') or 0.0
 
@@ -243,7 +279,7 @@ def get_tcs_amount(parties, ref_doc, tax_details, fiscal_year_details, vouchers,
 	advance_amt = frappe.db.get_value('GL Entry', {
 		'is_cancelled': 0,
 		'party': ['in', parties],
-		'company': ref_doc.company,
+		'company': inv.company,
 		'voucher_no': ['in', adv_vouchers],
 	}, 'sum(credit)') or 0.0
 
@@ -253,13 +289,13 @@ def get_tcs_amount(parties, ref_doc, tax_details, fiscal_year_details, vouchers,
 		'credit': ['>', 0],
 		'party': ['in', parties],
 		'fiscal_year': fiscal_year,
-		'company': ref_doc.company,
+		'company': inv.company,
 		'voucher_type': 'Sales Invoice',
 	}, 'sum(credit)') or 0.0
 
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
 
-	current_invoice_total = get_invoice_total_without_tcs(ref_doc, tax_details)
+	current_invoice_total = get_invoice_total_without_tcs(inv, tax_details)
 	total_invoiced_amt = current_invoice_total + invoiced_amt + advance_amt - credit_note_amt
 
 	if ((cumulative_threshold and total_invoiced_amt >= cumulative_threshold)):
@@ -268,11 +304,11 @@ def get_tcs_amount(parties, ref_doc, tax_details, fiscal_year_details, vouchers,
 
 	return tcs_amount
 
-def get_invoice_total_without_tcs(ref_doc, tax_details):
-	tcs_tax_row = [d for d in ref_doc.taxes if d.account_head == tax_details.account_head]
+def get_invoice_total_without_tcs(inv, tax_details):
+	tcs_tax_row = [d for d in inv.taxes if d.account_head == tax_details.account_head]
 	tcs_tax_row_amount = tcs_tax_row[0].base_tax_amount if tcs_tax_row else 0
 
-	return ref_doc.grand_total - tcs_tax_row_amount
+	return inv.grand_total - tcs_tax_row_amount
 
 def get_tds_amount_from_ldc(ldc, parties, fiscal_year, pan_no, tax_details, posting_date, net_total):
 	tds_amount = 0
