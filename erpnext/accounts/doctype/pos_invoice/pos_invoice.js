@@ -11,6 +11,7 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 
 	onload(doc) {
 		this._super();
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice Merge Log'];
 		if(doc.__islocal && doc.is_pos && frappe.get_route_str() !== 'point-of-sale') {
 			this.frm.script_manager.trigger("is_pos");
 			this.frm.refresh_fields();
