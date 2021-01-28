@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 {% include 'erpnext/selling/sales_common.js' %};
+frappe.provide("erpnext.accounts");
 
 erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend({
 	setup(doc) {
@@ -9,12 +10,19 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		this._super(doc);
 	},
 
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+
 	onload(doc) {
 		this._super();
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice Merge Log'];
 		if(doc.__islocal && doc.is_pos && frappe.get_route_str() !== 'point-of-sale') {
 			this.frm.script_manager.trigger("is_pos");
 			this.frm.refresh_fields();
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh(doc) {
