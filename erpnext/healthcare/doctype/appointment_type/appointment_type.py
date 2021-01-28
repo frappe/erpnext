@@ -29,11 +29,21 @@ class AppointmentType(Document):
 @frappe.whitelist()
 def get_service_item_based_on_department(appointment_type, department):
 	item_list = frappe.db.get_value('Appointment Type Service Item',
-		filters = {'department': department, 'appointment_type': appointment_type},
+		filters = {'medical_department': department, 'parent': appointment_type},
 		fieldname = ['op_consulting_charge_item',
 			'inpatient_visit_charge_item', 'op_consulting_charge', 'inpatient_visit_charge'],
 		as_dict = 1
 	)
+
+	# if department wise items are not set up
+	# use the generic items
+	if not item_list:
+		item_list = frappe.db.get_value('Appointment Type Service Item',
+			filters = {'parent': appointment_type},
+			fieldname = ['op_consulting_charge_item',
+				'inpatient_visit_charge_item', 'op_consulting_charge', 'inpatient_visit_charge'],
+			as_dict = 1
+		)
 
 	return item_list
 
