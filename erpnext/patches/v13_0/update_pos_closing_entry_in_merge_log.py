@@ -5,9 +5,9 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
+	frappe.reload_doc("accounts", "doctype", "POS Invoice Merge Log")
+	frappe.reload_doc("accounts", "doctype", "POS Closing Entry")
 	if frappe.db.count('POS Invoice Merge Log'):
-		frappe.reload_doc("accounts", "doctype", "POS Invoice Merge Log")
-		frappe.reload_doc("accounts", "doctype", "POS Closing Entry")
 		frappe.db.sql('''
 			UPDATE
 				`tabPOS Invoice Merge Log` log, `tabPOS Invoice Reference` log_ref
