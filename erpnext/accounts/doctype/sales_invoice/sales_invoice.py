@@ -232,6 +232,7 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
 	def check_if_consolidated_invoice(self):
+		# since POS Invoice extends Sales Invoice, we explicitly check if doctype is Sales Invoice
 		if self.doctype == "Sales Invoice" and self.is_consolidated:
 			invoice_or_credit_note = "consolidated_credit_note" if self.is_return else "consolidated_invoice"
 			pos_closing_entry = frappe.get_all(
@@ -247,8 +248,9 @@ class SalesInvoice(SellingController):
 				frappe.throw(msg, title=_("Not Allowed"))
 
 	def before_cancel(self):
+		self.check_if_consolidated_invoice()
+
 		super(SalesInvoice, self).before_cancel()
-    self.check_if_consolidated_invoice()
 		self.update_time_sheet(None)
 
 	def on_cancel(self):
