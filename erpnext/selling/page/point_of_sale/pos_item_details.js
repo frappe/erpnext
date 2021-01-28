@@ -220,15 +220,15 @@ erpnext.PointOfSale.ItemDetails = class {
 							me.render_discount_dom(item_row);
 						});
 					}
-				}
+				};
 			} else {
-				this.rate_control.df.read_only = 1
+				this.rate_control.df.read_only = 1;
 			}
 			this.rate_control.refresh();
 		}
 
 		if (this.discount_percentage_control && !this.allow_discount_change) {
-			this.discount_percentage_control.df.read_only = 1
+			this.discount_percentage_control.df.read_only = 1;
 			this.discount_percentage_control.refresh();
 		}
 
