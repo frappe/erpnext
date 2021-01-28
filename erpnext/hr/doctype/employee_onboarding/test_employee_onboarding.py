@@ -38,7 +38,8 @@ class TestEmployeeOnboarding(unittest.TestCase):
 		onboarding.insert()
 		onboarding.submit()
 
-		self.assertEqual(onboarding.project, 'Employee Onboarding : Test Researcher - test@researcher.com')
+		project_name = frappe.db.get_value("Project", onboarding.project, "project_name")
+		self.assertEqual(project_name, 'Employee Onboarding : Test Researcher - test@researcher.com')
 
 		# don't allow making employee if onboarding is not complete
 		self.assertRaises(IncompleteTaskError, make_employee, onboarding.name)
