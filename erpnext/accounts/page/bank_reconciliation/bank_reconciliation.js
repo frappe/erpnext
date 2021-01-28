@@ -356,6 +356,12 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 			me.bank_entry = $(this).attr("data-name");
 			me.new_expense();
 		})
+
+		$(me.row).on('click', '.new-journal', function() {
+			me.bank_entry = $(this).attr("data-name");
+			me.new_journal();
+		})
+
 	}
 
 	new_payment() {
@@ -379,6 +385,12 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 		frappe.new_doc("Expense Claim")
 	}
 
+	new_journal() {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.bank_transaction.bank_transaction.make_journal_entry",
+			source_name: this.bank_entry
+		})
+	}
 
 	show_dialog(data) {
 		const me = this;
