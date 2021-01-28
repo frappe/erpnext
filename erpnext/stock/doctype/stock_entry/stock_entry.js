@@ -9,7 +9,7 @@ frappe.ui.form.on('Stock Entry', {
 			if (!doc.s_warehouse) {
 				return 'blue';
 			} else {
-				return (doc.qty<=doc.actual_qty) ? 'green' : 'orange'
+				return (doc.qty<=doc.actual_qty) ? 'green' : 'orange';
 			}
 		});
 
