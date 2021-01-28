@@ -8,11 +8,10 @@ from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
-from erpnext.controllers.selling_controller import SellingController
+from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate, get_link_to_form
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option, get_mode_of_payment_info
 
 from six import iteritems
