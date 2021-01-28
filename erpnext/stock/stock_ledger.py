@@ -62,7 +62,7 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.submit()
 	return sle
 
-def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negative_stock=False, via_landed_cost_voucher=False):
+def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negative_stock=None, via_landed_cost_voucher=False):
 	if not args and voucher_type and voucher_no:
 		args = get_args_for_voucher(voucher_type, voucher_no)
 
@@ -181,7 +181,7 @@ class update_entries_after(object):
 				self.process_sle(sle)
 
 				if sle.dependant_sle_voucher_detail_no:
-					self.get_dependent_entries_to_fix(entries_to_fix, sle)
+					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -221,13 +221,15 @@ class update_entries_after(object):
 			excluded_sle=sle.name)
 
 		if not dependant_sle:
-			return
+			return entries_to_fix
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse == self.args.warehouse:
-			return
+			return entries_to_fix
 		elif dependant_sle.item_code != self.item_code \
 				and (dependant_sle.item_code, dependant_sle.warehouse) not in self.new_items:
 			self.new_items[(dependant_sle.item_code, dependant_sle.warehouse)] = dependant_sle
-			return
+			return entries_to_fix
+		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
+			return entries_to_fix
 
 		self.initialize_previous_data(dependant_sle)
 
@@ -236,7 +238,7 @@ class update_entries_after(object):
 		future_sle_for_dependant = list(self.get_sle_after_datetime(args))
 
 		entries_to_fix.extend(future_sle_for_dependant)
-		entries_to_fix = sorted(entries_to_fix, key=lambda k: k['timestamp'])
+		return sorted(entries_to_fix, key=lambda k: k['timestamp'])
 
 	def process_sle(self, sle):
 		# previous sle data for this warehouse
