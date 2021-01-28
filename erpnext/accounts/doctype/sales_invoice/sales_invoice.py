@@ -163,16 +163,18 @@ class SalesInvoice(SellingController):
 			return
 
 		accounts = []
+		tax_withholding_account = tax_withholding_details.get("account_head")
+
 		for d in self.taxes:
-			if d.account_head == tax_withholding_details.get("account_head"):
+			if d.account_head == tax_withholding_account:
 				d.update(tax_withholding_details)
 			accounts.append(d.account_head)
 
-		if not accounts or tax_withholding_details.get("account_head") not in accounts:
+		if not accounts or tax_withholding_account not in accounts:
 			self.append("taxes", tax_withholding_details)
 
 		to_remove = [d for d in self.taxes
-			if not d.tax_amount and d.account_head == tax_withholding_details.get("account_head")]
+			if not d.tax_amount and d.charge_type == "Actual" and d.account_head == tax_withholding_account]
 
 		for d in to_remove:
 			self.remove(d)
