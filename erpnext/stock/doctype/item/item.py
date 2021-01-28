@@ -679,7 +679,7 @@ class Item(WebsiteGenerator):
 		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
 
 		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}").format(
-			frappe.bold(old_name)))
+			frappe.bold(old_name))
 
 		frappe.throw(_(msg), title=_("Merge not allowed"))
 
