@@ -18,6 +18,7 @@ from erpnext.healthcare.utils import check_fee_validity, get_service_item_and_pr
 class PatientAppointment(Document):
 	def validate(self):
 		self.validate_overlaps()
+		self.validate_service_unit()
 		self.set_appointment_datetime()
 		self.validate_customer_created()
 		self.set_status()
@@ -68,6 +69,19 @@ class PatientAppointment(Document):
 				overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4])
 			frappe.throw(overlapping_details, title=_('Appointments Overlapping'))
 
+	def validate_service_unit(self):
+		if self.inpatient_record and self.service_unit:
+			from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+
+			is_inpatient_occupancy_unit = frappe.db.get_value('Healthcare Service Unit', self.service_unit,
+				'inpatient_occupancy')
+			service_unit = get_current_healthcare_service_unit(self.inpatient_record)
+			if is_inpatient_occupancy_unit and service_unit != self.service_unit:
+				msg = _('Patient {0} is not admitted in the service unit {1}').format(frappe.bold(self.patient), frappe.bold(self.service_unit)) + '<br>'
+				msg += _('Appointment for service units with Inpatient Occupancy can only be created against the unit where patient has been admitted.')
+				frappe.throw(msg, title=_('Invalid Healthcare Service Unit'))
+
+
 	def set_appointment_datetime(self):
 		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")
 
@@ -90,6 +104,17 @@ class PatientAppointment(Document):
 		fee_validity = manage_fee_validity(self)
 		if fee_validity:
 			frappe.msgprint(_('{0} has fee validity till {1}').format(self.patient, fee_validity.valid_till))
+
+	def get_therapy_types(self):
+		if not self.therapy_plan:
+			return
+
+		therapy_types = []
+		doc = frappe.get_doc('Therapy Plan', self.therapy_plan)
+		for entry in doc.therapy_plan_details:
+			therapy_types.append(entry.therapy_type)
+
+		return therapy_types
 
 
 @frappe.whitelist()
@@ -145,7 +170,7 @@ def invoice_appointment(appointment_doc):
 		sales_invoice.flags.ignore_mandatory = True
 		sales_invoice.save(ignore_permissions=True)
 		sales_invoice.submit()
-		frappe.msgprint(_('Sales Invoice {0} created'.format(sales_invoice.name)), alert=True)
+		frappe.msgprint(_('Sales Invoice {0} created').format(sales_invoice.name), alert=True)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
 		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
 

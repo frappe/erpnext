@@ -21,6 +21,7 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "apply_putaway_rule",
   "is_return",
   "return_against",
   "section_addresses",
@@ -1107,6 +1108,12 @@
    "read_only": 1
   },
   {
+   "default": "0",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
+  },
+  {
    "depends_on": "eval:!doc.__islocal",
    "fieldname": "per_returned",
    "fieldtype": "Percent",
@@ -1120,7 +1127,7 @@
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 12:54:23.278500",
+ "modified": "2020-12-08 18:31:32.234503",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

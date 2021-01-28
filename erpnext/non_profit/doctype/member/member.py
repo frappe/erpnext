@@ -18,8 +18,6 @@ class Member(Document):
 
 
 	def validate(self):
-		if self.email:
-			self.validate_email_type(self.email)
 		if self.email_id:
 			self.validate_email_type(self.email_id)
 
@@ -57,14 +55,16 @@ class Member(Document):
 	def make_customer_and_link(self):
 		if self.customer:
 			frappe.msgprint(_("A customer is already linked to this Member"))
-		cust = create_customer(frappe._dict({
+
+		customer = create_customer(frappe._dict({
 			'fullname': self.member_name,
-			'email': self.email_id or self.user,
+			'email': self.email_id,
 			'phone': None
 		}))
 
-		self.customer = cust
+		self.customer = customer
 		self.save()
+		frappe.msgprint(_("Customer {0} has been created succesfully.").format(self.customer))
 
 
 def get_or_create_member(user_details):

@@ -48,7 +48,7 @@ class CropCycle(Document):
 
 	def import_disease_tasks(self, disease, start_date):
 		disease_doc = frappe.get_doc('Disease', disease)
-		self.create_task(disease_doc.treatment_task, self.name, start_date)
+		self.create_task(disease_doc.treatment_task, self.project, start_date)
 
 	def create_project(self, period, crop_tasks):
 		project = frappe.get_doc({
