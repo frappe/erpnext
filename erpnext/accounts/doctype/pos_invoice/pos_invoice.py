@@ -6,10 +6,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.controllers.selling_controller import SellingController
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
+from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
@@ -58,6 +57,22 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+	
+	def before_cancel(self):
+		if self.consolidated_invoice and frappe.db.get_value('Sales Invoice', self.consolidated_invoice, 'docstatus') == 1:
+			pos_closing_entry = frappe.get_all(
+				"POS Invoice Reference",
+				ignore_permissions=True,
+				filters={ 'pos_invoice': self.name },
+				pluck="parent",
+				limit=1
+			)
+			frappe.throw(
+				_('You need to cancel POS Closing Entry {} to be able to cancel this document.').format(
+					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
+				),
+				title=_('Not Allowed')
+			)
 
 	def on_cancel(self):
 		# run on cancel method of selling controller
