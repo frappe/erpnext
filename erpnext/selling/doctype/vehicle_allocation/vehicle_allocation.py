@@ -55,17 +55,18 @@ class VehicleAllocation(Document):
 			fields=['name', 'code', 'sr_no', 'allocation_period', 'is_additional'], limit=1)
 
 		if duplicates:
-			frappe.throw(_("Vehicle Allocation already exists for period {0}: {1}{2}")
-				.format(self.allocation_period, get_allocation_title(self), " (Additional Allocation)" if self.is_additional else ""))
+			frappe.throw(_("Vehicle Allocation already exists for period {0}: {1}")
+				.format(self.allocation_period, get_allocation_title(self)))
 
 
 @frappe.whitelist()
 def get_allocation_title(vehicle_allocation):
 	if isinstance(vehicle_allocation, string_types):
 		vehicle_allocation = frappe.db.get_value("Vehicle Allocation", vehicle_allocation,
-			['code', 'sr_no'], as_dict=1)
+			['code', 'sr_no', 'is_additional'], as_dict=1)
 
-	return "{0} - {1}".format(vehicle_allocation.sr_no, vehicle_allocation.code)
+	return "{0} - {1}{2}".format(vehicle_allocation.sr_no, vehicle_allocation.code,
+		" (Additional)" if vehicle_allocation.is_additional else "")
 
 
 @frappe.whitelist()
