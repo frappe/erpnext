@@ -11,7 +11,7 @@ frappe.ui.form.on("Membership Settings", {
 			});
 		}
 
-		frm.set_query('inv_print_format', function(doc) {
+		frm.set_query("inv_print_format", function() {
 			return {
 				filters: {
 					"doc_type": "Sales Invoice"
@@ -19,7 +19,7 @@ frappe.ui.form.on("Membership Settings", {
 			};
 		});
 
-		frm.set_query('membership_print_format', function(doc) {
+		frm.set_query("membership_print_format", function() {
 			return {
 				filters: {
 					"doc_type": "Membership"
@@ -27,12 +27,23 @@ frappe.ui.form.on("Membership Settings", {
 			};
 		});
 
-		frm.set_query('debit_account', function(doc) {
+		frm.set_query("debit_account", function() {
 			return {
 				filters: {
-					'account_type': 'Receivable',
-					'is_group': 0,
-					'company': frm.doc.company
+					"account_type": "Receivable",
+					"is_group": 0,
+					"company": frm.doc.company
+				}
+			};
+		});
+
+		frm.set_query("payment_account", function () {
+			var account_types = ["Bank", "Cash"];
+			return {
+				filters: {
+					"account_type": ["in", account_types],
+					"is_group": 0,
+					"company": frm.doc.company
 				}
 			};
 		});
