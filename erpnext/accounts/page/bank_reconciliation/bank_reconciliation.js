@@ -335,32 +335,32 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 		$(me.row).on('click', '.clickable-section', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.show_dialog($(this).attr("data-name"));
-		})
+		});
 
 		$(me.row).on('click', '.new-reconciliation', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.show_dialog($(this).attr("data-name"));
-		})
+		});
 
 		$(me.row).on('click', '.new-payment', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.new_payment();
-		})
+		});
 
 		$(me.row).on('click', '.new-invoice', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.new_invoice();
-		})
+		});
 
 		$(me.row).on('click', '.new-expense', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.new_expense();
-		})
+		});
 
 		$(me.row).on('click', '.new-journal', function() {
 			me.bank_entry = $(this).attr("data-name");
 			me.new_journal();
-		})
+		});
 
 	}
 
@@ -389,7 +389,7 @@ erpnext.accounts.ReconciliationRow = class ReconciliationRow {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.accounts.doctype.bank_transaction.bank_transaction.make_journal_entry",
 			source_name: this.bank_entry
-		})
+		});
 	}
 
 	show_dialog(data) {
