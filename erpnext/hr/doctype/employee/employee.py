@@ -450,6 +450,19 @@ def get_all_employee_emails(company):
 			employee_emails.append(email)
 	return employee_emails
 
+def get_employee_emails(employee_list):
+	'''Returns list of employee emails either based on user_id or company_email'''
+	employee_emails = []
+	for employee in employee_list:
+		if not employee:
+			continue
+		user, company_email, personal_email = frappe.db.get_value('Employee', employee,
+											['user_id', 'company_email', 'personal_email'])
+		email = user or company_email or personal_email
+		if email:
+			employee_emails.append(email)
+	return employee_emails
+
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False, is_tree=False):
 
