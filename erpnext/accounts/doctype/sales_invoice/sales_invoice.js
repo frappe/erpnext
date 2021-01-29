@@ -20,6 +20,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		var me = this;
 		this._super();
 
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice'];
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
 			this.frm.set_df_property("debit_to", "print_hide", 0);
