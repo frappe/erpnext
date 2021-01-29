@@ -42,12 +42,15 @@
 		"public/js/hub/hub_factory.js",
 		"public/js/call_popup/call_popup.js",
 		"public/js/utils/dimension_tree_filter.js",
-		"public/js/telephony.js"
+		"public/js/telephony.js",
+		"public/js/templates/call_link.html"
 	],
 	"js/item-dashboard.min.js": [
 		"stock/dashboard/item_dashboard.html",
 		"stock/dashboard/item_dashboard_list.html",
-		"stock/dashboard/item_dashboard.js"
+		"stock/dashboard/item_dashboard.js",
+		"stock/page/warehouse_capacity_summary/warehouse_capacity_summary.html",
+		"stock/page/warehouse_capacity_summary/warehouse_capacity_summary_header.html"
 	],
 	"js/point-of-sale.min.js": [
 		"selling/page/point_of_sale/pos_item_selector.js",

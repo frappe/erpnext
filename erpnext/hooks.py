@@ -222,6 +222,11 @@ standard_queries = {
 }
 
 doc_events = {
+	"*": {
+		"on_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.create_medical_record",
+		"on_update_after_submit": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.update_medical_record",
+		"on_cancel": "erpnext.healthcare.doctype.patient_history_settings.patient_history_settings.delete_medical_record"
+	},
 	"Stock Entry": {
 		"on_submit": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty",
 		"on_cancel": "erpnext.stock.doctype.material_request.material_request.update_completed_and_requested_qty"
@@ -272,11 +277,8 @@ doc_events = {
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.set_caller_information",
+		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
-	},
-	"Lead": {
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.set_caller_information"
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
@@ -342,7 +344,8 @@ scheduler_events = {
 		"erpnext.selling.doctype.quotation.quotation.set_expired_status",
 		"erpnext.healthcare.doctype.patient_appointment.patient_appointment.update_appointment_status",
 		"erpnext.buying.doctype.supplier_quotation.supplier_quotation.set_expired_status",
-		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email"
+		"erpnext.accounts.doctype.process_statement_of_accounts.process_statement_of_accounts.send_auto_email",
+		"erpnext.non_profit.doctype.membership.membership.set_expired_status"
 	],
 	"daily_long": [
 		"erpnext.setup.doctype.email_digest.email_digest.send",
@@ -411,9 +414,6 @@ regional_overrides = {
 	'Italy': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.italy.utils.update_itemised_tax_data',
 		'erpnext.controllers.accounts_controller.validate_regional': 'erpnext.regional.italy.utils.sales_invoice_validate',
-	},
-	'Germany': {
-		'erpnext.controllers.accounts_controller.validate_regional': 'erpnext.regional.germany.accounts_controller.validate_regional',
 	}
 }
 user_privacy_documents = [
@@ -581,4 +581,8 @@ global_search_doctypes = {
 		{'doctype': 'Hotel Room Package', 'index': 3},
 		{'doctype': 'Hotel Room Type', 'index': 4}
 	]
+}
+
+additional_timeline_content = {
+	'*': ['erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs']
 }

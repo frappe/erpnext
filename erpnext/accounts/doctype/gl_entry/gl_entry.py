@@ -159,8 +159,8 @@ class GLEntry(Document):
 
 		if not self.flags.from_repost and not self.voucher_type == 'Period Closing Voucher' \
 			and self.cost_center and _check_is_group():
-			frappe.throw(_("""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot
-				be used in transactions""").format(self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)))
+			frappe.throw(_("""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot be used in transactions""").format(
+				self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)))
 
 	def validate_party(self):
 		validate_party_frozen_disabled(self.party_type, self.party)
@@ -170,7 +170,7 @@ class GLEntry(Document):
 		account_currency = get_account_currency(self.account)
 
 		if not self.account_currency:
-			self.account_currency = company_currency
+			self.account_currency = account_currency or company_currency
 
 		if account_currency != self.account_currency:
 			frappe.throw(_("{0} {1}: Accounting Entry for {2} can only be made in currency: {3}")

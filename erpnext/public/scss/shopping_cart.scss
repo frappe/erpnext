@@ -83,6 +83,10 @@ body.product-page {
 	// 		text-align: left;
 	// 	}
 	// }
+	.card-img-container {
+		height: 210px;
+		width: 100%;
+	}
 
 	.card-img {
 		max-height: 210px;
@@ -308,10 +312,6 @@ body.product-page {
 				}
 			}
 		}
-
-		svg {
-			display: none;
-		}
 	}
 }
 
@@ -458,6 +458,10 @@ body.product-page {
 	.card-title {
 		font-size: var(--text-base);
 		font-weight: 500;
+	}
+
+	.card-body {
+		max-width: 80%;
 	}
 
 	.card-text {

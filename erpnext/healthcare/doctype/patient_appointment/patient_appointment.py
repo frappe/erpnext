@@ -18,6 +18,7 @@ from erpnext.healthcare.utils import check_fee_validity, get_service_item_and_pr
 class PatientAppointment(Document):
 	def validate(self):
 		self.validate_overlaps()
+		self.validate_service_unit()
 		self.set_appointment_datetime()
 		self.validate_customer_created()
 		self.set_status()
@@ -67,6 +68,19 @@ class PatientAppointment(Document):
 			overlapping_details += _('{0} has appointment scheduled with {1} at {2} having {3} minute(s) duration.').format(
 				overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4])
 			frappe.throw(overlapping_details, title=_('Appointments Overlapping'))
+
+	def validate_service_unit(self):
+		if self.inpatient_record and self.service_unit:
+			from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+
+			is_inpatient_occupancy_unit = frappe.db.get_value('Healthcare Service Unit', self.service_unit,
+				'inpatient_occupancy')
+			service_unit = get_current_healthcare_service_unit(self.inpatient_record)
+			if is_inpatient_occupancy_unit and service_unit != self.service_unit:
+				msg = _('Patient {0} is not admitted in the service unit {1}').format(frappe.bold(self.patient), frappe.bold(self.service_unit)) + '<br>'
+				msg += _('Appointment for service units with Inpatient Occupancy can only be created against the unit where patient has been admitted.')
+				frappe.throw(msg, title=_('Invalid Healthcare Service Unit'))
+
 
 	def set_appointment_datetime(self):
 		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")

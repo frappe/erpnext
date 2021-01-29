@@ -12,7 +12,6 @@
   "membership_expiry_date",
   "column_break_5",
   "membership_type",
-  "email",
   "email_id",
   "image",
   "customer_section",
@@ -63,13 +62,6 @@
    "label": "Membership Type",
    "options": "Membership Type",
    "reqd": 1
-  },
-  {
-   "fieldname": "email",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "User",
-   "options": "User"
   },
   {
    "fieldname": "image",
@@ -178,7 +170,7 @@
  ],
  "image_field": "image",
  "links": [],
- "modified": "2020-09-16 23:44:13.596948",
+ "modified": "2020-11-09 12:12:10.174647",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Member",

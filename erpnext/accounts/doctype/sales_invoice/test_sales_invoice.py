@@ -22,6 +22,7 @@ from erpnext.regional.india.utils import get_ewb_data
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
+from erpnext.stock.utils import get_incoming_rate
 
 class TestSalesInvoice(unittest.TestCase):
 	def make(self):
@@ -688,7 +689,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertTrue(gle)
 
 	def test_pos_gl_entry_with_perpetual_inventory(self):
-		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory", item_code= "_Test FG Item",warehouse= "Stores - TCP1",cost_center= "Main - TCP1")
@@ -745,7 +746,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get('payments')[0].amount, -1000)
 
 	def test_pos_change_amount(self):
-		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1", 
+		make_pos_profile(company="_Test Company with perpetual inventory", income_account = "Sales - TCP1",
 			expense_account = "Cost of Goods Sold - TCP1", warehouse="Stores - TCP1", cost_center = "Main - TCP1", write_off_account="_Test Write Off - TCP1")
 
 		pr = make_purchase_receipt(company= "_Test Company with perpetual inventory",
@@ -1801,6 +1802,24 @@ class TestSalesInvoice(unittest.TestCase):
 		si.items[0].target_warehouse = 'Work In Progress - TCP1'
 		add_taxes(si)
 		si.save()
+
+		rate = 0.0
+		for d in si.get('items'):
+			rate = get_incoming_rate({
+				"item_code": d.item_code,
+				"warehouse": d.warehouse,
+				"posting_date": si.posting_date,
+				"posting_time": si.posting_time,
+				"qty": -1 * flt(d.get('stock_qty')),
+				"serial_no": d.serial_no,
+				"company": si.company,
+				"voucher_type": 'Sales Invoice',
+				"voucher_no": si.name,
+				"allow_zero_valuation": d.get("allow_zero_valuation")
+			}, raise_error_if_no_rate=False)
+
+			rate = flt(rate, 2)
+
 		si.submit()
 
 		target_doc = make_inter_company_transaction("Sales Invoice", si.name)
@@ -1810,17 +1829,22 @@ class TestSalesInvoice(unittest.TestCase):
 		target_doc.save()
 		target_doc.submit()
 
+		tax_amount = flt(rate * (12/100), 2)
 		si_gl_entries = [
-			["_Test Account Excise Duty - TCP1", 0.0, 12.0, nowdate()],
-			["Unrealized Profit - TCP1", 12.0, 0.0, nowdate()]
+			["_Test Account Excise Duty - TCP1", 0.0, tax_amount, nowdate()],
+			["Unrealized Profit - TCP1", tax_amount, 0.0, nowdate()]
 		]
 
 		check_gl_entries(self, si.name, si_gl_entries, add_days(nowdate(), -1))
 
 		pi_gl_entries = [
-			["_Test Account Excise Duty - TCP1", 12.0 , 0.0, nowdate()],
-			["Unrealized Profit - TCP1", 0.0, 12.0, nowdate()]
+			["_Test Account Excise Duty - TCP1", tax_amount , 0.0, nowdate()],
+			["Unrealized Profit - TCP1", 0.0, tax_amount, nowdate()]
 		]
+
+		# Sale and Purchase both should be at valuation rate
+		self.assertEqual(si.items[0].rate, rate)
+		self.assertEqual(target_doc.items[0].rate, rate)
 
 		check_gl_entries(self, target_doc.name, pi_gl_entries, add_days(nowdate(), -1))
 
@@ -1841,7 +1865,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
-	
+
 	def test_einvoice_submission_without_irn(self):
 		# init
 		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 1)
@@ -1857,7 +1881,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# reset
 		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 0)
 		frappe.flags.country = country
-	
+
 	def test_einvoice_json(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice
 
