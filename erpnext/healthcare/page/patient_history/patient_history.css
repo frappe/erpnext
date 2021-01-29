@@ -109,6 +109,11 @@
 	padding-right: 0px;
 }
 
+.patient-history-filter {
+	margin-left: 35px;
+	width: 25%;
+}
+
 #page-medical_record .plot-wrapper {
 	padding: 20px 15px;
 	border-bottom: 1px solid #d1d8dd;
