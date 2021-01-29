@@ -109,7 +109,7 @@ class MpesaConnector():
 			"CallBackURL": callback_url,
 			"AccountReference": reference_code,
 			"TransactionDesc": description,
-			"TransactionType": "CustomerPayBillOnline" if env == "sandbox" else "CustomerBuyGoodsOnline"
+			"TransactionType": "CustomerPayBillOnline" if self.env == "sandbox" else "CustomerBuyGoodsOnline"
 		}
 		headers = {'Authorization': 'Bearer {0}'.format(self.authentication_token), 'Content-Type': "application/json"}
 
