@@ -94,6 +94,7 @@ class TestMpesaSettings(unittest.TestCase):
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
 		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
 		frappe.db.set_value("Mpesa Settings", "Payment", "transaction_limit", "500")
+		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "KES")
 
 		pos_invoice = create_pos_invoice(do_not_submit=1)
 		pos_invoice.append("payments", {'mode_of_payment': 'Mpesa-Payment', 'account': mpesa_account, 'amount': 1000})
@@ -132,6 +133,7 @@ class TestMpesaSettings(unittest.TestCase):
 		pos_invoice.reload()
 		self.assertEquals(pos_invoice.mpesa_receipt_number, ', '.join(mpesa_receipt_numbers))
 
+		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "")
 		[d.delete() for d in integration_requests]
 		pr.reload()
 		pr.cancel()
@@ -143,6 +145,7 @@ class TestMpesaSettings(unittest.TestCase):
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
 		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
 		frappe.db.set_value("Mpesa Settings", "Payment", "transaction_limit", "500")
+		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "KES")
 
 		pos_invoice = create_pos_invoice(do_not_submit=1)
 		pos_invoice.append("payments", {'mode_of_payment': 'Mpesa-Payment', 'account': mpesa_account, 'amount': 1000})
@@ -186,6 +189,7 @@ class TestMpesaSettings(unittest.TestCase):
 
 		self.assertEquals(len(new_integration_req_ids), 1)
 
+		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "")
 		frappe.db.sql("delete from `tabIntegration Request` where integration_request_service = 'Mpesa'")
 		pr.reload()
 		pr.cancel()
