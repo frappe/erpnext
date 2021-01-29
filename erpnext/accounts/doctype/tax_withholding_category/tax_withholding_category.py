@@ -163,7 +163,7 @@ def get_tax_amount(party_type, parties, inv, tax_details, fiscal_year_details, p
 		else:
 			tax_amount = get_tds_amount(
 				ldc, parties, inv, tax_details,
-				fiscal_year_details, vouchers
+				fiscal_year_details, tax_deducted, vouchers
 			)
 
 	elif party_type == 'Customer':
@@ -230,7 +230,7 @@ def get_deducted_tax(taxable_vouchers, fiscal_year, tax_details):
 
 	return frappe.db.get_value('GL Entry', filters, field) or 0.0
 
-def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, vouchers):
+def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_deducted, vouchers):
 	tds_amount = 0
 
 	supp_credit_amt = frappe.db.get_value('Purchase Invoice', {
@@ -255,7 +255,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, vouchers
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
 			inv.posting_date, tax_deducted,
-			net_total, ldc.certificate_limit
+			inv.net_total, ldc.certificate_limit
 		):
 			tds_amount = get_ltds_amount(supp_credit_amt, 0, ldc.certificate_limit, ldc.rate, tax_details)
 		else:
