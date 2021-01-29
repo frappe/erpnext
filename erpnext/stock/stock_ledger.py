@@ -487,7 +487,6 @@ class update_entries_after(object):
 					self.wh_data.valuation_rate = new_stock_value / new_stock_qty
 				else:
 					self.wh_data.valuation_rate = sle.outgoing_rate
-
 		else:
 			if flt(self.wh_data.qty_after_transaction) >= 0 and sle.outgoing_rate:
 				self.wh_data.valuation_rate = sle.outgoing_rate

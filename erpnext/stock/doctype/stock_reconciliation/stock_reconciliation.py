@@ -30,6 +30,7 @@ class StockReconciliation(StockController):
 		self.validate_data()
 		self.validate_expense_account()
 		self.set_total_qty_and_amount()
+		self.validate_putaway_capacity()
 
 		if self._action=="submit":
 			self.make_batches('warehouse')
