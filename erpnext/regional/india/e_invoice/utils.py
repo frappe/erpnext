@@ -163,7 +163,7 @@ def get_item_list(invoice):
 		item.description = d.item_name.replace('"', '\\"')
 
 		item.qty = abs(item.qty)
-		item.discount_amount = abs(item.discount_amount * item.qty)
+		item.discount_amount = 0
 		item.unit_rate = abs(item.base_net_amount / item.qty)
 		item.gross_amount = abs(item.base_net_amount)
 		item.taxable_value = abs(item.base_net_amount)
@@ -223,11 +223,12 @@ def get_invoice_value_details(invoice):
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(invoice.base_total)
+		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
 	else:
 		invoice_value_details.base_total = abs(invoice.base_net_total)
+		# since tax already considers discount amount
+		invoice_value_details.invoice_discount_amt = 0
 
-	# since tax already considers discount amount
-	invoice_value_details.invoice_discount_amt = 0 # invoice.base_discount_amount
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
