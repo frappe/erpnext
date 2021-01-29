@@ -391,9 +391,26 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		});
 	},
 
+	set_warehouse: function(frm) {
+		this.autofill_warehouse(cur_frm.doc.items, "warehouse", cur_frm.doc.set_warehouse);
+	},
+
+	autofill_warehouse : function (child_table, warehouse_field, warehouse, force) {
+		if ((warehouse || force) && child_table && child_table.length) {
+			let doctype = child_table[0].doctype;
+			$.each(child_table || [], function(i, item) {
+				frappe.model.set_value(doctype, item.name, warehouse_field, warehouse);
+			});
+		}
+	},
+
 	items_add: function(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		if(doc.schedule_date) {
+		let row = frappe.get_doc(cdt, cdn);
+		// var item = frappe.get_doc(cdt, cdn);
+		if(!row.warehouse && doc.set_warehouse) {
+			row.warehouse = doc.set_warehouse;
+			refresh_field("warehouse", cdn, "items");
+		} if(doc.schedule_date) {
 			row.schedule_date = doc.schedule_date;
 			refresh_field("schedule_date", cdn, "items");
 		} else {
