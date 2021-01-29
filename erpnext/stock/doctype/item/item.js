@@ -383,7 +383,10 @@ $.extend(erpnext.item, {
 				const section = frm.dashboard.add_section('', __("Stock Levels"));
 				erpnext.item.item_dashboard = new erpnext.stock.ItemDashboard({
 					parent: section,
-					item_code: frm.doc.name
+					item_code: frm.doc.name,
+					page_length: 20,
+					method: 'erpnext.stock.dashboard.item_dashboard.get_data',
+					template: 'item_dashboard_list'
 				});
 				erpnext.item.item_dashboard.refresh();
 			});

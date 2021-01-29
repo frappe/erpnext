@@ -1,7 +1,9 @@
 erpnext.PointOfSale.ItemDetails = class {
-	constructor({ wrapper, events }) {
+	constructor({ wrapper, events, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
+		this.allow_rate_change = settings.allow_rate_change;
+		this.allow_discount_change = settings.allow_discount_change;
 		this.current_item = {};
 
 		this.init_component();
@@ -62,16 +64,16 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		this.events.toggle_item_selector(this.item_has_changed);
 		this.toggle_component(this.item_has_changed);
-		
+
 		if (this.item_has_changed) {
 			this.doctype = item.doctype;
 			this.item_meta = frappe.get_meta(this.doctype);
 			this.name = item.name;
 			this.item_row = item;
 			this.currency = this.events.get_frm().doc.currency;
-			
+
 			this.current_item = { item_code: item.item_code, batch_no: item.batch_no, uom: item.uom };
-			
+
 			this.render_dom(item);
 			this.render_discount_dom(item);
 			this.render_form(item);
@@ -80,7 +82,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.current_item = {};
 		}
 	}
-	
+
 	validate_serial_batch_item() {
 		const doc = this.events.get_frm().doc;
 		const item_row = doc.items.find(item => item.name === this.name);
@@ -92,7 +94,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		const no_serial_selected = !item_row.serial_no;
 		const no_batch_selected = !item_row.batch_no;
 
-		if ((serialized && no_serial_selected) || (batched && no_batch_selected) || 
+		if ((serialized && no_serial_selected) || (batched && no_batch_selected) ||
 			(serialized && batched && (no_batch_selected || no_serial_selected))) {
 
 			frappe.show_alert({
@@ -103,7 +105,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.events.remove_item_from_cart();
 		}
 	}
-	
+
 	render_dom(item) {
 		let { item_name, description, image, price_list_rate } = item;
 
@@ -114,7 +116,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			}
 			return ``;
 		}
-		
+
 		this.$item_name.html(item_name);
 		this.$item_description.html(get_description_html());
 		this.$item_price.html(format_currency(price_list_rate, this.currency));
@@ -125,7 +127,7 @@ erpnext.PointOfSale.ItemDetails = class {
 		}
 
 	}
-	
+
 	render_discount_dom(item) {
 		if (item.discount_percentage) {
 			this.$dicount_section.html(
@@ -150,10 +152,10 @@ erpnext.PointOfSale.ItemDetails = class {
 			const field_meta = this.item_meta.fields.find(df => df.fieldname === fieldname);
 			fieldname === 'discount_percentage' ? (field_meta.label = __('Discount (%)')) : '';
 			const me = this;
-			
+
 			this[`${fieldname}_control`] = frappe.ui.form.make_control({
-				df: { 
-					...field_meta, 
+				df: {
+					...field_meta,
 					onchange: function() {
 						me.events.form_updated(me.doctype, me.name, fieldname, this.value);
 					}
@@ -181,7 +183,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			if (!item.has_batch_no) {
 				this.$form_container.append(
 					`<div class="grid-filler no-select"></div>`
-				)	
+				)
 			}
 			this.$form_container.append(
 				`<div class="btn btn-sm btn-secondary auto-fetch-btn">Auto Fetch Serial Numbers</div>`
@@ -189,21 +191,31 @@ erpnext.PointOfSale.ItemDetails = class {
 			this.$form_container.find('.serial_no-control').find('textarea').css('height', '6rem');
 		}
 	}
-	
+
 	bind_custom_control_change_event() {
 		const me = this;
 		if (this.rate_control) {
-			this.rate_control.df.onchange = function() {
-				if (this.value || flt(this.value) === 0) {
-					me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
-						const item_row = frappe.get_doc(me.doctype, me.name);
-						const doc = me.events.get_frm().doc;
+			if (this.allow_rate_change) {
+				this.rate_control.df.onchange = function() {
+					if (this.value || flt(this.value) === 0) {
+						me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
+							const item_row = frappe.get_doc(me.doctype, me.name);
+							const doc = me.events.get_frm().doc;
 
-						me.$item_price.html(format_currency(item_row.rate, doc.currency));
-						me.render_discount_dom(item_row);
-					});
-				}
+							me.$item_price.html(format_currency(item_row.rate, doc.currency));
+							me.render_discount_dom(item_row);
+						});
+					}
+				};
+			} else {
+				this.rate_control.df.read_only = 1;
 			}
+			this.rate_control.refresh();
+		}
+
+		if (this.discount_percentage_control && !this.allow_discount_change) {
+			this.discount_percentage_control.df.read_only = 1;
+			this.discount_percentage_control.refresh();
 		}
 
 		if (this.warehouse_control) {
@@ -272,7 +284,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				me.events.set_value_in_current_cart_item('uom', this.value);
 				me.events.form_updated(me.doctype, me.name, 'uom', this.value);
 				me.current_item.uom = this.value;
-				
+
 				const item_row = frappe.get_doc(me.doctype, me.name);
 				me.conversion_factor_control.df.read_only = (item_row.stock_uom == this.value);
 				me.conversion_factor_control.refresh();
@@ -281,24 +293,25 @@ erpnext.PointOfSale.ItemDetails = class {
 
 		frappe.model.on("POS Invoice Item", "*", (fieldname, value, item_row) => {
 			const field_control = this[`${fieldname}_control`];
-			const { item_code, batch_no, uom } = this.current_item; 
+			const { item_code, batch_no, uom } = this.current_item;
 			const item_code_is_same = item_code === item_row.item_code;
 			const batch_is_same = batch_no == item_row.batch_no;
 			const uom_is_same = uom === item_row.uom;
+			const item_is_same = item_code_is_same && batch_is_same && uom_is_same ? true : false;
 
-			if (field_control && item_code_is_same && batch_is_same && uom_is_same) {
+			if (item_is_same && field_control && field_control.get_value() !== value) {
 				field_control.set_value(value);
 				cur_pos.update_cart_html(item_row);
 			}
 		});
 	}
-	
+
 	async auto_update_batch_no() {
 		if (this.serial_no_control && this.batch_no_control) {
 			const selected_serial_nos = this.serial_no_control.get_value().split(`\n`).filter(s => s);
 			if (!selected_serial_nos.length) return;
 
-			// find batch nos of the selected serial no 
+			// find batch nos of the selected serial no
 			const serials_with_batch_no = await frappe.db.get_list("Serial No", {
 				filters: { 'name': ["in", selected_serial_nos]},
 				fields: ["batch_no", "name"]
@@ -313,7 +326,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			const batch_serial_nos = batch_serial_map[batch_no].join(`\n`);
 			// eg. 10 selected serial no. -> 5 belongs to first batch other 5 belongs to second batch
 			const serial_nos_belongs_to_other_batch = selected_serial_nos.length !== batch_serial_map[batch_no].length;
-			
+
 			const current_batch_no = this.batch_no_control.get_value();
 			current_batch_no != batch_no && await this.batch_no_control.set_value(batch_no);
 
@@ -328,7 +341,7 @@ erpnext.PointOfSale.ItemDetails = class {
 				this.events.clone_new_batch_item_in_frm(batch_serial_map, this.current_item);
 		}
 	}
-	
+
 	bind_events() {
 		this.bind_auto_serial_fetch_event();
 		this.bind_fields_to_numpad_fields();
@@ -358,7 +371,7 @@ erpnext.PointOfSale.ItemDetails = class {
 			}
 		});
 	}
-	
+
 	bind_auto_serial_fetch_event() {
 		this.$form_container.on('click', '.auto-fetch-btn', () => {
 			this.batch_no_control && this.batch_no_control.set_value('');

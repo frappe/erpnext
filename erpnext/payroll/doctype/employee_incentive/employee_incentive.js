@@ -10,15 +10,7 @@ frappe.ui.form.on('Employee Incentive', {
 				}
 			};
 		});
-
-		if (!frm.doc.company) return;
-		frm.set_query("salary_component", function() {
-			return {
-				query: "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
-				filters: {type: "earning", company: frm.doc.company}
-			};
-		});
-
+		frm.trigger('set_earning_component');
 	},
 
 	employee: function(frm) {
@@ -45,8 +37,18 @@ frappe.ui.form.on('Employee Incentive', {
 			callback: function(data) {
 				if (data.message) {
 					frm.set_value("company", data.message.company);
+					frm.trigger('set_earning_component');
 				}
 			}
+		});
+	},
+
+	set_earning_component: function(frm) {
+		if (!frm.doc.company) return;
+		frm.set_query("salary_component", function() {
+			return {
+				filters: {type: "earning", company: frm.doc.company}
+			};
 		});
 	},
 
