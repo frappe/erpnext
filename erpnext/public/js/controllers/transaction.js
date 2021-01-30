@@ -1126,7 +1126,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	calculate_stock_uom_rate: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		item.stock_uom_rate = item.rate/item.conversion_factor;	
+		item.stock_uom_rate = flt(item.rate)/flt(item.conversion_factor);	
 		refresh_field("stock_uom_rate", item.name, item.parentfield);
 	},
 	service_stop_date: function(frm, cdt, cdn) {
@@ -1239,7 +1239,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
 			company_currency, "items");
 
-		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount"],
+		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount", "stock_uom_rate"],
 			this.frm.doc.currency, "items");
 
 		if(this.frm.fields_dict["operations"]) {
