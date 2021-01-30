@@ -459,7 +459,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "From Warehouse",
+   "label": "Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -468,11 +468,12 @@
    "width": "100px"
   },
   {
+   "depends_on": "eval:parent.is_internal_customer",
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "hidden": 1,
    "ignore_user_permissions": 1,
-   "label": "Customer Warehouse (Optional)",
+   "label": "Target Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
    "print_hide": 1

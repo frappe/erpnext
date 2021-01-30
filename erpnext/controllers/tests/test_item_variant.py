@@ -6,6 +6,7 @@ import unittest
 
 from erpnext.stock.doctype.item.test_item import set_item_variant_settings
 from erpnext.controllers.item_variant import copy_attributes_to_variant, make_variant_item_code
+from erpnext.stock.doctype.quality_inspection.test_quality_inspection import create_quality_inspection_parameter
 
 from six import string_types
 
@@ -56,6 +57,8 @@ def make_quality_inspection_template():
 
 	qc = frappe.new_doc("Quality Inspection Template")
 	qc.quality_inspection_template_name = qc_template
+
+	create_quality_inspection_parameter("Moisture")
 	qc.append('item_quality_inspection_parameter', {
 		"specification": "Moisture",
 		"value": "&lt; 5%",

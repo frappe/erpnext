@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import math
 import frappe
 from frappe import _
+from frappe.utils.formatters import format_value
 from frappe.utils import time_diff_in_hours, rounded
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
@@ -77,11 +78,13 @@ def get_appointments_to_invoice(patient, company):
 
 
 def get_encounters_to_invoice(patient, company):
+	if not isinstance(patient, str):
+		patient = patient.name
 	encounters_to_invoice = []
 	encounters = frappe.get_list(
 		'Patient Encounter',
 		fields=['*'],
-		filters={'patient': patient.name, 'company': company, 'invoiced': False, 'docstatus': 1}
+		filters={'patient': patient, 'company': company, 'invoiced': False, 'docstatus': 1}
 	)
 	if encounters:
 		for encounter in encounters:
@@ -90,6 +93,10 @@ def get_encounters_to_invoice(patient, company):
 				income_account = None
 				service_item = None
 				if encounter.practitioner:
+					if encounter.inpatient_record and \
+						frappe.db.get_single_value('Healthcare Settings', 'do_not_bill_inpatient_encounters'):
+						continue
+
 					service_item, practitioner_charge = get_service_item_and_practitioner_charge(encounter)
 					income_account = get_income_account(encounter.practitioner, encounter.company)
 
@@ -642,11 +649,15 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 				html += "<table class='table table-condensed table-bordered'>" \
 				+ table_head +  table_row + "</table>"
 			continue
+
 		#on other field types add label and value to html
 		if not df.hidden and not df.print_hide and doc.get(df.fieldname) and df.fieldname not in exclude_fields:
-			html +=  '<br>{0} : {1}'.format(df.label or df.fieldname, \
-			doc.get(df.fieldname))
+			if doc.get(df.fieldname):
+				formatted_value = format_value(doc.get(df.fieldname), meta.get_field(df.fieldname), doc)
+				html +=  '<br>{0} : {1}'.format(df.label or df.fieldname, formatted_value)
+
 			if not has_data : has_data = True
+
 	if sec_on and col_on and has_data:
 		doc_html += section_html + html + '</div></div>'
 	elif sec_on and not col_on and has_data:

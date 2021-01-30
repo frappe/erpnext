@@ -5,18 +5,22 @@
 cur_frm.pformat.print_heading = 'Invoice';
 
 {% include 'erpnext/selling/sales_common.js' %};
-
-
 frappe.provide("erpnext.accounts");
+
+
 erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.extend({
 	setup: function(doc) {
 		this.setup_posting_date_time_check();
 		this._super(doc);
 	},
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
 	onload: function() {
 		var me = this;
 		this._super();
 
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice'];
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
 			this.frm.set_df_property("debit_to", "print_hide", 0);
@@ -33,6 +37,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 			me.frm.refresh_fields();
 		}
 		erpnext.queries.setup_warehouse_query(this.frm);
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function(doc, dt, dn) {
@@ -126,16 +131,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.set_default_print_format();
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
-			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
-				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
-				var internal = customer.is_internal_customer;
-				var disabled = customer.disabled;
-				if (internal == 1 && disabled == 0) {
-					me.frm.add_custom_button("Inter Company Invoice", function() {
-						me.make_inter_company_invoice();
-					}, __('Create'));
-				}
-			});
+			let internal = me.frm.doc.is_internal_customer;
+			if (internal) {
+				let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Invoice" :
+					"Inter Company Purchase Invoice";
+
+				me.frm.add_custom_button(button_label, function() {
+					me.make_inter_company_invoice();
+				}, __('Create'));
+			}
 		}
 	},
 
@@ -571,15 +575,6 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
-
 		frm.set_query("unrealized_profit_loss_account", function() {
 			return {
 				filters: {
@@ -592,7 +587,7 @@ frappe.ui.form.on('Sales Invoice', {
 
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
-			'Sales Invoice': 'Sales Return',
+			'Sales Invoice': 'Return / Credit Note',
 			'Payment Request': 'Payment Request',
 			'Payment Entry': 'Payment'
 		},

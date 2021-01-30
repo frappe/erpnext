@@ -672,13 +672,14 @@ class Item(WebsiteGenerator):
 		if not records: return
 		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
 
-		msg = _("The items {0} and {1} are present in the following {2} : <br>"
-			.format(frappe.bold(old_name), frappe.bold(new_name), document))
+		msg = _("The items {0} and {1} are present in the following {2} : ").format(
+			frappe.bold(old_name), frappe.bold(new_name), document)
 
+		msg += '<br>'
 		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
 
-		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}"
-			.format(frappe.bold(old_name)))
+		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}").format(
+			frappe.bold(old_name))
 
 		frappe.throw(_(msg), title=_("Merge not allowed"))
 
@@ -971,7 +972,7 @@ class Item(WebsiteGenerator):
 							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
 
 	def check_if_linked_document_exists(self, field):
-		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "Purchase Receipt Item",
+		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "POS Invoice Item", "Purchase Receipt Item",
 			"Purchase Invoice Item", "Stock Entry Detail", "Stock Reconciliation Item"]
 
 		# For "Is Stock Item", following doctypes is important

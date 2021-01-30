@@ -77,6 +77,8 @@
   "purchase_order_item",
   "material_request_item",
   "purchase_receipt_item",
+  "delivery_note_item",
+  "putaway_rule",
   "section_break_45",
   "allow_zero_valuation_rate",
   "bom",
@@ -819,11 +821,12 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.is_internal_supplier",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "hidden": 1,
    "ignore_user_permissions": 1,
-   "label": "Supplier Warehouse",
+   "label": "From Warehouse",
    "options": "Warehouse"
   },
   {
@@ -839,6 +842,15 @@
    "collapsible": 1,
    "fieldname": "image_column",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "putaway_rule",
+   "fieldtype": "Link",
+   "label": "Putaway Rule",
+   "no_copy": 1,
+   "options": "Putaway Rule",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "tracking_section",
@@ -869,6 +881,14 @@
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
    "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivery_note_item",
+   "fieldtype": "Data",
+   "label": "Delivery Note Item",
+   "no_copy": 1,
+   "print_hide": 1,
    "read_only": 1
   }
  ],

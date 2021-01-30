@@ -88,7 +88,7 @@ def get_events(start, end, filters=None):
 
 def add_assignments(events, start, end, conditions=None):
 	query = """select name, start_date, end_date, employee_name,
-		employee, docstatus
+		employee, docstatus, shift_type
 		from `tabShift Assignment` where
 		start_date >= %(start_date)s
 		or end_date <=  %(end_date)s
@@ -97,18 +97,40 @@ def add_assignments(events, start, end, conditions=None):
 	if conditions:
 		query += conditions
 
-	for d in frappe.db.sql(query, {"start_date":start, "end_date":end}, as_dict=True):
-		e = {
-			"name": d.name,
-			"doctype": "Shift Assignment",
-			"start_date": d.start_date,
-			"end_date": d.end_date if d.end_date else nowdate(),
-			"title": cstr(d.employee_name) + ": "+ \
-				cstr(d.shift_type),
-			"docstatus": d.docstatus
-		}
-		if e not in events:
-			events.append(e)
+	records = frappe.db.sql(query, {"start_date":start, "end_date":end}, as_dict=True)
+	shift_timing_map = get_shift_type_timing([d.shift_type for d in records])
+
+	for d in records:
+		daily_event_start = d.start_date
+		daily_event_end = d.end_date if d.end_date else getdate()
+		delta = timedelta(days=1)
+		while daily_event_start <= daily_event_end:
+			start_timing = frappe.utils.get_datetime(daily_event_start)+ shift_timing_map[d.shift_type]['start_time']
+			end_timing = frappe.utils.get_datetime(daily_event_start)+ shift_timing_map[d.shift_type]['end_time']
+			daily_event_start += delta
+			e = {
+				"name": d.name,
+				"doctype": "Shift Assignment",
+				"start_date": start_timing,
+				"end_date": end_timing,
+				"title": cstr(d.employee_name) + ": "+ \
+					cstr(d.shift_type),
+				"docstatus": d.docstatus,
+				"allDay": 0
+			}
+			if e not in events:
+				events.append(e)
+
+	return events
+
+def get_shift_type_timing(shift_types):
+	shift_timing_map = {}
+	data = frappe.get_all("Shift Type", filters = {"name": ("IN", shift_types)}, fields = ['name', 'start_time', 'end_time'])
+
+	for d in data:
+		shift_timing_map[d.name] = d
+
+	return shift_timing_map
 
 
 def get_employee_shift(employee, for_date=nowdate(), consider_default_shift=False, next_shift_direction=None):

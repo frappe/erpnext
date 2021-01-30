@@ -566,11 +566,12 @@
    "print_hide": 1
   },
   {
+   "depends_on": "eval: parent.is_internal_customer && parent.update_stock",
    "fieldname": "target_warehouse",
    "fieldtype": "Link",
    "hidden": 1,
    "ignore_user_permissions": 1,
-   "label": "Customer Warehouse (Optional)",
+   "label": "Target Warehouse",
    "no_copy": 1,
    "options": "Warehouse",
    "print_hide": 1
