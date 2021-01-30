@@ -150,7 +150,7 @@ class VehicleAllocationRegisterReport(object):
 		if 'allocation_period' in grouped_by and not totals.get('allocation_period'):
 			totals['code'] = "Unassigned: {0}".format(count)
 		else:
-			totals['code'] = "Total: {0}, Booked: {1}".format(count, booked)
+			totals['code'] = "Tot: {0}, Bkd: {1}, Avl: {2}".format(count, booked, count-booked)
 
 		return totals
 
