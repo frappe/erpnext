@@ -299,6 +299,18 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Vehicle Sales Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Allocation Register",
+					"doctype": "Vehicle Allocation",
+					"dependencies": ["Vehicle Allocation"],
+				},
+			]
+		},
+		{
 			"label": _("Key Reports"),
 			"icon": "fa fa-table",
 			"items": [

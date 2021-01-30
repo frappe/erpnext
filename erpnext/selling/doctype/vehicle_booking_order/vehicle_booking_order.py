@@ -104,30 +104,20 @@ class VehicleBookingOrder(AccountsController):
 		self.title = self.customer_name
 
 	def get_payment_details(self):
-		self.payment_received = []
-		self.payment_paid = []
+		self.customer_payments = []
+		self.supplier_payments = []
 
 		if self.docstatus != 1:
 			return
 
-		payment_entries = frappe.db.sql("""
-			select pe.name, pe.posting_date,
-				pe.payment_type, pref.allocated_amount,
-				pe.instrument_type, pe.user_remark,
-				pe.reference_no, pe.reference_date, pe.deposit_no
-			from `tabPayment Entry Reference` pref
-			inner join `tabPayment Entry` pe on pe.name = pref.parent
-			where pe.docstatus = 1
-				and pref.original_reference_doctype = 'Vehicle Booking Order' and pref.original_reference_name = %s
-			order by pe.reference_date, pe.posting_date, pe.creation
-		""", self.name, as_dict=1)
+		payment_entries = get_booking_payments(self.name)
 
 		for d in payment_entries:
-			if d.payment_type == "Receive":
-				self.payment_received.append(d)
+			if d.party_type == "Customer":
+				self.customer_payments.append(d)
 
-			if d.payment_type == "Pay":
-				self.payment_paid.append(d)
+			if d.party_type == "Supplier":
+				self.supplier_payments.append(d)
 
 	def validate_customer(self):
 		if not self.customer and not self.customer_is_company:
@@ -1090,6 +1080,26 @@ def update_customer_details_in_booking(vehicle_booking_order):
 	vbo_doc.save_version()
 
 	frappe.msgprint(_("Customer Details Updated Successfully"), indicator='green', alert=True)
+
+
+def get_booking_payments(vehicle_booking_order):
+	if isinstance(vehicle_booking_order, string_types):
+		vehicle_booking_order = [vehicle_booking_order]
+
+	payment_entries = frappe.db.sql("""
+		select pe.name, pe.posting_date,
+			pe.party_type, pe.party,
+			pe.payment_type, pref.allocated_amount as amount, pref.original_reference_name as vehicle_booking_order,
+			pe.instrument_type, pe.user_remark,
+			pe.reference_no, pe.reference_date, pe.deposit_no
+		from `tabPayment Entry Reference` pref
+		inner join `tabPayment Entry` pe on pe.name = pref.parent
+		where pe.docstatus = 1
+			and pref.original_reference_doctype = 'Vehicle Booking Order' and pref.original_reference_name in %s
+		order by pe.reference_date, pe.posting_date, pe.creation
+	""", [vehicle_booking_order], as_dict=1)
+
+	return payment_entries
 
 
 def update_vehicle_booked(vehicle, is_booked):

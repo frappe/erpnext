@@ -53,6 +53,18 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Allocation Register",
+					"doctype": "Vehicle Allocation",
+					"dependencies": ["Vehicle Allocation"],
+				},
+			]
+		},
+		{
 			"label": _("Settings"),
 			"icon": "fa fa-cog",
 			"items": [
