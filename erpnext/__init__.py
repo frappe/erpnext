@@ -109,7 +109,7 @@ def get_region(company=None):
 	'''
 	if company or frappe.flags.company:
 		return frappe.get_cached_value('Company',
-			company or frappe.flags.company,  'country')
+			company or frappe.flags.company, 'country')
 	elif frappe.flags.country:
 		return frappe.flags.country
 	else:
