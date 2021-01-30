@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2017-02-02 11:00:24.853005",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -284,7 +283,7 @@
    "link_fieldname": "reference_name"
   }
  ],
- "modified": "2021-01-30 15:18:42.681053",
+ "modified": "2021-01-30 19:15:54.747421",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",

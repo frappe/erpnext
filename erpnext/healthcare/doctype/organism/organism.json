@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "field:organism",
- "beta": 1,
  "creation": "2019-09-06 16:29:07.797960",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -27,7 +26,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:52.903990",
+ "modified": "2021-01-30 19:16:37.951757",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Organism",

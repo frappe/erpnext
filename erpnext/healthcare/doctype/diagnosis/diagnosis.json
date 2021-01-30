@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:diagnosis",
- "beta": 1,
  "creation": "2017-02-15 12:23:59.341108",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -24,7 +23,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:44.680955",
+ "modified": "2021-01-30 19:16:43.245881",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Diagnosis",

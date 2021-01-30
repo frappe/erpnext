@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2017-04-07 12:52:43.542429",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -319,7 +318,7 @@
    "link_fieldname": "reference_name"
   }
  ],
- "modified": "2021-01-30 14:51:47.856460",
+ "modified": "2021-01-30 19:15:57.415898",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",

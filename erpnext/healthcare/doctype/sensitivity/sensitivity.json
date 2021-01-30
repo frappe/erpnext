@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:sensitivity",
- "beta": 1,
  "creation": "2016-02-23 11:12:54.623249",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -24,7 +23,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:42.800873",
+ "modified": "2021-01-30 19:16:45.237134",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sensitivity",

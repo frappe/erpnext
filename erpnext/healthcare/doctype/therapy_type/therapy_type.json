@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "field:therapy_type",
- "beta": 1,
  "creation": "2020-03-29 20:48:31.715063",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -206,7 +205,7 @@
    "link_fieldname": "therapy_type"
   }
  ],
- "modified": "2021-01-30 17:48:19.962332",
+ "modified": "2021-01-30 19:15:46.133479",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Type",

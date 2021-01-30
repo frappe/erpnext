@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2016-04-21 10:53:44.637684",
  "doctype": "DocType",
  "document_type": "Document",
@@ -351,7 +350,7 @@
    "link_fieldname": "encounter"
   }
  ],
- "modified": "2021-01-30 15:04:05.024755",
+ "modified": "2021-01-30 19:15:56.067665",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",

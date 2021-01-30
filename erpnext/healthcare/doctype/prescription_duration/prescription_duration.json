@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
- "beta": 1,
  "creation": "2016-09-16 15:50:28.895789",
  "doctype": "DocType",
  "document_type": "Document",
@@ -30,7 +29,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:36.615127",
+ "modified": "2021-01-30 19:16:49.575561",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Prescription Duration",

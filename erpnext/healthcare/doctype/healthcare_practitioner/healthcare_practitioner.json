@@ -3,7 +3,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2016-02-23 11:20:53.565119",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -321,7 +320,7 @@
    "link_fieldname": "practitioner"
   }
  ],
- "modified": "2021-01-30 14:18:46.862703",
+ "modified": "2021-01-30 19:16:40.779424",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",

@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:complaints",
- "beta": 1,
  "creation": "2017-02-15 12:25:28.045267",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -24,7 +23,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:42.065643",
+ "modified": "2021-01-30 19:16:46.239335",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Complaint",

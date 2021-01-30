@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2017-01-23 14:03:49.084370",
  "description": "Patient",
  "doctype": "DocType",
@@ -476,7 +475,7 @@
   }
  ],
  "max_attachments": 50,
- "modified": "2021-01-30 14:19:18.409398",
+ "modified": "2021-01-30 19:16:34.051056",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

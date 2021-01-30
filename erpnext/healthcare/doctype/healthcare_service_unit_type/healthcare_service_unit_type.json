@@ -3,7 +3,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:service_unit_type",
- "beta": 1,
  "creation": "2018-07-11 16:47:51.414675",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -144,7 +143,7 @@
    "link_fieldname": "service_unit_type"
   }
  ],
- "modified": "2021-01-30 14:20:17.773054",
+ "modified": "2021-01-30 19:16:00.971213",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit Type",

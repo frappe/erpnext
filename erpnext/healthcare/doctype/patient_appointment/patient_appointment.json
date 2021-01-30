@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2017-05-04 11:52:40.941507",
  "doctype": "DocType",
  "document_type": "Document",
@@ -385,7 +384,7 @@
    "link_fieldname": "appointment"
   }
  ],
- "modified": "2021-01-30 14:18:32.641402",
+ "modified": "2021-01-30 19:16:51.706764",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:antibiotic_name",
- "beta": 1,
  "creation": "2016-02-23 11:11:30.749731",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -30,7 +29,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:52.032260",
+ "modified": "2021-01-30 19:16:39.294327",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Antibiotic",

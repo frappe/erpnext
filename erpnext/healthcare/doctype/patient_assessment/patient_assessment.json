@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2020-04-19 22:45:12.356209",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -177,7 +176,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-30 18:31:44.507903",
+ "modified": "2021-01-30 19:15:42.247188",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment",

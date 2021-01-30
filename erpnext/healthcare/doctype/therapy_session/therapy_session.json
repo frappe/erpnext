@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2020-03-11 08:57:40.669857",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -259,7 +258,7 @@
    "link_fieldname": "reference_name"
   }
  ],
- "modified": "2021-01-30 18:16:03.290911",
+ "modified": "2021-01-30 19:15:44.076734",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",

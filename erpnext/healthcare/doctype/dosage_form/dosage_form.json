@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:dosage_form",
- "beta": 1,
  "creation": "2017-04-08 12:04:33.987972",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -24,7 +23,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:44.081772",
+ "modified": "2021-01-30 19:16:44.596181",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Dosage Form",

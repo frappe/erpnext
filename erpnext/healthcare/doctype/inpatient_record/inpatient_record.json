@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2018-07-11 17:48:51.404139",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -437,7 +436,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 19:02:45.689873",
+ "modified": "2021-01-30 19:15:40.264799",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",

@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:lab_test_uom",
- "beta": 1,
  "creation": "2016-03-29 17:28:08.630148",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -32,7 +31,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:45.748877",
+ "modified": "2021-01-30 19:16:42.698979",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test UOM",

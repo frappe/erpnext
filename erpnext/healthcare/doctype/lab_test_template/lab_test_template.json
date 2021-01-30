@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:lab_test_code",
- "beta": 1,
  "creation": "2016-03-29 17:35:36.761223",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -340,7 +339,7 @@
    "link_fieldname": "template"
   }
  ],
- "modified": "2021-01-30 15:46:17.578874",
+ "modified": "2021-01-30 19:15:50.829115",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

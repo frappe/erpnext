@@ -3,7 +3,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:appointment_type",
- "beta": 1,
  "creation": "2016-07-22 11:52:34.953019",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -60,7 +59,7 @@
    "link_fieldname": "appointment_type"
   }
  ],
- "modified": "2021-01-30 14:18:35.679707",
+ "modified": "2021-01-30 19:16:50.478352",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Appointment Type",

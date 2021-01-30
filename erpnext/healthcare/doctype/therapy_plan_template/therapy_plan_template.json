@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "field:plan_name",
- "beta": 1,
  "creation": "2020-09-22 17:51:38.861055",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -107,7 +106,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-30 14:20:03.826934",
+ "modified": "2021-01-30 19:16:07.220745",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan Template",

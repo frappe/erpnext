@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:sample",
- "beta": 1,
  "creation": "2016-04-04 17:35:44.823951",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -32,7 +31,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:19:22.213262",
+ "modified": "2021-01-30 19:16:33.284582",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Sample",

@@ -1,6 +1,5 @@
 {
  "actions": [],
- "beta": 1,
  "creation": "2017-05-09 11:26:22.337760",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -346,7 +345,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-01-30 15:38:59.036851",
+ "modified": "2021-01-30 19:15:52.317875",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

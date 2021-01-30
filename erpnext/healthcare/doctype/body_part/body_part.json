@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "field:body_part",
- "beta": 1,
  "creation": "2020-04-10 12:21:55.036402",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -20,7 +19,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:19:40.184835",
+ "modified": "2021-01-30 19:16:21.760632",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Body Part",

@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2020-09-14 18:33:56.715736",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -170,7 +169,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-30 14:19:58.149440",
+ "modified": "2021-01-30 19:16:11.853044",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Order",

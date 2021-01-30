@@ -4,7 +4,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:medical_code",
- "beta": 1,
  "creation": "2017-06-21 13:07:00.463176",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -23,7 +22,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:20:19.972789",
+ "modified": "2021-01-30 19:15:59.292159",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Medical Code Standard",

@@ -1,7 +1,6 @@
 {
  "actions": [],
  "autoname": "field:assessment_parameter",
- "beta": 1,
  "creation": "2020-04-15 14:34:46.551042",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -20,7 +19,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:19:43.043353",
+ "modified": "2021-01-30 19:16:20.711799",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment Parameter",

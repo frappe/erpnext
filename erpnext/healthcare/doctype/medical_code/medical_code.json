@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
- "beta": 1,
  "creation": "2017-06-21 13:02:56.122897",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -41,7 +40,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:20:20.992650",
+ "modified": "2021-01-30 19:15:58.409618",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Medical Code",

@@ -3,7 +3,6 @@
  "allow_copy": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
- "beta": 1,
  "creation": "2016-03-29 17:34:47.509094",
  "doctype": "DocType",
  "document_type": "Document",
@@ -591,7 +590,7 @@
    "link_fieldname": "reference_name"
   }
  ],
- "modified": "2021-01-30 16:22:38.843634",
+ "modified": "2021-01-30 19:15:48.438370",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

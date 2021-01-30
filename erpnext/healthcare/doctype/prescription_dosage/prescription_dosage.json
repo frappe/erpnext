@@ -3,7 +3,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:dosage",
- "beta": 1,
  "creation": "2016-09-16 15:49:25.327610",
  "doctype": "DocType",
  "document_type": "Document",
@@ -29,7 +28,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-30 14:18:37.739421",
+ "modified": "2021-01-30 19:16:47.737851",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Prescription Dosage",

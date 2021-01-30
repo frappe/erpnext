@@ -3,7 +3,6 @@
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "field:template",
- "beta": 1,
  "creation": "2017-10-05 14:59:55.438359",
  "description": "Procedure Template",
  "doctype": "DocType",
@@ -213,7 +212,7 @@
    "link_fieldname": "procedure_template"
   }
  ],
- "modified": "2021-01-30 14:18:33.919404",
+ "modified": "2021-01-30 19:16:26.773429",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",
