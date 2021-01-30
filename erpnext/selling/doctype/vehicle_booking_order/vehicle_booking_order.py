@@ -1083,6 +1083,9 @@ def update_customer_details_in_booking(vehicle_booking_order):
 
 
 def get_booking_payments(vehicle_booking_order):
+	if not vehicle_booking_order:
+		return []
+
 	if isinstance(vehicle_booking_order, string_types):
 		vehicle_booking_order = [vehicle_booking_order]
 
