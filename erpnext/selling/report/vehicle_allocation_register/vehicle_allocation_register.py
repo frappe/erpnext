@@ -125,7 +125,7 @@ class VehicleAllocationRegisterReport(object):
 		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
-		totals = {}
+		totals = frappe._dict()
 
 		# Copy grouped by into total row
 		for f, g in grouped_by.items():
@@ -142,12 +142,12 @@ class VehicleAllocationRegisterReport(object):
 		totals['reference_type'] = reference_dt
 		totals['reference'] = grouped_by.get(reference_field)
 
-		if totals['reference_type'] == "Vehicle Allocation Period" and not totals['reference']:
+		if totals.get('reference_type') == "Vehicle Allocation Period" and not totals.get('reference'):
 			totals['reference'] = "'Unassigned'"
 
 		count = len(data)
 		booked = len([d for d in data if d.vehicle_booking_order])
-		if not totals['allocation_period']:
+		if 'allocation_period' in grouped_by and not totals.get('allocation_period'):
 			totals['code'] = "Unassigned: {0}".format(count)
 		else:
 			totals['code'] = "Total: {0}, Booked: {1}".format(count, booked)
