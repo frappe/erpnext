@@ -12,15 +12,16 @@
   "basic_details_section",
   "naming_series",
   "first_name",
-  "middle_name",
-  "last_name",
   "practitioner_name",
-  "gender",
-  "image",
-  "column_break_7",
-  "status",
   "mobile_phone",
+  "column_break_5",
+  "middle_name",
+  "gender",
   "residence_phone",
+  "column_break_8",
+  "last_name",
+  "image",
+  "status",
   "office_phone",
   "employee_and_user_details_section",
   "employee",
@@ -104,10 +105,6 @@
    "in_standard_filter": 1,
    "label": "Medical Department",
    "options": "Medical Department"
-  },
-  {
-   "fieldname": "column_break_7",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "hospital",
@@ -276,11 +273,55 @@
    "fieldname": "address_and_contacts_section",
    "fieldtype": "Section Break",
    "label": "Address and Contacts"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
   }
  ],
  "image_field": "image",
- "links": [],
- "modified": "2020-04-06 13:44:24.759623",
+ "links": [
+  {
+   "group": "Consultation",
+   "link_doctype": "Patient Appointment",
+   "link_fieldname": "practitioner"
+  },
+  {
+   "group": "Consultation",
+   "link_doctype": "Patient Encounter",
+   "link_fieldname": "practitioner"
+  },
+  {
+   "group": "Consultation",
+   "link_doctype": "Fee Validity",
+   "link_fieldname": "practitioner"
+  },
+  {
+   "group": "Laboratory",
+   "link_doctype": "Lab Test",
+   "link_fieldname": "practitioner"
+  },
+  {
+   "group": "Clinical Procedure",
+   "link_doctype": "Clinical Procedure",
+   "link_fieldname": "practitioner"
+  },
+  {
+   "group": "Rehabilitation",
+   "link_doctype": "Patient Assessment",
+   "link_fieldname": "healthcare_practitioner"
+  },
+  {
+   "group": "Rehabilitation",
+   "link_doctype": "Therapy Session",
+   "link_fieldname": "practitioner"
+  }
+ ],
+ "modified": "2021-01-30 14:18:46.862703",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Practitioner",

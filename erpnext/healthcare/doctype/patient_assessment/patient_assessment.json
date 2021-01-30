@@ -1,21 +1,27 @@
 {
  "actions": [],
  "autoname": "naming_series:",
+ "beta": 1,
  "creation": "2020-04-19 22:45:12.356209",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "basic_details_section",
   "naming_series",
-  "therapy_session",
   "patient",
-  "assessment_template",
+  "patient_name",
+  "gender",
   "column_break_4",
-  "company",
-  "healthcare_practitioner",
+  "therapy_session",
+  "assessment_template",
   "assessment_datetime",
-  "assessment_description",
+  "column_break_9",
+  "healthcare_practitioner",
+  "practitioner_name",
+  "company",
   "section_break_7",
+  "assessment_description",
   "assessment_sheet",
   "section_break_9",
   "total_score_obtained",
@@ -68,7 +74,8 @@
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Assessment Details"
   },
   {
    "fieldname": "assessment_sheet",
@@ -78,7 +85,8 @@
   },
   {
    "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Total"
   },
   {
    "fieldname": "total_score",
@@ -136,11 +144,40 @@
    "in_standard_filter": 1,
    "label": "Company",
    "options": "Company"
+  },
+  {
+   "fetch_from": "patient.patient_name",
+   "fieldname": "patient_name",
+   "fieldtype": "Data",
+   "label": "Patient Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "patient.sex",
+   "fieldname": "gender",
+   "fieldtype": "Data",
+   "label": "Gender"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Practitioner Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-25 00:25:13.208400",
+ "modified": "2021-01-30 18:31:44.507903",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment",

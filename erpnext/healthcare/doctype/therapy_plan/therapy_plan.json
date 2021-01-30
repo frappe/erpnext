@@ -1,19 +1,22 @@
 {
  "actions": [],
  "autoname": "naming_series:",
+ "beta": 1,
  "creation": "2020-03-29 20:56:49.758602",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "details_section",
   "naming_series",
   "patient",
   "patient_name",
   "invoiced",
   "column_break_4",
-  "company",
-  "status",
   "start_date",
+  "status",
+  "column_break_1",
+  "company",
   "section_break_3",
   "therapy_plan_template",
   "therapy_plan_details",
@@ -41,7 +44,8 @@
   },
   {
    "fieldname": "section_break_3",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Plan Details"
   },
   {
    "fieldname": "therapy_plan_details",
@@ -78,7 +82,8 @@
   },
   {
    "fieldname": "section_break_9",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Total"
   },
   {
    "fieldname": "total_sessions",
@@ -126,10 +131,40 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
   }
  ],
- "links": [],
- "modified": "2020-11-04 18:13:13.564999",
+ "links": [
+  {
+   "group": "Consultation",
+   "link_doctype": "Patient Appointment",
+   "link_fieldname": "therapy_plan"
+  },
+  {
+   "group": "Consultation",
+   "link_doctype": "Patient Encounter",
+   "link_fieldname": "therapy_plan"
+  },
+  {
+   "group": "Rehabilitation",
+   "link_doctype": "Therapy Session",
+   "link_fieldname": "therapy_plan"
+  },
+  {
+   "group": "Inpatient",
+   "link_doctype": "Inpatient Record",
+   "link_fieldname": "therapy_plan"
+  }
+ ],
+ "modified": "2021-01-30 17:58:33.698953",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Plan",

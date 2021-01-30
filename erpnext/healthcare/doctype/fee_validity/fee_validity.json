@@ -9,18 +9,19 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "practitioner",
   "patient",
+  "column_break_2",
+  "practitioner",
   "column_break_3",
   "status",
-  "section_break_5",
   "section_break_3",
   "max_visits",
   "visited",
-  "ref_appointments",
-  "column_break_6",
+  "column_break_9",
   "start_date",
-  "valid_till"
+  "valid_till",
+  "column_break_6",
+  "ref_appointments"
  ],
  "fields": [
   {
@@ -46,7 +47,7 @@
   {
    "fieldname": "visited",
    "fieldtype": "Int",
-   "label": "Visited yet",
+   "label": "Number of Times Visited Till Now",
    "read_only": 1
   },
   {
@@ -68,7 +69,7 @@
   {
    "fieldname": "max_visits",
    "fieldtype": "Int",
-   "label": "Max number of visit",
+   "label": "Max Number of Visit",
    "read_only": 1
   },
   {
@@ -99,14 +100,17 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-03-17 20:25:06.487418",
+ "modified": "2021-01-30 15:23:01.210810",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Fee Validity",

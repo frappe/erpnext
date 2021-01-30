@@ -54,8 +54,13 @@
    "report_hide": 1
   }
  ],
- "links": [],
- "modified": "2020-02-03 21:06:05.833050",
+ "links": [
+  {
+   "link_doctype": "Patient Appointment",
+   "link_fieldname": "appointment_type"
+  }
+ ],
+ "modified": "2021-01-30 14:18:35.679707",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Appointment Type",

@@ -12,15 +12,17 @@
  "engine": "InnoDB",
  "field_order": [
   "template",
-  "item",
-  "item_code",
-  "item_group",
-  "description",
-  "column_break_5",
   "disabled",
+  "section_break_3",
+  "item_code",
+  "description",
   "is_billable",
   "rate",
+  "column_break_7",
+  "item_group",
   "medical_department",
+  "column_break_10",
+  "item",
   "medical_coding_section",
   "medical_code_standard",
   "medical_code",
@@ -67,10 +69,6 @@
    "fieldtype": "Link",
    "label": "Medical Department",
    "options": "Medical Department"
-  },
-  {
-   "fieldname": "column_break_5",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -194,10 +192,28 @@
    "fieldtype": "Link",
    "label": "Medical Code",
    "options": "Medical Code"
+  },
+  {
+   "fieldname": "section_break_3",
+   "fieldtype": "Section Break",
+   "label": "Item Details"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
   }
  ],
- "links": [],
- "modified": "2020-06-29 14:12:27.158130",
+ "links": [
+  {
+   "link_doctype": "Clinical Procedure",
+   "link_fieldname": "procedure_template"
+  }
+ ],
+ "modified": "2021-01-30 14:18:33.919404",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",

@@ -1,6 +1,7 @@
 {
  "actions": [],
  "autoname": "naming_series:",
+ "beta": 1,
  "creation": "2018-07-11 17:48:51.404139",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -16,22 +17,25 @@
   "mobile",
   "email",
   "phone",
-  "column_break_8",
-  "company",
-  "status",
+  "column_break_11",
   "scheduled_date",
   "admitted_datetime",
   "expected_discharge",
+  "column_break_8",
+  "company",
+  "status",
   "references",
   "admission_encounter",
   "admission_practitioner",
   "medical_department",
+  "column_break_22",
+  "primary_practitioner",
+  "secondary_practitioner",
+  "cb_admission",
   "admission_ordered_for",
   "expected_length_of_stay",
   "admission_service_unit_type",
-  "cb_admission",
-  "primary_practitioner",
-  "secondary_practitioner",
+  "admission_instructions_section",
   "admission_instruction",
   "encounter_details_section",
   "chief_complaint",
@@ -51,19 +55,21 @@
   "btn_transfer",
   "sb_discharge_details",
   "discharge_ordered_date",
+  "discharge_date",
+  "column_break_50",
   "discharge_practitioner",
   "discharge_encounter",
-  "discharge_date",
   "cb_discharge",
-  "discharge_instructions",
   "followup_date",
+  "discharge_instructions",
   "sb_discharge_note",
   "discharge_note"
  ],
  "fields": [
   {
    "fieldname": "section_break_1",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
   },
   {
    "fieldname": "naming_series",
@@ -245,7 +251,7 @@
   {
    "fieldname": "discharge_practitioner",
    "fieldtype": "Link",
-   "label": "Healthcare Practitioner",
+   "label": "Discharge Healthcare Practitioner",
    "options": "Healthcare Practitioner",
    "read_only": 1
   },
@@ -320,6 +326,7 @@
    "label": "Transfer"
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:(doc.status == \"Discharge Scheduled\" || doc.status == \"Discharged\")",
    "fieldname": "sb_discharge_note",
    "fieldtype": "Section Break",
@@ -336,7 +343,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -367,7 +375,7 @@
    "depends_on": "eval:(doc.status == \"Discharge Scheduled\" || doc.status == \"Discharged\")",
    "fieldname": "sb_discharge_details",
    "fieldtype": "Section Break",
-   "label": "Discharge Detials"
+   "label": "Discharge Details"
   },
   {
    "fieldname": "discharge_instructions",
@@ -408,10 +416,28 @@
    "fieldtype": "Date",
    "label": "Discharge Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "admission_instructions_section",
+   "fieldtype": "Section Break",
+   "label": "Admission Instructions"
+  },
+  {
+   "fieldname": "column_break_50",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2020-05-21 02:26:22.144575",
+ "modified": "2021-01-30 19:02:45.689873",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",

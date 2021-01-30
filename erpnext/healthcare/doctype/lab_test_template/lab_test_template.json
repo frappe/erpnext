@@ -9,14 +9,16 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "disabled",
+  "basic_details_section",
   "lab_test_name",
   "item",
   "lab_test_code",
   "lab_test_group",
   "department",
   "column_break_3",
-  "disabled",
   "lab_test_template_type",
+  "column_break_1",
   "is_billable",
   "lab_test_rate",
   "section_break_description",
@@ -36,6 +38,7 @@
   "lab_test_groups",
   "sb_sample_collection",
   "sample",
+  "column_break_30",
   "sample_uom",
   "sample_qty",
   "column_break_33",
@@ -316,10 +319,28 @@
   {
    "fieldname": "column_break_33",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
   }
  ],
- "links": [],
- "modified": "2020-07-30 14:32:40.449818",
+ "links": [
+  {
+   "link_doctype": "Lab Test",
+   "link_fieldname": "template"
+  }
+ ],
+ "modified": "2021-01-30 15:46:17.578874",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test Template",

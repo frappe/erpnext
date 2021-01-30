@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "beta": 1,
  "creation": "2020-09-14 21:51:30.259164",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -81,7 +82,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-09-30 14:03:26.755925",
+ "modified": "2021-01-30 14:19:59.457867",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Medication Order Entry",

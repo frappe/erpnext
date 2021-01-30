@@ -9,39 +9,43 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
+  "patient_details_section",
   "title",
-  "status",
+  "naming_series",
   "patient",
   "patient_name",
   "patient_sex",
   "patient_age",
   "inpatient_record",
-  "column_break_1",
-  "company",
-  "service_unit",
-  "procedure_template",
-  "get_procedure_from_encounter",
-  "procedure_prescription",
-  "therapy_plan",
-  "therapy_type",
-  "get_prescribed_therapies",
+  "column_break_8",
   "practitioner",
   "practitioner_name",
   "department",
+  "column_break_33",
+  "company",
+  "service_unit",
+  "status",
   "section_break_12",
   "appointment_type",
   "duration",
-  "column_break_17",
   "appointment_date",
   "appointment_time",
   "appointment_datetime",
+  "column_break_17",
+  "procedure_template",
+  "get_procedure_from_encounter",
+  "procedure_prescription",
+  "column_break_27",
+  "therapy_plan",
+  "therapy_type",
+  "get_prescribed_therapies",
   "section_break_16",
   "mode_of_payment",
-  "billing_item",
   "invoiced",
   "column_break_2",
   "paid_amount",
+  "column_break_3",
+  "billing_item",
   "ref_sales_invoice",
   "section_break_3",
   "referring_practitioner",
@@ -84,11 +88,6 @@
    "in_filter": 1,
    "label": "Duration (In Minutes)",
    "set_only_once": 1
-  },
-  {
-   "fieldname": "column_break_1",
-   "fieldtype": "Column Break",
-   "read_only": 1
   },
   {
    "depends_on": "eval:!doc.__islocal",
@@ -144,7 +143,6 @@
    "in_standard_filter": 1,
    "label": "Healthcare Practitioner",
    "options": "Healthcare Practitioner",
-   "read_only": 1,
    "reqd": 1,
    "search_index": 1,
    "set_only_once": 1
@@ -161,10 +159,6 @@
    "read_only": 1,
    "search_index": 1,
    "set_only_once": 1
-  },
-  {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "appointment_date",
@@ -292,7 +286,7 @@
    "set_only_once": 1
   },
   {
-   "depends_on": "eval:doc.patient && doc.therapy_plan && doc.__islocal;",
+   "depends_on": "eval:doc.patient && doc.__islocal;",
    "fieldname": "get_prescribed_therapies",
    "fieldtype": "Button",
    "label": "Get Prescribed Therapies"
@@ -302,7 +296,8 @@
    "fieldname": "therapy_plan",
    "fieldtype": "Link",
    "label": "Therapy Plan",
-   "options": "Therapy Plan"
+   "options": "Therapy Plan",
+   "set_only_once": 1
   },
   {
    "fieldname": "ref_sales_invoice",
@@ -344,10 +339,53 @@
    "fieldtype": "Data",
    "label": "Practitioner Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "patient_details_section",
+   "fieldtype": "Section Break",
+   "label": "Patient Details"
+  },
+  {
+   "fieldname": "column_break_33",
+   "fieldtype": "Column Break",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
   }
  ],
- "links": [],
- "modified": "2020-12-16 13:16:58.578503",
+ "links": [
+  {
+   "link_doctype": "Patient Encounter",
+   "link_fieldname": "appointment"
+  },
+  {
+   "link_doctype": "Vital Signs",
+   "link_fieldname": "appointment"
+  },
+  {
+   "link_doctype": "Clinical Procedure",
+   "link_fieldname": "appointment"
+  },
+  {
+   "link_doctype": "Therapy Session",
+   "link_fieldname": "appointment"
+  }
+ ],
+ "modified": "2021-01-30 14:18:32.641402",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

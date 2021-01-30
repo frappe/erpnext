@@ -16,21 +16,24 @@
   "inpatient_record",
   "appointment",
   "encounter",
-  "column_break_2",
-  "company",
+  "column_break_1",
   "signs_date",
   "signs_time",
+  "column_break_2",
+  "company",
   "sb_vs",
   "temperature",
   "pulse",
   "respiratory_rate",
-  "tongue",
-  "abdomen",
-  "column_break_8",
-  "reflexes",
+  "column_break_3",
   "bp_systolic",
   "bp_diastolic",
   "bp",
+  "column_break_8",
+  "tongue",
+  "abdomen",
+  "reflexes",
+  "vital_signs_notes_section",
   "vital_signs_note",
   "sb_nutrition_values",
   "height",
@@ -157,6 +160,7 @@
    "options": "\nNormal\nHyper\nVery Hyper\nOne Sided"
   },
   {
+   "description": "Normal resting blood pressure in an adult is approximately 120 mmHg systolic",
    "fieldname": "bp_systolic",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
@@ -164,6 +168,7 @@
    "label": "Blood Pressure (systolic)"
   },
   {
+   "description": "Normal resting blood pressure in an adult is approximately 80 mmHg diastolic",
    "fieldname": "bp_diastolic",
    "fieldtype": "Data",
    "ignore_xss_filter": 1,
@@ -171,7 +176,7 @@
    "label": "Blood Pressure (diastolic)"
   },
   {
-   "description": "Normal resting blood pressure in an adult is approximately 120 mmHg systolic, and 80 mmHg diastolic, abbreviated \"120/80 mmHg\"",
+   "description": "Normal resting blood pressure in an adult is abbreviated as \"120/80 mmHg\"",
    "fieldname": "bp",
    "fieldtype": "Data",
    "label": "Blood Pressure",
@@ -222,7 +227,8 @@
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -255,11 +261,30 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "vital_signs_notes_section",
+   "fieldtype": "Section Break",
+   "label": "Vital Signs Notes"
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-05-17 22:23:24.632286",
+ "links": [
+  {
+   "link_doctype": "Patient Medical Record",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2021-01-30 15:18:42.681053",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Vital Signs",

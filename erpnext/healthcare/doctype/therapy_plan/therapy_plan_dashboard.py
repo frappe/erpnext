@@ -9,10 +9,6 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'label': _('Therapy Sessions'),
-				'items': ['Therapy Session']
-			},
-			{
 				'label': _('Billing'),
 				'items': ['Sales Invoice']
 			}

@@ -11,18 +11,20 @@
  "field_order": [
   "naming_series",
   "patient",
+  "column_break_3",
   "status",
   "column_break_2",
   "attach",
   "section_break_4",
   "subject",
   "section_break_8",
-  "communication_date",
   "reference_doctype",
   "reference_name",
-  "column_break_9",
+  "column_break_12",
   "reference_owner",
-  "user"
+  "user",
+  "column_break_9",
+  "communication_date"
  ],
  "fields": [
   {
@@ -53,7 +55,8 @@
   },
   {
    "fieldname": "section_break_4",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Record Summary"
   },
   {
    "fieldname": "subject",
@@ -120,12 +123,21 @@
   },
   {
    "fieldname": "section_break_8",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
  "in_create": 1,
  "links": [],
- "modified": "2020-04-29 12:26:57.679402",
+ "modified": "2021-01-30 18:38:31.735913",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Medical Record",

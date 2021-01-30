@@ -1,6 +1,7 @@
 {
  "actions": [],
  "autoname": "field:assessment_name",
+ "beta": 1,
  "creation": "2020-04-19 19:33:13.204707",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -60,8 +61,13 @@
    "label": "Assessment Description"
   }
  ],
- "links": [],
- "modified": "2020-04-21 13:14:19.075167",
+ "links": [
+  {
+   "link_doctype": "Patient Assessment",
+   "link_fieldname": "assessment_template"
+  }
+ ],
+ "modified": "2021-01-30 18:23:14.654413",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment Template",

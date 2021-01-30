@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "beta": 1,
  "creation": "2020-11-25 13:41:37.675518",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -31,7 +32,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-11-25 13:43:38.511771",
+ "modified": "2021-01-30 14:20:10.461883",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient History Settings",

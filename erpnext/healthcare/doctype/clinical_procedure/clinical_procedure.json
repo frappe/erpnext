@@ -12,37 +12,38 @@
   "appointment",
   "procedure_template",
   "medical_code",
+  "invoiced",
+  "column_break_1",
+  "start_date",
+  "start_time",
   "column_break_30",
   "company",
-  "invoiced",
+  "status",
   "section_break_6",
   "patient",
   "patient_name",
   "patient_sex",
   "patient_age",
+  "column_break_2",
   "inpatient_record",
-  "notes",
-  "column_break_7",
-  "status",
   "practitioner",
   "practitioner_name",
+  "column_break_7",
   "medical_department",
   "service_unit",
-  "start_date",
-  "start_time",
+  "notes_and_sample_collection_section",
   "sample",
+  "notes",
   "consumables_section",
   "consume_stock",
   "warehouse",
   "items",
-  "section_break_24",
   "invoice_separately_as_consumables",
   "consumption_invoiced",
+  "section_break_34",
   "consumable_total_amount",
-  "column_break_27",
   "consumption_details",
   "sb_refs",
-  "column_break_34",
   "prescription",
   "amended_from"
  ],
@@ -133,6 +134,7 @@
    "set_only_once": 1
   },
   {
+   "depends_on": "consume_stock",
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
@@ -183,6 +185,7 @@
    "label": "Consume Stock"
   },
   {
+   "depends_on": "consume_stock",
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Consumables",
@@ -245,20 +248,13 @@
    "label": "Consumables"
   },
   {
-   "fieldname": "column_break_27",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_24",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "column_break_30",
    "fieldtype": "Column Break"
   },
   {
    "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Details"
   },
   {
    "collapsible": 1,
@@ -279,10 +275,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_34",
-   "fieldtype": "Column Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "title",
    "fieldtype": "Data",
@@ -299,11 +291,35 @@
    "label": "Medical Code",
    "options": "Medical Code",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "notes_and_sample_collection_section",
+   "fieldtype": "Section Break",
+   "label": "Notes and Sample Collection"
+  },
+  {
+   "fieldname": "section_break_34",
+   "fieldtype": "Section Break",
+   "hide_border": 1
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-06-29 14:28:11.779815",
+ "links": [
+  {
+   "link_doctype": "Patient Medical Record",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2021-01-30 14:51:47.856460",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",

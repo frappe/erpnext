@@ -7,13 +7,14 @@
  "engine": "InnoDB",
  "field_order": [
   "sb_op_settings",
-  "patient_name_by",
   "link_customer_to_patient",
-  "default_medical_code_standard",
-  "column_break_9",
   "collect_registration_fee",
   "registration_fee",
   "automate_appointment_invoicing",
+  "column_break_9",
+  "patient_name_by",
+  "default_medical_code_standard",
+  "column_break_1",
   "enable_free_follow_ups",
   "max_visits",
   "valid_days",
@@ -21,8 +22,9 @@
   "allow_discharge_despite_unbilled_services",
   "do_not_bill_inpatient_encounters",
   "healthcare_service_items",
-  "inpatient_visit_charge_item",
   "op_consulting_charge_item",
+  "column_break_2",
+  "inpatient_visit_charge_item",
   "column_break_13",
   "clinical_procedure_consumable_item",
   "sb_in_ac",
@@ -31,6 +33,7 @@
   "out_patient_sms_alerts",
   "send_registration_msg",
   "registration_msg",
+  "column_break_3",
   "send_appointment_confirmation",
   "appointment_confirmation_msg",
   "avoid_confirmation",
@@ -42,9 +45,10 @@
   "create_lab_test_on_si_submit",
   "create_sample_collection_for_lab_test",
   "column_break_34",
-  "lab_test_approval_required",
   "employee_name_and_designation_in_print",
   "custom_signature_in_print",
+  "column_break_42",
+  "lab_test_approval_required",
   "laboratory_sms_alerts",
   "sms_printed",
   "column_break_28",
@@ -54,7 +58,7 @@
   {
    "fieldname": "sb_op_settings",
    "fieldtype": "Section Break",
-   "label": "Out Patient Settings"
+   "label": "Basic Settings"
   },
   {
    "fieldname": "default_medical_code_standard",
@@ -163,10 +167,10 @@
    "description": "Check this if you want the Name and Designation of the Employee associated with the User who submits the document to be printed in the Lab Test Report.",
    "fieldname": "employee_name_and_designation_in_print",
    "fieldtype": "Check",
-   "label": "Employee name and designation in print"
+   "label": "Employee Name and Designation in Print"
   },
   {
-   "depends_on": "eval:doc.employee_name_and_designation_in_print == '0'\n",
+   "depends_on": "eval:!doc.employee_name_and_designation_in_print",
    "fieldname": "custom_signature_in_print",
    "fieldtype": "Small Text",
    "label": "Custom Signature in Print"
@@ -200,7 +204,7 @@
    "description": "Checking this will restrict printing and emailing of Lab Test documents unless they have the status as Approved.",
    "fieldname": "lab_test_approval_required",
    "fieldtype": "Check",
-   "label": "Do not print or email Lab Tests without Approval"
+   "label": "Do Not Print or Email Lab Tests without Approval"
   },
   {
    "default": "1",
@@ -322,11 +326,27 @@
    "fieldname": "do_not_bill_inpatient_encounters",
    "fieldtype": "Check",
    "label": "Do Not Bill Patient Encounters for Inpatients"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2021-01-13 09:04:35.877700",
+ "modified": "2021-01-30 15:38:59.036851",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

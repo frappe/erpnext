@@ -14,29 +14,31 @@
   "basic_info",
   "naming_series",
   "first_name",
-  "middle_name",
-  "last_name",
   "patient_name",
-  "sex",
-  "blood_group",
   "dob",
   "age_html",
-  "image",
-  "column_break_14",
-  "status",
+  "email",
   "inpatient_record",
   "inpatient_status",
-  "report_preference",
+  "column_break_4",
+  "middle_name",
+  "sex",
+  "blood_group",
   "mobile",
-  "email",
+  "column_break_6",
+  "last_name",
+  "status",
+  "image",
+  "report_preference",
   "phone",
   "customer_details_section",
   "customer",
-  "customer_group",
-  "territory",
-  "column_break_24",
   "default_currency",
+  "column_break_24",
+  "customer_group",
   "default_price_list",
+  "data_27",
+  "territory",
   "language",
   "personal_and_social_history",
   "occupation",
@@ -158,10 +160,6 @@
    "width": "50%"
   },
   {
-   "fieldname": "column_break_14",
-   "fieldtype": "Column Break"
-  },
-  {
    "description": "If \"Link Customer to Patient\" is checked in Healthcare Settings and an existing Customer is not selected then, a Customer will be created for this Patient for recording transactions in Accounts module.",
    "fieldname": "customer",
    "fieldtype": "Link",
@@ -217,7 +215,7 @@
    "collapsible": 1,
    "fieldname": "allergy_medical_and_surgical_history",
    "fieldtype": "Section Break",
-   "label": "Allergies, Medical and Surgical History"
+   "label": "Allergies, Medical, and Surgical History"
   },
   {
    "fieldname": "allergies",
@@ -389,13 +387,96 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "data_27",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "image_field": "image",
- "links": [],
+ "links": [
+  {
+   "group": "Consultation",
+   "link_doctype": "Patient Appointment",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Consultation",
+   "link_doctype": "Patient Encounter",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Consultation",
+   "link_doctype": "Vital Signs",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Laboratory",
+   "link_doctype": "Lab Test",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Laboratory",
+   "link_doctype": "Sample Collection",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Inpatient",
+   "link_doctype": "Inpatient Record",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Inpatient",
+   "link_doctype": "Inpatient Medication Order",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Rehabilitation",
+   "link_doctype": "Therapy Plan",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Rehabilitation",
+   "link_doctype": "Therapy Session",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Rehabilitation",
+   "link_doctype": "Patient Assessment",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Clinical Procedure",
+   "link_doctype": "Clinical Procedure",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Medical Record",
+   "link_doctype": "Patient Medical Record",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Billing",
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "patient"
+  },
+  {
+   "group": "Billing",
+   "link_doctype": "Fee Validity",
+   "link_fieldname": "patient"
+  }
+ ],
  "max_attachments": 50,
- "modified": "2020-04-25 17:24:32.146415",
+ "modified": "2021-01-30 14:19:18.409398",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient",

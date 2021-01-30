@@ -6,14 +6,13 @@ def get_data():
 		'heatmap': True,
 		'heatmap_message': _('This is based on transactions against this Healthcare Practitioner.'),
 		'fieldname': 'practitioner',
+		'non_standard_fieldnames': {
+			'Inpatient Record': 'primary_practitioner'
+		},
 		'transactions': [
 			{
-				'label': _('Appointments and Patient Encounters'),
-				'items': ['Patient Appointment', 'Patient Encounter', 'Fee Validity']
-			},
-			{
-				'label': _('Consultation'),
-				'items': ['Clinical Procedure', 'Lab Test']
+				'label': _('Inpatient'),
+				'items': ['Inpatient Record', 'Inpatient Medication Order']
 			}
 		]
 	}

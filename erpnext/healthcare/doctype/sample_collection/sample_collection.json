@@ -13,12 +13,13 @@
   "naming_series",
   "patient",
   "patient_name",
+  "invoiced",
+  "column_break_5",
   "patient_age",
   "patient_sex",
   "column_break_4",
   "inpatient_record",
   "company",
-  "invoiced",
   "section_break_6",
   "sample",
   "sample_uom",
@@ -220,11 +221,15 @@
    "fieldtype": "Data",
    "label": "Patient Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-30 16:53:13.076104",
+ "modified": "2021-01-30 16:57:38.295789",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Sample Collection",

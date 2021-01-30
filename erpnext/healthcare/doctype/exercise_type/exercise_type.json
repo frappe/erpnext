@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "beta": 1,
  "creation": "2020-03-29 21:37:03.366344",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -96,7 +97,7 @@
   }
  ],
  "links": [],
- "modified": "2020-04-21 13:05:36.555060",
+ "modified": "2021-01-30 14:19:35.569196",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Exercise Type",

@@ -13,18 +13,20 @@
   "template",
   "lab_test_name",
   "lab_test_group",
-  "medical_code",
-  "department",
-  "column_break_26",
-  "company",
-  "status",
-  "submitted_date",
+  "invoiced",
+  "column_break_1",
+  "creation_date",
   "result_date",
+  "submitted_date",
   "approved_date",
   "expected_result_date",
   "expected_result_time",
   "printed_on",
-  "invoiced",
+  "department",
+  "medical_code",
+  "column_break_26",
+  "company",
+  "status",
   "sb_first",
   "patient",
   "patient_name",
@@ -38,10 +40,12 @@
   "practitioner",
   "practitioner_name",
   "requesting_department",
+  "column_break_36",
   "employee",
   "employee_name",
   "employee_designation",
   "user",
+  "sample_section",
   "sample",
   "sb_normal",
   "lab_test_html",
@@ -212,12 +216,13 @@
    "report_hide": 1
   },
   {
+   "default": "Today",
    "fieldname": "approved_date",
    "fieldtype": "Datetime",
    "hidden": 1,
    "label": "Approved Date",
    "print_hide": 1,
-   "report_hide": 1
+   "read_only": 1
   },
   {
    "fieldname": "sample",
@@ -246,10 +251,10 @@
    "read_only": 1
   },
   {
+   "default": "Today",
    "fieldname": "result_date",
    "fieldtype": "Date",
    "label": "Result Date",
-   "read_only": 1,
    "search_index": 1
   },
   {
@@ -309,9 +314,11 @@
   },
   {
    "fieldname": "sb_first",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Details"
   },
   {
+   "fetch_from": "template.lab_test_name",
    "fieldname": "lab_test_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -555,11 +562,36 @@
    "label": "Organism Test Result",
    "options": "Organism Test Result",
    "print_hide": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Today",
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "label": "Creation Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_36",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sample_section",
+   "fieldtype": "Section Break",
+   "label": "Sample"
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-11-30 11:04:17.195848",
+ "links": [
+  {
+   "link_doctype": "Patient Medical Record",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2021-01-30 16:22:38.843634",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

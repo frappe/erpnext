@@ -69,6 +69,7 @@ def create_medical_record(doc, method=None):
 	subject = set_subject_field(doc)
 	date_field = get_date_field(doc.doctype)
 	medical_record = frappe.new_doc('Patient Medical Record')
+	medical_record.company = doc.company
 	medical_record.patient = doc.patient
 	medical_record.subject = subject
 	medical_record.status = 'Open'

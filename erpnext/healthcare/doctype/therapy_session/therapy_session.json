@@ -1,33 +1,38 @@
 {
  "actions": [],
  "autoname": "naming_series:",
+ "beta": 1,
  "creation": "2020-03-11 08:57:40.669857",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "basic_details_section",
   "naming_series",
   "appointment",
   "patient",
   "patient_name",
   "patient_age",
   "gender",
+  "column_break_1",
+  "practitioner",
+  "practitioner_name",
+  "department",
   "column_break_5",
   "company",
   "therapy_plan",
   "therapy_type",
-  "practitioner",
-  "department",
   "details_section",
-  "medical_code",
   "duration",
+  "medical_code",
   "rate",
-  "location",
-  "column_break_12",
-  "service_unit",
+  "invoiced",
+  "column_break_2",
   "start_date",
   "start_time",
-  "invoiced",
+  "column_break_12",
+  "service_unit",
+  "location",
   "exercises_section",
   "exercises",
   "section_break_23",
@@ -85,7 +90,7 @@
   {
    "fieldname": "details_section",
    "fieldtype": "Section Break",
-   "label": "Details"
+   "label": "Session Details"
   },
   {
    "fetch_from": "therapy_template.default_duration",
@@ -219,11 +224,42 @@
    "label": "Medical Code",
    "options": "Medical Code",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "practitioner.practitioner_name",
+   "fieldname": "practitioner_name",
+   "fieldtype": "Data",
+   "label": "Practitioner Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "basic_details_section",
+   "fieldtype": "Section Break",
+   "label": "Basic Details"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-11-04 18:14:25.999939",
+ "links": [
+  {
+   "group": "Assessment",
+   "link_doctype": "Patient Assessment",
+   "link_fieldname": "therapy_session"
+  },
+  {
+   "group": "Record",
+   "link_doctype": "Patient Medical Record",
+   "link_fieldname": "reference_name"
+  }
+ ],
+ "modified": "2021-01-30 18:16:03.290911",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",
