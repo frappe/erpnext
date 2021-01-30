@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "posting_details",
   "update_time",
   "amended_from"
  ],
@@ -26,11 +27,21 @@
    "label": "Update Time",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "posting_details",
+   "fieldtype": "Section Break",
+   "label": "Posting Details"
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2021-01-17 03:59:14.494557",
+ "links": [
+  {
+   "link_doctype": "Loan Security Shortfall",
+   "link_fieldname": "process_loan_security_shortfall"
+  }
+ ],
+ "modified": "2021-01-30 22:56:29.284915",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Security Shortfall",

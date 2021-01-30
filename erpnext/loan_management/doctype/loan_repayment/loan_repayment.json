@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_details_section",
   "against_loan",
   "applicant_type",
   "applicant",
@@ -226,12 +227,17 @@
    "fieldtype": "Percent",
    "label": "Rate Of Interest",
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-05 10:06:58.792841",
+ "modified": "2021-01-30 22:30:14.072816",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

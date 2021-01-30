@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "autoname": "LM-LSS-.#####",
  "creation": "2019-09-06 11:33:34.709540",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_details_section",
   "loan",
   "status",
   "column_break_3",
@@ -74,6 +76,7 @@
   {
    "fieldname": "process_loan_security_shortfall",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Process Loan Security Shortfall",
    "options": "Process Loan Security Shortfall",
    "read_only": 1
@@ -85,10 +88,16 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Details"
   }
  ],
  "in_create": 1,
- "modified": "2019-10-24 06:24:26.128997",
+ "links": [],
+ "modified": "2021-01-30 22:55:59.008362",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Shortfall",
