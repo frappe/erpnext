@@ -401,7 +401,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			current_tax_amount = Math.round(current_tax_amount);
 		}
 
-		return current_tax_amount
+		return current_tax_amount;
 	},
 
 	set_item_wise_tax: function(item, tax, tax_rate, current_tax_amount) {
