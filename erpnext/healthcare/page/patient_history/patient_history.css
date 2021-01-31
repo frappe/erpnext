@@ -9,6 +9,26 @@
 	cursor: pointer;
 }
 
+.patient-image-container {
+	margin-top: 17px;
+  }
+
+.patient-image {
+	display: inline-block;
+	width: 100%;
+	height: 0;
+	padding: 50% 0px;
+	background-size: cover;
+	background-repeat: no-repeat;
+	background-position: center center;
+	border-radius: 4px;
+}
+
+.patient-name {
+	font-size: 20px;
+	margin-top: 25px;
+}
+
 .medical_record-label {
 	max-width: 100px;
 	margin-bottom: -4px;
@@ -19,19 +39,19 @@
 }
 
 .date-indicator {
-    background:none;
-    font-size:12px;
-    vertical-align:middle;
-    font-weight:bold;
-    color:#6c7680;
+	background:none;
+	font-size:12px;
+	vertical-align:middle;
+	font-weight:bold;
+	color:#6c7680;
 }
 .date-indicator::after {
-    margin:0 -4px 0 12px;
-    content:'';
-    display:inline-block;
-    height:8px;
-    width:8px;
-    border-radius:8px;
+	margin:0 -4px 0 12px;
+	content:'';
+	display:inline-block;
+	height:8px;
+	width:8px;
+	border-radius:8px;
 	background: #d1d8dd;
 }
 
