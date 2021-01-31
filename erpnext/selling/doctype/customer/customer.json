@@ -638,13 +638,14 @@
   {
    "fieldname": "mobile_no_2",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Secondary Mobile No"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-01-31 11:48:58.886179",
+ "modified": "2021-01-31 15:20:51.480600",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -735,7 +736,7 @@
   }
  ],
  "quick_entry": 1,
- "search_fields": "customer_name,customer_group,territory,mobile_no, phone_no, email_id, tax_id, tax_cnic, tax_strn",
+ "search_fields": "customer_name,customer_group,territory,mobile_no, mobile_no_2, phone_no, email_id, tax_id, tax_cnic, tax_strn",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "ASC",

@@ -79,6 +79,7 @@ class Customer(TransactionBase):
 		self.validate_default_bank_account()
 
 		self.validate_tax_id()
+		self.validate_mobile_no()
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
@@ -111,6 +112,11 @@ class Customer(TransactionBase):
 		validate_duplicate_tax_id("Customer", "tax_id", self.tax_id, exclude=exclude, throw=False)
 		validate_duplicate_tax_id("Customer", "tax_cnic", self.tax_cnic, exclude=exclude, throw=False)
 		validate_duplicate_tax_id("Customer", "tax_strn", self.tax_strn, exclude=exclude, throw=False)
+
+	def validate_mobile_no(self):
+		from erpnext.accounts.party import validate_mobile_pakistan
+		validate_mobile_pakistan(self.mobile_no)
+		validate_mobile_pakistan(self.mobile_no_2)
 
 	def on_update(self):
 		self.validate_name_with_customer_group()

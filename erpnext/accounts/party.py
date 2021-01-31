@@ -573,6 +573,25 @@ def validate_ntn_cnic_strn(ntn=None, cnic=None, strn=None):
 	if strn and not strn_regex.match(strn):
 		frappe.throw(_("Invalid STRN. STRN must be in the format ##-##-####-###-##"))
 
+def validate_mobile_pakistan_in_contact(doc, method):
+	for d in doc.phone_nos:
+		if d.is_primary_mobile_no:
+			validate_mobile_pakistan(d.phone)
+
+def validate_mobile_pakistan(mobile_no):
+	if not mobile_no:
+		return
+
+	# do not check mobile number validity for international numbers
+	if mobile_no[:1] == "+" or mobile_no[:2] == "00":
+		return
+
+	import re
+	mobile_regex = re.compile(r'^0\d\d\d-\d\d\d\d\d\d\d$')
+
+	if not mobile_regex.match(mobile_no):
+		frappe.throw(_("Invalid Mobile No. Pakistani Mobile Nos must be in the format 0###-#######"))
+
 @frappe.whitelist()
 def validate_duplicate_tax_id(doctype, fieldname, value, exclude=None, throw=False):
 	if not value:

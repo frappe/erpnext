@@ -304,6 +304,15 @@ $.extend(erpnext.utils, {
 		return value;
 	},
 
+	format_ntn: function(frm, fieldname) {
+		let value = frm.doc[fieldname];
+		if (value) {
+			value = erpnext.utils.get_formatted_ntn(value);
+			frm.doc[fieldname] = value;
+			frm.refresh_field(fieldname);
+		}
+	},
+
 	get_formatted_cnic: function (value) {
 		value = value.replace(/[^0-9]+/g, "");
 
@@ -316,6 +325,15 @@ $.extend(erpnext.utils, {
 		}
 
 		return value;
+	},
+
+	format_cnic: function(frm, fieldname) {
+		let value = frm.doc[fieldname];
+		if (value) {
+			value = erpnext.utils.get_formatted_cnic(value);
+			frm.doc[fieldname] = value;
+			frm.refresh_field(fieldname);
+		}
 	},
 
 	get_formatted_strn: function (value) {
@@ -338,24 +356,6 @@ $.extend(erpnext.utils, {
 		return value;
 	},
 
-	format_ntn: function(frm, fieldname) {
-		let value = frm.doc[fieldname];
-		if (value) {
-			value = erpnext.utils.get_formatted_ntn(value);
-			frm.doc[fieldname] = value;
-			frm.refresh_field(fieldname);
-		}
-	},
-
-	format_cnic: function(frm, fieldname) {
-		let value = frm.doc[fieldname];
-		if (value) {
-			value = erpnext.utils.get_formatted_cnic(value);
-			frm.doc[fieldname] = value;
-			frm.refresh_field(fieldname);
-		}
-	},
-
 	format_strn: function(frm, fieldname) {
 		let value = frm.doc[fieldname];
 		if (value) {
@@ -363,6 +363,39 @@ $.extend(erpnext.utils, {
 			frm.doc[fieldname] = value;
 			frm.refresh_field(fieldname);
 		}
+	},
+
+	get_formatted_mobile_pakistan: function (value) {
+		value = value.replace(/[^0-9+]+/g, "");
+
+		// do not format international numbers
+		if (value.slice(0, 1) === '+' || value.slice(0, 2) === '00') {
+			return value;
+		}
+
+		// 0000-0000000
+		if (value.length >= 4) {
+			value = value.slice(0, 4) + "-" + value.slice(4);
+			return value;
+		}
+	},
+
+	format_mobile_pakistan: function (frm, fieldname) {
+		let value = frm.doc[fieldname];
+		if (value) {
+			value = erpnext.utils.get_formatted_mobile_pakistan(value);
+			frm.doc[fieldname] = value;
+			frm.refresh_field(fieldname);
+		}
+	},
+
+	format_mobile_pakistan_in_contact: function (frm) {
+		$.each(frm.doc.phone_nos || [], function (i, d) {
+			if (d.is_primary_mobile_no) {
+				d.phone = erpnext.utils.get_formatted_mobile_pakistan(d.phone);
+				refresh_field('phone', d.name, 'phone_nos');
+			}
+		});
 	},
 
 	get_formatted_vehicle_id(value) {

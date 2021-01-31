@@ -166,6 +166,12 @@ frappe.ui.form.on("Customer", {
 	validate: function(frm) {
 		if(frm.doc.lead_name) frappe.model.clear_doc("Lead", frm.doc.lead_name);
 
+		erpnext.utils.format_ntn(frm, "tax_id");
+		erpnext.utils.format_cnic(frm, "tax_cnic");
+		erpnext.utils.format_strn(frm, "tax_strn");
+
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no");
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no_2");
 	},
 
 	tax_id: function(frm) {
@@ -180,4 +186,11 @@ frappe.ui.form.on("Customer", {
 		erpnext.utils.format_strn(frm, "tax_strn");
 		erpnext.utils.validate_duplicate_tax_id(frm.doc, "tax_strn");
 	},
+
+	mobile_no: function (frm) {
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no");
+	},
+	mobile_no_2: function (frm) {
+		erpnext.utils.format_mobile_pakistan(frm, "mobile_no_2");
+	}
 });

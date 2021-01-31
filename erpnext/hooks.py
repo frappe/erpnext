@@ -23,6 +23,7 @@ web_include_css = "assets/css/erpnext-web.css"
 doctype_js = {
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
+	"Contact": "public/js/contact.js",
 	"Website Theme": "public/js/website_theme.js",
 	"Newsletter": "public/js/newsletter.js"
 }
@@ -261,7 +262,10 @@ doc_events = {
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
 		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information",
-		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
+		"validate": [
+			"erpnext.crm.utils.update_lead_phone_numbers",
+			"erpnext.accounts.party.validate_mobile_pakistan_in_contact"
+		]
 	},
 	"Lead": {
 		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information"
