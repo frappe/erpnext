@@ -244,6 +244,14 @@ class AccountsController(TransactionBase):
 		if self.doctype in ['Journal Entry', 'Payment Entry']:
 			self.get_gl_entries_for_print()
 
+			self.party_to_party_name = {}
+			if self.doctype == "Payment Entry":
+				self.party_to_party_name[(self.party_type, self.party)] = self.party_name
+			if self.doctype == "Journal Entry":
+				for d in self.accounts:
+					if d.party_type and d.party and d.party_name:
+						self.party_to_party_name[(d.party_type, d.party)] = d.party_name
+
 		self.company_address_doc = erpnext.get_company_address(self)
 
 		if self.doctype == "Stock Entry":

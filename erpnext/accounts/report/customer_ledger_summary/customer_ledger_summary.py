@@ -41,7 +41,7 @@ class PartyLedgerSummaryReport(object):
 			"fieldtype": "Link",
 			"fieldname": "party",
 			"options": self.filters.party_type,
-			"width": 200
+			"width": 80 if self.party_naming_by == "Naming Series" else 200
 		}]
 
 		if self.party_naming_by == "Naming Series":
@@ -49,7 +49,7 @@ class PartyLedgerSummaryReport(object):
 				"label": _(self.filters.party_type + " Name"),
 				"fieldtype": "Data",
 				"fieldname": "party_name",
-				"width": 110
+				"width": 200
 			})
 
 		invoiced_label = "Paid Amount" if self.filters.party_type == "Employee" else "Invoiced Amount"

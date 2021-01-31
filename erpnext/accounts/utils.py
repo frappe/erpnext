@@ -488,6 +488,7 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.exchange_rate = jvd[0]['exchange_rate']
 			ch.party_type = d["party_type"]
 			ch.party = d["party"]
+			ch.party_name = d["party_name"]
 			ch.cost_center = cstr(jvd[0]["cost_center"])
 			ch.project = jvd[0]["project"]
 			ch.balance = flt(jvd[0]["balance"])

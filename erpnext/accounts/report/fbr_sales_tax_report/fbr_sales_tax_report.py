@@ -55,7 +55,7 @@ class FBRInvoiceWiseTaxes(object):
 				"label": _("Buyer NTN"),
 				"fieldtype": "Data",
 				"fieldname": "tax_id",
-				"width": 70
+				"width": 75
 			},
 			{
 				"label": _("Buyer CNIC"),
@@ -68,13 +68,14 @@ class FBRInvoiceWiseTaxes(object):
 				"fieldtype": "Link",
 				"fieldname": "party",
 				"options": self.filters.party_type,
-				"width": 200
+				"width": 80 if self.party_naming_by == "Naming Series" else 200,
+				"hide_for_export": 1
 			},
 			{
 				"label": _("Buyer Name"),
 				"fieldtype": "Data",
 				"fieldname": "party_name",
-				"width": 110
+				"width": 200
 			},
 			{
 				"label": _("Buyer Type"),
@@ -221,7 +222,7 @@ class FBRInvoiceWiseTaxes(object):
 			},
 		]
 
-		if self.party_naming_by != "Naming Series":
+		if self.party_naming_by != "Naming Series" and not cint(self.filters.for_export):
 			columns = list(filter(lambda d: d['fieldname'] != 'party_name', columns))
 
 		if cint(self.filters.for_export):

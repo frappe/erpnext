@@ -51,7 +51,7 @@ class Analytics(object):
 				"label": _(self.filters.tree_type + " Name"),
 				"fieldname": "entity_name",
 				"fieldtype": "Data",
-				"width": 140
+				"width": 180
 			})
 
 		self.columns.append({

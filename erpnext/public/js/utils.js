@@ -870,6 +870,14 @@ frappe.form.link_formatters['Employee'] = function(value, doc) {
 	}
 }
 
+frappe.form.link_formatters['Customer'] = function(value, doc) {
+	if(doc && doc.party_type === "Customer" && doc.party_name && doc.party_name !== value) {
+		return value? value + ': ' + doc.party_name: doc.party_name;
+	} else {
+		return value;
+	}
+}
+
 // add description on posting time
 $(document).on('app_ready', function() {
 	if(!frappe.datetime.is_timezone_same()) {

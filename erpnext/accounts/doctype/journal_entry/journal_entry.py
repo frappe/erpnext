@@ -7,7 +7,7 @@ from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cin
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_balance_on_voucher, get_account_currency
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_account, get_party_name
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
 
@@ -57,6 +57,7 @@ class JournalEntry(AccountsController):
 		self.validate_credit_debit_note()
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
+		self.set_party_name()
 		self.validate_inter_company_accounts()
 		self.set_original_reference()
 
@@ -736,6 +737,11 @@ class JournalEntry(AccountsController):
 			d.account_balance = account_balance[d.account]
 			d.party_balance = flt(party_balance[(d.party_type, d.party)])
 
+	def set_party_name(self):
+		for d in self.get("accounts"):
+			if d.party_type and d.party:
+				d.party_name = get_party_name(d.party_type, d.party)
+
 
 @frappe.whitelist()
 def get_default_bank_cash_account(company, account_type=None, mode_of_payment=None, account=None):
@@ -1061,20 +1067,25 @@ def get_outstanding(args):
 		}
 
 @frappe.whitelist()
-def get_party_account_and_balance(company, party_type, party, cost_center=None):
+def get_party_account_and_balance(company, party_type, party, cost_center=None, account=None):
 	if not frappe.has_permission("Account"):
 		frappe.msgprint(_("No Permission"), raise_exception=1)
 
-	account = get_party_account(party_type, party, company)
+	if not account:
+		account = get_party_account(party_type, party, company)
+
+	account_currency = frappe.db.get_value("Account", account, "account_currency")
 
 	account_balance = get_balance_on(account=account, cost_center=cost_center)
 	party_balance = get_balance_on(party_type=party_type, party=party, company=company, cost_center=cost_center)
+	party_name = get_party_name(party_type, party)
 
 	return {
 		"account": account,
 		"balance": account_balance,
 		"party_balance": party_balance,
-		"account_currency": frappe.db.get_value("Account", account, "account_currency")
+		"party_name": party_name,
+		"account_currency": account_currency
 	}
 
 

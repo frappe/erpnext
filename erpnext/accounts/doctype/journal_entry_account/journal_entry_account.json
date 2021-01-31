@@ -13,6 +13,7 @@
   "col_break1",
   "party_type",
   "party",
+  "party_name",
   "party_balance",
   "accounting_dimensions_section",
   "cost_center",
@@ -309,11 +310,17 @@
    "no_copy": 1,
    "options": "original_reference_type",
    "read_only": 1
+  },
+  {
+   "fieldname": "party_name",
+   "fieldtype": "Data",
+   "label": "Party Name",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-13 00:41:00.164381",
+ "modified": "2021-01-31 22:06:27.798782",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

@@ -199,6 +199,7 @@ class SalesPurchaseDetailsReport(object):
 				"cost_center": d.cost_center,
 				"project": d.project,
 				scrub(self.filters.party_type) + "_name": d.party_name,
+				"party_name": d.party_name
 			})
 
 			if "Group by Item" in [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]:
@@ -302,6 +303,7 @@ class SalesPurchaseDetailsReport(object):
 				totals['group_doctype'] = data[0].get("party_group_dt")
 				totals['group'] = data[0].get("party_group")
 				totals['party_name'] = data[0].get("party_name")
+				totals['party_type'] = self.filters.party_type
 
 				if self.filters.party_type == "Customer":
 					details = self.additional_customer_info.get(group_value, frappe._dict())
@@ -451,6 +453,28 @@ class SalesPurchaseDetailsReport(object):
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_columns(self):
+		show_party_name = False
+		if self.filters.party_type == "Customer":
+			if frappe.defaults.get_global_default('cust_master_name') == "Naming Series":
+				show_party_name = True
+		if self.filters.party_type == "Supplier":
+			if frappe.defaults.get_global_default('supp_master_name') == "Naming Series":
+				show_party_name = True
+
+		party_field = {
+			"label": _(self.filters.party_type),
+			"fieldtype": "Link",
+			"fieldname": "party",
+			"options": self.filters.party_type,
+			"width": 80 if show_party_name else 180
+		}
+		party_name_field = {
+			"label": _(self.filters.party_type) + " Name",
+			"fieldtype": "Data",
+			"fieldname": "party_name",
+			"width": 180
+		}
+
 		if len(self.group_by) > 1:
 			columns = [
 				{
@@ -479,13 +503,9 @@ class SalesPurchaseDetailsReport(object):
 				})
 
 			if "Group by Customer" not in group_list and "Group by Supplier" not in group_list:
-				columns.append({
-					"label": _(self.filters.party_type),
-					"fieldtype": "Link",
-					"fieldname": "party",
-					"options": self.filters.party_type,
-					"width": 150
-				})
+				columns.append(party_field)
+				if show_party_name:
+					columns.append(party_name_field)
 
 			columns += [
 				{
@@ -520,14 +540,11 @@ class SalesPurchaseDetailsReport(object):
 					"width": 60
 				})
 
+			columns.append(party_field)
+			if show_party_name:
+				columns.append(party_name_field)
+
 			columns += [
-				{
-					"label": _(self.filters.party_type),
-					"fieldtype": "Link",
-					"fieldname": "party",
-					"options": self.filters.party_type,
-					"width": 150
-				},
 				{
 					"label": _("Item"),
 					"fieldtype": "Link",

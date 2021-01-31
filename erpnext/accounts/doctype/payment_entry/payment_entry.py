@@ -8,7 +8,7 @@ from frappe import _, scrub, ValidationError
 from frappe.utils import flt, cint, comma_or, nowdate, getdate
 from erpnext.accounts.utils import get_outstanding_invoices, get_account_currency, get_balance_on, get_balance_on_voucher, \
 	get_allow_cost_center_in_entry_of_bs_account
-from erpnext.accounts.party import get_party_account
+from erpnext.accounts.party import get_party_account, get_party_name
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account, \
 	get_average_party_exchange_rate_on_journal_entry
 from erpnext.setup.utils import get_exchange_rate
@@ -164,11 +164,7 @@ class PaymentEntry(AccountsController):
 				frappe.throw(_("Party is mandatory"))
 
 			if not self.party_name:
-				if self.party_type == "Letter of Credit":
-					self.party_name = self.party
-				else:
-					_party_name = "title" if self.party_type == "Student" else scrub(self.party_type) + "_name"
-					self.party_name = frappe.db.get_value(self.party_type, self.party, _party_name)
+				self.party_name = get_party_name(self.party_type, self.party)
 
 		if self.party:
 			if not self.get("party_balance"):
@@ -925,11 +921,7 @@ def get_party_details(company, party_type, party, date, cost_center=None):
 
 	account_currency = get_account_currency(party_account)
 	account_balance = get_balance_on(party_account, date, cost_center=cost_center)
-	_party_name = "title" if party_type in ["Student", "Shareholder"] else scrub(party_type) + "_name"
-	if party_type == "Letter of Credit":
-		party_name = party
-	else:
-		party_name = frappe.db.get_value(party_type, party, _party_name)
+	party_name = get_party_name(party_type, party)
 	party_balance = get_balance_on(party_type=party_type, party=party, cost_center=cost_center)
 	if party_type in ["Customer", "Supplier"]:
 		bank_account = get_party_bank_account(party_type, party)

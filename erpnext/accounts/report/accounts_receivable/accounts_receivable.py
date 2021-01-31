@@ -52,6 +52,8 @@ class ReceivablePayableReport(object):
 			self.filters.sales_person = set([sales_person] + [d.name for d in self.filters.sales_person])
 
 	def get_columns(self):
+		party_column_width = 80 if self.party_naming_by == "Naming Series" else 200
+
 		columns = [
 			{
 				"label": _("Date"),
@@ -65,7 +67,7 @@ class ReceivablePayableReport(object):
 				"fieldname": "party",
 				"filter_fieldname": scrub(self.filters.get("party_type")),
 				"options": self.filters.get("party_type"),
-				"width": 200 if self.filters.get("group_by", "Ungrouped") == "Ungrouped" else 300
+				"width": party_column_width if self.filters.get("group_by", "Ungrouped") == "Ungrouped" else 300
 			}
 		]
 
@@ -75,10 +77,9 @@ class ReceivablePayableReport(object):
 		if self.party_naming_by == "Naming Series":
 			columns.append({
 				"label": _(self.filters.get("party_type") + " Name"),
-				"fieldtype": "Link",
+				"fieldtype": "Data",
 				"fieldname": "party_name",
-				"options": self.filters.get("party_type"),
-				"width": 110
+				"width": 180
 			})
 
 		columns += [
@@ -457,6 +458,7 @@ class ReceivablePayableReport(object):
 				group_object.totals['party'] = "'Total'"
 			elif group_object.group_field == 'party':
 				group_object.totals['party'] = group_object.group_value
+				group_object.totals['party_name'] = group_object.rows[0].get('party_name')
 			else:
 				group_object.totals['party'] = "'{0}: {1}'".format(group_object.group_label, group_object.group_value)
 

@@ -614,6 +614,14 @@ def validate_duplicate_tax_id(doctype, fieldname, value, exclude=None, throw=Fal
 			", ".join([frappe.utils.get_link_to_form(doctype, name) for name in duplicate_names])),
 			raise_exception=throw, indicator='red' if throw else 'orange')
 
+@frappe.whitelist()
+def get_party_name(party_type, party):
+	if party_type == "Letter of Credit":
+		return party
+	else:
+		name_fieldname = "title" if party_type in ["Student", "Shareholder"] else scrub(party_type) + "_name"
+		return frappe.get_cached_value(party_type, party, name_fieldname)
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data for the past one year'''
 	from frappe.desk.form.load import get_communication_data

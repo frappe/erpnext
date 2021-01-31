@@ -695,3 +695,4 @@ erpnext.patches.v12_0.set_item_tax_details #19-11-2020
 erpnext.patches.v12_0.create_item_source_from_db_and_df
 erpnext.patches.v12_0.set_customer_primary_address_and_contact
 erpnext.patches.v12_0.initialize_depreciation_invoice_fields
+erpnext.patches.v12_0.set_party_name_in_journal_entry

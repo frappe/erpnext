@@ -122,6 +122,7 @@
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_global_search": 1,
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Full Name",
    "no_copy": 1,
@@ -141,6 +142,7 @@
    "default": "Company",
    "fieldname": "customer_type",
    "fieldtype": "Select",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Type",
    "oldfieldname": "customer_type",
@@ -188,6 +190,7 @@
    "fieldname": "customer_group",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Customer Group",
    "oldfieldname": "customer_group",
@@ -211,6 +214,7 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Tax ID"
   },
@@ -313,12 +317,14 @@
   {
    "fieldname": "mobile_no",
    "fieldtype": "Data",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Mobile No (Primary)"
   },
   {
    "fieldname": "email_id",
    "fieldtype": "Data",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Email Id"
   },
@@ -374,6 +380,7 @@
    "description": "Additional information regarding the customer.",
    "fieldname": "customer_details",
    "fieldtype": "Text",
+   "in_preview": 1,
    "label": "Customer Details",
    "oldfieldname": "customer_details",
    "oldfieldtype": "Code"
@@ -485,6 +492,7 @@
   {
    "fieldname": "tax_cnic",
    "fieldtype": "Data",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "CNIC"
   },
@@ -587,6 +595,7 @@
   {
    "fieldname": "phone_no",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Phone No"
   },
   {
@@ -638,6 +647,7 @@
   {
    "fieldname": "mobile_no_2",
    "fieldtype": "Data",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Mobile No (Secondary)"
   }
@@ -645,7 +655,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-01-31 16:22:45.407658",
+ "modified": "2021-01-31 22:01:48.687543",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -738,6 +748,7 @@
  "quick_entry": 1,
  "search_fields": "customer_name,customer_group,territory,mobile_no, mobile_no_2, phone_no, email_id, tax_id, tax_cnic, tax_strn",
  "show_name_in_global_search": 1,
+ "show_preview_popup": 1,
  "sort_field": "modified",
  "sort_order": "ASC",
  "title_field": "customer_name",
