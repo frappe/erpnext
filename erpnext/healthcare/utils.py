@@ -607,7 +607,7 @@ def render_docs_as_html(docs):
 
 @frappe.whitelist()
 def render_doc_as_html(doctype, docname, exclude_fields = []):
-	#render document as html, three column layout will break
+	# render document as html, three column layout will break
 	doc = frappe.get_doc(doctype, docname)
 	meta = frappe.get_meta(doctype)
 	doc_html = "<div class='col-md-12 col-sm-12'>"
