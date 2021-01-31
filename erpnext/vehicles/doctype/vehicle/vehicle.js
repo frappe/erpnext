@@ -24,7 +24,26 @@ erpnext.vehicles.VehicleController = frappe.ui.form.Controller.extend({
 
 	refresh: function () {
 
-	}
+	},
+
+	unregistered: function () {
+		if (this.frm.doc.unregistered) {
+			this.frm.set_value("license_plate", "");
+		}
+	},
+
+	chassis_no: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'chassis_no');
+		erpnext.utils.validate_duplicate_vehicle(this.frm.doc, 'chassis_no');
+	},
+	engine_no: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'engine_no');
+		erpnext.utils.validate_duplicate_vehicle(this.frm.doc, 'engine_no');
+	},
+	license_plate: function () {
+		erpnext.utils.format_vehicle_id(this.frm, 'license_plate');
+		erpnext.utils.validate_duplicate_vehicle(this.frm.doc, 'license_plate');
+	},
 });
 
 $.extend(cur_frm.cscript, new erpnext.vehicles.VehicleController({frm: cur_frm}));

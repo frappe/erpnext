@@ -31,6 +31,8 @@
   "reference",
   "reference_type",
   "reference_name",
+  "original_reference_type",
+  "original_reference_name",
   "col_break3",
   "cheque_no",
   "cheque_date",
@@ -205,6 +207,7 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Against Document Type",
+   "no_copy": 1,
    "options": "\nSales Invoice\nPurchase Invoice\nJournal Entry\nSales Order\nPurchase Order\nExpense Claim\nAsset\nLoan\nPayroll Entry\nEmployee Advance\nExchange Rate Revaluation\nInvoice Discounting"
   },
   {
@@ -213,6 +216,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Against Document No",
+   "no_copy": 1,
    "options": "reference_type"
   },
   {
@@ -287,11 +291,29 @@
   {
    "fieldname": "column_break_30",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "original_reference_type",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Original Against Document Type",
+   "no_copy": 1,
+   "options": "DocType",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.original_reference_name != doc.reference_name || doc.original_reference_type != doc.reference_type",
+   "fieldname": "original_reference_name",
+   "fieldtype": "Dynamic Link",
+   "label": "Original Against Doucment",
+   "no_copy": 1,
+   "options": "original_reference_type",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-11-07 23:37:30.321394",
+ "modified": "2020-10-13 00:41:00.164381",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",

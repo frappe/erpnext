@@ -42,6 +42,13 @@
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
+  "vehicle_details_section",
+  "vehicle_engine_capacity",
+  "column_break_35",
+  "column_break_37",
+  "vehicle_allocation_required",
+  "exempt_from_vehicle_withholding_tax",
+  "commission_item_code",
   "section_break_31",
   "purchase_uom",
   "sales_uom",
@@ -56,6 +63,7 @@
   "column_break_41",
   "is_sales_item",
   "is_purchase_item",
+  "include_in_vehicle_booking",
   "include_item_in_manufacturing",
   "allow_alternative_item",
   "hide_in_price_list",
@@ -1184,6 +1192,52 @@
   {
    "fieldname": "column_break_66",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "is_vehicle",
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "depends_on": "include_in_vehicle_booking",
+   "fieldname": "commission_item_code",
+   "fieldtype": "Link",
+   "label": "Commission Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_35",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_in_vehicle_booking",
+   "fieldtype": "Check",
+   "label": "Include in Vehicle Booking"
+  },
+  {
+   "fieldname": "vehicle_engine_capacity",
+   "fieldtype": "Int",
+   "label": "Engine Capacity (CC)"
+  },
+  {
+   "default": "0",
+   "depends_on": "include_in_vehicle_booking",
+   "fieldname": "vehicle_allocation_required",
+   "fieldtype": "Check",
+   "label": "Vehicle Allocation Required"
+  },
+  {
+   "default": "0",
+   "depends_on": "include_in_vehicle_booking",
+   "fieldname": "exempt_from_vehicle_withholding_tax",
+   "fieldtype": "Check",
+   "label": "Exempt From Vehicle Withholding Tax"
   }
  ],
  "has_web_view": 1,
@@ -1191,7 +1245,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-12-04 16:12:18.691029",
+ "modified": "2021-01-09 12:58:16.668784",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

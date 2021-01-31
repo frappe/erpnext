@@ -15,20 +15,30 @@
   "user_remark",
   "party_name",
   "payment_order_status",
-  "amended_from",
   "column_break_5",
+  "amended_from",
   "posting_date",
   "mode_of_payment",
+  "instrument_type",
   "more_information_section",
-  "column_break_20",
+  "bank",
+  "bank_account_no",
+  "col_break_18",
   "bank_account",
+  "column_break_20",
   "party_bank_account",
   "column_break_19",
   "contact_person",
   "contact_email",
   "payment_order",
-  "bank",
-  "bank_account_no",
+  "transaction_references",
+  "reference_no",
+  "column_break_23",
+  "reference_date",
+  "column_break_29",
+  "deposit_no",
+  "column_break_31",
+  "clearance_date",
   "payment_accounts_section",
   "paid_from",
   "account_paid_from_type",
@@ -72,11 +82,6 @@
   "write_off_difference_amount",
   "deductions_or_loss_section",
   "deductions",
-  "transaction_references",
-  "reference_no",
-  "column_break_23",
-  "reference_date",
-  "clearance_date",
   "section_break_12",
   "letter_head",
   "column_break_16",
@@ -436,7 +441,8 @@
    "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
    "fieldtype": "Data",
-   "label": "Cheque/Reference No"
+   "label": "Cheque/Reference No",
+   "no_copy": 1
   },
   {
    "fieldname": "column_break_23",
@@ -448,6 +454,7 @@
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "label": "Cheque/Reference Date",
+   "no_copy": 1,
    "search_index": 1
   },
   {
@@ -501,9 +508,9 @@
   {
    "fetch_from": "bank_account.bank",
    "fieldname": "bank",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Bank",
-   "read_only": 1
+   "options": "Bank"
   },
   {
    "fetch_from": "bank_account.bank_account_no",
@@ -669,10 +676,35 @@
   {
    "fieldname": "column_break_63",
    "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.payment_type != \"Receive\"",
+   "fieldname": "deposit_no",
+   "fieldtype": "Data",
+   "label": "Deposit Voucher No",
+   "no_copy": 1
+  },
+  {
+   "fieldname": "column_break_29",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "instrument_type",
+   "fieldtype": "Select",
+   "label": "Instrument/Voucher Type",
+   "options": "\nCheque\nPay Order\nCash\nDirect Deposit\nNCS"
   }
  ],
  "is_submittable": 1,
- "modified": "2020-10-18 15:59:21.423955",
+ "modified": "2021-01-28 14:26:21.228362",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -706,6 +738,22 @@
    "read": 1,
    "report": 1,
    "role": "Accounts Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "import": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Payments User",
    "share": 1,
    "submit": 1,
    "write": 1

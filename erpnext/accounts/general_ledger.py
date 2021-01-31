@@ -141,6 +141,11 @@ def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
 				vouchers_for_balance_update.add((entry.get("voucher_type"), entry.get("voucher_no"),
 					entry.get("account"), entry.get("party_type"), entry.get("party")))
 
+			if entry.get("original_against_voucher_type") and entry.get("original_against_voucher") \
+					and entry.get("original_against_voucher_type") in ('Sales Order', 'Purchase Order', 'Employee Advance'):
+				vouchers_for_balance_update.add((entry.get("original_against_voucher_type"), entry.get("original_against_voucher"),
+					entry.get("account"), entry.get("party_type"), entry.get("party")))
+
 	from erpnext.accounts.doctype.gl_entry.gl_entry import update_outstanding_amt
 	for voucher_type, voucher_no, account, party_type, party in vouchers_for_balance_update:
 		update_outstanding_amt(voucher_type, voucher_no, account, party_type, party)
@@ -325,6 +330,11 @@ def delete_gl_entries(gl_entries=None, voucher_type=None, voucher_no=None,
 					entry.get("account"), entry.get("party_type"), entry.get("party")))
 			else:
 				vouchers_for_balance_update.add((entry.get("voucher_type"), entry.get("voucher_no"),
+					entry.get("account"), entry.get("party_type"), entry.get("party")))
+
+			if entry.get("original_against_voucher_type") and entry.get("original_against_voucher") \
+					and entry.get("original_against_voucher_type") in ('Sales Order', 'Purchase Order', 'Employee Advance'):
+				vouchers_for_balance_update.add((entry.get("original_against_voucher_type"), entry.get("original_against_voucher"),
 					entry.get("account"), entry.get("party_type"), entry.get("party")))
 
 	for voucher_type, voucher_no, account, party_type, party in vouchers_for_balance_update:

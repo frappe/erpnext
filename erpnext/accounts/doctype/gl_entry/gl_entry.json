@@ -17,10 +17,12 @@
   "debit_in_account_currency",
   "credit_in_account_currency",
   "against",
-  "against_voucher_type",
-  "against_voucher",
   "voucher_type",
   "voucher_no",
+  "against_voucher_type",
+  "against_voucher",
+  "original_against_voucher_type",
+  "original_against_voucher",
   "voucher_detail_no",
   "project",
   "remarks",
@@ -259,12 +261,26 @@
    "fieldtype": "Date",
    "label": "Reference Date",
    "no_copy": 1
+  },
+  {
+   "fieldname": "original_against_voucher_type",
+   "fieldtype": "Link",
+   "label": "Original Against Voucher Type",
+   "options": "DocType",
+   "search_index": 1
+  },
+  {
+   "fieldname": "original_against_voucher",
+   "fieldtype": "Dynamic Link",
+   "label": "Original Against Voucher",
+   "options": "original_against_voucher_type",
+   "search_index": 1
   }
  ],
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2020-10-03 14:12:23.386607",
+ "modified": "2021-01-28 14:34:41.422050",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "GL Entry",
@@ -298,6 +314,13 @@
    "read": 1,
    "report": 1,
    "role": "Sales User"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Payments User"
   },
   {
    "export": 1,

@@ -71,6 +71,7 @@ frappe.ui.form.on(cur_frm.doctype, {
 				method: "set_advances",
 				callback: function(r, rt) {
 					refresh_field("advances");
+					frm.cscript.calculate_taxes_and_totals && frm.cscript.calculate_taxes_and_totals();
 				}
 			})
 		}

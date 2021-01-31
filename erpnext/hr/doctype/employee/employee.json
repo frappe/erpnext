@@ -863,8 +863,8 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2020-12-31 13:47:01.185533",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2021-01-28 14:58:53.615336",
+ "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",
@@ -907,6 +907,10 @@
   {
    "read": 1,
    "role": "Accounts User"
+  },
+  {
+   "read": 1,
+   "role": "Projects User"
   }
  ],
  "quick_entry": 1,

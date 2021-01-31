@@ -12,6 +12,7 @@ from erpnext.controllers.queries import get_filters_cond
 from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
+from frappe.model.utils import get_fetch_values
 from frappe.model.document import Document
 
 class Project(Document):
@@ -29,13 +30,47 @@ class Project(Document):
 	def before_print(self):
 		self.onload()
 
-
 	def validate(self):
 		if not self.is_new():
 			self.copy_from_template()
 		self.send_welcome_email()
 		self.update_costing()
 		self.update_percent_complete()
+
+	def on_update(self):
+		if 'Vehicles' in frappe.get_active_domains():
+			self.update_odometer()
+
+	def update_odometer(self):
+		from erpnext.vehicles.doctype.vehicle_log.vehicle_log import make_odometer_log
+		from erpnext.vehicles.doctype.vehicle.vehicle import get_project_odometer
+
+		if not self.meta.has_field('applies_to_vehicle'):
+			return
+
+		if self.get('applies_to_vehicle'):
+			reload = False
+			first_odometer, last_odometer = get_project_odometer(self.name, self.applies_to_vehicle)
+			if not first_odometer and self.vehicle_first_odometer:
+				make_odometer_log(self.applies_to_vehicle, self.vehicle_first_odometer, project=self.name)
+				reload = True
+			if (not last_odometer or first_odometer == last_odometer) and self.vehicle_last_odometer and self.vehicle_last_odometer > self.vehicle_first_odometer:
+				make_odometer_log(self.applies_to_vehicle, self.vehicle_last_odometer, project=self.name)
+				reload = True
+
+			if reload:
+				self.vehicle_first_odometer, self.vehicle_last_odometer = self.db_get(['vehicle_first_odometer', 'vehicle_last_odometer'])
+			else:
+				first_odometer, last_odometer = get_project_odometer(self.name, self.applies_to_vehicle)
+				self.db_set({
+					"vehicle_first_odometer": first_odometer,
+					"vehicle_last_odometer": last_odometer
+				})
+		else:
+			self.db_set({
+				"vehicle_first_odometer": 0,
+				"vehicle_last_odometer": 0
+			})
 
 	def copy_from_template(self):
 		'''
@@ -495,18 +530,21 @@ def set_project_status(project, status):
 	project.save()
 
 @frappe.whitelist()
-def get_project_details(project_name):
+def get_project_details(project_name, doctype):
 	project = frappe.get_doc("Project", project_name)
 
 	out = {}
 	fieldnames = [
-		'customer', 'applies_to_vehicle',
+		'customer', 'bill_to', 'applies_to_vehicle',
 		'service_advisor', 'service_manager',
-		'insurance_company', 'insurance_loss_no', 'insurance_policy_no', 'insurance_surveyor'
+		'insurance_company', 'insurance_loss_no', 'insurance_policy_no', 'insurance_surveyor', 'insurance_surveyor_company'
 	]
 	for f in fieldnames:
 		if project.get(f):
 			out[f] = project.get(f)
+
+	if out.get('applies_to_vehicle'):
+		out.update(get_fetch_values(doctype, 'applies_to_vehicle', out.get('applies_to_vehicle')))
 
 	return out
 

@@ -49,13 +49,11 @@ class ExpenseClaim(AccountsController):
 		self.make_gl_entries()
 
 		self.update_against_document_in_jv()
-		self.update_claimed_amount_in_employee_advance()
 
 	def on_cancel(self):
 		self.update_task_and_project()
 		self.make_gl_entries(cancel=True)
 
-		self.update_claimed_amount_in_employee_advance()
 		unlink_ref_doc_from_payment_entries(self, validate_permission=True)
 
 		self.set_status()
@@ -118,11 +116,6 @@ class ExpenseClaim(AccountsController):
 		for d in self.expenses:
 			if d.task and not d.project:
 				d.project = frappe.db.get_value("Task", d.task, "project", cache=1)
-
-	def update_claimed_amount_in_employee_advance(self):
-		for d in self.advances:
-			if d.reference_type == "Employee Advance":
-				frappe.get_doc("Employee Advance", d.reference_name).update_claimed_amount()
 
 	def update_task_and_project(self):
 		projects = []

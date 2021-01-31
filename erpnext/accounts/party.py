@@ -76,6 +76,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	party_details.tax_id = billing_party_doc.get('tax_id')
 	party_details.tax_cnic = billing_party_doc.get('tax_cnic')
 	party_details.tax_strn = billing_party_doc.get('tax_strn')
+	party_details.tax_status = billing_party_doc.get('tax_status')
 	party_details["taxes_and_charges"] = set_taxes(billing_party_doc.name, party_type, posting_date, company,
 		customer_group=billing_party_doc.get('customer_group'), supplier_group=billing_party_doc.get('supplier_group'),
 		tax_category=billing_party_doc.get('tax_category'),
@@ -244,16 +245,18 @@ def get_party_account(party_type, party, company, transaction_type=None):
 	if not company:
 		frappe.throw(_("Please select a Company"))
 
-	if not party:
-		return
-
 	account = None
 
 	if transaction_type:
 		transaction_type_doc = frappe.get_cached_doc("Transaction Type", transaction_type)
-		account_row = transaction_type_doc.get('accounts', filters={'company': company})
-		if account_row:
-			account = account_row[0].account
+		account_rows = transaction_type_doc.get('accounts', filters={'company': company})
+		party_account_type = erpnext.get_party_account_type(party_type)
+		for account_row in account_rows:
+			if account_row.account and frappe.get_cached_value("Account", account_row.account, 'account_type') == party_account_type:
+				account = account_row.account
+
+	if not party:
+		return account
 
 	if not account:
 		party_doc = frappe.get_cached_doc(party_type, party)
@@ -294,24 +297,27 @@ def get_party_cost_center(party_type, party, company, transaction_type=None):
 
 	if not company:
 		frappe.throw(_("Please select a Company"))
-	if not party:
-		return
 
-	account = None
+	cost_center = None
 
 	if transaction_type:
 		transaction_type_doc = frappe.get_cached_doc("Transaction Type", transaction_type)
-		account_row = transaction_type_doc.get('accounts', filters={'company': company})
-		if account_row:
-			account = account_row[0].cost_center
+		account_rows = transaction_type_doc.get('accounts', filters={'company': company})
+		party_account_type = erpnext.get_party_account_type(party_type)
+		for account_row in account_rows:
+			if (not account_row.account and account_row.cost_center) or frappe.get_cached_value("Account", account_row.account, 'account_type') == party_account_type:
+				cost_center = account_row.cost_center
 
-	if not account:
+	if not party:
+		return cost_center
+
+	if not cost_center:
 		party_doc = frappe.get_cached_doc(party_type, party)
 		account_row = party_doc.get('accounts', filters={'company': company})
 		if account_row:
-			account = account_row[0].cost_center
+			cost_center = account_row[0].cost_center
 
-	return account
+	return cost_center
 
 @frappe.whitelist()
 def get_party_bank_account(party_type, party):

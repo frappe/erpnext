@@ -34,16 +34,16 @@ class EmployeeAdvance(StatusUpdater):
 			frappe.throw(_("Advance account currency should be same as company currency {0}")
 				.format(company_currency))
 
-	def set_total_advance_paid(self):
+	def set_payment_and_claimed_amount(self, update=False):
 		payments = frappe.db.sql("""
 			select ifnull(sum(debit), 0) as paid_amount, ifnull(sum(credit), 0) as returned_amount
 			from `tabGL Entry`
-			where against_voucher_type = 'Employee Advance'
-				and against_voucher = %s
+			where ((against_voucher_type = 'Employee Advance' and against_voucher = %(name)s)
+					or (original_against_voucher_type = 'Employee Advance' and original_against_voucher = %(name)s))
 				and party_type = 'Employee'
-				and party = %s
+				and party = %(party)s
 				and voucher_type != 'Expense Claim'
-		""", (self.name, self.employee), as_dict=1)[0]
+		""", {"name": self.name, "party": self.employee}, as_dict=1)[0]
 
 		salary_deduction = frappe.db.sql("""
 			select sum(gle.credit-gle.debit)
@@ -60,18 +60,6 @@ class EmployeeAdvance(StatusUpdater):
 
 		payments.returned_amount -= salary_deduction
 
-		if flt(payments.paid_amount) > self.advance_amount:
-			frappe.throw(_("Paid Amount cannot be greater than requested advance amount"), EmployeeAdvanceOverPayment)
-
-		self.db_set({
-			"paid_amount": payments.paid_amount,
-			"returned_amount": payments.returned_amount,
-			"salary_deduction_amount": salary_deduction
-		})
-		self.set_status(update=True)
-		self.notify_update()
-
-	def update_claimed_amount(self):
 		claimed_amount = frappe.db.sql("""
 			select ifnull(sum(credit), 0)
 			from `tabGL Entry`
@@ -82,9 +70,18 @@ class EmployeeAdvance(StatusUpdater):
 				and voucher_type = 'Expense Claim'
 		""", (self.name, self.employee))[0][0] or 0
 
-		self.db_set("claimed_amount", flt(claimed_amount))
-		self.set_status(update=True)
-		self.notify_update()
+		if flt(payments.paid_amount) > self.advance_amount:
+			frappe.throw(_("Paid Amount cannot be greater than requested advance amount"), EmployeeAdvanceOverPayment)
+
+		values = {
+			"paid_amount": payments.paid_amount,
+			"returned_amount": payments.returned_amount,
+			"salary_deduction_amount": salary_deduction,
+			"claimed_amount": flt(claimed_amount)
+		}
+		self.update(values)
+		if update:
+			self.db_set(values)
 
 @frappe.whitelist()
 def get_due_advance_amount(employee, posting_date):

@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
+from frappe import _
 from frappe.desk.reportview import get_match_cond, get_filters_cond
 from frappe.utils import nowdate, getdate
 from collections import defaultdict
@@ -221,7 +222,11 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		applicable_to_item = filters.get('applicable_to_item')
 		del filters['applicable_to_item']
 
-		if frappe.get_cached_value("Stock Settings", None, "filter_items_by_applicable_to"):
+		force_applicable_to = filters.get('force_applicable_to')
+		if force_applicable_to:
+			del filters['force_applicable_to']
+
+		if force_applicable_to or frappe.get_cached_value("Stock Settings", None, "filter_items_by_applicable_to"):
 			variant_of = frappe.get_cached_value("Item", applicable_to_item, "variant_of")
 			if variant_of:
 				all_variants = frappe.db.sql_list("select name from `tabItem` where variant_of = %s", variant_of)
@@ -670,6 +675,93 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 
 		taxes = _get_item_tax_template(args, taxes, for_validate=True)
 		return [(d,) for d in set(taxes)]
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def vehicle_allocation_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+
+	fields = get_fields("Vehicle Allocation", ['name', 'title'])
+	fields[1] = "CONCAT('<b>', title, '</b>')"
+	searchfields = frappe.get_meta("Vehicle Allocation").get_search_fields()
+	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+
+	return frappe.db.sql("""
+		select {fields}
+		from `tabVehicle Allocation`
+		where ({scond}) {fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, title), locate(%(_txt)s, title), 99999),
+			sr_no
+		limit %(start)s, %(page_len)s
+	""".format(**{
+		'fields': ", ".join(fields),
+		'key': searchfield,
+		'scond': searchfields,
+		'fcond': get_filters_cond("Vehicle Allocation", filters, conditions).replace('%', '%%'),
+		'mcond': get_match_cond(doctype)
+	}), {
+		'txt': "%%%s%%" % txt,
+		'_txt': txt.replace("%", ""),
+		'start': start,
+		'page_len': page_len
+	})
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def vehicle_allocation_period_query(doctype, txt, searchfield, start, page_len, filters):
+	conditions = []
+
+	transaction_date = None
+	if isinstance(filters, dict) and filters.get('transaction_date'):
+		transaction_date = getdate(filters.get('transaction_date'))
+		del filters['transaction_date']
+
+	date_cond = ""
+	if transaction_date:
+		date_cond = "and `tabVehicle Allocation Period`.to_date >= {0}".format(frappe.db.escape(transaction_date))
+
+	having_cond = ""
+	if searchfield == 'allocation_period':
+		having_cond = "having allocations > 0"
+
+	subquery = """
+		select ifnull(count(`tabVehicle Allocation`.name), 0)
+		from `tabVehicle Allocation`
+		where `tabVehicle Allocation`.`{searchfield}` = `tabVehicle Allocation Period`.name
+			and `tabVehicle Allocation`.docstatus = 1
+			and `tabVehicle Allocation`.is_booked = 0
+			{fcond}
+	""".format(
+		searchfield=searchfield,
+		fcond=get_filters_cond("Vehicle Allocation", filters, conditions).replace('%', '%%')
+	)
+
+	query = """select `tabVehicle Allocation Period`.name, ({subquery}) as allocations
+		from `tabVehicle Allocation Period`
+		where `tabVehicle Allocation Period`.name like {txt} {mcond} {date_cond}
+		{having_cond}
+		order by `tabVehicle Allocation Period`.from_date asc
+		limit {start}, {page_len}
+		""".format(
+			subquery=subquery,
+			mcond=get_match_cond(doctype),
+			date_cond=date_cond,
+			having_cond=having_cond,
+			start=start,
+			page_len=page_len,
+			txt=frappe.db.escape('%{0}%'.format(txt))
+		)
+
+	res = frappe.db.sql(query)
+
+	out = []
+	for row in res:
+		out.append((row[0], _("Available Allocations: {0}").format(frappe.bold(row[1]))))
+
+	return out
 
 
 def get_fields(doctype, fields=[]):

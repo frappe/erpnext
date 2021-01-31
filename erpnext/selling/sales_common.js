@@ -243,6 +243,16 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.calculate_taxes_and_totals();
 	},
 
+	depreciation_percentage: function () {
+		if (this.frm.doc.docstatus === 0) {
+			this.calculate_taxes_and_totals();
+		}
+	},
+
+	depreciation_type: function () {
+		this.calculate_taxes_and_totals();
+	},
+
 	discount_percentage: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		item.discount_amount = 0.0;
@@ -402,7 +412,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 	calculate_contribution: function() {
 		var me = this;
-		$.each(this.frm.doc.doctype.sales_team || [], function(i, sales_person) {
+		$.each(this.frm.doc.sales_team || [], function(i, sales_person) {
 			frappe.model.round_floats_in(sales_person);
 			if(sales_person.allocated_percentage) {
 				sales_person.allocated_amount = flt(
@@ -599,9 +609,14 @@ frappe.ui.form.on(cur_frm.doctype,"project", function(frm) {
 	if (frm.doc.project) {
 		frappe.call({
 			method: 'erpnext.projects.doctype.project.project.get_project_details',
-			args: {project_name: frm.doc.project},
+			args: {project_name: frm.doc.project, doctype: frm.doc.doctype},
 			callback: function (r) {
 				if (!r.exc) {
+					if (frm.fields_dict.bill_to && r.message.bill_to && r.message.customer) {
+						frm.doc.customer = r.message.customer;
+						delete r.message['customer'];
+					}
+
 					$.each(r.message, function(fieldname, value) {
 						if (frm.fields_dict[fieldname]) {
 							frm.set_value(fieldname, value);

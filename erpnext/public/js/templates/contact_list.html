@@ -22,6 +22,9 @@
 			{% if(contact_list[i].mobile_no) { %}
 				{%= __("Mobile No") %}: {%= contact_list[i].mobile_no %}<span class="text-muted"> ({%= __("Primary") %})</span><br>
 			{% endif %}
+			{% if(contact_list[i].mobile_no_2) { %}
+				{%= __("Mobile No") %}: {%= contact_list[i].mobile_no_2 %}<span class="text-muted"> ({%= __("Secondary") %})</span><br>
+			{% endif %}
 			{% if(contact_list[i].phone_nos) { %}
 				{% for(var j=0, k=contact_list[i].phone_nos.length; j<k; j++) { %}
 					{%= __("Phone") %}: {%= contact_list[i].phone_nos[j].phone %}<br>

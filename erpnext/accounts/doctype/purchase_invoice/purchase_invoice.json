@@ -16,6 +16,7 @@
   "naming_series",
   "column_break_5",
   "remarks",
+  "vehicle_booking_order",
   "is_return",
   "reopen_order",
   "return_against",
@@ -1755,12 +1756,20 @@
    "fieldname": "update_item_prices",
    "fieldtype": "Button",
    "label": "Update Price List"
+  },
+  {
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "label": "Vehicle Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2020-10-31 02:19:44.823640",
+ "modified": "2020-12-12 00:00:18.785341",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

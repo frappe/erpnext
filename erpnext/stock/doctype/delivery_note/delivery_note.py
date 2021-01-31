@@ -263,6 +263,8 @@ class DeliveryNote(SellingController):
 		self.update_billing_status()
 		self.update_billing_status_for_zero_amount("Sales Order", "against_sales_order")
 
+		self.update_vehicle_booking_order()
+
 		if not self.is_return:
 			self.check_credit_limit()
 
@@ -283,6 +285,8 @@ class DeliveryNote(SellingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 		self.update_billing_status_for_zero_amount("Sales Order", "against_sales_order")
+
+		self.update_vehicle_booking_order()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
@@ -389,29 +393,39 @@ class DeliveryNote(SellingController):
 		except:
 			frappe.throw(_("Could not create Credit Note automatically, please uncheck 'Issue Credit Note' and submit again"))
 
+def calculate_billed_qty_and_amount(billed_data):
+	billed_qty = 0
+	billed_amt = 0
+
+	for d in billed_data:
+		if not d.is_return or (d.reopen_order and not d.update_stock):
+			billed_amt += d.amount
+
+			if d.depreciation_type != 'Depreciation Amount Only':
+				billed_qty += d.qty
+
+	return billed_qty, billed_amt
+
 def update_billed_amount_based_on_dn(dn_detail, update_modified=True):
 	billed = frappe.db.sql("""
-		select sum(item.qty), sum(item.amount)
+		select item.qty, item.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
 		where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1
-			and (inv.is_return = 0 or (inv.reopen_order = 1 and inv.update_stock = 0))
-	""", dn_detail)
+	""", dn_detail, as_dict=1)
 
-	billed_qty = flt(billed[0][0]) if billed else 0
-	billed_amt = flt(billed[0][1]) if billed else 0
+	billed_qty, billed_amt = calculate_billed_qty_and_amount(billed)
 	frappe.db.set_value("Delivery Note Item", dn_detail, {"billed_qty": billed_qty, "billed_amt": billed_amt}, None,
 		update_modified=update_modified)
 
 def update_billed_amount_based_on_so(so_detail, update_modified=True):
 	# Billed against Sales Order directly
 	billed_against_so = frappe.db.sql("""
-		select sum(item.qty), sum(item.amount)
+		select item.qty, item.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 		from `tabSales Invoice Item` item, `tabSales Invoice` inv
 		where inv.name=item.parent and item.so_detail=%s and (item.dn_detail is null or item.dn_detail = '') and item.docstatus=1
-			and (inv.is_return = 0 or inv.reopen_order = 1)
-	""", so_detail)
-	billed_qty_against_so = flt(billed_against_so[0][0]) if billed_against_so else 0
-	billed_amt_against_so = flt(billed_against_so[0][1]) if billed_against_so else 0
+	""", so_detail, as_dict=1)
+
+	billed_qty_against_so, billed_amt_against_so = calculate_billed_qty_and_amount(billed_against_so)
 
 	# Get all Delivery Note Item rows against the Sales Order Item row
 	dn_details = frappe.db.sql("""select dn_item.name, dn_item.amount, dn_item.qty, dn_item.returned_qty,
@@ -435,13 +449,12 @@ def update_billed_amount_based_on_so(so_detail, update_modified=True):
 		else:
 			# Get billed qty directly against Delivery Note
 			billed_against_dn = frappe.db.sql("""
-				select sum(item.qty), sum(item.amount)
+				select item.qty, item.amount, inv.is_return, inv.update_stock, inv.reopen_order, inv.depreciation_type
 				from `tabSales Invoice Item` item, `tabSales Invoice` inv
 				where inv.name=item.parent and item.dn_detail=%s and item.docstatus=1
-					and (inv.is_return = 0 or (inv.reopen_order = 1 and inv.update_stock = 0))
-			""", dnd.name)
-			billed_qty_against_dn = flt(billed_against_dn[0][0]) if billed_against_dn else 0
-			billed_amt_against_dn = flt(billed_against_dn[0][1]) if billed_against_dn else 0
+			""", dnd.name, as_dict=1)
+
+			billed_qty_against_dn, billed_amt_against_dn = calculate_billed_qty_and_amount(billed_against_dn)
 
 		# Distribute billed qty and amt directly against SO between DNs based on FIFO
 		pending_qty_to_bill = flt(dnd.qty) - flt(dnd.returned_qty) - billed_qty_against_dn
@@ -514,7 +527,8 @@ def make_sales_invoice(source_name, target_doc=None):
 			"doctype": "Sales Invoice",
 			"field_map": {
 				"is_return": "is_return",
-				"remarks": "remarks"
+				"remarks": "remarks",
+				"vehicle_booking_order": "vehicle_booking_order",
 			},
 			"validation": {
 				"docstatus": ["=", 1]

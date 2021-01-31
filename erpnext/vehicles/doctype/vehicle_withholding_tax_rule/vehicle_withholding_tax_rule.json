@@ -1,0 +1,86 @@
+{
+ "allow_import": 1,
+ "autoname": "VWTR-.YYYY.-.#####",
+ "creation": "2020-12-14 17:04:30.377175",
+ "doctype": "DocType",
+ "document_type": "Other",
+ "engine": "InnoDB",
+ "field_order": [
+  "validity_section",
+  "company",
+  "disabled",
+  "column_break_3",
+  "from_date",
+  "to_date",
+  "section_break_5",
+  "engine_capacity_slabs"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "disabled",
+   "fieldtype": "Check",
+   "label": "Disabled"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "validity_section",
+   "fieldtype": "Section Break",
+   "label": "Validity"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "engine_capacity_slabs",
+   "fieldtype": "Table",
+   "label": "Engine Capacity Slabs",
+   "options": "Vehicle Withholding Tax Engine Capacity"
+  }
+ ],
+ "icon": "fa fa-cog",
+ "modified": "2020-12-14 23:02:05.526987",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Withholding Tax Rule",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -1,0 +1,57 @@
+{
+ "creation": "2020-12-14 17:13:33.371689",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_capacity",
+  "to_capacity",
+  "filer_amount",
+  "nonfiler_amount"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "from_capacity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "From Capacity"
+  },
+  {
+   "columns": 2,
+   "fieldname": "to_capacity",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "To Capacity"
+  },
+  {
+   "columns": 3,
+   "fieldname": "filer_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Filer Amount",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "columns": 3,
+   "fieldname": "nonfiler_amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Non Filer Amount",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2020-12-14 22:09:23.379601",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Withholding Tax Engine Capacity",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

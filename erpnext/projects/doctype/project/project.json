@@ -27,6 +27,7 @@
   "customer_details_section",
   "customer",
   "column_break_14",
+  "bill_to",
   "sales_order",
   "sec_applies_to",
   "applies_to_item",
@@ -571,11 +572,18 @@
    "fieldtype": "Link",
    "label": "Insurance Surveyor Company",
    "options": "Insurance Surveyor Company"
+  },
+  {
+   "fieldname": "bill_to",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Bill To",
+   "options": "Customer"
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2020-11-19 17:02:53.895169",
+ "modified": "2021-01-28 14:37:29.506685",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
@@ -591,6 +599,24 @@
    "role": "Projects User",
    "share": 1,
    "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)",
+   "share": 1
   },
   {
    "permlevel": 1,

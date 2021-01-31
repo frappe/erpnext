@@ -185,7 +185,7 @@ def get_balance_on(account=None, date=None, party_type=None, party=None, company
 		# if bal is None, return 0
 		return flt(bal)
 
-def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=None):
+def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account, dr_or_cr=None, include_original_references=False):
 	if not dr_or_cr:
 		if erpnext.get_party_account_type(party_type) == 'Receivable':
 			dr_or_cr = "debit_in_account_currency - credit_in_account_currency"
@@ -198,13 +198,17 @@ def get_balance_on_voucher(voucher_type, voucher_no, party_type, party, account,
 	else:
 		account_condition = "account = {0}".format(frappe.db.escape(account))
 
+	original_reference_cond = ""
+	if include_original_references:
+		original_reference_cond = "or (original_against_voucher_type=%(voucher_type)s and original_against_voucher=%(voucher_no)s)"
+
 	res = frappe.db.sql("""
 		select ifnull(sum({dr_or_cr}), 0)
 		from `tabGL Entry`
 		where party_type=%(party_type)s and party=%(party)s and {account_condition}
 			and ((voucher_type=%(voucher_type)s and voucher_no=%(voucher_no)s and (against_voucher is null or against_voucher=''))
-				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s))
-	""".format(dr_or_cr=dr_or_cr, account_condition=account_condition),
+				or (against_voucher_type=%(voucher_type)s and against_voucher=%(voucher_no)s) {original_reference_cond})
+	""".format(dr_or_cr=dr_or_cr, account_condition=account_condition, original_reference_cond=original_reference_cond),
 	{"voucher_type": voucher_type, "voucher_no": voucher_no, "party_type": party_type, "party": party})
 
 	return flt(res[0][0]) if res else 0.0
@@ -380,7 +384,7 @@ def check_if_advance_entry_modified(args):
 					je.name = jea.parent and jea.account = %(account)s and je.docstatus=1
 					and je.name = %(voucher_no)s and jea.name = %(voucher_detail_no)s
 					and jea.party_type = %(party_type)s and jea.party = %(party)s
-					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order', 'Employee Advance')
+					and ifnull(jea.reference_type, '') in ('', 'Sales Order', 'Purchase Order', 'Employee Advance', 'Vehicle Booking Order')
 					and jea.{dr_or_cr} = %(unadjusted_amount)s""".format(dr_or_cr=args.dr_or_cr), args)
 		else:
 			if erpnext.get_party_account_type(args.party_type) == 'Receivable':
@@ -407,7 +411,7 @@ def check_if_advance_entry_modified(args):
 					pe.name = pref.parent and pe.docstatus = 1
 					and pe.name = %(voucher_no)s and pref.name = %(voucher_detail_no)s
 					and pe.party_type = %(party_type)s and pe.party = %(party)s and pe.{0} = %(account)s
-					and pref.reference_doctype in ('Sales Order', 'Purchase Order', 'Employee Advance')
+					and pref.reference_doctype in ('Sales Order', 'Purchase Order', 'Employee Advance', 'Vehicle Booking Order')
 					and pref.allocated_amount = %(unadjusted_amount)s
 			""".format(party_account_field), args)
 		else:
@@ -490,6 +494,8 @@ def update_reference_in_journal_entry(d, jv_doc):
 			ch.cheque_no = jvd[0]["cheque_no"]
 			ch.cheque_date = jvd[0]["cheque_date"]
 			ch.user_remark = jvd[0]["user_remark"]
+			ch.original_reference_type = jvd[0]["original_reference_type"]
+			ch.original_reference_name = jvd[0]["original_reference_type"]
 
 			ch.set(d['dr_or_cr'], amount_in_account_currency)
 			ch.set('debit' if d['dr_or_cr']=='debit_in_account_currency' else 'credit', amount_in_company_currency)
@@ -511,9 +517,6 @@ def update_reference_in_journal_entry(d, jv_doc):
 	jv_doc.flags.ignore_validate_update_after_submit = True
 	jv_doc.save(ignore_permissions=True)
 
-	for dn, dt in set(to_update_advance_amount):
-		frappe.get_doc(dn, dt).set_total_advance_paid()
-
 def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	reference_details = {
 		"reference_doctype": d.against_voucher_type,
@@ -529,6 +532,12 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	if d.voucher_detail_no:
 		existing_row = payment_entry.get("references", {"name": d["voucher_detail_no"]})[0]
 		original_row = existing_row.as_dict().copy()
+
+		reference_details.update({
+			"original_reference_doctype": existing_row.original_reference_doctype,
+			"original_reference_name": existing_row.original_reference_name
+		})
+
 		existing_row.update(reference_details)
 
 		if original_row.reference_doctype in ("Sales Order", "Purchase Order", "Employee Advance"):
@@ -562,9 +571,6 @@ def update_reference_in_payment_entry(d, payment_entry, do_not_save=False):
 	if not do_not_save:
 		payment_entry.save(ignore_permissions=True)
 
-	for dn, dt in set(to_update_advance_amount):
-		frappe.get_doc(dn, dt).set_total_advance_paid()
-
 def unlink_ref_doc_from_payment_entries(ref_doc, validate_permission=False):
 	if validate_permission:
 		allow_unlink_setting = cint(frappe.db.get_single_value("Accounts Settings", "unlink_payment_on_cancellation_of_invoice"))
@@ -595,8 +601,15 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 
 	if linked_jv:
 		frappe.db.sql("""update `tabJournal Entry Account`
-			set reference_type=null, reference_name = null,
-			modified=%s, modified_by=%s
+			set reference_type=original_reference_type, reference_name=original_reference_name,
+				modified=%s, modified_by=%s
+			where reference_type=%s and reference_name=%s
+				and ifnull(original_reference_type, '') != '' and ifnull(original_reference_name, '') != ''
+			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
+
+		frappe.db.sql("""update `tabJournal Entry Account`
+			set reference_type=null, reference_name=null,
+				modified=%s, modified_by=%s
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
@@ -604,25 +617,33 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 		frappe.msgprint(_("Journal Entries {0} are un-linked").format(", ".join(msg_jv_list)))
 
 def remove_ref_doc_link_from_pe(ref_type, ref_no):
-	linked_pe = frappe.db.sql_list("""select parent from `tabPayment Entry Reference`
+	linked_pe = frappe.db.sql_list("""select distinct parent from `tabPayment Entry Reference`
 		where reference_doctype=%s and reference_name=%s and docstatus < 2""", (ref_type, ref_no))
 
 	if linked_pe:
-		frappe.db.sql("""update `tabPayment Entry Reference`
-			set allocated_amount=0, modified=%s, modified_by=%s
-			where reference_doctype=%s and reference_name=%s
-			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
-
 		for pe in linked_pe:
 			pe_doc = frappe.get_doc("Payment Entry", pe)
+
+			prefs = pe_doc.get('references', filters={"reference_doctype": ref_type, "reference_name": ref_no})
+			for pref in prefs:
+				if pref.original_reference_doctype and pref.original_reference_name\
+						and (pref.original_reference_doctype, pref.original_reference_name) != (pref.reference_doctype, pref.reference_name):
+					pref.reference_doctype = pref.original_reference_doctype
+					pref.reference_name = pref.original_reference_name
+				else:
+					pref.allocated_amount = 0
+
+				pref.db_set({
+					'reference_doctype': pref.reference_doctype,
+					'reference_name': pref.reference_name,
+					'allocated_amount': pref.allocated_amount
+				})
+
 			pe_doc.set_total_allocated_amount()
 			pe_doc.set_unallocated_amount()
 			pe_doc.clear_unallocated_reference_document_rows()
 
-			frappe.db.sql("""update `tabPayment Entry` set total_allocated_amount=%s,
-				base_total_allocated_amount=%s, unallocated_amount=%s, modified=%s, modified_by=%s
-				where name=%s""", (pe_doc.total_allocated_amount, pe_doc.base_total_allocated_amount,
-					pe_doc.unallocated_amount, now(), frappe.session.user, pe))
+			pe_doc.db_update()
 
 		msg_pe_list = ["<a href='#Form/Payment Entry/{0}'>{0}</a>".format(jv) for jv in list(set(linked_pe))]
 		frappe.msgprint(_("Payment Entries {0} are un-linked").format(", ".join(msg_pe_list)))
