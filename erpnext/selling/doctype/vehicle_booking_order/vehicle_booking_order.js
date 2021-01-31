@@ -186,9 +186,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					if (this.frm.doc.vehicle_allocation_required) {
 						this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation());
 					}
+
+					this.frm.add_custom_button(__("Update Customer Details"), () => this.update_customer_details());
 				}
 
-				this.frm.add_custom_button(__("Update Customer Details"), () => this.update_customer_details());
 				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle());
 			}
 

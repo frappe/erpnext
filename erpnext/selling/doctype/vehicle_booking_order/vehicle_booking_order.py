@@ -1056,6 +1056,10 @@ def update_customer_details_in_booking(vehicle_booking_order):
 		frappe.throw(_("Cannot update Customer Details in Vehicle Booking Order {0} because Vehicle is already received")
 			.format(frappe.bold(vehicle_booking_order)))
 
+	if flt(vbo_doc.supplier_advance):
+		frappe.throw(_("Cannot update Customer Details in Vehicle Booking Order {0}  because Supplier Payment has already been made")
+			.format(frappe.bold(vehicle_booking_order)))
+
 	customer_details = get_customer_details(vbo_doc.as_dict(), get_withholding_tax=True)
 	for k, v in customer_details.items():
 		if not vbo_doc.get(k) or k in force_fields:
