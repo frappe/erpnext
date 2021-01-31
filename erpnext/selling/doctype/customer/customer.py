@@ -165,7 +165,8 @@ class Customer(TransactionBase):
 				for d in primary_contact_fields:
 					to_set[d['customer_field']] = contact.get(d['contact_field'])
 
-				self.db_set(to_set, notify=cint(self.flags.pull_contact))
+				self.update(to_set)
+				frappe.db.set_value("Customer", self.name, to_set, None, notify=cint(self.flags.pull_address))
 
 			elif push_or_pull == "push":
 				data_changed = any([cstr(self.get(d['customer_field'])) != cstr(contact.get(d['contact_field']))
@@ -262,10 +263,12 @@ class Customer(TransactionBase):
 				for d in primary_address_fields:
 					to_set[d['customer_field']] = address.get(d['address_field'])
 
-				self.db_set(to_set, notify=cint(self.flags.pull_address))
+				self.update(to_set)
+				frappe.db.set_value("Customer", self.name, to_set, None, notify=cint(self.flags.pull_address))
 
 			elif push_or_pull == "push":
-				self.db_set('primary_address', get_address_display(address.as_dict()))
+				self.primary_address = get_address_display(address.as_dict())
+				frappe.db.set_value("Customer", self.name, 'primary_address', self.primary_address, notify=cint(self.flags.pull_address))
 
 				data_changed = any([cstr(self.get(d['customer_field'])) != cstr(address.get(d['address_field']))
 					for d in primary_address_fields])
@@ -606,7 +609,7 @@ def get_credit_limit(customer, company):
 def make_contact(args, is_primary_contact=1):
 	contact = frappe.get_doc({
 		'doctype': 'Contact',
-		'first_name': args.get('name'),
+		'first_name': args.get('customer_name') or args.get('name'),
 		'is_primary_contact': is_primary_contact,
 		'links': [{
 			'link_doctype': args.get('doctype'),
