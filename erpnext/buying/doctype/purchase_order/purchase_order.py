@@ -545,6 +545,8 @@ def make_rm_stock_entry(purchase_order, rm_items):
 						"s_warehouse": rm_item_data["warehouse"],
 						"t_warehouse": purchase_order.supplier_warehouse,
 						"stock_uom": rm_item_data["stock_uom"],
+						"serial_no": rm_item_data.get("serial_no"),
+						"batch_no": rm_item_data.get("batch_no"),
 						"uom": rm_item_data["stock_uom"],
 						"subcontracted_item": rm_item_data["item_code"],
 						"allow_alternative_item": item_wh.get(rm_item_code, {}).get("allow_alternative_item")

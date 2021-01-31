@@ -364,6 +364,7 @@ class JobCard(Document):
 			self.update_corrective_in_work_order(wo)
 
 		elif self.operation_id:
+			wo.set_scrap_items()
 			self.validate_produced_quantity(for_quantity, wo)
 			self.update_work_order_data(for_quantity, time_in_mins, wo)
 

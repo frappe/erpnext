@@ -75,8 +75,7 @@
   "total_amount",
   "job_card",
   "amended_from",
-  "credit_note",
-  "is_return"
+  "credit_note"
  ],
  "fields": [
   {
@@ -625,7 +624,7 @@
    "label": "Get Items",
    "oldfieldtype": "Button",
    "print_hide": 1
-  },
+  }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,

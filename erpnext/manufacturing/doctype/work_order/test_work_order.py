@@ -491,7 +491,7 @@ class TestWorkOrder(unittest.TestCase):
 			if itemwise_serial_nos.get(ste_row.item_code):
 				ste_row.serial_no = '\n'.join(itemwise_serial_nos.get(ste_row.item_code))
 
-		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Material Consumption for Manufacture", 2))
+		ste3 = frappe.get_doc(make_stock_entry(wo.name, "Material Consumption for Manufacture", 2))
 		self.assertEqual(ste3.fg_completed_qty, 2)
 
 		expected_qty = {"_Test Item": 2, "_Test Item Home Desktop 100": 4}

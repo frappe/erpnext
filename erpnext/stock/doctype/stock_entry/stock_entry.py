@@ -2,7 +2,8 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe, erpnext
+import frappe
+import erpnext
 import frappe.defaults
 from frappe import _
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
@@ -20,7 +21,8 @@ from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_su
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
 from erpnext.accounts.general_ledger import process_gl_map
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
-import json, copy
+import json
+import copy
 
 from six import string_types, itervalues, iteritems
 
@@ -356,7 +358,8 @@ class StockEntry(StockController):
 
 	def check_if_operations_completed(self):
 		"""Check if Time Sheets are completed against before manufacturing to capture operating costs."""
-		if not self.work_order: return
+		if not self.work_order:
+			return
 
 		work_order_doc = frappe.get_cached_doc("Work Order", self.work_order)
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
@@ -460,7 +463,8 @@ class StockEntry(StockController):
 		"""
 		# Set rate for outgoing items
 		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
-		finished_item_qty = sum(d.transfer_qty for d in self.items if d.is_finished_item)
+		finished_item_qty = sum(flt(d.transfer_qty, d.precision('transfer_qty'))
+			for d in self.items if d.is_finished_item)
 
 		# Set basic rate for incoming items
 		for d in self.get('items'):
@@ -855,7 +859,6 @@ class StockEntry(StockController):
 				wo_doc.run_method("update_work_order_qty")
 				if self.purpose == "Manufacture":
 					wo_doc.run_method("update_planned_qty")
-					wo_doc.update_batch_produced_qty(self)
 
 			if not wo_doc.operations:
 				wo_doc.set_actual_dates()
@@ -993,7 +996,8 @@ class StockEntry(StockController):
 
 		for row in self.wo_doc.required_items:
 			if (self.purpose == "Material Transfer for Manufacture"
-				and (self.wo_doc.skip_transfer or row.skip_material_transfer)): continue
+				and (self.wo_doc.skip_transfer or row.skip_material_transfer)):
+				continue
 
 			if (row.transferred_qty and row.transferred_qty >= row.required_qty
 				and row.consumed_qty >= row.transferred_qty):
@@ -1353,11 +1357,11 @@ class StockEntry(StockController):
 
 	def set_serial_no_batch_for_finished_good(self):
 		args = {}
-		if self.pro_doc.serial_no:
+		if self.wo_doc.serial_no:
 			self.get_serial_nos_for_fg(args)
 
 		for row in self.items:
-			if row.is_finished_item and row.item_code == self.pro_doc.production_item:
+			if row.is_finished_item and row.item_code == self.wo_doc.production_item:
 				if args.get("serial_no"):
 					row.serial_no = '\n'.join(args["serial_no"][0: cint(row.qty)])
 
@@ -1366,11 +1370,11 @@ class StockEntry(StockController):
 			"`tabStock Entry Detail`.`serial_no`", "`tabStock Entry Detail`.`batch_no`"]
 
 		filters = [["Stock Entry","work_order","=",self.work_order], ["Stock Entry","purpose","=","Manufacture"],
-			["Stock Entry","docstatus","=",1], ["Stock Entry Detail","item_code","=",self.pro_doc.production_item]]
+			["Stock Entry","docstatus","=",1], ["Stock Entry Detail","item_code","=",self.wo_doc.production_item]]
 
 		stock_entries = frappe.get_all("Stock Entry", fields=fields, filters=filters)
 
-		if self.pro_doc.serial_no:
+		if self.wo_doc.serial_no:
 			args["serial_no"] = self.get_available_serial_nos(stock_entries)
 
 	def get_available_serial_nos(self, stock_entries):
@@ -1379,7 +1383,7 @@ class StockEntry(StockController):
 			if row.serial_no:
 				used_serial_nos.extend(get_serial_nos(row.serial_no))
 
-		return sorted(list(set(get_serial_nos(self.pro_doc.serial_no)) - set(used_serial_nos)))
+		return sorted(list(set(get_serial_nos(self.wo_doc.serial_no)) - set(used_serial_nos)))
 
 @frappe.whitelist()
 def move_sample_to_retention_warehouse(company, items):
@@ -1684,7 +1688,8 @@ def get_unconsumed_batches(item_data, row):
 		# Check the batch is already consumed or not
 		available_qty = flt(data[0]) - consumed_batch.get(batch_no, 0)
 
-		if available_qty <= 0 or qty_to_consume <= 0: continue
+		if available_qty <= 0 or qty_to_consume <= 0:
+			continue
 
 		args = copy.copy(item_data)
 		if available_qty > qty_to_consume:
@@ -1706,7 +1711,8 @@ def get_unconsumed_serial_nos(item_data, row):
 
 	serial_nos = []
 	for sn in available_serial_nos:
-		if qty_to_consume <= 0: break
+		if qty_to_consume <= 0:
+			break
 
 		qty_to_consume -= 1
 		serial_nos.append(sn)

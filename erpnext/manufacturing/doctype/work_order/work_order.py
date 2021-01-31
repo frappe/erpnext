@@ -96,7 +96,8 @@ class WorkOrder(Document):
 				frappe.throw(_("Sales Order {0} is not valid").format(self.sales_order))
 
 	def do_not_stop_if_materials_not_return(self, status):
-		if status != 'Stopped': return
+		if status != 'Stopped':
+			return
 
 		non_consumed_materials = [frappe.bold(d.item_code) for d in self.required_items
 			if d.transferred_qty and d.transferred_qty > d.consumed_qty]
@@ -631,7 +632,8 @@ class WorkOrder(Document):
 
 	def set_scrap_items(self):
 		job_cards = frappe.get_all("Job Card", filters={"docstatus": 1, "work_order": self.name})
-		if not job_cards: return
+		if not job_cards:
+			return
 
 		job_cards = [d.name for d in job_cards]
 
@@ -733,12 +735,7 @@ class WorkOrder(Document):
 		for item_row in self.required_items:
 			data = itemwise_transfer_details.get(item_row.item_code) or default_args
 			if data and item_row.item_code == data.get("item_code"):
-				if data.get("batch_no"):
-					data["batch_no"] = json.dumps(data.get("batch_no"))
-
-				if data.get("serial_no"):
-					data["serial_no"] = json.dumps(get_serial_nos(data.get("serial_no")))
-
+				convert_json_to_string_object(data)
 				del itemwise_transfer_details[item_row.item_code]
 
 			frappe.db.set_value(item_row.doctype, item_row.name, data)
@@ -748,6 +745,7 @@ class WorkOrder(Document):
 
 		# Add extra transferred materials(not in BOM) in the Required Items table
 		for item_code, details in itemwise_transfer_details.items():
+			convert_json_to_string_object(details)
 			details.update({"item_code": item_code, "stock_entry": se_doc.name, "docstatus": 1})
 			new_row = self.append("required_items", details)
 			new_row.insert()
@@ -784,7 +782,9 @@ class WorkOrder(Document):
 
 			batch_or_serial_no = {}
 			for row in consumed_item_details:
-				if not row.consumed_qty: continue
+				if not row.consumed_qty:
+					continue
+
 				if row.consumed_serial_no or row.consumed_batch_no:
 					update_batch_and_serial_no(row, batch_or_serial_no)
 
@@ -818,16 +818,12 @@ class WorkOrder(Document):
 		bom.set_bom_material_details()
 		return bom
 
-	def update_batch_produced_qty(self, stock_entry_doc):
-		if not cint(frappe.db.get_single_value("Manufacturing Settings", "make_serial_no_batch_from_work_order")):
-			return
+def convert_json_to_string_object(data):
+	if data.get("batch_no"):
+		data["batch_no"] = json.dumps(data.get("batch_no"))
 
-		for row in stock_entry_doc.items:
-			if row.batch_no and (row.is_finished_item or row.is_scrap_item):
-				qty = frappe.get_all("Stock Entry Detail", filters = {"batch_no": row.batch_no, "docstatus": 1},
-					or_filters= {"is_finished_item": 1, "is_scrap_item": 1}, fields = ["sum(qty)"], as_list=1)[0][0]
-
-				frappe.db.set_value("Batch", row.batch_no, "produced_qty", flt(qty))
+	if data.get("serial_no"):
+		data["serial_no"] = json.dumps(get_serial_nos(data.get("serial_no")))
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -854,10 +850,10 @@ def get_item_details(item, project = None, skip_bom_info=False):
 	res = res[0]
 	if skip_bom_info: return res
 
-	filters = {"item": item, "is_default": 1}
+	filters = {"item": item, "is_default": 1, "docstatus": 1}
 
 	if project:
-		filters = {"item": item, "project": project}
+		filters["project"] = project
 
 	res["bom_no"] = frappe.db.get_value("BOM", filters = filters)
 
@@ -865,7 +861,8 @@ def get_item_details(item, project = None, skip_bom_info=False):
 		variant_of= frappe.db.get_value("Item", item, "variant_of")
 
 		if variant_of:
-			res["bom_no"] = frappe.db.get_value("BOM", filters={"item": variant_of, "is_default": 1})
+			res["bom_no"] = frappe.db.get_value("BOM",
+				filters={"item": variant_of, "is_default": 1, "docstatus": 1})
 
 	if not res["bom_no"]:
 		if project:

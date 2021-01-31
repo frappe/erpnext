@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
+import json
 from frappe import _
 
 def execute(filters=None):
@@ -32,6 +33,10 @@ def get_data(report_filters):
 				#If one work order has multiple raw materials then show parent data in the first row only
 				for field in ["name", "status", "production_item", "qty", "produced_qty"]:
 					row[field] = ""
+
+			for key in ["transferred_batch_no", "consumed_batch_no"]:
+				if row.get(key):
+					row[key] = ','.join(json.loads(row.get(key)).keys())
 
 			data.append(row)
 
