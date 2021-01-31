@@ -196,6 +196,12 @@ class Customer(TransactionBase):
 						else:
 							contact.remove(primary_row)
 
+					remove_contact_rows = []
+
+					if self.get('mobile_no_2') and not self.get('mobile_no'):
+						self.mobile_no = self.mobile_no_2
+						self.mobile_no_2 = ""
+
 					if cstr(self.get('mobile_no')) != cstr(contact.get('mobile_no')):
 						primary_row = [d for d in contact.phone_nos if d.is_primary_mobile_no]
 						primary_row = primary_row[0] if primary_row else None
@@ -204,8 +210,8 @@ class Customer(TransactionBase):
 								primary_row.phone = self.mobile_no
 							else:
 								contact.add_phone(self.mobile_no, is_primary_mobile_no=1)
-						else:
-							contact.remove(primary_row)
+						elif primary_row:
+							remove_contact_rows.append(primary_row)
 
 					if cstr(self.get('mobile_no_2')) != cstr(contact.get('mobile_no_2')):
 						secondary_row = [d for d in contact.phone_nos if d.is_primary_mobile_no]
@@ -215,8 +221,12 @@ class Customer(TransactionBase):
 								secondary_row.phone = self.mobile_no_2
 							else:
 								contact.add_phone(self.mobile_no_2, is_primary_mobile_no=1)
-						else:
-							contact.remove(secondary_row)
+						elif secondary_row:
+							remove_contact_rows.append(secondary_row)
+
+					for d in remove_contact_rows:
+						if d:
+							contact.remove(d)
 
 					contact.flags.from_linked_document = ("Customer", self.name)
 					contact.save(ignore_permissions=True)
