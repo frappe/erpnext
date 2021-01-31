@@ -30,6 +30,7 @@ primary_contact_fields = [
 	{'customer_field': 'contact_middle_name', 'contact_field': 'middle_name'},
 	{'customer_field': 'contact_last_name', 'contact_field': 'last_name'},
 	{'customer_field': 'mobile_no', 'contact_field': 'mobile_no', 'custom_setter': 1},
+	{'customer_field': 'mobile_no_2', 'contact_field': 'mobile_no_2', 'custom_setter': 1},
 	{'customer_field': 'phone_no', 'contact_field': 'phone', 'custom_setter': 1},
 	{'customer_field': 'email_id', 'contact_field': 'email_id', 'custom_setter': 1}
 ]
@@ -205,6 +206,17 @@ class Customer(TransactionBase):
 								contact.add_phone(self.mobile_no, is_primary_mobile_no=1)
 						else:
 							contact.remove(primary_row)
+
+					if cstr(self.get('mobile_no_2')) != cstr(contact.get('mobile_no_2')):
+						secondary_row = [d for d in contact.phone_nos if d.is_primary_mobile_no]
+						secondary_row = secondary_row[1] if len(secondary_row) > 1 else None
+						if self.get('mobile_no_2'):
+							if secondary_row:
+								secondary_row.phone = self.mobile_no_2
+							else:
+								contact.add_phone(self.mobile_no_2, is_primary_mobile_no=1)
+						else:
+							contact.remove(secondary_row)
 
 					contact.flags.from_linked_document = ("Customer", self.name)
 					contact.save(ignore_permissions=True)

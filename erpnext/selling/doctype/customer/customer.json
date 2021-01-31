@@ -62,11 +62,12 @@
   "mobile_no",
   "contact_first_name",
   "column_break_50",
-  "phone_no",
+  "mobile_no_2",
   "contact_middle_name",
   "column_break_53",
-  "customer_primary_contact",
+  "phone_no",
   "contact_last_name",
+  "customer_primary_contact",
   "address_contacts",
   "address_html",
   "column_break_54",
@@ -313,7 +314,7 @@
    "fieldname": "mobile_no",
    "fieldtype": "Data",
    "in_standard_filter": 1,
-   "label": "Mobile No"
+   "label": "Primary Mobile No"
   },
   {
    "fieldname": "email_id",
@@ -633,12 +634,17 @@
   {
    "fieldname": "column_break_51",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "mobile_no_2",
+   "fieldtype": "Data",
+   "label": "Secondary Mobile No"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-01-21 17:10:25.651024",
+ "modified": "2021-01-31 11:48:58.886179",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
