@@ -121,7 +121,7 @@ class AccountsController(TransactionBase):
 
 	def before_cancel(self):
 		validate_einvoice_fields(self)
-	
+
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value('Accounts Settings', 'delete_linked_ledger_entries'):
