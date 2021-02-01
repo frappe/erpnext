@@ -57,12 +57,13 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			callback: (result) => {
 				const data = result.message;
 
-				const proposals_wrapper = this.dialog.fields_dict
-					.payment_proposals.$wrapper;
-				this.data = [];
 
 				if (data && data.length > 0) {
+					const proposals_wrapper = this.dialog.fields_dict
+					.payment_proposals.$wrapper;
 					proposals_wrapper.show();
+					this.dialog.fields_dict.no_matching_vouchers.$wrapper.hide();
+					this.data = [];
 					data.forEach((row) => {
 						const reference_date = row[5] ? row[5] : row[8];
 						this.data.push([
@@ -74,9 +75,16 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 							row[4],
 						]);
 					});
+					this.get_dt_columns();
+					this.get_datatable(proposals_wrapper);
 				}
-				this.get_dt_columns();
-				this.get_datatable(proposals_wrapper);
+				else {
+					const proposals_wrapper = this.dialog.fields_dict
+					.payment_proposals.$wrapper;
+					proposals_wrapper.hide();
+					this.dialog.fields_dict.no_matching_vouchers.$wrapper.show();
+
+				}
 				this.dialog.show();
 			},
 		});
@@ -221,6 +229,11 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			{
 				fieldtype: "HTML",
 				fieldname: "payment_proposals",
+			},
+			{
+				fieldtype: "HTML",
+				fieldname: "no_matching_vouchers",
+				options: "<b>No Matching Vouchers Found</b>"
 			},
 			{
 				fieldtype: "Section Break",
