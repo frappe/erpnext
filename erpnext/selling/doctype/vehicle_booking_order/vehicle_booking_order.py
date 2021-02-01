@@ -119,6 +119,20 @@ class VehicleBookingOrder(AccountsController):
 			if d.party_type == "Supplier":
 				self.supplier_payments.append(d)
 
+		self.is_full_payment = False
+		self.is_partial_payment = False
+
+		if self.customer_payments:
+			if self.supplier_payments:
+				first_deposit_posting_date = self.supplier_payments[0].posting_date
+				initial_payments = [d.amount for d in self.customer_payments if d.posting_date <= first_deposit_posting_date]
+			else:
+				initial_payments = [d.amount for d in self.customer_payments]
+
+			initial_payments_amount = flt(sum(initial_payments), self.precision('invoice_total'))
+			self.is_full_payment = initial_payments_amount >= self.invoice_total
+			self.is_partial_payment = not self.is_full_payment
+
 	def validate_customer(self):
 		if not self.customer and not self.customer_is_company:
 			frappe.throw(_("Customer is mandatory"))
