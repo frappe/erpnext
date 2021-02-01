@@ -6,11 +6,10 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "disabled",
-  "section_break_2",
-  "customer",
   "company",
+  "customer",
   "country",
+  "disabled",
   "column_break_9",
   "warehouse",
   "campaign",
@@ -60,10 +59,6 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
-  },
-  {
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
   },
   {
    "fieldname": "customer",
@@ -348,9 +343,9 @@
    "label": "Allow User to Edit Discount"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_23",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Filters"
   },
   {
    "fieldname": "column_break_25",
@@ -360,8 +355,29 @@
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2021-01-06 14:42:41.713864",
+ "links": [
+  {
+   "group": "Invoices",
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "pos_profile"
+  },
+  {
+   "group": "Invoices",
+   "link_doctype": "POS Invoice",
+   "link_fieldname": "pos_profile"
+  },
+  {
+   "group": "Opening & Closing",
+   "link_doctype": "POS Opening Entry",
+   "link_fieldname": "pos_profile"
+  },
+  {
+   "group": "Opening & Closing",
+   "link_doctype": "POS Closing Entry",
+   "link_fieldname": "pos_profile"
+  }
+ ],
+ "modified": "2021-02-01 13:52:51.081311",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",
