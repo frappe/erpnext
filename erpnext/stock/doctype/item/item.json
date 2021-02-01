@@ -17,22 +17,23 @@
   "variant_of",
   "item_name",
   "item_group",
-  "is_item_from_hub",
   "stock_uom",
   "column_break0",
-  "disabled",
-  "allow_alternative_item",
-  "is_stock_item",
-  "include_item_in_manufacturing",
   "opening_stock",
   "valuation_rate",
   "standard_rate",
-  "is_fixed_asset",
   "auto_create_assets",
   "asset_category",
   "asset_naming_series",
   "over_delivery_receipt_allowance",
   "over_billing_allowance",
+  "column_break_17",
+  "disabled",
+  "is_stock_item",
+  "allow_alternative_item",
+  "include_item_in_manufacturing",
+  "is_fixed_asset",
+  "is_item_from_hub",
   "image",
   "section_break_11",
   "brand",
@@ -69,18 +70,17 @@
   "defaults",
   "item_defaults",
   "purchase_details",
-  "is_purchase_item",
   "purchase_uom",
   "min_order_qty",
   "safety_stock",
+  "is_purchase_item",
+  "is_customer_provided_item",
   "purchase_details_cb",
   "lead_time_days",
   "last_purchase_rate",
-  "is_customer_provided_item",
   "customer",
   "supplier_details",
   "delivered_by_supplier",
-  "column_break2",
   "supplier_items",
   "foreign_trade_details",
   "country_of_origin",
@@ -136,9 +136,9 @@
   "website_content",
   "total_projected_qty",
   "hub_publishing_sb",
-  "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
+  "publish_in_hub",
   "synced_with_hub"
  ],
  "fields": [
@@ -635,12 +635,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "column_break2",
-   "fieldtype": "Column Break",
-   "oldfieldtype": "Column Break",
-   "width": "50%"
-  },
-  {
    "fieldname": "supplier_items",
    "fieldtype": "Table",
    "label": "Supplier Items",
@@ -1059,6 +1053,10 @@
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
   }
  ],
  "has_web_view": 1,
@@ -1066,9 +1064,50 @@
  "idx": 2,
  "image_field": "image",
  "index_web_pages_for_search": 1,
- "links": [],
+ "links": [
+  {
+   "group": "Groups",
+   "link_doctype": "BOM",
+   "link_fieldname": "item"
+  },
+  {
+   "group": "Groups",
+   "link_doctype": "Product Bundle",
+   "link_fieldname": "new_item_code"
+  },
+  {
+   "group": "Groups",
+   "link_doctype": "Item Alternative",
+   "link_fieldname": "item_code"
+  },
+  {
+   "group": "Pricing",
+   "link_doctype": "Item Price",
+   "link_fieldname": "item_code"
+  },
+  {
+   "group": "Manufacture",
+   "link_doctype": "Work Order",
+   "link_fieldname": "production_item"
+  },
+  {
+   "group": "Manufacture",
+   "link_doctype": "Item Manufacturer",
+   "link_fieldname": "item_code"
+  },
+  {
+   "group": "Traceability",
+   "link_doctype": "Serial No",
+   "link_fieldname": "item_code"
+  },
+  {
+   "group": "Traceability",
+   "link_doctype": "Batch",
+   "link_fieldname": "item"
+  }
+ ],
  "max_attachments": 1,
- "modified": "2021-01-25 20:49:50.222976",
+ "modified": "2021-02-01 15:03:19.211953",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -7,20 +7,14 @@ def get_data():
 		'heatmap_message': _('This is based on stock movement. See {0} for details')\
 			.format('<a href="#query-report/Stock Ledger">' + _('Stock Ledger') + '</a>'),
 		'fieldname': 'item_code',
-		'non_standard_fieldnames': {
-			'Work Order': 'production_item',
-			'Product Bundle': 'new_item_code',
-			'BOM': 'item',
-			'Batch': 'item'
-		},
 		'transactions': [
 			{
 				'label': _('Groups'),
-				'items': ['BOM', 'Product Bundle', 'Item Alternative']
+				'items': []
 			},
 			{
 				'label': _('Pricing'),
-				'items': ['Item Price', 'Pricing Rule']
+				'items': ['Pricing Rule']
 			},
 			{
 				'label': _('Sell'),
@@ -33,11 +27,7 @@ def get_data():
 			},
 			{
 				'label': _('Manufacture'),
-				'items': ['Production Plan', 'Work Order', 'Item Manufacturer']
-			},
-			{
-				'label': _('Traceability'),
-				'items': ['Serial No', 'Batch']
+				'items': ['Production Plan']
 			},
 			{
 				'label': _('Move'),
