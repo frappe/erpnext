@@ -11,4 +11,3 @@ def execute():
 		WHERE
 			naming_series is NULL""")
 
-	frappe.db.commit()
