@@ -133,9 +133,10 @@ class Asset(AccountsController):
 		if self.is_existing_asset: return
 
 		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:
-			frappe.throw(_("Gross Purchase Amount should be {} to purchase amount of one single Asset. {}\
-				Please do not book expense of multiple assets against one single Asset.")
-				.format(frappe.bold("equal"), "<br>"), title=_("Invalid Gross Purchase Amount"))
+			error_message = _("Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset.")
+			error_message += "<br>"
+			error_message += _("Please do not book expense of multiple assets against one single Asset.")
+			frappe.throw(error_message, title=_("Invalid Gross Purchase Amount"))
 
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'

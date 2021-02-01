@@ -89,8 +89,9 @@ class Company(NestedSet):
 					frappe.throw(_("Account {0} does not belong to company: {1}").format(self.get(account[1]), self.name))
 
 				if get_account_currency(self.get(account[1])) != self.default_currency:
-					frappe.throw(_("""{0} currency must be same as company's default currency.
-						Please select another account""").format(frappe.bold(account[0])))
+					error_message = _("{0} currency must be same as company's default currency. Please select another account.") \
+						.format(frappe.bold(account[0]))
+					frappe.throw(error_message)
 
 	def validate_currency(self):
 		if self.is_new():
