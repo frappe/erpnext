@@ -19,8 +19,8 @@ frappe.ui.form.on('Course Scheduling Tool', {
 					}
 					const { course_schedules } = r.message;
 					if (course_schedules) {
-						const html = `
-						<table class="table table-bordered">
+						/* eslint-disable indent */
+						const html = `<table class="table table-bordered">
 							<caption>${__('Following course schedules were created')}</caption>
 							<thead><tr><th>${__("Course")}</th><th>${__("Date")}</th></tr></thead>
 							<tbody>
@@ -29,7 +29,8 @@ frappe.ui.form.on('Course Scheduling Tool', {
 									<td>${c.schedule_date}</td></tr>`
 								).join('')}
 							</tbody>
-						</table>`
+						</table>`;
+						/* eslint-disable indent */
 
 						frappe.msgprint(html);
 					}

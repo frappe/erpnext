@@ -155,11 +155,11 @@ erpnext.PointOfSale.ItemCart = class {
 
 	bind_events() {
 		const me = this;
-		this.$customer_section.on('click', '.reset-customer-btn', function (e) {
+		this.$customer_section.on('click', '.reset-customer-btn', function () {
 			me.reset_customer_selector();
 		});
 
-		this.$customer_section.on('click', '.close-details-btn', function (e) {
+		this.$customer_section.on('click', '.close-details-btn', function () {
 			me.toggle_customer_info(false);
 		});
 
@@ -365,7 +365,7 @@ erpnext.PointOfSale.ItemCart = class {
 	}
 
 	show_discount_control() {
-		this.$add_discount_elem.css({ 'padding': '0px', 'border': 'none' })
+		this.$add_discount_elem.css({ 'padding': '0px', 'border': 'none' });
 		this.$add_discount_elem.html(
 			`<div class="add-discount-field"></div>`
 		);
@@ -447,13 +447,13 @@ erpnext.PointOfSale.ItemCart = class {
 
 		function get_customer_description() {
 			if (!email_id && !mobile_no) {
-				return `<div class="customer-desc">Click to add email / phone</div>`
+				return `<div class="customer-desc">Click to add email / phone</div>`;
 			} else if (email_id && !mobile_no) {
-				return `<div class="customer-desc">${email_id}</div>`
+				return `<div class="customer-desc">${email_id}</div>`;
 			} else if (mobile_no && !email_id) {
-				return `<div class="customer-desc">${mobile_no}</div>`
+				return `<div class="customer-desc">${mobile_no}</div>`;
 			} else {
-				return `<div class="customer-desc">${email_id} - ${mobile_no}</div>`
+				return `<div class="customer-desc">${email_id} - ${mobile_no}</div>`;
 			}
 		}
 
@@ -462,9 +462,9 @@ erpnext.PointOfSale.ItemCart = class {
 	get_customer_image() {
 		const { customer, image } = this.customer_info || {};
 		if (image) {
-			return `<div class="customer-image"><img src="${image}" alt="${image}""></div>`
+			return `<div class="customer-image"><img src="${image}" alt="${image}""></div>`;
 		} else {
-			return `<div class="customer-image customer-abbr">${frappe.get_abbr(customer)}</div>`
+			return `<div class="customer-image customer-abbr">${frappe.get_abbr(customer)}</div>`;
 		}
 	}
 
@@ -501,7 +501,7 @@ erpnext.PointOfSale.ItemCart = class {
 
 		this.$numpad_section.find('.numpad-grand-total').html(
 			`<div>Grand Total: <span>${format_currency(value, currency)}</span></div>`
-		)
+		);
 	}
 
 	render_taxes(value, taxes) {
@@ -509,6 +509,7 @@ erpnext.PointOfSale.ItemCart = class {
 			const currency = this.events.get_frm().doc.currency;
 			this.$totals_section.find('.taxes-container').css('display', 'flex').html(
 				`${
+					// eslint-disable-next-line no-unused-vars
 					taxes.map((t, i) => {
 						const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
 						return `<div class="tax-row">
@@ -519,7 +520,7 @@ erpnext.PointOfSale.ItemCart = class {
 								</div>`
 					}).join('')
 				}`
-			)
+			);
 		} else {
 			this.$totals_section.find('.taxes-container').css('display', 'none').html('');
 		}
@@ -633,7 +634,7 @@ erpnext.PointOfSale.ItemCart = class {
 					}
 				}
 				item_data.description = frappe.ellipsis(item_data.description, 45);
-				return `<div class="item-desc">${item_data.description}</div>`
+				return `<div class="item-desc">${item_data.description}</div>`;
 			}
 			return ``;
 		}
@@ -641,9 +642,9 @@ erpnext.PointOfSale.ItemCart = class {
 		function get_item_image_html() {
 			const { image, item_name } = item_data;
 			if (image) {
-				return `<div class="item-image"><img src="${image}" alt="${image}""></div>`
+				return `<div class="item-image"><img src="${image}" alt="${image}""></div>`;
 			} else {
-				return `<div class="item-image item-abbr">${frappe.get_abbr(item_name)}</div>`
+				return `<div class="item-image item-abbr">${frappe.get_abbr(item_name)}</div>`;
 			}
 		}
 	}
@@ -980,7 +981,7 @@ erpnext.PointOfSale.ItemCart = class {
 		this.fetch_customer_details(frm.doc.customer).then(() => {
 			this.events.customer_details_updated(this.customer_info);
 			this.update_customer_section();
-		})
+		});
 
 		this.$cart_items_wrapper.html('');
 		if (frm.doc.items.length) {
