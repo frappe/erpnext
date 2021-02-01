@@ -135,11 +135,6 @@ class SerialNo(StockController):
 				self.customer, self.customer_name = \
 					frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
 						["customer", "customer_name"])
-
-				so_fieldname = "against_sales_order" if delivery_sle.voucher_type == "Delivery Note" else "sales_order"
-				sales_order = frappe.db.get_value(delivery_sle.voucher_type + " Item", delivery_sle.voucher_detail_no, so_fieldname)
-				if sales_order:
-					self.sales_order = sales_order
 			if self.warranty_period:
 				self.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date),
 					cint(self.warranty_period))
