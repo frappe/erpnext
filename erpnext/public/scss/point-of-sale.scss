@@ -133,7 +133,7 @@
 				&:hover {
 					transform: scale(1.02, 1.02);
 				}
-				
+
 				.item-display {
 					display: flex;
 					align-items: center;
@@ -203,11 +203,11 @@
 					margin-bottom: var(--margin-md);
 					justify-content: space-between;
 					padding-top: var(--padding-md);
-	
+
 					> .label {
 						@extend .label;
 					}
-	
+
 					> .close-details-btn {
 						display: flex;
 						align-items: center;
@@ -251,7 +251,7 @@
 							font-weight: 700;
 							font-size: var(--text-lg);
 						}
-	
+
 						>.customer-desc {
 							color: var(--gray-600);
 							font-weight: 500;
@@ -392,7 +392,7 @@
 							@extend .abbr;
 							font-size: var(--text-lg);
 						}
-	
+
 
 						> .item-name-desc {
 							@extend .nowrap;
@@ -829,7 +829,7 @@
 			> .fields-section {
 				flex: 1;
 			}
-			
+
 			> .number-pad {
 				flex: 1;
 				display: flex;
@@ -841,7 +841,7 @@
 					grid-template-columns: repeat(3, minmax(0, 1fr));
 					gap: var(--margin-md);
 					margin-bottom: var(--margin-md);
-			
+
 					> .numpad-btn {
 						@extend .pointer-no-select;
 						border-radius: var(--border-radius-md);
@@ -864,7 +864,6 @@
 
 			> .totals {
 				display: flex;
-				padding-top: var(--padding-md);
 				background-color: var(--gray-100);
 				justify-content: center;
 				padding: var(--padding-md);
@@ -879,7 +878,7 @@
 						font-weight: 500;
 						color: var(--gray-600);
 					}
-	
+
 					> .value {
 						font-size: var(--text-2xl);
 						font-weight: 700;
@@ -1057,22 +1056,22 @@
 							font-weight: 500;
 							margin-right: var(--margin-md);
 						}
-	
+
 						> .item-qty {
 							font-weight: 500;
 							margin-left: auto;
 						}
-	
+
 						> .item-rate-disc {
 							display: flex;
 							text-align: right;
 							margin-left: var(--margin-md);
 							justify-content: flex-end;
-	
+
 							> .item-disc {
 								color: var(--dark-green-500);
 							}
-	
+
 							> .item-rate {
 								font-weight: 500;
 								margin-left: var(--margin-md);
