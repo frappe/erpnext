@@ -507,20 +507,14 @@ erpnext.PointOfSale.ItemCart = class {
 	render_taxes(value, taxes) {
 		if (taxes.length) {
 			const currency = this.events.get_frm().doc.currency;
-			this.$totals_section.find('.taxes-container').css('display', 'flex').html(
-				`${
-					// eslint-disable-next-line no-unused-vars
-					taxes.map((t, i) => {
-						const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
-						return `<div class="tax-row">
-									<div class="tax-label">
-										${description}
-									</div>
-									<div class="tax-value">${format_currency(value, currency)}</div>
-								</div>`
-					}).join('')
-				}`
-			);
+			const taxes_html = taxes.map(t => {
+				const description = /[0-9]+/.test(t.description) ? t.description : `${t.description} @ ${t.rate}%`;
+				return `<div class="tax-row">
+					<div class="tax-label">${description}</div>
+					<div class="tax-value">${format_currency(value, currency)}</div>
+				</div>`
+			}).join('');
+			this.$totals_section.find('.taxes-container').css('display', 'flex').html(taxes_html);
 		} else {
 			this.$totals_section.find('.taxes-container').css('display', 'none').html('');
 		}
@@ -844,7 +838,7 @@ erpnext.PointOfSale.ItemCart = class {
 				<div class="transactions-label">Recent Transactions</div>`
 			);
 			// transactions need to be in diff div from sticky elem for scrolling
-			this.$customer_section.append(`<div class="customer-transactions"></div>`)
+			this.$customer_section.append(`<div class="customer-transactions"></div>`);
 
 			this.render_customer_fields();
 			this.fetch_customer_transactions();
