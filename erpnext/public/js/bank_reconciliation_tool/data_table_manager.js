@@ -125,24 +125,31 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 	}
 
 	get_datatable() {
-		if (!this.datatable) {
-			const datatable_options = {
-				columns: this.columns,
-				data: this.transactions,
-				dynamicRowHeight: true,
-				checkboxColumn: false,
-				inlineFilters: true,
-			};
-			this.datatable = new frappe.DataTable(
-				this.$reconciliation_tool_dt.get(0),
-				datatable_options
-			);
-			$(`.${this.datatable.style.scopeClass} .dt-scrollable`).css(
-				"max-height",
-				"calc(100vh - 400px)"
-			);
-		} else {
-			this.datatable.refresh(this.transactions, this.columns);
+		const datatable_options = {
+			columns: this.columns,
+			data: this.transactions,
+			dynamicRowHeight: true,
+			checkboxColumn: false,
+			inlineFilters: true,
+		};
+		this.datatable = new frappe.DataTable(
+			this.$reconciliation_tool_dt.get(0),
+			datatable_options
+		);
+		$(`.${this.datatable.style.scopeClass} .dt-scrollable`).css(
+			"max-height",
+			"calc(100vh - 400px)"
+		);
+
+		console.log(this.transactions)
+
+		if (this.transactions.length > 0) {
+			this.$reconciliation_tool_dt.show()
+			this.$no_bank_transactions.hide()
+		}
+		else{
+			this.$reconciliation_tool_dt.hide()
+			this.$no_bank_transactions.show()
 		}
 	}
 
@@ -173,6 +180,12 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			this.transactions.splice(transaction_index, 1);
 		}
 		this.datatable.refresh(this.transactions, this.columns);
+
+		if (this.transactions.length == 0) {
+			this.$reconciliation_tool_dt.hide()
+			this.$no_bank_transactions.show()
+		}
+
 		// this.make_dt();
 		this.get_cleared_balance().then(() => {
 			this.cards_manager.$cards[1].set_value(

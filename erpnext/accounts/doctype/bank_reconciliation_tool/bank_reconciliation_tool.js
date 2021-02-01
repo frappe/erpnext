@@ -147,6 +147,9 @@ frappe.ui.form.on("Bank Reconciliation Tool", {
 					$reconciliation_tool_dt: frm.get_field(
 						"reconciliation_tool_dt"
 					).$wrapper,
+					$no_bank_transactions: frm.get_field(
+						"no_bank_transactions"
+					).$wrapper,
 					bank_statement_from_date: frm.doc.bank_statement_from_date,
 					bank_statement_to_date: frm.doc.bank_statement_to_date,
 					bank_statement_closing_balance:

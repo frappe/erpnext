@@ -15,7 +15,8 @@
   "bank_statement_closing_balance",
   "section_break_1",
   "reconciliation_tool_cards",
-  "reconciliation_tool_dt"
+  "reconciliation_tool_dt",
+  "no_bank_transactions"
  ],
  "fields": [
   {
@@ -78,13 +79,18 @@
   {
    "fieldname": "reconciliation_tool_dt",
    "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "no_bank_transactions",
+   "fieldtype": "HTML",
+   "options": "<div class=\"text-muted text-center\">No Matching Bank Transactions Found</div>"
   }
  ],
  "hide_toolbar": 1,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-12-02 10:45:03.322811",
+ "modified": "2021-02-02 01:35:53.043578",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Bank Reconciliation Tool",
