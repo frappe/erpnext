@@ -183,11 +183,11 @@ erpnext.PointOfSale.ItemDetails = class {
 			if (!item.has_batch_no) {
 				this.$form_container.append(
 					`<div class="grid-filler no-select"></div>`
-				)
+				);
 			}
 			this.$form_container.append(
 				`<div class="btn btn-sm btn-secondary auto-fetch-btn">Auto Fetch Serial Numbers</div>`
-			)
+			);
 			this.$form_container.find('.serial_no-control').find('textarea').css('height', '6rem');
 		}
 	}

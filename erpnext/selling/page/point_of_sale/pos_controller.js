@@ -182,7 +182,7 @@ erpnext.PointOfSale.Controller = class {
 
 		if (this.frm.doc.items.length == 0) {
 			frappe.show_alert({
-				message:__("You must add atleast one item to save it as draft."),
+				message: __("You must add atleast one item to save it as draft."),
 				indicator:'red'
 			});
 			frappe.utils.play_sound("error");
