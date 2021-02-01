@@ -34,7 +34,7 @@ class LabTest(Document):
 			frappe.db.set_value('Lab Prescription', self.prescription, 'lab_test_created', 1)
 			if frappe.db.get_value('Lab Prescription', self.prescription, 'invoiced'):
 				self.invoiced = True
-		if not self.lab_test_name and self.template:
+		if self.template:
 			self.load_test_from_template()
 			self.reload()
 
