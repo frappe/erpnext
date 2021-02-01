@@ -239,9 +239,6 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
-		if self.doc.doctype == 'Sales Invoice' and self.doc.is_pos:
-			self.doc.pos_total_qty = self.doc.total_qty
-
 	def calculate_taxes(self):
 		self.doc.rounding_adjustment = 0
 		# maintain actual tax rate based on idx
