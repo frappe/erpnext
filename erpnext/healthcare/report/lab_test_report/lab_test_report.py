@@ -169,7 +169,7 @@ def get_chart_data(data):
 			'labels': labels,
 			'datasets': datasets
 		},
-		'type': 'donut',
+		'type': 'bar',
 		'height': 300,
 	}
 

@@ -12,15 +12,15 @@
  "idx": 0,
  "is_public": 1,
  "is_standard": 1,
- "last_synced_on": "2020-07-22 13:22:47.296748",
- "modified": "2020-07-22 13:40:59.655129",
+ "last_synced_on": "2021-01-30 21:03:32.067473",
+ "modified": "2021-02-01 13:35:30.953718",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Symptoms",
  "number_of_groups": 0,
  "owner": "Administrator",
  "timeseries": 0,
- "type": "Percentage",
+ "type": "Bar",
  "use_report_chart": 0,
  "y_axis": []
 }
