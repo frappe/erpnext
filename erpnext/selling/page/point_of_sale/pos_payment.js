@@ -312,15 +312,15 @@ erpnext.PointOfSale.Payment = class {
 				const margin = i % 2 === 0 ? 'pr-2' : 'pl-2';
 				const amount = p.amount > 0 ? format_currency(p.amount, currency) : '';
 
-				return (
-					`<div class="payment-mode-wrapper">
-					<div class="mode-of-payment" data-mode="${mode}" data-payment-type="${payment_type}">
-						${p.mode_of_payment}
-						<div class="${mode}-amount pay-amount">${amount}</div>
-						<div class="${mode} mode-of-payment-control"></div>
+				return (`
+					<div class="payment-mode-wrapper">
+						<div class="mode-of-payment" data-mode="${mode}" data-payment-type="${payment_type}">
+							${p.mode_of_payment}
+							<div class="${mode}-amount pay-amount">${amount}</div>
+							<div class="${mode} mode-of-payment-control"></div>
+						</div>
 					</div>
-				</div>`
-				);
+				`);
 			}).join('')
 		}`);
 
@@ -367,15 +367,12 @@ erpnext.PointOfSale.Payment = class {
 		const shortcuts = this.get_cash_shortcuts(flt(grand_total));
 
 		this.$payment_modes.find('.cash-shortcuts').remove();
-		this.$payment_modes.find('[data-payment-type="Cash"]').find('.mode-of-payment-control').after(
-			`<div class="cash-shortcuts">
-				${
-	shortcuts.map(s => {
-		return `<div class="shortcut" data-value="${s}">${format_currency(s, currency, 0)}</div>`;
-	}).join('')
-}
-			</div>`
-		);
+		let shortcuts_html = shortcuts.map(s => {
+			return `<div class="shortcut" data-value="${s}">${format_currency(s, currency, 0)}</div>`;
+		}).join('');
+
+		this.$payment_modes.find('[data-payment-type="Cash"]').find('.mode-of-payment-control')
+			.after(`<div class="cash-shortcuts">${shortcuts_html}</div>`);
 	}
 
 	get_cash_shortcuts(grand_total) {
