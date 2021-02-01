@@ -15,9 +15,9 @@
   "customer",
   "status",
   "column_break_2",
+  "company",
   "transaction_date",
   "schedule_date",
-  "company",
   "amended_from",
   "warehouse_section",
   "set_warehouse",
@@ -30,14 +30,15 @@
   "per_ordered",
   "column_break2",
   "per_received",
+  "reference",
+  "job_card",
   "printing_details",
   "letter_head",
+  "column_break_26",
   "select_print_heading",
   "terms_section_break",
   "tc_name",
-  "terms",
-  "reference",
-  "job_card"
+  "terms"
  ],
  "fields": [
   {
@@ -302,19 +303,22 @@
   },
   {
    "allow_on_submit": 1,
-   "depends_on": "eval:doc.add_to_transit == 1",
    "fieldname": "transfer_status",
    "fieldtype": "Select",
    "label": "Transfer Status",
    "options": "\nNot Started\nIn Transit\nCompleted",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_26",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-19 01:04:09.285862",
+ "modified": "2021-02-01 16:39:02.457815",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
