@@ -76,7 +76,6 @@ class PatientHistory {
 					fieldtype: 'MultiSelectList',
 					fieldname: 'document_type',
 					placeholder: __('Select Document Type'),
-					input_class: 'input-lg',
 					change: () => {
 						me.start = 0;
 						me.page.main.find('.patient_documents_list').html('');
@@ -100,7 +99,7 @@ class PatientHistory {
 					fieldtype: 'DateRange',
 					fieldname: 'date_range',
 					placeholder: __('Date Range'),
-					input_class: 'input-lg',
+					input_class: 'input-xs',
 					change: () => {
 						let selected_date_range = date_range_field.get_value();
 						if (selected_date_range && selected_date_range.length === 2) {
