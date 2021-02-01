@@ -87,8 +87,8 @@ def update_bank_transaction(bank_transaction, reference_number, party_type=None,
 
 @frappe.whitelist()
 def create_journal_entry_bts( bank_transaction, reference_number, reference_date, posting_date, entry_type,
+	second_account, mode_of_payment=None, party_type=None, party=None, allow_edit=None):
 	# Create a new journal entry based on the bank transaction
-	second_account, mode_of_payment=None, party_type=None, party=None):
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
 	account_type = frappe.db.get_value("Account", second_account, "account_type")
@@ -98,10 +98,10 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 	accounts = []
 	accounts.append({
 			"account": second_account,
-			"credit_in_account_currency": bank_transaction.deposit
-				if  bank_transaction.deposit > 0 
+			"credit": bank_transaction.deposit
+				if  bank_transaction.deposit > 0
 				else 0,
-			"debit_in_account_currency":bank_transaction.withdrawal
+			"debit":bank_transaction.withdrawal
 				if  bank_transaction.withdrawal > 0
 				else 0,
 			"party_type":party_type,
@@ -111,10 +111,10 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 	accounts.append({
 			"account": company_account,
 			"bank_account": bank_transaction.bank_account,
-			"credit_in_account_currency": bank_transaction.withdrawal
+			"credit": bank_transaction.withdrawal
 				if  bank_transaction.withdrawal > 0
 				else 0,
-			"debit_in_account_currency":bank_transaction.deposit
+			"debit":bank_transaction.deposit
 				if  bank_transaction.deposit > 0
 				else 0,
 		})
@@ -132,7 +132,12 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 	}
 	journal_entry = frappe.get_doc(journal_entry_dict)
 	journal_entry.set("accounts", accounts)
+
 	journal_entry.insert()
+
+	if allow_edit:
+		return journal_entry
+
 	journal_entry.submit()
 
 	if bank_transaction.deposit > 0:
@@ -149,7 +154,7 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 
 @frappe.whitelist()
 def create_payment_entry_bts( bank_transaction, reference_number, reference_date, party_type, party, posting_date,
-	mode_of_payment=None, project=None, cost_center=None):
+	mode_of_payment=None, project=None, cost_center=None, allow_edit=None):
 	# Create a new payment entry based on the bank transaction
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	paid_amount = bank_transaction.unallocated_amount
@@ -181,7 +186,12 @@ def create_payment_entry_bts( bank_transaction, reference_number, reference_date
 		payment_entry.paid_to = company_account
 	else:
 		payment_entry.paid_from = company_account
+
 	payment_entry.insert()
+
+	if allow_edit:
+		return payment_entry
+
 	payment_entry.submit()
 	vouchers = json.dumps([{
 		"payment_doctype":"Payment Entry",
@@ -211,7 +221,7 @@ def reconcile_vouchers(bank_transaction, vouchers):
 	for voucher in vouchers:
 		gl_entry = frappe.get_doc("GL Entry", dict(account=account, voucher_type=voucher['payment_doctype'], voucher_no=voucher['payment_name']))
 		gl_amount, transaction_amount = (gl_entry.credit, transaction.deposit) if gl_entry.credit > 0 else (gl_entry.debit, transaction.withdrawal)
-		allocated_amount = gl_amount if gl_amount <= transaction_amount else transaction_amount
+		allocated_amount = gl_amount if gl_amount >= transaction_amount else transaction_amount
 
 		transaction.append("payment_entries", {
 			"payment_document": voucher['payment_entry'].doctype,
@@ -228,9 +238,9 @@ def get_linked_payments(bank_transaction, document_types = None):
 	# get all matching payments for a bank transaction
 	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	bank_account = frappe.db.get_values(
-		"Bank Account", 
-		transaction.bank_account, 
-		["account", "company"], 
+		"Bank Account",
+		transaction.bank_account,
+		["account", "company"],
 		as_dict=True)[0]
 	(account, company) = (bank_account.account, bank_account.company)
 	matching = check_matching(account, company, transaction, document_types)
@@ -400,7 +410,7 @@ def get_pi_matching_query(amount_condition):
 			AND cash_bank_account  = %(bank_account)s
 	"""
 
-def get_ec_matching_query(bank_account, company, amount_condition): 
+def get_ec_matching_query(bank_account, company, amount_condition):
 	# get matching Expense Claim query
 	mode_of_payments = [x["parent"] for x in frappe.db.get_list("Mode of Payment Account",
 			filters={"default_account": bank_account}, fields=["parent"])]
