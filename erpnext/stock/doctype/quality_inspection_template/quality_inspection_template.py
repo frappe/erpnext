@@ -14,6 +14,6 @@ def get_template_details(template):
 
 	return frappe.get_all('Item Quality Inspection Parameter',
 		fields=["specification", "value", "acceptance_formula",
-			"non_numeric", "formula_based_criteria", "min_value", "max_value"],
+			"numeric", "formula_based_criteria", "min_value", "max_value"],
 		filters={'parenttype': 'Quality Inspection Template', 'parent': template},
 		order_by="idx")
