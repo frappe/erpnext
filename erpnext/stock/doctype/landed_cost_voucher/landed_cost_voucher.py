@@ -352,7 +352,7 @@ class LandedCostVoucher(AccountsController):
 
 	def validate_asset_qty_and_status(self, receipt_document_type, receipt_document):
 		for item in self.get('items'):
-			if item.is_fixed_asset:
+			if item.get('is_fixed_asset'):
 				receipt_document_type = 'purchase_invoice' if item.receipt_document_type == 'Purchase Invoice' \
 						else 'purchase_receipt'
 				docs = frappe.db.get_all('Asset', filters={ receipt_document_type: item.receipt_document,
