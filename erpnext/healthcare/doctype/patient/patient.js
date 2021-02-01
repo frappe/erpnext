@@ -30,6 +30,11 @@ frappe.ui.form.on('Patient', {
 				frappe.route_options = {'patient': frm.doc.name};
 				frappe.set_route('patient_history');
 			},'View');
+
+			frm.add_custom_button(__('Patient Progress'), function() {
+				frappe.route_options = {'patient': frm.doc.name};
+				frappe.set_route('patient-progress');
+			},'View');
 		}
 
 		if (!frm.doc.__islocal && (frappe.user.has_role('Nursing User') || frappe.user.has_role('Physician'))) {

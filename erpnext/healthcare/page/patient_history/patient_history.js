@@ -45,7 +45,7 @@ class PatientHistory {
 		});
 		patient.refresh();
 
-		if (frappe.route_options && !this.patient) {
+		if (frappe.route_options && !this.patient_id) {
 			patient.set_value(frappe.route_options.patient);
 			this.patient_id = frappe.route_options.patient;
 		}
