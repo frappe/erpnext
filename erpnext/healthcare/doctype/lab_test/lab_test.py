@@ -34,13 +34,14 @@ class LabTest(Document):
 			frappe.db.set_value('Lab Prescription', self.prescription, 'lab_test_created', 1)
 			if frappe.db.get_value('Lab Prescription', self.prescription, 'invoiced'):
 				self.invoiced = True
-		if not self.lab_test_name and self.template:
+		if self.template:
 			self.load_test_from_template()
 			self.reload()
 
 	def load_test_from_template(self):
 		lab_test = self
-		self.create_test_from_template()
+		create_test_from_template(lab_test)
+		self.reload()
 
 	def set_secondary_uom_result(self):
 		for item in self.normal_test_items:
@@ -64,20 +65,21 @@ class LabTest(Document):
 					frappe.throw(_('Row #{0}: Please enter the result value for {1}').format(
 						item.idx, frappe.bold(item.lab_test_particulars)), title=_('Mandatory Results'))
 
-	def create_test_from_template(self):
-		template = frappe.get_doc('Lab Test Template', self.template)
-		patient = frappe.get_doc('Patient', self.patient)
 
-		self.lab_test_name = template.lab_test_name
-		self.result_date = getdate()
-		self.department = template.department
-		self.lab_test_group = template.lab_test_group
-		self.legend_print_position = template.legend_print_position
-		self.result_legend = template.result_legend
-		self.worksheet_instructions = template.worksheet_instructions
+def create_test_from_template(lab_test):
+	template = frappe.get_doc('Lab Test Template', lab_test.template)
+	patient = frappe.get_doc('Patient', lab_test.patient)
 
-		self = create_sample_collection(self, template, patient, None)
-		self = load_result_format(self, template, None, None)
+	lab_test.lab_test_name = template.lab_test_name
+	lab_test.result_date = getdate()
+	lab_test.department = template.department
+	lab_test.lab_test_group = template.lab_test_group
+	lab_test.legend_print_position = template.legend_print_position
+	lab_test.result_legend = template.result_legend
+	lab_test.worksheet_instructions = template.worksheet_instructions
+
+	lab_test = create_sample_collection(lab_test, template, patient, None)
+	lab_test = load_result_format(lab_test, template, None, None)
 
 
 @frappe.whitelist()

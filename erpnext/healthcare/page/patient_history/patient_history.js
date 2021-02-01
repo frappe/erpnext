@@ -193,8 +193,9 @@ class PatientHistory {
 									${data[i].date_sep}
 								</span>
 						</div>
-						<div class='frappe-card p-5'>
+						<div class='frappe-card p-5 mt-3'>
 							<span class='${data[i].reference_name} document-id'>${label}
+							<br>
 								<div align='center'>
 									<a class='btn octicon octicon-chevron-down btn-default btn-xs btn-more'
 										data-doctype='${data[i].reference_doctype}' data-docname='${data[i].reference_name}'>
@@ -314,7 +315,7 @@ class PatientHistory {
 				me.page.main.find('.'+docname).parent().find('.document-html').show();
 			} else {
 				if (doctype && docname) {
-					let exclude = ['patient', 'patient_name', 'patient_sex', 'encounter_date'];
+					let exclude = ['patient', 'patient_name', 'patient_sex', 'encounter_date', 'naming_series'];
 					frappe.call({
 						method: 'erpnext.healthcare.utils.render_doc_as_html',
 						args:{
@@ -329,6 +330,7 @@ class PatientHistory {
 
 								me.page.main.find('.' + docname).parent().find('.document-html').html(
 									`${r.message.html}
+									<br>
 										<div align='center'>
 											<a class='btn octicon octicon-chevron-up btn-default btn-xs btn-less'
 												data-doctype='${doctype}'
