@@ -226,11 +226,21 @@ frappe.ui.form.on("Bank Statement Import", {
 	},
 
 	download_template(frm) {
-		frappe.require("/assets/js/data_import_tools.min.js", () => {
-			frm.data_exporter = new frappe.data_import.DataExporter(
-				frm.doc.reference_doctype,
-				frm.doc.import_type
-			);
+		let method =
+			"/api/method/frappe.core.doctype.data_import.data_import.download_template";
+
+		open_url_post(method, {
+			doctype: "Bank Transaction",
+			export_records: "5_records",
+			export_fields: {
+				"Bank Transaction": [
+					"date",
+					"deposit",
+					"withdrawal",
+					"description",
+					"reference_number",
+				],
+			},
 		});
 	},
 
