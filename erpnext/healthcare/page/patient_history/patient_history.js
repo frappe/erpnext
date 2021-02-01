@@ -317,7 +317,7 @@ class PatientHistory {
 					let exclude = ['patient', 'patient_name', 'patient_sex', 'encounter_date', 'naming_series'];
 					frappe.call({
 						method: 'erpnext.healthcare.utils.render_doc_as_html',
-						args:{
+						args: {
 							doctype: doctype,
 							docname: docname,
 							exclude_fields: exclude
@@ -352,9 +352,9 @@ class PatientHistory {
 			me.page.main.find('.' + docname).parent().find('.document-id').show();
 			me.page.main.find('.' + docname).parent().find('.document-html').hide();
 		});
-		me.start = 0;
+
 		me.page.main.on('click', '.btn-get-records', function() {
-			setup_documents();
+			this.setup_documents();
 		});
 	}
 
@@ -363,7 +363,7 @@ class PatientHistory {
 
 		frappe.call({
 			method: 'erpnext.healthcare.utils.get_patient_vitals',
-			args:{
+			args: {
 				patient: me.patient_id
 			},
 			callback: function(r) {
