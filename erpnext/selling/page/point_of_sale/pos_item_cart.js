@@ -517,7 +517,7 @@ erpnext.PointOfSale.ItemCart = class {
 										${description}
 									</div>
 									<div class="tax-value">${format_currency(value, currency)}</div>
-								</div>`
+								</div>`;
 					}).join('')
 				}`
 			);
@@ -844,7 +844,7 @@ erpnext.PointOfSale.ItemCart = class {
 				<div class="transactions-label">Recent Transactions</div>`
 			);
 			// transactions need to be in diff div from sticky elem for scrolling
-			this.$customer_section.append(`<div class="customer-transactions"></div>`)
+			this.$customer_section.append(`<div class="customer-transactions"></div>`);
 
 			this.render_customer_fields();
 			this.fetch_customer_transactions();
