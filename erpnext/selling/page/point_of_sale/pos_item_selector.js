@@ -1,13 +1,14 @@
 import onScan from 'onscan.js';
 
 erpnext.PointOfSale.ItemSelector = class {
+	// eslint-disable-next-line no-unused-vars
 	constructor({ frm, wrapper, events, pos_profile, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.pos_profile = pos_profile;
 		this.hide_images = settings.hide_images;
 		this.auto_add_item = settings.auto_add_item_to_cart;
-		
+
 		this.inti_component();
 	}
 
@@ -39,7 +40,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		if (!this.item_group) {
 			const res = await frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name");
 			this.parent_item_group = res.message.name;
-		};
+		}
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
 			this.price_list = res.message.selling_price_list;
@@ -71,11 +72,12 @@ erpnext.PointOfSale.ItemSelector = class {
 		items.forEach(item => {
 			const item_html = this.get_item_html(item);
 			this.$items_container.append(item_html);
-		})
+		});
 	}
 
 	get_item_html(item) {
 		const me = this;
+		// eslint-disable-next-line no-unused-vars
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 
@@ -83,7 +85,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			if (!me.hide_images && item_image) {
 				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
-						</div>`
+						</div>`;
 			} else {
 				return `<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
 			}
@@ -105,7 +107,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					<div class="item-rate">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
 				</div>
 			</div>`
-		)
+		);
 	}
 
 	make_search_bar() {
@@ -140,7 +142,7 @@ erpnext.PointOfSale.ItemSelector = class {
 						filters: {
 							pos_profile: doc ? doc.pos_profile : ''
 						}
-					}
+					};
 				},
 			},
 			parent: this.$component.find('.item-group-field'),
@@ -176,7 +178,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			uom = uom === "undefined" ? undefined : uom;
 
 			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
-		})
+		});
 
 		this.search_field.$input.on('input', (e) => {
 			clearTimeout(this.last_search);
@@ -247,6 +249,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		this.get_items({ search_value: search_term })
 			.then(({ message }) => {
+				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;
 				if (search_term && !barcode) {
 					this.search_index[search_term] = items;
@@ -260,26 +263,26 @@ erpnext.PointOfSale.ItemSelector = class {
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
 	}
-	
+
 	resize_selector(minimize) {
 		minimize ?
-		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
-		this.$component.find('.filter-section').css('grid-template-columns', 'repeat(12, minmax(0, 1fr))');
+			this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
+			this.$component.find('.filter-section').css('grid-template-columns', 'repeat(12, minmax(0, 1fr))');
 
 		minimize ?
-		this.$component.find('.search-field').css('margin', 'var(--margin-sm) 0px') :
-		this.$component.find('.search-field').css('margin', '0px var(--margin-sm)');
+			this.$component.find('.search-field').css('margin', 'var(--margin-sm) 0px') :
+			this.$component.find('.search-field').css('margin', '0px var(--margin-sm)');
 
 		minimize ?
-		this.$component.css('grid-column', 'span 2 / span 2') :
-		this.$component.css('grid-column', 'span 6 / span 6')
+			this.$component.css('grid-column', 'span 2 / span 2') :
+			this.$component.css('grid-column', 'span 6 / span 6');
 
 		minimize ?
-		this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
-		this.$items_container.css('grid-template-columns', 'repeat(4, minmax(0, 1fr))')
+			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
+			this.$items_container.css('grid-template-columns', 'repeat(4, minmax(0, 1fr))');
 	}
 
 	toggle_component(show) {
 		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
 	}
-}
+};
