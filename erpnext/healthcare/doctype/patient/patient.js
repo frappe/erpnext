@@ -29,12 +29,12 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Patient History'), function() {
 				frappe.route_options = {'patient': frm.doc.name};
 				frappe.set_route('patient_history');
-			},'View');
+			}, 'View');
 
 			frm.add_custom_button(__('Patient Progress'), function() {
 				frappe.route_options = {'patient': frm.doc.name};
 				frappe.set_route('patient-progress');
-			},'View');
+			}, 'View');
 		}
 
 		if (!frm.doc.__islocal && (frappe.user.has_role('Nursing User') || frappe.user.has_role('Physician'))) {
