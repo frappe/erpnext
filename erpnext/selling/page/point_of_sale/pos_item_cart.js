@@ -512,7 +512,7 @@ erpnext.PointOfSale.ItemCart = class {
 				return `<div class="tax-row">
 					<div class="tax-label">${description}</div>
 					<div class="tax-value">${format_currency(value, currency)}</div>
-				</div>`
+				</div>`;
 			}).join('');
 			this.$totals_section.find('.taxes-container').css('display', 'flex').html(taxes_html);
 		} else {
