@@ -11,6 +11,7 @@
     "bank_statement",
     "bank_account",
     "bank",
+    "download_template",
     "import_file",
     "html_5",
     "google_sheets_url",
@@ -58,6 +59,12 @@
       "depends_on": "eval:doc.bank_account",
       "fetch_from": "bank_account.bank",
       "set_only_once": 1
+    },
+    {
+      "depends_on": "eval:!doc.__islocal",
+      "fieldname": "download_template",
+      "fieldtype": "Button",
+      "label": "Download Template"
     },
     {
       "depends_on": "eval:!doc.__islocal",

@@ -258,6 +258,16 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				depends_on: "eval:doc.action=='Create Voucher'",
 			},
 			{
+				fieldname: "edit_in_full_page",
+				fieldtype: "Button",
+				label: "Edit in Full Page",
+				click: () => {
+					this.edit_in_full_page();
+				},
+				depends_on:
+					"eval:doc.action=='Create Voucher'",
+			},
+			{
 				fieldname: "column_break_7",
 				fieldtype: "Column Break",
 			},
@@ -354,6 +364,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			{
 				fieldname: "description",
 				fieldtype: "Small Text",
+				label: "Description",
 				read_only: 1,
 			},
 			{
@@ -525,4 +536,56 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			},
 		});
 	}
+
+	edit_in_full_page() {
+		const values = this.dialog.get_values(true)
+		if (values.document_type == "Payment Entry") {
+
+			frappe.call({
+				method:
+					"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
+				args: {
+					bank_transaction: this.bank_transaction.name,
+					reference_number: values.reference_number,
+					reference_date: values.reference_date,
+					party_type: values.party_type,
+					party: values.party,
+					posting_date: values.posting_date,
+					mode_of_payment: values.mode_of_payment,
+					project: values.project,
+					cost_center: values.cost_center,
+					allow_edit: true
+				},
+				callback: (r) => {
+					var doc = frappe.model.sync(r.message);
+					console.log(doc)
+					frappe.set_route("Form", doc[0].doctype, doc[0].name);
+				},
+			});
+		}
+		else {
+			frappe.call({
+				method:
+					"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
+				args: {
+					bank_transaction: this.bank_transaction.name,
+					reference_number: values.reference_number,
+					reference_date: values.reference_date,
+					party_type: values.party_type,
+					party: values.party,
+					posting_date: values.posting_date,
+					mode_of_payment: values.mode_of_payment,
+					entry_type: values.journal_entry_type,
+					second_account: values.second_account,
+					allow_edit: true
+				},
+				callback: (r) => {
+					var doc = frappe.model.sync(r.message);
+					console.log(doc)
+					frappe.set_route("Form", doc[0].doctype, doc[0].name);
+				},
+			});
+		}
+	}
+
 };
