@@ -189,17 +189,18 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			}
 
 			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
-			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Allocation" : "Select Allocation";
+			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Vehicle Allocation" : "Select Allocation";
 			if (this.frm.doc.delivery_status === "To Receive") {
 				if (!this.frm.doc.supplier_advance) {
 					if (this.frm.doc.vehicle_allocation_required) {
-						this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation());
+						this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation(), this.frm.doc.vehicle_allocation ? __("Change") : null);
 					}
 
-					this.frm.add_custom_button(__("Update Customer Details"), () => this.update_customer_details());
+					this.frm.add_custom_button(__("Update Customer Details"), () => this.update_customer_details(), __("Change"));
 				}
 
-				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle());
+				this.frm.add_custom_button(__("Change Vehicle Color"), () => this.select_color(), __("Change"));
+				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle(), this.frm.doc.vehicle ? __("Change") : null);
 			}
 
 			if (this.frm.doc.vehicle_allocation_required && !this.frm.doc.vehicle_allocation) {
@@ -656,6 +657,37 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					vehicle_allocation: dialog.get_value('vehicle_allocation')
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		});
+		dialog.show();
+	},
+
+	select_color: function () {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Select Color"),
+			fields: [
+				{label: __("Color (1st Priority)"), fieldname: "color_1", fieldtype: "Link", options: "Vehicle Color", reqd: 1},
+				{label: __("Color (2nd Priority)"), fieldname: "color_2", fieldtype: "Link", options: "Vehicle Color"},
+				{label: __("Color (3rd Priority)"), fieldname: "color_3", fieldtype: "Link", options: "Vehicle Color"},
+			]
+		});
+
+		dialog.set_primary_action(__("Update"), function () {
+			frappe.call({
+				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_color_in_booking",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					color_1: dialog.get_value('color_1'),
+					color_2: dialog.get_value('color_2'),
+					color_3: dialog.get_value('color_3'),
 				},
 				callback: function (r) {
 					if (!r.exc) {

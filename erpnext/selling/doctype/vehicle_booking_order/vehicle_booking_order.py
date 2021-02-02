@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 from frappe import _
-from frappe.utils import cint, flt, getdate, today
+from frappe.utils import cint, flt, cstr, getdate, today
 from frappe.model.utils import get_fetch_values
 from frappe.model.naming import set_name_by_naming_series
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
@@ -1061,6 +1061,38 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 		update_allocation_booked(previous_allocation, 0)
 
 	frappe.msgprint(_("Allocation Changed Successfully"), indicator='green', alert=True)
+
+
+@frappe.whitelist()
+def update_color_in_booking(vehicle_booking_order, color_1, color_2, color_3):
+	if not color_1:
+		frappe.throw(_("Color (1st Priority) not provided"))
+
+	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
+
+	if vbo_doc.docstatus != 1:
+		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
+
+	if cstr(color_1) == cstr(vbo_doc.color_1) and cstr(color_2) == cstr(vbo_doc.color_2) and cstr(color_3) == cstr(vbo_doc.color_3):
+		frappe.throw(_("Color is the same in Vehicle Allocation {0}").format(vehicle_booking_order))
+
+	if vbo_doc.delivery_status != 'To Receive':
+		frappe.throw(_("Cannot change Vehicle Color in Vehicle Booking Order {0} because Vehicle is already received")
+			.format(frappe.bold(vehicle_booking_order)))
+
+	vbo_doc.color_1 = color_1
+	vbo_doc.color_2 = color_2
+	vbo_doc.color_3 = color_3
+	vbo_doc.validate_color_mandatory()
+
+	# vbo_doc.set_status()
+	vbo_doc.set_user_and_timestamp()
+	vbo_doc.db_update()
+	vbo_doc.notify_update()
+	vbo_doc.save_version()
+
+	frappe.msgprint(_("Color Changed Successfully"), indicator='green', alert=True)
 
 
 def handle_delivery_period_changed(vbo_doc):
