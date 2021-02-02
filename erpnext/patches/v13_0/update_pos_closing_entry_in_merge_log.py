@@ -15,7 +15,7 @@ def execute():
 				log.pos_closing_entry = (
 					SELECT clo_ref.parent FROM `tabPOS Invoice Reference` clo_ref
 					WHERE clo_ref.pos_invoice = log_ref.pos_invoice
-					AND clo_ref.parenttype = 'POS Closing Entry'
+					AND clo_ref.parenttype = 'POS Closing Entry' LIMIT 1
 				)
 			WHERE
 				log_ref.parent = log.name

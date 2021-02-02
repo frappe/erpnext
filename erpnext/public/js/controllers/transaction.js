@@ -450,9 +450,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				method: "erpnext.controllers.accounts_controller.get_default_taxes_and_charges",
 				args: {
 					"master_doctype": taxes_and_charges_field.options,
-					"tax_template": me.frm.doc.taxes_and_charges,
+					"tax_template": me.frm.doc.taxes_and_charges || "",
 					"company": me.frm.doc.company
 				},
+				debounce: 2000,
 				callback: function(r) {
 					if(!r.exc && r.message) {
 						frappe.run_serially([
