@@ -558,7 +558,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 		ss.insert()
 		count+=1
 		if publish_progress:
-			frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),
+			frappe.publish_progress(count*100/len(set(employees)),
 				title = _("Creating Salary Slips..."))
 
 	payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
