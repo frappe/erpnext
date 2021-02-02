@@ -15,8 +15,6 @@ class InpatientMedicationEntry(Document):
 		self.validate_medication_orders()
 
 	def get_medication_orders(self):
-		self.validate_datetime_filters()
-
 		# pull inpatient medication orders based on selected filters
 		orders = get_pending_medication_orders(self)
 
@@ -26,22 +24,6 @@ class InpatientMedicationEntry(Document):
 		else:
 			self.set('medication_orders', [])
 			frappe.msgprint(_('No pending medication orders found for selected criteria'))
-
-	def validate_datetime_filters(self):
-		if self.from_date and self.to_date:
-			self.validate_from_to_dates('from_date', 'to_date')
-
-		if self.from_date and getdate(self.from_date) > getdate():
-			frappe.throw(_('From Date cannot be after the current date.'))
-
-		if self.to_date and getdate(self.to_date) > getdate():
-			frappe.throw(_('To Date cannot be after the current date.'))
-
-		if self.from_time and self.from_time > nowtime():
-			frappe.throw(_('From Time cannot be after the current time.'))
-
-		if self.to_time and self.to_time > nowtime():
-			frappe.throw(_('To Time cannot be after the current time.'))
 
 	def add_mo_to_table(self, orders):
 		# Add medication orders in the child table
@@ -282,7 +264,7 @@ def get_filters(entry):
 
 def get_current_healthcare_service_unit(inpatient_record):
 	ip_record = frappe.get_doc('Inpatient Record', inpatient_record)
-	if ip_record.inpatient_occupancies:
+	if ip_record.status in ['Admitted', 'Discharge Scheduled'] and ip_record.inpatient_occupancies:
 		return ip_record.inpatient_occupancies[-1].service_unit
 	return
 
