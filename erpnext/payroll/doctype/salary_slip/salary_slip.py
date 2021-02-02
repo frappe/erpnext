@@ -107,7 +107,7 @@ class SalarySlip(TransactionBase):
 		if not self.salary_slip_based_on_timesheet:
 			ret_exist = frappe.db.sql("""select name from `tabSalary Slip`
 						where start_date = %s and end_date = %s and docstatus != 2
-						and employee = %s and name != %s""",
+						and employee = %s and name != %s and payroll_entry='' """,
 						(self.start_date, self.end_date, self.employee, self.name))
 			if ret_exist:
 				self.employee = ''

@@ -178,9 +178,9 @@ class PayrollEntry(Document):
 
 		ss_list = frappe.db.sql("""
 			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
-			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s
+			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s %s
-		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
+		""" % ('%s', '%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
 
 	def submit_salary_slips(self):
@@ -334,8 +334,8 @@ class PayrollEntry(Document):
 
 		cond = self.get_filter_condition()
 		salary_slip_name_list = frappe.db.sql(""" select t1.name from `tabSalary Slip` t1
-			where t1.docstatus = 1 and start_date >= %s and end_date <= %s %s
-			""" % ('%s', '%s', cond), (self.start_date, self.end_date), as_list = True)
+			where t1.docstatus = 1 and start_date >= %s and end_date <= %s and t1.payroll_entry = %s  %s
+			""" % ('%s', '%s','%s', cond), (self.start_date, self.end_date, self.name), as_list = True)
 
 		if salary_slip_name_list and len(salary_slip_name_list) > 0:
 			salary_slip_total = 0
@@ -548,35 +548,18 @@ def payroll_entry_has_bank_entries(name):
 	return response
 
 def create_salary_slips_for_employees(employees, args, publish_progress=True):
-	salary_slips_exists_for = get_existing_salary_slips(employees, args)
 	count=0
 	for emp in employees:
-		if emp not in salary_slips_exists_for:
-			args.update({
-				"doctype": "Salary Slip",
-				"employee": emp
-			})
-			ss = frappe.get_doc(args)
-			ss.insert()
-			count+=1
-			if publish_progress:
-				frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),
-					title = _("Creating Salary Slips..."))
-		else:
-			salary_slip_name = frappe.db.sql(
-				'''SELECT
-						name
-					FROM `tabSalary Slip`
-					WHERE company=%s
-					AND start_date >= %s
-					AND end_date <= %s
-					AND employee = %s
-				''', (args.company, args.start_date, args.end_date, emp), as_dict=True)
-
-			salary_slip_doc = frappe.get_doc('Salary Slip', salary_slip_name[0].name)
-			salary_slip_doc.exchange_rate = args.exchange_rate
-			salary_slip_doc.set_totals()
-			salary_slip_doc.db_update()
+		args.update({
+			"doctype": "Salary Slip",
+			"employee": emp
+		})
+		ss = frappe.get_doc(args)
+		ss.insert()
+		count+=1
+		if publish_progress:
+			frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),
+				title = _("Creating Salary Slips..."))
 
 	payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
 	payroll_entry.db_set("salary_slips_created", 1)
