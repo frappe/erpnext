@@ -378,6 +378,8 @@ $.extend(erpnext.utils, {
 			value = value.slice(0, 4) + "-" + value.slice(4);
 			return value;
 		}
+
+		return value;
 	},
 
 	format_mobile_pakistan: function (frm, fieldname) {
