@@ -580,9 +580,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 		dn.cancel()
 		pr1.cancel()
 
-		dn.cancel()
-		pr1.cancel()
-
 	def test_auto_asset_creation(self):
 		asset_item = "Test Asset Item"
 
