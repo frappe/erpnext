@@ -16,7 +16,6 @@ class ProductFiltersBuilder:
 
 	def get_field_filters(self):
 		filter_fields = [row.fieldname for row in self.doc.filter_fields]
-		print('FILTERS', self.doc.filter_fields)
 
 		meta = frappe.get_meta('Item')
 		fields = [df for df in meta.fields if df.fieldname in filter_fields]
@@ -53,7 +52,6 @@ class ProductFiltersBuilder:
 
 	def get_attribute_fitlers(self):
 		attributes = [row.attribute for row in self.doc.filter_attributes]
-		print('ATTRIBUTES', attributes)
 		attribute_docs = [
 			frappe.get_doc('Item Attribute', attribute) for attribute in attributes
 		]
