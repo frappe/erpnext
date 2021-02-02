@@ -133,6 +133,31 @@ frappe.ui.form.on('Payroll Entry', {
 				}
 			};
 		});
+
+		frm.set_query('employee', 'employees', () => {
+			if (!frm.doc.company) {
+				frappe.msgprint(__("Please set a Company"));
+				return []
+			}
+			let filters = {};
+			filters['company'] = frm.doc.company;
+			filters['start_date'] = frm.doc.start_date;
+			filters['end_date'] = frm.doc.end_date;
+
+			if (frm.doc.department) {
+				filters['department'] = frm.doc.department;
+			}
+			if (frm.doc.branch) {
+				filters['branch'] = frm.doc.branch;
+			}
+			if (frm.doc.designation) {
+				filters['designation'] = frm.doc.designation;
+			}
+			return {
+				query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.employee_query",
+				filters: filters
+			}
+		});
 	},
 
 	payroll_frequency: function (frm) {
@@ -141,40 +166,8 @@ frappe.ui.form.on('Payroll Entry', {
 		});
 	},
 
-	employee_filters: function (frm, emp_list) {
-		frm.set_query('employee', 'employees', () => {
-			return {
-				filters: {
-					name: ["not in", emp_list],
-					company: frm.doc.company
-				}
-			};
-		});
-	},
-
-	get_employee_with_salary_slip_and_set_query: function (frm) {
-		if (!frm.doc.company) {
-			frappe.throw(__("Please set a Company"));
-		}
-		frappe.db.get_list('Salary Slip', {
-			filters: {
-				start_date: frm.doc.start_date,
-				end_date: frm.doc.end_date,
-				docstatus: 1,
-			},
-			fields: ['employee']
-		}).then((emp) => {
-			var emp_list = [];
-			emp.forEach((employee_data) => {
-				emp_list.push(Object.values(employee_data)[0]);
-			});
-			frm.events.employee_filters(frm, emp_list);
-		});
-	},
-
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
-		frm.events.get_employee_with_salary_slip_and_set_query(frm);
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
@@ -349,14 +342,3 @@ let render_employee_attendance = function (frm, data) {
 		})
 	);
 };
-
-frappe.ui.form.on('Payroll Employee Detail', {
-	employee: function(frm) {
-		if (!frm.doc.company) {
-			frappe.throw(__("Please set a Company"));
-		}
-		if (!frm.doc.payroll_frequency) {
-			frappe.throw(__("Please set a Payroll Frequency"));
-		}
-	}
-});
