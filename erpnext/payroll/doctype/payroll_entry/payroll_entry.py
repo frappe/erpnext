@@ -10,6 +10,7 @@ from frappe.utils import cint, flt, add_days, getdate, add_to_date, DATE_FORMAT,
 from frappe import _
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from frappe.desk.reportview import get_match_cond, get_filters_cond
 
 class PayrollEntry(Document):
 	def onload(self):
@@ -631,4 +632,58 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 		.format(key=searchfield), {
 			'txt': "%%%s%%" % frappe.db.escape(txt),
 			'start': start, 'page_len': page_len
+		})
+
+def get_employee_with_existing_salary_slip(start_date, end_date):
+
+	return frappe.db.sql_list("""
+		select employee from `tabSalary Slip` 
+		where 
+			(start_date between %(start_date)s and %(end_date)s 
+		or 
+			end_date between %(start_date)s and %(end_date)s 
+		or 
+			%(start_date)s between start_date and end_date)
+		and docstatus = 1
+	""", {'start_date': start_date, 'end_date': end_date})
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def employee_query(doctype, txt, searchfield, start, page_len, filters):
+	filters = frappe._dict(filters)
+	conditions = []
+	emp_cond = ''
+	if filters.start_date and filters.end_date:
+		employee_list = get_employee_with_existing_salary_slip(filters.start_date, filters.end_date)
+		filters.pop('start_date')
+		filters.pop('end_date')
+		if employee_list:
+			emp_cond += 'and employee not in %(employee_list)s'
+	else:
+		employee_list = []
+	
+
+	return frappe.db.sql("""select name, employee_name from `tabEmployee`
+		where status = 'Active'
+			and docstatus < 2
+			and ({key} like %(txt)s
+				or employee_name like %(txt)s)
+			{emp_cond}
+			{fcond} {mcond}
+		order by
+			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
+			if(locate(%(_txt)s, employee_name), locate(%(_txt)s, employee_name), 99999),
+			idx desc,
+			name, employee_name
+		limit %(start)s, %(page_len)s""".format(**{
+			'key': searchfield,
+			'fcond': get_filters_cond(doctype, filters, conditions),
+			'mcond': get_match_cond(doctype),
+			'emp_cond': emp_cond
+		}), {
+			'txt': "%%%s%%" % txt,
+			'_txt': txt.replace("%", ""),
+			'start': start,
+			'page_len': page_len,
+			'employee_list': employee_list
 		})
