@@ -11,7 +11,7 @@ frappe.listview_settings['Subscription'] = {
 		} else if(doc.status === 'Unpaid') {
 			return [__("Unpaid"), "red"];
 		} else if(doc.status === 'Cancelled') {
-			return [__("Cancelled"), "darkgrey"];
+			return [__("Cancelled"), "gray"];
 		}
 	}
 };

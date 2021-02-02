@@ -27,9 +27,9 @@ frappe.query_reports["BOM Stock Report"] = {
 		value = default_formatter(value, row, column, data);
 		if (column.id == "item") {
 			if (data["enough_parts_to_build"] > 0) {
-				value = `<a style='color:green' href="#Form/Item/${data['item']}" data-doctype="Item">${data['item']}</a>`;
+				value = `<a style='color:green' href="/app/item/${data['item']}" data-doctype="Item">${data['item']}</a>`;
 			} else {
-				value = `<a style='color:red' href="#Form/Item/${data['item']}" data-doctype="Item">${data['item']}</a>`;
+				value = `<a style='color:red' href="/app/item/${data['item']}" data-doctype="Item">${data['item']}</a>`;
 			}
 		}
 		return value

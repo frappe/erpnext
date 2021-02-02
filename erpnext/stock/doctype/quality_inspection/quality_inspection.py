@@ -97,7 +97,7 @@ class QualityInspection(Document):
 					self.set_status_based_on_acceptance_values(reading)
 
 	def set_status_based_on_acceptance_values(self, reading):
-		if cint(reading.non_numeric):
+		if not cint(reading.numeric):
 			result = reading.get("reading_value") == reading.get("value")
 		else:
 			# numeric readings
@@ -136,7 +136,7 @@ class QualityInspection(Document):
 
 	def get_formula_evaluation_data(self, reading):
 		data = {}
-		if cint(reading.non_numeric):
+		if not cint(reading.numeric):
 			data = {"reading_value": reading.get("reading_value")}
 		else:
 			# numeric readings
