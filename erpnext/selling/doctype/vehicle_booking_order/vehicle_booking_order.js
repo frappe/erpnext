@@ -107,7 +107,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		};
 	},
 
-	allocation_query: function(ignore_allocation_period) {
+	allocation_query: function(ignore_allocation_period, dialog) {
 		var filters = {
 			item_code: this.frm.doc.item_code,
 			supplier: this.frm.doc.supplier,
@@ -117,9 +117,18 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		if (!ignore_allocation_period && this.frm.doc.allocation_period) {
 			filters['allocation_period'] = this.frm.doc.allocation_period;
 		}
-		if (this.frm.doc.delivery_period) {
-			filters['delivery_period'] = this.frm.doc.delivery_period;
+
+		if (dialog) {
+			var delivery_period = dialog.get_value('delivery_period');
+			if (delivery_period) {
+				filters['delivery_period'] = dialog.get_value('delivery_period');
+			}
+		} else {
+			if (this.frm.doc.delivery_period) {
+				filters['delivery_period'] = this.frm.doc.delivery_period;
+			}
 		}
+
 		return {
 			query: "erpnext.controllers.queries.vehicle_allocation_query",
 			filters: filters
@@ -621,6 +630,8 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Allocation"),
 			fields: [
+				{label: __("Delivery Period"), fieldname: "delivery_period", fieldtype: "Link", options: "Vehicle Allocation Period",
+					default: me.frm.doc.delivery_period, bold: 1},
 				{
 					label: __("Vehicle Allocation"), fieldname: "vehicle_allocation", fieldtype: "Link", options: "Vehicle Allocation", reqd: 1,
 					onchange: () => {
@@ -632,10 +643,9 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 								}
 							});
 						}
-					}, get_query: () => me.allocation_query(true), get_route_options_for_new_doc: () => me.allocation_route_options()
+					}, get_query: () => me.allocation_query(true, dialog), get_route_options_for_new_doc: () => me.allocation_route_options()
 				},
 				{label: __("Allocation Code / Sr #"), fieldname: "title", fieldtype: "Data", read_only: 1},
-				{label: __("Delivery Period"), fieldname: "delivery_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
 				{label: __("Allocation Period"), fieldname: "allocation_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
 			]
 		});

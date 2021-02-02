@@ -379,11 +379,11 @@
    "read_only": 1
   },
   {
+   "bold": 1,
    "fieldname": "color_1",
    "fieldtype": "Link",
    "label": "Color (1st Priority)",
-   "options": "Vehicle Color",
-   "reqd": 1
+   "options": "Vehicle Color"
   },
   {
    "depends_on": "color_1",
@@ -440,8 +440,7 @@
    "fieldname": "delivery_date",
    "fieldtype": "Date",
    "label": "Delivery Due Date",
-   "no_copy": 1,
-   "reqd": 1
+   "no_copy": 1
   },
   {
    "collapsible": 1,
@@ -463,8 +462,7 @@
    "fieldname": "due_date",
    "fieldtype": "Date",
    "label": "Payment Due Date",
-   "no_copy": 1,
-   "reqd": 1
+   "no_copy": 1
   },
   {
    "fetch_from": "item_code.image",
@@ -777,6 +775,7 @@
    "options": "Vehicle Allocation Period"
   },
   {
+   "bold": 1,
    "fieldname": "delivery_period",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -941,7 +940,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-01-31 22:59:29.997954",
+ "modified": "2021-02-02 16:58:07.021731",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",

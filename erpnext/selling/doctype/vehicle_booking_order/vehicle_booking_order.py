@@ -75,6 +75,7 @@ class VehicleBookingOrder(AccountsController):
 
 	def before_submit(self):
 		self.validate_allocation_required()
+		self.validate_color_mandatory()
 
 	def on_submit(self):
 		self.update_allocation_status()
@@ -226,7 +227,7 @@ class VehicleBookingOrder(AccountsController):
 		if delivery_date < getdate(self.transaction_date):
 			frappe.throw(_("Delivery Due Date cannot be before Booking Date"))
 
-		if self.delivery_period:
+		if self.delivery_period and self.delivery_date:
 			from_date, to_date = frappe.get_cached_value("Vehicle Allocation Period", self.delivery_period,
 				['from_date', 'to_date'])
 
@@ -237,7 +238,11 @@ class VehicleBookingOrder(AccountsController):
 	def validate_allocation_required(self):
 		required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
 		if required and not self.delivery_period:
-			frappe.throw(_("Delivery Period is required for allocation of {0}").format(self.item_name or self.item_code))
+			frappe.throw(_("Delivery Period is required for allocation of {0} before submission").format(self.item_name or self.item_code))
+
+	def validate_color_mandatory(self):
+		if not self.color_1:
+			frappe.throw(_("Color (1st Priority) is mandatory before submission"))
 
 	def set_missing_values(self, for_validate=False):
 		customer_details = get_customer_details(self.as_dict(), get_withholding_tax=False)
@@ -1034,7 +1039,7 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 			.format(frappe.bold(vehicle_booking_order)))
 
 	if flt(vbo_doc.supplier_advance):
-		frappe.throw(_("Cannot change Vehicle Allocation in Vehicle Booking Order {0}  because Supplier Payment has already been made")
+		frappe.throw(_("Cannot change Vehicle Allocation in Vehicle Booking Order {0} because Supplier Payment has already been made")
 			.format(frappe.bold(vehicle_booking_order)))
 
 	previous_allocation = vbo_doc.vehicle_allocation
@@ -1043,7 +1048,7 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 	vbo_doc.validate_allocation()
 
 	if vbo_doc.delivery_period != vbo_doc._doc_before_save.delivery_period:
-		frappe.throw(_("Delivery Period must be the same in the new Vehicle Allocation"))
+		handle_delivery_period_changed(vbo_doc)
 
 	vbo_doc.set_status()
 	vbo_doc.set_user_and_timestamp()
@@ -1056,6 +1061,24 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 		update_allocation_booked(previous_allocation, 0)
 
 	frappe.msgprint(_("Allocation Changed Successfully"), indicator='green', alert=True)
+
+
+def handle_delivery_period_changed(vbo_doc):
+	to_date = frappe.get_cached_value("Vehicle Allocation Period", vbo_doc.delivery_period, 'to_date')
+
+	vbo_doc.delivery_date = to_date
+	vbo_doc.validate_delivery_date()
+
+	vbo_doc.due_date = to_date
+	if len(vbo_doc.payment_schedule) == 1:
+		vbo_doc.payment_schedule[0].due_date = to_date
+
+	vbo_doc.validate_payment_schedule()
+	for d in vbo_doc.payment_schedule:
+		d.db_update()
+
+	frappe.msgprint(_("Delivery Period has been changed from {0} to {1}")
+		.format(frappe.bold(vbo_doc._doc_before_save.delivery_period or 'None'), frappe.bold(vbo_doc.delivery_period)))
 
 
 @frappe.whitelist()
