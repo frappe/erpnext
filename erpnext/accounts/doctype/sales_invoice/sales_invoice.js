@@ -298,6 +298,9 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		if (this.frm.doc.is_pos){
 			var pos_profile = this.frm.doc.pos_profile;
 		}
+
+		this.set_dynamic_link();
+
 		var me = this;
 		if(this.frm.updating_party_details) return;
 		erpnext.utils.get_party_details(this.frm,

@@ -66,7 +66,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address, bill_to)
-	set_contact_details(party_details, party, party_type)
+	set_contact_details(party_details, billing_party_doc, billing_party_type)
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 

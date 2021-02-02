@@ -177,7 +177,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 	refresh: function() {
 		this._super();
 
-		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+		this.set_dynamic_link();
 
 		if(this.frm.fields_dict.packed_items) {
 			var packing_list_exists = (this.frm.doc.packed_items || []).length;
@@ -196,6 +196,14 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 				}
 			});
 			this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden');
+		}
+	},
+
+	set_dynamic_link: function () {
+		if (this.frm.doc.bill_to) {
+			frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'bill_to', doctype: 'Customer'};
+		} else {
+			frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'};
 		}
 	},
 
