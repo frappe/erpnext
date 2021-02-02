@@ -4,14 +4,16 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import flt, today
+from frappe.utils import flt, today, cint
 from frappe.desk.query_report import group_report_data
 from erpnext.stock.utils import update_included_uom_in_dict_report
 
 def execute(filters=None):
+	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
+
 	filters = frappe._dict(filters or {})
 	include_uom = filters.get("include_uom")
-	columns = get_columns()
+	columns = get_columns(filters, show_item_name)
 	bin_list = get_bin_list(filters)
 	item_map = get_item_map(filters.get("item_code"), include_uom)
 
@@ -57,6 +59,7 @@ def execute(filters=None):
 		data.append({
 			"item_code": item.name,
 			"item_name": item.item_name,
+			"disable_item_formatter": cint(show_item_name),
 			"item_group": item.item_group,
 			"brand": item.brand,
 			"warehouse": bin.warehouse,
@@ -109,7 +112,7 @@ def get_grouped_data(columns, data, filters, item_map):
 		elif group_object.group_field == 'item_code':
 			group_object.totals['item_code'] = group_object.group_value
 
-			copy_fields = ['item_name', 'item_group', 'brand', 'uom']
+			copy_fields = ['item_name', 'item_group', 'brand', 'uom', 'disable_item_formatter']
 			for f in copy_fields:
 				group_object.totals[f] = group_object.rows[0][f]
 		else:
@@ -118,13 +121,17 @@ def get_grouped_data(columns, data, filters, item_map):
 	return group_report_data(data, group_by, total_fields=total_fields, postprocess_group=postprocess_group)
 
 
-def get_columns():
-	return [
-		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 250},
+def get_columns(filters, show_item_name=True):
+	item_col_width = 150 if filters.get('group_by_1', 'Ungrouped') != 'Ungrouped' or filters.get('group_by_2', 'Ungrouped') != 'Ungrouped'\
+		else 100
+
+	columns = [
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": item_col_width if show_item_name else 250},
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 200},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 120},
-		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 70},
+		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Actual Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Planned Qty"), "fieldname": "planned_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Requested Qty"), "fieldname": "indented_qty", "fieldtype": "Float", "width": 110, "convertible": "qty"},
@@ -139,6 +146,11 @@ def get_columns():
 		{"label": _("Reorder Qty"), "fieldname": "re_order_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
 		{"label": _("Shortage Qty"), "fieldname": "shortage_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"}
 	]
+
+	if not show_item_name:
+		columns = [c for c in columns if c.get('fieldname') != 'item_name']
+
+	return columns
 
 def get_bin_list(filters):
 	conditions = []

@@ -4,13 +4,14 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, flt
+from frappe.utils import date_diff, flt, cint
 from six import iteritems
 from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 def execute(filters=None):
+	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 
-	columns = get_columns(filters)
+	columns = get_columns(filters, show_item_name)
 	item_details = get_fifo_queue(filters)
 	to_date = filters["to_date"]
 	_func = lambda x: x[1]
@@ -26,14 +27,21 @@ def execute(filters=None):
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
 		latest_age = date_diff(to_date, fifo_queue[-1][1])
 
-		row = [details.name, details.item_name,
-			details.description, details.item_group, details.brand]
+		row = {
+			"item_code": details.name,
+			"item_name": details.item_name,
+			"disable_item_formatter": cint(show_item_name),
+			"item_group": details.item_group,
+			"brand": details.brand,
+			"qty": item_dict.get("total_qty"),
+			"average_age": average_age,
+			"earliest": earliest_age,
+			"latest": latest_age,
+			"uom": details.stock_uom
+		}
 
 		if filters.get("show_warehouse_wise_stock"):
-			row.append(details.warehouse)
-
-		row.extend([item_dict.get("total_qty"), average_age,
-			earliest_age, latest_age, details.stock_uom])
+			row['warehouse'] = details.warehouse
 
 		data.append(row)
 
@@ -53,24 +61,18 @@ def get_average_age(fifo_queue, to_date):
 
 	return (age_qty / total_qty) if total_qty else 0.0
 
-def get_columns(filters):
+def get_columns(filters, show_item_name=True):
 	columns = [
 		{
 			"label": _("Item Code"),
 			"fieldname": "item_code",
 			"fieldtype": "Link",
 			"options": "Item",
-			"width": 100
+			"width": 100 if show_item_name else 200
 		},
 		{
 			"label": _("Item Name"),
 			"fieldname": "item_name",
-			"fieldtype": "Data",
-			"width": 100
-		},
-		{
-			"label": _("Description"),
-			"fieldname": "description",
 			"fieldtype": "Data",
 			"width": 200
 		},
@@ -100,6 +102,13 @@ def get_columns(filters):
 
 	columns.extend([
 		{
+			"label": _("UOM"),
+			"fieldname": "uom",
+			"fieldtype": "Link",
+			"options": "UOM",
+			"width": 50
+		},
+		{
 			"label": _("Available Qty"),
 			"fieldname": "qty",
 			"fieldtype": "Float",
@@ -122,15 +131,11 @@ def get_columns(filters):
 			"fieldname": "latest",
 			"fieldtype": "Int",
 			"width": 80
-		},
-		{
-			"label": _("UOM"),
-			"fieldname": "uom",
-			"fieldtype": "Link",
-			"options": "UOM",
-			"width": 100
 		}
 	])
+
+	if not show_item_name:
+		columns = [c for c in columns if c.get('fieldname') != 'item_name']
 
 	return columns
 

@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
+from frappe.utils import cint
 from erpnext.stock.utils import update_included_uom_in_dict_report
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from six import iteritems
@@ -12,8 +13,10 @@ def execute(filters=None):
 	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
 
+	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
+
 	include_uom = filters.get("include_uom")
-	columns = get_columns(filters, show_amounts)
+	columns = get_columns(filters, show_amounts, show_item_name)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
@@ -34,6 +37,7 @@ def execute(filters=None):
 			"date": sle.date,
 			"item_code": sle.item_code,
 			"item_name": item_detail.item_name,
+			"disable_item_formatter": cint(show_item_name),
 			"item_group": item_detail.item_group,
 			"brand": item_detail.brand,
 			"description": item_detail.description,
@@ -75,12 +79,13 @@ def execute(filters=None):
 	data = get_grouped_data(filters, data)
 	return columns, data
 
-def get_columns(filters, show_amounts=True):
+def get_columns(filters, show_amounts=True, show_item_name=True):
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
-		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150, "hide_if_filtered": 1},
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100 if show_item_name else 150, "hide_if_filtered": 1},
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150, "hide_if_filtered": 1},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100, "hide_if_filtered": 1},
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
@@ -109,6 +114,9 @@ def get_columns(filters, show_amounts=True):
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
+
+	if not show_item_name:
+		columns = [c for c in columns if c.get('fieldname') != 'item_name']
 
 	return columns
 

@@ -30,8 +30,10 @@ def execute(filters=None):
 	show_amounts_role = frappe.db.get_single_value("Stock Settings", "restrict_amounts_in_report_to_role")
 	show_amounts = not show_amounts_role or show_amounts_role in frappe.get_roles()
 
+	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
+
 	include_uom = filters.get("include_uom")
-	columns = get_columns(filters, show_amounts)
+	columns = get_columns(filters, show_amounts, show_item_name)
 	items = get_items(filters)
 
 	# if no items in filter found return
@@ -70,6 +72,7 @@ def execute(filters=None):
 			report_data = {
 				"item_code": item,
 				"item_name": item_map[item]["item_name"],
+				"disable_item_formatter": cint(show_item_name),
 				"item_group": item_map[item]["item_group"],
 				"brand": item_map[item]["brand"],
 				"description": item_map[item]["description"],
@@ -119,29 +122,30 @@ def execute(filters=None):
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
-def get_columns(filters, show_amounts=True):
+def get_columns(filters, show_amounts=True, show_item_name=True):
 	"""return columns"""
 
 	columns = [
-		{"label": _("Item"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 200},
+		{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100 if show_item_name else 200},
+		{"label": _("Item Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 200},
 		{"label": _("Item Group"), "fieldname": "item_group", "fieldtype": "Link", "options": "Item Group", "width": 100},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 90},
 		{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 100},
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Size"), "fieldname": "alt_uom_size", "fieldtype": "Float", "width": 50},
-		{"label": _("Opening Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Opening Value"), "fieldname": "opening_val", "fieldtype": "Currency", "width": 110, "is_value": True},
-		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Currency", "width": 110, "is_value": True},
-		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Currency", "width": 110, "is_value": True},
-		{"label": _("Balance Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Balance Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 110, "is_value": True},
-		{"label": _("Valuation Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 100, "convertible": "rate", "is_value": True},
-		{"label": _("Purchase Qty"), "fieldname": "purchase_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Purchase Value"), "fieldname": "purchase_val", "fieldtype": "Currency", "width": 110, "is_value": True},
-		{"label": _("Sales Qty"), "fieldname": "sales_qty", "fieldtype": "Float", "width": 100, "convertible": "qty"},
-		{"label": _("Sales Value"), "fieldname": "sales_val", "fieldtype": "Currency", "width": 110, "is_value": True},
+		{"label": _("Open Qty"), "fieldname": "opening_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Open Value"), "fieldname": "opening_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("In Qty"), "fieldname": "in_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("In Value"), "fieldname": "in_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("Out Qty"), "fieldname": "out_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("Bal Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Bal Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("Avg Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 100, "convertible": "rate", "is_value": True},
+		{"label": _("Purchase Qty"), "fieldname": "purchase_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Purchase Value"), "fieldname": "purchase_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("Sales Qty"), "fieldname": "sales_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
+		{"label": _("Sales Value"), "fieldname": "sales_val", "fieldtype": "Currency", "width": 90, "is_value": True},
 		{"label": _("Reorder Level"), "fieldname": "reorder_level", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Reorder Qty"), "fieldname": "reorder_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 100}
@@ -154,6 +158,9 @@ def get_columns(filters, show_amounts=True):
 
 	if filters.get('show_variant_attributes'):
 		columns += [{'label': att_name, 'fieldname': att_name, 'width': 100} for att_name in get_variants_attributes()]
+
+	if not show_item_name:
+		columns = [c for c in columns if c.get('fieldname') != 'item_name']
 
 	if not show_amounts:
 		columns = list(filter(lambda d: not d.get("is_value"), columns))
