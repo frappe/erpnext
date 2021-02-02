@@ -134,8 +134,11 @@ class PatientProgress {
 			type: 'heatmap',
 			countLabel: 'Interactions',
 			data: {},
-			discreteDomains: 0
+			discreteDomains: 1,
+			radius: 3,
+			height: 150
 		});
+
 		this.update_heatmap_data();
 		this.create_heatmap_chart_filters();
 	}
