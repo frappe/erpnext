@@ -166,7 +166,8 @@ class Customer(TransactionBase):
 					to_set[d['customer_field']] = contact.get(d['contact_field'])
 
 				self.update(to_set)
-				frappe.db.set_value("Customer", self.name, to_set, None, notify=cint(self.flags.pull_address))
+				frappe.db.set_value("Customer", self.name, to_set, None,
+					notify=cint(self.flags.pull_contact), update_modified=cint(self.flags.pull_contact))
 
 			elif push_or_pull == "push":
 				data_changed = any([cstr(self.get(d['customer_field'])) != cstr(contact.get(d['contact_field']))
@@ -264,11 +265,13 @@ class Customer(TransactionBase):
 					to_set[d['customer_field']] = address.get(d['address_field'])
 
 				self.update(to_set)
-				frappe.db.set_value("Customer", self.name, to_set, None, notify=cint(self.flags.pull_address))
+				frappe.db.set_value("Customer", self.name, to_set, None,
+					notify=cint(self.flags.pull_address), update_modified=cint(self.flags.pull_address))
 
 			elif push_or_pull == "push":
 				self.primary_address = get_address_display(address.as_dict())
-				frappe.db.set_value("Customer", self.name, 'primary_address', self.primary_address, notify=cint(self.flags.pull_address))
+				frappe.db.set_value("Customer", self.name, 'primary_address', self.primary_address,
+					notify=cint(self.flags.pull_address), update_modified=cint(self.flags.pull_address))
 
 				data_changed = any([cstr(self.get(d['customer_field'])) != cstr(address.get(d['address_field']))
 					for d in primary_address_fields])
