@@ -16,6 +16,8 @@ class SalesPurchaseDetailsReport(object):
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
 
+		self.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
+
 		self.additional_customer_info = frappe._dict()
 
 		self.date_field = 'transaction_date' \
@@ -199,7 +201,8 @@ class SalesPurchaseDetailsReport(object):
 				"cost_center": d.cost_center,
 				"project": d.project,
 				scrub(self.filters.party_type) + "_name": d.party_name,
-				"party_name": d.party_name
+				"party_name": d.party_name,
+				"disable_item_formatter": cint(self.show_item_name),
 			})
 
 			if "Group by Item" in [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]:
@@ -246,6 +249,9 @@ class SalesPurchaseDetailsReport(object):
 
 		if len(self.group_by) <= 1:
 			return data
+
+		for d in data:
+			d['disable_item_formatter'] = 0
 
 		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
 
@@ -546,10 +552,16 @@ class SalesPurchaseDetailsReport(object):
 
 			columns += [
 				{
-					"label": _("Item"),
+					"label": _("Item Code"),
 					"fieldtype": "Link",
 					"fieldname": "item_code",
 					"options": "Item",
+					"width": 100 if self.show_item_name else 150
+				},
+				{
+					"label": _("Item Name"),
+					"fieldtype": "Data",
+					"fieldname": "item_name",
 					"width": 150
 				},
 			]
@@ -769,6 +781,9 @@ class SalesPurchaseDetailsReport(object):
 				"width": 100
 			},
 		]
+
+		if not self.show_item_name:
+			columns = [c for c in columns if c.get('fieldname') != 'item_name']
 
 		return columns
 
