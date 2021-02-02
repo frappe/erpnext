@@ -98,8 +98,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		context.field_filters = filter_engine.get_field_filters()
 		context.attribute_filters = filter_engine.get_attribute_fitlers()
 
-		print(context.field_filters, context.attribute_filters)
-
 		context.update({
 			"parents": get_parent_item_groups(self.parent_item_group),
 			"title": self.name
