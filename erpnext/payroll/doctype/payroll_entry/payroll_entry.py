@@ -179,7 +179,7 @@ class PayrollEntry(Document):
 			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
 			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s
-		""" % ('%s', '%s', '%s', '%s','%s'), (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
+		""", (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
 
 	def submit_salary_slips(self):
@@ -332,8 +332,8 @@ class PayrollEntry(Document):
 		self.check_permission('write')
 
 		salary_slip_name_list = frappe.db.sql(""" select t1.name from `tabSalary Slip` t1
-			where t1.docstatus = 1 and start_date >= %s and end_date <= %s and t1.payroll_entry = %s  %s
-			""" % ('%s', '%s','%s'), (self.start_date, self.end_date, self.name), as_list = True)
+			where t1.docstatus = 1 and start_date >= %s and end_date <= %s and t1.payroll_entry = %s
+			""", (self.start_date, self.end_date, self.name), as_list = True)
 
 		if salary_slip_name_list and len(salary_slip_name_list) > 0:
 			salary_slip_total = 0
