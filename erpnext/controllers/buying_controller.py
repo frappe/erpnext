@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, msgprint
 from frappe.utils import flt,cint, cstr, getdate
+from frappe.model.utils import get_fetch_values
 from six import iteritems
 from erpnext.accounts.party import get_party_details
 from erpnext.stock.get_item_details import get_conversion_factor
@@ -34,6 +35,13 @@ class BuyingController(StockController):
 		if self.get("supplier_name") or self.get("supplier"):
 			return _("From {0} | {1} {2}").format(self.get("supplier_name") or self.get("supplier"), self.currency,
 				self.get_formatted("grand_total"))
+
+	def onload(self):
+		super(BuyingController, self).onload()
+
+		if self.docstatus == 0:
+			if self.get('supplier'):
+				self.update(get_fetch_values(self.doctype, 'supplier', self.supplier))
 
 	def validate(self):
 		super(BuyingController, self).validate()

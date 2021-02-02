@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.utils import cint, flt, cstr, comma_or
 from frappe import _, throw
+from frappe.model.utils import get_fetch_values
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
@@ -32,6 +33,13 @@ class SellingController(StockController):
 
 	def onload(self):
 		super(SellingController, self).onload()
+
+		if self.docstatus == 0:
+			if self.get('customer'):
+				self.update(get_fetch_values(self.doctype, 'customer', self.customer))
+			if self.get('bill_to'):
+				self.update(get_fetch_values(self.doctype, 'bill_to', self.bill_to))
+
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
 				item.update(get_bin_details(item.item_code, item.warehouse))

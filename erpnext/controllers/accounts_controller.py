@@ -134,7 +134,7 @@ class AccountsController(TransactionBase):
 
 			validate_return(self)
 
-			if self.meta.has_field('total_in_words'):
+			if self.meta.has_field('in_words'):
 				self.set_total_in_words()
 
 		self.validate_all_documents_schedule()
