@@ -116,7 +116,7 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	exchange_rate: function(frm) {
-		set_totals_call(frm);
+		set_totals(frm);
 	},
 
 	hide_loan_section: function(frm) {
@@ -205,14 +205,14 @@ frappe.ui.form.on("Salary Slip", {
 
 frappe.ui.form.on('Salary Slip Timesheet', {
 	time_sheet: function(frm) {
-		set_totals_call(frm);
+		set_totals(frm);
 	},
 	timesheets_remove: function(frm) {
-		set_totals_call(frm);
+		set_totals(frm);
 	}
 });
 
-var set_totals_call = function(frm) {
+var set_totals = function(frm) {
 	if (frm.doc.docstatus === 0) {
 		if (frm.doc.earnings || frm.doc.deductions) {
 			frappe.call({
@@ -228,15 +228,15 @@ var set_totals_call = function(frm) {
 
 frappe.ui.form.on('Salary Detail', {
 	amount: function(frm) {
-		set_totals_call(frm);
+		set_totals(frm);
 	},
 
 	earnings_remove: function(frm) {
-		set_totals_call(frm);
+		set_totals(frm);
 	},
 
 	deductions_remove: function(frm) {
-		set_totals_call(frm);
+		set_totals(frm);
 	},
 
 	salary_component: function(frm, cdt, cdn) {
