@@ -62,7 +62,7 @@ def make_entry(args, allow_negative_stock=False, via_landed_cost_voucher=False):
 	sle.submit()
 	return sle
 
-def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negative_stock=False, via_landed_cost_voucher=False):
+def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negative_stock=None, via_landed_cost_voucher=False):
 	if not args and voucher_type and voucher_no:
 		args = get_args_for_voucher(voucher_type, voucher_no)
 
@@ -181,7 +181,7 @@ class update_entries_after(object):
 				self.process_sle(sle)
 
 				if sle.dependant_sle_voucher_detail_no:
-					self.get_dependent_entries_to_fix(entries_to_fix, sle)
+					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
 
 		if self.exceptions:
 			self.raise_exceptions()
@@ -221,13 +221,15 @@ class update_entries_after(object):
 			excluded_sle=sle.name)
 
 		if not dependant_sle:
-			return
+			return entries_to_fix
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse == self.args.warehouse:
-			return
-		elif dependant_sle.item_code != self.item_code \
-				and (dependant_sle.item_code, dependant_sle.warehouse) not in self.new_items:
-			self.new_items[(dependant_sle.item_code, dependant_sle.warehouse)] = dependant_sle
-			return
+			return entries_to_fix
+		elif dependant_sle.item_code != self.item_code:
+			if (dependant_sle.item_code, dependant_sle.warehouse) not in self.new_items:
+				self.new_items[(dependant_sle.item_code, dependant_sle.warehouse)] = dependant_sle
+			return entries_to_fix
+		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
+			return entries_to_fix
 
 		self.initialize_previous_data(dependant_sle)
 
@@ -236,7 +238,7 @@ class update_entries_after(object):
 		future_sle_for_dependant = list(self.get_sle_after_datetime(args))
 
 		entries_to_fix.extend(future_sle_for_dependant)
-		entries_to_fix = sorted(entries_to_fix, key=lambda k: k['timestamp'])
+		return sorted(entries_to_fix, key=lambda k: k['timestamp'])
 
 	def process_sle(self, sle):
 		# previous sle data for this warehouse
@@ -612,11 +614,11 @@ class update_entries_after(object):
 				frappe.local.flags.currently_saving):
 
 				msg = _("{0} units of {1} needed in {2} to complete this transaction.").format(
-					abs(deficiency), frappe.get_desk_link('Item', self.item_code),
+					abs(deficiency), frappe.get_desk_link('Item', exceptions[0]["item_code"]),
 					frappe.get_desk_link('Warehouse', warehouse))
 			else:
 				msg = _("{0} units of {1} needed in {2} on {3} {4} for {5} to complete this transaction.").format(
-					abs(deficiency), frappe.get_desk_link('Item', self.item_code),
+					abs(deficiency), frappe.get_desk_link('Item', exceptions[0]["item_code"]),
 					frappe.get_desk_link('Warehouse', warehouse),
 					exceptions[0]["posting_date"], exceptions[0]["posting_time"],
 					frappe.get_desk_link(exceptions[0]["voucher_type"], exceptions[0]["voucher_no"]))
@@ -761,25 +763,6 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	return valuation_rate
 
-def update_qty_in_future_sle(args, allow_negative_stock=None):
-	frappe.db.sql("""
-		update `tabStock Ledger Entry`
-		set qty_after_transaction = qty_after_transaction + {qty}
-		where
-			item_code = %(item_code)s
-			and warehouse = %(warehouse)s
-			and voucher_no != %(voucher_no)s
-			and is_cancelled = 0
-			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
-				or (
-					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
-					and creation > %(creation)s
-				)
-			)
-	""".format(qty=args.actual_qty), args)
-
-	validate_negative_qty_in_future_sle(args, allow_negative_stock)
-
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=None):
 	allow_negative_stock = allow_negative_stock \
 		or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
@@ -808,6 +791,7 @@ def get_future_sle_with_negative_qty(args):
 			and voucher_no != %(voucher_no)s
 			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 			and is_cancelled = 0
-			and qty_after_transaction < 0
+			and qty_after_transaction + {0} < 0
+		order by timestamp(posting_date, posting_time) asc
 		limit 1
-	""", args, as_dict=1)
+	""".format(args.actual_qty), args, as_dict=1)
