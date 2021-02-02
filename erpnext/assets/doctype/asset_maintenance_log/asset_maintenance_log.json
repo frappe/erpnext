@@ -18,15 +18,13 @@
   "task_name",
   "maintenance_type",
   "periodicity",
-  "assign_to_name",
-  "column_break_6",
-  "due_date",
-  "completion_date",
-  "maintenance_status",
-  "section_break_12",
   "has_certificate",
   "certificate_attachement",
-  "section_break_6",
+  "column_break_6",
+  "maintenance_status",
+  "assign_to_name",
+  "due_date",
+  "completion_date",
   "description",
   "column_break_9",
   "actions_performed",
@@ -70,7 +68,8 @@
   },
   {
    "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Maintenance Details"
   },
   {
    "fieldname": "task",
@@ -124,10 +123,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "section_break_12",
-   "fieldtype": "Section Break"
-  },
-  {
    "default": "0",
    "fetch_from": "task.certificate_required",
    "fieldname": "has_certificate",
@@ -139,10 +134,6 @@
    "fieldname": "certificate_attachement",
    "fieldtype": "Attach",
    "label": "Certificate"
-  },
-  {
-   "fieldname": "section_break_6",
-   "fieldtype": "Column Break"
   },
   {
    "fetch_from": "task.description",
@@ -179,9 +170,10 @@
    "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-28 20:51:48.238397",
+ "modified": "2021-01-22 12:33:45.888124",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance Log",

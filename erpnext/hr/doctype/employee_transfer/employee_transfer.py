@@ -50,8 +50,9 @@ class EmployeeTransfer(Document):
 		employee = frappe.get_doc("Employee", self.employee)
 		if self.create_new_employee_id:
 			if self.new_employee_id:
-				frappe.throw(_("Please delete the Employee <a href='#Form/Employee/{0}'>{0}</a>\
-					to cancel this document").format(self.new_employee_id))
+				frappe.throw(_("Please delete the Employee {0} to cancel this document").format(
+					"<a href='/app/Form/Employee/{0}'>{0}</a>".format(self.new_employee_id)
+				))
 			#mark the employee as active
 			employee.status = "Active"
 			employee.relieving_date = ''
