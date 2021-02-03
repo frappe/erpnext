@@ -1319,6 +1319,7 @@ def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname,
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description
+	child_item.item_group = item.item_group
 	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
 	child_item.uom = trans_item.get("uom") or item.stock_uom
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
@@ -1342,6 +1343,7 @@ def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docna
 	child_item.item_code = item.item_code
 	child_item.item_name = item.item_name
 	child_item.description = item.description
+	child_item.item_group = item.item_group
 	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
 	child_item.uom = trans_item.get("uom") or item.stock_uom
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
