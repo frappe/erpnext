@@ -59,8 +59,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 
 
 				if (data && data.length > 0) {
-					const proposals_wrapper = this.dialog.fields_dict
-					.payment_proposals.$wrapper;
+					const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 					proposals_wrapper.show();
 					this.dialog.fields_dict.no_matching_vouchers.$wrapper.hide();
 					this.data = [];
@@ -77,10 +76,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					});
 					this.get_dt_columns();
 					this.get_datatable(proposals_wrapper);
-				}
-				else {
-					const proposals_wrapper = this.dialog.fields_dict
-					.payment_proposals.$wrapper;
+				} else {
+					const proposals_wrapper = this.dialog.fields_dict.payment_proposals.$wrapper;
 					proposals_wrapper.hide();
 					this.dialog.fields_dict.no_matching_vouchers.$wrapper.show();
 
@@ -551,9 +548,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	}
 
 	edit_in_full_page() {
-		const values = this.dialog.get_values(true)
+		const values = this.dialog.get_values(true);
 		if (values.document_type == "Payment Entry") {
-
 			frappe.call({
 				method:
 					"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
@@ -571,12 +567,10 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 				callback: (r) => {
 					var doc = frappe.model.sync(r.message);
-					console.log(doc)
 					frappe.set_route("Form", doc[0].doctype, doc[0].name);
 				},
 			});
-		}
-		else {
+		} else {
 			frappe.call({
 				method:
 					"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
@@ -594,7 +588,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 				callback: (r) => {
 					var doc = frappe.model.sync(r.message);
-					console.log(doc)
 					frappe.set_route("Form", doc[0].doctype, doc[0].name);
 				},
 			});

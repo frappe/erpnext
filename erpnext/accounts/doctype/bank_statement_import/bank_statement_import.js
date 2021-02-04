@@ -225,7 +225,7 @@ frappe.ui.form.on("Bank Statement Import", {
 		});
 	},
 
-	download_template(frm) {
+	download_template() {
 		let method =
 			"/api/method/frappe.core.doctype.data_import.data_import.download_template";
 

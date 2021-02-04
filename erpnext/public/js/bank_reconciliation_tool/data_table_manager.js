@@ -141,15 +141,12 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			"calc(100vh - 400px)"
 		);
 
-		console.log(this.transactions)
-
 		if (this.transactions.length > 0) {
-			this.$reconciliation_tool_dt.show()
-			this.$no_bank_transactions.hide()
-		}
-		else{
-			this.$reconciliation_tool_dt.hide()
-			this.$no_bank_transactions.show()
+			this.$reconciliation_tool_dt.show();
+			this.$no_bank_transactions.hide();
+		} else {
+			this.$reconciliation_tool_dt.hide();
+			this.$no_bank_transactions.show();
 		}
 	}
 
@@ -182,8 +179,8 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 		this.datatable.refresh(this.transactions, this.columns);
 
 		if (this.transactions.length == 0) {
-			this.$reconciliation_tool_dt.hide()
-			this.$no_bank_transactions.show()
+			this.$reconciliation_tool_dt.hide();
+			this.$no_bank_transactions.show();
 		}
 
 		// this.make_dt();
