@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "specification",
+  "parameter_group",
   "value",
   "numeric",
   "column_break_3",
@@ -75,12 +76,20 @@
    "in_list_view": 1,
    "label": "Numeric",
    "width": "80px"
+  },
+  {
+   "fetch_from": "specification.parameter_group",
+   "fieldname": "parameter_group",
+   "fieldtype": "Link",
+   "label": "Parameter Group",
+   "options": "Quality Inspection Parameter Group",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-01 19:18:46.924399",
+ "modified": "2021-02-04 18:50:02.056173",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Quality Inspection Parameter",
