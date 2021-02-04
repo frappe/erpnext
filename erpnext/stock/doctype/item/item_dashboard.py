@@ -32,16 +32,16 @@ def get_data():
 					'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 			},
 			{
+				'label': _('Manufacture'),
+				'items': ['Production Plan', 'Work Order', 'Item Manufacturer']
+			},
+			{
 				'label': _('Traceability'),
 				'items': ['Serial No', 'Batch']
 			},
 			{
 				'label': _('Move'),
 				'items': ['Stock Entry']
-			},
-			{
-				'label': _('Manufacture'),
-				'items': ['Production Plan', 'Work Order', 'Item Manufacturer']
 			}
 		]
 	}

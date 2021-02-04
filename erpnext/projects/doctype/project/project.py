@@ -27,7 +27,7 @@ class Project(Document):
 
 		self.update_costing()
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		self.onload()
 
 

@@ -264,7 +264,7 @@ def get_filters(entry):
 
 def get_current_healthcare_service_unit(inpatient_record):
 	ip_record = frappe.get_doc('Inpatient Record', inpatient_record)
-	if ip_record.inpatient_occupancies:
+	if ip_record.status in ['Admitted', 'Discharge Scheduled'] and ip_record.inpatient_occupancies:
 		return ip_record.inpatient_occupancies[-1].service_unit
 	return
 
