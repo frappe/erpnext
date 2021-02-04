@@ -444,6 +444,8 @@ class GSPConnector():
 	def get_credentials(self):
 		if self.invoice:
 			gstin = self.get_seller_gstin()
+			if not self.e_invoice_settings.enable:
+				frappe.throw(_("{} isn't enabled. Please enable it.").format(get_link_to_form("E Invoice Settings", "E Invoice Settings")))
 			credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
 		else:
 			credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
