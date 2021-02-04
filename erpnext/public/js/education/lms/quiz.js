@@ -21,7 +21,7 @@ class Quiz {
 
 	make(data) {
 		data.questions.forEach(question_data => {
-			let question_wrapper = document.createElement('div');
+			let question_wrapper = document.createElement('li');
 			let question = new Question({
 				wrapper: question_wrapper,
 				...question_data

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "format:QUESTION-{#####}",
  "creation": "2018-10-01 15:58:00.696815",
@@ -6,6 +7,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "course",
   "question",
   "options",
   "question_type"
@@ -32,9 +34,17 @@
    "label": "Type",
    "options": "\nSingle Correct Answer\nMultiple Correct Answer",
    "read_only": 1
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Course",
+   "options": "Course"
   }
  ],
- "modified": "2020-09-24 18:39:21.880974",
+ "links": [],
+ "modified": "2021-01-31 13:44:15.509741",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Question",

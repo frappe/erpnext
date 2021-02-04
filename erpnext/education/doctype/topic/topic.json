@@ -1,13 +1,15 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:topic_name",
+ "autoname": "format:Topic-{#####}",
  "creation": "2018-12-12 11:37:39.917760",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "topic_name",
+  "course",
   "topic_content",
   "description",
   "hero_image"
@@ -18,8 +20,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Name",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "topic_content",
@@ -37,10 +38,19 @@
    "fieldname": "description",
    "fieldtype": "Small Text",
    "label": "Description"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Course",
+   "options": "Course"
   }
  ],
  "image_field": "hero_image",
- "modified": "2019-06-12 12:34:49.911300",
+ "links": [],
+ "modified": "2021-01-23 15:45:22.431436",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Topic",

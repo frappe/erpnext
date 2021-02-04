@@ -1,13 +1,15 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:title",
+ "autoname": "format:Quiz-{#####}",
  "creation": "2018-10-17 05:52:50.149904",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "title",
+  "course",
   "question",
   "quiz_configuration_section",
   "passing_score",
@@ -18,9 +20,9 @@
   {
    "fieldname": "title",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Title",
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "question",
@@ -39,7 +41,6 @@
    "description": "Score out of 100",
    "fieldname": "passing_score",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Passing Score",
    "reqd": 1
   },
@@ -48,7 +49,6 @@
    "description": "Enter 0 to waive limit",
    "fieldname": "max_attempts",
    "fieldtype": "Int",
-   "in_list_view": 1,
    "label": "Max Attempts",
    "reqd": 1
   },
@@ -58,9 +58,17 @@
    "fieldtype": "Select",
    "label": "Grading Basis",
    "options": "Latest Highest Score\nLatest Attempt"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Course",
+   "options": "Course"
   }
  ],
- "modified": "2019-06-12 12:23:57.020508",
+ "links": [],
+ "modified": "2021-01-17 15:29:12.299551",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Quiz",

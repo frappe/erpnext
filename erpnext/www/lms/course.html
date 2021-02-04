@@ -59,7 +59,7 @@
 						<li>
 							{% if has_access %}
 								<a class="text-muted" href="/lms/content?program={{ program }}&course={{ course.name }}&topic={{ topic.name }}&type={{ content.content_type }}&content={{ content.content }}">
-									{{ content.content }}
+									{{ content.title }}
 								</a>
 							{% else %}
 								<span class="text-muted">{{ content.content }}</span>

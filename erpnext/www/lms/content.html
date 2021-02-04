@@ -63,7 +63,7 @@
 		</a>
 	</div>
 	<div>
-		<h2>{{ content.name }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h2>
+		<h2>{{ content.title }} <span class="small text-muted">({{ position + 1 }}/{{length}})</span></h2>
 	</div>
 {% endmacro %}
 
@@ -128,8 +128,8 @@
 <div class="mb-5">
 	{{ title() }}
 </div>
-<div id="quiz-wrapper">
-</div>
+<ol id="quiz-wrapper">
+</ol>
 {% endmacro %}
 
 {% block content %}
