@@ -675,45 +675,7 @@ def get_outstanding_invoices(party_type, party, account, condition=None, filters
 			party=party,
 			account=account
 		)
-		# sql = """
-		# select
-		# 	voucher_no, voucher_type, posting_date, due_date,
-		# 	ifnull(sum({dr_or_cr}), 0) as invoice_amount
-		# from
-		# 	`tabGL Entry`
-		# where
-		# 	party_type = %(party_type)s and party = %(party)s
-		# 	and account = %(account)s and {dr_or_cr} > 0
-		# 	{condition}
-		# 	and ((voucher_type = 'Journal Entry'
-		# 			and (against_voucher = '' or against_voucher is null))
-		# 		or (voucher_type not in ('Journal Entry', 'Payment Entry')))
-		# group by voucher_type, voucher_no
-		# order by posting_date, name""".format(
-		# 	dr_or_cr=dr_or_cr,
-		# 	condition=condition or "",
-		# 	party_type=party_type,
-		# 	party=party,
-		# 	account=account
-		# )
-		# {
-		# 	"party_type": party_type,
-		# 	"party": party,
-		# 	"account": account,
-		# }
-	# frappe.errprint(sql)
-	invoice_list = frappe.db.sql(sql, as_dict=True)
-
-	# """
-	# 	select against_voucher_type, against_voucher,
-	# 		ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
-	# 	from `tabGL Entry`
-	# 	where party_type = %(party_type)s and party = %(party)s
-	# 		and account = %(account)s
-	# 		and {payment_dr_or_cr} > 0
-	# 		and against_voucher is not null and against_voucher != ''
-	# 	group by against_voucher_type, against_voucher
-	# """
+	invoice_list = frappe.db.sql(sql, as_dict=True, debug=0)
 	payment_sql = """
 		select against_voucher_type, against_voucher,
 			ifnull(sum({payment_dr_or_cr}), 0) as payment_amount
