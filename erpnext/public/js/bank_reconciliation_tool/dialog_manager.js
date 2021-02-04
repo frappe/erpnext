@@ -151,8 +151,8 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: __("Action"),
 				fieldname: "action",
 				fieldtype: "Select",
-				options: `Match against Voucher\nCreate Voucher\nUpdate Bank Transaction`,
-				default: "Match against Voucher",
+				options: `Match Against Voucher\nCreate Voucher\nUpdate Bank Transaction`,
+				default: "Match Against Voucher",
 			},
 			{
 				fieldname: "column_break_4",
@@ -170,7 +170,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Section Break",
 				fieldname: "section_break_1",
 				label: __("Filters"),
-				depends_on: "eval:doc.action=='Match against Voucher'",
+				depends_on: "eval:doc.action=='Match Against Voucher'",
 			},
 			{
 				fieldtype: "Check",
@@ -221,7 +221,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Section Break",
 				fieldname: "section_break_1",
 				label: __("Select Vouchers to Match"),
-				depends_on: "eval:doc.action=='Match against Voucher'",
+				depends_on: "eval:doc.action=='Match Against Voucher'",
 			},
 			{
 				fieldtype: "HTML",
@@ -236,7 +236,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				fieldtype: "Section Break",
 				fieldname: "details",
 				label: "Details",
-				depends_on: "eval:doc.action!='Match against Voucher'",
+				depends_on: "eval:doc.action!='Match Against Voucher'",
 			},
 			{
 				fieldname: "reference_number",
@@ -423,7 +423,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	}
 
 	reconciliation_dialog_primary_action(values) {
-		if (values.action == "Match against Voucher") this.match(values);
+		if (values.action == "Match Against Voucher") this.match(values);
 		if (
 			values.action == "Create Voucher" &&
 			values.document_type == "Payment Entry"
@@ -463,7 +463,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				const alert_string =
 					"Bank Transaction " +
 					this.bank_transaction.name +
-					" matched";
+					" Matched";
 				frappe.show_alert(alert_string);
 				this.update_dt_cards(response.message);
 				this.dialog.hide();
