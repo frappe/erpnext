@@ -86,8 +86,8 @@ def update_bank_transaction(bank_transaction, reference_number, party_type=None,
 
 
 @frappe.whitelist()
-def create_journal_entry_bts( bank_transaction, reference_number, reference_date, posting_date, entry_type,
-	second_account, mode_of_payment=None, party_type=None, party=None, allow_edit=None):
+def create_journal_entry_bts( bank_transaction, reference_number=None, reference_date=None, posting_date=None, entry_type=None,
+	second_account=None, mode_of_payment=None, party_type=None, party=None, allow_edit=None):
 	# Create a new journal entry based on the bank transaction
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
@@ -153,7 +153,7 @@ def create_journal_entry_bts( bank_transaction, reference_number, reference_date
 	return reconcile_vouchers(bank_transaction.name, vouchers)
 
 @frappe.whitelist()
-def create_payment_entry_bts( bank_transaction, reference_number, reference_date, party_type, party, posting_date,
+def create_payment_entry_bts( bank_transaction, reference_number=None, reference_date=None, party_type=None, party=None, posting_date=None,
 	mode_of_payment=None, project=None, cost_center=None, allow_edit=None):
 	# Create a new payment entry based on the bank transaction
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)

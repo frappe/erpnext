@@ -45,7 +45,7 @@ erpnext.accounts.bank_reconciliation.NumberCardManager = class NumberCardManager
 				? "text-success"
 				: "text-danger"
 		);
-		this.$summary.css("border-bottom", "0px");
+		this.$summary.css({"border-bottom": "0px", "padding-left": "0px", "padding-right": "0px"});
 		this.$summary.show();
 	}
 };

@@ -20,7 +20,6 @@ def execute():
 	for doctype in doctypes:
 		frappe.delete_doc("DocType", doctype, force=1)
 		frappe.db.commit()
-		frappe.db.sql(f"drop table if exists `tab{doctype}`")
 
 	frappe.delete_doc("Page", "bank-reconciliation", force=1)
 
