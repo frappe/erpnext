@@ -239,9 +239,6 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
-		if self.doc.doctype == 'Sales Invoice' and self.doc.is_pos:
-			self.doc.pos_total_qty = self.doc.total_qty
-
 	def calculate_taxes(self):
 		self.doc.rounding_adjustment = 0
 		# maintain actual tax rate based on idx
@@ -616,7 +613,6 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("base_write_off_amount"))
 
 	def calculate_margin(self, item):
-
 		rate_with_margin = 0.0
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
@@ -625,8 +621,8 @@ class calculate_taxes_and_totals(object):
 				for d in get_applied_pricing_rules(item.pricing_rules):
 					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
-					if (pricing_rule.margin_type in ['Amount', 'Percentage'] and pricing_rule.currency == self.doc.currency)\
-							or (pricing_rule.margin_type == 'Percentage'):
+					if pricing_rule.margin_rate_or_amount and ((pricing_rule.currency == self.doc.currency and
+						pricing_rule.margin_type in ['Amount', 'Percentage']) or pricing_rule.margin_type == 'Percentage'):
 						item.margin_type = pricing_rule.margin_type
 						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 						has_margin = True

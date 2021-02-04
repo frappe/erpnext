@@ -1865,7 +1865,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(data['billLists'][0]['sgstValue'], 5400)
 		self.assertEqual(data['billLists'][0]['vehicleNo'], 'KA12KA1234')
 		self.assertEqual(data['billLists'][0]['itemList'][0]['taxableAmount'], 60000)
-	
+
 	def test_einvoice_submission_without_irn(self):
 		# init
 		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 1)
@@ -1881,7 +1881,7 @@ class TestSalesInvoice(unittest.TestCase):
 		# reset
 		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 0)
 		frappe.flags.country = country
-	
+
 	def test_einvoice_json(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice
 
