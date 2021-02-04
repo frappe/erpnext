@@ -40,14 +40,13 @@ frappe.ui.form.on('Asset Maintenance', {
 					if(!r.message) {
 						return;
 					}
-					var section = frm.dashboard.add_section(`<h5 style="margin-top: 0px;">
-						${ __("Maintenance Log") }</a></h5>`);
+					const section = frm.dashboard.add_section('', __("Maintenance Log"));
 					var rows = $('<div></div>').appendTo(section);
 					// show
 					(r.message || []).forEach(function(d) {
 						$(`<div class='row' style='margin-bottom: 10px;'>
 							<div class='col-sm-3 small'>
-								<a onclick="frappe.set_route('List', 'Asset Maintenance Log', 
+								<a onclick="frappe.set_route('List', 'Asset Maintenance Log',
 									{'asset_name': '${d.asset_name}','maintenance_status': '${d.maintenance_status}' });">
 									${d.maintenance_status} <span class="badge">${d.count}</span>
 								</a>

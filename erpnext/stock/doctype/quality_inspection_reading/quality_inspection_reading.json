@@ -9,7 +9,7 @@
   "specification",
   "status",
   "value",
-  "non_numeric",
+  "numeric",
   "manual_inspection",
   "column_break_4",
   "min_value",
@@ -46,7 +46,7 @@
   },
   {
    "columns": 2,
-   "depends_on": "eval:(!doc.formula_based_criteria && doc.non_numeric)",
+   "depends_on": "eval:(!doc.formula_based_criteria && !doc.numeric)",
    "fieldname": "value",
    "fieldtype": "Data",
    "label": "Acceptance Criteria Value",
@@ -54,7 +54,7 @@
    "oldfieldtype": "Data"
   },
   {
-   "columns": 1,
+   "columns": 2,
    "fieldname": "reading_1",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -66,7 +66,6 @@
    "columns": 1,
    "fieldname": "reading_2",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Reading 2",
    "oldfieldname": "reading_2",
    "oldfieldtype": "Data"
@@ -140,7 +139,7 @@
    "options": "\nAccepted\nRejected"
   },
   {
-   "depends_on": "non_numeric",
+   "depends_on": "eval:!doc.numeric",
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
    "label": "Value Based Inspection"
@@ -171,38 +170,32 @@
    "label": "Formula Based Criteria"
   },
   {
-   "depends_on": "eval:(!doc.formula_based_criteria && !doc.non_numeric)",
+   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
    "description": "Applied on each reading.",
    "fieldname": "min_value",
    "fieldtype": "Float",
    "label": "Minimum Value"
   },
   {
-   "depends_on": "eval:(!doc.formula_based_criteria && !doc.non_numeric)",
+   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
    "description": "Applied on each reading.",
    "fieldname": "max_value",
    "fieldtype": "Float",
    "label": "Maximum Value"
   },
   {
-   "depends_on": "non_numeric",
+   "columns": 2,
+   "depends_on": "eval:!doc.numeric",
    "fieldname": "reading_value",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Reading Value"
   },
   {
-   "depends_on": "eval:!doc.non_numeric",
+   "depends_on": "numeric",
    "fieldname": "section_break_14",
    "fieldtype": "Section Break",
    "label": "Numeric Inspection"
-  },
-  {
-   "default": "0",
-   "fieldname": "non_numeric",
-   "fieldtype": "Check",
-   "in_list_view": 1,
-   "label": "Non-Numeric"
   },
   {
    "default": "0",
@@ -210,12 +203,19 @@
    "fieldname": "manual_inspection",
    "fieldtype": "Check",
    "label": "Manual Inspection"
+  },
+  {
+   "default": "1",
+   "fieldname": "numeric",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Numeric"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-07 22:16:53.978410",
+ "modified": "2021-02-01 19:46:22.138018",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Reading",
