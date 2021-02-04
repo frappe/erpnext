@@ -20,16 +20,6 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.stock.utils import get_incoming_rate
 
 class BuyingController(StockController):
-	def __setup__(self):
-		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
-				 "print_taxes_with_zero_amount"))
-			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
-
-			self.print_templates = {
-				"total": "templates/print_formats/includes/total.html",
-				"taxes": "templates/print_formats/includes/taxes.html"
-			}
 
 	def get_feed(self):
 		if self.get("supplier_name"):

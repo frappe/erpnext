@@ -2,7 +2,7 @@ frappe.listview_settings['Payment Request'] = {
 	add_fields: ["status"],
 	get_indicator: function(doc) {
 		if(doc.status == "Draft") {
-			return [__("Draft"), "darkgrey", "status,=,Draft"];
+			return [__("Draft"), "gray", "status,=,Draft"];
 		}
 		if(doc.status == "Requested") {
 			return [__("Requested"), "green", "status,=,Requested"];
@@ -19,5 +19,5 @@ frappe.listview_settings['Payment Request'] = {
 		else if(doc.status == "Cancelled") {
 			return [__("Cancelled"), "red", "status,=,Cancelled"];
 		}
-	}	
+	}
 }
