@@ -176,7 +176,7 @@ class Lead(SellingController):
 				"phone": self.mobile_no
 			})
 
-		contact.insert()
+		contact.insert(ignore_permissions=True)
 
 		return contact
 

@@ -56,6 +56,7 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(details.get("discount_percentage"), 10)
 
 		prule = frappe.get_doc(test_record.copy())
+		prule.priority = 1
 		prule.applicable_for = "Customer"
 		prule.title = "_Test Pricing Rule for Customer"
 		self.assertRaises(MandatoryError, prule.insert)
@@ -261,6 +262,7 @@ class TestPricingRule(unittest.TestCase):
 			"rate_or_discount": "Discount Percentage",
 			"rate": 0,
 			"discount_percentage": 17.5,
+			"priority": 1,
 			"company": "_Test Company"
 		}).insert()
 
@@ -557,6 +559,7 @@ def make_pricing_rule(**args):
 		"rate": args.rate or 0.0,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
 		"condition": args.condition or '',
+		"priority": 1,
 		"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0
 	})
 

@@ -14,31 +14,39 @@
 		</div>
 </div>
 {% endif %}
-<div class="mb-3" data-section="shipping-address">
-	<h6 class="text-uppercase">{{ _("Shipping Address") }}</h6>
+<div class="mb-3 frappe-card p-5" data-section="shipping-address">
+	<h6>{{ _("Shipping Address") }}</h6>
+	<hr>
+	{% for address in shipping_addresses %}
+	{% if doc.shipping_address_name == address.name %}
 	<div class="row no-gutters" data-fieldname="shipping_address_name">
-		{% for address in shipping_addresses %}
-			<div class="mr-3 mb-3 w-25" data-address-name="{{address.name}}" data-address-type="shipping" {% if doc.shipping_address_name == address.name %} data-active {% endif %}>
-				{% include "templates/includes/cart/address_card.html" %}
-			</div>
-		{% endfor %}
+		<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="shipping" data-active>
+			{% include "templates/includes/cart/address_card.html" %}
+		</div>
 	</div>
+	{% endif %}
+	{% endfor %}
 </div>
-<div class="mb-3" data-section="billing-address">
-	<h6 class="text-uppercase">{{ _("Billing Address") }}</h6>
-	<div class="row no-gutters" data-fieldname="customer_address">
-		{% for address in billing_addresses %}
-			<div class="mr-3 mb-3 w-25" data-address-name="{{address.name}}" data-address-type="billing" {% if doc.customer_address == address.name %} data-active {% endif %}>
-				{% include "templates/includes/cart/address_card.html" %}
-			</div>
-		{% endfor %}
-	</div>
+<div class="checkbox ml-1 mb-2">
+	<label for="input_same_billing">
+		<input type="checkbox" id="input_same_billing" checked>
+		<span class="label-area">{{ _('Billing Address is same as Shipping Address') }}</span>
+	</label>
 </div>
-<div class="custom-control custom-checkbox">
-	<input type="checkbox" class="custom-control-input" id="input_same_billing" checked>
-	<label class="custom-control-label" for="input_same_billing">{{ _('Billing Address is same as Shipping Address') }}</label>
+<div class="mb-3 frappe-card p-5" data-section="billing-address">
+	<h6>{{ _("Billing Address") }}</h6>
+	<hr>
+	{% for address in billing_addresses %}
+		{% if doc.customer_address == address.name %}
+		<div class="row no-gutters" data-fieldname="customer_address">
+			<div class="w-100 address-container" data-address-name="{{address.name}}" data-address-type="billing" data-active>
+					{% include "templates/includes/cart/address_card.html" %}
+				</div>
+		</div>
+		{% endif %}
+	{% endfor %}
 </div>
-<button class="btn btn-outline-primary btn-sm mt-3 btn-new-address">{{ _("Add a new address") }}</button>
+<button class="btn btn-outline-primary btn-sm mt-1 btn-new-address bg-white">{{ _("Add a new address") }}</button>
 
 <script>
 frappe.ready(() => {
