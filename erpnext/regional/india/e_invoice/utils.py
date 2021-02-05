@@ -11,6 +11,7 @@ import json
 import base64
 import frappe
 import traceback
+import io
 from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.integrations.utils import make_post_request, make_get_request
@@ -160,10 +161,10 @@ def get_item_list(invoice):
 		item.description = d.item_name.replace('"', '\\"')
 
 		item.qty = abs(item.qty)
-		item.discount_amount = abs(item.discount_amount * item.qty)
-		item.unit_rate = abs(item.base_amount / item.qty)
-		item.gross_amount = abs(item.base_amount)
-		item.taxable_value = abs(item.base_amount)
+		item.discount_amount = 0
+		item.unit_rate = abs(item.base_net_amount / item.qty)
+		item.gross_amount = abs(item.base_net_amount)
+		item.taxable_value = abs(item.base_net_amount)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
@@ -198,7 +199,7 @@ def update_item_taxes(invoice, item):
 		if t.account_head in gst_accounts_list:
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
-			item_tax_amount = (item_tax_rate / 100) * item.base_amount
+			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
 
 			if t.account_head in gst_accounts.cess_account:
 				item_tax_amount_after_discount = item_tax_detail[1]
@@ -217,8 +218,15 @@ def update_item_taxes(invoice, item):
 
 def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
-	invoice_value_details.base_total = abs(invoice.base_total)
-	invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+
+	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+		invoice_value_details.base_total = abs(invoice.base_total)
+		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+	else:
+		invoice_value_details.base_total = abs(invoice.base_net_total)
+		# since tax already considers discount amount
+		invoice_value_details.invoice_discount_amt = 0
+
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
@@ -244,9 +252,9 @@ def update_invoice_taxes(invoice, invoice_value_details):
 			
 			for tax_type in ['igst', 'cgst', 'sgst']:
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount)
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount_after_discount_amount)
 		else:
-			invoice_value_details.total_other_charges += abs(t.base_tax_amount)
+			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
 	
 	return invoice_value_details
 
@@ -430,7 +438,7 @@ class GSPConnector():
 		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
 		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
 		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
-		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
+		self.cancel_ewaybill_url = self.base_url + '/enriched/ewb/ewayapi?action=CANEWB'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
 	def get_credentials(self):
@@ -473,7 +481,7 @@ class GSPConnector():
 			"data": json.dumps(data, indent=4) if isinstance(data, dict) else data,
 			"response": json.dumps(res, indent=4) if res else None
 		})
-		request_log.insert(ignore_permissions=True)
+		request_log.save(ignore_permissions=True)
 		frappe.db.commit()
 
 	def fetch_auth_token(self):
@@ -486,7 +494,8 @@ class GSPConnector():
 			res = self.make_request('post', self.authenticate_url, headers)
 			self.e_invoice_settings.auth_token = "{} {}".format(res.get('token_type'), res.get('access_token'))
 			self.e_invoice_settings.token_expiry = add_to_date(None, seconds=res.get('expires_in'))
-			self.e_invoice_settings.save()
+			self.e_invoice_settings.save(ignore_permissions=True)
+			self.e_invoice_settings.reload()
 
 		except Exception:
 			self.log_error(res)
@@ -520,7 +529,7 @@ class GSPConnector():
 		except Exception:
 			self.log_error()
 			self.raise_error(True)
-	
+
 	@staticmethod
 	def get_gstin_details(gstin):
 		'''fetch and cache GSTIN details'''
@@ -615,7 +624,7 @@ class GSPConnector():
 		except Exception:
 			self.log_error(data)
 			self.raise_error(True)
-	
+
 	def generate_eway_bill(self, **kwargs):
 		args = frappe._dict(kwargs)
 
@@ -664,7 +673,8 @@ class GSPConnector():
 			'cancelRsnCode': reason,
 			'cancelRmrk': remark
 		}, indent=4)
-
+		headers["username"] = headers["user_name"]
+		del headers["user_name"]
 		try:
 			res = self.make_request('post', self.cancel_ewaybill_url, headers, data)
 			if res.get('success'):
@@ -757,26 +767,26 @@ class GSPConnector():
 			'label': _('IRN Generated')
 		}
 		self.update_invoice()
-	
+
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
 		docname = self.invoice.name
+		filename = 'QRCode_{}.png'.format(docname).replace(os.path.sep, "__")
 
-		_file = frappe.new_doc('File')
-		_file.update({
-			'file_name': 'QRCode_{}.png'.format(docname.replace('/', '-')),
-			'attached_to_doctype': doctype,
-			'attached_to_name': docname,
-			'content': 'qrcode',
-			'is_private': 1
-		})
-		_file.insert()
-		frappe.db.commit()
+		qr_image = io.BytesIO()
 		url = qrcreate(qrcode, error='L')
-		abs_file_path = os.path.abspath(_file.get_full_path())
-		url.png(abs_file_path, scale=2, quiet_zone=1)
-
+		url.png(qr_image, scale=2, quiet_zone=1)
+		_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": filename,
+			"attached_to_doctype": doctype,
+			"attached_to_name": docname,
+			"attached_to_field": "qrcode_image",
+			"is_private": 1,
+			"content": qr_image.getvalue()})
+		_file.save()
+		frappe.db.commit()
 		self.invoice.qrcode_image = _file.file_url
 	
 	def update_invoice(self):

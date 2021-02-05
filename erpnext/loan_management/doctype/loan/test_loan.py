@@ -321,7 +321,7 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(sum(pledged_qty.values()), 0)
 
 		amounts = amounts = calculate_amounts(loan.name, add_days(last_date, 5))
-		self.assertTrue(amounts['pending_principal_amount'] < 0)
+		self.assertEqual(amounts['pending_principal_amount'], 0)
 		self.assertEquals(amounts['payable_principal_amount'], 0.0)
 		self.assertEqual(amounts['interest_amount'], 0)
 
@@ -473,7 +473,7 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(loan.status, "Loan Closure Requested")
 
 		amounts = calculate_amounts(loan.name, add_days(last_date, 5))
-		self.assertTrue(amounts['pending_principal_amount'] < 0.0)
+		self.assertEqual(amounts['pending_principal_amount'], 0.0)
 
 	def test_partial_unaccrued_interest_payment(self):
 		pledge = [{
