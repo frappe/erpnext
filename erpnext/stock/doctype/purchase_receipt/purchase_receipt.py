@@ -339,10 +339,12 @@ class PurchaseReceipt(BuyingController):
 						d.precision("base_net_amount"))
 
 					if divisional_loss:
-						if self.is_return or valuation_item_tax_amount:
-							loss_account = expenses_included_in_valuation
-						else:
-							loss_account = self.get_company_default("stock_adjustment_account")
+						loss_account = self.get_company_default("stock_adjustment_account")
+						loss_account_currency = get_account_currency(loss_account)
+						# if self.is_return or valuation_item_tax_amount:
+						# 	loss_account = expenses_included_in_valuation
+						# else:
+						# 	loss_account = self.get_company_default("stock_adjustment_account")
 
 						gl_entries.append(self.get_gl_dict({
 							"account": loss_account,
@@ -351,7 +353,7 @@ class PurchaseReceipt(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": divisional_loss,
 							"project": d.project
-						}, stock_rbnb_currency, item=d))
+						}, loss_account_currency, item=d))
 
 				elif d.warehouse not in warehouse_with_no_account or \
 					d.rejected_warehouse not in warehouse_with_no_account:
