@@ -517,7 +517,7 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 	for d in items:
 		if not data.get('include_exploded_items') or not d.default_bom:
 			# Only include in MR if there's not enought qty in all warehouses
-			if not need_material_request(d.item_code, qty, company):
+			if not need_material_request(d.item_code, d.qty, company):
 				continue
 			if d.item_code in item_details:
 				item_details[d.item_code].qty = item_details[d.item_code].qty + d.qty
