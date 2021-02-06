@@ -532,7 +532,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 					and sle.warehouse == warehouse and sle.serial_no != d.serial_no:
 						to_update = frappe._dict()
 						to_update.serial_no = d.serial_no = sle.serial_no
-						if d.is_vehicle:
+						if d.get('is_vehicle'):
 							to_update.vehicle = d.vehicle = sle.serial_no
 
 						frappe.db.set_value(d.doctype, d.name, to_update, None)
@@ -543,7 +543,7 @@ def update_serial_nos_after_submit(controller, parentfield):
 					and sle.warehouse == d.rejected_warehouse and sle.serial_no != d.rejected_serial_no:
 						to_update = frappe._dict()
 						to_update.rejected_serial_no = d.rejected_serial_no = sle.serial_no
-						if d.is_vehicle:
+						if d.get('is_vehicle'):
 							to_update.vehicle = d.vehicle = sle.serial_no
 
 						frappe.db.set_value(d.doctype, d.name, to_update, None)
