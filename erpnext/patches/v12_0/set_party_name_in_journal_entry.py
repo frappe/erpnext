@@ -16,8 +16,9 @@ def execute():
 		doc = frappe.get_doc("Journal Entry", name)
 		for d in doc.get("accounts"):
 			if d.party_type and d.party:
-				d.party_name = get_party_name(d.party_type, d.party)
-				frappe.db.set_value("Journal Entry Account", d.name, "party_name", d.party_name,
-					update_modified=False)
+				if frappe.db.exists(d.party_type, d.party, cache=1):
+					d.party_name = get_party_name(d.party_type, d.party)
+					frappe.db.set_value("Journal Entry Account", d.name, "party_name", d.party_name,
+						update_modified=False)
 
 		doc.clear_cache()
