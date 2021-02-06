@@ -161,6 +161,8 @@ class update_entries_after(object):
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 		if not cint(self.allow_negative_stock):
 			# validate negative stock for serialized items, fifo valuation
 			# or when negative stock is not allowed for moving average
@@ -168,7 +170,7 @@ class update_entries_after(object):
 				self.qty_after_transaction += flt(sle.actual_qty)
 				return
 
-		if sle.serial_no:
+		if get_serial_nos(sle.serial_no):
 			self.get_serialized_values(sle)
 			self.qty_after_transaction += flt(sle.actual_qty)
 			if sle.voucher_type == "Stock Reconciliation":
@@ -224,9 +226,11 @@ class update_entries_after(object):
 			return True
 
 	def get_serialized_values(self, sle):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 		incoming_rate = flt(sle.incoming_rate)
 		actual_qty = flt(sle.actual_qty)
-		serial_nos = cstr(sle.serial_no).split("\n")
+		serial_nos = get_serial_nos(sle.serial_no)
 
 		if incoming_rate < 0:
 			# wrong incoming rate

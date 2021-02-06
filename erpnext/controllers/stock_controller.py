@@ -269,6 +269,8 @@ class StockController(AccountsController):
 			frappe.delete_doc("Batch", data.name)
 
 	def get_sl_entries(self, d, args):
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
 		sl_dict = frappe._dict({
 			"item_code": d.get("item_code", None),
 			"warehouse": d.get("warehouse", None),
@@ -283,7 +285,7 @@ class StockController(AccountsController):
 			"incoming_rate": 0,
 			"company": self.company,
 			"batch_no": cstr(d.get("batch_no")).strip(),
-			"serial_no": d.get("serial_no"),
+			"serial_no": '\n'.join(get_serial_nos(d.get("serial_no"))),
 			"project": d.get("project") or self.get('project'),
 			"is_cancelled": self.docstatus==2 and "Yes" or "No"
 		})
