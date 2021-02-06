@@ -350,7 +350,8 @@ frappe.ui.form.on("Material Request Plan Item", {
 				args: {
 					row: row,
 					company: frm.doc.company,
-					for_warehouse: row.warehouse
+					for_warehouse: row.warehouse,
+					all_warehouse: true
 				},
 				callback: function(r) {
 					let {projected_qty, actual_qty} = r.message;
