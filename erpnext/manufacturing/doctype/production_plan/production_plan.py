@@ -332,6 +332,11 @@ class ProductionPlan(Document):
 		get_sub_assembly_items(item.get("bom_no"), bom_data, item.get("qty"))
 
 		for key, data in bom_data.items():
+			# Only raise work orders if an item is not sub_contracted, and if there's no available stock
+			if frappe.db.get_value('Item', key[0], 'is_sub_contracted_item') or \
+				not need_material_request(key[0], data.get('stock_qty') * data.get('qty'),
+									self.company):
+					continue
 			data.update({
 				'qty': data.get("stock_qty"),
 				'production_plan': self.name,
@@ -471,7 +476,13 @@ def get_exploded_items(item_details, company, bom_no, include_non_stock_items, p
 			and bom.name=%s and item.is_stock_item in (1, {0})
 		group by bei.item_code, bei.stock_uom""".format(0 if include_non_stock_items else 1),
 		(planned_qty, company, bom_no), as_dict=1):
-			item_details.setdefault(d.get('item_code'), d)
+			qty, d.qty, item_code = d.qty, 0, d.get('item_code')
+			# Only include one exploded item if it's needed in MR
+			if need_material_request(item_code, qty, company):
+				if item_code not in item_details:
+					item_details.setdefault(item_code, d)
+				item_details[item_code]['qty'] += qty_needed_in_mr(d.item_code, qty, company)
+			
 	return item_details
 
 def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_items,
@@ -505,6 +516,9 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 
 	for d in items:
 		if not data.get('include_exploded_items') or not d.default_bom:
+			# Only include in MR if there's not enought qty in all warehouses
+			if not need_material_request(d.item_code, qty, company):
+				continue
 			if d.item_code in item_details:
 				item_details[d.item_code].qty = item_details[d.item_code].qty + d.qty
 			else:
@@ -625,6 +639,26 @@ def get_bin_details(row, company, for_warehouse=None, all_warehouse=False):
 		group by item_code, warehouse
 	""".format(conditions=conditions), { "item_code": row['item_code'] }, as_dict=1)
 
+def need_material_request(item_code, qty, company):
+	'''
+	Run thorught all warehouses and verify the projected_qty for an item_code, to
+	determine, if is needed to include the item_code in MR
+	'''
+	bin_details = get_bin_details({'item_code': item_code}, company, all_warehouse=True)
+	qty_needed = sum(map(lambda d: d['projected_qty'], bin_details)) - qty
+	return qty_needed < 0
+
+
+def qty_needed_in_mr(item_code, qty, company):
+	'''
+	Run throught all warehouses and verify the projected_qty for an item_code, to
+	determine, how many units are need to be included in MR
+	'''
+	bin_details = get_bin_details({'item_code': item_code}, company, all_warehouse=True)
+	qty_needed = sum(map(lambda d: d['projected_qty'], bin_details)) - qty
+	return abs(qty_needed)
+
+
 @frappe.whitelist()
 def get_items_for_material_requests(doc, warehouses=None):
 	if isinstance(doc, string_types):
@@ -705,7 +739,8 @@ def get_items_for_material_requests(doc, warehouses=None):
 					'default_warehouse': item_master.default_warehouse,
 					'min_order_qty' : item_master.min_order_qty,
 					'default_material_request_type' : item_master.default_material_request_type,
-					'qty': planned_qty or 1,
+					# Ensures that the requested qty will discount stock availability
+					'qty': qty_needed_in_mr(item_master.name, planned_qty, doc.company) or 1,
 					'is_sub_contracted' : item_master.is_subcontracted_item,
 					'item_code' : item_master.name,
 					'description' : item_master.description,
