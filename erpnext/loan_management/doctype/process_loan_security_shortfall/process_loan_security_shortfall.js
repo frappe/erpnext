@@ -3,6 +3,8 @@
 
 frappe.ui.form.on('Process Loan Security Shortfall', {
 	onload: function(frm) {
-		frm.set_value('update_time', frappe.datetime.now_datetime());
+		if (frm.is_new()) {
+			frm.set_value('update_time', frappe.datetime.now_datetime());
+		}
 	}
 });

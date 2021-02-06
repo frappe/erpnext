@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "applicant_details_section",
   "applicant_type",
   "applicant",
   "applicant_name",
@@ -15,10 +16,10 @@
   "status",
   "section_break_4",
   "loan_type",
-  "is_term_loan",
   "loan_amount",
-  "is_secured_loan",
   "rate_of_interest",
+  "is_term_loan",
+  "is_secured_loan",
   "column_break_7",
   "description",
   "loan_security_details_section",
@@ -210,11 +211,25 @@
    "fieldtype": "Check",
    "label": "Is Term Loan",
    "read_only": 1
+  },
+  {
+   "fieldname": "applicant_details_section",
+   "fieldtype": "Section Break",
+   "label": "Applicant Details"
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-03-01 10:21:44.413353",
+ "links": [
+  {
+   "link_doctype": "Loan",
+   "link_fieldname": "loan_application"
+  },
+  {
+   "link_doctype": "Loan Security Pledge",
+   "link_fieldname": "loan_application"
+  }
+ ],
+ "modified": "2021-01-30 20:26:17.485028",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Application",

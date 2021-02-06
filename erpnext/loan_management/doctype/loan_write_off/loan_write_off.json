@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_details_section",
   "loan",
   "applicant_type",
   "applicant",
@@ -111,12 +112,17 @@
    "options": "Loan Write Off",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-26 07:13:43.663924",
+ "modified": "2021-01-30 22:35:32.398542",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Write Off",

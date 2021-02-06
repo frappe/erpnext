@@ -6,13 +6,14 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_security_details_section",
   "loan_security_name",
-  "haircut",
   "loan_security_code",
+  "disabled",
   "column_break_3",
   "loan_security_type",
-  "unit_of_measure",
-  "disabled"
+  "haircut",
+  "unit_of_measure"
  ],
  "fields": [
   {
@@ -63,11 +64,21 @@
    "options": "UOM",
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "loan_security_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Details"
   }
  ],
  "index_web_pages_for_search": 1,
- "links": [],
- "modified": "2020-10-26 07:34:48.601766",
+ "links": [
+  {
+   "link_doctype": "Loan Security Price",
+   "link_fieldname": "loan_security"
+  }
+ ],
+ "modified": "2021-01-30 21:10:01.787613",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security",

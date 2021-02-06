@@ -8,6 +8,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "applicant_details_section",
   "applicant_type",
   "applicant",
   "applicant_name",
@@ -348,12 +349,46 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "applicant_details_section",
+   "fieldtype": "Section Break",
+   "label": "Applicant Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-11-24 12:27:23.208240",
+ "links": [
+  {
+   "link_doctype": "Loan Security Pledge",
+   "link_fieldname": "loan"
+  },
+  {
+   "link_doctype": "Loan Disbursement",
+   "link_fieldname": "against_loan"
+  },
+  {
+   "link_doctype": "Loan Interest Accrual",
+   "link_fieldname": "loan"
+  },
+  {
+   "link_doctype": "Loan Repayment",
+   "link_fieldname": "against_loan"
+  },
+  {
+   "link_doctype": "Loan Security Unpledge",
+   "link_fieldname": "loan"
+  },
+  {
+   "link_doctype": "Loan Security Shortfall",
+   "link_fieldname": "loan"
+  },
+  {
+   "link_doctype": "Loan Write Off",
+   "link_fieldname": "loan"
+  }
+ ],
+ "modified": "2021-01-30 21:59:31.893221",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

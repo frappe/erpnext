@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "applicant_and_loan_details_section",
   "against_loan",
   "posting_date",
   "applicant_type",
@@ -126,12 +127,17 @@
   {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "applicant_and_loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Applicant and Loan Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-06 10:04:30.882322",
+ "modified": "2021-01-30 22:01:30.255586",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Disbursement",

@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_details_section",
   "loan",
   "applicant_type",
   "applicant",
@@ -18,12 +19,12 @@
   "is_term_loan",
   "section_break_7",
   "pending_principal_amount",
+  "total_pending_interest_amount",
   "payable_principal_amount",
-  "paid_principal_amount",
   "column_break_14",
   "interest_amount",
-  "total_pending_interest_amount",
   "paid_interest_amount",
+  "paid_principal_amount",
   "penalty_amount",
   "section_break_15",
   "process_loan_interest_accrual",
@@ -128,6 +129,7 @@
   {
    "fieldname": "process_loan_interest_accrual",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Process Loan Interest Accrual",
    "options": "Process Loan Interest Accrual"
   },
@@ -179,13 +181,18 @@
    "fieldtype": "Currency",
    "label": "Total Pending Interest Amount",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "loan_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Details"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-10 00:15:21.544140",
+ "modified": "2021-01-30 22:27:52.672648",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",

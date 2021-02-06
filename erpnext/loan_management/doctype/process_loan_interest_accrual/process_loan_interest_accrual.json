@@ -6,6 +6,7 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "posting_details_section",
   "posting_date",
   "loan_type",
   "loan",
@@ -56,12 +57,22 @@
    "label": "Accrual Type",
    "options": "Regular\nRepayment\nDisbursement",
    "read_only": 1
+  },
+  {
+   "fieldname": "posting_details_section",
+   "fieldtype": "Section Break",
+   "label": "Posting Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-11-06 13:28:51.478909",
+ "links": [
+  {
+   "link_doctype": "Loan Interest Accrual",
+   "link_fieldname": "process_loan_interest_accrual"
+  }
+ ],
+ "modified": "2021-01-30 22:19:18.254755",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Process Loan Interest Accrual",

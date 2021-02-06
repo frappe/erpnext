@@ -6,12 +6,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "loan_security_type_details_section",
   "loan_security_type",
   "unit_of_measure",
   "haircut",
+  "disabled",
   "column_break_5",
-  "loan_to_value_ratio",
-  "disabled"
+  "loan_to_value_ratio"
  ],
  "fields": [
   {
@@ -51,10 +52,32 @@
    "fieldname": "loan_to_value_ratio",
    "fieldtype": "Percent",
    "label": "Loan To Value Ratio"
+  },
+  {
+   "fieldname": "loan_security_type_details_section",
+   "fieldtype": "Section Break",
+   "label": "Loan Security Type Details"
   }
  ],
- "links": [],
- "modified": "2020-05-16 09:38:45.988080",
+ "links": [
+  {
+   "link_doctype": "Loan Security",
+   "link_fieldname": "loan_security_type"
+  },
+  {
+   "link_doctype": "Loan Security Price",
+   "link_fieldname": "loan_security_type"
+  },
+  {
+   "link_doctype": "Pledge",
+   "link_fieldname": "loan_security_type"
+  },
+  {
+   "link_doctype": "Unpledge",
+   "link_fieldname": "loan_security_type"
+  }
+ ],
+ "modified": "2021-01-30 21:07:12.654583",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Type",
