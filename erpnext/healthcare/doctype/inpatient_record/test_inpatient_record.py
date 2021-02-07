@@ -139,6 +139,7 @@ def create_inpatient(patient):
 	inpatient_record.phone = patient_obj.phone
 	inpatient_record.inpatient = "Scheduled"
 	inpatient_record.scheduled_date = today()
+	inpatient_record.company = "_Test Company"
 	return inpatient_record
 
 

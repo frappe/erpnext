@@ -73,7 +73,8 @@ class ProductQuery:
 
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
-			item.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
+			if product_info:
+				item.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
 
 		return result
 
