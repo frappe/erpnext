@@ -11,7 +11,9 @@
   "title",
   "material_request_type",
   "customer",
+  "set_warehouse",
   "column_break_2",
+  "transaction_date",
   "schedule_date",
   "company",
   "amended_from",
@@ -20,7 +22,6 @@
   "items",
   "more_info",
   "requested_by",
-  "transaction_date",
   "column_break2",
   "status",
   "per_ordered",
@@ -271,12 +272,18 @@
    "options": "Job Card",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "set_warehouse",
+   "fieldtype": "Link",
+   "label": "For Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:08.585707",
+ "modified": "2021-01-22 19:41:28.163999",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
