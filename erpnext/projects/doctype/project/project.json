@@ -26,8 +26,10 @@
   "more_info_cb_2",
   "customer_details_section",
   "customer",
+  "customer_name",
   "column_break_14",
   "bill_to",
+  "bill_to_name",
   "sales_order",
   "sec_applies_to",
   "applies_to_item",
@@ -460,7 +462,7 @@
    "options": "PROJ-"
   },
   {
-   "default": "{customer}",
+   "default": "{customer_name}",
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -579,11 +581,27 @@
    "hidden": 1,
    "label": "Bill To",
    "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.bill_to && doc.bill_to_name != doc.bill_to",
+   "fetch_from": "bill_to.customer_name",
+   "fieldname": "bill_to_name",
+   "fieldtype": "Data",
+   "label": "Bill To Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-puzzle-piece",
  "idx": 29,
- "modified": "2021-01-28 14:37:29.506685",
+ "modified": "2021-02-08 17:11:47.855142",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Project",
