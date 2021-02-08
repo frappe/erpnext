@@ -165,9 +165,9 @@ def toggle_disabling(doc):
 		frappe.clear_cache(doctype=doctype)
 
 def get_doctypes_with_dimensions():
-	doclist = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
+	doclist = ["GL Entry", "Sales Invoice", "POS Invoice", "Purchase Invoice", "Payment Entry", "Asset",
 		"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
-		"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
+		"Sales Invoice Item", "POS Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
 		"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
 		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
 		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
@@ -203,7 +203,7 @@ def get_dimension_with_children(doctype, dimension):
 	return all_dimensions
 
 @frappe.whitelist()
-def get_dimension_filters():
+def get_dimensions(with_cost_center_and_project=False):
 	dimension_filters = frappe.db.sql("""
 		SELECT label, fieldname, document_type
 		FROM `tabAccounting Dimension`
@@ -213,6 +213,18 @@ def get_dimension_filters():
 	default_dimensions = frappe.db.sql("""SELECT p.fieldname, c.company, c.default_dimension
 		FROM `tabAccounting Dimension Detail` c, `tabAccounting Dimension` p
 		WHERE c.parent = p.name""", as_dict=1)
+
+	if with_cost_center_and_project:
+		dimension_filters.extend([
+			{
+				'fieldname': 'cost_center',
+				'document_type': 'Cost Center'
+			},
+			{
+				'fieldname': 'project',
+				'document_type': 'Project'
+			}
+		])
 
 	default_dimensions_map = {}
 	for dimension in default_dimensions:

@@ -92,6 +92,7 @@
 		"cur_page": true,
 		"cur_list": true,
 		"cur_tree": true,
+		"cur_pos": true,
 		"msg_dialog": true,
 		"is_null": true,
 		"in_list": true,
@@ -149,6 +150,7 @@
 		"it": true,
 		"context": true,
 		"before": true,
-		"beforeEach": true
+		"beforeEach": true,
+		"onScan": true
 	}
 }

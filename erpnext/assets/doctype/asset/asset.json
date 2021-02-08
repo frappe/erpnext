@@ -8,21 +8,20 @@
  "document_type": "Document",
  "engine": "InnoDB",
  "field_order": [
-  "is_existing_asset",
-  "section_break_2",
-  "naming_series",
+  "company",
   "item_code",
   "item_name",
-  "asset_category",
   "asset_owner",
   "asset_owner_company",
+  "is_existing_asset",
   "supplier",
   "customer",
   "image",
   "journal_entry_for_scrap",
   "column_break_3",
-  "company",
+  "naming_series",
   "asset_name",
+  "asset_category",
   "location",
   "custodian",
   "department",
@@ -95,12 +94,14 @@
    "reqd": 1
   },
   {
+   "depends_on": "item_code",
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Read Only",
    "label": "Item Name"
   },
   {
+   "depends_on": "item_code",
    "fetch_from": "item_code.asset_category",
    "fieldname": "asset_category",
    "fieldtype": "Link",
@@ -307,12 +308,13 @@
   {
    "depends_on": "calculate_depreciation",
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Depreciation Schedule"
   },
   {
    "fieldname": "schedules",
    "fieldtype": "Table",
-   "label": "Depreciation Schedules",
+   "label": "Depreciation Schedule",
    "no_copy": 1,
    "options": "Depreciation Schedule"
   },
@@ -459,10 +461,6 @@
    "label": "Allow Monthly Depreciation"
   },
   {
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
-  },
-  {
    "collapsible": 1,
    "collapsible_depends_on": "is_existing_asset",
    "fieldname": "purchase_details_section",
@@ -480,14 +478,31 @@
   {
    "depends_on": "calculate_depreciation",
    "fieldname": "section_break_36",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Finance Books"
   }
  ],
  "idx": 72,
  "image_field": "image",
  "is_submittable": 1,
- "links": [],
- "modified": "2020-07-28 15:04:44.452224",
+ "links": [
+  {
+   "group": "Maintenance",
+   "link_doctype": "Asset Maintenance",
+   "link_fieldname": "asset_name"
+  },
+  {
+   "group": "Repair",
+   "link_doctype": "Asset Repair",
+   "link_fieldname": "asset_name"
+  },
+  {
+   "group": "Value",
+   "link_doctype": "Asset Value Adjustment",
+   "link_fieldname": "asset"
+  }
+ ],
+ "modified": "2021-01-22 12:38:59.091510",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
@@ -527,5 +542,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "asset_name"
+ "title_field": "asset_name",
+ "track_changes": 1
 }
