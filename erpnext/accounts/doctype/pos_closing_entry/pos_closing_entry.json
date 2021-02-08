@@ -6,11 +6,13 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "period_details_section",
   "period_start_date",
   "period_end_date",
   "column_break_3",
   "posting_date",
   "pos_opening_entry",
+  "status",
   "section_break_5",
   "company",
   "column_break_7",
@@ -64,7 +66,8 @@
   },
   {
    "fieldname": "section_break_5",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "User Details"
   },
   {
    "fieldname": "company",
@@ -120,7 +123,7 @@
    "collapsible_depends_on": "eval:doc.docstatus==0",
    "fieldname": "section_break_13",
    "fieldtype": "Section Break",
-   "label": "Details"
+   "label": "Totals"
   },
   {
    "default": "0",
@@ -184,11 +187,32 @@
    "label": "POS Opening Entry",
    "options": "POS Opening Entry",
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Draft\nSubmitted\nQueued\nCancelled",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "period_details_section",
+   "fieldtype": "Section Break",
+   "label": "Period Details"
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-05-29 15:03:22.226113",
+ "links": [
+  {
+   "link_doctype": "POS Invoice Merge Log",
+   "link_fieldname": "pos_closing_entry"
+  }
+ ],
+ "modified": "2021-02-01 13:47:20.722104",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",
