@@ -5,8 +5,10 @@
 from __future__ import unicode_literals
 import math
 import frappe
+import json
 from frappe import _
 from frappe.utils import time_diff_in_hours, rounded
+from six import string_types
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
@@ -63,7 +65,9 @@ def get_appointments_to_invoice(patient, company):
 			income_account = None
 			service_item = None
 			if appointment.practitioner:
-				service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment)
+				details = get_service_item_and_practitioner_charge(appointment)
+				service_item = details.get('service_item')
+				practitioner_charge = details.get('practitioner_charge')
 				income_account = get_income_account(appointment.practitioner, appointment.company)
 			appointments_to_invoice.append({
 				'reference_type': 'Patient Appointment',
@@ -96,7 +100,9 @@ def get_encounters_to_invoice(patient, company):
 						frappe.db.get_single_value('Healthcare Settings', 'do_not_bill_inpatient_encounters'):
 						continue
 
-					service_item, practitioner_charge = get_service_item_and_practitioner_charge(encounter)
+					details = get_service_item_and_practitioner_charge(encounter)
+					service_item = details.get('service_item')
+					practitioner_charge = details.get('practitioner_charge')
 					income_account = get_income_account(encounter.practitioner, encounter.company)
 
 				encounters_to_invoice.append({
@@ -303,8 +309,12 @@ def get_therapy_sessions_to_invoice(patient, company):
 
 	return therapy_sessions_to_invoice
 
-
+@frappe.whitelist()
 def get_service_item_and_practitioner_charge(doc):
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+		doc = frappe.get_doc(doc)
+
 	service_item = None
 	practitioner_charge = None
 	department = doc.medical_department if doc.doctype == 'Patient Encounter' else doc.department
@@ -325,7 +335,7 @@ def get_service_item_and_practitioner_charge(doc):
 	if not practitioner_charge:
 		throw_config_practitioner_charge(is_inpatient, doc.practitioner)
 
-	return service_item, practitioner_charge
+	return {'service_item': service_item, 'practitioner_charge': practitioner_charge}
 
 
 def get_appointment_type_service_item(appointment_type, department, is_inpatient):

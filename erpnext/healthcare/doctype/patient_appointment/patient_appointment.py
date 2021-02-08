@@ -173,13 +173,14 @@ def check_is_new_patient(patient, name=None):
 
 
 def get_appointment_item(appointment_doc, item):
-	service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment_doc)
-	item.item_code = service_item
+	details = get_service_item_and_practitioner_charge(appointment_doc)
+	charge = appointment_doc.paid_amount or details.get('practitioner_charge')
+	item.item_code = details.get('service_item')
 	item.description = _('Consulting Charges: {0}').format(appointment_doc.practitioner)
 	item.income_account = get_income_account(appointment_doc.practitioner, appointment_doc.company)
 	item.cost_center = frappe.get_cached_value('Company', appointment_doc.company, 'cost_center')
-	item.rate = practitioner_charge
-	item.amount = practitioner_charge
+	item.rate = charge
+	item.amount = charge
 	item.qty = 1
 	item.reference_dt = 'Patient Appointment'
 	item.reference_dn = appointment_doc.name
