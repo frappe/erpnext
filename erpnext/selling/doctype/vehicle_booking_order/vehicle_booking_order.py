@@ -984,18 +984,11 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 	if not vehicle:
 		frappe.throw(_("Vehicle not provided"))
 
-	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
-	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
-
-	if vbo_doc.docstatus != 1:
-		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
 
 	if vehicle == vbo_doc.vehicle:
 		frappe.throw(_("Vehicle {0} is already selected in {1}").format(vehicle, vehicle_booking_order))
-
-	if vbo_doc.delivery_status != 'To Receive':
-		frappe.throw(_("Cannot change Vehicle in Vehicle Booking Order {0} because Vehicle is already received")
-			.format(frappe.bold(vehicle_booking_order)))
 
 	previous_vehicle = vbo_doc.vehicle
 
@@ -1004,11 +997,7 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 	vbo_doc.validate_vehicle()
 	vbo_doc.set_vehicle_details()
 
-	vbo_doc.set_status()
-	vbo_doc.set_user_and_timestamp()
-	vbo_doc.db_update()
-	vbo_doc.notify_update()
-	vbo_doc.save_version()
+	save_vehicle_booking_for_update(vbo_doc)
 
 	update_vehicle_booked(vehicle, 1)
 	if previous_vehicle:
@@ -1022,25 +1011,15 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 	if not vehicle_allocation:
 		frappe.throw(_("Vehicle Allocation not provided"))
 
-	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
-	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
-
-	if vbo_doc.docstatus != 1:
-		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
+	validate_supplier_payment_for_update(vbo_doc)
 
 	if not vbo_doc.vehicle_allocation_required:
 		frappe.throw(_("Vehicle Allocation is not required in {0}").format(vehicle_booking_order))
 
 	if vehicle_allocation == vbo_doc.vehicle_allocation:
 		frappe.throw(_("Vehicle Allocation {0} is already selected in {1}").format(vehicle_allocation, vehicle_booking_order))
-
-	if vbo_doc.delivery_status != 'To Receive':
-		frappe.throw(_("Cannot change Vehicle Allocation in Vehicle Booking Order {0} because Vehicle is already received")
-			.format(frappe.bold(vehicle_booking_order)))
-
-	if flt(vbo_doc.supplier_advance):
-		frappe.throw(_("Cannot change Vehicle Allocation in Vehicle Booking Order {0} because Supplier Payment has already been made")
-			.format(frappe.bold(vehicle_booking_order)))
 
 	previous_allocation = vbo_doc.vehicle_allocation
 
@@ -1050,11 +1029,7 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 	if vbo_doc.delivery_period != vbo_doc._doc_before_save.delivery_period:
 		handle_delivery_period_changed(vbo_doc)
 
-	vbo_doc.set_status()
-	vbo_doc.set_user_and_timestamp()
-	vbo_doc.db_update()
-	vbo_doc.notify_update()
-	vbo_doc.save_version()
+	save_vehicle_booking_for_update(vbo_doc)
 
 	update_allocation_booked(vehicle_allocation, 1)
 	if previous_allocation:
@@ -1064,35 +1039,70 @@ def update_allocation_in_booking(vehicle_booking_order, vehicle_allocation):
 
 
 @frappe.whitelist()
+def update_delivery_period_in_booking(vehicle_booking_order, delivery_period):
+	if not delivery_period:
+		frappe.throw(_("Delivery Period not provided"))
+
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
+	validate_supplier_payment_for_update(vbo_doc)
+
+	if delivery_period == vbo_doc.delivery_period:
+		frappe.throw(_("Delivery Period {0} is already selected in {1}").format(delivery_period, vehicle_booking_order))
+
+	if vbo_doc.vehicle_allocation:
+		frappe.throw(_("Cannot change Delivery Period because Vehicle Allocation is already set in {0}. Please change Vehicle Allocation instead")
+			.format(frappe.bold(vehicle_booking_order)))
+
+	vbo_doc.delivery_period = delivery_period
+	handle_delivery_period_changed(vbo_doc)
+
+	save_vehicle_booking_for_update(vbo_doc)
+
+	frappe.msgprint(_("Delivery Period Changed Successfully"), indicator='green', alert=True)
+
+
+@frappe.whitelist()
 def update_color_in_booking(vehicle_booking_order, color_1, color_2, color_3):
 	if not color_1:
 		frappe.throw(_("Color (1st Priority) not provided"))
 
-	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
-	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
-
-	if vbo_doc.docstatus != 1:
-		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
 
 	if cstr(color_1) == cstr(vbo_doc.color_1) and cstr(color_2) == cstr(vbo_doc.color_2) and cstr(color_3) == cstr(vbo_doc.color_3):
 		frappe.throw(_("Color is the same in Vehicle Allocation {0}").format(vehicle_booking_order))
-
-	if vbo_doc.delivery_status != 'To Receive':
-		frappe.throw(_("Cannot change Vehicle Color in Vehicle Booking Order {0} because Vehicle is already received")
-			.format(frappe.bold(vehicle_booking_order)))
 
 	vbo_doc.color_1 = color_1
 	vbo_doc.color_2 = color_2
 	vbo_doc.color_3 = color_3
 	vbo_doc.validate_color_mandatory()
 
-	# vbo_doc.set_status()
-	vbo_doc.set_user_and_timestamp()
-	vbo_doc.db_update()
-	vbo_doc.notify_update()
-	vbo_doc.save_version()
+	save_vehicle_booking_for_update(vbo_doc)
 
 	frappe.msgprint(_("Color Changed Successfully"), indicator='green', alert=True)
+
+
+@frappe.whitelist()
+def update_customer_details_in_booking(vehicle_booking_order):
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
+	validate_supplier_payment_for_update(vbo_doc)
+
+	customer_details = get_customer_details(vbo_doc.as_dict(), get_withholding_tax=True)
+	for k, v in customer_details.items():
+		if not vbo_doc.get(k) or k in force_fields:
+			vbo_doc.set(k, v)
+
+	vbo_doc.validate_customer()
+	vbo_doc.calculate_taxes_and_totals()
+	vbo_doc.validate_payment_schedule()
+	vbo_doc.update_payment_status()
+	vbo_doc.validate_amounts()
+
+	save_vehicle_booking_for_update(vbo_doc)
+
+	frappe.msgprint(_("Customer Details Updated Successfully"), indicator='green', alert=True)
 
 
 def handle_delivery_period_changed(vbo_doc):
@@ -1106,53 +1116,47 @@ def handle_delivery_period_changed(vbo_doc):
 		vbo_doc.payment_schedule[0].due_date = to_date
 
 	vbo_doc.validate_payment_schedule()
-	for d in vbo_doc.payment_schedule:
-		d.db_update()
 
 	frappe.msgprint(_("Delivery Period has been changed from {0} to {1}")
 		.format(frappe.bold(vbo_doc._doc_before_save.delivery_period or 'None'), frappe.bold(vbo_doc.delivery_period)))
 
 
-@frappe.whitelist()
-def update_customer_details_in_booking(vehicle_booking_order):
+def get_vehicle_booking_for_update(vehicle_booking_order):
 	vbo_doc = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
 	vbo_doc._doc_before_save = frappe.get_doc(vbo_doc.as_dict())
 
 	if vbo_doc.docstatus != 1:
 		frappe.throw(_("Vehicle Booking Order {0} is not submitted").format(vehicle_booking_order))
 
-	if vbo_doc.delivery_status != 'To Receive':
-		frappe.throw(_("Cannot update Customer Details in Vehicle Booking Order {0} because Vehicle is already received")
-			.format(frappe.bold(vehicle_booking_order)))
+	return vbo_doc
 
-	if flt(vbo_doc.supplier_advance):
-		frappe.throw(_("Cannot update Customer Details in Vehicle Booking Order {0}  because Supplier Payment has already been made")
-			.format(frappe.bold(vehicle_booking_order)))
 
-	customer_details = get_customer_details(vbo_doc.as_dict(), get_withholding_tax=True)
-	for k, v in customer_details.items():
-		if not vbo_doc.get(k) or k in force_fields:
-			vbo_doc.set(k, v)
-
-	vbo_doc.validate_customer()
-	vbo_doc.calculate_taxes_and_totals()
-	vbo_doc.validate_payment_schedule()
-	vbo_doc.update_payment_status()
-	vbo_doc.validate_amounts()
-
+def save_vehicle_booking_for_update(vbo_doc, update_child_tables=True):
 	vbo_doc.set_status()
 
 	vbo_doc.set_user_and_timestamp()
 	vbo_doc.db_update()
-	for d in vbo_doc.sales_team:
-		d.db_update()
-	for d in vbo_doc.payment_schedule:
-		d.db_update()
+
+	if update_child_tables:
+		for d in vbo_doc.sales_team:
+			d.db_update()
+		for d in vbo_doc.payment_schedule:
+			d.db_update()
 
 	vbo_doc.notify_update()
 	vbo_doc.save_version()
 
-	frappe.msgprint(_("Customer Details Updated Successfully"), indicator='green', alert=True)
+
+def validate_delivery_status_for_update(vbo_doc):
+	if vbo_doc.delivery_status != 'To Receive':
+		frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Vehicle is already received")
+			.format(frappe.bold(vbo_doc.name)))
+
+
+def validate_supplier_payment_for_update(vbo_doc):
+	if flt(vbo_doc.supplier_advance):
+		frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Supplier Payment has already been made")
+			.format(frappe.bold(vbo_doc.name)))
 
 
 def get_booking_payments(vehicle_booking_order):
