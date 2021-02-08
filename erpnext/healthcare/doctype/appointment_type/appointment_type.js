@@ -10,7 +10,7 @@ frappe.ui.form.on('Appointment Type', {
 		});
 
 		frm.set_query('medical_department', 'items', function(doc, cdt, cdn) {
-			let item_list = doc.items.map(({medical_department})=> medical_department)
+			let item_list = doc.items.map(({medical_department}) => medical_department);
 			return {
 				filters: [
 					['Medical Department', 'name', 'not in', item_list]
@@ -52,7 +52,7 @@ frappe.ui.form.on('Appointment Type Service Item', {
 				},
 				callback: function(data) {
 					if (data.message.price_list_rate) {
-						frappe.model.set_value(cdt, cdn,'op_consulting_charge', data.message.price_list_rate);
+						frappe.model.set_value(cdt, cdn, 'op_consulting_charge', data.message.price_list_rate);
 					}
 				}
 			});
@@ -74,7 +74,7 @@ frappe.ui.form.on('Appointment Type Service Item', {
 				},
 				callback: function (data) {
 					if (data.message.price_list_rate) {
-						frappe.model.set_value(cdt, cdn,'inpatient_visit_charge', data.message.price_list_rate);
+						frappe.model.set_value(cdt, cdn, 'inpatient_visit_charge', data.message.price_list_rate);
 					}
 				}
 			});
