@@ -303,7 +303,7 @@ def validate_mandatory_fields(invoice):
 			_('GSTIN is mandatory to fetch company GSTIN details. Please enter GSTIN in selected company address.'),
 			title=_('Missing Fields')
 		)
-	if not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
+	if invoice.gst_category != 'Overseas' and not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
 		frappe.throw(
 			_('GSTIN is mandatory to fetch customer GSTIN details. Please enter GSTIN in selected customer address.'),
 			title=_('Missing Fields')
