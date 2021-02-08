@@ -9,7 +9,7 @@ frappe.ui.form.on('Appointment Type', {
 			};
 		});
 
-		frm.set_query('medical_department', 'items', function(doc, cdt, cdn) {
+		frm.set_query('medical_department', 'items', function(doc) {
 			let item_list = doc.items.map(({medical_department}) => medical_department);
 			return {
 				filters: [
@@ -18,7 +18,7 @@ frappe.ui.form.on('Appointment Type', {
 			};
 		});
 
-		frm.set_query('op_consulting_charge_item', 'items', function(doc, cdt, cdn) {
+		frm.set_query('op_consulting_charge_item', 'items', function() {
 			return {
 				filters: {
 					is_stock_item: 0
@@ -26,7 +26,7 @@ frappe.ui.form.on('Appointment Type', {
 			};
 		});
 
-		frm.set_query('inpatient_visit_charge_item', 'items', function(doc, cdt, cdn) {
+		frm.set_query('inpatient_visit_charge_item', 'items', function() {
 			return {
 				filters: {
 					is_stock_item: 0
