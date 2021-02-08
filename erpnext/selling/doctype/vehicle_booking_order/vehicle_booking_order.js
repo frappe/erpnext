@@ -62,26 +62,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			}
 			return erpnext.queries.vehicle_allocation_period('allocation_period', filters);
 		});
-		this.frm.set_query("delivery_period", function () {
-			if (me.frm.doc.vehicle_allocation_required) {
-				var filters = {
-					item_code: me.frm.doc.item_code,
-					supplier: me.frm.doc.supplier
-				}
-
-				if (me.frm.doc.transaction_date) {
-					filters['transaction_date'] = me.frm.doc.transaction_date;
-				}
-				if (me.frm.doc.allocation_period) {
-					filters['allocation_period'] = me.frm.doc.allocation_period;
-				}
-				return erpnext.queries.vehicle_allocation_period('delivery_period', filters);
-			} else if (me.frm.doc.transaction_date) {
-				return {
-					filters: {to_date: [">=", me.frm.doc.transaction_date]}
-				}
-			}
-		});
+		this.frm.set_query("delivery_period", () => me.delivery_period_query());
 
 		this.frm.set_query("vehicle_allocation", () => me.allocation_query());
 
@@ -133,6 +114,27 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			query: "erpnext.controllers.queries.vehicle_allocation_query",
 			filters: filters
 		};
+	},
+
+	delivery_period_query: function (ignore_allocation_period) {
+		if (this.frm.doc.vehicle_allocation_required) {
+			var filters = {
+				item_code: this.frm.doc.item_code,
+				supplier: this.frm.doc.supplier
+			}
+
+			if (this.frm.doc.transaction_date) {
+				filters['transaction_date'] = this.frm.doc.transaction_date;
+			}
+			if (!ignore_allocation_period && this.frm.doc.allocation_period) {
+				filters['allocation_period'] = this.frm.doc.allocation_period;
+			}
+			return erpnext.queries.vehicle_allocation_period('delivery_period', filters);
+		} else if (this.frm.doc.transaction_date) {
+			return {
+				filters: {to_date: [">=", this.frm.doc.transaction_date]}
+			}
+		}
 	},
 
 	setup_route_options: function () {
@@ -632,7 +634,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			title: __("Select Allocation"),
 			fields: [
 				{label: __("Delivery Period"), fieldname: "delivery_period", fieldtype: "Link", options: "Vehicle Allocation Period",
-					default: me.frm.doc.delivery_period, bold: 1},
+					default: me.frm.doc.delivery_period, bold: 1, get_query: () => me.delivery_period_query(true)},
 				{
 					label: __("Vehicle Allocation"), fieldname: "vehicle_allocation", fieldtype: "Link", options: "Vehicle Allocation", reqd: 1,
 					onchange: () => {
