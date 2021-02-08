@@ -1249,6 +1249,7 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, base_gra
 	if getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date
 	term_details.mode_of_payment = term.mode_of_payment
+	term_details.discount_percentage = term.discount_percentage
 
 	return term_details
 

@@ -1083,6 +1083,8 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	paid_amount, received_amount = set_paid_amount_and_received_amount(
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc)
 
+	paid_amount, difference_amount = apply_early_payment_discount(paid_amount, doc)
+
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
 	pe.company = doc.company
@@ -1271,6 +1273,17 @@ def set_paid_amount_and_received_amount(dt, party_account_currency, bank, outsta
 			if dt == "Employee Advance":
 				paid_amount = received_amount * doc.get('exchange_rate', 1)
 	return paid_amount, received_amount
+
+def apply_early_payment_discount(paid_amount, doc):
+	difference_amount = 0
+	if doc.doctype == "Sales Invoice" and doc.payment_schedule:
+		for payment_term in doc.payment_schedule:
+			if payment_term.discount_percentage and getdate(nowdate()) <= payment_term.due_date:
+				discount_amount = payment_term.payment_amount * (payment_term.discount_percentage / 100)
+				paid_amount -= discount_amount
+				difference_amount += discount_amount
+
+	return paid_amount, difference_amount
 
 def get_reference_as_per_payment_terms(payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
 	references = []
