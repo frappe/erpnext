@@ -202,8 +202,7 @@ class update_entries_after(object):
 			where
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
-				and voucher_type = %(voucher_type)s
-				and voucher_no = %(voucher_no)s
+				and timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
 			order by
 				creation ASC
 			for update
