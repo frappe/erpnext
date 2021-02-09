@@ -310,7 +310,7 @@ class Subscription(Document):
 
 		# For backward compatibility
 		# Earlier subscription didn't had any company field
-		company = self.company or get_default_company()
+		company = self.get('company') or get_default_company()
 		if not company:
 			frappe.throw(_("Company is mandatory was generating invoice. Please set default company in Global Defaults"))
 
