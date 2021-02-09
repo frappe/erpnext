@@ -16,15 +16,17 @@ def execute(filters=None):
 
 def get_columns():
 	columns = [{
-			"label": _("Payment Document"),
-			"fieldname": "payment_document",
+			"label": _("Payment Document Type"),
+			"fieldname": "payment_document_type",
+			"fieldtype": "Link",
+			"options": "Doctype",
 			"width": 130
 		},
 		{
 			"label": _("Payment Entry"),
 			"fieldname": "payment_entry",
 			"fieldtype": "Dynamic Link",
-			"options": "payment_document",
+			"options": "payment_document_type",
 			"width": 140
 		},
 		{

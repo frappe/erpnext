@@ -37,15 +37,17 @@ def get_columns():
 			"width": 120
 		},
 		{
-			"label": _("Reference Document"),
-			"fieldname": "reference_document",
+			"label": _("Reference Document Type"),
+			"fieldname": "reference_document_type",
+			"fieldtype": "Link",
+			"options": "Doctype",
 			"width": 100
 		},
 		{
 			"label": _("Reference Name"),
 			"fieldname": "reference_name",
 			"fieldtype": "Dynamic Link",
-			"options": "reference_document",
+			"options": "reference_document_type",
 			"width": 140
 		},
 		{
