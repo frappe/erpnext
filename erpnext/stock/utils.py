@@ -279,7 +279,7 @@ def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
 
-def is_disabled_warehouse(warehouse):
+def validate_disabled_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "disabled"):
 		frappe.throw(_("Disabled Warehouse {0} cannot be used for this transaction.").format(get_link_to_form('Warehouse', warehouse)))
 
