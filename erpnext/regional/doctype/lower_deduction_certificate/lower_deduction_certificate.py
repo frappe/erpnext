@@ -38,9 +38,9 @@ class LowerDeductionCertificate(Document):
 	def are_dates_overlapping(self,duplicate_certificate):
 		valid_from = duplicate_certificate.valid_from
 		valid_upto = duplicate_certificate.valid_upto
-		if valid_from <= getdate(self.valid_from) and getdate(self.valid_from) <= valid_upto:
+		if valid_from <= getdate(self.valid_from) <= valid_upto:
 			return True
-		elif valid_from <= getdate(self.valid_upto) and getdate(self.valid_upto) <= valid_upto:
+		elif valid_from <= getdate(self.valid_upto) <= valid_upto:
 			return True
 		elif getdate(self.valid_from) <= valid_from and valid_upto <= getdate(self.valid_upto):
 			return True
