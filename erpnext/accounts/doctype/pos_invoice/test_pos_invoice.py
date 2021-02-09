@@ -349,7 +349,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 	def test_merging_into_sales_invoice_with_discount(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
-		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
 
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
@@ -365,7 +365,7 @@ class TestPOSInvoice(unittest.TestCase):
 		})
 		pos_inv2.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv.load_from_db()
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
@@ -374,7 +374,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 	def test_merging_into_sales_invoice_with_discount_and_inclusive_tax(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
-		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
 
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
@@ -407,7 +407,7 @@ class TestPOSInvoice(unittest.TestCase):
 		})
 		pos_inv2.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv.load_from_db()
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
@@ -416,7 +416,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 	def test_merging_with_validate_selling_price(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
-		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 1)
@@ -452,7 +452,7 @@ class TestPOSInvoice(unittest.TestCase):
 		})
 		pos_inv2.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv2.load_from_db()
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv2.consolidated_invoice, "rounded_total")

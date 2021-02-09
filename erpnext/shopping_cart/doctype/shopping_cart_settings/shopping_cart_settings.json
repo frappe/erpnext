@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "enabled",
+  "store_page_docs",
   "display_settings",
   "show_attachments",
   "show_price",
@@ -174,13 +175,18 @@
    "fieldname": "save_quotations_as_draft",
    "fieldtype": "Check",
    "label": "Save Quotations as Draft"
+  },
+  {
+   "depends_on": "doc.enabled",
+   "fieldname": "store_page_docs",
+   "fieldtype": "HTML"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-09-24 16:28:07.192525",
+ "modified": "2021-02-01 18:18:54.606535",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Shopping Cart Settings",

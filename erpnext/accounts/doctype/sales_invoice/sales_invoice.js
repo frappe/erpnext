@@ -20,6 +20,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		var me = this;
 		this._super();
 
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice'];
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
 			this.frm.set_df_property("debit_to", "print_hide", 0);
@@ -130,16 +131,15 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.set_default_print_format();
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
-			frappe.model.with_doc("Customer", me.frm.doc.customer, function() {
-				var customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
-				var internal = customer.is_internal_customer;
-				var disabled = customer.disabled;
-				if (internal == 1 && disabled == 0) {
-					me.frm.add_custom_button("Inter Company Invoice", function() {
-						me.make_inter_company_invoice();
-					}, __('Create'));
-				}
-			});
+			let internal = me.frm.doc.is_internal_customer;
+			if (internal) {
+				let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Invoice" :
+					"Inter Company Purchase Invoice";
+
+				me.frm.add_custom_button(button_label, function() {
+					me.make_inter_company_invoice();
+				}, __('Create'));
+			}
 		}
 	},
 
@@ -669,12 +669,12 @@ frappe.ui.form.on('Sales Invoice', {
 		};
 	},
 	// When multiple companies are set up. in case company name is changed set default company address
-	company:function(frm){
-		if (frm.doc.company)
-		{
+	company: function(frm){
+		if (frm.doc.company) {
 			frappe.call({
-				method:"erpnext.setup.doctype.company.company.get_default_company_address",
-				args:{name:frm.doc.company, existing_address: frm.doc.company_address},
+				method: "erpnext.setup.doctype.company.company.get_default_company_address",
+				args: {name:frm.doc.company, existing_address: frm.doc.company_address || ""},
+				debounce: 2000,
 				callback: function(r){
 					if (r.message){
 						frm.set_value("company_address",r.message)
