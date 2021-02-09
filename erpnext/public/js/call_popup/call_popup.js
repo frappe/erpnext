@@ -200,10 +200,10 @@ $(document).on('app_ready', function () {
 	frappe.realtime.on('show_call_popup', call_log => {
 		let call_popup = erpnext.call_popup;
 		if (call_popup && call_log.name === call_popup.call_log.name) {
-			erpnext.call_popup = new CallPopup(call_log);
-		} else {
 			call_popup.update_call_log(call_log);
 			call_popup.dialog.show();
+		} else {
+			erpnext.call_popup = new CallPopup(call_log);
 		}
 	});
 });
