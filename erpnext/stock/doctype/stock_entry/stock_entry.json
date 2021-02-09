@@ -27,6 +27,7 @@
   "set_posting_time",
   "inspection_required",
   "from_bom",
+  "apply_putaway_rule",
   "sb1",
   "bom_no",
   "fg_completed_qty",
@@ -640,13 +641,21 @@
    "fieldtype": "Check",
    "label": "Add to Transit",
    "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list([\"Material Transfer\", \"Material Receipt\"], doc.purpose)",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-11 19:10:07.954981",
+ "modified": "2020-12-09 14:58:13.267321",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

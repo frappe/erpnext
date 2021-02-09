@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -20,6 +21,7 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "apply_putaway_rule",
   "is_return",
   "return_against",
   "section_addresses",
@@ -46,6 +48,7 @@
   "set_warehouse",
   "rejected_warehouse",
   "col_break_warehouse",
+  "set_from_warehouse",
   "is_subcontracted",
   "supplier_warehouse",
   "items_section",
@@ -110,8 +113,10 @@
   "range",
   "column_break4",
   "per_billed",
+  "per_returned",
   "is_internal_supplier",
   "inter_company_reference",
+  "represents_company",
   "subscription_detail",
   "auto_repeat",
   "printing_settings",
@@ -894,7 +899,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nTo Bill\nCompleted\nCancelled\nClosed",
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1084,7 +1089,9 @@
    "fieldname": "inter_company_reference",
    "fieldtype": "Link",
    "label": "Inter Company Reference",
+   "no_copy": 1,
    "options": "Delivery Note",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -1103,13 +1110,44 @@
    "fieldtype": "Small Text",
    "label": "Billing Address",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_returned",
+   "fieldtype": "Percent",
+   "label": "% Returned",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.is_internal_supplier",
+   "description": "Sets 'From Warehouse' in each row of the items table.",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-03 23:20:26.381024",
+ "modified": "2020-12-26 20:49:39.106049",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",

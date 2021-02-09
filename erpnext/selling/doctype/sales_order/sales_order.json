@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-18 12:39:59",
@@ -106,6 +107,8 @@
   "tc_name",
   "terms",
   "more_info",
+  "is_internal_customer",
+  "represents_company",
   "inter_company_order_reference",
   "project",
   "party_account_currency",
@@ -1102,7 +1105,8 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Inter Company Order Reference",
-   "options": "Purchase Order"
+   "options": "Purchase Order",
+   "read_only": 1
   },
   {
    "description": "Track this Sales Order against any Project",
@@ -1454,13 +1458,29 @@
    "hide_seconds": 1,
    "label": "Skip Delivery Note",
    "print_hide": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "customer.is_internal_customer",
+   "fieldname": "is_internal_customer",
+   "fieldtype": "Check",
+   "label": "Is Internal Customer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "customer.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-07 14:30:01.782617",
+ "modified": "2021-01-20 23:40:39.929296",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

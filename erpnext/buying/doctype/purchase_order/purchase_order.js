@@ -2,7 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.buying");
-
+frappe.provide("erpnext.accounts.dimensions");
 {% include 'erpnext/public/js/controllers/buying.js' %};
 
 frappe.ui.form.on("Purchase Order", {
@@ -30,6 +30,10 @@ frappe.ui.form.on("Purchase Order", {
 
 	},
 
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+	},
+
 	onload: function(frm) {
 		set_schedule_date(frm);
 		if (!frm.doc.transaction_date){
@@ -39,6 +43,8 @@ frappe.ui.form.on("Purchase Order", {
 		erpnext.queries.setup_queries(frm, "Warehouse", function() {
 			return erpnext.queries.warehouse(frm.doc);
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	}
 });
 
@@ -58,8 +64,8 @@ frappe.ui.form.on("Purchase Order Item", {
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	setup: function() {
 		this.frm.custom_make_buttons = {
-			'Purchase Receipt': 'Receipt',
-			'Purchase Invoice': 'Invoice',
+			'Purchase Receipt': 'Purchase Receipt',
+			'Purchase Invoice': 'Purchase Invoice',
 			'Stock Entry': 'Material to Supplier',
 			'Payment Entry': 'Payment',
 		}
@@ -90,6 +96,11 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 		this.frm.set_df_property("drop_ship", "hidden", !is_drop_ship);
 
 		if(doc.docstatus == 1) {
+			this.frm.fields_dict.items_section.wrapper.addClass("hide-border");
+			if(!this.frm.doc.set_warehouse) {
+				this.frm.fields_dict.items_section.wrapper.removeClass("hide-border");
+			}
+
 			if(!in_list(["Closed", "Delivered"], doc.status)) {
 				if(this.frm.doc.status !== 'Closed' && flt(this.frm.doc.per_received) < 100 && flt(this.frm.doc.per_billed) < 100) {
 					this.frm.add_custom_button(__('Update Items'), () => {
@@ -126,15 +137,24 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(doc.status != "Closed") {
 				if (doc.status != "On Hold") {
 					if(flt(doc.per_received) < 100 && allow_receipt) {
-						cur_frm.add_custom_button(__('Receipt'), this.make_purchase_receipt, __('Create'));
+						cur_frm.add_custom_button(__('Purchase Receipt'), this.make_purchase_receipt, __('Create'));
 						if(doc.is_subcontracted==="Yes" && me.has_unsupplied_items()) {
 							cur_frm.add_custom_button(__('Material to Supplier'),
 								function() { me.make_stock_entry(); }, __("Transfer"));
 						}
 					}
 					if(flt(doc.per_billed) < 100)
-						cur_frm.add_custom_button(__('Invoice'),
+						cur_frm.add_custom_button(__('Purchase Invoice'),
 							this.make_purchase_invoice, __('Create'));
+
+					if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
+						cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __('Create'));
+					}
+
+					if(flt(doc.per_billed)==0) {
+						this.frm.add_custom_button(__('Payment Request'),
+							function() { me.make_payment_request() }, __('Create'));
+					}
 
 					if(!doc.auto_repeat) {
 						cur_frm.add_custom_button(__('Subscription'), function() {
@@ -144,25 +164,19 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
-						frappe.model.with_doc("Supplier", me.frm.doc.supplier, () => {
-							let supplier = frappe.model.get_doc("Supplier", me.frm.doc.supplier);
-							let internal = supplier.is_internal_supplier;
-							let disabled = supplier.disabled;
-							if (internal === 1 && disabled === 0) {
-								me.frm.add_custom_button("Inter Company Order", function() {
-									me.make_inter_company_order(me.frm);
-								}, __('Create'));
-							}
-						});
+						let internal = me.frm.doc.is_internal_supplier;
+						if (internal) {
+							let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Sales Order" :
+								"Inter Company Sales Order";
+
+							me.frm.add_custom_button(button_label, function() {
+								me.make_inter_company_order(me.frm);
+							}, __('Create'));
+						}
+
 					}
 				}
-				if(flt(doc.per_billed)==0) {
-					this.frm.add_custom_button(__('Payment Request'),
-						function() { me.make_payment_request() }, __('Create'));
-				}
-				if(flt(doc.per_billed)==0 && doc.status != "Delivered") {
-					cur_frm.add_custom_button(__('Payment'), cur_frm.cscript.make_payment_entry, __('Create'));
-				}
+
 				cur_frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 		} else if(doc.docstatus===0) {
@@ -299,7 +313,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(me.values) {
 				me.values.sub_con_rm_items.map((row,i) => {
 					if (!row.item_code || !row.rm_item_code || !row.warehouse || !row.qty || row.qty === 0) {
-						frappe.throw(__("Item Code, warehouse, quantity are required on row" + (i+1)));
+						frappe.throw(__("Item Code, warehouse, quantity are required on row {0}", [i+1]));
 					}
 				})
 				me._make_rm_stock_entry(me.dialog.fields_dict.sub_con_rm_items.grid.get_selected_children())
@@ -339,7 +353,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	make_purchase_receipt: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
-			frm: cur_frm
+			frm: cur_frm,
+			freeze_message: __("Creating Purchase Receipt ...")
 		})
 	},
 
@@ -358,15 +373,19 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					method: "erpnext.stock.doctype.material_request.material_request.make_purchase_order",
 					source_doctype: "Material Request",
 					target: me.frm,
-					setters: {},
+					setters: {
+						schedule_date: undefined,
+						status: undefined
+					},
 					get_query_filters: {
 						material_request_type: "Purchase",
 						docstatus: 1,
 						status: ["!=", "Stopped"],
-						per_ordered: ["<", 99.99],
+						per_ordered: ["<", 100],
+						company: me.frm.doc.company
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 		this.frm.add_custom_button(__('Supplier Quotation'),
 			function() {
@@ -375,16 +394,17 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					source_doctype: "Supplier Quotation",
 					target: me.frm,
 					setters: {
-						supplier: me.frm.doc.supplier
+						supplier: me.frm.doc.supplier,
+						valid_till: undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
-						status: ["!=", "Stopped"],
+						status: ["not in", ["Stopped", "Expired"]],
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
-		this.frm.add_custom_button(__('Update rate as per last purchase'),
+		this.frm.add_custom_button(__('Update Rate as per Last Purchase'),
 			function() {
 				frappe.call({
 					"method": "get_last_purchase_rate",

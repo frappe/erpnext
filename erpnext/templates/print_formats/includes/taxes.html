@@ -17,13 +17,13 @@
 			{{ render_discount_amount(doc) }}
 		{%- endif -%}
 		{%- for charge in data -%}
-			{%- if (charge.tax_amount or doc.flags.print_taxes_with_zero_amount) and (not charge.included_in_print_rate or doc.flags.show_inclusive_tax_in_print) -%}
+			{%- if (charge.tax_amount or print_settings.print_taxes_with_zero_amount) and (not charge.included_in_print_rate or doc.flags.show_inclusive_tax_in_print) -%}
 			<div class="row">
 				<div class="col-xs-5 {%- if doc.align_labels_right %} text-right{%- endif -%}">
-					<label>{{ charge.get_formatted("description") }}</label></div>
+					<label>{{ charge.get_formatted("description") }}</label>
+				</div>
 				<div class="col-xs-7 text-right">
-					{{ frappe.format_value(frappe.utils.flt(charge.tax_amount),
-						table_meta.get_field("tax_amount"), doc, currency=doc.currency) }}
+					{{ charge.get_formatted('tax_amount', doc) }}
 				</div>
 			</div>
 			{%- endif -%}

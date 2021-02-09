@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2020-01-24 15:29:29.933693",
@@ -12,11 +13,11 @@
   "customer",
   "customer_name",
   "tax_id",
-  "is_pos",
   "pos_profile",
-  "offline_pos_name",
-  "is_return",
   "consolidated_invoice",
+  "is_pos",
+  "is_return",
+  "update_billed_amount_in_sales_order",
   "column_break1",
   "company",
   "posting_date",
@@ -24,10 +25,7 @@
   "set_posting_time",
   "due_date",
   "amended_from",
-  "returns",
   "return_against",
-  "column_break_21",
-  "update_billed_amount_in_sales_order",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -182,8 +180,7 @@
   "column_break_140",
   "auto_repeat",
   "update_auto_repeat_reference",
-  "against_income_account",
-  "pos_total_qty"
+  "against_income_account"
  ],
  "fields": [
   {
@@ -265,22 +262,13 @@
    "print_hide": 1
   },
   {
-   "fieldname": "offline_pos_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "label": "Offline POS Name",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "allow_on_submit": 1,
    "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
    "label": "Is Return (Credit Note)",
    "no_copy": 1,
-   "print_hide": 1,
-   "set_only_once": 1
+   "print_hide": 1
   },
   {
    "fieldname": "column_break1",
@@ -350,23 +338,13 @@
   },
   {
    "depends_on": "return_against",
-   "fieldname": "returns",
-   "fieldtype": "Section Break",
-   "label": "Returns"
-  },
-  {
-   "depends_on": "return_against",
    "fieldname": "return_against",
    "fieldtype": "Link",
-   "label": "Return Against POS Invoice",
+   "label": "Return Against",
    "no_copy": 1,
    "options": "POS Invoice",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break"
   },
   {
    "default": "0",
@@ -461,7 +439,7 @@
   },
   {
    "fieldname": "contact_mobile",
-   "fieldtype": "Small Text",
+   "fieldtype": "Data",
    "hidden": 1,
    "label": "Mobile No",
    "read_only": 1
@@ -587,19 +565,21 @@
   },
   {
    "fieldname": "sec_warehouse",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
   },
   {
    "depends_on": "update_stock",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
-   "label": "Set Source Warehouse",
+   "label": "Source Warehouse",
    "options": "Warehouse",
    "print_hide": 1
   },
   {
    "fieldname": "items_section",
    "fieldtype": "Section Break",
+   "label": "Items",
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -1501,7 +1481,7 @@
    "allow_on_submit": 1,
    "fieldname": "sales_team",
    "fieldtype": "Table",
-   "label": "Sales Team1",
+   "label": "Sales Team",
    "oldfieldname": "sales_team",
    "oldfieldtype": "Table",
    "options": "Sales Team",
@@ -1561,15 +1541,6 @@
    "report_hide": 1
   },
   {
-   "fieldname": "pos_total_qty",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "label": "Total Qty",
-   "print_hide": 1,
-   "print_hide_if_no_value": 1,
-   "read_only": 1
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "consolidated_invoice",
    "fieldtype": "Link",
@@ -1579,10 +1550,9 @@
   }
  ],
  "icon": "fa fa-file-text",
- "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-07 12:43:09.138720",
+ "modified": "2021-02-01 15:03:33.800707",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice",
@@ -1627,7 +1597,6 @@
    "role": "All"
   }
  ],
- "quick_entry": 1,
  "search_fields": "posting_date, due_date, customer, base_grand_total, outstanding_amount",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

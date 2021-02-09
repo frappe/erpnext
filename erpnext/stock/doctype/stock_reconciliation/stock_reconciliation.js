@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.stock");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
 	onload: function(frm) {
@@ -26,6 +27,12 @@ frappe.ui.form.on("Stock Reconciliation", {
 		if (!frm.doc.expense_account) {
 			frm.trigger("set_expense_account");
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -109,6 +116,10 @@ frappe.ui.form.on("Stock Reconciliation", {
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "current_serial_no", r.message.serial_nos);
+
+					if (frm.doc.purpose == "Stock Reconciliation") {
+						frappe.model.set_value(cdt, cdn, "serial_no", r.message.serial_nos);
+					}
 				}
 			});
 		}

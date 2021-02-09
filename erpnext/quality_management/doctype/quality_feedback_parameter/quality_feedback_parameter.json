@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-05-26 21:25:01.715807",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -39,12 +40,13 @@
    "fieldname": "feedback",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
-   "label": "Feedback",
-   "reqd": 1
+   "label": "Feedback"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-07-13 19:58:08.966141",
+ "links": [],
+ "modified": "2020-10-27 17:28:12.033145",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Feedback Parameter",

@@ -22,7 +22,8 @@ class Lead(SellingController):
 		load_address_and_contact(self)
 
 	def before_insert(self):
-		self.address_doc = self.create_address()
+		if self.address_title and self.address_type:
+			self.address_doc = self.create_address()
 		self.contact_doc = self.create_contact()
 
 	def after_insert(self):
@@ -133,15 +134,6 @@ class Lead(SellingController):
 		# skipping country since the system auto-sets it from system defaults
 		address = frappe.new_doc("Address")
 
-		mandatory_fields = [ df.fieldname for df in address.meta.fields if df.reqd ]
-
-		if not all([self.get(field) for field in mandatory_fields]):
-			frappe.msgprint(_('Missing mandatory fields in address. \
-				{0} to create address' ).format("<a href='desk#Form/Address/New Address 1' \
-				> Click here </a>"),
-				alert=True, indicator='yellow')
-			return
-
 		address.update({addr_field: self.get(addr_field) for addr_field in address_fields})
 		address.update({info_field: self.get(info_field) for info_field in info_fields})
 		address.insert()
@@ -184,13 +176,13 @@ class Lead(SellingController):
 				"phone": self.mobile_no
 			})
 
-		contact.insert()
+		contact.insert(ignore_permissions=True)
 
 		return contact
 
 	def update_links(self):
 		# update address links
-		if self.address_doc:
+		if hasattr(self, 'address_doc'):
 			self.address_doc.append("links", {
 				"link_doctype": "Lead",
 				"link_name": self.name,
@@ -360,7 +352,7 @@ def get_lead_with_phone_number(number):
 	leads = frappe.get_all('Lead', or_filters={
 		'phone': ['like', '%{}'.format(number)],
 		'mobile_no': ['like', '%{}'.format(number)]
-	}, limit=1)
+	}, limit=1, order_by="creation DESC")
 
 	lead = leads[0].name if leads else None
 
