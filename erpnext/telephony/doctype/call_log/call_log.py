@@ -165,6 +165,8 @@ def get_linked_call_logs(doctype, docname):
 	for log in logs:
 		log.show_call_button = 0
 		timeline_contents.append({
+			'icon': 'call',
+			'is_card': True,
 			'creation': log.creation,
 			'template': 'call_link',
 			'template_data': log
