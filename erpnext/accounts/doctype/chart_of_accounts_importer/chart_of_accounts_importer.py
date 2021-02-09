@@ -22,9 +22,10 @@ def validate_company(company):
 		'allow_account_creation_against_child_company'])
 
 	if parent_company and (not allow_account_creation_against_child_company):
-		frappe.throw(_("""{0} is a child company. Please import accounts against parent company
-			or enable {1} in company master""").format(frappe.bold(company),
-			frappe.bold('Allow Account Creation Against Child Company')), title='Wrong Company')
+		msg = _("{} is a child company. ").format(frappe.bold(company))
+		msg += _("Please import accounts against parent company or enable {} in company master.").format(
+			frappe.bold('Allow Account Creation Against Child Company'))
+		frappe.throw(msg, title=_('Wrong Company'))
 
 	if frappe.db.get_all('GL Entry', {"company": company}, "name", limit=1):
 		return False
