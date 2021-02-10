@@ -71,6 +71,7 @@
    "options": "Mode of Payment"
   },
   {
+   "depends_on": "paid_amount",
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
    "label": "Paid Amount"
@@ -86,12 +87,15 @@
   },
   {
    "default": "0",
+   "depends_on": "discounted_amount",
    "fieldname": "discounted_amount",
    "fieldtype": "Currency",
    "label": "Discounted Amount",
    "read_only": 1
   },
   {
+   "depends_on": "outstanding || paid_amount",
+   "fetch_from": "payment_amount",
    "fieldname": "outstanding",
    "fieldtype": "Currency",
    "label": "Outstanding",
@@ -101,7 +105,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-09 20:47:56.617701",
+ "modified": "2021-02-10 13:39:47.405252",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
