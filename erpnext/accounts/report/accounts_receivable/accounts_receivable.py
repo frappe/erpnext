@@ -364,7 +364,7 @@ class ReceivablePayableReport(object):
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount
+				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
@@ -395,13 +395,13 @@ class ReceivablePayableReport(object):
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
 			"payment_term": d.description,
-			"paid": d.paid_amount,
+			"paid": d.paid_amount + d.discounted_amount,
 			"credit_note": 0.0,
-			"outstanding": invoiced - d.paid_amount
+			"outstanding": invoiced - d.paid_amount - d.discounted_amount
 		}))
 
 		if d.paid_amount:
-			row['paid'] -= d.paid_amount
+			row['paid'] -= d.paid_amount + d.discounted_amount
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:
