@@ -127,11 +127,9 @@ erpnext.setup.slides_settings = [
 				options: "", fieldtype: 'Select'
 			},
 			{ fieldname: 'view_coa', label: __('View Chart of Accounts'), fieldtype: 'Button' },
-
-			{ fieldtype: "Section Break", label: __('Financial Year') },
-			{ fieldname: 'fy_start_date', label: __('Start Date'), fieldtype: 'Date', reqd: 1 },
-			{ fieldtype: "Column Break" },
-			{ fieldname: 'fy_end_date', label: __('End Date'), fieldtype: 'Date', reqd: 1 },
+			{ fieldname: 'fy_start_date', label: __('Financial Year Begins On'), fieldtype: 'Date', reqd: 1 },
+			// end date should be hidden (auto calculated)
+			{ fieldname: 'fy_end_date', label: __('End Date'), fieldtype: 'Date', reqd: 1, hidden: 1 },
 		],
 
 		onload: function (slide) {
