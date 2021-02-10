@@ -66,9 +66,8 @@ def get_account_balance(bank_account, till_date):
 
 
 @frappe.whitelist()
-def update_bank_transaction(bank_transaction, reference_number, party_type=None, party=None):
+def update_bank_transaction(bank_transaction_name, reference_number, party_type=None, party=None):
 	# updates bank transaction based on the new parameters provided by the user from Vouchers
-	bank_transaction_name = bank_transaction
 	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_transaction.reference_number = reference_number
 	bank_transaction.party_type = party_type
@@ -86,22 +85,29 @@ def update_bank_transaction(bank_transaction, reference_number, party_type=None,
 
 
 @frappe.whitelist()
-def create_journal_entry_bts( bank_transaction, reference_number=None, reference_date=None, posting_date=None, entry_type=None,
+def create_journal_entry_bts( bank_transaction_name, reference_number=None, reference_date=None, posting_date=None, entry_type=None,
 	second_account=None, mode_of_payment=None, party_type=None, party=None, allow_edit=None):
 	# Create a new journal entry based on the bank transaction
-	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
+	bank_transaction = frappe.db.get_values(
+		"Bank Transaction", bank_transaction_name,
+		fieldname=["name", "deposit", "withdrawal", "bank_account"] ,
+		as_dict=True
+	)[0]
+	print(bank_transaction.withdrawal)
+	print(bank_transaction.deposit)
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
 	account_type = frappe.db.get_value("Account", second_account, "account_type")
 	if account_type in ["Receivable", "Payable"]:
 		if not (party_type and party):
 			frappe.throw(_("Party Type and Party is required for Receivable / Payable account {0}").format( second_account))
 	accounts = []
+	# Multi Currency?
 	accounts.append({
 			"account": second_account,
-			"credit": bank_transaction.deposit
+			"credit_in_account_currency": bank_transaction.deposit
 				if  bank_transaction.deposit > 0
 				else 0,
-			"debit":bank_transaction.withdrawal
+			"debit_in_account_currency":bank_transaction.withdrawal
 				if  bank_transaction.withdrawal > 0
 				else 0,
 			"party_type":party_type,
@@ -111,10 +117,10 @@ def create_journal_entry_bts( bank_transaction, reference_number=None, reference
 	accounts.append({
 			"account": company_account,
 			"bank_account": bank_transaction.bank_account,
-			"credit": bank_transaction.withdrawal
+			"credit_in_account_currency": bank_transaction.withdrawal
 				if  bank_transaction.withdrawal > 0
 				else 0,
-			"debit":bank_transaction.deposit
+			"debit_in_account_currency":bank_transaction.deposit
 				if  bank_transaction.deposit > 0
 				else 0,
 		})
@@ -122,7 +128,6 @@ def create_journal_entry_bts( bank_transaction, reference_number=None, reference
 	company = frappe.get_value("Account", company_account, "company")
 
 	journal_entry_dict = {
-		"doctype": 'Journal Entry',
 		"voucher_type" : entry_type,
 		"company" : company,
 		"posting_date" : posting_date,
@@ -130,14 +135,15 @@ def create_journal_entry_bts( bank_transaction, reference_number=None, reference
 		"cheque_no" : reference_number,
 		"mode_of_payment" : mode_of_payment
 	}
-	journal_entry = frappe.get_doc(journal_entry_dict)
+	journal_entry = frappe.new_doc('Journal Entry')
+	journal_entry.update(journal_entry_dict)
 	journal_entry.set("accounts", accounts)
 
-	journal_entry.insert()
 
 	if allow_edit:
 		return journal_entry
 
+	journal_entry.insert()
 	journal_entry.submit()
 
 	if bank_transaction.deposit > 0:
@@ -153,17 +159,21 @@ def create_journal_entry_bts( bank_transaction, reference_number=None, reference
 	return reconcile_vouchers(bank_transaction.name, vouchers)
 
 @frappe.whitelist()
-def create_payment_entry_bts( bank_transaction, reference_number=None, reference_date=None, party_type=None, party=None, posting_date=None,
+def create_payment_entry_bts( bank_transaction_name, reference_number=None, reference_date=None, party_type=None, party=None, posting_date=None,
 	mode_of_payment=None, project=None, cost_center=None, allow_edit=None):
 	# Create a new payment entry based on the bank transaction
-	bank_transaction = frappe.get_doc("Bank Transaction", bank_transaction)
+	bank_transaction = frappe.db.get_values(
+		"Bank Transaction", bank_transaction_name,
+		fieldname=["name", "unallocated_amount", "deposit", "bank_account"] ,
+		as_dict=True
+	)[0]
 	paid_amount = bank_transaction.unallocated_amount
 	payment_type = "Receive" if bank_transaction.deposit > 0 else "Pay"
 
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
 	company = frappe.get_value("Account", company_account, "company")
 	payment_entry_dict = {
-		"doctype": "Payment Entry",
+		# "doctype": "Payment Entry",
 		"company" : company,
 		"payment_type" : payment_type,
 		"reference_no" :  reference_number,
@@ -174,7 +184,10 @@ def create_payment_entry_bts( bank_transaction, reference_number=None, reference
 		"paid_amount": paid_amount,
 		"received_amount": paid_amount
 	}
-	payment_entry = frappe.get_doc(payment_entry_dict)
+	payment_entry = frappe.new_doc("Payment Entry")
+
+
+	payment_entry.update(payment_entry_dict)
 
 	if mode_of_payment:
 		payment_entry.mode_of_payment =  mode_of_payment
@@ -187,10 +200,15 @@ def create_payment_entry_bts( bank_transaction, reference_number=None, reference
 	else:
 		payment_entry.paid_from = company_account
 
-	payment_entry.insert()
+	# payment_entry.insert()
+	# payment_entry.insert()
+	print("payment_entry.name")
+	print(payment_entry.name)
 
 	if allow_edit:
 		return payment_entry
+
+	payment_entry.insert()
 
 	payment_entry.submit()
 	vouchers = json.dumps([{
@@ -200,10 +218,10 @@ def create_payment_entry_bts( bank_transaction, reference_number=None, reference
 	return reconcile_vouchers(bank_transaction.name, vouchers)
 
 @frappe.whitelist()
-def reconcile_vouchers(bank_transaction, vouchers):
+def reconcile_vouchers(bank_transaction_name, vouchers):
 	# updated clear date of all the vouchers based on the bank transaction
 	vouchers = json.loads(vouchers)
-	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
+	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	if transaction.unallocated_amount == 0:
 		frappe.throw(_("This bank transaction is already fully reconciled"))
 	total_amount = 0
@@ -231,12 +249,12 @@ def reconcile_vouchers(bank_transaction, vouchers):
 
 	transaction.save()
 	transaction.update_allocations()
-	return frappe.get_doc("Bank Transaction", bank_transaction)
+	return frappe.get_doc("Bank Transaction", bank_transaction_name)
 
 @frappe.whitelist()
-def get_linked_payments(bank_transaction, document_types = None):
+def get_linked_payments(bank_transaction_name, document_types = None):
 	# get all matching payments for a bank transaction
-	transaction = frappe.get_doc("Bank Transaction", bank_transaction)
+	transaction = frappe.get_doc("Bank Transaction", bank_transaction_name)
 	bank_account = frappe.db.get_values(
 		"Bank Account",
 		transaction.bank_account,

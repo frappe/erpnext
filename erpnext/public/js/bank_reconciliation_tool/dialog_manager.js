@@ -50,7 +50,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			method:
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.get_linked_payments",
 			args: {
-				bank_transaction: this.bank_transaction_name,
+				bank_transaction_name: this.bank_transaction_name,
 				document_types: document_types,
 			},
 
@@ -318,16 +318,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				options: "DocType",
 				mandatory_depends_on:
 					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Payment Entry'",
-				get_query: function () {
-					return {
-						filters: {
-							name: [
-								"in",
-								Object.keys(frappe.boot.party_account_types),
-							],
-						},
-					};
-				},
 			},
 			{
 				fieldname: "party",
@@ -456,7 +446,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			method:
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.reconcile_vouchers",
 			args: {
-				bank_transaction: this.bank_transaction.name,
+				bank_transaction_name: this.bank_transaction.name,
 				vouchers: vouchers,
 			},
 			callback: (response) => {
@@ -476,7 +466,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			method:
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
 			args: {
-				bank_transaction: this.bank_transaction.name,
+				bank_transaction_name: this.bank_transaction.name,
 				reference_number: values.reference_number,
 				reference_date: values.reference_date,
 				party_type: values.party_type,
@@ -503,7 +493,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			method:
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
 			args: {
-				bank_transaction: this.bank_transaction.name,
+				bank_transaction_name: this.bank_transaction.name,
 				reference_number: values.reference_number,
 				reference_date: values.reference_date,
 				party_type: values.party_type,
@@ -530,7 +520,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 			method:
 				"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.update_bank_transaction",
 			args: {
-				bank_transaction: this.bank_transaction.name,
+				bank_transaction_name: this.bank_transaction.name,
 				reference_number: values.reference_number,
 				party_type: values.party_type,
 				party: values.party,
@@ -554,7 +544,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				method:
 					"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_payment_entry_bts",
 				args: {
-					bank_transaction: this.bank_transaction.name,
+					bank_transaction_name: this.bank_transaction.name,
 					reference_number: values.reference_number,
 					reference_date: values.reference_date,
 					party_type: values.party_type,
@@ -567,6 +557,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				},
 				callback: (r) => {
 					var doc = frappe.model.sync(r.message);
+					console.log(doc);
 					frappe.set_route("Form", doc[0].doctype, doc[0].name);
 				},
 			});
@@ -575,7 +566,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				method:
 					"erpnext.accounts.doctype.bank_reconciliation_tool.bank_reconciliation_tool.create_journal_entry_bts",
 				args: {
-					bank_transaction: this.bank_transaction.name,
+					bank_transaction_name: this.bank_transaction.name,
 					reference_number: values.reference_number,
 					reference_date: values.reference_date,
 					party_type: values.party_type,

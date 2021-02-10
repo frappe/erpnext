@@ -52,7 +52,7 @@ erpnext.accounts.bank_reconciliation.NumberCardManager = class NumberCardManager
 
 erpnext.accounts.NumberCard = class NumberCard {
 	constructor(options) {
-		this.$card = frappe.widget.utils.build_summary_item(options);
+		this.$card = frappe.utils.build_summary_item(options);
 	}
 
 	set_value(value) {
