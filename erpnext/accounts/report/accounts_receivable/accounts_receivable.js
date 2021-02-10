@@ -58,6 +58,11 @@ frappe.query_reports["Accounts Receivable"] = {
 					frappe.query_report.set_filter_value('credit_limit', "");
 					frappe.query_report.set_filter_value('payment_terms', "");
 				}
+			},
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
 			}
 		},
 		{

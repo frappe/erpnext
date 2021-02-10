@@ -34,7 +34,12 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"fieldname":"customer",
 			"label": __("Customer"),
 			"fieldtype": "Link",
-			"options": "Customer"
+			"options": "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
 		},
 		{
 			"fieldname":"customer_group",

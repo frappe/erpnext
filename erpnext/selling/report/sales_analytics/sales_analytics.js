@@ -73,7 +73,12 @@ frappe.query_reports["Sales Analytics"] = {
 			fieldname: "customer",
 			label: __("Customer"),
 			fieldtype: "Link",
-			options: "Customer"
+			options: "Customer",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
+			}
 		},
 		{
 			fieldname: "customer_group",
