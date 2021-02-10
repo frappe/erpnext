@@ -48,6 +48,9 @@ def validate_gstin_for_india(doc, method):
 		validate_gstin_check_digit(doc.gstin)
 		set_gst_state_and_state_number(doc)
 
+		if not doc.gst_state:
+			frappe.throw(_("Please Enter GST state"))
+
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
@@ -168,7 +171,7 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if is_internal_transfer(party_details, doctype):
 		party_details.taxes_and_charges = ''
-		party_details.taxes = ''
+		party_details.taxes = []
 		return party_details
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):

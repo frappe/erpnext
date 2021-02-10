@@ -22,6 +22,7 @@
   "paid_principal_amount",
   "column_break_14",
   "interest_amount",
+  "total_pending_interest_amount",
   "paid_interest_amount",
   "penalty_amount",
   "section_break_15",
@@ -172,13 +173,19 @@
    "hidden": 1,
    "label": "Last Accrual Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_pending_interest_amount",
+   "fieldtype": "Currency",
+   "label": "Total Pending Interest Amount",
+   "options": "Company:company:default_currency"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-07 05:49:25.448875",
+ "modified": "2021-01-10 00:15:21.544140",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Interest Accrual",
