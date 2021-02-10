@@ -711,6 +711,8 @@ def get_outstanding_reference_documents(args):
 	outstanding_invoices = get_outstanding_invoices(args.get("party_type"), args.get("party"),
 		args.get("party_account"), filters=args, condition=condition)
 
+	outstanding_invoices = split_invoices_based_on_payment_terms(outstanding_invoices)
+
 	for d in outstanding_invoices:
 		d["exchange_rate"] = 1
 		if party_account_currency != company_currency:
@@ -737,6 +739,50 @@ def get_outstanding_reference_documents(args):
 
 	return data
 
+
+def split_invoices_based_on_payment_terms(outstanding_invoices):
+	invoice_ref_based_on_payment_terms = {}
+	for idx, d in enumerate(outstanding_invoices):
+		if d.voucher_type == 'Sales Invoice':
+			payment_term_template = frappe.db.get_value(d.voucher_type, d.voucher_no, 'payment_terms_template')
+			if payment_term_template:
+				allocate_payment_based_on_payment_terms = frappe.db.get_value(
+					'Payment Terms Template', payment_term_template, 'allocate_payment_based_on_payment_terms')
+				if allocate_payment_based_on_payment_terms:
+					payment_schedule = frappe.get_all('Payment Schedule',
+						filters={ 'parent': d.voucher_no, 'payment_term': ['is', 'set'] },
+						fields=["*"])
+
+					for payment_term in payment_schedule:
+						payment_term_outstanding = flt(payment_term.payment_amount - payment_term.paid_amount)
+
+						if payment_term_outstanding > 0.5:
+							invoice_ref_based_on_payment_terms.setdefault(idx, [])
+							invoice_ref_based_on_payment_terms[idx].append(frappe._dict({
+								'due_date': d.due_date,
+								'currency': d.currency,
+								'voucher_no': d.voucher_no,
+								'voucher_type': d.voucher_type,
+								'posting_date': d.posting_date,
+								'invoice_amount': flt(d.invoice_amount),
+								'outstanding_amount': flt(d.outstanding_amount),
+								'payment_amount': payment_term.payment_amount,
+								'payment_term': payment_term.payment_term,
+								'allocated_amount': payment_term_outstanding
+							}))
+
+	if invoice_ref_based_on_payment_terms:
+		for idx, ref in invoice_ref_based_on_payment_terms.items():
+			voucher_no = outstanding_invoices[idx]['voucher_no']
+			voucher_type = outstanding_invoices[idx]['voucher_type']
+
+			frappe.msgprint(_("Spliting {} {} into {} rows as per payment terms").format(
+				voucher_type, voucher_no, len(ref)), alert=True)
+
+			outstanding_invoices.pop(idx - 1)
+			outstanding_invoices += invoice_ref_based_on_payment_terms[idx]
+	
+	return outstanding_invoices
 
 def get_orders_to_be_billed(posting_date, party_type, party,
 	company, party_account_currency, company_currency, cost_center=None, filters=None):
