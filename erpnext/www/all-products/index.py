@@ -1,5 +1,5 @@
 import frappe
-from erpnext.portal.product_configurator.utils import (get_products_for_website, get_product_settings,
+from erpnext.portal.product_configurator.utils import (get_products_for_website, get_e_commerce_settings,
 	get_field_filter_data, get_attribute_filter_data)
 from erpnext.shopping_cart.product_query import ProductQuery
 from erpnext.shopping_cart.filters import ProductFiltersBuilder
@@ -23,14 +23,15 @@ def get_context(context):
 	# Add homepage as parent
 	context.parents = [{"name": frappe._("Home"), "route":"/"}]
 
-	product_settings = get_product_settings()
+	e_commerce_settings = get_e_commerce_settings()
 	filter_engine = ProductFiltersBuilder()
 
 	context.field_filters = filter_engine.get_field_filters()
 	context.attribute_filters = filter_engine.get_attribute_fitlers()
 
-	context.product_settings = product_settings
+	context.e_commerce_settings = e_commerce_settings
 	context.body_class = "product-page"
-	context.page_length = product_settings.products_per_page or 20
+	context.page_length = e_commerce_settings.products_per_page or 20
 
 	context.no_cache = 1
+	print(context)

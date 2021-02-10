@@ -1,7 +1,7 @@
-// Copyright (c) 2016, Frappe Technologies Pvt. Ltd. and contributors
+// Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Products Settings', {
+frappe.ui.form.on('E Commerce Settings', {
 	refresh: function(frm) {
 		frappe.model.with_doctype('Item', () => {
 			const item_meta = frappe.get_meta('Item');

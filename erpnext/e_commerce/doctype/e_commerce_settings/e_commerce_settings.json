@@ -1,0 +1,104 @@
+{
+ "actions": [],
+ "creation": "2021-02-10 17:13:39.139103",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "home_page_is_products",
+  "show_availability_status",
+  "hide_variants",
+  "column_break_4",
+  "products_per_page",
+  "filter_categories_section",
+  "enable_field_filters",
+  "filter_fields",
+  "enable_attribute_filters",
+  "filter_attributes"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "description": "If checked, the Home page will be the default Item Group for the website",
+   "fieldname": "home_page_is_products",
+   "fieldtype": "Check",
+   "label": "Home Page is Products"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_availability_status",
+   "fieldtype": "Check",
+   "label": "Show Availability Status"
+  },
+  {
+   "default": "6",
+   "fieldname": "products_per_page",
+   "fieldtype": "Int",
+   "label": "Products per Page"
+  },
+  {
+   "fieldname": "filter_categories_section",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_variants",
+   "fieldtype": "Check",
+   "label": "Hide Variants"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_field_filters",
+   "fieldtype": "Check",
+   "label": "Enable Field Filters"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_attribute_filters",
+   "fieldtype": "Check",
+   "label": "Enable Attribute Filters"
+  },
+  {
+   "depends_on": "enable_field_filters",
+   "fieldname": "filter_fields",
+   "fieldtype": "Table",
+   "label": "Item Fields",
+   "options": "Website Filter Field"
+  },
+  {
+   "depends_on": "enable_attribute_filters",
+   "fieldname": "filter_attributes",
+   "fieldtype": "Table",
+   "label": "Attributes",
+   "options": "Website Attribute"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2021-02-10 19:22:47.154104",
+ "modified_by": "Administrator",
+ "module": "E-commerce",
+ "name": "E Commerce Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

@@ -17,11 +17,11 @@ class TestProductConfigurator(unittest.TestCase):
 		template_items = frappe.get_all('Item', {'show_in_website': 1})
 		variant_items = frappe.get_all('Item', {'show_variant_in_website': 1})
 
-		products_settings = frappe.get_doc('Products Settings')
-		products_settings.enable_field_filters = 1
-		products_settings.append('filter_fields', {'fieldname': 'item_group'})
-		products_settings.append('filter_fields', {'fieldname': 'stock_uom'})
-		products_settings.save()
+		e_commerce_settings = frappe.get_doc('E Commerce Settings')
+		e_commerce_settings.enable_field_filters = 1
+		e_commerce_settings.append('filter_fields', {'fieldname': 'item_group'})
+		e_commerce_settings.append('filter_fields', {'fieldname': 'stock_uom'})
+		e_commerce_settings.save()
 
 		html = get_html_for_route('all-products')
 

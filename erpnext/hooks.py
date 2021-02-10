@@ -241,7 +241,7 @@ doc_events = {
 		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
 	},
 	"Website Settings": {
-		"validate": "erpnext.portal.doctype.products_settings.products_settings.home_page_is_products"
+		"validate": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.home_page_is_products"
 	},
 	"Tax Category": {
 		"validate": "erpnext.regional.india.utils.validate_tax_category"

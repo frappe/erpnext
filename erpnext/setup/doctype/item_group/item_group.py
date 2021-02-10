@@ -70,7 +70,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 	def get_context(self, context):
 		context.show_search=True
-		context.page_length = cint(frappe.db.get_single_value('Products Settings', 'products_per_page')) or 6
+		context.page_length = cint(frappe.db.get_single_value('E Commerce Settings', 'products_per_page')) or 6
 		context.search_link = '/product_search'
 
 		if frappe.form_dict:
@@ -231,7 +231,7 @@ def get_item_for_list_in_html(context):
 	if (context.get("website_image") or "").startswith("files/"):
 		context["website_image"] = "/" + quote(context["website_image"])
 
-	context["show_availability_status"] = cint(frappe.db.get_single_value('Products Settings',
+	context["show_availability_status"] = cint(frappe.db.get_single_value('E Commerce Settings',
 		'show_availability_status'))
 
 	products_template = 'templates/includes/products_as_list.html'
