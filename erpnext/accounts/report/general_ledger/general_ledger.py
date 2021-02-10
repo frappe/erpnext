@@ -224,7 +224,8 @@ def get_conditions(filters, accounting_dimensions):
 		conditions.append("against_voucher=%(against_voucher)s")
 
 	if filters.get("reference_no"):
-		conditions.append("reference_no=%(reference_no)s")
+		filters['_reference_no'] = '%%{0}%%'.format(filters.get("reference_no"))
+		conditions.append("reference_no like %(_reference_no)s")
 
 	if filters.get("group_by") == _("Group by Party") and not filters.get("party_type"):
 		conditions.append("party_type in ('Customer', 'Supplier')")
