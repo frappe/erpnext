@@ -37,12 +37,6 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"options": "Supplier"
 		},
 		{
-			"fieldname":"payment_terms_template",
-			"label": __("Payment Terms Template"),
-			"fieldtype": "Link",
-			"options": "Payment Terms Template"
-		},
-		{
 			"fieldname":"supplier_group",
 			"label": __("Supplier Group"),
 			"fieldtype": "Link",
@@ -64,6 +58,12 @@ frappe.query_reports["Accounts Payable Summary"] = {
 					}
 				}
 			}
+		},
+		{
+			"fieldname":"payment_terms_template",
+			"label": __("Payment Terms Template"),
+			"fieldtype": "Link",
+			"options": "Payment Terms Template"
 		},
 		{
 			"fieldname":"cost_center",
@@ -92,12 +92,6 @@ frappe.query_reports["Accounts Payable Summary"] = {
 					}
 				}
 			}
-		},
-		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
 		},
 		{
 			"fieldname":"based_on_payment_terms",

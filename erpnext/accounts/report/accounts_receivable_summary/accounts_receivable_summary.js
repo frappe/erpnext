@@ -48,6 +48,23 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"options": "Customer Group"
 		},
 		{
+			"fieldname": "account",
+			"label": __("Receivable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					"doctype": "Account",
+					"filters": {
+						"company": company,
+						"account_type": "Receivable",
+						"is_group": 0
+					}
+				}
+			}
+		},
+		{
 			"fieldname":"payment_terms_template",
 			"label": __("Payment Terms Template"),
 			"fieldtype": "Link",
@@ -70,23 +87,6 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 			"label": __("Sales Person"),
 			"fieldtype": "Link",
 			"options": "Sales Person"
-		},
-		{
-			"fieldname": "account",
-			"label": __("Receivable Account"),
-			"fieldtype": "Link",
-			"options": "Account",
-			"get_query": function() {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					"doctype": "Account",
-					"filters": {
-						"company": company,
-						"account_type": "Receivable",
-						"is_group": 0
-					}
-				}
-			}
 		},
 		{
 			"fieldname":"cost_center",
@@ -115,12 +115,6 @@ frappe.query_reports["Accounts Receivable Summary"] = {
 					}
 				}
 			}
-		},
-		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
 		},
 		{
 			"fieldname":"based_on_payment_terms",

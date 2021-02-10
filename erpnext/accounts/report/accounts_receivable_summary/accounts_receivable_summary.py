@@ -24,7 +24,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 				"label": _(args.get("party_type")),
 				"fieldtype": "Link",
 				"options": args.get("party_type"),
-				"width": 200
+				"width": 80 if party_naming_by == "Naming Series" else 200
 			}
 		]
 
@@ -34,7 +34,7 @@ class AccountsReceivableSummary(ReceivablePayableReport):
 					"fieldname": "party_name",
 					"label": _(args.get("party_type") + " Name"),
 					"fieldtype": "Data",
-					"width": 140
+					"width": 200
 				}
 			)
 
