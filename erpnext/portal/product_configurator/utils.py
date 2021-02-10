@@ -4,8 +4,8 @@ from erpnext.portal.product_configurator.item_variants_cache import ItemVariants
 from erpnext.shopping_cart.product_info import get_product_info_for_website
 
 def get_field_filter_data():
-	product_settings = get_product_settings()
-	filter_fields = [row.fieldname for row in product_settings.filter_fields]
+	e_commerce_settings = get_e_commerce_settings()
+	filter_fields = [row.fieldname for row in e_commerce_settings.filter_fields]
 
 	meta = frappe.get_meta('Item')
 	fields = [df for df in meta.fields if df.fieldname in filter_fields]
@@ -31,8 +31,8 @@ def get_field_filter_data():
 
 
 def get_attribute_filter_data():
-	product_settings = get_product_settings()
-	attributes = [row.attribute for row in product_settings.filter_attributes]
+	e_commerce_settings = get_e_commerce_settings()
+	attributes = [row.attribute for row in e_commerce_settings.filter_attributes]
 	attribute_docs = [
 		frappe.get_doc('Item Attribute', attribute) for attribute in attributes
 	]
@@ -299,8 +299,8 @@ def get_items_by_fields(field_filters):
 
 def get_items(filters=None, search=None):
 	start = frappe.form_dict.start or 0
-	products_settings = get_product_settings()
-	page_length = products_settings.products_per_page
+	e_commerce_settings = get_e_commerce_settings()
+	page_length = e_commerce_settings.products_per_page
 
 	filters = filters or []
 	# convert to list of filters
@@ -310,7 +310,7 @@ def get_items(filters=None, search=None):
 	enabled_items_filter = get_conditions({ 'disabled': 0 }, 'and')
 
 	show_in_website_condition = ''
-	if products_settings.hide_variants:
+	if e_commerce_settings.hide_variants:
 		show_in_website_condition = get_conditions({'show_in_website': 1 }, 'and')
 	else:
 		show_in_website_condition = get_conditions([
@@ -432,7 +432,7 @@ def get_html_for_items(items):
 		}))
 	return html
 
-def get_product_settings():
-	doc = frappe.get_cached_doc('Products Settings')
+def get_e_commerce_settings():
+	doc = frappe.get_cached_doc('E Commerce Settings')
 	doc.products_per_page = doc.products_per_page or 20
 	return doc

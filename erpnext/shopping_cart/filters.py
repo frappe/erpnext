@@ -7,8 +7,8 @@ from frappe import _dict
 
 class ProductFiltersBuilder:
 	def __init__(self, item_group=None):
-		if not item_group or item_group == "Products Settings":
-			self.doc = frappe.get_doc("Products Settings")
+		if not item_group or item_group == "E Commerce Settings":
+			self.doc = frappe.get_doc("E Commerce Settings")
 		else:
 			self.doc = frappe.get_doc("Item Group", item_group)
 

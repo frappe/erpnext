@@ -117,6 +117,7 @@
   "default_item_manufacturer",
   "default_manufacturer_part_no",
   "website_section",
+  "published_in_website",
   "show_in_website",
   "show_variant_in_website",
   "route",
@@ -124,7 +125,6 @@
   "slideshow",
   "website_image",
   "website_image_alt",
-  "thumbnail",
   "cb72",
   "website_warehouse",
   "website_item_groups",
@@ -912,12 +912,6 @@
    "label": "Website Image"
   },
   {
-   "fieldname": "thumbnail",
-   "fieldtype": "Data",
-   "label": "Thumbnail",
-   "read_only": 1
-  },
-  {
    "fieldname": "cb72",
    "fieldtype": "Column Break"
   },
@@ -1057,6 +1051,15 @@
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
+  },
+  {
+   "default": "0",
+   "fieldname": "published_in_website",
+   "fieldtype": "Check",
+   "label": "Published in Website",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "has_web_view": 1,
@@ -1066,7 +1069,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-02-18 14:00:19.668049",
+ "modified": "2021-02-10 16:38:50.778253",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

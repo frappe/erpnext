@@ -13,13 +13,13 @@ class ProductQuery:
 	    filters (TYPE): Description
 	    or_filters (list): Description
 	    page_length (Int): Length of page for the query
-	    settings (Document): Products Settings DocType
+	    settings (Document): E Commerce Settings DocType
 	    filters (list)
 	    or_filters (list)
 	"""
 
 	def __init__(self):
-		self.settings = frappe.get_doc("Products Settings")
+		self.settings = frappe.get_doc("E Commerce Settings")
 		self.cart_settings = frappe.get_doc("Shopping Cart Settings")
 		self.page_length = self.settings.products_per_page or 20
 		self.fields = ['name', 'item_name', 'item_code', 'website_image', 'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description', 'description', 'route']
