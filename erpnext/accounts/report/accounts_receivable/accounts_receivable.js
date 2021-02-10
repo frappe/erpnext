@@ -72,6 +72,23 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Customer Group"
 		},
 		{
+			"fieldname": "account",
+			"label": __("Receivable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					"doctype": "Account",
+					"filters": {
+						"company": company,
+						"account_type": "Receivable",
+						"is_group": 0
+					}
+				}
+			}
+		},
+		{
 			"fieldname":"payment_terms_template",
 			"label": __("Payment Terms Template"),
 			"fieldtype": "Link",
@@ -96,23 +113,6 @@ frappe.query_reports["Accounts Receivable"] = {
 			"options": "Sales Person"
 		},
 		{
-			"fieldname": "account",
-			"label": __("Receivable Account"),
-			"fieldtype": "Link",
-			"options": "Account",
-			"get_query": function() {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					"doctype": "Account",
-					"filters": {
-						"company": company,
-						"account_type": "Receivable",
-						"is_group": 0
-					}
-				}
-			}
-		},
-		{
 			"fieldname":"cost_center",
 			"label": __("Cost Center"),
 			"fieldtype": "MultiSelectList",
@@ -133,10 +133,14 @@ frappe.query_reports["Accounts Receivable"] = {
 			}
 		},
 		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
+			"fieldname":"from_date",
+			"label": __("Show Invoices of Date Above"),
+			"fieldtype": "Date"
+		},
+		{
+			"fieldname":"to_date",
+			"label": __("Show Invoices of Date Below"),
+			"fieldtype": "Date"
 		},
 		{
 			"fieldname":"group_by",
@@ -151,16 +155,6 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Select",
 			"options": "Ungrouped\nGroup by Customer\nGroup by Customer Group\nGroup by Territory\nGroup by Sales Person\nGroup by Cost Center\nGroup by Project",
 			"default": "Ungrouped"
-		},
-		{
-			"fieldname":"from_date",
-			"label": __("Show Invoices of Date Above"),
-			"fieldtype": "Date"
-		},
-		{
-			"fieldname":"to_date",
-			"label": __("Show Invoices of Date Below"),
-			"fieldtype": "Date"
 		},
 		{
 			"fieldname":"based_on_payment_terms",
