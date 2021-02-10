@@ -28,12 +28,6 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 			"width": "60px"
 		},
 		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
-		},
-		{
 			"fieldname":"party",
 			"label": __("Supplier"),
 			"fieldtype": "Link",
@@ -58,14 +52,8 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 			"options": "Supplier Group"
 		},
 		{
-			"fieldname":"payment_terms_template",
-			"label": __("Payment Terms Template"),
-			"fieldtype": "Link",
-			"options": "Payment Terms Template"
-		},
-		{
 			"fieldname": "account",
-			"label": __("Account"),
+			"label": __("Payable Account"),
 			"fieldtype": "Link",
 			"options": "Account",
 			"get_query": function() {
@@ -79,6 +67,12 @@ frappe.query_reports["Supplier Ledger Summary"] = {
 					}
 				}
 			}
+		},
+		{
+			"fieldname":"payment_terms_template",
+			"label": __("Payment Terms Template"),
+			"fieldtype": "Link",
+			"options": "Payment Terms Template"
 		},
 		{
 			"fieldname":"tax_id",

@@ -28,12 +28,6 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			"width": "60px"
 		},
 		{
-			"fieldname":"finance_book",
-			"label": __("Finance Book"),
-			"fieldtype": "Link",
-			"options": "Finance Book"
-		},
-		{
 			"fieldname":"party",
 			"label": __("Customer"),
 			"fieldtype": "Link",
@@ -49,6 +43,11 @@ frappe.query_reports["Customer Ledger Summary"] = {
 					frappe.query_report.set_filter_value('tax_id', "");
 					frappe.query_report.set_filter_value('customer_name', "");
 				}
+			},
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.customer_query"
+				};
 			}
 		},
 		{
@@ -56,6 +55,23 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			"label": __("Customer Group"),
 			"fieldtype": "Link",
 			"options": "Customer Group"
+		},
+		{
+			"fieldname": "account",
+			"label": __("Receivable Account"),
+			"fieldtype": "Link",
+			"options": "Account",
+			"get_query": function() {
+				var company = frappe.query_report.get_filter_value('company');
+				return {
+					"doctype": "Account",
+					"filters": {
+						"company": company,
+						"account_type": "Receivable",
+						"is_group": 0
+					}
+				}
+			}
 		},
 		{
 			"fieldname":"payment_terms_template",
@@ -80,23 +96,6 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			"label": __("Sales Person"),
 			"fieldtype": "Link",
 			"options": "Sales Person"
-		},
-		{
-			"fieldname": "account",
-			"label": __("Account"),
-			"fieldtype": "Link",
-			"options": "Account",
-			"get_query": function() {
-				var company = frappe.query_report.get_filter_value('company');
-				return {
-					"doctype": "Account",
-					"filters": {
-						"company": company,
-						"account_type": "Receivable",
-						"is_group": 0
-					}
-				}
-			}
 		},
 		{
 			"fieldname":"tax_id",
