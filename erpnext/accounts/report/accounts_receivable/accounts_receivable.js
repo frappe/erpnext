@@ -143,6 +143,17 @@ frappe.query_reports["Accounts Receivable"] = {
 			"fieldtype": "Date"
 		},
 		{
+			"fieldname":"has_item",
+			"label": __("Has Item"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"get_query": function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+				};
+			}
+		},
+		{
 			"fieldname":"group_by",
 			"label": __("Group By Level 1"),
 			"fieldtype": "Select",

@@ -372,7 +372,8 @@ class ReceivablePayableReport(object):
 
 		for gle in gl_entries_data:
 			if self.is_receivable_or_payable(gle, future_vouchers, return_entries)\
-					and self.is_in_cost_center(gle) and self.is_in_project(gle) and self.is_in_sales_person(gle):
+					and self.is_in_cost_center(gle) and self.is_in_project(gle) and self.is_in_sales_person(gle)\
+					and self.is_in_item_filtered_invoice(gle):
 				outstanding_amount, credit_note_amount, payment_amount = self.get_outstanding_amount(
 					gle, self.filters.report_date, self.dr_or_cr, return_entries)
 
@@ -746,6 +747,28 @@ class ReceivablePayableReport(object):
 			return sales_person and sales_person in self.filters.sales_person
 		else:
 			return True
+
+	def is_in_item_filtered_invoice(self, gle):
+		if self.filters.get("has_item"):
+			return gle.voucher_type == self.get_invoice_doctype() and gle.voucher_no in self.get_item_filtered_invoices()
+		else:
+			return True
+
+	def get_item_filtered_invoices(self):
+		if not self.filters.get('has_item') or self.filters.get("party_type") not in ['Customer', 'Supplier']:
+			return []
+
+		if not hasattr(self, 'item_filtered_invoices'):
+			item_doctype = self.get_invoice_doctype()
+			self.item_filtered_invoices = set(frappe.db.sql_list("""
+				select distinct parent from `tab{dt} Item` where item_code = %s
+			""".format(dt=item_doctype), self.filters.get('has_item')))
+
+		return self.item_filtered_invoices
+
+	def get_invoice_doctype(self):
+		if self.filters.get("party_type") in ['Customer', 'Supplier']:
+			return "Sales Invoice" if self.filters.get("party_type") == "Customer" else "Purchase Invoice"
 
 	def get_return_entries(self, party_type):
 		doctype = None

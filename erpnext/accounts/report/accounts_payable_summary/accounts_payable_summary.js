@@ -94,6 +94,17 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			}
 		},
 		{
+			"fieldname":"has_item",
+			"label": __("Has Item"),
+			"fieldtype": "Link",
+			"options": "Item",
+			"get_query": function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+				};
+			}
+		},
+		{
 			"fieldname":"based_on_payment_terms",
 			"label": __("Based On Payment Terms"),
 			"fieldtype": "Check",
