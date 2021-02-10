@@ -343,30 +343,40 @@ class PaymentEntry(AccountsController):
 					payment_schedule = frappe.get_all(
 						'Payment Schedule',
 						filters={'parent': ref.reference_name},
-						fields=['paid_amount', 'payment_amount', 'payment_term', 'discount_percentage']
+						fields=['paid_amount', 'payment_amount', 'payment_term', 'discount_percentage', 'outstanding']
 					)
 					for term in payment_schedule:
 						invoice_key = (term.payment_term, ref.reference_name)
 						invoice_paid_amount_map.setdefault(invoice_key, {})
-						invoice_paid_amount_map[invoice_key]['outstanding'] = term.payment_amount - term.paid_amount
+						invoice_paid_amount_map[invoice_key]['outstanding'] = term.outstanding
 						invoice_paid_amount_map[invoice_key]['discounted_amt'] = term.payment_amount * (term.discount_percentage / 100)
 
-		for key, amount in iteritems(invoice_payment_amount_map):
-			if cancel:
-				frappe.db.sql(""" UPDATE `tabPayment Schedule` SET paid_amount = `paid_amount` - %s
-					WHERE parent = %s and payment_term = %s""", (amount, key[1], key[0]))
-			else:
-				outstanding = flt(invoice_paid_amount_map.get(key, {}).get('outstanding'))
-				discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get('discounted_amt'))
+		for key, allocated_amount in iteritems(invoice_payment_amount_map):
+			outstanding = flt(invoice_paid_amount_map.get(key, {}).get('outstanding'))
+			discounted_amt = flt(invoice_paid_amount_map.get(key, {}).get('discounted_amt'))
 
-				if amount > outstanding:
+			if cancel:
+				frappe.db.sql("""
+					UPDATE `tabPayment Schedule`
+					SET
+						paid_amount = `paid_amount` - %s,
+						discounted_amount = `discounted_amount` - %s,
+						outstanding = `outstanding` + %s
+					WHERE parent = %s and payment_term = %s""",
+					(allocated_amount - discounted_amt, discounted_amt, allocated_amount, key[1], key[0]))
+			else:
+				if allocated_amount > outstanding:
 					frappe.throw(_('Cannot allocate more than {0} against payment term {1}').format(outstanding, key[0]))
 
-				if amount and outstanding:
+				if allocated_amount and outstanding:
 					frappe.db.sql("""
 						UPDATE `tabPayment Schedule`
-						SET paid_amount = `paid_amount` + %s, discounted_amount = `discounted_amount` + %s
-						WHERE parent = %s and payment_term = %s""", (amount, discounted_amt, key[1], key[0]))
+						SET
+							paid_amount = `paid_amount` + %s,
+							discounted_amount = `discounted_amount` + %s,
+							outstanding = `outstanding` - %s
+						WHERE parent = %s and payment_term = %s""",
+					(allocated_amount - discounted_amt, discounted_amt, allocated_amount, key[1], key[0]))
 
 	def set_status(self):
 		if self.docstatus == 2:
@@ -1136,7 +1146,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	paid_amount, received_amount = set_paid_amount_and_received_amount(
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc)
 
-	paid_amount, difference_amount = apply_early_payment_discount(paid_amount, doc)
+	paid_amount, received_amount, difference_amount = apply_early_payment_discount(paid_amount, received_amount, doc)
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
@@ -1327,16 +1337,25 @@ def set_paid_amount_and_received_amount(dt, party_account_currency, bank, outsta
 				paid_amount = received_amount * doc.get('exchange_rate', 1)
 	return paid_amount, received_amount
 
-def apply_early_payment_discount(paid_amount, doc):
+def apply_early_payment_discount(paid_amount, received_amount, doc):
 	difference_amount = 0
 	if doc.doctype == "Sales Invoice" and doc.payment_schedule:
-		for payment_term in doc.payment_schedule:
-			if payment_term.discount_percentage and getdate(nowdate()) <= payment_term.due_date:
-				discount_amount = payment_term.payment_amount * (payment_term.discount_percentage / 100)
+		for term in doc.payment_schedule:
+			if not term.discounted_amount and term.discount_percentage and getdate(nowdate()) <= term.due_date:
+				discount_amount = term.payment_amount * (term.discount_percentage / 100)
 				paid_amount -= discount_amount
 				difference_amount += discount_amount
 
-	return paid_amount, difference_amount
+	if difference_amount and paid_amount != received_amount:
+		discount_amount_in_foreign_currency = difference_amount * doc.get('conversion_rate', 1)
+		if doc.doctype == "Employee Advance":
+			discount_amount_in_foreign_currency = difference_amount * doc.get('exchange_rate', 1)
+		received_amount -= discount_amount_in_foreign_currency
+
+	if difference_amount:
+		frappe.msgprint(_("Discount of {} applied as per Payment Term").format(difference_amount), alert=1)
+
+	return paid_amount, received_amount, difference_amount
 
 def get_reference_as_per_payment_terms(payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
 	references = []
