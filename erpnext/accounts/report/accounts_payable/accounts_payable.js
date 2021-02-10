@@ -144,5 +144,5 @@ frappe.query_reports["Accounts Payable"] = {
 	initial_depth: 1
 }
 
-erpnext.utils.add_dimensions('Accounts Payable', 9);
+//erpnext.utils.add_dimensions('Accounts Payable', 9);
 

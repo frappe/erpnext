@@ -223,5 +223,5 @@ frappe.query_reports["Accounts Receivable"] = {
 	initial_depth: 1
 }
 
-erpnext.utils.add_dimensions('Accounts Receivable', 9);
+//erpnext.utils.add_dimensions('Accounts Receivable', 9);
 
