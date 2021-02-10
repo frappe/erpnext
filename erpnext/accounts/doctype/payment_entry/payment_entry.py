@@ -753,20 +753,16 @@ def get_outstanding_reference_documents(args):
 def split_invoices_based_on_payment_terms(outstanding_invoices):
 	invoice_ref_based_on_payment_terms = {}
 	for idx, d in enumerate(outstanding_invoices):
-		if d.voucher_type == 'Sales Invoice':
+		if d.voucher_type in ['Sales Invoice', 'Purchase Invoice']:
 			payment_term_template = frappe.db.get_value(d.voucher_type, d.voucher_no, 'payment_terms_template')
 			if payment_term_template:
 				allocate_payment_based_on_payment_terms = frappe.db.get_value(
 					'Payment Terms Template', payment_term_template, 'allocate_payment_based_on_payment_terms')
 				if allocate_payment_based_on_payment_terms:
-					payment_schedule = frappe.get_all('Payment Schedule',
-						filters={ 'parent': d.voucher_no, 'payment_term': ['is', 'set'] },
-						fields=["*"])
+					payment_schedule = frappe.get_all('Payment Schedule', filters={'parent': d.voucher_no}, fields=["*"])
 
 					for payment_term in payment_schedule:
-						payment_term_outstanding = flt(payment_term.payment_amount - payment_term.paid_amount)
-
-						if payment_term_outstanding > 0.5:
+						if payment_term.outstanding > 0.1:
 							invoice_ref_based_on_payment_terms.setdefault(idx, [])
 							invoice_ref_based_on_payment_terms[idx].append(frappe._dict({
 								'due_date': d.due_date,
@@ -778,7 +774,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 								'outstanding_amount': flt(d.outstanding_amount),
 								'payment_amount': payment_term.payment_amount,
 								'payment_term': payment_term.payment_term,
-								'allocated_amount': payment_term_outstanding
+								'allocated_amount': payment_term.outstanding
 							}))
 
 	if invoice_ref_based_on_payment_terms:
@@ -1339,21 +1335,23 @@ def set_paid_amount_and_received_amount(dt, party_account_currency, bank, outsta
 
 def apply_early_payment_discount(paid_amount, received_amount, doc):
 	difference_amount = 0
-	if doc.doctype == "Sales Invoice" and doc.payment_schedule:
+	if doc.doctype in ["Sales Invoice", "Purchase Invoice"] and doc.payment_schedule:
 		for term in doc.payment_schedule:
 			if not term.discounted_amount and term.discount_percentage and getdate(nowdate()) <= term.due_date:
 				discount_amount = term.payment_amount * (term.discount_percentage / 100)
-				paid_amount -= discount_amount
+				discount_amount_in_foreign_currency = discount_amount * doc.get('conversion_rate', 1)
+
+				if doc.doctype == "Sales Invoice":
+					paid_amount -= discount_amount
+					received_amount -= discount_amount_in_foreign_currency
+				else:
+					received_amount -= discount_amount
+					paid_amount -= discount_amount_in_foreign_currency
+
 				difference_amount += discount_amount
 
-	if difference_amount and paid_amount != received_amount:
-		discount_amount_in_foreign_currency = difference_amount * doc.get('conversion_rate', 1)
-		if doc.doctype == "Employee Advance":
-			discount_amount_in_foreign_currency = difference_amount * doc.get('exchange_rate', 1)
-		received_amount -= discount_amount_in_foreign_currency
-
-	if difference_amount:
-		frappe.msgprint(_("Discount of {} applied as per Payment Term").format(difference_amount), alert=1)
+		if difference_amount:
+			frappe.msgprint(_("Discount of {} applied as per Payment Term").format(difference_amount), alert=1)
 
 	return paid_amount, received_amount, difference_amount
 
