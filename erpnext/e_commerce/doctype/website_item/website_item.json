@@ -1,0 +1,279 @@
+{
+ "actions": [],
+ "allow_guest_to_view": 1,
+ "allow_import": 1,
+ "autoname": "field:item_code",
+ "creation": "2021-02-09 21:06:14.441698",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "web_item_name",
+  "route",
+  "has_variants",
+  "variant_of",
+  "published",
+  "column_break_3",
+  "item_code",
+  "item_name",
+  "item_group",
+  "stock_uom",
+  "brand",
+  "image",
+  "display_section",
+  "website_image",
+  "website_image_alt",
+  "column_break_13",
+  "slideshow",
+  "thumbnail",
+  "section_break_17",
+  "website_warehouse",
+  "website_specifications",
+  "copy_from_item_group",
+  "column_break_27",
+  "web_long_description",
+  "section_break_6",
+  "ranking",
+  "set_meta_tags",
+  "column_break_22",
+  "website_item_groups",
+  "advanced_display_section",
+  "website_content"
+ ],
+ "fields": [
+  {
+   "description": "Website display name",
+   "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
+   "fieldname": "web_item_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Website Item Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break",
+   "label": "Search and SEO"
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Route",
+   "no_copy": 1
+  },
+  {
+   "description": "Items with higher ranking will be shown higher",
+   "fieldname": "ranking",
+   "fieldtype": "Int",
+   "label": "Ranking"
+  },
+  {
+   "description": "Show a slideshow at the top of the page",
+   "fieldname": "slideshow",
+   "fieldtype": "Link",
+   "label": "Slideshow",
+   "options": "Website Slideshow"
+  },
+  {
+   "description": "Item Image (if not slideshow)",
+   "fieldname": "website_image",
+   "fieldtype": "Attach",
+   "label": "Website Image"
+  },
+  {
+   "description": "Image Alternative Text",
+   "fieldname": "website_image_alt",
+   "fieldtype": "Data",
+   "label": "Image Description"
+  },
+  {
+   "fieldname": "thumbnail",
+   "fieldtype": "Data",
+   "label": "Thumbnail",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "description": "Show Stock availability based on this warehouse.",
+   "fieldname": "website_warehouse",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Website Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "description": "List this Item in multiple groups on the website.",
+   "fieldname": "website_item_groups",
+   "fieldtype": "Table",
+   "label": "Website Item Groups",
+   "options": "Website Item Group"
+  },
+  {
+   "fieldname": "set_meta_tags",
+   "fieldtype": "Button",
+   "label": "Set Meta Tags"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break",
+   "label": "Display Information"
+  },
+  {
+   "fieldname": "copy_from_item_group",
+   "fieldtype": "Button",
+   "label": "Copy From Item Group"
+  },
+  {
+   "fieldname": "website_specifications",
+   "fieldtype": "Table",
+   "label": "Website Specifications",
+   "options": "Item Website Specification"
+  },
+  {
+   "fieldname": "web_long_description",
+   "fieldtype": "Text Editor",
+   "label": "Website Description"
+  },
+  {
+   "description": "You can use any valid Bootstrap 4 markup in this field. It will be shown on your Item Page.",
+   "fieldname": "website_content",
+   "fieldtype": "HTML Editor",
+   "label": "Website Content"
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.image",
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "in_preview": 1,
+   "label": "Image",
+   "print_hide": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "published",
+   "fieldtype": "Check",
+   "label": "Published"
+  },
+  {
+   "default": "0",
+   "depends_on": "has_variants",
+   "fetch_from": "item_code.has_variants",
+   "fieldname": "has_variants",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "Has Variants",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "variant_of",
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "in_standard_filter": 1,
+   "label": "Variant Of",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1,
+   "set_only_once": 1
+  },
+  {
+   "fetch_from": "item_code.stock_uom",
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "depends_on": "brand",
+   "fetch_from": "item_code.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "label": "Brand",
+   "options": "Brand"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "advanced_display_section",
+   "fieldtype": "Section Break",
+   "label": "Advanced Display"
+  },
+  {
+   "fieldname": "display_section",
+   "fieldtype": "Section Break",
+   "label": "Display Images"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "has_web_view": 1,
+ "image_field": "image",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-02-10 14:22:41.628232",
+ "modified_by": "Administrator",
+ "module": "E-commerce",
+ "name": "Website Item",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "show_name_in_global_search": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "web_item_name",
+ "track_changes": 1
+}

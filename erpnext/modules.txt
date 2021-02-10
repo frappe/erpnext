@@ -23,4 +23,9 @@ Quality Management
 Communication
 Loan Management
 Payroll
+<<<<<<< HEAD
 Telephony
+=======
+Telephony
+E-commerce
+>>>>>>> 939b0dd67d (feat: E-commerce Refactor)

@@ -117,6 +117,7 @@
   "default_item_manufacturer",
   "default_manufacturer_part_no",
   "website_section",
+  "published_in_website",
   "show_in_website",
   "show_variant_in_website",
   "route",
@@ -124,7 +125,6 @@
   "slideshow",
   "website_image",
   "website_image_alt",
-  "thumbnail",
   "cb72",
   "website_warehouse",
   "website_item_groups",
@@ -909,12 +909,6 @@
    "label": "Website Image"
   },
   {
-   "fieldname": "thumbnail",
-   "fieldtype": "Data",
-   "label": "Thumbnail",
-   "read_only": 1
-  },
-  {
    "fieldname": "cb72",
    "fieldtype": "Column Break"
   },
@@ -1022,10 +1016,20 @@
    "label": "Image Description"
   },
   {
+<<<<<<< HEAD
    "default": "1",
    "fieldname": "grant_commission",
    "fieldtype": "Check",
    "label": "Grant Commission"
+=======
+   "default": "0",
+   "fieldname": "published_in_website",
+   "fieldtype": "Check",
+   "label": "Published in Website",
+   "no_copy": 1,
+   "read_only": 1,
+   "search_index": 1
+>>>>>>> 939b0dd67d (feat: E-commerce Refactor)
   }
  ],
  "has_web_view": 1,
@@ -1034,7 +1038,12 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
+<<<<<<< HEAD
  "modified": "2021-12-14 04:13:16.857534",
+=======
+ "max_attachments": 1,
+ "modified": "2021-08-27 12:23:07.277077",
+>>>>>>> 939b0dd67d (feat: E-commerce Refactor)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
