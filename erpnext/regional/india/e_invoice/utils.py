@@ -23,6 +23,10 @@ def validate_einvoice_fields(doc):
 	invalid_doctype = doc.doctype not in ['Sales Invoice']
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
+<<<<<<< HEAD
+=======
+	no_taxes_applied = len(doc.get('taxes', [])) == 0
+>>>>>>> 7b2afaf349... fix: NoneType has no len() (#24600)
 
 	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction: return
 
