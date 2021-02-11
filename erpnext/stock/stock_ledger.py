@@ -202,7 +202,7 @@ class update_entries_after(object):
 			where
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
-				and timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
+				and timestamp(posting_date, time_format(posting_time, '%H:%i:%s')) = timestamp(%(posting_date)s, time_format(%(posting_time)s, '%H:%i:%s'))
 			order by
 				creation ASC
 			for update
