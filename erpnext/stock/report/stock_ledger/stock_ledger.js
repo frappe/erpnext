@@ -41,7 +41,23 @@ frappe.query_reports["Stock Ledger"] = {
 				return {
 					query: "erpnext.controllers.queries.item_query"
 				}
+			},
+			on_change: function() {
+				var item_code = frappe.query_report.get_filter_value('item_code');
+				if(!item_code) {
+					frappe.query_report.set_filter_value('item_name', "");
+				} else {
+					frappe.db.get_value("Item", item_code, 'item_name', function(value) {
+						frappe.query_report.set_filter_value('item_name', value['item_name']);
+					});
+				}
 			}
+		},
+		{
+			"fieldname":"item_name",
+			"label": __("Item Name"),
+			"fieldtype": "Data",
+			"hidden": 1
 		},
 		{
 			"fieldname":"warehouse",
@@ -100,7 +116,26 @@ frappe.query_reports["Stock Ledger"] = {
 			"fieldname":"party",
 			"label": __("Party"),
 			"fieldtype": "Dynamic Link",
-			"options": "party_type"
+			"options": "party_type",
+			on_change: function() {
+				var party_type = frappe.query_report.get_filter_value('party_type');
+				var party = frappe.query_report.get_filter_value('party');
+
+				if(!party_type || !party) {
+					frappe.query_report.set_filter_value('party_name', "");
+				} else {
+					var fieldname = erpnext.utils.get_party_name(party_type) || "name";
+					frappe.db.get_value(party_type, party, fieldname, function(value) {
+						frappe.query_report.set_filter_value('party_name', value[fieldname]);
+					});
+				}
+			}
+		},
+		{
+			"fieldname":"party_name",
+			"label": __("Party Name"),
+			"fieldtype": "Data",
+			"hidden": 1
 		},
 		{
 			"fieldname":"group_by",

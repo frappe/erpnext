@@ -6,6 +6,7 @@ import frappe
 from frappe import _, scrub
 from frappe.utils import cint
 from erpnext.stock.utils import update_included_uom_in_dict_report
+from erpnext.accounts.party import set_party_name_in_list
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from six import iteritems
 
@@ -75,6 +76,8 @@ def execute(filters=None):
 			conversion_factors.append(item_detail.conversion_factor)
 
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
+
+	set_party_name_in_list(data)
 
 	data = get_grouped_data(filters, data)
 	return columns, data
@@ -252,6 +255,12 @@ def get_grouped_data(filters, data):
 			opening_dt = frappe.utils.get_datetime(group_object.rows[0].date)
 			opening_dt -= opening_dt.resolution
 			group_header = get_opening_balance(group_object.item_code, group_object.warehouse, opening_dt.date(), opening_dt.time())
+
+		if 'item_code' in grouped_by:
+			group_object.item_name = group_object.rows[0].get('item_name')
+
+		if 'party' in grouped_by:
+			group_object.party_name = group_object.rows[0].get('party_name')
 
 		for f, g in iteritems(grouped_by):
 			group_header[f] = g
