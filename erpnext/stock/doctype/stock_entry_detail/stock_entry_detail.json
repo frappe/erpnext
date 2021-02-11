@@ -69,7 +69,8 @@
   "putaway_rule",
   "column_break_51",
   "reference_purchase_receipt",
-  "quality_inspection"
+  "quality_inspection",
+  "job_card_item"
  ],
  "fields": [
   {
@@ -532,13 +533,22 @@
    "fieldname": "is_finished_item",
    "fieldtype": "Check",
    "label": "Is Finished Item"
+  },
+  {
+   "fieldname": "job_card_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Job Card Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-12-30 15:00:44.489442",
+ "modified": "2021-02-11 13:47:50.158754",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
