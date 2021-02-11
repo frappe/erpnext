@@ -25,6 +25,13 @@ for(var i=0, l=data.length; i<l; i++) {
 %}
 
 <h2 class="text-center" style="margin-top:0;">{%= __("Statement of Account") %}</h2>
+
+<h4 class="text-center">
+	{% if (filters.account || group.account) { %}
+		{%= filters.account || group.account %}
+	{% } %}
+</h4>
+
 <h4 class="text-center">
 	{% var parties = filters.party ? [filters.party] : [] %}
 	{% if (parties && parties.length) { %}
@@ -37,8 +44,6 @@ for(var i=0, l=data.length; i<l; i++) {
 		{% if (group.party_name && group.party_name != group.party) { %}
 			- {%= group.party_name %}
 		{% } %}
-	{% } else if (filters.account || group.account) { %}
-		{%= filters.account || group.account %}
 	{% } %}
 </h4>
 
