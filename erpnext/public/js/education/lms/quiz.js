@@ -24,8 +24,8 @@ class Quiz {
 			const timer_display = document.createElement("div");
 			timer_display.classList.add("lms-timer", "float-right", "font-weight-bold");
 			document.getElementsByClassName("lms-title")[0].appendChild(timer_display);
-			if (data.activity && !data.activity.is_complete) {
-				this.set_timer(data.duration);
+			if (!data.activity || (data.activity && !data.activity.is_complete)) {
+				this.initialiseTimer(data.duration);
 				this.is_time_bound = true;
 				this.time_taken = 0;
 			} else if (data.activity && data.activity.is_complete && data.activity.time_taken) {
@@ -61,16 +61,22 @@ class Quiz {
 		});
 	}
 
-	set_timer(duration) {
+	initialiseTimer(duration) {
 		this.time_left = duration;
 		var self = this;
+		var old_diff;
 		this.calculate_and_display_time(this.time_left, "Time Left - ");
+		this.start_time = new Date().getTime()
 		this.timer = setInterval(function () {
-			self.time_left -= 1;
-			self.time_taken += 1;
+			var diff = (new Date().getTime() - self.start_time)/1000;
+			var variation = old_diff ? diff - old_diff : diff
+			old_diff = diff
+			self.time_left -= variation;
+			self.time_taken += variation;
 			self.calculate_and_display_time(self.time_left, "Time Left - ");
-			if (!self.time_left) {
+			if (self.time_left <= 0) {
 				clearInterval(self.timer);
+				self.time_taken -= 1;
 				self.submit();
 			}
 		}, 1000);
@@ -80,7 +86,7 @@ class Quiz {
 		var timer_display = document.getElementsByClassName("lms-timer")[0];
 		var hours = this.append_zero(Math.floor(second / 3600));
 		var minutes = this.append_zero(Math.floor(second % 3600 / 60));
-		var seconds = this.append_zero(Math.floor(second % 3600 % 60));
+		var seconds = this.append_zero(Math.ceil(second % 3600 % 60));
 		timer_display.innerText = text + hours + ":" + minutes + ":" + seconds;
 	}
 
