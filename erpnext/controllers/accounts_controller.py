@@ -1319,7 +1319,7 @@ def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child
 	for field in ("item_code", "item_name", "description", "item_group"):
 	    child_item.update({field: item.get(field)})
 	date_fieldname = "delivery_date" if child_doctype == "Sales Order Item" else "schedule_date"
-	child_item.update({date_fieldname: trans_item.get(date_fieldname) or p_doc.date_fieldname})
+	child_item.update({date_fieldname: trans_item.get(date_fieldname) or p_doc.get(date_fieldname)})
 	child_item.uom = trans_item.get("uom") or item.stock_uom
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
