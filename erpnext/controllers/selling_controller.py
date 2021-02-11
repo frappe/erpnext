@@ -446,9 +446,13 @@ class SellingController(StockController):
 		check_list, chk_dupl_itm = [], []
 		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
 			return
+		if self.doctype == "Sales Invoice" and self.is_consolidated:
+			return
+		if self.doctype == "POS Invoice":
+			return
 
 		for d in self.get('items'):
-			if self.doctype in ["POS Invoice","Sales Invoice"]:
+			if self.doctype == "Sales Invoice":
 				stock_items = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
 				non_stock_items = [d.item_code, d.description, d.sales_order or d.delivery_note]
 			elif self.doctype == "Delivery Note":
