@@ -20,11 +20,13 @@ from frappe.utils.data import cstr, cint, formatdate as format_date, flt, time_d
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
-	invalid_doctype = doc.doctype not in ['Sales Invoice']
+	invalid_doctype = doc.doctype != 'Sales Invoice'
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
+	no_taxes_applied = len(doc.get('taxes', [])) == 0
 
-	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction: return
+	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+		return
 
 	if doc.docstatus == 0 and doc._action == 'save':
 		if doc.irn:
@@ -303,7 +305,7 @@ def validate_mandatory_fields(invoice):
 			_('GSTIN is mandatory to fetch company GSTIN details. Please enter GSTIN in selected company address.'),
 			title=_('Missing Fields')
 		)
-	if not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
+	if invoice.gst_category != 'Overseas' and not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
 		frappe.throw(
 			_('GSTIN is mandatory to fetch customer GSTIN details. Please enter GSTIN in selected customer address.'),
 			title=_('Missing Fields')
@@ -330,7 +332,10 @@ def make_einvoice(invoice):
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
-		shipping_details = get_party_details(invoice.shipping_address_name)
+		if invoice.gst_category == 'Overseas':
+			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
+		else:
+			shipping_details = get_party_details(invoice.shipping_address_name)
 	
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
