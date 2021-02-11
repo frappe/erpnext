@@ -211,6 +211,9 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle(),
 					this.frm.doc.vehicle ? __("Change") : null);
+
+				this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.select_item_code(),
+					__("Change"));
 			}
 
 			if (this.frm.doc.vehicle_allocation_required && !this.frm.doc.vehicle_allocation) {
@@ -756,6 +759,56 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				});
 			}
 		)
+	},
+
+	select_item_code: function () {
+		var me = this;
+
+		frappe.db.get_value("Item", me.frm.doc.item_code, 'variant_of', (r) => {
+			var variant_of = r.variant_of;
+			var item_filters = {"is_vehicle": 1, "include_in_vehicle_booking": 1, "item_code": ['!=', me.frm.doc.item_code]}
+			if (variant_of) {
+				item_filters['variant_of'] = variant_of;
+			}
+
+			var dialog = new frappe.ui.Dialog({
+				title: __("Change Vehicle Item (Variant)"),
+				fields: [
+					{
+						label: __("Vehicle Item Code (Variant)"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1,
+						onchange: () => {
+							let item_code = dialog.get_value('item_code');
+							if (item_code) {
+								frappe.db.get_value("Item", item_code, 'item_name', (r) => {
+									if (r) {
+										dialog.set_values(r);
+									}
+								});
+							}
+						},
+						get_query: () => erpnext.queries.item(item_filters)
+					},
+					{label: __("Vehicle Item Name"), fieldname: "item_name", fieldtype: "Data", read_only: 1}
+				]
+			});
+
+			dialog.set_primary_action(__("Change"), function () {
+				frappe.call({
+					method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_item_in_booking",
+					args: {
+						vehicle_booking_order: me.frm.doc.name,
+						item_code: dialog.get_value('item_code')
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+							dialog.hide();
+						}
+					}
+				});
+			});
+			dialog.show();
+		});
 	},
 });
 

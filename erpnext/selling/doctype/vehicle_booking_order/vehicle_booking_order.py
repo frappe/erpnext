@@ -693,8 +693,9 @@ def get_item_details(args):
 		out.supplier = get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
 			transaction_type_defaults)
 
-	out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
-		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
+	if not args.warehouse:
+		out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
+			brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
 
 	out.vehicle_price_list = args.vehicle_price_list or get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
 		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
@@ -1104,6 +1105,54 @@ def update_customer_details_in_booking(vehicle_booking_order):
 
 	frappe.msgprint(_("Customer Details Updated Successfully"), indicator='green', alert=True)
 
+
+@frappe.whitelist()
+def update_item_in_booking(vehicle_booking_order, item_code):
+	if not item_code:
+		frappe.throw(_("Vehicle Item Code (Variant) not provided"))
+
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
+
+	if item_code == vbo_doc.item_code:
+		frappe.throw(_("Vehicle Item Code (Variant) {0} is already selected in {1}").format(frappe.bold(item_code), vehicle_booking_order))
+
+	previous_item_code = vbo_doc.item_code
+	previous_item = frappe.get_cached_doc("Item", previous_item_code)
+	template_item_name = frappe.get_cached_value("Item", previous_item.variant_of, "item_name") if previous_item.variant_of else None
+	item = frappe.get_cached_doc("Item", item_code)
+
+	if previous_item.variant_of and item.variant_of != previous_item.variant_of:
+		frappe.throw(_("New Vehicle Item (Variant) must be a variant of {0}").format(frappe.bold(template_item_name or previous_item.variant_of)))
+
+	vbo_doc.item_code = item_code
+
+	if vbo_doc.vehicle_allocation:
+		update_allocation_booked(vbo_doc.vehicle_allocation, 0)
+		vbo_doc.vehicle_allocation = None
+	if vbo_doc.vehicle:
+		update_vehicle_booked(vbo_doc.vehicle, 0)
+		vbo_doc.vehicle = None
+
+	item_detail_args = vbo_doc.as_dict()
+	item_detail_args['tc_name'] = None
+	item_details = get_item_details(item_detail_args)
+	vbo_doc.update(item_details)
+
+	vbo_doc.validate_vehicle_item()
+	vbo_doc.validate_allocation()
+	vbo_doc.validate_vehicle()
+
+	vbo_doc.calculate_taxes_and_totals()
+	vbo_doc.validate_payment_schedule()
+	vbo_doc.update_payment_status()
+	vbo_doc.validate_amounts()
+
+	vbo_doc.get_terms_and_conditions()
+
+	save_vehicle_booking_for_update(vbo_doc)
+
+	frappe.msgprint(_("Vehicle Item Code (Variant) Updated Successfully"), indicator='green')
 
 def handle_delivery_period_changed(vbo_doc):
 	to_date = frappe.get_cached_value("Vehicle Allocation Period", vbo_doc.delivery_period, 'to_date')
