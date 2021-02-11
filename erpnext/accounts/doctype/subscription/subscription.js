@@ -13,10 +13,10 @@ frappe.ui.form.on('Subscription', {
 
 		frm.set_query('cost_center', function() {
 			return {
-				filters : {
+				filters: {
 					company: frm.doc.company
 				}
-			}
+			};
 		});
 	},
 
