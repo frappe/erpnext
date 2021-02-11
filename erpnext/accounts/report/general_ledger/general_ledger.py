@@ -7,6 +7,7 @@ from erpnext.accounts.report.utils import get_currency, convert_to_presentation_
 from frappe.utils import getdate, cstr, flt
 from frappe import _, _dict
 from erpnext.accounts.utils import get_account_currency
+from erpnext.accounts.party import set_party_name_in_list
 from erpnext.accounts.report.financial_statements import get_cost_centers_with_children
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
 from six import iteritems, string_types
@@ -119,6 +120,8 @@ def get_result(filters, account_details, accounting_dimensions):
 
 	if filters.get('merge_similar_entries'):
 		gl_entries = merge_similar_entries(filters, gl_entries, supplier_invoice_details)
+
+	set_party_name_in_list(gl_entries)
 
 	group_by_field = get_group_by_field(filters.get('group_by'))
 	group_by = [None]
@@ -301,6 +304,13 @@ def postprocess_group(filters, group_object, grouped_by):
 			if group_object.rows[0].party_type == "Customer":
 				customer = frappe.get_cached_doc("Customer", grouped_by['party'])
 				group_object.sales_person = ", ".join(set([d.sales_person for d in customer.sales_team]))
+
+			for k in ['opening', 'closing']:
+				group_object.totals[k].party_type = group_object.rows[0].party_type
+				group_object.totals[k].party = grouped_by['party']
+				group_object.totals[k].party_name = group_object.rows[0].get('party_name')
+
+			group_object.party_name = group_object.rows[0].get('party_name')
 
 		group_object.rows = list(filter(lambda d: not d.get("to_remove"), group_object.rows))
 
