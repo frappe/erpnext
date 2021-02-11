@@ -214,7 +214,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-12-30 12:57:38.876956",
+ "modified": "2021-02-08 17:02:44.951572",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
@@ -271,6 +271,15 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Customer",
+   "select": 1,
+   "share": 1
   }
  ],
  "search_fields": "parent_item_group",
