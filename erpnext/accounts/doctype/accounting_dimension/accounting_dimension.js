@@ -41,6 +41,8 @@ frappe.ui.form.on('Accounting Dimension', {
 				});
 			});
 		}
+
+		frm.toggle_enable('document_type', frm.doc.__islocal);
 	},
 
 	document_type: function(frm) {
