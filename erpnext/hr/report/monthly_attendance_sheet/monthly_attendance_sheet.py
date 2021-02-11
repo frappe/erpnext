@@ -36,6 +36,8 @@ def execute(filters=None):
 	conditions, filters = get_conditions(filters)
 	columns, days = get_columns(filters)
 	att_map = get_attendance_list(conditions, filters)
+	if not att_map:
+		return columns, [], None, None
 
 	if filters.group_by:
 		emp_map, group_by_parameters = get_employee_details(filters.group_by, filters.company)
@@ -65,10 +67,14 @@ def execute(filters=None):
 	if filters.group_by:
 		emp_att_map = {}
 		for parameter in group_by_parameters:
-			data.append([ "<b>"+ parameter + "</b>"])
-			record, aaa = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
-			emp_att_map.update(aaa)
-			data += record
+			emp_map_set = set([key for key in emp_map[parameter].keys()])
+			att_map_set = set([key for key in att_map.keys()])
+			if (att_map_set & emp_map_set):
+				parameter_row = ["<b>"+ parameter + "</b>"] + ['' for day in range(filters["total_days_in_month"] + 2)]
+				data.append(parameter_row)
+				record, emp_att_data = add_data(emp_map[parameter], att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
+				emp_att_map.update(emp_att_data)
+				data += record
 	else:
 		record, emp_att_map = add_data(emp_map, att_map, filters, holiday_map, conditions, default_holiday_list, leave_list=leave_list)
 		data += record
@@ -236,6 +242,9 @@ def get_attendance_list(conditions, filters):
 	attendance_list = frappe.db.sql("""select employee, day(attendance_date) as day_of_month,
 		status from tabAttendance where docstatus = 1 %s order by employee, attendance_date""" %
 		conditions, filters, as_dict=1)
+
+	if not attendance_list:
+		msgprint(_("No attendance record found"), alert=True, indicator="orange")
 
 	att_map = {}
 	for d in attendance_list:
