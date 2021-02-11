@@ -8,6 +8,7 @@
   "payment_term",
   "description",
   "discount_percentage",
+  "discount_validity",
   "discounted_amount",
   "outstanding",
   "column_break_3",
@@ -100,12 +101,20 @@
    "fieldtype": "Currency",
    "label": "Outstanding",
    "read_only": 1
+  },
+  {
+   "depends_on": "discount_percentage",
+   "fetch_from": "payment_term.discount_validity",
+   "fieldname": "discount_validity",
+   "fieldtype": "Date",
+   "label": "Discount Validity",
+   "mandatory_depends_on": "discount_percentage"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-10 13:39:47.405252",
+ "modified": "2021-02-11 13:03:33.353333",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
