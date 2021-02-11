@@ -428,19 +428,21 @@ class SalesInvoice(SellingController):
 
 		return frappe.get_cached_doc('POS Profile', self.pos_profile) if self.pos_profile else {}
 
-	def get_customer_selling_price_list(self):
+	def get_customer_specific_info(self):
 		customer_price_list, customer_group_price_list = None, None
 		if self.customer:
-			customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+			customer_price_list, customer_group, currency = frappe.get_value(
+				"Customer", self.customer, 
+				['default_price_list', 'customer_group', 'default_currency'])
 			customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
-		return customer_price_list or customer_group_price_list
+		return customer_price_list or customer_group_price_list, currency
 
 	def set_pos_item_details(self, profile, for_validate):
 		from erpnext.stock.get_item_details import get_pos_profile_item_details
 		# set pos values in items
 		for item in self.get("items"):
 			if item.get('item_code'):
-				profile_item_details = get_pos_profile_item_details(pos, item.as_dict(), profile)
+				profile_item_details = get_pos_profile_item_details(profile, item.as_dict(), profile)
 				for fname, val in iteritems(profile_item_details):
 					if (not for_validate) or (for_validate and not item.get(fname)):
 						item.set(fname, val)
@@ -448,30 +450,33 @@ class SalesInvoice(SellingController):
 	def set_pos_fields(self, for_validate=False):
 		"""Set retail related fields from POS Profiles"""
 		profile = self.get_pos_profile()
-
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
-
 		if profile:
 			for_initial_setup = not for_validate
+
 			if not self.get('payments') and for_initial_setup:
 				set_mode_of_payments(self, profile)
 
 			# overwrite these fields of invoice
-			for fieldname in ('currency', 'letter_head', 'tc_name',
-				'tax_category', 'ignore_pricing_rule', 'account_for_change_amount',
-				'company', 'select_print_heading', 'write_off_account', 'update_stock',
+			for fieldname in ('letter_head', 'tc_name', 'tax_category',
+				'select_print_heading', 'write_off_account', 'update_stock',
+				'ignore_pricing_rule', 'account_for_change_amount', 'company',
 				'campaign', 'write_off_cost_center', 'apply_discount_on', 'cost_center'):
 					if (for_initial_setup) or (for_validate and not self.get(fieldname)):
 						self.set(fieldname, profile.get(fieldname))
-			
+
+			self.set_warehouse = profile.get('warehouse') or self.set_warehouse
+
 			# only set if pos_profile has value
 			for field in ('company_address', 'customer', 'taxes_and_charges'):
 				if (for_initial_setup and profile.get(field)) or (for_validate and not self.get(field)):
 					self.set(field, profile.get(field))
 
-			selling_price_list = self.get_customer_selling_price_list() or profile.get('selling_price_list')
+			selling_price_list, customer_currency = self.get_customer_specific_info()
+			selling_price_list = selling_price_list or profile.get('selling_price_list')
+
 			self.set('selling_price_list', selling_price_list)
+			if customer_currency and customer_currency != profile.get('currency'):
+				self.set('currency', customer_currency)
 
 			# fetch terms
 			if self.tc_name and not self.terms:
@@ -486,7 +491,8 @@ class SalesInvoice(SellingController):
 
 			self.set_pos_item_details(profile, for_validate)
 
-		return profile
+		if not self.account_for_change_amount:
+			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
@@ -1496,6 +1502,7 @@ def make_sales_return(source_name, target_doc=None):
 	return make_return_doc("Sales Invoice", source_name, target_doc)
 
 def set_account_for_mode_of_payment(self):
+	self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
 	for data in self.payments:
 		if not data.account:
 			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
@@ -1800,6 +1807,23 @@ def create_invoice_discounting(source_name, target_doc=None):
 
 	return invoice_discounting
 
+def add_return_mode_of_payments(doc, pos_profile):
+	def append_payment(payment_mode):
+		payment = doc.append('payments', {})
+		payment.default = payment_mode.default
+		payment.mode_of_payment = payment_mode.parent
+		payment.account = payment_mode.default_account
+		payment.type = payment_mode.type
+
+	for pos_payment_method in pos_profile.get('payments'):
+		pos_payment_method = pos_payment_method.as_dict()
+		mode_of_payment = pos_payment_method.mode_of_payment
+		mode_already_exits = [d for d in doc.get('payments') if d.mode_of_payment == mode_of_payment]
+
+		if pos_payment_method.allow_in_returns and not mode_already_exists:
+			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
+			append_payment(payment_mode[0])
+
 def set_mode_of_payments(doc, pos_profile):
 	def append_payment(payment_mode):
 		payment = doc.append('payments', {})
@@ -1820,6 +1844,9 @@ def set_mode_of_payments(doc, pos_profile):
 
 		payment_mode[0].default = pos_payment_method.default
 		append_payment(payment_mode[0])
+
+	if doc.is_return:
+		add_return_mode_of_payments(doc, pos_profile)
 
 	if invalid_modes:
 		if invalid_modes == 1:

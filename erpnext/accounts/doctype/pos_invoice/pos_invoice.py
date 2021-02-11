@@ -12,7 +12,7 @@ from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, set_mode_of_payments, get_mode_of_payment_info
+from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, set_mode_of_payments
 
 from six import iteritems
 
@@ -277,103 +277,6 @@ class POSInvoice(SalesInvoice):
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
 
-	def set_pos_fields(self, for_validate=False):
-		"""Set retail related fields from POS Profiles"""
-		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
-		if not self.pos_profile:
-			pos_profile = get_pos_profile(self.company) or {}
-			if not pos_profile:
-				frappe.throw(_("No POS Profile found. Please create a New POS Profile first"))
-			self.pos_profile = pos_profile.get('name')
-
-		profile = {}
-		if self.pos_profile:
-			profile = frappe.get_doc('POS Profile', self.pos_profile)
-
-		if not self.get('payments') and not for_validate:
-			set_mode_of_payments(self, profile)
-		
-		if self.is_return and not for_validate:
-			add_return_modes(self, profile)
-
-		if profile:
-			if not for_validate and not self.customer:
-				self.customer = profile.customer
-
-			self.ignore_pricing_rule = profile.ignore_pricing_rule
-			self.account_for_change_amount = profile.get('account_for_change_amount') or self.account_for_change_amount
-			self.set_warehouse = profile.get('warehouse') or self.set_warehouse
-
-			for fieldname in ('currency', 'letter_head', 'tc_name',
-				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
-				'write_off_cost_center', 'apply_discount_on', 'cost_center', 'tax_category',
-				'ignore_pricing_rule', 'company_address', 'update_stock'):
-					if not for_validate:
-						self.set(fieldname, profile.get(fieldname))
-
-			if self.customer:
-				customer_price_list, customer_group, customer_currency = frappe.db.get_value(
-					"Customer", self.customer, ['default_price_list', 'customer_group', 'default_currency']
-				)
-				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
-				selling_price_list = customer_price_list or customer_group_price_list or profile.get('selling_price_list')
-			else:
-				selling_price_list = profile.get('selling_price_list')
-
-			if selling_price_list:
-				self.set('selling_price_list', selling_price_list)
-			if customer_currency != profile.get('currency'):
-				self.set('currency', customer_currency)
-
-			# set pos values in items
-			for item in self.get("items"):
-				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(profile.get("company"), frappe._dict(item.as_dict()), profile)
-					for fname, val in iteritems(profile_details):
-						if (not for_validate) or (for_validate and not item.get(fname)):
-							item.set(fname, val)
-
-			# fetch terms
-			if self.tc_name and not self.terms:
-				self.terms = frappe.db.get_value("Terms and Conditions", self.tc_name, "terms")
-
-			# fetch charges
-			if self.taxes_and_charges and not len(self.get("taxes")):
-				self.set_taxes()
-
-		if not self.account_for_change_amount:
-			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
-
-		return profile
-
-	def set_missing_values(self, for_validate=False):
-		profile = self.set_pos_fields(for_validate)
-
-		if not self.debit_to:
-			self.debit_to = get_party_account("Customer", self.customer, self.company)
-			self.party_account_currency = frappe.db.get_value("Account", self.debit_to, "account_currency", cache=True)
-		if not self.due_date and self.customer:
-			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
-
-		super(SalesInvoice, self).set_missing_values(for_validate)
-
-		print_format = profile.get("print_format") if profile else None
-		if not print_format and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):
-			print_format = 'POS Invoice'
-
-		if profile:
-			return {
-				"print_format": print_format,
-				"campaign": profile.get("campaign"),
-				"allow_print_before_pay": profile.get("allow_print_before_pay")
-			}
-
-	def set_account_for_mode_of_payment(self):
-		self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
-		for pay in self.payments:
-			if not pay.account:
-				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
-
 	def create_payment_request(self):
 		for pay in self.payments:
 			if pay.type == "Phone":
@@ -457,18 +360,3 @@ def make_merge_log(invoices):
 
 	if merge_log.get('pos_invoices'):
 		return merge_log.as_dict()
-
-def add_return_modes(doc, pos_profile):
-	def append_payment(payment_mode):
-		payment = doc.append('payments', {})
-		payment.default = payment_mode.default
-		payment.mode_of_payment = payment_mode.parent
-		payment.account = payment_mode.default_account
-		payment.type = payment_mode.type
-
-	for pos_payment_method in pos_profile.get('payments'):
-		pos_payment_method = pos_payment_method.as_dict()
-		mode_of_payment = pos_payment_method.mode_of_payment
-		if pos_payment_method.allow_in_returns and not [d for d in doc.get('payments') if d.mode_of_payment == mode_of_payment]:
-			payment_mode = get_mode_of_payment_info(mode_of_payment, doc.company)
-			append_payment(payment_mode[0])
