@@ -12,5 +12,8 @@ frappe.listview_settings['Vehicle Booking Order'] = {
 		} else if(["Overdue Payment", "Overdue Delivery"].includes(doc.status)) {
 			return [__(doc.status), "red", `status,=,${doc.status}`];
 		}
+	},
+	onload: function(listview) {
+		listview.page.fields_dict.item_code.get_query = () => erpnext.queries.item({"is_vehicle": 1, "include_in_vehicle_booking": 1});
 	}
 };
