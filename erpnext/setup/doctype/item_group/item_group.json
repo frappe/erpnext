@@ -245,6 +245,15 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Customer",
+   "select": 1,
+   "share": 1
   }
  ],
  "search_fields": "parent_item_group",
