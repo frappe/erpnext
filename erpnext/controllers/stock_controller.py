@@ -319,12 +319,13 @@ class StockController(AccountsController):
 		return incoming_rate
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_company, validate_disabled_warehouse
 
 		warehouses = list(set([d.warehouse for d in
 			self.get("items") if getattr(d, "warehouse", None)]))
 
 		for w in warehouses:
+			validate_disabled_warehouse(w)
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):

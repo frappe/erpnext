@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 import json
-from frappe.utils import flt, cstr, nowdate, nowtime
+from frappe.utils import flt, cstr, nowdate, nowtime, get_link_to_form
 
 from six import string_types
 
@@ -278,6 +278,10 @@ def validate_warehouse_company(warehouse, company):
 def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
+
+def validate_disabled_warehouse(warehouse):
+	if frappe.db.get_value("Warehouse", warehouse, "disabled"):
+		frappe.throw(_("Disabled Warehouse {0} cannot be used for this transaction.").format(get_link_to_form('Warehouse', warehouse)))
 
 def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:
