@@ -622,6 +622,48 @@ def get_party_name(party_type, party):
 		name_fieldname = "title" if party_type in ["Student", "Shareholder"] else scrub(party_type) + "_name"
 		return frappe.get_cached_value(party_type, party, name_fieldname)
 
+def set_party_name_in_list(entries):
+	party_name_map = get_party_name_map(entries)
+	if party_name_map:
+		for d in entries:
+			if d.get('party_type') and d.get('party'):
+				party_name = party_name_map.get((d.get('party_type'), d.get('party')))
+				if party_name:
+					d['party_name'] = party_name
+
+def get_party_name_map(entries):
+	if not entries:
+		return {}
+
+	customer_naming_by = frappe.get_cached_value("Selling Settings", None, "cust_master_name")
+	supplier_naming_by = frappe.get_cached_value("Buying Settings", None, "supp_master_name")
+	employee_naming_by = frappe.get_cached_value("HR Settings", None, "emp_created_by")
+
+	party_name_map = {}
+
+	if customer_naming_by != 'Customer Name':
+		customers = list(set([d.get('party') for d in entries if d.get('party_type') == 'Customer' and d.get('party')]))
+		if customers:
+			customer_names = frappe.db.sql("select name, customer_name from `tabCustomer` where name in %s", [customers])
+			for d in customer_names:
+				party_name_map[('Customer', d[0])] = d[1]
+
+	if supplier_naming_by != 'Supplier Name':
+		suppliers = list(set([d.get('party') for d in entries if d.get('party_type') == 'Supplier' and d.get('party')]))
+		if suppliers:
+			supplier_names = frappe.db.sql("select name, supplier_name from `tabSupplier` where name in %s", [suppliers])
+			for d in supplier_names:
+				party_name_map[('Supplier', d[0])] = d[1]
+
+	if employee_naming_by != 'Employee Name':
+		employees = list(set([d.get('party') for d in entries if d.get('party_type') == 'Employee' and d.get('party')]))
+		if employees:
+			employee_names = frappe.db.sql("select name, employee_name from `tabEmployee` where name in %s", [employees])
+			for d in employee_names:
+				party_name_map[('Employee', d[0])] = d[1]
+
+	return party_name_map
+
 def get_timeline_data(doctype, name):
 	'''returns timeline data for the past one year'''
 	from frappe.desk.form.load import get_communication_data
