@@ -8,6 +8,7 @@
   "payment_term",
   "description",
   "discount_percentage",
+  "discount_validity",
   "column_break_3",
   "invoice_portion",
   "due_date_based_on",
@@ -85,12 +86,18 @@
    "fieldname": "discount_percentage",
    "fieldtype": "Float",
    "label": "Discount (%)"
+  },
+  {
+   "fetch_from": "payment_term.discount_validity",
+   "fieldname": "discount_validity",
+   "fieldtype": "Int",
+   "label": "Discount Validity"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-08 12:39:20.175580",
+ "modified": "2021-02-11 12:54:48.934368",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template Detail",

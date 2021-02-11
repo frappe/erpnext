@@ -16,6 +16,7 @@
   "due_date_based_on",
   "credit_days",
   "credit_months",
+  "discount_validity",
   "section_break_6",
   "description"
  ],
@@ -77,10 +78,17 @@
    "fieldname": "discount_percentage",
    "fieldtype": "Float",
    "label": "Discount (%)"
+  },
+  {
+   "depends_on": "discount_percentage",
+   "fieldname": "discount_validity",
+   "fieldtype": "Int",
+   "label": "Discount Validity",
+   "mandatory_depends_on": "discount_percentage"
   }
  ],
  "links": [],
- "modified": "2021-02-08 12:41:38.215919",
+ "modified": "2021-02-11 13:04:03.192185",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Term",
