@@ -60,21 +60,23 @@ def get_report_summary(period_list, periodicity, income, expense, net_profit_los
 
 	return [
 		{
-			"value": net_profit,
-			"indicator": "Green" if net_profit > 0 else "Red",
-			"label": profit_label,
-			"datatype": "Currency",
-			"currency": currency
-		},
-		{
 			"value": net_income,
 			"label": income_label,
 			"datatype": "Currency",
 			"currency": currency
 		},
+		{ "type": "separator", "value": "-"},
 		{
 			"value": net_expense,
 			"label": expense_label,
+			"datatype": "Currency",
+			"currency": currency
+		},
+		{ "type": "separator", "value": "=", "color": "blue"},
+		{
+			"value": net_profit,
+			"indicator": "Green" if net_profit > 0 else "Red",
+			"label": profit_label,
 			"datatype": "Currency",
 			"currency": currency
 		}

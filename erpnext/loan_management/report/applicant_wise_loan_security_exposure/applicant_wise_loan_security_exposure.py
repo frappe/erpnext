@@ -43,22 +43,24 @@ def get_data(filters):
 	currency = erpnext.get_company_currency(filters.get('company'))
 
 	for key, qty in iteritems(pledge_values):
-		row = {}
-		current_value = flt(qty * loan_security_details.get(key[1], {}).get('latest_price', 0))
-		valid_upto = loan_security_details.get(key[1], {}).get('valid_upto')
+		if qty:
+			row = {}
+			current_value = flt(qty * loan_security_details.get(key[1], {}).get('latest_price', 0))
+			valid_upto = loan_security_details.get(key[1], {}).get('valid_upto')
 
-		row.update(loan_security_details.get(key[1]))
-		row.update({
-			'applicant_type': applicant_type_map.get(key[0]),
-			'applicant_name': key[0],
-			'total_qty': qty,
-			'current_value': current_value,
-			'price_valid_upto': valid_upto,
-			'portfolio_percent': flt(current_value * 100 / total_value_map.get(key[0]), 2),
-			'currency': currency
-		})
+			row.update(loan_security_details.get(key[1]))
+			row.update({
+				'applicant_type': applicant_type_map.get(key[0]),
+				'applicant_name': key[0],
+				'total_qty': qty,
+				'current_value': current_value,
+				'price_valid_upto': valid_upto,
+				'portfolio_percent': flt(current_value * 100 / total_value_map.get(key[0]), 2) if total_value_map.get(key[0]) \
+					else 0.0,
+				'currency': currency
+			})
 
-		data.append(row)
+			data.append(row)
 
 	return data
 

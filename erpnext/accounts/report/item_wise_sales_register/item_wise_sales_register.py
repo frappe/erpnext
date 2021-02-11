@@ -52,8 +52,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		row = {
 			'item_code': d.item_code,
-			'item_name': item_record.item_name,
-			'item_group': item_record.item_group,
+			'item_name': item_record.item_name if item_record else d.item_name,
+			'item_group': item_record.item_group if item_record else d.item_group,
 			'description': d.description,
 			'invoice': d.parent,
 			'posting_date': d.posting_date,
@@ -76,7 +76,7 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 			'company': d.company,
 			'sales_order': d.sales_order,
 			'delivery_note': d.delivery_note,
-			'income_account': d.income_account,
+			'income_account': d.unrealized_profit_loss_account or d.income_account,
 			'cost_center': d.cost_center,
 			'stock_qty': d.stock_qty,
 			'stock_uom': d.stock_uom
@@ -379,9 +379,11 @@ def get_items(filters, additional_query_columns):
 		select
 			`tabSales Invoice Item`.name, `tabSales Invoice Item`.parent,
 			`tabSales Invoice`.posting_date, `tabSales Invoice`.debit_to,
+			`tabSales Invoice`.unrealized_profit_loss_account,
 			`tabSales Invoice`.project, `tabSales Invoice`.customer, `tabSales Invoice`.remarks,
 			`tabSales Invoice`.territory, `tabSales Invoice`.company, `tabSales Invoice`.base_net_total,
 			`tabSales Invoice Item`.item_code, `tabSales Invoice Item`.description,
+			`tabSales Invoice Item`.`item_name`, `tabSales Invoice Item`.`item_group`,
 			`tabSales Invoice Item`.sales_order, `tabSales Invoice Item`.delivery_note,
 			`tabSales Invoice Item`.income_account, `tabSales Invoice Item`.cost_center,
 			`tabSales Invoice Item`.stock_qty, `tabSales Invoice Item`.stock_uom,

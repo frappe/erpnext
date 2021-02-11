@@ -6,12 +6,10 @@ from __future__ import unicode_literals
 import frappe
 
 def execute():
-	frappe.reload_doc("accounts", "doctype", "POS Payment Method")
+	frappe.reload_doc("accounts", "doctype", "pos_payment_method")
 	pos_profiles = frappe.get_all("POS Profile")
 
 	for pos_profile in pos_profiles:
-		if not pos_profile.get("payments"): return
-
 		payments = frappe.db.sql("""
 			select idx, parentfield, parenttype, parent, mode_of_payment, `default` from `tabSales Invoice Payment` where parent=%s
 		""", pos_profile.name, as_dict=1)
