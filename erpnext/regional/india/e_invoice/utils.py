@@ -11,6 +11,7 @@ import json
 import base64
 import frappe
 import traceback
+import io
 from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.integrations.utils import make_post_request, make_get_request
@@ -19,11 +20,13 @@ from frappe.utils.data import cstr, cint, formatdate as format_date, flt, time_d
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
-	invalid_doctype = doc.doctype not in ['Sales Invoice']
+	invalid_doctype = doc.doctype != 'Sales Invoice'
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
+	no_taxes_applied = len(doc.get('taxes', [])) == 0
 
-	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction: return
+	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+		return
 
 	if doc.docstatus == 0 and doc._action == 'save':
 		if doc.irn:
@@ -34,7 +37,7 @@ def validate_einvoice_fields(doc):
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
 
-	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
+	elif doc.irn and doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
 		frappe.throw(_('You must cancel IRN before cancelling the document.'), title=_('Cancel Not Allowed'))
 
 def raise_document_name_too_long_error():
@@ -160,7 +163,7 @@ def get_item_list(invoice):
 		item.description = d.item_name.replace('"', '\\"')
 
 		item.qty = abs(item.qty)
-		item.discount_amount = abs(item.discount_amount * item.qty)
+		item.discount_amount = 0
 		item.unit_rate = abs(item.base_net_amount / item.qty)
 		item.gross_amount = abs(item.base_net_amount)
 		item.taxable_value = abs(item.base_net_amount)
@@ -220,11 +223,12 @@ def get_invoice_value_details(invoice):
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(invoice.base_total)
+		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
 	else:
 		invoice_value_details.base_total = abs(invoice.base_net_total)
+		# since tax already considers discount amount
+		invoice_value_details.invoice_discount_amt = 0
 
-	# since tax already considers discount amount
-	invoice_value_details.invoice_discount_amt = 0 # invoice.base_discount_amount
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
@@ -301,7 +305,7 @@ def validate_mandatory_fields(invoice):
 			_('GSTIN is mandatory to fetch company GSTIN details. Please enter GSTIN in selected company address.'),
 			title=_('Missing Fields')
 		)
-	if not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
+	if invoice.gst_category != 'Overseas' and not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
 		frappe.throw(
 			_('GSTIN is mandatory to fetch customer GSTIN details. Please enter GSTIN in selected customer address.'),
 			title=_('Missing Fields')
@@ -328,7 +332,10 @@ def make_einvoice(invoice):
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
-		shipping_details = get_party_details(invoice.shipping_address_name)
+		if invoice.gst_category == 'Overseas':
+			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
+		else:
+			shipping_details = get_party_details(invoice.shipping_address_name)
 	
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -440,7 +447,7 @@ class GSPConnector():
 		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
 		self.generate_irn_url = self.base_url + '/enriched/ei/api/invoice'
 		self.gstin_details_url = self.base_url + '/enriched/ei/api/master/gstin'
-		self.cancel_ewaybill_url = self.base_url + '/enriched/ei/api/ewayapi'
+		self.cancel_ewaybill_url = self.base_url + '/enriched/ewb/ewayapi?action=CANEWB'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
 	def get_credentials(self):
@@ -675,6 +682,8 @@ class GSPConnector():
 			'cancelRsnCode': reason,
 			'cancelRmrk': remark
 		}, indent=4)
+		headers["username"] = headers["user_name"]
+		del headers["user_name"]
 
 		try:
 			res = self.make_request('post', self.cancel_ewaybill_url, headers, data)
@@ -773,20 +782,21 @@ class GSPConnector():
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
 		docname = self.invoice.name
+		filename = 'QRCode_{}.png'.format(docname).replace(os.path.sep, "__")
 
-		_file = frappe.new_doc('File')
-		_file.update({
-			'file_name': 'QRCode_{}.png'.format(docname.replace('/', '-')),
-			'attached_to_doctype': doctype,
-			'attached_to_name': docname,
-			'content': str(base64.b64encode(os.urandom(64))),
-			'is_private': 1
-		})
-		_file.insert()
-		frappe.db.commit()
+		qr_image = io.BytesIO()
 		url = qrcreate(qrcode, error='L')
-		abs_file_path = os.path.abspath(_file.get_full_path())
-		url.png(abs_file_path, scale=2, quiet_zone=1)
+		url.png(qr_image, scale=2, quiet_zone=1)
+		_file = frappe.get_doc({
+			"doctype": "File",
+			"file_name": filename,
+			"attached_to_doctype": doctype,
+			"attached_to_name": docname,
+			"attached_to_field": "qrcode_image",
+			"is_private": 1,
+			"content": qr_image.getvalue()})
+		_file.save()
+		frappe.db.commit()
 
 		self.invoice.qrcode_image = _file.file_url
 	
