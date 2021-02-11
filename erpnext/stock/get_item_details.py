@@ -78,8 +78,8 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		# get price list rate only if the invoice is not a credit or debit note
 		get_price_list_rate(args, item, out)
 
-	if args.customer and cint(args.is_pos):
-		out.update(get_pos_profile_item_details(args.company, args))
+	if cint(args.is_pos):
+		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
 
 	if (args.get("doctype") == "Material Request" and
 		args.get("material_request_type") == "Material Transfer"):

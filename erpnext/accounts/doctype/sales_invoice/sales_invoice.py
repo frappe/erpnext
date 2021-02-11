@@ -362,28 +362,22 @@ class SalesInvoice(SellingController):
 			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
 	def set_missing_values(self, for_validate=False):
-		pos = self.set_pos_fields(for_validate)
+		if cint(self.is_pos):
+			self.set_pos_fields(for_validate)
 
-		if not self.debit_to:
-			self.debit_to = get_party_account("Customer", self.customer, self.company)
-			self.party_account_currency = frappe.db.get_value("Account", self.debit_to, "account_currency", cache=True)
-		if not self.due_date and self.customer:
-			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
+		self.set_missing_accounts()
+		self.set_due_date()
 
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
-		print_format = pos.get("print_format") if pos else None
-		if not print_format and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):
-			print_format = 'POS Invoice'
+	def set_missing_accounts(self):
+		if not self.debit_to:
+			self.debit_to = get_party_account("Customer", self.customer, self.company)
+			self.party_account_currency = frappe.db.get_value("Account", self.debit_to, "account_currency", cache=True)
 
-		if pos:
-			return {
-				"print_format": print_format,
-				"allow_edit_rate": pos.get("allow_user_to_edit_rate"),
-				"allow_edit_discount": pos.get("allow_user_to_edit_discount"),
-				"campaign": pos.get("campaign"),
-				"allow_print_before_pay": pos.get("allow_print_before_pay")
-			}
+	def set_due_date(self):
+		if not self.due_date and self.customer:
+			self.due_date = get_due_date(self.posting_date, "Customer", self.customer, self.company)
 
 	def update_time_sheet(self, sales_invoice):
 		for d in self.timesheets:
@@ -424,70 +418,60 @@ class SalesInvoice(SellingController):
 				if status not in ['Submitted', 'Payslip']:
 					frappe.throw(_("Timesheet {0} is already completed or cancelled").format(data.time_sheet))
 
-	def set_pos_fields(self, for_validate=False):
-		"""Set retail related fields from POS Profiles"""
-		if cint(self.is_pos) != 1:
-			return
-
-		from erpnext.stock.get_item_details import get_pos_profile_item_details, get_pos_profile
+	def get_pos_profile(self):
+		from erpnext.stock.get_item_details import get_pos_profile
 		if not self.pos_profile:
 			pos_profile = get_pos_profile(self.company) or {}
 			if not pos_profile:
 				frappe.throw(_("No POS Profile found. Please create a New POS Profile first"))
 			self.pos_profile = pos_profile.get('name')
 
-		pos = {}
-		if self.pos_profile:
-			pos = frappe.get_doc('POS Profile', self.pos_profile)
+		return frappe.get_cached_doc('POS Profile', self.pos_profile) if self.pos_profile else {}
 
-		if not self.get('payments') and not for_validate:
-			update_multi_mode_option(self, pos)
+	def get_customer_selling_price_list(self):
+		customer_price_list, customer_group_price_list = None, None
+		if self.customer:
+			customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+			customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
+		return customer_price_list or customer_group_price_list
+
+	def set_pos_item_details(self, profile, for_validate):
+		from erpnext.stock.get_item_details import get_pos_profile_item_details
+		# set pos values in items
+		for item in self.get("items"):
+			if item.get('item_code'):
+				profile_item_details = get_pos_profile_item_details(pos, item.as_dict(), profile)
+				for fname, val in iteritems(profile_item_details):
+					if (not for_validate) or (for_validate and not item.get(fname)):
+						item.set(fname, val)
+
+	def set_pos_fields(self, for_validate=False):
+		"""Set retail related fields from POS Profiles"""
+		profile = self.get_pos_profile()
 
 		if not self.account_for_change_amount:
 			self.account_for_change_amount = frappe.get_cached_value('Company',  self.company,  'default_cash_account')
 
-		if pos:
-			if not for_validate:
-				self.tax_category = pos.get("tax_category")
+		if profile:
+			for_initial_setup = not for_validate
+			if not self.get('payments') and for_initial_setup:
+				set_mode_of_payments(self, profile)
 
-			if not for_validate and not self.customer:
-				self.customer = pos.customer
-
-			if not for_validate:
-				self.ignore_pricing_rule = pos.ignore_pricing_rule
-
-			if pos.get('account_for_change_amount'):
-				self.account_for_change_amount = pos.get('account_for_change_amount')
-
+			# overwrite these fields of invoice
 			for fieldname in ('currency', 'letter_head', 'tc_name',
-				'company', 'select_print_heading', 'write_off_account', 'taxes_and_charges',
-				'write_off_cost_center', 'apply_discount_on', 'cost_center'):
-					if (not for_validate) or (for_validate and not self.get(fieldname)):
-						self.set(fieldname, pos.get(fieldname))
+				'tax_category', 'ignore_pricing_rule', 'account_for_change_amount',
+				'company', 'select_print_heading', 'write_off_account', 'update_stock',
+				'campaign', 'write_off_cost_center', 'apply_discount_on', 'cost_center'):
+					if (for_initial_setup) or (for_validate and not self.get(fieldname)):
+						self.set(fieldname, profile.get(fieldname))
+			
+			# only set if pos_profile has value
+			for field in ('company_address', 'customer', 'taxes_and_charges'):
+				if (for_initial_setup and profile.get(field)) or (for_validate and not self.get(field)):
+					self.set(field, profile.get(field))
 
-			if pos.get("company_address"):
-				self.company_address = pos.get("company_address")
-
-			if self.customer:
-				customer_price_list, customer_group = frappe.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
-				customer_group_price_list = frappe.get_value("Customer Group", customer_group, 'default_price_list')
-				selling_price_list = customer_price_list or customer_group_price_list or pos.get('selling_price_list')
-			else:
-				selling_price_list = pos.get('selling_price_list')
-
-			if selling_price_list:
-				self.set('selling_price_list', selling_price_list)
-
-			if not for_validate:
-				self.update_stock = cint(pos.get("update_stock"))
-
-			# set pos values in items
-			for item in self.get("items"):
-				if item.get('item_code'):
-					profile_details = get_pos_profile_item_details(pos, frappe._dict(item.as_dict()), pos)
-					for fname, val in iteritems(profile_details):
-						if (not for_validate) or (for_validate and not item.get(fname)):
-							item.set(fname, val)
+			selling_price_list = self.get_customer_selling_price_list() or profile.get('selling_price_list')
+			self.set('selling_price_list', selling_price_list)
 
 			# fetch terms
 			if self.tc_name and not self.terms:
@@ -497,7 +481,12 @@ class SalesInvoice(SellingController):
 			if self.taxes_and_charges and not len(self.get("taxes")):
 				self.set_taxes()
 
-		return pos
+			if not profile.get("print_format") and not cint(frappe.db.get_value('Print Format', 'POS Invoice', 'disabled')):
+				profile.print_format = 'POS Invoice'
+
+			self.set_pos_item_details(profile, for_validate)
+
+		return profile
 
 	def get_company_abbr(self):
 		return frappe.db.sql("select abbr from tabCompany where name=%s", self.company)[0][0]
@@ -600,7 +589,6 @@ class SalesInvoice(SellingController):
 				for d in self.get('items'):
 					if (d.item_code and not d.get(key.lower().replace(' ', '_')) and not self.get(value[1])):
 						msgprint(_("{0} is mandatory for Item {1}").format(key, d.item_code), raise_exception=1)
-
 
 	def validate_proj_cust(self):
 		"""check for does customer belong to same project as entered.."""
@@ -1812,7 +1800,7 @@ def create_invoice_discounting(source_name, target_doc=None):
 
 	return invoice_discounting
 
-def update_multi_mode_option(doc, pos_profile):
+def set_mode_of_payments(doc, pos_profile):
 	def append_payment(payment_mode):
 		payment = doc.append('payments', {})
 		payment.default = payment_mode.default
