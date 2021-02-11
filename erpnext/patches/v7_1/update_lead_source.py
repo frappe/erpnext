@@ -5,7 +5,7 @@ from frappe import _
 def execute():
 	from erpnext.setup.setup_wizard.operations.install_fixtures import default_lead_sources
 
-	frappe.reload_doc('selling', 'doctype', 'lead_source')
+	frappe.reload_doc('crm', 'doctype', 'lead_source')
 
 	frappe.local.lang = frappe.db.get_default("lang") or 'en'
 
