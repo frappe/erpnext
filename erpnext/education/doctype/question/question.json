@@ -13,7 +13,7 @@
  "fields": [
   {
    "fieldname": "question",
-   "fieldtype": "Small Text",
+   "fieldtype": "Text Editor",
    "in_list_view": 1,
    "label": "Question",
    "reqd": 1
@@ -34,7 +34,7 @@
    "read_only": 1
   }
  ],
- "modified": "2019-05-30 18:39:21.880974",
+ "modified": "2021-01-28 18:39:21.880974",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Question",
