@@ -19,15 +19,50 @@ def set_defaut_value_for_filters(filters):
 	if not filters.get('lead_age'): filters["lead_age"] = 60
 
 def get_columns():
-	return [
-		_("Lead") + ":Link/Lead:100",
-		_("Name") + "::100",
-		_("Organization") + "::100",
-		_("Reference Document") + "::150",
-		_("Reference Name") + ":Dynamic Link/"+_("Reference Document")+":120",
-		_("Last Communication") + ":Data:200",
-		_("Last Communication Date") + ":Date:180"
-	]
+	columns = [{
+			"label": _("Lead"),
+			"fieldname": "lead",
+			"fieldtype": "Link",
+			"options": "Lead",
+			"width": 130
+		},
+		{
+			"label": _("Name"),
+			"fieldname": "name",
+			"width": 120
+		},
+		{
+			"label": _("Organization"),
+			"fieldname": "organization",
+			"width": 120
+		},
+		{
+			"label": _("Reference Document Type"),
+			"fieldname": "reference_document_type",
+			"fieldtype": "Link",
+			"options": "Doctype",
+			"width": 100
+		},
+		{
+			"label": _("Reference Name"),
+			"fieldname": "reference_name",
+			"fieldtype": "Dynamic Link",
+			"options": "reference_document_type",
+			"width": 140
+		},
+		{
+			"label": _("Last Communication"),
+			"fieldname": "last_communication",
+			"fieldtype": "Data",
+			"width": 200
+		},
+		{
+			"label": _("Last Communication Date"),
+			"fieldname": "last_communication_date",
+			"fieldtype": "Date",
+			"width": 100
+		}]
+	return columns
 
 def get_data(filters):
 	lead_details = []
