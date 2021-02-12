@@ -6,9 +6,8 @@
  "engine": "InnoDB",
  "field_order": [
   "payment_term",
-  "description",
   "discount_percentage",
-  "discount_validity",
+  "description",
   "column_break_3",
   "invoice_portion",
   "due_date_based_on",
@@ -23,7 +22,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Payment Term",
-   "options": "Payment Term"
+   "options": "Payment Term",
+   "reqd": 1
   },
   {
    "columns": 2,
@@ -60,7 +60,8 @@
    "fieldname": "credit_days",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Credit Days"
+   "label": "Credit Days",
+   "non_negative": 1
   },
   {
    "default": "0",
@@ -68,7 +69,8 @@
    "fetch_from": "payment_term.credit_months",
    "fieldname": "credit_months",
    "fieldtype": "Int",
-   "label": "Credit Months"
+   "label": "Credit Months",
+   "non_negative": 1
   },
   {
    "fetch_from": "payment_term.mode_of_payment",
@@ -86,18 +88,12 @@
    "fieldname": "discount_percentage",
    "fieldtype": "Float",
    "label": "Discount (%)"
-  },
-  {
-   "fetch_from": "payment_term.discount_validity",
-   "fieldname": "discount_validity",
-   "fieldtype": "Int",
-   "label": "Discount Validity"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-11 12:54:48.934368",
+ "modified": "2021-02-11 20:10:29.233745",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template Detail",

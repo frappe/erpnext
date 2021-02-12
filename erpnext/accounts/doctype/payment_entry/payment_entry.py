@@ -1337,7 +1337,7 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 	difference_amount = 0
 	if doc.doctype in ["Sales Invoice", "Purchase Invoice"] and doc.payment_schedule:
 		for term in doc.payment_schedule:
-			if not term.discounted_amount and term.discount_percentage and getdate(nowdate()) <= term.discount_validity:
+			if not term.discounted_amount and term.discount_percentage and getdate(nowdate()) <= term.due_date:
 				discount_amount = term.payment_amount * (term.discount_percentage / 100)
 				discount_amount_in_foreign_currency = discount_amount * doc.get('conversion_rate', 1)
 
