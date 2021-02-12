@@ -37,7 +37,7 @@ def validate_einvoice_fields(doc):
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
 
-	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
+	elif doc.irn and doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
 		frappe.throw(_('You must cancel IRN before cancelling the document.'), title=_('Cancel Not Allowed'))
 
 def raise_document_name_too_long_error():
