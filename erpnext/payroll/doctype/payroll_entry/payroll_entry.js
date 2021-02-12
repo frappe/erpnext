@@ -153,6 +153,9 @@ frappe.ui.form.on('Payroll Entry', {
 			if (frm.doc.designation) {
 				filters['designation'] = frm.doc.designation;
 			}
+			if (frm.doc.employees) {
+				filters['employees'] = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
+			}
 			return {
 				query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.employee_query",
 				filters: filters
@@ -169,6 +172,16 @@ frappe.ui.form.on('Payroll Entry', {
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		frm.trigger("fill_details");
+	},
+
+	fill_details: function (frm) {
+		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_currency", (r) => {
+			frm.set_value('currency', r.default_currency);
+		});
+		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_payroll_payable_account", (r) => {
+			frm.set_value('payroll_payable_account', r.default_payroll_payable_account);
+		});
 	},
 
 	currency: function (frm) {

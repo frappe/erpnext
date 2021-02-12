@@ -39,7 +39,8 @@ frappe.ui.form.on("Salary Slip", {
 
 		frm.set_query("employee", function() {
 			return {
-				query: "erpnext.controllers.queries.employee_query"
+				query: "erpnext.controllers.queries.employee_query",
+				filters: frm.doc.company
 			};
 		});
 	},
@@ -100,10 +101,12 @@ frappe.ui.form.on("Salary Slip", {
 							to_currency: company_currency,
 						},
 						callback: function(r) {
-							frm.set_value("exchange_rate", flt(r.message));
-							frm.set_df_property('exchange_rate', 'hidden', 0);
-							frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-								+ " = [?] " + company_currency);
+							if (r.message) {
+								frm.set_value("exchange_rate", flt(r.message));
+								frm.set_df_property('exchange_rate', 'hidden', 0);
+								frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+									+ " = [?] " + company_currency);
+							}
 						}
 					});
 				} else {

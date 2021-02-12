@@ -178,7 +178,7 @@ class PayrollEntry(Document):
 
 		ss_list = frappe.db.sql("""
 			select t1.name, t1.salary_structure, t1.payroll_cost_center from `tabSalary Slip` t1
-			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s 
+			where t1.docstatus = %s and t1.start_date >= %s and t1.end_date <= %s and t1.payroll_entry = %s
 			and (t1.journal_entry is null or t1.journal_entry = "") and ifnull(salary_slip_based_on_timesheet,0) = %s
 		""", (ss_status, self.start_date, self.end_date, self.name, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
@@ -633,34 +633,39 @@ def get_payroll_entries_for_jv(doctype, txt, searchfield, start, page_len, filte
 			'start': start, 'page_len': page_len
 		})
 
-def get_employee_with_existing_salary_slip(start_date, end_date):
-
+def get_employee_with_existing_salary_slip(start_date, end_date, company):
 	return frappe.db.sql_list("""
-		select employee from `tabSalary Slip` 
-		where 
-			(start_date between %(start_date)s and %(end_date)s 
-		or 
-			end_date between %(start_date)s and %(end_date)s 
-		or 
+		select employee from `tabSalary Slip`
+		where
+			(start_date between %(start_date)s and %(end_date)s
+		or
+			end_date between %(start_date)s and %(end_date)s
+		or
 			%(start_date)s between start_date and end_date)
+		and company = %(company)s
 		and docstatus = 1
-	""", {'start_date': start_date, 'end_date': end_date})
+	""", {'start_date': start_date, 'end_date': end_date, 'company': company})
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def employee_query(doctype, txt, searchfield, start, page_len, filters):
 	filters = frappe._dict(filters)
 	conditions = []
+	exclude_employees = []
 	emp_cond = ''
 	if filters.start_date and filters.end_date:
-		employee_list = get_employee_with_existing_salary_slip(filters.start_date, filters.end_date)
+		employee_list = get_employee_with_existing_salary_slip(filters.start_date, filters.end_date, filters.company)
+		emp = filters.get('employees')
 		filters.pop('start_date')
 		filters.pop('end_date')
+		if filters.employees is not None:
+			filters.pop('employees')
 		if employee_list:
-			emp_cond += 'and employee not in %(employee_list)s'
-	else:
-		employee_list = []
-
+			exclude_employees.extend(employee_list)
+		if emp:
+			exclude_employees.extend(emp)
+		if exclude_employees:
+			emp_cond += 'and employee not in %(exclude_employees)s'
 
 	return frappe.db.sql("""select name, employee_name from `tabEmployee`
 		where status = 'Active'
@@ -684,5 +689,5 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			'_txt': txt.replace("%", ""),
 			'start': start,
 			'page_len': page_len,
-			'employee_list': employee_list
+			'exclude_employees': exclude_employees
 		})
