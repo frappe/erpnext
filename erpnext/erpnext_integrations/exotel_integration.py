@@ -44,7 +44,7 @@ def handle_outgoing_call(**kwargs):
 def update_outgoing_call_log(call_payload):
 	call_log = get_call_log(call_payload) or None
 	if call_log:
-		call_log.status = status
+		call_log.status = call_payload.get('Status')
 		call_log.to = call_payload.get('To')
 		call_log.duration = call_payload.get('ConversationDuration') or 0
 		call_log.recording_url = call_payload.get('RecordingUrl')
