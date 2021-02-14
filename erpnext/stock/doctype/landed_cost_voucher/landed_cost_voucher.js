@@ -156,6 +156,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			callback: function(r, rt) {
 				refresh_field("advances");
 				me.calculate_taxes_and_totals();
+				me.frm.dirty();
 			}
 		})
 	},
@@ -282,7 +283,7 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 					item_total_tax += charges_map[i][item_idx];
 				}
 
-				Object.keys(item.manual_distribution_data).forEach(function(account_head) {
+				Object.keys(item.manual_distribution_data || {}).forEach(function(account_head) {
 					if(manual_account_heads.has(account_head)) {
 						item_total_tax += flt(item.manual_distribution_data[account_head]) * flt(me.frm.doc.conversion_rate);
 					}
