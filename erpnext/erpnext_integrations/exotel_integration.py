@@ -82,6 +82,17 @@ def create_call_log(call_payload):
 	frappe.db.commit()
 	return call_log
 
+def create_outgoing_call_log(call_payload):
+	call_log = frappe.new_doc('Call Log')
+	call_log.id = call_payload.get('Call', {}).get('Sid')
+	call_log.to = call_payload.get('Call', {}).get('To')
+	call_log.medium = call_payload.get('Call', {}).get('PhoneNumberSid')
+	call_log.status = call_payload.get('Call', {}).get('Status')
+	setattr(call_log, 'from', call_payload.get('Call', {}).get('From'))
+	call_log.save(ignore_permissions=True)
+	frappe.db.commit()
+	return call_log
+
 @frappe.whitelist()
 def get_call_status(call_id):
 	endpoint = get_exotel_endpoint('Calls/{call_id}.json'.format(call_id=call_id))
@@ -103,7 +114,7 @@ def make_a_call(from_number, to_number, caller_id):
 		'StatusCallbackEvents[0]': 'terminal',
 		'StatusCallbackContentType': 'application/json'
 	})
-	create_call_log(response.json())
+	create_outgoing_call_log(response.json())
 	return response.json()
 
 def get_exotel_settings():
