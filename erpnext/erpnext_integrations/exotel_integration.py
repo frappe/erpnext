@@ -4,6 +4,7 @@ from frappe import _
 from urllib.parse import urljoin
 
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call
+# api/method/erpnext.erpnext_integrations.exotel_integration.handle_outgoing_call
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_missed_call
 
@@ -35,6 +36,21 @@ def handle_end_call(**kwargs):
 @frappe.whitelist(allow_guest=True)
 def handle_missed_call(**kwargs):
 	update_call_log(kwargs, 'Missed')
+
+@frappe.whitelist(allow_guest=True)
+def handle_outgoing_call(**kwargs):
+	update_outgoing_call_log(kwargs)
+	
+def update_outgoing_call_log(call_payload):
+	call_log = get_call_log(call_payload) or None
+	if call_log:
+		call_log.status = status
+		call_log.to = call_payload.get('To')
+		call_log.duration = call_payload.get('ConversationDuration') or 0
+		call_log.recording_url = call_payload.get('RecordingUrl')
+		call_log.save(ignore_permissions=True)
+		frappe.db.commit()
+		return call_log
 
 def update_call_log(call_payload, status='Ringing', call_log=None):
 	call_log = call_log or get_call_log(call_payload)
@@ -76,7 +92,7 @@ def get_call_status(call_id):
 @frappe.whitelist()
 def make_a_call(from_number, to_number, caller_id):
 	base_url = frappe.utils.get_url()
-	callback_path = '/api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call'
+	callback_path = '/api/method/erpnext.erpnext_integrations.exotel_integration.handle_outgoing_call'
 	redirect_uri = urljoin(base_url, callback_path)
 	endpoint = get_exotel_endpoint('Calls/connect.json?details=true')
 	response = requests.post(endpoint, data={
