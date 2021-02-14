@@ -298,18 +298,25 @@ def get_data():
 				},
 			]
 		},
-		{
-			"label": _("Vehicle Sales Reports"),
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Allocation Register",
-					"doctype": "Vehicle Allocation",
-					"dependencies": ["Vehicle Allocation"],
-				},
-			]
-		},
+	]
+
+	if 'Vehicles' in frappe.get_active_domains():
+		out += [
+			{
+				"label": _("Vehicle Sales Reports"),
+				"items": [
+					{
+						"type": "report",
+						"is_query_report": True,
+						"name": "Vehicle Allocation Register",
+						"doctype": "Vehicle Allocation",
+						"dependencies": ["Vehicle Allocation"],
+					},
+				]
+			},
+		]
+
+	out += [
 		{
 			"label": _("Key Reports"),
 			"icon": "fa fa-table",
