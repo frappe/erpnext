@@ -1,6 +1,7 @@
 import frappe
 import requests
 from frappe import _
+from urllib.parse import urljoin
 
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_incoming_call
 # api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call
@@ -74,13 +75,19 @@ def get_call_status(call_id):
 
 @frappe.whitelist()
 def make_a_call(from_number, to_number, caller_id):
+	base_url = frappe.utils.get_url()
+	callback_path = '/api/method/erpnext.erpnext_integrations.exotel_integration.handle_end_call'
+	redirect_uri = urljoin(base_url, callback_path)
 	endpoint = get_exotel_endpoint('Calls/connect.json?details=true')
 	response = requests.post(endpoint, data={
 		'From': from_number,
 		'To': to_number,
-		'CallerId': caller_id
+		'CallerId': caller_id,
+		'StatusCallback': redirect_uri,
+		'StatusCallbackEvents[0]': 'terminal',
+		'StatusCallbackContentType': 'application/json'
 	})
-
+	create_call_log(response.json())
 	return response.json()
 
 def get_exotel_settings():
