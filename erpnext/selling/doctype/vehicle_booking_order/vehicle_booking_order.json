@@ -45,6 +45,8 @@
   "column_break_15",
   "contact_person",
   "contact_display",
+  "financer_contact_person",
+  "financer_contact_display",
   "column_break_27",
   "contact_email",
   "contact_mobile",
@@ -241,7 +243,7 @@
   {
    "fieldname": "contact_display",
    "fieldtype": "Data",
-   "label": "Contact Name",
+   "label": "Customer Contact Name",
    "read_only": 1
   },
   {
@@ -935,12 +937,24 @@
    "fieldname": "terms",
    "fieldtype": "Text Editor",
    "label": "Terms and Conditions Details"
+  },
+  {
+   "fieldname": "financer_contact_person",
+   "fieldtype": "Link",
+   "label": "Financer Contact Person",
+   "options": "Contact"
+  },
+  {
+   "fieldname": "financer_contact_display",
+   "fieldtype": "Data",
+   "label": "Financer Contact Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-02-08 15:10:01.823857",
+ "modified": "2021-02-14 19:10:21.449707",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",

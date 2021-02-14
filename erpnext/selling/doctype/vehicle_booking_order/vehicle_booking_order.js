@@ -32,8 +32,26 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		this.frm.set_query('customer', erpnext.queries.customer);
-		this.frm.set_query('contact_person', erpnext.queries.contact_query);
-		this.frm.set_query('customer_address', erpnext.queries.address_query);
+		this.frm.set_query('contact_person', () => {
+			frappe.dynamic_link = {
+				doc: this.frm.doc,
+				fieldname: 'customer',
+				doctype: 'Customer'
+			};
+			return erpnext.queries.contact_query(me.frm.doc);
+		});
+		this.frm.set_query('financer_contact_person', () => {
+			frappe.dynamic_link = {
+				doc: this.frm.doc,
+				fieldname: 'financer',
+				doctype: 'Customer'
+			};
+			return erpnext.queries.contact_query(me.frm.doc);
+		});
+		this.frm.set_query('customer_address', () => {
+			me.set_dynamic_link();
+			return erpnext.queries.address_query(me.frm.doc);
+		});
 
 		this.frm.set_query("item_code", function() {
 			return erpnext.queries.item({"is_vehicle": 1, "include_in_vehicle_booking": 1});
@@ -250,7 +268,6 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	financer: function () {
-		this.set_dynamic_link();
 		this.set_finance_type_mandatory();
 
 		if (this.frm.doc.finance_type) {
@@ -263,8 +280,6 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	finance_type: function () {
-		this.set_dynamic_link();
-
 		if (this.frm.doc.finance_type) {
 			this.get_customer_details();
 		}
@@ -284,7 +299,6 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		}
 
 		this.get_customer_details();
-		this.set_dynamic_link();
 	},
 
 	item_code: function () {
@@ -404,7 +418,33 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	contact_person: function() {
-		erpnext.utils.get_contact_details(this.frm);
+		this.get_contact_details();
+	},
+
+	financer_contact_person: function() {
+		this.get_contact_details();
+	},
+
+	get_contact_details: function () {
+		var me = this;
+
+		frappe.call({
+			method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_contact_details",
+			args: {
+				args: {
+					customer: me.frm.doc.customer,
+					financer: me.frm.doc.financer,
+					finance_type: me.frm.doc.finance_type
+				},
+				customer_contact: me.frm.doc.contact_person,
+				financer_contact: me.frm.doc.financer_contact_person
+			},
+			callback: function (r) {
+				if (r.message && !r.exc) {
+					me.frm.set_value(r.message);
+				}
+			}
+		});
 	},
 
 	calculate_taxes_and_totals: function () {
