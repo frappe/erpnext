@@ -1233,6 +1233,10 @@ def validate_delivery_status_for_update(vbo_doc):
 
 
 def validate_supplier_payment_for_update(vbo_doc):
+	role_allowed = frappe.get_cached_value("Vehicles Settings", None, "role_change_booking_after_payment")
+	if role_allowed and role_allowed in frappe.get_roles():
+		return
+	
 	if flt(vbo_doc.supplier_advance):
 		frappe.throw(_("Cannot modify Vehicle Booking Order {0} because Supplier Payment has already been made")
 			.format(frappe.bold(vbo_doc.name)))
