@@ -911,7 +911,6 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
-					d.discounted_amount = flt(d.payment_amount * flt(d.discount_percentage / 100), d.precision('payment_amount'))
 					d.outstanding = d.payment_amount
 
 	def set_due_date(self):
@@ -950,7 +949,7 @@ class AccountsController(TransactionBase):
 			total = 0
 			base_total = 0
 			for d in self.get("payment_schedule"):
-				total += flt(d.payment_amount) if not d.discount_percentage else 0
+				total += flt(d.payment_amount)
 
 			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -1232,16 +1231,18 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, base_gra
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
-	term_details.discounted_amount = term_details.payment_amount * (term.discount_percentage / 100)
+	term_details.discount_type = term.discount_type
+	term_details.discount = term.discount
+	# term_details.discounted_amount = flt(grand_total) * (term.discount / 100) if term.discount_type == 'Percentage' else discount
 	term_details.outstanding = term_details.payment_amount
-
 	term_details.mode_of_payment = term.mode_of_payment
-	term_details.discount_percentage = term.discount_percentage
 
 	if bill_date:
 		term_details.due_date = get_due_date(term, bill_date)
+		term_details.discount_date = get_discount_date(term, bill_date)
 	elif posting_date:
 		term_details.due_date = get_due_date(term, posting_date)
+		term_details.discount_date = get_discount_date(term, posting_date)
 
 	if getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date
@@ -1258,6 +1259,17 @@ def get_due_date(term, posting_date=None, bill_date=None):
 	elif term.due_date_based_on == "Month(s) after the end of the invoice month":
 		due_date = add_months(get_last_day(date), term.credit_months)
 	return due_date
+
+def get_discount_date(term, posting_date=None, bill_date=None):
+	discount_validity = None
+	date = bill_date or posting_date
+	if term.discount_validity_based_on == "Day(s) after invoice date":
+		discount_validity = add_days(date, term.discount_validity)
+	elif term.discount_validity_based_on == "Day(s) after the end of the invoice month":
+		discount_validity = add_days(get_last_day(date), term.discount_validity)
+	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
+		discount_validity = add_months(get_last_day(date), term.discount_validity)
+	return discount_validity
 
 def get_supplier_block_status(party_name):
 	"""

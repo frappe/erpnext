@@ -343,13 +343,13 @@ class PaymentEntry(AccountsController):
 					payment_schedule = frappe.get_all(
 						'Payment Schedule',
 						filters={'parent': ref.reference_name},
-						fields=['paid_amount', 'payment_amount', 'payment_term', 'discount_percentage', 'outstanding']
+						fields=['paid_amount', 'payment_amount', 'payment_term', 'discount', 'outstanding']
 					)
 					for term in payment_schedule:
 						invoice_key = (term.payment_term, ref.reference_name)
 						invoice_paid_amount_map.setdefault(invoice_key, {})
 						invoice_paid_amount_map[invoice_key]['outstanding'] = term.outstanding
-						invoice_paid_amount_map[invoice_key]['discounted_amt'] = term.payment_amount * (term.discount_percentage / 100)
+						invoice_paid_amount_map[invoice_key]['discounted_amt'] = ref.total_amount * (term.discount / 100)
 
 		for key, allocated_amount in iteritems(invoice_payment_amount_map):
 			outstanding = flt(invoice_paid_amount_map.get(key, {}).get('outstanding'))
@@ -1337,8 +1337,12 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 	difference_amount = 0
 	if doc.doctype in ["Sales Invoice", "Purchase Invoice"] and doc.payment_schedule:
 		for term in doc.payment_schedule:
-			if not term.paid_amount and term.discount_percentage and getdate(nowdate()) <= term.due_date:
-				discount_amount = term.payment_amount * (term.discount_percentage / 100)
+			if not term.discounted_amount and term.discount and getdate(nowdate()) <= term.discount_date:
+				if term.discount_type == 'Percentage':
+					discount_amount = flt(doc.get('grand_total')) * (term.discount / 100)
+				else:
+					discount_amount = term.discount
+
 				discount_amount_in_foreign_currency = discount_amount * doc.get('conversion_rate', 1)
 
 				if doc.doctype == "Sales Invoice":
@@ -1351,7 +1355,8 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 				difference_amount += discount_amount
 
 		if difference_amount:
-			frappe.msgprint(_("Discount of {} applied as per Payment Term").format(difference_amount), alert=1)
+			money = frappe.utils.fmt_money(difference_amount, currency=doc.get('currency'))
+			frappe.msgprint(_("Discount of {} applied as per Payment Term").format(money), alert=1)
 
 	return paid_amount, received_amount, difference_amount
 

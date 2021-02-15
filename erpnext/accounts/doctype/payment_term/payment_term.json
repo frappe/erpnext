@@ -10,12 +10,17 @@
  "field_order": [
   "payment_term_name",
   "invoice_portion",
-  "discount_percentage",
+  "mode_of_payment",
   "column_break_3",
   "due_date_based_on",
   "credit_days",
   "credit_months",
-  "mode_of_payment",
+  "section_break_8",
+  "discount_type",
+  "discount",
+  "column_break_11",
+  "discount_validity_based_on",
+  "discount_validity",
   "section_break_6",
   "description"
  ],
@@ -74,13 +79,44 @@
    "label": "Description"
   },
   {
-   "fieldname": "discount_percentage",
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break",
+   "label": "Discount Settings"
+  },
+  {
+   "default": "Percentage",
+   "fieldname": "discount_type",
+   "fieldtype": "Select",
+   "label": "Discount Type",
+   "options": "Percentage\nAmount"
+  },
+  {
+   "fieldname": "discount",
    "fieldtype": "Float",
-   "label": "Discount (%)"
+   "label": "Discount"
+  },
+  {
+   "default": "Day(s) after invoice date",
+   "depends_on": "discount",
+   "fieldname": "discount_validity_based_on",
+   "fieldtype": "Select",
+   "label": "Discount Validity Based On",
+   "options": "Day(s) after invoice date\nDay(s) after the end of the invoice month\nMonth(s) after the end of the invoice month"
+  },
+  {
+   "depends_on": "discount",
+   "fieldname": "discount_validity",
+   "fieldtype": "Int",
+   "label": "Discount Validity",
+   "mandatory_depends_on": "discount"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2021-02-11 20:09:42.559344",
+ "modified": "2021-02-15 20:30:56.256403",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Term",
