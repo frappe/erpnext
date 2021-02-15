@@ -11,8 +11,10 @@
   "consumer_secret",
   "initiator_name",
   "till_number",
+  "transaction_limit",
   "sandbox",
   "column_break_4",
+  "business_shortcode",
   "online_passkey",
   "security_credential",
   "get_account_balance",
@@ -84,10 +86,24 @@
    "fieldname": "get_account_balance",
    "fieldtype": "Button",
    "label": "Get Account Balance"
+  },
+  {
+   "depends_on": "eval:(doc.sandbox==0)",
+   "fieldname": "business_shortcode",
+   "fieldtype": "Data",
+   "label": "Business Shortcode",
+   "mandatory_depends_on": "eval:(doc.sandbox==0)"
+  },
+  {
+   "default": "150000",
+   "fieldname": "transaction_limit",
+   "fieldtype": "Float",
+   "label": "Transaction Limit",
+   "non_negative": 1
   }
  ],
  "links": [],
- "modified": "2020-09-25 20:21:38.215494",
+ "modified": "2021-01-29 12:02:16.106942",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Mpesa Settings",
