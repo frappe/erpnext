@@ -1,0 +1,13 @@
+{
+ "creation": "2021-02-06 22:01:01.332628",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart Source",
+ "idx": 0,
+ "modified": "2021-02-06 22:01:01.332628",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Top 10 Pledged Loan Securities",
+ "owner": "Administrator",
+ "source_name": "Top 10 Pledged Loan Securities ",
+ "timeseries": 0
+}
