@@ -283,7 +283,9 @@ frappe.ui.form.on('Payment Entry', {
 		let party_types = Object.keys(frappe.boot.party_account_types);
 		if(frm.doc.party_type && !party_types.includes(frm.doc.party_type)){
 			frm.set_value("party_type", "");
-			frappe.throw(__("Party can only be one of {0}", [party_types.join(", ")]));
+			frappe.throw(
+				__("Party can only be one of {0}", [party_types.join(", ")])
+			);
 		}
 
 		frm.set_query("party", function() {
@@ -637,13 +639,13 @@ frappe.ui.form.on('Payment Entry', {
 			let to_field = fields[key][1];
 
 			if (filters[from_field] && !filters[to_field]) {
-				frappe.throw(__("Error: {0} is mandatory field",
-					[to_field.replace(/_/g, " ")]
-				));
+				frappe.throw(
+					__("Error: {0} is mandatory field", [to_field.replace(/_/g, " ")])
+				);
 			} else if (filters[from_field] && filters[from_field] > filters[to_field]) {
-				frappe.throw(__("{0}: {1} must be less than {2}",
-					[key, from_field.replace(/_/g, " "), to_field.replace(/_/g, " ")]
-				));
+				frappe.throw(
+					__("{0}: {1} must be less than {2}", [key, from_field.replace(/_/g, " "), to_field.replace(/_/g, " ")])
+				);
 			}
 		}
 	},
@@ -776,12 +778,15 @@ frappe.ui.form.on('Payment Entry', {
 		} else if (in_list(["Customer", "Supplier"], frm.doc.party_type)) {
 			if(paid_amount > total_negative_outstanding) {
 				if(total_negative_outstanding == 0) {
-					frappe.msgprint(__("Cannot {0} {1} {2} without any negative outstanding invoice",
-						[frm.doc.payment_type,
-							(frm.doc.party_type=="Customer" ? "to" : "from"), frm.doc.party_type]));
+					frappe.msgprint(
+						__("Cannot {0} {1} {2} without any negative outstanding invoice", [frm.doc.payment_type,
+							(frm.doc.party_type=="Customer" ? "to" : "from"), frm.doc.party_type])
+					);
 					return false
 				} else {
-					frappe.msgprint(__("Paid Amount cannot be greater than total negative outstanding amount {0}", [total_negative_outstanding]));
+					frappe.msgprint(
+						__("Paid Amount cannot be greater than total negative outstanding amount {0}", [total_negative_outstanding])
+					);
 					return false;
 				}
 			} else {
