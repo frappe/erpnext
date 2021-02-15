@@ -183,8 +183,10 @@ def create_sales_invoice(appointment_doc):
 	sales_invoice.save(ignore_permissions=True)
 	sales_invoice.submit()
 	frappe.msgprint(_('Sales Invoice {0} created').format(sales_invoice.name), alert=True)
-	frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
-	frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
+	frappe.db.set_value('Patient Appointment', appointment_doc.name, {
+		'invoiced': 1,
+		'ref_sales_invoice': sales_invoice.name
+	})
 
 
 def check_is_new_patient(patient, name=None):
