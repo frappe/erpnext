@@ -1,0 +1,23 @@
+{
+ "aggregate_function_based_on": "",
+ "creation": "2021-02-06 17:10:26.132493",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Loan",
+ "dynamic_filters_json": "[]",
+ "filters_json": "[[\"Loan\",\"docstatus\",\"=\",\"1\",false],[\"Loan\",\"status\",\"in\",[\"Disbursed\",\"Partially Disbursed\",null],false]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 0,
+ "is_standard": 1,
+ "label": "Active Loans",
+ "modified": "2021-02-06 17:29:20.304087",
+ "modified_by": "Administrator",
+ "module": "Loan Management",
+ "name": "Active Loans",
+ "owner": "Administrator",
+ "report_function": "Sum",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Monthly",
+ "type": "Document Type"
+}
