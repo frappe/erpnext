@@ -1,0 +1,154 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2021-02-15 12:37:21.577042",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "recipient",
+  "member",
+  "member_name",
+  "email",
+  "pan_number",
+  "donor",
+  "column_break_4",
+  "company",
+  "date",
+  "fiscal_year",
+  "section_break_6",
+  "get_payments",
+  "payments",
+  "total"
+ ],
+ "fields": [
+  {
+   "fieldname": "recipient",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Certificate Recipient",
+   "options": "Member\nDonor",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.recipient === \"Member\";",
+   "fieldname": "member",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Member",
+   "mandatory_depends_on": "eval:doc.recipient === \"Member\";",
+   "options": "Member"
+  },
+  {
+   "fetch_from": "member.member_name",
+   "fieldname": "member_name",
+   "fieldtype": "Data",
+   "label": "Member Name",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "member.email_id",
+   "fieldname": "email",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Email",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "member.pan_number",
+   "fieldname": "pan_number",
+   "fieldtype": "Data",
+   "label": "PAN Details",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.recipient === \"Donor\";",
+   "fieldname": "donor",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Donor",
+   "mandatory_depends_on": "eval:doc.recipient === \"Donor\";",
+   "options": "Donor"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "payments",
+   "fieldtype": "Table",
+   "label": "Payments",
+   "options": "Tax Exemption 80G Certificate Detail"
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total",
+   "read_only": 1
+  },
+  {
+   "depends_on": "member",
+   "fieldname": "fiscal_year",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Fiscal Year",
+   "options": "Fiscal Year"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "get_payments",
+   "fieldtype": "Button",
+   "label": "Get Payments"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series",
+   "options": "NPO-80G-.YYYY.-"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-02-15 16:34:20.963355",
+ "modified_by": "Administrator",
+ "module": "Regional",
+ "name": "Tax Exemption 80G Certificate",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "search_fields": "member, member_name",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "title_field": "member_name",
+ "track_changes": 1
+}

@@ -1,0 +1,49 @@
+# -*- coding: utf-8 -*-
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+from __future__ import unicode_literals
+import frappe
+from frappe.model.document import Document
+from frappe.utils import getdate, flt
+from erpnext.accounts.utils import get_fiscal_year
+
+class TaxExemption80GCertificate(Document):
+	def validate(self):
+		if getdate(self.date):
+			fiscal_year = get_fiscal_year(fiscal_year=self.fiscal_year, as_dict=True)
+
+			if not (fiscal_year.year_start_date <= getdate(self.date) \
+				<= fiscal_year.year_end_date):
+				frappe.throw(_('The Certificate Date is not in the Fiscal Year {0}').format(frappe.bold(self.fiscal_year)))
+
+	def get_payments(self):
+		if not self.member:
+			frappe.throw(_('Please select a Member first.'))
+
+		fiscal_year = get_fiscal_year(fiscal_year=self.fiscal_year, as_dict=True)
+
+		memberships = frappe.db.get_all('Membership', {
+			'member': self.member,
+			'from_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
+			'to_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
+			'membership_status': ('!=', 'Cancelled')
+		}, ['from_date', 'amount', 'name', 'invoice', 'payment_id'])
+
+		if not memberships:
+			frappe.msgprint(_('No Membership Payments found against the Member {0}').format(self.member))
+
+		total = 0
+		self.payments = []
+
+		for doc in memberships:
+			self.append('payments', {
+				'date': doc.from_date,
+				'amount': doc.amount,
+				'invoice_id': doc.invoice,
+				'payment_id': doc.payment_id,
+				'membership': doc.name
+			})
+			total += flt(doc.amount)
+
+		self.total = total
