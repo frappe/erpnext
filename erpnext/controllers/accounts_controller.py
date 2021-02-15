@@ -22,6 +22,7 @@ from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.controllers.print_settings import set_print_templates_for_item_table, set_print_templates_for_taxes
 
 class AccountMissingError(frappe.ValidationError): pass
 
@@ -30,6 +31,19 @@ force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
 		super(AccountsController, self).__init__(*args, **kwargs)
+
+	def get_print_settings(self):
+		print_setting_fields = []
+		items_field = self.meta.get_field('items')
+
+		if items_field and items_field.fieldtype == 'Table':
+			print_setting_fields += ['compact_item_print', 'print_uom_after_quantity']
+
+		taxes_field = self.meta.get_field('taxes')
+		if taxes_field and taxes_field.fieldtype == 'Table':
+			print_setting_fields += ['print_taxes_with_zero_amount']
+
+		return print_setting_fields
 
 	@property
 	def company_currency(self):
@@ -121,7 +135,7 @@ class AccountsController(TransactionBase):
 
 	def before_cancel(self):
 		validate_einvoice_fields(self)
-	
+
 	def on_trash(self):
 		# delete sl and gl entries on deletion of transaction
 		if frappe.db.get_single_value('Accounts Settings', 'delete_linked_ledger_entries'):
@@ -157,7 +171,7 @@ class AccountsController(TransactionBase):
 		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
 			self.validate_non_invoice_documents_schedule()
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
@@ -169,6 +183,9 @@ class AccountsController(TransactionBase):
 				self.discount_amount = -self.discount_amount
 			else:
 				df.set("print_hide", 1)
+
+		set_print_templates_for_item_table(self, settings)
+		set_print_templates_for_taxes(self, settings)
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -1504,6 +1521,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.flags.ignore_validate_update_after_submit = True
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
+	parent.set_total_in_words()
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()

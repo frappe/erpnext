@@ -147,8 +147,7 @@ class IssueAnalytics(object):
 
 		self.entries = frappe.db.get_all('Issue',
 			fields=[self.field_map.get(self.filters.based_on), 'name', 'opening_date'],
-			filters=filters,
-			debug=1
+			filters=filters
 		)
 
 	def get_common_filters(self):
