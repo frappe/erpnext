@@ -285,12 +285,12 @@
    "fieldtype": "Section Break"
   },
   {
-   "fetch_from": "employee.bank_name",
    "fieldname": "bank_name",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Bank Name",
    "oldfieldname": "bank_name",
    "oldfieldtype": "Data",
+   "options": "Bank",
    "read_only": 1
   },
   {
@@ -559,7 +559,7 @@
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2020-12-21 14:34:08.162915",
+ "modified": "2021-02-11 19:42:42.001809",
  "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Salary Slip",

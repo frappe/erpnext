@@ -13,7 +13,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employment Type",
+					"name": "Department",
+				},
+				{
+					"type": "doctype",
+					"name": "Designation",
 				},
 				{
 					"type": "doctype",
@@ -21,12 +25,9 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Department",
+					"name": "Employment Type",
 				},
-				{
-					"type": "doctype",
-					"name": "Designation",
-				},
+
 				{
 					"type": "doctype",
 					"name": "Employee Grade",
@@ -36,22 +37,17 @@ def get_data():
 					"name": "Employee Group",
 					"dependencies": ["Employee"]
 				},
-				{
-					"type": "doctype",
-					"name": "Employee Health Insurance"
-				},
+			]
+		},
+		{
+			"label": _("Employee Grouping"),
+			"items": [
+
 			]
 		},
 		{
 			"label": _("Attendance"),
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Employee Attendance Tool",
-					"hide_count": True,
-					"onboard": 1,
-					"dependencies": ["Employee"]
-				},
 				{
 					"type": "doctype",
 					"name": "Attendance",
@@ -81,6 +77,13 @@ def get_data():
 					"name": "Monthly Attendance Sheet",
 					"doctype": "Attendance"
 				},
+				{
+					"type": "doctype",
+					"name": "Employee Attendance Tool",
+					"hide_count": True,
+					"onboard": 1,
+					"dependencies": ["Employee"]
+				},
 			]
 		},
 		{
@@ -98,24 +101,6 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Leave Policy",
-					"dependencies": ["Leave Type"]
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Period",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name":"Leave Type",
-				},
-				{
-					"type": "doctype",
-					"name": "Holiday List",
-				},
-				{
-					"type": "doctype",
 					"name": "Compensatory Leave Request",
 					"dependencies": ["Employee"]
 				},
@@ -123,10 +108,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Leave Encashment",
 					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Leave Block List",
 				},
 				{
 					"type": "report",
@@ -143,19 +124,35 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Payroll"),
+			"label": _("Leave Configuration"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Salary Structure",
-					"onboard": 1,
+					"name": "Leave Policy",
+					"dependencies": ["Leave Type"]
 				},
 				{
 					"type": "doctype",
-					"name": "Salary Structure Assignment",
-					"onboard": 1,
-					"dependencies": ["Salary Structure", "Employee"],
+					"name": "Leave Period",
+					"dependencies": ["Employee"]
 				},
+				{
+					"type": "doctype",
+					"name": "Leave Type",
+				},
+				{
+					"type": "doctype",
+					"name": "Holiday List",
+				},
+				{
+					"type": "doctype",
+					"name": "Leave Block List",
+				},
+			]
+		},
+		{
+			"label": _("Payroll"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Payroll Entry",
@@ -165,18 +162,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Salary Slip",
 					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Payroll Period",
-				},
-				{
-					"type": "doctype",
-					"name": "Income Tax Slab",
-				},
-				{
-					"type": "doctype",
-					"name": "Salary Component",
 				},
 				{
 					"type": "doctype",
@@ -198,6 +183,49 @@ def get_data():
 					"name": "Salary Register",
 					"doctype": "Salary Slip"
 				},
+			]
+		},
+		{
+			"label": _("Payroll Configuration"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Salary Structure",
+					"onboard": 1,
+				},
+				{
+					"type": "doctype",
+					"name": "Salary Structure Assignment",
+					"onboard": 1,
+					"dependencies": ["Salary Structure", "Employee"],
+				},
+				{
+					"type": "doctype",
+					"name": "Payroll Period",
+				},
+				{
+					"type": "doctype",
+					"name": "Income Tax Slab",
+				},
+				{
+					"type": "doctype",
+					"name": "Salary Component",
+				},
+			]
+		},
+		{
+			"label": _("Expenses and Advances"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Expense Claim",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Advance",
+					"dependencies": ["Employee"]
+				},
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -213,7 +241,7 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Employee Tax and Benefits"),
+			"label": _("Employee Tax"),
 			"items": [
 				{
 					"type": "doctype",
@@ -225,6 +253,21 @@ def get_data():
 					"name": "Employee Tax Exemption Proof Submission",
 					"dependencies": ["Employee"]
 				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Category",
+					"dependencies": ["Employee"]
+				},
+				{
+					"type": "doctype",
+					"name": "Employee Tax Exemption Sub Category",
+					"dependencies": ["Employee"]
+				},
+			]
+		},
+		{
+			"label": _("Employee Benefits"),
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Employee Other Income",
@@ -241,13 +284,7 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Employee Tax Exemption Category",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Tax Exemption Sub Category",
-					"dependencies": ["Employee"]
+					"name": "Employee Health Insurance"
 				},
 			]
 		},
@@ -258,11 +295,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Employee Onboarding",
 					"dependencies": ["Job Applicant"],
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Skill Map",
-					"dependencies": ["Employee"],
 				},
 				{
 					"type": "doctype",
@@ -277,6 +309,16 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Employee Separation",
+					"dependencies": ["Employee"],
+				},
+			]
+		},
+		{
+			"label": _("Employee Lifecycle Configuration"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Employee Skill Map",
 					"dependencies": ["Employee"],
 				},
 				{
@@ -364,21 +406,6 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Expense Claims"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Expense Claim",
-					"dependencies": ["Employee"]
-				},
-				{
-					"type": "doctype",
-					"name": "Employee Advance",
-					"dependencies": ["Employee"]
-				},
-			]
-		},
-		{
 			"label": _("Loans"),
 			"items": [
 				{
@@ -410,25 +437,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Shift Assignment",
-				},
-			]
-		},
-		{
-			"label": _("Fleet Management"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Vehicle"
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Log"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Expenses",
-					"doctype": "Vehicle"
 				},
 			]
 		},

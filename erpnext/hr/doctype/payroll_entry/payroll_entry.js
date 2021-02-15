@@ -20,6 +20,7 @@ frappe.ui.form.on('Payroll Entry', {
 	},
 
 	refresh: function(frm) {
+		erpnext.hide_company();
 		if (frm.doc.docstatus == 0) {
 			if(!frm.is_new()) {
 				frm.page.clear_primary_action();
@@ -72,30 +73,105 @@ frappe.ui.form.on('Payroll Entry', {
 		})
 	},
 
+	update_salary_slips: function(frm) {
+		frm.call({
+			doc: frm.doc,
+			method: "update_salary_slips",
+		})
+	},
+
 	add_context_buttons: function(frm) {
 		if(frm.doc.salary_slips_submitted || (frm.doc.__onload && frm.doc.__onload.submitted_ss)) {
 			frm.events.add_bank_entry_button(frm);
 		} else if(frm.doc.salary_slips_created) {
+			frm.add_custom_button(__("Update Salary Slips"), function () {
+				frm.trigger("update_salary_slips");
+			});
+
 			frm.add_custom_button(__("Submit Salary Slip"), function() {
 				submit_salary_slip(frm);
 			}).addClass("btn-primary");
 		}
 	},
 
-	add_bank_entry_button: function(frm) {
+	make_disbursement_entry: function(frm) {
 		frappe.call({
-			method: 'erpnext.hr.doctype.payroll_entry.payroll_entry.payroll_entry_has_bank_entries',
-			args: {
-				'name': frm.doc.name
-			},
+			doc: frm.doc,
+			method: "get_disbursement_mode_details",
 			callback: function(r) {
-				if (r.message && !r.message.submitted) {
-					frm.add_custom_button("Make Bank Entry", function() {
-						make_bank_entry(frm);
-					}).addClass("btn-primary");
+				if (r && r.message) {
+					let salary_modes = r.message[0]
+					let banks = r.message[1]
+					let d = new frappe.ui.Dialog({
+						title: 'Select Salary Mode',
+						fields: [
+							{
+								label: 'Payment Account',
+								fieldname: 'payment_account',
+								fieldtype: 'Link',
+								options: "Account",
+								reqd: 1,
+								get_query: function () {
+									return {
+										filters: {
+											company: frm.doc.company,
+											is_group: 0,
+											account_type: ['in', ['Cash', 'Bank']]
+										}
+									}
+								}
+							},
+							{
+								label: 'Salary Mode',
+								fieldname: 'salary_mode',
+								fieldtype: 'Select',
+								options: salary_modes
+							},
+							{
+								label: 'Bank',
+								fieldname: 'bank_name',
+								fieldtype: 'Select',
+								options: banks,
+								depends_on: "eval:doc.salary_mode == 'Bank'"
+							},
+						],
+						primary_action_label: 'Submit',
+						primary_action: function(r) {
+							return frappe.call({
+								doc: cur_frm.doc,
+								method: "make_payment_entry",
+								args: {
+									payment_account: r.payment_account,
+									salary_mode: r.salary_mode,
+									bank_name: r.bank_name
+								},
+								freeze: true,
+								freeze_message: __("Creating Payment Entries......"),
+								callback: function(r) {
+									if (r.message && r.message.length) {
+										if (r.message.length === 1) {
+											frappe.set_route('Form', 'Journal Entry', r.message[0]);
+										} else {
+											frappe.set_route('List', 'Journal Entry',
+												{"Journal Entry Account.reference_name": frm.doc.name});
+										}
+									}
+								}
+							});
+						}
+					});
+					d.show();
 				}
 			}
 		});
+	},
+
+	add_bank_entry_button: function(frm) {
+		if (!frm.doc.__onload || !frm.doc.__onload.has_bank_entries) {
+			frm.add_custom_button("Make Bank Entry", function() {
+				frm.trigger("make_disbursement_entry");
+			}).addClass("btn-primary");
+		}
 	},
 
 	setup: function (frm) {
@@ -246,27 +322,6 @@ const submit_salary_slip = function (frm) {
 		}
 	);
 };
-
-let make_bank_entry = function (frm) {
-	var doc = frm.doc;
-	if (doc.payment_account) {
-		return frappe.call({
-			doc: cur_frm.doc,
-			method: "make_payment_entry",
-			callback: function() {
-				frappe.set_route(
-					'List', 'Journal Entry', {"Journal Entry Account.reference_name": frm.doc.name}
-				);
-			},
-			freeze: true,
-			freeze_message: __("Creating Payment Entries......")
-		});
-	} else {
-		frappe.msgprint(__("Payment Account is mandatory"));
-		frm.scroll_to_field('payment_account');
-	}
-};
-
 
 let render_employee_attendance = function(frm, data) {
 	frm.fields_dict.attendance_detail_html.html(

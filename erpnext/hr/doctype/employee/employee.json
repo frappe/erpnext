@@ -454,10 +454,11 @@
   {
    "depends_on": "eval:doc.salary_mode == 'Bank'",
    "fieldname": "bank_name",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
    "label": "Bank Name",
    "oldfieldname": "bank_name",
-   "oldfieldtype": "Link"
+   "oldfieldtype": "Link",
+   "options": "Bank"
   },
   {
    "depends_on": "eval:doc.salary_mode == 'Bank'",
@@ -863,8 +864,8 @@
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
- "modified": "2021-01-28 14:58:53.615336",
- "modified_by": "Administrator",
+ "modified": "2021-02-03 16:38:23.059061",
+ "modified_by": "furqan.790@outlook.com",
  "module": "HR",
  "name": "Employee",
  "name_case": "Title Case",

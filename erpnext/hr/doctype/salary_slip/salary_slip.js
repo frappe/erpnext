@@ -83,6 +83,12 @@ frappe.ui.form.on("Salary Slip", {
 		var salary_detail_fields = ["formula", "abbr", "statistical_component", "variable_based_on_taxable_salary"];
 		cur_frm.fields_dict['earnings'].grid.set_column_disp(salary_detail_fields,false);
 		cur_frm.fields_dict['deductions'].grid.set_column_disp(salary_detail_fields,false);
+
+		if (frm.doc.docstatus === 0) {
+			frm.add_custom_button(__('Update Salary Slip'), function () {
+				frm.save();
+			});
+		}
 	},
 
 	salary_slip_based_on_timesheet: function(frm) {

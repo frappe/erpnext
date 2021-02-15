@@ -5,10 +5,11 @@
 from __future__ import unicode_literals
 import frappe
 import erpnext
-from erpnext.controllers.status_updater import StatusUpdater
 from frappe import _
-from frappe.model.document import Document
 from frappe.utils import flt, nowdate
+from erpnext.controllers.status_updater import StatusUpdater
+from six import string_types
+import json
 
 class EmployeeAdvanceOverPayment(frappe.ValidationError):
 	pass
@@ -111,8 +112,11 @@ def get_advance_details(employee_advance):
 	return details[0] if details else {}
 
 @frappe.whitelist()
-def make_bank_entry(dt, dn):
+def make_bank_entry(dt, dn, is_advance_return=False):
 	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+
+	if not frappe.has_permission("Journal Entry", "write"):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
 
 	doc = frappe.get_doc(dt, dn)
 	payment_account = get_default_bank_cash_account(doc.company, account_type="Cash",
@@ -122,11 +126,14 @@ def make_bank_entry(dt, dn):
 	je.posting_date = nowdate()
 	je.voucher_type = 'Bank Entry'
 	je.company = doc.company
+	je.cost_center = doc.cost_center
+	je.project = doc.project
 	je.remark = 'Payment against Employee Advance: ' + dn + '\n' + doc.purpose
 
 	je.append("accounts", {
 		"account": doc.advance_account,
-		"debit_in_account_currency": flt(doc.advance_amount),
+		"debit_in_account_currency": flt(doc.advance_amount) if not is_advance_return else 0,
+		"credit_in_account_currency": flt(doc.advance_amount) if is_advance_return else 0,
 		"reference_type": "Employee Advance",
 		"reference_name": doc.name,
 		"party_type": "Employee",
@@ -135,7 +142,63 @@ def make_bank_entry(dt, dn):
 
 	je.append("accounts", {
 		"account": payment_account.account,
-		"credit_in_account_currency": flt(doc.advance_amount),
+		"credit_in_account_currency": flt(doc.advance_amount) if not is_advance_return else 0,
+		"debit_in_account_currency": flt(doc.advance_amount) if is_advance_return else 0,
+		"account_currency": payment_account.account_currency,
+		"account_type": payment_account.account_type
+	})
+
+	return je.as_dict()
+
+
+@frappe.whitelist()
+def make_multiple_bank_entries(names):
+	from erpnext.accounts.doctype.journal_entry.journal_entry import get_default_bank_cash_account
+
+	if not frappe.has_permission("Journal Entry", "write"):
+		frappe.throw(_("Not Permitted"), frappe.PermissionError)
+
+	if isinstance(names, string_types):
+		names = json.loads(names)
+
+	je = frappe.new_doc("Journal Entry")
+	je.posting_date = nowdate()
+	je.voucher_type = 'Bank Entry'
+
+	total_amount = 0
+	company = None
+
+	for name in names:
+		ead = frappe.get_doc("Employee Advance", name)
+
+		if ead.docstatus != 1 or flt(ead.paid_amount):
+			continue
+
+		if not company:
+			company = ead.company
+			je.company = company
+		elif ead.company != company:
+			continue
+
+		je.append("accounts", {
+			"account": ead.advance_account,
+			"debit_in_account_currency": flt(ead.advance_amount),
+			"reference_type": "Employee Advance",
+			"reference_name": ead.name,
+			"party_type": "Employee",
+			"party": ead.employee,
+			"cost_center": ead.cost_center,
+			"project": ead.project
+		})
+		total_amount += flt(ead.advance_amount)
+
+	if not total_amount:
+		frappe.throw(_("No Payable Employee Advance selected"))
+
+	payment_account = get_default_bank_cash_account(je.company, account_type="Cash")
+	je.append("accounts", {
+		"account": payment_account.account,
+		"credit_in_account_currency": total_amount,
 		"account_currency": payment_account.account_currency,
 		"account_type": payment_account.account_type
 	})
