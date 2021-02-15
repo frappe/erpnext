@@ -93,8 +93,6 @@ def create_journal_entry_bts( bank_transaction_name, reference_number=None, refe
 		fieldname=["name", "deposit", "withdrawal", "bank_account"] ,
 		as_dict=True
 	)[0]
-	print(bank_transaction.withdrawal)
-	print(bank_transaction.deposit)
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
 	account_type = frappe.db.get_value("Account", second_account, "account_type")
 	if account_type in ["Receivable", "Payable"]:
@@ -173,7 +171,6 @@ def create_payment_entry_bts( bank_transaction_name, reference_number=None, refe
 	company_account = frappe.get_value("Bank Account", bank_transaction.bank_account, "account")
 	company = frappe.get_value("Account", company_account, "company")
 	payment_entry_dict = {
-		# "doctype": "Payment Entry",
 		"company" : company,
 		"payment_type" : payment_type,
 		"reference_no" :  reference_number,
@@ -199,11 +196,6 @@ def create_payment_entry_bts( bank_transaction_name, reference_number=None, refe
 		payment_entry.paid_to = company_account
 	else:
 		payment_entry.paid_from = company_account
-
-	# payment_entry.insert()
-	# payment_entry.insert()
-	print("payment_entry.name")
-	print(payment_entry.name)
 
 	if allow_edit:
 		return payment_entry
