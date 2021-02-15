@@ -10,7 +10,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 	show_dialog(bank_transaction_name, update_dt_cards) {
 		this.bank_transaction_name = bank_transaction_name;
 		this.update_dt_cards = update_dt_cards;
-		// TODO use whitelisted method
 		frappe.call({
 			method: "frappe.client.get_value",
 			args: {
@@ -41,8 +40,6 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				}
 			},
 		});
-
-		// this.get_linked_vouchers();
 	}
 
 	get_linked_vouchers(document_types) {
@@ -318,6 +315,16 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				options: "DocType",
 				mandatory_depends_on:
 					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Payment Entry'",
+					get_query: function () {
+						return {
+							filters: {
+								name: [
+									"in",
+									Object.keys(frappe.boot.party_account_types),
+								],
+							},
+						};
+					},
 			},
 			{
 				fieldname: "party",

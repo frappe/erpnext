@@ -38,7 +38,7 @@ erpnext.accounts.bank_reconciliation.DataTableManager = class DataTableManager {
 			{
 				name: "Party Type",
 				editable: false,
-				width: 70,
+				width: 95,
 			},
 			{
 				name: "Party",
