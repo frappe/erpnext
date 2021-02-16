@@ -7,12 +7,18 @@ frappe.ui.form.on('Tax Exemption 80G Certificate', {
 	},
 
 	get_payments: function(frm) {
-		return frappe.call({
-			method: 'get_payments',
+		frm.call({
 			doc: frm.doc,
-			callback: function(r) {
-				frm.refresh_fields();
-			}
+			method: 'get_payments',
+			freeze: true
+		});
+	},
+
+	company: function(frm) {
+		frm.call({
+			doc: frm.doc,
+			method: 'set_company_address',
+			freeze: true
 		});
 	}
 });

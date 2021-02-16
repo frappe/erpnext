@@ -14,9 +14,16 @@
   "pan_number",
   "donor",
   "column_break_4",
-  "company",
   "date",
   "fiscal_year",
+  "section_break_11",
+  "company",
+  "company_address",
+  "company_address_display",
+  "column_break_14",
+  "company_pan_number",
+  "company_80g_number",
+  "company_80g_wef",
   "section_break_6",
   "get_payments",
   "payments",
@@ -123,11 +130,54 @@
    "fieldtype": "Select",
    "label": "Naming Series",
    "options": "NPO-80G-.YYYY.-"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "company_address",
+   "fieldtype": "Link",
+   "label": "Company Address",
+   "options": "Address"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "company.pan_details",
+   "fieldname": "company_pan_number",
+   "fieldtype": "Data",
+   "label": "PAN Number",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company_address_display",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Company Address Display",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.company_80g_number",
+   "fieldname": "company_80g_number",
+   "fieldtype": "Data",
+   "label": "80G Number",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "company.with_effect_from",
+   "fieldname": "company_80g_wef",
+   "fieldtype": "Date",
+   "label": "80G With Effect From",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-15 16:34:20.963355",
+ "modified": "2021-02-16 13:22:26.337109",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "Tax Exemption 80G Certificate",
