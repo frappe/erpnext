@@ -64,7 +64,7 @@ def repost(doc):
 			message += "<br>" + "Traceback: <br>" + traceback
 		frappe.db.set_value(doc.doctype, doc.name, 'error_log', message)
 
-		notify_error_to_stock_managers(doc)
+		notify_error_to_stock_managers(doc, message)
 		doc.set_status('Failed')
 		raise
 	finally:

@@ -3,7 +3,6 @@ from frappe import _
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.accounts.utils import update_gl_entries_after
 
-
 def execute():
 	data = frappe.db.sql(''' SELECT name, item_code, warehouse, voucher_type, voucher_no, posting_date, posting_time
 		from `tabStock Ledger Entry` where creation > '2020-12-26 12:58:55.903836' and is_cancelled = 0
