@@ -168,5 +168,10 @@
   "state_number": "37",
   "state_code": "AD",
   "state_name": "Andhra Pradesh (New)"
+ },
+ {
+  "state_number": "38",
+  "state_code": "LA",
+  "state_name": "Ladakh"
  }
 ]
