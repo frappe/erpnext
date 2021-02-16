@@ -46,7 +46,7 @@ class VehicleAllocationRegisterReport(object):
 			select m.name as vehicle_booking_order, m.item_code, m.supplier, m.allocation_period, m.delivery_period,
 				m.vehicle_allocation, m.transaction_date,
 				m.color_1, m.color_2, m.color_3,
-				m.customer, m.financer, m.customer_name, m.tax_id, m.tax_cnic,
+				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
@@ -82,8 +82,10 @@ class VehicleAllocationRegisterReport(object):
 				d.reference = d.vehicle_booking_order
 				d.allocation_period = None
 
+			is_leased = d.financer and d.finance_type == "Leased"
+
 			d.vehicle_color = d.vehicle_color or d.color_1 or d.color_2 or d.color_3
-			d.tax_cnic_ntn = d.tax_cnic or d.tax_id
+			d.tax_cnic_ntn = d.tax_id or d.tax_cnic if is_leased else d.tax_cnic or d.tax_id
 			d.contact_number = d.contact_mobile or d.contact_phone
 
 			if d.vehicle_booking_order in self.customer_payments:
