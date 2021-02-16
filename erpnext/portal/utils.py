@@ -2,7 +2,7 @@ import frappe
 from frappe.utils.nestedset import get_root_of
 
 from erpnext.shopping_cart.cart import get_debtors_account
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import (
 	get_shopping_cart_settings,
 )
 

@@ -1,11 +1,12 @@
-# Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
+<<<<<<< HEAD
+=======
+
+>>>>>>> eef9cf152f (chore: Drive E-commerce via Website Item)
 import frappe
 
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
-	is_cart_enabled,
-)
-
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import is_cart_enabled
 
 def show_cart_count():
 	if (is_cart_enabled() and

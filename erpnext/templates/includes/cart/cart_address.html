@@ -4,7 +4,7 @@
 	{% set select_address = True %}
 {% endif %}
 
-{% set show_coupon_code = frappe.db.get_single_value('Shopping Cart Settings', 'show_apply_coupon_code_in_website') %}
+{% set show_coupon_code = frappe.db.get_single_value('E Commerce Settings', 'show_apply_coupon_code_in_website') %}
 {% if show_coupon_code == 1%}
 <div class="mb-3">
 	<div class="row no-gutters">

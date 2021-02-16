@@ -10,26 +10,22 @@ class ProductQuery:
 	"""Query engine for product listing
 
 	Attributes:
-	    cart_settings (Document): Settings for Cart
 	    fields (list): Fields to fetch in query
-	    filters (TYPE): Description
-	    or_filters (list): Description
+	    conditions (string): Conditions for query building
+	    or_conditions (string): Search conditions
 	    page_length (Int): Length of page for the query
 	    settings (Document): E Commerce Settings DocType
-	    filters (list)
-	    or_filters (list)
 	"""
 
 	def __init__(self):
 		self.settings = frappe.get_doc("E Commerce Settings")
-		self.cart_settings = frappe.get_doc("Shopping Cart Settings")
 		self.page_length = self.settings.products_per_page or 20
-		self.fields = ['name', 'item_name', 'item_code', 'website_image', 'variant_of', 'has_variants',
-			'item_group', 'image', 'web_long_description', 'description', 'route', 'weightage']
-		self.filters = []
-		self.or_filters = [['show_in_website', '=', 1]]
-		if not self.settings.get('hide_variants'):
-			self.or_filters.append(['show_variant_in_website', '=', 1])
+		self.fields = ['wi.name', 'wi.item_name', 'wi.item_code', 'wi.website_image', 'wi.variant_of',
+			'wi.has_variants', 'wi.item_group', 'wi.image', 'wi.web_long_description', 'wi.description',
+			'wi.route']
+		self.conditions = ""
+		self.or_conditions = ""
+		self.substitutions = []
 
 	def query(self, attributes=None, fields=None, search_term=None, start=0, item_group=None):
 		"""Summary
@@ -57,56 +53,64 @@ class ProductQuery:
 				filters=[["Website Item Group", "item_group", "=", item_group]]
 			)
 
+		self.query_fields = (", ").join(self.fields)
 		if attributes:
-			all_items = []
-			for attribute, values in attributes.items():
-				if not isinstance(values, list):
-					values = [values]
-
-				items = frappe.get_all(
-					"Item",
-					fields=self.fields,
-					filters=[
-						*self.filters,
-						["Item Variant Attribute", "attribute", "=", attribute],
-						["Item Variant Attribute", "attribute_value", "in", values],
-					],
-					or_filters=self.or_filters,
-					start=start,
-					limit=self.page_length,
-					order_by="weightage desc"
-				)
-
-				items_dict = {item.name: item for item in items}
-
-				all_items.append(set(items_dict.keys()))
-
-			result = [items_dict.get(item) for item in list(set.intersection(*all_items))]
+			result = self.query_items_with_attributes(attributes, start)
 		else:
-			result = frappe.get_all(
-				"Item",
-				fields=self.fields,
-				filters=self.filters,
-				or_filters=self.or_filters,
-				start=start,
-				limit=self.page_length,
-				order_by="weightage desc"
-			)
+			result = self.query_items(self.conditions, self.or_conditions,
+				self.substitutions, start=start)
 
-		# Combine results having context of website item groups into item results
-		if item_group and website_item_groups:
-			items_list = {row.name for row in result}
-			for row in website_item_groups:
-				if row.wig_parent not in items_list:
-					result.append(row)
-
-		result = sorted(result, key=lambda x: x.get("weightage"), reverse=True)
-
+		# add price info in results
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
 			if product_info:
 				item.formatted_price = (product_info.get('price') or {}).get('formatted_price')
 
+		return result
+
+	def query_items(self, conditions, or_conditions, substitutions, start=0):
+		"""Build a query to fetch Website Items based on field filters."""
+		return frappe.db.sql("""
+			select distinct {query_fields}
+			from
+				`tabWebsite Item` wi, `tabItem Variant Attribute` iva
+			where
+				wi.published = 1
+				{conditions}
+				{or_conditions}
+			limit {limit} offset {start}
+		""".format(
+				query_fields=self.query_fields,
+				conditions=conditions,
+				or_conditions=or_conditions,
+				limit=self.page_length,
+				start=start),
+			tuple(substitutions),
+			as_dict=1)
+
+	def query_items_with_attributes(self, attributes, start=0):
+		"""Build a query to fetch Website Items based on field & attribute filters."""
+		all_items = []
+		self.conditions += " and iva.parent = wi.item_code"
+
+		for attribute, values in attributes.items():
+			if not isinstance(values, list): values = [values]
+
+			conditions_copy = self.conditions
+			substitutions_copy = self.substitutions.copy()
+
+			conditions_copy += " and iva.attribute = '{0}' and iva.attribute_value in ({1})" \
+				.format(attribute, (", ").join(['%s'] * len(values)))
+			substitutions_copy.extend(values)
+
+			items = self.query_items(conditions_copy, self.or_conditions, substitutions_copy, start=start)
+
+			items_dict = {item.name: item for item in items}
+			# TODO: Replace Variants by their parent templates
+
+			all_items.append(set(items_dict.keys()))
+
+		result = [items_dict.get(item) for item in list(set.intersection(*all_items))]
 		return result
 
 	def build_fields_filters(self, filters):
@@ -130,10 +134,11 @@ class ProductQuery:
 					self.filters.append([child_doctype, fields[0].fieldname, 'IN', values])
 			elif isinstance(values, list):
 				# If value is a list use `IN` query
-				self.filters.append([field, 'IN', values])
+				self.conditions += " and wi.{0} in ({1})".format(field, (', ').join(['%s'] * len(values)))
+				self.substitutions.extend(values)
 			else:
 				# `=` will be faster than `IN` for most cases
-				self.filters.append([field, '=', values])
+				self.conditions += " and wi.{0} = '{1}'".format(field, values)
 
 	def build_search_filters(self, search_term):
 		"""Query search term in specified fields
@@ -158,4 +163,5 @@ class ProductQuery:
 
 		# Build or filters for query
 		search = '%{}%'.format(search_term)
-		self.or_filters += [[field, 'like', search] for field in search_fields]
+		for field in search_fields:
+			self.or_conditions += " or {0} like '{1}'".format(field, search)

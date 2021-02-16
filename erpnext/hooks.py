@@ -237,8 +237,8 @@ doc_events = {
 			"erpnext.support.doctype.issue.issue.set_first_response_time"
 		]
 	},
-	"Sales Taxes and Charges Template": {
-		"on_update": "erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings.validate_cart_settings"
+	("Sales Taxes and Charges Template", "Price List"): {
+		"on_update": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.validate_cart_settings"
 	},
 	"Website Settings": {
 		"validate": "erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings.home_page_is_products"
