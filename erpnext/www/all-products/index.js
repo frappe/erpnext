@@ -125,7 +125,7 @@ $(() => {
 			};
 
 			return new Promise((resolve, reject) => {
-				frappe.call('erpnext.portal.product_configurator.utils.get_products_html_for_website', args)
+				frappe.call('erpnext.www.all-products.index.get_products_html_for_website', args)
 					.then(r => {
 						if (r.exc) reject(r.exc);
 						else resolve(r.message);

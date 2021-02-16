@@ -492,7 +492,7 @@ def install_defaults(args=None):
 
 		# Shopping cart: needs price lists
 		{
-			"doctype": "Shopping Cart Settings",
+			"doctype": "E Commerce Settings",
 			"enabled": 1,
 			'company': args.company_name,
 			# uh oh

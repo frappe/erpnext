@@ -269,7 +269,7 @@ def _make_customer(source_name, ignore_permissions=False):
 				customer = frappe.get_doc(customer_doclist)
 				customer.flags.ignore_permissions = ignore_permissions
 				if quotation.get("party_name") == "Shopping Cart":
-					customer.customer_group = frappe.db.get_value("Shopping Cart Settings", None,
+					customer.customer_group = frappe.db.get_value("E Commerce Settings", None,
 						"default_customer_group")
 
 				try:
