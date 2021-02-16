@@ -117,7 +117,11 @@ def call_mws_method(mws_method, *args, **kwargs):
 			return response
 		except Exception as e:
 			delay = math.pow(4, x) * 125
-			frappe.log_error(message=e, title=str(mws_method))
+
+			if hasattr(mws_method, '__name__'):
+				title = getattr(mws_method, '__name__')
+
+			frappe.log_error(message=e, title=str(title))
 			time.sleep(delay)
 			continue
 
