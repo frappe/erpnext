@@ -82,7 +82,7 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	error_msg = _("""{0} {1} is not in any active Fiscal Year""").format(label, formatdate(transaction_date))
 	if company:
 		error_msg = _("""{0} for {1}""").format(error_msg, frappe.bold(company))
-	
+
 	if verbose==1: frappe.msgprint(error_msg)
 	raise FiscalYearError(error_msg)
 
@@ -895,7 +895,8 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 
-	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
+	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time,
+		for_warehouses, for_items, company)
 	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
 
 	for voucher_type, voucher_no in future_stock_vouchers:
@@ -909,7 +910,7 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 
-def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
+def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
 	future_stock_vouchers = []
 
 	values = []
@@ -921,6 +922,10 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	if for_warehouses:
 		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
 		values += for_warehouses
+
+	if company:
+		condition += " and company = %s "
+		values.append(company)
 
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
@@ -982,7 +987,7 @@ def check_if_stock_and_account_balance_synced(posting_date, company, voucher_typ
 			error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses as on {3}.").format(
 				stock_bal, account_bal, frappe.bold(account), posting_date)
 			error_resolution = _("Please create an adjustment Journal Entry for amount {0} on {1}")\
-				.format(frappe.bold(diff), frappe.bold(posting_date))			
+				.format(frappe.bold(diff), frappe.bold(posting_date))
 
 			frappe.msgprint(
 				msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
