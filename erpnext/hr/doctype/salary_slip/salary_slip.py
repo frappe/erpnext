@@ -288,8 +288,7 @@ class SalarySlip(TransactionBase):
 				AND ifnull(leave_application, '') = ''
 				AND employee = %(employee)s
 				AND attendance_date between %(st_dt)s AND %(end_dt)s
-				and attendance_date not in ('{0}')
-			""".format(holidays), {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
+			""", {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
 
 			absent_days = flt(absent[0][0]) if absent else 0
 			lwp += absent_days
@@ -981,8 +980,8 @@ class SalarySlip(TransactionBase):
 		emp = frappe.db.get_value("Employee", self.employee, ["salary_mode", "bank_name", "bank_ac_no"], as_dict=1)
 		if emp:
 			self.salary_mode = emp.salary_mode
-			self.bank_name = emp.bank_name
-			self.bank_account_no = emp.bank_ac_no
+			self.bank_name = emp.bank_name if self.salary_mode == "Bank" else None
+			self.bank_account_no = emp.bank_ac_no if self.salary_mode == "Bank" else None
 
 	def process_salary_based_on_leave(self, lwp=0):
 		self.get_leave_details(lwp=lwp)
