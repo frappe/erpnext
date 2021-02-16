@@ -7,7 +7,7 @@ from frappe.utils import cint, flt, cstr, get_link_to_form, today, getdate
 from frappe import _
 import frappe.defaults
 from collections import defaultdict
-from erpnext.accounts.utils import get_fiscal_year, check_if_stock_and_account_balance_synced
+from erpnext.accounts.utils import get_fiscal_year, check_if_stock_and_account_balance_synced, repost_gle_for_stock_vouchers
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -488,12 +488,31 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-
 		if check_if_future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
 		elif not is_reposting_pending():
+			# self.update_gl_entries_for_entries_with_same_timestamp(args)
 			check_if_stock_and_account_balance_synced(self.posting_date,
 				self.company, self.doctype, self.name)
+	
+	def update_gl_entries_for_entries_with_same_timestamp(self, args):
+		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
+			return
+
+		args['time_format'] = '%H:%i:%s'
+		transactions_with_same_timestamp = frappe.db.sql("""
+			select
+				distinct voucher_type, voucher_no
+			from
+				`tabStock Ledger Entry`
+			where
+				voucher_no != %(voucher_no)s
+				and company = %(company)s
+				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
+		""", args)
+		if transactions_with_same_timestamp:
+			repost_gle_for_stock_vouchers(transactions_with_same_timestamp, self.posting_date, company=self.company)
+
 
 def is_reposting_pending():
 	return frappe.db.exists("Repost Item Valuation",
@@ -520,13 +539,15 @@ def check_if_future_sle_exists(args):
 	return sle_exists
 
 def get_sle(args):
+	args['time_format'] = '%H:%i:%s'
 	return frappe.db.sql("""
 		select name
 		from `tabStock Ledger Entry`
 		where
 			item_code=%(item_code)s
 			and warehouse=%(warehouse)s
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
+				or timestamp(posting_date, time_format(posting_time, %(time_format)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s)))
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		limit 1
