@@ -2,12 +2,13 @@
  "actions": [],
  "allow_guest_to_view": 1,
  "allow_import": 1,
- "autoname": "field:item_code",
+ "autoname": "naming_series",
  "creation": "2021-02-09 21:06:14.441698",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "naming_series",
   "web_item_name",
   "route",
   "has_variants",
@@ -28,6 +29,7 @@
   "thumbnail",
   "section_break_17",
   "website_warehouse",
+  "description",
   "website_specifications",
   "copy_from_item_group",
   "column_break_27",
@@ -60,8 +62,8 @@
    "fieldtype": "Link",
    "label": "Item Code",
    "options": "Item",
-   "reqd": 1,
-   "unique": 1
+   "read_only_depends_on": "eval:!doc.__islocal",
+   "reqd": 1
   },
   {
    "fetch_from": "item_code.item_name",
@@ -246,13 +248,30 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "item_code.description",
+   "fieldname": "description",
+   "fieldtype": "Text Editor",
+   "label": "Item Description",
+   "read_only": 1
+  },
+  {
+   "default": "WEB-ITM-.####",
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Naming Series",
+   "no_copy": 1,
+   "options": "WEB-ITM-.####",
+   "print_hide": 1
   }
  ],
  "has_web_view": 1,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-10 14:22:41.628232",
+ "modified": "2021-02-12 16:49:42.275517",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",

@@ -151,7 +151,7 @@ class TestShoppingCart(unittest.TestCase):
 
 	# helper functions
 	def enable_shopping_cart(self):
-		settings = frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings")
+		settings = frappe.get_doc("E Commerce Settings", "E Commerce Settings")
 
 		settings.update({
 			"enabled": 1,
@@ -181,7 +181,7 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.local.shopping_cart_settings = None
 
 	def disable_shopping_cart(self):
-		settings = frappe.get_doc("Shopping Cart Settings", "Shopping Cart Settings")
+		settings = frappe.get_doc("E Commerce Settings", "E Commerce Settings")
 		settings.enabled = 0
 		settings.save()
 		frappe.local.shopping_cart_settings = None

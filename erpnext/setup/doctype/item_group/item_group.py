@@ -116,9 +116,8 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 				values[f"slide_{index + 1}_image"] = slide.image
 				values[f"slide_{index + 1}_title"] = slide.heading
 				values[f"slide_{index + 1}_subtitle"] = slide.description
-				values[f"slide_{index + 1}_theme"] = slide.theme or "Light"
-				values[f"slide_{index + 1}_content_align"] = slide.content_align or "Centre"
-				values[f"slide_{index + 1}_primary_action_label"] = slide.label
+				values[f"slide_{index + 1}_theme"] = slide.get("theme") or "Light"
+				values[f"slide_{index + 1}_content_align"] = slide.get("content_align") or "Centre"
 				values[f"slide_{index + 1}_primary_action"] = slide.url
 
 			context.slideshow = values
@@ -167,7 +166,7 @@ def get_product_list_for_group(product_group=None, start=0, limit=10, search=Non
 	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
 	data = adjust_qty_for_expired_items(data)
 
-	if cint(frappe.db.get_single_value("Shopping Cart Settings", "enabled")):
+	if cint(frappe.db.get_single_value("E Commerce Settings", "enabled")):
 		for item in data:
 			set_product_info_for_website(item)
 

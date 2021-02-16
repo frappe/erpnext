@@ -10,6 +10,30 @@
   "hide_variants",
   "column_break_4",
   "products_per_page",
+  "display_settings_section",
+  "show_attachments",
+  "show_price",
+  "show_stock_availability",
+  "enable_variants",
+  "column_break_13",
+  "show_contact_us_button",
+  "show_quantity_in_website",
+  "show_apply_coupon_code_in_website",
+  "allow_items_not_in_stock",
+  "section_break_18",
+  "company",
+  "price_list",
+  "enabled",
+  "store_page_docs",
+  "column_break_21",
+  "default_customer_group",
+  "quotation_series",
+  "checkout_settings_section",
+  "enable_checkout",
+  "save_quotations_as_draft",
+  "column_break_27",
+  "payment_gateway_account",
+  "payment_success_url",
   "filter_categories_section",
   "enable_field_filters",
   "filter_fields",
@@ -37,6 +61,7 @@
    "label": "Products per Page"
   },
   {
+   "collapsible": 1,
    "fieldname": "filter_categories_section",
    "fieldtype": "Section Break",
    "label": "Filters"
@@ -76,12 +101,169 @@
    "fieldtype": "Table",
    "label": "Attributes",
    "options": "Website Attribute"
+  },
+  {
+   "default": "0",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enable Shopping Cart"
+  },
+  {
+   "depends_on": "doc.enabled",
+   "fieldname": "store_page_docs",
+   "fieldtype": "HTML"
+  },
+  {
+   "fieldname": "display_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Display Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_attachments",
+   "fieldtype": "Check",
+   "label": "Show Public Attachments"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_price",
+   "fieldtype": "Check",
+   "label": "Show Price"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_stock_availability",
+   "fieldtype": "Check",
+   "label": "Show Stock Availability"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_variants",
+   "fieldtype": "Check",
+   "label": "Enable Variants"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_contact_us_button",
+   "fieldtype": "Check",
+   "label": "Show Contact Us Button"
+  },
+  {
+   "default": "0",
+   "depends_on": "show_stock_availability",
+   "fieldname": "show_quantity_in_website",
+   "fieldtype": "Check",
+   "label": "Show Stock Quantity"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_apply_coupon_code_in_website",
+   "fieldtype": "Check",
+   "label": "Show Apply Coupon Code"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_items_not_in_stock",
+   "fieldtype": "Check",
+   "label": "Allow items not in stock to be added to cart"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break",
+   "label": "Shopping Cart"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Company",
+   "remember_last_selected_value": 1
+  },
+  {
+   "depends_on": "enabled",
+   "description": "Prices will not be shown if Price List is not set",
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "default_customer_group",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Default Customer Group",
+   "mandatory_depends_on": "eval: doc.enabled === 1",
+   "options": "Customer Group"
+  },
+  {
+   "depends_on": "enabled",
+   "fieldname": "quotation_series",
+   "fieldtype": "Select",
+   "label": "Quotation Series",
+   "mandatory_depends_on": "eval: doc.enabled === 1"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "eval:doc.enable_checkout",
+   "depends_on": "enabled",
+   "fieldname": "checkout_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Checkout Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_checkout",
+   "fieldtype": "Check",
+   "label": "Enable Checkout"
+  },
+  {
+   "default": "Orders",
+   "depends_on": "enable_checkout",
+   "description": "After payment completion redirect user to selected page.",
+   "fieldname": "payment_success_url",
+   "fieldtype": "Select",
+   "label": "Payment Success Url",
+   "mandatory_depends_on": "enable_checkout",
+   "options": "\nOrders\nInvoices\nMy Account"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.enable_checkout == 0",
+   "fieldname": "save_quotations_as_draft",
+   "fieldtype": "Check",
+   "label": "Save Quotations as Draft"
+  },
+  {
+   "depends_on": "enable_checkout",
+   "fieldname": "payment_gateway_account",
+   "fieldtype": "Link",
+   "label": "Payment Gateway Account",
+   "mandatory_depends_on": "enable_checkout",
+   "options": "Payment Gateway Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-10 19:22:47.154104",
+ "modified": "2021-02-11 18:22:14.556880",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
