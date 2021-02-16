@@ -563,7 +563,7 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 					allow_edit: true
 				},
 				callback: (r) => {
-					var doc = frappe.model.sync(r.message);
+					const doc = frappe.model.sync(r.message);
 					frappe.set_route("Form", doc[0].doctype, doc[0].name);
 				},
 			});
