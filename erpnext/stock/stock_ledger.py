@@ -23,6 +23,7 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 		cancel = sl_entries[0].get("is_cancelled")
 		if cancel:
+			validate_cancellation(sl_entries)
 			set_as_cancel(sl_entries[0].get('voucher_type'), sl_entries[0].get('voucher_no'))
 
 		for sle in sl_entries:
@@ -44,6 +45,20 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 
 			args = sle_doc.as_dict()
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
+
+def validate_cancellation(args):
+	if sl_entries[0].get("is_cancelled"):
+		repost_entry = frappe.db.get_value("Repost Item Valuation", {
+			'voucher_type': self.voucher_type,
+			'voucher_no': self.voucher_no,
+			'docstatus': 1
+		}, ['name', 'status'], as_dict=1)
+
+		if repost_entry:
+			if repost_entry.status == 'In Progress':
+				frappe.throw(_("Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."))
+			if repost_entry.status == 'Queued':
+				frappe.delete_doc("Repost Item Valuation", repost_entry.name)
 
 
 def set_as_cancel(voucher_type, voucher_no):
@@ -182,11 +197,11 @@ class update_entries_after(object):
 
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
+			
+			self.update_bin()
 
 		if self.exceptions:
 			self.raise_exceptions()
-
-		self.update_bin()
 
 	def process_sle_against_current_voucher(self):
 		sl_entries = self.get_sle_against_current_voucher()
@@ -194,8 +209,6 @@ class update_entries_after(object):
 			self.process_sle(sle)
 
 	def get_sle_against_current_voucher(self):
-		self.args['time_format'] = '%H:%i:%s'
-
 		return frappe.db.sql("""
 			select
 				*, timestamp(posting_date, posting_time) as "timestamp"
@@ -639,7 +652,6 @@ class update_entries_after(object):
 		# update bin for each warehouse
 		for warehouse, data in iteritems(self.data):
 			bin_doc = get_bin(self.item_code, warehouse)
-
 			bin_doc.update({
 				"valuation_rate": data.valuation_rate,
 				"actual_qty": data.qty_after_transaction,
@@ -765,6 +777,25 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no,
 
 	return valuation_rate
 
+def update_qty_in_future_sle(args, allow_negative_stock=None):
+	frappe.db.sql("""
+		update `tabStock Ledger Entry`
+		set qty_after_transaction = qty_after_transaction + {qty}
+		where
+			item_code = %(item_code)s
+			and warehouse = %(warehouse)s
+			and voucher_no != %(voucher_no)s
+			and is_cancelled = 0
+			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
+				or (
+					timestamp(posting_date, posting_time) = timestamp(%(posting_date)s, %(posting_time)s)
+					and creation > %(creation)s
+				)
+			)
+	""".format(qty=args.actual_qty), args)
+
+	validate_negative_qty_in_future_sle(args, allow_negative_stock)
+
 def validate_negative_qty_in_future_sle(args, allow_negative_stock=None):
 	allow_negative_stock = allow_negative_stock \
 		or cint(frappe.db.get_single_value("Stock Settings", "allow_negative_stock"))
@@ -793,7 +824,7 @@ def get_future_sle_with_negative_qty(args):
 			and voucher_no != %(voucher_no)s
 			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 			and is_cancelled = 0
-			and qty_after_transaction + {0} < 0
+			and qty_after_transaction < 0
 		order by timestamp(posting_date, posting_time) asc
 		limit 1
-	""".format(args.actual_qty), args, as_dict=1)
+	""", args, as_dict=1)
