@@ -7,7 +7,7 @@ from frappe.utils import cint, flt, cstr, get_link_to_form, today, getdate
 from frappe import _
 import frappe.defaults
 from collections import defaultdict
-from erpnext.accounts.utils import get_fiscal_year, check_if_stock_and_account_balance_synced, repost_gle_for_stock_vouchers
+from erpnext.accounts.utils import get_fiscal_year, check_if_stock_and_account_balance_synced
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
@@ -519,7 +519,6 @@ def check_if_future_sle_exists(args):
 	return sle_exists
 
 def get_sle(args):
-	args['time_format'] = '%H:%i:%s'
 	return frappe.db.sql("""
 		select name
 		from `tabStock Ledger Entry`
