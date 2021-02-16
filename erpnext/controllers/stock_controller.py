@@ -491,29 +491,9 @@ class StockController(AccountsController):
 		if check_if_future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
 		elif not is_reposting_pending():
-			# self.update_gl_entries_for_entries_with_same_timestamp(args)
 			check_if_stock_and_account_balance_synced(self.posting_date,
 				self.company, self.doctype, self.name)
 	
-	def update_gl_entries_for_entries_with_same_timestamp(self, args):
-		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
-			return
-
-		args['time_format'] = '%H:%i:%s'
-		transactions_with_same_timestamp = frappe.db.sql("""
-			select
-				distinct voucher_type, voucher_no
-			from
-				`tabStock Ledger Entry`
-			where
-				voucher_no != %(voucher_no)s
-				and company = %(company)s
-				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
-		""", args)
-		if transactions_with_same_timestamp:
-			repost_gle_for_stock_vouchers(transactions_with_same_timestamp, self.posting_date, company=self.company)
-
-
 def is_reposting_pending():
 	return frappe.db.exists("Repost Item Valuation",
 		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
@@ -546,8 +526,7 @@ def get_sle(args):
 		where
 			item_code=%(item_code)s
 			and warehouse=%(warehouse)s
-			and (timestamp(posting_date, posting_time) > timestamp(%(posting_date)s, %(posting_time)s)
-				or timestamp(posting_date, time_format(posting_time, %(time_format)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s)))
+			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		limit 1
