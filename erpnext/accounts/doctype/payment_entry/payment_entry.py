@@ -1142,7 +1142,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	paid_amount, received_amount = set_paid_amount_and_received_amount(
 		dt, party_account_currency, bank, outstanding_amount, payment_type, bank_amount, doc)
 
-	paid_amount, received_amount, difference_amount = apply_early_payment_discount(paid_amount, received_amount, doc)
+	paid_amount, received_amount, discount_amount = apply_early_payment_discount(paid_amount, received_amount, doc)
 
 	pe = frappe.new_doc("Payment Entry")
 	pe.payment_type = payment_type
@@ -1213,11 +1213,20 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	pe.setup_party_account_field()
 	pe.set_missing_values()
+
 	if party_account and bank:
 		if dt == "Employee Advance":
 			reference_doc = doc
 		pe.set_exchange_rate(ref_doc=reference_doc)
 		pe.set_amounts()
+		if discount_amount:
+			pe.set_gain_or_loss(account_details={
+				'account': frappe.get_cached_value('Company', pe.company, "default_discount_account"),
+				'cost_center': pe.cost_center or frappe.get_cached_value('Company', pe.company, "cost_center"),
+				'amount': discount_amount * -1 if payment_type == "Pay" else 1
+			})
+			pe.set_difference_amount()
+
 	return pe
 
 def get_bank_cash_account(doc, bank_account):
@@ -1334,8 +1343,8 @@ def set_paid_amount_and_received_amount(dt, party_account_currency, bank, outsta
 	return paid_amount, received_amount
 
 def apply_early_payment_discount(paid_amount, received_amount, doc):
-	difference_amount = 0
-	if doc.doctype in ["Sales Invoice", "Purchase Invoice"] and doc.payment_schedule:
+	total_discount = 0
+	if doc.doctype in ['Sales Invoice', 'Purchase Invoice'] and doc.payment_schedule:
 		for term in doc.payment_schedule:
 			if not term.discounted_amount and term.discount and getdate(nowdate()) <= term.discount_date:
 				if term.discount_type == 'Percentage':
@@ -1345,20 +1354,20 @@ def apply_early_payment_discount(paid_amount, received_amount, doc):
 
 				discount_amount_in_foreign_currency = discount_amount * doc.get('conversion_rate', 1)
 
-				if doc.doctype == "Sales Invoice":
+				if doc.doctype == 'Sales Invoice':
 					paid_amount -= discount_amount
 					received_amount -= discount_amount_in_foreign_currency
 				else:
 					received_amount -= discount_amount
 					paid_amount -= discount_amount_in_foreign_currency
 
-				difference_amount += discount_amount
+				total_discount += discount_amount
 
-		if difference_amount:
-			money = frappe.utils.fmt_money(difference_amount, currency=doc.get('currency'))
+		if total_discount:
+			money = frappe.utils.fmt_money(total_discount, currency=doc.get('currency'))
 			frappe.msgprint(_("Discount of {} applied as per Payment Term").format(money), alert=1)
 
-	return paid_amount, received_amount, difference_amount
+	return paid_amount, received_amount, total_discount
 
 def get_reference_as_per_payment_terms(payment_schedule, dt, dn, doc, grand_total, outstanding_amount):
 	references = []
