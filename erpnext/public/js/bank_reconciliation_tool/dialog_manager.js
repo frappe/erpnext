@@ -314,17 +314,17 @@ erpnext.accounts.bank_reconciliation.DialogManager = class DialogManager {
 				label: "Party Type",
 				options: "DocType",
 				mandatory_depends_on:
-					"eval:doc.action=='Create Voucher' &&  doc.document_type=='Payment Entry'",
-					get_query: function () {
-						return {
-							filters: {
-								name: [
-									"in",
-									Object.keys(frappe.boot.party_account_types),
-								],
-							},
-						};
-					},
+				"eval:doc.action=='Create Voucher' &&  doc.document_type=='Payment Entry'",
+				get_query: function () {
+					return {
+						filters: {
+							name: [
+								"in",
+								Object.keys(frappe.boot.party_account_types),
+							],
+						},
+					};
+				},
 			},
 			{
 				fieldname: "party",
