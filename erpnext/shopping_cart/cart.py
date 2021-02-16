@@ -1,8 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-
 import frappe
 import frappe.defaults
 from frappe import _, throw
@@ -11,10 +9,8 @@ from frappe.contacts.doctype.contact.contact import get_contact_name
 from frappe.utils import cint, cstr, flt, get_fullname
 from frappe.utils.nestedset import get_root_of
 
+from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import get_shopping_cart_settings
 from erpnext.accounts.utils import get_account_name
-from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import (
-	get_shopping_cart_settings,
-)
 from erpnext.utilities.product import get_qty_in_stock
 
 
@@ -22,7 +18,7 @@ class WebsitePriceListMissingError(frappe.ValidationError):
 	pass
 
 def set_cart_count(quotation=None):
-	if cint(frappe.db.get_singles_value("Shopping Cart Settings", "enabled")):
+	if cint(frappe.db.get_singles_value("E Commerce Settings", "enabled")):
 		if not quotation:
 			quotation = _get_cart_quotation()
 		cart_count = cstr(len(quotation.get("items")))
@@ -49,7 +45,7 @@ def get_cart_quotation(doc=None):
 		"shipping_addresses": get_shipping_addresses(party),
 		"billing_addresses": get_billing_addresses(party),
 		"shipping_rules": get_applicable_shipping_rules(party),
-		"cart_settings": frappe.get_cached_doc("Shopping Cart Settings")
+		"cart_settings": frappe.get_cached_doc("E Commerce Settings")
 	}
 
 @frappe.whitelist()
@@ -73,7 +69,7 @@ def get_billing_addresses(party=None):
 @frappe.whitelist()
 def place_order():
 	quotation = _get_cart_quotation()
-	cart_settings = frappe.db.get_value("Shopping Cart Settings", None,
+	cart_settings = frappe.db.get_value("E Commerce Settings", None,
 		["company", "allow_items_not_in_stock"], as_dict=1)
 	quotation.company = cart_settings.company
 
@@ -263,7 +259,7 @@ def guess_territory():
 		territory = frappe.db.get_value("Territory", geoip_country)
 
 	return territory or \
-		frappe.db.get_value("Shopping Cart Settings", None, "territory") or \
+		frappe.db.get_value("E Commerce Settings", None, "territory") or \
 			get_root_of("Territory")
 
 def decorate_quotation_doc(doc):
@@ -286,7 +282,7 @@ def _get_cart_quotation(party=None):
 	if quotation:
 		qdoc = frappe.get_doc("Quotation", quotation[0].name)
 	else:
-		company = frappe.db.get_value("Shopping Cart Settings", None, ["company"])
+		company = frappe.db.get_value("E Commerce Settings", None, ["company"])
 		qdoc = frappe.get_doc({
 			"doctype": "Quotation",
 			"naming_series": get_shopping_cart_settings().quotation_series or "QTN-CART-",
@@ -341,7 +337,7 @@ def apply_cart_settings(party=None, quotation=None):
 	if not quotation:
 		quotation = _get_cart_quotation(party)
 
-	cart_settings = frappe.get_doc("Shopping Cart Settings")
+	cart_settings = frappe.get_doc("E Commerce Settings")
 
 	set_price_list_and_rate(quotation, cart_settings)
 
@@ -418,7 +414,7 @@ def get_party(user=None):
 			party_doctype = contact.links[0].link_doctype
 			party = contact.links[0].link_name
 
-	cart_settings = frappe.get_doc("Shopping Cart Settings")
+	cart_settings = frappe.get_doc("E Commerce Settings")
 
 	debtors_account = ''
 

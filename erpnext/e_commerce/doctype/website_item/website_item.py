@@ -5,13 +5,17 @@
 from __future__ import unicode_literals
 import frappe
 import json
+import itertools
+from frappe import _
+from six import iteritems
 from frappe.website.doctype.website_slideshow.website_slideshow import \
 	get_slideshow
 
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
+from frappe.utils import cstr, random_string, cint
 
-from frappe.utils import cstr, random_string
+from erpnext.setup.doctype.item_group.item_group import get_parent_item_groups
 
 class WebsiteItem(WebsiteGenerator):
 	website = frappe._dict(
@@ -30,12 +34,22 @@ class WebsiteItem(WebsiteGenerator):
 		if not self.item_code:
 			frappe.throw(_("Item Code is required"), title=_("Mandatory"))
 
+		self.validate_duplicate_website_item()
 		self.validate_website_image()
 		self.make_thumbnail()
 		self.publish_unpublish_desk_item(publish=True)
 
+	def on_update(self):
+		self.update_template_item()
+
 	def on_trash(self):
 		self.publish_unpublish_desk_item(publish=False)
+
+	def validate_duplicate_website_item(self):
+		existing_web_item = frappe.db.exists("Website Item", {"item_code": self.item_code})
+		if existing_web_item and existing_web_item != self.name:
+			message = _("Website Item already exists against Item {0}").format(frappe.bold(self.item_code))
+			frappe.throw(message, title=_("Already Published"))
 
 	def publish_unpublish_desk_item(self, publish=True):
 		if frappe.db.get_value("Item", self.item_code, "published_in_website") and publish:
@@ -47,6 +61,18 @@ class WebsiteItem(WebsiteGenerator):
 		if not self.route:
 			return cstr(frappe.db.get_value('Item Group', self.item_group,
 					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
+
+	def update_template_item(self):
+		"""Set Show in Website for Template Item if True for its Variant"""
+		if self.variant_of:
+			if self.published:
+				# show template
+				template_item = frappe.get_doc("Item", self.variant_of)
+
+				if not template_item.published:
+					template_item.published = 1
+					template_item.flags.ignore_permissions = True
+					template_item.save()
 
 	def validate_website_image(self):
 		if frappe.flags.in_import:
@@ -133,6 +159,164 @@ class WebsiteItem(WebsiteGenerator):
 
 				self.thumbnail = file_doc.thumbnail_url
 
+	def get_context(self, context):
+		print(context)
+		context.show_search = True
+		context.search_link = '/search'
+
+		context.parents = get_parent_item_groups(self.item_group)
+		context.body_class = "product-page"
+		self.attributes = frappe.get_all("Item Variant Attribute",
+					  fields=["attribute", "attribute_value"],
+					  filters={"parent": self.item_code})
+		self.set_variant_context(context)
+		self.set_attribute_context(context)
+		self.set_disabled_attributes(context)
+		self.set_metatags(context)
+		self.set_shopping_cart_data(context)
+		print("IN WEB ITEM")
+
+		return context
+
+	def set_variant_context(self, context):
+		if self.has_variants:
+			context.no_cache = True
+
+			# load variants
+			# also used in set_attribute_context
+			context.variants = frappe.get_all("Item",
+				 filters={"variant_of": self.name, "show_variant_in_website": 1},
+				 order_by="name asc")
+
+			variant = frappe.form_dict.variant
+			if not variant and context.variants:
+				# the case when the item is opened for the first time from its list
+				variant = context.variants[0]
+
+			if variant:
+				context.variant = frappe.get_doc("Item", variant)
+
+				for fieldname in ("website_image", "website_image_alt", "web_long_description", "description",
+										"website_specifications"):
+					if context.variant.get(fieldname):
+						value = context.variant.get(fieldname)
+						if isinstance(value, list):
+							value = [d.as_dict() for d in value]
+
+						context[fieldname] = value
+
+	def set_attribute_context(self, context):
+		if self.has_variants:
+			attribute_values_available = {}
+			context.attribute_values = {}
+			context.selected_attributes = {}
+
+			# load attributes
+			for v in context.variants:
+				v.attributes = frappe.get_all("Item Variant Attribute",
+					  fields=["attribute", "attribute_value"],
+					  filters={"parent": v.name})
+				# make a map for easier access in templates
+				v.attribute_map = frappe._dict({})
+				for attr in v.attributes:
+					v.attribute_map[attr.attribute] = attr.attribute_value
+
+				for attr in v.attributes:
+					values = attribute_values_available.setdefault(attr.attribute, [])
+					if attr.attribute_value not in values:
+						values.append(attr.attribute_value)
+
+					if v.name == context.variant.name:
+						context.selected_attributes[attr.attribute] = attr.attribute_value
+
+			# filter attributes, order based on attribute table
+			for attr in self.attributes:
+				values = context.attribute_values.setdefault(attr.attribute, [])
+
+				if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
+					for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
+						values.append(val)
+
+				else:
+					# get list of values defined (for sequence)
+					for attr_value in frappe.db.get_all("Item Attribute Value",
+						fields=["attribute_value"],
+						filters={"parent": attr.attribute}, order_by="idx asc"):
+
+						if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
+							values.append(attr_value.attribute_value)
+
+			context.variant_info = json.dumps(context.variants)
+
+	def set_disabled_attributes(self, context):
+		"""Disable selection options of attribute combinations that do not result in a variant"""
+
+		if not self.attributes or not self.has_variants:
+			return
+
+		context.disabled_attributes = {}
+		attributes = [attr.attribute for attr in self.attributes]
+
+		def find_variant(combination):
+			for variant in context.variants:
+				if len(variant.attributes) < len(attributes):
+					continue
+
+				if "combination" not in variant:
+					ref_combination = []
+
+					for attr in variant.attributes:
+						idx = attributes.index(attr.attribute)
+						ref_combination.insert(idx, attr.attribute_value)
+
+					variant["combination"] = ref_combination
+
+				if not (set(combination) - set(variant["combination"])):
+					# check if the combination is a subset of a variant combination
+					# eg. [Blue, 0.5] is a possible combination if exists [Blue, Large, 0.5]
+					return True
+
+		for i, attr in enumerate(self.attributes):
+			if i == 0:
+				continue
+
+			combination_source = []
+
+			# loop through previous attributes
+			for prev_attr in self.attributes[:i]:
+				combination_source.append([context.selected_attributes.get(prev_attr.attribute)])
+
+			combination_source.append(context.attribute_values[attr.attribute])
+
+			for combination in itertools.product(*combination_source):
+				if not find_variant(combination):
+					context.disabled_attributes.setdefault(attr.attribute, []).append(combination[-1])
+
+	def set_metatags(self, context):
+		context.metatags = frappe._dict({})
+
+		safe_description = frappe.utils.to_markdown(self.description)
+
+		context.metatags.url = frappe.utils.get_url() + '/' + context.route
+
+		if context.website_image:
+			if context.website_image.startswith('http'):
+				url = context.website_image
+			else:
+				url = frappe.utils.get_url() + context.website_image
+			context.metatags.image = url
+
+		context.metatags.description = safe_description[:300]
+
+		context.metatags.title = self.item_name or self.item_code
+
+		context.metatags['og:type'] = 'product'
+		context.metatags['og:site_name'] = 'ERPNext'
+
+	def set_shopping_cart_data(self, context):
+		from erpnext.shopping_cart.product_info import get_product_info_for_website
+		context.shopping_cart = get_product_info_for_website(self.item_code, skip_quotation_creation=True)
+
 @frappe.whitelist()
 def make_website_item(doc):
 	if not doc:
@@ -141,13 +325,13 @@ def make_website_item(doc):
 
 	if frappe.db.exists("Website Item", {"item_code": doc.get("item_code")}):
 		message = _("Website Item already exists against {0}").format(frappe.bold(doc.get("item_code")))
-		frappe.throw(message, title=_("Already Published"), indicator="blue")
+		frappe.throw(message, title=_("Already Published"))
 
 	website_item = frappe.new_doc("Website Item")
 	website_item.web_item_name = doc.get("item_name")
 
 	fields_to_map = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
-		"has_variants", "variant_of"]
+		"has_variants", "variant_of", "description"]
 	for field in fields_to_map:
 		website_item.update({field: doc.get(field)})
 
