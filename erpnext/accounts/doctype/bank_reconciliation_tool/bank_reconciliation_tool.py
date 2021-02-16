@@ -197,6 +197,8 @@ def create_payment_entry_bts( bank_transaction_name, reference_number=None, refe
 	else:
 		payment_entry.paid_from = company_account
 
+	payment_entry.validate()
+
 	if allow_edit:
 		return payment_entry
 
