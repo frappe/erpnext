@@ -81,7 +81,7 @@ class TestBankTransaction(unittest.TestCase):
 			"payment_doctype":"Payment Entry",
 			"payment_name":payment.name,
 			"amount":bank_transaction.unallocated_amount}])
-		self.assertRaises(frappe.ValidationError, reconcile_vouchers, bank_transaction=bank_transaction.name, vouchers=vouchers)
+		self.assertRaises(frappe.ValidationError, reconcile_vouchers, bank_transaction_name=bank_transaction.name, vouchers=vouchers)
 
 	# Raise an error if debitor transaction vs debitor payment
 	def test_clear_sales_invoice(self):
