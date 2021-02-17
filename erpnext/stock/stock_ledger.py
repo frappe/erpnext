@@ -47,10 +47,10 @@ def make_sl_entries(sl_entries, allow_negative_stock=False, via_landed_cost_vouc
 			update_bin(args, allow_negative_stock, via_landed_cost_voucher)
 
 def validate_cancellation(args):
-	if sl_entries[0].get("is_cancelled"):
+	if args[0].get("is_cancelled"):
 		repost_entry = frappe.db.get_value("Repost Item Valuation", {
-			'voucher_type': self.voucher_type,
-			'voucher_no': self.voucher_no,
+			'voucher_type': args[0].voucher_type,
+			'voucher_no': args[0].voucher_no,
 			'docstatus': 1
 		}, ['name', 'status'], as_dict=1)
 
