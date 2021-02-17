@@ -298,9 +298,9 @@ class TestBatch(unittest.TestCase):
 		self.assertEqual(details.get('price_list_rate'), 400)
 
 def create_batch(item_code, rate, create_item_price_for_batch):
-	pi = make_purchase_invoice(company="_Test Company with perpetual inventory",
-		warehouse= "Stores - TCP1", cost_center = "Main - TCP1", update_stock=1,
-		expense_account ="_Test Account Cost for Goods Sold - TCP1", item_code=item_code)
+	pi = make_purchase_invoice(company="_Test Company",
+		warehouse= "Stores - _TC", cost_center = "Main - _TC", update_stock=1,
+		expense_account ="_Test Account Cost for Goods Sold - _TC", item_code=item_code)
 
 	batch = frappe.db.get_value('Batch', {'item': item_code, 'reference_name': pi.name})
 
