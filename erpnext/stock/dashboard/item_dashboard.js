@@ -24,6 +24,16 @@ erpnext.stock.ItemDashboard = Class.extend({
 			handle_move_add($(this), "Add")
 		});
 
+		this.content.on('click', '.btn-edit', function() {
+			let item = unescape($(this).attr('data-item'));
+			let warehouse = unescape($(this).attr('data-warehouse'));
+			let company = unescape($(this).attr('data-company'));
+			frappe.db.get_value('Putaway Rule',
+				{'item_code': item, 'warehouse': warehouse, 'company': company}, 'name', (r) => {
+					frappe.set_route("Form", "Putaway Rule", r.name);
+				});
+		});
+
 		function handle_move_add(element, action) {
 			let item = unescape(element.attr('data-item'));
 			let warehouse = unescape(element.attr('data-warehouse'));
@@ -59,7 +69,7 @@ erpnext.stock.ItemDashboard = Class.extend({
 
 		// more
 		this.content.find('.btn-more').on('click', function() {
-			me.start += 20;
+			me.start += me.page_length;
 			me.refresh();
 		});
 
@@ -69,33 +79,43 @@ erpnext.stock.ItemDashboard = Class.extend({
 			this.before_refresh();
 		}
 
+		let args = {
+			item_code: this.item_code,
+			warehouse: this.warehouse,
+			parent_warehouse: this.parent_warehouse,
+			item_group: this.item_group,
+			company: this.company,
+			start: this.start,
+			sort_by: this.sort_by,
+			sort_order: this.sort_order
+		};
+
 		var me = this;
 		frappe.call({
-			method: 'erpnext.stock.dashboard.item_dashboard.get_data',
-			args: {
-				item_code: this.item_code,
-				warehouse: this.warehouse,
-				item_group: this.item_group,
-				start: this.start,
-				sort_by: this.sort_by,
-				sort_order: this.sort_order,
-			},
+			method: this.method,
+			args: args,
 			callback: function(r) {
 				me.render(r.message);
 			}
 		});
 	},
 	render: function(data) {
-		if(this.start===0) {
+		if (this.start===0) {
 			this.max_count = 0;
 			this.result.empty();
 		}
 
-		var context = this.get_item_dashboard_data(data, this.max_count, true);
+		let context = "";
+		if (this.page_name === "warehouse-capacity-summary") {
+			context = this.get_capacity_dashboard_data(data);
+		} else {
+			context = this.get_item_dashboard_data(data, this.max_count, true);
+		}
+
 		this.max_count = this.max_count;
 
 		// show more button
-		if(data && data.length===21) {
+		if (data && data.length===(this.page_length + 1)) {
 			this.content.find('.more').removeClass('hidden');
 
 			// remove the last element
@@ -106,12 +126,17 @@ erpnext.stock.ItemDashboard = Class.extend({
 
 		// If not any stock in any warehouses provide a message to end user
 		if (context.data.length > 0) {
-			$(frappe.render_template('item_dashboard_list', context)).appendTo(this.result);
+			this.content.find('.result').css('text-align', 'unset');
+			$(frappe.render_template(this.template, context)).appendTo(this.result);
 		} else {
-			var message = __("Currently no stock available in any warehouse");
-			$(`<span class='text-muted small'>  ${message} </span>`).appendTo(this.result);
+			var message = __("No Stock Available Currently");
+			this.content.find('.result').css('text-align', 'center');
+
+			$(`<div class='text-muted' style='margin: 20px 5px;'>
+				${message} </div>`).appendTo(this.result);
 		}
 	},
+
 	get_item_dashboard_data: function(data, max_count, show_item) {
 		if(!max_count) max_count = 0;
 		if(!data) data = [];
@@ -128,8 +153,8 @@ erpnext.stock.ItemDashboard = Class.extend({
 				d.total_reserved, max_count);
 		});
 
-		var can_write = 0;
-		if(frappe.boot.user.can_write.indexOf("Stock Entry")>=0){
+		let can_write = 0;
+		if (frappe.boot.user.can_write.indexOf("Stock Entry") >= 0) {
 			can_write = 1;
 		}
 
@@ -138,9 +163,27 @@ erpnext.stock.ItemDashboard = Class.extend({
 			max_count: max_count,
 			can_write:can_write,
 			show_item: show_item || false
+		};
+	},
+
+	get_capacity_dashboard_data: function(data) {
+		if (!data) data = [];
+
+		data.forEach(function(d) {
+			d.color =  d.percent_occupied >=80 ? "#f8814f" : "#2490ef";
+		});
+
+		let can_write = 0;
+		if (frappe.boot.user.can_write.indexOf("Putaway Rule") >= 0) {
+			can_write = 1;
 		}
+
+		return {
+			data: data,
+			can_write: can_write,
+		};
 	}
-})
+});
 
 erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callback) {
 	var dialog = new frappe.ui.Dialog({
@@ -198,7 +241,7 @@ erpnext.stock.move_item = function(item, source, target, actual_qty, rate, callb
 			freeze: true,
 			callback: function(r) {
 				frappe.show_alert(__('Stock Entry {0} created',
-					['<a href="#Form/Stock Entry/'+r.message.name+'">' + r.message.name+ '</a>']));
+					['<a href="/app/stock-entry/'+r.message.name+'">' + r.message.name+ '</a>']));
 				dialog.hide();
 				callback(r);
 			},

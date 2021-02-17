@@ -5,7 +5,7 @@ import datetime
 
 class MpesaConnector():
 	def __init__(self, env="sandbox", app_key=None, app_secret=None, sandbox_url="https://sandbox.safaricom.co.ke",
-		live_url="https://safaricom.co.ke"):
+		live_url="https://api.safaricom.co.ke"):
 		"""Setup configuration for Mpesa connector and generate new access token."""
 		self.env = env
 		self.app_key = app_key
@@ -102,14 +102,14 @@ class MpesaConnector():
 			"BusinessShortCode": business_shortcode,
 			"Password": encoded.decode("utf-8"),
 			"Timestamp": time,
-			"TransactionType": "CustomerPayBillOnline",
 			"Amount": amount,
 			"PartyA": int(phone_number),
-			"PartyB": business_shortcode,
+			"PartyB": reference_code,
 			"PhoneNumber": int(phone_number),
 			"CallBackURL": callback_url,
 			"AccountReference": reference_code,
-			"TransactionDesc": description
+			"TransactionDesc": description,
+			"TransactionType": "CustomerPayBillOnline" if self.env == "sandbox" else "CustomerBuyGoodsOnline"
 		}
 		headers = {'Authorization': 'Bearer {0}'.format(self.authentication_token), 'Content-Type': "application/json"}
 
