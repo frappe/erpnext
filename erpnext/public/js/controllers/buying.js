@@ -191,7 +191,10 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
 			item.received_stock_qty = flt(item.conversion_factor, precision("conversion_factor", item)) * flt(item.received_qty);
 		}
+		this._super(doc, cdt, cdn);
+	},
 
+	batch_no: function(doc, cdt, cdn) {
 		this._super(doc, cdt, cdn);
 	},
 
