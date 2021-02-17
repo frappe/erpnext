@@ -53,6 +53,12 @@ def process_gl_map(gl_map, merge_entries=True):
 		gl_map = merge_similar_entries(gl_map)
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
+		if flt(entry.debit) < 0 and flt(entry.credit) < 0:
+			entry.debit, entry.credit = -flt(entry.credit), -flt(entry.debit)
+
+		if flt(entry.debit_in_account_currency) < 0 and flt(entry.credit_in_account_currency) < 0:
+			entry.debit_in_account_currency, entry.credit_in_account_currency = -flt(entry.credit_in_account_currency), -flt(entry.debit_in_account_currency)
+
 		if flt(entry.debit) < 0:
 			entry.credit = flt(entry.credit) - flt(entry.debit)
 			entry.debit = 0.0
