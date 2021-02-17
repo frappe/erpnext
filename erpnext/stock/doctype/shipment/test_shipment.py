@@ -190,6 +190,7 @@ def create_shipment_company(company_name, abbr):
 	company.abbr = abbr
 	company.default_currency = 'EUR'
 	company.country = 'Germany'
+	company.enable_perpetual_inventory = 0
 	company.insert()
 	return company
 
