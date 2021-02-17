@@ -6,7 +6,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _, msgprint, throw
-from frappe.utils import flt, fmt_money
+from frappe.utils import flt, fmt_money, cint
 from frappe.model.document import Document
 
 class OverlappingConditionError(frappe.ValidationError): pass
@@ -70,6 +70,11 @@ class ShippingRule(Document):
 
 		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
 
+		# add gst for shipping charges
+		if self.apply_gst:
+			self.add_gst_for_shipping_charges(doc)
+		
+
 	def get_shipping_amount_from_rules(self, value):
 		for condition in self.get("conditions"):
 			if not condition.to_value or (flt(condition.from_value) <= flt(value) <= flt(condition.to_value)):
@@ -114,6 +119,38 @@ class ShippingRule(Document):
 			shipping_charge["tax_amount"] = shipping_amount
 			shipping_charge["description"] = self.label
 			doc.append("taxes", shipping_charge)
+
+	def add_gst_for_shipping_charges(self, doc):
+		gst_for_shipping_charge = {
+			"charge_type": "On Previous Row Amount",
+			"account_head": self.tax_account,
+			"cost_center": self.cost_center
+		}
+		if self.shipping_rule_type == "Selling":
+			# check if not applied on purchase
+			if not doc.meta.get_field('taxes').options == 'Sales Taxes and Charges':
+				frappe.throw(_('Shipping rule only applicable for Selling'))
+			gst_for_shipping_charge["doctype"] = "Sales Taxes and Charges"
+		else:
+			# check if not applied on sales, pass for now
+			pass
+		
+		from erpnext.controllers.accounts_controller import get_tax_rate
+		tax_rate = ""
+		tax_rate_dict = get_tax_rate(self.tax_account)
+
+		if tax_rate_dict:
+			tax_rate = tax_rate_dict.tax_rate
+
+		existing_shipping_charge = doc.get("taxes", filters=gst_for_shipping_charge)
+		if existing_shipping_charge:
+			existing_shipping_charge[-1].rate = tax_rate
+		else:
+			gst_for_shipping_charge["description"] = "Shipping charge GST"
+			gst_for_shipping_charge["row_id"] = len(doc.taxes)
+			gst_for_shipping_charge["rate"] = tax_rate
+			doc.append("taxes", gst_for_shipping_charge)
+
 
 	def sort_shipping_rule_conditions(self):
 		"""Sort Shipping Rule Conditions based on increasing From Value"""
