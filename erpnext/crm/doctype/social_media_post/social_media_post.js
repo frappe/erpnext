@@ -21,8 +21,8 @@ frappe.ui.form.on('Social Media Post', {
             if (frm.doc.post_status != "Posted"){
                 add_post_btn(frm); 
             }
-            else if (frm.doc.post_status == "Posted"){
-                frm.set_df_property('sheduled_time', 'read_only', 1);
+            else {
+                frm.disable_form();
             }
 
             let html='';

@@ -41,11 +41,7 @@ class LinkedInSettings(Document):
 		self.db_set("access_token", response["access_token"])
 
 	def get_member_profile(self):
-		headers = {
-			"Authorization": "Bearer {}".format(self.access_token)
-		}
-		url = "https://api.linkedin.com/v2/me"
-		response = requests.get(url=url, headers=headers)
+		response = requests.get(url="https://api.linkedin.com/v2/me", headers=self.get_headers())
 		response = frappe.parse_json(response.content.decode())
 
 		frappe.db.set_value(self.doctype, self.name, {
@@ -81,9 +77,7 @@ class LinkedInSettings(Document):
 				}]
 			}
 		}
-		headers = {
-			"Authorization": "Bearer {}".format(self.access_token)
-		}
+		headers = self.get_headers()
 		response = self.http_post(url=register_url, body=body, headers=headers)
 
 		if response.status_code == 200:
@@ -101,11 +95,10 @@ class LinkedInSettings(Document):
 
 	def post_text(self, text, media_id=None):
 		url = "https://api.linkedin.com/v2/shares"
-		headers = {
-			"X-Restli-Protocol-Version": "2.0.0",
-			"Authorization": "Bearer {}".format(self.access_token),
-			"Content-Type": "application/json; charset=UTF-8"
-		}
+		headers = self.get_headers()
+		headers["X-Restli-Protocol-Version"] = "2.0.0"
+		headers["Content-Type"] = "application/json; charset=UTF-8"
+
 		body = {
 			"distribution": {
 				"linkedInDistributionTarget": {}
@@ -116,6 +109,16 @@ class LinkedInSettings(Document):
 				"text": text
 			}
 		}
+
+		reference_url = self.get_reference_url(text)
+		if reference_url:
+			body["content"] = {
+				"contentEntities": [
+					{
+						"entityLocation": reference_url
+					}
+				]
+			}
 
 		if media_id:
 			body["content"]= {
@@ -153,6 +156,27 @@ class LinkedInSettings(Document):
 				frappe.throw(response.reason, title=response.status_code)
 
 		return response
+
+	def get_headers(self):
+		return {
+			"Authorization": "Bearer {}".format(self.access_token)
+		}
+
+	def get_reference_url(self, text):
+		import re
+		regex_url = r"http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+"
+		urls = re.findall(regex_url, text)
+		if urls:
+			return urls[0]
+
+	def delete_post(self, post_id):
+		try:
+			response = requests.delete("https://api.linkedin.com/v2/shares/{0}".format(post_id), self.get_headers())
+			if response.status_code !=200:
+				raise
+		except Exception as e:
+			content = json.loads(response.content)
+			frappe.throw(response.reason, title=response.status_code)
 
 @frappe.whitelist(allow_guest=True)
 def callback(code=None, error=None, error_description=None):

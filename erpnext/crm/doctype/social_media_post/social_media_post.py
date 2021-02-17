@@ -30,7 +30,7 @@ class SocialMediaPost(Document):
 			if self.linkedin and not self.linkedin_post_id:
 				linkedin = frappe.get_doc("LinkedIn Settings")
 				linkedin_post = linkedin.post(self.linkedin_post, self.image)
-				self.db_set("linkedin_post_id", linkedin_post.headers['X-RestLi-Id'].split(":")[-1])
+				self.db_set("linkedin_post_id", linkedin_post.headers['X-RestLi-Id'])
 			self.db_set("post_status", "Posted")
 
 		except:
@@ -38,6 +38,16 @@ class SocialMediaPost(Document):
 			title = _("Error while POSTING {0}").format(self.name)
 			traceback = frappe.get_traceback()
 			frappe.log_error(message=traceback , title=title)
+
+	def on_cancel(self):
+		if self.twitter and self.twitter_post_id:
+			twitter = frappe.get_doc("Twitter Settings")
+			twitter.delete_tweet(self.twitter_post_id)
+		
+		if self.linkedin and self.linkedin_post_id:
+			linkedin = frappe.get_doc("LinkedIn Settings")
+			linkedin.delete_post(self.linkedin_post_id)
+		self.post_status = 'Cancelled'
 
 def process_scheduled_social_media_posts():
 	posts = frappe.get_list("Social Media Post", filters={"post_status": "Scheduled", "docstatus":1}, fields= ["name", "scheduled_time","post_status"])

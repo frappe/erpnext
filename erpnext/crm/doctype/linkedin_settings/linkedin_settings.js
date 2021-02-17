@@ -14,6 +14,7 @@ frappe.ui.form.on('LinkedIn Settings', {
 				}
 			);
 		}
+		frm.dashboard.set_headline(__("For more information, {0}.", [`<a target='_blank' href='https://docs.erpnext.com/docs/user/manual/en/CRM/linkedin-settings'>${__('Click here')}</a>`]));
 	},
 	refresh: function(frm){
 		if (frm.doc.session_status=="Expired"){
