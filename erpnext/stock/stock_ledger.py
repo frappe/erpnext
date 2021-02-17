@@ -194,6 +194,8 @@ class update_entries_after(object):
 			self.process_sle(sle)
 
 	def get_sle_against_current_voucher(self):
+		self.args['time_format'] = '%H:%i:%s'
+
 		return frappe.db.sql("""
 			select
 				*, timestamp(posting_date, posting_time) as "timestamp"
