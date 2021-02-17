@@ -58,7 +58,7 @@ class Membership(Document):
 		else:
 			self.from_date = nowdate()
 
-		if frappe.db.get_single_value("Membership Settings", "billing_cycle") == "Yearly":
+		if frappe.db.get_single_value("Non Profit Settings", "billing_cycle") == "Yearly":
 			self.to_date = add_years(self.from_date, 1)
 		else:
 			self.to_date = add_months(self.from_date, 1)
@@ -68,7 +68,7 @@ class Membership(Document):
 			return
 		self.load_from_db()
 		self.db_set("paid", 1)
-		settings = frappe.get_doc("Membership Settings")
+		settings = frappe.get_doc("Non Profit Settings")
 		if settings.enable_invoicing and settings.create_for_web_forms:
 			self.generate_invoice(with_payment_entry=settings.make_payment_entry, save=True)
 
@@ -85,7 +85,7 @@ class Membership(Document):
 			frappe.throw(_("No customer linked to member {0}").format(frappe.bold(self.member)))
 
 		plan = frappe.get_doc("Membership Type", self.membership_type)
-		settings = frappe.get_doc("Membership Settings")
+		settings = frappe.get_doc("Non Profit Settings")
 		self.validate_membership_type_and_settings(plan, settings)
 
 		invoice = make_invoice(self, member, plan, settings)
@@ -128,10 +128,10 @@ class Membership(Document):
 		pe.submit()
 
 	def send_acknowlement(self):
-		settings = frappe.get_doc("Membership Settings")
+		settings = frappe.get_doc("Non Profit Settings")
 		if not settings.send_email:
 			frappe.throw(_("You need to enable <b>Send Acknowledge Email</b> in {0}").format(
-				get_link_to_form("Membership Settings", "Membership Settings")))
+				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
 
 		member = frappe.get_doc("Member", self.member)
 		if not member.email_id:
@@ -208,7 +208,7 @@ def verify_signature(data):
 		return True
 	signature = frappe.request.headers.get("X-Razorpay-Signature")
 
-	settings = frappe.get_doc("Membership Settings")
+	settings = frappe.get_doc("Non Profit Settings")
 	key = settings.get_webhook_secret()
 
 	controller = frappe.get_doc("Razorpay Settings")

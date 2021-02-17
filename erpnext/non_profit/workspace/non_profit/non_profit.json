@@ -10,6 +10,7 @@
  "hide_custom": 0,
  "icon": "non-profit",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Non Profit",
  "links": [
@@ -108,8 +109,8 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Membership Settings",
-   "link_to": "Membership Settings",
+   "label": "Non Profit Settings",
+   "link_to": "Non Profit Settings",
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
@@ -186,7 +187,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:38.351409",
+ "modified": "2021-02-17 18:48:23.360311",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",
@@ -201,8 +202,8 @@
    "type": "DocType"
   },
   {
-   "label": "Membership Settings",
-   "link_to": "Membership Settings",
+   "label": "Non Profit Settings",
+   "link_to": "Non Profit Settings",
    "type": "DocType"
   },
   {

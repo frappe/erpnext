@@ -8,7 +8,7 @@ from frappe import _
 from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.model.document import Document
 
-class MembershipSettings(Document):
+class NonProfitSettings(Document):
 	def generate_webhook_key(self):
 		key = frappe.generate_hash(length=20)
 		self.webhook_secret = key

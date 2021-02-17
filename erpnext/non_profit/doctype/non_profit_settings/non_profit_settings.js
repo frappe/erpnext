@@ -1,7 +1,7 @@
 // Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on("Membership Settings", {
+frappe.ui.form.on("Non Profit Settings", {
 	refresh: function(frm) {
 		if (frm.doc.webhook_secret) {
 			frm.add_custom_button(__("Revoke <Key></Key>"), () => {

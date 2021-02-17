@@ -26,8 +26,8 @@ class Member(Document):
 		validate_email_address(email.strip(), True)
 
 	def setup_subscription(self):
-		membership_settings = frappe.get_doc("Membership Settings")
-		if not membership_settings.enable_razorpay:
+		non_profit_settings = frappe.get_doc('Non Profit Settings')
+		if not non_profit_settings.enable_razorpay:
 			frappe.throw("Please enable Razorpay to setup subscription")
 
 		controller = get_payment_gateway_controller("Razorpay")
@@ -40,7 +40,7 @@ class Member(Document):
 
 		subscription_details = {
 			"plan_id": plan_id,
-			"billing_frequency": cint(membership_settings.billing_frequency),
+			"billing_frequency": cint(non_profit_settings.billing_frequency),
 			"customer_notify": 1
 		}
 

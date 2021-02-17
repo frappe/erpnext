@@ -755,3 +755,4 @@ erpnext.patches.v13_0.add_naming_series_to_old_projects # 1-02-2021
 erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.setup_non_profit_regional_fields
+erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
