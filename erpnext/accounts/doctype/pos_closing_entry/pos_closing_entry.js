@@ -3,6 +3,7 @@
 
 frappe.ui.form.on('POS Closing Entry', {
 	onload: function(frm) {
+		frm.ignore_doctypes_on_cancel_all = ['POS Invoice Merge Log'];
 		frm.set_query("pos_profile", function(doc) {
 			return {
 				filters: { 'user': doc.user }
@@ -20,7 +21,7 @@ frappe.ui.form.on('POS Closing Entry', {
 			return { filters: { 'status': 'Open', 'docstatus': 1 } };
 		});
 		
-		if (frm.doc.docstatus === 0) frm.set_value("period_end_date", frappe.datetime.now_datetime());
+		if (frm.doc.docstatus === 0 && !frm.doc.amended_from) frm.set_value("period_end_date", frappe.datetime.now_datetime());
 		if (frm.doc.docstatus === 1) set_html_data(frm);
 	},
 

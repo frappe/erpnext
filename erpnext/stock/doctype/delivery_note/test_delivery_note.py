@@ -489,7 +489,10 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
 
-		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
+		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
+
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1',
+			cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
 
 		dn.submit()
 

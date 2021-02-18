@@ -19,7 +19,7 @@ class Quotation(SellingController):
 			self.indicator_color = 'blue'
 			self.indicator_title = 'Submitted'
 		if self.valid_till and getdate(self.valid_till) < getdate(nowdate()):
-			self.indicator_color = 'darkgrey'
+			self.indicator_color = 'gray'
 			self.indicator_title = 'Expired'
 
 	def validate(self):
