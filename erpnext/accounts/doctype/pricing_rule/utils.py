@@ -172,7 +172,7 @@ def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 
 		if parenttype in ["Customer Group", "Item Group", "Territory"]:
 			parent_field = "parent_{0}".format(frappe.scrub(parenttype))
-			root_name = frappe.db.get_list(parenttype,
+			root_name = frappe.db.get_all(parenttype,
 				{"is_group": 1, parent_field: ("is", "not set")}, "name", as_list=1)
 
 			if root_name and root_name[0][0]:
