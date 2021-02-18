@@ -94,10 +94,15 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.get_doc('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice').delete()
 
 	def test_purchase_receipt_no_gl_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
 
-		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
+		existing_bin_qty, existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC"}, ["actual_qty", "stock_value"])
+
+		if existing_bin_qty < 0:
+			make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=abs(existing_bin_qty))
 
 		pr = make_purchase_receipt()
 

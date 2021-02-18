@@ -179,10 +179,18 @@ class POSInvoice(SalesInvoice):
 			if d.get("serial_no"):
 				serial_nos = get_serial_nos(d.serial_no)
 				for sr in serial_nos:
-					serial_no_exists = frappe.db.exists("POS Invoice Item", {
-						"parent": self.return_against, 
-						"serial_no": ["like", d.get("serial_no")]
-					})
+					serial_no_exists = frappe.db.sql("""
+						SELECT name
+						FROM `tabPOS Invoice Item`
+						WHERE
+							parent = %s
+							and (serial_no = %s
+								or serial_no like %s
+								or serial_no like %s
+								or serial_no like %s
+							)
+					""", (self.return_against, sr, sr+'\n%', '%\n'+sr, '%\n'+sr+'\n%'))
+
 					if not serial_no_exists:
 						bold_return_against = frappe.bold(self.return_against)
 						bold_serial_no = frappe.bold(sr)
@@ -190,7 +198,7 @@ class POSInvoice(SalesInvoice):
 							_("Row #{}: Serial No {} cannot be returned since it was not transacted in original invoice {}")
 							.format(d.idx, bold_serial_no, bold_return_against)
 						)
-	
+
 	def validate_non_stock_items(self):
 		for d in self.get("items"):
 			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
@@ -292,7 +300,7 @@ class POSInvoice(SalesInvoice):
 
 		if not self.get('payments') and not for_validate:
 			update_multi_mode_option(self, profile)
-		
+
 		if self.is_return and not for_validate:
 			add_return_modes(self, profile)
 

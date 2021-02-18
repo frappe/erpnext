@@ -12,7 +12,10 @@
   "appointment_type",
   "ip",
   "default_duration",
-  "color"
+  "color",
+  "billing_section",
+  "price_list",
+  "items"
  ],
  "fields": [
   {
@@ -52,10 +55,27 @@
    "label": "Color",
    "no_copy": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "billing_section",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "price_list",
+   "fieldtype": "Link",
+   "label": "Price List",
+   "options": "Price List"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "label": "Appointment Type Service Items",
+   "options": "Appointment Type Service Item"
   }
  ],
  "links": [],
- "modified": "2020-02-03 21:06:05.833050",
+ "modified": "2021-01-22 09:41:05.010524",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Appointment Type",

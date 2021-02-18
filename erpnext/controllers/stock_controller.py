@@ -24,6 +24,7 @@ class StockController(AccountsController):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 
@@ -396,6 +397,11 @@ class StockController(AccountsController):
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
 
+	def set_rate_of_stock_uom(self):
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice", "Purchase Order", "Sales Invoice", "Sales Order", "Delivery Note", "Quotation"]:
+			for d in self.get("items"):
+				d.stock_uom_rate = d.rate / d.conversion_factor
+
 	def validate_internal_transfer(self):
 		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Purchase Invoice', 'Purchase Receipt') \
 			and self.is_internal_transfer():
@@ -482,13 +488,12 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-
 		if check_if_future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
 		elif not is_reposting_pending():
 			check_if_stock_and_account_balance_synced(self.posting_date,
 				self.company, self.doctype, self.name)
-
+	
 def is_reposting_pending():
 	return frappe.db.exists("Repost Item Valuation",
 		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
