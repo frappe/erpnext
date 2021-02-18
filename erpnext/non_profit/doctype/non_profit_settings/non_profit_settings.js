@@ -3,14 +3,6 @@
 
 frappe.ui.form.on("Non Profit Settings", {
 	refresh: function(frm) {
-		if (frm.doc.webhook_secret) {
-			frm.add_custom_button(__("Revoke <Key></Key>"), () => {
-				frm.call("revoke_key").then(() => {
-					frm.refresh();
-				})
-			});
-		}
-
 		frm.set_query("inv_print_format", function() {
 			return {
 				filters: {
@@ -37,7 +29,7 @@ frappe.ui.form.on("Non Profit Settings", {
 			};
 		});
 
-		frm.set_query("payment_account", function () {
+		frm.set_query("membership_payment_account", function () {
 			var account_types = ["Bank", "Cash"];
 			return {
 				filters: {
@@ -51,31 +43,70 @@ frappe.ui.form.on("Non Profit Settings", {
 		let docs_url = "https://docs.erpnext.com/docs/user/manual/en/non_profit/membership";
 
 		frm.set_intro(__("You can learn more about memberships in the manual. ") + `<a href='${docs_url}'>${__('ERPNext Docs')}</a>`, true);
-
-		frm.trigger("add_generate_button");
-		frm.trigger("add_copy_buttonn");
+		frm.trigger("setup_buttons_for_membership");
+		frm.trigger("setup_buttons_for_donation");
 	},
 
-	add_generate_button: function(frm) {
+	setup_buttons_for_membership: function(frm) {
 		let label;
 
-		if (frm.doc.webhook_secret) {
+		if (frm.doc.membership_webhook_secret) {
+
+			frm.add_custom_button(__("Copy Webhook URL"), () => {
+				frappe.utils.copy_to_clipboard(`https://${frappe.boot.sitename}/api/method/erpnext.non_profit.doctype.membership.membership.trigger_razorpay_subscription`);
+			}, __("Memberships"));
+
+			frm.add_custom_button(__("Revoke Key"), () => {
+				frm.call("revoke_key",  {
+					key: "membership_webhook_secret"
+				}).then(() => {
+					frm.refresh();
+				})
+			}, __("Memberships"));
+
 			label = __("Regenerate Webhook Secret");
+
 		} else {
 			label = __("Generate Webhook Secret");
 		}
+
 		frm.add_custom_button(label, () => {
-			frm.call("generate_webhook_key").then(() => {
+			frm.call("generate_webhook_secret", {
+				field: "membership_webhook_secret"
+			}).then(() => {
 				frm.refresh();
 			});
-		});
+		}, __("Memberships"));
 	},
 
-	add_copy_buttonn: function(frm) {
-		if (frm.doc.webhook_secret) {
+	setup_buttons_for_donation: function(frm) {
+		let label;
+
+		if (frm.doc.donation_webhook_secret) {
+			label = __("Regenerate Webhook Secret");
+
 			frm.add_custom_button(__("Copy Webhook URL"), () => {
-				frappe.utils.copy_to_clipboard(`https://${frappe.boot.sitename}/api/method/erpnext.non_profit.doctype.membership.membership.trigger_razorpay_subscription`);
-			});
+				frappe.utils.copy_to_clipboard(`https://${frappe.boot.sitename}/api/method/erpnext.non_profit.doctype.donation.donation.capture_razorpay_donations`);
+			}, __("Donations"));
+
+			frm.add_custom_button(__("Revoke Key"), () => {
+				frm.call("revoke_key", {
+					key: "donation_webhook_secret"
+				}).then(() => {
+					frm.refresh();
+				})
+			}, __("Donations"));
+
+		} else {
+			label = __("Generate Webhook Secret");
 		}
+
+		frm.add_custom_button(label, () => {
+			frm.call("generate_webhook_secret", {
+				field: "donation_webhook_secret"
+			}).then(() => {
+				frm.refresh();
+			})
+		}, __("Donations"));
 	}
 });

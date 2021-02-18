@@ -203,13 +203,13 @@ def get_member_based_on_subscription(subscription_id, email):
 		return None
 
 
-def verify_signature(data):
+def verify_signature(data, endpoint="Membership"):
 	if frappe.flags.in_test:
 		return True
 	signature = frappe.request.headers.get("X-Razorpay-Signature")
 
 	settings = frappe.get_doc("Non Profit Settings")
-	key = settings.get_webhook_secret()
+	key = settings.get_webhook_secret(endpoint)
 
 	controller = frappe.get_doc("Razorpay Settings")
 
@@ -222,7 +222,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 	try:
 		verify_signature(data)
 	except Exception as e:
-		log = frappe.log_error(e, "Webhook Verification Error")
+		log = frappe.log_error(e, "Membership Webhook Verification Error")
 		notify_failure(log)
 		return { "status": "Failed", "reason": e}
 

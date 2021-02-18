@@ -14,7 +14,8 @@ def execute():
 		"create_for_web_forms": "automate_membership_invoicing",
 		"make_payment_entry": "automate_membership_payment_entries",
 		"enable_razorpay": "enable_razorpay_for_memberships",
-		"payment_account": "membership_payment_account"
+		"payment_account": "membership_payment_account",
+		"webhook_secret": "membership_webhook_secret"
 	}
 
 	for old_name, new_name in rename_fields_map.items():

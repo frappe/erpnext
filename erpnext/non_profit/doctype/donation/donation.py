@@ -10,6 +10,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.utils import getdate, flt, get_link_to_form
 from frappe.email import sendmail_to_system_managers
+from erpnext.non_profit.doctype.membership.membership import verify_signature
 
 class Donation(Document):
 	def on_payment_authorized(self, *args, **kwargs):
@@ -20,6 +21,13 @@ class Donation(Document):
 @frappe.whitelist(allow_guest=True)
 def capture_razorpay_donations(*args, **kwargs):
 	data = frappe.request.get_data(as_text=True)
+
+	try:
+		verify_signature(data, endpoint='Donation')
+	except Exception as e:
+		log = frappe.log_error(e, 'Donation Webhook Verification Error')
+		notify_failure(log)
+		return { 'status': 'Failed', 'reason': e }
 
 	if isinstance(data, six.string_types):
 		data = json.loads(data)

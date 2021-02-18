@@ -9,7 +9,7 @@
   "razorpay_settings_section",
   "billing_cycle",
   "billing_frequency",
-  "webhook_secret",
+  "membership_webhook_secret",
   "column_break_6",
   "allow_invoicing",
   "automate_membership_invoicing",
@@ -22,7 +22,11 @@
   "send_invoice",
   "membership_print_format",
   "inv_print_format",
-  "email_template"
+  "email_template",
+  "do",
+  "donation_webhook_secret",
+  "automate_donation_payment_entries",
+  "donation_payment_account"
  ],
  "fields": [
   {
@@ -42,12 +46,6 @@
    "fieldname": "billing_frequency",
    "fieldtype": "Int",
    "label": "Billing Frequency"
-  },
-  {
-   "fieldname": "webhook_secret",
-   "fieldtype": "Password",
-   "label": "Webhook Secret",
-   "read_only": 1
   },
   {
    "fieldname": "column_break_6",
@@ -147,12 +145,44 @@
    "label": "Membership Payment To",
    "mandatory_depends_on": "eval:doc.automate_membership_payment_entries",
    "options": "Account"
+  },
+  {
+   "fieldname": "membership_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Membership Webhook Secret",
+   "read_only": 1
+  },
+  {
+   "fieldname": "donation_webhook_secret",
+   "fieldtype": "Password",
+   "label": "Donation Webhook Secret",
+   "read_only": 1
+  },
+  {
+   "depends_on": "automate_donation_payment_entries",
+   "description": "Account for accepting donation payments",
+   "fieldname": "donation_payment_account",
+   "fieldtype": "Link",
+   "label": "Donation Payment To",
+   "mandatory_depends_on": "automate_donation_payment_entries",
+   "options": "Account"
+  },
+  {
+   "default": "0",
+   "fieldname": "automate_donation_payment_entries",
+   "fieldtype": "Check",
+   "label": "Automate Donation Payment Entries"
+  },
+  {
+   "fieldname": "do",
+   "fieldtype": "Section Break",
+   "label": "Donation Settings"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-18 12:19:57.826767",
+ "modified": "2021-02-18 13:43:14.027792",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",
