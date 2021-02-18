@@ -94,11 +94,11 @@ class TestWorkOrder(unittest.TestCase):
 		wo_order = make_wo_order_test_record(item="_Test FG Item", qty=2,
 			source_warehouse=warehouse, skip_transfer=1)
 
-		bin1_on_submit = get_bin(item, warehouse)
+		reserved_qty_on_submission = cint(get_bin(item, warehouse).reserved_qty_for_production)
 
 		# reserved qty for production is updated
-		self.assertEqual(cint(bin1_at_start.reserved_qty_for_production) + 2,
-			cint(bin1_on_submit.reserved_qty_for_production))
+		self.assertEqual(cint(bin1_at_start.reserved_qty_for_production) + 2, reserved_qty_on_submission)
+
 
 		test_stock_entry.make_stock_entry(item_code="_Test Item",
 			target=warehouse, qty=100, basic_rate=100)
@@ -109,9 +109,9 @@ class TestWorkOrder(unittest.TestCase):
 		s.submit()
 
 		bin1_at_completion = get_bin(item, warehouse)
-
+		
 		self.assertEqual(cint(bin1_at_completion.reserved_qty_for_production),
-			cint(bin1_on_submit.reserved_qty_for_production) - 1)
+			reserved_qty_on_submission - 1)
 
 	def test_production_item(self):
 		wo_order = make_wo_order_test_record(item="_Test FG Item", qty=1, do_not_save=True)
@@ -544,11 +544,53 @@ class TestWorkOrder(unittest.TestCase):
 		expected_qty = {"_Test Item": 2, "_Test Item Home Desktop 100": 4}
 		for row in ste3.items:
 			self.assertEquals(row.qty, expected_qty.get(row.item_code))
-
+		ste_cancel_list.reverse()
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
 
 		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
+
+	def test_extra_material_transfer(self):
+		frappe.db.set_value("Manufacturing Settings", None, "material_consumption", 0)
+		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on",
+			"Material Transferred for Manufacture")
+
+		wo_order = make_wo_order_test_record(planned_start_date=now(), qty=4)
+
+		ste_cancel_list = []
+		ste1 = test_stock_entry.make_stock_entry(item_code="_Test Item",
+			target="_Test Warehouse - _TC", qty=20, basic_rate=5000.0)
+		ste2 = test_stock_entry.make_stock_entry(item_code="_Test Item Home Desktop 100",
+			target="_Test Warehouse - _TC", qty=20, basic_rate=1000.0)
+
+		ste_cancel_list.extend([ste1, ste2])
+
+		itemwise_qty = {}
+		s = frappe.get_doc(make_stock_entry(wo_order.name, "Material Transfer for Manufacture", 4))
+		for row in s.items:
+			row.qty = row.qty + 2
+			itemwise_qty.setdefault(row.item_code, row.qty)
+
+		s.submit()
+		ste_cancel_list.append(s)
+
+		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		for ste_row in ste3.items:
+			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
+				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+
+		ste3.submit()
+		ste_cancel_list.append(ste3)
+
+		ste2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
+		for ste_row in ste2.items:
+			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
+				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+		ste_cancel_list.reverse()
+		for ste_doc in ste_cancel_list:
+			ste_doc.cancel()
+
+		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}

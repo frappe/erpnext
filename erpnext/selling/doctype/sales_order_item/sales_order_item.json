@@ -46,6 +46,7 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
+  "stock_uom_rate",
   "is_free_item",
   "section_break_24",
   "net_rate",
@@ -214,7 +215,6 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
-   "print_hide": 0,
    "reqd": 1
   },
   {
@@ -780,12 +780,20 @@
    "fieldname": "manufacturing_section_section",
    "fieldtype": "Section Break",
    "label": "Manufacturing Section"
+  },
+  {
+   "depends_on": "eval: doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-012-07 20:54:32.309460",
+ "modified": "2021-01-30 21:35:07.617320",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

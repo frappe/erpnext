@@ -75,7 +75,8 @@ frappe.ui.form.on("Leave Application", {
 			frm.dashboard.add_section(
 				frappe.render_template('leave_application_dashboard', {
 					data: leave_details
-				})
+				}),
+				__("Allocated Leaves")
 			);
 			frm.dashboard.show();
 			let allowed_leave_types =  Object.keys(leave_details);
