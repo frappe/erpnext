@@ -46,6 +46,9 @@ class RepostItemValuation(Document):
 
 def repost(doc):
 	try:
+		if not frappe.db.exists("Repost Item Valuation", doc.name):
+			return
+
 		doc.set_status('In Progress')
 		frappe.db.commit()
 
