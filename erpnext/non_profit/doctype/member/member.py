@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.contacts.address_and_contact import load_address_and_contact
-from frappe.utils import cint
+from frappe.utils import cint, get_link_to_form
 from frappe.integrations.utils import get_payment_gateway_controller
 from erpnext.non_profit.doctype.membership_type.membership_type import get_membership_type
 
@@ -27,8 +27,9 @@ class Member(Document):
 
 	def setup_subscription(self):
 		non_profit_settings = frappe.get_doc('Non Profit Settings')
-		if not non_profit_settings.enable_razorpay:
-			frappe.throw("Please enable Razorpay to setup subscription")
+		if not non_profit_settings.enable_razorpay_for_memberships:
+			frappe.throw('Please check Enable Razorpay for Memberships in {0} to setup subscription').format(
+				get_link_to_form('Non Profit Settings', 'Non Profit Settings'))
 
 		controller = get_payment_gateway_controller("Razorpay")
 		settings = controller.get_settings({})

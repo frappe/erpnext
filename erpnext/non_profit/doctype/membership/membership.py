@@ -69,8 +69,8 @@ class Membership(Document):
 		self.load_from_db()
 		self.db_set("paid", 1)
 		settings = frappe.get_doc("Non Profit Settings")
-		if settings.enable_invoicing and settings.create_for_web_forms:
-			self.generate_invoice(with_payment_entry=settings.make_payment_entry, save=True)
+		if settings.allow_invoicing and settings.automate_membership_invoicing:
+			self.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
 
 
 	def generate_invoice(self, save=True, with_payment_entry=False):
@@ -113,7 +113,7 @@ class Membership(Document):
 				get_link_to_form("Membership Type", self.membership_type)))
 
 	def make_payment_entry(self, settings, invoice):
-		if not settings.payment_account:
+		if not settings.membership_payment_account:
 			frappe.throw(_("You need to set <b>Payment Account</b> in {0}").format(
 				get_link_to_form("Membership Type", self.membership_type)))
 
@@ -121,7 +121,7 @@ class Membership(Document):
 		frappe.flags.ignore_account_permission = True
 		pe = get_payment_entry(dt="Sales Invoice", dn=invoice.name, bank_amount=invoice.grand_total)
 		frappe.flags.ignore_account_permission=False
-		pe.paid_to = settings.payment_account
+		pe.paid_to = settings.membership_payment_account
 		pe.reference_no = self.name
 		pe.reference_date = getdate()
 		pe.save(ignore_permissions=True)

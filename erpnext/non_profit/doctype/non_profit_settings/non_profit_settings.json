@@ -5,18 +5,18 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "enable_razorpay",
+  "enable_razorpay_for_memberships",
   "razorpay_settings_section",
   "billing_cycle",
   "billing_frequency",
   "webhook_secret",
   "column_break_6",
-  "enable_invoicing",
-  "create_for_web_forms",
-  "make_payment_entry",
+  "allow_invoicing",
+  "automate_membership_invoicing",
+  "automate_membership_payment_entries",
   "company",
   "debit_account",
-  "payment_account",
+  "membership_payment_account",
   "column_break_9",
   "send_email",
   "send_invoice",
@@ -32,16 +32,10 @@
    "options": "Monthly\nYearly"
   },
   {
-   "default": "0",
-   "fieldname": "enable_razorpay",
-   "fieldtype": "Check",
-   "label": "Enable RazorPay For Memberships"
-  },
-  {
-   "depends_on": "eval:doc.enable_razorpay",
+   "depends_on": "eval:doc.enable_razorpay_for_memberships",
    "fieldname": "razorpay_settings_section",
    "fieldtype": "Section Break",
-   "label": "RazorPay Settings"
+   "label": "RazorPay Settings for Memberships"
   },
   {
    "description": "The number of billing cycles for which the customer should be charged. For example, if a customer is buying a 1-year membership that should be billed on a monthly basis, this value should be 12.",
@@ -58,14 +52,14 @@
   {
    "fieldname": "column_break_6",
    "fieldtype": "Section Break",
-   "label": "Invoicing"
+   "label": "Membership Invoicing"
   },
   {
-   "depends_on": "eval:doc.enable_invoicing",
+   "depends_on": "eval:doc.allow_invoicing",
    "fieldname": "debit_account",
    "fieldtype": "Link",
    "label": "Debit Account",
-   "mandatory_depends_on": "eval:doc.enable_auto_invoicing",
+   "mandatory_depends_on": "eval:doc.allow_invoicing",
    "options": "Account"
   },
   {
@@ -73,16 +67,16 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.enable_invoicing",
+   "depends_on": "eval:doc.allow_invoicing",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "mandatory_depends_on": "eval:doc.enable_auto_invoicing",
+   "mandatory_depends_on": "eval:doc.allow_invoicing",
    "options": "Company"
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.enable_invoicing && doc.send_email",
+   "depends_on": "eval:doc.allow_invoicing && doc.send_email",
    "fieldname": "send_invoice",
    "fieldtype": "Check",
    "label": "Send Invoice with Email"
@@ -118,40 +112,47 @@
   },
   {
    "default": "0",
-   "fieldname": "enable_invoicing",
+   "fieldname": "allow_invoicing",
    "fieldtype": "Check",
-   "label": "Enable Invoicing",
+   "label": "Allow Invoicing for Memberships",
    "mandatory_depends_on": "eval:doc.send_invoice || doc.make_payment_entry"
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.enable_invoicing",
-   "description": "Auto creates Payment Entry for Sales Invoices created for Membership from web forms.",
-   "fieldname": "make_payment_entry",
+   "depends_on": "eval:doc.allow_invoicing",
+   "description": "Automatically create an invoice when payment is authorized from a web form entry",
+   "fieldname": "automate_membership_invoicing",
    "fieldtype": "Check",
-   "label": "Make Payment Entry"
-  },
-  {
-   "depends_on": "eval:doc.make_payment_entry",
-   "fieldname": "payment_account",
-   "fieldtype": "Link",
-   "label": "Payment To",
-   "mandatory_depends_on": "eval:doc.make_payment_entry",
-   "options": "Account"
+   "label": "Automate Invoicing for Web Forms"
   },
   {
    "default": "0",
-   "depends_on": "eval:doc.enable_invoicing",
-   "description": "Automatically create an invoice when payment is authorized from a web form entry",
-   "fieldname": "create_for_web_forms",
+   "depends_on": "eval:doc.allow_invoicing",
+   "description": "Auto creates Payment Entry for Sales Invoices created for Membership from web forms.",
+   "fieldname": "automate_membership_payment_entries",
    "fieldtype": "Check",
-   "label": "Auto Create Invoice for Web Forms"
+   "label": "Automate Payment Entry Creation"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_razorpay_for_memberships",
+   "fieldtype": "Check",
+   "label": "Enable RazorPay For Memberships"
+  },
+  {
+   "depends_on": "eval:doc.automate_membership_payment_entries",
+   "description": "Account for accepting membership payments",
+   "fieldname": "membership_payment_account",
+   "fieldtype": "Link",
+   "label": "Membership Payment To",
+   "mandatory_depends_on": "eval:doc.automate_membership_payment_entries",
+   "options": "Account"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-01-21 19:57:53.213286",
+ "modified": "2021-02-18 12:19:57.826767",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",

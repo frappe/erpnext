@@ -1,6 +1,21 @@
 from __future__ import unicode_literals
 import frappe
+from frappe.model.utils.rename_field import rename_field
 
 def execute():
+	if "Non Profit" not in frappe.get_active_domains():
+		return
+
 	if frappe.db.table_exists("Membership Settings"):
 		frappe.rename_doc("DocType", "Membership Settings", "Non Profit Settings")
+
+	rename_fields_map = {
+		"enable_invoicing": "allow_invoicing",
+		"create_for_web_forms": "automate_membership_invoicing",
+		"make_payment_entry": "automate_membership_payment_entries",
+		"enable_razorpay": "enable_razorpay_for_memberships",
+		"payment_account": "membership_payment_account"
+	}
+
+	for old_name, new_name in rename_fields_map.items():
+		rename_field("Non Profit Settings", old_name, new_name)

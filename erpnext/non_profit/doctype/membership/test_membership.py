@@ -16,14 +16,14 @@ class TestMembership(unittest.TestCase):
 		# update non profit settings
 		settings = frappe.get_doc("Non Profit Settings")
 		# Enable razorpay
-		settings.enable_razorpay = 1
+		settings.enable_razorpay_for_memberships = 1
 		settings.billing_cycle = "Monthly"
 		settings.billing_frequency = 24
 		# Enable invoicing
-		settings.enable_invoicing = 1
-		settings.make_payment_entry = 1
+		settings.allow_invoicing = 1
+		settings.automate_membership_payment_entries = 1
 		settings.company = company.name
-		settings.payment_account = company.default_cash_account
+		settings.membership_payment_account = company.default_cash_account
 		settings.debit_account = company.default_receivable_account
 		settings.save()
 
