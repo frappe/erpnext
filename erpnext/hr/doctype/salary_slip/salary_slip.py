@@ -38,6 +38,7 @@ class SalarySlip(TransactionBase):
 		self.status = self.get_status()
 		self.validate_dates()
 		self.check_existing()
+		self.pull_emp_details()
 		if not self.salary_slip_based_on_timesheet:
 			self.get_date_details()
 
