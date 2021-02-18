@@ -83,6 +83,8 @@ def get_data(filters):
 	data = prepare_data(accounts, filters, total_row, parent_children_map, company_currency)
 	data = filter_out_zero_value_rows(data, parent_children_map, show_zero_values=filters.get("show_zero_values"))
 
+	set_zero_for_group_accounts(data, parent_children_map)
+
 	return data
 
 def get_opening_balances(filters):
@@ -213,6 +215,12 @@ def accumulate_values_into_parents(accounts, accounts_by_name):
 		if d.parent_account:
 			for key in value_fields:
 				accounts_by_name[d.parent_account][key] += d[key]
+
+def set_zero_for_group_accounts(data, parent_children_map):
+	for d in data:
+		if d.get('account') and parent_children_map.get(d['account']):
+			for key in value_fields:
+				del d[key]
 
 def prepare_data(accounts, filters, total_row, parent_children_map, company_currency):
 	data = []
