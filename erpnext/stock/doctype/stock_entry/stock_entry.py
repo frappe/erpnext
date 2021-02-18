@@ -527,13 +527,12 @@ class StockEntry(StockController):
 		})
 
 	def set_basic_rate_for_finished_goods(self, raw_material_cost=0, scrap_material_cost=0):
-		total_fg_qty = 0
 		if not raw_material_cost and self.get("items"):
 			raw_material_cost = sum([flt(row.basic_amount) for row in self.items
 				if row.s_warehouse and not row.t_warehouse])
 
-			total_fg_qty = sum([flt(row.qty) for row in self.items
-				if row.t_warehouse and not row.s_warehouse])
+		total_fg_qty = sum([flt(row.qty) for row in self.items
+			if row.t_warehouse and not row.s_warehouse])
 
 		if self.purpose in ["Manufacture", "Repack"]:
 			for d in self.get("items"):
