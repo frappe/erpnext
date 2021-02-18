@@ -32,7 +32,8 @@ class TestPatientAppointment(unittest.TestCase):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 4), invoice = 1)
-		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'invoiced'), 1)
+		appointment.reload()
+		self.assertEqual(appointment.invoiced, 1)
 		encounter = make_encounter(appointment.name)
 		self.assertTrue(encounter)
 		self.assertEqual(encounter.company, appointment.company)
@@ -41,7 +42,7 @@ class TestPatientAppointment(unittest.TestCase):
 		# invoiced flag mapped from appointment
 		self.assertEqual(encounter.invoiced, frappe.db.get_value('Patient Appointment', appointment.name, 'invoiced'))
 
-	def test_invoicing(self):
+	def test_auto_invoicing(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 0)
@@ -56,6 +57,50 @@ class TestPatientAppointment(unittest.TestCase):
 		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'company'), appointment.company)
 		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'patient'), appointment.patient)
 		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'paid_amount'), appointment.paid_amount)
+
+	def test_auto_invoicing_based_on_department(self):
+		patient, medical_department, practitioner = create_healthcare_docs()
+		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		appointment_type = create_appointment_type()
+
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2),
+			invoice=1, appointment_type=appointment_type.name, department='_Test Medical Department')
+		appointment.reload()
+
+		self.assertEqual(appointment.invoiced, 1)
+		self.assertEqual(appointment.billing_item, 'HLC-SI-001')
+		self.assertEqual(appointment.paid_amount, 200)
+
+		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
+		self.assertTrue(sales_invoice_name)
+		self.assertEqual(frappe.db.get_value('Sales Invoice', sales_invoice_name, 'paid_amount'), appointment.paid_amount)
+
+	def test_auto_invoicing_according_to_appointment_type_charge(self):
+		patient, medical_department, practitioner = create_healthcare_docs()
+		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
+		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+
+		item = create_healthcare_service_items()
+		items = [{
+				'op_consulting_charge_item': item,
+				'op_consulting_charge': 300
+		}]
+		appointment_type = create_appointment_type(args={
+				'name': 'Generic Appointment Type charge',
+				'items': items
+			})
+
+		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2),
+			invoice=1, appointment_type=appointment_type.name)
+		appointment.reload()
+
+		self.assertEqual(appointment.invoiced, 1)
+		self.assertEqual(appointment.billing_item, item)
+		self.assertEqual(appointment.paid_amount, 300)
+
+		sales_invoice_name = frappe.db.get_value('Sales Invoice Item', {'reference_dn': appointment.name}, 'parent')
+		self.assertTrue(sales_invoice_name)
 
 	def test_appointment_cancel(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
@@ -178,14 +223,15 @@ def create_encounter(appointment):
 		encounter.submit()
 		return encounter
 
-def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0, service_unit=None, save=1):
+def create_appointment(patient, practitioner, appointment_date, invoice=0, procedure_template=0,
+	service_unit=None, appointment_type=None, save=1, department=None):
 	item = create_healthcare_service_items()
 	frappe.db.set_value('Healthcare Settings', None, 'inpatient_visit_charge_item', item)
 	frappe.db.set_value('Healthcare Settings', None, 'op_consulting_charge_item', item)
 	appointment = frappe.new_doc('Patient Appointment')
 	appointment.patient = patient
 	appointment.practitioner = practitioner
-	appointment.department = '_Test Medical Department'
+	appointment.department = department or '_Test Medical Department'
 	appointment.appointment_date = appointment_date
 	appointment.company = '_Test Company'
 	appointment.duration = 15
@@ -193,7 +239,8 @@ def create_appointment(patient, practitioner, appointment_date, invoice=0, proce
 		appointment.service_unit = service_unit
 	if invoice:
 		appointment.mode_of_payment = 'Cash'
-		appointment.paid_amount = 500
+	if appointment_type:
+		appointment.appointment_type = appointment_type
 	if procedure_template:
 		appointment.procedure_template = create_clinical_procedure_template().get('name')
 	if save:
@@ -224,3 +271,28 @@ def create_clinical_procedure_template():
 	template.rate = 50000
 	template.save()
 	return template
+
+def create_appointment_type(args=None):
+	if not args:
+		args =  frappe.local.form_dict
+
+	name = args.get('name') or 'Test Appointment Type wise Charge'
+
+	if frappe.db.exists('Appointment Type', name):
+		return frappe.get_doc('Appointment Type', name)
+
+	else:
+		item = create_healthcare_service_items()
+		items = [{
+				'medical_department': '_Test Medical Department',
+				'op_consulting_charge_item': item,
+				'op_consulting_charge': 200
+		}]
+		return frappe.get_doc({
+			'doctype': 'Appointment Type',
+			'appointment_type': args.get('name') or 'Test Appointment Type wise Charge',
+			'default_duration': args.get('default_duration') or 20,
+			'color': args.get('color') or '#7575ff',
+			'price_list': args.get('price_list') or frappe.db.get_value("Price List", {"selling": 1}),
+			'items': args.get('items') or items
+		}).insert()
