@@ -35,7 +35,8 @@ class Bin(Document):
 				"posting_time": args.get("posting_time"),
 				"voucher_type": args.get("voucher_type"),
 				"voucher_no": args.get("voucher_no"),
-				"sle_id": args.name
+				"sle_id": args.name,
+				"creation": args.creation
 			}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
 			# update qty in future ale and Validate negative qty
@@ -53,7 +54,7 @@ class Bin(Document):
 		self.reserved_qty = flt(self.reserved_qty) + flt(args.get("reserved_qty"))
 		self.indented_qty = flt(self.indented_qty) + flt(args.get("indented_qty"))
 		self.planned_qty = flt(self.planned_qty) + flt(args.get("planned_qty"))
-
+		
 		self.set_projected_qty()
 		self.db_update()
 

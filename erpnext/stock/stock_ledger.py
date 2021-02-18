@@ -89,7 +89,8 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 			"item_code": args[i].item_code,
 			"warehouse": args[i].warehouse,
 			"posting_date": args[i].posting_date,
-			"posting_time": args[i].posting_time
+			"posting_time": args[i].posting_time,
+			"creation": args[i].get("creation")
 		}, allow_negative_stock=allow_negative_stock, via_landed_cost_voucher=via_landed_cost_voucher)
 
 		for item_wh, new_sle in iteritems(obj.new_items):
@@ -101,7 +102,7 @@ def repost_future_sle(args=None, voucher_type=None, voucher_no=None, allow_negat
 def get_args_for_voucher(voucher_type, voucher_no):
 	return frappe.db.get_all("Stock Ledger Entry",
 		filters={"voucher_type": voucher_type, "voucher_no": voucher_no},
-		fields=["item_code", "warehouse", "posting_date", "posting_time"],
+		fields=["item_code", "warehouse", "posting_date", "posting_time", "creation"],
 		order_by="creation asc",
 		group_by="item_code, warehouse"
 	)
@@ -132,7 +133,7 @@ class update_entries_after(object):
 		self.item_code = args.get("item_code")
 		if self.args.sle_id:
 			self.args['name'] = self.args.sle_id
-
+		
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.get_precision()
 		self.valuation_method = get_valuation_method(self.item_code)
@@ -170,7 +171,7 @@ class update_entries_after(object):
 		"""
 		self.data.setdefault(args.warehouse, frappe._dict())
 		warehouse_dict = self.data[args.warehouse]
-		previous_sle = self.get_sle_before_datetime(args)
+		previous_sle = self.get_previous_sle_of_current_voucher(args)
 		warehouse_dict.previous_sle = previous_sle
 
 		for key in ("qty_after_transaction", "valuation_rate", "stock_value"):
@@ -182,9 +183,35 @@ class update_entries_after(object):
 			"stock_value_difference": 0.0
 		})
 
+	def get_previous_sle_of_current_voucher(self, args):
+		"""get stock ledger entries filtered by specific posting datetime conditions"""
+
+		args['time_format'] = '%H:%i:%s'
+		if not args.get("posting_date"):
+			args["posting_date"] = "1900-01-01"
+		if not args.get("posting_time"):
+			args["posting_time"] = "00:00"
+
+		sle = frappe.db.sql("""
+			select *, timestamp(posting_date, posting_time) as "timestamp"
+			from `tabStock Ledger Entry`
+			where item_code = %(item_code)s
+				and warehouse = %(warehouse)s
+				and is_cancelled = 0
+				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
+			order by timestamp(posting_date, posting_time) desc, creation desc
+			limit 1""", args, as_dict=1)
+		
+		return sle[0] if sle else frappe._dict()
+
+
 	def build(self):
+		from erpnext.controllers.stock_controller import check_if_future_sle_exists
+
 		if self.args.get("sle_id"):
-			self.process_sle_against_current_voucher()
+			self.process_sle_against_current_timestamp()
+			if not check_if_future_sle_exists(self.args):
+				self.update_bin()
 		else:
 			entries_to_fix = self.get_future_entries_to_fix()
 
@@ -203,12 +230,14 @@ class update_entries_after(object):
 		if self.exceptions:
 			self.raise_exceptions()
 
-	def process_sle_against_current_voucher(self):
+	def process_sle_against_current_timestamp(self):
 		sl_entries = self.get_sle_against_current_voucher()
 		for sle in sl_entries:
 			self.process_sle(sle)
 
 	def get_sle_against_current_voucher(self):
+		self.args['time_format'] = '%H:%i:%s'
+
 		return frappe.db.sql("""
 			select
 				*, timestamp(posting_date, posting_time) as "timestamp"
@@ -217,8 +246,8 @@ class update_entries_after(object):
 			where
 				item_code = %(item_code)s
 				and warehouse = %(warehouse)s
-				and voucher_type = %(voucher_type)s
-				and voucher_no = %(voucher_no)s
+				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) = timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
+
 			order by
 				creation ASC
 			for update
@@ -245,7 +274,6 @@ class update_entries_after(object):
 			return entries_to_fix
 		elif dependant_sle.item_code == self.item_code and dependant_sle.warehouse in self.data:
 			return entries_to_fix
-
 		self.initialize_previous_data(dependant_sle)
 
 		args = self.data[dependant_sle.warehouse].previous_sle \
