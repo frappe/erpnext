@@ -42,7 +42,7 @@ class GrossProfitGenerator(object):
 
 		self.data = frappe.db.sql("""
 			select
-				si.name as parent, si_item.name, si_item.idx,
+				si.name as parent, si_item.parenttype, si_item.name, si_item.idx,
 				si.posting_date, si.posting_time,
 				si.customer, si.customer_name, c.customer_group, c.territory,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
@@ -146,9 +146,12 @@ class GrossProfitGenerator(object):
 				totals['sales_person'] = data[0].get('sales_person')
 
 			if 'item_code' in grouped_by:
+				totals['item_name'] = data[0].get('item_name')
 				totals['item_group'] = data[0].get('item_group')
+				totals['disable_item_formatter'] = cint(self.show_item_name)
 
-			if group_field == 'party':
+			if group_field in ('party', 'parent'):
+				totals['customer_name'] = data[0].get("customer_name")
 				totals['customer_group'] = data[0].get("customer_group")
 
 		# Set reference field
@@ -232,10 +235,38 @@ class GrossProfitGenerator(object):
 
 	def get_columns(self):
 		columns = []
+		group_list = [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]
 
 		show_party_name = False
 		if frappe.defaults.get_global_default('cust_master_name') == "Naming Series":
 			show_party_name = True
+
+		customer_field = {
+			"label": _("Customer"),
+			"fieldtype": "Link",
+			"fieldname": "customer",
+			"options": "Customer",
+			"width": 80 if show_party_name else 180
+		}
+		customer_name_field = {
+			"label": _("Customer Name"),
+			"fieldtype": "Data",
+			"fieldname": "customer_name",
+			"width": 180
+		}
+		item_code_field = {
+			"label": _("Item Code"),
+			"fieldtype": "Link",
+			"fieldname": "item_code",
+			"options": "Item",
+			"width": 100 if self.show_item_name else 150
+		}
+		item_name_field = {
+			"label": _("Item Name"),
+			"fieldtype": "Data",
+			"fieldname": "item_name",
+			"width": 150
+		}
 
 		if len(self.group_by) > 1:
 			columns += [
@@ -254,6 +285,9 @@ class GrossProfitGenerator(object):
 				},
 			]
 
+			if "Group by Item" in group_list:
+				columns.append(item_name_field)
+
 			columns += [
 				{
 					"label": _("Date"),
@@ -263,15 +297,9 @@ class GrossProfitGenerator(object):
 				},
 			]
 
-			group_list = [self.filters.group_by_1, self.filters.group_by_2, self.filters.group_by_3]
 			if "Group by Customer" not in group_list:
-				columns.append({
-					"label": _("Customer"),
-					"fieldtype": "Link",
-					"fieldname": "customer",
-					"options": "Customer",
-					"width": 180
-				})
+				columns.append(customer_field)
+				columns.append(customer_name_field)
 
 			if "Group by Invoice" not in group_list:
 				columns.append({
@@ -296,35 +324,13 @@ class GrossProfitGenerator(object):
 					"options": "Sales Invoice",
 					"width": 100
 				},
-				{
-					"label": _("Customer"),
-					"fieldtype": "Link",
-					"fieldname": "customer",
-					"options": "Customer",
-					"width": 80 if show_party_name else 180
-				},
-				{
-					"label": _("Customer Name"),
-					"fieldtype": "Data",
-					"fieldname": "customer_name",
-					"width": 180
-				},
-				{
-					"label": _("Item Code"),
-					"fieldtype": "Link",
-					"fieldname": "item_code",
-					"options": "Item",
-					"width": 100 if self.show_item_name else 150
-				},
+				customer_field,
+				customer_name_field,
+				item_code_field,
+				item_name_field,
 			]
 
 		columns += [
-			{
-				"label": _("Item Name"),
-				"fieldtype": "Data",
-				"fieldname": "item_name",
-				"width": 150
-			},
 			{
 				"label": _("UOM"),
 				"fieldtype": "Link",
@@ -557,7 +563,7 @@ def get_sle_outgoing_rate(voucher_detail_nos):
 		from `tabStock Ledger Entry`
 		where (voucher_type, voucher_detail_no) in ({0})
 		group by voucher_type, voucher_detail_no
-	""".format(", ".join(["(%s, %s)"] * len(voucher_detail_nos))), voucher_detail_nos, as_dict=1)
+	""".format(", ".join(["(%s, %s)"] * len(voucher_detail_nos))), values, as_dict=1)
 
 	for d in res:
 		out[(d.voucher_type, d.voucher_detail_no)] = d.outgoing_rate
