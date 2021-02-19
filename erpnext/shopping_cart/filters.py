@@ -1,7 +1,10 @@
-# Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and Contributors
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> f1ce418bdc (fix: Hide Attribute filters if 'Hide Variants' is enabled in E Commerce Settings)
 import frappe
 
 
@@ -15,6 +18,8 @@ class ProductFiltersBuilder:
 		self.item_group = item_group
 
 	def get_field_filters(self):
+		if not self.doc.enable_field_filters: return
+
 		filter_fields = [row.fieldname for row in self.doc.filter_fields]
 
 		meta = frappe.get_meta('Item')
@@ -55,6 +60,8 @@ class ProductFiltersBuilder:
 		return filter_data
 
 	def get_attribute_filters(self):
+		if not self.doc.enable_attribute_filters: return
+
 		attributes = [row.attribute for row in self.doc.filter_attributes]
 
 		if not attributes:

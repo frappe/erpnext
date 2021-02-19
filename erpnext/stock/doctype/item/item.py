@@ -23,7 +23,6 @@ from frappe.utils import (
 from frappe.utils.html_utils import clean_html
 from frappe.website.utils import clear_cache
 from frappe.model.document import Document
-from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
 from erpnext.controllers.item_variant import (
@@ -946,6 +945,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 
 
 def invalidate_cache_for_item(doc):
+	"""Invalidate Item Group cache and rebuild ItemVariantsCacheManager."""
 	invalidate_cache_for(doc, doc.item_group)
 
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
@@ -955,6 +955,7 @@ def invalidate_cache_for_item(doc):
 
 
 def invalidate_item_variants_cache_for_website(doc):
+	"""Rebuild ItemVariantsCacheManager via Item or Website Item."""
 	from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
 
 	item_code = None
