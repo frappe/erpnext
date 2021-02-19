@@ -186,12 +186,14 @@ def get_doctypes_with_dimensions():
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"])
+	if not frappe.flags.accounting_dimensions:
+		frappe.flags.accounting_dimensions = frappe.get_all("Accounting Dimension",
+			fields=["label", "fieldname", "disabled", "document_type"])
 
 	if as_list:
-		return [d.fieldname for d in accounting_dimensions]
+		return [d.fieldname for d in frappe.flags.accounting_dimensions]
 	else:
-		return accounting_dimensions
+		return frappe.flags.accounting_dimensions
 
 def get_checks_for_pl_and_bs_accounts():
 	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
