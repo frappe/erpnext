@@ -206,7 +206,7 @@ def get_data(companies, root_type, balance_must_be, fiscal_year, filters=None, i
 
 		set_gl_entries_by_account(fiscal_year.year_start_date,
 			fiscal_year.year_end_date, root.lft, root.rgt, filters,
-			gl_entries_by_account, accounts_by_name, ignore_closing_entries=False)
+			gl_entries_by_account, accounts_by_name, accounts, ignore_closing_entries=False)
 
 	calculate_values(accounts_by_name, gl_entries_by_account, companies, fiscal_year, filters)
 	accumulate_values_into_parents(accounts, accounts_by_name, companies)
@@ -325,7 +325,7 @@ def prepare_data(accounts, fiscal_year, balance_must_be, companies, company_curr
 	return data
 
 def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, gl_entries_by_account,
-	accounts_by_name, ignore_closing_entries=False):
+	accounts_by_name, accounts, ignore_closing_entries=False):
 	"""Returns a dict like { "account": [gl entries], ... }"""
 
 	company_lft, company_rgt = frappe.get_cached_value('Company',
@@ -368,15 +368,31 @@ def set_gl_entries_by_account(from_date, to_date, root_lft, root_rgt, filters, g
 
 		for entry in gl_entries:
 			key = entry.account_number or entry.account_name
-			validate_entries(key, entry, accounts_by_name)
+			validate_entries(key, entry, accounts_by_name, accounts)
 			gl_entries_by_account.setdefault(key, []).append(entry)
 
 	return gl_entries_by_account
 
-def validate_entries(key, entry, accounts_by_name):
+def get_account_details(account):
+	return frappe.get_cached_value('Account', account, ['name', 'report_type', 'root_type', 'company',
+		'is_group', 'account_name', 'account_number', 'parent_account', 'lft', 'rgt'], as_dict=1)
+
+def validate_entries(key, entry, accounts_by_name, accounts):
 	if key not in accounts_by_name:
-		field = "Account number" if entry.account_number else "Account name"
-		frappe.throw(_("{0} {1} is not present in the parent company").format(field, key))
+		args = get_account_details(entry.account)
+
+		if args.parent_account:
+			parent_args = get_account_details(args.parent_account)
+
+			args.update({
+				'lft': parent_args.lft + 1,
+				'rgt': parent_args.rgt - 1,
+				'root_type': parent_args.root_type,
+				'report_type': parent_args.report_type
+			})
+
+		accounts_by_name.setdefault(key, args)
+		accounts.append(args)
 
 def get_additional_conditions(from_date, ignore_closing_entries, filters):
 	additional_conditions = []

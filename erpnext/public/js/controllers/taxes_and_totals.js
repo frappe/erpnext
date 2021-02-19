@@ -24,6 +24,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if (item.discount_amount) {
 			item.rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
+			item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
 		}
 	},
 

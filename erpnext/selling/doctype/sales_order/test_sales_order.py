@@ -319,10 +319,13 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(get_reserved_qty("_Test Item Home Desktop 100"),
 			existing_reserved_qty_item2 + 20)
 
-	def test_add_new_item_in_update_child_qty_rate(self):
+	def test_update_child_adding_new_item(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)
 		create_dn_against_so(so.name, 4)
 		make_sales_invoice(so.name)
+
+		prev_total = so.get("base_total")
+		prev_total_in_words = so.get("base_in_words")
 
 		first_item_of_so = so.get("items")[0]
 		trans_item = json.dumps([
@@ -339,7 +342,13 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].amount, 1400)
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
-	def test_remove_item_in_update_child_qty_rate(self):
+		updated_total = so.get("base_total")
+		updated_total_in_words = so.get("base_in_words")
+
+		self.assertEqual(updated_total, prev_total+1400)
+		self.assertNotEqual(updated_total_in_words, prev_total_in_words)
+
+	def test_update_child_removing_item(self):
 		so = make_sales_order(**{
 			"item_list": [{
 				"item_code": '_Test Item',
@@ -382,7 +391,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 
-	def test_update_child_qty_rate(self):
+	def test_update_child(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)
 		create_dn_against_so(so.name, 4)
 		make_sales_invoice(so.name)
@@ -419,7 +428,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.items[0].rate, 200.34669)
 		make_property_setter("Sales Order Item", "rate", "precision", precision, "Currency")
 
-	def test_update_child_qty_rate_perm(self):
+	def test_update_child_perm(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)
 
 		user = 'test@example.com'
@@ -472,7 +481,7 @@ class TestSalesOrder(unittest.TestCase):
 		workflow.is_active = 0
 		workflow.save()
 
-	def test_update_child_qty_rate_product_bundle(self):
+	def test_update_child_product_bundle(self):
 		# test Update Items with product bundle
 		if not frappe.db.exists("Item", "_Product Bundle Item"):
 			bundle_item = make_item("_Product Bundle Item", {"is_stock_item": 0})
@@ -491,6 +500,20 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 4)
+
+		# test uom and conversion factor change
+		update_uom_conv_factor = json.dumps([{
+			'item_code': so.get("items")[0].item_code,
+			'rate': so.get("items")[0].rate,
+			'qty': so.get("items")[0].qty,
+			'uom': "_Test UOM 1",
+			'conversion_factor': 2,
+			'docname': so.get("items")[0].name
+		}])
+		update_child_qty_rate('Sales Order', update_uom_conv_factor, so.name)
+
+		so.reload()
+		self.assertEqual(so.packed_items[0].qty, 8)
 
 	def test_update_child_with_tax_template(self):
 		"""

@@ -108,6 +108,10 @@ class RequestforQuotation(BuyingController):
 				'link_doctype': 'Supplier',
 				'link_name': rfq_supplier.supplier
 			})
+			contact.append('email_ids', {
+				'email_id': user.name,
+				'is_primary': 1
+			})
 
 		if not contact.email_id and not contact.user:
 			contact.email_id = user.name

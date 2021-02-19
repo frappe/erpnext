@@ -88,18 +88,18 @@ class PaymentReconciliation(Document):
 		voucher_type = ('Sales Invoice'
 			if self.party_type == 'Customer' else "Purchase Invoice")
 
-		return frappe.db.sql(""" SELECT `tab{doc}`.name as reference_name, %(voucher_type)s as reference_type,
-				(sum(`tabGL Entry`.{dr_or_cr}) - sum(`tabGL Entry`.{reconciled_dr_or_cr})) as amount,
+		return frappe.db.sql(""" SELECT doc.name as reference_name, %(voucher_type)s as reference_type,
+				(sum(gl.{dr_or_cr}) - sum(gl.{reconciled_dr_or_cr})) as amount,
 				account_currency as currency
-			FROM `tab{doc}`, `tabGL Entry`
+			FROM `tab{doc}` doc, `tabGL Entry` gl
 			WHERE
-				(`tab{doc}`.name = `tabGL Entry`.against_voucher or `tab{doc}`.name = `tabGL Entry`.voucher_no)
-				and `tab{doc}`.{party_type_field} = %(party)s
-				and `tab{doc}`.is_return = 1 and `tab{doc}`.return_against IS NULL
-				and `tabGL Entry`.against_voucher_type = %(voucher_type)s
-				and `tab{doc}`.docstatus = 1 and `tabGL Entry`.party = %(party)s
-				and `tabGL Entry`.party_type = %(party_type)s and `tabGL Entry`.account = %(account)s
-			GROUP BY `tab{doc}`.name
+				(doc.name = gl.against_voucher or doc.name = gl.voucher_no)
+				and doc.{party_type_field} = %(party)s
+				and doc.is_return = 1 and ifnull(doc.return_against, "") = ""
+				and gl.against_voucher_type = %(voucher_type)s
+				and doc.docstatus = 1 and gl.party = %(party)s
+				and gl.party_type = %(party_type)s and gl.account = %(account)s
+			GROUP BY doc.name
 			Having
 				amount > 0
 		""".format(

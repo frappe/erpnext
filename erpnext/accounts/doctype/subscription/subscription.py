@@ -298,7 +298,8 @@ class Subscription(Document):
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
 		if prorate:
-			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
+			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start,
+				self.generate_invoice_at_period_start)
 
 		items = []
 		customer = self.customer
@@ -468,11 +469,13 @@ class Subscription(Document):
 		if invoice:
 			return invoice.precision('grand_total')
 
-
-def get_prorata_factor(period_end, period_start):
-	diff = flt(date_diff(nowdate(), period_start) + 1)
-	plan_days = flt(date_diff(period_end, period_start) + 1)
-	prorate_factor = diff / plan_days
+def get_prorata_factor(period_end, period_start, is_prepaid):
+	if is_prepaid:
+		prorate_factor = 1
+	else:
+		diff = flt(date_diff(nowdate(), period_start) + 1)
+		plan_days = flt(date_diff(period_end, period_start) + 1)
+		prorate_factor = diff / plan_days
 
 	return prorate_factor
 
