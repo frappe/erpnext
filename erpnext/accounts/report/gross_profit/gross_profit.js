@@ -126,8 +126,34 @@ frappe.query_reports["Gross Profit"] = {
 			label: __("Group By Level 3"),
 			fieldtype: "Select",
 			options: group_by_options_gp,
-			default: "Group by Invoice"
+			default: "Ungrouped"
 		},
 	],
-	"initial_depth": 1
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (['gross_profit', 'gross_profit_per_unit', 'per_gross_profit'].includes(column.fieldname)) {
+			if (flt(value, 2) === 0) {
+				style['color'] = 'orange';
+			} else if (flt(value) < 0) {
+				style['color'] = 'red';
+			}
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
+	get_datatable_options(options) {
+		return Object.assign(options, {
+			hooks: {
+				columnTotal: function (values, column, type) {
+					if (in_list(['gross_profit_per_unit', 'per_gross_profit', 'valuation_rate', 'cogs_per_unit'], column.column.fieldname)) {
+						return '';
+					} else {
+						return frappe.utils.report_column_total(values, column, type);
+					}
+				}
+			},
+		});
+	},
+	"initial_depth": 1,
 }
