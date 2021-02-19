@@ -50,6 +50,7 @@ class GrossProfitGenerator(object):
 				si.update_stock, si_item.dn_detail, si_item.delivery_note,
 				si_item.qty, si_item.stock_qty, si_item.conversion_factor, si_item.alt_uom_size,
 				si_item.base_net_amount,
+				si.depreciation_type, si_item.depreciation_percentage,
 				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person,
 				sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage
 			from `tabSales Invoice` si
@@ -74,11 +75,18 @@ class GrossProfitGenerator(object):
 
 			d["disable_item_formatter"] = cint(self.show_item_name)
 
+			if d.depreciation_type:
+				d.split_percentage = 100 - d.depreciation_percentage if d.depreciation_type == "After Depreciation Amount"\
+					else d.depreciation_percentage
+			else:
+				d.split_percentage = 100
+
 	def get_cogs(self):
 		update_item_valuation_rates(self.data)
 
 		for item in self.data:
 			item.cogs_per_unit = flt(item.valuation_rate) * flt(item.conversion_factor)
+			item.cogs_per_unit = item.cogs_per_unit * item.split_percentage / 100
 
 			item.cogs_qty = flt(item.qty) - flt(item.get('returned_qty'))
 			item.cogs = item.cogs_per_unit * item.cogs_qty
@@ -332,6 +340,12 @@ class GrossProfitGenerator(object):
 
 		columns += [
 			{
+				"label": _("Net Qty"),
+				"fieldtype": "Float",
+				"fieldname": "cogs_qty",
+				"width": 80
+			},
+			{
 				"label": _("UOM"),
 				"fieldtype": "Link",
 				"options": "UOM",
@@ -339,10 +353,17 @@ class GrossProfitGenerator(object):
 				"width": 50
 			},
 			{
-				"label": _("Net Qty"),
-				"fieldtype": "Float",
-				"fieldname": "cogs_qty",
-				"width": 80
+				"label": _("Split %"),
+				"fieldtype": "Percent",
+				"fieldname": "split_percentage",
+				"width": 60
+			},
+			{
+				"label": _("Valuation Rate"),
+				"fieldtype": "Currency",
+				"fieldname": "valuation_rate",
+				"options": "Company:company:default_currency",
+				"width": 110
 			},
 			{
 				"label": _("Cost / Unit"),
@@ -386,17 +407,17 @@ class GrossProfitGenerator(object):
 				"width": 110
 			},
 			{
-				"label": _("Sales Person"),
-				"fieldtype": "Data",
-				"fieldname": "sales_person",
-				"width": 150
-			},
-			{
 				"label": _("Warehouse"),
 				"fieldtype": "Link",
 				"fieldname": "warehouse",
 				"options": "Warehouse",
 				"width": 100
+			},
+			{
+				"label": _("Sales Person"),
+				"fieldtype": "Data",
+				"fieldname": "sales_person",
+				"width": 150
 			},
 			{
 				"label": _("Batch No"),
@@ -428,13 +449,6 @@ class GrossProfitGenerator(object):
 				"label": _("Credit Amount"),
 				"fieldtype": "Currency",
 				"fieldname": "base_returned_amount",
-				"options": "Company:company:default_currency",
-				"width": 110
-			},
-			{
-				"label": _("Valuation Rate"),
-				"fieldtype": "Currency",
-				"fieldname": "valuation_rate",
 				"options": "Company:company:default_currency",
 				"width": 110
 			},
