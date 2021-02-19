@@ -76,6 +76,8 @@
   "total_in_words",
   "column_break_69",
   "base_total_in_words",
+  "leave_details_section",
+  "leave_details",
   "section_break_75",
   "amended_from"
  ],
@@ -578,13 +580,55 @@
   {
    "fieldname": "column_break_69",
    "fieldtype": "Column Break"
+  },
+  {
+   "description": "Total salary booked for this employee from the beginning of the year (payroll period or fiscal year) up to the current salary slip's end date.",
+   "fieldname": "year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "description": "Total salary booked for this employee from the beginning of the month up to the current salary slip's end date.",
+   "fieldname": "month_to_date",
+   "fieldtype": "Currency",
+   "label": "Month To Date",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_year_to_date",
+   "fieldtype": "Currency",
+   "label": "Year To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_month_to_date",
+   "fieldtype": "Currency",
+   "label": "Month To Date(Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "leave_details_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Details"
+  },
+  {
+   "fieldname": "leave_details",
+   "fieldtype": "Table",
+   "label": "Leave Details",
+   "options": "Salary Slip Leave",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-21 23:02:59.400249",
+ "modified": "2021-02-19 11:48:05.383945",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
