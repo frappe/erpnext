@@ -40,6 +40,10 @@
   {
    "chart": "Top 10 Pledged Loan Securities",
    "width": "Half"
+  },
+  {
+   "chart": "Loan Interest Accrual",
+   "width": "Half"
   }
  ],
  "creation": "2021-02-06 16:52:43.484752",
@@ -49,7 +53,7 @@
  "idx": 0,
  "is_default": 0,
  "is_standard": 1,
- "modified": "2021-02-09 08:07:27.293764",
+ "modified": "2021-02-18 20:07:10.095401",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Dashboard",
