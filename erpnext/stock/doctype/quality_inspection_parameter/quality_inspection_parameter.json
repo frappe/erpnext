@@ -29,13 +29,12 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Parameter Group",
-   "options": "Quality Inspection Parameter Group",
-   "reqd": 1
+   "options": "Quality Inspection Parameter Group"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-04 18:45:12.486344",
+ "modified": "2021-02-19 20:33:30.657406",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Parameter",
