@@ -27,7 +27,7 @@ class ProductFiltersBuilder:
 				if self.item_group:
 					filters['item_group'] = self.item_group
 
-				values =  frappe.get_all("Item", fields=[df.fieldname], filters=filters, distinct="True", pluck=df.fieldname)
+				values =  frappe.get_all("Item", fields=[df.fieldname], filters=filters, distinct="True", pluck=df.fieldname, debug=1)
 			else:
 				doctype = df.get_link_doctype()
 
@@ -44,7 +44,8 @@ class ProductFiltersBuilder:
 				values = [d.name for d in frappe.get_all(doctype, filters)]
 
 			# Remove None
-			values = values.remove(None) if None in values else values
+			if None in values: values.remove(None)
+
 			if values:
 				filter_data.append([df, values])
 

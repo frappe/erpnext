@@ -130,85 +130,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 	def delete_child_item_groups_key(self):
 		frappe.cache().hdel("child_item_groups", self.name)
 
-@frappe.whitelist(allow_guest=True)
-def get_product_list_for_group(product_group=None, start=0, limit=10, search=None):
-	if product_group:
-		item_group = frappe.get_cached_doc('Item Group', product_group)
-		if item_group.is_group:
-			# return child item groups if the type is of "Is Group"
-			return get_child_groups_for_list_in_html(item_group, start, limit, search)
-
-	child_groups = ", ".join([frappe.db.escape(i[0]) for i in get_child_groups(product_group)])
-
-	# base query
-	query = """select I.name, I.item_name, I.item_code, I.route, I.image, I.website_image, I.thumbnail, I.item_group,
-			I.description, I.web_long_description as website_description, I.is_stock_item,
-			case when (S.actual_qty - S.reserved_qty) > 0 then 1 else 0 end as in_stock, I.website_warehouse,
-			I.has_batch_no
-		from `tabItem` I
-		left join tabBin S on I.item_code = S.item_code and I.website_warehouse = S.warehouse
-		where I.show_in_website = 1
-			and I.disabled = 0
-			and (I.end_of_life is null or I.end_of_life='0000-00-00' or I.end_of_life > %(today)s)
-			and (I.variant_of = '' or I.variant_of is null)
-			and (I.item_group in ({child_groups})
-			or I.name in (select parent from `tabWebsite Item Group` where item_group in ({child_groups})))
-			""".format(child_groups=child_groups)
-	# search term condition
-	if search:
-		query += """ and (I.web_long_description like %(search)s
-				or I.item_name like %(search)s
-				or I.name like %(search)s)"""
-		search = "%" + cstr(search) + "%"
-
-	query += """order by I.weightage desc, in_stock desc, I.modified desc limit %s, %s""" % (cint(start), cint(limit))
-
-	data = frappe.db.sql(query, {"product_group": product_group,"search": search, "today": nowdate()}, as_dict=1)
-	data = adjust_qty_for_expired_items(data)
-
-	if cint(frappe.db.get_single_value("E Commerce Settings", "enabled")):
-		for item in data:
-			set_product_info_for_website(item)
-
-	return data
-
-def get_child_groups_for_list_in_html(item_group, start, limit, search):
-	search_filters = None
-	if search_filters:
-		search_filters = [
-			dict(name = ('like', '%{}%'.format(search))),
-			dict(description = ('like', '%{}%'.format(search)))
-		]
-	data = frappe.db.get_all('Item Group',
-		fields = ['name', 'route', 'description', 'image'],
-		filters = dict(
-			show_in_website = 1,
-			parent_item_group = item_group.name,
-			lft = ('>', item_group.lft),
-			rgt = ('<', item_group.rgt),
-		),
-		or_filters = search_filters,
-		order_by = 'weightage desc, name asc',
-		start = start,
-		limit = limit
-	)
-
-	return data
-
-def adjust_qty_for_expired_items(data):
-	adjusted_data = []
-
-	for item in data:
-		if item.get('has_batch_no') and item.get('website_warehouse'):
-			stock_qty_dict = get_qty_in_stock(
-				item.get('name'), 'website_warehouse', item.get('website_warehouse'))
-			qty = stock_qty_dict.stock_qty[0][0] if stock_qty_dict.stock_qty else 0
-			item['in_stock'] = 1 if qty else 0
-		adjusted_data.append(item)
-
-	return adjusted_data
-
-
 def get_child_groups(item_group_name):
 	item_group = frappe.get_doc("Item Group", item_group_name)
 	return frappe.db.sql("""select name
@@ -236,14 +157,6 @@ def get_item_for_list_in_html(context):
 	products_template = 'templates/includes/products_as_list.html'
 
 	return frappe.get_template(products_template).render(context)
-
-def get_group_item_count(item_group):
-	child_groups = ", ".join(['"' + i[0] + '"' for i in get_child_groups(item_group)])
-	return frappe.db.sql("""select count(*) from `tabItem`
-		where docstatus = 0 and show_in_website = 1
-		and (item_group in (%s)
-			or name in (select parent from `tabWebsite Item Group`
-				where item_group in (%s))) """ % (child_groups, child_groups))[0][0]
 
 
 def get_parent_item_groups(item_group_name):

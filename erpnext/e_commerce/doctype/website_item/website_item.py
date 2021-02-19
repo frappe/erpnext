@@ -7,15 +7,12 @@ import frappe
 import json
 import itertools
 from frappe import _
-from six import iteritems
-from frappe.website.doctype.website_slideshow.website_slideshow import \
-	get_slideshow
 
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
-from frappe.utils import cstr, random_string, cint
+from frappe.utils import cstr, random_string, cint, flt
 
-from erpnext.setup.doctype.item_group.item_group import get_parent_item_groups
+from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 
 class WebsiteItem(WebsiteGenerator):
 	website = frappe._dict(
@@ -39,7 +36,13 @@ class WebsiteItem(WebsiteGenerator):
 		self.make_thumbnail()
 		self.publish_unpublish_desk_item(publish=True)
 
+		if not self.get("__islocal"):
+			self.old_website_item_groups = frappe.db.sql_list("""select item_group
+					from `tabWebsite Item Group`
+					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
+
 	def on_update(self):
+		invalidate_cache_for_web_item(self)
 		self.update_template_item()
 
 	def on_trash(self):
@@ -69,10 +72,9 @@ class WebsiteItem(WebsiteGenerator):
 				# show template
 				template_item = frappe.get_doc("Item", self.variant_of)
 
-				if not template_item.published:
-					template_item.published = 1
+				if not template_item.published_in_website:
 					template_item.flags.ignore_permissions = True
-					template_item.save()
+					make_website_item(template_item)
 
 	def validate_website_image(self):
 		if frappe.flags.in_import:
@@ -160,7 +162,6 @@ class WebsiteItem(WebsiteGenerator):
 				self.thumbnail = file_doc.thumbnail_url
 
 	def get_context(self, context):
-		print(context)
 		context.show_search = True
 		context.search_link = '/search'
 
@@ -174,7 +175,6 @@ class WebsiteItem(WebsiteGenerator):
 		self.set_disabled_attributes(context)
 		self.set_metatags(context)
 		self.set_shopping_cart_data(context)
-		print("IN WEB ITEM")
 
 		return context
 
@@ -316,6 +316,28 @@ class WebsiteItem(WebsiteGenerator):
 	def set_shopping_cart_data(self, context):
 		from erpnext.shopping_cart.product_info import get_product_info_for_website
 		context.shopping_cart = get_product_info_for_website(self.item_code, skip_quotation_creation=True)
+
+	def copy_specification_from_item_group(self):
+		self.set("website_specifications", [])
+		if self.item_group:
+			for label, desc in frappe.db.get_values("Item Website Specification",
+				{"parent": self.item_group}, ["label", "description"]):
+				row = self.append("website_specifications")
+				row.label = label
+				row.description = desc
+
+def invalidate_cache_for_web_item(doc):
+	from erpnext.stock.doctype.item.item import invalidate_item_variants_cache_for_website
+
+	invalidate_cache_for(doc, doc.item_group)
+
+	website_item_groups = list(set((doc.get("old_website_item_groups") or [])
+		+ [d.item_group for d in doc.get({"doctype": "Website Item Group"}) if d.item_group]))
+
+	for item_group in website_item_groups:
+		invalidate_cache_for(doc, item_group)
+
+	invalidate_item_variants_cache_for_website(doc)
 
 @frappe.whitelist()
 def make_website_item(doc):

@@ -15,7 +15,7 @@ class Homepage(Document):
 
 	def setup_items(self):
 		for d in frappe.get_all('Item', fields=['name', 'item_name', 'description', 'image'],
-			filters={'show_in_website': 1}, limit=3):
+			filters={'published_in_website': 1}, limit=3):
 
 			doc = frappe.get_doc('Item', d.name)
 			if not doc.route:

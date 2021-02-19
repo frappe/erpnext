@@ -94,7 +94,7 @@ frappe.ui.form.on("Item", {
 			erpnext.toggle_naming_series();
 		}
 
-		if(!frm.doc.published_in_website) {
+		if (!frm.doc.published_in_website) {
 			frm.add_custom_button(__("Publish in Website"), function() {
 				frappe.call({
 					method: "erpnext.e_commerce.doctype.website_item.website_item.make_website_item",
@@ -105,8 +105,8 @@ frappe.ui.form.on("Item", {
 						frappe.msgprint({
 							message: __("Website Item {0} has been created.",
 								[repl('<a href="/app/website-item/%(item_encoded)s" class="strong">%(item)s</a>', {
-								item_encoded: encodeURIComponent(result.message[0]),
-								item: result.message[1]
+									item_encoded: encodeURIComponent(result.message[0]),
+									item: result.message[1]
 								})]
 							),
 							title: __("Published"),
@@ -220,25 +220,8 @@ frappe.ui.form.on("Item", {
 		}
 	},
 
-	copy_from_item_group: function(frm) {
-		return frm.call({
-			doc: frm.doc,
-			method: "copy_specification_from_item_group"
-		});
-	},
-
 	has_variants: function(frm) {
 		erpnext.item.toggle_attributes(frm);
-	},
-
-	show_in_website: function(frm) {
-		if (frm.doc.default_warehouse && !frm.doc.website_warehouse){
-			frm.set_value("website_warehouse", frm.doc.default_warehouse);
-		}
-	},
-
-	set_meta_tags(frm) {
-		frappe.utils.set_meta_tag(frm.doc.route);
 	}
 });
 
