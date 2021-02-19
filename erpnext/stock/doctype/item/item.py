@@ -22,6 +22,7 @@ from frappe.utils import (
 )
 from frappe.utils.html_utils import clean_html
 from frappe.website.utils import clear_cache
+from frappe.model.document import Document
 from frappe.website.website_generator import WebsiteGenerator
 
 import erpnext
@@ -51,17 +52,8 @@ class InvalidBarcode(frappe.ValidationError):
 	pass
 
 
-class Item(WebsiteGenerator):
-	website = frappe._dict(
-		page_title_field="item_name",
-		condition_field="show_in_website",
-		template="templates/generators/item/item.html",
-		no_cache=1
-	)
-
+class Item(Document):
 	def onload(self):
-		super(Item, self).onload()
-
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 
@@ -102,8 +94,6 @@ class Item(WebsiteGenerator):
 			self.set_opening_stock()
 
 	def validate(self):
-		super(Item, self).validate()
-
 		if not self.item_name:
 			self.item_name = self.item_code
 
@@ -142,9 +132,6 @@ class Item(WebsiteGenerator):
 
 		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
-			self.old_website_item_groups = frappe.db.sql_list("""select item_group
-					from `tabWebsite Item Group`
-					where parentfield='website_item_groups' and parenttype='Item' and parent=%s""", self.name)
 
 	def on_update(self):
 		invalidate_cache_for_item(self)
@@ -573,16 +560,6 @@ class Item(WebsiteGenerator):
 
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 
-	@frappe.whitelist()
-	def copy_specification_from_item_group(self):
-		self.set("website_specifications", [])
-		if self.item_group:
-			for label, desc in frappe.db.get_values("Item Website Specification",
-										   {"parent": self.item_group}, ["label", "description"]):
-				row = self.append("website_specifications")
-				row.label = label
-				row.description = desc
-
 	def update_bom_item_desc(self):
 		if self.is_new():
 			return
@@ -856,46 +833,6 @@ class Item(WebsiteGenerator):
 			if not enabled:
 				frappe.msgprint(msg=_("You have to enable auto re-order in Stock Settings to maintain re-order levels."), title=_("Enable Auto Re-Order"), indicator="orange")
 
-	def create_onboarding_docs(self, args):
-		company = frappe.defaults.get_defaults().get('company') or \
-			frappe.db.get_single_value('Global Defaults', 'default_company')
-
-		for i in range(1, args.get('max_count')):
-			item = args.get('item_' + str(i))
-			if item:
-				default_warehouse = ''
-				default_warehouse = frappe.db.get_value('Warehouse', filters={
-					'warehouse_name': _('Finished Goods'),
-					'company': company
-				})
-
-				try:
-					frappe.get_doc({
-						'doctype': self.doctype,
-						'item_code': item,
-						'item_name': item,
-						'description': item,
-						'is_sales_item': 1,
-						'is_purchase_item': 1,
-						'is_stock_item': 1,
-						'item_group': _('Products'),
-						'stock_uom': _(args.get('item_uom_' + str(i))),
-						'item_defaults': [{
-							'default_warehouse': default_warehouse,
-							'company': company
-						}]
-					}).insert()
-
-				except frappe.NameError:
-					pass
-				else:
-					if args.get('item_price_' + str(i)):
-						item_price = flt(args.get('item_price_' + str(i)))
-
-						price_list_name = frappe.db.get_value('Price List', {'selling': 1})
-						make_item_price(item, price_list_name, item_price)
-						price_list_name = frappe.db.get_value('Price List', {'buying': 1})
-						make_item_price(item, price_list_name, item_price)
 
 def make_item_price(item, price_list_name, item_price):
 	frappe.get_doc({
@@ -1012,12 +949,6 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
 def invalidate_cache_for_item(doc):
 	invalidate_cache_for(doc, doc.item_group)
 
-	website_item_groups = list(set((doc.get("old_website_item_groups") or [])
-								+ [d.item_group for d in doc.get({"doctype": "Website Item Group"}) if d.item_group]))
-
-	for item_group in website_item_groups:
-		invalidate_cache_for(doc, item_group)
-
 	if doc.get("old_item_group") and doc.get("old_item_group") != doc.item_group:
 		invalidate_cache_for(doc, doc.old_item_group)
 
@@ -1028,9 +959,10 @@ def invalidate_item_variants_cache_for_website(doc):
 	from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
 
 	item_code = None
-	if doc.has_variants and doc.show_in_website:
-		item_code = doc.name
-	elif doc.variant_of and frappe.db.get_value('Item', doc.variant_of, 'show_in_website'):
+	is_web_item = doc.get("published_in_website") or doc.get("published")
+	if doc.has_variants and is_web_item:
+		item_code = doc.item_code
+	elif doc.variant_of and frappe.db.get_value('Item', doc.variant_of, 'published_in_website'):
 		item_code = doc.variant_of
 
 	if item_code:

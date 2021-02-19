@@ -47,8 +47,7 @@ class ProductFiltersBuilder:
 				values = [d.name for d in frappe.get_all(doctype, filters)]
 
 			# Remove None
-			if None in values:
-				values.remove(None)
+			if None in values: values.remove(None)
 
 			if values:
 				filter_data.append([df, values])

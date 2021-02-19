@@ -271,7 +271,7 @@
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-12 16:49:42.275517",
+ "modified": "2021-02-18 13:23:18.286883",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",
@@ -290,9 +290,10 @@
    "write": 1
   }
  ],
+ "search_fields": "item_code, item_name ,item_group",
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "web_item_name",
+ "title_field": "item_name",
  "track_changes": 1
 }

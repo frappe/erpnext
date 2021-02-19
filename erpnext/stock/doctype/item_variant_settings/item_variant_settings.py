@@ -1,7 +1,14 @@
+<<<<<<< HEAD
 # Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
 
 
+=======
+# -*- coding: utf-8 -*-
+# Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
+# For license information, please see license.txt
+
+>>>>>>> 025574d9b5 (chore: Removing Item's Website section & references)
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -13,7 +20,7 @@ class ItemVariantSettings(Document):
 	def set_default_fields(self):
 		self.fields = []
 		fields = frappe.get_meta('Item').fields
-		exclude_fields = {"naming_series", "item_code", "item_name", "show_in_website",
+		exclude_fields = {"naming_series", "item_code", "item_name", "published_in_website",
 			"show_variant_in_website", "standard_rate", "opening_stock", "image", "description",
 			"variant_of", "valuation_rate", "description", "barcodes",
 			"website_image", "thumbnail", "website_specifiations", "web_long_description",
