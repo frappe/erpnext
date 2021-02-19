@@ -97,6 +97,11 @@ frappe.query_reports["Gross Profit"] = {
 			"options": "Batch"
 		},
 		{
+			fieldname: "include_non_stock_items",
+			label: __("Include Non Stock Items"),
+			fieldtype: "Check",
+		},
+		{
 			fieldname: "group_by_1",
 			label: __("Group By Level 1"),
 			fieldtype: "Select",

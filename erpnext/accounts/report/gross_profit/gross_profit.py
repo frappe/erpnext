@@ -225,6 +225,9 @@ class GrossProfitGenerator(object):
 			conditions.append("""sp.sales_person in (select name from `tabSales Person`
 				where lft>=%s and rgt<=%s)""" % (lft, rgt))
 
+		if not self.filters.get("include_non_stock_items"):
+			conditions.append("i.is_stock_item = 1")
+
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_columns(self):
