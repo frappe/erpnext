@@ -8,7 +8,6 @@ import json
 import itertools
 from frappe import _
 
-from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.utils import cstr, random_string, cint, flt
 
@@ -359,3 +358,7 @@ def make_website_item(doc):
 
 	website_item.save()
 	return [website_item.name, website_item.web_item_name]
+
+def on_doctype_update():
+	# since route is a Text column, it needs a length for indexing
+	frappe.db.add_index("Website Item", ["route(500)"])
