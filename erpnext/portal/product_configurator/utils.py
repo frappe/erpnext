@@ -136,15 +136,3 @@ def get_item_attributes(item_code):
 
 	return attributes
 
-def get_html_for_items(items):
-	html = []
-	for item in items:
-		html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
-			'item': item
-		}))
-	return html
-
-def get_e_commerce_settings():
-	doc = frappe.get_cached_doc('E Commerce Settings')
-	doc.products_per_page = doc.products_per_page or 20
-	return doc
