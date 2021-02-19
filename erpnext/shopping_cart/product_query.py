@@ -42,6 +42,9 @@ class ProductQuery:
 		if fields: self.build_fields_filters(fields)
 		if search_term: self.build_search_filters(search_term)
 
+		if self.settings.hide_variants:
+			self.conditions += " and wi.variant_of is null"
+
 		result = []
 		website_item_groups = []
 
@@ -53,7 +56,6 @@ class ProductQuery:
 				filters=[["Website Item Group", "item_group", "=", item_group]]
 			)
 
-		self.query_fields = (", ").join(self.fields)
 		if attributes:
 			result = self.query_items_with_attributes(attributes, start)
 		else:
@@ -70,6 +72,8 @@ class ProductQuery:
 
 	def query_items(self, conditions, or_conditions, substitutions, start=0):
 		"""Build a query to fetch Website Items based on field filters."""
+		self.query_fields = (", ").join(self.fields)
+
 		return frappe.db.sql("""
 			select distinct {query_fields}
 			from
