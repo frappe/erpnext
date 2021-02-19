@@ -25,7 +25,7 @@ def update_itemised_tax_data(doc):
 				tax_rate += rate
 		elif row.item_code and itemised_tax.get(row.item_code):
 			tax_rate = sum([tax.get('tax_rate', 0) for d, tax in itemised_tax.get(row.item_code).items()])
-		print(cint(frappe.db.get_default("currency_precision")))
+
 		row.tax_rate = flt(tax_rate, cint(frappe.db.get_default("float_precision")))
 		row.tax_amount = flt((row.net_amount * tax_rate) / 100, row.precision("net_amount"))
 		row.total_amount = flt((row.net_amount + row.tax_amount), cint(frappe.db.get_default("currency_precision")))
