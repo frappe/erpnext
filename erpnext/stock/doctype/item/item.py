@@ -370,7 +370,6 @@ class Item(Document):
 
 		if self.published_in_website:
 			invalidate_cache_for_item(self)
-			clear_cache(self.route)
 
 		frappe.db.set_value("Item", new_name, "item_code", new_name)
 
@@ -957,7 +956,3 @@ def update_variants(variants, template, publish_progress=True):
 		count+=1
 		if publish_progress:
 				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
-
-def on_doctype_update():
-	# since route is a Text column, it needs a length for indexing
-	frappe.db.add_index("Item", ["route(500)"])
