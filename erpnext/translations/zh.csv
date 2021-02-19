@@ -7685,13 +7685,13 @@ Collected Amount,收到金额,
 Expected Amount,预期金额,
 POS Closing Voucher Invoices,POS关闭凭证账单,
 Quantity of Items,物料数量,
-"Aggregate group of **Items** into another **Item**. This is useful if you are bundling a certain **Items** into a package and you maintain stock of the packed **Items** and not the aggregate **Item**. 
+"<h3>About Product Bundle</h3>
 
-The package **Item** will have ""Is Stock Item"" as ""No"" and ""Is Sales Item"" as ""Yes"".
-
-For Example: If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.
-
-Note: BOM = Bill of Materials",将一组物料组合成一个新物料。即将一组物料组合打包/包装，然后维护这个产品组合的库存。产品组合物料属性为：“是库存物料”（取值“否”），或“是销售物料”（取值“是”）。例如：你分别销售笔记本电脑和背包，并且如果有客户采购两种而使用单独的价格，那么笔记本电脑+背包将是一个新的产品组合物料。注：物料BOM =Bill of Materials,Parent Item,上层物料,
+<p>Aggregate group of <b>Items</b> into another <b>Item</b>. This is useful if you are bundling a certain <b>Items</b> into a package and you maintain stock of the packed <b>Items</b> and not the aggregate <b>Item</b>.</p>
+<p>The package <b>Item</b> will have <code>Is Stock Item</code> as <b>No</b> and <code>Is Sales Item</code> as <b>Yes</b>.</p>
+<h4>Example:</h4>
+<p>If you are selling Laptops and Backpacks separately and have a special price if the customer buys both, then the Laptop + Backpack will be a new Product Bundle Item.</p>",<h3>产品组合</h3><p>将一组<b>物料</b>组合成另一个<b>物料</b>.适用于组合内的物料属于库存物料，产品组合本身只是用于销售，在物料主数据中勾选<code>是销售物料</code>，不勾选<code>是库存物料</code></p><h4>比如:</h4><p>你单独出售笔记本电脑和电脑包，希望给同时购买笔记本电脑和电脑包的客户特别的优惠，就可以将笔记本电脑和电脑包组合成一个产品组合</p>,
+Parent Item,上层物料,
 List items that form the package.,本产品组合内的物料列表。,
 SAL-QTN-.YYYY.-,SAL-QTN-.YYYY.-,
 Quotation To,报价对象,
