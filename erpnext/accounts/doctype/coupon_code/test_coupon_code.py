@@ -41,9 +41,7 @@ def test_create_test_data():
 		"selling_cost_center": "Main - _TC",
 		"income_account": "Sales - _TC"
 		}],
-		"show_in_website": 1,
 		"route":"-test-tesla-car",
-		"website_warehouse": "Stores - _TC"
 		})
 		item.insert()
 	# create test item price
@@ -102,7 +100,7 @@ class TestCouponCode(unittest.TestCase):
 		test_create_test_data()
 
 	def tearDown(self):
-		frappe.set_user("Administrator")		
+		frappe.set_user("Administrator")
 
 	def test_sales_order_with_coupon_code(self):
 		frappe.db.set_value("Coupon Code", "SAVE30", "used", 0)

@@ -13,7 +13,7 @@ class ItemVariantSettings(Document):
 	def set_default_fields(self):
 		self.fields = []
 		fields = frappe.get_meta('Item').fields
-		exclude_fields = ["naming_series", "item_code", "item_name", "show_in_website",
+		exclude_fields = ["naming_series", "item_code", "item_name", "published_in_website",
 			"show_variant_in_website", "standard_rate", "opening_stock", "image", "description",
 			"variant_of", "valuation_rate", "description", "barcodes",
 			"website_image", "thumbnail", "website_specifiations", "web_long_description"]
