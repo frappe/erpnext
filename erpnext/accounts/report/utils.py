@@ -147,8 +147,7 @@ def get_invoiced_item_gross_margin(sales_invoice=None, item_code=None, company=N
 	filters = {
 		'sales_invoice': sales_invoice,
 		'item_code': item_code,
-		'company': company,
-		'group_by': 'Invoice'
+		'company': company
 	}
 
 	gross_profit_data = GrossProfitGenerator(filters)
