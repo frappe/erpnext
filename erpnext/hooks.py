@@ -77,7 +77,7 @@ domains = {
 	'Services': 'erpnext.domains.services',
 }
 
-website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
+website_generators = ["Item Group", "Website Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 
 website_context = {
