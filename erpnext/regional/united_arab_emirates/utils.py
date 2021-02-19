@@ -26,9 +26,13 @@ def update_itemised_tax_data(doc):
 		elif row.item_code and itemised_tax.get(row.item_code):
 			tax_rate = sum([tax.get('tax_rate', 0) for d, tax in itemised_tax.get(row.item_code).items()])
 
-		row.tax_rate = flt(tax_rate, cint(frappe.db.get_default("float_precision")))
+		meta = frappe.get_meta(doc.doctype)
+		tax_rate_precision = row.precision("tax_rate") if meta.has_field("tax_rate") else cint(frappe.db.get_default("float_precision"))
+		total_amount_precision = row.precision("total_amount") if meta.has_field("total_amount") else cint(frappe.db.get_default("currency_precision"))
+
+		row.tax_rate = flt(tax_rate, tax_rate_precision)
 		row.tax_amount = flt((row.net_amount * tax_rate) / 100, row.precision("net_amount"))
-		row.total_amount = flt((row.net_amount + row.tax_amount), cint(frappe.db.get_default("currency_precision")))
+		row.total_amount = flt((row.net_amount + row.tax_amount), total_amount_precision)
 
 def get_account_currency(account):
 	"""Helper function to get account currency."""
