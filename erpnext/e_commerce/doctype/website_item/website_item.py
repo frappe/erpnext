@@ -326,6 +326,7 @@ class WebsiteItem(WebsiteGenerator):
 				row.description = desc
 
 def invalidate_cache_for_web_item(doc):
+	"""Invalidate Website Item Group cache and rebuild ItemVariantsCacheManager."""
 	from erpnext.stock.doctype.item.item import invalidate_item_variants_cache_for_website
 
 	invalidate_cache_for(doc, doc.item_group)
