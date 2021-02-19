@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 import erpnext
-from frappe.utils import flt, round_based_on_smallest_currency_fraction, money_in_words
+from frappe.utils import flt, round_based_on_smallest_currency_fraction, money_in_words, cint
 from erpnext.controllers.taxes_and_totals import get_itemised_tax
 from six import iteritems
 
@@ -25,10 +25,10 @@ def update_itemised_tax_data(doc):
 				tax_rate += rate
 		elif row.item_code and itemised_tax.get(row.item_code):
 			tax_rate = sum([tax.get('tax_rate', 0) for d, tax in itemised_tax.get(row.item_code).items()])
-
-		row.tax_rate = flt(tax_rate, row.precision("tax_rate"))
+		print(cint(frappe.db.get_default("currency_precision")))
+		row.tax_rate = flt(tax_rate, cint(frappe.db.get_default("float_precision")))
 		row.tax_amount = flt((row.net_amount * tax_rate) / 100, row.precision("net_amount"))
-		row.total_amount = flt((row.net_amount + row.tax_amount), row.precision("total_amount"))
+		row.total_amount = flt((row.net_amount + row.tax_amount), cint(frappe.db.get_default("currency_precision")))
 
 def get_account_currency(account):
 	"""Helper function to get account currency."""
