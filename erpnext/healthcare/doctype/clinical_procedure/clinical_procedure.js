@@ -85,7 +85,7 @@ frappe.ui.form.on('Clinical Procedure', {
 								callback: function(r) {
 									if (r.message) {
 										frappe.show_alert({
-											message: __('Stock Entry {0} created', ['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
+											message: __('Stock Entry {0} created', ['<a class="bold" href="/app/stock-entry/'+ r.message + '">' + r.message + '</a>']),
 											indicator: 'green'
 										});
 									}

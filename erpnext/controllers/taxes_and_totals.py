@@ -10,10 +10,13 @@ from erpnext.controllers.accounts_controller import validate_conversion_rate, \
 	validate_taxes_and_charges, validate_inclusive_tax
 from erpnext.stock.get_item_details import _get_item_tax_template
 from erpnext.accounts.doctype.pricing_rule.utils import get_applied_pricing_rules
+from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_rate
 
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
 		self.doc = doc
+		frappe.flags.round_off_applicable_accounts = []
+		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
 		self.calculate()
 
 	def calculate(self):
@@ -106,7 +109,7 @@ class calculate_taxes_and_totals(object):
 					elif item.discount_amount and item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
 
-				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item']:
+				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item', 'POS Invoice Item']:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
@@ -238,9 +241,6 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
-		if self.doc.doctype == 'Sales Invoice' and self.doc.is_pos:
-			self.doc.pos_total_qty = self.doc.total_qty
-
 	def calculate_taxes(self):
 		self.doc.rounding_adjustment = 0
 		# maintain actual tax rate based on idx
@@ -334,8 +334,16 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
+		current_tax_amount = self.get_final_current_tax_amount(tax, current_tax_amount)
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
+		return current_tax_amount
+
+	def get_final_current_tax_amount(self, tax, current_tax_amount):
+		# Some countries need individual tax components to be rounded
+		# Handeled via regional doctypess
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			current_tax_amount = round(current_tax_amount, 0)
 		return current_tax_amount
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
@@ -519,6 +527,17 @@ class calculate_taxes_and_totals(object):
 			if self.doc.docstatus == 0:
 				self.calculate_outstanding_amount()
 
+	def is_internal_invoice(self):
+		"""
+			Checks if its an internal transfer invoice
+			and decides if to calculate any out standing amount or not
+		"""
+
+		if self.doc.doctype in ('Sales Invoice', 'Purchase Invoice') and self.doc.is_internal_transfer():
+			return True
+
+		return False
+
 	def calculate_outstanding_amount(self):
 		# NOTE:
 		# write_off_amount is only for POS Invoice
@@ -526,7 +545,8 @@ class calculate_taxes_and_totals(object):
 		if self.doc.doctype == "Sales Invoice":
 			self.calculate_paid_amount()
 
-		if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos'): return
+		if self.doc.is_return and self.doc.return_against and not self.doc.get('is_pos') or \
+			self.is_internal_invoice(): return
 
 		self.doc.round_floats_in(self.doc, ["grand_total", "total_advance", "write_off_amount"])
 		self._set_in_company_currency(self.doc, ['write_off_amount'])
@@ -603,7 +623,6 @@ class calculate_taxes_and_totals(object):
 				self.doc.precision("base_write_off_amount"))
 
 	def calculate_margin(self, item):
-
 		rate_with_margin = 0.0
 		base_rate_with_margin = 0.0
 		if item.price_list_rate:
@@ -612,8 +631,8 @@ class calculate_taxes_and_totals(object):
 				for d in get_applied_pricing_rules(item.pricing_rules):
 					pricing_rule = frappe.get_cached_doc('Pricing Rule', d)
 
-					if (pricing_rule.margin_type in ['Amount', 'Percentage'] and pricing_rule.currency == self.doc.currency)\
-							or (pricing_rule.margin_type == 'Percentage'):
+					if pricing_rule.margin_rate_or_amount and ((pricing_rule.currency == self.doc.currency and
+						pricing_rule.margin_type in ['Amount', 'Percentage']) or pricing_rule.margin_type == 'Percentage'):
 						item.margin_type = pricing_rule.margin_type
 						item.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 						has_margin = True
@@ -641,7 +660,8 @@ class calculate_taxes_and_totals(object):
 		if default_mode_of_payment:
 			self.doc.append('payments', {
 				'mode_of_payment': default_mode_of_payment.mode_of_payment,
-				'amount': total_amount_to_pay
+				'amount': total_amount_to_pay,
+				'default': 1
 			})
 		else:
 			self.doc.is_pos = 0
@@ -682,6 +702,15 @@ def get_itemised_tax_breakup_html(doc):
 		)
 	)
 
+@frappe.whitelist()
+def get_round_off_applicable_accounts(company, account_list):
+	account_list = get_regional_round_off_accounts(company, account_list)
+
+	return account_list
+
+@erpnext.allow_regional
+def get_regional_round_off_accounts(company, account_list):
+	pass
 
 @erpnext.allow_regional
 def update_itemised_tax_data(doc):
@@ -744,3 +773,35 @@ def get_rounded_tax_amount(itemised_tax, precision):
 	for taxes in itemised_tax.values():
 		for tax_account in taxes:
 			taxes[tax_account]["tax_amount"] = flt(taxes[tax_account]["tax_amount"], precision)
+
+class init_landed_taxes_and_totals(object):
+	def __init__(self, doc):
+		self.doc = doc
+		self.tax_field = 'taxes' if self.doc.doctype == 'Landed Cost Voucher' else 'additional_costs'
+		self.set_account_currency()
+		self.set_exchange_rate()
+		self.set_amounts_in_company_currency()
+
+	def set_account_currency(self):
+		company_currency = erpnext.get_company_currency(self.doc.company)
+		for d in self.doc.get(self.tax_field):
+			if not d.account_currency:
+				account_currency = frappe.db.get_value('Account', d.expense_account, 'account_currency')
+				d.account_currency = account_currency or company_currency
+
+	def set_exchange_rate(self):
+		company_currency = erpnext.get_company_currency(self.doc.company)
+		for d in self.doc.get(self.tax_field):
+			if d.account_currency == company_currency:
+				d.exchange_rate = 1
+			elif not d.exchange_rate or d.exchange_rate == 1 or self.doc.posting_date:
+				d.exchange_rate = get_exchange_rate(self.doc.posting_date, account=d.expense_account,
+					account_currency=d.account_currency, company=self.doc.company)
+
+			if not d.exchange_rate:
+				frappe.throw(_("Row {0}: Exchange Rate is mandatory").format(d.idx))
+
+	def set_amounts_in_company_currency(self):
+		for d in self.doc.get(self.tax_field):
+			d.amount = flt(d.amount, d.precision("amount"))
+			d.base_amount = flt(d.amount * flt(d.exchange_rate), d.precision("base_amount"))

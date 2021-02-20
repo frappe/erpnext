@@ -22,9 +22,14 @@ class AdditionalSalary(Document):
 
 	def validate(self):
 		self.validate_dates()
+		self.validate_salary_structure()
 		self.validate_recurring_additional_salary_overlap()
 		if self.amount < 0:
 			frappe.throw(_("Amount should not be less than zero."))
+
+	def validate_salary_structure(self):
+		if not frappe.db.exists('Salary Structure Assignment', {'employee': self.employee}):
+			frappe.throw(_("There is no Salary Structure assigned to {0}. First assign a Salary Stucture.").format(self.employee))
 
 	def validate_recurring_additional_salary_overlap(self):
 		if self.is_recurring:

@@ -44,11 +44,17 @@ erpnext.buying.SupplierQuotationController = erpnext.buying.BuyingController.ext
 							material_request_type: "Purchase",
 							docstatus: 1,
 							status: ["!=", "Stopped"],
-							per_ordered: ["<", 99.99],
+							per_ordered: ["<", 100],
 							company: me.frm.doc.company
 						}
 					})
 				}, __("Get Items From"));
+
+			// Link Material Requests
+			this.frm.add_custom_button(__('Link to Material Requests'),
+				function() {
+					erpnext.buying.link_to_mrs(me.frm);
+				}, __("Tools"));
 
 			this.frm.add_custom_button(__("Request for Quotation"),
 			function() {

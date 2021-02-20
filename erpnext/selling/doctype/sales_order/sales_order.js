@@ -8,7 +8,7 @@ frappe.ui.form.on("Sales Order", {
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery Note',
 			'Pick List': 'Pick List',
-			'Sales Invoice': 'Invoice',
+			'Sales Invoice': 'Sales Invoice',
 			'Material Request': 'Material Request',
 			'Purchase Order': 'Purchase Order',
 			'Project': 'Project',
@@ -171,8 +171,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						this.frm.add_custom_button(__('Request for Raw Materials'), () => this.make_raw_material_request(), __('Create'));
 					}
 
-					// make purchase order
+					// Make Purchase Order
+					if (!this.frm.doc.is_internal_customer) {
 						this.frm.add_custom_button(__('Purchase Order'), () => this.make_purchase_order(), __('Create'));
+					}
 
 					// maintenance
 					if(flt(doc.per_delivered, 2) < 100 && (order_is_maintenance || order_is_a_custom_sale)) {
@@ -193,16 +195,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
-						frappe.model.with_doc("Customer", me.frm.doc.customer, () => {
-							let customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
-							let internal = customer.is_internal_customer;
-							let disabled = customer.disabled;
-							if (internal === 1 && disabled === 0) {
-								me.frm.add_custom_button("Inter Company Order", function() {
-									me.make_inter_company_order();
-								}, __('Create'));
-							}
-						});
+						let internal = me.frm.doc.is_internal_customer;
+						if (internal) {
+							let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Order" :
+								"Inter Company Purchase Order";
+
+							me.frm.add_custom_button(button_label, function() {
+								me.make_inter_company_order();
+							}, __('Create'));
+						}
 					}
 				}
 				// payment request
@@ -327,7 +328,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 									if(r.message) {
 										frappe.msgprint({
 											message: __('Work Orders Created: {0}', [r.message.map(function(d) {
-													return repl('<a href="#Form/Work Order/%(name)s">%(name)s</a>', {name:d})
+													return repl('<a href="/app/work-order/%(name)s">%(name)s</a>', {name:d})
 												}).join(', ')]),
 											indicator: 'green'
 										})
@@ -436,7 +437,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					callback: function(r) {
 						if(r.message) {
 							frappe.msgprint(__('Material Request {0} submitted.',
-							['<a href="#Form/Material Request/'+r.message.name+'">' + r.message.name+ '</a>']));
+							['<a href="/app/material-request/'+r.message.name+'">' + r.message.name+ '</a>']));
 						}
 						d.hide();
 						me.frm.reload_doc();
@@ -513,7 +514,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	make_delivery_note: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			frm: me.frm
+			frm: this.frm
 		})
 	},
 

@@ -8,7 +8,17 @@ frappe.views.calendar["Job Card"] = {
 		"allDay": "allDay",
 		"progress": "progress"
 	},
-	gantt: true,
+	gantt: {
+		field_map: {
+			"start": "started_time",
+			"end": "started_time",
+			"id": "name",
+			"title": "subject",
+			"color": "color",
+			"allDay": "allDay",
+			"progress": "progress"
+		}
+	},
 	filters: [
 		{
 			"fieldtype": "Link",

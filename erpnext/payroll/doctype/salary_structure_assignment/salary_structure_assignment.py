@@ -13,6 +13,8 @@ class DuplicateAssignment(frappe.ValidationError): pass
 class SalaryStructureAssignment(Document):
 	def validate(self):
 		self.validate_dates()
+		self.validate_income_tax_slab()
+		self.set_payroll_payable_account()
 
 	def validate_dates(self):
 		joining_date, relieving_date = frappe.db.get_value("Employee", self.employee,
@@ -31,6 +33,24 @@ class SalaryStructureAssignment(Document):
 				frappe.throw(_("From Date {0} cannot be after employee's relieving Date {1}")
 					.format(self.from_date, relieving_date))
 
+	def validate_income_tax_slab(self):
+		if not self.income_tax_slab:
+			return
+		
+		income_tax_slab_currency = frappe.db.get_value('Income Tax Slab', self.income_tax_slab, 'currency')
+		if self.currency != income_tax_slab_currency:
+			frappe.throw(_("Currency of selected Income Tax Slab should be {0} instead of {1}").format(self.currency, income_tax_slab_currency))
+
+	def set_payroll_payable_account(self):
+		if not self.payroll_payable_account:
+			payroll_payable_account = frappe.db.get_value('Company', self.company, 'default_payroll_payable_account')
+			if not payroll_payable_account:
+				payroll_payable_account = frappe.db.get_value(
+					"Account", {
+						"account_name": _("Payroll Payable"), "company": self.company, "account_currency": frappe.db.get_value(
+							"Company", self.company, "default_currency"), "is_group": 0})
+			self.payroll_payable_account = payroll_payable_account
+
 def get_assigned_salary_structure(employee, on_date):
 	if not employee or not on_date:
 		return None
@@ -43,3 +63,10 @@ def get_assigned_salary_structure(employee, on_date):
 			'on_date': on_date,
 		})
 	return salary_structure[0][0] if salary_structure else None
+
+@frappe.whitelist()
+def get_employee_currency(employee):
+	employee_currency = frappe.db.get_value('Salary Structure Assignment', {'employee': employee}, 'currency')
+	if not employee_currency:
+		frappe.throw(_("There is no Salary Structure assigned to {0}. First assign a Salary Stucture.").format(employee))
+	return employee_currency

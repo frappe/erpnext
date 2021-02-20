@@ -158,8 +158,8 @@ class PurchaseOrder(BuyingController):
 		if self.is_subcontracted == "Yes":
 			for item in self.items:
 				if not item.bom:
-					frappe.throw(_("BOM is not specified for subcontracting item {0} at row {1}"\
-						.format(item.item_code, item.idx)))
+					frappe.throw(_("BOM is not specified for subcontracting item {0} at row {1}")
+						.format(item.item_code, item.idx))
 
 	def get_schedule_dates(self):
 		for d in self.get('items'):

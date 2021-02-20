@@ -96,6 +96,8 @@ def execute(filters=None):
 	"""Entry point for frappe."""
 	data = []
 	if filters and validate(filters):
+		fn = 'temporary_against_account_number'
+		filters[fn] = frappe.get_value('DATEV Settings', filters.get('company'), fn)
 		data = get_transactions(filters, as_dict=0)
 
 	return COLUMNS, data
@@ -156,11 +158,11 @@ def get_transactions(filters, as_dict=1):
 			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
 
 			/* account number or, if empty, party account number */
-			coalesce(acc.account_number, acc_pa.account_number) as 'Konto',
+			acc.account_number as 'Konto',
 
 			/* against number or, if empty, party against number */
-			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
-			
+			%(temporary_against_account_number)s as 'Gegenkonto (ohne BU-Schlüssel)',
+
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
 			LEFT(gl.remarks, 60) as 'Buchungstext',
@@ -171,26 +173,9 @@ def get_transactions(filters, as_dict=1):
 
 		FROM `tabGL Entry` gl
 
-			/* Statistisches Konto (Debitoren/Kreditoren) */
-			left join `tabParty Account` pa
-			on gl.against = pa.parent
-			and gl.company = pa.company
-
 			/* Kontonummer */
 			left join `tabAccount` acc 
 			on gl.account = acc.name
-
-			/* Gegenkonto-Nummer */
-			left join `tabAccount` acc_against 
-			on gl.against = acc_against.name
-
-			/* Statistische Kontonummer */
-			left join `tabAccount` acc_pa
-			on pa.account = acc_pa.name
-
-			/* Statistische Gegenkonto-Nummer */
-			left join `tabAccount` acc_against_pa 
-			on pa.account = acc_against_pa.name
 
 		WHERE gl.company = %(company)s 
 		AND DATE(gl.posting_date) >= %(from_date)s
@@ -347,7 +332,9 @@ def download_datev_csv(filters):
 	coa = frappe.get_value('Company', company, 'chart_of_accounts')
 	filters['skr'] = '04' if 'SKR04' in coa else ('03' if 'SKR03' in coa else '')
 
-	filters['account_number_length'] = frappe.get_value('DATEV Settings', company, 'account_number_length')
+	datev_settings = frappe.get_doc('DATEV Settings', company)
+	filters['account_number_length'] = datev_settings.account_number_length
+	filters['temporary_against_account_number'] = datev_settings.temporary_against_account_number
 
 	transactions = get_transactions(filters)
 	account_names = get_account_names(filters)

@@ -80,6 +80,7 @@ class TestInvoiceDiscounting(unittest.TestCase):
 			short_term_loan=self.short_term_loan,
 			bank_charges_account=self.bank_charges_account,
 			bank_account=self.bank_account,
+			bank_charges=100
 			)
 
 		je = inv_disc.create_disbursement_entry()
@@ -289,6 +290,7 @@ def create_invoice_discounting(invoices, **args):
 	inv_disc.bank_account=args.bank_account
 	inv_disc.loan_start_date = args.start or nowdate()
 	inv_disc.loan_period = args.period or 30
+	inv_disc.bank_charges = flt(args.bank_charges)
 
 	for d in invoices:
 		inv_disc.append("invoices", {

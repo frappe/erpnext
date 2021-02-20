@@ -245,7 +245,7 @@ class LeaveApplication(Document):
 	def throw_overlap_error(self, d):
 		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(self.employee,
 			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date'])) \
-			+ """ <b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
+			+ """ <b><a href="/app/Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
 
 	def get_total_leaves_on_half_day(self):
@@ -376,24 +376,32 @@ class LeaveApplication(Document):
 		if expiry_date:
 			self.create_ledger_entry_for_intermediate_allocation_expiry(expiry_date, submit, lwp)
 		else:
+			raise_exception = True
+			if frappe.flags.in_patch:
+				raise_exception=False
+
 			args = dict(
 				leaves=self.total_leave_days * -1,
 				from_date=self.from_date,
 				to_date=self.to_date,
 				is_lwp=lwp,
-				holiday_list=get_holiday_list_for_employee(self.employee)
+				holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
 			)
 			create_leave_ledger_entry(self, args, submit)
 
 	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):
 		''' splits leave application into two ledger entries to consider expiry of allocation '''
+
+		raise_exception = True
+		if frappe.flags.in_patch:
+			raise_exception=False
+
 		args = dict(
 			from_date=self.from_date,
 			to_date=expiry_date,
 			leaves=(date_diff(expiry_date, self.from_date) + 1) * -1,
 			is_lwp=lwp,
-			holiday_list=get_holiday_list_for_employee(self.employee),
-
+			holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
 		)
 		create_leave_ledger_entry(self, args, submit)
 
