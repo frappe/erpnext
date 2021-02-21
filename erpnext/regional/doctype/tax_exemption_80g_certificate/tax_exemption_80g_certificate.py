@@ -13,16 +13,27 @@ from frappe.contacts.doctype.address.address import get_company_address
 class TaxExemption80GCertificate(Document):
 	def validate(self):
 		self.validate_date()
+		self.validate_duplicates()
 		self.validate_company_details()
 		self.set_company_address()
+		self.set_title()
 
 	def validate_date(self):
-		if getdate(self.date):
-			fiscal_year = get_fiscal_year(fiscal_year=self.fiscal_year, as_dict=True)
+		if self.recipient == 'Member':
+			if getdate(self.date):
+				fiscal_year = get_fiscal_year(fiscal_year=self.fiscal_year, as_dict=True)
 
-			if not (fiscal_year.year_start_date <= getdate(self.date) \
-				<= fiscal_year.year_end_date):
-				frappe.throw(_('The Certificate Date is not in the Fiscal Year {0}').format(frappe.bold(self.fiscal_year)))
+				if not (fiscal_year.year_start_date <= getdate(self.date) \
+					<= fiscal_year.year_end_date):
+					frappe.throw(_('The Certificate Date is not in the Fiscal Year {0}').format(frappe.bold(self.fiscal_year)))
+
+	def validate_duplicates(self):
+		if self.recipient == 'Donor':
+			certificate = frappe.db.exists(self.doctype, {'donation': self.donation})
+			if certificate:
+				frappe.throw(_('An 80G Certificate {0} already exists for the donation {1}').format(
+					get_link_to_form(self.doctype, certificate), frappe.bold(self.donation)
+				), title=_('Duplicate Certificate'))
 
 	def validate_company_details(self):
 		fields = ['company_80g_number', 'with_effect_from', 'pan_details']
@@ -39,6 +50,12 @@ class TaxExemption80GCertificate(Document):
 		address = get_company_address(self.company)
 		self.company_address = address.company_address
 		self.company_address_display = address.company_address_display
+
+	def set_title(self):
+		if self.recipient == "Member":
+			self.title = self.member_name
+		else:
+			self.title = self.donor_name
 
 	def get_payments(self):
 		if not self.member:
