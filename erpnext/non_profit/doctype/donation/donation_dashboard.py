@@ -7,9 +7,6 @@ def get_data():
 		'non_standard_fieldnames': {
 			'Payment Entry': 'reference_name'
 		},
-		'internal_links': {
-			'Sales Order': ['items', 'sales_order']
-		},
 		'transactions': [
 			{
 				'label': _('Payment'),

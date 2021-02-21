@@ -61,7 +61,7 @@ frappe.ui.form.on("Non Profit Settings", {
 					key: "membership_webhook_secret"
 				}).then(() => {
 					frm.refresh();
-				})
+				});
 			}, __("Memberships"));
 
 			label = __("Regenerate Webhook Secret");
@@ -94,7 +94,7 @@ frappe.ui.form.on("Non Profit Settings", {
 					key: "donation_webhook_secret"
 				}).then(() => {
 					frm.refresh();
-				})
+				});
 			}, __("Donations"));
 
 		} else {
@@ -106,7 +106,7 @@ frappe.ui.form.on("Non Profit Settings", {
 				field: "donation_webhook_secret"
 			}).then(() => {
 				frm.refresh();
-			})
+			});
 		}, __("Donations"));
 	}
 });

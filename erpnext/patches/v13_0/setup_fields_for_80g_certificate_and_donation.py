@@ -9,7 +9,7 @@ def execute():
 	make_custom_fields()
 
 	if not frappe.db.exists('Party Type', 'Donor'):
-		party = frappe.get_doc({
+		frappe.get_doc({
 			'doctype': 'Party Type',
 			'party_type': 'Donor',
 			'account_type': 'Receivable'

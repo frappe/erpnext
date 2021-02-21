@@ -2,9 +2,9 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Tax Exemption 80G Certificate', {
-	refresh: function(frm) {
+	// refresh: function(frm) {
 
-	},
+	// },
 
 	get_payments: function(frm) {
 		frm.call({
@@ -15,10 +15,12 @@ frappe.ui.form.on('Tax Exemption 80G Certificate', {
 	},
 
 	company: function(frm) {
-		frm.call({
-			doc: frm.doc,
-			method: 'set_company_address',
-			freeze: true
-		});
+		if (frm.doc.member && frm.doc.company) {
+			frm.call({
+				doc: frm.doc,
+				method: 'set_company_address',
+				freeze: true
+			});
+		}
 	}
 });

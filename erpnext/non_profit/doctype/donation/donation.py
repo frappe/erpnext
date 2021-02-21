@@ -18,13 +18,13 @@ class Donation(Document):
 		self.create_payment_entry()
 
 	def create_payment_entry(self):
-		settings = frappe.get_doc("Non Profit Settings")
+		settings = frappe.get_doc('Non Profit Settings')
 		if not settings.automate_donation_payment_entries:
 			return
 
 		if not settings.donation_payment_account:
-			frappe.throw(_("You need to set <b>Payment Account</b> for Donation in {0}").format(
-				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
+			frappe.throw(_('You need to set <b>Payment Account</b> for Donation in {0}').format(
+				get_link_to_form('Non Profit Settings', 'Non Profit Settings')))
 
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 
@@ -106,7 +106,7 @@ def get_donor(email):
 
 	try:
 		return frappe.get_doc('Donor', donors[0]['name'])
-	except:
+	except Exception:
 		return None
 
 
@@ -156,15 +156,15 @@ def create_mode_of_payment(method):
 
 def notify_failure(log):
 	try:
-		content = _('''
+		content = '''
 			Dear System Manager,
 			Razorpay webhook for creating donation failed due to some reason.
 			Please check the error log linked below
 			Error Log: {0}
 			Regards, Administrator
-		''').format(get_link_to_form('Error Log', log.name))
+		'''.format(get_link_to_form('Error Log', log.name))
 
 		sendmail_to_system_managers(_('[Important] [ERPNext] Razorpay donation webhook failed, please check.'), content)
-	except:
+	except Exception:
 		pass
 
