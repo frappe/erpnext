@@ -260,7 +260,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		# Update Membership
 		membership = frappe.new_doc("Membership")
 		membership.update({
-			"company": frappe.db.get_single_value("Non Profit Settings", "company")
+			"company": frappe.db.get_single_value("Non Profit Settings", "company"),
 			"member": member.name,
 			"membership_status": "Current",
 			"membership_type": member.membership_type,
