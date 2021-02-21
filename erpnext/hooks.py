@@ -272,6 +272,9 @@ doc_events = {
 	'Address': {
 		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code', 'erpnext.regional.india.utils.update_gst_category']
 	},
+	'Supplier': {
+		'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
+	},
 	('Sales Invoice', 'Sales Order', 'Delivery Note', 'Purchase Invoice', 'Purchase Order', 'Purchase Receipt'): {
 		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
 	},
