@@ -1,22 +1,25 @@
 {
  "cards": [
   {
-   "card": "Total Disbursed"
-  },
-  {
-   "card": "Total Sanctioned Amount"
+   "card": "New Loans"
   },
   {
    "card": "Active Loans"
   },
   {
+   "card": "Closed Loans"
+  },
+  {
+   "card": "Total Disbursed"
+  },
+  {
    "card": "Open Loan Applications"
   },
   {
-   "card": "New Loans"
+   "card": "New Loan Applications"
   },
   {
-   "card": "New Loan Applications"
+   "card": "Total Sanctioned Amount"
   },
   {
    "card": "Active Securities"
@@ -26,6 +29,12 @@
   },
   {
    "card": "Total Shortfall Amount"
+  },
+  {
+   "card": "Total Repayment"
+  },
+  {
+   "card": "Total Write Off"
   }
  ],
  "charts": [
@@ -53,7 +62,7 @@
  "idx": 0,
  "is_default": 0,
  "is_standard": 1,
- "modified": "2021-02-18 20:07:10.095401",
+ "modified": "2021-02-21 20:53:47.531699",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Dashboard",
