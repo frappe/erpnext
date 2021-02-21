@@ -11,12 +11,14 @@
   "donor_name",
   "email",
   "column_break_4",
+  "company",
   "date",
   "payment_details_section",
   "paid",
   "amount",
   "mode_of_payment",
-  "razorpay_payment_id"
+  "razorpay_payment_id",
+  "amended_from"
  ],
  "fields": [
   {
@@ -87,12 +89,31 @@
    "default": "0",
    "fieldname": "paid",
    "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Paid"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Donation",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
+ "is_submittable": 1,
  "links": [],
- "modified": "2021-02-17 16:37:42.731178",
+ "modified": "2021-02-21 20:41:15.799330",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Donation",

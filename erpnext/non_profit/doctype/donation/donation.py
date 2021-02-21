@@ -15,7 +15,28 @@ from erpnext.non_profit.doctype.membership.membership import verify_signature
 class Donation(Document):
 	def on_payment_authorized(self, *args, **kwargs):
 		self.load_from_db()
-		self.db_set('paid', 1)
+		self.create_payment_entry()
+
+	def create_payment_entry(self):
+		settings = frappe.get_doc("Non Profit Settings")
+		if not settings.automate_donation_payment_entries:
+			return
+
+		if not settings.donation_payment_account:
+			frappe.throw(_("You need to set <b>Payment Account</b> for Donation in {0}").format(
+				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
+
+		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
+
+		frappe.flags.ignore_account_permission = True
+		pe = get_payment_entry(dt=self.doctype, dn=self.name)
+		frappe.flags.ignore_account_permission = False
+		pe.paid_from = settings.donation_debit_account
+		pe.paid_to = settings.donation_payment_account
+		pe.reference_no = self.name
+		pe.reference_date = getdate()
+		pe.save(ignore_permissions=True)
+		pe.submit()
 
 
 @frappe.whitelist(allow_guest=True)
@@ -60,7 +81,9 @@ def create_donation(donor, payment):
 		create_mode_of_payment(payment.method)
 
 	donation = frappe.new_doc('Donation')
+	company = frappe.db.get_single_value('Non Profit Settings', 'donation_company')
 	donation.update({
+		'company': company,
 		'donor': donor.name,
 		'donor_name': donor.donor_name,
 		'email': donor.email,
@@ -70,7 +93,10 @@ def create_donation(donor, payment):
 		'razorpay_payment_id': payment.id
 	})
 
-	donation.insert(ignore_permissions=True)
+	donation.flags.ignore_permissions = True
+	donation.flags.ignore_mandatory = True
+	donation.insert()
+	donation.submit()
 
 
 def get_donor(email):

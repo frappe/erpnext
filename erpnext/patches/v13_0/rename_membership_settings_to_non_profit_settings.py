@@ -14,6 +14,7 @@ def execute():
 		"create_for_web_forms": "automate_membership_invoicing",
 		"make_payment_entry": "automate_membership_payment_entries",
 		"enable_razorpay": "enable_razorpay_for_memberships",
+		"debit_account": "membership_debit_account",
 		"payment_account": "membership_payment_account",
 		"webhook_secret": "membership_webhook_secret"
 	}

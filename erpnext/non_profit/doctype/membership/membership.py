@@ -114,8 +114,8 @@ class Membership(Document):
 
 	def make_payment_entry(self, settings, invoice):
 		if not settings.membership_payment_account:
-			frappe.throw(_("You need to set <b>Payment Account</b> in {0}").format(
-				get_link_to_form("Membership Type", self.membership_type)))
+			frappe.throw(_("You need to set <b>Payment Account</b> for Membership in {0}").format(
+				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
 
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 		frappe.flags.ignore_account_permission = True
@@ -260,6 +260,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		# Update Membership
 		membership = frappe.new_doc("Membership")
 		membership.update({
+			"company": frappe.db.get_single_value("Non Profit Settings", "company")
 			"member": member.name,
 			"membership_status": "Current",
 			"membership_type": member.membership_type,

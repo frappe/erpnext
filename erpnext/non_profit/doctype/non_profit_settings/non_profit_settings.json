@@ -15,7 +15,7 @@
   "automate_membership_invoicing",
   "automate_membership_payment_entries",
   "company",
-  "debit_account",
+  "membership_debit_account",
   "membership_payment_account",
   "column_break_9",
   "send_email",
@@ -23,9 +23,12 @@
   "membership_print_format",
   "inv_print_format",
   "email_template",
-  "do",
+  "donation_settings_section",
+  "donation_company",
   "donation_webhook_secret",
+  "column_break_22",
   "automate_donation_payment_entries",
+  "donation_debit_account",
   "donation_payment_account"
  ],
  "fields": [
@@ -53,23 +56,16 @@
    "label": "Membership Invoicing"
   },
   {
-   "depends_on": "eval:doc.allow_invoicing",
-   "fieldname": "debit_account",
-   "fieldtype": "Link",
-   "label": "Debit Account",
-   "mandatory_depends_on": "eval:doc.allow_invoicing",
-   "options": "Account"
-  },
-  {
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.allow_invoicing",
+   "depends_on": "enable_razorpay_for_memberships",
+   "description": "This company will be set for the Memberships created via webhook.",
    "fieldname": "company",
    "fieldtype": "Link",
    "label": "Company",
-   "mandatory_depends_on": "eval:doc.allow_invoicing",
+   "mandatory_depends_on": "enable_razorpay_for_memberships",
    "options": "Company"
   },
   {
@@ -169,20 +165,48 @@
   },
   {
    "default": "0",
+   "description": "Auto creates Payment Entry for Donations created from web forms.",
    "fieldname": "automate_donation_payment_entries",
    "fieldtype": "Check",
    "label": "Automate Donation Payment Entries"
   },
   {
-   "fieldname": "do",
+   "depends_on": "eval:doc.allow_invoicing",
+   "fieldname": "membership_debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "mandatory_depends_on": "eval:doc.allow_invoicing",
+   "options": "Account"
+  },
+  {
+   "depends_on": "automate_donation_payment_entries",
+   "fieldname": "donation_debit_account",
+   "fieldtype": "Link",
+   "label": "Debit Account",
+   "mandatory_depends_on": "automate_donation_payment_entries",
+   "options": "Account"
+  },
+  {
+   "description": "This company will be set for the Donations created via webhook.",
+   "fieldname": "donation_company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "donation_settings_section",
    "fieldtype": "Section Break",
    "label": "Donation Settings"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-18 13:43:14.027792",
+ "modified": "2021-02-19 15:06:55.218024",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",
