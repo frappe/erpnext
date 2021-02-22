@@ -20,7 +20,7 @@ doctype_series_map = {
 	'Certified Consultant': 'NPO-CONS-.YYYY.-.#####',
 	'Chat Room': 'CHAT-ROOM-.#####',
 	'Compensatory Leave Request': 'HR-CMP-.YY.-.MM.-.#####',
-	'Custom Script': 'SYS-SCR-.#####',
+	'Client Script': 'SYS-SCR-.#####',
 	'Employee Benefit Application': 'HR-BEN-APP-.YY.-.MM.-.#####',
 	'Employee Benefit Application Detail': '',
 	'Employee Benefit Claim': 'HR-BEN-CLM-.YY.-.MM.-.#####',
