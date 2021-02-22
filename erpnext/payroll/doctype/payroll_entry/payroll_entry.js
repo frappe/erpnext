@@ -348,7 +348,6 @@ let render_employee_attendance = function (frm, data) {
 
 frappe.ui.form.on('Payroll Employee Detail', {
 	employee: function(frm) {
-		frm.events.clear_employee_table(frm);
 		if (!frm.doc.payroll_frequency) {
 			frappe.throw(__("Please set a Payroll Frequency"));
 		}

@@ -55,7 +55,7 @@ class TestQualityInspection(unittest.TestCase):
 		},
 		{
 			"specification": "Particle Inspection Needed", # non-numeric reading
-			"non_numeric": 1,
+			"numeric": 0,
 			"value": "Yes",
 			"reading_value": "Yes"
 		}]
@@ -96,7 +96,7 @@ class TestQualityInspection(unittest.TestCase):
 		{
 			"specification": "Calcium Content", # non-numeric reading
 			"formula_based_criteria": 1,
-			"non_numeric": 1,
+			"numeric": 0,
 			"acceptance_formula": "reading_value in ('Grade A', 'Grade B', 'Grade C')",
 			"reading_value": "Grade B"
 		}]

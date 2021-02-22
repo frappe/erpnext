@@ -95,13 +95,19 @@ frappe.ui.form.on("Delivery Note", {
 			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.is_internal_customer && !frm.doc.inter_company_reference) {
-			frm.add_custom_button(__('Purchase Receipt'), function() {
-				frappe.model.open_mapped_doc({
-					method: 'erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_purchase_receipt',
-					frm: frm,
-				})
-			}, __('Create'));
+		if (frm.doc.docstatus == 1 && !frm.doc.inter_company_reference) {
+			let internal = me.frm.doc.is_internal_customer;
+			if (internal) {
+				let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Receipt" :
+					"Inter Company Purchase Receipt";
+
+				me.frm.add_custom_button(button_label, function() {
+					frappe.model.open_mapped_doc({
+						method: 'erpnext.stock.doctype.delivery_note.delivery_note.make_inter_company_purchase_receipt',
+						frm: frm,
+					});
+				}, __('Create'));
+			}
 		}
 	}
 });
@@ -297,15 +303,6 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 			}
 		})
 	},
-
-	to_warehouse: function() {
-		let packed_items_table = this.frm.doc["packed_items"];
-		this.autofill_warehouse(this.frm.doc["items"], "target_warehouse", this.frm.doc.to_warehouse);
-		if (packed_items_table && packed_items_table.length) {
-			this.autofill_warehouse(packed_items_table, "target_warehouse", this.frm.doc.to_warehouse);
-		}
-	}
-
 });
 
 $.extend(cur_frm.cscript, new erpnext.stock.DeliveryNoteController({frm: cur_frm}));

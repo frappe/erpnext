@@ -58,13 +58,11 @@ frappe.ui.form.on('Salary Structure', {
 		if(!frm.doc.company) return;
 		frm.set_query("salary_component", "earnings", function() {
 			return {
-				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
 				filters: {type: "earning", company: frm.doc.company}
 			};
 		});
 		frm.set_query("salary_component", "deductions", function() {
 			return {
-				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
 				filters: {type: "deduction", company: frm.doc.company}
 			};
 		});

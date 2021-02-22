@@ -81,7 +81,7 @@ def get_active_loan_details(filters):
 			+ loan['penalty']
 
 		if loan_wise_security_value.get(loan.loan):
-			loan['loan_to_value'] = (loan['principal_outstanding'] * 100) / loan_wise_security_value.get(loan.loan)
+			loan['loan_to_value'] = flt((loan['principal_outstanding'] * 100) / loan_wise_security_value.get(loan.loan))
 
 	return loan_details
 
@@ -148,7 +148,7 @@ def get_loan_wise_pledges(filters):
 		WHERE u.parent = up.name
 		AND up.status = 'Approved'
 		{conditions}
-		GROUP BY up.loan
+		GROUP BY up.loan, u.loan_security
 	""".format(conditions=conditions), filters, as_dict=1)
 
 	for unpledge in unpledges:
@@ -160,7 +160,7 @@ def get_loan_wise_pledges(filters):
 		WHERE p.parent = lp.name
 		AND lp.status = 'Pledged'
 		{conditions}
-		GROUP BY lp.loan
+		GROUP BY lp.loan, p.loan_security
 	""".format(conditions=conditions), filters, as_dict=1)
 
 	for security in pledges:

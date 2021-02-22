@@ -16,6 +16,7 @@
   "action_if_quality_inspection_is_not_submitted",
   "show_barcode_field",
   "clean_description_html",
+  "disable_serial_no_and_batch_selector",
   "section_break_7",
   "auto_insert_price_list_rate_if_missing",
   "allow_negative_stock",
@@ -227,6 +228,12 @@
    "fieldname": "control_historical_stock_transactions_section",
    "fieldtype": "Section Break",
    "label": "Control Historical Stock Transactions"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_serial_no_and_batch_selector",
+   "fieldtype": "Check",
+   "label": "Disable Serial No And Batch Selector"
   }
  ],
  "icon": "icon-cog",
@@ -234,7 +241,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-12-29 12:53:31.162247",
+ "modified": "2021-01-18 13:15:38.352796",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",

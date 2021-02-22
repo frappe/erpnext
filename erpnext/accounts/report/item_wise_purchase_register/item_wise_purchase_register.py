@@ -49,7 +49,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		elif d.po_detail:
 			purchase_receipt = ", ".join(po_pr_map.get(d.po_detail, []))
 
-		expense_account = d.expense_account or aii_account_map.get(d.company)
+		expense_account = d.unrealized_profit_loss_account or d.expense_account \
+			or aii_account_map.get(d.company)
 
 		row = {
 			'item_code': d.item_code,
@@ -315,6 +316,7 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`name`, `tabPurchase Invoice Item`.`parent`,
 			`tabPurchase Invoice`.posting_date, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.company,
 			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total,
+			`tabPurchase Invoice`.unrealized_profit_loss_account,
 			`tabPurchase Invoice Item`.`item_code`, `tabPurchase Invoice Item`.description,
 			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`,
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,

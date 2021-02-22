@@ -26,6 +26,7 @@ class PatientAppointment(Document):
 
 	def after_insert(self):
 		self.update_prescription_details()
+		self.set_payment_details()
 		invoice_appointment(self)
 		self.update_fee_validity()
 		send_confirmation_msg(self)
@@ -64,7 +65,7 @@ class PatientAppointment(Document):
 
 		if overlaps:
 			overlapping_details = _('Appointment overlaps with ')
-			overlapping_details += "<b><a href='#Form/Patient Appointment/{0}'>{0}</a></b><br>".format(overlaps[0][0])
+			overlapping_details += "<b><a href='/app/Form/Patient Appointment/{0}'>{0}</a></b><br>".format(overlaps[0][0])
 			overlapping_details += _('{0} has appointment scheduled with {1} at {2} having {3} minute(s) duration.').format(
 				overlaps[0][1], overlaps[0][2], overlaps[0][3], overlaps[0][4])
 			frappe.throw(overlapping_details, title=_('Appointments Overlapping'))
@@ -85,11 +86,18 @@ class PatientAppointment(Document):
 	def set_appointment_datetime(self):
 		self.appointment_datetime = "%s %s" % (self.appointment_date, self.appointment_time or "00:00:00")
 
+	def set_payment_details(self):
+		if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
+			details = get_service_item_and_practitioner_charge(self)
+			self.db_set('billing_item', details.get('service_item'))
+			if not self.paid_amount:
+				self.db_set('paid_amount', details.get('practitioner_charge'))
+
 	def validate_customer_created(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing'):
 			if not frappe.db.get_value('Patient', self.patient, 'customer'):
 				msg = _("Please set a Customer linked to the Patient")
-				msg +=  " <b><a href='#Form/Patient/{0}'>{0}</a></b>".format(self.patient)
+				msg +=  " <b><a href='/app/Form/Patient/{0}'>{0}</a></b>".format(self.patient)
 				frappe.throw(msg, title=_('Customer Not Found'))
 
 	def update_prescription_details(self):
@@ -148,31 +156,37 @@ def invoice_appointment(appointment_doc):
 		fee_validity = None
 
 	if automate_invoicing and not appointment_invoiced and not fee_validity:
-		sales_invoice = frappe.new_doc('Sales Invoice')
-		sales_invoice.patient = appointment_doc.patient
-		sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
-		sales_invoice.appointment = appointment_doc.name
-		sales_invoice.due_date = getdate()
-		sales_invoice.company = appointment_doc.company
-		sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
+		create_sales_invoice(appointment_doc)
 
-		item = sales_invoice.append('items', {})
-		item = get_appointment_item(appointment_doc, item)
 
-		# Add payments if payment details are supplied else proceed to create invoice as Unpaid
-		if appointment_doc.mode_of_payment and appointment_doc.paid_amount:
-			sales_invoice.is_pos = 1
-			payment = sales_invoice.append('payments', {})
-			payment.mode_of_payment = appointment_doc.mode_of_payment
-			payment.amount = appointment_doc.paid_amount
+def create_sales_invoice(appointment_doc):
+	sales_invoice = frappe.new_doc('Sales Invoice')
+	sales_invoice.patient = appointment_doc.patient
+	sales_invoice.customer = frappe.get_value('Patient', appointment_doc.patient, 'customer')
+	sales_invoice.appointment = appointment_doc.name
+	sales_invoice.due_date = getdate()
+	sales_invoice.company = appointment_doc.company
+	sales_invoice.debit_to = get_receivable_account(appointment_doc.company)
 
-		sales_invoice.set_missing_values(for_validate=True)
-		sales_invoice.flags.ignore_mandatory = True
-		sales_invoice.save(ignore_permissions=True)
-		sales_invoice.submit()
-		frappe.msgprint(_('Sales Invoice {0} created').format(sales_invoice.name), alert=True)
-		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'invoiced', 1)
-		frappe.db.set_value('Patient Appointment', appointment_doc.name, 'ref_sales_invoice', sales_invoice.name)
+	item = sales_invoice.append('items', {})
+	item = get_appointment_item(appointment_doc, item)
+
+	# Add payments if payment details are supplied else proceed to create invoice as Unpaid
+	if appointment_doc.mode_of_payment and appointment_doc.paid_amount:
+		sales_invoice.is_pos = 1
+		payment = sales_invoice.append('payments', {})
+		payment.mode_of_payment = appointment_doc.mode_of_payment
+		payment.amount = appointment_doc.paid_amount
+
+	sales_invoice.set_missing_values(for_validate=True)
+	sales_invoice.flags.ignore_mandatory = True
+	sales_invoice.save(ignore_permissions=True)
+	sales_invoice.submit()
+	frappe.msgprint(_('Sales Invoice {0} created').format(sales_invoice.name), alert=True)
+	frappe.db.set_value('Patient Appointment', appointment_doc.name, {
+		'invoiced': 1,
+		'ref_sales_invoice': sales_invoice.name
+	})
 
 
 def check_is_new_patient(patient, name=None):
@@ -187,13 +201,14 @@ def check_is_new_patient(patient, name=None):
 
 
 def get_appointment_item(appointment_doc, item):
-	service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment_doc)
-	item.item_code = service_item
+	details = get_service_item_and_practitioner_charge(appointment_doc)
+	charge = appointment_doc.paid_amount or details.get('practitioner_charge')
+	item.item_code = details.get('service_item')
 	item.description = _('Consulting Charges: {0}').format(appointment_doc.practitioner)
 	item.income_account = get_income_account(appointment_doc.practitioner, appointment_doc.company)
 	item.cost_center = frappe.get_cached_value('Company', appointment_doc.company, 'cost_center')
-	item.rate = practitioner_charge
-	item.amount = practitioner_charge
+	item.rate = charge
+	item.amount = charge
 	item.qty = 1
 	item.reference_dt = 'Patient Appointment'
 	item.reference_dn = appointment_doc.name

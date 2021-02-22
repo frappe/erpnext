@@ -133,9 +133,10 @@ class Asset(AccountsController):
 		if self.is_existing_asset: return
 
 		if self.gross_purchase_amount and self.gross_purchase_amount != self.purchase_receipt_amount:
-			frappe.throw(_("Gross Purchase Amount should be {} to purchase amount of one single Asset. {}\
-				Please do not book expense of multiple assets against one single Asset.")
-				.format(frappe.bold("equal"), "<br>"), title=_("Invalid Gross Purchase Amount"))
+			error_message = _("Gross Purchase Amount should be <b>equal</b> to purchase amount of one single Asset.")
+			error_message += "<br>"
+			error_message += _("Please do not book expense of multiple assets against one single Asset.")
+			frappe.throw(error_message, title=_("Invalid Gross Purchase Amount"))
 
 	def make_asset_movement(self):
 		reference_doctype = 'Purchase Receipt' if self.purchase_receipt else 'Purchase Invoice'
@@ -471,7 +472,7 @@ class Asset(AccountsController):
 
 		asset_bought_with_invoice = (purchase_document == self.purchase_invoice)
 		fixed_asset_account = self.get_fixed_asset_account()
-		
+
 		cwip_enabled = is_cwip_accounting_enabled(self.asset_category)
 		cwip_account = self.get_cwip_account(cwip_enabled=cwip_enabled)
 
@@ -503,10 +504,10 @@ class Asset(AccountsController):
 		purchase_document = self.purchase_invoice if asset_bought_with_invoice else self.purchase_receipt
 
 		return purchase_document
-	
+
 	def get_fixed_asset_account(self):
 		return get_asset_category_account('fixed_asset_account', None, self.name, None, self.asset_category, self.company)
-	
+
 	def get_cwip_account(self, cwip_enabled=False):
 		cwip_account = None
 		try:
@@ -659,7 +660,7 @@ def transfer_asset(args):
 
 	frappe.db.commit()
 
-	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='#Form/Asset Movement/{0}'>{0}</a>").format(movement_entry.name))
+	frappe.msgprint(_("Asset Movement record {0} created").format("<a href='/app/Form/Asset Movement/{0}'>{0}</a>").format(movement_entry.name))
 
 @frappe.whitelist()
 def get_item_details(item_code, asset_category):

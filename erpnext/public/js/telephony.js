@@ -11,7 +11,7 @@ frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
 				.append(`
 					<span class="phone-btn">
 						<a class="btn-open no-decoration" title="${__('Make a call')}">
-							<i class="fa fa-phone"></i></a>
+							${frappe.utils.icon('call')}
 					</span>
 				`)
 				.find('.phone-btn')

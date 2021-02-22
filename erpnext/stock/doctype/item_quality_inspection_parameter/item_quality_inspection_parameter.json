@@ -8,7 +8,7 @@
  "field_order": [
   "specification",
   "value",
-  "non_numeric",
+  "numeric",
   "column_break_3",
   "min_value",
   "max_value",
@@ -29,7 +29,7 @@
    "width": "100px"
   },
   {
-   "depends_on": "eval:(!doc.formula_based_criteria && doc.non_numeric)",
+   "depends_on": "eval:(!doc.formula_based_criteria && !doc.numeric)",
    "fieldname": "value",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -55,32 +55,32 @@
    "label": "Formula Based Criteria"
   },
   {
-   "depends_on": "eval:(!doc.formula_based_criteria && !doc.non_numeric)",
+   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
    "fieldname": "min_value",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Minimum Value"
   },
   {
-   "depends_on": "eval:(!doc.formula_based_criteria && !doc.non_numeric)",
+   "depends_on": "eval:(!doc.formula_based_criteria && doc.numeric)",
    "fieldname": "max_value",
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Maximum Value"
   },
   {
-   "default": "0",
-   "fieldname": "non_numeric",
+   "default": "1",
+   "fieldname": "numeric",
    "fieldtype": "Check",
    "in_list_view": 1,
-   "label": "Non-Numeric",
+   "label": "Numeric",
    "width": "80px"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-07 21:32:49.866439",
+ "modified": "2021-02-01 19:18:46.924399",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Quality Inspection Parameter",

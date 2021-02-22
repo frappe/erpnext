@@ -5,34 +5,26 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "call_details_section",
   "id",
   "from",
   "to",
-  "column_break_3",
-  "received_by",
   "medium",
-  "caller_information",
-  "contact",
-  "contact_name",
-  "column_break_10",
+  "start_time",
+  "end_time",
+  "column_break_4",
+  "type",
   "customer",
-  "lead",
-  "lead_name",
-  "section_break_5",
   "status",
   "duration",
-  "recording_url"
+  "recording_url",
+  "recording_html",
+  "section_break_11",
+  "summary",
+  "section_break_19",
+  "links"
  ],
  "fields": [
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_5",
-   "fieldtype": "Section Break",
-   "label": "Call Details"
-  },
   {
    "fieldname": "id",
    "fieldtype": "Data",
@@ -50,6 +42,7 @@
   {
    "fieldname": "to",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "To",
    "read_only": 1
   },
@@ -58,13 +51,13 @@
    "fieldtype": "Select",
    "in_list_view": 1,
    "label": "Status",
-   "options": "Ringing\nIn Progress\nCompleted\nMissed",
+   "options": "Ringing\nIn Progress\nCompleted\nFailed\nBusy\nNo Answer\nQueued\nCanceled",
    "read_only": 1
   },
   {
    "description": "Call Duration in seconds",
    "fieldname": "duration",
-   "fieldtype": "Int",
+   "fieldtype": "Duration",
    "in_list_view": 1,
    "label": "Duration",
    "read_only": 1
@@ -72,8 +65,8 @@
   {
    "fieldname": "recording_url",
    "fieldtype": "Data",
-   "label": "Recording URL",
-   "read_only": 1
+   "hidden": 1,
+   "label": "Recording URL"
   },
   {
    "fieldname": "medium",
@@ -82,51 +75,52 @@
    "read_only": 1
   },
   {
-   "fieldname": "received_by",
-   "fieldtype": "Link",
-   "label": "Received By",
-   "options": "Employee",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "Incoming\nOutgoing",
    "read_only": 1
   },
   {
-   "fieldname": "caller_information",
+   "fieldname": "recording_html",
+   "fieldtype": "HTML",
+   "label": "Recording HTML"
+  },
+  {
+   "fieldname": "section_break_19",
    "fieldtype": "Section Break",
-   "label": "Caller Information"
+   "label": "Reference"
   },
   {
-   "fieldname": "contact",
-   "fieldtype": "Link",
-   "label": "Contact",
-   "options": "Contact",
-   "read_only": 1
+   "fieldname": "links",
+   "fieldtype": "Table",
+   "label": "Links",
+   "options": "Dynamic Link"
   },
   {
-   "fieldname": "lead",
-   "fieldtype": "Link",
-   "label": "Lead ",
-   "options": "Lead",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "contact.name",
-   "fieldname": "contact_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Contact Name",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_10",
+   "fieldname": "column_break_4",
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "lead.lead_name",
-   "fieldname": "lead_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "in_list_view": 1,
-   "label": "Lead Name",
+   "fieldname": "summary",
+   "fieldtype": "Small Text"
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break",
+   "hide_border": 1,
+   "label": "Call Summary"
+  },
+  {
+   "fieldname": "start_time",
+   "fieldtype": "Datetime",
+   "label": "Start Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "end_time",
+   "fieldtype": "Datetime",
+   "label": "End Time",
    "read_only": 1
   },
   {
@@ -135,11 +129,17 @@
    "label": "Customer",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "fieldname": "call_details_section",
+   "fieldtype": "Section Break",
+   "label": "Call Details"
   }
  ],
+ "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-11-25 14:32:44.407815",
+ "modified": "2021-02-08 14:23:28.744844",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Call Log",
@@ -162,8 +162,8 @@
    "role": "Employee"
   }
  ],
- "sort_field": "modified",
- "sort_order": "ASC",
+ "sort_field": "creation",
+ "sort_order": "DESC",
  "title_field": "from",
  "track_changes": 1,
  "track_views": 1

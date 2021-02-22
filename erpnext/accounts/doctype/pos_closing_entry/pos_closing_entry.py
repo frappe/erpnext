@@ -6,13 +6,12 @@ from __future__ import unicode_literals
 import frappe
 import json
 from frappe import _
-from frappe.model.document import Document
-from frappe.utils import getdate, get_datetime, flt
-from collections import defaultdict
+from frappe.utils import get_datetime, flt
+from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.controllers.taxes_and_totals import get_itemised_tax_breakup_data
-from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices, unconsolidate_pos_invoices
 
-class POSClosingEntry(Document):
+class POSClosingEntry(StatusUpdater):
 	def validate(self):
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
 			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
@@ -21,11 +20,16 @@ class POSClosingEntry(Document):
 		self.validate_pos_invoices()
 	
 	def validate_pos_closing(self):
-		user = frappe.get_all("POS Closing Entry", 
-			filters = { "user": self.user, "docstatus": 1, "pos_profile": self.pos_profile },
-			or_filters = {
-				"period_start_date": ("between", [self.period_start_date, self.period_end_date]),
-				"period_end_date": ("between", [self.period_start_date, self.period_end_date])
+		user = frappe.db.sql("""
+			SELECT name FROM `tabPOS Closing Entry`
+			WHERE
+				user = %(user)s AND docstatus = 1 AND pos_profile = %(profile)s AND
+				(period_start_date between %(start)s and %(end)s OR period_end_date between %(start)s and %(end)s)
+			""", {
+				'user': self.user,
+				'profile': self.pos_profile,
+				'start': self.period_start_date,
+				'end': self.period_end_date
 			})
 
 		if user:
@@ -57,20 +61,29 @@ class POSClosingEntry(Document):
 		if not invalid_rows:
 			return
 
-		error_list = [_("Row #{}: {}").format(row.get('idx'), row.get('msg')) for row in invalid_rows]
-		frappe.throw(error_list, title=_("Invalid POS Invoices"), as_list=True)
+		error_list = []
+		for row in invalid_rows:
+			for msg in row.get('msg'):
+				error_list.append(_("Row #{}: {}").format(row.get('idx'), msg))
 
-	def on_submit(self):
-		merge_pos_invoices(self.pos_transactions)
-		opening_entry = frappe.get_doc("POS Opening Entry", self.pos_opening_entry)
-		opening_entry.pos_closing_entry = self.name
-		opening_entry.set_status()
-		opening_entry.save()
+		frappe.throw(error_list, title=_("Invalid POS Invoices"), as_list=True)
 
 	def get_payment_reconciliation_details(self):
 		currency = frappe.get_cached_value('Company', self.company,  "default_currency")
 		return frappe.render_template("erpnext/accounts/doctype/pos_closing_entry/closing_voucher_details.html",
 			{"data": self, "currency": currency})
+	
+	def on_submit(self):
+		consolidate_pos_invoices(closing_entry=self)
+	
+	def on_cancel(self):
+		unconsolidate_pos_invoices(closing_entry=self)
+
+	def update_opening_entry(self, for_cancel=False):
+		opening_entry = frappe.get_doc("POS Opening Entry", self.pos_opening_entry)
+		opening_entry.pos_closing_entry = self.name if not for_cancel else None
+		opening_entry.set_status()
+		opening_entry.save()
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

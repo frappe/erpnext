@@ -26,7 +26,6 @@ class TestUnitedStates(unittest.TestCase):
         make_payment_entry_to_irs_1099_supplier()
         filters = frappe._dict({"fiscal_year": "_Test Fiscal Year 2016", "company": "_Test Company 1"})
         columns, data = execute_1099_report(filters)
-        print(columns, data)
         expected_row = {'supplier': '_US 1099 Test Supplier',
                         'supplier_group': 'Services',
                         'payments': 100.0,
