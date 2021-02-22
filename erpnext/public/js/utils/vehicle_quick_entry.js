@@ -50,7 +50,8 @@ frappe.ui.form.VehicleQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			if (item_code) {
 				frappe.db.get_value("Item", item_code, "item_name", (r) => {
 					if (r) {
-						me.dialog.set_value('item_name', r.item_name);
+						me.dialog.doc.item_name = r.item_name;
+						me.dialog.get_field('item_name').refresh();
 					}
 				});
 			} else {
