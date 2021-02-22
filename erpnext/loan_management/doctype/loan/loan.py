@@ -201,7 +201,9 @@ def request_loan_closure(loan, posting_date=None):
 	write_off_limit = frappe.get_value('Loan Type', loan_type, 'write_off_amount')
 
 	# checking greater than 0 as there may be some minor precision error
-	if pending_amount < write_off_limit:
+	if not pending_amount:
+		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
+	elif pending_amount < write_off_limit:
 		# Auto create loan write off and update status as loan closure requested
 		write_off = make_loan_write_off(loan)
 		write_off.submit()
