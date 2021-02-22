@@ -163,7 +163,7 @@ class StockEntry(StockController):
 		if self.purpose not in valid_purposes:
 			frappe.throw(_("Purpose must be one of {0}").format(comma_or(valid_purposes)))
 
-		if self.job_card and self.purpose != 'Material Transfer for Manufacture':
+		if self.job_card and self.purpose not in ['Material Transfer for Manufacture', 'Repack']:
 			frappe.throw(_("For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry")
 				.format(self.job_card))
 
@@ -823,6 +823,7 @@ class StockEntry(StockController):
 		if self.job_card:
 			job_doc = frappe.get_doc('Job Card', self.job_card)
 			job_doc.set_transferred_qty(update_status=True)
+			job_doc.set_transferred_qty_in_job_card(self)
 
 		if self.work_order:
 			pro_doc = frappe.get_doc("Work Order", self.work_order)

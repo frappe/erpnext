@@ -40,17 +40,17 @@ def get_columns():
 		'fieldname': 'opening_balance',
 		'width': 130,
 	}, {
-		'label': _('Leaves Allocated'),
+		'label': _('Leave Allocated'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_allocated',
 		'width': 130,
 	}, {
-		'label': _('Leaves Taken'),
+		'label': _('Leave Taken'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_taken',
 		'width': 130,
 	}, {
-		'label': _('Leaves Expired'),
+		'label': _('Leave Expired'),
 		'fieldtype': 'float',
 		'fieldname': 'leaves_expired',
 		'width': 130,
