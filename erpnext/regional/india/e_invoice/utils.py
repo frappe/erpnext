@@ -160,7 +160,7 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.description = d.item_name.replace('"', '\\"')
+		item.description = json.dumps(d.item_name)[1:-1]
 
 		item.qty = abs(item.qty)
 		item.discount_amount = 0
