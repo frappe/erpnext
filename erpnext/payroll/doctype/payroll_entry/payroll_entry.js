@@ -139,28 +139,34 @@ frappe.ui.form.on('Payroll Entry', {
 				frappe.msgprint(__("Please set a Company"));
 				return [];
 			}
-			let filters = {};
-			filters['company'] = frm.doc.company;
-			filters['start_date'] = frm.doc.start_date;
-			filters['end_date'] = frm.doc.end_date;
-
-			if (frm.doc.department) {
-				filters['department'] = frm.doc.department;
-			}
-			if (frm.doc.branch) {
-				filters['branch'] = frm.doc.branch;
-			}
-			if (frm.doc.designation) {
-				filters['designation'] = frm.doc.designation;
-			}
-			if (frm.doc.employees) {
-				filters['employees'] = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
-			}
 			return {
 				query: "erpnext.payroll.doctype.payroll_entry.payroll_entry.employee_query",
-				filters: filters
+				filters: frm.events.get_employee_filters(frm)
 			};
 		});
+	},
+
+	get_employee_filters: function (frm) {
+		let filters = {};
+		filters['company'] = frm.doc.company;
+		filters['start_date'] = frm.doc.start_date;
+		filters['end_date'] = frm.doc.end_date;
+
+		if (frm.doc.department) {
+			filters['department'] = frm.doc.department;
+		}
+		if (frm.doc.branch) {
+			filters['branch'] = frm.doc.branch;
+		}
+		if (frm.doc.designation) {
+			filters['designation'] = frm.doc.designation;
+		}
+		if (frm.doc.employees) {
+			filters['employees'] = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
+		}
+
+		return filters
+
 	},
 
 	payroll_frequency: function (frm) {
@@ -172,10 +178,10 @@ frappe.ui.form.on('Payroll Entry', {
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
-		frm.trigger("fill_details");
+		frm.trigger("set_payable_account_and_currency");
 	},
 
-	fill_details: function (frm) {
+	set_payable_account_and_currency: function (frm) {
 		frappe.db.get_value("Company", {"name": frm.doc.company}, "default_currency", (r) => {
 			frm.set_value('currency', r.default_currency);
 		});
