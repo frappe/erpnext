@@ -81,7 +81,7 @@ class TaxExemption80GCertificate(Document):
 				'date': doc.from_date,
 				'amount': doc.amount,
 				'invoice_id': doc.invoice,
-				'payment_id': doc.payment_id,
+				'razorpay_payment_id': doc.razorpay_payment_id,
 				'membership': doc.name
 			})
 			total += flt(doc.amount)

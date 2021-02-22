@@ -102,7 +102,7 @@ class Membership(Document):
 	def validate_membership_type_and_settings(self, plan, settings):
 		settings_link = get_link_to_form("Membership Type", self.membership_type)
 
-		if not settings.debit_account:
+		if not settings.membership_debit_account:
 			frappe.throw(_("You need to set <b>Debit Account</b> in {0}").format(settings_link))
 
 		if not settings.company:
@@ -170,7 +170,7 @@ def make_invoice(membership, member, plan, settings):
 	invoice = frappe.get_doc({
 		"doctype": "Sales Invoice",
 		"customer": member.customer,
-		"debit_to": settings.debit_account,
+		"debit_to": settings.membership_debit_account,
 		"currency": membership.currency,
 		"company": settings.company,
 		"is_pos": 0,
