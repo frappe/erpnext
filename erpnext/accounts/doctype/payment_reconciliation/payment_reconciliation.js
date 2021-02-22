@@ -74,7 +74,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 			}
 		});
 
-		this.frm.set_value('party_type', '');
+		// this.frm.set_value('party_type', '');
 		this.frm.set_value('party', '');
 		this.frm.set_value('receivable_payable_account', '');
 	},
