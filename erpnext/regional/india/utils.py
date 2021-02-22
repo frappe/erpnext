@@ -56,7 +56,7 @@ def validate_gstin_for_india(doc, method):
 				.format(doc.gst_state_number))
 
 def validate_pan_for_india(doc, method):
-	if doc.get('country') != 'India':
+	if doc.get('country') != 'India' or not doc.pan:
 		return
 
 	p = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
