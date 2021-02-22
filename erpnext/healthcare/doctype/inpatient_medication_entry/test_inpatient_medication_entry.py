@@ -9,6 +9,7 @@ from frappe.utils import add_days, getdate, now_datetime
 from erpnext.healthcare.doctype.inpatient_record.test_inpatient_record import create_patient, create_inpatient, get_healthcare_service_unit, mark_invoiced_inpatient_occupancy
 from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_patient, discharge_patient, schedule_discharge
 from erpnext.healthcare.doctype.inpatient_medication_order.test_inpatient_medication_order import create_ipmo, create_ipme
+from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_drug_shortage_map, make_difference_stock_entry
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_account
 
 class TestInpatientMedicationEntry(unittest.TestCase):
@@ -82,6 +83,39 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 		self.assertEqual(stock_entry.items[0].patient, self.patient)
 		self.assertEqual(stock_entry.items[0].inpatient_medication_entry_child, ipme.medication_orders[0].name)
 
+	def test_drug_shortage_stock_entry(self):
+		ipmo = create_ipmo(self.patient)
+		ipmo.submit()
+		ipmo.reload()
+
+		date = add_days(getdate(), -1)
+		filters = frappe._dict(
+			from_date=date,
+			to_date=date,
+			from_time='',
+			to_time='',
+			item_code='Dextromethorphan',
+			patient=self.patient
+		)
+
+		# check drug shortage
+		ipme = create_ipme(filters, update_stock=1)
+		ipme.warehouse = 'Finished Goods - _TC'
+		ipme.save()
+		drug_shortage = get_drug_shortage_map(ipme.medication_orders, ipme.warehouse)
+		self.assertEqual(drug_shortage.get('Dextromethorphan'), 3)
+
+		# check material transfer for drug shortage
+		make_stock_entry()
+		stock_entry = make_difference_stock_entry(ipme.name)
+		self.assertEqual(stock_entry.items[0].item_code, 'Dextromethorphan')
+		self.assertEqual(stock_entry.items[0].qty, 3)
+		stock_entry.from_warehouse = 'Stores - _TC'
+		stock_entry.submit()
+
+		ipme.reload()
+		ipme.submit()
+
 	def tearDown(self):
 		# cleanup - Discharge
 		schedule_discharge(frappe.as_json({'patient': self.patient}))
@@ -94,15 +128,12 @@ class TestInpatientMedicationEntry(unittest.TestCase):
 		for entry in frappe.get_all('Inpatient Medication Entry'):
 			doc = frappe.get_doc('Inpatient Medication Entry', entry.name)
 			doc.cancel()
-			frappe.db.delete('Stock Entry', {'inpatient_medication_entry': doc.name})
-			doc.delete()
 
 		for entry in frappe.get_all('Inpatient Medication Order'):
 			doc = frappe.get_doc('Inpatient Medication Order', entry.name)
 			doc.cancel()
-			doc.delete()
 
-def make_stock_entry():
+def make_stock_entry(warehouse=None):
 	frappe.db.set_value('Company', '_Test Company', {
 		'stock_adjustment_account': 'Stock Adjustment - _TC',
 		'default_inventory_account': 'Stock In Hand - _TC'
@@ -110,7 +141,7 @@ def make_stock_entry():
 	stock_entry = frappe.new_doc('Stock Entry')
 	stock_entry.stock_entry_type = 'Material Receipt'
 	stock_entry.company = '_Test Company'
-	stock_entry.to_warehouse = 'Stores - _TC'
+	stock_entry.to_warehouse = warehouse or 'Stores - _TC'
 	expense_account = get_account(None, 'expense_account', 'Healthcare Settings', '_Test Company')
 	se_child = stock_entry.append('items')
 	se_child.item_code = 'Dextromethorphan'

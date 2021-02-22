@@ -39,7 +39,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party_details = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[party_type.lower()]
 
-	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
+	if not ignore_permissions and not (frappe.has_permission(party_type, "read", party) or frappe.has_permission(party_type, "select", party)):
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)

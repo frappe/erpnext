@@ -29,25 +29,12 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-09-30 20:08:18.764798",
+ "modified": "2020-12-25 20:20:22.342426",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "UAE VAT Settings",
  "owner": "Administrator",
- "permissions": [
-  {
-   "create": 1,
-   "delete": 1,
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "System Manager",
-   "share": 1,
-   "write": 1
-  }
- ],
+ "permissions": [],
  "quick_entry": 1,
  "sort_field": "modified",
  "sort_order": "DESC",

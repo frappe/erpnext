@@ -28,7 +28,7 @@ frappe.listview_settings['Issue'] = {
 		} else if (doc.status === 'Closed') {
 			return [__(doc.status), "green", "status,=," + doc.status];
 		} else {
-			return [__(doc.status), "darkgrey", "status,=," + doc.status];
+			return [__(doc.status), "gray", "status,=," + doc.status];
 		}
 	}
 }

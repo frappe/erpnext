@@ -3,7 +3,7 @@ frappe.listview_settings['Purchase Receipt'] = {
 		"transporter_name", "is_return", "status", "per_billed", "currency"],
 	get_indicator: function(doc) {
 		if(cint(doc.is_return)==1) {
-			return [__("Return"), "darkgrey", "is_return,=,Yes"];
+			return [__("Return"), "gray", "is_return,=,Yes"];
 		} else if (doc.status === "Closed") {
 			return [__("Closed"), "green", "status,=,Closed"];
 		} else if (flt(doc.per_returned, 2) === 100) {

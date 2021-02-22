@@ -450,7 +450,6 @@ erpnext.patches.v8_9.set_member_party_type
 erpnext.patches.v9_0.add_user_to_child_table_in_pos_profile
 erpnext.patches.v9_0.set_schedule_date_for_material_request_and_purchase_order
 erpnext.patches.v9_0.student_admission_childtable_migrate
-erpnext.patches.v9_0.fix_subscription_next_date #2017-10-23
 erpnext.patches.v9_0.add_healthcare_domain
 erpnext.patches.v9_0.set_variant_item_description
 erpnext.patches.v9_0.set_uoms_in_variant_field
@@ -678,7 +677,7 @@ erpnext.patches.v13_0.move_tax_slabs_from_payroll_period_to_income_tax_slab #123
 erpnext.patches.v12_0.fix_quotation_expired_status
 erpnext.patches.v12_0.update_appointment_reminder_scheduler_entry
 erpnext.patches.v12_0.rename_pos_closing_doctype
-erpnext.patches.v13_0.replace_pos_payment_mode_table
+erpnext.patches.v13_0.replace_pos_payment_mode_table #2020-12-29
 erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries #2020-05-22
 erpnext.patches.v13_0.patch_to_fix_reverse_linking_in_additional_salary_encashment_and_incentive
 execute:frappe.reload_doc("HR", "doctype", "Employee Advance")
@@ -712,6 +711,7 @@ erpnext.patches.v13_0.delete_old_sales_reports
 execute:frappe.delete_doc_if_exists("DocType", "Bank Reconciliation")
 erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll #22-06-2020
 erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings #22-06-2020
+execute:frappe.reload_doc("regional", "doctype", "e_invoice_settings")
 erpnext.patches.v13_0.check_is_income_tax_component #22-06-2020
 erpnext.patches.v13_0.loyalty_points_entry_for_pos_invoice #22-07-2020
 erpnext.patches.v12_0.add_taxjar_integration_field
@@ -730,14 +730,27 @@ erpnext.patches.v13_0.setting_custom_roles_for_some_regional_reports
 erpnext.patches.v13_0.rename_issue_doctype_fields
 erpnext.patches.v13_0.change_default_pos_print_format
 erpnext.patches.v13_0.set_youtube_video_id
+erpnext.patches.v13_0.set_app_name
 erpnext.patches.v13_0.print_uom_after_quantity_patch
 erpnext.patches.v13_0.set_payment_channel_in_payment_gateway_account
 erpnext.patches.v13_0.create_healthcare_custom_fields_in_stock_entry_detail
+erpnext.patches.v12_0.setup_einvoice_fields #2020-12-02
 erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.update_reason_for_resignation_in_employee
-erpnext.patches.v13_0.update_custom_fields_for_shopify
 execute:frappe.delete_doc("Report", "Quoted Item Comparison")
+erpnext.patches.v13_0.update_member_email_address
+erpnext.patches.v13_0.update_custom_fields_for_shopify
 erpnext.patches.v13_0.updates_for_multi_currency_payroll
 erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_leave_policy
+erpnext.patches.v13_0.update_pos_closing_entry_in_merge_log
 erpnext.patches.v13_0.add_po_to_global_search
 erpnext.patches.v13_0.update_returned_qty_in_pr_dn
+execute:frappe.rename_doc("Workspace", "Loan", "Loan Management", ignore_if_exists=True, force=True)
+erpnext.patches.v13_0.create_uae_pos_invoice_fields
+erpnext.patches.v13_0.update_project_template_tasks
+erpnext.patches.v13_0.set_company_in_leave_ledger_entry
+erpnext.patches.v13_0.convert_qi_parameter_to_link_field
+erpnext.patches.v13_0.setup_patient_history_settings_for_standard_doctypes
+erpnext.patches.v13_0.add_naming_series_to_old_projects # 1-02-2021
+erpnext.patches.v12_0.add_state_code_for_ladakh
+erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl

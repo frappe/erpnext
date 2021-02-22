@@ -345,7 +345,8 @@
    "label": "Status",
    "no_copy": 1,
    "options": "Draft\nSubmitted\nBooked\nCancelled\nCompleted",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "tracking_url",
@@ -430,7 +431,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-02 15:43:44.607039",
+ "modified": "2020-12-25 15:02:34.891976",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Shipment",

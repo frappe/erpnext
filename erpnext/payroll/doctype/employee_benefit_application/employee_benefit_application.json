@@ -23,6 +23,7 @@
   "employee_benefits",
   "totals",
   "total_amount",
+  "column_break",
   "pro_rata_dispensed_amount"
  ],
  "fields": [
@@ -139,11 +140,15 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-25 11:49:05.095101",
+ "modified": "2020-12-14 15:52:08.566418",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Application",

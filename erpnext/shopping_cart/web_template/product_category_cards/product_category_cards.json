@@ -1,0 +1,85 @@
+{
+ "__unsaved": 1,
+ "creation": "2020-11-17 15:25:50.855934",
+ "docstatus": 0,
+ "doctype": "Web Template",
+ "fields": [
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "label": "Title",
+   "reqd": 1
+  },
+  {
+   "fieldname": "subtitle",
+   "fieldtype": "Data",
+   "label": "Subtitle",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_1",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_2",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_3",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_4",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_5",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_6",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_7",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  },
+  {
+   "fieldname": "category_8",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group",
+   "reqd": 0
+  }
+ ],
+ "idx": 0,
+ "modified": "2020-11-18 17:26:28.726260",
+ "modified_by": "Administrator",
+ "module": "Shopping Cart",
+ "name": "Product Category Cards",
+ "owner": "Administrator",
+ "standard": 1,
+ "template": "",
+ "type": "Section"
+}
