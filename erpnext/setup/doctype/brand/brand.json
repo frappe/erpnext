@@ -10,11 +10,21 @@
   "brand",
   "is_vehicle_maker",
   "column_break_2",
-  "item_naming_by",
-  "item_naming_series",
   "show_item_code",
   "description_section",
   "description",
+  "item_override_settings_section",
+  "item_naming_by",
+  "item_naming_series",
+  "column_break_10",
+  "is_stock_item",
+  "is_fixed_asset",
+  "column_break_13",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_16",
+  "is_vehicle",
+  "has_variants",
   "defaults",
   "brand_defaults"
  ],
@@ -83,11 +93,65 @@
    "fieldname": "is_vehicle_maker",
    "fieldtype": "Check",
    "label": "Is Vehicle Maker"
+  },
+  {
+   "fieldname": "item_override_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Override Settings"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_stock_item",
+   "fieldtype": "Select",
+   "label": "Maintain Stock",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_fixed_asset",
+   "fieldtype": "Select",
+   "label": "Is Fixed Asset",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "has_serial_no",
+   "fieldtype": "Select",
+   "label": "Has Serial No",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "has_batch_no",
+   "fieldtype": "Select",
+   "label": "Has Batch No",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_vehicle",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Is Vehicle",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "has_variants",
+   "fieldtype": "Select",
+   "label": "Has Variants",
+   "options": "\nNo\nYes"
   }
  ],
  "icon": "fa fa-certificate",
  "idx": 1,
- "modified": "2020-10-04 22:19:35.439683",
+ "modified": "2021-02-21 17:05:30.348675",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Brand",

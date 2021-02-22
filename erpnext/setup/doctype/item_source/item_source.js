@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Item Source', {
-	// refresh: function(frm) {
-
-	// }
+	refresh: function(frm) {
+		erpnext.utils.set_item_naming_series_options(frm);
+	}
 });

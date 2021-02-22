@@ -9,6 +9,18 @@
  "field_order": [
   "item_source_name",
   "show_item_code",
+  "item_override_settings_section",
+  "item_naming_by",
+  "item_naming_series",
+  "column_break_6",
+  "is_stock_item",
+  "is_fixed_asset",
+  "column_break_9",
+  "has_serial_no",
+  "has_batch_no",
+  "column_break_12",
+  "is_vehicle",
+  "has_variants",
   "defaults",
   "item_source_defaults"
  ],
@@ -40,10 +52,76 @@
    "fieldtype": "Select",
    "label": "Show Item Code",
    "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "item_override_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Override Settings"
+  },
+  {
+   "fieldname": "item_naming_by",
+   "fieldtype": "Select",
+   "label": "Item Naming By",
+   "options": "\nItem Code\nItem Name\nNaming Series"
+  },
+  {
+   "depends_on": "eval:doc.item_naming_by == \"Naming Series\"",
+   "fieldname": "item_naming_series",
+   "fieldtype": "Select",
+   "label": "Naming Series"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_stock_item",
+   "fieldtype": "Select",
+   "label": "Maintain Stock",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "is_fixed_asset",
+   "fieldtype": "Select",
+   "label": "Is Fixed Asset",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "has_serial_no",
+   "fieldtype": "Select",
+   "label": "Has Serial No",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "has_batch_no",
+   "fieldtype": "Select",
+   "label": "Has Batch No",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "is_vehicle",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Is Vehicle",
+   "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "has_variants",
+   "fieldtype": "Select",
+   "label": "Has Variants",
+   "options": "\nNo\nYes"
   }
  ],
  "icon": "fa fa-certificate",
- "modified": "2020-12-01 18:41:19.064999",
+ "modified": "2021-02-21 17:11:32.107677",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Source",

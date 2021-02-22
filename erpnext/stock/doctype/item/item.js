@@ -187,10 +187,13 @@ frappe.ui.form.on("Item", {
 	page_name: frappe.utils.warn_page_name_change,
 
 	brand: function(frm) {
-		erpnext.utils.set_override_item_naming_by(frm);
+		erpnext.utils.set_item_overrides(frm);
 	},
 	item_group: function(frm) {
-		erpnext.utils.set_override_item_naming_by(frm);
+		erpnext.utils.set_item_overrides(frm);
+	},
+	item_source: function(frm) {
+		erpnext.utils.set_item_overrides(frm);
 	},
 
 	item_naming_by: function(frm) {

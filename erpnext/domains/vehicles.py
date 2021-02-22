@@ -69,6 +69,9 @@ common_properties = [
 
 	[('Sales Invoice', 'Project'),
 		{"fieldname": "sec_insurance", "property": "hidden", "value": 0}],
+
+	[('Item', 'Item Group', 'Brand', 'Item Source'),
+		{"fieldname": "is_vehicle", "property": "hidden", "value": 0}],
 ]
 
 data = {

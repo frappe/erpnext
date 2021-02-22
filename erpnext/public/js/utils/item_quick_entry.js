@@ -43,11 +43,15 @@ frappe.ui.form.ItemQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		me.dialog.fields_dict["item_naming_by"].df.onchange();
 
 		me.dialog.fields_dict["brand"].df.onchange = () => {
-			erpnext.utils.set_override_item_naming_by(me.dialog);
+			erpnext.utils.set_item_overrides(me.dialog);
 		};
 
 		me.dialog.fields_dict["item_group"].df.onchange = () => {
-			erpnext.utils.set_override_item_naming_by(me.dialog);
+			erpnext.utils.set_item_overrides(me.dialog);
+		};
+
+		me.dialog.fields_dict["item_source"].df.onchange = () => {
+			erpnext.utils.set_item_overrides(me.dialog);
 		};
 	},
 

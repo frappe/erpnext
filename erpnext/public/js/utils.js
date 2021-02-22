@@ -466,32 +466,28 @@ $.extend(erpnext.utils, {
 		});
 	},
 
-	set_override_item_naming_by: function(frm) {
-		if (!frm.doc.item_group && !frm.doc.brand) {
-			frm.set_df_property('item_naming_by', 'read_only', 0);
-			frm.set_df_property('naming_series', 'read_only', 0);
-		} else {
-			frappe.call({
-				method: "erpnext.stock.doctype.item.item.get_override_naming_by",
+	set_item_overrides: function(frm) {
+		frappe.call({
+			method: "erpnext.stock.doctype.item.item.get_item_override_values",
+			args: {
 				args: {
-					item_group_name: frm.doc.item_group,
-					brand_name: frm.doc.brand
-				},
-				callback: function (r) {
-					if (r.message) {
-						frm.set_df_property('item_naming_by', 'read_only', r.message.override_naming_by ? 1 : 0);
-						frm.set_df_property('naming_series', 'read_only', (r.message.override_naming_by && r.message.override_naming_series) ? 1 : 0);
-
-						if (r.message.override_naming_by) {
-							frm.get_field('item_naming_by').set_value(r.message.override_naming_by);
-							if (r.message.override_naming_series) {
-								frm.get_field('naming_series').set_value(r.message.override_naming_series);
-							}
-						}
-					}
+					brand: frm.doc.brand,
+					item_group: frm.doc.item_group,
+					item_source: frm.doc.item_source,
+					variant_of: frm.doc.variant_of
 				}
-			});
-		}
+			},
+			callback: function (r) {
+				if (r.message) {
+					$.each(r.message.fieldnames || [], function (i, fieldname) {
+						frm.set_df_property(fieldname, 'read_only', r.message.values.hasOwnProperty(fieldname) ? 1 : 0);
+					});
+					$.each(r.message.values || {}, function (fieldname, value) {
+						frm.get_field(fieldname).set_value(value);
+					});
+				}
+			}
+		});
 	},
 
 	create_new_doc: function (doctype, update_fields) {

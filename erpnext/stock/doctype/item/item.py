@@ -21,7 +21,7 @@ from frappe.website.doctype.website_slideshow.website_slideshow import \
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
 
-from six import iteritems
+from six import iteritems, string_types
 
 
 class DuplicateReorderRows(frappe.ValidationError):
@@ -68,12 +68,6 @@ class Item(WebsiteGenerator):
 		self.set_onload('asset_naming_series', self._asset_naming_series)
 
 	def autoname(self):
-		override = get_override_naming_by(self.item_group, self.brand, self.item_naming_by)
-		if override.override_naming_by:
-			self.item_naming_by = override.override_naming_by
-			if override.override_naming_series:
-				self.naming_series = override.override_naming_series
-
 		if self.item_naming_by == "Item Code" and not self.item_code:
 			frappe.throw(_("Item Code is mandatory"))
 
@@ -97,7 +91,7 @@ class Item(WebsiteGenerator):
 			self.name = self.item_code = self.item_name
 
 	def before_insert(self):
-		pass
+		self.set_item_override_values()
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -1073,6 +1067,10 @@ class Item(WebsiteGenerator):
 				if self.check_if_linked_doctype_exists(doctype):
 					return True
 
+	def set_item_override_values(self):
+		override_values = get_item_override_values(self.as_dict())['values']
+		self.update(override_values)
+
 	def check_if_linked_doctype_exists(self, doctype):
 		if not hasattr(self, "_linked_doctype_exists"):
 			self._linked_doctype_exists = {}
@@ -1355,34 +1353,65 @@ def get_item_attribute(parent, attribute_value=''):
 	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
 		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
 
+
 @frappe.whitelist()
-def get_override_naming_by(item_group_name=None, brand_name=None, validate_item_naming_by=None):
-	override_naming_by = None
-	override_naming_series = None
-	if brand_name:
-		brand = frappe.get_cached_value("Brand", brand_name, ['item_naming_by', 'item_naming_series'], as_dict=1)
-		if brand and brand.item_naming_by:
-			if validate_item_naming_by and validate_item_naming_by != brand.item_naming_by:
-				frappe.throw(_("Items of Brand {0} must be named by {1}").format(brand_name, brand.item_naming_by))
-			if brand.item_naming_by == "Naming Series":
-				override_naming_series = brand.item_naming_series
-			override_naming_by = brand.item_naming_by
+def get_item_override_values(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
 
-	while item_group_name and not override_naming_by:
-		item_group = frappe.get_cached_value("Item Group", item_group_name,
-			['item_naming_by', 'item_naming_series', 'parent_item_group'], as_dict=1)
-		if item_group and item_group.item_naming_by:
-			if validate_item_naming_by and validate_item_naming_by != item_group.item_naming_by:
-				frappe.throw(_("Items under Item Group {0} must be named by {1}").format(item_group_name, item_group.item_naming_by))
-			if item_group.item_naming_by == "Naming Series":
-				override_naming_series = item_group.item_naming_series
-			override_naming_by = item_group.item_naming_by
-		item_group_name = item_group.parent_item_group
+	args = frappe._dict(args)
 
-	return frappe._dict({
-		"override_naming_by": override_naming_by,
-		"override_naming_series": override_naming_series
-	})
+	override_values = frappe._dict()
+	item_fields = {
+		'item_naming_by': 'Data',
+		'naming_series': 'Data',
+		'is_stock_item': 'YesNo',
+		'is_fixed_asset': 'YesNo',
+		'has_serial_no': 'YesNo',
+		'has_batch_no': 'YesNo',
+		'is_vehicle': 'YesNo',
+		'has_variants': 'YesNo'
+	}
+
+	def set_override_values(doc):
+		for target_fieldname, fieldtype in item_fields.items():
+			if target_fieldname not in override_values:
+				source_fieldname = target_fieldname
+				if target_fieldname == 'naming_series':
+					source_fieldname = 'item_naming_series'
+
+				source_value = doc.get(source_fieldname)
+				if source_value:
+					target_value = source_value
+					if fieldtype == 'YesNo':
+						target_value = cint(source_value == 'Yes')
+
+					override_values[target_fieldname] = target_value
+
+	if args.brand:
+		brand = frappe.get_cached_doc("Brand", args.brand)
+		set_override_values(brand)
+
+	current_item_group_name = args.item_group
+	while current_item_group_name:
+		item_group = frappe.get_cached_doc("Item Group", current_item_group_name)
+		set_override_values(item_group)
+		current_item_group_name = item_group.parent_item_group
+
+	if args.item_source:
+		item_source = frappe.get_cached_doc("Item Source", args.item_source)
+		set_override_values(item_source)
+
+	if override_values.naming_series and override_values.item_naming_by != 'Naming Series':
+		del override_values['naming_series']
+	if override_values.has_variants and args.variant_of:
+		del override_values['has_variants']
+
+	return {
+		'fieldnames': list(item_fields.keys()),
+		'values': override_values
+	}
+
 
 @frappe.whitelist()
 def change_uom(item_code, stock_uom=None, alt_uom=None, alt_uom_size=None):
