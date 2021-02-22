@@ -1,6 +1,6 @@
 frappe.ui.form.ControlData = frappe.ui.form.ControlData.extend( {
 	make_input() {
-		if(!this.df.read_only) {
+		if (!this.df.read_only) {
 			this._super();
 		}
 		if (this.df.options == 'Phone') {
