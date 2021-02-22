@@ -25,6 +25,7 @@
   "email_template",
   "donation_settings_section",
   "donation_company",
+  "default_donor_type",
   "donation_webhook_secret",
   "column_break_22",
   "automate_donation_payment_entries",
@@ -60,13 +61,13 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "enable_razorpay_for_memberships",
    "description": "This company will be set for the Memberships created via webhook.",
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "mandatory_depends_on": "enable_razorpay_for_memberships",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "default": "0",
@@ -190,8 +191,10 @@
    "description": "This company will be set for the Donations created via webhook.",
    "fieldname": "donation_company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
-   "options": "Company"
+   "options": "Company",
+   "reqd": 1
   },
   {
    "fieldname": "donation_settings_section",
@@ -201,12 +204,21 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
+  },
+  {
+   "description": "This Donor Type will be set for the Donor created via Donation web form entry.",
+   "fieldname": "default_donor_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Default Donor Type",
+   "options": "Donor Type",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-19 15:06:55.218024",
+ "modified": "2021-02-22 11:26:16.864927",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",

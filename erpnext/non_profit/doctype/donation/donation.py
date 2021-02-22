@@ -29,7 +29,7 @@ class Donation(Document):
 			user = frappe.get_doc('User', frappe.session.user)
 			donor = frappe.get_doc(dict(
 				doctype='Donor',
-				donor_type=self.get('donor_type')
+				donor_type=self.get('donor_type'),
 				email=frappe.session.user,
 				member_name=user.get_fullname()
 			)).insert(ignore_permissions=True)
@@ -66,6 +66,10 @@ class Donation(Document):
 
 @frappe.whitelist(allow_guest=True)
 def capture_razorpay_donations(*args, **kwargs):
+	"""
+		Creates Donation from Razorpay Webhook Request Data on payment.captured event
+		Creates Donor from email if not found
+	"""
 	data = frappe.request.get_data(as_text=True)
 
 	try:
@@ -106,7 +110,7 @@ def create_donation(donor, payment):
 		create_mode_of_payment(payment.method)
 
 	donation = frappe.new_doc('Donation')
-	company = frappe.db.get_single_value('Non Profit Settings', 'donation_company')
+	company = get_company_for_donations()
 	donation.update({
 		'company': company,
 		'donor': donor.name,
@@ -123,6 +127,7 @@ def create_donation(donor, payment):
 	donation.insert()
 	donation.submit()
 
+	return donation
 
 def get_donor(email):
 	donors = frappe.get_all('Donor',
@@ -138,10 +143,12 @@ def get_donor(email):
 @frappe.whitelist()
 def create_donor(payment):
 	donor_details = frappe._dict(payment)
+	donor_type = frappe.db.get_single_value('Non Profit Settings', 'default_donor_type')
 
 	donor = frappe.new_doc('Donor')
 	donor.update({
 		'donor_name': donor_details.email,
+		'donor_type': donor_type,
 		'email': donor_details.email,
 		'contact': donor_details.contact
 	})
@@ -151,6 +158,14 @@ def create_donor(payment):
 
 	donor.insert(ignore_mandatory=True, ignore_permissions=True)
 	return donor
+
+
+def get_company_for_donations():
+	company = frappe.db.get_single_value('Non Profit Settings', 'donation_company')
+	if not company:
+		from erpnext.healthcare.setup import get_company
+		company = get_company()
+	return company
 
 
 def get_additional_notes(donor, donor_details):
