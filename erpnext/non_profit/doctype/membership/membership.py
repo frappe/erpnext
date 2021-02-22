@@ -250,12 +250,9 @@ def trigger_razorpay_subscription(*args, **kwargs):
 
 			member.subscription_id = subscription.id
 			member.customer_id = payment.customer_id
-			if subscription.notes and type(subscription.notes) == dict:
-				notes = "\n".join("{}: {}".format(k, v) for k, v in subscription.notes.items())
-				member.add_comment("Comment", notes)
-			elif subscription.notes and type(subscription.notes) == str:
-				member.add_comment("Comment", subscription.notes)
 
+			if subscription.get("notes"):
+				member = get_additional_notes(member, subscription)
 
 		# Update Membership
 		membership = frappe.new_doc("Membership")
@@ -285,6 +282,25 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		return { "status": "Failed", "reason": e}
 
 	return { "status": "Success" }
+
+
+def get_additional_notes(member, subscription):
+	if type(subscription.notes) == dict:
+		for k, v in subscription.notes.items():
+			notes = "\n".join("{}: {}".format(k, v))
+
+			# extract member name from notes
+			if "name" in k.lower():
+				member.update({
+					"member_name": subscription.notes.get(k)
+				})
+
+		member.add_comment("Comment", notes)
+
+	elif type(subscription.notes) == str:
+		member.add_comment("Comment", subscription.notes)
+
+	return member
 
 
 def notify_failure(log):
