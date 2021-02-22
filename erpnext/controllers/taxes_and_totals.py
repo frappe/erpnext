@@ -15,6 +15,8 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_ra
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
 		self.doc = doc
+		frappe.flags.round_off_applicable_accounts = []
+		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
 		self.calculate()
 
 	def calculate(self):
@@ -332,8 +334,16 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
+		current_tax_amount = self.get_final_current_tax_amount(tax, current_tax_amount)
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
+		return current_tax_amount
+
+	def get_final_current_tax_amount(self, tax, current_tax_amount):
+		# Some countries need individual tax components to be rounded
+		# Handeled via regional doctypess
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			current_tax_amount = round(current_tax_amount, 0)
 		return current_tax_amount
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
@@ -693,6 +703,15 @@ def get_itemised_tax_breakup_html(doc):
 		)
 	)
 
+@frappe.whitelist()
+def get_round_off_applicable_accounts(company, account_list):
+	account_list = get_regional_round_off_accounts(company, account_list)
+
+	return account_list
+
+@erpnext.allow_regional
+def get_regional_round_off_accounts(company, account_list):
+	pass
 
 @erpnext.allow_regional
 def update_itemised_tax_data(doc):
