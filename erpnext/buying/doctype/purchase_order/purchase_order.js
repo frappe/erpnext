@@ -383,7 +383,10 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						status: ["!=", "Stopped"],
 						per_ordered: ["<", 100],
 						company: me.frm.doc.company
-					}
+					},
+					child_selection_mode: true,
+					selectable_child: "Material Request Item",
+					child_cols: ["item_code"]
 				})
 			}, __("Get Items From"));
 

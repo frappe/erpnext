@@ -264,7 +264,10 @@ def update_status(name, status):
 	material_request.update_status(status)
 
 @frappe.whitelist()
-def make_purchase_order(source_name, target_doc=None):
+def make_purchase_order(source_name, target_doc=None, args={}):
+
+	if isinstance(args, string_types):
+		args = json.loads(args)
 
 	def postprocess(source, target_doc):
 		if frappe.flags.args and frappe.flags.args.default_supplier:
@@ -279,7 +282,7 @@ def make_purchase_order(source_name, target_doc=None):
 		set_missing_values(source, target_doc)
 
 	def select_item(d):
-		return d.ordered_qty < d.stock_qty
+		return d.ordered_qty < d.stock_qty and d.name in args.get('filtered_children', [])
 
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {

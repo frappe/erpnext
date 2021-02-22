@@ -690,6 +690,9 @@ erpnext.utils.map_current_doc = function(opts) {
 			setters: opts.setters,
 			get_query: opts.get_query,
 			add_filters_group: 1,
+			child_selection_mode: opts.child_selection_mode,
+			selectable_child: opts.selectable_child,
+			child_cols: opts.child_cols,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){
@@ -697,7 +700,7 @@ erpnext.utils.map_current_doc = function(opts) {
 					return;
 				}
 				opts.source_name = values;
-				opts.setters = args;
+				opts.args = args;
 				d.dialog.hide();
 				_map();
 			},
