@@ -58,6 +58,9 @@ class AccountingDimension(Document):
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
 
+	def on_update(self):
+		frappe.flags.accounting_dimensions = None
+
 def make_dimension_in_accounting_doctypes(doc):
 	doclist = get_doctypes_with_dimensions()
 	doc_count = len(get_accounting_dimensions())
