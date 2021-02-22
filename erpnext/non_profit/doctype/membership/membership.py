@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import json
 import frappe
 import six
+import os
 from datetime import datetime
 from frappe.model.document import Document
 from frappe.email import sendmail_to_system_managers
@@ -204,7 +205,7 @@ def get_member_based_on_subscription(subscription_id, email):
 
 
 def verify_signature(data, endpoint="Membership"):
-	if frappe.flags.in_test or os.environ.get('CI'):
+	if frappe.flags.in_test or os.environ.get("CI"):
 		return True
 	signature = frappe.request.headers.get("X-Razorpay-Signature")
 
@@ -286,7 +287,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 
 
 def get_company_for_memberships():
-	company = frappe.db.get_single_value('Non Profit Settings', 'company')
+	company = frappe.db.get_single_value("Non Profit Settings", "company")
 	if not company:
 		from erpnext.healthcare.setup import get_company
 		company = get_company()

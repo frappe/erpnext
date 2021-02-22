@@ -17,7 +17,7 @@ class Donation(Document):
 		if not self.donor or not frappe.db.exists('Donor', self.donor):
 			# for web forms
 			user_type = frappe.db.get_value('User', frappe.session.user, 'user_type')
-			if user_type == "Website User":
+			if user_type == 'Website User':
 				self.create_donor_for_website_user()
 			else:
 				frappe.throw(_('Please select a Member'))
@@ -35,7 +35,7 @@ class Donation(Document):
 			)).insert(ignore_permissions=True)
 			donor_name = donor.name
 
-		if self.get("__islocal"):
+		if self.get('__islocal'):
 			self.donor = donor_name
 
 	def on_payment_authorized(self, *args, **kwargs):

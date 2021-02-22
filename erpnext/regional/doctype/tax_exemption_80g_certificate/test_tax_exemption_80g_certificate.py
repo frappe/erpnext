@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import getdate, add_months
+from frappe.utils import getdate
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.non_profit.doctype.donation.test_donation import create_donor, create_mode_of_payment, create_donor_type
 from erpnext.non_profit.doctype.donation.donation import create_donation

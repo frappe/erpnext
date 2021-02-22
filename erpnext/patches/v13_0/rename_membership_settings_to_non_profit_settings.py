@@ -3,9 +3,6 @@ import frappe
 from frappe.model.utils.rename_field import rename_field
 
 def execute():
-	if "Non Profit" not in frappe.get_active_domains():
-		return
-
 	if frappe.db.table_exists("Membership Settings"):
 		frappe.rename_doc("DocType", "Membership Settings", "Non Profit Settings")
 

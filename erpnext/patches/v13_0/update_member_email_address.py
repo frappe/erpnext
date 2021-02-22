@@ -19,5 +19,5 @@ def execute():
 				# Set the value for it
 				frappe.db.set_value("Member", member, "email_id", email)
 
-	if frappe.db.exists("DocType", "Non Profit Settings"):
-		rename_field("Non Profit Settings", "enable_auto_invoicing", "enable_invoicing")
+	if frappe.db.exists("DocType", "Membership Settings"):
+		rename_field("Membership Settings", "enable_auto_invoicing", "enable_invoicing")
