@@ -13,6 +13,31 @@ from frappe.email import sendmail_to_system_managers
 from erpnext.non_profit.doctype.membership.membership import verify_signature
 
 class Donation(Document):
+	def validate(self):
+		if not self.donor or not frappe.db.exists('Donor', self.donor):
+			# for web forms
+			user_type = frappe.db.get_value('User', frappe.session.user, 'user_type')
+			if user_type == "Website User":
+				self.create_donor_for_website_user()
+			else:
+				frappe.throw(_('Please select a Member'))
+
+	def create_donor_for_website_user(self):
+		donor_name = frappe.get_value('Donor', dict(email=frappe.session.user))
+
+		if not donor_name:
+			user = frappe.get_doc('User', frappe.session.user)
+			donor = frappe.get_doc(dict(
+				doctype='Donor',
+				donor_type=self.get('donor_type')
+				email=frappe.session.user,
+				member_name=user.get_fullname()
+			)).insert(ignore_permissions=True)
+			donor_name = donor.name
+
+		if self.get("__islocal"):
+			self.donor = donor_name
+
 	def on_payment_authorized(self, *args, **kwargs):
 		self.load_from_db()
 		self.create_payment_entry()
