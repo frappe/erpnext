@@ -66,11 +66,11 @@ class Quiz {
 		var self = this;
 		var old_diff;
 		this.calculate_and_display_time(this.time_left, "Time Left - ");
-		this.start_time = new Date().getTime()
+		this.start_time = new Date().getTime();
 		this.timer = setInterval(function () {
 			var diff = (new Date().getTime() - self.start_time)/1000;
-			var variation = old_diff ? diff - old_diff : diff
-			old_diff = diff
+			var variation = old_diff ? diff - old_diff : diff;
+			old_diff = diff;
 			self.time_left -= variation;
 			self.time_taken += variation;
 			self.calculate_and_display_time(self.time_left, "Time Left - ");
