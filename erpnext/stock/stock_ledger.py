@@ -440,7 +440,7 @@ class update_entries_after(object):
 
 		# Recalculate subcontracted item's rate in case of subcontracted purchase receipt/invoice
 		if frappe.db.get_value(sle.voucher_type, sle.voucher_no, "is_subcontracted"):
-			doc = frappe.get_cached_doc(sle.voucher_type, sle.voucher_no)
+			doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
 			doc.update_valuation_rate(reset_outgoing_rate=False)
 			for d in (doc.items + doc.supplied_items):
 				d.db_update()

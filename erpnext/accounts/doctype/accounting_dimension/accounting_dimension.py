@@ -186,7 +186,7 @@ def get_doctypes_with_dimensions():
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	if not frappe.flags.accounting_dimensions:
+	if frappe.flags.accounting_dimensions is None:
 		frappe.flags.accounting_dimensions = frappe.get_all("Accounting Dimension",
 			fields=["label", "fieldname", "disabled", "document_type"])
 

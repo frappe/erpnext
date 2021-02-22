@@ -37,8 +37,9 @@ class GLEntry(Document):
 			self.validate_party()
 			self.validate_currency()
 
-	def on_update_with_args(self, adv_adj, update_outstanding = 'Yes', from_repost=False):
-		if not from_repost:
+	def on_update(self):
+		adv_adj = self.flags.adv_adj
+		if not self.flags.from_repost:
 			self.validate_account_details(adv_adj)
 			self.validate_dimensions_for_pl_and_bs()
 			self.validate_allowed_dimensions()
@@ -47,7 +48,7 @@ class GLEntry(Document):
 
 			# Update outstanding amt on against voucher
 			if (self.against_voucher_type in ['Journal Entry', 'Sales Invoice', 'Purchase Invoice', 'Fees']
-				and self.against_voucher and update_outstanding == 'Yes'):
+				and self.against_voucher and self.flags.update_outstanding == 'Yes'):
 					update_outstanding_amt(self.account, self.party_type, self.party, self.against_voucher_type,
 						self.against_voucher)
 
