@@ -118,12 +118,13 @@ class POSInvoiceMergeLog(Document):
 						i.uom == item.uom and i.net_rate == item.net_rate):
 						found = True
 						i.qty = i.qty + item.qty
+
 				if not found:
 					item.rate = item.net_rate
 					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
 					items.append(si_item)
-			
+
 			for tax in doc.get('taxes'):
 				found = False
 				for t in taxes:

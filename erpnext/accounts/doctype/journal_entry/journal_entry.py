@@ -102,7 +102,7 @@ class JournalEntry(AccountsController):
 			if account_currency == previous_account_currency:
 				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
-	
+
 	def validate_stock_accounts(self):
 		stock_accounts = get_stock_accounts(self.company, self.doctype, self.name)
 		for account in stock_accounts:
@@ -229,11 +229,11 @@ class JournalEntry(AccountsController):
 			if d.reference_type=="Journal Entry":
 				account_root_type = frappe.db.get_value("Account", d.account, "root_type")
 				if account_root_type == "Asset" and flt(d.debit) > 0:
-					frappe.throw(_("For {0}, only credit accounts can be linked against another debit entry")
-						.format(d.account))
+					frappe.throw(_("Row #{0}: For {1}, you can select reference document only if account gets credited")
+						.format(d.idx, d.account))
 				elif account_root_type == "Liability" and flt(d.credit) > 0:
-					frappe.throw(_("For {0}, only debit accounts can be linked against another credit entry")
-						.format(d.account))
+					frappe.throw(_("Row #{0}: For {1}, you can select reference document only if account gets debited")
+						.format(d.idx, d.account))
 
 				if d.reference_name == self.name:
 					frappe.throw(_("You can not enter current voucher in 'Against Journal Entry' column"))
