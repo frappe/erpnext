@@ -164,9 +164,7 @@ frappe.ui.form.on('Payroll Entry', {
 		if (frm.doc.employees) {
 			filters['employees'] = frm.doc.employees.filter(d => d.employee).map(d => d.employee);
 		}
-
-		return filters
-
+		return filters;
 	},
 
 	payroll_frequency: function (frm) {
