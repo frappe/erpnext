@@ -4,6 +4,8 @@ from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.accounts.utils import update_gl_entries_after
 
 def execute():
+	frappe.reload_doc('Stock', 'doctype', 'repost_item_valuation')
+
 	reposting_project_deployed_on = frappe.db.get_value("DocType", "Repost Item Valuation", "creation")
 
 	data = frappe.db.sql('''
