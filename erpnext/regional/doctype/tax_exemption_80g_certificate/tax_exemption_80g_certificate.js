@@ -10,7 +10,7 @@ frappe.ui.form.on('Tax Exemption 80G Certificate', {
 						docstatus: 1,
 						donor: frm.doc.donor
 					}
-				}
+				};
 			});
 		}
 	},
