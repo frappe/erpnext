@@ -43,11 +43,11 @@ class AccountingDimension(Document):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
-			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self)
+			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self, queue='long')
 
 	def on_trash(self):
 		if frappe.flags.in_test:
-			delete_accounting_dimension(doc=self)
+			delete_accounting_dimension(doc=self, queue='long')
 		else:
 			frappe.enqueue(delete_accounting_dimension, doc=self)
 
