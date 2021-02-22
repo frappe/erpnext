@@ -752,3 +752,5 @@ erpnext.patches.v13_0.set_company_in_leave_ledger_entry
 erpnext.patches.v13_0.convert_qi_parameter_to_link_field
 erpnext.patches.v13_0.setup_patient_history_settings_for_standard_doctypes
 erpnext.patches.v13_0.add_naming_series_to_old_projects # 1-02-2021
+erpnext.patches.v12_0.add_state_code_for_ladakh
+erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
