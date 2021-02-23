@@ -11,7 +11,7 @@ import copy
 from erpnext.controllers.item_variant import (ItemVariantExistsError,
 		copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
-from frappe import _, msgprint
+from frappe import _, msgprint, unscrub
 from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
 						  now_datetime, random_string, strip, get_link_to_form, clean_whitespace)
 from frappe.utils.html_utils import clean_html
@@ -137,6 +137,7 @@ class Item(WebsiteGenerator):
 		self.validate_applicable_to()
 		self.cant_change()
 		self.update_show_in_website()
+		self.validate_item_override_values()
 
 		if not self.get("__islocal"):
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
@@ -651,7 +652,7 @@ class Item(WebsiteGenerator):
 			if not self.is_stock_item:
 				frappe.throw(_("'Maintain Stock' must be enabled for Vehicle Item"))
 			if not self.has_serial_no:
-				frappe.throw(_("'Has Serial No' must be enabled for Vehicle Item"))
+				self.has_serial_no = 1
 
 		if self.has_serial_no == 1 and self.is_stock_item == 0 and not self.is_fixed_asset:
 			msgprint(_("'Has Serial No' can not be 'Yes' for non-stock item"), raise_exception=1)
@@ -1071,6 +1072,9 @@ class Item(WebsiteGenerator):
 		override_values = get_item_override_values(self.as_dict())['values']
 		self.update(override_values)
 
+	def validate_item_override_values(self):
+		get_item_override_values(self.as_dict(), validate=True)
+
 	def check_if_linked_doctype_exists(self, doctype):
 		if not hasattr(self, "_linked_doctype_exists"):
 			self._linked_doctype_exists = {}
@@ -1355,7 +1359,7 @@ def get_item_attribute(parent, attribute_value=''):
 
 
 @frappe.whitelist()
-def get_item_override_values(args):
+def get_item_override_values(args, validate=False):
 	if isinstance(args, string_types):
 		args = json.loads(args)
 
@@ -1373,6 +1377,16 @@ def get_item_override_values(args):
 		'has_variants': 'YesNo'
 	}
 
+	def throw_override_must_be(doc, target_fieldname, source_value):
+		df = frappe.get_meta("Item").get_field(target_fieldname)
+		if df:
+			label = _(df.label)
+		else:
+			label = _(unscrub(target_fieldname))
+
+		frappe.throw(_("Items of {0} {1} must have {2} set as '{3}'")
+			.format(doc.doctype, doc.name, frappe.bold(label), frappe.bold(source_value)))
+
 	def set_override_values(doc):
 		for target_fieldname, fieldtype in item_fields.items():
 			if target_fieldname not in override_values:
@@ -1380,11 +1394,17 @@ def get_item_override_values(args):
 				if target_fieldname == 'naming_series':
 					source_fieldname = 'item_naming_series'
 
+				if args.variant_of and target_fieldname == "has_variants":
+					continue
+
 				source_value = doc.get(source_fieldname)
 				if source_value:
 					target_value = source_value
 					if fieldtype == 'YesNo':
 						target_value = cint(source_value == 'Yes')
+
+					if validate and target_value != args.get(target_fieldname):
+						throw_override_must_be(doc, target_fieldname, source_value)
 
 					override_values[target_fieldname] = target_value
 

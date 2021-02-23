@@ -479,9 +479,11 @@ $.extend(erpnext.utils, {
 			},
 			callback: function (r) {
 				if (r.message) {
-					$.each(r.message.fieldnames || [], function (i, fieldname) {
-						frm.set_df_property(fieldname, 'read_only', r.message.values.hasOwnProperty(fieldname) ? 1 : 0);
-					});
+					// $.each(r.message.fieldnames || [], function (i, fieldname) {
+					// 	var default_read_only = frappe.meta.get_docfield("Item", fieldname);
+					// 	default_read_only = default_read_only ? default_read_only.read_only : 0;
+					// 	frm.set_df_property(fieldname, 'read_only', r.message.values.hasOwnProperty(fieldname) ? 1 : default_read_only);
+					// });
 					$.each(r.message.values || {}, function (fieldname, value) {
 						frm.get_field(fieldname).set_value(value);
 					});
