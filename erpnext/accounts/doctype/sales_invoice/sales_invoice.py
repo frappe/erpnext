@@ -134,6 +134,26 @@ class SalesInvoice(SellingController):
 						where name=`tabDelivery Note Item`.parent and is_return=1)"""
 				})
 
+		if cint(self.is_return):
+			self.status_updater.append({
+				'source_dt': 'Sales Invoice Item',
+				'target_dt': 'Sales Invoice Item',
+				'join_field': 'si_detail',
+				'target_field': 'returned_qty',
+				'source_field': '-1 * qty',
+				'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
+					and is_return=1 and update_stock=1 and depreciation_type != 'Depreciation Amount Only')"""
+			})
+			self.status_updater.append({
+				'source_dt': 'Sales Invoice Item',
+				'target_dt': 'Sales Invoice Item',
+				'join_field': 'si_detail',
+				'target_field': 'base_returned_amount',
+				'source_field': '-1 * base_net_amount',
+				'extra_cond': """ and exists(select name from `tabSales Invoice` where name=`tabSales Invoice Item`.parent
+					and is_return=1)"""
+			})
+
 	def set_indicator(self):
 		"""Set indicator for portal"""
 		if self.outstanding_amount < 0:
