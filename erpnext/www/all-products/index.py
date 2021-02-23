@@ -12,7 +12,6 @@ def get_context(context):
 		search = frappe.form_dict.search
 		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
 		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
-		print(field_filters, attribute_filters)
 		start = frappe.parse_json(frappe.form_dict.start)
 	else:
 		search = field_filters = attribute_filters = None
@@ -29,8 +28,6 @@ def get_context(context):
 
 	context.field_filters = filter_engine.get_field_filters()
 	context.attribute_filters = filter_engine.get_attribute_fitlers()
-
-	print(context.field_filters, context.attribute_filters)
 
 	context.product_settings = product_settings
 	context.body_class = "product-page"

@@ -29,6 +29,16 @@ class AccountingDimension(Document):
 		if exists and self.is_new():
 			frappe.throw("Document Type already used as a dimension")
 
+		if not self.is_new():
+			self.validate_document_type_change()
+
+	def validate_document_type_change(self):
+		doctype_before_save = frappe.db.get_value("Accounting Dimension", self.name, "document_type")
+		if doctype_before_save != self.document_type:
+			message = _("Cannot change Reference Document Type.")
+			message += _("Please create a new Accounting Dimension if required.")
+			frappe.throw(message)
+
 	def after_insert(self):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)

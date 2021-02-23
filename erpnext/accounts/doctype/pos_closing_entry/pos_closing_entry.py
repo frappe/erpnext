@@ -20,11 +20,16 @@ class POSClosingEntry(StatusUpdater):
 		self.validate_pos_invoices()
 	
 	def validate_pos_closing(self):
-		user = frappe.get_all("POS Closing Entry", 
-			filters = { "user": self.user, "docstatus": 1, "pos_profile": self.pos_profile },
-			or_filters = {
-				"period_start_date": ("between", [self.period_start_date, self.period_end_date]),
-				"period_end_date": ("between", [self.period_start_date, self.period_end_date])
+		user = frappe.db.sql("""
+			SELECT name FROM `tabPOS Closing Entry`
+			WHERE
+				user = %(user)s AND docstatus = 1 AND pos_profile = %(profile)s AND
+				(period_start_date between %(start)s and %(end)s OR period_end_date between %(start)s and %(end)s)
+			""", {
+				'user': self.user,
+				'profile': self.pos_profile,
+				'start': self.period_start_date,
+				'end': self.period_end_date
 			})
 
 		if user:
