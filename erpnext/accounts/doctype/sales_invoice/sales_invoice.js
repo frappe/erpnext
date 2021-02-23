@@ -15,13 +15,21 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 
 		this.frm.set_indicator_formatter('item_code', function(doc, parent) {
 			if (doc.docstatus === 0) {
-				if (parent.update_stock) {
+				if (parent.update_stock && !parent.is_return) {
 					if (!doc.actual_qty) {
 						return "red";
 					} else if (doc.actual_qty < doc.stock_qty) {
 						return "orange";
 					} else {
 						return "green";
+					}
+				}
+			} else {
+				if (!parent.is_return) {
+					if (doc.returned_qty) {
+						return "yellow";
+					} else if (doc.base_returned_amount) {
+						return "darkgrey";
 					}
 				}
 			}
