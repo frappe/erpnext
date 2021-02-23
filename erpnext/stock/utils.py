@@ -115,10 +115,17 @@ def get_serial_nos_data_after_transactions(args):
 			order by posting_date, posting_time asc """, args, as_dict=1)
 
 	for d in data:
-		if d.actual_qty > 0:
-			serial_nos.extend(get_serial_nos_data(d.serial_no))
-		else:
-			serial_nos = list(set(serial_nos) - set(get_serial_nos_data(d.serial_no)))
+		for sn in get_serial_nos_data(d.serial_no):
+			if d.actual_qty > 0:
+				if sn not in serial_nos:
+					serial_nos.append(sn)
+				else:
+					serial_nos.remove(sn)
+			elif d.actual_qty < 0:
+				if sn in serial_nos:
+					serial_nos.remove(sn)
+				else:
+					serial_nos.append(sn)
 
 	return '\n'.join(serial_nos)
 
