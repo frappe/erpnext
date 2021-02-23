@@ -348,3 +348,13 @@ def validate_employee_currency_with_company_currency(applicant, company):
 	if employee_currency != company_currency:
 		frappe.throw(_("Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}")
 			.format(applicant, employee_currency))
+
+@frappe.whitelist()
+def get_shortfall_applicants():
+	loans = frappe.get_all('Loan Security Shortfall', {'status': 'Pending'}, pluck='loan')
+	applicants = set(frappe.get_all('Loan', {'name': ('in', loans)}, pluck='name'))
+
+	return {
+		"value": len(applicants),
+		"fieldtype": "Int"
+	}

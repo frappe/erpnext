@@ -35,7 +35,7 @@ def get_columns(filters):
 
 def get_data(filters):
 	data = []
-	loan_security_details = get_loan_security_details(filters)
+	loan_security_details = get_loan_security_details()
 	current_pledges, total_portfolio_value = get_company_wise_loan_security_details(filters, loan_security_details)
 	currency = erpnext.get_company_currency(filters.get('company'))
 
