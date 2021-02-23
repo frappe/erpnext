@@ -19,19 +19,19 @@
   "inpatient_record",
   "column_break_1",
   "company",
+  "practitioner",
+  "practitioner_name",
+  "department",
   "service_unit",
+  "section_break_12",
+  "appointment_type",
+  "duration",
   "procedure_template",
   "get_procedure_from_encounter",
   "procedure_prescription",
   "therapy_plan",
   "therapy_type",
   "get_prescribed_therapies",
-  "practitioner",
-  "practitioner_name",
-  "department",
-  "section_break_12",
-  "appointment_type",
-  "duration",
   "column_break_17",
   "appointment_date",
   "appointment_time",
@@ -79,6 +79,7 @@
    "set_only_once": 1
   },
   {
+   "fetch_from": "appointment_type.default_duration",
    "fieldname": "duration",
    "fieldtype": "Int",
    "in_filter": 1,
@@ -144,7 +145,6 @@
    "in_standard_filter": 1,
    "label": "Healthcare Practitioner",
    "options": "Healthcare Practitioner",
-   "read_only": 1,
    "reqd": 1,
    "search_index": 1,
    "set_only_once": 1
@@ -158,7 +158,6 @@
    "in_standard_filter": 1,
    "label": "Department",
    "options": "Medical Department",
-   "read_only": 1,
    "search_index": 1,
    "set_only_once": 1
   },
@@ -227,12 +226,14 @@
    "fieldname": "mode_of_payment",
    "fieldtype": "Link",
    "label": "Mode of Payment",
-   "options": "Mode of Payment"
+   "options": "Mode of Payment",
+   "read_only_depends_on": "invoiced"
   },
   {
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
-   "label": "Paid Amount"
+   "label": "Paid Amount",
+   "read_only_depends_on": "invoiced"
   },
   {
    "fieldname": "column_break_2",
@@ -302,7 +303,8 @@
    "fieldname": "therapy_plan",
    "fieldtype": "Link",
    "label": "Therapy Plan",
-   "options": "Therapy Plan"
+   "options": "Therapy Plan",
+   "set_only_once": 1
   },
   {
    "fieldname": "ref_sales_invoice",
@@ -347,7 +349,7 @@
   }
  ],
  "links": [],
- "modified": "2020-12-16 13:16:58.578503",
+ "modified": "2021-02-08 13:13:15.116833",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
