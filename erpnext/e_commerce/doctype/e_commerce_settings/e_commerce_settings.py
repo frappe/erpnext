@@ -22,6 +22,7 @@ class ECommerceSettings(Document):
 
 		self.validate_field_filters()
 		self.validate_attribute_filters()
+		self.validate_checkout()
 		if self.enabled:
 			self.validate_exchange_rates_exist()
 
@@ -42,6 +43,10 @@ class ECommerceSettings(Document):
 
 		# if attribute filters are enabled, hide_variants should be disabled
 		self.hide_variants = 0
+
+	def validate_checkout(self):
+		if self.enable_checkout and not self.payment_gateway_account:
+			self.enable_checkout = 0
 
 	def validate_exchange_rates_exist(self):
 		"""check if exchange rates exist for all Price List currencies (to company's currency)"""

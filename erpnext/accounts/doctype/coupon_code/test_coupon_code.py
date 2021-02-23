@@ -41,7 +41,6 @@ def test_create_test_data():
 		"selling_cost_center": "Main - _TC",
 		"income_account": "Sales - _TC"
 		}],
-		"route":"-test-tesla-car",
 		})
 		item.insert()
 	# create test item price
