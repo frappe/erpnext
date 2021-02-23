@@ -456,7 +456,9 @@ class SalesInvoice(SellingController):
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 
-			self.ignore_pricing_rule = pos.ignore_pricing_rule
+			if not for_validate:
+				self.ignore_pricing_rule = pos.ignore_pricing_rule
+
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 

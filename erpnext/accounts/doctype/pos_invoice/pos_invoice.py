@@ -93,7 +93,7 @@ class POSInvoice(SalesInvoice):
 						mode_of_payment=pay.mode_of_payment, status="Paid"),
 					fieldname="grand_total")
 
-				if pay.amount != paid_amt:
+				if paid_amt and pay.amount != paid_amt:
 					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
 	def validate_stock_availablility(self):
@@ -311,7 +311,9 @@ class POSInvoice(SalesInvoice):
 						self.set(fieldname, profile.get(fieldname))
 
 			if self.customer:
-				customer_price_list, customer_group = frappe.db.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_price_list, customer_group, customer_currency = frappe.db.get_value(
+					"Customer", self.customer, ['default_price_list', 'customer_group', 'default_currency']
+				)
 				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
 				selling_price_list = customer_price_list or customer_group_price_list or profile.get('selling_price_list')
 				if customer_currency != profile.get('currency'):
@@ -322,6 +324,8 @@ class POSInvoice(SalesInvoice):
 
 			if selling_price_list:
 				self.set('selling_price_list', selling_price_list)
+			if customer_currency != profile.get('currency'):
+				self.set('currency', customer_currency)
 
 			# set pos values in items
 			for item in self.get("items"):

@@ -2,11 +2,16 @@
 // For license information, please see license.txt
 
 {% include 'erpnext/selling/sales_common.js' %};
+frappe.provide("erpnext.accounts");
 
 erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend({
 	setup(doc) {
 		this.setup_posting_date_time_check();
 		this._super(doc);
+	},
+
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
 	},
 
 	onload(doc) {
@@ -16,6 +21,8 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 			this.frm.script_manager.trigger("is_pos");
 			this.frm.refresh_fields();
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh(doc) {
