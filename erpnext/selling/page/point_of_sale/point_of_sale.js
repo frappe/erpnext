@@ -1052,7 +1052,7 @@ class POSCart {
 
 	add_item(item) {
 		this.$empty_state.hide();
-		
+
 		if (this.exists(item.item_code, item.batch_no)) {
 			// update quantity
 			this.update_item(item);

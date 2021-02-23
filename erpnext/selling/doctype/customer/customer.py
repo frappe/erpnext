@@ -49,6 +49,7 @@ class Customer(TransactionBase):
 		'''If customer created from Lead, update customer id in quotations, opportunities'''
 		self.update_lead_status()
 
+
 	def generateSerie(self):
 		series = frappe.get_all("Customer",["naming_series"],order_by='naming_series desc')
 		number = ""
