@@ -1,5 +1,6 @@
 import frappe
 from frappe import _
+from frappe.utils import getdate, get_time
 from erpnext.stock.stock_ledger import update_entries_after
 from erpnext.accounts.utils import update_gl_entries_after
 
@@ -40,7 +41,10 @@ def execute():
 
 
 	print("Reposting General Ledger Entries...")
+	posting_date = getdate(reposting_project_deployed_on)
+	posting_time = get_time(reposting_project_deployed_on)
+
 	for row in frappe.get_all('Company', filters= {'enable_perpetual_inventory': 1}):
-		update_gl_entries_after('2020-12-25', '01:58:55', company=row.name)
+		update_gl_entries_after(posting_date, posting_time, company=row.name)
 
 	frappe.db.auto_commit_on_many_writes = 0
