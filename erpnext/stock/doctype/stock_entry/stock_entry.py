@@ -276,7 +276,7 @@ class StockEntry(StockController):
 					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
 
 		for item_code, qty_list in iteritems(item_wise_qty):
-			total = round(sum(qty_list), frappe.get_precision("Stock Entry Detail", "qty"))
+			total = flt(sum(qty_list), frappe.get_precision("Stock Entry Detail", "qty"))
 			if self.fg_completed_qty != total:
 				frappe.throw(_("The finished product {0} quantity {1} and For Quantity {2} cannot be different")
 					.format(frappe.bold(item_code), frappe.bold(total), frappe.bold(self.fg_completed_qty)))
