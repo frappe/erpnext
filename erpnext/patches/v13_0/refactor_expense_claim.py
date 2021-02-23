@@ -14,18 +14,20 @@ def execute():
 		)
 
 		for entry in expense_types:
-			doc = frappe.get_doc('Expense Claim Type', entry.name)
-
 			item = frappe.new_doc('Item')
-			item.item_code = doc.expense_type
+			item.item_code = entry.expense_type
 			item.item_group = 'Services'
 			item.is_stock_item = 0
-			item.decription = doc.description
+			item.decription = entry.description
 			item.include_item_in_manufacturing = 0
 			item.stock_uom = 'Nos'
-			item.enable_deferred_expense = doc.deferred_expense_account
+			item.enable_deferred_expense = entry.deferred_expense_account
 
-			for acc in doc.accounts:
+			accounts = frappe.db.get_all('Expense Claim Account', filters={
+				'parent': entry.name
+			}, fields=['company', 'default_account'])
+
+			for acc in accounts:
 				item.append('item_defaults', {
 					'company': acc.company,
 					'expense_account': acc.default_account

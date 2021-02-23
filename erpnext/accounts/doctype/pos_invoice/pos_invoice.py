@@ -9,7 +9,6 @@ from frappe.model.document import Document
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
 from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
-from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import SalesInvoice, get_bank_cash_account, update_multi_mode_option, get_mode_of_payment_info
@@ -57,7 +56,7 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
-	
+
 	def before_cancel(self):
 		if self.consolidated_invoice and frappe.db.get_value('Sales Invoice', self.consolidated_invoice, 'docstatus') == 1:
 			pos_closing_entry = frappe.get_all(
@@ -400,8 +399,9 @@ class POSInvoice(SalesInvoice):
 					pay_req.request_phone_payment()
 
 				return pay_req
-	
+
 	def get_new_payment_request(self, mop):
+		from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 		payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
 			"payment_account": mop.account,
 		}, ["name"])

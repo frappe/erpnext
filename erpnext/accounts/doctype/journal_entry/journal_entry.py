@@ -9,7 +9,6 @@ from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.utils import get_balance_on, get_stock_accounts, get_stock_and_account_balance, \
 	get_account_currency, check_if_stock_and_account_balance_synced
 from erpnext.accounts.party import get_party_account
-from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 from erpnext.accounts.doctype.invoice_discounting.invoice_discounting \
 	import get_party_account_based_on_invoice_discounting
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
@@ -634,6 +633,7 @@ class JournalEntry(AccountsController):
 				and outstanding_amount > 0 %s""" % ('%s', cond), self.company, as_dict=True)
 
 	def update_expense_claim(self):
+		from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim" and d.reference_name:
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
