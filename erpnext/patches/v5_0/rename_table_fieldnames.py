@@ -114,8 +114,7 @@ rename_map = {
 		["item_supplier_details", "supplier_items"],
 		["item_customer_details", "customer_items"],
 		["item_tax", "taxes"],
-		["item_specification_details", "quality_parameters"],
-		["item_website_specifications", "website_specifications"]
+		["item_specification_details", "quality_parameters"]
 	],
 	"Item Group": [
 		["item_website_specifications", "website_specifications"]

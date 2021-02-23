@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import json
 import itertools
+from six import string_types
 from frappe import _
 
 from frappe.website.website_generator import WebsiteGenerator
@@ -340,10 +341,11 @@ def invalidate_cache_for_web_item(doc):
 	invalidate_item_variants_cache_for_website(doc)
 
 @frappe.whitelist()
-def make_website_item(doc):
-	if not doc:
-		return
-	doc = json.loads(doc)
+def make_website_item(doc, save=True):
+	if not doc: return
+
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
 
 	if frappe.db.exists("Website Item", {"item_code": doc.get("item_code")}):
 		message = _("Website Item already exists against {0}").format(frappe.bold(doc.get("item_code")))
@@ -356,6 +358,9 @@ def make_website_item(doc):
 		"has_variants", "variant_of", "description"]
 	for field in fields_to_map:
 		website_item.update({field: doc.get(field)})
+
+	if not save:
+		return website_item
 
 	website_item.save()
 	return [website_item.name, website_item.web_item_name]
