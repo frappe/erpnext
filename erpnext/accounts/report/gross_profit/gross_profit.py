@@ -558,9 +558,14 @@ def get_item_incoming_rate_data(args):
 
 
 def get_item_last_purchase_rate(args):
+	from erpnext.stock.doctype.item.item import get_last_purchase_details
 	out = {}
 	if not args:
 		return out
+
+	for item_code, t_date in args:
+		get_last_purchase_detail = get_last_purchase_details(item_code, transaction_date=t_date)
+		out[(item_code, t_date)] = get_last_purchase_detail['base_rate'] if get_last_purchase_detail else 0
 
 	return out
 
