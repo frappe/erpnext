@@ -307,6 +307,7 @@ erpnext.patches.v13_0.modify_invalid_gain_loss_gl_entries #2
 erpnext.patches.v13_0.fix_additional_cost_in_mfg_stock_entry
 erpnext.patches.v13_0.set_status_in_maintenance_schedule_table
 erpnext.patches.v13_0.add_default_interview_notification_templates
+<<<<<<< HEAD
 erpnext.patches.v13_0.enable_scheduler_job_for_item_reposting
 erpnext.patches.v13_0.requeue_failed_reposts
 erpnext.patches.v13_0.update_job_card_status
@@ -333,3 +334,8 @@ erpnext.patches.v13_0.update_exchange_rate_settings
 erpnext.patches.v14_0.update_leave_notification_template
 erpnext.patches.v14_0.restore_einvoice_fields
 erpnext.patches.v14_0.rearrange_company_fields
+=======
+erpnext.patches.v13_0.create_website_items
+erpnext.patches.v13_0.populate_e_commerce_settings
+erpnext.patches.v13_0.make_homepage_products_website_items
+>>>>>>> 37a246e738 (chore: Patches for Website Item)
