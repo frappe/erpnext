@@ -29,8 +29,7 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Payment Term",
-   "options": "Payment Term",
-   "reqd": 1
+   "options": "Payment Term"
   },
   {
    "columns": 2,
@@ -144,7 +143,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-15 21:03:38.211696",
+ "modified": "2021-02-23 20:16:23.301064",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template Detail",
