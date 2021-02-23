@@ -24,6 +24,7 @@ class StockController(AccountsController):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 
@@ -73,7 +74,7 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
-		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
+		precision = self.get_debit_field_precision()
 		for item_row in voucher_details:
 
 			sle_list = sle_map.get(item_row.name)
@@ -130,7 +131,13 @@ class StockController(AccountsController):
 				if frappe.db.get_value("Warehouse", wh, "company"):
 					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
 
-		return process_gl_map(gl_list)
+		return process_gl_map(gl_list, precision=precision)
+
+	def get_debit_field_precision(self):
+		if not frappe.flags.debit_field_precision:
+			frappe.flags.debit_field_precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
+
+		return frappe.flags.debit_field_precision
 
 	def update_stock_ledger_entries(self, sle):
 		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
@@ -243,7 +250,7 @@ class StockController(AccountsController):
 				.format(item.idx, frappe.bold(item.item_code), msg), title=_("Expense Account Missing"))
 
 		else:
-			is_expense_account = frappe.db.get_value("Account",
+			is_expense_account = frappe.get_cached_value("Account",
 				item.get("expense_account"), "report_type")=="Profit and Loss"
 			if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Stock Reconciliation", "Stock Entry") and not is_expense_account:
 				frappe.throw(_("Expense / Difference account ({0}) must be a 'Profit or Loss' account")
@@ -396,6 +403,11 @@ class StockController(AccountsController):
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
 
+	def set_rate_of_stock_uom(self):
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice", "Purchase Order", "Sales Invoice", "Sales Order", "Delivery Note", "Quotation"]:
+			for d in self.get("items"):
+				d.stock_uom_rate = d.rate / d.conversion_factor
+
 	def validate_internal_transfer(self):
 		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Purchase Invoice', 'Purchase Receipt') \
 			and self.is_internal_transfer():
@@ -482,7 +494,6 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-
 		if check_if_future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
 		elif not is_reposting_pending():
