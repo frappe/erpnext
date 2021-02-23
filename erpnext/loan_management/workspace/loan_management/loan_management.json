@@ -10,6 +10,7 @@
  "hide_custom": 0,
  "icon": "loan",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Loan Management",
  "links": [
@@ -219,7 +220,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-01-12 11:27:56.079724",
+ "modified": "2021-02-18 17:31:53.586508",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Management",
@@ -239,6 +240,12 @@
    "label": "Loan",
    "link_to": "Loan",
    "type": "DocType"
+  },
+  {
+   "doc_view": "",
+   "label": "Dashboard",
+   "link_to": "Loan Dashboard",
+   "type": "Dashboard"
   }
  ]
 }
