@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
@@ -485,7 +486,8 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-02-12 23:59:50.829861",
+ "links": [],
+ "modified": "2020-03-18 19:17:34.932576",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
