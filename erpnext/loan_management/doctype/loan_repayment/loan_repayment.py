@@ -81,8 +81,8 @@ class LoanRepayment(AccountsController):
 				last_accrual_date = get_last_accrual_date(self.against_loan)
 
 				# get posting date upto which interest has to be accrued
-				per_day_interest = flt(get_per_day_interest(self.pending_principal_amount,
-					self.rate_of_interest, self.posting_date), 2)
+				per_day_interest = get_per_day_interest(self.pending_principal_amount,
+					self.rate_of_interest, self.posting_date)
 
 				no_of_days = flt(flt(self.total_interest_paid - self.interest_payable,
 					precision)/per_day_interest, 0) - 1
@@ -105,8 +105,6 @@ class LoanRepayment(AccountsController):
 				})
 
 	def update_paid_amount(self):
-		precision = cint(frappe.db.get_default("currency_precision")) or 2
-
 		loan = frappe.get_doc("Loan", self.against_loan)
 
 		for payment in self.repayment_details:
@@ -114,7 +112,7 @@ class LoanRepayment(AccountsController):
 				SET paid_principal_amount = `paid_principal_amount` + %s,
 					paid_interest_amount = `paid_interest_amount` + %s
 				WHERE name = %s""",
-				(flt(payment.paid_principal_amount, precision), flt(payment.paid_interest_amount, precision), payment.loan_interest_accrual))
+				(flt(payment.paid_principal_amount), flt(payment.paid_interest_amount), payment.loan_interest_accrual))
 
 		frappe.db.sql(""" UPDATE `tabLoan` SET total_amount_paid = %s, total_principal_paid = %s
 			WHERE name = %s """, (loan.total_amount_paid + self.amount_paid,
@@ -148,8 +146,6 @@ class LoanRepayment(AccountsController):
 			frappe.db.set_value("Loan", self.against_loan, "status", "Disbursed")
 
 	def allocate_amounts(self, repayment_details):
-		precision = cint(frappe.db.get_default("currency_precision")) or 2
-
 		self.set('repayment_details', [])
 		self.principal_amount_paid = 0
 		total_interest_paid = 0
@@ -185,21 +181,18 @@ class LoanRepayment(AccountsController):
 			# no of days for which to accrue interest
 			# Interest can only be accrued for an entire day and not partial
 			if interest_paid > repayment_details['unaccrued_interest']:
-				per_day_interest = flt(get_per_day_interest(self.pending_principal_amount,
-					self.rate_of_interest, self.posting_date), precision)
 				interest_paid -= repayment_details['unaccrued_interest']
 				total_interest_paid += repayment_details['unaccrued_interest']
 			else:
 				# get no of days for which interest can be paid
-				per_day_interest = flt(get_per_day_interest(self.pending_principal_amount,
-					self.rate_of_interest, self.posting_date), precision)
+				per_day_interest = get_per_day_interest(self.pending_principal_amount,
+					self.rate_of_interest, self.posting_date)
 
 				no_of_days = cint(interest_paid/per_day_interest)
 				total_interest_paid += no_of_days * per_day_interest
 				interest_paid -= no_of_days * per_day_interest
 
 		self.total_interest_paid = total_interest_paid
-
 		if interest_paid:
 			self.principal_amount_paid += interest_paid
 
@@ -369,7 +362,7 @@ def get_amounts(amounts, against_loan, posting_date):
 	if pending_days > 0:
 		principal_amount = flt(pending_principal_amount, precision)
 		per_day_interest = get_per_day_interest(principal_amount, loan_type_details.rate_of_interest, posting_date)
-		unaccrued_interest += (pending_days * flt(per_day_interest, precision))
+		unaccrued_interest += (pending_days * per_day_interest)
 
 	amounts["pending_principal_amount"] = flt(pending_principal_amount, precision)
 	amounts["payable_principal_amount"] = flt(payable_principal_amount, precision)
