@@ -5,6 +5,7 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "call_details_section",
   "id",
   "from",
   "to",
@@ -21,20 +22,9 @@
   "section_break_11",
   "summary",
   "section_break_19",
-  "links",
-  "column_break_3",
-  "section_break_5"
+  "links"
  ],
  "fields": [
-  {
-   "fieldname": "column_break_3",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "section_break_5",
-   "fieldtype": "Section Break",
-   "label": "Call Details"
-  },
   {
    "fieldname": "id",
    "fieldtype": "Data",
@@ -75,6 +65,7 @@
   {
    "fieldname": "recording_url",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Recording URL"
   },
   {
@@ -112,13 +103,13 @@
   },
   {
    "fieldname": "summary",
-   "fieldtype": "Small Text",
-   "label": "Call Summary"
+   "fieldtype": "Small Text"
   },
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break",
-   "hide_border": 1
+   "hide_border": 1,
+   "label": "Call Summary"
   },
   {
    "fieldname": "start_time",
@@ -138,12 +129,17 @@
    "label": "Customer",
    "options": "Customer",
    "read_only": 1
+  },
+  {
+   "fieldname": "call_details_section",
+   "fieldtype": "Section Break",
+   "label": "Call Details"
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-13 12:28:20.288985",
+ "modified": "2021-02-08 14:23:28.744844",
  "modified_by": "Administrator",
  "module": "Telephony",
  "name": "Call Log",

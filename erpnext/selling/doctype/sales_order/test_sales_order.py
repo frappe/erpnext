@@ -325,6 +325,9 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 4)
 		make_sales_invoice(so.name)
 
+		prev_total = so.get("base_total")
+		prev_total_in_words = so.get("base_in_words")
+
 		first_item_of_so = so.get("items")[0]
 		trans_item = json.dumps([
 			{'item_code' : first_item_of_so.item_code, 'rate' : first_item_of_so.rate, \
@@ -339,6 +342,12 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
 		self.assertEqual(so.status, 'To Deliver and Bill')
+
+		updated_total = so.get("base_total")
+		updated_total_in_words = so.get("base_in_words")
+
+		self.assertEqual(updated_total, prev_total+1400)
+		self.assertNotEqual(updated_total_in_words, prev_total_in_words)
 
 	def test_update_child_removing_item(self):
 		so = make_sales_order(**{

@@ -32,6 +32,10 @@ def execute(filters=None):
 
 	data = []
 	columns = get_columns()
+	conditions = ""
+	if filters.supplier_group:
+		conditions += "AND s.supplier_group = %s" %frappe.db.escape(filters.get("supplier_group"))
+
 	data = frappe.db.sql("""
 		SELECT
 			s.supplier_group as "supplier_group",
@@ -46,15 +50,17 @@ def execute(filters=None):
 				AND s.irs_1099 = 1
 				AND gl.fiscal_year = %(fiscal_year)s
 				AND gl.party_type = "Supplier"
+				AND gl.company = %(company)s
+				{conditions}
+			
 		GROUP BY
 			gl.party
+
 		ORDER BY
-			gl.party DESC
-	""", {
-		"fiscal_year": filters.fiscal_year,
-		"supplier_group": filters.supplier_group,
-		"company": filters.company
-	}, as_dict=True)
+			gl.party DESC""".format(conditions=conditions), {
+				"fiscal_year": filters.fiscal_year,
+				"company": filters.company
+			}, as_dict=True)
 
 	return columns, data
 
@@ -79,13 +85,13 @@ def get_columns():
 			"fieldname": "tax_id",
 			"label": _("Tax ID"),
 			"fieldtype": "Data",
-			"width": 120
+			"width": 200
 		},
 		{
 			"fieldname": "payments",
 			"label": _("Total Payments"),
 			"fieldtype": "Currency",
-			"width": 120
+			"width": 200
 		}
 	]
 
