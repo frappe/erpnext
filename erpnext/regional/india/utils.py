@@ -55,6 +55,14 @@ def validate_gstin_for_india(doc, method):
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
 
+def validate_pan_for_india(doc, method):
+	if doc.get('country') != 'India' or not doc.pan:
+		return
+
+	p = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
+	if not p.match(doc.pan):
+		frappe.throw(_("Invalid PAN No. The input you've entered doesn't match the format of PAN."))
+
 def validate_tax_category(doc, method):
 	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
 		if doc.is_inter_state:
@@ -772,3 +780,24 @@ def make_regional_gl_entries(gl_entries, doc):
 				)
 
 	return gl_entries
+
+@frappe.whitelist()
+def get_regional_round_off_accounts(company, account_list):
+	country = frappe.get_cached_value('Company', company, 'country')
+
+	if country != 'India':
+		return
+
+	if isinstance(account_list, string_types):
+		account_list = json.loads(account_list)
+
+	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
+		return
+
+	gst_accounts = get_gst_accounts(company)
+	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+		+ gst_accounts.get('igst_account')
+
+	account_list.extend(gst_account_list)
+
+	return account_list
