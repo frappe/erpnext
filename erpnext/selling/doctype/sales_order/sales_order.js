@@ -171,8 +171,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 						this.frm.add_custom_button(__('Request for Raw Materials'), () => this.make_raw_material_request(), __('Create'));
 					}
 
-					// make purchase order
+					// Make Purchase Order
+					if (!this.frm.doc.is_internal_customer) {
 						this.frm.add_custom_button(__('Purchase Order'), () => this.make_purchase_order(), __('Create'));
+					}
 
 					// maintenance
 					if(flt(doc.per_delivered, 2) < 100 && (order_is_maintenance || order_is_a_custom_sale)) {
@@ -193,16 +195,15 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 					if (doc.docstatus === 1 && !doc.inter_company_order_reference) {
 						let me = this;
-						frappe.model.with_doc("Customer", me.frm.doc.customer, () => {
-							let customer = frappe.model.get_doc("Customer", me.frm.doc.customer);
-							let internal = customer.is_internal_customer;
-							let disabled = customer.disabled;
-							if (internal === 1 && disabled === 0) {
-								me.frm.add_custom_button("Inter Company Order", function() {
-									me.make_inter_company_order();
-								}, __('Create'));
-							}
-						});
+						let internal = me.frm.doc.is_internal_customer;
+						if (internal) {
+							let button_label = (me.frm.doc.company === me.frm.doc.represents_company) ? "Internal Purchase Order" :
+								"Inter Company Purchase Order";
+
+							me.frm.add_custom_button(button_label, function() {
+								me.make_inter_company_order();
+							}, __('Create'));
+						}
 					}
 				}
 				// payment request

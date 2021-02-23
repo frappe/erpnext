@@ -255,15 +255,16 @@ class Gstr1Report(object):
 
 						for item_code, tax_amounts in item_wise_tax_detail.items():
 							tax_rate = tax_amounts[0]
-							if cgst_or_sgst:
-								tax_rate *= 2
-								if parent not in self.cgst_sgst_invoices:
-									self.cgst_sgst_invoices.append(parent)
+							if tax_rate:
+								if cgst_or_sgst:
+									tax_rate *= 2
+									if parent not in self.cgst_sgst_invoices:
+										self.cgst_sgst_invoices.append(parent)
 
-							rate_based_dict = self.items_based_on_tax_rate\
-								.setdefault(parent, {}).setdefault(tax_rate, [])
-							if item_code not in rate_based_dict:
-								rate_based_dict.append(item_code)
+								rate_based_dict = self.items_based_on_tax_rate\
+									.setdefault(parent, {}).setdefault(tax_rate, [])
+								if item_code not in rate_based_dict:
+									rate_based_dict.append(item_code)
 					except ValueError:
 						continue
 		if unidentified_gst_accounts:

@@ -89,10 +89,11 @@ class TestTimesheet(unittest.TestCase):
 
 	def test_timesheet_billing_based_on_project(self):
 		emp = make_employee("test_employee_6@salary.com")
+		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 
-		timesheet = make_timesheet(emp, simulate=True, billable=1, project = '_Test Project', company='_Test Company')
+		timesheet = make_timesheet(emp, simulate=True, billable=1, project=project, company='_Test Company')
 		sales_invoice = create_sales_invoice(do_not_save=True)
-		sales_invoice.project = '_Test Project'
+		sales_invoice.project = project
 		sales_invoice.submit()
 
 		ts = frappe.get_doc('Timesheet', timesheet.name)

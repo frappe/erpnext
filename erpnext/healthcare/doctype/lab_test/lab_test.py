@@ -17,11 +17,9 @@ class LabTest(Document):
 		self.validate_result_values()
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
-		insert_lab_test_to_medical_record(self)
 
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
-		delete_lab_test_from_medical_record(self)
 		self.reload()
 
 	def on_update(self):
@@ -330,60 +328,6 @@ def get_employee_by_user_id(user_id):
 		return frappe.get_doc('Employee', emp_id)
 	return None
 
-def insert_lab_test_to_medical_record(doc):
-	table_row = False
-	subject = cstr(doc.lab_test_name)
-	if doc.practitioner:
-		subject += frappe.bold(_('Healthcare Practitioner: '))+ doc.practitioner + '<br>'
-	if doc.normal_test_items:
-		item = doc.normal_test_items[0]
-		comment = ''
-		if item.lab_test_comment:
-			comment = str(item.lab_test_comment)
-		table_row = frappe.bold(_('Lab Test Conducted: ')) + item.lab_test_name
-
-		if item.lab_test_event:
-			table_row += frappe.bold(_('Lab Test Event: ')) + item.lab_test_event
-
-		if item.result_value:
-			table_row += ' ' + frappe.bold(_('Lab Test Result: ')) + item.result_value
-
-		if item.normal_range:
-			table_row += ' ' + _('Normal Range: ') + item.normal_range
-		table_row += ' ' + comment
-
-	elif doc.descriptive_test_items:
-		item = doc.descriptive_test_items[0]
-
-		if item.lab_test_particulars and item.result_value:
-			table_row = item.lab_test_particulars + ' ' + item.result_value
-
-	elif doc.sensitivity_test_items:
-		item = doc.sensitivity_test_items[0]
-
-		if item.antibiotic and item.antibiotic_sensitivity:
-			table_row = item.antibiotic + ' ' + item.antibiotic_sensitivity
-
-	if table_row:
-		subject += '<br>' + table_row
-	if doc.lab_test_comment:
-		subject += '<br>' + cstr(doc.lab_test_comment)
-
-	medical_record = frappe.new_doc('Patient Medical Record')
-	medical_record.patient = doc.patient
-	medical_record.subject = subject
-	medical_record.status = 'Open'
-	medical_record.communication_date = doc.result_date
-	medical_record.reference_doctype = 'Lab Test'
-	medical_record.reference_name = doc.name
-	medical_record.reference_owner = doc.owner
-	medical_record.save(ignore_permissions = True)
-
-def delete_lab_test_from_medical_record(self):
-	medical_record_id = frappe.db.sql('select name from `tabPatient Medical Record` where reference_name=%s', (self.name))
-
-	if medical_record_id and medical_record_id[0][0]:
-		frappe.delete_doc('Patient Medical Record', medical_record_id[0][0])
 
 @frappe.whitelist()
 def get_lab_test_prescribed(patient):

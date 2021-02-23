@@ -37,6 +37,7 @@ class StockLedgerEntry(Document):
 		self.block_transactions_against_group_warehouse()
 		self.validate_with_last_transaction_posting_time()
 
+
 	def on_submit(self):
 		self.check_stock_frozen_date()
 		self.actual_amt_check()

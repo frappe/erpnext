@@ -111,13 +111,14 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-17 16:27:20.311060",
+ "modified": "2020-12-31 16:43:30.695206",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Policy Assignment",
  "owner": "Administrator",
  "permissions": [
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -131,6 +132,7 @@
    "write": 1
   },
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -144,6 +146,7 @@
    "write": 1
   },
   {
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,

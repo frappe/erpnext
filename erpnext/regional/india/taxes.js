@@ -40,14 +40,12 @@ erpnext.setup_auto_gst_taxation = (doctype) => {
 				callback: function(r) {
 					if(r.message) {
 						frm.set_value('taxes_and_charges', r.message.taxes_and_charges);
+						frm.set_value('taxes', r.message.taxes);
 						frm.set_value('place_of_supply', r.message.place_of_supply);
-					} else if (frm.doc.is_internal_supplier || frm.doc.is_internal_customer) {
-						frm.set_value('taxes_and_charges', '');
-						frm.set_value('taxes', []);
 					}
 				}
 			});
 		}
 	});
-};
+}
 

@@ -262,6 +262,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 
 		if doc.get("is_return"):
 			if doc.doctype == 'Sales Invoice' or doc.doctype == 'POS Invoice':
+				doc.consolidated_invoice = ""
 				doc.set('payments', [])
 				for data in source.payments:
 					paid_amount = 0.00
