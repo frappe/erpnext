@@ -356,6 +356,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.delivery_note = source_doc.delivery_note
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.dn_detail = source_doc.dn_detail
+			target_doc.si_detail = source_doc.name
 			target_doc.expense_account = source_doc.expense_account
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
