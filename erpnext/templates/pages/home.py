@@ -10,7 +10,7 @@ def get_context(context):
 	homepage = frappe.get_doc('Homepage')
 
 	for item in homepage.products:
-		route = frappe.db.get_value('Item', item.item_code, 'route')
+		route = frappe.db.get_value('Website Item', {"item_code": item.item_code}, 'route')
 		if route:
 			item.route = '/' + route
 
