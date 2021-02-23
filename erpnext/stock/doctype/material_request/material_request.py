@@ -282,7 +282,10 @@ def make_purchase_order(source_name, target_doc=None, args={}):
 		set_missing_values(source, target_doc)
 
 	def select_item(d):
-		return d.ordered_qty < d.stock_qty and d.name in args.get('filtered_children', [])
+		filtered_items = args.get('filtered_children', [])
+		child_filter = d.name in filtered_items if filtered_items else True
+
+		return d.ordered_qty < d.stock_qty and child_filter
 
 	doclist = get_mapped_doc("Material Request", source_name, 	{
 		"Material Request": {

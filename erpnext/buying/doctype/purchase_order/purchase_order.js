@@ -386,7 +386,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					},
 					child_selection_mode: true,
 					child_doctype: "Material Request Item",
-					child_columns: ["item_code"]
+					child_columns: ["item_code", "qty"]
 				})
 			}, __("Get Items From"));
 
