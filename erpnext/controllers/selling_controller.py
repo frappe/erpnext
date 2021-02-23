@@ -473,13 +473,19 @@ class SellingController(StockController):
 				non_stock_items = [d.item_code, d.description]
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
+				duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
+				duplicate_items_msg += "<br><br>"
+				duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+					frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
+					get_link_to_form("Selling Settings", "Selling Settings")
+				)
 				if stock_items in check_list:
-					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+					frappe.throw(duplicate_items_msg)
 				else:
 					check_list.append(stock_items)
 			else:
 				if non_stock_items in chk_dupl_itm:
-					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+					frappe.throw(duplicate_items_msg)
 				else:
 					chk_dupl_itm.append(non_stock_items)
 

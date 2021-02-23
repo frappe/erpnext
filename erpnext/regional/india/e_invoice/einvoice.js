@@ -188,7 +188,6 @@ const get_ewaybill_fields = (frm) => {
 			'fieldname': 'vehicle_no',
 			'label': 'Vehicle No',
 			'fieldtype': 'Data',
-			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
 			'default': frm.doc.vehicle_no
 		},
 		{

@@ -21,8 +21,7 @@ class TestEmployee(unittest.TestCase):
 
 		from erpnext.hr.doctype.employee.employee import get_employees_who_are_born_today, send_birthday_reminders
 
-		employees_born_today = get_employees_who_are_born_today()
-		self.assertTrue(employees_born_today.get("_Test Company"))
+		self.assertTrue(employee.name in [e.name for e in get_employees_who_are_born_today()])
 
 		frappe.db.sql("delete from `tabEmail Queue`")
 

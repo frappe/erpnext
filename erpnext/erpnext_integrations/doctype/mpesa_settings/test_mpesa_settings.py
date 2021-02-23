@@ -50,6 +50,7 @@ class TestMpesaSettings(unittest.TestCase):
 		create_mpesa_settings(payment_gateway_name="Payment")
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
 		frappe.db.set_value("Account", mpesa_account, "account_currency", "KES")
+		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "KES")
 
 		pos_invoice = create_pos_invoice(do_not_submit=1)
 		pos_invoice.append("payments", {'mode_of_payment': 'Mpesa-Payment', 'account': mpesa_account, 'amount': 500})
@@ -194,6 +195,8 @@ class TestMpesaSettings(unittest.TestCase):
 		pr.cancel()
 		pr.delete()
 		pos_invoice.delete()
+
+		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "")
 
 def create_mpesa_settings(payment_gateway_name="Express"):
 	if frappe.db.exists("Mpesa Settings", payment_gateway_name):

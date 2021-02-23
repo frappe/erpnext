@@ -19,7 +19,7 @@ from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_m
 
 from six import string_types, iteritems
 
-sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'POS Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 
 @frappe.whitelist()
