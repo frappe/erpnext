@@ -52,7 +52,8 @@ class GrossProfitGenerator(object):
 				si_item.base_net_amount,
 				si.depreciation_type, si_item.depreciation_percentage,
 				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person,
-				sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage
+				sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage,
+				si_item.si_detail, si_item.returned_qty, si_item.base_returned_amount
 			from `tabSales Invoice` si
 			inner join `tabSales Invoice Item` si_item on si_item.parent = si.name
 			left join `tabCustomer` c on c.name = si.customer
@@ -128,7 +129,7 @@ class GrossProfitGenerator(object):
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
 		total_fields = [
 			'qty', 'stock_qty', 'cogs',
-			'base_net_amount'
+			'base_net_amount', 'returned_qty', 'base_returned_amount'
 		]
 
 		totals = frappe._dict()
