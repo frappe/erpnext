@@ -385,8 +385,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						company: me.frm.doc.company
 					},
 					child_selection_mode: true,
-					selectable_child: "Material Request Item",
-					child_cols: ["item_code"]
+					child_doctype: "Material Request Item",
+					child_columns: ["item_code"]
 				})
 			}, __("Get Items From"));
 

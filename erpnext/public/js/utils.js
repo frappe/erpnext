@@ -691,8 +691,8 @@ erpnext.utils.map_current_doc = function(opts) {
 			get_query: opts.get_query,
 			add_filters_group: 1,
 			child_selection_mode: opts.child_selection_mode,
-			selectable_child: opts.selectable_child,
-			child_cols: opts.child_cols,
+			child_doctype: opts.child_doctype,
+			child_columns: opts.child_columns,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){
