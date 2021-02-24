@@ -62,13 +62,13 @@ class VehicleBookingOrder(AccountsController):
 		self.set_title()
 		self.clean_remarks()
 
+		self.reset_payment_adjustment()
 		self.calculate_taxes_and_totals()
 		self.validate_amounts()
 		self.validate_taxes_and_charges_accounts()
 
 		self.get_terms_and_conditions()
 		self.validate_payment_schedule()
-
 		self.update_payment_status()
 		self.update_delivery_status()
 		self.update_invoice_status()
@@ -109,25 +109,38 @@ class VehicleBookingOrder(AccountsController):
 		self.customer_payments = []
 		self.supplier_payments = []
 
-		if self.docstatus != 1:
+		if self.docstatus == 2:
 			return
 
-		payment_entries = get_booking_payments(self.name)
+		payment_entries = get_booking_payments(self.name, include_draft=cint(self.docstatus == 0))
+		customer_payments_by_row_id = {}
 
 		for d in payment_entries:
-			if d.party_type == "Customer":
+			if d.payment_type == "Receive":
 				self.customer_payments.append(d)
+				customer_payments_by_row_id[d.row_id] = d
 
-			if d.party_type == "Supplier":
+			if d.payment_type == "Pay":
 				self.supplier_payments.append(d)
+
+		for d in self.supplier_payments:
+			if d.vehicle_booking_payment_row:
+				customer_payment_row = customer_payments_by_row_id.get(d.vehicle_booking_payment_row)
+				if customer_payment_row:
+					customer_payment_row.deposit_slip_no = d.deposit_slip_no
+					customer_payment_row.deposit_type = d.deposit_type
+					customer_payment_row.deposit_date = d.posting_date
 
 		self.is_full_payment = False
 		self.is_partial_payment = False
 
 		if self.customer_payments:
+			first_receipt_document = self.customer_payments[0].name
+
 			if self.supplier_payments:
 				first_deposit_posting_date = self.supplier_payments[0].posting_date
-				initial_payments = [d.amount for d in self.customer_payments if d.posting_date <= first_deposit_posting_date]
+				initial_payments = [d.amount for d in self.customer_payments\
+					if d.name == first_receipt_document or d.posting_date <= first_deposit_posting_date]
 			else:
 				initial_payments = [d.amount for d in self.customer_payments]
 
@@ -277,11 +290,22 @@ class VehicleBookingOrder(AccountsController):
 			self.customer_advance = 0
 			self.supplier_advance = 0
 
-		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
-		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance, self.precision('supplier_outstanding'))
+		self.calculate_outstanding_amount()
 
 		self.calculate_contribution()
 		self.set_total_in_words()
+
+	def calculate_outstanding_amount(self):
+		self.payment_adjustment = flt(self.payment_adjustment, self.precision('payment_adjustment'))
+
+		self.customer_outstanding = flt(self.invoice_total - self.customer_advance + self.payment_adjustment,
+			self.precision('customer_outstanding'))
+		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance + self.payment_adjustment,
+			self.precision('supplier_outstanding'))
+
+	def reset_payment_adjustment(self):
+		if self.docstatus != 1:
+			self.payment_adjustment = 0
 
 	def calculate_contribution(self):
 		total = 0.0
@@ -303,6 +327,16 @@ class VehicleBookingOrder(AccountsController):
 			self.validate_value(field, '>', 0)
 		for field in ['fni_amount', 'withholding_tax_amount', 'customer_outstanding', 'supplier_outstanding']:
 			self.validate_value(field, '>=', 0)
+
+		maximum_payment_adjustment = frappe.get_cached_value("Vehicles Settings", None, "maximum_payment_adjustment")
+		maximum_payment_adjustment = flt(maximum_payment_adjustment, self.precision('payment_adjustment'))
+		if maximum_payment_adjustment:
+			if abs(flt(self.payment_adjustment)) > maximum_payment_adjustment:
+				frappe.throw(_("Payment Adjustment cannot be greater than {0}")
+					.format(frappe.format(maximum_payment_adjustment, df=self.meta.get_field('payment_adjustment'))))
+
+		if abs(flt(self.payment_adjustment)) > self.invoice_total:
+			frappe.throw(_("Payment Adjustment cannot be greater than the Invoice Total"))
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -342,9 +376,25 @@ class VehicleBookingOrder(AccountsController):
 		# if self.withholding_tax_amount and not self.withholding_tax_account:
 		# 	frappe.throw(_("Withholding Tax Amount is set but account is not provided"))
 
+	def update_paid_amount(self, update=False):
+		payments = dict(frappe.db.sql("""
+			select payment_type, sum(total_amount)
+			from `tabVehicle Booking Payment`
+			where vehicle_booking_order = %s and docstatus = 1
+			group by payment_type
+		""", self.name))
+
+		self.customer_advance = flt(payments.get('Receive'), self.precision('customer_advance'))
+		self.supplier_advance = flt(payments.get('Pay'), self.precision('supplier_advance'))
+
+		if update:
+			self.db_set({
+				'customer_advance': self.customer_advance,
+				'supplier_advance': self.supplier_advance
+			})
+
 	def update_payment_status(self, update=False):
-		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
-		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance, self.precision('supplier_outstanding'))
+		self.calculate_outstanding_amount()
 
 		if self.customer_outstanding < 0:
 			frappe.throw(_("Customer Advance Received cannot be greater than the Invoice Total"))
@@ -1184,6 +1234,23 @@ def update_item_in_booking(vehicle_booking_order, item_code):
 
 	frappe.msgprint(_("Vehicle Item Code (Variant) Updated Successfully"), indicator='green')
 
+
+@frappe.whitelist()
+def update_payment_adjustment_in_booking(vehicle_booking_order, payment_adjustment):
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
+
+	vbo_doc.payment_adjustment = flt(payment_adjustment)
+
+	vbo_doc.calculate_outstanding_amount()
+	vbo_doc.update_payment_status()
+	vbo_doc.validate_amounts()
+
+	save_vehicle_booking_for_update(vbo_doc)
+
+	frappe.msgprint(_("Payment Adjustment Updated Successfully"), indicator='green', alert=True)
+
+
 def handle_delivery_period_changed(vbo_doc):
 	to_date = frappe.get_cached_value("Vehicle Allocation Period", vbo_doc.delivery_period, 'to_date')
 
@@ -1242,25 +1309,30 @@ def validate_supplier_payment_for_update(vbo_doc):
 			.format(frappe.bold(vbo_doc.name)))
 
 
-def get_booking_payments(vehicle_booking_order):
+def get_booking_payments(vehicle_booking_order, include_draft=False):
 	if not vehicle_booking_order:
 		return []
 
 	if isinstance(vehicle_booking_order, string_types):
 		vehicle_booking_order = [vehicle_booking_order]
 
+	docstatus_cond = "p.docstatus = 1"
+	if include_draft:
+		docstatus_cond = "p.docstatus < 2"
+
 	payment_entries = frappe.db.sql("""
-		select pe.name, pe.posting_date,
-			pe.party_type, pe.party,
-			pe.payment_type, pref.allocated_amount as amount, pref.original_reference_name as vehicle_booking_order,
-			pe.instrument_type, pe.user_remark,
-			pe.reference_no, pe.reference_date, pe.deposit_no
-		from `tabPayment Entry Reference` pref
-		inner join `tabPayment Entry` pe on pe.name = pref.parent
-		where pe.docstatus = 1
-			and pref.original_reference_doctype = 'Vehicle Booking Order' and pref.original_reference_name in %s
-		order by pe.reference_date, pe.posting_date, pe.creation
-	""", [vehicle_booking_order], as_dict=1)
+		select p.name, p.posting_date,
+			p.vehicle_booking_order, p.party_type, p.party,
+			p.payment_type, i.amount,
+			i.instrument_type, i.instrument_title,
+			i.instrument_no, i.instrument_date,
+			p.deposit_slip_no, p.deposit_type,
+			i.name as row_id, i.vehicle_booking_payment_row
+		from `tabVehicle Booking Payment Detail` i
+		inner join `tabVehicle Booking Payment` p on p.name = i.parent
+		where {0} and p.vehicle_booking_order in %s
+		order by i.instrument_date, p.posting_date, p.creation
+	""".format(docstatus_cond), [vehicle_booking_order], as_dict=1)
 
 	return payment_entries
 

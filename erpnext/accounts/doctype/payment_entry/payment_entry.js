@@ -98,9 +98,9 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.set_query("reference_doctype", "references", function() {
 			if (frm.doc.party_type=="Customer") {
-				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Vehicle Booking Order"];
+				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry"];
 			} else if (frm.doc.party_type=="Supplier") {
-				var doctypes = ["Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry", "Vehicle Booking Order"];
+				var doctypes = ["Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry"];
 			} else if (frm.doc.party_type=="Letter of Credit") {
 				var doctypes = ["Purchase Invoice", "Landed Cost Voucher", "Journal Entry"];
 			} else if (frm.doc.party_type=="Employee") {
@@ -147,7 +147,7 @@ frappe.ui.form.on('Payment Entry', {
 
 			const filters = {"docstatus": 1, "company": doc.company};
 			const party_type_doctypes = ['Sales Invoice', 'Sales Order', 'Purchase Invoice',
-				'Purchase Order', 'Expense Claim', 'Fees', 'Vehicle Booking Order'];
+				'Purchase Order', 'Expense Claim', 'Fees'];
 
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				if (child.reference_doctype == "Sales Invoice") {
@@ -691,7 +691,7 @@ frappe.ui.form.on('Payment Entry', {
 						c.outstanding_amount = d.outstanding_amount;
 						c.bill_no = d.bill_no;
 
-						if(!in_list(["Sales Order", "Purchase Order", "Expense Claim", "Fees", "Vehicle Booking Order"], d.voucher_type)) {
+						if(!in_list(["Sales Order", "Purchase Order", "Expense Claim", "Fees"], d.voucher_type)) {
 							if(flt(d.outstanding_amount) > 0)
 								total_positive_outstanding += flt(d.outstanding_amount);
 							else
@@ -891,18 +891,18 @@ frappe.ui.form.on('Payment Entry', {
 			}
 
 			if(frm.doc.party_type=="Customer" &&
-				!in_list(["Sales Order", "Sales Invoice", "Journal Entry", "Vehicle Booking Order"], row.reference_doctype)
+				!in_list(["Sales Order", "Sales Invoice", "Journal Entry"], row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "reference_doctype", null);
-				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice, Vehicle Booking Order or Journal Entry", [row.idx]));
+				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Sales Order, Sales Invoice or Journal Entry", [row.idx]));
 				return false;
 			}
 
 			if(frm.doc.party_type=="Supplier" &&
-				!in_list(["Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry", "Vehicle Booking Order"], row.reference_doctype)
+				!in_list(["Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry"], row.reference_doctype)
 			) {
 				frappe.model.set_value(row.doctype, row.name, "against_voucher_type", null);
-				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice, Landed Cost Voucher, Vehicle Booking Order or Journal Entry", [row.idx]));
+				frappe.msgprint(__("Row #{0}: Reference Document Type must be one of Purchase Order, Purchase Invoice, Landed Cost Voucher or Journal Entry", [row.idx]));
 				return false;
 			}
 

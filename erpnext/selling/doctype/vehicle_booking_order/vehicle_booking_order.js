@@ -182,12 +182,15 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	add_create_buttons: function () {
-		if (this.frm.doc.docstatus === 1) {
-			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.supplier_outstanding) > 0;
-
+		if (this.frm.doc.docstatus < 2) {
 			if (flt(this.frm.doc.customer_outstanding) > 0) {
 				this.frm.add_custom_button(__('Customer Payment'), () => this.make_payment_entry('Customer'), __('Payment'));
 			}
+		}
+
+		if (this.frm.doc.docstatus === 1) {
+			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.supplier_outstanding) > 0;
+
 			if (flt(this.frm.doc.supplier_outstanding) > 0) {
 				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Payment'));
 			}
@@ -229,6 +232,9 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle(),
 					this.frm.doc.vehicle ? __("Change") : null);
+
+				this.frm.add_custom_button(__("Change Payment Adjustment"), () => this.select_payment_adjustment(),
+					__("Change"));
 
 				this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.select_item_code(),
 					__("Change"));
@@ -602,13 +608,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	make_payment_entry: function(party_type) {
 		if (['Customer', 'Supplier'].includes(party_type)) {
 			return frappe.call({
-				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+				method: "erpnext.selling.doctype.vehicle_booking_payment.vehicle_booking_payment.get_payment_entry",
 				args: {
-					"dt": this.frm.doc.doctype,
-					"dn": this.frm.doc.name,
+					"vehicle_booking_order": this.frm.doc.name,
 					"party_type": party_type,
-					"mode_of_payment": party_type === "Customer" ? this.frm.doc.selling_mode_of_payment : this.frm.doc.buying_mode_of_payment,
-					"bank_amount": 0
 				},
 				callback: function (r) {
 					var doclist = frappe.model.sync(r.message);
@@ -849,6 +852,35 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			});
 			dialog.show();
 		});
+	},
+
+	select_payment_adjustment: function () {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Change Payment Adjustment"),
+			fields: [
+				{label: __("Payment Adjustment Amount"), fieldname: "payment_adjustment", fieldtype: "Currency",
+					options: "Comoany:company:default_currency", reqd: 1,
+					description: __(frappe.meta.get_docfield("Vehicle Booking Order", "payment_adjustment").description)},
+			]
+		});
+
+		dialog.set_primary_action(__("Update"), function () {
+			frappe.call({
+				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_payment_adjustment_in_booking",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					payment_adjustment: dialog.get_value('payment_adjustment')
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		});
+		dialog.show();
 	},
 });
 

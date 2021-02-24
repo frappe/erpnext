@@ -19,7 +19,8 @@
   "section_break_11",
   "vehicle_allocation_periodicity",
   "section_break_14",
-  "role_change_booking_after_payment"
+  "role_change_booking_after_payment",
+  "maximum_payment_adjustment"
  ],
  "fields": [
   {
@@ -102,11 +103,16 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Change Booking Details after Supplier Payment",
    "options": "Role"
+  },
+  {
+   "fieldname": "maximum_payment_adjustment",
+   "fieldtype": "Currency",
+   "label": "Maximum Payment Adjustment"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-02-14 19:30:35.689098",
+ "modified": "2021-02-24 23:33:27.116893",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

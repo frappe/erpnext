@@ -163,8 +163,7 @@ class PaymentEntry(AccountsController):
 			if not self.party:
 				frappe.throw(_("Party is mandatory"))
 
-			if not self.party_name:
-				self.party_name = get_party_name(self.party_type, self.party)
+			self.party_name = get_party_name(self.party_type, self.party)
 
 		if self.party:
 			if not self.get("party_balance"):
@@ -247,10 +246,9 @@ class PaymentEntry(AccountsController):
 		if self.party_type == "Student":
 			valid_reference_doctypes = ("Fees")
 		elif self.party_type == "Customer":
-			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry", "Vehicle Booking Order")
+			valid_reference_doctypes = ("Sales Order", "Sales Invoice", "Journal Entry")
 		elif self.party_type == "Supplier":
-			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry",
-				"Vehicle Booking Order")
+			valid_reference_doctypes = ("Purchase Order", "Purchase Invoice", "Landed Cost Voucher", "Journal Entry")
 		elif self.party_type == "Employee":
 			valid_reference_doctypes = ("Expense Claim", "Journal Entry", "Employee Advance")
 		elif self.party_type == "Letter of Credit":
@@ -276,8 +274,6 @@ class PaymentEntry(AccountsController):
 						party_type_field = "party_type" if d.reference_doctype=="Landed Cost Voucher" else ""
 
 						ref_party = ref_doc.get("bill_to") or ref_doc.get(party_field)
-						if d.reference_doctype == "Vehicle Booking Order" and self.party_type == "Customer" and ref_doc.get('financer'):
-							ref_party = ref_doc.get('financer')
 
 						if self.party != ref_party or (party_type_field and self.party_type != ref_doc.get(party_type_field)):
 							frappe.throw(_("{0} {1} is not associated with {2} {3} for payments")
@@ -285,7 +281,7 @@ class PaymentEntry(AccountsController):
 					else:
 						self.validate_journal_entry(d)
 
-					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim", "Fees", "Vehicle Booking Order"):
+					if d.reference_doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim", "Fees"):
 						if self.party_type == "Customer":
 							if d.reference_doctype == "Sales Invoice":
 								ref_party_account = get_party_account_based_on_invoice_discounting(d.reference_name) or ref_doc.debit_to
@@ -309,7 +305,7 @@ class PaymentEntry(AccountsController):
 	def validate_journal_entry(self, d):
 		je_accounts = frappe.db.sql("""select debit, credit from `tabJournal Entry Account`
 			where account = %s and party_type=%s and party=%s and parent = %s and docstatus = 1
-			and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order", "Vehicle Booking Order"))
+			and (reference_type is null or reference_type in ("", "Sales Order", "Purchase Order"))
 			""", (self.party_account, self.party_type, self.party, d.reference_name), as_dict=True)
 
 		if not je_accounts:
@@ -745,21 +741,16 @@ def get_outstanding_reference_documents(args):
 
 	# Get all SO / PO which are not fully billed or aginst which full advance not paid
 	orders_to_be_billed = []
-	outstanding_vehicle_bookings = []
 	if include_orders:
 		orders_to_be_billed = get_orders_to_be_billed(args.get("posting_date"), args.get("party_type"),
 			args.get("party"), party_account_currency, company_currency, filters=args)
-
-		outstanding_vehicle_bookings = get_outstanding_vehicle_booking_orders(args.get("party_type"), args.get("party"),
-			args.get("party_account"), filters=args)
 
 	outstanding_employee_advances = []
 	if args.get("party_type") == "Employee":
 		outstanding_employee_advances = get_outstanding_employee_advances(args.get("party"), args.get("party_account"),
 			is_return=args.get("payment_type") == "Receive", filters=args)
 
-	data = outstanding_invoices + orders_to_be_billed + outstanding_employee_advances + outstanding_vehicle_bookings
-
+	data = outstanding_invoices + orders_to_be_billed + outstanding_employee_advances
 
 	if not data:
 		frappe.msgprint(_("No outstanding invoices found for the {0} {1} which qualify the filters you have specified.")
@@ -842,32 +833,6 @@ def get_outstanding_employee_advances(employee, account, is_return, filters=None
 			where advance_account = %s and employee = %s and paid_amount < advance_amount
 			order by posting_date, name
 		""", [account, employee], as_dict=1)
-
-	return advances or []
-
-def get_outstanding_vehicle_booking_orders(party_type, party, party_account, filters=None):
-	if party_type not in ('Customer', 'Supplier'):
-		return []
-
-	party_field = scrub(party_type)
-	outstanding_field = "customer_outstanding" if party_type == "Customer" else "supplier_outstanding"
-	account_field = "receivable_account" if party_type == "Customer" else "payable_account"
-
-	if party_type == "Customer":
-		party_condition = "(({0} = %(party)s and ifnull(financer, '') = '') or financer = %(party)s)".format(party_field)
-	else:
-		party_condition = "{0} = %(party)s".format(party_field)
-
-	advances = frappe.db.sql("""
-		select
-			transaction_date as posting_date, 'Vehicle Booking Order' as voucher_type, name as voucher_no,
-			invoice_total as invoice_amount, customer_outstanding as outstanding_amount, due_date
-		from `tabVehicle Booking Order`
-		where {party_condition} and {account_field} = %(account)s and docstatus = 1 and {outstanding_field} != 0
-		order by transaction_date, name
-	""".format(**{
-		'party_condition': party_condition, 'account_field': account_field, 'outstanding_field': outstanding_field
-	}), {"party": party, "account": party_account}, as_dict=1)
 
 	return advances or []
 
@@ -1001,8 +966,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 					total_amount = ref_doc.paid_amount
 				else:
 					total_amount = ref_doc.advance_amount
-			elif ref_doc.doctype == "Vehicle Booking Order":
-				total_amount = ref_doc.invoice_total
 			else:
 				total_amount = ref_doc.base_grand_total
 			exchange_rate = 1
@@ -1025,8 +988,6 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				outstanding_amount = -ref_doc.balance_amount
 			else:
 				outstanding_amount = ref_doc.advance_amount - flt(ref_doc.paid_amount)
-		elif reference_doctype == "Vehicle Booking Order":
-			outstanding_amount = ref_doc.customer_outstanding if party_type == "Customer" else ref_doc.supplier_outstanding
 		else:
 			outstanding_amount = flt(total_amount) - flt(ref_doc.advance_paid)
 	else:
@@ -1064,11 +1025,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_type = "Employee"
 	elif dt in ("Fees"):
 		party_type = "Student"
-	elif dt == "Vehicle Booking Order" and not party_type:
-		frappe.throw(_("Party Type is mandatory for Vehicle Booking Order"))
-
-	if dt == "Vehicle Booking Order" and party_type == "Supplier" and doc.vehicle_allocation_required and not doc.vehicle_allocation:
-		frappe.throw(_("Please set Vehicle Allocation first"))
 
 	# party account
 	if dt == "Sales Invoice":
@@ -1081,8 +1037,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 		party_account = doc.advance_account
 	elif dt == "Expense Claim":
 		party_account = doc.payable_account
-	elif dt == "Vehicle Booking Order":
-		party_account = doc.receivable_account if party_type == "Customer" else doc.payable_account
 	else:
 		party_account = get_party_account(party_type, doc.get(scrub(party_type)), doc.company)
 
@@ -1095,8 +1049,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	if (dt == "Sales Order"
 		or (dt in ("Sales Invoice", "Fees") and doc.outstanding_amount > 0)
 		or (dt == "Purchase Invoice" and doc.outstanding_amount < 0)
-		or (dt == "Employee Advance" and is_advance_return)
-		or (dt == "Vehicle Booking Order" and party_type == "Customer")):
+		or (dt == "Employee Advance" and is_advance_return)):
 		payment_type = "Receive"
 	else:
 		payment_type = "Pay"
@@ -1124,9 +1077,6 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	elif dt == "Fees":
 		grand_total = doc.grand_total
 		outstanding_amount = doc.outstanding_amount
-	elif dt == "Vehicle Booking Order":
-		grand_total = doc.invoice_total
-		outstanding_amount = doc.customer_outstanding if party_type == "Customer" else doc.supplier_outstanding
 	else:
 		if party_account_currency == doc.company_currency:
 			grand_total = flt(doc.get("base_rounded_total") or doc.base_grand_total)
@@ -1171,14 +1121,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 	pe.mode_of_payment = mode_of_payment or doc.get("mode_of_payment")
 	pe.party_type = party_type
 	pe.party = doc.get('bill_to') or doc.get(scrub(party_type)) or doc.get("party")
-	if dt == "Vehicle Booking Order" and party_type == "Customer" and doc.get('financer'):
-		pe.party = doc.get('financer')
 	pe.contact_person = doc.get("contact_person")
 	pe.contact_email = doc.get("contact_email")
 	pe.ensure_supplier_is_not_blocked()
-
-	if dt == "Vehicle Booking Order" and party_type == "Customer":
-		pe.party_name = doc.get('customer_name')
 
 	pe.paid_from = party_account if payment_type=="Receive" else bank.account
 	pe.paid_to = party_account if payment_type=="Pay" else bank.account
