@@ -39,8 +39,8 @@ frappe.ui.form.on("Issue", {
 
 	refresh: function (frm) {
 
-		if (frm.doc.status !== "Closed" && frm.doc.agreement_fulfilled === "Ongoing") {
-			if (frm.doc.service_level_agreement) {
+		if (frm.doc.status !== "Closed") {
+			if (frm.doc.service_level_agreement && frm.doc.agreement_fulfilled === "Ongoing") {
 				set_time_to_resolve_and_response(frm);
 			}
 
