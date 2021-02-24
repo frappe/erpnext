@@ -342,3 +342,11 @@ let render_employee_attendance = function (frm, data) {
 		})
 	);
 };
+
+frappe.ui.form.on('Payroll Employee Detail', {
+	employee: function(frm) {
+		if (!frm.doc.payroll_frequency) {
+			frappe.throw(__("Please set a Payroll Frequency"));
+		}
+	}
+});

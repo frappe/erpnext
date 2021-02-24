@@ -236,7 +236,25 @@ class SalesInvoice(SellingController):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
+	def check_if_consolidated_invoice(self):
+		# since POS Invoice extends Sales Invoice, we explicitly check if doctype is Sales Invoice
+		if self.doctype == "Sales Invoice" and self.is_consolidated:
+			invoice_or_credit_note = "consolidated_credit_note" if self.is_return else "consolidated_invoice"
+			pos_closing_entry = frappe.get_all(
+				"POS Invoice Merge Log",
+				filters={ invoice_or_credit_note: self.name },
+				pluck="pos_closing_entry"
+			)
+			if pos_closing_entry:
+				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}. ").format(
+					frappe.bold("Consolidated Sales Invoice"),
+					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
+				)
+				frappe.throw(msg, title=_("Not Allowed"))
+
 	def before_cancel(self):
+		self.check_if_consolidated_invoice()
+
 		super(SalesInvoice, self).before_cancel()
 		self.update_time_sheet(None)
 
@@ -438,7 +456,9 @@ class SalesInvoice(SellingController):
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 
-			self.ignore_pricing_rule = pos.ignore_pricing_rule
+			if not for_validate:
+				self.ignore_pricing_rule = pos.ignore_pricing_rule
+
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 

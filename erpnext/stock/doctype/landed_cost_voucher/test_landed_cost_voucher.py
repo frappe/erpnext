@@ -148,7 +148,6 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 
 	def test_landed_cost_voucher_for_odd_numbers (self):
-
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", do_not_save=True)
 		pr.items[0].cost_center = "Main - TCP1"
 		for x in range(2):
@@ -208,6 +207,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
 	def test_multi_currency_lcv(self):
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records, save_new_records
+
+		save_new_records(test_records)
+
 		## Create USD Shipping charges_account
 		usd_shipping = create_account(account_name="Shipping Charges USD",
 			parent_account="Duties and Taxes - TCP1", company="_Test Company with perpetual inventory",

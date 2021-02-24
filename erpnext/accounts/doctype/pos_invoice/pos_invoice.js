@@ -2,6 +2,7 @@
 // For license information, please see license.txt
 
 {% include 'erpnext/selling/sales_common.js' %};
+frappe.provide("erpnext.accounts");
 
 erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend({
 	setup(doc) {
@@ -9,12 +10,19 @@ erpnext.selling.POSInvoiceController = erpnext.selling.SellingController.extend(
 		this._super(doc);
 	},
 
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+
 	onload(doc) {
 		this._super();
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice Merge Log'];
 		if(doc.__islocal && doc.is_pos && frappe.get_route_str() !== 'point-of-sale') {
 			this.frm.script_manager.trigger("is_pos");
 			this.frm.refresh_fields();
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh(doc) {
@@ -187,18 +195,43 @@ frappe.ui.form.on('POS Invoice', {
 	},
 
 	request_for_payment: function (frm) {
+		if (!frm.doc.contact_mobile) {
+			frappe.throw(__('Please enter mobile number first.'));
+		}
+		frm.dirty();
 		frm.save().then(() => {
-			frappe.dom.freeze();
-			frappe.call({
-				method: 'create_payment_request',
-				doc: frm.doc,
-			})
+			frappe.dom.freeze(__('Waiting for payment...'));
+			frappe
+				.call({
+					method: 'create_payment_request',
+					doc: frm.doc
+				})
 				.fail(() => {
 					frappe.dom.unfreeze();
-					frappe.msgprint('Payment request failed');
+					frappe.msgprint(__('Payment request failed'));
 				})
-				.then(() => {
-					frappe.msgprint('Payment request sent successfully');
+				.then(({ message }) => {
+					const payment_request_name = message.name;
+					setTimeout(() => {
+						frappe.db.get_value('Payment Request', payment_request_name, ['status', 'grand_total']).then(({ message }) => {
+							if (message.status != 'Paid') {
+								frappe.dom.unfreeze();
+								frappe.msgprint({
+									message: __('Payment Request took too long to respond. Please try requesting for payment again.'),
+									title: __('Request Timeout')
+								});
+							} else if (frappe.dom.freeze_count != 0) {
+								frappe.dom.unfreeze();
+								cur_frm.reload_doc();
+								cur_pos.payment.events.submit_invoice();
+
+								frappe.show_alert({
+									message: __("Payment of {0} received successfully.", [format_currency(message.grand_total, frm.doc.currency, 0)]),
+									indicator: 'green'
+								});
+							}
+						});
+					}, 60000);
 				});
 		});
 	}
