@@ -113,13 +113,23 @@ class VehicleBookingOrder(AccountsController):
 			return
 
 		payment_entries = get_booking_payments(self.name)
+		customer_payments_by_row_id = {}
 
 		for d in payment_entries:
-			if d.party_type == "Customer":
+			if d.payment_type == "Receive":
 				self.customer_payments.append(d)
+				customer_payments_by_row_id[d.row_id] = d
 
-			if d.party_type == "Supplier":
+			if d.payment_type == "Pay":
 				self.supplier_payments.append(d)
+
+		for d in self.supplier_payments:
+			if d.vehicle_booking_payment_row:
+				customer_payment_row = customer_payments_by_row_id.get(d.vehicle_booking_payment_row)
+				if customer_payment_row:
+					customer_payment_row.deposit_slip_no = d.deposit_slip_no
+					customer_payment_row.deposit_type = d.deposit_type
+					customer_payment_row.deposit_date = d.posting_date
 
 		self.is_full_payment = False
 		self.is_partial_payment = False
@@ -1267,16 +1277,17 @@ def get_booking_payments(vehicle_booking_order):
 		vehicle_booking_order = [vehicle_booking_order]
 
 	payment_entries = frappe.db.sql("""
-		select pe.name, pe.posting_date,
-			pe.party_type, pe.party,
-			pe.payment_type, pref.allocated_amount as amount, pref.original_reference_name as vehicle_booking_order,
-			pe.instrument_type, pe.user_remark,
-			pe.reference_no, pe.reference_date, pe.deposit_no
-		from `tabPayment Entry Reference` pref
-		inner join `tabPayment Entry` pe on pe.name = pref.parent
-		where pe.docstatus = 1
-			and pref.original_reference_doctype = 'Vehicle Booking Order' and pref.original_reference_name in %s
-		order by pe.reference_date, pe.posting_date, pe.creation
+		select p.name, p.posting_date,
+			p.vehicle_booking_order, p.party_type, p.party,
+			p.payment_type, i.amount,
+			i.instrument_type, i.instrument_title,
+			i.instrument_no, i.instrument_date,
+			p.deposit_slip_no, p.deposit_type,
+			i.name as row_id, i.vehicle_booking_payment_row
+		from `tabVehicle Booking Payment Detail` i
+		inner join `tabVehicle Booking Payment` p on p.name = i.parent
+		where p.docstatus = 1 and p.vehicle_booking_order in %s
+		order by i.instrument_date, p.posting_date, p.creation
 	""", [vehicle_booking_order], as_dict=1)
 
 	return payment_entries

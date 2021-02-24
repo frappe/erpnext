@@ -32,7 +32,8 @@ class VehicleAllocationRegisterReport(object):
 
 		allocation_data = frappe.db.sql("""
 			select m.name as vehicle_allocation, m.item_code, m.supplier, m.allocation_period, m.delivery_period,
-				m.sr_no, m.code, m.is_additional, m.booking_price, m.vehicle_color, ap.from_date as allocation_from_date
+				m.sr_no, m.code, m.is_additional, m.booking_price, m.vehicle_color,
+				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date
 			from `tabVehicle Allocation` m
 			inner join `tabItem` item on item.name = m.item_code
 			inner join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
@@ -47,7 +48,8 @@ class VehicleAllocationRegisterReport(object):
 				m.vehicle_allocation, m.transaction_date,
 				m.color_1, m.color_2, m.color_3,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
-				m.contact_person, m.contact_mobile, m.contact_phone
+				m.contact_person, m.contact_mobile, m.contact_phone,
+				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
 			left join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
@@ -89,13 +91,14 @@ class VehicleAllocationRegisterReport(object):
 			d.contact_number = d.contact_mobile or d.contact_phone
 
 			if d.vehicle_booking_order in self.customer_payments:
-				d.customer_payment_date = self.customer_payments[d.vehicle_booking_order][0].reference_date
+				d.customer_payment_date = self.customer_payments[d.vehicle_booking_order][0].instrument_date
 
 			if d.vehicle_booking_order in self.supplier_payments:
-				d.supplier_payment_date = self.supplier_payments[d.vehicle_booking_order][0].reference_date
+				d.supplier_payment_date = self.supplier_payments[d.vehicle_booking_order][0].posting_date
 
 		self.data = sorted(self.data, key=lambda d: (
-			cstr(d.allocation_from_date),
+			bool(d.vehicle_allocation),
+			cstr(d.allocation_from_date) if d.allocation_from_date else cstr(d.delivery_from_date),
 			d.item_code,
 			d.code,
 			cint(d.is_additional),
