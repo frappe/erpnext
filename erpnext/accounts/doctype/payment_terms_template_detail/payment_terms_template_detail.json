@@ -52,6 +52,7 @@
   {
    "columns": 2,
    "fetch_from": "payment_term.due_date_based_on",
+   "fetch_if_empty": 1,
    "fieldname": "due_date_based_on",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -100,6 +101,7 @@
   {
    "default": "Percentage",
    "fetch_from": "payment_term.discount_type",
+   "fetch_if_empty": 1,
    "fieldname": "discount_type",
    "fieldtype": "Select",
    "label": "Discount Type",
@@ -107,6 +109,7 @@
   },
   {
    "fetch_from": "payment_term.discount",
+   "fetch_if_empty": 1,
    "fieldname": "discount",
    "fieldtype": "Float",
    "label": "Discount"
@@ -119,6 +122,7 @@
    "default": "Day(s) after invoice date",
    "depends_on": "discount",
    "fetch_from": "payment_term.discount_validity_based_on",
+   "fetch_if_empty": 1,
    "fieldname": "discount_validity_based_on",
    "fieldtype": "Select",
    "label": "Discount Validity Based On",
@@ -133,6 +137,7 @@
   {
    "depends_on": "discount",
    "fetch_from": "payment_term.discount_validity",
+   "fetch_if_empty": 1,
    "fieldname": "discount_validity",
    "fieldtype": "Int",
    "label": "Discount Validity",
@@ -146,7 +151,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-24 11:32:39.134870",
+ "modified": "2021-02-24 11:56:12.410807",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Terms Template Detail",
