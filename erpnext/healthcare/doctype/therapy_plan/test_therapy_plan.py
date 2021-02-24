@@ -5,10 +5,10 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from frappe.utils import getdate, flt
+from frappe.utils import getdate, flt, nowdate
 from erpnext.healthcare.doctype.therapy_type.test_therapy_type import create_therapy_type
 from erpnext.healthcare.doctype.therapy_plan.therapy_plan import make_therapy_session, make_sales_invoice
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_patient
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_healthcare_docs, create_patient, create_appointment
 
 class TestTherapyPlan(unittest.TestCase):
 	def test_creation_on_encounter_submission(self):
@@ -27,6 +27,15 @@ class TestTherapyPlan(unittest.TestCase):
 		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company')
 		frappe.get_doc(session).submit()
 		self.assertEquals(frappe.db.get_value('Therapy Plan', plan.name, 'status'), 'Completed')
+
+		patient, medical_department, practitioner = create_healthcare_docs()
+		appointment = create_appointment(patient, practitioner, nowdate())		
+		session = make_therapy_session(plan.name, plan.patient, 'Basic Rehab', '_Test Company', appointment.name)
+		session = frappe.get_doc(session)
+		session.submit()
+		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
+		session.cancel()
+		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Open')
 
 	def test_therapy_plan_from_template(self):
 		patient = create_patient()

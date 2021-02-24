@@ -44,10 +44,16 @@ class LoanSecurityUnpledge(Document):
 				"valid_upto": (">=", get_datetime())
 			}, as_list=1))
 
-		total_payment, principal_paid, interest_payable, written_off_amount = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
-			'total_interest_payable', 'written_off_amount'])
+		loan_details = frappe.get_value("Loan", self.loan, ['total_payment', 'total_principal_paid',
+			'total_interest_payable', 'written_off_amount', 'disbursed_amount', 'status'], as_dict=1)
 
-		pending_principal_amount = flt(total_payment) - flt(interest_payable) - flt(principal_paid) - flt(written_off_amount)
+		if loan_details.status == 'Disbursed':
+			pending_principal_amount = flt(loan_details.total_payment) - flt(loan_details.total_interest_payable) \
+				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
+		else:
+			pending_principal_amount = flt(loan_details.disbursed_amount) - flt(loan_details.total_interest_payable) \
+				- flt(loan_details.total_principal_paid) - flt(loan_details.written_off_amount)
+
 		security_value = 0
 		unpledge_qty_map = {}
 		ltv_ratio = 0

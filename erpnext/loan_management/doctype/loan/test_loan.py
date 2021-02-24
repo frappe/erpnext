@@ -321,7 +321,7 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(sum(pledged_qty.values()), 0)
 
 		amounts = amounts = calculate_amounts(loan.name, add_days(last_date, 5))
-		self.assertTrue(amounts['pending_principal_amount'] < 0)
+		self.assertEqual(amounts['pending_principal_amount'], 0)
 		self.assertEquals(amounts['payable_principal_amount'], 0.0)
 		self.assertEqual(amounts['interest_amount'], 0)
 
@@ -361,6 +361,27 @@ class TestLoan(unittest.TestCase):
 		unpledge_request.submit()
 		unpledge_request.load_from_db()
 		self.assertEqual(unpledge_request.docstatus, 1)
+
+	def test_santined_loan_security_unpledge(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		self.assertEquals(loan.loan_amount, 1000000)
+
+		unpledge_map = {'Test Security 1': 4000}
+		unpledge_request = unpledge_security(loan=loan.name, security_map = unpledge_map, save=1)
+		unpledge_request.submit()
+		unpledge_request.status = 'Approved'
+		unpledge_request.save()
+		unpledge_request.submit()
 
 	def test_disbursal_check_with_shortfall(self):
 		pledges = [{
@@ -452,7 +473,7 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(loan.status, "Loan Closure Requested")
 
 		amounts = calculate_amounts(loan.name, add_days(last_date, 5))
-		self.assertTrue(amounts['pending_principal_amount'] < 0.0)
+		self.assertEqual(amounts['pending_principal_amount'], 0.0)
 
 	def test_partial_unaccrued_interest_payment(self):
 		pledge = [{
@@ -526,7 +547,7 @@ class TestLoan(unittest.TestCase):
 
 		# 30 days - grace period
 		penalty_days = 30 - 4
-		penalty_applicable_amount = flt(amounts['interest_amount']/2, 2)
+		penalty_applicable_amount = flt(amounts['interest_amount']/2)
 		penalty_amount = flt((((penalty_applicable_amount * 25) / 100) * penalty_days), 2)
 		process = process_loan_interest_accrual_for_demand_loans(posting_date = '2019-11-30')
 

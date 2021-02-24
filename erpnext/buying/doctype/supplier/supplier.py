@@ -52,7 +52,10 @@ class Supplier(TransactionBase):
 		self.validate_internal_supplier()
 
 	def validate_internal_supplier(self):
-		if self.is_internal_supplier and frappe.db.get_value("Supplier", {"represents_company": self.represents_company}, "name"):
+		internal_supplier = frappe.db.get_value("Supplier",
+			{"is_internal_supplier": 1, "represents_company": self.represents_company, "name": ("!=", self.name)}, "name")
+
+		if internal_supplier:
 			frappe.throw(_("Internal Supplier for company {0} already exists").format(
 				frappe.bold(self.represents_company)))
 

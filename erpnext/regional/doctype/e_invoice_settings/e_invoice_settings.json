@@ -7,6 +7,7 @@
  "field_order": [
   "enable",
   "section_break_2",
+  "sandbox_mode",
   "credentials",
   "auth_token",
   "token_expiry"
@@ -41,12 +42,18 @@
    "label": "Credentials",
    "mandatory_depends_on": "enable",
    "options": "E Invoice User"
+  },
+  {
+   "default": "0",
+   "fieldname": "sandbox_mode",
+   "fieldtype": "Check",
+   "label": "Sandbox Mode"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-12-22 15:34:57.280044",
+ "modified": "2021-01-13 12:04:49.449199",
  "modified_by": "Administrator",
  "module": "Regional",
  "name": "E Invoice Settings",

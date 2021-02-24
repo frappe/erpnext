@@ -123,7 +123,7 @@
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:11:36.623555",
+ "modified": "2021-02-08 17:10:03.767426",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Territory",
@@ -166,6 +166,15 @@
   {
    "read": 1,
    "role": "Maintenance User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Customer",
+   "select": 1,
+   "share": 1
   }
  ],
  "search_fields": "parent_territory,territory_manager",

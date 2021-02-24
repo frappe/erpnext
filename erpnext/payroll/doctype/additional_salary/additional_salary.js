@@ -12,6 +12,8 @@ frappe.ui.form.on('Additional Salary', {
 				}
 			};
 		});
+
+		frm.trigger('set_earning_component');
 	},
 
 	employee: function(frm) {
@@ -40,6 +42,19 @@ frappe.ui.form.on('Additional Salary', {
 					frm.set_value("company", data.message.company);
 				}
 			}
+		});
+	},
+
+	company: function(frm) {
+		frm.trigger('set_earning_component');
+	},
+
+	set_earning_component: function(frm) {
+		if (!frm.doc.company) return;
+		frm.set_query("salary_component", function() {
+			return {
+				filters: {type: ["in", ["earning", "deduction"]], company: frm.doc.company}
+			};
 		});
 	},
 

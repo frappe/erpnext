@@ -46,6 +46,9 @@ class RepostItemValuation(Document):
 
 def repost(doc):
 	try:
+		if not frappe.db.exists("Repost Item Valuation", doc.name):
+			return
+
 		doc.set_status('In Progress')
 		frappe.db.commit()
 
@@ -64,7 +67,7 @@ def repost(doc):
 			message += "<br>" + "Traceback: <br>" + traceback
 		frappe.db.set_value(doc.doctype, doc.name, 'error_log', message)
 
-		notify_error_to_stock_managers(doc)
+		notify_error_to_stock_managers(doc, message)
 		doc.set_status('Failed')
 		raise
 	finally:

@@ -87,7 +87,7 @@ class ProgramEnrollment(Document):
 				fees.submit()
 				fee_list.append(fees.name)
 		if fee_list:
-			fee_list = ["""<a href="#Form/Fees/%s" target="_blank">%s</a>""" % \
+			fee_list = ["""<a href="/app/Form/Fees/%s" target="_blank">%s</a>""" % \
 				(fee, fee) for fee in fee_list]
 			msgprint(_("Fee Records Created - {0}").format(comma_and(fee_list)))
 
@@ -124,21 +124,24 @@ class ProgramEnrollment(Document):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
-	if filters.get('program'):
-		return frappe.db.sql("""select course, course_name from `tabProgram Course`
-			where  parent = %(program)s and course like %(txt)s {match_cond}
-			order by
-				if(locate(%(_txt)s, course), locate(%(_txt)s, course), 99999),
-				idx desc,
-				`tabProgram Course`.course asc
-			limit {start}, {page_len}""".format(
-				match_cond=get_match_cond(doctype),
-				start=start,
-				page_len=page_len), {
-					"txt": "%{0}%".format(txt),
-					"_txt": txt.replace('%', ''),
-					"program": filters['program']
-				})
+	if not filters.get('program'):
+		frappe.msgprint(_("Please select a Program first."))
+		return []
+
+	return frappe.db.sql("""select course, course_name from `tabProgram Course`
+		where  parent = %(program)s and course like %(txt)s {match_cond}
+		order by
+			if(locate(%(_txt)s, course), locate(%(_txt)s, course), 99999),
+			idx desc,
+			`tabProgram Course`.course asc
+		limit {start}, {page_len}""".format(
+			match_cond=get_match_cond(doctype),
+			start=start,
+			page_len=page_len), {
+				"txt": "%{0}%".format(txt),
+				"_txt": txt.replace('%', ''),
+				"program": filters['program']
+			})
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
