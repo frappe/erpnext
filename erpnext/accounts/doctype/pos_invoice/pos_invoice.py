@@ -6,10 +6,9 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
-from erpnext.controllers.selling_controller import SellingController
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
 from erpnext.accounts.utils import get_account_currency
 from erpnext.accounts.party import get_party_account, get_due_date
+from frappe.utils import cint, flt, getdate, nowdate, get_link_to_form
 from erpnext.accounts.doctype.payment_request.payment_request import make_payment_request
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import validate_loyalty_points
 from erpnext.stock.doctype.serial_no.serial_no import get_pos_reserved_serial_nos, get_serial_nos
@@ -58,6 +57,22 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
+	
+	def before_cancel(self):
+		if self.consolidated_invoice and frappe.db.get_value('Sales Invoice', self.consolidated_invoice, 'docstatus') == 1:
+			pos_closing_entry = frappe.get_all(
+				"POS Invoice Reference",
+				ignore_permissions=True,
+				filters={ 'pos_invoice': self.name },
+				pluck="parent",
+				limit=1
+			)
+			frappe.throw(
+				_('You need to cancel POS Closing Entry {} to be able to cancel this document.').format(
+					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
+				),
+				title=_('Not Allowed')
+			)
 
 	def on_cancel(self):
 		# run on cancel method of selling controller
@@ -78,7 +93,7 @@ class POSInvoice(SalesInvoice):
 						mode_of_payment=pay.mode_of_payment, status="Paid"),
 					fieldname="grand_total")
 
-				if pay.amount != paid_amt:
+				if paid_amt and pay.amount != paid_amt:
 					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
 	def validate_stock_availablility(self):
@@ -296,14 +311,21 @@ class POSInvoice(SalesInvoice):
 						self.set(fieldname, profile.get(fieldname))
 
 			if self.customer:
-				customer_price_list, customer_group = frappe.db.get_value("Customer", self.customer, ['default_price_list', 'customer_group'])
+				customer_price_list, customer_group, customer_currency = frappe.db.get_value(
+					"Customer", self.customer, ['default_price_list', 'customer_group', 'default_currency']
+				)
 				customer_group_price_list = frappe.db.get_value("Customer Group", customer_group, 'default_price_list')
 				selling_price_list = customer_price_list or customer_group_price_list or profile.get('selling_price_list')
+				if customer_currency != profile.get('currency'):
+					self.set('currency', customer_currency)
+
 			else:
 				selling_price_list = profile.get('selling_price_list')
 
 			if selling_price_list:
 				self.set('selling_price_list', selling_price_list)
+			if customer_currency != profile.get('currency'):
+				self.set('currency', customer_currency)
 
 			# set pos values in items
 			for item in self.get("items"):
@@ -363,22 +385,48 @@ class POSInvoice(SalesInvoice):
 				if not self.contact_mobile:
 					frappe.throw(_("Please enter the phone number first"))
 
-				payment_gateway = frappe.db.get_value("Payment Gateway Account", {
-					"payment_account": pay.account,
-				})
-				record = {
-					"payment_gateway": payment_gateway,
-					"dt": "POS Invoice",
-					"dn": self.name,
-					"payment_request_type": "Inward",
-					"party_type": "Customer",
-					"party": self.customer,
-					"mode_of_payment": pay.mode_of_payment,
-					"recipient_id": self.contact_mobile,
-					"submit_doc": True
-				}
+				pay_req = self.get_existing_payment_request(pay)
+				if not pay_req:
+					pay_req = self.get_new_payment_request(pay)
+					pay_req.submit()
+				else:
+					pay_req.request_phone_payment()
 
-				return make_payment_request(**record)
+				return pay_req
+	
+	def get_new_payment_request(self, mop):
+		payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
+			"payment_account": mop.account,
+		}, ["name"])
+
+		args = {
+			"dt": "POS Invoice",
+			"dn": self.name,
+			"recipient_id": self.contact_mobile,
+			"mode_of_payment": mop.mode_of_payment,
+			"payment_gateway_account": payment_gateway_account,
+			"payment_request_type": "Inward",
+			"party_type": "Customer",
+			"party": self.customer,
+			"return_doc": True
+		}
+		return make_payment_request(**args)
+
+	def get_existing_payment_request(self, pay):
+		payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
+			"payment_account": pay.account,
+		}, ["name"])
+
+		args = {
+			'doctype': 'Payment Request',
+			'reference_doctype': 'POS Invoice',
+			'reference_name': self.name,
+			'payment_gateway_account': payment_gateway_account,
+			'email_to': self.contact_mobile
+		}
+		pr = frappe.db.exists(args)
+		if pr:
+			return frappe.get_doc('Payment Request', pr[0][0])
 
 def add_return_modes(doc, pos_profile):
 	def append_payment(payment_mode):

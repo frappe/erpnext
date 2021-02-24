@@ -7,6 +7,8 @@
  "field_order": [
   "posting_date",
   "customer",
+  "column_break_3",
+  "pos_closing_entry",
   "section_break_3",
   "pos_invoices",
   "references_section",
@@ -76,11 +78,22 @@
    "label": "Consolidated Credit Note",
    "options": "Sales Invoice",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "pos_closing_entry",
+   "fieldtype": "Link",
+   "label": "POS Closing Entry",
+   "options": "POS Closing Entry"
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-29 15:08:41.317100",
+ "modified": "2020-12-01 11:53:57.267579",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Invoice Merge Log",

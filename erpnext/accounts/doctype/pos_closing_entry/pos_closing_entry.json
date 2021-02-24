@@ -11,6 +11,7 @@
   "column_break_3",
   "posting_date",
   "pos_opening_entry",
+  "status",
   "section_break_5",
   "company",
   "column_break_7",
@@ -184,11 +185,27 @@
    "label": "POS Opening Entry",
    "options": "POS Opening Entry",
    "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Draft",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Draft\nSubmitted\nQueued\nCancelled",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2020-05-29 15:03:22.226113",
+ "links": [
+  {
+   "link_doctype": "POS Invoice Merge Log",
+   "link_fieldname": "pos_closing_entry"
+  }
+ ],
+ "modified": "2021-01-12 12:21:05.388650",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Closing Entry",

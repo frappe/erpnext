@@ -5,9 +5,11 @@
 from __future__ import unicode_literals
 import math
 import frappe
+import json
 from frappe import _
 from frappe.utils.formatters import format_value
 from frappe.utils import time_diff_in_hours, rounded
+from six import string_types
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
 from erpnext.healthcare.doctype.lab_test.lab_test import create_multiple
@@ -64,7 +66,9 @@ def get_appointments_to_invoice(patient, company):
 			income_account = None
 			service_item = None
 			if appointment.practitioner:
-				service_item, practitioner_charge = get_service_item_and_practitioner_charge(appointment)
+				details = get_service_item_and_practitioner_charge(appointment)
+				service_item = details.get('service_item')
+				practitioner_charge = details.get('practitioner_charge')
 				income_account = get_income_account(appointment.practitioner, appointment.company)
 			appointments_to_invoice.append({
 				'reference_type': 'Patient Appointment',
@@ -97,7 +101,9 @@ def get_encounters_to_invoice(patient, company):
 						frappe.db.get_single_value('Healthcare Settings', 'do_not_bill_inpatient_encounters'):
 						continue
 
-					service_item, practitioner_charge = get_service_item_and_practitioner_charge(encounter)
+					details = get_service_item_and_practitioner_charge(encounter)
+					service_item = details.get('service_item')
+					practitioner_charge = details.get('practitioner_charge')
 					income_account = get_income_account(encounter.practitioner, encounter.company)
 
 				encounters_to_invoice.append({
@@ -173,7 +179,7 @@ def get_clinical_procedures_to_invoice(patient, company):
 		if procedure.invoice_separately_as_consumables and procedure.consume_stock \
 			and procedure.status == 'Completed' and not procedure.consumption_invoiced:
 
-			service_item = get_healthcare_service_item('clinical_procedure_consumable_item')
+			service_item = frappe.db.get_single_value('Healthcare Settings', 'clinical_procedure_consumable_item')
 			if not service_item:
 				msg = _('Please Configure Clinical Procedure Consumable Item in ')
 				msg += '''<b><a href='#Form/Healthcare Settings'>Healthcare Settings</a></b>'''
@@ -304,23 +310,49 @@ def get_therapy_sessions_to_invoice(patient, company):
 
 	return therapy_sessions_to_invoice
 
-
+@frappe.whitelist()
 def get_service_item_and_practitioner_charge(doc):
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+		doc = frappe.get_doc(doc)
+
+	service_item = None
+	practitioner_charge = None
+	department = doc.medical_department if doc.doctype == 'Patient Encounter' else doc.department
+
 	is_inpatient = doc.inpatient_record
-	if is_inpatient:
-		service_item = get_practitioner_service_item(doc.practitioner, 'inpatient_visit_charge_item')
+
+	if doc.get('appointment_type'):
+		service_item, practitioner_charge = get_appointment_type_service_item(doc.appointment_type, department, is_inpatient)
+
+	if not service_item and not practitioner_charge:
+		service_item, practitioner_charge = get_practitioner_service_item(doc.practitioner, is_inpatient)
 		if not service_item:
-			service_item = get_healthcare_service_item('inpatient_visit_charge_item')
-	else:
-		service_item = get_practitioner_service_item(doc.practitioner, 'op_consulting_charge_item')
-		if not service_item:
-			service_item = get_healthcare_service_item('op_consulting_charge_item')
+			service_item = get_healthcare_service_item(is_inpatient)
+
 	if not service_item:
 		throw_config_service_item(is_inpatient)
 
-	practitioner_charge = get_practitioner_charge(doc.practitioner, is_inpatient)
 	if not practitioner_charge:
 		throw_config_practitioner_charge(is_inpatient, doc.practitioner)
+
+	return {'service_item': service_item, 'practitioner_charge': practitioner_charge}
+
+
+def get_appointment_type_service_item(appointment_type, department, is_inpatient):
+	from erpnext.healthcare.doctype.appointment_type.appointment_type import get_service_item_based_on_department
+
+	item_list = get_service_item_based_on_department(appointment_type, department)
+	service_item = None
+	practitioner_charge = None
+
+	if item_list:
+		if is_inpatient:
+			service_item = item_list.get('inpatient_visit_charge_item')
+			practitioner_charge = item_list.get('inpatient_visit_charge')
+		else:
+			service_item = item_list.get('op_consulting_charge_item')
+			practitioner_charge = item_list.get('op_consulting_charge')
 
 	return service_item, practitioner_charge
 
@@ -345,12 +377,27 @@ def throw_config_practitioner_charge(is_inpatient, practitioner):
 	frappe.throw(msg, title=_('Missing Configuration'))
 
 
-def get_practitioner_service_item(practitioner, service_item_field):
-	return frappe.db.get_value('Healthcare Practitioner', practitioner, service_item_field)
+def get_practitioner_service_item(practitioner, is_inpatient):
+	service_item = None
+	practitioner_charge = None
+
+	if is_inpatient:
+		service_item, practitioner_charge = frappe.db.get_value('Healthcare Practitioner', practitioner, ['inpatient_visit_charge_item', 'inpatient_visit_charge'])
+	else:
+		service_item, practitioner_charge = frappe.db.get_value('Healthcare Practitioner', practitioner, ['op_consulting_charge_item', 'op_consulting_charge'])
+
+	return service_item, practitioner_charge
 
 
-def get_healthcare_service_item(service_item_field):
-	return frappe.db.get_single_value('Healthcare Settings', service_item_field)
+def get_healthcare_service_item(is_inpatient):
+	service_item = None
+
+	if is_inpatient:
+		service_item = frappe.db.get_single_value('Healthcare Settings', 'inpatient_visit_charge_item')
+	else:
+		service_item = frappe.db.get_single_value('Healthcare Settings', 'op_consulting_charge_item')
+
+	return service_item
 
 
 def get_practitioner_charge(practitioner, is_inpatient):
@@ -381,7 +428,8 @@ def set_invoiced(item, method, ref_invoice=None):
 		invoiced = True
 
 	if item.reference_dt == 'Clinical Procedure':
-		if get_healthcare_service_item('clinical_procedure_consumable_item') == item.item_code:
+		service_item = frappe.db.get_single_value('Healthcare Settings', 'clinical_procedure_consumable_item')
+		if service_item == item.item_code:
 			frappe.db.set_value(item.reference_dt, item.reference_dn, 'consumption_invoiced', invoiced)
 		else:
 			frappe.db.set_value(item.reference_dt, item.reference_dn, 'invoiced', invoiced)
@@ -403,7 +451,8 @@ def set_invoiced(item, method, ref_invoice=None):
 
 
 def validate_invoiced_on_submit(item):
-	if item.reference_dt == 'Clinical Procedure' and get_healthcare_service_item('clinical_procedure_consumable_item') == item.item_code:
+	if item.reference_dt == 'Clinical Procedure' and \
+		frappe.db.get_single_value('Healthcare Settings', 'clinical_procedure_consumable_item') == item.item_code:
 		is_invoiced = frappe.db.get_value(item.reference_dt, item.reference_dn, 'consumption_invoiced')
 	else:
 		is_invoiced = frappe.db.get_value(item.reference_dt, item.reference_dn, 'invoiced')

@@ -20,11 +20,13 @@ from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
-	invalid_doctype = doc.doctype not in ['Sales Invoice']
+	invalid_doctype = doc.doctype != 'Sales Invoice'
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
-
-	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction: return
+	no_taxes_applied = not doc.get('taxes')
+	
+	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+		return
 
 	if doc.docstatus == 0 and doc._action == 'save':
 		if doc.irn:
@@ -35,7 +37,7 @@ def validate_einvoice_fields(doc):
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
 
-	elif doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
+	elif doc.irn and doc.docstatus == 2 and doc._action == 'cancel' and not doc.irn_cancelled:
 		frappe.throw(_('You must cancel IRN before cancelling the document.'), title=_('Cancel Not Allowed'))
 
 def raise_document_name_too_long_error():
@@ -158,10 +160,10 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.description = d.item_name.replace('"', '\\"')
+		item.description = json.dumps(d.item_name)[1:-1]
 
 		item.qty = abs(item.qty)
-		item.discount_amount = abs(item.discount_amount * item.qty)
+		item.discount_amount = 0
 		item.unit_rate = abs(item.base_net_amount / item.qty)
 		item.gross_amount = abs(item.base_net_amount)
 		item.taxable_value = abs(item.base_net_amount)
@@ -221,11 +223,12 @@ def get_invoice_value_details(invoice):
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(invoice.base_total)
+		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
 	else:
 		invoice_value_details.base_total = abs(invoice.base_net_total)
+		# since tax already considers discount amount
+		invoice_value_details.invoice_discount_amt = 0
 
-	# since tax already considers discount amount
-	invoice_value_details.invoice_discount_amt = 0 # invoice.base_discount_amount
 	invoice_value_details.round_off = invoice.base_rounding_adjustment
 	invoice_value_details.base_grand_total = abs(invoice.base_rounded_total) or abs(invoice.base_grand_total)
 	invoice_value_details.grand_total = abs(invoice.rounded_total) or abs(invoice.grand_total)
@@ -302,7 +305,7 @@ def validate_mandatory_fields(invoice):
 			_('GSTIN is mandatory to fetch company GSTIN details. Please enter GSTIN in selected company address.'),
 			title=_('Missing Fields')
 		)
-	if not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
+	if invoice.gst_category != 'Overseas' and not frappe.db.get_value('Address', invoice.customer_address, 'gstin'):
 		frappe.throw(
 			_('GSTIN is mandatory to fetch customer GSTIN details. Please enter GSTIN in selected customer address.'),
 			title=_('Missing Fields')
@@ -443,6 +446,8 @@ class GSPConnector():
 	def get_credentials(self):
 		if self.invoice:
 			gstin = self.get_seller_gstin()
+			if not self.e_invoice_settings.enable:
+				frappe.throw(_("E-Invoicing is disabled. Please enable it from {} to generate e-invoices.").format(get_link_to_form("E Invoice Settings", "E Invoice Settings")))
 			credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
 		else:
 			credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None

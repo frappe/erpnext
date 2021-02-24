@@ -7,8 +7,11 @@ import frappe
 from frappe import _
 from frappe.model import default_fields
 from frappe.model.document import Document
+from frappe.utils import flt, getdate, nowdate
+from frappe.utils.background_jobs import enqueue
 from frappe.model.mapper import map_doc, map_child_doc
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate
+from frappe.utils.scheduler import is_scheduler_inactive
+from frappe.core.page.background_jobs.background_jobs import get_info
 
 from six import iteritems
 
@@ -61,7 +64,13 @@ class POSInvoiceMergeLog(Document):
 
 		self.save() # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 
-		self.update_pos_invoices(sales_invoice, credit_note)
+		self.update_pos_invoices(pos_invoice_docs, sales_invoice, credit_note)
+
+	def on_cancel(self):
+		pos_invoice_docs = [frappe.get_doc("POS Invoice", d.pos_invoice) for d in self.pos_invoices]
+
+		self.update_pos_invoices(pos_invoice_docs)
+		self.cancel_linked_invoices()
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
@@ -111,6 +120,7 @@ class POSInvoiceMergeLog(Document):
 						i.qty = i.qty + item.qty
 				if not found:
 					item.rate = item.net_rate
+					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
 					items.append(si_item)
 			
@@ -148,6 +158,8 @@ class POSInvoiceMergeLog(Document):
 		invoice.set('taxes', taxes)
 		invoice.additional_discount_percentage = 0
 		invoice.discount_amount = 0.0
+		invoice.taxes_and_charges = None
+		invoice.ignore_pricing_rule = 1
 
 		return invoice
 	
@@ -160,17 +172,21 @@ class POSInvoiceMergeLog(Document):
 
 		return sales_invoice
 	
-	def update_pos_invoices(self, sales_invoice, credit_note):
-		for d in self.pos_invoices:
-			doc = frappe.get_doc('POS Invoice', d.pos_invoice)
-			if not doc.is_return:
-				doc.update({'consolidated_invoice': sales_invoice})
-			else:
-				doc.update({'consolidated_invoice': credit_note})
+	def update_pos_invoices(self, invoice_docs, sales_invoice='', credit_note=''):
+		for doc in invoice_docs:
+			doc.load_from_db()
+			doc.update({ 'consolidated_invoice': None if self.docstatus==2 else (credit_note if doc.is_return else sales_invoice) })
 			doc.set_status(update=True)
 			doc.save()
 
-def get_all_invoices():
+	def cancel_linked_invoices(self):
+		for si_name in [self.consolidated_invoice, self.consolidated_credit_note]:
+			if not si_name: continue
+			si = frappe.get_doc('Sales Invoice', si_name)
+			si.flags.ignore_validate = True
+			si.cancel()
+
+def get_all_unconsolidated_invoices():
 	filters = {
 		'consolidated_invoice': [ 'in', [ '', None ]],
 		'status': ['not in', ['Consolidated']],
@@ -181,7 +197,7 @@ def get_all_invoices():
 	
 	return pos_invoices
 
-def get_invoices_customer_map(pos_invoices):
+def get_invoice_customer_map(pos_invoices):
 	# pos_invoice_customer_map = { 'Customer 1': [{}, {}, {}], 'Custoemr 2' : [{}] }
 	pos_invoice_customer_map = {}
 	for invoice in pos_invoices:
@@ -191,20 +207,82 @@ def get_invoices_customer_map(pos_invoices):
 	
 	return pos_invoice_customer_map
 
-def merge_pos_invoices(pos_invoices=[]):
-	if not pos_invoices:
-		pos_invoices = get_all_invoices()
-	
-	pos_invoice_map = get_invoices_customer_map(pos_invoices)
-	create_merge_logs(pos_invoice_map)
+def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
+	invoices = pos_invoices or closing_entry.get('pos_transactions') or get_all_unconsolidated_invoices()
+	invoice_by_customer = get_invoice_customer_map(invoices)
 
-def create_merge_logs(pos_invoice_customer_map):
-	for customer, invoices in iteritems(pos_invoice_customer_map):
+	if len(invoices) >= 5 and closing_entry:
+		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
+		closing_entry.set_status(update=True, status='Queued')
+	else:
+		create_merge_logs(invoice_by_customer, closing_entry)
+
+def unconsolidate_pos_invoices(closing_entry):
+	merge_logs = frappe.get_all(
+		'POS Invoice Merge Log',
+		filters={ 'pos_closing_entry': closing_entry.name },
+		pluck='name'
+	)
+
+	if len(merge_logs) >= 5:
+		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
+		closing_entry.set_status(update=True, status='Queued')
+	else:
+		cancel_merge_logs(merge_logs, closing_entry)
+
+def create_merge_logs(invoice_by_customer, closing_entry={}):
+	for customer, invoices in iteritems(invoice_by_customer):
 		merge_log = frappe.new_doc('POS Invoice Merge Log')
 		merge_log.posting_date = getdate(nowdate())
 		merge_log.customer = customer
+		merge_log.pos_closing_entry = closing_entry.get('name', None)
 
 		merge_log.set('pos_invoices', invoices)
 		merge_log.save(ignore_permissions=True)
 		merge_log.submit()
+	
+	if closing_entry:
+		closing_entry.set_status(update=True, status='Submitted')
+		closing_entry.update_opening_entry()
 
+def cancel_merge_logs(merge_logs, closing_entry={}):
+	for log in merge_logs:
+		merge_log = frappe.get_doc('POS Invoice Merge Log', log)
+		merge_log.flags.ignore_permissions = True
+		merge_log.cancel()
+
+	if closing_entry:
+		closing_entry.set_status(update=True, status='Cancelled')
+		closing_entry.update_opening_entry(for_cancel=True)
+
+def enqueue_job(job, invoice_by_customer, closing_entry):
+	check_scheduler_status()
+
+	job_name = closing_entry.get("name")
+	if not job_already_enqueued(job_name):
+		enqueue(
+			job,
+			queue="long",
+			timeout=10000,
+			event="processing_merge_logs",
+			job_name=job_name,
+			closing_entry=closing_entry,
+			invoice_by_customer=invoice_by_customer,
+			now=frappe.conf.developer_mode or frappe.flags.in_test
+		)
+
+		if job == create_merge_logs:
+			msg = _('POS Invoices will be consolidated in a background process')
+		else:
+			msg = _('POS Invoices will be unconsolidated in a background process')
+
+		frappe.msgprint(msg, alert=1)
+
+def check_scheduler_status():
+	if is_scheduler_inactive() and not frappe.flags.in_test:
+		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
+
+def job_already_enqueued(job_name):
+	enqueued_jobs = [d.get("job_name") for d in get_info()]
+	if job_name in enqueued_jobs:
+		return True
