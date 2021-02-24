@@ -135,9 +135,12 @@ class VehicleBookingOrder(AccountsController):
 		self.is_partial_payment = False
 
 		if self.customer_payments:
+			first_receipt_document = self.customer_payments[0].name
+
 			if self.supplier_payments:
 				first_deposit_posting_date = self.supplier_payments[0].posting_date
-				initial_payments = [d.amount for d in self.customer_payments if d.posting_date <= first_deposit_posting_date]
+				initial_payments = [d.amount for d in self.customer_payments\
+					if d.name == first_receipt_document or d.posting_date <= first_deposit_posting_date]
 			else:
 				initial_payments = [d.amount for d in self.customer_payments]
 
