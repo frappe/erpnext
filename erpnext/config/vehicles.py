@@ -32,6 +32,12 @@ def get_data():
 					"name": "Vehicle Booking Order",
 					"onboard": 1
 				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Booking Payment",
+					"description": _("Payments for Vehicle Booking."),
+					"dependencies": ["Vehicle Booking Order"],
+				},
 			]
 		},
 		{

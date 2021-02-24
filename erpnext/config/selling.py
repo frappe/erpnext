@@ -3,21 +3,42 @@ import frappe
 from frappe import _
 
 def get_data():
-	vbo_link = []
-	if 'Vehicles' in frappe.get_active_domains():
-		vbo_link.append({
-			"type": "doctype",
-			"name": "Vehicle Booking Order",
-			"description": _("Vehicle Bookings from Customers."),
-			"onboard": 1,
-			"dependencies": ["Item", "Customer"],
-		})
+	out = []
 
-	out = [
+	if 'Vehicles' in frappe.get_active_domains():
+		out += [
+			{
+				"label": _("Vehicle Booking"),
+				"items": [
+					{
+						"type": "doctype",
+						"name": "Vehicle Booking Order",
+						"description": _("Vehicle Bookings from Customers."),
+						"onboard": 1,
+						"dependencies": ["Item", "Customer"],
+					},
+					{
+						"type": "doctype",
+						"name": "Vehicle Booking Payment",
+						"description": _("Payments for Vehicle Booking."),
+						"dependencies": ["Vehicle Booking Order"],
+					},
+					{
+						"type": "report",
+						"is_query_report": True,
+						"name": "Vehicle Allocation Register",
+						"doctype": "Vehicle Allocation",
+						"dependencies": ["Vehicle Allocation"],
+					},
+				]
+			},
+		]
+
+	out += [
 		{
 			"label": _("Sales Transactions"),
 			"icon": "fa fa-star",
-			"items": vbo_link + [
+			"items": [
 				{
 					"type": "doctype",
 					"name": "Sales Order",
@@ -298,25 +319,6 @@ def get_data():
 				},
 			]
 		},
-	]
-
-	if 'Vehicles' in frappe.get_active_domains():
-		out += [
-			{
-				"label": _("Vehicle Sales Reports"),
-				"items": [
-					{
-						"type": "report",
-						"is_query_report": True,
-						"name": "Vehicle Allocation Register",
-						"doctype": "Vehicle Allocation",
-						"dependencies": ["Vehicle Allocation"],
-					},
-				]
-			},
-		]
-
-	out += [
 		{
 			"label": _("Key Reports"),
 			"icon": "fa fa-table",
