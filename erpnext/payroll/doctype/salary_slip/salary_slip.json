@@ -584,6 +584,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Total salary booked for this employee from the beginning of the year (payroll period or fiscal year) up to the current salary slip's end date.",
    "fieldname": "year_to_date",
    "fieldtype": "Currency",
    "label": "Year To Date",
@@ -591,6 +592,7 @@
    "read_only": 1
   },
   {
+   "description": "Total salary booked for this employee from the beginning of the month up to the current salary slip's end date.",
    "fieldname": "month_to_date",
    "fieldtype": "Currency",
    "label": "Month To Date",
@@ -616,7 +618,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-21 23:43:44.959840",
+ "modified": "2021-01-14 13:37:38.180920",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

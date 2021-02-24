@@ -21,6 +21,9 @@ class PayrollEntry(Document):
 		if cint(entries) == len(self.employees):
 				self.set_onload("submitted_ss", True)
 
+	def validate(self):
+		self.number_of_employees = len(self.employees)
+
 	def on_submit(self):
 		self.create_salary_slips()
 
@@ -113,7 +116,7 @@ class PayrollEntry(Document):
 		for d in employees:
 			self.append('employees', d)
 
-		self.number_of_employees = len(employees)
+		self.number_of_employees = len(self.employees)
 		if self.validate_attendance:
 			return self.validate_employee_attendance()
 
@@ -145,8 +148,8 @@ class PayrollEntry(Document):
 		"""
 		self.check_permission('write')
 		self.created = 1
-		emp_list = [d.employee for d in self.get_emp_list()]
-		if emp_list:
+		employees = [emp.employee for emp in self.employees]
+		if employees:
 			args = frappe._dict({
 				"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
 				"payroll_frequency": self.payroll_frequency,
@@ -160,10 +163,10 @@ class PayrollEntry(Document):
 				"exchange_rate": self.exchange_rate,
 				"currency": self.currency
 			})
-			if len(emp_list) > 30:
-				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=emp_list, args=args)
+			if len(employees) > 30:
+				frappe.enqueue(create_salary_slips_for_employees, timeout=600, employees=employees, args=args)
 			else:
-				create_salary_slips_for_employees(emp_list, args, publish_progress=False)
+				create_salary_slips_for_employees(employees, args, publish_progress=False)
 				# since this method is called via frm.call this doc needs to be updated manually
 				self.reload()
 

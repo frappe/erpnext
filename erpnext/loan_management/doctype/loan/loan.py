@@ -201,8 +201,12 @@ def request_loan_closure(loan, posting_date=None):
 	write_off_limit = frappe.get_value('Loan Type', loan_type, 'write_off_amount')
 
 	# checking greater than 0 as there may be some minor precision error
-	if pending_amount < write_off_limit:
-		# update status as loan closure requested
+	if not pending_amount:
+		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
+	elif pending_amount < write_off_limit:
+		# Auto create loan write off and update status as loan closure requested
+		write_off = make_loan_write_off(loan)
+		write_off.submit()
 		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
 	else:
 		frappe.throw(_("Cannot close loan as there is an outstanding of {0}").format(pending_amount))
@@ -336,13 +340,23 @@ def create_loan_security_unpledge(unpledge_map, loan, company, applicant_type, a
 	return unpledge_request
 
 def validate_employee_currency_with_company_currency(applicant, company):
-		from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
-		if not applicant:
-			frappe.throw(_("Please select Applicant"))
-		if not company:
-			frappe.throw(_("Please select Company"))
-		employee_currency = get_employee_currency(applicant)
-		company_currency = erpnext.get_company_currency(company)
-		if employee_currency != company_currency:
-			frappe.throw(_("Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}")
-				.format(applicant, employee_currency))
+	from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
+	if not applicant:
+		frappe.throw(_("Please select Applicant"))
+	if not company:
+		frappe.throw(_("Please select Company"))
+	employee_currency = get_employee_currency(applicant)
+	company_currency = erpnext.get_company_currency(company)
+	if employee_currency != company_currency:
+		frappe.throw(_("Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}")
+			.format(applicant, employee_currency))
+
+@frappe.whitelist()
+def get_shortfall_applicants():
+	loans = frappe.get_all('Loan Security Shortfall', {'status': 'Pending'}, pluck='loan')
+	applicants = set(frappe.get_all('Loan', {'name': ('in', loans)}, pluck='name'))
+
+	return {
+		"value": len(applicants),
+		"fieldtype": "Int"
+	}

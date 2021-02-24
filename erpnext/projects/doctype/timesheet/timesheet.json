@@ -15,7 +15,7 @@
   "column_break_3",
   "salary_slip",
   "status",
-  "project",
+  "parent_project",
   "employee_detail",
   "employee",
   "employee_name",
@@ -261,7 +261,7 @@
    "read_only": 1
   },
   {
-   "fieldname": "project",
+   "fieldname": "parent_project",
    "fieldtype": "Link",
    "label": "Project",
    "options": "Project"
@@ -271,7 +271,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-29 07:50:35.938231",
+ "modified": "2021-01-08 20:51:14.590080",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",

@@ -158,7 +158,6 @@ class SalesOrder(SellingController):
 					frappe.throw(_("Quotation {0} is cancelled").format(quotation))
 
 				doc.set_status(update=True)
-				doc.update_opportunity()
 
 	def validate_drop_ship(self):
 		for d in self.get('items'):
@@ -181,6 +180,7 @@ class SalesOrder(SellingController):
 			update_coupon_code_count(self.coupon_code,'used')
 
 	def on_cancel(self):
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
 		super(SalesOrder, self).on_cancel()
 
 		# Cannot cancel closed SO
@@ -830,56 +830,49 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
 	for supplier in suppliers:
-		po = frappe.get_list("Purchase Order", filters={"sales_order":source_name, "supplier":supplier, "docstatus": ("<", "2")})
-		if len(po) == 0:
-			doc = get_mapped_doc("Sales Order", source_name, {
-				"Sales Order": {
-					"doctype": "Purchase Order",
-					"field_no_map": [
-						"address_display",
-						"contact_display",
-						"contact_mobile",
-						"contact_email",
-						"contact_person",
-						"taxes_and_charges",
-						"shipping_address",
-						"terms"
-					],
-					"validation": {
-						"docstatus": ["=", 1]
-					}
-				},
-				"Sales Order Item": {
-					"doctype": "Purchase Order Item",
-					"field_map":  [
-						["name", "sales_order_item"],
-						["parent", "sales_order"],
-						["stock_uom", "stock_uom"],
-						["uom", "uom"],
-						["conversion_factor", "conversion_factor"],
-						["delivery_date", "schedule_date"]
-			 		],
-					"field_no_map": [
-						"rate",
-						"price_list_rate",
-						"item_tax_template",
-						"discount_percentage",
-						"discount_amount",
-						"pricing_rules"
-					],
-					"postprocess": update_item,
-					"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in items_to_map
+		doc = get_mapped_doc("Sales Order", source_name, {
+			"Sales Order": {
+				"doctype": "Purchase Order",
+				"field_no_map": [
+					"address_display",
+					"contact_display",
+					"contact_mobile",
+					"contact_email",
+					"contact_person",
+					"taxes_and_charges",
+					"shipping_address",
+					"terms"
+				],
+				"validation": {
+					"docstatus": ["=", 1]
 				}
-			}, target_doc, set_missing_values)
+			},
+			"Sales Order Item": {
+				"doctype": "Purchase Order Item",
+				"field_map":  [
+					["name", "sales_order_item"],
+					["parent", "sales_order"],
+					["stock_uom", "stock_uom"],
+					["uom", "uom"],
+					["conversion_factor", "conversion_factor"],
+					["delivery_date", "schedule_date"]
+				],
+				"field_no_map": [
+					"rate",
+					"price_list_rate",
+					"item_tax_template",
+					"discount_percentage",
+					"discount_amount",
+					"pricing_rules"
+				],
+				"postprocess": update_item,
+				"condition": lambda doc: doc.ordered_qty < doc.stock_qty and doc.supplier == supplier and doc.item_code in items_to_map
+			}
+		}, target_doc, set_missing_values)
 
-			doc.insert()
-		else:
-			suppliers =[]
-	if suppliers:
+		doc.insert()
 		frappe.db.commit()
 		return doc
-	else:
-		frappe.msgprint(_("Purchase Order already created for all Sales Order items"))
 
 @frappe.whitelist()
 def make_purchase_order(source_name, selected_items=None, target_doc=None):

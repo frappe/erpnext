@@ -3,6 +3,8 @@
 
 var in_progress = false;
 
+frappe.provide("erpnext.accounts.dimensions");
+
 frappe.ui.form.on('Payroll Entry', {
 	onload: function (frm) {
 		if (!frm.doc.posting_date) {
@@ -10,6 +12,7 @@ frappe.ui.form.on('Payroll Entry', {
 		}
 		frm.toggle_reqd(['payroll_frequency'], !frm.doc.salary_slip_based_on_timesheet);
 
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 		frm.events.department_filters(frm);
 		frm.events.payroll_payable_account_filters(frm);
 	},
@@ -46,7 +49,7 @@ frappe.ui.form.on('Payroll Entry', {
 					}
 				).toggleClass('btn-primary', !(frm.doc.employees || []).length);
 			}
-			if ((frm.doc.employees || []).length) {
+			if ((frm.doc.employees || []).length && !frappe.model.has_workflow(frm.doctype)) {
 				frm.page.clear_primary_action();
 				frm.page.set_primary_action(__('Create Salary Slips'), () => {
 					frm.save('Submit').then(() => {
@@ -129,21 +132,6 @@ frappe.ui.form.on('Payroll Entry', {
 					"company": frm.doc.company
 				}
 			};
-		}),
-		frm.set_query("cost_center", function () {
-			return {
-				filters: {
-					"is_group": 0,
-					company: frm.doc.company
-				}
-			};
-		}),
-		frm.set_query("project", function () {
-			return {
-				filters: {
-					company: frm.doc.company
-				}
-			};
 		});
 	},
 
@@ -183,6 +171,7 @@ frappe.ui.form.on('Payroll Entry', {
 
 	company: function (frm) {
 		frm.events.clear_employee_table(frm);
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	currency: function (frm) {
@@ -359,7 +348,6 @@ let render_employee_attendance = function (frm, data) {
 
 frappe.ui.form.on('Payroll Employee Detail', {
 	employee: function(frm) {
-		frm.events.clear_employee_table(frm);
 		if (!frm.doc.payroll_frequency) {
 			frappe.throw(__("Please set a Payroll Frequency"));
 		}

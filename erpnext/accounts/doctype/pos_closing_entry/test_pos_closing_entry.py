@@ -13,7 +13,6 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 class TestPOSClosingEntry(unittest.TestCase):
 	def test_pos_closing_entry(self):
 		test_user, pos_profile = init_user_and_profile()
-
 		opening_entry = create_opening_entry(pos_profile, test_user.name)
 
 		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
@@ -41,6 +40,49 @@ class TestPOSClosingEntry(unittest.TestCase):
 
 		self.assertEqual(pcv_doc.total_quantity, 2)
 		self.assertEqual(pcv_doc.net_total, 6700)
+
+		frappe.set_user("Administrator")
+		frappe.db.sql("delete from `tabPOS Profile`")
+
+	def test_cancelling_of_pos_closing_entry(self):
+		test_user, pos_profile = init_user_and_profile()
+		opening_entry = create_opening_entry(pos_profile, test_user.name)
+
+		pos_inv1 = create_pos_invoice(rate=3500, do_not_submit=1)
+		pos_inv1.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3500
+		})
+		pos_inv1.submit()
+
+		pos_inv2 = create_pos_invoice(rate=3200, do_not_submit=1)
+		pos_inv2.append('payments', {
+			'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 3200
+		})
+		pos_inv2.submit()
+
+		pcv_doc = make_closing_entry_from_opening(opening_entry)
+		payment = pcv_doc.payment_reconciliation[0]
+
+		self.assertEqual(payment.mode_of_payment, 'Cash')
+
+		for d in pcv_doc.payment_reconciliation:
+			if d.mode_of_payment == 'Cash':
+				d.closing_amount = 6700
+
+		pcv_doc.submit()
+
+		pos_inv1.load_from_db()
+		self.assertRaises(frappe.ValidationError, pos_inv1.cancel)
+
+		si_doc = frappe.get_doc("Sales Invoice", pos_inv1.consolidated_invoice)
+		self.assertRaises(frappe.ValidationError, si_doc.cancel)
+
+		pcv_doc.load_from_db()
+		pcv_doc.cancel()
+		si_doc.load_from_db()
+		pos_inv1.load_from_db()
+		self.assertEqual(si_doc.docstatus, 2)
+		self.assertEqual(pos_inv1.status, 'Paid')
 
 		frappe.set_user("Administrator")
 		frappe.db.sql("delete from `tabPOS Profile`")

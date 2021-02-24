@@ -47,6 +47,7 @@
   "base_amount",
   "base_net_amount",
   "pricing_rules",
+  "stock_uom_rate",
   "is_free_item",
   "section_break_43",
   "valuation_rate",
@@ -634,12 +635,20 @@
    "print_hide": 1,
    "read_only": 1,
    "report_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-05-19 20:48:43.222229",
+ "modified": "2021-01-30 21:39:40.174551",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

@@ -41,7 +41,7 @@ frappe.team_updates = {
 						me.add_row(d);
 					});
 				} else {
-					frappe.show_alert({message:__('No more updates'), indicator:'darkgrey'});
+					frappe.show_alert({message: __('No more updates'), indicator: 'gray'});
 					me.more.parent().addClass('hidden');
 				}
 			}

@@ -12,11 +12,11 @@
   "customer",
   "customer_name",
   "tax_id",
+  "pos_profile",
   "is_pos",
   "is_consolidated",
-  "pos_profile",
-  "offline_pos_name",
   "is_return",
+  "update_billed_amount_in_sales_order",
   "column_break1",
   "company",
   "company_tax_id",
@@ -24,11 +24,8 @@
   "posting_time",
   "set_posting_time",
   "due_date",
-  "amended_from",
-  "returns",
   "return_against",
-  "column_break_21",
-  "update_billed_amount_in_sales_order",
+  "amended_from",
   "accounting_dimensions_section",
   "project",
   "dimension_col_break",
@@ -60,6 +57,8 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "set_warehouse",
+  "column_break_55",
+  "set_target_warehouse",
   "items_section",
   "update_stock",
   "scan_barcode",
@@ -186,8 +185,7 @@
   "column_break_140",
   "auto_repeat",
   "update_auto_repeat_reference",
-  "against_income_account",
-  "pos_total_qty"
+  "against_income_account"
  ],
  "fields": [
   {
@@ -295,16 +293,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "offline_pos_name",
-   "fieldtype": "Data",
-   "hidden": 1,
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Offline POS Name",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "default": "0",
    "fieldname": "is_return",
    "fieldtype": "Check",
@@ -404,30 +392,16 @@
   },
   {
    "depends_on": "return_against",
-   "fieldname": "returns",
-   "fieldtype": "Section Break",
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Returns"
-  },
-  {
-   "depends_on": "return_against",
    "fieldname": "return_against",
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Return Against Sales Invoice",
+   "label": "Return Against",
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
-  },
-  {
-   "fieldname": "column_break_21",
-   "fieldtype": "Column Break",
-   "hide_days": 1,
-   "hide_seconds": 1
   },
   {
    "default": "0",
@@ -676,7 +650,8 @@
    "fieldname": "sec_warehouse",
    "fieldtype": "Section Break",
    "hide_days": 1,
-   "hide_seconds": 1
+   "hide_seconds": 1,
+   "label": "Warehouse"
   },
   {
    "depends_on": "update_stock",
@@ -684,7 +659,7 @@
    "fieldtype": "Link",
    "hide_days": 1,
    "hide_seconds": 1,
-   "label": "Set Source Warehouse",
+   "label": "Source Warehouse",
    "options": "Warehouse",
    "print_hide": 1
   },
@@ -693,6 +668,7 @@
    "fieldtype": "Section Break",
    "hide_days": 1,
    "hide_seconds": 1,
+   "label": "Items",
    "oldfieldtype": "Section Break",
    "options": "fa fa-shopping-cart"
   },
@@ -1903,17 +1879,6 @@
    "report_hide": 1
   },
   {
-   "fieldname": "pos_total_qty",
-   "fieldtype": "Float",
-   "hidden": 1,
-   "hide_days": 1,
-   "hide_seconds": 1,
-   "label": "Total Qty",
-   "print_hide": 1,
-   "print_hide_if_no_value": 1,
-   "read_only": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
@@ -1969,13 +1934,31 @@
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.is_internal_customer && doc.update_stock",
+   "fieldname": "set_target_warehouse",
+   "fieldtype": "Link",
+   "label": "Set Target Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-12-11 12:48:31.769958",
+ "links": [
+  {
+   "custom": 1,
+   "group": "Reference",
+   "link_doctype": "POS Invoice",
+   "link_fieldname": "consolidated_invoice"
+  }
+ ],
+ "modified": "2021-02-01 15:42:26.261540",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
