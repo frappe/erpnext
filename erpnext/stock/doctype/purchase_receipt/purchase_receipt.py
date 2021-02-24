@@ -295,7 +295,8 @@ class PurchaseReceipt(BuyingController):
 								"against": warehouse_account[d.warehouse]["account"],
 								"cost_center": d.cost_center,
 								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-								"credit": flt(amount["base_amount"]),
+								"credit": (flt(amount["base_amount"]) if (amount["base_amount"] or
+									account_currency!=self.company_currency) else flt(amount["amount"])),
 								"credit_in_account_currency": flt(amount["amount"]),
 								"project": d.project
 							}, item=d))
