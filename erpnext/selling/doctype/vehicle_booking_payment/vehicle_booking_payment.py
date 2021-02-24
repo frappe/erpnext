@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 from frappe import _
-from frappe.utils import flt, cstr, cint
+from frappe.utils import flt, cstr, cint, nowdate
 from frappe.model.document import Document
 
 instrument_copy_fields = ['instrument_type', 'instrument_date', 'instrument_no', 'bank', 'amount']
@@ -256,3 +256,39 @@ def get_undeposited_instruments(vehicle_booking_order):
 			.format(frappe.get_desk_link("Vehicle Booking Order", vehicle_booking_order)), indicator='orange')
 
 	return instruments
+
+
+@frappe.whitelist()
+def get_payment_entry(vehicle_booking_order, party_type):
+	vbo = frappe.get_doc("Vehicle Booking Order", vehicle_booking_order)
+
+	if not party_type:
+		frappe.throw(_("Party Type is mandatory for Vehicle Booking Order"))
+
+	if vbo.docstatus == 2:
+		frappe.throw(_("{0} is cancelled").format(frappe.get_desk_link("Vehicle Booking Order", vehicle_booking_order)))
+
+	if party_type == "Supplier" and vbo.vehicle_allocation_required and not vbo.vehicle_allocation:
+		frappe.throw(_("Please set Vehicle Allocation first"))
+
+	doc = frappe.new_doc("Vehicle Booking Payment")
+	doc.posting_date = nowdate()
+	doc.payment_type = "Pay" if party_type == "Supplier" else "Receive"
+	doc.vehicle_booking_order = vehicle_booking_order
+	doc.party_type = party_type
+
+	if party_type == "Supplier":
+		doc.party = vbo.supplier
+	else:
+		doc.party = vbo.get('financer') or vbo.get('customer')
+
+	doc.set('instruments', [])
+	if doc.payment_type == "Pay":
+		instruments = get_undeposited_instruments(vehicle_booking_order)
+		for d in instruments:
+			doc.append('instruments', d)
+
+	doc.set_party_name()
+	doc.calculate_total_amount()
+
+	return doc

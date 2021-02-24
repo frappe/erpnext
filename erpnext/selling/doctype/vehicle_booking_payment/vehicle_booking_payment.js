@@ -127,6 +127,7 @@ erpnext.selling.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 		});
 
 		me.frm.doc.total_amount = flt(me.frm.doc.total_amount, precision('total_amount'));
+		me.frm.doc.in_words = "";
 		me.frm.refresh_fields();
 	},
 

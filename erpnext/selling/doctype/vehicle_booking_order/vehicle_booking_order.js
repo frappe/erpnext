@@ -602,13 +602,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	make_payment_entry: function(party_type) {
 		if (['Customer', 'Supplier'].includes(party_type)) {
 			return frappe.call({
-				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_payment_entry",
+				method: "erpnext.selling.doctype.vehicle_booking_payment.vehicle_booking_payment.get_payment_entry",
 				args: {
-					"dt": this.frm.doc.doctype,
-					"dn": this.frm.doc.name,
+					"vehicle_booking_order": this.frm.doc.name,
 					"party_type": party_type,
-					"mode_of_payment": party_type === "Customer" ? this.frm.doc.selling_mode_of_payment : this.frm.doc.buying_mode_of_payment,
-					"bank_amount": 0
 				},
 				callback: function (r) {
 					var doclist = frappe.model.sync(r.message);
