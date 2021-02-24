@@ -1209,7 +1209,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			pe.set_gain_or_loss(account_details={
 				'account': frappe.get_cached_value('Company', pe.company, "default_discount_account"),
 				'cost_center': pe.cost_center or frappe.get_cached_value('Company', pe.company, "cost_center"),
-				'amount': discount_amount * -1 if payment_type == "Pay" else 1
+				'amount': discount_amount * (-1 if payment_type == "Pay" else 1)
 			})
 			pe.set_difference_amount()
 
