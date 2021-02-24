@@ -12,7 +12,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Payment'),
-				'items': ['Payment Entry', 'Journal Entry', 'Payment Request']
+				'items': ['Vehicle Booking Payment', 'Payment Request']
 			},
 			{
 				'label': _('Delivery'),

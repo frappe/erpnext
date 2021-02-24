@@ -45,7 +45,8 @@
    "in_standard_filter": 1,
    "label": "Payment Type",
    "options": "\nReceive\nPay",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "party_type",
@@ -188,7 +189,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-02-24 09:25:08.140323",
+ "modified": "2021-02-24 11:07:37.249871",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Payment",

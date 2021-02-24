@@ -202,7 +202,12 @@ class VehicleBookingPayment(Document):
 				cint(bool(self.get_is_deposited(d, exclude_self=False))))
 
 	def update_vehicle_booking_order(self):
-		pass
+		if self.vehicle_booking_order:
+			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
+			vbo.update_paid_amount(update=True)
+			vbo.update_payment_status(update=True)
+			vbo.set_status(update=True)
+			vbo.notify_update()
 
 
 @frappe.whitelist()

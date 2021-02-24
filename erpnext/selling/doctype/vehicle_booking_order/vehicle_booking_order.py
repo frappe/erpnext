@@ -342,6 +342,23 @@ class VehicleBookingOrder(AccountsController):
 		# if self.withholding_tax_amount and not self.withholding_tax_account:
 		# 	frappe.throw(_("Withholding Tax Amount is set but account is not provided"))
 
+	def update_paid_amount(self, update=False):
+		payments = dict(frappe.db.sql("""
+			select payment_type, sum(total_amount)
+			from `tabVehicle Booking Payment`
+			where vehicle_booking_order = %s and docstatus = 1
+			group by payment_type
+		""", self.name))
+
+		self.customer_advance = flt(payments.get('Receive'), self.precision('customer_advance'))
+		self.supplier_advance = flt(payments.get('Pay'), self.precision('supplier_advance'))
+
+		if update:
+			self.db_set({
+				'customer_advance': self.customer_advance,
+				'supplier_advance': self.supplier_advance
+			})
+
 	def update_payment_status(self, update=False):
 		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
 		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance, self.precision('supplier_outstanding'))
