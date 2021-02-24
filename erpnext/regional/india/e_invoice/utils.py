@@ -10,6 +10,7 @@ import sys
 import json
 import base64
 import frappe
+import six
 import traceback
 import io
 from frappe import _, bold
@@ -108,11 +109,13 @@ def get_party_details(address_name):
 		pincode = 999999
 
 	return frappe._dict(dict(
-		gstin=d.gstin, legal_name=d.address_title,
-		location=d.city, pincode=d.pincode,
+		gstin=d.gstin,
+		legal_name=sanitize_for_json(d.address_title),
+		location=sanitize_for_json(d.city),
+		pincode=d.pincode,
 		state_code=d.gst_state_number,
-		address_line1=d.address_line1,
-		address_line2=d.address_line2
+		address_line1=sanitize_for_json(d.address_line1),
+		address_line2=sanitize_for_json(d.address_line2)
 	))
 
 def get_gstin_details(gstin):
@@ -146,8 +149,11 @@ def get_overseas_address_details(address_name):
 		)
 
 	return frappe._dict(dict(
-		gstin='URP', legal_name=address_title, location=city,
-		address_line1=address_line1, address_line2=address_line2,
+		gstin='URP',
+		legal_name=sanitize_for_json(address_title),
+		location=city,
+		address_line1=sanitize_for_json(address_line1),
+		address_line2=sanitize_for_json(address_line2),
 		pincode=999999, state_code=96, place_of_supply=96
 	))
 
@@ -160,7 +166,7 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.description = json.dumps(d.item_name)[1:-1]
+		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
 		item.discount_amount = 0
@@ -326,7 +332,7 @@ def make_einvoice(invoice):
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
 		buyer_details = get_party_details(invoice.customer_address)
-		place_of_supply = get_place_of_supply(invoice, invoice.doctype) or invoice.billing_address_gstin
+		place_of_supply = get_place_of_supply(invoice, invoice.doctype) or sanitize_for_json(invoice.billing_address_gstin)
 		place_of_supply = place_of_supply[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 
@@ -356,7 +362,7 @@ def make_einvoice(invoice):
 		period_details=period_details, prev_doc_details=prev_doc_details,
 		export_details=export_details, eway_bill_details=eway_bill_details
 	)
-	einvoice = json.loads(einvoice)
+	einvoice = safe_json_load(einvoice)
 
 	validations = json.loads(read_json('einv_validation'))
 	errors = validate_einvoice(validations, einvoice)
@@ -370,6 +376,18 @@ def make_einvoice(invoice):
 		frappe.throw(errors, title=_('E Invoice Validation Failed'), as_list=1)
 
 	return einvoice
+
+def safe_json_load(json_string):
+	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
+
+	try:
+		return json.loads(json_string)
+	except JSONDecodeError as e:
+		# print a snippet of 40 characters around the location where error occured
+		pos = e.pos
+		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
+		snippet = json_string[start:end]
+		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
 def validate_einvoice(validations, einvoice, errors=[]):
 	for fieldname, field_validation in validations.items():
@@ -797,6 +815,13 @@ class GSPConnector():
 		self.invoice.flags.ignore_validate_update_after_submit = True
 		self.invoice.flags.ignore_validate = True
 		self.invoice.save()
+
+
+def sanitize_for_json(string):
+	"""Escape JSON specific characters from a string."""
+
+	# json.dumps adds double-quotes to the string. Indexing to remove them.
+	return json.dumps(string)[1:-1]
 
 @frappe.whitelist()
 def get_einvoice(doctype, docname):
