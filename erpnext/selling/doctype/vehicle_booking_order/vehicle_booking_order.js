@@ -230,6 +230,9 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle(),
 					this.frm.doc.vehicle ? __("Change") : null);
 
+				this.frm.add_custom_button(__("Change Payment Adjustment"), () => this.select_payment_adjustment(),
+					__("Change"));
+
 				this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.select_item_code(),
 					__("Change"));
 			}
@@ -846,6 +849,35 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			});
 			dialog.show();
 		});
+	},
+
+	select_payment_adjustment: function () {
+		var me = this;
+		var dialog = new frappe.ui.Dialog({
+			title: __("Change Payment Adjustment"),
+			fields: [
+				{label: __("Payment Adjustment Amount"), fieldname: "payment_adjustment", fieldtype: "Currency",
+					options: "Comoany:company:default_currency", reqd: 1,
+					description: __(frappe.meta.get_docfield("Vehicle Booking Order", "payment_adjustment").description)},
+			]
+		});
+
+		dialog.set_primary_action(__("Update"), function () {
+			frappe.call({
+				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_payment_adjustment_in_booking",
+				args: {
+					vehicle_booking_order: me.frm.doc.name,
+					payment_adjustment: dialog.get_value('payment_adjustment')
+				},
+				callback: function (r) {
+					if (!r.exc) {
+						me.frm.reload_doc();
+						dialog.hide();
+					}
+				}
+			});
+		});
+		dialog.show();
 	},
 });
 

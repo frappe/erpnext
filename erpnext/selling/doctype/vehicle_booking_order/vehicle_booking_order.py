@@ -62,13 +62,13 @@ class VehicleBookingOrder(AccountsController):
 		self.set_title()
 		self.clean_remarks()
 
+		self.reset_payment_adjustment()
 		self.calculate_taxes_and_totals()
 		self.validate_amounts()
 		self.validate_taxes_and_charges_accounts()
 
 		self.get_terms_and_conditions()
 		self.validate_payment_schedule()
-
 		self.update_payment_status()
 		self.update_delivery_status()
 		self.update_invoice_status()
@@ -287,11 +287,22 @@ class VehicleBookingOrder(AccountsController):
 			self.customer_advance = 0
 			self.supplier_advance = 0
 
-		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
-		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance, self.precision('supplier_outstanding'))
+		self.calculate_outstanding_amount()
 
 		self.calculate_contribution()
 		self.set_total_in_words()
+
+	def calculate_outstanding_amount(self):
+		self.payment_adjustment = flt(self.payment_adjustment, self.precision('payment_adjustment'))
+
+		self.customer_outstanding = flt(self.invoice_total - self.customer_advance + self.payment_adjustment,
+			self.precision('customer_outstanding'))
+		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance + self.payment_adjustment,
+			self.precision('supplier_outstanding'))
+
+	def reset_payment_adjustment(self):
+		if self.docstatus != 1:
+			self.payment_adjustment = 0
 
 	def calculate_contribution(self):
 		total = 0.0
@@ -313,6 +324,16 @@ class VehicleBookingOrder(AccountsController):
 			self.validate_value(field, '>', 0)
 		for field in ['fni_amount', 'withholding_tax_amount', 'customer_outstanding', 'supplier_outstanding']:
 			self.validate_value(field, '>=', 0)
+
+		maximum_payment_adjustment = frappe.get_cached_value("Vehicles Settings", None, "maximum_payment_adjustment")
+		maximum_payment_adjustment = flt(maximum_payment_adjustment, self.precision('payment_adjustment'))
+		if maximum_payment_adjustment:
+			if abs(flt(self.payment_adjustment)) > maximum_payment_adjustment:
+				frappe.throw(_("Payment Adjustment cannot be greater than {0}")
+					.format(frappe.format(maximum_payment_adjustment, df=self.meta.get_field('payment_adjustment'))))
+
+		if abs(flt(self.payment_adjustment)) > self.invoice_total:
+			frappe.throw(_("Payment Adjustment cannot be greater than the Invoice Total"))
 
 	def set_total_in_words(self):
 		from frappe.utils import money_in_words
@@ -370,8 +391,7 @@ class VehicleBookingOrder(AccountsController):
 			})
 
 	def update_payment_status(self, update=False):
-		self.customer_outstanding = flt(self.invoice_total - self.customer_advance, self.precision('customer_outstanding'))
-		self.supplier_outstanding = flt(self.invoice_total - self.supplier_advance, self.precision('supplier_outstanding'))
+		self.calculate_outstanding_amount()
 
 		if self.customer_outstanding < 0:
 			frappe.throw(_("Customer Advance Received cannot be greater than the Invoice Total"))
@@ -1210,6 +1230,23 @@ def update_item_in_booking(vehicle_booking_order, item_code):
 	save_vehicle_booking_for_update(vbo_doc)
 
 	frappe.msgprint(_("Vehicle Item Code (Variant) Updated Successfully"), indicator='green')
+
+
+@frappe.whitelist()
+def update_payment_adjustment_in_booking(vehicle_booking_order, payment_adjustment):
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	validate_delivery_status_for_update(vbo_doc)
+
+	vbo_doc.payment_adjustment = flt(payment_adjustment)
+
+	vbo_doc.calculate_outstanding_amount()
+	vbo_doc.update_payment_status()
+	vbo_doc.validate_amounts()
+
+	save_vehicle_booking_for_update(vbo_doc)
+
+	frappe.msgprint(_("Payment Adjustment Updated Successfully"), indicator='green', alert=True)
+
 
 def handle_delivery_period_changed(vbo_doc):
 	to_date = frappe.get_cached_value("Vehicle Allocation Period", vbo_doc.delivery_period, 'to_date')
