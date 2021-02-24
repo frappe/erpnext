@@ -4,22 +4,21 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import msgprint, _
+from frappe.utils import flt
+from erpnext.accounts.utils import get_currency_precision
+from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
 
 def execute(filters=None):
 	if not filters: filters = {}
 
-	advances_list = get_advances(filters)
+	advances = get_advances(filters)
 	columns = get_columns()
 
-	if not advances_list:
+	if not advances:
 		msgprint(_("No record found"))
-		return columns, advances_list
+		return columns, advances
 
-	data = []
-	for advance in advances_list:
-		row = [advance.name, advance.employee, advance.company, advance.posting_date,
-		advance.advance_amount, advance.paid_amount,  advance.claimed_amount, advance.status]
-		data.append(row)
+	data = get_data(advances, filters)
 
 	return columns, data
 
@@ -57,18 +56,21 @@ def get_columns():
 			"label": _("Advance Amount"),
 			"fieldname": "advance_amount",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"label": _("Paid Amount"),
 			"fieldname": "paid_amount",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
 			"label": _("Claimed Amount"),
 			"fieldname": "claimed_amount",
 			"fieldtype": "Currency",
+			"options": "currency",
 			"width": 120
 		},
 		{
@@ -76,29 +78,73 @@ def get_columns():
 			"fieldname": "status",
 			"fieldtype": "Data",
 			"width": 120
+		},
+		{
+			"label": _("Currency"),
+			"fieldname": "currency",
+			"fieldtype": "Link",
+			"options": "Currency",
+			"width": 120
 		}
 	]
 
 def get_conditions(filters):
-	conditions = ""
+	conditions = {}
 
 	if filters.get("employee"):
-		conditions += "and employee = %(employee)s"
+		conditions["employee"] = filters.employee
+
 	if filters.get("company"):
-		conditions += " and company = %(company)s"
+		conditions["company"] = filters.company
+
 	if filters.get("status"):
-		conditions += " and status = %(status)s"
+		conditions["status"] = filters.status
+
 	if filters.get("from_date"):
-		conditions += " and posting_date>=%(from_date)s"
+		conditions["posting_date"] = (">=", filters.from_date)
+
 	if filters.get("to_date"):
-		conditions += " and posting_date<=%(to_date)s"
+		conditions["posting_date"] = ("<=", filters.to_date)
 
 	return conditions
 
 def get_advances(filters):
 	conditions = get_conditions(filters)
-	return frappe.db.sql("""select name, employee, paid_amount, status, advance_amount, claimed_amount, company,
-		posting_date, purpose
-		from `tabEmployee Advance`
-		where docstatus<2 %s order by posting_date, name desc""" %
-		conditions, filters, as_dict=1)
+	conditions["docstatus"] = ("<", 2)
+
+	return frappe.db.get_list("Employee Advance",
+		fields = ["name", "employee", "paid_amount", "status", "advance_amount",
+			"claimed_amount", "company", "posting_date", "purpose", "exchange_rate"],
+		filters = conditions,
+		order_by = "posting_date, name desc"
+	)
+
+def get_data(advances, filters):
+	currency_precision = get_currency_precision() or 2
+	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
+
+	for adv in advances:
+		employee_currency = get_employee_currency(adv.employee)
+
+		# if employee filter is applied show the report in employee currency, else in company currency
+
+		if filters.get("employee"):
+			adv.currency = employee_currency
+		else:
+			adv.currency = company_currency
+
+		if filters.get("employee") and adv.currency == employee_currency:
+			adv["paid_amount"] = adv.paid_amount
+			adv["advance_amount"] = adv.advance_amount
+			adv["claimed_amount"] = adv.claimed_amount
+		else:
+			adv["paid_amount"] = flt(flt(adv.paid_amount) *
+				flt(adv.exchange_rate), currency_precision)
+
+			adv["advance_amount"] = flt(flt(adv.advance_amount) *
+				flt(adv.exchange_rate), currency_precision)
+
+			adv["claimed_amount"] = flt(flt(adv.claimed_amount) *
+				flt(adv.exchange_rate), currency_precision)
+
+	return advances
