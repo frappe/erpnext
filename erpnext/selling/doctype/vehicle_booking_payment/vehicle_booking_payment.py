@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 from frappe import _
-from frappe.utils import flt, cstr, cint, nowdate
+from frappe.utils import flt, cstr, cint, nowdate, clean_whitespace
 from frappe.model.document import Document
 
 instrument_copy_fields = ['instrument_type', 'instrument_date', 'instrument_no', 'bank', 'amount']
@@ -21,6 +21,7 @@ class VehicleBookingPayment(Document):
 		self.update_undeposited_instrument_details()
 		self.validate_amounts()
 		self.calculate_total_amount()
+		self.clean_whitespace()
 		self.set_party_name()
 		self.set_title()
 
@@ -45,6 +46,11 @@ class VehicleBookingPayment(Document):
 
 	def set_title(self):
 		self.title = self.party_name
+
+	def clean_whitespace(self):
+		for d in self.instruments:
+			d.instrument_no = clean_whitespace(d.instrument_no)
+			d.instrument_title = clean_whitespace(d.instrument_title)
 
 	def validate_party_type(self):
 		party_types_allowed_map = {
