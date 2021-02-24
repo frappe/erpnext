@@ -64,9 +64,16 @@ def get_notification_config():
 			"Timesheet": {"status": "Draft"},
 
 			"Employee Advance": {
-				"status": ("!=", "Claimed"),
+				"status": ("not in", ("Claimed", "Deducted from Salary")),
 				"docstatus": ("<", 2)
 			},
+
+			"Vehicle Booking Order": {
+				"status": ("!=", "Completed"),
+				"docstatus": ("<", 2)
+			},
+
+			"Vehicle Booking Payment": {"docstatus": 0},
 
 			"Lab Test": {"docstatus": 0},
 			"Sample Collection": {"docstatus": 0},
