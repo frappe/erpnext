@@ -19,7 +19,6 @@
  ],
  "fields": [
   {
-   "depends_on": "eval:!doc.asset_category_name",
    "fieldname": "asset_category_name",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -67,7 +66,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-22 12:31:14.425319",
+ "modified": "2021-02-24 15:05:38.621803",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Category",
