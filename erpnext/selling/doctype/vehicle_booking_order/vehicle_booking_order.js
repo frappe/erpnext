@@ -182,12 +182,15 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	add_create_buttons: function () {
-		if (this.frm.doc.docstatus === 1) {
-			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.supplier_outstanding) > 0;
-
+		if (this.frm.doc.docstatus < 2) {
 			if (flt(this.frm.doc.customer_outstanding) > 0) {
 				this.frm.add_custom_button(__('Customer Payment'), () => this.make_payment_entry('Customer'), __('Payment'));
 			}
+		}
+
+		if (this.frm.doc.docstatus === 1) {
+			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.supplier_outstanding) > 0;
+
 			if (flt(this.frm.doc.supplier_outstanding) > 0) {
 				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Payment'));
 			}

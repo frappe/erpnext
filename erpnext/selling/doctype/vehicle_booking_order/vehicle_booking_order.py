@@ -109,10 +109,10 @@ class VehicleBookingOrder(AccountsController):
 		self.customer_payments = []
 		self.supplier_payments = []
 
-		if self.docstatus != 1:
+		if self.docstatus == 2:
 			return
 
-		payment_entries = get_booking_payments(self.name)
+		payment_entries = get_booking_payments(self.name, include_draft=cint(self.docstatus == 0))
 		customer_payments_by_row_id = {}
 
 		for d in payment_entries:
@@ -1306,12 +1306,16 @@ def validate_supplier_payment_for_update(vbo_doc):
 			.format(frappe.bold(vbo_doc.name)))
 
 
-def get_booking_payments(vehicle_booking_order):
+def get_booking_payments(vehicle_booking_order, include_draft=False):
 	if not vehicle_booking_order:
 		return []
 
 	if isinstance(vehicle_booking_order, string_types):
 		vehicle_booking_order = [vehicle_booking_order]
+
+	docstatus_cond = "p.docstatus = 1"
+	if include_draft:
+		docstatus_cond = "p.docstatus < 2"
 
 	payment_entries = frappe.db.sql("""
 		select p.name, p.posting_date,
@@ -1323,9 +1327,9 @@ def get_booking_payments(vehicle_booking_order):
 			i.name as row_id, i.vehicle_booking_payment_row
 		from `tabVehicle Booking Payment Detail` i
 		inner join `tabVehicle Booking Payment` p on p.name = i.parent
-		where p.docstatus = 1 and p.vehicle_booking_order in %s
+		where {0} and p.vehicle_booking_order in %s
 		order by i.instrument_date, p.posting_date, p.creation
-	""", [vehicle_booking_order], as_dict=1)
+	""".format(docstatus_cond), [vehicle_booking_order], as_dict=1)
 
 	return payment_entries
 
