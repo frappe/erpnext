@@ -1,0 +1,117 @@
+{
+ "creation": "2021-02-23 14:15:06.962411",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "instrument_type",
+  "instrument_date",
+  "instrument_no",
+  "column_break_4",
+  "instrument_title",
+  "vehicle_booking_payment",
+  "vehicle_booking_payment_row",
+  "section_break_6",
+  "bank",
+  "amount",
+  "column_break_8",
+  "deposited"
+ ],
+ "fields": [
+  {
+   "fieldname": "instrument_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Type",
+   "options": "\nPay Order\nCheque\nDemand Draft",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Bank",
+   "options": "Bank"
+  },
+  {
+   "columns": 1,
+   "fieldname": "instrument_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "instrument_no",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Instrument No",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "Company:company:default_currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "instrument_title",
+   "fieldtype": "Small Text",
+   "label": "Instrument Title"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_booking_payment",
+   "fieldtype": "Link",
+   "label": "Receiving Document",
+   "options": "Vehicle Booking Payment",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_booking_payment_row",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Receiving Document Row",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "deposited",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Deposited",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-02-23 20:46:59.350437",
+ "modified_by": "Administrator",
+ "module": "Selling",
+ "name": "Vehicle Booking Payment Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
