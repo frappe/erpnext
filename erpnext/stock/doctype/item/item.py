@@ -1168,7 +1168,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0, tra
 		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and
 			po.name = po_item.parent {0}
 		order by po.transaction_date desc, po.name desc
-		limit 1""".format(po_date_condition), (item_code, cstr(doc_name)), as_dict=1, debug=True)
+		limit 1""".format(po_date_condition), (item_code, cstr(doc_name)), as_dict=1)
 
 	# get last purchase receipt item details
 	last_purchase_receipt = frappe.db.sql("""
@@ -1179,7 +1179,7 @@ def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0, tra
 		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
 			pr.name = pr_item.parent {0}
 		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
-		limit 1""".format(prec_date_condition), (item_code, cstr(doc_name)), as_dict=1, debug=True)
+		limit 1""".format(prec_date_condition), (item_code, cstr(doc_name)), as_dict=1)
 
 	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date
 							   or "1900-01-01")
