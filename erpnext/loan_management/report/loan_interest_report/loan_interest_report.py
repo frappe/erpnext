@@ -171,7 +171,7 @@ def get_loan_wise_pledges(filters):
 	return current_pledges
 
 def get_loan_wise_security_value(filters, current_pledges):
-	loan_security_details = get_loan_security_details(filters)
+	loan_security_details = get_loan_security_details()
 	loan_wise_security_value = {}
 
 	for key in current_pledges:
