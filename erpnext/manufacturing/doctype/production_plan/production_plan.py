@@ -319,7 +319,7 @@ class ProductionPlan(Document):
 		frappe.flags.mute_messages = False
 
 		if wo_list:
-			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
+			wo_list = ["""<a href="/app/Form/Work Order/%s" target="_blank">%s</a>""" % \
 				(p, p) for p in wo_list]
 			msgprint(_("{0} created").format(comma_and(wo_list)))
 		else :
@@ -423,7 +423,7 @@ class ProductionPlan(Document):
 		frappe.flags.mute_messages = False
 
 		if material_request_list:
-			material_request_list = ["""<a href="#Form/Material Request/{0}">{1}</a>""".format(m.name, m.name) \
+			material_request_list = ["""<a href="/app/Form/Material Request/{0}">{1}</a>""".format(m.name, m.name) \
 				for m in material_request_list]
 			msgprint(_("{0} created").format(comma_and(material_request_list)))
 		else :

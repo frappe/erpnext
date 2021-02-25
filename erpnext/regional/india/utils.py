@@ -12,6 +12,7 @@ from erpnext.regional.india import number_state_mapping
 from six import string_types
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_account_currency
+from frappe.model.utils import get_fetch_values
 
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
@@ -47,12 +48,23 @@ def validate_gstin_for_india(doc, method):
 		validate_gstin_check_digit(doc.gstin)
 		set_gst_state_and_state_number(doc)
 
+		if not doc.gst_state:
+			frappe.throw(_("Please Enter GST state"))
+
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
 
+def validate_pan_for_india(doc, method):
+	if doc.get('country') != 'India' or not doc.pan:
+		return
+
+	p = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
+	if not p.match(doc.pan):
+		frappe.throw(_("Invalid PAN No. The input you've entered doesn't match the format of PAN."))
+
 def validate_tax_category(doc, method):
-	if doc.get('gst_state') and frappe.db.get_value('Tax category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
+	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
 		if doc.is_inter_state:
 			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
 		else:
@@ -161,11 +173,13 @@ def get_regional_address_details(party_details, doctype, company):
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
 
+	update_party_details(party_details, doctype)
+
 	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
 
 	if is_internal_transfer(party_details, doctype):
 		party_details.taxes_and_charges = ''
-		party_details.taxes = ''
+		party_details.taxes = []
 		return party_details
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
@@ -208,6 +222,11 @@ def get_regional_address_details(party_details, doctype, company):
 	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
 	return party_details
+
+def update_party_details(party_details, doctype):
+	for address_field in ['shipping_address', 'company_address', 'supplier_address', 'shipping_address_name', 'customer_address']:
+		if party_details.get(address_field):
+			party_details.update(get_fetch_values(doctype, address_field, party_details.get(address_field)))
 
 def is_internal_transfer(party_details, doctype):
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
@@ -761,3 +780,24 @@ def make_regional_gl_entries(gl_entries, doc):
 				)
 
 	return gl_entries
+
+@frappe.whitelist()
+def get_regional_round_off_accounts(company, account_list):
+	country = frappe.get_cached_value('Company', company, 'country')
+
+	if country != 'India':
+		return
+
+	if isinstance(account_list, string_types):
+		account_list = json.loads(account_list)
+
+	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
+		return
+
+	gst_accounts = get_gst_accounts(company)
+	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+		+ gst_accounts.get('igst_account')
+
+	account_list.extend(gst_account_list)
+
+	return account_list

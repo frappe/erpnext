@@ -119,7 +119,7 @@ def create_records(patient):
 	ip_record.expected_length_of_stay = 0
 	ip_record.save()
 	ip_record.reload()
-	service_unit = get_healthcare_service_unit()
+	service_unit = get_healthcare_service_unit('Test Service Unit Ip Occupancy')
 	admit_patient(ip_record, service_unit, now_datetime())
 
 	ipmo = create_ipmo(patient)

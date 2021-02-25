@@ -29,7 +29,7 @@ def execute():
 				'response_by_variance': response_by_variance,
 				'resolution_by_variance': resolution_by_variance,
 				'first_response_time': mins_to_first_response
-			})
+			}, update_modified=False)
 			# commit after every 100 updates
 			count += 1
 			if count%100 == 0:
@@ -44,7 +44,7 @@ def execute():
 		count = 0
 		for entry in opportunities:
 			mins_to_first_response = convert_to_seconds(entry.mins_to_first_response, 'Minutes')
-			frappe.db.set_value('Opportunity', entry.name, 'first_response_time', mins_to_first_response)
+			frappe.db.set_value('Opportunity', entry.name, 'first_response_time', mins_to_first_response, update_modified=False)
 			# commit after every 100 updates
 			count += 1
 			if count%100 == 0:

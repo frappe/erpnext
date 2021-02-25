@@ -172,7 +172,7 @@ class TestAccount(unittest.TestCase):
 			frappe.delete_doc("Account", doc)
 
 
-def _make_test_records(verbose):
+def _make_test_records(verbose=None):
 	from frappe.test_runner import make_test_objects
 
 	accounts = [
@@ -254,7 +254,8 @@ def create_account(**kwargs):
 			account_name = kwargs.get('account_name'),
 			account_type = kwargs.get('account_type'),
 			parent_account = kwargs.get('parent_account'),
-			company = kwargs.get('company')
+			company = kwargs.get('company'),
+			account_currency = kwargs.get('account_currency')
 		))
 
 		account.save()
