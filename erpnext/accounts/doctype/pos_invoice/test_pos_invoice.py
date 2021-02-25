@@ -198,6 +198,65 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get('payments')[0].amount, -500)
 		self.assertEqual(pos_return.get('payments')[1].amount, -500)
 
+	def test_pos_return_for_serialized_item(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
+
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+
+		pos.get("items")[0].serial_no = serial_nos[0]
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 1000, 'default': 1})
+
+		pos.insert()
+		pos.submit()
+
+		pos_return = make_sales_return(pos.name)
+
+		pos_return.insert()
+		pos_return.submit()
+		self.assertEqual(pos_return.get('items')[0].serial_no, serial_nos[0])
+
+	def test_partial_pos_returns(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
+
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, qty=2, rate=1000, do_not_save=1)
+
+		pos.get("items")[0].serial_no = serial_nos[0] + "\n" + serial_nos[1]
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 1000, 'default': 1})
+
+		pos.insert()
+		pos.submit()
+
+		pos_return1 = make_sales_return(pos.name)
+
+		# partial return 1
+		pos_return1.get('items')[0].qty = -1
+		pos_return1.get('items')[0].serial_no = serial_nos[0]
+		pos_return1.insert()
+		pos_return1.submit()
+
+		# partial return 2
+		pos_return2 = make_sales_return(pos.name)
+		self.assertEqual(pos_return2.get('items')[0].qty, -1)
+		self.assertEqual(pos_return2.get('items')[0].serial_no, serial_nos[1])
+
 	def test_pos_change_amount(self):
 		pos = create_pos_invoice(company= "_Test Company", debit_to="Debtors - _TC",
 			income_account = "Sales - _TC", expense_account = "Cost of Goods Sold - _TC", rate=105,
