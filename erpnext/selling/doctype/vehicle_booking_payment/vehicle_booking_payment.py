@@ -288,11 +288,12 @@ def get_payment_entry(vehicle_booking_order, party_type):
 	else:
 		doc.party = vbo.get('financer') or vbo.get('customer')
 
-	doc.set('instruments', [])
 	if doc.payment_type == "Pay":
 		instruments = get_undeposited_instruments(vehicle_booking_order)
 		for d in instruments:
 			doc.append('instruments', d)
+	else:
+		doc.append('instruments')
 
 	doc.set_party_name()
 	doc.calculate_total_amount()
