@@ -134,6 +134,8 @@
   "ref_sq",
   "column_break_74",
   "party_account_currency",
+  "is_internal_supplier",
+  "represents_company",
   "inter_company_order_reference"
  ],
  "fields": [
@@ -168,6 +170,7 @@
    "bold": 1,
    "fieldname": "supplier",
    "fieldtype": "Link",
+   "in_global_search": 1,
    "in_standard_filter": 1,
    "label": "Supplier",
    "oldfieldname": "supplier",
@@ -1100,13 +1103,28 @@
   {
    "fieldname": "items_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fetch_from": "supplier.is_internal_supplier",
+   "fieldname": "is_internal_supplier",
+   "fieldtype": "Check",
+   "label": "Is Internal Supplier"
+  },
+  {
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-30 13:58:14.697921",
+ "modified": "2021-01-20 22:07:23.487138",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2019-05-09 15:47:39.760406",
  "doctype": "DocType",
  "engine": "InnoDB",
@@ -8,6 +9,7 @@
   "leave_type",
   "transaction_type",
   "transaction_name",
+  "company",
   "leaves",
   "column_break_7",
   "from_date",
@@ -106,12 +108,22 @@
    "fieldtype": "Link",
    "label": "Holiday List",
    "options": "Holiday List"
+  },
+  {
+   "fetch_from": "employee.company",
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "read_only": 1,
+   "reqd": 1
   }
  ],
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2020-09-04 12:16:36.569066",
+ "links": [],
+ "modified": "2021-01-04 18:47:45.146652",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Ledger Entry",

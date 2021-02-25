@@ -7,12 +7,13 @@ from frappe import _
 from frappe.utils import flt, cint, getdate, now, date_diff
 from erpnext.stock.utils import add_additional_uom_columns
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
-
+from erpnext.stock.utils import is_reposting_item_valuation_in_progress
 from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
 from six import iteritems
 
 def execute(filters=None):
+	is_reposting_item_valuation_in_progress()
 	if not filters: filters = {}
 
 	validate_filters(filters)

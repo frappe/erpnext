@@ -9,7 +9,7 @@ def execute():
 	# NOTE: sequence is important
 	renamed_fields = get_all_renamed_fields()
 
-	for dt, script_field, ref_dt_field in (("Custom Script", "script", "dt"), ("Print Format", "html", "doc_type")):
+	for dt, script_field, ref_dt_field in (("Client Script", "script", "dt"), ("Print Format", "html", "doc_type")):
 
 		cond1 = " or ".join("""{0} like "%%{1}%%" """.format(script_field, d[0].replace("_", "\\_")) for d in renamed_fields)
 		cond2 = " and standard = 'No'" if dt == "Print Format" else ""

@@ -18,13 +18,18 @@ frappe.ui.form.on('Employee Advance', {
 			if (!frm.doc.employee) {
 				frappe.msgprint(__("Please select employee first"));
 			}
-			var company_currency = erpnext.get_currency(frm.doc.company);
+			let company_currency = erpnext.get_currency(frm.doc.company);
+			let currencies = [company_currency];
+			if (frm.doc.currency && (frm.doc.currency != company_currency)) {
+				currencies.push(frm.doc.currency);
+			}
+
 			return {
 				filters: {
 					"root_type": "Asset",
 					"is_group": 0,
 					"company": frm.doc.company,
-					"account_currency": ["in", [frm.doc.currency, company_currency]],
+					"account_currency": ["in", currencies],
 				}
 			};
 		});
@@ -181,21 +186,23 @@ frappe.ui.form.on('Employee Advance', {
 	},
 
 	currency: function(frm) {
-		var from_currency = frm.doc.currency;
-		var company_currency;
-		if (!frm.doc.company) {
-			company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
-		} else {
-			company_currency = erpnext.get_currency(frm.doc.company);
+		if (frm.doc.currency) {
+			var from_currency = frm.doc.currency;
+			var company_currency;
+			if (!frm.doc.company) {
+				company_currency = erpnext.get_currency(frappe.defaults.get_default("Company"));
+			} else {
+				company_currency = erpnext.get_currency(frm.doc.company);
+			}
+			if (from_currency != company_currency) {
+				frm.events.set_exchange_rate(frm, from_currency, company_currency);
+			} else {
+				frm.set_value("exchange_rate", 1.0);
+				frm.set_df_property('exchange_rate', 'hidden', 1);
+				frm.set_df_property("exchange_rate", "description", "" );
+			}
+			frm.refresh_fields();
 		}
-		if (from_currency != company_currency) {
-			frm.events.set_exchange_rate(frm, from_currency, company_currency);
-		} else {
-			frm.set_value("exchange_rate", 1.0);
-			frm.set_df_property('exchange_rate', 'hidden', 1);
-			frm.set_df_property("exchange_rate", "description", "" );
-		}
-		frm.refresh_fields();
 	},
 
 	set_exchange_rate: function(frm, from_currency, company_currency) {

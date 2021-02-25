@@ -7,9 +7,10 @@ import unittest
 import frappe
 from frappe.utils import flt
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import set_perpetual_inventory, get_gl_entries, test_records as pr_test_records, make_purchase_receipt
+	import get_gl_entries, test_records as pr_test_records, make_purchase_receipt
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
+from erpnext.accounts.doctype.account.test_account import create_account
 
 class TestLandedCostVoucher(unittest.TestCase):
 	def test_landed_cost_voucher(self):
@@ -27,7 +28,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
-		submit_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
+		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		pr_lc_value = frappe.db.get_value("Purchase Receipt Item", {"parent": pr.name}, "landed_cost_voucher_amount")
 		self.assertEqual(pr_lc_value, 25.0)
@@ -89,7 +90,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 			},
 			fieldname=["qty_after_transaction", "stock_value"], as_dict=1)
 
-		submit_landed_cost_voucher("Purchase Invoice", pi.name, pi.company)
+		create_landed_cost_voucher("Purchase Invoice", pi.name, pi.company)
 
 		pi_lc_value = frappe.db.get_value("Purchase Invoice Item", {"parent": pi.name},
 			"landed_cost_voucher_amount")
@@ -137,7 +138,7 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 		serial_no_rate = frappe.db.get_value("Serial No", "SN001", "purchase_rate")
 
-		submit_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
+		create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company)
 
 		serial_no = frappe.db.get_value("Serial No", "SN001",
 			["warehouse", "purchase_rate"], as_dict=1)
@@ -147,7 +148,6 @@ class TestLandedCostVoucher(unittest.TestCase):
 
 
 	def test_landed_cost_voucher_for_odd_numbers (self):
-
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1", supplier_warehouse = "Work in Progress - TCP1", do_not_save=True)
 		pr.items[0].cost_center = "Main - TCP1"
 		for x in range(2):
@@ -160,10 +160,10 @@ class TestLandedCostVoucher(unittest.TestCase):
 			})
 		pr.submit()
 
-		lcv = submit_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, 123.22)
+		lcv = create_landed_cost_voucher("Purchase Receipt", pr.name, pr.company, 123.22)
 
-		self.assertEqual(lcv.items[0].applicable_charges, 41.07)
-		self.assertEqual(lcv.items[2].applicable_charges, 41.08)
+		self.assertEqual(flt(lcv.items[0].applicable_charges, 2), 41.07)
+		self.assertEqual(flt(lcv.items[2].applicable_charges, 2), 41.08)
 
 	def test_multiple_landed_cost_voucher_against_pr(self):
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
@@ -206,6 +206,50 @@ class TestLandedCostVoucher(unittest.TestCase):
 		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 100)
 		self.assertEqual(pr.items[1].landed_cost_voucher_amount, 100)
 
+	def test_multi_currency_lcv(self):
+		from erpnext.setup.doctype.currency_exchange.test_currency_exchange import test_records, save_new_records
+
+		save_new_records(test_records)
+
+		## Create USD Shipping charges_account
+		usd_shipping = create_account(account_name="Shipping Charges USD",
+			parent_account="Duties and Taxes - TCP1", company="_Test Company with perpetual inventory",
+			account_currency="USD")
+
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", warehouse = "Stores - TCP1",
+			supplier_warehouse = "Stores - TCP1")
+		pr.submit()
+
+		lcv = make_landed_cost_voucher(company = pr.company, receipt_document_type = "Purchase Receipt",
+			receipt_document=pr.name, charges=100, do_not_save=True)
+
+		lcv.append("taxes", {
+			"description": "Shipping Charges",
+			"expense_account": usd_shipping,
+			"amount": 10
+		})
+
+		lcv.save()
+		lcv.submit()
+		pr.load_from_db()
+
+		# Considering exchange rate from USD to INR as 62.9
+		self.assertEqual(lcv.total_taxes_and_charges, 729)
+		self.assertEqual(pr.items[0].landed_cost_voucher_amount, 729)
+
+		gl_entries = frappe.get_all("GL Entry", fields=["account", "credit", "credit_in_account_currency"],
+			filters={"voucher_no": pr.name, "account": ("in", ["Shipping Charges USD - TCP1", "Expenses Included In Valuation - TCP1"])})
+
+		expected_gl_entries = {
+			"Shipping Charges USD - TCP1": [629, 10],
+			"Expenses Included In Valuation - TCP1": [100, 100]
+		}
+
+		for entry in gl_entries:
+			amounts = expected_gl_entries.get(entry.account)
+			self.assertEqual(entry.credit, amounts[0])
+			self.assertEqual(entry.credit_in_account_currency, amounts[1])
+
 def make_landed_cost_voucher(** args):
 	args = frappe._dict(args)
 	ref_doc = frappe.get_doc(args.receipt_document_type, args.receipt_document)
@@ -236,7 +280,7 @@ def make_landed_cost_voucher(** args):
 	return lcv
 
 
-def submit_landed_cost_voucher(receipt_document_type, receipt_document, company, charges=50):
+def create_landed_cost_voucher(receipt_document_type, receipt_document, company, charges=50):
 	ref_doc = frappe.get_doc(receipt_document_type, receipt_document)
 
 	lcv = frappe.new_doc("Landed Cost Voucher")

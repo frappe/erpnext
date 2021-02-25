@@ -127,7 +127,7 @@ def make_custom_fields(update=True):
 				options="\n".join(map(lambda x: frappe.safe_decode(x, encoding='utf-8'), vat_collectability_options)),
 				fetch_from="company.vat_collectability"),
 			dict(fieldname='sb_e_invoicing_reference', label='E-Invoicing',
-				fieldtype='Section Break', insert_after='pos_total_qty', print_hide=1),
+				fieldtype='Section Break', insert_after='against_income_account', print_hide=1),
 			dict(fieldname='company_tax_id', label='Company Tax ID',
 				fieldtype='Data', insert_after='sb_e_invoicing_reference', print_hide=1, read_only=1,
 				fetch_from="company.tax_id"),

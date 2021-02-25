@@ -21,7 +21,7 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 		item.no_of_months = 12
 		item.save()
 
-		si = create_sales_invoice(item=item.name, posting_date="2019-01-10", do_not_submit=True)
+		si = create_sales_invoice(item=item.name, update_stock=0, posting_date="2019-01-10", do_not_submit=True)
 		si.items[0].enable_deferred_revenue = 1
 		si.items[0].service_start_date = "2019-01-10"
 		si.items[0].service_end_date = "2019-03-15"

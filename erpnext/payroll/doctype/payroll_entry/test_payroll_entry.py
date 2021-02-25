@@ -22,7 +22,7 @@ class TestPayrollEntry(unittest.TestCase):
 				frappe.db.sql("delete from `tab%s`" % dt)
 
 		make_earning_salary_component(setup=True, company_list=["_Test Company"])
-		make_deduction_salary_component(setup=True, company_list=["_Test Company"])
+		make_deduction_salary_component(setup=True, test_tax=False, company_list=["_Test Company"])
 
 		frappe.db.set_value("Payroll Settings", None, "email_salary_slip_to_employee", 0)
 
@@ -107,9 +107,9 @@ class TestPayrollEntry(unittest.TestCase):
 			frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") != "_Test Payroll Payable - _TC":
 				frappe.db.set_value("Company", "_Test Company", "default_payroll_payable_account",
 					"_Test Payroll Payable - _TC")
-
-		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=frappe.db.get_value("Company", "_Test Company", "default_currency"))
-		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=frappe.db.get_value("Company", "_Test Company", "default_currency"))
+		currency=frappe.db.get_value("Company", "_Test Company", "default_currency")
+		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=currency, test_tax=False)
+		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=currency, test_tax=False)
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):

@@ -1,6 +1,8 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+frappe.provide("erpnext.accounts.dimensions");
+
 frappe.ui.form.on('Loyalty Program', {
 	setup: function(frm) {
 		var help_content =
@@ -46,20 +48,17 @@ frappe.ui.form.on('Loyalty Program', {
 			};
 		});
 
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company
-				}
-			};
-		});
-
 		frm.set_value("company", frappe.defaults.get_user_default("Company"));
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
 		if (frm.doc.loyalty_program_type === "Single Tier Program" && frm.doc.collection_rules.length > 1) {
 			frappe.throw(__("Please select the Multiple Tier Program type for more than one collection rules."));
 		}
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	}
 });

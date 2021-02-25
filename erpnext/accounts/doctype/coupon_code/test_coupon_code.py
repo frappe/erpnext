@@ -28,22 +28,22 @@ def test_create_test_data():
 		"item_group": "_Test Item Group",
 		"item_name": "_Test Tesla Car",
 		"apply_warehouse_wise_reorder_level": 0,
-		"warehouse":"Stores - TCP1",
+		"warehouse":"Stores - _TC",
 		"gst_hsn_code": "999800",
 		"valuation_rate": 5000,
 		"standard_rate":5000,
 		"item_defaults": [{
-		"company": "_Test Company with perpetual inventory",
-		"default_warehouse": "Stores - TCP1",
+		"company": "_Test Company",
+		"default_warehouse": "Stores - _TC",
 		"default_price_list":"_Test Price List",
-		"expense_account": "Cost of Goods Sold - TCP1",
-		"buying_cost_center": "Main - TCP1",
-		"selling_cost_center": "Main - TCP1",
-		"income_account": "Sales - TCP1"
+		"expense_account": "Cost of Goods Sold - _TC",
+		"buying_cost_center": "Main - _TC",
+		"selling_cost_center": "Main - _TC",
+		"income_account": "Sales - _TC"
 		}],
 		"show_in_website": 1,
 		"route":"-test-tesla-car",
-		"website_warehouse": "Stores - TCP1"
+		"website_warehouse": "Stores - _TC"
 		})
 		item.insert()
 	# create test item price
@@ -65,12 +65,12 @@ def test_create_test_data():
 		"items": [{
 			"item_code": "_Test Tesla Car"
 		}],
-		"warehouse":"Stores - TCP1",
+		"warehouse":"Stores - _TC",
 		"coupon_code_based":1,
 		"selling": 1,
 		"rate_or_discount": "Discount Percentage",
 		"discount_percentage": 30,
-		"company": "_Test Company with perpetual inventory",
+		"company": "_Test Company",
 		"currency":"INR",
 		"for_price_list":"_Test Price List"
 		})
@@ -85,7 +85,7 @@ def test_create_test_data():
 		})
 		sales_partner.insert()
 	# create test item coupon code
-	if not frappe.db.exists("Coupon Code","SAVE30"):
+	if not frappe.db.exists("Coupon Code", "SAVE30"):
 		coupon_code = frappe.get_doc({
 		"doctype": "Coupon Code",
 		"coupon_name":"SAVE30",
@@ -102,35 +102,27 @@ class TestCouponCode(unittest.TestCase):
 		test_create_test_data()
 
 	def tearDown(self):
-		frappe.set_user("Administrator")
+		frappe.set_user("Administrator")		
 
-	def test_1_check_coupon_code_used_before_so(self):
-		coupon_code = frappe.get_doc("Coupon Code", frappe.db.get_value("Coupon Code", {"coupon_name":"SAVE30"}))
-		# reset used coupon code count
-		coupon_code.used=0
-		coupon_code.save()
-		# check no coupon code is used before sales order is made
-		self.assertEqual(coupon_code.get("used"),0)
+	def test_sales_order_with_coupon_code(self):
+		frappe.db.set_value("Coupon Code", "SAVE30", "used", 0)
 
-	def test_2_sales_order_with_coupon_code(self):
-		so = make_sales_order(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1',
-			customer="_Test Customer", selling_price_list="_Test Price List", item_code="_Test Tesla Car", rate=5000,qty=1,
+		so = make_sales_order(company='_Test Company', warehouse='Stores - _TC',
+			customer="_Test Customer", selling_price_list="_Test Price List",
+			item_code="_Test Tesla Car", rate=5000, qty=1,
 			do_not_submit=True)
 
-		so = frappe.get_doc('Sales Order', so.name)
-		# check item price before coupon code is applied
 		self.assertEqual(so.items[0].rate, 5000)
+
 		so.coupon_code='SAVE30'
 		so.sales_partner='_Test Coupon Partner'
 		so.save()
+
 		# check item price after coupon code is applied
 		self.assertEqual(so.items[0].rate, 3500)
-		so.submit()
 
-	def test_3_check_coupon_code_used_after_so(self):
-		doc = frappe.get_doc("Coupon Code", frappe.db.get_value("Coupon Code", {"coupon_name":"SAVE30"}))
-		# check no coupon code is used before sales order is made
-		self.assertEqual(doc.get("used"),1)
+		so.submit()
+		self.assertEqual(frappe.db.get_value("Coupon Code", "SAVE30", "used"), 1)
 
 
 
