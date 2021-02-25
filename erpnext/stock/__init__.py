@@ -64,10 +64,10 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 	if not account and warehouse.company:
 		account = get_company_default_inventory_account(warehouse.company)
 
-	if not account and warehouse.company:
+	if not account and warehouse.company and not warehouse.is_group:
 		frappe.throw(_("Please set Account in Warehouse {0} or Default Inventory Account in Company {1}")
 			.format(warehouse.name, warehouse.company))
 	return account
 
 def get_company_default_inventory_account(company):
-	return frappe.get_cached_value('Company',  company,  'default_inventory_account')
+	return frappe.get_cached_value('Company',  company, 'default_inventory_account')

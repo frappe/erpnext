@@ -1,0 +1,227 @@
+{
+ "actions": [],
+ "autoname": "format:Bank Statement Import on {creation}",
+ "beta": 1,
+ "creation": "2019-08-04 14:16:08.318714",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "bank_account",
+  "bank",
+  "column_break_4",
+  "google_sheets_url",
+  "refresh_google_sheet",
+  "html_5",
+  "import_file",
+  "download_template",
+  "status",
+  "template_options",
+  "import_warnings_section",
+  "template_warnings",
+  "import_warnings",
+  "section_import_preview",
+  "import_preview",
+  "import_log_section",
+  "import_log",
+  "show_failed_logs",
+  "import_log_preview",
+  "reference_doctype",
+  "import_type",
+  "submit_after_import",
+  "mute_emails"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "bank_account",
+   "fieldtype": "Link",
+   "label": "Bank Account",
+   "options": "Bank Account",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "depends_on": "eval:doc.bank_account",
+   "fetch_from": "bank_account.bank",
+   "fieldname": "bank",
+   "fieldtype": "Link",
+   "label": "Bank",
+   "options": "Bank",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "download_template",
+   "fieldtype": "Button",
+   "label": "Download Template"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "import_file",
+   "fieldtype": "Attach",
+   "in_list_view": 1,
+   "label": "Import File"
+  },
+  {
+   "fieldname": "import_preview",
+   "fieldtype": "HTML",
+   "label": "Import Preview"
+  },
+  {
+   "fieldname": "section_import_preview",
+   "fieldtype": "Section Break",
+   "label": "Preview"
+  },
+  {
+   "fieldname": "template_options",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Template Options",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "fieldname": "import_log",
+   "fieldtype": "Code",
+   "label": "Import Log",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "import_log_section",
+   "fieldtype": "Section Break",
+   "label": "Import Log"
+  },
+  {
+   "fieldname": "import_log_preview",
+   "fieldtype": "HTML",
+   "label": "Import Log Preview"
+  },
+  {
+   "default": "Pending",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Status",
+   "options": "Pending\nSuccess\nPartial Success\nError",
+   "read_only": 1
+  },
+  {
+   "fieldname": "template_warnings",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Template Warnings",
+   "options": "JSON"
+  },
+  {
+   "fieldname": "import_warnings_section",
+   "fieldtype": "Section Break",
+   "label": "Import File Errors and Warnings"
+  },
+  {
+   "fieldname": "import_warnings",
+   "fieldtype": "HTML",
+   "label": "Import Warnings"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_failed_logs",
+   "fieldtype": "Check",
+   "label": "Show Failed Logs"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal && !doc.import_file",
+   "fieldname": "html_5",
+   "fieldtype": "HTML",
+   "options": "<h5 class=\"text-muted uppercase\">Or</h5>"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal && !doc.import_file\n",
+   "description": "Must be a publicly accessible Google Sheets URL",
+   "fieldname": "google_sheets_url",
+   "fieldtype": "Data",
+   "label": "Import from Google Sheets"
+  },
+  {
+   "depends_on": "eval:doc.google_sheets_url && !doc.__unsaved",
+   "fieldname": "refresh_google_sheet",
+   "fieldtype": "Button",
+   "label": "Refresh Google Sheet"
+  },
+  {
+   "default": "Bank Transaction",
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Document Type",
+   "options": "DocType",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "default": "Insert New Records",
+   "fieldname": "import_type",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "in_list_view": 1,
+   "label": "Import Type",
+   "options": "\nInsert New Records\nUpdate Existing Records",
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "submit_after_import",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Submit After Import",
+   "set_only_once": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "mute_emails",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Don't Send Emails",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "hide_toolbar": 1,
+ "links": [],
+ "modified": "2021-02-10 19:29:59.027325",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Bank Statement Import",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
