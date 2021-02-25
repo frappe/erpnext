@@ -24,6 +24,7 @@ class VehicleAllocationCreationTool(Document):
 			doc.delivery_period = d.delivery_period_link
 			doc.code = d.code
 			doc.sr_no = d.sr_no
+			doc.is_additional = self.is_additional
 			doc.booking_price = d.booking_price
 			doc.vehicle_color = d.vehicle_color
 

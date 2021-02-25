@@ -80,7 +80,6 @@
    "default": "0",
    "fieldname": "is_additional",
    "fieldtype": "Check",
-   "hidden": 1,
    "label": "Is Additional Allocation"
   },
   {
@@ -103,7 +102,7 @@
  "hide_toolbar": 1,
  "icon": "fa fa-file-text",
  "issingle": 1,
- "modified": "2021-01-30 20:14:32.662331",
+ "modified": "2021-02-25 15:03:42.540724",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation Creation Tool",
