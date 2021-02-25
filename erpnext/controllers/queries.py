@@ -693,7 +693,7 @@ def vehicle_allocation_query(doctype, txt, searchfield, start, page_len, filters
 		where ({scond}) {fcond} {mcond}
 		order by
 			if(locate(%(_txt)s, title), locate(%(_txt)s, title), 99999),
-			sr_no
+			is_additional, sr_no
 		limit %(start)s, %(page_len)s
 	""".format(**{
 		'fields': ", ".join(fields),
