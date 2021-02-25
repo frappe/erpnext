@@ -341,6 +341,7 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
+			target_doc.pi_detail = source_doc.name
 		elif doctype == "Delivery Note":
 			target_doc.qty = -1* (source_doc.qty - source_doc.billed_qty - source_doc.returned_qty)
 			target_doc.against_sales_order = source_doc.against_sales_order

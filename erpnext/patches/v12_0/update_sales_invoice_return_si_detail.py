@@ -8,8 +8,10 @@ from six import iteritems
 def execute():
 	frappe.reload_doctype("Sales Invoice")
 	frappe.reload_doctype("Sales Invoice Item")
+	frappe.reload_doctype("Purchase Invoice")
+	frappe.reload_doctype("Purchase Invoice Item")
 
-	for dt, detail_field in [('Sales Invoice', 'si_detail')]:
+	for dt, detail_field in [('Sales Invoice', 'si_detail'), ('Purchase Invoice', 'pi_detail')]:
 		si_rows_to_update = {}
 		returns = frappe.get_all(dt, filters={"is_return": 1, "return_against": ['is', 'set']}, fields=['name', 'return_against', 'update_stock', 'docstatus'])
 
@@ -45,7 +47,7 @@ def execute():
 						frappe.db.sql("update `tab{0} Item` set {1} = %s where name = %s".format(dt, detail_field),
 							[valid_source.name, return_row.name])
 
-						if return_doc.docstatus == 1:
+						if return_doc.docstatus == 1 and dt == 'Sales Invoice':
 							update_dict = si_rows_to_update.setdefault(valid_source.name, frappe._dict({"returned_qty": 0, "base_returned_amount": 0}))
 							update_dict.base_returned_amount -= return_row.base_net_amount
 							if return_doc.update_stock:
