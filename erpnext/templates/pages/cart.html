@@ -96,7 +96,7 @@
 							})
 						});
 						function show_terms_and_conditions(terms_name) {
-							frappe.call('erpnext.shopping_cart.cart.get_terms_and_conditions', { terms_name })
+							frappe.call('erpnext.e_commerce.shopping_cart.cart.get_terms_and_conditions', { terms_name })
 							.then(r => {
 								frappe.msgprint({
 									title: terms_name,

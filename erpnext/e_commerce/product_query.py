@@ -3,7 +3,7 @@
 
 import frappe
 
-from erpnext.shopping_cart.product_info import get_product_info_for_website
+from erpnext.e_commerce.shopping_cart.product_info import get_product_info_for_website
 
 
 class ProductQuery:
