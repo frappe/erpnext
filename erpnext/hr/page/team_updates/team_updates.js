@@ -36,7 +36,7 @@ frappe.team_updates = {
 				start: me.start
 			},
 			callback: function(r) {
-				if(r.message) {
+				if (r.message && r.message.length > 0) {
 					r.message.forEach(function(d) {
 						me.add_row(d);
 					});
