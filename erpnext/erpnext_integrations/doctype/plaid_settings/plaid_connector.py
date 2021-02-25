@@ -20,7 +20,7 @@ class PlaidConnector():
 			client_id=self.settings.plaid_client_id,
 			secret=self.settings.get_password("plaid_secret"),
 			environment=self.settings.plaid_env,
-			api_version="2019-05-29"
+			api_version="2020-09-14"
 		)
 
 	def get_access_token(self, public_token):
@@ -29,7 +29,7 @@ class PlaidConnector():
 		response = self.client.Item.public_token.exchange(public_token)
 		access_token = response["access_token"]
 		return access_token
-	
+
 	def get_token_request(self, update_mode=False):
 		country_codes = ["US", "CA", "FR", "IE", "NL", "ES", "GB"] if self.settings.enable_european_access else ["US", "CA"]
 		args = {

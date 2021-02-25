@@ -26,10 +26,10 @@
   "quotation_series",
   "section_break_8",
   "enable_checkout",
-  "payment_success_url",
-  "column_break_11",
   "save_quotations_as_draft",
-  "payment_gateway_account"
+  "column_break_11",
+  "payment_gateway_account",
+  "payment_success_url"
  ],
  "fields": [
   {
@@ -143,10 +143,12 @@
   },
   {
    "default": "Orders",
+   "depends_on": "enable_checkout",
    "description": "After payment completion redirect user to selected page.",
    "fieldname": "payment_success_url",
    "fieldtype": "Select",
    "label": "Payment Success Url",
+   "mandatory_depends_on": "enable_checkout",
    "options": "\nOrders\nInvoices\nMy Account"
   },
   {
@@ -154,9 +156,11 @@
    "fieldtype": "Column Break"
   },
   {
+   "depends_on": "enable_checkout",
    "fieldname": "payment_gateway_account",
    "fieldtype": "Link",
    "label": "Payment Gateway Account",
+   "mandatory_depends_on": "enable_checkout",
    "options": "Payment Gateway Account"
   },
   {
@@ -186,7 +190,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-01 18:18:54.606535",
+ "modified": "2021-02-11 18:48:30.433058",
  "modified_by": "Administrator",
  "module": "Shopping Cart",
  "name": "Shopping Cart Settings",

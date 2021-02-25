@@ -43,11 +43,11 @@ class AccountingDimension(Document):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
-			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self)
+			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self, queue='long')
 
 	def on_trash(self):
 		if frappe.flags.in_test:
-			delete_accounting_dimension(doc=self)
+			delete_accounting_dimension(doc=self, queue='long')
 		else:
 			frappe.enqueue(delete_accounting_dimension, doc=self)
 
@@ -57,6 +57,9 @@ class AccountingDimension(Document):
 
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
+
+	def on_update(self):
+		frappe.flags.accounting_dimensions = None
 
 def make_dimension_in_accounting_doctypes(doc):
 	doclist = get_doctypes_with_dimensions()
@@ -186,12 +189,14 @@ def get_doctypes_with_dimensions():
 	return doclist
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"])
+	if frappe.flags.accounting_dimensions is None:
+		frappe.flags.accounting_dimensions = frappe.get_all("Accounting Dimension",
+			fields=["label", "fieldname", "disabled", "document_type"])
 
 	if as_list:
-		return [d.fieldname for d in accounting_dimensions]
+		return [d.fieldname for d in frappe.flags.accounting_dimensions]
 	else:
-		return accounting_dimensions
+		return frappe.flags.accounting_dimensions
 
 def get_checks_for_pl_and_bs_accounts():
 	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
