@@ -317,26 +317,26 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 	},
 
 	accounts_add: function(doc, cdt, cdn) {
-		var row = frappe.get_doc(cdt, cdn);
-		$.each(doc.accounts, function(i, d) {
-			if(d.account && d.party && d.party_type) {
-				row.account = d.account;
-				row.party = d.party;
-				row.party_type = d.party_type;
-			}
-		});
+		// var row = frappe.get_doc(cdt, cdn);
+		// $.each(doc.accounts, function(i, d) {
+		// 	if(d.account && d.party && d.party_type) {
+		// 		row.account = d.account;
+		// 		row.party = d.party;
+		// 		row.party_type = d.party_type;
+		// 	}
+		// });
 
-		// set difference
-		if(doc.difference) {
-			if(doc.difference > 0) {
-				row.credit_in_account_currency = doc.difference;
-				row.credit = doc.difference;
-			} else {
-				row.debit_in_account_currency = -doc.difference;
-				row.debit = -doc.difference;
-			}
-		}
-		cur_frm.cscript.update_totals(doc);
+		// // set difference
+		// if(doc.difference) {
+		// 	if(doc.difference > 0) {
+		// 		row.credit_in_account_currency = doc.difference;
+		// 		row.credit = doc.difference;
+		// 	} else {
+		// 		row.debit_in_account_currency = -doc.difference;
+		// 		row.debit = -doc.difference;
+		// 	}
+		// }
+		// cur_frm.cscript.update_totals(doc);
 	},
 
 });
