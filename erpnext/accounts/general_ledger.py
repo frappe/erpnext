@@ -196,7 +196,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 
 	if not round_off_gle:
 		for k in ["voucher_type", "voucher_no", "company",
-			"posting_date", "remarks", "is_opening"]:
+			"posting_date", "remarks"]:
 				round_off_gle[k] = gl_map[0][k]
 
 	round_off_gle.update({
@@ -208,6 +208,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 		"cost_center": round_off_cost_center,
 		"party_type": None,
 		"party": None,
+		"is_opening": "No",
 		"against_voucher_type": None,
 		"against_voucher": None
 	})
