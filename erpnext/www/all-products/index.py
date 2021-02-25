@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import cint
-from erpnext.shopping_cart.product_query import ProductQuery
-from erpnext.shopping_cart.filters import ProductFiltersBuilder
+from erpnext.e_commerce.product_query import ProductQuery
+from erpnext.e_commerce.filters import ProductFiltersBuilder
 
 sitemap = 1
 
@@ -25,7 +25,7 @@ def get_context(context):
 	filter_engine = ProductFiltersBuilder()
 
 	context.field_filters = filter_engine.get_field_filters()
-	context.attribute_filters = filter_engine.get_attribute_fitlers()
+	context.attribute_filters = filter_engine.get_attribute_filters()
 
 	context.e_commerce_settings = engine.settings
 	context.body_class = "product-page"

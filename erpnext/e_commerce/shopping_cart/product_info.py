@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.shopping_cart.cart import _get_cart_quotation, _set_price_list
+from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, _set_price_list
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings \
 	import get_shopping_cart_settings, show_quantity_in_website
 from erpnext.utilities.product import get_price, get_qty_in_stock, get_non_stock_item_status

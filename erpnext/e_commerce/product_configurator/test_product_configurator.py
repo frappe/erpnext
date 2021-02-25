@@ -4,18 +4,21 @@ from bs4 import BeautifulSoup
 import frappe, unittest
 from frappe.utils import set_request, get_html_for_route
 from frappe.website.render import render
-from erpnext.portal.product_configurator.utils import get_products_for_website
+from erpnext.e_commerce.product_query import ProductQuery
 from erpnext.stock.doctype.item.test_item import make_item_variant
+from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 
 test_dependencies = ["Item"]
 
 class TestProductConfigurator(unittest.TestCase):
 	def setUp(self):
 		self.create_variant_item()
+		self.publish_items_on_website()
 
 	def test_product_list(self):
-		template_items = frappe.get_all('Item', {'show_in_website': 1})
-		variant_items = frappe.get_all('Item', {'show_variant_in_website': 1})
+		usual_items = frappe.get_all('Website Item', {'published': 1, 'has_variants': 0, 'variant_of': ['is', 'not set']})
+		template_items = frappe.get_all('Website Item', {'published': 1, 'has_variants': 1})
+		variant_items = frappe.get_all('Website Item', {'published': 1, 'variant_of': ['is', 'set']})
 
 		e_commerce_settings = frappe.get_doc('E Commerce Settings')
 		e_commerce_settings.enable_field_filters = 1
@@ -28,10 +31,10 @@ class TestProductConfigurator(unittest.TestCase):
 		soup = BeautifulSoup(html, 'html.parser')
 		products_list = soup.find(class_='products-list')
 		items = products_list.find_all(class_='card')
-		self.assertEqual(len(items), len(template_items + variant_items))
 
-		items_with_item_group = frappe.get_all('Item', {'item_group': '_Test Item Group Desktops', 'show_in_website': 1})
-		variants_with_item_group = frappe.get_all('Item', {'item_group': '_Test Item Group Desktops', 'show_variant_in_website': 1})
+		self.assertEqual(len(items), len(template_items + variant_items + usual_items))
+
+		items_with_item_group = frappe.get_all('Website Item', {'item_group': '_Test Item Group Desktops', 'published': 1})
 
 		# mock query params
 		frappe.form_dict = frappe._dict({
@@ -41,11 +44,12 @@ class TestProductConfigurator(unittest.TestCase):
 		soup = BeautifulSoup(html, 'html.parser')
 		products_list = soup.find(class_='products-list')
 		items = products_list.find_all(class_='card')
-		self.assertEqual(len(items), len(items_with_item_group + variants_with_item_group))
+		self.assertEqual(len(items), len(items_with_item_group))
 
 
 	def test_get_products_for_website(self):
-		items = get_products_for_website(attribute_filters={
+		engine = ProductQuery()
+		items = engine.query(attributes={
 			'Test Size': ['Medium']
 		})
 		self.assertEqual(len(items), 1)
@@ -75,10 +79,17 @@ class TestProductConfigurator(unittest.TestCase):
 						"attribute": "Test Size",
 						"attribute_value": "Medium"
 					}
-				],
-				"show_variant_in_website": 1
+				]
 			}).insert()
 
+	def publish_items_on_website(self):
+		if frappe.db.exists("Item",  "_Test Item") and not frappe.db.exists("Website Item",  {"item_code": "_Test Item"}):
+				make_website_item(frappe.get_cached_doc("Item",  "_Test Item"))
+
+		if frappe.db.exists("Item",  "_Test Variant Item") and not frappe.db.exists("Website Item",  {"item_code": "_Test Variant Item"}):
+			make_website_item(frappe.get_cached_doc("Item",  "_Test Variant Item"))
+
+		make_website_item(frappe.get_cached_doc("Item",  "_Test Variant Item 1"))
 
 	def tearDown(self):
 		frappe.db.rollback()

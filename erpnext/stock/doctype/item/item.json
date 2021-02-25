@@ -116,12 +116,14 @@
   "customer_code",
   "default_item_manufacturer",
   "default_manufacturer_part_no",
-  "total_projected_qty",
   "hub_publishing_sb",
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
-  "synced_with_hub"
+  "synced_with_hub",
+  "more_information_section",
+  "published_in_website",
+  "total_projected_qty"
  ],
  "fields": [
   {
@@ -916,6 +918,20 @@
    "fieldtype": "Data",
    "label": "Default Manufacturer Part No",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "default": "0",
+   "depends_on": "published_in_website",
+   "fieldname": "published_in_website",
+   "fieldtype": "Check",
+   "label": "Published in Website",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-tag",
@@ -924,7 +940,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-02-19 12:41:55.301730",
+ "modified": "2021-02-25 12:49:56.609383",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

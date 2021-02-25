@@ -17,15 +17,12 @@
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "primary_action_label",
    "fieldtype": "Data",
    "label": "Primary Action Label",
    "reqd": 0
   },
   {
-   "__islocal": 1,
-   "__unsaved": 1,
    "fieldname": "primary_action",
    "fieldtype": "Data",
    "label": "Primary Action",
@@ -262,9 +259,9 @@
   }
  ],
  "idx": 0,
- "modified": "2020-11-19 18:48:52.633045",
+ "modified": "2021-02-24 16:05:31.242342",
  "modified_by": "Administrator",
- "module": "Shopping Cart",
+ "module": "E-commerce",
  "name": "Item Card Group",
  "owner": "Administrator",
  "standard": 1,

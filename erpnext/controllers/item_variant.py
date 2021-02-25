@@ -131,7 +131,7 @@ def find_variant(template, args, variant_item_code=None):
 
 	conditions = " or ".join(conditions)
 
-	from erpnext.portal.product_configurator.utils import get_item_codes_by_attributes
+	from erpnext.e_commerce.product_configurator.utils import get_item_codes_by_attributes
 	possible_variants = [i for i in get_item_codes_by_attributes(args, template) if i != variant_item_code]
 
 	for variant in possible_variants:
