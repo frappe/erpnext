@@ -8,7 +8,8 @@ import frappe
 from frappe.utils import add_months, nowdate
 
 from erpnext.accounts.doctype.tax_rule.tax_rule import ConflictingTaxRule
-from erpnext.shopping_cart.cart import _get_cart_quotation, get_party, update_cart
+from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
+from erpnext.e_commerce.shopping_cart.cart import _get_cart_quotation, get_party, update_cart
 from erpnext.tests.utils import create_test_contact_and_address
 
 # test_dependencies = ['Payment Terms Template']
@@ -27,6 +28,11 @@ class TestShoppingCart(unittest.TestCase):
 		frappe.set_user("Administrator")
 		create_test_contact_and_address()
 		self.enable_shopping_cart()
+		if not frappe.db.exists("Website Item", {"item_code": "_Test Item"}):
+			make_website_item(frappe.get_cached_doc("Item",  "_Test Item"))
+
+		if not frappe.db.exists("Website Item", {"item_code": "_Test Item 2"}):
+			make_website_item(frappe.get_cached_doc("Item",  "_Test Item 2"))
 
 	def tearDown(self):
 		frappe.set_user("Administrator")

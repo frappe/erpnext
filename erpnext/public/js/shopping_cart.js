@@ -63,7 +63,7 @@ $.extend(shopping_cart, {
 		$(".shopping-cart").on('shown.bs.dropdown', function() {
 			if (!$('.shopping-cart-menu .cart-container').length) {
 				return frappe.call({
-					method: 'erpnext.shopping_cart.cart.get_shopping_cart_menu',
+					method: 'erpnext.e_commerce.shopping_cart.cart.get_shopping_cart_menu',
 					callback: function(r) {
 						if (r.message) {
 							$('.shopping-cart-menu').html(r.message);
@@ -83,7 +83,7 @@ $.extend(shopping_cart, {
 		} else {
 			return frappe.call({
 				type: "POST",
-				method: "erpnext.shopping_cart.cart.update_cart",
+				method: "erpnext.e_commerce.shopping_cart.cart.update_cart",
 				args: {
 					item_code: opts.item_code,
 					qty: opts.qty,

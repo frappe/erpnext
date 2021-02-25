@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import cint, cstr, nowdate
 
 from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
-from erpnext.shopping_cart.product_info import set_product_info_for_website
+from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_website
 
 no_cache = 1
 

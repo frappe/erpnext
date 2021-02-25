@@ -5,7 +5,6 @@
  "doctype": "Web Template",
  "fields": [
   {
-   "__unsaved": 1,
    "fieldname": "item",
    "fieldtype": "Link",
    "label": "Item",
@@ -13,7 +12,6 @@
    "reqd": 0
   },
   {
-   "__unsaved": 1,
    "fieldname": "featured",
    "fieldtype": "Check",
    "label": "Featured",
@@ -22,9 +20,9 @@
   }
  ],
  "idx": 0,
- "modified": "2020-11-17 15:33:34.982515",
+ "modified": "2021-02-24 16:05:17.926610",
  "modified_by": "Administrator",
- "module": "Shopping Cart",
+ "module": "E-commerce",
  "name": "Product Card",
  "owner": "Administrator",
  "standard": 1,

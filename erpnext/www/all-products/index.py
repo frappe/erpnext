@@ -1,7 +1,7 @@
 import frappe
 from frappe.utils import cint
-from erpnext.shopping_cart.product_query import ProductQuery
-from erpnext.shopping_cart.filters import ProductFiltersBuilder
+from erpnext.e_commerce.product_query import ProductQuery
+from erpnext.e_commerce.filters import ProductFiltersBuilder
 
 sitemap = 1
 

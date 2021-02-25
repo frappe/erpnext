@@ -117,6 +117,7 @@
   "default_item_manufacturer",
   "default_manufacturer_part_no",
 <<<<<<< HEAD
+<<<<<<< HEAD
   "website_section",
   "published_in_website",
   "show_in_website",
@@ -138,12 +139,21 @@
   "total_projected_qty"
 =======
   "total_projected_qty",
+=======
+>>>>>>> 22f41a17b7 (chore: Removed Shopping Cart Module)
   "hub_publishing_sb",
   "publish_in_hub",
   "hub_category_to_publish",
   "hub_warehouse",
+<<<<<<< HEAD
   "synced_with_hub"
 >>>>>>> 025574d9b5 (chore: Removing Item's Website section & references)
+=======
+  "synced_with_hub",
+  "more_information_section",
+  "published_in_website",
+  "total_projected_qty"
+>>>>>>> 22f41a17b7 (chore: Removed Shopping Cart Module)
  ],
  "fields": [
   {
@@ -905,6 +915,7 @@
    "label": "Default Manufacturer Part No",
    "read_only": 1
 <<<<<<< HEAD
+<<<<<<< HEAD
   },
   {
    "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
@@ -929,6 +940,22 @@
 >>>>>>> 939b0dd67d (feat: E-commerce Refactor)
 =======
 >>>>>>> 025574d9b5 (chore: Removing Item's Website section & references)
+=======
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
+  },
+  {
+   "default": "0",
+   "depends_on": "published_in_website",
+   "fieldname": "published_in_website",
+   "fieldtype": "Check",
+   "label": "Published in Website",
+   "read_only": 1
+>>>>>>> 22f41a17b7 (chore: Removed Shopping Cart Module)
   }
  ],
  "icon": "fa fa-tag",
@@ -940,8 +967,12 @@
  "modified": "2021-12-14 04:13:16.857534",
 =======
  "max_attachments": 1,
+<<<<<<< HEAD
  "modified": "2021-08-27 12:23:07.277077",
 >>>>>>> 939b0dd67d (feat: E-commerce Refactor)
+=======
+ "modified": "2021-10-12 12:23:07.277077",
+>>>>>>> 22f41a17b7 (chore: Removed Shopping Cart Module)
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

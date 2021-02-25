@@ -32,7 +32,7 @@ def execute():
 			""".format(
 				doctype=doctype,
 				fields=(",").join(['%s'] * len(fields))
-			), tuple(fields), as_dict=1, debug=1)
+			), tuple(fields), as_dict=1)
 
 		# {'enable_attribute_filters': '1', ...}
 		mapper = {row.field: row.value for row in data}
