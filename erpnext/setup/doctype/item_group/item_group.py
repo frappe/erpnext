@@ -10,11 +10,10 @@ from frappe.utils.nestedset import NestedSet
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
-from erpnext.shopping_cart.product_info import set_product_info_for_website
 from erpnext.utilities.product import get_qty_in_stock
 from six.moves.urllib.parse import quote
-from erpnext.shopping_cart.product_query import ProductQuery
-from erpnext.shopping_cart.filters import ProductFiltersBuilder
+from erpnext.e_commerce.product_query import ProductQuery
+from erpnext.e_commerce.filters import ProductFiltersBuilder
 
 class ItemGroup(NestedSet, WebsiteGenerator):
 	nsm_parent_field = 'parent_item_group'
@@ -96,7 +95,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		filter_engine = ProductFiltersBuilder(self.name)
 
 		context.field_filters = filter_engine.get_field_filters()
-		context.attribute_filters = filter_engine.get_attribute_fitlers()
+		context.attribute_filters = filter_engine.get_attribute_filters()
 
 		context.update({
 			"parents": get_parent_item_groups(self.parent_item_group),

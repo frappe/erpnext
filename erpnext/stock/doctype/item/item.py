@@ -840,7 +840,7 @@ def invalidate_cache_for_item(doc):
 
 def invalidate_item_variants_cache_for_website(doc):
 	"""Rebuild ItemVariantsCacheManager via Item or Website Item."""
-	from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
+	from erpnext.e_commerce.product_configurator.item_variants_cache import ItemVariantsCacheManager
 
 	item_code = None
 	is_web_item = doc.get("published_in_website") or doc.get("published")

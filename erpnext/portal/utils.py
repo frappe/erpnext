@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import get_shopping_cart_settings
-from erpnext.shopping_cart.cart import get_debtors_account
+from erpnext.e_commerce.shopping_cart.cart import get_debtors_account
 from frappe.utils.nestedset import get_root_of
 
 def set_default_role(doc, method):

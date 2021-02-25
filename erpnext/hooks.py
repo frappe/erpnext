@@ -50,15 +50,15 @@ additional_print_settings = "erpnext.controllers.print_settings.get_print_settin
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
-	"erpnext.shopping_cart.utils.set_cart_count"
+	"erpnext.e_commerce.shopping_cart.utils.set_cart_count"
 ]
-on_logout = "erpnext.shopping_cart.utils.clear_cart_count"
+on_logout = "erpnext.e_commerce.shopping_cart.utils.clear_cart_count"
 
 treeviews = ['Account', 'Cost Center', 'Warehouse', 'Item Group', 'Customer Group', 'Sales Person', 'Territory', 'Assessment Group', 'Department']
 
 # website
-update_website_context = ["erpnext.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
-my_account_context = "erpnext.shopping_cart.utils.update_my_account_context"
+update_website_context = ["erpnext.e_commerce.shopping_cart.utils.update_website_context", "erpnext.education.doctype.education_settings.education_settings.update_website_context"]
+my_account_context = "erpnext.e_commerce.shopping_cart.utils.update_my_account_context"
 
 calendars = ["Task", "Work Order", "Leave Application", "Sales Order", "Holiday List", "Course Schedule"]
 

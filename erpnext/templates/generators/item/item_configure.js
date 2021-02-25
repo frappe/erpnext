@@ -280,14 +280,14 @@ class ItemConfigure {
 	}
 
 	get_next_attribute_and_values(selected_attributes) {
-		return this.call('erpnext.portal.product_configurator.utils.get_next_attribute_and_values', {
+		return this.call('erpnext.e_commerce.product_configurator.utils.get_next_attribute_and_values', {
 			item_code: this.item_code,
 			selected_attributes
 		});
 	}
 
 	get_attributes_and_values() {
-		return this.call('erpnext.portal.product_configurator.utils.get_attributes_and_values', {
+		return this.call('erpnext.e_commerce.product_configurator.utils.get_attributes_and_values', {
 			item_code: this.item_code
 		});
 	}
