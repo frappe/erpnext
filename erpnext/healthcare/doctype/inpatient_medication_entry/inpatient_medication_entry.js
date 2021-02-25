@@ -5,6 +5,7 @@ frappe.ui.form.on('Inpatient Medication Entry', {
 	refresh: function(frm) {
 		// Ignore cancellation of doctype on cancel all
 		frm.ignore_doctypes_on_cancel_all = ['Stock Entry'];
+		frm.fields_dict['medication_orders'].grid.wrapper.find('.grid-add-row').hide();
 
 		frm.set_query('item_code', () => {
 			return {

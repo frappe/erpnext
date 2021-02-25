@@ -94,10 +94,15 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.get_doc('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice').delete()
 
 	def test_purchase_receipt_no_gl_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
 
-		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
+		existing_bin_qty, existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC"}, ["actual_qty", "stock_value"])
+
+		if existing_bin_qty < 0:
+			make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=abs(existing_bin_qty))
 
 		pr = make_purchase_receipt()
 
@@ -1011,6 +1016,7 @@ def make_purchase_receipt(**args):
 	pr.currency = args.currency or "INR"
 	pr.is_return = args.is_return
 	pr.return_against = args.return_against
+	pr.apply_putaway_rule = args.apply_putaway_rule
 	qty = args.qty or 5
 	received_qty = args.received_qty or qty
 	rejected_qty = args.rejected_qty or flt(received_qty) - flt(qty)
@@ -1026,6 +1032,7 @@ def make_purchase_receipt(**args):
 		"rejected_warehouse": args.rejected_warehouse or "_Test Rejected Warehouse - _TC" if rejected_qty != 0 else "",
 		"rate": args.rate if args.rate != None else 50,
 		"conversion_factor": args.conversion_factor or 1.0,
+		"stock_qty": flt(qty) * (flt(args.conversion_factor) or 1.0),
 		"serial_no": args.serial_no,
 		"stock_uom": args.stock_uom or "_Test UOM",
 		"uom": uom,

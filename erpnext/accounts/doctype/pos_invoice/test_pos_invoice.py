@@ -198,6 +198,65 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(pos_return.get('payments')[0].amount, -500)
 		self.assertEqual(pos_return.get('payments')[1].amount, -500)
 
+	def test_pos_return_for_serialized_item(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
+
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+
+		pos.get("items")[0].serial_no = serial_nos[0]
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 1000, 'default': 1})
+
+		pos.insert()
+		pos.submit()
+
+		pos_return = make_sales_return(pos.name)
+
+		pos_return.insert()
+		pos_return.submit()
+		self.assertEqual(pos_return.get('items')[0].serial_no, serial_nos[0])
+
+	def test_partial_pos_returns(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
+
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		pos = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, qty=2, rate=1000, do_not_save=1)
+
+		pos.get("items")[0].serial_no = serial_nos[0] + "\n" + serial_nos[1]
+		pos.append("payments", {'mode_of_payment': 'Cash', 'account': 'Cash - _TC', 'amount': 1000, 'default': 1})
+
+		pos.insert()
+		pos.submit()
+
+		pos_return1 = make_sales_return(pos.name)
+
+		# partial return 1
+		pos_return1.get('items')[0].qty = -1
+		pos_return1.get('items')[0].serial_no = serial_nos[0]
+		pos_return1.insert()
+		pos_return1.submit()
+
+		# partial return 2
+		pos_return2 = make_sales_return(pos.name)
+		self.assertEqual(pos_return2.get('items')[0].qty, -1)
+		self.assertEqual(pos_return2.get('items')[0].serial_no, serial_nos[1])
+
 	def test_pos_change_amount(self):
 		pos = create_pos_invoice(company= "_Test Company", debit_to="Debtors - _TC",
 			income_account = "Sales - _TC", expense_account = "Cost of Goods Sold - _TC", rate=105,
@@ -290,7 +349,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 	def test_merging_into_sales_invoice_with_discount(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
-		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
 
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
@@ -306,7 +365,7 @@ class TestPOSInvoice(unittest.TestCase):
 		})
 		pos_inv2.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv.load_from_db()
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
@@ -315,7 +374,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 	def test_merging_into_sales_invoice_with_discount_and_inclusive_tax(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
-		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
 
 		frappe.db.sql("delete from `tabPOS Invoice`")
 		test_user, pos_profile = init_user_and_profile()
@@ -348,7 +407,7 @@ class TestPOSInvoice(unittest.TestCase):
 		})
 		pos_inv2.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv.load_from_db()
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv.consolidated_invoice, "rounded_total")
@@ -357,7 +416,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 	def test_merging_with_validate_selling_price(self):
 		from erpnext.accounts.doctype.pos_closing_entry.test_pos_closing_entry import init_user_and_profile
-		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import merge_pos_invoices
+		from erpnext.accounts.doctype.pos_invoice_merge_log.pos_invoice_merge_log import consolidate_pos_invoices
 
 		if not frappe.db.get_single_value("Selling Settings", "validate_selling_price"):
 			frappe.db.set_value("Selling Settings", "Selling Settings", "validate_selling_price", 1)
@@ -393,7 +452,7 @@ class TestPOSInvoice(unittest.TestCase):
 		})
 		pos_inv2.submit()
 
-		merge_pos_invoices()
+		consolidate_pos_invoices()
 
 		pos_inv2.load_from_db()
 		rounded_total = frappe.db.get_value("Sales Invoice", pos_inv2.consolidated_invoice, "rounded_total")

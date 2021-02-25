@@ -8,7 +8,7 @@ from frappe import _
 from erpnext.accounts.utils import get_account_currency
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import (get_accounting_dimensions,
-	get_dimension_filters)
+	get_dimensions)
 
 class PeriodClosingVoucher(AccountsController):
 	def validate(self):
@@ -58,7 +58,7 @@ class PeriodClosingVoucher(AccountsController):
 		for dimension in accounting_dimensions:
 			dimension_fields.append('t1.{0}'.format(dimension))
 
-		dimension_filters, default_dimensions = get_dimension_filters()
+		dimension_filters, default_dimensions = get_dimensions()
 
 		pl_accounts = self.get_pl_balances(dimension_fields)
 

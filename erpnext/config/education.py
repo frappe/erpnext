@@ -173,7 +173,7 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Course Schedule",
-					"route": "#List/Course Schedule/Calendar"
+					"route": "/app/List/Course Schedule/Calendar"
 				},
 				{
 					"type": "doctype",

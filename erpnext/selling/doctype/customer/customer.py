@@ -84,7 +84,10 @@ class Customer(TransactionBase):
 				frappe.throw(_("{0} is not a company bank account").format(frappe.bold(self.default_bank_account)))
 
 	def validate_internal_customer(self):
-		if self.is_internal_customer and frappe.db.get_value('Customer', {"represents_company": self.represents_company}, "name"):
+		internal_customer = frappe.db.get_value("Customer",
+			{"is_internal_customer": 1, "represents_company": self.represents_company, "name": ("!=", self.name)}, "name")
+
+		if internal_customer:
 			frappe.throw(_("Internal Customer for company {0} already exists").format(
 				frappe.bold(self.represents_company)))
 
@@ -123,7 +126,9 @@ class Customer(TransactionBase):
 		'''If Customer created from Lead, update lead status to "Converted"
 		update Customer link in Quotation, Opportunity'''
 		if self.lead_name:
-			frappe.db.set_value('Lead', self.lead_name, 'status', 'Converted', update_modified=False)
+			lead = frappe.get_doc('Lead', self.lead_name)
+			lead.status = 'Converted'
+			lead.save()
 
 	def create_lead_address_contact(self):
 		if self.lead_name:

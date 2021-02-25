@@ -160,7 +160,7 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertFalse(gle)
 
 	def test_reverse_journal_entry(self):
-		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry 
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
 		jv = make_journal_entry("_Test Bank USD - _TC",
 			"Sales - _TC", 100, exchange_rate=50, save=False)
 
@@ -299,15 +299,20 @@ class TestJournalEntry(unittest.TestCase):
 
 	def test_jv_with_project(self):
 		from erpnext.projects.doctype.project.test_project import make_project
-		project = make_project({
-			'project_name': 'Journal Entry Project',
-			'project_template_name': 'Test Project Template',
-			'start_date': '2020-01-01'
-		})
+
+		if not frappe.db.exists("Project", {"project_name": "Journal Entry Project"}):
+			project = make_project({
+				'project_name': 'Journal Entry Project',
+				'project_template_name': 'Test Project Template',
+				'start_date': '2020-01-01'
+			})
+			project_name = project.name
+		else:
+			project_name = frappe.get_value("Project", {"project_name": "_Test Project"})
 
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
 		for d in jv.accounts:
-			d.project = project.project_name
+			d.project = project_name
 		jv.voucher_type = "Bank Entry"
 		jv.multi_currency = 0
 		jv.cheque_no = "112233"
@@ -317,10 +322,10 @@ class TestJournalEntry(unittest.TestCase):
 
 		expected_values = {
 			"_Test Cash - _TC": {
-				"project": project.project_name
+				"project": project_name
 			},
 			"_Test Bank - _TC": {
-				"project": project.project_name
+				"project": project_name
 			}
 		}
 

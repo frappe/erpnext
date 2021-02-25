@@ -52,6 +52,7 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 		self.compute_year_to_date()
 		self.compute_month_to_date()
+		self.compute_component_wise_year_to_date()
 
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
@@ -577,7 +578,7 @@ class SalarySlip(TransactionBase):
 					'default_amount': amount if not struct_row.get("is_additional_component") else 0,
 					'depends_on_payment_days' : struct_row.depends_on_payment_days,
 					'salary_component' : struct_row.salary_component,
-					'abbr' : struct_row.abbr,
+					'abbr' : struct_row.abbr or struct_row.get("salary_component_abbr"),
 					'additional_salary': additional_salary,
 					'do_not_include_in_total' : struct_row.do_not_include_in_total,
 					'is_tax_applicable': struct_row.is_tax_applicable,
@@ -1102,10 +1103,10 @@ class SalarySlip(TransactionBase):
 			self.calculate_total_for_salary_slip_based_on_timesheet()
 		else:
 			self.total_deduction = 0.0
-			if self.earnings:
+			if hasattr(self, "earnings"):
 				for earning in self.earnings:
 					self.gross_pay += flt(earning.amount, earning.precision("amount"))
-			if self.deductions:
+			if hasattr(self, "deductions"):
 				for deduction in self.deductions:
 					self.total_deduction += flt(deduction.amount, deduction.precision("amount"))
 			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
@@ -1138,16 +1139,7 @@ class SalarySlip(TransactionBase):
 
 	def compute_year_to_date(self):
 		year_to_date = 0
-		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
-
-		if payroll_period:
-			period_start_date = payroll_period.start_date
-			period_end_date = payroll_period.end_date
-		else:
-			# get dates based on fiscal year if no payroll period exists
-			fiscal_year = get_fiscal_year(date=self.start_date, company=self.company, as_dict=1)
-			period_start_date = fiscal_year.year_start_date
-			period_end_date = fiscal_year.year_end_date
+		period_start_date, period_end_date = self.get_year_to_date_period()
 
 		salary_slip_sum = frappe.get_list('Salary Slip',
 			fields = ['sum(net_pay) as sum'],
@@ -1179,6 +1171,47 @@ class SalarySlip(TransactionBase):
 
 		month_to_date += self.net_pay
 		self.month_to_date = month_to_date
+
+	def compute_component_wise_year_to_date(self):
+		period_start_date, period_end_date = self.get_year_to_date_period()
+
+		for key in ('earnings', 'deductions'):
+			for component in self.get(key):
+				year_to_date = 0
+				component_sum = frappe.db.sql("""
+					SELECT sum(detail.amount) as sum
+					FROM `tabSalary Detail` as detail
+					INNER JOIN `tabSalary Slip` as salary_slip
+					ON detail.parent = salary_slip.name
+					WHERE
+						salary_slip.employee_name = %(employee_name)s
+						AND detail.salary_component = %(component)s
+						AND salary_slip.start_date >= %(period_start_date)s
+						AND salary_slip.end_date < %(period_end_date)s
+						AND salary_slip.name != %(docname)s
+						AND salary_slip.docstatus = 1""",
+						{'employee_name': self.employee_name, 'component': component.salary_component, 'period_start_date': period_start_date,
+							'period_end_date': period_end_date, 'docname': self.name}
+				)
+
+				year_to_date = flt(component_sum[0][0]) if component_sum else 0.0
+				year_to_date += component.amount
+				component.year_to_date = year_to_date
+
+	def get_year_to_date_period(self):
+		payroll_period = get_payroll_period(self.start_date, self.end_date, self.company)
+
+		if payroll_period:
+			period_start_date = payroll_period.start_date
+			period_end_date = payroll_period.end_date
+		else:
+			# get dates based on fiscal year if no payroll period exists
+			fiscal_year = get_fiscal_year(date=self.start_date, company=self.company, as_dict=1)
+			period_start_date = fiscal_year.year_start_date
+			period_end_date = fiscal_year.year_end_date
+
+		return period_start_date, period_end_date
+
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
