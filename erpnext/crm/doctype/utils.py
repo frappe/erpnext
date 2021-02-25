@@ -78,7 +78,9 @@ def get_scheduled_employees_for_popup(communication_medium):
 
 def strip_number(number):
 	if not number: return
-	# strip 0 from the start of the number for proper number comparisions
+	# strip + and 0 from the start of the number for proper number comparisions
+	# eg. +7888383332 should match with 7888383332
 	# eg. 07888383332 should match with 7888383332
+	number = number.lstrip('+')
 	number = number.lstrip('0')
 	return number

@@ -82,7 +82,7 @@ def get_fiscal_years(transaction_date=None, fiscal_year=None, label="Date", verb
 	error_msg = _("""{0} {1} is not in any active Fiscal Year""").format(label, formatdate(transaction_date))
 	if company:
 		error_msg = _("""{0} for {1}""").format(error_msg, frappe.bold(company))
-	
+
 	if verbose==1: frappe.msgprint(error_msg)
 	raise FiscalYearError(error_msg)
 
@@ -888,6 +888,11 @@ def get_coa(doctype, parent, is_root, chart=None):
 
 def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for_items=None,
 		warehouse_account=None, company=None):
+	stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items, company)
+	repost_gle_for_stock_vouchers(stock_vouchers, posting_date, company, warehouse_account)
+
+
+def repost_gle_for_stock_vouchers(stock_vouchers, posting_date, company=None, warehouse_account=None):
 	def _delete_gl_entries(voucher_type, voucher_no):
 		frappe.db.sql("""delete from `tabGL Entry`
 			where voucher_type=%s and voucher_no=%s""", (voucher_type, voucher_no))
@@ -895,21 +900,21 @@ def update_gl_entries_after(posting_date, posting_time, for_warehouses=None, for
 	if not warehouse_account:
 		warehouse_account = get_warehouse_account_map(company)
 
-	future_stock_vouchers = get_future_stock_vouchers(posting_date, posting_time, for_warehouses, for_items)
-	gle = get_voucherwise_gl_entries(future_stock_vouchers, posting_date)
+	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit")) or 2
 
-	for voucher_type, voucher_no in future_stock_vouchers:
+	gle = get_voucherwise_gl_entries(stock_vouchers, posting_date)
+	for voucher_type, voucher_no in stock_vouchers:
 		existing_gle = gle.get((voucher_type, voucher_no), [])
-		voucher_obj = frappe.get_doc(voucher_type, voucher_no)
+		voucher_obj = frappe.get_cached_doc(voucher_type, voucher_no)
 		expected_gle = voucher_obj.get_gl_entries(warehouse_account)
 		if expected_gle:
-			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle):
+			if not existing_gle or not compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 				_delete_gl_entries(voucher_type, voucher_no)
 				voucher_obj.make_gl_entries(gl_entries=expected_gle, from_repost=True)
 		else:
 			_delete_gl_entries(voucher_type, voucher_no)
 
-def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None):
+def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, for_items=None, company=None):
 	future_stock_vouchers = []
 
 	values = []
@@ -921,6 +926,10 @@ def get_future_stock_vouchers(posting_date, posting_time, for_warehouses=None, f
 	if for_warehouses:
 		condition += " and warehouse in ({})".format(", ".join(["%s"] * len(for_warehouses)))
 		values += for_warehouses
+
+	if company:
+		condition += " and company = %s"
+		values.append(company)
 
 	for d in frappe.db.sql("""select distinct sle.voucher_type, sle.voucher_no
 		from `tabStock Ledger Entry` sle
@@ -945,16 +954,17 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 
 	return gl_entries
 
-def compare_existing_and_expected_gle(existing_gle, expected_gle):
+def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 	matched = True
 	for entry in expected_gle:
 		account_existed = False
 		for e in existing_gle:
 			if entry.account == e.account:
 				account_existed = True
-			if entry.account == e.account and entry.against_account == e.against_account \
-					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center) \
-					and (entry.debit != e.debit or entry.credit != e.credit):
+			if (entry.account == e.account and entry.against_account == e.against_account
+					and (not entry.cost_center or not e.cost_center or entry.cost_center == e.cost_center)
+					and ( flt(entry.debit, precision) != flt(e.debit, precision) or
+						flt(entry.credit, precision) != flt(e.credit, precision))):
 				matched = False
 				break
 		if not account_existed:
@@ -982,7 +992,7 @@ def check_if_stock_and_account_balance_synced(posting_date, company, voucher_typ
 			error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses as on {3}.").format(
 				stock_bal, account_bal, frappe.bold(account), posting_date)
 			error_resolution = _("Please create an adjustment Journal Entry for amount {0} on {1}")\
-				.format(frappe.bold(diff), frappe.bold(posting_date))			
+				.format(frappe.bold(diff), frappe.bold(posting_date))
 
 			frappe.msgprint(
 				msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),

@@ -547,7 +547,7 @@ class TestLoan(unittest.TestCase):
 
 		# 30 days - grace period
 		penalty_days = 30 - 4
-		penalty_applicable_amount = flt(amounts['interest_amount']/2, 2)
+		penalty_applicable_amount = flt(amounts['interest_amount']/2)
 		penalty_amount = flt((((penalty_applicable_amount * 25) / 100) * penalty_days), 2)
 		process = process_loan_interest_accrual_for_demand_loans(posting_date = '2019-11-30')
 

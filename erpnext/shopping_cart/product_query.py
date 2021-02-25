@@ -23,8 +23,10 @@ class ProductQuery:
 		self.cart_settings = frappe.get_doc("Shopping Cart Settings")
 		self.page_length = self.settings.products_per_page or 20
 		self.fields = ['name', 'item_name', 'item_code', 'website_image', 'variant_of', 'has_variants', 'item_group', 'image', 'web_long_description', 'description', 'route']
-		self.filters = [['show_in_website', '=', 1]]
-		self.or_filters = []
+		self.filters = []
+		self.or_filters = [['show_in_website', '=', 1]]
+		if not self.settings.get('hide_variants'):
+			self.or_filters.append(['show_variant_in_website', '=', 1])
 
 	def query(self, attributes=None, fields=None, search_term=None, start=0):
 		"""Summary
