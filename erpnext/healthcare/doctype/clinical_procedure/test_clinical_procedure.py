@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+	# -*- coding: utf-8 -*-
 # Copyright (c) 2017, ESS LLP and Contributors
 # See license.txt
 from __future__ import unicode_literals
@@ -60,6 +60,7 @@ def create_procedure(procedure_template, patient, practitioner):
 	procedure.practitioner = practitioner
 	procedure.consume_stock = procedure_template.allow_stock_consumption
 	procedure.items = procedure_template.items
-	procedure.warehouse = frappe.db.get_single_value('Stock Settings', 'default_warehouse')
+	procedure.company = "_Test Company"
+	procedure.warehouse = "_Test Warehouse - _TC"
 	procedure.submit()
 	return procedure
