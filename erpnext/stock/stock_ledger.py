@@ -58,8 +58,9 @@ def validate_cancellation(args):
 			if repost_entry.status == 'In Progress':
 				frappe.throw(_("Cannot cancel the transaction. Reposting of item valuation on submission is not completed yet."))
 			if repost_entry.status == 'Queued':
-				frappe.delete_doc("Repost Item Valuation", repost_entry.name)
-
+				doc = frappe.get_doc("Repost Item Valuation", repost_entry.name)
+				doc.cancel()
+				doc.delete()
 
 def set_as_cancel(voucher_type, voucher_no):
 	frappe.db.sql("""update `tabStock Ledger Entry` set is_cancelled=1,
@@ -133,7 +134,7 @@ class update_entries_after(object):
 		self.item_code = args.get("item_code")
 		if self.args.sle_id:
 			self.args['name'] = self.args.sle_id
-		
+
 		self.company = frappe.get_cached_value("Warehouse", self.args.warehouse, "company")
 		self.get_precision()
 		self.valuation_method = get_valuation_method(self.item_code)
@@ -201,7 +202,7 @@ class update_entries_after(object):
 				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
 			order by timestamp(posting_date, posting_time) desc, creation desc
 			limit 1""", args, as_dict=1)
-		
+
 		return sle[0] if sle else frappe._dict()
 
 
@@ -224,7 +225,7 @@ class update_entries_after(object):
 
 				if sle.dependant_sle_voucher_detail_no:
 					entries_to_fix = self.get_dependent_entries_to_fix(entries_to_fix, sle)
-			
+
 			self.update_bin()
 
 		if self.exceptions:
@@ -439,7 +440,7 @@ class update_entries_after(object):
 
 		# Recalculate subcontracted item's rate in case of subcontracted purchase receipt/invoice
 		if frappe.db.get_value(sle.voucher_type, sle.voucher_no, "is_subcontracted"):
-			doc = frappe.get_cached_doc(sle.voucher_type, sle.voucher_no)
+			doc = frappe.get_doc(sle.voucher_type, sle.voucher_no)
 			doc.update_valuation_rate(reset_outgoing_rate=False)
 			for d in (doc.items + doc.supplied_items):
 				d.db_update()
