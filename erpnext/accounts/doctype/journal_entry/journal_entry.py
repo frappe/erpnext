@@ -639,15 +639,19 @@ class JournalEntry(AccountsController):
 				doc = frappe.get_doc("Expense Claim", d.reference_name)
 				update_reimbursed_amount(doc, jv=self.name)
 
-
 	def validate_expense_claim(self):
 		for d in self.accounts:
 			if d.reference_type=="Expense Claim":
-				sanctioned_amount, reimbursed_amount = frappe.db.get_value("Expense Claim",
-					d.reference_name, ("total_sanctioned_amount", "total_amount_reimbursed"))
-				pending_amount = flt(sanctioned_amount) - flt(reimbursed_amount)
-				if d.debit > pending_amount:
-					frappe.throw(_("Row No {0}: Amount cannot be greater than Pending Amount against Expense Claim {1}. Pending Amount is {2}").format(d.idx, d.reference_name, pending_amount))
+				outstanding_amount = frappe.db.get_value("Expense Claim", d.reference_name, "outstanding_amount")
+
+				debit_amount = d.debit_in_account_currency if self.multi_currency else d.debit_amount
+
+				if debit_amount > outstanding_amount:
+					msg = _("Row No {0}: Amount cannot be greater than the Outstanding Amount against Expense Claim {1}").format(
+						d.idx, d.reference_name)
+
+					msg += _("Outstanding Amount is {0}").format(outstanding_amount)
+					frappe.throw(msg)
 
 	def validate_credit_debit_note(self):
 		if self.stock_entry:

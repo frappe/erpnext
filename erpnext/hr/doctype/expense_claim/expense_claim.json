@@ -404,7 +404,6 @@
    "reqd": 1
   },
   {
-   "default": "Company:company:default_currency",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -527,7 +526,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-11 13:26:49.835316",
+ "modified": "2021-02-24 13:28:14.511145",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

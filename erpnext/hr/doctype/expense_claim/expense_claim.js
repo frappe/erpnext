@@ -117,13 +117,7 @@ frappe.ui.form.on("Expense Claim", {
 			};
 		});
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-		frm.set_query("cost_center", "items", function() {
-=======
 		frm.set_query("account_head", "taxes", function() {
->>>>>>> refactor: client side code
 			return {
 				filters: [
 					["company", "=", frm.doc.company],
@@ -132,7 +126,6 @@ frappe.ui.form.on("Expense Claim", {
 			};
 		});
 
->>>>>>> refactor: replace Expense Taxes and Charges with Purchase Taxes table
 		frm.set_query("payable_account", function() {
 			return {
 				filters: {
@@ -285,11 +278,13 @@ frappe.ui.form.on("Expense Claim", {
 			}, __("View"));
 		}
 
-		if (frm.doc.docstatus===1 && !cint(frm.doc.is_paid) && cint(frm.doc.grand_total) > 0
-				&& (cint(frm.doc.total_amount_reimbursed) < cint(frm.doc.total))
+		if (frm.doc.docstatus === 1 && !cint(frm.doc.is_paid) && cint(frm.doc.outstanding_amount) > 0
 				&& frappe.model.can_create("Payment Entry")) {
 			frm.add_custom_button(__("Payment"),
-				function() { frm.events.make_payment_entry(frm); }, __("Create"));
+				function() { frm.events.make_payment_entry(frm); },
+				 __("Create")
+			);
+			frm.page.set_inner_btn_group_as_primary(__("Create"));
 		}
 	},
 
