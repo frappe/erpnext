@@ -1,6 +1,6 @@
 {
     "country_code": "fr",
-    "name": "France - Plan Comptable General",
+    "name": "France - Plan Comptable General avec Code Comptable",
     "tree": {
         "Comptes de Capitaux": {
             "root_type": "Equity",
