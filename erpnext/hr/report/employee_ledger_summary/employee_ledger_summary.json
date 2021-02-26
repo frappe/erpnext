@@ -1,29 +1,28 @@
 {
- "add_total_row": 1, 
- "creation": "2019-09-10 08:04:59.892542", 
- "disable_prepared_report": 0, 
- "disabled": 0, 
- "docstatus": 0, 
- "doctype": "Report", 
- "idx": 0, 
- "is_standard": "Yes", 
- "letter_head": "Techno Automotive Refinish", 
- "modified": "2019-09-10 08:04:59.892542", 
- "modified_by": "Administrator", 
- "module": "HR", 
- "name": "Employee Ledger Summary", 
- "owner": "Administrator", 
- "prepared_report": 0, 
- "ref_doctype": "Expense Claim", 
- "report_name": "Employee Ledger Summary", 
- "report_type": "Script Report", 
+ "add_total_row": 1,
+ "creation": "2019-09-10 08:04:59.892542",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "modified": "2021-02-26 12:54:01.873065",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Employee Ledger Summary",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "GL Entry",
+ "report_name": "Employee Ledger Summary",
+ "report_type": "Script Report",
  "roles": [
   {
    "role": "HR User"
-  }, 
+  },
   {
    "role": "Accounts User"
-  }, 
+  },
   {
    "role": "Expense Approver"
   }
