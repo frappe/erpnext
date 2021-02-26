@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import get_fullname, flt, cstr, get_link_to_form, getdate
+from frappe.utils import flt, get_link_to_form, getdate
 from frappe.model.document import Document
 from erpnext.hr.utils import set_employee_name
 from erpnext.accounts.party import get_party_account

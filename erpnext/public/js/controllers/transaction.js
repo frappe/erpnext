@@ -999,7 +999,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		if(this.frm.doc.currency === this.get_company_currency()) {
 			this.frm.set_value("conversion_rate", 1.0);
 		}
-		if(frappe.meta.has_field(this.frm.doc.doctype, "plc_conversion_rate") && this.frm.doc.currency === this.frm.doc.price_list_currency &&
+		if (frappe.meta.has_field(this.frm.doc.doctype, "plc_conversion_rate") && this.frm.doc.currency === this.frm.doc.price_list_currency &&
 			this.frm.doc.plc_conversion_rate !== this.frm.doc.conversion_rate) {
 			this.frm.set_value("plc_conversion_rate", this.frm.doc.conversion_rate);
 		}
