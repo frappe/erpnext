@@ -536,8 +536,8 @@
                     "3312-Produits en cours P2": {}
                 }, 
                 "335-Travaux en cours": {
-                    "Travaux en cours T1": {}, 
-                    "Travaux en cours T2": {}
+                    "3351-Travaux en cours T1": {},
+                    "3352-Travaux en cours T2": {}
                 }
             }, 
             "34-En-cours de production de services": {

@@ -1053,8 +1053,12 @@
                     "account_number": "331"
                 },
                 "Travaux en cours": {
-                    "Travaux en cours T1": [],
-                    "Travaux en cours T2": [],
+                    "Travaux en cours T1": {
+                        "account_number": "3351"
+                    },
+                    "Travaux en cours T2": {
+                        "account_number": "3352"
+                    },
                     "account_number": "335"
                 },
                 "account_number": "33"
