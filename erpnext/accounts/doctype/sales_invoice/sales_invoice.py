@@ -183,7 +183,7 @@ class SalesInvoice(SellingController):
 		self.calculate_taxes_and_totals()
 
 	def before_save(self):
-		set_account_for_mode_of_payment(self)
+		self.set_account_for_mode_of_payment()
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
@@ -1360,6 +1360,12 @@ class SalesInvoice(SellingController):
 		if update:
 			self.db_set('status', self.status, update_modified = update_modified)
 
+	def set_account_for_mode_of_payment(self):
+		self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
+		for data in self.payments:
+			if not data.account:
+				data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
+
 def get_discounting_status(sales_invoice):
 	status = None
 
@@ -1529,12 +1535,6 @@ def make_delivery_note(source_name, target_doc=None):
 def make_sales_return(source_name, target_doc=None):
 	from erpnext.controllers.sales_and_purchase_return import make_return_doc
 	return make_return_doc("Sales Invoice", source_name, target_doc)
-
-def set_account_for_mode_of_payment(self):
-	self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
-	for data in self.payments:
-		if not data.account:
-			data.account = get_bank_cash_account(data.mode_of_payment, self.company).get("account")
 
 def get_inter_company_details(doc, doctype):
 	if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"]:
