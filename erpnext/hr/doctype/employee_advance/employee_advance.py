@@ -58,9 +58,11 @@ class EmployeeAdvance(Document):
 		""", (self.name, self.employee), as_dict=1)[0].return_amount
 
 		if paid_amount != 0:
-			paid_amount = flt(paid_amount) / flt(self.exchange_rate)
+			paid_amount = flt(flt(paid_amount) / flt(self.exchange_rate),
+				self.precision("paid_amount"))
 		if return_amount != 0:
-			return_amount = flt(return_amount) / flt(self.exchange_rate)
+			return_amount = flt(flt(return_amount) / flt(self.exchange_rate),
+				self.precision("return_amount"))
 
 		if flt(paid_amount) > self.advance_amount:
 			frappe.throw(_("Row {0}# Paid Amount cannot be greater than requested advance amount"),

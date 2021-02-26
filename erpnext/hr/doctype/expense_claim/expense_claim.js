@@ -230,19 +230,21 @@ frappe.ui.form.on("Expense Claim", {
 	},
 
 	set_exchange_rate: function(frm, from_currency, company_currency) {
-		frappe.call({
-			method: "erpnext.setup.utils.get_exchange_rate",
-			args: {
-				from_currency: from_currency,
-				to_currency: company_currency,
-			},
-			callback: function(r) {
-				frm.set_value("conversion_rate", flt(r.message));
-				frm.set_df_property("conversion_rate", "hidden", 0);
-				frm.set_df_property("conversion_rate", "description", "1 " + frm.doc.currency
-					+ " = [?] " + company_currency);
-			}
-		});
+		if (frm.doc.docstatus === 0) {
+			frappe.call({
+				method: "erpnext.setup.utils.get_exchange_rate",
+				args: {
+					from_currency: from_currency,
+					to_currency: company_currency,
+				},
+				callback: function(r) {
+					frm.set_value("conversion_rate", flt(r.message));
+					frm.set_df_property("conversion_rate", "hidden", 0);
+					frm.set_df_property("conversion_rate", "description", "1 " + frm.doc.currency
+						+ " = [?] " + company_currency);
+				}
+			});
+		}
 	},
 
 	set_dynamic_currency_labels: function(frm, from_currency, company_currency) {
