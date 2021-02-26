@@ -358,10 +358,13 @@ class ReceivablePayableReport(object):
 		self.pdc_details = get_pdc_details(self.filters.get("party_type"), self.filters.report_date)
 		gl_entries_data = self.get_entries_till(self.filters.report_date, self.filters.get("party_type"))
 
+		voucher_nos = [d.voucher_no for d in gl_entries_data] or []
+
 		if gl_entries_data:
-			voucher_nos = [d.voucher_no for d in gl_entries_data] or []
 			dn_details = get_dn_details(self.filters.get("party_type"), voucher_nos)
 			self.voucher_details = get_voucher_details(self.filters.get("party_type"), voucher_nos, dn_details)
+
+		self.sales_person_details = get_sales_person_details(self.filters.get("party_type"), voucher_nos)
 
 		if self.filters.party_type == "Employee":
 			employee_advances = list(set([d.against_voucher for d in gl_entries_data or [] if d.against_voucher_type == "Employee Advance"]))
@@ -695,7 +698,7 @@ class ReceivablePayableReport(object):
 		if self.filters.get("party_type") == "Customer":
 			row["territory"] = self.get_territory(gle.party)
 			row["customer_group"] = self.get_customer_group(gle.party)
-			row["sales_person"] = self.get_sales_person(gle.voucher_no, gle.against_voucher, gle.party)
+			row["sales_person"] = ", ".join(self.get_sales_persons(gle.voucher_no, gle.against_voucher))
 		if self.filters.get("party_type") == "Supplier":
 			row["supplier_group"] = self.get_supplier_group(gle.party)
 
@@ -743,8 +746,8 @@ class ReceivablePayableReport(object):
 
 	def is_in_sales_person(self, gle):
 		if self.filters.get("sales_person"):
-			sales_person = self.get_sales_person(gle.voucher_no, gle.against_voucher, gle.party)
-			return sales_person and sales_person in self.filters.sales_person
+			sales_persons = self.get_sales_persons(gle.voucher_no, gle.against_voucher)
+			return bool([sp for sp in sales_persons if sp in self.filters.sales_person])
 		else:
 			return True
 
@@ -834,9 +837,9 @@ class ReceivablePayableReport(object):
 	def get_territory(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("territory")
 
-	def get_sales_person(self, voucher_no, against_voucher, party_name):
-		return self.voucher_details.get(voucher_no, {}).get("sales_person")\
-			or self.voucher_details.get(against_voucher, {}).get("sales_person")
+	def get_sales_persons(self, voucher_no, against_voucher):
+		return self.sales_person_details.get(voucher_no, [])\
+			or self.sales_person_details.get(against_voucher, [])
 
 	def get_customer_group(self, party_name):
 		return self.get_party_map("Customer").get(party_name, {}).get("customer_group")
@@ -1149,11 +1152,9 @@ def get_voucher_details(party_type, voucher_nos, dn_details):
 
 	if party_type == "Customer":
 		for si in frappe.db.sql("""
-			select inv.name, inv.due_date, inv.po_no, GROUP_CONCAT(steam.sales_person SEPARATOR ', ') as sales_person
+			select inv.name, inv.due_date, inv.po_no
 			from `tabSales Invoice` inv
-			left join `tabSales Team` steam on steam.parent = inv.name and steam.parenttype = 'Sales Invoice'
 			where inv.docstatus=1 and inv.name in (%s)
-			group by inv.name
 			""" %(','.join(['%s'] *len(voucher_nos))), (tuple(voucher_nos)), as_dict=1):
 				si['delivery_note'] = dn_details.get(si.name)
 				voucher_details.setdefault(si.name, si)
@@ -1170,6 +1171,22 @@ def get_voucher_details(party_type, voucher_nos, dn_details):
 			voucher_details.setdefault(pi.name, pi)
 
 	return voucher_details
+
+
+def get_sales_person_details(party_type, voucher_nos):
+	sales_persons = {}
+
+	if party_type == "Customer" and voucher_nos:
+		data = frappe.db.sql("""
+			select parent, sales_person
+			from `tabSales Team`
+			where parent in %s and docstatus = 1 
+		""", [voucher_nos], as_dict=1)
+
+		for d in data:
+			sales_persons.setdefault(d.parent, []).append(d.sales_person)
+
+	return sales_persons
 
 def get_employee_advance_details(names):
 	details = {}
