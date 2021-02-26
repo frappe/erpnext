@@ -61,8 +61,10 @@ class AccountingDimension(Document):
 	def on_update(self):
 		frappe.flags.accounting_dimensions = None
 
-def make_dimension_in_accounting_doctypes(doc):
-	doclist = get_doctypes_with_dimensions()
+def make_dimension_in_accounting_doctypes(doc, doclist=None):
+	if not doclist:
+		doclist = get_doctypes_with_dimensions()
+
 	doc_count = len(get_accounting_dimensions())
 	count = 0
 
@@ -82,13 +84,13 @@ def make_dimension_in_accounting_doctypes(doc):
 			"owner": "Administrator"
 		}
 
-		if doctype == "Budget":
-			add_dimension_to_budget_doctype(df, doc)
-		else:
-			meta = frappe.get_meta(doctype, cached=False)
-			fieldnames = [d.fieldname for d in meta.get("fields")]
+		meta = frappe.get_meta(doctype, cached=False)
+		fieldnames = [d.fieldname for d in meta.get("fields")]
 
-			if df['fieldname'] not in fieldnames:
+		if df['fieldname'] not in fieldnames:
+			if doctype == "Budget":
+				add_dimension_to_budget_doctype(df.copy(), doc)
+			else:
 				create_custom_field(doctype, df)
 
 		count += 1
@@ -178,15 +180,7 @@ def toggle_disabling(doc):
 		frappe.clear_cache(doctype=doctype)
 
 def get_doctypes_with_dimensions():
-	doclist = ["GL Entry", "Sales Invoice", "POS Invoice", "Purchase Invoice", "Payment Entry", "Asset",
-		"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
-		"Sales Invoice Item", "POS Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
-		"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
-		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
-		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
-		"Subscription Plan"]
-
-	return doclist
+	return frappe.get_hooks("accounting_dimension_doctypes")
 
 def get_accounting_dimensions(as_list=True):
 	if frappe.flags.accounting_dimensions is None:
