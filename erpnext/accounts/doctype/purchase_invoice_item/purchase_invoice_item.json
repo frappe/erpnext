@@ -132,6 +132,7 @@
   "col_break6",
   "purchase_receipt",
   "pr_detail",
+  "pi_detail",
   "asset_category",
   "accounting_dimensions_section",
   "expense_account",
@@ -1159,12 +1160,22 @@
    "hidden": 1,
    "label": "Is Vehicle",
    "read_only": 1
+  },
+  {
+   "fieldname": "pi_detail",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Against Purchase Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:12.007298",
- "modified_by": "Administrator",
+ "modified": "2021-02-25 17:27:30.513707",
+ "modified_by": "furqan.790@outlook.com",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
  "owner": "Administrator",

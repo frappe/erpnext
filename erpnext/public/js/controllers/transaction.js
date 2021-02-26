@@ -1411,7 +1411,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				"base_item_taxes_and_charges", "base_tax_inclusive_amount", "base_tax_inclusive_rate",
 				"base_total_discount", "base_tax_exclusive_total_discount",
 				"base_depreciation_amount", "base_amount_before_depreciation",
-				"base_tax_exclusive_depreciation_amount", "base_tax_exclusive_amount_before_depreciation"],
+				"base_tax_exclusive_depreciation_amount", "base_tax_exclusive_amount_before_depreciation",
+				"base_returned_amount"],
 			company_currency, "items");
 
 		this.frm.set_currency_labels(["price_list_rate", "rate", "net_rate", "taxable_rate",

@@ -1149,34 +1149,38 @@ def _msgprint(msg, verbose):
 		raise frappe.ValidationError(msg)
 
 
-def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0):
+def get_last_purchase_details(item_code, doc_name=None, conversion_rate=1.0, transaction_date=None):
 	"""returns last purchase details in stock uom"""
 	# get last purchase order item details
 
-	last_purchase_order = frappe.db.sql("""\
+	po_date_condition = ""
+	prec_date_condition = ""
+	if transaction_date:
+		transaction_date = getdate(transaction_date)
+		po_date_condition = " and po.transaction_date <= '{0}'".format(transaction_date)
+		prec_date_condition = " and pr.posting_time <= '{0}'".format(transaction_date)
+
+	last_purchase_order = frappe.db.sql("""
 		select po.name, po.transaction_date, po.conversion_rate,
 			po_item.conversion_factor, po_item.base_price_list_rate,
 			po_item.discount_percentage, po_item.base_rate, po_item.base_net_rate
 		from `tabPurchase Order` po, `tabPurchase Order Item` po_item
 		where po.docstatus = 1 and po_item.item_code = %s and po.name != %s and
-			po.name = po_item.parent
+			po.name = po_item.parent {0}
 		order by po.transaction_date desc, po.name desc
-		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
-
+		limit 1""".format(po_date_condition), (item_code, cstr(doc_name)), as_dict=1)
 
 	# get last purchase receipt item details
-	last_purchase_receipt = frappe.db.sql("""\
+	last_purchase_receipt = frappe.db.sql("""
 		select pr.name, pr.posting_date, pr.posting_time, pr.conversion_rate,
 			pr_item.conversion_factor, pr_item.base_price_list_rate, pr_item.discount_percentage,
 			pr_item.base_rate, pr_item.base_net_rate
 		from `tabPurchase Receipt` pr, `tabPurchase Receipt Item` pr_item
 		where pr.docstatus = 1 and pr_item.item_code = %s and pr.name != %s and
-			pr.name = pr_item.parent
+			pr.name = pr_item.parent {0}
 		order by pr.posting_date desc, pr.posting_time desc, pr.name desc
-		limit 1""", (item_code, cstr(doc_name)), as_dict=1)
+		limit 1""".format(prec_date_condition), (item_code, cstr(doc_name)), as_dict=1)
 
-	
-	
 	purchase_order_date = getdate(last_purchase_order and last_purchase_order[0].transaction_date
 							   or "1900-01-01")
 	purchase_receipt_date = getdate(last_purchase_receipt and
