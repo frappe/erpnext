@@ -1683,7 +1683,7 @@
  "icon": "fa fa-file-text",
  "idx": 105,
  "is_submittable": 1,
- "modified": "2020-12-21 16:43:40.634432",
+ "modified": "2021-02-27 10:42:47.149962",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",
@@ -1727,6 +1727,7 @@
    "create": 1,
    "delete": 1,
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -1751,6 +1752,8 @@
    "write": 1
   },
   {
+   "export": 1,
+   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Stock User"
@@ -1763,15 +1766,19 @@
   },
   {
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
   },
   {
+   "email": 1,
    "export": 1,
    "permlevel": 1,
+   "print": 1,
    "read": 1,
+   "report": 1,
    "role": "Accounts User",
    "write": 1
   }

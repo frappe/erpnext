@@ -2165,7 +2165,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-01-31 21:58:17.857090",
+ "modified": "2021-02-27 10:44:08.292021",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
@@ -2178,6 +2178,7 @@
    "create": 1,
    "delete": 1,
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -2214,7 +2215,6 @@
    "role": "All"
   },
   {
-   "export": 1,
    "permlevel": 1,
    "read": 1,
    "role": "Invoice User",
@@ -2225,6 +2225,7 @@
    "cancel": 1,
    "create": 1,
    "email": 1,
+   "export": 1,
    "if_owner": 1,
    "print": 1,
    "read": 1,
@@ -2243,7 +2244,6 @@
    "role": "Sales User (Read Only)"
   },
   {
-   "export": 1,
    "permlevel": 1,
    "read": 1,
    "role": "Accounts User",
