@@ -20,7 +20,8 @@ def execute(filters=None):
 
 		fifo_queue = sorted(filter(_func, item_dict["fifo_queue"]), key=_func)
 		details = item_dict["details"]
-		if not fifo_queue and (not item_dict.get("total_qty")): continue
+
+		if not fifo_queue: continue
 
 		average_age = get_average_age(fifo_queue, to_date)
 		earliest_age = date_diff(to_date, fifo_queue[0][1])
@@ -232,7 +233,8 @@ def get_stock_ledger_entries(filters):
 				from `tabItem` {item_conditions}) item
 		where item_code = item.name and
 			company = %(company)s and
-			posting_date <= %(to_date)s
+			posting_date <= %(to_date)s and
+			is_cancelled != 1
 			{sle_conditions}
 			order by posting_date, posting_time, sle.creation, actual_qty""" #nosec
 		.format(item_conditions=get_item_conditions(filters),

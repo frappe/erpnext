@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "creation": "2019-08-29 22:29:37.628178",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "loan_security",
+  "loan_security_name",
   "qty",
   "loan_security_price",
   "amount",
@@ -39,7 +41,8 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity"
+   "label": "Quantity",
+   "non_negative": 1
   },
   {
    "fieldname": "loan_security",
@@ -54,10 +57,19 @@
    "label": "Post Haircut Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_name",
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-12-02 10:23:11.498308",
+ "links": [],
+ "modified": "2021-01-17 07:29:01.671722",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Proposed Pledge",

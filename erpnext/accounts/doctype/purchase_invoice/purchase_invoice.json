@@ -57,8 +57,8 @@
   "set_warehouse",
   "rejected_warehouse",
   "col_break_warehouse",
+  "set_from_warehouse",
   "is_subcontracted",
-  "supplier_warehouse",
   "items_section",
   "update_stock",
   "scan_barcode",
@@ -152,9 +152,11 @@
   "is_opening",
   "against_expense_account",
   "column_break_63",
+  "unrealized_profit_loss_account",
   "status",
   "inter_company_invoice_reference",
   "is_internal_supplier",
+  "represents_company",
   "remarks",
   "subscription_section",
   "from_date",
@@ -605,6 +607,7 @@
   },
   {
    "depends_on": "update_stock",
+   "description": "Sets 'Accepted Warehouse' in each row of the items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
    "label": "Set Accepted Warehouse",
@@ -640,19 +643,6 @@
    "print_hide": 1,
    "show_days": 1,
    "show_seconds": 1
-  },
-  {
-   "depends_on": "eval:doc.is_subcontracted==\"Yes\"",
-   "fieldname": "supplier_warehouse",
-   "fieldtype": "Link",
-   "label": "Supplier Warehouse",
-   "no_copy": 1,
-   "options": "Warehouse",
-   "print_hide": 1,
-   "print_width": "50px",
-   "show_days": 1,
-   "show_seconds": 1,
-   "width": "50px"
   },
   {
    "fieldname": "items_section",
@@ -1499,19 +1489,17 @@
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled",
-   "print_hide": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled\nInternal Transfer",
+   "print_hide": 1
   },
   {
    "fieldname": "inter_company_invoice_reference",
    "fieldtype": "Link",
    "label": "Inter Company Invoice Reference",
+   "no_copy": 1,
    "options": "Sales Invoice",
-   "read_only": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "fieldname": "remarks",
@@ -1635,25 +1623,50 @@
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
-   "options": "Project",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Project"
   },
   {
    "default": "0",
    "description": "Taxes paid while advance payment will be adjusted against this invoice",
    "fieldname": "adjust_advance_taxes",
    "fieldtype": "Check",
-   "label": "Adjust Advance Taxes",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Adjust Advance Taxes"
+  },
+  {
+   "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Unrealized Profit / Loss account for intra-company transfers",
+   "fieldname": "unrealized_profit_loss_account",
+   "fieldtype": "Link",
+   "label": "Unrealized Profit / Loss Account",
+   "options": "Account"
+  },
+  {
+   "depends_on": "eval:doc.is_internal_supplier",
+   "description": "Company which internal supplier represents",
+   "fetch_from": "supplier.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company"
+  },
+  {
+   "depends_on": "eval:doc.update_stock && (doc.is_subcontracted==\"Yes\" || doc.is_internal_supplier)",
+   "description": "Sets 'From Warehouse' in each row of the items table.",
+   "fieldname": "set_from_warehouse",
+   "fieldtype": "Link",
+   "label": "Set From Warehouse",
+   "no_copy": 1,
+   "options": "Warehouse",
+   "print_hide": 1,
+   "print_width": "50px",
+   "width": "50px"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-27 21:21:22.647349",
+ "modified": "2020-12-26 20:49:03.305063",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

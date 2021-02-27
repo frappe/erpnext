@@ -5,42 +5,18 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-from erpnext.quality_management.doctype.quality_procedure.test_quality_procedure import create_procedure
-from erpnext.quality_management.doctype.quality_goal.test_quality_goal import create_unit
-from erpnext.quality_management.doctype.quality_goal.test_quality_goal import create_goal
+
+from ..quality_goal.test_quality_goal import get_quality_goal
+from .quality_review import review
 
 class TestQualityReview(unittest.TestCase):
+	def test_review_creation(self):
+		quality_goal = get_quality_goal()
+		review()
 
-	def test_quality_review(self):
-		create_procedure()
-		create_unit()
-		create_goal()
-		test_create_review = create_review()
-		test_get_review = get_review()
-		self.assertEquals(test_create_review, test_get_review)
+		# check if review exists
+		quality_review = frappe.get_doc('Quality Review', dict(goal = quality_goal.name))
+		self.assertEqual(quality_goal.objectives[0].target, quality_review.reviews[0].target)
+		quality_review.delete()
 
-def create_review():
-	review = frappe.get_doc({
-		"doctype": "Quality Review",
-		"goal": "GOAL-_Test Quality Goal",
-		"procedure": "PRC-_Test Quality Procedure",
-		"date": frappe.utils.nowdate(),
-		"reviews": [
-			{
-				"objective": "_Test Quality Objective",
-				"target": "100",
-				"uom": "_Test UOM",
-				"review": "Test Review"
-			}
-		]
-	})
-	review_exist = frappe.db.exists("Quality Review", {"goal": "GOAL-_Test Quality Goal"})
-	if not review_exist:
-		review.insert(ignore_permissions=True)
-		return review.name
-	else:
-		return review_exist
-
-def get_review():
-	review = frappe.db.exists("Quality Review", {"goal": "GOAL-_Test Quality Goal"})
-	return review
+		quality_goal.delete()

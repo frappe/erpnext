@@ -8,13 +8,10 @@ import unittest
 
 from erpnext.stock.doctype.batch.batch import get_batch_qty, UnableToSelectBatchError, get_batch_no
 from frappe.utils import cint, flt
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
+from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
+from erpnext.stock.get_item_details import get_item_details
 
 class TestBatch(unittest.TestCase):
-
-	def setUp(self):
-		set_perpetual_inventory(0)
-
 	def test_item_has_batch_enabled(self):
 		self.assertRaises(ValidationError, frappe.get_doc({
 			"doctype": "Batch",
@@ -187,7 +184,7 @@ class TestBatch(unittest.TestCase):
 		stock_entry.cancel()
 		current_batch_qty = flt(frappe.db.get_value("Batch", "B100", "batch_qty"))
 		self.assertEqual(current_batch_qty, existing_batch_qty)
-		
+
 	@classmethod
 	def make_new_batch_and_entry(cls, item_name, batch_name, warehouse):
 		'''Make a new stock entry for given target warehouse and batch name of item'''
@@ -256,3 +253,84 @@ class TestBatch(unittest.TestCase):
 			batch.insert()
 
 		return batch
+
+	def test_batch_wise_item_price(self):
+		if not frappe.db.get_value('Item', '_Test Batch Price Item'):
+			frappe.get_doc({
+				'doctype': 'Item',
+				'is_stock_item': 1,
+				'item_code': '_Test Batch Price Item',
+				'item_group': 'Products',
+				'has_batch_no': 1,
+				'create_new_batch': 1
+			}).insert(ignore_permissions=True)
+
+		batch1 = create_batch('_Test Batch Price Item', 200, 1)
+		batch2 = create_batch('_Test Batch Price Item', 300, 1)
+		batch3 = create_batch('_Test Batch Price Item', 400, 0)
+
+		args = frappe._dict({
+			"item_code": "_Test Batch Price Item",
+			"company": "_Test Company with perpetual inventory",
+			"price_list": "_Test Price List",
+			"currency": "_Test Currency",
+			"doctype": "Sales Invoice",
+			"conversion_rate": 1,
+			"price_list_currency": "_Test Currency",
+			"plc_conversion_rate": 1,
+			"customer": "_Test Customer",
+			"name": None
+		})
+
+		#test price for batch1
+		args.update({'batch_no': batch1})
+		details = get_item_details(args)
+		self.assertEqual(details.get('price_list_rate'), 200)
+
+		#test price for batch2
+		args.update({'batch_no': batch2})
+		details = get_item_details(args)
+		self.assertEqual(details.get('price_list_rate'), 300)
+
+		#test price for batch3
+		args.update({'batch_no': batch3})
+		details = get_item_details(args)
+		self.assertEqual(details.get('price_list_rate'), 400)
+
+def create_batch(item_code, rate, create_item_price_for_batch):
+	pi = make_purchase_invoice(company="_Test Company",
+		warehouse= "Stores - _TC", cost_center = "Main - _TC", update_stock=1,
+		expense_account ="_Test Account Cost for Goods Sold - _TC", item_code=item_code)
+
+	batch = frappe.db.get_value('Batch', {'item': item_code, 'reference_name': pi.name})
+
+	if not create_item_price_for_batch:
+		create_price_list_for_batch(item_code, None, rate)
+	else:
+		create_price_list_for_batch(item_code, batch, rate)
+
+	return batch
+
+def create_price_list_for_batch(item_code, batch, rate):
+	frappe.get_doc({
+		'doctype': 'Item Price',
+		'item_code': '_Test Batch Price Item',
+		'price_list': '_Test Price List',
+		'batch_no': batch,
+		'price_list_rate': rate
+	}).insert()
+
+def make_new_batch(**args):
+	args = frappe._dict(args)
+
+	try:
+		batch = frappe.get_doc({
+			"doctype": "Batch",
+			"batch_id": args.batch_id,
+			"item": args.item_code,
+		}).insert()
+
+	except frappe.DuplicateEntryError:
+		batch = frappe.get_doc("Batch", args.batch_id)
+
+	return batch

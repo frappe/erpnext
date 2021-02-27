@@ -63,6 +63,7 @@ def get_pos_entries(filters, group_by_field):
 		FROM
 			`tabPOS Invoice` p {from_sales_invoice_payment}
 		WHERE
+			p.docstatus = 1 and
 			{group_by_mop_condition}
 			{conditions}
 		ORDER BY

@@ -219,12 +219,16 @@ class ProductionPlan(Document):
 			filters = {'docstatus': 0, 'production_plan': ("=", self.name)}):
 			frappe.delete_doc('Work Order', d.name)
 
-	def set_status(self):
+	def set_status(self, close=None):
 		self.status = {
 			0: 'Draft',
 			1: 'Submitted',
 			2: 'Cancelled'
 		}.get(self.docstatus)
+
+		if close:
+			self.db_set('status', 'Closed')
+			return
 
 		if self.total_produced_qty > 0:
 			self.status = "In Process"
@@ -234,6 +238,9 @@ class ProductionPlan(Document):
 		if self.status != 'Completed':
 			self.update_ordered_status()
 			self.update_requested_status()
+
+		if close is not None:
+			self.db_set('status', self.status)
 
 	def update_ordered_status(self):
 		update_status = False
@@ -312,7 +319,7 @@ class ProductionPlan(Document):
 		frappe.flags.mute_messages = False
 
 		if wo_list:
-			wo_list = ["""<a href="#Form/Work Order/%s" target="_blank">%s</a>""" % \
+			wo_list = ["""<a href="/app/Form/Work Order/%s" target="_blank">%s</a>""" % \
 				(p, p) for p in wo_list]
 			msgprint(_("{0} created").format(comma_and(wo_list)))
 		else :
@@ -416,7 +423,7 @@ class ProductionPlan(Document):
 		frappe.flags.mute_messages = False
 
 		if material_request_list:
-			material_request_list = ["""<a href="#Form/Material Request/{0}">{1}</a>""".format(m.name, m.name) \
+			material_request_list = ["""<a href="/app/Form/Material Request/{0}">{1}</a>""".format(m.name, m.name) \
 				for m in material_request_list]
 			msgprint(_("{0} created").format(comma_and(material_request_list)))
 		else :
@@ -564,6 +571,8 @@ def get_sales_orders(self):
 		so_filter += " and so.customer = %(customer)s"
 	if self.project:
 		so_filter += " and so.project = %(project)s"
+	if self.sales_order_status:
+		so_filter += "and so.status = %(sales_order_status)s"
 
 	if self.item_code:
 		item_filter += " and so_item.item_code = %(item)s"
@@ -587,8 +596,8 @@ def get_sales_orders(self):
 			"customer": self.customer,
 			"project": self.project,
 			"item": self.item_code,
-			"company": self.company
-
+			"company": self.company,
+			"sales_order_status": self.sales_order_status
 		}, as_dict=1)
 	return open_so
 
@@ -735,10 +744,12 @@ def get_items_for_material_requests(doc, warehouses=None):
 		mr_items = new_mr_items
 
 	if not mr_items:
-		frappe.msgprint(_("""As raw materials projected quantity is more than required quantity,
-			there is no need to create material request for the warehouse {0}.
-			Still if you want to make material request,
-			kindly enable <b>Ignore Existing Projected Quantity</b> checkbox""").format(doc.get('for_warehouse')))
+		to_enable = frappe.bold(_("Ignore Existing Projected Quantity"))
+		warehouse = frappe.bold(doc.get('for_warehouse'))
+		message = _("As there are sufficient raw materials, Material Request is not required for Warehouse {0}.").format(warehouse) + "<br><br>"
+		message += _(" If you still want to proceed, please enable {0}.").format(to_enable)
+
+		frappe.msgprint(message, title=_("Note"))
 
 	return mr_items
 

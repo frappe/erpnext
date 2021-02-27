@@ -217,13 +217,15 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						source_doctype: "Material Request",
 						target: me.frm,
 						setters: {
-							company: me.frm.doc.company
+							schedule_date: undefined,
+							status: undefined
 						},
 						get_query_filters: {
 							material_request_type: "Purchase",
 							docstatus: 1,
 							status: ["!=", "Stopped"],
-							per_ordered: ["<", 99.99]
+							per_ordered: ["<", 100],
+							company: me.frm.doc.company
 						}
 					})
 				}, __("Get Items From"));
@@ -236,32 +238,40 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 						source_doctype: "Opportunity",
 						target: me.frm,
 						setters: {
-							company: me.frm.doc.company
+							party_name: undefined,
+							opportunity_from: undefined,
+							status: undefined
 						},
+						get_query_filters: {
+							status: ["not in", ["Closed", "Lost"]],
+							company: me.frm.doc.company
+						}
 					})
 				}, __("Get Items From"));
 
 			// Get items from open Material Requests based on supplier
 			this.frm.add_custom_button(__('Possible Supplier'), function() {
 				// Create a dialog window for the user to pick their supplier
-				var d = new frappe.ui.Dialog({
+				var dialog = new frappe.ui.Dialog({
 					title: __('Select Possible Supplier'),
 					fields: [
-					{fieldname: 'supplier', fieldtype:'Link', options:'Supplier', label:'Supplier', reqd:1},
-					{fieldname: 'ok_button', fieldtype:'Button', label:'Get Items from Material Requests'},
-					]
-				});
-
-				// On the user clicking the ok button
-				d.fields_dict.ok_button.input.onclick = function() {
-					var btn = d.fields_dict.ok_button.input;
-					var v = d.get_values();
-					if(v) {
-						$(btn).set_working();
+						{
+							fieldname: 'supplier',
+							fieldtype:'Link',
+							options:'Supplier',
+							label:'Supplier',
+							reqd:1,
+							description: __("Get Items from Material Requests against this Supplier")
+						}
+					],
+					primary_action_label: __("Get Items"),
+					primary_action: (args) => {
+						if(!args) return;
+						dialog.hide();
 
 						erpnext.utils.map_current_doc({
 							method: "erpnext.buying.doctype.request_for_quotation.request_for_quotation.get_item_from_material_requests_based_on_supplier",
-							source_name: v.supplier,
+							source_name: args.supplier,
 							target: me.frm,
 							setters: {
 								company: me.frm.doc.company
@@ -270,21 +280,27 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 								material_request_type: "Purchase",
 								docstatus: 1,
 								status: ["!=", "Stopped"],
-								per_ordered: ["<", 99.99]
+								per_ordered: ["<", 100]
 							}
 						});
-						$(btn).done_working();
-						d.hide();
+						dialog.hide();
 					}
-				}
-				d.show();
+				});
+
+				dialog.show();
 			}, __("Get Items From"));
+
+			// Link Material Requests
+			this.frm.add_custom_button(__('Link to Material Requests'),
+				function() {
+					erpnext.buying.link_to_mrs(me.frm);
+				}, __("Tools"));
 
 			// Get Suppliers
 			this.frm.add_custom_button(__('Get Suppliers'),
 				function() {
 					me.get_suppliers_button(me.frm);
-				});
+				}, __("Tools"));
 		}
 	},
 
@@ -304,7 +320,7 @@ erpnext.buying.RequestforQuotationController = erpnext.buying.BuyingController.e
 				{
 					"fieldtype": "Select", "label": __("Get Suppliers By"),
 					"fieldname": "search_type",
-					"options": ["Tag","Supplier Group"],
+					"options": ["Supplier Group", "Tag"],
 					"reqd": 1,
 					onchange() {
 						if(dialog.get_value('search_type') == 'Tag'){

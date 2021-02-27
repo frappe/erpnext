@@ -1,32 +1,34 @@
 {
- "autoname": "format:ACTN-{#####}",
+ "actions": [],
+ "autoname": "format:QA-ACT-{#####}",
  "creation": "2018-10-02 11:40:43.666100",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "corrective_preventive",
-  "document_type",
-  "goal",
+  "review",
+  "feedback",
+  "status",
   "cb_00",
   "date",
-  "document_name",
+  "goal",
   "procedure",
-  "status",
   "sb_00",
   "resolutions"
  ],
  "fields": [
   {
-   "depends_on": "eval:doc.type == 'Quality Review'",
    "fetch_from": "review.goal",
    "fieldname": "goal",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Goal",
-   "options": "Quality Goal",
-   "read_only": 1
+   "options": "Quality Goal"
   },
   {
+   "default": "Today",
    "fieldname": "date",
    "fieldtype": "Date",
    "in_list_view": 1,
@@ -34,34 +36,20 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.type == 'Quality Review'",
    "fieldname": "procedure",
    "fieldtype": "Link",
    "label": "Procedure",
-   "options": "Quality Procedure",
-   "read_only": 1
+   "options": "Quality Procedure"
   },
   {
    "default": "Open",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Status",
-   "options": "Open\nClosed"
-  },
-  {
-   "fieldname": "document_name",
-   "fieldtype": "Dynamic Link",
-   "label": "Document Name",
-   "options": "document_type"
-  },
-  {
-   "fieldname": "document_type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Document Type",
-   "options": "Quality Review\nQuality Feedback",
-   "reqd": 1
+   "options": "Open\nCompleted",
+   "read_only": 1
   },
   {
    "default": "Corrective",
@@ -86,9 +74,24 @@
    "fieldtype": "Table",
    "label": "Resolutions",
    "options": "Quality Action Resolution"
+  },
+  {
+   "fieldname": "review",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Review",
+   "options": "Quality Review"
+  },
+  {
+   "fieldname": "feedback",
+   "fieldtype": "Link",
+   "label": "Feedback",
+   "options": "Quality Feedback"
   }
  ],
- "modified": "2019-05-28 13:10:44.092497",
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2020-10-27 16:21:59.533937",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Action",

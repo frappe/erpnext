@@ -7,10 +7,12 @@
  "engine": "InnoDB",
  "field_order": [
   "employee",
-  "incentive_amount",
   "employee_name",
-  "salary_component",
+  "company",
+  "currency",
+  "incentive_amount",
   "column_break_5",
+  "salary_component",
   "payroll_date",
   "department",
   "amended_from"
@@ -28,6 +30,7 @@
    "fieldname": "incentive_amount",
    "fieldtype": "Currency",
    "label": "Incentive Amount",
+   "options": "currency",
    "reqd": 1
   },
   {
@@ -70,11 +73,29 @@
    "label": "Salary Component",
    "options": "Salary Component",
    "reqd": 1
+  },
+  {
+   "default": "Company:company:default_currency",
+   "depends_on": "eval:(doc.docstatus==1 || doc.employee)",
+   "fieldname": "currency",
+   "fieldtype": "Link",
+   "label": "Currency",
+   "options": "Currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-22 22:42:51.209630",
+ "modified": "2020-10-20 17:22:16.468042",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Incentive",

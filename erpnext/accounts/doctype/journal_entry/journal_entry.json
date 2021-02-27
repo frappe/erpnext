@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-03-25 10:53:52",
@@ -503,7 +504,7 @@
  "idx": 176,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-02 18:15:46.955697",
+ "modified": "2020-10-30 13:56:01.121995",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry",

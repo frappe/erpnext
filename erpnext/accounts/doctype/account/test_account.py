@@ -111,6 +111,17 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(acc_tc_4, "Test Sync Account - _TC4")
 		self.assertEqual(acc_tc_5, "Test Sync Account - _TC5")
 
+	def test_add_account_to_a_group(self):
+		frappe.db.set_value("Account", "Office Rent - _TC3", "is_group", 1)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Group Account"
+		acc.parent_account = "Office Rent - _TC3"
+		acc.company = "_Test Company 3"
+		self.assertRaises(frappe.ValidationError, acc.insert)
+
+		frappe.db.set_value("Account", "Office Rent - _TC3", "is_group", 0)
+
 	def test_account_rename_sync(self):
 		frappe.local.flags.pop("ignore_root_company_validation", None)
 
@@ -160,7 +171,8 @@ class TestAccount(unittest.TestCase):
 		for doc in to_delete:
 			frappe.delete_doc("Account", doc)
 
-def _make_test_records(verbose):
+
+def _make_test_records(verbose=None):
 	from frappe.test_runner import make_test_objects
 
 	accounts = [
@@ -242,7 +254,8 @@ def create_account(**kwargs):
 			account_name = kwargs.get('account_name'),
 			account_type = kwargs.get('account_type'),
 			parent_account = kwargs.get('parent_account'),
-			company = kwargs.get('company')
+			company = kwargs.get('company'),
+			account_currency = kwargs.get('account_currency')
 		))
 
 		account.save()

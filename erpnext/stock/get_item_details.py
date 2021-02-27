@@ -19,7 +19,7 @@ from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_m
 
 from six import string_types, iteritems
 
-sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'POS Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 
 @frappe.whitelist()
@@ -74,7 +74,9 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	get_price_list_rate(args, item, out)
+	if not doc or cint(doc.get('is_return')) == 0:
+		# get price list rate only if the invoice is not a credit or debit note
+		get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
@@ -559,22 +561,39 @@ def get_default_deferred_account(args, item, fieldname=None):
 	else:
 		return None
 
-def get_default_cost_center(args, item, item_group, brand, company=None):
+def get_default_cost_center(args, item=None, item_group=None, brand=None, company=None):
 	cost_center = None
+
+	if not company and args.get("company"):
+		company = args.get("company")
+
 	if args.get('project'):
 		cost_center = frappe.db.get_value("Project", args.get("project"), "cost_center", cache=True)
 
-	if not cost_center:
+	if not cost_center and (item and item_group and brand):
 		if args.get('customer'):
 			cost_center = item.get('selling_cost_center') or item_group.get('selling_cost_center') or brand.get('selling_cost_center')
 		else:
 			cost_center = item.get('buying_cost_center') or item_group.get('buying_cost_center') or brand.get('buying_cost_center')
 
-	cost_center = cost_center or args.get("cost_center")
+	elif not cost_center and args.get("item_code") and company:
+		for method in ["get_item_defaults", "get_item_group_defaults", "get_brand_defaults"]:
+			path = "erpnext.stock.get_item_details.{0}".format(method)
+			data = frappe.get_attr(path)(args.get("item_code"), company)
+
+			if data and (data.selling_cost_center or data.buying_cost_center):
+				return data.selling_cost_center or data.buying_cost_center
+
+	if not cost_center and args.get("cost_center"):
+		cost_center = args.get("cost_center")
 
 	if (company and cost_center
 		and frappe.get_cached_value("Cost Center", cost_center, "company") != company):
 		return None
+
+	if not cost_center and company:
+		cost_center = frappe.get_cached_value("Company",
+			company, "cost_center")
 
 	return cost_center
 
@@ -655,6 +674,8 @@ def get_item_price(args, item_code, ignore_party=False):
 		and price_list=%(price_list)s
 		and ifnull(uom, '') in ('', %(uom)s)"""
 
+	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
+
 	if not ignore_party:
 		if args.get("customer"):
 			conditions += " and customer=%(customer)s"
@@ -673,7 +694,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by valid_from desc, uom desc """.format(conditions=conditions), args)
+		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -692,6 +713,7 @@ def get_price_list_rate_for(args, item_code):
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
 			"posting_date": args.get('posting_date'),
+			"batch_no": args.get('batch_no')
 	}
 
 	item_price_data = 0

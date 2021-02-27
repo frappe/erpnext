@@ -7,6 +7,8 @@ from frappe.utils import cstr, cint, getdate, get_first_day, get_last_day, date_
 from frappe import msgprint, _
 from calendar import monthrange
 from erpnext.education.api import get_student_group_students
+from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
+from erpnext.support.doctype.issue.issue import get_holidays
 
 def execute(filters=None):
 	if not filters: filters = {}
@@ -19,26 +21,32 @@ def execute(filters=None):
 	students_list = get_students_list(students)
 	att_map = get_attendance_list(from_date, to_date, filters.get("student_group"), students_list)
 	data = []
+
 	for stud in students:
 		row = [stud.student, stud.student_name]
 		student_status = frappe.db.get_value("Student", stud.student, "enabled")
 		date = from_date
 		total_p = total_a = 0.0
+
 		for day in range(total_days_in_month):
 			status="None"
+
 			if att_map.get(stud.student):
 				status = att_map.get(stud.student).get(date, "None")
 			elif not student_status:
 				status = "Inactive"
 			else:
 				status = "None"
-			status_map = {"Present": "P", "Absent": "A", "None": "", "Inactive":"-"}
+
+			status_map = {"Present": "P", "Absent": "A", "None": "", "Inactive":"-", "Holiday":"H"}
 			row.append(status_map[status])
+
 			if status == "Present":
 				total_p += 1
 			elif status == "Absent":
 				total_a += 1
 			date = add_days(date, 1)
+
 		row += [total_p, total_a]
 		data.append(row)
 	return columns, data
@@ -63,14 +71,19 @@ def get_attendance_list(from_date, to_date, student_group, students_list):
 		and date between %s and %s
 		order by student, date''',
 		(student_group, from_date, to_date), as_dict=1)
+
 	att_map = {}
 	students_with_leave_application = get_students_with_leave_application(from_date, to_date, students_list)
 	for d in attendance_list:
 		att_map.setdefault(d.student, frappe._dict()).setdefault(d.date, "")
+
 		if students_with_leave_application.get(d.date) and d.student in students_with_leave_application.get(d.date):
 			att_map[d.student][d.date] = "Present"
 		else:
 			att_map[d.student][d.date] = d.status
+
+	att_map = mark_holidays(att_map, from_date, to_date, students_list)
+
 	return att_map
 
 def get_students_with_leave_application(from_date, to_date, students_list):
@@ -108,3 +121,14 @@ def get_attendance_years():
 	if not year_list:
 		year_list = [getdate().year]
 	return "\n".join(str(year) for year in year_list)
+
+def mark_holidays(att_map, from_date, to_date, students_list):
+	holiday_list = get_holiday_list()
+	holidays = get_holidays(holiday_list)
+
+	for dt in daterange(getdate(from_date), getdate(to_date)):
+		if dt in holidays:
+			for student in students_list:
+				att_map.setdefault(student, frappe._dict()).setdefault(dt, "Holiday")
+
+	return att_map

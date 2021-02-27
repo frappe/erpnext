@@ -9,11 +9,12 @@ frappe.ui.form.on('Mpesa Settings', {
 	refresh: function(frm) {
 		frappe.realtime.on("refresh_mpesa_dashboard", function(){
 			frm.reload_doc();
+			frm.events.setup_account_balance_html(frm);
 		});
 	},
 
 	get_account_balance: function(frm) {
-		if (!frm.initiator_name && !frm.security_credentials) {
+		if (!frm.doc.initiator_name && !frm.doc.security_credential) {
 			frappe.throw(__("Please set the initiator name and the security credential"));
 		}
 		frappe.call({

@@ -35,6 +35,15 @@ frappe.ui.form.on('POS Profile', {
 			};
 		});
 
+		frm.set_query("taxes_and_charges", function() {
+			return {
+				filters: [
+					['Sales Taxes and Charges Template', 'company', '=', frm.doc.company],
+					['Sales Taxes and Charges Template', 'docstatus', '!=', 2]
+				]
+			};
+		});
+
 		frm.set_query('company_address', function(doc) {
 			if(!doc.company) {
 				frappe.throw(__('Please set Company'));
@@ -48,6 +57,8 @@ frappe.ui.form.on('POS Profile', {
 				}
 			};
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -58,6 +69,7 @@ frappe.ui.form.on('POS Profile', {
 
 	company: function(frm) {
 		frm.trigger("toggle_display_account_head");
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	toggle_display_account_head: function(frm) {

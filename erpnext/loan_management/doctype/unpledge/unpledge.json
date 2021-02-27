@@ -6,6 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "loan_security",
+  "loan_security_name",
   "loan_security_type",
   "loan_security_code",
   "haircut",
@@ -52,6 +53,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity",
+   "non_negative": 1,
    "reqd": 1
   },
   {
@@ -60,11 +62,19 @@
    "fieldtype": "Percent",
    "label": "Haircut",
    "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_name",
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-05-06 10:50:18.448552",
+ "modified": "2021-01-17 07:36:20.212342",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Unpledge",

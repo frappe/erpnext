@@ -90,29 +90,41 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
-			frm.add_custom_button(__('Create Tax Template'), function() {
-				frm.trigger("make_default_tax_template");
-			});
+			if (frm.has_perm('write')) {
+				frm.add_custom_button(__('Create Tax Template'), function() {
+					frm.trigger("make_default_tax_template");
+				});
+			}
 
-			frm.add_custom_button(__('Cost Centers'), function() {
-				frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name})
-			}, __("View"));
+			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
+				frm.add_custom_button(__('Cost Centers'), function() {
+					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Chart of Accounts'), function() {
-				frappe.set_route('Tree', 'Account', {'company': frm.doc.name})
-			}, __("View"));
+			if (frappe.perm.has_perm("Account", 0, 'read')) {
+				frm.add_custom_button(__('Chart of Accounts'), function() {
+					frappe.set_route('Tree', 'Account', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Sales Tax Template'), function() {
-				frappe.set_route('List', 'Sales Taxes and Charges Template', {'company': frm.doc.name});
-			}, __("View"));
+			if (frappe.perm.has_perm("Sales Taxes and Charges Template", 0, 'read')) {
+				frm.add_custom_button(__('Sales Tax Template'), function() {
+					frappe.set_route('List', 'Sales Taxes and Charges Template', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Purchase Tax Template'), function() {
-				frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
-			}, __("View"));
+			if (frappe.perm.has_perm("Purchase Taxes and Charges Template", 0, 'read')) {
+				frm.add_custom_button(__('Purchase Tax Template'), function() {
+					frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Default Tax Template'), function() {
-				frm.trigger("make_default_tax_template");
-			}, __('Create'));
+			if (frm.has_perm('write')) {
+				frm.add_custom_button(__('Default Tax Template'), function() {
+					frm.trigger("make_default_tax_template");
+				}, __('Create'));
+			}
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
@@ -262,7 +274,8 @@ erpnext.company.setup_queries = function(frm) {
 		["default_employee_advance_account", {"root_type": "Asset"}],
 		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
-		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}]
+		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],
+		["unrealized_profit_loss_account", {"root_type": "Liability"}]
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});

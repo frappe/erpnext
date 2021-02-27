@@ -2,12 +2,11 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Accounting Dimension', {
-
 	refresh: function(frm) {
 		frm.set_query('document_type', () => {
 			let invalid_doctypes = frappe.model.core_doctypes_list;
 			invalid_doctypes.push('Accounting Dimension', 'Project',
-				'Cost Center', 'Accounting Dimension Detail');
+				'Cost Center', 'Accounting Dimension Detail', 'Company');
 
 			return {
 				filters: {
