@@ -211,9 +211,6 @@ def build_tree_from_json(chart_template, chart_data=None):
 	''' get chart template from its folder and parse the json to be rendered as tree '''
 	chart = chart_data or get_chart(chart_template)
 
-	#  frappe.utils.logger.set_log_level("DEBUG")
-	# logger = frappe.logger("api", allow_site=True, file_count=50)
-
 	# if no template selected, return as it is
 	if not chart:
 		return
@@ -225,9 +222,6 @@ def build_tree_from_json(chart_template, chart_data=None):
 			account = {}
 			if account_name in ["account_number", "account_type",\
 				"root_type", "is_group", "tax_rate"]: continue
-
-			#if not child:
-			#	frappe.throw(f"account name {account_name}");
 
 			account['parent_account'] = parent
 			account['expandable'] = True if identify_is_group(child) else False
