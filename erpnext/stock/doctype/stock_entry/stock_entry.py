@@ -276,9 +276,10 @@ class StockEntry(StockController):
 					item_wise_qty.setdefault(d.item_code, []).append(d.qty)
 
 		for item_code, qty_list in iteritems(item_wise_qty):
-			if self.fg_completed_qty != sum(qty_list):
+			total = flt(sum(qty_list), frappe.get_precision("Stock Entry Detail", "qty"))
+			if self.fg_completed_qty != total:
 				frappe.throw(_("The finished product {0} quantity {1} and For Quantity {2} cannot be different")
-					.format(frappe.bold(item_code), frappe.bold(sum(qty_list)), frappe.bold(self.fg_completed_qty)))
+					.format(frappe.bold(item_code), frappe.bold(total), frappe.bold(self.fg_completed_qty)))
 
 	def validate_difference_account(self):
 		if not cint(erpnext.is_perpetual_inventory_enabled(self.company)):
