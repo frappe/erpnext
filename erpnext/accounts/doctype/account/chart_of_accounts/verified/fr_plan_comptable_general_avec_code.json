@@ -169,32 +169,29 @@
                 },
                 "Subventions d'investissement inscrites au compte de r\u00e9sultat": {
                     "Subventions d'\u00e9quipement": {
-                        "Subventions d'\u00e9quipement": {
-                            "Etat": {
-                                "account_number": "13911"
-                            },
-                            "R\u00e9gions": {
-                                "account_number": "13912"
-                            },
-                            "D\u00e9partements": {
-                                "account_number": "13913"
-                            },
-                            "Communes": {
-                                "account_number": "13914"
-                            },
-                            "Collectivit\u00e9s publiques": {
-                                "account_number": "13915"
-                            },
-                            "Entreprises publiques": {
-                                "account_number": "13916"
-                            },
-                            "Entreprises et organismes priv\u00e9s": {
-                                "account_number": "13917"
-                            },
-                            "Autres": {
-                                "account_number": "13918"
-                            },
+                        "Etat": {
                             "account_number": "13911"
+                        },
+                        "R\u00e9gions": {
+                            "account_number": "13912"
+                        },
+                        "D\u00e9partements": {
+                            "account_number": "13913"
+                        },
+                        "Communes": {
+                            "account_number": "13914"
+                        },
+                        "Collectivit\u00e9s publiques": {
+                            "account_number": "13915"
+                        },
+                        "Entreprises publiques": {
+                            "account_number": "13916"
+                        },
+                        "Entreprises et organismes priv\u00e9s": {
+                            "account_number": "13917"
+                        },
+                        "Autres": {
+                            "account_number": "13918"
                         },
                         "account_number": "1391"
                     },
@@ -1216,9 +1213,9 @@
             },
             "account_number": "3"
         },
-        "Comptes de Tiers (ACTIF)": {
+        "4-Comptes de Tiers (ACTIF)": {
             "root_type": "Asset",
-            "Fournisseurs et Comptes Rattach\u00e9s (ACTIF)": {
+            "40-Fournisseurs et Comptes Rattach\u00e9s (ACTIF)": {
                 "Fournisseurs d\u00e9biteurs": {
                     "Fournisseurs - Avances et acomptes vers\u00e9s sur commandes": {
                         "account_number": "4091"
@@ -1239,10 +1236,9 @@
                         "account_number": "4098"
                     },
                     "account_number": "409"
-                },
-                "account_number": "40"
+                }
             },
-            "Clients et comptes rattach\u00e9s (ACTIF)": {
+            "41-Clients et comptes rattach\u00e9s (ACTIF)": {
                 "account_type": "Receivable",
                 "Clients et Comptes rattach\u00e9s": {
                     "account_type": "Receivable",
@@ -1279,31 +1275,27 @@
                         "account_number": "4188"
                     },
                     "account_number": "418"
-                },
-                "account_number": "41"
+                }
             },
-            "Personnel et comptes rattach\u00e9s (ACTIF)": {
+            "42-Personnel et comptes rattach\u00e9s (ACTIF)": {
                 "Personnel - Avances et acomptes": {
                     "account_number": "425"
-                },
-                "account_number": "42"
+                }
             },
-            "S\u00e9curit\u00e9 sociale et autres organismes sociaux (ACTIF)": {
+            "43-S\u00e9curit\u00e9 sociale et autres organismes sociaux (ACTIF)": {
                 "S\u00e9curit\u00e9 sociale": {
                     "account_number": "431"
                 },
                 "Autres organismes sociaux": {
                     "account_number": "437"
                 },
-                "Organismes sociaux - Produits \u00e0 recevoir": {
+                "438-Organismes sociaux - Produits \u00e0 recevoir": {
                     "Produits \u00e0 recevoir": {
                         "account_number": "4387"
-                    },
-                    "account_number": "438"
-                },
-                "account_number": "43"
+                    }
+                }
             },
-            "Etat et autres collectivit\u00e9s publiques (ACTIF)": {
+            "44-Etat et autres collectivit\u00e9s publiques (ACTIF)": {
                 "Etat - Subventions \u00e0 recevoir": {
                     "Subventions d'investissement": {
                         "account_number": "4411"
@@ -1351,7 +1343,7 @@
                         },
                         "account_number": "4456"
                     },
-                    "Taxes sur le chiffre d'affaires \u00e0 r\u00e9gulariser ou en attente (ACTIF)": {
+                    "4458-Taxes sur le chiffre d'affaires \u00e0 r\u00e9gulariser ou en attente (ACTIF)": {
                         "Acomptes - R\u00e9gime simplifi\u00e9 d'imposition": {
                             "account_number": "44581"
                         },
@@ -1363,10 +1355,8 @@
                         },
                         "Taxes sur le chiffre d'affaires sur factures non parvenues": {
                             "account_number": "44586"
-                        },
-                        "account_number": "4458"
-                    },
-                    "account_number": "445"
+                        }
+                    }
                 },
                 "Etat - Charges \u00e0 payer et produits \u00e0 recevoir": {
                     "Charges fiscales sur cong\u00e9s \u00e0 payer": {
@@ -1379,12 +1369,11 @@
                         "account_number": "4487"
                     },
                     "account_number": "448"
-                },
-                "account_number": "44"
+                }
             },
-            "Groupe et associ\u00e9s (ACTIF)": {
+            "45-Groupe et associ\u00e9s (ACTIF)": {
                 "Associ\u00e9s - Op\u00e9rations sur le capital (ACTIF)": {
-                    "Apporteurs - Capital appel\u00e9, non vers\u00e9": {
+                    "456-Apporteurs - Capital appel\u00e9, non vers\u00e9": {
                         "Actionnaires - Capital souscrit et appel\u00e9, non vers\u00e9": {
                             "account_number": "45621"
                         },
@@ -1392,33 +1381,26 @@
                             "account_number": "45625"
                         },
                         "account_number": "4562"
-                    },
-                    "account_number": "456"
-                },
-                "account_number": "45"
+                    }
+                }
             },
-            "D\u00e9biteurs divers et cr\u00e9diteurs divers (ACTIF)": {
+            "46-D\u00e9biteurs divers et cr\u00e9diteurs divers (ACTIF)": {
                 "Cr\u00e9ances sur cessions d'immobilisations": {
                     "account_number": "462"
                 },
                 "Cr\u00e9ances sur cessions de valeurs mobili\u00e8res de placement": {
                     "account_number": "465"
                 },
-                "Autres comptes d\u00e9biteurs ou cr\u00e9diteurs (ACTIF)": {
-                    "account_number": "467"
-                },
-                "Divers - Charges \u00e0 payer et produits \u00e0 recevoir (ACTIF)": {
+                "467-Autres comptes d\u00e9biteurs ou cr\u00e9diteurs (ACTIF)": {},
+                "468-Divers - Charges \u00e0 payer et produits \u00e0 recevoir (ACTIF)": {
                     "Produits \u00e0 recevoir": {
                         "account_number": "4687"
-                    },
-                    "account_number": "468"
-                },
-                "account_number": "46"
+                    }
+                }
             },
-            "Comptes transitoires ou d'attente (ACTIF)": {
-                "Comptes d'attente (ACTIF)": {
-                    "account_type": "Temporary",
-                    "account_number": "471"
+            "47-Comptes transitoires ou d'attente (ACTIF)": {
+                "471-Comptes d'attente (ACTIF)": {
+                    "account_type": "Temporary"
                 },
                 "Diff\u00e9rences de conversion (ACTIF)": {
                     "Diminution des cr\u00e9ances": {
@@ -1436,14 +1418,12 @@
                     "Mali de fusion sur actif circulant": {
                         "account_number": "4781"
                     },
-                    "Diff\u00e9rences d'\u00e9valuation sur instruments de tr\u00e9sorerie (ACTIF)": {
+                    "478-Diff\u00e9rences d'\u00e9valuation sur instruments de tr\u00e9sorerie (ACTIF)": {
                         "account_number": "4786"
-                    },
-                    "account_number": "478"
-                },
-                "account_number": "47"
+                    }
+                }
             },
-            "Comptes de r\u00e9gularisation (ACTIF)": {
+            "48-Comptes de r\u00e9gularisation (ACTIF)": {
                 "Charges \u00e0 r\u00e9partir sur plusieurs exercices": {
                     "Frais d'\u00e9mission des emprunts": {
                         "account_number": "4816"
@@ -1453,15 +1433,13 @@
                 "Charges constat\u00e9es d'avance": {
                     "account_number": "486"
                 },
-                "Comptes de r\u00e9partition p\u00e9riodique des charges et des produits (ACTIF)": {
+                "488-Comptes de r\u00e9partition p\u00e9riodique des charges et des produits (ACTIF)": {
                     "Charges": {
                         "account_number": "4886"
-                    },
-                    "account_number": "488"
-                },
-                "account_number": "48"
+                    }
+                }
             },
-            "D\u00e9pr\u00e9ciation des comptes de tiers (ACTIF)": {
+            "49-D\u00e9pr\u00e9ciation des comptes de tiers (ACTIF)": {
                 "D\u00e9pr\u00e9ciations des comptes clients": {
                     "account_number": "491"
                 },
@@ -1488,14 +1466,12 @@
                         "account_number": "4967"
                     },
                     "account_number": "496"
-                },
-                "account_number": "49"
-            },
-            "account_number": "4"
+                }
+            }
         },
-        "Comptes de Tiers (PASSIF)": {
+        "4-Comptes de Tiers (PASSIF)": {
             "root_type": "Liability",
-            "Fournisseurs et Comptes Rattach\u00e9s (PASSIF)": {
+            "40-Fournisseurs et Comptes Rattach\u00e9s (PASSIF)": {
                 "account_type": "Payable",
                 "Fournisseurs": {
                     "account_type": "Payable",
@@ -1544,10 +1520,9 @@
                         "account_number": "4088"
                     },
                     "account_number": "408"
-                },
-                "account_number": "40"
+                }
             },
-            "Clients et comptes rattach\u00e9s (PASSIF)": {
+            "41-Clients et comptes rattach\u00e9s (PASSIF)": {
                 "Clients cr\u00e9diteurs": {
                     "Clients - Avances et acomptes re\u00e7us sur commandes": {
                         "account_number": "4191"
@@ -1562,10 +1537,9 @@
                         "account_number": "4198"
                     },
                     "account_number": "419"
-                },
-                "account_number": "41"
+                }
             },
-            "Personnel et comptes rattach\u00e9s (PASSIF)": {
+            "42-Personnel et comptes rattach\u00e9s (PASSIF)": {
                 "Personnel - R\u00e9mun\u00e9rations dues": {
                     "account_number": "421"
                 },
@@ -1601,22 +1575,19 @@
                         "account_number": "4287"
                     },
                     "account_number": "428"
-                },
-                "account_number": "42"
+                }
             },
-            "S\u00e9curit\u00e9 sociale et autres organismes sociaux (PASSIF)": {
-                "Organismes sociaux - Charges \u00e0 payer": {
+            "43-S\u00e9curit\u00e9 sociale et autres organismes sociaux (PASSIF)": {
+                "438-Organismes sociaux - Charges \u00e0 payer": {
                     "Charges sociales sur cong\u00e9s \u00e0 payer": {
                         "account_number": "4382"
                     },
                     "Autres charges \u00e0 payer": {
                         "account_number": "4386"
-                    },
-                    "account_number": "438"
-                },
-                "account_number": "43"
+                    }
+                }
             },
-            "Etat et autres collectivit\u00e9s publiques (PASSIF)": {
+            "44-Etat et autres collectivit\u00e9s publiques (PASSIF)": {
                 "Etat - Imp\u00f4ts et taxes recouvrables sur des tiers": {
                     "Obligataires": {
                         "account_number": "4424"
@@ -1650,16 +1621,14 @@
                         },
                         "account_number": "4457"
                     },
-                    "Taxes sur le chiffre d'affaires \u00e0 r\u00e9gulariser ou en attente (PASSIF)": {
+                    "4458-Taxes sur le chiffre d'affaires \u00e0 r\u00e9gulariser ou en attente (PASSIF)": {
                         "TVA r\u00e9cup\u00e9r\u00e9e  d'avance": {
                             "account_number": "44584"
                         },
                         "Taxes sur le chiffre d'affaires sur factures \u00e0 \u00e9tablir": {
                             "account_number": "44587"
-                        },
-                        "account_number": "4458"
-                    },
-                    "account_number": "445"
+                        }
+                    }
                 },
                 "Obligations cautionn\u00e9es": {
                     "account_number": "446"
@@ -1669,10 +1638,9 @@
                 },
                 "Quotas d'\u00e9mission \u00e0 acqu\u00e9rir": {
                     "account_number": "449"
-                },
-                "account_number": "44"
+                }
             },
-            "Groupe et associ\u00e9s (PASSIF)": {
+            "45-Groupe et associ\u00e9s (PASSIF)": {
                 "Groupe (PASSIF)": {
                     "account_number": "451"
                 },
@@ -1686,7 +1654,7 @@
                     "account_number": "455"
                 },
                 "Associ\u00e9s - Op\u00e9rations sur le capital (PASSIF)": {
-                    "Associ\u00e9s - Comptes d'apport en soci\u00e9t\u00e9": {
+                    "456-Associ\u00e9s - Comptes d'apport en soci\u00e9t\u00e9": {
                         "Apports en nature": {
                             "account_number": "45611"
                         },
@@ -1706,8 +1674,7 @@
                     },
                     "Associ\u00e9s - Capital \u00e0 rembourser": {
                         "account_number": "4567"
-                    },
-                    "account_number": "456"
+                    }
                 },
                 "Associ\u00e9s - Dividendes \u00e0 payer": {
                     "account_number": "457"
@@ -1720,28 +1687,22 @@
                         "account_number": "4588"
                     },
                     "account_number": "458"
-                },
-                "account_number": "45"
+                }
             },
-            "D\u00e9biteurs divers et cr\u00e9diteurs divers (PASSIF)": {
+            "46-D\u00e9biteurs divers et cr\u00e9diteurs divers (PASSIF)": {
                 "Dettes sur acquisitions de valeurs mobili\u00e8res de placement": {
                     "account_number": "464"
                 },
-                "Autres comptes d\u00e9biteurs ou cr\u00e9diteurs (PASSIF)": {
-                    "account_number": "467"
-                },
-                "Divers - Charges \u00e0 payer et produits \u00e0 recevoir (PASSIF)": {
+                "467-Autres comptes d\u00e9biteurs ou cr\u00e9diteurs (PASSIF)": {},
+                "468-Divers - Charges \u00e0 payer et produits \u00e0 recevoir (PASSIF)": {
                     "Charges \u00e0 payer": {
                         "account_number": "4686"
-                    },
-                    "account_number": "468"
-                },
-                "account_number": "46"
+                    }
+                }
             },
-            "Comptes transitoires ou d'attente (PASSIF)": {
-                "Comptes d'attente (PASSIF)": {
-                    "account_type": "Temporary",
-                    "account_number": "471"
+            "47-Comptes transitoires ou d'attente (PASSIF)": {
+                "471-Comptes d'attente (PASSIF)": {
+                    "account_type": "Temporary"
                 },
                 "Diff\u00e9rences de conversion (PASSIF)": {
                     "Augmentation des cr\u00e9ances": {
@@ -1755,27 +1716,22 @@
                     },
                     "account_number": "477"
                 },
-                "Autres comptes transitoires (PASSIF)": {
+                "478-Autres comptes transitoires (PASSIF)": {
                     "Diff\u00e9rences d'\u00e9valuation sur instruments de tr\u00e9sorerie (PASSIF)": {
                         "account_number": "4787"
-                    },
-                    "account_number": "478"
-                },
-                "account_number": "47"
+                    }
+                }
             },
-            "Comptes de r\u00e9gularisation (PASSIF)": {
+            "48-Comptes de r\u00e9gularisation (PASSIF)": {
                 "Produits constat\u00e9s d'avance": {
                     "account_number": "487"
                 },
-                "Comptes de r\u00e9partition p\u00e9riodique des charges et des produits (PASSIF)": {
+                "448-Comptes de r\u00e9partition p\u00e9riodique des charges et des produits (PASSIF)": {
                     "Produits": {
                         "account_number": "4887"
-                    },
-                    "account_number": "488"
-                },
-                "account_number": "48"
-            },
-            "account_number": "4"
+                    }
+                }
+            }
         },
         "Comptes Financiers": {
             "root_type": "Asset",

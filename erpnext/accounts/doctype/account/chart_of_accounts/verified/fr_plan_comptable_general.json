@@ -72,16 +72,14 @@
                 "138-Autres subventions d'investissement (m\u00eame ventilation que celle du compte 131)": {}, 
                 "139-Subventions d'investissement inscrites au compte de r\u00e9sultat": {
                     "1391-Subventions d'\u00e9quipement": {
-                        "13911-Subventions d'\u00e9quipement": {
-                            "13911-Etat": {}, 
-                            "13912-R\u00e9gions": {}, 
-                            "13913-D\u00e9partements": {}, 
-                            "13914-Communes": {}, 
-                            "13915-Collectivit\u00e9s publiques": {}, 
-                            "13916-Entreprises publiques": {}, 
-                            "13917-Entreprises et organismes priv\u00e9s": {}, 
-                            "13918-Autres": {}
-                        }
+                        "13911-Etat": {},
+                        "13912-R\u00e9gions": {},
+                        "13913-D\u00e9partements": {},
+                        "13914-Communes": {},
+                        "13915-Collectivit\u00e9s publiques": {},
+                        "13916-Entreprises publiques": {},
+                        "13917-Entreprises et organismes priv\u00e9s": {},
+                        "13918-Autres": {}
                     }, 
                     "1398-Autres subventions d'investissement (m\u00eame ventilation que celle du compte 1391)": {}
                 }
