@@ -78,7 +78,8 @@ class StockEntry(StockController):
 		if self._action == 'submit':
 			self.make_batches('t_warehouse')
 		else:
-			set_batch_nos(self, 's_warehouse')
+			pass
+			# set_batch_nos(self, 's_warehouse')
 
 		self.set_incoming_rate()
 		self.validate_serialized_batch()
