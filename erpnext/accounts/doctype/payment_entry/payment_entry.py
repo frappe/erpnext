@@ -967,7 +967,7 @@ def split_invoices_based_on_payment_terms(outstanding_invoices):
 
 			outstanding_invoices.pop(idx - 1)
 			outstanding_invoices += invoice_ref_based_on_payment_terms[idx]
-	
+
 	return outstanding_invoices
 
 def get_orders_to_be_billed(posting_date, party_type, party,
@@ -1410,6 +1410,9 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 				'amount': discount_amount * (-1 if payment_type == "Pay" else 1)
 			})
 			pe.set_difference_amount()
+
+	if doc.doctype == 'Purchase Order' and doc.apply_tds:
+		pe.apply_tax_withholding_amount = 1
 
 	return pe
 
