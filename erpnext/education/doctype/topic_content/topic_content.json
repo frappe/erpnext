@@ -36,13 +36,14 @@
    "fieldname": "title",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Title"
+   "label": "Title",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-16 16:27:37.866665",
+ "modified": "2021-02-28 09:46:36.344156",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Topic Content",
