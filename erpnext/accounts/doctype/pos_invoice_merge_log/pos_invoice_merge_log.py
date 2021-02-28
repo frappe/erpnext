@@ -212,8 +212,8 @@ def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 5 and closing_entry:
-		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
 		closing_entry.set_status(update=True, status='Queued')
+		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
 	else:
 		create_merge_logs(invoice_by_customer, closing_entry)
 
@@ -225,8 +225,8 @@ def unconsolidate_pos_invoices(closing_entry):
 	)
 
 	if len(merge_logs) >= 5:
-		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
 		closing_entry.set_status(update=True, status='Queued')
+		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
 	else:
 		cancel_merge_logs(merge_logs, closing_entry)
 

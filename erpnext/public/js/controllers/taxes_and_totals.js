@@ -4,7 +4,7 @@
 erpnext.taxes_and_totals = erpnext.payments.extend({
 	setup: function() {},
 
-	apply_pricing_rule_on_item: function(item){
+	apply_pricing_rule_on_item: function(item) {
 		let effective_item_rate = item.price_list_rate;
 		let item_rate = item.rate;
 		if (in_list(["Sales Order", "Quotation"], item.parenttype) && item.blanket_order_rate) {
@@ -26,6 +26,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 		if (item.discount_amount) {
 			item_rate = flt((item.rate_with_margin) - (item.discount_amount), precision('rate', item));
+			item.discount_percentage = 100 * flt(item.discount_amount) / flt(item.rate_with_margin);
 		}
 
 		frappe.model.set_value(item.doctype, item.name, "rate", item_rate);

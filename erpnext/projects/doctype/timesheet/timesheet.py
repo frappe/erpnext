@@ -288,7 +288,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 def make_salary_slip(source_name, target_doc=None):
 	target = frappe.new_doc("Salary Slip")
 	set_missing_values(source_name, target)
-	target.run_method("get_emp_and_leave_details")
+	target.run_method("get_emp_and_working_day_details")
 
 	return target
 

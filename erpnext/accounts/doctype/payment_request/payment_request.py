@@ -3,6 +3,7 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+import json
 import frappe
 from frappe import _
 from frappe.model.document import Document
@@ -82,18 +83,37 @@ class PaymentRequest(Document):
 			self.make_communication_entry()
 
 		elif self.payment_channel == "Phone":
-			controller = get_payment_gateway_controller(self.payment_gateway)
-			payment_record = dict(
-				reference_doctype="Payment Request",
-				reference_docname=self.name,
-				payment_reference=self.reference_name,
-				grand_total=self.grand_total,
-				sender=self.email_to,
-				currency=self.currency,
-				payment_gateway=self.payment_gateway
-			)
-			controller.validate_transaction_currency(self.currency)
-			controller.request_for_payment(**payment_record)
+			self.request_phone_payment()
+
+	def request_phone_payment(self):
+		controller = get_payment_gateway_controller(self.payment_gateway)
+		request_amount = self.get_request_amount()
+
+		payment_record = dict(
+			reference_doctype="Payment Request",
+			reference_docname=self.name,
+			payment_reference=self.reference_name,
+			request_amount=request_amount,
+			sender=self.email_to,
+			currency=self.currency,
+			payment_gateway=self.payment_gateway
+		)
+
+		controller.validate_transaction_currency(self.currency)
+		controller.request_for_payment(**payment_record)
+	
+	def get_request_amount(self):
+		data_of_completed_requests = frappe.get_all("Integration Request", filters={
+			'reference_doctype': self.doctype,
+			'reference_docname': self.name,
+			'status': 'Completed'
+		}, pluck="data")
+
+		if not data_of_completed_requests:
+			return self.grand_total
+
+		request_amounts = sum([json.loads(d).get('request_amount') for d in data_of_completed_requests])
+		return request_amounts
 
 	def on_cancel(self):
 		self.check_if_payment_entry_exists()
@@ -351,8 +371,8 @@ def make_payment_request(**args):
 		if args.order_type == "Shopping Cart" or args.mute_email:
 			pr.flags.mute_email = True
 
+		pr.insert(ignore_permissions=True)
 		if args.submit_doc:
-			pr.insert(ignore_permissions=True)
 			pr.submit()
 
 	if args.order_type == "Shopping Cart":
@@ -412,8 +432,8 @@ def get_existing_payment_request_amount(ref_dt, ref_dn):
 
 def get_gateway_details(args):
 	"""return gateway and payment account of default payment gateway"""
-	if args.get("payment_gateway"):
-		return get_payment_gateway_account(args.get("payment_gateway"))
+	if args.get("payment_gateway_account"):
+		return get_payment_gateway_account(args.get("payment_gateway_account"))
 
 	if args.order_type == "Shopping Cart":
 		payment_gateway_account = frappe.get_doc("Shopping Cart Settings").payment_gateway_account
