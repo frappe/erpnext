@@ -127,7 +127,6 @@
   "write_off_cost_center",
   "advances_section",
   "allocate_advances_automatically",
-  "adjust_advance_taxes",
   "get_advances",
   "advances",
   "payment_schedule_section",
@@ -1492,7 +1491,9 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "\nDraft\nReturn\nDebit Note Issued\nSubmitted\nPaid\nUnpaid\nOverdue\nCancelled\nInternal Transfer",
-   "print_hide": 1
+   "print_hide": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "inter_company_invoice_reference",
@@ -1501,7 +1502,9 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1
+   "read_only": 1,
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "fieldname": "remarks",
@@ -1633,7 +1636,9 @@
    "fieldname": "unrealized_profit_loss_account",
    "fieldtype": "Link",
    "label": "Unrealized Profit / Loss Account",
-   "options": "Account"
+   "options": "Account",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.is_internal_supplier",
@@ -1642,7 +1647,9 @@
    "fieldname": "represents_company",
    "fieldtype": "Link",
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "show_days": 1,
+   "show_seconds": 1
   },
   {
    "depends_on": "eval:doc.update_stock && doc.is_internal_supplier",
@@ -1654,6 +1661,8 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "50px",
+   "show_days": 1,
+   "show_seconds": 1,
    "width": "50px"
   },
   {
@@ -1681,7 +1690,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-27 21:21:22.647349",
+ "modified": "2021-02-28 22:33:15.728392",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
