@@ -935,7 +935,7 @@ class PurchaseInvoice(BuyingController):
 							rev_dr_cr + "_in_account_currency": unallocated_amount \
 								if account_currency==self.company_currency \
 								else unallocated_amount,
-							'cost_center': tax.cost_center
+							'cost_center': tax.cost_center or self.cost_center
 						}, account_currency, item=tax))
 
 					frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount + unallocated_amount)

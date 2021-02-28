@@ -65,7 +65,7 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.validate_paid_invoices()
 		self.ensure_supplier_is_not_blocked()
-		self.validate_advance_tax_account()
+		self.set_advance_tax_account()
 		self.set_status()
 
 	def on_submit(self):
@@ -307,9 +307,13 @@ class PaymentEntry(AccountsController):
 				+ "<br><br>" + _("If this is undesirable please cancel the corresponding Payment Entry."),
 				title=_("Warning"), indicator="orange")
 
-	def validate_advance_tax_account(self):
+	def set_advance_tax_account(self):
 		if self.get('taxes') and not self.advance_tax_account:
-			frappe.throw(_('Please select advance tax account'))
+			unrealized_profit_loss_account = frappe.db.get_value('Company', self.company, 'unrealized_profit_loss_account')
+			if not unrealized_profit_loss_account:
+				frappe.throw(_("Please select advance tax account or add Unrealized Profit / Loss Account in company master"))
+
+			self.advance_tax_account = unrealized_profit_loss_account
 
 	def validate_journal_entry(self):
 		for d in self.get("references"):
@@ -397,8 +401,10 @@ class PaymentEntry(AccountsController):
 					net_total = order_amount[0][0]
 					included_in_paid_amount = 1
 
+		# Adding args as purchase invoice to get TDS amount
 		args = frappe._dict({
 			'company': self.company,
+			'doctype': 'Purchase Invoice',
 			'supplier': self.party,
 			'posting_date': self.posting_date,
 			'net_total': net_total
@@ -702,7 +708,7 @@ class PaymentEntry(AccountsController):
 					rev_dr_cr + "_in_account_currency": d.base_tax_amount \
 						if account_currency==self.company_currency \
 						else d.tax_amount,
-					"cost_center": d.cost_center
+					"cost_center": d.cost_center or self.cost_center
 				}, account_currency, item=d))
 
 	def add_deductions_gl_entries(self, gl_entries):
@@ -798,12 +804,14 @@ class PaymentEntry(AccountsController):
 			else:
 				current_tax_amount *= 1.0
 
-			if i == 0:
-				tax.total = flt(self.paid_amount + current_tax_amount, self.precision("total", tax))
-			else:
-				tax.total = flt(self.taxes[i-1].total + current_tax_amount, self.precision("total", tax))
+			if not tax.included_in_paid_amount:
+				if i == 0:
+					tax.total = flt(self.paid_amount + current_tax_amount, self.precision("total", tax))
+				else:
+					tax.total = flt(self.taxes[i-1].total + current_tax_amount, self.precision("total", tax))
 
-			tax.base_total = tax.total * self.source_exchange_rate
+				tax.base_total = tax.total * self.source_exchange_rate
+
 			self.total_taxes_and_charges += current_tax_amount
 			self.base_total_taxes_and_charges += current_tax_amount * self.source_exchange_rate
 
@@ -1164,7 +1172,7 @@ def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_curre
 			total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 	elif ref_doc.doctype == "Employee Advance":
 		total_amount, exchange_rate = get_total_amount_exchange_rate_for_employee_advance(party_account_currency, ref_doc)
-		
+
 	if not total_amount:
 		total_amount, exchange_rate = get_total_amount_exchange_rate_base_on_currency(
 			party_account_currency, company_currency, ref_doc)

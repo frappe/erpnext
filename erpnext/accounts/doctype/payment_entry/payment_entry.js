@@ -93,6 +93,15 @@ frappe.ui.form.on('Payment Entry', {
 			}
 		});
 
+		frm.set_query("advance_tax_account", function() {
+			return {
+				filters: {
+					"company": frm.doc.company,
+					"root_type": ["in", ["Asset", "Liability"]]
+				}
+			}
+		});
+
 		frm.set_query("reference_doctype", "references", function() {
 			if (frm.doc.party_type=="Customer") {
 				var doctypes = ["Sales Order", "Sales Invoice", "Journal Entry", "Dunning"];
@@ -1080,10 +1089,12 @@ frappe.ui.form.on('Payment Entry', {
 
 			current_tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 
-			if(i==0) {
-				tax.total = flt(frm.doc.paid_amount + current_tax_amount, precision("total", tax));
-			} else {
-				tax.total = flt(frm.doc["taxes"][i-1].total + current_tax_amount, precision("total", tax));
+			if (!tax.included_in_paid_amount) {
+				if(i==0) {
+					tax.total = flt(frm.doc.paid_amount + current_tax_amount, precision("total", tax));
+				} else {
+					tax.total = flt(frm.doc["taxes"][i-1].total + current_tax_amount, precision("total", tax));
+				}
 			}
 
 			tax.base_total = tax.total * frm.doc.source_exchange_rate;
