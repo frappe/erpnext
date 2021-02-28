@@ -1319,6 +1319,10 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 			reference_doc = doc
 		pe.set_exchange_rate(ref_doc=reference_doc)
 		pe.set_amounts()
+
+	if doc.doctype == 'Purchase Order' and doc.apply_tds:
+		pe.apply_tax_withholding_amount = 1
+
 	return pe
 
 def get_bank_cash_account(doc, bank_account):

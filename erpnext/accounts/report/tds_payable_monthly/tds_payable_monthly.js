@@ -70,13 +70,13 @@ frappe.query_reports["TDS Payable Monthly"] = {
 				let supplier = frappe.query_report.get_filter_value('supplier');
 				if(!supplier) return; // return if no supplier selected
 
-				// filter order based on selected supplier
-				let orders = [];
-				frappe.query_report.order_data.map(d => {
+				// filter invoices based on selected supplier
+				let invoices = [];
+				frappe.query_report.invoice_data.map(d => {
 					if(d.supplier==supplier)
-						orders.push(d.name)
+						invoices.push(d.name)
 				});
-				frappe.query_report.orders = orders;
+				frappe.query_report.invoices = invoices;
 				frappe.query_report.refresh();
 			}
 		},
@@ -104,21 +104,14 @@ frappe.query_reports["TDS Payable Monthly"] = {
 			"method": "erpnext.accounts.report.tds_payable_monthly.tds_payable_monthly.get_tds_invoices_and_orders",
 			callback: function(r) {
 				let invoices = [];
-				let orders = [];
 
-				r.message.invoices.map(d => {
+				r.message.map(d => {
 					invoices.push(d.name);
-				});
-
-				r.message.orders.map(d => {
-					orders.push(d.name);
 				});
 
 				report["invoice_data"] = r.message.invoices;
 				report["invoices"] = invoices;
 
-				report["order_data"] = r.message.orders;
-				report["invoices"] = orders;
 			}
 		});
 	}

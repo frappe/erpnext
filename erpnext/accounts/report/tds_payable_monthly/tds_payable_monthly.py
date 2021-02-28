@@ -8,7 +8,6 @@ from frappe.utils import getdate
 
 def execute(filters=None):
 	filters["invoices"] = frappe.cache().hget("invoices", frappe.session.user)
-	filters["orders"] = frappe.cache().hget("orders", frappe.session.user)
 	validate_filters(filters)
 	set_filters(filters)
 
@@ -16,7 +15,7 @@ def execute(filters=None):
 	payment_entries = get_payment_entires(filters)
 
 	columns = get_columns(filters)
-	if not (filters.get("invoices") and filters.get('orders')):
+	if not filters.get("invoices"):
 		return columns, []
 
 	res = get_result(filters, payment_entries)
@@ -30,13 +29,9 @@ def validate_filters(filters):
 
 def set_filters(filters):
 	invoices = []
-	orders = []
 
 	if not filters.get("invoices"):
-		filters["invoices"] = get_tds_invoices_and_orders()['invoices']
-
-	if not filters.get("orders"):
-		filters["orders"] = get_tds_invoices_and_orders()['orders']
+		filters["invoices"] = get_tds_invoices_and_orders()
 
 	if filters.supplier and filters.purchase_invoice:
 		for d in filters["invoices"]:
@@ -50,23 +45,24 @@ def set_filters(filters):
 		for d in filters["invoices"]:
 			if d.name == filters.purchase_invoice:
 				invoices.append(d)
-
-	if filters.supplier and filters.purchase_order:
-		for d in filters.get("orders"):
+	elif filters.supplier and filters.purchase_order:
+		for d in filters.get("invoices"):
 			if d.name == filters.purchase_order and d.supplier == filters.supplier:
-				orders.append(d)
+				invoices.append(d)
 	elif filters.supplier and not filters.purchase_order:
-		for d in filters.get("orders"):
+		for d in filters.get("invoices"):
 			if d.supplier == filters.supplier:
-				orders.append(d)
+				invoices.append(d)
 	elif filters.purchase_order and not filters.supplier:
 		for d in filters.get("invoices"):
 			if d.name == filters.purchase_order:
-				orders.append(d)
+				print("$#$#$$#")
+				invoices.append(d)
 
 	filters["invoices"] = invoices if invoices else filters["invoices"]
-	filters["orders"] = orders if orders else filters["orders"]
 	filters.naming_series = frappe.db.get_single_value('Buying Settings', 'supp_master_name')
+
+	#print(filters.get('invoices'))
 
 def get_result(filters, payment_entries):
 	supplier_map, tds_docs = get_supplier_map(filters, payment_entries)
@@ -115,17 +111,13 @@ def get_supplier_map(filters, payment_entries):
 	# pre-fetch all distinct applicable tds docs
 	supplier_map, tds_docs = {}, {}
 	pan = "pan" if frappe.db.has_column("Supplier", "pan") else "tax_id"
-	supplier_list = [d.supplier for d in filters["invoices"]] + [d.supplier for d in filters["orders"]]
+	supplier_list = [d.supplier for d in filters["invoices"]]
 
 	supplier_detail = frappe.db.get_all('Supplier',
 		{"name": ["in", supplier_list]},
 		["tax_withholding_category", "name", pan+" as pan", "supplier_type", "supplier_name"])
 
 	for d in filters["invoices"]:
-		supplier_map[d.get("name")] = [k for k in supplier_detail
-			if k.name == d.get("supplier")][0]
-
-	for d in filters["orders"]:
 		supplier_map[d.get("name")] = [k for k in supplier_detail
 			if k.name == d.get("supplier")][0]
 
@@ -248,12 +240,10 @@ def get_payment_entires(filters):
 		'apply_tax_withholding_amount': 1
 	}
 
-	if filters.get('purchase_order') or filters.get('purchase_invoice'):
+	if filters.get('purchase_invoice') or filters.get('purchase_order'):
 		parent = frappe.db.get_all('Payment Entry Reference',
-			{
-				'reference_name': ('in', [d.get('name') for d in filters.get('orders')] +
-					[d.get('name') for d in filters.get('invoices')])
-			}, ['parent'])
+			{ 'reference_name': ('in', [d.get('name') for d in filters.get('invoices')])}, ['parent'])
+
 		filter_dict.update({'name': ('in', [d.get('parent') for d in parent])})
 
 	payment_entries = frappe.get_all('Payment Entry', fields=['name', 'party_name as supplier'],
@@ -273,13 +263,9 @@ def get_tds_invoices_and_orders():
 	orders = frappe.db.get_list("Purchase Order",
 		{"supplier": ["in", suppliers]}, ["name", "supplier"])
 
+	invoices = invoices + orders
 	invoices = [d for d in invoices if d.supplier]
-	orders = [d for d in orders if d.supplier]
 
 	frappe.cache().hset("invoices", frappe.session.user, invoices)
-	frappe.cache().hset("orders", frappe.session.user, invoices)
 
-	return {
-		'invoices': invoices,
-		'orders': orders
-	}
+	return invoices
