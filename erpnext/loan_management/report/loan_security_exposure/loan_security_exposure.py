@@ -35,7 +35,7 @@ def get_columns(filters):
 
 def get_data(filters):
 	data = []
-	loan_security_details = get_loan_security_details(filters)
+	loan_security_details = get_loan_security_details()
 	current_pledges, total_portfolio_value = get_company_wise_loan_security_details(filters, loan_security_details)
 	currency = erpnext.get_company_currency(filters.get('company'))
 
@@ -76,7 +76,7 @@ def get_company_wise_loan_security_details(filters, loan_security_details):
 		if qty:
 			security_wise_map[key[1]]['applicant_count'] += 1
 
-		total_portfolio_value += flt(qty * loan_security_details.get(key[1])['latest_price'])
+		total_portfolio_value += flt(qty * loan_security_details.get(key[1], {}).get('latest_price', 0))
 
 	return security_wise_map, total_portfolio_value
 

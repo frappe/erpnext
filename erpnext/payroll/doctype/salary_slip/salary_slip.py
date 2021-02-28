@@ -1103,10 +1103,10 @@ class SalarySlip(TransactionBase):
 			self.calculate_total_for_salary_slip_based_on_timesheet()
 		else:
 			self.total_deduction = 0.0
-			if self.earnings:
+			if hasattr(self, "earnings"):
 				for earning in self.earnings:
 					self.gross_pay += flt(earning.amount, earning.precision("amount"))
-			if self.deductions:
+			if hasattr(self, "deductions"):
 				for deduction in self.deductions:
 					self.total_deduction += flt(deduction.amount, deduction.precision("amount"))
 			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
