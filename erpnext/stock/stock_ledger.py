@@ -664,6 +664,6 @@ def get_batch_valuation_rate(item_code, warehouse, voucher_type, voucher_no, bat
 				AND batch_valuation_rate > 0
 				AND NOT (voucher_no = %s AND voucher_type = %s)
 			order by posting_date desc, posting_time desc, creation desc limit 1
-		""", (item_code, warehouse, batch_no, voucher_no, voucher_type))
+		""", (item_code, batch_no, voucher_no, voucher_type))
 
 	return last_batch_valuation_rate
