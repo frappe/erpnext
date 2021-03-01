@@ -53,7 +53,7 @@ class GrossProfitGenerator(object):
 				si.depreciation_type, si_item.depreciation_percentage,
 				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person,
 				sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage,
-				si_item.si_detail, si_item.returned_qty, si_item.base_returned_amount
+				si_item.returned_qty, si_item.base_returned_amount
 			from `tabSales Invoice` si
 			inner join `tabSales Invoice Item` si_item on si_item.parent = si.name
 			left join `tabCustomer` c on c.name = si.customer
