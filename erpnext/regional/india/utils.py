@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe, re, json
 from frappe import _
 import erpnext
-from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words
+from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words, getdate
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -147,6 +147,20 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 
 def set_place_of_supply(doc, method=None):
 	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
+
+def validate_document_name(doc, method=None):
+	"""Validate GST invoice number requirements."""
+	country = frappe.get_cached_value("Company", doc.company, "country")
+
+	if country != "India" or getdate(doc.posting_date) < getdate("2021-04-01"):
+		return
+
+	if len(doc.name) > 16:
+		frappe.throw(_("Maximum length of document number should be 16 characters as per GST rules. Please change the naming series."))
+
+	gst_doc_name_pattern = re.compile(r"^[a-zA-Z0-9\-/]+$")
+	if not gst_doc_name_pattern.match(doc.name):
+		frappe.throw(_("Document name should only contain alphanumeric values, dash(-) and slash(/) characters as per GST rules. Please change the naming series."))
 
 # don't remove this function it is used in tests
 def test_method():
