@@ -495,5 +495,28 @@
     "selling_cost_center": "_Test Cost Center - _TC",
     "income_account": "Sales - _TC"
   }]
+ },
+ {
+  "description": "_Test Batch Wise Valuation Item",
+  "doctype": "Item",
+  "has_serial_no": 0,
+  "has_batch_no": 1,
+  "create_new_batch": 1,
+  "valuation_method": "Moving Average",
+  "inspection_required": 0,
+  "is_stock_item": 1,
+  "is_sub_contracted_item": 0,
+  "item_code": "_Test Batch Wise Valuation Item",
+  "item_group": "_Test Item Group",
+  "item_name": "_Test Batch Wise Valuation Item",
+  "stock_uom": "_Test UOM",
+  "item_defaults": [{
+    "company": "_Test Company",
+    "default_warehouse": "_Test Warehouse - _TC",
+    "expense_account": "_Test Account Cost for Goods Sold - _TC",
+    "buying_cost_center": "_Test Cost Center - _TC",
+    "selling_cost_center": "_Test Cost Center - _TC",
+    "income_account": "Sales - _TC"
+  }]
  }
 ]
