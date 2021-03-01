@@ -60,8 +60,6 @@ class SalarySlip(TransactionBase):
 				frappe.msgprint(_("Total working hours should not be greater than max working hours {0}").
 								format(max_working_hours), alert=True)
 
-		# frappe.throw("Hello")
-
 	def set_net_total_in_words(self):
 		doc_currency = self.currency
 		company_currency = erpnext.get_company_currency(self.company)
@@ -581,7 +579,7 @@ class SalarySlip(TransactionBase):
 
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
-				if additional_salary == d.additional_salary and d.overwritten == 1:
+				if additional_salary == d.additional_salary and d.overwritten:
 					return
 
 				if struct_row.get("is_additional_component") and d.additional_salary == additional_salary and not overwrite:
@@ -636,7 +634,7 @@ class SalarySlip(TransactionBase):
 			component_row.deduct_full_tax_on_selected_payroll_date = struct_row.deduct_full_tax_on_selected_payroll_date
 
 	def get_overwritten_components(self, key):
-		return [ele.salary_component for ele in self.get(key) if ele.overwritten == 1]
+		return [entry.salary_component for entry in self.get(key) if entry.overwritten == 1]
 
 	def calculate_variable_based_on_taxable_salary(self, tax_component, payroll_period):
 		if not payroll_period:
