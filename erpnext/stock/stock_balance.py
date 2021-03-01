@@ -283,6 +283,8 @@ def repost_all_stock_vouchers():
 
 			if doc.doctype == "Purchase Receipt":
 				doc.set_billed_valuation_amounts()
+			if doc.doctype == "Purchase Invoice":
+				doc.set_debit_note_amount()
 
 			doc.set_landed_cost_voucher_amount()
 			doc.update_valuation_rate("items")

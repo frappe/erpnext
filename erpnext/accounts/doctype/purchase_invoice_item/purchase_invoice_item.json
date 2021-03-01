@@ -133,6 +133,7 @@
   "purchase_receipt",
   "pr_detail",
   "pi_detail",
+  "debit_note_amount",
   "asset_category",
   "accounting_dimensions_section",
   "expense_account",
@@ -1170,12 +1171,20 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "debit_note_amount",
+   "fieldtype": "Currency",
+   "hidden": 1,
+   "label": "Debit Note Amount",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-02-25 17:27:30.513707",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2021-02-25 18:06:01.867148",
+ "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
  "owner": "Administrator",
