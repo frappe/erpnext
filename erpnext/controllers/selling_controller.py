@@ -356,6 +356,7 @@ class SellingController(StockController):
 							args = frappe._dict({
 								"item_code": d.item_code,
 								"warehouse": d.warehouse,
+								"batch_no": d.batch_no,
 								"posting_date": self.posting_date,
 								"posting_time": self.posting_time,
 								"qty": -1*flt(d.qty),

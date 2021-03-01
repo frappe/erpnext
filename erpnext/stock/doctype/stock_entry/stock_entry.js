@@ -384,6 +384,7 @@ frappe.ui.form.on('Stock Entry', {
 				'posting_date': frm.doc.posting_date,
 				'posting_time': frm.doc.posting_time,
 				'warehouse': cstr(item.s_warehouse) || cstr(item.t_warehouse),
+				'batch_no': item.batch_no,
 				'serial_no': item.serial_no,
 				'company': frm.doc.company,
 				'qty': item.s_warehouse ? -1 * flt(item.transfer_qty) : flt(item.transfer_qty),
@@ -416,6 +417,7 @@ frappe.ui.form.on('Stock Entry', {
 					"args": {
 						'item_code': child.item_code,
 						'warehouse': cstr(child.s_warehouse) || cstr(child.t_warehouse),
+						'batch_no': child.batch_no,
 						'transfer_qty': child.transfer_qty,
 						'serial_no': child.serial_no,
 						'qty': child.s_warehouse ? -1* child.transfer_qty : child.transfer_qty,

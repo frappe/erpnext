@@ -409,6 +409,7 @@ class BuyingController(StockController):
 			rm.rate = get_incoming_rate({
 				"item_code": raw_material_data.rm_item_code,
 				"warehouse": self.supplier_warehouse,
+				"batch_no": d.batch_no,
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"qty": -1 * qty,
@@ -492,6 +493,7 @@ class BuyingController(StockController):
 				rm.rate = get_incoming_rate({
 					"item_code": bom_item.item_code,
 					"warehouse": self.supplier_warehouse,
+					"batch_no": rm.batch_no,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
 					"qty": -1 * required_qty,

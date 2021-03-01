@@ -191,19 +191,22 @@ def get_incoming_rate(args, raise_error_if_no_rate=True):
 	if (args.get("serial_no") or "").strip():
 		in_rate = get_avg_purchase_rate(args.get("serial_no"))
 	else:
-		valuation_method = get_valuation_method(args.get("item_code"))
+		valuation_method, batch_wise_valuation = get_valuation_method(args.get("item_code"))
 		previous_sle = get_previous_sle(args)
 		if valuation_method == 'FIFO':
 			if previous_sle:
 				previous_stock_queue = json.loads(previous_sle.get('stock_queue', '[]') or '[]')
 				in_rate = get_fifo_rate(previous_stock_queue, args.get("qty") or 0) if previous_stock_queue else 0
 		elif valuation_method == 'Moving Average':
-			in_rate = previous_sle.get('valuation_rate') or 0
+			if batch_wise_valuation:
+				in_rate = previous_sle.get('batch_valuation_rate') or 0
+			else:
+				in_rate = previous_sle.get('valuation_rate') or 0
 
 	if not in_rate:
 		voucher_no = args.get('voucher_no') or args.get('name')
 		in_rate = get_valuation_rate(args.get('item_code'), args.get('warehouse'),
-			args.get('voucher_type'), voucher_no, args.get('allow_zero_valuation'),
+			args.get('voucher_type'), voucher_no, args.get('batch_no'), args.get('allow_zero_valuation'),
 			currency=erpnext.get_company_currency(args.get('company')), company=args.get('company'),
 			raise_error_if_no_rate=raise_error_if_no_rate)
 
@@ -219,10 +222,18 @@ def get_avg_purchase_rate(serial_nos):
 
 def get_valuation_method(item_code):
 	"""get valuation method from item or default"""
-	val_method = frappe.db.get_value('Item', item_code, 'valuation_method')
+	val_method, batch_wise_valuation, has_batch_no = frappe.db.get_value('Item', item_code,
+		['valuation_method', 'batch_wise_valuation', 'has_batch_no'])
 	if not val_method:
 		val_method = frappe.db.get_value("Stock Settings", None, "valuation_method") or "FIFO"
-	return val_method
+	if has_batch_no and not batch_wise_valuation:
+		batch_wise_valuation = frappe.db.get_value("Stock Settings", None, "batch_wise_valuation") or "No"
+
+	if has_batch_no:
+		batch_wise_valuation = 1 if batch_wise_valuation == "Yes" else 0
+	else:
+		batch_wise_valuation = 0
+	return val_method, batch_wise_valuation
 
 def get_fifo_rate(previous_stock_queue, qty):
 	"""get FIFO (average) Rate from Queue"""
