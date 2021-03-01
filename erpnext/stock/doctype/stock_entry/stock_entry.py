@@ -854,10 +854,10 @@ class StockEntry(StockController):
 		stock_and_rate = get_warehouse_details(args) if args.get('warehouse') else {}
 		ret.update(stock_and_rate)
 
-		# automatically select batch for outgoing item
-		if (args.get('s_warehouse', None) and args.get('qty') and
-			ret.get('has_batch_no') and not args.get('batch_no')):
-			args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
+		# # automatically select batch for outgoing item
+		# if (args.get('s_warehouse', None) and args.get('qty') and
+		# 	ret.get('has_batch_no') and not args.get('batch_no')):
+		# 	args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
 
 		# Contents UOM
 		ret.alt_uom = item.alt_uom
