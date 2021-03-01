@@ -472,7 +472,8 @@ erpnext.PointOfSale.ItemCart = class {
 		if (!frm) frm = this.events.get_frm();
 
 		this.render_net_total(frm.doc.net_total);
-		this.render_grand_total(frm.doc.grand_total);
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
+		this.render_grand_total(grand_total);
 
 		const taxes = frm.doc.taxes.map(t => {
 			return {
