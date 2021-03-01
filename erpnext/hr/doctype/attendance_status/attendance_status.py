@@ -11,7 +11,7 @@ from frappe.model.document import Document
 class AttendanceStatus(Document):
 	def validate(self):
 		if self.is_present and self.is_leave and self.is_half_day:
-			frappe.throw(_("Attendance status can be either Present, leave or Half day"))
+			frappe.throw(_("Attendance status can either be Present, Leave or Half day."))
 
 		self.validate_multiple_defaults()
 
@@ -56,5 +56,4 @@ class AttendanceStatus(Document):
 			link = get_link_to_form(references[i], documents[i])
 			msg += _("Duplicate Default Status for {0}.{1}Reference : {2}").format(references[i], "<br>", bold(link)) + "<hr>"
 		frappe.throw(msg)
-
 
