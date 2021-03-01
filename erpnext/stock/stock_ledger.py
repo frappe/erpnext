@@ -311,6 +311,7 @@ class update_entries_after(object):
 	def get_moving_average_values(self, sle):
 		actual_qty = flt(sle.actual_qty)
 		prev_qty = flt(self.batch_data.batch_qty_after_transaction if self.batch_wise_valuation else self.qty_after_transaction)
+
 		new_qty = flt(prev_qty + actual_qty, self.qty_db_precision)
 		prev_valuation_rate = flt(self.batch_data.batch_valuation_rate if self.batch_wise_valuation else self.valuation_rate)
 		new_valuation_rate = prev_valuation_rate
@@ -351,8 +352,10 @@ class update_entries_after(object):
 						currency=erpnext.get_company_currency(sle.company), batch_wise_valuation=self.batch_wise_valuation)
 
 		self.qty_after_transaction += flt(sle.actual_qty)
+		self.qty_after_transaction = flt(self.qty_after_transaction, self.qty_db_precision)
 		if self.batch_wise_valuation:
 			self.batch_data.batch_qty_after_transaction += flt(sle.actual_qty)
+			self.batch_data.batch_qty_after_transaction = flt(self.batch_data.batch_qty_after_transaction, self.qty_db_precision)
 			self.batch_data.batch_valuation_rate = new_valuation_rate
 			self.batch_data.batch_stock_value = flt(self.batch_data.batch_qty_after_transaction) * flt(self.batch_data.batch_valuation_rate)
 
@@ -529,7 +532,8 @@ def get_previous_sle(args, for_update=False):
 	sle = get_stock_ledger_entries(args, "<=", "desc", "limit 1", for_update=for_update, batch_sle=batch_wise_valuation)
 	return sle and sle[0] or {}
 
-def get_stock_ledger_entries(previous_sle, operator=None, order="desc", limit=None, for_update=False, batch_sle=False, debug=False, check_serial_no=True):
+def get_stock_ledger_entries(previous_sle, operator=None,
+	order="desc", limit=None, for_update=False, batch_sle=False, debug=False, check_serial_no=True):
 	"""get stock ledger entries filtered by specific posting datetime conditions"""
 	conditions = " and timestamp(posting_date, posting_time) {0} timestamp(%(posting_date)s, %(posting_time)s)".format(operator)
 	if previous_sle.get("warehouse"):
@@ -584,13 +588,14 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=
 		last_valuation_rate = get_batch_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no)
 
 	if not last_valuation_rate:
-		operator = '>' if batch_no and batch_wise_valuation else '>='
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
-			where item_code = %s and warehouse = %s
+			where item_code = %s
+			and warehouse = %s
 			and valuation_rate {0} 0
-			order by posting_date desc, posting_time desc, name desc limit 1
-		""".format(operator), (item_code, warehouse, voucher_no, voucher_type))  # nosec
+			AND NOT (voucher_no = %s AND voucher_type = %s)
+			order by posting_date desc, posting_time desc, creation desc limit 1
+		""".format('>' if batch_no and batch_wise_valuation else '>='), (item_code, warehouse, voucher_no, voucher_type))
 
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
@@ -600,7 +605,7 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=
 				item_code = %s
 				AND valuation_rate > 0
 				AND NOT(voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, voucher_no, voucher_type))
+			order by posting_date desc, posting_time desc, creation desc limit 1""", (item_code, voucher_no, voucher_type))
 
 	if last_valuation_rate:
 		return flt(last_valuation_rate[0][0]) # as there is previous records, it might come with zero rate
@@ -646,7 +651,7 @@ def get_batch_valuation_rate(item_code, warehouse, voucher_type, voucher_no, bat
 			AND batch_no = %s
 			AND batch_valuation_rate >= 0
 			AND NOT (voucher_no = %s AND voucher_type = %s)
-		order by posting_date desc, posting_time desc, name desc limit 1
+		order by posting_date desc, posting_time desc, creation desc limit 1
 	""", (item_code, warehouse, batch_no, voucher_no, voucher_type))
 
 	if not last_batch_valuation_rate:
@@ -658,7 +663,7 @@ def get_batch_valuation_rate(item_code, warehouse, voucher_type, voucher_no, bat
 				AND batch_no = %s
 				AND batch_valuation_rate > 0
 				AND NOT (voucher_no = %s AND voucher_type = %s)
-			order by posting_date desc, posting_time desc, name desc limit 1
+			order by posting_date desc, posting_time desc, creation desc limit 1
 		""", (item_code, warehouse, batch_no, voucher_no, voucher_type))
 
 	return last_batch_valuation_rate
