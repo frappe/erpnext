@@ -606,18 +606,20 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 	cond = "1=1"
 	if posting_date:
 		if future_payment:
-			cond = "posting_date <= '{0}' OR DATE(creation) <= '{0}' """.format(posting_date)
+			cond = "gle.posting_date <= '{0}' OR DATE(creation) <= '{0}' """.format(posting_date)
 		else:
-			cond = "posting_date <= '{0}'".format(posting_date)
+			cond = "gle.posting_date <= '{0}'".format(posting_date)
 
 	if company:
-		cond += "and company = {0}".format(frappe.db.escape(company))
+		cond += "and gle.company = {0}".format(frappe.db.escape(company))
 
-	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
-		FROM `tabGL Entry`
+	data = frappe.db.sql(""" SELECT gle.party, sum(gle.{0}) as amount
+		FROM `tabGL Entry` gle
+		INNER JOIN `tabPayment Entry` pe ON pe.name = gle.voucher_no
 		WHERE
-			party_type = %s and against_voucher is null
-			and {1} GROUP BY party"""
+			gle.party_type = %s and gle.against_voucher is null
+            and pe.docstatus = 1
+			and {1} GROUP BY gle.party"""
 		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
 
 	if data:
