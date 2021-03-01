@@ -84,6 +84,9 @@ class TestStockEntry(unittest.TestCase):
 			for k, v in iteritems(values):
 				self.assertEqual(sle.get(k), v)
 
+		# For a spreadsheet view go to
+		# https://docs.google.com/spreadsheets/d/10GOG70ZuKPm4pjF8ZpvjniNHmo05i6Gs6jJedhaXKso/edit?usp=sharing
+
 		# In 1
 		in1_1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
 		batch1 = in1_1.items[0].batch_no

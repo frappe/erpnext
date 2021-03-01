@@ -581,20 +581,16 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=
 		valuation_method, batch_wise_valuation = get_valuation_method(item_code)
 
 	if batch_no and batch_wise_valuation:
-		last_valuation_rate = frappe.db.sql("""
-			select batch_valuation_rate
-			from `tabStock Ledger Entry`
-			where item_code = %s and warehouse = %s and batch_no = %s
-			and valuation_rate >= 0
-			order by posting_date desc, posting_time desc, name desc limit 1""", (item_code, warehouse, batch_no))
+		last_valuation_rate = get_batch_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no)
 
 	if not last_valuation_rate:
+		operator = '>' if batch_no and batch_wise_valuation else '>='
 		last_valuation_rate = frappe.db.sql("""select valuation_rate
 			from `tabStock Ledger Entry`
 			where item_code = %s and warehouse = %s
 			and valuation_rate {0} 0
 			order by posting_date desc, posting_time desc, name desc limit 1
-		""".format('>' if batch_no and batch_wise_valuation else '>='), (item_code, warehouse))
+		""".format(operator), (item_code, warehouse, voucher_no, voucher_type))  # nosec
 
 	if not last_valuation_rate:
 		# Get valuation rate from last sle for the item against any warehouse
@@ -639,3 +635,30 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=
 		frappe.throw(msg=msg, title=_("Valuation Rate Missing"))
 
 	return valuation_rate
+
+def get_batch_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no):
+	last_batch_valuation_rate = frappe.db.sql("""
+		select batch_valuation_rate
+		from `tabStock Ledger Entry`
+		where
+			item_code = %s
+			AND warehouse = %s
+			AND batch_no = %s
+			AND batch_valuation_rate >= 0
+			AND NOT (voucher_no = %s AND voucher_type = %s)
+		order by posting_date desc, posting_time desc, name desc limit 1
+	""", (item_code, warehouse, batch_no, voucher_no, voucher_type))
+
+	if not last_batch_valuation_rate:
+		last_batch_valuation_rate = frappe.db.sql("""
+			select batch_valuation_rate
+			from `tabStock Ledger Entry`
+			where
+				item_code = %s
+				AND batch_no = %s
+				AND batch_valuation_rate > 0
+				AND NOT (voucher_no = %s AND voucher_type = %s)
+			order by posting_date desc, posting_time desc, name desc limit 1
+		""", (item_code, warehouse, batch_no, voucher_no, voucher_type))
+
+	return last_batch_valuation_rate
