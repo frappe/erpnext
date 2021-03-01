@@ -14,7 +14,7 @@ frappe.ui.form.on('Attendance Status', {
 
 	reset_values: function(fields) {
 		fields.forEach(field => {
-			cur_frm.set_value(field, 0);
+			frm.set_value(field, 0);
 		});
 
 	}
