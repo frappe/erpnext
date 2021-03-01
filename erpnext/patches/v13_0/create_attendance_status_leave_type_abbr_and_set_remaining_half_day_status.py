@@ -4,9 +4,10 @@ from erpnext.hr.utils import create_standard_attendance_status
 
 def execute():
 
-    frappe.reload_doc("HR", "doctype", 'Attendance Status')
-    frappe.reload_doc("HR", "doctype", 'Leave Application')
-    frappe.reload_doc("HR", "doctype", 'Attendance')
+    frappe.reload_doc("HR", "doctype", "Attendance Status")
+    frappe.reload_doc("HR", "doctype", "Leave Application")
+    frappe.reload_doc("HR", "doctype", "Attendance")
+    frappe.reload_doc("HR", "doctype", "Leave Type")
 
     create_standard_attendance_status()
 
@@ -33,4 +34,3 @@ def execute():
     #setting default status to present for old records
     frappe.db.sql("Update `tabAttendance` set remaining_half_day_status = 'Present' where status = 'Half Day' ")
     frappe.db.sql("Update `tabLeave Application` set remaining_half_day_status = 'Present' where half_day = 1 ")
-
