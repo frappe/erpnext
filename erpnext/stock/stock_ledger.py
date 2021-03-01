@@ -581,7 +581,8 @@ def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=
 		valuation_method, batch_wise_valuation = get_valuation_method(item_code)
 
 	if batch_no and batch_wise_valuation:
-		last_valuation_rate = frappe.db.sql("""select valuation_rate
+		last_valuation_rate = frappe.db.sql("""
+			select batch_valuation_rate
 			from `tabStock Ledger Entry`
 			where item_code = %s and warehouse = %s and batch_no = %s
 			and valuation_rate >= 0
