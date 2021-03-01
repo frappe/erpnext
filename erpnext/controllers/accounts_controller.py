@@ -829,7 +829,8 @@ class AccountsController(TransactionBase):
 				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
 				if (party_account_currency
-						and self.currency != party_account_currency):
+						and (self.currency != party_account_currency
+						or self.currency != self.company_currency)):
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
 								 .format(party_type, party, party_account_currency), InvalidCurrency)
 
@@ -1393,7 +1394,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			)
 
 	def get_new_child_item(item_row):
-		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item" 
+		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item"
 		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
