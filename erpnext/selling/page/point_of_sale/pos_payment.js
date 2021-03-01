@@ -223,7 +223,8 @@ erpnext.PointOfSale.Payment = class {
 
 			if (success) {
 				title = __("Payment Received");
-				if (amount >= doc.grand_total) {
+				const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
+				if (amount >= grand_total) {
 					frappe.dom.unfreeze();
 					message = __("Payment of {0} received successfully.", [format_currency(amount, doc.currency, 0)]);
 					this.events.submit_invoice();
@@ -243,7 +244,8 @@ erpnext.PointOfSale.Payment = class {
 
 	auto_set_remaining_amount() {
 		const doc = this.events.get_frm().doc;
-		const remaining_amount = doc.grand_total - doc.paid_amount;
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
+		const remaining_amount = grand_total - doc.paid_amount;
 		const current_value = this.selected_mode ? this.selected_mode.get_value() : undefined;
 		if (!current_value && remaining_amount > 0 && this.selected_mode) {
 			this.selected_mode.set_value(remaining_amount);
@@ -389,7 +391,7 @@ erpnext.PointOfSale.Payment = class {
 	}
 
 	attach_cash_shortcuts(doc) {
-		const grand_total = doc.grand_total;
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
 		const currency = doc.currency;
 
 		const shortcuts = this.get_cash_shortcuts(flt(grand_total));
@@ -499,7 +501,8 @@ erpnext.PointOfSale.Payment = class {
 	update_totals_section(doc) {
 		if (!doc) doc = this.events.get_frm().doc;
 		const paid_amount = doc.paid_amount;
-		const remaining = doc.grand_total - doc.paid_amount;
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? doc.grand_total : doc.rounded_total;
+		const remaining = grand_total - doc.paid_amount;
 		const change = doc.change_amount || remaining <= 0 ? -1 * remaining : undefined;
 		const currency = doc.currency;
 		const label = change ? __('Change') : __('To Be Paid');
@@ -507,7 +510,7 @@ erpnext.PointOfSale.Payment = class {
 		this.$totals.html(
 			`<div class="col">
 				<div class="total-label">Grand Total</div>
-				<div class="value">${format_currency(doc.grand_total, currency)}</div>
+				<div class="value">${format_currency(grand_total, currency)}</div>
 			</div>
 			<div class="seperator-y"></div>
 			<div class="col">
