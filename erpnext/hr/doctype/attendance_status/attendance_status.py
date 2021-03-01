@@ -54,6 +54,5 @@ class AttendanceStatus(Document):
 		msg = ''
 		for i in range(len(documents)):
 			link = get_link_to_form(references[i], documents[i])
-			msg += _("Duplicate Default Status for {0}.{1}Reference : {2}").format(references[i], "<br>", bold(link)) + "<hr>"
+			msg += _("A Default Status for {0} already exists. {1} Reference : {2}").format(references[i], "<br>", bold(link)) + "<hr>"
 		frappe.throw(msg)
-
