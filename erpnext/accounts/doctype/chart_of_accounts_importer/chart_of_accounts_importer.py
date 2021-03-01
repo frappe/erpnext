@@ -26,9 +26,10 @@ def validate_company(company):
 		'allow_account_creation_against_child_company'])
 
 	if parent_company and (not allow_account_creation_against_child_company):
-		frappe.throw(_("""{0} is a child company. Please import accounts against parent company
-			or enable {1} in company master""").format(frappe.bold(company),
-			frappe.bold('Allow Account Creation Against Child Company')), title='Wrong Company')
+		msg = _("{} is a child company. ").format(frappe.bold(company))
+		msg += _("Please import accounts against parent company or enable {} in company master.").format(
+			frappe.bold('Allow Account Creation Against Child Company'))
+		frappe.throw(msg, title=_('Wrong Company'))
 
 	if frappe.db.get_all('GL Entry', {"company": company}, "name", limit=1):
 		return False
@@ -78,7 +79,9 @@ def generate_data_from_csv(file_doc, as_dict=False):
 			if as_dict:
 				data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
 			else:
-				if not row[1]: row[1] = row[0]
+				if not row[1]:
+					row[1] = row[0]
+					row[3] = row[2]
 				data.append(row)
 
 	# convert csv data
@@ -100,7 +103,9 @@ def generate_data_from_excel(file_doc, extension, as_dict=False):
 		if as_dict:
 			data.append({frappe.scrub(header): row[index] for index, header in enumerate(headers)})
 		else:
-			if not row[1]: row[1] = row[0]
+			if not row[1]:
+					row[1] = row[0]
+					row[3] = row[2]
 			data.append(row)
 
 	return data
@@ -152,7 +157,13 @@ def build_forest(data):
 		from frappe import _
 
 		for row in data:
-			account_name, parent_account = row[0:2]
+			account_name, parent_account, account_number, parent_account_number = row[0:4]
+			if account_number:
+				account_name = "{} - {}".format(account_number, account_name)
+			if parent_account_number:
+				parent_account_number = cstr(parent_account_number).strip()
+				parent_account = "{} - {}".format(parent_account_number, parent_account)
+
 			if parent_account == account_name == child:
 				return [parent_account]
 			elif account_name == child:
@@ -165,30 +176,31 @@ def build_forest(data):
 	charts_map = defaultdict(dict)
 	paths = []
 
-	line_no = 3
+	line_no = 2
 	error_messages = []
 
 	for row in data:
-		account_name, parent_account, account_number, is_group, account_type, root_type, *others = row
+		account_name, parent_account, account_number, parent_account_number, \
+			is_group, account_type, root_type, *others = row
 
 		if not account_name:
 			error_messages.append("Row {0}: Please enter Account Name".format(line_no))
 
-		charts_map[account_name]["is_group"] = cint(is_group)
+		if account_number:
+			account_number = cstr(account_number).strip()
+			account_name = "{} - {}".format(account_number, account_name)
+
+		charts_map[account_name] = {}
+		if cint(is_group) == 1:
+			charts_map[account_name]["is_group"] = is_group
 		if account_type:
 			charts_map[account_name]["account_type"] = account_type
 		if root_type:
 			charts_map[account_name]["root_type"] = root_type
-		if account_number:
-			charts_map[account_name]["account_number"] = account_number
 		if others and others[0]:  # currency
 			charts_map[account_name]["account_currency"] = others[0]
-
-		# create a list of paths
-		path = return_parent(data, account_name)
-		path.reverse()
-		paths.append(path)
-
+		path = return_parent(data, account_name)[::-1]
+		paths.append(path)  # List of path is created
 		line_no += 1
 
 	if error_messages:
@@ -235,9 +247,10 @@ def download_template(file_type, template_type):
 	else:
 		build_response_as_excel(writer)
 
-
 def get_template(template_type):
-	fields = ["Account Name", "Parent Account", "Account Number", "Is Group", "Account Type", "Root Type", "Currency"]
+	fields = ["Account Name", "Parent Account", "Account Number", "Parent Account Number",
+		"Is Group", "Account Type", "Root Type", "Currency"]
+
 	writer = UnicodeWriter()
 	writer.writerow(fields)
 
@@ -258,23 +271,23 @@ def get_template(template_type):
 
 def get_sample_template(writer):
 	template = [
-		["Application Of Funds(Assets)", "", "", 1, "", "Asset"],
-		["Sources Of Funds(Liabilities)", "", "", 1, "", "Liability"],
-		["Equity", "", "", 1, "", "Equity"],
-		["Expenses", "", "", 1, "", "Expense"],
-		["Income", "", "", 1, "", "Income"],
-		["Bank Accounts", "Application Of Funds(Assets)", "", 1, "Bank", "Asset"],
-		["Cash In Hand", "Application Of Funds(Assets)", "", 1, "Cash", "Asset"],
-		["Stock Assets", "Application Of Funds(Assets)", "", 1, "Stock", "Asset"],
-		["Cost Of Goods Sold", "Expenses", "", 0, "Cost of Goods Sold", "Expense"],
-		["Asset Depreciation", "Expenses", "", 0, "Depreciation", "Expense"],
-		["Fixed Assets", "Application Of Funds(Assets)", "", 0, "Fixed Asset", "Asset"],
-		["Accounts Payable", "Sources Of Funds(Liabilities)", "", 0, "Payable", "Liability"],
-		["Accounts Receivable", "Application Of Funds(Assets)", "", 1, "Receivable", "Asset"],
-		["Stock Expenses", "Expenses", "", 0, "Stock Adjustment", "Expense"],
-		["Sample Bank", "Bank Accounts", "", 0, "Bank", "Asset"],
-		["Cash", "Cash In Hand", "", 0, "Cash", "Asset"],
-		["Stores", "Stock Assets", "", 0, "Stock", "Asset"],
+		["Application Of Funds(Assets)", "", "", "", 1, "", "Asset"],
+		["Sources Of Funds(Liabilities)", "", "", "", 1, "", "Liability"],
+		["Equity", "", "", "", 1, "", "Equity"],
+		["Expenses", "", "", "", 1, "", "Expense"],
+		["Income", "", "", "", 1, "", "Income"],
+		["Bank Accounts", "Application Of Funds(Assets)", "", "", 1, "Bank", "Asset"],
+		["Cash In Hand", "Application Of Funds(Assets)", "", "", 1, "Cash", "Asset"],
+		["Stock Assets", "Application Of Funds(Assets)", "", "", 1, "Stock", "Asset"],
+		["Cost Of Goods Sold", "Expenses", "", "", 0, "Cost of Goods Sold", "Expense"],
+		["Asset Depreciation", "Expenses", "", "", 0, "Depreciation", "Expense"],
+		["Fixed Assets", "Application Of Funds(Assets)", "", "", 0, "Fixed Asset", "Asset"],
+		["Accounts Payable", "Sources Of Funds(Liabilities)", "", "", 0, "Payable", "Liability"],
+		["Accounts Receivable", "Application Of Funds(Assets)", "", "", 1, "Receivable", "Asset"],
+		["Stock Expenses", "Expenses", "", "", 0, "Stock Adjustment", "Expense"],
+		["Sample Bank", "Bank Accounts", "", "", 0, "Bank", "Asset"],
+		["Cash", "Cash In Hand", "", "", 0, "Cash", "Asset"],
+		["Stores", "Stock Assets", "", "", 0, "Stock", "Asset"],
 	]
 
 	for row in template:

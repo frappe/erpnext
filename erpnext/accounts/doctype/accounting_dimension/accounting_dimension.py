@@ -43,11 +43,11 @@ class AccountingDimension(Document):
 		if frappe.flags.in_test:
 			make_dimension_in_accounting_doctypes(doc=self)
 		else:
-			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self)
+			frappe.enqueue(make_dimension_in_accounting_doctypes, doc=self, queue='long')
 
 	def on_trash(self):
 		if frappe.flags.in_test:
-			delete_accounting_dimension(doc=self)
+			delete_accounting_dimension(doc=self, queue='long')
 		else:
 			frappe.enqueue(delete_accounting_dimension, doc=self)
 
@@ -58,8 +58,13 @@ class AccountingDimension(Document):
 		if not self.fieldname:
 			self.fieldname = scrub(self.label)
 
-def make_dimension_in_accounting_doctypes(doc):
-	doclist = get_doctypes_with_dimensions()
+	def on_update(self):
+		frappe.flags.accounting_dimensions = None
+
+def make_dimension_in_accounting_doctypes(doc, doclist=None):
+	if not doclist:
+		doclist = get_doctypes_with_dimensions()
+
 	doc_count = len(get_accounting_dimensions())
 	count = 0
 
@@ -79,13 +84,13 @@ def make_dimension_in_accounting_doctypes(doc):
 			"owner": "Administrator"
 		}
 
-		if doctype == "Budget":
-			add_dimension_to_budget_doctype(df, doc)
-		else:
-			meta = frappe.get_meta(doctype, cached=False)
-			fieldnames = [d.fieldname for d in meta.get("fields")]
+		meta = frappe.get_meta(doctype, cached=False)
+		fieldnames = [d.fieldname for d in meta.get("fields")]
 
-			if df['fieldname'] not in fieldnames:
+		if df['fieldname'] not in fieldnames:
+			if doctype == "Budget":
+				add_dimension_to_budget_doctype(df.copy(), doc)
+			else:
 				create_custom_field(doctype, df)
 
 		count += 1
@@ -175,23 +180,17 @@ def toggle_disabling(doc):
 		frappe.clear_cache(doctype=doctype)
 
 def get_doctypes_with_dimensions():
-	doclist = ["GL Entry", "Sales Invoice", "POS Invoice", "Purchase Invoice", "Payment Entry", "Asset",
-		"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
-		"Sales Invoice Item", "POS Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
-		"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
-		"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
-		"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
-		"Subscription Plan"]
-
-	return doclist
+	return frappe.get_hooks("accounting_dimension_doctypes")
 
 def get_accounting_dimensions(as_list=True):
-	accounting_dimensions = frappe.get_all("Accounting Dimension", fields=["label", "fieldname", "disabled", "document_type"])
+	if frappe.flags.accounting_dimensions is None:
+		frappe.flags.accounting_dimensions = frappe.get_all("Accounting Dimension",
+			fields=["label", "fieldname", "disabled", "document_type"])
 
 	if as_list:
-		return [d.fieldname for d in accounting_dimensions]
+		return [d.fieldname for d in frappe.flags.accounting_dimensions]
 	else:
-		return accounting_dimensions
+		return frappe.flags.accounting_dimensions
 
 def get_checks_for_pl_and_bs_accounts():
 	dimensions = frappe.db.sql("""SELECT p.label, p.disabled, p.fieldname, c.default_dimension, c.company, c.mandatory_for_pl, c.mandatory_for_bs
