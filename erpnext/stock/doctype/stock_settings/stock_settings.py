@@ -57,19 +57,6 @@ class StockSettings(Document):
 			if sle:
 				frappe.throw(_("Can't change valuation method, as there are transactions against some items which does not have it's own valuation method"))
 
-		db_batch_wise_valuation = frappe.db.get_single_value("Stock Settings", "batch_wise_valuation")
-
-		if db_batch_wise_valuation and db_batch_wise_valuation != self.batch_wise_valuation:
-			# check if there are any stock ledger entries against items
-			# which does not have batch wise valuation defined
-			sle = frappe.db.sql("""select name from `tabStock Ledger Entry` sle
-				where exists(select name from tabItem
-					where name=sle.item_code and (batch_wise_valuation is null or batch_wise_valuation='')) limit 1
-			""")
-
-			if sle:
-				frappe.throw(_("Can't change Use 'Batch Costing by Default', as there are transactions against some items which does not explicitly define whether to use Batch Costing"))
-
 	def validate_clean_description_html(self):
 		if int(self.clean_description_html or 0) \
 			and not int(self.db_get('clean_description_html') or 0):
