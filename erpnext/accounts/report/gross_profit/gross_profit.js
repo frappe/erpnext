@@ -132,7 +132,7 @@ frappe.query_reports["Gross Profit"] = {
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
-		if (['gross_profit', 'gross_profit_per_unit', 'per_gross_profit'].includes(column.fieldname)) {
+		if (['gross_profit', 'gross_profit_per_unit', 'profit_margin', 'profit_markup'].includes(column.fieldname)) {
 			if (flt(value, 2) === 0) {
 				style['color'] = 'orange';
 			} else if (flt(value) < 0) {
@@ -146,7 +146,7 @@ frappe.query_reports["Gross Profit"] = {
 		return Object.assign(options, {
 			hooks: {
 				columnTotal: function (values, column, type) {
-					if (in_list(['gross_profit_per_unit', 'per_gross_profit', 'valuation_rate', 'cogs_per_unit'], column.column.fieldname)) {
+					if (in_list(['gross_profit_per_unit', 'profit_margin', 'profit_markup', 'valuation_rate', 'cogs_per_unit'], column.column.fieldname)) {
 						return '';
 					} else {
 						return frappe.utils.report_column_total(values, column, type);
