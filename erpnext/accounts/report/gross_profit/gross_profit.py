@@ -42,7 +42,7 @@ class GrossProfitGenerator(object):
 
 		self.data = frappe.db.sql("""
 			select
-				si.name as parent, si_item.parenttype, si_item.name, si_item.idx,
+				si.name as parent, si_item.parenttype, si_item.name, si_item.idx, si.docstatus,
 				si.posting_date, si.posting_time,
 				si.customer, si.customer_name, c.customer_group, c.territory,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
@@ -60,7 +60,7 @@ class GrossProfitGenerator(object):
 			left join `tabItem` i on i.name = si_item.item_code
 			left join `tabSales Team` sp on sp.parent = si.name and sp.parenttype = 'Sales Invoice'
 			where
-				si.docstatus = 1 and si.is_return = 0 and si.is_opening != 'Yes' {conditions}
+				si.docstatus = 1 and ifnull(si.return_against, '') = '' and si.is_opening != 'Yes' {conditions}
 			group by si.name, si_item.name
 			order by si.posting_date desc, si.posting_time desc, si.name desc, si_item.idx asc
 		""".format(conditions=conditions), self.filters, as_dict=1)
