@@ -17,6 +17,18 @@ from erpnext.selling.doctype.product_bundle.test_product_bundle import make_prod
 from erpnext.stock.doctype.item.test_item import make_item
 
 class TestSalesOrder(unittest.TestCase):
+
+	@classmethod
+	def setUpClass(cls):
+		cls.unlink_setting = int(frappe.db.get_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order"))
+
+	@classmethod
+	def tearDownClass(cls) -> None:
+		# reset config to previous state
+		frappe.db.set_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order", cls.unlink_setting)
+
 	def tearDown(self):
 		frappe.set_user("Administrator")
 
@@ -1048,6 +1060,38 @@ class TestSalesOrder(unittest.TestCase):
 		so_doc = frappe.get_doc('Sales Order', so.name)
 
 		self.assertRaises(frappe.LinkExistsError, so_doc.cancel)
+
+	def test_cancel_sales_order_after_cancel_payment_entry(self):
+		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
+		# make a sales order
+		so = make_sales_order()
+
+		# disable unlinking of payment entry
+		frappe.db.set_value("Accounts Settings", "Accounts Settings",
+			"unlink_advance_payment_on_cancelation_of_order", 0)
+
+		# create a payment entry against sales order
+		pe = get_payment_entry("Sales Order", so.name, bank_account="_Test Bank - _TC")
+		pe.reference_no = "1"
+		pe.reference_date = nowdate()
+		pe.paid_from_account_currency = so.currency
+		pe.paid_to_account_currency = so.currency
+		pe.source_exchange_rate = 1
+		pe.target_exchange_rate = 1
+		pe.paid_amount = so.grand_total
+		pe.save(ignore_permissions=True)
+		pe.submit()
+
+		# Cancel payment entry
+		po_doc = frappe.get_doc("Payment Entry", pe.name)
+		po_doc.cancel()
+
+		# Cancel sales order
+		try:
+			so_doc = frappe.get_doc('Sales Order', so.name)
+			so_doc.cancel()
+		except Exception:
+			self.fail("Can not cancel sales order with linked cancelled payment entry")
 
 	def test_request_for_raw_materials(self):
 		item = make_item("_Test Finished Item", {"is_stock_item": 1,
