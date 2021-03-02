@@ -102,6 +102,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			"title": self.name
 		})
 
+		context.sub_categories = get_child_groups(self.name)
 		if self.slideshow:
 			values = {
 				'show_indicators': 1,
@@ -121,8 +122,9 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 			context.slideshow = values
 
-		context.breadcrumbs = 0
+		context.no_breadcrumbs = False
 		context.title = self.website_title or self.name
+		context.body_class = "product-page"
 
 		return context
 
@@ -130,10 +132,11 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		frappe.cache().hdel("child_item_groups", self.name)
 
 def get_child_groups(item_group_name):
+	"""Returns child item groups *excluding* passed group."""
 	item_group = frappe.get_doc("Item Group", item_group_name)
-	return frappe.db.sql("""select name
-		from `tabItem Group` where lft>=%(lft)s and rgt<=%(rgt)s
-			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt})
+	return frappe.db.sql("""select name, route
+		from `tabItem Group` where lft>%(lft)s and rgt<%(rgt)s
+			and show_in_website = 1""", {"lft": item_group.lft, "rgt": item_group.rgt}, as_dict=1)
 
 def get_child_item_groups(item_group_name):
 	item_group = frappe.get_cached_value("Item Group",
@@ -158,15 +161,25 @@ def get_item_for_list_in_html(context):
 	return frappe.get_template(products_template).render(context)
 
 
-def get_parent_item_groups(item_group_name):
+def get_parent_item_groups(item_group_name, from_item=False):
+	base_nav_page = {"name": frappe._("Shop by Category"), "route":"/shop-by-category"}
+
+	if from_item:
+		# base page after 'Home' will vary on Item page
+		last_page = frappe.request.environ["HTTP_REFERER"].split('/')[-1]
+		if last_page and last_page in ("shop-by-category", "all-products"):
+			base_nav_page_title = " ".join(last_page.split("-")).title()
+			base_nav_page = {"name": frappe._(base_nav_page_title), "route":"/"+last_page}
+
 	base_parents = [
 		{"name": frappe._("Home"), "route":"/"},
-		{"name": frappe._("All Products"), "route":"/all-products"},
+		base_nav_page,
 	]
+
 	if not item_group_name:
 		return base_parents
 
-	item_group = frappe.get_doc("Item Group", item_group_name)
+	item_group = frappe.db.get_value("Item Group", item_group_name, ["lft", "rgt"], as_dict=1)
 	parent_groups = frappe.db.sql("""select name, route from `tabItem Group`
 		where lft <= %s and rgt >= %s
 		and show_in_website=1
