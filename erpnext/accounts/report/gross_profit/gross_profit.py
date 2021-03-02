@@ -55,7 +55,7 @@ class GrossProfitGenerator(object):
 				si.depreciation_type, si_item.depreciation_percentage,
 				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person,
 				sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage,
-				si_item.si_detail, si_item.returned_qty, si_item.base_returned_amount
+				si_item.returned_qty, si_item.base_returned_amount
 			from `tabSales Invoice` si
 			inner join `tabSales Invoice Item` si_item on si_item.parent = si.name
 			left join `tabCustomer` c on c.name = si.customer
@@ -580,7 +580,7 @@ def get_item_last_purchase_rate(args):
 
 	for item_code, t_date in args:
 		get_last_purchase_detail = get_last_purchase_details(item_code, transaction_date=t_date)
-		out[(item_code, t_date)] = get_last_purchase_detail['base_rate'] if get_last_purchase_detail else 0
+		out[(item_code, t_date)] = get_last_purchase_detail['base_net_rate'] if get_last_purchase_detail else 0
 
 	return out
 
