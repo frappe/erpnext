@@ -1123,6 +1123,7 @@ class SalarySlip(TransactionBase):
 	#calculate total working hours, earnings based on hourly wages and totals
 	def calculate_total_for_salary_slip_based_on_timesheet(self):
 		if self.timesheets:
+			self.total_working_hours = 0
 			for timesheet in self.timesheets:
 				if timesheet.working_hours:
 					self.total_working_hours += timesheet.working_hours
