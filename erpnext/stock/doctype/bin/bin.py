@@ -29,6 +29,7 @@ class Bin(Document):
 			update_entries_after({
 				"item_code": self.item_code,
 				"warehouse": self.warehouse,
+				"batch_no": args.get("batch_no"),
 				"posting_date": args.get("posting_date"),
 				"posting_time": args.get("posting_time"),
 				"voucher_no": args.get("voucher_no")

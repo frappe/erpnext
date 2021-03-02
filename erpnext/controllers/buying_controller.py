@@ -409,6 +409,7 @@ class BuyingController(StockController):
 			rm.rate = get_incoming_rate({
 				"item_code": raw_material_data.rm_item_code,
 				"warehouse": self.supplier_warehouse,
+				"batch_no": rm.batch_no,
 				"posting_date": self.posting_date,
 				"posting_time": self.posting_time,
 				"qty": -1 * qty,
@@ -417,7 +418,7 @@ class BuyingController(StockController):
 
 			if not rm.rate:
 				rm.rate = get_valuation_rate(raw_material_data.rm_item_code, self.supplier_warehouse,
-					self.doctype, self.name, currency=self.company_currency, company=self.company)
+					self.doctype, self.name, rm.batch_no, currency=self.company_currency, company=self.company)
 
 		rm.amount = qty * flt(rm.rate)
 		fg_item_doc.rm_supp_cost += rm.amount
@@ -492,6 +493,7 @@ class BuyingController(StockController):
 				rm.rate = get_incoming_rate({
 					"item_code": bom_item.item_code,
 					"warehouse": self.supplier_warehouse,
+					"batch_no": rm.batch_no,
 					"posting_date": self.posting_date,
 					"posting_time": self.posting_time,
 					"qty": -1 * required_qty,
@@ -499,7 +501,7 @@ class BuyingController(StockController):
 				})
 				if not rm.rate:
 					rm.rate = get_valuation_rate(bom_item.item_code, self.supplier_warehouse,
-						self.doctype, self.name, currency=self.company_currency, company = self.company)
+						self.doctype, self.name, rm.batch_no, currency=self.company_currency, company = self.company)
 			else:
 				rm.rate = bom_item.rate
 
@@ -686,7 +688,7 @@ class BuyingController(StockController):
 				incoming_rate = 0
 				if self.is_return and self.return_against and self.docstatus==1:
 					incoming_rate = self.get_incoming_rate_for_sales_return(d.rm_item_code, self.supplier_warehouse,
-						self.doctype, self.return_against)
+						self.doctype, self.return_against, d.get('batch_no'))
 
 				sl_entries.append(self.get_sl_entries(d, {
 					"item_code": d.rm_item_code,

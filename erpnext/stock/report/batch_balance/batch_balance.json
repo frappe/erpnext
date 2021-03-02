@@ -7,14 +7,14 @@
  "doctype": "Report",
  "idx": 3,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:29.736128",
+ "modified": "2021-03-02 16:32:39.856188",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Batch-Wise Balance History",
+ "name": "Batch Balance",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Stock Ledger Entry",
- "report_name": "Batch-Wise Balance History",
+ "report_name": "Batch Balance",
  "report_type": "Script Report",
  "roles": [
   {
@@ -22,6 +22,15 @@
   },
   {
    "role": "Accounts Manager"
+  },
+  {
+   "role": "Purchase User"
+  },
+  {
+   "role": "Sales User"
+  },
+  {
+   "role": "Sales User (Read Only)"
   }
  ]
 }

@@ -331,9 +331,9 @@ class SellingController(StockController):
 				return_rate = 0
 				if cint(self.is_return) and self.docstatus==1:
 					if d.get('delivery_note'):
-						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, d.warehouse, "Delivery Note", d.delivery_note)
+						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, d.warehouse, "Delivery Note", d.delivery_note, d.batch_no)
 					else:
-						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, d.warehouse, self.doctype, self.return_against)
+						return_rate = self.get_incoming_rate_for_sales_return(d.item_code, d.warehouse, self.doctype, self.return_against, d.batch_no)
 
 				# On cancellation or if return entry submission, make stock ledger entry for
 				# target warehouse first, to update serial no values properly
@@ -356,6 +356,7 @@ class SellingController(StockController):
 							args = frappe._dict({
 								"item_code": d.item_code,
 								"warehouse": d.warehouse,
+								"batch_no": d.batch_no,
 								"posting_date": self.posting_date,
 								"posting_time": self.posting_time,
 								"qty": -1*flt(d.qty),

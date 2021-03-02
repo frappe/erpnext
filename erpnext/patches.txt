@@ -698,3 +698,4 @@ erpnext.patches.v12_0.initialize_depreciation_invoice_fields
 erpnext.patches.v12_0.set_party_name_in_journal_entry
 erpnext.patches.v12_0.create_banks_for_bank_name_in_employee_and_salary_slip
 erpnext.patches.v12_0.update_sales_invoice_return_si_detail
+execute:frappe.delete_doc_if_exists("Report", "Batch-Wise Balance History")

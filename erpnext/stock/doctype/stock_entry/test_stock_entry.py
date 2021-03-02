@@ -73,6 +73,177 @@ class TestStockEntry(unittest.TestCase):
 
 		frappe.db.set_default("allow_negative_stock", 0)
 
+	def test_batch_wise_valuation(self):
+		item_code = "_Test Batch Wise Valuation Item"
+		warehouse = "_Test Warehouse - _TC"
+
+		for d in frappe.get_all("Stock Entry", filters={'item_code': item_code, 'docstatus': 1}):
+			frappe.get_doc("Stock Entry", d.name).cancel()
+
+		def assert_sle(sle, values):
+			for k, v in iteritems(values):
+				self.assertEqual(sle.get(k), v)
+
+		# For a spreadsheet view go to
+		# https://docs.google.com/spreadsheets/d/10GOG70ZuKPm4pjF8ZpvjniNHmo05i6Gs6jJedhaXKso/edit?usp=sharing
+
+		# In 1
+		in1_1 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=100)
+		batch1 = in1_1.items[0].batch_no
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch1,
+			voucher_type=in1_1.doctype, voucher_no=in1_1.name)[0], {
+			'stock_value_difference': 1000, 'batch_stock_value': 1000, 'stock_value': 1000,
+			'batch_valuation_rate': 100, 'valuation_rate': 100,
+			'batch_qty_after_transaction': 10, 'qty_after_transaction': 10
+		})
+
+		in1_2 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=80)
+		batch2 = in1_2.items[0].batch_no
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch2,
+			voucher_type=in1_2.doctype, voucher_no=in1_2.name)[0], {
+			'stock_value_difference': 800, 'batch_stock_value': 800, 'stock_value': 1800,
+			'batch_valuation_rate': 80, 'valuation_rate': 90,
+			'batch_qty_after_transaction': 10, 'qty_after_transaction': 20
+		})
+
+		in1_3 = make_stock_entry(item_code=item_code, target=warehouse, qty=10, basic_rate=120)
+		batch3 = in1_3.items[0].batch_no
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch3,
+			voucher_type=in1_3.doctype, voucher_no=in1_3.name)[0], {
+			'stock_value_difference': 1200, 'batch_stock_value': 1200, 'stock_value': 3000,
+			'batch_valuation_rate': 120, 'valuation_rate': 100,
+			'batch_qty_after_transaction': 10, 'qty_after_transaction': 30
+		})
+
+		# Out 1
+		# Batch 2 first then Batch 1!
+		out1_2 = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batch2, qty=5)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch2,
+			voucher_type=out1_2.doctype, voucher_no=out1_2.name)[0], {
+			'stock_value_difference': -400, 'batch_stock_value': 400, 'stock_value': 2600,
+			'batch_valuation_rate': 80, 'valuation_rate': 104,
+			'batch_qty_after_transaction': 5, 'qty_after_transaction': 25
+		})
+
+		out1_1 = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batch1, qty=5)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch1,
+			voucher_type=out1_1.doctype, voucher_no=out1_1.name)[0], {
+			'stock_value_difference': -500, 'batch_stock_value': 500, 'stock_value': 2100,
+			'batch_valuation_rate': 100, 'valuation_rate': 105,
+			'batch_qty_after_transaction': 5, 'qty_after_transaction': 20
+		})
+
+		out1_3 = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batch3, qty=5)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch3,
+			voucher_type=out1_3.doctype, voucher_no=out1_3.name)[0], {
+			'stock_value_difference': -600, 'batch_stock_value': 600, 'stock_value': 1500,
+			'batch_valuation_rate': 120, 'valuation_rate': 100,
+			'batch_qty_after_transaction': 5, 'qty_after_transaction': 15
+		})
+
+		# In 2
+		in2_1 = make_stock_entry(item_code=item_code, target=warehouse, qty=5, batch_no=batch1, basic_rate=200)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch1,
+			voucher_type=in2_1.doctype, voucher_no=in2_1.name)[0], {
+			'stock_value_difference': 1000, 'batch_stock_value': 1500, 'stock_value': 2500,
+			'batch_valuation_rate': 150, 'valuation_rate': 125,
+			'batch_qty_after_transaction': 10, 'qty_after_transaction': 20
+		})
+
+		in2_2 = make_stock_entry(item_code=item_code, target=warehouse, qty=5, batch_no=batch2, basic_rate=160)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch2,
+			voucher_type=in2_2.doctype, voucher_no=in2_2.name)[0], {
+			'stock_value_difference': 800, 'batch_stock_value': 1200, 'stock_value': 3300,
+			'batch_valuation_rate': 120, 'valuation_rate': 132,
+			'batch_qty_after_transaction': 10, 'qty_after_transaction': 25
+		})
+
+		in2_3 = make_stock_entry(item_code=item_code, target=warehouse, qty=5, batch_no=batch3, basic_rate=240)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch3,
+			voucher_type=in2_3.doctype, voucher_no=in2_3.name)[0], {
+			'stock_value_difference': 1200, 'batch_stock_value': 1800, 'stock_value': 4500,
+			'batch_valuation_rate': 180, 'valuation_rate': 150,
+			'batch_qty_after_transaction': 10, 'qty_after_transaction': 30
+		})
+
+		# Out 2
+		posting_datetime = frappe.utils.add_days(frappe.utils.now_datetime(), 1)
+		posting_date = posting_datetime.date()
+		posting_time = posting_datetime.time()
+
+		out2_1 = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batch1, qty=10,
+			posting_date=posting_date, posting_time=posting_time, edit_posting_time=1)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch1,
+			voucher_type=out2_1.doctype, voucher_no=out2_1.name)[0], {
+			'stock_value_difference': -1500, 'batch_stock_value': 0, 'stock_value': 3000,
+			'batch_valuation_rate': 150, 'valuation_rate': 150,
+			'batch_qty_after_transaction': 0, 'qty_after_transaction': 20
+		})
+
+		out2_2 = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batch2, qty=10,
+			posting_date=posting_date, posting_time=posting_time, edit_posting_time=1)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch2,
+			voucher_type=out2_2.doctype, voucher_no=out2_2.name)[0], {
+			'stock_value_difference': -1200, 'batch_stock_value': 0, 'stock_value': 1800,
+			'batch_valuation_rate': 120, 'valuation_rate': 180,
+			'batch_qty_after_transaction': 0, 'qty_after_transaction': 10
+		})
+
+		out2_3 = make_stock_entry(item_code=item_code, source=warehouse, batch_no=batch3, qty=10,
+			posting_date=posting_date, posting_time=posting_time, edit_posting_time=1)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch3,
+			voucher_type=out2_3.doctype, voucher_no=out2_3.name)[0], {
+			'stock_value_difference': -1800, 'batch_stock_value': 0, 'stock_value': 0,
+			'batch_valuation_rate': 180, 'valuation_rate': 180,
+			'batch_qty_after_transaction': 0, 'qty_after_transaction': 0
+		})
+
+		# In 3 (backdated)
+		in3_1 = make_stock_entry(item_code=item_code, target=warehouse, qty=2, batch_no=batch1, basic_rate=100)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch1,
+			voucher_type=in3_1.doctype, voucher_no=in3_1.name)[0], {
+			'stock_value_difference': 200, 'batch_stock_value': 1700, 'stock_value': 4700,
+			'batch_valuation_rate': 141.666667, 'valuation_rate': 146.875,
+			'batch_qty_after_transaction': 12, 'qty_after_transaction': 32
+		})
+
+		in3_2 = make_stock_entry(item_code=item_code, target=warehouse, qty=2, batch_no=batch2, basic_rate=80)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch2,
+			voucher_type=in3_2.doctype, voucher_no=in3_2.name)[0], {
+			'stock_value_difference': 160, 'batch_stock_value': 1360, 'stock_value': 4860,
+			'batch_valuation_rate': 113.333333, 'valuation_rate': 142.941176,
+			'batch_qty_after_transaction': 12, 'qty_after_transaction': 34
+		})
+
+		in3_3 = make_stock_entry(item_code=item_code, target=warehouse, qty=2, batch_no=batch3, basic_rate=120)
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch3,
+			voucher_type=in3_3.doctype, voucher_no=in3_3.name)[0], {
+			'stock_value_difference': 240, 'batch_stock_value': 2040, 'stock_value': 5100,
+			'batch_valuation_rate': 170, 'valuation_rate': 141.666667,
+			'batch_qty_after_transaction': 12, 'qty_after_transaction': 36
+		})
+
+		# Validate reposted SLEs for Out 2
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch1,
+			voucher_type=out2_1.doctype, voucher_no=out2_1.name)[0], {
+			'stock_value_difference': -1416.67, 'batch_stock_value': 283.33, 'stock_value': 3683.33,
+			'batch_valuation_rate': 141.666667, 'valuation_rate': 141.666667,
+			'batch_qty_after_transaction': 2, 'qty_after_transaction': 26
+		})
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch2,
+			voucher_type=out2_2.doctype, voucher_no=out2_2.name)[0], {
+			'stock_value_difference': -1133.33, 'batch_stock_value': 226.67, 'stock_value': 2550,
+			'batch_valuation_rate': 113.333333, 'valuation_rate': 159.374792,
+			'batch_qty_after_transaction': 2, 'qty_after_transaction': 16
+		})
+		assert_sle(get_sle(item_code=item_code, warehouse=warehouse, batch_no=batch3,
+			voucher_type=out2_3.doctype, voucher_no=out2_3.name)[0], {
+			'stock_value_difference': -1700, 'batch_stock_value': 340, 'stock_value': 850,
+			'batch_valuation_rate': 170, 'valuation_rate': 141.666667,
+			'batch_qty_after_transaction': 2, 'qty_after_transaction': 6
+		})
+
+
 	def test_auto_material_request(self):
 		make_item_variant()
 		self._test_auto_material_request("_Test Item")

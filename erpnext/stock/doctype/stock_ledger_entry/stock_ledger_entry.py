@@ -36,23 +36,10 @@ class StockLedgerEntry(Document):
 
 	def on_submit(self):
 		self.check_stock_frozen_date()
-		self.actual_amt_check()
 
 		if not self.get("via_landed_cost_voucher"):
 			from erpnext.stock.doctype.serial_no.serial_no import process_serial_no
 			process_serial_no(self)
-
-	#check for item quantity available in stock
-	def actual_amt_check(self):
-		if self.batch_no and not self.get("allow_negative_stock"):
-			batch_bal_after_transaction = flt(frappe.db.sql("""select sum(actual_qty)
-				from `tabStock Ledger Entry`
-				where warehouse=%s and item_code=%s and batch_no=%s""",
-				(self.warehouse, self.item_code, self.batch_no))[0][0])
-
-			if batch_bal_after_transaction < 0:
-				frappe.throw(_("Stock balance in Batch {0} will become negative {1} for Item {2} at Warehouse {3}")
-					.format(self.batch_no, batch_bal_after_transaction, self.item_code, self.warehouse))
 
 	def validate_mandatory(self):
 		mandatory = ['warehouse','posting_date','voucher_type','voucher_no','company']

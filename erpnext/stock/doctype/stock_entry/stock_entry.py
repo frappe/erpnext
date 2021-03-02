@@ -220,7 +220,7 @@ class StockEntry(StockController):
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
 			item_details = self.get_item_details(frappe._dict(
-				{"item_code": item.item_code, "company": self.company,
+				{"item_code": item.item_code, "company": self.company, 'batch_no': item.batch_no,
 				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
 				for_update=True)
 
@@ -416,7 +416,7 @@ class StockEntry(StockController):
 				d.basic_rate = 0.0
 			elif d.t_warehouse and not d.basic_rate:
 				d.basic_rate = get_valuation_rate(d.item_code, d.t_warehouse,
-					self.doctype, self.name, d.allow_zero_valuation_rate,
+					self.doctype, d.name, d.batch_no, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company)
 
 		if self.purpose in ("Repack", "Manufacture"):
@@ -517,6 +517,7 @@ class StockEntry(StockController):
 		return frappe._dict({
 			"item_code": item.item_code,
 			"warehouse": item.s_warehouse or item.t_warehouse,
+			"batch_no": item.batch_no,
 			"posting_date": self.posting_date,
 			"posting_time": self.posting_time,
 			"qty": item.s_warehouse and -1*flt(item.transfer_qty) or flt(item.transfer_qty),
@@ -853,10 +854,10 @@ class StockEntry(StockController):
 		stock_and_rate = get_warehouse_details(args) if args.get('warehouse') else {}
 		ret.update(stock_and_rate)
 
-		# automatically select batch for outgoing item
-		if (args.get('s_warehouse', None) and args.get('qty') and
-			ret.get('has_batch_no') and not args.get('batch_no')):
-			args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
+		# # automatically select batch for outgoing item
+		# if (args.get('s_warehouse', None) and args.get('qty') and
+		# 	ret.get('has_batch_no') and not args.get('batch_no')):
+		# 	args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
 
 		# Contents UOM
 		ret.alt_uom = item.alt_uom
