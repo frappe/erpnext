@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe import _, bold
-from frappe.utils import getdate, date_diff, comma_and, formatdate
+from frappe.utils import getdate, date_diff, comma_and, formatdate, get_datetime, flt
 from math import ceil
 import json
 from six import string_types
@@ -84,16 +84,51 @@ class LeavePolicyAssignment(Document):
 		return allocation.name, new_leaves_allocated
 
 	def get_new_leaves(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
+		from frappe.model.meta import get_field_precision
+		precision = get_field_precision(frappe.get_meta("Leave Allocation").get_field("new_leaves_allocated"))
+
+		# Earned Leaves and Compensatory Leaves are allocated by scheduler, initially allocate 0
+		if leave_type_details.get(leave_type).is_compensatory == 1:
+			new_leaves_allocated = 0
+
+		elif leave_type_details.get(leave_type).is_earned_leave == 1:
+			if self.assignment_based_on == "Leave Period":
+				new_leaves_allocated = self.get_leaves_for_passed_months(leave_type, new_leaves_allocated, leave_type_details, date_of_joining)
+			else:
+				new_leaves_allocated = 0
 		# Calculate leaves at pro-rata basis for employees joining after the beginning of the given leave period
-		if getdate(date_of_joining) > getdate(self.effective_from):
+		elif getdate(date_of_joining) > getdate(self.effective_from):
 			remaining_period = ((date_diff(self.effective_to, date_of_joining) + 1) / (date_diff(self.effective_to, self.effective_from) + 1))
 			new_leaves_allocated = ceil(new_leaves_allocated * remaining_period)
 
-		# Earned Leaves and Compensatory Leaves are allocated by scheduler, initially allocate 0
-		if leave_type_details.get(leave_type).is_earned_leave == 1 or leave_type_details.get(leave_type).is_compensatory == 1:
-			new_leaves_allocated = 0
+		return flt(new_leaves_allocated, precision)
+
+	def get_leaves_for_passed_months(self, leave_type, new_leaves_allocated, leave_type_details, date_of_joining):
+		from erpnext.hr.utils import get_monthly_earned_leave
+
+		current_month = get_datetime().month
+		current_year = get_datetime().year
+
+		from_date = frappe.db.get_value("Leave Period", self.leave_period, "from_date")
+		if getdate(date_of_joining) > getdate(from_date):
+			from_date = date_of_joining
+
+		from_date_month = get_datetime(from_date).month
+		from_date_year = get_datetime(from_date).year
+
+		months_passed = 0
+		if current_year == from_date_year and current_month > from_date_month:
+			months_passed = current_month - from_date_month
+		elif current_year > from_date_year:
+			months_passed = (12 - from_date_month) + current_month
+
+		if months_passed > 0:
+			monthly_earned_leave = get_monthly_earned_leave(new_leaves_allocated,
+				leave_type_details.get(leave_type).earned_leave_frequency, leave_type_details.get(leave_type).rounding)
+			new_leaves_allocated = monthly_earned_leave * months_passed
 
 		return new_leaves_allocated
+
 
 @frappe.whitelist()
 def grant_leave_for_multiple_employees(leave_policy_assignments):
@@ -156,7 +191,8 @@ def automatically_allocate_leaves_based_on_leave_policy():
 def get_leave_type_details():
 	leave_type_details = frappe._dict()
 	leave_types = frappe.get_all("Leave Type",
-		fields=["name", "is_lwp", "is_earned_leave", "is_compensatory", "is_carry_forward", "expire_carry_forwarded_leaves_after_days"])
+		fields=["name", "is_lwp", "is_earned_leave", "is_compensatory",
+			"is_carry_forward", "expire_carry_forwarded_leaves_after_days", "earned_leave_frequency", "rounding"])
 	for d in leave_types:
 		leave_type_details.setdefault(d.name, d)
 	return leave_type_details
