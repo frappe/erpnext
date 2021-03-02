@@ -123,9 +123,9 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Item Prices",
-					"doctype": "Item",
-					"dependencies": ["Item"],
+					"name": "Batch Balance",
+					"doctype": "Batch",
+					"dependencies": ["Item", "Batch"],
 				}
 			]
 		},
@@ -298,12 +298,6 @@ def get_data():
 					"is_query_report": True,
 					"name": "Item Shortage Report",
 					"doctype": "Bin"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Batch-Wise Balance History",
-					"doctype": "Batch"
 				},
 			]
 		},
