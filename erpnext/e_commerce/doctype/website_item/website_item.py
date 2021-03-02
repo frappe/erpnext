@@ -165,7 +165,7 @@ class WebsiteItem(WebsiteGenerator):
 		context.show_search = True
 		context.search_link = '/search'
 
-		context.parents = get_parent_item_groups(self.item_group)
+		context.parents = get_parent_item_groups(self.item_group, from_item=True)
 		context.body_class = "product-page"
 		self.attributes = frappe.get_all("Item Variant Attribute",
 					  fields=["attribute", "attribute_value"],

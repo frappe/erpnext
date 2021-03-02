@@ -325,6 +325,32 @@ body.product-page {
 	}
 }
 
+.sub-category-container {
+	padding-bottom: 1rem;
+	margin-bottom: 1.25rem;
+	border-bottom: 1px solid var(--table-border-color);
+
+	.heading {
+		color: var(--gray-500);
+	}
+}
+
+.scroll-categories {
+	white-space: nowrap;
+	overflow-x: auto;
+
+	.category-pill {
+		margin: 0px 4px;
+		display: inline-block;
+		padding: 6px 12px;
+		background-color: #ecf5fe;
+		width: fit-content;
+		font-size: 14px;
+		border-radius: 18px;
+		color: var(--blue-500);
+	}
+}
+
 .cart-icon {
 	.cart-badge {
 		position: relative;
