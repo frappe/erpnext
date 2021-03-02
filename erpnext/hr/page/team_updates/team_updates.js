@@ -75,6 +75,6 @@ frappe.team_updates = {
 		}
 		me.last_feed_date = date;
 
-		$(frappe.render_template('team_update_row', data)).appendTo(me.body)
+		$(frappe.render_template('team_update_row', data)).appendTo(me.body);
 	}
 }
