@@ -571,7 +571,7 @@ class SalarySlip(TransactionBase):
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
-		if not component_row or (struct_row.get("is_additional_component") and not overwrite):
+		if not component_row:
 			if amount:
 				self.append(key, {
 					'amount': amount,
