@@ -109,7 +109,7 @@
  "icon": "fa fa-cog",
  "issingle": 1,
  "links": [],
- "modified": "2020-06-22 17:00:58.408030",
+ "modified": "2021-03-02 17:49:59.579723",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",
@@ -126,5 +126,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }
