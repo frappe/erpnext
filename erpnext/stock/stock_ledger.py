@@ -222,6 +222,10 @@ class update_entries_after(object):
 			sle.batch_qty_after_transaction = self.batch_data.batch_qty_after_transaction
 			sle.batch_valuation_rate = self.batch_data.batch_valuation_rate
 			sle.batch_stock_value = self.batch_data.batch_stock_value
+		else:
+			sle.batch_qty_after_transaction = self.qty_after_transaction
+			sle.batch_valuation_rate = self.valuation_rate
+			sle.batch_stock_value = self.stock_value
 
 		sle.doctype="Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
