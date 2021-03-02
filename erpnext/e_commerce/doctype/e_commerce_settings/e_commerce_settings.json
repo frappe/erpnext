@@ -38,7 +38,9 @@
   "enable_field_filters",
   "filter_fields",
   "enable_attribute_filters",
-  "filter_attributes"
+  "filter_attributes",
+  "shop_by_category_section",
+  "slideshow"
  ],
  "fields": [
   {
@@ -64,7 +66,7 @@
    "collapsible": 1,
    "fieldname": "filter_categories_section",
    "fieldtype": "Section Break",
-   "label": "Filters"
+   "label": "Filters and Categories"
   },
   {
    "default": "0",
@@ -78,9 +80,10 @@
   },
   {
    "default": "0",
+   "description": "The field filters will also work as categories in the <b>Shop by Category</b> page.",
    "fieldname": "enable_field_filters",
    "fieldtype": "Check",
-   "label": "Enable Field Filters"
+   "label": "Enable Field Filters (Categories)"
   },
   {
    "default": "0",
@@ -258,12 +261,25 @@
    "label": "Payment Gateway Account",
    "mandatory_depends_on": "enable_checkout",
    "options": "Payment Gateway Account"
+  },
+  {
+   "collapsible": 1,
+   "depends_on": "enable_field_filters",
+   "fieldname": "shop_by_category_section",
+   "fieldtype": "Section Break",
+   "label": "Shop by Category"
+  },
+  {
+   "fieldname": "slideshow",
+   "fieldtype": "Link",
+   "label": "Slideshow",
+   "options": "Website Slideshow"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-11 18:22:14.556880",
+ "modified": "2021-03-01 20:24:56.548673",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
