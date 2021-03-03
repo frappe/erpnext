@@ -16,6 +16,7 @@ class VehicleBookingPayment(Document):
 		self.validate_party_type()
 		self.validate_vehicle_booking_order()
 		self.validate_deposit_fields()
+		self.validate_duplicate_instruments()
 		self.set_undeposited()
 		self.validate_undeposited_instruments()
 		self.update_undeposited_instrument_details()
@@ -98,6 +99,31 @@ class VehicleBookingPayment(Document):
 				frappe.throw(_("Deposit Slip No is mandatory for Payment Type 'Pay'"))
 			if not self.deposit_type:
 				frappe.throw(_("Deposit Type is mandatory for Payment Type 'Pay'"))
+
+	def validate_duplicate_instruments(self):
+		if self.payment_type != "Receive" or not self.vehicle_booking_order:
+			return
+
+		already_received = frappe.db.sql("""
+			select p.name, i.instrument_no, i.instrument_type, i.bank
+			from `tabVehicle Booking Payment Detail` i
+			inner join `tabVehicle Booking Payment` p on p.name = i.parent
+			where p.docstatus = 1 and p.payment_type = 'Receive' and p.vehicle_booking_order = %s
+		""", self.vehicle_booking_order, as_dict=1)
+
+		received_map = {}
+		for d in already_received:
+			key = (d.instrument_no, d.instrument_type, cstr(d.bank))
+			received_map.setdefault(key, []).append(d.name)
+
+		for d in self.instruments:
+			if d.instrument_no:
+				key = (d.instrument_no, d.instrument_type, cstr(d.bank))
+				if key in received_map:
+					vbp_names = received_map[key]
+					frappe.throw(_("{0} {1} is already received in: {2}")
+						.format(d.instrument_type, frappe.bold(d.instrument_no),
+							", ".join([frappe.get_desk_link("Vehicle Booking Payment", name) for name in vbp_names])))
 
 	def validate_amounts(self):
 		for d in self.instruments:
