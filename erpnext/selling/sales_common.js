@@ -14,18 +14,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this._super();
 		this.frm.add_fetch("sales_partner", "commission_rate", "commission_rate");
 		this.frm.add_fetch("sales_person", "commission_rate", "commission_rate");
-
-		var me = this;
-		$(me.frm.wrapper).on("grid-row-render", function(e, grid_row) {
-			if(grid_row.doc && grid_row.doc.doctype === me.frm.doc.doctype + " Item") {
-				$(grid_row.wrapper).off('focus', 'input').on('focus', 'input', function() {
-					me.frm.focused_item_dn = grid_row.doc.name;
-					var show_select_batch = me.frm.doc.docstatus === 0 && !me.frm.doc.is_return && grid_row.doc.has_batch_no
-						&& (me.frm.doc.doctype === 'Delivery Note' || (me.frm.doc.doctype === 'Sales Invoice' && me.frm.doc.update_stock));
-					me.toggle_select_batch_button(show_select_batch);
-				});
-			}
-		});
 	},
 
 	onload: function() {
@@ -187,13 +175,8 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 
 		var me = this;
 
-		if (me.frm.doc.docstatus == 0) {
-			this.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
-				if (me.frm.focused_item_dn) {
-					me.set_batch_number(me.frm.doc.doctype + " Item", me.frm.focused_item_dn, true);
-				}
-			});
-			this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden');
+		if (me.frm.doc.docstatus === 0) {
+			this.create_select_batch_button();
 		}
 	},
 
@@ -560,12 +543,45 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	toggle_select_batch_button: function(show) {
+	create_select_batch_button: function (doc, cdt, cdn) {
+		var me = this;
+		this.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
+			if (me.frm.focused_item_dn) {
+				me.set_batch_number(me.frm.doc.doctype + " Item", me.frm.focused_item_dn, true);
+			}
+		});
+		this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden btn-primary');
+	},
+
+	items_row_focused: function (doc, cdt, cdn) {
+		var row = frappe.get_doc(cdt, cdn);
+		this.frm.focused_item_dn = row ? row.name : null;
+		this.show_hide_select_batch_button();
+	},
+
+	show_hide_select_batch_button: function() {
+		var row;
+		if (this.frm.focused_item_dn) {
+			row = frappe.get_doc(this.frm.doc.doctype + " Item", this.frm.focused_item_dn);
+		}
+
+		var update_stock = this.frm.doc.doctype === 'Delivery Note' ||
+			(this.frm.doc.doctype === 'Sales Invoice' && this.frm.doc.update_stock);
+
+		var show_select_batch = update_stock
+			&& row
+			&& row.item_code
+			&& row.has_batch_no
+			&& this.frm.doc.docstatus === 0
+			&& !this.frm.doc.is_return;
+
 		var button = this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")];
-		if (show) {
-			button.removeClass('hidden');
-		} else {
-			button.addClass('hidden');
+		if (button) {
+			if (show_select_batch) {
+				button.removeClass('hidden');
+			} else {
+				button.addClass('hidden');
+			}
 		}
 	},
 

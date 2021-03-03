@@ -698,7 +698,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								},
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
-								() => me.conversion_factor(doc, cdt, cdn, true, true),
+								() => me.conversion_factor(doc, cdt, cdn, true),
+								() => me.show_hide_select_batch_button && me.show_hide_select_batch_button(),
 								() => me.remove_pricing_rule(item),
 								() => {
 									if (item.apply_rule_on_other_items) {

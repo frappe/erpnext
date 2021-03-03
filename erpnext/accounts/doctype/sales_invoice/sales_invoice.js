@@ -515,6 +515,7 @@ cur_frm.cscript.hide_fields = function(doc) {
 cur_frm.cscript.update_stock = function(doc, dt, dn) {
 	cur_frm.cscript.hide_fields(doc, dt, dn);
 	this.frm.fields_dict.items.grid.toggle_reqd("item_code", doc.update_stock? true: false)
+	this.show_hide_select_batch_button();
 }
 
 cur_frm.cscript['Make Delivery Note'] = function() {
