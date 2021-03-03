@@ -66,7 +66,8 @@ class ShippingRule(Document):
 
 		# convert to order currency
 		if doc.currency != doc.company_currency:
-			shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
+			# shipping_amount = flt(shipping_amount / doc.conversion_rate, 2)
+			shipping_amount = flt(shipping_amount, 2)
 
 		self.add_shipping_rule_to_tax_table(doc, shipping_amount)
 
