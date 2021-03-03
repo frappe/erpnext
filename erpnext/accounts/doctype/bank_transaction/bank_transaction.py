@@ -11,7 +11,7 @@ from frappe import _
 
 class BankTransaction(StatusUpdater):
 	def after_insert(self):
-		self.unallocated_amount = abs(flt(self.credit) - flt(self.debit))
+		self.unallocated_amount = abs(flt(self.withdrawal) - flt(self.deposit))
 
 	def on_submit(self):
 		self.clear_linked_payment_entries()
@@ -30,13 +30,13 @@ class BankTransaction(StatusUpdater):
 
 		if allocated_amount:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", flt(allocated_amount))
-			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)) - flt(allocated_amount))
+			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.withdrawal) - flt(self.deposit)) - flt(allocated_amount))
 
 		else:
 			frappe.db.set_value(self.doctype, self.name, "allocated_amount", 0)
-			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.credit) - flt(self.debit)))
+			frappe.db.set_value(self.doctype, self.name, "unallocated_amount", abs(flt(self.withdrawal) - flt(self.deposit)))
 
-		amount = self.debit or self.credit
+		amount = self.deposit or self.withdrawal
 		if amount == self.allocated_amount:
 			frappe.db.set_value(self.doctype, self.name, "status", "Reconciled")
 
@@ -44,18 +44,11 @@ class BankTransaction(StatusUpdater):
 
 	def clear_linked_payment_entries(self):
 		for payment_entry in self.payment_entries:
-			allocated_amount = get_total_allocated_amount(payment_entry)
-			paid_amount = get_paid_amount(payment_entry, self.currency)
+			if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
+				self.clear_simple_entry(payment_entry)
 
-			if paid_amount and allocated_amount:
-				if  flt(allocated_amount[0]["allocated_amount"]) > flt(paid_amount):
-					frappe.throw(_("The total allocated amount ({0}) is greated than the paid amount ({1}).").format(flt(allocated_amount[0]["allocated_amount"]), flt(paid_amount)))
-				else:
-					if payment_entry.payment_document in ["Payment Entry", "Journal Entry", "Purchase Invoice", "Expense Claim"]:
-						self.clear_simple_entry(payment_entry)
-
-					elif payment_entry.payment_document == "Sales Invoice":
-						self.clear_sales_invoice(payment_entry)
+			elif payment_entry.payment_document == "Sales Invoice":
+				self.clear_sales_invoice(payment_entry)
 
 	def clear_simple_entry(self, payment_entry):
 		frappe.db.set_value(payment_entry.payment_document, payment_entry.payment_entry, "clearance_date", self.date)
@@ -112,3 +105,4 @@ def unclear_reference_payment(doctype, docname):
 			frappe.db.set_value(doc.payment_document, doc.payment_entry, "clearance_date", None)
 
 		return doc.payment_entry
+

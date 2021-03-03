@@ -80,6 +80,8 @@
   "total_in_words",
   "column_break_69",
   "base_total_in_words",
+  "leave_details_section",
+  "leave_details",
   "section_break_75",
   "amended_from"
  ],
@@ -612,13 +614,25 @@
    "label": "Month To Date(Company Currency)",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "leave_details_section",
+   "fieldtype": "Section Break",
+   "label": "Leave Details"
+  },
+  {
+   "fieldname": "leave_details",
+   "fieldtype": "Table",
+   "label": "Leave Details",
+   "options": "Salary Slip Leave",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-14 13:37:38.180920",
+ "modified": "2021-02-19 11:48:05.383945",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",
