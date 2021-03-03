@@ -114,7 +114,6 @@ def update_stock(args, out):
 		and out.warehouse and out.stock_qty > 0:
 
 		if out.has_batch_no and not args.get("batch_no"):
-			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty, sales_order_item=args.get('so_detail'))
 			actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
 			if actual_batch_qty:
 				out.update(actual_batch_qty)

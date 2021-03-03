@@ -186,9 +186,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.toggle_editable_price_list_rate();
 
 		var me = this;
-		$.each(this.frm.doc.items || [], function(item, i) {
-			me.set_qty_color_based_on_availability(item);
-		});
+
 		if (me.frm.doc.docstatus == 0) {
 			this.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
 				if (me.frm.focused_item_dn) {
@@ -381,14 +379,7 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 						serial_no: item.serial_no || "",
 					},
 					callback:function(r){
-						if (in_list(['Delivery Note', 'Sales Invoice'], doc.doctype)) {
 
-							if (doc.doctype === 'Sales Invoice' && (!doc.update_stock)) return;
-
-							me.set_batch_number(cdt, cdn);
-							me.batch_no(doc, cdt, cdn);
-						}
-						me.set_qty_color_based_on_availability(item);
 					}
 				});
 			}
@@ -522,14 +513,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			})
 		} else {
 			this.frm.set_value("company_address_display", "");
-		}
-	},
-
-	conversion_factor: function(doc, cdt, cdn, dont_fetch_price_list_rate, dont_fetch_batch_no) {
-	    this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
-		this._super(doc, cdt, cdn, dont_fetch_price_list_rate);
-		if(!dont_fetch_batch_no) {
-			this.set_batch_number(cdt, cdn);
 		}
 	},
 

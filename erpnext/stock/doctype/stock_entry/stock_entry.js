@@ -599,10 +599,6 @@ frappe.ui.form.on('Stock Entry Detail', {
 							}
 						});
 						refresh_field("items");
-
-						if (!d.serial_no && !d.is_vehicle) {
-							erpnext.stock.select_batch_and_serial_no(frm, d);
-						}
 					}
 				}
 			});

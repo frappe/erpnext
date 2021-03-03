@@ -30,6 +30,7 @@ $.extend(erpnext.bundling, {
 			items_remove: function(frm) {
 				erpnext.bundling.validate_bundle_states(frm);
 				erpnext.bundling.render_bundle_icons(frm);
+				erpnext.bundling.toggle_bundle_buttons(frm);
 			}
 		});
 	},
