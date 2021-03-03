@@ -15,6 +15,13 @@ from erpnext.accounts.utils import get_account_currency
 from frappe.contacts.doctype.address.address import get_address_display
 from frappe.model.utils import get_fetch_values
 
+
+GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")   #alphanumeric and - /
+GSTIN_FORMAT = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
+GSTIN_UIN_FORMAT = re.compile("^[0-9]{4}[A-Z]{3}[0-9]{5}[0-9A-Z]{3}")
+PAN_NUMBER_FORMAT = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
+
+
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
 		doc.gst_state_number = state_numbers[doc.gst_state]
@@ -38,12 +45,10 @@ def validate_gstin_for_india(doc, method):
 		frappe.throw(_("Invalid GSTIN! A GSTIN must have 15 characters."))
 
 	if gst_category and gst_category == 'UIN Holders':
-		p = re.compile("^[0-9]{4}[A-Z]{3}[0-9]{5}[0-9A-Z]{3}")
-		if not p.match(doc.gstin):
+		if not GSTIN_UIN_FORMAT.match(doc.gstin):
 			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers"))
 	else:
-		p = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
-		if not p.match(doc.gstin):
+		if not GSTIN_FORMAT.match(doc.gstin):
 			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the format of GSTIN."))
 
 		validate_gstin_check_digit(doc.gstin)
@@ -166,14 +171,14 @@ def validate_document_name(doc, method=None):
 	"""Validate GST invoice number requirements."""
 	country = frappe.get_cached_value("Company", doc.company, "country")
 
+	# Date was chosen as start of next FY to avoid irritating current users.
 	if country != "India" or getdate(doc.posting_date) < getdate("2021-04-01"):
 		return
 
 	if len(doc.name) > 16:
 		frappe.throw(_("Maximum length of document number should be 16 characters as per GST rules. Please change the naming series."))
 
-	gst_doc_name_pattern = re.compile(r"^[a-zA-Z0-9\-/]+$")
-	if not gst_doc_name_pattern.match(doc.name):
+	if not GST_INVOICE_NUMBER_FORMAT.match(doc.name):
 		frappe.throw(_("Document name should only contain alphanumeric values, dash(-) and slash(/) characters as per GST rules. Please change the naming series."))
 
 # don't remove this function it is used in tests
