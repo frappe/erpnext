@@ -316,13 +316,7 @@ def allocate_earned_leaves():
 				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
 
 def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
-	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
-	if annual_allocation:
-		earned_leaves = flt(annual_allocation) / divide_by_frequency[e_leave_type.earned_leave_frequency]
-		if e_leave_type.rounding == "0.5":
-			earned_leaves = round(earned_leaves * 2) / 2
-		else:
-			earned_leaves = round(earned_leaves)
+		earned_leaves = get_monthly_earned_leave(annual_allocation, e_leave_type.earned_leave_frequency, e_leave_type.rounding)
 
 		allocation = frappe.get_doc('Leave Allocation', allocation.name)
 		new_allocation = flt(allocation.total_leaves_allocated) + flt(earned_leaves)
@@ -334,6 +328,21 @@ def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type
 			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
 			today_date = today()
 			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+
+def get_monthly_earned_leave(annual_leaves, frequency, rounding):
+	earned_leaves = 0.0
+	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
+	if annual_leaves:
+		earned_leaves = flt(annual_leaves) / divide_by_frequency[frequency]
+		if rounding:
+			if rounding == "0.25":
+				earned_leaves = round(earned_leaves * 4) / 4
+			elif rounding == "0.5":
+				earned_leaves = round(earned_leaves * 2) / 2
+			else:
+				earned_leaves = round(earned_leaves)
+
+	return earned_leaves
 
 
 def get_leave_allocations(date, leave_type):
