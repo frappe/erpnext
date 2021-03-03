@@ -223,18 +223,9 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 				this.frm.page.set_inner_btn_group_as_primary(__('Create'));
 			}
 
-			if (doc.docstatus == 0) {
-				var item_childtable = me.frm.fields_dict["items"].$wrapper;
-				var grid_buttons = $(item_childtable).find(".grid-buttons");
-				if (!$(grid_buttons).find(".update-qty-from-availability").length) {
-					$(grid_buttons).append(`
-						<button class="update-qty-from-availability btn btn-xs btn-default" style="margin-left: 4px;">
-							${__("Update Qty from Availability")}
-						</button>
-					`)
-				}
-				$(grid_buttons).find(".update-qty-from-availability").off().click(function() {
-					me.update_item_qty_from_availability();
+			if (doc.docstatus === 0) {
+				this.frm.fields_dict.items.grid.add_custom_button(__("Update Qty from Availability"), function() {
+					me.update_item_qty_from_availability()
 				});
 			}
 		}
@@ -289,7 +280,7 @@ erpnext.stock.DeliveryNoteController = erpnext.selling.SellingController.extend(
 
 		if(items.length) {
 			frappe.call({
-				method: "erpnext.stock.doctype.delivery_note.delivery_note.update_item_qty_from_availability",
+				method: "erpnext.controllers.stock_controller.update_item_qty_from_availability",
 				args: {
 					"items": items
 				},
