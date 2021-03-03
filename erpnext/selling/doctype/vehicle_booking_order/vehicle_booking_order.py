@@ -11,7 +11,6 @@ from frappe.model.utils import get_fetch_values
 from frappe.model.naming import set_name_by_naming_series
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_contact_details, get_default_contact
-from erpnext.accounts.party import get_party_account
 from erpnext.stock.get_item_details import get_item_warehouse, get_item_price, get_default_supplier, get_default_terms
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
@@ -37,8 +36,7 @@ force_fields = [
 ]
 force_fields += address_fields
 
-force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_type',
-	'receivable_account', 'payable_account']
+force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_type']
 
 class VehicleBookingOrder(AccountsController):
 	def autoname(self):
@@ -55,7 +53,6 @@ class VehicleBookingOrder(AccountsController):
 		self.validate_customer()
 		self.validate_vehicle_item()
 		self.validate_vehicle()
-		self.validate_party_accounts()
 		self.validate_allocation()
 		self.validate_delivery_date()
 
@@ -65,7 +62,6 @@ class VehicleBookingOrder(AccountsController):
 		self.reset_payment_adjustment()
 		self.calculate_taxes_and_totals()
 		self.validate_amounts()
-		self.validate_taxes_and_charges_accounts()
 
 		self.get_terms_and_conditions()
 		self.validate_payment_schedule()
@@ -353,29 +349,6 @@ class VehicleBookingOrder(AccountsController):
 		if self.tc_name:
 			self.terms = get_terms_and_conditions(self.tc_name, self.as_dict())
 
-	def validate_party_accounts(self):
-		company_currency = erpnext.get_company_currency(self.company)
-		receivable_currency, receivable_type = frappe.db.get_value('Account', self.receivable_account, ['account_currency', 'account_type'])
-		payable_currency, payable_type = frappe.db.get_value('Account', self.payable_account, ['account_currency', 'account_type'])
-
-		if company_currency != receivable_currency:
-			frappe.throw(_("Receivable account currency should be same as company currency {0}")
-				.format(company_currency))
-		if company_currency != payable_currency:
-			frappe.throw(_("Payable account currency should be same as company currency {0}")
-				.format(company_currency))
-		if receivable_type != 'Receivable':
-			frappe.throw(_("Receivable Account must be of type Receivable"))
-		if payable_type != 'Payable':
-			frappe.throw(_("Payable Account must be of type Payable"))
-
-	def validate_taxes_and_charges_accounts(self):
-		pass
-		# if self.fni_amount and not self.fni_account:
-		# 	frappe.throw(_("Freight and Insurance Amount is set but account is not provided"))
-		# if self.withholding_tax_amount and not self.withholding_tax_account:
-		# 	frappe.throw(_("Withholding Tax Amount is set but account is not provided"))
-
 	def update_paid_amount(self, update=False):
 		payments = dict(frappe.db.sql("""
 			select payment_type, sum(total_amount)
@@ -616,16 +589,6 @@ def get_customer_details(args, get_withholding_tax=True):
 		else vehicles_settings.selling_transaction_type_customer
 	out.buying_transaction_type = vehicles_settings.buying_transaction_type_company if args.customer_is_company \
 		else vehicles_settings.buying_transaction_type_customer
-
-	out.receivable_account = get_party_account("Customer", None if args.customer_is_company else args.customer,
-		args.company, transaction_type=out.selling_transaction_type)
-	out.payable_account = get_party_account("Supplier", args.supplier,
-		args.company, transaction_type=out.buying_transaction_type)
-
-	if out.selling_transaction_type:
-		out.selling_mode_of_payment = frappe.get_cached_value("Transaction Type", out.selling_transaction_type, "mode_of_payment")
-	if out.buying_transaction_type:
-		out.buying_mode_of_payment = frappe.get_cached_value("Transaction Type", out.buying_transaction_type, "mode_of_payment")
 
 	# Withholding Tax
 	if get_withholding_tax and args.item_code:
@@ -1023,11 +986,6 @@ def set_next_document_values(source, target, buying_or_selling):
 			target.append('sales_team', {
 				'sales_person': d.sales_person, 'allocated_percentage': d.allocated_percentage
 			})
-
-	if target.meta.has_field('debit_to'):
-		target.debit_to = source.receivable_account
-	if target.meta.has_field('credit_to'):
-		target.credit_to = source.payable_account
 
 	vehicle_item = target.append('items')
 	vehicle_item.item_code = source.item_code
