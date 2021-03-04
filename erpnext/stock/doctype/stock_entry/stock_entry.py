@@ -225,8 +225,8 @@ class StockEntry(StockController):
 				for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
-				"cost_center", "conversion_factor"):
-					if f in ["stock_uom", "conversion_factor"] or not item.get(f):
+				"cost_center", "conversion_factor", "has_batch_no", "has_serial_no"):
+					if f in ["stock_uom", "conversion_factor", "has_batch_no", "has_serial_no"] or not item.get(f):
 						item.set(f, item_details.get(f))
 
 			if not item.transfer_qty and item.qty:
