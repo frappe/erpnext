@@ -197,7 +197,7 @@
    "fieldtype": "Column Break"
   }
  ],
- "modified": "2021-01-02 12:52:05.854749",
+ "modified": "2021-03-04 14:33:12.120645",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Transaction Type",
@@ -241,7 +241,7 @@
    "write": 1
   }
  ],
- "sort_field": "modified",
+ "sort_field": "idx",
  "sort_order": "DESC",
  "track_changes": 1
 }
