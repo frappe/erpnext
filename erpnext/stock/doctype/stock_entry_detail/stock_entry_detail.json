@@ -46,9 +46,11 @@
   "column_break_36",
   "basic_amount",
   "amount",
+  "has_serial_no",
   "serial_no_batch",
   "serial_no",
   "col_break4",
+  "has_batch_no",
   "batch_no",
   "quality_inspection",
   "accounting_dimensions_section",
@@ -565,11 +567,29 @@
    "hidden": 1,
    "label": "Is Vehicle",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Batch No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Serial No",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:14.548533",
+ "modified": "2021-03-04 14:11:04.974143",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",
