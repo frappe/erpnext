@@ -491,21 +491,25 @@ class update_entries_after(object):
 		exc = exc[0] if exc else {}
 
 		if self.batch_wise_valuation and exc.get("validate_batch"):
-			batch_msg = "in {0} ".format(frappe.get_desk_link('Batch', exc.batch_no))
+			batch_msg = " ({0})".format(frappe.get_desk_link('Batch', exc.batch_no))
 		else:
 			batch_msg = ""
 
 		if ((self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]) in
 			frappe.local.flags.currently_saving):
 
-			msg = _("{0} units of {1} needed in {2}{3} to complete this transaction.").format(
-				abs(deficiency), frappe.get_desk_link('Item', self.item_code), batch_msg,
+			msg = _("{0} units of {1}{2} needed in {3} to complete this transaction.").format(
+				abs(deficiency),
+				frappe.get_desk_link('Item', self.item_code),
+				batch_msg,
 				frappe.get_desk_link('Warehouse', self.warehouse))
 		else:
-			msg = _("{0} units of {1} needed in {2}{3} on {4} {5} for {6} to complete this transaction.").format(
-				abs(deficiency), frappe.get_desk_link('Item', self.item_code), batch_msg,
+			msg = _("{0} units of {1}{2} needed in {3} on {4} {5} for {6} to complete this transaction.").format(
+				abs(deficiency),
+				frappe.get_desk_link('Item', self.item_code),
+				batch_msg,
 				frappe.get_desk_link('Warehouse', self.warehouse),
-				self.exceptions[0]["posting_date"], self.exceptions[0]["posting_time"],
+				frappe.format(self.exceptions[0]["posting_date"]), frappe.format(self.exceptions[0]["posting_time"]),
 				frappe.get_desk_link(self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]))
 
 		if self.verbose:
