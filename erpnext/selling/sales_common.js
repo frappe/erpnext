@@ -543,11 +543,16 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		}
 	},
 
-	create_select_batch_button: function (doc, cdt, cdn) {
+	create_select_batch_button: function () {
 		var me = this;
 		this.frm.fields_dict.items.grid.add_custom_button(__("Select Batches"), function() {
 			if (me.frm.focused_item_dn) {
-				me.set_batch_number(me.frm.doc.doctype + " Item", me.frm.focused_item_dn, true);
+				const item = frappe.get_doc(me.frm.doc.doctype + " Item", me.frm.focused_item_dn);
+				if (item && !item.delivery_note && (me.frm.doc.update_stock || me.frm.doc.doctype != 'Sales Invoice') && !me.frm.doc.is_return) {
+					erpnext.show_serial_batch_selector(me.frm, item, (item) => {
+						me.qty(item, item.doctype, item.name);
+					}, null, 'batch_no');
+				}
 			}
 		});
 		this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden btn-primary');
