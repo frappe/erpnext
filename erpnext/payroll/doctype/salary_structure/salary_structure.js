@@ -145,7 +145,10 @@ frappe.ui.form.on('Salary Structure', {
 				frappe.call({
 					doc: frm.doc,
 					method: "assign_salary_structure",
-					args: data,
+					args: {
+						"employee": data.employee,
+						"from_date": data.from_date
+					},
 					callback: function(r) {
 						if(!r.exc) {
 							d.hide();
