@@ -628,14 +628,16 @@ class BuyingController(StockController):
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
-						if d.get('purchase_receipt'):
+						purchase_receipt = self.return_against if self.doctype == "Purchase Receipt" else d.get('purchase_receipt')
+						if d.get('pr_detail') and purchase_receipt:
 							original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-								{"voucher_type": "Purchase Receipt", "voucher_no": d.purchase_receipt,
-									"item_code": d.item_code}, "incoming_rate")
-						elif self.get('return_against'):
+								{"voucher_type": "Purchase Receipt", "voucher_no": purchase_receipt,
+									"voucher_detail_no": d.pr_detail}, "incoming_rate")
+						elif self.doctype == "Purchase Invoice" and d.get('pi_detail') and self.get('return_against')\
+								and frappe.db.get_value("Purchase Invoice", self.return_against, 'update_stock', cache=1):
 							original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-								{"voucher_type": self.doctype, "voucher_no": self.return_against,
-								"item_code": d.item_code}, "incoming_rate")
+								{"voucher_type": "Purchase Invoice", "voucher_no": self.return_against,
+								"voucher_detail_no": d.pi_detail}, "incoming_rate")
 						else:
 							original_incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
 
@@ -690,8 +692,9 @@ class BuyingController(StockController):
 				# when PR is submitted and it has to be increased when PR is cancelled
 				incoming_rate = 0
 				if self.is_return and self.return_against and self.docstatus==1:
-					incoming_rate = self.get_incoming_rate_for_sales_return(d.rm_item_code, self.supplier_warehouse,
-						self.doctype, self.return_against, d.get('batch_no'))
+					incoming_rate = self.get_incoming_rate_for_sales_return(item_code=d.rm_item_code,
+						warehouse=self.supplier_warehouse, batch_no=d.get('batch_no'),
+						against_document_type=self.doctype, against_document=self.return_against)
 
 				sl_entries.append(self.get_sl_entries(d, {
 					"item_code": d.rm_item_code,

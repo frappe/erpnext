@@ -329,18 +329,29 @@ class StockController(AccountsController):
 
 		return serialized_items
 
-	def get_incoming_rate_for_sales_return(self, item_code, warehouse, batch_no, against_document_type, against_document):
+	def get_incoming_rate_for_sales_return(self, item_code=None, warehouse=None, batch_no=None, voucher_detail_no=None,
+			against_document_type=None, against_document=None):
 		incoming_rate = 0.0
-		if against_document_type and against_document and item_code:
-			incoming_rate = frappe.db.sql("""select abs(stock_value_difference / actual_qty)
+
+		if against_document_type and against_document and voucher_detail_no:
+			incoming_rate = frappe.db.sql("""
+				select abs(stock_value_difference / actual_qty)
 				from `tabStock Ledger Entry`
 				where voucher_type = %s and voucher_no = %s
-					and item_code = %s limit 1""",
-				(against_document_type, against_document, item_code))
+					and voucher_detail_no = %s limit 1
+			""", (against_document_type, against_document, voucher_detail_no))
 			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
-		else:
+		elif against_document_type and against_document and item_code:
+			incoming_rate = frappe.db.sql("""
+				select abs(sum(stock_value_difference) / sum(actual_qty))
+				from `tabStock Ledger Entry`
+				where voucher_type = %s and voucher_no = %s
+					and item_code = %s limit 1
+			""", (against_document_type, against_document, item_code))
+			incoming_rate = incoming_rate[0][0] if incoming_rate else 0.0
+		elif item_code and warehouse:
 			incoming_rate = get_valuation_rate(item_code, warehouse,
-				self.doctype, against_document, batch_no, company=self.company, currency=self.currency)
+				self.doctype, self.name, batch_no, company=self.company, currency=self.currency)
 
 		return incoming_rate
 
