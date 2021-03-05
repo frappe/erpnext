@@ -52,7 +52,7 @@ class StockLedgerEntry(Document):
 			frappe.throw(_("Actual Qty is mandatory"))
 
 	def validate_date(self):
-		if not self.get("via_landed_cost_voucher") and getdate(self.posting_date) > getdate(today()):
+		if not self.get("via_landed_cost_voucher") and getdate(self.posting_date) > getdate(today()) and self.is_cancelled == "No":
 			frappe.throw(_("Stock cannot be created for a future date {0}").format(self.get_formatted('posting_date')))
 
 	def validate_item(self):
