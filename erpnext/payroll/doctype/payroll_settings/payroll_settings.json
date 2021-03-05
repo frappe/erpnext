@@ -15,6 +15,7 @@
   "daily_wages_fraction_for_half_day",
   "email_salary_slip_to_employee",
   "encrypt_salary_slips_in_emails",
+  "show_leave_balances_in_salary_slip",
   "password_policy"
  ],
  "fields": [
@@ -23,58 +24,44 @@
    "fieldname": "payroll_based_on",
    "fieldtype": "Select",
    "label": "Calculate Payroll Working Days Based On",
-   "options": "Leave\nAttendance",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Leave\nAttendance"
   },
   {
    "fieldname": "max_working_hours_against_timesheet",
    "fieldtype": "Float",
-   "label": "Max working hours against Timesheet",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Max working hours against Timesheet"
   },
   {
    "default": "0",
    "description": "If checked, Total no. of Working Days will include holidays, and this will reduce the value of Salary Per Day",
    "fieldname": "include_holidays_in_total_working_days",
    "fieldtype": "Check",
-   "label": "Include holidays in Total no. of Working Days",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Include holidays in Total no. of Working Days"
   },
   {
    "default": "0",
    "description": "If checked, hides and disables Rounded Total field in Salary Slips",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
-   "label": "Disable Rounded Total",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Disable Rounded Total"
   },
   {
    "fieldname": "column_break_11",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "0.5",
    "description": "The fraction of daily wages to be paid for half-day attendance",
    "fieldname": "daily_wages_fraction_for_half_day",
    "fieldtype": "Float",
-   "label": "Fraction of Daily Salary for Half Day",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Fraction of Daily Salary for Half Day"
   },
   {
    "default": "1",
    "description": "Emails salary slip to employee based on preferred email selected in Employee",
    "fieldname": "email_salary_slip_to_employee",
    "fieldtype": "Check",
-   "label": "Email Salary Slip to Employee",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Email Salary Slip to Employee"
   },
   {
    "default": "0",
@@ -82,9 +69,7 @@
    "description": "The salary slip emailed to the employee will be password protected, the password will be generated based on the password policy.",
    "fieldname": "encrypt_salary_slips_in_emails",
    "fieldtype": "Check",
-   "label": "Encrypt Salary Slips in Emails",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Encrypt Salary Slips in Emails"
   },
   {
    "depends_on": "eval: doc.encrypt_salary_slips_in_emails == 1",
@@ -92,24 +77,27 @@
    "fieldname": "password_policy",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Password Policy",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Password Policy"
   },
   {
    "depends_on": "eval:doc.payroll_based_on == 'Attendance'",
    "fieldname": "consider_unmarked_attendance_as",
    "fieldtype": "Select",
    "label": "Consider Unmarked Attendance As",
-   "options": "Present\nAbsent",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Present\nAbsent"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_leave_balances_in_salary_slip",
+   "fieldtype": "Check",
+   "label": "Show Leave Balances in Salary Slip"
   }
  ],
  "icon": "fa fa-cog",
+ "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-06-22 17:00:58.408030",
+ "modified": "2021-02-19 11:07:55.873991",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",
