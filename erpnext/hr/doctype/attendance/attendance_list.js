@@ -27,6 +27,7 @@ frappe.listview_settings['Attendance'] = {
 							dialog.set_df_property("status", "hidden", 1);
 							dialog.set_df_property("month", "value", '');
 							dialog.set_df_property("unmarked_days", "options", []);
+							dialog.no_unmarked_days_left = false;
 						}
 					},
 					{
@@ -39,6 +40,7 @@ frappe.listview_settings['Attendance'] = {
 							if(dialog.fields_dict.employee.value && dialog.fields_dict.month.value) {
 								dialog.set_df_property("status", "hidden", 0);
 								dialog.set_df_property("unmarked_days", "options", []);
+								dialog.no_unmarked_days_left = false;
 								me.get_multi_select_options(dialog.fields_dict.employee.value, dialog.fields_dict.month.value).then(options =>{
 									if (options.length > 0) {
 										dialog.set_df_property("unmarked_days", "hidden", 0);
