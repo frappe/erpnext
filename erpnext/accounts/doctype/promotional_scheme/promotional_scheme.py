@@ -21,7 +21,7 @@ price_discount_fields = ['rate_or_discount', 'apply_discount_on', 'apply_discoun
 	'rate', 'discount_amount', 'discount_percentage', 'validate_applied_rule']
 
 product_discount_fields = ['free_item', 'free_qty', 'free_item_uom',
-	'free_item_rate', 'same_item']
+	'free_item_rate', 'same_item', 'is_recursive']
 
 class PromotionalScheme(Document):
 	def validate(self):
