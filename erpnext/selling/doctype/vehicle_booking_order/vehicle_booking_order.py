@@ -29,7 +29,7 @@ address_fields = ['address_line1', 'address_line2', 'city', 'state']
 force_fields = [
 	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
 	'item_name', 'item_group', 'brand',
-	'customer_address', 'financer_address',
+	'customer_address',
 	'address_display', 'contact_display', 'financer_contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'father_name', 'husband_name',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no',
@@ -574,8 +574,9 @@ def get_customer_details(args, get_withholding_tax=True):
 	out.husband_name = party.get('husband_name')
 
 	# Address
-	out.customer_address = args.customer_address or get_default_address(party_type, party.name)
-	out.financer_address = args.financer_address or (get_default_address("Customer", financer.name) if financer else None)
+	out.customer_address = args.customer_address
+	if not out.customer_address:
+		out.customer_address = get_default_address("Customer", financer.name) if is_leased else get_default_address(party_type, party.name)
 	out.update(get_address_details(out.customer_address))
 
 	# Contact
