@@ -29,6 +29,7 @@ address_fields = ['address_line1', 'address_line2', 'city', 'state']
 force_fields = [
 	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
 	'item_name', 'item_group', 'brand',
+	'customer_address', 'financer_address',
 	'address_display', 'contact_display', 'financer_contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'father_name', 'husband_name',
 	'tax_id', 'tax_cnic', 'tax_strn', 'tax_status', 'tax_overseas_cnic', 'passport_no',
