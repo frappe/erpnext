@@ -66,7 +66,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	get_item_tax_template(args, item, out)
 	out["item_tax_rate"] = get_item_tax_map(args.company, args.get("item_tax_template") if out.get("item_tax_template") is None \
-		else out.get("item_tax_template"), as_json=True)
+		else out.get("item_tax_template"), as_json=True, args=args)
 
 	get_party_item_code(args, item, out)
 
@@ -504,13 +504,24 @@ def _get_item_tax_template(args, taxes, out={}, for_validate=False):
 	return None
 
 @frappe.whitelist()
-def get_item_tax_map(company, item_tax_template, as_json=True):
+def get_item_tax_map(company, item_tax_template, as_json=True, args=None):
 	item_tax_map = {}
+	transaction_type = None
+
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	if args and args.get("doctype"):
+		transaction_type = "Sales" if args.get("doctype") in sales_doctypes else "Purchase"
+
 	if item_tax_template:
 		template = frappe.get_cached_doc("Item Tax Template", item_tax_template)
 		for d in template.taxes:
 			if frappe.get_cached_value("Account", d.tax_type, "company") == company:
-				item_tax_map[d.tax_type] = d.tax_rate
+				if d.transaction_type == "All":
+					item_tax_map[d.tax_type] = d.tax_rate
+				elif transaction_type == d.transaction_type:
+					item_tax_map[d.tax_type] = d.tax_rate
 
 	return json.dumps(item_tax_map) if as_json else item_tax_map
 
