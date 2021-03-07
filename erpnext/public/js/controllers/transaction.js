@@ -1170,7 +1170,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	calculate_stock_uom_rate: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		item.stock_uom_rate = flt(item.rate)/flt(item.conversion_factor);	
+		item.stock_uom_rate = flt(item.rate)/flt(item.conversion_factor);
 		refresh_field("stock_uom_rate", item.name, item.parentfield);
 	},
 	service_stop_date: function(frm, cdt, cdn) {
@@ -1724,7 +1724,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				args: {
 					company: me.frm.doc.company,
 					item_tax_template: item.item_tax_template,
-					as_json: true
+					as_json: true,
+					args: {
+						doctype: doc.doctype
+					}
 				},
 				callback: function(r) {
 					if(!r.exc) {
