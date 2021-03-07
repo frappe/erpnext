@@ -278,6 +278,9 @@ doc_events = {
 	('Sales Invoice', 'Sales Order', 'Delivery Note', 'Purchase Invoice', 'Purchase Order', 'Purchase Receipt'): {
 		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
 	},
+	('Sales Invoice', 'Purchase Invoice'): {
+		'validate': ['erpnext.regional.india.utils.validate_document_name']
+	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
 		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
