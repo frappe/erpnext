@@ -1252,12 +1252,12 @@ class StockEntry(StockController):
 			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
+			se_child.expense_account = frappe.get_cached_value('Company', self.company, "stock_adjustment_account") or item_dict[d].get("expense_account")
 			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 
-			for field in ["idx", "po_detail", "original_item",
-				"expense_account", "description", "item_name"]:
+			for field in ["idx", "po_detail", "original_item", "description", "item_name"]:
 				if item_dict[d].get(field):
 					se_child.set(field, item_dict[d].get(field))
 
