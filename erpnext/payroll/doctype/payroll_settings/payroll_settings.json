@@ -97,7 +97,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-19 11:07:55.873991",
+ "modified": "2021-03-03 17:49:59.579723",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",
@@ -114,5 +114,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }
