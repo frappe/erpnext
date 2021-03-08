@@ -524,7 +524,7 @@ class PurchaseInvoice(BuyingController):
 	def set_debit_note_amount(self):
 		for d in self.items:
 			debit_note_amount = frappe.db.sql("""
-				select -sum(item.net_amount)
+				select -sum(item.base_net_amount)
 				from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
 				where inv.name=item.parent and item.pi_detail=%s and item.docstatus=1
 					and inv.update_stock = 0 and inv.is_return = 1 and inv.return_against = %s
