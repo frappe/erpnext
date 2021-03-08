@@ -20,6 +20,8 @@ class GrossProfitGenerator(object):
 		self.filters.from_date = getdate(self.filters.from_date or nowdate())
 		self.filters.to_date = getdate(self.filters.to_date or nowdate())
 
+		self.has_depreciation = False
+
 		self.show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 
 		self.data = []
@@ -42,7 +44,7 @@ class GrossProfitGenerator(object):
 
 		self.data = frappe.db.sql("""
 			select
-				si.name as parent, si_item.parenttype, si_item.name, si_item.idx,
+				si.name as parent, si_item.parenttype, si_item.name, si_item.idx, si.docstatus,
 				si.posting_date, si.posting_time,
 				si.customer, si.customer_name, c.customer_group, c.territory,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
@@ -53,14 +55,14 @@ class GrossProfitGenerator(object):
 				si.depreciation_type, si_item.depreciation_percentage,
 				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person,
 				sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage,
-				si_item.si_detail, si_item.returned_qty, si_item.base_returned_amount
+				si_item.returned_qty, si_item.base_returned_amount
 			from `tabSales Invoice` si
 			inner join `tabSales Invoice Item` si_item on si_item.parent = si.name
 			left join `tabCustomer` c on c.name = si.customer
 			left join `tabItem` i on i.name = si_item.item_code
 			left join `tabSales Team` sp on sp.parent = si.name and sp.parenttype = 'Sales Invoice'
 			where
-				si.docstatus = 1 and si.is_return = 0 and si.is_opening != 'Yes' {conditions}
+				si.docstatus = 1 and ifnull(si.return_against, '') = '' and si.is_opening != 'Yes' {conditions}
 			group by si.name, si_item.name
 			order by si.posting_date desc, si.posting_time desc, si.name desc, si_item.idx asc
 		""".format(conditions=conditions), self.filters, as_dict=1)
@@ -77,6 +79,7 @@ class GrossProfitGenerator(object):
 			d["disable_item_formatter"] = cint(self.show_item_name)
 
 			if d.depreciation_type:
+				self.has_depreciation = True
 				d.split_percentage = 100 - d.depreciation_percentage if d.depreciation_type == "After Depreciation Amount"\
 					else d.depreciation_percentage
 			else:
@@ -120,8 +123,9 @@ class GrossProfitGenerator(object):
 			return data
 
 		def sort_group(group_object, group_by_map):
-			group_object.per_gross_profit = group_object.totals.per_gross_profit
-			group_object.rows = sorted(group_object.rows, key=lambda d: -flt(d.per_gross_profit))
+			group_object.profit_margin = group_object.totals.profit_margin
+			group_object.profit_markup = group_object.totals.profit_markup
+			group_object.rows = sorted(group_object.rows, key=lambda d: -flt(d.profit_margin))
 
 		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals,
 			postprocess_group=sort_group)
@@ -184,7 +188,8 @@ class GrossProfitGenerator(object):
 	def postprocess_row(self, item):
 		item.revenue = item.base_net_amount - flt(item.get('base_returned_amount'))
 		item.gross_profit = item.revenue - item.cogs
-		item.per_gross_profit = item.gross_profit / item.revenue * 100 if item.revenue else 0
+		item.profit_margin = item.gross_profit / item.revenue * 100 if item.revenue else 0
+		item.profit_markup = item.gross_profit / item.cogs * 100 if item.cogs else 0
 
 	def get_conditions(self):
 		conditions = []
@@ -405,30 +410,16 @@ class GrossProfitGenerator(object):
 				"width": 110
 			},
 			{
-				"label": _("Gross Profit %"),
+				"label": _("Margin %"),
 				"fieldtype": "Percent",
-				"fieldname": "per_gross_profit",
-				"width": 110
+				"fieldname": "profit_margin",
+				"width": 80
 			},
 			{
-				"label": _("Warehouse"),
-				"fieldtype": "Link",
-				"fieldname": "warehouse",
-				"options": "Warehouse",
-				"width": 100
-			},
-			{
-				"label": _("Sales Person"),
-				"fieldtype": "Data",
-				"fieldname": "sales_person",
-				"width": 150
-			},
-			{
-				"label": _("Batch No"),
-				"fieldtype": "Link",
-				"fieldname": "batch_no",
-				"options": "Batch",
-				"width": 140
+				"label": _("Markup %"),
+				"fieldtype": "Percent",
+				"fieldname": "profit_markup",
+				"width": 80
 			},
 			{
 				"label": _("Invoice Qty"),
@@ -456,6 +447,26 @@ class GrossProfitGenerator(object):
 				"options": "Company:company:default_currency",
 				"width": 110
 			},
+			{
+				"label": _("Sales Person"),
+				"fieldtype": "Data",
+				"fieldname": "sales_person",
+				"width": 150
+			},
+			{
+				"label": _("Warehouse"),
+				"fieldtype": "Link",
+				"fieldname": "warehouse",
+				"options": "Warehouse",
+				"width": 100
+			},
+			{
+				"label": _("Batch No"),
+				"fieldtype": "Link",
+				"fieldname": "batch_no",
+				"options": "Batch",
+				"width": 140
+			},
 		]
 		if self.filters.sales_person:
 			columns.append({
@@ -469,6 +480,9 @@ class GrossProfitGenerator(object):
 			columns = [c for c in columns if c.get('fieldname') != 'item_name']
 		if not show_party_name:
 			columns = [c for c in columns if c.get('fieldname') != 'customer_name']
+		if not self.has_depreciation:
+			columns = [c for c in columns if c.get('fieldname') != 'split_percentage']
+
 
 		return columns
 
@@ -566,7 +580,7 @@ def get_item_last_purchase_rate(args):
 
 	for item_code, t_date in args:
 		get_last_purchase_detail = get_last_purchase_details(item_code, transaction_date=t_date)
-		out[(item_code, t_date)] = get_last_purchase_detail['base_rate'] if get_last_purchase_detail else 0
+		out[(item_code, t_date)] = get_last_purchase_detail['base_net_rate'] if get_last_purchase_detail else 0
 
 	return out
 

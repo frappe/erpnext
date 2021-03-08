@@ -265,6 +265,9 @@ class BuyingController(StockController):
 				unbilled_qty = max(0, item.qty - item.billed_qty)
 				amt = item.billed_net_amount
 				amt += item.base_net_amount * unbilled_qty / item.qty
+		elif self.doctype == "Purchase Invoice":
+			amt -= flt(item.debit_note_amount)
+
 		return flt(amt, self.precision("base_net_amount", "items"))
 
 	def validate_for_subcontracting(self):
@@ -621,25 +624,30 @@ class BuyingController(StockController):
 				pr_qty = flt(d.qty) * flt(d.conversion_factor)
 
 				if pr_qty:
+					val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
+
 					sle = self.get_sl_entries(d, {
 						"actual_qty": flt(pr_qty),
 						"serial_no": cstr(d.serial_no).strip()
 					})
 					if self.is_return:
-						if d.get('purchase_receipt'):
+						purchase_receipt = self.return_against if self.doctype == "Purchase Receipt" else d.get('purchase_receipt')
+						if d.get('pr_detail') and purchase_receipt:
 							original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-								{"voucher_type": "Purchase Receipt", "voucher_no": d.purchase_receipt,
-									"item_code": d.item_code}, "incoming_rate")
+								{"voucher_type": "Purchase Receipt", "voucher_no": purchase_receipt,
+									"voucher_detail_no": d.pr_detail}, "incoming_rate")
+						elif self.doctype == "Purchase Invoice" and d.get('pi_detail') and self.get('return_against')\
+								and frappe.db.get_value("Purchase Invoice", self.return_against, 'update_stock', cache=1):
+							original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
+								{"voucher_type": "Purchase Invoice", "voucher_no": self.return_against,
+								"voucher_detail_no": d.pi_detail}, "incoming_rate")
 						else:
-							original_incoming_rate = frappe.db.get_value("Stock Ledger Entry",
-								{"voucher_type": self.doctype, "voucher_no": self.return_against,
-								"item_code": d.item_code}, "incoming_rate")
+							original_incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
 
 						sle.update({
 							"outgoing_rate": original_incoming_rate
 						})
 					else:
-						val_rate_db_precision = 6 if cint(self.precision("valuation_rate", d)) <= 6 else 9
 						incoming_rate = flt(d.valuation_rate, val_rate_db_precision)
 						sle.update({
 							"incoming_rate": incoming_rate
@@ -687,8 +695,9 @@ class BuyingController(StockController):
 				# when PR is submitted and it has to be increased when PR is cancelled
 				incoming_rate = 0
 				if self.is_return and self.return_against and self.docstatus==1:
-					incoming_rate = self.get_incoming_rate_for_sales_return(d.rm_item_code, self.supplier_warehouse,
-						self.doctype, self.return_against, d.get('batch_no'))
+					incoming_rate = self.get_incoming_rate_for_sales_return(item_code=d.rm_item_code,
+						warehouse=self.supplier_warehouse, batch_no=d.get('batch_no'),
+						against_document_type=self.doctype, against_document=self.return_against)
 
 				sl_entries.append(self.get_sl_entries(d, {
 					"item_code": d.rm_item_code,

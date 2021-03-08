@@ -98,7 +98,7 @@ def execute(filters=None):
 					"in_val": qty_dict.in_val,
 					"purchase_val": qty_dict.purchase_val,
 					"out_val": qty_dict.out_val,
-					"sales_val": qty_dict.purchase_val,
+					"sales_val": qty_dict.sales_val,
 					"bal_val": qty_dict.bal_val,
 					"val_rate": qty_dict.val_rate / alt_uom_size,
 				})

@@ -444,7 +444,7 @@ class PurchaseInvoice(BuyingController):
 						.format(item.purchase_receipt))
 
 	def validate_update_stock_mandatory(self):
-		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")):
+		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")) and self.return_against:
 			for d in self.items:
 				if d.item_code and not d.purchase_receipt and frappe.get_cached_value("Item", d.item_code, "is_stock_item"):
 					frappe.throw(_("'Update Stock' must be enabled for stock items if Purchase Invoice is not made from Purchase Receipt."))
@@ -486,13 +486,20 @@ class PurchaseInvoice(BuyingController):
 		update_linked_doc(self.doctype, self.name, self.inter_company_invoice_reference)
 
 	def update_receipts_valuation(self):
-		purchase_receipts = set([item.purchase_receipt for item in self.items if item.purchase_receipt])
+		receipt_documents = set([('Purchase Receipt', item.purchase_receipt) for item in self.items if item.purchase_receipt])
 
-		for pr_name in purchase_receipts:
-			pr_doc = frappe.get_doc("Purchase Receipt", pr_name)
+		if self.is_return and self.return_against and not self.update_stock:
+			if frappe.db.get_value("Purchase Invoice", self.return_against, 'update_stock'):
+				receipt_documents.add(('Purchase Invoice', self.return_against))
+
+		for dt, dn in receipt_documents:
+			pr_doc = frappe.get_doc(dt, dn)
 
 			# set billed item tax amount and billed net amount in pr item
-			pr_doc.set_billed_valuation_amounts()
+			if dt == "Purchase Receipt":
+				pr_doc.set_billed_valuation_amounts()
+			elif dt == "Purchase Invoice":
+				pr_doc.set_debit_note_amount()
 
 			# set valuation rate in pr item
 			pr_doc.update_valuation_rate("items")
@@ -513,6 +520,17 @@ class PurchaseInvoice(BuyingController):
 			pr_doc.docstatus = 1
 			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)
 			pr_doc.make_gl_entries()
+
+	def set_debit_note_amount(self):
+		for d in self.items:
+			debit_note_amount = frappe.db.sql("""
+				select -sum(item.base_net_amount)
+				from `tabPurchase Invoice Item` item, `tabPurchase Invoice` inv
+				where inv.name=item.parent and item.pi_detail=%s and item.docstatus=1
+					and inv.update_stock = 0 and inv.is_return = 1 and inv.return_against = %s
+			""",[ d.name, self.name])
+
+			d.debit_note_amount = flt(debit_note_amount[0][0]) if debit_note_amount else 0
 
 	def make_gl_entries(self, gl_entries=None, repost_future_gle=True, from_repost=False):
 		if not self.grand_total:
@@ -636,6 +654,18 @@ class PurchaseInvoice(BuyingController):
 							"project": item.project
 						}, account_currency, item=item)
 					)
+
+					if flt(item.debit_note_amount):
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": self.stock_received_but_not_billed,
+								"against": billing_party,
+								"debit": flt(item.debit_note_amount, item.precision("base_net_amount")),
+								"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
+								"cost_center": item.cost_center or self.cost_center,
+								"project": item.project
+							}, item=item)
+						)
 
 					# Amount added through landed-cost-voucher
 					if flt(item.landed_cost_voucher_amount):

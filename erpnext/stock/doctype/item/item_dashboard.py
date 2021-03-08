@@ -11,7 +11,8 @@ def get_data():
 			'Work Order': 'production_item',
 			'Product Bundle': 'new_item_code',
 			'BOM': 'item',
-			'Batch': 'item'
+			'Batch': 'item',
+			'Project': 'applies_to_item'
 		},
 		'transactions': [
 			{

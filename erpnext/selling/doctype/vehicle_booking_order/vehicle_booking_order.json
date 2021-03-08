@@ -121,13 +121,7 @@
   "column_break_89",
   "supplier",
   "supplier_name",
-  "status",
-  "accounting_details_section",
-  "receivable_account",
-  "payable_account",
-  "column_break_20",
-  "selling_mode_of_payment",
-  "buying_mode_of_payment"
+  "status"
  ],
  "fields": [
   {
@@ -490,10 +484,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "column_break_20",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "column_break_62",
    "fieldtype": "Column Break"
   },
@@ -670,22 +660,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "receivable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Receivable Account",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
-   "fieldname": "payable_account",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Payable Account",
-   "options": "Account",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_89",
    "fieldtype": "Column Break"
   },
@@ -759,12 +733,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "collapsible": 1,
-   "fieldname": "accounting_details_section",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
    "fieldname": "allocation_details_section",
    "fieldtype": "Section Break",
    "label": "Delivery / Allocation Details"
@@ -819,19 +787,6 @@
   {
    "fieldname": "column_break_55",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "selling_mode_of_payment",
-   "fieldtype": "Link",
-   "ignore_user_permissions": 1,
-   "label": "Mode of Payment (Selling)",
-   "options": "Mode of Payment"
-  },
-  {
-   "fieldname": "buying_mode_of_payment",
-   "fieldtype": "Link",
-   "label": "Mode of Payment (Buying)",
-   "options": "Mode of Payment"
   },
   {
    "fieldname": "booking_number",
@@ -965,7 +920,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-02-24 23:59:25.649387",
+ "modified": "2021-03-03 15:04:52.101721",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Vehicle Booking Order",

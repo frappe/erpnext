@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate, add_days, formatdate
+from frappe.utils import flt, getdate, add_days, formatdate, today
 from frappe.model.document import Document
 from datetime import date
 from erpnext.controllers.item_variant import ItemTemplateCannotHaveStock
@@ -29,6 +29,7 @@ class StockLedgerEntry(Document):
 		self.validate_mandatory()
 		self.validate_item()
 		self.validate_batch()
+		self.validate_date()
 		validate_warehouse_company(self.warehouse, self.company)
 		self.scrub_posting_time()
 		self.validate_and_set_fiscal_year()
@@ -49,6 +50,10 @@ class StockLedgerEntry(Document):
 
 		if self.voucher_type != "Stock Reconciliation" and not self.actual_qty:
 			frappe.throw(_("Actual Qty is mandatory"))
+
+	def validate_date(self):
+		if not self.get("via_landed_cost_voucher") and getdate(self.posting_date) > getdate(today()) and self.is_cancelled == "No":
+			frappe.throw(_("Stock cannot be created for a future date {0}").format(self.get_formatted('posting_date')))
 
 	def validate_item(self):
 		item_det = frappe.db.sql("""select name, item_name, has_batch_no, docstatus,
