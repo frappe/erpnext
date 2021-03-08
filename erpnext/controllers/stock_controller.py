@@ -11,6 +11,9 @@ from erpnext.accounts.general_ledger import make_gl_entries, delete_gl_entries, 
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
+from frappe.model.meta import get_field_precision
+import json
+from six import string_types
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
 class QualityInspectionRejectedError(frappe.ValidationError): pass
@@ -535,3 +538,36 @@ def get_voucherwise_gl_entries(future_stock_vouchers, posting_date):
 				gl_entries.setdefault((d.voucher_type, d.voucher_no), []).append(d)
 
 	return gl_entries
+
+
+@frappe.whitelist()
+def update_item_qty_from_availability(items):
+	if isinstance(items, string_types):
+		items = json.loads(items)
+
+	out = {}
+	actual_qty_map = {}
+	for d in items:
+		d = frappe._dict(d)
+		if d.item_code and d.warehouse:
+			if (d.item_code, d.warehouse) not in actual_qty_map:
+				actual_qty = frappe.db.sql("""select actual_qty from `tabBin`
+					where item_code = %s and warehouse = %s""", (d.item_code, d.warehouse))
+				actual_qty = actual_qty and flt(actual_qty[0][0]) or 0
+				actual_qty_map[(d.item_code, d.warehouse)] = actual_qty
+				out.setdefault(d.name, frappe._dict()).actual_qty = actual_qty
+			else:
+				out.setdefault(d.name, frappe._dict()).actual_qty = actual_qty_map[(d.item_code, d.warehouse)]
+
+	for d in items:
+		d = frappe._dict(d)
+		if d.item_code and d.warehouse:
+			remaining_qty = actual_qty_map[(d.item_code, d.warehouse)]
+			if flt(d.stock_qty) > remaining_qty:
+				out[d.name].qty = flt(remaining_qty / flt(d.conversion_factor),
+					get_field_precision(frappe.get_meta("Delivery Note Item").get_field("qty")))
+				actual_qty_map[(d.item_code, d.warehouse)] = 0
+			else:
+				actual_qty_map[(d.item_code, d.warehouse)] -= flt(d.stock_qty)
+
+	return out

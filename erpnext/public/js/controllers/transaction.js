@@ -621,15 +621,12 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	item_code: function(doc, cdt, cdn) {
 		var me = this;
 		var item = frappe.get_doc(cdt, cdn);
-		var update_stock = 0, show_batch_dialog = 0;
+
+		var update_stock = 0;
 		if(['Sales Invoice'].includes(this.frm.doc.doctype)) {
 			update_stock = cint(me.frm.doc.update_stock);
-			show_batch_dialog = update_stock;
-
-		} else if((this.frm.doc.doctype === 'Purchase Receipt' && me.frm.doc.is_return) ||
-			this.frm.doc.doctype === 'Delivery Note') {
-			show_batch_dialog = 1;
 		}
+
 		// clear barcode if setting item (else barcode will take priority)
 		if(!this.frm.from_barcode) {
 			item.barcode = null;
@@ -701,40 +698,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 								},
 								() => me.frm.script_manager.trigger("price_list_rate", cdt, cdn),
 								() => me.toggle_conversion_factor(item),
-								() => {
-									if (show_batch_dialog && !item.has_serial_no
-										&& !item.has_batch_no) {
-										show_batch_dialog = false;
-									}
-								},
-								() => {
-									if (show_batch_dialog)
-										return frappe.db.get_value("Item", item.item_code, ["has_batch_no", "has_serial_no"])
-											.then((r) => {
-												if(r.message && !frappe.flags.hide_serial_batch_dialog &&
-													(r.message.has_batch_no || r.message.has_serial_no)) {
-													frappe.flags.hide_serial_batch_dialog = false;
-												}
-											});
-								},
-								() => {
-									if(show_batch_dialog && !frappe.flags.hide_serial_batch_dialog) {
-										var d = locals[cdt][cdn];
-										$.each(r.message, function(k, v) {
-											if(!d[k]) d[k] = v;
-										});
-
-										if (d.has_batch_no && d.has_serial_no) {
-											d.batch_no = undefined;
-										}
-
-										erpnext.show_serial_batch_selector(me.frm, d, (item) => {
-											me.qty(item, item.doctype, item.name, true);
-										});
-									}
-								},
-								() => me.conversion_factor(doc, cdt, cdn, true, true),
-								() => me.set_qty_color_based_on_availability(frappe.get_doc(cdt, cdn)),
+								() => me.conversion_factor(doc, cdt, cdn, true),
+								() => me.show_hide_select_batch_button && me.show_hide_select_batch_button(),
 								() => me.remove_pricing_rule(item),
 								() => {
 									if (item.apply_rule_on_other_items) {
@@ -747,18 +712,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					}
 				});
 			}
-		}
-	},
-
-	set_qty_color_based_on_availability: function(item) {
-		if (!in_list(['Sales Order', 'Delivery Note'], this.frm.doc.doctype) || !item)
-			return;
-
-		var warn = this.frm.doc.docstatus === 0 && item.item_code && item.qty > item.actual_qty && item.warehouse;
-		var grid_row = this.frm.get_field("items").grid.get_grid_row(item.name);
-		if (grid_row) {
-			$("[data-fieldname='actual_qty'], [data-fieldname='qty']", grid_row.wrapper)
-				.css("color", warn ? "red" : "inherit");
 		}
 	},
 
@@ -1254,11 +1207,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		frappe.model.set_value(cdt, cdn, "rate", item.tax_exclusive_rate * (1 + item.cumulated_tax_fraction));
 	},
 
-	qty: function(doc, cdt, cdn, dont_fetch_batch_no) {
+	qty: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		this.conversion_factor(doc, cdt, cdn, true, dont_fetch_batch_no);
+		this.conversion_factor(doc, cdt, cdn, true);
 		this.apply_pricing_rule(item, true);
-		this.set_qty_color_based_on_availability(frappe.get_doc(cdt, cdn));
 	},
 
 	service_stop_date: function(frm, cdt, cdn) {

@@ -17,7 +17,6 @@ def execute(filters=None):
 	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
 
 	include_uom = filters.get("include_uom")
-	columns = get_columns(filters, show_amounts, show_item_name)
 	items = get_items(filters)
 	sl_entries = get_stock_ledger_entries(filters, items)
 	item_details = get_item_details(items, sl_entries, include_uom)
@@ -48,7 +47,7 @@ def execute(filters=None):
 			"uom": item_detail.alt_uom or item_detail.stock_uom if filters.qty_field == "Contents Qty" else item_detail.stock_uom,
 			"actual_qty": sle.actual_qty * alt_uom_size,
 			"qty_after_transaction": sle.qty_after_transaction * alt_uom_size,
-			"stock_value_difference": sle.stock_value_difference,
+			"batch_qty_after_transaction": sle.batch_qty_after_transaction * alt_uom_size,
 			"voucher_type": sle.voucher_type,
 			"voucher_no": sle.voucher_no,
 			"batch_no": sle.batch_no,
@@ -60,7 +59,10 @@ def execute(filters=None):
 		if show_amounts:
 			row.update({
 				"valuation_rate": sle.valuation_rate / alt_uom_size,
-				"stock_value": sle.stock_value
+				"batch_valuation_rate": sle.batch_valuation_rate / alt_uom_size,
+				"stock_value": sle.stock_value,
+				"batch_stock_value": sle.batch_stock_value,
+				"stock_value_difference": sle.stock_value_difference,
 			})
 
 			if sle.actual_qty:
@@ -75,6 +77,7 @@ def execute(filters=None):
 		if include_uom:
 			conversion_factors.append(item_detail.conversion_factor)
 
+	columns = get_columns(filters, item_details, show_amounts, show_item_name)
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 
 	set_party_name_in_list(data)
@@ -82,7 +85,7 @@ def execute(filters=None):
 	data = get_grouped_data(filters, data)
 	return columns, data
 
-def get_columns(filters, show_amounts=True, show_item_name=True):
+def get_columns(filters, item_details, show_amounts=True, show_item_name=True):
 	columns = [
 		{"label": _("Date"), "fieldname": "date", "fieldtype": "Datetime", "width": 95},
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
@@ -94,6 +97,7 @@ def get_columns(filters, show_amounts=True, show_item_name=True):
 		{"label": _("UOM"), "fieldname": "uom", "fieldtype": "Link", "options": "UOM", "width": 50},
 		{"label": _("Qty"), "fieldname": "actual_qty", "fieldtype": "Float", "width": 60, "convertible": "qty"},
 		{"label": _("Balance Qty"), "fieldname": "qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty"},
+		{"label": _("Batch Qty"), "fieldname": "batch_qty_after_transaction", "fieldtype": "Float", "width": 90, "convertible": "qty", "is_batch": 1},
 	]
 
 	if show_amounts:
@@ -104,19 +108,27 @@ def get_columns(filters, show_amounts=True, show_item_name=True):
 				"options": "Company:company:default_currency"},
 			{"label": _("Valuation Rate"), "fieldname": "valuation_rate", "fieldtype": "Currency", "width": 100,
 				"options": "Company:company:default_currency", "convertible": "rate"},
+			{"label": _("Batch Valuation Rate"), "fieldname": "batch_valuation_rate", "fieldtype": "Currency", "width": 100,
+				"options": "Company:company:default_currency", "convertible": "rate", "is_batch": 1},
 			{"label": _("Balance Value"), "fieldname": "stock_value", "fieldtype": "Currency", "width": 110,
 				"options": "Company:company:default_currency"},
+			{"label": _("Batch Value"), "fieldname": "batch_stock_value", "fieldtype": "Currency", "width": 110,
+				"options": "Company:company:default_currency", "is_batch": 1},
 		]
 
 	columns += [
 		{"label": _("Party Type"), "fieldname": "party_type", "fieldtype": "Data", "width": 70, "hide_if_filtered": 1},
 		{"label": _("Party"), "fieldname": "party", "fieldtype": "Dynamic Link", "options": "party_type", "width": 150, "hide_if_filtered": 1},
-		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
+		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100, "is_batch": 1},
 		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100, "hide_if_filtered": 1},
 		{"label": _("Brand"), "fieldname": "brand", "fieldtype": "Link", "options": "Brand", "width": 100, "hide_if_filtered": 1, "filter_fieldname": "item_code"},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
+
+	has_batch_no = any([d.has_batch_no for d in item_details.values()])
+	if not has_batch_no:
+		columns = [c for c in columns if not c.get('is_batch')]
 
 	if not show_item_name:
 		columns = [c for c in columns if c.get('fieldname') != 'item_name']
@@ -132,7 +144,8 @@ def get_stock_ledger_entries(filters, items):
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
 			item_code, warehouse, actual_qty, qty_after_transaction, incoming_rate, valuation_rate,
 			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project, stock_value_difference,
-			party_type, party
+			party_type, party,
+			batch_qty_after_transaction, batch_stock_value, batch_valuation_rate
 		from `tabStock Ledger Entry` sle
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
@@ -179,7 +192,7 @@ def get_item_details(items, sl_entries, include_uom):
 	res = frappe.db.sql("""
 		select
 			item.name, item.item_name, item.description, item.item_group, item.brand,
-			item.stock_uom, item.alt_uom, item.alt_uom_size {cf_field}
+			item.stock_uom, item.alt_uom, item.alt_uom_size, item.has_batch_no {cf_field}
 		from
 			`tabItem` item
 			{cf_join}

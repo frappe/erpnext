@@ -51,6 +51,7 @@
   "source_warehouse_type",
   "source_warehouse_address",
   "source_address_display",
+  "auto_select_batches",
   "cb0",
   "to_warehouse",
   "target_warehouse_type",
@@ -671,12 +672,18 @@
    "fieldtype": "Check",
    "label": "Provided By Customer",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.docstatus == 0 && (doc.items || []).filter(d=>d.has_batch_no && d.s_warehouse).length",
+   "fieldname": "auto_select_batches",
+   "fieldtype": "Button",
+   "label": "Auto Select Batches (FIFO)"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-01-15 15:43:38.916448",
+ "modified": "2021-03-08 14:38:00.919383",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

@@ -122,6 +122,7 @@
   "column_break_21",
   "has_batch_no",
   "batch_no",
+  "has_serial_no",
   "serial_no",
   "col_break5",
   "sales_order",
@@ -1175,6 +1176,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.has_batch_no",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
    "hidden": 1,
@@ -1323,11 +1325,20 @@
    "fieldtype": "Currency",
    "label": "Returned Amount (Company Currency)",
    "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Serial No",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-02-23 18:07:53.508454",
+ "modified": "2021-03-04 14:41:46.718280",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

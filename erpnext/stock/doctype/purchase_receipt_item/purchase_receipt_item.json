@@ -137,9 +137,11 @@
   "billed_qty",
   "section_break_45",
   "bom",
+  "has_batch_no",
   "batch_no",
   "allow_zero_valuation_rate",
   "col_break5",
+  "has_serial_no",
   "serial_no",
   "column_break_48",
   "rejected_serial_no",
@@ -1309,11 +1311,29 @@
    "hidden": 1,
    "label": "Is Vehicle",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Batch No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Serial No",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-11-02 13:42:39.769819",
+ "modified": "2021-03-04 14:10:11.263237",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

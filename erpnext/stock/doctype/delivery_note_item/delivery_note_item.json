@@ -116,6 +116,7 @@
   "target_warehouse",
   "has_batch_no",
   "batch_no",
+  "has_serial_no",
   "serial_no",
   "section_break_40",
   "actual_qty",
@@ -1122,6 +1123,7 @@
   },
   {
    "default": "0",
+   "fetch_from": "item_code.has_batch_no",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
    "hidden": 1,
@@ -1182,11 +1184,20 @@
    "fieldname": "depreciation_percentage",
    "fieldtype": "Percent",
    "label": "Depreciation (%)"
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Serial No",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-01-23 12:34:53.722668",
+ "modified": "2021-03-04 14:09:39.644164",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

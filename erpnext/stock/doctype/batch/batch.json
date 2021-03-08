@@ -71,7 +71,6 @@
    "label": "Disabled"
   },
   {
-   "default": "Today",
    "fieldname": "manufacturing_date",
    "fieldtype": "Date",
    "label": "Manufacturing Date"
@@ -130,7 +129,7 @@
  "idx": 1,
  "image_field": "image",
  "max_attachments": 5,
- "modified": "2020-03-03 15:41:14.359730",
+ "modified": "2021-03-04 15:57:42.736556",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Batch",

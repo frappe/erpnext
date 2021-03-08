@@ -10,6 +10,7 @@ from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
 from erpnext.stock.doctype.item.item import set_item_default
+from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
 from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.controllers.stock_controller import StockController
@@ -43,6 +44,11 @@ class SellingController(StockController):
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
 				item.update(get_bin_details(item.item_code, item.warehouse))
+				if item.meta.has_field('actual_batch_qty'):
+					if item.get('batch_no'):
+						item.actual_batch_qty = get_batch_qty(item.batch_no, item.warehouse, item.item_code)
+					else:
+						item.actual_batch_qty = 0
 
 	def validate(self):
 		super(SellingController, self).validate()
@@ -259,6 +265,10 @@ class SellingController(StockController):
 					'si_detail': d.get('si_detail')
 				}))
 		return il
+
+	def auto_select_batches(self):
+		if (self.doctype == "Delivery Note" or self.get('update_stock')) and not self.get('is_return'):
+			auto_select_and_split_batches(self, 'warehouse')
 
 	def has_product_bundle(self, item_code):
 		return frappe.db.sql("""select name from `tabProduct Bundle`

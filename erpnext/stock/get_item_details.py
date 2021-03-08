@@ -114,7 +114,6 @@ def update_stock(args, out):
 		and out.warehouse and out.stock_qty > 0:
 
 		if out.has_batch_no and not args.get("batch_no"):
-			out.batch_no = get_batch_no(out.item_code, out.warehouse, out.qty, sales_order_item=args.get('so_detail'))
 			actual_batch_qty = get_batch_qty(out.batch_no, out.warehouse, out.item_code)
 			if actual_batch_qty:
 				out.update(actual_batch_qty)
@@ -277,7 +276,7 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		'has_serial_no': item.has_serial_no,
 		'has_batch_no': item.has_batch_no,
 		'is_vehicle': item.is_vehicle,
-		"batch_no": args.get("batch_no"),
+		"batch_no": args.get("batch_no") if args.get("batch_no") and frappe.db.get_value("Batch", args.get("batch_no"), 'item') == item.name else "",
 		"uom": args.uom,
 		"min_order_qty": flt(item.min_order_qty) if args.doctype == "Material Request" else "",
 		"qty": flt(args.qty) or 1.0,

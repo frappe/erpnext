@@ -13,7 +13,7 @@ from erpnext.stock.get_item_details import get_bin_details, get_default_cost_cen
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
-from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
 from erpnext.stock.utils import get_bin
@@ -117,6 +117,9 @@ class StockEntry(StockController):
 		self.update_cost_in_project()
 		self.update_transferred_qty()
 		self.update_quality_inspection()
+
+	def auto_select_batches(self):
+		auto_select_and_split_batches(self, 's_warehouse')
 
 	def set_job_card_data(self):
 		if self.job_card and not self.work_order:
@@ -225,8 +228,8 @@ class StockEntry(StockController):
 				for_update=True)
 
 			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
-				"cost_center", "conversion_factor"):
-					if f in ["stock_uom", "conversion_factor"] or not item.get(f):
+				"cost_center", "conversion_factor", "has_batch_no", "has_serial_no"):
+					if f in ["stock_uom", "conversion_factor", "has_batch_no", "has_serial_no"] or not item.get(f):
 						item.set(f, item_details.get(f))
 
 			if not item.transfer_qty and item.qty:

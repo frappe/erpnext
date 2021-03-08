@@ -108,10 +108,12 @@
   "warehouse",
   "rejected_warehouse",
   "column_break_100",
+  "has_serial_no",
   "serial_no",
   "allow_zero_valuation_rate",
   "col_br_wh",
   "quality_inspection",
+  "has_batch_no",
   "batch_no",
   "rejected_serial_no",
   "deferred_expense_section",
@@ -1178,6 +1180,24 @@
    "hidden": 1,
    "label": "Debit Note Amount",
    "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_batch_no",
+   "fieldname": "has_batch_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Batch No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fetch_from": "item_code.has_serial_no",
+   "fieldname": "has_serial_no",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Has Serial No",
    "read_only": 1
   }
  ],

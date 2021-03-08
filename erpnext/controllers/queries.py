@@ -6,7 +6,7 @@ import frappe
 import erpnext
 from frappe import _
 from frappe.desk.reportview import get_match_cond, get_filters_cond
-from frappe.utils import nowdate, getdate
+from frappe.utils import nowdate, getdate, flt, cstr
 from collections import defaultdict
 from erpnext.stock.get_item_details import _get_item_tax_template
 from frappe.utils import unique
@@ -368,7 +368,10 @@ def get_delivery_notes_to_be_billed(doctype, txt, searchfield, start, page_len, 
 def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	cond = ""
 	if filters.get("posting_date"):
-		cond = "and (batch.expiry_date is null or batch.expiry_date >= %(posting_date)s)"
+		cond += " and (batch.expiry_date is null or batch.expiry_date >= %(posting_date)s)"
+
+	if filters.get("warehouse"):
+		cond += " and sle.warehouse = %(warehouse)s"
 
 	batch_nos = None
 	args = {
@@ -381,45 +384,38 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	}
 
 	having_clause = "having sum(sle.actual_qty) > 0"
-	if filters.get("is_return"):
+	if filters.get("is_return") or filters.get('is_receipt'):
 		having_clause = ""
 
-	if args.get('warehouse'):
-		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom,
-				concat('MFG-',batch.manufacturing_date), concat('EXP-',batch.expiry_date)
-			from `tabStock Ledger Entry` sle
-				INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
-			where
-				batch.disabled = 0
-				and sle.item_code = %(item_code)s
-				and sle.warehouse = %(warehouse)s
-				and (sle.batch_no like %(txt)s
-				or batch.expiry_date like %(txt)s
-				or batch.manufacturing_date like %(txt)s)
-				and batch.docstatus < 2
-				{cond}
-				{match_conditions}
-			group by batch_no {having_clause}
-			order by batch.expiry_date, sle.batch_no desc
-			limit %(start)s, %(page_len)s""".format(
-				cond=cond,
-				match_conditions=get_match_cond(doctype),
-				having_clause = having_clause
-			), args)
-
-		return batch_nos
-	else:
-		return frappe.db.sql("""select name, concat('MFG-', manufacturing_date), concat('EXP-',expiry_date) from `tabBatch` batch
-			where batch.disabled = 0
-			and item = %(item_code)s
-			and (name like %(txt)s
-			or expiry_date like %(txt)s
-			or manufacturing_date like %(txt)s)
-			and docstatus < 2
-			{0}
+	batch_nos = frappe.db.sql("""
+		select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom,
+			min(timestamp(sle.posting_date, sle.posting_time)), batch.manufacturing_date, batch.expiry_date
+		from `tabStock Ledger Entry` sle
+			INNER JOIN `tabBatch` batch on sle.batch_no = batch.name
+		where
+			batch.disabled = 0
+			and sle.item_code = %(item_code)s
+			and (sle.batch_no like %(txt)s
+			or batch.expiry_date like %(txt)s
+			or batch.manufacturing_date like %(txt)s)
+			and batch.docstatus < 2
+			{cond}
 			{match_conditions}
-			order by expiry_date, name desc
-			limit %(start)s, %(page_len)s""".format(cond, match_conditions=get_match_cond(doctype)), args)
+		group by batch_no {having_clause}
+		order by batch.expiry_date, sle.batch_no desc
+		limit %(start)s, %(page_len)s""".format(
+			cond=cond,
+			match_conditions=get_match_cond(doctype),
+			having_clause = having_clause
+		), args, as_list=1)
+
+	for d in batch_nos:
+		d[1] = cstr(flt(d[1])) # Actual Qty
+		d[3] = "Received: {0}".format(frappe.format(getdate(d[3]))) if d[3] else None  # Received Date
+		d[4] = "Manufactured: {0}".format(frappe.format(getdate(d[4]))) if d[4] else None  # Manufactured Date
+		d[5] = "Expiry: {0}".format(frappe.format(getdate(d[5]))) if d[5] else None  # Expiry Date
+
+	return batch_nos
 
 
 @frappe.whitelist()
