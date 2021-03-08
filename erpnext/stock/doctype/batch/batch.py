@@ -7,11 +7,11 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname, revert_series_if_last
-from frappe.utils import flt, cint, get_link_to_form
-from frappe.utils.jinja import render_template
+from frappe.utils import flt, cint, get_link_to_form, cstr
 from frappe.utils.data import add_days
 from six import string_types
 import json
+import math
 
 class UnableToSelectBatchError(frappe.ValidationError):
 	pass
@@ -65,8 +65,10 @@ def _make_naming_series_key(prefix):
 	"""
 	if not text_type(prefix):
 		return ''
-	else:
+	elif not prefix.find('#'):
 		return prefix.upper() + '.#####'
+	else:
+		return prefix.upper()
 
 
 def get_batch_naming_series():
@@ -153,28 +155,28 @@ def get_batch_qty(batch_no=None, warehouse=None, item_code=None, posting_date=No
 	:param item_code: Optional - give qty for this item"""
 
 	out = 0
-	if batch_no and warehouse:
-		cond = ""
-		if posting_date and posting_time:
-			cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(posting_date,
-				posting_time)
 
+	date_cond = ""
+	if posting_date and posting_time:
+		date_cond = " and timestamp(posting_date, posting_time) <= timestamp('{0}', '{1}')".format(posting_date, posting_time)
+
+	if batch_no and warehouse:
 		out = flt(frappe.db.sql("""select sum(actual_qty)
 			from `tabStock Ledger Entry`
-			where warehouse=%s and batch_no=%s {0}""".format(cond),
+			where warehouse=%s and batch_no=%s {0}""".format(date_cond),
 			(warehouse, batch_no))[0][0] or 0)
 
 	if batch_no and not warehouse:
 		out = frappe.db.sql('''select warehouse, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where batch_no=%s
-			group by warehouse''', batch_no, as_dict=1)
+			where batch_no=%s {0}
+			group by warehouse'''.format(date_cond), batch_no, as_dict=1)
 
 	if not batch_no and item_code and warehouse:
 		out = frappe.db.sql('''select batch_no, sum(actual_qty) as qty
 			from `tabStock Ledger Entry`
-			where item_code = %s and warehouse=%s
-			group by batch_no''', (item_code, warehouse), as_dict=1)
+			where item_code = %s and warehouse=%s {0}
+			group by batch_no'''.format(date_cond), (item_code, warehouse), as_dict=1)
 
 	return out
 
@@ -233,14 +235,91 @@ def set_batch_nos(doc, warehouse_field, throw=False):
 		warehouse = d.get(warehouse_field, None)
 		if has_batch_no and warehouse and qty > 0:
 			if not d.batch_no:
-				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw, d.serial_no)
+				d.batch_no = get_batch_no(d.item_code, warehouse, qty, throw)
 			else:
 				batch_qty = get_batch_qty(batch_no=d.batch_no, warehouse=warehouse)
-				if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")):
+				if flt(batch_qty, d.precision("qty")) < flt(qty, d.precision("qty")) and throw:
 					frappe.throw(_("Row #{0}: The batch {1} has only {2} qty. Please select another batch which has {3} qty available or split the row into multiple rows, to deliver/issue from multiple batches").format(d.idx, d.batch_no, batch_qty, qty))
 
+
+def auto_select_and_split_batches(doc, warehouse_field):
+	iuw_qty_map = {}
+	iuw_boxes_map = {}
+	iw_qty_map = {}
+	for d in doc.items:
+		warehouse = d.get(warehouse_field)
+		if warehouse and frappe.get_cached_value("Item", d.item_code, "has_batch_no"):
+			iuw_key = (d.item_code, cstr(d.get('uom')), warehouse)
+			iw_key = (d.item_code, warehouse)
+
+			iuw_qty_map.setdefault(iuw_key, 0)
+			iuw_qty_map[iuw_key] += flt(d.get('qty'))
+
+			if d.meta.get_field('boxes'):
+				iuw_boxes_map.setdefault(iuw_key, 0)
+				iuw_boxes_map[iuw_key] += flt(d.get('boxes'))
+
+			iw_qty_map.setdefault(iw_key, 0)
+			iw_qty_map[iw_key] += flt(d.get('qty'))
+
+	visited = set()
+	to_remove = []
+	for d in doc.items:
+		warehouse = d.get(warehouse_field)
+		if warehouse and frappe.get_cached_value("Item", d.item_code, "has_batch_no"):
+			iuw_key = (d.item_code, cstr(d.get('uom')), warehouse)
+			if iuw_key not in visited:
+				visited.add(iuw_key)
+				d.batch_no = None
+				d.qty = flt(iuw_qty_map.get(iuw_key))
+
+				if d.meta.get_field('boxes'):
+					d.boxes = flt(iuw_boxes_map.get(iuw_key))
+			else:
+				to_remove.append(d)
+
+	for d in to_remove:
+		doc.remove(d)
+
+	updated_rows = []
+	batches_used = {}
+	for d in doc.items:
+		updated_rows.append(d)
+		warehouse = d.get(warehouse_field)
+		if warehouse and frappe.get_cached_value("Item", d.item_code, "has_batch_no"):
+			batches = get_sufficient_batch_or_fifo(d.item_code, warehouse, flt(d.qty), flt(d.conversion_factor),
+				batches_used=batches_used, include_empty_batch=True, precision=d.precision('qty'))
+
+			rows = [d]
+			total_qty = flt(d.qty)
+			total_boxes = flt(d.boxes) if d.meta.get_field('boxes') else 0
+
+			for i in range(1, len(batches)):
+				new_row = frappe.copy_doc(d)
+				rows.append(new_row)
+				updated_rows.append(new_row)
+
+			for row, batch in zip(rows, batches):
+				row.qty = batch.selected_qty
+				row.batch_no = batch.batch_no
+
+				if row.meta.get_field('boxes'):
+					row.boxes = total_boxes * row.qty / total_qty if total_qty else 0
+
+	# Replace with updated list
+	for i, row in enumerate(updated_rows):
+		row.idx = i + 1
+	doc.items = updated_rows
+
+	if doc.doctype == 'Stock Entry':
+		doc.run_method("set_transfer_qty")
+	else:
+		doc.run_method("calculate_taxes_and_totals")
+
+
+
 @frappe.whitelist()
-def get_batch_no(item_code, warehouse, qty=1, throw=False, sales_order_item=None):
+def get_batch_no(item_code, warehouse, qty=1, throw=False, sales_order_item=None, serial_no=None):
 	"""
 	Get batch number using First Expiring First Out method.
 	:param item_code: `item_code` of Item Document
@@ -258,69 +337,123 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, sales_order_item=None
 			break
 
 	if not batch_no:
-		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
-		if throw:
-			raise UnableToSelectBatchError
+		batch_no=""
+		return batch_no
 
 	return batch_no
 
+
+def round_down(value, decimals):
+	factor = 10 ** decimals
+	db_precision = 6 if decimals <= 6 else 9
+
+	value = math.floor(flt(value * factor, db_precision)) / factor
+	value = flt(value, db_precision)
+	return value
+
+
 @frappe.whitelist()
-def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1, exclude_batches=None, sales_order_item=None):
+def get_sufficient_batch_or_fifo(item_code, warehouse, qty=1, conversion_factor=1, batches_used=None,
+		include_empty_batch=False, precision=None):
 	if not warehouse or not qty:
 		return []
 
-	batches = get_batches(item_code, warehouse, sales_order_item=sales_order_item)
-	selected_batches = []
+	if not precision:
+		precision = cint(frappe.db.get_default("float_precision")) or 3
 
-	if isinstance(exclude_batches, string_types):
-		json.loads(exclude_batches)
-	if exclude_batches is None:
-		exclude_batches = []
+	batches = get_batches(item_code, warehouse)
+
+	if batches_used:
+		for batch in batches:
+			if batch.name in batches_used:
+				batch.qty -= flt(batches_used.get(batch.name))
+
+		batches = [d for d in batches if d.qty > 0]
+
+	selected_batches = []
 
 	qty = flt(qty)
 	conversion_factor = flt(conversion_factor or 1)
 	stock_qty = qty * conversion_factor
-	remaining_qty = stock_qty
+	remaining_stock_qty = stock_qty
 
 	for batch in batches:
-		if batch.name in exclude_batches:
+		if remaining_stock_qty <= 0:
+			break
+
+		selected_stock_qty = min(remaining_stock_qty, batch.qty)
+		selected_qty = round_down(selected_stock_qty / conversion_factor, precision)
+		if not selected_qty:
 			continue
 
-		if remaining_qty <= 0:
-			break
-		if stock_qty <= flt(batch.qty):
-			return [{
-				'batch_no': batch.name,
-				'available_qty': batch.qty / conversion_factor,
-				'selected_qty': qty
-			}]
-
-		selected_qty = min(remaining_qty, batch.qty)
-		selected_batches.append({
+		selected_stock_qty = selected_qty * conversion_factor
+		selected_batches.append(frappe._dict({
 			'batch_no': batch.name,
 			'available_qty': batch.qty / conversion_factor,
-			'selected_qty': selected_qty / conversion_factor
-		})
+			'selected_qty': selected_qty
+		}))
 
-		remaining_qty -= selected_qty
+		if isinstance(batches_used, dict):
+			batches_used.setdefault(batch.name, 0)
+			batches_used[batch.name] += selected_stock_qty
 
-	if remaining_qty > 0:
-		total_selected_qty = stock_qty - remaining_qty
-		frappe.msgprint(_("Only {0} {1} found in {2}".format(total_selected_qty, item_code, warehouse)))
+		remaining_stock_qty -= selected_stock_qty
+
+	if remaining_stock_qty > 0:
+		if include_empty_batch:
+			selected_batches.append(frappe._dict({
+				'batch_no': None,
+				'available_qty': 0,
+				'selected_qty': remaining_stock_qty
+			}))
+
+		total_selected_qty = stock_qty - remaining_stock_qty
+		frappe.msgprint(_("Only {0} {1} found in {2}".format(total_selected_qty, frappe.get_desk_link('Item', item_code),
+			frappe.get_desk_link('Warehouse', warehouse))))
 
 	return selected_batches
 
+def get_batch_received_date(batch_no, warehouse):
+	date = frappe.db.sql("""
+		select min(timestamp(posting_date, posting_time))
+		from `tabStock Ledger Entry`
+		where batch_no = %s and warehouse = %s
+	""", [batch_no, warehouse])
 
-def get_batches(item_code, warehouse, sales_order_item=None):
+	return date[0][0] if date else None
+
+def get_batches(item_code, warehouse, posting_date=None, posting_time=None, qty_condition="positive", sales_order_item=None):
+	if qty_condition == "both":
+		having = "having qty != 0"
+	elif qty_condition == "negative":
+		having = "having qty < 0"
+	else:
+		having = "having qty > 0"
+
+	date_cond = ""
+	if posting_date:
+		date_cond = "and (b.expiry_date is null or b.expiry_date >= %(posting_date)s)"
+		if posting_time:
+			date_cond += " and (sle.posting_date, sle.posting_time) <= (%(posting_date)s, %(posting_time)s)"
+		else:
+			date_cond += " and sle.posting_date <= %(posting_date)s"
+
+	args = {
+		'item_code': item_code,
+		'warehouse': warehouse,
+		'posting_date': posting_date,
+		'posting_time': posting_time
+	}
+
 	batches = frappe.db.sql("""
 		select b.name, sum(sle.actual_qty) as qty, b.expiry_date,
 			min(timestamp(sle.posting_date, sle.posting_time)) received_date
 		from `tabBatch` b
 		join `tabStock Ledger Entry` sle ignore index (item_code, warehouse) on b.name = sle.batch_no
-		where sle.item_code = %s and sle.warehouse = %s and (b.expiry_date >= CURDATE() or b.expiry_date IS NULL)
+		where sle.item_code = %(item_code)s and sle.warehouse = %(warehouse)s {0}
 		group by b.name
-		having qty > 0
-	""", (item_code, warehouse), as_dict=True)
+		{1}
+	""".format(date_cond, having), args, as_dict=True)
 
 	batches = sorted(batches, key=lambda d: (d.expiry_date, d.received_date))
 

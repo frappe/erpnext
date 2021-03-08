@@ -10,7 +10,7 @@ from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.get_item_details import get_conversion_factor, get_target_warehouse_validation
 from erpnext.stock.doctype.item.item import set_item_default
-from erpnext.stock.doctype.batch.batch import get_batch_qty
+from erpnext.stock.doctype.batch.batch import get_batch_qty, auto_select_and_split_batches
 from frappe.contacts.doctype.address.address import get_address_display
 
 from erpnext.controllers.stock_controller import StockController
@@ -263,6 +263,10 @@ class SellingController(StockController):
 					'delivery_note': d.get('delivery_note')
 				}))
 		return il
+
+	def auto_select_batches(self):
+		if (self.doctype == "Delivery Note" or self.get('update_stock')) and not self.get('is_return'):
+			auto_select_and_split_batches(self, 'warehouse')
 
 	def has_product_bundle(self, item_code):
 		return frappe.db.sql("""select name from `tabProduct Bundle`

@@ -558,6 +558,23 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.frm.fields_dict.items.grid.custom_buttons[__("Select Batches")].addClass('hidden btn-primary');
 	},
 
+	auto_select_batches: function() {
+		if ((this.frm.doc.doctype === "Delivery Note" || this.frm.doc.update_stock) && !this.frm.doc.is_return) {
+			var me = this;
+			return frappe.call({
+				method: 'auto_select_batches',
+				doc: me.frm.doc,
+				freeze: 1,
+				callback: function (r) {
+					if (!r.exc) {
+						me.calculate_taxes_and_totals();
+						me.frm.dirty();
+					}
+				}
+			});
+		}
+	},
+
 	items_row_focused: function (doc, cdt, cdn) {
 		var row = frappe.get_doc(cdt, cdn);
 		this.frm.focused_item_dn = row ? row.name : null;

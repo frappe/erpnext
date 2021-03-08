@@ -90,6 +90,7 @@
   "get_latest_price",
   "sec_warehouse",
   "update_stock",
+  "auto_select_batches",
   "column_break_79",
   "set_warehouse",
   "items_section",
@@ -2160,12 +2161,18 @@
    "fieldtype": "Select",
    "label": "Depreciation Type",
    "options": "\nDepreciation Amount Only\nAfter Depreciation Amount"
+  },
+  {
+   "depends_on": "eval:doc.update_stock && !doc.is_return && (doc.items || []).filter(d=>d.has_batch_no).length && doc.docstatus == 0",
+   "fieldname": "auto_select_batches",
+   "fieldtype": "Button",
+   "label": "Auto Select Batches (FIFO)"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-02-27 10:44:08.292021",
+ "modified": "2021-03-08 14:36:33.796728",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
