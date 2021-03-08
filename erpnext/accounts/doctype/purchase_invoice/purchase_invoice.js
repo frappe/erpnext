@@ -145,7 +145,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				})
 			}, __("Get Items From"));
 		}
-		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
+		this.frm.toggle_reqd("set_from_warehouse", this.frm.doc.is_subcontracted==="Yes");
 
 		if (doc.docstatus == 1 && !doc.inter_company_invoice_reference) {
 			frappe.model.with_doc("Supplier", me.frm.doc.supplier, function() {
@@ -542,7 +542,7 @@ frappe.ui.form.on("Purchase Invoice", {
 		if (frm.doc.is_subcontracted === "Yes") {
 			erpnext.buying.get_default_bom(frm);
 		}
-		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+		frm.toggle_reqd("set_from_warehouse", frm.doc.is_subcontracted==="Yes");
 	},
 
 	update_stock: function(frm) {

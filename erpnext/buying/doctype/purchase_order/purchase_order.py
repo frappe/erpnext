@@ -433,7 +433,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"doctype": "Purchase Invoice",
 			"field_map": {
 				"party_account_currency": "party_account_currency",
-				"supplier_warehouse":"supplier_warehouse"
+				"set_from_warehouse":"supplier_warehouse"
 			},
 			"validation": {
 				"docstatus": ["=", 1],
