@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt, getdate
+from frappe.utils import flt
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category \
 	import get_advance_vouchers, get_debit_note_amount
