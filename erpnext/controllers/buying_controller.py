@@ -265,6 +265,9 @@ class BuyingController(StockController):
 				unbilled_qty = max(0, item.qty - item.billed_qty)
 				amt = item.billed_net_amount
 				amt += item.base_net_amount * unbilled_qty / item.qty
+		elif self.doctype == "Purchase Invoice":
+			amt -= flt(item.debit_note_amount)
+
 		return flt(amt, self.precision("base_net_amount", "items"))
 
 	def validate_for_subcontracting(self):

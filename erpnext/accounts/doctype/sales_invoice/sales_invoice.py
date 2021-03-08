@@ -693,7 +693,7 @@ class SalesInvoice(SellingController):
 					msgprint(_("Stock cannot be updated against Delivery Note {0}").format(d.delivery_note), raise_exception=1)
 
 	def validate_update_stock_mandatory(self):
-		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")):
+		if not cint(self.update_stock) and not cint(frappe.db.get_single_value("Accounts Settings", "allow_invoicing_without_updating_stock")) and self.return_against:
 			packed_items = []
 			for p in self.get('packed_items'):
 				packed_items.append(p.parent_detail_docname)
