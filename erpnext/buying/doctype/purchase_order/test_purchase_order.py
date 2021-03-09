@@ -652,7 +652,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		# Make Purchase Invoice
 		pi = make_pi_from_po(po.name)
 		pi.update_stock = 1
-		pi.set_from_warehouse = "_Test Warehouse 1 - _TC"
+		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 		pi.insert()
 		pi.submit()
 		bin8 = frappe.db.get_value("Bin",

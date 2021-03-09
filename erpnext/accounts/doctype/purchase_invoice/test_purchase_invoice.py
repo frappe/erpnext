@@ -977,7 +977,7 @@ def make_purchase_invoice(**args):
 	pi.is_return = args.is_return
 	pi.return_against = args.return_against
 	pi.is_subcontracted = args.is_subcontracted or "No"
-	pi.set_from_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
+	pi.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
@@ -1032,7 +1032,7 @@ def make_purchase_invoice_against_cost_center(**args):
 	pi.credit_to = args.return_against or "Creditors - _TC"
 	pi.is_subcontracted = args.is_subcontracted or "No"
 	if args.supplier_warehouse:
-		pi.set_from_warehouse = "_Test Warehouse 1 - _TC"
+		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

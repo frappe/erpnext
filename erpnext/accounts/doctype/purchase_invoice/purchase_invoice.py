@@ -590,10 +590,10 @@ class PurchaseInvoice(BuyingController):
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
-						supplier_warehouse_account = warehouse_account[self.set_from_warehouse]["account"]
+						supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
 						if not supplier_warehouse_account:
 							frappe.throw(_("Please set account in Warehouse {0}")
-								.format(self.set_from_warehouse))
+								.format(self.supplier_warehouse))
 						gl_entries.append(self.get_gl_dict({
 							"account": supplier_warehouse_account,
 							"against": item.expense_account,
@@ -601,7 +601,7 @@ class PurchaseInvoice(BuyingController):
 							"project": item.project or self.project,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
-						}, warehouse_account[self.set_from_warehouse]["account_currency"], item=item))
+						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
 
 				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
 					expense_account = (item.expense_account

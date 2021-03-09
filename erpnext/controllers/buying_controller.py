@@ -277,8 +277,8 @@ class BuyingController(StockController):
 			frappe.throw(_("Please enter 'Is Subcontracted' as Yes or No"))
 
 		if self.is_subcontracted == "Yes":
-			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.set_from_warehouse:
-				frappe.throw(_("From Warehouse mandatory for sub-contracted {0}").format(self.doctype))
+			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
+				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
 
 			for item in self.get("items"):
 				if item in self.sub_contracted_items and not item.bom:
