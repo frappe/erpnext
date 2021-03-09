@@ -287,7 +287,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.cancel()
 		po.delete()
 		new_item_with_tax.delete()
-		frappe.get_doc("Item Tax Template", "Test Update Items Template").delete()
+		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
 
 	def test_update_child_uom_conv_factor_change(self):
 		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
