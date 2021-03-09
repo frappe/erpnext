@@ -521,8 +521,7 @@
    "fieldname": "has_variants",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "Has Variants",
-   "no_copy": 1
+   "label": "Has Variants"
   },
   {
    "default": "Item Attribute",
@@ -538,7 +537,6 @@
    "fieldtype": "Table",
    "hidden": 1,
    "label": "Attributes",
-   "no_copy": 1,
    "options": "Item Variant Attribute"
   },
   {
@@ -1068,7 +1066,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-01-25 20:49:50.222976",
+ "modified": "2021-02-18 14:00:19.668049",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

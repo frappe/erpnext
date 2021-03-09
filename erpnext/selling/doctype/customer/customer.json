@@ -16,6 +16,8 @@
   "customer_name",
   "gender",
   "customer_type",
+  "pan",
+  "tax_withholding_category",
   "default_bank_account",
   "lead_name",
   "image",
@@ -479,13 +481,25 @@
    "fieldname": "dn_required",
    "fieldtype": "Check",
    "label": "Allow Sales Invoice Creation Without Delivery Note"
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Data",
+   "label": "PAN"
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-06 19:35:25.418017",
+ "modified": "2021-01-28 12:54:57.258959",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
