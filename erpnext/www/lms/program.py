@@ -16,7 +16,7 @@ def get_context(context):
 	context.program = get_program(program)
 	context.courses = [frappe.get_doc("Course", course.course) for course in context.program.courses]
 	context.has_access = utils.allowed_program_access(program)
-	context.progress = get_course_progress(context.courses, context.program) or {}
+	context.progress = get_course_progress(context.courses, context.program)
 
 def get_program(program_name):
 	try:
@@ -26,4 +26,4 @@ def get_program(program_name):
 
 def get_course_progress(courses, program):
 	progress = {course.name: utils.get_course_progress(course, program) for course in courses}
-	return progress
+	return progress or {}
