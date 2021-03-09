@@ -74,9 +74,13 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Material Request",
+					"dependencies": ["Item"]
+				},
+				{
+					"type": "doctype",
 					"name": "Timesheet",
 					"description": _("Time Sheet for manufacturing."),
-					"onboard": 1,
 					"dependencies": ["Activity Type"]
 				},
 				{
@@ -101,6 +105,18 @@ def get_data():
 					"description": _("Compare BOMs for changes in Raw Materials and Operations"),
 					"data_doctype": "BOM"
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "BOM Search",
+					"doctype": "BOM"
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "BOM Stock Report",
+					"doctype": "BOM"
+				}
 			]
 		},
 		{
@@ -146,18 +162,6 @@ def get_data():
 					"is_query_report": True,
 					"name": "Production Analytics",
 					"doctype": "Work Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "BOM Search",
-					"doctype": "BOM"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "BOM Stock Report",
-					"doctype": "BOM"
 				}
 			]
 		},
