@@ -41,6 +41,7 @@
   "operations",
   "materials_section",
   "items",
+  "total_raw_material_qty",
   "scrap_section",
   "scrap_items",
   "costing",
@@ -541,13 +542,19 @@
   {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_raw_material_qty",
+   "fieldtype": "Float",
+   "label": "Total Raw Material Qty",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-01-22 19:25:34.819153",
+ "modified": "2021-03-09 12:53:34.194880",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

@@ -74,11 +74,16 @@ class MaterialRequest(BuyingController):
 			"Partially Ordered", "Ordered", "Issued", "Transferred", "Received"])
 
 		validate_for_items(self)
+		self.calculate_totals()
 
 		self.set_title()
 		# self.validate_qty_against_so()
 		# NOTE: Since Item BOM and FG quantities are combined, using current data, it cannot be validated
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
+
+	def calculate_totals(self):
+		self.total_qty = sum([d.qty for d in self.items])
+		self.total_qty = flt(self.total_qty, self.precision("total_qty"))
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''

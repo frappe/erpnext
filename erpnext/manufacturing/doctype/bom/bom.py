@@ -473,6 +473,7 @@ class BOM(WebsiteGenerator):
 		self.calculate_sm_cost()
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
 		self.base_total_cost = self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
+		self.total_raw_material_qty = sum([d.qty for d in self.items])
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""

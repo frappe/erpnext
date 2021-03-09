@@ -20,6 +20,7 @@
   "items_section",
   "scan_barcode",
   "items",
+  "total_qty",
   "more_info",
   "requested_by",
   "column_break2",
@@ -278,12 +279,18 @@
    "fieldtype": "Link",
    "label": "For Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "total_qty",
+   "fieldtype": "Float",
+   "label": "Total Qty",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2021-01-22 19:41:28.163999",
+ "modified": "2021-03-09 12:58:33.163530",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
