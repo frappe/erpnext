@@ -25,7 +25,7 @@ from erpnext.stock.get_item_details import get_item_warehouse
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 from collections import OrderedDict
 
-force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules",
+force_item_fields = ("item_group", "brand", "stock_uom", "alt_uom", "alt_uom_size", "is_fixed_asset", "item_tax_rate", "pricing_rules",
 	"allow_zero_valuation_rate", "has_batch_no", "has_serial_no", "is_vehicle")
 
 merge_items_sum_fields = ['qty', 'stock_qty', 'alt_uom_qty', 'total_weight',

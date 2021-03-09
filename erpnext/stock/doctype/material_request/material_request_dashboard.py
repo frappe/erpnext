@@ -7,8 +7,12 @@ def get_data():
 		'fieldname': 'material_request',
 		'transactions': [
 			{
-				'label': _('Related'),
-				'items': ['Request for Quotation', 'Supplier Quotation', 'Purchase Order', 'Stock Entry', 'Pick List']
+				'label': _('Purchase'),
+				'items': ['Request for Quotation', 'Supplier Quotation', 'Purchase Order']
+			},
+			{
+				'label': _('Stock'),
+				'items': ['Stock Entry', 'Pick List']
 			},
 			{
 				'label': _('Manufacturing'),

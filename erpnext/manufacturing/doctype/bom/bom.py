@@ -92,6 +92,9 @@ class BOM(WebsiteGenerator):
 		self.validate_bom_links()
 		self.manage_default_bom()
 
+	def before_print(self):
+		self.company_address_doc = erpnext.get_company_address(self)
+
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
 			is_sub_contracted_item, stock_uom, manufacture_uom, default_bom, last_purchase_rate, include_item_in_manufacturing

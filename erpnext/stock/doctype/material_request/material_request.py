@@ -74,6 +74,7 @@ class MaterialRequest(BuyingController):
 			"Partially Ordered", "Ordered", "Issued", "Transferred", "Received"])
 
 		validate_for_items(self)
+		self.set_alt_uom_qty()
 		self.calculate_totals()
 
 		self.set_title()
@@ -82,8 +83,11 @@ class MaterialRequest(BuyingController):
 		# Though the creation of Material Request from a Production Plan can be rethought to fix this
 
 	def calculate_totals(self):
-		self.total_qty = sum([d.qty for d in self.items])
+		self.total_qty = sum([flt(d.qty) for d in self.items])
 		self.total_qty = flt(self.total_qty, self.precision("total_qty"))
+
+		self.total_alt_uom_qty = sum([flt(d.alt_uom_qty) for d in self.items])
+		self.total_alt_uom_qty = flt(self.total_alt_uom_qty, self.precision("total_alt_uom_qty"))
 
 	def set_title(self):
 		'''Set title as comma separated list of items'''
