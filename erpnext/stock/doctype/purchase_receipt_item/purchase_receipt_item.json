@@ -830,6 +830,7 @@
    "fieldname": "expense_account",
    "fieldtype": "Link",
    "hidden": 1,
+   "ignore_user_permissions": 1,
    "label": "Expense Account",
    "options": "Account",
    "read_only": 1
@@ -1333,7 +1334,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-04 14:10:11.263237",
+ "modified": "2021-03-09 22:52:10.462352",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt Item",

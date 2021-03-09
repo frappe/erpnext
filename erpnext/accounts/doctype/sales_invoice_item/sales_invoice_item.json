@@ -482,6 +482,7 @@
   {
    "fieldname": "income_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Income Account",
    "oldfieldname": "income_account",
    "oldfieldtype": "Link",
@@ -494,6 +495,7 @@
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Expense Account",
    "options": "Account",
    "print_hide": 1,
@@ -529,6 +531,7 @@
    "depends_on": "enable_deferred_revenue",
    "fieldname": "deferred_revenue_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Deferred Revenue Account",
    "options": "Account"
   },
@@ -1338,7 +1341,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-04 14:41:46.718280",
+ "modified": "2021-03-09 22:46:20.286465",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

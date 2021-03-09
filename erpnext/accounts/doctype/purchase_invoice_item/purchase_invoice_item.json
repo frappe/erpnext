@@ -493,6 +493,7 @@
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Expense Account",
    "oldfieldname": "expense_head",
    "oldfieldtype": "Link",
@@ -539,6 +540,7 @@
    "depends_on": "enable_deferred_expense",
    "fieldname": "deferred_expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Deferred Expense Account",
    "options": "Account"
   },
@@ -1203,7 +1205,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-02-25 18:06:01.867148",
+ "modified": "2021-03-09 22:52:36.604602",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

@@ -625,6 +625,7 @@
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Expense Account",
    "no_copy": 1,
    "options": "Account",
@@ -1197,7 +1198,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-04 14:09:39.644164",
+ "modified": "2021-03-09 22:42:58.518384",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",

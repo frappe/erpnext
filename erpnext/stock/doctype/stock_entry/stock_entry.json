@@ -33,6 +33,7 @@
   "bom_no",
   "column_break_26",
   "fg_completed_qty",
+  "column_break_28",
   "scrap_qty",
   "cb1",
   "use_multi_level_bom",
@@ -678,12 +679,16 @@
    "fieldname": "auto_select_batches",
    "fieldtype": "Button",
    "label": "Auto Select Batches (FIFO)"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-03-08 14:38:00.919383",
+ "modified": "2021-03-09 22:31:57.450817",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

@@ -1028,6 +1028,7 @@
   {
    "fieldname": "cash_bank_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Cash/Bank Account",
    "options": "Account"
   },
@@ -1096,6 +1097,7 @@
    "depends_on": "eval:flt(doc.write_off_amount)!=0",
    "fieldname": "write_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Write Off Account",
    "options": "Account",
    "print_hide": 1
@@ -1769,7 +1771,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-02-27 10:46:08.203472",
+ "modified": "2021-03-09 22:54:30.322220",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

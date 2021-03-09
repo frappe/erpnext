@@ -929,6 +929,7 @@
    "depends_on": "redeem_loyalty_points",
    "fieldname": "loyalty_redemption_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Redemption Account",
    "no_copy": 1,
    "options": "Account"
@@ -1168,6 +1169,7 @@
    "fieldname": "cash_bank_account",
    "fieldtype": "Link",
    "hidden": 1,
+   "ignore_user_permissions": 1,
    "label": "Cash/Bank Account",
    "oldfieldname": "cash_bank_account",
    "oldfieldtype": "Link",
@@ -1241,6 +1243,7 @@
    "depends_on": "is_pos",
    "fieldname": "account_for_change_amount",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Account for Change Amount",
    "options": "Account",
    "print_hide": 1
@@ -1287,6 +1290,7 @@
   {
    "fieldname": "write_off_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Write Off Account",
    "options": "Account",
    "print_hide": 1
@@ -2172,7 +2176,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-03-08 14:36:33.796728",
+ "modified": "2021-03-09 22:47:51.789481",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
