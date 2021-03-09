@@ -132,6 +132,7 @@ class WorkOrder(Document):
 	def calculate_total_cost(self):
 		bom_cost, bom_qty = frappe.db.get_value("BOM", self.bom_no, ["base_total_cost", "quantity"])
 		self.total_cost = bom_cost * self.qty / bom_qty
+		self.total_raw_material_qty = sum([d.required_qty for d in self.required_items])
 		
 	def validate_work_order_against_so(self):
 		# already ordered qty
@@ -465,6 +466,7 @@ class WorkOrder(Document):
 	def get_items_and_operations_from_bom(self):
 		self.set_required_items()
 		self.set_work_order_operations()
+		self.calculate_total_cost()
 
 		return check_if_scrap_warehouse_mandatory(self.bom_no)
 

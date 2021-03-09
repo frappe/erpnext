@@ -188,6 +188,7 @@ frappe.ui.form.on('Material Request', {
 					$.each(r.message, function(k, v) {
 						if(!d[k]) d[k] = v;
 					});
+					frm.cscript.calculate_total_qty();
 				}
 			}
 		});
@@ -342,6 +343,10 @@ frappe.ui.form.on("Material Request Item", {
 		frm.events.get_item_data(frm, item);
 	},
 
+	items_remove: function (frm) {
+		frm.cscript.calculate_total_qty();
+	},
+
 	schedule_date: function(frm, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if (row.schedule_date) {
@@ -416,6 +421,12 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		} else {
 			this.frm.script_manager.copy_from_first_row("items", row, ["schedule_date"]);
 		}
+	},
+
+	calculate_total_qty: function () {
+		var total_qty = frappe.utils.sum((this.frm.doc.items || []).map(d => flt(d.qty)));
+		total_qty = flt(total_qty, precision('total_qty'));
+		this.frm.set_value("total_qty", total_qty);
 	},
 
 	items_on_form_rendered: function() {
