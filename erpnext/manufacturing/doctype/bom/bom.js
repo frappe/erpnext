@@ -219,7 +219,7 @@ erpnext.bom.BomController = erpnext.TransactionController.extend({
 			child.bom_no = '';
 		}
 
-		get_bom_material_detail(doc, cdt, cdn, scrap_items);
+		get_bom_material_detail(doc, cdt, cdn, scrap_items, true);
 	},
 
 	buying_price_list: function(doc) {
@@ -261,7 +261,7 @@ cur_frm.cscript.is_default = function(doc) {
 	if (doc.is_default) cur_frm.set_value("is_active", 1);
 };
 
-var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
+var get_bom_material_detail= function(doc, cdt, cdn, scrap_items, item_changed) {
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return frappe.call({
@@ -273,10 +273,10 @@ var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
 				"scrap_items": scrap_items,
 				'qty': d.qty,
 				"stock_qty": d.stock_qty,
-				"include_item_in_manufacturing": d.include_item_in_manufacturing,
-				"uom": d.uom,
-				"stock_uom": d.stock_uom,
-				"conversion_factor": d.conversion_factor
+				"include_item_in_manufacturing": item_changed ? null : d.include_item_in_manufacturing,
+				"uom": item_changed ? null : d.uom,
+				"stock_uom": item_changed ? null : d.stock_uom,
+				"conversion_factor": item_changed ? null : d.conversion_factor
 			},
 			callback: function(r) {
 				d = locals[cdt][cdn];
