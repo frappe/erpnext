@@ -591,6 +591,7 @@ frappe.ui.form.on('Stock Entry', {
 
 	add_to_transit: function(frm) {
 		if(frm.doc.add_to_transit && frm.doc.purpose=='Material Transfer') {
+			frm.set_value('to_warehouse', '');
 			frm.set_value('stock_entry_type', 'Material Transfer');
 			frm.fields_dict.to_warehouse.get_query = function() {
 				return {
@@ -601,7 +602,15 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				};
 			};
-			frappe.db.get_value('Company', frm.doc.company, 'default_in_transit_warehouse', (r) => {
+			frm.trigger('set_tansit_warehouse');
+		}
+	},
+
+	set_tansit_warehouse: function(frm) {
+		if(frm.doc.add_to_transit && frm.doc.purpose == 'Material Transfer' && !frm.doc.to_warehouse) {
+			let dt = frm.doc.from_warehouse ? 'Warehouse' : 'Company';
+			let dn = frm.doc.from_warehouse ? frm.doc.from_warehouse : frm.doc.company;
+			frappe.db.get_value(dt, dn, 'default_in_transit_warehouse', (r) => {
 				if (r.default_in_transit_warehouse) {
 					frm.set_value('to_warehouse', r.default_in_transit_warehouse);
 				}
@@ -968,6 +977,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 	},
 
 	from_warehouse: function(doc) {
+		this.frm.trigger('set_tansit_warehouse');
 		this.set_warehouse_in_children(doc.items, "s_warehouse", doc.from_warehouse);
 	},
 
