@@ -560,7 +560,7 @@ class TestSalesOrder(unittest.TestCase):
 		})
 		new_item_with_tax.save()
 
-		tax_template = "_Test Account Excise Duty @ 10"
+		tax_template = "_Test Account Excise Duty @ 10 - _TC"
 		item =  "_Test Item Home Desktop 100"
 		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
 			item_doc = frappe.get_doc("Item", item)
