@@ -8,6 +8,7 @@ from frappe.utils import cint
 from erpnext.stock.utils import update_included_uom_in_dict_report
 from erpnext.accounts.party import set_party_name_in_list
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
+from frappe.desk.reportview import build_match_conditions
 from six import iteritems
 
 def execute(filters=None):
@@ -138,7 +139,7 @@ def get_columns(filters, item_details, show_amounts=True, show_item_name=True):
 def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
-		item_conditions_sql = 'and sle.item_code in ({})'\
+		item_conditions_sql = 'and item_code in ({})'\
 			.format(', '.join([frappe.db.escape(i) for i in items]))
 
 	return frappe.db.sql("""select concat_ws(" ", posting_date, posting_time) as date,
@@ -146,7 +147,7 @@ def get_stock_ledger_entries(filters, items):
 			stock_value, voucher_type, voucher_no, batch_no, serial_no, company, project, stock_value_difference,
 			party_type, party,
 			batch_qty_after_transaction, batch_stock_value, batch_valuation_rate
-		from `tabStock Ledger Entry` sle
+		from `tabStock Ledger Entry`
 		where company = %(company)s and
 			posting_date between %(from_date)s and %(to_date)s
 			{sle_conditions}
@@ -221,6 +222,10 @@ def get_sle_conditions(filters):
 		conditions.append("party_type=%(party_type)s")
 	if filters.get("party"):
 		conditions.append("party=%(party)s")
+
+	match_conditions = build_match_conditions("Stock Ledger Entry")
+	if match_conditions:
+		conditions.append(match_conditions)
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 

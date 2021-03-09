@@ -86,7 +86,7 @@
    "options": "\nNo\nYes"
   }
  ],
- "modified": "2021-01-15 15:35:10.565651",
+ "modified": "2021-03-09 17:52:09.461514",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",
@@ -136,6 +136,12 @@
    "report": 1,
    "role": "Stock User",
    "share": 1
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
   }
  ],
  "quick_entry": 1,

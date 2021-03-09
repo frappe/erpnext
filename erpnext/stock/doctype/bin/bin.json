@@ -166,7 +166,7 @@
  "hide_toolbar": 1,
  "idx": 1,
  "in_create": 1,
- "modified": "2020-03-03 15:34:45.778855",
+ "modified": "2021-03-09 18:49:56.821514",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Bin",
@@ -174,6 +174,7 @@
  "permissions": [
   {
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -181,6 +182,7 @@
   },
   {
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
@@ -188,10 +190,19 @@
   },
   {
    "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Manufacturing User"
   }
  ],
  "quick_entry": 1,

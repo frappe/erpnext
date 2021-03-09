@@ -222,8 +222,8 @@
  "icon": "icon-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-12-31 14:42:48.698728",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2021-03-09 17:51:00.686951",
+ "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
  "owner": "Administrator",
@@ -240,6 +240,10 @@
   {
    "read": 1,
    "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "role": "Manufacturing User"
   }
  ],
  "quick_entry": 1,

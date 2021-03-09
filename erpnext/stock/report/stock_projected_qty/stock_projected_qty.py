@@ -7,6 +7,7 @@ from frappe import _, scrub
 from frappe.utils import flt, today, cint
 from frappe.desk.query_report import group_report_data
 from erpnext.stock.utils import update_included_uom_in_dict_report
+from frappe.desk.reportview import build_match_conditions
 
 def execute(filters=None):
 	show_item_name = frappe.defaults.get_global_default('item_naming_by') != "Item Name"
@@ -163,12 +164,16 @@ def get_bin_list(filters):
 
 		if warehouse_details:
 			conditions.append(" exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and bin.warehouse = wh.name)"%(warehouse_details.lft,
+				where wh.lft >= %s and wh.rgt <= %s and tabBin.warehouse = wh.name)"%(warehouse_details.lft,
 				warehouse_details.rgt))
+
+	match_conditions = build_match_conditions("Bin")
+	if match_conditions:
+		conditions.append(match_conditions)
 
 	bin_list = frappe.db.sql("""select item_code, warehouse, actual_qty, planned_qty, indented_qty,
 		ordered_qty, reserved_qty, reserved_qty_for_production, reserved_qty_for_sub_contract, projected_qty
-		from tabBin bin {conditions} order by item_code, warehouse
+		from tabBin {conditions} order by item_code, warehouse
 		""".format(conditions=" where " + " and ".join(conditions) if conditions else ""), as_dict=1)
 
 	return bin_list

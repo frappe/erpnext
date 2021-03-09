@@ -9,6 +9,7 @@ from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condit
 from erpnext.stock.doctype.item.item import convert_item_uom_for
 from six import iteritems, string_types
 from frappe.model.meta import get_field_precision
+from frappe.desk.reportview import build_match_conditions
 import json
 
 
@@ -226,6 +227,10 @@ def get_price_lists(filters):
 		conditions.append("selling = 1")
 	elif filters.buying_selling == "Buying":
 		conditions.append("buying = 1")
+
+	match_conditions = build_match_conditions("Price List")
+	if match_conditions:
+		conditions.append(match_conditions)
 
 	conditions = " and ".join(conditions)
 

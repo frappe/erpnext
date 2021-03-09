@@ -7,6 +7,7 @@ from frappe import _
 from frappe.utils import flt, cint, getdate, now, date_diff
 from erpnext.stock.utils import update_included_uom_in_dict_report
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
+from frappe.desk.reportview import build_match_conditions
 
 from erpnext.stock.report.stock_ageing.stock_ageing import get_fifo_queue, get_average_age
 
@@ -176,7 +177,7 @@ def get_conditions(filters):
 		frappe.throw(_("'From Date' is required"))
 
 	if filters.get("to_date"):
-		conditions += " and sle.posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
+		conditions += " and posting_date <= %s" % frappe.db.escape(filters.get("to_date"))
 	else:
 		frappe.throw(_("'To Date' is required"))
 
@@ -185,32 +186,36 @@ def get_conditions(filters):
 			filters.get("warehouse"), ["lft", "rgt"], as_dict=1)
 		if warehouse_details:
 			conditions += " and exists (select name from `tabWarehouse` wh \
-				where wh.lft >= %s and wh.rgt <= %s and sle.warehouse = wh.name)"%(warehouse_details.lft,
+				where wh.lft >= %s and wh.rgt <= %s and `tabStock Ledger Entry`.warehouse = wh.name)"%(warehouse_details.lft,
 				warehouse_details.rgt)
 
 	if filters.get("warehouse_type") and not filters.get("warehouse"):
 		conditions += " and exists (select name from `tabWarehouse` wh \
-			where wh.warehouse_type = '%s' and sle.warehouse = wh.name)"%(filters.get("warehouse_type"))
+			where wh.warehouse_type = '%s' and `tabStock Ledger Entry`.warehouse = wh.name)"%(filters.get("warehouse_type"))
+
+	match_conditions = build_match_conditions("Stock Ledger Entry")
+	if match_conditions:
+		conditions += " and {0}".format(match_conditions)
 
 	return conditions
 
 def get_stock_ledger_entries(filters, items):
 	item_conditions_sql = ''
 	if items:
-		item_conditions_sql = ' and sle.item_code in ({})'\
+		item_conditions_sql = ' and item_code in ({})'\
 			.format(', '.join([frappe.db.escape(i, percent=False) for i in items]))
 
 	conditions = get_conditions(filters)
 
 	return frappe.db.sql("""
 		select
-			sle.item_code, warehouse, sle.posting_date, sle.actual_qty, sle.valuation_rate,
-			sle.company, sle.voucher_type, sle.qty_after_transaction, sle.stock_value_difference,
-			sle.item_code as name, sle.voucher_no
+			item_code, warehouse, posting_date, actual_qty, valuation_rate,
+			company, voucher_type, qty_after_transaction, stock_value_difference,
+			item_code as name, voucher_no
 		from
-			`tabStock Ledger Entry` sle force index (posting_sort_index)
-		where sle.docstatus < 2 %s %s
-		order by sle.posting_date, sle.posting_time, sle.creation, sle.actual_qty""" % #nosec
+			`tabStock Ledger Entry` force index (posting_sort_index)
+		where docstatus < 2 %s %s
+		order by posting_date, posting_time, creation, actual_qty""" % #nosec
 		(item_conditions_sql, conditions), as_dict=1)
 
 def get_item_warehouse_map(filters, sle):

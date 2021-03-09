@@ -7,7 +7,7 @@
  "doctype": "Report",
  "idx": 27,
  "is_standard": "Yes",
- "modified": "2020-10-03 14:32:31.606307",
+ "modified": "2021-03-09 18:36:24.647094",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Balance",
@@ -27,7 +27,13 @@
    "role": "Sales User"
   },
   {
+   "role": "Sales User (Read Only)"
+  },
+  {
    "role": "Purchase User"
+  },
+  {
+   "role": "Manufacturing User"
   }
  ]
 }

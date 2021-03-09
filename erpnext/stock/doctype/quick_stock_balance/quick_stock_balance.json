@@ -77,6 +77,7 @@
    "fieldname": "value",
    "fieldtype": "Currency",
    "label": "Stock Value",
+   "permlevel": 1,
    "read_only": 1
   },
   {
@@ -97,7 +98,7 @@
  ],
  "hide_toolbar": 1,
  "issingle": 1,
- "modified": "2020-03-03 15:36:37.402843",
+ "modified": "2021-03-09 18:54:59.236622",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quick Stock Balance",
@@ -125,6 +126,36 @@
    "read": 1,
    "role": "Stock Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "Manufacturing User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Accounts Manager",
+   "write": 1
+  },
+  {
+   "permlevel": 1,
+   "read": 1,
+   "role": "Accounts Manager",
    "write": 1
   }
  ],
