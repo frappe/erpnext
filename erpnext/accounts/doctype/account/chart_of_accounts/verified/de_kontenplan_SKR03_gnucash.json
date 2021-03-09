@@ -63,17 +63,21 @@
 					"Gewinnermittlung \u00a74/3 nicht Ergebniswirksam": {
 						"account_number": "1371"
 					},
-					"Abziehbare VSt. 7%": {
-						"account_number": "1571"
-					},
-					"Abziehbare VSt. 19%": {
-						"account_number": "1576"
-					},
-					"Abziehbare VStr. nach \u00a713b UStG 19%": {
-						"account_number": "1577"
-					},
-					"Leistungen \u00a713b UStG 19% Vorsteuer, 19% Umsatzsteuer": {
-						"account_number": "3120"
+					"Abziehbare Vorsteuer": {
+						"account_type": "Tax",
+						"is_group": 1,
+						"Abziehbare Vorsteuer 7%": {
+							"account_number": "1571"
+						},
+						"Abziehbare Vorsteuer 19%": {
+							"account_number": "1576"
+						},
+						"Abziehbare Vorsteuer nach \u00a713b UStG 19%": {
+							"account_number": "1577"
+						},
+						"Leistungen \u00a713b UStG 19% Vorsteuer, 19% Umsatzsteuer": {
+							"account_number": "3120"
+						}
 					}
 				},
 				"III. Wertpapiere": {
@@ -196,6 +200,7 @@
 					},
 					"Umsatzsteuer": {
 						"is_group": 1,
+						"account_type": "Tax",
 						"Umsatzsteuer 7%": {
 							"account_number": "1771"
 						},
