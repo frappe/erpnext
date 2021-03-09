@@ -131,6 +131,10 @@ def mark_bulk_attendance(data):
 		data = json.loads(data)
 	data = frappe._dict(data)
 	company = frappe.get_value('Employee', data.employee, 'company')
+	if not data.unmarked_days:
+		frappe.throw(_("Please select a date."))
+		return
+
 	for date in data.unmarked_days:
 		doc_dict = {
 			'doctype': 'Attendance',
