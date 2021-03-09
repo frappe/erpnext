@@ -124,6 +124,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Qty Consumed Per Unit",
+   "precision": "6",
    "read_only": 1
   },
   {
@@ -159,7 +160,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:09.641354",
+ "modified": "2021-03-09 13:09:43.587885",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Explosion Item",

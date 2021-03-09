@@ -22,26 +22,35 @@
   "quantity_and_warehouse",
   "qty",
   "uom",
+  "column_break_17",
   "conversion_factor",
+  "stock_qty",
   "stock_uom",
-  "warehouse",
   "col_break2",
+  "alt_uom_qty",
+  "alt_uom_size",
+  "alt_uom",
+  "warehouse_and_rate_section",
+  "warehouse",
   "schedule_date",
+  "column_break_25",
   "rate",
   "amount",
-  "stock_qty",
+  "planning_section",
+  "actual_qty",
+  "projected_qty",
+  "column_break_34",
+  "received_qty",
+  "ordered_qty",
+  "column_break_37",
+  "min_order_qty",
   "more_info",
-  "lead_time_date",
   "sales_order",
   "sales_order_item",
+  "col_break3",
   "production_plan",
   "material_request_plan_item",
-  "col_break3",
-  "min_order_qty",
-  "projected_qty",
-  "actual_qty",
-  "ordered_qty",
-  "received_qty",
+  "lead_time_date",
   "accounting_details",
   "expense_account",
   "accounting_dimensions_section",
@@ -59,6 +68,7 @@
    "fieldtype": "Link",
    "in_global_search": 1,
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Item Code",
    "oldfieldname": "item_code",
    "oldfieldtype": "Link",
@@ -110,7 +120,7 @@
   {
    "fieldname": "quantity_and_warehouse",
    "fieldtype": "Section Break",
-   "label": "Quantity and Warehouse"
+   "label": "Quantity"
   },
   {
    "columns": 1,
@@ -159,6 +169,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "For Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
@@ -176,6 +187,7 @@
    "fieldname": "schedule_date",
    "fieldtype": "Date",
    "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Required Date",
    "oldfieldname": "schedule_date",
    "oldfieldtype": "Date",
@@ -213,6 +225,7 @@
   {
    "fieldname": "item_group",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Item Group",
    "oldfieldname": "item_group",
    "oldfieldtype": "Link",
@@ -224,6 +237,7 @@
   {
    "fieldname": "brand",
    "fieldtype": "Link",
+   "hidden": 1,
    "label": "Brand",
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
@@ -316,7 +330,7 @@
   {
    "fieldname": "actual_qty",
    "fieldtype": "Float",
-   "label": "Actual Qty",
+   "label": "In Stock",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1,
@@ -325,7 +339,7 @@
   {
    "fieldname": "ordered_qty",
    "fieldtype": "Float",
-   "label": "Completed Qty",
+   "label": "Ordered Qty",
    "no_copy": 1,
    "oldfieldname": "ordered_qty",
    "oldfieldtype": "Currency",
@@ -333,6 +347,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_details",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
@@ -340,6 +355,7 @@
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Expense Account",
    "options": "Account",
    "print_hide": 1
@@ -391,6 +407,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
    "label": "Manufacture"
@@ -409,11 +426,62 @@
    "fieldname": "manufacturer_part_no",
    "fieldtype": "Data",
    "label": "Manufacturer Part Number"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "warehouse_and_rate_section",
+   "fieldtype": "Section Break",
+   "label": "Warehouse and Rate"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "alt_uom",
+   "fieldname": "alt_uom_qty",
+   "fieldtype": "Float",
+   "label": "Contents Qty",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "alt_uom",
+   "fieldname": "alt_uom_size",
+   "fieldtype": "Float",
+   "label": "Per Unit",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "alt_uom",
+   "fieldname": "alt_uom",
+   "fieldtype": "Link",
+   "label": "Contents UOM",
+   "options": "UOM",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "planning_section",
+   "fieldtype": "Section Break",
+   "label": "Planning"
+  },
+  {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_37",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-10-09 23:48:11.164435",
+ "modified": "2021-03-09 15:43:37.457799",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

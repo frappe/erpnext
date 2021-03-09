@@ -394,8 +394,12 @@ erpnext.bom.calculate_total = function(doc) {
 	var base_total_cost = flt(doc.base_operating_cost) + flt(doc.base_raw_material_cost)
 		- flt(doc.base_scrap_material_cost);
 
+	var total_raw_material_qty = frappe.utils.sum((doc.items || []).map(d => flt(d.qty)));
+	total_raw_material_qty = flt(total_raw_material_qty, precision('total_raw_material_qty'));
+
 	cur_frm.set_value("total_cost", total_cost);
 	cur_frm.set_value("base_total_cost", base_total_cost);
+	cur_frm.set_value("total_raw_material_qty", total_raw_material_qty);
 };
 
 cur_frm.cscript.validate = function(doc) {

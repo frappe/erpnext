@@ -1172,23 +1172,25 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			refresh_field("stock_qty", item.name, item.parentfield);
 			this.toggle_conversion_factor(item);
 
-			if(doc.doctype != "Material Request") {
-				item.total_weight = flt(item.stock_qty * item.weight_per_unit);
-				refresh_field("total_weight", item.name, item.parentfield);
-				this.calculate_net_weight();
-			}
-
-			if (!dont_fetch_price_list_rate &&
-				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
-				this.apply_price_list(item, true);
-			}
-
 			if(frappe.meta.get_docfield(cdt, "alt_uom_size", cdn)) {
 				if (!item.alt_uom) {
 					item.alt_uom_size = 1.0
 				}
 				item.alt_uom_qty = flt(item.qty * item.conversion_factor * item.alt_uom_size, precision("alt_uom_qty", item));
 				refresh_field("alt_uom_qty", item.name, item.parentfield);
+			}
+
+			if(doc.doctype != "Material Request") {
+				item.total_weight = flt(item.stock_qty * item.weight_per_unit);
+				refresh_field("total_weight", item.name, item.parentfield);
+				this.calculate_net_weight();
+			} else {
+				this.calculate_total_qty();
+			}
+
+			if (!dont_fetch_price_list_rate &&
+				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
+				this.apply_price_list(item, true);
 			}
 		}
 	},

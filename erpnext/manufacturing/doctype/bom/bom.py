@@ -92,6 +92,9 @@ class BOM(WebsiteGenerator):
 		self.validate_bom_links()
 		self.manage_default_bom()
 
+	def before_print(self):
+		self.company_address_doc = erpnext.get_company_address(self)
+
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
 			is_sub_contracted_item, stock_uom, manufacture_uom, default_bom, last_purchase_rate, include_item_in_manufacturing
@@ -174,8 +177,8 @@ class BOM(WebsiteGenerator):
  			 'conversion_factor': args.get('conversion_factor') or 1,
 			 'bom_no'		: args['bom_no'],
 			 'rate'			: rate,
-			 'qty'			: args.get("qty") or args.get("stock_qty") or 1,
-			 'stock_qty'	: args.get("qty") or args.get("stock_qty") or 1,
+			 'qty'			: flt(args.get("qty")) or flt(args.get("stock_qty")) or 1,
+			 'stock_qty'	: flt(args.get("stock_qty")) or flt(args.get("qty")) or 1,
 			 'base_rate'	: flt(rate) * (flt(self.conversion_rate) or 1),
 			 'include_item_in_manufacturing': cint(args['transfer_for_manufacture']) or 0
 		}
@@ -473,6 +476,8 @@ class BOM(WebsiteGenerator):
 		self.calculate_sm_cost()
 		self.total_cost = self.operating_cost + self.raw_material_cost - self.scrap_material_cost
 		self.base_total_cost = self.base_operating_cost + self.base_raw_material_cost - self.base_scrap_material_cost
+		self.total_raw_material_qty = sum([d.qty for d in self.items])
+		self.total_raw_material_qty = flt(self.total_raw_material_qty, self.precision("total_raw_material_qty"))
 
 	def calculate_op_cost(self):
 		"""Update workstation rate and calculates totals"""

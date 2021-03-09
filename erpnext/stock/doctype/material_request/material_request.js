@@ -130,6 +130,10 @@ frappe.ui.form.on('Material Request', {
 		}
 	},
 
+	schedule_date: function(frm) {
+		set_schedule_date(frm);
+	},
+
 	update_status: function(frm, stop_status) {
 		frappe.call({
 			method: 'erpnext.stock.doctype.material_request.material_request.update_status',
@@ -173,6 +177,7 @@ frappe.ui.form.on('Material Request', {
 					currency: frappe.defaults.get_default('Currency'),
 					name: frm.doc.name,
 					qty: item.qty || 1,
+					uom: item.uom,
 					stock_qty: item.stock_qty,
 					company: frm.doc.company,
 					conversion_rate: 1,
@@ -188,6 +193,7 @@ frappe.ui.form.on('Material Request', {
 					$.each(r.message, function(k, v) {
 						if(!d[k]) d[k] = v;
 					});
+					frm.cscript.calculate_total_qty();
 				}
 			}
 		});
@@ -338,8 +344,11 @@ frappe.ui.form.on("Material Request Item", {
 	item_code: function(frm, doctype, name) {
 		const item = locals[doctype][name];
 		item.rate = 0;
-		set_schedule_date(frm);
 		frm.events.get_item_data(frm, item);
+	},
+
+	items_remove: function (frm) {
+		frm.cscript.calculate_total_qty();
 	},
 
 	schedule_date: function(frm, cdt, cdn) {
@@ -418,20 +427,26 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 		}
 	},
 
-	items_on_form_rendered: function() {
-		set_schedule_date(this.frm);
-	},
+	calculate_total_qty: function () {
+		var total_qty = frappe.utils.sum((this.frm.doc.items || []).map(d => flt(d.qty)));
+		total_qty = flt(total_qty, precision('total_qty'));
 
-	schedule_date: function() {
-		set_schedule_date(this.frm);
-	}
+		var total_alt_uom_qty = frappe.utils.sum((this.frm.doc.items || []).map(d => flt(d.alt_uom_qty)));
+		total_alt_uom_qty = flt(total_alt_uom_qty, precision('total_alt_uom_qty'));
+
+		this.frm.set_value("total_qty", total_qty);
+		this.frm.set_value("total_alt_uom_qty", total_alt_uom_qty);
+	},
 });
 
 // for backward compatibility: combine new and previous states
 $.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 
 function set_schedule_date(frm) {
-	if(frm.doc.schedule_date){
-		erpnext.utils.copy_value_in_all_rows(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
+	if (frm.doc.schedule_date) {
+		$.each(frm.doc.items || [], function (i, d) {
+			d.schedule_date = frm.doc.schedule_date;
+		});
+		refresh_field("items");
 	}
 }
