@@ -3,6 +3,10 @@ import frappe
 
 
 def execute():
+	frappe.reload_doctype("BOM")
+	frappe.reload_doctype("Work Order")
+	frappe.reload_doctype("Material Request")
+
 	bom = dict(frappe.db.sql("""
 		select parent, sum(qty)
 		from `tabBOM Item`
