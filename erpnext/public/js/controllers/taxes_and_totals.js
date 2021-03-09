@@ -158,16 +158,18 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		let me = this;
 		frappe.flags.round_off_applicable_accounts = [];
 
-		return frappe.call({
-			"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
-			"args": {
-				"company": me.frm.doc.company,
-				"account_list": frappe.flags.round_off_applicable_accounts
-			},
-			callback: function(r) {
-				frappe.flags.round_off_applicable_accounts.push(...r.message);
-			}
-		});
+		if (me.frm.doc.company) {
+			return frappe.call({
+				"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
+				"args": {
+					"company": me.frm.doc.company,
+					"account_list": frappe.flags.round_off_applicable_accounts
+				},
+				callback: function(r) {
+					frappe.flags.round_off_applicable_accounts.push(...r.message);
+				}
+			});
+		}
 	},
 
 	determine_exclusive_rate: function() {

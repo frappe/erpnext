@@ -1,12 +1,12 @@
 erpnext.setup_einvoice_actions = (doctype) => {
 	frappe.ui.form.on(doctype, {
-		refresh(frm) {
-			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
+		async refresh(frm) {
+			const einvoicing_enabled = await frappe.db.get_single_value("E Invoice Settings", "enable");
 			const supply_type = frm.doc.gst_category;
 			const valid_supply_type = ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type);
 			const company_transaction = frm.doc.billing_address_gstin == frm.doc.company_gstin;
 
-			if (!einvoicing_enabled || !valid_supply_type || company_transaction) return;
+			if (cint(einvoicing_enabled) == 0 || !valid_supply_type || company_transaction) return;
 
 			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
 
@@ -83,7 +83,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				const action = () => {
 					const d = new frappe.ui.Dialog({
 						title: __('Generate E-Way Bill'),
-						wide: 1,
+						size: "large",
 						fields: get_ewaybill_fields(frm),
 						primary_action: function() {
 							const data = d.get_values();
@@ -252,7 +252,7 @@ const request_irn_generation = (frm) => {
 const get_preview_dialog = (frm, action) => {
 	const dialog = new frappe.ui.Dialog({
 		title: __("Preview"),
-		wide: 1,
+		size: "large",
 		fields: [
 			{ 
 				"label": "Preview",
