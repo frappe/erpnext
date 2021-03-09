@@ -455,6 +455,10 @@ class PaymentEntry(AccountsController):
 					.format(total_negative_outstanding), InvalidPaymentEntry)
 
 	def set_title(self):
+		if frappe.flags.in_import and self.title:
+			# do not set title dynamically if title exists during data import.
+			return
+
 		if self.payment_type in ("Receive", "Pay"):
 			self.title = self.party
 		else:
@@ -996,7 +1000,7 @@ def get_amounts_based_on_ref_doc(reference_doctype, ref_doc, party_account_curre
 			total_amount = flt(ref_doc.total_sanctioned_amount) + flt(ref_doc.total_taxes_and_charges)
 	elif ref_doc.doctype == "Employee Advance":
 		total_amount, exchange_rate = get_total_amount_exchange_rate_for_employee_advance(party_account_currency, ref_doc)
-		
+
 	if not total_amount:
 		total_amount, exchange_rate = get_total_amount_exchange_rate_base_on_currency(
 			party_account_currency, company_currency, ref_doc)
