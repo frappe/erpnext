@@ -49,6 +49,7 @@ frappe.ui.form.on('Patient', {
 		if(!frm.doc.dob){
 			$(frm.fields_dict['age_html'].wrapper).html('');
 		}
+		
 		if(frm.doc.dob){
 			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${get_age(frm.doc.dob)}`);
 		}
