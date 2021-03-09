@@ -506,7 +506,8 @@ class SalarySlip(TransactionBase):
 			return amount
 
 		except NameError as err:
-			frappe.throw(_("Name error: {0}").format(err))
+			frappe.throw(_("{0} <br> This error can be due to missing or deleted field.").format(err),
+			    title=_("Name error"))
 		except SyntaxError as err:
 			frappe.throw(_("Syntax error in formula or condition: {0}").format(err))
 		except Exception as e:
@@ -930,7 +931,8 @@ class SalarySlip(TransactionBase):
 			if condition:
 				return frappe.safe_eval(condition, self.whitelisted_globals, data)
 		except NameError as err:
-			frappe.throw(_("Name error: {0}").format(err))
+			frappe.throw(_("{0} <br> This error can be due to missing or deleted field.").format(err),
+			    title=_("Name error"))
 		except SyntaxError as err:
 			frappe.throw(_("Syntax error in condition: {0}").format(err))
 		except Exception as e:
