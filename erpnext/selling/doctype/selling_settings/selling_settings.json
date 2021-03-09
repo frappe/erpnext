@@ -140,7 +140,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 12:12:56.784014",
+ "modified": "2021-03-02 17:35:53.603607",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -157,5 +157,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

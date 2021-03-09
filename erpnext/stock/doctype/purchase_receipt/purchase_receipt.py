@@ -324,10 +324,12 @@ class PurchaseReceipt(BuyingController):
 						else:
 							loss_account = self.get_company_default("default_expense_account")
 
+						cost_center = d.cost_center or frappe.get_cached_value("Company", self.company, "cost_center")
+
 						gl_entries.append(self.get_gl_dict({
 							"account": loss_account,
 							"against": warehouse_account[d.warehouse]["account"],
-							"cost_center": d.cost_center,
+							"cost_center": cost_center,
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": divisional_loss,
 							"project": d.project

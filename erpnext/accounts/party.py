@@ -617,6 +617,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 		FROM `tabGL Entry`
 		WHERE
 			party_type = %s and against_voucher is null
+			and is_cancelled = 0
 			and {1} GROUP BY party"""
 		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
 
