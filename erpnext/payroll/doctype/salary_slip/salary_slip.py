@@ -19,6 +19,7 @@ from erpnext.payroll.doctype.employee_benefit_application.employee_benefit_appli
 from erpnext.payroll.doctype.employee_benefit_claim.employee_benefit_claim import get_benefit_claim_amount, get_last_payroll_period_benefits
 from erpnext.loan_management.doctype.loan_repayment.loan_repayment import calculate_amounts, create_repayment_entry
 from erpnext.accounts.utils import get_fiscal_year
+from six import iteritems
 
 class SalarySlip(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -53,6 +54,7 @@ class SalarySlip(TransactionBase):
 		self.compute_year_to_date()
 		self.compute_month_to_date()
 		self.compute_component_wise_year_to_date()
+		self.add_leave_balances()
 
 		if frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet"):
 			max_working_hours = frappe.db.get_single_value("Payroll Settings", "max_working_hours_against_timesheet")
@@ -1125,6 +1127,7 @@ class SalarySlip(TransactionBase):
 	#calculate total working hours, earnings based on hourly wages and totals
 	def calculate_total_for_salary_slip_based_on_timesheet(self):
 		if self.timesheets:
+			self.total_working_hours = 0
 			for timesheet in self.timesheets:
 				if timesheet.working_hours:
 					self.total_working_hours += timesheet.working_hours
@@ -1214,6 +1217,22 @@ class SalarySlip(TransactionBase):
 
 		return period_start_date, period_end_date
 
+	def add_leave_balances(self):
+		self.set('leave_details', [])
+
+		if frappe.db.get_single_value('Payroll Settings', 'show_leave_balances_in_salary_slip'):
+			from erpnext.hr.doctype.leave_application.leave_application import get_leave_details
+			leave_details = get_leave_details(self.employee, self.end_date)
+
+			for leave_type, leave_values in iteritems(leave_details['leave_allocation']):
+				self.append('leave_details', {
+					'leave_type': leave_type,
+					'total_allocated_leaves': flt(leave_values.get('total_leaves')),
+					'expired_leaves': flt(leave_values.get('expired_leaves')),
+					'used_leaves': flt(leave_values.get('leaves_taken')),
+					'pending_leaves': flt(leave_values.get('pending_leaves')),
+					'available_leaves': flt(leave_values.get('remaining_leaves'))
+				})
 
 def unlink_ref_doc_from_salary_slip(ref_no):
 	linked_ss = frappe.db.sql_list("""select name from `tabSalary Slip`
