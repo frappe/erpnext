@@ -109,9 +109,9 @@ def create_donation(donor, payment):
 	if not frappe.db.exists('Mode of Payment', payment.method):
 		create_mode_of_payment(payment.method)
 
-	donation = frappe.new_doc('Donation')
 	company = get_company_for_donations()
-	donation.update({
+	donation = frappe.get_doc({
+		'doctype': 'Donation',
 		'company': company,
 		'donor': donor.name,
 		'donor_name': donor.donor_name,
@@ -120,14 +120,11 @@ def create_donation(donor, payment):
 		'amount': flt(payment.amount),
 		'mode_of_payment': payment.method,
 		'razorpay_payment_id': payment.id
-	})
-
-	donation.flags.ignore_permissions = True
-	donation.flags.ignore_mandatory = True
-	donation.insert()
+	}).insert(ignore_mandatory=True, ignore_permissions=True)
 	donation.submit()
 
 	return donation
+
 
 def get_donor(email):
 	donors = frappe.get_all('Donor',

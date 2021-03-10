@@ -593,7 +593,7 @@ def make_custom_fields(update=True):
 				'fieldname': 'pan_number',
 				'label': 'PAN Details',
 				'fieldtype': 'Data',
-				'insert_after': 'email'
+				'insert_after': 'email_id'
 			}
 		],
 		'Donor': [

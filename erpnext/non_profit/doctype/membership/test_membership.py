@@ -98,8 +98,10 @@ def setup_membership():
 	settings.allow_invoicing = 1
 	settings.automate_membership_payment_entries = 1
 	settings.company = company.name
+	settings.donation_company = company.name
 	settings.membership_payment_account = company.default_cash_account
 	settings.membership_debit_account = company.default_receivable_account
+	settings.flags.ignore_mandatory = True
 	settings.save()
 
 	# make test plan
