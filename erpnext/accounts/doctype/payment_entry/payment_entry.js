@@ -927,7 +927,7 @@ frappe.ui.form.on('Payment Entry', {
 						if (!write_off_row.length && difference_amount) {
 							row = frm.add_child("deductions");
 							row.account = r.message[account];
-							row.cost_center = r.message["cost_center"];
+							row.cost_center = cur_frm.doc["cost_center"];
 						} else {
 							row = write_off_row[0];
 						}
