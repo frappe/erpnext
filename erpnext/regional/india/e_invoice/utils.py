@@ -16,8 +16,8 @@ import io
 from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.integrations.utils import make_post_request, make_get_request
-from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form
+from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply, validate_gstin_for_india
+from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
@@ -76,6 +76,9 @@ def get_transaction_details(invoice):
 	))
 
 def get_doc_details(invoice):
+	if getdate(invoice.posting_date) < getdate('2021-01-01'):
+		frappe.throw(_('IRN generation is not allowed for invoices dated before 1st Jan 2021'), title=_('Not Allowed'))
+
 	invoice_type = 'CRN' if invoice.is_return else 'INV'
 
 	invoice_name = invoice.name
@@ -87,35 +90,40 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def get_party_details(address_name):
-	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
-
-	if (not d.gstin
-		or not d.city
-		or not d.pincode
-		or not d.address_title
-		or not d.address_line1
-		or not d.gst_state_number):
+def validate_address_fields(addr):
+	if (not addr.gstin
+		or not addr.city
+		or not addr.pincode
+		or not addr.address_title
+		or not addr.address_line1
+		or not addr.gst_state_number):
 
 		frappe.throw(
 			msg=_('Address lines, city, pincode, gstin is mandatory for address {}. Please set them and try again.').format(
-				get_link_to_form('Address', address_name)
+				get_link_to_form('Address', addr.name)
 			),
 			title=_('Missing Address Fields')
 		)
+	
+	validate_gstin_for_india(addr, '')
 
-	if d.gst_state_number == 97:
+def get_party_details(address_name):
+	addr = frappe.get_doc('Address', address_name)
+	
+	validate_address_fields(addr)
+
+	if addr.gst_state_number == 97:
 		# according to einvoice standard
-		pincode = 999999
+		addr.pincode = 999999
 
 	return frappe._dict(dict(
-		gstin=d.gstin,
-		legal_name=sanitize_for_json(d.address_title),
-		location=sanitize_for_json(d.city),
-		pincode=d.pincode,
-		state_code=d.gst_state_number,
-		address_line1=sanitize_for_json(d.address_line1),
-		address_line2=sanitize_for_json(d.address_line2)
+		gstin=addr.gstin,
+		legal_name=sanitize_for_json(addr.address_title),
+		location=sanitize_for_json(addr.city),
+		pincode=addr.pincode,
+		state_code=addr.gst_state_number,
+		address_line1=sanitize_for_json(addr.address_line1),
+		address_line2=sanitize_for_json(addr.address_line2)
 	))
 
 def get_gstin_details(gstin):
@@ -280,6 +288,10 @@ def get_payment_details(invoice):
 	))
 
 def get_return_doc_reference(invoice):
+	if not invoice.return_against:
+		frappe.throw(_('For generating IRN, reference to the original invoice is mandatory for a credit note. Please set {} field to generate e-invoice.')
+			.format(frappe.bold('Return Against')), title=_('Missing Field'))
+
 	invoice_date = frappe.db.get_value('Sales Invoice', invoice.return_against, 'posting_date')
 	return frappe._dict(dict(
 		invoice_name=invoice.return_against, invoice_date=format_date(invoice_date, 'dd/mm/yyyy')
@@ -287,7 +299,11 @@ def get_return_doc_reference(invoice):
 
 def get_eway_bill_details(invoice):
 	if invoice.is_return:
-		frappe.throw(_('E-Way Bill cannot be generated for Credit Notes & Debit Notes'), title=_('E Invoice Validation Failed'))
+		frappe.throw(_('E-Way Bill cannot be generated for Credit Notes & Debit Notes. Please clear fields in the Transporter Section of the invoice.'),
+			title=_('Invalid Fields'))
+	
+	if not invoice.distance:
+		frappe.throw(_('Distance is mandatory for generating e-way bill for an e-invoice.'), title=_('Missing Field'))
 
 	mode_of_transport = { '': '', 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
 	vehicle_type = { 'Regular': 'R', 'Over Dimensional Cargo (ODC)': 'O' }
@@ -319,6 +335,36 @@ def validate_mandatory_fields(invoice):
 			title=_('Missing Fields')
 		)
 
+def validate_totals(einvoice):
+	item_list = einvoice['ItemList']
+	values_details = einvoice['ValDtls']
+
+	total_item_ass_value = 0
+	total_item_cgst_value = 0
+	total_item_sgst_value = 0
+	total_item_igst_value = 0
+	total_item_value = 0
+	for item in item_list:
+		total_item_ass_value += item['AssAmt']
+		total_item_cgst_value += item['CgstAmt']
+		total_item_sgst_value += item['SgstAmt']
+		total_item_igst_value += item['IgstAmt']
+		total_item_value += item['TotItemVal']
+
+		if abs(item['AssAmt'] * item['GstRate'] / 100) - (item['CgstAmt'] + item['SgstAmt'] + item['IgstAmt']) > 1:
+			frappe.throw(_('Row #{}: GST rate is invalid. Please remove zero rated / unallocated tax rows from taxes table.').format(item.idx))
+
+	if abs(value_details['AssVal'] - total_item_ass_value) > 1:
+		frappe.throw(_('Total Taxable Value of all the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
+
+	calculated_invoice_value = \
+			value_details['AssVal'] + value_details['CgstVal'] \
+			+ value_details['SgstVal'] + value_details['IgstVal'] \
+			+ value_details['OthChrg'] - value_details['Discount']
+
+	if abs(value_details['TotInvVal'] - calculated_invoice_value) > 1:
+		frappe.throw(_('Total Value of all the items is not equal to the Invoice Grand Total. Please check taxes / discounts for any correction.'))
+
 def make_einvoice(invoice):
 	validate_mandatory_fields(invoice)
 
@@ -348,7 +394,7 @@ def make_einvoice(invoice):
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 
-	if invoice.is_return and invoice.return_against:
+	if invoice.is_return:
 		prev_doc_details = get_return_doc_reference(invoice)
 
 	if invoice.transporter:
@@ -366,16 +412,7 @@ def make_einvoice(invoice):
 	)
 	einvoice = safe_json_load(einvoice)
 
-	validations = json.loads(read_json('einv_validation'))
-	errors = validate_einvoice(validations, einvoice)
-	if errors:
-		message = "\n".join([
-			"E Invoice: ", json.dumps(einvoice, indent=4),
-			"-" * 50,
-			"Errors: ", json.dumps(errors, indent=4)
-		])
-		frappe.log_error(title="E Invoice Validation Failed", message=message)
-		frappe.throw(errors, title=_('E Invoice Validation Failed'), as_list=1)
+	validate_totals(einvoice)
 
 	return einvoice
 
@@ -390,57 +427,6 @@ def safe_json_load(json_string):
 		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
 		snippet = json_string[start:end]
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
-
-def validate_einvoice(validations, einvoice, errors=[]):
-	for fieldname, field_validation in validations.items():
-		value = einvoice.get(fieldname, None)
-		if not value or value == "None":
-			# remove keys with empty values
-			einvoice.pop(fieldname, None)
-			continue
-
-		value_type = field_validation.get("type").lower()
-		if value_type in ['object', 'array']:
-			child_validations = field_validation.get('properties')
-
-			if isinstance(value, list):
-				for d in value:
-					validate_einvoice(child_validations, d, errors)
-					if not d:
-						# remove empty dicts
-						einvoice.pop(fieldname, None)
-			else:
-				validate_einvoice(child_validations, value, errors)
-				if not value:
-					# remove empty dicts
-					einvoice.pop(fieldname, None)
-			continue
-
-		# convert to int or str
-		if value_type == 'string':
-			einvoice[fieldname] = str(value)
-		elif value_type == 'number':
-			is_integer = '.' not in str(field_validation.get('maximum'))
-			precision = 3 if '.999' in str(field_validation.get('maximum')) else 2
-			einvoice[fieldname] = flt(value, precision) if not is_integer else cint(value)
-			value = einvoice[fieldname]
-
-		max_length = field_validation.get('maxLength')
-		minimum = flt(field_validation.get('minimum'))
-		maximum = flt(field_validation.get('maximum'))
-		pattern_str = field_validation.get('pattern')
-		pattern = re.compile(pattern_str or '')
-
-		label = field_validation.get('description') or fieldname
-
-		if value_type == 'string' and len(value) > max_length:
-			errors.append(_('{} should not exceed {} characters').format(label, max_length))
-		if value_type == 'number' and (value > maximum or value < minimum):
-			errors.append(_('{} {} should be between {} and {}').format(label, value, minimum, maximum))
-		if pattern_str and not pattern.match(value):
-			errors.append(field_validation.get('validationMsg'))
-
-	return errors
 
 class RequestFailed(Exception): pass
 
