@@ -82,7 +82,7 @@ class TestWorkOrder(unittest.TestCase):
 		wo_order.set_work_order_operations()
 		self.assertEqual(wo_order.planned_operating_cost, cost*2)
 
-	def test_resered_qty_for_partial_completion(self):
+	def test_reserved_qty_for_partial_completion(self):
 		item = "_Test Item"
 		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
 
@@ -109,7 +109,7 @@ class TestWorkOrder(unittest.TestCase):
 		s.submit()
 
 		bin1_at_completion = get_bin(item, warehouse)
-		
+
 		self.assertEqual(cint(bin1_at_completion.reserved_qty_for_production),
 			reserved_qty_on_submission - 1)
 
@@ -591,6 +591,38 @@ class TestWorkOrder(unittest.TestCase):
 			ste_doc.cancel()
 
 		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
+
+	def test_make_stock_entry_for_customer_provided_item(self):
+		item_name = 'CUST-0987'
+		make_item(item_name, {
+			'item_group': 'All Item Groups',
+			'stock_uom': 'Unit',
+			'is_purchase_item': 0,
+			'is_customer_provided_item': 1,
+			'customer': '_Test Customer'
+		})
+		if not frappe.db.get_value('BOM', {'item': item_name}):
+			make_bom(item = item_name, raw_materials = [item_name], rm_qty=1)
+		wo = make_wo_order_test_record(item = item_name, qty=1)
+		ste = frappe.get_doc(make_stock_entry(wo.name, purpose='Material Transfer for Manufacture'))
+		ste.insert()
+		self.assertEqual(len(ste.items), 1)
+		for item in ste.items:
+			if item:
+				self.assertEqual(item.allow_zero_valuation_rate, 1)
+				self.assertEqual(item.valuation_rate, 0)
+
+	def test_make_stock_entry_for_non_customer_provided_item(self):
+		item_name = 'Test Purchase Item'
+		make_item(item_name, {
+			'item_group': 'All Item Groups',
+			'stock_uom': 'Unit',
+		})
+		if not frappe.db.get_value('BOM', {'item': item_name}):
+			make_bom(item = item_name, raw_materials = [item_name], rm_qty=1)
+		wo = make_wo_order_test_record(item = item_name, qty=1)
+		ste = frappe.get_doc(make_stock_entry(wo.name, purpose='Material Transfer for Manufacture'))
+		self.assertRaises(frappe.ValidationError, ste.insert)
 
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
