@@ -579,7 +579,7 @@ def get_existing_salary_slips(employees, args):
 		where docstatus!= 2 and company = %s and payroll_entry = %s
 			and start_date >= %s and end_date <= %s
 			and employee in (%s)
-	""" % ('%s', '%s', '%s', ', '.join(['%s']*len(employees))),
+	""" % ('%s', '%s', '%s', '%s', ', '.join(['%s']*len(employees))),
 		[args.company, args.payroll_entry, args.start_date, args.end_date] + employees)
 
 def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progress=True):
