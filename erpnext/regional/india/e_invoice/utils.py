@@ -178,7 +178,7 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 		item.discount_amount = 0
-		item.unit_rate = abs(item.base_net_amount / item.qty)
+		item.unit_rate = flt(abs(item.base_net_amount / item.qty), 3)
 		item.gross_amount = abs(item.base_net_amount)
 		item.taxable_value = abs(item.base_net_amount)
 
@@ -217,7 +217,7 @@ def update_item_taxes(invoice, item):
 
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
-			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
+			item_tax_amount = flt((item_tax_rate / 100) * item.base_net_amount, 3)
 
 			if t.account_head in gst_accounts.cess_account:
 				item_tax_amount_after_discount = item_tax_detail[1]
@@ -337,7 +337,7 @@ def validate_mandatory_fields(invoice):
 
 def validate_totals(einvoice):
 	item_list = einvoice['ItemList']
-	values_details = einvoice['ValDtls']
+	value_details = einvoice['ValDtls']
 
 	total_item_ass_value = 0
 	total_item_cgst_value = 0
@@ -345,25 +345,28 @@ def validate_totals(einvoice):
 	total_item_igst_value = 0
 	total_item_value = 0
 	for item in item_list:
-		total_item_ass_value += item['AssAmt']
-		total_item_cgst_value += item['CgstAmt']
-		total_item_sgst_value += item['SgstAmt']
-		total_item_igst_value += item['IgstAmt']
-		total_item_value += item['TotItemVal']
+		total_item_ass_value += flt(item['AssAmt'])
+		total_item_cgst_value += flt(item['CgstAmt'])
+		total_item_sgst_value += flt(item['SgstAmt'])
+		total_item_igst_value += flt(item['IgstAmt'])
+		total_item_value += flt(item['TotItemVal'])
 
-		if abs(item['AssAmt'] * item['GstRate'] / 100) - (item['CgstAmt'] + item['SgstAmt'] + item['IgstAmt']) > 1:
+		if abs(flt(item['AssAmt']) * flt(item['GstRt']) / 100) - (flt(item['CgstAmt']) + flt(item['SgstAmt']) + flt(item['IgstAmt'])) > 1:
 			frappe.throw(_('Row #{}: GST rate is invalid. Please remove zero rated / unallocated tax rows from taxes table.').format(item.idx))
 
-	if abs(value_details['AssVal'] - total_item_ass_value) > 1:
-		frappe.throw(_('Total Taxable Value of all the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
+	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
+		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
+
+	if abs(flt(value_details['TotInvVal']) - total_item_value) > 1:
+		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
 
 	calculated_invoice_value = \
-			value_details['AssVal'] + value_details['CgstVal'] \
-			+ value_details['SgstVal'] + value_details['IgstVal'] \
-			+ value_details['OthChrg'] - value_details['Discount']
+			flt(value_details['AssVal']) + flt(value_details['CgstVal']) \
+			+ flt(value_details['SgstVal']) + flt(value_details['IgstVal']) \
+			+ flt(value_details['OthChrg']) - flt(value_details['Discount'])
 
-	if abs(value_details['TotInvVal'] - calculated_invoice_value) > 1:
-		frappe.throw(_('Total Value of all the items is not equal to the Invoice Grand Total. Please check taxes / discounts for any correction.'))
+	if abs(flt(value_details['TotInvVal']) - calculated_invoice_value) > 1:
+		frappe.throw(_('Total Item Value + Taxes - Discount is not equal to the Invoice Grand Total. Please check taxes / discounts for any correction.'))
 
 def make_einvoice(invoice):
 	validate_mandatory_fields(invoice)
@@ -412,7 +415,30 @@ def make_einvoice(invoice):
 	)
 	einvoice = safe_json_load(einvoice)
 
+	einvoice = remove_undefined_keys(einvoice)
+
 	validate_totals(einvoice)
+
+	return einvoice
+
+def remove_undefined_keys(einvoice):
+	copy = einvoice.copy()
+	for key, value in copy.items():
+		if isinstance(value, list):
+			for idx, d in enumerate(value):
+				santized_dict = remove_undefined_keys(d)
+				if santized_dict:
+					einvoice[key][idx] = santized_dict
+				else:
+					einvoice[key].pop(idx)
+		elif isinstance(value, dict):
+			santized_dict = remove_undefined_keys(value)
+			if santized_dict:
+				einvoice[key] = santized_dict
+			else:
+				einvoice.pop(key, None)
+		elif not value or value == "None":
+			einvoice.pop(key, None)
 
 	return einvoice
 
