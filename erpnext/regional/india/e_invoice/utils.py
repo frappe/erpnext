@@ -105,7 +105,7 @@ def validate_address_fields(addr):
 			title=_('Missing Address Fields')
 		)
 	
-	validate_gstin_for_india(addr, '')
+	# validate_gstin_for_india(addr, '')
 
 def get_party_details(address_name):
 	addr = frappe.get_doc('Address', address_name)
@@ -178,7 +178,7 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 		item.discount_amount = 0
-		item.unit_rate = flt(abs(item.base_net_amount / item.qty), 3)
+		item.unit_rate = flt(abs(item.base_net_amount / item.qty), 2)
 		item.gross_amount = abs(item.base_net_amount)
 		item.taxable_value = abs(item.base_net_amount)
 
@@ -217,7 +217,7 @@ def update_item_taxes(invoice, item):
 
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
-			item_tax_amount = flt((item_tax_rate / 100) * item.base_net_amount, 3)
+			item_tax_amount = flt((item_tax_rate / 100) * item.base_net_amount, 2)
 
 			if t.account_head in gst_accounts.cess_account:
 				item_tax_amount_after_discount = item_tax_detail[1]
@@ -352,7 +352,7 @@ def validate_totals(einvoice):
 		total_item_value += flt(item['TotItemVal'])
 
 		if abs(flt(item['AssAmt']) * flt(item['GstRt']) / 100) - (flt(item['CgstAmt']) + flt(item['SgstAmt']) + flt(item['IgstAmt'])) > 1:
-			frappe.throw(_('Row #{}: GST rate is invalid. Please remove zero rated / unallocated tax rows from taxes table.').format(item.idx))
+			frappe.throw(_('Row #{}: GST rate is invalid. Please remove tax rows with zero tax amount from taxes table.').format(item.idx))
 
 	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
@@ -415,30 +415,39 @@ def make_einvoice(invoice):
 	)
 	einvoice = safe_json_load(einvoice)
 
-	einvoice = remove_undefined_keys(einvoice)
+	einvoice = santize_einvoice_fields(einvoice)
 
 	validate_totals(einvoice)
 
 	return einvoice
 
-def remove_undefined_keys(einvoice):
+def santize_einvoice_fields(einvoice):
+	number_fields = ["Pin","Qty","FreeQty","UnitPrice","TotAmt","Discount","PreTaxVal","AssAmt","GstRt","IgstAmt","CgstAmt","SgstAmt","CesRt","CesAmt","CesNonAdvlAmt","StateCesRt","StateCesAmt","StateCesNonAdvlAmt","OthChrg","TotItemVal","AssVal","CgstVal","SgstVal","IgstVal","CesVal","StCesVal","Discount","OthChrg","RndOffAmt","TotInvVal","TotInvValFc","CrDay","PaidAmt","PaymtDue","ExpDuty","Distance"]
 	copy = einvoice.copy()
 	for key, value in copy.items():
 		if isinstance(value, list):
 			for idx, d in enumerate(value):
-				santized_dict = remove_undefined_keys(d)
+				santized_dict = santize_einvoice_fields(d)
 				if santized_dict:
 					einvoice[key][idx] = santized_dict
 				else:
 					einvoice[key].pop(idx)
+
+			if not einvoice[key]:
+				einvoice.pop(key, None)
+
 		elif isinstance(value, dict):
-			santized_dict = remove_undefined_keys(value)
+			santized_dict = santize_einvoice_fields(value)
 			if santized_dict:
 				einvoice[key] = santized_dict
 			else:
 				einvoice.pop(key, None)
+
 		elif not value or value == "None":
 			einvoice.pop(key, None)
+
+		elif key in number_fields:
+			einvoice[key] = flt(value, 2) if '.' in value else cint(value)
 
 	return einvoice
 
@@ -458,15 +467,15 @@ class RequestFailed(Exception): pass
 
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
-		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
-		sandbox_mode = self.e_invoice_settings.sandbox_mode
+		self.doctype = doctype
+		self.docname = docname
 
-		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
-		self.credentials = self.get_credentials()
+		self.set_invoice()
+		self.set_credentials()
 
 		# authenticate url is same for sandbox & live
 		self.authenticate_url = 'https://gsp.adaequare.com/gsp/authenticate?grant_type=token'
-		self.base_url = 'https://gsp.adaequare.com' if not sandbox_mode else 'https://gsp.adaequare.com/test'
+		self.base_url = 'https://gsp.adaequare.com' if not self.e_invoice_settings.sandbox_mode else 'https://gsp.adaequare.com/test'
 
 		self.cancel_irn_url = self.base_url + '/enriched/ei/api/invoice/cancel'
 		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
@@ -475,15 +484,22 @@ class GSPConnector():
 		self.cancel_ewaybill_url = self.base_url + '/enriched/ewb/ewayapi?action=CANEWB'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
-	def get_credentials(self):
+	def set_invoice(self):
+		self.invoice = None
+		if self.doctype and self.docname:
+			self.invoice = frappe.get_cached_doc(self.doctype, self.docname)
+
+	def set_credentials(self):
+		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
+
+		if not self.e_invoice_settings.enable:
+			frappe.throw(_("E-Invoicing is disabled. Please enable it from {} to generate e-invoices.").format(get_link_to_form("E Invoice Settings", "E Invoice Settings")))
+
 		if self.invoice:
 			gstin = self.get_seller_gstin()
-			if not self.e_invoice_settings.enable:
-				frappe.throw(_("E-Invoicing is disabled. Please enable it from {} to generate e-invoices.").format(get_link_to_form("E Invoice Settings", "E Invoice Settings")))
-			credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
+			self.credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
 		else:
-			credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
-		return credentials
+			self.credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
 
 	def get_seller_gstin(self):
 		gstin = self.invoice.company_gstin or frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
@@ -612,6 +628,28 @@ class GSPConnector():
 			self.log_error(data)
 			self.raise_error(True)
 
+	@staticmethod
+	def bulk_generate_irn(invoices):
+		gsp_connector = GSPConnector()
+		gsp_connector.doctype = 'Sales Invoice'
+
+		failed = []
+
+		for invoice in invoices:
+			gsp_connector.docname = invoice
+			gsp_connector.set_invoice()
+			gsp_connector.set_credentials()
+
+			try:
+				gsp_connector.generate_irn()
+			except Exception as e:
+				failed.append({
+					'docname': invoice,
+					'message': str(e)
+				})
+
+		return failed
+
 	def get_irn_details(self, irn):
 		headers = self.get_headers()
 
@@ -660,6 +698,29 @@ class GSPConnector():
 		except Exception:
 			self.log_error(data)
 			self.raise_error(True)
+
+	@staticmethod
+	def bulk_cancel_irn(invoices, reason, remark):
+		gsp_connector = GSPConnector()
+		gsp_connector.doctype = 'Sales Invoice'
+
+		failed = []
+
+		for invoice in invoices:
+			gsp_connector.docname = invoice
+			gsp_connector.set_invoice()
+			gsp_connector.set_credentials()
+
+			try:
+				irn = gsp_connector.invoice.irn
+				gsp_connector.cancel_irn(irn, reason, remark)
+			except Exception as e:
+				failed.append({
+					'docname': invoice,
+					'message': str(e)
+				})
+
+		return failed
 
 	def generate_eway_bill(self, **kwargs):
 		args = frappe._dict(kwargs)
@@ -861,3 +922,42 @@ def generate_eway_bill(doctype, docname, **kwargs):
 def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
 	gsp_connector = GSPConnector(doctype, docname)
 	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+
+@frappe.whitelist()
+def get_einvoices(doctype, docnames):
+	einvoices_json = []
+	errors = []
+
+	for name in json.loads(docnames):
+		invoice = frappe.get_doc(doctype, name)
+		try:
+			einvoice = make_einvoice(invoice)
+			einvoices_json.append(einvoice)
+		except Exception as e:
+			errors.append({
+				'docname': name,
+				'message': str(e)
+			})
+			pass
+
+	frappe.local.message_log = []
+	return {
+		'data': einvoices_json,
+		'errors': errors
+	}
+
+@frappe.whitelist()
+def generate_einvoices(docnames):
+	docnames = json.loads(docnames)
+	failed_invoices = GSPConnector.bulk_generate_irn(docnames)
+	frappe.local.message_log = []
+
+	return failed_invoices
+
+@frappe.whitelist()
+def cancel_irns(docnames, reason, remark):
+	docnames = json.loads(docnames)
+	failed_invoices = GSPConnector.bulk_cancel_irn(docnames, reason, remark)
+	frappe.local.message_log = []
+
+	return failed_invoices
