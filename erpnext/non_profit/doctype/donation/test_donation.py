@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 
 import frappe
 import unittest
-import json, requests, time
 from erpnext.non_profit.doctype.donation.donation import create_donation
 
 class TestDonation(unittest.TestCase):
