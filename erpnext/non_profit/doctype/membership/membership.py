@@ -305,6 +305,12 @@ def get_additional_notes(member, subscription):
 					"member_name": subscription.notes.get(k)
 				})
 
+			# extract pan number from notes
+			if "pan" in k.lower():
+				member.update({
+					"pan_number": subscription.notes.get(k)
+				})
+
 		member.add_comment("Comment", notes)
 
 	elif type(subscription.notes) == str:

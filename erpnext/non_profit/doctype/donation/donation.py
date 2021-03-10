@@ -176,6 +176,12 @@ def get_additional_notes(donor, donor_details):
 					'donor_name': donor_details.notes.get(k)
 				})
 
+			# extract pan from notes
+			if 'pan' in k.lower():
+				donor.update({
+					'pan_number': donor_details.notes.get(k)
+				})
+
 		donor.add_comment('Comment', notes)
 
 	elif type(donor_details.notes) == str:
