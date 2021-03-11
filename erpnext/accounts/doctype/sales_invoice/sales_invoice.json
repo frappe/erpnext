@@ -1637,12 +1637,6 @@
    "unique": 1
   },
   {
-   "fieldname": "type_document",
-   "fieldtype": "Link",
-   "label": "Type Document",
-   "options": "GType Document"
-  },
-  {
    "fieldname": "patient_statement",
    "fieldtype": "Link",
    "label": "Patient Statement",
@@ -1732,12 +1726,19 @@
    "fieldname": "total_exonerated",
    "fieldtype": "Currency",
    "label": "Total Exonerated"
+  },
+  {
+   "fieldname": "type_document",
+   "fieldtype": "Link",
+   "label": "Type Document",
+   "options": "GType Document",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-03-11 10:47:23.272545",
+ "modified": "2021-03-11 11:03:36.459249",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
