@@ -456,7 +456,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
 			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
-		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, 
+		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2,
 			company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
 			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
@@ -1031,7 +1031,7 @@ def make_purchase_invoice_against_cost_center(**args):
 	pi.is_return = args.is_return
 	pi.credit_to = args.return_against or "Creditors - _TC"
 	pi.is_subcontracted = args.is_subcontracted or "No"
-	if args.supplier_warehouse: 
+	if args.supplier_warehouse:
 		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {
