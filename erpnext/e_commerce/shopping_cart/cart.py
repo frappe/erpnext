@@ -138,7 +138,7 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 				"additional_notes": additional_notes
 			})
 		else:
-			quotation_items[0].qty = qty
+			quotation_items[0].qty = qty + 1
 			quotation_items[0].additional_notes = additional_notes
 
 	apply_cart_settings(quotation=quotation)
@@ -153,9 +153,8 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 
 	set_cart_count(quotation)
 
-	context = get_cart_quotation(quotation)
-
 	if cint(with_items):
+		context = get_cart_quotation(quotation)
 		return {
 			"items": frappe.render_template("templates/includes/cart/cart_items.html",
 				context),
@@ -164,8 +163,7 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 		}
 	else:
 		return {
-			'name': quotation.name,
-			'shopping_cart_menu': get_shopping_cart_menu(context)
+			'name': quotation.name
 		}
 
 @frappe.whitelist()

@@ -93,9 +93,6 @@ $.extend(shopping_cart, {
 				btn: opts.btn,
 				callback: function(r) {
 					shopping_cart.set_cart_count();
-					if (r.message.shopping_cart_menu) {
-						$('.shopping-cart-menu').html(r.message.shopping_cart_menu);
-					}
 					if(opts.callback)
 						opts.callback(r);
 				}
@@ -129,6 +126,10 @@ $.extend(shopping_cart, {
 
 		if(cart_count) {
 			$badge.html(cart_count);
+			$cart.addClass('cart-animate');
+			setTimeout(() => {
+				$cart.removeClass('cart-animate');
+			}, 500);
 		} else {
 			$badge.remove();
 		}
