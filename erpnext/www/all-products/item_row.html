@@ -2,6 +2,6 @@
 
 {{ item_card(
 	item.item_name or item.name, item.website_image or item.image, item.route, item.website_description or item.description,
-	item.formatted_price, item.item_group
+	item.formatted_price, item.item_group, in_stock=item.in_stock
 ) }}
 
