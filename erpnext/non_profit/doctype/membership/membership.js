@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Membership', {
 	setup: function(frm) {
-		frappe.db.get_single_value("Membership Settings", "enable_razorpay").then(val => {
+		frappe.db.get_single_value("Non Profit Settings", "enable_razorpay_for_memberships").then(val => {
 			if (val) frm.set_df_property("razorpay_details_section", "hidden", false);
 		})
 	},
@@ -26,7 +26,7 @@ frappe.ui.form.on('Membership', {
 			});
 		});
 
-		frappe.db.get_single_value("Membership Settings", "send_email").then(val => {
+		frappe.db.get_single_value("Non Profit Settings", "send_email").then(val => {
 			if (val) frm.add_custom_button("Send Acknowledgement", () => {
 				frm.call("send_acknowlement").then(() => {
 					frm.reload_doc();
