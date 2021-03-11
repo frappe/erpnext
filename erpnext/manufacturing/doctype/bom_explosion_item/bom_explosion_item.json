@@ -17,12 +17,18 @@
   "image",
   "image_view",
   "section_break_4",
+  "qty",
+  "uom",
+  "column_break_14",
   "stock_qty",
-  "rate",
-  "qty_consumed_per_unit",
-  "column_break_8",
   "stock_uom",
+  "column_break_17",
+  "qty_consumed_per_unit",
+  "stock_qty_consumed_per_unit",
+  "section_break_20",
+  "rate",
   "amount",
+  "column_break_8",
   "include_item_in_manufacturing"
  ],
  "fields": [
@@ -41,7 +47,6 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "in_list_view": 1,
    "label": "Item Name",
    "read_only": 1
   },
@@ -64,13 +69,13 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
   },
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_list_view": 1,
    "label": "Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text",
@@ -102,7 +107,6 @@
   {
    "fieldname": "stock_qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Stock Qty",
    "oldfieldname": "qty",
    "oldfieldtype": "Currency",
@@ -110,6 +114,7 @@
    "read_only": 1
   },
   {
+   "columns": 1,
    "fieldname": "rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -122,7 +127,6 @@
   {
    "fieldname": "qty_consumed_per_unit",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Qty Consumed Per Unit",
    "precision": "6",
    "read_only": 1
@@ -141,6 +145,7 @@
    "read_only": 1
   },
   {
+   "columns": 2,
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -156,11 +161,47 @@
    "fieldtype": "Check",
    "label": "Include Item In Manufacturing",
    "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty",
+   "read_only": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stock_qty_consumed_per_unit",
+   "fieldtype": "Float",
+   "label": "Stock Qty Consumed Per Unit",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-09 13:09:43.587885",
+ "modified": "2021-03-10 16:59:56.428725",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Explosion Item",

@@ -4,21 +4,24 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "operation",
   "item_code",
-  "source_warehouse",
-  "column_break_3",
   "item_name",
+  "column_break_3",
+  "operation",
+  "source_warehouse",
+  "description_section",
   "description",
   "qty_section",
   "required_qty",
   "transferred_qty",
-  "allow_alternative_item",
-  "include_item_in_manufacturing",
-  "column_break_11",
   "consumed_qty",
+  "column_break_11",
   "available_qty_at_source_warehouse",
-  "available_qty_at_wip_warehouse"
+  "available_qty_at_wip_warehouse",
+  "column_break_16",
+  "uom",
+  "allow_alternative_item",
+  "include_item_in_manufacturing"
  ],
  "fields": [
   {
@@ -119,10 +122,27 @@
    "fieldtype": "Float",
    "label": "Available Qty at WIP Warehouse",
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "description_section",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "label": "UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2021-01-15 16:29:18.656002",
+ "modified": "2021-03-10 21:30:23.330685",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

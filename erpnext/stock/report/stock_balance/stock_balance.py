@@ -109,7 +109,7 @@ def execute(filters=None):
 					report_data["variant_{}".format(i)] = item_map[item].get(v)
 
 			if include_uom:
-				conversion_factors.setdefault(item, item_map[item].conversion_factor)
+				conversion_factors.setdefault(item, flt(item_map[item].conversion_factor) * alt_uom_size)
 
 			if filters.get('show_stock_ageing_data'):
 				fifo_queue = item_wise_fifo_queue[(item, warehouse)].get('fifo_queue')

@@ -700,3 +700,4 @@ erpnext.patches.v12_0.create_banks_for_bank_name_in_employee_and_salary_slip
 erpnext.patches.v12_0.update_sales_invoice_return_si_detail
 execute:frappe.delete_doc_if_exists("Report", "Batch-Wise Balance History")
 erpnext.patches.v12_0.update_total_rm_qty
+erpnext.patches.v12_0.set_uom_in_bom_explosion_and_wo

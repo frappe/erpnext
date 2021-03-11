@@ -216,7 +216,7 @@ class BOM(WebsiteGenerator):
 						args = frappe._dict({
 							"doctype": "BOM",
 							"price_list": self.buying_price_list,
-							"qty": arg.get("qty") or 1,
+							"qty": flt(arg.get("qty")) or 1,
 							"uom": arg.get("uom") or arg.get("stock_uom"),
 							"stock_uom": arg.get("stock_uom"),
 							"transaction_type": "buying",
@@ -548,7 +548,7 @@ class BOM(WebsiteGenerator):
 		self.cur_exploded_items = {}
 		for d in self.get('items'):
 			if d.bom_no:
-				self.get_child_exploded_items(d.bom_no, d.stock_qty)
+				self.get_child_exploded_items(d.bom_no, d.qty)
 			else:
 				self.add_to_cur_exploded_items(frappe._dict({
 					'item_code'		: d.item_code,
@@ -557,9 +557,11 @@ class BOM(WebsiteGenerator):
 					'source_warehouse': d.source_warehouse,
 					'description'	: d.description,
 					'image'			: d.image,
+					'uom'			: d.uom,
+					'qty'			: flt(d.qty),
 					'stock_uom'		: d.stock_uom,
 					'stock_qty'		: flt(d.stock_qty),
-					'rate'			: flt(d.base_rate) / (flt(d.conversion_factor) or 1.0),
+					'rate'			: flt(d.base_rate),
 					'include_item_in_manufacturing': d.include_item_in_manufacturing
 				}))
 
@@ -567,12 +569,14 @@ class BOM(WebsiteGenerator):
 		return erpnext.get_company_currency(self.company)
 
 	def add_to_cur_exploded_items(self, args):
-		if self.cur_exploded_items.get(args.item_code):
-			self.cur_exploded_items[args.item_code]["stock_qty"] += args.stock_qty
+		key = (args.item_code, args.uom)
+		if self.cur_exploded_items.get(key):
+			self.cur_exploded_items[key]["qty"] += args.qty
+			self.cur_exploded_items[key]["stock_qty"] += args.stock_qty
 		else:
-			self.cur_exploded_items[args.item_code] = args
+			self.cur_exploded_items[key] = args
 
-	def get_child_exploded_items(self, bom_no, stock_qty):
+	def get_child_exploded_items(self, bom_no, qty):
 		""" Add all items from Flat BOM of child BOM"""
 		# Did not use qty_consumed_per_unit in the query, as it leads to rounding loss
 		child_fb_items = frappe.db.sql("""
@@ -582,11 +586,13 @@ class BOM(WebsiteGenerator):
 				bom_item.description,
 				bom_item.source_warehouse,
 				bom_item.operation,
+				bom_item.uom,
+				bom_item.qty,
 				bom_item.stock_uom,
 				bom_item.stock_qty,
 				bom_item.rate,
 				bom_item.include_item_in_manufacturing,
-				bom_item.stock_qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
+				bom_item.qty / ifnull(bom.quantity, 1) AS qty_consumed_per_unit
 			FROM `tabBOM Explosion Item` bom_item, tabBOM bom
 			WHERE
 				bom_item.parent = bom.name
@@ -595,14 +601,18 @@ class BOM(WebsiteGenerator):
 		""", bom_no, as_dict = 1)
 
 		for d in child_fb_items:
+			new_qty = d['qty_consumed_per_unit'] * qty
+			new_stock_qty = new_qty * ((d['stock_qty'] / d['qty']) or 1)
 			self.add_to_cur_exploded_items(frappe._dict({
 				'item_code'				: d['item_code'],
 				'item_name'				: d['item_name'],
 				'source_warehouse'		: d['source_warehouse'],
 				'operation'				: d['operation'],
 				'description'			: d['description'],
+				'uom'					: d['uom'],
+				'qty'					: new_qty,
 				'stock_uom'				: d['stock_uom'],
-				'stock_qty'				: d['qty_consumed_per_unit'] * stock_qty,
+				'stock_qty'				: new_stock_qty,
 				'rate'					: flt(d['rate']),
 				'include_item_in_manufacturing': d.get('include_item_in_manufacturing', 0)
 			}))
@@ -618,8 +628,9 @@ class BOM(WebsiteGenerator):
 			ch = self.append('exploded_items', {})
 			for i in self.cur_exploded_items[d].keys():
 				ch.set(i, self.cur_exploded_items[d][i])
-			ch.amount = flt(ch.stock_qty) * flt(ch.rate)
-			ch.qty_consumed_per_unit = flt(ch.stock_qty) / flt(self.quantity)
+			ch.amount = flt(ch.qty) * flt(ch.rate)
+			ch.qty_consumed_per_unit = flt(ch.qty) / flt(self.quantity)
+			ch.stock_qty_consumed_per_unit = flt(ch.stock_qty) / flt(self.quantity)
 			ch.docstatus = self.docstatus
 
 			if self.docstatus == 1:
@@ -683,13 +694,19 @@ def get_bom_items_as_dict(bom, company, qty=1, fetch_exploded=1, fetch_scrap_ite
 
 	is_stock_item = 0 if include_non_stock_items else 1
 	if cint(fetch_exploded):
+		uom_fields = ""
+		if not fetch_qty_in_stock_uom:
+			uom_fields = ", bom_item.stock_qty / bom_item.qty as conversion_factor, bom_item.uom"
+
 		query = query.format(table="BOM Explosion Item",
 			where_conditions="",
 			is_stock_item=is_stock_item,
-			qty_field="stock_qty",
+			qty_field="stock_qty" if fetch_qty_in_stock_uom else "qty",
 			select_columns = """, bom_item.source_warehouse, bom_item.operation,
 				bom_item.include_item_in_manufacturing, bom_item.description, bom_item.rate,
-				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx""")
+				(Select idx from `tabBOM Item` where item_code = bom_item.item_code and parent = %(parent)s limit 1) as idx
+				{0}
+			""".format(uom_fields))
 
 		items = frappe.db.sql(query, { "parent": bom, "qty": qty, "bom": bom, "company": company }, as_dict=True)
 	elif fetch_scrap_items:
