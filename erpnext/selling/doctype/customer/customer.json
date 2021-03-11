@@ -1,19 +1,19 @@
 {
- "actions": [],
  "allow_events_in_timeline": 1,
  "allow_import": 1,
  "allow_rename": 1,
  "autoname": "naming_series:",
  "creation": "2013-06-11 14:26:44",
- "description": "Buyer of Goods and Services.",
  "doctype": "DocType",
  "document_type": "Setup",
  "engine": "InnoDB",
  "field_order": [
   "basic_info",
+  "serie",
   "naming_series",
   "salutation",
   "customer_name",
+  "customer_default",
   "gender",
   "customer_type",
   "default_bank_account",
@@ -76,14 +76,6 @@
    "label": "Name and Type",
    "oldfieldtype": "Section Break",
    "options": "fa fa-user"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Series",
-   "no_copy": 1,
-   "options": "CUST-.YYYY.-",
-   "set_only_once": 1
   },
   {
    "depends_on": "eval:doc.customer_type!='Company'",
@@ -473,13 +465,32 @@
    "fieldtype": "Data",
    "label": "RTN",
    "reqd": 1
+  },
+  {
+   "fieldname": "serie",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Serie",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "customer_default",
+   "fieldtype": "Check",
+   "label": "Default"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": " Series",
+   "options": "CUST-.YYYY.-"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "links": [],
- "modified": "2020-03-18 19:17:34.932576",
+ "modified": "2021-03-02 11:40:21.325308",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

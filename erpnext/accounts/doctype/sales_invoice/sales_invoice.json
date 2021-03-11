@@ -12,8 +12,8 @@
   "customer",
   "customer_name",
   "rtn",
-  "tax_id",
   "type_document",
+  "tax_id",
   "is_pos",
   "pos_profile",
   "offline_pos_name",
@@ -126,6 +126,10 @@
   "additional_discount_percentage",
   "discount_amount",
   "totals",
+  "isv15",
+  "isv18",
+  "total_exempt",
+  "total_exonerated",
   "base_grand_total",
   "base_rounding_adjustment",
   "base_rounded_total",
@@ -940,6 +944,7 @@
   {
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "label": "Totals",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money",
    "print_hide": 1
@@ -1713,13 +1718,33 @@
    "fieldtype": "Data",
    "label": "Branch Office",
    "read_only": 1
+  },
+  {
+   "fieldname": "isv15",
+   "fieldtype": "Currency",
+   "label": "ISV 15%"
+  },
+  {
+   "fieldname": "isv18",
+   "fieldtype": "Currency",
+   "label": "ISV 18%"
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "label": "Total Exempt"
+  },
+  {
+   "fieldname": "total_exonerated",
+   "fieldtype": "Currency",
+   "label": "Total Exonerated"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-16 16:09:00.434463",
+ "modified": "2020-04-28 13:52:21.420234",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

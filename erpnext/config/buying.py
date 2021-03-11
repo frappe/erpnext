@@ -245,6 +245,12 @@ def get_data():
 					"route_options": {
 						"party_type": "Supplier"
 					}
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Material Request Price Comparison",
+					"doctype": "Material Request"
 				}
 			]
 		},

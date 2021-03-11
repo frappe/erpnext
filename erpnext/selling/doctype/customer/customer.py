@@ -13,6 +13,8 @@ from erpnext.accounts.party import validate_party_accounts, get_dashboard_info, 
 from frappe.contacts.address_and_contact import load_address_and_contact, delete_contact_and_address
 from frappe.model.rename_doc import update_linked_doctypes
 from frappe.model.mapper import get_mapped_doc
+from datetime import date
+from datetime import datetime
 
 class Customer(TransactionBase):
 	def get_feed(self):
@@ -47,6 +49,41 @@ class Customer(TransactionBase):
 		'''If customer created from Lead, update customer id in quotations, opportunities'''
 		self.update_lead_status()
 
+
+	def generateSerie(self):
+		series = frappe.get_all("Customer",["naming_series"],order_by='naming_series desc')
+		number = ""
+		today = date.today()
+		year = today.year
+		if(len(series) != 0):
+			ultimateSerieNumberString = series[0].naming_series.split('-')
+			if(str(year) != ultimateSerieNumberString[1]):
+				number = self.serie_number(0)
+			else:
+				number = self.serie_number(int(ultimateSerieNumberString[2]))	
+		else:
+			number = self.serie_number(0)
+
+		self.naming_series = "{}-{}-{}".format("CUST", year, number)
+		self.serie = "{}-{}-{}".format("CUST", year, number)
+
+	def serie_number(self, num):
+		num += 1
+
+		if num >= 1 and num < 10:
+			return("0000" + str(num))
+		elif num >= 10 and num < 100:
+			return("000" + str(num))
+		elif num >= 100 and num < 1000:
+			return("00"+ str(num))
+		elif num >= 1000 and num < 10000:
+			return("0" + str(num))
+		elif num >= 10000 and num < 100000:
+			return(str(num))
+
+	def before_insert(self):
+		self.generateSerie()
+
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name
@@ -54,6 +91,7 @@ class Customer(TransactionBase):
 		self.validate_credit_limit_on_change()
 		self.set_loyalty_program()
 		self.check_customer_group_change()
+			
 
 		# set loyalty program tier
 		if frappe.db.exists('Customer', self.name):
