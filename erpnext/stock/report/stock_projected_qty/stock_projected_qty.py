@@ -79,7 +79,7 @@ def execute(filters=None):
 		})
 
 		if include_uom:
-			conversion_factors.append(item.conversion_factor)
+			conversion_factors.append(flt(item.conversion_factor) * alt_uom_size)
 
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
 

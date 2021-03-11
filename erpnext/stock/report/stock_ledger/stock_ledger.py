@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub
-from frappe.utils import cint
+from frappe.utils import cint, flt
 from erpnext.stock.utils import update_included_uom_in_dict_report
 from erpnext.accounts.party import set_party_name_in_list
 from frappe.desk.query_report import group_report_data, hide_columns_if_filtered
@@ -76,7 +76,7 @@ def execute(filters=None):
 		data.append(row)
 
 		if include_uom:
-			conversion_factors.append(item_detail.conversion_factor)
+			conversion_factors.append(flt(item_detail.conversion_factor) * alt_uom_size)
 
 	columns = get_columns(filters, item_details, show_amounts, show_item_name)
 	update_included_uom_in_dict_report(columns, data, include_uom, conversion_factors)
