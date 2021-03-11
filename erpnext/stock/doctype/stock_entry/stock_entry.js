@@ -913,7 +913,10 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				doc: me.frm.doc,
 				method: "get_items",
 				callback: function(r) {
-					if(!r.exc) refresh_field("items");
+					if(!r.exc){
+						refresh_field("items");
+						me.frm.dirty();
+					}
 				}
 			});
 		}

@@ -36,6 +36,8 @@ form_grid_templates = {
 	"items": "templates/form_grid/stock_entry_grid.html"
 }
 
+force_fields = ["stock_uom", "has_batch_no", "has_serial_no", "is_vehicle", "alt_uom", "alt_uom_size"]
+
 class StockEntry(StockController):
 	def get_feed(self):
 		return self.stock_entry_type
@@ -222,15 +224,7 @@ class StockEntry(StockController):
 			if item.item_code not in stock_items:
 				frappe.throw(_("{0} is not a stock Item").format(item.item_code))
 
-			item_details = self.get_item_details(frappe._dict(
-				{"item_code": item.item_code, "company": self.company, 'batch_no': item.batch_no,
-				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
-				for_update=True)
-
-			for f in ("uom", "stock_uom", "description", "item_name", "expense_account",
-				"cost_center", "conversion_factor", "has_batch_no", "has_serial_no"):
-					if f in ["stock_uom", "conversion_factor", "has_batch_no", "has_serial_no"] or not item.get(f):
-						item.set(f, item_details.get(f))
+			self.set_missing_item_values(item)
 
 			if not item.transfer_qty and item.qty:
 				item.transfer_qty = flt(flt(item.qty) * flt(item.conversion_factor),
@@ -241,6 +235,16 @@ class StockEntry(StockController):
 				and item.item_code in serialized_items):
 				frappe.throw(_("Row #{0}: Please specify Serial No for Item {1}").format(item.idx, item.item_code),
 					frappe.MandatoryError)
+
+	def set_missing_item_values(self, item):
+		item_details = self.get_item_details(frappe._dict(
+			{"item_code": item.item_code, "company": self.company, 'batch_no': item.batch_no,
+				"project": self.project, "uom": item.uom, 's_warehouse': item.s_warehouse}),
+			for_update=True)
+
+		for f in item_details:
+			if f in force_fields or not item.get(f):
+				item.set(f, item_details.get(f))
 
 	def validate_qty(self):
 		manufacture_purpose = ["Manufacture", "Material Consumption for Manufacture"]
@@ -838,8 +842,11 @@ class StockEntry(StockController):
 		if args.get("uom") and for_update:
 			ret.update(get_uom_details(args.get('item_code'), args.get('uom'), args.get('qty')))
 
-		for company_field, field in {'stock_adjustment_account': 'expense_account',
-			'cost_center': 'cost_center'}.items():
+		company_copy_fields = {
+			'stock_adjustment_account': 'expense_account',
+			'cost_center': 'cost_center'
+		}
+		for company_field, field in company_copy_fields.items():
 			if not ret.get(field):
 				ret[field] = frappe.get_cached_value('Company',  self.company,  company_field)
 
@@ -853,11 +860,6 @@ class StockEntry(StockController):
 
 		stock_and_rate = get_warehouse_details(args) if args.get('warehouse') else {}
 		ret.update(stock_and_rate)
-
-		# # automatically select batch for outgoing item
-		# if (args.get('s_warehouse', None) and args.get('qty') and
-		# 	ret.get('has_batch_no') and not args.get('batch_no')):
-		# 	args.batch_no = get_batch_no(args['item_code'], args['s_warehouse'], args['qty'])
 
 		# Contents UOM
 		ret.alt_uom = item.alt_uom
@@ -1269,8 +1271,9 @@ class StockEntry(StockController):
 
 			# in stock uom
 			se_child.conversion_factor = flt(item_dict[d].get("conversion_factor")) or 1
-			se_child.transfer_qty = flt(item_dict[d]["qty"]*se_child.conversion_factor, se_child.precision("qty"))
+			se_child.transfer_qty = flt(item_dict[d]["qty"]*se_child.conversion_factor, se_child.precision("transfer_qty"))
 
+			self.set_missing_item_values(se_child)
 
 			# to be assigned for finished item
 			se_child.bom_no = bom_no
