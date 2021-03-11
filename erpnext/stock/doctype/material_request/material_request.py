@@ -488,6 +488,7 @@ def make_stock_entry(source_name, target_doc=None):
 				"parent": "material_request",
 				"uom": "stock_uom"
 			},
+			"field_no_map": ['expense_account'],
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 		}
