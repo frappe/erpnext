@@ -17,6 +17,7 @@ class ProductsSettings(Document):
 
 		self.validate_field_filters()
 		self.validate_attribute_filters()
+		frappe.clear_document_cache("Product Settings", "Product Settings")
 
 	def validate_field_filters(self):
 		if not (self.enable_field_filters and self.filter_fields): return

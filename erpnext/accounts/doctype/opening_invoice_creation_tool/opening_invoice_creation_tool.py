@@ -64,11 +64,11 @@ class OpeningInvoiceCreationTool(Document):
 			prepare_invoice_summary(doctype, invoices)
 
 		return invoices_summary, max_count
-	
+
 	def validate_company(self):
 		if not self.company:
 			frappe.throw(_("Please select the Company"))
-	
+
 	def set_missing_values(self, row):
 		row.qty = row.qty or 1.0
 		row.temporary_opening_account = row.temporary_opening_account or get_temporary_opening_account(self.company)
@@ -198,6 +198,7 @@ def start_import(invoices):
 		try:
 			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
+			doc.flags.ignore_mandatory = True
 			doc.insert()
 			doc.submit()
 			frappe.db.commit()
@@ -210,7 +211,7 @@ def start_import(invoices):
 			frappe.db.commit()
 	if errors:
 		frappe.msgprint(_("You had {} errors while creating opening invoices. Check {} for more details")
-			.format(errors, "<a href='#List/Error Log' class='variant-click'>Error Log</a>"), indicator="red", title=_("Error Occured"))
+			.format(errors, "<a href='/app/List/Error Log' class='variant-click'>Error Log</a>"), indicator="red", title=_("Error Occured"))
 	return names
 
 def publish(index, total, doctype):

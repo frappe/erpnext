@@ -177,7 +177,7 @@ class Item(WebsiteGenerator):
 		if not self.valuation_rate and self.standard_rate:
 			self.valuation_rate = self.standard_rate
 
-		if not self.valuation_rate:
+		if not self.valuation_rate and not self.is_customer_provided_item:
 			frappe.throw(_("Valuation Rate is mandatory if Opening Stock entered"))
 
 		from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -317,6 +317,7 @@ class Item(WebsiteGenerator):
 		context.search_link = '/product_search'
 
 		context.parents = get_parent_item_groups(self.item_group)
+		context.body_class = "product-page"
 
 		self.set_variant_context(context)
 		self.set_attribute_context(context)
@@ -861,7 +862,7 @@ class Item(WebsiteGenerator):
 
 		rows = ''
 		for docname, attr_list in not_included.items():
-			link = "<a href='#Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
+			link = "<a href='/app/Form/Item/{0}'>{0}</a>".format(frappe.bold(_(docname)))
 			rows += table_row(link, body(attr_list))
 
 		error_description = _('The following deleted attributes exist in Variants but not in the Template. You can either delete the Variants or keep the attribute(s) in template.')

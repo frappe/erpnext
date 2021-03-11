@@ -13,6 +13,7 @@
   "column_break_3",
   "warehouse_type",
   "parent_warehouse",
+  "default_in_transit_warehouse",
   "is_group",
   "column_break_4",
   "account",
@@ -230,13 +231,20 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: doc.warehouse_type !== 'Transit';",
+   "fieldname": "default_in_transit_warehouse",
+   "fieldtype": "Link",
+   "label": "Default In-Transit Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-08-03 18:41:52.442502",
+ "modified": "2021-02-16 17:21:52.380098",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

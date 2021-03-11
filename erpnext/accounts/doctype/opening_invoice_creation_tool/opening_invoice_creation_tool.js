@@ -121,7 +121,8 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				frappe.render_template('opening_invoice_creation_tool_dashboard', {
 					data: opening_invoices_summary,
 					max_count: max_count
-				})
+				}),
+				__("Opening Invoices Summary")
 			);
 
 			section.on('click', '.invoice-link', function() {

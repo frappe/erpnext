@@ -80,9 +80,26 @@ class SalarySlip(TransactionBase):
 			if (frappe.db.get_single_value("Payroll Settings", "email_salary_slip_to_employee")) and not frappe.flags.via_payroll_entry:
 				self.email_salary_slip()
 
+		self.update_payment_status_for_gratuity()
+
+	def update_payment_status_for_gratuity(self):
+		add_salary = frappe.db.get_all("Additional Salary",
+			filters = {
+				"payroll_date": ("BETWEEN", [self.start_date, self.end_date]),
+				"employee": self.employee,
+				"ref_doctype": "Gratuity",
+				"docstatus": 1,
+			}, fields = ["ref_docname", "name"], limit=1)
+
+		if len(add_salary):
+			status = "Paid" if self.docstatus == 1 else "Unpaid"
+			if add_salary[0].name in [data.additional_salary for data in self.earnings]:
+				frappe.db.set_value("Gratuity", add_salary.ref_docname, "status", status)
+
 	def on_cancel(self):
 		self.set_status()
 		self.update_status()
+		self.update_payment_status_for_gratuity()
 		self.cancel_loan_repayment_entry()
 
 	def on_trash(self):
@@ -506,7 +523,8 @@ class SalarySlip(TransactionBase):
 			return amount
 
 		except NameError as err:
-			frappe.throw(_("Name error: {0}").format(err))
+			frappe.throw(_("{0} <br> This error can be due to missing or deleted field.").format(err),
+			    title=_("Name error"))
 		except SyntaxError as err:
 			frappe.throw(_("Syntax error in formula or condition: {0}").format(err))
 		except Exception as e:
@@ -573,6 +591,7 @@ class SalarySlip(TransactionBase):
 		for d in self.get(key):
 			if d.salary_component == struct_row.salary_component:
 				component_row = d
+
 		if not component_row or (struct_row.get("is_additional_component") and not overwrite):
 			if amount:
 				self.append(key, {
@@ -930,7 +949,8 @@ class SalarySlip(TransactionBase):
 			if condition:
 				return frappe.safe_eval(condition, self.whitelisted_globals, data)
 		except NameError as err:
-			frappe.throw(_("Name error: {0}").format(err))
+			frappe.throw(_("{0} <br> This error can be due to missing or deleted field.").format(err),
+			    title=_("Name error"))
 		except SyntaxError as err:
 			frappe.throw(_("Syntax error in condition: {0}").format(err))
 		except Exception as e:
@@ -1125,6 +1145,7 @@ class SalarySlip(TransactionBase):
 	#calculate total working hours, earnings based on hourly wages and totals
 	def calculate_total_for_salary_slip_based_on_timesheet(self):
 		if self.timesheets:
+			self.total_working_hours = 0
 			for timesheet in self.timesheets:
 				if timesheet.working_hours:
 					self.total_working_hours += timesheet.working_hours
