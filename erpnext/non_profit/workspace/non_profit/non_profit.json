@@ -109,7 +109,7 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Non Profit Settings",
+   "label": "Membership Settings",
    "link_to": "Non Profit Settings",
    "link_type": "DocType",
    "onboard": 0,
@@ -162,7 +162,7 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Donor",
+   "label": "Donation",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -185,9 +185,35 @@
    "link_type": "DocType",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Donation",
+   "link_to": "Donation",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tax Exemption Certification (India)",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Tax Exemption 80G Certificate",
+   "link_to": "Tax Exemption 80G Certificate",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2021-02-17 18:48:23.360311",
+ "modified": "2021-03-11 11:38:09.140655",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit",
