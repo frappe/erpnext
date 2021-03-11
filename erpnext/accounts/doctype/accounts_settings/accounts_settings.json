@@ -12,6 +12,7 @@
   "frozen_accounts_modifier",
   "determine_address_tax_category_from",
   "over_billing_allowance",
+  "role_allowed_to_over_bill",
   "column_break_4",
   "credit_controller",
   "check_supplier_invoice_uniqueness",
@@ -226,6 +227,13 @@
    "fieldname": "delete_linked_ledger_entries",
    "fieldtype": "Check",
    "label": "Delete Accounting and Stock Ledger Entries on deletion of Transaction"
+  },
+  {
+   "description": "Users with this role are allowed to over bill above the allowance perecentage",
+   "fieldname": "role_allowed_to_over_bill",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Over Bill ",
+   "options": "Role"
   }
  ],
  "icon": "icon-cog",
@@ -233,7 +241,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-01-05 13:04:00.118892",
+ "modified": "2021-03-11 18:52:05.601996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

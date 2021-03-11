@@ -13,6 +13,7 @@
   "column_break_4",
   "valuation_method",
   "over_delivery_receipt_allowance",
+  "role_allowed_to_over_deliver_receive",
   "action_if_quality_inspection_is_not_submitted",
   "show_barcode_field",
   "clean_description_html",
@@ -234,6 +235,13 @@
    "fieldname": "disable_serial_no_and_batch_selector",
    "fieldtype": "Check",
    "label": "Disable Serial No And Batch Selector"
+  },
+  {
+   "description": "Users with this role are allowed to over deliver/receive against orders above the allowance perecentage",
+   "fieldname": "role_allowed_to_over_deliver_receive",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Over Deliver/Receive",
+   "options": "Role"
   }
  ],
  "icon": "icon-cog",
@@ -241,7 +249,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-01-18 13:15:38.352796",
+ "modified": "2021-03-11 18:48:14.513055",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
