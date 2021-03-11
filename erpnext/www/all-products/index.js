@@ -2,6 +2,7 @@ $(() => {
 	class ProductListing {
 		constructor() {
 			this.bind_filters();
+			this.bind_card_actions();
 			this.bind_search();
 			this.restore_filters_state();
 		}
@@ -71,8 +72,35 @@ $(() => {
 			}, 1000));
 		}
 
-		make_filters() {
+		bind_card_actions() {
+			$('.page_content').on('click', '.btn-add-to-cart-list', (e) => {
+				const $btn = $(e.currentTarget);
+				$btn.prop('disabled', true);
 
+				this.animate_add_to_cart($btn);
+
+				const item_code = $btn.data('item-code');
+				erpnext.shopping_cart.update_cart({
+					item_code,
+					qty: 1
+				});
+
+			});
+		}
+
+		animate_add_to_cart(button) {
+			// Create 'added to cart' animation
+			let btn_id = "#" + button[0].id;
+			button.removeClass('not-added');
+			button.addClass('added-to-cart');
+			$(btn_id).text('Added to Cart');
+
+			// undo
+			setTimeout(() => {
+				button.removeClass('added-to-cart');
+				button.addClass('not-added');
+				$(btn_id).text('Add to Cart');
+			}, 2000);
 		}
 
 		bind_search() {
