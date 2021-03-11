@@ -44,7 +44,8 @@ class VehicleAllocationRegisterReport(object):
 		""".format(conditions=allocation_conditions, vbo_join=vbo_join), self.filters, as_dict=1)
 
 		booking_data = frappe.db.sql("""
-			select m.name as vehicle_booking_order, m.item_code, m.supplier, m.allocation_period, m.delivery_period,
+			select m.name as vehicle_booking_order, m.item_code, m.previous_item_code,
+				m.supplier, m.allocation_period, m.delivery_period,
 				m.vehicle_allocation, m.transaction_date,
 				m.color_1, m.color_2, m.color_3,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
@@ -90,6 +91,8 @@ class VehicleAllocationRegisterReport(object):
 			d.tax_cnic_ntn = d.tax_id or d.tax_cnic if is_leased else d.tax_cnic or d.tax_id
 			d.contact_number = d.contact_mobile or d.contact_phone
 
+			d.original_item_code = d.get('previous_item_code') or d.item_code
+
 			if d.vehicle_booking_order in self.customer_payments:
 				d.customer_payment_date = self.customer_payments[d.vehicle_booking_order][0].instrument_date
 
@@ -99,7 +102,7 @@ class VehicleAllocationRegisterReport(object):
 		self.data = sorted(self.data, key=lambda d: (
 			bool(d.vehicle_allocation),
 			cstr(d.allocation_from_date) if d.allocation_from_date else cstr(d.delivery_from_date),
-			d.item_code,
+			d.get('original_item_code') or d.item_code,
 			d.code,
 			cint(d.is_additional),
 			d.sr_no,
@@ -118,7 +121,7 @@ class VehicleAllocationRegisterReport(object):
 			if not group_label or group_label == "Ungrouped":
 				continue
 			elif group_label == "Item":
-				group_field = "item_code"
+				group_field = "original_item_code"
 			else:
 				group_field = scrub(group_label)
 
@@ -137,7 +140,7 @@ class VehicleAllocationRegisterReport(object):
 			totals[f] = g
 
 		group_reference_doctypes = {
-			"item_code": "Item",
+			"original_item_code": "Item",
 			"allocation_period": "Vehicle Allocation Period",
 			"delivery_period": "Vehicle Allocation Period",
 		}
@@ -147,8 +150,11 @@ class VehicleAllocationRegisterReport(object):
 		totals['reference_type'] = reference_dt
 		totals['reference'] = grouped_by.get(reference_field)
 
-		if totals.get('reference_type') == "Vehicle Allocation Period" and not totals.get('reference'):
+		if reference_dt == "Vehicle Allocation Period" and not totals.get('reference'):
 			totals['reference'] = "'Unassigned'"
+
+		if "original_item_code" in grouped_by:
+			totals['item_code'] = totals['original_item_code']
 
 		count = len(data)
 		booked = len([d for d in data if d.vehicle_booking_order])
@@ -171,7 +177,7 @@ class VehicleAllocationRegisterReport(object):
 
 		if self.filters.to_allocation_period:
 			self.filters.allocation_to_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.to_allocation_period, "to_date")
-			conditions.append("ap.to_date <= %(allocation_from_date)s")
+			conditions.append("ap.to_date <= %(allocation_to_date)s")
 
 		if self.filters.from_delivery_period:
 			self.filters.delivery_from_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.from_delivery_period, "from_date")
@@ -227,7 +233,7 @@ class VehicleAllocationRegisterReport(object):
 		return [
 			{"label": _("Reference"), "fieldname": "reference", "fieldtype": "Dynamic Link", "options": "reference_type", "width": 160},
 			{"label": _("Sr #"), "fieldname": "sr_no", "fieldtype": "Int", "width": 45},
-			{"label": _("Allocation Code"), "fieldname": "code", "fieldtype": "Data", "width": 140},
+			{"label": _("Allocation Code"), "fieldname": "code", "fieldtype": "Data", "width": 150},
 			{"label": _("Additional"), "fieldname": "is_additional", "fieldtype": "Check", "width": 60},
 			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 120},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
@@ -243,7 +249,8 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Instrument Date"), "fieldname": "customer_payment_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Deposit Date"), "fieldname": "supplier_payment_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Supplier"), "fieldname": "supplier", "fieldtype": "Link", "options": "Supplier", "width": 100},
+			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
+			{"label": _("Supplier"), "fieldname": "supplier", "fieldtype": "Data", "width": 100},
 		]
 
 

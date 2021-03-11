@@ -164,6 +164,11 @@ class VehicleBookingOrder(AccountsController):
 		item = frappe.get_cached_doc("Item", self.item_code)
 		validate_vehicle_item(item)
 
+		# remove previous item code if Draft or if current item code and previous item code are the same
+		if self.docstatus == 0 or (self.docstatus == 1 and self.previous_item_code == self.item_code):
+			self.previous_item_code = None
+			self.previous_item_name = None
+
 	def validate_vehicle(self):
 		if self.vehicle:
 			vehicle_item_code = frappe.db.get_value("Vehicle", self.vehicle, "item_code")
@@ -1165,7 +1170,9 @@ def update_item_in_booking(vehicle_booking_order, item_code):
 	if previous_item.variant_of and item.variant_of != previous_item.variant_of:
 		frappe.throw(_("New Vehicle Item (Variant) must be a variant of {0}").format(frappe.bold(template_item_name or previous_item.variant_of)))
 
-	vbo_doc.previous_item_code = vbo_doc.item_code
+	if not vbo_doc.previous_item_code:
+		vbo_doc.previous_item_code = vbo_doc.item_code
+
 	vbo_doc.item_code = item_code
 
 	if vbo_doc.vehicle_allocation and not flt(vbo_doc.supplier_advance):

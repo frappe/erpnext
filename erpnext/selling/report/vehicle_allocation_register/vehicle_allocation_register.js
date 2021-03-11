@@ -16,7 +16,13 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			fieldname: "from_allocation_period",
 			label: __("From Allocation Period"),
 			fieldtype: "Link",
-			options: "Vehicle Allocation Period"
+			options: "Vehicle Allocation Period",
+			on_change: function () {
+				var period = frappe.query_report.get_filter_value('from_allocation_period');
+				if (period) {
+					frappe.query_report.set_filter_value('to_allocation_period', period);
+				}
+			}
 		},
 		{
 			fieldname: "to_allocation_period",
@@ -28,7 +34,13 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			fieldname: "from_delivery_period",
 			label: __("From Delivery Period"),
 			fieldtype: "Link",
-			options: "Vehicle Allocation Period"
+			options: "Vehicle Allocation Period",
+			on_change: function () {
+				var period = frappe.query_report.get_filter_value('from_delivery_period');
+				if (period) {
+					frappe.query_report.set_filter_value('to_delivery_period', period);
+				}
+			}
 		},
 		{
 			fieldname: "to_delivery_period",
@@ -103,5 +115,17 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			default: "Group by Item"
 		},
 	],
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+
+		if (data.original_item_code !== data.item_code) {
+			if (['item_code', 'code'].includes(column.fieldname)) {
+				style['font-weight'] = 'bold';
+			}
+			style['background-color'] = '#ffe2a7';
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
 	"initial_depth": 1
 };

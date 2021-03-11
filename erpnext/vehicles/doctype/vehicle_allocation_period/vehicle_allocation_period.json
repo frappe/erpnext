@@ -33,7 +33,7 @@
    "unique": 1
   }
  ],
- "modified": "2020-12-31 13:33:35.078132",
+ "modified": "2021-03-11 22:42:09.356257",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation Period",
@@ -88,7 +88,7 @@
  "quick_entry": 1,
  "restrict_to_domain": "Vehicles",
  "search_fields": "from_date, to_date",
- "sort_field": "from_date",
- "sort_order": "ASC",
+ "sort_field": "to_date",
+ "sort_order": "DESC",
  "track_changes": 1
 }
