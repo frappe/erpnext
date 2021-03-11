@@ -197,11 +197,11 @@ class VehicleBookingOrder(AccountsController):
 				frappe.throw(_("Vehicle Allocation {0} ({1}) is not submitted")
 					.format(self.allocation_title, self.vehicle_allocation))
 
-			if allocation_doc.item_code != self.item_code:
+			if allocation_doc.item_code != self.item_code and (not self.previous_item_code or allocation_doc.item_code != self.previous_item_code):
 				frappe.throw(_("Vehicle Allocation {0} ({1}) Vehicle Item {2} does not match Vehicle Booking Order Vehicle Item {3}")
 					.format(self.allocation_title, self.vehicle_allocation,
 						frappe.bold(allocation_doc.item_name or allocation_doc.item_code),
-						frappe.bold(self.item_name or self.item_code)))
+						frappe.bold(self.previous_item_code or self.item_code)))
 
 			if allocation_doc.supplier != self.supplier:
 				frappe.throw(_("Vehicle Allocation {0} ({1}) Supplier {2} does not match Vehicle Booking Order Supplier {3}")
@@ -1165,11 +1165,13 @@ def update_item_in_booking(vehicle_booking_order, item_code):
 	if previous_item.variant_of and item.variant_of != previous_item.variant_of:
 		frappe.throw(_("New Vehicle Item (Variant) must be a variant of {0}").format(frappe.bold(template_item_name or previous_item.variant_of)))
 
+	vbo_doc.previous_item_code = vbo_doc.item_code
 	vbo_doc.item_code = item_code
 
-	if vbo_doc.vehicle_allocation:
+	if vbo_doc.vehicle_allocation and not flt(vbo_doc.supplier_advance):
 		update_allocation_booked(vbo_doc.vehicle_allocation, 0)
 		vbo_doc.vehicle_allocation = None
+
 	if vbo_doc.vehicle:
 		update_vehicle_booked(vbo_doc.vehicle, 0)
 		vbo_doc.vehicle = None
