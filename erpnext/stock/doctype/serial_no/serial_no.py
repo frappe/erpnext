@@ -554,7 +554,7 @@ def auto_fetch_serial_number(qty, item_code, warehouse, posting_date=None, batch
 
 	if batch_nos:
 		try:
-			filters["batch_no"] = json.loads(batch_nos)
+			filters["batch_no"] = json.loads(batch_nos) if (type(json.loads(batch_nos)) == list) else [json.loads(batch_nos)]
 		except:
 			filters["batch_no"] = [batch_nos]
 
