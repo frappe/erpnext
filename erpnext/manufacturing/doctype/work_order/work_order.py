@@ -131,7 +131,7 @@ class WorkOrder(Document):
 
 	def calculate_total_cost(self):
 		bom_cost, bom_qty = frappe.db.get_value("BOM", self.bom_no, ["base_total_cost", "quantity"])
-		self.total_cost = bom_cost * self.qty / bom_qty
+		self.total_cost = bom_cost * flt(self.qty) / bom_qty if bom_qty else 0
 		self.total_raw_material_qty = sum([d.required_qty for d in self.required_items])
 		
 	def validate_work_order_against_so(self):
@@ -470,6 +470,13 @@ class WorkOrder(Document):
 
 		return check_if_scrap_warehouse_mandatory(self.bom_no)
 
+	def get_required_items_dict(self):
+		item_dict = {}
+		for d in self.required_items:
+			item_dict[d.item_code] = d
+
+		return item_dict
+
 	def set_available_qty(self):
 		for d in self.get("required_items"):
 			if d.source_warehouse:
@@ -485,7 +492,7 @@ class WorkOrder(Document):
 
 		if self.bom_no and self.qty:
 			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
-				fetch_exploded = self.use_multi_level_bom)
+				fetch_exploded = self.use_multi_level_bom, fetch_qty_in_stock_uom=False)
 
 			if reset_only_qty:
 				for d in self.get("required_items"):
@@ -502,6 +509,7 @@ class WorkOrder(Document):
 						'description': item.description,
 						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
+						'uom': item.uom,
 						'source_warehouse': self.source_warehouse or item.source_warehouse or item.default_warehouse,
 						'include_item_in_manufacturing': item.include_item_in_manufacturing
 					})
