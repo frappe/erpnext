@@ -125,7 +125,8 @@ class Membership(Document):
 		pe.paid_to = settings.membership_payment_account
 		pe.reference_no = self.name
 		pe.reference_date = getdate()
-		pe.save(ignore_permissions=True)
+		pe.flags.ignore_mandatory = True
+		pe.save()
 		pe.submit()
 
 	def send_acknowlement(self):
@@ -184,7 +185,7 @@ def make_invoice(membership, member, plan, settings):
 		]
 	})
 	invoice.set_missing_values()
-	invoice.insert(ignore_permissions=True)
+	invoice.insert()
 	invoice.submit()
 
 	frappe.msgprint(_("Sales Invoice created successfully"))
@@ -215,6 +216,7 @@ def verify_signature(data, endpoint="Membership"):
 	controller = frappe.get_doc("Razorpay Settings")
 
 	controller.verify_signature(data, signature, key)
+	frappe.set_user(settings.creation_user)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -270,13 +272,19 @@ def trigger_razorpay_subscription(*args, **kwargs):
 			"to_date": datetime.fromtimestamp(subscription.current_end),
 			"amount": payment.amount / 100 # Convert to rupees from paise
 		})
-		membership.insert(ignore_permissions=True)
+		membership.flags.ignore_mandatory = True
+		membership.insert()
 
 		# Update membership values
 		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
 		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
 		member.subscription_activated = 1
-		member.save(ignore_permissions=True)
+		member.flags.ignore_mandatory = True
+		member.save()
+
+		automate_payment = frappe.db.get_single_value("Membership Settings", "automate_membership_payment_entries")
+		membership.generate_invoice(with_payment_entry=automate_payment, save=True)
+
 	except Exception as e:
 		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), __("Payment ID"), payment.id)
 		log = frappe.log_error(message, _("Error creating membership entry for {0}").format(member.name))

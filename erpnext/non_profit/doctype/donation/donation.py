@@ -60,7 +60,8 @@ class Donation(Document):
 		pe.paid_to = settings.donation_payment_account
 		pe.reference_no = self.name
 		pe.reference_date = getdate()
-		pe.save(ignore_permissions=True)
+		pe.flags.ignore_mandatory = True
+		pe.insert()
 		pe.submit()
 
 
@@ -94,7 +95,8 @@ def capture_razorpay_donations(*args, **kwargs):
 		if not donor:
 			donor = create_donor(payment)
 
-		create_donation(donor, payment)
+		donation = create_donation(donor, payment)
+		donation.run_method('create_payment_entry')
 
 	except Exception as e:
 		message = '{0}\n\n{1}\n\n{2}: {3}'.format(e, frappe.get_traceback(), _('Payment ID'), payment.id)
@@ -120,9 +122,9 @@ def create_donation(donor, payment):
 		'amount': flt(payment.amount),
 		'mode_of_payment': payment.method,
 		'razorpay_payment_id': payment.id
-	}).insert(ignore_mandatory=True, ignore_permissions=True)
-	donation.submit()
+	}).insert(ignore_mandatory=True)
 
+	donation.submit()
 	return donation
 
 
@@ -153,7 +155,7 @@ def create_donor(payment):
 	if donor_details.get('notes'):
 		donor = get_additional_notes(donor, donor_details)
 
-	donor.insert(ignore_mandatory=True, ignore_permissions=True)
+	donor.insert(ignore_mandatory=True)
 	return donor
 
 
@@ -194,7 +196,7 @@ def create_mode_of_payment(method):
 	frappe.get_doc({
 		'doctype': 'Mode of Payment',
 		'mode_of_payment': method
-	}).insert(ignore_permissions=True, ignore_mandatory=True)
+	}).insert(ignore_mandatory=True)
 
 
 def notify_failure(log):

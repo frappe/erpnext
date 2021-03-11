@@ -30,7 +30,9 @@
   "column_break_22",
   "automate_donation_payment_entries",
   "donation_debit_account",
-  "donation_payment_account"
+  "donation_payment_account",
+  "section_break_27",
+  "creation_user"
  ],
  "fields": [
   {
@@ -213,12 +215,24 @@
    "label": "Default Donor Type",
    "options": "Donor Type",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_27",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "The user that will be used to create Donations, Memberships, Invoices, and Payment Entries. This user should have the relevant permissions.",
+   "fieldname": "creation_user",
+   "fieldtype": "Link",
+   "label": "Creation User",
+   "options": "User",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-02-22 11:26:16.864927",
+ "modified": "2021-03-11 10:43:38.124240",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Non Profit Settings",
