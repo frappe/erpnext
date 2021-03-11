@@ -132,7 +132,7 @@ frappe.treeview_settings["Account"] = {
 			let dr_or_cr = balance > 0 ? "Dr": "Cr";
 
 			if (node.data && node.data.balance!==undefined) {
-				$('<span class="balance-area pull-right text-muted small">'
+				$('<span class="balance-area pull-right text-light small">'
 					+ (node.data.balance_in_account_currency ?
 						(format_currency(Math.abs(node.data.balance_in_account_currency),
 							node.data.account_currency) + " / ") : "")

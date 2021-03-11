@@ -84,7 +84,7 @@ erpnext.MarkedEmployee = Class.extend({
 			var color_class = "";
 			if(m.status == "Absent") {
 				attendance_icon = "fa fa-check-empty"
-				color_class = "text-muted";
+				color_class = "text-light";
 			}
 			else if(m.status == "Half Day") {
 				attendance_icon = "fa fa-check-minus"
