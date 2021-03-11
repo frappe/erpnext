@@ -237,7 +237,7 @@
    "label": "Disable Serial No And Batch Selector"
   },
   {
-   "description": "Users with this role are allowed to over deliver/receive against orders above the allowance perecentage",
+   "description": "Users with this role are allowed to over deliver/receive against orders above the allowance percentage",
    "fieldname": "role_allowed_to_over_deliver_receive",
    "fieldtype": "Link",
    "label": "Role Allowed to Over Deliver/Receive",
