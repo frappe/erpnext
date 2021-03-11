@@ -156,6 +156,17 @@ class MaterialRequest(BuyingController):
 		self.update_requested_qty()
 		self.update_requested_qty_in_production_plan()
 
+	def get_bom_items(self, bom, company, qty=1, fetch_exploded=1, warehouse=None):
+		from erpnext.manufacturing.doctype.bom.bom import get_bom_items
+
+		items = get_bom_items(bom, company, qty=qty, fetch_exploded=fetch_exploded)
+		for d in items:
+			d.warehouse = warehouse or self.set_warehouse or d.source_warehouse
+			self.append('items', d)
+
+		self.set_missing_item_details(for_validate=True)
+		self.calculate_totals()
+
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
 			return
@@ -477,6 +488,7 @@ def make_stock_entry(source_name, target_doc=None):
 				"parent": "material_request",
 				"uom": "stock_uom"
 			},
+			"field_no_map": ['expense_account'],
 			"postprocess": update_item,
 			"condition": lambda doc: doc.ordered_qty < doc.stock_qty
 		}

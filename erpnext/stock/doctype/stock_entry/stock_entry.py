@@ -594,8 +594,13 @@ class StockEntry(StockController):
 
 	def set_stock_entry_type(self):
 		if self.purpose:
-			self.stock_entry_type = frappe.get_cached_value('Stock Entry Type',
-				{'purpose': self.purpose}, 'name')
+			types = frappe.db.get_all("Stock Entry Type", filters={'purpose': self.purpose}, order_by='creation asc')
+			types = [d.name for d in types]
+
+			if self.purpose in types:
+				self.stock_entry_type = self.purpose
+			else:
+				self.stock_entry_type = types[0]
 
 	def set_purpose_for_stock_entry(self):
 		if self.stock_entry_type and not self.purpose:

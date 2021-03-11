@@ -15,6 +15,7 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
 from frappe.core.doctype.version.version import get_diff
+from frappe.model.utils import get_fetch_values
 
 import functools
 
@@ -92,8 +93,17 @@ class BOM(WebsiteGenerator):
 		self.validate_bom_links()
 		self.manage_default_bom()
 
+	def onload(self):
+		if self.docstatus == 0:
+			if self.get('item'):
+				self.update(get_fetch_values(self.doctype, 'item', self.item))
+
 	def before_print(self):
 		self.company_address_doc = erpnext.get_company_address(self)
+
+		if self.docstatus == 0:
+			if self.get('item'):
+				self.update(get_fetch_values(self.doctype, 'item', self.item))
 
 	def get_item_det(self, item_code):
 		item = frappe.db.sql("""select name, item_name, docstatus, description, image,
