@@ -787,8 +787,8 @@ def make_regional_gl_entries(gl_entries, doc):
 
 def get_gst_tax_amount(doc):
 	gst_accounts = get_gst_accounts(doc.company)
-	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-		+ gst_accounts.get('igst_account')
+	gst_account_list = gst_accounts.get('cgst_account', []) + gst_accounts.get('sgst_account', []) \
+		+ gst_accounts.get('igst_account', [])
 
 	base_gst_tax = 0
 	gst_tax = 0
