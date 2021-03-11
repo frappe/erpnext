@@ -84,7 +84,7 @@ class StockEntry(StockController):
 		self.set_incoming_rate()
 		self.validate_serialized_batch()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount(update_finished_item_rate=False)
+		self.calculate_rate_and_amount()
 
 	def on_submit(self):
 
@@ -422,9 +422,6 @@ class StockEntry(StockController):
 					self.doctype, d.name, d.batch_no, d.allow_zero_valuation_rate,
 					currency=erpnext.get_company_currency(self.company), company=self.company)
 
-		if self.purpose in ("Repack", "Manufacture"):
-			self.set_basic_rate_for_finished_goods()
-
 	def set_actual_qty(self):
 		allow_negative_stock = cint(frappe.db.get_value("Stock Settings", None, "allow_negative_stock"))
 
@@ -513,7 +510,7 @@ class StockEntry(StockController):
 					scrap_material_cost += flt(d.basic_amount)
 
 		number_of_fg_items = len([t.t_warehouse for t in self.get("items") if t.t_warehouse])
-		if self.purpose == "Repack" or (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
+		if self.purpose in ("Manufacture", "Repack") or (fg_basic_rate == 0.0 and number_of_fg_items == 1) or update_finished_item_rate:
 			self.set_basic_rate_for_finished_goods(raw_material_cost, scrap_material_cost)
 
 	def get_args_for_incoming_rate(self, item):
@@ -948,6 +945,11 @@ class StockEntry(StockController):
 					for item in itervalues(item_dict):
 						if self.pro_doc and (cint(self.pro_doc.from_wip_warehouse) or not self.pro_doc.skip_transfer):
 							item["from_warehouse"] = self.pro_doc.wip_warehouse
+						elif self.pro_doc:
+							required_item_dict = self.pro_doc.get_required_items_dict()
+							required_item_row = required_item_dict.get(item.item_code)
+							if required_item_row:
+								item["from_warehouse"] = required_item_row.get('source_warehouse')
 						#Get Reserve Warehouse from PO
 						if self.purchase_order and self.purpose=="Send to Subcontractor":
 							item["from_warehouse"] = item_wh.get(item.item_code)
@@ -1016,8 +1018,6 @@ class StockEntry(StockController):
 				"item_name": item.item_name,
 				"description": item.description,
 				"stock_uom": item.stock_uom,
-				"expense_account": item.get("expense_account"),
-				"cost_center": item.get("buying_cost_center"),
 			}
 		}, bom_no = self.bom_no)
 
@@ -1062,7 +1062,7 @@ class StockEntry(StockController):
 		wo = frappe.get_doc("Work Order", self.work_order)
 		wo_items = frappe.get_all('Work Order Item',
 			filters={'parent': self.work_order},
-			fields=["item_code", "required_qty", "consumed_qty"]
+			fields=["item_code", "uom", "required_qty", "consumed_qty"]
 			)
 
 		for item in wo_items:
@@ -1089,11 +1089,10 @@ class StockEntry(StockController):
 						"from_warehouse": wo.wip_warehouse,
 						"to_warehouse": "",
 						"qty": qty,
+						"uom": item.uom,
 						"item_name": item.item_name,
 						"description": item.description,
 						"stock_uom": item_account_details.stock_uom,
-						"expense_account": item_account_details.get("expense_account"),
-						"cost_center": item_account_details.get("buying_cost_center"),
 					}
 				})
 
@@ -1101,7 +1100,7 @@ class StockEntry(StockController):
 		transferred_materials = frappe.db.sql("""
 			select
 				item_name, original_item, item_code, sum(qty) as qty, sed.t_warehouse as warehouse,
-				description, stock_uom, expense_account, cost_center
+				description, uom, stock_uom, expense_account, cost_center
 			from `tabStock Entry` se,`tabStock Entry Detail` sed
 			where
 				se.name = sed.parent and se.docstatus=1 and se.purpose='Material Transfer for Manufacture'
@@ -1183,9 +1182,10 @@ class StockEntry(StockController):
 						"qty": qty,
 						"item_name": item.item_name,
 						"description": item.description,
+						"uom": item.uom,
 						"stock_uom": item.stock_uom,
 						"expense_account": item.expense_account,
-						"cost_center": item.buying_cost_center,
+						"cost_center": item.cost_center,
 						"original_item": item.original_item
 					}
 				})
@@ -1243,8 +1243,6 @@ class StockEntry(StockController):
 		return item_dict
 
 	def add_to_stock_entry_detail(self, item_dict, bom_no=None):
-		cost_center = frappe.db.get_value("Company", self.company, 'cost_center')
-
 		for d in item_dict:
 			stock_uom = item_dict[d].get("stock_uom") or frappe.db.get_value("Item", d, "stock_uom")
 
@@ -1256,7 +1254,7 @@ class StockEntry(StockController):
 			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
 			se_child.expense_account = frappe.get_cached_value('Company', self.company, "stock_adjustment_account") or item_dict[d].get("expense_account")
-			se_child.cost_center = item_dict[d].get("cost_center") or cost_center
+			se_child.cost_center = item_dict[d].get("cost_center")
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
 
