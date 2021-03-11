@@ -684,7 +684,9 @@ class AccountsController(TransactionBase):
 						total_billed_amt = abs(total_billed_amt)
 						max_allowed_amt = abs(max_allowed_amt)
 
-					if total_billed_amt - max_allowed_amt > 0.01:
+					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+
+					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
 						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 							.format(item.item_code, item.idx, max_allowed_amt))
 
@@ -1382,8 +1384,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			)
 
 	def get_new_child_item(item_row):
-		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
-		return new_child_function(parent_doctype, parent_doctype_name, child_docname, item_row)
+		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item"
+		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):
