@@ -13,6 +13,7 @@
   "po_required",
   "pr_required",
   "maintain_same_rate",
+  "maintain_same_rate_action",
   "allow_multiple_items",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
@@ -89,6 +90,16 @@
   {
    "fieldname": "column_break_11",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_rate",
+   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action If Same Rate is Not Maintained",
+   "mandatory_depends_on": "maintain_same_rate",
+   "options": "Stop\nWarn"
   }
  ],
  "icon": "fa fa-cog",
@@ -96,7 +107,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 12:00:23.276329",
+ "modified": "2021-03-11 17:31:21.293142",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
