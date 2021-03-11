@@ -21,6 +21,7 @@ class TestTaxExemption80GCertificate(unittest.TestCase):
 		settings.company = '_Test Company'
 		settings.donation_company = '_Test Company'
 		settings.default_donor_type = '_Test Donor'
+		settings.creation_user = 'Administrator'
 		settings.save()
 
 		company = frappe.get_doc('Company', '_Test Company')

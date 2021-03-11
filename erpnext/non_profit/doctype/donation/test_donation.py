@@ -17,6 +17,7 @@ class TestDonation(unittest.TestCase):
 		settings.automate_donation_payment_entries = 1
 		settings.donation_debit_account = 'Debtors - _TC'
 		settings.donation_payment_account =  'Cash - _TC'
+		settings.creation_user = 'Administrator'
 		settings.flags.ignore_permissions = True
 		settings.save()
 
