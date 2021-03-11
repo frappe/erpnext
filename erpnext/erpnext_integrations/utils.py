@@ -37,7 +37,7 @@ def get_webhook_address(connector_name, method, exclude_uri=False):
 	try:
 		url = frappe.request.url
 	except RuntimeError:
-		url = "http://localhost:8000"
+		url = "https://localhost:8000"
 
 	server_url = '{uri.scheme}://{uri.netloc}/api/method/{endpoint}'.format(uri=urlparse(url), endpoint=endpoint)
 
