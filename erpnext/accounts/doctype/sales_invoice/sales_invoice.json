@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -761,8 +760,7 @@
    "oldfieldname": "charge",
    "oldfieldtype": "Link",
    "options": "Sales Taxes and Charges Template",
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_38",
@@ -774,16 +772,14 @@
    "label": "Shipping Rule",
    "oldfieldtype": "Button",
    "options": "Shipping Rule",
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "print_hide": 1
   },
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category",
-   "print_hide": 1,
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "print_hide": 1
   },
   {
    "fieldname": "section_break_40",
@@ -795,8 +791,7 @@
    "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
-   "options": "Sales Taxes and Charges",
-   "read_only_depends_on": "eval:doc.exonerated==1"
+   "options": "Sales Taxes and Charges"
   },
   {
    "collapsible": 1,
@@ -1645,8 +1640,7 @@
    "fieldname": "type_document",
    "fieldtype": "Link",
    "label": "Type Document",
-   "options": "GType Document",
-   "print_hide": 1
+   "options": "GType Document"
   },
   {
    "fieldname": "patient_statement",
@@ -1743,8 +1737,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-28 13:52:21.420234",
+ "modified": "2021-03-11 10:47:23.272545",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
