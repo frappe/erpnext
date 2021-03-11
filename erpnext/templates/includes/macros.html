@@ -59,7 +59,7 @@
 
 {% endmacro %}
 
-{%- macro item_card(title, image, url, description, rate, category, is_featured=False, is_full_width=False, align="Left") -%}
+{%- macro item_card(title, image, url, description, rate, category, in_stock=None, is_featured=False, is_full_width=False, align="Left") -%}
 {%- set align_items_class = resolve_class({
 	'align-items-end': align == 'Right',
 	'align-items-center': align == 'Center',
@@ -89,35 +89,61 @@
 <div class="col-sm-{{ col_size }} item-card">
 	<div class="card {{ align_items_class }}">
 		{% if image %}
-		<div class="card-img-container">
-			<img class="card-img" src="{{ image }}" alt="{{ title }}">
-		</div>
+			<div class="card-img-container">
+				<a href="/{{ url or '#' }}" style="text-decoration: none;">
+					<img class="card-img" src="{{ image }}" alt="{{ title }}">
+				</a>
+			</div>
 		{% else %}
-		<div class="card-img-top no-image">
-			{{ frappe.utils.get_abbr(title) }}
-		</div>
+		<a href="/{{ url or '#' }}" style="text-decoration: none;">
+			<div class="card-img-top no-image">
+				{{ frappe.utils.get_abbr(title) }}
+			</div>
+		</a>
 		{% endif %}
-		{{ item_card_body(title, description, url, rate, category, is_featured, align) }}
+		{{ item_card_body(title, description, url, rate, category, is_featured, align, in_stock) }}
 	</div>
 </div>
 {% endif %}
 {%- endmacro -%}
 
-{%- macro item_card_body(title, description, url, rate, category, is_featured, align) -%}
+{%- macro item_card_body(title, description, url, rate, category, is_featured, align, in_stock=None) -%}
 {%- set align_class = resolve_class({
 	'text-right': align == 'Right',
 	'text-center': align == 'Center' and not is_featured,
 	'text-left': align == 'Left' or is_featured,
 }) -%}
-<div class="card-body {{ align_class }}">
-	<div class="product-title">{{ title or '' }}</div>
+<div class="card-body {{ align_class }}" style="width:100%">
+
+	<div style="margin-top: 16px; display: flex;">
+		<a href="/{{ url or '#' }}">
+			<div class="product-title">{{ title or '' }}</div>
+		</a>
+		{% if in_stock %}
+			<span class="indicator {{ in_stock }} card-indicator"></span>
+		{% endif %}
+		<input class="level-item list-row-checkbox hidden-xs"
+			type="checkbox" data-name="{{ title }}" style="display: none !important;">
+		<div class="like-action"
+			data-name="{{ title }}" data-doctype="Item">
+			<svg class="icon sm">
+				<use class="wish-icon" href="#icon-heart"></use>
+			</svg>
+		</div>
+	</div>
 	{% if is_featured %}
 	<div class="product-price">{{ rate or '' }}</div>
 	<div class="product-description ellipsis">{{ description or '' }}</div>
 	{% else %}
 	<div class="product-category">{{ category or '' }}</div>
-	<div class="product-price">{{ rate or '' }}</div>
+	<div style="display: flex;">
+		{% if rate %}
+		<div class="product-price" style="width: 60%;">{{ rate or '' }}</div>
+		{% endif %}
+		<div class="btn btn-sm btn-add-to-cart-list">
+			{{ _('Add to Cart') }}
+		</div>
+	</div>
 	{% endif %}
 </div>
-<a href="/{{ url or '#' }}" class="stretched-link"></a>
 {%- endmacro -%}

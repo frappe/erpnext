@@ -22,7 +22,7 @@ class ProductQuery:
 		self.page_length = self.settings.products_per_page or 20
 		self.fields = ['wi.name', 'wi.item_name', 'wi.item_code', 'wi.website_image', 'wi.variant_of',
 			'wi.has_variants', 'wi.item_group', 'wi.image', 'wi.web_long_description', 'wi.description',
-			'wi.route']
+			'wi.route', 'wi.website_warehouse']
 		self.conditions = ""
 		self.or_conditions = ""
 		self.substitutions = []
@@ -62,12 +62,22 @@ class ProductQuery:
 			result = self.query_items(self.conditions, self.or_conditions,
 				self.substitutions, start=start)
 
-		# add price info in results
+		# add price and availability info in results
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
 			if product_info:
 				item.formatted_price = (product_info.get('price') or {}).get('formatted_price')
 
+			if self.settings.show_stock_availability and item.get("website_warehouse"):
+				stock_qty = frappe.utils.flt(
+						frappe.db.get_value("Bin",
+							{
+								"item_code": item.item_code,
+								"warehouse": item.get("website_warehouse")
+							},
+							"actual_qty")
+						)
+				item.in_stock = "green" if stock_qty else "red"
 		return result
 
 	def query_items(self, conditions, or_conditions, substitutions, start=0):
