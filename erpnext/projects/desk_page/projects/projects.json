@@ -1,0 +1,38 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Projects",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Project\",\n\t\t\"description\": \"Project master.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Task\",\n\t\t\"route\": \"#List/Task\",\n\t\t\"description\": \"Project activity / task.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"route\": \"#List/Task/Gantt\",\n\t\t\"doctype\": \"Task\",\n\t\t\"name\": \"Gantt Chart\",\n\t\t\"description\": \"Gantt chart of all tasks.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Project Template\",\n\t\t\"description\": \"Make project from a template.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Project Type\",\n\t\t\"description\": \"Define Project type.\"\n\t},\n\t{\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Project Update\",\n\t\t\"description\": \"Project Update.\",\n\t\t\"dependencies\": [\"Project\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Time Tracking",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Timesheet\",\n\t\t\"description\": \"Timesheet for tasks.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Activity Type\",\n\t\t\"description\": \"Types of activities for Time Logs\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Activity Cost\",\n\t\t\"description\": \"Cost of various activities\",\n\t\t\"dependencies\": [\"Activity Type\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Daily Timesheet Summary\",\n\t\t\"doctype\": \"Timesheet\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Timesheet\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Project wise Stock Tracking\",\n\t\t\"doctype\": \"Project\",\n\t\t\"dependencies\": [\"Project\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Project Billing Summary\",\n\t\t\"doctype\": \"Project\",\n\t\t\"dependencies\": [\"Project\"]\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 15:24:00.085498",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Projects",
+ "modified": "2020-06-01 11:27:31.011328",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Projects",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

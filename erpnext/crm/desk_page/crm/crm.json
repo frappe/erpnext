@@ -1,0 +1,43 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Sales Pipeline",
+   "links": "[\n    {\n\t    \"type\": \"doctype\",\n\t\t\"name\": \"Lead\",\n\t\t\"description\": \"Database of potential customers.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Opportunity\",\n\t\t\"description\": \"Potential opportunities for selling.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Customer\",\n\t\t\"description\": \"Customer database.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Contact\",\n\t\t\"description\": \"All Contacts.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Communication\",\n\t\t\"description\": \"Record of all communications of type email, phone, chat, visit, etc.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Lead Source\",\n\t\t\"description\": \"Track Leads by Lead Source.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Contract\",\n\t\t\"description\": \"Helps you keep tracks of Contracts based on Supplier, Customer and Employee\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Appointment\",\n\t    \"description\" : \"Helps you manage appointments with your leads\"\n\t},\n    {\n        \"type\": \"doctype\",\n\t\t\"name\": \"Newsletter\",\n\t\t\"label\": \"Newsletter\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Lead Details\",\n\t\t\"doctype\": \"Lead\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t    \"type\": \"page\",\n\t\t\"name\": \"sales-funnel\",\n\t\t\"label\": \"Sales Funnel\",\n\t\t\"icon\": \"fa fa-bar-chart\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Prospects Engaged But Not Converted\",\n\t\t\"doctype\": \"Lead\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Minutes to First Response for Opportunity\",\n\t\t\"doctype\": \"Opportunity\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"dependencies\": [\"Opportunity\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Customer Addresses And Contacts\",\n\t\t\"doctype\": \"Contact\",\n\t\t\"dependencies\": [\"Customer\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Inactive Customers\",\n\t\t\"doctype\": \"Sales Order\",\n\t\t\"dependencies\": [\"Sales Order\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Campaign Efficiency\",\n\t\t\"doctype\": \"Lead\",\n\t\t\"dependencies\": [\"Lead\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Lead Owner Efficiency\",\n\t\t\"doctype\": \"Lead\",\n\t\t\"dependencies\": [\"Lead\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Customer Group\",\n\t\t\"name\": \"Customer Group\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"link\": \"Tree/Customer Group\",\n\t\t\"description\": \"Manage Customer Group Tree.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Territory\",\n\t\t\"name\": \"Territory\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"link\": \"Tree/Territory\",\n\t\t\"description\": \"Manage Territory Tree.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Sales Person\",\n\t\t\"name\": \"Sales Person\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"link\": \"Tree/Sales Person\",\n\t\t\"description\": \"Manage Sales Person Tree.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Campaign\",\n\t\t\"description\": \"Sales campaigns.\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Email Campaign\",\n\t\t\"description\": \"Sends Mails to lead or contact based on a Campaign schedule\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"SMS Center\",\n\t\t\"description\":\"Send mass SMS to your contacts\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"SMS Log\",\n\t\t\"description\":\"Logs for maintaining sms delivery status\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"SMS Settings\",\n\t\t\"description\": \"Setup SMS gateway settings\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"label\": \"Email Group\",\n\t\t\"name\": \"Email Group\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Maintenance",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Maintenance Schedule\",\n\t\t\"description\": \"Plan for maintenance visits.\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Maintenance Visit\",\n\t\t\"description\": \"Visit report for maintenance call.\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Maintenance Schedules\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"doctype\": \"Maintenance Schedule\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Warranty Claim\",\n\t\t\"description\": \"Warranty Claim against Serial No.\"\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 15:23:37.680357",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "CRM",
+ "modified": "2020-06-01 10:57:59.449739",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "CRM",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

@@ -1,0 +1,38 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Assets",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Location\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset Category\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset Movement\",\n\t\t\"description\": \"Transfer an asset from one warehouse to another\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Maintenance",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset Maintenance Team\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset Maintenance\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Asset Maintenance Team\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset Maintenance Tasks\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Asset Maintenance\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t    \"name\": \"Asset Maintenance Log\",\n\t\t\"dependencies\": [\"Asset Maintenance\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset Value Adjustment\",\n\t\t\"dependencies\": [\"Asset\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Asset Repair\",\n\t\t\"dependencies\": [\"Asset\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Asset Depreciation Ledger\",\n\t\t\"doctype\": \"Asset\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"dependencies\": [\"Asset\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Asset Depreciations and Balances\",\n\t\t\"doctype\": \"Asset\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"dependencies\": [\"Asset\"]\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"name\": \"Asset Maintenance\",\n\t\t\"doctype\": \"Asset Maintenance\",\n\t\t\"dependencies\": [\"Asset Maintenance\"]\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 15:25:01.636772",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Assets",
+ "modified": "2020-06-01 11:12:19.300974",
+ "modified_by": "Administrator",
+ "module": "Assets",
+ "name": "Assets",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}

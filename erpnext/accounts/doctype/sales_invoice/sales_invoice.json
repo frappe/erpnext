@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:05",
@@ -10,6 +11,8 @@
   "naming_series",
   "customer",
   "customer_name",
+  "rtn",
+  "type_document",
   "tax_id",
   "is_pos",
   "pos_profile",
@@ -21,12 +24,24 @@
   "posting_time",
   "set_posting_time",
   "due_date",
+  "reason_for_sale",
+  "patient_statement",
   "amended_from",
   "returns",
   "return_against",
   "column_break_21",
   "update_billed_amount_in_sales_order",
+  "billing",
+  "cashier",
+  "pos",
+  "branch_office",
+  "cai",
+  "column_numeration",
+  "due_date_cai",
+  "numeration",
+  "authorized_range",
   "accounting_dimensions_section",
+  "deadline_for_authorization",
   "project",
   "dimension_col_break",
   "cost_center",
@@ -78,6 +93,7 @@
   "net_total",
   "total_net_weight",
   "taxes_section",
+  "exonerated",
   "taxes_and_charges",
   "column_break_38",
   "shipping_rule",
@@ -90,6 +106,10 @@
   "base_total_taxes_and_charges",
   "column_break_47",
   "total_taxes_and_charges",
+  "product_discount",
+  "empty",
+  "column_break_141",
+  "partial_discount",
   "loyalty_points_redemption",
   "loyalty_points",
   "loyalty_amount",
@@ -99,12 +119,17 @@
   "loyalty_redemption_account",
   "loyalty_redemption_cost_center",
   "section_break_49",
+  "discount_reason",
   "apply_discount_on",
   "base_discount_amount",
   "column_break_51",
   "additional_discount_percentage",
   "discount_amount",
   "totals",
+  "isv15",
+  "isv18",
+  "total_exempt",
+  "total_exonerated",
   "base_grand_total",
   "base_rounding_adjustment",
   "base_rounded_total",
@@ -421,12 +446,14 @@
    "fieldtype": "Link",
    "label": "Customer Address",
    "options": "Address",
-   "print_hide": 1
+   "print_hide": 1,
+   "reqd": 1
   },
   {
    "fieldname": "address_display",
    "fieldtype": "Small Text",
    "label": "Address",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -673,6 +700,7 @@
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "label": "Total Quantity",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -733,7 +761,8 @@
    "oldfieldname": "charge",
    "oldfieldtype": "Link",
    "options": "Sales Taxes and Charges Template",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "fieldname": "column_break_38",
@@ -745,14 +774,16 @@
    "label": "Shipping Rule",
    "oldfieldtype": "Button",
    "options": "Shipping Rule",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "fieldname": "tax_category",
    "fieldtype": "Link",
    "label": "Tax Category",
    "options": "Tax Category",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "fieldname": "section_break_40",
@@ -764,7 +795,8 @@
    "label": "Sales Taxes and Charges",
    "oldfieldname": "other_charges",
    "oldfieldtype": "Table",
-   "options": "Sales Taxes and Charges"
+   "options": "Sales Taxes and Charges",
+   "read_only_depends_on": "eval:doc.exonerated==1"
   },
   {
    "collapsible": 1,
@@ -912,6 +944,7 @@
   {
    "fieldname": "totals",
    "fieldtype": "Section Break",
+   "label": "Totals",
    "oldfieldtype": "Section Break",
    "options": "fa fa-money",
    "print_hide": 1
@@ -1562,12 +1595,156 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reason_for_sale",
+   "fieldtype": "Link",
+   "label": "Reason for sale",
+   "options": "Reason for sale",
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Data",
+   "label": "Cashier",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Data",
+   "label": "CAI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "authorized_range",
+   "fieldtype": "Data",
+   "label": "Authorized Range",
+   "read_only": 1
+  },
+  {
+   "fieldname": "deadline_for_authorization",
+   "fieldtype": "Data",
+   "label": "Deadline for authorization",
+   "read_only": 1
+  },
+  {
+   "fieldname": "billing",
+   "fieldtype": "Section Break",
+   "label": "Billing"
+  },
+  {
+   "fieldname": "numeration",
+   "fieldtype": "Data",
+   "label": "Numeration",
+   "read_only": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "type_document",
+   "fieldtype": "Link",
+   "label": "Type Document",
+   "options": "GType Document",
+   "print_hide": 1
+  },
+  {
+   "fieldname": "patient_statement",
+   "fieldtype": "Link",
+   "label": "Patient Statement",
+   "options": "Patient statement"
+  },
+  {
+   "fetch_from": "customer.rtn",
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pos",
+   "fieldtype": "Link",
+   "label": "Pos",
+   "options": "GPos",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_numeration",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "due_date_cai",
+   "fieldtype": "Date",
+   "label": "Due Date Cai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "partial_discount",
+   "fieldtype": "Currency",
+   "label": "Partial Discount",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "product_discount",
+   "fieldtype": "Section Break",
+   "label": "Product Discount"
+  },
+  {
+   "fieldname": "column_break_141",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "empty",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Empty"
+  },
+  {
+   "fieldname": "discount_reason",
+   "fieldtype": "Link",
+   "label": "Discount Reason",
+   "options": "Reason For Discount"
+  },
+  {
+   "default": "0",
+   "fieldname": "exonerated",
+   "fieldtype": "Check",
+   "label": "Exonerated"
+  },
+  {
+   "fieldname": "branch_office",
+   "fieldtype": "Data",
+   "label": "Branch Office",
+   "read_only": 1
+  },
+  {
+   "fieldname": "isv15",
+   "fieldtype": "Currency",
+   "label": "ISV 15%"
+  },
+  {
+   "fieldname": "isv18",
+   "fieldtype": "Currency",
+   "label": "ISV 18%"
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "label": "Total Exempt"
+  },
+  {
+   "fieldname": "total_exonerated",
+   "fieldtype": "Currency",
+   "label": "Total Exonerated"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2019-10-05 21:39:49.235990",
+ "links": [],
+ "modified": "2020-04-28 13:52:21.420234",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

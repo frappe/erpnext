@@ -1,0 +1,63 @@
+{
+ "cards": [
+  {
+   "hidden": 0,
+   "label": "Stock Transactions",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Stock Entry\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Delivery Note\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\", \"Customer\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Purchase Receipt\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\", \"Supplier\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Material Request\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Pick List\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Delivery Trip\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Stock Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Stock Ledger\",\n\t\t\"doctype\": \"Stock Ledger Entry\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Material Request Details\",\n\t\t\"doctype\": \"Material Request Details\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item Price\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Stock Balance\",\n\t\t\"doctype\": \"Stock Ledger Entry\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Stock Projected Qty\",\n\t\t\"doctype\": \"Item\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t    \"type\": \"page\",\n\t\t\"name\": \"stock-balance\",\n\t\t\"label\": \"Stock Summary\",\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Stock Ageing\",\n\t\t\"doctype\": \"Item\",\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Item Price Stock\",\n\t\t\"doctype\": \"Item\",\n\t\t\"dependencies\": [\"Item\"]\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Settings",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Stock Settings\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Warehouse\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"UOM\",\n\t\t\"label\": \"Unit of Measure\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Brand\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Attribute\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Variant Settings\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Items and Pricing",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Product Bundle\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Group\",\n\t\t\"icon\": \"fa fa-sitemap\",\n\t\t\"label\": \"Item Group\",\n\t\t\"link\": \"Tree/Item Group\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Category for sale\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Category for purchase\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Price List\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Price\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Shipping Rule\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Pricing Rule\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Alternative\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Manufacturer\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Item Variant Settings\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Serial No and Batch",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Serial No\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Batch\",\n\t\t\"onboard\": 1,\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Installation Note\",\n\t\t\"dependencies\": [\"Item\"]\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Serial No Service Contract Expiry\",\n\t\t\"doctype\": \"Serial No\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Serial No Status\",\n\t\t\"doctype\": \"Serial No\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"name\": \"Serial No Warranty Expiry\",\n\t\t\"doctype\": \"Serial No\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Tools",
+   "links": "[\n    {\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Stock Reconciliation\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Landed Cost Voucher\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Packing Slip\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Inspection\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quality Inspection Template\"\n\t},\n\t{\n\t\t\"type\": \"doctype\",\n\t\t\"name\": \"Quick Stock Balance\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Key Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"False\",\n\t\t\"name\": \"Item-wise Price List Rate\",\n\t\t\"doctype\": \"Item Price\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Stock Analytics\",\n\t\t\"doctype\": \"Stock Entry\",\n\t\t\"onboard\": 1\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Delivery Note Trends\",\n\t\t\"doctype\": \"Delivery Note\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Purchase Receipt Trends\",\n\t\t\"doctype\": \"Purchase Receipt\"\n\t},\n\t{\n\t    \"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Ordered Items To Be Delivered\",\n\t\t\"doctype\": \"Delivery Note\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Purchase Order Items To Be Received\",\n\t\t\"doctype\": \"Purchase Receipt\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Item Shortage Report\",\n\t\t\"doctype\": \"Bin\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Batch-Wise Balance History\",\n\t\t\"doctype\": \"Batch\"\n\t}\n]"
+  },
+  {
+   "hidden": 0,
+   "label": "Other Reports",
+   "links": "[\n    {\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Requested Items To Be Transferred\",\n\t\t\"doctype\": \"Material Request\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Batch Item Expiry Status\",\n\t\t\"doctype\": \"Stock Ledger Entry\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Item Prices\",\n\t\t\"doctype\": \"Price List\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Itemwise Recommended Reorder Level\",\n\t\t\"doctype\": \"Item\"\n\t},\n\t{\n\t\t\"type\": \"report\",\n\t\t\"is_query_report\": \"True\",\n\t\t\"name\": \"Item Variant Details\",\n\t\t\"doctype\": \"Item\"\n\t}\n]"
+  }
+ ],
+ "category": "Modules",
+ "charts": [],
+ "creation": "2020-05-27 15:25:44.182312",
+ "developer_mode_only": 0,
+ "disable_user_customization": 0,
+ "docstatus": 0,
+ "doctype": "Desk Page",
+ "extends_another_page": 0,
+ "idx": 0,
+ "is_standard": 1,
+ "label": "Stock",
+ "modified": "2020-05-28 10:56:35.346832",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Stock",
+ "owner": "Administrator",
+ "pin_to_bottom": 0,
+ "pin_to_top": 0,
+ "shortcuts": []
+}
