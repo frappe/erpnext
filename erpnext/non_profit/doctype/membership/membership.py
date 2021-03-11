@@ -282,8 +282,9 @@ def trigger_razorpay_subscription(*args, **kwargs):
 		member.flags.ignore_mandatory = True
 		member.save()
 
-		automate_payment = frappe.db.get_single_value("Membership Settings", "automate_membership_payment_entries")
-		membership.generate_invoice(with_payment_entry=automate_payment, save=True)
+		settings = frappe.get_doc("Non Profit Settings")
+		if settings.allow_invoicing and settings.automate_membership_invoicing:
+			membership.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
 
 	except Exception as e:
 		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), __("Payment ID"), payment.id)
