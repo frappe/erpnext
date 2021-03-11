@@ -83,7 +83,7 @@ class DeliveryNote(SellingController):
 			}
 		])
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		def toggle_print_hide(meta, fieldname):
 			df = meta.get_field(fieldname)
 			if self.get("print_without_amount"):

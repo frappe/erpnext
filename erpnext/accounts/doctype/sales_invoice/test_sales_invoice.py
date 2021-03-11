@@ -405,10 +405,10 @@ class TestSalesInvoice(unittest.TestCase):
 		item_row = si.get("items")[0]
 
 		add_items = [
-			(54, '_Test Account Excise Duty @ 12'),
-			(288, '_Test Account Excise Duty @ 15'),
-			(144, '_Test Account Excise Duty @ 20'),
-			(430, '_Test Item Tax Template 1')
+			(54, '_Test Account Excise Duty @ 12 - _TC'),
+			(288, '_Test Account Excise Duty @ 15 - _TC'),
+			(144, '_Test Account Excise Duty @ 20 - _TC'),
+			(430, '_Test Item Tax Template 1 - _TC')
 		]
 		for qty, item_tax_template in add_items:
 			item_row_copy = copy.deepcopy(item_row)
@@ -2077,14 +2077,14 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 			item.save()
 
 		item.append("taxes", {
-			"item_tax_template": "_Test Item Tax Template 1",
+			"item_tax_template": "_Test Item Tax Template 1 - _TC",
 			"valid_from": add_days(nowdate(), 1)
 		})
 
 		item.save()
 
 		sales_invoice = create_sales_invoice(item = "_Test Item 2", do_not_save=1)
-		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1"
+		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1 - _TC"
 		self.assertRaises(frappe.ValidationError, sales_invoice.save)
 
 		item.taxes = []

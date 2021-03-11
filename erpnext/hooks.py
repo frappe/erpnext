@@ -10,7 +10,7 @@ app_color = "#e74c3c"
 app_email = "info@erpnext.com"
 app_license = "GNU General Public License (v3)"
 source_link = "https://github.com/frappe/erpnext"
-app_logo_url = '/assets/erpnext/images/erp-icon.svg'
+app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 
 develop_version = '13.x.x-develop'
@@ -46,6 +46,7 @@ notification_config = "erpnext.startup.notifications.get_notification_config"
 get_help_messages = "erpnext.utilities.activation.get_help_messages"
 leaderboards = "erpnext.startup.leaderboard.get_leaderboards"
 filters_config = "erpnext.startup.filters.get_filters_config"
+additional_print_settings = "erpnext.controllers.print_settings.get_print_settings"
 
 on_session_creation = [
 	"erpnext.portal.utils.create_customer_or_supplier",
@@ -77,8 +78,8 @@ website_generators = ["Item Group", "Item", "BOM", "Sales Partner",
 	"Job Opening", "Student Admission"]
 
 website_context = {
-	"favicon": 	"/assets/erpnext/images/favicon.png",
-	"splash_image": "/assets/erpnext/images/erp-icon.svg"
+	"favicon": 	"/assets/erpnext/images/erpnext-favicon.svg",
+	"splash_image": "/assets/erpnext/images/erpnext-logo.svg"
 }
 
 website_route_rules = [
@@ -271,16 +272,19 @@ doc_events = {
 	'Address': {
 		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code', 'erpnext.regional.india.utils.update_gst_category']
 	},
+	'Supplier': {
+		'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
+	},
 	('Sales Invoice', 'Sales Order', 'Delivery Note', 'Purchase Invoice', 'Purchase Order', 'Purchase Receipt'): {
 		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
 	},
+	('Sales Invoice', 'Purchase Invoice'): {
+		'validate': ['erpnext.regional.india.utils.validate_document_name']
+	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.set_caller_information",
+		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
 		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
-	},
-	"Lead": {
-		"after_insert": "erpnext.telephony.doctype.call_log.call_log.set_caller_information"
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
@@ -392,6 +396,15 @@ payment_gateway_enabled = "erpnext.accounts.utils.create_payment_gateway_account
 
 communication_doctypes = ["Customer", "Supplier"]
 
+accounting_dimension_doctypes = ["GL Entry", "Sales Invoice", "Purchase Invoice", "Payment Entry", "Asset",
+	"Expense Claim", "Expense Claim Detail", "Expense Taxes and Charges", "Stock Entry", "Budget", "Payroll Entry", "Delivery Note",
+	"Sales Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Journal Entry Account", "Material Request Item", "Delivery Note Item",
+	"Purchase Receipt Item", "Stock Entry Detail", "Payment Entry Deduction", "Sales Taxes and Charges", "Purchase Taxes and Charges", "Shipping Rule",
+	"Landed Cost Item", "Asset Value Adjustment", "Loyalty Program", "Fee Schedule", "Fee Structure", "Stock Reconciliation",
+	"Travel Request", "Fees", "POS Profile", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item", "Subscription",
+	"Subscription Plan"
+]
+
 regional_overrides = {
 	'France': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'
@@ -401,6 +414,7 @@ regional_overrides = {
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_header': 'erpnext.regional.india.utils.get_itemised_tax_breakup_header',
 		'erpnext.controllers.taxes_and_totals.get_itemised_tax_breakup_data': 'erpnext.regional.india.utils.get_itemised_tax_breakup_data',
 		'erpnext.accounts.party.get_regional_address_details': 'erpnext.regional.india.utils.get_regional_address_details',
+		'erpnext.controllers.taxes_and_totals.get_regional_round_off_accounts': 'erpnext.regional.india.utils.get_regional_round_off_accounts',
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
 		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries',
@@ -583,4 +597,8 @@ global_search_doctypes = {
 		{'doctype': 'Hotel Room Package', 'index': 3},
 		{'doctype': 'Hotel Room Type', 'index': 4}
 	]
+}
+
+additional_timeline_content = {
+	'*': ['erpnext.telephony.doctype.call_log.call_log.get_linked_call_logs']
 }

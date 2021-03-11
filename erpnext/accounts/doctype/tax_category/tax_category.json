@@ -11,15 +11,18 @@
  ],
  "fields": [
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "title",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Title",
+   "reqd": 1,
    "unique": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-08-30 19:41:25.783852",
+ "modified": "2021-03-03 11:50:38.748872",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Tax Category",

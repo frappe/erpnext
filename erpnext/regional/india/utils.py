@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe, re, json
 from frappe import _
 import erpnext
-from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words
+from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words, getdate
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -13,6 +13,13 @@ from six import string_types
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_account_currency
 from frappe.model.utils import get_fetch_values
+
+
+GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")   #alphanumeric and - /
+GSTIN_FORMAT = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
+GSTIN_UIN_FORMAT = re.compile("^[0-9]{4}[A-Z]{3}[0-9]{5}[0-9A-Z]{3}")
+PAN_NUMBER_FORMAT = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
+
 
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
@@ -37,12 +44,10 @@ def validate_gstin_for_india(doc, method):
 		frappe.throw(_("Invalid GSTIN! A GSTIN must have 15 characters."))
 
 	if gst_category and gst_category == 'UIN Holders':
-		p = re.compile("^[0-9]{4}[A-Z]{3}[0-9]{5}[0-9A-Z]{3}")
-		if not p.match(doc.gstin):
+		if not GSTIN_UIN_FORMAT.match(doc.gstin):
 			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers"))
 	else:
-		p = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
-		if not p.match(doc.gstin):
+		if not GSTIN_FORMAT.match(doc.gstin):
 			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the format of GSTIN."))
 
 		validate_gstin_check_digit(doc.gstin)
@@ -54,6 +59,13 @@ def validate_gstin_for_india(doc, method):
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
+
+def validate_pan_for_india(doc, method):
+	if doc.get('country') != 'India' or not doc.pan:
+		return
+
+	if not PAN_NUMBER_FORMAT.match(doc.pan):
+		frappe.throw(_("Invalid PAN No. The input you've entered doesn't match the format of PAN."))
 
 def validate_tax_category(doc, method):
 	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
@@ -139,6 +151,20 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 
 def set_place_of_supply(doc, method=None):
 	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
+
+def validate_document_name(doc, method=None):
+	"""Validate GST invoice number requirements."""
+	country = frappe.get_cached_value("Company", doc.company, "country")
+
+	# Date was chosen as start of next FY to avoid irritating current users.
+	if country != "India" or getdate(doc.posting_date) < getdate("2021-04-01"):
+		return
+
+	if len(doc.name) > 16:
+		frappe.throw(_("Maximum length of document number should be 16 characters as per GST rules. Please change the naming series."))
+
+	if not GST_INVOICE_NUMBER_FORMAT.match(doc.name):
+		frappe.throw(_("Document name should only contain alphanumeric values, dash(-) and slash(/) characters as per GST rules. Please change the naming series."))
 
 # don't remove this function it is used in tests
 def test_method():
@@ -775,3 +801,24 @@ def make_regional_gl_entries(gl_entries, doc):
 				)
 
 	return gl_entries
+
+@frappe.whitelist()
+def get_regional_round_off_accounts(company, account_list):
+	country = frappe.get_cached_value('Company', company, 'country')
+
+	if country != 'India':
+		return
+
+	if isinstance(account_list, string_types):
+		account_list = json.loads(account_list)
+
+	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
+		return
+
+	gst_accounts = get_gst_accounts(company)
+	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+		+ gst_accounts.get('igst_account')
+
+	account_list.extend(gst_account_list)
+
+	return account_list

@@ -22,6 +22,7 @@ from six import text_type
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 from erpnext.stock.get_item_details import get_item_warehouse, _get_item_tax_template, get_item_tax_map
 from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
+from erpnext.controllers.print_settings import set_print_templates_for_item_table, set_print_templates_for_taxes
 
 class AccountMissingError(frappe.ValidationError): pass
 
@@ -30,6 +31,19 @@ force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
 		super(AccountsController, self).__init__(*args, **kwargs)
+
+	def get_print_settings(self):
+		print_setting_fields = []
+		items_field = self.meta.get_field('items')
+
+		if items_field and items_field.fieldtype == 'Table':
+			print_setting_fields += ['compact_item_print', 'print_uom_after_quantity']
+
+		taxes_field = self.meta.get_field('taxes')
+		if taxes_field and taxes_field.fieldtype == 'Table':
+			print_setting_fields += ['print_taxes_with_zero_amount']
+
+		return print_setting_fields
 
 	@property
 	def company_currency(self):
@@ -157,7 +171,7 @@ class AccountsController(TransactionBase):
 		elif self.doctype in ("Quotation", "Purchase Order", "Sales Order"):
 			self.validate_non_invoice_documents_schedule()
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		if self.doctype in ['Purchase Order', 'Sales Order', 'Sales Invoice', 'Purchase Invoice',
 							'Supplier Quotation', 'Purchase Receipt', 'Delivery Note', 'Quotation']:
 			if self.get("group_same_items"):
@@ -169,6 +183,9 @@ class AccountsController(TransactionBase):
 				self.discount_amount = -self.discount_amount
 			else:
 				df.set("print_hide", 1)
+
+		set_print_templates_for_item_table(self, settings)
+		set_print_templates_for_taxes(self, settings)
 
 	def calculate_paid_amount(self):
 		if hasattr(self, "is_pos") or hasattr(self, "is_paid"):
@@ -1292,45 +1309,28 @@ def add_taxes_from_tax_template(child_item, parent_doc):
 					})
 				tax_row.db_insert()
 
-def set_sales_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
+def set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, trans_item):
 	"""
-	Returns a Sales Order Item child item containing the default values
+	Returns a Sales/Purchase Order Item child item containing the default values
 	"""
 	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc('Sales Order Item', p_doc, child_docname)
+	child_item = frappe.new_doc(child_doctype, p_doc, child_docname)
 	item = frappe.get_doc("Item", trans_item.get('item_code'))
-	child_item.item_code = item.item_code
-	child_item.item_name = item.item_name
-	child_item.description = item.description
-	child_item.delivery_date = trans_item.get('delivery_date') or p_doc.delivery_date
+	for field in ("item_code", "item_name", "description", "item_group"):
+	    child_item.update({field: item.get(field)})
+	date_fieldname = "delivery_date" if child_doctype == "Sales Order Item" else "schedule_date"
+	child_item.update({date_fieldname: trans_item.get(date_fieldname) or p_doc.get(date_fieldname)})
 	child_item.uom = trans_item.get("uom") or item.stock_uom
 	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
 	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
-	set_child_tax_template_and_map(item, child_item, p_doc)
-	add_taxes_from_tax_template(child_item, p_doc)
-	child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
-	if not child_item.warehouse:
-		frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
-			.format(frappe.bold("default warehouse"), frappe.bold(item.item_code)))
-	return child_item
-
-
-def set_purchase_order_defaults(parent_doctype, parent_doctype_name, child_docname, trans_item):
-	"""
-	Returns a Purchase Order Item child item containing the default values
-	"""
-	p_doc = frappe.get_doc(parent_doctype, parent_doctype_name)
-	child_item = frappe.new_doc('Purchase Order Item', p_doc, child_docname)
-	item = frappe.get_doc("Item", trans_item.get('item_code'))
-	child_item.item_code = item.item_code
-	child_item.item_name = item.item_name
-	child_item.description = item.description
-	child_item.schedule_date = trans_item.get('schedule_date') or p_doc.schedule_date
-	child_item.uom = trans_item.get("uom") or item.stock_uom
-	conversion_factor = flt(get_conversion_factor(item.item_code, child_item.uom).get("conversion_factor"))
-	child_item.conversion_factor = flt(trans_item.get('conversion_factor')) or conversion_factor
-	child_item.base_rate = 1 # Initiallize value will update in parent validation
-	child_item.base_amount = 1 # Initiallize value will update in parent validation
+	if child_doctype == "Purchase Order Item":
+		child_item.base_rate = 1 # Initiallize value will update in parent validation
+		child_item.base_amount = 1 # Initiallize value will update in parent validation
+	if child_doctype == "Sales Order Item":
+		child_item.warehouse = get_item_warehouse(item, p_doc, overwrite_warehouse=True)
+		if not child_item.warehouse:
+			frappe.throw(_("Cannot find {} for item {}. Please set the same in Item Master or Stock Settings.")
+				.format(frappe.bold("default warehouse"), frappe.bold(item.item_code)))
 	set_child_tax_template_and_map(item, child_item, p_doc)
 	add_taxes_from_tax_template(child_item, p_doc)
 	return child_item
@@ -1394,8 +1394,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			)
 
 	def get_new_child_item(item_row):
-		new_child_function = set_sales_order_defaults if parent_doctype == "Sales Order" else set_purchase_order_defaults
-		return new_child_function(parent_doctype, parent_doctype_name, child_docname, item_row)
+		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item" 
+		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
 		if parent_doctype == "Sales Order" and flt(d.get("qty")) < flt(child_item.delivered_qty):

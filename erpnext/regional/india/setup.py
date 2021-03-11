@@ -21,6 +21,7 @@ def setup_company_independent_fixtures():
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
+	create_gratuity_rule()
 	add_print_formats()
 
 def add_hsn_sac_codes():
@@ -105,8 +106,9 @@ def add_print_formats():
 	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
 	frappe.reload_doc("accounts", "print_format", "GST E-Invoice")
 
-	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
-		name in('GST POS Invoice', 'GST Tax Invoice', 'GST E-Invoice') """)
+	frappe.db.set_value("Print Format", "GST POS Invoice", "disabled", 0)
+	frappe.db.set_value("Print Format", "GST Tax Invoice", "disabled", 0)
+	frappe.db.set_value("Print Format", "GST E-Invoice", "disabled", 0)
 
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
@@ -839,3 +841,23 @@ def get_tds_details(accounts, fiscal_year):
 			rates=[{"fiscal_year": fiscal_year, "tax_withholding_rate": 20,
 			"single_threshold": 2500, "cumulative_threshold": 0}])
 	]
+
+def create_gratuity_rule():
+
+	# Standard Indain Gratuity Rule
+	if not frappe.db.exists("Gratuity Rule", "Indian Standard Gratuity Rule"):
+		rule = frappe.new_doc("Gratuity Rule")
+		rule.name = "Indian Standard Gratuity Rule"
+		rule.calculate_gratuity_amount_based_on = "Current Slab"
+		rule.work_experience_calculation_method = "Round Off Work Experience"
+		rule.minimum_year_for_gratuity = 5
+
+		fraction = 15/26
+		rule.append("gratuity_rule_slabs", {
+			"from_year": 0,
+			"to_year":0,
+			"fraction_of_applicable_earnings": fraction
+		})
+
+		rule.flags.ignore_mandatory = True
+		rule.save()
