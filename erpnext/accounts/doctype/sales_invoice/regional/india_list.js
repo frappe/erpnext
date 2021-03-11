@@ -122,10 +122,23 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 		d.show();
 	};
 
+	let einvoicing_enabled = false;
 	frappe.db.get_single_value("E Invoice Settings", "enable").then(enabled => {
-		if (enabled) {
-			doclist.page.add_actions_menu_item(__('Generate IRNs'), generate_irns, false);
-			doclist.page.add_actions_menu_item(__('Cancel IRNs'), cancel_irns, false);
+		einvoicing_enabled = enabled;
+	});
+
+	doclist.$result.on("change", "input[type=checkbox]", (e) => {
+		if (einvoicing_enabled) {
+			const docnames = doclist.get_checked_items(true);
+			if (docnames && docnames.length) {
+				if (doclist.page.get_inner_group_button(__('E-Invoicing')).length == 0) {
+					doclist.page.add_inner_button(__('Generate IRNs'), generate_irns, __('E-Invoicing'));
+					doclist.page.add_inner_button(__('Cancel IRNs'), cancel_irns, __('E-Invoicing'));
+				}
+			} else {
+				doclist.page.remove_inner_button(__('Generate IRNs'), __('E-Invoicing'));
+				doclist.page.remove_inner_button(__('Cancel IRNs'), __('E-Invoicing'));
+			}
 		}
 	});
 };
