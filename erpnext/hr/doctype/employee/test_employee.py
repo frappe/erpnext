@@ -48,6 +48,7 @@ class TestEmployee(unittest.TestCase):
 		self.assertRaises(EmployeeLeftValidationError, employee1_doc.save)
 
 def make_employee(user, company=None, **kwargs):
+	""
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc({
 			"doctype": "User",

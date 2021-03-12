@@ -96,7 +96,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 12:00:23.276329",
+ "modified": "2021-03-02 17:34:04.190677",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -113,5 +113,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

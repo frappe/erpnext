@@ -555,12 +555,12 @@ class TestSalesOrder(unittest.TestCase):
 		new_item_with_tax = frappe.get_doc("Item", "Test Item with Tax")
 
 		new_item_with_tax.append("taxes", {
-			"item_tax_template": "Test Update Items Template",
+			"item_tax_template": "Test Update Items Template - _TC",
 			"valid_from": nowdate()
 		})
 		new_item_with_tax.save()
 
-		tax_template = "_Test Account Excise Duty @ 10"
+		tax_template = "_Test Account Excise Duty @ 10 - _TC"
 		item =  "_Test Item Home Desktop 100"
 		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
 			item_doc = frappe.get_doc("Item", item)
@@ -614,7 +614,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.cancel()
 		so.delete()
 		new_item_with_tax.delete()
-		frappe.get_doc("Item Tax Template", "Test Update Items Template").delete()
+		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
 		frappe.db.set_value("Stock Settings", None, "default_warehouse", old_stock_settings_value)
 
 	def test_warehouse_user(self):
