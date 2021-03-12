@@ -82,6 +82,7 @@ jobs:
           TYPE: ${{ matrix.TYPE }}
 
       - name: Coverage
+        if: matrix.TYPE == 'server'
         run: |
           cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
           cd ${GITHUB_WORKSPACE}
