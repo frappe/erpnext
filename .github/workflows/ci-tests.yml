@@ -81,9 +81,6 @@ jobs:
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-
       - name: Run Tests
         run: bash ${GITHUB_WORKSPACE}/.github/helper/run_tests.sh
         env:
