@@ -31,7 +31,7 @@
  ],
  "icon": "fa fa-compass",
  "idx": 1,
- "modified": "2020-03-03 15:36:35.670739",
+ "modified": "2021-03-12 15:04:16.648152",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "UOM",
@@ -81,6 +81,11 @@
    "read": 1,
    "report": 1,
    "role": "Manufacturing User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "All"
   }
  ],
  "quick_entry": 1,

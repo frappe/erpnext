@@ -655,7 +655,7 @@
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
- "modified": "2021-01-31 22:01:48.687543",
+ "modified": "2021-03-12 15:01:58.196493",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",
@@ -743,6 +743,12 @@
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "export": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
   }
  ],
  "quick_entry": 1,

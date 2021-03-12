@@ -28,7 +28,7 @@
   }
  ],
  "in_create": 1,
- "modified": "2020-03-03 15:36:35.911704",
+ "modified": "2021-03-12 15:03:16.725456",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Party Type",
@@ -66,6 +66,11 @@
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
   }
  ],
  "show_name_in_global_search": 1,

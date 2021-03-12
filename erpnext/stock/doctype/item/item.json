@@ -1245,7 +1245,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-02-21 18:13:44.094378",
+ "modified": "2021-03-12 15:05:48.882713",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
@@ -1308,6 +1308,11 @@
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
   },
   {
    "export": 1,

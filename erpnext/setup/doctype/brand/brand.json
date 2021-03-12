@@ -151,7 +151,7 @@
  ],
  "icon": "fa fa-certificate",
  "idx": 1,
- "modified": "2021-02-21 17:05:30.348675",
+ "modified": "2021-03-12 15:00:02.701086",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Brand",
@@ -192,9 +192,18 @@
    "role": "Accounts User"
   },
   {
+   "export": 1,
+   "print": 1,
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
   },
   {
    "read": 1,

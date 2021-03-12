@@ -688,7 +688,7 @@
  "icon": "fa fa-file-text",
  "idx": 1,
  "is_submittable": 1,
- "modified": "2021-03-09 22:31:57.450817",
+ "modified": "2021-03-12 15:09:13.110004",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
@@ -768,6 +768,13 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User"
+  },
+  {
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
   }
  ],
  "search_fields": "posting_date, from_warehouse, to_warehouse, purpose, remarks",

@@ -704,7 +704,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-01-28 14:26:21.228362",
+ "modified": "2021-03-12 15:08:47.934111",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
@@ -759,7 +759,7 @@
    "write": 1
   },
   {
-   "email": 1,
+   "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,

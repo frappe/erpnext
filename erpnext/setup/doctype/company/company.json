@@ -890,7 +890,7 @@
  "idx": 1,
  "image_field": "company_logo",
  "is_tree": 1,
- "modified": "2021-03-09 18:41:51.286733",
+ "modified": "2021-03-12 15:01:33.523214",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
@@ -937,6 +937,10 @@
   {
    "read": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "role": "Auditor"
   },
   {
    "read": 1,

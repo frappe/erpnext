@@ -271,7 +271,7 @@
  "image_field": "image",
  "is_tree": 1,
  "max_attachments": 3,
- "modified": "2021-02-21 17:10:12.765788",
+ "modified": "2021-03-12 15:02:55.087626",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
@@ -325,6 +325,11 @@
    "read": 1,
    "report": 1,
    "role": "Sales User (Read Only)"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Auditor"
   },
   {
    "read": 1,
