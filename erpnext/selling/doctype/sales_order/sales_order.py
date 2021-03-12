@@ -778,6 +778,7 @@ def get_events(start, end, filters=None):
 
 @frappe.whitelist()
 def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
+	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 	if not selected_items: return
 
 	if isinstance(selected_items, string_types):
@@ -829,6 +830,7 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
+	purchase_orders = []
 	for supplier in suppliers:
 		doc = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
@@ -872,7 +874,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 
 		doc.insert()
 		frappe.db.commit()
-		return doc
+		purchase_orders.append(doc)
+
+	return purchase_orders
 
 @frappe.whitelist()
 def make_purchase_order(source_name, selected_items=None, target_doc=None):
