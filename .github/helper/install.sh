@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 cd ~ || exit
 
 sudo apt-get install redis-server
