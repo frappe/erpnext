@@ -851,6 +851,20 @@ def get_payment_entry(ref_doc, args):
 
 	return je if args.get("journal_entry") else je.as_dict()
 
+def make_journal_entry(**args):
+	args = frappe._dict(args)
+
+	jv = frappe.new_doc("Journal Entry")
+	jv.update(args)
+
+	jv.accounts = []
+	for row in args.accounts:
+		if isinstance(row, dict):
+			row = frappe._dict(row)
+
+		jv.append('accounts', row)
+
+	jv.submit()
 
 @frappe.whitelist()
 def get_opening_accounts(company):

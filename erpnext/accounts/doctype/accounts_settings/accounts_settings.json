@@ -28,6 +28,8 @@
   "column_break_18",
   "book_deferred_entries_via_journal_entry",
   "submit_journal_entries",
+  "values_out_of_sync_section",
+  "make_auto_journal_entry_on_values_out_of_sync",
   "print_settings",
   "show_inclusive_tax_in_print",
   "column_break_12",
@@ -226,6 +228,18 @@
    "fieldname": "delete_linked_ledger_entries",
    "fieldtype": "Check",
    "label": "Delete Accounting and Stock Ledger Entries on deletion of Transaction"
+  },
+  {
+   "fieldname": "values_out_of_sync_section",
+   "fieldtype": "Section Break",
+   "label": "Values Out Of Sync"
+  },
+  {
+   "default": "1",
+   "description": "If stock value and account value is not same then system will create the adjustment journal entry",
+   "fieldname": "make_auto_journal_entry_on_values_out_of_sync",
+   "fieldtype": "Check",
+   "label": "Make Auto Journal Entry On Values Out Of Sync"
   }
  ],
  "icon": "icon-cog",
@@ -233,7 +247,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-01-05 13:04:00.118892",
+ "modified": "2021-03-12 12:02:48.682509",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

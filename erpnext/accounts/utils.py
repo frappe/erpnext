@@ -973,10 +973,14 @@ def compare_existing_and_expected_gle(existing_gle, expected_gle, precision):
 	return matched
 
 def check_if_stock_and_account_balance_synced(posting_date, company, voucher_type=None, voucher_no=None):
+	from erpnext.accounts.doctype.journal_entry.journal_entry import make_journal_entry
+
 	if not cint(erpnext.is_perpetual_inventory_enabled(company)):
 		return
 
 	accounts = get_stock_accounts(company, voucher_type, voucher_no)
+	make_auto_jv = frappe.db.get_single_value('Accounts Settings', 'make_auto_journal_entry_on_values_out_of_sync')
+
 	stock_adjustment_account = frappe.db.get_value("Company", company, "stock_adjustment_account")
 
 	for account in accounts:
@@ -989,20 +993,24 @@ def check_if_stock_and_account_balance_synced(posting_date, company, voucher_typ
 
 			diff = flt(stock_bal - account_bal, precision)
 
-			error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses as on {3}.").format(
-				stock_bal, account_bal, frappe.bold(account), posting_date)
-			error_resolution = _("Please create an adjustment Journal Entry for amount {0} on {1}")\
-				.format(frappe.bold(diff), frappe.bold(posting_date))
+			if not make_auto_jv:
+				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses as on {3}.").format(
+					stock_bal, account_bal, frappe.bold(account), posting_date)
+				error_resolution = _("Please create an adjustment Journal Entry for amount {0} on {1}")\
+					.format(frappe.bold(diff), frappe.bold(posting_date))
 
-			frappe.msgprint(
-				msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
-				raise_exception=StockValueAndAccountBalanceOutOfSync,
-				title=_('Values Out Of Sync'),
-				primary_action={
-					'label': _('Make Journal Entry'),
-					'client_action': 'erpnext.route_to_adjustment_jv',
-					'args': get_journal_entry(account, stock_adjustment_account, diff)
-				})
+				frappe.msgprint(
+					msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
+					raise_exception=StockValueAndAccountBalanceOutOfSync,
+					title=_('Values Out Of Sync'),
+					primary_action={
+						'label': _('Make Journal Entry'),
+						'client_action': 'erpnext.route_to_adjustment_jv',
+						'args': get_journal_entry(account, stock_adjustment_account, diff)
+					})
+			else:
+				data = get_journal_entry(account, stock_adjustment_account, diff)
+				make_journal_entry(posting_date=posting_date, company=company, accounts=data.get('accounts'))
 
 def get_stock_accounts(company, voucher_type=None, voucher_no=None):
 	stock_accounts = [d.name for d in frappe.db.get_all("Account", {

@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form
+from frappe.utils import cint, get_link_to_form, today
 from erpnext.stock.stock_ledger import repost_future_sle
 from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
 from frappe.utils.user import get_users_with_role
@@ -29,7 +29,7 @@ class RepostItemValuation(Document):
 			self.company = frappe.get_cached_value(self.voucher_type, self.voucher_no, "company")
 		elif self.warehouse:
 			self.company = frappe.get_cached_value("Warehouse", self.warehouse, "company")
-	
+
 	def set_status(self, status=None):
 		if not status:
 			status = 'Queued'
@@ -54,7 +54,7 @@ def repost(doc):
 
 		repost_sl_entries(doc)
 		repost_gl_entries(doc)
-		check_if_stock_and_account_balance_synced(doc.posting_date, doc.company)
+		check_if_stock_and_account_balance_synced(today(), doc.company)
 
 		doc.set_status('Completed')
 	except Exception:
@@ -103,7 +103,7 @@ def notify_error_to_stock_managers(doc, traceback):
 	recipients = get_users_with_role("Stock Manager")
 	if not recipients:
 		get_users_with_role("System Manager")
-	
+
 	subject = _("Error while reposting item valuation")
 	message = (_("Hi,") + "<br>"
 		+ _("An error has been appeared while reposting item valuation via {0}")
