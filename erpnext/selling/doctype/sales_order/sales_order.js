@@ -502,6 +502,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	},
 
 	make_raw_material_request_dialog: function(r) {
+		var me = this;
 		var fields = [
 			{fieldtype:'Check', fieldname:'include_exploded_items',
 				label: __('Include Exploded Items')},
@@ -545,11 +546,10 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 					freeze: true,
 					callback: function(r) {
 						if(r.message) {
-							frappe.msgprint(__('Material Request {0} submitted.',
-							['<a href="#Form/Material Request/'+r.message.name+'">' + r.message.name+ '</a>']));
+							var doc = frappe.model.sync(r.message);
+							frappe.set_route("Form", r.message.doctype, r.message.name);
 						}
 						d.hide();
-						me.frm.reload_doc();
 					}
 				});
 			},

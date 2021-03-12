@@ -406,6 +406,7 @@ class ProductionPlan(Document):
 			# submit
 			material_request.flags.ignore_permissions = 1
 			material_request.run_method("set_missing_values")
+			material_request.run_method("calculate_totals")
 
 			if self.get('submit_material_request'):
 				material_request.submit()

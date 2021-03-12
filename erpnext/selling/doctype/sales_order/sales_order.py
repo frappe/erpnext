@@ -1115,8 +1115,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 		doctype = 'Material Request',
 		transaction_date = nowdate(),
 		company = company,
-		requested_by = frappe.session.user,
-		material_request_type = 'Purchase'
+		requested_by = frappe.session.user
 	))
 	for item in raw_materials:
 		item_doc = frappe.get_cached_doc('Item', item.get('item_code'))
@@ -1131,13 +1130,10 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			'project': project
 		})
 
-		if not (strip_html(item.get("description")) and strip_html(item_doc.description)):
-			row.description = item_doc.item_name or item.get('item_code')
-
 	material_request.insert()
 	material_request.flags.ignore_permissions = 1
 	material_request.run_method("set_missing_values")
-	material_request.submit()
+	material_request.run_method("calculate_totals")
 	return material_request
 
 @frappe.whitelist()
