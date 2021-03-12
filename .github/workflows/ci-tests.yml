@@ -10,6 +10,7 @@ jobs:
 
     strategy:
       fail-fast: false
+
       matrix:
        include:
         - TYPE: "server"
