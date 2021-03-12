@@ -30,7 +30,6 @@ def get_data():
 					"onboard": 1,
 					"dependencies": ["Item"]
 				},
-
 				{
 					"type": "doctype",
 					"name": "Workstation",
@@ -120,19 +119,16 @@ def get_data():
 			]
 		},
 		{
-			"label": _("Settings"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Manufacturing Settings",
-					"description": _("Global settings for all manufacturing processes."),
-				}
-			]
-		},
-		{
 			"label": _("Reports"),
 			"icon": "fa fa-list",
 			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Production Analytics",
+					"doctype": "Work Order",
+					"onboard": 1
+				},
 				{
 					"type": "report",
 					"is_query_report": True,
@@ -148,20 +144,24 @@ def get_data():
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Issued Items Against Work Order",
-					"doctype": "Work Order"
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
 					"name": "Completed Work Orders",
 					"doctype": "Work Order"
 				},
 				{
 					"type": "report",
 					"is_query_report": True,
-					"name": "Production Analytics",
+					"name": "Issued Items Against Work Order",
 					"doctype": "Work Order"
+				},
+			]
+		},
+		{
+			"label": _("Settings"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Manufacturing Settings",
+					"description": _("Global settings for all manufacturing processes."),
 				}
 			]
 		},
