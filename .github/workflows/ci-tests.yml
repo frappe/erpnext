@@ -15,8 +15,10 @@ jobs:
        include:
         - TYPE: "server"
           JOB_NAME: "Server"
+          RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-tests --app erpnext --coverage
         - TYPE: "patch"
           JOB_NAME: "Patch"
+          RUN_COMMAND: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate
 
     name: ${{ matrix.JOB_NAME }}
 
@@ -50,7 +52,7 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Tests
-        run: bash ${GITHUB_WORKSPACE}/.github/helper/run_tests.sh
+        run: ${{ matrix.RUN_COMMAND }}
         env:
           TYPE: ${{ matrix.TYPE }}
 

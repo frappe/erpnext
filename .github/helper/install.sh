@@ -6,8 +6,6 @@ cd ~ || exit
 
 sudo apt-get install redis-server
 
-sudo echo 1 > /proc/sys/vm/overcommit_memory
-
 pip install frappe-bench
 
 git clone https://github.com/frappe/frappe --branch "${GITHUB_BASE_REF}" --depth 1
