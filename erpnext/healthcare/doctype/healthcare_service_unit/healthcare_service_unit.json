@@ -205,11 +205,13 @@
   }
  ],
  "links": [],
- "modified": "2021-02-23 11:47:31.168541",
+ "is_tree": 1,
+ "modified": "2021-02-23 13:47:31.168541",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit",
  "owner": "Administrator",
+ "nsm_parent_field": "parent_healthcare_service_unit",
  "permissions": [
   {
    "email": 1,

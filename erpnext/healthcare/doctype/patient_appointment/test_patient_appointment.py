@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe import _
 from erpnext.healthcare.doctype.patient_appointment.patient_appointment import update_status, make_encounter
 from frappe.utils import nowdate, add_days, now_datetime
 from frappe.utils.make_random import get_random

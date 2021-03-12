@@ -412,8 +412,7 @@ let check_and_set_availability = function(frm) {
 											disabled = true;
 											return false;
 										}
-									}
-									else {
+									} else {
 										if (slot_start_time.isBefore(end_time) && slot_end_time.isAfter(booked_moment)) {
 											appointment_count++;
 										}
@@ -424,12 +423,12 @@ let check_and_set_availability = function(frm) {
 										}
 									}
 								});
-								let tool_tip = ``
-								let count = ``
+								let count = ``;
+								let tool_tip = ``;
 								if (slot_details[i].allow_overlap == 1 && slot_details[i].service_unit_capacity > 1) {
 									let available_slots = slot_details[i].service_unit_capacity - appointment_count;
-									count = `${(available_slots > 0 ? available_slots : __('Full'))}`
-									tool_tip =`${available_slots} ${__('slots available for booking')}`
+									count = `${(available_slots > 0 ? available_slots : __('Full'))}`;
+									tool_tip =`${available_slots} ${__('slots available for booking')}`;
 								}
 								return `<button class="btn btn-secondary"
 									data-name=${start_str}

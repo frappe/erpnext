@@ -7,8 +7,8 @@ frappe.ui.form.on('Healthcare Service Unit', {
 
 		// get query select healthcare service unit
 		frm.fields_dict['parent_healthcare_service_unit'].get_query = function(doc) {
-			return{
-				filters:[
+			return {
+				filters: [
 					['Healthcare Service Unit', 'is_group', '=', 1],
 					['Healthcare Service Unit', 'name', '!=', doc.healthcare_service_unit_name]
 				]
@@ -53,7 +53,7 @@ frappe.ui.form.on('Healthcare Service Unit', {
 		}
 	},
 	overlap_appointments: function(frm) {
-		if(frm.doc.overlap_appointments == 0){
+		if (frm.doc.overlap_appointments == 0) {
 			frm.set_value('service_unit_capacity', '');
 		}
 	}

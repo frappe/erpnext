@@ -543,58 +543,43 @@ def get_drugs_to_invoice(encounter):
 
 
 @frappe.whitelist()
-def get_children(doctype, parent, company, is_root=False):
-	parent_fieldname = "parent_" + doctype.lower().replace(" ", "_")
-	fields = [
-		"name as value",
-		"is_group as expandable",
-		"lft",
-		"rgt"
-	]
-	# fields = [ "name", "is_group", "lft", "rgt" ]
-	filters = [["ifnull(`{0}`,'')".format(parent_fieldname), "=", "" if is_root else parent]]
+def get_children(doctype, parent=None, company=None, is_root=False):
+    parent_fieldname = 'parent_' + doctype.lower().replace(' ', '_')
+    fields = [
+        'name as value',
+        'is_group as expandable',
+        'lft',
+        'rgt'
+    ]
 
-	if is_root:
-		fields += ["service_unit_type"] if doctype == "Healthcare Service Unit" else []
-		filters.append(["company", "=", company])
+    filters = [["ifnull(`{0}`,'')".format(parent_fieldname),
+                '=', '' if is_root else parent]]
 
-	else:
-		fields += ["service_unit_type", "allow_appointments", "inpatient_occupancy", "occupancy_status"] if doctype == "Healthcare Service Unit" else []
-		fields += [parent_fieldname + " as parent"]
+    if is_root:
+        fields += ['service_unit_type'] if doctype == 'Healthcare Service Unit' else []
+        filters.append(['company', '=', company])
+    else:
+        fields += ['service_unit_type', 'allow_appointments', 'inpatient_occupancy',
+                   'occupancy_status'] if doctype == 'Healthcare Service Unit' else []
+        fields += [parent_fieldname + ' as parent']
 
-	hc_service_units = frappe.get_list(doctype, fields=fields, filters=filters)
+    service_units = frappe.get_list(doctype, fields=fields, filters=filters)
+    for each in service_units:
+        if each['expandable'] == 1:  # group node
+            available_count = frappe.db.count('Healthcare Service Unit',  filters={
+                'parent_healthcare_service_unit': each['value'],
+                'inpatient_occupancy': 1})
 
-	if doctype == "Healthcare Service Unit":
-		for each in hc_service_units:
-			occupancy_msg = ""
-			if each["expandable"] == 1:
-				occupied = False
-				vacant = False
-				child_list = frappe.db.sql(
-					'''
-						SELECT
-							name, occupancy_status
-						FROM
-							`tabHealthcare Service Unit`
-						WHERE
-							inpatient_occupancy = 1
-							and lft > %s and rgt < %s
-					''', (each['lft'], each['rgt']))
+            if available_count > 0:
+                occupied_count = frappe.db.count('Healthcare Service Unit',  {
+                    'parent_healthcare_service_unit': each['value'],
+                    'inpatient_occupancy': 1,
+                    'occupancy_status': 'Occupied'})
+                # set occupancy status of group node
+                each['occupied_of_available'] = str(
+                    occupied_count) + ' Occupied of ' + str(available_count)
 
-				for child in child_list:
-					if not occupied:
-						occupied = 0
-					if child[1] == "Occupied":
-						occupied += 1
-					if not vacant:
-						vacant = 0
-					if child[1] == "Vacant":
-						vacant += 1
-				if vacant and occupied:
-					occupancy_total = vacant + occupied
-					occupancy_msg = str(occupied) + " Occupied out of " + str(occupancy_total)
-			each["occupied_out_of_vacant"] = occupancy_msg
-	return hc_service_units
+    return service_units
 
 
 @frappe.whitelist()
