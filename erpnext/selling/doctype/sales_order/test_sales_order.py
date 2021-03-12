@@ -851,10 +851,10 @@ class TestSalesOrder(unittest.TestCase):
 		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier
 
 		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 1"):
-			po_item1 = make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
+			make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
 		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 2"):
-			po_item2 = make_item("_Test Item for Drop Shipping 2", {"is_stock_item": 1, "delivered_by_supplier": 1})
+			make_item("_Test Item for Drop Shipping 2", {"is_stock_item": 1, "delivered_by_supplier": 1})
 
 		so_items = [
 			{
