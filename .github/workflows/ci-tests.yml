@@ -83,7 +83,8 @@ jobs:
 
       - name: Coverage
         run: |
-          cd ~/frappe-bench/sites/
+          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
+          cd ${GITHUB_WORKSPACE}
           pip install coveralls==2.2.0
           pip install coverage==4.5.4
           coveralls
