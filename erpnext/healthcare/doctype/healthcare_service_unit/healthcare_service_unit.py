@@ -6,9 +6,17 @@ from __future__ import unicode_literals
 
 from frappe.utils.nestedset import NestedSet
 import frappe
+from frappe import _
 
 class HealthcareServiceUnit(NestedSet):
 	nsm_parent_field = 'parent_healthcare_service_unit'
+
+	def validate(self):
+		if self.overlap_appointments:
+			if not self.service_unit_capacity:
+				frappe.throw(_('Service Unit Capacity is mandatory'))
+			elif not float(self.service_unit_capacity) > 0:
+				frappe.throw(_('Service Unit Capacity should be greater than 0'))
 
 	def autoname(self):
 		if self.company:
