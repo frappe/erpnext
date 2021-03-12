@@ -97,3 +97,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
