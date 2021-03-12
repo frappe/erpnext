@@ -6,6 +6,10 @@ cd ~ || exit
 
 sudo apt-get install redis-server
 
+sudo apt install nodejs
+
+sudo apt install npm
+
 pip install frappe-bench
 
 git clone https://github.com/frappe/frappe --branch "${GITHUB_BASE_REF}" --depth 1

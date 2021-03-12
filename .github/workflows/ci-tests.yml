@@ -40,11 +40,6 @@ jobs:
         with:
           python-version: 3.6
 
-      - uses: actions/setup-node@v2
-        with:
-          node-version: '12'
-          check-latest: true
-
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
 
