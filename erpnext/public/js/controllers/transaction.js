@@ -1888,7 +1888,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			frappe.throw(__("Please enter Item Code to get batch no"));
 		} else if (doc.doctype == "Purchase Receipt" ||
 			(doc.doctype == "Purchase Invoice" && doc.update_stock)) {
-
 			return {
 				filters: {'item': item.item_code}
 			}
@@ -1914,9 +1913,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	set_query_for_item_tax_template: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		if(!item.item_code) {
-			frappe.throw(__("Please enter Item Code to get item taxes"));
+			return doc.company ? {filters: {company: doc.company}} : {};
 		} else {
-
 			let filters = {
 				'item_code': item.item_code,
 				'valid_from': ["<=", doc.transaction_date || doc.bill_date || doc.posting_date],
