@@ -116,7 +116,7 @@ def create_item(shopify_item, warehouse, has_variant=0, attributes=None,variant_
 		]
 	}
 
-	if not is_item_exists(item_dict, attributes, variant_of=variant_of):
+	if not item_exists(item_dict, attributes, variant_of=variant_of):
 		item_details = get_item_details(shopify_item)
 		name = ''
 
@@ -255,11 +255,16 @@ def get_item_details(shopify_item):
 			["name", "stock_uom", "item_name"], as_dict=1)
 		return item_details
 
-def is_item_exists(shopify_item, attributes=None, variant_of=None):
-	if variant_of:
-		name = variant_of
-	else:
-		name = frappe.db.get_value("Item", {"item_name": shopify_item.get("item_name")})
+def item_exists(shopify_item, attributes=None, variant_of=None):
+	name = ''
+	name = frappe.db.get_value('Integration Item', {'integration_item_name': shopify_item.get("item_name")},
+		'erpnext_item_code')
+
+	if not name:
+		if variant_of:
+			name = variant_of
+		else:
+			name = frappe.db.get_value("Item", {"item_name": shopify_item.get("item_name")})
 
 	if name:
 		item = frappe.get_doc("Item", name)

@@ -10,6 +10,7 @@ from erpnext.erpnext_integrations.connectors.shopify_connection import create_or
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
 from frappe.core.doctype.data_import.data_import import import_doc
+from erpnext.stock.doctype.item.test_item import make_item
 
 
 class ShopifySettings(unittest.TestCase):
@@ -96,3 +97,223 @@ class ShopifySettings(unittest.TestCase):
 			where shopify_order_id = %s""", sales_order.shopify_order_id)[0][0]
 
 		self.assertEqual(delivery_note_count, len(shopify_order.get("order").get("fulfillments")))
+
+	def test_product_sync_using_integration_item():
+		# Create erpnext item
+		item = make_item("_Test Shopify Item")
+
+		# Add Integration Item
+		frappe.get_doc({
+			"doctype":"Integration Item",
+			"integration_item": "Protein Bar"
+			"erpnext_item_code": "_Test Shopify Item"
+		}).insert()
+
+		shopify_order_json = {
+			"id": 3669049704638,
+			"email": "frappe@maplestores.com",
+			"created_at": "2021-03-12T13:38:34+05:30",
+			"updated_at": "2021-03-12T13:38:35+05:30",
+			"number": 8,
+			"note": "",
+			"token": "88d2c4051b4b13e268ebb6ed409db82a",
+			"gateway": "manual",
+			"test": false,
+			"total_price": "165200.00",
+			"subtotal_price": "140000.00",
+			"total_weight": 0,
+			"total_tax": "25200.00",
+			"taxes_included": false,
+			"currency": "INR",
+			"financial_status": "pending",
+			"confirmed": true,
+			"total_discounts": "0.00",
+			"total_line_items_price": "140000.00",
+			"buyer_accepts_marketing": false,
+			"name": "#1008",
+			"total_price_usd": "2272.11",
+			"user_id": 71496466622,
+			"location_id": 61178446014,
+			"processed_at": "2021-03-12T13:38:34+05:30",
+			"customer_locale": "en",
+			"app_id": 1354745,
+			"order_number": 1008,
+			"discount_applications": [],
+			"discount_codes": [],
+			"note_attributes": [],
+			"payment_gateway_names": [
+				"manual"
+			],
+			"processing_method": "manual",
+			"source_name": "shopify_draft_order",
+			"tax_lines": [
+				{
+					"price": "25200.00",
+					"rate": 0.18,
+					"title": "IGST",
+					"price_set": {
+						"shop_money": {
+							"amount": "25200.00",
+							"currency_code": "INR"
+						},
+						"presentment_money": {
+							"amount": "25200.00",
+							"currency_code": "INR"
+						}
+					}
+				}
+			],
+			"tags": "",
+			"contact_email": "frappe@maplestores.com",
+			"presentment_currency": "INR",
+			"total_line_items_price_set": {
+				"shop_money": {
+					"amount": "140000.00",
+					"currency_code": "INR"
+				},
+				"presentment_money": {
+					"amount": "140000.00",
+					"currency_code": "INR"
+				}
+			},
+			"total_discounts_set": {
+				"shop_money": {
+					"amount": "0.00",
+					"currency_code": "INR"
+				},
+				"presentment_money": {
+					"amount": "0.00",
+					"currency_code": "INR"
+				}
+			},
+			"total_shipping_price_set": {
+				"shop_money": {
+					"amount": "0.00",
+					"currency_code": "INR"
+				},
+				"presentment_money": {
+					"amount": "0.00",
+					"currency_code": "INR"
+				}
+			},
+			"subtotal_price_set": {
+				"shop_money": {
+					"amount": "140000.00",
+					"currency_code": "INR"
+				},
+				"presentment_money": {
+					"amount": "140000.00",
+					"currency_code": "INR"
+				}
+			},
+			"total_price_set": {
+				"shop_money": {
+					"amount": "165200.00",
+					"currency_code": "INR"
+				},
+				"presentment_money": {
+					"amount": "165200.00",
+					"currency_code": "INR"
+				}
+			},
+			"total_tax_set": {
+				"shop_money": {
+					"amount": "25200.00",
+					"currency_code": "INR"
+				},
+				"presentment_money": {
+					"amount": "25200.00",
+					"currency_code": "INR"
+				}
+			},
+			"line_items": [
+				{
+					"id": 9645225836734,
+					"variant_id": 39351752425662,
+					"title": "Protein Bar",
+					"quantity": 1,
+					"sku": "",
+					"variant_title": null,
+					"vendor": "Maple Stores Mumbai",
+					"fulfillment_service": "manual",
+					"product_id": 6565573427390,
+					"requires_shipping": true,
+					"taxable": true,
+					"gift_card": false,
+					"name": "Protein Bar",
+					"variant_inventory_management": "shopify",
+					"properties": [],
+					"product_exists": true,
+					"fulfillable_quantity": 1,
+					"grams": 0,
+					"price": "140000.00",
+					"total_discount": "0.00",
+					"fulfillment_status": null,
+					"price_set": {
+						"shop_money": {
+							"amount": "140000.00",
+							"currency_code": "INR"
+						},
+						"presentment_money": {
+							"amount": "140000.00",
+							"currency_code": "INR"
+						}
+					},
+					"total_discount_set": {
+						"shop_money": {
+							"amount": "0.00",
+							"currency_code": "INR"
+						},
+						"presentment_money": {
+							"amount": "0.00",
+							"currency_code": "INR"
+						}
+					},
+					"discount_allocations": [],
+					"duties": [],
+					"tax_lines": [
+						{
+							"title": "IGST",
+							"price": "25200.00",
+							"rate": 0.18,
+							"price_set": {
+								"shop_money": {
+									"amount": "25200.00",
+									"currency_code": "INR"
+								},
+								"presentment_money": {
+									"amount": "25200.00",
+									"currency_code": "INR"
+								}
+							}
+						}
+					]
+				}
+			],
+			"fulfillments": [],
+			"refunds": [],
+			"total_tip_received": "0.0",
+			"shipping_lines": [],
+			"customer": {
+				"id": 5049858588862,
+				"email": "frappe@maplestores.com",
+				"accepts_marketing": false,
+				"created_at": "2021-03-10T19:57:40+05:30",
+				"updated_at": "2021-03-12T13:38:35+05:30",
+				"first_name": "Frappe Technologies",
+				"last_name": "",
+				"orders_count": 5,
+				"state": "disabled",
+				"total_spent": "731600.00",
+				"last_order_id": 3669049704638,
+				"note": "",
+				"verified_email": true,
+				"tags": "",
+				"last_order_name": "#1008",
+				"currency": "INR",
+				"accepts_marketing_updated_at": "2021-03-10T19:57:40+05:30",
+			}
+		}
+		# Create Order
+		create_order(shopify_order_json, self.shopify_settings, False, company="_Test Company")
+
