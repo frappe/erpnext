@@ -1130,7 +1130,6 @@ def make_raw_material_request(items, company, sales_order, project=None):
 			'project': project
 		})
 
-	material_request.insert()
 	material_request.flags.ignore_permissions = 1
 	material_request.run_method("set_missing_values")
 	material_request.run_method("calculate_totals")
