@@ -107,7 +107,6 @@
    "oldfieldname": "description",
    "oldfieldtype": "Text",
    "print_width": "250px",
-   "reqd": 1,
    "width": "250px"
   },
   {
@@ -481,7 +480,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-09 15:43:37.457799",
+ "modified": "2021-03-12 21:37:19.466669",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

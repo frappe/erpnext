@@ -72,9 +72,9 @@ class Bin(Document):
 		self.reserved_qty_for_production = frappe.db.sql('''
 			SELECT
 				CASE WHEN ifnull(skip_transfer, 0) = 0 THEN
-					SUM(item.required_qty - item.transferred_qty)
+					SUM((item.required_qty - item.transferred_qty) * item.conversion_factor)
 				ELSE
-					SUM(item.required_qty - item.consumed_qty)
+					SUM((item.required_qty - item.consumed_qty) * item.conversion_factor)
 				END
 			FROM `tabWork Order` pro, `tabWork Order Item` item
 			WHERE

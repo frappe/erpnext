@@ -384,13 +384,14 @@ class BOM(WebsiteGenerator):
 
 	def update_stock_qty(self):
 		for m in self.get('items'):
-			if not m.conversion_factor:
-				m.conversion_factor = flt(get_conversion_factor(m.item_code, m.uom)['conversion_factor'])
-			if m.uom and m.qty:
-				m.stock_qty = flt(m.conversion_factor)*flt(m.qty)
 			if not m.uom and m.stock_uom:
 				m.uom = m.stock_uom
 				m.qty = m.stock_qty
+
+			if not m.conversion_factor:
+				m.conversion_factor = flt(get_conversion_factor(m.item_code, m.uom)['conversion_factor'])
+
+			m.stock_qty = flt(m.conversion_factor)*flt(m.qty)
 
 			m.db_update()
 

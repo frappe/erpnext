@@ -11,6 +11,7 @@ from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life
+from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
 from erpnext.projects.doctype.timesheet.timesheet import OverlapError
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
@@ -502,7 +503,7 @@ class WorkOrder(Document):
 				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
 				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
 				for item in sorted(item_dict.values(), key=lambda d: d['idx'] or 9999):
-					self.append('required_items', {
+					row = self.append('required_items', {
 						'operation': item.operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
@@ -510,9 +511,13 @@ class WorkOrder(Document):
 						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
 						'uom': item.uom,
+						'conversion_factor': flt(item.conversion_factor) or 1,
 						'source_warehouse': self.source_warehouse or item.source_warehouse or item.default_warehouse,
 						'include_item_in_manufacturing': item.include_item_in_manufacturing
 					})
+
+					if not row.conversion_factor:
+						row.conversion_factor = flt(get_conversion_factor(row.item_code, row.uom)['conversion_factor'])
 
 					if not self.project:
 						self.project = item.get("project")

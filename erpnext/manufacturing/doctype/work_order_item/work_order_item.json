@@ -20,6 +20,7 @@
   "available_qty_at_wip_warehouse",
   "column_break_16",
   "uom",
+  "conversion_factor",
   "allow_alternative_item",
   "include_item_in_manufacturing"
  ],
@@ -134,15 +135,24 @@
    "fieldtype": "Link",
    "label": "UOM",
    "options": "UOM",
-   "read_only": 1
+   "read_only": 1,
+   "reqd": 1
   },
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "1",
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "label": "Conversion Factor",
+   "precision": "9",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-03-10 21:30:23.330685",
+ "modified": "2021-03-13 11:52:01.961843",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",
