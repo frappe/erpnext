@@ -1574,17 +1574,17 @@ class TestSalesInvoice(unittest.TestCase):
 		})
 
 		sales_invoice = create_sales_invoice(do_not_save=1)
-		sales_invoice.items[0].project = item_project.project_name
-		sales_invoice.project = project.project_name
+		sales_invoice.items[0].project = item_project.name
+		sales_invoice.project = project.name
 
 		sales_invoice.submit()
 
 		expected_values = {
 			"Debtors - _TC": {
-				"project": project.project_name
+				"project": project.name
 			},
 			"Sales - _TC": {
-				"project": item_project.project_name
+				"project": item_project.name
 			}
 		}
 
@@ -1885,23 +1885,6 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_einvoice_json(self):
 		from erpnext.regional.india.e_invoice.utils import make_einvoice
 
-		customer_gstin = '27AACCM7806M1Z3'
-		customer_gstin_dtls = {
-			'LegalName': '_Test Customer', 'TradeName': '_Test Customer', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '410038', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		company_gstin = '27AAECE4835E1ZR'
-		company_gstin_dtls = {
-			'LegalName': '_Test Company', 'TradeName': '_Test Company', 'AddrLoc': '_Test City',
-			'StateCode': '27', 'AddrPncd': '401108', 'AddrBno': '_Test Bldg',
-			'AddrBnm': '100', 'AddrFlno': '200', 'AddrSt': '_Test Street'
-		}
-		# set cache gstin details to avoid fetching details which will require connection to GSP servers
-		frappe.local.gstin_cache = {}
-		frappe.local.gstin_cache[customer_gstin] = customer_gstin_dtls
-		frappe.local.gstin_cache[company_gstin] = company_gstin_dtls
-
 		si = make_sales_invoice_for_ewaybill()
 		si.naming_series = 'INV-2020-.#####'
 		si.items = []
@@ -1909,8 +1892,8 @@ class TestSalesInvoice(unittest.TestCase):
 			"item_code": "_Test Item",
 			"uom": "Nos",
 			"warehouse": "_Test Warehouse - _TC",
-			"qty": 2,
-			"rate": 100,
+			"qty": 2000,
+			"rate": 12,
 			"income_account": "Sales - _TC",
 			"expense_account": "Cost of Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
@@ -1919,31 +1902,52 @@ class TestSalesInvoice(unittest.TestCase):
 			"item_code": "_Test Item 2",
 			"uom": "Nos",
 			"warehouse": "_Test Warehouse - _TC",
-			"qty": 4,
-			"rate": 150,
+			"qty": 420,
+			"rate": 15,
 			"income_account": "Sales - _TC",
 			"expense_account": "Cost of Goods Sold - _TC",
 			"cost_center": "_Test Cost Center - _TC",
 		})
+		si.discount_amount = 100
 		si.save()
 
 		einvoice = make_einvoice(si)
 
-		total_item_ass_value = sum([d['AssAmt'] for d in einvoice['ItemList']])
-		total_item_cgst_value = sum([d['CgstAmt'] for d in einvoice['ItemList']])
-		total_item_sgst_value = sum([d['SgstAmt'] for d in einvoice['ItemList']])
-		total_item_igst_value = sum([d['IgstAmt'] for d in einvoice['ItemList']])
-		total_item_value = sum([d['TotItemVal'] for d in einvoice['ItemList']])
+		total_item_ass_value = 0
+		total_item_cgst_value = 0
+		total_item_sgst_value = 0
+		total_item_igst_value = 0
+		total_item_value = 0
+
+		for item in einvoice['ItemList']:
+			total_item_ass_value += item['AssAmt']
+			total_item_cgst_value += item['CgstAmt']
+			total_item_sgst_value += item['SgstAmt']
+			total_item_igst_value += item['IgstAmt']
+			total_item_value += item['TotItemVal']
+
+			self.assertTrue(item['AssAmt'], item['TotAmt'] - item['Discount'])
+			self.assertTrue(item['TotItemVal'], item['AssAmt'] + item['CgstAmt'] + item['SgstAmt'] + item['IgstAmt'])
+
+		value_details = einvoice['ValDtls']
 
 		self.assertEqual(einvoice['Version'], '1.1')
-		self.assertEqual(einvoice['ValDtls']['AssVal'], total_item_ass_value)
-		self.assertEqual(einvoice['ValDtls']['CgstVal'], total_item_cgst_value)
-		self.assertEqual(einvoice['ValDtls']['SgstVal'], total_item_sgst_value)
-		self.assertEqual(einvoice['ValDtls']['IgstVal'], total_item_igst_value)
-		self.assertEqual(einvoice['ValDtls']['TotInvVal'], total_item_value)
+		self.assertEqual(value_details['AssVal'], total_item_ass_value)
+		self.assertEqual(value_details['CgstVal'], total_item_cgst_value)
+		self.assertEqual(value_details['SgstVal'], total_item_sgst_value)
+		self.assertEqual(value_details['IgstVal'], total_item_igst_value)
+
+		calculated_invoice_value = \
+			value_details['AssVal'] + value_details['CgstVal'] \
+			+ value_details['SgstVal'] + value_details['IgstVal'] \
+			+ value_details['OthChrg'] - value_details['Discount']
+
+		self.assertTrue(value_details['TotInvVal'] - calculated_invoice_value < 0.1)
+
+		self.assertEqual(value_details['TotInvVal'], si.base_grand_total)
 		self.assertTrue(einvoice['EwbDtls'])
 
-def make_sales_invoice_for_ewaybill():
+def make_test_address_for_ewaybill():
 	if not frappe.db.exists('Address', '_Test Address for Eway bill-Billing'):
 		address = frappe.get_doc({
 			"address_line1": "_Test Address Line 1",
@@ -1992,6 +1996,7 @@ def make_sales_invoice_for_ewaybill():
 
 		address.save()
 
+def make_test_transporter_for_ewaybill():
 	if not frappe.db.exists('Supplier', '_Test Transporter'):
 		frappe.get_doc({
 			"doctype": "Supplier",
@@ -2002,12 +2007,17 @@ def make_sales_invoice_for_ewaybill():
 			"is_transporter": 1
 		}).insert()
 
+def make_sales_invoice_for_ewaybill():
+	make_test_address_for_ewaybill()
+	make_test_transporter_for_ewaybill()
+
 	gst_settings = frappe.get_doc("GST Settings")
 
 	gst_account = frappe.get_all(
 		"GST Account",
 		fields=["cgst_account", "sgst_account", "igst_account"],
-		filters = {"company": "_Test Company"})
+		filters = {"company": "_Test Company"}
+	)
 
 	if not gst_account:
 		gst_settings.append("gst_accounts", {
@@ -2019,7 +2029,7 @@ def make_sales_invoice_for_ewaybill():
 
 	gst_settings.save()
 
-	si = create_sales_invoice(do_not_save =1, rate = '60000')
+	si = create_sales_invoice(do_not_save=1, rate='60000')
 
 	si.distance = 2000
 	si.company_address = "_Test Address for Eway bill-Billing"

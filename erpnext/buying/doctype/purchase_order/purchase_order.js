@@ -64,8 +64,8 @@ frappe.ui.form.on("Purchase Order Item", {
 erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend({
 	setup: function() {
 		this.frm.custom_make_buttons = {
-			'Purchase Receipt': 'Receipt',
-			'Purchase Invoice': 'Invoice',
+			'Purchase Receipt': 'Purchase Receipt',
+			'Purchase Invoice': 'Purchase Invoice',
 			'Stock Entry': 'Material to Supplier',
 			'Payment Entry': 'Payment',
 		}
@@ -353,7 +353,8 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 	make_purchase_receipt: function() {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
-			frm: cur_frm
+			frm: cur_frm,
+			freeze_message: __("Creating Purchase Receipt ...")
 		})
 	},
 
@@ -380,7 +381,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 						material_request_type: "Purchase",
 						docstatus: 1,
 						status: ["!=", "Stopped"],
-						per_ordered: ["<", 99.99],
+						per_ordered: ["<", 100],
 						company: me.frm.doc.company
 					}
 				})

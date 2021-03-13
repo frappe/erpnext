@@ -377,7 +377,7 @@ def get_amounts(amounts, against_loan, posting_date):
 	amounts["penalty_amount"] = flt(penalty_amount, precision)
 	amounts["payable_amount"] = flt(payable_principal_amount + total_pending_interest + penalty_amount, precision)
 	amounts["pending_accrual_entries"] = pending_accrual_entries
-	amounts["unaccrued_interest"] = unaccrued_interest
+	amounts["unaccrued_interest"] = flt(unaccrued_interest, precision)
 
 	if final_due_date:
 		amounts["due_date"] = final_due_date

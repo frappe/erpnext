@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 import datetime, math
 
-from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate
+from frappe.utils import add_days, cint, cstr, flt, getdate, rounded, date_diff, money_in_words, formatdate, get_first_day
 from frappe.model.naming import make_autoname
 
 from frappe import msgprint, _
@@ -146,8 +146,8 @@ class SalarySlip(TransactionBase):
 				self.salary_slip_based_on_timesheet = self._salary_structure_doc.salary_slip_based_on_timesheet or 0
 				self.set_time_sheet()
 				self.pull_sal_struct()
-				payroll_based_on, consider_unmarked_attendance_as = frappe.db.get_value("Payroll Settings", None, ["payroll_based_on","consider_unmarked_attendance_as"])
-				return [payroll_based_on, consider_unmarked_attendance_as]
+				ps = frappe.db.get_value("Payroll Settings", None, ["payroll_based_on","consider_unmarked_attendance_as"], as_dict=1)
+				return [ps.payroll_based_on, ps.consider_unmarked_attendance_as]
 
 	def set_time_sheet(self):
 		if self.salary_slip_based_on_timesheet:
@@ -427,16 +427,19 @@ class SalarySlip(TransactionBase):
 	def calculate_net_pay(self):
 		if self.salary_structure:
 			self.calculate_component_amounts("earnings")
-		self.gross_pay = self.get_component_totals("earnings")
+		self.gross_pay = self.get_component_totals("earnings", depends_on_payment_days=1)
 		self.base_gross_pay = flt(flt(self.gross_pay) * flt(self.exchange_rate), self.precision('base_gross_pay'))
 
 		if self.salary_structure:
 			self.calculate_component_amounts("deductions")
-		self.total_deduction = self.get_component_totals("deductions")
-		self.base_total_deduction = flt(flt(self.total_deduction) * flt(self.exchange_rate), self.precision('base_total_deduction'))
 
 		self.set_loan_repayment()
+		self.set_component_amounts_based_on_payment_days()
+		self.set_net_pay()
 
+	def set_net_pay(self):
+		self.total_deduction = self.get_component_totals("deductions")
+		self.base_total_deduction = flt(flt(self.total_deduction) * flt(self.exchange_rate), self.precision('base_total_deduction'))
 		self.net_pay = flt(self.gross_pay) - (flt(self.total_deduction) + flt(self.total_loan_repayment))
 		self.rounded_total = rounded(self.net_pay)
 		self.base_net_pay = flt(flt(self.net_pay) * flt(self.exchange_rate), self.precision('base_net_pay'))
@@ -457,8 +460,6 @@ class SalarySlip(TransactionBase):
 			self.add_employee_benefits(payroll_period)
 		else:
 			self.add_tax_components(payroll_period)
-
-		self.set_component_amounts_based_on_payment_days(component_type)
 
 	def add_structure_components(self, component_type):
 		data = self.get_data_for_eval()
@@ -579,7 +580,7 @@ class SalarySlip(TransactionBase):
 					'default_amount': amount if not struct_row.get("is_additional_component") else 0,
 					'depends_on_payment_days' : struct_row.depends_on_payment_days,
 					'salary_component' : struct_row.salary_component,
-					'abbr' : struct_row.abbr,
+					'abbr' : struct_row.abbr or struct_row.get("salary_component_abbr"),
 					'additional_salary': additional_salary,
 					'do_not_include_in_total' : struct_row.do_not_include_in_total,
 					'is_tax_applicable': struct_row.is_tax_applicable,
@@ -816,7 +817,7 @@ class SalarySlip(TransactionBase):
 			cint(row.depends_on_payment_days) and cint(self.total_working_days) and
 			(not self.salary_slip_based_on_timesheet or
 				getdate(self.start_date) < joining_date or
-				getdate(self.end_date) > relieving_date
+				(relieving_date and getdate(self.end_date) > relieving_date)
 			)):
 			additional_amount = flt((flt(row.additional_amount) * flt(self.payment_days)
 				/ cint(self.total_working_days)), row.precision("additional_amount"))
@@ -949,15 +950,21 @@ class SalarySlip(TransactionBase):
 		struct_row['variable_based_on_taxable_salary'] = component.variable_based_on_taxable_salary
 		return struct_row
 
-	def get_component_totals(self, component_type):
+	def get_component_totals(self, component_type, depends_on_payment_days=0):
+		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
+			["date_of_joining", "relieving_date"])
+
 		total = 0.0
 		for d in self.get(component_type):
 			if not d.do_not_include_in_total:
-				d.amount = flt(d.amount, d.precision("amount"))
-				total += d.amount
+				if depends_on_payment_days:
+					amount = self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0]
+				else:
+					amount = flt(d.amount, d.precision("amount"))
+				total += amount
 		return total
 
-	def set_component_amounts_based_on_payment_days(self, component_type):
+	def set_component_amounts_based_on_payment_days(self):
 		joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
 			["date_of_joining", "relieving_date"])
 
@@ -967,8 +974,9 @@ class SalarySlip(TransactionBase):
 		if not joining_date:
 			frappe.throw(_("Please set the Date Of Joining for employee {0}").format(frappe.bold(self.employee_name)))
 
-		for d in self.get(component_type):
-			d.amount = self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0]
+		for component_type in ("earnings", "deductions"):
+			for d in self.get(component_type):
+				d.amount = flt(self.get_amount_based_on_payment_days(d, joining_date, relieving_date)[0], d.precision("amount"))
 
 	def set_loan_repayment(self):
 		self.total_loan_repayment = 0
@@ -1092,17 +1100,17 @@ class SalarySlip(TransactionBase):
 		self.calculate_net_pay()
 
 	def set_totals(self):
-		self.gross_pay = 0
+		self.gross_pay = 0.0
 		if self.salary_slip_based_on_timesheet == 1:
 			self.calculate_total_for_salary_slip_based_on_timesheet()
 		else:
-			self.total_deduction = 0
-			if self.earnings:
+			self.total_deduction = 0.0
+			if hasattr(self, "earnings"):
 				for earning in self.earnings:
-					self.gross_pay += flt(earning.amount)
-			if self.deductions:
+					self.gross_pay += flt(earning.amount, earning.precision("amount"))
+			if hasattr(self, "deductions"):
 				for deduction in self.deductions:
-					self.total_deduction += flt(deduction.amount)
+					self.total_deduction += flt(deduction.amount, deduction.precision("amount"))
 			self.net_pay = flt(self.gross_pay) - flt(self.total_deduction) - flt(self.total_loan_repayment)
 		self.set_base_totals()
 

@@ -26,7 +26,7 @@
    "fieldname": "total_allocated_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Total Allocated Leaves",
+   "label": "Total Allocated Leave",
    "no_copy": 1,
    "read_only": 1
   },
@@ -34,7 +34,7 @@
    "fieldname": "expired_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Expired Leaves",
+   "label": "Expired Leave",
    "no_copy": 1,
    "read_only": 1
   },
@@ -42,7 +42,7 @@
    "fieldname": "used_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Used Leaves",
+   "label": "Used Leave",
    "no_copy": 1,
    "read_only": 1
   },
@@ -50,7 +50,7 @@
    "fieldname": "pending_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Pending Leaves",
+   "label": "Pending Leave",
    "no_copy": 1,
    "read_only": 1
   },
@@ -58,7 +58,7 @@
    "fieldname": "available_leaves",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Available Leaves",
+   "label": "Available Leave",
    "no_copy": 1,
    "read_only": 1
   }

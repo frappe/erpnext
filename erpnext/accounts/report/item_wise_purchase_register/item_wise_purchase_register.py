@@ -54,8 +54,8 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 
 		row = {
 			'item_code': d.item_code,
-			'item_name': item_record.item_name,
-			'item_group': item_record.item_group,
+			'item_name': item_record.item_name if item_record else d.item_name,
+			'item_group': item_record.item_group if item_record else d.item_group,
 			'description': d.description,
 			'invoice': d.parent,
 			'posting_date': d.posting_date,
@@ -316,8 +316,10 @@ def get_items(filters, additional_query_columns):
 			`tabPurchase Invoice Item`.`name`, `tabPurchase Invoice Item`.`parent`,
 			`tabPurchase Invoice`.posting_date, `tabPurchase Invoice`.credit_to, `tabPurchase Invoice`.company,
 			`tabPurchase Invoice`.supplier, `tabPurchase Invoice`.remarks, `tabPurchase Invoice`.base_net_total,
+			`tabPurchase Invoice`.unrealized_profit_loss_account,
 			`tabPurchase Invoice Item`.`item_code`, `tabPurchase Invoice Item`.description,
 			`tabPurchase Invoice`.unrealized_profit_loss_account,
+			`tabPurchase Invoice Item`.`item_name`, `tabPurchase Invoice Item`.`item_group`,
 			`tabPurchase Invoice Item`.`project`, `tabPurchase Invoice Item`.`purchase_order`,
 			`tabPurchase Invoice Item`.`purchase_receipt`, `tabPurchase Invoice Item`.`po_detail`,
 			`tabPurchase Invoice Item`.`expense_account`, `tabPurchase Invoice Item`.`stock_qty`,

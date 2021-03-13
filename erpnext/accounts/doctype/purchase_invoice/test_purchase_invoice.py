@@ -426,32 +426,37 @@ class TestPurchaseInvoice(unittest.TestCase):
 		)
 
 	def test_total_purchase_cost_for_project(self):
-		make_project({'project_name':'_Test Project'})
+		if not frappe.db.exists("Project", {"project_name": "_Test Project for Purchase"}):
+			project = make_project({'project_name':'_Test Project for Purchase'})
+		else:
+			project = frappe.get_doc("Project", {"project_name": "_Test Project for Purchase"})
 
 		existing_purchase_cost = frappe.db.sql("""select sum(base_net_amount)
-			from `tabPurchase Invoice Item` where project = '_Test Project' and docstatus=1""")
+			from `tabPurchase Invoice Item`
+			where project = '{0}'
+			and docstatus=1""".format(project.name))
 		existing_purchase_cost = existing_purchase_cost and existing_purchase_cost[0][0] or 0
 
-		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project="_Test Project")
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"),
+		pi = make_purchase_invoice(currency="USD", conversion_rate=60, project=project.name)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_purchase_cost"),
 			existing_purchase_cost + 15000)
 
-		pi1 = make_purchase_invoice(qty=10, project="_Test Project")
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"),
+		pi1 = make_purchase_invoice(qty=10, project=project.name)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_purchase_cost"),
 			existing_purchase_cost + 15500)
 
 		pi1.cancel()
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"),
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_purchase_cost"),
 			existing_purchase_cost + 15000)
 
 		pi.cancel()
-		self.assertEqual(frappe.db.get_value("Project", "_Test Project", "total_purchase_cost"), existing_purchase_cost)
+		self.assertEqual(frappe.db.get_value("Project", project.name, "total_purchase_cost"), existing_purchase_cost)
 
 	def test_return_purchase_invoice_with_perpetual_inventory(self):
 		pi = make_purchase_invoice(company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
 			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
-		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, 
+		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2,
 			company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
 			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
@@ -860,17 +865,17 @@ class TestPurchaseInvoice(unittest.TestCase):
 		})
 
 		pi = make_purchase_invoice(credit_to="Creditors - _TC" ,do_not_save=1)
-		pi.items[0].project = item_project.project_name
-		pi.project = project.project_name
+		pi.items[0].project = item_project.name
+		pi.project = project.name
 
 		pi.submit()
 
 		expected_values = {
 			"Creditors - _TC": {
-				"project": project.project_name
+				"project": project.name
 			},
 			"_Test Account Cost for Goods Sold - _TC": {
-				"project": item_project.project_name
+				"project": item_project.name
 			}
 		}
 
@@ -1026,7 +1031,7 @@ def make_purchase_invoice_against_cost_center(**args):
 	pi.is_return = args.is_return
 	pi.credit_to = args.return_against or "Creditors - _TC"
 	pi.is_subcontracted = args.is_subcontracted or "No"
-	if args.supplier_warehouse: 
+	if args.supplier_warehouse:
 		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {

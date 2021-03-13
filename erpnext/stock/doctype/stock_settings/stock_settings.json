@@ -219,7 +219,7 @@
    "fieldname": "role_allowed_to_create_edit_back_dated_transactions",
    "fieldtype": "Link",
    "label": "Role Allowed to Create/Edit Back-dated Transactions",
-   "options": "User"
+   "options": "Role"
   },
   {
    "fieldname": "column_break_26",

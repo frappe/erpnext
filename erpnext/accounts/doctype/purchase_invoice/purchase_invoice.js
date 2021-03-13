@@ -508,7 +508,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Purchase Invoice': 'Debit Note',
+			'Purchase Invoice': 'Return / Debit Note',
 			'Payment Entry': 'Payment'
 		}
 

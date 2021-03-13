@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate, get_link_to_form
+from frappe.utils import cint, flt, getdate, add_days, cstr, nowdate, get_link_to_form, formatdate
 from frappe import _, msgprint, throw
 from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
 from frappe.model.mapper import get_mapped_doc
@@ -215,6 +215,9 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
@@ -263,7 +266,25 @@ class SalesInvoice(SellingController):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
+	def check_if_consolidated_invoice(self):
+		# since POS Invoice extends Sales Invoice, we explicitly check if doctype is Sales Invoice
+		if self.doctype == "Sales Invoice" and self.is_consolidated:
+			invoice_or_credit_note = "consolidated_credit_note" if self.is_return else "consolidated_invoice"
+			pos_closing_entry = frappe.get_all(
+				"POS Invoice Merge Log",
+				filters={ invoice_or_credit_note: self.name },
+				pluck="pos_closing_entry"
+			)
+			if pos_closing_entry:
+				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}. ").format(
+					frappe.bold("Consolidated Sales Invoice"),
+					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
+				)
+				frappe.throw(msg, title=_("Not Allowed"))
+
 	def before_cancel(self):
+		self.check_if_consolidated_invoice()
+
 		super(SalesInvoice, self).before_cancel()
 		self.update_time_sheet(None)
 
@@ -465,7 +486,9 @@ class SalesInvoice(SellingController):
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 
-			self.ignore_pricing_rule = pos.ignore_pricing_rule
+			if not for_validate:
+				self.ignore_pricing_rule = pos.ignore_pricing_rule
+
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
@@ -1891,6 +1914,7 @@ def get_mode_of_payment_info(mode_of_payment, company):
 		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
 	(company, mode_of_payment), as_dict=1)
 
+@frappe.whitelist()
 def create_dunning(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount

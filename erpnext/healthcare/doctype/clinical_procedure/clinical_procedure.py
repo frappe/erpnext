@@ -100,7 +100,6 @@ class ClinicalProcedure(Document):
 		allow_start = self.set_actual_qty()
 		if allow_start:
 			self.db_set('status', 'In Progress')
-			insert_clinical_procedure_to_medical_record(self)
 			return 'success'
 		return 'insufficient stock'
 
@@ -122,6 +121,7 @@ class ClinicalProcedure(Document):
 
 		stock_entry.stock_entry_type = 'Material Receipt'
 		stock_entry.to_warehouse = self.warehouse
+		stock_entry.company = self.company
 		expense_account = get_account(None, 'expense_account', 'Healthcare Settings', self.company)
 		for item in self.items:
 			if item.qty > item.actual_qty:
@@ -247,21 +247,3 @@ def make_procedure(source_name, target_doc=None):
 		}, target_doc, set_missing_values)
 
 	return doc
-
-
-def insert_clinical_procedure_to_medical_record(doc):
-	subject = frappe.bold(_("Clinical Procedure conducted: ")) + cstr(doc.procedure_template) + "<br>"
-	if doc.practitioner:
-		subject += frappe.bold(_('Healthcare Practitioner: ')) + doc.practitioner
-	if subject and doc.notes:
-		subject += '<br/>' + doc.notes
-
-	medical_record = frappe.new_doc('Patient Medical Record')
-	medical_record.patient = doc.patient
-	medical_record.subject = subject
-	medical_record.status = 'Open'
-	medical_record.communication_date = doc.start_date
-	medical_record.reference_doctype = 'Clinical Procedure'
-	medical_record.reference_name = doc.name
-	medical_record.reference_owner = doc.owner
-	medical_record.save(ignore_permissions=True)

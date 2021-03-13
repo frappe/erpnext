@@ -6,6 +6,18 @@ frappe.ui.form.on('Accounting Dimension Filter', {
 		if (frm.doc.accounting_dimension) {
 			frm.set_df_property('dimensions', 'label', frm.doc.accounting_dimension, cdn, 'dimension_value');
 		}
+
+		let help_content =
+			`<table class="table table-bordered" style="background-color: #f9f9f9;">
+				<tr><td>
+					<p>
+						<i class="fa fa-hand-right"></i>
+						{{__('Note: On checking Is Mandatory the accounting dimension will become mandatory against that specific account for all accounting transactions')}}
+					</p>
+				</td></tr>
+			</table>`;
+
+		frm.set_df_property('dimension_filter_help', 'options', help_content);
 	},
 	onload: function(frm) {
 		frm.set_query('applicable_on_account', 'accounts', function() {

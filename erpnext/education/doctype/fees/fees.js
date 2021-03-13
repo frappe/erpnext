@@ -14,15 +14,15 @@ frappe.ui.form.on("Fees", {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
-	onload: function(frm){
-		frm.set_query("academic_term",function(){
+	onload: function(frm) {
+		frm.set_query("academic_term", function() {
 			return{
-				"filters":{
+				"filters": {
 					"academic_year": (frm.doc.academic_year)
 				}
 			};
 		});
-		frm.set_query("fee_structure",function(){
+		frm.set_query("fee_structure", function() {
 			return{
 				"filters":{
 					"academic_year": (frm.doc.academic_year)

@@ -115,7 +115,7 @@ $.extend(erpnext.queries, {
 				["Warehouse", "is_group", "=",0]
 
 			]
-		}
+		};
 	},
 
 	get_filtered_dimensions: function(doc, child_fields, dimension, company) {

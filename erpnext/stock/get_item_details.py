@@ -19,7 +19,7 @@ from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_m
 
 from six import string_types, iteritems
 
-sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'POS Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 
 @frappe.whitelist()
@@ -74,7 +74,9 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	get_price_list_rate(args, item, out)
+	if not doc or cint(doc.get('is_return')) == 0:
+		# get price list rate only if the invoice is not a credit or debit note
+		get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))

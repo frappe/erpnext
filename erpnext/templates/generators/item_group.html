@@ -1,5 +1,9 @@
 {% extends "templates/web.html" %}
 
+{% block breadcrumbs %}
+	{% include "templates/includes/breadcrumbs.html" %}
+{% endblock %}
+
 {% block header %}<h1>{{ name }}</h1>{% endblock %}
 
 {% block page_content %}

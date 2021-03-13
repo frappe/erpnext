@@ -122,6 +122,12 @@ class AccountsController(TransactionBase):
 	def before_cancel(self):
 		validate_einvoice_fields(self)
 
+	def on_trash(self):
+		# delete sl and gl entries on deletion of transaction
+		if frappe.db.get_single_value('Accounts Settings', 'delete_linked_ledger_entries'):
+			frappe.db.sql("delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name))
+			frappe.db.sql("delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name))
+
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
 			if d.get("enable_deferred_revenue") or d.get("enable_deferred_expense"):
@@ -210,7 +216,10 @@ class AccountsController(TransactionBase):
 									 self.meta.get_label(date_field), self)
 
 	def validate_inter_company_reference(self):
-		if self.is_internal_transfer() and self.doctype in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
+		if self.doctype not in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
+			return
+
+		if self.is_internal_transfer():
 			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')
 				or self.get('inter_company_order_reference')):
 				msg = _("Internal Sale or Delivery Reference missing. ")
@@ -293,6 +302,7 @@ class AccountsController(TransactionBase):
 					args["doctype"] = self.doctype
 					args["name"] = self.name
 					args["child_docname"] = item.name
+					args["ignore_pricing_rule"] = self.ignore_pricing_rule if hasattr(self, 'ignore_pricing_rule') else 0
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
@@ -459,8 +469,10 @@ class AccountsController(TransactionBase):
 			account_currency = get_account_currency(gl_dict.account)
 
 		if gl_dict.account and self.doctype not in ["Journal Entry",
-													"Period Closing Voucher", "Payment Entry"]:
+			"Period Closing Voucher", "Payment Entry", "Purchase Receipt", "Purchase Invoice", "Stock Entry"]:
 			self.validate_account_currency(gl_dict.account, account_currency)
+
+		if gl_dict.account and self.doctype not in ["Journal Entry", "Period Closing Voucher", "Payment Entry"]:
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"),
 											self.company_currency)
 
@@ -1494,6 +1506,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.flags.ignore_validate_update_after_submit = True
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
+	parent.set_total_in_words()
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()

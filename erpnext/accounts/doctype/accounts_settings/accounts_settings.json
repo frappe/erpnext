@@ -22,6 +22,7 @@
   "book_asset_depreciation_entry_automatically",
   "add_taxes_from_item_tax_template",
   "automatically_fetch_payment_terms",
+  "delete_linked_ledger_entries",
   "deferred_accounting_settings_section",
   "automatically_process_deferred_accounting_entry",
   "book_deferred_entries_based_on",
