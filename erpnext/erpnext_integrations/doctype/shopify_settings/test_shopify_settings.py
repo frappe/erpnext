@@ -6,11 +6,12 @@ import frappe
 
 import unittest, os, json
 from frappe.utils import cstr
-from erpnext.erpnext_integrations.connectors.shopify_connection import create_order
+from erpnext.erpnext_integrations.connectors.shopify_connection import create_order, validate_customer, validate_item
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_product import make_item
 from erpnext.erpnext_integrations.doctype.shopify_settings.sync_customer import create_customer
 from frappe.core.doctype.data_import.data_import import import_doc
-from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.stock.doctype.item.test_item import make_item as make_erpnext_item
+from erpnext.selling.doctype.customer.test_customer import get_customer_dict
 
 
 class ShopifySettings(unittest.TestCase):
@@ -98,38 +99,90 @@ class ShopifySettings(unittest.TestCase):
 
 		self.assertEqual(delivery_note_count, len(shopify_order.get("order").get("fulfillments")))
 
-	def test_product_sync_using_integration_item():
+	def test_product_sync_using_integration_item(self):
 		# Create erpnext item
-		item = make_item("_Test Shopify Item")
+		item = make_erpnext_item("_Test Shopify Item")
+
+		if not frappe.db.get_value("Customer", "_Test Shopify Customer"):
+			customer = get_customer_dict("_Test Shopify Customer")
+			customer['shopify_customer_id'] = "5049858588862"
+			frappe.get_doc(customer).insert(ignore_permissions=True)
 
 		# Add Integration Item
-		frappe.get_doc({
-			"doctype":"Integration Item",
-			"integration_item": "Protein Bar"
-			"erpnext_item_code": "_Test Shopify Item"
-		}).insert()
+		if not frappe.db.get_value("Integration Item", {"integration_item_name": "Protein Bar"}):
+			frappe.get_doc({
+				"doctype":"Integration Item",
+				"integration_item_name": "Protein Bar",
+				"erpnext_item_code": "_Test Shopify Item"
+			}).insert()
+
+		item = {
+				"id": 6565573427390,
+				"title": "Protein Bar",
+				"body_html": "",
+				"vendor": "Maple Stores Mumbai",
+				"product_type": "",
+				"created_at": "2021-03-12T11:42:04+05:30",
+				"handle": "macbook-air-copper",
+				"updated_at": "2021-03-12T13:40:18+05:30",
+				"published_at": "2021-03-12T11:42:05+05:30",
+				"template_suffix": "",
+				"status": "active",
+				"published_scope": "web",
+				"tags": "",
+				"variants": [
+					{
+						"id": 39351752425662,
+						"product_id": 6565573427390,
+						"title": "Default Title",
+						"price": "140000.00",
+						"sku": "",
+						"position": 1,
+						"inventory_policy": "deny",
+						"fulfillment_service": "manual",
+						"inventory_management": "shopify",
+						"option1": "Default Title",
+						"created_at": "2021-03-12T11:42:04+05:30",
+						"updated_at": "2021-03-12T13:38:35+05:30",
+						"barcode": "",
+						"grams": 0,
+						"weight": 0.0,
+						"weight_unit": "kg",
+						"inventory_item_id": 41445821972670,
+						"inventory_quantity": 14,
+						"old_inventory_quantity": 14,
+					}
+				],
+				"options": [
+					{
+						"id": 8439626989758,
+						"product_id": 6565573427390,
+						"name": "Title",
+						"position": 1,
+						"values": [
+							"Default Title"
+						]
+					}
+				],
+				"images": [],
+			}
 
 		shopify_order_json = {
 			"id": 3669049704638,
-			"email": "frappe@maplestores.com",
 			"created_at": "2021-03-12T13:38:34+05:30",
 			"updated_at": "2021-03-12T13:38:35+05:30",
 			"number": 8,
 			"note": "",
 			"token": "88d2c4051b4b13e268ebb6ed409db82a",
 			"gateway": "manual",
-			"test": false,
 			"total_price": "165200.00",
 			"subtotal_price": "140000.00",
 			"total_weight": 0,
 			"total_tax": "25200.00",
-			"taxes_included": false,
 			"currency": "INR",
 			"financial_status": "pending",
-			"confirmed": true,
 			"total_discounts": "0.00",
 			"total_line_items_price": "140000.00",
-			"buyer_accepts_marketing": false,
 			"name": "#1008",
 			"total_price_usd": "2272.11",
 			"user_id": 71496466622,
@@ -146,23 +199,7 @@ class ShopifySettings(unittest.TestCase):
 			],
 			"processing_method": "manual",
 			"source_name": "shopify_draft_order",
-			"tax_lines": [
-				{
-					"price": "25200.00",
-					"rate": 0.18,
-					"title": "IGST",
-					"price_set": {
-						"shop_money": {
-							"amount": "25200.00",
-							"currency_code": "INR"
-						},
-						"presentment_money": {
-							"amount": "25200.00",
-							"currency_code": "INR"
-						}
-					}
-				}
-			],
+			"tax_lines": [],
 			"tags": "",
 			"contact_email": "frappe@maplestores.com",
 			"presentment_currency": "INR",
@@ -233,22 +270,17 @@ class ShopifySettings(unittest.TestCase):
 					"title": "Protein Bar",
 					"quantity": 1,
 					"sku": "",
-					"variant_title": null,
 					"vendor": "Maple Stores Mumbai",
 					"fulfillment_service": "manual",
 					"product_id": 6565573427390,
-					"requires_shipping": true,
-					"taxable": true,
-					"gift_card": false,
 					"name": "Protein Bar",
 					"variant_inventory_management": "shopify",
 					"properties": [],
-					"product_exists": true,
+					"product_exists": 1,
 					"fulfillable_quantity": 1,
 					"grams": 0,
 					"price": "140000.00",
 					"total_discount": "0.00",
-					"fulfillment_status": null,
 					"price_set": {
 						"shop_money": {
 							"amount": "140000.00",
@@ -271,23 +303,7 @@ class ShopifySettings(unittest.TestCase):
 					},
 					"discount_allocations": [],
 					"duties": [],
-					"tax_lines": [
-						{
-							"title": "IGST",
-							"price": "25200.00",
-							"rate": 0.18,
-							"price_set": {
-								"shop_money": {
-									"amount": "25200.00",
-									"currency_code": "INR"
-								},
-								"presentment_money": {
-									"amount": "25200.00",
-									"currency_code": "INR"
-								}
-							}
-						}
-					]
+					"tax_lines": []
 				}
 			],
 			"fulfillments": [],
@@ -297,23 +313,24 @@ class ShopifySettings(unittest.TestCase):
 			"customer": {
 				"id": 5049858588862,
 				"email": "frappe@maplestores.com",
-				"accepts_marketing": false,
 				"created_at": "2021-03-10T19:57:40+05:30",
 				"updated_at": "2021-03-12T13:38:35+05:30",
-				"first_name": "Frappe Technologies",
+				"first_name": "_Test Shopify Customer",
 				"last_name": "",
 				"orders_count": 5,
 				"state": "disabled",
 				"total_spent": "731600.00",
 				"last_order_id": 3669049704638,
 				"note": "",
-				"verified_email": true,
 				"tags": "",
 				"last_order_name": "#1008",
 				"currency": "INR",
 				"accepts_marketing_updated_at": "2021-03-10T19:57:40+05:30",
 			}
 		}
-		# Create Order
-		create_order(shopify_order_json, self.shopify_settings, False, company="_Test Company")
 
+		# Create Order
+		make_item("_Test Warehouse - _TC", item)
+		create_order(shopify_order_json, self.shopify_settings, False, company="_Test Company")
+		sales_order_doc = frappe.get_doc("Sales Order", {"shopify_order_id": "3669049704638"})
+		self.assertEqual(sales_order_doc.items[0].item_code, "_Test Shopify Item")
