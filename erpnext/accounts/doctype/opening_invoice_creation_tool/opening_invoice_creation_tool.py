@@ -198,6 +198,7 @@ def start_import(invoices):
 		try:
 			publish(idx, len(invoices), d.doctype)
 			doc = frappe.get_doc(d)
+			doc.flags.ignore_mandatory = True
 			doc.insert()
 			doc.submit()
 			frappe.db.commit()
