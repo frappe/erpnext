@@ -73,5 +73,32 @@ frappe.query_reports["Stock Projected Qty"] = {
 			default: "Group by Item"
 		},
 	],
+	formatter: function(value, row, column, data, default_formatter) {
+		var style = {};
+		if (['actual_qty', 'projected_qty', 'shortage_qty'].includes(column.fieldname)) {
+			if (flt(value) < 0) {
+				style['background-color'] = 'pink';
+				style['font-weight'] = 'bold';
+			}
+		}
+
+		if (['projected_qty', 'ordered_qty', 'planned_qty', 'indented_qty'].includes(column.fieldname)) {
+			if (flt(value) > 0) {
+				style['color'] = 'green';
+			} else if(flt(value) < 0 && column.fieldname !== 'projected_qty') {
+				style['color'] = 'red';
+			}
+		}
+
+		if (['reserved_qty', 'reserved_qty_for_production', 'reserved_qty_for_sub_contract'].includes(column.fieldname)) {
+			if (flt(value) > 0) {
+				style['color'] = 'red';
+			} else if(flt(value) < 0) {
+				style['color'] = 'green';
+			}
+		}
+
+		return default_formatter(value, row, column, data, {css: style});
+	},
 	"initial_depth": 0
 }
