@@ -33,6 +33,9 @@ form_grid_templates = {
 }
 
 class WorkOrder(Document):
+	def get_feed(self):
+		return "{0} {1} of {2}".format(self.get_formatted('qty'), self.get('stock_uom'), self.get('item_name') or self.get('production_item'))
+
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)

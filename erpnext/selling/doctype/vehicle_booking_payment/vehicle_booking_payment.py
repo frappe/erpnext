@@ -12,6 +12,10 @@ from frappe.model.document import Document
 instrument_copy_fields = ['instrument_type', 'instrument_date', 'instrument_no', 'bank', 'amount']
 
 class VehicleBookingPayment(Document):
+	def get_feed(self):
+		currency = erpnext.get_company_currency(self.company)
+		return _("{0}: {1} {2}").format(self.payment_type, currency, self.get_formatted('total_amount'))
+
 	def validate(self):
 		self.validate_party_type()
 		self.validate_vehicle_booking_order()

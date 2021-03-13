@@ -53,6 +53,9 @@ class Item(WebsiteGenerator):
 	_cant_change_fields_trn = ["stock_uom", "alt_uom", "alt_uom_size", "is_vehicle"]
 	_cant_change_fields = _cant_change_fields_bin + _cant_change_fields_sle + _cant_change_fields_trn
 
+	def get_feed(self):
+		return self.get('item_name') or self.get('item_code') or self.get('name')
+
 	def onload(self):
 		super(Item, self).onload()
 

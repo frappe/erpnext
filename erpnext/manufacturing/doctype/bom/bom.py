@@ -34,6 +34,9 @@ class BOM(WebsiteGenerator):
 		template = "templates/generators/bom.html"
 	)
 
+	def get_feed(self):
+		return "For {0}".format(self.get('item_name') or self.get('item_code') or self.get('name'))
+
 	def autoname(self):
 		names = frappe.db.sql_list("""select name from `tabBOM` where item=%s""", self.item)
 

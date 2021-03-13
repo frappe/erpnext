@@ -554,7 +554,7 @@
  "idx": 1,
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-09 12:53:34.194880",
+ "modified": "2021-03-14 00:44:06.930156",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
@@ -591,5 +591,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "timeline_field": "item",
  "track_changes": 1
 }

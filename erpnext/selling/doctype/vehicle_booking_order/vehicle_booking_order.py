@@ -40,6 +40,10 @@ force_fields += address_fields
 force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_type']
 
 class VehicleBookingOrder(AccountsController):
+	def get_feed(self):
+		customer = self.get('company') if self.customer_is_company else self.get('customer') or self.get('financer')
+		return _("For {0} | {1}").format(self.get("customer_name") or customer, self.get("item_name") or self.get("item_code"))
+
 	def autoname(self):
 		if self.meta.has_field('booking_number'):
 			set_name_by_naming_series(self, 'booking_number')
