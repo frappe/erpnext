@@ -34,7 +34,8 @@ def create_therapy_type():
 		})
 		therapy_type.save()
 	else:
-		therapy_type = frappe.get_doc('Therapy Type', 'Basic Rehab')
+		therapy_type = frappe.get_doc('Therapy Type', therapy_type)
+
 	return therapy_type
 
 def create_exercise_type():
@@ -47,4 +48,7 @@ def create_exercise_type():
 			'description': 'Squat and Rise'
 		})
 		exercise_type.save()
+	else:
+		exercise_type = frappe.get_doc('Exercise Type', exercise_type)
+
 	return exercise_type

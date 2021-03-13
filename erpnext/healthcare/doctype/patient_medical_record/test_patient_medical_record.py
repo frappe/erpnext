@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from frappe.utils import nowdate
-from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_encounter, create_healthcare_docs, create_appointment
+from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_encounter, create_healthcare_docs, create_appointment, create_medical_department
 from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 class TestPatientMedicalRecord(unittest.TestCase):
@@ -15,7 +15,8 @@ class TestPatientMedicalRecord(unittest.TestCase):
 		make_pos_profile()
 
 	def test_medical_record(self):
-		patient, medical_department, practitioner = create_healthcare_docs()
+		patient, practitioner = create_healthcare_docs()
+		medical_department = create_medical_department()
 		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1)
 		encounter = create_encounter(appointment)
 
