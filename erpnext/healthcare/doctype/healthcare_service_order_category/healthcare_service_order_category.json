@@ -1,27 +1,18 @@
 {
  "actions": [],
- "allow_copy": 1,
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:department",
+ "autoname": "field:service_order_category_name",
  "beta": 1,
- "creation": "2017-02-27 13:38:30.806362",
+ "creation": "2020-07-20 16:52:53.440961",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "department",
+  "service_order_category_name",
   "patient_care_type"
  ],
  "fields": [
-  {
-   "fieldname": "department",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Department",
-   "reqd": 1,
-   "unique": 1
-  },
   {
    "allow_in_quick_entry": 1,
    "fieldname": "patient_care_type",
@@ -29,43 +20,35 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Patient Care Type",
-   "options": "Patient Care Type"
+   "options": "Patient Care Type",
+   "search_index": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "service_order_category_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Service Order Category Name",
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "links": [],
- "modified": "2021-03-14 20:34:43.328918",
+ "modified": "2021-03-14 18:37:45.290599",
  "modified_by": "Administrator",
  "module": "Healthcare",
- "name": "Medical Department",
+ "name": "Healthcare Service Order Category",
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 1,
+   "delete": 1,
    "email": 1,
    "export": 1,
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Physician",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Nursing User",
-   "share": 1,
-   "write": 1
-  },
-  {
-   "email": 1,
-   "export": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Laboratory User",
+   "role": "System Manager",
    "share": 1,
    "write": 1
   },
@@ -80,13 +63,32 @@
    "role": "Healthcare Administrator",
    "share": 1,
    "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Physician",
+   "share": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Nursing User",
+   "share": 1
   }
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Healthcare",
- "search_fields": "department",
+ "search_fields": "service_order_category_name,patient_care_type",
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "department",
+ "title_field": "service_order_category_name",
  "track_changes": 1
 }
