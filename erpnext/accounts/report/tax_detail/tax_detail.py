@@ -3,7 +3,7 @@
 # Contributed by Case Solved and sponsored by Nulight Studios
 
 from __future__ import unicode_literals
-import frappe
+import frappe, json
 from frappe import _
 
 # field lists in multiple doctypes will be coalesced
@@ -16,15 +16,12 @@ required_sql_fields = {
 #	"Journal Entry Account": ["debit_in_account_currency", "credit_in_account_currency"]
 }
 
-@frappe.whitelist()
-def get_required_fieldlist():
-	"""For overriding the fieldlist from the client"""
-	return required_sql_fields
 
-def execute(filters=None, fieldlist=required_sql_fields):
+def execute(filters=None):
 	if not filters:
 		return [], []
 
+	fieldlist = required_sql_fields
 	fieldstr = get_fieldstr(fieldlist)
 
 	gl_entries = frappe.db.sql("""
@@ -136,9 +133,12 @@ custom_report_dict = {
 }
 
 @frappe.whitelist()
-def get_custom_reports():
+def get_custom_reports(name=None):
+	filters = custom_report_dict.copy()
+	if name:
+		filters['name'] = name
 	reports = frappe.get_list('Report',
-		filters = custom_report_dict,
+		filters = filters,
 		fields = ['name', 'json'],
 		as_list=False
 	)
@@ -148,22 +148,34 @@ def get_custom_reports():
 	return reports_dict
 
 @frappe.whitelist()
-def new_custom_report(name=None):
-	if name == 'Tax Detail':
-		frappe.throw("The parent report cannot be overwritten.")
-	if not name:
-		frappe.throw("The report name must be supplied.")
+def save_custom_report(reference_report, report_name, columns, sections):
+	import pymysql
+	if reference_report != 'Tax Detail':
+		frappe.throw(_("The wrong report is referenced."))
+	if report_name == 'Tax Detail':
+		frappe.throw(_("The parent report cannot be overwritten."))
+
+	data = {
+		'columns': json.loads(columns),
+		'sections': json.loads(sections)
+	}
+
 	doc = {
 		'doctype': 'Report',
-		'report_name': name,
+		'report_name': report_name,
 		'is_standard': 'No',
-		'module': 'Accounts'
+		'module': 'Accounts',
+		'json': json.dumps(data, separators=(',', ':'))
 	}
 	doc.update(custom_report_dict)
-	doc = frappe.get_doc(doc)
-	doc.insert()
-	return True
 
-@frappe.whitelist()
-def save_custom_report(data):
-	return None
+	try:
+		newdoc = frappe.get_doc(doc)
+		newdoc.insert()
+		frappe.msgprint(_("Report created successfully"))
+	except (frappe.exceptions.DuplicateEntryError, pymysql.err.IntegrityError):
+		dbdoc = frappe.get_doc('Report', report_name)
+		dbdoc.update(doc)
+		dbdoc.save()
+		frappe.msgprint(_("Report updated successfully"))
+	return report_name
