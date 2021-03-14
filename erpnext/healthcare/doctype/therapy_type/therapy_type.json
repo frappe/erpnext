@@ -22,14 +22,20 @@
   "item_group",
   "column_break_12",
   "description",
-  "medical_coding_section",
-  "medical_code_standard",
-  "medical_code",
   "section_break_18",
+  "section_break_6",
   "therapy_for",
   "add_exercises",
-  "section_break_6",
   "exercises",
+  "medical_coding_section",
+  "medical_code_standard",
+  "column_break_34",
+  "medical_code",
+  "service_order_defaults_section",
+  "service_order_category",
+  "patient_care_type",
+  "column_break_16",
+  "staff_role",
   "change_in_item"
  ],
  "fields": [
@@ -178,15 +184,49 @@
    "options": "Medical Code Standard"
   },
   {
+   "fieldname": "column_break_34",
+   "fieldtype": "Column Break"
+  },
+  {
    "depends_on": "medical_code_standard",
    "fieldname": "medical_code",
    "fieldtype": "Link",
    "label": "Medical Code",
    "options": "Medical Code"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "service_order_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Service Order Defaults"
+  },
+  {
+   "fieldname": "service_order_category",
+   "fieldtype": "Link",
+   "label": "Service Order Category",
+   "options": "Healthcare Service Order Category"
+  },
+  {
+   "fetch_from": "service_order_category.patient_care_type",
+   "fetch_if_empty": 1,
+   "fieldname": "patient_care_type",
+   "fieldtype": "Link",
+   "label": "Patient Care Type",
+   "options": "Patient Care Type"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "staff_role",
+   "fieldtype": "Link",
+   "label": "Staff Role",
+   "options": "Role"
   }
  ],
  "links": [],
- "modified": "2020-06-29 14:18:50.669951",
+ "modified": "2021-03-14 22:45:26.025285",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Type",
