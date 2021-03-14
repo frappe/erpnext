@@ -351,19 +351,19 @@ body.product-page {
 	}
 }
 
-.cart-icon {
-	.cart-badge {
-		position: relative;
-		top: -10px;
-		left: -12px;
-		background: var(--red-600);
-		width: 16px;
-		align-items: center;
-		height: 16px;
-		font-size: 10px;
-		border-radius: 50%;
-	}
+
+.shopping-badge {
+	position: relative;
+	top: -10px;
+	left: -12px;
+	background: var(--red-600);
+	width: 16px;
+	align-items: center;
+	height: 16px;
+	font-size: 10px;
+	border-radius: 50%;
 }
+
 
 .cart-animate {
 	animation: wiggle 0.5s linear;
@@ -553,7 +553,28 @@ body.product-page {
 	margin-left: 12px;
 }
 
-.wish-icon {
+.like-animate {
+	animation: expand cubic-bezier(0.04, 0.4, 0.5, 0.95) 1.6s forwards 1;
+}
+
+@keyframes expand {
+	30% {
+	  transform: scale(1.6);
+	}
+	50% {
+	  transform: scale(0.8);
+	}
+	70% {
+		transform: scale(1.3);
+	}
+	100% {
+	  transform: scale(1);
+	}
+  }
+
+@keyframes heart { 0%, 17.5% { font-size: 0; } }
+
+.not-wished {
 	cursor: pointer;
 	stroke: #F47A7A !important;
 
@@ -563,10 +584,8 @@ body.product-page {
 }
 
 .wished {
-		.wish-icon {
-			stroke: none;
-			fill: #F47A7A !important;
-		}
+	stroke: none;
+	fill: #F47A7A !important;
 }
 
 .list-row-checkbox {

@@ -12,6 +12,8 @@
   "item_details_section",
   "description",
   "column_break_7",
+  "section_break_8",
+  "price",
   "image",
   "image_view",
   "warehouse_section",
@@ -52,6 +54,7 @@
   },
   {
    "fetch_from": "item_code.description",
+   "fetch_if_empty": 1,
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Description"
@@ -62,6 +65,7 @@
   },
   {
    "fetch_from": "item_code.image",
+   "fetch_if_empty": 1,
    "fieldname": "image",
    "fieldtype": "Attach",
    "hidden": 1,
@@ -69,6 +73,7 @@
   },
   {
    "fetch_from": "item_code.image",
+   "fetch_if_empty": 1,
    "fieldname": "image_view",
    "fieldtype": "Image",
    "hidden": 1,
@@ -87,12 +92,21 @@
    "in_list_view": 1,
    "label": "Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Float",
+   "label": "Price"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-10 19:13:41.310816",
+ "modified": "2021-03-12 18:23:03.487891",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Wishlist Items",

@@ -56,6 +56,7 @@ class ProductQuery:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
 			if product_info:
 				item.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
+				item.price = product_info['price'].get('price_list_rate')
 
 			if self.settings.show_stock_availability and item.get("website_warehouse"):
 				stock_qty = frappe.utils.flt(
@@ -67,6 +68,11 @@ class ProductQuery:
 							"actual_qty")
 						)
 				item.in_stock = "green" if stock_qty else "red"
+
+			item.wished = False
+			if frappe.db.exists("Wishlist Items", {"item_code": item.item_code}):
+				item.wished = True
+
 		return result
 
 	def query_items(self, conditions, or_conditions, substitutions, start=0):
