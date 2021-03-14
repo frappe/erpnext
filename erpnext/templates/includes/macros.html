@@ -127,12 +127,11 @@
 			<span class="indicator {{ item.in_stock }} card-indicator"></span>
 		{% endif %}
 		{% if not item.has_variants %}
-			<input class="level-item list-row-checkbox hidden-xs"
-				type="checkbox" data-name="{{ title }}" style="display: none !important;">
 			<div class="like-action"
-				data-name="{{ title }}" data-doctype="Item">
+				data-item-code="{{ item.item_code }}" data-price="{{ item.price }}">
 				<svg class="icon sm">
-					<use class="wish-icon" href="#icon-heart"></use>
+					{%- set icon_class = "wished" if item.wished else "not-wished"-%}
+					<use class="{{ icon_class }} wish-icon" href="#icon-heart"></use>
 				</svg>
 			</div>
 		{% endif %}

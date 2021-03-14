@@ -73,6 +73,11 @@ $(() => {
 		}
 
 		bind_card_actions() {
+			this.bind_add_to_cart_action();
+			this.bind_wishlist_action();
+		}
+
+		bind_add_to_cart_action() {
 			$('.page_content').on('click', '.btn-add-to-cart-list', (e) => {
 				const $btn = $(e.currentTarget);
 				$btn.prop('disabled', true);
@@ -91,16 +96,75 @@ $(() => {
 		animate_add_to_cart(button) {
 			// Create 'added to cart' animation
 			let btn_id = "#" + button[0].id;
-			button.removeClass('not-added');
-			button.addClass('added-to-cart');
+			this.toggle_button_class(button, 'not-added', 'added-to-cart');
 			$(btn_id).text('Added to Cart');
 
 			// undo
 			setTimeout(() => {
-				button.removeClass('added-to-cart');
-				button.addClass('not-added');
+				this.toggle_button_class(button, 'added-to-cart', 'not-added');
 				$(btn_id).text('Add to Cart');
 			}, 2000);
+		}
+
+		bind_wishlist_action() {
+			$('.page_content').on('click', '.like-action', (e) => {
+				const $btn = $(e.currentTarget);
+				const $wish_icon = $btn.find('.wish-icon');
+				let me = this;
+
+				if ($wish_icon.hasClass('wished')) {
+					// un-wish item
+					$btn.removeClass("like-animate");
+					this.toggle_button_class($wish_icon, 'wished', 'not-wished');
+					frappe.call({
+						type: "POST",
+						method: "erpnext.e_commerce.doctype.wishlist.wishlist.remove_from_wishlist",
+						args: {
+							item_code: $btn.data('item-code')
+						},
+						callback: function (r) {
+							if (r.exc) {
+								me.toggle_button_class($wish_icon, 'wished', 'not-wished');
+								frappe.msgprint({
+									message: __("Sorry, something went wrong. Please refresh."),
+									indicator: "red",
+									title: __("Note")}
+								);
+							} else {
+								erpnext.e_commerce.set_wishlist_count();
+							}
+						}
+					});
+				} else {
+					$btn.addClass("like-animate");
+					this.toggle_button_class($wish_icon, 'not-wished', 'wished');
+					frappe.call({
+						type: "POST",
+						method: "erpnext.e_commerce.doctype.wishlist.wishlist.add_to_wishlist",
+						args: {
+							item_code: $btn.data('item-code'),
+							price: $btn.data('price')
+						},
+						callback: function (r) {
+							if (r.exc) {
+								me.toggle_button_class($wish_icon, 'wished', 'not-wished');
+								frappe.msgprint({
+									message: __("Sorry, something went wrong. Please refresh."),
+									indicator: "red",
+									title: __("Note")}
+								);
+							} else {
+								erpnext.e_commerce.set_wishlist_count();
+							}
+						}
+					});
+				}
+			});
+		}
+
+		toggle_button_class(button, remove, add) {
+			button.removeClass(remove);
+			button.addClass(add);
 		}
 
 		bind_search() {
