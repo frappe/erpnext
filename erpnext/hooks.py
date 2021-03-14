@@ -270,7 +270,12 @@ doc_events = {
 		"on_trash": "erpnext.regional.check_deletion_permission"
 	},
 	'Address': {
-		'validate': ['erpnext.regional.india.utils.validate_gstin_for_india', 'erpnext.regional.italy.utils.set_state_code', 'erpnext.regional.india.utils.update_gst_category']
+		'validate': [
+			'erpnext.regional.india.utils.validate_gstin_for_india',
+			'erpnext.regional.italy.utils.set_state_code',
+			'erpnext.regional.india.utils.update_gst_category',
+			'erpnext.healthcare.utils.update_address_links'
+			],
 	},
 	'Supplier': {
 		'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
@@ -284,7 +289,7 @@ doc_events = {
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
 		"after_insert": "erpnext.telephony.doctype.call_log.call_log.link_existing_conversations",
-		"validate": "erpnext.crm.utils.update_lead_phone_numbers"
+		"validate": ["erpnext.crm.utils.update_lead_phone_numbers", "erpnext.healthcare.utils.update_patient_email_and_phone_numbers"]
 	},
 	"Email Unsubscribe": {
 		"after_insert": "erpnext.crm.doctype.email_campaign.email_campaign.unsubscribe_recipient"
