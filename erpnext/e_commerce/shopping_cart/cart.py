@@ -138,7 +138,7 @@ def update_cart(item_code, qty, additional_notes=None, with_items=False):
 				"additional_notes": additional_notes
 			})
 		else:
-			quotation_items[0].qty = qty + 1
+			quotation_items[0].qty = qty
 			quotation_items[0].additional_notes = additional_notes
 
 	apply_cart_settings(quotation=quotation)
