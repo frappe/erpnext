@@ -10,7 +10,8 @@
 	],
 	"js/erpnext-web.min.js": [
 		"public/js/website_utils.js",
-		"public/js/shopping_cart.js"
+		"public/js/shopping_cart.js",
+		"public/js/wishlist.js"
 	],
 	"css/erpnext-web.css": [
 		"public/scss/website.scss",
