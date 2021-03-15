@@ -32,7 +32,7 @@ def execute():
 				no_copy=1, print_hide=1, read_only=1),
 
 			dict(fieldname='einvoice_status', label='E-Invoice Status', fieldtype='Select', insert_after='qrcode_image',
-				options='\nNot Eligible\nPending\nGenerated\nCancelled', default=None, hidden=1, no_copy=1, print_hide=1, read_only=1)
+				options='\nPending\nGenerated\nCancelled\nFailed', default=None, hidden=1, no_copy=1, print_hide=1, read_only=1)
 		]
 	}
 	create_custom_fields(custom_fields, update=True)
@@ -52,14 +52,6 @@ def execute():
 			AND ifnull(`billing_address_gstin`, '') != ifnull(`company_gstin`, '')
 			AND ifnull(gst_category, '') in ('Registered Regular', 'SEZ', 'Overseas', 'Deemed Export')
 	''')
-
-	frappe.db.sql('''
-		UPDATE `tabSales Invoice` SET einvoice_status = 'Not Eligible'
-		WHERE
-			posting_date >= '2020-11-01'
-			AND ifnull(irn, '') = ''
-			AND (ifnull(`billing_address_gstin`, '') = ifnull(`company_gstin`, '')
-			OR ifnull(gst_category, '') not in ('Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'))''')
 
 	# set correct acknowledgement in e-invoices
 	einvoices = frappe.get_all('Sales Invoice', { 'irn': ['is', 'set'] }, ['name', 'signed_einvoice'])

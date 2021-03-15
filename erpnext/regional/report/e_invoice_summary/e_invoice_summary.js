@@ -36,7 +36,7 @@ frappe.query_reports["E-Invoice Summary"] = {
 			"fieldtype": "Select",
 			"fieldname": "status",
 			"label": __("Status"),
-			"options": "\nNot Eligible\nPending\nGenerated\nCancelled\n"
+			"options": "\nPending\nGenerated\nCancelled\nFailed"
 		}
 	],
 
@@ -47,7 +47,7 @@ frappe.query_reports["E-Invoice Summary"] = {
 			if (value == 'Pending') value = `<span class="bold" style="color: var(--text-on-orange)">${value}</span>`;
 			else if (value == 'Generated') value = `<span class="bold" style="color: var(--text-on-green)">${value}</span>`;
 			else if (value == 'Cancelled') value = `<span class="bold" style="color: var(--text-on-red)">${value}</span>`;
-			else if (value == 'Not Eligible') value = `<span class="bold">${value}</span>`;
+			else if (value == 'Failed') value = `<span class="bold"  style="color: var(--text-on-red)">${value}</span>`;
 		}
 
 		return value;

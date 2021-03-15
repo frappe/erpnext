@@ -427,7 +427,7 @@ def make_custom_fields(update=True):
 			no_copy=1, print_hide=1, read_only=1),
 
 		dict(fieldname='einvoice_status', label='E-Invoice Status', fieldtype='Select', insert_after='qrcode_image',
-			options='\nNot Eligible\nPending\nGenerated\nCancelled', default=None, hidden=1, no_copy=1, print_hide=1, read_only=1)
+			options='\nPending\nGenerated\nCancelled\nFailed', default=None, hidden=1, no_copy=1, print_hide=1, read_only=1)
 	]
 
 	custom_fields = {
