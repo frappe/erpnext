@@ -25,8 +25,8 @@ class PickList(Document):
 			if not frappe.get_cached_value('Item', item.item_code, 'has_serial_no'):
 				continue
 			if not item.serial_no:
-				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}".format(
-					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse))),
+				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}").format(
+					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse)),
 					title=_("Serial Nos Required"))
 			if len(item.serial_no.split('\n')) == item.picked_qty:
 				continue
