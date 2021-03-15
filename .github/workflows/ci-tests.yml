@@ -10,12 +10,15 @@ jobs:
 
     strategy:
       fail-fast: false
+
       matrix:
        include:
         - TYPE: "server"
           JOB_NAME: "Server"
+          RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-tests --app erpnext --coverage
         - TYPE: "patch"
           JOB_NAME: "Patch"
+          RUN_COMMAND: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate
 
     name: ${{ matrix.JOB_NAME }}
 
@@ -48,7 +51,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
-
       - name: Cache node modules
         uses: actions/cache@v2
         env:
@@ -60,7 +62,6 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
-
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -77,7 +78,7 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Tests
-        run: bash ${GITHUB_WORKSPACE}/.github/helper/run_tests.sh
+        run: ${{ matrix.RUN_COMMAND }}
         env:
           TYPE: ${{ matrix.TYPE }}
 
@@ -92,3 +93,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+

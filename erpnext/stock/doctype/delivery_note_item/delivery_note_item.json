@@ -750,6 +750,7 @@
    "fieldname": "stock_uom_rate",
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
+   "no_copy": 1,
    "options": "currency",
    "read_only": 1
   }
@@ -758,7 +759,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-30 21:42:03.767968",
+ "modified": "2021-02-23 01:04:08.588104",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
