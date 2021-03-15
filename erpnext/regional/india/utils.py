@@ -719,25 +719,12 @@ def update_grand_total_for_rcm(doc, method):
 	if country != 'India':
 		return
 
-	if not doc.total_taxes_and_charges:
+	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
+
+	if not base_gst_tax:
 		return
 
 	if doc.reverse_charge == 'Y':
-		gst_accounts = get_gst_accounts(doc.company)
-		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-			+ gst_accounts.get('igst_account')
-
-		base_gst_tax = 0
-		gst_tax = 0
-
-		for tax in doc.get('taxes'):
-			if tax.category not in ("Total", "Valuation and Total"):
-				continue
-
-			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-				base_gst_tax += tax.base_tax_amount_after_discount_amount
-				gst_tax += tax.tax_amount_after_discount_amount
-
 		doc.taxes_and_charges_added -= gst_tax
 		doc.total_taxes_and_charges -= gst_tax
 		doc.base_taxes_and_charges_added -= base_gst_tax
@@ -771,6 +758,11 @@ def make_regional_gl_entries(gl_entries, doc):
 	if country != 'India':
 		return gl_entries
 
+	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
+
+	if not base_gst_tax:
+		return gl_entries
+
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
@@ -799,23 +791,20 @@ def make_regional_gl_entries(gl_entries, doc):
 
 	return gl_entries
 
-@frappe.whitelist()
-def get_regional_round_off_accounts(company, account_list):
-	country = frappe.get_cached_value('Company', company, 'country')
+def get_gst_tax_amount(doc):
+	gst_accounts = get_gst_accounts(doc.company)
+	gst_account_list = gst_accounts.get('cgst_account', []) + gst_accounts.get('sgst_account', []) \
+		+ gst_accounts.get('igst_account', [])
 
-	if country != 'India':
-		return
+	base_gst_tax = 0
+	gst_tax = 0
 
-	if isinstance(account_list, string_types):
-		account_list = json.loads(account_list)
+	for tax in doc.get('taxes'):
+		if tax.category not in ("Total", "Valuation and Total"):
+			continue
 
-	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
-		return
+		if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
+			base_gst_tax += tax.base_tax_amount_after_discount_amount
+			gst_tax += tax.tax_amount_after_discount_amount
 
-	gst_accounts = get_gst_accounts(company)
-	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-		+ gst_accounts.get('igst_account')
-
-	account_list.extend(gst_account_list)
-
-	return account_list
+	return gst_tax, base_gst_tax
