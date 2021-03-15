@@ -6,8 +6,7 @@
  "engine": "InnoDB",
  "field_order": [
   "topic",
-  "topic_name",
-  "course"
+  "topic_name"
  ],
  "fields": [
   {
@@ -23,19 +22,12 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Topic Name"
-  },
-  {
-   "fieldname": "course",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Course",
-   "options": "Course"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-23 15:44:51.655372",
+ "modified": "2021-03-15 18:39:05.153150",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Course Topic",
