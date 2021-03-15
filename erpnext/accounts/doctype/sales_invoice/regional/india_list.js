@@ -1,14 +1,14 @@
 var globalOnload = frappe.listview_settings['Sales Invoice'].onload;
-frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
+frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 
 	// Provision in case onload event is added to sales_invoice.js in future
 	if (globalOnload) {
-		globalOnload(doclist);
+		globalOnload(list_view);
 	}
 
 	const action = () => {
-		const selected_docs = doclist.get_checked_items();
-		const docnames = doclist.get_checked_items(true);
+		const selected_docs = list_view.get_checked_items();
+		const docnames = list_view.get_checked_items(true);
 
 		for (let doc of selected_docs) {
 			if (doc.docstatus !== 1) {
@@ -19,7 +19,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 		frappe.call({
 			method: 'erpnext.regional.india.utils.generate_ewb_json',
 			args: {
-				'dt': doclist.doctype,
+				'dt': list_view.doctype,
 				'dn': docnames
 			},
 			callback: function(r) {
@@ -35,14 +35,14 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 		});
 	};
 
-	doclist.page.add_actions_menu_item(__('Generate E-Way Bill JSON'), action, false);
+	list_view.page.add_actions_menu_item(__('Generate E-Way Bill JSON'), action, false);
 
 	const generate_irns = () => {
-		const docnames = doclist.get_checked_items(true);
+		const docnames = list_view.get_checked_items(true);
 
 		frappe.call({
 			method: 'erpnext.regional.india.e_invoice.utils.get_einvoices',
-			args: { 'doctype': doclist.doctype, docnames },
+			args: { 'doctype': list_view.doctype, docnames },
 			freeze: true,
 			freeze_message: __('Validating Invoices...'),
 			callback: function(r) {
@@ -62,12 +62,19 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 							freeze_message: __('Generating E-Invoices...'),
 							callback: function(r) {
 								if (r.message.length) {
-									for (let d of r.message) {
+									for (let failed_doc of r.message) {
+										const docname = `<a href="app/sales-invoice/${failed_doc.docname}">${failed_doc.docname}</a>`;
+										const errors = JSON.parse(failed_doc.message.replaceAll("'", '"'));
+										const message = `${docname} has following errors:<br>
+											<ul style="padding-left: 20px; padding-top: 5px">
+												${errors.map(err => `<li>${err}</li>`).join('')}
+											</ul>
+										`;
+
 										frappe.msgprint({
-											message: JSON.parse(d.message.replaceAll("'", '"')),
+											message: message,
 											title: __('Bulk E-Invoice Generation Failed'),
-											indicator: 'red',
-											as_list: 1
+											indicator: 'red'
 										})
 									}
 								}
@@ -80,7 +87,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 	};
 
 	const cancel_irns = () => {
-		const docnames = doclist.get_checked_items(true);
+		const docnames = list_view.get_checked_items(true);
 
 		const fields = [
 			{
@@ -127,17 +134,17 @@ frappe.listview_settings['Sales Invoice'].onload = function (doclist) {
 		einvoicing_enabled = enabled;
 	});
 
-	doclist.$result.on("change", "input[type=checkbox]", (e) => {
+	list_view.$result.on("change", "input[type=checkbox]", (e) => {
 		if (einvoicing_enabled) {
-			const docnames = doclist.get_checked_items(true);
+			const docnames = list_view.get_checked_items(true);
 			if (docnames && docnames.length) {
-				if (doclist.page.get_inner_group_button(__('E-Invoicing')).length == 0) {
-					doclist.page.add_inner_button(__('Generate IRNs'), generate_irns, __('E-Invoicing'));
-					doclist.page.add_inner_button(__('Cancel IRNs'), cancel_irns, __('E-Invoicing'));
+				if (list_view.page.get_inner_group_button(__('E-Invoicing')).length == 0) {
+					list_view.page.add_inner_button(__('Generate IRNs'), generate_irns, __('E-Invoicing'));
+					list_view.page.add_inner_button(__('Cancel IRNs'), cancel_irns, __('E-Invoicing'));
 				}
 			} else {
-				doclist.page.remove_inner_button(__('Generate IRNs'), __('E-Invoicing'));
-				doclist.page.remove_inner_button(__('Cancel IRNs'), __('E-Invoicing'));
+				list_view.page.remove_inner_button(__('Generate IRNs'), __('E-Invoicing'));
+				list_view.page.remove_inner_button(__('Cancel IRNs'), __('E-Invoicing'));
 			}
 		}
 	});
