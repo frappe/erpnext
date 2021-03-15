@@ -646,3 +646,27 @@ body.product-page {
 		color: white;
 	}
 }
+
+.wishlist-cart-not-added {
+	color: var(--blue-500);
+	background-color: white;
+	border: 1px solid var(--blue-500);
+	--icon-stroke: var(--blue-500);
+
+	&:hover {
+		background-color: var(--blue-500);
+		color: white;
+		--icon-stroke: white;
+	}
+}
+
+.remove-wish {
+	&:hover {
+		background-color: var(--gray-100);
+		border: 1px solid var(--icon-stroke);
+	}
+}
+
+.wish-removed {
+	display: none;
+}

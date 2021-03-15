@@ -10,18 +10,22 @@ class Wishlist(Document):
 	pass
 
 @frappe.whitelist()
-def add_to_wishlist(item_code, price):
+def add_to_wishlist(item_code, price, formatted_price=None):
 	"""Insert Item into wishlist."""
 	web_item_data = frappe.db.get_value("Website Item", {"item_code": item_code},
-		["image", "website_warehouse", "name", "item_name"], as_dict=1)
+		["image", "website_warehouse", "name", "item_name", "item_group", "route"]
+		, as_dict=1)
 
 	wished_item_dict = {
 		"item_code": item_code,
 		"item_name": web_item_data.get("item_name"),
+		"item_group": web_item_data.get("item_group"),
 		"website_item": web_item_data.get("name"),
 		"price": frappe.utils.flt(price),
+		"formatted_price": formatted_price,
 		"image": web_item_data.get("image"),
-		"website_warehouse": web_item_data.get("website_warehouse")
+		"warehouse": web_item_data.get("website_warehouse"),
+		"route": web_item_data.get("route")
 	}
 
 	if not frappe.db.exists("Wishlist", frappe.session.user):
