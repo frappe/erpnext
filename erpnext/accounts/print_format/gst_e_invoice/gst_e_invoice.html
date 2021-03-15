@@ -22,8 +22,8 @@
 		</p>
 	</div>
 	{% endif %}
+	<h5 class="font-bold" style="margin-top: 0px;">1. Transaction Details</h5>
 	<div class="row section-break" style="border-bottom: 1px solid #d1d8dd; padding-bottom: 10px;">
-		<h5 class="font-bold" style="margin-left: 15px; margin-top: 0px;">1. Transaction Details</h5>
 		<div class="col-xs-8 column-break">
 			<div class="row data-field">
 				<div class="col-xs-4"><label>IRN</label></div>
@@ -54,8 +54,8 @@
 			<img src="{{ doc.qrcode_image }}" width="175px" style="float: right;">
 		</div>
 	</div>
+	<h5 class="font-bold" style="margin-top: 15px; margin-bottom: 10px;">2. Party Details</h5>
 	<div class="row section-break" style="border-bottom: 1px solid #d1d8dd; padding-bottom: 10px;">
-		<h5 class="font-bold" style="margin-left: 15px; margin-bottom: 0px;">2. Party Details</h5>
 		{%- set seller = einvoice.SellerDtls -%}
 		<div class="col-xs-6 column-break">
 			<h5 style="margin-bottom: 5px;">Seller</h5>
@@ -89,7 +89,7 @@
 		</div>
 	</div>
 	<div style="overflow-x: auto;">
-		<h5 class="font-bold" style="margin-bottom: 0px;">3. Item Details</h5>
+		<h5 class="font-bold" style="margin-top: 15px; margin-bottom: 10px;">3. Item Details</h5>
 		<table class="table table-bordered">
 			<thead>
 				<tr>

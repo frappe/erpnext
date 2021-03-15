@@ -103,7 +103,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-29 12:02:16.106942",
+ "modified": "2021-03-02 17:35:14.084342",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Mpesa Settings",
@@ -147,5 +147,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

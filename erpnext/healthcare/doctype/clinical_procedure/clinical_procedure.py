@@ -121,6 +121,7 @@ class ClinicalProcedure(Document):
 
 		stock_entry.stock_entry_type = 'Material Receipt'
 		stock_entry.to_warehouse = self.warehouse
+		stock_entry.company = self.company
 		expense_account = get_account(None, 'expense_account', 'Healthcare Settings', self.company)
 		for item in self.items:
 			if item.qty > item.actual_qty:
