@@ -1,10 +1,14 @@
 #!/bin/bash
 
+set -e
+
 cd ~ || exit
 
 sudo apt-get install redis-server
 
-nvm install 10
+sudo apt install nodejs
+
+sudo apt install npm
 
 pip install frappe-bench
 
