@@ -31,6 +31,7 @@ class StockReconciliation(StockController):
 		self.validate_data()
 		self.validate_expense_account()
 		self.set_total_qty_and_amount()
+		self.validate_customer_provided_item()
 
 		if self._action=="submit":
 			self.make_batches('warehouse')
@@ -213,7 +214,7 @@ class StockReconciliation(StockController):
 					if row.valuation_rate in ("", None):
 						row.valuation_rate = previous_sle.get("valuation_rate", 0)
 
-				if row.qty and not row.valuation_rate:
+				if row.qty and not row.valuation_rate and not row.allow_zero_valuation_rate:
 					frappe.throw(_("Valuation Rate required for Item {0} at row {1}").format(row.item_code, row.idx))
 
 				if (not item.has_batch_no and (previous_sle and row.qty == previous_sle.get("qty_after_transaction")
