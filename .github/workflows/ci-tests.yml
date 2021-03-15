@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+       include:
+        - TYPE: "server"
+          JOB_NAME: "Server"
+        - TYPE: "patch"
+          JOB_NAME: "Patch"
+
+    name: ${{ matrix.JOB_NAME }}
+
+    services:
+      mysql:
+        image: mariadb:10.3
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: YES
+        ports:
+          - 3306:3306
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.6
+
+      - name: Add to Hosts
+        run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
+
+      - name: Cache pip
+        uses: actions/cache@v2
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+            ${{ runner.os }}-
+
+      - name: Cache node modules
+        uses: actions/cache@v2
+        env:
+          cache-name: cache-node-modules
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-build-${{ env.cache-name }}-
+            ${{ runner.os }}-build-
+            ${{ runner.os }}-
+
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v2
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
+
+      - name: Run Tests
+        run: bash ${GITHUB_WORKSPACE}/.github/helper/run_tests.sh
+        env:
+          TYPE: ${{ matrix.TYPE }}
+
+      - name: Coverage
+        if: matrix.TYPE == 'server'
+        run: |
+          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
+          cd ${GITHUB_WORKSPACE}
+          pip install coveralls==2.2.0
+          pip install coverage==4.5.4
+          coveralls
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
