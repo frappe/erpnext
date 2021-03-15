@@ -35,6 +35,8 @@ def validate_einvoice_fields(doc):
 		if len(doc.name) > 16:
 			raise_document_name_too_long_error()
 
+		doc.einvoice_status = 'Pending'
+
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
 
@@ -681,6 +683,8 @@ class GSPConnector():
 			res = self.make_request('post', self.cancel_irn_url, headers, data)
 			if res.get('success'):
 				self.invoice.irn_cancelled = 1
+				self.invoice.irn_cancel_date = res.get('result')['CancelDate']
+				self.invoice.einvoice_status = 'Cancelled'
 				self.invoice.flags.updater_reference = {
 					'doctype': self.invoice.doctype,
 					'docname': self.invoice.name,
@@ -857,6 +861,7 @@ class GSPConnector():
 		self.invoice.ack_no = res.get('AckNo')
 		self.invoice.ack_date = res.get('AckDt')
 		self.invoice.signed_qr_code = res.get('SignedQRCode')
+		self.invoice.einvoice_status = 'Generated'
 
 		self.attach_qrcode_image()
 
