@@ -51,6 +51,7 @@
   "warehouse_and_reference",
   "warehouse",
   "actual_qty",
+  "company_total_stock",
   "material_request",
   "material_request_item",
   "sales_order",
@@ -744,13 +745,19 @@
    "label": "Available Qty at Warehouse",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "company_total_stock",
+   "fieldtype": "Float",
+   "label": "Available Qty at Company",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-15 10:10:16.342693",
+ "modified": "2021-03-22 11:20:00.121296",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

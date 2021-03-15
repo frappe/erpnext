@@ -30,7 +30,7 @@ class ProgramEnrollmentTool(Document):
 					.format(condition), self.as_dict(), as_dict=1)
 			elif self.get_students_from == "Program Enrollment":
 				condition2 = 'and student_batch_name=%(student_batch)s' if self.student_batch else " "
-				students = frappe.db.sql('''select student, student_name, student_batch_name from `tabProgram Enrollment`
+				students = frappe.db.sql('''select student, student_name, student_batch_name, student_category from `tabProgram Enrollment`
 					where program=%(program)s and academic_year=%(academic_year)s {0} {1} and docstatus != 2'''
 					.format(condition, condition2), self.as_dict(), as_dict=1)
 
@@ -57,6 +57,7 @@ class ProgramEnrollmentTool(Document):
 				prog_enrollment = frappe.new_doc("Program Enrollment")
 				prog_enrollment.student = stud.student
 				prog_enrollment.student_name = stud.student_name
+				prog_enrollment.student_category = stud.student_category
 				prog_enrollment.program = self.new_program
 				prog_enrollment.academic_year = self.new_academic_year
 				prog_enrollment.academic_term = self.new_academic_term

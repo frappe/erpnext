@@ -99,10 +99,10 @@ class TestPOSInvoice(unittest.TestCase):
 		item_row = inv.get("items")[0]
 
 		add_items = [
-			(54, '_Test Account Excise Duty @ 12'),
-			(288, '_Test Account Excise Duty @ 15'),
-			(144, '_Test Account Excise Duty @ 20'),
-			(430, '_Test Item Tax Template 1')
+			(54, '_Test Account Excise Duty @ 12 - _TC'),
+			(288, '_Test Account Excise Duty @ 15 - _TC'),
+			(144, '_Test Account Excise Duty @ 20 - _TC'),
+			(430, '_Test Item Tax Template 1 - _TC')
 		]
 		for qty, item_tax_template in add_items:
 			item_row_copy = copy.deepcopy(item_row)
