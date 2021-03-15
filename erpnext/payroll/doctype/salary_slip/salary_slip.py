@@ -1050,7 +1050,7 @@ class SalarySlip(TransactionBase):
 			repayment_entry.save()
 			repayment_entry.submit()
 
-			loan.loan_repayment_entry = repayment_entry.name
+			frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
 
 	def cancel_loan_repayment_entry(self):
 		for loan in self.loans:
