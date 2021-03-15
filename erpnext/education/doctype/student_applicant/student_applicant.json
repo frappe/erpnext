@@ -11,6 +11,7 @@
   "middle_name",
   "last_name",
   "program",
+  "student_category",
   "lms_only",
   "paid",
   "column_break_8",
@@ -257,12 +258,18 @@
    "options": "Student Applicant",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "student_category",
+   "fieldtype": "Link",
+   "label": "Student Category",
+   "options": "Student Category"
   }
  ],
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-05 13:59:45.631647",
+ "modified": "2021-03-01 23:00:25.119241",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Applicant",

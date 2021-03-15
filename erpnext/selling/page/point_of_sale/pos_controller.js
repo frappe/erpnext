@@ -93,6 +93,10 @@ erpnext.PointOfSale.Controller = class {
 					})
 					return frappe.utils.play_sound("error");
 				}
+
+				// filter balance details for empty rows
+				balance_details = balance_details.filter(d => d.mode_of_payment);
+
 				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
 				const res = await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze:true });
 				!res.exc && me.prepare_app_defaults(res.message);
@@ -498,10 +502,11 @@ erpnext.PointOfSale.Controller = class {
 
 	async on_cart_update(args) {
 		frappe.dom.freeze();
+		let item_row = undefined;
 		try {
 			let { field, value, item } = args;
 			const { item_code, batch_no, serial_no, uom } = item;
-			let item_row = this.get_item_from_frm(item_code, batch_no, uom);
+			item_row = this.get_item_from_frm(item_code, batch_no, uom);
 
 			const item_selected_from_selector = field === 'qty' && value === "+1"
 
@@ -553,10 +558,12 @@ erpnext.PointOfSale.Controller = class {
 				this.check_serial_batch_selection_needed(item_row) && this.edit_item_details_of(item_row);
 				this.update_cart_html(item_row);
 			}
+
 		} catch (error) {
 			console.log(error);
 		} finally {
 			frappe.dom.unfreeze();
+			return item_row;
 		}
 	}
 
