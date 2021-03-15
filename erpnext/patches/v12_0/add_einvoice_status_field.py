@@ -1,4 +1,5 @@
 from __future__ import unicode_literals
+import json
 import frappe
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 
@@ -36,6 +37,7 @@ def execute():
 	}
 	create_custom_fields(custom_fields, update=True)
 
+	# set appropriate statuses
 	frappe.db.sql('''UPDATE `tabSales Invoice` SET einvoice_status = 'Generated'
 		WHERE ifnull(irn, '') != '' AND ifnull(irn_cancelled, 0) = 0''')
 
@@ -58,3 +60,14 @@ def execute():
 			AND ifnull(irn, '') = ''
 			AND (ifnull(`billing_address_gstin`, '') = ifnull(`company_gstin`, '')
 			OR ifnull(gst_category, '') not in ('Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'))''')
+
+	# set correct acknowledgement in e-invoices
+	einvoices = frappe.get_all('Sales Invoice', { 'irn': ['is', 'set'] }, ['name', 'signed_einvoice'])
+
+	if einvoices:
+		for inv in einvoices:
+			signed_einvoice = inv.get('signed_einvoice')
+			if signed_einvoice:
+				signed_einvoice = json.loads(signed_einvoice)
+				frappe.db.set_value('Sales Invoice', inv.get('name'), 'ack_no', signed_einvoice.get('AckNo'), update_modified=False)
+				frappe.db.set_value('Sales Invoice', inv.get('name'), 'ack_date', signed_einvoice.get('AckDt'), update_modified=False)
