@@ -183,20 +183,20 @@ def add_non_standard_user_types():
 
 def get_user_types_data():
 	return {
-		'ESS User': {
-			'role': 'ESS User',
+		'Employee Self Service': {
+			'role': 'Employee Self Service',
 			'apply_user_permission_on': 'Employee',
 			'user_id_field': 'user_id',
 			'doctypes': {
 				'Salary Slip': ['read'],
 				'Employee': ['read', 'write'],
-				'Timesheet': ['read', 'write', 'create'],
-				'Expense Claim': ['read', 'write', 'create'],
-				'Leave Application': ['read', 'write', 'create'],
-				'Attendance Request': ['read', 'write', 'create'],
-				'Compensatory Leave Request': ['read', 'write', 'create'],
-				'Employee Tax Exemption Declaration': ['read', 'write', 'create'],
-				'Employee Tax Exemption Proof Submission': ['read', 'write', 'create'],
+				'Expense Claim': ['read', 'write', 'create', 'delete'],
+				'Leave Application': ['read', 'write', 'create', 'delete'],
+				'Attendance Request': ['read', 'write', 'create', 'delete'],
+				'Compensatory Leave Request': ['read', 'write', 'create', 'delete'],
+				'Employee Tax Exemption Declaration': ['read', 'write', 'create', 'delete'],
+				'Employee Tax Exemption Proof Submission': ['read', 'write', 'create', 'delete'],
+				'Timesheet': ['read', 'write', 'create', 'delete', 'submit', 'cancel', 'amend']
 			}
 		}
 	}
