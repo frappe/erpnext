@@ -118,7 +118,6 @@
 	'text-left': align == 'Left' or is_featured,
 }) -%}
 <div class="card-body {{ align_class }}" style="width:100%">
-
 	<div style="margin-top: 16px; display: flex;">
 		<a href="/{{ item.route or '#' }}">
 			<div class="product-title">{{ title or '' }}</div>
@@ -128,7 +127,9 @@
 		{% endif %}
 		{% if not item.has_variants %}
 			<div class="like-action"
-				data-item-code="{{ item.item_code }}" data-price="{{ item.price }}">
+				data-item-code="{{ item.item_code }}"
+				data-price="{{ item.price }}"
+				data-formatted-price="{{ item.get('formatted_price') }}">
 				<svg class="icon sm">
 					{%- set icon_class = "wished" if item.wished else "not-wished"-%}
 					<use class="{{ icon_class }} wish-icon" href="#icon-heart"></use>
@@ -157,6 +158,66 @@
 				{{ _('Add to Cart') }}
 			</div>
 		{% endif %}
+	</div>
+	{% endif %}
+</div>
+{%- endmacro -%}
+
+
+{%- macro wishlist_card(item, settings) %}
+<div class="col-sm-3 item-card" style="min-width: 220px;">
+	<div class="card text-center">
+		{% if item.image %}
+			<div class="card-img-container">
+				<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
+					<img class="card-img" src="{{ item.image }}" alt="{{ title }}">
+				</a>
+				<div class="remove-wish"
+					style="position:absolute; top:10px; right: 20px; border-radius: 50%; border: 1px solid var(--gray-100); width: 25px; height: 25px;"
+					data-item-code="{{ item.item_code }}">
+					<span style="padding-bottom: 2px;">
+						<svg class="icon sm remove-wish-icon" style="margin-bottom: 4px; margin-left: 0.5px;">
+							<use class="close" href="#icon-close"></use>
+						</svg>
+					</span>
+				</div>
+
+			</div>
+		{% else %}
+		<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
+			<div class="card-img-top no-image">
+				{{ frappe.utils.get_abbr(title) }}
+			</div>
+		</a>
+		{% endif %}
+
+		{{ wishlist_card_body(item, settings) }}
+
+
+	</div>
+</div>
+{%- endmacro -%}
+
+{%- macro wishlist_card_body(item, settings) %}
+<div class="card-body text-center" style="width:100%">
+	<div style="margin-top: 16px;">
+		<div class="product-title">{{ item.item_name or item.item_code or ''}}</div>
+	</div>
+	<div class="product-price">{{ item.formatted_price or '' }}</div>
+
+	{% if (item.available and settings.show_stock_availability) or (not settings.show_stock_availability) %}
+	<!-- Show move to cart button if in stock or if showing stock availability is disabled -->
+	<button data-item-code="{{ item.item_code}}" class="btn btn-add-to-cart w-100 wishlist-cart-not-added">
+		<span class="mr-2">
+			<svg class="icon icon-md">
+				<use href="#icon-assets"></use>
+			</svg>
+		</span>
+		{{ _("Move to Cart") }}
+	</button>
+	{% else %}
+	<div style="color: #F47A7A; width: 100%;">
+		{{ _("Not in Stock") }}
 	</div>
 	{% endif %}
 </div>
