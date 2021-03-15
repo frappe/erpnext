@@ -189,9 +189,7 @@ def make_custom_fields(update=True):
 
 def setup_report():
 	report_name = 'Electronic Invoice Register'
-
-	frappe.db.sql(""" update `tabReport` set disabled = 0 where
-		name = %s """, report_name)
+	frappe.db.set_value("Report", report_name, "disabled", 0)
 
 	if not frappe.db.get_value('Custom Role', dict(report=report_name)):
 		frappe.get_doc(dict(
