@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days
+from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days, ceil
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.stock_balance import update_bin_qty, get_indented_qty
@@ -166,6 +166,14 @@ class MaterialRequest(BuyingController):
 
 		self.set_missing_item_details(for_validate=True)
 		self.calculate_totals()
+
+	def round_up_qty(self):
+		for d in self.items:
+			d.qty = ceil(flt(d.qty))
+
+		self.set_missing_item_details(for_validate=True)
+		self.calculate_totals()
+
 
 	def update_completed_qty(self, mr_items=None, update_modified=True):
 		if self.material_request_type == "Purchase":
