@@ -513,16 +513,28 @@ def get_subitems(doc, data, item_details, bom_no, company, include_non_stock_ite
 
 def get_material_request_items(row, sales_order,
 	company, ignore_existing_ordered_qty, warehouse, bin_dict):
+	from erpnext.stock.doctype.bin.bin import get_reserved_qty_for_production
+
 	total_qty = row['qty']
 
+	item_group_defaults = get_item_group_defaults(row.item_code, company)
+	warehouse = warehouse or row.get('source_warehouse') \
+		or row.get('default_warehouse') or item_group_defaults.get("default_warehouse")
+
 	required_qty = 0
-	if ignore_existing_ordered_qty or bin_dict.get("projected_qty", 0) < 0:
+	projected_qty = bin_dict.get("projected_qty", 0)
+	if sales_order:
+		existing_work_orders = frappe.get_all("Work Order", filters={"sales_order": sales_order, "docstatus": 1})
+		for d in existing_work_orders:
+			reserved_qty = get_reserved_qty_for_production(row.item_code, warehouse, work_order=d.name)
+			projected_qty += flt(reserved_qty)
+
+	if ignore_existing_ordered_qty or projected_qty < 0:
 		required_qty = total_qty
-	elif total_qty > bin_dict.get("projected_qty", 0):
-		required_qty = total_qty - bin_dict.get("projected_qty", 0)
+	elif total_qty > projected_qty:
+		required_qty = total_qty - projected_qty
 	if required_qty > 0 and required_qty < row['min_order_qty']:
 		required_qty = row['min_order_qty']
-	item_group_defaults = get_item_group_defaults(row.item_code, company)
 
 	if not row['purchase_uom']:
 		row['purchase_uom'] = row['stock_uom']
@@ -541,10 +553,9 @@ def get_material_request_items(row, sales_order,
 			'item_code': row.item_code,
 			'item_name': row.item_name,
 			'quantity': required_qty,
-			'description': row.description,
+			'required_qty': total_qty,
 			'stock_uom': row.get("stock_uom"),
-			'warehouse': warehouse or row.get('source_warehouse') \
-				or row.get('default_warehouse') or item_group_defaults.get("default_warehouse"),
+			'warehouse': warehouse,
 			'actual_qty': bin_dict.get("actual_qty", 0),
 			'projected_qty': bin_dict.get("projected_qty", 0),
 			'min_order_qty': row['min_order_qty'],
@@ -553,6 +564,8 @@ def get_material_request_items(row, sales_order,
 			'description': row.get("description"),
 			'uom': row.get("purchase_uom") or row.get("stock_uom")
 		}
+
+
 
 def get_sales_orders(self):
 	so_filter = item_filter = ""

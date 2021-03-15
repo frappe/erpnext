@@ -44,6 +44,7 @@
   "ordered_qty",
   "column_break_37",
   "min_order_qty",
+  "required_qty",
   "more_info",
   "sales_order",
   "sales_order_item",
@@ -476,11 +477,17 @@
   {
    "fieldname": "column_break_37",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "required_qty",
+   "fieldtype": "Float",
+   "label": "Required Qty",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-12 21:37:19.466669",
+ "modified": "2021-03-15 16:53:17.764575",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

@@ -399,6 +399,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							item_name= i.item_name,
 							description= i.description,
 							bom = bom,
 							warehouse = i.warehouse,
@@ -410,6 +411,7 @@ class SalesOrder(SellingController):
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
+							item_name= i.item_name,
 							description= i.description,
 							bom = '',
 							warehouse = i.warehouse,
@@ -1124,6 +1126,7 @@ def make_raw_material_request(items, company, sales_order, project=None):
 		row = material_request.append('items', {
 			'item_code': item.get('item_code'),
 			'qty': item.get('quantity'),
+			'required_qty': flt(item.get('required_qty')),
 			'schedule_date': schedule_date,
 			'warehouse': item.get('warehouse'),
 			'sales_order': sales_order,
