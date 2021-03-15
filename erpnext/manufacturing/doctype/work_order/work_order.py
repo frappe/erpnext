@@ -501,7 +501,11 @@ class WorkOrder(Document):
 			if reset_only_qty:
 				for d in self.get("required_items"):
 					if item_dict.get(d.item_code):
-						d.required_qty = item_dict.get(d.item_code).get("qty")
+						item = item_dict.get(d.item_code)
+						d.required_qty = flt(item.get("qty"))
+						d.stock_uom = item.get('stock_uom') or frappe.get_cached_value("Item", d.item_code, 'stock_uom')
+						d.conversion_factor = flt(item.get('conversion_factor')) or 1
+						d.stock_required_qty = d.required_qty * d.conversion_factor
 			else:
 				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
 				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
@@ -513,7 +517,9 @@ class WorkOrder(Document):
 						'description': item.description,
 						'allow_alternative_item': item.allow_alternative_item,
 						'required_qty': item.qty,
+						'stock_required_qty': item.qty * flt(item.conversion_factor) or 1,
 						'uom': item.uom,
+						'stock_uom': item.stock_uom,
 						'conversion_factor': flt(item.conversion_factor) or 1,
 						'source_warehouse': self.source_warehouse or item.source_warehouse or item.default_warehouse,
 						'include_item_in_manufacturing': item.include_item_in_manufacturing
