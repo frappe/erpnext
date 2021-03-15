@@ -21,6 +21,7 @@ class LoanRepayment(AccountsController):
 	def validate(self):
 		amounts = calculate_amounts(self.against_loan, self.posting_date)
 		self.set_missing_values(amounts)
+		self.check_future_entries()
 		self.validate_amount()
 		self.allocate_amounts(amounts)
 
@@ -30,6 +31,7 @@ class LoanRepayment(AccountsController):
 	def on_submit(self):
 		self.update_paid_amount()
 		self.make_gl_entries()
+		#self.repost_future_loan_interest_accruals()
 
 	def on_cancel(self):
 		self.mark_as_unpaid()
@@ -62,6 +64,13 @@ class LoanRepayment(AccountsController):
 
 		if amounts.get('due_date'):
 			self.due_date = amounts.get('due_date')
+
+	def check_future_entries(self):
+		future_repayment_date = frappe.db.get_value("Loan Repayment", {"posting_date": (">", self.posting_date),
+			"docstatus": 1}, 'posting_date')
+
+		if future_repayment_date:
+			frappe.throw("Repayment already made till date {0}".format(getdate(future_repayment_date)))
 
 	def validate_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
@@ -265,6 +274,10 @@ class LoanRepayment(AccountsController):
 		if gle_map:
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
 
+	# def repost_future_loan_interest_accruals(self):
+	# 	future_lias = frappe.db.get_all("Loan Interest Accrual", {"docstatus": 1, "posting_date": (">", self.posting_date)})
+	# 	if future_lias:
+
 def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 	payment_type, interest_payable, payable_principal_amount, amount_paid, penalty_amount=None):
 
@@ -284,8 +297,7 @@ def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 
 	return lr
 
-def get_accrued_interest_entries(against_loan):
-
+def get_accrued_interest_entries(against_loan, posting_date):
 	unpaid_accrued_entries = frappe.db.sql(
 		"""
 			SELECT name, posting_date, interest_amount - paid_interest_amount as interest_amount,
@@ -295,12 +307,13 @@ def get_accrued_interest_entries(against_loan):
 				`tabLoan Interest Accrual`
 			WHERE
 				loan = %s
+			AND posting_date <= %s
 			AND (interest_amount - paid_interest_amount > 0 OR
 				payable_principal_amount - paid_principal_amount > 0)
 			AND
 				docstatus = 1
 			ORDER BY posting_date
-		""", (against_loan), as_dict=1)
+		""", (against_loan, posting_date), as_dict=1)
 
 	return unpaid_accrued_entries
 
