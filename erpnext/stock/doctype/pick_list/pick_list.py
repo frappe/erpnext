@@ -380,7 +380,7 @@ def create_stock_entry(pick_list):
 
 	stock_entry.set_incoming_rate()
 	stock_entry.set_actual_qty()
-	stock_entry.calculate_rate_and_amount(update_finished_item_rate=False)
+	stock_entry.calculate_rate_and_amount()
 
 	return stock_entry.as_dict()
 
