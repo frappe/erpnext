@@ -831,8 +831,8 @@ class AccountsController(TransactionBase):
 				if (party_account_currency
 						and (self.currency != party_account_currency
 						and self.currency != self.company_currency)):
-					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2} or {3}")
-								 .format(party_type, party, frappe.bold(party_account_currency), frappe.bold(self.company_currency)), InvalidCurrency)
+					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
+								 .format(party_type, party, frappe.bold(party_account_currency), InvalidCurrency))
 
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
@@ -898,7 +898,7 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 
-		if party_account_currency == self.company_currency and party_account_currency == self.currency:
+		if self.company_currency == self.currency:
 			grand_total = self.get("base_rounded_total") or self.base_grand_total
 		else:
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -959,7 +959,7 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
 
-			if party_account_currency == self.company_currency and party_account_currency == self.currency:
+			if self.company_currency == self.currency:
 				total = flt(total, self.precision("base_grand_total"))
 				grand_total = flt(self.get("base_rounded_total") or self.base_grand_total, self.precision('base_grand_total'))
 			else:
