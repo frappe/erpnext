@@ -548,22 +548,21 @@ def get_material_request_items(row, sales_order,
 	if frappe.db.get_value("UOM", row['purchase_uom'], "must_be_whole_number"):
 		required_qty = ceil(required_qty)
 
-	if required_qty > 0:
-		return {
-			'item_code': row.item_code,
-			'item_name': row.item_name,
-			'quantity': required_qty,
-			'required_qty': total_qty,
-			'stock_uom': row.get("stock_uom"),
-			'warehouse': warehouse,
-			'actual_qty': bin_dict.get("actual_qty", 0),
-			'projected_qty': bin_dict.get("projected_qty", 0),
-			'min_order_qty': row['min_order_qty'],
-			'material_request_type': row.get("default_material_request_type"),
-			'sales_order': sales_order,
-			'description': row.get("description"),
-			'uom': row.get("purchase_uom") or row.get("stock_uom")
-		}
+	return {
+		'item_code': row.item_code,
+		'item_name': row.item_name,
+		'quantity': required_qty,
+		'required_qty': total_qty,
+		'stock_uom': row.get("stock_uom"),
+		'warehouse': warehouse,
+		'actual_qty': bin_dict.get("actual_qty", 0),
+		'projected_qty': bin_dict.get("projected_qty", 0),
+		'min_order_qty': row['min_order_qty'],
+		'material_request_type': row.get("default_material_request_type"),
+		'sales_order': sales_order,
+		'description': row.get("description"),
+		'uom': row.get("purchase_uom") or row.get("stock_uom")
+	}
 
 
 
@@ -716,11 +715,9 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 			bin_dict = get_bin_details(details, doc.company, warehouse)
 			bin_dict = bin_dict[0] if bin_dict else {}
 
-			if details.qty > 0:
-				items = get_material_request_items(details, sales_order, company,
-					ignore_existing_ordered_qty, warehouse, bin_dict)
-				if items:
-					mr_items.append(items)
+			items = get_material_request_items(details, sales_order, company, ignore_existing_ordered_qty, warehouse, bin_dict)
+			if items:
+				mr_items.append(items)
 
 	if not mr_items:
 		frappe.msgprint(_("""As raw materials projected quantity is more than required quantity, there is no need to create material request.
