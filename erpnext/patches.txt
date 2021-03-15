@@ -757,3 +757,4 @@ erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
 erpnext.patches.v12_0.update_vehicle_no_reqd_condition
 erpnext.patches.v12_0.add_einvoice_status_field
+erpnext.patches.v12_0.add_einvoice_summary_report_permissions
