@@ -186,5 +186,40 @@ $.extend(shopping_cart, {
 				$(".shopping-cart").toggleClass('hidden', r.message ? false : true);
 			}
 		});
+	},
+
+	animate_add_to_cart(button) {
+		// Create 'added to cart' animation
+		let btn_id = "#" + button[0].id;
+		this.toggle_button_class(button, 'not-added', 'added-to-cart');
+		$(btn_id).text('Added to Cart');
+
+		// undo
+		setTimeout(() => {
+			this.toggle_button_class(button, 'added-to-cart', 'not-added');
+			$(btn_id).text('Add to Cart');
+		}, 2000);
+	},
+
+	toggle_button_class(button, remove, add) {
+		button.removeClass(remove);
+		button.addClass(add);
+	},
+
+	bind_add_to_cart_action() {
+		$('.page_content').on('click', '.btn-add-to-cart-list', (e) => {
+			const $btn = $(e.currentTarget);
+			$btn.prop('disabled', true);
+
+			this.animate_add_to_cart($btn);
+
+			const item_code = $btn.data('item-code');
+			erpnext.shopping_cart.update_cart({
+				item_code,
+				qty: 1
+			});
+
+		});
 	}
+
 });

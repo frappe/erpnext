@@ -9,13 +9,16 @@
   "website_item",
   "column_break_3",
   "item_name",
+  "item_group",
   "item_details_section",
   "description",
   "column_break_7",
-  "section_break_8",
-  "price",
+  "route",
   "image",
   "image_view",
+  "section_break_8",
+  "price",
+  "formatted_price",
   "warehouse_section",
   "warehouse"
  ],
@@ -101,12 +104,28 @@
    "fieldname": "price",
    "fieldtype": "Float",
    "label": "Price"
+  },
+  {
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "route",
+   "fieldtype": "Small Text",
+   "label": "Route"
+  },
+  {
+   "fieldname": "formatted_price",
+   "fieldtype": "Data",
+   "label": "Formatted Price"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-03-12 18:23:03.487891",
+ "modified": "2021-03-15 16:37:40.405333",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Wishlist Items",

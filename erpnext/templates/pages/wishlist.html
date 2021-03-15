@@ -1,0 +1,24 @@
+{% extends "templates/web.html" %}
+
+{% block title %} {{ _("Wishlist") }} {% endblock %}
+
+{% block header %}<h3 class="shopping-cart-header mt-2 mb-6">{{ _("Wishlist") }}</h1>{% endblock %}
+
+{% block page_content %}
+{% if items %}
+	<div class="row">
+		<div class="col-12 col-md-11 item-card-group-section">
+			<div class="row products-list">
+					{% from "erpnext/templates/includes/macros.html" import wishlist_card %}
+					{% for item in items %}
+						{{ wishlist_card(item, settings) }}
+					{% endfor %}
+			</div>
+		</div>
+	</div>
+{% else %}
+	<!-- TODO: Make empty state for wishlist -->
+	{% include "erpnext/www/all-products/not_found.html" %}
+{% endif %}
+
+{% endblock %}

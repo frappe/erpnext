@@ -81,7 +81,7 @@ class ProductQuery:
 				item.in_stock = "green" if stock_qty else "red"
 
 			item.wished = False
-			if frappe.db.exists("Wishlist Items", {"item_code": item.item_code}):
+			if frappe.db.exists("Wishlist Items", {"item_code": item.item_code, "parent": frappe.session.user}):
 				item.wished = True
 
 		return result
