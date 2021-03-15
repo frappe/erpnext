@@ -258,7 +258,7 @@
 					{% } %}
 				{% } else { %}
 					{% if(data[i]["party"]|| "&nbsp;") { %}
-						{% if((data[i]["party"]) != __("'Total'")) { %}
+						{% if(!data[i]["is_total_row"]) { %}
 							<td>
 								{% if(!(filters.customer || filters.supplier)) { %}
 									{%= data[i]["party"] %}

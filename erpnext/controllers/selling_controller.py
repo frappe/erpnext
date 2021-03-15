@@ -142,6 +142,11 @@ class SellingController(StockController):
 				self.base_net_total * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
 
+			if sales_person.commission_rate:
+				sales_person.incentives = flt(
+					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0, 
+					self.precision("incentives", sales_person))
+
 			total += sales_person.allocated_percentage
 
 		if sales_team and total != 100.0:
