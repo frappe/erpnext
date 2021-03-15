@@ -599,12 +599,12 @@ class GSPConnector():
 		return details
 
 	def generate_irn(self):
-		headers = self.get_headers()
-		einvoice = make_einvoice(self.invoice)
-		data = json.dumps(einvoice, indent=4)
-
 		try:
+			headers = self.get_headers()
+			einvoice = make_einvoice(self.invoice)
+			data = json.dumps(einvoice, indent=4)
 			res = self.make_request('post', self.generate_irn_url, headers, data)
+
 			if res.get('success'):
 				self.set_einvoice_data(res.get('result'))
 
@@ -624,9 +624,11 @@ class GSPConnector():
 
 		except RequestFailed:
 			errors = self.sanitize_error_message(res.get('message'))
+			self.set_failed_status(errors=errors)
 			self.raise_error(errors=errors)
 
-		except Exception:
+		except Exception as e:
+			self.set_failed_status(errors=str(e))
 			self.log_error(data)
 			self.raise_error(True)
 
@@ -898,6 +900,10 @@ class GSPConnector():
 		self.invoice.flags.ignore_validate = True
 		self.invoice.save()
 
+	def set_failed_status(self, errors=None):
+		frappe.db.rollback()
+		frappe.db.set_value(self.invoice.doctype, self.invoice.name, 'einvoice_status', 'Failed', update_modified=False)
+		frappe.db.commit()
 
 def sanitize_for_json(string):
 	"""Escape JSON specific characters from a string."""
