@@ -417,8 +417,8 @@ class VehicleBookingOrder(AccountsController):
 		vehicle_delivery = None
 
 		if self.docstatus != 0:
-			vehicle_receipt = frappe.db.get_all("Vehicle Receipt", {"vehicle_booking_order": self.name, "docstatus": 1},
-				['name', 'posting_date', 'supplier_delivery_note'])
+			vehicle_receipt = self.get_vehicle_receipts()
+
 			vehicle_delivery = frappe.db.get_all("Vehicle Delivery", {"vehicle_booking_order": self.name, "docstatus": 1},
 				['name', 'posting_date'])
 
@@ -433,6 +433,12 @@ class VehicleBookingOrder(AccountsController):
 		if vehicle_receipt and not vehicle_receipt.supplier_delivery_note:
 			frappe.throw(_("Supplier Delivery Note is mandatory for Vehicle Receipt against Vehicle Booking Order"))
 
+		# open stock
+		if vehicle_receipt and not vehicle_receipt.vehicle_booking_order:
+			self.vehicle_receipt = vehicle_receipt.name
+		else:
+			self.vehicle_receipt = None
+
 		self.vehicle_received_date = vehicle_receipt.posting_date
 		self.vehicle_delivered_date = vehicle_delivery.posting_date
 		self.supplier_delivery_note = vehicle_receipt.supplier_delivery_note
@@ -446,11 +452,24 @@ class VehicleBookingOrder(AccountsController):
 
 		if update:
 			self.db_set({
+				"vehicle_receipt": self.vehicle_receipt,
 				"vehicle_received_date": self.vehicle_received_date,
 				"vehicle_delivered_date": self.vehicle_delivered_date,
 				"supplier_delivery_note": self.supplier_delivery_note,
 				"delivery_status": self.delivery_status
 			})
+
+	def get_vehicle_receipts(self):
+		fields = ['name', 'posting_date', 'supplier_delivery_note', 'supplier', 'vehicle_booking_order']
+
+		vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle_booking_order": self.name, "docstatus": 1}, fields)
+
+		# open stock
+		if not vehicle_receipts and self.vehicle:
+			vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle": self.vehicle, "docstatus": 1}, fields,
+				order_by='timestamp(posting_date, posting_time) asc', limit=1)
+
+		return vehicle_receipts
 
 	def update_invoice_status(self, update=False):
 		purchase_invoice = None
@@ -980,6 +999,8 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 	vbo_doc.validate_vehicle_item()
 	vbo_doc.validate_vehicle()
 	vbo_doc.set_vehicle_details()
+
+	vbo_doc.update_delivery_status()
 
 	save_vehicle_booking_for_update(vbo_doc)
 
