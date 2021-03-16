@@ -20,7 +20,7 @@ from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply, validate_gstin_for_india
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate
+from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
 
 def validate_einvoice_fields(doc):
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
@@ -681,6 +681,10 @@ class GSPConnector():
 			self.raise_error(True)
 
 	def cancel_irn(self, irn, reason, remark):
+		# validate cancellation
+		if time_diff_in_hours(now_datetime(), self.invoice.ack_date) > 24:
+			frappe.throw(_('E-Invoice cannot be cancelled after 24 hours of IRN generation.'), title=_('Not Allowed'))
+
 		headers = self.get_headers()
 		data = json.dumps({
 			'Irn': irn,
