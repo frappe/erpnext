@@ -23,7 +23,7 @@ def validate_einvoice_fields(doc):
 	invalid_doctype = doc.doctype != 'Sales Invoice'
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
-	no_taxes_applied = len(doc.get('taxes', [])) == 0
+	no_taxes_applied = not doc.get('taxes')
 
 	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
 		return
@@ -160,7 +160,7 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.description = d.item_name.replace('"', '\\"')
+		item.description = json.dumps(d.item_name)[1:-1]
 
 		item.qty = abs(item.qty)
 		item.discount_amount = 0
@@ -196,9 +196,11 @@ def update_item_taxes(invoice, item):
 		item[attr] = 0
 
 	for t in invoice.taxes:
-		# this contains item wise tax rate & tax amount (incl. discount)
-		item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
-		if t.account_head in gst_accounts_list:
+		is_applicable = t.tax_amount and t.account_head in gst_accounts_list
+		if is_applicable:
+			# this contains item wise tax rate & tax amount (incl. discount)
+			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
+
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
 			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
@@ -223,7 +225,7 @@ def get_invoice_value_details(invoice):
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(invoice.base_total)
-		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+		invoice_value_details.invoice_discount_amt = abs(invoice.base_discount_amount)
 	else:
 		invoice_value_details.base_total = abs(invoice.base_net_total)
 		# since tax already considers discount amount
