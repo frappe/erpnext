@@ -14,7 +14,7 @@ def make_custom_fields():
     custom_fields = {
             'Sales Invoice': [
                 dict(fieldname='reference_number', label='Reference Number',
-                    fieldtype='Data', insert_after='naming_series', length='21', unique='1', translatable='0')
+                    fieldtype='Data', insert_after='naming_series', length='25', unique='1', translatable='0')
             ]
     }
     create_custom_fields(custom_fields)
