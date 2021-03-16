@@ -18,6 +18,9 @@ erpnext.setup_einvoice_actions = (doctype) => {
 
 			if (!irn && !__unsaved) {
 				const action = () => {
+					if (frm.doc.__unsaved) {
+						frappe.throw(__('Please save the document to generate IRN.'));
+					}
 					frappe.call({
 						method: 'erpnext.regional.india.e_invoice.utils.get_einvoice',
 						args: { doctype, docname: name },
@@ -42,7 +45,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						"default": "1-Duplicate",
 						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
 					},
-					{ 
+					{
 						"label": "Remark",
 						"fieldname": "remark",
 						"fieldtype": "Data",
@@ -57,7 +60,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							const data = d.get_values();
 							frappe.call({
 								method: 'erpnext.regional.india.e_invoice.utils.cancel_irn',
-								args: { 
+								args: {
 									doctype,
 									docname: name,
 									irn: irn,
@@ -185,7 +188,6 @@ const get_ewaybill_fields = (frm) => {
 			'fieldname': 'vehicle_no',
 			'label': 'Vehicle No',
 			'fieldtype': 'Data',
-			'depends_on': 'eval:(doc.mode_of_transport === "Road")',
 			'default': frm.doc.vehicle_no
 		},
 		{
@@ -252,7 +254,7 @@ const get_preview_dialog = (frm, action) => {
 		title: __("Preview"),
 		wide: 1,
 		fields: [
-			{ 
+			{
 				"label": "Preview",
 				"fieldname": "preview_html",
 				"fieldtype": "HTML"

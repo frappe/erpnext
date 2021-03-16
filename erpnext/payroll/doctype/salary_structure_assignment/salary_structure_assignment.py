@@ -43,7 +43,7 @@ class SalaryStructureAssignment(Document):
 
 	def set_payroll_payable_account(self):
 		if not self.payroll_payable_account:
-			payroll_payable_account = frappe.db.get_value('Company', self.company, 'default_payable_account')
+			payroll_payable_account = frappe.db.get_value('Company', self.company, 'default_payroll_payable_account')
 			if not payroll_payable_account:
 				payroll_payable_account = frappe.db.get_value(
 					"Account", {

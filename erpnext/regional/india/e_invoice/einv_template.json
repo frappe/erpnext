@@ -59,7 +59,7 @@
         {item_list}
     ],
     "ValDtls": {{
-        "AssVal": "{invoice_value_details.base_net_total}",
+        "AssVal": "{invoice_value_details.base_total}",
         "CgstVal": "{invoice_value_details.total_cgst_amt}",
         "SgstVal": "{invoice_value_details.total_sgst_amt}",
         "IgstVal": "{invoice_value_details.total_igst_amt}",

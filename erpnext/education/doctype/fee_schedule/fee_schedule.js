@@ -1,11 +1,16 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+frappe.provide("erpnext.accounts.dimensions");
 frappe.ui.form.on('Fee Schedule', {
 	setup: function(frm) {
 		frm.add_fetch('fee_structure', 'receivable_account', 'receivable_account');
 		frm.add_fetch('fee_structure', 'income_account', 'income_account');
 		frm.add_fetch('fee_structure', 'cost_center', 'cost_center');
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	onload: function(frm) {
@@ -50,6 +55,8 @@ frappe.ui.form.on('Fee Schedule', {
 				}
 			}
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {

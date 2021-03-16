@@ -60,6 +60,8 @@
   "ignore_pricing_rule",
   "sec_warehouse",
   "set_warehouse",
+  "column_break_55",
+  "set_target_warehouse",
   "items_section",
   "update_stock",
   "scan_barcode",
@@ -1969,13 +1971,31 @@
    "label": "Represents Company",
    "options": "Company",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_55",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval: doc.is_internal_customer && doc.update_stock",
+   "fieldname": "set_target_warehouse",
+   "fieldtype": "Link",
+   "label": "Set Target Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-12-11 12:48:31.769958",
+ "links": [
+  {
+   "custom": 1,
+   "group": "Reference",
+   "link_doctype": "POS Invoice",
+   "link_fieldname": "consolidated_invoice"
+  }
+ ],
+ "modified": "2021-01-12 12:16:15.192520",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

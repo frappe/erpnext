@@ -48,6 +48,9 @@ def validate_gstin_for_india(doc, method):
 		validate_gstin_check_digit(doc.gstin)
 		set_gst_state_and_state_number(doc)
 
+		if not doc.gst_state:
+			frappe.throw(_("Please Enter GST state"))
+
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
@@ -168,7 +171,7 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if is_internal_transfer(party_details, doctype):
 		party_details.taxes_and_charges = ''
-		party_details.taxes = ''
+		party_details.taxes = []
 		return party_details
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
@@ -690,25 +693,12 @@ def update_grand_total_for_rcm(doc, method):
 	if country != 'India':
 		return
 
-	if not doc.total_taxes_and_charges:
+	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
+
+	if not base_gst_tax:
 		return
 
 	if doc.reverse_charge == 'Y':
-		gst_accounts = get_gst_accounts(doc.company)
-		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-			+ gst_accounts.get('igst_account')
-
-		base_gst_tax = 0
-		gst_tax = 0
-
-		for tax in doc.get('taxes'):
-			if tax.category not in ("Total", "Valuation and Total"):
-				continue
-
-			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-				base_gst_tax += tax.base_tax_amount_after_discount_amount
-				gst_tax += tax.tax_amount_after_discount_amount
-
 		doc.taxes_and_charges_added -= gst_tax
 		doc.total_taxes_and_charges -= gst_tax
 		doc.base_taxes_and_charges_added -= base_gst_tax
@@ -742,7 +732,9 @@ def make_regional_gl_entries(gl_entries, doc):
 	if country != 'India':
 		return gl_entries
 
-	if not doc.total_taxes_and_charges:
+	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
+
+	if not base_gst_tax:
 		return gl_entries
 
 	if doc.reverse_charge == 'Y':

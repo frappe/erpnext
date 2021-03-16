@@ -45,7 +45,7 @@ class TestLoan(unittest.TestCase):
 		create_loan_security_price("Test Security 2", 250, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
 
 		self.applicant1 = make_employee("robert_loan@loan.com")
-		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant1, currency='INR')
+		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant1, currency='INR', company="_Test Company")
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)
 
@@ -321,9 +321,67 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(sum(pledged_qty.values()), 0)
 
 		amounts = amounts = calculate_amounts(loan.name, add_days(last_date, 5))
-		self.assertTrue(amounts['pending_principal_amount'] < 0)
+		self.assertEqual(amounts['pending_principal_amount'], 0)
 		self.assertEquals(amounts['payable_principal_amount'], 0.0)
 		self.assertEqual(amounts['interest_amount'], 0)
+
+	def test_partial_loan_security_unpledge(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 2000.00
+		},
+		{
+			"loan_security": "Test Security 2",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		self.assertEquals(loan.loan_amount, 1000000)
+
+		first_date = '2019-10-01'
+		last_date = '2019-10-30'
+
+		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=first_date)
+		process_loan_interest_accrual_for_demand_loans(posting_date = last_date)
+
+		repayment_entry = create_repayment_entry(loan.name, self.applicant2, add_days(last_date, 5), 600000)
+		repayment_entry.submit()
+
+		unpledge_map = {'Test Security 2': 2000}
+
+		unpledge_request = unpledge_security(loan=loan.name, security_map = unpledge_map, save=1)
+		unpledge_request.submit()
+		unpledge_request.status = 'Approved'
+		unpledge_request.save()
+		unpledge_request.submit()
+		unpledge_request.load_from_db()
+		self.assertEqual(unpledge_request.docstatus, 1)
+
+	def test_santined_loan_security_unpledge(self):
+		pledge = [{
+			"loan_security": "Test Security 1",
+			"qty": 4000.00
+		}]
+
+		loan_application = create_loan_application('_Test Company', self.applicant2, 'Demand Loan', pledge)
+		create_pledge(loan_application)
+
+		loan = create_demand_loan(self.applicant2, "Demand Loan", loan_application, posting_date='2019-10-01')
+		loan.submit()
+
+		self.assertEquals(loan.loan_amount, 1000000)
+
+		unpledge_map = {'Test Security 1': 4000}
+		unpledge_request = unpledge_security(loan=loan.name, security_map = unpledge_map, save=1)
+		unpledge_request.submit()
+		unpledge_request.status = 'Approved'
+		unpledge_request.save()
+		unpledge_request.submit()
 
 	def test_disbursal_check_with_shortfall(self):
 		pledges = [{
@@ -415,7 +473,7 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(loan.status, "Loan Closure Requested")
 
 		amounts = calculate_amounts(loan.name, add_days(last_date, 5))
-		self.assertTrue(amounts['pending_principal_amount'] < 0.0)
+		self.assertEqual(amounts['pending_principal_amount'], 0.0)
 
 	def test_partial_unaccrued_interest_payment(self):
 		pledge = [{
