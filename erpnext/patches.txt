@@ -759,6 +759,7 @@ erpnext.patches.v13_0.update_vehicle_no_reqd_condition
 erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
+execute:frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
 erpnext.patches.v13_0.create_website_items
 erpnext.patches.v13_0.populate_e_commerce_settings
 erpnext.patches.v13_0.make_homepage_products_website_items
