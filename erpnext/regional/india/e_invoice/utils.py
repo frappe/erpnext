@@ -966,21 +966,21 @@ def schedule_bulk_generate_irn(docnames):
 	failures = GSPConnector.bulk_generate_irn(docnames)
 	frappe.local.message_log = []
 
-	frappe.publish_realtime("bulk_einvoice_action_complete", { "user": frappe.session.user, "failures": failures })
+	frappe.publish_realtime("bulk_einvoice_action_complete", { "user": frappe.session.user, "failures": failures, "invoices": docnames })
 
 def show_bulk_generation_failure_message(failures):
 	for doc in failures:
-		docname = '<a href="app/sales-invoice/{0}">{0}</a>'.format(doc.docname)
-		errors = json.loads(doc.message.replace("'", '"'))
+		docname = '<a href="app/sales-invoice/{0}">{0}</a>'.format(doc.get('docname'))
+		errors = json.loads(doc.get('message').replace("'", '"'))
 		error_list = ''.join(['<li>{err}</li>' for err in errors])
 		message = '''{} has following errors:<br>
 			<ul style="padding-left: 20px; padding-top: 5px">{}</ul>'''.format(docname, error_list)
 
-		frappe.msgprint({
-			message: message,
-			title: __('Bulk E-Invoice Generation Failed'),
-			indicator: 'red'
-		})
+		frappe.msgprint(
+			message,
+			title=__('Bulk E-Invoice Generation Failed'),
+			indicator='red'
+		)
 
 @frappe.whitelist()
 def cancel_irns(docnames, reason, remark):
@@ -995,11 +995,11 @@ def enqueue_bulk_action(job, **kwargs):
 
 	enqueue(
 		job,
+		**kwargs,
 		queue="long",
 		timeout=10000,
 		event="processing_bulk_einvoice_action",
 		now=frappe.conf.developer_mode or frappe.flags.in_test,
-		**kwargs
 	)
 
 	if job == schedule_bulk_generate_irn:

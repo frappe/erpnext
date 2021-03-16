@@ -106,7 +106,9 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 	list_view.$result.on("change", "input[type=checkbox]", (e) => {
 		if (einvoicing_enabled) {
 			const docnames = list_view.get_checked_items(true);
+			// show/hide e-invoicing actions when no sales invoices are checked
 			if (docnames && docnames.length) {
+				// prevent adding actions twice if e-invoicing action group already exists
 				if (list_view.page.get_inner_group_button(__('E-Invoicing')).length == 0) {
 					list_view.page.add_inner_button(__('Generate IRNs'), generate_irns, __('E-Invoicing'));
 					list_view.page.add_inner_button(__('Cancel IRNs'), cancel_irns, __('E-Invoicing'));
@@ -119,17 +121,23 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 	});
 
 	frappe.realtime.on("bulk_einvoice_action_complete", (data) => {
-		const { failures, user } = data;
+		const { failures, user, invoices } = data;
 
 		if (failures && failures.length && user == frappe.session.user) {
 			let message = `
 				Failed to generate IRNs for following ${failures.length} sales invoices:
-				<ul style="padding-left: 10px">
+				<ul style="padding-left: 20px">
 					${failures.map(d => `<li>${d.docname}</li>`).join('')}
 				</ul>
 			`;
-			frappe.throw({
+			frappe.msgprint({
 				message: message,
+				title: __('Bulk E-Invoice Generation Complete'),
+				indicator: 'orange'
+			});
+		} else {
+			frappe.msgprint({
+				message: __('{0} e-invoices generated successfully', [invoices.length]),
 				title: __('Bulk E-Invoice Generation Complete'),
 				indicator: 'orange'
 			});
