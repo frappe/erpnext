@@ -452,6 +452,9 @@ class update_entries_after(object):
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = ""
 
+		if voucher_type in ('Vehicle Receipt', 'Vehicle Delivery'):
+			return 1
+
 		if voucher_type == "Stock Entry":
 			ref_item_dt = voucher_type + " Detail"
 		elif voucher_type in ["Purchase Invoice", "Sales Invoice", "Delivery Note", "Purchase Receipt"]:

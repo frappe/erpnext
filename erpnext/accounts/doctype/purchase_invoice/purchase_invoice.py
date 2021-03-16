@@ -459,8 +459,6 @@ class PurchaseInvoice(BuyingController):
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
 
-		self.update_vehicle_booking_order()
-
 		frappe.get_doc('Authorization Control').validate_approving_authority(self.doctype,
 			self.company, self.base_grand_total)
 
@@ -1048,8 +1046,6 @@ class PurchaseInvoice(BuyingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-
-		self.update_vehicle_booking_order()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO

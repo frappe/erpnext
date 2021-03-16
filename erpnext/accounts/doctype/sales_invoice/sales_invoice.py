@@ -272,8 +272,6 @@ class SalesInvoice(SellingController):
 		self.update_prevdoc_status()
 		self.clear_unallocated_mode_of_payments()
 
-		self.update_vehicle_booking_order()
-
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating reserved qty in bin depends upon updated delivered qty in SO
 		if self.update_stock == 1:
@@ -341,8 +339,6 @@ class SalesInvoice(SellingController):
 
 		self.update_status_updater_args()
 		self.update_prevdoc_status()
-
-		self.update_vehicle_booking_order()
 
 		if not self.is_return:
 			self.update_serial_no(in_cancel=True)

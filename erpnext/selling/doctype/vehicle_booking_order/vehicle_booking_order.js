@@ -31,6 +31,8 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	setup_queries: function () {
 		var me = this;
 
+		this.frm.set_query('warehouse', () => erpnext.queries.warehouse(me.frm.doc));
+
 		this.frm.set_query('customer', erpnext.queries.customer);
 		this.frm.set_query('contact_person', () => {
 			frappe.dynamic_link = {
@@ -197,17 +199,17 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 			if (this.frm.doc.vehicle) {
 				if (this.frm.doc.delivery_status === "To Receive") {
-					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Purchase Receipt'));
+					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
 				} else if (this.frm.doc.delivery_status === "To Deliver") {
-					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Delivery Note'));
+					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
 				}
 			}
 
 			if (this.frm.doc.delivery_status !== "To Receive") {
 				if (this.frm.doc.invoice_status === "To Receive") {
-					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Purchase Invoice'));
+					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
 				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
-					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Sales Invoice'));
+					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
 				}
 			}
 
@@ -246,12 +248,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 			if (unpaid) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
+			} else if (this.frm.doc.status === "To Assign Vehicle") {
+				this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Receive Vehicle") {
-				if (this.frm.doc.vehicle) {
-					this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
-				} else {
-					this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
-				}
+				this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Receive Invoice") {
 				this.frm.custom_buttons[__('Receive Invoice')] && this.frm.custom_buttons[__('Receive Invoice')].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Deliver Vehicle") {

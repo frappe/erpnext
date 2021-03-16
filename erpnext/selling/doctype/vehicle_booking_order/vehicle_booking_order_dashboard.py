@@ -16,11 +16,12 @@ def get_data():
 			},
 			{
 				'label': _('Delivery'),
-				'items': ['Purchase Receipt', 'Delivery Note']
+				'items': ['Vehicle Receipt', 'Vehicle Delivery']
 			},
-			{
-				'label': _('Invoice'),
-				'items': ['Purchase Invoice', 'Sales Invoice']
-			},
+			# {
+			# 	'label': _('Invoice'),
+			# 	'items': ['Purchase Invoice', 'Sales Invoice']
+			# },
+			# TODO
 		]
 	}

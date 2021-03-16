@@ -336,7 +336,8 @@
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
    "options": "Customer",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -547,7 +548,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-02-22 17:09:28.980025",
+ "modified": "2021-03-15 22:27:51.345721",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

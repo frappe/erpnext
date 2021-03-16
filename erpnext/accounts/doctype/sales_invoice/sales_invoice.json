@@ -19,7 +19,6 @@
   "po_no",
   "po_date",
   "depreciation_type",
-  "vehicle_booking_order",
   "is_return",
   "return_against",
   "reopen_order",
@@ -2069,14 +2068,6 @@
    "options": "Insurance Surveyor Company"
   },
   {
-   "fieldname": "vehicle_booking_order",
-   "fieldtype": "Link",
-   "label": "Vehicle Booking Order",
-   "no_copy": 1,
-   "options": "Vehicle Booking Order",
-   "read_only": 1
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "contact_phone",
    "fieldtype": "Data",
@@ -2176,7 +2167,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-03-12 15:01:10.180102",
+ "modified": "2021-03-15 22:57:30.290944",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

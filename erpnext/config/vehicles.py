@@ -38,6 +38,14 @@ def get_data():
 					"description": _("Payments for Vehicle Booking."),
 					"dependencies": ["Vehicle Booking Order"],
 				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Receipt"
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Delivery"
+				},
 			]
 		},
 		{

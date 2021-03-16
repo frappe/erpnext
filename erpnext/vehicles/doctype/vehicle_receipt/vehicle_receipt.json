@@ -1,0 +1,385 @@
+{
+ "allow_import": 1,
+ "autoname": "naming_series:",
+ "creation": "2021-03-14 14:21:40.334844",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "image",
+  "title",
+  "naming_series",
+  "company",
+  "supplier",
+  "supplier_name",
+  "customer",
+  "customer_name",
+  "column_break_8",
+  "remarks",
+  "column_break_11",
+  "amended_from",
+  "posting_date",
+  "posting_time",
+  "set_posting_time",
+  "reference_section",
+  "vehicle_booking_order",
+  "column_break_17",
+  "project",
+  "column_break_18",
+  "supplier_delivery_note",
+  "vehicle_details_section",
+  "item_code",
+  "item_name",
+  "warehouse",
+  "item_group",
+  "brand",
+  "column_break_21",
+  "vehicle",
+  "serial_no",
+  "vehicle_chassis_no",
+  "vehicle_engine_no",
+  "column_break_25",
+  "vehicle_color",
+  "vehicle_license_plate",
+  "vehicle_unregistered"
+ ],
+ "fields": [
+  {
+   "fetch_from": "item_code.image",
+   "fetch_if_empty": 1,
+   "fieldname": "image",
+   "fieldtype": "Attach Image",
+   "hidden": 1,
+   "label": "Image",
+   "options": "image"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "hidden": 1,
+   "label": "Series",
+   "options": "VREC-",
+   "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:doc.supplier && doc.supplier_name != doc.supplier",
+   "fetch_from": "supplier.supplier_name",
+   "fieldname": "supplier_name",
+   "fieldtype": "Data",
+   "label": "Supplier Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_booking_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Vehicle Booking Order",
+   "no_copy": 1,
+   "options": "Vehicle Booking Order"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "in_standard_filter": 1,
+   "label": "Remarks",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "supplier_delivery_note",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Supplier Delivery Note"
+  },
+  {
+   "fieldname": "column_break_11",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Receipt",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Received Date",
+   "no_copy": 1,
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "posting_time",
+   "fieldtype": "Time",
+   "label": "Received Time",
+   "no_copy": 1,
+   "print_hide": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "vehicle_details_section",
+   "fieldtype": "Section Break",
+   "label": "Vehicle Details"
+  },
+  {
+   "fieldname": "item_code",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle Item Code (Variant)",
+   "options": "Item",
+   "reqd": 1,
+   "search_index": 1
+  },
+  {
+   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
+   "fetch_from": "item_code.item_name",
+   "fieldname": "item_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "item_code.item_group",
+   "fieldname": "item_group",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Item Group",
+   "options": "Item Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.brand",
+   "fieldname": "brand",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Brand",
+   "options": "Brand",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Vehicle",
+   "no_copy": 1,
+   "options": "Vehicle",
+   "search_index": 1
+  },
+  {
+   "fetch_from": "vehicle.chassis_no",
+   "fieldname": "vehicle_chassis_no",
+   "fieldtype": "Data",
+   "label": "Chassis No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.engine_no",
+   "fieldname": "vehicle_engine_no",
+   "fieldtype": "Data",
+   "label": "Engine No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle.color",
+   "fieldname": "vehicle_color",
+   "fieldtype": "Link",
+   "label": "Color",
+   "no_copy": 1,
+   "options": "Vehicle Color",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle.license_plate",
+   "fieldname": "vehicle_license_plate",
+   "fieldtype": "Data",
+   "label": "License Plate",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Receipt",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.docstatus==0",
+   "fieldname": "set_posting_time",
+   "fieldtype": "Check",
+   "label": "Edit Posting Date and Time",
+   "no_copy": 1,
+   "print_hide": 1
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Serial No",
+   "no_copy": 1,
+   "options": "Serial No",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:!doc.vehicle_license_plate || doc.vehicle_unregistered",
+   "fetch_from": "vehicle.unregistered",
+   "fieldname": "vehicle_unregistered",
+   "fieldtype": "Check",
+   "label": "Is Unregistered",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reference_section",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "no_copy": 1,
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer (User)",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  }
+ ],
+ "icon": "fa fa-file-text",
+ "image_field": "image",
+ "is_submittable": 1,
+ "modified": "2021-03-15 17:07:14.167675",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Receipt",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "amend": 1,
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Accounts User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Stock User"
+  },
+  {
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Sales User (Read Only)"
+  }
+ ],
+ "restrict_to_domain": "Vehicles",
+ "search_fields": "supplier,item_code,item_name,posting_date,vehicle_booking_order,vehicle_chassis_no,vehicle_engine_no,vehicle_license_plate",
+ "show_name_in_global_search": 1,
+ "sort_field": "posting_date",
+ "sort_order": "DESC",
+ "timeline_field": "supplier",
+ "title_field": "title",
+ "track_changes": 1,
+ "track_seen": 1
+}

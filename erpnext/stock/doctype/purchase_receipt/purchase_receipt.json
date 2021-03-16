@@ -20,7 +20,6 @@
   "letter_of_credit",
   "column_break_10",
   "remarks",
-  "vehicle_booking_order",
   "is_return",
   "reopen_order",
   "return_against",
@@ -1503,20 +1502,12 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "vehicle_booking_order",
-   "fieldtype": "Link",
-   "label": "Vehicle Booking Order",
-   "no_copy": 1,
-   "options": "Vehicle Booking Order",
-   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 261,
  "is_submittable": 1,
- "modified": "2021-03-12 15:08:04.406824",
+ "modified": "2021-03-15 22:57:35.379867",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Purchase Receipt",
