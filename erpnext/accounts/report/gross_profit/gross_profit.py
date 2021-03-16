@@ -45,7 +45,7 @@ class GrossProfitGenerator(object):
 		self.data = frappe.db.sql("""
 			select
 				si.name as parent, si_item.parenttype, si_item.name, si_item.idx, si.docstatus,
-				si.posting_date, si.posting_time, si.transaction_type, si.project, si.cost_center,
+				si.posting_date, si.posting_time, si.transaction_type, si.project, si_item.cost_center,
 				si.customer, si.customer_name, c.customer_group, c.territory,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
 				si_item.warehouse, i.item_group, i.brand, i.item_source, 
