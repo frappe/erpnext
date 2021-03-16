@@ -8,24 +8,23 @@ $.extend(wishlist, {
 	set_wishlist_count: function() {
 		// set badge count for wishlist icon
 		var wish_count = frappe.get_cookie("wish_count");
-		if(frappe.session.user==="Guest") {
+		if (frappe.session.user==="Guest") {
 			wish_count = 0;
 		}
 
-		if(wish_count) {
+		if (wish_count) {
 			$(".wishlist").toggleClass('hidden', false);
 		}
 
 		var $wishlist = $('.wishlist-icon');
 		var $badge = $wishlist.find("#wish-count");
 
-		if(parseInt(wish_count) === 0 || wish_count === undefined) {
+		if (parseInt(wish_count) === 0 || wish_count === undefined) {
 			$wishlist.css("display", "none");
-		}
-		else {
+		} else {
 			$wishlist.css("display", "inline");
 		}
-		if(wish_count) {
+		if (wish_count) {
 			$badge.html(wish_count);
 			$wishlist.addClass('cart-animate');
 			setTimeout(() => {
@@ -129,18 +128,21 @@ $.extend(wishlist, {
 		}
 
 		frappe.call({
+			async: async,
 			type: "POST",
 			method: method,
 			args: args,
 			callback: function (r) {
 				if (r.exc) {
-					if (failure_action && (typeof failure_action === 'function')) {failure_action();}
+					if (failure_action && (typeof failure_action === 'function')) {
+						failure_action();
+					}
 					frappe.msgprint({
 						message: __("Sorry, something went wrong. Please refresh."),
 						indicator: "red", title: __("Note")
 					});
-				} else {
-					if (success_action && (typeof success_action === 'function')) {success_action();}
+				} else if (success_action && (typeof success_action === 'function')) {
+					success_action();
 				}
 			}
 		});
