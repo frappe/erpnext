@@ -48,7 +48,7 @@ class Membership(Document):
 		last_membership = erpnext.get_last_membership(self.member)
 
 		# if person applied for offline membership
-		if last_membership and not frappe.session.user == "Administrator":
+		if last_membership and last_membership != self.name and not frappe.session.user == "Administrator":
 			# if last membership does not expire in 30 days, then do not allow to renew
 			if getdate(add_days(last_membership.to_date, -30)) > getdate(nowdate()) :
 				frappe.throw(_("You can only renew if your membership expires within 30 days"))
