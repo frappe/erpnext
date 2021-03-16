@@ -293,6 +293,7 @@
   {
    "fieldname": "material_request_plan_item",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Material Request Plan Item",
    "no_copy": 1,
    "print_hide": 1,
@@ -487,7 +488,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-15 16:53:17.764575",
+ "modified": "2021-03-16 15:07:55.165276",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",
