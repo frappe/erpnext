@@ -18,10 +18,9 @@ def get_data():
 				'label': _('Delivery'),
 				'items': ['Vehicle Receipt', 'Vehicle Delivery']
 			},
-			# {
-			# 	'label': _('Invoice'),
-			# 	'items': ['Purchase Invoice', 'Sales Invoice']
-			# },
-			# TODO
+			{
+				'label': _('Invoice'),
+				'items': ['Vehicle Invoice Receipt', 'Vehicle Invoice Delivery']
+			}
 		]
 	}

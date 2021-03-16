@@ -4,12 +4,7 @@
 {% include 'erpnext/vehicles/vehicle_transaction_controller.js' %}
 
 frappe.provide("erpnext.vehicles");
-erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionController.extend({
-	refresh: function () {
-		this._super();
-		this.show_stock_ledger()
-	},
-
+erpnext.vehicles.VehicleInvoiceReceiptController = erpnext.vehicles.VehicleTransactionController.extend({
 	setup_queries: function () {
 		this._super();
 
@@ -17,13 +12,8 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 		this.frm.set_query("vehicle", function () {
 			var filters = {
 				item_code: me.frm.doc.item_code,
-				warehouse: ['is', 'not set'],
-				purchase_document_no: ['is', 'not set']
+				is_booked: 1
 			};
-
-			if (!me.frm.doc.vehicle_booking_order) {
-				filters['is_booked'] = 0;
-			}
 
 			if (me.frm.doc.supplier) {
 				filters['supplier'] = ['in', ['', me.frm.doc.supplier]];
@@ -38,11 +28,11 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionC
 			return {
 				filters: {
 					docstatus: 1,
-					delivery_status: 'To Receive'
+					invoice_status: 'To Receive'
 				}
 			};
 		});
 	}
 });
 
-$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleReceiptController({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleInvoiceReceiptController({frm: cur_frm}));

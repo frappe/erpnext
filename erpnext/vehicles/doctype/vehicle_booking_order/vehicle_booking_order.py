@@ -472,40 +472,41 @@ class VehicleBookingOrder(AccountsController):
 		return vehicle_receipts
 
 	def update_invoice_status(self, update=False):
-		purchase_invoice = None
-		sales_invoice = None
+		vehicle_invoice_receipt = None
+		vehicle_invoice_delivery = None
 
-		# if self.docstatus != 0:
-		# 	purchase_invoice = frappe.db.get_all("Purchase Invoice", {"vehicle_booking_order": self.name, "docstatus": 1},
-		# 		['name', 'posting_date', 'bill_no', 'bill_date'])
-		# 	sales_invoice = frappe.db.get_all("Sales Invoice", {"vehicle_booking_order": self.name, "docstatus": 1},
-		# 		['name', 'posting_date'])
-		#
-		# 	if len(purchase_invoice) > 1:
-		# 		frappe.throw(_("Purchase Invoice already exists against Vehicle Booking Order"))
-		# 	if len(sales_invoice) > 1:
-		# 		frappe.throw(_("Sales Invoice already exists against Vehicle Booking Order"))
-		#
-		# 	if sales_invoice and not purchase_invoice:
-		# 		frappe.throw(_("Cannot make Sales Invoice against Vehicle Booking Order before making Purchase Invoice"))
-		# TODO
-		purchase_invoice = []
-		sales_invoice = []
+		if self.docstatus != 0:
+			vehicle_invoice_receipt = frappe.db.get_all("Vehicle Invoice Receipt", {"vehicle_booking_order": self.name, "docstatus": 1},
+				['name', 'posting_date', 'bill_no', 'bill_date'])
+			vehicle_invoice_delivery = frappe.db.get_all("Vehicle Invoice Delivery", {"vehicle_booking_order": self.name, "docstatus": 1},
+				['name', 'posting_date'])
 
-		purchase_invoice = purchase_invoice[0] if purchase_invoice else frappe._dict()
-		sales_invoice = sales_invoice[0] if sales_invoice else frappe._dict()
+			if len(vehicle_invoice_receipt) > 1:
+				frappe.throw(_("Vehicle Invoice Receipt already exists against Vehicle Booking Order"))
+			if len(vehicle_invoice_delivery) > 1:
+				frappe.throw(_("Vehicle Invoice Delivery already exists against Vehicle Booking Order"))
 
-		if purchase_invoice and (not purchase_invoice.bill_no or not purchase_invoice.bill_date):
-			frappe.throw(_("Supplier Invoice No and Supplier Invoice Date is mandatory for Vehicle Invoice Receipt against Vehicle Booking Order"))
+			if vehicle_invoice_delivery and not vehicle_invoice_receipt:
+				frappe.throw(_("Cannot make Vehicle Invoice Delivery against Vehicle Booking Order before making Vehicle Invoice Receipt"))
 
-		self.invoice_received_date = purchase_invoice.posting_date
-		self.invoice_delivered_date = sales_invoice.posting_date
-		self.bill_no = purchase_invoice.bill_no
-		self.bill_date = purchase_invoice.bill_date
+		vehicle_invoice_receipt = vehicle_invoice_receipt[0] if vehicle_invoice_receipt else frappe._dict()
+		vehicle_invoice_delivery = vehicle_invoice_delivery[0] if vehicle_invoice_delivery else frappe._dict()
 
-		if not purchase_invoice:
+		if vehicle_invoice_receipt and (not vehicle_invoice_receipt.bill_no or not vehicle_invoice_receipt.bill_date):
+			frappe.throw(_("Invoice No and Invoice Date is mandatory for Vehicle Invoice Receipt against Vehicle Booking Order"))
+
+		self.invoice_received_date = vehicle_invoice_receipt.posting_date
+		self.invoice_delivered_date = vehicle_invoice_delivery.posting_date
+		self.bill_no = vehicle_invoice_receipt.bill_no
+		self.bill_date = vehicle_invoice_receipt.bill_date
+
+		if self.invoice_received_date and self.invoice_delivered_date:
+			if getdate(self.invoice_delivered_date) < getdate(self.invoice_received_date):
+				frappe.throw(_("Invoice Delivered Date cannot be before Invoice Received Date"))
+
+		if not vehicle_invoice_receipt:
 			self.invoice_status = "To Receive"
-		elif not sales_invoice:
+		elif not vehicle_invoice_delivery:
 			self.invoice_status = "To Deliver"
 		else:
 			self.invoice_status = "Delivered"
@@ -930,11 +931,11 @@ def get_vehicle_invoice_receipt(source):
 def get_vehicle_invoice_delivery(source):
 	check_if_doc_exists("Vehicle Invoice Delivery", source.name)
 
-	prev_doc = get_previous_doc("Vehicle Invoice Delivery", source)
+	prev_doc = get_previous_doc("Vehicle Invoice Receipt", source)
 	if not prev_doc:
-		frappe.throw(_("Cannot make Vehicle Invoice Delivery against Vehicle Booking Order before making Vehicle Invoice Delivery"))
+		frappe.throw(_("Cannot make Vehicle Invoice Delivery against Vehicle Booking Order before making Vehicle Invoice Receipt"))
 
-	target = frappe.new_doc("Vehicle Invoice Receipt")
+	target = frappe.new_doc("Vehicle Invoice Delivery")
 	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
 	return target

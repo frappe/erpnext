@@ -17,9 +17,6 @@ class VehicleDelivery(VehicleTransactionController):
 
 		self.set_title()
 
-	def before_submit(self):
-		self.validate_vehicle_mandatory()
-
 	def on_submit(self):
 		self.update_stock_ledger()
 		self.update_vehicle_booking_order()

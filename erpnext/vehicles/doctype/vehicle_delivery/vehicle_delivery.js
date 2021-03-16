@@ -1,7 +1,7 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-{% include 'erpnext/vehicles/vehicle_transaction_common.js' %}
+{% include 'erpnext/vehicles/vehicle_transaction_controller.js' %}
 
 frappe.provide("erpnext.vehicles");
 erpnext.vehicles.VehicleDeliveryController = erpnext.vehicles.VehicleTransactionController.extend({

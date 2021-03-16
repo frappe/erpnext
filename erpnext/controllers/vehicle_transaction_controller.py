@@ -44,12 +44,15 @@ class VehicleTransactionController(StockController):
 
 		self.clean_remarks()
 
+	def before_submit(self):
+		self.validate_vehicle_mandatory()
+
 	def onload(self):
 		if self.docstatus == 0:
 			self.set_missing_values(for_validate=True)
 
 	def before_print(self):
-		self.company_address_doc = erpnext.get_company_address(self)
+		super(VehicleTransactionController, self).before_print()
 
 		if self.docstatus == 0:
 			self.set_missing_values(for_validate=True)
@@ -152,7 +155,7 @@ class VehicleTransactionController(StockController):
 					.format(self.doctype, frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 	def validate_project(self):
-		if self.project:
+		if self.get('project'):
 			project = frappe.db.get_value("Project", self.project,
 				['customer', 'applies_to_item', 'applies_to_vehicle'], as_dict=1)
 
@@ -177,7 +180,12 @@ class VehicleTransactionController(StockController):
 	def update_vehicle_booking_order(self):
 		if self.get('vehicle_booking_order'):
 			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
-			vbo.update_delivery_status(update=True)
+
+			if self.doctype in ['Vehicle Receipt', 'Vehicle Delivery']:
+				vbo.update_delivery_status(update=True)
+			elif self.doctype in ['Vehicle Invoice Receipt', 'Vehicle Invoice Delivery']:
+				vbo.update_invoice_status(update=True)
+
 			vbo.set_status(update=True)
 			vbo.notify_update()
 
@@ -235,7 +243,7 @@ def get_vehicle_booking_order_details(args):
 		frappe.throw(_("Vehicle Booking Order is mandatory"))
 
 	out = frappe.db.get_value('Vehicle Booking Order', args.vehicle_booking_order,
-		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name', 'supplier'], as_dict=1)
+		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name', 'supplier', 'bill_no', 'bill_date'], as_dict=1)
 
 	return out
 
