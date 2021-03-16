@@ -92,7 +92,7 @@ def capture_razorpay_donations(*args, **kwargs):
 			return
 
 		# to avoid capturing subscription payments as donations
-		if 'subscription' in data.contains:
+		if payment.description and 'subscription' in str(payment.description).lower():
 			return
 
 		donor = get_donor(payment.email)
