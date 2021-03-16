@@ -5,7 +5,6 @@ from __future__ import unicode_literals
 no_cache = 1
 
 import frappe
-from erpnext.e_commerce.shopping_cart.cart import get_cart_quotation
 
 def get_context(context):
 	settings = frappe.get_doc("E Commerce Settings")
