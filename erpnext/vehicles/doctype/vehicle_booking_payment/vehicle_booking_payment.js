@@ -1,9 +1,9 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.provide("erpnext.selling");
+frappe.provide("erpnext.vehicles");
 
-erpnext.selling.VehicleBookingPayment = frappe.ui.form.Controller.extend({
+erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
@@ -171,4 +171,4 @@ erpnext.selling.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 	},
 });
 
-$.extend(cur_frm.cscript, new erpnext.selling.VehicleBookingPayment({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleBookingPayment({frm: cur_frm}));

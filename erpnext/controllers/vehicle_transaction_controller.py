@@ -23,7 +23,7 @@ force_fields = [
 ]
 
 
-class VehicleStockController(StockController):
+class VehicleTransactionController(StockController):
 	def validate(self):
 		self.validate_posting_time()
 

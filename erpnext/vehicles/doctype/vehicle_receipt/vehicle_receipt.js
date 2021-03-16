@@ -4,7 +4,7 @@
 {% include 'erpnext/vehicles/vehicle_transaction_common.js' %}
 
 frappe.provide("erpnext.vehicles");
-erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehiclesController.extend({
+erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehicleTransactionController.extend({
 	refresh: function () {
 		this._super();
 		this.show_stock_ledger()
@@ -32,6 +32,15 @@ erpnext.vehicles.VehicleReceiptController = erpnext.vehicles.VehiclesController.
 			return {
 				filters: filters
 			}
+		});
+
+		this.frm.set_query("vehicle_booking_order", function() {
+			return {
+				filters: {
+					docstatus: 1,
+					delivery_status: 'To Receive'
+				}
+			};
 		});
 	}
 });

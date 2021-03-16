@@ -1,9 +1,9 @@
 // Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.provide("erpnext.selling");
+frappe.provide("erpnext.vehicles");
 
-erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
+erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.frm.custom_make_buttons = {
 			'Delivery Note': 'Deliver Vehicle',
@@ -884,4 +884,4 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 });
 
-$.extend(cur_frm.cscript, new erpnext.selling.VehicleBookingOrder({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleBookingOrder({frm: cur_frm}));

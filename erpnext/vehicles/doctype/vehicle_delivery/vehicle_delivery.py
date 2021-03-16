@@ -5,9 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.controllers.vehicle_stock_controller import VehicleStockController
+from erpnext.controllers.vehicle_transaction_controller import VehicleTransactionController
 
-class VehicleDelivery(VehicleStockController):
+class VehicleDelivery(VehicleTransactionController):
 	def get_feed(self):
 		return _("To {0} | {1}").format(self.get("customer_name") or self.get('customer'),
 			self.get("item_name") or self.get("item_code"))

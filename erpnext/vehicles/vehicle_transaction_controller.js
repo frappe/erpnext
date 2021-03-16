@@ -1,8 +1,10 @@
 frappe.provide("erpnext.vehicles");
 
-erpnext.vehicles.VehiclesController = erpnext.stock.StockController.extend({
+erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.extend({
 	setup: function () {
-		this.setup_posting_date_time_check();
+		if (this.frm.fields_dict.posting_time) {
+			this.setup_posting_date_time_check();
+		}
 	},
 
 	onload: function() {
@@ -49,26 +51,11 @@ erpnext.vehicles.VehiclesController = erpnext.stock.StockController.extend({
 		if (this.frm.fields_dict.item_code) {
 			this.frm.set_query("item_code", function() {
 				var filters = {"is_vehicle": 1};
-				if (me.frm.doc.vehicle_booking_order) {
+				if (me.frm.doc.vehicle_booking_order
+						|| ['Vehicle Invoice Receipt', 'Vehicle Invoice Delivery'].includes(me.frm.doc.doctype)) {
 					filters.include_in_vehicle_booking = 1;
 				}
 				return erpnext.queries.item(filters);
-			});
-		}
-
-		if (this.frm.fields_dict.vehicle_booking_order) {
-			this.frm.set_query("vehicle_booking_order", function() {
-				var filters = {"docstatus": 1};
-
-				if (me.frm.doc.doctype === "Vehicle Receipt") {
-					filters['delivery_status'] = 'To Receive';
-				} else {
-					filters['delivery_status'] = 'To Deliver';
-				}
-
-				return {
-					filters: filters
-				};
 			});
 		}
 	},
@@ -110,7 +97,7 @@ erpnext.vehicles.VehiclesController = erpnext.stock.StockController.extend({
 		var me = this;
 
 		frappe.call({
-			method: "erpnext.controllers.vehicle_stock_controller.get_customer_details",
+			method: "erpnext.controllers.vehicle_transaction_controller.get_customer_details",
 			args: {
 				args: {
 					company: me.frm.doc.company,
@@ -132,7 +119,7 @@ erpnext.vehicles.VehiclesController = erpnext.stock.StockController.extend({
 		var me = this;
 		if (me.frm.doc.vehicle_booking_order) {
 			frappe.call({
-				method: "erpnext.controllers.vehicle_stock_controller.get_vehicle_booking_order_details",
+				method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_booking_order_details",
 				args: {
 					args: {
 						company: me.frm.doc.company,
@@ -161,7 +148,7 @@ erpnext.vehicles.VehiclesController = erpnext.stock.StockController.extend({
 
 	get_contact_details: function (contact, prefix) {
 		frappe.call({
-			method: "erpnext.controllers.vehicle_stock_controller.get_contact_details",
+			method: "erpnext.controllers.vehicle_transaction_controller.get_contact_details",
 			args: {
 				contact: contact,
 				prefix: prefix
