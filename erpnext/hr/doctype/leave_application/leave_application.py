@@ -40,7 +40,8 @@ class LeaveApplication(Document):
 	def on_update(self):
 		if self.status == "Open" and self.docstatus < 1:
 			# notify leave approver about creation
-			self.notify_leave_approver()
+			if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+				self.notify_leave_approver()
 
 	def on_submit(self):
 		if self.status == "Open":
@@ -50,7 +51,8 @@ class LeaveApplication(Document):
 		self.update_attendance()
 
 		# notify leave applier about approval
-		self.notify_employee()
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
 		self.create_leave_ledger_entry()
 		self.reload()
 
@@ -60,7 +62,8 @@ class LeaveApplication(Document):
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
 		# notify leave applier about cancellation
-		self.notify_employee()
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
 		self.cancel_attendance()
 
 	def validate_applicable_after(self):
