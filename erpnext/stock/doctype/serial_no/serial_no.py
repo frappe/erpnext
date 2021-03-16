@@ -112,18 +112,10 @@ class SerialNo(StockController):
 			self.purchase_date = purchase_sle.posting_date
 			self.purchase_time = purchase_sle.posting_time
 			self.purchase_rate = purchase_sle.incoming_rate
-			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Vehicle Receipt"):
 				self.supplier, self.supplier_name = \
 					frappe.db.get_value(purchase_sle.voucher_type, purchase_sle.voucher_no,
 						["supplier", "supplier_name"])
-
-			if purchase_sle.voucher_type == "Vehicle Receipt":
-				self.supplier, self.supplier_name, customer, customer_name = \
-					frappe.db.get_value(purchase_sle.voucher_type, purchase_sle.voucher_no,
-						["supplier", "supplier_name", "customer", "customer_name"])
-
-				if customer:
-					self.customer, self.customer_name = customer, customer_name
 
 			# If sales return entry
 			if self.purchase_document_type == 'Delivery Note':
