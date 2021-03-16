@@ -3,38 +3,7 @@ import frappe
 from frappe import _
 
 def get_data():
-	out = []
-
-	if 'Vehicles' in frappe.get_active_domains():
-		out += [
-			{
-				"label": _("Vehicle Booking"),
-				"items": [
-					{
-						"type": "doctype",
-						"name": "Vehicle Booking Order",
-						"description": _("Vehicle Bookings from Customers."),
-						"onboard": 1,
-						"dependencies": ["Item", "Customer"],
-					},
-					{
-						"type": "doctype",
-						"name": "Vehicle Booking Payment",
-						"description": _("Payments for Vehicle Booking."),
-						"dependencies": ["Vehicle Booking Order"],
-					},
-					{
-						"type": "report",
-						"is_query_report": True,
-						"name": "Vehicle Allocation Register",
-						"doctype": "Vehicle Allocation",
-						"dependencies": ["Vehicle Allocation"],
-					},
-				]
-			},
-		]
-
-	out += [
+	out = [
 		{
 			"label": _("Sales Transactions"),
 			"icon": "fa fa-star",
@@ -133,45 +102,7 @@ def get_data():
 					"dependencies": ["Item"],
 				},
 			]
-		}
-	]
-
-	if 'Vehicles' in frappe.get_active_domains():
-		out.append({
-			"label": _("Vehicles"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Item",
-					"label": _("Vehicle Item (Variant)"),
-					"description": _("Vehicle Item/Variant List"),
-					"onboard": 1,
-					"route_options": {
-						"is_vehicle": 1
-					}
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle",
-					"description": _("Vehicle List."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Allocation"
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Allocation Creation Tool",
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle Allocation Period",
-				},
-			]
-		})
-
-	out += [
+		},
 		{
 			"label": _("Price List"),
 			"items": [

@@ -6,7 +6,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import cstr
 from erpnext.controllers.stock_controller import StockController
-from erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
+from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
 from erpnext.accounts.party import validate_party_frozen_disabled
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address

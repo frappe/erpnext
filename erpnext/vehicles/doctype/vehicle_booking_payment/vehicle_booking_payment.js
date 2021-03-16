@@ -70,7 +70,7 @@ erpnext.selling.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 
 		if (me.frm.doc.party_type && me.frm.doc.party) {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_payment.vehicle_booking_payment.get_party_name",
+				method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_party_name",
 				args: {
 					party_type: me.frm.doc.party_type,
 					party: me.frm.doc.party,
@@ -95,7 +95,7 @@ erpnext.selling.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 
 		if (me.frm.doc.vehicle_booking_order && me.frm.doc.party_type) {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_payment.vehicle_booking_payment.get_vehicle_booking_party",
+				method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_vehicle_booking_party",
 				args: {
 					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
 					party_type: me.frm.doc.party_type
@@ -151,7 +151,7 @@ erpnext.selling.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 
 		if (me.frm.doc.payment_type === "Pay" && me.frm.doc.vehicle_booking_order) {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_payment.vehicle_booking_payment.get_undeposited_instruments",
+				method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_undeposited_instruments",
 				args: {
 					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
 				},

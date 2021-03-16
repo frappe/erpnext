@@ -104,9 +104,9 @@
   }
  ],
  "istable": 1,
- "modified": "2021-02-23 20:46:59.350437",
+ "modified": "2021-03-16 21:29:49.957485",
  "modified_by": "Administrator",
- "module": "Selling",
+ "module": "Vehicles",
  "name": "Vehicle Booking Payment Detail",
  "owner": "Administrator",
  "permissions": [],
