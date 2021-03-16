@@ -39,51 +39,20 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 
 	const generate_irns = () => {
 		const docnames = list_view.get_checked_items(true);
-
-		frappe.call({
-			method: 'erpnext.regional.india.e_invoice.utils.get_einvoices',
-			args: { 'doctype': list_view.doctype, docnames },
-			freeze: true,
-			freeze_message: __('Validating Invoices...'),
-			callback: function(r) {
-				if (r.message) {
-					if (r.message.errors.length) {
-						frappe.msgprint({
-							message: r.message.errors.map(error => `${error.docname} - ${error.message}`),
-							title: __('Bulk E-Invoice Generation Failed'),
-							indicator: 'red',
-							as_list: 1
-						});
-					} else {
-						frappe.call({
-							method: 'erpnext.regional.india.e_invoice.utils.generate_einvoices',
-							args: { docnames },
-							freeze: true,
-							freeze_message: __('Generating E-Invoices...'),
-							callback: function(r) {
-								if (r.message.length) {
-									for (let failed_doc of r.message) {
-										const docname = `<a href="app/sales-invoice/${failed_doc.docname}">${failed_doc.docname}</a>`;
-										const errors = JSON.parse(failed_doc.message.replaceAll("'", '"'));
-										const message = `${docname} has following errors:<br>
-											<ul style="padding-left: 20px; padding-top: 5px">
-												${errors.map(err => `<li>${err}</li>`).join('')}
-											</ul>
-										`;
-
-										frappe.msgprint({
-											message: message,
-											title: __('Bulk E-Invoice Generation Failed'),
-											indicator: 'red'
-										})
-									}
-								}
-							}
-						})
-					}
-				}
-			}
-		});
+		if (docnames && docnames.length) {
+			frappe.call({
+				method: 'erpnext.regional.india.e_invoice.utils.generate_einvoices',
+				args: { docnames },
+				freeze: true,
+				freeze_message: __('Generating E-Invoices...')
+			});
+		} else {
+			frappe.msgprint({
+				message: __('Please select at least one sales invoice to generate IRN'),
+				title: __('No Invoice Selected'),
+				indicator: 'red'
+			});
+		}
 	};
 
 	const cancel_irns = () => {
@@ -146,6 +115,24 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 				list_view.page.remove_inner_button(__('Generate IRNs'), __('E-Invoicing'));
 				list_view.page.remove_inner_button(__('Cancel IRNs'), __('E-Invoicing'));
 			}
+		}
+	});
+
+	frappe.realtime.on("bulk_einvoice_action_complete", (data) => {
+		const { failures, user } = data;
+
+		if (failures && failures.length && user == frappe.session.user) {
+			let message = `
+				Failed to generate IRNs for following ${failures.length} sales invoices:
+				<ul style="padding-left: 10px">
+					${failures.map(d => `<li>${d.docname}</li>`).join('')}
+				</ul>
+			`;
+			frappe.throw({
+				message: message,
+				title: __('Bulk E-Invoice Generation Complete'),
+				indicator: 'orange'
+			});
 		}
 	});
 };

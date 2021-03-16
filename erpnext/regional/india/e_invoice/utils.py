@@ -15,6 +15,9 @@ import traceback
 import io
 from frappe import _, bold
 from pyqrcode import create as qrcreate
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.scheduler import is_scheduler_inactive
+from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply, validate_gstin_for_india
 from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate
@@ -499,7 +502,11 @@ class GSPConnector():
 
 		if self.invoice:
 			gstin = self.get_seller_gstin()
-			self.credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
+			credentials_for_gstin = [d for d in self.e_invoice_settings.credentials if d.gstin == gstin]
+			if credentials_for_gstin:
+				self.credentials = credentials_for_gstin[0]
+			else:
+				frappe.throw(_('Cannot find e-invoicing credentials for selected Company GSTIN. Please check E-Invoice Settings'))
 		else:
 			self.credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
 
@@ -640,12 +647,12 @@ class GSPConnector():
 		failed = []
 
 		for invoice in invoices:
-			gsp_connector.docname = invoice
-			gsp_connector.set_invoice()
-			gsp_connector.set_credentials()
-
 			try:
+				gsp_connector.docname = invoice
+				gsp_connector.set_invoice()
+				gsp_connector.set_credentials()
 				gsp_connector.generate_irn()
+
 			except Exception as e:
 				failed.append({
 					'docname': invoice,
@@ -937,35 +944,39 @@ def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
 	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
 
 @frappe.whitelist()
-def get_einvoices(doctype, docnames):
-	einvoices_json = []
-	errors = []
-
-	for name in json.loads(docnames):
-		invoice = frappe.get_doc(doctype, name)
-		try:
-			einvoice = make_einvoice(invoice)
-			einvoices_json.append(einvoice)
-		except Exception as e:
-			errors.append({
-				'docname': name,
-				'message': str(e)
-			})
-			pass
-
-	frappe.local.message_log = []
-	return {
-		'data': einvoices_json,
-		'errors': errors
-	}
-
-@frappe.whitelist()
 def generate_einvoices(docnames):
-	docnames = json.loads(docnames)
-	failed_invoices = GSPConnector.bulk_generate_irn(docnames)
+	docnames = json.loads(docnames) or []
+
+	if len(docnames) < 10:
+		failures = GSPConnector.bulk_generate_irn(docnames)
+		frappe.local.message_log = []
+
+		if failures:
+			show_bulk_generation_failure_message(failures)
+		else:
+			frappe.msgprint(_('{} e-invoices generated successfully').format(len(docnames)))
+	else:
+		enqueue_bulk_action(schedule_bulk_generate_irn, docnames=docnames)
+
+def schedule_bulk_generate_irn(docnames):
+	failures = GSPConnector.bulk_generate_irn(docnames)
 	frappe.local.message_log = []
 
-	return failed_invoices
+	frappe.publish_realtime("bulk_einvoice_action_complete", { "user": frappe.session.user, "failures": failures })
+
+def show_bulk_generation_failure_message(failures):
+	for doc in failures:
+		docname = '<a href="app/sales-invoice/{0}">{0}</a>'.format(doc.docname)
+		errors = json.loads(doc.message.replace("'", '"'))
+		error_list = ''.join(['<li>{err}</li>' for err in errors])
+		message = '''{} has following errors:<br>
+			<ul style="padding-left: 20px; padding-top: 5px">{}</ul>'''.format(docname, error_list)
+
+		frappe.msgprint({
+			message: message,
+			title: __('Bulk E-Invoice Generation Failed'),
+			indicator: 'red'
+		})
 
 @frappe.whitelist()
 def cancel_irns(docnames, reason, remark):
@@ -974,3 +985,31 @@ def cancel_irns(docnames, reason, remark):
 	frappe.local.message_log = []
 
 	return failed_invoices
+
+def enqueue_bulk_action(job, **kwargs):
+	check_scheduler_status()
+
+	enqueue(
+		job,
+		queue="long",
+		timeout=10000,
+		event="processing_bulk_einvoice_action",
+		now=frappe.conf.developer_mode or frappe.flags.in_test,
+		**kwargs
+	)
+
+	if job == schedule_bulk_generate_irn:
+		msg = _('E-Invoices will be generated in a background process.')
+	else:
+		msg = _('E-Invoices will be cancelled in a background process.')
+
+	frappe.msgprint(msg, alert=1)
+
+def check_scheduler_status():
+	if is_scheduler_inactive() and not frappe.flags.in_test:
+		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
+
+def job_already_enqueued(job_name):
+	enqueued_jobs = [d.get("job_name") for d in get_info()]
+	if job_name in enqueued_jobs:
+		return True
