@@ -29,7 +29,10 @@ class TaxExemption80GCertificate(Document):
 
 	def validate_duplicates(self):
 		if self.recipient == 'Donor':
-			certificate = frappe.db.exists(self.doctype, {'donation': self.donation})
+			certificate = frappe.db.exists(self.doctype, {
+				'donation': self.donation,
+				'name': ('!=', self.name)
+			})
 			if certificate:
 				frappe.throw(_('An 80G Certificate {0} already exists for the donation {1}').format(
 					get_link_to_form(self.doctype, certificate), frappe.bold(self.donation)
