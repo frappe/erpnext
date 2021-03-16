@@ -772,3 +772,42 @@ def make_regional_gl_entries(gl_entries, doc):
 				)
 
 	return gl_entries
+
+def get_gst_tax_amount(doc):
+	gst_accounts = get_gst_accounts(doc.company)
+	gst_account_list = gst_accounts.get('cgst_account', []) + gst_accounts.get('sgst_account', []) \
+		+ gst_accounts.get('igst_account', [])
+
+	base_gst_tax = 0
+	gst_tax = 0
+
+	for tax in doc.get('taxes'):
+		if tax.category not in ("Total", "Valuation and Total"):
+			continue
+
+		if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
+			base_gst_tax += tax.base_tax_amount_after_discount_amount
+			gst_tax += tax.tax_amount_after_discount_amount
+
+	return gst_tax, base_gst_tax
+
+@frappe.whitelist()
+def get_regional_round_off_accounts(company, account_list):
+	country = frappe.get_cached_value('Company', company, 'country')
+
+	if country != 'India':
+		return
+
+	if isinstance(account_list, string_types):
+		account_list = json.loads(account_list)
+
+	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
+		return
+
+	gst_accounts = get_gst_accounts(company)
+	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
+		+ gst_accounts.get('igst_account')
+
+	account_list.extend(gst_account_list)
+
+	return account_list
