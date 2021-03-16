@@ -89,10 +89,11 @@ class AdditionalSalary(Document):
 		no_of_days = date_diff(getdate(end_date), getdate(start_date)) + 1
 		return amount_per_day * no_of_days
 
-@frappe.whitelist()
-def get_additional_salary_component(employee, start_date, end_date, component_type):
-	additional_salaries = frappe.db.sql("""
-		select name, salary_component, type, amount, overwrite_salary_structure_amount, deduct_full_tax_on_selected_payroll_date
+def get_additional_salaries(employee, start_date, end_date, component_type):
+	additional_salary_list = frappe.db.sql("""
+		select name, salary_component as component, type, amount,
+		overwrite_salary_structure_amount as overwrite,
+		deduct_full_tax_on_selected_payroll_date
 		from `tabAdditional Salary`
 		where employee=%(employee)s
 			and docstatus = 1
@@ -102,7 +103,7 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 					from_date <= %(to_date)s and to_date >= %(to_date)s
 				)
 		and type = %(component_type)s
-		order by salary_component, overwrite_salary_structure_amount DESC
+		order by salary_component, overwrite ASC
 	""", {
 		'employee': employee,
 		'from_date': start_date,
@@ -110,38 +111,18 @@ def get_additional_salary_component(employee, start_date, end_date, component_ty
 		'component_type': "Earning" if component_type == "earnings" else "Deduction"
 	}, as_dict=1)
 
-	existing_salary_components= []
-	salary_components_details = {}
-	additional_salary_details = []
+	additional_salaries = []
+	components_to_overwrite = []
 
-	overwrites_components = [ele.salary_component for ele in additional_salaries if ele.overwrite_salary_structure_amount == 1]
+	for d in additional_salary_list:
+		if d.overwrite:
+			if d.component in components_to_overwrite:
+				frappe.throw(_("Multiple Additional Salaries with overwrite "
+					"property exist for Salary Component {0} between {1} and {2}.").format(
+					frappe.bold(d.component), start_date, end_date), title=_("Error"))
 
-	component_fields = ["depends_on_payment_days", "salary_component_abbr", "is_tax_applicable", "variable_based_on_taxable_salary", 'type']
-	for d in additional_salaries:
+			components_to_overwrite.append(d.component)
 
-		if d.salary_component not in existing_salary_components:
-			component = frappe.get_all("Salary Component", filters={'name': d.salary_component}, fields=component_fields)
-			struct_row = frappe._dict({'salary_component': d.salary_component})
-			if component:
-				struct_row.update(component[0])
+		additional_salaries.append(d)
 
-			struct_row['deduct_full_tax_on_selected_payroll_date'] = d.deduct_full_tax_on_selected_payroll_date
-			struct_row['is_additional_component'] = 1
-
-			salary_components_details[d.salary_component] = struct_row
-
-
-		if overwrites_components.count(d.salary_component) > 1:
-			frappe.throw(_("Multiple Additional Salaries with overwrite property exist for Salary Component: {0} between {1} and {2}.".format(d.salary_component, start_date, end_date)), title=_("Error"))
-		else:
-			additional_salary_details.append({
-				'name': d.name,
-				'component': d.salary_component,
-				'amount': d.amount,
-				'type': d.type,
-				'overwrite': d.overwrite_salary_structure_amount,
-			})
-
-		existing_salary_components.append(d.salary_component)
-
-	return salary_components_details, additional_salary_details
+	return additional_salaries
