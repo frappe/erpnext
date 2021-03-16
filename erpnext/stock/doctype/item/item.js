@@ -728,7 +728,7 @@ $.extend(erpnext.item, {
 					if (modal) {
 						$(modal).addClass("modal-dialog-scrollable");
 					}
-				})
+				});
 		});
 	},
 
