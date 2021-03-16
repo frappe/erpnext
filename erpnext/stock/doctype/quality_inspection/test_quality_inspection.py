@@ -44,24 +44,61 @@ class TestQualityInspection(unittest.TestCase):
 		qa.delete()
 		dn.delete()
 
+	def test_value_based_qi_readings(self):
+		# Test QI based on acceptance values (Non formula)
+		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
+		readings = [{
+			"specification": "Iron Content", # numeric reading
+			"min_value": 0.1,
+			"max_value": 0.9,
+			"reading_1": "0.4"
+		},
+		{
+			"specification": "Particle Inspection Needed", # non-numeric reading
+			"numeric": 0,
+			"value": "Yes",
+			"reading_value": "Yes"
+		}]
+
+		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name,
+			readings=readings, do_not_save=True)
+		qa.save()
+
+		# status must be auto set as per formula
+		self.assertEqual(qa.readings[0].status, "Accepted")
+		self.assertEqual(qa.readings[1].status, "Accepted")
+
+		qa.delete()
+		dn.delete()
+
 	def test_formula_based_qi_readings(self):
 		dn = create_delivery_note(item_code="_Test Item with QA", do_not_submit=True)
 		readings = [{
-			"specification": "Iron Content",
+			"specification": "Iron Content", # numeric reading
+			"formula_based_criteria": 1,
 			"acceptance_formula": "reading_1 > 0.35 and reading_1 < 0.50",
-			"reading_1": 0.4
+			"reading_1": "0.4"
 		},
 		{
-			"specification": "Calcium Content",
+			"specification": "Calcium Content", # numeric reading
+			"formula_based_criteria": 1,
 			"acceptance_formula": "reading_1 > 0.20 and reading_1 < 0.50",
-			"reading_1": 0.7
+			"reading_1": "0.7"
 		},
 		{
-			"specification": "Mg Content",
-			"acceptance_formula": "(reading_1 + reading_2 + reading_3) / 3 < 0.9",
-			"reading_1": 0.5,
-			"reading_2": 0.7,
+			"specification": "Mg Content", # numeric reading
+			"formula_based_criteria": 1,
+			"acceptance_formula": "mean < 0.9",
+			"reading_1": "0.5",
+			"reading_2": "0.7",
 			"reading_3": "random text" # check if random string input causes issues
+		},
+		{
+			"specification": "Calcium Content", # non-numeric reading
+			"formula_based_criteria": 1,
+			"numeric": 0,
+			"acceptance_formula": "reading_value in ('Grade A', 'Grade B', 'Grade C')",
+			"reading_value": "Grade B"
 		}]
 
 		qa = create_quality_inspection(reference_type="Delivery Note", reference_name=dn.name,
@@ -72,6 +109,7 @@ class TestQualityInspection(unittest.TestCase):
 		self.assertEqual(qa.readings[0].status, "Accepted")
 		self.assertEqual(qa.readings[1].status, "Rejected")
 		self.assertEqual(qa.readings[2].status, "Accepted")
+		self.assertEqual(qa.readings[3].status, "Accepted")
 
 		qa.delete()
 		dn.delete()
@@ -86,11 +124,20 @@ def create_quality_inspection(**args):
 	qa.item_code = args.item_code or "_Test Item with QA"
 	qa.sample_size = 1
 	qa.inspected_by = frappe.session.user
+	qa.status = args.status or "Accepted"
 
-	readings = args.readings or {"specification": "Size", "status": args.status}
+	if not args.readings:
+		create_quality_inspection_parameter("Size")
+		readings = {"specification": "Size", "min_value": 0, "max_value": 10}
+	else:
+		readings = args.readings
+
+	if args.status == "Rejected":
+		readings["reading_1"] = "12" # status is auto set in child on save
 
 	if isinstance(readings, list):
 		for entry in readings:
+			create_quality_inspection_parameter(entry["specification"])
 			qa.append("readings", entry)
 	else:
 		qa.append("readings", readings)
@@ -101,3 +148,11 @@ def create_quality_inspection(**args):
 			qa.submit()
 
 	return qa
+
+def create_quality_inspection_parameter(parameter):
+	if not frappe.db.exists("Quality Inspection Parameter", parameter):
+		frappe.get_doc({
+			"doctype": "Quality Inspection Parameter",
+			"parameter": parameter,
+			"description": parameter
+		}).insert()

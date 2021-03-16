@@ -36,6 +36,8 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 			frm.dashboard.show_progress(data.title, (data.count / data.total) * 100, data.message);
 			frm.page.set_indicator(__('In Progress'), 'orange');
 		});
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -100,6 +102,7 @@ frappe.ui.form.on('Opening Invoice Creation Tool', {
 				}
 			})
 		}
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	invoice_type: function(frm) {

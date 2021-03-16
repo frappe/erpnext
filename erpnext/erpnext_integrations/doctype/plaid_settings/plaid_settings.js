@@ -12,9 +12,25 @@ frappe.ui.form.on('Plaid Settings', {
 
 	refresh: function (frm) {
 		if (frm.doc.enabled) {
-			frm.add_custom_button('Link a new bank account', () => {
+			frm.add_custom_button(__('Link a new bank account'), () => {
 				new erpnext.integrations.plaidLink(frm);
 			});
+
+			frm.add_custom_button(__("Sync Now"), () => {
+				frappe.call({
+					method: "erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.enqueue_synchronization",
+					freeze: true,
+					callback: () => {
+						let bank_transaction_link = '<a href="#List/Bank Transaction">Bank Transaction</a>';
+
+						frappe.msgprint({
+							title: __("Sync Started"),
+							message: __("The sync has started in the background, please check the {0} list for new records.", [bank_transaction_link]),
+							alert: 1
+						});
+					}
+				});
+			}).addClass("btn-primary");
 		}
 	}
 });
@@ -30,8 +46,16 @@ erpnext.integrations.plaidLink = class plaidLink {
 		this.product = ["auth", "transactions"];
 		this.plaid_env = this.frm.doc.plaid_env;
 		this.client_name = frappe.boot.sitename;
-		this.token = await this.frm.call("get_link_token").then(resp => resp.message);
+		this.token = await this.get_link_token();
 		this.init_plaid();
+	}
+
+	async get_link_token() {
+		const token = await this.frm.call("get_link_token").then(resp => resp.message);
+		if (!token) {
+			frappe.throw(__('Cannot retrieve link token. Check Error Log for more information'));
+		}
+		return token;
 	}
 
 	init_plaid() {
@@ -78,8 +102,8 @@ erpnext.integrations.plaidLink = class plaidLink {
 	}
 
 	onScriptError(error) {
-		frappe.msgprint("There was an issue connecting to Plaid's authentication server");
-		frappe.msgprint(error);
+		frappe.msgprint(__("There was an issue connecting to Plaid's authentication server. Check browser console for more information"));
+		console.log(error);
 	}
 
 	plaid_success(token, response) {

@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import nowdate
+from frappe.utils import nowdate, flt
 from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
 from erpnext.loan_management.doctype.loan.loan import make_repayment_entry
@@ -113,15 +113,15 @@ def execute():
 					interest_paid = 0
 					principal_paid = 0
 
-					if total_interest > entry.interest_amount:
-						interest_paid = entry.interest_amount
+					if flt(total_interest) > flt(entry.interest_amount):
+						interest_paid = flt(entry.interest_amount)
 					else:
-						interest_paid = total_interest
+						interest_paid = flt(total_interest)
 
-					if total_principal > entry.payable_principal_amount:
-						principal_paid = entry.payable_principal_amount
+					if flt(total_principal) > flt(entry.payable_principal_amount):
+						principal_paid = flt(entry.payable_principal_amount)
 					else:
-						principal_paid = total_principal
+						principal_paid = flt(total_principal)
 
 					frappe.db.sql(""" UPDATE `tabLoan Interest Accrual`
 						SET paid_principal_amount = `paid_principal_amount` + %s,
@@ -129,8 +129,8 @@ def execute():
 						WHERE name = %s""",
 						(principal_paid, interest_paid, entry.name))
 
-					total_principal -= principal_paid
-					total_interest -= interest_paid
+					total_principal = flt(total_principal) - principal_paid
+					total_interest = flt(total_interest) - interest_paid
 
 def create_loan_type(loan, loan_type_name, penalty_account):
 	loan_type_doc = frappe.new_doc('Loan Type')

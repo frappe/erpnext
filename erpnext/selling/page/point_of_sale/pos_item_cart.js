@@ -5,6 +5,8 @@ erpnext.PointOfSale.ItemCart = class {
 		this.customer_info = undefined;
 		this.hide_images = settings.hide_images;
 		this.allowed_customer_groups = settings.customer_groups;
+		this.allow_rate_change = settings.allow_rate_change;
+		this.allow_discount_change = settings.allow_discount_change;
 		
 		this.init_component();
 	}
@@ -201,7 +203,7 @@ erpnext.PointOfSale.ItemCart = class {
 			me.events.checkout();
 			me.toggle_checkout_btn(false);
 
-			me.$add_discount_elem.removeClass("d-none");
+			me.allow_discount_change && me.$add_discount_elem.removeClass("d-none");
 		});
 
 		this.$totals_section.on('click', '.edit-cart-btn', () => {
@@ -479,11 +481,15 @@ erpnext.PointOfSale.ItemCart = class {
 	update_totals_section(frm) {
 		if (!frm) frm = this.events.get_frm();
 
-		this.render_net_total(frm.doc.base_net_total);
-		this.render_grand_total(frm.doc.base_grand_total);
+		this.render_net_total(frm.doc.net_total);
+		this.render_grand_total(frm.doc.grand_total);
 
-		const taxes = frm.doc.taxes.map(t => { return { description: t.description, rate: t.rate }})
-		this.render_taxes(frm.doc.base_total_taxes_and_charges, taxes);
+		const taxes = frm.doc.taxes.map(t => {
+			return {
+				description: t.description, rate: t.rate
+			};
+		});
+		this.render_taxes(frm.doc.total_taxes_and_charges, taxes);
 	}
 	
 	render_net_total(value) {
@@ -545,7 +551,7 @@ erpnext.PointOfSale.ItemCart = class {
 	get_cart_item({ item_code, batch_no, uom }) {
 		const batch_attr = `[data-batch-no="${escape(batch_no)}"]`;
 		const item_code_attr = `[data-item-code="${escape(item_code)}"]`;
-		const uom_attr = `[data-uom=${escape(uom)}]`;
+		const uom_attr = `[data-uom="${escape(uom)}"]`;
 
 		const item_selector = batch_no ? 
 			`.cart-item-wrapper${batch_attr}${uom_attr}` : `.cart-item-wrapper${item_code_attr}${uom_attr}`;
@@ -667,7 +673,7 @@ erpnext.PointOfSale.ItemCart = class {
 	
 	update_selector_value_in_cart_item(selector, value, item) {
 		const $item_to_update = this.get_cart_item(item);
-		$item_to_update.attr(`data-${selector}`, value);
+		$item_to_update.attr(`data-${selector}`, escape(value));
 	}
 
 	toggle_checkout_btn(show_checkout) {
@@ -702,14 +708,26 @@ erpnext.PointOfSale.ItemCart = class {
 	on_numpad_event($btn) {
 		const current_action = $btn.attr('data-button-value');
 		const action_is_field_edit = ['qty', 'discount_percentage', 'rate'].includes(current_action);
-
-		this.highlight_numpad_btn($btn, current_action);
+		const action_is_allowed = action_is_field_edit ? (
+			(current_action == 'rate' && this.allow_rate_change) ||
+			(current_action == 'discount_percentage' && this.allow_discount_change) ||
+			(current_action == 'qty')) : true;
 
 		const action_is_pressed_twice = this.prev_action === current_action;
 		const first_click_event = !this.prev_action;
 		const field_to_edit_changed = this.prev_action && this.prev_action != current_action;
 
 		if (action_is_field_edit) {
+			if (!action_is_allowed) {
+				const label = current_action == 'rate' ? 'Rate'.bold() : 'Discount'.bold();
+				const message = __('Editing {0} is not allowed as per POS Profile settings', [label]);
+				frappe.show_alert({
+					indicator: 'red',
+					message: message
+				});
+				frappe.utils.play_sound("error");
+				return;
+			}
 
 			if (first_click_event || field_to_edit_changed) {
 				this.prev_action = current_action;
@@ -753,6 +771,7 @@ erpnext.PointOfSale.ItemCart = class {
 			this.numpad_value = current_action;
 		}
 
+		this.highlight_numpad_btn($btn, current_action);
 		this.events.numpad_event(this.numpad_value, this.prev_action);
 	}
 	

@@ -41,10 +41,11 @@ def get_pricing_rules(args, doc=None):
 	if not pricing_rules: return []
 
 	if apply_multiple_pricing_rules(pricing_rules):
-		pricing_rules = sorted_by_priority(pricing_rules)
+		pricing_rules = sorted_by_priority(pricing_rules, args, doc)
 		for pricing_rule in pricing_rules:
-			pricing_rule = filter_pricing_rules(args, pricing_rule, doc)
-			if pricing_rule:
+			if isinstance(pricing_rule, list):
+				rules.extend(pricing_rule)
+			else:
 				rules.append(pricing_rule)
 	else:
 		pricing_rule = filter_pricing_rules(args, pricing_rules, doc)
@@ -53,17 +54,22 @@ def get_pricing_rules(args, doc=None):
 
 	return rules
 
-def sorted_by_priority(pricing_rules):
+def sorted_by_priority(pricing_rules, args, doc=None):
 	# If more than one pricing rules, then sort by priority
 	pricing_rules_list = []
 	pricing_rule_dict = {}
-	for pricing_rule in pricing_rules:
-		if not pricing_rule.get("priority"): continue
 
-		pricing_rule_dict.setdefault(cint(pricing_rule.get("priority")), []).append(pricing_rule)
+	for pricing_rule in pricing_rules:
+		pricing_rule = filter_pricing_rules(args, pricing_rule, doc)
+		if pricing_rule:
+			if not pricing_rule.get('priority'):
+				pricing_rule['priority'] = 1
+
+			if pricing_rule.get('apply_multiple_pricing_rules'):
+				pricing_rule_dict.setdefault(cint(pricing_rule.get("priority")), []).append(pricing_rule)
 
 	for key in sorted(pricing_rule_dict):
-		pricing_rules_list.append(pricing_rule_dict.get(key))
+		pricing_rules_list.extend(pricing_rule_dict.get(key))
 
 	return pricing_rules_list or pricing_rules
 
@@ -144,9 +150,7 @@ def apply_multiple_pricing_rules(pricing_rules):
 
 	if not apply_multiple_rule: return False
 
-	if (apply_multiple_rule
-		and len(apply_multiple_rule) == len(pricing_rules)):
-		return True
+	return True
 
 def _get_tree_conditions(args, parenttype, table, allow_blank=True):
 	field = frappe.scrub(parenttype)
@@ -263,18 +267,6 @@ def filter_pricing_rules(args, pricing_rules, doc=None):
 		max_priority = max([cint(p.priority) for p in pricing_rules])
 		if max_priority:
 			pricing_rules = list(filter(lambda x: cint(x.priority)==max_priority, pricing_rules))
-
-	# apply internal priority
-	all_fields = ["item_code", "item_group", "brand", "customer", "customer_group", "territory",
-		"supplier", "supplier_group", "campaign", "sales_partner", "variant_of"]
-
-	if len(pricing_rules) > 1:
-		for field_set in [["item_code", "variant_of", "item_group", "brand"],
-			["customer", "customer_group", "territory"], ["supplier", "supplier_group"]]:
-				remaining_fields = list(set(all_fields) - set(field_set))
-				if if_all_rules_same(pricing_rules, remaining_fields):
-					pricing_rules = apply_internal_priority(pricing_rules, field_set, args)
-					break
 
 	if pricing_rules and not isinstance(pricing_rules, list):
 		pricing_rules = list(pricing_rules)

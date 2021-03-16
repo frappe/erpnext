@@ -44,7 +44,6 @@ class BuyingController(StockController):
 		self.validate_items()
 		self.set_qty_as_per_stock_uom()
 		self.validate_stock_or_nonstock_items()
-		self.update_tax_category_for_internal_transfer()
 		self.validate_warehouse()
 		self.validate_from_warehouse()
 		self.set_supplier_address()
@@ -98,11 +97,6 @@ class BuyingController(StockController):
 	def validate_stock_or_nonstock_items(self):
 		if self.meta.get_field("taxes") and not self.get_stock_items() and not self.get_asset_items():
 			msg = _('Tax Category has been changed to "Total" because all the Items are non-stock items')
-			self.update_tax_category(msg)
-
-	def update_tax_category_for_internal_transfer(self):
-		if self.doctype == 'Purchase Invoice' and self.is_internal_transfer():
-			msg = _('Tax Category has been changed to "Total" as its an internal purchase.')
 			self.update_tax_category(msg)
 
 	def update_tax_category(self, msg):
@@ -224,6 +218,48 @@ class BuyingController(StockController):
 			else:
 				item.valuation_rate = 0.0
 
+	def set_incoming_rate(self):
+		if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Purchase Order"):
+			return
+
+		ref_doctype_map = {
+			"Purchase Order": "Sales Order Item",
+			"Purchase Receipt": "Delivery Note Item",
+			"Purchase Invoice": "Sales Invoice Item",
+		}
+
+		ref_doctype = ref_doctype_map.get(self.doctype)
+		items = self.get("items")
+		for d in items:
+			if not cint(self.get("is_return")):
+				# Get outgoing rate based on original item cost based on valuation method
+
+				if not d.get(frappe.scrub(ref_doctype)):
+					outgoing_rate = get_incoming_rate({
+						"item_code": d.item_code,
+						"warehouse": d.get('from_warehouse'),
+						"posting_date": self.get('posting_date') or self.get('transation_date'),
+						"posting_time": self.get('posting_time'),
+						"qty": -1 * flt(d.get('stock_qty')),
+						"serial_no": d.get('serial_no'),
+						"company": self.company,
+						"voucher_type": self.doctype,
+						"voucher_no": self.name,
+						"allow_zero_valuation": d.get("allow_zero_valuation")
+					}, raise_error_if_no_rate=False)
+
+					rate = flt(outgoing_rate * d.conversion_factor, d.precision('rate'))
+				else:
+					rate = frappe.db.get_value(ref_doctype, d.get(frappe.scrub(ref_doctype)), 'rate')
+
+				if self.is_internal_transfer():
+					if rate != d.rate:
+						d.rate = rate
+						d.discount_percentage = 0
+						d.discount_amount = 0
+						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
+							.format(d.idx), alert=1)
+
 	def get_supplied_items_cost(self, item_row_id, reset_outgoing_rate=True):
 		supplied_items_cost = 0.0
 		for d in self.get("supplied_items"):
@@ -243,7 +279,7 @@ class BuyingController(StockController):
 
 				d.amount = flt(flt(d.consumed_qty) * flt(d.rate), d.precision("amount"))
 				supplied_items_cost += flt(d.amount)
-		
+
 		return supplied_items_cost
 
 	def validate_for_subcontracting(self):
@@ -252,7 +288,7 @@ class BuyingController(StockController):
 
 		if self.is_subcontracted == "Yes":
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
-				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted Purchase Receipt"))
+				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
 
 			for item in self.get("items"):
 				if item in self.sub_contracted_items and not item.bom:
@@ -336,7 +372,7 @@ class BuyingController(StockController):
 				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
 
 				consumed_qty = raw_material_data.get('qty', 0)
-				consumed_serial_nos = raw_material_data.get('serial_nos', '')
+				consumed_serial_nos = raw_material_data.get('serial_no', '')
 				consumed_batch_nos = raw_material_data.get('batch_nos', '')
 
 				transferred_qty = raw_material.qty
@@ -559,6 +595,8 @@ class BuyingController(StockController):
 						from_warehouse_sle = self.get_sl_entries(d, {
 							"actual_qty": -1 * pr_qty,
 							"warehouse": d.from_warehouse,
+							"outgoing_rate": d.rate,
+							"recalculate_rate": 1,
 							"dependant_sle_voucher_detail_no": d.name
 						})
 

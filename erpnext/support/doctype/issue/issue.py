@@ -214,7 +214,10 @@ class Issue(Document):
 
 	def before_insert(self):
 		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
-			self.set_response_and_resolution_time()
+			if frappe.flags.in_test:
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+			else:
+				self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
 		service_level_agreement = get_active_service_level_agreement_for(priority=priority,

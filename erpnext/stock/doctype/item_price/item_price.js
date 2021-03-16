@@ -15,5 +15,13 @@ frappe.ui.form.on("Item Price", {
 
 		frm.set_df_property("bulk_import_help", "options",
 			'<a href="#data-import-tool/Item Price">' + __("Import in Bulk") + '</a>');
+
+		frm.set_query('batch_no', function() {
+			return {
+				filters: {
+					'item': frm.doc.item_code
+				}
+			}
+		});
 	}
 });

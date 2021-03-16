@@ -13,17 +13,14 @@ from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import g
 class AssetValueAdjustment(Document):
 	def validate(self):
 		self.validate_date()
-		self.set_difference_amount()
 		self.set_current_asset_value()
+		self.set_difference_amount()
 
 	def on_submit(self):
 		self.make_depreciation_entry()
 		self.reschedule_depreciations(self.new_asset_value)
 
 	def on_cancel(self):
-		if self.journal_entry:
-			frappe.throw(_("Cancel the journal entry {0} first").format(self.journal_entry))
-
 		self.reschedule_depreciations(self.current_asset_value)
 
 	def validate_date(self):

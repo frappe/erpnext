@@ -12,8 +12,6 @@
   "company",
   "country",
   "column_break_9",
-  "update_stock",
-  "ignore_pricing_rule",
   "warehouse",
   "campaign",
   "company_address",
@@ -25,8 +23,14 @@
   "hide_images",
   "hide_unavailable_items",
   "auto_add_item_to_cart",
-  "item_groups",
   "column_break_16",
+  "update_stock",
+  "ignore_pricing_rule",
+  "allow_rate_change",
+  "allow_discount_change",
+  "section_break_23",
+  "item_groups",
+  "column_break_25",
   "customer_groups",
   "section_break_16",
   "print_format",
@@ -309,6 +313,7 @@
    "default": "1",
    "fieldname": "update_stock",
    "fieldtype": "Check",
+   "hidden": 1,
    "label": "Update Stock",
    "read_only": 1
   },
@@ -329,13 +334,34 @@
    "fieldname": "auto_add_item_to_cart",
    "fieldtype": "Check",
    "label": "Automatically Add Filtered Item To Cart"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_rate_change",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_discount_change",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Discount"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-20 13:59:28.877572",
+ "modified": "2021-01-06 14:42:41.713864",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

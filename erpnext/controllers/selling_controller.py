@@ -3,7 +3,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint, flt, cstr, comma_or, get_link_to_form
+from frappe.utils import cint, flt, cstr, get_link_to_form, nowtime
 from frappe import _, throw
 from erpnext.stock.get_item_details import get_bin_details
 from erpnext.stock.utils import get_incoming_rate
@@ -49,7 +49,6 @@ class SellingController(StockController):
 		self.set_customer_address()
 		self.validate_for_duplicate_items()
 		self.validate_target_warehouse()
-		self.set_incoming_rate()
 
 	def set_missing_values(self, for_validate=False):
 
@@ -191,7 +190,7 @@ class SellingController(StockController):
 		for it in self.get("items"):
 			if not it.item_code:
 				continue
-			
+
 			last_purchase_rate, is_stock_item = frappe.get_cached_value("Item", it.item_code, ["last_purchase_rate", "is_stock_item"])
 			last_purchase_rate_in_sales_uom = last_purchase_rate * (it.conversion_factor or 1)
 			if flt(it.base_net_rate) < flt(last_purchase_rate_in_sales_uom):
@@ -233,7 +232,7 @@ class SellingController(StockController):
 							'allow_zero_valuation': d.allow_zero_valuation_rate,
 							'sales_invoice_item': d.get("sales_invoice_item"),
 							'dn_detail': d.get("dn_detail"),
-							'incoming_rate': p.incoming_rate
+							'incoming_rate': p.get("incoming_rate")
 						}))
 			else:
 				il.append(frappe._dict({
@@ -252,7 +251,7 @@ class SellingController(StockController):
 					'allow_zero_valuation': d.allow_zero_valuation_rate,
 					'sales_invoice_item': d.get("sales_invoice_item"),
 					'dn_detail': d.get("dn_detail"),
-					'incoming_rate': d.incoming_rate
+					'incoming_rate': d.get("incoming_rate")
 				}))
 		return il
 
@@ -312,7 +311,7 @@ class SellingController(StockController):
 				sales_order.update_reserved_qty(so_item_rows)
 
 	def set_incoming_rate(self):
-		if self.doctype not in ("Delivery Note", "Sales Invoice"):
+		if self.doctype not in ("Delivery Note", "Sales Invoice", "Sales Order"):
 			return
 
 		items = self.get("items") + (self.get("packed_items") or [])
@@ -322,15 +321,26 @@ class SellingController(StockController):
 				d.incoming_rate = get_incoming_rate({
 					"item_code": d.item_code,
 					"warehouse": d.warehouse,
-					"posting_date": self.posting_date,
-					"posting_time": self.posting_time,
-					"qty": -1*flt(d.qty),
-					"serial_no": d.serial_no,
+					"posting_date": self.get('posting_date') or self.get('transaction_date'),
+					"posting_time": self.get('posting_time') or nowtime(),
+					"qty": -1 * flt(d.get('stock_qty') or d.get('actual_qty')),
+					"serial_no": d.get('serial_no'),
 					"company": self.company,
 					"voucher_type": self.doctype,
 					"voucher_no": self.name,
 					"allow_zero_valuation": d.get("allow_zero_valuation")
 				}, raise_error_if_no_rate=False)
+
+				# For internal transfers use incoming rate as the valuation rate
+				if self.is_internal_transfer():
+					rate = flt(d.incoming_rate * d.conversion_factor, d.precision('rate'))
+					if d.rate != rate:
+						d.rate = rate
+						d.discount_percentage = 0
+						d.discount_amount = 0
+						frappe.msgprint(_("Row {0}: Item rate has been updated as per valuation rate since its an internal stock transfer")
+							.format(d.idx), alert=1)
+
 			elif self.get("return_against"):
 				# Get incoming rate of return entry from reference document
 				# based on original item cost as per valuation method
@@ -391,7 +401,7 @@ class SellingController(StockController):
 				})
 				if item_row.warehouse:
 					sle.dependant_sle_voucher_detail_no = item_row.name
-			
+
 		return sle
 
 	def set_po_nos(self, for_validate=False):
@@ -446,9 +456,13 @@ class SellingController(StockController):
 		check_list, chk_dupl_itm = [], []
 		if cint(frappe.db.get_single_value("Selling Settings", "allow_multiple_items")):
 			return
+		if self.doctype == "Sales Invoice" and self.is_consolidated:
+			return
+		if self.doctype == "POS Invoice":
+			return
 
 		for d in self.get('items'):
-			if self.doctype in ["POS Invoice","Sales Invoice"]:
+			if self.doctype == "Sales Invoice":
 				stock_items = [d.item_code, d.description, d.warehouse, d.sales_order or d.delivery_note, d.batch_no or '']
 				non_stock_items = [d.item_code, d.description, d.sales_order or d.delivery_note]
 			elif self.doctype == "Delivery Note":
@@ -459,13 +473,19 @@ class SellingController(StockController):
 				non_stock_items = [d.item_code, d.description]
 
 			if frappe.db.get_value("Item", d.item_code, "is_stock_item") == 1:
+				duplicate_items_msg = _("Item {0} entered multiple times.").format(frappe.bold(d.item_code))
+				duplicate_items_msg += "<br><br>"
+				duplicate_items_msg += _("Please enable {} in {} to allow same item in multiple rows").format(
+					frappe.bold("Allow Item to Be Added Multiple Times in a Transaction"),
+					get_link_to_form("Selling Settings", "Selling Settings")
+				)
 				if stock_items in check_list:
-					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+					frappe.throw(duplicate_items_msg)
 				else:
 					check_list.append(stock_items)
 			else:
 				if non_stock_items in chk_dupl_itm:
-					frappe.throw(_("Note: Item {0} entered multiple times").format(d.item_code))
+					frappe.throw(duplicate_items_msg)
 				else:
 					chk_dupl_itm.append(non_stock_items)
 
