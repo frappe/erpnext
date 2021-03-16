@@ -14,8 +14,15 @@ class VehicleReceipt(VehicleTransactionController):
 
 	def validate(self):
 		super(VehicleReceipt, self).validate()
-
 		self.set_title()
+
+	def before_submit(self):
+		super(VehicleReceipt, self).before_submit()
+		self.validate_supplier_delivery_note()
+
+	def validate_supplier_delivery_note(self):
+		if self.get('supplier') and not self.get('supplier_delivery_note'):
+			frappe.throw(_("Supplier Delivery Note # is mandatory when receiving from Supplier"))
 
 	def on_submit(self):
 		self.update_stock_ledger()

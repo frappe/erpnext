@@ -19,7 +19,7 @@ force_fields = [
 	'customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'address_display',
 	'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
-	'item_name', 'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered'
+	'item_name', 'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered', 'vehicle_color'
 ]
 
 
@@ -58,25 +58,27 @@ class VehicleTransactionController(StockController):
 			self.set_missing_values(for_validate=True)
 
 	def set_missing_values(self, for_validate=False):
+		if self.get('vehicle') and not self.get('vehicle_booking_order'):
+			self.vehicle_booking_order = get_vehicle_booking_order_from_vehicle(self.vehicle)
+
 		if self.get('vehicle_booking_order'):
 			vehicle_booking_order_details = get_vehicle_booking_order_details(self.as_dict())
 			for k, v in vehicle_booking_order_details.items():
 				if not self.get(k) or k in force_fields:
 					self.set(k, v)
 
+		vehicle_details = get_vehicle_details(self.get('vehicle'), get_vehicle_booking_order=False)
+		for k, v in vehicle_details.items():
+			if not self.get(k) or k in force_fields:
+				self.set(k, v)
+
 		customer_details = get_customer_details(self.as_dict())
 		for k, v in customer_details.items():
 			if not self.get(k) or k in force_fields:
 				self.set(k, v)
 
-		self.set_vehicle_details()
-
-	def set_vehicle_details(self):
 		if self.get('item_code'):
 			self.item_name = frappe.get_cached_value("Item", self.item_code, 'item_name')
-
-		if self.get('vehicle'):
-			self.update(get_fetch_values(self.doctype, 'vehicle', self.vehicle))
 
 	def update_stock_ledger(self):
 		qty = 1 if self.doctype == "Vehicle Receipt" else -1
@@ -246,6 +248,41 @@ def get_vehicle_booking_order_details(args):
 		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name', 'supplier', 'bill_no', 'bill_date'], as_dict=1)
 
 	return out
+
+
+@frappe.whitelist()
+def get_vehicle_details(vehicle=None, get_vehicle_booking_order=True, vehicle_booking_order=None):
+	out = frappe._dict()
+
+	vehicle_details = frappe._dict()
+	if vehicle:
+		vehicle_details = frappe.db.get_value("Vehicle", vehicle,
+			['item_code', 'warehouse', 'chassis_no', 'engine_no', 'license_plate', 'unregistered', 'color'], as_dict=1)
+		if not vehicle_details:
+			frappe.throw(_("Vehicle {0} does not exist").format(vehicle))
+
+	if vehicle_details:
+		out.item_code = vehicle_details.item_code
+
+	out.vehicle_chassis_no = vehicle_details.chassis_no
+	out.vehicle_engine_no = vehicle_details.engine_no
+	out.vehicle_license_plate = vehicle_details.license_plate
+	out.vehicle_unregistered = vehicle_details.unregistered
+	out.vehicle_color = vehicle_details.color
+
+	if vehicle_details.warehouse:
+		out.warehouse = vehicle_details.warehouse
+
+	if vehicle and get_vehicle_booking_order and not vehicle_booking_order:
+		vehicle_booking_order = get_vehicle_booking_order_from_vehicle(vehicle)
+		if vehicle_booking_order:
+			out.vehicle_booking_order = vehicle_booking_order
+
+	return out
+
+
+def get_vehicle_booking_order_from_vehicle(vehicle):
+	return frappe.db.get_value("Vehicle Booking Order", {"vehicle": vehicle, "docstatus": 1})
 
 
 @frappe.whitelist()

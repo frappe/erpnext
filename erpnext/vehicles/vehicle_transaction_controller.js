@@ -93,6 +93,10 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		this.get_customer_details();
 	},
 
+	vehicle: function () {
+		this.get_vehicle_details();
+	},
+
 	get_customer_details: function () {
 		var me = this;
 
@@ -136,6 +140,22 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			});
 		}
+	},
+
+	get_vehicle_details: function () {
+		var me = this;
+		frappe.call({
+			method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_details",
+			args: {
+				vehicle: me.frm.doc.vehicle,
+				vehicle_booking_order: me.frm.doc.vehicle_booking_order
+			},
+			callback: function (r) {
+				if (r.message && !r.exc) {
+					me.frm.set_value(r.message);
+				}
+			}
+		});
 	},
 
 	contact_person: function () {

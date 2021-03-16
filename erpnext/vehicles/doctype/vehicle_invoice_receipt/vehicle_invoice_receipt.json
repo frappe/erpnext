@@ -192,7 +192,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "vehicle.chassis_no",
    "fieldname": "vehicle_chassis_no",
    "fieldtype": "Data",
    "label": "Chassis No",
@@ -200,7 +199,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "vehicle.engine_no",
    "fieldname": "vehicle_engine_no",
    "fieldtype": "Data",
    "label": "Engine No",
@@ -212,7 +210,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fetch_from": "vehicle.color",
    "fieldname": "vehicle_color",
    "fieldtype": "Link",
    "label": "Color",
@@ -250,7 +247,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-16 22:58:35.817103",
+ "modified": "2021-03-17 01:06:01.647081",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Receipt",
