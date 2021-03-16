@@ -148,6 +148,14 @@ frappe.ui.form.on('Payment Entry', {
 				filters: filters
 			};
 		});
+
+		frm.set_query("cost_center", function() {
+			return {
+				filters: {
+					"company": frm.doc.company
+				}
+			}
+		});
 	},
 
 	refresh: function(frm) {
