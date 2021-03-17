@@ -971,7 +971,6 @@ def schedule_bulk_generate_irn(docnames):
 	frappe.publish_realtime("bulk_einvoice_generation_complete", { "user": frappe.session.user, "failures": failures, "invoices": docnames })
 
 def show_bulk_action_failure_message(failures):
-	print(failures)
 	for doc in failures:
 		docname = '<a href="app/sales-invoice/{0}">{0}</a>'.format(doc.get('docname'))
 		message = doc.get('message').replace("'", '"')
