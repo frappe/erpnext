@@ -38,6 +38,13 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			me.dialog.get_field('tax_strn').refresh();
 			erpnext.utils.validate_duplicate_tax_id(me.dialog.doc, "tax_strn");
 		};
+
+		me.dialog.fields_dict["mobile_no"].df.onchange = () => {
+			var value = me.dialog.get_value('mobile_no');
+			value = erpnext.utils.get_formatted_mobile_pakistan(value);
+			me.dialog.doc.mobile_no = value;
+			me.dialog.get_field('mobile_no').refresh();
+		};
 	},
 
 	get_variant_fields: function() {
