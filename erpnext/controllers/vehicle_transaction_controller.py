@@ -8,7 +8,6 @@ from frappe.utils import cstr
 from erpnext.controllers.stock_controller import StockController
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
 from erpnext.accounts.party import validate_party_frozen_disabled
-from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display, get_default_address
 from frappe.contacts.doctype.contact.contact import get_default_contact
 import json
@@ -18,7 +17,7 @@ from six import string_types
 force_fields = [
 	'customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'address_display',
 	'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
-	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
+	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone', 'receiver_contact_cnic',
 	'item_name', 'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered', 'vehicle_color'
 ]
 
@@ -298,5 +297,6 @@ def get_contact_details(contact=None, prefix=None):
 	out[prefix + 'contact_mobile'] = contact_details.get('contact_mobile')
 	out[prefix + 'contact_phone'] = contact_details.get('contact_phone')
 	out[prefix + 'contact_email'] = contact_details.get('contact_email')
+	out[prefix + 'contact_cnic'] = contact_details.get('contact_cnic')
 
 	return out

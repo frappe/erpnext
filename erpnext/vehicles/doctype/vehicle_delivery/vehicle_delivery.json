@@ -35,6 +35,7 @@
   "column_break_27",
   "receiver_contact",
   "receiver_contact_display",
+  "receiver_contact_cnic",
   "receiver_contact_email",
   "receiver_contact_mobile",
   "receiver_contact_phone",
@@ -404,12 +405,19 @@
    "fieldtype": "Image",
    "label": "Image Display",
    "options": "image"
+  },
+  {
+   "fieldname": "receiver_contact_cnic",
+   "fieldtype": "Data",
+   "label": "Receiver CNIC",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-17 09:52:59.611719",
+ "modified": "2021-03-17 21:48:38.086610",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",
