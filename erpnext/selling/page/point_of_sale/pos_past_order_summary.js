@@ -201,9 +201,13 @@ erpnext.PointOfSale.PastOrderSummary = class {
 
 		this.$summary_container.on('click', '.print-btn', () => {
 			const frm = this.events.get_frm();
-			frm.doc = this.doc;
-			frm.print_preview.lang_code = frm.doc.language;
-			frm.print_preview.printit(true);
+			frappe.utils.print(
+				frm.doctype,
+				frm.docname,
+				frm.pos_print_format,
+				frm.doc.letter_head,
+				frm.doc.language || frappe.boot.lang
+			)
 		});
 	}
 
