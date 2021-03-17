@@ -32,6 +32,7 @@
   "leave_without_pay",
   "payment_days",
   "column_break_26",
+  "late_days",
   "salary_structure",
   "deduct_tax_for_unclaimed_employee_benefits",
   "deduct_tax_for_unsubmitted_tax_exemption_proof",
@@ -554,13 +555,19 @@
   {
    "fieldname": "col_break_37",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "late_days",
+   "fieldtype": "Float",
+   "label": "Late Days",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 9,
  "is_submittable": 1,
- "modified": "2021-02-11 19:42:42.001809",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2021-03-16 16:39:18.537009",
+ "modified_by": "Administrator",
  "module": "HR",
  "name": "Salary Slip",
  "owner": "Administrator",
