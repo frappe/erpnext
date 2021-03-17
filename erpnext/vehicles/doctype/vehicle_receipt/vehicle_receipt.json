@@ -26,7 +26,13 @@
   "vehicle_booking_order",
   "column_break_17",
   "project",
-  "column_break_18",
+  "transporter_details_section",
+  "transporter",
+  "transporter_name",
+  "col_break_23",
+  "driver",
+  "driver_name",
+  "column_break_23",
   "supplier_delivery_note",
   "vehicle_details_section",
   "item_code",
@@ -297,10 +303,6 @@
    "options": "Project"
   },
   {
-   "fieldname": "column_break_18",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer (User)",
@@ -314,12 +316,54 @@
    "label": "Customer Name",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "transporter",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Transporter",
+   "options": "Supplier"
+  },
+  {
+   "depends_on": "eval:doc.transporter && doc.transporter_name != doc.transporter",
+   "fetch_from": "transporter.supplier_name",
+   "fieldname": "transporter_name",
+   "fieldtype": "Data",
+   "label": "Transporter Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "transporter_details_section",
+   "fieldtype": "Section Break",
+   "label": "Transporter Details"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "col_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "driver",
+   "fieldtype": "Link",
+   "label": "Driver",
+   "options": "Driver"
+  },
+  {
+   "depends_on": "eval:doc.driver && doc.driver_name != doc.driver",
+   "fetch_from": "driver.full_name",
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Driver Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-17 01:06:59.184914",
+ "modified": "2021-03-17 22:05:48.217961",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Receipt",

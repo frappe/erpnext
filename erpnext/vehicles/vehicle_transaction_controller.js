@@ -58,16 +58,54 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				return erpnext.queries.item(filters);
 			});
 		}
+
+		if (this.frm.fields_dict.transporter) {
+			this.frm.set_query('transporter', function () {
+				return {
+					filters: {
+						'is_transporter': 1
+					}
+				}
+			});
+		}
+
+		if (this.frm.fields_dict.driver) {
+			this.frm.set_query('driver', function () {
+				return {
+					filters: {
+						'transporter': me.frm.doc.transporter
+					}
+				}
+			});
+		}
 	},
 
 	setup_route_options: function () {
 		var vehicle_field = this.frm.get_docfield("vehicle");
+		var transporter_field = this.frm.get_docfield("transporter");
+		var driver_field = this.frm.get_docfield("driver");
 
 		if (vehicle_field) {
 			vehicle_field.get_route_options_for_new_doc = () => {
 				return {
 					"item_code": this.frm.doc.item_code,
 					"item_name": this.frm.doc.item_name
+				}
+			};
+		}
+
+		if (transporter_field) {
+			transporter_field.get_route_options_for_new_doc = () => {
+				return {
+					"is_transporter": 1
+				}
+			};
+		}
+
+		if (driver_field) {
+			driver_field.get_route_options_for_new_doc = () => {
+				return {
+					"transporter": this.frm.doc.transporter
 				}
 			};
 		}
