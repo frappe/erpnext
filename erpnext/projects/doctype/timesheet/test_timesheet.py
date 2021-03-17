@@ -49,7 +49,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 0)
 
 	def test_salary_slip_from_timesheet(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 
 		salary_structure = make_salary_structure_for_timesheet(emp)
 		timesheet = make_timesheet(emp, simulate = True, billable=1)
