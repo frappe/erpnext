@@ -473,7 +473,7 @@ class PayrollEntry(Document):
 		filter_cond = self.get_filter_condition()
 
 		salary_slips = frappe.db.sql("""
-			select t1.name, t1.employee, t1.salary_mode, t1.bank_name, t1.bank_account_no, t1.net_pay, t1.rounded_total
+			select t1.name, t1.employee, t1.employee_name, t1.salary_mode, t1.bank_name, t1.bank_account_no, t1.net_pay, t1.rounded_total
 			from `tabSalary Slip` t1
 			where {0} and start_date >= %s and end_date <= %s {1}
 		""".format(docstatus_cond, filter_cond), (self.start_date, self.end_date), as_dict=True)
@@ -498,6 +498,7 @@ class PayrollEntry(Document):
 
 			bank_employee_map[bank_name].employees.append({
 				'employee': d.employee,
+				'employee_name': d.employee_name,
 				'rounded_total': d.rounded_total,
 				'bank_account_no': d.bank_account_no
 			})
