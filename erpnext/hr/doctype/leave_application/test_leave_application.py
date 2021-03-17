@@ -50,7 +50,13 @@ _test_records = [
 
 class TestLeaveApplication(unittest.TestCase):
 	def setUp(self):
-		for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Leave Ledger Entry"]:
+		for dt in (
+			"Leave Application",
+			"Leave Allocation",
+			"Salary Slip",
+			"Leave Ledger Entry",
+			"Leave Period"
+		):
 			frappe.db.sql("DELETE FROM `tab%s`" % dt) #nosec
 
 	@classmethod
@@ -65,7 +71,7 @@ class TestLeaveApplication(unittest.TestCase):
 			("test@example.com", "test1@example.com", "test2@example.com")""")
 
 	def _clear_applications(self):
-		frappe.db.sql("""delete from `tabLeave Application`""")
+		frappe.db.sql("delete from `tabLeave Application`")
 
 	def get_application(self, doc):
 		application = frappe.copy_doc(doc)
@@ -117,7 +123,7 @@ class TestLeaveApplication(unittest.TestCase):
 		frappe.set_user("test@example.com")
 
 		# clear other applications
-		frappe.db.sql("delete from `tabLeave Application`")
+		self._clear_applications()
 
 		application = self.get_application(_test_records[0])
 		self.assertTrue(application.insert())
@@ -411,11 +417,7 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, nowdate(), add_days(nowdate(), 8)), 21)
 
 	def test_earned_leaves_creation(self):
-
-		frappe.db.sql('''delete from `tabLeave Period`''')
-		frappe.db.sql('''delete from `tabLeave Policy Assignment`''')
-		frappe.db.sql('''delete from `tabLeave Allocation`''')
-		frappe.db.sql('''delete from `tabLeave Ledger Entry`''')
+		frappe.db.sql('delete from `tabLeave Policy Assignment`')
 
 		leave_period = get_leave_period()
 		employee = get_employee()
