@@ -65,5 +65,41 @@ frappe.query_reports["Cost of Poor Quality Report"] = {
 			fieldtype: "Link",
 			options: "Workstation"
 		},
+		{
+			label: __("Item"),
+			fieldname: "production_item",
+			fieldtype: "Link",
+			options: "Item"
+		},
+		{
+			label: __("Serial No"),
+			fieldname: "serial_no",
+			fieldtype: "Link",
+			options: "Serial No",
+			depends_on: "eval: doc.production_item",
+			get_query: function() {
+				var item_code = frappe.query_report.get_filter_value('production_item');
+				return {
+					filters: {
+						item_code: item_code
+					}
+				}
+			}
+		},
+		{
+			label: __("Batch No"),
+			fieldname: "batch_no",
+			fieldtype: "Link",
+			options: "Batch No",
+			depends_on: "eval: doc.production_item",
+			get_query: function() {
+				var item_code = frappe.query_report.get_filter_value('production_item');
+				return {
+					filters: {
+						item: item_code
+					}
+				}
+			}
+		},
 	]
 };

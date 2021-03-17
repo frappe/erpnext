@@ -27,6 +27,7 @@
   "overproduction_percentage_for_work_order",
   "other_settings_section",
   "update_bom_costs_automatically",
+  "add_corrective_operation_cost_in_finished_good_valuation",
   "column_break_23",
   "make_serial_no_batch_from_work_order"
  ],
@@ -168,13 +169,19 @@
    "fieldname": "make_serial_no_batch_from_work_order",
    "fieldtype": "Check",
    "label": "Make Serial No / Batch from Work Order"
+  },
+  {
+   "default": "0",
+   "fieldname": "add_corrective_operation_cost_in_finished_good_valuation",
+   "fieldtype": "Check",
+   "label": "Add Corrective Operation Cost in Finished Good Valuation"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-12-08 13:37:40.325838",
+ "modified": "2021-03-16 15:54:38.967341",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

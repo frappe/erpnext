@@ -1097,7 +1097,8 @@ class StockEntry(StockController):
 
 	def set_batchwise_finished_goods(self, args, item):
 		qty = flt(self.fg_completed_qty)
-		filters = {"reference_name": self.pro_doc.name,
+		filters = {
+			"reference_name": self.pro_doc.name,
 			"reference_doctype": self.pro_doc.doctype,
 			"qty_to_produce": (">", 0)
 		}
@@ -1106,7 +1107,8 @@ class StockEntry(StockController):
 
 		for row in frappe.get_all("Batch", filters = filters, fields = fields, order_by="creation asc"):
 			batch_qty = flt(row.qty) - flt(row.produced_qty)
-			if not batch_qty: continue
+			if not batch_qty:
+				continue
 
 			if qty <=0:
 				break
@@ -1700,6 +1702,10 @@ def get_operating_cost_per_unit(work_order=None, bom_no=None):
 		bom = frappe.db.get_value("BOM", bom_no, ["operating_cost", "quantity"], as_dict=1)
 		if bom.quantity:
 			operating_cost_per_unit = flt(bom.operating_cost) / flt(bom.quantity)
+
+	if work_order and work_order.produced_qty and cint(frappe.db.get_single_value('Manufacturing Settings',
+		'add_corrective_operation_cost_in_finished_good_valuation')):
+		operating_cost_per_unit += flt(work_order.corrective_operation_cost) / flt(work_order.produced_qty)
 
 	return operating_cost_per_unit
 

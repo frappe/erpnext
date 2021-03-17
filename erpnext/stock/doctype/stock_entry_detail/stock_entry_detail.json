@@ -18,6 +18,7 @@
   "col_break2",
   "is_finished_item",
   "is_scrap_item",
+  "quality_inspection",
   "subcontracted_item",
   "section_break_8",
   "description",
@@ -69,7 +70,6 @@
   "putaway_rule",
   "column_break_51",
   "reference_purchase_receipt",
-  "quality_inspection",
   "job_card_item"
  ],
  "fields": [
@@ -548,7 +548,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-11 13:47:50.158754",
+ "modified": "2021-04-22 20:08:23.799715",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

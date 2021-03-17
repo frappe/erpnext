@@ -42,7 +42,7 @@ frappe.ui.form.on('Job Card', {
 		}
 
 		if (frm.doc.docstatus == 1 && !frm.doc.is_corrective_job_card) {
-			frm.trigger('setup_corrective_job_card')
+			frm.trigger('setup_corrective_job_card');
 		}
 
 		frm.set_query("quality_inspection", function() {
@@ -71,15 +71,27 @@ frappe.ui.form.on('Job Card', {
 			let fields = [
 				{
 					fieldtype: 'Link', label: __('Corrective Operation'), options: 'Operation',
-					fieldname: 'operation', get_query() { return { filters: { "is_corrective_operation": 1 }}}
+					fieldname: 'operation', get_query() {
+						return {
+							filters: {
+								"is_corrective_operation": 1
+							}
+						};
+					}
 				}, {
 					fieldtype: 'Link', label: __('For Operation'), options: 'Operation',
-					fieldname: 'for_operation', get_query() { return { filters: { "name": ["in", operations] }}}
+					fieldname: 'for_operation', get_query() {
+						return {
+							filters: {
+								"name": ["in", operations]
+							}
+						};
+					}
 				}
 			];
 
 			frappe.prompt(fields, d => {
-					frm.events.make_corrective_job_card(frm, d.operation, d.for_operation);
+				frm.events.make_corrective_job_card(frm, d.operation, d.for_operation);
 			}, __("Select Corrective Operation"));
 		}, __('Make'));
 	},
@@ -152,14 +164,18 @@ frappe.ui.form.on('Job Card', {
 
 		if (!frm.doc.started_time && !frm.doc.current_time) {
 			frm.add_custom_button(__("Start Job"), () => {
-				frappe.prompt({fieldtype: 'Table MultiSelect', label: __('Select Employees'),
-					options: "Job Card Time Log", fieldname: 'employees'}, d => {
+				if ((frm.doc.employee && !frm.doc.employee.length) || !frm.doc.employee) {
+					frappe.prompt({fieldtype: 'Table MultiSelect', label: __('Select Employees'),
+						options: "Job Card Time Log", fieldname: 'employees'}, d => {
 						frm.events.start_job(frm, "Work In Progress", d.employees);
-				}, __("Assign Job to Employee"));
+					}, __("Assign Job to Employee"));
+				} else {
+					frm.events.start_job(frm, "Work In Progress", frm.doc.employee);
+				}
 			}).addClass("btn-primary");
 		} else if (frm.doc.status == "On Hold") {
 			frm.add_custom_button(__("Resume Job"), () => {
-				frm.events.start_job(frm, "Resume Job");
+				frm.events.start_job(frm, "Resume Job", frm.doc.employee);
 			}).addClass("btn-primary");
 		} else {
 			frm.add_custom_button(__("Pause Job"), () => {
@@ -167,10 +183,26 @@ frappe.ui.form.on('Job Card', {
 			});
 
 			frm.add_custom_button(__("Complete Job"), () => {
-				frappe.prompt({fieldtype: 'Float', label: __('Completed Quantity'),
-					fieldname: 'qty', default: frm.doc.for_quantity}, data => {
+				var sub_operations = frm.doc.sub_operations;
+
+				let set_qty = true;
+				if (sub_operations && sub_operations.length > 1) {
+					set_qty = false;
+					let last_op_row = sub_operations[sub_operations.length - 2];
+
+					if (last_op_row.status == 'Complete') {
+						set_qty = true;
+					}
+				}
+
+				if (set_qty) {
+					frappe.prompt({fieldtype: 'Float', label: __('Completed Quantity'),
+						fieldname: 'qty', default: frm.doc.for_quantity}, data => {
 						frm.events.complete_job(frm, "Complete", data.qty);
 					}, __("Enter Value"));
+				} else {
+					frm.events.complete_job(frm, "Complete", 0.0);
+				}
 			}).addClass("btn-primary");
 		}
 	},
@@ -204,11 +236,11 @@ frappe.ui.form.on('Job Card', {
 				args: args
 			},
 			freeze: true,
-			callback: function (r) {
+			callback: function () {
 				frm.reload_doc();
 				frm.trigger("make_dashboard");
 			}
-		})
+		});
 	},
 
 	update_sub_operation: function(frm, args) {

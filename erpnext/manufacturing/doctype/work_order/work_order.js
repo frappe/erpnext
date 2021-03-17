@@ -189,35 +189,41 @@ frappe.ui.form.on("Work Order", {
 		const dialog = frappe.prompt({fieldname: 'operations', fieldtype: 'Table', label: __('Operations'),
 			fields: [
 				{
-					fieldtype:'Link',
-					fieldname:'operation',
+					fieldtype: 'Link',
+					fieldname: 'operation',
 					label: __('Operation'),
-					read_only:1,
-					in_list_view:1
+					read_only: 1,
+					in_list_view: 1
 				},
 				{
-					fieldtype:'Link',
-					fieldname:'workstation',
+					fieldtype: 'Link',
+					fieldname: 'workstation',
 					label: __('Workstation'),
-					read_only:1,
-					in_list_view:1
+					read_only: 1,
+					in_list_view: 1
 				},
 				{
-					fieldtype:'Data',
-					fieldname:'name',
+					fieldtype: 'Data',
+					fieldname: 'name',
 					label: __('Operation Id')
 				},
 				{
-					fieldtype:'Float',
-					fieldname:'pending_qty',
+					fieldtype: 'Float',
+					fieldname: 'pending_qty',
 					label: __('Pending Qty'),
 				},
 				{
-					fieldtype:'Float',
-					fieldname:'qty',
+					fieldtype: 'Float',
+					fieldname: 'qty',
 					label: __('Quantity to Manufacture'),
-					read_only:0,
-					in_list_view:1,
+					read_only: 0,
+					in_list_view: 1,
+				},
+				{
+					fieldtype: 'Float',
+					fieldname: 'batch_size',
+					label: __('Batch Size'),
+					read_only: 1
 				},
 			],
 			data: operations_data,
@@ -228,9 +234,13 @@ frappe.ui.form.on("Work Order", {
 		}, function(data) {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.make_job_card",
+				freeze: true,
 				args: {
 					work_order: frm.doc.name,
 					operations: data.operations,
+				},
+				callback: function() {
+					frm.reload_doc();
 				}
 			});
 		}, __("Job Card"), __("Create"));
@@ -247,6 +257,7 @@ frappe.ui.form.on("Work Order", {
 						'name': data.name,
 						'operation': data.operation,
 						'workstation': data.workstation,
+						'batch_size': data.batch_size,
 						'qty': pending_qty,
 						'pending_qty': pending_qty
 					});
