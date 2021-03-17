@@ -145,8 +145,7 @@ class TestTimesheet(unittest.TestCase):
 def make_salary_structure_for_timesheet(employee):
 	salary_structure_name = "Timesheet Salary Structure Test"
 	frequency = "Monthly"
-
-	salary_structure = make_salary_structure(salary_structure_name, frequency, dont_submit=True)
+	salary_structure = make_salary_structure(salary_structure_name, frequency, dont_submit=True, required_for_test=True)
 	salary_structure.salary_component = "Timesheet Component"
 	salary_structure.salary_slip_based_on_timesheet = 1
 	salary_structure.hour_rate = 50.0

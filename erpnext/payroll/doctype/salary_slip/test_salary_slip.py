@@ -542,7 +542,7 @@ def create_account(account_name, company, parent_account):
 		}).insert()
 	return account
 
-def make_earning_salary_component(setup=False, test_tax=False, company_list=None):
+def make_earning_salary_component(setup=False, test_tax=False, company_list=None, required_for_test=False):
 	data = [
 		{
 			"salary_component": 'Basic Salary',
@@ -597,7 +597,7 @@ def make_earning_salary_component(setup=False, test_tax=False, company_list=None
 				"type": "Earning"
 			}
 		])
-	if setup or test_tax:
+	if setup or test_tax or required_for_test:
 		make_salary_component(data, test_tax, company_list)
 	data.append({
 		"salary_component": 'Basic Salary',
@@ -609,7 +609,7 @@ def make_earning_salary_component(setup=False, test_tax=False, company_list=None
 	})
 	return data
 
-def make_deduction_salary_component(setup=False, test_tax=False, company_list=None):
+def make_deduction_salary_component(setup=False, test_tax=False, company_list=None, required_for_test=False):
 	data =  [
 		{
 			"salary_component": 'Professional Tax',
@@ -637,7 +637,7 @@ def make_deduction_salary_component(setup=False, test_tax=False, company_list=No
 			"variable_based_on_taxable_salary": 1,
 			"round_to_the_nearest_integer": 1
 		})
-	if setup or test_tax:
+	if setup or test_tax or required_for_test:
 		make_salary_component(data, test_tax, company_list)
 
 	return data

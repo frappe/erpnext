@@ -114,7 +114,7 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(sal_struct.currency, 'USD')
 
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
-	test_tax=False, company=None, currency=erpnext.get_default_currency(), payroll_period=None):
+	test_tax=False, company=None, currency=erpnext.get_default_currency(), payroll_period=None, required_for_test=False):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 
@@ -123,8 +123,8 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 			"doctype": "Salary Structure",
 			"name": salary_structure,
 			"company": company or erpnext.get_default_company(),
-			"earnings": make_earning_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
-			"deductions": make_deduction_salary_component(test_tax=test_tax, company_list=["_Test Company"]),
+			"earnings": make_earning_salary_component(test_tax=test_tax, company_list=["_Test Company"], required_for_test=required_for_test),
+			"deductions": make_deduction_salary_component(test_tax=test_tax, company_list=["_Test Company"], required_for_test=required_for_test),
 			"payroll_frequency": payroll_frequency,
 			"payment_account": get_random("Account", filters={'account_currency': currency}),
 			"currency": currency
