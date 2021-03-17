@@ -188,6 +188,25 @@ class SalarySlip(TransactionBase):
 
 		make_salary_slip(self._salary_structure_doc.name, self)
 
+	def calculate_late_days(self, holidays):
+		late_days = 0
+
+		holidays = "','".join(holidays)
+		late_days = frappe.db.sql("""
+			SELECT count(t1.name)
+			FROM `tabAttendance` as t1
+			WHERE t1.docstatus = 1
+				AND t1.status = 'Present'
+				AND t1.late_entry = 1
+				AND ifnull(leave_application, '') = ''
+				AND employee = %(employee)s
+				AND attendance_date between %(st_dt)s AND %(end_dt)s
+				AND attendance_date not in ({0})
+			""".format(holidays), {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
+
+		late_days = flt(late_days[0][0]) if late_days else 0
+		return late_days
+
 	def get_leave_details(self, joining_date=None, relieving_date=None, lwp=None, for_preview=0):
 		if not joining_date:
 			joining_date, relieving_date = frappe.get_cached_value("Employee", self.employee,
@@ -201,14 +220,22 @@ class SalarySlip(TransactionBase):
 
 		holidays = self.get_holidays_for_employee(self.start_date, self.end_date)
 		actual_lwp = self.calculate_lwp(holidays, working_days)
+		self.late_days = self.calculate_late_days(holidays) # get late days
+		no_of_late_days_as_lwp = frappe.db.get_value("HR Settings", None, "no_of_late_days")
+		if no_of_late_days_as_lwp:
+			late_lwp = self.late_days // int(no_of_late_days_as_lwp)
+		else:
+			late_lwp = 0
+		lwp_with_late = actual_lwp + late_lwp
+
 		if not cint(frappe.db.get_value("HR Settings", None, "include_holidays_in_total_working_days")):
 			working_days -= len(holidays)
 			if working_days < 0:
 				frappe.throw(_("There are more holidays than working days this month."))
 
 		if not lwp:
-			lwp = actual_lwp
-		elif lwp != actual_lwp:
+			lwp = lwp_with_late
+		elif lwp != lwp_with_late:
 			frappe.msgprint(_("Leave Without Pay does not match with approved Leave Application records"))
 
 		self.total_working_days = working_days

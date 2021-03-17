@@ -20,6 +20,7 @@
   "email_salary_slip_to_employee",
   "encrypt_salary_slips_in_emails",
   "consider_lwp_as_deduction",
+  "no_of_late_days",
   "password_policy",
   "leave_settings",
   "leave_approval_notification_template",
@@ -183,13 +184,18 @@
    "fieldname": "consider_lwp_as_deduction",
    "fieldtype": "Check",
    "label": "Consider LWP as Deduction"
+  },
+  {
+   "fieldname": "no_of_late_days",
+   "fieldtype": "Int",
+   "label": "Consider Number of Late Days as LWP"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
- "modified": "2020-12-22 15:27:40.841164",
- "modified_by": "furqan.790@outlook.com",
+ "modified": "2021-03-16 20:19:28.994519",
+ "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
  "owner": "Administrator",

@@ -210,11 +210,48 @@ class PayrollEntry(Document):
 
 	def submit_salary_slips(self):
 		self.check_permission('write')
-		ss_list = self.get_sal_slip_list(ss_status=0)
+		ss_list = self.get_sal_slip_list(0, as_dict=True)
 		if len(ss_list) > 30:
-			frappe.enqueue(submit_salary_slips_for_employees, timeout=600, payroll_entry=self, salary_slips=ss_list)
+			self.queue_action('_submit_salary_slips', timeout=600, sal_slips=ss_list)
 		else:
-			submit_salary_slips_for_employees(self, ss_list, publish_progress=False)
+			self._submit_salary_slips(ss_list, publish_progress=False)
+			frappe.msgprint(_("Submitted Salary Slips Successfully"))
+
+	def _submit_salary_slips(self, sal_slips, publish_progress=True):
+		self.check_permission('write')
+		submitted_ss = []
+		not_submitted_ss = []
+		frappe.flags.via_payroll_entry = True
+
+		for count, ss in enumerate(sal_slips):
+			ss_obj = frappe.get_doc("Salary Slip", ss.name)
+			if ss_obj.net_pay < 0:
+				not_submitted_ss.append(ss.name)
+			else:
+				try:
+					ss_obj.submit()
+					submitted_ss.append(ss_obj)
+				except frappe.ValidationError:
+					not_submitted_ss.append(ss.name)
+			if publish_progress:
+				frappe.publish_progress((count + 1) * 100 / len(sal_slips), title=_("Submitting Salary Slips..."))
+
+		if submitted_ss:
+			self.make_accrual_jv_entry()
+			frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
+				.format(self.get_formatted('start_date'), self.get_formatted('end_date')))
+
+			self.email_salary_slip(submitted_ss)
+
+			self.db_set("salary_slips_submitted", 1)
+			self.notify_update()
+
+		if not submitted_ss and not not_submitted_ss:
+			frappe.msgprint(
+				_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
+
+		if not_submitted_ss:
+			frappe.msgprint(_("Could not submit some Salary Slips"))
 
 	def email_salary_slip(self, submitted_ss):
 		if frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee"):
@@ -388,7 +425,7 @@ class PayrollEntry(Document):
 
 			payable_amount_rounded = flt(payable_amount_rounded, precision)
 			payable_amount = flt(payable_amount, precision)
-			round_off_amount = flt(payable_amount - payable_amount_rounded, precision)
+			round_off_amount = flt(payable_amount_rounded - payable_amount, precision)
 
 			accounts.append({
 				"account": default_payroll_payable_account,
@@ -400,8 +437,8 @@ class PayrollEntry(Document):
 			if round_off_amount:
 				accounts.append({
 					"account": round_off_account,
-					"debit_in_account_currency": round_off_amount if round_off_amount < 0 else 0,
-					"credit_in_account_currency": round_off_amount if round_off_amount >= 0 else 0,
+					"debit_in_account_currency": round_off_amount if round_off_amount > 0 else 0,
+					"credit_in_account_currency": round_off_amount if round_off_amount < 0 else 0,
 					"cost_center": self.cost_center or round_off_cost_center,
 				})
 
@@ -436,7 +473,7 @@ class PayrollEntry(Document):
 		filter_cond = self.get_filter_condition()
 
 		salary_slips = frappe.db.sql("""
-			select t1.name, t1.employee, t1.salary_mode, t1.bank_name, t1.bank_account_no, t1.net_pay, t1.rounded_total
+			select t1.name, t1.employee, t1.employee_name, t1.salary_mode, t1.bank_name, t1.bank_account_no, t1.net_pay, t1.rounded_total
 			from `tabSalary Slip` t1
 			where {0} and start_date >= %s and end_date <= %s {1}
 		""".format(docstatus_cond, filter_cond), (self.start_date, self.end_date), as_dict=True)
@@ -461,6 +498,7 @@ class PayrollEntry(Document):
 
 			bank_employee_map[bank_name].employees.append({
 				'employee': d.employee,
+				'employee_name': d.employee_name,
 				'rounded_total': d.rounded_total,
 				'bank_account_no': d.bank_account_no
 			})
@@ -657,42 +695,6 @@ def get_month_details(year, month):
 	else:
 		frappe.throw(_("Fiscal Year {0} not found").format(year))
 
-
-def submit_salary_slips_for_employees(payroll_entry, salary_slips, publish_progress=True):
-	submitted_ss = []
-	not_submitted_ss = []
-	frappe.flags.via_payroll_entry = True
-
-	count = 0
-	for ss in salary_slips:
-		ss_obj = frappe.get_doc("Salary Slip",ss[0])
-		if ss_obj.net_pay<0:
-			not_submitted_ss.append(ss[0])
-		else:
-			try:
-				ss_obj.submit()
-				submitted_ss.append(ss_obj)
-			except frappe.ValidationError:
-				not_submitted_ss.append(ss[0])
-
-		count += 1
-		if publish_progress:
-			frappe.publish_progress(count*100/len(salary_slips), title = _("Submitting Salary Slips..."))
-	if submitted_ss:
-		payroll_entry.make_accrual_jv_entry()
-		frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
-			.format(ss_obj.start_date, ss_obj.end_date))
-
-		payroll_entry.email_salary_slip(submitted_ss)
-
-		payroll_entry.db_set("salary_slips_submitted", 1)
-		payroll_entry.notify_update()
-
-	if not submitted_ss and not not_submitted_ss:
-		frappe.msgprint(_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
-
-	if not_submitted_ss:
-		frappe.msgprint(_("Could not submit some Salary Slips"))
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
