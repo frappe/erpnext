@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub, unscrub
 from frappe.utils import cint, cstr
-from erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order import get_booking_payments
+from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import get_booking_payments
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
 from frappe.desk.query_report import group_report_data
 

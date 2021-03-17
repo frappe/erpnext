@@ -92,14 +92,14 @@ class AccountsController(TransactionBase):
 
 	def ensure_supplier_is_not_blocked(self):
 		is_supplier_payment = self.doctype == 'Payment Entry' and self.party_type == 'Supplier'
-		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order']
+		is_buying_invoice = self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order', 'Vehicle Receipt']
 		supplier = None
 		supplier_name = None
 
 		if is_buying_invoice or is_supplier_payment:
 			supplier_name = self.supplier if is_buying_invoice else self.party
 			supplier = frappe.get_doc('Supplier', supplier_name)
-		elif self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order']:
+		elif self.doctype in ['Purchase Invoice', 'Purchase Order', 'Vehicle Booking Order', 'Vehicle Receipt']:
 			supplier_name = self.supplier
 			is_buying_invoice = True
 		elif self.doctype == 'Landed Cost Voucher' and self.party_type == 'Supplier':
@@ -644,12 +644,7 @@ class AccountsController(TransactionBase):
 			party_type = self.party_type
 			party = self.party
 
-		if self.get('vehicle_booking_order'):
-			order_doctype = "Vehicle Booking Order"
-			order_field = None
-			order_list = [self.get('vehicle_booking_order')]
-			include_unallocated = False
-		elif order_field:
+		if order_field:
 			order_list = list(set([d.get(order_field) for d in self.get("items") if d.get(order_field)]))
 		else:
 			order_list = []
@@ -675,12 +670,9 @@ class AccountsController(TransactionBase):
 		return is_inclusive
 
 	def validate_advance_entries(self):
-		if self.get('vehicle_booking_order'):
-			order_list = [self.get('vehicle_booking_order')]
-		else:
-			order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
-			order_list = list(set([d.get(order_field)
-				for d in self.get("items") if d.get(order_field)]))
+		order_field = "sales_order" if self.doctype == "Sales Invoice" else "purchase_order"
+		order_list = list(set([d.get(order_field)
+			for d in self.get("items") if d.get(order_field)]))
 
 		if not order_list: return
 
@@ -971,7 +963,12 @@ class AccountsController(TransactionBase):
 				# from creating a sales invoice if sales order is already created
 
 	def clean_remarks(self):
-		for f in ['remarks', 'remark', 'user_remark', 'user_remarks', 'cheque_no', 'reference_no']:
+		fields = [
+			'remarks', 'remark', 'user_remark', 'user_remarks',
+			'cheque_no', 'reference_no',
+			'po_no', 'supplier_delivery_note'
+		]
+		for f in fields:
 			if self.meta.has_field(f):
 				self.set(f, clean_whitespace(self.get(f)))
 
@@ -1407,26 +1404,6 @@ class AccountsController(TransactionBase):
 			if validate_zero_outstanding and self.outstanding_amount != 0:
 				frappe.throw(_("Outstanding Amount must be 0 for Transaction Type {0}")
 					.format(frappe.bold(self.get('transaction_type'))))
-
-	def update_vehicle_booking_order(self):
-		if self.vehicle_booking_order:
-			vbo = frappe.get_doc("Vehicle Booking Order", self.vehicle_booking_order)
-
-			if vbo.docstatus != 1:
-				frappe.throw(_("Vehicle Booking Order"))
-
-			grand_total = self.rounded_total or self.grand_total
-			if grand_total != vbo.invoice_total:
-				frappe.throw(_("Grand Total must be the same as Invoice Total {0} in Vehicle Booking Order")
-					.format(vbo.get_formatted('invoice_total')))
-
-			if self.doctype in ('Purchase Receipt', 'Delivery Note'):
-				vbo.update_delivery_status(update=True)
-			elif self.doctype in ('Purchase Invoice', 'Sales Invoice'):
-				vbo.update_invoice_status(update=True)
-
-			vbo.set_status(update=True)
-			vbo.notify_update()
 
 
 @frappe.whitelist()

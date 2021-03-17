@@ -16,7 +16,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
-from erpnext.selling.doctype.vehicle_allocation.vehicle_allocation import get_allocation_title
+from erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation import get_allocation_title
 from erpnext.accounts.doctype.transaction_type.transaction_type import get_transaction_type_defaults
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
@@ -413,77 +413,100 @@ class VehicleBookingOrder(AccountsController):
 			})
 
 	def update_delivery_status(self, update=False):
-		purchase_receipt = None
-		delivery_note = None
+		vehicle_receipt = None
+		vehicle_delivery = None
 
 		if self.docstatus != 0:
-			purchase_receipt = frappe.db.get_all("Purchase Receipt", {"vehicle_booking_order": self.name, "docstatus": 1},
-				['name', 'posting_date', 'supplier_delivery_note'])
-			delivery_note = frappe.db.get_all("Delivery Note", {"vehicle_booking_order": self.name, "docstatus": 1},
+			vehicle_receipt = self.get_vehicle_receipts()
+
+			vehicle_delivery = frappe.db.get_all("Vehicle Delivery", {"vehicle_booking_order": self.name, "docstatus": 1},
 				['name', 'posting_date'])
 
-			if len(purchase_receipt) > 1:
-				frappe.throw(_("Purchase Receipt already exists against Vehicle Booking Order"))
-			if len(delivery_note) > 1:
-				frappe.throw(_("Delivery Note already exists against Vehicle Booking Order"))
+			if len(vehicle_receipt) > 1:
+				frappe.throw(_("Vehicle Receipt already exists against Vehicle Booking Order"))
+			if len(vehicle_delivery) > 1:
+				frappe.throw(_("Vehicle Delivery already exists against Vehicle Booking Order"))
 
-		purchase_receipt = purchase_receipt[0] if purchase_receipt else frappe._dict()
-		delivery_note = delivery_note[0] if delivery_note else frappe._dict()
+		vehicle_receipt = vehicle_receipt[0] if vehicle_receipt else frappe._dict()
+		vehicle_delivery = vehicle_delivery[0] if vehicle_delivery else frappe._dict()
 
-		if purchase_receipt and not purchase_receipt.supplier_delivery_note:
-			frappe.throw(_("Supplier Delivery Note is mandatory for Purchase receipt against Vehicle Booking Order"))
+		if vehicle_receipt and not vehicle_receipt.supplier_delivery_note:
+			frappe.throw(_("Supplier Delivery Note is mandatory for Vehicle Receipt against Vehicle Booking Order"))
 
-		self.vehicle_received_date = purchase_receipt.posting_date
-		self.vehicle_delivered_date = delivery_note.posting_date
-		self.supplier_delivery_note = purchase_receipt.supplier_delivery_note
+		# open stock
+		if vehicle_receipt and not vehicle_receipt.vehicle_booking_order:
+			self.vehicle_receipt = vehicle_receipt.name
+		else:
+			self.vehicle_receipt = None
 
-		if not purchase_receipt:
+		self.vehicle_received_date = vehicle_receipt.posting_date
+		self.vehicle_delivered_date = vehicle_delivery.posting_date
+		self.supplier_delivery_note = vehicle_receipt.supplier_delivery_note
+
+		if not vehicle_receipt:
 			self.delivery_status = "To Receive"
-		elif not delivery_note:
+		elif not vehicle_delivery:
 			self.delivery_status = "To Deliver"
 		else:
 			self.delivery_status = "Delivered"
 
 		if update:
 			self.db_set({
+				"vehicle_receipt": self.vehicle_receipt,
 				"vehicle_received_date": self.vehicle_received_date,
 				"vehicle_delivered_date": self.vehicle_delivered_date,
 				"supplier_delivery_note": self.supplier_delivery_note,
 				"delivery_status": self.delivery_status
 			})
 
+	def get_vehicle_receipts(self):
+		fields = ['name', 'posting_date', 'supplier_delivery_note', 'supplier', 'vehicle_booking_order']
+
+		vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle_booking_order": self.name, "docstatus": 1}, fields)
+
+		# open stock
+		if not vehicle_receipts and self.vehicle:
+			vehicle_receipts = frappe.db.get_all("Vehicle Receipt", {"vehicle": self.vehicle, "docstatus": 1}, fields,
+				order_by='timestamp(posting_date, posting_time) asc', limit=1)
+
+		return vehicle_receipts
+
 	def update_invoice_status(self, update=False):
-		purchase_invoice = None
-		sales_invoice = None
+		vehicle_invoice_receipt = None
+		vehicle_invoice_delivery = None
 
 		if self.docstatus != 0:
-			purchase_invoice = frappe.db.get_all("Purchase Invoice", {"vehicle_booking_order": self.name, "docstatus": 1},
+			vehicle_invoice_receipt = frappe.db.get_all("Vehicle Invoice Receipt", {"vehicle_booking_order": self.name, "docstatus": 1},
 				['name', 'posting_date', 'bill_no', 'bill_date'])
-			sales_invoice = frappe.db.get_all("Sales Invoice", {"vehicle_booking_order": self.name, "docstatus": 1},
+			vehicle_invoice_delivery = frappe.db.get_all("Vehicle Invoice Delivery", {"vehicle_booking_order": self.name, "docstatus": 1},
 				['name', 'posting_date'])
 
-			if len(purchase_invoice) > 1:
-				frappe.throw(_("Purchase Invoice already exists against Vehicle Booking Order"))
-			if len(sales_invoice) > 1:
-				frappe.throw(_("Sales Invoice already exists against Vehicle Booking Order"))
+			if len(vehicle_invoice_receipt) > 1:
+				frappe.throw(_("Vehicle Invoice Receipt already exists against Vehicle Booking Order"))
+			if len(vehicle_invoice_delivery) > 1:
+				frappe.throw(_("Vehicle Invoice Delivery already exists against Vehicle Booking Order"))
 
-			if sales_invoice and not purchase_invoice:
-				frappe.throw(_("Cannot make Sales Invoice against Vehicle Booking Order before making Purchase Invoice"))
+			if vehicle_invoice_delivery and not vehicle_invoice_receipt:
+				frappe.throw(_("Cannot make Vehicle Invoice Delivery against Vehicle Booking Order before making Vehicle Invoice Receipt"))
 
-		purchase_invoice = purchase_invoice[0] if purchase_invoice else frappe._dict()
-		sales_invoice = sales_invoice[0] if sales_invoice else frappe._dict()
+		vehicle_invoice_receipt = vehicle_invoice_receipt[0] if vehicle_invoice_receipt else frappe._dict()
+		vehicle_invoice_delivery = vehicle_invoice_delivery[0] if vehicle_invoice_delivery else frappe._dict()
 
-		if purchase_invoice and (not purchase_invoice.bill_no or not purchase_invoice.bill_date):
-			frappe.throw(_("Supplier Invoice No and Supplier Invoice Date is mandatory for Purchase Invoice against Vehicle Booking Order"))
+		if vehicle_invoice_receipt and (not vehicle_invoice_receipt.bill_no or not vehicle_invoice_receipt.bill_date):
+			frappe.throw(_("Invoice No and Invoice Date is mandatory for Vehicle Invoice Receipt against Vehicle Booking Order"))
 
-		self.invoice_received_date = purchase_invoice.posting_date
-		self.invoice_delivered_date = sales_invoice.posting_date
-		self.bill_no = purchase_invoice.bill_no
-		self.bill_date = purchase_invoice.bill_date
+		self.invoice_received_date = vehicle_invoice_receipt.posting_date
+		self.invoice_delivered_date = vehicle_invoice_delivery.posting_date
+		self.bill_no = vehicle_invoice_receipt.bill_no
+		self.bill_date = vehicle_invoice_receipt.bill_date
 
-		if not purchase_invoice:
+		if self.invoice_received_date and self.invoice_delivered_date:
+			if getdate(self.invoice_delivered_date) < getdate(self.invoice_received_date):
+				frappe.throw(_("Invoice Delivered Date cannot be before Invoice Received Date"))
+
+		if not vehicle_invoice_receipt:
 			self.invoice_status = "To Receive"
-		elif not sales_invoice:
+		elif not vehicle_invoice_delivery:
 			self.invoice_status = "To Deliver"
 		else:
 			self.invoice_status = "Delivered"
@@ -849,13 +872,13 @@ def get_default_price_list(item, args, item_defaults, item_group_defaults, brand
 		return price_list
 
 
-def validate_vehicle_item(item):
+def validate_vehicle_item(item, validate_in_vehicle_booking=True):
 	from erpnext.stock.doctype.item.item import validate_end_of_life
 	validate_end_of_life(item.name, item.end_of_life, item.disabled)
 
 	if not item.is_vehicle:
 		frappe.throw(_("{0} is not a Vehicle Item").format(item.item_name or item.name))
-	if not item.include_in_vehicle_booking:
+	if validate_in_vehicle_booking and not item.include_in_vehicle_booking:
 		frappe.throw(_("Vehicle Item {0} is not allowed for Vehicle Booking").format(item.item_name or item.name))
 
 
@@ -866,82 +889,55 @@ def get_next_document(vehicle_booking_order, doctype):
 	if doc.docstatus != 1:
 		frappe.throw(_("Vehicle Booking Order must be submitted"))
 
-	if doctype == "Purchase Receipt":
-		return get_purchase_receipt(doc)
-	elif doctype == "Purchase Invoice":
-		return get_purchase_invoice(doc)
-	elif doctype == "Delivery Note":
-		return get_delivery_note(doc)
-	elif doctype == "Sales Invoice":
-		return get_sales_invoice(doc)
+	if doctype == "Vehicle Receipt":
+		return get_vehicle_receipt(doc)
+	elif doctype == "Vehicle Delivery":
+		return get_vehicle_delivery(doc)
+	elif doctype == "Vehicle Invoice Receipt":
+		return get_vehicle_invoice_receipt(doc)
+	elif doctype == "Vehicle Invoice Delivery":
+		return get_vehicle_invoice_delivery(doc)
 	else:
 		frappe.throw(_("Invalid DocType"))
 
 
-def get_purchase_receipt(source):
-	check_if_doc_exists("Purchase Receipt", source.name)
+def get_vehicle_receipt(source):
+	check_if_doc_exists("Vehicle Receipt", source.name)
 
-	target = frappe.new_doc("Purchase Receipt")
-
-	vehicle_item = set_next_document_values(source, target, 'buying')
-	prev_doc, prev_vehicle_item = get_previous_doc("Purchase Order", source)
-
-	if prev_vehicle_item:
-		vehicle_item.purchase_order = prev_vehicle_item.parent
-		vehicle_item.purchase_order_item = prev_vehicle_item.name
-
+	target = frappe.new_doc("Vehicle Receipt")
+	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
-	target.run_method("calculate_taxes_and_totals")
 	return target
 
 
-def get_purchase_invoice(source):
-	check_if_doc_exists("Purchase Invoice", source.name)
+def get_vehicle_delivery(source):
+	check_if_doc_exists("Vehicle Delivery", source.name)
 
-	target = frappe.new_doc("Purchase Invoice")
+	target = frappe.new_doc("Vehicle Delivery")
+	set_next_document_values(source, target)
+	target.run_method("set_missing_values")
+	return target
 
-	vehicle_item = set_next_document_values(source, target, 'buying')
-	prev_doc, prev_vehicle_item = get_previous_doc("Purchase Receipt", source)
 
+def get_vehicle_invoice_receipt(source):
+	check_if_doc_exists("Vehicle Invoice Receipt", source.name)
+
+	target = frappe.new_doc("Vehicle Invoice Receipt")
+	set_next_document_values(source, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+def get_vehicle_invoice_delivery(source):
+	check_if_doc_exists("Vehicle Invoice Delivery", source.name)
+
+	prev_doc = get_previous_doc("Vehicle Invoice Receipt", source)
 	if not prev_doc:
-		frappe.throw(_("Cannot make Purchase Invoice against Vehicle Booking Order before making Purchase Receipt"))
+		frappe.throw(_("Cannot make Vehicle Invoice Delivery against Vehicle Booking Order before making Vehicle Invoice Receipt"))
 
-	if prev_vehicle_item:
-		vehicle_item.purchase_receipt = prev_vehicle_item.parent
-		vehicle_item.pr_detail = prev_vehicle_item.name
-
+	target = frappe.new_doc("Vehicle Invoice Delivery")
+	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
-	target.run_method("calculate_taxes_and_totals")
-	return target
-
-
-def get_delivery_note(source):
-	check_if_doc_exists("Delivery Note", source.name)
-
-	target = frappe.new_doc("Delivery Note")
-	set_next_document_values(source, target, 'selling')
-	target.run_method("set_missing_values")
-	target.run_method("calculate_taxes_and_totals")
-	return target
-
-
-def get_sales_invoice(source):
-	check_if_doc_exists("Sales Invoice", source.name)
-
-	target = frappe.new_doc("Sales Invoice")
-
-	vehicle_item = set_next_document_values(source, target, 'selling')
-	prev_doc, prev_vehicle_item = get_previous_doc("Delivery Note", source)
-
-	if not prev_doc:
-		frappe.throw(_("Cannot make Sales Invoice against Vehicle Booking Order before making Delivery Note"))
-
-	if prev_vehicle_item:
-		vehicle_item.delivery_note = prev_vehicle_item.parent
-		vehicle_item.dn_detail = prev_vehicle_item.name
-
-	target.run_method("set_missing_values")
-	target.run_method("calculate_taxes_and_totals")
 	return target
 
 
@@ -954,20 +950,13 @@ def check_if_doc_exists(doctype, vehicle_booking_order):
 def get_previous_doc(doctype, source):
 	prev_docname = frappe.db.get_value(doctype, {"vehicle_booking_order": source.name, "docstatus": 1})
 	if not prev_docname:
-		return None, None
+		return None
 
 	prev_doc = frappe.get_doc(doctype, prev_docname)
-
-	vehicle_item = prev_doc.get('items', filters={'item_code': source.item_code})
-	vehicle_item = vehicle_item[0] if vehicle_item else None
-
-	if not vehicle_item:
-		frappe.throw(_("{0} {1} does not have Vehicle Item {2}").format(doctype, prev_docname, source.item_name or source.item_code))
-
-	return prev_doc, vehicle_item
+	return prev_doc
 
 
-def set_next_document_values(source, target, buying_or_selling):
+def set_next_document_values(source, target):
 	if not source.vehicle and target.doctype != 'Purchase Order':
 		frappe.throw(_("Please set Vehicle first"))
 	if source.vehicle_allocation_required and not source.vehicle_allocation and target.doctype != 'Purchase Order':
@@ -975,58 +964,23 @@ def set_next_document_values(source, target, buying_or_selling):
 
 	target.vehicle_booking_order = source.name
 	target.company = source.company
-	target.ignore_pricing_rule = 1
 
-	if buying_or_selling == "buying":
+	if target.meta.has_field('supplier'):
 		target.supplier = source.supplier
-		target.transaction_type = source.buying_transaction_type
-		target.buying_price_list = source.vehicle_price_list
-	else:
+
+	if target.meta.has_field('customer'):
 		target.customer = source.customer
-		target.transaction_type = source.selling_transaction_type
-		target.selling_price_list = source.vehicle_price_list
+		target.customer_name = source.customer_name
+
+	if target.meta.has_field('customer_address'):
 		target.customer_address = source.customer_address
+
+	if target.meta.has_field('contact_person'):
 		target.contact_person = source.contact_person
 
-		if source.financer and target.meta.has_field('bill_to'):
-			target.bill_to = source.financer
-		if target.meta.has_field('has_stin'):
-			target.has_stin = 0
-
-		for d in source.sales_team:
-			target.append('sales_team', {
-				'sales_person': d.sales_person, 'allocated_percentage': d.allocated_percentage
-			})
-
-	vehicle_item = target.append('items')
-	vehicle_item.item_code = source.item_code
-	vehicle_item.qty = 1
-	vehicle_item.vehicle = source.vehicle
-	vehicle_item.price_list_rate = source.vehicle_amount
-	vehicle_item.rate = source.invoice_total
-	vehicle_item.margin_type = "Amount"
-	# vehicle_item.discount_percentage = 0
-
-	# if source.fni_amount:
-	# 	add_taxes_and_charges_row(target, source.fni_account, source.fni_amount)
-	# if source.withholding_tax_amount:
-	# 	add_taxes_and_charges_row(target, source.withholding_tax_account, source.withholding_tax_amount)
-
-	return vehicle_item
-
-
-def add_taxes_and_charges_row(target, account, amount):
-	row = target.append('taxes')
-
-	row.charge_type = 'Actual'
-	row.account_head = account
-	row.tax_amount = amount
-
-	if row.meta.has_field('category'):
-		row.category = 'Valuation and Total'
-
-	if row.meta.has_field('add_deduct_tax'):
-		row.add_deduct_tax = 'Add'
+	target.item_code = source.item_code
+	target.warehouse = source.warehouse
+	target.vehicle = source.vehicle
 
 
 @frappe.whitelist()
@@ -1046,6 +1000,8 @@ def update_vehicle_in_booking(vehicle_booking_order, vehicle):
 	vbo_doc.validate_vehicle_item()
 	vbo_doc.validate_vehicle()
 	vbo_doc.set_vehicle_details()
+
+	vbo_doc.update_delivery_status()
 
 	save_vehicle_booking_for_update(vbo_doc)
 

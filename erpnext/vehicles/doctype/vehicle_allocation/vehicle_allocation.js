@@ -16,7 +16,7 @@ frappe.ui.form.on('Vehicle Allocation', {
 	item_code: function (frm) {
 		if (frm.doc.item_code && frm.doc.company) {
 			return frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_vehicle_default_supplier",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_vehicle_default_supplier",
 				args: {
 					item_code: frm.doc.item_code,
 					company: frm.doc.company

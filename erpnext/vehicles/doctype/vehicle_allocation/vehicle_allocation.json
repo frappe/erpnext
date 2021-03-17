@@ -192,9 +192,9 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-01-30 20:15:30.884196",
+ "modified": "2021-03-16 21:33:16.939268",
  "modified_by": "Administrator",
- "module": "Selling",
+ "module": "Vehicles",
  "name": "Vehicle Allocation",
  "owner": "Administrator",
  "permissions": [

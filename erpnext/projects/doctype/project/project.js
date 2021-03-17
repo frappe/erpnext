@@ -164,7 +164,7 @@ frappe.ui.form.on("Project", {
 					}).then(r => {
 						if (dt == "Stock Entry") {
 							cur_frm.set_value('purpose', 'Material Receipt');
-							cur_frm.set_value('for_maintenance', 1);
+							cur_frm.set_value('customer_provided', 1);
 						}
 						if (items_fieldname) {
 							cur_frm.doc[items_fieldname] = [];

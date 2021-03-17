@@ -102,6 +102,7 @@
   "supplier_outstanding",
   "column_break_71",
   "delivery_status",
+  "vehicle_receipt",
   "vehicle_received_date",
   "vehicle_delivered_date",
   "supplier_delivery_note",
@@ -678,6 +679,7 @@
    "fieldname": "vehicle_color",
    "fieldtype": "Link",
    "label": "Color (Actual)",
+   "no_copy": 1,
    "options": "Vehicle Color",
    "read_only": 1
   },
@@ -935,14 +937,22 @@
    "label": "Vehicle Item Name (Before Variant Change)",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_receipt",
+   "fieldtype": "Link",
+   "label": "Open Stock Vehicle Receipt",
+   "no_copy": 1,
+   "options": "Vehicle Receipt",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-11 23:32:02.307766",
+ "modified": "2021-03-16 21:34:39.177848",
  "modified_by": "Administrator",
- "module": "Selling",
+ "module": "Vehicles",
  "name": "Vehicle Booking Order",
  "owner": "Administrator",
  "permissions": [
@@ -1007,7 +1017,7 @@
   }
  ],
  "restrict_to_domain": "Vehicles",
- "search_fields": "customer,item_code,item_name,transaction_date,delivery_date,vehicle_chassis_no,vehicle_engine_no",
+ "search_fields": "customer,item_code,item_name,transaction_date,delivery_period, allocation_title,vehicle_chassis_no,vehicle_engine_no",
  "show_name_in_global_search": 1,
  "sort_field": "transaction_date",
  "sort_order": "DESC",

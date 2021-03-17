@@ -2,16 +2,25 @@ from __future__ import unicode_literals
 import frappe
 
 def get_data():
-	project_link = []
+	vehicle_domain_sections = []
 	if 'Vehicles' in frappe.get_active_domains():
-		project_link.append('Project')
+		vehicle_domain_sections = [
+			{
+				'label': ['Reference'],
+				'items': ['Vehicle Booking Order', 'Project']
+			},
+			{
+				'label': ['Vehicle Transaction'],
+				'items': ['Vehicle Receipt', 'Vehicle Delivery']
+			},
+		]
 
 	return {
 		'fieldname': 'vehicle',
 		'non_standard_fieldnames': {
 			'Project': 'applies_to_vehicle',
 		},
-		'transactions': [
+		'transactions': vehicle_domain_sections + [
 			{
 				'label': ['Sales'],
 				'items': ['Delivery Note', 'Sales Invoice']
@@ -23,10 +32,6 @@ def get_data():
 			{
 				'label': ['Movement'],
 				'items': ['Stock Entry', 'Vehicle Log']
-			},
-			{
-				'label': ['Reference'],
-				'items': ['Vehicle Booking Order'] + project_link
 			},
 		]
 	}

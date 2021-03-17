@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
+from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
 from frappe.model.document import Document
 from frappe.utils import clean_whitespace, add_years, get_first_day, get_last_day, add_months
 

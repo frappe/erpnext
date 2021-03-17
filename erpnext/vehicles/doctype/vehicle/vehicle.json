@@ -336,12 +336,14 @@
    "oldfieldname": "customer",
    "oldfieldtype": "Link",
    "options": "Customer",
-   "print_hide": 1
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "bold": 1,
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
    "fetch_from": "customer.customer_name",
+   "fetch_if_empty": 1,
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "in_preview": 1,
@@ -547,7 +549,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-02-22 17:09:28.980025",
+ "modified": "2021-03-17 00:19:33.176129",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

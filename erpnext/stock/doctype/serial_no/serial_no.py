@@ -112,7 +112,7 @@ class SerialNo(StockController):
 			self.purchase_date = purchase_sle.posting_date
 			self.purchase_time = purchase_sle.posting_time
 			self.purchase_rate = purchase_sle.incoming_rate
-			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Vehicle Receipt"):
 				self.supplier, self.supplier_name = \
 					frappe.db.get_value(purchase_sle.voucher_type, purchase_sle.voucher_no,
 						["supplier", "supplier_name"])
@@ -131,7 +131,7 @@ class SerialNo(StockController):
 			self.delivery_document_no = delivery_sle.voucher_no
 			self.delivery_date = delivery_sle.posting_date
 			self.delivery_time = delivery_sle.posting_time
-			if delivery_sle.voucher_type  in ("Delivery Note", "Sales Invoice"):
+			if delivery_sle.voucher_type  in ("Delivery Note", "Sales Invoice", "Vehicle Delivery"):
 				self.customer, self.customer_name = \
 					frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
 						["customer", "customer_name"])
@@ -291,7 +291,7 @@ def validate_serial_no(sle, item_det):
 						frappe.throw(_("{0} {1} has already been received").format(label_serial_no, serial_no),
 							SerialNoDuplicateError)
 
-					if (sr.delivery_document_no and sle.voucher_type not in ['Stock Entry', 'Stock Reconciliation']
+					if (sr.delivery_document_no and sle.voucher_type not in ['Stock Entry', 'Stock Reconciliation', 'Vehicle Delivery']
 						and sle.voucher_type == sr.delivery_document_type):
 						return_against = frappe.db.get_value(sle.voucher_type, sle.voucher_no, 'return_against')
 						if return_against and return_against != sr.delivery_document_no:
@@ -302,7 +302,7 @@ def validate_serial_no(sle, item_det):
 							frappe.throw(_("{0} {1} does not belong to Warehouse {2}").format(label_serial_no, serial_no,
 								sle.warehouse), SerialNoWarehouseError)
 
-						if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+						if sle.voucher_type in ("Delivery Note", "Sales Invoice", "Vehicle Delivery"):
 
 							if sr.batch_no and sr.batch_no != sle.batch_no:
 								frappe.throw(_("{0} {1} does not belong to Batch {2}").format(label_serial_no, serial_no,
@@ -399,8 +399,8 @@ def has_duplicate_serial_no(sn, sle):
 			status = True
 
 		if status and sle.voucher_type == 'Stock Entry':
-			purpose, for_maintenance = frappe.db.get_value('Stock Entry', sle.voucher_no, ['purpose', 'for_maintenance'])
-			if purpose != 'Material Receipt' or for_maintenance:
+			purpose, customer_provided = frappe.db.get_value('Stock Entry', sle.voucher_no, ['purpose', 'customer_provided'])
+			if purpose != 'Material Receipt' or customer_provided:
 				status = False
 
 	return status

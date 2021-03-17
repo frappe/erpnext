@@ -1,9 +1,9 @@
 // Copyright (c) 2020, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.provide("erpnext.selling");
+frappe.provide("erpnext.vehicles");
 
-erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
+erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.frm.custom_make_buttons = {
 			'Delivery Note': 'Deliver Vehicle',
@@ -30,6 +30,8 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 	setup_queries: function () {
 		var me = this;
+
+		this.frm.set_query('warehouse', () => erpnext.queries.warehouse(me.frm.doc));
 
 		this.frm.set_query('customer', erpnext.queries.customer);
 		this.frm.set_query('contact_person', () => {
@@ -197,17 +199,17 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 			if (this.frm.doc.vehicle) {
 				if (this.frm.doc.delivery_status === "To Receive") {
-					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Purchase Receipt'));
+					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
 				} else if (this.frm.doc.delivery_status === "To Deliver") {
-					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Delivery Note'));
+					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
 				}
 			}
 
 			if (this.frm.doc.delivery_status !== "To Receive") {
 				if (this.frm.doc.invoice_status === "To Receive") {
-					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Purchase Invoice'));
+					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
 				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
-					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Sales Invoice'));
+					this.frm.add_custom_button(__('Deliver Invoice'), () => this.make_next_document('Vehicle Invoice Delivery'));
 				}
 			}
 
@@ -246,12 +248,10 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 			if (unpaid) {
 				this.frm.page.set_inner_btn_group_as_primary(__('Payment'));
+			} else if (this.frm.doc.status === "To Assign Vehicle") {
+				this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Receive Vehicle") {
-				if (this.frm.doc.vehicle) {
-					this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
-				} else {
-					this.frm.custom_buttons[__(select_vehicle_label)] && this.frm.custom_buttons[__(select_vehicle_label)].addClass('btn-primary');
-				}
+				this.frm.custom_buttons[__('Receive Vehicle')] && this.frm.custom_buttons[__('Receive Vehicle')].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Receive Invoice") {
 				this.frm.custom_buttons[__('Receive Invoice')] && this.frm.custom_buttons[__('Receive Invoice')].addClass('btn-primary');
 			} else if (this.frm.doc.status === "To Deliver Vehicle") {
@@ -312,7 +312,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		if (me.frm.doc.company && me.frm.doc.item_code) {
 			me.frm.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_item_details",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_item_details",
 				child: me.frm.doc,
 				args: {
 					args: {
@@ -360,7 +360,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		if (me.frm.doc.company && (me.frm.doc.customer || me.frm.doc.company_is_customer)) {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_details",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_details",
 				args: {
 					args: {
 						company: me.frm.doc.company,
@@ -411,7 +411,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		frappe.call({
-			method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_address_details",
+			method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_address_details",
 			args: {
 				address: cstr(this.frm.doc.customer_address),
 			},
@@ -435,7 +435,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var me = this;
 
 		frappe.call({
-			method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_contact_details",
+			method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_contact_details",
 			args: {
 				args: {
 					customer: me.frm.doc.customer,
@@ -507,7 +507,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var me = this;
 		if (me.frm.doc.vehicle_allocation) {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_allocation.vehicle_allocation.get_allocation_details",
+				method: "erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation.get_allocation_details",
 				args: {
 					vehicle_allocation: this.frm.doc.vehicle_allocation,
 				},
@@ -608,7 +608,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	make_payment_entry: function(party_type) {
 		if (['Customer', 'Supplier'].includes(party_type)) {
 			return frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_payment.vehicle_booking_payment.get_payment_entry",
+				method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_payment_entry",
 				args: {
 					"vehicle_booking_order": this.frm.doc.name,
 					"party_type": party_type,
@@ -626,7 +626,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			return;
 
 		return frappe.call({
-			method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.get_next_document",
+			method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_next_document",
 			args: {
 				"vehicle_booking_order": this.frm.doc.name,
 				"doctype": doctype
@@ -666,7 +666,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		dialog.set_primary_action(__("Update"), function () {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_vehicle_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_vehicle_in_booking",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					vehicle: dialog.get_value('vehicle')
@@ -709,7 +709,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		dialog.set_primary_action(__("Update"), function () {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_allocation_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_allocation_in_booking",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					vehicle_allocation: dialog.get_value('vehicle_allocation')
@@ -737,7 +737,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		dialog.set_primary_action(__("Update"), function () {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_delivery_period_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_delivery_period_in_booking",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					delivery_period: dialog.get_value('delivery_period')
@@ -766,7 +766,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		dialog.set_primary_action(__("Update"), function () {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_color_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_color_in_booking",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					color_1: dialog.get_value('color_1'),
@@ -790,7 +790,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		frappe.confirm(__('Are you sure you want to update details from Customer Master(s)? This may change the Invoice Total.'),
 			function() {
 				frappe.call({
-					method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_customer_details_in_booking",
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_customer_details_in_booking",
 					args: {
 						vehicle_booking_order: me.frm.doc.name,
 					},
@@ -837,7 +837,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 			dialog.set_primary_action(__("Change"), function () {
 				frappe.call({
-					method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_item_in_booking",
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_item_in_booking",
 					args: {
 						vehicle_booking_order: me.frm.doc.name,
 						item_code: dialog.get_value('item_code')
@@ -867,7 +867,7 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		dialog.set_primary_action(__("Update"), function () {
 			frappe.call({
-				method: "erpnext.selling.doctype.vehicle_booking_order.vehicle_booking_order.update_payment_adjustment_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_payment_adjustment_in_booking",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					payment_adjustment: dialog.get_value('payment_adjustment')
@@ -884,4 +884,4 @@ erpnext.selling.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 });
 
-$.extend(cur_frm.cscript, new erpnext.selling.VehicleBookingOrder({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.vehicles.VehicleBookingOrder({frm: cur_frm}));

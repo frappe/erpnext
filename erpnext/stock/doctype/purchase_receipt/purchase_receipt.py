@@ -209,8 +209,6 @@ class PurchaseReceipt(BuyingController):
 		self.update_billing_status()
 		self.update_billing_status_for_zero_amount("Purchase Order", "purchase_order")
 
-		self.update_vehicle_booking_order()
-
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty, reserved_qty_for_subcontract in bin
 		# depends upon updated ordered qty in PO
@@ -244,8 +242,6 @@ class PurchaseReceipt(BuyingController):
 		self.update_prevdoc_status()
 		self.update_billing_status()
 		self.update_billing_status_for_zero_amount("Purchase Order", "purchase_order")
-
-		self.update_vehicle_booking_order()
 
 		# Updating stock ledger should always be called after updating prevdoc status,
 		# because updating ordered qty in bin depends upon updated ordered qty in PO
