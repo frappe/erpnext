@@ -2,6 +2,8 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.model.db_query import DatabaseQuery
+from frappe.model.meta import get_field_precision
+from frappe.utils import flt
 
 @frappe.whitelist()
 def get_data(item_code=None, warehouse=None, item_group=None,
@@ -42,11 +44,20 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		limit_start=start,
 		limit_page_length='21')
 
+	precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"))
+
 	for item in items:
 		item.update({
-			'item_name': frappe.get_cached_value("Item", item.item_code, 'item_name'),
-			'disable_quick_entry': frappe.get_cached_value("Item", item.item_code, 'has_batch_no')
-				or frappe.get_cached_value("Item", item.item_code, 'has_serial_no'),
+			'item_name': frappe.get_cached_value(
+				"Item", item.item_code, 'item_name'),
+			'disable_quick_entry': frappe.get_cached_value(
+				"Item", item.item_code, 'has_batch_no')
+			or frappe.get_cached_value(
+				"Item", item.item_code, 'has_serial_no'),
+			'projected_qty': flt(item.projected_qty, precision),
+			'reserved_qty': flt(item.reserved_qty, precision),
+			'reserved_qty_for_production': flt(item.reserved_qty_for_production, precision),
+			'reserved_qty_for_sub_contract': flt(item.reserved_qty_for_sub_contract, precision),
+			'actual_qty': flt(item.actual_qty, precision),
 		})
-
 	return items
