@@ -120,7 +120,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 		}
 	});
 
-	frappe.realtime.on("bulk_einvoice_action_complete", (data) => {
+	frappe.realtime.on("bulk_einvoice_generation_complete", (data) => {
 		const { failures, user, invoices } = data;
 
 		if (failures && failures.length && user == frappe.session.user) {
@@ -137,8 +137,32 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 			});
 		} else {
 			frappe.msgprint({
-				message: __('{0} e-invoices generated successfully', [invoices.length]),
+				message: __('{0} e-invoice generated successfully', [String(invoices.length).bold()]),
 				title: __('Bulk E-Invoice Generation Complete'),
+				indicator: 'orange'
+			});
+		}
+	});
+
+	frappe.realtime.on("bulk_einvoice_cancellation_complete", (data) => {
+		const { failures, user, invoices } = data;
+
+		if (failures && failures.length && user == frappe.session.user) {
+			let message = `
+				Failed to cancel IRNs for following ${failures.length} sales invoices:
+				<ul style="padding-left: 20px">
+					${failures.map(d => `<li>${d.docname}</li>`).join('')}
+				</ul>
+			`;
+			frappe.msgprint({
+				message: message,
+				title: __('Bulk E-Invoice Cancellation Complete'),
+				indicator: 'orange'
+			});
+		} else {
+			frappe.msgprint({
+				message: __('{0} e-invoice cancelled successfully', [String(invoices.length).bold()]),
+				title: __('Bulk E-Invoice Cancellation Complete'),
 				indicator: 'orange'
 			});
 		}

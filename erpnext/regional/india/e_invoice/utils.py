@@ -725,13 +725,13 @@ class GSPConnector():
 		failed = []
 
 		for invoice in invoices:
-			gsp_connector.docname = invoice
-			gsp_connector.set_invoice()
-			gsp_connector.set_credentials()
-
 			try:
+				gsp_connector.docname = invoice
+				gsp_connector.set_invoice()
+				gsp_connector.set_credentials()
 				irn = gsp_connector.invoice.irn
 				gsp_connector.cancel_irn(irn, reason, remark)
+
 			except Exception as e:
 				failed.append({
 					'docname': invoice,
@@ -968,9 +968,10 @@ def schedule_bulk_generate_irn(docnames):
 	failures = GSPConnector.bulk_generate_irn(docnames)
 	frappe.local.message_log = []
 
-	frappe.publish_realtime("bulk_einvoice_action_complete", { "user": frappe.session.user, "failures": failures, "invoices": docnames })
+	frappe.publish_realtime("bulk_einvoice_generation_complete", { "user": frappe.session.user, "failures": failures, "invoices": docnames })
 
-def show_bulk_generation_failure_message(failures):
+def show_bulk_action_failure_message(failures):
+	print(failures)
 	for doc in failures:
 		docname = '<a href="app/sales-invoice/{0}">{0}</a>'.format(doc.get('docname'))
 		message = doc.get('message').replace("'", '"')
@@ -979,6 +980,8 @@ def show_bulk_generation_failure_message(failures):
 			error_list = ''.join(['<li>{}</li>'.format(err) for err in errors])
 			message = '''{} has following errors:<br>
 				<ul style="padding-left: 20px; padding-top: 5px">{}</ul>'''.format(docname, error_list)
+		else:
+			message = '{} - {}'.format(docname, message)
 
 		frappe.msgprint(
 			message,
@@ -988,11 +991,25 @@ def show_bulk_generation_failure_message(failures):
 
 @frappe.whitelist()
 def cancel_irns(docnames, reason, remark):
-	docnames = json.loads(docnames)
-	failed_invoices = GSPConnector.bulk_cancel_irn(docnames, reason, remark)
+	docnames = json.loads(docnames) or []
+
+	if len(docnames) < 10:
+		failures = GSPConnector.bulk_cancel_irn(docnames, reason, remark)
+		frappe.local.message_log = []
+
+		if failures:
+			show_bulk_action_failure_message(failures)
+		else:
+			frappe.msgprint(_('{} e-invoice generated successfully', title=_('Bulk E-Invoice Generation Success'))
+				.format(frappe.bold(len(docnames))))
+	else:
+		enqueue_bulk_action(schedule_bulk_cancel_irn, docnames=docnames, reason=reason, remark=remark)
+
+def schedule_bulk_cancel_irn(docnames, reason, remark):
+	failures = GSPConnector.bulk_cancel_irn(docnames, reason, remark)
 	frappe.local.message_log = []
 
-	return failed_invoices
+	frappe.publish_realtime("bulk_einvoice_cancellation_complete", { "user": frappe.session.user, "failures": failures, "invoices": docnames })
 
 def enqueue_bulk_action(job, **kwargs):
 	check_scheduler_status()
