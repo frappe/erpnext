@@ -606,6 +606,7 @@ class GSPConnector():
 		return details
 
 	def generate_irn(self):
+		data = {}
 		try:
 			headers = self.get_headers()
 			einvoice = make_einvoice(self.invoice)
@@ -958,7 +959,8 @@ def generate_einvoices(docnames):
 		if failures:
 			show_bulk_generation_failure_message(failures)
 		else:
-			frappe.msgprint(_('{} e-invoices generated successfully').format(len(docnames)))
+			frappe.msgprint(_('{} e-invoice generated successfully', title=_('Bulk E-Invoice Generation Success'))
+				.format(frappe.bold(len(docnames))))
 	else:
 		enqueue_bulk_action(schedule_bulk_generate_irn, docnames=docnames)
 
@@ -971,14 +973,16 @@ def schedule_bulk_generate_irn(docnames):
 def show_bulk_generation_failure_message(failures):
 	for doc in failures:
 		docname = '<a href="app/sales-invoice/{0}">{0}</a>'.format(doc.get('docname'))
-		errors = json.loads(doc.get('message').replace("'", '"'))
-		error_list = ''.join(['<li>{err}</li>' for err in errors])
-		message = '''{} has following errors:<br>
-			<ul style="padding-left: 20px; padding-top: 5px">{}</ul>'''.format(docname, error_list)
+		message = doc.get('message').replace("'", '"')
+		if message[0] == '[':
+			errors = json.loads(message)
+			error_list = ''.join(['<li>{}</li>'.format(err) for err in errors])
+			message = '''{} has following errors:<br>
+				<ul style="padding-left: 20px; padding-top: 5px">{}</ul>'''.format(docname, error_list)
 
 		frappe.msgprint(
 			message,
-			title=__('Bulk E-Invoice Generation Failed'),
+			title=_('Bulk E-Invoice Generation Failed'),
 			indicator='red'
 		)
 
