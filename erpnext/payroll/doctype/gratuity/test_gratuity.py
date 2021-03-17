@@ -15,9 +15,12 @@ from frappe.utils import getdate, add_days, get_datetime, flt
 
 test_dependencies = ["Salary Component", "Salary Slip", "Account"]
 class TestGratuity(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
 		make_earning_salary_component(setup=True, test_tax=True, company_list=['_Test Company'])
 		make_deduction_salary_component(setup=True, test_tax=True, company_list=['_Test Company'])
+
+	def setUp(self):
 		frappe.db.sql("DELETE FROM `tabGratuity`")
 		frappe.db.sql("DELETE FROM `tabAdditional Salary` WHERE ref_doctype = 'Gratuity'")
 
