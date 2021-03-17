@@ -13,6 +13,7 @@
   "validate_course",
   "academic_term_reqd",
   "user_creation_skip",
+  "applicant_send_welcome_email",
   "section_break_7",
   "instructor_created_by",
   "web_academy_settings_section",
@@ -103,11 +104,18 @@
    "fieldname": "user_creation_skip",
    "fieldtype": "Check",
    "label": "Skip User creation for new Student"
+  },
+  {
+   "default": "1",
+   "description": "By default, Welcome email is sent for every new Student. If disabled, no welcome email will be send when a new Student is created.",
+   "fieldname": "applicant_send_welcome_email",
+   "fieldtype": "Check",
+   "label": "Send welcome email for new Applicants"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-05-07 19:18:10.639356",
+ "modified": "2021-03-17 17:17:56.805611",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Education Settings",

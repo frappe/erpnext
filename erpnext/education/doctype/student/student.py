@@ -52,7 +52,7 @@ class Student(Document):
 	def check_unique(self):
 		"""Validates if the Student Applicant is Unique"""
 		student = frappe.db.sql("select name from `tabStudent` where student_applicant=%s and name!=%s", (self.student_applicant, self.name))
-		if student:
+		if student and student.student_email_id != frappe.session.user.email:
 			frappe.throw(_("Student {0} exist against student applicant {1}").format(student[0][0], self.student_applicant))
 
 	def after_insert(self):
@@ -68,7 +68,7 @@ class Student(Document):
 				'last_name': self.last_name,
 				'email': self.student_email_id,
 				'gender': self.gender,
-				'send_welcome_email': 1,
+				'send_welcome_email': frappe.get_single('Education Settings').get('applicant_send_welcome_email'),
 				'user_type': 'Website User'
 				})
 			student_user.flags.ignore_permissions = True
