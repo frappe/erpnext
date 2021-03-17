@@ -1544,17 +1544,18 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	apply_product_discount: function(args) {
 		const items = this.frm.doc.items.filter(d => (d.is_free_item)) || [];
 
-		const exist_items = items.map(row => row.item_code);
+		const exist_items = items.map(row => (row.item_code, row.pricing_rules));
 
 		args.free_item_data.forEach(pr_row => {
 			let row_to_modify = {};
-			if (!items || !in_list(exist_items, pr_row.item_code)) {
+			if (!items || !in_list(exist_items, (pr_row.item_code, pr_row.pricing_rules))) {
 
 				row_to_modify = frappe.model.add_child(this.frm.doc,
 					this.frm.doc.doctype + ' Item', 'items');
 
 			} else if(items) {
-				row_to_modify = items.filter(d => d.item_code === pr_row.item_code)[0];
+				row_to_modify = items.filter(d => (d.item_code === pr_row.item_code
+					&& d.pricing_rules === pr_row.pricing_rules))[0];
 			}
 
 			for (let key in pr_row) {
