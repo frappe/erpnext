@@ -200,7 +200,7 @@ class SalarySlip(TransactionBase):
 				AND ifnull(leave_application, '') = ''
 				AND employee = %(employee)s
 				AND attendance_date between %(st_dt)s AND %(end_dt)s
-				AND attendance_date not in ({0})
+				AND attendance_date not in ('{0}')
 			""".format(holidays), {"employee": self.employee, "st_dt": self.start_date, "end_dt": self.end_date})
 
 		late_days = flt(late_days[0][0]) if late_days else 0
