@@ -8,7 +8,6 @@ test_records = frappe.get_test_records('Project')
 test_ignore = ["Sales Order"]
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
-from erpnext.projects.doctype.project.project import update_if_holiday
 from erpnext.projects.doctype.task.test_task import create_task
 from frappe.utils import getdate, nowdate, add_days
 
@@ -97,7 +96,8 @@ def get_project(name, template):
 		project_name = name,
 		status = 'Open',
 		project_template = template.name,
-		expected_start_date = nowdate()
+		expected_start_date = nowdate(),
+		company="_Test Company"
 	)).insert()
 
 	return project
@@ -131,7 +131,7 @@ def task_exists(subject):
 
 def calculate_end_date(project, start, duration):
 	start = add_days(project.expected_start_date, start)
-	start = update_if_holiday(project.holiday_list, start)
+	start = project.update_if_holiday(start)
 	end = add_days(start, duration)
-	end = update_if_holiday(project.holiday_list, end)
+	end = project.update_if_holiday(end)
 	return getdate(end)
