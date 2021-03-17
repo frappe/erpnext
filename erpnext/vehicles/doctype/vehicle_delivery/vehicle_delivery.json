@@ -12,17 +12,18 @@
   "company",
   "customer",
   "customer_name",
+  "booking_customer_name",
   "column_break_8",
-  "remarks",
+  "vehicle_booking_order",
+  "project",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
   "column_break_11",
   "amended_from",
   "posting_date",
   "posting_time",
   "set_posting_time",
-  "reference_section",
-  "vehicle_booking_order",
-  "column_break_16",
-  "project",
   "address_and_contact_section",
   "customer_address",
   "address_display",
@@ -54,6 +55,10 @@
   "vehicle_color",
   "vehicle_license_plate",
   "vehicle_unregistered",
+  "delivery_details_section",
+  "remarks",
+  "column_break_51",
+  "keys",
   "section_break_47",
   "image",
   "image_display"
@@ -99,6 +104,7 @@
   },
   {
    "depends_on": "eval:doc.customer && doc.customer_name != doc.customer",
+   "fetch_from": "customer.customer_name",
    "fieldname": "customer_name",
    "fieldtype": "Data",
    "label": "Customer Name",
@@ -120,10 +126,7 @@
   {
    "fieldname": "remarks",
    "fieldtype": "Small Text",
-   "in_standard_filter": 1,
-   "label": "Remarks",
-   "no_copy": 1,
-   "print_hide": 1
+   "label": "Note"
   },
   {
    "fieldname": "column_break_11",
@@ -288,14 +291,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "reference_section",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "column_break_16",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "project",
    "fieldtype": "Link",
    "label": "Project",
@@ -413,12 +408,59 @@
    "label": "Receiver CNIC",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "delivery_details_section",
+   "fieldtype": "Section Break",
+   "label": "Delivery Details"
+  },
+  {
+   "depends_on": "eval:doc.vehicle_booking_order && doc.booking_customer_name != doc.customer_name",
+   "fetch_from": "vehicle_booking_order.customer_name",
+   "fieldname": "booking_customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name (as per Vehicle Booking Order)",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Tax ID",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "CNIC",
+   "read_only": 1
+  },
+  {
+   "fieldname": "tax_strn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "STRN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_51",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "keys",
+   "fieldtype": "Data",
+   "in_standard_filter": 1,
+   "label": "Keys",
+   "no_copy": 1,
+   "print_hide": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-17 22:26:22.734355",
+ "modified": "2021-03-18 02:35:13.154624",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",

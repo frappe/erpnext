@@ -15,9 +15,9 @@ from six import string_types
 
 
 force_fields = [
-	'customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'address_display',
-	'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
-	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone', 'receiver_contact_cnic',
+	'customer_name', 'booking_customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'receiver_contact_cnic',
+	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
 	'item_name', 'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered', 'vehicle_color'
 ]
 
@@ -57,9 +57,6 @@ class VehicleTransactionController(StockController):
 			self.set_missing_values(for_validate=True)
 
 	def set_missing_values(self, for_validate=False):
-		if self.get('vehicle') and not self.get('vehicle_booking_order'):
-			self.vehicle_booking_order = get_vehicle_booking_order_from_vehicle(self.vehicle)
-
 		if self.get('vehicle_booking_order'):
 			vehicle_booking_order_details = get_vehicle_booking_order_details(self.as_dict())
 			for k, v in vehicle_booking_order_details.items():
@@ -199,20 +196,22 @@ def get_customer_details(args):
 	args = frappe._dict(args)
 	out = frappe._dict()
 
-	detail_dt = "Vehicle Booking Order" if args.vehicle_booking_order else "Customer"
-	detail_dn = args.vehicle_booking_order if args.vehicle_booking_order else args.customer
-
-	if detail_dn:
-		details = frappe.db.get_value(detail_dt, detail_dn,
+	customer_details = frappe._dict()
+	if args.customer:
+		customer_details = frappe.get_cached_value("Customer", args.customer,
 			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn'], as_dict=1)
-	else:
-		details = frappe._dict()
+
+	booking_details = frappe._dict()
+	if args.vehicle_booking_order:
+		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
+			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn'], as_dict=1)
 
 	# Customer Name and Tax IDs
-	out.customer_name = details.customer_name
-	out.tax_id = details.tax_id
-	out.tax_cnic = details.tax_cnic
-	out.tax_strn = details.tax_strn
+	out.customer_name = customer_details.customer_name
+	out.booking_customer_name = booking_details.customer_name
+	out.tax_id = booking_details.tax_id or customer_details.tax_id
+	out.tax_cnic = booking_details.tax_cnic or customer_details.tax_cnic
+	out.tax_strn = booking_details.tax_strn or customer_details.tax_strn
 
 	# Customer Address
 	out.customer_address = args.customer_address
@@ -244,7 +243,11 @@ def get_vehicle_booking_order_details(args):
 		frappe.throw(_("Vehicle Booking Order is mandatory"))
 
 	out = frappe.db.get_value('Vehicle Booking Order', args.vehicle_booking_order,
-		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name', 'supplier', 'bill_no', 'bill_date'], as_dict=1)
+		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name as booking_customer_name', 'supplier',
+			'bill_no', 'bill_date'], as_dict=1)
+
+	if args.doctype == "Vehicle Delivery":
+		del out['warehouse']
 
 	return out
 

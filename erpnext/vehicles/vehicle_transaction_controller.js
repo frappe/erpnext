@@ -164,6 +164,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_booking_order_details",
 				args: {
 					args: {
+						doctype: me.frm.doc.doctype,
 						company: me.frm.doc.company,
 						customer: me.frm.doc.customer,
 						supplier: me.frm.doc.supplier,
