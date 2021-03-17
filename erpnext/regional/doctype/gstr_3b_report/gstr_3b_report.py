@@ -349,7 +349,6 @@ class GSTR3BReport(Document):
 		return inter_state_supply_details
 
 	def get_inward_nil_exempt(self, state):
-		print("@@@@@@@@@@@@")
 		inward_nil_exempt = frappe.db.sql(""" select p.place_of_supply, sum(i.base_amount) as base_amount,
 			i.is_nil_exempt, i.is_non_gst from `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
 			where p.docstatus = 1 and p.name = i.parent
@@ -357,7 +356,6 @@ class GSTR3BReport(Document):
 			month(p.posting_date) = %s and year(p.posting_date) = %s and p.company = %s and p.company_gstin = %s
 			group by p.place_of_supply, i.is_nil_exempt, i.is_non_gst""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
-		print(inward_nil_exempt, "$#$#$#$")
 		inward_nil_exempt_details = {
 			"gst": {
 				"intra": 0.0,
