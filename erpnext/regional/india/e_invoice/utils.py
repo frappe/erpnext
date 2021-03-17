@@ -469,6 +469,7 @@ def safe_json_load(json_string):
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
 class RequestFailed(Exception): pass
+class CancellationNotAllowed(Exception): pass
 
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
@@ -684,18 +685,17 @@ class GSPConnector():
 	def cancel_irn(self, irn, reason, remark):
 		data, res = {}, {}
 		try:
-		# validate cancellation
-		if time_diff_in_hours(now_datetime(), self.invoice.ack_date) > 24:
-			frappe.throw(_('E-Invoice cannot be cancelled after 24 hours of IRN generation.'), title=_('Not Allowed'))
+			# validate cancellation
+			if time_diff_in_hours(now_datetime(), self.invoice.ack_date) > 24:
+				frappe.throw(_('E-Invoice cannot be cancelled after 24 hours of IRN generation.'), title=_('Not Allowed'), exc=CancellationNotAllowed)
 
-		headers = self.get_headers()
-		data = json.dumps({
-			'Irn': irn,
-			'Cnlrsn': reason,
-			'Cnlrem': remark
-		}, indent=4)
+			headers = self.get_headers()
+			data = json.dumps({
+				'Irn': irn,
+				'Cnlrsn': reason,
+				'Cnlrem': remark
+			}, indent=4)
 
-		try:
 			res = self.make_request('post', self.cancel_irn_url, headers, data)
 			if res.get('success'):
 				self.invoice.irn_cancelled = 1
@@ -715,6 +715,10 @@ class GSPConnector():
 			errors = self.sanitize_error_message(res.get('message'))
 			self.set_failed_status(errors=errors)
 			self.raise_error(errors=errors)
+
+		except CancellationNotAllowed as e:
+			self.set_failed_status(errors=str(e))
+			self.raise_error(errors=str(e))
 
 		except Exception as e:
 			self.set_failed_status(errors=str(e))
@@ -922,8 +926,14 @@ class GSPConnector():
 	def set_failed_status(self, errors=None):
 		frappe.db.rollback()
 		self.invoice.einvoice_status = 'Failed'
+		self.invoice.failure_description = self.get_failure_message(errors) if errors else ""
 		self.update_invoice()
 		frappe.db.commit()
+	
+	def get_failure_message(self, errors):
+		if isinstance(errors, list):
+			errors = ', '.join(errors)
+		return errors
 
 def sanitize_for_json(string):
 	"""Escape JSON specific characters from a string."""
