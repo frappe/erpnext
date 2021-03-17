@@ -168,7 +168,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	vehicle_route_options: function() {
 		return {
 			"item_code": this.frm.doc.item_code,
-			"item_name": this.frm.doc.item_name
+			"item_name": this.frm.doc.item_name,
+			"color": this.frm.doc.color_1,
+			"unregistered": 1
 		}
 	},
 
@@ -178,7 +180,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			"item_code": this.frm.doc.item_code,
 			"item_name": this.frm.doc.item_name,
 			"supplier": this.frm.doc.supplier,
-			"allocation_period": this.frm.doc.allocation_period,
+			"allocation_period": this.frm.doc.allocation_period || this.frm.doc.delivery_period,
 			"delivery_period": this.frm.doc.delivery_period
 		}
 	},
@@ -687,8 +689,6 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Allocation"),
 			fields: [
-				{label: __("Delivery Period"), fieldname: "delivery_period", fieldtype: "Link", options: "Vehicle Allocation Period",
-					default: me.frm.doc.delivery_period, bold: 1, get_query: () => me.delivery_period_query(true)},
 				{
 					label: __("Vehicle Allocation"), fieldname: "vehicle_allocation", fieldtype: "Link", options: "Vehicle Allocation", reqd: 1,
 					onchange: () => {
@@ -702,6 +702,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 						}
 					}, get_query: () => me.allocation_query(true, dialog), get_route_options_for_new_doc: () => me.allocation_route_options()
 				},
+				{label: __("Delivery Period"), fieldname: "delivery_period", fieldtype: "Link", options: "Vehicle Allocation Period",
+					default: me.frm.doc.delivery_period, bold: 1, get_query: () => me.delivery_period_query(true)},
 				{label: __("Allocation Code / Sr #"), fieldname: "title", fieldtype: "Data", read_only: 1},
 				{label: __("Allocation Period"), fieldname: "allocation_period", fieldtype: "Link", options: "Vehicle Allocation Period", read_only: 1},
 			]
