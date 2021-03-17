@@ -425,7 +425,7 @@ class PayrollEntry(Document):
 
 			payable_amount_rounded = flt(payable_amount_rounded, precision)
 			payable_amount = flt(payable_amount, precision)
-			round_off_amount = flt(payable_amount - payable_amount_rounded, precision)
+			round_off_amount = flt(payable_amount_rounded - payable_amount, precision)
 
 			accounts.append({
 				"account": default_payroll_payable_account,
@@ -437,8 +437,8 @@ class PayrollEntry(Document):
 			if round_off_amount:
 				accounts.append({
 					"account": round_off_account,
-					"debit_in_account_currency": round_off_amount if round_off_amount < 0 else 0,
-					"credit_in_account_currency": round_off_amount if round_off_amount >= 0 else 0,
+					"debit_in_account_currency": round_off_amount if round_off_amount > 0 else 0,
+					"credit_in_account_currency": round_off_amount if round_off_amount < 0 else 0,
 					"cost_center": self.cost_center or round_off_cost_center,
 				})
 
