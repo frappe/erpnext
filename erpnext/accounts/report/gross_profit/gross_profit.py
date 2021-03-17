@@ -45,10 +45,10 @@ class GrossProfitGenerator(object):
 		self.data = frappe.db.sql("""
 			select
 				si.name as parent, si_item.parenttype, si_item.name, si_item.idx, si.docstatus,
-				si.posting_date, si.posting_time,
+				si.posting_date, si.posting_time, si.transaction_type, si.project, si_item.cost_center,
 				si.customer, si.customer_name, c.customer_group, c.territory,
 				si_item.item_code, si_item.item_name, si_item.batch_no, si_item.uom,
-				si_item.warehouse, i.item_group, i.brand,
+				si_item.warehouse, i.item_group, i.brand, i.item_source, 
 				si.update_stock, si_item.dn_detail, si_item.delivery_note,
 				si_item.qty, si_item.stock_qty, si_item.conversion_factor, si_item.alt_uom_size,
 				si_item.base_net_amount,
@@ -239,6 +239,15 @@ class GrossProfitGenerator(object):
 
 		if self.filters.get("batch_no"):
 			conditions.append("si_item.batch_no = %(batch_no)s")
+
+		if self.filters.get("transaction_type"):
+			conditions.append("si.transaction_type = %(transaction_type)s")
+
+		if self.filters.get("project"):
+			conditions.append("si.project = %(project)s")
+
+		if self.filters.get("cost_center"):
+			conditions.append("si.cost_center = %(cost_center)s")
 
 		if self.filters.get("sales_person"):
 			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])

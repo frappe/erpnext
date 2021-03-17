@@ -4,7 +4,8 @@
 const group_by_options_gp = [
 	"Ungrouped", "Group by Invoice", "Group by Customer", "Group by Customer Group",
 	"Group by Item", "Group by Item Group", "Group by Brand", "Group by Warehouse",
-	"Group by Territory", "Group by Sales Person"
+	"Group by Territory", "Group by Sales Person", "Group by Item Source",
+	"Group by Transaction Type", "Group by Project", "Group by Cost Center"
 ]
 
 frappe.query_reports["Gross Profit"] = {
@@ -85,12 +86,6 @@ frappe.query_reports["Gross Profit"] = {
 			"options": "Brand"
 		},
 		{
-			fieldname: "item_source",
-			label: __("Item Source"),
-			fieldtype: "Link",
-			options: "Item Source"
-		},
-		{
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
@@ -101,6 +96,30 @@ frappe.query_reports["Gross Profit"] = {
 			"label": __("Batch"),
 			"fieldtype": "Link",
 			"options": "Batch"
+		},
+		{
+			"fieldname":"item_source",
+			"label": __("Item Source"),
+			"fieldtype": "Link",
+			"options": "Item Source"
+		},
+		{
+			"fieldname":"transaction_type",
+			"label": __("Transaction Type"),
+			"fieldtype": "Link",
+			"options": "Transaction Type"
+		},
+		{
+			"fieldname":"project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
+		},
+		{
+			"fieldname":"cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center"
 		},
 		{
 			fieldname: "include_non_stock_items",
