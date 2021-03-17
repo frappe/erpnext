@@ -578,6 +578,10 @@ def validate_mobile_pakistan_in_contact(doc, method):
 		if d.is_primary_mobile_no:
 			validate_mobile_pakistan(d.phone)
 
+def validate_cnic_in_contact(doc, method):
+	if doc.get('tax_cnic'):
+		validate_ntn_cnic_strn(cnic=doc.tax_cnic)
+
 def validate_mobile_pakistan(mobile_no):
 	if not mobile_no:
 		return

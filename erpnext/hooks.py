@@ -264,7 +264,8 @@ doc_events = {
 		"after_insert": "erpnext.communication.doctype.call_log.call_log.set_caller_information",
 		"validate": [
 			"erpnext.crm.utils.update_lead_phone_numbers",
-			"erpnext.accounts.party.validate_mobile_pakistan_in_contact"
+			"erpnext.accounts.party.validate_mobile_pakistan_in_contact",
+			"erpnext.accounts.party.validate_cnic_in_contact",
 		]
 	},
 	"Lead": {

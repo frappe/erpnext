@@ -3,8 +3,13 @@
 frappe.provide("erpnext.utils");
 
 frappe.ui.form.on("Contact", {
-	refresh: function(frm) {
+	validate: function (frm) {
 		erpnext.utils.format_mobile_pakistan_in_contact(frm);
+		erpnext.utils.format_cnic(frm, "tax_cnic");
+	},
+
+	tax_cnic: function (frm) {
+		erpnext.utils.format_cnic(frm, "tax_cnic");
 	}
 });
 
