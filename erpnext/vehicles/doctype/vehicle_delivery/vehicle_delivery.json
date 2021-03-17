@@ -133,15 +133,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Vehicle Delivery",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "default": "Today",
    "fieldname": "posting_date",
    "fieldtype": "Date",
@@ -261,15 +252,6 @@
    "fieldtype": "Data",
    "label": "License Plate",
    "no_copy": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Vehicle Delivery",
-   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -455,12 +437,21 @@
    "label": "Keys",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Delivery",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-18 02:35:13.154624",
+ "modified": "2021-03-18 02:46:10.724190",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",
