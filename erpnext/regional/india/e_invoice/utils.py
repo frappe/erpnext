@@ -682,6 +682,8 @@ class GSPConnector():
 			self.raise_error(True)
 
 	def cancel_irn(self, irn, reason, remark):
+		data, res = {}, {}
+		try:
 		# validate cancellation
 		if time_diff_in_hours(now_datetime(), self.invoice.ack_date) > 24:
 			frappe.throw(_('E-Invoice cannot be cancelled after 24 hours of IRN generation.'), title=_('Not Allowed'))
@@ -711,9 +713,11 @@ class GSPConnector():
 
 		except RequestFailed:
 			errors = self.sanitize_error_message(res.get('message'))
+			self.set_failed_status(errors=errors)
 			self.raise_error(errors=errors)
 
-		except Exception:
+		except Exception as e:
+			self.set_failed_status(errors=str(e))
 			self.log_error(data)
 			self.raise_error(True)
 
@@ -825,6 +829,9 @@ class GSPConnector():
 			]
 			then we trim down the message by looping over errors
 		'''
+		if not message:
+			return []
+
 		errors = re.findall(': [^:]+', message)
 		for idx, e in enumerate(errors):
 			# remove colons
@@ -914,7 +921,8 @@ class GSPConnector():
 
 	def set_failed_status(self, errors=None):
 		frappe.db.rollback()
-		frappe.db.set_value(self.invoice.doctype, self.invoice.name, 'einvoice_status', 'Failed', update_modified=False)
+		self.invoice.einvoice_status = 'Failed'
+		self.update_invoice()
 		frappe.db.commit()
 
 def sanitize_for_json(string):
@@ -959,8 +967,10 @@ def generate_einvoices(docnames):
 		if failures:
 			show_bulk_generation_failure_message(failures)
 		else:
-			frappe.msgprint(_('{} e-invoice generated successfully', title=_('Bulk E-Invoice Generation Success'))
-				.format(frappe.bold(len(docnames))))
+			frappe.msgprint(
+				_('{} e-invoice generated successfully').format(frappe.bold(len(docnames))),
+				title=_('Bulk E-Invoice Generation Success')
+			)
 	else:
 		enqueue_bulk_action(schedule_bulk_generate_irn, docnames=docnames)
 
@@ -999,8 +1009,10 @@ def cancel_irns(docnames, reason, remark):
 		if failures:
 			show_bulk_action_failure_message(failures)
 		else:
-			frappe.msgprint(_('{} e-invoice generated successfully', title=_('Bulk E-Invoice Generation Success'))
-				.format(frappe.bold(len(docnames))))
+			frappe.msgprint(
+				_('{} e-invoice cancelled successfully').format(frappe.bold(len(docnames))),
+				title=_('Bulk E-Invoice Cancellation Success')
+			)
 	else:
 		enqueue_bulk_action(schedule_bulk_cancel_irn, docnames=docnames, reason=reason, remark=remark)
 
