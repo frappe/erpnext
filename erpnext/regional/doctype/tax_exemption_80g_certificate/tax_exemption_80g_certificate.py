@@ -16,6 +16,7 @@ class TaxExemption80GCertificate(Document):
 		self.validate_duplicates()
 		self.validate_company_details()
 		self.set_company_address()
+		self.calculate_total()
 		self.set_title()
 
 	def validate_date(self):
@@ -54,8 +55,17 @@ class TaxExemption80GCertificate(Document):
 		self.company_address = address.company_address
 		self.company_address_display = address.company_address_display
 
+	def calculate_total(self):
+		if self.recipient == 'Donor':
+			return
+
+		total = 0
+		for entry in self.payments:
+			total += flt(entry.amount)
+		self.total = total
+
 	def set_title(self):
-		if self.recipient == "Member":
+		if self.recipient == 'Member':
 			self.title = self.member_name
 		else:
 			self.title = self.donor_name
