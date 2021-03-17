@@ -12,7 +12,7 @@ from frappe.model.document import Document
 pricing_rule_fields = ['apply_on', 'mixed_conditions', 'is_cumulative', 'other_item_code', 'other_item_group'
 	'apply_rule_on_other', 'other_brand', 'selling', 'buying', 'applicable_for', 'valid_from',
 	'valid_upto', 'customer', 'customer_group', 'territory', 'sales_partner', 'campaign', 'supplier',
-	'supplier_group', 'company', 'currency']
+	'supplier_group', 'company', 'currency', 'apply_multiple_pricing_rules']
 
 other_fields = ['min_qty', 'max_qty', 'min_amt',
 	'max_amt', 'priority','warehouse', 'threshold_percentage', 'rule_description']
