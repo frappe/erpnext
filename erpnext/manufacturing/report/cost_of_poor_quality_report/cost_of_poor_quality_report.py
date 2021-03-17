@@ -20,7 +20,7 @@ def get_data(report_filters):
 	if operations:
 		operations = [d.name for d in operations]
 		fields = ["production_item as item_code", "item_name", "work_order", "operation",
-			"workstation", "total_time_in_mins", "name", "hour_rate"]
+			"workstation", "total_time_in_mins", "name", "hour_rate", "serial_no", "batch_no"]
 
 		filters = get_filters(report_filters, operations)
 
@@ -30,15 +30,18 @@ def get_data(report_filters):
 		for row in job_cards:
 			row.operating_cost = flt(row.hour_rate) * (flt(row.total_time_in_mins) / 60.0)
 			update_raw_material_cost(row, report_filters)
-			update_time_details(row, report_filters, data)
+			data.append(row)
 
 	return data
 
 def get_filters(report_filters, operations):
 	filters = {"docstatus": 1, "operation": ("in", operations), "is_corrective_job_card": 1}
-	for field in ["name", "work_order", "operation", "workstation", "company"]:
+	for field in ["name", "work_order", "operation", "workstation", "company", "serial_no", "batch_no", "production_item"]:
 		if report_filters.get(field):
-			filters[field] = report_filters.get(field)
+			if field != 'serial_no':
+				filters[field] = report_filters.get(field)
+			else:
+				filters[field] = ('like', '% {} %'.format(report_filters.get(field)))
 
 	return filters
 
@@ -47,24 +50,6 @@ def update_raw_material_cost(row, filters):
 	for data in frappe.get_all("Job Card Item", fields = ["amount"],
 		filters={"parent": row.name, "docstatus": 1}):
 		row.rm_cost += data.amount
-
-def update_time_details(row, filters, data):
-	args = frappe._dict({"item_code": "", "item_name": "", "name": "", "work_order":"",
-		"operation": "", "workstation":"", "operating_cost": "", "rm_cost": "", "total_time_in_mins": ""})
-
-	i=0
-	for time_log in frappe.get_all("Job Card Time Log",
-		fields = ["from_time", "to_time", "time_in_mins"],
-		filters={"parent": row.name, "docstatus": 1,
-			"from_time": (">=", filters.from_date), "to_time": ("<=", filters.to_date)}):
-
-		if i==0:
-			i += 1
-			row.update(time_log)
-			data.append(row)
-		else:
-			args.update(time_log)
-			data.append(args)
 
 def get_columns(filters):
 	return [
@@ -103,6 +88,18 @@ def get_columns(filters):
 			"width": "100"
 		},
 		{
+			"label": _("Serial No"),
+			"fieldtype": "Data",
+			"fieldname": "serial_no",
+			"width": "100"
+		},
+		{
+			"label": _("Batch No"),
+			"fieldtype": "Data",
+			"fieldname": "batch_no",
+			"width": "100"
+		},
+		{
 			"label": _("Workstation"),
 			"fieldtype": "Link",
 			"fieldname": "workstation",
@@ -126,23 +123,5 @@ def get_columns(filters):
 			"fieldtype": "Float",
 			"fieldname": "total_time_in_mins",
 			"width": "100"
-		},
-		{
-			"label": _("From Time"),
-			"fieldtype": "Datetime",
-			"fieldname": "from_time",
-			"width": "100"
-		},
-		{
-			"label": _("To Time"),
-			"fieldtype": "Datetime",
-			"fieldname": "to_time",
-			"width": "100"
-		},
-		{
-			"label": _("Time in Mins"),
-			"fieldtype": "Float",
-			"fieldname": "time_in_mins",
-			"width": "100"
-		},
+		}
 	]

@@ -16,15 +16,18 @@
   "production_item",
   "item_name",
   "for_quantity",
+  "serial_no",
   "column_break_12",
   "wip_warehouse",
   "quality_inspection",
   "project",
+  "batch_no",
   "operation_section_section",
   "operation",
   "operation_row_number",
   "column_break_18",
   "workstation",
+  "employee",
   "section_break_21",
   "sub_operations",
   "timing_detail",
@@ -163,8 +166,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
-   "options": "Job Card Item",
-   "read_only": 1
+   "options": "Job Card Item"
   },
   {
    "collapsible": 1,
@@ -373,11 +375,28 @@
    "fieldtype": "Link",
    "label": "For Operation",
    "options": "Operation"
+  },
+  {
+   "fieldname": "employee",
+   "fieldtype": "Table MultiSelect",
+   "label": "Employee",
+   "options": "Job Card Time Log"
+  },
+  {
+   "fieldname": "serial_no",
+   "fieldtype": "Small Text",
+   "label": "Serial No"
+  },
+  {
+   "fieldname": "batch_no",
+   "fieldtype": "Link",
+   "label": "Batch No",
+   "options": "Batch"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-02-03 20:36:51.826944",
+ "modified": "2021-03-16 15:59:32.766484",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Job Card",

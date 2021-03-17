@@ -527,7 +527,8 @@
    "depends_on": "has_serial_no",
    "fieldname": "serial_no",
    "fieldtype": "Small Text",
-   "label": "Serial Nos"
+   "label": "Serial Nos",
+   "no_copy": 1
   },
   {
    "default": "0",
@@ -552,7 +553,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-16 13:27:51.116484",
+ "modified": "2021-06-20 15:19:14.902699",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
