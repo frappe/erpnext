@@ -303,6 +303,7 @@
    "options": "Project"
   },
   {
+   "collapsible": 1,
    "fieldname": "address_and_contact_section",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
@@ -417,7 +418,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-17 21:48:38.086610",
+ "modified": "2021-03-17 22:26:22.734355",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",
