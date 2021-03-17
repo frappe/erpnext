@@ -143,8 +143,8 @@ class SalesInvoice(SellingController):
 		if self.docstatus == 0:
 			self.validate_camps()
 
-		if self.docstatus == 1:
-			self.assign_cai()
+		# if self.docstatus == 1:
+		# 	self.assign_cai()
 
 	def calculated_taxes(self):
 		taxed15 = 0
@@ -252,61 +252,61 @@ class SalesInvoice(SellingController):
 		elif number >= 10000000:
 			return(str(number))
 
-	def assign_cai(self):
-		user = frappe.session.user
-		gcai_allocation = frappe.get_all("GCAI Allocation", ["branch", "pos"], filters = {"user": user, "company": self.company, "type_document": self.type_document})
+	# def assign_cai(self):
+	# 	user = frappe.session.user
+	# 	gcai_allocation = frappe.get_all("GCAI Allocation", ["branch", "pos"], filters = {"user": user, "company": self.company, "type_document": self.type_document})
 
-		if not gcai_allocation:
-			frappe.throw(_("The user {} does not have an assigned CAI".format(user)))
+	# 	if not gcai_allocation:
+	# 		frappe.throw(_("The user {} does not have an assigned CAI".format(user)))
 
-		for item in gcai_allocation:
-			cais = frappe.get_all("GCAI", ["codedocument", "codebranch", "codepos","initial_range", "final_range", "current_numbering", "name", "cai", "due_date", "sucursal"], filters = {"company": self.company, "sucursal": item.branch, "pos_name": item.pos, "state": "Valid", "type_document": self.type_document})
+	# 	for item in gcai_allocation:
+	# 		cais = frappe.get_all("GCAI", ["codedocument", "codebranch", "codepos","initial_range", "final_range", "current_numbering", "name", "cai", "due_date", "sucursal"], filters = {"company": self.company, "sucursal": item.branch, "pos_name": item.pos, "state": "Valid", "type_document": self.type_document})
 			
-			if not cais:
-				frappe.throw(_("There is no CAI available to generate this invoice."))
+	# 		if not cais:
+	# 			frappe.throw(_("There is no CAI available to generate this invoice."))
 
-			for cai in cais:
-				if str(cai.due_date) < str(datetime.now()):
-					self.validate_cai(cai.name)
+	# 		for cai in cais:
+	# 			if str(cai.due_date) < str(datetime.now()):
+	# 				self.validate_cai(cai.name)
 
-					if len(cais) == 1:
-						frappe.throw(_("The CAI {} arrived at its expiration day.".format(cai.cai)))
+	# 				if len(cais) == 1:
+	# 					frappe.throw(_("The CAI {} arrived at its expiration day.".format(cai.cai)))
 					
-					continue
+	# 				continue
 									
-				if cai.current_numbering > cai.final_range:					
-					self.validate_cai(cai.name)
+	# 			if cai.current_numbering > cai.final_range:					
+	# 				self.validate_cai(cai.name)
 
-					if len(cais) == 1:
-						frappe.throw(_("The CAI {} reached its limit numbering.".format(cai.cai)))
+	# 				if len(cais) == 1:
+	# 					frappe.throw(_("The CAI {} reached its limit numbering.".format(cai.cai)))
 					
-					continue
+	# 				continue
 
-				initial_range = self.initial_number(cai.initial_range)
-				final_range = self.initial_number(cai.final_range)
-				number = self.initial_number(cai.current_numbering)
+	# 			initial_range = self.initial_number(cai.initial_range)
+	# 			final_range = self.initial_number(cai.final_range)
+	# 			number = self.initial_number(cai.current_numbering)
 
-				self.pos = item.pos
+	# 			self.pos = item.pos
 
-				self.due_date_cai = cai.due_date
+	# 			self.due_date_cai = cai.due_date
 
-				self.cai = cai.cai
+	# 			self.cai = cai.cai
 
-				self.branch_office = cai.sucursal
+	# 			self.branch_office = cai.sucursal
 
-				self.authorized_range = "{} - {}".format(initial_range, final_range)
+	# 			self.authorized_range = "{} - {}".format(initial_range, final_range)
 
-				self.cashier = user
+	# 			self.cashier = user
 
-				self.numeration = "{}-{}-{}-{}".format(cai.codebranch, cai.codepos, cai.codedocument, number)
+	# 			self.numeration = "{}-{}-{}-{}".format(cai.codebranch, cai.codepos, cai.codedocument, number)
 
-				doc = frappe.get_doc("GCAI", cai.name)
-				doc.current_numbering += 1 
-				doc.save()
+	# 			doc = frappe.get_doc("GCAI", cai.name)
+	# 			doc.current_numbering += 1 
+	# 			doc.save()
 
-				amount = int(cai.final_range) - int(cai.current_numbering)
-				self.alerts(cai.due_date, amount)
-				break
+	# 			amount = int(cai.final_range) - int(cai.current_numbering)
+	# 			self.alerts(cai.due_date, amount)
+	# 			break
 	
 	def alerts(self, date, amount):
 		gcai_setting = frappe.get_all("GCai Settings", ["expired_days", "expired_amount"])
