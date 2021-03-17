@@ -12,7 +12,7 @@ from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
 
-test_dependencies = ["Leave Allocation", "Leave Block List"]
+test_dependencies = ["Leave Allocation", "Leave Block List", "Employee"]
 
 _test_records = [
  {
