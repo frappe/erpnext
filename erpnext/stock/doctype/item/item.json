@@ -215,6 +215,7 @@
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
+   "reqd": 1,
    "search_index": 1
   },
   {
@@ -1245,7 +1246,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-03-12 15:05:48.882713",
+ "modified": "2021-03-15 18:33:11.319487",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

@@ -20,9 +20,14 @@
   "available_qty_at_wip_warehouse",
   "column_break_16",
   "uom",
-  "conversion_factor",
   "allow_alternative_item",
-  "include_item_in_manufacturing"
+  "include_item_in_manufacturing",
+  "section_break_19",
+  "stock_required_qty",
+  "column_break_21",
+  "conversion_factor",
+  "column_break_23",
+  "stock_uom"
  ],
  "fields": [
   {
@@ -149,10 +154,36 @@
    "label": "Conversion Factor",
    "precision": "9",
    "read_only": 1
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_required_qty",
+   "fieldtype": "Float",
+   "label": "Required Qty (as per Stock UOM)",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_21",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2021-03-13 11:52:01.961843",
+ "modified": "2021-03-15 15:23:22.096164",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

@@ -44,6 +44,7 @@
   "ordered_qty",
   "column_break_37",
   "min_order_qty",
+  "required_qty",
   "more_info",
   "sales_order",
   "sales_order_item",
@@ -292,6 +293,7 @@
   {
    "fieldname": "material_request_plan_item",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Material Request Plan Item",
    "no_copy": 1,
    "print_hide": 1,
@@ -476,11 +478,17 @@
   {
    "fieldname": "column_break_37",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "required_qty",
+   "fieldtype": "Float",
+   "label": "Required Qty",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-12 21:37:19.466669",
+ "modified": "2021-03-16 15:07:55.165276",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

@@ -434,7 +434,6 @@ $.extend(erpnext.item, {
 	},
 
 	toggle_naming_fields: function(frm) {
-		frm.toggle_reqd("item_name", frm.doc.item_naming_by == "Item Name" ? 1 : 0);
 		if (frm.doc.__islocal) {
 			frm.toggle_reqd("item_code", frm.doc.item_naming_by == "Item Code" ? 1 : 0);
 			frm.toggle_reqd("naming_series", frm.doc.item_naming_by == "Naming Series" ? 1 : 0);

@@ -504,25 +504,22 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 	make_raw_material_request_dialog: function(r) {
 		var me = this;
 		var fields = [
-			{fieldtype:'Check', fieldname:'include_exploded_items',
-				label: __('Include Exploded Items')},
-			{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty',
-				label: __('Ignore Existing Ordered Qty')},
+			{fieldtype:'Check', fieldname:'include_exploded_items', default: 1, label: __('Include Exploded Items')},
+			{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty', label: __('Ignore Existing Ordered Qty')},
+			{fieldtype:'Link', options: 'Warehouse', fieldname:'for_warehouse', label: __('For Warehouse'), reqd: 1,
+				get_query: () => erpnext.queries.warehouse(me.frm.doc)},
 			{
 				fieldtype:'Table', fieldname: 'items',
 				description: __('Select BOM, Qty and For Warehouse'),
 				fields: [
-					{fieldtype:'Read Only', fieldname:'item_code',
-						label: __('Item Code'), in_list_view:1},
-					{fieldtype:'Link', fieldname:'warehouse', options: 'Warehouse',
-						label: __('For Warehouse'), in_list_view:1},
-					{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1,
-						label: __('BOM'), in_list_view:1, get_query: function(doc) {
+					{fieldtype:'Link', options: "Item", fieldname:'item_code', label: __('Item Code'), read_only: 1, columns: 5, in_list_view:1},
+					{fieldtype:'Data', fieldname:'item_name', label: __('Item Name'), read_only: 1},
+					{fieldtype:'Link', fieldname:'bom', options: 'BOM', reqd: 1, label: __('BOM'), columns: 3, in_list_view:1,
+						get_query: function(doc) {
 							return {filters: {item: doc.item_code}};
 						}
 					},
-					{fieldtype:'Float', fieldname:'required_qty', reqd: 1,
-						label: __('Qty'), in_list_view:1},
+					{fieldtype:'Float', fieldname:'required_qty', reqd: 1, label: __('Qty'), columns: 2, in_list_view:1},
 				],
 				data: r.message,
 				get_data: function() {
@@ -533,6 +530,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		var d = new frappe.ui.Dialog({
 			title: __("Items for Raw Material Request"),
 			fields: fields,
+			size: "large",
 			primary_action: function() {
 				var data = d.get_values();
 				me.frm.call({

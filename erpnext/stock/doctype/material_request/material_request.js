@@ -59,6 +59,7 @@ frappe.ui.form.on('Material Request', {
 
 	refresh: function(frm) {
 		frm.events.make_custom_buttons(frm);
+		frm.cscript.add_rounding_button();
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 	},
 
@@ -369,6 +370,23 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 
 	validate: function() {
 		set_schedule_date(this.frm);
+	},
+
+	add_rounding_button: function () {
+		var me = this;
+		if (me.frm.doc.docstatus === 0) {
+			me.frm.fields_dict.items.grid.add_custom_button(__("Round Up Qty"),  function () {
+				me.frm.call({
+					method: "round_up_qty",
+					doc: me.frm.doc,
+					callback: function(r) {
+						if(!r.exc) {
+							me.frm.dirty();
+						}
+					}
+				});
+			})
+		}
 	},
 
 	onload: function(doc, cdt, cdn) {

@@ -69,22 +69,7 @@ class Bin(Document):
 	def update_reserved_qty_for_production(self):
 		'''Update qty reserved for production from Production Item tables
 			in open work orders'''
-		self.reserved_qty_for_production = frappe.db.sql('''
-			SELECT
-				CASE WHEN ifnull(skip_transfer, 0) = 0 THEN
-					SUM((item.required_qty - item.transferred_qty) * item.conversion_factor)
-				ELSE
-					SUM((item.required_qty - item.consumed_qty) * item.conversion_factor)
-				END
-			FROM `tabWork Order` pro, `tabWork Order Item` item
-			WHERE
-				item.item_code = %s
-				and item.parent = pro.name
-				and pro.docstatus = 1
-				and item.source_warehouse = %s
-				and pro.status not in ("Stopped", "Completed")
-				and (item.required_qty > item.transferred_qty or item.required_qty > item.consumed_qty)
-		''', (self.item_code, self.warehouse))[0][0]
+		self.reserved_qty_for_production = get_reserved_qty_for_production(self.item_code, self.warehouse)
 
 		self.set_projected_qty()
 
@@ -132,6 +117,33 @@ class Bin(Document):
 		self.db_set('reserved_qty_for_sub_contract', reserved_qty_for_sub_contract)
 		self.set_projected_qty()
 		self.db_set('projected_qty', self.projected_qty)
+
+
+def get_reserved_qty_for_production(item_code, warehouse, work_order=None):
+	work_order_condition = ""
+	if work_order:
+		work_order_condition = " and pro.name = %(work_order)s"
+
+	return flt(frappe.db.sql('''
+		SELECT
+			CASE WHEN ifnull(skip_transfer, 0) = 0 THEN
+				SUM((item.required_qty - item.transferred_qty) * item.conversion_factor)
+			ELSE
+				SUM((item.required_qty - item.consumed_qty) * item.conversion_factor)
+			END
+		FROM `tabWork Order` pro, `tabWork Order Item` item
+		WHERE
+			item.item_code = %(item_code)s
+			and item.parent = pro.name
+			and pro.docstatus = 1
+			and item.source_warehouse = %(warehouse)s
+			and pro.status not in ("Stopped", "Completed")
+			and (item.required_qty > item.transferred_qty or item.required_qty > item.consumed_qty)
+			{0}
+	'''.format(work_order_condition), {
+		'item_code': item_code, 'warehouse': warehouse, 'work_order': work_order
+	})[0][0])
+
 
 def on_doctype_update():
 	frappe.db.add_index("Bin", ["item_code", "warehouse"])
