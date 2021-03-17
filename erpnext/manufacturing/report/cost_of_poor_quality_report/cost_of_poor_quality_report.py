@@ -24,8 +24,6 @@ def get_data(report_filters):
 
 		filters = get_filters(report_filters, operations)
 
-		filters = get_filters(report_filters, operations)
-
 		job_cards = frappe.get_all("Job Card", fields = fields,
 			filters = filters)
 
