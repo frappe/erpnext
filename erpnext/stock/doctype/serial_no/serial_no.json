@@ -453,7 +453,7 @@
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2020-11-19 11:56:03.644717",
+ "modified": "2021-03-17 15:25:02.743289",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
@@ -479,16 +479,8 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock Manager",
-   "set_user_permissions": 1,
+   "role": "Stock User",
    "write": 1
-  },
-  {
-   "email": 1,
-   "print": 1,
-   "read": 1,
-   "report": 1,
-   "role": "Stock User"
   },
   {
    "export": 1,
