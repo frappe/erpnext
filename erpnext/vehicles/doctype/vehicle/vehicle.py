@@ -70,7 +70,7 @@ class Vehicle(Document):
 				serial_no_doc.item_code = self.item_code
 				serial_no_doc.serial_no = self.name
 				serial_no_doc.vehicle = self.name
-				serial_no_doc.insert()
+				serial_no_doc.insert(ignore_permissions=True)
 
 				self.update_reference_from_serial_no(serial_no_doc)
 				self.db_update()
