@@ -293,7 +293,7 @@ $.extend(erpnext.utils, {
 	},
 	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
 		var d = locals[dt][dn];
-		if(d[fieldname]){
+		if(d[parent_fieldname]){
 			var cl = doc[table_fieldname] || [];
 			for(var i = 0; i < cl.length; i++) {
 				cl[i][fieldname] = doc[parent_fieldname];
