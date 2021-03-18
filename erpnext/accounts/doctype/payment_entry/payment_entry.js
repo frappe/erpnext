@@ -593,12 +593,22 @@ frappe.ui.form.on('Payment Entry', {
 			{fieldtype:"Column Break"},
 			{fieldtype:"Float", label: __("Less Than Amount"), fieldname:"outstanding_amt_less_than"},
 			{fieldtype:"Section Break"},
+			{fieldtype:"Link", label:__("Cost Center"), fieldname:"cost_center", options:"Cost Center",
+                "get_query": function() {
+                    return {
+                        "filters": {"company": frm.doc.company}
+					}
+				}
+			},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Section Break"},
 			{fieldtype:"Check", label: __("Allocate Payment Amount"), fieldname:"allocate_payment_amount", default:1},
 		];
 
 		frappe.prompt(fields, function(filters){
 			frappe.flags.allocate_payment_amount = true;
 			frm.events.validate_filters_data(frm, filters);
+			frm.doc.cost_center = filters.cost_center;
 			frm.events.get_outstanding_documents(frm, filters);
 		}, __("Filters"), __("Get Outstanding Documents"));
 	},
@@ -1045,6 +1055,11 @@ frappe.ui.form.on('Payment Entry', {
 								frm.set_value("paid_from_account_balance", r.message.paid_from_account_balance);
 								frm.set_value("paid_to_account_balance", r.message.paid_to_account_balance);
 								frm.set_value("party_balance", r.message.party_balance);
+<<<<<<< HEAD
+=======
+							}
+						]);
+>>>>>>> 9bf1083d9e (fix: payment references from disappearing on selecting cost center (#24831))
 
 					}
 				}
