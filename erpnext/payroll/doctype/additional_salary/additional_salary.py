@@ -9,16 +9,9 @@ from frappe import _, bold
 from frappe.utils import getdate, date_diff, comma_and, formatdate
 
 class AdditionalSalary(Document):
-
 	def on_submit(self):
 		if self.ref_doctype == "Employee Advance" and self.ref_docname:
 			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", self.amount)
-
-	def before_insert(self):
-		if frappe.db.exists("Additional Salary", {"employee": self.employee, "salary_component": self.salary_component,
-			"amount": self.amount, "payroll_date": self.payroll_date, "company": self.company, "docstatus": 1}):
-
-			frappe.throw(_("Additional Salary Component Exists."))
 
 	def validate(self):
 		self.validate_dates()
