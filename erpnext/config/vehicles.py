@@ -88,6 +88,13 @@ def get_data():
 					"doctype": "Vehicle Allocation",
 					"dependencies": ["Vehicle Allocation"],
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Stock",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
+				},
 			]
 		},
 		{
