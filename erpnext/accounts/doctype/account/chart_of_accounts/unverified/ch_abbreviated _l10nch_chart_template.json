@@ -54,7 +54,7 @@
                   },
                   "account_number": "106"
               },
-              "Comptes d'attente"": {
+              "Comptes d'attente": {
                   "Compte de transfert": {
                     "account_number": "1090"
                   },
@@ -192,7 +192,7 @@
                       "account_type": "Stock",
                       "account_number": "1260"
                   },
-                  "Stocks de produits semi-ouvr\u00e9s" {
+                  "Stocks de produits semi-ouvr\u00e9s": {
                       "account_type": "Stock",
                       "account_number": "1270"
                   },
