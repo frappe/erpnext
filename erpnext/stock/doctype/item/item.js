@@ -85,7 +85,7 @@ frappe.ui.form.on("Item", {
 		}
 		if (frm.doc.variant_of) {
 			frm.set_intro(__('This Item is a Variant of {0} (Template).',
-				[`<a href="/app/item/${frm.doc.variant_of}">${frm.doc.variant_of}</a>`]), true);
+				[`<a href="/app/item/${frm.doc.variant_of}" onclick="location.reload()">${frm.doc.variant_of}</a>`]), true);
 		}
 
 		if (frappe.defaults.get_default("item_naming_by")!="Naming Series" || frm.doc.variant_of) {
@@ -717,6 +717,18 @@ $.extend(erpnext.item, {
 				.on('focus', function(e) {
 					$(e.target).val('').trigger('input');
 				})
+				.on("awesomplete-open", () => {
+					let modal = field.$input.parents('.modal-dialog')[0];
+					if (modal) {
+						$(modal).removeClass("modal-dialog-scrollable");
+					}
+				})
+				.on("awesomplete-close", () => {
+					let modal = field.$input.parents('.modal-dialog')[0];
+					if (modal) {
+						$(modal).addClass("modal-dialog-scrollable");
+					}
+				});
 		});
 	},
 
