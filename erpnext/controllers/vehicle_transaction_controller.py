@@ -15,10 +15,11 @@ from six import string_types
 
 
 force_fields = [
-	'customer_name', 'booking_customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'receiver_contact_cnic',
+	'customer_name', 'booking_customer_name', 'vehicle_owner_name', 'finance_type',
+	'tax_id', 'tax_cnic', 'tax_strn', 'receiver_contact_cnic',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
-	'item_name', 'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered', 'vehicle_color'
+	'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered', 'vehicle_color'
 ]
 
 
@@ -73,7 +74,7 @@ class VehicleTransactionController(StockController):
 			if not self.get(k) or k in force_fields:
 				self.set(k, v)
 
-		if self.get('item_code'):
+		if self.get('item_code') and not self.get('item_name'):
 			self.item_name = frappe.get_cached_value("Item", self.item_code, 'item_name')
 
 	def update_stock_ledger(self):
@@ -214,7 +215,7 @@ def get_customer_details(args):
 	booking_details = frappe._dict()
 	if args.vehicle_booking_order:
 		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
-			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'customer_address'], as_dict=1)
+			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'customer_address', 'finance_type'], as_dict=1)
 
 	# Customer Name and Tax IDs
 	out.customer_name = customer_details.customer_name
@@ -223,6 +224,8 @@ def get_customer_details(args):
 	out.tax_id = booking_details.tax_id or customer_details.tax_id
 	out.tax_cnic = booking_details.tax_cnic or customer_details.tax_cnic
 	out.tax_strn = booking_details.tax_strn or customer_details.tax_strn
+
+	out.finance_type = booking_details.finance_type
 
 	# Customer Address
 	out.customer_address = args.customer_address or booking_details.customer_address

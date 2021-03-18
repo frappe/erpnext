@@ -26,6 +26,7 @@
   "set_posting_time",
   "section_break_18",
   "vehicle_booking_order",
+  "finance_type",
   "column_break_20",
   "project",
   "address_and_contact_section",
@@ -180,12 +181,11 @@
    "search_index": 1
   },
   {
-   "depends_on": "eval:doc.item_code && doc.item_name != doc.item_code",
    "fetch_from": "item_code.item_name",
+   "fetch_if_empty": 1,
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Vehicle Item Name",
-   "read_only": 1
+   "label": "Vehicle Item Name"
   },
   {
    "fieldname": "warehouse",
@@ -473,12 +473,20 @@
   {
    "fieldname": "column_break_20",
    "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_booking_order.finance_type",
+   "fieldname": "finance_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Finance Type",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-18 11:45:38.870682",
+ "modified": "2021-03-18 16:05:41.033261",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",
