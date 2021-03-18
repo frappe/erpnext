@@ -779,7 +779,7 @@ class init_landed_taxes_and_totals(object):
 		for d in self.doc.get(self.tax_field):
 			if d.account_currency == company_currency:
 				d.exchange_rate = 1
-			elif not d.exchange_rate or d.exchange_rate == 1 or self.doc.posting_date:
+			elif not d.exchange_rate:
 				d.exchange_rate = get_exchange_rate(self.doc.posting_date, account=d.expense_account,
 					account_currency=d.account_currency, company=self.doc.company)
 
