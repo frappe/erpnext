@@ -14,8 +14,8 @@
   "customer_name",
   "booking_customer_name",
   "column_break_8",
-  "vehicle_booking_order",
-  "project",
+  "vehicle_owner",
+  "vehicle_owner_name",
   "tax_id",
   "tax_cnic",
   "tax_strn",
@@ -24,6 +24,10 @@
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "section_break_18",
+  "vehicle_booking_order",
+  "column_break_20",
+  "project",
   "address_and_contact_section",
   "customer_address",
   "address_display",
@@ -446,12 +450,35 @@
    "options": "Vehicle Delivery",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "vehicle_owner",
+   "fieldtype": "Link",
+   "label": "Vehicle Owner",
+   "no_copy": 1,
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.vehicle_owner && doc.vehicle_owner_name != doc.vehicle_owner",
+   "fieldname": "vehicle_owner_name",
+   "fieldtype": "Data",
+   "label": "Vehicle Owner Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-18 02:46:10.724190",
+ "modified": "2021-03-18 11:45:38.870682",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",

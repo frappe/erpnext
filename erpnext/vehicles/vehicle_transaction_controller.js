@@ -131,6 +131,10 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		this.get_customer_details();
 	},
 
+	vehicle_owner: function () {
+		this.get_customer_details();
+	},
+
 	vehicle: function () {
 		this.get_vehicle_details();
 	},
@@ -144,6 +148,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				args: {
 					company: me.frm.doc.company,
 					customer: me.frm.doc.customer,
+					vehicle_owner: me.frm.doc.vehicle_owner,
 					supplier: me.frm.doc.supplier,
 					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
 					posting_date: me.frm.doc.posting_date

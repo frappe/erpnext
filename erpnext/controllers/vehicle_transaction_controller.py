@@ -130,7 +130,12 @@ class VehicleTransactionController(StockController):
 
 			if self.get('customer'):
 				if self.customer not in (vbo.customer, vbo.financer):
-					frappe.throw(_("Customer/Financer does not match in {0}")
+					frappe.throw(_("Customer does not match in {0}")
+						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+
+			if self.get('vehicle_owner'):
+				if self.vehicle_owner not in (vbo.customer, vbo.financer):
+					frappe.throw(_("Vehicle Owner does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.get('supplier'):
@@ -201,20 +206,26 @@ def get_customer_details(args):
 		customer_details = frappe.get_cached_value("Customer", args.customer,
 			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn'], as_dict=1)
 
+	owner_details = frappe._dict()
+	if args.vehicle_owner:
+		owner_details = frappe.get_cached_value("Customer", args.vehicle_owner,
+			['customer_name'], as_dict=1)
+
 	booking_details = frappe._dict()
 	if args.vehicle_booking_order:
 		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
-			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn'], as_dict=1)
+			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'customer_address'], as_dict=1)
 
 	# Customer Name and Tax IDs
 	out.customer_name = customer_details.customer_name
 	out.booking_customer_name = booking_details.customer_name
+	out.vehicle_owner_name = owner_details.customer_name
 	out.tax_id = booking_details.tax_id or customer_details.tax_id
 	out.tax_cnic = booking_details.tax_cnic or customer_details.tax_cnic
 	out.tax_strn = booking_details.tax_strn or customer_details.tax_strn
 
 	# Customer Address
-	out.customer_address = args.customer_address
+	out.customer_address = args.customer_address or booking_details.customer_address
 	if not out.customer_address and args.customer:
 		out.customer_address = get_default_address("Customer", args.customer)
 
@@ -243,11 +254,13 @@ def get_vehicle_booking_order_details(args):
 		frappe.throw(_("Vehicle Booking Order is mandatory"))
 
 	out = frappe.db.get_value('Vehicle Booking Order', args.vehicle_booking_order,
-		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name as booking_customer_name', 'supplier',
-			'bill_no', 'bill_date'], as_dict=1)
+		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name as booking_customer_name', 'customer_address',
+			'supplier', 'bill_no', 'bill_date', 'financer', 'finance_type'], as_dict=1)
 
 	if args.doctype == "Vehicle Delivery":
 		del out['warehouse']
+
+	out.vehicle_owner = out.financer if out.financer and out.finance_type == 'Leased' else None
 
 	return out
 
