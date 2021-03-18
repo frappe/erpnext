@@ -8,7 +8,6 @@ test_records = frappe.get_test_records('Project')
 test_ignore = ["Sales Order"]
 
 from erpnext.projects.doctype.project_template.test_project_template import make_project_template
-from erpnext.projects.doctype.project.project import update_if_holiday
 from erpnext.projects.doctype.task.test_task import create_task
 from frappe.utils import getdate, nowdate, add_days
 
@@ -37,7 +36,7 @@ class TestProject(unittest.TestCase):
 
 		task1 = task_exists("Test Template Task Parent")
 		if not task1:
-			task1 = create_task(subject="Test Template Task Parent", is_group=1, is_template=1, begin=1, duration=1)
+			task1 = create_task(subject="Test Template Task Parent", is_group=1, is_template=1, begin=1, duration=4)
 
 		task2 = task_exists("Test Template Task Child 1")
 		if not task2:
@@ -52,7 +51,7 @@ class TestProject(unittest.TestCase):
 		tasks = frappe.get_all('Task', ['subject','exp_end_date','depends_on_tasks', 'name', 'parent_task'], dict(project=project.name), order_by='creation asc')
 
 		self.assertEqual(tasks[0].subject, 'Test Template Task Parent')
-		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 1))
+		self.assertEqual(getdate(tasks[0].exp_end_date), calculate_end_date(project, 1, 4))
 
 		self.assertEqual(tasks[1].subject, 'Test Template Task Child 1')
 		self.assertEqual(getdate(tasks[1].exp_end_date), calculate_end_date(project, 1, 3))
@@ -97,7 +96,8 @@ def get_project(name, template):
 		project_name = name,
 		status = 'Open',
 		project_template = template.name,
-		expected_start_date = nowdate()
+		expected_start_date = nowdate(),
+		company="_Test Company"
 	)).insert()
 
 	return project
@@ -131,7 +131,7 @@ def task_exists(subject):
 
 def calculate_end_date(project, start, duration):
 	start = add_days(project.expected_start_date, start)
-	start = update_if_holiday(project.holiday_list, start)
+	start = project.update_if_holiday(start)
 	end = add_days(start, duration)
-	end = update_if_holiday(project.holiday_list, end)
+	end = project.update_if_holiday(end)
 	return getdate(end)

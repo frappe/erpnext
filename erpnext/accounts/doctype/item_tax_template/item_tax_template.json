@@ -1,7 +1,7 @@
 {
+ "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:title",
  "creation": "2018-11-22 22:45:00.370913",
  "doctype": "DocType",
  "document_type": "Setup",
@@ -20,8 +20,7 @@
    "in_list_view": 1,
    "label": "Title",
    "no_copy": 1,
-   "reqd": 1,
-   "unique": 1
+   "reqd": 1
   },
   {
    "fieldname": "taxes",
@@ -33,12 +32,14 @@
   {
    "fieldname": "company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Company",
    "options": "Company",
    "reqd": 1
   }
  ],
- "modified": "2020-09-18 17:26:09.703215",
+ "links": [],
+ "modified": "2021-03-08 19:50:21.416513",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Item Tax Template",
@@ -81,5 +82,6 @@
  "show_name_in_global_search": 1,
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1
 }

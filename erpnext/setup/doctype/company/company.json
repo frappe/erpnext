@@ -726,7 +726,7 @@
   {
    "fieldname": "default_in_transit_warehouse",
    "fieldtype": "Link",
-   "label": "Default In Transit Warehouse",
+   "label": "Default In-Transit Warehouse",
    "options": "Warehouse"
   },
   {
@@ -747,7 +747,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-02-16 11:12:03.400217",
+ "modified": "2021-02-16 15:53:37.167589",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",

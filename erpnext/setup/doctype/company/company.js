@@ -140,7 +140,7 @@ frappe.ui.form.on("Company", {
 			doc: frm.doc,
 			freeze: true,
 			callback: function() {
-				frappe.msgprint(__("Default tax templates for sales and purchase are created."));
+				frappe.msgprint(__("Default tax templates for sales, purchase and items are created."));
 			}
 		})
 	},
