@@ -70,6 +70,7 @@
  ],
  "fields": [
   {
+   "allow_on_submit": 1,
    "fetch_from": "item_code.image",
    "fetch_if_empty": 1,
    "fieldname": "image",
@@ -383,6 +384,7 @@
    "label": "Picture"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "image_display",
    "fieldtype": "Image",
    "label": "Image Display",
@@ -486,7 +488,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-18 16:05:41.033261",
+ "modified": "2021-03-18 17:35:53.643910",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",
