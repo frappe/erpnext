@@ -14,11 +14,11 @@ class Vehicle(Document):
 	_copy_fields = [
 		'company',
 		'warehouse', 'sales_order',
-		'customer', 'customer_name',
+		'customer', 'customer_name', 'vehicle_owner', 'vehicle_owner_name',
 		'supplier', 'supplier_name',
 		'purchase_document_type', 'purchase_document_no', 'purchase_date', 'purchase_time', 'purchase_rate',
 		'delivery_document_type', 'delivery_document_no', 'delivery_date', 'delivery_time', 'sales_invoice',
-		'warranty_expiry_date', 'amc_expiry_date'
+		'warranty_expiry_date', 'amc_expiry_date', 'maintenance_status'
 	]
 
 	def autoname(self):

@@ -25,6 +25,8 @@
   "column_break_16",
   "customer",
   "customer_name",
+  "vehicle_owner",
+  "vehicle_owner_name",
   "purchase_details",
   "purchase_document_type",
   "purchase_document_no",
@@ -449,11 +451,30 @@
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "vehicle_owner",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Vehicle Owner",
+   "no_copy": 1,
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_owner.customer_name",
+   "fetch_if_empty": 1,
+   "fieldname": "vehicle_owner_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Vehicle Owner Name",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-barcode",
  "idx": 1,
- "modified": "2021-03-17 15:25:02.743289",
+ "modified": "2021-03-18 12:05:42.364493",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Serial No",
