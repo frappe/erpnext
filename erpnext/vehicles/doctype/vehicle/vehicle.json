@@ -119,6 +119,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "chassis_no",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Chassis No"
   },
   {
@@ -149,6 +150,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "color",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Color",
    "options": "Vehicle Color"
   },
@@ -169,6 +171,7 @@
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Vehicle Item Name",
    "read_only": 1
   },
@@ -176,7 +179,6 @@
    "fetch_from": "item_code.item_group",
    "fieldname": "item_group",
    "fieldtype": "Link",
-   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Item Group",
    "options": "Item Group",
@@ -453,6 +455,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "engine_no",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Engine No"
   },
   {
@@ -480,7 +483,6 @@
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
-   "in_preview": 1,
    "label": "Image"
   },
   {
@@ -509,6 +511,7 @@
   {
    "fieldname": "vehicle_owner",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Vehicle Owner",
    "no_copy": 1,
    "options": "Customer"
@@ -518,6 +521,7 @@
    "fetch_from": "vehicle_owner.customer_name",
    "fieldname": "vehicle_owner_name",
    "fieldtype": "Data",
+   "in_preview": 1,
    "label": "Vehicle Owner Name",
    "no_copy": 1,
    "read_only": 1
@@ -535,6 +539,7 @@
    "depends_on": "eval:!doc.license_plate || doc.unregistered",
    "fieldname": "unregistered",
    "fieldtype": "Check",
+   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Is Unregistered"
   },
@@ -549,7 +554,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-03-17 21:14:08.979388",
+ "modified": "2021-03-18 17:23:33.230912",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
