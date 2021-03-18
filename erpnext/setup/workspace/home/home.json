@@ -10,13 +10,14 @@
  "hide_custom": 0,
  "icon": "getting-started",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Home",
  "links": [
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Healthcare",
+   "label": "Accounting",
    "onboard": 0,
    "type": "Card Break"
   },
@@ -24,8 +25,8 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Patient",
-   "link_to": "Patient",
+   "label": "Chart of Accounts",
+   "link_to": "Account",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -34,25 +35,8 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Diagnosis",
-   "link_to": "Diagnosis",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Agriculture",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Crop",
-   "link_to": "Crop",
+   "label": "Company",
+   "link_to": "Company",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -61,8 +45,8 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Crop Cycle",
-   "link_to": "Crop Cycle",
+   "label": "Customer",
+   "link_to": "Customer",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -71,112 +55,8 @@
    "dependencies": "",
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Location",
-   "link_to": "Location",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Fertilizer",
-   "link_to": "Fertilizer",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Education",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Student",
-   "link_to": "Student",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Course",
-   "link_to": "Course",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Instructor",
-   "link_to": "Instructor",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Room",
-   "link_to": "Room",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Non Profit",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Member",
-   "link_to": "Member",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Volunteer",
-   "link_to": "Volunteer",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Chapter",
-   "link_to": "Chapter",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Donor",
-   "link_to": "Donor",
+   "label": "Supplier",
+   "link_to": "Supplier",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -187,6 +67,16 @@
    "label": "Stock",
    "onboard": 0,
    "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Item",
+   "link_to": "Item",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
   },
   {
    "dependencies": "",
@@ -305,73 +195,6 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Accounting",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Item",
-   "link_to": "Item",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Customer",
-   "link_to": "Customer",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Supplier",
-   "link_to": "Supplier",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Company",
-   "link_to": "Company",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Chart of Accounts",
-   "link_to": "Account",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "dependencies": "",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Opening Invoice Creation Tool",
-   "link_to": "Opening Invoice Creation Tool",
-   "link_type": "DocType",
-   "onboard": 1,
-   "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
    "label": "Data Import and Settings",
    "onboard": 0,
    "type": "Card Break"
@@ -382,6 +205,16 @@
    "is_query_report": 0,
    "label": "Import Data",
    "link_to": "Data Import",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Opening Invoice Creation Tool",
+   "link_to": "Opening Invoice Creation Tool",
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
@@ -415,9 +248,177 @@
    "link_type": "DocType",
    "onboard": 1,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Healthcare",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Patient",
+   "link_to": "Patient",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Diagnosis",
+   "link_to": "Diagnosis",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Education",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Student",
+   "link_to": "Student",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Instructor",
+   "link_to": "Instructor",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Course",
+   "link_to": "Course",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Room",
+   "link_to": "Room",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Non Profit",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Donor",
+   "link_to": "Donor",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Member",
+   "link_to": "Member",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Volunteer",
+   "link_to": "Volunteer",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Chapter",
+   "link_to": "Chapter",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Agriculture",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Location",
+   "link_to": "Location",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Crop",
+   "link_to": "Crop",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Crop Cycle",
+   "link_to": "Crop Cycle",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "dependencies": "",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Fertilizer",
+   "link_to": "Fertilizer",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
   }
  ],
- "modified": "2021-01-01 12:13:16.055668",
+ "modified": "2021-03-16 15:59:58.416154",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Home",
