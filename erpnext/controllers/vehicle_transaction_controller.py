@@ -25,7 +25,8 @@ force_fields = [
 
 class VehicleTransactionController(StockController):
 	def validate(self):
-		self.validate_posting_time()
+		if self.meta.has_field('set_posting_time'):
+			self.validate_posting_time()
 
 		if self.get("_action") and self._action != "update_after_submit":
 			self.set_missing_values(for_validate=True)
