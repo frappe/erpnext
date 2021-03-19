@@ -177,14 +177,13 @@ class TestPayrollEntry(unittest.TestCase):
 				loan_account='Loan Account - _TC',
 				interest_income_account='Interest Income Account - _TC',
 				penalty_income_account='Penalty Income Account - _TC')
+
 		loan = create_loan(applicant, "Car Loan", 280000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()
 
 		make_loan_disbursement_entry(loan.name, loan.loan_amount, disbursement_date=add_months(nowdate(), -1))
-
 		process_loan_interest_accrual_for_term_loans(posting_date=nowdate())
-
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		make_payroll_entry(company="_Test Company", start_date=dates.start_date, payable_account=company_doc.default_payroll_payable_account,
