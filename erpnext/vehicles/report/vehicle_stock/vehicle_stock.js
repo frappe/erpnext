@@ -60,11 +60,16 @@ frappe.query_reports["Vehicle Stock"] = {
 			label: __("Group By Level 2"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Item", "Group by Item Group", "Group by Brand", "Group by Warehouse"],
-			default: "Group by Item"
+			default: "Ungrouped"
 		},
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
+
+		if (column.fieldname === "status" && data.status_color) {
+			style['color'] = data.status_color;
+		}
+
 		return default_formatter(value, row, column, data, {css: style});
 	},
 	"initial_depth": 1

@@ -41,7 +41,6 @@
   "column_break_23",
   "insurance_end_date",
   "purchase_details",
-  "column_break2",
   "purchase_document_type",
   "purchase_document_no",
   "column_break_41",
@@ -50,6 +49,7 @@
   "column_break3",
   "supplier",
   "supplier_name",
+  "dispatch_date",
   "purchase_rate",
   "delivery_details",
   "delivery_document_type",
@@ -211,14 +211,10 @@
    "read_only": 1
   },
   {
+   "allow_in_quick_entry": 1,
    "fieldname": "purchase_details",
    "fieldtype": "Section Break",
-   "label": "Purchase / Manufacture Details"
-  },
-  {
-   "fieldname": "column_break2",
-   "fieldtype": "Column Break",
-   "width": "50%"
+   "label": "Receiving Details"
   },
   {
    "fieldname": "purchase_document_type",
@@ -255,6 +251,7 @@
   {
    "fieldname": "purchase_rate",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Purchase Rate",
    "no_copy": 1,
    "oldfieldname": "purchase_rate",
@@ -548,10 +545,17 @@
    "label": "Is Booked",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "dispatch_date",
+   "fieldtype": "Date",
+   "label": "Dispatch Date",
+   "no_copy": 1
   }
  ],
  "image_field": "image",
- "modified": "2021-03-19 11:52:02.837654",
+ "modified": "2021-03-19 14:41:08.158298",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

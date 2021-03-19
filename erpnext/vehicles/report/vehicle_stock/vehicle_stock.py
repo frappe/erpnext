@@ -21,8 +21,10 @@ class VehicleStockReport(object):
 		self.get_item_data()
 		self.get_stock_ledger_entries()
 		self.process_sle()
+		self.get_dispatched_vehicles()
 		self.get_vehicle_data()
-		self.get_vehicle_booking_order_data()
+		self.get_vehicle_receipt_delivery_data()
+		self.get_booked_open_stock_data()
 		self.prepare_data()
 
 		columns = self.get_columns()
@@ -50,7 +52,8 @@ class VehicleStockReport(object):
 		return self.sle
 
 	def process_sle(self):
-		vehicle_map = {}
+		vehicles_in_stock = {}
+		vehicles_delivered = []
 
 		empty_vehicle_dict = frappe._dict({
 			"qty": 0,
@@ -60,7 +63,7 @@ class VehicleStockReport(object):
 			key = (sle.item_code, sle.serial_no)
 
 			# Item Code, Warehouse and Vehicle
-			vehicle_dict = vehicle_map.setdefault(key, empty_vehicle_dict.copy())
+			vehicle_dict = vehicles_in_stock.setdefault(key, empty_vehicle_dict.copy())
 			vehicle_dict.item_code = sle.item_code
 			vehicle_dict.vehicle = sle.serial_no
 			vehicle_dict.warehouse = sle.warehouse
@@ -68,23 +71,37 @@ class VehicleStockReport(object):
 			# In Stock or not
 			vehicle_dict.qty = flt(vehicle_dict.qty + sle.actual_qty, 0)
 
-			# Receiving and Delivery Date
+			# Receiving and Delivery
 			if sle.actual_qty > 0:
 				vehicle_dict.received_date = sle.posting_date
+				vehicle_dict.received_dt = sle.voucher_type
+				vehicle_dict.received_dn = sle.voucher_no
+
 				vehicle_dict.delivery_date = None
+				vehicle_dict.delivery_dt = None
+				vehicle_dict.delivery_dn = None
 			else:
 				vehicle_dict.delivery_date = sle.posting_date
+				vehicle_dict.delivery_dt = sle.voucher_type
+				vehicle_dict.delivery_dn = sle.voucher_no
 
 			# Project
 			if sle.actual_qty > 0 or (sle.actual_qty < 0 and not vehicle_dict.project):
 				vehicle_dict.project = sle.project
 
-		self.data = []
-		for vehicle_dict in vehicle_map.values():
-			# skip delivered vehicle outside of date range
-			if not vehicle_dict.qty and vehicle_dict.delivery_date and vehicle_dict.delivery_date < getdate(self.filters.from_date):
-				continue
+			# Move to delivered vehicles
+			if vehicle_dict.qty <= 0:
+				del vehicles_in_stock[key]
+				vehicles_delivered.append(vehicle_dict)
 
+		self.data = []
+
+		for vehicle_dict in vehicles_delivered:
+			if not vehicle_dict.delivery_date or not self.filters.from_date\
+					or getdate(vehicle_dict.delivery_date) >= getdate(self.filters.from_date):
+				self.data.append(vehicle_dict)
+
+		for vehicle_dict in vehicles_in_stock.values():
 			self.data.append(vehicle_dict)
 
 	def prepare_data(self):
@@ -95,15 +112,61 @@ class VehicleStockReport(object):
 			vehicle_data = self.vehicle_data.get(d.vehicle, frappe._dict())
 			d.chassis_no = vehicle_data.chassis_no
 			d.engine_no = vehicle_data.engine_no
-			d.license_plate = 'Unregistered' if vehicle_data.unregistered else vehicle_data.license_plate
+			d.license_plate = vehicle_data.license_plate
+			d.unregistered = vehicle_data.unregistered
 
-			booking_data = self.booking_data.get(d.vehicle, frappe._dict())
-			d.vehicle_booking_order = booking_data.name
+			# Data from receipt
+			if d.received_dt and d.received_dn:
+				if d.received_dt == "Vehicle Receipt":
+					vehicle_receipt_data = self.vehicle_receipt_data.get(d.received_dn, frappe._dict())
+					if vehicle_receipt_data:
+						d.chassis_no = vehicle_receipt_data.vehicle_chassis_no
+						d.engine_no = vehicle_receipt_data.vehicle_engine_no
+						d.license_plate = vehicle_receipt_data.vehicle_license_plate
+						d.unregistered = vehicle_receipt_data.vehicle_unregistered
+						d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
 
+			# Data from delivery
+			if d.delivery_dt and d.delivery_dn:
+				if d.delivery_dt == "Vehicle Delivery":
+					vehicle_delivery_data = self.vehicle_delivery_data.get(d.delivery_dn, frappe._dict())
+					if vehicle_delivery_data:
+						d.chassis_no = vehicle_delivery_data.vehicle_chassis_no or d.chassis_no
+						d.engine_no = vehicle_delivery_data.vehicle_engine_no or d.engine_no
+						d.license_plate = vehicle_delivery_data.vehicle_license_plate or d.license_plate
+						d.unregistered = vehicle_delivery_data.vehicle_unregistered or d.unregistered
+						d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
+
+			# Booked Open Stock
+			if not d.vehicle_booking_order and d.vehicle in self.booked_open_stock:
+				d.vehicle_booking_order = self.booked_open_stock[d.vehicle].name
+				d.open_stock = 1
+
+			# Status
 			if d.qty > 0:
-				d.status = "In Stock"
-			elif d.qty == 0 and d.delivery_date:
-				d.status = "Delivered"
+				if d.vehicle_booking_order and d.open_stock:
+					d.status = "Booked (Open Stock)"
+					d.status_color = "purple"
+				elif d.vehicle_booking_order:
+					d.status = "Booked (In Stock)"
+					d.status_color = "#743ee2"
+				elif d.project:
+					d.status = "For Repair"
+					d.status_color = "orange"
+				else:
+					d.status = "Open Stock"
+					d.status_color = "blue"
+			elif d.qty <= 0:
+				if d.delivery_dn:
+					d.status = "Delivered"
+					d.status_color = "green"
+				elif d.dispatch_date and not d.received_date:
+					d.status = "Dispatched"
+
+			# Mark Unregistered
+			d.license_plate = 'Unregistered' if d.unregistered else d.license_plate
+
+		self.data = sorted(self.data, key=lambda d: (not bool(d.received_date), cstr(d.received_date), cstr(d.dispatch_date)))
 
 	def get_grouped_data(self):
 		data = self.data
@@ -170,7 +233,7 @@ class VehicleStockReport(object):
 			return self.vehicle_data
 
 		data = frappe.db.sql("""
-			select name, item_code, chassis_no, engine_no, license_plate, unregistered
+			select name, item_code, chassis_no, engine_no, license_plate, unregistered, dispatch_date
 			from `tabVehicle`
 			where name in %s
 		""", [vehicle_names], as_dict=1)
@@ -180,21 +243,73 @@ class VehicleStockReport(object):
 
 		return self.vehicle_data
 
-	def get_vehicle_booking_order_data(self):
-		self.booking_data = {}
+	def get_dispatched_vehicles(self):
+		vehicle_names = list(set([d.vehicle for d in self.data]))
+
+		exclude_condition = ""
+		if vehicle_names:
+			exclude_condition = " and name not in %(vehicle_names)s"
+
+		date_condition = ""
+		if self.filters.from_date:
+			date_condition += " and dispatch_date >= %(from_date)s"
+		if self.filters.to_date:
+			date_condition += " and dispatch_date <= %(to_date)s"
+
+		self.dispatched_vehicles = frappe.db.sql("""
+			select name as vehicle, item_code, 0 as qty, dispatch_date
+			from `tabVehicle`
+			where ifnull(dispatch_date, '') != '' and ifnull(purchase_document_no, '') = '' {0} {1}
+		""".format(exclude_condition, date_condition),
+			{'vehicle_names': vehicle_names, 'from_date': self.filters.from_date, 'to_date': self.filters.to_date},
+			as_dict=1)
+
+		for d in self.dispatched_vehicles:
+			self.data.append(d)
+
+	def get_vehicle_receipt_delivery_data(self):
+		self.vehicle_receipt_data = {}
+		self.vehicle_delivery_data = {}
+
+		receipt_names = list(set([d.received_dn for d in self.data if d.received_dn and d.received_dt == "Vehicle Receipt"]))
+		if receipt_names:
+			data = frappe.db.sql("""
+				select name, vehicle_booking_order, supplier, customer, supplier_delivery_note,
+					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered
+				from `tabVehicle Receipt`
+				where docstatus = 1 and name in %s
+			""", [receipt_names], as_dict=1)
+
+			for d in data:
+				self.vehicle_receipt_data[d.name] = d
+
+		delivery_names = list(set([d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Delivery"]))
+		if delivery_names:
+			data = frappe.db.sql("""
+				select name, vehicle_booking_order, customer,
+					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered
+				from `tabVehicle Delivery`
+				where docstatus = 1 and name in %s
+			""", [delivery_names], as_dict=1)
+
+			for d in data:
+				self.vehicle_delivery_data[d.name] = d
+
+	def get_booked_open_stock_data(self):
+		self.booked_open_stock = {}
 
 		vehicle_names = list(set([d.vehicle for d in self.data]))
 		if not vehicle_names:
-			return self.booking_data
+			return self.booked_open_stock
 
 		data = frappe.db.sql("""
-			select name, vehicle
+			select name, vehicle, vehicle_receipt
 			from `tabVehicle Booking Order`
-			where docstatus = 1 and vehicle in %s
+			where docstatus = 1 and ifnull(vehicle_receipt, '') != '' and vehicle in %s
 		""", [vehicle_names], as_dict=1)
 
 		for d in data:
-			self.booking_data[d.vehicle] = d
+			self.booked_open_stock[d.vehicle] = d
 
 	def get_item_conditions(self):
 		conditions = []
@@ -227,17 +342,20 @@ class VehicleStockReport(object):
 
 	def get_columns(self):
 		return [
-			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 150},
+			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 150},
+			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
-			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
 			{"label": _("Chassis No"), "fieldname": "chassis_no", "fieldtype": "Data", "width": 150},
 			{"label": _("Engine No"), "fieldname": "engine_no", "fieldtype": "Data", "width": 115},
 			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 100},
-			{"label": _("Received"), "fieldname": "received_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Delivered"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Booking Order"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 110},
+			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 90},
+			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 100},
 			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
-			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 100},
+			{"label": _("Dispatched"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 85},
+			{"label": _("Received"), "fieldname": "received_date", "fieldtype": "Date", "width": 80},
+			{"label": _("Delivered"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 80},
+			{"label": _("Receipt Document"), "fieldname": "received_dn", "fieldtype": "Dynamic Link", "options": "received_dt", "width": 100},
+			{"label": _("Delivery Document"), "fieldname": "delivery_dn", "fieldtype": "Dynamic Link", "options": "delivery_dt", "width": 100},
 			{"label": _("Warehouse"), "fieldname": "warehouse", "fieldtype": "Link", "options": "Warehouse", "width": 150},
 		]
 
