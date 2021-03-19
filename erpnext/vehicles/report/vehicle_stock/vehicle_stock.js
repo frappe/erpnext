@@ -71,6 +71,5 @@ frappe.query_reports["Vehicle Stock"] = {
 		}
 
 		return default_formatter(value, row, column, data, {css: style});
-	},
-	"initial_depth": 1
+	}
 };

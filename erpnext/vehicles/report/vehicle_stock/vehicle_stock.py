@@ -196,14 +196,18 @@ class VehicleStockReport(object):
 		for f, g in grouped_by.items():
 			totals[f] = g
 
-		# group_reference_doctypes = {
-		# 	"item_code": "Item"
-		# }
-		#
-		# reference_field = group_field[0] if isinstance(group_field, (list, tuple)) else group_field
-		# reference_dt = group_reference_doctypes.get(reference_field, unscrub(cstr(reference_field)))
-		# totals['reference_type'] = reference_dt
-		# totals['reference'] = grouped_by.get(reference_field)
+		group_reference_doctypes = {
+			"item_code": "Item"
+		}
+
+		reference_field = group_field[0] if isinstance(group_field, (list, tuple)) else group_field
+		reference_dt = group_reference_doctypes.get(reference_field, unscrub(cstr(reference_field)))
+
+		totals['vehicle'] = "'{0}: {1}'".format(reference_dt, grouped_by.get(reference_field))
+
+		if 'item_code' in grouped_by:
+			totals['item_name'] = data[0].item_name
+			totals['disable_item_formatter'] = data[0].disable_item_formatter
 
 		count = len(data)
 		totals['code'] = "{0}".format(count)
