@@ -507,6 +507,7 @@ erpnext.utils.update_child_items = function(opts) {
 	}, {
 		fieldtype:'Currency',
 		fieldname:"rate",
+		options: "currency",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
