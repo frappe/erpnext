@@ -143,6 +143,9 @@ class VehicleStockReport(object):
 				d.vehicle_booking_order = booking_data.name
 				d.open_stock = 1 if booking_data.vehicle_receipt else 0
 
+			if d.vehicle_booking_order and not d.dispatch_date:
+				d.dispatch_date = vehicle_data.get('dispatch_date')
+
 			# Status
 			if d.qty > 0:
 				if d.vehicle_booking_order and d.open_stock:
