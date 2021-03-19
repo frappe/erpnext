@@ -331,7 +331,6 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Customer (User)",
    "no_copy": 1,
@@ -511,7 +510,6 @@
   {
    "fieldname": "vehicle_owner",
    "fieldtype": "Link",
-   "in_preview": 1,
    "label": "Vehicle Owner",
    "no_copy": 1,
    "options": "Customer"
@@ -539,7 +537,6 @@
    "depends_on": "eval:!doc.license_plate || doc.unregistered",
    "fieldname": "unregistered",
    "fieldtype": "Check",
-   "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Is Unregistered"
   },
@@ -554,7 +551,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-03-18 17:23:33.230912",
+ "modified": "2021-03-19 11:52:02.837654",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
