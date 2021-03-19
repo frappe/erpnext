@@ -54,10 +54,89 @@ def execute(filters=None):
 		order by ge.posting_date, ge.voucher_no
 		""".format(fieldstr=fieldstr), filters, as_dict=1)
 
-	gl_entries = modify_report_data(gl_entries)
+	report_data = modify_report_data(gl_entries)
+	summary = None
+	if filters['mode'] == 'run' and filters['report_name'] != 'Tax Detail':
+		report_data, summary = run_report(filters['report_name'], report_data)
 
-	return get_columns(fieldlist), gl_entries
+	# return columns, data, message, chart, report_summary
+	return get_columns(fieldlist), report_data, None, None, summary
 
+def run_report(report_name, data):
+	"Applies the sections and filters saved in the custom report"
+	report_config = json.loads(frappe.get_doc('Report', report_name).json)
+	# Columns indexed from 1 wrt colno
+	columns = report_config.get('columns')
+	sections = report_config.get('sections', {})
+	show_detail = report_config.get('show_detail', 1)
+	new_data = []
+	summary = []
+	for section_name, section in sections.items():
+		section_total = 0.0
+		for filt_name, filt in section.items():
+			value_field = filt['fieldname']
+			rmidxs = []
+			for colno, filter_string in filt['filters'].items():
+				filter_field = columns[int(colno) - 1]['fieldname']
+				for i, row in enumerate(data):
+					if not filter_match(row[filter_field], filter_string):
+						rmidxs += [i]
+			rows = [row for i, row in enumerate(data) if i not in rmidxs]
+			section_total += subtotal(rows, value_field)
+			if show_detail: new_data += rows
+		new_data += [ {columns[1]['fieldname']: section_name, columns[2]['fieldname']: section_total} ]
+		summary += [ {'label': section_name, 'datatype': 'Currency', 'value': section_total} ]
+		if show_detail: new_data += [ {} ]
+	return new_data if new_data else data, summary
+
+def filter_match(value, string):
+	"Approximation to datatable filters"
+	import datetime
+	if string == '': return True
+	if value is None: value = -999999999999999
+	elif isinstance(value, datetime.date): return True
+
+	if isinstance(value, str):
+		value = value.lower()
+		string = string.lower()
+		if string[0] == '<': return True if string[1:].strip() else False
+		elif string[0] == '>': return False if string[1:].strip() else True
+		elif string[0] == '=': return string[1:] in value if string[1:] else False
+		elif string[0:2] == '!=': return string[2:] not in value
+		elif len(string.split(':')) == 2:
+			pre, post = string.split(':')
+			return (True if not pre.strip() and post.strip() in value else False)
+		else:
+			return string in value
+	else:
+		if string[0] in ['<', '>', '=']:
+			operator = string[0]
+			if operator == '=': operator = '=='
+			string = string[1:].strip()
+		elif string[0:2] == '!=':
+			operator = '!='
+			string = string[2:].strip()
+		elif len(string.split(':')) == 2:
+			pre, post = string.split(':')
+			try:
+				return (True if float(pre) <= value and float(post) >= value else False)
+			except ValueError:
+				return (False if pre.strip() else True)
+		else:
+			return string in str(value)
+
+	try:
+		num = float(string) if string.strip() else 0
+		return eval(f'{value} {operator} {num}')
+	except ValueError:
+		if operator == '<': return True
+		return False
+
+def subtotal(data, field):
+	subtotal = 0.0
+	for row in data:
+		subtotal += row[field]
+	return subtotal
 
 abbrev = lambda dt: ''.join(l[0].lower() for l in dt.split(' ')) + '.'
 doclist = lambda dt, dfs: [abbrev(dt) + f for f in dfs]
@@ -148,24 +227,18 @@ def get_custom_reports(name=None):
 	return reports_dict
 
 @frappe.whitelist()
-def save_custom_report(reference_report, report_name, columns, sections):
-	import pymysql
+def save_custom_report(reference_report, report_name, data):
 	if reference_report != 'Tax Detail':
 		frappe.throw(_("The wrong report is referenced."))
 	if report_name == 'Tax Detail':
 		frappe.throw(_("The parent report cannot be overwritten."))
-
-	data = {
-		'columns': json.loads(columns),
-		'sections': json.loads(sections)
-	}
 
 	doc = {
 		'doctype': 'Report',
 		'report_name': report_name,
 		'is_standard': 'No',
 		'module': 'Accounts',
-		'json': json.dumps(data, separators=(',', ':'))
+		'json': data
 	}
 	doc.update(custom_report_dict)
 
@@ -173,7 +246,7 @@ def save_custom_report(reference_report, report_name, columns, sections):
 		newdoc = frappe.get_doc(doc)
 		newdoc.insert()
 		frappe.msgprint(_("Report created successfully"))
-	except (frappe.exceptions.DuplicateEntryError, pymysql.err.IntegrityError):
+	except frappe.exceptions.DuplicateEntryError:
 		dbdoc = frappe.get_doc('Report', report_name)
 		dbdoc.update(doc)
 		dbdoc.save()

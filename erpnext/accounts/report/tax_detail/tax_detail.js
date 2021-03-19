@@ -92,11 +92,8 @@ class TaxReport {
 			freeze: true
 		}).then((r) => {
 			const data = JSON.parse(r.message[report_name]['json']);
-			if (data && data['sections']) {
-				this.sections = data['sections'];
-			} else {
-				this.sections = {};
-			}
+			this.sections = data.sections || {};
+			this.controls['show_detail'].set_input(data.show_detail);
 			this.set_section();
 		})
 		this.loaded = 1;
@@ -107,8 +104,11 @@ class TaxReport {
 			args: {
 				reference_report: 'Tax Detail',
 				report_name: this.qr.report_name,
-				columns: this.qr.get_visible_columns(),
-				sections: this.sections
+				data: {
+					columns: this.qr.get_visible_columns(),
+					sections: this.sections,
+					show_detail: this.controls['show_detail'].get_input_value()
+				}
 			},
 			freeze: true
 		}).then((r) => {
@@ -233,7 +233,9 @@ class TaxReport {
 	reload() {
 		// Reloads the data. When the datatable is reloaded, load_report()
 		// will be run by the after_datatable_render event.
+		// TODO: why does this trigger multiple reloads?
 		this.qr.refresh();
+		this.show_help();
 		if (this.edit_mode()) {
 			this.reload_filter();
 		} else {
@@ -353,6 +355,12 @@ class TaxReport {
 				this.set_mode('run');
 				this.save_report();
 			}
+		});
+		controls['show_detail'] = this.page.add_field({
+			label: __('Show Detail'),
+			fieldtype: 'Check',
+			fieldname: 'show_detail',
+			default: 1
 		});
 		this.controls = controls;
 		this.set_value_options();
