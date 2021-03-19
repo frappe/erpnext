@@ -95,6 +95,13 @@ def get_data():
 					"doctype": "Vehicle",
 					"dependencies": ["Vehicle"],
 				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Booking Deposit Summary",
+					"doctype": "Vehicle Booking Payment",
+					"dependencies": ["Vehicle Booking Payment"],
+				},
 			]
 		},
 		{
