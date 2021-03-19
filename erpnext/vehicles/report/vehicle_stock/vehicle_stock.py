@@ -24,7 +24,7 @@ class VehicleStockReport(object):
 		self.get_dispatched_vehicles()
 		self.get_vehicle_data()
 		self.get_vehicle_receipt_delivery_data()
-		self.get_booked_open_stock_data()
+		self.get_booking_data()
 		self.prepare_data()
 
 		columns = self.get_columns()
@@ -138,9 +138,10 @@ class VehicleStockReport(object):
 						d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
 
 			# Booked Open Stock
-			if not d.vehicle_booking_order and d.vehicle in self.booked_open_stock:
-				d.vehicle_booking_order = self.booked_open_stock[d.vehicle].name
-				d.open_stock = 1
+			if not d.vehicle_booking_order and d.vehicle in self.booking_data:
+				booking_data = self.booking_data[d.vehicle]
+				d.vehicle_booking_order = booking_data.name
+				d.open_stock = 1 if booking_data.vehicle_receipt else 0
 
 			# Status
 			if d.qty > 0:
@@ -161,7 +162,10 @@ class VehicleStockReport(object):
 					d.status = "Delivered"
 					d.status_color = "green"
 				elif d.dispatch_date and not d.received_date:
-					d.status = "Dispatched"
+					if d.vehicle_booking_order:
+						d.status = "Booked (Dispatched)"
+					else:
+						d.status = "Dispatched"
 
 			# Mark Unregistered
 			d.license_plate = 'Unregistered' if d.unregistered else d.license_plate
@@ -299,21 +303,21 @@ class VehicleStockReport(object):
 			for d in data:
 				self.vehicle_delivery_data[d.name] = d
 
-	def get_booked_open_stock_data(self):
-		self.booked_open_stock = {}
+	def get_booking_data(self):
+		self.booking_data = {}
 
 		vehicle_names = list(set([d.vehicle for d in self.data]))
 		if not vehicle_names:
-			return self.booked_open_stock
+			return self.booking_data
 
 		data = frappe.db.sql("""
 			select name, vehicle, vehicle_receipt
 			from `tabVehicle Booking Order`
-			where docstatus = 1 and ifnull(vehicle_receipt, '') != '' and vehicle in %s
+			where docstatus = 1 and vehicle in %s
 		""", [vehicle_names], as_dict=1)
 
 		for d in data:
-			self.booked_open_stock[d.vehicle] = d
+			self.booking_data[d.vehicle] = d
 
 	def get_item_conditions(self):
 		conditions = []
@@ -346,13 +350,13 @@ class VehicleStockReport(object):
 
 	def get_columns(self):
 		return [
-			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 150},
+			{"label": _("Vehicle"), "fieldname": "vehicle", "fieldtype": "Link", "options": "Vehicle", "width": 100},
 			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Chassis No"), "fieldname": "chassis_no", "fieldtype": "Data", "width": 150},
 			{"label": _("Engine No"), "fieldname": "engine_no", "fieldtype": "Data", "width": 115},
 			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 100},
-			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 90},
+			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 100},
 			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
 			{"label": _("Dispatched"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 85},
