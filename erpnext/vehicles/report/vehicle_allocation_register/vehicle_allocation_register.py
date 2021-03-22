@@ -50,7 +50,8 @@ class VehicleAllocationRegisterReport(object):
 				m.color_1, m.color_2, m.color_3,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
-				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date
+				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
+				m.customer_advance, m.supplier_advance
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
 			left join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
@@ -249,6 +250,7 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Instrument Date"), "fieldname": "customer_payment_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Deposit Date"), "fieldname": "supplier_payment_date", "fieldtype": "Date", "width": 100},
+			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 100},
 			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Supplier"), "fieldname": "supplier", "fieldtype": "Data", "width": 100},
 		]
