@@ -1,17 +1,14 @@
 @import "frappe/public/scss/desk/variables";
 @import "frappe/public/scss/common/mixins";
 
+$wish-red: #F47A7A;
+
 body.product-page {
 	background: var(--gray-50);
 }
 
-
 .item-breadcrumbs {
 	.breadcrumb-container {
-		ol.breadcrumb {
-			background-color: var(--gray-50) !important;
-		}
-
 		a {
 			color: var(--gray-900);
 		}
@@ -140,6 +137,7 @@ body.product-page {
 
 	.item-card {
 		padding: var(--padding-sm);
+		min-width: 250px;
 	}
 }
 
@@ -189,11 +187,37 @@ body.product-page {
 	min-height: 70vh;
 
 	.product-details {
-		max-width: 40%;
-		margin-left: -30px;
+		max-width: 50%;
 
 		.btn-add-to-cart {
 			font-size: var(--text-base);
+		}
+	}
+
+	.expand {
+		max-width: 100% !important; // expand in absence of slideshow
+	}
+
+	@media (max-width: 789px) {
+		.product-details {
+			max-width: 90% !important;
+
+			.btn-add-to-cart {
+				font-size: var(--text-base);
+			}
+		}
+	}
+
+	.btn-add-to-wishlist {
+		svg use {
+			stroke: var(--wish-red);
+		}
+	}
+
+	.btn-view-in-wishlist {
+		svg use {
+			fill: var(--wish-red);
+			stroke: none;
 		}
 	}
 
@@ -576,16 +600,16 @@ body.product-page {
 
 .not-wished {
 	cursor: pointer;
-	stroke: #F47A7A !important;
+	stroke: var(--wish-red) !important;
 
 	&:hover {
-		fill: #F47A7A;
+		fill: var(--wish-red);
 	}
 }
 
 .wished {
 	stroke: none;
-	fill: #F47A7A !important;
+	fill: var(--wish-red) !important;
 }
 
 .list-row-checkbox {
@@ -661,12 +685,23 @@ body.product-page {
 }
 
 .remove-wish {
+	position: absolute;
+	top:10px;
+	right: 20px;
+	border-radius: 50%;
+	border: 1px solid var(--gray-100);
+	width: 25px;
+	height: 25px;
+
 	&:hover {
 		background-color: var(--gray-100);
-		border: 1px solid var(--icon-stroke);
 	}
 }
 
 .wish-removed {
 	display: none;
+}
+
+.item-website-specification {
+	font-size: .875rem;
 }

@@ -5,6 +5,7 @@
 
 <div class="item-cart row mt-2" data-variant-item-code="{{ item_code }}">
 	<div class="col-md-12">
+		<!-- Price and Availability -->
 		{% if cart_settings.show_price and product_info.price %}
 		<div class="product-price">
 			{{ product_info.price.formatted_price_sales_uom }}
@@ -30,17 +31,21 @@
 			{% endif %}
 		</div>
 		{% endif %}
+
+		<!-- Add to Cart / View in Cart, Contact Us -->
 		<div class="mt-5 mb-5">
-			{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
+			<div style="display: flex;" class="mb-4">
+				<!-- Add to Cart -->
+				{% if product_info.price and (cart_settings.allow_items_not_in_stock or product_info.in_stock) %}
 				<a href="/cart"
-					class="btn btn-light btn-view-in-cart {% if not product_info.qty %}hidden{% endif %}"
+					class="btn btn-light btn-view-in-cart hidden mr-2"
 					role="button"
 				>
 					{{ _("View in Cart") }}
 				</a>
 				<button
 					data-item-code="{{item_code}}"
-					class="btn btn-primary btn-add-to-cart {% if product_info.qty %}hidden{% endif %} w-100"
+					class="btn btn-primary btn-add-to-cart w-50 mr-2"
 				>
 					<span class="mr-2">
 						<svg class="icon icon-md">
@@ -49,7 +54,37 @@
 					</span>
 					{{ _("Add to Cart") }}
 				</button>
-			{% endif %}
+				{% endif %}
+
+				<!-- Add to Wishlist -->
+				<a href="/wishlist"
+					class="btn btn-view-in-wishlist hidden"
+					role="button"
+				>
+					<span class="mr-2">
+						<svg class="icon icon-md">
+							<use href="#icon-heart"></use>
+						</svg>
+					</span>
+					{{ _("View in Wishlist") }}
+				</a>
+
+				{% set price = product_info.get("price") or {} %}
+				<button
+						data-item-code="{{item_code}}"
+						data-price="{{ price.get('price_list_rate') or 0}}"
+						data-formatted-price="{{ price.get('formatted_price') or 0 }}"
+						class="btn btn-add-to-wishlist"
+					>
+					<span class="mr-2">
+						<svg class="icon icon-md">
+							<use href="#icon-heart"></use>
+						</svg>
+					</span>
+					{{ _("Add to Wishlist") }}
+				</button>
+			</div>
+
 			{% if cart_settings.show_contact_us_button %}
 				{% include "templates/generators/item/item_inquiry.html" %}
 			{% endif %}
@@ -60,6 +95,7 @@
 <script>
 	frappe.ready(() => {
 		$('.page_content').on('click', '.btn-add-to-cart', (e) => {
+			// Bind action on add to cart button
 			const $btn = $(e.currentTarget);
 			$btn.prop('disabled', true);
 			const item_code = $btn.data('item-code');
@@ -73,6 +109,28 @@
 					}
 				}
 			});
+		});
+
+		$('.page_content').on('click', '.btn-add-to-wishlist', (e) => {
+			// Bind action on wishlist button
+			const $btn = $(e.currentTarget);
+			$btn.prop('disabled', true);
+
+			let args = {
+				item_code: $btn.data('item-code'),
+				price: $btn.data('price'),
+				formatted_price: $btn.data('formatted-price')
+			};
+			let failure_action = function() {
+				$btn.prop('disabled', false);
+			};
+			let success_action = function() {
+				$btn.prop('disabled', false);
+				erpnext.wishlist.set_wishlist_count();
+				$('.btn-add-to-wishlist, .btn-view-in-wishlist').toggleClass('hidden');
+
+			};
+			erpnext.wishlist.add_remove_from_wishlist("add", args, success_action, failure_action);
 		});
 	});
 </script>

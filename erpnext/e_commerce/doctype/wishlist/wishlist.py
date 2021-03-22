@@ -12,6 +12,10 @@ class Wishlist(Document):
 @frappe.whitelist()
 def add_to_wishlist(item_code, price, formatted_price=None):
 	"""Insert Item into wishlist."""
+
+	if frappe.db.exists("Wishlist Items", {"item_code": item_code, "parent": frappe.session.user}):
+		return
+
 	web_item_data = frappe.db.get_value("Website Item", {"item_code": item_code},
 		["image", "website_warehouse", "name", "item_name", "item_group", "route"]
 		, as_dict=1)
@@ -44,7 +48,7 @@ def add_to_wishlist(item_code, price, formatted_price=None):
 
 @frappe.whitelist()
 def remove_from_wishlist(item_code):
-	if frappe.db.exists("Wishlist Items", {"item_code": item_code}):
+	if frappe.db.exists("Wishlist Items", {"item_code": item_code, "parent": frappe.session.user}):
 		frappe.db.sql("""
 			delete
 			from `tabWishlist Items`
