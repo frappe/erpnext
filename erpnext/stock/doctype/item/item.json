@@ -122,6 +122,7 @@
   "weightage",
   "slideshow",
   "website_image",
+  "website_image_alt",
   "thumbnail",
   "cb72",
   "website_warehouse",
@@ -1053,14 +1054,21 @@
    "fieldtype": "Data",
    "label": "Default Manufacturer Part No",
    "read_only": 1
+  },
+  {
+   "fieldname": "website_image_alt",
+   "fieldtype": "Data",
+   "label": "Image Description"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
+ "index_web_pages_for_search": 1,
+ "links": [],
  "max_attachments": 1,
- "modified": "2020-08-06 17:03:26.594319",
+ "modified": "2021-03-18 11:24:58.384992",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
