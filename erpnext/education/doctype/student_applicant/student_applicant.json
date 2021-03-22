@@ -11,7 +11,7 @@
   "middle_name",
   "last_name",
   "program",
-  "student_category",
+  "send_welcome_email",
   "lms_only",
   "paid",
   "column_break_8",
@@ -260,16 +260,17 @@
    "read_only": 1
   },
   {
-   "fieldname": "student_category",
-   "fieldtype": "Link",
-   "label": "Student Category",
-   "options": "Student Category"
+   "default": "1",
+   "description": "By default, Welcome email is sent for every new Student. If disabled, no welcome email will be send when a new Student is created.",
+   "fieldname": "send_welcome_email",
+   "fieldtype": "Check",
+   "label": "Send welcome email for new Applicants"
   }
  ],
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-01 23:00:25.119241",
+ "modified": "2021-03-22 14:30:11.749276",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Applicant",

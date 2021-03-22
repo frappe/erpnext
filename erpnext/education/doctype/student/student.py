@@ -68,7 +68,7 @@ class Student(Document):
 				'last_name': self.last_name,
 				'email': self.student_email_id,
 				'gender': self.gender,
-				'send_welcome_email': frappe.get_single('Education Settings').get('applicant_send_welcome_email'),
+				'send_welcome_email': self.send_welcome_email,
 				'user_type': 'Website User'
 				})
 			student_user.flags.ignore_permissions = True
