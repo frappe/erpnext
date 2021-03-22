@@ -104,7 +104,6 @@ class VehicleAllocationRegisterReport(object):
 			bool(d.vehicle_allocation),
 			cstr(d.allocation_from_date) if d.allocation_from_date else cstr(d.delivery_from_date),
 			d.get('original_item_code') or d.item_code,
-			d.code,
 			cint(d.is_additional),
 			d.sr_no,
 			cstr(d.transaction_date)
