@@ -76,7 +76,7 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
-		
+
 		self.set_tax_withholding()
 
 		self.validate_proj_cust()
