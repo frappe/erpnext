@@ -15,6 +15,8 @@
   "uom",
   "projected_qty",
   "actual_qty",
+  "ordered_qty",
+  "reserved_qty_for_production",
   "safety_stock",
   "item_details",
   "description",
@@ -136,11 +138,25 @@
    "fieldname": "safety_stock",
    "fieldtype": "Float",
    "label": "Safety Stock"
+  },
+  {
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "label": "Ordered Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_production",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Production",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-03-08 18:39:17.553611",
+ "modified": "2021-03-22 12:11:10.993737",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",
