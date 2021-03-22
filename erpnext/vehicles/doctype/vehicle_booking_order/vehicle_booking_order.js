@@ -75,7 +75,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.frm.set_query("allocation_period", function () {
 			var filters = {
 				item_code: me.frm.doc.item_code,
-				supplier: me.frm.doc.supplier
+				supplier: me.frm.doc.supplier,
+				vehicle_color: me.frm.doc.color_1
 			}
 			if (me.frm.doc.delivery_period) {
 				filters['delivery_period'] = me.frm.doc.delivery_period;
@@ -112,8 +113,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var filters = {
 			item_code: this.frm.doc.item_code,
 			supplier: this.frm.doc.supplier,
-			is_booked: 0,
 			vehicle_color: this.frm.doc.color_1,
+			is_booked: 0,
 			docstatus: 1
 		}
 		if (!ignore_allocation_period && this.frm.doc.allocation_period) {
@@ -141,7 +142,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.vehicle_allocation_required) {
 			var filters = {
 				item_code: this.frm.doc.item_code,
-				supplier: this.frm.doc.supplier
+				supplier: this.frm.doc.supplier,
+				vehicle_color: this.frm.doc.color_1
 			}
 
 			if (this.frm.doc.transaction_date) {

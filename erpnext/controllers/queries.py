@@ -683,7 +683,7 @@ def vehicle_allocation_query(doctype, txt, searchfield, start, page_len, filters
 	searchfields = frappe.get_meta("Vehicle Allocation").get_search_fields()
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
-	if filters and isinstance(filters, dict) and 'vehicle_color' in filters:
+	if isinstance(filters, dict) and 'vehicle_color' in filters:
 		color = filters.pop('vehicle_color')
 		if color:
 			conditions.append("ifnull(vehicle_color, '') in ('', {0})".format(frappe.db.escape(color)))
@@ -719,6 +719,11 @@ def vehicle_allocation_period_query(doctype, txt, searchfield, start, page_len, 
 	if isinstance(filters, dict) and filters.get('transaction_date'):
 		transaction_date = getdate(filters.get('transaction_date'))
 		del filters['transaction_date']
+
+	if isinstance(filters, dict) and 'vehicle_color' in filters:
+		color = filters.pop('vehicle_color')
+		if color:
+			conditions.append("ifnull(vehicle_color, '') in ('', {0})".format(frappe.db.escape(color)))
 
 	date_cond = ""
 	if transaction_date:
