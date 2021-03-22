@@ -28,7 +28,6 @@ def get_context(context):
 	context.attribute_filters = filter_engine.get_attribute_filters()
 
 	context.e_commerce_settings = engine.settings
-	context.body_class = "product-page"
 	context.page_length = engine.settings.products_per_page or 20
 
 	context.no_cache = 1
