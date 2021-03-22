@@ -2,10 +2,12 @@
 <!-- style defined at shop-by-category index -->
 <div class="card category-card" data-type="{{ type }}" data-name="{{ title }}">
 	{% if image %}
-	<img class="card-img-top" src="{{ image }}" alt="{{ title }}" style="height:80%">
+	<img class="card-img-top" src="{{ image }}" alt="{{ title }}" style="height: 80%;">
 	{% else %}
 	<div class="placeholder-div">
-		<span class="placeholder">AB</span>
+		<span class="placeholder">
+			{{ frappe.utils.get_abbr(title) }}
+		</span>
 	</div>
 	{% endif %}
 	<div class="card-body text-center text-muted">

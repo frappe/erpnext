@@ -34,6 +34,9 @@
   "copy_from_item_group",
   "column_break_27",
   "web_long_description",
+  "display_additional_information_section",
+  "show_tabbed_section",
+  "tabs",
   "section_break_6",
   "ranking",
   "set_meta_tags",
@@ -234,7 +237,7 @@
    "collapsible": 1,
    "fieldname": "advanced_display_section",
    "fieldtype": "Section Break",
-   "label": "Advanced Display"
+   "label": "Advanced Display Content"
   },
   {
    "fieldname": "display_section",
@@ -265,13 +268,31 @@
    "no_copy": 1,
    "options": "WEB-ITM-.####",
    "print_hide": 1
+  },
+  {
+   "fieldname": "display_additional_information_section",
+   "fieldtype": "Section Break",
+   "label": "Display Additional Information"
+  },
+  {
+   "depends_on": "show_tabbed_section",
+   "fieldname": "tabs",
+   "fieldtype": "Table",
+   "label": "Tabs",
+   "options": "Website Item Tabbed Section"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_tabbed_section",
+   "fieldtype": "Check",
+   "label": "Add Section with Tabs"
   }
  ],
  "has_web_view": 1,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-18 13:23:18.286883",
+ "modified": "2021-03-18 20:37:54.955364",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",

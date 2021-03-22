@@ -11,6 +11,7 @@ from frappe import _
 
 from frappe.website.website_generator import WebsiteGenerator
 from frappe.utils import cstr, random_string, cint, flt
+from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 
@@ -166,7 +167,6 @@ class WebsiteItem(WebsiteGenerator):
 		context.search_link = '/search'
 
 		context.parents = get_parent_item_groups(self.item_group, from_item=True)
-		context.body_class = "product-page"
 		self.attributes = frappe.get_all("Item Variant Attribute",
 					  fields=["attribute", "attribute_value"],
 					  filters={"parent": self.item_code})
@@ -175,6 +175,11 @@ class WebsiteItem(WebsiteGenerator):
 		self.set_disabled_attributes(context)
 		self.set_metatags(context)
 		self.set_shopping_cart_data(context)
+		self.get_product_details_section(context)
+
+		context.wished = False
+		if frappe.db.exists("Wishlist Items", {"item_code": self.item_code, "parent": frappe.session.user}):
+				context.wished = True
 
 		return context
 
@@ -204,6 +209,12 @@ class WebsiteItem(WebsiteGenerator):
 							value = [d.as_dict() for d in value]
 
 						context[fieldname] = value
+
+		if self.slideshow:
+			if context.variant and context.variant.slideshow:
+				context.update(get_slideshow(context.variant))
+			else:
+				context.update(get_slideshow(self))
 
 	def set_attribute_context(self, context):
 		if self.has_variants:
@@ -325,6 +336,30 @@ class WebsiteItem(WebsiteGenerator):
 				row = self.append("website_specifications")
 				row.label = label
 				row.description = desc
+
+	def get_product_details_section(self, context):
+		""" Get section with tabs or website specifications. """
+		context.show_tabs = self.show_tabbed_section
+		if self.show_tabbed_section and self.tabs:
+			context.tabs = self.get_tabs()
+		else:
+			context.website_specifications = self.website_specifications
+
+	def get_tabs(self):
+		tab_values = {}
+		tab_values["tab_1_title"] = "Product Details"
+		tab_values["tab_1_content"] = frappe.render_template(
+			"templates/generators/item/item_specifications.html",
+			{
+				"website_specifications": self.website_specifications,
+				"show_tabs": self.show_tabbed_section
+			})
+
+		for row in self.tabs:
+			tab_values[f"tab_{row.idx + 1}_title"] = _(row.label)
+			tab_values[f"tab_{row.idx + 1}_content"] = row.content
+
+		return tab_values
 
 def invalidate_cache_for_web_item(doc):
 	"""Invalidate Website Item Group cache and rebuild ItemVariantsCacheManager."""

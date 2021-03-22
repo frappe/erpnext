@@ -172,9 +172,7 @@
 				<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
 					<img class="card-img" src="{{ item.image }}" alt="{{ title }}">
 				</a>
-				<div class="remove-wish"
-					style="position:absolute; top:10px; right: 20px; border-radius: 50%; border: 1px solid var(--gray-100); width: 25px; height: 25px;"
-					data-item-code="{{ item.item_code }}">
+				<div class="remove-wish" data-item-code="{{ item.item_code }}">
 					<span style="padding-bottom: 2px;">
 						<svg class="icon sm remove-wish-icon" style="margin-bottom: 4px; margin-left: 0.5px;">
 							<use class="close" href="#icon-close"></use>
@@ -199,7 +197,7 @@
 {%- endmacro -%}
 
 {%- macro wishlist_card_body(item, settings) %}
-<div class="card-body text-center" style="width:100%">
+<div class="card-body text-center" style="width: 100%;">
 	<div style="margin-top: 16px;">
 		<div class="product-title">{{ item.item_name or item.item_code or ''}}</div>
 	</div>
