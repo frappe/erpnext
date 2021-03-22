@@ -6,9 +6,11 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-test_dependencies = ["Customer", "Supplier"]
+from frappe.cache_manager import clear_doctype_cache
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from erpnext.accounts.doctype.opening_invoice_creation_tool.opening_invoice_creation_tool import get_temporary_opening_account
+
+test_dependencies = ["Customer", "Supplier"]
 
 class TestOpeningInvoiceCreationTool(unittest.TestCase):
 	def setUp(self):
@@ -24,22 +26,25 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 
 	def test_opening_sales_invoice_creation(self):
 		property_setter = make_property_setter("Sales Invoice", "update_stock", "default", 1, "Check")
-		invoices = self.make_invoices(company="_Test Opening Invoice Company")
+		try:
+			invoices = self.make_invoices(company="_Test Opening Invoice Company")
 
-		self.assertEqual(len(invoices), 2)
-		expected_value = {
-			"keys": ["customer", "outstanding_amount", "status"],
-			0: ["_Test Customer", 300, "Overdue"],
-			1: ["_Test Customer 1", 250, "Overdue"],
-		}
-		self.check_expected_values(invoices, expected_value)
+			self.assertEqual(len(invoices), 2)
+			expected_value = {
+				"keys": ["customer", "outstanding_amount", "status"],
+				0: ["_Test Customer", 300, "Overdue"],
+				1: ["_Test Customer 1", 250, "Overdue"],
+			}
+			self.check_expected_values(invoices, expected_value)
 
-		si = frappe.get_doc("Sales Invoice", invoices[0])
+			si = frappe.get_doc("Sales Invoice", invoices[0])
 
-		# Check if update stock is not enabled
-		self.assertEqual(si.update_stock, 0)
+			# Check if update stock is not enabled
+			self.assertEqual(si.update_stock, 0)
 
-		property_setter.delete()
+		finally:
+			property_setter.delete()
+			clear_doctype_cache("Sales Invoice")
 
 	def check_expected_values(self, invoices, expected_value, invoice_type="Sales"):
 		doctype = "Sales Invoice" if invoice_type == "Sales" else "Purchase Invoice"

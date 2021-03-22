@@ -4,7 +4,7 @@ on: [pull_request, workflow_dispatch, push]
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
 
     strategy:
       fail-fast: false
