@@ -90,24 +90,6 @@
    "read_only": 1
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Vehicle Allocation",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Vehicle Allocation",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
   },
@@ -188,11 +170,20 @@
    "label": "Is Booked",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Vehicle Allocation",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-03-16 21:33:16.939268",
+ "modified": "2021-03-22 19:12:53.755959",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation",
@@ -248,7 +239,7 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Vehicles",
- "search_fields": "title, allocation_period, delivery_period",
+ "search_fields": "title, allocation_period, delivery_period, vehicle_color",
  "sort_field": "sr_no",
  "sort_order": "ASC",
  "timeline_field": "item_code",
