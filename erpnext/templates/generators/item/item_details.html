@@ -1,11 +1,12 @@
-<div class="col-md-7 product-details">
+{% set width_class = "expand" if not slides else "" %}
+<div class="col-md-7 product-details {{ width_class }}">
 <!-- title -->
 <h1 class="product-title" itemprop="name">
 	{{ item_name }}
 </h1>
 <p class="product-code">
 	<span>{{ _("Item Code") }}:</span>
-	<span itemprop="productID">{{ doc.name }}</span>
+	<span itemprop="productID">{{ doc.item_code }}</span>
 </p>
 {% if has_variants %}
 	<!-- configure template -->

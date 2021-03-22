@@ -1,4 +1,5 @@
-<div class="col-md-5 h-100 d-flex">
+{% set column_size = 5 if slides else 4 %}
+<div class="col-md-{{ column_size }} h-100 d-flex mb-4">
 	{% if slides %}
 	<div class="item-slideshow d-flex flex-column mr-3">
 		{% for item in slides %}

@@ -1,10 +1,13 @@
-{% if doc.website_specifications -%}
-<div class="row item-website-specification mt-5">
-	<div class="col-md-12">
-		<table class="table table-bordered">
-		{% for d in doc.website_specifications -%}
+{% if website_specifications -%}
+<div class="row mt-5 item-website-specification">
+	<div class="col-md-11">
+		{% if not show_tabs %}
+			<h2 class="product-title mb-5">Product Details</h2>
+		{% endif %}
+		<table class="table table-bordered table-hover">
+		{% for d in website_specifications -%}
 			<tr>
-				<td class="text-muted" style="width: 30%;">{{ d.label }}</td>
+				<td class="text-muted" style="width: 30%; font-weight: bold;">{{ d.label }}</td>
 				<td>{{ d.description }}</td>
 			</tr>
 		{%- endfor %}
