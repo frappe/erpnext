@@ -22,14 +22,30 @@ from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply, validate_gstin_for_india
 from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
 
-def validate_einvoice_fields(doc):
+@frappe.whitelist()
+def validate_eligibility(doc):
+	if isinstance(doc, six.string_types):
+		doc = json.loads(doc)
+
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
-	invalid_doctype = doc.doctype != 'Sales Invoice'
+	if not einvoicing_enabled:
+		return False
+
+	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
+	invalid_doctype = doc.get('doctype') != 'Sales Invoice'
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
 
-	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_company or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+		return False
+
+	return True
+
+def validate_einvoice_fields(doc):
+	invoice_eligible = validate_eligibility(doc)
+
+	if not invoice_eligible:
 		return
 
 	if doc.docstatus == 0 and doc._action == 'save':
