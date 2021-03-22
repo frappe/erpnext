@@ -113,6 +113,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			item_code: this.frm.doc.item_code,
 			supplier: this.frm.doc.supplier,
 			is_booked: 0,
+			vehicle_color: this.frm.doc.color_1,
 			docstatus: 1
 		}
 		if (!ignore_allocation_period && this.frm.doc.allocation_period) {

@@ -678,10 +678,15 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 def vehicle_allocation_query(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 
-	fields = get_fields("Vehicle Allocation", ['name', 'title'])
+	fields = get_fields("Vehicle Allocation", ['name', 'title', 'vehicle_color'])
 	fields[1] = "CONCAT('<b>', title, '</b>')"
 	searchfields = frappe.get_meta("Vehicle Allocation").get_search_fields()
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
+
+	if filters and isinstance(filters, dict) and 'vehicle_color' in filters:
+		color = filters.pop('vehicle_color')
+		if color:
+			conditions.append("ifnull(vehicle_color, '') in ('', {0})".format(frappe.db.escape(color)))
 
 	return frappe.db.sql("""
 		select {fields}
