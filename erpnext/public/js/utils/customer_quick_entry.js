@@ -45,6 +45,13 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			me.dialog.doc.mobile_no = value;
 			me.dialog.get_field('mobile_no').refresh();
 		};
+
+		me.dialog.fields_dict["mobile_no_2"].df.onchange = () => {
+			var value = me.dialog.get_value('mobile_no_2');
+			value = erpnext.utils.get_formatted_mobile_pakistan(value);
+			me.dialog.doc.mobile_no_2 = value;
+			me.dialog.get_field('mobile_no_2').refresh();
+		};
 	},
 
 	get_variant_fields: function() {
@@ -94,8 +101,16 @@ frappe.ui.form.CustomerQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 			fieldtype: "Column Break"
 		},
 		{
-			label: __("Mobile Number"),
+			label: __("Mobile Number (Primary)"),
 			fieldname: "mobile_no",
+			fieldtype: "Data"
+		},
+		{
+			fieldtype: "Column Break"
+		},
+		{
+			label: __("Mobile Number (Secondary"),
+			fieldname: "mobile_no_2",
 			fieldtype: "Data"
 		},
 		{
