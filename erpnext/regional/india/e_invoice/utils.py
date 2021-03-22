@@ -218,7 +218,7 @@ def update_item_taxes(invoice, item):
 		is_applicable = t.tax_amount and t.account_head in gst_accounts_list
 		if is_applicable:
 			# this contains item wise tax rate & tax amount (incl. discount)
-			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
+			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code or item.item_name)
 
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
@@ -688,6 +688,8 @@ class GSPConnector():
 			# validate cancellation
 			if time_diff_in_hours(now_datetime(), self.invoice.ack_date) > 24:
 				frappe.throw(_('E-Invoice cannot be cancelled after 24 hours of IRN generation.'), title=_('Not Allowed'), exc=CancellationNotAllowed)
+			if not irn:
+				frappe.throw(_('IRN not found. You must generate IRN before cancelling.'), title=_('Cancellation Not Allowed'), exc=CancellationNotAllowed)
 
 			headers = self.get_headers()
 			data = json.dumps({
