@@ -1,8 +1,6 @@
 @import "frappe/public/scss/desk/variables";
 @import "frappe/public/scss/common/mixins";
 
-$wish-red: #F47A7A;
-
 body.product-page {
 	background: var(--gray-50);
 }
@@ -210,13 +208,13 @@ body.product-page {
 
 	.btn-add-to-wishlist {
 		svg use {
-			stroke: var(--wish-red);
+			stroke: #F47A7A;
 		}
 	}
 
 	.btn-view-in-wishlist {
 		svg use {
-			fill: var(--wish-red);
+			fill: #F47A7A;
 			stroke: none;
 		}
 	}
@@ -600,16 +598,16 @@ body.product-page {
 
 .not-wished {
 	cursor: pointer;
-	stroke: var(--wish-red) !important;
+	stroke: #F47A7A !important;
 
 	&:hover {
-		fill: var(--wish-red);
+		fill: #F47A7A;
 	}
 }
 
 .wished {
 	stroke: none;
-	fill: var(--wish-red) !important;
+	fill: #F47A7A !important;
 }
 
 .list-row-checkbox {
@@ -685,6 +683,7 @@ body.product-page {
 }
 
 .remove-wish {
+	background-color: var(--gray-200);
 	position: absolute;
 	top:10px;
 	right: 20px;
@@ -692,10 +691,6 @@ body.product-page {
 	border: 1px solid var(--gray-100);
 	width: 25px;
 	height: 25px;
-
-	&:hover {
-		background-color: var(--gray-100);
-	}
 }
 
 .wish-removed {
