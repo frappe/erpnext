@@ -218,6 +218,13 @@ class VehicleBookingOrder(AccountsController):
 						frappe.bold(allocation_doc.supplier_name or allocation_doc.supplier),
 						frappe.bold(self.supplier_name or self.supplier)))
 
+			if allocation_doc.vehicle_color:
+				if self.color_1 != allocation_doc.vehicle_color:
+					frappe.throw(_("Vehicle Allocation {0} ({1}) Vehicle Color {2} does not match Vehicle Booking Order Color (Priority 1) {3}")
+						.format(self.allocation_title, self.vehicle_allocation,
+							frappe.bold(allocation_doc.vehicle_color),
+							frappe.bold(self.color_1)))
+
 			existing_filters = {"docstatus": 1, "vehicle_allocation": self.vehicle_allocation}
 			if not self.is_new():
 				existing_filters['name'] = ['!=', self.name]
