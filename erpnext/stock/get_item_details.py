@@ -932,12 +932,6 @@ def get_company_total_stock(item_code, company):
 		.format(company, item_code))[0][0]
 
 @frappe.whitelist()
-def get_total_stock_value(item_code):
-	query = """select sum(actual_qty) from `tabBin`, `tabItem` where
-		 `tabItem`.name = `tabBin`.item_code and ifnull(`tabItem`.disabled, 0) = 0  and `tabBin`.item_code = %(item_code)s"""
-	return frappe.db.sql(query, debug=True)
-	
-@frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
 	args = frappe._dict({"item_code":item_code, "warehouse":warehouse, "stock_qty":stock_qty, "serial_no":serial_no})
 	serial_no = get_serial_no(args)
