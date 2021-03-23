@@ -88,7 +88,9 @@
    "depends_on": "eval:!doc.unregistered",
    "fieldname": "license_plate",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "License Plate",
    "no_copy": 1
   },
@@ -119,7 +121,9 @@
    "allow_in_quick_entry": 1,
    "fieldname": "chassis_no",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Chassis No"
   },
   {
@@ -138,6 +142,7 @@
    "allow_in_quick_entry": 1,
    "fieldname": "insurance_company",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Insurance Company",
    "options": "Customer"
   },
@@ -151,6 +156,7 @@
    "fieldname": "color",
    "fieldtype": "Link",
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Color",
    "options": "Vehicle Color"
   },
@@ -191,7 +197,6 @@
   {
    "fieldname": "warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "Warehouse",
@@ -204,7 +209,6 @@
    "fetch_from": "item_code.brand",
    "fieldname": "brand",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Make",
    "options": "Brand",
@@ -451,7 +455,9 @@
    "allow_in_quick_entry": 1,
    "fieldname": "engine_no",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "in_preview": 1,
+   "in_standard_filter": 1,
    "label": "Engine No"
   },
   {
@@ -555,7 +561,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-03-19 14:41:08.158298",
+ "modified": "2021-03-22 23:48:49.905708",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
