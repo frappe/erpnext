@@ -294,4 +294,8 @@ def rename_temporarily_named_docs(doctype):
 		oldname = doc.name
 		set_name_from_naming_options(frappe.get_meta(doctype).autoname, doc)
 		newname = doc.name
-		frappe.db.sql("""UPDATE `tab{}` SET name = %s, to_rename = 0 where name = %s""".format(doctype), (newname, oldname))
+		frappe.db.sql(
+			"UPDATE `tab{}` SET name = %s, to_rename = 0 where name = %s".format(doctype),
+			(newname, oldname),
+			auto_commit=True
+		)
