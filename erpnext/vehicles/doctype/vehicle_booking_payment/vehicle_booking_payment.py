@@ -59,7 +59,7 @@ class VehicleBookingPayment(Document):
 
 	def validate_party_type(self):
 		party_types_allowed_map = {
-			"Receive": ['Customer'],
+			"Receive": ['Customer', 'Company'],
 			"Pay": ['Supplier']
 		}
 		party_types_allowed = party_types_allowed_map.get(self.payment_type, [])
@@ -71,7 +71,7 @@ class VehicleBookingPayment(Document):
 	def validate_vehicle_booking_order(self):
 		if self.vehicle_booking_order:
 			vbo = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order,
-				['docstatus', 'customer', 'financer', 'supplier'], as_dict=1)
+				['docstatus', 'customer', 'company', 'financer', 'supplier'], as_dict=1)
 
 			if not vbo:
 				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
@@ -79,6 +79,11 @@ class VehicleBookingPayment(Document):
 			if self.party_type == "Customer":
 				if self.party not in (vbo.customer, vbo.financer):
 					frappe.throw(_("Customer/Financer does not match in {0}")
+						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+
+			if self.party_type == "Company":
+				if self.party != vbo.company:
+					frappe.throw(_("Company does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.party_type == "Supplier":
@@ -253,7 +258,7 @@ def get_party_name(party_type, party, vehicle_booking_order=None):
 	party_name = None
 
 	if vehicle_booking_order:
-		if party_type == "Customer":
+		if party_type in ["Customer", "Company"]:
 			party_name = frappe.db.get_value("Vehicle Booking Order", vehicle_booking_order, 'customer_name')
 		elif party_type == "Supplier":
 			party_name = frappe.db.get_value("Vehicle Booking Order", vehicle_booking_order, 'supplier_name')
@@ -266,12 +271,14 @@ def get_party_name(party_type, party, vehicle_booking_order=None):
 @frappe.whitelist()
 def get_vehicle_booking_party(vehicle_booking_order, party_type):
 	vbo = frappe.db.get_value("Vehicle Booking Order", vehicle_booking_order,
-		['customer', 'financer', 'supplier'], as_dict=1)
+		['customer', 'financer', 'company', 'supplier'], as_dict=1)
 
 	if party_type == "Customer":
 		return vbo.financer or vbo.customer
 	elif party_type == "Supplier":
 		return vbo.supplier
+	elif party_type == "Company":
+		return vbo.company
 
 
 @frappe.whitelist()
@@ -315,8 +322,10 @@ def get_payment_entry(vehicle_booking_order, party_type):
 
 	if party_type == "Supplier":
 		doc.party = vbo.supplier
-	else:
+	elif party_type == "Customer":
 		doc.party = vbo.get('financer') or vbo.get('customer')
+	elif party_type == "Company":
+		doc.party = vbo.company
 
 	if doc.payment_type == "Pay":
 		instruments = get_undeposited_instruments(vehicle_booking_order)

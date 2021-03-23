@@ -37,8 +37,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.frm.set_query('contact_person', () => {
 			frappe.dynamic_link = {
 				doc: this.frm.doc,
-				fieldname: 'customer',
-				doctype: 'Customer'
+				fieldname: me.frm.doc.customer_is_company ? 'company' : 'customer',
+				doctype: me.frm.doc.customer_is_company ? 'Company' : 'Customer'
 			};
 			return erpnext.queries.contact_query(me.frm.doc);
 		});
@@ -191,7 +191,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	add_create_buttons: function () {
 		if (this.frm.doc.docstatus < 2) {
 			if (flt(this.frm.doc.customer_outstanding) > 0) {
-				this.frm.add_custom_button(__('Customer Payment'), () => this.make_payment_entry('Customer'), __('Payment'));
+				this.frm.add_custom_button(__('Customer Payment'),
+					() => this.make_payment_entry(this.frm.doc.customer_is_company ? 'Company' : 'Customer'), __('Payment'));
 			}
 		}
 
@@ -269,7 +270,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 	company: function () {
 		this.set_customer_is_company_label();
-		if (this.frm.doc.company_is_customer) {
+		if (this.frm.doc.customer_is_company) {
 			this.get_customer_details();
 		}
 	},
@@ -363,14 +364,14 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	get_customer_details: function () {
 		var me = this;
 
-		if (me.frm.doc.company && (me.frm.doc.customer || me.frm.doc.company_is_customer)) {
+		if (me.frm.doc.company && (me.frm.doc.customer || me.frm.doc.customer_is_company)) {
 			frappe.call({
 				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_customer_details",
 				args: {
 					args: {
 						company: me.frm.doc.company,
 						customer: me.frm.doc.customer,
-						company_is_customer: me.frm.doc.company_is_customer,
+						customer_is_company: me.frm.doc.customer_is_company,
 						financer: me.frm.doc.financer,
 						finance_type: me.frm.doc.finance_type,
 						item_code: me.frm.doc.item_code,
@@ -611,7 +612,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	make_payment_entry: function(party_type) {
-		if (['Customer', 'Supplier'].includes(party_type)) {
+		if (['Customer', 'Supplier', 'Company'].includes(party_type)) {
 			return frappe.call({
 				method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_payment_entry",
 				args: {
