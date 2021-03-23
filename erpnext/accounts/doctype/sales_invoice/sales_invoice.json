@@ -25,12 +25,16 @@
   "reason_for_sale",
   "patient_statement",
   "amended_from",
+  "cai_info_section",
+  "cai",
+  "due_date_cai",
+  "authorized_range",
+  "cashier",
   "returns",
   "return_against",
   "column_break_21",
   "update_billed_amount_in_sales_order",
   "column_numeration",
-  "authorized_range",
   "accounting_dimensions_section",
   "deadline_for_authorization",
   "project",
@@ -1674,12 +1678,36 @@
    "fieldname": "total_exonerated",
    "fieldtype": "Currency",
    "label": "Total Exonerated"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "cai_info_section",
+   "fieldtype": "Section Break",
+   "label": "CAI Info"
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Data",
+   "label": "Cai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "due_date_cai",
+   "fieldtype": "Date",
+   "label": "Due Date CAI",
+   "read_only": 1
+  },
+  {
+   "fieldname": "cashier",
+   "fieldtype": "Data",
+   "label": "Cashier",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-03-17 16:11:50.346659",
+ "modified": "2021-03-19 10:40:09.232477",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
