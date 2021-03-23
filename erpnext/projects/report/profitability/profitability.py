@@ -96,7 +96,7 @@ def get_data(filters):
 					`tabSalary Slip Timesheet` as sst join `tabTimesheet` on tabTimesheet.name = sst.time_sheet
 					join `tabSales Invoice Timesheet` as sit on sit.time_sheet = tabTimesheet. name
 					join `tabSales Invoice` as si on si. name = sit.parent and si.status != "Cancelled"
-					join `tabSalary Slip` as ss on ss.name = sst.parent """
+					join `tabSalary Slip` as ss on ss.name = sst.parent and ss.status != "Cancelled" """
 	if conditions:
 		sql += """
 				where
