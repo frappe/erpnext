@@ -1800,6 +1800,15 @@ class TestSalesInvoice(unittest.TestCase):
 		si.selling_price_list = "_Test Price List Rest of the World"
 		si.update_stock = 1
 		si.items[0].target_warehouse = 'Work In Progress - TCP1'
+
+		# Add stock to stores for succesful stock transfer
+		make_stock_entry(
+			target="Stores - TCP1",
+			company = "_Test Company with perpetual inventory",
+			qty=1,
+			basic_rate=100
+		)
+
 		add_taxes(si)
 		si.save()
 
