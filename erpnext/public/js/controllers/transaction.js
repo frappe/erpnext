@@ -635,9 +635,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 			else {
 				var valid_serial_nos = [];
-
+				var serialnos = [];
 				// Replacing all occurences of comma with carriage return
-				item.serial_no = item.serial_no.trim().replace(/,/g, '\n');
+				item.serial_no = item.serial_no.replace(/,/g, '\n');
+				serialnos = item.serial_no.split("\n");
+				for (var i = 0; i < serialnos.length; i++) {
+					if (serialnos[i] != "") {
+						valid_serial_nos.push(serialnos[i]);
+					}
+				}
 				item.conversion_factor = item.conversion_factor || 1;
 
 				refresh_field("serial_no", item.name, item.parentfield);
