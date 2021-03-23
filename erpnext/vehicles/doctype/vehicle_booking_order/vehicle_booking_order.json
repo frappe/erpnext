@@ -578,6 +578,7 @@
    "depends_on": "eval:!doc.customer",
    "fieldname": "customer_is_company",
    "fieldtype": "Check",
+   "in_standard_filter": 1,
    "label": "Customer is Your Company"
   },
   {
@@ -951,7 +952,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-22 19:14:05.477225",
+ "modified": "2021-03-23 13:35:08.881223",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
