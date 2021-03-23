@@ -161,5 +161,4 @@ def add_standard_navbar_items():
 	navbar_settings.save()
 
 def add_app_name():
-	settings = frappe.get_doc("System Settings")
-	settings.app_name = _("ERPNext")
+	frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')

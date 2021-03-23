@@ -39,6 +39,7 @@ class StaffingPlan(Document):
 			detail.current_count = designation_counts['employee_count']
 			detail.current_openings = designation_counts['job_openings']
 
+			detail.total_estimated_cost = 0
 			if detail.number_of_positions > 0:
 				if detail.vacancies > 0 and detail.estimated_cost_per_position:
 					detail.total_estimated_cost = cint(detail.vacancies) * flt(detail.estimated_cost_per_position)
