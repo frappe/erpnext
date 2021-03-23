@@ -25,6 +25,11 @@
   "reason_for_sale",
   "patient_statement",
   "amended_from",
+  "cai_info_section",
+  "cai",
+  "due_date_cai",
+  "authorized_range",
+  "cashier",
   "returns",
   "return_against",
   "column_break_21",
@@ -196,12 +201,7 @@
   "auto_repeat",
   "update_auto_repeat_reference",
   "against_income_account",
-  "pos_total_qty",
-  "cai_info_section",
-  "cai",
-  "due_date_cai",
-  "authorized_range",
-  "cashier"
+  "pos_total_qty"
  ],
  "fields": [
   {
@@ -1598,7 +1598,8 @@
   {
    "fieldname": "authorized_range",
    "fieldtype": "Data",
-   "label": "Authorized Range"
+   "label": "Authorized Range",
+   "read_only": 1
   },
   {
    "fieldname": "deadline_for_authorization",
@@ -1687,23 +1688,26 @@
   {
    "fieldname": "cai",
    "fieldtype": "Data",
-   "label": "Cai"
+   "label": "Cai",
+   "read_only": 1
   },
   {
    "fieldname": "due_date_cai",
    "fieldtype": "Date",
-   "label": "Due Date CAI"
+   "label": "Due Date CAI",
+   "read_only": 1
   },
   {
    "fieldname": "cashier",
    "fieldtype": "Data",
-   "label": "Cashier"
+   "label": "Cashier",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-03-18 16:03:30.906801",
+ "modified": "2021-03-19 10:40:09.232477",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
