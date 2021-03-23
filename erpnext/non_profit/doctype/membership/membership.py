@@ -48,7 +48,7 @@ class Membership(Document):
 		last_membership = erpnext.get_last_membership(self.member)
 
 		# if person applied for offline membership
-		if last_membership and not frappe.session.user == "Administrator":
+		if last_membership and last_membership.name != self.name and not frappe.session.user == "Administrator":
 			# if last membership does not expire in 30 days, then do not allow to renew
 			if getdate(add_days(last_membership.to_date, -30)) > getdate(nowdate()) :
 				frappe.throw(_("You can only renew if your membership expires within 30 days"))
@@ -90,6 +90,7 @@ class Membership(Document):
 		self.validate_membership_type_and_settings(plan, settings)
 
 		invoice = make_invoice(self, member, plan, settings)
+		self.reload()
 		self.invoice = invoice.name
 
 		if with_payment_entry:
@@ -284,10 +285,11 @@ def trigger_razorpay_subscription(*args, **kwargs):
 
 		settings = frappe.get_doc("Non Profit Settings")
 		if settings.allow_invoicing and settings.automate_membership_invoicing:
+			membership.reload()
 			membership.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
 
 	except Exception as e:
-		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), __("Payment ID"), payment.id)
+		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), _("Payment ID"), payment.id)
 		log = frappe.log_error(message, _("Error creating membership entry for {0}").format(member.name))
 		notify_failure(log)
 		return { "status": "Failed", "reason": e}
