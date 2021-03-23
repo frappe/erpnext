@@ -709,7 +709,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				serialnos = item.serial_no.split("\n");
 				for (var i = 0; i < serialnos.length; i++) {
 					if (serialnos[i] != "") {
-						valid_serial_nos.push(serialnos[i])
+						valid_serial_nos.push(serialnos[i]);
 					}
 				}
 				item.conversion_factor = item.conversion_factor || 1;
