@@ -86,7 +86,7 @@ class Patient(Document):
 			self.language = frappe.db.get_single_value('System Settings', 'language')
 
 	def create_website_user(self):
-		if self.email and not frappe.db.exists ('User', self.email):
+		if self.email and not frappe.db.exists('User', self.email):
 			user = frappe.get_doc({
 				'doctype': 'User',
 				'first_name': self.first_name,
@@ -170,7 +170,8 @@ class Patient(Document):
 	def update_contact(self, contact=None):
 		if not contact:
 			contact_name = get_default_contact(self.doctype, self.name)
-			if contact_name: contact = frappe.get_doc('Contact', contact_name)
+			if contact_name:
+				contact = frappe.get_doc('Contact', contact_name)
 
 		if contact:
 			if self.email and self.email != contact.email_id:

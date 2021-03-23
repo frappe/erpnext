@@ -15,8 +15,10 @@ from erpnext.hr.doctype.employee.employee import is_holiday
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 from erpnext.healthcare.utils import check_fee_validity, get_service_item_and_practitioner_charge, manage_fee_validity
 
-class MaximumCapacityError(frappe.ValidationError): pass
-class OverlapError(frappe.ValidationError): pass
+class MaximumCapacityError(frappe.ValidationError):
+	pass
+class OverlapError(frappe.ValidationError):
+	pass
 
 class PatientAppointment(Document):
 	def validate(self):
@@ -83,14 +85,11 @@ class PatientAppointment(Document):
 			allow_overlap, service_unit_capacity = frappe.get_value('Healthcare Service Unit', self.service_unit,
 				['overlap_appointments', 'service_unit_capacity'])
 			if allow_overlap:
-				service_unit_appointments = list(filter(lambda appointment: appointment['service_unit'] == self.service_unit and \
+				service_unit_appointments = list(filter(lambda appointment: appointment['service_unit'] == self.service_unit and
 					appointment['patient'] != self.patient, overlapping_appointments)) # if same patient already booked, it should be an overlap
 				if len(service_unit_appointments) >= (service_unit_capacity or 1):
 					frappe.throw(_("Not allowed, {} cannot exceed maximum capacity {}")
-						.format(
-							frappe.bold(self.service_unit),
-							frappe.bold(service_unit_capacity or 1)
-						), MaximumCapacityError)
+						.format(frappe.bold(self.service_unit), frappe.bold(service_unit_capacity or 1)), MaximumCapacityError)
 				else: # service_unit_appointments within capacity, remove from overlapping_appointments
 					overlapping_appointments = [appointment for appointment in overlapping_appointments if appointment not in service_unit_appointments]
 
@@ -366,8 +365,7 @@ def get_available_slots(practitioner_doc, date):
 				}
 
 				if schedule_entry.service_unit:
-					slot_name  = f'{schedule_entry.schedule} - {schedule_entry.service_unit}'
-					print(slot_name)
+					slot_name = f'{schedule_entry.schedule} - {schedule_entry.service_unit}'
 					allow_overlap, service_unit_capacity = frappe.get_value('Healthcare Service Unit', schedule_entry.service_unit, ['overlap_appointments', 'service_unit_capacity'])
 					if not allow_overlap:
 						# fetch all appointments to service unit

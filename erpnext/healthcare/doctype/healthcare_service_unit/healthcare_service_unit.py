@@ -55,7 +55,7 @@ class HealthcareServiceUnit(NestedSet):
 		if self.overlap_appointments:
 			if not self.service_unit_capacity or float(self.service_unit_capacity) <= 0:
 				frappe.throw(_('Please set a valid Servie Unit Capacity to enable Overlap Appointments'),
-							 title=_('Invalid Servie Unit Capacity'))
+					title=_('Invalid Servie Unit Capacity'))
 
 
 @frappe.whitelist()
@@ -74,12 +74,12 @@ def add_multiple_service_units(parent, data):
 
 	if not data.get('healthcare_service_unit_name') or not company:
 		frappe.throw(_('Service Unit Name and Company are mandatory to create Healthcare Service Units'),
-					 title=_('Missing Required Fields'))
+			title=_('Missing Required Fields'))
 
 	count = cint(data.get('count') or 0)
 	if count <= 0:
 		frappe.throw(_('Number of Service Units to be created should at least be 1'),
-					 title=_('Invalid Number of Service Units'))
+			title=_('Invalid Number of Service Units'))
 
 	capacity = cint(data.get('service_unit_capacity') or 1)
 

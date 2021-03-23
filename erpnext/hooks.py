@@ -275,7 +275,7 @@ doc_events = {
 			'erpnext.regional.italy.utils.set_state_code',
 			'erpnext.regional.india.utils.update_gst_category',
 			'erpnext.healthcare.utils.update_address_links'
-			],
+		],
 	},
 	'Supplier': {
 		'validate': 'erpnext.regional.india.utils.validate_pan_for_india'
