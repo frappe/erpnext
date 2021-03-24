@@ -117,6 +117,7 @@ def validate_address_fields(addr):
 		or not addr.pincode
 		or not addr.address_title
 		or not addr.address_line1
+		or not addr.address_line2
 		or not addr.gst_state_number):
 
 		frappe.throw(
@@ -252,6 +253,9 @@ def update_item_taxes(invoice, item):
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
 					item.tax_rate += item_tax_rate
 					item[f'{tax_type}_amount'] += abs(item_tax_amount)
+		else:
+			# TODO: other charges per item
+			pass
 
 	return item
 
