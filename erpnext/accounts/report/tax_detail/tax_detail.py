@@ -6,6 +6,8 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 
+# NOTE: Not compatible with the frappe custom report feature of adding arbitrary doctype columns to the report
+
 # field lists in multiple doctypes will be coalesced
 required_sql_fields = {
 	"GL Entry": ["posting_date", "voucher_type", "voucher_no", "account", "account_currency", "debit", "credit"],
@@ -87,7 +89,7 @@ def run_report(report_name, data):
 		new_data += [ {columns[1]['fieldname']: section_name, columns[2]['fieldname']: section_total} ]
 		summary += [ {'label': section_name, 'datatype': 'Currency', 'value': section_total} ]
 		if show_detail: new_data += [ {} ]
-	return new_data if new_data else data, summary
+	return new_data or data, summary or None
 
 def filter_match(value, string):
 	"Approximation to datatable filters"

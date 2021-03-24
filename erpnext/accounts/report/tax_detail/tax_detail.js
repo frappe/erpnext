@@ -81,7 +81,6 @@ erpnext.TaxDetail = class TaxDetail {
 	}
 	show_footer_message() {
 		// The last thing to run after datatable_render in refresh()
-		console.log('show_footer_message');
 		this.super.show_footer_message.apply(this.qr);
 		if (this.qr.report_name !== 'Tax Detail') {
 			this.set_value_options();
@@ -97,7 +96,6 @@ erpnext.TaxDetail = class TaxDetail {
 		// Infrequent report build (onload), load filters & data
 		// super function runs a refresh() serially
 		// already run within frappe.run_serially
-		console.log('refresh_report');
 		this.loading = true;
 		this.super.refresh_report.apply(this.qr);
 		if (this.qr.report_name !== 'Tax Detail') {
@@ -115,21 +113,23 @@ erpnext.TaxDetail = class TaxDetail {
 	load_report() {
 		// One-off report build like titles, menu, etc
 		// Run when this object is created which happens in qr.load_report
-		console.log('load_report');
 		this.qr.menu_items = this.get_menu_items();
 	}
 	get_menu_items() {
-		// Replace save button
+		// Replace Save, remove Add Column
 		let new_items = [];
-		const label = __('Save');
+		const save = __('Save');
+		const addColumn = __('Add Column');
 
 		for (let item of this.qr.menu_items) {
-			if (item.label === label) {
+			if (item.label === save) {
 				new_items.push({
-					label: label,
-					action: this.save_report,
+					label: save,
+					action: () => this.save_report(),
 					standard: false
 				});
+			} else if (item.label === addColumn) {
+				// Don't add
 			} else {
 				new_items.push(item);
 			}
@@ -279,9 +279,6 @@ erpnext.TaxDetail = class TaxDetail {
 		}
 	}
 	create_controls() {
-		if (this.controls) {
-			return;
-		}
 		let controls = {};
 		// SELECT in data.js
 		controls['section_name'] = this.qr.page.add_field({
@@ -389,7 +386,8 @@ erpnext.TaxDetail = class TaxDetail {
 			To specify what data goes in each section, specify column filters in the data table, then save with Add Filter.
 			Each section can have multiple filters added but be careful with the duplicated data rows.
 			You can specify which Currency column will be summed for each filter in the final report with the Value Column
-			select box. Once you're done, hit Save & Run.`);
+			select box. Use the Show Detail box to see the data rows included in each section in the final report.
+			Once you're done, hit Save & Run.`);
 		this.qr.$report_footer.append(`<div class="col-md-12">${help}</div>`);
 	}
 }
