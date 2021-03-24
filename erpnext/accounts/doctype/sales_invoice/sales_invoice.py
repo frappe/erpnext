@@ -458,7 +458,7 @@ class SalesInvoice(SellingController):
 		return frappe.get_cached_doc('POS Profile', self.pos_profile) if self.pos_profile else {}
 
 	def get_customer_specific_info(self):
-		customer_price_list, customer_group_price_list = None, None
+		customer_price_list, customer_group_price_list, currency = None, None, None
 		if self.customer:
 			customer_price_list, customer_group, currency = frappe.get_value(
 				"Customer", self.customer, 
