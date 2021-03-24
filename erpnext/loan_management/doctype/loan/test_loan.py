@@ -275,6 +275,11 @@ class TestLoan(unittest.TestCase):
 		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250
 			where loan_security='Test Security 2'""")
 
+		create_process_loan_security_shortfall()
+		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
+		self.assertEquals(loan_security_shortfall.status, "Completed")
+		self.assertEquals(loan_security_shortfall.shortfall_amount, 0)
+
 	def test_loan_security_unpledge(self):
 		pledge = [{
 			"loan_security": "Test Security 1",
