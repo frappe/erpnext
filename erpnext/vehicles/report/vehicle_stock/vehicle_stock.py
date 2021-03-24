@@ -114,6 +114,8 @@ class VehicleStockReport(object):
 			d.engine_no = vehicle_data.engine_no
 			d.license_plate = vehicle_data.license_plate
 			d.unregistered = vehicle_data.unregistered
+			d.customer = vehicle_data.customer
+			d.customer_name = vehicle_data.customer_name
 
 			# Data from receipt
 			if d.received_dt and d.received_dn:
@@ -125,6 +127,8 @@ class VehicleStockReport(object):
 						d.license_plate = vehicle_receipt_data.vehicle_license_plate
 						d.unregistered = vehicle_receipt_data.vehicle_unregistered
 						d.vehicle_booking_order = vehicle_receipt_data.vehicle_booking_order
+						d.customer = vehicle_receipt_data.customer
+						d.customer_name = vehicle_receipt_data.customer_name
 
 			# Data from delivery
 			if d.delivery_dt and d.delivery_dn:
@@ -136,15 +140,21 @@ class VehicleStockReport(object):
 						d.license_plate = vehicle_delivery_data.vehicle_license_plate or d.license_plate
 						d.unregistered = vehicle_delivery_data.vehicle_unregistered or d.unregistered
 						d.vehicle_booking_order = vehicle_delivery_data.vehicle_booking_order or d.vehicle_booking_order
+						d.customer = vehicle_delivery_data.customer
+						d.customer_name = vehicle_delivery_data.customer_name
 
 			# Booked Open Stock
-			if not d.vehicle_booking_order and d.vehicle in self.booking_data:
-				booking_data = self.booking_data[d.vehicle]
+			if not d.vehicle_booking_order and d.vehicle in self.booking_by_vehicle_data:
+				booking_data = self.booking_by_vehicle_data[d.vehicle]
 				d.vehicle_booking_order = booking_data.name
 				d.open_stock = 1 if booking_data.vehicle_receipt else 0
 
 			if d.vehicle_booking_order and not d.dispatch_date:
 				d.dispatch_date = vehicle_data.get('dispatch_date')
+
+			# Booking Customer Name
+			if d.vehicle_booking_order and d.vehicle_booking_order in self.booking_by_booking_data:
+				d.customer_name = self.booking_by_booking_data[d.vehicle_booking_order].get('customer_name')
 
 			# Status
 			if d.qty > 0:
@@ -285,7 +295,7 @@ class VehicleStockReport(object):
 		receipt_names = list(set([d.received_dn for d in self.data if d.received_dn and d.received_dt == "Vehicle Receipt"]))
 		if receipt_names:
 			data = frappe.db.sql("""
-				select name, vehicle_booking_order, supplier, customer, supplier_delivery_note,
+				select name, vehicle_booking_order, supplier, customer, customer_name, supplier_delivery_note,
 					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered
 				from `tabVehicle Receipt`
 				where docstatus = 1 and name in %s
@@ -297,7 +307,7 @@ class VehicleStockReport(object):
 		delivery_names = list(set([d.delivery_dn for d in self.data if d.delivery_dn and d.delivery_dt == "Vehicle Delivery"]))
 		if delivery_names:
 			data = frappe.db.sql("""
-				select name, vehicle_booking_order, customer,
+				select name, vehicle_booking_order, customer, customer_name,
 					vehicle_chassis_no, vehicle_engine_no, vehicle_license_plate, vehicle_unregistered
 				from `tabVehicle Delivery`
 				where docstatus = 1 and name in %s
@@ -307,20 +317,22 @@ class VehicleStockReport(object):
 				self.vehicle_delivery_data[d.name] = d
 
 	def get_booking_data(self):
-		self.booking_data = {}
+		self.booking_by_vehicle_data = {}
+		self.booking_by_booking_data = {}
 
 		vehicle_names = list(set([d.vehicle for d in self.data]))
 		if not vehicle_names:
-			return self.booking_data
+			return {}
 
 		data = frappe.db.sql("""
-			select name, vehicle, vehicle_receipt
+			select name, vehicle, vehicle_receipt, customer, customer_name
 			from `tabVehicle Booking Order`
 			where docstatus = 1 and vehicle in %s
 		""", [vehicle_names], as_dict=1)
 
 		for d in data:
-			self.booking_data[d.vehicle] = d
+			self.booking_by_booking_data[d.name] = d
+			self.booking_by_vehicle_data[d.vehicle] = d
 
 	def get_item_conditions(self):
 		conditions = []
@@ -360,6 +372,7 @@ class VehicleStockReport(object):
 			{"label": _("Engine No"), "fieldname": "engine_no", "fieldtype": "Data", "width": 115},
 			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 100},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
+			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 100},
 			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
 			{"label": _("Dispatched"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 85},
