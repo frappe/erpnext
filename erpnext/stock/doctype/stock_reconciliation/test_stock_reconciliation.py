@@ -193,6 +193,16 @@ class TestStockReconciliation(unittest.TestCase):
 			stock_doc = frappe.get_doc("Stock Reconciliation", d)
 			stock_doc.cancel()
 
+	def test_customer_provided_items(self):
+		item_code = 'Stock-Reco-customer-Item-100'
+		create_item(item_code, is_customer_provided_item = 1,
+			  customer = '_Test Customer', is_purchase_item = 0)
+
+		sr = create_stock_reconciliation(item_code = item_code, qty = 10, rate = 420)
+
+		self.assertEqual(sr.get("items")[0].allow_zero_valuation_rate, 1)
+		self.assertEqual(sr.get("items")[0].valuation_rate, 0)
+		self.assertEqual(sr.get("items")[0].amount, 0)
 
 def insert_existing_sle(warehouse):
 	from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry

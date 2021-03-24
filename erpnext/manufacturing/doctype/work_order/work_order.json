@@ -333,8 +333,7 @@
    "fieldname": "operations",
    "fieldtype": "Table",
    "label": "Operations",
-   "options": "Work Order Operation",
-   "read_only": 1
+   "options": "Work Order Operation"
   },
   {
    "depends_on": "operations",
@@ -496,7 +495,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-05 19:32:43.323054",
+ "modified": "2021-03-16 13:27:51.116484",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
