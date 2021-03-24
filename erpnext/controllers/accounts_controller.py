@@ -829,10 +829,10 @@ class AccountsController(TransactionBase):
 				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
 				if (party_account_currency
-						and party_account_currency != self.company_currency
-						and self.currency != party_account_currency):
+						and (self.currency != party_account_currency
+						and self.currency != self.company_currency)):
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-								 .format(party_type, party, party_account_currency), InvalidCurrency)
+								 .format(party_type, party, frappe.bold(party_account_currency), InvalidCurrency))
 
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
@@ -898,7 +898,7 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 
-		if party_account_currency == self.company_currency:
+		if self.company_currency == self.currency:
 			grand_total = self.get("base_rounded_total") or self.base_grand_total
 		else:
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -959,7 +959,7 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
 
-			if party_account_currency == self.company_currency:
+			if self.company_currency == self.currency:
 				total = flt(total, self.precision("base_grand_total"))
 				grand_total = flt(self.get("base_rounded_total") or self.base_grand_total, self.precision('base_grand_total'))
 			else:
@@ -1394,7 +1394,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			)
 
 	def get_new_child_item(item_row):
-		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item" 
+		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item"
 		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
