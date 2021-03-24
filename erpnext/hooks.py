@@ -279,7 +279,7 @@ doc_events = {
 		'validate': ['erpnext.regional.india.utils.set_place_of_supply']
 	},
 	('Sales Invoice', 'Purchase Invoice'): {
-		'validate': ['erpnext.regional.india.utils.validate_document_name']
+		'validate': ['erpnext.regional.india.utils.validate_document_name', 'erpnext.regional.india.utils.update_taxable_values']
 	},
 	"Contact": {
 		"on_trash": "erpnext.support.doctype.issue.issue.update_issue",
