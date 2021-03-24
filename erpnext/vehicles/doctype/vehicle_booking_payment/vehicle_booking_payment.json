@@ -87,7 +87,8 @@
    "in_standard_filter": 1,
    "label": "Posting Date",
    "no_copy": 1,
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "amended_from",
@@ -189,7 +190,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-16 21:29:54.334516",
+ "modified": "2021-03-24 10:39:23.260138",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Payment",

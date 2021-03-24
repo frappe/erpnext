@@ -133,7 +133,8 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Posting Date",
-   "reqd": 1
+   "reqd": 1,
+   "search_index": 1
   },
   {
    "fieldname": "company",
@@ -704,7 +705,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-12 15:08:47.934111",
+ "modified": "2021-03-24 10:39:06.309819",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

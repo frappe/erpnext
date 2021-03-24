@@ -93,7 +93,8 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
-   "label": "Required By"
+   "label": "Required By",
+   "search_index": 1
   },
   {
    "fieldname": "company",
@@ -317,7 +318,7 @@
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
- "modified": "2021-03-09 17:43:22.336701",
+ "modified": "2021-03-24 10:39:41.973531",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
