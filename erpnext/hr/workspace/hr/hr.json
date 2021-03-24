@@ -812,86 +812,9 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
-  },
-  {
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax and Benefits",
-   "onboard": 0,
-   "type": "Card Break"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax Exemption Declaration",
-   "link_to": "Employee Tax Exemption Declaration",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax Exemption Proof Submission",
-   "link_to": "Employee Tax Exemption Proof Submission",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee, Payroll Period",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Other Income",
-   "link_to": "Employee Other Income",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Benefit Application",
-   "link_to": "Employee Benefit Application",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Benefit Claim",
-   "link_to": "Employee Benefit Claim",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax Exemption Category",
-   "link_to": "Employee Tax Exemption Category",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
-  },
-  {
-   "dependencies": "Employee",
-   "hidden": 0,
-   "is_query_report": 0,
-   "label": "Employee Tax Exemption Sub Category",
-   "link_to": "Employee Tax Exemption Sub Category",
-   "link_type": "DocType",
-   "onboard": 0,
-   "type": "Link"
   }
  ],
- "modified": "2021-03-24 12:57:30.057844",
+ "modified": "2021-03-24 17:35:21.483297",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR",
