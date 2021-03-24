@@ -172,8 +172,8 @@ erpnext.TaxDetail = class TaxDetail {
 		}
 	}
 	set_value_label_from_filter() {
-		const section_name = this.controls['section_name'].value;
-		const fidx = this.controls['filter_index'].value;
+		const section_name = this.controls['section_name'].get_input_value();
+		const fidx = this.controls['filter_index'].get_input_value();
 		if (section_name && fidx) {
 			const fieldname = this.sections[section_name][fidx]['fieldname'];
 			this.controls['value_field'].set_input(this.label_lookup[fieldname]);
@@ -182,7 +182,7 @@ erpnext.TaxDetail = class TaxDetail {
 		}
 	}
 	get_value_fieldname() {
-		const curlabel = this.controls['value_field'].value;
+		const curlabel = this.controls['value_field'].get_input_value();
 		return this.fieldname_lookup[curlabel];
 	}
 	new_section(label) {
@@ -203,6 +203,7 @@ erpnext.TaxDetail = class TaxDetail {
 	}
 	set_section(name) {
 		// Sets the given section name and then reloads the data
+		this.controls['filter_index'].set_input('');
 		if (name && !this.sections[name]) {
 			this.sections[name] = {};
 		}
@@ -224,10 +225,10 @@ erpnext.TaxDetail = class TaxDetail {
 				refresh = true;
 			}
 		}
-		this.reload_filter();
 		if (refresh) {
 			this.qr.refresh();
 		}
+		this.reload_filter();
 	}
 	reload_filter() {
 		const section_name = this.controls['section_name'].get_input_value();
