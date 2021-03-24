@@ -38,6 +38,10 @@ def get_data():
 				'label': _('Testing'),
 				'items': ['Sample']
 			},
+			{
+				'label': 'Shipments',
+				'items': ['Shipment Entry']
+			},
 			# {
 			# 	'label': _('Subscription'),
 			# 	'items': ['Auto Repeat']
