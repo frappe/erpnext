@@ -261,10 +261,10 @@
   },
   {
    "default": "1",
-   "description": "By default, Welcome email is sent for every new Student. If disabled, no welcome email will be send when a new Student is created.",
+   
    "fieldname": "send_welcome_email",
    "fieldtype": "Check",
-   "label": "Send welcome email for new Applicants"
+   "label": "Send welcome email"
   }
  ],
  "image_field": "image",
