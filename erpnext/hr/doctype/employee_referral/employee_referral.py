@@ -10,11 +10,7 @@ from frappe.model.document import Document
 
 class EmployeeReferral(Document):
 	def validate(self):
-		self.check_email_id_is_unique()
 		self.set_full_name()
-
-	def check_email_id_is_unique(self):
-		pass
 
 	def set_full_name(self):
 		self.full_name = self.first_name + " "+self.last_name
@@ -40,5 +36,24 @@ def create_job_applicant(source_name, target_doc=None):
 	frappe.msgprint(_("Job Applicant created successfully. {0}").format(get_link_to_form("Job Applicant", job_applicant.name)))
 	emp_ref.db_set('status', "In Process")
 
-	return emp_ref
+	return job_applicant
+
+
+@frappe.whitelist()
+def create_additional_salary(doc):
+	import json
+	from six import string_types
+
+	if isinstance(doc, string_types):
+		doc = frappe._dict(json.loads(doc))
+
+	if not frappe.db.exists("Additional Salary", {'ref_docname': doc.name}):
+		additional_salary = frappe.new_doc('Additional Salary')
+		additional_salary.employee = doc.employee
+		additional_salary.company = frappe.db.get_value("Employee", doc.employee, "company")
+		additional_salary.overwrite_salary_structure_amount = 0
+		additional_salary.ref_doctype = doc.doctype
+		additional_salary.ref_docname = doc.name
+
+	return additional_salary
 

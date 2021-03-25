@@ -17,8 +17,10 @@ class AdditionalSalary(Document):
 		self.validate_dates()
 		self.validate_salary_structure()
 		self.validate_recurring_additional_salary_overlap()
+		if self.ref_doctype == "Employee Referral" and self.type == "Deduction":
+			frappe.throw(_("Earning Salary Component is required for Employee Referral"))
 		if self.amount < 0:
-			frappe.throw(_("Amount should not be less than zero."))
+			frappe.throw(_("Amount should not be less than zero"))
 
 	def validate_salary_structure(self):
 		if not frappe.db.exists('Salary Structure Assignment', {'employee': self.employee}):

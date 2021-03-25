@@ -22,6 +22,7 @@
   "employee",
   "employee_name",
   "column_break_14",
+  "is_applicable_for_referral_compensation",
   "department",
   "additional_information_section",
   "why_this_candidate_is_qualified_for_this_position",
@@ -167,12 +168,18 @@
    "options": "Email",
    "reqd": 1,
    "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_applicable_for_referral_compensation",
+   "fieldtype": "Check",
+   "label": "Is applicable for referral compensation"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-24 17:46:55.193436",
+ "modified": "2021-03-25 14:45:42.897710",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Referral",
