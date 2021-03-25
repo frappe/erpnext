@@ -12,6 +12,7 @@
   "company",
   "customer",
   "customer_name",
+  "is_transfer",
   "booking_customer_name",
   "column_break_8",
   "vehicle_owner",
@@ -554,12 +555,18 @@
    "label": "Booking STRN",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_transfer",
+   "fieldtype": "Check",
+   "label": "Is Transfer"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-25 14:03:46.358647",
+ "modified": "2021-03-25 15:03:49.911689",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",

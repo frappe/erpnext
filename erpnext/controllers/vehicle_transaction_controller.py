@@ -132,9 +132,14 @@ class VehicleTransactionController(StockController):
 				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
 
 			if self.get('customer'):
-				if self.customer not in (vbo.customer, vbo.financer):
-					frappe.throw(_("Customer does not match in {0}")
-						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+				if not self.get('is_transfer'):
+					if self.customer not in (vbo.customer, vbo.financer):
+						frappe.throw(_("Customer does not match in {0}")
+							.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+				else:
+					if self.customer in (vbo.customer, vbo.financer):
+						frappe.throw(_("Customer cannot be the same as in {0} when delivery is a transfer")
+							.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.get('vehicle_owner'):
 				if self.vehicle_owner not in (vbo.customer, vbo.financer):
