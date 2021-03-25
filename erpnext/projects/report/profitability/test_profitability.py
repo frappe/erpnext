@@ -1,8 +1,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-import datetime
-from frappe.utils import getdate, nowdate, add_days, add_months
+from frappe.utils import getdate, nowdate
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.projects.doctype.timesheet.test_timesheet import make_salary_structure_for_timesheet, make_timesheet 
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
