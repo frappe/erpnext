@@ -15,6 +15,7 @@
  "hide_custom": 0,
  "icon": "project",
  "idx": 0,
+ "is_default": 0,
  "is_standard": 1,
  "label": "Projects",
  "links": [
@@ -130,6 +131,16 @@
    "type": "Link"
   },
   {
+   "dependencies": "Timesheet, Sales Invoice, Salary Slip",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Profitability",
+   "link_to": "Profitability",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Project",
    "hidden": 0,
    "is_query_report": 1,
@@ -150,7 +161,7 @@
    "type": "Link"
   }
  ],
- "modified": "2020-12-01 13:38:37.856224",
+ "modified": "2021-03-25 13:25:17.609608",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",

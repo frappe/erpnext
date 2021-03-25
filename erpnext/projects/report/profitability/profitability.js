@@ -5,16 +5,26 @@
 frappe.query_reports["Profitability"] = {
 	"filters": [
 		{
+			"fieldname": "company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"default": frappe.defaults.get_user_default("Company"),
+			"reqd": 1
+		},
+		{
 			"fieldname": "start_date",
 			"label": __("Start Date"),
 			"fieldtype": "Date",
-			"reqd": 1
+			"reqd": 1,
+			"default": frappe.datetime.add_months(frappe.datetime.get_today(), -1)
 		},
 		{
 			"fieldname": "end_date",
 			"label": __("End Date"),
 			"fieldtype": "Date",
-			"reqd": 1
+			"reqd": 1,
+			"default": frappe.datetime.now_date()
 		},
 		{
 			"fieldname": "customer_name",
