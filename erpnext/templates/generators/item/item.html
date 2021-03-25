@@ -37,6 +37,11 @@
 
 			<!-- Advanced Custom Website Content -->
 			{{ doc.website_content or '' }}
+
+			<!-- Reviews and Comments -->
+			{% if shopping_cart.cart_settings.enable_reviews %}
+				{% include "templates/generators/item/item_reviews.html"%}
+			{% endif %}
 		</div>
 	</div>
 </div>

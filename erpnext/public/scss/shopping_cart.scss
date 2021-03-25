@@ -135,7 +135,7 @@ body.product-page {
 
 	.item-card {
 		padding: var(--padding-sm);
-		min-width: 250px;
+		min-width: 260px;
 	}
 }
 
@@ -699,4 +699,72 @@ body.product-page {
 
 .item-website-specification {
 	font-size: .875rem;
+}
+
+.ratings-reviews-section {
+	border-top: 1px solid #E2E6E9;
+	display: flex;
+}
+
+.reviews-header {
+	font-size: 20px;
+	font-weight: 600;
+	color: var(--gray-800);
+}
+
+.rating-summary-title {
+	margin-top: 0.15rem;
+	font-size: 18px;
+}
+
+.user-review-title {
+	margin-top: 0.15rem;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.rating {
+	--star-fill: var(--gray-300);
+	.star-hover {
+		--star-fill: var(--yellow-100);
+	}
+	.star-click {
+		--star-fill: var(--yellow-300);
+	}
+}
+
+.review {
+	max-width: 80%;
+	line-height: 1.6;
+	padding-bottom: 0.5rem;
+	border-bottom: 1px solid #E2E6E9;
+}
+
+.review-signature {
+	display: flex;
+	font-size: 14px;
+	color: var(--gray-500);
+	font-weight: 400;
+
+	.reviewer {
+		padding-right: 8px;
+		margin-right: 8px;
+		border-right: 1px solid var(--gray-400);
+	}
+}
+
+.rating-progress-bar-section {
+	padding-bottom: 2rem;
+	border-bottom: 1px solid #E2E6E9;
+	margin-right: -10px;
+
+	.rating-bar-title {
+		margin-left: -15px;
+	}
+
+	.rating-progress-bar {
+		margin-bottom: 4px;
+		height: 7px;
+		margin-top: 6px;
+	}
 }

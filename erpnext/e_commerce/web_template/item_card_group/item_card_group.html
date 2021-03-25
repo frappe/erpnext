@@ -26,7 +26,7 @@
 				{%- set item = frappe.get_doc("Item", item) -%}
 				{{ item_card(
 					item, is_featured=values['card_' + index + '_featured'],
-					True, "Center"
+					is_full_width=True, align="Center"
 				) }}
 			{%- endif -%}
 		{%- endfor -%}
