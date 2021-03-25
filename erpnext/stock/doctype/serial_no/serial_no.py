@@ -14,6 +14,7 @@ from frappe import _, ValidationError
 from erpnext.controllers.stock_controller import StockController
 from six import string_types
 from six.moves import map
+
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass
 class SerialNoNotRequiredError(ValidationError): pass
@@ -322,11 +323,31 @@ def validate_serial_no(sle, item_det):
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
 	elif serial_nos:
+		# SLE is being cancelled and has serial nos
 		for serial_no in serial_nos:
-			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
-			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
-				frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
-					.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse))
+			check_serial_no_validity_on_cancel(serial_no, sle)
+
+def check_serial_no_validity_on_cancel(serial_no, sle):
+	sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse", "company", "status"], as_dict=1)
+	sr_link = frappe.utils.get_link_to_form("Serial No", serial_no)
+	doc_link = frappe.utils.get_link_to_form(sle.voucher_type, sle.voucher_no)
+
+	if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
+		# if actual_qty < 0, receipt is being cancelled
+		frappe.throw(
+			_("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}")
+				.format(sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse)),
+			title=_("Cannot cancel"))
+	elif sr and cint(sle.actual_qty) > 0 and (
+		sr.warehouse or (sr.company != sle.company and sr.status == "Delivered")):
+		# if actual_qty > 0, delivery is being cancelled, check for warehouse.
+		# if warehouse exists, serial no is received in another warehouse/company.
+		# if warehouse does not exist, then if company differs
+		# it could be inactive (allowed) or delivered from another company (block).
+		frappe.throw(
+			_("Cannot cancel {0} {1} as Serial No {2} does not belong to the company {3}")
+				.format(sle.voucher_type, doc_link, sr_link, frappe.bold(sle.company)),
+			title=_("Cannot cancel"))
 
 def validate_material_transfer_entry(sle_doc):
 	sle_doc.update({
