@@ -1,12 +1,13 @@
 erpnext.setup_einvoice_actions = (doctype) => {
 	frappe.ui.form.on(doctype, {
-		refresh(frm) {
-			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
-			const supply_type = frm.doc.gst_category;
-			const valid_supply_type = ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type);
-			const company_transaction = frm.doc.billing_address_gstin == frm.doc.company_gstin;
+		async refresh(frm) {
+			const res = await frappe.call({
+				method: 'erpnext.regional.india.e_invoice.utils.validate_eligibility',
+				args: { doc: frm.doc }
+			});
+			const invoice_eligible = res.message;
 
-			if (!einvoicing_enabled || !valid_supply_type || company_transaction) return;
+			if (!invoice_eligible) return;
 
 			const { doctype, irn, irn_cancelled, ewaybill, eway_bill_cancelled, name, __unsaved } = frm.doc;
 

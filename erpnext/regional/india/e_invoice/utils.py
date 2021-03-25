@@ -14,18 +14,37 @@ import traceback
 import io
 from frappe import _, bold
 from pyqrcode import create as qrcreate
+from frappe.utils.background_jobs import enqueue
+from frappe.utils.scheduler import is_scheduler_inactive
+from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_post_request, make_get_request
-from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form
+from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply, validate_gstin_for_india
+from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
 
-def validate_einvoice_fields(doc):
+@frappe.whitelist()
+def validate_eligibility(doc):
+	if isinstance(doc, six.string_types):
+		doc = json.loads(doc)
+
 	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
-	invalid_doctype = doc.doctype != 'Sales Invoice'
+	if not einvoicing_enabled:
+		return False
+
+	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
+	invalid_doctype = doc.get('doctype') != 'Sales Invoice'
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
-	
-	if not einvoicing_enabled or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+
+	if invalid_company or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+		return False
+
+	return True
+
+def validate_einvoice_fields(doc):
+	invoice_eligible = validate_eligibility(doc)
+
+	if not invoice_eligible:
 		return
 
 	if doc.docstatus == 0 and doc._action == 'save':
@@ -33,6 +52,8 @@ def validate_einvoice_fields(doc):
 			frappe.throw(_('You cannot edit the invoice after generating IRN'), title=_('Edit Not Allowed'))
 		if len(doc.name) > 16:
 			raise_document_name_too_long_error()
+
+		doc.einvoice_status = 'Pending'
 
 	elif doc.docstatus == 1 and doc._action == 'submit' and not doc.irn:
 		frappe.throw(_('You must generate IRN before submitting the document.'), title=_('Missing IRN'))
@@ -75,6 +96,9 @@ def get_transaction_details(invoice):
 	))
 
 def get_doc_details(invoice):
+	if getdate(invoice.posting_date) < getdate('2021-01-01'):
+		frappe.throw(_('IRN generation is not allowed for invoices dated before 1st Jan 2021'), title=_('Not Allowed'))
+
 	invoice_type = 'CRN' if invoice.is_return else 'INV'
 
 	invoice_name = invoice.name
@@ -86,33 +110,41 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def get_party_details(address_name):
-	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
-
-	if (not d.gstin
-		or not d.city
-		or not d.pincode
-		or not d.address_title
-		or not d.address_line1
-		or not d.gst_state_number):
+def validate_address_fields(addr):
+	if (not addr.gstin
+		or not addr.city
+		or not addr.pincode
+		or not addr.address_title
+		or not addr.address_line1
+		or not addr.address_line2
+		or not addr.gst_state_number):
 
 		frappe.throw(
 			msg=_('Address lines, city, pincode, gstin is mandatory for address {}. Please set them and try again.').format(
-				get_link_to_form('Address', address_name)
+				get_link_to_form('Address', addr.name)
 			),
 			title=_('Missing Address Fields')
 		)
+	
+	# validate_gstin_for_india(addr, '')
 
-	if d.gst_state_number == 97:
+def get_party_details(address_name):
+	addr = frappe.get_doc('Address', address_name)
+	
+	validate_address_fields(addr)
+
+	if addr.gst_state_number == 97:
 		# according to einvoice standard
-		pincode = 999999
+		addr.pincode = 999999
 
 	return frappe._dict(dict(
-		gstin=d.gstin, legal_name=d.address_title,
-		location=d.city, pincode=d.pincode,
-		state_code=d.gst_state_number,
-		address_line1=d.address_line1,
-		address_line2=d.address_line2
+		gstin=addr.gstin,
+		legal_name=sanitize_for_json(addr.address_title),
+		location=sanitize_for_json(addr.city),
+		pincode=addr.pincode,
+		state_code=addr.gst_state_number,
+		address_line1=sanitize_for_json(addr.address_line1),
+		address_line2=sanitize_for_json(addr.address_line2)
 	))
 
 def get_gstin_details(gstin):
@@ -164,7 +196,7 @@ def get_item_list(invoice):
 
 		item.qty = abs(item.qty)
 		item.discount_amount = 0
-		item.unit_rate = abs(item.base_net_amount / item.qty)
+		item.unit_rate = flt(abs(item.base_net_amount / item.qty), 2)
 		item.gross_amount = abs(item.base_net_amount)
 		item.taxable_value = abs(item.base_net_amount)
 
@@ -196,12 +228,14 @@ def update_item_taxes(invoice, item):
 		item[attr] = 0
 
 	for t in invoice.taxes:
-		# this contains item wise tax rate & tax amount (incl. discount)
-		item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
-		if t.account_head in gst_accounts_list:
+		is_applicable = t.tax_amount and t.account_head in gst_accounts_list
+		if is_applicable:
+			# this contains item wise tax rate & tax amount (incl. discount)
+			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code or item.item_name)
+
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
-			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
+			item_tax_amount = flt((item_tax_rate / 100) * item.base_net_amount, 2)
 
 			if t.account_head in gst_accounts.cess_account:
 				item_tax_amount_after_discount = item_tax_detail[1]
@@ -215,6 +249,9 @@ def update_item_taxes(invoice, item):
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
 					item.tax_rate += item_tax_rate
 					item[f'{tax_type}_amount'] += abs(item_tax_amount)
+		else:
+			# TODO: other charges per item
+			pass
 
 	return item
 
@@ -272,6 +309,10 @@ def get_payment_details(invoice):
 	))
 
 def get_return_doc_reference(invoice):
+	if not invoice.return_against:
+		frappe.throw(_('For generating IRN, reference to the original invoice is mandatory for a credit note. Please set {} field to generate e-invoice.')
+			.format(frappe.bold('Return Against')), title=_('Missing Field'))
+
 	invoice_date = frappe.db.get_value('Sales Invoice', invoice.return_against, 'posting_date')
 	return frappe._dict(dict(
 		invoice_name=invoice.return_against, invoice_date=format_date(invoice_date, 'dd/mm/yyyy')
@@ -279,7 +320,11 @@ def get_return_doc_reference(invoice):
 
 def get_eway_bill_details(invoice):
 	if invoice.is_return:
-		frappe.throw(_('E-Way Bill cannot be generated for Credit Notes & Debit Notes'), title=_('E Invoice Validation Failed'))
+		frappe.throw(_('E-Way Bill cannot be generated for Credit Notes & Debit Notes. Please clear fields in the Transporter Section of the invoice.'),
+			title=_('Invalid Fields'))
+	
+	if not invoice.distance:
+		frappe.throw(_('Distance is mandatory for generating e-way bill for an e-invoice.'), title=_('Missing Field'))
 
 	mode_of_transport = { '': '', 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
 	vehicle_type = { 'Regular': 'R', 'Over Dimensional Cargo (ODC)': 'O' }
@@ -311,6 +356,39 @@ def validate_mandatory_fields(invoice):
 			title=_('Missing Fields')
 		)
 
+def validate_totals(einvoice):
+	item_list = einvoice['ItemList']
+	value_details = einvoice['ValDtls']
+
+	total_item_ass_value = 0
+	total_item_cgst_value = 0
+	total_item_sgst_value = 0
+	total_item_igst_value = 0
+	total_item_value = 0
+	for item in item_list:
+		total_item_ass_value += flt(item['AssAmt'])
+		total_item_cgst_value += flt(item['CgstAmt'])
+		total_item_sgst_value += flt(item['SgstAmt'])
+		total_item_igst_value += flt(item['IgstAmt'])
+		total_item_value += flt(item['TotItemVal'])
+
+		if abs(flt(item['AssAmt']) * flt(item['GstRt']) / 100) - (flt(item['CgstAmt']) + flt(item['SgstAmt']) + flt(item['IgstAmt'])) > 1:
+			frappe.throw(_('Row #{}: GST rate is invalid. Please remove tax rows with zero tax amount from taxes table.').format(item.idx))
+
+	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
+		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
+
+	if abs(flt(value_details['TotInvVal']) - total_item_value) > 1:
+		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
+
+	calculated_invoice_value = \
+			flt(value_details['AssVal']) + flt(value_details['CgstVal']) \
+			+ flt(value_details['SgstVal']) + flt(value_details['IgstVal']) \
+			+ flt(value_details['OthChrg']) - flt(value_details['Discount'])
+
+	if abs(flt(value_details['TotInvVal']) - calculated_invoice_value) > 1:
+		frappe.throw(_('Total Item Value + Taxes - Discount is not equal to the Invoice Grand Total. Please check taxes / discounts for any correction.'))
+
 def make_einvoice(invoice):
 	validate_mandatory_fields(invoice)
 
@@ -340,7 +418,7 @@ def make_einvoice(invoice):
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 
-	if invoice.is_return and invoice.return_against:
+	if invoice.is_return:
 		prev_doc_details = get_return_doc_reference(invoice)
 
 	if invoice.transporter:
@@ -358,83 +436,67 @@ def make_einvoice(invoice):
 	)
 	einvoice = json.loads(einvoice)
 
-	validations = json.loads(read_json('einv_validation'))
-	errors = validate_einvoice(validations, einvoice)
-	if errors:
-		message = "\n".join([
-			"E Invoice: ", json.dumps(einvoice, indent=4),
-			"-" * 50,
-			"Errors: ", json.dumps(errors, indent=4)
-		])
-		frappe.log_error(title="E Invoice Validation Failed", message=message)
-		frappe.throw(errors, title=_('E Invoice Validation Failed'), as_list=1)
+	einvoice = santize_einvoice_fields(einvoice)
+
+	validate_totals(einvoice)
 
 	return einvoice
 
-def validate_einvoice(validations, einvoice, errors=[]):
-	for fieldname, field_validation in validations.items():
-		value = einvoice.get(fieldname, None)
-		if not value or value == "None":
-			# remove keys with empty values
-			einvoice.pop(fieldname, None)
-			continue
+def santize_einvoice_fields(einvoice):
+	number_fields = ["Pin","Qty","FreeQty","UnitPrice","TotAmt","Discount","PreTaxVal","AssAmt","GstRt","IgstAmt","CgstAmt","SgstAmt","CesRt","CesAmt","CesNonAdvlAmt","StateCesRt","StateCesAmt","StateCesNonAdvlAmt","OthChrg","TotItemVal","AssVal","CgstVal","SgstVal","IgstVal","CesVal","StCesVal","Discount","OthChrg","RndOffAmt","TotInvVal","TotInvValFc","CrDay","PaidAmt","PaymtDue","ExpDuty","Distance"]
+	copy = einvoice.copy()
+	for key, value in copy.items():
+		if isinstance(value, list):
+			for idx, d in enumerate(value):
+				santized_dict = santize_einvoice_fields(d)
+				if santized_dict:
+					einvoice[key][idx] = santized_dict
+				else:
+					einvoice[key].pop(idx)
 
-		value_type = field_validation.get("type").lower()
-		if value_type in ['object', 'array']:
-			child_validations = field_validation.get('properties')
+			if not einvoice[key]:
+				einvoice.pop(key, None)
 
-			if isinstance(value, list):
-				for d in value:
-					validate_einvoice(child_validations, d, errors)
-					if not d:
-						# remove empty dicts
-						einvoice.pop(fieldname, None)
+		elif isinstance(value, dict):
+			santized_dict = santize_einvoice_fields(value)
+			if santized_dict:
+				einvoice[key] = santized_dict
 			else:
-				validate_einvoice(child_validations, value, errors)
-				if not value:
-					# remove empty dicts
-					einvoice.pop(fieldname, None)
-			continue
+				einvoice.pop(key, None)
 
-		# convert to int or str
-		if value_type == 'string':
-			einvoice[fieldname] = str(value)
-		elif value_type == 'number':
-			is_integer = '.' not in str(field_validation.get('maximum'))
-			precision = 3 if '.999' in str(field_validation.get('maximum')) else 2
-			einvoice[fieldname] = flt(value, precision) if not is_integer else cint(value)
-			value = einvoice[fieldname]
+		elif not value or value == "None":
+			einvoice.pop(key, None)
 
-		max_length = field_validation.get('maxLength')
-		minimum = flt(field_validation.get('minimum'))
-		maximum = flt(field_validation.get('maximum'))
-		pattern_str = field_validation.get('pattern')
-		pattern = re.compile(pattern_str or '')
+		elif key in number_fields:
+			einvoice[key] = flt(value, 2) if '.' in value else cint(value)
 
-		label = field_validation.get('description') or fieldname
+	return einvoice
+def safe_json_load(json_string):
+	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
 
-		if value_type == 'string' and len(value) > max_length:
-			errors.append(_('{} should not exceed {} characters').format(label, max_length))
-		if value_type == 'number' and (value > maximum or value < minimum):
-			errors.append(_('{} {} should be between {} and {}').format(label, value, minimum, maximum))
-		if pattern_str and not pattern.match(value):
-			errors.append(field_validation.get('validationMsg'))
-
-	return errors
+	try:
+		return json.loads(json_string)
+	except JSONDecodeError as e:
+		# print a snippet of 40 characters around the location where error occured
+		pos = e.pos
+		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
+		snippet = json_string[start:end]
+		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
 class RequestFailed(Exception): pass
+class CancellationNotAllowed(Exception): pass
 
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
-		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
-		sandbox_mode = self.e_invoice_settings.sandbox_mode
+		self.doctype = doctype
+		self.docname = docname
 
-		self.invoice = frappe.get_cached_doc(doctype, docname) if doctype and docname else None
-		self.credentials = self.get_credentials()
+		self.set_invoice()
+		self.set_credentials()
 
 		# authenticate url is same for sandbox & live
 		self.authenticate_url = 'https://gsp.adaequare.com/gsp/authenticate?grant_type=token'
-		self.base_url = 'https://gsp.adaequare.com' if not sandbox_mode else 'https://gsp.adaequare.com/test'
+		self.base_url = 'https://gsp.adaequare.com' if not self.e_invoice_settings.sandbox_mode else 'https://gsp.adaequare.com/test'
 
 		self.cancel_irn_url = self.base_url + '/enriched/ei/api/invoice/cancel'
 		self.irn_details_url = self.base_url + '/enriched/ei/api/invoice/irn'
@@ -443,15 +505,26 @@ class GSPConnector():
 		self.cancel_ewaybill_url = self.base_url + '/enriched/ewb/ewayapi?action=CANEWB'
 		self.generate_ewaybill_url = self.base_url + '/enriched/ei/api/ewaybill'
 
-	def get_credentials(self):
+	def set_invoice(self):
+		self.invoice = None
+		if self.doctype and self.docname:
+			self.invoice = frappe.get_cached_doc(self.doctype, self.docname)
+
+	def set_credentials(self):
+		self.e_invoice_settings = frappe.get_cached_doc('E Invoice Settings')
+
+		if not self.e_invoice_settings.enable:
+			frappe.throw(_("E-Invoicing is disabled. Please enable it from {} to generate e-invoices.").format(get_link_to_form("E Invoice Settings", "E Invoice Settings")))
+
 		if self.invoice:
 			gstin = self.get_seller_gstin()
-			if not self.e_invoice_settings.enable:
-				frappe.throw(_("E-Invoicing is disabled. Please enable it from {} to generate e-invoices.").format(get_link_to_form("E Invoice Settings", "E Invoice Settings")))
-			credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
+			credentials_for_gstin = [d for d in self.e_invoice_settings.credentials if d.gstin == gstin]
+			if credentials_for_gstin:
+				self.credentials = credentials_for_gstin[0]
+			else:
+				frappe.throw(_('Cannot find e-invoicing credentials for selected Company GSTIN. Please check E-Invoice Settings'))
 		else:
-			credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
-		return credentials
+			self.credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
 
 	def get_seller_gstin(self):
 		gstin = self.invoice.company_gstin or frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
@@ -548,12 +621,13 @@ class GSPConnector():
 		return details
 
 	def generate_irn(self):
-		headers = self.get_headers()
-		einvoice = make_einvoice(self.invoice)
-		data = json.dumps(einvoice, indent=4)
-
+		data = {}
 		try:
+			headers = self.get_headers()
+			einvoice = make_einvoice(self.invoice)
+			data = json.dumps(einvoice, indent=4)
 			res = self.make_request('post', self.generate_irn_url, headers, data)
+
 			if res.get('success'):
 				self.set_einvoice_data(res.get('result'))
 
@@ -573,11 +647,35 @@ class GSPConnector():
 
 		except RequestFailed:
 			errors = self.sanitize_error_message(res.get('message'))
+			self.set_failed_status(errors=errors)
 			self.raise_error(errors=errors)
 
-		except Exception:
+		except Exception as e:
+			self.set_failed_status(errors=str(e))
 			self.log_error(data)
 			self.raise_error(True)
+
+	@staticmethod
+	def bulk_generate_irn(invoices):
+		gsp_connector = GSPConnector()
+		gsp_connector.doctype = 'Sales Invoice'
+
+		failed = []
+
+		for invoice in invoices:
+			try:
+				gsp_connector.docname = invoice
+				gsp_connector.set_invoice()
+				gsp_connector.set_credentials()
+				gsp_connector.generate_irn()
+
+			except Exception as e:
+				failed.append({
+					'docname': invoice,
+					'message': str(e)
+				})
+
+		return failed
 
 	def get_irn_details(self, irn):
 		headers = self.get_headers()
@@ -599,17 +697,26 @@ class GSPConnector():
 			self.raise_error(True)
 
 	def cancel_irn(self, irn, reason, remark):
-		headers = self.get_headers()
-		data = json.dumps({
-			'Irn': irn,
-			'Cnlrsn': reason,
-			'Cnlrem': remark
-		}, indent=4)
-
+		data, res = {}, {}
 		try:
+			# validate cancellation
+			if time_diff_in_hours(now_datetime(), self.invoice.ack_date) > 24:
+				frappe.throw(_('E-Invoice cannot be cancelled after 24 hours of IRN generation.'), title=_('Not Allowed'), exc=CancellationNotAllowed)
+			if not irn:
+				frappe.throw(_('IRN not found. You must generate IRN before cancelling.'), title=_('Cancellation Not Allowed'), exc=CancellationNotAllowed)
+
+			headers = self.get_headers()
+			data = json.dumps({
+				'Irn': irn,
+				'Cnlrsn': reason,
+				'Cnlrem': remark
+			}, indent=4)
+
 			res = self.make_request('post', self.cancel_irn_url, headers, data)
 			if res.get('success'):
 				self.invoice.irn_cancelled = 1
+				self.invoice.irn_cancel_date = res.get('result')['CancelDate']
+				self.invoice.einvoice_status = 'Cancelled'
 				self.invoice.flags.updater_reference = {
 					'doctype': self.invoice.doctype,
 					'docname': self.invoice.name,
@@ -622,11 +729,41 @@ class GSPConnector():
 
 		except RequestFailed:
 			errors = self.sanitize_error_message(res.get('message'))
+			self.set_failed_status(errors=errors)
 			self.raise_error(errors=errors)
 
-		except Exception:
+		except CancellationNotAllowed as e:
+			self.set_failed_status(errors=str(e))
+			self.raise_error(errors=str(e))
+
+		except Exception as e:
+			self.set_failed_status(errors=str(e))
 			self.log_error(data)
 			self.raise_error(True)
+
+	@staticmethod
+	def bulk_cancel_irn(invoices, reason, remark):
+		gsp_connector = GSPConnector()
+		gsp_connector.doctype = 'Sales Invoice'
+
+		failed = []
+
+		for invoice in invoices:
+			try:
+				gsp_connector.docname = invoice
+				gsp_connector.set_invoice()
+				gsp_connector.set_credentials()
+				irn = gsp_connector.invoice.irn
+				gsp_connector.cancel_irn(irn, reason, remark)
+
+			except Exception as e:
+				failed.append({
+					'docname': invoice,
+					'message': str(e)
+				})
+
+		return failed
+
 	def generate_eway_bill(self, **kwargs):
 		args = frappe._dict(kwargs)
 
@@ -712,6 +849,9 @@ class GSPConnector():
 			]
 			then we trim down the message by looping over errors
 		'''
+		if not message:
+			return []
+
 		errors = re.findall(': [^:]+', message)
 		for idx, e in enumerate(errors):
 			# remove colons
@@ -759,7 +899,10 @@ class GSPConnector():
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')
 		self.invoice.signed_einvoice = dec_signed_invoice
+		self.invoice.ack_no = res.get('AckNo')
+		self.invoice.ack_date = res.get('AckDt')
 		self.invoice.signed_qr_code = res.get('SignedQRCode')
+		self.invoice.einvoice_status = 'Generated'
 
 		self.attach_qrcode_image()
 
@@ -795,6 +938,24 @@ class GSPConnector():
 		self.invoice.flags.ignore_validate = True
 		self.invoice.save()
 
+	def set_failed_status(self, errors=None):
+		frappe.db.rollback()
+		self.invoice.einvoice_status = 'Failed'
+		self.invoice.failure_description = self.get_failure_message(errors) if errors else ""
+		self.update_invoice()
+		frappe.db.commit()
+	
+	def get_failure_message(self, errors):
+		if isinstance(errors, list):
+			errors = ', '.join(errors)
+		return errors
+
+def sanitize_for_json(string):
+	"""Escape JSON specific characters from a string."""
+
+	# json.dumps adds double-quotes to the string. Indexing to remove them.
+	return json.dumps(string)[1:-1]
+
 @frappe.whitelist()
 def get_einvoice(doctype, docname):
 	invoice = frappe.get_doc(doctype, docname)
@@ -819,3 +980,105 @@ def generate_eway_bill(doctype, docname, **kwargs):
 def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
 	gsp_connector = GSPConnector(doctype, docname)
 	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+
+@frappe.whitelist()
+def generate_einvoices(docnames):
+	docnames = json.loads(docnames) or []
+
+	if len(docnames) < 10:
+		failures = GSPConnector.bulk_generate_irn(docnames)
+		frappe.local.message_log = []
+
+		if failures:
+			show_bulk_action_failure_message(failures)
+		else:
+			frappe.msgprint(
+				_('{} e-invoice generated successfully').format(frappe.bold(len(docnames))),
+				title=_('Bulk E-Invoice Generation Success')
+			)
+	else:
+		enqueue_bulk_action(schedule_bulk_generate_irn, docnames=docnames)
+
+def schedule_bulk_generate_irn(docnames):
+	failures = GSPConnector.bulk_generate_irn(docnames)
+	frappe.local.message_log = []
+
+	frappe.publish_realtime("bulk_einvoice_generation_complete", {
+		"user": frappe.session.user,
+		"failures": failures,
+		"invoices": docnames
+	})
+
+def show_bulk_action_failure_message(failures):
+	for doc in failures:
+		docname = '<a href="sales-invoice/{0}">{0}</a>'.format(doc.get('docname'))
+		message = doc.get('message').replace("'", '"')
+		if message[0] == '[':
+			errors = json.loads(message)
+			error_list = ''.join(['<li>{}</li>'.format(err) for err in errors])
+			message = '''{} has following errors:<br>
+				<ul style="padding-left: 20px; padding-top: 5px">{}</ul>'''.format(docname, error_list)
+		else:
+			message = '{} - {}'.format(docname, message)
+
+		frappe.msgprint(
+			message,
+			title=_('Bulk E-Invoice Generation Failed'),
+			indicator='red'
+		)
+
+@frappe.whitelist()
+def cancel_irns(docnames, reason, remark):
+	docnames = json.loads(docnames) or []
+
+	if len(docnames) < 10:
+		failures = GSPConnector.bulk_cancel_irn(docnames, reason, remark)
+		frappe.local.message_log = []
+
+		if failures:
+			show_bulk_action_failure_message(failures)
+		else:
+			frappe.msgprint(
+				_('{} e-invoice cancelled successfully').format(frappe.bold(len(docnames))),
+				title=_('Bulk E-Invoice Cancellation Success')
+			)
+	else:
+		enqueue_bulk_action(schedule_bulk_cancel_irn, docnames=docnames, reason=reason, remark=remark)
+
+def schedule_bulk_cancel_irn(docnames, reason, remark):
+	failures = GSPConnector.bulk_cancel_irn(docnames, reason, remark)
+	frappe.local.message_log = []
+
+	frappe.publish_realtime("bulk_einvoice_cancellation_complete", {
+		"user": frappe.session.user,
+		"failures": failures,
+		"invoices": docnames
+	})
+
+def enqueue_bulk_action(job, **kwargs):
+	check_scheduler_status()
+
+	enqueue(
+		job,
+		**kwargs,
+		queue="long",
+		timeout=10000,
+		event="processing_bulk_einvoice_action",
+		now=frappe.conf.developer_mode or frappe.flags.in_test,
+	)
+
+	if job == schedule_bulk_generate_irn:
+		msg = _('E-Invoices will be generated in a background process.')
+	else:
+		msg = _('E-Invoices will be cancelled in a background process.')
+
+	frappe.msgprint(msg, alert=1)
+
+def check_scheduler_status():
+	if is_scheduler_inactive() and not frappe.flags.in_test:
+		frappe.throw(_("Scheduler is inactive. Cannot enqueue job."), title=_("Scheduler Inactive"))
+
+def job_already_enqueued(job_name):
+	enqueued_jobs = [d.get("job_name") for d in get_info()]
+	if job_name in enqueued_jobs:
+		return True
