@@ -57,10 +57,10 @@ def execute(filters=None):
 
 	data = []
 
-	leave_types = frappe.db.sql("""select name from `tabLeave Type`""", as_list=True)
+	leave_types = frappe.db.get_list("Leave Type")
 	leave_list = None
 	if filters.summarized_view:
-		leave_list = [d[0] + ":Float:120" for d in leave_types]
+		leave_list = [d.name + ":Float:120" for d in leave_types]
 		columns.extend(leave_list)
 		columns.extend([_("Total Late Entries") + ":Float:120", _("Total Early Exits") + ":Float:120"])
 
@@ -205,8 +205,8 @@ def add_data(employee_map, att_map, filters, holiday_map, conditions, default_ho
 					leaves[d.leave_type] = d.count
 
 			for d in leave_types:
-				if d[0] in leaves:
-					row.append(leaves[d[0]])
+				if d.name in leaves:
+					row.append(leaves[d.name])
 				else:
 					row.append("0.0")
 
