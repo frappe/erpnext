@@ -16,9 +16,6 @@
   "column_break_8",
   "vehicle_owner",
   "vehicle_owner_name",
-  "tax_id",
-  "tax_cnic",
-  "tax_strn",
   "column_break_11",
   "amended_from",
   "posting_date",
@@ -38,6 +35,17 @@
   "contact_email",
   "contact_mobile",
   "contact_phone",
+  "tax_id",
+  "tax_cnic",
+  "tax_strn",
+  "column_break_32",
+  "booking_address_display",
+  "booking_email",
+  "booking_mobile",
+  "booking_phone",
+  "booking_tax_id",
+  "booking_tax_cnic",
+  "booking_tax_strn",
   "column_break_27",
   "receiver_contact",
   "receiver_contact_display",
@@ -407,7 +415,7 @@
    "fetch_from": "vehicle_booking_order.customer_name",
    "fieldname": "booking_customer_name",
    "fieldtype": "Data",
-   "label": "Customer Name (as per Vehicle Booking Order)",
+   "label": "Booking Customer Name",
    "no_copy": 1,
    "read_only": 1
   },
@@ -483,12 +491,75 @@
    "hidden": 1,
    "label": "Finance Type",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_32",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_booking_order.address_display",
+   "fieldname": "booking_address_display",
+   "fieldtype": "Small Text",
+   "label": "Booking Address Display",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_email",
+   "fieldname": "booking_email",
+   "fieldtype": "Data",
+   "label": "Booking Email",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_mobile",
+   "fieldname": "booking_mobile",
+   "fieldtype": "Data",
+   "label": "Booking Mobile No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_phone",
+   "fieldname": "booking_phone",
+   "fieldtype": "Data",
+   "label": "Booking Phone No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_id",
+   "fieldname": "booking_tax_id",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking Tax ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_cnic",
+   "fieldname": "booking_tax_cnic",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking CNIC",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_strn",
+   "fieldname": "booking_tax_strn",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Booking STRN",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-18 17:35:53.643910",
+ "modified": "2021-03-25 14:03:46.358647",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",

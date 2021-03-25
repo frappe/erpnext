@@ -15,9 +15,11 @@ from six import string_types
 
 
 force_fields = [
-	'customer_name', 'booking_customer_name', 'vehicle_owner_name', 'finance_type',
-	'tax_id', 'tax_cnic', 'tax_strn', 'receiver_contact_cnic',
+	'customer_name', 'vehicle_owner_name',
+	'tax_id', 'tax_cnic', 'tax_strn',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
+	'booking_customer_name', 'booking_address_display', 'booking_email', 'booking_mobile', 'booking_phone',
+	'booking_tax_id', 'booking_tax_cnic', 'booking_tax_strn', 'receiver_contact_cnic', 'finance_type'
 	'receiver_contact_display', 'receiver_contact_email', 'receiver_contact_mobile', 'receiver_contact_phone',
 	'vehicle_chassis_no', 'vehicle_engine_no', 'vehicle_license_plate', 'vehicle_unregistered', 'vehicle_color'
 ]
@@ -59,11 +61,10 @@ class VehicleTransactionController(StockController):
 			self.set_missing_values(for_validate=True)
 
 	def set_missing_values(self, for_validate=False):
-		if self.get('vehicle_booking_order'):
-			vehicle_booking_order_details = get_vehicle_booking_order_details(self.as_dict())
-			for k, v in vehicle_booking_order_details.items():
-				if not self.get(k) or k in force_fields:
-					self.set(k, v)
+		vehicle_booking_order_details = get_vehicle_booking_order_details(self.as_dict())
+		for k, v in vehicle_booking_order_details.items():
+			if not self.get(k) or k in force_fields:
+				self.set(k, v)
 
 		vehicle_details = get_vehicle_details(self.get('vehicle'), get_vehicle_booking_order=False)
 		for k, v in vehicle_details.items():
@@ -213,23 +214,15 @@ def get_customer_details(args):
 		owner_details = frappe.get_cached_value("Customer", args.vehicle_owner,
 			['customer_name'], as_dict=1)
 
-	booking_details = frappe._dict()
-	if args.vehicle_booking_order:
-		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
-			['customer_name', 'tax_id', 'tax_cnic', 'tax_strn', 'customer_address', 'finance_type'], as_dict=1)
-
 	# Customer Name and Tax IDs
 	out.customer_name = customer_details.customer_name
-	out.booking_customer_name = booking_details.customer_name
 	out.vehicle_owner_name = owner_details.customer_name
-	out.tax_id = booking_details.tax_id or customer_details.tax_id
-	out.tax_cnic = booking_details.tax_cnic or customer_details.tax_cnic
-	out.tax_strn = booking_details.tax_strn or customer_details.tax_strn
-
-	out.finance_type = booking_details.finance_type
+	out.tax_id = customer_details.tax_id
+	out.tax_cnic = customer_details.tax_cnic
+	out.tax_strn = customer_details.tax_strn
 
 	# Customer Address
-	out.customer_address = args.customer_address or booking_details.customer_address
+	out.customer_address = args.customer_address
 	if not out.customer_address and args.customer:
 		out.customer_address = get_default_address("Customer", args.customer)
 
@@ -254,17 +247,42 @@ def get_vehicle_booking_order_details(args):
 		args = json.loads(args)
 
 	args = frappe._dict(args)
-	if not args.vehicle_booking_order:
-		frappe.throw(_("Vehicle Booking Order is mandatory"))
 
-	out = frappe.db.get_value('Vehicle Booking Order', args.vehicle_booking_order,
-		['item_code', 'warehouse', 'vehicle', 'customer', 'customer_name as booking_customer_name', 'customer_address',
-			'supplier', 'bill_no', 'bill_date', 'financer', 'finance_type'], as_dict=1)
+	booking_details = frappe._dict()
+	if args.vehicle_booking_order:
+		booking_details = frappe.db.get_value("Vehicle Booking Order", args.vehicle_booking_order,
+			['customer', 'customer_name', 'financer', 'finance_type', 'supplier',
+				'tax_id', 'tax_cnic', 'tax_strn',
+				'address_display', 'contact_email', 'contact_mobile', 'contact_phone',
+				'item_code', 'warehouse', 'vehicle',
+				'bill_no', 'bill_date'], as_dict=1)
 
-	if args.doctype == "Vehicle Delivery":
-		del out['warehouse']
+	out = frappe._dict()
 
-	out.vehicle_owner = out.financer if out.financer and out.finance_type == 'Leased' else None
+	if booking_details:
+		out.customer = booking_details.customer
+		out.supplier = booking_details.supplier
+		out.item_code = booking_details.item_code
+		out.vehicle = booking_details.vehicle
+		out.bill_no = booking_details.bill_no
+		out.bill_date = booking_details.bill_date
+
+		if args.doctype != "Vehicle Delivery":
+			out.warehouse = booking_details.warehouse
+
+	out.booking_customer_name = booking_details.customer_name
+	out.booking_tax_id = booking_details.tax_id
+	out.booking_tax_cnic = booking_details.tax_cnic
+	out.booking_tax_strn = booking_details.tax_strn
+
+	out.booking_address_display = booking_details.address_display
+	out.booking_email = booking_details.contact_email
+	out.booking_mobile = booking_details.contact_mobile
+	out.booking_phone = booking_details.contact_phone
+
+	out.finance_type = booking_details.finance_type
+
+	out.vehicle_owner = booking_details.financer if booking_details.financer and booking_details.finance_type == 'Leased' else None
 
 	return out
 

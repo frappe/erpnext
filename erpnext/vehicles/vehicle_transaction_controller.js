@@ -120,11 +120,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	},
 
 	vehicle_booking_order: function () {
-		if (this.frm.doc.vehicle_booking_order) {
-			this.get_vehicle_booking_order_details();
-		} else {
-			this.get_customer_details();
-		}
+		this.get_vehicle_booking_order_details();
 	},
 
 	customer: function () {
@@ -146,6 +142,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 			method: "erpnext.controllers.vehicle_transaction_controller.get_customer_details",
 			args: {
 				args: {
+					doctype: me.frm.doc.doctype,
 					company: me.frm.doc.company,
 					customer: me.frm.doc.customer,
 					vehicle_owner: me.frm.doc.vehicle_owner,
@@ -164,26 +161,24 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 
 	get_vehicle_booking_order_details: function () {
 		var me = this;
-		if (me.frm.doc.vehicle_booking_order) {
-			frappe.call({
-				method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_booking_order_details",
+		frappe.call({
+			method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_booking_order_details",
+			args: {
 				args: {
-					args: {
-						doctype: me.frm.doc.doctype,
-						company: me.frm.doc.company,
-						customer: me.frm.doc.customer,
-						supplier: me.frm.doc.supplier,
-						vehicle_booking_order: me.frm.doc.vehicle_booking_order,
-						posting_date: me.frm.doc.posting_date
-					}
-				},
-				callback: function (r) {
-					if (r.message && !r.exc) {
-						me.frm.set_value(r.message);
-					}
+					doctype: me.frm.doc.doctype,
+					company: me.frm.doc.company,
+					customer: me.frm.doc.customer,
+					supplier: me.frm.doc.supplier,
+					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
+					posting_date: me.frm.doc.posting_date
 				}
-			});
-		}
+			},
+			callback: function (r) {
+				if (r.message && !r.exc) {
+					me.frm.set_value(r.message);
+				}
+			}
+		});
 	},
 
 	get_vehicle_details: function () {
@@ -191,6 +186,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		frappe.call({
 			method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_details",
 			args: {
+				doctype: me.frm.doc.doctype,
 				vehicle: me.frm.doc.vehicle,
 				vehicle_booking_order: me.frm.doc.vehicle_booking_order
 			},
@@ -200,6 +196,10 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 				}
 			}
 		});
+	},
+
+	customer_address: function () {
+		erpnext.utils.get_address_display(this.frm, "customer_address", "address_display");
 	},
 
 	contact_person: function () {
