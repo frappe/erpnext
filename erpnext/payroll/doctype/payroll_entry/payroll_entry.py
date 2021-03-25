@@ -15,12 +15,12 @@ from frappe.desk.reportview import get_match_cond, get_filters_cond
 class PayrollEntry(Document):
 	def onload(self):
 		if not self.docstatus==1 or self.salary_slips_submitted:
-				return
+			return
 
 		# check if salary slips were manually submitted
 		entries = frappe.db.count("Salary Slip", {'payroll_entry': self.name, 'docstatus': 1}, ['name'])
 		if cint(entries) == len(self.employees):
-				self.set_onload("submitted_ss", True)
+			self.set_onload("submitted_ss", True)
 
 	def validate(self):
 		self.number_of_employees = len(self.employees)
@@ -60,16 +60,16 @@ class PayrollEntry(Document):
 			condition = """and payroll_frequency = '%(payroll_frequency)s'"""% {"payroll_frequency": self.payroll_frequency}
 
 		sal_struct = frappe.db.sql_list("""
-				select
-					name from `tabSalary Structure`
-				where
-					docstatus = 1 and
-					is_active = 'Yes'
-					and company = %(company)s
-					and currency = %(currency)s and
-					ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
-					{condition}""".format(condition=condition),
-				{"company": self.company, "currency": self.currency, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
+			select
+				name from `tabSalary Structure`
+			where
+				docstatus = 1 and
+				is_active = 'Yes'
+				and company = %(company)s
+				and currency = %(currency)s and
+				ifnull(salary_slip_based_on_timesheet,0) = %(salary_slip_based_on_timesheet)s
+				{condition}""".format(condition=condition),
+			{"company": self.company, "currency": self.currency, "salary_slip_based_on_timesheet":self.salary_slip_based_on_timesheet})
 
 		if sal_struct:
 			cond += "and t2.salary_structure IN %(sal_struct)s "
@@ -268,26 +268,26 @@ class PayrollEntry(Document):
 				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
 				payable_amount += flt(amount, precision)
 				accounts.append({
-						"account": acc_cc[0],
-						"debit_in_account_currency": flt(amt, precision),
-						"exchange_rate": flt(exchange_rate),
-						"party_type": '',
-						"cost_center": acc_cc[1] or self.cost_center,
-						"project": self.project
-					})
+					"account": acc_cc[0],
+					"debit_in_account_currency": flt(amt, precision),
+					"exchange_rate": flt(exchange_rate),
+					"party_type": '',
+					"cost_center": acc_cc[1] or self.cost_center,
+					"project": self.project
+				})
 
 			# Deductions
 			for acc_cc, amount in deductions.items():
 				exchange_rate, amt = self.get_amount_and_exchange_rate_for_journal_entry(acc_cc[0], amount, company_currency, currencies)
 				payable_amount -= flt(amount, precision)
 				accounts.append({
-						"account": acc_cc[0],
-						"credit_in_account_currency": flt(amt, precision),
-						"exchange_rate": flt(exchange_rate),
-						"cost_center": acc_cc[1] or self.cost_center,
-						"party_type": '',
-						"project": self.project
-					})
+					"account": acc_cc[0],
+					"credit_in_account_currency": flt(amt, precision),
+					"exchange_rate": flt(exchange_rate),
+					"cost_center": acc_cc[1] or self.cost_center,
+					"party_type": '',
+					"project": self.project
+				})
 
 			# Payable amount
 			exchange_rate, payable_amt = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, payable_amount, company_currency, currencies)
@@ -366,20 +366,20 @@ class PayrollEntry(Document):
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(self.payment_account, je_payment_amount, company_currency, currencies)
 		accounts.append({
-				"account": self.payment_account,
-				"bank_account": self.bank_account,
-				"credit_in_account_currency": flt(amount, precision),
-				"exchange_rate": flt(exchange_rate),
-			})
+			"account": self.payment_account,
+			"bank_account": self.bank_account,
+			"credit_in_account_currency": flt(amount, precision),
+			"exchange_rate": flt(exchange_rate),
+		})
 
 		exchange_rate, amount = self.get_amount_and_exchange_rate_for_journal_entry(payroll_payable_account, je_payment_amount, company_currency, currencies)
 		accounts.append({
-				"account": payroll_payable_account,
-				"debit_in_account_currency": flt(amount, precision),
-				"exchange_rate": flt(exchange_rate),
-				"reference_type": self.doctype,
-				"reference_name": self.name
-			})
+			"account": payroll_payable_account,
+			"debit_in_account_currency": flt(amount, precision),
+			"exchange_rate": flt(exchange_rate),
+			"reference_type": self.doctype,
+			"reference_name": self.name
+		})
 
 		if len(currencies) > 1:
 				multi_currency = 1
@@ -420,7 +420,7 @@ class PayrollEntry(Document):
 				employees_to_mark_attendance.append({
 					"employee": employee_detail.employee,
 					"employee_name": employee_detail.employee_name
-					})
+				})
 		return employees_to_mark_attendance
 
 	def get_count_holidays_of_employee(self, employee, start_date):
@@ -437,11 +437,11 @@ class PayrollEntry(Document):
 	def get_count_employee_attendance(self, employee, start_date):
 		marked_days = 0
 		attendances = frappe.get_all("Attendance",
-				fields = ["count(*)"],
-				filters = {
-					"employee": employee,
-					"attendance_date": ('between', [start_date, self.end_date])
-				}, as_list=1)
+			fields = ["count(*)"],
+			filters = {
+				"employee": employee,
+				"attendance_date": ('between', [start_date, self.end_date])
+			}, as_list=1)
 		if attendances and attendances[0][0]:
 			marked_days = attendances[0][0]
 		return marked_days
@@ -689,5 +689,4 @@ def employee_query(doctype, txt, searchfield, start, page_len, filters):
 			'_txt': txt.replace("%", ""),
 			'start': start,
 			'page_len': page_len,
-			'exclude_employees': exclude_employees
-		})
+			'exclude_employees': exclude_employees})
