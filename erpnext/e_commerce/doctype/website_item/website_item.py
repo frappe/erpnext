@@ -176,6 +176,7 @@ class WebsiteItem(WebsiteGenerator):
 		self.set_metatags(context)
 		self.set_shopping_cart_data(context)
 		self.get_product_details_section(context)
+		self.get_reviews(context)
 
 		context.wished = False
 		if frappe.db.exists("Wishlist Items", {"item_code": self.item_code, "parent": frappe.session.user}):
@@ -340,7 +341,7 @@ class WebsiteItem(WebsiteGenerator):
 	def get_product_details_section(self, context):
 		""" Get section with tabs or website specifications. """
 		context.show_tabs = self.show_tabbed_section
-		if self.show_tabbed_section and self.tabs:
+		if self.show_tabbed_section and (self.tabs or self.website_specifications):
 			context.tabs = self.get_tabs()
 		else:
 			context.website_specifications = self.website_specifications
@@ -360,6 +361,28 @@ class WebsiteItem(WebsiteGenerator):
 			tab_values[f"tab_{row.idx + 1}_content"] = row.content
 
 		return tab_values
+
+	def get_reviews(self, context):
+		if context.shopping_cart.cart_settings.enable_reviews:
+			context.reviews = frappe.db.get_all("Item Review", filters={"item": self.item_code},
+				fields=["*"], limit=4)
+
+			rating_data = frappe.db.get_all("Item Review", filters={"item": self.item_code},
+				fields=["avg(rating) as average, count(*) as total"])[0]
+			context.average_rating = rating_data.average
+			context.average_whole_rating = flt(context.average_rating, 0)
+
+			# get % of reviews per rating
+			reviews_per_rating = []
+			for i in range(1,6):
+				count = frappe.db.get_all("Item Review", filters={"item": self.item_code, "rating": i},
+					fields=["count(*) as count"])[0].count
+
+				percent = flt((count / rating_data.total or 1) * 100, 0) if count else 0
+				reviews_per_rating.append(percent)
+
+			context.reviews_per_rating = reviews_per_rating
+			context.total_reviews = rating_data.total
 
 def invalidate_cache_for_web_item(doc):
 	"""Invalidate Website Item Group cache and rebuild ItemVariantsCacheManager."""

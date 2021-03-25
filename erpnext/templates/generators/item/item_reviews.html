@@ -1,0 +1,127 @@
+{% from "erpnext/templates/includes/macros.html" import ratings_with_title %}
+
+<div class="mt-8 ratings-reviews-section">
+	<!-- Ratings Summary -->
+	<div class="col-md-4 order-md-1 mt-8" style="max-width: 300px;">
+		<h2 class="reviews-header">
+			{{ _("Customer Ratings") }}
+		</h2>
+
+		{% if reviews %}
+			{% set rating_title = frappe.utils.cstr(average_rating) + " " + _("out of 5") %}
+			{{ ratings_with_title(average_whole_rating, rating_title, "lg", "rating-summary-title") }}
+		{% endif %}
+
+		<!-- Rating Progress Bars -->
+		<div class="rating-progress-bar-section">
+			{% for percent in reviews_per_rating %}
+				<div class="mt-4 col-sm-4 small rating-bar-title">
+					{{ loop.index }} star
+				</div>
+				<div class="row">
+					<div class="col-md-7">
+						<div class="progress rating-progress-bar" title="{{ percent }} % of reviews are {{ loop.index }} star">
+							<div class="progress-bar" role="progressbar"
+								aria-valuenow="{{ percent }}"
+								aria-valuemin="0" aria-valuemax="100"
+								style="width: {{ percent }}%; background-color: var(--text-on-green);">
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-1 small">
+						{{ percent }}%
+					</div>
+				</div>
+			{% endfor %}
+		</div>
+
+		<!-- Write a Review for legitimate users -->
+		{% if frappe.session.user != "Guest" %}
+		<button class="btn btn-light btn-write-review mr-2 mt-4 mb-4 w-100">
+			{{ _("Write a Review") }}
+		</button>
+		{% endif %}
+
+	</div>
+
+	<!-- Reviews and Comments -->
+	<div class="col-12 order-2 col-md-9 order-md-2 mt-8 ml-16">
+		<h2 class="reviews-header">
+			{{ _("Reviews") }}
+		</h2>
+		{% if reviews %}
+			{% for review in reviews %}
+			<!-- User review -->
+			<div class="mb-3 review">
+				{{ ratings_with_title(review.rating, _(review.review_title), "md", "user-review-title") }}
+
+				<div class="review-signature">
+					<span class="reviewer">{{ _(review.customer) }}</span>
+					<span>{{ review.published_on }}</span>
+				</div>
+				<div class="product-description mb-4 mt-4">
+					<p>
+						{{ _(review.comment) }}
+					</p>
+				</div>
+			</div>
+			{% endfor %}
+
+			{% if total_reviews > 4 %}
+				<div class="mt-6 mb-6"style="color: var(--primary);">
+					<a href="/reviews">{{ _("View all reviews") }}</a>
+				</div>
+			{% endif %}
+		{% else %}
+			<h6 class="text-muted mt-6">
+				{{ _("No Reviews") }}
+			</h6>
+		{% endif %}
+	</div>
+</div>
+
+<script>
+	frappe.ready(() => {
+		$('.page_content').on('click', '.btn-write-review', (e) => {
+			// Bind action on write a review button
+			const $btn = $(e.currentTarget);
+
+			let d = new frappe.ui.Dialog({
+				title: __("Write a Review"),
+				fields: [
+					{fieldname: "title", fieldtype: "Data", label: "Headline", reqd: 1},
+					{fieldname: "rating", fieldtype: "Rating", label: "Overall Rating", reqd: 1},
+					{fieldtype: "Section Break"},
+					{fieldname: "comment", fieldtype: "Small Text", label: "Your Review"}
+				],
+				primary_action: function() {
+					var data = d.get_values();
+					$btn.prop('hidden', true);
+					frappe.call({
+						method: "erpnext.e_commerce.doctype.item_review.item_review.add_item_review",
+						args: {
+							web_item: "{{ doc.name }}",
+							title: data.title,
+							rating: data.rating,
+							comment: data.comment
+						},
+						freeze: true,
+						freeze_message: __("Submitting Review ..."),
+						callback: function(r) {
+							if(!r.exc) {
+								frappe.msgprint({
+									message: __("Thank you for submitting your review"),
+									title: __("Review Submitted"),
+									indicator: "green"
+								});
+								d.hide();
+							}
+						}
+					});
+				},
+				primary_action_label: __('Submit')
+			});
+			d.show();
+		});
+	});
+</script>
