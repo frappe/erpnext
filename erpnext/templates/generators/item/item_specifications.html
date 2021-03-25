@@ -1,8 +1,9 @@
-{% if website_specifications -%}
-<div class="row mt-5 item-website-specification">
+<!-- Is reused to render within tabs as well as independently -->
+{% if website_specifications %}
+<div class="mt-5 item-website-specification">
 	<div class="col-md-11">
 		{% if not show_tabs %}
-			<h2 class="product-title mb-5">Product Details</h2>
+			<h3 class="product-title mb-5 mt-8">Product Details</h3>
 		{% endif %}
 		<table class="table table-bordered table-hover">
 		{% for d in website_specifications -%}
@@ -14,4 +15,4 @@
 		</table>
 	</div>
 </div>
-{%- endif %}
+{% endif %}

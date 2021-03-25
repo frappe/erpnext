@@ -69,16 +69,19 @@ class ProductQuery:
 				item.formatted_price = (product_info.get('price') or {}).get('formatted_price')
 				item.price = product_info['price'].get('price_list_rate')
 
-			if self.settings.show_stock_availability and item.get("website_warehouse"):
-				stock_qty = frappe.utils.flt(
-						frappe.db.get_value("Bin",
-							{
-								"item_code": item.item_code,
-								"warehouse": item.get("website_warehouse")
-							},
-							"actual_qty")
-						)
-				item.in_stock = "green" if stock_qty else "red"
+			if self.settings.show_stock_availability:
+				if item.get("website_warehouse"):
+					stock_qty = frappe.utils.flt(
+							frappe.db.get_value("Bin",
+								{
+									"item_code": item.item_code,
+									"warehouse": item.get("website_warehouse")
+								},
+								"actual_qty")
+							)
+					item.in_stock = "green" if stock_qty else "red"
+				elif not frappe.db.get_value("Item", item.item_code, "is_stock_item"):
+					item.in_stock = "green" # non-stock item will always be available
 
 			item.wished = False
 			if frappe.db.exists("Wishlist Items", {"item_code": item.item_code, "parent": frappe.session.user}):

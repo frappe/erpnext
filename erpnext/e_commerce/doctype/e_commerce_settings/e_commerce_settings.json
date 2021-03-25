@@ -20,6 +20,10 @@
   "show_quantity_in_website",
   "show_apply_coupon_code_in_website",
   "allow_items_not_in_stock",
+  "add_ons_section",
+  "enable_wishlist",
+  "column_break_18",
+  "enable_reviews",
   "section_break_18",
   "company",
   "price_list",
@@ -274,12 +278,34 @@
    "fieldtype": "Link",
    "label": "Slideshow",
    "options": "Website Slideshow"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "add_ons_section",
+   "fieldtype": "Section Break",
+   "label": "Add-ons"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_wishlist",
+   "fieldtype": "Check",
+   "label": "Enable Wishlist"
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_reviews",
+   "fieldtype": "Check",
+   "label": "Enable Reviews and Ratings"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-01 20:24:56.548673",
+ "modified": "2021-03-23 17:15:01.956630",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
