@@ -649,6 +649,40 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
+	price_list_rate: function(doc, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
+
+		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
+		if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item", "POS Invoice Item", "Purchase Invoice Item", "Purchase Order Item", "Purchase Receipt Item"]), cdt)
+			this.apply_pricing_rule_on_item(item);
+		else
+			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
+				precision("rate", item));
+
+		this.calculate_taxes_and_totals();
+	},
+
+	margin_rate_or_amount: function(doc, cdt, cdn) {
+		// calculated the revised total margin and rate on margin rate changes
+		let item = frappe.get_doc(cdt, cdn);
+		this.apply_pricing_rule_on_item(item);
+		this.calculate_taxes_and_totals();
+		cur_frm.refresh_fields();
+	},
+
+	margin_type: function(doc, cdt, cdn) {
+		// calculate the revised total margin and rate on margin type changes
+		let item = frappe.get_doc(cdt, cdn);
+		if (!item.margin_type) {
+			frappe.model.set_value(cdt, cdn, "margin_rate_or_amount", 0);
+		} else {
+			this.apply_pricing_rule_on_item(item, doc, cdt, cdn);
+			this.calculate_taxes_and_totals();
+			cur_frm.refresh_fields();
+		}
+	},
+
 	get_incoming_rate: function(item, posting_date, posting_time, voucher_type, company) {
 
 		let item_args = {
@@ -704,21 +738,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 			else {
 				var valid_serial_nos = [];
-
+				var serialnos = [];
 				// Replacing all occurences of comma with carriage return
-				var serial_nos = item.serial_no.trim().replace(/,/g, '\n');
-
-				serial_nos = serial_nos.trim().split('\n');
-
-				// Trim each string and push unique string to new list
-				for (var x=0; x<=serial_nos.length - 1; x++) {
-					if (serial_nos[x].trim() != "" && valid_serial_nos.indexOf(serial_nos[x].trim()) == -1) {
-						valid_serial_nos.push(serial_nos[x].trim());
+				item.serial_no = item.serial_no.replace(/,/g, '\n');
+				serialnos = item.serial_no.split("\n");
+				for (var i = 0; i < serialnos.length; i++) {
+					if (serialnos[i] != "") {
+						valid_serial_nos.push(serialnos[i]);
 					}
 				}
-
-				// Add the new list to the serial no. field in grid with each in new line
-				item.serial_no = valid_serial_nos.join('\n');
 				item.conversion_factor = item.conversion_factor || 1;
 
 				refresh_field("serial_no", item.name, item.parentfield);
@@ -1030,7 +1058,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	set_margin_amount_based_on_currency: function(exchange_rate) {
-		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice"]), this.frm.doc.doctype) {
+		if (in_list(["Quotation", "Sales Order", "Delivery Note", "Sales Invoice", "Purchase Invoice", "Purchase Order", "Purchase Receipt"]), this.frm.doc.doctype) {
 			var me = this;
 			$.each(this.frm.doc.items || [], function(i, d) {
 				if(d.margin_type == "Amount") {
@@ -1280,10 +1308,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	change_grid_labels: function(company_currency) {
 		var me = this;
 
-		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
+		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount", "base_rate_with_margin"],
 			company_currency, "items");
 
-		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount", "stock_uom_rate"],
+		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount", "stock_uom_rate", "rate_with_margin"],
 			this.frm.doc.currency, "items");
 
 		if(this.frm.fields_dict["operations"]) {
@@ -1321,7 +1349,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		// toggle columns
 		var item_grid = this.frm.fields_dict["items"].grid;
-		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
+		$.each(["base_rate", "base_price_list_rate", "base_amount", "base_rate_with_margin"], function(i, fname) {
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 		});
@@ -1468,7 +1496,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				});
 
 				// if doctype is Quotation Item / Sales Order Iten then add Margin Type and rate in item_list
-				if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item"]), d.doctype){
+				if (in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item",  "Purchase Invoice Item", "Purchase Order Item", "Purchase Receipt Item"]), d.doctype) {
 					item_list[0]["margin_type"] = d.margin_type;
 					item_list[0]["margin_rate_or_amount"] = d.margin_rate_or_amount;
 				}

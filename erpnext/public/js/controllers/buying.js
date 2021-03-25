@@ -141,29 +141,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.apply_price_list();
 	},
 
-	price_list_rate: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-
-		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
-
-		let item_rate = item.price_list_rate;
-		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
-			item_rate = item.blanket_order_rate;
-		}
-
-		if (item.discount_percentage) {
-			item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
-		}
-
-		if (item.discount_amount) {
-			item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
-		} else {
-			item.rate = item_rate;
-		}
-
-		this.calculate_taxes_and_totals();
-	},
-
 	discount_percentage: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		item.discount_amount = 0.0;
