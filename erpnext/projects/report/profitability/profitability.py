@@ -4,7 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import nowdate, time_diff_in_hours
 
 def execute(filters=None):
 	columns, data = [], []
@@ -25,31 +24,31 @@ def get_data(filters):
 				(select
 				si.customer_name,tabTimesheet.title,tabTimesheet.employee,si.grand_total,si.name as voucher_no,
 				ss.gross_pay,ss.total_working_days,tabTimesheet.end_date,tabTimesheet.total_billed_hours,tabTimesheet.name as timesheet,
-				tabTimesheet.total_billed_hours/(ss.total_working_days * %s) as utilization
+				tabTimesheet.total_billed_hours/(ss.total_working_days * {0}) as utilization
 				from 
 					`tabSalary Slip Timesheet` as sst join `tabTimesheet` on tabTimesheet.name = sst.time_sheet
 					join `tabSales Invoice Timesheet` as sit on sit.time_sheet = tabTimesheet.name
 					join `tabSales Invoice` as si on si.name = sit.parent and si.status != "Cancelled"
-					join `tabSalary Slip` as ss on ss.name = sst.parent and ss.status != "Cancelled" """%(default_working_hours)
+					join `tabSalary Slip` as ss on ss.name = sst.parent and ss.status != "Cancelled" """.format(default_working_hours)
 	if conditions:
 		sql += """
 				where
-					%s) as t"""%(conditions)
+					{0}) as t""".format(conditions)
 	data = frappe.db.sql(sql,filters, as_dict=True)
 	return data
 
 def get_conditions(filters):
 	conditions = []
 	if filters.get("company"):
-		conditions.append("tabTimesheet.company='%s'"%filters.get("company"))
+		conditions.append('tabTimesheet.company="{0}"'.format(filters.get("company")))
 	if filters.get("customer_name"):
-		conditions.append("si.customer_name='%s'"%filters.get("customer_name"))
+		conditions.append("si.customer_name='{0}'".format(filters.get("customer_name")))
 	if filters.get("start_date"):
-		conditions.append("tabTimesheet.start_date>='%s'"%filters.get("start_date"))
+		conditions.append("tabTimesheet.start_date>='{0}'".format(filters.get("start_date")))
 	if filters.get("end_date"):
-		conditions.append("tabTimesheet.end_date<='%s'"%filters.get("end_date"))
+		conditions.append("tabTimesheet.end_date<='{0}'".format(filters.get("end_date")))
 	if filters.get("employee"):
-		conditions.append("tabTimesheet.employee='%s'"%filters.get("employee"))
+		conditions.append("tabTimesheet.employee='{0}'".format(filters.get("employee")))
 	
 	conditions = " and ".join(conditions)
 	return conditions
