@@ -45,11 +45,11 @@ def validate_gstin_for_india(doc, method):
 
 	if gst_category and gst_category == 'UIN Holders':
 		if not GSTIN_UIN_FORMAT.match(doc.gstin):
-			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers"),
+			frappe.throw(_("The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers"),
 				title=_("Invalid GSTIN"))
 	else:
 		if not GSTIN_FORMAT.match(doc.gstin):
-			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the format of GSTIN."), title=_("Invalid GSTIN"))
+			frappe.throw(_("The input you've entered doesn't match the format of GSTIN."), title=_("Invalid GSTIN"))
 
 		validate_gstin_check_digit(doc.gstin)
 		set_gst_state_and_state_number(doc)

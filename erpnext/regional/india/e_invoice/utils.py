@@ -127,7 +127,7 @@ def validate_address_fields(addr):
 			title=_('Missing Address Fields')
 		)
 	
-	# validate_gstin_for_india(addr, '')
+	validate_gstin_for_india(addr, '')
 
 def get_party_details(address_name):
 	addr = frappe.get_doc('Address', address_name)
@@ -411,6 +411,9 @@ def make_einvoice(invoice):
 		place_of_supply = get_place_of_supply(invoice, invoice.doctype) or sanitize_for_json(invoice.billing_address_gstin)
 		place_of_supply = place_of_supply[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
+
+	seller_details.update(dict(legal_name=invoice.company))
+	buyer_details.update(dict(legal_name=invoice.customer_name or invoice.customer))
 
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
