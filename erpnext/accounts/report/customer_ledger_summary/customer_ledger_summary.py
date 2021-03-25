@@ -197,6 +197,9 @@ class PartyLedgerSummaryReport(object):
 		if self.filters.get("account"):
 			conditions.append("account=%(account)s")
 
+		if self.filters.get("cost_center"):
+			conditions.append("cost_center=%(cost_center)s")
+
 		if self.filters.party_type == "Customer":
 			if self.filters.get("customer_group"):
 				lft, rgt = frappe.db.get_value("Customer Group",

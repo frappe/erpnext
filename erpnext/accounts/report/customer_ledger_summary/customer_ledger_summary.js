@@ -74,6 +74,12 @@ frappe.query_reports["Customer Ledger Summary"] = {
 			}
 		},
 		{
+			"fieldname": "cost_center",
+			"label": __("Cost Center"),
+			"fieldtype": "Link",
+			"options": "Cost Center"
+		},
+		{
 			"fieldname":"payment_terms_template",
 			"label": __("Payment Terms Template"),
 			"fieldtype": "Link",
