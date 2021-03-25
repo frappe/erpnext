@@ -17,7 +17,6 @@ from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
 from erpnext.vehicles.doctype.vehicle_allocation.vehicle_allocation import get_allocation_title
-from erpnext.accounts.doctype.transaction_type.transaction_type import get_transaction_type_defaults
 from erpnext.controllers.accounts_controller import AccountsController
 from erpnext.vehicles.doctype.vehicle_withholding_tax_rule.vehicle_withholding_tax_rule import get_withholding_tax_amount
 from erpnext.setup.doctype.terms_and_conditions.terms_and_conditions import get_terms_and_conditions
@@ -37,7 +36,7 @@ force_fields = [
 ]
 force_fields += address_fields
 
-force_if_not_empty_fields = ['selling_transaction_type', 'buying_transaction_type']
+force_if_not_empty_fields = []
 
 class VehicleBookingOrder(AccountsController):
 	def get_feed(self):
@@ -623,25 +622,10 @@ def get_customer_details(args, get_withholding_tax=True):
 	out.financer_contact_person = args.financer_contact_person or (get_default_contact("Customer", financer.name) if financer else None)
 	out.update(get_customer_contact_details(args, out.contact_person, out.financer_contact_person))
 
-	# Transaction Type
-	vehicles_settings = frappe.get_cached_doc("Vehicles Settings", None)
-
-	out.selling_transaction_type = vehicles_settings.selling_transaction_type_company if args.customer_is_company \
-		else vehicles_settings.selling_transaction_type_customer
-	out.buying_transaction_type = vehicles_settings.buying_transaction_type_company if args.customer_is_company \
-		else vehicles_settings.buying_transaction_type_customer
-
 	# Withholding Tax
 	if get_withholding_tax and args.item_code:
 		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
-
-	# Warehouse
-	if args.item_code and (out.buying_transaction_type or out.selling_transaction_type):
-		item = frappe.get_cached_doc("Item", args.item_code)
-		transaction_type_defaults = get_transaction_type_defaults(out.buying_transaction_type or out.selling_transaction_type, args.company)
-		out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True,
-			transaction_type_defaults=transaction_type_defaults)
 
 	return out
 
@@ -770,19 +754,16 @@ def get_item_details(args):
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
 	brand_defaults = get_brand_defaults(item.name, args.company)
 	item_source_defaults = get_item_source_defaults(item.name, args.company)
-	transaction_type = args.buying_transaction_type or args.selling_transaction_type
-	transaction_type_defaults = get_transaction_type_defaults(transaction_type, args.company)
 
 	if not args.supplier:
-		out.supplier = get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
-			transaction_type_defaults)
+		out.supplier = get_default_supplier(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
 
 	if not args.warehouse:
 		out.warehouse = get_item_warehouse(item, args, overwrite_warehouse=True, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
-			brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
+			brand_defaults=brand_defaults, item_source_defaults=item_source_defaults)
 
 	out.vehicle_price_list = args.vehicle_price_list or get_default_price_list(item, args, item_defaults=item_defaults, item_group_defaults=item_group_defaults,
-		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults, transaction_type_defaults=transaction_type_defaults)
+		brand_defaults=brand_defaults, item_source_defaults=item_source_defaults)
 
 	fni_price_list_settings = frappe.get_cached_value("Vehicles Settings", None, "fni_price_list")
 	if fni_price_list_settings:
@@ -797,8 +778,7 @@ def get_item_details(args):
 		out.update(get_vehicle_price(item.name, out.vehicle_price_list, out.fni_price_list, args.transaction_date, args.tax_status, args.company))
 
 	if not args.tc_name:
-		out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
-			transaction_type_defaults)
+		out.tc_name = get_default_terms(args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults, {})
 		if not out.tc_name:
 			out.tc_name = frappe.get_cached_value("Vehicles Settings", None, "default_booking_terms")
 
@@ -859,10 +839,8 @@ def get_vehicle_price(item_code, vehicle_price_list, fni_price_list, transaction
 	return out
 
 
-def get_default_price_list(item, args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults,
-			transaction_type_defaults):
-		price_list = (transaction_type_defaults.get('default_price_list')
-			or item_defaults.get('default_price_list')
+def get_default_price_list(item, args, item_defaults, item_group_defaults, brand_defaults, item_source_defaults):
+		price_list = (item_defaults.get('default_price_list')
 			or item_source_defaults.get('default_price_list')
 			or brand_defaults.get('default_price_list')
 			or item_group_defaults.get('default_price_list')
