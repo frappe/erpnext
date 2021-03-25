@@ -34,7 +34,7 @@
  "in_create": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-18 16:10:29.534522",
+ "modified": "2021-03-24 20:42:58.402031",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Wishlist",
@@ -55,7 +55,7 @@
    "print": 1,
    "read": 1,
    "report": 1,
-   "role": "Stock Manager",
+   "role": "Website Manager",
    "share": 1
   }
  ],

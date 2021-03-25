@@ -59,7 +59,7 @@
 
 {% endmacro %}
 
-{%- macro item_card(item, is_featured=False, is_full_width=False, align="Left") -%}
+{%- macro item_card(item, settings=None, is_featured=False, is_full_width=False, align="Left") -%}
 {%- set align_items_class = resolve_class({
 	'align-items-end': align == 'Right',
 	'align-items-center': align == 'Center',
@@ -79,12 +79,12 @@
 				<img class="card-img" src="{{ image }}" alt="{{ title }}">
 			</div>
 			<div class="col-md-6">
-				{{ item_card_body(title, description, item, is_featured, align) }}
+				{{ item_card_body(title, settings, description, item, is_featured, align) }}
 			</div>
 		</div>
 		{% else %}
 			<div class="col-md-12">
-				{{ item_card_body(title, description, item, is_featured, align) }}
+				{{ item_card_body(title, settings, description, item, is_featured, align) }}
 			</div>
 		{% endif %}
 	</div>
@@ -105,13 +105,13 @@
 			</div>
 		</a>
 		{% endif %}
-		{{ item_card_body(title, description, item, is_featured, align) }}
+		{{ item_card_body(title, settings, description, item, is_featured, align) }}
 	</div>
 </div>
 {% endif %}
 {%- endmacro -%}
 
-{%- macro item_card_body(title, description, item, is_featured, align) -%}
+{%- macro item_card_body(title, settings, description, item, is_featured, align) -%}
 {%- set align_class = resolve_class({
 	'text-right': align == 'Right',
 	'text-center': align == 'Center' and not is_featured,
@@ -125,7 +125,7 @@
 		{% if item.in_stock %}
 			<span class="indicator {{ item.in_stock }} card-indicator"></span>
 		{% endif %}
-		{% if not item.has_variants %}
+		{% if not item.has_variants and settings.enable_wishlist %}
 			<div class="like-action"
 				data-item-code="{{ item.item_code }}"
 				data-price="{{ item.price }}"
@@ -152,7 +152,7 @@
 				{{ _('Explore') }}
 			</div>
 		</a>
-		{% else %}
+		{% elif settings.enabled %}
 			<div id="{{ item.name }}" class="btn btn-sm btn-add-to-cart-list not-added"
 				data-item-code="{{ item.item_code }}">
 				{{ _('Add to Cart') }}
@@ -218,5 +218,21 @@
 		{{ _("Not in Stock") }}
 	</div>
 	{% endif %}
+</div>
+{%- endmacro -%}
+
+{%- macro ratings_with_title(avg_rating, title, size, rating_header_class) -%}
+<div style="display: flex;">
+	<div class="rating">
+		{% for i in range(1,6) %}
+			{% set fill_class = 'star-click' if i <= avg_rating else '' %}
+			<svg class="icon icon-{{ size }} {{ fill_class }}">
+				<use href="#icon-star"></use>
+			</svg>
+		{% endfor %}
+	</div>
+	<p class="ml-4 {{ rating_header_class }}">
+		<span>{{ title }}</span>
+	</p>
 </div>
 {%- endmacro -%}
