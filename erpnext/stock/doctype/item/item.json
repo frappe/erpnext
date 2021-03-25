@@ -45,6 +45,7 @@
   "vehicle_details_section",
   "vehicle_engine_capacity",
   "column_break_35",
+  "vehicle_colors",
   "column_break_37",
   "vehicle_allocation_required",
   "exempt_from_vehicle_withholding_tax",
@@ -1239,6 +1240,13 @@
    "fieldname": "exempt_from_vehicle_withholding_tax",
    "fieldtype": "Check",
    "label": "Exempt From Vehicle Withholding Tax"
+  },
+  {
+   "fieldname": "vehicle_colors",
+   "fieldtype": "Table MultiSelect",
+   "label": "Allowed Colors",
+   "no_copy": 1,
+   "options": "Item Vehicle Color"
   }
  ],
  "has_web_view": 1,
@@ -1246,7 +1254,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2021-03-15 18:33:11.319487",
+ "modified": "2021-03-25 20:33:27.057074",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

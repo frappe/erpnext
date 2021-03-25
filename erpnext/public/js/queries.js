@@ -118,6 +118,12 @@ $.extend(erpnext.queries, {
 		return args;
 	},
 
+	vehicle_color: function (filters) {
+		var args = { query: "erpnext.controllers.queries.vehicle_color_query" };
+		if(filters) args["filters"] = filters;
+		return args;
+	},
+
 	warehouse: function(doc, get_warehouse_filters) {
 		let filters = [
 			["Warehouse", "company", "in", ["", cstr(doc.company)]],

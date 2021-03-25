@@ -87,6 +87,10 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		this.frm.set_query("vehicle_allocation", () => me.allocation_query());
 
+		this.frm.set_query("color_1", () => me.color_query());
+		this.frm.set_query("color_2", () => me.color_query());
+		this.frm.set_query("color_3", () => me.color_query());
+
 		this.frm.set_query("additional_item_code", "additional_items", function(doc) {
 			var filters = {'include_in_vehicle_booking': 1, 'is_vehicle': 0};
 			if (doc.item_code) {
@@ -158,6 +162,10 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				filters: {to_date: [">=", this.frm.doc.transaction_date]}
 			}
 		}
+	},
+
+	color_query: function () {
+		return erpnext.queries.vehicle_color({item_code: this.frm.doc.item_code});
 	},
 
 	setup_route_options: function () {
@@ -764,9 +772,12 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Color"),
 			fields: [
-				{label: __("Color (1st Priority)"), fieldname: "color_1", fieldtype: "Link", options: "Vehicle Color", reqd: 1},
-				{label: __("Color (2nd Priority)"), fieldname: "color_2", fieldtype: "Link", options: "Vehicle Color"},
-				{label: __("Color (3rd Priority)"), fieldname: "color_3", fieldtype: "Link", options: "Vehicle Color"},
+				{label: __("Color (1st Priority)"), fieldname: "color_1", fieldtype: "Link", options: "Vehicle Color", reqd: 1,
+					get_query: () => me.color_query()},
+				{label: __("Color (2nd Priority)"), fieldname: "color_2", fieldtype: "Link", options: "Vehicle Color",
+					get_query: () => me.color_query()},
+				{label: __("Color (3rd Priority)"), fieldname: "color_3", fieldtype: "Link", options: "Vehicle Color",
+					get_query: () => me.color_query()},
 			]
 		});
 
