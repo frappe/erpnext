@@ -111,9 +111,8 @@ class calculate_taxes_and_totals(object):
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-						if not item.discount_amount:
-							item.discount_amount = item.rate_with_margin - item.rate
-						elif not item.discount_percentage:
+						item.discount_amount = item.rate_with_margin - item.rate
+						if not item.discount_percentage:
 							item.rate -= item.discount_amount
 					elif flt(item.price_list_rate) > 0:
 						item.discount_amount = item.price_list_rate - item.rate
