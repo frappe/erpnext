@@ -237,6 +237,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		"doctype": args.doctype,
 		"has_margin": False,
 		"name": args.name,
+		"free_item_data": [],
 		"parent": args.parent,
 		"parenttype": args.parenttype,
 		"child_docname": args.get('child_docname')
