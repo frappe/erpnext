@@ -215,7 +215,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				if (this.frm.doc.delivery_status === "To Receive") {
 					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
 				} else if (this.frm.doc.delivery_status === "To Deliver") {
-					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
+					if (!flt(this.frm.doc.customer_outstanding) && !flt(this.frm.doc.supplier_outstanding)) {
+						this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
+					}
 				}
 			}
 

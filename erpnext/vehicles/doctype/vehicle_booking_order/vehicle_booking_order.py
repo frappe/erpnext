@@ -439,6 +439,14 @@ class VehicleBookingOrder(AccountsController):
 		if vehicle_receipt and not vehicle_receipt.supplier_delivery_note:
 			frappe.throw(_("Supplier Delivery Note is mandatory for Vehicle Receipt against Vehicle Booking Order"))
 
+		if vehicle_delivery:
+			if flt(self.customer_outstanding):
+				frappe.throw(_("Cannot deliver vehicle because there is a Customer Outstanding of {0}")
+					.format(self.get_formatted("customer_outstanding")))
+			if flt(self.supplier_outstanding):
+				frappe.throw(_("Cannot deliver vehicle because there is a Supplier Outstanding of {0}")
+					.format(self.get_formatted("supplier_outstanding")))
+
 		# open stock
 		if vehicle_receipt and not vehicle_receipt.vehicle_booking_order:
 			self.vehicle_receipt = vehicle_receipt.name
