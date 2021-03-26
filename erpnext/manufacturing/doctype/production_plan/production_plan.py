@@ -435,11 +435,13 @@ def download_raw_materials(doc):
 		doc = frappe._dict(json.loads(doc))
 
 	item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
-		'projected Qty', 'Actual Qty']]
+		'Projected Qty', 'Actual Qty', 'Ordered Qty', 'Reserved Qty for Production',
+		'Safety Stock']]
 
 	for d in get_items_for_material_requests(doc):
 		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('quantity'),
-			d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty')])
+			d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
+			d.get('reserved_qty_for_production'), d.get('safety_stock')])
 
 		if not doc.get('for_warehouse'):
 			row = {'item_code': d.get('item_code')}
@@ -448,7 +450,8 @@ def download_raw_materials(doc):
 					continue
 
 				item_list.append(['', '', '', '', bin_dict.get('warehouse'),
-					bin_dict.get('projected_qty', 0), bin_dict.get('actual_qty', 0)])
+					bin_dict.get('projected_qty', 0), bin_dict.get('actual_qty', 0)],
+					bin_dict.get('ordered_qty', 0), bin_dict.get('reserved_qty_for_production', 0))
 
 	build_csv_response(item_list, doc.name)
 
@@ -555,6 +558,7 @@ def get_material_request_items(row, sales_order, company,
 			'stock_uom': row.get("stock_uom"),
 			'warehouse': warehouse or row.get('source_warehouse') \
 				or row.get('default_warehouse') or item_group_defaults.get("default_warehouse"),
+			'safety_stock': row.safety_stock,
 			'actual_qty': bin_dict.get("actual_qty", 0),
 			'projected_qty': bin_dict.get("projected_qty", 0),
 			'ordered_qty': bin_dict.get("ordered_qty", 0),
