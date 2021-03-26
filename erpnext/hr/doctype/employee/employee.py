@@ -503,7 +503,8 @@ def has_user_permission_for_employee(user_name, employee_name):
 	})
 
 def has_upload_permission(doc, ptype='read', user=None):
-	if not user: user = frappe.session.user
+	if not user: 
+		user = frappe.session.user
 	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
 		return True
 	return doc.user_id == user
