@@ -1,7 +1,8 @@
 erpnext.setup_einvoice_actions = (doctype) => {
 	frappe.ui.form.on(doctype, {
-		refresh(frm) {
-			const einvoicing_enabled = frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
+		async refresh(frm) {
+			const { message } = await frappe.db.get_value("E Invoice Settings", "E Invoice Settings", "enable");
+			const einvoicing_enabled = cint(message.enable);
 			const supply_type = frm.doc.gst_category;
 			const valid_supply_type = ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export'].includes(supply_type);
 			const company_transaction = frm.doc.billing_address_gstin == frm.doc.company_gstin;
