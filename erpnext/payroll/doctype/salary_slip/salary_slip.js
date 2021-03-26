@@ -75,17 +75,22 @@ frappe.ui.form.on("Salary Slip", {
 		if (!frm.doc.letter_head && company.default_letter_head) {
 			frm.set_value('letter_head', company.default_letter_head);
 		}
+	},
+
+	currency: function(frm) {
 		frm.trigger("set_dynamic_labels");
 	},
 
 	set_dynamic_labels: function(frm) {
 		var company_currency = frm.doc.company? erpnext.get_currency(frm.doc.company): frappe.defaults.get_default("currency");
-		frappe.run_serially([
-			() => 	frm.events.set_exchange_rate(frm, company_currency),
-			() => 	frm.events.change_form_labels(frm, company_currency),
-			() => 	frm.events.change_grid_labels(frm),
-			() => 	frm.refresh_fields()
-		]);
+		if (frm.doc.employee && frm.doc.currency) {
+			frappe.run_serially([
+				() => 	frm.events.set_exchange_rate(frm, company_currency),
+				() => 	frm.events.change_form_labels(frm, company_currency),
+				() => 	frm.events.change_grid_labels(frm),
+				() => 	frm.refresh_fields()
+			]);
+		}
 	},
 
 	set_exchange_rate: function(frm, company_currency) {
@@ -114,7 +119,6 @@ frappe.ui.form.on("Salary Slip", {
 					frm.set_df_property('exchange_rate', 'hidden', 1);
 					frm.set_df_property("exchange_rate", "description", "" );
 				}
-			}
 		}
 	},
 
