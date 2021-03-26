@@ -31,7 +31,14 @@ class SalarySlip(TransactionBase):
 			"long": int,
 			"round": round,
 			"date": datetime.date,
-			"getdate": getdate
+			"getdate": getdate,
+			"max": max,
+			"min": min,
+			"pow": pow,
+			"sum": sum,
+			"abs": abs,
+			"all": all,
+			"any": any
 		}
 
 	def autoname(self):
