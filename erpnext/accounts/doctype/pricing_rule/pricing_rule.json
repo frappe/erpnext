@@ -44,6 +44,14 @@
   "column_break_21",
   "min_amt",
   "max_amt",
+  "product_discount_scheme_section",
+  "same_item",
+  "free_item",
+  "free_qty",
+  "free_item_rate",
+  "column_break_42",
+  "free_item_uom",
+  "is_recursive",
   "section_break_23",
   "valid_from",
   "valid_upto",
@@ -62,13 +70,6 @@
   "discount_amount",
   "discount_percentage",
   "for_price_list",
-  "product_discount_scheme_section",
-  "same_item",
-  "free_item",
-  "free_qty",
-  "column_break_51",
-  "free_item_uom",
-  "free_item_rate",
   "section_break_13",
   "threshold_percentage",
   "priority",
@@ -460,10 +461,6 @@
    "label": "Qty"
   },
   {
-   "fieldname": "column_break_51",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "free_item_uom",
    "fieldtype": "Link",
    "label": "UOM",
@@ -553,19 +550,33 @@
    "fieldname": "promotional_scheme",
    "fieldtype": "Link",
    "label": "Promotional Scheme",
-   "options": "Promotional Scheme"
+   "no_copy": 1,
+   "options": "Promotional Scheme",
+   "print_hide": 1,
+   "read_only": 1
   },
   {
    "description": "Simple Python Expression, Example: territory != 'All Territories'",
    "fieldname": "condition",
    "fieldtype": "Code",
    "label": "Condition"
+  },
+  {
+   "fieldname": "column_break_42",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "Discounts to be applied in sequential ranges like buy 1 get 1, buy 2 get 2, buy 3 get 3 and so on",
+   "fieldname": "is_recursive",
+   "fieldtype": "Check",
+   "label": "Is Recursive"
   }
  ],
  "icon": "fa fa-gift",
  "idx": 1,
  "links": [],
- "modified": "2020-12-04 00:36:24.698219",
+ "modified": "2021-03-06 22:01:24.840422",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Pricing Rule",
