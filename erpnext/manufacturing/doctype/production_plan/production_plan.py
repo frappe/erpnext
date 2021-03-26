@@ -434,14 +434,14 @@ def download_raw_materials(doc):
 	if isinstance(doc, string_types):
 		doc = frappe._dict(json.loads(doc))
 
-	item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
+	item_list = [['Item Code', 'Description', 'Stock UOM', 'Warehouse', 'Required Qty as per BOM',
 		'Projected Qty', 'Actual Qty', 'Ordered Qty', 'Reserved Qty for Production',
-		'Safety Stock']]
+		'Safety Stock', 'Required Qty']]
 
 	for d in get_items_for_material_requests(doc):
-		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('quantity'),
-			d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
-			d.get('reserved_qty_for_production'), d.get('safety_stock')])
+		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('warehouse'),
+			d.get('required_bom_qty'), d.get('projected_qty'), d.get('actual_qty'), d.get('ordered_qty'),
+			d.get('reserved_qty_for_production'), d.get('safety_stock'), d.get('quantity')])
 
 		if not doc.get('for_warehouse'):
 			row = {'item_code': d.get('item_code')}
@@ -449,9 +449,9 @@ def download_raw_materials(doc):
 				if d.get("warehouse") == bin_dict.get('warehouse'):
 					continue
 
-				item_list.append(['', '', '', '', bin_dict.get('warehouse'),
-					bin_dict.get('projected_qty', 0), bin_dict.get('actual_qty', 0)],
-					bin_dict.get('ordered_qty', 0), bin_dict.get('reserved_qty_for_production', 0))
+				item_list.append(['', '', '', bin_dict.get('warehouse'), '',
+					bin_dict.get('projected_qty', 0), bin_dict.get('actual_qty', 0),
+					bin_dict.get('ordered_qty', 0), bin_dict.get('reserved_qty_for_production', 0)])
 
 	build_csv_response(item_list, doc.name)
 
@@ -554,6 +554,7 @@ def get_material_request_items(row, sales_order, company,
 			'item_code': row.item_code,
 			'item_name': row.item_name,
 			'quantity': required_qty,
+			'required_bom_qty': total_qty,
 			'description': row.description,
 			'stock_uom': row.get("stock_uom"),
 			'warehouse': warehouse or row.get('source_warehouse') \
