@@ -36,6 +36,7 @@
   {
    "fieldname": "default_warehouse",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Warehouse",
    "options": "Warehouse"
   },
@@ -46,6 +47,7 @@
   {
    "fieldname": "default_price_list",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Price List",
    "options": "Price List"
   },
@@ -57,6 +59,7 @@
   {
    "fieldname": "buying_cost_center",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Default Buying Cost Center",
    "options": "Cost Center"
@@ -75,6 +78,7 @@
   {
    "fieldname": "expense_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Default Expense Account",
    "options": "Account"
@@ -87,6 +91,7 @@
   {
    "fieldname": "selling_cost_center",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Default Selling Cost Center",
    "options": "Cost Center"
@@ -98,6 +103,7 @@
   {
    "fieldname": "income_account",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Default Income Account",
    "options": "Account"
@@ -129,12 +135,13 @@
   {
    "fieldname": "default_terms",
    "fieldtype": "Link",
+   "ignore_user_permissions": 1,
    "label": "Default Terms and Conditions",
    "options": "Terms and Conditions"
   }
  ],
  "istable": 1,
- "modified": "2021-01-26 23:10:24.683436",
+ "modified": "2021-03-26 18:13:44.789951",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item Default",
