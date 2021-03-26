@@ -6,11 +6,12 @@ frappe.provide("erpnext.vehicles");
 erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	setup: function () {
 		this.frm.custom_make_buttons = {
-			'Delivery Note': 'Deliver Vehicle',
-			'Sales Invoice': 'Deliver Invoice',
+			'Vehicle Booking Payment': 'Customer Payment',
+			'Vehicle Receipt': 'Receive Vehicle',
+			'Vehicle Delivery': 'Deliver Vehicle',
+			'Vehicle Invoice Receipt': 'Receive Invoice',
+			'Vehicle Invoice Delivery': 'Deliver Invoice',
 			'Purchase Order': 'Purchase Order',
-			'Purchase Invoice': 'Receive Invoice',
-			'Purchase Receipt': 'Receive Vehicle',
 		}
 	},
 
