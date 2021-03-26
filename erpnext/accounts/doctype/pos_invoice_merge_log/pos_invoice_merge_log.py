@@ -128,12 +128,12 @@ class POSInvoiceMergeLog(Document):
 			for tax in doc.get('taxes'):
 				found = False
 				for t in taxes:
-					if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
+					if t.account_head == tax.account_head and t.cost_center == tax.cost_center \
+						and t.charge_type == tax.charge_type:
 						t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
 						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
 						found = True
 				if not found:
-					tax.charge_type = 'Actual'
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
@@ -172,7 +172,7 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice.posting_date = getdate(nowdate())
 
 		return sales_invoice
-	
+
 	def update_pos_invoices(self, invoice_docs, sales_invoice='', credit_note=''):
 		for doc in invoice_docs:
 			doc.load_from_db()
@@ -214,7 +214,7 @@ def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
 
 	if len(invoices) >= 5 and closing_entry:
 		closing_entry.set_status(update=True, status='Queued')
-		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
+		enqueue_job(create_merge_logs, invoice_by_customer=invoice_by_customer, closing_entry=closing_entry)
 	else:
 		create_merge_logs(invoice_by_customer, closing_entry)
 
@@ -227,7 +227,7 @@ def unconsolidate_pos_invoices(closing_entry):
 
 	if len(merge_logs) >= 5:
 		closing_entry.set_status(update=True, status='Queued')
-		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
+		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
 		cancel_merge_logs(merge_logs, closing_entry)
 
@@ -241,7 +241,7 @@ def create_merge_logs(invoice_by_customer, closing_entry={}):
 		merge_log.set('pos_invoices', invoices)
 		merge_log.save(ignore_permissions=True)
 		merge_log.submit()
-	
+
 	if closing_entry:
 		closing_entry.set_status(update=True, status='Submitted')
 		closing_entry.update_opening_entry()
@@ -256,7 +256,7 @@ def cancel_merge_logs(merge_logs, closing_entry={}):
 		closing_entry.set_status(update=True, status='Cancelled')
 		closing_entry.update_opening_entry(for_cancel=True)
 
-def enqueue_job(job, invoice_by_customer, closing_entry):
+def enqueue_job(job, merge_logs=None, invoice_by_customer=None, closing_entry=None):
 	check_scheduler_status()
 
 	job_name = closing_entry.get("name")
@@ -269,6 +269,7 @@ def enqueue_job(job, invoice_by_customer, closing_entry):
 			job_name=job_name,
 			closing_entry=closing_entry,
 			invoice_by_customer=invoice_by_customer,
+			merge_logs=merge_logs,
 			now=frappe.conf.developer_mode or frappe.flags.in_test
 		)
 
