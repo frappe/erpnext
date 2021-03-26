@@ -10,7 +10,7 @@ class TestInpatientMedicationOrders(unittest.TestCase):
 	@classmethod
 	def setUp(self):
 		task1 = create_task("_Test Task 98", add_days(nowdate(), -10), nowdate())
-		task2 = create_task("_Test Task 99", add_days(nowdate(), -10), add_days(nowdate(), -1))
+		create_task("_Test Task 99", add_days(nowdate(), -10), add_days(nowdate(), -1))
 		
 		task1.status = "Completed"
 		task1.completed_on = add_days(nowdate(), -1)

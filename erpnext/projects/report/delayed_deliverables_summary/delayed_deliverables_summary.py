@@ -30,7 +30,7 @@ def get_conditions(filters):
 		if filters.get(key):
 			conditions[key] = filters.get(key)
 	if filters.get("from_date"):
-		conditions.exp_end_date =  [">=", filters.get("from_date")]
+		conditions.exp_end_date = [">=", filters.get("from_date")]
 	if filters.get("to_date"):
 		conditions.exp_start_date = ["<=", filters.get("to_date")]
 	return conditions
