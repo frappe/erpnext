@@ -397,6 +397,7 @@ erpnext.PointOfSale.Controller = class {
 					this.recent_order_list.toggle_component(false);
 					frappe.run_serially([
 						() => this.frm.refresh(name),
+						() => this.frm.call('reset_mode_of_payments'),
 						() => this.cart.load_invoice(),
 						() => this.item_selector.toggle_component(true)
 					]);

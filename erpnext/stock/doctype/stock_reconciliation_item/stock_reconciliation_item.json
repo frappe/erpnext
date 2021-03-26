@@ -13,6 +13,7 @@
   "qty",
   "valuation_rate",
   "amount",
+  "allow_zero_valuation_rate",
   "serial_no_and_batch_section",
   "serial_no",
   "column_break_11",
@@ -166,10 +167,19 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_zero_valuation_rate",
+   "fieldtype": "Check",
+   "label": "Allow Zero Valuation Rate",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-06-14 17:10:53.188305",
+ "links": [],
+ "modified": "2021-03-23 11:09:44.407157",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

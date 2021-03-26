@@ -376,6 +376,12 @@ class POSInvoice(SalesInvoice):
 				"campaign": profile.get("campaign"),
 				"allow_print_before_pay": profile.get("allow_print_before_pay")
 			}
+	
+	def reset_mode_of_payments(self):
+		if self.pos_profile:
+			pos_profile = frappe.get_cached_doc('POS Profile', self.pos_profile)
+			update_multi_mode_option(self, pos_profile)
+			self.paid_amount = 0
 
 	def set_account_for_mode_of_payment(self):
 		self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
