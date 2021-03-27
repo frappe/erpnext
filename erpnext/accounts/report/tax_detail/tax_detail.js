@@ -116,10 +116,9 @@ erpnext.TaxDetail = class TaxDetail {
 		this.qr.menu_items = this.get_menu_items();
 	}
 	get_menu_items() {
-		// Replace Save, remove Add Column
+		// Replace Save action
 		let new_items = [];
 		const save = __('Save');
-		const addColumn = __('Add Column');
 
 		for (let item of this.qr.menu_items) {
 			if (item.label === save) {
@@ -128,8 +127,6 @@ erpnext.TaxDetail = class TaxDetail {
 					action: () => this.save_report(),
 					standard: false
 				});
-			} else if (item.label === addColumn) {
-				// Don't add
 			} else {
 				new_items.push(item);
 			}
@@ -424,8 +421,11 @@ function new_report() {
 				args: {
 					reference_report: 'Tax Detail',
 					report_name: values.report_name,
-					columns: frappe.query_report.get_visible_columns(),
-					sections: {}
+					data: {
+						columns: [],
+						sections: {},
+						show_detail: 1
+					}
 				},
 				freeze: true
 			}).then((r) => {

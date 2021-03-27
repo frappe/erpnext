@@ -6,17 +6,14 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 
-# NOTE: Not compatible with the frappe custom report feature of adding arbitrary doctype columns to the report
 # NOTE: Payroll is implemented using Journal Entries
 
 # field lists in multiple doctypes will be coalesced
 required_sql_fields = {
 	"GL Entry": ["posting_date", "voucher_type", "voucher_no", "account as tax_account", "account_currency", "debit", "credit"],
-#	"Account": ["account_type"],
 	"Journal Entry Account": ["account_type", "account", "debit_in_account_currency", "credit_in_account_currency"],
 	("Purchase Invoice Item", "Sales Invoice Item"): ["base_net_amount", "item_tax_rate", "item_tax_template", "item_name"],
 	("Purchase Invoice", "Sales Invoice"): ["taxes_and_charges", "tax_category"],
-#	"Journal Entry": ["total_amount_currency"],
 	"Purchase Invoice Item": ["expense_account"],
 	"Sales Invoice Item": ["income_account"]
 }
@@ -35,27 +32,20 @@ def execute(filters=None):
 		inner join `tabAccount` a on
 			ge.account=a.name and ge.company=a.company
 		left join `tabSales Invoice` si on
-			a.account_type='Tax' and ge.company=si.company and ge.voucher_type='Sales Invoice' and ge.voucher_no=si.name
+			ge.company=si.company and ge.voucher_type='Sales Invoice' and ge.voucher_no=si.name
 		left join `tabSales Invoice Item` sii on
 			si.name=sii.parent
 		left join `tabPurchase Invoice` pi on
-			a.account_type='Tax' and ge.company=pi.company and ge.voucher_type='Purchase Invoice' and ge.voucher_no=pi.name
+			ge.company=pi.company and ge.voucher_type='Purchase Invoice' and ge.voucher_no=pi.name
 		left join `tabPurchase Invoice Item` pii on
 			pi.name=pii.parent
-/*		left outer join `tabJournal Entry` je on
-			ge.voucher_no=je.name and ge.company=je.company */
-		left outer join `tabJournal Entry Account` jea on
+		left join `tabJournal Entry Account` jea on
 			ge.voucher_type=jea.parenttype and ge.voucher_no=jea.parent
-		where (ge.voucher_type, ge.voucher_no) in (
-			select ge.voucher_type, ge.voucher_no
-			from `tabGL Entry` ge
-			join `tabAccount` a on ge.account=a.name and ge.company=a.company
-			where
-				a.account_type='Tax' and
-				ge.company=%(company)s and
-				ge.posting_date>=%(from_date)s and
-				ge.posting_date<=%(to_date)s
-		)
+		where
+			a.account_type='Tax' and
+			ge.company=%(company)s and
+			ge.posting_date>=%(from_date)s and
+			ge.posting_date<=%(to_date)s
 		order by ge.posting_date, ge.voucher_no
 		""".format(fieldstr=fieldstr), filters, as_dict=1)
 
@@ -238,7 +228,7 @@ def modify_report_data(data):
 			if line.item_tax_rate:
 				tax_rates = json.loads(line.item_tax_rate)
 				for account, rate in tax_rates.items():
-					if account == line.account:
+					if account == line.tax_account:
 						if line.voucher_type == "Sales Invoice":
 							line.credit = line.base_net_amount * (rate / 100)
 							line.credit_net_amount = line.base_net_amount
@@ -247,6 +237,9 @@ def modify_report_data(data):
 							line.debit_net_amount = line.base_net_amount
 		# Transform Journal Entry lines
 		if "Journal" in line.voucher_type:
+			if line.account_type != 'Tax':
+				line.debit = 0.0
+				line.credit = 0.0
 			if line.debit_in_account_currency:
 				line.debit_net_amount = line.debit_in_account_currency
 			if line.credit_in_account_currency:
