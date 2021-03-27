@@ -495,7 +495,7 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-		if check_if_future_sle_exists(args):
+		if future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
 		elif not is_reposting_pending():
 			check_if_stock_and_account_balance_synced(self.posting_date,
@@ -506,37 +506,42 @@ def is_reposting_pending():
 		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
 
 
-def check_if_future_sle_exists(args):
-	sl_entries = frappe.db.get_all("Stock Ledger Entry",
+def future_sle_exists(args):
+	sl_entries = frappe.get_all("Stock Ledger Entry",
 		filters={"voucher_type": args.voucher_type, "voucher_no": args.voucher_no},
 		fields=["item_code", "warehouse"],
 		order_by="creation asc")
 
-	distinct_item_warehouses = list(set([(d.item_code, d.warehouse) for d in sl_entries]))
+	if not sl_entries:
+		return
 
-	sle_exists = False
-	for item_code, warehouse in distinct_item_warehouses:
-		args.update({
-			"item_code": item_code,
-			"warehouse": warehouse
-		})
-		if get_sle(args):
-			sle_exists = True
-			break
-	return sle_exists
+	warehouse_items_map = {}
+	for entry in sl_entries:
+		if entry.warehouse not in warehouse_items_map:
+			warehouse_items_map[entry.warehouse] = set()
 
-def get_sle(args):
+		warehouse_items_map[entry.warehouse].add(entry.item_code)
+
+	or_conditions = []
+	for warehouse, items in warehouse_items_map.items():
+		or_conditions.append(
+			"warehouse = '{}' and item_code in ({})".format(
+				warehouse,
+				", ".join(frappe.db.escape(item) for item in items)
+			)
+		)
+
 	return frappe.db.sql("""
 		select name
 		from `tabStock Ledger Entry`
 		where
-			item_code=%(item_code)s
-			and warehouse=%(warehouse)s
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+			({})
+			and timestamp(posting_date, posting_time)
+				>= timestamp(%(posting_date)s, %(posting_time)s)
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		limit 1
-	""", args)
+		""".format(" or ".join(or_conditions)), args)
 
 def create_repost_item_valuation_entry(args):
 	args = frappe._dict(args)
