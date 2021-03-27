@@ -491,6 +491,7 @@
    "fieldtype": "Data",
    "hidden": 1,
    "label": "Finance Type",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -566,7 +567,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-25 15:03:49.911689",
+ "modified": "2021-03-27 13:04:51.607216",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Delivery",

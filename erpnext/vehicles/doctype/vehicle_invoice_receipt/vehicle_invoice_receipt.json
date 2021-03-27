@@ -14,6 +14,8 @@
   "supplier",
   "supplier_name",
   "vehicle_booking_order",
+  "booking_customer_name",
+  "finance_type",
   "column_break_8",
   "remarks",
   "column_break_11",
@@ -21,6 +23,16 @@
   "posting_date",
   "bill_no",
   "bill_date",
+  "address_and_contact_section",
+  "booking_address_display",
+  "column_break_19",
+  "booking_email",
+  "booking_mobile",
+  "booking_phone",
+  "column_break_23",
+  "booking_tax_id",
+  "booking_tax_cnic",
+  "booking_tax_strn",
   "vehicle_details_section",
   "item_code",
   "item_name",
@@ -233,12 +245,99 @@
    "options": "Vehicle Invoice Receipt",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.customer_name",
+   "fieldname": "booking_customer_name",
+   "fieldtype": "Data",
+   "label": "Booking Customer Name",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.finance_type",
+   "fieldname": "finance_type",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Finance Type",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "address_and_contact_section",
+   "fieldtype": "Section Break",
+   "label": "Address and Contact"
+  },
+  {
+   "fetch_from": "vehicle_booking_order.address_display",
+   "fieldname": "booking_address_display",
+   "fieldtype": "Small Text",
+   "label": "Booking Address Display",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_email",
+   "fieldname": "booking_email",
+   "fieldtype": "Data",
+   "label": "Booking Email",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_mobile",
+   "fieldname": "booking_mobile",
+   "fieldtype": "Data",
+   "label": "Booking Mobile No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.contact_phone",
+   "fieldname": "booking_phone",
+   "fieldtype": "Data",
+   "label": "Booking Phone No",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_id",
+   "fieldname": "booking_tax_id",
+   "fieldtype": "Data",
+   "label": "Booking Tax ID",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_cnic",
+   "fieldname": "booking_tax_cnic",
+   "fieldtype": "Data",
+   "label": "Booking CNIC",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fetch_from": "vehicle_booking_order.tax_strn",
+   "fieldname": "booking_tax_strn",
+   "fieldtype": "Data",
+   "label": "Booking STRN",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-03-18 02:49:01.097502",
+ "modified": "2021-03-27 13:09:06.602407",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Receipt",
