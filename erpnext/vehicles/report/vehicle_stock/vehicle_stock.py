@@ -159,14 +159,13 @@ class VehicleStockReport(object):
 			# Status
 			if d.qty > 0:
 				if d.vehicle_booking_order and d.open_stock:
-					d.status = "Booked (Open Stock)"
+					d.status = "Open Stock (Booked)"
 					d.status_color = "purple"
 				elif d.vehicle_booking_order:
-					d.status = "Booked (In Stock)"
+					d.status = "In Stock (Booked)"
 					d.status_color = "#743ee2"
 				elif d.project:
 					d.status = "For Repair"
-					d.status_color = "orange"
 				else:
 					d.status = "Open Stock"
 					d.status_color = "blue"
@@ -176,9 +175,11 @@ class VehicleStockReport(object):
 					d.status_color = "green"
 				elif d.dispatch_date and not d.received_date:
 					if d.vehicle_booking_order:
-						d.status = "Booked (Dispatched)"
+						d.status = "Dispatched (Booked)"
+						d.status_color = "orange"
 					else:
 						d.status = "Dispatched"
+						d.status_color = "orange"
 
 			# Mark Unregistered
 			d.license_plate = 'Unregistered' if d.unregistered else d.license_plate
