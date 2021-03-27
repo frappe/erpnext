@@ -46,7 +46,6 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			self.assertFalse(pos_inv.consolidated_invoice == pos_inv3.consolidated_invoice)
 
 		finally:
-
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
@@ -96,7 +95,6 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			self.assertTrue(frappe.db.get_value("Sales Invoice", pos_inv_cn.consolidated_invoice, "is_return"))
 
 		finally:
-
 			frappe.set_user("Administrator")
 			frappe.db.sql("delete from `tabPOS Profile`")
 			frappe.db.sql("delete from `tabPOS Invoice`")
