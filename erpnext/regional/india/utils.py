@@ -823,8 +823,11 @@ def get_regional_round_off_accounts(company, account_list):
 		return
 
 	gst_accounts = get_gst_accounts(company)
-	gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-		+ gst_accounts.get('igst_account')
+
+	gst_account_list = []
+	for account in ['cgst_account', 'sgst_account', 'igst_account']:
+		if account in gst_accounts.keys():
+			gst_account_list += gst_accounts.get(account)
 
 	account_list.extend(gst_account_list)
 
