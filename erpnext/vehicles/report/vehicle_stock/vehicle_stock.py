@@ -272,8 +272,6 @@ class VehicleStockReport(object):
 			exclude_condition = " and name not in %(vehicle_names)s"
 
 		date_condition = ""
-		if self.filters.from_date:
-			date_condition += " and dispatch_date >= %(from_date)s"
 		if self.filters.to_date:
 			date_condition += " and dispatch_date <= %(to_date)s"
 
