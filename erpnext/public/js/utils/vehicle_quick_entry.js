@@ -67,5 +67,9 @@ frappe.ui.form.VehicleQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 				}
 			}
 		}
+
+		me.dialog.get_field("color").get_query = function () {
+			return erpnext.queries.vehicle_color({item_code: me.dialog.get_value('item_code')});
+		}
 	},
 })
