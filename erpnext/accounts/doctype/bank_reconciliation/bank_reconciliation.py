@@ -126,8 +126,12 @@ class BankReconciliation(Document):
 				if not d.clearance_date:
 					d.clearance_date = None
 
-				payment_entry = frappe.get_doc(d.payment_document, d.payment_entry)
-				payment_entry.db_set('clearance_date', d.clearance_date)
+				if d.payment_detail_dn:
+					frappe.db.set_value(d.payment_detail_dt, d.payment_detail_dn, 'clearance_date', d.clearance_date,
+						notify=True)
+				else:
+					frappe.db.set_value(d.payment_document, d.payment_entry, 'clearance_date', d.clearance_date,
+						notify=True)
 
 				clearance_date_updated = True
 
