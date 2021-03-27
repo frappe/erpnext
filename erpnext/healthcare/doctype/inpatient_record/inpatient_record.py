@@ -151,7 +151,7 @@ def check_out_inpatient(inpatient_record):
 
 def discharge_patient(inpatient_record):
 	validate_inpatient_invoicing(inpatient_record)
-	inpatient_record.discharge_date = today()
+	inpatient_record.discharge_datetime = now_datetime()
 	inpatient_record.status = "Discharged"
 
 	inpatient_record.save(ignore_permissions = True)
