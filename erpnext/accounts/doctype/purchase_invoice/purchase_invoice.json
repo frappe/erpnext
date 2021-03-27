@@ -163,7 +163,8 @@
   "to_date",
   "column_break_114",
   "auto_repeat",
-  "update_auto_repeat_reference"
+  "update_auto_repeat_reference",
+  "per_received"
  ],
  "fields": [
   {
@@ -1364,6 +1365,15 @@
    "print_hide": 1,
    "print_width": "50px",
    "width": "50px"
+  },
+  {
+   "fieldname": "per_received",
+   "fieldtype": "Percent",
+   "hidden": 1,
+   "label": "Per Received",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
