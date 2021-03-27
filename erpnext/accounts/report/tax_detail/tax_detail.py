@@ -7,15 +7,18 @@ import frappe, json
 from frappe import _
 
 # NOTE: Not compatible with the frappe custom report feature of adding arbitrary doctype columns to the report
+# NOTE: Payroll is implemented using Journal Entries
 
 # field lists in multiple doctypes will be coalesced
 required_sql_fields = {
-	"GL Entry": ["posting_date", "voucher_type", "voucher_no", "account", "account_currency", "debit", "credit"],
-	"Account": ["account_type"],
+	"GL Entry": ["posting_date", "voucher_type", "voucher_no", "account as tax_account", "account_currency", "debit", "credit"],
+#	"Account": ["account_type"],
+	"Journal Entry Account": ["account_type", "account", "debit_in_account_currency", "credit_in_account_currency"],
+	("Purchase Invoice Item", "Sales Invoice Item"): ["base_net_amount", "item_tax_rate", "item_tax_template", "item_name"],
 	("Purchase Invoice", "Sales Invoice"): ["taxes_and_charges", "tax_category"],
-	("Purchase Invoice Item", "Sales Invoice Item"): ["item_tax_template", "item_name", "base_net_amount", "item_tax_rate"],
 #	"Journal Entry": ["total_amount_currency"],
-#	"Journal Entry Account": ["debit_in_account_currency", "credit_in_account_currency"]
+	"Purchase Invoice Item": ["expense_account"],
+	"Sales Invoice Item": ["income_account"]
 }
 
 
@@ -40,9 +43,9 @@ def execute(filters=None):
 		left join `tabPurchase Invoice Item` pii on
 			pi.name=pii.parent
 /*		left outer join `tabJournal Entry` je on
-			ge.voucher_no=je.name and ge.company=je.company
+			ge.voucher_no=je.name and ge.company=je.company */
 		left outer join `tabJournal Entry Account` jea on
-			je.name=jea.parent and a.account_type='Tax' */
+			ge.voucher_type=jea.parenttype and ge.voucher_no=jea.parent
 		where (ge.voucher_type, ge.voucher_no) in (
 			select ge.voucher_type, ge.voucher_no
 			from `tabGL Entry` ge
@@ -142,7 +145,18 @@ def subtotal(data, field):
 
 abbrev = lambda dt: ''.join(l[0].lower() for l in dt.split(' ')) + '.'
 doclist = lambda dt, dfs: [abbrev(dt) + f for f in dfs]
-coalesce = lambda dts, dfs: ['coalesce(' + ', '.join(abbrev(dt) + f for dt in dts) + ') ' + f for f in dfs]
+
+def as_split(fields):
+	for field in fields:
+		split = field.split(' as ')
+		yield (split[0], split[1] if len(split) > 1 else split[0])
+
+def coalesce(doctypes, fields):
+	coalesce = []
+	for name, new_name in as_split(fields):
+		sharedfields = ', '.join(abbrev(dt) + name for dt in doctypes)
+		coalesce += [f'coalesce({sharedfields}) as {new_name}']
+	return coalesce
 
 def get_fieldstr(fieldlist):
 	fields = []
@@ -158,20 +172,22 @@ def get_columns(fieldlist):
 	for doctypes, docfields in fieldlist.items():
 		if isinstance(doctypes, str):
 			doctypes = [doctypes]
+		fieldmap = {name: new_name for name, new_name in as_split(docfields)}
 		for doctype in doctypes:
 			meta = frappe.get_meta(doctype)
 			# get column field metadata from the db
 			fieldmeta = {}
 			for field in meta.get('fields'):
-				if field.fieldname in docfields:
-					fieldmeta[field.fieldname] = {
+				if field.fieldname in fieldmap.keys():
+					new_name = fieldmap[field.fieldname]
+					fieldmeta[new_name] = {
 						"label": _(field.label),
-						"fieldname": field.fieldname,
+						"fieldname": new_name,
 						"fieldtype": field.fieldtype,
 						"options": field.options
 					}
 			# edit the columns to match the modified data
-			for field in docfields:
+			for field in fieldmap.values():
 				col = modify_report_columns(doctype, field, fieldmeta[field])
 				if col:
 					columns[col["fieldname"]] = col
@@ -182,10 +198,28 @@ def modify_report_columns(doctype, field, column):
 	"Because data is rearranged into other columns"
 	if doctype in ["Sales Invoice Item", "Purchase Invoice Item"] and field == "item_tax_rate":
 		return None
+	if doctype == "GL Entry" and field == "tax_account":
+		column.update({"label": _("Tax Account")})
+	if doctype == "GL Entry" and field == "debit":
+		column.update({"label": _("Tax Debit")})
+	if doctype == "GL Entry" and field == "credit":
+		column.update({"label": _("Tax Credit")})
+
+	if doctype == "Journal Entry Account" and field == "debit_in_account_currency":
+		column.update({"label": _("Debit Net Amount"), "fieldname": "debit_net_amount"})
+	if doctype == "Journal Entry Account" and field == "credit_in_account_currency":
+		column.update({"label": _("Credit Net Amount"), "fieldname": "credit_net_amount"})
+
 	if doctype == "Sales Invoice Item" and field == "base_net_amount":
 		column.update({"label": _("Credit Net Amount"), "fieldname": "credit_net_amount"})
+	if doctype == "Sales Invoice Item" and field == "income_account":
+		column.update({"label": _("Account"), "fieldname": "account"})
+
 	if doctype == "Purchase Invoice Item" and field == "base_net_amount":
 		column.update({"label": _("Debit Net Amount"), "fieldname": "debit_net_amount"})
+	if doctype == "Purchase Invoice Item" and field == "expense_account":
+		column.update({"label": _("Account"), "fieldname": "account"})
+
 	if field == "taxes_and_charges":
 		column.update({"label": _("Taxes and Charges Template")})
 	return column
@@ -193,16 +227,30 @@ def modify_report_columns(doctype, field, column):
 def modify_report_data(data):
 	import json
 	for line in data:
-		if line.account_type == "Tax" and line.item_tax_rate:
-			tax_rates = json.loads(line.item_tax_rate)
-			for account, rate in tax_rates.items():
-				if account == line.account:
-					if line.voucher_type == "Sales Invoice":
-						line.credit = line.base_net_amount * (rate / 100)
-						line.credit_net_amount = line.base_net_amount
-					if line.voucher_type == "Purchase Invoice":
-						line.debit = line.base_net_amount * (rate / 100)
-						line.debit_net_amount = line.base_net_amount
+		# Transform Invoice lines
+		if "Invoice" in line.voucher_type:
+			if line.income_account:
+				line.account = line.income_account
+				line.account_type = "Income Account"
+			if line.expense_account:
+				line.account = line.expense_account
+				line.account_type = "Expense Account"
+			if line.item_tax_rate:
+				tax_rates = json.loads(line.item_tax_rate)
+				for account, rate in tax_rates.items():
+					if account == line.account:
+						if line.voucher_type == "Sales Invoice":
+							line.credit = line.base_net_amount * (rate / 100)
+							line.credit_net_amount = line.base_net_amount
+						if line.voucher_type == "Purchase Invoice":
+							line.debit = line.base_net_amount * (rate / 100)
+							line.debit_net_amount = line.base_net_amount
+		# Transform Journal Entry lines
+		if "Journal" in line.voucher_type:
+			if line.debit_in_account_currency:
+				line.debit_net_amount = line.debit_in_account_currency
+			if line.credit_in_account_currency:
+				line.credit_net_amount = line.credit_in_account_currency
 	return data
 
 ####### JS client utilities
