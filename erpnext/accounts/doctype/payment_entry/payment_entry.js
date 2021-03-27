@@ -614,6 +614,8 @@ frappe.ui.form.on('Payment Entry', {
 			{fieldtype:"Float", label: __("Less Than Amount"), fieldname:"outstanding_amt_less_than"},
 			{fieldtype:"Section Break"},
 			{fieldtype:"Check", label: __("Allocate Payment Amount"), fieldname:"allocate_payment_amount", default:1},
+			{fieldtype:"Column Break"},
+			{fieldtype:"Check", label: __("Include Orders"), fieldname:"include_orders"},
 		];
 
 		frappe.prompt(fields, function(filters){

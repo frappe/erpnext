@@ -697,11 +697,13 @@ def get_outstanding_reference_documents(args):
 	if args.get("cost_center"):
 		condition += " and cost_center='%s'" % args.get("cost_center")
 
-	include_orders = False
+	include_orders = args.get('include_orders')
 	party_account_type = erpnext.get_party_account_type(args.get("party_type"))
-	if (args.get("payment_type") == "Receive" and party_account_type == "Receivable") \
+	if include_orders and (args.get("payment_type") == "Receive" and party_account_type == "Receivable") \
 			or (args.get("payment_type") == "Pay" and party_account_type == "Payable"):
 		include_orders = True
+	else:
+		include_orders = False
 
 	date_fields_dict = {
 		'posting_date': ['from_posting_date', 'to_posting_date'],

@@ -19,7 +19,6 @@
   "amended_from",
   "posting_date",
   "mode_of_payment",
-  "instrument_type",
   "more_information_section",
   "bank",
   "bank_account_no",
@@ -439,7 +438,6 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_no",
    "fieldtype": "Data",
    "label": "Cheque/Reference No",
@@ -451,7 +449,6 @@
   },
   {
    "bold": 1,
-   "depends_on": "eval:(doc.paid_from && doc.paid_to)",
    "fieldname": "reference_date",
    "fieldtype": "Date",
    "label": "Cheque/Reference Date",
@@ -696,16 +693,10 @@
   {
    "fieldname": "col_break_18",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "instrument_type",
-   "fieldtype": "Select",
-   "label": "Instrument/Voucher Type",
-   "options": "\nCheque\nPay Order\nCash\nDirect Deposit\nNCS"
   }
  ],
  "is_submittable": 1,
- "modified": "2021-03-24 10:39:06.309819",
+ "modified": "2021-03-27 21:02:45.160032",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",
