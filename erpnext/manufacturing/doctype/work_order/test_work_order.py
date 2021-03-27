@@ -82,7 +82,7 @@ class TestWorkOrder(unittest.TestCase):
 		wo_order.set_work_order_operations()
 		self.assertEqual(wo_order.planned_operating_cost, cost*2)
 
-	def test_resered_qty_for_partial_completion(self):
+	def test_reserved_qty_for_partial_completion(self):
 		item = "_Test Item"
 		warehouse = create_warehouse("Test Warehouse for reserved_qty - _TC")
 
@@ -109,7 +109,7 @@ class TestWorkOrder(unittest.TestCase):
 		s.submit()
 
 		bin1_at_completion = get_bin(item, warehouse)
-		
+
 		self.assertEqual(cint(bin1_at_completion.reserved_qty_for_production),
 			reserved_qty_on_submission - 1)
 
@@ -592,6 +592,55 @@ class TestWorkOrder(unittest.TestCase):
 
 		frappe.db.set_value("Manufacturing Settings", None, "backflush_raw_materials_based_on", "BOM")
 
+	def test_make_stock_entry_for_customer_provided_item(self):
+		finished_item = 'Test Item for Make Stock Entry 1'
+		make_item(finished_item, {
+				"include_item_in_manufacturing": 1,
+				"is_stock_item": 1
+			})
+
+		customer_provided_item = 'CUST-0987'
+		make_item(customer_provided_item, {
+			'is_purchase_item': 0,
+			'is_customer_provided_item': 1,
+			"is_stock_item": 1,
+			"include_item_in_manufacturing": 1,
+			'customer': '_Test Customer'
+		})
+
+		if not frappe.db.exists('BOM', {'item': finished_item}):
+			make_bom(item=finished_item, raw_materials=[customer_provided_item], rm_qty=1)
+
+		company = "_Test Company with perpetual inventory"
+		customer_warehouse = create_warehouse("Test Customer Provided Warehouse", company=company)
+		wo = make_wo_order_test_record(item=finished_item, qty=1, source_warehouse=customer_warehouse,
+			company=company)
+
+		ste = frappe.get_doc(make_stock_entry(wo.name, purpose='Material Transfer for Manufacture'))
+		ste.insert()
+
+		self.assertEqual(len(ste.items), 1)
+		for item in ste.items:
+			self.assertEqual(item.allow_zero_valuation_rate, 1)
+			self.assertEqual(item.valuation_rate, 0)
+
+	def test_valuation_rate_missing_on_make_stock_entry(self):
+		item_name = 'Test Valuation Rate Missing'
+		make_item(item_name, {
+			"is_stock_item": 1,
+			"include_item_in_manufacturing": 1,
+		})
+
+		if not frappe.db.get_value('BOM', {'item': item_name}):
+			make_bom(item=item_name, raw_materials=[item_name], rm_qty=1)
+
+		company = "_Test Company with perpetual inventory"
+		source_warehouse = create_warehouse("Test Valuation Rate Missing Warehouse", company=company)
+		wo = make_wo_order_test_record(item=item_name, qty=1, source_warehouse=source_warehouse,
+			company=company)
+
+		self.assertRaises(frappe.ValidationError, make_stock_entry, wo.name, 'Material Transfer for Manufacture')
+
 def get_scrap_item_details(bom_no):
 	scrap_items = {}
 	for item in frappe.db.sql("""select item_code, stock_qty from `tabBOM Scrap Item`
@@ -609,6 +658,15 @@ def allow_overproduction(fieldname, percentage):
 
 def make_wo_order_test_record(**args):
 	args = frappe._dict(args)
+	if args.company and args.company != "_Test Company":
+		warehouse_map = {
+			"fg_warehouse": "_Test FG Warehouse",
+			"wip_warehouse": "_Test WIP Warehouse"
+		}
+
+		for attr, wh_name in warehouse_map.items():
+			if not args.get(attr):
+				args[attr] = create_warehouse(wh_name, company=args.company)
 
 	wo_order = frappe.new_doc("Work Order")
 	wo_order.production_item = args.production_item or args.item or args.item_code or "_Test FG Item"
