@@ -8,13 +8,13 @@ def get_data():
 			"label": _("Purchasing"),
 			"icon": "fa fa-star",
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Material Request",
-					"onboard": 1,
-					"dependencies": ["Item"],
-					"description": _("Request for purchase."),
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Material Request",
+				# 	"onboard": 1,
+				# 	"dependencies": ["Item"],
+				# 	"description": _("Request for purchase."),
+				# },
 				{
 					"type": "doctype",
 					"name": "Purchase Order",
@@ -28,13 +28,13 @@ def get_data():
 					"onboard": 1,
 					"dependencies": ["Item", "Supplier"]
 				},
-				{
-					"type": "doctype",
-					"name": "Request for Quotation",
-					"onboard": 1,
-					"dependencies": ["Item", "Supplier"],
-					"description": _("Request for quotation."),
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Request for Quotation",
+				# 	"onboard": 1,
+				# 	"dependencies": ["Item", "Supplier"],
+				# 	"description": _("Request for quotation."),
+				# },
 				{
 					"type": "doctype",
 					"name": "Supplier Quotation",
