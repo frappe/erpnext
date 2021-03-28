@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import json
 import frappe
 import six
+import os
 from datetime import datetime
 from frappe.model.document import Document
 from frappe.email import sendmail_to_system_managers
@@ -47,7 +48,7 @@ class Membership(Document):
 		last_membership = erpnext.get_last_membership(self.member)
 
 		# if person applied for offline membership
-		if last_membership and not frappe.session.user == "Administrator":
+		if last_membership and last_membership.name != self.name and not frappe.session.user == "Administrator":
 			# if last membership does not expire in 30 days, then do not allow to renew
 			if getdate(add_days(last_membership.to_date, -30)) > getdate(nowdate()) :
 				frappe.throw(_("You can only renew if your membership expires within 30 days"))
@@ -58,7 +59,7 @@ class Membership(Document):
 		else:
 			self.from_date = nowdate()
 
-		if frappe.db.get_single_value("Membership Settings", "billing_cycle") == "Yearly":
+		if frappe.db.get_single_value("Non Profit Settings", "billing_cycle") == "Yearly":
 			self.to_date = add_years(self.from_date, 1)
 		else:
 			self.to_date = add_months(self.from_date, 1)
@@ -68,9 +69,9 @@ class Membership(Document):
 			return
 		self.load_from_db()
 		self.db_set("paid", 1)
-		settings = frappe.get_doc("Membership Settings")
-		if settings.enable_invoicing and settings.create_for_web_forms:
-			self.generate_invoice(with_payment_entry=settings.make_payment_entry, save=True)
+		settings = frappe.get_doc("Non Profit Settings")
+		if settings.allow_invoicing and settings.automate_membership_invoicing:
+			self.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
 
 
 	def generate_invoice(self, save=True, with_payment_entry=False):
@@ -85,10 +86,11 @@ class Membership(Document):
 			frappe.throw(_("No customer linked to member {0}").format(frappe.bold(self.member)))
 
 		plan = frappe.get_doc("Membership Type", self.membership_type)
-		settings = frappe.get_doc("Membership Settings")
+		settings = frappe.get_doc("Non Profit Settings")
 		self.validate_membership_type_and_settings(plan, settings)
 
 		invoice = make_invoice(self, member, plan, settings)
+		self.reload()
 		self.invoice = invoice.name
 
 		if with_payment_entry:
@@ -102,7 +104,7 @@ class Membership(Document):
 	def validate_membership_type_and_settings(self, plan, settings):
 		settings_link = get_link_to_form("Membership Type", self.membership_type)
 
-		if not settings.debit_account:
+		if not settings.membership_debit_account:
 			frappe.throw(_("You need to set <b>Debit Account</b> in {0}").format(settings_link))
 
 		if not settings.company:
@@ -113,25 +115,26 @@ class Membership(Document):
 				get_link_to_form("Membership Type", self.membership_type)))
 
 	def make_payment_entry(self, settings, invoice):
-		if not settings.payment_account:
-			frappe.throw(_("You need to set <b>Payment Account</b> in {0}").format(
-				get_link_to_form("Membership Type", self.membership_type)))
+		if not settings.membership_payment_account:
+			frappe.throw(_("You need to set <b>Payment Account</b> for Membership in {0}").format(
+				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
 
 		from erpnext.accounts.doctype.payment_entry.payment_entry import get_payment_entry
 		frappe.flags.ignore_account_permission = True
 		pe = get_payment_entry(dt="Sales Invoice", dn=invoice.name, bank_amount=invoice.grand_total)
 		frappe.flags.ignore_account_permission=False
-		pe.paid_to = settings.payment_account
+		pe.paid_to = settings.membership_payment_account
 		pe.reference_no = self.name
 		pe.reference_date = getdate()
-		pe.save(ignore_permissions=True)
+		pe.flags.ignore_mandatory = True
+		pe.save()
 		pe.submit()
 
 	def send_acknowlement(self):
-		settings = frappe.get_doc("Membership Settings")
+		settings = frappe.get_doc("Non Profit Settings")
 		if not settings.send_email:
 			frappe.throw(_("You need to enable <b>Send Acknowledge Email</b> in {0}").format(
-				get_link_to_form("Membership Settings", "Membership Settings")))
+				get_link_to_form("Non Profit Settings", "Non Profit Settings")))
 
 		member = frappe.get_doc("Member", self.member)
 		if not member.email_id:
@@ -170,7 +173,7 @@ def make_invoice(membership, member, plan, settings):
 	invoice = frappe.get_doc({
 		"doctype": "Sales Invoice",
 		"customer": member.customer,
-		"debit_to": settings.debit_account,
+		"debit_to": settings.membership_debit_account,
 		"currency": membership.currency,
 		"company": settings.company,
 		"is_pos": 0,
@@ -183,7 +186,7 @@ def make_invoice(membership, member, plan, settings):
 		]
 	})
 	invoice.set_missing_values()
-	invoice.insert(ignore_permissions=True)
+	invoice.insert()
 	invoice.submit()
 
 	frappe.msgprint(_("Sales Invoice created successfully"))
@@ -203,17 +206,18 @@ def get_member_based_on_subscription(subscription_id, email):
 		return None
 
 
-def verify_signature(data):
-	if frappe.flags.in_test:
+def verify_signature(data, endpoint="Membership"):
+	if frappe.flags.in_test or os.environ.get("CI"):
 		return True
 	signature = frappe.request.headers.get("X-Razorpay-Signature")
 
-	settings = frappe.get_doc("Membership Settings")
-	key = settings.get_webhook_secret()
+	settings = frappe.get_doc("Non Profit Settings")
+	key = settings.get_webhook_secret(endpoint)
 
 	controller = frappe.get_doc("Razorpay Settings")
 
 	controller.verify_signature(data, signature, key)
+	frappe.set_user(settings.creation_user)
 
 
 @frappe.whitelist(allow_guest=True)
@@ -222,7 +226,7 @@ def trigger_razorpay_subscription(*args, **kwargs):
 	try:
 		verify_signature(data)
 	except Exception as e:
-		log = frappe.log_error(e, "Webhook Verification Error")
+		log = frappe.log_error(e, "Membership Webhook Verification Error")
 		notify_failure(log)
 		return { "status": "Failed", "reason": e}
 
@@ -250,16 +254,15 @@ def trigger_razorpay_subscription(*args, **kwargs):
 
 			member.subscription_id = subscription.id
 			member.customer_id = payment.customer_id
-			if subscription.notes and type(subscription.notes) == dict:
-				notes = "\n".join("{}: {}".format(k, v) for k, v in subscription.notes.items())
-				member.add_comment("Comment", notes)
-			elif subscription.notes and type(subscription.notes) == str:
-				member.add_comment("Comment", subscription.notes)
 
+			if subscription.get("notes"):
+				member = get_additional_notes(member, subscription)
 
+		company = get_company_for_memberships()
 		# Update Membership
 		membership = frappe.new_doc("Membership")
 		membership.update({
+			"company": company,
 			"member": member.name,
 			"membership_status": "Current",
 			"membership_type": member.membership_type,
@@ -270,20 +273,61 @@ def trigger_razorpay_subscription(*args, **kwargs):
 			"to_date": datetime.fromtimestamp(subscription.current_end),
 			"amount": payment.amount / 100 # Convert to rupees from paise
 		})
-		membership.insert(ignore_permissions=True)
+		membership.flags.ignore_mandatory = True
+		membership.insert()
 
 		# Update membership values
 		member.subscription_start = datetime.fromtimestamp(subscription.start_at)
 		member.subscription_end = datetime.fromtimestamp(subscription.end_at)
 		member.subscription_activated = 1
-		member.save(ignore_permissions=True)
+		member.flags.ignore_mandatory = True
+		member.save()
+
+		settings = frappe.get_doc("Non Profit Settings")
+		if settings.allow_invoicing and settings.automate_membership_invoicing:
+			membership.reload()
+			membership.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
+
 	except Exception as e:
-		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), __("Payment ID"), payment.id)
+		message = "{0}\n\n{1}\n\n{2}: {3}".format(e, frappe.get_traceback(), _("Payment ID"), payment.id)
 		log = frappe.log_error(message, _("Error creating membership entry for {0}").format(member.name))
 		notify_failure(log)
 		return { "status": "Failed", "reason": e}
 
 	return { "status": "Success" }
+
+
+def get_company_for_memberships():
+	company = frappe.db.get_single_value("Non Profit Settings", "company")
+	if not company:
+		from erpnext.healthcare.setup import get_company
+		company = get_company()
+	return company
+
+
+def get_additional_notes(member, subscription):
+	if type(subscription.notes) == dict:
+		for k, v in subscription.notes.items():
+			notes = "\n".join("{}: {}".format(k, v))
+
+			# extract member name from notes
+			if "name" in k.lower():
+				member.update({
+					"member_name": subscription.notes.get(k)
+				})
+
+			# extract pan number from notes
+			if "pan" in k.lower():
+				member.update({
+					"pan_number": subscription.notes.get(k)
+				})
+
+		member.add_comment("Comment", notes)
+
+	elif type(subscription.notes) == str:
+		member.add_comment("Comment", subscription.notes)
+
+	return member
 
 
 def notify_failure(log):
