@@ -26,7 +26,8 @@ from erpnext.controllers.print_settings import set_print_templates_for_item_tabl
 
 class AccountMissingError(frappe.ValidationError): pass
 
-force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
+force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate",
+	"pricing_rules", "weight_per_unit", "weight_uom", "total_weight")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -829,10 +830,10 @@ class AccountsController(TransactionBase):
 				party_account_currency = get_party_account_currency(party_type, party, self.company)
 
 				if (party_account_currency
-						and (self.currency != party_account_currency
-						and self.currency != self.company_currency)):
+						and party_account_currency != self.company_currency
+						and self.currency != party_account_currency):
 					frappe.throw(_("Accounting Entry for {0}: {1} can only be made in currency: {2}")
-								 .format(party_type, party, frappe.bold(party_account_currency), InvalidCurrency))
+								 .format(party_type, party, party_account_currency), InvalidCurrency)
 
 				# Note: not validating with gle account because we don't have the account
 				# at quotation / sales order level and we shouldn't stop someone
@@ -898,7 +899,7 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 
-		if self.company_currency == self.currency:
+		if party_account_currency == self.company_currency:
 			grand_total = self.get("base_rounded_total") or self.base_grand_total
 		else:
 			grand_total = self.get("rounded_total") or self.grand_total
@@ -959,7 +960,7 @@ class AccountsController(TransactionBase):
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
 
-			if self.company_currency == self.currency:
+			if party_account_currency == self.company_currency:
 				total = flt(total, self.precision("base_grand_total"))
 				grand_total = flt(self.get("base_rounded_total") or self.base_grand_total, self.precision('base_grand_total'))
 			else:
