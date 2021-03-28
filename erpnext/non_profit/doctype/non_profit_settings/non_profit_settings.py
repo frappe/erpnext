@@ -8,23 +8,26 @@ from frappe import _
 from frappe.integrations.utils import get_payment_gateway_controller
 from frappe.model.document import Document
 
-class MembershipSettings(Document):
-	def generate_webhook_key(self):
+class NonProfitSettings(Document):
+	def generate_webhook_secret(self, field="membership_webhook_secret"):
 		key = frappe.generate_hash(length=20)
-		self.webhook_secret = key
+		self.set(field, key)
 		self.save()
+
+		secret_for = "Membership" if field == "membership_webhook_secret" else "Donation"
 
 		frappe.msgprint(
-			_("Here is your webhook secret, this will be shown to you only once.") + "<br><br>" + key,
+			_("Here is your webhook secret for {0} API, this will be shown to you only once.").format(secret_for) + "<br><br>" + key,
 			_("Webhook Secret")
-		);
+		)
 
-	def revoke_key(self):
-		self.webhook_secret = None;
+	def revoke_key(self, key):
+		self.set(key, None)
 		self.save()
 
-	def get_webhook_secret(self):
-		return self.get_password(fieldname="webhook_secret", raise_exception=False)
+	def get_webhook_secret(self, endpoint="Membership"):
+		fieldname = "membership_webhook_secret" if endpoint == "Membership" else "donation_webhook_secret"
+		return self.get_password(fieldname=fieldname, raise_exception=False)
 
 @frappe.whitelist()
 def get_plans_for_membership(*args, **kwargs):
