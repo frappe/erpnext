@@ -32,6 +32,8 @@ class PayrollEntry(Document):
 	def on_cancel(self):
 		frappe.delete_doc("Salary Slip", frappe.db.sql_list("""select name from `tabSalary Slip`
 			where payroll_entry=%s """, (self.name)))
+		
+		self.state = "Cancelled"
 
 	def get_emp_list(self):
 		"""
@@ -151,6 +153,22 @@ class PayrollEntry(Document):
 			frappe.enqueue(submit_salary_slips_for_employees, timeout=600, payroll_entry=self, salary_slips=ss_list)
 		else:
 			submit_salary_slips_for_employees(self, ss_list, publish_progress=False)
+
+		args = frappe._dict({
+			"salary_slip_based_on_timesheet": self.salary_slip_based_on_timesheet,
+			"payroll_frequency": self.payroll_frequency,
+			"start_date": self.start_date,
+			"end_date": self.end_date,
+			"company": self.company,
+			"posting_date": self.posting_date,
+			"deduct_tax_for_unclaimed_employee_benefits": self.deduct_tax_for_unclaimed_employee_benefits,
+			"deduct_tax_for_unsubmitted_tax_exemption_proof": self.deduct_tax_for_unsubmitted_tax_exemption_proof,
+			"payroll_entry": self.name
+		})
+		
+		payroll_entry = frappe.get_doc("Payroll Entry", args.payroll_entry)
+		payroll_entry.db_set("state", "Closed")
+		payroll_entry.notify_update()
 
 	def email_salary_slip(self, submitted_ss):
 		if frappe.db.get_single_value("HR Settings", "email_salary_slip_to_employee"):
