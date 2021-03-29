@@ -441,8 +441,7 @@
    "fieldtype": "Link",
    "label": "Customer Address",
    "options": "Address",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "address_display",
@@ -1707,7 +1706,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-03-19 10:40:09.232477",
+ "modified": "2021-03-24 13:54:27.173484",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
