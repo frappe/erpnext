@@ -130,6 +130,9 @@ def create_item_code(amazon_item_json, sku):
 	if frappe.db.get_value("Item", sku):
 		return
 
+	if frappe.db.get_value('Integration Item', {'integration_item_name': sku}, 'erpnext_item_code')
+		return
+
 	item = frappe.new_doc("Item")
 
 	new_manufacturer = create_manufacturer(amazon_item_json)
@@ -438,6 +441,11 @@ def get_order_items(market_place_order_id):
 def get_item_code(order_item):
 	sku = order_item.SellerSKU
 	item_code = frappe.db.get_value("Item", {"item_code": sku}, "item_code")
+
+	# Check for item code mapping in integration item
+	if not item_code:
+		item_code = frappe.db.get_value('Integration Item', {'integration_item_name': sku}, 'erpnext_item_code')
+
 	if item_code:
 		return item_code
 
