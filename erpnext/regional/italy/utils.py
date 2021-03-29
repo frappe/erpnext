@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import io
-import os
 import json
 import frappe
 from frappe.utils import flt, cstr
