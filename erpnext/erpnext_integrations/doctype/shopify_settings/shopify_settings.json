@@ -2,6 +2,7 @@
  "creation": "2015-05-18 05:21:07.270859",
  "doctype": "DocType",
  "document_type": "System",
+ "engine": "InnoDB",
  "field_order": [
   "status_html",
   "enable_shopify",
@@ -258,8 +259,8 @@
   }
  ],
  "issingle": 1,
- "modified": "2020-05-28 12:32:11.384757",
- "modified_by": "umair@erpnext.com",
+ "modified": "2021-03-02 18:06:00.868688",
+ "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Shopify Settings",
  "owner": "Administrator",
@@ -276,5 +277,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

@@ -51,6 +51,10 @@ class BOM(WebsiteGenerator):
 
 	def validate(self):
 		self.route = frappe.scrub(self.name).replace('_', '-')
+
+		if not self.company:
+			frappe.throw(_("Please select a Company first."), title=_("Mandatory"))
+
 		self.clear_operations()
 		self.validate_main_item()
 		self.validate_currency()
@@ -122,6 +126,7 @@ class BOM(WebsiteGenerator):
 			self.validate_bom_currecny(item)
 
 			ret = self.get_bom_material_detail({
+				"company": self.company,
 				"item_code": item.item_code,
 				"item_name": item.item_name,
 				"bom_no": item.bom_no,
@@ -236,6 +241,7 @@ class BOM(WebsiteGenerator):
 
 		for d in self.get("items"):
 			rate = self.get_rm_rate({
+				"company": self.company,
 				"item_code": d.item_code,
 				"bom_no": d.bom_no,
 				"qty": d.qty,
@@ -288,10 +294,20 @@ class BOM(WebsiteGenerator):
 		""" Get weighted average of valuation rate from all warehouses """
 
 		total_qty, total_value, valuation_rate = 0.0, 0.0, 0.0
-		for d in frappe.db.sql("""select actual_qty, stock_value from `tabBin`
-			where item_code=%s""", args['item_code'], as_dict=1):
-				total_qty += flt(d.actual_qty)
-				total_value += flt(d.stock_value)
+		item_bins = frappe.db.sql("""
+			select
+				bin.actual_qty, bin.stock_value
+			from
+				`tabBin` bin, `tabWarehouse` warehouse
+			where
+				bin.item_code=%(item)s
+				and bin.warehouse = warehouse.name
+				and warehouse.company=%(company)s""",
+			{"item": args['item_code'], "company": args['company']}, as_dict=1)
+
+		for d in item_bins:
+			total_qty += flt(d.actual_qty)
+			total_value += flt(d.stock_value)
 
 		if total_qty:
 			valuation_rate =  total_value / total_qty

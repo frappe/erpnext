@@ -61,9 +61,11 @@ frappe.query_reports["Batch-Wise Balance History"] = {
 			"options": "Batch",
 			"get_query": function() {
 				let item_code = frappe.query_report.get_filter_value('item_code');
-				return {
-					filters: {
-						"item": item_code
+				if (item_code) {
+					return {
+						filters: {
+							"item": item_code
+						}
 					}
 				}
 			}

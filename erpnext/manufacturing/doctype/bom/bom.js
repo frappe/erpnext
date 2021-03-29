@@ -253,7 +253,7 @@ cur_frm.cscript.hour_rate = function(doc) {
 
 cur_frm.cscript.time_in_mins = cur_frm.cscript.hour_rate;
 
-cur_frm.cscript.bom_no	= function(doc, cdt, cdn) {
+cur_frm.cscript.bom_no = function(doc, cdt, cdn) {
 	get_bom_material_detail(doc, cdt, cdn, false);
 };
 
@@ -261,17 +261,22 @@ cur_frm.cscript.is_default = function(doc) {
 	if (doc.is_default) cur_frm.set_value("is_active", 1);
 };
 
-var get_bom_material_detail= function(doc, cdt, cdn, scrap_items) {
+var get_bom_material_detail = function(doc, cdt, cdn, scrap_items) {
+	if (!doc.company) {
+		frappe.throw({message: __("Please select a Company first."), title: __("Mandatory")});
+	}
+
 	var d = locals[cdt][cdn];
 	if (d.item_code) {
 		return frappe.call({
 			doc: doc,
 			method: "get_bom_material_detail",
 			args: {
-				'item_code': d.item_code,
-				'bom_no': d.bom_no != null ? d.bom_no: '',
+				"company": doc.company,
+				"item_code": d.item_code,
+				"bom_no": d.bom_no != null ? d.bom_no: '',
 				"scrap_items": scrap_items,
-				'qty': d.qty,
+				"qty": d.qty,
 				"stock_qty": d.stock_qty,
 				"include_item_in_manufacturing": d.include_item_in_manufacturing,
 				"uom": d.uom,
@@ -309,7 +314,7 @@ cur_frm.cscript.rate = function(doc, cdt, cdn) {
 	}
 
 	if (d.bom_no) {
-		frappe.msgprint(__("You can not change rate if BOM mentioned agianst any item"));
+		frappe.msgprint(__("You cannot change the rate if BOM is mentioned against any Item."));
 		get_bom_material_detail(doc, cdt, cdn, scrap_items);
 	} else {
 		erpnext.bom.calculate_rm_cost(doc);

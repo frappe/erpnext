@@ -441,6 +441,10 @@ class PaymentEntry(AccountsController):
 					.format(total_negative_outstanding), InvalidPaymentEntry)
 
 	def set_title(self):
+		if frappe.flags.in_import and self.title:
+			# do not set title dynamically if title exists during data import.
+			return
+
 		if self.payment_type in ("Receive", "Pay"):
 			self.title = self.party
 		else:

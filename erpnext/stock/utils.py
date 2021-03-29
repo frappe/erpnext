@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 import json
-from frappe.utils import flt, cstr, nowdate, nowtime
+from frappe.utils import flt, cstr, nowdate, nowtime, get_link_to_form
 
 from six import string_types
 
@@ -115,10 +115,17 @@ def get_serial_nos_data_after_transactions(args):
 			order by posting_date, posting_time asc """, args, as_dict=1)
 
 	for d in data:
-		if d.actual_qty > 0:
-			serial_nos.extend(get_serial_nos_data(d.serial_no))
-		else:
-			serial_nos = list(set(serial_nos) - set(get_serial_nos_data(d.serial_no)))
+		for sn in get_serial_nos_data(d.serial_no):
+			if d.actual_qty > 0:
+				if sn not in serial_nos:
+					serial_nos.append(sn)
+				else:
+					serial_nos.remove(sn)
+			elif d.actual_qty < 0:
+				if sn in serial_nos:
+					serial_nos.remove(sn)
+				else:
+					serial_nos.append(sn)
 
 	return '\n'.join(serial_nos)
 
@@ -278,6 +285,10 @@ def validate_warehouse_company(warehouse, company):
 def is_group_warehouse(warehouse):
 	if frappe.db.get_value("Warehouse", warehouse, "is_group"):
 		frappe.throw(_("Group node warehouse is not allowed to select for transactions"))
+
+def validate_disabled_warehouse(warehouse):
+	if frappe.db.get_value("Warehouse", warehouse, "disabled"):
+		frappe.throw(_("Disabled Warehouse {0} cannot be used for this transaction.").format(get_link_to_form('Warehouse', warehouse)))
 
 def update_included_uom_in_report(columns, result, include_uom, conversion_factors):
 	if not include_uom or not conversion_factors:

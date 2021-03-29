@@ -153,8 +153,8 @@ def update_multi_mode_option(doc, pos_profile):
 
 def get_mode_of_payment(doc):
 	return frappe.db.sql("""
-		select mpa.default_account, mpa.parent, mp.type as type 
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
+		select mpa.default_account, mpa.parent, mp.type as type
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
 	{'company': doc.company}, as_dict=1)
 
@@ -394,6 +394,14 @@ def get_pricing_rule_data(doc):
 						between ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')
 						order by priority desc, name desc""",
                         {'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
+
+		for row in pricing_rules:
+			if row.apply_on:
+				doctype = "Pricing Rule " + row.apply_on
+				apply_on = frappe.scrub(row.apply_on)
+				row[apply_on] = [d.get(apply_on) for d in frappe.get_all(doctype,
+					filters = {"parent": row.name}, fields = [apply_on])]
+
 	return pricing_rules
 
 
@@ -434,10 +442,10 @@ def make_invoice(pos_profile, doc_list={}, email_queue_list={}, customers_list={
 				name_list.append(name)
 
 	email_queue = make_email_queue(email_queue_list)
-	
+
 	if isinstance(pos_profile, string_types):
 		pos_profile = json.loads(pos_profile)
-	
+
 	customers = get_customers_list(pos_profile)
 	return {
 		'invoice': name_list,

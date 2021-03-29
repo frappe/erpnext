@@ -211,7 +211,8 @@ def get_stock_ledger_entries(filters):
 				from `tabItem` {item_conditions}) item
 		where item_code = item.name and
 			company = %(company)s and
-			posting_date <= %(to_date)s
+			posting_date <= %(to_date)s and
+			is_cancelled != 1
 			{sle_conditions}
 			order by posting_date, posting_time, sle.creation, actual_qty""" #nosec
 		.format(item_conditions=get_item_conditions(filters),

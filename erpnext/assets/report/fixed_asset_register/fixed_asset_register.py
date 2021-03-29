@@ -141,7 +141,7 @@ def get_data(filters):
 
 	assets_record = frappe.db.get_all("Asset",
 		filters=conditions,
-		fields=["name", "asset_name", "department", "cost_center", "purchase_receipt",
+		fields=["name as asset_id", "asset_name", "department", "cost_center", "purchase_receipt",
 			"asset_category", "purchase_date", "gross_purchase_amount", "location",
 			"available_for_use_date", "status", "purchase_invoice", "opening_accumulated_depreciation"])
 

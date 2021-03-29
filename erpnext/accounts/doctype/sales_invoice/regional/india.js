@@ -1,6 +1,8 @@
 {% include "erpnext/regional/india/taxes.js" %}
+{% include "erpnext/regional/india/e_invoice/einvoice.js" %}
 
 erpnext.setup_auto_gst_taxation('Sales Invoice');
+erpnext.setup_einvoice_actions('Sales Invoice')
 
 frappe.ui.form.on("Sales Invoice", {
 	setup: function(frm) {
@@ -10,6 +12,16 @@ frappe.ui.form.on("Sales Invoice", {
 					'is_transporter': 1
 				}
 			};
+		});
+
+		frm.set_query('transporter_address', function (doc) {
+			return {
+				query: 'frappe.contacts.doctype.address.address.address_query',
+				filters: {
+					link_doctype: 'Supplier',
+					link_name: doc.transporter
+				}
+			}
 		});
 
 		frm.set_query('driver', function(doc) {
