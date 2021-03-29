@@ -10,6 +10,8 @@ from erpnext.hr.doctype.attendance_request.test_attendance_request import get_em
 from erpnext.hr.doctype.leave_period.test_leave_period import create_leave_period
 from erpnext.hr.doctype.leave_application.leave_application import get_leave_balance_on
 
+test_dependencies = ["Employee"]
+
 class TestCompensatoryLeaveRequest(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql(''' delete from `tabCompensatory Leave Request`''')

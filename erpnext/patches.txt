@@ -720,7 +720,7 @@ erpnext.patches.v13_0.delete_report_requested_items_to_order
 erpnext.patches.v12_0.update_item_tax_template_company
 erpnext.patches.v13_0.move_branch_code_to_bank_account
 erpnext.patches.v13_0.healthcare_lab_module_rename_doctypes
-erpnext.patches.v13_0.add_standard_navbar_items #4
+erpnext.patches.v13_0.add_standard_navbar_items #2021-03-24
 erpnext.patches.v13_0.stock_entry_enhancements
 erpnext.patches.v12_0.update_state_code_for_daman_and_diu
 erpnext.patches.v12_0.rename_lost_reason_detail
@@ -759,3 +759,6 @@ erpnext.patches.v13_0.update_vehicle_no_reqd_condition
 erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
+erpnext.patches.v13_0.setup_uae_vat_fields
+execute:frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
+erpnext.patches.v13_0.rename_discharge_date_in_ip_record
