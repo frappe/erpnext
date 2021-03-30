@@ -252,6 +252,7 @@ class PurchaseOrder(BuyingController):
 		self.update_prevdoc_status()
 
 		# Must be called after updating ordered qty in Material Request
+		# bin uses Material Request Items to recalculate & update
 		self.update_requested_qty()
 		self.update_ordered_qty()
 
