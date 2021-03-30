@@ -2,7 +2,9 @@
 // License: GNU General Public License v3. See license.txt
 
 erpnext.taxes_and_totals = erpnext.payments.extend({
-	setup: function() {},
+	setup: function() {
+		this.fetch_round_off_accounts();
+	},
 
 	apply_pricing_rule_on_item: function(item){
 		let effective_item_rate = item.price_list_rate;
@@ -148,6 +150,22 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				me.validate_inclusive_tax(tax);
 			}
 			frappe.model.round_floats_in(tax);
+		});
+	},
+
+	fetch_round_off_accounts: function() {
+		let me = this;
+		frappe.flags.round_off_applicable_accounts = [];
+
+		return frappe.call({
+			"method": "erpnext.controllers.taxes_and_totals.get_round_off_applicable_accounts",
+			"args": {
+				"company": me.frm.doc.company,
+				"account_list": frappe.flags.round_off_applicable_accounts
+			},
+			callback: function(r) {
+				frappe.flags.round_off_applicable_accounts.push(...r.message);
+			}
 		});
 	},
 
@@ -371,7 +389,17 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		} else if (tax.charge_type == "On Item Quantity") {
 			current_tax_amount = tax_rate * item.qty;
 		}
+
+		current_tax_amount = this.get_final_tax_amount(tax, current_tax_amount);
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
+
+		return current_tax_amount;
+	},
+
+	get_final_tax_amount: function(tax, current_tax_amount) {
+		if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
+			current_tax_amount = Math.round(current_tax_amount);
+		}
 
 		return current_tax_amount;
 	},
