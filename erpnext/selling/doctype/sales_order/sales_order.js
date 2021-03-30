@@ -167,7 +167,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 
 					// delivery note
 					if(flt(doc.per_delivered, 6) < 100 && ["Sales", "Shopping Cart"].indexOf(doc.order_type)!==-1 && allow_delivery) {
-						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on_delivery_date(), __('Create'));
+						this.frm.add_custom_button(__('Delivery Note'), () => this.make_delivery_note_based_on(), __('Create'));
 						this.frm.add_custom_button(__('Work Order'), () => this.make_work_order(), __('Create'));
 
 						var has_vehicles = doc.items.some(d => d.is_vehicle);
@@ -556,72 +556,142 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 		d.show();
 	},
 
-	make_delivery_note_based_on_delivery_date: function() {
+	make_delivery_note_based_on: function () {
 		var me = this;
 
+		var warehouses = [];
 		var delivery_dates = [];
 		$.each(this.frm.doc.items || [], function(i, d) {
+			if(!warehouses.includes(d.warehouse)) {
+				warehouses.push(d.warehouse);
+			}
 			if(!delivery_dates.includes(d.delivery_date)) {
 				delivery_dates.push(d.delivery_date);
 			}
 		});
 
 		var item_grid = this.frm.fields_dict["items"].grid;
-		if(!item_grid.get_selected().length && delivery_dates.length > 1) {
-			var dialog = new frappe.ui.Dialog({
-				title: __("Select Items based on Delivery Date"),
-				fields: [{fieldtype: "HTML", fieldname: "dates_html"}]
-			});
-
-			var html = $(`
-				<div style="border: 1px solid #d1d8dd">
-					<div class="list-item list-item--head">
-						<div class="list-item__content list-item__content--flex-2">
-							${__('Delivery Date')}
-						</div>
-					</div>
-					${delivery_dates.map(date => `
-						<div class="list-item">
-							<div class="list-item__content list-item__content--flex-2">
-								<label>
-								<input type="checkbox" data-date="${date}" checked="checked"/>
-								${frappe.datetime.str_to_user(date)}
-								</label>
-							</div>
-						</div>
-					`).join("")}
-				</div>
-			`);
-
-			var wrapper = dialog.fields_dict.dates_html.$wrapper;
-			wrapper.html(html);
-
-			dialog.set_primary_action(__("Select"), function() {
-				var dates = wrapper.find('input[type=checkbox]:checked')
-					.map((i, el) => $(el).attr('data-date')).toArray();
-
-				if(!dates) return;
-
-				$.each(dates, function(i, d) {
-					$.each(item_grid.grid_rows || [], function(j, row) {
-						if(row.doc.delivery_date == d) {
-							row.doc.__checked = 1;
-						}
-					});
-				})
-				me.make_delivery_note();
-				dialog.hide();
-			});
-			dialog.show();
+		if(item_grid.get_selected().length) {
+			me.make_delivery_note();
+		} else if (warehouses.length > 1) {
+			me.make_delivery_note_based_on_warehouse(warehouses);
+		} else if (delivery_dates.length > 1) {
+			me.make_delivery_note_based_on_delivery_date(delivery_dates);
 		} else {
-			this.make_delivery_note();
+			me.make_delivery_note();
 		}
 	},
 
-	make_delivery_note: function() {
+	make_delivery_note_based_on_warehouse: function(warehouses) {
+		var me = this;
+		var item_grid = this.frm.fields_dict["items"].grid;
+
+		var dialog = new frappe.ui.Dialog({
+			title: __("Select Items based on Warehouse"),
+			fields: [{fieldtype: "HTML", fieldname: "warehouses_html"}]
+		});
+
+		var html = $(`
+			<div style="border: 1px solid #d1d8dd">
+				<div class="list-item list-item--head">
+					<div class="list-item__content list-item__content--flex-2">
+						${__('Warehouse')}
+					</div>
+				</div>
+				${warehouses.map(warehouse => `
+					<div class="list-item">
+						<div class="list-item__content list-item__content--flex-2">
+							<label>
+							<input type="checkbox" data-warehouse="${warehouse}" checked="checked"/>
+							${warehouse}
+							</label>
+						</div>
+					</div>
+				`).join("")}
+			</div>
+		`);
+
+		var wrapper = dialog.fields_dict.warehouses_html.$wrapper;
+		wrapper.html(html);
+
+		dialog.set_primary_action(__("Select"), function() {
+			var warehouses = wrapper.find('input[type=checkbox]:checked')
+				.map((i, el) => $(el).attr('data-warehouse')).toArray();
+
+			if(!warehouses) return;
+
+			$.each(warehouses, function(i, d) {
+				$.each(item_grid.grid_rows || [], function(j, row) {
+					if(row.doc.warehouse === d) {
+						row.doc.__checked = 1;
+					}
+				});
+			})
+
+			me.make_delivery_note(warehouses.length === 1 ? warehouses[0] : null);
+			dialog.hide();
+		});
+		dialog.show();
+	},
+
+	make_delivery_note_based_on_delivery_date: function(delivery_dates) {
+		var me = this;
+		var item_grid = this.frm.fields_dict["items"].grid;
+
+		var dialog = new frappe.ui.Dialog({
+			title: __("Select Items based on Delivery Date"),
+			fields: [{fieldtype: "HTML", fieldname: "dates_html"}]
+		});
+
+		var html = $(`
+			<div style="border: 1px solid #d1d8dd">
+				<div class="list-item list-item--head">
+					<div class="list-item__content list-item__content--flex-2">
+						${__('Delivery Date')}
+					</div>
+				</div>
+				${delivery_dates.map(date => `
+					<div class="list-item">
+						<div class="list-item__content list-item__content--flex-2">
+							<label>
+							<input type="checkbox" data-date="${date}" checked="checked"/>
+							${frappe.datetime.str_to_user(date)}
+							</label>
+						</div>
+					</div>
+				`).join("")}
+			</div>
+		`);
+
+		var wrapper = dialog.fields_dict.dates_html.$wrapper;
+		wrapper.html(html);
+
+		dialog.set_primary_action(__("Select"), function() {
+			var dates = wrapper.find('input[type=checkbox]:checked')
+				.map((i, el) => $(el).attr('data-date')).toArray();
+
+			if(!dates) return;
+
+			$.each(dates, function(i, d) {
+				$.each(item_grid.grid_rows || [], function(j, row) {
+					if(row.doc.delivery_date == d) {
+						row.doc.__checked = 1;
+					}
+				});
+			})
+			me.make_delivery_note();
+			dialog.hide();
+		});
+		dialog.show();
+	},
+
+	make_delivery_note: function(warehouse) {
 		frappe.model.open_mapped_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_delivery_note",
-			frm: me.frm
+			frm: this.frm,
+			args: {
+				warehouse: warehouse
+			}
 		})
 	},
 

@@ -610,6 +610,9 @@ def make_project(source_name, target_doc=None):
 
 @frappe.whitelist()
 def make_delivery_note(source_name, target_doc=None, warehouse=None, skip_item_mapping=False):
+	if not warehouse and frappe.flags.args:
+		warehouse = frappe.flags.args.warehouse
+
 	def set_missing_values(source, target):
 		target.ignore_pricing_rule = 1
 
