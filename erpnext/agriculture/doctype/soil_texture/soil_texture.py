@@ -38,7 +38,7 @@ class SoilTexture(Document):
 		last_edit_index = self.soil_edit_order.index(min(self.soil_edit_order))
 
 		# set composition of the last edited soil
-		self.set( self.soil_types[last_edit_index],
+		self.set(self.soil_types[last_edit_index],
 			100 - sum(cint(self.get(soil_type)) for soil_type in self.soil_types) + cint(self.get(self.soil_types[last_edit_index])))
 
 		# calculate soil type
