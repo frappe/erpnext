@@ -40,21 +40,22 @@ def execute():
 	}
 	create_custom_fields(custom_fields, update=True)
 
-	# set appropriate statuses
-	frappe.db.sql('''UPDATE `tabSales Invoice` SET einvoice_status = 'Generated'
-		WHERE ifnull(irn, '') != '' AND ifnull(irn_cancelled, 0) = 0''')
+	if frappe.db.exists('E Invoice Settings') and frappe.db.get_single_value('E Invoice Settings', 'enable')):
+		frappe.db.sql('''
+			UPDATE `tabSales Invoice` SET einvoice_status = 'Pending'
+			WHERE
+				posting_date >= '2020-11-01'
+				AND ifnull(irn, '') = ''
+				AND ifnull(`billing_address_gstin`, '') != ifnull(`company_gstin`, '')
+				AND ifnull(gst_category, '') in ('Registered Regular', 'SEZ', 'Overseas', 'Deemed Export')
+		''')
 
-	frappe.db.sql('''UPDATE `tabSales Invoice` SET einvoice_status = 'Cancelled'
-		WHERE ifnull(irn_cancelled, 0) = 1''')
+		# set appropriate statuses
+		frappe.db.sql('''UPDATE `tabSales Invoice` SET einvoice_status = 'Generated'
+			WHERE ifnull(irn, '') != '' AND ifnull(irn_cancelled, 0) = 0''')
 
-	frappe.db.sql('''
-		UPDATE `tabSales Invoice` SET einvoice_status = 'Pending'
-		WHERE
-			posting_date >= '2020-11-01'
-			AND ifnull(irn, '') = ''
-			AND ifnull(`billing_address_gstin`, '') != ifnull(`company_gstin`, '')
-			AND ifnull(gst_category, '') in ('Registered Regular', 'SEZ', 'Overseas', 'Deemed Export')
-	''')
+		frappe.db.sql('''UPDATE `tabSales Invoice` SET einvoice_status = 'Cancelled'
+			WHERE ifnull(irn_cancelled, 0) = 1''')
 
 	# set correct acknowledgement in e-invoices
 	einvoices = frappe.get_all('Sales Invoice', { 'irn': ['is', 'set'] }, ['name', 'signed_einvoice'])

@@ -27,8 +27,12 @@ def validate_eligibility(doc):
 	if isinstance(doc, six.string_types):
 		doc = json.loads(doc)
 
-	einvoicing_enabled = cint(frappe.db.get_value('E Invoice Settings', 'E Invoice Settings', 'enable'))
+	einvoicing_enabled = cint(frappe.db.get_single_value('E Invoice Settings', 'enable'))
 	if not einvoicing_enabled:
+		return False
+
+	einvoicing_eligible_from = frappe.db.get_single_value('E Invoice Settings', 'applicable_from')
+	if getdate(doc.posting_date) < getdate(einvoicing_eligible_from):
 		return False
 
 	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
