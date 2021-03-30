@@ -564,6 +564,7 @@ class JournalEntry(AccountsController):
 		if gl_map:
 			make_gl_entries(gl_map, cancel=cancel, adv_adj=adv_adj, update_outstanding=update_outstanding)
 
+	@frappe.whitelist()
 	def get_balance(self):
 		if not self.get('accounts'):
 			msgprint(_("'Entries' cannot be empty"), raise_exception=True)
