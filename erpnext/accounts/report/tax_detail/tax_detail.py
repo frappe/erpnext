@@ -6,16 +6,15 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 
-# NOTE: Payroll is implemented using Journal Entries
+# NOTE: Payroll is implemented using Journal Entries which translate directly to GL Entries
 
 # field lists in multiple doctypes will be coalesced
 required_sql_fields = {
-	"GL Entry": ["posting_date", "voucher_type", "voucher_no", "account as tax_account", "account_currency", "debit", "credit"],
-	"Journal Entry Account": ["account_type", "account", "debit_in_account_currency", "credit_in_account_currency"],
-	("Purchase Invoice Item", "Sales Invoice Item"): ["base_net_amount", "item_tax_rate", "item_tax_template", "item_name"],
+	("GL Entry", 1): ["posting_date"],
+	("Account",): ["account_type"],
+	("GL Entry", 2): ["account", "voucher_type", "voucher_no", "debit", "credit"],
+	("Purchase Invoice Item", "Sales Invoice Item"): ["base_net_amount", "item_tax_rate", "item_tax_template", "item_group", "item_name"],
 	("Purchase Invoice", "Sales Invoice"): ["taxes_and_charges", "tax_category"],
-	"Purchase Invoice Item": ["expense_account"],
-	"Sales Invoice Item": ["income_account"]
 }
 
 
@@ -34,15 +33,12 @@ def execute(filters=None):
 		left join `tabSales Invoice` si on
 			ge.company=si.company and ge.voucher_type='Sales Invoice' and ge.voucher_no=si.name
 		left join `tabSales Invoice Item` sii on
-			si.name=sii.parent
+			a.root_type='Income' and si.name=sii.parent
 		left join `tabPurchase Invoice` pi on
 			ge.company=pi.company and ge.voucher_type='Purchase Invoice' and ge.voucher_no=pi.name
 		left join `tabPurchase Invoice Item` pii on
-			pi.name=pii.parent
-		left join `tabJournal Entry Account` jea on
-			ge.voucher_type=jea.parenttype and ge.voucher_no=jea.parent
+			a.root_type='Expense' and pi.name=pii.parent
 		where
-			a.account_type='Tax' and
 			ge.company=%(company)s and
 			ge.posting_date>=%(from_date)s and
 			ge.posting_date<=%(to_date)s
@@ -151,19 +147,18 @@ def coalesce(doctypes, fields):
 def get_fieldstr(fieldlist):
 	fields = []
 	for doctypes, docfields in fieldlist.items():
-		if isinstance(doctypes, str):
-			fields += doclist(doctypes, docfields)
-		if isinstance(doctypes, tuple):
+		if len(doctypes) == 1 or isinstance(doctypes[1], int):
+			fields += doclist(doctypes[0], docfields)
+		else:
 			fields += coalesce(doctypes, docfields)
 	return ', '.join(fields)
 
 def get_columns(fieldlist):
 	columns = {}
 	for doctypes, docfields in fieldlist.items():
-		if isinstance(doctypes, str):
-			doctypes = [doctypes]
 		fieldmap = {name: new_name for name, new_name in as_split(docfields)}
 		for doctype in doctypes:
+			if isinstance(doctype, int): break
 			meta = frappe.get_meta(doctype)
 			# get column field metadata from the db
 			fieldmeta = {}
@@ -186,29 +181,9 @@ def get_columns(fieldlist):
 
 def modify_report_columns(doctype, field, column):
 	"Because data is rearranged into other columns"
-	if doctype in ["Sales Invoice Item", "Purchase Invoice Item"] and field == "item_tax_rate":
-		return None
-	if doctype == "GL Entry" and field == "tax_account":
-		column.update({"label": _("Tax Account")})
-	if doctype == "GL Entry" and field == "debit":
-		column.update({"label": _("Tax Debit")})
-	if doctype == "GL Entry" and field == "credit":
-		column.update({"label": _("Tax Credit")})
-
-	if doctype == "Journal Entry Account" and field == "debit_in_account_currency":
-		column.update({"label": _("Debit Net Amount"), "fieldname": "debit_net_amount"})
-	if doctype == "Journal Entry Account" and field == "credit_in_account_currency":
-		column.update({"label": _("Credit Net Amount"), "fieldname": "credit_net_amount"})
-
-	if doctype == "Sales Invoice Item" and field == "base_net_amount":
-		column.update({"label": _("Credit Net Amount"), "fieldname": "credit_net_amount"})
-	if doctype == "Sales Invoice Item" and field == "income_account":
-		column.update({"label": _("Account"), "fieldname": "account"})
-
-	if doctype == "Purchase Invoice Item" and field == "base_net_amount":
-		column.update({"label": _("Debit Net Amount"), "fieldname": "debit_net_amount"})
-	if doctype == "Purchase Invoice Item" and field == "expense_account":
-		column.update({"label": _("Account"), "fieldname": "account"})
+	if doctype in ["Sales Invoice Item", "Purchase Invoice Item"]:
+		if field in ["item_tax_rate", "base_net_amount"]:
+			return None
 
 	if field == "taxes_and_charges":
 		column.update({"label": _("Taxes and Charges Template")})
@@ -216,35 +191,28 @@ def modify_report_columns(doctype, field, column):
 
 def modify_report_data(data):
 	import json
+	new_data = []
 	for line in data:
-		# Transform Invoice lines
+		# Remove Invoice GL Tax Entries and generate Tax entries from the invoice lines
 		if "Invoice" in line.voucher_type:
-			if line.income_account:
-				line.account = line.income_account
-				line.account_type = "Income Account"
-			if line.expense_account:
-				line.account = line.expense_account
-				line.account_type = "Expense Account"
+			if line.account_type != "Tax":
+				new_data += [line]
 			if line.item_tax_rate:
 				tax_rates = json.loads(line.item_tax_rate)
 				for account, rate in tax_rates.items():
-					if account == line.tax_account:
-						if line.voucher_type == "Sales Invoice":
-							line.credit = line.base_net_amount * (rate / 100)
-							line.credit_net_amount = line.base_net_amount
-						if line.voucher_type == "Purchase Invoice":
-							line.debit = line.base_net_amount * (rate / 100)
-							line.debit_net_amount = line.base_net_amount
-		# Transform Journal Entry lines
-		if "Journal" in line.voucher_type:
-			if line.account_type != 'Tax':
-				line.debit = 0.0
-				line.credit = 0.0
-			if line.debit_in_account_currency:
-				line.debit_net_amount = line.debit_in_account_currency
-			if line.credit_in_account_currency:
-				line.credit_net_amount = line.credit_in_account_currency
-	return data
+					tax_line = line.copy()
+					tax_line.account_type = "Tax"
+					tax_line.account = account
+					if line.voucher_type == "Sales Invoice":
+						line.credit = line.base_net_amount
+						tax_line.credit = line.base_net_amount * (rate / 100)
+					if line.voucher_type == "Purchase Invoice":
+						line.debit = line.base_net_amount
+						tax_line.debit = line.base_net_amount * (rate / 100)
+					new_data += [tax_line]
+		else:
+			new_data += [line]
+	return new_data
 
 ####### JS client utilities
 
