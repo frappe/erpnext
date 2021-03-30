@@ -88,7 +88,7 @@ class CropCycle(Document):
 		frappe.publish_realtime("List of Linked Docs",
 								output, user=frappe.session.user)
 
-	@frappe.whitelite()
+	@frappe.whitelist()
 	def append_to_child(self, obj_to_append):
 		for doctype in obj_to_append:
 			for doc_name in set(obj_to_append[doctype]):
