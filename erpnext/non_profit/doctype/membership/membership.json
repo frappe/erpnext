@@ -10,6 +10,7 @@
   "member_name",
   "membership_type",
   "column_break_3",
+  "company",
   "membership_status",
   "membership_validity_section",
   "from_date",
@@ -132,11 +133,18 @@
    "fieldtype": "Data",
    "label": "Member Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-21 16:31:20.032656",
+ "modified": "2021-02-19 14:33:44.925122",
  "modified_by": "Administrator",
  "module": "Non Profit",
  "name": "Membership",

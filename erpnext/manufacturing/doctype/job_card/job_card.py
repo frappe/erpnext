@@ -255,6 +255,9 @@ class JobCard(Document):
 				data.actual_operation_time = time_in_mins
 				data.actual_start_time = time_data[0].start_time if time_data else None
 				data.actual_end_time = time_data[0].end_time if time_data else None
+				if data.get("workstation") != self.workstation:
+					# workstations can change in a job card
+					data.workstation = self.workstation
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status()
@@ -266,6 +269,17 @@ class JobCard(Document):
 		return frappe.get_all('Job Card',
 			fields = ["sum(total_time_in_mins) as time_in_mins", "sum(total_completed_qty) as completed_qty"],
 			filters = {"docstatus": 1, "work_order": self.work_order, "operation_id": self.operation_id})
+
+	def set_transferred_qty_in_job_card(self, ste_doc):
+		for row in ste_doc.items:
+			if not row.job_card_item: continue
+
+			qty = frappe.db.sql(""" SELECT SUM(qty) from `tabStock Entry Detail` sed, `tabStock Entry` se
+				WHERE  sed.job_card_item = %s and se.docstatus = 1 and sed.parent = se.name and
+				se.purpose = 'Material Transfer for Manufacture'
+			""", (row.job_card_item))[0][0]
+
+			frappe.db.set_value('Job Card Item', row.job_card_item, 'transferred_qty', flt(qty))
 
 	def set_transferred_qty(self, update_status=False):
 		if not self.items:
@@ -279,7 +293,8 @@ class JobCard(Document):
 			self.transferred_qty = frappe.db.get_value('Stock Entry', {
 				'job_card': self.name,
 				'work_order': self.work_order,
-				'docstatus': 1
+				'docstatus': 1,
+				'purpose': 'Material Transfer for Manufacture'
 			}, 'sum(fg_completed_qty)') or 0
 
 		self.db_set("transferred_qty", self.transferred_qty)
@@ -415,11 +430,13 @@ def make_material_request(source_name, target_doc=None):
 def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
+		target.conversion_factor = 1
 
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"
 		target.from_bom = 1
 		target.fg_completed_qty = source.get('for_quantity', 0) - source.get('transferred_qty', 0)
+		target.set_transfer_qty()
 		target.calculate_rate_and_amount()
 		target.set_missing_values()
 		target.set_stock_entry_type()
@@ -437,9 +454,10 @@ def make_stock_entry(source_name, target_doc=None):
 			"field_map": {
 				"source_warehouse": "s_warehouse",
 				"required_qty": "qty",
-				"uom": "stock_uom"
+				"name": "job_card_item"
 			},
 			"postprocess": update_item,
+			"condition": lambda doc: doc.required_qty > 0
 		}
 	}, target_doc, set_missing_values)
 
