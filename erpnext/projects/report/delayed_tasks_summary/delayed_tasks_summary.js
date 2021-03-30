@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Delayed Deliverables Summary"] = {
+frappe.query_reports["Delayed Tasks Summary"] = {
 	"filters": [
 		{
 			"fieldname": "from_date",

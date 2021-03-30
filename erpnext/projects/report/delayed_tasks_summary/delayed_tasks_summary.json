@@ -12,11 +12,11 @@
  "modified": "2021-03-25 15:03:31.311234",
  "modified_by": "Administrator",
  "module": "Projects",
- "name": "Delayed Deliverables Summary",
+ "name": "Delayed Tasks Summary",
  "owner": "Administrator",
  "prepared_report": 0,
  "ref_doctype": "Task",
- "report_name": "Delayed Deliverables Summary",
+ "report_name": "Delayed Tasks Summary",
  "report_type": "Script Report",
  "roles": [
   {

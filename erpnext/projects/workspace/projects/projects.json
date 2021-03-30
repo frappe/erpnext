@@ -154,8 +154,8 @@
    "dependencies": "Task",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Delayed Deliverables",
-   "link_to": "Delayed Deliverables Summary",
+   "label": "Delayed Tasks Summary",
+   "link_to": "Delayed Tasks Summary",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
