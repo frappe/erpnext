@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 
 import urllib
-import urllib.parse.quote as quote
+from urllib.parse import quote
 import hashlib
 import hmac
 import base64
