@@ -382,39 +382,28 @@ class SalesOrder(SellingController):
 		items = []
 		item_codes = [i.item_code for i in self.items]
 		product_bundle_parents = [pb.new_item_code for pb in frappe.get_all("Product Bundle", {"new_item_code": ["in", item_codes]}, ["new_item_code"])]
+		default_rm_warehouse = frappe.get_cached_value("Manufacturing Settings", None, "default_rm_warehouse")
 
 		for table in [self.items, self.packed_items]:
 			for i in table:
 				bom = get_default_bom_item(i.item_code)
-				stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
-				if not for_raw_material_request:
-					total_work_order_qty = flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
-						where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
-					pending_qty = stock_qty - total_work_order_qty
-				else:
-					pending_qty = stock_qty
+				if bom:
+					stock_qty = i.qty if i.doctype == 'Packed Item' else i.stock_qty
+					if not for_raw_material_request:
+						total_work_order_qty = flt(frappe.db.sql('''select sum(qty) from `tabWork Order`
+							where production_item=%s and sales_order=%s and sales_order_item = %s and docstatus<2''', (i.item_code, self.name, i.name))[0][0])
+						pending_qty = stock_qty - total_work_order_qty
+					else:
+						pending_qty = stock_qty
 
-				if pending_qty and i.item_code not in product_bundle_parents:
-					if bom:
+					if pending_qty and i.item_code not in product_bundle_parents:
 						items.append(dict(
 							name= i.name,
 							item_code= i.item_code,
 							item_name= i.item_name,
 							description= i.description,
 							bom = bom,
-							warehouse = i.warehouse,
-							pending_qty = pending_qty,
-							required_qty = pending_qty if for_raw_material_request else 0,
-							sales_order_item = i.name
-						))
-					else:
-						items.append(dict(
-							name= i.name,
-							item_code= i.item_code,
-							item_name= i.item_name,
-							description= i.description,
-							bom = '',
-							warehouse = i.warehouse,
+							warehouse = default_rm_warehouse if for_raw_material_request else i.warehouse,
 							pending_qty = pending_qty,
 							required_qty = pending_qty if for_raw_material_request else 0,
 							sales_order_item = i.name
