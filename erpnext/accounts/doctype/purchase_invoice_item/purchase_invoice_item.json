@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "autoname": "hash",
  "creation": "2013-05-22 12:43:10",
  "doctype": "DocType",
@@ -27,10 +28,16 @@
   "stock_qty",
   "sec_break1",
   "price_list_rate",
-  "discount_percentage",
-  "discount_amount",
   "col_break3",
   "base_price_list_rate",
+  "section_break_26",
+  "margin_type",
+  "margin_rate_or_amount",
+  "rate_with_margin",
+  "column_break_30",
+  "discount_percentage",
+  "discount_amount",
+  "base_rate_with_margin",
   "sec_break2",
   "rate",
   "amount",
@@ -39,6 +46,7 @@
   "base_rate",
   "base_amount",
   "pricing_rules",
+  "stock_uom_rate",
   "is_free_item",
   "section_break_22",
   "net_rate",
@@ -87,6 +95,7 @@
   "po_detail",
   "purchase_receipt",
   "pr_detail",
+  "sales_invoice_item",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -553,8 +562,8 @@
    "fieldtype": "Link",
    "hidden": 1,
    "label": "Brand",
-   "print_hide": 1,
-   "options": "Brand"
+   "options": "Brand",
+   "print_hide": 1
   },
   {
    "fetch_from": "item_code.item_group",
@@ -562,9 +571,9 @@
    "fieldname": "item_group",
    "fieldtype": "Link",
    "label": "Item Group",
+   "options": "Item Group",
    "print_hide": 1,
-   "read_only": 1,
-   "options": "Item Group"
+   "read_only": 1
   },
   {
    "description": "Tax detail table fetched from item master as a string and stored in this field.\nUsed for Taxes and Charges",
@@ -759,10 +768,11 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.is_internal_supplier && parent.update_stock",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
-   "label": "Supplier Warehouse",
+   "label": "From Warehouse",
    "options": "Warehouse"
   },
   {
@@ -779,11 +789,71 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "sales_invoice_item",
+   "fieldtype": "Data",
+   "label": "Sales Invoice Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break",
+   "label": "Discount and Margin"
+  },
+  {
+   "depends_on": "price_list_rate",
+   "fieldname": "margin_type",
+   "fieldtype": "Select",
+   "label": "Margin Type",
+   "options": "\nPercentage\nAmount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate",
+   "fieldname": "margin_rate_or_amount",
+   "fieldtype": "Float",
+   "label": "Margin Rate or Amount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "base_rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-08-20 11:48:01.398356",
+ "links": [],
+ "modified": "2021-02-23 00:59:52.614805",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

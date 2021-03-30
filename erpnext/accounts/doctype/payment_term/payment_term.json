@@ -45,6 +45,7 @@
    "unique": 0
   }, 
   {
+   "description": "Provide the invoice portion in percent",
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 1, 
@@ -170,6 +171,7 @@
    "unique": 0
   }, 
   {
+   "description": "Give number of days according to prior selection",
    "allow_bulk_edit": 0, 
    "allow_on_submit": 0, 
    "bold": 1, 
@@ -305,7 +307,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2018-03-08 10:47:32.830478", 
+ "modified": "2020-10-14 10:47:32.830478", 
  "modified_by": "Administrator", 
  "module": "Accounts", 
  "name": "Payment Term", 

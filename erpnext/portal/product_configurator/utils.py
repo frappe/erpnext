@@ -1,6 +1,7 @@
 import frappe
 from frappe.utils import cint
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
+from erpnext.shopping_cart.product_info import get_product_info_for_website
 
 def get_field_filter_data():
 	product_settings = get_product_settings()
@@ -297,7 +298,7 @@ def get_items_by_fields(field_filters):
 
 
 def get_items(filters=None, search=None):
-	start = frappe.form_dict.start or 0
+	start = frappe.form_dict.get('start', 0)
 	products_settings = get_product_settings()
 	page_length = products_settings.products_per_page
 
@@ -356,10 +357,10 @@ def get_items(filters=None, search=None):
 
 	results = frappe.db.sql('''
 		SELECT
-			`tabItem`.`name`, `tabItem`.`item_name`,
+			`tabItem`.`name`, `tabItem`.`item_name`, `tabItem`.`item_code`,
 			`tabItem`.`website_image`, `tabItem`.`image`,
 			`tabItem`.`web_long_description`, `tabItem`.`description`,
-			`tabItem`.`route`
+			`tabItem`.`route`, `tabItem`.`item_group`
 		FROM
 			`tabItem`
 		{left_join}
@@ -384,6 +385,9 @@ def get_items(filters=None, search=None):
 	for r in results:
 		r.description = r.web_long_description or r.description
 		r.image = r.website_image or r.image
+		product_info = get_product_info_for_website(r.item_code, skip_quotation_creation=True).get('product_info')
+		if product_info:
+			r.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
 
 	return results
 

@@ -24,8 +24,12 @@
   "route",
   "weightage",
   "slideshow",
+  "website_title",
   "description",
   "website_specifications",
+  "website_filters_section",
+  "filter_fields",
+  "filter_attributes",
   "lft",
   "rgt",
   "old_parent"
@@ -180,6 +184,28 @@
    "options": "Item Group",
    "print_hide": 1,
    "report_hide": 1
+  },
+  {
+   "fieldname": "website_filters_section",
+   "fieldtype": "Section Break",
+   "label": "Website Filters"
+  },
+  {
+   "fieldname": "filter_fields",
+   "fieldtype": "Table",
+   "label": "Item Fields",
+   "options": "Website Filter Field"
+  },
+  {
+   "fieldname": "filter_attributes",
+   "fieldtype": "Table",
+   "label": "Attributes",
+   "options": "Website Attribute"
+  },
+  {
+   "fieldname": "website_title",
+   "fieldtype": "Data",
+   "label": "Title"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -188,7 +214,7 @@
  "is_tree": 1,
  "links": [],
  "max_attachments": 3,
- "modified": "2020-03-18 18:10:34.383363",
+ "modified": "2021-02-18 13:40:30.049650",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Item Group",
@@ -245,6 +271,15 @@
    "read": 1,
    "report": 1,
    "role": "Accounts User"
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "All",
+   "select": 1,
+   "share": 1
   }
  ],
  "search_fields": "parent_item_group",

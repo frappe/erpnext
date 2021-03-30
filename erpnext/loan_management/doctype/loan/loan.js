@@ -7,16 +7,28 @@ frappe.ui.form.on('Loan', {
 	setup: function(frm) {
 		frm.make_methods = {
 			'Loan Disbursement': function() { frm.trigger('make_loan_disbursement') },
-			'Loan Security Unpledge': function() { frm.trigger('create_loan_security_unpledge') }
+			'Loan Security Unpledge': function() { frm.trigger('create_loan_security_unpledge') },
+			'Loan Write Off': function() { frm.trigger('make_loan_write_off_entry') }
 		}
 	},
 	onload: function (frm) {
+		// Ignore loan security pledge on cancel of loan
+		frm.ignore_doctypes_on_cancel_all = ["Loan Security Pledge"];
+
 		frm.set_query("loan_application", function () {
 			return {
 				"filters": {
 					"applicant": frm.doc.applicant,
 					"docstatus": 1,
 					"status": "Approved"
+				}
+			};
+		});
+
+		frm.set_query("loan_type", function () {
+			return {
+				"filters": {
+					"docstatus": 1
 				}
 			};
 		});
@@ -49,22 +61,31 @@ frappe.ui.form.on('Loan', {
 
 	refresh: function (frm) {
 		if (frm.doc.docstatus == 1) {
-			if (frm.doc.status == "Sanctioned" || frm.doc.status == 'Partially Disbursed') {
+			if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (!frm.doc.repay_from_salary)) {
+				frm.add_custom_button(__('Request Loan Closure'), function() {
+					frm.trigger("request_loan_closure");
+				},__('Status'));
+
+				frm.add_custom_button(__('Loan Repayment'), function() {
+					frm.trigger("make_repayment_entry");
+				},__('Create'));
+			}
+
+			if (["Sanctioned", "Partially Disbursed"].includes(frm.doc.status)) {
 				frm.add_custom_button(__('Loan Disbursement'), function() {
 					frm.trigger("make_loan_disbursement");
 				},__('Create'));
 			}
 
-			if (["Disbursed", "Partially Disbursed"].includes(frm.doc.status) && (!frm.doc.repay_from_salary)) {
-				frm.add_custom_button(__('Loan Repayment'), function() {
-					frm.trigger("make_repayment_entry");
-				},__('Create'));
-
-			}
-
 			if (frm.doc.status == "Loan Closure Requested") {
 				frm.add_custom_button(__('Loan Security Unpledge'), function() {
 					frm.trigger("create_loan_security_unpledge");
+				},__('Create'));
+			}
+
+			if (["Loan Closure Requested", "Disbursed", "Partially Disbursed"].includes(frm.doc.status)) {
+				frm.add_custom_button(__('Loan Write Off'), function() {
+					frm.trigger("make_loan_write_off_entry");
 				},__('Create'));
 			}
 		}
@@ -115,6 +136,38 @@ frappe.ui.form.on('Loan', {
 				frappe.set_route("Form", doc.doctype, doc.name);
 			}
 		})
+	},
+
+	make_loan_write_off_entry: function(frm) {
+		frappe.call({
+			args: {
+				"loan": frm.doc.name,
+				"company": frm.doc.company,
+				"as_dict": 1
+			},
+			method: "erpnext.loan_management.doctype.loan.loan.make_loan_write_off",
+			callback: function (r) {
+				if (r.message)
+					var doc = frappe.model.sync(r.message)[0];
+				frappe.set_route("Form", doc.doctype, doc.name);
+			}
+		})
+	},
+
+	request_loan_closure: function(frm) {
+		frappe.confirm(__("Do you really want to close this loan"),
+			function() {
+				frappe.call({
+					args: {
+						'loan': frm.doc.name
+					},
+					method: "erpnext.loan_management.doctype.loan.loan.request_loan_closure",
+					callback: function() {
+						frm.reload_doc();
+					}
+				});
+			}
+		);
 	},
 
 	create_loan_security_unpledge: function(frm) {

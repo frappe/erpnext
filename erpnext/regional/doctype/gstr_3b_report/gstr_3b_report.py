@@ -192,19 +192,20 @@ class GSTR3BReport(Document):
 		for d in self.report_dict["itc_elg"]["itc_avl"]:
 
 			itc_type = itc_type_map.get(d["ty"])
-			gst_category = ["Registered Regular"]
 
 			if d["ty"] == 'ISRC':
-				reverse_charge = "Y"
+				reverse_charge = ["Y"]
 				itc_type = 'All Other ITC'
 				gst_category = ['Unregistered', 'Overseas']
 			else:
-				reverse_charge = "N"
+				gst_category = ['Unregistered', 'Overseas', 'Registered Regular']
+				reverse_charge = ["N", "Y"]
 
 			for account_head in self.account_heads:
 				for category in gst_category:
-					for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
-						d[key[0]] += flt(itc_details.get((category, itc_type, reverse_charge, account_head.get(key[1])), {}).get("amount"), 2)
+					for charge_type in reverse_charge:
+						for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
+							d[key[0]] += flt(itc_details.get((category, itc_type, charge_type, account_head.get(key[1])), {}).get("amount"), 2)
 
 			for key in ['iamt', 'camt', 'samt', 'csamt']:
 				net_itc[key] += flt(d[key], 2)
@@ -264,7 +265,8 @@ class GSTR3BReport(Document):
 
 	def get_itc_details(self):
 		itc_amount = frappe.db.sql("""
-			select s.gst_category, sum(t.tax_amount_after_discount_amount) as tax_amount, t.account_head, s.eligibility_for_itc, s.reverse_charge
+			select s.gst_category, sum(t.base_tax_amount_after_discount_amount) as tax_amount,
+			t.account_head, s.eligibility_for_itc, s.reverse_charge
 			from `tabPurchase Invoice` s , `tabPurchase Taxes and Charges` t
 			where s.docstatus = 1 and t.parent = s.name
 			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s
@@ -347,13 +349,12 @@ class GSTR3BReport(Document):
 		return inter_state_supply_details
 
 	def get_inward_nil_exempt(self, state):
-
 		inward_nil_exempt = frappe.db.sql(""" select p.place_of_supply, sum(i.base_amount) as base_amount,
 			i.is_nil_exempt, i.is_non_gst from `tabPurchase Invoice` p , `tabPurchase Invoice Item` i
 			where p.docstatus = 1 and p.name = i.parent
-			and i.is_nil_exempt = 1 or i.is_non_gst = 1 and
+			and (i.is_nil_exempt = 1 or i.is_non_gst = 1) and
 			month(p.posting_date) = %s and year(p.posting_date) = %s and p.company = %s and p.company_gstin = %s
-			group by p.place_of_supply """, (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+			group by p.place_of_supply, i.is_nil_exempt, i.is_non_gst""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		inward_nil_exempt_details = {
 			"gst": {
@@ -387,7 +388,7 @@ class GSTR3BReport(Document):
 			tax_template = 'Purchase Taxes and Charges'
 
 		tax_amounts = frappe.db.sql("""
-			select s.gst_category, sum(t.tax_amount_after_discount_amount) as tax_amount, t.account_head
+			select s.gst_category, sum(t.base_tax_amount_after_discount_amount) as tax_amount, t.account_head
 			from `tab{doctype}` s , `tab{template}` t
 			where s.docstatus = 1 and t.parent = s.name and s.reverse_charge = %s
 			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s

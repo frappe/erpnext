@@ -13,12 +13,10 @@
   "schedule_date",
   "section_break_4",
   "description",
+  "column_break_12",
   "item_group",
   "brand",
-  "image_section",
   "image",
-  "column_break_12",
-  "manufacturer_part_no",
   "quantity_and_warehouse",
   "qty",
   "stock_uom",
@@ -28,12 +26,26 @@
   "uom",
   "conversion_factor",
   "stock_qty",
+  "qty_info_sec_break",
+  "min_order_qty",
+  "projected_qty",
+  "qty_info_col_break",
+  "actual_qty",
+  "ordered_qty",
+  "received_qty",
   "rate_and_amount_section_break",
   "rate",
   "col_break3",
   "amount",
   "manufacture_details",
   "manufacturer",
+  "manufacturer_part_no",
+  "col_break_mfg",
+  "bom_no",
+  "accounting_dimensions_section",
+  "project",
+  "dimension_col_break",
+  "cost_center",
   "more_info",
   "lead_time_date",
   "sales_order",
@@ -41,19 +53,7 @@
   "production_plan",
   "material_request_plan_item",
   "col_break4",
-  "min_order_qty",
-  "projected_qty",
-  "actual_qty",
-  "ordered_qty",
-  "received_qty",
-  "accounting_details",
   "expense_account",
-  "accounting_dimensions_section",
-  "project",
-  "dimension_col_break",
-  "cost_center",
-  "section_break_37",
-  "bom_no",
   "section_break_46",
   "page_break"
  ],
@@ -164,7 +164,7 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "For Warehouse",
+   "label": "Target Warehouse",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
@@ -191,12 +191,14 @@
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
-   "label": "Rate"
+   "label": "Rate",
+   "print_hide": 1
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
    "label": "Amount",
+   "print_hide": 1,
    "read_only": 1
   },
   {
@@ -326,6 +328,7 @@
    "report_hide": 1
   },
   {
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "ordered_qty",
    "fieldtype": "Float",
    "label": "Completed Qty",
@@ -334,12 +337,6 @@
    "oldfieldtype": "Currency",
    "print_hide": 1,
    "read_only": 1
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "accounting_details",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
   },
   {
    "fieldname": "expense_account",
@@ -367,21 +364,10 @@
    "print_hide": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "image_section",
-   "fieldtype": "Section Break",
-   "label": "Image"
-  },
-  {
-   "depends_on": "eval:parent.material_request_type == \"Manufacture\"",
-   "fieldname": "section_break_37",
-   "fieldtype": "Section Break",
-   "label": "Manufacturing"
-  },
-  {
+   "depends_on": "eval:doc.docstatus==1",
    "fieldname": "received_qty",
    "fieldtype": "Float",
-   "label": "Received Quantity",
+   "label": "Received Qty",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -398,6 +384,7 @@
   },
   {
    "collapsible": 1,
+   "depends_on": "eval:in_list([\"Manufacture\", \"Purchase\"], parent.material_request_type)",
    "fieldname": "manufacture_details",
    "fieldtype": "Section Break",
    "label": "Manufacture"
@@ -430,10 +417,11 @@
    "depends_on": "eval:parent.material_request_type == \"Material Transfer\"",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
-   "label": "Source Warehouse (Material Transfer)",
+   "label": "Source Warehouse",
    "options": "Warehouse"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "bom_no",
    "fieldtype": "Link",
    "label": "BOM No",
@@ -444,12 +432,25 @@
   {
    "fieldname": "section_break_46",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "col_break_mfg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "qty_info_sec_break",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "qty_info_col_break",
+   "fieldtype": "Column Break"
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-05-15 09:00:00.992835",
+ "modified": "2020-10-02 11:44:36.553064",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request Item",

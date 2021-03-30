@@ -1,28 +1,19 @@
 {
  "actions": [],
- "autoname": "naming_series:",
+ "autoname": "format:QA-MEET-{YY}-{MM}-{DD}",
  "creation": "2018-10-15 16:25:41.548432",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "naming_series",
-  "date",
-  "cb_00",
   "status",
+  "cb_00",
   "sb_00",
   "agenda",
   "sb_01",
   "minutes"
  ],
  "fields": [
-  {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date",
-   "read_only": 1
-  },
   {
    "default": "Open",
    "fieldname": "status",
@@ -42,8 +33,7 @@
   },
   {
    "fieldname": "sb_00",
-   "fieldtype": "Section Break",
-   "label": "Agenda"
+   "fieldtype": "Section Break"
   },
   {
    "fieldname": "agenda",
@@ -53,18 +43,12 @@
   },
   {
    "fieldname": "sb_01",
-   "fieldtype": "Section Break",
-   "label": "Minutes"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "label": "Naming Series",
-   "options": "MTNG-.YYYY.-.MM.-.DD.-"
+   "fieldtype": "Section Break"
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-05-19 13:18:59.821740",
+ "modified": "2021-02-27 16:36:45.657883",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Meeting",

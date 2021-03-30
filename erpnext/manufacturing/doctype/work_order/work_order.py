@@ -378,7 +378,7 @@ class WorkOrder(Document):
 			select
 				operation, description, workstation, idx,
 				base_hour_rate as hour_rate, time_in_mins,
-				"Pending" as status, parent as bom, batch_size
+				"Pending" as status, parent as bom, batch_size, sequence_id
 			from
 				`tabBOM Operation`
 			where
@@ -403,7 +403,7 @@ class WorkOrder(Document):
 		bom_qty = frappe.db.get_value("BOM", self.bom_no, "quantity")
 
 		for d in self.get("operations"):
-			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * math.ceil(flt(self.qty) / flt(d.batch_size))
+			d.time_in_mins = flt(d.time_in_mins) / flt(bom_qty) * (flt(self.qty) / flt(d.batch_size))
 
 		self.calculate_operating_cost()
 
@@ -434,7 +434,7 @@ class WorkOrder(Document):
 			elif flt(d.completed_qty) <= max_allowed_qty_for_wo:
 				d.status = "Completed"
 			else:
-				frappe.throw(_("Completed Qty can not be greater than 'Qty to Manufacture'"))
+				frappe.throw(_("Completed Qty cannot be greater than 'Qty to Manufacture'"))
 
 	def set_actual_dates(self):
 		if self.get("operations"):
@@ -456,10 +456,10 @@ class WorkOrder(Document):
 
 			if data and len(data):
 				dates = [d.posting_datetime for d in data]
-				self.actual_start_date = min(dates)
+				self.db_set('actual_start_date', min(dates))
 
 				if self.status == "Completed":
-					self.actual_end_date = max(dates)
+					self.db_set('actual_end_date', max(dates))
 
 		self.set_lead_time()
 
@@ -528,6 +528,10 @@ class WorkOrder(Document):
 		if not reset_only_qty:
 			self.required_items = []
 
+		operation = None
+		if self.get('operations') and len(self.operations) == 1:
+			operation = self.operations[0].operation
+
 		if self.bom_no and self.qty:
 			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
 				fetch_exploded = self.use_multi_level_bom)
@@ -536,6 +540,9 @@ class WorkOrder(Document):
 				for d in self.get("required_items"):
 					if item_dict.get(d.item_code):
 						d.required_qty = item_dict.get(d.item_code).get("qty")
+
+					if not d.operation:
+						d.operation = operation
 			else:
 				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
 				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
@@ -543,7 +550,7 @@ class WorkOrder(Document):
 					self.append('required_items', {
 						'rate': item.rate,
 						'amount': item.amount,
-						'operation': item.operation,
+						'operation': item.operation or operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
 						'description': item.description,
@@ -725,6 +732,7 @@ def add_variant_item(variant_items, wo_doc, bom_no, table_name="items"):
 		args.update(item_data)
 
 		args["rate"] = get_bom_item_rate({
+			"company": wo_doc.company,
 			"item_code": args.get("item_code"),
 			"qty": args.get("required_qty"),
 			"uom": args.get("stock_uom"),
@@ -865,6 +873,7 @@ def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto
 		'bom_no': work_order.bom_no,
 		'project': work_order.project,
 		'company': work_order.company,
+		'sequence_id': row.get("sequence_id"),
 		'wip_warehouse': work_order.wip_warehouse
 	})
 
@@ -877,7 +886,7 @@ def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto
 			doc.schedule_time_logs(row)
 
 		doc.insert()
-		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)))
+		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
 
 	return doc
 

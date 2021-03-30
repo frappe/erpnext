@@ -11,6 +11,7 @@ test_records = frappe.get_test_records('Fiscal Year')
 test_ignore = ["Company"]
 
 class TestFiscalYear(unittest.TestCase):
+
 	def test_extra_year(self):
 		if frappe.db.exists("Fiscal Year", "_Test Fiscal Year 2000"):
 			frappe.delete_doc("Fiscal Year", "_Test Fiscal Year 2000")

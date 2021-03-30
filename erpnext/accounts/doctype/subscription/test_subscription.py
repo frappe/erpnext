@@ -237,7 +237,7 @@ class TestSubscription(unittest.TestCase):
 		subscription.party_type = 'Customer'
 		subscription.party = '_Test Customer'
 		subscription.append('plans', {'plan': '_Test Plan Name', 'qty': 1})
-		subscription.start_date = '2018-01-01'
+		subscription.start_date = add_days(nowdate(), -1000)
 		subscription.insert()
 		subscription.process()		# generate first invoice
 
@@ -321,7 +321,8 @@ class TestSubscription(unittest.TestCase):
 
 		self.assertEqual(
 			flt(
-				get_prorata_factor(subscription.current_invoice_end, subscription.current_invoice_start),
+				get_prorata_factor(subscription.current_invoice_end, subscription.current_invoice_start,
+					subscription.generate_invoice_at_period_start),
 				2),
 			flt(prorate_factor, 2)
 		)
@@ -561,9 +562,7 @@ class TestSubscription(unittest.TestCase):
 		current_inv = subscription.get_current_invoice()
 		self.assertEqual(current_inv.status, "Unpaid")
 
-		diff = flt(date_diff(nowdate(), subscription.current_invoice_start) + 1)
-		plan_days = flt(date_diff(subscription.current_invoice_end, subscription.current_invoice_start) + 1)
-		prorate_factor = flt(diff / plan_days)
+		prorate_factor = 1
 
 		self.assertEqual(flt(current_inv.grand_total, 2), flt(prorate_factor * 900, 2))
 

@@ -39,7 +39,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party_details = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[party_type.lower()]
 
-	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
+	if not ignore_permissions and not (frappe.has_permission(party_type, "read", party) or frappe.has_permission(party_type, "select", party)):
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
@@ -59,7 +59,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			billing_address=party_address, shipping_address=shipping_address)
 
 	if fetch_payment_terms_template:
-		party_details["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
+		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
 
 	if not party_details.get("currency"):
 		party_details["currency"] = currency
@@ -203,7 +203,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	return out
 
 @frappe.whitelist()
-def get_party_account(party_type, party, company):
+def get_party_account(party_type, party, company=None):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Group),
@@ -315,7 +315,7 @@ def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 	due_date = None
 	if (bill_date or posting_date) and party:
 		due_date = bill_date or posting_date
-		template_name = get_pyt_term_template(party, party_type, company)
+		template_name = get_payment_terms_template(party, party_type, company)
 
 		if template_name:
 			due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
@@ -422,7 +422,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 
 @frappe.whitelist()
-def get_pyt_term_template(party_name, party_type, company=None):
+def get_payment_terms_template(party_name, party_type, company=None):
 	if party_type not in ("Customer", "Supplier"):
 		return
 	template = None
@@ -617,6 +617,7 @@ def get_partywise_advanced_payment_amount(party_type, posting_date = None, futur
 		FROM `tabGL Entry`
 		WHERE
 			party_type = %s and against_voucher is null
+			and is_cancelled = 0
 			and {1} GROUP BY party"""
 		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
 

@@ -9,7 +9,7 @@ import frappe
 from frappe.utils import nowdate
 from erpnext.stock.doctype.item.test_item import make_item
 from erpnext.templates.pages.rfq import check_supplier_has_docname_access
-from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
+from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation_from_rfq
 from erpnext.buying.doctype.request_for_quotation.request_for_quotation import create_supplier_quotation
 from erpnext.crm.doctype.opportunity.test_opportunity import make_opportunity
 from erpnext.crm.doctype.opportunity.opportunity import make_request_for_quotation as make_rfq
@@ -22,25 +22,21 @@ class TestRequestforQuotation(unittest.TestCase):
 		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'Pending')
 
 		# Submit the first supplier quotation
-		sq = make_supplier_quotation(rfq.name, rfq.get('suppliers')[0].supplier)
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.get('suppliers')[0].supplier)
 		sq.submit()
-
-		# No Quote first supplier quotation
-		rfq.get('suppliers')[1].no_quote = 1
-		rfq.get('suppliers')[1].quote_status = 'No Quote'
 
 		rfq.update_rfq_supplier_status() #rfq.get('suppliers')[1].supplier)
 
 		self.assertEqual(rfq.get('suppliers')[0].quote_status, 'Received')
-		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'No Quote')
+		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'Pending')
 
 	def test_make_supplier_quotation(self):
 		rfq = make_request_for_quotation()
 
-		sq = make_supplier_quotation(rfq.name, rfq.get('suppliers')[0].supplier)
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.get('suppliers')[0].supplier)
 		sq.submit()
 
-		sq1 = make_supplier_quotation(rfq.name, rfq.get('suppliers')[1].supplier)
+		sq1 = make_supplier_quotation_from_rfq(rfq.name, for_supplier=rfq.get('suppliers')[1].supplier)
 		sq1.submit()
 
 		self.assertEqual(sq.supplier, rfq.get('suppliers')[0].supplier)
@@ -62,7 +58,7 @@ class TestRequestforQuotation(unittest.TestCase):
 
 		rfq = make_request_for_quotation(supplier_data=supplier_wt_appos)
 
-		sq = make_supplier_quotation(rfq.name, supplier_wt_appos[0].get("supplier"))
+		sq = make_supplier_quotation_from_rfq(rfq.name, for_supplier=supplier_wt_appos[0].get("supplier"))
 		sq.submit()
 
 		frappe.form_dict = frappe.local("form_dict")

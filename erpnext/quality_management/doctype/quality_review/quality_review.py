@@ -7,7 +7,26 @@ import frappe
 from frappe.model.document import Document
 
 class QualityReview(Document):
-	pass
+	def validate(self):
+		# fetch targets from goal
+		if not self.reviews:
+			for d in frappe.get_doc('Quality Goal', self.goal).objectives:
+				self.append('reviews', dict(
+					objective = d.objective,
+					target = d.target,
+					uom = d.uom
+				))
+
+		self.set_status()
+
+	def set_status(self):
+		# if any child item is failed, fail the parent
+		if not len(self.reviews or []) or any([d.status=='Open' for d in self.reviews]):
+			self.status = 'Open'
+		elif any([d.status=='Failed' for d in self.reviews]):
+			self.status = 'Failed'
+		else:
+			self.status = 'Passed'
 
 def review():
 	day = frappe.utils.getdate().day
@@ -24,7 +43,7 @@ def review():
 		elif goal.frequency == 'Monthly' and goal.date == str(day):
 			create_review(goal.name)
 
-		elif goal.frequency == 'Quarterly' and goal.data == str(day) and get_quarter(month):
+		elif goal.frequency == 'Quarterly' and day==1 and get_quarter(month):
 			create_review(goal.name)
 
 def create_review(goal):
@@ -35,15 +54,6 @@ def create_review(goal):
 		"goal": goal.name,
 		"date": frappe.utils.getdate()
 	})
-
-	for objective in goal.objectives:
-		review.append("reviews",
-			{
-				"objective": objective.objective,
-				"target": objective.target,
-				"uom": objective.uom
-			}
-		)
 
 	review.insert(ignore_permissions=True)
 

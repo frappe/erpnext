@@ -12,7 +12,6 @@ from datetime import timedelta
 class TestIssue(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabService Level Agreement`")
-		frappe.db.sql("delete from `tabEmployee`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 
@@ -135,15 +134,19 @@ class TestIssue(unittest.TestCase):
 		self.assertEqual(flt(issue.total_hold_time, 2), 2700)
 
 
-def make_issue(creation=None, customer=None, index=0):
+def make_issue(creation=None, customer=None, index=0, priority=None, issue_type=None):
 	issue = frappe.get_doc({
 		"doctype": "Issue",
 		"subject": "Service Level Agreement Issue {0}".format(index),
 		"customer": customer,
 		"raised_by": "test@example.com",
 		"description": "Service Level Agreement Issue",
+		"issue_type": issue_type,
+		"priority": priority,
 		"creation": creation,
-		"service_level_agreement_creation": creation
+		"opening_date": creation,
+		"service_level_agreement_creation": creation,
+		"company": "_Test Company"
 	}).insert(ignore_permissions=True)
 
 	return issue

@@ -66,7 +66,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 							company: me.frm.doc.company
 						}
 					});
-				}, __("Get items from"));
+				}, __("Get Items From"));
 		} else if (this.frm.doc.docstatus === 1) {
 			this.frm.add_custom_button(__('Create Maintenance Visit'), function() {
 				frappe.model.open_mapped_doc({

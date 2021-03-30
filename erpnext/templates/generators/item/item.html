@@ -3,21 +3,25 @@
 {% block title %} {{ title }} {% endblock %}
 
 {% block breadcrumbs %}
+<div class="item-breadcrumbs small text-muted">
 	{% include "templates/includes/breadcrumbs.html" %}
+</div>
 {% endblock %}
 
 {% block page_content %}
-{% from "erpnext/templates/includes/macros.html" import product_image %}
-<div class="item-content">
-	<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
-		<div class="row mb-5">
-			{% include "templates/generators/item/item_image.html" %}
-			{% include "templates/generators/item/item_details.html" %}
+<div class="product-container">
+	{% from "erpnext/templates/includes/macros.html" import product_image %}
+	<div class="item-content">
+		<div class="product-page-content" itemscope itemtype="http://schema.org/Product">
+			<div class="row mb-5">
+				{% include "templates/generators/item/item_image.html" %}
+				{% include "templates/generators/item/item_details.html" %}
+			</div>
+
+			{% include "templates/generators/item/item_specifications.html" %}
+
+			{{ doc.website_content or '' }}
 		</div>
-
-		{% include "templates/generators/item/item_specifications.html" %}
-
-		{{ doc.website_content or '' }}
 	</div>
 </div>
 {% endblock %}

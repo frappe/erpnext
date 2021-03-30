@@ -147,7 +147,7 @@ class Student(Document):
 			enrollment.save(ignore_permissions=True)
 		except frappe.exceptions.ValidationError:
 			enrollment_name = frappe.get_list("Course Enrollment", filters={"student": self.name, "course": course_name, "program_enrollment": program_enrollment})[0].name
-			return frappe.get_doc("Program Enrollment", enrollment_name)
+			return frappe.get_doc("Course Enrollment", enrollment_name)
 		else:
 			return enrollment
 

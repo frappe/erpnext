@@ -70,6 +70,7 @@ def get_items_list(pos_profile, company):
 		""".format(cond=cond), tuple([company] + args_list), as_dict=1)
 
 def make_pos_profile(**args):
+	frappe.db.sql("delete from `tabPOS Payment Method`")
 	frappe.db.sql("delete from `tabPOS Profile`")
 
 	args = frappe._dict(args)

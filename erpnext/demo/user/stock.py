@@ -79,7 +79,7 @@ def make_stock_reconciliation():
 				if item.qty:
 					item.qty = item.qty - round(random.randint(1, item.qty))
 			try:
-				stock_reco.insert(ignore_permissions=True)
+				stock_reco.insert(ignore_permissions=True, ignore_mandatory=True)
 				stock_reco.submit()
 				frappe.db.commit()
 			except OpeningEntryAccountError:

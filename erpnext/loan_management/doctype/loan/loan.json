@@ -26,11 +26,11 @@
   "disbursed_amount",
   "column_break_11",
   "maximum_loan_amount",
-  "is_term_loan",
   "repayment_method",
   "repayment_periods",
   "monthly_repayment_amount",
   "repayment_start_date",
+  "is_term_loan",
   "account_info",
   "mode_of_payment",
   "payment_account",
@@ -43,6 +43,7 @@
   "section_break_17",
   "total_payment",
   "total_principal_paid",
+  "written_off_amount",
   "column_break_19",
   "total_interest_payable",
   "total_amount_paid",
@@ -75,6 +76,7 @@
    "fieldname": "loan_application",
    "fieldtype": "Link",
    "label": "Loan Application",
+   "no_copy": 1,
    "options": "Loan Application"
   },
   {
@@ -134,6 +136,7 @@
    "fieldname": "loan_amount",
    "fieldtype": "Currency",
    "label": "Loan Amount",
+   "non_negative": 1,
    "options": "Company:company:default_currency"
   },
   {
@@ -148,7 +151,8 @@
    "depends_on": "eval:doc.status==\"Disbursed\"",
    "fieldname": "disbursement_date",
    "fieldtype": "Date",
-   "label": "Disbursement Date"
+   "label": "Disbursement Date",
+   "no_copy": 1
   },
   {
    "depends_on": "is_term_loan",
@@ -252,6 +256,7 @@
    "fieldname": "total_payment",
    "fieldtype": "Currency",
    "label": "Total Payable Amount",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -265,6 +270,7 @@
    "fieldname": "total_interest_payable",
    "fieldtype": "Currency",
    "label": "Total Interest Payable",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -273,6 +279,7 @@
    "fieldname": "total_amount_paid",
    "fieldtype": "Currency",
    "label": "Total Amount Paid",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -289,8 +296,7 @@
    "default": "0",
    "fieldname": "is_secured_loan",
    "fieldtype": "Check",
-   "label": "Is Secured Loan",
-   "read_only": 1
+   "label": "Is Secured Loan"
   },
   {
    "default": "0",
@@ -313,6 +319,7 @@
    "fieldname": "total_principal_paid",
    "fieldtype": "Currency",
    "label": "Total Principal Paid",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -320,21 +327,33 @@
    "fieldname": "disbursed_amount",
    "fieldtype": "Currency",
    "label": "Disbursed Amount",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
+   "depends_on": "eval:doc.is_secured_loan",
    "fetch_from": "loan_application.maximum_loan_amount",
    "fieldname": "maximum_loan_amount",
    "fieldtype": "Currency",
    "label": "Maximum Loan Amount",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "written_off_amount",
+   "fieldtype": "Currency",
+   "label": "Written Off Amount",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-01 12:36:11.255233",
+ "modified": "2020-11-24 12:27:23.208240",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

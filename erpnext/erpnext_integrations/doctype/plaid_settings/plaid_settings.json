@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2018-10-25 10:02:48.656165",
  "doctype": "DocType",
  "editable_grid": 1,
@@ -11,7 +12,8 @@
   "plaid_client_id",
   "plaid_secret",
   "column_break_7",
-  "plaid_env"
+  "plaid_env",
+  "enable_european_access"
  ],
  "fields": [
   {
@@ -58,10 +60,17 @@
   {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_european_access",
+   "fieldtype": "Check",
+   "label": "Enable European Access"
   }
  ],
  "issingle": 1,
- "modified": "2020-09-12 02:31:44.542385",
+ "links": [],
+ "modified": "2021-03-02 17:35:27.544259",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Plaid Settings",
@@ -79,5 +88,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

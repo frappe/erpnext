@@ -6,13 +6,17 @@ import frappe, erpnext, json
 from frappe.utils import cstr, flt, fmt_money, formatdate, getdate, nowdate, cint, get_link_to_form
 from frappe import msgprint, _, scrub
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.accounts.utils import get_balance_on, get_account_currency
+from erpnext.accounts.utils import get_balance_on, get_stock_accounts, get_stock_and_account_balance, \
+	get_account_currency, check_if_stock_and_account_balance_synced
 from erpnext.accounts.party import get_party_account
 from erpnext.hr.doctype.expense_claim.expense_claim import update_reimbursed_amount
-from erpnext.accounts.doctype.invoice_discounting.invoice_discounting import get_party_account_based_on_invoice_discounting
+from erpnext.accounts.doctype.invoice_discounting.invoice_discounting \
+	import get_party_account_based_on_invoice_discounting
 from erpnext.accounts.deferred_revenue import get_deferred_booking_accounts
 
 from six import string_types, iteritems
+
+class StockAccountInvalidTransaction(frappe.ValidationError): pass
 
 class JournalEntry(AccountsController):
 	def __init__(self, *args, **kwargs):
@@ -22,14 +26,19 @@ class JournalEntry(AccountsController):
 		return self.voucher_type
 
 	def validate(self):
+		if self.voucher_type == 'Opening Entry':
+			self.is_opening = 'Yes'
+
 		if not self.is_opening:
 			self.is_opening='No'
+
 		self.clearance_date = None
 
 		self.validate_party()
 		self.validate_entries_for_advance()
 		self.validate_multi_currency()
 		self.set_amounts_in_company_currency()
+		self.validate_debit_credit_amount()
 		self.validate_total_debit_and_credit()
 		self.validate_against_jv()
 		self.validate_reference_doc()
@@ -41,6 +50,7 @@ class JournalEntry(AccountsController):
 		self.validate_empty_accounts_table()
 		self.set_account_and_party_balance()
 		self.validate_inter_company_accounts()
+		self.validate_stock_accounts()
 		if not self.title:
 			self.title = self.get_title()
 
@@ -52,6 +62,8 @@ class JournalEntry(AccountsController):
 		self.update_expense_claim()
 		self.update_inter_company_jv()
 		self.update_invoice_discounting()
+		check_if_stock_and_account_balance_synced(self.posting_date,
+			self.company, self.doctype, self.name)
 
 	def on_cancel(self):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
@@ -90,6 +102,16 @@ class JournalEntry(AccountsController):
 			if account_currency == previous_account_currency:
 				if self.total_credit != doc.total_debit or self.total_debit != doc.total_credit:
 					frappe.throw(_("Total Credit/ Debit Amount should be same as linked Journal Entry"))
+
+	def validate_stock_accounts(self):
+		stock_accounts = get_stock_accounts(self.company, self.doctype, self.name)
+		for account in stock_accounts:
+			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
+				self.posting_date, self.company)
+
+			if account_bal == stock_bal:
+				frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
+					.format(account), StockAccountInvalidTransaction)
 
 	def update_inter_company_jv(self):
 		if self.voucher_type == "Inter Company Journal Entry" and self.inter_company_journal_entry_reference:
@@ -207,11 +229,11 @@ class JournalEntry(AccountsController):
 			if d.reference_type=="Journal Entry":
 				account_root_type = frappe.db.get_value("Account", d.account, "root_type")
 				if account_root_type == "Asset" and flt(d.debit) > 0:
-					frappe.throw(_("For {0}, only credit accounts can be linked against another debit entry")
-						.format(d.account))
+					frappe.throw(_("Row #{0}: For {1}, you can select reference document only if account gets credited")
+						.format(d.idx, d.account))
 				elif account_root_type == "Liability" and flt(d.credit) > 0:
-					frappe.throw(_("For {0}, only debit accounts can be linked against another credit entry")
-						.format(d.account))
+					frappe.throw(_("Row #{0}: For {1}, you can select reference document only if account gets debited")
+						.format(d.idx, d.account))
 
 				if d.reference_name == self.name:
 					frappe.throw(_("You can not enter current voucher in 'Against Journal Entry' column"))
@@ -335,8 +357,7 @@ class JournalEntry(AccountsController):
 						currency=account_currency)
 
 				if flt(voucher_total) < (flt(order.advance_paid) + total):
-					frappe.throw(_("Advance paid against {0} {1} cannot be greater \
-						than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
+					frappe.throw(_("Advance paid against {0} {1} cannot be greater than Grand Total {2}").format(reference_type, reference_name, formatted_voucher_total))
 
 	def validate_invoices(self):
 		"""Validate totals and docstatus for invoices"""
@@ -364,6 +385,11 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if flt(d.debit > 0): d.against_account = ", ".join(list(set(accounts_credited)))
 			if flt(d.credit > 0): d.against_account = ", ".join(list(set(accounts_debited)))
+
+	def validate_debit_credit_amount(self):
+		for d in self.get('accounts'):
+			if not flt(d.debit) and not flt(d.credit):
+				frappe.throw(_("Row {0}: Both Debit and Credit values cannot be zero").format(d.idx))
 
 	def validate_total_debit_and_credit(self):
 		self.set_total_debit_credit()

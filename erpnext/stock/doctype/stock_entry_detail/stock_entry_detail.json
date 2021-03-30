@@ -14,58 +14,63 @@
   "t_warehouse",
   "sec_break1",
   "item_code",
-  "col_break2",
   "item_name",
+  "col_break2",
+  "is_finished_item",
+  "is_scrap_item",
+  "subcontracted_item",
   "section_break_8",
   "description",
   "column_break_10",
   "item_group",
   "image",
   "image_view",
-  "quantity_and_rate",
-  "set_basic_rate_manually",
+  "quantity_section",
   "qty",
-  "basic_rate",
-  "basic_amount",
-  "additional_cost",
-  "amount",
-  "valuation_rate",
-  "col_break3",
-  "uom",
-  "conversion_factor",
-  "stock_uom",
   "transfer_qty",
   "retain_sample",
+  "column_break_20",
+  "uom",
+  "stock_uom",
+  "conversion_factor",
   "sample_quantity",
+  "rates_section",
+  "basic_rate",
+  "additional_cost",
+  "valuation_rate",
+  "allow_zero_valuation_rate",
+  "col_break3",
+  "set_basic_rate_manually",
+  "basic_amount",
+  "amount",
   "serial_no_batch",
   "serial_no",
   "col_break4",
   "batch_no",
-  "quality_inspection",
   "accounting",
   "expense_account",
-  "col_break5",
   "accounting_dimensions_section",
   "cost_center",
+  "project",
   "dimension_col_break",
   "more_info",
-  "allow_zero_valuation_rate",
   "actual_qty",
+  "transferred_qty",
   "bom_no",
   "allow_alternative_item",
   "col_break6",
   "material_request",
   "material_request_item",
   "original_item",
-  "subcontracted_item",
   "reference_section",
   "against_stock_entry",
   "ste_detail",
   "po_detail",
+  "putaway_rule",
   "column_break_51",
-  "transferred_qty",
   "reference_purchase_receipt",
-  "project"
+  "quality_inspection",
+  "job_card_item"
  ],
  "fields": [
   {
@@ -161,11 +166,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "quantity_and_rate",
-   "fieldtype": "Section Break",
-   "label": "Quantity and Rate"
-  },
-  {
    "bold": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
@@ -238,7 +238,6 @@
    "oldfieldname": "conversion_factor",
    "oldfieldtype": "Currency",
    "print_hide": 1,
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -324,10 +323,6 @@
    "print_hide": 1
   },
   {
-   "fieldname": "col_break5",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": ":Company",
    "depends_on": "eval:cint(erpnext.is_perpetual_inventory_enabled(parent.company))",
    "fieldname": "cost_center",
@@ -337,6 +332,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
    "label": "More Information"
@@ -416,6 +412,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.purpose == 'Send to Subcontractor'",
    "fieldname": "subcontracted_item",
    "fieldtype": "Link",
    "label": "Subcontracted Item",
@@ -457,6 +454,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -498,15 +496,59 @@
    "depends_on": "eval:parent.purpose===\"Repack\" && doc.t_warehouse",
    "fieldname": "set_basic_rate_manually",
    "fieldtype": "Check",
-   "label": "Set Basic Rate Manually",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Set Basic Rate Manually"
+  },
+  {
+   "depends_on": "eval:in_list([\"Material Transfer\", \"Material Receipt\"], parent.purpose)",
+   "fieldname": "putaway_rule",
+   "fieldtype": "Link",
+   "label": "Putaway Rule",
+   "no_copy": 1,
+   "options": "Putaway Rule",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "quantity_section",
+   "fieldtype": "Section Break",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "rates_section",
+   "fieldtype": "Section Break",
+   "label": "Rates"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_scrap_item",
+   "fieldtype": "Check",
+   "label": "Is Scrap Item"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_finished_item",
+   "fieldtype": "Check",
+   "label": "Is Finished Item"
+  },
+  {
+   "fieldname": "job_card_item",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Job Card Item",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-06-08 12:57:03.172887",
+ "modified": "2021-02-11 13:47:50.158754",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Detail",

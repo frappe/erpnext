@@ -3,6 +3,7 @@ import frappe
 from frappe import _
 import base64, hashlib, hmac
 from six.moves.urllib.parse import urlparse
+from erpnext import get_default_company
 
 def validate_webhooks_request(doctype,  hmac_key, secret_key='secret'):
 	def innerfn(fn):
@@ -41,3 +42,30 @@ def get_webhook_address(connector_name, method, exclude_uri=False):
 	server_url = '{uri.scheme}://{uri.netloc}/api/method/{endpoint}'.format(uri=urlparse(url), endpoint=endpoint)
 
 	return server_url
+
+def create_mode_of_payment(gateway, payment_type="General"):
+	payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
+			"payment_gateway": gateway
+		}, ['payment_account'])
+
+	if not frappe.db.exists("Mode of Payment", gateway) and payment_gateway_account:
+		mode_of_payment = frappe.get_doc({
+			"doctype": "Mode of Payment",
+			"mode_of_payment": gateway,
+			"enabled": 1,
+			"type": payment_type,
+			"accounts": [{
+				"doctype": "Mode of Payment Account",
+				"company": get_default_company(),
+				"default_account": payment_gateway_account
+			}]
+		})
+		mode_of_payment.insert(ignore_permissions=True)
+
+def get_tracking_url(carrier, tracking_number):
+	# Return the formatted Tracking URL.
+	tracking_url = ''
+	url_reference = frappe.get_value('Parcel Service', carrier, 'url_reference')
+	if url_reference:
+		tracking_url = frappe.render_template(url_reference, {'tracking_number': tracking_number})
+	return tracking_url

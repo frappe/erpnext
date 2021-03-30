@@ -127,6 +127,7 @@ def create_loan(source_name, target_doc=None, submit=0):
 		target_doc.loan_account = account_details.loan_account
 		target_doc.interest_income_account = account_details.interest_income_account
 		target_doc.penalty_income_account = account_details.penalty_income_account
+		target_doc.loan_application = source_name
 
 
 	doclist = get_mapped_doc("Loan Application", source_name, {
@@ -196,7 +197,7 @@ def get_proposed_pledge(securities):
 			security.qty = cint(security.amount/security.loan_security_price)
 
 		security.amount = security.qty * security.loan_security_price
-		security.post_haircut_amount = security.amount - (security.amount * security.haircut/100)
+		security.post_haircut_amount = cint(security.amount - (security.amount * security.haircut/100))
 
 		maximum_loan_amount += security.post_haircut_amount
 

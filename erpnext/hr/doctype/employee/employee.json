@@ -57,7 +57,6 @@
   "column_break_45",
   "shift_request_approver",
   "attendance_and_leave_details",
-  "leave_policy",
   "attendance_device_id",
   "column_break_44",
   "holiday_list",
@@ -109,7 +108,6 @@
   "encashment_date",
   "exit_interview_details",
   "held_on",
-  "reason_for_resignation",
   "new_workplace",
   "feedback",
   "lft",
@@ -413,14 +411,6 @@
    "options": "Branch"
   },
   {
-   "fetch_from": "grade.default_leave_policy",
-   "fetch_if_empty": 1,
-   "fieldname": "leave_policy",
-   "fieldtype": "Link",
-   "label": "Leave Policy",
-   "options": "Leave Policy"
-  },
-  {
    "description": "Applicable Holiday List",
    "fieldname": "holiday_list",
    "fieldtype": "Link",
@@ -673,16 +663,16 @@
    "oldfieldtype": "Date"
   },
   {
-   "depends_on": "eval:doc.status == \"Left\"",
    "fieldname": "relieving_date",
    "fieldtype": "Date",
    "label": "Relieving Date",
+   "mandatory_depends_on": "eval:doc.status == \"Left\"",
    "oldfieldname": "relieving_date",
    "oldfieldtype": "Date"
   },
   {
    "fieldname": "reason_for_leaving",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Reason for Leaving",
    "oldfieldname": "reason_for_leaving",
    "oldfieldtype": "Data"
@@ -696,6 +686,7 @@
    "options": "\nYes\nNo"
   },
   {
+   "depends_on": "eval:doc.leave_encashed ==\"Yes\"",
    "fieldname": "encashment_date",
    "fieldtype": "Date",
    "label": "Encashment Date",
@@ -705,7 +696,6 @@
   {
    "fieldname": "exit_interview_details",
    "fieldtype": "Column Break",
-   "label": "Exit Interview Details",
    "oldfieldname": "col_brk6",
    "oldfieldtype": "Column Break",
    "width": "50%"
@@ -713,17 +703,9 @@
   {
    "fieldname": "held_on",
    "fieldtype": "Date",
-   "label": "Held On",
+   "label": "Exit Interview Held On",
    "oldfieldname": "held_on",
    "oldfieldtype": "Date"
-  },
-  {
-   "fieldname": "reason_for_resignation",
-   "fieldtype": "Select",
-   "label": "Reason for Resignation",
-   "oldfieldname": "reason_for_resignation",
-   "oldfieldtype": "Select",
-   "options": "\nBetter Prospects\nHealth Concerns"
   },
   {
    "fieldname": "new_workplace",
@@ -809,37 +791,29 @@
    "fieldname": "expense_approver",
    "fieldtype": "Link",
    "label": "Expense Approver",
-   "options": "User",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "User"
   },
   {
    "fieldname": "approvers_section",
    "fieldtype": "Section Break",
-   "label": "Approvers",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Approvers"
   },
   {
    "fieldname": "column_break_45",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "fieldname": "shift_request_approver",
    "fieldtype": "Link",
    "label": "Shift Request Approver",
-   "options": "User",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "User"
   }
  ],
  "icon": "fa fa-user",
  "idx": 24,
  "image_field": "image",
  "links": [],
- "modified": "2020-07-28 01:36:04.109189",
+ "modified": "2021-01-02 16:54:33.477439",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee",
@@ -881,7 +855,6 @@
    "write": 1
   }
  ],
- "quick_entry": 1,
  "search_fields": "employee_name",
  "show_name_in_global_search": 1,
  "sort_field": "modified",

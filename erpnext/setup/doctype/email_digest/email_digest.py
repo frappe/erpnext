@@ -48,12 +48,8 @@ class EmailDigest(Document):
 		recipients = list(filter(lambda r: r in valid_users,
 			self.recipient_list.split("\n")))
 
-		original_user = frappe.session.user
-
 		if recipients:
 			for user_id in recipients:
-				frappe.set_user(user_id)
-				frappe.set_user_lang(user_id)
 				msg_for_this_recipient = self.get_msg_html()
 				if msg_for_this_recipient:
 					frappe.sendmail(
@@ -63,9 +59,6 @@ class EmailDigest(Document):
 						reference_doctype = self.doctype,
 						reference_name = self.name,
 						unsubscribe_message = _("Unsubscribe from this Email Digest"))
-
-		frappe.set_user(original_user)
-		frappe.set_user_lang(original_user)
 
 	def get_msg_html(self):
 		"""Build email digest content"""

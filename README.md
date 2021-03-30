@@ -5,7 +5,7 @@
         <p>ERP made simple</p>
     </p>
 
-[![Build Status](https://travis-ci.com/frappe/erpnext.svg)](https://travis-ci.com/frappe/erpnext)
+[![CI](https://github.com/frappe/erpnext/actions/workflows/ci-tests.yml/badge.svg?branch=develop)](https://github.com/frappe/erpnext/actions/workflows/ci-tests.yml)
 [![Open Source Helpers](https://www.codetriage.com/frappe/erpnext/badges/users.svg)](https://www.codetriage.com/frappe/erpnext)
 [![Coverage Status](https://coveralls.io/repos/github/frappe/erpnext/badge.svg?branch=develop)](https://coveralls.io/github/frappe/erpnext?branch=develop)
 

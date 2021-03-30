@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe, re, json
 from frappe import _
 import erpnext
-from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words
+from frappe.utils import cstr, flt, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words, getdate
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
@@ -12,6 +12,14 @@ from erpnext.regional.india import number_state_mapping
 from six import string_types
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.utils import get_account_currency
+from frappe.model.utils import get_fetch_values
+
+
+GST_INVOICE_NUMBER_FORMAT = re.compile(r"^[a-zA-Z0-9\-/]+$")   #alphanumeric and - /
+GSTIN_FORMAT = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
+GSTIN_UIN_FORMAT = re.compile("^[0-9]{4}[A-Z]{3}[0-9]{5}[0-9A-Z]{3}")
+PAN_NUMBER_FORMAT = re.compile("[A-Z]{5}[0-9]{4}[A-Z]{1}")
+
 
 def validate_gstin_for_india(doc, method):
 	if hasattr(doc, 'gst_state') and doc.gst_state:
@@ -36,20 +44,35 @@ def validate_gstin_for_india(doc, method):
 		frappe.throw(_("Invalid GSTIN! A GSTIN must have 15 characters."))
 
 	if gst_category and gst_category == 'UIN Holders':
-		p = re.compile("^[0-9]{4}[A-Z]{3}[0-9]{5}[0-9A-Z]{3}")
-		if not p.match(doc.gstin):
+		if not GSTIN_UIN_FORMAT.match(doc.gstin):
 			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the GSTIN format for UIN Holders or Non-Resident OIDAR Service Providers"))
 	else:
-		p = re.compile("^[0-9]{2}[A-Z]{4}[0-9A-Z]{1}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}[1-9A-Z]{1}[0-9A-Z]{1}$")
-		if not p.match(doc.gstin):
+		if not GSTIN_FORMAT.match(doc.gstin):
 			frappe.throw(_("Invalid GSTIN! The input you've entered doesn't match the format of GSTIN."))
 
 		validate_gstin_check_digit(doc.gstin)
 		set_gst_state_and_state_number(doc)
 
+		if not doc.gst_state:
+			frappe.throw(_("Please Enter GST state"))
+
 		if doc.gst_state_number != doc.gstin[:2]:
 			frappe.throw(_("Invalid GSTIN! First 2 digits of GSTIN should match with State number {0}.")
 				.format(doc.gst_state_number))
+
+def validate_pan_for_india(doc, method):
+	if doc.get('country') != 'India' or not doc.pan:
+		return
+
+	if not PAN_NUMBER_FORMAT.match(doc.pan):
+		frappe.throw(_("Invalid PAN No. The input you've entered doesn't match the format of PAN."))
+
+def validate_tax_category(doc, method):
+	if doc.get('gst_state') and frappe.db.get_value('Tax Category', {'gst_state': doc.gst_state, 'is_inter_state': doc.is_inter_state}):
+		if doc.is_inter_state:
+			frappe.throw(_("Inter State tax category for GST State {0} already exists").format(doc.gst_state))
+		else:
+			frappe.throw(_("Intra State tax category for GST State {0} already exists").format(doc.gst_state))
 
 def update_gst_category(doc, method):
 	for link in doc.links:
@@ -85,8 +108,7 @@ def validate_gstin_check_digit(gstin, label='GSTIN'):
 		total += digit
 		factor = 2 if factor == 1 else 1
 	if gstin[-1] != code_point_chars[((mod - (total % mod)) % mod)]:
-		frappe.throw(_("""Invalid {0}! The check digit validation has failed.
-			Please ensure you've typed the {0} correctly.""".format(label)))
+		frappe.throw(_("""Invalid {0}! The check digit validation has failed. Please ensure you've typed the {0} correctly.""").format(label))
 
 def get_itemised_tax_breakup_header(item_doctype, tax_accounts):
 	if frappe.get_meta(item_doctype).has_field('gst_hsn_code'):
@@ -130,6 +152,20 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 def set_place_of_supply(doc, method=None):
 	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
 
+def validate_document_name(doc, method=None):
+	"""Validate GST invoice number requirements."""
+	country = frappe.get_cached_value("Company", doc.company, "country")
+
+	# Date was chosen as start of next FY to avoid irritating current users.
+	if country != "India" or getdate(doc.posting_date) < getdate("2021-04-01"):
+		return
+
+	if len(doc.name) > 16:
+		frappe.throw(_("Maximum length of document number should be 16 characters as per GST rules. Please change the naming series."))
+
+	if not GST_INVOICE_NUMBER_FORMAT.match(doc.name):
+		frappe.throw(_("Document name should only contain alphanumeric values, dash(-) and slash(/) characters as per GST rules. Please change the naming series."))
+
 # don't remove this function it is used in tests
 def test_method():
 	'''test function'''
@@ -139,7 +175,7 @@ def get_place_of_supply(party_details, doctype):
 	if not frappe.get_meta('Address').has_field('gst_state'): return
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
-		address_name = party_details.shipping_address_name or party_details.customer_address
+		address_name = party_details.customer_address or party_details.shipping_address_name
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		address_name = party_details.shipping_address or party_details.supplier_address
 
@@ -150,17 +186,19 @@ def get_place_of_supply(party_details, doctype):
 			return cstr(address.gst_state_number) + "-" + cstr(address.gst_state)
 
 @frappe.whitelist()
-def get_regional_address_details(party_details, doctype, company, return_taxes=None):
+def get_regional_address_details(party_details, doctype, company):
 	if isinstance(party_details, string_types):
 		party_details = json.loads(party_details)
 		party_details = frappe._dict(party_details)
+
+	update_party_details(party_details, doctype)
 
 	party_details.place_of_supply = get_place_of_supply(party_details, doctype)
 
 	if is_internal_transfer(party_details, doctype):
 		party_details.taxes_and_charges = ''
-		party_details.taxes = ''
-		return
+		party_details.taxes = []
+		return party_details
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
@@ -168,26 +206,26 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Customer')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges') and return_taxes:
+		if party_details.get('taxes_and_charges'):
 			return party_details
 
 		if not party_details.company_gstin:
-			return
+			return party_details
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
 		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
-		if party_details.get('taxes_and_charges') and return_taxes:
+		if party_details.get('taxes_and_charges'):
 			return party_details
 
 		if not party_details.supplier_gstin:
-			return
+			return party_details
 
-	if not party_details.place_of_supply: return
+	if not party_details.place_of_supply: return party_details
 
-	if not party_details.company_gstin: return
+	if not party_details.company_gstin: return party_details
 
 	if ((doctype in ("Sales Invoice", "Delivery Note", "Sales Order") and party_details.company_gstin
 		and party_details.company_gstin[:2] != party_details.place_of_supply[:2]) or (doctype in ("Purchase Invoice",
@@ -197,12 +235,16 @@ def get_regional_address_details(party_details, doctype, company, return_taxes=N
 		default_tax = get_tax_template(master_doctype, company, 0, party_details.company_gstin[:2])
 
 	if not default_tax:
-		return
+		return party_details
 	party_details["taxes_and_charges"] = default_tax
 	party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
 
-	if return_taxes:
-		return party_details
+	return party_details
+
+def update_party_details(party_details, doctype):
+	for address_field in ['shipping_address', 'company_address', 'supplier_address', 'shipping_address_name', 'customer_address']:
+		if party_details.get(address_field):
+			party_details.update(get_fetch_values(doctype, address_field, party_details.get(address_field)))
 
 def is_internal_transfer(party_details, doctype):
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
@@ -236,7 +278,7 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 		if tax_category.gst_state == number_state_mapping[state_code] or \
 	 		(not default_tax and not tax_category.gst_state):
 			default_tax = frappe.db.get_value(master_doctype,
-				{'disabled': 0, 'tax_category': tax_category.name}, 'name')
+				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
 
 def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
@@ -517,6 +559,9 @@ def get_address_details(data, doc, company_address, billing_address):
 		data.actualToStateCode = data.toStateCode
 		shipping_address = billing_address
 
+	if doc.gst_category == 'SEZ':
+		data.toStateCode = 99
+
 	return data
 
 def get_item_list(data, doc):
@@ -674,25 +719,12 @@ def update_grand_total_for_rcm(doc, method):
 	if country != 'India':
 		return
 
-	if not doc.total_taxes_and_charges:
+	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
+
+	if not base_gst_tax:
 		return
 
 	if doc.reverse_charge == 'Y':
-		gst_accounts = get_gst_accounts(doc.company)
-		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
-			+ gst_accounts.get('igst_account')
-
-		base_gst_tax = 0
-		gst_tax = 0
-
-		for tax in doc.get('taxes'):
-			if tax.category not in ("Total", "Valuation and Total"):
-				continue
-
-			if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-				base_gst_tax += tax.base_tax_amount_after_discount_amount
-				gst_tax += tax.tax_amount_after_discount_amount
-
 		doc.taxes_and_charges_added -= gst_tax
 		doc.total_taxes_and_charges -= gst_tax
 		doc.base_taxes_and_charges_added -= base_gst_tax
@@ -726,6 +758,11 @@ def make_regional_gl_entries(gl_entries, doc):
 	if country != 'India':
 		return gl_entries
 
+	gst_tax, base_gst_tax = get_gst_tax_amount(doc)
+
+	if not base_gst_tax:
+		return gl_entries
+
 	if doc.reverse_charge == 'Y':
 		gst_accounts = get_gst_accounts(doc.company)
 		gst_account_list = gst_accounts.get('cgst_account') + gst_accounts.get('sgst_account') \
@@ -753,3 +790,45 @@ def make_regional_gl_entries(gl_entries, doc):
 				)
 
 	return gl_entries
+
+def get_gst_tax_amount(doc):
+	gst_accounts = get_gst_accounts(doc.company)
+	gst_account_list = gst_accounts.get('cgst_account', []) + gst_accounts.get('sgst_account', []) \
+		+ gst_accounts.get('igst_account', [])
+
+	base_gst_tax = 0
+	gst_tax = 0
+
+	for tax in doc.get('taxes'):
+		if tax.category not in ("Total", "Valuation and Total"):
+			continue
+
+		if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
+			base_gst_tax += tax.base_tax_amount_after_discount_amount
+			gst_tax += tax.tax_amount_after_discount_amount
+
+	return gst_tax, base_gst_tax
+
+@frappe.whitelist()
+def get_regional_round_off_accounts(company, account_list):
+	country = frappe.get_cached_value('Company', company, 'country')
+
+	if country != 'India':
+		return
+
+	if isinstance(account_list, string_types):
+		account_list = json.loads(account_list)
+
+	if not frappe.db.get_single_value('GST Settings', 'round_off_gst_values'):
+		return
+
+	gst_accounts = get_gst_accounts(company)
+
+	gst_account_list = []
+	for account in ['cgst_account', 'sgst_account', 'igst_account']:
+		if account in gst_accounts:
+			gst_account_list += gst_accounts.get(account)
+
+	account_list.extend(gst_account_list)
+
+	return account_list

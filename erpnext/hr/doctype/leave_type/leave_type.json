@@ -15,6 +15,8 @@
   "column_break_3",
   "is_carry_forward",
   "is_lwp",
+  "is_ppl",
+  "fraction_of_daily_salary_per_leave",
   "is_optional_leave",
   "allow_negative",
   "include_holiday",
@@ -31,6 +33,7 @@
   "is_earned_leave",
   "earned_leave_frequency",
   "column_break_22",
+  "based_on_date_of_joining",
   "rounding"
  ],
  "fields": [
@@ -77,6 +80,7 @@
   },
   {
    "default": "0",
+   "depends_on": "eval:doc.is_ppl == 0",
    "fieldname": "is_lwp",
    "fieldtype": "Check",
    "label": "Is Leave Without Pay"
@@ -168,7 +172,7 @@
    "fieldname": "rounding",
    "fieldtype": "Select",
    "label": "Rounding",
-   "options": "0.5\n1.0"
+   "options": "\n0.25\n0.5\n1.0"
   },
   {
    "depends_on": "is_carry_forward",
@@ -183,12 +187,34 @@
   {
    "fieldname": "column_break_22",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_earned_leave",
+   "description": "If checked, leave will be granted on the day of joining every month.",
+   "fieldname": "based_on_date_of_joining",
+   "fieldtype": "Check",
+   "label": "Based On Date Of Joining"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.is_lwp == 0",
+   "fieldname": "is_ppl",
+   "fieldtype": "Check",
+   "label": "Is Partially Paid Leave"
+  },
+  {
+   "depends_on": "eval:doc.is_ppl == 1",
+   "fieldname": "fraction_of_daily_salary_per_leave",
+   "fieldtype": "Float",
+   "label": "Fraction of Daily Salary per Leave",
+   "mandatory_depends_on": "eval:doc.is_ppl == 1"
   }
  ],
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2019-12-12 12:48:37.780254",
+ "modified": "2021-03-02 11:22:33.776320",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",

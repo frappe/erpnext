@@ -5,10 +5,12 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.utils import cint, flt
-from erpnext.stock.utils import update_included_uom_in_report
+from erpnext.stock.utils import update_included_uom_in_report, is_reposting_item_valuation_in_progress
 from frappe import _
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 def execute(filters=None):
+	is_reposting_item_valuation_in_progress()
 	include_uom = filters.get("include_uom")
 	columns = get_columns()
 	items = get_items(filters)
@@ -24,6 +26,7 @@ def execute(filters=None):
 
 	actual_qty = stock_value = 0
 
+	available_serial_nos = {}
 	for sle in sl_entries:
 		item_detail = item_details[sle.item_code]
 
@@ -47,6 +50,9 @@ def execute(filters=None):
 			"out_qty": min(sle.actual_qty, 0)
 		})
 
+		if sle.serial_no:
+			update_available_serial_nos(available_serial_nos, sle)
+
 		data.append(sle)
 
 		if include_uom:
@@ -55,6 +61,26 @@ def execute(filters=None):
 	update_included_uom_in_report(columns, data, include_uom, conversion_factors)
 	return columns, data
 
+def update_available_serial_nos(available_serial_nos, sle):
+	serial_nos = get_serial_nos(sle.serial_no)
+	key = (sle.item_code, sle.warehouse)
+	if key not in available_serial_nos:
+		available_serial_nos.setdefault(key, [])
+
+	existing_serial_no = available_serial_nos[key]
+	for sn in serial_nos:
+		if sle.actual_qty > 0:
+			if sn in existing_serial_no:
+				existing_serial_no.remove(sn)
+			else:
+				existing_serial_no.append(sn)
+		else:
+			if sn in existing_serial_no:
+				existing_serial_no.remove(sn)
+			else:
+				existing_serial_no.append(sn)
+
+	sle.balance_serial_no = '\n'.join(existing_serial_no)
 
 def get_columns():
 	columns = [
@@ -76,7 +102,8 @@ def get_columns():
 		{"label": _("Voucher Type"), "fieldname": "voucher_type", "width": 110},
 		{"label": _("Voucher #"), "fieldname": "voucher_no", "fieldtype": "Dynamic Link", "options": "voucher_type", "width": 100},
 		{"label": _("Batch"), "fieldname": "batch_no", "fieldtype": "Link", "options": "Batch", "width": 100},
-		{"label": _("Serial #"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
+		{"label": _("Serial No"), "fieldname": "serial_no", "fieldtype": "Link", "options": "Serial No", "width": 100},
+		{"label": _("Balance Serial No"), "fieldname": "balance_serial_no", "width": 100},
 		{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
 		{"label": _("Company"), "fieldname": "company", "fieldtype": "Link", "options": "Company", "width": 110}
 	]
@@ -111,7 +138,7 @@ def get_stock_ledger_entries(filters, items):
 			`tabStock Ledger Entry` sle
 		WHERE
 			company = %(company)s
-				AND posting_date BETWEEN %(from_date)s AND %(to_date)s
+				AND is_cancelled = 0 AND posting_date BETWEEN %(from_date)s AND %(to_date)s
 				{sle_conditions}
 				{item_conditions_sql}
 		ORDER BY
@@ -181,9 +208,6 @@ def get_sle_conditions(filters):
 		conditions.append("batch_no=%(batch_no)s")
 	if filters.get("project"):
 		conditions.append("project=%(project)s")
-
-	if not filters.get("show_cancelled_entries"):
-		conditions.append("is_cancelled = 0")
 
 	return "and {}".format(" and ".join(conditions)) if conditions else ""
 

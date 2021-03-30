@@ -19,17 +19,22 @@ frappe.ui.form.on('Course Scheduling Tool', {
 					}
 					const { course_schedules } = r.message;
 					if (course_schedules) {
+						const course_schedules_html = course_schedules.map(c => `
+							<tr>
+								<td><a href="/app/course-schedule/${c.name}">${c.name}</a></td>
+								<td>${c.schedule_date}</td>
+							</tr>
+						`).join('');
+
 						const html = `
-						<table class="table table-bordered">
-							<caption>${__('Following course schedules were created')}</caption>
-							<thead><tr><th>${__("Course")}</th><th>${__("Date")}</th></tr></thead>
-							<tbody>
-								${course_schedules.map(
-									c => `<tr><td><a href="#Form/Course Schedule/${c.name}">${c.name}</a></td>
-									<td>${c.schedule_date}</td></tr>`
-								).join('')}
-							</tbody>
-						</table>`
+							<table class="table table-bordered">
+								<caption>${__('Following course schedules were created')}</caption>
+								<thead><tr><th>${__("Course")}</th><th>${__("Date")}</th></tr></thead>
+								<tbody>
+									${course_schedules_html}
+								</tbody>
+							</table>
+						`;
 
 						frappe.msgprint(html);
 					}

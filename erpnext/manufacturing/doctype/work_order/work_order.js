@@ -545,7 +545,8 @@ erpnext.work_order = {
 						var tbl = frm.doc.required_items || [];
 						var tbl_lenght = tbl.length;
 						for (var i = 0, len = tbl_lenght; i < len; i++) {
-							if (flt(frm.doc.required_items[i].required_qty) > flt(frm.doc.required_items[i].consumed_qty)) {
+							let wo_item_qty = frm.doc.required_items[i].transferred_qty || frm.doc.required_items[i].required_qty;
+							if (flt(wo_item_qty) > flt(frm.doc.required_items[i].consumed_qty)) {
 								counter += 1;
 							}
 						}
@@ -636,7 +637,7 @@ erpnext.work_order = {
 				description: __('Max: {0}', [max]),
 				default: max
 			}, data => {
-				max += (max * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
+				max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
 
 				if (data.qty > max) {
 					frappe.msgprint(__('Quantity must not be more than {0}', [max]));

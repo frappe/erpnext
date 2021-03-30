@@ -368,13 +368,17 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 	searchfields = meta.get_search_fields()
 
 	search_columns = ''
+	search_cond = ''
+
 	if searchfields:
 		search_columns = ", " + ", ".join(searchfields)
+		search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
 
 	if args.get('warehouse'):
 		searchfields = ['batch.' + field for field in searchfields]
 		if searchfields:
 			search_columns = ", " + ", ".join(searchfields)
+			search_cond = " or " + " or ".join([field + " like %(txt)s" for field in searchfields])
 
 		batch_nos = frappe.db.sql("""select sle.batch_no, round(sum(sle.actual_qty),2), sle.stock_uom,
 				concat('MFG-',batch.manufacturing_date), concat('EXP-',batch.expiry_date)
@@ -387,7 +391,8 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				and sle.warehouse = %(warehouse)s
 				and (sle.batch_no like %(txt)s
 				or batch.expiry_date like %(txt)s
-				or batch.manufacturing_date like %(txt)s)
+				or batch.manufacturing_date like %(txt)s
+				{search_cond})
 				and batch.docstatus < 2
 				{cond}
 				{match_conditions}
@@ -397,7 +402,8 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 				search_columns = search_columns,
 				cond=cond,
 				match_conditions=get_match_cond(doctype),
-				having_clause = having_clause
+				having_clause = having_clause,
+				search_cond = search_cond
 			), args)
 
 		return batch_nos
@@ -409,12 +415,15 @@ def get_batch_no(doctype, txt, searchfield, start, page_len, filters):
 			and item = %(item_code)s
 			and (name like %(txt)s
 			or expiry_date like %(txt)s
-			or manufacturing_date like %(txt)s)
+			or manufacturing_date like %(txt)s
+			{search_cond})
 			and docstatus < 2
 			{0}
 			{match_conditions}
+
 			order by expiry_date, name desc
-			limit %(start)s, %(page_len)s""".format(cond, search_columns = search_columns, match_conditions=get_match_cond(doctype)), args)
+			limit %(start)s, %(page_len)s""".format(cond, search_columns = search_columns,
+			search_cond = search_cond, match_conditions=get_match_cond(doctype)), args)
 
 
 @frappe.whitelist()
@@ -484,6 +493,41 @@ def get_income_account(doctype, txt, searchfield, start, page_len, filters):
 				'company': filters.get("company", "")
 			})
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_filtered_dimensions(doctype, txt, searchfield, start, page_len, filters):
+	from erpnext.accounts.doctype.accounting_dimension_filter.accounting_dimension_filter import get_dimension_filter_map
+	dimension_filters = get_dimension_filter_map()
+	dimension_filters = dimension_filters.get((filters.get('dimension'),filters.get('account')))
+	query_filters = []
+
+	meta = frappe.get_meta(doctype)
+	if meta.is_tree:
+		query_filters.append(['is_group', '=', 0])
+
+	if meta.has_field('company'):
+		query_filters.append(['company', '=', filters.get('company')])
+
+	if txt:
+		query_filters.append([searchfield, 'LIKE', "%%%s%%" % txt])
+
+	if dimension_filters:
+		if dimension_filters['allow_or_restrict'] == 'Allow':
+			query_selector = 'in'
+		else:
+			query_selector = 'not in'
+
+		if len(dimension_filters['allowed_dimensions']) == 1:
+			dimensions = tuple(dimension_filters['allowed_dimensions'] * 2)
+		else:
+			dimensions = tuple(dimension_filters['allowed_dimensions'])
+
+		query_filters.append(['name', query_selector, dimensions])
+
+	output = frappe.get_all(doctype, filters=query_filters)
+	result = [d.name for d in output]
+
+	return [(d,) for d in set(result)]
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
@@ -607,6 +651,34 @@ def get_purchase_invoices(doctype, txt, searchfield, start, page_len, filters):
 
 	if filters and filters.get('item_code'):
 		query += " and piitem.item_code = {item_code}".format(item_code = frappe.db.escape(filters.get('item_code')))
+
+	return frappe.db.sql(query, filters)
+
+
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
+def get_healthcare_service_units(doctype, txt, searchfield, start, page_len, filters):
+	query = """
+		select name
+		from `tabHealthcare Service Unit`
+		where
+			is_group = 0
+			and company = {company}
+			and name like {txt}""".format(
+				company = frappe.db.escape(filters.get('company')), txt = frappe.db.escape('%{0}%'.format(txt)))
+
+	if filters and filters.get('inpatient_record'):
+		from erpnext.healthcare.doctype.inpatient_medication_entry.inpatient_medication_entry import get_current_healthcare_service_unit
+		service_unit = get_current_healthcare_service_unit(filters.get('inpatient_record'))
+
+		# if the patient is admitted, then appointments should be allowed against the admission service unit,
+		# inspite of it being an Inpatient Occupancy service unit
+		if service_unit:
+			query += " and (allow_appointments = 1 or name = {service_unit})".format(service_unit = frappe.db.escape(service_unit))
+		else:
+			query += " and allow_appointments = 1"
+	else:
+		query += " and allow_appointments = 1"
 
 	return frappe.db.sql(query, filters)
 

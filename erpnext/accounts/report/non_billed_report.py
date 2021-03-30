@@ -17,18 +17,26 @@ def get_ordered_to_be_billed_data(args):
 
 	return frappe.db.sql("""
 		Select
-			`{parent_tab}`.name, `{parent_tab}`.status, `{parent_tab}`.{date_field}, `{parent_tab}`.{party}, `{parent_tab}`.{party}_name,
-			{project_field}, `{child_tab}`.item_code, `{child_tab}`.base_amount,
+			`{parent_tab}`.name, `{parent_tab}`.{date_field},
+			`{parent_tab}`.{party}, `{parent_tab}`.{party}_name,
+			`{child_tab}`.item_code,
+			`{child_tab}`.base_amount,
 			(`{child_tab}`.billed_amt * ifnull(`{parent_tab}`.conversion_rate, 1)),
-			(`{child_tab}`.base_amount - (`{child_tab}`.billed_amt * ifnull(`{parent_tab}`.conversion_rate, 1))),
-			`{child_tab}`.item_name, `{child_tab}`.description, `{parent_tab}`.company
+			(`{child_tab}`.base_rate * ifnull(`{child_tab}`.returned_qty, 0)),
+			(`{child_tab}`.base_amount -
+			(`{child_tab}`.billed_amt * ifnull(`{parent_tab}`.conversion_rate, 1)) -
+			(`{child_tab}`.base_rate * ifnull(`{child_tab}`.returned_qty, 0))),
+			`{child_tab}`.item_name, `{child_tab}`.description,
+			{project_field}, `{parent_tab}`.company
 		from
 			`{parent_tab}`, `{child_tab}`
 		where
 			`{parent_tab}`.name = `{child_tab}`.parent and `{parent_tab}`.docstatus = 1
 			and `{parent_tab}`.status not in ('Closed', 'Completed')
-			and `{child_tab}`.amount > 0 and round(`{child_tab}`.billed_amt *
-			ifnull(`{parent_tab}`.conversion_rate, 1), {precision}) < `{child_tab}`.base_amount
+			and `{child_tab}`.amount > 0
+			and (`{child_tab}`.base_amount -
+			round(`{child_tab}`.billed_amt * ifnull(`{parent_tab}`.conversion_rate, 1), {precision}) -
+			(`{child_tab}`.base_rate * ifnull(`{child_tab}`.returned_qty, 0))) > 0
 		order by
 			`{parent_tab}`.{order} {order_by}
 		""".format(parent_tab = 'tab' + doctype, child_tab = 'tab' + child_tab, precision= precision, party = party,

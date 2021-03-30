@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 import frappe.share
 from frappe import _
-from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form
+from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form, date_diff, nowdate
 from erpnext.controllers.status_updater import StatusUpdater
 from erpnext.accounts.utils import get_fiscal_year
 
@@ -28,8 +28,6 @@ class TransactionBase(StatusUpdater):
 				get_time(self.posting_time)
 			except ValueError:
 				frappe.throw(_('Invalid Posting Time'))
-
-		self.validate_with_last_transaction_posting_time()
 
 	def add_calendar_event(self, opts, force=False):
 		if cstr(self.contact_by) != cstr(self._prev.contact_by) or \
@@ -159,30 +157,6 @@ class TransactionBase(StatusUpdater):
 			ret = None
 
 		return ret
-
-	def validate_with_last_transaction_posting_time(self):
-
-		if self.doctype not in ["Sales Invoice", "Purchase Invoice", "Stock Entry", "Stock Reconciliation",
-			"Delivery Note", "Purchase Receipt", "Fees"]:
-				return
-
-		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			if not (self.get("update_stock") or self.get("is_pos")):
-				return
-
-		for item in self.get('items'):
-			last_transaction_time = frappe.db.sql("""
-				select MAX(timestamp(posting_date, posting_time)) as posting_time
-				from `tabStock Ledger Entry`
-				where docstatus = 1 and item_code = %s """, (item.item_code))[0][0]
-
-			cur_doc_posting_datetime = "%s %s" % (self.posting_date, self.get("posting_time") or "00:00:00")
-
-			if last_transaction_time and get_datetime(cur_doc_posting_datetime) < get_datetime(last_transaction_time):
-				msg = _("Last Stock Transaction for item {0} was on {1}.").format(frappe.bold(item.item_code), frappe.bold(last_transaction_time))
-				msg += "<br><br>" + _("Stock Transactions for Item {0} cannot be posted before this time.").format(frappe.bold(item.item_code))
-				msg += "<br><br>" + _("Please remove this item and try to submit again or update the posting time.")
-				frappe.throw(msg, title=_("Backdated Stock Entry"))
 
 def delete_events(ref_type, ref_name):
 	events = frappe.db.sql_list(""" SELECT

@@ -1,7 +1,9 @@
 {
+ "actions": [],
  "creation": "2015-05-18 05:21:07.270859",
  "doctype": "DocType",
  "document_type": "System",
+ "engine": "InnoDB",
  "field_order": [
   "status_html",
   "enable_shopify",
@@ -40,7 +42,16 @@
   "sales_invoice_series",
   "section_break_22",
   "html_16",
-  "taxes"
+  "taxes",
+  "syncing_details_section",
+  "sync_missing_orders",
+  "sync_based_on",
+  "column_break_41",
+  "from_date",
+  "to_date",
+  "from_order_id",
+  "to_order_id",
+  "last_order_id"
  ],
  "fields": [
   {
@@ -255,10 +266,71 @@
    "fieldtype": "Table",
    "label": "Shopify Tax Account",
    "options": "Shopify Tax Account"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "syncing_details_section",
+   "fieldtype": "Section Break",
+   "label": "Syncing Missing Orders"
+  },
+  {
+   "depends_on": "eval:doc.sync_missing_orders",
+   "fieldname": "last_order_id",
+   "fieldtype": "Data",
+   "label": "Last Order Id",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_41",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "On checking this Order from the ",
+   "fieldname": "sync_missing_orders",
+   "fieldtype": "Check",
+   "label": "Sync Missing Old Shopify Orders"
+  },
+  {
+   "depends_on": "eval:doc.sync_missing_orders",
+   "fieldname": "sync_based_on",
+   "fieldtype": "Select",
+   "label": "Sync Based On",
+   "mandatory_depends_on": "eval:doc.sync_missing_orders",
+   "options": "\nDate\nShopify Order Id"
+  },
+  {
+   "depends_on": "eval:doc.sync_based_on == 'Date' && doc.sync_missing_orders",
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date",
+   "mandatory_depends_on": "eval:doc.sync_based_on == 'Date' && doc.sync_missing_orders"
+  },
+  {
+   "depends_on": "eval:doc.sync_based_on == 'Date' && doc.sync_missing_orders",
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date",
+   "mandatory_depends_on": "eval:doc.sync_based_on == 'Date' && doc.sync_missing_orders"
+  },
+  {
+   "depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders",
+   "fieldname": "from_order_id",
+   "fieldtype": "Data",
+   "label": "From Order Id",
+   "mandatory_depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders"
+  },
+  {
+   "depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders",
+   "fieldname": "to_order_id",
+   "fieldtype": "Data",
+   "label": "To Order Id",
+   "mandatory_depends_on": "eval:doc.sync_based_on == 'Shopify Order Id' && doc.sync_missing_orders"
   }
  ],
  "issingle": 1,
- "modified": "2020-09-18 17:26:09.703215",
+ "links": [],
+ "modified": "2021-03-02 17:35:41.953317",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Shopify Settings",
@@ -276,5 +348,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

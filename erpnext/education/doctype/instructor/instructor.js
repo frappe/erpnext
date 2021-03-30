@@ -41,5 +41,24 @@ frappe.ui.form.on("Instructor", {
 				}
 			};
 		});
+
+		frm.set_query("academic_term", "instructor_log", function(_doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				filters: {
+					"academic_year": d.academic_year
+				}
+			};
+		});
+
+		frm.set_query("course", "instructor_log", function(_doc, cdt, cdn) {
+			let d = locals[cdt][cdn];
+			return {
+				query: "erpnext.education.doctype.program_enrollment.program_enrollment.get_program_courses",
+				filters: {
+					"program": d.program
+				}
+			};
+		});
 	}
 });

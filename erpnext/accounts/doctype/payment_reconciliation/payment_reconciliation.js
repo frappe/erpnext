@@ -37,6 +37,11 @@ frappe.ui.form.on("Payment Reconciliation Payment", {
 erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.extend({
 	onload: function() {
 		var me = this;
+
+		this.frm.set_query("party", function() {
+			check_mandatory(me.frm);
+		});
+
 		this.frm.set_query("party_type", function() {
 			return {
 				"filters": {
@@ -46,37 +51,39 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		});
 
 		this.frm.set_query('receivable_payable_account', function() {
-			if(!me.frm.doc.company || !me.frm.doc.party_type) {
-				frappe.msgprint(__("Please select Company and Party Type first"));
-			} else {
-				return{
-					filters: {
-						"company": me.frm.doc.company,
-						"is_group": 0,
-						"account_type": frappe.boot.party_account_types[me.frm.doc.party_type]
-					}
-				};
-			}
-
+			check_mandatory(me.frm);
+			return {
+				filters: {
+					"company": me.frm.doc.company,
+					"is_group": 0,
+					"account_type": frappe.boot.party_account_types[me.frm.doc.party_type]
+				}
+			};
 		});
 
 		this.frm.set_query('bank_cash_account', function() {
-			if(!me.frm.doc.company) {
-				frappe.msgprint(__("Please select Company first"));
-			} else {
-				return{
-					filters:[
-						['Account', 'company', '=', me.frm.doc.company],
-						['Account', 'is_group', '=', 0],
-						['Account', 'account_type', 'in', ['Bank', 'Cash']]
-					]
-				};
-			}
+			check_mandatory(me.frm, true);
+			return {
+				filters:[
+					['Account', 'company', '=', me.frm.doc.company],
+					['Account', 'is_group', '=', 0],
+					['Account', 'account_type', 'in', ['Bank', 'Cash']]
+				]
+			};
 		});
 
 		this.frm.set_value('party_type', '');
 		this.frm.set_value('party', '');
 		this.frm.set_value('receivable_payable_account', '');
+
+		var check_mandatory = (frm, only_company=false) => {
+			var title = __("Mandatory");
+			if (only_company && !frm.doc.company) {
+				frappe.throw({message: __("Please Select a Company First"), title: title});
+			} else if (!frm.doc.company || !frm.doc.party_type) {
+				frappe.throw({message: __("Please Select Both Company and Party Type First"), title: title});
+			}
+		};
 	},
 
 	refresh: function() {
@@ -90,7 +97,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 	party: function() {
 		var me = this
-		if(!me.frm.doc.receivable_payable_account && me.frm.doc.party_type && me.frm.doc.party) {
+		if (!me.frm.doc.receivable_payable_account && me.frm.doc.party_type && me.frm.doc.party) {
 			return frappe.call({
 				method: "erpnext.accounts.party.get_party_account",
 				args: {
@@ -99,7 +106,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 					party: me.frm.doc.party
 				},
 				callback: function(r) {
-					if(!r.exc && r.message) {
+					if (!r.exc && r.message) {
 						me.frm.set_value("receivable_payable_account", r.message);
 					}
 				}

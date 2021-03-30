@@ -78,7 +78,7 @@ class LoanSecurityPledge(Document):
 		self.maximum_loan_value = maximum_loan_value
 
 def update_loan(loan, maximum_value_against_pledge):
-	maximum_loan_value = frappe.db.get_value('Loan', {'name': loan}, ['maximum_loan_value'])
+	maximum_loan_value = frappe.db.get_value('Loan', {'name': loan}, ['maximum_loan_amount'])
 
-	frappe.db.sql(""" UPDATE `tabLoan` SET maximum_loan_value=%s, is_secured_loan=1
+	frappe.db.sql(""" UPDATE `tabLoan` SET maximum_loan_amount=%s, is_secured_loan=1
 		WHERE name=%s""", (maximum_loan_value + maximum_value_against_pledge, loan))

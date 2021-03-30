@@ -7,7 +7,7 @@
 frappe.ui.form.on('Quotation', {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Sales Order': 'Make Sales Order'
+			'Sales Order': 'Sales Order'
 		},
 
 		frm.set_query("quotation_to", function() {
@@ -116,7 +116,7 @@ erpnext.selling.QuotationController = erpnext.selling.SellingController.extend({
 							company: me.frm.doc.company
 						}
 					})
-				}, __("Get items from"), "btn-default");
+				}, __("Get Items From"), "btn-default");
 		}
 
 		this.toggle_reqd_lead_customer();

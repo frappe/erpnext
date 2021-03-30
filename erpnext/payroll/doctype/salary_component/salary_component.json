@@ -217,7 +217,7 @@
    "fieldname": "help",
    "fieldtype": "HTML",
    "label": "Help",
-   "options": "<h3>Help</h3>\n\n<p>Notes:</p>\n\n<ol>\n<li>Use field <code>base</code> for using base salary of the Employee</li>\n<li>Use Salary Component abbreviations in conditions and formulas. <code>BS = Basic Salary</code></li>\n<li>Use field name for employee details in conditions and formulas. <code>Employment Type = employment_type</code><code>Branch = branch</code></li>\n<li>Use field name from Salary Slip in conditions and formulas. <code>Payment Days = payment_days</code><code>Leave without pay = leave_without_pay</code></li>\n<li>Direct Amount can also be entered based on Condtion. See example 3</li></ol>\n\n<h4>Examples</h4>\n<ol>\n<li>Calculating Basic Salary based on <code>base</code>\n<pre><code>Condition: base &lt; 10000</code></pre>\n<pre><code>Formula: base * .2</code></pre></li>\n<li>Calculating HRA based on Basic Salary<code>BS</code> \n<pre><code>Condition: BS &gt; 2000</code></pre>\n<pre><code>Formula: BS * .1</code></pre></li>\n<li>Calculating TDS based on Employment Type<code>employment_type</code> \n<pre><code>Condition: employment_type==\"Intern\"</code></pre>\n<pre><code>Amount: 1000</code></pre></li>\n</ol>"
+   "options": "<h3>Help</h3>\n\n<p>Notes:</p>\n\n<ol>\n<li>Use field <code>base</code> for using base salary of the Employee</li>\n<li>Use Salary Component abbreviations in conditions and formulas. <code>BS = Basic Salary</code></li>\n<li>Use field name for employee details in conditions and formulas. <code>Employment Type = employment_type</code><code>Branch = branch</code></li>\n<li>Use field name from Salary Slip in conditions and formulas. <code>Payment Days = payment_days</code><code>Leave without pay = leave_without_pay</code></li>\n<li>Direct Amount can also be entered based on Condition. See example 3</li></ol>\n\n<h4>Examples</h4>\n<ol>\n<li>Calculating Basic Salary based on <code>base</code>\n<pre><code>Condition: base &lt; 10000</code></pre>\n<pre><code>Formula: base * .2</code></pre></li>\n<li>Calculating HRA based on Basic Salary<code>BS</code> \n<pre><code>Condition: BS &gt; 2000</code></pre>\n<pre><code>Formula: BS * .1</code></pre></li>\n<li>Calculating TDS based on Employment Type<code>employment_type</code> \n<pre><code>Condition: employment_type==\"Intern\"</code></pre>\n<pre><code>Amount: 1000</code></pre></li>\n</ol>"
   },
   {
    "default": "0",
@@ -238,14 +238,13 @@
    "depends_on": "eval:doc.type == \"Deduction\"",
    "fieldname": "is_income_tax_component",
    "fieldtype": "Check",
-   "label": "Is Income Tax Component",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Is Income Tax Component"
   }
  ],
  "icon": "fa fa-flag",
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-06-22 15:39:20.826565",
+ "modified": "2020-10-07 20:38:33.795853",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Component",
