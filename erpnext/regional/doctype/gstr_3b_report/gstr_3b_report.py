@@ -172,7 +172,6 @@ class GSTR3BReport(Document):
 		self.json_output = frappe.as_json(self.report_dict)
 
 	def set_inward_nil_exempt(self, inward_nil_exempt):
-
 		self.report_dict["inward_sup"]["isup_details"][0]["inter"] = flt(inward_nil_exempt.get("gst").get("inter"), 2)
 		self.report_dict["inward_sup"]["isup_details"][0]["intra"] = flt(inward_nil_exempt.get("gst").get("intra"), 2)
 		self.report_dict["inward_sup"]["isup_details"][1]["inter"] = flt(inward_nil_exempt.get("non_gst").get("inter"), 2)
@@ -362,7 +361,7 @@ class GSTR3BReport(Document):
 			WHERE docstatus = 1 and gst_category = 'Registered Composition'
 			and month(posting_date) = %s and year(posting_date) = %s
 			and company = %s and company_gstin = %s
-			group by place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1, debug=1)
+			group by place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		inward_nil_exempt_details = {
 			"gst": {
