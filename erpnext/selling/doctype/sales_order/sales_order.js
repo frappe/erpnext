@@ -533,7 +533,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			size: "large",
 			primary_action: function() {
 				var data = d.get_values();
-				me.frm.call({
+				frappe.call({
 					method: 'erpnext.selling.doctype.sales_order.sales_order.make_raw_material_request',
 					args: {
 						items: data,
