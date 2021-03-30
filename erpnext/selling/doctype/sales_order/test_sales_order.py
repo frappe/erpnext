@@ -341,6 +341,9 @@ class TestSalesOrder(unittest.TestCase):
 		prev_total = so.get("base_total")
 		prev_total_in_words = so.get("base_in_words")
 
+		# get reserved qty before update items
+		reserved_qty_for_second_item = get_reserved_qty("_Test Item 2")
+
 		first_item_of_so = so.get("items")[0]
 		trans_item = json.dumps([
 			{'item_code' : first_item_of_so.item_code, 'rate' : first_item_of_so.rate, \
@@ -354,6 +357,10 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].rate, 200)
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
+
+		# reserved qty should increase after adding row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item + 7)
+
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 		updated_total = so.get("base_total")
@@ -373,6 +380,9 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 2)
 		make_sales_invoice(so.name)
 
+		# get reserved qty before update items
+		reserved_qty_for_second_item = get_reserved_qty("_Test Item 2")
+
 		# add an item so as to try removing items
 		trans_item = json.dumps([
 			{"item_code": '_Test Item', "qty": 5, "rate":1000, "docname": so.get("items")[0].name},
@@ -381,6 +391,9 @@ class TestSalesOrder(unittest.TestCase):
 		update_child_qty_rate('Sales Order', trans_item, so.name)
 		so.reload()
 		self.assertEqual(len(so.get("items")), 2)
+
+		# reserved qty should increase after adding row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item + 2)
 
 		# check if delivered items can be removed
 		trans_item = json.dumps([{
@@ -402,6 +415,10 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.reload()
 		self.assertEqual(len(so.get("items")), 1)
+
+		# reserved qty should decrease (back to initial) after deleting row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item)
+
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 
@@ -503,11 +520,17 @@ class TestSalesOrder(unittest.TestCase):
 
 		so = make_sales_order(item_code = "_Test Item", warehouse=None)
 
+		# get reserved qty of packed item
+		existing_reserved_qty = get_reserved_qty("_Packed Item")
+
 		added_item = json.dumps([{"item_code" : "_Product Bundle Item", "rate" : 200, 'qty' : 2}])
 		update_child_qty_rate('Sales Order', added_item, so.name)
 
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 4)
+
+		# reserved qty in packed item should increase after adding bundle item
+		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 4)
 
 		# test uom and conversion factor change
 		update_uom_conv_factor = json.dumps([{
@@ -522,6 +545,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 8)
+
+		# reserved qty in packed item should increase after changing bundle item uom
+		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 8)
 
 	def test_update_child_with_tax_template(self):
 		"""
