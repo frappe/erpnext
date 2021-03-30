@@ -12,6 +12,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
+import json
 
 from six import iteritems
 
@@ -128,15 +129,17 @@ class POSInvoiceMergeLog(Document):
 			for tax in doc.get('taxes'):
 				found = False
 				for t in taxes:
-					if t.account_head == tax.account_head and t.cost_center == tax.cost_center \
-						and t.charge_type == tax.charge_type:
+					if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
 						t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
 						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
+						update_item_wise_tax_detail(t, tax)
 						found = True
 				if not found:
+					tax.charge_type = 'Actual'
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
+					tax.item_wise_tax_detail = tax.item_wise_tax_detail
 					taxes.append(tax)
 
 			for payment in doc.get('payments'):
@@ -186,6 +189,26 @@ class POSInvoiceMergeLog(Document):
 			si = frappe.get_doc('Sales Invoice', si_name)
 			si.flags.ignore_validate = True
 			si.cancel()
+
+def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
+	consolidated_tax_detail = json.loads(consolidate_tax_row.item_wise_tax_detail)
+	tax_row_detail = json.loads(tax_row.item_wise_tax_detail)
+
+	if not consolidated_tax_detail:
+		consolidated_tax_detail = {}
+
+	for item_code, tax_data in tax_row_detail.items():
+		if consolidated_tax_detail.get(item_code):
+			consolidated_tax_data = consolidated_tax_detail.get(item_code)
+			consolidated_tax_detail.update({
+				item_code: [consolidated_tax_data[0], consolidated_tax_data[1] + tax_data[1]]
+			})
+		else:
+			consolidated_tax_detail.update({
+				item_code: [tax_data[0], tax_data[1]]
+			})
+
+	consolidate_tax_row.item_wise_tax_detail = json.dumps(consolidated_tax_detail, separators=(',', ':'))
 
 def get_all_unconsolidated_invoices():
 	filters = {
