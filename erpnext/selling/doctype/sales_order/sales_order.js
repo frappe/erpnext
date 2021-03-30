@@ -487,7 +487,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 				for_raw_material_request: 1
 			},
 			callback: function(r) {
-				if(!r.message) {
+				if(!r.message || !r.message.length) {
 					frappe.msgprint({
 						message: __('No Items with Bill of Materials.'),
 						indicator: 'orange'
@@ -507,7 +507,7 @@ erpnext.selling.SalesOrderController = erpnext.selling.SellingController.extend(
 			{fieldtype:'Check', fieldname:'include_exploded_items', default: 1, label: __('Include Exploded Items')},
 			{fieldtype:'Check', fieldname:'ignore_existing_ordered_qty', label: __('Ignore Existing Ordered Qty')},
 			{fieldtype:'Link', options: 'Warehouse', fieldname:'for_warehouse', label: __('For Warehouse'), reqd: 1,
-				get_query: () => erpnext.queries.warehouse(me.frm.doc)},
+				default: r.message && r.message[0].warehouse, get_query: () => erpnext.queries.warehouse(me.frm.doc)},
 			{
 				fieldtype:'Table', fieldname: 'items',
 				description: __('Select BOM, Qty and For Warehouse'),

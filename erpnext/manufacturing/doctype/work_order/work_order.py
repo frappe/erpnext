@@ -106,10 +106,11 @@ class WorkOrder(Document):
 			frappe.throw(_("Sales Order {0} is {1}").format(self.sales_order, status))
 
 	def set_default_warehouse(self):
-		if not self.wip_warehouse:
-			self.wip_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_wip_warehouse")
-		if not self.fg_warehouse:
-			self.fg_warehouse = frappe.db.get_single_value("Manufacturing Settings", "default_fg_warehouse")
+		warehouse_map = get_default_warehouse()
+
+		for field, warehouse in warehouse_map.items():
+			if not self.get(field) and warehouse:
+				self.set(field, warehouse)
 
 	def validate_warehouse_belongs_to_company(self):
 		warehouses = [self.fg_warehouse, self.wip_warehouse]
@@ -721,11 +722,13 @@ def make_stock_entry(work_order_id, purpose, qty=None, scrap_remaining=False):
 
 @frappe.whitelist()
 def get_default_warehouse():
-	wip_warehouse = frappe.db.get_single_value("Manufacturing Settings",
+	wip_warehouse = frappe.get_cached_value("Manufacturing Settings", None,
 		"default_wip_warehouse")
-	fg_warehouse = frappe.db.get_single_value("Manufacturing Settings",
+	fg_warehouse = frappe.get_cached_value("Manufacturing Settings", None,
 		"default_fg_warehouse")
-	return {"wip_warehouse": wip_warehouse, "fg_warehouse": fg_warehouse}
+	rm_warehouse = frappe.get_cached_value("Manufacturing Settings", None,
+		"default_rm_warehouse")
+	return {"wip_warehouse": wip_warehouse, "fg_warehouse": fg_warehouse, "source_warehouse": rm_warehouse}
 
 @frappe.whitelist()
 def stop_unstop(work_order, status):

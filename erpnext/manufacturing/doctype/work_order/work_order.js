@@ -584,9 +584,8 @@ erpnext.work_order = {
 			frappe.call({
 				method: "erpnext.manufacturing.doctype.work_order.work_order.get_default_warehouse",
 				callback: function(r) {
-					if (!r.exe) {
-						frm.set_value("wip_warehouse", r.message.wip_warehouse);
-						frm.set_value("fg_warehouse", r.message.fg_warehouse);
+					if (!r.exe && r.message) {
+						frm.set_value(r.message);
 					}
 				}
 			});
