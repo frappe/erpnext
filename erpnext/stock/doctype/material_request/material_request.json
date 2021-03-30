@@ -13,7 +13,9 @@
   "material_request_type",
   "transfer_status",
   "customer",
+  "status",
   "column_break_2",
+  "transaction_date",
   "schedule_date",
   "company",
   "amended_from",
@@ -25,11 +27,8 @@
   "scan_barcode",
   "items",
   "more_info",
-  "requested_by",
-  "transaction_date",
-  "column_break2",
-  "status",
   "per_ordered",
+  "column_break2",
   "per_received",
   "printing_details",
   "letter_head",
@@ -82,7 +81,8 @@
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "options": "Customer"
+   "options": "Customer",
+   "print_hide": 1
   },
   {
    "fieldname": "column_break_2",
@@ -92,12 +92,12 @@
    "allow_on_submit": 1,
    "fieldname": "schedule_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Required By"
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Company",
    "oldfieldname": "company",
@@ -154,17 +154,9 @@
    "options": "fa fa-file-text"
   },
   {
-   "fieldname": "requested_by",
-   "fieldtype": "Data",
-   "in_standard_filter": 1,
-   "label": "Requested For",
-   "options": "Email"
-  },
-  {
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
-   "in_list_view": 1,
    "label": "Transaction Date",
    "no_copy": 1,
    "oldfieldname": "transaction_date",
@@ -197,7 +189,7 @@
    "width": "100px"
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
+   "depends_on": "eval:doc.per_ordered > 0",
    "fieldname": "per_ordered",
    "fieldtype": "Percent",
    "label": "% Ordered",
@@ -208,7 +200,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval:doc.docstatus==1",
+   "depends_on": "eval:doc.per_received > 0",
    "fieldname": "per_received",
    "fieldtype": "Percent",
    "label": "% Received",
@@ -282,13 +274,15 @@
   },
   {
    "fieldname": "warehouse_section",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Warehouse"
   },
   {
-   "description": "Sets 'For Warehouse' in each row of the Items table.",
+   "description": "Sets 'Target Warehouse' in each row of the Items table.",
    "fieldname": "set_warehouse",
    "fieldtype": "Link",
-   "label": "Set Warehouse",
+   "in_list_view": 1,
+   "label": "Set Target Warehouse",
    "options": "Warehouse"
   },
   {
@@ -300,9 +294,10 @@
   },
   {
    "depends_on": "eval:doc.material_request_type == 'Material Transfer'",
+   "description": "Sets 'Source Warehouse' in each row of the Items table.",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
-   "label": "Set From Warehouse",
+   "label": "Set Source Warehouse",
    "options": "Warehouse"
   },
   {
@@ -319,7 +314,7 @@
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-08-10 13:27:54.891058",
+ "modified": "2020-09-19 01:04:09.285862",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

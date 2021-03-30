@@ -11,8 +11,6 @@ def execute():
 	frappe.reload_doc("HR", "doctype", "Leave Ledger Entry")
 	frappe.reload_doc("HR", "doctype", "Leave Encashment")
 	frappe.reload_doc("HR", "doctype", "Leave Type")
-	if frappe.db.a_row_exists("Leave Ledger Entry"):
-		return
 
 	if not frappe.get_meta("Leave Allocation").has_field("unused_leaves"):
 		frappe.reload_doc("HR", "doctype", "Leave Allocation")
@@ -53,7 +51,7 @@ def generate_encashment_leave_ledger_entries():
 
 	for encashment in leave_encashments:
 		if not frappe.db.exists("Leave Ledger Entry", {'transaction_type': 'Leave Encashment', 'transaction_name': encashment.name}):
-			frappe.get_doc("Leave Enchashment", encashment).create_leave_ledger_entry()
+			frappe.get_doc("Leave Encashment", encashment).create_leave_ledger_entry()
 
 def generate_expiry_allocation_ledger_entries():
 	''' fix ledger entries for missing leave allocation transaction '''

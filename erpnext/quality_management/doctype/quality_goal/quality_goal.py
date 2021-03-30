@@ -8,7 +8,5 @@ import frappe
 from frappe.model.document import Document
 
 class QualityGoal(Document):
-
 	def validate(self):
-		self.revision += 1
-		self.revised_on = frappe.utils.today()
+		pass

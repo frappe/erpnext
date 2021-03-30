@@ -10,6 +10,7 @@
  ],
  "fields": [
   {
+   "columns": 8,
    "fieldname": "process_description",
    "fieldtype": "Text Editor",
    "in_list_view": 1,
@@ -20,13 +21,14 @@
    "fieldname": "procedure",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Child Procedure",
+   "label": "Sub Procedure",
    "options": "Quality Procedure"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-06-17 15:44:38.937915",
+ "modified": "2020-10-27 13:55:11.252945",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure Process",

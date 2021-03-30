@@ -85,8 +85,7 @@ frappe.ui.form.on('Clinical Procedure', {
 								callback: function(r) {
 									if (r.message) {
 										frappe.show_alert({
-											message:  __('Stock Entry {0} created',
-												['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
+											message: __('Stock Entry {0} created', ['<a class="bold" href="/app/stock-entry/'+ r.message + '">' + r.message + '</a>']),
 											indicator: 'green'
 										});
 									}
@@ -105,8 +104,7 @@ frappe.ui.form.on('Clinical Procedure', {
 						callback: function(r) {
 							if (!r.exc) {
 								if (r.message == 'insufficient stock') {
-									let msg = __('Stock quantity to start the Procedure is not available in the Warehouse {0}. Do you want to record a Stock Entry?',
-										[frm.doc.warehouse.bold()]);
+									let msg = __('Stock quantity to start the Procedure is not available in the Warehouse {0}. Do you want to record a Stock Entry?', [frm.doc.warehouse.bold()]);
 									frappe.confirm(
 										msg,
 										function() {
@@ -366,7 +364,7 @@ let calculate_age = function(birth) {
 	let age = new Date();
 	age.setTime(ageMS);
 	let years =  age.getFullYear() - 1970;
-	return  years + ' Year(s) ' + age.getMonth() + ' Month(s) ' + age.getDate() + ' Day(s)';
+	return `${years} ${__('Years(s)')} ${age.getMonth()} ${__('Month(s)')} ${age.getDate()} ${__('Day(s)')}`;
 };
 
 // List Stock items

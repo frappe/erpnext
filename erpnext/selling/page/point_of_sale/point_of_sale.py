@@ -11,54 +11,66 @@ from erpnext.accounts.doctype.pos_invoice.pos_invoice import get_stock_availabil
 from six import string_types
 
 @frappe.whitelist()
-def get_items(start, page_length, price_list, item_group, search_value="", pos_profile=None):
+def get_items(start, page_length, price_list, item_group, pos_profile, search_value=""):
 	data = dict()
-	warehouse = ""
+	result = []
 
-	if pos_profile:
-		warehouse = frappe.db.get_value('POS Profile', pos_profile, ['warehouse'])
+	allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
+	warehouse, hide_unavailable_items = frappe.db.get_value('POS Profile', pos_profile, ['warehouse', 'hide_unavailable_items'])
 
 	if not frappe.db.exists('Item Group', item_group):
 		item_group = get_root_of('Item Group')
 
 	if search_value:
 		data = search_serial_or_batch_or_barcode_number(search_value)
-
+	
 	item_code = data.get("item_code") if data.get("item_code") else search_value
 	serial_no = data.get("serial_no") if data.get("serial_no") else ""
 	batch_no = data.get("batch_no") if data.get("batch_no") else ""
 	barcode = data.get("barcode") if data.get("barcode") else ""
 
-	condition = get_conditions(item_code, serial_no, batch_no, barcode)
+	if data:
+		item_info = frappe.db.get_value(
+			"Item", data.get("item_code"), 
+			["name as item_code", "item_name", "description", "stock_uom", "image as item_image", "is_stock_item"]
+		, as_dict=1)
+		item_info.setdefault('serial_no', serial_no)
+		item_info.setdefault('batch_no', batch_no)
+		item_info.setdefault('barcode', barcode)
 
-	if pos_profile:
-		condition += get_item_group_condition(pos_profile)
+		return { 'items': [item_info] }
+
+	condition = get_conditions(item_code, serial_no, batch_no, barcode)
+	condition += get_item_group_condition(pos_profile)
 
 	lft, rgt = frappe.db.get_value('Item Group', item_group, ['lft', 'rgt'])
-	# locate function is used to sort by closest match from the beginning of the value
 
-	result = []
+	bin_join_selection, bin_join_condition = "", ""
+	if hide_unavailable_items:
+		bin_join_selection = ", `tabBin` bin"
+		bin_join_condition = "AND bin.warehouse = %(warehouse)s AND bin.item_code = item.name AND bin.actual_qty > 0"
 
 	items_data = frappe.db.sql("""
 		SELECT
-			name AS item_code,
-			item_name,
-			description,
-			stock_uom,
-			image AS item_image,
-			idx AS idx,
-			is_stock_item
+			item.name AS item_code,
+			item.item_name,
+			item.description,
+			item.stock_uom,
+			item.image AS item_image,
+			item.is_stock_item
 		FROM
-			`tabItem`
+			`tabItem` item {bin_join_selection}
 		WHERE
-			disabled = 0
-				AND has_variants = 0
-				AND is_sales_item = 1
-				AND is_fixed_asset = 0
-				AND item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
-				AND {condition}
+			item.disabled = 0
+			AND item.is_stock_item = 1
+			AND item.has_variants = 0
+			AND item.is_sales_item = 1
+			AND item.is_fixed_asset = 0
+			AND item.item_group in (SELECT name FROM `tabItem Group` WHERE lft >= {lft} AND rgt <= {rgt})
+			AND {condition}
+			{bin_join_condition}
 		ORDER BY
-			name asc
+			item.name asc
 		LIMIT
 			{start}, {page_length}"""
 		.format(
@@ -66,8 +78,10 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 			page_length=page_length,
 			lft=lft,
 			rgt=rgt,
-			condition=condition
-		), as_dict=1)
+			condition=condition,
+			bin_join_selection=bin_join_selection,
+			bin_join_condition=bin_join_condition
+		), {'warehouse': warehouse}, as_dict=1)
 
 	if items_data:
 		items = [d.item_code for d in items_data]
@@ -82,45 +96,23 @@ def get_items(start, page_length, price_list, item_group, search_value="", pos_p
 		for item in items_data:
 			item_code = item.item_code
 			item_price = item_prices.get(item_code) or {}
-			item_stock_qty = get_stock_availability(item_code, warehouse)
-
-			if not item_stock_qty:
-				pass
+			if allow_negative_stock:
+				item_stock_qty = frappe.db.sql("""select ifnull(sum(actual_qty), 0) from `tabBin` where item_code = %s""", item_code)[0][0]
 			else:
-				row = {}
-				row.update(item)
-				row.update({
-					'price_list_rate': item_price.get('price_list_rate'),
-					'currency': item_price.get('currency'),
-					'actual_qty': item_stock_qty,
-				})
-				result.append(row)
+				item_stock_qty = get_stock_availability(item_code, warehouse)
+
+			row = {}
+			row.update(item)
+			row.update({
+				'price_list_rate': item_price.get('price_list_rate'),
+				'currency': item_price.get('currency'),
+				'actual_qty': item_stock_qty,
+			})
+			result.append(row)
 
 	res = {
 		'items': result
 	}
-
-	if len(res['items']) == 1:
-		res['items'][0].setdefault('serial_no', serial_no)
-		res['items'][0].setdefault('batch_no', batch_no)
-		res['items'][0].setdefault('barcode', barcode)
-
-		return res
-
-	if serial_no:
-		res.update({
-			'serial_no': serial_no
-		})
-
-	if batch_no:
-		res.update({
-			'batch_no': batch_no
-		})
-
-	if barcode:
-		res.update({
-			'barcode': barcode
-		})
 
 	return res
 
@@ -145,16 +137,16 @@ def search_serial_or_batch_or_barcode_number(search_value):
 
 def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
-		return "name = {0}".format(frappe.db.escape(item_code))
+		return "item.name = {0}".format(frappe.db.escape(item_code))
 
-	return """(name like {item_code}
-		or item_name like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
+	return """(item.name like {item_code}
+		or item.item_name like {item_code})""".format(item_code = frappe.db.escape('%' + item_code + '%'))
 
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"
 	item_groups = get_item_groups(pos_profile)
 	if item_groups:
-		cond = "and item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
+		cond = "and item.item_group in (%s)"%(', '.join(['%s']*len(item_groups)))
 
 	return cond % tuple(item_groups)
 
@@ -238,13 +230,31 @@ def set_customer_info(fieldname, customer, value=""):
 		frappe.db.set_value('Customer', customer, 'loyalty_program', value)
 
 	contact = frappe.get_cached_value('Customer', customer, 'customer_primary_contact')
+	if not contact:
+		contact = frappe.db.sql("""
+			SELECT parent FROM `tabDynamic Link`
+			WHERE
+				parenttype = 'Contact' AND
+				parentfield = 'links' AND
+				link_doctype = 'Customer' AND
+				link_name = %s
+			""", (customer), as_dict=1)
+		contact = contact[0].get('parent') if contact else None
 
-	if contact:
-		contact_doc = frappe.get_doc('Contact', contact)
-		if fieldname == 'email_id':
-			contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
-			frappe.db.set_value('Customer', customer, 'email_id', value)
-		elif fieldname == 'mobile_no':
-			contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
-			frappe.db.set_value('Customer', customer, 'mobile_no', value)
-		contact_doc.save()
+	if not contact:
+		new_contact = frappe.new_doc('Contact')
+		new_contact.is_primary_contact = 1
+		new_contact.first_name = customer
+		new_contact.set('links', [{'link_doctype': 'Customer', 'link_name': customer}])
+		new_contact.save()
+		contact = new_contact.name
+		frappe.db.set_value('Customer', customer, 'customer_primary_contact', contact)
+
+	contact_doc = frappe.get_doc('Contact', contact)
+	if fieldname == 'email_id':
+		contact_doc.set('email_ids', [{ 'email_id': value, 'is_primary': 1}])
+		frappe.db.set_value('Customer', customer, 'email_id', value)
+	elif fieldname == 'mobile_no':
+		contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
+		frappe.db.set_value('Customer', customer, 'mobile_no', value)
+	contact_doc.save()

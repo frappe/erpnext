@@ -11,7 +11,9 @@
   "contract_terms",
   "sb_fulfilment",
   "requires_fulfilment",
-  "fulfilment_terms"
+  "fulfilment_terms",
+  "section_break_6",
+  "contract_template_help"
  ],
  "fields": [
   {
@@ -23,8 +25,7 @@
   {
    "fieldname": "contract_terms",
    "fieldtype": "Text Editor",
-   "label": "Contract Terms and Conditions",
-   "read_only": 1
+   "label": "Contract Terms and Conditions"
   },
   {
    "fieldname": "sb_fulfilment",
@@ -42,10 +43,20 @@
    "fieldtype": "Table",
    "label": "Fulfilment Terms and Conditions",
    "options": "Contract Template Fulfilment Terms"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "contract_template_help",
+   "fieldtype": "HTML",
+   "label": "Contract Template Help",
+   "options": "<h4>Contract Template Example</h4>\n\n<pre>Contract for Customer {{ party_name }}\n\n-Valid From : {{ start_date }} \n-Valid To : {{ end_date }}\n</pre>\n\n<h4>How to get fieldnames</h4>\n\n<p>The field names you can use in your Contract Template are the fields in the Contract for which you are creating the template. You can find out the fields of any documents via Setup &gt; Customize Form View and selecting the document type (e.g. Contract)</p>\n\n<h4>Templating</h4>\n\n<p>Templates are compiled using the Jinja Templating Language. To learn more about Jinja, <a class=\"strong\" href=\"http://jinja.pocoo.org/docs/dev/templates/\">read this documentation.</a></p>"
   }
  ],
  "links": [],
- "modified": "2020-06-03 00:24:58.179816",
+ "modified": "2020-12-07 10:44:22.587047",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Contract Template",

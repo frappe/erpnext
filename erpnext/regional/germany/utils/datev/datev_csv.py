@@ -104,9 +104,9 @@ def get_header(filters, csv_class):
 		# L = Tax client number (Mandantennummer)
 		datev_settings.get('client_number', '00000'),
 		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
-		frappe.utils.formatdate(frappe.defaults.get_user_default('year_start_date'), 'yyyyMMdd'),
+		frappe.utils.formatdate(filters.get('fiscal_year_start'), 'yyyyMMdd'),
 		# N = Length of account numbers (Sachkontenlänge)
-		datev_settings.get('account_number_length', '4'),
+		str(filters.get('account_number_length', 4)),
 		# O = Transaction batch start date (YYYYMMDD)
 		frappe.utils.formatdate(filters.get('from_date'), 'yyyyMMdd') if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
 		# P = Transaction batch end date (YYYYMMDD)
@@ -155,20 +155,22 @@ def get_header(filters, csv_class):
 	return header
 
 
-def download_csv_files_as_zip(csv_data_list):
+def zip_and_download(zip_filename, csv_files):
 	"""
 	Put CSV files in a zip archive and send that to the client.
 
 	Params:
-	csv_data_list -- list of dicts [{'file_name': 'EXTF_Buchunsstapel.zip', 'csv_data': get_datev_csv()}]
+	zip_filename	Name of the zip file
+	csv_files		list of dicts [{'file_name': 'my_file.csv', 'csv_data': 'comma,separated,values'}]
 	"""
 	zip_buffer = BytesIO()
 
-	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
-	for csv_file in csv_data_list:
-		datev_zip.writestr(csv_file.get('file_name'), csv_file.get('csv_data'))
-	datev_zip.close()
+	zip_file = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
+	for csv_file in csv_files:
+		zip_file.writestr(csv_file.get('file_name'), csv_file.get('csv_data'))
+
+	zip_file.close()
 
 	frappe.response['filecontent'] = zip_buffer.getvalue()
-	frappe.response['filename'] = 'DATEV.zip'
+	frappe.response['filename'] = zip_filename
 	frappe.response['type'] = 'binary'

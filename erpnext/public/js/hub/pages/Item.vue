@@ -113,12 +113,12 @@ export default {
 
 			let stats = __('No views yet');
 			if (this.item.view_count) {
-				const views_message = __(`${this.item.view_count} Views`);
+				const views_message = __('{0} Views', [this.item.view_count]);
 
 				const rating_html = get_rating_html(this.item.average_rating);
 				const rating_count =
 					this.item.no_of_ratings > 0
-						? `${this.item.no_of_ratings} reviews`
+						? __('{0} reviews', [this.item.no_of_ratings])
 						: __('No reviews yet');
 
 				stats = [views_message, rating_html, rating_count];
@@ -310,7 +310,7 @@ export default {
 					return this.get_item_details();
 				})
 				.then(() => {
-					frappe.show_alert(__(`${this.item.item_name} Updated`));
+					frappe.show_alert(__('{0} Updated', [this.item.item_name]));
 				});
 		},
 
@@ -337,7 +337,7 @@ export default {
 		},
 
 		unpublish_item() {
-			frappe.confirm(__(`Unpublish {0}?`, [this.item.item_name]), () => {
+			frappe.confirm(__('Unpublish {0}?', [this.item.item_name]), () => {
 				frappe
 					.call('erpnext.hub_node.api.unpublish_item', {
 						item_code: this.item.item_code,

@@ -71,7 +71,7 @@ class SupplierQuotation(BuyingController):
 			doc_sup = doc_sup[0] if doc_sup else None
 			if not doc_sup:
 				frappe.throw(_("Supplier {0} not found in {1}").format(self.supplier,
-					"<a href='desk#Form/Request for Quotation/{0}'> Request for Quotation {0} </a>".format(doc.name)))
+					"<a href='desk/app/Form/Request for Quotation/{0}'> Request for Quotation {0} </a>".format(doc.name)))
 
 			quote_status = _('Received')
 			for item in doc.items:
@@ -91,12 +91,7 @@ class SupplierQuotation(BuyingController):
 					for my_item in self.items) if include_me else 0
 				if (sqi_count.count + self_count) == 0:
 					quote_status = _('Pending')
-			if quote_status == _('Received') and doc_sup.quote_status == _('No Quote'):
-				frappe.msgprint(_("{0} indicates that {1} will not provide a quotation, but all items \
-					have been quoted. Updating the RFQ quote status.").format(doc.name, self.supplier))
-				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'quote_status', quote_status)
-				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'no_quote', 0)
-			elif doc_sup.quote_status != _('No Quote'):
+
 				frappe.db.set_value('Request for Quotation Supplier', doc_sup.name, 'quote_status', quote_status)
 
 def get_list_context(context=None):

@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import cint
+from frappe.utils import cint, get_link_to_form
 from frappe.model.document import Document
 
 class AssetCategory(Document):
@@ -13,6 +13,7 @@ class AssetCategory(Document):
 		self.validate_finance_books()
 		self.validate_account_types()
 		self.validate_account_currency()
+		self.valide_cwip_account()
 
 	def validate_finance_books(self):
 		for d in self.finance_books:
@@ -58,6 +59,21 @@ class AssetCategory(Document):
 						frappe.throw(_("Row #{}: {} of {} should be {}. Please modify the account or select a different account.")
 							.format(d.idx, frappe.unscrub(key_to_match), frappe.bold(selected_account), frappe.bold(expected_key_type)),
 							title=_("Invalid Account"))
+	
+	def valide_cwip_account(self):
+		if self.enable_cwip_accounting:
+			missing_cwip_accounts_for_company = []
+			for d in self.accounts:
+				if (not d.capital_work_in_progress_account and 
+					not frappe.db.get_value("Company", d.company_name, "capital_work_in_progress_account")):
+					missing_cwip_accounts_for_company.append(get_link_to_form("Company", d.company_name))
+
+			if missing_cwip_accounts_for_company:
+				msg = _("""To enable Capital Work in Progress Accounting, """)
+				msg += _("""you must select Capital Work in Progress Account in accounts table""")
+				msg += "<br><br>"
+				msg += _("You can also set default CWIP account in Company {}").format(", ".join(missing_cwip_accounts_for_company))
+				frappe.throw(msg, title=_("Missing Account"))
 
 
 @frappe.whitelist()

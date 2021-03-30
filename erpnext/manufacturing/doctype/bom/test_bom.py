@@ -10,6 +10,8 @@ from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
 from six import string_types
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.buying.doctype.purchase_order.test_purchase_order import create_purchase_order
 
 test_records = frappe.get_test_records('BOM')
 
@@ -137,6 +139,73 @@ class TestBOM(unittest.TestCase):
 		bom.update_cost()
 
 		self.assertEqual(bom.items[0].rate, 20)
+
+	def test_subcontractor_sourced_item(self):
+		item_code = "_Test Subcontracted FG Item 1"
+
+		if not frappe.db.exists('Item', item_code):
+			make_item(item_code, {
+				'is_stock_item': 1,
+				'is_sub_contracted_item': 1,
+				'stock_uom': 'Nos'
+			})
+
+		if not frappe.db.exists('Item', "Test Extra Item 1"):
+			make_item("Test Extra Item 1", {
+				'is_stock_item': 1,
+				'stock_uom': 'Nos'
+			})
+
+		if not frappe.db.exists('Item', "Test Extra Item 2"):
+			make_item("Test Extra Item 2", {
+				'is_stock_item': 1,
+				'stock_uom': 'Nos'
+			})
+
+		if not frappe.db.exists('Item', "Test Extra Item 3"):
+			make_item("Test Extra Item 3", {
+				'is_stock_item': 1,
+				'stock_uom': 'Nos'
+			})
+		bom = frappe.get_doc({
+			'doctype': 'BOM',
+			'is_default': 1,
+			'item': item_code,
+			'currency': 'USD',
+			'quantity': 1,
+			'company': '_Test Company'
+		})
+
+		for item in ["Test Extra Item 1", "Test Extra Item 2"]:
+			item_doc = frappe.get_doc('Item', item)
+
+			bom.append('items', {
+				'item_code': item,
+				'qty': 1,
+				'uom': item_doc.stock_uom,
+				'stock_uom': item_doc.stock_uom,
+				'rate': item_doc.valuation_rate
+			})
+
+		bom.append('items', {
+			'item_code': "Test Extra Item 3",
+			'qty': 1,
+			'uom': item_doc.stock_uom,
+			'stock_uom': item_doc.stock_uom,
+			'rate': 0,
+			'sourced_by_supplier': 1
+		})
+		bom.insert(ignore_permissions=True)
+		bom.update_cost()
+		bom.submit()
+		# test that sourced_by_supplier rate is zero even after updating cost
+		self.assertEqual(bom.items[2].rate, 0)
+		# test in Purchase Order sourced_by_supplier is not added to Supplied Item
+		po = create_purchase_order(item_code=item_code, qty=1,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+		bom_items = sorted([d.item_code for d in bom.items if d.sourced_by_supplier != 1])
+		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
+		self.assertEquals(bom_items, supplied_items)
 
 def get_default_bom(item_code="_Test FG Item 2"):
 	return frappe.db.get_value("BOM", {"item": item_code, "is_active": 1, "is_default": 1})

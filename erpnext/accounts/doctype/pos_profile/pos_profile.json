@@ -6,15 +6,11 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "disabled",
-  "section_break_2",
-  "naming_series",
-  "customer",
   "company",
+  "customer",
   "country",
+  "disabled",
   "column_break_9",
-  "update_stock",
-  "ignore_pricing_rule",
   "warehouse",
   "campaign",
   "company_address",
@@ -23,8 +19,17 @@
   "section_break_11",
   "payments",
   "section_break_14",
-  "item_groups",
+  "hide_images",
+  "hide_unavailable_items",
+  "auto_add_item_to_cart",
   "column_break_16",
+  "update_stock",
+  "ignore_pricing_rule",
+  "allow_rate_change",
+  "allow_discount_change",
+  "section_break_23",
+  "item_groups",
+  "column_break_25",
   "customer_groups",
   "section_break_16",
   "print_format",
@@ -54,21 +59,6 @@
    "fieldname": "disabled",
    "fieldtype": "Check",
    "label": "Disabled"
-  },
-  {
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "naming_series",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Series",
-   "no_copy": 1,
-   "oldfieldname": "naming_series",
-   "oldfieldtype": "Select",
-   "options": "[Select]",
-   "reqd": 1
   },
   {
    "fieldname": "customer",
@@ -135,7 +125,8 @@
   },
   {
    "fieldname": "section_break_14",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Configuration"
   },
   {
    "description": "Only show Items from these Item Groups",
@@ -302,28 +293,91 @@
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "label": "Warehouse",
-   "mandatory_depends_on": "update_stock",
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
-   "options": "Warehouse"
-  },
-  {
-   "default": "0",
-   "fieldname": "update_stock",
-   "fieldtype": "Check",
-   "label": "Update Stock"
+   "options": "Warehouse",
+   "reqd": 1
   },
   {
    "default": "0",
    "fieldname": "ignore_pricing_rule",
    "fieldtype": "Check",
    "label": "Ignore Pricing Rule"
+  },
+  {
+   "default": "1",
+   "fieldname": "update_stock",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Update Stock",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_unavailable_items",
+   "fieldtype": "Check",
+   "label": "Hide Unavailable Items"
+  },
+  {
+   "default": "0",
+   "fieldname": "hide_images",
+   "fieldtype": "Check",
+   "label": "Hide Images"
+  },
+  {
+   "default": "0",
+   "fieldname": "auto_add_item_to_cart",
+   "fieldtype": "Check",
+   "label": "Automatically Add Filtered Item To Cart"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_rate_change",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Rate"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_discount_change",
+   "fieldtype": "Check",
+   "label": "Allow User to Edit Discount"
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break",
+   "label": "Filters"
+  },
+  {
+   "fieldname": "column_break_25",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
  "idx": 1,
- "links": [],
- "modified": "2020-06-29 12:20:30.977272",
+ "index_web_pages_for_search": 1,
+ "links": [
+  {
+   "group": "Invoices",
+   "link_doctype": "Sales Invoice",
+   "link_fieldname": "pos_profile"
+  },
+  {
+   "group": "Invoices",
+   "link_doctype": "POS Invoice",
+   "link_fieldname": "pos_profile"
+  },
+  {
+   "group": "Opening & Closing",
+   "link_doctype": "POS Opening Entry",
+   "link_fieldname": "pos_profile"
+  },
+  {
+   "group": "Opening & Closing",
+   "link_doctype": "POS Closing Entry",
+   "link_fieldname": "pos_profile"
+  }
+ ],
+ "modified": "2021-02-01 13:52:51.081311",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Profile",

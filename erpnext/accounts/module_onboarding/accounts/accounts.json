@@ -13,14 +13,14 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/accounts",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-08 14:06:09.033880",
+ "modified": "2020-10-30 15:41:15.547225",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Chart Of Accounts"
+   "step": "Chart of Accounts"
   },
   {
    "step": "Setup Taxes"

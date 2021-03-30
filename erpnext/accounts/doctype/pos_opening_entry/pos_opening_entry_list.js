@@ -5,7 +5,7 @@
 frappe.listview_settings['POS Opening Entry'] = {
 	get_indicator: function(doc) {
 		var status_color = {
-			"Draft": "grey",
+			"Draft": "red",
 			"Open": "orange",
 			"Closed": "green",
 			"Cancelled": "red"

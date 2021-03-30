@@ -7,6 +7,23 @@ frappe.ui.form.on('Assessment Result', {
 			frm.trigger('setup_chart');
 		}
 		frm.set_df_property('details', 'read_only', 1);
+
+		frm.set_query('course', function() {
+			return {
+				query: 'erpnext.education.doctype.program_enrollment.program_enrollment.get_program_courses',
+				filters: {
+					'program': frm.doc.program
+				}
+			};
+		});
+
+		frm.set_query('academic_term', function() {
+			return {
+				filters: {
+					'academic_year': frm.doc.academic_year
+				}
+			};
+		});
 	},
 
 	onload: function(frm) {

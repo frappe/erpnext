@@ -45,7 +45,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Min Taxable Income",
-   "options": "Company:company:default_currency"
+   "options": "currency"
   },
   {
    "fieldname": "column_break_7",
@@ -57,12 +57,12 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Max Taxable Income",
-   "options": "Company:company:default_currency"
+   "options": "currency"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-06-22 23:33:17.931912",
+ "modified": "2020-10-19 13:45:12.850090",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Income Tax Slab Other Charges",

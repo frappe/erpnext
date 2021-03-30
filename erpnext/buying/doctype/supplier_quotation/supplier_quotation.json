@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:45",
@@ -34,7 +35,6 @@
   "ignore_pricing_rule",
   "items_section",
   "items",
-  "link_to_mrs",
   "pricing_rule_details",
   "pricing_rules",
   "section_break_22",
@@ -159,6 +159,7 @@
    "default": "Today",
    "fieldname": "transaction_date",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Date",
    "oldfieldname": "transaction_date",
    "oldfieldtype": "Date",
@@ -319,12 +320,6 @@
    "oldfieldtype": "Table",
    "options": "Supplier Quotation Item",
    "reqd": 1
-  },
-  {
-   "depends_on": "eval:doc.docstatus===0 && (doc.items && doc.items.length)",
-   "fieldname": "link_to_mrs",
-   "fieldtype": "Button",
-   "label": "Link to material requests"
   },
   {
    "fieldname": "pricing_rule_details",
@@ -798,14 +793,16 @@
   {
    "fieldname": "valid_till",
    "fieldtype": "Date",
+   "in_list_view": 1,
    "label": "Valid Till"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 29,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-18 05:10:45.556792",
+ "modified": "2020-12-03 15:18:29.073368",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation",

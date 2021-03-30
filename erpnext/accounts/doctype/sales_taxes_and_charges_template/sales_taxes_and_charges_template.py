@@ -34,6 +34,9 @@ def valdiate_taxes_and_charges_template(doc):
 
 	validate_disabled(doc)
 
+	# Validate with existing taxes and charges template for unique tax category
+	validate_for_tax_category(doc)
+
 	for tax in doc.get("taxes"):
 		validate_taxes_and_charges(tax)
 		validate_inclusive_tax(tax, doc)
@@ -41,3 +44,7 @@ def valdiate_taxes_and_charges_template(doc):
 def validate_disabled(doc):
 	if doc.is_default and doc.disabled:
 		frappe.throw(_("Disabled template must not be default template"))
+
+def validate_for_tax_category(doc):
+	if frappe.db.exists(doc.doctype, {"company": doc.company, "tax_category": doc.tax_category, "disabled": 0, "name": ["!=", doc.name]}):
+		frappe.throw(_("A template with tax category {0} already exists. Only one template is allowed with each tax category").format(frappe.bold(doc.tax_category)))

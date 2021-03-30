@@ -36,6 +36,11 @@ class FiscalYear(Document):
 					frappe.throw(_("Cannot change Fiscal Year Start Date and Fiscal Year End Date once the Fiscal Year is saved."))
 
 	def validate_dates(self):
+		if self.is_short_year:
+			# Fiscal Year can be shorter than one year, in some jurisdictions
+			# under certain circumstances. For example, in the USA and Germany.
+			return
+
 		if getdate(self.year_start_date) > getdate(self.year_end_date):
 			frappe.throw(_("Fiscal Year Start Date should be one year earlier than Fiscal Year End Date"),
 				FiscalYearIncorrectDate)
@@ -116,12 +121,8 @@ def auto_create_fiscal_year():
 			pass
 
 def get_from_and_to_date(fiscal_year):
-	from_and_to_date_tuple = frappe.db.sql("""select year_start_date, year_end_date
-		from `tabFiscal Year` where name=%s""", (fiscal_year))[0]
-
-	from_and_to_date = {
-		"from_date": from_and_to_date_tuple[0],
-		"to_date": from_and_to_date_tuple[1]
-	}
-
-	return from_and_to_date
+	fields = [
+		"year_start_date as from_date",
+		"year_end_date as to_date"
+	]
+	return frappe.db.get_value("Fiscal Year", fiscal_year, fields, as_dict=1)

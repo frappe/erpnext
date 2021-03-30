@@ -22,22 +22,36 @@ frappe.ui.form.on('Patient Appointment', {
 				filters: {'status': 'Active'}
 			};
 		});
+
 		frm.set_query('practitioner', function() {
+			if (frm.doc.department) {
+				return {
+					filters: {
+						'department': frm.doc.department
+					}
+				};
+			}
+		});
+
+		frm.set_query('service_unit', function() {
 			return {
+				query: 'erpnext.controllers.queries.get_healthcare_service_units',
 				filters: {
-					'department': frm.doc.department
+					company: frm.doc.company,
+					inpatient_record: frm.doc.inpatient_record
 				}
 			};
 		});
-		frm.set_query('service_unit', function(){
+
+		frm.set_query('therapy_plan', function() {
 			return {
 				filters: {
-					'is_group': false,
-					'allow_appointments': true,
-					'company': frm.doc.company
+					'patient': frm.doc.patient
 				}
 			};
 		});
+
+		frm.trigger('set_therapy_type_filter');
 
 		if (frm.is_new()) {
 			frm.page.set_primary_action(__('Check Availability'), function() {
@@ -128,11 +142,74 @@ frappe.ui.form.on('Patient Appointment', {
 	patient: function(frm) {
 		if (frm.doc.patient) {
 			frm.trigger('toggle_payment_fields');
+			frappe.call({
+				method: 'frappe.client.get',
+				args: {
+					doctype: 'Patient',
+					name: frm.doc.patient
+				},
+				callback: function (data) {
+					let age = null;
+					if (data.message.dob) {
+						age = calculate_age(data.message.dob);
+					}
+					frappe.model.set_value(frm.doctype, frm.docname, 'patient_age', age);
+				}
+			});
 		} else {
 			frm.set_value('patient_name', '');
 			frm.set_value('patient_sex', '');
 			frm.set_value('patient_age', '');
 			frm.set_value('inpatient_record', '');
+		}
+	},
+
+	practitioner: function(frm) {
+		if (frm.doc.practitioner ) {
+			frm.events.set_payment_details(frm);
+		}
+	},
+
+	appointment_type: function(frm) {
+		if (frm.doc.appointment_type) {
+			frm.events.set_payment_details(frm);
+		}
+	},
+
+	set_payment_details: function(frm) {
+		frappe.db.get_single_value('Healthcare Settings', 'automate_appointment_invoicing').then(val => {
+			if (val) {
+				frappe.call({
+					method: 'erpnext.healthcare.utils.get_service_item_and_practitioner_charge',
+					args: {
+						doc: frm.doc
+					},
+					callback: function(data) {
+						if (data.message) {
+							frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', data.message.practitioner_charge);
+							frappe.model.set_value(frm.doctype, frm.docname, 'billing_item', data.message.service_item);
+						}
+					}
+				});
+			}
+		});
+	},
+
+	therapy_plan: function(frm) {
+		frm.trigger('set_therapy_type_filter');
+	},
+
+	set_therapy_type_filter: function(frm) {
+		if (frm.doc.therapy_plan) {
+			frm.call('get_therapy_types').then(r => {
+				frm.set_query('therapy_type', function() {
+					return {
+						filters: {
+							'name': ['in', r.message]
+						}
+					};
+				});
+			});
 		}
 	},
 
@@ -160,14 +237,18 @@ frappe.ui.form.on('Patient Appointment', {
 					// show payment fields as non-mandatory
 					frm.toggle_display('mode_of_payment', 0);
 					frm.toggle_display('paid_amount', 0);
+					frm.toggle_display('billing_item', 0);
 					frm.toggle_reqd('mode_of_payment', 0);
 					frm.toggle_reqd('paid_amount', 0);
+					frm.toggle_reqd('billing_item', 0);
 				} else {
 					// if automated appointment invoicing is disabled, hide fields
 					frm.toggle_display('mode_of_payment', data.message ? 1 : 0);
 					frm.toggle_display('paid_amount', data.message ? 1 : 0);
+					frm.toggle_display('billing_item', data.message ? 1 : 0);
 					frm.toggle_reqd('mode_of_payment', data.message ? 1 : 0);
 					frm.toggle_reqd('paid_amount', data.message ? 1 :0);
+					frm.toggle_reqd('billing_item', data.message ? 1 : 0);
 				}
 			}
 		});
@@ -510,61 +591,10 @@ let update_status = function(frm, status){
 	);
 };
 
-frappe.ui.form.on('Patient Appointment', 'practitioner', function(frm) {
-	if (frm.doc.practitioner) {
-		frappe.call({
-			method: 'frappe.client.get',
-			args: {
-				doctype: 'Healthcare Practitioner',
-				name: frm.doc.practitioner
-			},
-			callback: function (data) {
-				frappe.model.set_value(frm.doctype, frm.docname, 'department', data.message.department);
-				frappe.model.set_value(frm.doctype, frm.docname, 'paid_amount', data.message.op_consulting_charge);
-				frappe.model.set_value(frm.doctype, frm.docname, 'billing_item', data.message.op_consulting_charge_item);
-			}
-		});
-	}
-});
-
-frappe.ui.form.on('Patient Appointment', 'patient', function(frm) {
-	if (frm.doc.patient) {
-		frappe.call({
-			method: 'frappe.client.get',
-			args: {
-				doctype: 'Patient',
-				name: frm.doc.patient
-			},
-			callback: function (data) {
-				let age = null;
-				if (data.message.dob) {
-					age = calculate_age(data.message.dob);
-				}
-				frappe.model.set_value(frm.doctype,frm.docname, 'patient_age', age);
-			}
-		});
-	}
-});
-
-frappe.ui.form.on('Patient Appointment', 'appointment_type', function(frm) {
-	if (frm.doc.appointment_type) {
-		frappe.call({
-			method: 'frappe.client.get',
-			args: {
-				doctype: 'Appointment Type',
-				name: frm.doc.appointment_type
-			},
-			callback: function(data) {
-				frappe.model.set_value(frm.doctype,frm.docname, 'duration',data.message.default_duration);
-			}
-		});
-	}
-});
-
 let calculate_age = function(birth) {
 	let ageMS = Date.parse(Date()) - Date.parse(birth);
 	let age = new Date();
 	age.setTime(ageMS);
 	let years =  age.getFullYear() - 1970;
-	return  years + ' Year(s) ' + age.getMonth() + ' Month(s) ' + age.getDate() + ' Day(s)';
+	return `${years} ${__('Years(s)')} ${age.getMonth()} ${__('Month(s)')} ${age.getDate()} ${__('Day(s)')}`;
 };

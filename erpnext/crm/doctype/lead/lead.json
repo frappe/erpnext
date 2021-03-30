@@ -49,6 +49,7 @@
   "phone",
   "mobile_no",
   "fax",
+  "website",
   "more_info",
   "type",
   "market_segment",
@@ -56,8 +57,8 @@
   "request_type",
   "column_break3",
   "company",
-  "website",
   "territory",
+  "language",
   "unsubscribed",
   "blog_subscriber",
   "title"
@@ -241,6 +242,7 @@
   },
   {
    "depends_on": "eval: doc.__islocal",
+   "description": "Home, Work, etc.",
    "fieldname": "address_title",
    "fieldtype": "Data",
    "label": "Address Title"
@@ -249,7 +251,8 @@
    "depends_on": "eval: doc.__islocal",
    "fieldname": "address_line1",
    "fieldtype": "Data",
-   "label": "Address Line 1"
+   "label": "Address Line 1",
+   "mandatory_depends_on": "eval: doc.address_title && doc.address_type"
   },
   {
    "depends_on": "eval: doc.__islocal",
@@ -261,7 +264,8 @@
    "depends_on": "eval: doc.__islocal",
    "fieldname": "city",
    "fieldtype": "Data",
-   "label": "City/Town"
+   "label": "City/Town",
+   "mandatory_depends_on": "eval: doc.address_title && doc.address_type"
   },
   {
    "depends_on": "eval: doc.__islocal",
@@ -280,6 +284,7 @@
    "fieldname": "country",
    "fieldtype": "Link",
    "label": "Country",
+   "mandatory_depends_on": "eval: doc.address_title && doc.address_type",
    "options": "Country"
   },
   {
@@ -443,13 +448,19 @@
    "fieldtype": "Select",
    "label": "Address Type",
    "options": "Billing\nShipping\nOffice\nPersonal\nPlant\nPostal\nShop\nSubsidiary\nWarehouse\nCurrent\nPermanent\nOther"
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Print Language",
+   "options": "Language"
   }
  ],
  "icon": "fa fa-user",
  "idx": 5,
  "image_field": "image",
  "links": [],
- "modified": "2020-06-18 14:39:41.835416",
+ "modified": "2021-01-06 19:39:58.748978",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Lead",

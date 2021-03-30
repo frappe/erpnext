@@ -5,23 +5,19 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.utils import flt, cstr, cint, comma_and, today, getdate, formatdate, now
 from frappe import _
-from erpnext.accounts.utils import get_stock_and_account_balance
 from frappe.model.meta import get_field_precision
 from erpnext.accounts.doctype.budget.budget import validate_expense_against_budget
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
 
-
 class ClosedAccountingPeriod(frappe.ValidationError): pass
-class StockAccountInvalidTransaction(frappe.ValidationError): pass
-class StockValueAndAccountBalanceOutOfSync(frappe.ValidationError): pass
 
-def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes'):
+def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, update_outstanding='Yes', from_repost=False):
 	if gl_map:
 		if not cancel:
 			validate_accounting_period(gl_map)
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
-				save_entries(gl_map, adv_adj, update_outstanding)
+				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
 			else:
 				frappe.throw(_("Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction."))
 		else:
@@ -48,9 +44,9 @@ def validate_accounting_period(gl_map):
 		frappe.throw(_("You cannot create or cancel any accounting entries with in the closed Accounting Period {0}")
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
-def process_gl_map(gl_map, merge_entries=True):
+def process_gl_map(gl_map, merge_entries=True, precision=None):
 	if merge_entries:
-		gl_map = merge_similar_entries(gl_map)
+		gl_map = merge_similar_entries(gl_map, precision)
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
 		if flt(entry.debit) < 0:
@@ -73,7 +69,7 @@ def process_gl_map(gl_map, merge_entries=True):
 
 	return gl_map
 
-def merge_similar_entries(gl_map):
+def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
 	for entry in gl_map:
@@ -92,7 +88,9 @@ def merge_similar_entries(gl_map):
 
 	company = gl_map[0].company if gl_map else erpnext.get_default_company()
 	company_currency = erpnext.get_company_currency(company)
-	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+
+	if not precision:
+		precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(lambda x: flt(x.debit, precision)!=0 or flt(x.credit, precision)!=0, merged_gl_map)
@@ -119,8 +117,9 @@ def check_if_in_list(gle, gl_map, dimensions=None):
 		if same_head:
 			return e
 
-def save_entries(gl_map, adv_adj, update_outstanding):
-	validate_cwip_accounts(gl_map)
+def save_entries(gl_map, adv_adj, update_outstanding, from_repost=False):
+	if not from_repost:
+		validate_cwip_accounts(gl_map)
 
 	round_off_debit_credit(gl_map)
 
@@ -128,76 +127,19 @@ def save_entries(gl_map, adv_adj, update_outstanding):
 		check_freezing_date(gl_map[0]["posting_date"], adv_adj)
 
 	for entry in gl_map:
-		make_entry(entry, adv_adj, update_outstanding)
+		make_entry(entry, adv_adj, update_outstanding, from_repost)
 
-		# check against budget
-		validate_expense_against_budget(entry)
-
-	validate_account_for_perpetual_inventory(gl_map)
-
-
-def make_entry(args, adv_adj, update_outstanding):
+def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle = frappe.new_doc("GL Entry")
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
-	gle.insert()
-	gle.run_method("on_update_with_args", adv_adj, update_outstanding)
+	gle.flags.from_repost = from_repost
+	gle.flags.adv_adj = adv_adj
+	gle.flags.update_outstanding = update_outstanding or 'Yes'
 	gle.submit()
 
-	# check against budget
-	validate_expense_against_budget(args)
-
-def validate_account_for_perpetual_inventory(gl_map):
-	if cint(erpnext.is_perpetual_inventory_enabled(gl_map[0].company)):
-		account_list = [gl_entries.account for gl_entries in gl_map]
-
-		aii_accounts = [d.name for d in frappe.get_all("Account",
-			filters={'account_type': 'Stock', 'is_group': 0, 'company': gl_map[0].company})]
-
-		for account in account_list:
-			if account not in aii_accounts:
-				continue
-
-			# Always use current date to get stock and account balance as there can future entries for
-			# other items
-			account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(account,
-				getdate(), gl_map[0].company)
-
-			if gl_map[0].voucher_type=="Journal Entry":
-				# In case of Journal Entry, there are no corresponding SL entries,
-				# hence deducting currency amount
-				account_bal -= flt(gl_map[0].debit) - flt(gl_map[0].credit)
-				if account_bal == stock_bal:
-					frappe.throw(_("Account: {0} can only be updated via Stock Transactions")
-						.format(account), StockAccountInvalidTransaction)
-
-			elif account_bal != stock_bal:
-				precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"),
-					currency=frappe.get_cached_value('Company',  gl_map[0].company,  "default_currency"))
-
-				diff = flt(stock_bal - account_bal, precision)
-				error_reason = _("Stock Value ({0}) and Account Balance ({1}) are out of sync for account {2} and it's linked warehouses.").format(
-					stock_bal, account_bal, frappe.bold(account))
-				error_resolution = _("Please create adjustment Journal Entry for amount {0} ").format(frappe.bold(diff))
-				stock_adjustment_account = frappe.db.get_value("Company",gl_map[0].company,"stock_adjustment_account")
-
-				db_or_cr_warehouse_account =('credit_in_account_currency' if diff < 0 else 'debit_in_account_currency')
-				db_or_cr_stock_adjustment_account = ('debit_in_account_currency' if diff < 0 else 'credit_in_account_currency')
-
-				journal_entry_args = {
-				'accounts':[
-					{'account': account, db_or_cr_warehouse_account : abs(diff)},
-					{'account': stock_adjustment_account, db_or_cr_stock_adjustment_account : abs(diff) }]
-				}
-
-				frappe.msgprint(msg="""{0}<br></br>{1}<br></br>""".format(error_reason, error_resolution),
-					raise_exception=StockValueAndAccountBalanceOutOfSync,
-					title=_('Values Out Of Sync'),
-					primary_action={
-						'label': _('Make Journal Entry'),
-						'client_action': 'erpnext.route_to_adjustment_jv',
-						'args': journal_entry_args
-					})
+	if not from_repost:
+		validate_expense_against_budget(args)
 
 def validate_cwip_accounts(gl_map):
 	cwip_enabled = any([cint(ac.enable_cwip_accounting) for ac in frappe.db.get_all("Asset Category","enable_cwip_accounting")])
@@ -254,7 +196,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 
 	if not round_off_gle:
 		for k in ["voucher_type", "voucher_no", "company",
-			"posting_date", "remarks", "is_opening"]:
+			"posting_date", "remarks"]:
 				round_off_gle[k] = gl_map[0][k]
 
 	round_off_gle.update({
@@ -266,6 +208,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 		"cost_center": round_off_cost_center,
 		"party_type": None,
 		"party": None,
+		"is_opening": "No",
 		"against_voucher_type": None,
 		"against_voucher": None
 	})

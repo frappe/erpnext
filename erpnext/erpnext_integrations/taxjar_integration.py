@@ -1,5 +1,7 @@
 import traceback
 
+import taxjar
+
 import frappe
 from erpnext import get_default_company
 from frappe import _
@@ -29,7 +31,6 @@ def get_client():
 
 
 def create_transaction(doc, method):
-	import taxjar
 	"""Create an order transaction in TaxJar"""
 
 	if not TAXJAR_CREATE_TRANSACTIONS:

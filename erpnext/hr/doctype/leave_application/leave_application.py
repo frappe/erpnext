@@ -40,7 +40,8 @@ class LeaveApplication(Document):
 	def on_update(self):
 		if self.status == "Open" and self.docstatus < 1:
 			# notify leave approver about creation
-			self.notify_leave_approver()
+			if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+				self.notify_leave_approver()
 
 	def on_submit(self):
 		if self.status == "Open":
@@ -50,7 +51,8 @@ class LeaveApplication(Document):
 		self.update_attendance()
 
 		# notify leave applier about approval
-		self.notify_employee()
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
 		self.create_leave_ledger_entry()
 		self.reload()
 
@@ -60,7 +62,8 @@ class LeaveApplication(Document):
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
 		# notify leave applier about cancellation
-		self.notify_employee()
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
 		self.cancel_attendance()
 
 	def validate_applicable_after(self):
@@ -130,8 +133,7 @@ class LeaveApplication(Document):
 		if self.status == "Approved":
 			for dt in daterange(getdate(self.from_date), getdate(self.to_date)):
 				date = dt.strftime("%Y-%m-%d")
-				status = "Half Day" if getdate(date) == getdate(self.half_day_date) else "On Leave"
-
+				status = "Half Day" if self.half_day_date and getdate(date) == getdate(self.half_day_date) else "On Leave"
 				attendance_name = frappe.db.exists('Attendance', dict(employee = self.employee,
 					attendance_date = date, docstatus = ('!=', 2)))
 
@@ -246,7 +248,7 @@ class LeaveApplication(Document):
 	def throw_overlap_error(self, d):
 		msg = _("Employee {0} has already applied for {1} between {2} and {3} : ").format(self.employee,
 			d['leave_type'], formatdate(d['from_date']), formatdate(d['to_date'])) \
-			+ """ <b><a href="#Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
+			+ """ <b><a href="/app/Form/Leave Application/{0}">{0}</a></b>""".format(d["name"])
 		frappe.throw(msg, OverlapError)
 
 	def get_total_leaves_on_half_day(self):
@@ -293,7 +295,8 @@ class LeaveApplication(Document):
 	def set_half_day_date(self):
 		if self.from_date == self.to_date and self.half_day == 1:
 			self.half_day_date = self.from_date
-		elif self.half_day == 0:
+
+		if self.half_day == 0:
 			self.half_day_date = None
 
 	def notify_employee(self):
@@ -376,24 +379,32 @@ class LeaveApplication(Document):
 		if expiry_date:
 			self.create_ledger_entry_for_intermediate_allocation_expiry(expiry_date, submit, lwp)
 		else:
+			raise_exception = True
+			if frappe.flags.in_patch:
+				raise_exception=False
+
 			args = dict(
 				leaves=self.total_leave_days * -1,
 				from_date=self.from_date,
 				to_date=self.to_date,
 				is_lwp=lwp,
-				holiday_list=get_holiday_list_for_employee(self.employee)
+				holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
 			)
 			create_leave_ledger_entry(self, args, submit)
 
 	def create_ledger_entry_for_intermediate_allocation_expiry(self, expiry_date, submit, lwp):
 		''' splits leave application into two ledger entries to consider expiry of allocation '''
+
+		raise_exception = True
+		if frappe.flags.in_patch:
+			raise_exception=False
+
 		args = dict(
 			from_date=self.from_date,
 			to_date=expiry_date,
 			leaves=(date_diff(expiry_date, self.from_date) + 1) * -1,
 			is_lwp=lwp,
-			holiday_list=get_holiday_list_for_employee(self.employee),
-
+			holiday_list=get_holiday_list_for_employee(self.employee, raise_exception=raise_exception) or ''
 		)
 		create_leave_ledger_entry(self, args, submit)
 

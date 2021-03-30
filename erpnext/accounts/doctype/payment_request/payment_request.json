@@ -48,6 +48,7 @@
   "section_break_7",
   "payment_gateway",
   "payment_account",
+  "payment_channel",
   "payment_order",
   "amended_from"
  ],
@@ -230,6 +231,7 @@
    "label": "Recipient Message And Payment Details"
   },
   {
+   "depends_on": "eval: doc.payment_channel != \"Phone\"",
    "fieldname": "print_format",
    "fieldtype": "Select",
    "label": "Print Format"
@@ -241,6 +243,7 @@
    "label": "To"
   },
   {
+   "depends_on": "eval: doc.payment_channel != \"Phone\"",
    "fieldname": "subject",
    "fieldtype": "Data",
    "in_global_search": 1,
@@ -277,16 +280,18 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.payment_request_type == 'Inward'",
+   "depends_on": "eval: doc.payment_request_type == 'Inward' || doc.payment_channel != \"Phone\"",
    "fieldname": "section_break_10",
    "fieldtype": "Section Break"
   },
   {
+   "depends_on": "eval: doc.payment_channel != \"Phone\"",
    "fieldname": "message",
    "fieldtype": "Text",
    "label": "Message"
   },
   {
+   "depends_on": "eval: doc.payment_channel != \"Phone\"",
    "fieldname": "message_examples",
    "fieldtype": "HTML",
    "label": "Message Examples",
@@ -347,12 +352,21 @@
    "options": "Payment Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "payment_gateway_account.payment_channel",
+   "fieldname": "payment_channel",
+   "fieldtype": "Select",
+   "label": "Payment Channel",
+   "options": "\nEmail\nPhone",
+   "read_only": 1
   }
  ],
  "in_create": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-17 14:06:42.185763",
+ "modified": "2020-09-18 12:24:14.178853",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Request",

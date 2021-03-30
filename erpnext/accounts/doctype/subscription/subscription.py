@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 # Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 # For license information, please see license.txt
@@ -5,12 +6,13 @@
 from __future__ import unicode_literals
 
 import frappe
+import erpnext
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils.data import nowdate, getdate, cstr, cint, add_days, date_diff, get_last_day, add_to_date, flt
 from erpnext.accounts.doctype.subscription_plan.subscription_plan import get_plan_rate
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
-
+from erpnext import get_default_company
 
 class Subscription(Document):
 	def before_insert(self):
@@ -243,6 +245,7 @@ class Subscription(Document):
 		self.validate_plans_billing_cycle(self.get_billing_cycle_and_interval())
 		self.validate_end_date()
 		self.validate_to_follow_calendar_months()
+		self.cost_center = erpnext.get_default_cost_center(self.get('company'))
 
 	def validate_trial_period(self):
 		"""
@@ -304,6 +307,14 @@ class Subscription(Document):
 		doctype = 'Sales Invoice' if self.party_type == 'Customer' else 'Purchase Invoice'
 
 		invoice = frappe.new_doc(doctype)
+
+		# For backward compatibility
+		# Earlier subscription didn't had any company field
+		company = self.get('company') or get_default_company()
+		if not company:
+			frappe.throw(_("Company is mandatory was generating invoice. Please set default company in Global Defaults"))
+
+		invoice.company = company
 		invoice.set_posting_time = 1
 		invoice.posting_date = self.current_invoice_start if self.generate_invoice_at_period_start \
 			else self.current_invoice_end
@@ -330,6 +341,7 @@ class Subscription(Document):
 		# for that reason
 		items_list = self.get_items_from_plans(self.plans, prorate)
 		for item in items_list:
+			item['cost_center'] = self.cost_center
 			invoice.append('items', item)
 
 		# Taxes
@@ -345,13 +357,14 @@ class Subscription(Document):
 			invoice.set_taxes()
 
 		# Due date
-		invoice.append(
-			'payment_schedule',
-			{
-				'due_date': add_days(invoice.posting_date, cint(self.days_until_due)),
-				'invoice_portion': 100
-			}
-		)
+		if self.days_until_due:
+			invoice.append(
+				'payment_schedule',
+				{
+					'due_date': add_days(invoice.posting_date, cint(self.days_until_due)),
+					'invoice_portion': 100
+				}
+			)
 
 		# Discounts
 		if self.additional_discount_percentage:
@@ -379,7 +392,8 @@ class Subscription(Document):
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
 		if prorate:
-			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
+			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start,
+				self.generate_invoice_at_period_start)
 
 		items = []
 		party = self.party
@@ -445,7 +459,7 @@ class Subscription(Document):
 		if not self.generate_invoice_at_period_start:
 			return False
 
-		if self.is_new_subscription():
+		if self.is_new_subscription() and getdate() >= getdate(self.current_invoice_start):
 			return True
 
 		# Check invoice dates and make sure it doesn't have outstanding invoices
@@ -582,10 +596,13 @@ def get_calendar_months(billing_interval):
 
 	return calendar_months
 
-def get_prorata_factor(period_end, period_start):
-	diff = flt(date_diff(nowdate(), period_start) + 1)
-	plan_days = flt(date_diff(period_end, period_start) + 1)
-	prorate_factor = diff / plan_days
+def get_prorata_factor(period_end, period_start, is_prepaid):
+	if is_prepaid:
+		prorate_factor = 1
+	else:
+		diff = flt(date_diff(nowdate(), period_start) + 1)
+		plan_days = flt(date_diff(period_end, period_start) + 1)
+		prorate_factor = diff / plan_days
 
 	return prorate_factor
 

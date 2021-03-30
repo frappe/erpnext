@@ -1,10 +1,10 @@
 {% for d in data %}
 	<div class="dashboard-list-item">
 		<div class="row">
-			<div class="col-sm-3 small" style="margin-top: 8px;">
+			<div class="col-sm-3" style="margin-top: 8px;">
 				<a data-type="warehouse" data-name="{{ d.warehouse }}">{{ d.warehouse }}</a>
 			</div>
-			<div class="col-sm-3 small" style="margin-top: 8px;">
+			<div class="col-sm-3" style="margin-top: 8px;">
 				{% if show_item %}
 					<a data-type="item"
 						data-name="{{ d.item_code }}">{{ d.item_code }}
@@ -12,7 +12,7 @@
 					</a>
 				{% endif %}
 			</div>
-			<div class="col-sm-4 small">
+			<div class="col-sm-4">
 				<span class="inline-graph">
 					<span class="inline-graph-half" title="{{ __("Reserved Qty") }}">
 						<span class="inline-graph-count">{{ d.total_reserved }}</span>
@@ -40,7 +40,7 @@
 				</span>
 			</div>
 			{% if can_write %}
-			<div class="col-sm-2 text-right" style="margin-top: 8px;">
+			<div class="col-sm-2 text-right" style="margin: var(--margin-sm) 0;">
 				{% if d.actual_qty %}
 				<button class="btn btn-default btn-xs btn-move"
 					data-disable_quick_entry="{{ d.disable_quick_entry }}"

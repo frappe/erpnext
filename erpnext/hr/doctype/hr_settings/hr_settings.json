@@ -13,6 +13,7 @@
   "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
   "leave_settings",
+  "send_leave_notification",
   "leave_approval_notification_template",
   "leave_status_notification_template",
   "role_allowed_to_create_backdated_leave_application",
@@ -21,6 +22,7 @@
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
   "restrict_backdated_leave_application",
+  "automatically_allocate_leaves_based_on_leave_policy",
   "hiring_settings",
   "check_vacancies"
  ],
@@ -28,144 +30,126 @@
   {
    "fieldname": "employee_settings",
    "fieldtype": "Section Break",
-   "label": "Employee Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Employee Settings"
   },
   {
    "description": "Enter retirement age in years",
    "fieldname": "retirement_age",
    "fieldtype": "Data",
-   "label": "Retirement Age",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Retirement Age"
   },
   {
    "default": "Naming Series",
-   "description": "Employee record is created using selected field. ",
+   "description": "Employee records are created using the selected field",
    "fieldname": "emp_created_by",
    "fieldtype": "Select",
    "label": "Employee Records to be created by",
-   "options": "Naming Series\nEmployee Number\nFull Name",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Naming Series\nEmployee Number\nFull Name"
   },
   {
    "fieldname": "column_break_4",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "0",
-   "description": "Don't send Employee Birthday Reminders",
+   "description": "Don't send employee birthday reminders",
    "fieldname": "stop_birthday_reminders",
    "fieldtype": "Check",
-   "label": "Stop Birthday Reminders",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Stop Birthday Reminders"
   },
   {
    "default": "1",
    "fieldname": "expense_approver_mandatory_in_expense_claim",
    "fieldtype": "Check",
-   "label": "Expense Approver Mandatory In Expense Claim",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Expense Approver Mandatory In Expense Claim"
   },
   {
    "collapsible": 1,
    "fieldname": "leave_settings",
    "fieldtype": "Section Break",
-   "label": "Leave Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Leave Settings"
   },
   {
+   "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_approval_notification_template",
    "fieldtype": "Link",
    "label": "Leave Approval Notification Template",
-   "options": "Email Template",
-   "show_days": 1,
-   "show_seconds": 1
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
+   "options": "Email Template"
   },
   {
+   "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_status_notification_template",
    "fieldtype": "Link",
    "label": "Leave Status Notification Template",
-   "options": "Email Template",
-   "show_days": 1,
-   "show_seconds": 1
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
+   "options": "Email Template"
   },
   {
    "fieldname": "column_break_18",
-   "fieldtype": "Column Break",
-   "show_days": 1,
-   "show_seconds": 1
+   "fieldtype": "Column Break"
   },
   {
    "default": "1",
    "fieldname": "leave_approver_mandatory_in_leave_application",
    "fieldtype": "Check",
-   "label": "Leave Approver Mandatory In Leave Application",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Leave Approver Mandatory In Leave Application"
   },
   {
    "default": "0",
    "fieldname": "show_leaves_of_all_department_members_in_calendar",
    "fieldtype": "Check",
-   "label": "Show Leaves Of All Department Members In Calendar",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Show Leaves Of All Department Members In Calendar"
   },
   {
    "collapsible": 1,
    "fieldname": "hiring_settings",
    "fieldtype": "Section Break",
-   "label": "Hiring Settings",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Hiring Settings"
   },
   {
    "default": "0",
    "fieldname": "check_vacancies",
    "fieldtype": "Check",
-   "label": "Check Vacancies On Job Offer Creation",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Check Vacancies On Job Offer Creation"
   },
   {
    "default": "0",
    "fieldname": "auto_leave_encashment",
    "fieldtype": "Check",
-   "label": "Auto Leave Encashment",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Auto Leave Encashment"
   },
   {
    "default": "0",
    "fieldname": "restrict_backdated_leave_application",
    "fieldtype": "Check",
-   "label": "Restrict Backdated Leave Application",
-   "show_days": 1,
-   "show_seconds": 1
+   "label": "Restrict Backdated Leave Application"
   },
   {
    "depends_on": "eval:doc.restrict_backdated_leave_application == 1",
    "fieldname": "role_allowed_to_create_backdated_leave_application",
    "fieldtype": "Link",
    "label": "Role Allowed to Create Backdated Leave Application",
-   "options": "Role",
-   "show_days": 1,
-   "show_seconds": 1
+   "options": "Role"
+  },
+  {
+   "default": "0",
+   "fieldname": "automatically_allocate_leaves_based_on_leave_policy",
+   "fieldtype": "Check",
+   "label": "Automatically Allocate Leaves Based On Leave Policy"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_leave_notification",
+   "fieldtype": "Check",
+   "label": "Send Leave Notification"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-06-04 15:15:09.865476",
+ "modified": "2021-03-14 02:04:22.907159",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
@@ -182,5 +166,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }

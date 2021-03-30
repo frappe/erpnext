@@ -30,6 +30,23 @@ frappe.ui.form.on('Assessment Plan', {
 				frappe.set_route('Form', 'Assessment Result Tool');
 			}, __('Tools'));
 		}
+
+		frm.set_query('course', function() {
+			return {
+				query: 'erpnext.education.doctype.program_enrollment.program_enrollment.get_program_courses',
+				filters: {
+					'program': frm.doc.program
+				}
+			};
+		});
+
+		frm.set_query('academic_term', function() {
+			return {
+				filters: {
+					'academic_year': frm.doc.academic_year
+				}
+			};
+		});
 	},
 
 	course: function(frm) {

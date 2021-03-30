@@ -13,6 +13,7 @@ from frappe.desk.reportview import get_match_cond
 from erpnext.hr.doctype.daily_work_summary.daily_work_summary import get_users_email
 from erpnext.hr.doctype.holiday_list.holiday_list import is_holiday
 from frappe.model.document import Document
+from erpnext.education.doctype.student_attendance.student_attendance import get_holiday_list
 
 class Project(Document):
 	def get_feed(self):
@@ -26,7 +27,7 @@ class Project(Document):
 
 		self.update_costing()
 
-	def before_print(self):
+	def before_print(self, settings=None):
 		self.onload()
 
 
@@ -54,17 +55,70 @@ class Project(Document):
 				self.project_type = template.project_type
 
 			# create tasks from template
+			project_tasks = []
+			tmp_task_details = []
 			for task in template.tasks:
-				frappe.get_doc(dict(
-					doctype = 'Task',
-					subject = task.subject,
-					project = self.name,
-					status = 'Open',
-					exp_start_date = add_days(self.expected_start_date, task.start),
-					exp_end_date = add_days(self.expected_start_date, task.start + task.duration),
-					description = task.description,
-					task_weight = task.task_weight
-				)).insert()
+				template_task_details = frappe.get_doc("Task", task.task)
+				tmp_task_details.append(template_task_details)
+				task = self.create_task_from_template(template_task_details)
+				project_tasks.append(task)
+			self.dependency_mapping(tmp_task_details, project_tasks)
+
+	def create_task_from_template(self, task_details):
+		return frappe.get_doc(dict(
+				doctype = 'Task',
+				subject = task_details.subject,
+				project = self.name,
+				status = 'Open',
+				exp_start_date = self.calculate_start_date(task_details),
+				exp_end_date = self.calculate_end_date(task_details),
+				description = task_details.description,
+				task_weight = task_details.task_weight,
+				type = task_details.type,
+				issue = task_details.issue,
+				is_group = task_details.is_group
+			)).insert()
+
+	def calculate_start_date(self, task_details):
+		self.start_date = add_days(self.expected_start_date, task_details.start)
+		self.start_date = self.update_if_holiday(self.start_date)
+		return self.start_date
+
+	def calculate_end_date(self, task_details):
+		self.end_date = add_days(self.start_date, task_details.duration)
+		return self.update_if_holiday(self.end_date)
+
+	def update_if_holiday(self, date):
+		holiday_list = self.holiday_list or get_holiday_list(self.company)
+		while is_holiday(holiday_list, date):
+			date = add_days(date, 1)
+		return date
+
+	def dependency_mapping(self, template_tasks, project_tasks):
+		for template_task in template_tasks:
+			project_task = list(filter(lambda x: x.subject == template_task.subject, project_tasks))[0]
+			project_task = frappe.get_doc("Task", project_task.name)
+			self.check_depends_on_value(template_task, project_task, project_tasks)
+			self.check_for_parent_tasks(template_task, project_task, project_tasks)
+
+	def check_depends_on_value(self, template_task, project_task, project_tasks):
+		if template_task.get("depends_on") and not project_task.get("depends_on"):
+			for child_task in template_task.get("depends_on"):
+				child_task_subject = frappe.db.get_value("Task", child_task.task, "subject")
+				corresponding_project_task = list(filter(lambda x: x.subject == child_task_subject, project_tasks))
+				if len(corresponding_project_task):
+					project_task.append("depends_on",{
+						"task": corresponding_project_task[0].name
+					})
+					project_task.save()
+
+	def check_for_parent_tasks(self, template_task, project_task, project_tasks):
+		if template_task.get("parent_task") and not project_task.get("parent_task"):
+			parent_task_subject = frappe.db.get_value("Task", template_task.get("parent_task"), "subject")
+			corresponding_project_task = list(filter(lambda x: x.subject == parent_task_subject, project_tasks))
+			if len(corresponding_project_task):
+				project_task.parent_task = corresponding_project_task[0].name
+				project_task.save()
 
 	def is_row_updated(self, row, existing_task_data, fields):
 		if self.get("__islocal") or not existing_task_data: return True

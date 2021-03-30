@@ -10,8 +10,7 @@ import frappe.defaults
 from frappe.utils import cint, nowdate, nowtime, cstr, add_days, flt, today
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.accounts.utils import get_balance_on
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import get_gl_entries, set_perpetual_inventory
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice, make_delivery_trip
 from erpnext.stock.doctype.stock_entry.test_stock_entry \
 	import make_stock_entry, make_serialized_item, get_qty_after_transaction
@@ -24,9 +23,6 @@ from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.doctype.item.test_item import create_item
 
 class TestDeliveryNote(unittest.TestCase):
-	def setUp(self):
-		set_perpetual_inventory(0)
-
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -43,7 +39,6 @@ class TestDeliveryNote(unittest.TestCase):
 
 	def test_delivery_note_no_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(0, company)
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
 		stock_queue = json.loads(get_previous_sle({
@@ -57,7 +52,7 @@ class TestDeliveryNote(unittest.TestCase):
 
 		sle = frappe.get_doc("Stock Ledger Entry", {"voucher_type": "Delivery Note", "voucher_no": dn.name})
 
-		self.assertEqual(sle.stock_value_difference, -1*stock_queue[0][1])
+		self.assertEqual(sle.stock_value_difference, flt(-1*stock_queue[0][1], 2))
 
 		self.assertFalse(get_gl_entries("Delivery Note", dn.name))
 
@@ -206,7 +201,7 @@ class TestDeliveryNote(unittest.TestCase):
 		for field, value in field_values.items():
 			self.assertEqual(cstr(serial_no.get(field)), value)
 
-	def test_sales_return_for_non_bundled_items(self):
+	def test_sales_return_for_non_bundled_items_partial(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
 		make_stock_entry(item_code="_Test Item", target="Stores - TCP1", qty=50, basic_rate=100)
@@ -225,7 +220,10 @@ class TestDeliveryNote(unittest.TestCase):
 
 		# return entry
 		dn1 = create_delivery_note(is_return=1, return_against=dn.name, qty=-2, rate=500,
-			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1", do_not_submit=1)
+		dn1.items[0].dn_detail = dn.items[0].name
+		dn1.submit()
 
 		actual_qty_2 = get_qty_after_transaction(warehouse="Stores - TCP1")
 
@@ -242,6 +240,70 @@ class TestDeliveryNote(unittest.TestCase):
 			"voucher_no": dn1.name, "account": stock_in_hand_account}, "debit")
 
 		self.assertEqual(gle_warehouse_amount, stock_value_difference)
+
+		# hack because new_doc isn't considering is_return portion of status_updater
+		returned = frappe.get_doc("Delivery Note", dn1.name)
+		returned.update_prevdoc_status()
+		dn.load_from_db()
+
+		# Check if Original DN updated
+		self.assertEqual(dn.items[0].returned_qty, 2)
+		self.assertEqual(dn.per_returned, 40)
+
+		from erpnext.controllers.sales_and_purchase_return import make_return_doc
+		return_dn_2 = make_return_doc("Delivery Note", dn.name)
+
+		# Check if unreturned amount is mapped in 2nd return
+		self.assertEqual(return_dn_2.items[0].qty, -3)
+
+		si = make_sales_invoice(dn.name)
+		si.submit()
+
+		self.assertEqual(si.items[0].qty, 3)
+
+		dn.load_from_db()
+		# DN should be completed on billing all unreturned amount
+		self.assertEqual(dn.items[0].billed_amt, 1500)
+		self.assertEqual(dn.per_billed, 100)
+		self.assertEqual(dn.status, 'Completed')
+
+		si.load_from_db()
+		si.cancel()
+
+		dn.load_from_db()
+		self.assertEqual(dn.per_billed, 0)
+
+		dn1.cancel()
+		dn.cancel()
+
+	def test_sales_return_for_non_bundled_items_full(self):
+		from erpnext.stock.doctype.item.test_item import make_item
+
+		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
+
+		make_item("Box", {'is_stock_item': 1})
+
+		make_stock_entry(item_code="Box", target="Stores - TCP1", qty=10, basic_rate=100)
+
+		dn = create_delivery_note(item_code="Box", qty=5, rate=500, warehouse="Stores - TCP1", company=company,
+			expense_account="Cost of Goods Sold - TCP1", cost_center="Main - TCP1")
+
+		#return entry
+		dn1 = create_delivery_note(item_code="Box", is_return=1, return_against=dn.name, qty=-5, rate=500,
+			company=company, warehouse="Stores - TCP1", expense_account="Cost of Goods Sold - TCP1",
+			cost_center="Main - TCP1", do_not_submit=1)
+		dn1.items[0].dn_detail = dn.items[0].name
+		dn1.submit()
+
+		# hack because new_doc isn't considering is_return portion of status_updater
+		returned = frappe.get_doc("Delivery Note", dn1.name)
+		returned.update_prevdoc_status()
+		dn.load_from_db()
+
+		# Check if Original DN updated
+		self.assertEqual(dn.items[0].returned_qty, 5)
+		self.assertEqual(dn.per_returned, 100)
+		self.assertEqual(dn.status, 'Return Issued')
 
 	def test_return_single_item_from_bundled_items(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
@@ -427,7 +489,10 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
 
-		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
+		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
+
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1',
+			cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
 
 		dn.submit()
 
@@ -442,8 +507,14 @@ class TestDeliveryNote(unittest.TestCase):
 		self.assertEqual(dn.status, "To Bill")
 		self.assertEqual(dn.per_billed, 0)
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn.po_no, so.po_no)
+
 		si = make_sales_invoice(dn.name)
 		si.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn.po_no, si.po_no)
 
 		dn.load_from_db()
 		self.assertEqual(dn.get("items")[0].billed_amt, 200)
@@ -461,15 +532,24 @@ class TestDeliveryNote(unittest.TestCase):
 		si.insert()
 		si.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, si.po_no)
+
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
 		dn1 = make_delivery_note(so.name)
 		dn1.get("items")[0].qty = 2
 		dn1.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, dn1.po_no)
+
 		dn2 = make_delivery_note(so.name)
 		dn2.get("items")[0].qty = 3
 		dn2.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, dn2.po_no)
 
 		dn1.load_from_db()
 		self.assertEqual(dn1.get("items")[0].billed_amt, 200)
@@ -492,8 +572,14 @@ class TestDeliveryNote(unittest.TestCase):
 		dn1.get("items")[0].qty = 2
 		dn1.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn1.po_no, so.po_no)
+
 		si1 = make_sales_invoice(dn1.name)
 		si1.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn1.po_no, si1.po_no)
 
 		dn1.load_from_db()
 		self.assertEqual(dn1.per_billed, 100)
@@ -502,9 +588,15 @@ class TestDeliveryNote(unittest.TestCase):
 		si2.get("items")[0].qty = 4
 		si2.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(si2.po_no, so.po_no)
+
 		dn2 = make_delivery_note(so.name)
 		dn2.get("items")[0].qty = 5
 		dn2.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn2.po_no, so.po_no)
 
 		dn1.load_from_db()
 		self.assertEqual(dn1.get("items")[0].billed_amt, 200)
@@ -525,8 +617,14 @@ class TestDeliveryNote(unittest.TestCase):
 		si = make_sales_invoice(so.name)
 		si.submit()
 
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(so.po_no, si.po_no)
+
 		dn = make_delivery_note(si.name)
 		dn.submit()
+
+		# Testing if Customer's Purchase Order No was rightly copied
+		self.assertEqual(dn.po_no, si.po_no)
 
 		self.assertEqual(dn.get("items")[0].billed_amt, 1000)
 		self.assertEqual(dn.per_billed, 100)
