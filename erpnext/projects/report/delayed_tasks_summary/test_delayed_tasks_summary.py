@@ -6,7 +6,7 @@ from frappe.utils import nowdate, add_days, add_months
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.report.delayed_tasks_summary.delayed_tasks_summary import execute
 
-class TestInpatientMedicationOrders(unittest.TestCase):
+class TestDelayedTasksSummary(unittest.TestCase):
 	@classmethod
 	def setUp(self):
 		task1 = create_task("_Test Task 98", add_days(nowdate(), -10), nowdate())
