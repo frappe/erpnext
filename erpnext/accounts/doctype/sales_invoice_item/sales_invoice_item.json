@@ -1,5 +1,4 @@
 {
- "actions": [],
  "autoname": "hash",
  "creation": "2013-06-04 11:02:19",
  "doctype": "DocType",
@@ -9,6 +8,7 @@
  "field_order": [
   "barcode",
   "item_code",
+  "category_for_sale",
   "col_break1",
   "item_name",
   "customer_item_code",
@@ -808,12 +808,22 @@
    "options": "currency",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fetch_from": "item_code.category_for_sale",
+   "fetch_if_empty": 1,
+   "fieldname": "category_for_sale",
+   "fieldtype": "Link",
+   "label": "Category for sale",
+   "options": "Category for sale",
+   "read_only": 1,
+   "search_index": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "links": [],
- "modified": "2020-04-09 14:13:04.557521",
+ "modified": "2021-03-30 15:17:21.232055",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
