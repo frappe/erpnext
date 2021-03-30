@@ -41,7 +41,8 @@
   "column_break_33",
   "bank_account",
   "salary_slips_created",
-  "salary_slips_submitted"
+  "salary_slips_submitted",
+  "state"
  ],
  "fields": [
   {
@@ -256,11 +257,18 @@
   {
    "fieldname": "column_break_33",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "state",
+   "fieldtype": "Select",
+   "label": "State",
+   "options": "Open\nClosed\nCancelled",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cog",
  "is_submittable": 1,
- "modified": "2019-09-12 15:46:31.436381",
+ "modified": "2021-03-26 02:54:48.445112",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Payroll Entry",
