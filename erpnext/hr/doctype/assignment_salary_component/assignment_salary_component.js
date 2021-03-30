@@ -11,5 +11,11 @@ frappe.ui.form.on('Assignment Salary Component', {
 				filters:{'type': doc.type}
 			}
 		}
+
+		cur_frm.fields_dict['payroll_entry'].get_query = function(doc, cdt, cdn) {
+			return {
+				filters:{'state': ["=","Open"]}
+			}
+		}
 	}	
 });
