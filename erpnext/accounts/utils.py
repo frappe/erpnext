@@ -590,6 +590,13 @@ def unlink_ref_doc_from_payment_entries(ref_doc, validate_permission=False):
 		and voucher_no != ifnull(against_voucher, '')""",
 		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
 
+	frappe.db.sql("""update `tabGL Entry`
+		set original_against_voucher_type=null, original_against_voucher=null,
+		modified=%s, modified_by=%s
+		where original_against_voucher_type=%s and original_against_voucher=%s
+		and voucher_no != ifnull(against_voucher, '')""",
+		(now(), frappe.session.user, ref_doc.doctype, ref_doc.name))
+
 	if ref_doc.doctype in ("Sales Invoice", "Purchase Invoice", "Landed Cost Voucher", "Expense Claim"):
 		ref_doc.set("advances", [])
 
