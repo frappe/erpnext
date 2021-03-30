@@ -1236,22 +1236,23 @@ class AccountsController(TransactionBase):
 
 
 	def get_gl_entries_for_print(self):
+		from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions
+		dimension_fields = get_accounting_dimensions()
+
 		if self.docstatus == 1:
-			gles = frappe.db.sql("""
-				select
-					account, remarks, party_type, party, debit, credit,
-					against_voucher, against_voucher_type, reference_no, reference_date
-				from `tabGL Entry`
-				where voucher_type = %s and voucher_no = %s
-			""", [self.doctype, self.name], as_dict=1)
+			gles = frappe.get_all("GL Entry", filters={"voucher_type": self.doctype, "voucher_no": self.name},
+				fields=['account', 'remarks', 'party_type', 'party', 'debit', 'credit',
+					'against_voucher', 'against_voucher_type', 'reference_no', 'reference_date'] + dimension_fields)
 		else:
 			gles = self.get_gl_entries()
 
 		grouped_gles = OrderedDict()
 
 		for gle in gles:
-			key = (gle.account, cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no),
-				cstr(gle.reference_date), bool(gle.against_voucher))
+			key = [gle.account, cstr(gle.party_type), cstr(gle.party), cstr(gle.remarks), cstr(gle.reference_no),
+				cstr(gle.reference_date), bool(gle.against_voucher)]
+			key += [cstr(gle.get(f)) for f in dimension_fields]
+			key = tuple(key)
 			group = grouped_gles.setdefault(key, frappe._dict({
 				"account": cstr(gle.account),
 				"party_type": cstr(gle.party_type),
@@ -1261,6 +1262,8 @@ class AccountsController(TransactionBase):
 				"reference_date": cstr(gle.reference_date),
 				"sum": 0, "against_voucher_set": set(), "against_voucher": []
 			}))
+			for f in dimension_fields:
+				group[f] = cstr(gle.get(f))
 			group.sum += flt(gle.debit) - flt(gle.credit)
 			if gle.against_voucher_type and gle.against_voucher:
 				group.against_voucher_set.add((cstr(gle.against_voucher_type), cstr(gle.against_voucher)))

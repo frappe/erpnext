@@ -21,7 +21,6 @@
   {
    "fieldname": "fieldname",
    "fieldtype": "Data",
-   "hidden": 1,
    "label": "Fieldname"
   },
   {
@@ -46,7 +45,7 @@
    "options": "Accounting Dimension Detail"
   }
  ],
- "modified": "2020-03-22 20:34:39.805728",
+ "modified": "2021-03-27 21:44:39.730437",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounting Dimension",
