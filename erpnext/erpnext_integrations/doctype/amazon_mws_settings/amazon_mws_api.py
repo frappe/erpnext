@@ -7,6 +7,7 @@
 from __future__ import unicode_literals
 
 import urllib
+import urllib.parse.quote as quote
 import hashlib
 import hmac
 import base64
@@ -178,7 +179,6 @@ class MWS(object):
 			'SignatureMethod': 'HmacSHA256',
 		}
 		params.update(extra_data)
-		quote = urllib.parse.quote
 		request_description = '&'.join(['%s=%s' % (k, quote(params[k], safe='-_.~')) for k in sorted(params)])
 		signature = self.calc_signature(method, request_description)
 		url = '%s%s?%s&Signature=%s' % (self.domain, self.uri, request_description, quote(signature))
