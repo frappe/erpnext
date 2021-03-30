@@ -380,7 +380,7 @@ def make_einvoice(invoice):
 	return einvoice
 
 def safe_json_load(json_string):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
+	JSONDecodeError = json.JSONDecodeError
 
 	try:
 		return json.loads(json_string)

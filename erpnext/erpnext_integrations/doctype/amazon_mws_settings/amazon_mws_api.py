@@ -68,8 +68,9 @@ def calc_md5(string):
 	"""
 	md = hashlib.md5()
 	md.update(string)
-	return base64.encodestring(md.digest()).strip('\n') if six.PY2 \
-		else base64.encodebytes(md.digest()).decode().strip()
+	return base64.encodebytes(md.digest()).decode().strip()
+
+
 
 def remove_empty(d):
 	"""
@@ -177,7 +178,7 @@ class MWS(object):
 			'SignatureMethod': 'HmacSHA256',
 		}
 		params.update(extra_data)
-		quote = urllib.quote if six.PY2 else urllib.parse.quote
+		quote = urllib.parse.quote
 		request_description = '&'.join(['%s=%s' % (k, quote(params[k], safe='-_.~')) for k in sorted(params)])
 		signature = self.calc_signature(method, request_description)
 		url = '%s%s?%s&Signature=%s' % (self.domain, self.uri, request_description, quote(signature))
