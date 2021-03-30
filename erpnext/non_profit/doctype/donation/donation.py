@@ -42,7 +42,7 @@ class Donation(Document):
 		self.load_from_db()
 		self.create_payment_entry()
 
-	def create_payment_entry(self):
+	def create_payment_entry(self, date=None):
 		settings = frappe.get_doc('Non Profit Settings')
 		if not settings.automate_donation_payment_entries:
 			return
@@ -58,8 +58,9 @@ class Donation(Document):
 		frappe.flags.ignore_account_permission = False
 		pe.paid_from = settings.donation_debit_account
 		pe.paid_to = settings.donation_payment_account
+		pe.posting_date = date or getdate()
 		pe.reference_no = self.name
-		pe.reference_date = getdate()
+		pe.reference_date = date or getdate()
 		pe.flags.ignore_mandatory = True
 		pe.insert()
 		pe.submit()
@@ -91,6 +92,10 @@ def capture_razorpay_donations(*args, **kwargs):
 		if not data.event == 'payment.captured':
 			return
 
+		# to avoid capturing subscription payments as donations
+		if payment.description and 'subscription' in str(payment.description).lower():
+			return
+
 		donor = get_donor(payment.email)
 		if not donor:
 			donor = create_donor(payment)
@@ -119,7 +124,7 @@ def create_donation(donor, payment):
 		'donor_name': donor.donor_name,
 		'email': donor.email,
 		'date': getdate(),
-		'amount': flt(payment.amount),
+		'amount': flt(payment.amount) / 100, # Convert to rupees from paise
 		'mode_of_payment': payment.method,
 		'razorpay_payment_id': payment.id
 	}).insert(ignore_mandatory=True)

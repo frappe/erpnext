@@ -16,6 +16,7 @@ class TaxExemption80GCertificate(Document):
 		self.validate_duplicates()
 		self.validate_company_details()
 		self.set_company_address()
+		self.calculate_total()
 		self.set_title()
 
 	def validate_date(self):
@@ -29,7 +30,10 @@ class TaxExemption80GCertificate(Document):
 
 	def validate_duplicates(self):
 		if self.recipient == 'Donor':
-			certificate = frappe.db.exists(self.doctype, {'donation': self.donation})
+			certificate = frappe.db.exists(self.doctype, {
+				'donation': self.donation,
+				'name': ('!=', self.name)
+			})
 			if certificate:
 				frappe.throw(_('An 80G Certificate {0} already exists for the donation {1}').format(
 					get_link_to_form(self.doctype, certificate), frappe.bold(self.donation)
@@ -51,8 +55,17 @@ class TaxExemption80GCertificate(Document):
 		self.company_address = address.company_address
 		self.company_address_display = address.company_address_display
 
+	def calculate_total(self):
+		if self.recipient == 'Donor':
+			return
+
+		total = 0
+		for entry in self.payments:
+			total += flt(entry.amount)
+		self.total = total
+
 	def set_title(self):
-		if self.recipient == "Member":
+		if self.recipient == 'Member':
 			self.title = self.member_name
 		else:
 			self.title = self.donor_name
@@ -68,7 +81,7 @@ class TaxExemption80GCertificate(Document):
 			'from_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
 			'to_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
 			'membership_status': ('!=', 'Cancelled')
-		}, ['from_date', 'amount', 'name', 'invoice', 'payment_id'])
+		}, ['from_date', 'amount', 'name', 'invoice', 'payment_id'], order_by='from_date')
 
 		if not memberships:
 			frappe.msgprint(_('No Membership Payments found against the Member {0}').format(self.member))
