@@ -1952,13 +1952,12 @@
  "is_submittable": 1,
  "links": [
   {
-   "custom": 1,
    "group": "Reference",
    "link_doctype": "POS Invoice",
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-02-01 15:42:26.261540",
+ "modified": "2021-03-31 15:42:26.261540",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
