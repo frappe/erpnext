@@ -340,6 +340,9 @@ class TestSalesOrder(unittest.TestCase):
 		prev_total = so.get("base_total")
 		prev_total_in_words = so.get("base_in_words")
 
+		# get reserved qty before update items
+		reserved_qty_for_second_item = get_reserved_qty("_Test Item 2")
+
 		first_item_of_so = so.get("items")[0]
 		trans_item = json.dumps([
 			{'item_code' : first_item_of_so.item_code, 'rate' : first_item_of_so.rate, \
@@ -353,6 +356,10 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].rate, 200)
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
+
+		# reserved qty should increase after adding row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item + 7)
+
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 		updated_total = so.get("base_total")
@@ -372,6 +379,9 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 2)
 		make_sales_invoice(so.name)
 
+		# get reserved qty before update items
+		reserved_qty_for_second_item = get_reserved_qty("_Test Item 2")
+
 		# add an item so as to try removing items
 		trans_item = json.dumps([
 			{"item_code": '_Test Item', "qty": 5, "rate":1000, "docname": so.get("items")[0].name},
@@ -380,6 +390,9 @@ class TestSalesOrder(unittest.TestCase):
 		update_child_qty_rate('Sales Order', trans_item, so.name)
 		so.reload()
 		self.assertEqual(len(so.get("items")), 2)
+
+		# reserved qty should increase after adding row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item + 2)
 
 		# check if delivered items can be removed
 		trans_item = json.dumps([{
@@ -401,6 +414,10 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.reload()
 		self.assertEqual(len(so.get("items")), 1)
+
+		# reserved qty should decrease (back to initial) after deleting row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item)
+
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 
@@ -508,11 +525,17 @@ class TestSalesOrder(unittest.TestCase):
 
 		so = make_sales_order(item_code = "_Test Item", warehouse=None)
 
+		# get reserved qty of packed item
+		existing_reserved_qty = get_reserved_qty("_Packed Item")
+
 		added_item = json.dumps([{"item_code" : "_Product Bundle Item", "rate" : 200, 'qty' : 2}])
 		update_child_qty_rate('Sales Order', added_item, so.name)
 
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 4)
+
+		# reserved qty in packed item should increase after adding bundle item
+		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 4)
 
 		# test uom and conversion factor change
 		update_uom_conv_factor = json.dumps([{
@@ -527,6 +550,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 8)
+
+		# reserved qty in packed item should increase after changing bundle item uom
+		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 8)
 
 	def test_update_child_with_tax_template(self):
 		"""
@@ -743,7 +769,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
+		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=2)
@@ -825,7 +851,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 
 		# create po for only one item
-		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
+		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
 		po1.submit()
 
 		self.assertEqual(so.customer, po1.customer)
@@ -835,7 +861,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(len(po1.items), 1)
 
 		# create po for remaining item
-		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])
+		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])[0]
 		po2.submit()
 
 		# teardown
@@ -845,6 +871,45 @@ class TestSalesOrder(unittest.TestCase):
 		po2.cancel()
 		so.load_from_db()
 		so.cancel()
+
+	def test_drop_shipping_full_for_default_suppliers(self):
+		"""Test if multiple POs are generated in one go against different default suppliers."""
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier
+
+		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 1"):
+			make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 2"):
+			make_item("_Test Item for Drop Shipping 2", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		so_items = [
+			{
+				"item_code": "_Test Item for Drop Shipping 1",
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			},
+			{
+				"item_code": "_Test Item for Drop Shipping 2",
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier 1'
+			}
+		]
+
+		# create so and po
+		so = make_sales_order(item_list=so_items, do_not_submit=True)
+		so.submit()
+
+		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=so_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		self.assertEqual(purchase_orders[0].supplier, '_Test Supplier')
+		self.assertEqual(purchase_orders[1].supplier, '_Test Supplier 1')
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
