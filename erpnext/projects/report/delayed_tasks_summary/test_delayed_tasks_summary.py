@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-import datetime
 from frappe.utils import nowdate, add_days, add_months
 from erpnext.projects.doctype.task.test_task import create_task
 from erpnext.projects.report.delayed_tasks_summary.delayed_tasks_summary import execute
