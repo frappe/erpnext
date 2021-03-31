@@ -679,7 +679,6 @@ frappe.ui.form.on('Stock Entry Detail', {
 							no_batch_serial_number_value = !d.batch_no;
 						}
 
-						console.log(frappe.flags.hide_serial_batch_dialog, "$#$#$#");
 						if (no_batch_serial_number_value && !frappe.flags.hide_serial_batch_dialog) {
 							erpnext.stock.select_batch_and_serial_no(frm, d);
 						}
