@@ -261,13 +261,6 @@ def add_vouchers():
 	except frappe.DuplicateEntryError:
 		pass
 
-	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080)
-	pe = get_payment_entry("Sales Invoice", si.name, bank_account="_Test Bank - _TC")
-	pe.reference_no = "Fayva Oct 18"
-	pe.reference_date = "2018-10-29"
-	pe.insert()
-	pe.submit()
-
 	mode_of_payment = frappe.get_doc({
 		"doctype": "Mode of Payment",
 		"name": "Cash"
@@ -280,7 +273,7 @@ def add_vouchers():
 		})
 		mode_of_payment.save()
 
-	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_submit=1)
+	si = create_sales_invoice(customer="Fayva", qty=1, rate=109080, do_not_save=1)
 	si.is_pos = 1
 	si.append("payments", {
 		"mode_of_payment": "Cash",
