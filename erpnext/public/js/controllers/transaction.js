@@ -1173,6 +1173,11 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				this.calculate_net_weight();
 			}
 
+			// for handling customization not to fetch price list rate
+			if (frappe.flags.dont_fetch_price_list_rate) {
+				return;
+			}
+
 			if (!dont_fetch_price_list_rate &&
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);
