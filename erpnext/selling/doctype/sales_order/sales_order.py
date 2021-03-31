@@ -372,6 +372,7 @@ class SalesOrder(SellingController):
 			self.indicator_color = "green"
 			self.indicator_title = _("Paid")
 
+	@frappe.whitelist()
 	def get_work_order_items(self, for_raw_material_request=0):
 		'''Returns items with BOM that already do not have a linked work order'''
 		items = []
@@ -778,6 +779,7 @@ def get_events(start, end, filters=None):
 
 @frappe.whitelist()
 def make_purchase_order_for_default_supplier(source_name, selected_items=None, target_doc=None):
+	"""Creates Purchase Order for each Supplier. Returns a list of doc objects."""
 	if not selected_items: return
 
 	if isinstance(selected_items, string_types):
@@ -820,15 +822,16 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 		target.stock_qty = (flt(source.stock_qty) - flt(source.ordered_qty))
 		target.project = source_parent.project
 
-	suppliers = [item.get('supplier') for item in selected_items if item.get('supplier') and item.get('supplier')]
-	suppliers = list(set(suppliers))
+	suppliers = [item.get('supplier') for item in selected_items if item.get('supplier')]
+	suppliers = list(dict.fromkeys(suppliers)) # remove duplicates while preserving order
 
-	items_to_map = [item.get('item_code') for item in selected_items if item.get('item_code') and item.get('item_code')]
+	items_to_map = [item.get('item_code') for item in selected_items if item.get('item_code')]
 	items_to_map = list(set(items_to_map))
 
 	if not suppliers:
 		frappe.throw(_("Please set a Supplier against the Items to be considered in the Purchase Order."))
 
+	purchase_orders = []
 	for supplier in suppliers:
 		doc = get_mapped_doc("Sales Order", source_name, {
 			"Sales Order": {
@@ -872,7 +875,9 @@ def make_purchase_order_for_default_supplier(source_name, selected_items=None, t
 
 		doc.insert()
 		frappe.db.commit()
-		return doc
+		purchase_orders.append(doc)
+
+	return purchase_orders
 
 @frappe.whitelist()
 def make_purchase_order(source_name, selected_items=None, target_doc=None):

@@ -50,6 +50,7 @@ class GlobalDefaults(Document):
 		# clear cache
 		frappe.clear_cache()
 
+	@frappe.whitelist()
 	def get_defaults(self):
 		return frappe.defaults.get_defaults()
 
