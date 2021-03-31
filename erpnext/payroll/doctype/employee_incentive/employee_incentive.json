@@ -75,7 +75,6 @@
    "reqd": 1
   },
   {
-   "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.employee)",
    "fieldname": "currency",
    "fieldtype": "Link",
@@ -95,7 +94,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-20 17:22:16.468042",
+ "modified": "2021-03-31 14:48:00.919839",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Incentive",
