@@ -345,7 +345,7 @@ def create_delivery_note(source_name, target_doc=None):
 
 		if dn_item:
 			dn_item.warehouse = location.warehouse
-			dn_item.qty = location.picked_qty
+			dn_item.qty = location.picked_qty / location.conversion_factor
 			dn_item.batch_no = location.batch_no
 			dn_item.serial_no = location.serial_no
 
