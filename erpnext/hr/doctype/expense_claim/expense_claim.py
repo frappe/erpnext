@@ -211,6 +211,7 @@ class ExpenseClaim(AccountsController):
 			self.total_claimed_amount += flt(d.amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 
+	@frappe.whitelist()
 	def calculate_taxes(self):
 		self.total_taxes_and_charges = 0
 		for tax in self.taxes:
