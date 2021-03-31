@@ -214,6 +214,7 @@ class Account(NestedSet):
 				if parent_value_changed:
 					doc.save()
 
+	@frappe.whitelist()
 	def convert_group_to_ledger(self):
 		if self.check_if_child_exists():
 			throw(_("Account with child nodes cannot be converted to ledger"))
@@ -224,6 +225,7 @@ class Account(NestedSet):
 			self.save()
 			return 1
 
+	@frappe.whitelist()
 	def convert_ledger_to_group(self):
 		if self.check_gle_exists():
 			throw(_("Account with existing transaction can not be converted to group."))
