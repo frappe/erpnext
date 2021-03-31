@@ -29,8 +29,9 @@ class EmployeeHoursReport:
 	def run(self):
 		self.generate_columns()
 		self.generate_data()
+		self.generate_report_summary()
 
-		return self.columns, self.data
+		return self.columns, self.data, None, None, self.report_summary
 
 	def generate_columns(self):
 		self.columns = [
@@ -127,3 +128,24 @@ class EmployeeHoursReport:
 			data['total_hours'] = TOTAL_HOURS
 			data['untracked_hours'] = flt(TOTAL_HOURS - data['billed_hours'] - data['non_billed_hours'], 2)
 			data['per_util'] = flt(((data['billed_hours'] + data['non_billed_hours']) / TOTAL_HOURS) * 100, 2)
+	
+	def generate_report_summary(self):
+		if not self.data:
+			return 
+
+		avg_utilisation = 0.0
+		for row in self.data:
+			avg_utilisation += row['per_util']
+
+		avg_utilisation /= len(self.data)
+		avg_utilisation = flt(avg_utilisation, 2)
+
+		THRESHOLD_PERCENTAGE = 70.0
+		self.report_summary = [
+			{
+				'value': f'{avg_utilisation}%',
+				'indicator': 'Red' if avg_utilisation < THRESHOLD_PERCENTAGE else 'Green',
+				'label': _('Average Utilisation'),
+				'datatype': 'Percentage'
+			}
+		]
