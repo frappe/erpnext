@@ -99,6 +99,7 @@ class LeaveAllocation(Document):
 				.format(formatdate(future_allocation[0].from_date), future_allocation[0].name),
 					BackDatedAllocationError)
 
+	@frappe.whitelist()
 	def set_total_leaves_allocated(self):
 		self.unused_leaves = get_carry_forwarded_leaves(self.employee,
 			self.leave_type, self.from_date, self.carry_forward)
