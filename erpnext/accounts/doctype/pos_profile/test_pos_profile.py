@@ -92,11 +92,21 @@ def make_pos_profile(**args):
 		"write_off_cost_center":  args.write_off_cost_center or "_Test Write Off Cost Center - _TC"
 	})
 
-	payments = [{
+	mode_of_payment = frappe.get_doc("Mode of Payment", "Cash")
+	company = args.company or "_Test Company"
+	default_account =  args.income_account or "Sales - _TC"
+
+	if not frappe.db.get_value("Mode of Payment Account", {"company": company, "parent": "Cash"}):
+		mode_of_payment.append("accounts", {
+			"company": company,
+			"default_account": default_account
+		})
+		mode_of_payment.save()
+
+	pos_profile.append("payments", {
 		'mode_of_payment': 'Cash',
 		'default': 1
-	}]
-	pos_profile.set("payments", payments)
+	})
 
 	if not frappe.db.exists("POS Profile", args.name or "_Test POS Profile"):
 		pos_profile.insert()
