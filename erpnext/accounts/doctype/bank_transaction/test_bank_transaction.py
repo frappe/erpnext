@@ -15,12 +15,14 @@ from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profi
 test_dependencies = ["Item", "Cost Center"]
 
 class TestBankTransaction(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
 		make_pos_profile()
 		add_transactions()
 		add_vouchers()
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(cls):
 		for bt in frappe.get_all("Bank Transaction"):
 			doc = frappe.get_doc("Bank Transaction", bt.name)
 			doc.cancel()
@@ -33,9 +35,6 @@ class TestBankTransaction(unittest.TestCase):
 		# Delete POS Profile
 		frappe.db.sql("delete from `tabPOS Profile`")
 
-		frappe.flags.test_bank_transactions_created = False
-		frappe.flags.test_payments_created = False
-
 	# This test checks if ERPNext is able to provide a linked payment for a bank transaction based on the amount of the bank transaction.
 	def test_linked_payments(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Re 95282925234 FE/000002917 AT171513000281183046 Conrad Electronic"))
@@ -44,8 +43,8 @@ class TestBankTransaction(unittest.TestCase):
 
 	# This test validates a simple reconciliation leading to the clearance of the bank transaction and the payment
 	def test_reconcile(self):
-		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000002918 OPSKATTUZWXXX AT776000000098709837 Herr G"))
-		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1200))
+		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="1512567 BG/000003025 OPSKATTUZWXXX AT776000000098709849 Herr G"))
+		payment = frappe.get_doc("Payment Entry", dict(party="Mr G", paid_amount=1700))
 		vouchers = json.dumps([{
 		"payment_doctype":"Payment Entry",
 		"payment_name":payment.name,
@@ -116,10 +115,6 @@ def create_bank_account(bank_name="Citi Bank", account_name="_Test Bank - _TC"):
 		pass
 
 def add_transactions():
-	if frappe.flags.test_bank_transactions_created:
-		return
-
-	frappe.set_user("Administrator")
 	create_bank_account()
 
 	doc = frappe.get_doc({
@@ -172,14 +167,8 @@ def add_transactions():
 	}).insert()
 	doc.submit()
 
-	frappe.flags.test_bank_transactions_created = True
 
 def add_vouchers():
-	if frappe.flags.test_payments_created:
-		return
-
-	frappe.set_user("Administrator")
-
 	try:
 		frappe.get_doc({
 			"doctype": "Supplier",
@@ -298,7 +287,5 @@ def add_vouchers():
 		"account": "_Test Bank - _TC",
 		"amount": 109080
 	})
-	si.save()
+	si.insert()
 	si.submit()
-
-	frappe.flags.test_payments_created = True
