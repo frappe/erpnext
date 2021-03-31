@@ -334,19 +334,16 @@ def check_serial_no_validity_on_cancel(serial_no, sle):
 
 	if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
 		# if actual_qty < 0, receipt is being cancelled
-		frappe.throw(
-			_("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}")
-				.format(sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse)),
+		frappe.throw(_("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}")
+			.format(sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse)),
 			title=_("Cannot cancel"))
-	elif sr and cint(sle.actual_qty) > 0 and (
-		sr.warehouse or (sr.company != sle.company and sr.status == "Delivered")):
+	elif sr and cint(sle.actual_qty) > 0 and (sr.warehouse or (sr.company != sle.company and sr.status == "Delivered")):
 		# if actual_qty > 0, delivery is being cancelled, check for warehouse.
 		# if warehouse exists, serial no is received in another warehouse/company.
 		# if warehouse does not exist, then if company differs
 		# it could be inactive (allowed) or delivered from another company (block).
-		frappe.throw(
-			_("Cannot cancel {0} {1} as Serial No {2} does not belong to the company {3}")
-				.format(sle.voucher_type, doc_link, sr_link, frappe.bold(sle.company)),
+		frappe.throw(_("Cannot cancel {0} {1} as Serial No {2} does not belong to the company {3}")
+			.format(sle.voucher_type, doc_link, sr_link, frappe.bold(sle.company)),
 			title=_("Cannot cancel"))
 
 def validate_material_transfer_entry(sle_doc):
