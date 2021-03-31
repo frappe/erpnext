@@ -610,7 +610,7 @@ def get_bom_operations(doctype, txt, searchfield, start, page_len, filters):
 @frappe.whitelist()
 def get_item_details(item, project = None):
 	res = frappe.db.sql("""
-		select stock_uom, description
+		select item_name, stock_uom, description
 		from `tabItem`
 		where disabled=0
 			and (end_of_life is null or end_of_life='0000-00-00' or end_of_life > %s)
