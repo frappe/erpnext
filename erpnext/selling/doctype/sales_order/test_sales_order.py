@@ -762,7 +762,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
+		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=2)
@@ -844,7 +844,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 
 		# create po for only one item
-		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
+		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
 		po1.submit()
 
 		self.assertEqual(so.customer, po1.customer)
@@ -854,7 +854,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(len(po1.items), 1)
 
 		# create po for remaining item
-		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])
+		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])[0]
 		po2.submit()
 
 		# teardown
@@ -864,6 +864,45 @@ class TestSalesOrder(unittest.TestCase):
 		po2.cancel()
 		so.load_from_db()
 		so.cancel()
+
+	def test_drop_shipping_full_for_default_suppliers(self):
+		"""Test if multiple POs are generated in one go against different default suppliers."""
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier
+
+		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 1"):
+			make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 2"):
+			make_item("_Test Item for Drop Shipping 2", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		so_items = [
+			{
+				"item_code": "_Test Item for Drop Shipping 1",
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			},
+			{
+				"item_code": "_Test Item for Drop Shipping 2",
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier 1'
+			}
+		]
+
+		# create so and po
+		so = make_sales_order(item_list=so_items, do_not_submit=True)
+		so.submit()
+
+		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=so_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		self.assertEqual(purchase_orders[0].supplier, '_Test Supplier')
+		self.assertEqual(purchase_orders[1].supplier, '_Test Supplier 1')
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},
