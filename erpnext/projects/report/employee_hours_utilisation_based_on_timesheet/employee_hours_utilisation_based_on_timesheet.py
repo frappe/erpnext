@@ -30,8 +30,9 @@ class EmployeeHoursReport:
 		self.generate_columns()
 		self.generate_data()
 		self.generate_report_summary()
+		self.generate_chart_data()
 
-		return self.columns, self.data, None, None, self.report_summary
+		return self.columns, self.data, None, self.chart, self.report_summary
 
 	def generate_columns(self):
 		self.columns = [
@@ -86,6 +87,9 @@ class EmployeeHoursReport:
 			row['employee'] = emp
 			row.update(data)
 			self.data.append(row)
+
+		#  Sort by descending order of percentage utilisation
+		self.data.sort(key=lambda x: x['per_util'], reverse=True)
 
 	def generate_filtered_time_logs(self):
 		additional_filters = ''
@@ -149,3 +153,45 @@ class EmployeeHoursReport:
 				'datatype': 'Percentage'
 			}
 		]
+
+	def generate_chart_data(self):
+		self.chart = {}
+
+		labels = []
+		billed_hours = []
+		non_billed_hours = []
+		untracked_hours = []
+
+
+		for row in self.data:
+			emp_name = frappe.db.get_value(
+				'Employee', row['employee'], 'employee_name'
+			)
+			labels.append(emp_name)
+			billed_hours.append(row.get('billed_hours'))
+			non_billed_hours.append(row.get('non_billed_hours'))
+			untracked_hours.append(row.get('untracked_hours'))
+		
+		self.chart = {
+			'data': {
+				'labels': labels[:30],
+				'datasets': [
+					{
+						'name': _('Billed Hours'),
+						'values': billed_hours[:30]
+					},
+					{
+						'name': _('Non-Billed Hours'),
+						'values': non_billed_hours[:30]
+					},
+					{
+						'name': _('Untracked Hours'),
+						'values': untracked_hours[:30]
+					}
+				]
+			},
+			'type': 'bar',
+			'barOptions': {
+				'stacked': True
+			}
+		}
