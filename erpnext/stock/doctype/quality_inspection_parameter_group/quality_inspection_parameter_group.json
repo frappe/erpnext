@@ -1,43 +1,29 @@
 {
  "actions": [],
- "autoname": "field:parameter",
- "creation": "2020-12-28 17:06:00.254129",
+ "autoname": "field:group_name",
+ "creation": "2021-02-04 18:44:12.223295",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "parameter",
-  "parameter_group",
-  "description"
+  "group_name"
  ],
  "fields": [
   {
-   "fieldname": "parameter",
+   "fieldname": "group_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Parameter",
+   "label": "Parameter Group Name",
    "reqd": 1,
    "unique": 1
-  },
-  {
-   "fieldname": "description",
-   "fieldtype": "Text Editor",
-   "label": "Description"
-  },
-  {
-   "fieldname": "parameter_group",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Parameter Group",
-   "options": "Quality Inspection Parameter Group"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-02-19 20:33:30.657406",
+ "modified": "2021-02-04 18:44:12.223295",
  "modified_by": "Administrator",
  "module": "Stock",
- "name": "Quality Inspection Parameter",
+ "name": "Quality Inspection Parameter Group",
  "owner": "Administrator",
  "permissions": [
   {
