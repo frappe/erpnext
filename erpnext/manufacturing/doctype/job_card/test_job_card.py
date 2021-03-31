@@ -35,8 +35,16 @@ class TestJobCard(unittest.TestCase):
 				frappe.delete_doc("Job Card", d.name)
 
 	def test_job_card_with_different_work_station(self):
-		data = frappe.get_cached_value('BOM',
-			{'docstatus': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
+		data = frappe.db.get_value(
+			"BOM",
+			{
+				"docstatus": 1,
+				"with_operations": 1,
+				"company": "_Test Company",
+				"item": "_Test FG Item 2",
+			},
+			["name", "item"],
+		)
 
 		if data:
 			bom, bom_item = data
