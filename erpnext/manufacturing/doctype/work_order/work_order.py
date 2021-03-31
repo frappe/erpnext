@@ -41,6 +41,8 @@ class WorkOrder(Document):
 		self.set_onload("material_consumption", ms.material_consumption)
 		self.set_onload("backflush_raw_materials_based_on", ms.backflush_raw_materials_based_on)
 		self.set_onload("overproduction_percentage", ms.overproduction_percentage_for_work_order)
+		self.set_onload("scrap_remaining_by_default",
+						frappe.get_cached_value('Manufacturing Settings', None, "scrap_remaining_by_default"))
 
 	def validate(self):
 		self.validate_production_item()
@@ -703,6 +705,7 @@ def make_stock_entry(work_order_id, purpose, qty=None, scrap_remaining=False):
 	stock_entry.bom_no = work_order.bom_no
 	stock_entry.use_multi_level_bom = work_order.use_multi_level_bom
 	stock_entry.fg_completed_qty = qty or (flt(work_order.qty) - flt(work_order.produced_qty))
+	scrap_remaining = cint(scrap_remaining)
 	stock_entry.scrap_qty = max(0, flt(work_order.qty) - flt(work_order.produced_qty) - flt(qty)) if scrap_remaining and qty else 0
 	if work_order.bom_no:
 		stock_entry.inspection_required = frappe.db.get_value('BOM',

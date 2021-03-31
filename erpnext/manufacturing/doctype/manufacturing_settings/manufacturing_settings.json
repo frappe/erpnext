@@ -20,7 +20,8 @@
   "column_break_11",
   "default_wip_warehouse",
   "default_fg_warehouse",
-  "default_rm_warehouse"
+  "default_rm_warehouse",
+  "scrap_remaining_by_default"
  ],
  "fields": [
   {
@@ -122,11 +123,17 @@
    "fieldtype": "Link",
    "label": "Default Raw Material Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "scrap_remaining_by_default",
+   "fieldtype": "Check",
+   "label": "Set Scrap Remaining default"
   }
  ],
  "icon": "icon-wrench",
  "issingle": 1,
- "modified": "2021-03-30 21:05:24.291716",
+ "modified": "2021-03-31 22:27:44.226038",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
