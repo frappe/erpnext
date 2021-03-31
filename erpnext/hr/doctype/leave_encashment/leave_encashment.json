@@ -130,7 +130,6 @@
    "read_only": 1
   },
   {
-   "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.employee)",
    "fieldname": "currency",
    "fieldtype": "Link",
@@ -155,7 +154,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-25 11:56:06.777241",
+ "modified": "2021-03-31 21:32:55.492327",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Encashment",
