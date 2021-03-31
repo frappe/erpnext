@@ -93,6 +93,7 @@
    "options": "Income Tax Slab Other Charges"
   },
   {
+   "fetch_from": "company.default_currency",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -103,7 +104,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-20 13:54:24.728075",
+ "modified": "2021-03-31 20:53:33.323712",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Income Tax Slab",

@@ -131,6 +131,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.employee",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -141,7 +142,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 14:49:35.433390",
+ "modified": "2021-03-31 20:48:32.639885",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Proof Submission",
