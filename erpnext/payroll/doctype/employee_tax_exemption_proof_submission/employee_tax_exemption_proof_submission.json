@@ -131,7 +131,6 @@
    "read_only": 1
   },
   {
-   "default": "Company:company:default_currency",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -142,7 +141,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-20 16:47:03.410020",
+ "modified": "2021-03-31 14:49:35.433390",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Proof Submission",
