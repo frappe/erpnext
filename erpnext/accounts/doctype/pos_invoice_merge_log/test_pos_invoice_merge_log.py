@@ -101,43 +101,50 @@ class TestPOSInvoiceMergeLog(unittest.TestCase):
 			frappe.db.sql("delete from `tabPOS Invoice`")
 
 	def test_consolidated_invoice_item_taxes(self):
-		inv = create_pos_invoice(qty=1, rate=100, do_not_save=True)
+		frappe.db.sql("delete from `tabPOS Invoice`")
 
-		inv.append("taxes", {
-			"account_head": "_Test Account VAT - _TC",
-			"charge_type": "On Net Total",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "VAT",
-			"doctype": "Sales Taxes and Charges",
-			"rate": 9
-		})
-		inv.insert()
-		inv.submit()
+		try:
+			inv = create_pos_invoice(qty=1, rate=100, do_not_save=True)
 
-		inv2 = create_pos_invoice(qty=1, rate=100, do_not_save=True)
-		inv2.get('items')[0].item_code = '_Test Item 2'
-		inv2.append("taxes", {
-			"account_head": "_Test Account VAT - _TC",
-			"charge_type": "On Net Total",
-			"cost_center": "_Test Cost Center - _TC",
-			"description": "VAT",
-			"doctype": "Sales Taxes and Charges",
-			"rate": 5
-		})
-		inv2.insert()
-		inv2.submit()
+			inv.append("taxes", {
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 9
+			})
+			inv.insert()
+			inv.submit()
 
-		consolidate_pos_invoices()
-		inv.load_from_db()
+			inv2 = create_pos_invoice(qty=1, rate=100, do_not_save=True)
+			inv2.get('items')[0].item_code = '_Test Item 2'
+			inv2.append("taxes", {
+				"account_head": "_Test Account VAT - _TC",
+				"charge_type": "On Net Total",
+				"cost_center": "_Test Cost Center - _TC",
+				"description": "VAT",
+				"doctype": "Sales Taxes and Charges",
+				"rate": 5
+			})
+			inv2.insert()
+			inv2.submit()
 
-		consolidated_invoice = frappe.get_doc('Sales Invoice', inv.consolidated_invoice)
-		item_wise_tax_detail = json.loads(consolidated_invoice.get('taxes')[0].item_wise_tax_detail)
+			consolidate_pos_invoices()
+			inv.load_from_db()
 
-		tax_rate, amount = item_wise_tax_detail.get('_Test Item')
-		self.assertEqual(tax_rate, 9)
-		self.assertEqual(amount, 9)
+			consolidated_invoice = frappe.get_doc('Sales Invoice', inv.consolidated_invoice)
+			item_wise_tax_detail = json.loads(consolidated_invoice.get('taxes')[0].item_wise_tax_detail)
 
-		tax_rate2, amount2 = item_wise_tax_detail.get('_Test Item 2')
-		self.assertEqual(tax_rate2, 5)
-		self.assertEqual(amount2, 5)
+			tax_rate, amount = item_wise_tax_detail.get('_Test Item')
+			self.assertEqual(tax_rate, 9)
+			self.assertEqual(amount, 9)
+
+			tax_rate2, amount2 = item_wise_tax_detail.get('_Test Item 2')
+			self.assertEqual(tax_rate2, 5)
+			self.assertEqual(amount2, 5)
+		finally:
+			frappe.set_user("Administrator")
+			frappe.db.sql("delete from `tabPOS Profile`")
+			frappe.db.sql("delete from `tabPOS Invoice`")
 
