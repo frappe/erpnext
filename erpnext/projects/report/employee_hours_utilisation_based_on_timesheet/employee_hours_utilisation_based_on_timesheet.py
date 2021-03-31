@@ -99,7 +99,10 @@ class EmployeeHoursReport:
 		
 		if self.filters.project:
 			additional_filters += f"AND ttd.project = '{self.filters.project}'"
- 
+
+		if self.filters.company:
+			additional_filters += f"AND tt.company = '{self.filters.company}'"
+
 		self.filtered_time_logs = frappe.db.sql('''
 			SELECT tt.employee AS employee, ttd.hours AS hours, ttd.billable AS billable, ttd.project AS project
 			FROM `tabTimesheet Detail` AS ttd 
@@ -134,6 +137,8 @@ class EmployeeHoursReport:
 			data['per_util'] = flt(((data['billed_hours'] + data['non_billed_hours']) / TOTAL_HOURS) * 100, 2)
 	
 	def generate_report_summary(self):
+		self.report_summary = []
+
 		if not self.data:
 			return 
 
