@@ -81,7 +81,7 @@ class TaxExemption80GCertificate(Document):
 			'from_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
 			'to_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
 			'membership_status': ('!=', 'Cancelled')
-		}, ['from_date', 'amount', 'name', 'invoice', 'payment_id'])
+		}, ['from_date', 'amount', 'name', 'invoice', 'payment_id'], order_by='from_date')
 
 		if not memberships:
 			frappe.msgprint(_('No Membership Payments found against the Member {0}').format(self.member))
