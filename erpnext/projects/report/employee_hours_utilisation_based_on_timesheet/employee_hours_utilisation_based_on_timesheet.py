@@ -91,10 +91,10 @@ class EmployeeHoursReport:
 		additional_filters = ''
 
 		if self.filters.employee:
-			additional_filters += f'AND tt.employee = {self.filters.employee}'
+			additional_filters += f"AND tt.employee = '{self.filters.employee}'"
 		
 		if self.filters.project:
-			additional_filters += f'AND ttd.project = {self.filters.project}'
+			additional_filters += f"AND ttd.project = '{self.filters.project}'"
  
 		self.filtered_time_logs = frappe.db.sql('''
 			SELECT tt.employee AS employee, ttd.hours AS hours, ttd.billable AS billable, ttd.project AS project
