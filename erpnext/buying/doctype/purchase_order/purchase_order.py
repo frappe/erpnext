@@ -133,6 +133,7 @@ class PurchaseOrder(BuyingController):
 						d.material_request_item, "schedule_date")
 
 
+	@frappe.whitelist()
 	def get_last_purchase_rate(self):
 		"""get last purchase rates for all items"""
 
