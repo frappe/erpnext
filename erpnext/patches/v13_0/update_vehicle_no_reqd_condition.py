@@ -6,4 +6,5 @@ def execute():
 		return
 
 	if frappe.db.exists('Custom Field', { 'fieldname': 'vehicle_no' }):
-		frappe.db.set_value('Custom Field', { 'fieldname': 'vehicle_no' }, 'mandatory_depends_on', '')
+		if frappe.db.field_exists('Custom Field', 'mandatory_depends_on'):
+			frappe.db.set_value('Custom Field', { 'fieldname': 'vehicle_no' }, 'mandatory_depends_on', '')
