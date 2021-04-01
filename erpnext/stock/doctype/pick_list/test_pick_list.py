@@ -291,6 +291,63 @@ class TestPickList(unittest.TestCase):
 		self.assertEqual(pick_list.locations[1].qty, 5)
 		self.assertEqual(pick_list.locations[1].sales_order_item, sales_order.items[0].name)
 
+	def test_pick_list_for_items_with_multiple_UOM(self):
+		purchase_receipt = make_purchase_receipt(item_code="_Test Item", qty=10)
+		purchase_receipt.submit()
+
+		sales_order = frappe.get_doc({
+				'doctype': 'Sales Order',
+				'customer': '_Test Customer',
+				'company': '_Test Company',
+				'items': [{
+					'item_code': '_Test Item',
+					'qty': 1,
+					'conversion_factor': 5,
+					'delivery_date': frappe.utils.today()
+				},
+				{
+					'item_code': '_Test Item',
+					'qty': 1,
+					'conversion_factor': 1,
+					'delivery_date': frappe.utils.today()
+				}],
+			}).insert()
+		sales_order.submit()
+
+		pick_list = frappe.get_doc({
+			'doctype': 'Pick List',
+			'company': '_Test Company',
+			'customer': '_Test Customer',
+			'items_based_on': 'Sales Order',
+			'locations': [{
+				'item_code': '_Test Item',
+				'qty': 1,
+				'stock_qty': 5,
+				'conversion_factor': 5,
+				'sales_order': sales_order.name,
+				'sales_order_item': sales_order.items[0].name ,
+			},
+			{
+				'item_code': '_Test Item',
+				'qty': 1,
+				'stock_qty': 1,
+				'conversion_factor': 1,
+				'sales_order': sales_order.name,
+				'sales_order_item': sales_order.items[1].name ,
+			}]
+		})
+		pick_list.set_item_locations()
+		pick_list.submit()
+
+		delivery_note = create_delivery_note(pick_list.name)
+
+		self.assertEqual(pick_list.locations[0].qty, delivery_note.items[0].qty)
+		self.assertEqual(pick_list.locations[1].qty, delivery_note.items[1].qty)
+		self.assertEqual(sales_order.items[0].conversion_factor, delivery_note.items[0].conversion_factor)
+
+		pick_list.cancel()
+		sales_order.cancel()
+		purchase_receipt.cancel()
 
 	# def test_pick_list_skips_items_in_expired_batch(self):
 	# 	pass
