@@ -741,16 +741,16 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				item.serial_no = item.serial_no.replace(/,/g, '\n');
 				item.conversion_factor = item.conversion_factor || 1;
 				refresh_field("serial_no", item.name, item.parentfield);
-				if(!doc.is_return && cint(frappe.user_defaults.set_qty_in_transactions_based_on_serial_no_input)) {
+				if (!doc.is_return && cint(frappe.user_defaults.set_qty_in_transactions_based_on_serial_no_input)) {
 					setTimeout(() => {
-						me.update_qty(cdt, cdn)
-					}, 10000)
+						me.update_qty(cdt, cdn);
+					}, 10000);
 				}
 			}
 		}
 	},
 
-	update_qty: function(cdt, cdn){
+	update_qty: function(cdt, cdn) {
 		var valid_serial_nos = [];
 		var serialnos = [];
 		var item = frappe.get_doc(cdt, cdn);
