@@ -62,17 +62,21 @@ class QualityInspection(Document):
 					(quality_inspection, self.modified, self.reference_name, self.item_code))
 
 		else:
+			args = [quality_inspection, self.modified, self.reference_name, self.item_code]
 			doctype = self.reference_type + ' Item'
+
 			if self.reference_type == 'Stock Entry':
 				doctype = 'Stock Entry Detail'
 
 			if self.reference_type and self.reference_name:
 				conditions = ""
 				if self.batch_no and self.docstatus == 1:
-					conditions += " and t1.batch_no = '%s'"%(self.batch_no)
+					conditions += " and t1.batch_no = %s"
+					args.append(self.batch_no)
 
 				if self.docstatus == 2: # if cancel, then remove qi link wherever same name
-					conditions += " and t1.quality_inspection = '%s'"%(self.name)
+					conditions += " and t1.quality_inspection = %s"
+					args.append(self.name)
 
 				frappe.db.sql("""
 					UPDATE
@@ -85,7 +89,7 @@ class QualityInspection(Document):
 						and t1.parent = t2.name
 						{conditions}
 				""".format(parent_doc=self.reference_type, child_doc=doctype, conditions=conditions),
-					(quality_inspection, self.modified, self.reference_name, self.item_code))
+					args)
 
 	def inspect_and_set_status(self):
 		for reading in self.readings:
