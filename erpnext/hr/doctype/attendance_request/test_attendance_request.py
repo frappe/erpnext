@@ -12,8 +12,11 @@ test_dependencies = ["Employee"]
 
 class TestAttendanceRequest(unittest.TestCase):
 	def setUp(self):
-		for doctype in ["Attendance Request", "Attendance"]:
-			frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
+		clear_attendance_data()
+
+	@classmethod
+	def tearDown(cls):
+		clear_attendance_data()
 
 	def test_on_duty_attendance_request(self):
 		today = nowdate()
@@ -59,3 +62,7 @@ class TestAttendanceRequest(unittest.TestCase):
 
 def get_employee():
 	return frappe.get_doc("Employee", "_T-Employee-00001")
+
+def clear_attendance_data():
+	for doctype in ["Attendance Request", "Attendance"]:
+		frappe.db.sql("delete from `tab{doctype}`".format(doctype=doctype))
