@@ -2106,6 +2106,7 @@ def create_sales_invoice(**args):
 	si.return_against = args.return_against
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
+	si.naming_series = args.naming_series or "T-SINV-"
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",
