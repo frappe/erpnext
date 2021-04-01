@@ -94,7 +94,7 @@ def make_pos_profile(**args):
 
 	mode_of_payment = frappe.get_doc("Mode of Payment", "Cash")
 	company = args.company or "_Test Company"
-	default_account =  args.income_account or "Sales - _TC"
+	default_account = args.income_account or "Sales - _TC"
 
 	if not frappe.db.get_value("Mode of Payment Account", {"company": company, "parent": "Cash"}):
 		mode_of_payment.append("accounts", {
