@@ -57,7 +57,7 @@ class POSInvoice(SalesInvoice):
 			self.apply_loyalty_points()
 		self.check_phone_payments()
 		self.set_status(update=True)
-	
+
 	def before_cancel(self):
 		if self.consolidated_invoice and frappe.db.get_value('Sales Invoice', self.consolidated_invoice, 'docstatus') == 1:
 			pos_closing_entry = frappe.get_all(
@@ -332,8 +332,6 @@ class POSInvoice(SalesInvoice):
 
 			if selling_price_list:
 				self.set('selling_price_list', selling_price_list)
-			if customer_currency != profile.get('currency'):
-				self.set('currency', customer_currency)
 
 			# set pos values in items
 			for item in self.get("items"):
@@ -401,7 +399,7 @@ class POSInvoice(SalesInvoice):
 					pay_req.request_phone_payment()
 
 				return pay_req
-	
+
 	def get_new_payment_request(self, mop):
 		payment_gateway_account = frappe.db.get_value("Payment Gateway Account", {
 			"payment_account": mop.account,
