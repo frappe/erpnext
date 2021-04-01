@@ -152,10 +152,8 @@ def get_itemised_tax_breakup_data(doc, account_wise=False):
 def set_place_of_supply(doc, method=None):
 	doc.place_of_supply = get_place_of_supply(doc, doc.doctype)
 
-def validate_document_name(doc, method=None, validation_test=False):
+def validate_document_name(doc, method=None):
 	"""Validate GST invoice number requirements."""
-	if frappe.flags.in_test and not validation_test:
-		return
 
 	country = frappe.get_cached_value("Company", doc.company, "country")
 

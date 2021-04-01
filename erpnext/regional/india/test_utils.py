@@ -16,15 +16,14 @@ class TestIndiaUtils(unittest.TestCase):
 				"SI.2020.0001", "PI2021 - 001"]
 		for name in invalid_names:
 			doc = frappe._dict(name=name, posting_date=posting_date)
-			self.assertRaises(frappe.ValidationError, validate_document_name,
-				doc, validation_test=True)
+			self.assertRaises(frappe.ValidationError, validate_document_name, doc)
 
 		valid_names = ["012345678901236", "SI/2020/0001", "SI/2020-0001",
 			"2020-PI-0001", "PI2020-0001"]
 		for name in valid_names:
 			doc = frappe._dict(name=name, posting_date=posting_date)
 			try:
-				validate_document_name(doc, validation_test=True)
+				validate_document_name(doc)
 			except frappe.ValidationError:
 				self.fail("Valid name {} throwing error".format(name))
 
@@ -34,6 +33,6 @@ class TestIndiaUtils(unittest.TestCase):
 		doc = frappe._dict(name="SI$123", posting_date="2021-05-01")
 
 		try:
-			validate_document_name(doc, validation_test=True)
+			validate_document_name(doc)
 		except frappe.ValidationError:
 			self.fail("Regional validation related to India are being applied to other countries")
