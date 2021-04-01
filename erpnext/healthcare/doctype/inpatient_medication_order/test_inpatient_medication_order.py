@@ -11,7 +11,6 @@ from erpnext.healthcare.doctype.inpatient_record.inpatient_record import admit_p
 
 class TestInpatientMedicationOrder(unittest.TestCase):
 	def setUp(self):
-		frappe.db.sql("""delete from `tabInpatient Record`""")
 		self.patient = create_patient()
 
 		# Admit
@@ -80,16 +79,6 @@ class TestInpatientMedicationOrder(unittest.TestCase):
 
 			self.ip_record.reload()
 			discharge_patient(self.ip_record)
-
-		for entry in frappe.get_all('Inpatient Medication Entry'):
-			doc = frappe.get_doc('Inpatient Medication Entry', entry.name)
-			doc.cancel()
-			doc.delete()
-
-		for entry in frappe.get_all('Inpatient Medication Order'):
-			doc = frappe.get_doc('Inpatient Medication Order', entry.name)
-			doc.cancel()
-			doc.delete()
 
 def create_dosage_form():
 	if not frappe.db.exists('Dosage Form', 'Tablet'):
