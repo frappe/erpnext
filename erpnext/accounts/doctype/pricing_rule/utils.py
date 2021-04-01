@@ -367,7 +367,7 @@ def get_qty_and_rate_for_mixed_conditions(doc, pr_doc, args):
 
 	if items and doc.get("items"):
 		for row in doc.get('items'):
-			if row.get(apply_on) not in items: continue
+			if (row.get(apply_on) or args.get(apply_on)) not in items: continue
 
 			if pr_doc.mixed_conditions:
 				amt = args.get('qty') * args.get("price_list_rate")
@@ -479,7 +479,7 @@ def apply_pricing_rule_on_transaction(doc):
 
 				doc.calculate_taxes_and_totals()
 			elif d.price_or_product_discount == 'Product':
-				item_details = frappe._dict({'parenttype': doc.doctype})
+				item_details = frappe._dict({'parenttype': doc.doctype, 'free_item_data': []})
 				get_product_discount_rule(d, item_details, doc=doc)
 				apply_pricing_rule_for_free_items(doc, item_details.free_item_data)
 				doc.set_missing_values()
@@ -508,9 +508,16 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 		frappe.throw(_("Free item not set in the pricing rule {0}")
 			.format(get_link_to_form("Pricing Rule", pricing_rule.name)))
 
-	item_details.free_item_data = {
+	qty = pricing_rule.free_qty or 1
+	if pricing_rule.is_recursive:
+		transaction_qty = args.get('qty') if args else doc.total_qty
+		if transaction_qty:
+			qty = flt(transaction_qty) * qty
+
+	free_item_data_args = {
 		'item_code': free_item,
-		'qty': pricing_rule.free_qty or 1,
+		'qty': qty,
+		'pricing_rules': pricing_rule.name,
 		'rate': pricing_rule.free_item_rate or 0,
 		'price_list_rate': pricing_rule.free_item_rate or 0,
 		'is_free_item': 1
@@ -519,24 +526,26 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	item_data = frappe.get_cached_value('Item', free_item, ['item_name',
 		'description', 'stock_uom'], as_dict=1)
 
-	item_details.free_item_data.update(item_data)
-	item_details.free_item_data['uom'] = pricing_rule.free_item_uom or item_data.stock_uom
-	item_details.free_item_data['conversion_factor'] = get_conversion_factor(free_item,
-		item_details.free_item_data['uom']).get("conversion_factor", 1)
+	free_item_data_args.update(item_data)
+	free_item_data_args['uom'] = pricing_rule.free_item_uom or item_data.stock_uom
+	free_item_data_args['conversion_factor'] = get_conversion_factor(free_item,
+		free_item_data_args['uom']).get("conversion_factor", 1)
 
 	if item_details.get("parenttype") == 'Purchase Order':
-		item_details.free_item_data['schedule_date'] = doc.schedule_date if doc else today()
+		free_item_data_args['schedule_date'] = doc.schedule_date if doc else today()
 
 	if item_details.get("parenttype") == 'Sales Order':
-		item_details.free_item_data['delivery_date'] = doc.delivery_date if doc else today()
+		free_item_data_args['delivery_date'] = doc.delivery_date if doc else today()
+
+	item_details.free_item_data.append(free_item_data_args)
 
 def apply_pricing_rule_for_free_items(doc, pricing_rule_args, set_missing_values=False):
-	if pricing_rule_args.get('item_code'):
-		items = [d.item_code for d in doc.items
-			if d.item_code == (pricing_rule_args.get("item_code")) and d.is_free_item]
+	if pricing_rule_args:
+		items = tuple([(d.item_code, d.pricing_rules) for d in doc.items if d.is_free_item])
 
-		if not items:
-			doc.append('items', pricing_rule_args)
+		for args in pricing_rule_args:
+			if not items or (args.get('item_code'), args.get('pricing_rules')) not in items:
+				doc.append('items', args)
 
 def get_pricing_rule_items(pr_doc):
 	apply_on_data = []

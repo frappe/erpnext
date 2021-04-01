@@ -26,7 +26,8 @@ from erpnext.controllers.print_settings import set_print_templates_for_item_tabl
 
 class AccountMissingError(frappe.ValidationError): pass
 
-force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
+force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate",
+	"pricing_rules", "weight_per_unit", "weight_uom", "total_weight")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -920,7 +921,8 @@ class AccountsController(TransactionBase):
 		else:
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
-					d.payment_amount = flt(grand_total * flt(d.invoice_portion) / 100, d.precision('payment_amount'))
+					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+					d.outstanding = d.payment_amount
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
@@ -1235,17 +1237,23 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, bill_dat
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
+	term_details.discount_type = term.discount_type
+	term_details.discount = term.discount
+	# term_details.discounted_amount = flt(grand_total) * (term.discount / 100) if term.discount_type == 'Percentage' else discount
+	term_details.outstanding = term_details.payment_amount
+	term_details.mode_of_payment = term.mode_of_payment
+
 	if bill_date:
 		term_details.due_date = get_due_date(term, bill_date)
+		term_details.discount_date = get_discount_date(term, bill_date)
 	elif posting_date:
 		term_details.due_date = get_due_date(term, posting_date)
+		term_details.discount_date = get_discount_date(term, posting_date)
 
 	if getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date
-	term_details.mode_of_payment = term.mode_of_payment
 
 	return term_details
-
 
 def get_due_date(term, posting_date=None, bill_date=None):
 	due_date = None
@@ -1258,6 +1266,16 @@ def get_due_date(term, posting_date=None, bill_date=None):
 		due_date = add_months(get_last_day(date), term.credit_months)
 	return due_date
 
+def get_discount_date(term, posting_date=None, bill_date=None):
+	discount_validity = None
+	date = bill_date or posting_date
+	if term.discount_validity_based_on == "Day(s) after invoice date":
+		discount_validity = add_days(date, term.discount_validity)
+	elif term.discount_validity_based_on == "Day(s) after the end of the invoice month":
+		discount_validity = add_days(get_last_day(date), term.discount_validity)
+	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
+		discount_validity = add_months(get_last_day(date), term.discount_validity)
+	return discount_validity
 
 def get_supplier_block_status(party_name):
 	"""
