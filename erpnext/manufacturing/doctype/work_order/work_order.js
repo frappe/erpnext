@@ -624,7 +624,7 @@ erpnext.work_order = {
 				fieldtype: 'Check',
 				label: __('Scrap Remaining'),
 				fieldname: 'scrap_remaining',
-				default: 1
+				default: frm.doc.__onload.scrap_remaining_by_default
 			})
 		}
 
