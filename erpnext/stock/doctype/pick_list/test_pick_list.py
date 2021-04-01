@@ -305,8 +305,7 @@ class TestPickList(unittest.TestCase):
 					'qty': 1,
 					'conversion_factor': 5,
 					'delivery_date': frappe.utils.today()
-				},
-				{
+				}, {
 					'item_code': '_Test Item',
 					'qty': 1,
 					'conversion_factor': 1,
@@ -327,8 +326,7 @@ class TestPickList(unittest.TestCase):
 				'conversion_factor': 5,
 				'sales_order': sales_order.name,
 				'sales_order_item': sales_order.items[0].name ,
-			},
-			{
+			}, {
 				'item_code': '_Test Item',
 				'qty': 1,
 				'stock_qty': 1,
