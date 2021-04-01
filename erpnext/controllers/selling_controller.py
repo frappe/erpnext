@@ -316,14 +316,16 @@ class SellingController(StockController):
 
 		items = self.get("items") + (self.get("packed_items") or [])
 		for d in items:
-			if not cint(self.get("is_return")):
+			if not self.get("return_against"):
 				# Get incoming rate based on original item cost based on valuation method
+				qty = flt(d.get('stock_qty') or d.get('actual_qty'))
+
 				d.incoming_rate = get_incoming_rate({
 					"item_code": d.item_code,
 					"warehouse": d.warehouse,
 					"posting_date": self.get('posting_date') or self.get('transaction_date'),
 					"posting_time": self.get('posting_time') or nowtime(),
-					"qty": -1 * flt(d.get('stock_qty') or d.get('actual_qty')),
+					"qty": qty if cint(self.get("is_return")) else (-1 * qty),
 					"serial_no": d.get('serial_no'),
 					"company": self.company,
 					"voucher_type": self.doctype,
