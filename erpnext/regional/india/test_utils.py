@@ -12,7 +12,7 @@ class TestIndiaUtils(unittest.TestCase):
 		mock_get_cached.return_value = "India"  # mock country
 		posting_date = "2021-05-01"
 
-		invalid_names = [ "SI$1231", "012345678901234567", "SI 2020 05", 
+		invalid_names = [ "SI$1231", "012345678901234567", "SI 2020 05",
 				"SI.2020.0001", "PI2021 - 001" ]
 		for name in invalid_names:
 			doc = frappe._dict(name=name, posting_date=posting_date)
@@ -23,7 +23,7 @@ class TestIndiaUtils(unittest.TestCase):
 		for name in valid_names:
 			doc = frappe._dict(name=name, posting_date=posting_date)
 			try:
-				validate_document_name(doc)
+				validate_document_name(doc, validation_test=True)
 			except frappe.ValidationError:
 				self.fail("Valid name {} throwing error".format(name))
 
@@ -33,6 +33,6 @@ class TestIndiaUtils(unittest.TestCase):
 		doc = frappe._dict(name="SI$123", posting_date="2021-05-01")
 
 		try:
-			validate_document_name(doc)
+			validate_document_name(doc, validation_test=True)
 		except frappe.ValidationError:
 			self.fail("Regional validation related to India are being applied to other countries")
