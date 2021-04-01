@@ -43,7 +43,7 @@ frappe.query_reports["Tax Detail"] = {
 			fieldname: "mode",
 			label: __("Mode"),
 			fieldtype: "Read Only",
-			default: "run",
+			default: "edit",
 			hidden: 1,
 			reqd: 1
 		}
@@ -83,12 +83,12 @@ erpnext.TaxDetail = class TaxDetail {
 		// The last thing to run after datatable_render in refresh()
 		this.super.show_footer_message.apply(this.qr);
 		if (this.qr.report_name !== 'Tax Detail') {
-			this.set_value_options();
 			this.show_help();
 			if (this.loading) {
 				this.set_section('');
+			} else {
+				this.reload_component('');
 			}
-			this.reload_filter();
 		}
 		this.loading = false;
 	}
@@ -134,6 +134,7 @@ erpnext.TaxDetail = class TaxDetail {
 		return new_items;
 	}
 	save_report() {
+		this.check_datatable();
 		if (this.qr.report_name !== 'Tax Detail') {
 			frappe.call({
 				method:'erpnext.accounts.report.tax_detail.tax_detail.save_custom_report',
@@ -152,55 +153,13 @@ erpnext.TaxDetail = class TaxDetail {
 			});
 		}
 	}
-	set_value_options() {
-		// May be run with no columns or data
-		if (this.qr.columns) {
-			this.fieldname_lookup = {};
-			this.label_lookup = {};
-			this.qr.columns.forEach((col, index) => {
-				if (col['fieldtype'] == "Currency") {
-					this.fieldname_lookup[col['label']] = col['fieldname'];
-					this.label_lookup[col['fieldname']] = col['label'];
-				}
-			});
-			const options = Object.keys(this.fieldname_lookup);
-			this.controls['value_field'].$wrapper.find("select").empty().add_options(options);
-			this.controls['value_field'].set_input(options[0]);
+	check_datatable() {
+		if (!this.qr.datatable) {
+			frappe.throw(__('Please change the date range to load data first'));
 		}
-	}
-	set_value_label_from_filter() {
-		const section_name = this.controls['section_name'].get_input_value();
-		const fidx = this.controls['filter_index'].get_input_value();
-		if (section_name && fidx) {
-			const fieldname = this.sections[section_name][fidx]['fieldname'];
-			this.controls['value_field'].set_input(this.label_lookup[fieldname]);
-		} else {
-			this.controls['value_field'].set_input(Object.keys(this.fieldname_lookup)[0]);
-		}
-	}
-	get_value_fieldname() {
-		const curlabel = this.controls['value_field'].get_input_value();
-		return this.fieldname_lookup[curlabel];
-	}
-	new_section(label) {
-		const dialog = new frappe.ui.Dialog({
-			title: label,
-			fields: [{
-				fieldname: 'data',
-				label: label,
-				fieldtype: 'Data'
-			}],
-			primary_action_label: label,
-			primary_action: (values) => {
-				dialog.hide();
-				this.set_section(values.data);
-			}
-		});
-		dialog.show();
 	}
 	set_section(name) {
 		// Sets the given section name and then reloads the data
-		this.controls['filter_index'].set_input('');
 		if (name && !this.sections[name]) {
 			this.sections[name] = {};
 		}
@@ -225,43 +184,49 @@ erpnext.TaxDetail = class TaxDetail {
 		if (refresh) {
 			this.qr.refresh();
 		}
-		this.reload_filter();
+		this.reload_component('');
 	}
-	reload_filter() {
+	reload_component(component_name) {
 		const section_name = this.controls['section_name'].get_input_value();
 		if (section_name) {
-			let fidx = this.controls['filter_index'].get_input_value();
-			let section = this.sections[section_name];
-			let fidxs = Object.keys(section);
-			fidxs.unshift('');
-			this.controls['filter_index'].$wrapper.find("select").empty().add_options(fidxs);
-			this.controls['filter_index'].set_input(fidx);
+			const section = this.sections[section_name];
+			const component_names = Object.keys(section);
+			component_names.unshift('');
+			this.controls['component'].$wrapper.find("select").empty().add_options(component_names);
+			this.controls['component'].set_input(component_name);
+			if (component_name) {
+				this.controls['component_type'].set_input(section[component_name].type);
+			}
 		} else {
-			this.controls['filter_index'].$wrapper.find("select").empty();
-			this.controls['filter_index'].set_input('');
+			this.controls['component'].$wrapper.find("select").empty();
+			this.controls['component'].set_input('');
 		}
 		this.set_table_filters();
 	}
 	set_table_filters() {
 		let filters = {};
 		const section_name = this.controls['section_name'].get_input_value();
-		const fidx = this.controls['filter_index'].get_input_value();
-		if (section_name && fidx) {
-			filters = this.sections[section_name][fidx]['filters'];
+		const component_name = this.controls['component'].get_input_value();
+		if (section_name && component_name) {
+			const component_type = this.sections[section_name][component_name].type;
+			if (component_type === 'filter') {
+				filters = this.sections[section_name][component_name]['filters'];
+			}
 		}
 		this.setAppliedFilters(filters);
-		this.set_value_label_from_filter();
 	}
 	setAppliedFilters(filters) {
-		Array.from(this.qr.datatable.header.querySelectorAll('.dt-filter')).map(function setFilters(input) {
-			let idx = input.dataset.colIndex;
-			if (filters[idx]) {
-				input.value = filters[idx];
-			} else {
-				input.value = null;
-			}
-		});
-		this.qr.datatable.columnmanager.applyFilter(filters);
+		if (this.qr.datatable) {
+			Array.from(this.qr.datatable.header.querySelectorAll('.dt-filter')).map(function setFilters(input) {
+				let idx = input.dataset.colIndex;
+				if (filters[idx]) {
+					input.value = filters[idx];
+				} else {
+					input.value = null;
+				}
+			});
+			this.qr.datatable.columnmanager.applyFilter(filters);
+		}
 	}
 	delete(name, type) {
 		if (type === 'section') {
@@ -269,11 +234,10 @@ erpnext.TaxDetail = class TaxDetail {
 			const new_section = Object.keys(this.sections)[0] || '';
 			this.set_section(new_section);
 		}
-		if (type === 'filter') {
+		if (type === 'component') {
 			const cur_section = this.controls['section_name'].get_input_value();
 			delete this.sections[cur_section][name];
-			this.controls['filter_index'].set_input('');
-			this.reload_filter();
+			this.reload_component('');
 		}
 	}
 	create_controls() {
@@ -293,7 +257,13 @@ erpnext.TaxDetail = class TaxDetail {
 			fieldtype: 'Button',
 			fieldname: 'new_section',
 			click: () => {
-				this.new_section(__('New Section'));
+				frappe.prompt({
+					label: __('Section Name'),
+					fieldname: 'name',
+					fieldtype: 'Data'
+				}, (values) => {
+					this.set_section(values.name);
+				});
 			}
 		});
 		controls['delete_section'] = this.qr.page.add_field({
@@ -308,59 +278,85 @@ erpnext.TaxDetail = class TaxDetail {
 				}
 			}
 		});
-		controls['filter_index'] = this.qr.page.add_field({
-			label: __('Filter'),
+		controls['component'] = this.qr.page.add_field({
+			label: __('Component'),
 			fieldtype: 'Select',
-			fieldname: 'filter_index',
+			fieldname: 'component',
 			change: (e) => {
-				this.controls['filter_index'].set_input(this.controls['filter_index'].get_input_value());
-				this.set_table_filters();
+				this.reload_component(this.controls['component'].get_input_value());
 			}
 		});
-		controls['add_filter'] = this.qr.page.add_field({
-			label: __('Add Filter'),
+		controls['component_type'] = this.qr.page.add_field({
+			label: __('Component Type'),
+			fieldtype: 'Select',
+			fieldname: 'component_type',
+			default: 'filter',
+			options: [
+				{label: __('Filtered Row Subtotal'), value: 'filter'},
+				{label: __('Section Subtotal'), value: 'section'}
+			]
+		});
+		controls['add_component'] = this.qr.page.add_field({
+			label: __('Add Component'),
 			fieldtype: 'Button',
-			fieldname: 'add_filter',
+			fieldname: 'add_component',
 			click: () => {
+				this.check_datatable();
 				let section_name = this.controls['section_name'].get_input_value();
 				if (section_name) {
-					let prefix = 'Filter';
-					let data = {
-						filters: this.qr.datatable.columnmanager.getAppliedFilters(),
-						fieldname: this.get_value_fieldname()
+					const component_type = this.controls['component_type'].get_input_value();
+					let idx = 0;
+					const names = Object.keys(this.sections[section_name]);
+					if (names.length > 0) {
+						const idxs = names.map((key) => parseInt(key.match(/\d+$/)) || 0);
+						idx = Math.max(...idxs) + 1;
 					}
-					const fidxs = Object.keys(this.sections[section_name]);
-					let new_idx = prefix + '0';
-					if (fidxs.length > 0) {
-						const fiidxs = fidxs.map((key) => parseInt(key.replace(prefix, '')));
-						new_idx = prefix + (Math.max(...fiidxs) + 1).toString();
+					const filters = this.qr.datatable.columnmanager.getAppliedFilters();
+					if (component_type === 'filter') {
+						const name = 'Filter' + idx.toString();
+						let data = {
+							type: component_type,
+							filters: filters
+						}
+						this.sections[section_name][name] = data;
+						this.reload_component(name);
+					} else if (component_type === 'section') {
+						if (filters && Object.keys(filters).length !== 0) {
+							frappe.show_alert({
+								message: __('Column filters ignored'),
+								indicator: 'yellow'
+							});
+						}
+						let data = {
+							type: component_type
+						}
+						frappe.prompt({
+							label: __('Section'),
+							fieldname: 'section',
+							fieldtype: 'Select',
+							options: Object.keys(this.sections)
+						}, (values) => {
+							this.sections[section_name][values.section] = data;
+							this.reload_component(values.section);
+						});
+					} else {
+						frappe.throw(__('Please select the Component Type first'));
 					}
-					this.sections[section_name][new_idx] = data;
-					this.controls['filter_index'].set_input(new_idx);
-					this.reload_filter();
 				} else {
-					frappe.throw(__('Please add or select the Section first'));
+					frappe.throw(__('Please select the Section first'));
 				}
 			}
 		});
-		controls['delete_filter'] = this.qr.page.add_field({
-			label: __('Delete Filter'),
+		controls['delete_component'] = this.qr.page.add_field({
+			label: __('Delete Component'),
 			fieldtype: 'Button',
-			fieldname: 'delete_filter',
+			fieldname: 'delete_component',
 			click: () => {
-				let cur_filter = this.controls['filter_index'].get_input_value();
-				if (cur_filter) {
-					frappe.confirm(__('Are you sure you want to delete filter ') + cur_filter + '?',
-					() => {this.delete(cur_filter, 'filter')});
+				const component = this.controls['component'].get_input_value();
+				if (component) {
+					frappe.confirm(__('Are you sure you want to delete component ') + component + '?',
+					() => {this.delete(component, 'component')});
 				}
-			}
-		});
-		controls['value_field'] = this.qr.page.add_field({
-			label: __('Value Column'),
-			fieldtype: 'Select',
-			fieldname: 'value_field',
-			change: (e) => {
-				this.controls['value_field'].set_input(this.controls['value_field'].get_input_value());
 			}
 		});
 		controls['save'] = this.qr.page.add_field({
@@ -380,13 +376,16 @@ erpnext.TaxDetail = class TaxDetail {
 		this.controls = controls;
 	}
 	show_help() {
-		const help = __(`You can add multiple sections to your custom report using the New Section button above.
-			To specify what data goes in each section, specify column filters in the data table, then save with Add Filter.
-			Each section can have multiple filters added but be careful with the duplicated data rows.
-			You can specify which Currency column will be summed for each filter in the final report with the Value Column
-			select box. Use the Show Detail box to see the data rows included in each section in the final report.
-			Once you're done, hit Save & Run.`);
-		this.qr.$report_footer.append(`<div class="col-md-12">${help}</div>`);
+		const help = __(`<strong>Help:</strong> Your custom report is built from General Ledger Entries within the date range.
+			You can add multiple sections to the report using the New Section button.
+			Each component added to a section adds a subset of the data into the specified section.
+			Beware of duplicated data rows.
+			The Filtered Row component type saves the datatable column filters to specify the added data.
+			The Section component type refers to the data in a previously defined section, but it cannot refer to its parent section.
+			The Amount column is summed to give the section subtotal.
+			Use the Show Detail box to see the data rows included in each section in the final report.
+			Once finished, hit Save & Run. Report contributed by`);
+		this.qr.$report_footer.append(`<div class="col-md-12">${help}<a href="https://www.casesolved.co.uk"> Case Solved</a></div>`);
 	}
 }
 

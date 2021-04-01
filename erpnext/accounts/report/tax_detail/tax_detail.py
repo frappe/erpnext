@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe, json
 from frappe import _
 
-# NOTE: Payroll is implemented using Journal Entries which translate directly to GL Entries
+# NOTE: Payroll is implemented using Journal Entries which are included as GL Entries
 
 # field lists in multiple doctypes will be coalesced
 required_sql_fields = {
@@ -60,23 +60,35 @@ def run_report(report_name, data):
 	columns = report_config.get('columns')
 	sections = report_config.get('sections', {})
 	show_detail = report_config.get('show_detail', 1)
+	report = {}
 	new_data = []
 	summary = []
 	for section_name, section in sections.items():
-		section_total = 0.0
-		for filt_name, filt in section.items():
-			value_field = filt['fieldname']
-			rmidxs = []
-			for colno, filter_string in filt['filters'].items():
-				filter_field = columns[int(colno) - 1]['fieldname']
-				for i, row in enumerate(data):
-					if not filter_match(row[filter_field], filter_string):
-						rmidxs += [i]
-			rows = [row for i, row in enumerate(data) if i not in rmidxs]
-			section_total += subtotal(rows, value_field)
-			if show_detail: new_data += rows
-		new_data += [ {columns[1]['fieldname']: section_name, columns[2]['fieldname']: section_total} ]
-		summary += [ {'label': section_name, 'datatype': 'Currency', 'value': section_total} ]
+		report[section_name] = {'rows': [], 'subtotal': 0.0}
+		for component_name, component in section.items():
+			if component['type'] == 'filter':
+				for row in data:
+					matched = True
+					for colno, filter_string in component['filters'].items():
+						filter_field = columns[int(colno) - 1]['fieldname']
+						if not filter_match(row[filter_field], filter_string):
+							matched = False
+							break
+					if matched:
+						report[section_name]['rows'] += [row]
+						report[section_name]['subtotal'] += row['amount']
+			if component['type'] == 'section':
+				if component_name == section_name:
+					frappe.throw(_("A report component cannot refer to its parent section: ") + section_name)
+				try:
+					report[section_name]['rows'] += report[component_name]['rows']
+					report[section_name]['subtotal'] += report[component_name]['subtotal']
+				except KeyError:
+					frappe.throw(_("A report component can only refer to an earlier section: ") + section_name)
+
+		if show_detail: new_data += report[section_name]['rows']
+		new_data += [ {'voucher_no': section_name, 'amount': report[section_name]['subtotal']} ]
+		summary += [ {'label': section_name, 'datatype': 'Currency', 'value': report[section_name]['subtotal']} ]
 		if show_detail: new_data += [ {} ]
 	return new_data or data, summary or None
 
@@ -123,11 +135,6 @@ def filter_match(value, string):
 		if operator == '<': return True
 		return False
 
-def subtotal(data, field):
-	subtotal = 0.0
-	for row in data:
-		subtotal += row[field]
-	return subtotal
 
 abbrev = lambda dt: ''.join(l[0].lower() for l in dt.split(' ')) + '.'
 doclist = lambda dt, dfs: [abbrev(dt) + f for f in dfs]
@@ -185,6 +192,9 @@ def modify_report_columns(doctype, field, column):
 		if field in ["item_tax_rate", "base_net_amount"]:
 			return None
 
+	if doctype == "GL Entry" and field in ["debit", "credit"]:
+		column.update({"label": _("Amount"), "fieldname": "amount"})
+
 	if field == "taxes_and_charges":
 		column.update({"label": _("Taxes and Charges Template")})
 	return column
@@ -193,6 +203,8 @@ def modify_report_data(data):
 	import json
 	new_data = []
 	for line in data:
+		if line.debit: line.amount = -line.debit
+		else: line.amount = line.credit
 		# Remove Invoice GL Tax Entries and generate Tax entries from the invoice lines
 		if "Invoice" in line.voucher_type:
 			if line.account_type != "Tax":
@@ -204,11 +216,11 @@ def modify_report_data(data):
 					tax_line.account_type = "Tax"
 					tax_line.account = account
 					if line.voucher_type == "Sales Invoice":
-						line.credit = line.base_net_amount
-						tax_line.credit = line.base_net_amount * (rate / 100)
+						line.amount = line.base_net_amount
+						tax_line.amount = line.base_net_amount * (rate / 100)
 					if line.voucher_type == "Purchase Invoice":
-						line.debit = line.base_net_amount
-						tax_line.debit = line.base_net_amount * (rate / 100)
+						line.amount = -line.base_net_amount
+						tax_line.amount = -line.base_net_amount * (rate / 100)
 					new_data += [tax_line]
 		else:
 			new_data += [line]
