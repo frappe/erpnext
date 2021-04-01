@@ -16,7 +16,8 @@ class TestIndiaUtils(unittest.TestCase):
 				"SI.2020.0001", "PI2021 - 001" ]
 		for name in invalid_names:
 			doc = frappe._dict(name=name, posting_date=posting_date)
-			self.assertRaises(frappe.ValidationError, validate_document_name, doc)
+			self.assertRaises(frappe.ValidationError, validate_document_name,
+				doc, validation_test=True)
 
 		valid_names = [ "012345678901236", "SI/2020/0001", "SI/2020-0001",
 			"2020-PI-0001", "PI2020-0001" ]
