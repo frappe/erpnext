@@ -107,7 +107,7 @@ def get_party_details(address_name, company_address=None, billing_address=None, 
 		# according to einvoice standard
 		pincode = 999999
 
-	address_details = frappe._dict(dict(
+	party_address_details = frappe._dict(dict(
 		legal_name=d.address_title,
 		location=d.city, pincode=d.pincode,
 		state_code=d.gst_state_number,
@@ -115,8 +115,8 @@ def get_party_details(address_name, company_address=None, billing_address=None, 
 		address_line2=d.address_line2
 	))
 	if d.gstin:
-		address_details.gstin = d.gstin
-	return address_details
+		party_address_details.gstin = d.gstin
+	return party_address_details
 
 def get_gstin_details(gstin):
 	if not hasattr(frappe.local, 'gstin_cache'):
