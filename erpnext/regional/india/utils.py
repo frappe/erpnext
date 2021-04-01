@@ -154,6 +154,7 @@ def set_place_of_supply(doc, method=None):
 
 def validate_document_name(doc, method=None):
 	"""Validate GST invoice number requirements."""
+
 	country = frappe.get_cached_value("Company", doc.company, "country")
 
 	# Date was chosen as start of next FY to avoid irritating current users.
