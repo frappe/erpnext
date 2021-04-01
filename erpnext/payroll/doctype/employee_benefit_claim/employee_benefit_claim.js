@@ -21,7 +21,6 @@ frappe.ui.form.on('Employee Benefit Claim', {
 				callback: function(r) {
 					if (r.message) {
 						frm.set_value('currency', r.message);
-						frm.set_df_property('currency', 'hidden', 0);
 					}
 				}
 			});

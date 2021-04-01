@@ -7,6 +7,8 @@ import frappe
 import unittest
 from frappe.utils import nowdate, add_days
 
+test_dependencies = ["Shift Type"]
+
 class TestShiftRequest(unittest.TestCase):
 	def setUp(self):
 		for doctype in ["Shift Request", "Shift Assignment"]:

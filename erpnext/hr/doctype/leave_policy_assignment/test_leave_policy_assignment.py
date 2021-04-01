@@ -9,6 +9,8 @@ from erpnext.hr.doctype.leave_application.test_leave_application import get_leav
 from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
 from erpnext.hr.doctype.leave_policy.test_leave_policy import create_leave_policy
 
+test_dependencies = ["Employee"]
+
 class TestLeavePolicyAssignment(unittest.TestCase):
 
 	def setUp(self):
