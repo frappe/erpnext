@@ -372,7 +372,8 @@ class update_entries_after(object):
 		elif sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice"):
 			if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return"):
 				from erpnext.controllers.sales_and_purchase_return import get_rate_for_return # don't move this import to top
-				rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code, voucher_detail_no=sle.voucher_detail_no)
+				rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code,
+					voucher_detail_no=sle.voucher_detail_no, sle = sle)
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 					rate_field = "valuation_rate"
