@@ -12,16 +12,16 @@ from frappe.model.document import Document
 pricing_rule_fields = ['apply_on', 'mixed_conditions', 'is_cumulative', 'other_item_code', 'other_item_group'
 	'apply_rule_on_other', 'other_brand', 'selling', 'buying', 'applicable_for', 'valid_from',
 	'valid_upto', 'customer', 'customer_group', 'territory', 'sales_partner', 'campaign', 'supplier',
-	'supplier_group', 'company', 'currency']
+	'supplier_group', 'company', 'currency', 'apply_multiple_pricing_rules']
 
 other_fields = ['min_qty', 'max_qty', 'min_amt',
 	'max_amt', 'priority','warehouse', 'threshold_percentage', 'rule_description']
 
 price_discount_fields = ['rate_or_discount', 'apply_discount_on', 'apply_discount_on_rate',
-	'rate', 'discount_amount', 'discount_percentage', 'validate_applied_rule']
+	'rate', 'discount_amount', 'discount_percentage', 'validate_applied_rule', 'apply_multiple_pricing_rules']
 
 product_discount_fields = ['free_item', 'free_qty', 'free_item_uom',
-	'free_item_rate', 'same_item']
+	'free_item_rate', 'same_item', 'is_recursive', 'apply_multiple_pricing_rules']
 
 class PromotionalScheme(Document):
 	def validate(self):

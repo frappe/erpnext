@@ -577,7 +577,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 									var d = locals[cdt][cdn];
 									me.add_taxes_from_item_tax_template(d.item_tax_rate);
 									if (d.free_item_data) {
-										me.apply_product_discount(d.free_item_data);
+										me.apply_product_discount(d);
 									}
 								},
 								() => {
@@ -738,21 +738,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 			else {
 				var valid_serial_nos = [];
-
+				var serialnos = [];
 				// Replacing all occurences of comma with carriage return
-				var serial_nos = item.serial_no.trim().replace(/,/g, '\n');
-
-				serial_nos = serial_nos.trim().split('\n');
-
-				// Trim each string and push unique string to new list
-				for (var x=0; x<=serial_nos.length - 1; x++) {
-					if (serial_nos[x].trim() != "" && valid_serial_nos.indexOf(serial_nos[x].trim()) == -1) {
-						valid_serial_nos.push(serial_nos[x].trim());
+				item.serial_no = item.serial_no.replace(/,/g, '\n');
+				serialnos = item.serial_no.split("\n");
+				for (var i = 0; i < serialnos.length; i++) {
+					if (serialnos[i] != "") {
+						valid_serial_nos.push(serialnos[i]);
 					}
 				}
-
-				// Add the new list to the serial no. field in grid with each in new line
-				item.serial_no = valid_serial_nos.join('\n');
 				item.conversion_factor = item.conversion_factor || 1;
 
 				refresh_field("serial_no", item.name, item.parentfield);
@@ -1209,7 +1203,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	calculate_stock_uom_rate: function(doc, cdt, cdn) {
 		let item = frappe.get_doc(cdt, cdn);
-		item.stock_uom_rate = flt(item.rate)/flt(item.conversion_factor);	
+		item.stock_uom_rate = flt(item.rate)/flt(item.conversion_factor);
 		refresh_field("stock_uom_rate", item.name, item.parentfield);
 	},
 	service_stop_date: function(frm, cdt, cdn) {
@@ -1538,7 +1532,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					if(k=="price_list_rate") {
 						if(flt(v) != flt(d.price_list_rate)) price_list_rate_changed = true;
 					}
-					frappe.model.set_value(d.doctype, d.name, k, v);
+
+					if (k !== 'free_item_data') {
+						frappe.model.set_value(d.doctype, d.name, k, v);
+					}
 				}
 			}
 
@@ -1550,7 +1547,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 			if (d.free_item_data) {
-				me.apply_product_discount(d.free_item_data);
+				me.apply_product_discount(d);
 			}
 
 			if (d.apply_rule_on_other_items) {
@@ -1584,20 +1581,31 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 	},
 
-	apply_product_discount: function(free_item_data) {
-		const items = this.frm.doc.items.filter(d => (d.item_code == free_item_data.item_code
-			&& d.is_free_item)) || [];
+	apply_product_discount: function(args) {
+		const items = this.frm.doc.items.filter(d => (d.is_free_item)) || [];
 
-		if (!items.length) {
-			let row_to_modify = frappe.model.add_child(this.frm.doc,
-				this.frm.doc.doctype + ' Item', 'items');
+		const exist_items = items.map(row => (row.item_code, row.pricing_rules));
 
-			for (let key in free_item_data) {
-				row_to_modify[key] = free_item_data[key];
+		args.free_item_data.forEach(pr_row => {
+			let row_to_modify = {};
+			if (!items || !in_list(exist_items, (pr_row.item_code, pr_row.pricing_rules))) {
+
+				row_to_modify = frappe.model.add_child(this.frm.doc,
+					this.frm.doc.doctype + ' Item', 'items');
+
+			} else if(items) {
+				row_to_modify = items.filter(d => (d.item_code === pr_row.item_code
+					&& d.pricing_rules === pr_row.pricing_rules))[0];
 			}
-		} if (items && items.length && free_item_data) {
-			items[0].qty = free_item_data.qty
-		}
+
+			for (let key in pr_row) {
+				row_to_modify[key] = pr_row[key];
+			}
+		});
+
+		// free_item_data is a temporary variable
+		args.free_item_data = '';
+		refresh_field('items');
 	},
 
 	apply_price_list: function(item, reset_plc_conversion) {
