@@ -155,7 +155,7 @@ def has_website_permission(doc, ptype, user, verbose=False):
 		return frappe.db.exists(doctype, get_customer_filter(doc, customers))
 	elif suppliers:
 		fieldname = 'suppliers' if doctype == 'Request for Quotation' else 'supplier'
-		return frappe.db.exists(doctype, filters={
+		return frappe.db.exists(doctype, {
 			'name': doc.name,
 			fieldname: ["in", suppliers]
 		})

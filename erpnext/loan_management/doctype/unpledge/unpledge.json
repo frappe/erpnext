@@ -1,11 +1,12 @@
 {
+ "actions": [],
  "creation": "2019-09-21 13:22:19.793797",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "loan_security",
-  "against_pledge",
+  "loan_security_name",
   "loan_security_type",
   "loan_security_code",
   "haircut",
@@ -52,14 +53,7 @@
    "fieldtype": "Float",
    "in_list_view": 1,
    "label": "Quantity",
-   "reqd": 1
-  },
-  {
-   "fieldname": "against_pledge",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Against Pledge",
-   "options": "Loan Security Pledge",
+   "non_negative": 1,
    "reqd": 1
   },
   {
@@ -68,10 +62,19 @@
    "fieldtype": "Percent",
    "label": "Haircut",
    "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_name",
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-10-02 12:48:18.588236",
+ "links": [],
+ "modified": "2021-01-17 07:36:20.212342",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Unpledge",

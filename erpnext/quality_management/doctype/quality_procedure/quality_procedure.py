@@ -4,67 +4,68 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, rebuild_tree
 from frappe import _
 
 class QualityProcedure(NestedSet):
 	nsm_parent_field = 'parent_quality_procedure'
 
 	def before_save(self):
-		for process in self.processes:
-			if process.procedure:
-				doc = frappe.get_doc("Quality Procedure", process.procedure)
-				if doc.parent_quality_procedure:
-					frappe.throw(_("{0} already has a Parent Procedure {1}.").format(process.procedure, doc.parent_quality_procedure))
-				self.is_group = 1
+		self.check_for_incorrect_child()
 
 	def on_update(self):
+		NestedSet.on_update(self)
 		self.set_parent()
 
 	def after_insert(self):
 		self.set_parent()
 
-	def on_trash(self):
+		# add child to parent if missing
 		if self.parent_quality_procedure:
-			doc = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)
-			for process in doc.processes:
-				if process.procedure == self.name:
-					doc.processes.remove(process)
-					doc.save(ignore_permissions=True)
+			parent = frappe.get_doc("Quality Procedure", self.parent_quality_procedure)
+			if not [d for d in parent.processes if d.procedure == self.name]:
+				parent.append("processes", {"procedure": self.name, "process_description": self.name})
+				parent.save()
 
-			flag_is_group = 0
-			doc.load_from_db()
-
-			for process in doc.processes:
-				flag_is_group = 1 if process.procedure else 0
-
-			doc.is_group = 0 if flag_is_group == 0 else 1
-			doc.save(ignore_permissions=True)
+	def on_trash(self):
+		# clear from child table (sub procedures)
+		frappe.db.sql('''update `tabQuality Procedure Process`
+			set `procedure`='' where `procedure`=%s''', self.name)
+		NestedSet.on_trash(self, allow_root_deletion=True)
 
 	def set_parent(self):
 		for process in self.processes:
+			# Set parent for only those children who don't have a parent
+			has_parent = frappe.db.get_value("Quality Procedure", process.procedure, "parent_quality_procedure")
+			if not has_parent and process.procedure:
+				frappe.db.set_value(self.doctype, process.procedure, "parent_quality_procedure", self.name)
+
+	def check_for_incorrect_child(self):
+		for process in self.processes:
 			if process.procedure:
-				doc = frappe.get_doc("Quality Procedure", process.procedure)
-				doc.parent_quality_procedure = self.name
-				doc.save(ignore_permissions=True)
+				self.is_group = 1
+				# Check if any child process belongs to another parent.
+				parent_quality_procedure = frappe.db.get_value("Quality Procedure", process.procedure, "parent_quality_procedure")
+				if parent_quality_procedure and parent_quality_procedure != self.name:
+					frappe.throw(_("{0} already has a Parent Procedure {1}.").format(frappe.bold(process.procedure), frappe.bold(parent_quality_procedure)),
+						title=_("Invalid Child Procedure"))
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, parent_quality_procedure=None, is_root=False):
 	if parent is None or parent == "All Quality Procedures":
 		parent = ""
 
-	return frappe.db.sql("""
-		select
-			name as value,
-			is_group as expandable
-		from
-			`tab{doctype}`
-		where
-			ifnull(parent_quality_procedure, "")={parent}
-		""".format(
-			doctype = doctype,
-			parent=frappe.db.escape(parent)
-		), as_dict=1)
+	if parent:
+		parent_procedure = frappe.get_doc('Quality Procedure', parent)
+		# return the list in order
+		return [dict(
+				value=d.procedure,
+				expandable=frappe.db.get_value('Quality Procedure', d.procedure, 'is_group'))
+				for d in parent_procedure.processes if d.procedure
+			]
+	else:
+		return frappe.get_all(doctype, fields=['name as value', 'is_group as expandable'],
+			filters = dict(parent_quality_procedure = parent), order_by='name asc')
 
 @frappe.whitelist()
 def add_node():
@@ -76,4 +77,4 @@ def add_node():
 	if args.parent_quality_procedure == 'All Quality Procedures':
 		args.parent_quality_procedure = None
 
-	frappe.get_doc(args).insert()
+	return frappe.get_doc(args).insert()

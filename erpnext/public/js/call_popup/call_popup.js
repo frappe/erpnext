@@ -7,101 +7,23 @@ class CallPopup {
 	}
 
 	make() {
+		frappe.utils.play_sound('incoming-call');
 		this.dialog = new frappe.ui.Dialog({
 			'static': true,
-			'minimizable': true,
-			'fields': [{
-				'fieldname': 'name',
-				'label': 'Name',
-				'default': this.get_caller_name() || __('Unknown Caller'),
-				'fieldtype': 'Data',
-				'read_only': 1
-			}, {
-				'fieldtype': 'Button',
-				'label': __('Open Contact'),
-				'click': () => frappe.set_route('Form', 'Contact', this.call_log.contact),
-				'depends_on': () => this.call_log.contact
-			}, {
-				'fieldtype': 'Button',
-				'label': __('Open Lead'),
-				'click': () => frappe.set_route('Form', 'Lead', this.call_log.lead),
-				'depends_on': () => this.call_log.lead
-			}, {
-				'fieldtype': 'Button',
-				'label': __('Create New Contact'),
-				'click': () => frappe.new_doc('Contact', { 'mobile_no': this.caller_number }),
-				'depends_on': () => !this.get_caller_name()
-			}, {
-				'fieldtype': 'Button',
-				'label': __('Create New Lead'),
-				'click': () => frappe.new_doc('Lead', { 'mobile_no': this.caller_number }),
-				'depends_on': () => !this.get_caller_name()
-			}, {
-				'fieldtype': 'Column Break',
-			}, {
-				'fieldname': 'number',
-				'label': 'Phone Number',
-				'fieldtype': 'Data',
-				'default': this.caller_number,
-				'read_only': 1
-			}, {
-				'fielname': 'last_interaction',
-				'fieldtype': 'Section Break',
-				'label': __('Activity'),
-				'depends_on': () => this.get_caller_name()
-			}, {
-				'fieldtype': 'Small Text',
-				'label': __('Last Issue'),
-				'fieldname': 'last_issue',
-				'read_only': true,
-				'depends_on': () => this.call_log.contact,
-				'default': `<i class="text-muted">${__('No issue has been raised by the caller.')}<i>`
-			}, {
-				'fieldtype': 'Small Text',
-				'label': __('Last Communication'),
-				'fieldname': 'last_communication',
-				'read_only': true,
-				'default': `<i class="text-muted">${__('No communication found.')}<i>`
-			}, {
-				'fieldtype': 'Section Break',
-			}, {
-				'fieldtype': 'Small Text',
-				'label': __('Call Summary'),
-				'fieldname': 'call_summary',
-			}, {
-				'fieldtype': 'Button',
-				'label': __('Save'),
-				'click': () => {
-					const call_summary = this.dialog.get_value('call_summary');
-					if (!call_summary) return;
-					frappe.xcall('erpnext.communication.doctype.call_log.call_log.add_call_summary', {
-						'call_log': this.call_log.name,
-						'summary': call_summary,
-					}).then(() => {
-						this.close_modal();
-						frappe.show_alert({
-							message: `
-								${__('Call Summary Saved')}
-								<br>
-								<a
-									class="text-small text-muted"
-									href="#Form/Call Log/${this.call_log.name}">
-									${__('View call log')}
-								</a>
-							`,
-							indicator: 'green'
-						});
-					});
-				}
-			}],
+			'minimizable': true
 		});
-		this.set_call_status();
 		this.dialog.get_close_btn().show();
-		this.make_last_interaction_section();
-		this.dialog.$body.addClass('call-popup');
-		this.dialog.set_secondary_action(this.close_modal.bind(this));
-		frappe.utils.play_sound('incoming-call');
+		this.setup_dialog();
+		this.set_call_status();
+		frappe.utils.bind_actions_with_object(this.dialog.$body, this);
+		this.dialog.$wrapper.addClass('call-popup');
+		this.dialog.get_close_btn().unbind('click').click(this.close_modal.bind(this));
 		this.dialog.show();
+	}
+
+	setup_dialog() {
+		this.setup_call_details();
+		this.dialog.$body.empty().append(this.caller_info);
 	}
 
 	set_indicator(color, blink=false) {
@@ -117,13 +39,13 @@ class CallPopup {
 			this.set_indicator('blue', true);
 		} else if (call_status === 'In Progress') {
 			title = __('Call Connected');
+			this.set_indicator('green');
+		} else if (['No Answer', 'Missed'].includes(call_status)) {
 			this.set_indicator('yellow');
-		} else if (call_status === 'Missed') {
-			this.set_indicator('red');
 			title = __('Call Missed');
-		} else if (['Completed', 'Disconnected'].includes(call_status)) {
+		} else if (['Completed', 'Busy', 'Failed'].includes(call_status)) {
 			this.set_indicator('red');
-			title = __('Call Disconnected');
+			title = __('Call Ended');
 		} else {
 			this.set_indicator('blue');
 			title = call_status;
@@ -131,9 +53,9 @@ class CallPopup {
 		this.dialog.set_title(title);
 	}
 
-	update_call_log(call_log) {
+	update_call_log(call_log, missed) {
 		this.call_log = call_log;
-		this.set_call_status();
+		this.set_call_status(missed ? 'Missed': null);
 	}
 
 	close_modal() {
@@ -141,61 +63,149 @@ class CallPopup {
 		delete erpnext.call_popup;
 	}
 
-	call_disconnected(call_log) {
+	call_ended(call_log, missed) {
 		frappe.utils.play_sound('call-disconnect');
-		this.update_call_log(call_log);
+		this.update_call_log(call_log, missed);
 		setTimeout(() => {
 			if (!this.dialog.get_value('call_summary')) {
 				this.close_modal();
 			}
-		}, 30000);
-	}
-
-	make_last_interaction_section() {
-		frappe.xcall('erpnext.crm.doctype.utils.get_last_interaction', {
-			'contact': this.call_log.contact,
-			'lead': this.call_log.lead
-		}).then(data => {
-			const comm_field = this.dialog.get_field('last_communication');
-			if (data.last_communication) {
-				const comm = data.last_communication;
-				comm_field.set_value(comm.content);
-			}
-
-			if (data.last_issue) {
-				const issue = data.last_issue;
-				const issue_field = this.dialog.get_field("last_issue");
-				issue_field.set_value(issue.subject);
-				issue_field.$wrapper.append(`
-					<a class="text-medium" href="#List/Issue?customer=${issue.customer}">
-						${__('View all issues from {0}', [issue.customer])}
-					</a>
-				`);
-			}
-		});
+		}, 60000);
+		this.clear_listeners();
 	}
 
 	get_caller_name() {
+		const contact_link = this.get_contact_link();
+		return contact_link.link_title || contact_link.link_name;
+	}
+
+	get_contact_link() {
 		let log = this.call_log;
-		return log.contact_name || log.lead_name;
+		let contact_link = log.links.find(d => d.link_doctype === 'Contact');
+		return contact_link || {};
 	}
 
 	setup_listener() {
-		frappe.realtime.on(`call_${this.call_log.id}_disconnected`, call_log => {
-			this.call_disconnected(call_log);
-			// Remove call disconnect listener after the call is disconnected
-			frappe.realtime.off(`call_${this.call_log.id}_disconnected`);
+		frappe.realtime.on(`call_${this.call_log.id}_ended`, call_log => {
+			this.call_ended(call_log);
 		});
+
+		frappe.realtime.on(`call_${this.call_log.id}_missed`, call_log => {
+			this.call_ended(call_log, true);
+		});
+	}
+
+	clear_listeners() {
+		frappe.realtime.off(`call_${this.call_log.id}_ended`);
+		frappe.realtime.off(`call_${this.call_log.id}_missed`);
+	}
+
+	setup_call_details() {
+		this.caller_info = $(`<div></div>`);
+		this.call_details = new frappe.ui.FieldGroup({
+			fields: [{
+				'fieldname': 'name',
+				'label': 'Name',
+				'default': this.get_caller_name() || __('Unknown Caller'),
+				'fieldtype': 'Data',
+				'read_only': 1
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Open Contact'),
+				'click': () => frappe.set_route('Form', 'Contact', this.get_contact_link().link_name),
+				'depends_on': () => this.get_caller_name()
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Create New Contact'),
+				'click': this.create_new_contact.bind(this),
+				'depends_on': () => !this.get_caller_name()
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Create New Customer'),
+				'click': this.create_new_customer.bind(this),
+				'depends_on': () => !this.get_caller_name()
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Create New Lead'),
+				'click': () => frappe.new_doc('Lead', { 'mobile_no': this.caller_number }),
+				'depends_on': () => !this.get_caller_name()
+			}, {
+				'fieldtype': 'Column Break',
+			}, {
+				'fieldname': 'number',
+				'label': 'Phone Number',
+				'fieldtype': 'Data',
+				'default': this.caller_number,
+				'read_only': 1
+			}, {
+				'fieldtype': 'Section Break',
+				'hide_border': 1,
+			}, {
+				'fieldtype': 'Small Text',
+				'label': __('Call Summary'),
+				'fieldname': 'call_summary',
+			}, {
+				'fieldtype': 'Button',
+				'label': __('Save'),
+				'click': () => {
+					const call_summary = this.call_details.get_value('call_summary');
+					if (!call_summary) return;
+					frappe.xcall('erpnext.telephony.doctype.call_log.call_log.add_call_summary', {
+						'call_log': this.call_log.name,
+						'summary': call_summary,
+					}).then(() => {
+						this.close_modal();
+						frappe.show_alert({
+							message: `
+								${__('Call Summary Saved')}
+								<br>
+								<a
+									class="text-small text-muted"
+									href="/app/call-log/${this.call_log.name}">
+									${__('View call log')}
+								</a>
+							`,
+							indicator: 'green'
+						});
+					});
+				}
+			}],
+			body: this.caller_info
+		});
+		this.call_details.make();
+	}
+
+	is_known_caller() {
+		return Boolean(this.get_caller_name());
+	}
+
+	create_new_customer() {
+		// to avoid quick entry form
+		const new_customer = frappe.model.get_new_doc('Customer');
+		new_customer.mobile_no = this.caller_number;
+		frappe.set_route('Form', new_customer.doctype, new_customer.name);
+	}
+
+	create_new_contact() {
+		// TODO: fix new_doc, it should accept child table values
+		const new_contact = frappe.model.get_new_doc('Contact');
+		const phone_no = frappe.model.add_child(new_contact, 'Contact Phone', 'phone_nos');
+		phone_no.phone = this.caller_number;
+		phone_no.is_primary_mobile_no = 1;
+		frappe.set_route('Form', new_contact.doctype, new_contact.name);
 	}
 }
 
 $(document).on('app_ready', function () {
 	frappe.realtime.on('show_call_popup', call_log => {
-		if (!erpnext.call_popup) {
-			erpnext.call_popup = new CallPopup(call_log);
+		let call_popup = erpnext.call_popup;
+		if (call_popup && call_log.name === call_popup.call_log.name) {
+			call_popup.update_call_log(call_log);
+			call_popup.dialog.show();
 		} else {
-			erpnext.call_popup.update_call_log(call_log);
-			erpnext.call_popup.dialog.show();
+			erpnext.call_popup = new CallPopup(call_log);
 		}
 	});
 });
+
+window.CallPopup = CallPopup;

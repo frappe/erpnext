@@ -1,0 +1,50 @@
+{
+ "allow_roles": [
+  {
+   "role": "Education Manager"
+  }
+ ],
+ "creation": "2020-07-27 19:02:49.561391",
+ "docstatus": 0,
+ "doctype": "Module Onboarding",
+ "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/education",
+ "idx": 0,
+ "is_complete": 0,
+ "modified": "2020-07-27 21:10:46.722961",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Education",
+ "owner": "Administrator",
+ "steps": [
+  {
+   "step": "Create a Student"
+  },
+  {
+   "step": "Create an Instructor"
+  },
+  {
+   "step": "Introduction to Program and Courses"
+  },
+  {
+   "step": "Create a Topic"
+  },
+  {
+   "step": "Create a Course"
+  },
+  {
+   "step": "Create a Program"
+  },
+  {
+   "step": "Enroll a Student in a Program"
+  },
+  {
+   "step": "Introduction to Student Group"
+  },
+  {
+   "step": "Introduction to Student Attendance"
+  }
+ ],
+ "subtitle": "Students, Instructors, Programs and more.",
+ "success_message": "The Education Module is all set up!",
+ "title": "Let's Set Up the Education Module."
+}

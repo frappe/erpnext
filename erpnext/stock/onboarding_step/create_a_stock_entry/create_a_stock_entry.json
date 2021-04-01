@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-15 03:20:16.277043",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-10-14 14:53:00.105905",
+ "modified_by": "Administrator",
+ "name": "Create a Stock Entry",
+ "owner": "Administrator",
+ "reference_document": "Stock Entry",
+ "show_full_form": 1,
+ "title": "Create a Stock Entry",
+ "validate_action": 1
+}

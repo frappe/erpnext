@@ -46,5 +46,28 @@ frappe.query_reports["HSN-wise-summary of outward supplies"] = {
 	],
 	onload: (report) => {
 		fetch_gstins(report);
+
+		report.page.add_inner_button(__("Download JSON"), function () {
+			var filters = report.get_values();
+
+			frappe.call({
+				method: 'erpnext.regional.report.hsn_wise_summary_of_outward_supplies.hsn_wise_summary_of_outward_supplies.get_json',
+				args: {
+					data: report.data,
+					report_name: report.report_name,
+					filters: filters
+				},
+				callback: function(r) {
+					if (r.message) {
+						const args = {
+							cmd: 'erpnext.regional.report.hsn_wise_summary_of_outward_supplies.hsn_wise_summary_of_outward_supplies.download_json_file',
+							data: r.message.data,
+							report_name: r.message.report_name
+						};
+						open_url_post(frappe.request.url, args);
+					}
+				}
+			});
+		});
 	}
 };

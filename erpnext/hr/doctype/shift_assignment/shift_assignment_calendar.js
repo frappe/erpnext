@@ -3,17 +3,11 @@
 
 frappe.views.calendar["Shift Assignment"] = {
 	field_map: {
-		"start": "date",
-		"end": "date",
+		"start": "start_date",
+		"end": "end_date",
 		"id": "name",
-		"docstatus": 1
-	},
-	options: {
-		header: {
-			left: 'prev,next today',
-			center: 'title',
-			right: 'month'
-		}
+		"docstatus": 1,
+		"allDay": "allDay",
 	},
 	get_events_method: "erpnext.hr.doctype.shift_assignment.shift_assignment.get_events"
 }

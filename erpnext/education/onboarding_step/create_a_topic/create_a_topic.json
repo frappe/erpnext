@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-07-27 19:08:40.754534",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-07-27 19:09:13.231995",
+ "modified_by": "Administrator",
+ "name": "Create a Topic",
+ "owner": "Administrator",
+ "reference_document": "Topic",
+ "show_full_form": 1,
+ "title": "Create a Topic",
+ "validate_action": 1
+}

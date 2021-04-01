@@ -20,7 +20,8 @@ def execute():
 		else:
 			insert_after_field = 'accounting_dimensions_section'
 
-		for doctype in ["Subscription Plan", "Subscription", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item"]:
+		for doctype in ["Subscription Plan", "Subscription", "Opening Invoice Creation Tool", "Opening Invoice Creation Tool Item",
+			"Expense Claim Detail", "Expense Taxes and Charges"]:
 
 			field = frappe.db.get_value("Custom Field", {"dt": doctype, "fieldname": d.fieldname})
 

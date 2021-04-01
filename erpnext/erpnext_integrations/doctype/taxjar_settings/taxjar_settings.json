@@ -1,0 +1,110 @@
+{
+ "actions": [],
+ "creation": "2017-06-15 08:21:24.624315",
+ "doctype": "DocType",
+ "document_type": "Setup",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "is_sandbox",
+  "taxjar_calculate_tax",
+  "taxjar_create_transactions",
+  "credentials",
+  "api_key",
+  "cb_keys",
+  "sandbox_api_key",
+  "configuration",
+  "tax_account_head",
+  "configuration_cb",
+  "shipping_account_head"
+ ],
+ "fields": [
+  {
+   "fieldname": "credentials",
+   "fieldtype": "Section Break",
+   "label": "Credentials"
+  },
+  {
+   "fieldname": "api_key",
+   "fieldtype": "Password",
+   "in_list_view": 1,
+   "label": "Live API Key",
+   "reqd": 1
+  },
+  {
+   "fieldname": "configuration",
+   "fieldtype": "Section Break",
+   "label": "Configuration"
+  },
+  {
+   "fieldname": "tax_account_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tax Account Head",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "fieldname": "shipping_account_head",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Shipping Account Head",
+   "options": "Account",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "is_sandbox",
+   "fieldtype": "Check",
+   "label": "Sandbox Mode"
+  },
+  {
+   "fieldname": "sandbox_api_key",
+   "fieldtype": "Password",
+   "label": "Sandbox API Key"
+  },
+  {
+   "fieldname": "configuration_cb",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "taxjar_create_transactions",
+   "fieldtype": "Check",
+   "label": "Create TaxJar Transaction"
+  },
+  {
+   "default": "0",
+   "fieldname": "taxjar_calculate_tax",
+   "fieldtype": "Check",
+   "label": "Enable Tax Calculation"
+  },
+  {
+   "fieldname": "cb_keys",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "issingle": 1,
+ "links": [],
+ "modified": "2020-04-30 04:38:03.311089",
+ "modified_by": "Administrator",
+ "module": "ERPNext Integrations",
+ "name": "TaxJar Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

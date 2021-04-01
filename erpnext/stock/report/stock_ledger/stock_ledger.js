@@ -32,7 +32,7 @@ frappe.query_reports["Stock Ledger"] = {
 			"options": "Warehouse",
 			"get_query": function() {
 				const company = frappe.query_report.get_filter_value('company');
-				return { 
+				return {
 					filters: { 'company': company }
 				}
 			}
@@ -96,9 +96,3 @@ frappe.query_reports["Stock Ledger"] = {
 		return value;
 	},
 }
-
-// $(function() {
-// 	$(wrapper).bind("show", function() {
-// 		frappe.query_report.load();
-// 	});
-// });

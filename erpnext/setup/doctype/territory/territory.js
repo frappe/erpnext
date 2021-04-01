@@ -20,7 +20,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root territory
-	if(!doc.parent_territory) {
+	if(!doc.parent_territory && !doc.__islocal) {
 		cur_frm.set_read_only();
 		cur_frm.set_intro(__("This is a root territory and cannot be edited."));
 	} else {

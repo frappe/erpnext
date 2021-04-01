@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.stock");
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Stock Reconciliation", {
 	onload: function(frm) {
@@ -26,6 +27,12 @@ frappe.ui.form.on("Stock Reconciliation", {
 		if (!frm.doc.expense_account) {
 			frm.trigger("set_expense_account");
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+	},
+
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -74,6 +81,20 @@ frappe.ui.form.on("Stock Reconciliation", {
 		, __("Get Items"), __("Update"));
 	},
 
+	posting_date: function(frm) {
+		frm.trigger("set_valuation_rate_and_qty_for_all_items");
+	},
+
+	posting_time: function(frm) {
+		frm.trigger("set_valuation_rate_and_qty_for_all_items");
+	},
+
+	set_valuation_rate_and_qty_for_all_items: function(frm) {
+		frm.doc.items.forEach(row => {
+			frm.events.set_valuation_rate_and_qty(frm, row.doctype, row.name);
+		});
+	},
+
 	set_valuation_rate_and_qty: function(frm, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
 
@@ -95,6 +116,10 @@ frappe.ui.form.on("Stock Reconciliation", {
 					frappe.model.set_value(cdt, cdn, "current_amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "amount", r.message.rate * r.message.qty);
 					frappe.model.set_value(cdt, cdn, "current_serial_no", r.message.serial_nos);
+
+					if (frm.doc.purpose == "Stock Reconciliation") {
+						frappe.model.set_value(cdt, cdn, "serial_no", r.message.serial_nos);
+					}
 				}
 			});
 		}
@@ -227,7 +252,7 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 	},
 
 	refresh: function() {
-		if(this.frm.doc.docstatus==1) {
+		if(this.frm.doc.docstatus > 0) {
 			this.show_stock_ledger();
 			if (erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 				this.show_general_ledger();

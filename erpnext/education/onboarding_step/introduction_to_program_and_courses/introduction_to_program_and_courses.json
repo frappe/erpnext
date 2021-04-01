@@ -1,0 +1,19 @@
+{
+ "action": "Watch Video",
+ "creation": "2020-07-27 19:05:12.663987",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-07-27 20:18:11.831789",
+ "modified_by": "Administrator",
+ "name": "Introduction to Program and Courses",
+ "owner": "Administrator",
+ "show_full_form": 0,
+ "title": "Introduction to Program and Courses",
+ "validate_action": 1,
+ "video_url": "https://www.youtube.com/watch?v=1ueE4seFTp8"
+}

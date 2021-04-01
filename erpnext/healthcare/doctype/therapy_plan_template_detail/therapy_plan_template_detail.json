@@ -1,0 +1,54 @@
+{
+ "actions": [],
+ "creation": "2020-10-07 23:04:44.373381",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "therapy_type",
+  "no_of_sessions",
+  "rate",
+  "amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "therapy_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Therapy Type",
+   "options": "Therapy Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "no_of_sessions",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "No of Sessions"
+  },
+  {
+   "fieldname": "rate",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Rate"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-10-07 23:46:54.296322",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Therapy Plan Template Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

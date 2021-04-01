@@ -14,11 +14,22 @@ frappe.ui.form.on('Cost Center', {
 					is_group: 1
 				}
 			}
-		})
+		});
+
+		frm.set_query("cost_center", "distributed_cost_center", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					is_group: 0,
+					enable_distributed_cost_center: 0,
+					name: ['!=', frm.doc.name]
+				}
+			};
+		});
 	},
 	refresh: function(frm) {
 		if (!frm.is_new()) {
-			frm.add_custom_button(__('Update Cost Center Number'), function () {
+			frm.add_custom_button(__('Update Cost Center Name / Number'), function () {
 				frm.trigger("update_cost_center_number");
 			});
 		}
@@ -47,35 +58,51 @@ frappe.ui.form.on('Cost Center', {
 	},
 	update_cost_center_number: function(frm) {
 		var d = new frappe.ui.Dialog({
-			title: __('Update Cost Center Number'),
+			title: __('Update Cost Center Name / Number'),
 			fields: [
 				{
-					"label": 'Cost Center Number',
+					"label": "Cost Center Name",
+					"fieldname": "cost_center_name",
+					"fieldtype": "Data",
+					"reqd": 1,
+					"default": frm.doc.cost_center_name
+				},
+				{
+					"label": "Cost Center Number",
 					"fieldname": "cost_center_number",
 					"fieldtype": "Data",
-					"reqd": 1
+					"default": frm.doc.cost_center_number
+				},
+				{
+					"label": __("Merge with existing"),
+					"fieldname": "merge",
+					"fieldtype": "Check",
+					"default": 0
 				}
 			],
 			primary_action: function() {
 				var data = d.get_values();
-				if(data.cost_center_number === frm.doc.cost_center_number) {
+				if(data.cost_center_name === frm.doc.cost_center_name && data.cost_center_number === frm.doc.cost_center_number) {
 					d.hide();
 					return;
 				}
+				frappe.dom.freeze();
 				frappe.call({
-					method: "erpnext.accounts.utils.update_number_field",
+					method: "erpnext.accounts.utils.update_cost_center",
 					args: {
-						doctype_name: frm.doc.doctype,
-						name: frm.doc.name,
-						field_name: d.fields[0].fieldname,
-						number_value: data.cost_center_number,
-						company: frm.doc.company
+						docname: frm.doc.name,
+						cost_center_name: data.cost_center_name,
+						cost_center_number: cstr(data.cost_center_number),
+						company: frm.doc.company,
+						merge: data.merge
 					},
 					callback: function(r) {
+						frappe.dom.unfreeze();
 						if(!r.exc) {
 							if(r.message) {
 								frappe.set_route("Form", "Cost Center", r.message);
 							} else {
+								me.frm.set_value("cost_center_name", data.cost_center_name);
 								me.frm.set_value("cost_center_number", data.cost_center_number);
 							}
 							d.hide();

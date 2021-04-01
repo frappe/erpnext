@@ -4,10 +4,8 @@
 frappe.ui.form.on('Loan Security Unpledge', {
 	refresh: function(frm) {
 
-		frm.set_query("against_pledge", "securities", () => {
-			return {
-				filters : [["status", "in", ["Pledged", "Partially Pledged"]]]
-			};
-		});
+		if (frm.doc.docstatus == 1 && frm.doc.status == 'Approved') {
+			frm.set_df_property('status', 'read_only', 1);
+		}
 	}
 });

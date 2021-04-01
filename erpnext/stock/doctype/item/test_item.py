@@ -104,41 +104,41 @@ class TestItem(unittest.TestCase):
 	def test_item_tax_template(self):
 		expected_item_tax_template = [
 			{"item_code": "_Test Item With Item Tax Template", "tax_category": "",
-				"item_tax_template": "_Test Account Excise Duty @ 10"},
+				"item_tax_template": "_Test Account Excise Duty @ 10 - _TC"},
 			{"item_code": "_Test Item With Item Tax Template", "tax_category": "_Test Tax Category 1",
-				"item_tax_template": "_Test Account Excise Duty @ 12"},
+				"item_tax_template": "_Test Account Excise Duty @ 12 - _TC"},
 			{"item_code": "_Test Item With Item Tax Template", "tax_category": "_Test Tax Category 2",
 				"item_tax_template": None},
 
 			{"item_code": "_Test Item Inherit Group Item Tax Template 1", "tax_category": "",
-				"item_tax_template": "_Test Account Excise Duty @ 10"},
+				"item_tax_template": "_Test Account Excise Duty @ 10 - _TC"},
 			{"item_code": "_Test Item Inherit Group Item Tax Template 1", "tax_category": "_Test Tax Category 1",
-				"item_tax_template": "_Test Account Excise Duty @ 12"},
+				"item_tax_template": "_Test Account Excise Duty @ 12 - _TC"},
 			{"item_code": "_Test Item Inherit Group Item Tax Template 1", "tax_category": "_Test Tax Category 2",
 				"item_tax_template": None},
 
 			{"item_code": "_Test Item Inherit Group Item Tax Template 2", "tax_category": "",
-				"item_tax_template": "_Test Account Excise Duty @ 15"},
+				"item_tax_template": "_Test Account Excise Duty @ 15 - _TC"},
 			{"item_code": "_Test Item Inherit Group Item Tax Template 2", "tax_category": "_Test Tax Category 1",
-				"item_tax_template": "_Test Account Excise Duty @ 12"},
+				"item_tax_template": "_Test Account Excise Duty @ 12 - _TC"},
 			{"item_code": "_Test Item Inherit Group Item Tax Template 2", "tax_category": "_Test Tax Category 2",
 				"item_tax_template": None},
 
 			{"item_code": "_Test Item Override Group Item Tax Template", "tax_category": "",
-				"item_tax_template": "_Test Account Excise Duty @ 20"},
+				"item_tax_template": "_Test Account Excise Duty @ 20 - _TC"},
 			{"item_code": "_Test Item Override Group Item Tax Template", "tax_category": "_Test Tax Category 1",
-				"item_tax_template": "_Test Item Tax Template 1"},
+				"item_tax_template": "_Test Item Tax Template 1 - _TC"},
 			{"item_code": "_Test Item Override Group Item Tax Template", "tax_category": "_Test Tax Category 2",
 				"item_tax_template": None},
 		]
 
 		expected_item_tax_map = {
 			None: {},
-			"_Test Account Excise Duty @ 10": {"_Test Account Excise Duty - _TC": 10},
-			"_Test Account Excise Duty @ 12": {"_Test Account Excise Duty - _TC": 12},
-			"_Test Account Excise Duty @ 15": {"_Test Account Excise Duty - _TC": 15},
-			"_Test Account Excise Duty @ 20": {"_Test Account Excise Duty - _TC": 20},
-			"_Test Item Tax Template 1": {"_Test Account Excise Duty - _TC": 5, "_Test Account Education Cess - _TC": 10,
+			"_Test Account Excise Duty @ 10 - _TC": {"_Test Account Excise Duty - _TC": 10},
+			"_Test Account Excise Duty @ 12 - _TC": {"_Test Account Excise Duty - _TC": 12},
+			"_Test Account Excise Duty @ 15 - _TC": {"_Test Account Excise Duty - _TC": 15},
+			"_Test Account Excise Duty @ 20 - _TC": {"_Test Account Excise Duty - _TC": 20},
+			"_Test Item Tax Template 1 - _TC": {"_Test Account Excise Duty - _TC": 5, "_Test Account Education Cess - _TC": 10,
 				"_Test Account S&H Education Cess - _TC": 15}
 		}
 
@@ -471,7 +471,7 @@ class TestItem(unittest.TestCase):
 		item_doc = frappe.get_doc('Item', item_code)
 		new_barcode = item_doc.append('barcodes')
 		new_barcode.update(barcode_properties_list[0])
-		self.assertRaises(frappe.DuplicateEntryError, item_doc.save)
+		self.assertRaises(frappe.UniqueValidationError, item_doc.save)
 
 		# Add invalid barcode - should cause InvalidBarcode
 		item_doc = frappe.get_doc('Item', item_code)

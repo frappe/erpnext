@@ -10,12 +10,15 @@
  "field_order": [
   "warehouse_detail",
   "warehouse_name",
+  "column_break_3",
+  "warehouse_type",
+  "parent_warehouse",
+  "default_in_transit_warehouse",
   "is_group",
-  "company",
-  "disabled",
   "column_break_4",
   "account",
-  "warehouse_type",
+  "company",
+  "disabled",
   "address_and_contact",
   "address_html",
   "column_break_10",
@@ -31,7 +34,6 @@
   "state",
   "pin",
   "tree_details",
-  "parent_warehouse",
   "lft",
   "rgt",
   "old_parent"
@@ -44,7 +46,6 @@
    "oldfieldtype": "Section Break"
   },
   {
-   "description": "If blank, parent Warehouse Account or company default will be considered",
    "fieldname": "warehouse_name",
    "fieldtype": "Data",
    "label": "Warehouse Name",
@@ -85,12 +86,14 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "If blank, parent Warehouse Account or company default will be considered in transactions",
    "fieldname": "account",
    "fieldtype": "Link",
    "label": "Account",
    "options": "Account"
   },
   {
+   "depends_on": "eval:!doc.__islocal",
    "fieldname": "address_and_contact",
    "fieldtype": "Section Break",
    "label": "Address and Contact"
@@ -224,13 +227,24 @@
    "fieldtype": "Link",
    "label": "Warehouse Type",
    "options": "Warehouse Type"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "depends_on": "eval: doc.warehouse_type !== 'Transit';",
+   "fieldname": "default_in_transit_warehouse",
+   "fieldtype": "Link",
+   "label": "Default In-Transit Warehouse",
+   "options": "Warehouse"
   }
  ],
  "icon": "fa fa-building",
  "idx": 1,
  "is_tree": 1,
  "links": [],
- "modified": "2020-03-18 18:11:53.282358",
+ "modified": "2021-02-16 17:21:52.380098",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Warehouse",

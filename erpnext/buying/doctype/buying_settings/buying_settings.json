@@ -1,8 +1,10 @@
 {
+ "actions": [],
  "creation": "2013-06-25 11:04:03",
  "description": "Settings for Buying Module",
  "doctype": "DocType",
  "document_type": "Other",
+ "engine": "InnoDB",
  "field_order": [
   "supp_master_name",
   "supplier_group",
@@ -44,26 +46,26 @@
   {
    "fieldname": "po_required",
    "fieldtype": "Select",
-   "label": "Purchase Order Required",
+   "label": "Is Purchase Order Required for Purchase Invoice & Receipt Creation?",
    "options": "No\nYes"
   },
   {
    "fieldname": "pr_required",
    "fieldtype": "Select",
-   "label": "Purchase Receipt Required",
+   "label": "Is Purchase Receipt Required for Purchase Invoice Creation?",
    "options": "No\nYes"
   },
   {
    "default": "0",
    "fieldname": "maintain_same_rate",
    "fieldtype": "Check",
-   "label": "Maintain same rate throughout purchase cycle"
+   "label": "Maintain Same Rate Throughout the Purchase Cycle"
   },
   {
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item to be added multiple times in a transaction"
+   "label": "Allow Item To Be Added Multiple Times in a Transaction"
   },
   {
    "fieldname": "subcontract",
@@ -91,8 +93,10 @@
  ],
  "icon": "fa fa-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "issingle": 1,
- "modified": "2019-08-20 13:13:09.055189",
+ "links": [],
+ "modified": "2021-03-02 17:34:04.190677",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",
@@ -107,5 +111,8 @@
    "share": 1,
    "write": 1
   }
- ]
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
 }

@@ -1571,5 +1571,19 @@
 		"to_uom": "Parts Per Million",
 		"abbr": "ppm",
 		"value": "10000"
+	},
+	{
+		"category": "Mass",
+		"from_uom": "Pound",
+		"to_uom": "Ounce",
+		"abbr": "oz",
+		"value": "16"
+	},
+	{
+		"category": "Mass",
+		"from_uom": "Gram",
+		"to_uom": "Ounce",
+		"abbr": "oz",
+		"value": "0.035274"
 	}
 ]

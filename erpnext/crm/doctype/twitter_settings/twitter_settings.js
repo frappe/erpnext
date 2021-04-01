@@ -16,23 +16,27 @@ frappe.ui.form.on('Twitter Settings', {
 		}
 	},
 	refresh: function(frm){
-		let msg,color;
+		let msg, color, flag=false;
 		if (frm.doc.session_status == "Active"){
 			msg = __("Session Active");
 			color = 'green';
+			flag = true;
 		}
-		else {
+		else if(frm.doc.consumer_key && frm.doc.consumer_secret) {
 			msg = __("Session Not Active. Save doc to login.");
 			color = 'red';
+			flag = true;
 		}
 
-		frm.dashboard.set_headline_alert(
-			`<div class="row">
-				<div class="col-xs-12">
-					<span class="indicator whitespace-nowrap ${color}"><span class="hidden-xs">${msg}</span></span>
-				</div>
-			</div>`
-		);
+		if (flag){
+			frm.dashboard.set_headline_alert(
+				`<div class="row">
+					<div class="col-xs-12">
+						<span class="indicator whitespace-nowrap ${color}"><span class="hidden-xs">${msg}</span></span>
+					</div>
+				</div>`
+			);
+		}
 	},
 	login: function(frm){
 		if (frm.doc.consumer_key && frm.doc.consumer_secret){
@@ -43,6 +47,8 @@ frappe.ui.form.on('Twitter Settings', {
 				callback : function(r) {
 					window.location.href = r.message;
 				}
+			}).fail(function() {
+				frappe.dom.unfreeze();
 			});
 		}
 	},

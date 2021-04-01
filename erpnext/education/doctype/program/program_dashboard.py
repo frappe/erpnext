@@ -10,11 +10,15 @@ def get_data():
 			},
 			{
 				'label': _('Student Activity'),
-				'items': ['Student Group' ]
+				'items': ['Student Group', 'Student Log']
 			},
 			{
 				'label': _('Fee'),
-				'items': ['Fees','Fee Structure']
+				'items': ['Fees','Fee Structure', 'Fee Schedule']
+			},
+			{
+				'label': _('Assessment'),
+				'items': ['Assessment Plan', 'Assessment Result']
 			}
 		]
 	}

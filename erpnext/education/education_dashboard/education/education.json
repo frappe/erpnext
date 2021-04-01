@@ -1,0 +1,62 @@
+{
+ "cards": [
+  {
+   "card": "Total Students"
+  },
+  {
+   "card": "Total Instructors"
+  },
+  {
+   "card": "Program Enrollments"
+  },
+  {
+   "card": "Student Applicants to Review"
+  }
+ ],
+ "charts": [
+  {
+   "chart": "Program Enrollments",
+   "width": "Full"
+  },
+  {
+   "chart": "Program wise Enrollment",
+   "width": "Half"
+  },
+  {
+   "chart": "Course wise Enrollment",
+   "width": "Half"
+  },
+  {
+   "chart": "Course wise Student Count",
+   "width": "Half"
+  },
+  {
+   "chart": "Student Category wise Program Enrollments",
+   "width": "Half"
+  },
+  {
+   "chart": "Student Gender Diversity Ratio",
+   "width": "Half"
+  },
+  {
+   "chart": "Instructor Gender Diversity Ratio",
+   "width": "Half"
+  },
+  {
+   "chart": "Program wise Fee Collection",
+   "width": "Full"
+  }
+ ],
+ "creation": "2020-07-22 18:51:02.195762",
+ "dashboard_name": "Education",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2020-08-05 16:22:17.428101",
+ "modified_by": "Administrator",
+ "module": "Education",
+ "name": "Education",
+ "owner": "Administrator"
+}

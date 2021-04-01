@@ -7,7 +7,7 @@ import json
 from frappe import _
 from frappe import utils
 from frappe.model.document import Document
-from frappe.utils import now, time_diff_in_hours, now_datetime, getdate, get_weekdays, add_to_date, today, get_time, get_datetime
+from frappe.utils import now_datetime, getdate, get_weekdays, add_to_date, get_time, get_datetime, time_diff_in_seconds
 from datetime import datetime, timedelta
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils.user import is_website_user
@@ -47,8 +47,8 @@ class Issue(Document):
 				self.contact = frappe.db.get_value("Contact", {"email_id": email_id})
 
 				if self.contact:
-					contact = frappe.get_doc('Contact', self.contact)
-					self.customer = contact.get_link_for('Customer')
+					contact = frappe.get_doc("Contact", self.contact)
+					self.customer = contact.get_link_for("Customer")
 
 			if not self.company:
 				self.company = frappe.db.get_value("Lead", self.lead, "company") or \
@@ -56,39 +56,96 @@ class Issue(Document):
 
 	def update_status(self):
 		status = frappe.db.get_value("Issue", self.name, "status")
-		if self.status!="Open" and status =="Open" and not self.first_responded_on:
+		if self.status != "Open" and status == "Open" and not self.first_responded_on:
 			self.first_responded_on = frappe.flags.current_time or now_datetime()
 
-		if self.status=="Closed" and status !="Closed":
+		if self.status in ["Closed", "Resolved"] and status not in ["Resolved", "Closed"]:
 			self.resolution_date = frappe.flags.current_time or now_datetime()
-			if frappe.db.get_value("Issue", self.name, "agreement_fulfilled") == "Ongoing":
+			if frappe.db.get_value("Issue", self.name, "agreement_status") == "Ongoing":
 				set_service_level_agreement_variance(issue=self.name)
 				self.update_agreement_status()
+			set_resolution_time(issue=self)
+			set_user_resolution_time(issue=self)
 
-		if self.status=="Open" and status !="Open":
+		if self.status == "Open" and status != "Open":
 			# if no date, it should be set as None and not a blank string "", as per mysql strict config
 			self.resolution_date = None
+			self.reset_issue_metrics()
+			# enable SLA and variance on Reopen
+			self.agreement_status = "Ongoing"
+			set_service_level_agreement_variance(issue=self.name)
+
+		self.handle_hold_time(status)
+
+	def handle_hold_time(self, status):
+		if self.service_level_agreement:
+			# set response and resolution variance as None as the issue is on Hold
+			pause_sla_on = frappe.db.get_all("Pause SLA On Status", fields=["status"],
+				filters={"parent": self.service_level_agreement})
+			hold_statuses = [entry.status for entry in pause_sla_on]
+			update_values = {}
+
+			if hold_statuses:
+				if self.status in hold_statuses and status not in hold_statuses:
+					update_values['on_hold_since'] = frappe.flags.current_time or now_datetime()
+					if not self.first_responded_on:
+						update_values['response_by'] = None
+						update_values['response_by_variance'] = 0
+					update_values['resolution_by'] = None
+					update_values['resolution_by_variance'] = 0
+
+				# calculate hold time when status is changed from any hold status to any non-hold status
+				if self.status not in hold_statuses and status in hold_statuses:
+					hold_time = self.total_hold_time if self.total_hold_time else 0
+					now_time = frappe.flags.current_time or now_datetime()
+					last_hold_time = 0
+					if self.on_hold_since:
+						# last_hold_time will be added to the sla variables
+						last_hold_time = time_diff_in_seconds(now_time, self.on_hold_since)
+						update_values['total_hold_time'] = hold_time + last_hold_time
+
+					# re-calculate SLA variables after issue changes from any hold status to any non-hold status
+					# add hold time to SLA variables
+					start_date_time = get_datetime(self.service_level_agreement_creation)
+					priority = get_priority(self)
+					now_time = frappe.flags.current_time or now_datetime()
+
+					if not self.first_responded_on:
+						response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
+						response_by = add_to_date(response_by, seconds=round(last_hold_time))
+						response_by_variance = round(time_diff_in_seconds(response_by, now_time))
+						update_values['response_by'] = response_by
+						update_values['response_by_variance'] = response_by_variance + last_hold_time
+
+					resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
+					resolution_by = add_to_date(resolution_by, seconds=round(last_hold_time))
+					resolution_by_variance = round(time_diff_in_seconds(resolution_by, now_time))
+					update_values['resolution_by'] = resolution_by
+					update_values['resolution_by_variance'] = resolution_by_variance + last_hold_time
+					update_values['on_hold_since'] = None
+
+				self.db_set(update_values)
 
 	def update_agreement_status(self):
-		if self.service_level_agreement and self.agreement_fulfilled == "Ongoing":
+		if self.service_level_agreement and self.agreement_status == "Ongoing":
 			if frappe.db.get_value("Issue", self.name, "response_by_variance") < 0 or \
 				frappe.db.get_value("Issue", self.name, "resolution_by_variance") < 0:
 
-				self.agreement_fulfilled = "Failed"
+				self.agreement_status = "Failed"
 			else:
-				self.agreement_fulfilled = "Fulfilled"
+				self.agreement_status = "Fulfilled"
 
-	def update_agreement_fulfilled_on_custom_status(self):
+	def update_agreement_status_on_custom_status(self):
 		"""
 			Update Agreement Fulfilled status using Custom Scripts for Custom Issue Status
 		"""
 		if not self.first_responded_on: # first_responded_on set when first reply is sent to customer
-			self.response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()), 2)
+			self.response_by_variance = round(time_diff_in_seconds(self.response_by, now_datetime()), 2)
 
 		if not self.resolution_date: # resolution_date set when issue has been closed
-			self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()), 2)
+			self.resolution_by_variance = round(time_diff_in_seconds(self.resolution_by, now_datetime()), 2)
 
-		self.agreement_fulfilled = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
+		self.agreement_status = "Fulfilled" if self.response_by_variance > 0 and self.resolution_by_variance > 0 else "Failed"
 
 	def create_communication(self):
 		communication = frappe.new_doc("Communication")
@@ -115,7 +172,7 @@ class Issue(Document):
 		replicated_issue = deepcopy(self)
 		replicated_issue.subject = subject
 		replicated_issue.issue_split_from = self.name
-		replicated_issue.mins_to_first_response = 0
+		replicated_issue.first_response_time = 0
 		replicated_issue.first_responded_on = None
 		replicated_issue.creation = now_datetime()
 
@@ -123,11 +180,12 @@ class Issue(Document):
 		if replicated_issue.service_level_agreement:
 			replicated_issue.service_level_agreement_creation = now_datetime()
 			replicated_issue.service_level_agreement = None
-			replicated_issue.agreement_fulfilled = "Ongoing"
+			replicated_issue.agreement_status = "Ongoing"
 			replicated_issue.response_by = None
 			replicated_issue.response_by_variance = None
 			replicated_issue.resolution_by = None
 			replicated_issue.resolution_by_variance = None
+			replicated_issue.reset_issue_metrics()
 
 		frappe.get_doc(replicated_issue).insert()
 
@@ -137,7 +195,7 @@ class Issue(Document):
 		communications = frappe.get_all("Communication",
 			filters={"reference_doctype": "Issue",
 				"reference_name": comm_to_split_from.reference_name,
-				"creation": ('>=', comm_to_split_from.creation)})
+				"creation": (">=", comm_to_split_from.creation)})
 
 		for communication in communications:
 			doc = frappe.get_doc("Communication", communication.name)
@@ -149,14 +207,17 @@ class Issue(Document):
 			"comment_type": "Info",
 			"reference_doctype": "Issue",
 			"reference_name": replicated_issue.name,
-			"content": " - Split the Issue from <a href='#Form/Issue/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
+			"content": " - Split the Issue from <a href='/app/Form/Issue/{0}'>{1}</a>".format(self.name, frappe.bold(self.name)),
 		}).insert(ignore_permissions=True)
 
 		return replicated_issue.name
 
 	def before_insert(self):
 		if frappe.db.get_single_value("Support Settings", "track_service_level_agreement"):
-			self.set_response_and_resolution_time()
+			if frappe.flags.in_test:
+				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
+			else:
+				self.set_response_and_resolution_time()
 
 	def set_response_and_resolution_time(self, priority=None, service_level_agreement=None):
 		service_level_agreement = get_active_service_level_agreement_for(priority=priority,
@@ -173,23 +234,18 @@ class Issue(Document):
 		self.service_level_agreement = service_level_agreement.name
 		self.priority = service_level_agreement.default_priority if not priority else priority
 
-		service_level_agreement = frappe.get_doc("Service Level Agreement", service_level_agreement.name)
-		priority = service_level_agreement.get_service_level_agreement_priority(self.priority)
-		priority.update({
-			"support_and_resolution": service_level_agreement.support_and_resolution,
-			"holiday_list": service_level_agreement.holiday_list
-		})
+		priority = get_priority(self)
 
 		if not self.creation:
 			self.creation = now_datetime()
 			self.service_level_agreement_creation = now_datetime()
 
 		start_date_time = get_datetime(self.service_level_agreement_creation)
-		self.response_by = get_expected_time_for(parameter='response', service_level=priority, start_date_time=start_date_time)
-		self.resolution_by = get_expected_time_for(parameter='resolution', service_level=priority, start_date_time=start_date_time)
+		self.response_by = get_expected_time_for(parameter="response", service_level=priority, start_date_time=start_date_time)
+		self.resolution_by = get_expected_time_for(parameter="resolution", service_level=priority, start_date_time=start_date_time)
 
-		self.response_by_variance = round(time_diff_in_hours(self.response_by, now_datetime()))
-		self.resolution_by_variance = round(time_diff_in_hours(self.resolution_by, now_datetime()))
+		self.response_by_variance = round(time_diff_in_seconds(self.response_by, now_datetime()))
+		self.resolution_by_variance = round(time_diff_in_seconds(self.resolution_by, now_datetime()))
 
 	def change_service_level_agreement_and_priority(self):
 		if self.service_level_agreement and frappe.db.exists("Issue", self.name) and \
@@ -218,8 +274,23 @@ class Issue(Document):
 
 		self.service_level_agreement_creation = now_datetime()
 		self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
-		self.agreement_fulfilled = "Ongoing"
+		self.agreement_status = "Ongoing"
 		self.save()
+
+	def reset_issue_metrics(self):
+		self.db_set("resolution_time", None)
+		self.db_set("user_resolution_time", None)
+
+
+def get_priority(issue):
+	service_level_agreement = frappe.get_doc("Service Level Agreement", issue.service_level_agreement)
+	priority = service_level_agreement.get_service_level_agreement_priority(issue.priority)
+	priority.update({
+		"support_and_resolution": service_level_agreement.support_and_resolution,
+		"holiday_list": service_level_agreement.holiday_list
+	})
+	return priority
+
 
 def get_expected_time_for(parameter, service_level, start_date_time):
 	current_date_time = start_date_time
@@ -227,30 +298,20 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 	start_time = None
 	end_time = None
 
-	# lets assume response time is in days by default
-	if parameter == 'response':
-		allotted_days = service_level.get("response_time")
-		time_period = service_level.get("response_time_period")
-	elif parameter == 'resolution':
-		allotted_days = service_level.get("resolution_time")
-		time_period = service_level.get("resolution_time_period")
+	if parameter == "response":
+		allotted_seconds = service_level.get("response_time")
+	elif parameter == "resolution":
+		allotted_seconds = service_level.get("resolution_time")
 	else:
 		frappe.throw(_("{0} parameter is invalid").format(parameter))
 
-	allotted_hours = 0
-	if time_period == 'Hour':
-		allotted_hours = allotted_days
-		allotted_days = 0
-	elif time_period == 'Week':
-		allotted_days *= 7
-
-	expected_time_is_set = 1 if allotted_days == 0 and time_period in ['Day', 'Week'] else 0
+	expected_time_is_set = 0
 
 	support_days = {}
 	for service in service_level.get("support_and_resolution"):
 		support_days[service.workday] = frappe._dict({
-			'start_time': service.start_time,
-			'end_time': service.end_time,
+			"start_time": service.start_time,
+			"end_time": service.end_time,
 		})
 
 	holidays = get_holidays(service_level.get("holiday_list"))
@@ -264,25 +325,22 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 				if getdate(current_date_time) == getdate(start_date_time) and get_time_in_timedelta(current_date_time.time()) > support_days[current_weekday].start_time \
 				else support_days[current_weekday].start_time
 			end_time = support_days[current_weekday].end_time
-			time_left_today = time_diff_in_hours(end_time, start_time)
+			time_left_today = time_diff_in_seconds(end_time, start_time)
 
 			# no time left for support today
-			if time_left_today < 0: pass
-			elif time_period == 'Hour':
-				if time_left_today >= allotted_hours:
+			if time_left_today <= 0: pass
+			elif allotted_seconds:
+				if time_left_today >= allotted_seconds:
 					expected_time = datetime.combine(getdate(current_date_time), get_time(start_time))
-					expected_time = add_to_date(expected_time, hours=allotted_hours)
+					expected_time = add_to_date(expected_time, seconds=allotted_seconds)
 					expected_time_is_set = 1
 				else:
-					allotted_hours = allotted_hours - time_left_today
-			else:
-				allotted_days -= 1
-				expected_time_is_set = allotted_days <= 0
+					allotted_seconds = allotted_seconds - time_left_today
 
 		if not expected_time_is_set:
 			current_date_time = add_to_date(current_date_time, days=1)
 
-	if end_time and time_period != 'Hour':
+	if end_time and allotted_seconds >= 86400:
 		current_date_time = datetime.combine(getdate(current_date_time), get_time(end_time))
 	else:
 		current_date_time = expected_time
@@ -292,7 +350,7 @@ def get_expected_time_for(parameter, service_level, start_date_time):
 def set_service_level_agreement_variance(issue=None):
 	current_time = frappe.flags.current_time or now_datetime()
 
-	filters = {"status": "Open", "agreement_fulfilled": "Ongoing"}
+	filters = {"status": "Open", "agreement_status": "Ongoing"}
 	if issue:
 		filters = {"name": issue}
 
@@ -300,16 +358,46 @@ def set_service_level_agreement_variance(issue=None):
 		doc = frappe.get_doc("Issue", issue.name)
 
 		if not doc.first_responded_on: # first_responded_on set when first reply is sent to customer
-			variance = round(time_diff_in_hours(doc.response_by, current_time), 2)
+			variance = round(time_diff_in_seconds(doc.response_by, current_time), 2)
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="response_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_status", val="Failed", update_modified=False)
 
 		if not doc.resolution_date: # resolution_date set when issue has been closed
-			variance = round(time_diff_in_hours(doc.resolution_by, current_time), 2)
+			variance = round(time_diff_in_seconds(doc.resolution_by, current_time), 2)
 			frappe.db.set_value(dt="Issue", dn=doc.name, field="resolution_by_variance", val=variance, update_modified=False)
 			if variance < 0:
-				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_fulfilled", val="Failed", update_modified=False)
+				frappe.db.set_value(dt="Issue", dn=doc.name, field="agreement_status", val="Failed", update_modified=False)
+
+
+def set_resolution_time(issue):
+	# total time taken from issue creation to closing
+	resolution_time = time_diff_in_seconds(issue.resolution_date, issue.creation)
+	issue.db_set("resolution_time", resolution_time)
+
+
+def set_user_resolution_time(issue):
+	# total time taken by a user to close the issue apart from wait_time
+	communications = frappe.get_list("Communication", filters={
+			"reference_doctype": issue.doctype,
+			"reference_name": issue.name
+		},
+		fields=["sent_or_received", "name", "creation"],
+		order_by="creation"
+	)
+
+	pending_time = []
+	for i in range(len(communications)):
+		if communications[i].sent_or_received == "Received" and communications[i-1].sent_or_received == "Sent":
+			wait_time = time_diff_in_seconds(communications[i].creation, communications[i-1].creation)
+			if wait_time > 0:
+				pending_time.append(wait_time)
+
+	total_pending_time = sum(pending_time)
+	resolution_time_in_secs = time_diff_in_seconds(issue.resolution_date, issue.creation)
+	user_resolution_time = resolution_time_in_secs - total_pending_time
+	issue.db_set("user_resolution_time", user_resolution_time)
+
 
 def get_list_context(context=None):
 	return {
@@ -318,7 +406,7 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/issue_row.html",
 		"show_sidebar": True,
 		"show_search": True,
-		'no_breadcrumbs': True
+		"no_breadcrumbs": True
 	}
 
 
@@ -326,12 +414,12 @@ def get_issue_list(doctype, txt, filters, limit_start, limit_page_length=20, ord
 	from frappe.www.list import get_list
 
 	user = frappe.session.user
-	contact = frappe.db.get_value('Contact', {'user': user}, 'name')
+	contact = frappe.db.get_value("Contact", {"user": user}, "name")
 	customer = None
 
 	if contact:
-		contact_doc = frappe.get_doc('Contact', contact)
-		customer = contact_doc.get_link_for('Customer')
+		contact_doc = frappe.get_doc("Contact", contact)
+		customer = contact_doc.get_link_for("Customer")
 
 	ignore_permissions = False
 	if is_website_user():

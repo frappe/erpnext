@@ -73,6 +73,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		me.frm.set_query('contact_person', erpnext.queries.contact_query);
 		me.frm.set_query('supplier_address', erpnext.queries.address_query);
 
+		me.frm.set_query('billing_address', erpnext.queries.company_address_query);
+
 		if(this.frm.fields_dict.supplier) {
 			this.frm.set_query("supplier", function() {
 				return{	query: "erpnext.controllers.queries.supplier_query" }});
@@ -139,29 +141,6 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		this.apply_price_list();
 	},
 
-	price_list_rate: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-
-		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
-
-		let item_rate = item.price_list_rate;
-		if (doc.doctype == "Purchase Order" && item.blanket_order_rate) {
-			item_rate = item.blanket_order_rate;
-		}
-
-		if (item.discount_percentage) {
-			item.discount_amount = flt(item_rate) * flt(item.discount_percentage) / 100;
-		}
-
-		if (item.discount_amount) {
-			item.rate = flt((item.price_list_rate) - (item.discount_amount), precision('rate', item));
-		} else {
-			item.rate = item_rate;
-		}
-
-		this.calculate_taxes_and_totals();
-	},
-
 	discount_percentage: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		item.discount_amount = 0.0;
@@ -187,8 +166,12 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 
 			frappe.model.round_floats_in(item, ["qty", "received_qty"]);
 			item.rejected_qty = flt(item.received_qty - item.qty, precision("rejected_qty", item));
+			item.received_stock_qty = flt(item.conversion_factor, precision("conversion_factor", item)) * flt(item.received_qty);
 		}
+		this._super(doc, cdt, cdn);
+	},
 
+	batch_no: function(doc, cdt, cdn) {
 		this._super(doc, cdt, cdn);
 	},
 
@@ -216,8 +199,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var is_negative_qty = false;
 		for(var i = 0; i<fieldnames.length; i++) {
 			if(item[fieldnames[i]] < 0){
-				frappe.msgprint(__("Row #{0}: {1} can not be negative for item {2}",
-					[item.idx,__(frappe.meta.get_label(cdt, fieldnames[i], cdn)), item.item_code]));
+				frappe.msgprint(__("Row #{0}: {1} can not be negative for item {2}", [item.idx,__(frappe.meta.get_label(cdt, fieldnames[i], cdn)), item.item_code]));
 				is_negative_qty = true;
 				break;
 			}
@@ -253,6 +235,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		}
 	},
 
+	rejected_warehouse: function(doc, cdt) {
+		// trigger autofill_warehouse only if parent rejected_warehouse field is triggered
+		if (["Purchase Invoice", "Purchase Receipt"].includes(cdt)) {
+			this.autofill_warehouse(doc.items, "rejected_warehouse", doc.rejected_warehouse);
+		}
+	},
+
 	category: function(doc, cdt, cdn) {
 		// should be the category field of tax table
 		if(cdt != doc.doctype) {
@@ -267,7 +256,7 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 		var me = this;
 		this.frm.add_custom_button(__("Product Bundle"), function() {
 			erpnext.buying.get_items_from_product_bundle(me.frm);
-		}, __("Get items from"));
+		}, __("Get Items From"));
 	},
 
 	shipping_address: function(){
@@ -276,71 +265,13 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 			"shipping_address_display", true);
 	},
 
-	tc_name: function() {
-		this.get_terms();
+	billing_address: function() {
+		erpnext.utils.get_address_display(this.frm, "billing_address",
+			"billing_address_display", true);
 	},
 
-	link_to_mrs: function() {
-		var my_items = [];
-		for (var i in cur_frm.doc.items) {
-			if(!cur_frm.doc.items[i].material_request){
-				my_items.push(cur_frm.doc.items[i].item_code);
-			}
-		}
-		frappe.call({
-			method: "erpnext.buying.utils.get_linked_material_requests",
-			args:{
-				items: my_items
-			},
-			callback: function(r) {
-				if(!r.message || r.message.length == 0) {
-					frappe.throw(__("No pending Material Requests found to link for the given items."))
-				}
-				else {
-					var i = 0;
-					var item_length = cur_frm.doc.items.length;
-					while (i < item_length) {
-						var qty = cur_frm.doc.items[i].qty;
-						(r.message[0] || []).forEach(function(d) {
-							if (d.qty > 0 && qty > 0 && cur_frm.doc.items[i].item_code == d.item_code && !cur_frm.doc.items[i].material_request_item)
-							{
-								cur_frm.doc.items[i].material_request = d.mr_name;
-								cur_frm.doc.items[i].material_request_item = d.mr_item;
-								var my_qty = Math.min(qty, d.qty);
-								qty = qty - my_qty;
-								d.qty = d.qty  - my_qty;
-								cur_frm.doc.items[i].stock_qty = my_qty*cur_frm.doc.items[i].conversion_factor;
-								cur_frm.doc.items[i].qty = my_qty;
-
-								frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + cur_frm.doc.items[i].idx + ")");
-								if (qty > 0)
-								{
-									frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
-									var newrow = frappe.model.add_child(cur_frm.doc, cur_frm.doc.items[i].doctype, "items");
-									item_length++;
-
-									for (var key in cur_frm.doc.items[i])
-									{
-										newrow[key] = cur_frm.doc.items[i][key];
-									}
-
-									newrow.idx = item_length;
-									newrow["stock_qty"] = newrow.conversion_factor*qty;
-									newrow["qty"] = qty;
-
-									newrow["material_request"] = "";
-									newrow["material_request_item"] = "";
-
-								}
-							}
-						});
-						i++;
-					}
-					refresh_field("items");
-					//cur_frm.save();
-				}
-			}
-		});
+	tc_name: function() {
+		this.get_terms();
 	},
 
 	update_auto_repeat_reference: function(doc) {
@@ -407,6 +338,62 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 });
 
 cur_frm.add_fetch('project', 'cost_center', 'cost_center');
+
+erpnext.buying.link_to_mrs = function(frm) {
+	frappe.call({
+		method: "erpnext.buying.utils.get_linked_material_requests",
+		args:{
+			items: frm.doc.items.map((item) => item.item_code)
+		},
+		callback: function(r) {
+			if (!r.message || r.message.length == 0) {
+				frappe.throw({
+					message: __("No pending Material Requests found to link for the given items."),
+					title: __("Note")
+				});
+			}
+
+			var item_length = frm.doc.items.length;
+			for (let item of frm.doc.items) {
+				var qty = item.qty;
+				(r.message[0] || []).forEach(function(d) {
+					if (d.qty > 0 && qty > 0 && item.item_code == d.item_code && !item.material_request_item)
+					{
+						item.material_request = d.mr_name;
+						item.material_request_item = d.mr_item;
+						var my_qty = Math.min(qty, d.qty);
+						qty = qty - my_qty;
+						d.qty = d.qty - my_qty;
+						item.stock_qty = my_qty*item.conversion_factor;
+						item.qty = my_qty;
+
+						frappe.msgprint("Assigning " + d.mr_name + " to " + d.item_code + " (row " + item.idx + ")");
+						if (qty > 0)
+						{
+							frappe.msgprint("Splitting " + qty + " units of " + d.item_code);
+							var newrow = frappe.model.add_child(frm.doc, item.doctype, "items");
+							item_length++;
+
+							for (var key in item)
+							{
+								newrow[key] = item[key];
+							}
+
+							newrow.idx = item_length;
+							newrow["stock_qty"] = newrow.conversion_factor*qty;
+							newrow["qty"] = qty;
+
+							newrow["material_request"] = "";
+							newrow["material_request_item"] = "";
+
+						}
+					}
+				});
+			}
+			refresh_field("items");
+		}
+	});
+}
 
 erpnext.buying.get_default_bom = function(frm) {
 	$.each(frm.doc["items"] || [], function(i, d) {
@@ -489,11 +476,11 @@ erpnext.buying.get_items_from_product_bundle = function(frm) {
 
 					if(!r.exc && r.message) {
 						remove_empty_first_row(frm);
-						for ( var i=0; i< r.message.length; i++ ) {
+						for (var i=0; i< r.message.length; i++) {
 							var d = frm.add_child("items");
 							var item = r.message[i];
-							for ( var key in  item) {
-								if ( !is_null(item[key]) ) {
+							for (var key in  item) {
+								if (!is_null(item[key]) && key !== "doctype") {
 									d[key] = item[key];
 								}
 							}

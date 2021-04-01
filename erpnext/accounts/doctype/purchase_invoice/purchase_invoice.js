@@ -15,7 +15,22 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				return (doc.qty<=doc.received_qty) ? "green" : "orange";
 			});
 		}
+
+		this.frm.set_query("unrealized_profit_loss_account", function() {
+			return {
+				filters: {
+					company: doc.company,
+					is_group: 0,
+					root_type: "Liability",
+				}
+			};
+		});
 	},
+
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+
 	onload: function() {
 		this._super();
 
@@ -25,6 +40,14 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				this.frm.set_df_property("credit_to", "print_hide", 0);
 			}
 		}
+
+		// Trigger supplier event on load if supplier is available
+		// The reason for this is PI can be created from PR or PO and supplier is pre populated
+		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
+			this.frm.trigger('supplier');
+		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function(doc) {
@@ -93,6 +116,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 					target: me.frm,
 					setters: {
 						supplier: me.frm.doc.supplier || undefined,
+						schedule_date: undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -101,16 +125,16 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 						company: me.frm.doc.company
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 			this.frm.add_custom_button(__('Purchase Receipt'), function() {
 				erpnext.utils.map_current_doc({
 					method: "erpnext.stock.doctype.purchase_receipt.purchase_receipt.make_purchase_invoice",
 					source_doctype: "Purchase Receipt",
 					target: me.frm,
-					date_field: "posting_date",
 					setters: {
 						supplier: me.frm.doc.supplier || undefined,
+						posting_date: undefined
 					},
 					get_query_filters: {
 						docstatus: 1,
@@ -119,7 +143,7 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 						is_return: 0
 					}
 				})
-			}, __("Get items from"));
+			}, __("Get Items From"));
 		}
 		this.frm.toggle_reqd("supplier_warehouse", this.frm.doc.is_subcontracted==="Yes");
 
@@ -135,6 +159,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 				}
 			});
 		}
+
+		this.frm.set_df_property("tax_withholding_category", "hidden", doc.apply_tds ? 0 : 1);
 	},
 
 	unblock_invoice: function() {
@@ -249,8 +275,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 	supplier: function() {
 		var me = this;
-		if(this.frm.updating_party_details)
+
+		// Do not update if inter company reference is there as the details will already be updated
+		if(this.frm.updating_party_details || this.frm.doc.inter_company_invoice_reference)
 			return;
+
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
@@ -382,11 +411,6 @@ function hide_fields(doc) {
 	cur_frm.refresh_fields();
 }
 
-cur_frm.cscript.update_stock = function(doc, dt, dn) {
-	hide_fields(doc, dt, dn);
-	this.frm.fields_dict.items.grid.toggle_reqd("item_code", doc.update_stock? true: false)
-}
-
 cur_frm.fields_dict.cash_bank_account.get_query = function(doc) {
 	return {
 		filters: [
@@ -484,7 +508,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Purchase Invoice': 'Debit Note',
+			'Purchase Invoice': 'Return / Debit Note',
 			'Payment Entry': 'Payment'
 		}
 
@@ -497,19 +521,10 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
-
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
 	},
 
 	onload: function(frm) {
-		if(frm.doc.__onload) {
+		if(frm.doc.__onload && frm.is_new()) {
 			if(frm.doc.supplier) {
 				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
 			}
@@ -528,5 +543,10 @@ frappe.ui.form.on("Purchase Invoice", {
 			erpnext.buying.get_default_bom(frm);
 		}
 		frm.toggle_reqd("supplier_warehouse", frm.doc.is_subcontracted==="Yes");
+	},
+
+	update_stock: function(frm) {
+		hide_fields(frm.doc);
+		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock? true: false);
 	}
 })

@@ -82,6 +82,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 			pricing_rule = get_pricing_rule_for_item(frappe._dict({
 				"item_code": item_code,
 				"qty": qty,
+				"stock_qty": qty,
 				"transaction_type": "selling",
 				"price_list": price_list,
 				"customer_group": customer_group,

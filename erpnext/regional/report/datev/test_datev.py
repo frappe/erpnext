@@ -1,32 +1,22 @@
 # coding=utf-8
 from __future__ import unicode_literals
 
-import os
-import json
 import zipfile
+import frappe
 from six import BytesIO
 from unittest import TestCase
-
-import frappe
-from frappe.utils import getdate, today, now_datetime, cstr
-from frappe.test_runner import make_test_objects
+from frappe.utils import today, now_datetime, cstr
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
-from erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts import create_charts
 
 from erpnext.regional.report.datev.datev import validate
 from erpnext.regional.report.datev.datev import get_transactions
 from erpnext.regional.report.datev.datev import get_customers
 from erpnext.regional.report.datev.datev import get_suppliers
 from erpnext.regional.report.datev.datev import get_account_names
-from erpnext.regional.report.datev.datev import get_datev_csv
-from erpnext.regional.report.datev.datev import get_header
 from erpnext.regional.report.datev.datev import download_datev_csv
 
-from erpnext.regional.report.datev.datev_constants import DataCategory
-from erpnext.regional.report.datev.datev_constants import Transactions
-from erpnext.regional.report.datev.datev_constants import DebtorsCreditors
-from erpnext.regional.report.datev.datev_constants import AccountNames
-from erpnext.regional.report.datev.datev_constants import QUERY_REPORT_COLUMNS
+from erpnext.regional.germany.utils.datev.datev_csv import get_datev_csv, get_header
+from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
 
 def make_company(company_name, abbr):
 	if not frappe.db.exists("Company", company_name):
@@ -90,7 +80,7 @@ def make_customer_with_account(customer_name, company):
 
 	if not frappe.db.exists("Customer", customer_name):
 		customer = frappe.get_doc({
-			"doctype": "Customer",		
+			"doctype": "Customer",
 			"customer_name": customer_name,
 			"customer_type": "Company",
 			"accounts": [{
@@ -136,7 +126,8 @@ def make_datev_settings(company):
 			"doctype": "DATEV Settings",
 			"client": company.name,
 			"client_number": "12345",
-			"consultant_number": "67890"
+			"consultant_number": "67890",
+			"temporary_against_account_number": "9999"
 		}).insert()
 
 
@@ -147,7 +138,8 @@ class TestDatev(TestCase):
 		self.filters = {
 			"company": self.company.name,
 			"from_date": today(),
-			"to_date": today()
+			"to_date": today(),
+			"temporary_against_account_number": "9999"
 		}
 
 		make_datev_settings(self.company)
@@ -155,17 +147,17 @@ class TestDatev(TestCase):
 		setup_fiscal_year()
 
 		warehouse = frappe.db.get_value("Item Default", {
-				"parent": item.name, 
+				"parent": item.name,
 				"company": self.company.name
 			}, "default_warehouse")
 
 		income_account = frappe.db.get_value("Account", {
-				"account_number": "4200", 
+				"account_number": "4200",
 				"company": self.company.name
 			}, "name")
 
 		tax_account = frappe.db.get_value("Account", {
-				"account_number": "3806", 
+				"account_number": "3806",
 				"company": self.company.name
 			}, "name")
 
@@ -186,8 +178,11 @@ class TestDatev(TestCase):
 			"charge_type": "On Net Total",
 			"account_head": tax_account,
 			"description": "Umsatzsteuer 19 %",
-			"rate": 19
+			"rate": 19,
+			"cost_center": self.company.cost_center
 		})
+
+		si.cost_center = self.company.cost_center
 
 		si.save()
 		si.submit()
@@ -196,7 +191,7 @@ class TestDatev(TestCase):
 		def is_subset(get_data, allowed_keys):
 			"""
 			Validate that the dict contains only allowed keys.
-			
+
 			Params:
 			get_data -- Function that returns a list of dicts.
 			allowed_keys -- List of allowed keys

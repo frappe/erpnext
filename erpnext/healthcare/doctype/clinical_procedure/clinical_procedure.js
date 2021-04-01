@@ -43,7 +43,8 @@ frappe.ui.form.on('Clinical Procedure', {
 			return {
 				filters: {
 					'is_group': false,
-					'allow_appointments': true
+					'allow_appointments': true,
+					'company': frm.doc.company
 				}
 			};
 		});
@@ -84,8 +85,7 @@ frappe.ui.form.on('Clinical Procedure', {
 								callback: function(r) {
 									if (r.message) {
 										frappe.show_alert({
-											message:  __('Stock Entry {0} created',
-												['<a class="bold" href="#Form/Stock Entry/'+ r.message + '">' + r.message + '</a>']),
+											message: __('Stock Entry {0} created', ['<a class="bold" href="/app/stock-entry/'+ r.message + '">' + r.message + '</a>']),
 											indicator: 'green'
 										});
 									}
@@ -104,8 +104,7 @@ frappe.ui.form.on('Clinical Procedure', {
 						callback: function(r) {
 							if (!r.exc) {
 								if (r.message == 'insufficient stock') {
-									let msg = __('Stock quantity to start the Procedure is not available in the Warehouse {0}. Do you want to record a Stock Entry?',
-										[frm.doc.warehouse.bold()]);
+									let msg = __('Stock quantity to start the Procedure is not available in the Warehouse {0}. Do you want to record a Stock Entry?', [frm.doc.warehouse.bold()]);
 									frappe.confirm(
 										msg,
 										function() {
@@ -158,11 +157,13 @@ frappe.ui.form.on('Clinical Procedure', {
 							age = __('{0} as on {1}', [age, data.message.age_as_on]);
 						}
 					}
+					frm.set_value('patient_name', data.message.patient_name);
 					frm.set_value('patient_age', age);
 					frm.set_value('patient_sex', data.message.sex);
 				}
 			});
 		} else {
+			frm.set_value('patient_name', '');
 			frm.set_value('patient_age', '');
 			frm.set_value('patient_sex', '');
 		}
@@ -177,15 +178,35 @@ frappe.ui.form.on('Clinical Procedure', {
 					name: frm.doc.appointment
 				},
 				callback: function(data) {
-					frm.set_value('patient', data.message.patient);
-					frm.set_value('procedure_template', data.message.procedure_template);
-					frm.set_value('medical_department', data.message.department);
-					frm.set_value('start_date', data.message.appointment_date);
-					frm.set_value('start_time', data.message.appointment_time);
-					frm.set_value('notes', data.message.notes);
-					frm.set_value('service_unit', data.message.service_unit);
+					let values = {
+						'patient':data.message.patient,
+						'procedure_template': data.message.procedure_template,
+						'medical_department': data.message.department,
+						'practitioner': data.message.practitioner,
+						'start_date': data.message.appointment_date,
+						'start_time': data.message.appointment_time,
+						'notes': data.message.notes,
+						'service_unit': data.message.service_unit,
+						'company': data.message.company
+					};
+					frm.set_value(values);
 				}
 			});
+		} else {
+			let values = {
+				'patient': '',
+				'patient_name': '',
+				'patient_sex': '',
+				'patient_age': '',
+				'medical_department': '',
+				'procedure_template': '',
+				'start_date': '',
+				'start_time': '',
+				'notes': '',
+				'service_unit': '',
+				'inpatient_record': ''
+			};
+			frm.set_value(values);
 		}
 	},
 
@@ -234,9 +255,11 @@ frappe.ui.form.on('Clinical Procedure', {
 					name: frm.doc.practitioner
 				},
 				callback: function (data) {
-					frappe.model.set_value(frm.doctype,frm.docname, 'medical_department',data.message.department);
+					frappe.model.set_value(frm.doctype,frm.docname, 'practitioner_name', data.message.practitioner_name);
 				}
 			});
+		} else {
+			frappe.model.set_value(frm.doctype,frm.docname, 'practitioner_name', '');
 		}
 	},
 
@@ -282,14 +305,6 @@ frappe.ui.form.on('Clinical Procedure', {
 		});
 	}
 
-});
-
-cur_frm.set_query('procedure_template', function(doc) {
-	return {
-		filters: {
-			'medical_department': doc.medical_department
-		}
-	};
 });
 
 frappe.ui.form.on('Clinical Procedure Item', {
@@ -349,7 +364,7 @@ let calculate_age = function(birth) {
 	let age = new Date();
 	age.setTime(ageMS);
 	let years =  age.getFullYear() - 1970;
-	return  years + ' Year(s) ' + age.getMonth() + ' Month(s) ' + age.getDate() + ' Day(s)';
+	return `${years} ${__('Years(s)')} ${age.getMonth()} ${__('Month(s)')} ${age.getDate()} ${__('Day(s)')}`;
 };
 
 // List Stock items

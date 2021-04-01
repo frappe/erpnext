@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+{% include 'erpnext/stock/landed_taxes_and_charges_common.js' %};
 
 frappe.provide("erpnext.stock");
 
@@ -29,20 +30,9 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 		this.frm.add_fetch("receipt_document", "supplier", "supplier");
 		this.frm.add_fetch("receipt_document", "posting_date", "posting_date");
 		this.frm.add_fetch("receipt_document", "base_grand_total", "grand_total");
-
-		this.frm.set_query("expense_account", "taxes", function() {
-			return {
-				query: "erpnext.controllers.queries.tax_account_query",
-				filters: {
-					"account_type": ["Tax", "Chargeable", "Income Account", "Expenses Included In Valuation", "Expenses Included In Asset Valuation"],
-					"company": me.frm.doc.company
-				}
-			};
-		});
-
 	},
 
-	refresh: function(frm) {
+	refresh: function() {
 		var help_content =
 			`<br><br>
 			<table class="table table-bordered" style="background-color: #f9f9f9;">
@@ -72,6 +62,11 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 			</table>`;
 
 		set_field_options("landed_cost_help", help_content);
+
+		if (this.frm.doc.company) {
+			let company_currency = frappe.get_doc(":Company", this.frm.doc.company).default_currency;
+			this.frm.set_currency_labels(["total_taxes_and_charges"], company_currency);
+		}
 	},
 
 	get_items_from_purchase_receipts: function() {
@@ -97,34 +92,36 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	set_total_taxes_and_charges: function() {
 		var total_taxes_and_charges = 0.0;
 		$.each(this.frm.doc.taxes || [], function(i, d) {
-			total_taxes_and_charges += flt(d.amount)
+			total_taxes_and_charges += flt(d.base_amount);
 		});
-		cur_frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
+		this.frm.set_value("total_taxes_and_charges", total_taxes_and_charges);
 	},
 
 	set_applicable_charges_for_item: function() {
 		var me = this;
 
 		if(this.frm.doc.taxes.length) {
-
 			var total_item_cost = 0.0;
 			var based_on = this.frm.doc.distribute_charges_based_on.toLowerCase();
-			$.each(this.frm.doc.items || [], function(i, d) {
-				total_item_cost += flt(d[based_on])
-			});
 
-			var total_charges = 0.0;
-			$.each(this.frm.doc.items || [], function(i, item) {
-				item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
-				item.applicable_charges = flt(item.applicable_charges, precision("applicable_charges", item))
-				total_charges += item.applicable_charges
-			});
+			if (based_on != 'distribute manually') {
+				$.each(this.frm.doc.items || [], function(i, d) {
+					total_item_cost += flt(d[based_on])
+				});
 
-			if (total_charges != this.frm.doc.total_taxes_and_charges){
-				var diff = this.frm.doc.total_taxes_and_charges - flt(total_charges)
-				this.frm.doc.items.slice(-1)[0].applicable_charges += diff
+				var total_charges = 0.0;
+				$.each(this.frm.doc.items || [], function(i, item) {
+					item.applicable_charges = flt(item[based_on]) * flt(me.frm.doc.total_taxes_and_charges) / flt(total_item_cost)
+					item.applicable_charges = flt(item.applicable_charges, precision("applicable_charges", item))
+					total_charges += item.applicable_charges
+				});
+
+				if (total_charges != this.frm.doc.total_taxes_and_charges){
+					var diff = this.frm.doc.total_taxes_and_charges - flt(total_charges)
+					this.frm.doc.items.slice(-1)[0].applicable_charges += diff
+				}
+				refresh_field("items");
 			}
-			refresh_field("items");
 		}
 	},
 	distribute_charges_based_on: function (frm) {
@@ -134,7 +131,16 @@ erpnext.stock.LandedCostVoucher = erpnext.stock.StockController.extend({
 	items_remove: () => {
 		this.trigger('set_applicable_charges_for_item');
 	}
-
 });
 
 cur_frm.script_manager.make(erpnext.stock.LandedCostVoucher);
+
+frappe.ui.form.on('Landed Cost Taxes and Charges', {
+	expense_account: function(frm, cdt, cdn) {
+		frm.events.set_account_currency(frm, cdt, cdn);
+	},
+
+	amount: function(frm, cdt, cdn) {
+		frm.events.set_base_amount(frm, cdt, cdn);
+	}
+});

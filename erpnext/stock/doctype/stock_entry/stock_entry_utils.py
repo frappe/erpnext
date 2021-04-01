@@ -53,6 +53,8 @@ def make_stock_entry(**args):
 		args.target = args.to_warehouse
 	if args.item_code:
 		args.item = args.item_code
+	if args.apply_putaway_rule:
+		s.apply_putaway_rule = args.apply_putaway_rule
 
 	if isinstance(args.qty, string_types):
 		if '.' in args.qty:
@@ -118,7 +120,8 @@ def make_stock_entry(**args):
 		"t_warehouse": args.target,
 		"qty": args.qty,
 		"basic_rate": args.rate or args.basic_rate,
-		"conversion_factor": 1.0,
+		"conversion_factor": args.conversion_factor or 1.0,
+		"transfer_qty": flt(args.qty) * (flt(args.conversion_factor) or 1.0),
 		"serial_no": args.serial_no,
 		'batch_no': args.batch_no,
 		'cost_center': args.cost_center,

@@ -21,7 +21,7 @@ class Attendance(Document):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 		# leaves can be marked for future dates
-		if self.status not in ('On Leave', 'Half Day') and getdate(self.attendance_date) > getdate(nowdate()):
+		if self.status != 'On Leave' and not self.leave_application and getdate(self.attendance_date) > getdate(nowdate()):
 			frappe.throw(_("Attendance can not be marked for future dates"))
 		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
 			frappe.throw(_("Attendance date can not be less than employee's joining date"))
@@ -99,7 +99,8 @@ def add_attendance(events, start, end, conditions=None):
 		e = {
 			"name": d.name,
 			"doctype": "Attendance",
-			"date": d.attendance_date,
+			"start": d.attendance_date,
+			"end": d.attendance_date,
 			"title": cstr(d.status),
 			"docstatus": d.docstatus
 		}
@@ -131,6 +132,10 @@ def mark_bulk_attendance(data):
 		data = json.loads(data)
 	data = frappe._dict(data)
 	company = frappe.get_value('Employee', data.employee, 'company')
+	if not data.unmarked_days:
+		frappe.throw(_("Please select a date."))
+		return
+
 	for date in data.unmarked_days:
 		doc_dict = {
 			'doctype': 'Attendance',
@@ -173,8 +178,8 @@ def get_unmarked_days(employee, month):
 
 
 	records = frappe.get_all("Attendance", fields = ['attendance_date', 'employee'] , filters = [
-		["attendance_date", ">", month_start],
-		["attendance_date", "<", month_end],
+		["attendance_date", ">=", month_start],
+		["attendance_date", "<=", month_end],
 		["employee", "=", employee],
 		["docstatus", "!=", 2]
 	])

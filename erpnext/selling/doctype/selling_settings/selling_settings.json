@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "creation": "2013-06-25 10:25:16",
  "description": "Settings for Selling Module",
  "doctype": "DocType",
@@ -62,7 +63,7 @@
   },
   {
    "default": "15",
-   "description": "Auto close Opportunity after 15 days",
+   "description": "Auto close Opportunity after the no. of days mentioned above",
    "fieldname": "close_opportunity_after_days",
    "fieldtype": "Int",
    "label": "Close Opportunity After Days"
@@ -79,18 +80,18 @@
   {
    "fieldname": "so_required",
    "fieldtype": "Select",
-   "label": "Sales Order Required",
+   "label": "Is Sales Order Required for Sales Invoice & Delivery Note Creation?",
    "options": "No\nYes"
   },
   {
    "fieldname": "dn_required",
    "fieldtype": "Select",
-   "label": "Delivery Note Required",
+   "label": "Is Delivery Note Required for Sales Invoice Creation?",
    "options": "No\nYes"
   },
   {
    "default": "Each Transaction",
-   "description": "How often should project and company be updated based on Sales Transactions.",
+   "description": "How often should Project and Company be updated based on Sales Transactions?",
    "fieldname": "sales_update_frequency",
    "fieldtype": "Select",
    "label": "Sales Update Frequency",
@@ -107,37 +108,39 @@
    "default": "0",
    "fieldname": "editable_price_list_rate",
    "fieldtype": "Check",
-   "label": "Allow user to edit Price List Rate in transactions"
+   "label": "Allow User to Edit Price List Rate in Transactions"
   },
   {
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item to be added multiple times in a transaction"
+   "label": "Allow Item to Be Added Multiple Times in a Transaction"
   },
   {
    "default": "0",
    "fieldname": "allow_against_multiple_purchase_orders",
    "fieldtype": "Check",
-   "label": "Allow multiple Sales Orders against a Customer's Purchase Order"
+   "label": "Allow Multiple Sales Orders Against a Customer's Purchase Order"
   },
   {
    "default": "0",
    "fieldname": "validate_selling_price",
    "fieldtype": "Check",
-   "label": "Validate Selling Price for Item against Purchase Rate or Valuation Rate"
+   "label": "Validate Selling Price for Item Against Purchase Rate or Valuation Rate"
   },
   {
    "default": "0",
    "fieldname": "hide_tax_id",
    "fieldtype": "Check",
-   "label": "Hide Customer's Tax Id from Sales Transactions"
+   "label": "Hide Customer's Tax ID from Sales Transactions"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "issingle": 1,
- "modified": "2019-12-09 13:38:36.486298",
+ "links": [],
+ "modified": "2021-03-02 17:35:53.603607",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -154,5 +157,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

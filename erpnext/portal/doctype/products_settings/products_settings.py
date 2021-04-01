@@ -11,12 +11,13 @@ from frappe.model.document import Document
 class ProductsSettings(Document):
 	def validate(self):
 		if self.home_page_is_products:
-			website_settings = frappe.get_doc('Website Settings')
-			website_settings.home_page = 'products'
-			website_settings.save()
+			frappe.db.set_value("Website Settings", None, "home_page", "products")
+		elif frappe.db.get_single_value("Website Settings", "home_page") == 'products':
+			frappe.db.set_value("Website Settings", None, "home_page", "home")
 
 		self.validate_field_filters()
 		self.validate_attribute_filters()
+		frappe.clear_document_cache("Product Settings", "Product Settings")
 
 	def validate_field_filters(self):
 		if not (self.enable_field_filters and self.filter_fields): return
@@ -40,4 +41,3 @@ def home_page_is_products(doc, method):
 	home_page_is_products = cint(frappe.db.get_single_value('Products Settings', 'home_page_is_products'))
 	if home_page_is_products:
 		doc.home_page = 'products'
-

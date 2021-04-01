@@ -10,6 +10,7 @@ from frappe.permissions import clear_user_permissions_for_doctype
 from frappe.utils import add_days, nowdate, now_datetime, getdate, add_months
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
+from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
 
 test_dependencies = ["Leave Allocation", "Leave Block List"]
 
@@ -410,25 +411,39 @@ class TestLeaveApplication(unittest.TestCase):
 		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, nowdate(), add_days(nowdate(), 8)), 21)
 
 	def test_earned_leaves_creation(self):
+
+		frappe.db.sql('''delete from `tabLeave Period`''')
+		frappe.db.sql('''delete from `tabLeave Policy Assignment`''')
+		frappe.db.sql('''delete from `tabLeave Allocation`''')
+		frappe.db.sql('''delete from `tabLeave Ledger Entry`''')
+
 		leave_period = get_leave_period()
 		employee = get_employee()
 		leave_type = 'Test Earned Leave Type'
-		if not frappe.db.exists('Leave Type', leave_type):
-			frappe.get_doc(dict(
-				leave_type_name = leave_type,
-				doctype = 'Leave Type',
-				is_earned_leave = 1,
-				earned_leave_frequency = 'Monthly',
-				rounding = 0.5,
-				max_leaves_allowed = 6
-			)).insert()
+		frappe.delete_doc_if_exists("Leave Type", 'Test Earned Leave Type', force=1)
+		frappe.get_doc(dict(
+			leave_type_name = leave_type,
+			doctype = 'Leave Type',
+			is_earned_leave = 1,
+			earned_leave_frequency = 'Monthly',
+			rounding = 0.5,
+			max_leaves_allowed = 6
+		)).insert()
+
 		leave_policy = frappe.get_doc({
 			"doctype": "Leave Policy",
 			"leave_policy_details": [{"leave_type": leave_type, "annual_allocation": 6}]
 		}).insert()
-		frappe.db.set_value("Employee", employee.name, "leave_policy", leave_policy.name)
 
-		allocate_leaves(employee, leave_period, leave_type, 0, eligible_leaves = 12)
+		data = {
+			"assignment_based_on": "Leave Period",
+			"leave_policy": leave_policy.name,
+			"leave_period": leave_period.name
+		}
+
+		leave_policy_assignments = create_assignment_for_multiple_employees([employee.name], frappe._dict(data))
+
+		frappe.get_doc("Leave Policy Assignment", leave_policy_assignments[0]).grant_leave_alloc_for_employee()
 
 		from erpnext.hr.utils import allocate_earned_leaves
 		i = 0

@@ -1,0 +1,19 @@
+{
+ "creation": "2020-07-08 22:40:22.592042",
+ "docstatus": 0,
+ "doctype": "Number Card",
+ "document_type": "Job Card",
+ "filters_json": "[[\"Job Card\",\"status\",\"!=\",\"Completed\"],[\"Job Card\",\"docstatus\",\"=\",1]]",
+ "function": "Count",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "label": "Ongoing Job Cards",
+ "modified": "2020-07-09 12:23:18.218233",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Ongoing Job Card",
+ "owner": "Administrator",
+ "show_percentage_stats": 1,
+ "stats_time_interval": "Weekly"
+}

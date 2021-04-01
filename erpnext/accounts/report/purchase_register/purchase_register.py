@@ -14,13 +14,15 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 	if not filters: filters = {}
 
 	invoice_list = get_invoices(filters, additional_query_columns)
-	columns, expense_accounts, tax_accounts = get_columns(invoice_list, additional_table_columns)
+	columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts \
+		= get_columns(invoice_list, additional_table_columns)
 
 	if not invoice_list:
 		msgprint(_("No record found"))
 		return columns, invoice_list
 
 	invoice_expense_map = get_invoice_expense_map(invoice_list)
+	internal_invoice_map = get_internal_invoice_map(invoice_list)
 	invoice_expense_map, invoice_tax_map = get_invoice_tax_map(invoice_list,
 		invoice_expense_map, expense_accounts)
 	invoice_po_pr_map = get_invoice_po_pr_map(invoice_list)
@@ -52,9 +54,16 @@ def _execute(filters=None, additional_table_columns=None, additional_query_colum
 		# map expense values
 		base_net_total = 0
 		for expense_acc in expense_accounts:
-			expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
+			if inv.is_internal_supplier and inv.company == inv.represents_company:
+				expense_amount = 0
+			else:
+				expense_amount = flt(invoice_expense_map.get(inv.name, {}).get(expense_acc))
 			base_net_total += expense_amount
 			row.append(expense_amount)
+
+		# Add amount in unrealized account
+		for account in unrealized_profit_loss_accounts:
+			row.append(flt(internal_invoice_map.get((inv.name, account))))
 
 		# net total
 		row.append(base_net_total or inv.base_net_total)
@@ -96,7 +105,8 @@ def get_columns(invoice_list, additional_table_columns):
 			"width": 80
 		}
 	]
-	expense_accounts = tax_accounts = expense_columns = tax_columns = []
+	expense_accounts = tax_accounts = expense_columns = tax_columns = unrealized_profit_loss_accounts = \
+		unrealized_profit_loss_account_columns = []
 
 	if invoice_list:
 		expense_accounts = frappe.db.sql_list("""select distinct expense_account
@@ -112,17 +122,25 @@ def get_columns(invoice_list, additional_table_columns):
 			and parent in (%s) order by account_head""" %
 			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
+		unrealized_profit_loss_accounts = frappe.db.sql_list("""SELECT distinct unrealized_profit_loss_account
+			from `tabPurchase Invoice` where docstatus = 1 and name in (%s)
+			and ifnull(unrealized_profit_loss_account, '') != ''
+			order by unrealized_profit_loss_account""" %
+			', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]))
 
 	expense_columns = [(account + ":Currency/currency:120") for account in expense_accounts]
+	unrealized_profit_loss_account_columns = [(account + ":Currency/currency:120") for account in unrealized_profit_loss_accounts]
+
 	for account in tax_accounts:
 		if account not in expense_accounts:
 			tax_columns.append(account + ":Currency/currency:120")
 
-	columns = columns + expense_columns + [_("Net Total") + ":Currency/currency:120"] + tax_columns + \
+	columns = columns + expense_columns + unrealized_profit_loss_account_columns + \
+		[_("Net Total") + ":Currency/currency:120"] + tax_columns + \
 		[_("Total Tax") + ":Currency/currency:120", _("Grand Total") + ":Currency/currency:120",
 			_("Rounded Total") + ":Currency/currency:120", _("Outstanding Amount") + ":Currency/currency:120"]
 
-	return columns, expense_accounts, tax_accounts
+	return columns, expense_accounts, tax_accounts, unrealized_profit_loss_accounts
 
 def get_conditions(filters):
 	conditions = ""
@@ -198,6 +216,19 @@ def get_invoice_expense_map(invoice_list):
 		invoice_expense_map[d.parent][d.expense_account] = flt(d.amount)
 
 	return invoice_expense_map
+
+def get_internal_invoice_map(invoice_list):
+	unrealized_amount_details = frappe.db.sql("""SELECT name, unrealized_profit_loss_account,
+		base_net_total as amount from `tabPurchase Invoice` where name in (%s)
+		and is_internal_supplier = 1 and company = represents_company""" %
+		', '.join(['%s']*len(invoice_list)), tuple([inv.name for inv in invoice_list]), as_dict=1)
+
+	internal_invoice_map = {}
+	for d in unrealized_amount_details:
+		if d.unrealized_profit_loss_account:
+			internal_invoice_map.setdefault((d.name, d.unrealized_profit_loss_account), d.amount)
+
+	return internal_invoice_map
 
 def get_invoice_tax_map(invoice_list, invoice_expense_map, expense_accounts):
 	tax_details = frappe.db.sql("""

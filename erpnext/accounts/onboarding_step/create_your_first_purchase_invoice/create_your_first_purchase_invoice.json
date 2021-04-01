@@ -1,0 +1,20 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-14 22:10:07.049704",
+ "description": "# What's a Purchase Invoice?\n\nA Purchase Invoice is a bill you receive from your Suppliers against which you need to make the payment.\nPurchase Invoice is the exact opposite of your Sales Invoice. Here you accrue expenses to your Supplier. \n\nThe following is what a typical purchase cycle looks like, however you can create a purchase invoice directly as well.\n\n![Purchase Flow](https://docs.erpnext.com/docs/assets/img/accounts/pi-flow.png)\n\n",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-10-30 15:30:26.337773",
+ "modified_by": "Administrator",
+ "name": "Create Your First Purchase Invoice",
+ "owner": "Administrator",
+ "reference_document": "Purchase Invoice",
+ "show_form_tour": 0,
+ "show_full_form": 1,
+ "title": "Create Your First Purchase Invoice ",
+ "validate_action": 1
+}

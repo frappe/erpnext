@@ -16,6 +16,7 @@
   "opportunity_from",
   "party_name",
   "customer_name",
+  "source",
   "column_break0",
   "title",
   "opportunity_type",
@@ -23,7 +24,7 @@
   "converted_by",
   "sales_stage",
   "order_lost_reason",
-  "mins_to_first_response",
+  "first_response_time",
   "expected_closing",
   "next_contact",
   "contact_by",
@@ -49,11 +50,11 @@
   "contact_email",
   "contact_mobile",
   "more_info",
-  "source",
+  "company",
   "campaign",
   "column_break1",
-  "company",
   "transaction_date",
+  "language",
   "amended_from",
   "lost_reasons"
  ],
@@ -153,13 +154,6 @@
    "read_only": 1
   },
   {
-   "bold": 1,
-   "fieldname": "mins_to_first_response",
-   "fieldtype": "Float",
-   "label": "Mins to first response",
-   "read_only": 1
-  },
-  {
    "fieldname": "expected_closing",
    "fieldtype": "Date",
    "label": "Expected Closing Date"
@@ -254,6 +248,7 @@
    "fieldname": "items",
    "fieldtype": "Table",
    "label": "Items",
+   "mandatory_depends_on": "eval: doc.with_items == 1",
    "oldfieldname": "enquiry_details",
    "oldfieldtype": "Table",
    "options": "Opportunity Item"
@@ -343,7 +338,7 @@
    "collapsible": 1,
    "fieldname": "more_info",
    "fieldtype": "Section Break",
-   "label": "Source",
+   "label": "More Information",
    "oldfieldtype": "Section Break",
    "options": "fa fa-file-text"
   },
@@ -410,7 +405,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
-   "options": "Lost Reason Detail",
+   "options": "Opportunity Lost Reason Detail",
    "read_only": 1
   },
   {
@@ -418,12 +413,25 @@
    "fieldtype": "Link",
    "label": "Converted By",
    "options": "User"
+  },
+  {
+   "bold": 1,
+   "fieldname": "first_response_time",
+   "fieldtype": "Duration",
+   "label": "First Response Time",
+   "read_only": 1
+  },
+  {
+   "fieldname": "language",
+   "fieldtype": "Link",
+   "label": "Print Language",
+   "options": "Language"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2020-04-07 09:05:39.391109",
+ "modified": "2021-01-06 19:42:46.190051",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

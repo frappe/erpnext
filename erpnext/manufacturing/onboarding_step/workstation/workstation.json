@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-12 16:14:14.930214",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-19 12:50:33.938176",
+ "modified_by": "Administrator",
+ "name": "Workstation",
+ "owner": "Administrator",
+ "reference_document": "Workstation",
+ "show_full_form": 0,
+ "title": "Create a Workstation / Machine",
+ "validate_action": 1
+}

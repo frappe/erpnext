@@ -31,6 +31,7 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Service Unit Type",
+   "no_copy": 1,
    "reqd": 1,
    "unique": 1
   },
@@ -40,8 +41,7 @@
    "depends_on": "eval:doc.inpatient_occupancy != 1",
    "fieldname": "allow_appointments",
    "fieldtype": "Check",
-   "label": "Allow Appointments",
-   "no_copy": 1
+   "label": "Allow Appointments"
   },
   {
    "bold": 1,
@@ -49,8 +49,7 @@
    "depends_on": "eval:doc.allow_appointments == 1 && doc.inpatient_occupany != 1",
    "fieldname": "overlap_appointments",
    "fieldtype": "Check",
-   "label": "Allow Overlap",
-   "no_copy": 1
+   "label": "Allow Overlap"
   },
   {
    "bold": 1,
@@ -58,8 +57,7 @@
    "depends_on": "eval:doc.allow_appointments != 1",
    "fieldname": "inpatient_occupancy",
    "fieldtype": "Check",
-   "label": "Inpatient Occupancy",
-   "no_copy": 1
+   "label": "Inpatient Occupancy"
   },
   {
    "bold": 1,
@@ -79,6 +77,7 @@
    "fieldname": "item",
    "fieldtype": "Link",
    "label": "Item",
+   "no_copy": 1,
    "options": "Item",
    "read_only": 1
   },
@@ -86,7 +85,8 @@
    "fieldname": "item_code",
    "fieldtype": "Data",
    "label": "Item Code",
-   "mandatory_depends_on": "eval: doc.is_billable == 1"
+   "mandatory_depends_on": "eval: doc.is_billable == 1",
+   "no_copy": 1
   },
   {
    "fieldname": "item_group",
@@ -138,7 +138,7 @@
   }
  ],
  "links": [],
- "modified": "2020-01-30 16:06:00.624496",
+ "modified": "2020-05-20 15:31:09.627516",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Unit Type",

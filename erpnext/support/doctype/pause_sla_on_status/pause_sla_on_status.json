@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "creation": "2020-06-05 13:59:43.265588",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "status"
+ ],
+ "fields": [
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "reqd": 1,
+   "show_days": 1,
+   "show_seconds": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-06-05 15:15:29.986608",
+ "modified_by": "Administrator",
+ "module": "Support",
+ "name": "Pause SLA On Status",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

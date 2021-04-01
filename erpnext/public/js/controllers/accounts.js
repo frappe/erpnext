@@ -31,15 +31,6 @@ frappe.ui.form.on(cur_frm.doctype, {
 					}
 				}
 			});
-
-			frm.set_query("cost_center", "taxes", function(doc) {
-				return {
-					filters: {
-						'company': doc.company,
-						"is_group": 0
-					}
-				}
-			});
 		}
 	},
 	validate: function(frm) {
@@ -120,7 +111,7 @@ frappe.ui.form.on('Salary Structure', {
 
 var get_payment_mode_account = function(frm, mode_of_payment, callback) {
 	if(!frm.doc.company) {
-		frappe.throw(__("Please select the Company first"));
+		frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")});
 	}
 
 	if(!mode_of_payment) {
@@ -146,18 +137,18 @@ cur_frm.cscript.account_head = function(doc, cdt, cdn) {
 	if(!d.charge_type && d.account_head){
 		frappe.msgprint(__("Please select Charge Type first"));
 		frappe.model.set_value(cdt, cdn, "account_head", "");
-	} else if(d.account_head && d.charge_type!=="Actual") {
+	} else if (d.account_head) {
 		frappe.call({
 			type:"GET",
 			method: "erpnext.controllers.accounts_controller.get_tax_rate",
 			args: {"account_head":d.account_head},
 			callback: function(r) {
-				frappe.model.set_value(cdt, cdn, "rate", r.message.tax_rate || 0);
+				if (d.charge_type!=="Actual") {
+					frappe.model.set_value(cdt, cdn, "rate", r.message.tax_rate || 0);
+				}
 				frappe.model.set_value(cdt, cdn, "description", r.message.account_name);
 			}
 		})
-	} else if (d.charge_type == 'Actual' && d.account_head) {
-		frappe.model.set_value(cdt, cdn, "description", d.account_head.split(' - ')[0]);
 	}
 }
 

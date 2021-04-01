@@ -10,9 +10,11 @@
   "employee",
   "employee_name",
   "shift_type",
+  "status",
   "column_break_3",
   "company",
-  "date",
+  "start_date",
+  "end_date",
   "shift_request",
   "department",
   "amended_from"
@@ -60,12 +62,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Date"
-  },
-  {
    "fieldname": "shift_request",
    "fieldtype": "Link",
    "label": "Shift Request",
@@ -80,11 +76,36 @@
    "options": "Shift Assignment",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Start Date",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date",
+   "show_days": 1,
+   "show_seconds": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Active",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Active\nInactive",
+   "show_days": 1,
+   "show_seconds": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2019-12-12 15:49:06.956901",
+ "modified": "2020-06-15 14:27:54.310773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Shift Assignment",

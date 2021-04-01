@@ -8,48 +8,132 @@ Provide a report and downloadable CSV according to the German DATEV format.
   all required columns. Used to import the data into the DATEV Software.
 """
 from __future__ import unicode_literals
-import datetime
+
 import json
-import zlib
-import zipfile
-import six
-from csv import QUOTE_NONNUMERIC
-from six import BytesIO
-from six import string_types
 import frappe
+from six import string_types
+
 from frappe import _
-import pandas as pd
-from .datev_constants import DataCategory
-from .datev_constants import Transactions
-from .datev_constants import DebtorsCreditors
-from .datev_constants import AccountNames
-from .datev_constants import QUERY_REPORT_COLUMNS
+from erpnext.accounts.utils import get_fiscal_year
+from erpnext.regional.germany.utils.datev.datev_csv import zip_and_download, get_datev_csv
+from erpnext.regional.germany.utils.datev.datev_constants import Transactions, DebtorsCreditors, AccountNames
+
+COLUMNS = [
+	{
+		"label": "Umsatz (ohne Soll/Haben-Kz)",
+		"fieldname": "Umsatz (ohne Soll/Haben-Kz)",
+		"fieldtype": "Currency",
+		"width": 100
+	},
+	{
+		"label": "Soll/Haben-Kennzeichen",
+		"fieldname": "Soll/Haben-Kennzeichen",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Konto",
+		"fieldname": "Konto",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Gegenkonto (ohne BU-Schlüssel)",
+		"fieldname": "Gegenkonto (ohne BU-Schlüssel)",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Belegdatum",
+		"fieldname": "Belegdatum",
+		"fieldtype": "Date",
+		"width": 100
+	},
+	{
+		"label": "Belegfeld 1",
+		"fieldname": "Belegfeld 1",
+		"fieldtype": "Data",
+		"width": 150
+	},
+	{
+		"label": "Buchungstext",
+		"fieldname": "Buchungstext",
+		"fieldtype": "Text",
+		"width": 300
+	},
+	{
+		"label": "Beleginfo - Art 1",
+		"fieldname": "Beleginfo - Art 1",
+		"fieldtype": "Link",
+		"options": "DocType",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 1",
+		"fieldname": "Beleginfo - Inhalt 1",
+		"fieldtype": "Dynamic Link",
+		"options": "Beleginfo - Art 1",
+		"width": 150
+	},
+	{
+		"label": "Beleginfo - Art 2",
+		"fieldname": "Beleginfo - Art 2",
+		"fieldtype": "Link",
+		"options": "DocType",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 2",
+		"fieldname": "Beleginfo - Inhalt 2",
+		"fieldtype": "Dynamic Link",
+		"options": "Beleginfo - Art 2",
+		"width": 150
+	}
+]
 
 
 def execute(filters=None):
 	"""Entry point for frappe."""
-	validate(filters)
-	result = get_transactions(filters, as_dict=0)
-	columns = QUERY_REPORT_COLUMNS
+	data = []
+	if filters and validate(filters):
+		fn = 'temporary_against_account_number'
+		filters[fn] = frappe.get_value('DATEV Settings', filters.get('company'), fn)
+		data = get_transactions(filters, as_dict=0)
 
-	return columns, result
+	return COLUMNS, data
 
 
 def validate(filters):
 	"""Make sure all mandatory filters and settings are present."""
-	if not filters.get('company'):
+	company = filters.get('company')
+	if not company:
 		frappe.throw(_('<b>Company</b> is a mandatory filter.'))
 
-	if not filters.get('from_date'):
+	from_date = filters.get('from_date')
+	if not from_date:
 		frappe.throw(_('<b>From Date</b> is a mandatory filter.'))
 
-	if not filters.get('to_date'):
+	to_date = filters.get('to_date')
+	if not to_date:
 		frappe.throw(_('<b>To Date</b> is a mandatory filter.'))
 
-	try:
-		frappe.get_doc('DATEV Settings', filters.get('company'))
-	except frappe.DoesNotExistError:
-		frappe.throw(_('Please create <b>DATEV Settings</b> for Company <b>{}</b>.').format(filters.get('company')))
+	validate_fiscal_year(from_date, to_date, company)
+
+	if not frappe.db.exists('DATEV Settings', filters.get('company')):
+		frappe.log_error(_('Please create {} for Company {}.').format(
+			'<a href="desk#List/DATEV%20Settings/List">{}</a>'.format(_('DATEV Settings')),
+			frappe.bold(filters.get('company'))
+		))
+		return False
+
+	return True
+
+
+def validate_fiscal_year(from_date, to_date, company):
+	from_fiscal_year = get_fiscal_year(date=from_date, company=company)
+	to_fiscal_year = get_fiscal_year(date=to_date, company=company)
+	if from_fiscal_year != to_fiscal_year:
+		frappe.throw(_('Dates {} and {} are not in the same fiscal year.').format(from_date, to_date))
 
 
 def get_transactions(filters, as_dict=1):
@@ -74,11 +158,11 @@ def get_transactions(filters, as_dict=1):
 			case gl.debit when 0 then 'H' else 'S' end as 'Soll/Haben-Kennzeichen',
 
 			/* account number or, if empty, party account number */
-			coalesce(acc.account_number, acc_pa.account_number) as 'Konto',
+			acc.account_number as 'Konto',
 
 			/* against number or, if empty, party against number */
-			coalesce(acc_against.account_number, acc_against_pa.account_number) as 'Gegenkonto (ohne BU-Schlüssel)',
-			
+			%(temporary_against_account_number)s as 'Gegenkonto (ohne BU-Schlüssel)',
+
 			gl.posting_date as 'Belegdatum',
 			gl.voucher_no as 'Belegfeld 1',
 			LEFT(gl.remarks, 60) as 'Buchungstext',
@@ -89,26 +173,9 @@ def get_transactions(filters, as_dict=1):
 
 		FROM `tabGL Entry` gl
 
-			/* Statistisches Konto (Debitoren/Kreditoren) */
-			left join `tabParty Account` pa
-			on gl.against = pa.parent
-			and gl.company = pa.company
-
 			/* Kontonummer */
 			left join `tabAccount` acc 
 			on gl.account = acc.name
-
-			/* Gegenkonto-Nummer */
-			left join `tabAccount` acc_against 
-			on gl.against = acc_against.name
-
-			/* Statistische Kontonummer */
-			left join `tabAccount` acc_pa
-			on pa.account = acc_pa.name
-
-			/* Statistische Gegenkonto-Nummer */
-			left join `tabAccount` acc_against_pa 
-			on pa.account = acc_against_pa.name
 
 		WHERE gl.company = %(company)s 
 		AND DATE(gl.posting_date) >= %(from_date)s
@@ -130,8 +197,10 @@ def get_customers(filters):
 		SELECT
 
 			acc.account_number as 'Konto',
-			cus.customer_name as 'Name (Adressatentyp Unternehmen)',
-			case cus.customer_type when 'Individual' then 1 when 'Company' then 2 else 0 end as 'Adressatentyp',
+			CASE cus.customer_type WHEN 'Company' THEN cus.customer_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
+			CASE cus.customer_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
+			CASE cus.customer_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE cus.customer_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
@@ -140,8 +209,7 @@ def get_customers(filters):
 			con.email_id as 'E-Mail',
 			coalesce(con.mobile_no, con.phone) as 'Telefon',
 			cus.website as 'Internet',
-			cus.tax_id as 'Steuernummer',
-			ccl.credit_limit as 'Kreditlimit (Debitor)'
+			cus.tax_id as 'Steuernummer'
 
 		FROM `tabParty Account` par
 
@@ -160,10 +228,6 @@ def get_customers(filters):
 			left join `tabContact` con
 			on con.name = cus.customer_primary_contact
 
-			left join `tabCustomer Credit Limit` ccl
-			on ccl.parent = cus.name
-			and ccl.company = par.company
-
 		WHERE par.company = %(company)s
 		AND par.parenttype = 'Customer'""", filters, as_dict=1)
 
@@ -179,8 +243,10 @@ def get_suppliers(filters):
 		SELECT
 
 			acc.account_number as 'Konto',
-			sup.supplier_name as 'Name (Adressatentyp Unternehmen)',
-			case sup.supplier_type when 'Individual' then '1' when 'Company' then '2' else '0' end as 'Adressatentyp',
+			CASE sup.supplier_type WHEN 'Company' THEN sup.supplier_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
+			CASE sup.supplier_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
@@ -226,153 +292,22 @@ def get_suppliers(filters):
 
 
 def get_account_names(filters):
-	return frappe.get_list("Account", 
-		fields=["account_number as Konto", "name as Kontenbeschriftung"], 
-		filters={"company": filters.get("company"), "is_group": "0"})
+	return frappe.db.sql("""
+		SELECT
 
+			account_number as 'Konto',
+			LEFT(account_name, 40) as 'Kontenbeschriftung',
+			'de-DE' as 'Sprach-ID'
 
-def get_datev_csv(data, filters, csv_class):
-	"""
-	Fill in missing columns and return a CSV in DATEV Format.
-
-	For automatic processing, DATEV requires the first line of the CSV file to
-	hold meta data such as the length of account numbers oder the category of
-	the data.
-
-	Arguments:
-	data -- array of dictionaries
-	filters -- dict
-	csv_class -- defines DATA_CATEGORY, FORMAT_NAME and COLUMNS
-	"""
-	empty_df = pd.DataFrame(columns=csv_class.COLUMNS)
-	data_df = pd.DataFrame.from_records(data)
-
-	result = empty_df.append(data_df, sort=True)
-
-	if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS:
-		result['Belegdatum'] = pd.to_datetime(result['Belegdatum'])
-
-	if csv_class.DATA_CATEGORY == DataCategory.ACCOUNT_NAMES:
-		result['Sprach-ID'] = 'de-DE'
-
-	data = result.to_csv(
-		# Reason for str(';'): https://github.com/pandas-dev/pandas/issues/6035
-		sep=str(';'),
-		# European decimal seperator
-		decimal=',',
-		# Windows "ANSI" encoding
-		encoding='latin_1',
-		# format date as DDMM
-		date_format='%d%m',
-		# Windows line terminator
-		line_terminator='\r\n',
-		# Do not number rows
-		index=False,
-		# Use all columns defined above
-		columns=csv_class.COLUMNS,
-		# Quote most fields, even currency values with "," separator
-		quoting=QUOTE_NONNUMERIC
-	)
-
-	if not six.PY2:
-		data = data.encode('latin_1')
-
-	header = get_header(filters, csv_class)
-	header = ';'.join(header).encode('latin_1')
-
-	# 1st Row: Header with meta data
-	# 2nd Row: Data heading (Überschrift der Nutzdaten), included in `data` here.
-	# 3rd - nth Row: Data (Nutzdaten)
-	return header + b'\r\n' + data
-
-
-def get_header(filters, csv_class):
-	coa = frappe.get_value("Company", filters.get("company"), "chart_of_accounts")
-	description = filters.get("voucher_type", csv_class.FORMAT_NAME)
-	coa_used = "04" if "SKR04" in coa else ("03" if "SKR03" in coa else "")
-
-	header = [
-		# DATEV format
-		#	"DTVF" = created by DATEV software,
-		#	"EXTF" = created by other software
-		'"EXTF"',
-		# version of the DATEV format
-		#	141 = 1.41, 
-		#	510 = 5.10,
-		#	720 = 7.20
-		'700',
-		csv_class.DATA_CATEGORY,
-		'"%s"' % csv_class.FORMAT_NAME,
-		# Format version (regarding format name)
-		csv_class.FORMAT_VERSION,
-		# Generated on
-		datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '000',
-		# Imported on -- stays empty
-		'',
-		# Origin. Any two symbols, will be replaced by "SV" on import.
-		'"EN"',
-		# I = Exported by
-		'"%s"' % frappe.session.user,
-		# J = Imported by -- stays empty
-		'',
-		# K = Tax consultant number (Beraternummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "consultant_number"),
-		# L = Tax client number (Mandantennummer)
-		frappe.get_value("DATEV Settings", filters.get("company"), "client_number"),
-		# M = Start of the fiscal year (Wirtschaftsjahresbeginn)
-		frappe.utils.formatdate(frappe.defaults.get_user_default("year_start_date"), "yyyyMMdd"),
-		# N = Length of account numbers (Sachkontenlänge)
-		'4',
-		# O = Transaction batch start date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('from_date'), "yyyyMMdd"),
-		# P = Transaction batch end date (YYYYMMDD)
-		frappe.utils.formatdate(filters.get('to_date'), "yyyyMMdd"),
-		# Q = Description (for example, "Sales Invoice") Max. 30 chars
-		'"{}"'.format(_(description)),
-		# R = Diktatkürzel
-		'',
-		# S = Buchungstyp
-		#	1 = Transaction batch (Finanzbuchführung),
-		#	2 = Annual financial statement (Jahresabschluss)
-		'1' if csv_class.DATA_CATEGORY == DataCategory.TRANSACTIONS else '',
-		# T = Rechnungslegungszweck
-		#	0 oder leer = vom Rechnungslegungszweck unabhängig
-		#	50 = Handelsrecht
-		#	30 = Steuerrecht
-		#	64 = IFRS
-		#	40 = Kalkulatorik
-		#	11 = Reserviert
-		#	12 = Reserviert
-		'0',
-		# U = Festschreibung
-		# TODO: Filter by Accounting Period. In export for closed Accounting Period, this will be "1"
-		'0',
-		# V = Default currency, for example, "EUR"
-		'"%s"' % frappe.get_value("Company", filters.get("company"), "default_currency"),
-		# reserviert
-		'',
-		# Derivatskennzeichen
-		'',
-		# reserviert
-		'',
-		# reserviert
-		'',
-		# SKR
-		'"%s"' % coa_used,
-		# Branchen-Lösungs-ID
-		'',
-		# reserviert
-		'',
-		# reserviert
-		'',
-		# Anwendungsinformation (Verarbeitungskennzeichen der abgebenden Anwendung)
-		''
-	]
-	return header
+		FROM `tabAccount`
+		WHERE company = %(company)s
+		AND is_group = 0
+		AND account_number != ''
+	""", filters, as_dict=1)
 
 
 @frappe.whitelist()
-def download_datev_csv(filters=None):
+def download_datev_csv(filters):
 	"""
 	Provide accounting entries for download in DATEV format.
 
@@ -388,31 +323,40 @@ def download_datev_csv(filters=None):
 		filters = json.loads(filters)
 
 	validate(filters)
+	company = filters.get('company')
 
-	# This is where my zip will be written
-	zip_buffer = BytesIO()
-	# This is my zip file
-	datev_zip = zipfile.ZipFile(zip_buffer, mode='w', compression=zipfile.ZIP_DEFLATED)
+	fiscal_year = get_fiscal_year(date=filters.get('from_date'), company=company)
+	filters['fiscal_year_start'] = fiscal_year[1]
+
+	# set chart of accounts used
+	coa = frappe.get_value('Company', company, 'chart_of_accounts')
+	filters['skr'] = '04' if 'SKR04' in coa else ('03' if 'SKR03' in coa else '')
+
+	datev_settings = frappe.get_doc('DATEV Settings', company)
+	filters['account_number_length'] = datev_settings.account_number_length
+	filters['temporary_against_account_number'] = datev_settings.temporary_against_account_number
 
 	transactions = get_transactions(filters)
-	transactions_csv = get_datev_csv(transactions, filters, csv_class=Transactions)
-	datev_zip.writestr('EXTF_Buchungsstapel.csv', transactions_csv)
-
 	account_names = get_account_names(filters)
-	account_names_csv = get_datev_csv(account_names, filters, csv_class=AccountNames)
-	datev_zip.writestr('EXTF_Kontenbeschriftungen.csv', account_names_csv)
-
 	customers = get_customers(filters)
-	customers_csv = get_datev_csv(customers, filters, csv_class=DebtorsCreditors)
-	datev_zip.writestr('EXTF_Kunden.csv', customers_csv)
-
 	suppliers = get_suppliers(filters)
-	suppliers_csv = get_datev_csv(suppliers, filters, csv_class=DebtorsCreditors)
-	datev_zip.writestr('EXTF_Lieferanten.csv', suppliers_csv)
-	
-	# You must call close() before exiting your program or essential records will not be written.
-	datev_zip.close()
 
-	frappe.response['filecontent'] = zip_buffer.getvalue()
-	frappe.response['filename'] = 'DATEV.zip'
-	frappe.response['type'] = 'binary'
+	zip_name = '{} DATEV.zip'.format(frappe.utils.datetime.date.today())
+	zip_and_download(zip_name, [
+		{
+			'file_name': 'EXTF_Buchungsstapel.csv',
+			'csv_data': get_datev_csv(transactions, filters, csv_class=Transactions)
+		},
+		{
+			'file_name': 'EXTF_Kontenbeschriftungen.csv',
+			'csv_data': get_datev_csv(account_names, filters, csv_class=AccountNames)
+		},
+		{
+			'file_name': 'EXTF_Kunden.csv',
+			'csv_data': get_datev_csv(customers, filters, csv_class=DebtorsCreditors)
+		},
+		{
+			'file_name': 'EXTF_Lieferanten.csv',
+			'csv_data': get_datev_csv(suppliers, filters, csv_class=DebtorsCreditors)
+		},
+	])

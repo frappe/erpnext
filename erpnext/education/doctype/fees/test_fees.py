@@ -7,7 +7,7 @@ import frappe
 import unittest
 from frappe.utils import nowdate
 from frappe.utils.make_random import get_random
-
+from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
 
 # test_records = frappe.get_test_records('Fees')
 
@@ -15,6 +15,7 @@ class TestFees(unittest.TestCase):
 
 	def test_fees(self):
 		student = get_random("Student")
+		program = make_program_and_linked_courses("_Test Program 1", ["_Test Course 1", "_Test Course 2"])
 		fee = frappe.new_doc("Fees")
 		fee.posting_date = nowdate()
 		fee.due_date = nowdate()
@@ -23,6 +24,7 @@ class TestFees(unittest.TestCase):
 		fee.income_account = "Sales - _TC"
 		fee.cost_center = "_Test Cost Center - _TC"
 		fee.company = "_Test Company"
+		fee.program = program.name
 
 		fee.extend("components", [
 			{

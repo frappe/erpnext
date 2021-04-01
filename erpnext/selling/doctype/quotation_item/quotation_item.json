@@ -47,7 +47,12 @@
   "base_amount",
   "base_net_amount",
   "pricing_rules",
+  "stock_uom_rate",
   "is_free_item",
+  "section_break_43",
+  "valuation_rate",
+  "column_break_45",
+  "gross_profit",
   "item_weight_details",
   "weight_per_unit",
   "total_weight",
@@ -602,12 +607,49 @@
    "label": "Against Blanket Order",
    "no_copy": 1,
    "print_hide": 1
+  },
+  {
+   "fieldname": "section_break_43",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "valuation_rate",
+   "fieldtype": "Currency",
+   "label": "Valuation Rate",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "fieldname": "column_break_45",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "gross_profit",
+   "fieldtype": "Currency",
+   "label": "Gross Profit",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "depends_on": "eval: doc.uom != doc.stock_uom",
+   "fieldname": "stock_uom_rate",
+   "fieldtype": "Currency",
+   "label": "Rate of Stock UOM",
+   "no_copy": 1,
+   "options": "currency",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-03-30 18:40:28.782720",
+ "modified": "2021-02-23 01:13:54.670763",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation Item",

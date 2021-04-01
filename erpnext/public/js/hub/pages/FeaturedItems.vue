@@ -33,10 +33,8 @@ export default {
 
 			// Constants
 			page_title: __('Your Featured Items'),
-            empty_state_message: __(`No featured items yet. Got to your 
-                                <a href="#marketplace/published-items">
-                                Published Items</a> 
-                                and feature upto 8 items that you want to highlight to your customers.`)
+			empty_state_message: __('No featured items yet. Got to your {0} and feature up to eight items that you want to highlight to your customers.',
+				[`<a href="#marketplace/published-items">${__("Published Items")}</a>`])
 		};
 	},
 	created() {
@@ -71,9 +69,9 @@ export default {
 
 			const item_name = this.items.filter(item => item.hub_item_name === hub_item_name);
 
-			alert = frappe.show_alert(__(`<span>${item_name} removed.
-				<a href="#" data-action="undo-remove"><b>Undo</b></a></span>`),
-				grace_period/1000,
+			alert_message = __('{0} removed. {1}', [item_name, 
+				`<a href="#" data-action="undo-remove"><b>${__('Undo')}</b></a>`]);
+			alert = frappe.show_alert(alert_message, grace_period / 1000,
 				{
 					'undo-remove': undo_remove.bind(this)
 				}

@@ -23,13 +23,13 @@
 		{% if has_access %}
 		<div class='card-footer'>
 			{% if content.content_type == 'Quiz' %}
-				{% if content.result == 'Fail' %} <span class="indicator red">Fail <span class="text-muted">({{ content.score }}/100)</span></span>
-				{% elif content.result == 'Pass' %} <span class="indicator green">Pass <span class="text-muted">({{ content.score }}/100)</span>
-				{% else %} <span class="indicator blue">Start</span>
+				{% if content.result == 'Fail' %} <span class="indicator red">{{_('Fail')}} <span class="text-muted">({{ content.score }}/100)</span></span>
+				{% elif content.result == 'Pass' %} <span class="indicator green">{{_('Pass')}} <span class="text-muted">({{ content.score }}/100)</span>
+				{% else %} <span class="indicator blue">{{_('Start')}}</span>
 				{% endif %}
 			{% else %}
-				{% if content.completed %} <span class="indicator green">Completed</span>
-				{% else %} <span class="indicator blue">Start</span>
+				{% if content.completed %} <span class="indicator green">{{_('Completed')}}</span>
+				{% else %} <span class="indicator blue">{{_('Start')}}</span>
 				{% endif %}
 			{% endif %}
 		</div>

@@ -16,6 +16,7 @@ def setup_healthcare():
 	create_healthcare_item_groups()
 	create_sensitivity()
 	add_healthcare_service_unit_tree_root()
+	setup_patient_history_settings()
 
 def create_medical_departments():
 	departments = [
@@ -195,10 +196,100 @@ def create_sensitivity():
 
 def add_healthcare_service_unit_tree_root():
 	record = [
-	 {
-	  "doctype": "Healthcare Service Unit",
-	  "healthcare_service_unit_name": "All Healthcare Service Units",
-	  "is_group": 1
-	 }
+		{
+			"doctype": "Healthcare Service Unit",
+			"healthcare_service_unit_name": "All Healthcare Service Units",
+			"is_group": 1,
+			"company": get_company()
+	 	}
 	]
 	insert_record(record)
+
+def get_company():
+	company = frappe.defaults.get_defaults().company
+	if company:
+		return company
+	else:
+		company = frappe.get_list("Company", limit=1)
+		if company:
+			return company[0].name
+	return None
+
+def setup_patient_history_settings():
+	import json
+
+	settings = frappe.get_single('Patient History Settings')
+	configuration = get_patient_history_config()
+	for dt, config in configuration.items():
+		settings.append("standard_doctypes", {
+			"document_type": dt,
+			"date_fieldname": config[0],
+			"selected_fields": json.dumps(config[1])
+		})
+	settings.save()
+
+def get_patient_history_config():
+	return {
+		"Patient Encounter": ("encounter_date", [
+			{"label": "Healthcare Practitioner", "fieldname": "practitioner", "fieldtype": "Link"},
+			{"label": "Symptoms", "fieldname": "symptoms", "fieldtype": "Table Multiselect"},
+			{"label": "Diagnosis", "fieldname": "diagnosis", "fieldtype": "Table Multiselect"},
+			{"label": "Drug Prescription", "fieldname": "drug_prescription", "fieldtype": "Table"},
+			{"label": "Lab Tests", "fieldname": "lab_test_prescription", "fieldtype": "Table"},
+			{"label": "Clinical Procedures", "fieldname": "procedure_prescription", "fieldtype": "Table"},
+			{"label": "Therapies", "fieldname": "therapies", "fieldtype": "Table"},
+			{"label": "Review Details", "fieldname": "encounter_comment", "fieldtype": "Small Text"}
+		]),
+		"Clinical Procedure": ("start_date", [
+			{"label": "Procedure Template", "fieldname": "procedure_template", "fieldtype": "Link"},
+			{"label": "Healthcare Practitioner", "fieldname": "practitioner", "fieldtype": "Link"},
+			{"label": "Notes", "fieldname": "notes", "fieldtype": "Small Text"},
+			{"label": "Service Unit", "fieldname": "service_unit", "fieldtype": "Healthcare Service Unit"},
+			{"label": "Start Time", "fieldname": "start_time", "fieldtype": "Time"},
+			{"label": "Sample", "fieldname": "sample", "fieldtype": "Link"}
+		]),
+		"Lab Test": ("result_date", [
+			{"label": "Test Template", "fieldname": "template", "fieldtype": "Link"},
+			{"label": "Healthcare Practitioner", "fieldname": "practitioner", "fieldtype": "Link"},
+			{"label": "Test Name", "fieldname": "lab_test_name", "fieldtype": "Data"},
+			{"label": "Lab Technician Name", "fieldname": "employee_name", "fieldtype": "Data"},
+			{"label": "Sample ID", "fieldname": "sample", "fieldtype": "Link"},
+			{"label": "Normal Test Result", "fieldname": "normal_test_items", "fieldtype": "Table"},
+			{"label": "Descriptive Test Result", "fieldname": "descriptive_test_items", "fieldtype": "Table"},
+			{"label": "Organism Test Result", "fieldname": "organism_test_items", "fieldtype": "Table"},
+			{"label": "Sensitivity Test Result", "fieldname": "sensitivity_test_items", "fieldtype": "Table"},
+			{"label": "Comments", "fieldname": "lab_test_comment", "fieldtype": "Table"}
+		]),
+		"Therapy Session": ("start_date", [
+			{"label": "Therapy Type", "fieldname": "therapy_type", "fieldtype": "Link"},
+			{"label": "Healthcare Practitioner", "fieldname": "practitioner", "fieldtype": "Link"},
+			{"label": "Therapy Plan", "fieldname": "therapy_plan", "fieldtype": "Link"},
+			{"label": "Duration", "fieldname": "duration", "fieldtype": "Int"},
+			{"label": "Location", "fieldname": "location", "fieldtype": "Link"},
+			{"label": "Healthcare Service Unit", "fieldname": "service_unit", "fieldtype": "Link"},
+			{"label": "Start Time", "fieldname": "start_time", "fieldtype": "Time"},
+			{"label": "Exercises", "fieldname": "exercises", "fieldtype": "Table"},
+			{"label": "Total Counts Targeted", "fieldname": "total_counts_targeted", "fieldtype": "Int"},
+			{"label": "Total Counts Completed", "fieldname": "total_counts_completed", "fieldtype": "Int"}
+		]),
+		"Vital Signs": ("signs_date", [
+			{"label": "Body Temperature", "fieldname": "temperature", "fieldtype": "Data"},
+			{"label": "Heart Rate / Pulse", "fieldname": "pulse", "fieldtype": "Data"},
+			{"label": "Respiratory rate", "fieldname": "respiratory_rate", "fieldtype": "Data"},
+			{"label": "Tongue", "fieldname": "tongue", "fieldtype": "Select"},
+			{"label": "Abdomen", "fieldname": "abdomen", "fieldtype": "Select"},
+			{"label": "Reflexes", "fieldname": "reflexes", "fieldtype": "Select"},
+			{"label": "Blood Pressure", "fieldname": "bp", "fieldtype": "Data"},
+			{"label": "Notes", "fieldname": "vital_signs_note", "fieldtype": "Small Text"},
+			{"label": "Height (In Meter)", "fieldname": "height", "fieldtype": "Float"},
+			{"label": "Weight (In Kilogram)", "fieldname": "weight", "fieldtype": "Float"},
+			{"label": "BMI", "fieldname": "bmi", "fieldtype": "Float"}
+		]),
+		"Inpatient Medication Order": ("start_date", [
+			{"label": "Healthcare Practitioner", "fieldname": "practitioner", "fieldtype": "Link"},
+			{"label": "Start Date", "fieldname": "start_date", "fieldtype": "Date"},
+			{"label": "End Date", "fieldname": "end_date", "fieldtype": "Date"},
+			{"label": "Medication Orders", "fieldname": "medication_orders", "fieldtype": "Table"},
+			{"label": "Total Orders", "fieldname": "total_orders", "fieldtype": "Float"}
+		])
+	}

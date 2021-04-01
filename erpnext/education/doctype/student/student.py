@@ -25,7 +25,7 @@ class Student(Document):
 		for sibling in self.siblings:
 			if sibling.date_of_birth and getdate(sibling.date_of_birth) > getdate():
 				frappe.throw(_("Row {0}:Sibling Date of Birth cannot be greater than today.").format(sibling.idx))
-				
+
 		if self.date_of_birth and getdate(self.date_of_birth) >= getdate(today()):
 			frappe.throw(_("Date of Birth cannot be greater than today."))
 
@@ -147,7 +147,7 @@ class Student(Document):
 			enrollment.save(ignore_permissions=True)
 		except frappe.exceptions.ValidationError:
 			enrollment_name = frappe.get_list("Course Enrollment", filters={"student": self.name, "course": course_name, "program_enrollment": program_enrollment})[0].name
-			return frappe.get_doc("Program Enrollment", enrollment_name)
+			return frappe.get_doc("Course Enrollment", enrollment_name)
 		else:
 			return enrollment
 
@@ -157,5 +157,5 @@ def get_timeline_data(doctype, name):
 		from `tabStudent Attendance` where
 			student=%s
 			and `date` > date_sub(curdate(), interval 1 year)
-			and status = 'Present'
+			and docstatus = 1 and status = 'Present'
 			group by date''', name))

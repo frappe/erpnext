@@ -138,4 +138,23 @@ class TestItemPrice(unittest.TestCase):
 		# Valid price list must already exist
 		self.assertRaises(frappe.ValidationError, doc.save)
 
+	def test_empty_duplicate_validation(self):
+		# Check if none/empty values are not compared during insert validation
+		doc = frappe.copy_doc(test_records[2])
+		doc.customer = None
+		doc.price_list_rate = 21
+		doc.insert()
+
+		args = {
+			"price_list": doc.price_list,
+			"uom": "_Test UOM",
+			"transaction_date": '2017-04-18',
+			"qty": 7
+		}
+
+		price = get_price_list_rate_for(args, doc.item_code)
+		frappe.db.rollback()
+
+		self.assertEqual(price, 21)
+
 test_records = frappe.get_test_records('Item Price')

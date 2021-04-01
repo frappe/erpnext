@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:09",
@@ -24,10 +25,10 @@
   "return_against",
   "customer_po_details",
   "po_no",
-  "section_break_18",
-  "pick_list",
   "column_break_17",
   "po_date",
+  "section_break_18",
+  "pick_list",
   "contact_info",
   "shipping_address_name",
   "shipping_address",
@@ -52,7 +53,7 @@
   "sec_warehouse",
   "set_warehouse",
   "col_break_warehouse",
-  "to_warehouse",
+  "set_target_warehouse",
   "items_section",
   "scan_barcode",
   "items",
@@ -116,6 +117,7 @@
   "source",
   "column_break5",
   "is_internal_customer",
+  "represents_company",
   "inter_company_reference",
   "per_billed",
   "customer_group",
@@ -132,6 +134,7 @@
   "per_installed",
   "installation_status",
   "column_break_89",
+  "per_returned",
   "excise_page",
   "instructions",
   "subscription_section",
@@ -175,7 +178,7 @@
    "no_copy": 1,
    "oldfieldname": "naming_series",
    "oldfieldtype": "Select",
-   "options": "MAT-DN-.YYYY.-",
+   "options": "MAT-DN-.YYYY.-\nMAT-DN-RET-.YYYY.-",
    "print_hide": 1,
    "reqd": 1,
    "set_only_once": 1
@@ -296,7 +299,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "po_no",
    "fieldname": "customer_po_details",
    "fieldtype": "Section Break",
    "label": "Customer PO Details"
@@ -304,7 +306,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "po_no",
-   "fieldtype": "Data",
+   "fieldtype": "Small Text",
    "label": "Customer's Purchase Order No",
    "no_copy": 1,
    "oldfieldname": "po_no",
@@ -318,7 +320,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:doc.po_no",
    "fieldname": "po_date",
    "fieldtype": "Date",
    "label": "Customer's Purchase Order Date",
@@ -326,7 +327,6 @@
    "oldfieldtype": "Data",
    "print_hide": 1,
    "print_width": "100px",
-   "read_only": 1,
    "width": "100px"
   },
   {
@@ -416,7 +416,8 @@
   {
    "fieldname": "company_address_display",
    "fieldtype": "Small Text",
-   "label": "Company Address"
+   "label": "Company Address",
+   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -501,18 +502,6 @@
   {
    "fieldname": "col_break_warehouse",
    "fieldtype": "Column Break"
-  },
-  {
-   "description": "Required only for sample item.",
-   "fieldname": "to_warehouse",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "To Warehouse",
-   "no_copy": 1,
-   "oldfieldname": "to_warehouse",
-   "oldfieldtype": "Link",
-   "options": "Warehouse",
-   "print_hide": 1
   },
   {
    "fieldname": "items_section",
@@ -804,6 +793,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -854,6 +844,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_export",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -1098,7 +1089,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nTo Bill\nCompleted\nCancelled\nClosed",
+   "options": "\nDraft\nTo Bill\nCompleted\nReturn Issued\nCancelled\nClosed",
    "print_hide": 1,
    "print_width": "150px",
    "read_only": 1,
@@ -1250,13 +1241,43 @@
    "fieldtype": "Link",
    "label": "Inter Company Reference",
    "options": "Purchase Receipt"
+  },
+  {
+   "depends_on": "eval:!doc.__islocal",
+   "fieldname": "per_returned",
+   "fieldtype": "Percent",
+   "label": "% Returned",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.is_internal_customer",
+   "fieldname": "set_target_warehouse",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Set Target Warehouse",
+   "no_copy": 1,
+   "oldfieldname": "to_warehouse",
+   "oldfieldtype": "Link",
+   "options": "Warehouse",
+   "print_hide": 1
+  },
+  {
+   "description": "Company which internal customer represents.",
+   "fetch_from": "customer.represents_company",
+   "fieldname": "represents_company",
+   "fieldtype": "Link",
+   "label": "Represents Company",
+   "options": "Company",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-truck",
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-17 12:51:41.288600",
+ "modified": "2020-12-26 17:07:59.194403",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

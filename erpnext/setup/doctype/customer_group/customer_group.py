@@ -6,9 +6,12 @@ import frappe
 from frappe import _
 
 
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, get_root_of
 class CustomerGroup(NestedSet):
 	nsm_parent_field = 'parent_customer_group'
+	def validate(self):
+		if not self.parent_customer_group:
+			self.parent_customer_group = get_root_of("Customer Group")
 
 	def on_update(self):
 		self.validate_name_with_customer()
