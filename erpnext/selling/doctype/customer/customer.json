@@ -16,6 +16,8 @@
   "customer_name",
   "gender",
   "customer_type",
+  "pan",
+  "tax_withholding_category",
   "default_bank_account",
   "lead_name",
   "image",
@@ -34,9 +36,8 @@
   "companies",
   "currency_and_price_list",
   "default_currency",
-  "default_price_list",
   "column_break_14",
-  "language",
+  "default_price_list",
   "address_contacts",
   "address_html",
   "website",
@@ -59,6 +60,7 @@
   "column_break_45",
   "market_segment",
   "industry",
+  "language",
   "is_frozen",
   "column_break_38",
   "loyalty_program",
@@ -210,7 +212,8 @@
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
    "label": "Represents Company",
-   "options": "Company"
+   "options": "Company",
+   "unique": 1
   },
   {
    "depends_on": "represents_company",
@@ -479,13 +482,25 @@
    "fieldname": "dn_required",
    "fieldtype": "Check",
    "label": "Allow Sales Invoice Creation Without Delivery Note"
+  },
+  {
+   "fieldname": "pan",
+   "fieldtype": "Data",
+   "label": "PAN"
+  },
+  {
+   "fieldname": "tax_withholding_category",
+   "fieldtype": "Link",
+   "label": "Tax Withholding Category",
+   "options": "Tax Withholding Category"
   }
  ],
  "icon": "fa fa-user",
  "idx": 363,
  "image_field": "image",
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-03-17 11:03:42.706907",
+ "modified": "2021-01-28 12:54:57.258959",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Customer",

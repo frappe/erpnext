@@ -101,7 +101,7 @@ class Account(NestedSet):
 				return
 			if not frappe.db.get_value("Account",
 				{'account_name': self.account_name, 'company': ancestors[0]}, 'name'):
-				frappe.throw(_("Please add the account to root level Company - %s" % ancestors[0]))
+				frappe.throw(_("Please add the account to root level Company - {}").format(ancestors[0]))
 		elif self.parent_account:
 			descendants = get_descendants_of('Company', self.company)
 			if not descendants: return
@@ -117,7 +117,9 @@ class Account(NestedSet):
 
 			for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
 				parent_acc_name_map[d["company"]] = d["name"]
+
 			if not parent_acc_name_map: return
+
 			self.create_account_for_child_company(parent_acc_name_map, descendants, parent_acc_name)
 
 	def validate_group_or_ledger(self):
@@ -162,9 +164,19 @@ class Account(NestedSet):
 
 	def create_account_for_child_company(self, parent_acc_name_map, descendants, parent_acc_name):
 		for company in descendants:
+			company_bold = frappe.bold(company)
+			parent_acc_name_bold = frappe.bold(parent_acc_name)
 			if not parent_acc_name_map.get(company):
-				frappe.throw(_("While creating account for child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
-					.format(company, parent_acc_name))
+				frappe.throw(_("While creating account for Child Company {0}, parent account {1} not found. Please create the parent account in corresponding COA")
+					.format(company_bold, parent_acc_name_bold), title=_("Account Not Found"))
+
+			# validate if parent of child company account to be added is a group
+			if (frappe.db.get_value("Account", self.parent_account, "is_group")
+				and not frappe.db.get_value("Account", parent_acc_name_map[company], "is_group")):
+				msg = _("While creating account for Child Company {0}, parent account {1} found as a ledger account.").format(company_bold, parent_acc_name_bold)
+				msg += "<br><br>"
+				msg += _("Please convert the parent account in corresponding child company to a group account.")
+				frappe.throw(msg, title=_("Invalid Parent Account"))
 
 			filters = {
 				"account_name": self.account_name,
@@ -244,6 +256,8 @@ class Account(NestedSet):
 
 		super(Account, self).on_trash(True)
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount
 		where is_group = 1 and docstatus != 2 and company = %s
@@ -287,16 +301,43 @@ def validate_account_number(name, account_number, company):
 				.format(account_number, account_with_same_number))
 
 @frappe.whitelist()
-def update_account_number(name, account_name, account_number=None):
-
+def update_account_number(name, account_name, account_number=None, from_descendant=False):
 	account = frappe.db.get_value("Account", name, "company", as_dict=True)
 	if not account: return
+
+	old_acc_name, old_acc_number = frappe.db.get_value('Account', name, \
+				["account_name", "account_number"])
+
+	# check if account exists in parent company
+	ancestors = get_ancestors_of("Company", account.company)
+	allow_independent_account_creation = frappe.get_value("Company", account.company, "allow_account_creation_against_child_company")
+
+	if ancestors and not allow_independent_account_creation:
+		for ancestor in ancestors:
+			if frappe.db.get_value("Account", {'account_name': old_acc_name, 'company': ancestor}, 'name'):
+				# same account in parent company exists
+				allow_child_account_creation = _("Allow Account Creation Against Child Company")
+
+				message = _("Account {0} exists in parent company {1}.").format(frappe.bold(old_acc_name), frappe.bold(ancestor))
+				message += "<br>"
+				message += _("Renaming it is only allowed via parent company {0}, to avoid mismatch.").format(frappe.bold(ancestor))
+				message += "<br><br>"
+				message += _("To overrule this, enable '{0}' in company {1}").format(allow_child_account_creation, frappe.bold(account.company))
+
+				frappe.throw(message, title=_("Rename Not Allowed"))
+
 	validate_account_number(name, account_number, account.company)
 	if account_number:
 		frappe.db.set_value("Account", name, "account_number", account_number.strip())
 	else:
 		frappe.db.set_value("Account", name, "account_number", "")
 	frappe.db.set_value("Account", name, "account_name", account_name.strip())
+
+	if not from_descendant:
+		# Update and rename in child company accounts as well
+		descendants = get_descendants_of('Company', account.company)
+		if descendants:
+			sync_update_account_number_in_child(descendants, old_acc_name, account_name, account_number, old_acc_number)
 
 	new_name = get_account_autoname(account_number, account_name, account.company)
 	if name != new_name:
@@ -328,3 +369,14 @@ def get_root_company(company):
 	# return the topmost company in the hierarchy
 	ancestors = get_ancestors_of('Company', company, "lft asc")
 	return [ancestors[0]] if ancestors else []
+
+def sync_update_account_number_in_child(descendants, old_acc_name, account_name, account_number=None, old_acc_number=None):
+	filters = {
+		"company": ["in", descendants],
+		"account_name": old_acc_name,
+	}
+	if old_acc_number:
+		filters["account_number"] = old_acc_number
+
+	for d in frappe.db.get_values('Account', filters=filters, fieldname=["company", "name"], as_dict=True):
+			update_account_number(d["name"], account_name, account_number, from_descendant=True)

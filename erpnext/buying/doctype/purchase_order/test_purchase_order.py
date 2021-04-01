@@ -19,6 +19,8 @@ from erpnext.controllers.accounts_controller import update_child_qty_rate
 from erpnext.controllers.status_updater import OverAllowanceError
 from erpnext.manufacturing.doctype.blanket_order.test_blanket_order import make_blanket_order
 
+from erpnext.stock.doctype.batch.test_batch import make_new_batch
+from erpnext.controllers.buying_controller import get_backflushed_subcontracted_raw_materials
 
 class TestPurchaseOrder(unittest.TestCase):
 	def test_make_purchase_receipt(self):
@@ -88,8 +90,52 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.db.set_value('Item', '_Test Item', 'over_billing_allowance', 0)
 		frappe.db.set_value("Accounts Settings", None, "over_billing_allowance", 0)
 
+	def test_update_remove_child_linked_to_mr(self):
+		"""Test impact on linked PO and MR on deleting/updating row."""
+		mr = make_material_request(qty=10)
+		po = make_purchase_order(mr.name)
+		po.supplier = "_Test Supplier"
+		po.save()
+		po.submit()
 
-	def test_update_child_qty_rate(self):
+		first_item_of_po = po.get("items")[0]
+		existing_ordered_qty = get_ordered_qty() # 10
+		existing_requested_qty = get_requested_qty() # 0
+
+		# decrease ordered qty by 3 (10 -> 7) and add item
+		trans_item = json.dumps([
+			{
+				'item_code': first_item_of_po.item_code,
+				'rate': first_item_of_po.rate,
+				'qty': 7,
+				'docname': first_item_of_po.name
+			},
+			{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 2}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		mr.reload()
+
+		# requested qty increases as ordered qty decreases
+		self.assertEqual(get_requested_qty(), existing_requested_qty + 3) # 3
+		self.assertEqual(mr.items[0].ordered_qty, 7)
+
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty - 3) # 7
+
+		# delete first item linked to Material Request
+		trans_item = json.dumps([
+			{'item_code' : '_Test Item 2', 'rate' : 200, 'qty' : 2}
+		])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		mr.reload()
+
+		# requested qty increases as ordered qty is 0 (deleted row)
+		self.assertEqual(get_requested_qty(), existing_requested_qty + 10) # 10
+		self.assertEqual(mr.items[0].ordered_qty, 0)
+
+		# ordered qty decreases as ordered qty is 0 (deleted row)
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty - 10) # 0
+
+	def test_update_child(self):
 		mr = make_material_request(qty=10)
 		po = make_purchase_order(mr.name)
 		po.supplier = "_Test Supplier"
@@ -118,8 +164,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		self.assertEqual(po.get("items")[0].amount, 1400)
 		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 3)
 
-	
-	def test_add_new_item_in_update_child_qty_rate(self):
+	def test_update_child_adding_new_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
 		po.save()
@@ -127,6 +172,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		pr = make_pr_against_po(po.name, 2)
 
 		po.load_from_db()
+		existing_ordered_qty = get_ordered_qty()
 		first_item_of_po = po.get("items")[0]
 
 		trans_item = json.dumps([
@@ -143,9 +189,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.reload()
 		self.assertEquals(len(po.get('items')), 2)
 		self.assertEqual(po.status, 'To Receive and Bill')
+		# ordered qty should increase on row addition
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 7)
 
-	
-	def test_remove_item_in_update_child_qty_rate(self):
+	def test_update_child_removing_item(self):
 		po = create_purchase_order(do_not_save=1)
 		po.items[0].qty = 4
 		po.save()
@@ -154,6 +201,7 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		po.reload()
 		first_item_of_po = po.get("items")[0]
+		existing_ordered_qty = get_ordered_qty()
 		# add an item
 		trans_item = json.dumps([
 			{
@@ -166,6 +214,10 @@ class TestPurchaseOrder(unittest.TestCase):
 		update_child_qty_rate('Purchase Order', trans_item, po.name)
 
 		po.reload()
+
+		# ordered qty should increase on row addition
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty + 7)
+
 		# check if can remove received item
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.get("items")[1].name}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate, 'Purchase Order', trans_item, po.name)
@@ -184,6 +236,132 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.reload()
 		self.assertEquals(len(po.get('items')), 1)
 		self.assertEqual(po.status, 'To Receive and Bill')
+
+		# ordered qty should decrease (back to initial) on row deletion
+		self.assertEqual(get_ordered_qty(), existing_ordered_qty)
+
+	def test_update_child_perm(self):
+		po = create_purchase_order(item_code= "_Test Item", qty=4)
+
+		user = 'test@example.com'
+		test_user = frappe.get_doc('User', user)
+		test_user.add_roles("Accounts User")
+		frappe.set_user(user)
+
+		# update qty
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': po.items[0].name}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
+
+		# add new item
+		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
+		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Purchase Order', trans_item, po.name)
+		frappe.set_user("Administrator")
+
+	def test_update_child_with_tax_template(self):
+		"""
+			Test Action: Create a PO with one item having its tax account head already in the PO.
+			Add the same item + new item with tax template via Update Items.
+			Expected result: First Item's tax row is updated. New tax row is added for second Item.
+		"""
+		if not frappe.db.exists("Item", "Test Item with Tax"):
+			make_item("Test Item with Tax", {
+				'is_stock_item': 1,
+			})
+
+		if not frappe.db.exists("Item Tax Template", {"title": 'Test Update Items Template'}):
+			frappe.get_doc({
+				'doctype': 'Item Tax Template',
+				'title': 'Test Update Items Template',
+				'company': '_Test Company',
+				'taxes': [
+					{
+						'tax_type': "_Test Account Service Tax - _TC",
+						'tax_rate': 10,
+					}
+				]
+			}).insert()
+
+		new_item_with_tax = frappe.get_doc("Item", "Test Item with Tax")
+
+		if not frappe.db.exists("Item Tax",
+			{"item_tax_template": "Test Update Items Template - _TC", "parent": "Test Item with Tax"}):
+			new_item_with_tax.append("taxes", {
+				"item_tax_template": "Test Update Items Template - _TC",
+				"valid_from": nowdate()
+			})
+			new_item_with_tax.save()
+
+		tax_template = "_Test Account Excise Duty @ 10 - _TC"
+		item =  "_Test Item Home Desktop 100"
+		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
+			item_doc = frappe.get_doc("Item", item)
+			item_doc.append("taxes", {
+				"item_tax_template": tax_template,
+				"valid_from": nowdate()
+			})
+			item_doc.save()
+		else:
+			# update valid from
+			frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = CURDATE()
+				where parent = %(item)s and item_tax_template = %(tax)s""",
+					{"item": item, "tax": tax_template})
+
+		po = create_purchase_order(item_code=item, qty=1, do_not_save=1)
+
+		po.append("taxes", {
+			"account_head": "_Test Account Excise Duty - _TC",
+			"charge_type": "On Net Total",
+			"cost_center": "_Test Cost Center - _TC",
+			"description": "Excise Duty",
+			"doctype": "Purchase Taxes and Charges",
+			"rate": 10
+		})
+		po.insert()
+		po.submit()
+
+		self.assertEqual(po.taxes[0].tax_amount, 50)
+		self.assertEqual(po.taxes[0].total, 550)
+
+		items = json.dumps([
+			{'item_code' : item, 'rate' : 500, 'qty' : 1, 'docname': po.items[0].name},
+			{'item_code' : item, 'rate' : 100, 'qty' : 1}, # added item whose tax account head already exists in PO
+			{'item_code' : new_item_with_tax.name, 'rate' : 100, 'qty' : 1} # added item whose tax account head  is missing in PO
+		])
+		update_child_qty_rate('Purchase Order', items, po.name)
+
+		po.reload()
+		self.assertEqual(po.taxes[0].tax_amount, 70)
+		self.assertEqual(po.taxes[0].total, 770)
+		self.assertEqual(po.taxes[1].account_head, "_Test Account Service Tax - _TC")
+		self.assertEqual(po.taxes[1].tax_amount, 70)
+		self.assertEqual(po.taxes[1].total, 840)
+
+		# teardown
+		frappe.db.sql("""UPDATE `tabItem Tax` set valid_from = NULL
+			where parent = %(item)s and item_tax_template = %(tax)s""", {"item": item, "tax": tax_template})
+		po.cancel()
+		po.delete()
+		new_item_with_tax.delete()
+		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
+
+	def test_update_child_uom_conv_factor_change(self):
+		po = create_purchase_order(item_code="_Test FG Item", is_subcontracted="Yes")
+		total_reqd_qty = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+
+		trans_item = json.dumps([{
+			'item_code': po.get("items")[0].item_code,
+			'rate': po.get("items")[0].rate,
+			'qty': po.get("items")[0].qty,
+			'uom': "_Test UOM 1",
+			'conversion_factor': 2,
+			'docname': po.get("items")[0].name
+		}])
+		update_child_qty_rate('Purchase Order', trans_item, po.name)
+		po.reload()
+
+		total_reqd_qty_after_change = sum([d.get("required_qty") for d in po.as_dict().get("supplied_items")])
+
+		self.assertEqual(total_reqd_qty_after_change, 2 * total_reqd_qty)
 
 	def test_update_qty(self):
 		po = create_purchase_order()
@@ -565,15 +743,15 @@ class TestPurchaseOrder(unittest.TestCase):
 
 	def test_exploded_items_in_subcontracted(self):
 		item_code = "_Test Subcontracted FG Item 1"
-		make_subcontracted_item(item_code)
+		make_subcontracted_item(item_code=item_code)
 
 		po = create_purchase_order(item_code=item_code, qty=1,
-			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", include_exploded_items=1)
 
 		name = frappe.db.get_value('BOM', {'item': item_code}, 'name')
 		bom = frappe.get_doc('BOM', name)
 
-		exploded_items = sorted([d.item_code for d in bom.exploded_items])
+		exploded_items = sorted([d.item_code for d in bom.exploded_items if not d.get('sourced_by_supplier')])
 		supplied_items = sorted([d.rm_item_code for d in po.supplied_items])
 		self.assertEquals(exploded_items, supplied_items)
 
@@ -581,13 +759,13 @@ class TestPurchaseOrder(unittest.TestCase):
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", include_exploded_items=0)
 
 		supplied_items1 = sorted([d.rm_item_code for d in po1.supplied_items])
-		bom_items = sorted([d.item_code for d in bom.items])
+		bom_items = sorted([d.item_code for d in bom.items if not d.get('sourced_by_supplier')])
 
 		self.assertEquals(supplied_items1, bom_items)
 
 	def test_backflush_based_on_stock_entry(self):
 		item_code = "_Test Subcontracted FG Item 1"
-		make_subcontracted_item(item_code)
+		make_subcontracted_item(item_code=item_code)
 		make_item('Sub Contracted Raw Material 1', {
 			'is_stock_item': 1,
 			'is_sub_contracted_item': 1
@@ -646,6 +824,133 @@ class TestPurchaseOrder(unittest.TestCase):
 
 		update_backflush_based_on("BOM")
 
+	def test_backflushed_based_on_for_multiple_batches(self):
+		item_code = "_Test Subcontracted FG Item 2"
+		make_item('Sub Contracted Raw Material 2', {
+			'is_stock_item': 1,
+			'is_sub_contracted_item': 1
+		})
+
+		make_subcontracted_item(item_code=item_code, has_batch_no=1, create_new_batch=1,
+			raw_materials=["Sub Contracted Raw Material 2"])
+
+		update_backflush_based_on("Material Transferred for Subcontract")
+
+		order_qty = 500
+		po = create_purchase_order(item_code=item_code, qty=order_qty,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
+
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Sub Contracted Raw Material 2", qty=552, basic_rate=100)
+
+		rm_items = [
+			{"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 2","item_name":"_Test Item",
+				"qty":552,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"}]
+
+		rm_item_string = json.dumps(rm_items)
+		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
+		se.submit()
+
+		for batch in ["ABCD1", "ABCD2", "ABCD3", "ABCD4"]:
+			make_new_batch(batch_id=batch, item_code=item_code)
+
+		pr = make_purchase_receipt(po.name)
+
+		# partial receipt
+		pr.get('items')[0].qty = 30
+		pr.get('items')[0].batch_no = "ABCD1"
+
+		purchase_order = po.name
+		purchase_order_item = po.items[0].name
+
+		for batch_no, qty in {"ABCD2": 60, "ABCD3": 70, "ABCD4":40}.items():
+			pr.append("items", {
+				"item_code": pr.get('items')[0].item_code,
+				"item_name": pr.get('items')[0].item_name,
+				"uom": pr.get('items')[0].uom,
+				"stock_uom": pr.get('items')[0].stock_uom,
+				"warehouse": pr.get('items')[0].warehouse,
+				"conversion_factor": pr.get('items')[0].conversion_factor,
+				"cost_center": pr.get('items')[0].cost_center,
+				"rate": pr.get('items')[0].rate,
+				"qty": qty,
+				"batch_no": batch_no,
+				"purchase_order": purchase_order,
+				"purchase_order_item": purchase_order_item
+			})
+
+		pr.submit()
+
+		pr1 = make_purchase_receipt(po.name)
+		pr1.get('items')[0].qty = 300
+		pr1.get('items')[0].batch_no = "ABCD1"
+		pr1.save()
+
+		pr_key = ("Sub Contracted Raw Material 2", po.name)
+		consumed_qty = get_backflushed_subcontracted_raw_materials([po.name]).get(pr_key)
+
+		self.assertTrue(pr1.supplied_items[0].consumed_qty > 0)
+		self.assertTrue(pr1.supplied_items[0].consumed_qty,  flt(552.0) - flt(consumed_qty))
+
+		update_backflush_based_on("BOM")
+
+	def test_supplied_qty_against_subcontracted_po(self):
+		item_code = "_Test Subcontracted FG Item 5"
+		make_item('Sub Contracted Raw Material 4', {
+			'is_stock_item': 1,
+			'is_sub_contracted_item': 1
+		})
+
+		make_subcontracted_item(item_code=item_code, raw_materials=["Sub Contracted Raw Material 4"])
+
+		update_backflush_based_on("Material Transferred for Subcontract")
+
+		order_qty = 250
+		po = create_purchase_order(item_code=item_code, qty=order_qty,
+			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC", do_not_save=True)
+
+		# Add same subcontracted items multiple times
+		po.append("items", {
+			"item_code": item_code,
+			"qty": order_qty,
+			"schedule_date": add_days(nowdate(), 1),
+			"warehouse": "_Test Warehouse - _TC"
+		})
+
+		po.set_missing_values()
+		po.submit()
+
+		# Material receipt entry for the raw materials which will be send to supplier
+		make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Sub Contracted Raw Material 4", qty=500, basic_rate=100)
+
+		rm_items = [
+			{
+				"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 4","item_name":"_Test Item",
+				"qty":250,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos", "name": po.supplied_items[0].name
+			},
+			{
+				"item_code":item_code,"rm_item_code":"Sub Contracted Raw Material 4","item_name":"_Test Item",
+				"qty":250,"warehouse":"_Test Warehouse - _TC", "stock_uom":"Nos"
+			},
+		]
+
+		# Raw Materials transfer entry from stores to supplier's warehouse
+		rm_item_string = json.dumps(rm_items)
+		se = frappe.get_doc(make_subcontract_transfer_entry(po.name, rm_item_string))
+		se.submit()
+
+		# Test po_detail field has value or not
+		for item_row in se.items:
+			self.assertEqual(item_row.po_detail, po.supplied_items[item_row.idx - 1].name)
+
+		po_doc = frappe.get_doc("Purchase Order", po.name)
+		for row in po_doc.supplied_items:
+			# Valid that whether transferred quantity is matching with supplied qty or not in the purchase order
+			self.assertEqual(row.supplied_qty, 250.0)
+
+		update_backflush_based_on("BOM")
+
 	def test_advance_payment_entry_unlink_against_purchase_order(self):
 		from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 		frappe.db.set_value("Accounts Settings", "Accounts Settings",
@@ -689,7 +994,7 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.save()
 		self.assertEqual(po.schedule_date, add_days(nowdate(), 2))
 
-	
+
 	def test_po_optional_blanket_order(self):
 		"""
 			Expected result: Blanket order Ordered Quantity should only be affected on Purchase Order with against_blanket_order = 1.
@@ -718,27 +1023,33 @@ def make_pr_against_po(po, received_qty=0):
 	pr.submit()
 	return pr
 
-def make_subcontracted_item(item_code):
+def make_subcontracted_item(**args):
 	from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-	if not frappe.db.exists('Item', item_code):
-		make_item(item_code, {
+	args = frappe._dict(args)
+
+	if not frappe.db.exists('Item', args.item_code):
+		make_item(args.item_code, {
 			'is_stock_item': 1,
-			'is_sub_contracted_item': 1
+			'is_sub_contracted_item': 1,
+			'has_batch_no': args.get("has_batch_no") or 0
 		})
 
-	if not frappe.db.exists('Item', "Test Extra Item 1"):
-		make_item("Test Extra Item 1", {
-			'is_stock_item': 1,
-		})
+	if not args.raw_materials:
+		if not frappe.db.exists('Item', "Test Extra Item 1"):
+			make_item("Test Extra Item 1", {
+				'is_stock_item': 1,
+			})
 
-	if not frappe.db.exists('Item', "Test Extra Item 2"):
-		make_item("Test Extra Item 2", {
-			'is_stock_item': 1,
-		})
+		if not frappe.db.exists('Item', "Test Extra Item 2"):
+			make_item("Test Extra Item 2", {
+				'is_stock_item': 1,
+			})
 
-	if not frappe.db.get_value('BOM', {'item': item_code}, 'name'):
-		make_bom(item = item_code, raw_materials = ['_Test FG Item', 'Test Extra Item 1'])
+		args.raw_materials = ['_Test FG Item', 'Test Extra Item 1']
+
+	if not frappe.db.get_value('BOM', {'item': args.item_code}, 'name'):
+		make_bom(item = args.item_code, raw_materials = args.get("raw_materials"))
 
 def update_backflush_based_on(based_on):
 	doc = frappe.get_doc('Buying Settings')

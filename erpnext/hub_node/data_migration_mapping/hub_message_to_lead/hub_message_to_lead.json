@@ -21,10 +21,10 @@
  "mapping_name": "Hub Message to Lead",
  "mapping_type": "Pull",
  "migration_id_field": "hub_sync_id",
- "modified": "2018-02-14 15:57:05.606597",
- "modified_by": "achilles@erpnext.com",
+ "modified": "2020-09-18 17:26:09.703215",
+ "modified_by": "Administrator",
  "name": "Hub Message to Lead",
- "owner": "frappetest@gmail.com",
+ "owner": "Administrator",
  "page_length": 10,
  "remote_objectname": "Hub Message",
  "remote_primary_key": "name"

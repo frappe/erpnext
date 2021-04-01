@@ -3,7 +3,7 @@ import frappe
 from frappe.utils import flt
 
 def execute():
-	frappe.reload_doc('hr', 'doctype', 'salary_component')
+	frappe.reload_doc('Payroll', 'doctype', 'salary_component')
 	sal_components = frappe.db.sql("""
 		select DISTINCT salary_component, parentfield from `tabSalary Detail`""", as_dict=True)
 

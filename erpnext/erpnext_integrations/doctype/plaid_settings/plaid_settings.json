@@ -12,8 +12,8 @@
   "plaid_client_id",
   "plaid_secret",
   "column_break_7",
-  "plaid_public_key",
-  "plaid_env"
+  "plaid_env",
+  "enable_european_access"
  ],
  "fields": [
   {
@@ -42,12 +42,6 @@
    "label": "Plaid Secret"
   },
   {
-   "fieldname": "plaid_public_key",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Plaid Public Key"
-  },
-  {
    "fieldname": "plaid_env",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -66,11 +60,17 @@
   {
    "fieldname": "column_break_7",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_european_access",
+   "fieldtype": "Check",
+   "label": "Enable European Access"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-02-07 15:21:11.616231",
+ "modified": "2021-03-02 17:35:27.544259",
  "modified_by": "Administrator",
  "module": "ERPNext Integrations",
  "name": "Plaid Settings",
@@ -88,5 +88,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

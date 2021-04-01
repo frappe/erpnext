@@ -8,18 +8,19 @@ from __future__ import unicode_literals
 import re
 from past.builtins import cmp
 import functools
+import math
 
 import frappe, erpnext
 from erpnext.accounts.report.utils import get_currency, convert_to_presentation_currency
 from erpnext.accounts.utils import get_fiscal_year
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr)
+from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr, cint)
 
 from six import itervalues
 from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
 
 def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_end_date, filter_based_on, periodicity, accumulated_values=False,
-	company=None, reset_period_on_fy_change=True):
+	company=None, reset_period_on_fy_change=True, ignore_fiscal_year=False):
 	"""Get a list of dict {"from_date": from_date, "to_date": to_date, "key": key, "label": label}
 		Periodicity can be (Yearly, Quarterly, Monthly)"""
 
@@ -45,20 +46,20 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 	start_date = year_start_date
 	months = get_months(year_start_date, year_end_date)
 
-	if (months // months_to_add) != (months / months_to_add):
-		months += months_to_add
-
-	for i in range(months // months_to_add):
+	for i in range(cint(math.ceil(months / months_to_add))):
 		period = frappe._dict({
 			"from_date": start_date
 		})
 
-		to_date = add_months(start_date, months_to_add)
+		if i==0 and filter_based_on == 'Date Range':
+			to_date = add_months(get_first_day(start_date), months_to_add)
+		else:
+			to_date = add_months(start_date, months_to_add)
+
 		start_date = to_date
 
-		if to_date == get_first_day(to_date):
-			# if to_date is the first day, get the last day of previous month
-			to_date = add_days(to_date, -1)
+		# Subtract one day from to_date, as it may be first day in next fiscal year or month
+		to_date = add_days(to_date, -1)
 
 		if to_date <= year_end_date:
 			# the normal case
@@ -67,8 +68,9 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 			# if a fiscal year ends before a 12 month period
 			period.to_date = year_end_date
 
-		period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
-		period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
+		if not ignore_fiscal_year:
+			period.to_date_fiscal_year = get_fiscal_year(period.to_date, company=company)[0]
+			period.from_date_fiscal_year_start_date = get_fiscal_year(period.from_date, company=company)[1]
 
 		period_list.append(period)
 
@@ -309,7 +311,7 @@ def get_accounts(company, root_type):
 		where company=%s and root_type=%s order by lft""", (company, root_type), as_dict=True)
 
 
-def filter_accounts(accounts, depth=10):
+def filter_accounts(accounts, depth=20):
 	parent_children_map = {}
 	accounts_by_name = {}
 	for d in accounts:
@@ -386,14 +388,46 @@ def set_gl_entries_by_account(
 					key: value
 				})
 
+		distributed_cost_center_query = ""
+		if filters and filters.get('cost_center'):
+			distributed_cost_center_query = """
+			UNION ALL
+			SELECT posting_date,
+				account,
+				debit*(DCC_allocation.percentage_allocation/100) as debit,
+				credit*(DCC_allocation.percentage_allocation/100) as credit,
+				is_opening,
+				fiscal_year,
+				debit_in_account_currency*(DCC_allocation.percentage_allocation/100) as debit_in_account_currency,
+				credit_in_account_currency*(DCC_allocation.percentage_allocation/100) as credit_in_account_currency,
+				account_currency
+			FROM `tabGL Entry`,
+			(
+				SELECT parent, sum(percentage_allocation) as percentage_allocation
+				FROM `tabDistributed Cost Center`
+				WHERE cost_center IN %(cost_center)s
+				AND parent NOT IN %(cost_center)s
+				GROUP BY parent
+			) as DCC_allocation
+			WHERE company=%(company)s
+			{additional_conditions}
+			AND posting_date <= %(to_date)s
+			AND is_cancelled = 0
+			AND cost_center = DCC_allocation.parent
+			""".format(additional_conditions=additional_conditions.replace("and cost_center in %(cost_center)s ", ''))
+
 		gl_entries = frappe.db.sql("""select posting_date, account, debit, credit, is_opening, fiscal_year, debit_in_account_currency, credit_in_account_currency, account_currency from `tabGL Entry`
 			where company=%(company)s
 			{additional_conditions}
 			and posting_date <= %(to_date)s
-			order by account, posting_date""".format(additional_conditions=additional_conditions), gl_filters, as_dict=True) #nosec
+			and is_cancelled = 0
+			{distributed_cost_center_query}
+			order by account, posting_date""".format(
+				additional_conditions=additional_conditions,
+				distributed_cost_center_query=distributed_cost_center_query), gl_filters, as_dict=True) #nosec
 
 		if filters and filters.get('presentation_currency'):
-			convert_to_presentation_currency(gl_entries, get_currency(filters))
+			convert_to_presentation_currency(gl_entries, get_currency(filters), filters.get('company'))
 
 		for entry in gl_entries:
 			gl_entries_by_account.setdefault(entry.account, []).append(entry)

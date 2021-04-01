@@ -4,21 +4,52 @@
 
 from __future__ import unicode_literals
 import frappe
+import datetime
 from frappe.model.document import Document
+from frappe.utils import get_time, flt
 from frappe.model.mapper import get_mapped_doc
 from frappe import _
-from frappe.utils import cstr, getdate
+from frappe.utils import cstr, getdate, get_link_to_form
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 
 class TherapySession(Document):
 	def validate(self):
+		self.validate_duplicate()
 		self.set_total_counts()
+
+	def validate_duplicate(self):
+		end_time = datetime.datetime.combine(getdate(self.start_date), get_time(self.start_time)) \
+			 + datetime.timedelta(minutes=flt(self.duration))
+
+		overlaps = frappe.db.sql("""
+		select
+			name
+		from
+			`tabTherapy Session`
+		where
+			start_date=%s and name!=%s and docstatus!=2
+			and (practitioner=%s or patient=%s) and
+			((start_time<%s and start_time + INTERVAL duration MINUTE>%s) or
+			(start_time>%s and start_time<%s) or
+			(start_time=%s))
+		""", (self.start_date, self.name, self.practitioner, self.patient,
+		self.start_time, end_time.time(), self.start_time, end_time.time(), self.start_time))
+
+		if overlaps:
+			overlapping_details = _('Therapy Session overlaps with {0}').format(get_link_to_form('Therapy Session', overlaps[0][0]))
+			frappe.throw(overlapping_details, title=_('Therapy Sessions Overlapping'))
 
 	def on_submit(self):
 		self.update_sessions_count_in_therapy_plan()
-		insert_session_medical_record(self)
+
+	def on_update(self):
+		if self.appointment:
+			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Closed')
 
 	def on_cancel(self):
+		if self.appointment:
+			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Open')
+
 		self.update_sessions_count_in_therapy_plan(on_cancel=True)
 
 	def update_sessions_count_in_therapy_plan(self, on_cancel=False):
@@ -110,23 +141,3 @@ def get_therapy_item(therapy, item):
 	item.reference_dt = 'Therapy Session'
 	item.reference_dn = therapy.name
 	return item
-
-
-def insert_session_medical_record(doc):
-	subject = frappe.bold(_('Therapy: ')) + cstr(doc.therapy_type) + '<br>'
-	if doc.therapy_plan:
-		subject += frappe.bold(_('Therapy Plan: ')) + cstr(doc.therapy_plan) + '<br>'
-	if doc.practitioner:
-		subject += frappe.bold(_('Healthcare Practitioner: ')) + doc.practitioner
-	subject += frappe.bold(_('Total Counts Targeted: ')) + cstr(doc.total_counts_targeted) + '<br>'
-	subject += frappe.bold(_('Total Counts Completed: ')) + cstr(doc.total_counts_completed) + '<br>'
-
-	medical_record = frappe.new_doc('Patient Medical Record')
-	medical_record.patient = doc.patient
-	medical_record.subject = subject
-	medical_record.status = 'Open'
-	medical_record.communication_date = doc.start_date
-	medical_record.reference_doctype = 'Therapy Session'
-	medical_record.reference_name = doc.name
-	medical_record.reference_owner = doc.owner
-	medical_record.save(ignore_permissions=True)

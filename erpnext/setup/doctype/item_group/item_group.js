@@ -61,12 +61,25 @@ frappe.ui.form.on("Item Group", {
 				frappe.set_route("List", "Item", {"item_group": frm.doc.name});
 			});
 		}
+		
+		frappe.model.with_doctype('Item', () => {
+			const item_meta = frappe.get_meta('Item');
+
+			const valid_fields = item_meta.fields.filter(
+				df => ['Link', 'Table MultiSelect'].includes(df.fieldtype) && !df.hidden
+			).map(df => ({ label: df.label, value: df.fieldname }));
+
+			const field = frappe.meta.get_docfield("Website Filter Field", "fieldname", frm.docname);
+			field.fieldtype = 'Select';
+			field.options = valid_fields;
+			frm.fields_dict.filter_fields.grid.refresh();
+		});
 	},
 
 	set_root_readonly: function(frm) {
 		// read-only for root item group
 		frm.set_intro("");
-		if(!frm.doc.parent_item_group) {
+		if(!frm.doc.parent_item_group && !frm.doc.__islocal) {
 			frm.set_read_only();
 			frm.set_intro(__("This is a root item group and cannot be edited."), true);
 		}

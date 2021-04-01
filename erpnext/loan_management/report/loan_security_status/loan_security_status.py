@@ -76,7 +76,8 @@ def get_columns(filters):
 			"fieldtype": "Link",
 			"fieldname": "currency",
 			"options": "Currency",
-			"width": 50
+			"width": 50,
+			"hidden": 1
 		}
 	]
 
@@ -84,17 +85,13 @@ def get_columns(filters):
 
 def get_data(filters):
 
-	loan_security_price_map = frappe._dict(frappe.get_all("Loan Security",
-		fields=["name", "loan_security_price"], as_list=1
-	))
-
 	data = []
 	conditions = get_conditions(filters)
 
 	loan_security_pledges = frappe.db.sql("""
 		SELECT
 			p.name, p.applicant, p.loan, p.status, p.pledge_time,
-			c.loan_security, c.qty
+			c.loan_security, c.qty, c.loan_security_price, c.amount
 		FROM
 			`tabLoan Security Pledge` p, `tabPledge` c
 		WHERE
@@ -115,8 +112,8 @@ def get_data(filters):
 		row["pledge_time"] = pledge.pledge_time
 		row["loan_security"] = pledge.loan_security
 		row["qty"] = pledge.qty
-		row["loan_security_price"] = loan_security_price_map.get(pledge.loan_security)
-		row["loan_security_value"] = row["loan_security_price"] * pledge.qty
+		row["loan_security_price"] = pledge.loan_security_price
+		row["loan_security_value"] = pledge.amount
 		row["currency"] = default_currency
 
 		data.append(row)

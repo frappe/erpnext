@@ -62,7 +62,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 							company: me.frm.doc.company
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 			this.frm.add_custom_button(__('Warranty Claim'),
 				function() {
 					erpnext.utils.map_current_doc({
@@ -78,7 +78,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 							company: me.frm.doc.company
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 			this.frm.add_custom_button(__('Sales Order'),
 				function() {
 					erpnext.utils.map_current_doc({
@@ -94,7 +94,7 @@ erpnext.maintenance.MaintenanceVisit = frappe.ui.form.Controller.extend({
 							order_type: me.frm.doc.order_type,
 						}
 					})
-				}, __("Get items from"));
+				}, __("Get Items From"));
 		}
 	},
 });

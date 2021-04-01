@@ -9,6 +9,7 @@ from erpnext.demo.domains import data
 from six import iteritems
 
 def setup_data():
+	import_json("Location")
 	import_json("Asset Category")
 	setup_item()
 	setup_workstation()

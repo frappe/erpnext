@@ -5,8 +5,7 @@ from __future__ import unicode_literals
 import unittest
 import frappe
 from erpnext.stock import get_warehouse_account, get_company_default_inventory_account
-from erpnext.accounts.doctype.account.account import update_account_number
-from erpnext.accounts.doctype.account.account import merge_account
+from erpnext.accounts.doctype.account.account import update_account_number, merge_account
 
 class TestAccount(unittest.TestCase):
 	def test_rename_account(self):
@@ -99,7 +98,8 @@ class TestAccount(unittest.TestCase):
 			"Softwares - _TC", doc.is_group, doc.root_type, doc.company)
 
 	def test_account_sync(self):
-		del frappe.local.flags["ignore_root_company_validation"]
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
 		acc = frappe.new_doc("Account")
 		acc.account_name = "Test Sync Account"
 		acc.parent_account = "Temporary Accounts - _TC3"
@@ -111,7 +111,68 @@ class TestAccount(unittest.TestCase):
 		self.assertEqual(acc_tc_4, "Test Sync Account - _TC4")
 		self.assertEqual(acc_tc_5, "Test Sync Account - _TC5")
 
-def _make_test_records(verbose):
+	def test_add_account_to_a_group(self):
+		frappe.db.set_value("Account", "Office Rent - _TC3", "is_group", 1)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Group Account"
+		acc.parent_account = "Office Rent - _TC3"
+		acc.company = "_Test Company 3"
+		self.assertRaises(frappe.ValidationError, acc.insert)
+
+		frappe.db.set_value("Account", "Office Rent - _TC3", "is_group", 0)
+
+	def test_account_rename_sync(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Rename Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		# Rename account in parent company
+		update_account_number(acc.name, "Test Rename Sync Account", "1234")
+
+		# Check if renamed in children
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Rename Sync Account", "company": "_Test Company 4", "account_number": "1234"}))
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Rename Sync Account", "company": "_Test Company 5", "account_number": "1234"}))
+
+		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC3")
+		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC4")
+		frappe.delete_doc("Account", "1234 - Test Rename Sync Account - _TC5")
+
+	def test_child_company_account_rename_sync(self):
+		frappe.local.flags.pop("ignore_root_company_validation", None)
+
+		acc = frappe.new_doc("Account")
+		acc.account_name = "Test Group Account"
+		acc.parent_account = "Temporary Accounts - _TC3"
+		acc.is_group = 1
+		acc.company = "_Test Company 3"
+		acc.insert()
+
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Group Account", "company": "_Test Company 4"}))
+		self.assertTrue(frappe.db.exists("Account", {'account_name': "Test Group Account", "company": "_Test Company 5"}))
+
+		# Try renaming child company account
+		acc_tc_5 = frappe.db.get_value('Account', {'account_name': "Test Group Account", "company": "_Test Company 5"})
+		self.assertRaises(frappe.ValidationError, update_account_number, acc_tc_5, "Test Modified Account")
+
+		# Rename child company account with allow_account_creation_against_child_company enabled
+		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 1)
+
+		update_account_number(acc_tc_5, "Test Modified Account")
+		self.assertTrue(frappe.db.exists("Account", {'name': "Test Modified Account - _TC5", "company": "_Test Company 5"}))
+
+		frappe.db.set_value("Company", "_Test Company 5", "allow_account_creation_against_child_company", 0)
+
+		to_delete = ["Test Group Account - _TC3", "Test Group Account - _TC4", "Test Modified Account - _TC5"]
+		for doc in to_delete:
+			frappe.delete_doc("Account", doc)
+
+
+def _make_test_records(verbose=None):
 	from frappe.test_runner import make_test_objects
 
 	accounts = [
@@ -193,7 +254,8 @@ def create_account(**kwargs):
 			account_name = kwargs.get('account_name'),
 			account_type = kwargs.get('account_type'),
 			parent_account = kwargs.get('parent_account'),
-			company = kwargs.get('company')
+			company = kwargs.get('company'),
+			account_currency = kwargs.get('account_currency')
 		))
 
 		account.save()

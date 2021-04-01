@@ -1,12 +1,6 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 frappe.views.calendar["Attendance"] = {
-	field_map: {
-		"start": "attendance_date",
-		"end": "attendance_date",
-		"id": "name",
-		"docstatus": 1
-	},
 	options: {
 		header: {
 			left: 'prev,next today',

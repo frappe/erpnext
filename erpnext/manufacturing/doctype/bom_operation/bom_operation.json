@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "creation": "2013-02-22 01:27:49",
  "doctype": "DocType",
  "document_type": "Setup",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "sequence_id",
   "operation",
   "workstation",
   "description",
@@ -78,6 +80,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:parent.doctype == 'BOM'",
    "fieldname": "base_hour_rate",
    "fieldtype": "Currency",
    "label": "Base Hour Rate(Company Currency)",
@@ -87,6 +90,7 @@
   },
   {
    "default": "5",
+   "depends_on": "eval:parent.doctype == 'BOM'",
    "fieldname": "base_operating_cost",
    "fieldtype": "Currency",
    "label": "Operating Cost(Company Currency)",
@@ -104,12 +108,20 @@
    "fieldname": "batch_size",
    "fieldtype": "Int",
    "label": "Batch Size"
+  },
+  {
+   "depends_on": "eval:doc.parenttype == \"Routing\"",
+   "fieldname": "sequence_id",
+   "fieldtype": "Int",
+   "label": "Sequence ID"
   }
  ],
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-07-16 22:35:55.374037",
- "modified_by": "govindsmenokee@gmail.com",
+ "links": [],
+ "modified": "2020-10-13 18:14:10.018774",
+ "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Operation",
  "owner": "Administrator",

@@ -10,6 +10,8 @@ frappe.ui.form.on('Patient', {
 				]
 			};
 		});
+		frm.set_query('customer_group', {'is_group': 0});
+		frm.set_query('default_price_list', { 'selling': 1});
 
 		if (frappe.defaults.get_default('patient_name_by') != 'Naming Series') {
 			frm.toggle_display('naming_series', false);
@@ -40,14 +42,15 @@ frappe.ui.form.on('Patient', {
 			frm.add_custom_button(__('Patient Encounter'), function () {
 				create_encounter(frm);
 			}, 'Create');
+			frm.toggle_enable(['customer'], 0); // ToDo, allow change only if no transactions booked or better, add merge option
 		}
 	},
 	onload: function (frm) {
-		if(!frm.doc.dob){
+		if (!frm.doc.dob) {
 			$(frm.fields_dict['age_html'].wrapper).html('');
 		}
-		if(frm.doc.dob){
-			$(frm.fields_dict['age_html'].wrapper).html('AGE : ' + get_age(frm.doc.dob));
+		if (frm.doc.dob) {
+			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${get_age(frm.doc.dob)}`);
 		}
 	}
 });
@@ -62,7 +65,7 @@ frappe.ui.form.on('Patient', 'dob', function(frm) {
 		}
 		else {
 			let age_str = get_age(frm.doc.dob);
-			$(frm.fields_dict['age_html'].wrapper).html('AGE : ' + age_str);
+			$(frm.fields_dict['age_html'].wrapper).html(`${__('AGE')} : ${age_str}`);
 		}
 	}
 	else {

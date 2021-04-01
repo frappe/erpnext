@@ -62,6 +62,8 @@ frappe.ui.form.on('LinkedIn Settings', {
 				callback : function(r) {
 					window.location.href = r.message;
 				}
+			}).fail(function() {
+				frappe.dom.unfreeze();
 			});
 		}
 	},

@@ -34,6 +34,16 @@ frappe.ui.form.on("Company", {
 		frm.set_query("default_buying_terms", function() {
 			return { filters: { buying: 1 } };
 		});
+
+		frm.set_query("default_in_transit_warehouse", function() {
+			return {
+				filters:{
+					'warehouse_type' : 'Transit',
+					'is_group': 0,
+					'company': frm.doc.company
+				}
+			};
+		});
 	},
 
 	company_name: function(frm) {
@@ -80,33 +90,48 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
-			frm.add_custom_button(__('Create Tax Template'), function() {
-				frm.trigger("make_default_tax_template");
-			});
+			if (frm.has_perm('write')) {
+				frm.add_custom_button(__('Create Tax Template'), function() {
+					frm.trigger("make_default_tax_template");
+				});
+			}
 
-			frm.add_custom_button(__('Cost Centers'), function() {
-				frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name})
-			}, __("View"));
+			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
+				frm.add_custom_button(__('Cost Centers'), function() {
+					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Chart of Accounts'), function() {
-				frappe.set_route('Tree', 'Account', {'company': frm.doc.name})
-			}, __("View"));
+			if (frappe.perm.has_perm("Account", 0, 'read')) {
+				frm.add_custom_button(__('Chart of Accounts'), function() {
+					frappe.set_route('Tree', 'Account', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Sales Tax Template'), function() {
-				frappe.set_route('List', 'Sales Taxes and Charges Template', {'company': frm.doc.name});
-			}, __("View"));
+			if (frappe.perm.has_perm("Sales Taxes and Charges Template", 0, 'read')) {
+				frm.add_custom_button(__('Sales Tax Template'), function() {
+					frappe.set_route('List', 'Sales Taxes and Charges Template', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Purchase Tax Template'), function() {
-				frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
-			}, __("View"));
+			if (frappe.perm.has_perm("Purchase Taxes and Charges Template", 0, 'read')) {
+				frm.add_custom_button(__('Purchase Tax Template'), function() {
+					frappe.set_route('List', 'Purchase Taxes and Charges Template', {'company': frm.doc.name});
+				}, __("View"));
+			}
 
-			frm.add_custom_button(__('Default Tax Template'), function() {
-				frm.trigger("make_default_tax_template");
-			}, __('Create'));
+			if (frm.has_perm('write')) {
+				frm.add_custom_button(__('Default Tax Template'), function() {
+					frm.trigger("make_default_tax_template");
+				}, __('Create'));
+			}
 		}
 
 		erpnext.company.set_chart_of_accounts_options(frm.doc);
 
+		if (!frappe.user.has_role('System Manager')) {
+			frm.get_field("delete_company_transactions").hide();
+		}
 	},
 
 	make_default_tax_template: function(frm) {
@@ -115,7 +140,7 @@ frappe.ui.form.on("Company", {
 			doc: frm.doc,
 			freeze: true,
 			callback: function() {
-				frappe.msgprint(__("Default tax templates for sales and purchase are created."));
+				frappe.msgprint(__("Default tax templates for sales, purchase and items are created."));
 			}
 		})
 	},
@@ -134,7 +159,7 @@ frappe.ui.form.on("Company", {
 			var d = frappe.prompt({
 				fieldtype:"Data",
 				fieldname: "company_name",
-				label: __("Please re-type company name to confirm"),
+				label: __("Please enter the company name to confirm"),
 				reqd: 1,
 				description: __("Please make sure you really want to delete all the transactions for this company. Your master data will remain as it is. This action cannot be undone.")
 			},
@@ -234,6 +259,7 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
+		["default_discount_account", {}],
 		["discount_allowed_account", {"root_type": "Expense"}],
 		["discount_received_account", {"root_type": "Income"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],
@@ -249,7 +275,8 @@ erpnext.company.setup_queries = function(frm) {
 		["default_employee_advance_account", {"root_type": "Asset"}],
 		["expenses_included_in_asset_valuation", {"account_type": "Expenses Included In Asset Valuation"}],
 		["capital_work_in_progress_account", {"account_type": "Capital Work in Progress"}],
-		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}]
+		["asset_received_but_not_billed", {"account_type": "Asset Received But Not Billed"}],
+		["unrealized_profit_loss_account", {"root_type": "Liability"},]
 	], function(i, v) {
 		erpnext.company.set_custom_query(frm, v);
 	});
@@ -261,7 +288,10 @@ erpnext.company.setup_queries = function(frm) {
 			["expenses_included_in_valuation",
 				{"root_type": "Expense", "account_type": "Expenses Included in Valuation"}],
 			["stock_received_but_not_billed",
-				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}]
+				{"root_type": "Liability", "account_type": "Stock Received But Not Billed"}],
+			["service_received_but_not_billed",
+				{"root_type": "Liability", "account_type": "Service Received But Not Billed"}],
+
 		], function(i, v) {
 			erpnext.company.set_custom_query(frm, v);
 		});

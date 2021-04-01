@@ -1,0 +1,20 @@
+{
+ "action": "Go to Page",
+ "creation": "2020-05-19 18:54:19.383397",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-10-14 14:53:25.538900",
+ "modified_by": "Administrator",
+ "name": "Setup your Warehouse",
+ "owner": "Administrator",
+ "path": "Tree/Warehouse",
+ "reference_document": "Warehouse",
+ "show_full_form": 0,
+ "title": "Set up your Warehouse",
+ "validate_action": 1
+}

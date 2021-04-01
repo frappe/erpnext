@@ -22,6 +22,9 @@
   "item_group",
   "column_break_12",
   "description",
+  "medical_coding_section",
+  "medical_code_standard",
+  "medical_code",
   "section_break_18",
   "therapy_for",
   "add_exercises",
@@ -160,10 +163,30 @@
   {
    "fieldname": "section_break_18",
    "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "medical_coding_section",
+   "fieldtype": "Section Break",
+   "label": "Medical Coding",
+   "options": "Medical Coding"
+  },
+  {
+   "fieldname": "medical_code_standard",
+   "fieldtype": "Link",
+   "label": "Medical Code Standard",
+   "options": "Medical Code Standard"
+  },
+  {
+   "depends_on": "medical_code_standard",
+   "fieldname": "medical_code",
+   "fieldtype": "Link",
+   "label": "Medical Code",
+   "options": "Medical Code"
   }
  ],
  "links": [],
- "modified": "2020-04-21 13:09:04.006289",
+ "modified": "2020-06-29 14:18:50.669951",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Type",

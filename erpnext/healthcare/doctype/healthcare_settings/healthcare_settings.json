@@ -17,6 +17,9 @@
   "enable_free_follow_ups",
   "max_visits",
   "valid_days",
+  "inpatient_settings_section",
+  "allow_discharge_despite_unbilled_services",
+  "do_not_bill_inpatient_encounters",
   "healthcare_service_items",
   "inpatient_visit_charge_item",
   "op_consulting_charge_item",
@@ -39,8 +42,8 @@
   "create_lab_test_on_si_submit",
   "create_sample_collection_for_lab_test",
   "column_break_34",
-  "employee_name_and_designation_in_print",
   "lab_test_approval_required",
+  "employee_name_and_designation_in_print",
   "custom_signature_in_print",
   "laboratory_sms_alerts",
   "sms_printed",
@@ -240,7 +243,7 @@
    "label": "Patient Registration"
   },
   {
-   "default": "Hello {{doc.patient}}, Thank you for registering with  {{doc.company}}. Your ID is {{doc.id}} . Please note this ID for future reference. \nThank You, Get well soon!",
+   "default": "Hello {{doc.patient}}, Thank you for registering with  {{doc.company}}. Your ID is {{doc.name}} . Please note this ID for future reference. \nThank You!",
    "depends_on": "send_registration_msg",
    "fieldname": "registration_msg",
    "fieldtype": "Small Text",
@@ -254,7 +257,7 @@
    "label": "Appointment Confirmation"
   },
   {
-   "default": "Hello {{doc.patient}}, You have scheduled an appointment with {{doc.practitioner}} by {{doc.start_dt}} at  {{doc.company}}.\nThank you, Good day!",
+   "default": "Hello {{doc.patient}}, You have scheduled an appointment with {{doc.practitioner}} on {{doc.appointment_datetime}} at  {{doc.company}}.\nThank you, Good day!",
    "depends_on": "send_appointment_confirmation",
    "fieldname": "appointment_confirmation_msg",
    "fieldtype": "Small Text",
@@ -276,7 +279,7 @@
    "label": "Appointment Reminder"
   },
   {
-   "default": "Hello {{doc.patient}}, You have an appointment with {{doc.practitioner}} by {{doc.appointment_time}} at  {{doc.company}}.\nThank you, Good day!\n",
+   "default": "Hello {{doc.patient}}, You have an appointment with {{doc.practitioner}} by {{doc.appointment_datetime}} at  {{doc.company}}.\nThank you, Good day!\n",
    "depends_on": "send_appointment_reminder",
    "fieldname": "appointment_reminder_msg",
    "fieldtype": "Small Text",
@@ -302,11 +305,28 @@
    "fieldname": "enable_free_follow_ups",
    "fieldtype": "Check",
    "label": "Enable Free Follow-ups"
+  },
+  {
+   "fieldname": "inpatient_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Inpatient Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_discharge_despite_unbilled_services",
+   "fieldtype": "Check",
+   "label": "Allow Discharge Despite Unbilled Healthcare Services"
+  },
+  {
+   "default": "0",
+   "fieldname": "do_not_bill_inpatient_encounters",
+   "fieldtype": "Check",
+   "label": "Do Not Bill Patient Encounters for Inpatients"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-03-26 11:25:21.842092",
+ "modified": "2021-01-13 09:04:35.877700",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Settings",

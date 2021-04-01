@@ -24,7 +24,6 @@ class Timesheet(Document):
 		self.set_status()
 		self.validate_dates()
 		self.validate_time_logs()
-		self.calculate_std_hours()
 		self.update_cost()
 		self.calculate_total_amounts()
 		self.calculate_percentage_billed()
@@ -90,17 +89,6 @@ class Timesheet(Document):
 			if start_date and end_date:
 				self.start_date = getdate(start_date)
 				self.end_date = getdate(end_date)
-
-	def calculate_std_hours(self):
-		std_working_hours = frappe.get_value("Company", self.company, 'standard_working_hours')
-
-		for time in self.time_logs:
-			if time.from_time and time.to_time:
-				if flt(std_working_hours) and date_diff(time.to_time, time.from_time):
-					time.hours = flt(std_working_hours) * date_diff(time.to_time, time.from_time)
-				else:
-					if not time.hours:
-						time.hours = time_diff_in_hours(time.to_time, time.from_time)
 
 	def before_cancel(self):
 		self.set_status()
@@ -216,16 +204,19 @@ class Timesheet(Document):
 			ts_detail.billing_rate = 0.0
 
 @frappe.whitelist()
-def get_projectwise_timesheet_data(project, parent=None):
-	cond = ''
+def get_projectwise_timesheet_data(project, parent=None, from_time=None, to_time=None):
+	condition = ''
 	if parent:
-		cond = "and parent = %(parent)s"
+		condition = "AND parent = %(parent)s"
+	if from_time and to_time:
+		condition += "AND from_time BETWEEN %(from_time)s AND %(to_time)s"
 
 	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt
 			from `tabTimesheet Detail` where parenttype = 'Timesheet' and docstatus=1 and project = %(project)s {0} and billable = 1
-			and sales_invoice is null""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
+			and sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 	if not filters: filters = {}
 
@@ -299,7 +290,7 @@ def make_sales_invoice(source_name, item_code=None, customer=None):
 def make_salary_slip(source_name, target_doc=None):
 	target = frappe.new_doc("Salary Slip")
 	set_missing_values(source_name, target)
-	target.run_method("get_emp_and_leave_details")
+	target.run_method("get_emp_and_working_day_details")
 
 	return target
 

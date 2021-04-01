@@ -4,12 +4,13 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import cstr
+from frappe.utils import cstr, cint
 from frappe import msgprint, throw, _
 
 from frappe.model.document import Document
 from frappe.model.naming import parse_naming_series
 from frappe.permissions import get_doctypes_with_read
+from frappe.core.doctype.doctype.doctype import validate_series
 
 class NamingSeriesNotSetError(frappe.ValidationError): pass
 
@@ -126,7 +127,7 @@ class NamingSeries(Document):
 		dt = frappe.get_doc("DocType", self.select_doc_for_series)
 		options = self.scrub_options_list(self.set_options.split("\n"))
 		for series in options:
-			dt.validate_series(series)
+			validate_series(dt, series)
 			for i in sr:
 				if i[0]:
 					existing_series = [d.split('.')[0] for d in i[0].split("\n")]
@@ -159,7 +160,7 @@ class NamingSeries(Document):
 			prefix = self.parse_naming_series()
 			self.insert_series(prefix)
 			frappe.db.sql("update `tabSeries` set current = %s where name = %s",
-				(self.current_value, prefix))
+				(cint(self.current_value), prefix))
 			msgprint(_("Series Updated Successfully"))
 		else:
 			msgprint(_("Please select prefix first"))

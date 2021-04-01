@@ -1,15 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr, add_days, today
-from frappe.model.document import Document
-from frappe.desk.form import assign_to
+import erpnext
+import frappe
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from frappe import _
+from frappe.desk.form import assign_to
+from frappe.model.document import Document
+from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
+	get_datetime, getdate, nowdate, today, unique)
+
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
+
 
 class EmployeeBoardingController(Document):
 	'''
@@ -48,36 +51,47 @@ class EmployeeBoardingController(Document):
 				continue
 
 			task = frappe.get_doc({
-					"doctype": "Task",
-					"project": self.project,
-					"subject": activity.activity_name + " : " + self.employee_name,
-					"description": activity.description,
-					"department": self.department,
-					"company": self.company,
-					"task_weight": activity.task_weight
-				}).insert(ignore_permissions=True)
+				"doctype": "Task",
+				"project": self.project,
+				"subject": activity.activity_name + " : " + self.employee_name,
+				"description": activity.description,
+				"department": self.department,
+				"company": self.company,
+				"task_weight": activity.task_weight
+			}).insert(ignore_permissions=True)
 			activity.db_set("task", task.name)
+
 			users = [activity.user] if activity.user else []
 			if activity.role:
-				user_list = frappe.db.sql_list('''select distinct(parent) from `tabHas Role`
-					where parenttype='User' and role=%s''', activity.role)
-				users = users + user_list
+				user_list = frappe.db.sql_list('''
+					SELECT
+						DISTINCT(has_role.parent)
+					FROM
+						`tabHas Role` has_role
+							LEFT JOIN `tabUser` user
+								ON has_role.parent = user.name
+					WHERE
+						has_role.parenttype = 'User'
+							AND user.enabled = 1
+							AND has_role.role = %s
+				''', activity.role)
+				users = unique(users + user_list)
 
 				if "Administrator" in users:
 					users.remove("Administrator")
 
 			# assign the task the users
 			if users:
-				self.assign_task_to_users(task, set(users))
+				self.assign_task_to_users(task, users)
 
 	def assign_task_to_users(self, task, users):
 		for user in users:
 			args = {
-				'assign_to' 	:	user,
-				'doctype'		:	task.doctype,
-				'name'			:	task.name,
-				'description'	:	task.description or task.subject,
-				'notify':	self.notify_users_by_email
+				'assign_to': [user],
+				'doctype': task.doctype,
+				'name': task.name,
+				'description': task.description or task.subject,
+				'notify': self.notify_users_by_email
 			}
 			assign_to.add(args)
 
@@ -211,22 +225,9 @@ def get_doc_condition(doctype):
 def throw_overlap_error(doc, exists_for, overlap_doc, from_date, to_date):
 	msg = _("A {0} exists between {1} and {2} (").format(doc.doctype,
 		formatdate(from_date), formatdate(to_date)) \
-		+ """ <b><a href="#Form/{0}/{1}">{1}</a></b>""".format(doc.doctype, overlap_doc) \
+		+ """ <b><a href="/app/Form/{0}/{1}">{1}</a></b>""".format(doc.doctype, overlap_doc) \
 		+ _(") for {0}").format(exists_for)
 	frappe.throw(msg)
-
-def get_employee_leave_policy(employee):
-	leave_policy = frappe.db.get_value("Employee", employee, "leave_policy")
-	if not leave_policy:
-		employee_grade = frappe.db.get_value("Employee", employee, "grade")
-		if employee_grade:
-			leave_policy = frappe.db.get_value("Employee Grade", employee_grade, "default_leave_policy")
-			if not leave_policy:
-				frappe.throw(_("Employee {0} of grade {1} have no default leave policy").format(employee, employee_grade))
-	if leave_policy:
-		return frappe.get_doc("Leave Policy", leave_policy)
-	else:
-		frappe.throw(_("Please set leave policy for employee {0} in Employee / Grade record").format(employee))
 
 def validate_duplicate_exemption_for_payroll_period(doctype, docname, payroll_period, employee):
 	existing_record = frappe.db.exists(doctype, {
@@ -300,43 +301,77 @@ def generate_leave_encashment():
 
 def allocate_earned_leaves():
 	'''Allocate earned leaves to Employees'''
-	e_leave_types = frappe.get_all("Leave Type",
-		fields=["name", "max_leaves_allowed", "earned_leave_frequency", "rounding"],
-		filters={'is_earned_leave' : 1})
+	e_leave_types = get_earned_leaves()
 	today = getdate()
-	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
 
 	for e_leave_type in e_leave_types:
-		leave_allocations = frappe.db.sql("""select name, employee, from_date, to_date from `tabLeave Allocation` where %s
-			between from_date and to_date and docstatus=1 and leave_type=%s""", (today, e_leave_type.name), as_dict=1)
+
+		leave_allocations = get_leave_allocations(today, e_leave_type.name)
+
 		for allocation in leave_allocations:
-			leave_policy = get_employee_leave_policy(allocation.employee)
-			if not leave_policy:
+
+			if not allocation.leave_policy_assignment and not allocation.leave_policy:
 				continue
-			if not e_leave_type.earned_leave_frequency == "Monthly":
-				if not check_frequency_hit(allocation.from_date, today, e_leave_type.earned_leave_frequency):
-					continue
+
+			leave_policy = allocation.leave_policy if allocation.leave_policy else frappe.db.get_value(
+					"Leave Policy Assignment", allocation.leave_policy_assignment, ["leave_policy"])
+
 			annual_allocation = frappe.db.get_value("Leave Policy Detail", filters={
-				'parent': leave_policy.name,
+				'parent': leave_policy,
 				'leave_type': e_leave_type.name
 			}, fieldname=['annual_allocation'])
-			if annual_allocation:
-				earned_leaves = flt(annual_allocation) / divide_by_frequency[e_leave_type.earned_leave_frequency]
-				if e_leave_type.rounding == "0.5":
-					earned_leaves = round(earned_leaves * 2) / 2
-				else:
-					earned_leaves = round(earned_leaves)
 
-				allocation = frappe.get_doc('Leave Allocation', allocation.name)
-				new_allocation = flt(allocation.total_leaves_allocated) + flt(earned_leaves)
+			from_date=allocation.from_date
 
-				if new_allocation > e_leave_type.max_leaves_allowed and e_leave_type.max_leaves_allowed > 0:
-					new_allocation = e_leave_type.max_leaves_allowed
+			if e_leave_type.based_on_date_of_joining_date:
+				from_date  = frappe.db.get_value("Employee", allocation.employee, "date_of_joining")
 
-				if new_allocation == allocation.total_leaves_allocated:
-					continue
-				allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
-				create_additional_leave_ledger_entry(allocation, earned_leaves, today)
+			if check_effective_date(from_date, today, e_leave_type.earned_leave_frequency, e_leave_type.based_on_date_of_joining_date):
+				update_previous_leave_allocation(allocation, annual_allocation, e_leave_type)
+
+def update_previous_leave_allocation(allocation, annual_allocation, e_leave_type):
+		earned_leaves = get_monthly_earned_leave(annual_allocation, e_leave_type.earned_leave_frequency, e_leave_type.rounding)
+
+		allocation = frappe.get_doc('Leave Allocation', allocation.name)
+		new_allocation = flt(allocation.total_leaves_allocated) + flt(earned_leaves)
+
+		if new_allocation > e_leave_type.max_leaves_allowed and e_leave_type.max_leaves_allowed > 0:
+			new_allocation = e_leave_type.max_leaves_allowed
+
+		if new_allocation != allocation.total_leaves_allocated:
+			allocation.db_set("total_leaves_allocated", new_allocation, update_modified=False)
+			today_date = today()
+			create_additional_leave_ledger_entry(allocation, earned_leaves, today_date)
+
+def get_monthly_earned_leave(annual_leaves, frequency, rounding):
+	earned_leaves = 0.0
+	divide_by_frequency = {"Yearly": 1, "Half-Yearly": 6, "Quarterly": 4, "Monthly": 12}
+	if annual_leaves:
+		earned_leaves = flt(annual_leaves) / divide_by_frequency[frequency]
+		if rounding:
+			if rounding == "0.25":
+				earned_leaves = round(earned_leaves * 4) / 4
+			elif rounding == "0.5":
+				earned_leaves = round(earned_leaves * 2) / 2
+			else:
+				earned_leaves = round(earned_leaves)
+
+	return earned_leaves
+
+
+def get_leave_allocations(date, leave_type):
+	return frappe.db.sql("""select name, employee, from_date, to_date, leave_policy_assignment, leave_policy
+		from `tabLeave Allocation`
+		where
+			%s between from_date and to_date and docstatus=1
+			and leave_type=%s""",
+	(date, leave_type), as_dict=1)
+
+
+def get_earned_leaves():
+	return frappe.get_all("Leave Type",
+		fields=["name", "max_leaves_allowed", "earned_leave_frequency", "rounding", "based_on_date_of_joining"],
+		filters={'is_earned_leave' : 1})
 
 def create_additional_leave_ledger_entry(allocation, leaves, date):
 	''' Create leave ledger entry for leave types '''
@@ -345,23 +380,31 @@ def create_additional_leave_ledger_entry(allocation, leaves, date):
 	allocation.unused_leaves = 0
 	allocation.create_leave_ledger_entry()
 
-def check_frequency_hit(from_date, to_date, frequency):
-	'''Return True if current date matches frequency'''
-	from_dt = get_datetime(from_date)
-	to_dt = get_datetime(to_date)
+def check_effective_date(from_date, to_date, frequency, based_on_date_of_joining_date):
+	import calendar
 	from dateutil import relativedelta
-	rd = relativedelta.relativedelta(to_dt, from_dt)
-	months = rd.months
-	if frequency == "Quarterly":
-		if not months % 3:
+
+	from_date = get_datetime(from_date)
+	to_date = get_datetime(to_date)
+	rd = relativedelta.relativedelta(to_date, from_date)
+	#last day of month
+	last_day =  calendar.monthrange(to_date.year, to_date.month)[1]
+
+	if (from_date.day == to_date.day and based_on_date_of_joining_date) or (not based_on_date_of_joining_date and to_date.day == last_day):
+		if frequency == "Monthly":
 			return True
-	elif frequency == "Half-Yearly":
-		if not months % 6:
+		elif frequency == "Quarterly" and rd.months % 3:
 			return True
-	elif frequency == "Yearly":
-		if not months % 12:
+		elif frequency == "Half-Yearly" and rd.months % 6:
 			return True
+		elif frequency == "Yearly" and rd.months % 12:
+			return True
+
+	if frappe.flags.in_test:
+		return True
+
 	return False
+
 
 def get_salary_assignment(employee, date):
 	assignment = frappe.db.sql("""
@@ -454,3 +497,10 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 	if sum_of_claimed_amount and flt(sum_of_claimed_amount[0].total_amount) > 0:
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount
+
+def grant_leaves_automatically():
+	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_singles_value("HR Settings", "automatically_allocate_leaves_based_on_leave_policy")
+	if automatically_allocate_leaves_based_on_leave_policy:
+		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "leaves_allocated":0})
+		for assignment in lpa:
+			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()

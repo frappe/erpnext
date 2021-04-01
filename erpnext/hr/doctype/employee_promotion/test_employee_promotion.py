@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 from frappe.utils import getdate, add_days
-from erpnext.hr.doctype.salary_structure.test_salary_structure import make_employee
+from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_employee
 
 class TestEmployeePromotion(unittest.TestCase):
 	def setUp(self):

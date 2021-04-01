@@ -19,7 +19,8 @@ frappe.ui.form.on('Production Plan', {
 		frm.set_query('for_warehouse', function(doc) {
 			return {
 				filters: {
-					company: doc.company
+					company: doc.company,
+					is_group: 0
 				}
 			}
 		});
@@ -55,23 +56,35 @@ frappe.ui.form.on('Production Plan', {
 	refresh: function(frm) {
 		if (frm.doc.docstatus === 1) {
 			frm.trigger("show_progress");
+
+			if (frm.doc.status !== "Completed") {
+				if (frm.doc.po_items && frm.doc.status !== "Closed") {
+					frm.add_custom_button(__("Work Order"), ()=> {
+						frm.trigger("make_work_order");
+					}, __('Create'));
+				}
+
+				if (frm.doc.mr_items && !in_list(['Material Requested', 'Closed'], frm.doc.status)) {
+					frm.add_custom_button(__("Material Request"), ()=> {
+						frm.trigger("make_material_request");
+					}, __('Create'));
+				}
+
+				if  (frm.doc.status === "Closed") {
+					frm.add_custom_button(__("Re-open"), function() {
+						frm.events.close_open_production_plan(frm, false);
+					}, __("Status"));
+				} else {
+					frm.add_custom_button(__("Close"), function() {
+						frm.events.close_open_production_plan(frm, true);
+					}, __("Status"));
+				}
+			}
 		}
 
-		if (frm.doc.docstatus === 1 && frm.doc.po_items
-			&& frm.doc.status != 'Completed') {
-			frm.add_custom_button(__("Work Order"), ()=> {
-				frm.trigger("make_work_order");
-			}, __('Create'));
+		if (frm.doc.status !== "Closed") {
+			frm.page.set_inner_btn_group_as_primary(__('Create'));
 		}
-
-		if (frm.doc.docstatus === 1 && frm.doc.mr_items
-			&& !in_list(['Material Requested', 'Completed'], frm.doc.status)) {
-			frm.add_custom_button(__("Material Request"), ()=> {
-				frm.trigger("make_material_request");
-			}, __('Create'));
-		}
-
-		frm.page.set_inner_btn_group_as_primary(__('Create'));
 		frm.trigger("material_requirement");
 
 		const projected_qty_formula = ` <table class="table table-bordered" style="background-color: #f9f9f9;">
@@ -118,6 +131,18 @@ frappe.ui.form.on('Production Plan', {
 		</table>`;
 
 		set_field_options("projected_qty_formula", projected_qty_formula);
+	},
+
+	close_open_production_plan: (frm, close=false) => {
+		frappe.call({
+			method: "set_status",
+			freeze: true,
+			doc: frm.doc,
+			args: {close : close},
+			callback: function() {
+				frm.reload_doc();
+			}
+		});
 	},
 
 	make_work_order: function(frm) {
@@ -188,12 +213,54 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	get_items_for_mr: function(frm) {
-		const set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom',
-			'min_order_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'material_request_type'];
+		if (!frm.doc.for_warehouse) {
+			frappe.throw(__("Select warehouse for material requests"));
+		}
+
+		if (frm.doc.ignore_existing_ordered_qty) {
+			frm.events.get_items_for_material_requests(frm);
+		} else {
+			const title = __("Transfer Materials For Warehouse {0}", [frm.doc.for_warehouse]);
+			var dialog = new frappe.ui.Dialog({
+				title: title,
+				fields: [
+					{
+						"fieldtype": "Table MultiSelect", "label": __("Source Warehouses (Optional)"),
+						"fieldname": "warehouses", "options": "Production Plan Material Request Warehouse",
+						"description": __("System will pickup the materials from the selected warehouses. If not specified, system will create material request for purchase."),
+						get_query: function () {
+							return {
+								filters: {
+									company: frm.doc.company
+								}
+							};
+						},
+					},
+				]
+			});
+
+			dialog.show();
+
+			dialog.set_primary_action(__("Get Items"), () => {
+				let warehouses = dialog.get_values().warehouses;
+				frm.events.get_items_for_material_requests(frm, warehouses);
+				dialog.hide();
+			});
+		}
+	},
+
+	get_items_for_material_requests: function(frm, warehouses) {
+		const set_fields = ['actual_qty', 'item_code','item_name', 'description', 'uom', 'from_warehouse',
+			'min_order_qty', 'required_bom_qty', 'quantity', 'sales_order', 'warehouse', 'projected_qty', 'ordered_qty',
+			'reserved_qty_for_production', 'material_request_type'];
+
 		frappe.call({
 			method: "erpnext.manufacturing.doctype.production_plan.production_plan.get_items_for_material_requests",
 			freeze: true,
-			args: {doc: frm.doc},
+			args: {
+				doc: frm.doc,
+				warehouses: warehouses || []
+			},
 			callback: function(r) {
 				if(r.message) {
 					frm.set_value('mr_items', []);
@@ -212,14 +279,14 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	for_warehouse: function(frm) {
-		if (frm.doc.mr_items) {
+		if (frm.doc.mr_items && frm.doc.for_warehouse) {
 			frm.trigger("get_items_for_mr");
 		}
 	},
 
 	download_materials_required: function(frm) {
 		let get_template_url = 'erpnext.manufacturing.doctype.production_plan.production_plan.download_raw_materials';
-		open_url_post(frappe.request.url, { cmd: get_template_url, production_plan: frm.doc.name });
+		open_url_post(frappe.request.url, { cmd: get_template_url, doc: frm.doc });
 	},
 
 	show_progress: function(frm) {

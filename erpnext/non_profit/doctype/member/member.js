@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Member', {
 	setup: function(frm) {
-		frappe.db.get_single_value("Membership Settings", "enable_razorpay").then(val => {
+		frappe.db.get_single_value('Non Profit Settings', 'enable_razorpay_for_memberships').then(val => {
 			if (val && (frm.doc.subscription_id || frm.doc.customer_id)) {
 				frm.set_df_property('razorpay_details_section', 'hidden', false);
 			}
@@ -28,6 +28,14 @@ frappe.ui.form.on('Member', {
 			frm.add_custom_button(__('Accounts Receivable'), function() {
 				frappe.set_route('query-report', 'Accounts Receivable', {member:frm.doc.name});
 			});
+
+			if (!frm.doc.customer) {
+				frm.add_custom_button(__('Create Customer'), () => {
+					frm.call('make_customer_and_link').then(() => {
+						frm.reload_doc();
+					});
+				});
+			}
 
 			// indicator
 			erpnext.utils.set_party_dashboard_indicators(frm);

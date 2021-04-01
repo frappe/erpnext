@@ -106,9 +106,9 @@
   "item_tax_section_break",
   "taxes",
   "inspection_criteria",
+  "quality_inspection_template",
   "inspection_required_before_purchase",
   "inspection_required_before_delivery",
-  "quality_inspection_template",
   "manufacturing",
   "default_bom",
   "is_sub_contracted_item",
@@ -123,6 +123,7 @@
   "weightage",
   "slideshow",
   "website_image",
+  "website_image_alt",
   "thumbnail",
   "cb72",
   "website_warehouse",
@@ -473,6 +474,7 @@
   },
   {
    "default": "0",
+   "depends_on": "has_batch_no",
    "fieldname": "retain_sample",
    "fieldtype": "Check",
    "label": "Retain Sample"
@@ -499,7 +501,7 @@
    "oldfieldtype": "Select"
   },
   {
-   "depends_on": "eval:doc.is_stock_item || doc.is_fixed_asset",
+   "depends_on": "has_serial_no",
    "description": "Example: ABCD.#####\nIf series is set and Serial No is not mentioned in transactions, then automatic serial number will be created based on this series. If you always want to explicitly mention Serial Nos for this item. leave this blank.",
    "fieldname": "serial_no_series",
    "fieldtype": "Data",
@@ -519,8 +521,7 @@
    "fieldname": "has_variants",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "Has Variants",
-   "no_copy": 1
+   "label": "Has Variants"
   },
   {
    "default": "Item Attribute",
@@ -536,7 +537,6 @@
    "fieldtype": "Table",
    "hidden": 1,
    "label": "Attributes",
-   "no_copy": 1,
    "options": "Item Variant Attribute"
   },
   {
@@ -812,7 +812,6 @@
    "label": "Inspection Required before Delivery"
   },
   {
-   "depends_on": "eval:(doc.inspection_required_before_purchase || doc.inspection_required_before_delivery)",
    "fieldname": "quality_inspection_template",
    "fieldtype": "Link",
    "label": "Quality Inspection Template",
@@ -987,6 +986,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "depends_on": "eval:(!doc.is_item_from_hub)",
    "fieldname": "hub_publishing_sb",
    "fieldtype": "Section Break",
@@ -1052,15 +1052,21 @@
    "fieldtype": "Data",
    "label": "Default Manufacturer Part No",
    "read_only": 1
+  },
+  {
+   "fieldname": "website_image_alt",
+   "fieldtype": "Data",
+   "label": "Image Description"
   }
  ],
  "has_web_view": 1,
  "icon": "fa fa-tag",
  "idx": 2,
  "image_field": "image",
+ "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-04-07 15:56:06.195722",
+ "modified": "2021-02-18 14:00:19.668049",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

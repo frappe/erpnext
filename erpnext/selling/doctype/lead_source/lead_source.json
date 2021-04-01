@@ -1,7 +1,7 @@
 {
  "allow_copy": 0, 
  "allow_import": 0, 
- "allow_rename": 0, 
+ "allow_rename": 1, 
  "autoname": "field:source_name", 
  "beta": 0, 
  "creation": "2016-09-16 01:47:47.382372", 
@@ -74,7 +74,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-09-16 02:03:01.441622", 
+ "modified": "2020-09-16 02:03:01.441622", 
  "modified_by": "Administrator", 
  "module": "Selling", 
  "name": "Lead Source", 

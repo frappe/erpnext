@@ -1,0 +1,74 @@
+{
+ "actions": [],
+ "allow_copy": 1,
+ "beta": 1,
+ "creation": "2016-02-22 15:12:36.202380",
+ "doctype": "DocType",
+ "document_type": "Document",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "lab_test_particulars",
+  "result_value",
+  "allow_blank",
+  "template",
+  "require_result_value"
+ ],
+ "fields": [
+  {
+   "fieldname": "lab_test_particulars",
+   "fieldtype": "Data",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Particulars",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.require_result_value == 1",
+   "fieldname": "result_value",
+   "fieldtype": "Small Text",
+   "ignore_xss_filter": 1,
+   "in_list_view": 1,
+   "label": "Value"
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Template",
+   "options": "Lab Test Template",
+   "print_hide": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "require_result_value",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Require Result Value",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "allow_blank",
+   "fieldtype": "Check",
+   "label": "Allow Blank",
+   "print_hide": 1,
+   "read_only": 1,
+   "report_hide": 1
+  }
+ ],
+ "istable": 1,
+ "links": [],
+ "modified": "2020-07-23 12:33:47.693065",
+ "modified_by": "Administrator",
+ "module": "Healthcare",
+ "name": "Descriptive Test Result",
+ "owner": "Administrator",
+ "permissions": [],
+ "restrict_to_domain": "Healthcare",
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

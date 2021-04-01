@@ -15,7 +15,7 @@ class LinkedInSettings(Document):
 		params = urlencode({
 			"response_type":"code",
 			"client_id": self.consumer_key,
-			"redirect_uri": get_site_url(frappe.local.site) + "/?cmd=erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback",
+			"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(frappe.utils.get_url()),
 			"scope": "r_emailaddress w_organization_social r_basicprofile r_liteprofile r_organization_social rw_organization_admin w_member_social"
 		})
 
@@ -30,7 +30,7 @@ class LinkedInSettings(Document):
 			"code": code,
 			"client_id": self.consumer_key,
 			"client_secret": self.get_password(fieldname="consumer_secret"),
-			"redirect_uri": get_site_url(frappe.local.site) + "/?cmd=erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback",
+			"redirect_uri": "{0}/api/method/erpnext.crm.doctype.linkedin_settings.linkedin_settings.callback?".format(frappe.utils.get_url()),
 		}
 		headers = {
 			"Content-Type": "application/x-www-form-urlencoded"
@@ -154,7 +154,7 @@ class LinkedInSettings(Document):
 
 		return response
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def callback(code=None, error=None, error_description=None):
 	if not error:
 		linkedin_settings = frappe.get_doc("LinkedIn Settings")

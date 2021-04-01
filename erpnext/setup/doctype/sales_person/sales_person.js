@@ -5,8 +5,7 @@ frappe.ui.form.on('Sales Person', {
 	refresh: function(frm) {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var info = frm.doc.__onload.dashboard_info;
-			frm.dashboard.add_indicator(__('Total Contribution Amount: {0}',
-				[format_currency(info.allocated_amount, info.currency)]), 'blue');
+			frm.dashboard.add_indicator(__('Total Contribution Amount: {0}', [format_currency(info.allocated_amount, info.currency)]), 'blue');
 		}
 	},
 
@@ -19,7 +18,7 @@ frappe.ui.form.on('Sales Person', {
 				}
 			}
 		};
-	
+
 		frm.make_methods = {
 			'Sales Order': () => frappe.new_doc("Sales Order")
 				.then(() => frm.add_child("sales_team", {"sales_person": frm.doc.name}))
@@ -33,7 +32,7 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 
 cur_frm.cscript.set_root_readonly = function(doc) {
 	// read-only for root
-	if(!doc.parent_sales_person) {
+	if(!doc.parent_sales_person && !doc.__islocal) {
 		cur_frm.set_read_only();
 		cur_frm.set_intro(__("This is a root sales person and cannot be edited."));
 	} else {

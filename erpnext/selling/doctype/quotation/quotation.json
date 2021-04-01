@@ -1,5 +1,6 @@
 {
  "actions": [],
+ "allow_auto_repeat": 1,
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-24 19:29:08",
@@ -654,6 +655,7 @@
    "fieldname": "base_in_words",
    "fieldtype": "Data",
    "label": "In Words (Company Currency)",
+   "length": 240,
    "oldfieldname": "in_words",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -713,6 +715,7 @@
    "fieldname": "in_words",
    "fieldtype": "Data",
    "label": "In Words",
+   "length": 240,
    "oldfieldname": "in_words_export",
    "oldfieldtype": "Data",
    "print_hide": 1,
@@ -921,7 +924,7 @@
    "fieldname": "lost_reasons",
    "fieldtype": "Table MultiSelect",
    "label": "Lost Reasons",
-   "options": "Lost Reason Detail",
+   "options": "Quotation Lost Reason Detail",
    "read_only": 1
   }
  ],
@@ -930,7 +933,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2019-12-30 19:14:56.630270",
+ "modified": "2020-10-30 13:58:59.212060",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

@@ -19,7 +19,7 @@ def create_stock_entry_types():
 
 	for purpose in ["Material Issue", "Material Receipt", "Material Transfer",
 		"Material Transfer for Manufacture", "Material Consumption for Manufacture", "Manufacture",
-		"Repack", "Send to Subcontractor", "Send to Warehouse", "Receive at Warehouse"]:
+		"Repack", "Send to Subcontractor"]:
 
 		ste_type = frappe.get_doc({
 			'doctype': 'Stock Entry Type',

@@ -11,6 +11,7 @@
   "patient",
   "assessment_template",
   "column_break_4",
+  "company",
   "healthcare_practitioner",
   "assessment_datetime",
   "assessment_description",
@@ -62,7 +63,8 @@
   {
    "fieldname": "assessment_datetime",
    "fieldtype": "Datetime",
-   "label": "Assessment Datetime"
+   "label": "Assessment Datetime",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_7",
@@ -127,11 +129,18 @@
    "fieldname": "assessment_description",
    "fieldtype": "Small Text",
    "label": "Assessment Description"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-04-21 13:23:09.815007",
+ "modified": "2020-06-25 00:25:13.208400",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Assessment",

@@ -8,7 +8,7 @@ from frappe.utils import getdate, flt
 
 def execute(filters=None):
 	if not filters: filters = {}
-	float_preceision = frappe.db.get_default("float_preceision")
+	float_precision = frappe.db.get_default("float_precision")
 
 	condition = get_condition(filters)
 
@@ -25,7 +25,7 @@ def execute(filters=None):
 	data = []
 	for item in items:
 		total_outgoing = flt(consumed_item_map.get(item.name, 0)) + flt(delivered_item_map.get(item.name,0))
-		avg_daily_outgoing = flt(total_outgoing / diff, float_preceision)
+		avg_daily_outgoing = flt(total_outgoing / diff, float_precision)
 		reorder_level = (avg_daily_outgoing * flt(item.lead_time_days)) + flt(item.safety_stock)
 
 		data.append([item.name, item.item_name, item.item_group, item.brand, item.description,

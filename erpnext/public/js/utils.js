@@ -191,6 +191,29 @@ $.extend(erpnext.utils, {
 		})
 	},
 
+	add_dimensions: function(report_name, index) {
+		let filters = frappe.query_reports[report_name].filters;
+
+		frappe.call({
+			method: "erpnext.accounts.doctype.accounting_dimension.accounting_dimension.get_dimensions",
+			callback: function(r) {
+				let accounting_dimensions = r.message[0];
+				accounting_dimensions.forEach((dimension) => {
+					let found = filters.some(el => el.fieldname === dimension['fieldname']);
+
+					if (!found) {
+						filters.splice(index, 0, {
+							"fieldname": dimension["fieldname"],
+							"label": __(dimension["label"]),
+							"fieldtype": "Link",
+							"options": dimension["document_type"]
+						});
+					}
+				});
+			}
+		});
+	},
+
 	make_subscription: function(doctype, docname) {
 		frappe.call({
 			method: "frappe.automation.doctype.auto_repeat.auto_repeat.make_auto_repeat",
@@ -435,6 +458,9 @@ erpnext.utils.update_child_items = function(opts) {
 	const frm = opts.frm;
 	const cannot_add_row = (typeof opts.cannot_add_row === 'undefined') ? true : opts.cannot_add_row;
 	const child_docname = (typeof opts.cannot_add_row === 'undefined') ? "items" : opts.child_docname;
+	const child_meta = frappe.get_meta(`${frm.doc.doctype} Item`);
+	const get_precision = (fieldname) => child_meta.fields.find(f => f.fieldname == fieldname).precision;
+
 	this.data = [];
 	const fields = [{
 		fieldtype:'Data',
@@ -450,19 +476,49 @@ erpnext.utils.update_child_items = function(opts) {
 		disabled: 0,
 		label: __('Item Code')
 	}, {
+		fieldtype:'Link',
+		fieldname:'uom',
+		options: 'UOM',
+		read_only: 0,
+		label: __('UOM'),
+		reqd: 1,
+		onchange: function () {
+			frappe.call({
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
+				args: { item_code: this.doc.item_code, uom: this.value },
+				callback: r => {
+					if(!r.exc) {
+						if (this.doc.conversion_factor == r.message.conversion_factor) return;
+
+						const docname = this.doc.docname;
+						dialog.fields_dict.trans_items.df.data.some(doc => {
+							if (doc.docname == docname) {
+								doc.conversion_factor = r.message.conversion_factor;
+								dialog.fields_dict.trans_items.grid.refresh();
+								return true;
+							}
+						})
+					}
+				}
+			});
+		}
+	}, {
 		fieldtype:'Float',
 		fieldname:"qty",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
-		label: __('Qty')
+		label: __('Qty'),
+		precision: get_precision("qty")
 	}, {
 		fieldtype:'Currency',
 		fieldname:"rate",
+		options: "currency",
 		default: 0,
 		read_only: 0,
 		in_list_view: 1,
-		label: __('Rate')
+		label: __('Rate'),
+		precision: get_precision("rate")
 	}];
 
 	if (frm.doc.doctype == 'Sales Order' || frm.doc.doctype == 'Purchase Order' ) {
@@ -470,7 +526,15 @@ erpnext.utils.update_child_items = function(opts) {
 			fieldtype: 'Date',
 			fieldname: frm.doc.doctype == 'Sales Order' ? "delivery_date" : "schedule_date",
 			in_list_view: 1,
-			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date")
+			label: frm.doc.doctype == 'Sales Order' ? __("Delivery Date") : __("Reqd by date"),
+			reqd: 1
+		})
+		fields.splice(3, 0, {
+			fieldtype: 'Float',
+			fieldname: "conversion_factor",
+			in_list_view: 1,
+			label: __("Conversion Factor"),
+			precision: get_precision('conversion_factor')
 		})
 	}
 
@@ -482,7 +546,7 @@ erpnext.utils.update_child_items = function(opts) {
 				fieldtype: "Table",
 				label: "Items",
 				cannot_add_rows: cannot_add_row,
-				in_place_edit: true,
+				in_place_edit: false,
 				reqd: 1,
 				data: this.data,
 				get_data: () => {
@@ -519,8 +583,10 @@ erpnext.utils.update_child_items = function(opts) {
 			"item_code": d.item_code,
 			"delivery_date": d.delivery_date,
 			"schedule_date": d.schedule_date,
+			"conversion_factor": d.conversion_factor,
 			"qty": d.qty,
 			"rate": d.rate,
+			"uom": d.uom
 		});
 		this.data = dialog.fields_dict.trans_items.df.data;
 		dialog.fields_dict.trans_items.grid.refresh();
@@ -529,21 +595,7 @@ erpnext.utils.update_child_items = function(opts) {
 }
 
 erpnext.utils.map_current_doc = function(opts) {
-	let query_args = {};
-	if (opts.get_query_filters) {
-		query_args.filters = opts.get_query_filters;
-	}
-
-	if (opts.get_query_method) {
-		query_args.query = opts.get_query_method;
-	}
-
-	if (query_args.filters || query_args.query) {
-		opts.get_query = () => {
-			return query_args;
-		}
-	}
-	var _map = function() {
+	function _map() {
 		if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
 			// remove first item row if empty
 			if(!cur_frm.doc.items[0].item_code) {
@@ -617,13 +669,28 @@ erpnext.utils.map_current_doc = function(opts) {
 			}
 		});
 	}
-	if(opts.source_doctype) {
-		var d = new frappe.ui.form.MultiSelectDialog({
+
+	let query_args = {};
+	if (opts.get_query_filters) {
+		query_args.filters = opts.get_query_filters;
+	}
+
+	if (opts.get_query_method) {
+		query_args.query = opts.get_query_method;
+	}
+
+	if (query_args.filters || query_args.query) {
+		opts.get_query = () => query_args;
+	}
+
+	if (opts.source_doctype) {
+		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			date_field: opts.date_field || undefined,
 			setters: opts.setters,
 			get_query: opts.get_query,
+			add_filters_group: 1,
 			action: function(selections, args) {
 				let values = selections;
 				if(values.length === 0){
@@ -636,16 +703,24 @@ erpnext.utils.map_current_doc = function(opts) {
 				_map();
 			},
 		});
-	} else if(opts.source_name) {
+
+		return d;
+	}
+
+	if (opts.source_name) {
 		opts.source_name = [opts.source_name];
 		_map();
 	}
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
-	if(doc && doc.item_name && doc.item_name !== value) {
-		return value? value + ': ' + doc.item_name: doc.item_name;
+	if (doc && value && doc.item_name && doc.item_name !== value) {
+		return value + ': ' + doc.item_name;
+	} else if (!value && doc.doctype && doc.item_name) {
+		// format blank value in child table
+		return doc.item_name;
 	} else {
+		// if value is blank in report view or item code and name are the same, return as is
 		return value;
 	}
 }

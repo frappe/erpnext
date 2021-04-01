@@ -1,6 +1,7 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+frappe.provide("erpnext.accounts.dimensions");
 
 frappe.ui.form.on("Fees", {
 	setup: function(frm) {
@@ -9,15 +10,19 @@ frappe.ui.form.on("Fees", {
 		frm.add_fetch("fee_structure", "cost_center", "cost_center");
 	},
 
-	onload: function(frm){
-		frm.set_query("academic_term",function(){
+	company: function(frm) {
+		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+	},
+
+	onload: function(frm) {
+		frm.set_query("academic_term", function() {
 			return{
-				"filters":{
+				"filters": {
 					"academic_year": (frm.doc.academic_year)
 				}
 			};
 		});
-		frm.set_query("fee_structure",function(){
+		frm.set_query("fee_structure", function() {
 			return{
 				"filters":{
 					"academic_year": (frm.doc.academic_year)
@@ -45,6 +50,8 @@ frappe.ui.form.on("Fees", {
 		if (!frm.doc.posting_date) {
 			frm.doc.posting_date = frappe.datetime.get_today();
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
 	},
 
 	refresh: function(frm) {
@@ -55,14 +62,15 @@ frappe.ui.form.on("Fees", {
 			frm.set_df_property('posting_date', 'read_only', 1);
 			frm.set_df_property('posting_time', 'read_only', 1);
 		}
-		if(frm.doc.docstatus===1) {
+		if(frm.doc.docstatus > 0) {
 			frm.add_custom_button(__('Accounting Ledger'), function() {
 				frappe.route_options = {
 					voucher_no: frm.doc.name,
 					from_date: frm.doc.posting_date,
-					to_date: frm.doc.posting_date,
+					to_date: moment(frm.doc.modified).format('YYYY-MM-DD'),
 					company: frm.doc.company,
-					group_by_voucher: false
+					group_by: '',
+					show_cancelled_entries: frm.doc.docstatus === 2
 				};
 				frappe.set_route("query-report", "General Ledger");
 			}, __("View"));
@@ -112,6 +120,8 @@ frappe.ui.form.on("Fees", {
 				args: {
 					"dt": frm.doc.doctype,
 					"dn": frm.doc.name,
+					"party_type": "Student",
+					"party": frm.doc.student,
 					"recipient_id": frm.doc.student_email
 				},
 				callback: function(r) {
@@ -159,6 +169,7 @@ frappe.ui.form.on("Fees", {
 						$.each(r.message, function(i, d) {
 							var row = frappe.model.add_child(frm.doc, "Fee Component", "components");
 							row.fees_category = d.fees_category;
+							row.description = d.description;
 							row.amount = d.amount;
 						});
 					}

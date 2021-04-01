@@ -108,3 +108,38 @@ frappe.ui.form.on('Healthcare Practitioner', 'employee', function(frm) {
 		});
 	}
 });
+
+frappe.tour['Healthcare Practitioner'] = [
+	{
+		fieldname: 'employee',
+		title: __('Employee'),
+		description: __('If you want to track Payroll and other HRMS operations for a Practitoner, create an Employee and link it here.')
+	},
+	{
+		fieldname: 'practitioner_schedules',
+		title: __('Practitioner Schedules'),
+		description: __('Set the Practitioner Schedule you just created. This will be used while booking appointments.')
+	},
+	{
+		fieldname: 'op_consulting_charge_item',
+		title: __('Out Patient Consulting Charge Item'),
+		description: __('Create a service item for Out Patient Consulting.')
+	},
+	{
+		fieldname: 'inpatient_visit_charge_item',
+		title: __('Inpatient Visit Charge Item'),
+		description: __('If this Healthcare Practitioner works for the In-Patient Department, create a service item for Inpatient Visits.')
+	},
+	{
+		fieldname: 'op_consulting_charge',
+		title: __('Out Patient Consulting Charge'),
+		description: __('Set the Out Patient Consulting Charge for this Practitioner.')
+
+	},
+	{
+		fieldname: 'inpatient_visit_charge',
+		title: __('Inpatient Visit Charge'),
+		description: __('If this Healthcare Practitioner also works for the In-Patient Department, set the inpatient visit charge for this Practitioner.')
+	}
+];
+

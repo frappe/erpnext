@@ -9,9 +9,15 @@ from frappe.utils.nestedset import get_descendants_of
 
 def execute(filters=None):
 	filters = frappe._dict(filters or {})
+	if filters.from_date > filters.to_date:
+		frappe.throw(_("From Date cannot be greater than To Date"))
+
 	columns = get_columns(filters)
 	data = get_data(filters)
-	return columns, data
+
+	chart_data = get_chart_data(data)
+
+	return columns, data, None, chart_data
 
 def get_columns(filters):
 	return [
@@ -96,7 +102,7 @@ def get_columns(filters):
 			"label": _("Customer Group"),
 			"fieldtype": "Link",
 			"fieldname": "customer_group",
-			"options": "customer Group",
+			"options": "Customer Group",
 			"width": 120
 		},
 		{
@@ -142,14 +148,16 @@ def get_data(filters):
 	company_list.append(filters.get("company"))
 
 	customer_details = get_customer_details()
+	item_details = get_item_details()
 	sales_order_records = get_sales_order_details(company_list, filters)
 
 	for record in sales_order_records:
 		customer_record = customer_details.get(record.customer)
+		item_record = item_details.get(record.item_code)
 		row = {
 			"item_code": record.item_code,
-			"item_name": record.item_name,
-			"item_group": record.item_group,
+			"item_name": item_record.item_name,
+			"item_group": item_record.item_group,
 			"description": record.description,
 			"quantity": record.qty,
 			"uom": record.uom,
@@ -181,11 +189,17 @@ def get_conditions(filters):
 	if filters.get('to_date'):
 		conditions += "AND so.transaction_date <= '%s'" %filters.to_date
 
+	if filters.get("item_code"):
+		conditions += "AND so_item.item_code = %s" %frappe.db.escape(filters.item_code)
+
+	if filters.get("customer"):
+		conditions += "AND so.customer = %s" %frappe.db.escape(filters.customer)
+
 	return conditions
 
 def get_customer_details():
-	details = frappe.get_all('Customer',
-		fields=['name', 'customer_name', "customer_group"])
+	details = frappe.get_all("Customer",
+		fields=["name", "customer_name", "customer_group"])
 	customer_details = {}
 	for d in details:
 		customer_details.setdefault(d.name, frappe._dict({
@@ -194,15 +208,25 @@ def get_customer_details():
 		}))
 	return customer_details
 
+def get_item_details():
+	details = frappe.db.get_all("Item",
+		fields=["item_code", "item_name", "item_group"])
+	item_details = {}
+	for d in details:
+		item_details.setdefault(d.item_code, frappe._dict({
+			"item_name": d.item_name,
+			"item_group": d.item_group
+		}))
+	return item_details
+
 def get_sales_order_details(company_list, filters):
 	conditions = get_conditions(filters)
 
 	return frappe.db.sql("""
 		SELECT
-			so_item.item_code, so_item.item_name, so_item.item_group,
-			so_item.description, so_item.qty, so_item.uom,
-			so_item.base_rate, so_item.base_amount, so.name,
-			so.transaction_date, so.customer, so.territory,
+			so_item.item_code, so_item.description, so_item.qty,
+			so_item.uom, so_item.base_rate, so_item.base_amount,
+			so.name, so.transaction_date, so.customer,so.territory,
 			so.project, so_item.delivered_qty,
 			so_item.billed_amt, so.company
 		FROM
@@ -212,3 +236,34 @@ def get_sales_order_details(company_list, filters):
 			AND so.company in ({0})
 			AND so.docstatus = 1 {1}
 	""".format(','.join(["%s"] * len(company_list)), conditions), tuple(company_list), as_dict=1)
+
+def get_chart_data(data):
+	item_wise_sales_map = {}
+	labels, datapoints = [], []
+
+	for row in data:
+		item_key = row.get("item_code")
+
+		if not item_key in item_wise_sales_map:
+			item_wise_sales_map[item_key] = 0
+
+		item_wise_sales_map[item_key] = flt(item_wise_sales_map[item_key]) + flt(row.get("amount"))
+
+	item_wise_sales_map = { item: value for item, value in (sorted(item_wise_sales_map.items(), key = lambda i: i[1], reverse=True))}
+
+	for key in item_wise_sales_map:
+		labels.append(key)
+		datapoints.append(item_wise_sales_map[key])
+
+	return {
+		"data" : {
+			"labels" : labels[:30], # show max of 30 items in chart
+			"datasets" : [
+				{
+					"name" : _(" Total Sales Amount"),
+					"values" : datapoints[:30]
+				}
+			]
+		},
+		"type" : "bar"
+	}

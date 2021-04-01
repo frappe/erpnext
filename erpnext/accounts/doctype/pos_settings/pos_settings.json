@@ -5,24 +5,11 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "use_pos_in_offline_mode",
-  "section_break_2",
-  "fields"
+  "invoice_fields"
  ],
  "fields": [
   {
-   "default": "0",
-   "fieldname": "use_pos_in_offline_mode",
-   "fieldtype": "Check",
-   "label": "Use POS in Offline Mode"
-  },
-  {
-   "fieldname": "section_break_2",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:!doc.use_pos_in_offline_mode",
-   "fieldname": "fields",
+   "fieldname": "invoice_fields",
    "fieldtype": "Table",
    "label": "POS Field",
    "options": "POS Field"
@@ -30,7 +17,7 @@
  ],
  "issingle": 1,
  "links": [],
- "modified": "2019-12-26 11:50:47.122997",
+ "modified": "2020-06-01 15:46:41.478928",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",

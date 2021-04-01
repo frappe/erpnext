@@ -19,6 +19,9 @@ class StudentAdmission(WebsiteGenerator):
 		if not self.route:		#pylint: disable=E0203
 			self.route = "admissions/" + "-".join(self.title.split(" "))
 
+		if self.enable_admission_application and not self.program_details:
+			frappe.throw(_("Please add programs to enable admission application."))
+
 	def get_context(self, context):
 		context.no_cache = 1
 		context.show_sidebar = True

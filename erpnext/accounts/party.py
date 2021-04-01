@@ -39,7 +39,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 	party_details = frappe._dict(set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[party_type.lower()]
 
-	if not ignore_permissions and not frappe.has_permission(party_type, "read", party):
+	if not ignore_permissions and not (frappe.has_permission(party_type, "read", party) or frappe.has_permission(party_type, "select", party)):
 		frappe.throw(_("Not permitted for {0}").format(party), frappe.PermissionError)
 
 	party = frappe.get_doc(party_type, party)
@@ -59,7 +59,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", company=
 			billing_address=party_address, shipping_address=shipping_address)
 
 	if fetch_payment_terms_template:
-		party_details["payment_terms_template"] = get_pyt_term_template(party.name, party_type, company)
+		party_details["payment_terms_template"] = get_payment_terms_template(party.name, party_type, company)
 
 	if not party_details.get("currency"):
 		party_details["currency"] = currency
@@ -162,7 +162,7 @@ def get_default_price_list(party):
 def set_price_list(party_details, party, party_type, given_price_list, pos=None):
 	# price list
 	price_list = get_permitted_documents('Price List')
-	
+
 	# if there is only one permitted document based on user permissions, set it
 	if price_list and len(price_list) == 1:
 		price_list = price_list[0]
@@ -184,7 +184,7 @@ def set_price_list(party_details, party, party_type, given_price_list, pos=None)
 
 
 def set_account_and_due_date(party, account, party_type, company, posting_date, bill_date, doctype):
-	if doctype not in ["Sales Invoice", "Purchase Invoice"]:
+	if doctype not in ["POS Invoice", "Sales Invoice", "Purchase Invoice"]:
 		# not an invoice
 		return {
 			party_type.lower(): party
@@ -203,7 +203,7 @@ def set_account_and_due_date(party, account, party_type, company, posting_date, 
 	return out
 
 @frappe.whitelist()
-def get_party_account(party_type, party, company):
+def get_party_account(party_type, party, company=None):
 	"""Returns the account for the given `party`.
 		Will first search in party (Customer / Supplier) record, if not found,
 		will search in group (Customer Group / Supplier Group),
@@ -315,7 +315,7 @@ def get_due_date(posting_date, party_type, party, company=None, bill_date=None):
 	due_date = None
 	if (bill_date or posting_date) and party:
 		due_date = bill_date or posting_date
-		template_name = get_pyt_term_template(party, party_type, company)
+		template_name = get_payment_terms_template(party, party_type, company)
 
 		if template_name:
 			due_date = get_due_date_from_template(template_name, posting_date, bill_date).strftime("%Y-%m-%d")
@@ -388,7 +388,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 	from erpnext.accounts.doctype.tax_rule.tax_rule import get_tax_template, get_party_details
 	args = {
 		party_type.lower(): party,
-		"company":			company
+		"company": company
 	}
 
 	if tax_category:
@@ -422,7 +422,7 @@ def set_taxes(party, party_type, posting_date, company, customer_group=None, sup
 
 
 @frappe.whitelist()
-def get_pyt_term_template(party_name, party_type, company=None):
+def get_payment_terms_template(party_name, party_type, company=None):
 	if party_type not in ("Customer", "Supplier"):
 		return
 	template = None
@@ -465,23 +465,25 @@ def get_timeline_data(doctype, name):
 	from frappe.desk.form.load import get_communication_data
 
 	out = {}
-	fields = 'date(creation), count(name)'
+	fields = 'creation, count(*)'
 	after = add_years(None, -1).strftime('%Y-%m-%d')
-	group_by='group by date(creation)'
+	group_by='group by Date(creation)'
 
-	data = get_communication_data(doctype, name, after=after, group_by='group by date(creation)',
-		fields='date(C.creation) as creation, count(C.name)',as_dict=False)
+	data = get_communication_data(doctype, name, after=after, group_by='group by creation',
+		fields='C.creation as creation, count(C.name)',as_dict=False)
 
 	# fetch and append data from Activity Log
 	data += frappe.db.sql("""select {fields}
 		from `tabActivity Log`
-		where (reference_doctype="{doctype}" and reference_name="{name}")
-		or (timeline_doctype in ("{doctype}") and timeline_name="{name}")
-		or (reference_doctype in ("Quotation", "Opportunity") and timeline_name="{name}")
+		where (reference_doctype=%(doctype)s and reference_name=%(name)s)
+		or (timeline_doctype in (%(doctype)s) and timeline_name=%(name)s)
+		or (reference_doctype in ("Quotation", "Opportunity") and timeline_name=%(name)s)
 		and status!='Success' and creation > {after}
 		{group_by} order by creation desc
-		""".format(doctype=frappe.db.escape(doctype), name=frappe.db.escape(name), fields=fields,
-			group_by=group_by, after=after), as_dict=False)
+		""".format(fields=fields, group_by=group_by, after=after), {
+			"doctype": doctype,
+			"name": name
+		}, as_dict=False)
 
 	timeline_items = dict(data)
 
@@ -600,15 +602,22 @@ def get_party_shipping_address(doctype, name):
 	else:
 		return ''
 
-def get_partywise_advanced_payment_amount(party_type, posting_date = None):
+def get_partywise_advanced_payment_amount(party_type, posting_date = None, future_payment=0, company=None):
 	cond = "1=1"
 	if posting_date:
-		cond = "posting_date <= '{0}'".format(posting_date)
+		if future_payment:
+			cond = "posting_date <= '{0}' OR DATE(creation) <= '{0}' """.format(posting_date)
+		else:
+			cond = "posting_date <= '{0}'".format(posting_date)
+
+	if company:
+		cond += "and company = {0}".format(frappe.db.escape(company))
 
 	data = frappe.db.sql(""" SELECT party, sum({0}) as amount
 		FROM `tabGL Entry`
 		WHERE
 			party_type = %s and against_voucher is null
+			and is_cancelled = 0
 			and {1} GROUP BY party"""
 		.format(("credit") if party_type == "Customer" else "debit", cond) , party_type)
 

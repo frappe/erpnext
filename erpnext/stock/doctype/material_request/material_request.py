@@ -370,6 +370,7 @@ def get_items_based_on_default_supplier(supplier):
 	return supplier_items
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, page_len, filters):
 	conditions = ""
 	if txt:
@@ -402,6 +403,8 @@ def get_material_requests_based_on_supplier(doctype, txt, searchfield, start, pa
 
 	return material_requests
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_default_supplier_query(doctype, txt, searchfield, start, page_len, filters):
 	doc = frappe.get_doc("Material Request", filters.get("doc"))
 	item_list = []
@@ -455,6 +458,9 @@ def make_stock_entry(source_name, target_doc=None):
 
 		if source_parent.material_request_type == "Customer Provided":
 			target.allow_zero_valuation_rate = 1
+
+		if source_parent.material_request_type == "Material Transfer":
+			target.s_warehouse = obj.from_warehouse
 
 	def set_missing_values(source, target):
 		target.purpose = source.material_request_type

@@ -1,0 +1,21 @@
+{
+ "cards": [],
+ "charts": [
+  {
+   "chart": "Project Summary",
+   "width": "Full"
+  }
+ ],
+ "creation": "2020-07-20 20:17:16.397373",
+ "dashboard_name": "Project",
+ "docstatus": 0,
+ "doctype": "Dashboard",
+ "idx": 0,
+ "is_default": 0,
+ "is_standard": 1,
+ "modified": "2020-07-22 17:17:03.780625",
+ "modified_by": "Administrator",
+ "module": "Projects",
+ "name": "Project",
+ "owner": "Administrator"
+}

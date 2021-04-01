@@ -7,12 +7,15 @@ import frappe
 from frappe import msgprint, _
 from frappe.model.document import Document
 from frappe.desk.reportview import get_match_cond, get_filters_cond
-from frappe.utils import comma_and
+from frappe.utils import comma_and, get_link_to_form, getdate
 import erpnext.www.lms as lms
 
 class ProgramEnrollment(Document):
 	def validate(self):
 		self.validate_duplication()
+		self.validate_academic_year()
+		if self.academic_term:
+			self.validate_academic_term()
 		if not self.student_name:
 			self.student_name = frappe.db.get_value("Student", self.student, "title")
 		if not self.courses:
@@ -23,11 +26,34 @@ class ProgramEnrollment(Document):
 		self.make_fee_records()
 		self.create_course_enrollments()
 
+	def validate_academic_year(self):
+		start_date, end_date = frappe.db.get_value("Academic Year", self.academic_year, ["year_start_date", "year_end_date"])
+		if self.enrollment_date:
+			if start_date and getdate(self.enrollment_date) < getdate(start_date):
+				frappe.throw(_("Enrollment Date cannot be before the Start Date of the Academic Year {0}").format(
+					get_link_to_form("Academic Year", self.academic_year)))
+
+			if end_date and getdate(self.enrollment_date) > getdate(end_date):
+				frappe.throw(_("Enrollment Date cannot be after the End Date of the Academic Term {0}").format(
+					get_link_to_form("Academic Year", self.academic_year)))
+
+	def validate_academic_term(self):
+		start_date, end_date = frappe.db.get_value("Academic Term", self.academic_term, ["term_start_date", "term_end_date"])
+		if self.enrollment_date:
+			if start_date and getdate(self.enrollment_date) < getdate(start_date):
+				frappe.throw(_("Enrollment Date cannot be before the Start Date of the Academic Term {0}").format(
+					get_link_to_form("Academic Term", self.academic_term)))
+
+			if end_date and getdate(self.enrollment_date) > getdate(end_date):
+				frappe.throw(_("Enrollment Date cannot be after the End Date of the Academic Term {0}").format(
+					get_link_to_form("Academic Term", self.academic_term)))
+
 	def validate_duplication(self):
 		enrollment = frappe.get_all("Program Enrollment", filters={
 			"student": self.student,
 			"program": self.program,
 			"academic_year": self.academic_year,
+			"academic_term": self.academic_term,
 			"docstatus": ("<", 2),
 			"name": ("!=", self.name)
 		})
@@ -61,7 +87,7 @@ class ProgramEnrollment(Document):
 				fees.submit()
 				fee_list.append(fees.name)
 		if fee_list:
-			fee_list = ["""<a href="#Form/Fees/%s" target="_blank">%s</a>""" % \
+			fee_list = ["""<a href="/app/Form/Fees/%s" target="_blank">%s</a>""" % \
 				(fee, fee) for fee in fee_list]
 			msgprint(_("Fee Records Created - {0}").format(comma_and(fee_list)))
 
@@ -70,10 +96,9 @@ class ProgramEnrollment(Document):
 
 	def create_course_enrollments(self):
 		student = frappe.get_doc("Student", self.student)
-		program = frappe.get_doc("Program", self.program)
-		course_list = [course.course for course in program.courses]
+		course_list = [course.course for course in self.courses]
 		for course_name in course_list:
-			student.enroll_in_course(course_name=course_name, program_enrollment=self.name)
+			student.enroll_in_course(course_name=course_name, program_enrollment=self.name, enrollment_date=self.enrollment_date)
 
 	def get_all_course_enrollments(self):
 		course_enrollment_names = frappe.get_list("Course Enrollment", filters={'program_enrollment': self.name})
@@ -97,24 +122,29 @@ class ProgramEnrollment(Document):
 		return quiz_progress
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
-	if filters.get('program'):
-		return frappe.db.sql("""select course, course_name from `tabProgram Course`
-			where  parent = %(program)s and course like %(txt)s {match_cond}
-			order by
-				if(locate(%(_txt)s, course), locate(%(_txt)s, course), 99999),
-				idx desc,
-				`tabProgram Course`.course asc
-			limit {start}, {page_len}""".format(
-				match_cond=get_match_cond(doctype),
-				start=start,
-				page_len=page_len), {
-					"txt": "%{0}%".format(txt),
-					"_txt": txt.replace('%', ''),
-					"program": filters['program']
-				})
+	if not filters.get('program'):
+		frappe.msgprint(_("Please select a Program first."))
+		return []
+
+	return frappe.db.sql("""select course, course_name from `tabProgram Course`
+		where  parent = %(program)s and course like %(txt)s {match_cond}
+		order by
+			if(locate(%(_txt)s, course), locate(%(_txt)s, course), 99999),
+			idx desc,
+			`tabProgram Course`.course asc
+		limit {start}, {page_len}""".format(
+			match_cond=get_match_cond(doctype),
+			start=start,
+			page_len=page_len), {
+				"txt": "%{0}%".format(txt),
+				"_txt": txt.replace('%', ''),
+				"program": filters['program']
+			})
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_students(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("academic_term"):
 		filters["academic_term"] = frappe.defaults.get_defaults().academic_term

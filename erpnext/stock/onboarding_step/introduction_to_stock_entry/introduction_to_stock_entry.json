@@ -1,0 +1,19 @@
+{
+ "action": "Watch Video",
+ "creation": "2020-05-15 02:47:17.958806",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-10-14 14:53:00.075177",
+ "modified_by": "Administrator",
+ "name": "Introduction to Stock Entry",
+ "owner": "Administrator",
+ "show_full_form": 0,
+ "title": "Introduction to Stock Entry",
+ "validate_action": 1,
+ "video_url": "https://www.youtube.com/watch?v=Njt107hlY3I"
+}

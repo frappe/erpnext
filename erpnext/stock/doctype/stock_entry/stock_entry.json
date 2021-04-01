@@ -1,4 +1,5 @@
 {
+ "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-04-09 11:43:55",
@@ -12,7 +13,7 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
-  "company",
+  "add_to_transit",
   "work_order",
   "purchase_order",
   "delivery_note_no",
@@ -20,11 +21,13 @@
   "pick_list",
   "purchase_receipt_no",
   "col2",
+  "company",
   "posting_date",
   "posting_time",
   "set_posting_time",
   "inspection_required",
   "from_bom",
+  "apply_putaway_rule",
   "sb1",
   "bom_no",
   "fg_completed_qty",
@@ -65,6 +68,7 @@
   "dimension_col_break",
   "printing_settings",
   "select_print_heading",
+  "print_settings_col_break",
   "letter_head",
   "more_info",
   "is_opening",
@@ -114,11 +118,12 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval:doc.purpose == 'Receive at Warehouse'",
+   "depends_on": "eval:doc.purpose == 'Material Transfer'",
    "fieldname": "outgoing_stock_entry",
    "fieldtype": "Link",
    "label": "Stock Entry (Outward GIT)",
-   "options": "Stock Entry"
+   "options": "Stock Entry",
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -130,7 +135,7 @@
    "label": "Purpose",
    "oldfieldname": "purpose",
    "oldfieldtype": "Select",
-   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor\nSend to Warehouse\nReceive at Warehouse",
+   "options": "Material Issue\nMaterial Receipt\nMaterial Transfer\nMaterial Transfer for Manufacture\nMaterial Consumption for Manufacture\nManufacture\nRepack\nSend to Subcontractor",
    "read_only": 1
   },
   {
@@ -291,6 +296,7 @@
    "fieldtype": "Section Break"
   },
   {
+   "description": "Sets 'Source Warehouse' in each row of the items table.",
    "fieldname": "from_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -320,6 +326,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "description": "Sets 'Target Warehouse' in each row of the items table.",
    "fieldname": "to_warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -622,12 +629,33 @@
    "label": "Pick List",
    "options": "Pick List",
    "read_only": 1
+  },
+  {
+   "fieldname": "print_settings_col_break",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.purpose=='Material Transfer' && !doc.outgoing_stock_entry",
+   "fieldname": "add_to_transit",
+   "fieldtype": "Check",
+   "label": "Add to Transit",
+   "no_copy": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:in_list([\"Material Transfer\", \"Material Receipt\"], doc.purpose)",
+   "fieldname": "apply_putaway_rule",
+   "fieldtype": "Check",
+   "label": "Apply Putaway Rule"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 1,
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "modified": "2019-09-27 14:38:20.801420",
+ "links": [],
+ "modified": "2020-12-09 14:58:13.267321",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

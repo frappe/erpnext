@@ -2,6 +2,24 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Subscription', {
+	setup: function(frm) {
+		frm.set_query('party_type', function() {
+			return {
+				filters : {
+					name: ['in', ['Customer', 'Supplier']]
+				}
+			}
+		});
+
+		frm.set_query('cost_center', function() {
+			return {
+				filters: {
+					company: frm.doc.company
+				}
+			};
+		});
+	},
+
 	refresh: function(frm) {
 		if(!frm.is_new()){
 			if(frm.doc.status !== 'Cancelled'){

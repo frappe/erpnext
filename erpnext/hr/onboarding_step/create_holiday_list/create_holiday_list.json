@@ -1,0 +1,19 @@
+{
+ "action": "Create Entry",
+ "creation": "2020-05-28 11:47:34.700174",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_mandatory": 1,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2020-05-14 12:25:38.068582",
+ "modified_by": "Administrator",
+ "name": "Create Holiday list",
+ "owner": "Administrator",
+ "reference_document": "Holiday List",
+ "show_full_form": 1,
+ "title": "Create Holiday List",
+ "validate_action": 0
+}

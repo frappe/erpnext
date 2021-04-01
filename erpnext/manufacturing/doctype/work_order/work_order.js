@@ -122,12 +122,8 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	source_warehouse: function(frm) {
-		if (frm.doc.source_warehouse) {
-			frm.doc.required_items.forEach(d => {
-				frappe.model.set_value(d.doctype, d.name,
-					"source_warehouse", frm.doc.source_warehouse);
-			});
-		}
+		let transaction_controller = new erpnext.TransactionController();
+		transaction_controller.autofill_warehouse(frm.doc.required_items, "source_warehouse", frm.doc.source_warehouse);
 	},
 
 	refresh: function(frm) {
@@ -453,6 +449,32 @@ frappe.ui.form.on("Work Order Item", {
 				}
 			});
 		}
+	},
+
+	item_code: function(frm, cdt, cdn) {
+		let row = locals[cdt][cdn];
+
+		if (row.item_code) {
+			frappe.call({
+				method: "erpnext.stock.doctype.item.item.get_item_details",
+				args: {
+					item_code: row.item_code,
+					company: frm.doc.company
+				},
+				callback: function(r) {
+					if (r.message) {
+						frappe.model.set_value(cdt, cdn, {
+							"required_qty": 1,
+							"item_name": r.message.item_name,
+							"description": r.message.description,
+							"source_warehouse": r.message.default_warehouse,
+							"allow_alternative_item": r.message.allow_alternative_item,
+							"include_item_in_manufacturing": r.message.include_item_in_manufacturing
+						});
+					}
+				}
+			});
+		}
 	}
 });
 
@@ -523,7 +545,8 @@ erpnext.work_order = {
 						var tbl = frm.doc.required_items || [];
 						var tbl_lenght = tbl.length;
 						for (var i = 0, len = tbl_lenght; i < len; i++) {
-							if (flt(frm.doc.required_items[i].required_qty) > flt(frm.doc.required_items[i].consumed_qty)) {
+							let wo_item_qty = frm.doc.required_items[i].transferred_qty || frm.doc.required_items[i].required_qty;
+							if (flt(wo_item_qty) > flt(frm.doc.required_items[i].consumed_qty)) {
 								counter += 1;
 							}
 						}
@@ -614,7 +637,7 @@ erpnext.work_order = {
 				description: __('Max: {0}', [max]),
 				default: max
 			}, data => {
-				max += (max * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
+				max += (frm.doc.qty * (frm.doc.__onload.overproduction_percentage || 0.0)) / 100;
 
 				if (data.qty > max) {
 					frappe.msgprint(__('Quantity must not be more than {0}', [max]));

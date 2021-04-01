@@ -6,9 +6,13 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.model.document import Document
+from frappe.utils import get_link_to_form
 from functools import reduce
 
 class CourseEnrollment(Document):
+	def validate(self):
+		self.validate_duplication()
+
 	def get_progress(self, student):
 		"""
 		Returns Progress of given student for a particular course enrollment
@@ -27,13 +31,15 @@ class CourseEnrollment(Document):
 			return []
 
 	def validate_duplication(self):
-		enrollment = frappe.get_all("Course Enrollment", filters={
+		enrollment = frappe.db.exists("Course Enrollment", {
 			"student": self.student,
 			"course": self.course,
-			"program_enrollment": self.program_enrollment
+			"program_enrollment": self.program_enrollment,
+			"name": ("!=", self.name)
 		})
 		if enrollment:
-			frappe.throw(_("Student is already enrolled."))
+			frappe.throw(_("Student is already enrolled via Course Enrollment {0}").format(
+				get_link_to_form("Course Enrollment", enrollment)), title=_('Duplicate Entry'))
 
 	def add_quiz_activity(self, quiz_name, quiz_response, answers, score, status):
 		result = {k: ('Correct' if v else 'Wrong') for k,v in answers.items()}

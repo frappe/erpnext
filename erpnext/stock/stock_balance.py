@@ -6,7 +6,7 @@ import frappe
 from frappe.utils import flt, cstr, nowdate, nowtime
 from erpnext.stock.utils import update_bin
 from erpnext.stock.stock_ledger import update_entries_after
-from erpnext.controllers.stock_controller import update_gl_entries_after
+from erpnext.controllers.stock_controller import create_repost_item_valuation_entry
 
 def repost(only_actual=False, allow_negative_stock=False, allow_zero_rate=False, only_bin=False):
 	"""
@@ -56,12 +56,19 @@ def repost_stock(item_code, warehouse, allow_zero_rate=False,
 
 		update_bin_qty(item_code, warehouse, qty_dict)
 
-def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False):		update_entries_after({ "item_code": item_code, "warehouse": warehouse },
-		allow_zero_rate=allow_zero_rate, allow_negative_stock=allow_negative_stock)
+def repost_actual_qty(item_code, warehouse, allow_zero_rate=False, allow_negative_stock=False):
+	create_repost_item_valuation_entry({
+		"item_code": item_code,
+		"warehouse": warehouse,
+		"posting_date": "1900-01-01",
+		"posting_time": "00:01",
+		"allow_negative_stock": allow_negative_stock,
+		"allow_zero_rate": allow_zero_rate
+	})
 
 def get_balance_qty_from_sle(item_code, warehouse):
 	balance_qty = frappe.db.sql("""select qty_after_transaction from `tabStock Ledger Entry`
-		where item_code=%s and warehouse=%s and is_cancelled='No'
+		where item_code=%s and warehouse=%s and is_cancelled=0
 		order by posting_date desc, posting_time desc, creation desc
 		limit 1""", (item_code, warehouse))
 
@@ -191,7 +198,7 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			print(d[0], d[1], d[2], serial_nos[0][0])
 
 		sle = frappe.db.sql("""select valuation_rate, company from `tabStock Ledger Entry`
-			where item_code = %s and warehouse = %s and ifnull(is_cancelled, 'No') = 'No'
+			where item_code = %s and warehouse = %s and is_cancelled = 0
 			order by posting_date desc limit 1""", (d[0], d[1]))
 
 		sle_dict = {
@@ -208,7 +215,6 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 			'stock_uom'					: d[3],
 			'incoming_rate'				: sle and flt(serial_nos[0][0]) > flt(d[2]) and flt(sle[0][0]) or 0,
 			'company'					: sle and cstr(sle[0][1]) or 0,
-			'is_cancelled'			 	: 'No',
 			'batch_no'					: '',
 			'serial_no'					: ''
 		}
@@ -220,12 +226,12 @@ def set_stock_balance_as_per_serial_no(item_code=None, posting_date=None, postin
 
 		args = sle_dict.copy()
 		args.update({
-			"sle_id": sle_doc.name,
-			"is_amended": 'No'
+			"sle_id": sle_doc.name
 		})
 
 		update_bin(args)
-		update_entries_after({
+		
+		create_repost_item_valuation_entry({
 			"item_code": d[0],
 			"warehouse": d[1],
 			"posting_date": posting_date,
@@ -246,15 +252,3 @@ def reset_serial_no_status_and_warehouse(serial_nos=None):
 				sr.save()
 			except:
 				pass
-
-def repost_gle_for_stock_transactions(posting_date=None, posting_time=None, for_warehouses=None):
-	frappe.db.auto_commit_on_many_writes = 1
-
-	if not posting_date:
-		posting_date = "1900-01-01"
-	if not posting_time:
-		posting_time = "00:00"
-
-	update_gl_entries_after(posting_date, posting_time, for_warehouses=for_warehouses)
-
-	frappe.db.auto_commit_on_many_writes = 0

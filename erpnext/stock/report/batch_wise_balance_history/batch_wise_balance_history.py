@@ -11,6 +11,9 @@ from frappe.utils import cint, flt, getdate
 def execute(filters=None):
 	if not filters: filters = {}
 
+	if filters.from_date > filters.to_date:
+		frappe.throw(_("From Date must be before To Date"))
+
 	float_precision = cint(frappe.db.get_default("float_precision")) or 3
 
 	columns = get_columns(filters)
@@ -53,6 +56,10 @@ def get_conditions(filters):
 		conditions += " and posting_date <= '%s'" % filters["to_date"]
 	else:
 		frappe.throw(_("'To Date' is required"))
+
+	for field in ["item_code", "warehouse", "batch_no", "company"]:
+		if filters.get(field):
+			conditions += " and {0} = {1}".format(field, frappe.db.escape(filters.get(field)))
 
 	return conditions
 

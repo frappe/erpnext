@@ -30,14 +30,14 @@ frappe.ui.form.on('Social Media Post', {
                 let color = frm.doc.twitter_post_id ? "green" : "red";
                 let status = frm.doc.twitter_post_id ? "Posted" : "Not Posted";
                 html += `<div class="col-xs-6">
-                            <span class="indicator whitespace-nowrap ${color}"><span class="hidden-xs">Twitter : ${status} </span></span>
+                            <span class="indicator whitespace-nowrap ${color}"><span>Twitter : ${status} </span></span>
                         </div>` ;
             }
             if (frm.doc.linkedin){
                 let color = frm.doc.linkedin_post_id ? "green" : "red";
                 let status = frm.doc.linkedin_post_id ? "Posted" : "Not Posted";
                 html += `<div class="col-xs-6">
-                            <span class="indicator whitespace-nowrap ${color}"><span class="hidden-xs">LinkedIn : ${status} </span></span>
+                            <span class="indicator whitespace-nowrap ${color}"><span>LinkedIn : ${status} </span></span>
                         </div>` ;
             }
             html = `<div class="row">${html}</div>`;

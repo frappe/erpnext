@@ -6,16 +6,19 @@ import unittest
 import frappe
 from frappe.utils import nowdate
 from erpnext.healthcare.doctype.patient_appointment.test_patient_appointment import create_encounter, create_healthcare_docs, create_appointment
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 class TestPatientMedicalRecord(unittest.TestCase):
 	def setUp(self):
 		frappe.db.set_value('Healthcare Settings', None, 'enable_free_follow_ups', 0)
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 1)
+		make_pos_profile()
 
 	def test_medical_record(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		appointment = create_appointment(patient, practitioner, nowdate(), invoice=1)
 		encounter = create_encounter(appointment)
+
 		# check for encounter
 		medical_rec = frappe.db.exists('Patient Medical Record', {'status': 'Open', 'reference_name': encounter.name})
 		self.assertTrue(medical_rec)
@@ -34,7 +37,7 @@ class TestPatientMedicalRecord(unittest.TestCase):
 		self.assertTrue(medical_rec)
 
 		template = create_lab_test_template(medical_department)
-		lab_test = create_lab_test(template, patient)
+		lab_test = create_lab_test(template.name, patient)
 		# check for lab test
 		medical_rec = frappe.db.exists('Patient Medical Record', {'status': 'Open', 'reference_name': lab_test.name})
 		self.assertTrue(medical_rec)
@@ -66,7 +69,7 @@ def create_vital_signs(appointment):
 
 def create_lab_test_template(medical_department):
 	if frappe.db.exists('Lab Test Template', 'Blood Test'):
-		return 'Blood Test'
+		return frappe.get_doc('Lab Test Template', 'Blood Test')
 
 	template = frappe.new_doc('Lab Test Template')
 	template.lab_test_name = 'Blood Test'
@@ -76,7 +79,7 @@ def create_lab_test_template(medical_department):
 	template.is_billable = 1
 	template.lab_test_rate = 2000
 	template.save()
-	return template.name
+	return template
 
 def create_lab_test(template, patient):
 	lab_test = frappe.new_doc('Lab Test')

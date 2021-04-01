@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "creation": "2019-09-09 17:06:16.756573",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "loan_security",
+  "loan_security_name",
   "loan_security_type",
   "loan_security_code",
   "uom",
@@ -49,7 +51,8 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity"
+   "label": "Quantity",
+   "non_negative": 1
   },
   {
    "fieldname": "loan_security_price",
@@ -83,10 +86,18 @@
    "label": "Post Haircut Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fetch_from": "loan_security.loan_security_name",
+   "fieldname": "loan_security_name",
+   "fieldtype": "Data",
+   "label": "Loan Security Name",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2019-12-03 10:59:58.001421",
+ "links": [],
+ "modified": "2021-01-17 07:41:12.452514",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Pledge",

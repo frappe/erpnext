@@ -3,7 +3,7 @@ frappe.provide("erpnext.financial_statements");
 erpnext.financial_statements = {
 	"filters": get_filters(),
 	"formatter": function(value, row, column, data, default_formatter) {
-		if (column.fieldname=="account") {
+		if (data && column.fieldname=="account") {
 			value = data.account_name || value;
 
 			column.link_onclick =
@@ -13,7 +13,7 @@ erpnext.financial_statements = {
 
 		value = default_formatter(value, row, column, data);
 
-		if (!data.parent_account) {
+		if (data && !data.parent_account) {
 			value = $(`<span>${value}</span>`);
 
 			var $value = $(value).css("font-weight", "bold");
@@ -47,22 +47,36 @@ erpnext.financial_statements = {
 		// dropdown for links to other financial statements
 		erpnext.financial_statements.filters = get_filters()
 
-		report.page.add_inner_button(__("Balance Sheet"), function() {
+		let fiscal_year = frappe.defaults.get_user_default("fiscal_year")
+
+		frappe.model.with_doc("Fiscal Year", fiscal_year, function(r) {
+			var fy = frappe.model.get_doc("Fiscal Year", fiscal_year);
+			frappe.query_report.set_filter_value({
+				period_start_date: fy.year_start_date,
+				period_end_date: fy.year_end_date
+			});
+		});
+
+		const views_menu = report.page.add_custom_button_group(__('Financial Statements'));
+
+		report.page.add_custom_menu_item(views_menu, __("Balance Sheet"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Balance Sheet', {company: filters.company});
-		}, __('Financial Statements'));
-		report.page.add_inner_button(__("Profit and Loss"), function() {
+		});
+
+		report.page.add_custom_menu_item(views_menu, __("Profit and Loss"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Profit and Loss Statement', {company: filters.company});
-		}, __('Financial Statements'));
-		report.page.add_inner_button(__("Cash Flow Statement"), function() {
+		});
+
+		report.page.add_custom_menu_item(views_menu, __("Cash Flow Statement"), function() {
 			var filters = report.get_values();
 			frappe.set_route('query-report', 'Cash Flow', {company: filters.company});
-		}, __('Financial Statements'));
+		});
 	}
 };
 
-function get_filters(){
+function get_filters() {
 	let filters = [
 		{
 			"fieldname":"company",
@@ -99,7 +113,6 @@ function get_filters(){
 			"fieldname":"period_start_date",
 			"label": __("Start Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.nowdate(),
 			"hidden": 1,
 			"reqd": 1
 		},
@@ -107,7 +120,6 @@ function get_filters(){
 			"fieldname":"period_end_date",
 			"label": __("End Date"),
 			"fieldtype": "Date",
-			"default": frappe.datetime.add_months(frappe.datetime.nowdate(), 12),
 			"hidden": 1,
 			"reqd": 1
 		},
@@ -161,15 +173,6 @@ function get_filters(){
 			}
 		}
 	]
-
-	erpnext.dimension_filters.forEach((dimension) => {
-		filters.push({
-			"fieldname": dimension["fieldname"],
-			"label": __(dimension["label"]),
-			"fieldtype": "Link",
-			"options": dimension["document_type"]
-		});
-	});
 
 	return filters;
 }

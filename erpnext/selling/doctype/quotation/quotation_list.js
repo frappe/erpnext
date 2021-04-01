@@ -3,13 +3,15 @@ frappe.listview_settings['Quotation'] = {
 		"company", "currency", 'valid_till'],
 
 	onload: function(listview) {
-		listview.page.fields_dict.quotation_to.get_query = function() {
-			return {
-				"filters": {
-					"name": ["in", ["Customer", "Lead"]],
-				}
+		if (listview.page.fields_dict.quotation_to) {
+			listview.page.fields_dict.quotation_to.get_query = function() {
+				return {
+					"filters": {
+						"name": ["in", ["Customer", "Lead"]],
+					}
+				};
 			};
-		};
+		}
 	},
 
 	get_indicator: function(doc) {
@@ -18,9 +20,9 @@ frappe.listview_settings['Quotation'] = {
 		} else if(doc.status==="Ordered") {
 			return [__("Ordered"), "green", "status,=,Ordered"];
 		} else if(doc.status==="Lost") {
-			return [__("Lost"), "darkgrey", "status,=,Lost"];
+			return [__("Lost"), "gray", "status,=,Lost"];
 		} else if(doc.status==="Expired") {
-			return [__("Expired"), "darkgrey", "status,=,Expired"];
+			return [__("Expired"), "gray", "status,=,Expired"];
 		}
 	}
 };

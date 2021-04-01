@@ -46,7 +46,7 @@ QUnit.test("test: quotation", function (assert) {
 			assert.ok(cur_frm.doc.items[0].rate == 200, "Price Changed Manually");
 			assert.equal(cur_frm.doc.total, 1000, "New Total Calculated");
 
-			// Check Terms and Condtions
+			// Check Terms and Conditions
 			assert.ok(cur_frm.doc.tc_name == "Test Term 1", "Terms and Conditions Checked");
 
 			assert.ok(cur_frm.doc.payment_terms_template, "Payment Terms Template is correct");

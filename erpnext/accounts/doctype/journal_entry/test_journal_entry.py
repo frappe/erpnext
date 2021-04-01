@@ -6,6 +6,7 @@ import unittest, frappe
 from frappe.utils import flt, nowdate
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.exceptions import InvalidAccountCurrency
+from erpnext.accounts.doctype.journal_entry.journal_entry import StockAccountInvalidTransaction
 
 class TestJournalEntry(unittest.TestCase):
 	def test_journal_entry_with_against_jv(self):
@@ -74,27 +75,46 @@ class TestJournalEntry(unittest.TestCase):
 
 		elif test_voucher.doctype in ["Sales Order", "Purchase Order"]:
 			# if test_voucher is a Sales Order/Purchase Order, test error on cancellation of test_voucher
+			frappe.db.set_value("Accounts Settings", "Accounts Settings",
+				"unlink_advance_payment_on_cancelation_of_order", 0)
 			submitted_voucher = frappe.get_doc(test_voucher.doctype, test_voucher.name)
 			self.assertRaises(frappe.LinkExistsError, submitted_voucher.cancel)
 
 	def test_jv_against_stock_account(self):
-		from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import set_perpetual_inventory
-		set_perpetual_inventory()
+		company = "_Test Company with perpetual inventory"
+		stock_account = get_inventory_account(company)
 
-		jv = frappe.copy_doc(test_records[0])
-		jv.get("accounts")[0].update({
-			"account": get_inventory_account('_Test Company'),
-			"company": "_Test Company",
-			"party_type": None,
-			"party": None
+		from erpnext.accounts.utils import get_stock_and_account_balance
+		account_bal, stock_bal, warehouse_list = get_stock_and_account_balance(stock_account, nowdate(), company)
+		diff = flt(account_bal) - flt(stock_bal)
+
+		if not diff:
+			diff = 100
+
+		jv = frappe.new_doc("Journal Entry")
+		jv.company = company
+		jv.posting_date = nowdate()
+		jv.append("accounts", {
+			"account": stock_account,
+			"cost_center": "Main - TCP1",
+			"debit_in_account_currency": 0 if diff > 0 else abs(diff),
+			"credit_in_account_currency": diff if diff > 0 else 0
 		})
-
+		
+		jv.append("accounts", {
+			"account": "Stock Adjustment - TCP1",
+			"cost_center": "Main - TCP1",
+			"debit_in_account_currency": diff if diff > 0 else 0,
+			"credit_in_account_currency": 0 if diff > 0 else abs(diff)
+		})
 		jv.insert()
 
-		from erpnext.accounts.general_ledger import StockAccountInvalidTransaction
-		self.assertRaises(StockAccountInvalidTransaction, jv.submit)
-
-		set_perpetual_inventory(0)
+		if account_bal == stock_bal:
+			self.assertRaises(StockAccountInvalidTransaction, jv.submit)
+			frappe.db.rollback()
+		else:
+			jv.submit()
+			jv.cancel()
 
 	def test_multi_currency(self):
 		jv = make_journal_entry("_Test Bank USD - _TC",
@@ -138,6 +158,49 @@ class TestJournalEntry(unittest.TestCase):
 			where voucher_type='Sales Invoice' and voucher_no=%s""", jv.name)
 
 		self.assertFalse(gle)
+
+	def test_reverse_journal_entry(self):
+		from erpnext.accounts.doctype.journal_entry.journal_entry import make_reverse_journal_entry
+		jv = make_journal_entry("_Test Bank USD - _TC",
+			"Sales - _TC", 100, exchange_rate=50, save=False)
+
+		jv.get("accounts")[1].credit_in_account_currency = 5000
+		jv.get("accounts")[1].exchange_rate = 1
+		jv.submit()
+
+		rjv = make_reverse_journal_entry(jv.name)
+		rjv.posting_date = nowdate()
+		rjv.submit()
+
+
+		gl_entries = frappe.db.sql("""select account, account_currency, debit, credit,
+			debit_in_account_currency, credit_in_account_currency
+			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
+			order by account asc""", rjv.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+
+		expected_values = {
+			"_Test Bank USD - _TC": {
+				"account_currency": "USD",
+				"debit": 0,
+				"debit_in_account_currency": 0,
+				"credit": 5000,
+				"credit_in_account_currency": 100,
+			},
+			"Sales - _TC": {
+				"account_currency": "INR",
+				"debit": 5000,
+				"debit_in_account_currency": 5000,
+				"credit": 0,
+				"credit_in_account_currency": 0,
+			}
+		}
+
+		for field in ("account_currency", "debit", "debit_in_account_currency", "credit", "credit_in_account_currency"):
+			for i, gle in enumerate(gl_entries):
+				self.assertEqual(expected_values[gle.account][field], gle[field])
 
 	def test_disallow_change_in_account_currency_for_a_party(self):
 		# create jv in USD
@@ -204,11 +267,8 @@ class TestJournalEntry(unittest.TestCase):
 		self.assertEqual(jv.inter_company_journal_entry_reference, "")
 		self.assertEqual(jv1.inter_company_journal_entry_reference, "")
 
-	def test_jv_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+	def test_jv_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center = cost_center, save=False)
@@ -237,15 +297,50 @@ class TestJournalEntry(unittest.TestCase):
 		for gle in gl_entries:
 			self.assertEqual(expected_values[gle.account]["cost_center"], gle.cost_center)
 
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
+	def test_jv_with_project(self):
+		from erpnext.projects.doctype.project.test_project import make_project
 
-	def test_jv_account_and_party_balance_for_enable_allow_cost_center_in_entry_of_bs_account(self):
+		if not frappe.db.exists("Project", {"project_name": "Journal Entry Project"}):
+			project = make_project({
+				'project_name': 'Journal Entry Project',
+				'project_template_name': 'Test Project Template',
+				'start_date': '2020-01-01'
+			})
+			project_name = project.name
+		else:
+			project_name = frappe.get_value("Project", {"project_name": "_Test Project"})
+
+		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, save=False)
+		for d in jv.accounts:
+			d.project = project_name
+		jv.voucher_type = "Bank Entry"
+		jv.multi_currency = 0
+		jv.cheque_no = "112233"
+		jv.cheque_date = nowdate()
+		jv.insert()
+		jv.submit()
+
+		expected_values = {
+			"_Test Cash - _TC": {
+				"project": project_name
+			},
+			"_Test Bank - _TC": {
+				"project": project_name
+			}
+		}
+
+		gl_entries = frappe.db.sql("""select account, project, debit, credit
+			from `tabGL Entry` where voucher_type='Journal Entry' and voucher_no=%s
+			order by account asc""", jv.name, as_dict=1)
+
+		self.assertTrue(gl_entries)
+
+		for gle in gl_entries:
+			self.assertEqual(expected_values[gle.account]["project"], gle.project)
+
+	def test_jv_account_and_party_balance_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on
-		accounts_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 1
-		accounts_settings.save()
 		cost_center = "_Test Cost Center for BS Account - _TC"
 		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center = cost_center, save=False)
@@ -260,9 +355,6 @@ class TestJournalEntry(unittest.TestCase):
 		expected_account_balance = account_balance - 100
 		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
 		self.assertEqual(expected_account_balance, account_balance)
-
-		accounts_settings.allow_cost_center_in_entry_of_bs_account = 0
-		accounts_settings.save()
 
 def make_journal_entry(account1, account2, amount, cost_center=None, posting_date=None, exchange_rate=1, save=True, submit=False, project=None):
 	if not cost_center:

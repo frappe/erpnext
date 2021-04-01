@@ -160,6 +160,8 @@ class ReceivablePayableReport(object):
 			else:
 				# advance / unlinked payment or other adjustment
 				row.paid -= gle_balance
+		if gle.cost_center:
+			row.cost_center =  str(gle.cost_center)
 
 	def update_sub_total_row(self, row, party):
 		total_row = self.total_row_map.get(party)
@@ -169,9 +171,11 @@ class ReceivablePayableReport(object):
 
 	def append_subtotal_row(self, party):
 		sub_total_row = self.total_row_map.get(party)
-		self.data.append(sub_total_row)
-		self.data.append({})
-		self.update_sub_total_row(sub_total_row, 'Total')
+
+		if sub_total_row:
+			self.data.append(sub_total_row)
+			self.data.append({})
+			self.update_sub_total_row(sub_total_row, 'Total')
 
 	def get_voucher_balance(self, gle):
 		if self.filters.get("sales_person"):
@@ -208,7 +212,6 @@ class ReceivablePayableReport(object):
 		for key, row in self.voucher_balance.items():
 			row.outstanding = flt(row.invoiced - row.paid - row.credit_note, self.currency_precision)
 			row.invoice_grand_total = row.invoiced
-
 			if abs(row.outstanding) > 1.0/10 ** self.currency_precision:
 				# non-zero oustanding, we must consider this row
 
@@ -232,7 +235,8 @@ class ReceivablePayableReport(object):
 
 		if self.filters.get('group_by_party'):
 			self.append_subtotal_row(self.previous_party)
-			self.data.append(self.total_row_map.get('Total'))
+			if self.data:
+				self.data.append(self.total_row_map.get('Total'))
 
 	def append_row(self, row):
 		self.allocate_future_payments(row)
@@ -360,7 +364,7 @@ class ReceivablePayableReport(object):
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount
+				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
@@ -391,13 +395,13 @@ class ReceivablePayableReport(object):
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
 			"payment_term": d.description,
-			"paid": d.paid_amount,
+			"paid": d.paid_amount + d.discounted_amount,
 			"credit_note": 0.0,
-			"outstanding": invoiced - d.paid_amount
+			"outstanding": invoiced - d.paid_amount - d.discounted_amount
 		}))
 
 		if d.paid_amount:
-			row['paid'] -= d.paid_amount
+			row['paid'] -= d.paid_amount + d.discounted_amount
 
 	def allocate_closing_to_term(self, row, term, key):
 		if row[key]:
@@ -534,7 +538,7 @@ class ReceivablePayableReport(object):
 
 	def get_ageing_data(self, entry_date, row):
 		# [0-30, 30-60, 60-90, 90-120, 120-above]
-		row.range1 = row.range2 = row.range3 = row.range4 = range5 = 0.0
+		row.range1 = row.range2 = row.range3 = row.range4 = row.range5 = 0.0
 
 		if not (self.age_as_on and entry_date):
 			return
@@ -546,7 +550,7 @@ class ReceivablePayableReport(object):
 			self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4 = 30, 60, 90, 120
 
 		for i, days in enumerate([self.filters.range1, self.filters.range2, self.filters.range3, self.filters.range4]):
-			if row.age <= days:
+			if cint(row.age) <= cint(days):
 				index = i
 				break
 
@@ -559,6 +563,14 @@ class ReceivablePayableReport(object):
 		conditions, values = self.prepare_conditions()
 		order_by = self.get_order_by_condition()
 
+		if self.filters.show_future_payments:
+			values.insert(2, self.filters.report_date)
+
+			date_condition = """AND (posting_date <= %s
+				OR (against_voucher IS NULL AND DATE(creation) <= %s))"""
+		else:
+			date_condition = "AND posting_date <=%s"
+
 		if self.filters.get(scrub(self.party_type)):
 			select_fields = "debit_in_account_currency as debit, credit_in_account_currency as credit"
 		else:
@@ -566,7 +578,7 @@ class ReceivablePayableReport(object):
 
 		self.gl_entries = frappe.db.sql("""
 			select
-				name, posting_date, account, party_type, party, voucher_type, voucher_no,
+				name, posting_date, account, party_type, party, voucher_type, voucher_no, cost_center,
 				against_voucher_type, against_voucher, account_currency, remarks, {0}
 			from
 				`tabGL Entry`
@@ -574,9 +586,8 @@ class ReceivablePayableReport(object):
 				docstatus < 2
 				and party_type=%s
 				and (party is not null and party != '')
-				and posting_date <= %s
-				{1} {2}"""
-			.format(select_fields, conditions, order_by), values, as_dict=True)
+				{1} {2} {3}"""
+			.format(select_fields, date_condition, conditions, order_by), values, as_dict=True)
 
 	def get_sales_invoices_or_customers_based_on_sales_person(self):
 		if self.filters.get("sales_person"):
@@ -607,8 +618,18 @@ class ReceivablePayableReport(object):
 		elif party_type_field=="supplier":
 			self.add_supplier_filters(conditions, values)
 
+		if self.filters.cost_center:
+			self.get_cost_center_conditions(conditions)
+
 		self.add_accounting_dimensions_filters(conditions, values)
 		return " and ".join(conditions), values
+
+	def get_cost_center_conditions(self, conditions):
+		lft, rgt = frappe.db.get_value("Cost Center", self.filters.cost_center, ["lft", "rgt"])
+		cost_center_list = [center.name for center in frappe.get_list("Cost Center", filters = {'lft': (">=", lft), 'rgt': ("<=", rgt)})]
+
+		cost_center_string = '", "'.join(cost_center_list)
+		conditions.append('cost_center in ("{0}")'.format(cost_center_string))
 
 	def get_order_by_condition(self):
 		if self.filters.get('group_by_party'):
@@ -633,8 +654,10 @@ class ReceivablePayableReport(object):
 		account_type = "Receivable" if self.party_type == "Customer" else "Payable"
 		accounts = [d.name for d in frappe.get_all("Account",
 			filters={"account_type": account_type, "company": self.filters.company})]
-		conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
-		values += accounts
+
+		if accounts:
+			conditions.append("account in (%s)" % ','.join(['%s'] *len(accounts)))
+			values += accounts
 
 	def add_customer_filters(self, conditions, values):
 		if self.filters.get("customer_group"):
@@ -719,6 +742,7 @@ class ReceivablePayableReport(object):
 			self.add_column(_("Customer Contact"), fieldname='customer_primary_contact',
 				fieldtype='Link', options='Contact')
 
+		self.add_column(label=_('Cost Center'), fieldname='cost_center', fieldtype='Data')
 		self.add_column(label=_('Voucher Type'), fieldname='voucher_type', fieldtype='Data')
 		self.add_column(label=_('Voucher No'), fieldname='voucher_no', fieldtype='Dynamic Link',
 			options='voucher_type', width=180)

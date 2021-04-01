@@ -18,7 +18,7 @@
  "is_standard": 1,
  "login_required": 1,
  "max_attachment_size": 0,
- "modified": "2020-03-06 05:24:05.749664",
+ "modified": "2020-05-19 13:01:10.729088",
  "modified_by": "Administrator",
  "module": "Support",
  "name": "issues",
@@ -76,7 +76,7 @@
   {
    "allow_read_on_all_link_options": 0,
    "fieldname": "description",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "hidden": 0,
    "label": "Description",
    "max_length": 0,
