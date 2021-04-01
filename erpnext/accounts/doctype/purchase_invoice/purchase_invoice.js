@@ -524,7 +524,7 @@ frappe.ui.form.on("Purchase Invoice", {
 	},
 
 	onload: function(frm) {
-		if(frm.doc.__onload) {
+		if(frm.doc.__onload && frm.is_new()) {
 			if(frm.doc.supplier) {
 				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
 			}
