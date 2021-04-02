@@ -120,6 +120,6 @@ def update_pending_shortfall(shortfall):
 		{
 			"status": "Completed",
 			"shortfall_amount": 0,
-			"shortfall_precentage": 0
+			"shortfall_percentage": 0
 		})
 
