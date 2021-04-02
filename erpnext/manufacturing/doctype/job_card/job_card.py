@@ -164,6 +164,7 @@ class JobCard(Document):
 			"time_in_mins": time_diff_in_minutes(row.planned_end_time, row.planned_start_time),
 		})
 
+	@frappe.whitelist()
 	def get_required_items(self):
 		if not self.get('work_order'):
 			return
