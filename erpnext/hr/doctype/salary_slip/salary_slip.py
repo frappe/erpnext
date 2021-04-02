@@ -459,6 +459,7 @@ class SalarySlip(TransactionBase):
 	def add_additional_salary_components(self, component_type):
 		additional_components = get_additional_salary_component(self.employee,
 			self.start_date, self.end_date, component_type)
+		self.additional_components = additional_components
 		if additional_components:
 			for additional_component in additional_components:
 				amount = additional_component.amount
@@ -479,10 +480,12 @@ class SalarySlip(TransactionBase):
 			tax_components = [d.name for d in frappe.get_all("Salary Component", filters={"variable_based_on_taxable_salary": 1})
 				if d.name not in other_deduction_components]
 
+		overwritten_tax_components = [ac.struct_row.salary_component for ac in self.additional_components if ac.overwrite]
 		for d in tax_components:
-			tax_amount = self.calculate_variable_based_on_taxable_salary(d, payroll_period)
-			tax_row = self.get_salary_slip_row(d)
-			self.update_component_row(tax_row, tax_amount, "deductions")
+			if d not in overwritten_tax_components:
+				tax_amount = self.calculate_variable_based_on_taxable_salary(d, payroll_period)
+				tax_row = self.get_salary_slip_row(d)
+				self.update_component_row(tax_row, tax_amount, "deductions")
 
 	def update_component_row(self, struct_row, amount, key, overwrite=1):
 		component_row = None
