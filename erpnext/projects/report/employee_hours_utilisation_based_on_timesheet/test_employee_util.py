@@ -68,7 +68,6 @@ class TestEmployeeUtilisation(unittest.TestCase):
 
         frappe.db.sql("DELETE FROM `tabTimesheet` WHERE company='_Test Company'")
         frappe.db.sql(f"DELETE FROM `tabProject` WHERE name='{cls.test_project.name}'")
-        print(f"DELETE FROM `tabProject` WHERE name='{cls.test_project.name}'")
 
     def test_utilisation_report_with_required_filters_only(self):
         filters = {
@@ -145,3 +144,21 @@ class TestEmployeeUtilisation(unittest.TestCase):
         ]
 
         self.assertEqual(report[1], expected_data)
+
+    def test_report_summary_data(self):
+        filters = {
+            "company": "_Test Company",
+            "from_date": "2021-04-01",
+            "to_date": "2021-04-03"
+        }
+
+        report = execute(filters)
+        summary = report[4]
+        expected_summary_values = ['41.67%', 5.0, 10.0, 21.0]
+
+        self.assertEqual(len(summary), 4)
+
+        for i in range(4):
+            self.assertEqual(
+                summary[i]['value'], expected_summary_values[i]
+        )
