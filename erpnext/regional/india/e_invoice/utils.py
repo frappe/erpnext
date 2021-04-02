@@ -335,7 +335,7 @@ def make_einvoice(invoice):
 		if place_of_supply:
 			place_of_supply = place_of_supply.split('-')[0]
 		else:
-			place_of_supply = sanitize_for_json(invoice.billing_address_gstin)[:2]
+			place_of_supply = invoice.billing_address_gstin[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 	
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
