@@ -1083,7 +1083,7 @@ def get_default_bom_item(item_code):
 
 @frappe.whitelist()
 def make_raw_material_request(items, company, sales_order, project=None):
-	if not frappe.has_permission("Sales Order", "write"):
+	if not frappe.has_permission("Sales Order", "read"):
 		frappe.throw(_("Not permitted"), frappe.PermissionError)
 
 	if isinstance(items, string_types):
