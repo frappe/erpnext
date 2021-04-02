@@ -1,0 +1,82 @@
+{
+ "autoname": "RentOwners.#####",
+ "creation": "2021-02-19 15:24:59.300962",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "dzongkhag",
+  "location",
+  "building_name",
+  "owner_account_number",
+  "table_5",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "dzongkhag",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Dzongkhag"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Location"
+  },
+  {
+   "fieldname": "building_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Building Name"
+  },
+  {
+   "fieldname": "owner_account_number",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Owner Account Number"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rent Owners",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "table_5",
+   "fieldtype": "Table",
+   "options": "Rent Owner Item"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-02-19 16:01:27.811143",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Rent Owners",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "if_owner": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

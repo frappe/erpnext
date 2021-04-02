@@ -1,0 +1,62 @@
+{
+ "autoname": "FSC.#####",
+ "creation": "2021-03-11 10:30:30.794425",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "part_a",
+  "part_b",
+  "column_break_3",
+  "total_score",
+  "overall_rating"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "part_a",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Part A",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "part_b",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Part B",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "total_score",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Score(A+B)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overall_rating",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Overall Performance Rating",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-03-18 10:54:21.833940",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Final Score Calculation",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

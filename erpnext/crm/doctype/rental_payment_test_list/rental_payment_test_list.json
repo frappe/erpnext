@@ -1,0 +1,74 @@
+{
+ "autoname": "Rental Payment Test List.#####",
+ "creation": "2021-03-02 12:36:07.509148",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "party_type",
+  "party",
+  "amount",
+  "taxable_amount",
+  "tds_amount",
+  "net_amount",
+  "remarks",
+  "company"
+ ],
+ "fields": [
+  {
+   "fieldname": "party_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Party Type"
+  },
+  {
+   "fieldname": "party",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Party"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Amount"
+  },
+  {
+   "fieldname": "taxable_amount",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Taxable Amount"
+  },
+  {
+   "fieldname": "tds_amount",
+   "fieldtype": "Data",
+   "label": "TDS Amount"
+  },
+  {
+   "fieldname": "net_amount",
+   "fieldtype": "Data",
+   "label": " Net Amount"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Data",
+   "label": "Remarks"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Data",
+   "label": "Company"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-03-02 12:53:15.885815",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Rental Payment Test List",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

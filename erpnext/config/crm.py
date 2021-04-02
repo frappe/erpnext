@@ -4,58 +4,22 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Sales Pipeline"),
-			"icon": "fa fa-star",
+			"label": _("PMS"),			
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Lead",
-					"description": _("Database of potential customers."),
+					"name": "PMS Calendar",
 					"onboard": 1,
 				},
 				{
 					"type": "doctype",
-					"name": "Opportunity",
-					"description": _("Potential opportunities for selling."),
-					"onboard": 1,
+					"name": "Target Set Up",
+					"onboard": 1
 				},
-				{
-					"type": "doctype",
-					"name": "Customer",
-					"description": _("Customer database."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Contact",
-					"description": _("All Contacts."),
-					"onboard": 1,
-				},
-				{
-					"type": "doctype",
-					"name": "Communication",
-					"description": _("Record of all communications of type email, phone, chat, visit, etc."),
-				},
-				{
-					"type": "doctype",
-					"name": "Lead Source",
-					"description": _("Track Leads by Lead Source.")
-				},
-				{
-					"type": "doctype",
-					"name": "Contract",
-					"description": _("Helps you keep tracks of Contracts based on Supplier, Customer and Employee"),
-				},
-				{
-					"type": "doctype",
-					"name": "Appointment",
-					"description" : _("Helps you manage appointments with your leads"),
-				},
-        {
-          "type": "doctype",
-					"name": "Newsletter",
-					"label": _("Newsletter"),
-				}
+			
+
+
+				
 			]
 		},
 		{
@@ -117,6 +81,13 @@ def get_data():
 					"name": "Lead Owner Efficiency",
 					"doctype": "Lead",
 					"dependencies": ["Lead"]
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Dzongkhang Wise House Owner",
+					"doctype": "Dzongkhang Wise House Owner",
+					"dependencies": ["Dzongkhang Wise House Owner"]
 				}
 			]
 		},
@@ -209,6 +180,34 @@ def get_data():
 					"name": "Warranty Claim",
 					"description": _("Warranty Claim against Serial No."),
 				},
+				{
+					"type": "doctype",
+					"name": "AMC",
+					"description": _("AMC"),
+				},
+				{
+					"type": "doctype",
+					"name": "Rent Owners",
+					"description": _("Rent Owners Details"),
+				},
+				{
+					"type": "doctype",
+					"name": "Rental Payment",
+					"description": _("Rental Payment Details"),
+				},
+				{
+					"type": "doctype",
+					"name": "Rental Payment Test",
+					"description": _("Rental Payment Details"),
+				},
+				{
+					"type": "doctype",
+					"name": "Compare",
+					"description": _("Compare Details"),
+				},
+			
+			
+
 			]
 		},
 		# {

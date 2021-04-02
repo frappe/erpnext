@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
  "creation": "2013-02-05 11:48:26",
@@ -125,8 +124,7 @@
  "icon": "fa fa-sitemap",
  "idx": 1,
  "is_tree": 1,
- "links": [],
- "modified": "2020-03-18 18:26:05.966022",
+ "modified": "2021-03-03 14:47:48.267826",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Department",
@@ -167,6 +165,18 @@
    "report": 1,
    "role": "HR Manager",
    "set_user_permissions": 1,
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
    "share": 1,
    "write": 1
   }

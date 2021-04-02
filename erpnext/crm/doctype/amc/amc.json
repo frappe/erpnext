@@ -1,0 +1,148 @@
+{
+ "autoname": "AMC.#####",
+ "creation": "2021-02-10 14:46:23.255857",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "types_of_amc",
+  "column_break_2",
+  "amc_name",
+  "parties_name",
+  "column_break_5",
+  "agreement_signing_date",
+  "amc_period_section",
+  "from_date",
+  "column_break_10",
+  "to_date",
+  "section_break_13",
+  "amc_amount",
+  "column_break_15",
+  "amc_interval",
+  "section_break_17",
+  "amc_obligation",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "types_of_amc",
+   "fieldtype": "Select",
+   "label": "Types of AMC",
+   "options": "Rental Payment\nMaintenance\nAMC Payment"
+  },
+  {
+   "fieldname": "amc_name",
+   "fieldtype": "Data",
+   "label": "AMC Name"
+  },
+  {
+   "fieldname": "parties_name",
+   "fieldtype": "Data",
+   "label": "Parties Name"
+  },
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "label": "To Date"
+  },
+  {
+   "fieldname": "amc_amount",
+   "fieldtype": "Float",
+   "label": "AMC Amount"
+  },
+  {
+   "fieldname": "amc_interval",
+   "fieldtype": "Date",
+   "label": "AMC Interval"
+  },
+  {
+   "fieldname": "amc_obligation",
+   "fieldtype": "Text Editor",
+   "label": "AMC Obligation"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "AMC",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amc_period_section",
+   "fieldtype": "Section Break",
+   "label": "AMC Period"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_17",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_10",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "agreement_signing_date",
+   "fieldtype": "Date",
+   "label": "Agreement Signing Date",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-02-10 16:36:53.451715",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "AMC",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

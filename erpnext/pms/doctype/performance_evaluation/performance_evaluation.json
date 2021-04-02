@@ -1,0 +1,415 @@
+{
+ "autoname": "PEVA.#####",
+ "creation": "2021-03-11 09:35:53.455657",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "designation",
+  "pms_group",
+  "required_to_set_target",
+  "grade",
+  "column_break_2",
+  "old_employee_id",
+  "employee_name",
+  "department",
+  "branch",
+  "date",
+  "approver_detail_section",
+  "approver",
+  "column_break_17",
+  "approver_name",
+  "pms_calendar_section",
+  "pms_calendar",
+  "start_date",
+  "column_break_16",
+  "end_date",
+  "section_break_18",
+  "part_a_section",
+  "get_target",
+  "evaluate_target_item",
+  "achievements_items",
+  "section_break_22",
+  "a_total_weightage",
+  "column_break_28",
+  "a_sup_rating_total",
+  "part_b_section",
+  "get_competency",
+  "evaluate_competency_item",
+  "section_break_29",
+  "b_total_weightage",
+  "column_break_31",
+  "b_sup_rating_total",
+  "final_score_calculation_section",
+  "part_a_score",
+  "part_b_score",
+  "column_break_43",
+  "final_score",
+  "overall_rating",
+  "amended_from",
+  "workflow_state"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "label": "Employee ID",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.pms_group",
+   "fieldname": "pms_group",
+   "fieldtype": "Link",
+   "label": "PMS Group",
+   "options": "PMS Group",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.grade",
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Employee Grade",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.old_employee_id",
+   "fieldname": "old_employee_id",
+   "fieldtype": "Read Only",
+   "label": "Old Employee ID"
+  },
+  {
+   "bold": 1,
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Employee Name"
+  },
+  {
+   "bold": 1,
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Read Only",
+   "label": "Date"
+  },
+  {
+   "depends_on": "eval:doc.required_to_set_target == 1 && doc.pms_calendar",
+   "fieldname": "part_a_section",
+   "fieldtype": "Section Break",
+   "label": "Part A: Performance Target Evaluation(refer to the signed Planing form for evaluation)"
+  },
+  {
+   "depends_on": "eval:doc.pms_calendar",
+   "fieldname": "part_b_section",
+   "fieldtype": "Section Break",
+   "label": "Part B: Work Competency Evaluation (refer to the work competency definition for evaluation)"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Performance Evaluation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Performance Evaluation",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "evaluate_target_item",
+   "fieldtype": "Table",
+   "label": "Evaluate Target Item",
+   "options": "Evaluate Target Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "evaluate_competency_item",
+   "fieldtype": "Table",
+   "label": "Evaluate Competency ",
+   "options": "Evaluate Competency Item",
+   "read_only": 1
+  },
+  {
+   "fieldname": "final_score_calculation_section",
+   "fieldtype": "Section Break",
+   "label": "Final Score Calculation"
+  },
+  {
+   "fieldname": "pms_calendar_section",
+   "fieldtype": "Section Break",
+   "label": "PMS Calendar"
+  },
+  {
+   "fetch_from": "pms_calendar.evaluation_start_date",
+   "fieldname": "start_date",
+   "fieldtype": "Read Only",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "pms_calendar.evaluation_end_date",
+   "fieldname": "end_date",
+   "fieldtype": "Read Only",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "pms_group.required_to_set_target",
+   "fieldname": "required_to_set_target",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Require to set target",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pms_calendar",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "PMS Calendar",
+   "options": "PMS Calendar",
+   "reqd": 1
+  },
+  {
+   "depends_on": "eval:doc.pms_calendar",
+   "fieldname": "get_target",
+   "fieldtype": "Button",
+   "label": "Get Target"
+  },
+  {
+   "fieldname": "get_competency",
+   "fieldtype": "Button",
+   "label": "Get Competency"
+  },
+  {
+   "depends_on": "eval:doc.required_to_set_target == 1 && doc.pms_calendar",
+   "fieldname": "section_break_22",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "a_sup_rating_total",
+   "fieldtype": "Float",
+   "label": "Total Supervisor Rating",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.pms_calendar",
+   "fieldname": "section_break_29",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "b_sup_rating_total",
+   "fieldtype": "Float",
+   "label": "Total Supervisor Rating",
+   "read_only": 1
+  },
+  {
+   "fieldname": "achievements_items",
+   "fieldtype": "Table",
+   "label": "Achievements Items",
+   "options": "Evaluate Additional Achievements",
+   "read_only": 1
+  },
+  {
+   "fieldname": "final_score",
+   "fieldtype": "Float",
+   "label": "Final Score(%)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "a_total_weightage",
+   "fieldtype": "Float",
+   "label": "(Target + Achievement)Total Weightage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "b_total_weightage",
+   "fieldtype": "Float",
+   "label": "Competecy Total Weightage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "part_a_score",
+   "fieldtype": "Float",
+   "label": "Part A Score(%)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "part_b_score",
+   "fieldtype": "Float",
+   "label": "Part B Score(%)",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_43",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "overall_rating",
+   "fieldtype": "Data",
+   "label": "Overall Rating",
+   "read_only": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Workflow State",
+   "options": "Workflow State",
+   "read_only": 1
+  },
+  {
+   "bold": 1,
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Division/Unit/Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Approver Detail"
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approver",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "approver.full_name",
+   "fieldname": "approver_name",
+   "fieldtype": "Read Only",
+   "label": "Approver Name"
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-03-26 10:24:25.842128",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Performance Evaluation",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

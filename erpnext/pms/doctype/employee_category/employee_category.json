@@ -1,0 +1,80 @@
+{
+ "autoname": "field:employee_category",
+ "creation": "2021-03-03 15:54:41.527670",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_category",
+  "pms_group_section",
+  "items"
+ ],
+ "fields": [
+  {
+   "fieldname": "pms_group_section",
+   "fieldtype": "Section Break",
+   "label": "PMS Group"
+  },
+  {
+   "fieldname": "items",
+   "fieldtype": "Table",
+   "options": "Employee Category Group"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "employee_category",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Employee Category",
+   "reqd": 1,
+   "unique": 1
+  }
+ ],
+ "modified": "2021-03-09 12:19:46.868784",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Employee Category",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Administrator",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "ASC",
+ "title_field": "employee_category",
+ "track_changes": 1
+}

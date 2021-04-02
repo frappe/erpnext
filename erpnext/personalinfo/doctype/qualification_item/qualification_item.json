@@ -1,0 +1,35 @@
+{
+ "creation": "2021-02-19 11:48:33.658967",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "high_school",
+  "college"
+ ],
+ "fields": [
+  {
+   "fieldname": "high_school",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "High School"
+  },
+  {
+   "fieldname": "college",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "College"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-02-19 11:48:33.658967",
+ "modified_by": "Administrator",
+ "module": "PersonalInfo",
+ "name": "Qualification Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

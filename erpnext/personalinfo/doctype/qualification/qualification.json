@@ -1,0 +1,73 @@
+{
+ "autoname": "Qualification.#####",
+ "creation": "2021-02-11 12:15:26.186914",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "college_name",
+  "course",
+  "year_of_completion",
+  "table_5",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "college_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "College Name"
+  },
+  {
+   "fieldname": "course",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Course"
+  },
+  {
+   "fieldname": "year_of_completion",
+   "fieldtype": "Date",
+   "label": "Year of Completion"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Qualification",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "table_5",
+   "fieldtype": "Table",
+   "options": "Qualification Item"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-02-19 12:43:12.806620",
+ "modified_by": "Administrator",
+ "module": "PersonalInfo",
+ "name": "Qualification",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

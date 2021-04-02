@@ -1,0 +1,139 @@
+{
+ "autoname": "RentalPaymentTest.#####",
+ "creation": "2021-03-02 11:45:51.438542",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "posting_date",
+  "cost_center",
+  "notification_date",
+  "invoice_number",
+  "payment_type",
+  "invoice_date",
+  "business_acitvity",
+  "credit_account",
+  "tds_percent",
+  "debit_account",
+  "tds_account",
+  "fiscal_year",
+  "month",
+  "amended_from",
+  "table_16"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Data",
+   "label": "Cost Center"
+  },
+  {
+   "fieldname": "notification_date",
+   "fieldtype": "Date",
+   "label": "Notification Date"
+  },
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "label": "Invoice Number"
+  },
+  {
+   "fieldname": "payment_type",
+   "fieldtype": "Data",
+   "label": "Payment Type"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date"
+  },
+  {
+   "fieldname": "business_acitvity",
+   "fieldtype": "Data",
+   "label": "Business Acitvity"
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Data",
+   "label": "Credit Account"
+  },
+  {
+   "fieldname": "tds_percent",
+   "fieldtype": "Data",
+   "label": "TDS Percent"
+  },
+  {
+   "fieldname": "debit_account",
+   "fieldtype": "Data",
+   "label": "Debit Account"
+  },
+  {
+   "fieldname": "tds_account",
+   "fieldtype": "Data",
+   "label": "TDS Account"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Data",
+   "label": "Fiscal Year"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Data",
+   "label": "Month"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rental Payment Test",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "table_16",
+   "fieldtype": "Table",
+   "options": "Rental Payment Test List"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-03-02 12:57:11.703316",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Rental Payment Test",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

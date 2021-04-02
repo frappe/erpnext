@@ -1,0 +1,295 @@
+{
+ "autoname": "REV.#####",
+ "creation": "2021-03-09 10:20:42.851171",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee",
+  "designation",
+  "pms_group",
+  "required_to_set_target",
+  "grade",
+  "column_break_2",
+  "old_employee_id",
+  "employee_name",
+  "department",
+  "branch",
+  "date",
+  "approver_details_section",
+  "approver",
+  "column_break_17",
+  "approver_name",
+  "pms_calendar_section",
+  "pms_calendar",
+  "start_date",
+  "column_break_16",
+  "end_date",
+  "section_break_12",
+  "part_a_section",
+  "get_target",
+  "review_target_item",
+  "part_b_section",
+  "get_competency",
+  "review_competency_item",
+  "part_c_section",
+  "additional_items",
+  "amended_from",
+  "workflow_state"
+ ],
+ "fields": [
+  {
+   "fieldname": "employee",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee ID",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "employee.employee_name",
+   "fieldname": "employee_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Employee Name"
+  },
+  {
+   "fetch_from": "employee.department",
+   "fieldname": "department",
+   "fieldtype": "Link",
+   "label": "Department",
+   "options": "Department",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.pms_group",
+   "fieldname": "pms_group",
+   "fieldtype": "Link",
+   "label": "PMS Group",
+   "options": "PMS Group",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "employee.grade",
+   "fieldname": "grade",
+   "fieldtype": "Link",
+   "label": "Grade",
+   "options": "Employee Grade",
+   "read_only": 1
+  },
+  {
+   "default": "Today",
+   "fieldname": "date",
+   "fieldtype": "Read Only",
+   "label": "Date"
+  },
+  {
+   "depends_on": "eval:doc.employee",
+   "fieldname": "part_b_section",
+   "fieldtype": "Section Break",
+   "label": "Part B: Review of core competencies"
+  },
+  {
+   "fetch_from": "employee.old_employee_id",
+   "fieldname": "old_employee_id",
+   "fieldtype": "Read Only",
+   "label": "Old Employee ID"
+  },
+  {
+   "depends_on": "eval:doc.required_to_set_target == 1",
+   "fieldname": "part_a_section",
+   "fieldtype": "Section Break",
+   "label": "Part A : Review of planned performance targets(not applicable to grades A2 and below)"
+  },
+  {
+   "depends_on": "eval:doc.pms_calendar",
+   "fieldname": "part_c_section",
+   "fieldtype": "Section Break",
+   "label": "Part C: Review on achievements by the appraisee which were not planned"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Review",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "review_target_item",
+   "fieldtype": "Table",
+   "label": "Review Target Item",
+   "options": "Review Target Item",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "pms_group.required_to_set_target",
+   "fieldname": "required_to_set_target",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Require to set target",
+   "read_only": 1
+  },
+  {
+   "fieldname": "pms_calendar_section",
+   "fieldtype": "Section Break",
+   "label": "PMS Calendar"
+  },
+  {
+   "fieldname": "pms_calendar",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "PMS Calendar",
+   "options": "PMS Calendar",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "pms_calendar.review_start_date",
+   "fieldname": "start_date",
+   "fieldtype": "Read Only",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "pms_calendar.review_end_date",
+   "fieldname": "end_date",
+   "fieldtype": "Read Only",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "additional_items",
+   "fieldtype": "Table",
+   "label": "Additional Achievements",
+   "options": "Additional Achievements"
+  },
+  {
+   "fieldname": "review_competency_item",
+   "fieldtype": "Table",
+   "label": "Review competency",
+   "options": "Review Competency Item",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.pms_calendar",
+   "fieldname": "get_target",
+   "fieldtype": "Button",
+   "label": "Get Target"
+  },
+  {
+   "depends_on": "eval:doc.pms_calendar",
+   "fieldname": "get_competency",
+   "fieldtype": "Button",
+   "label": "Get Competency"
+  },
+  {
+   "fetch_from": "employee.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "workflow_state",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Workflow State",
+   "options": "Workflow State",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "employee.branch",
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "label": "Division/Unit/Branch",
+   "options": "Branch",
+   "read_only": 1
+  },
+  {
+   "fieldname": "approver",
+   "fieldtype": "Link",
+   "label": "Approver",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "approver.full_name",
+   "fieldname": "approver_name",
+   "fieldtype": "Read Only",
+   "label": "Approver Name"
+  },
+  {
+   "fieldname": "approver_details_section",
+   "fieldtype": "Section Break",
+   "label": "Approver Details"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-03-26 10:24:54.019545",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Review",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

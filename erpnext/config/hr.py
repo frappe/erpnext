@@ -344,6 +344,14 @@ def get_data():
 					"name": "Energy Point Log",
 				},
 				{
+					"type": "doctype",
+					"name": "PMS Calendar",
+				},
+				{
+					"type": "doctype",
+					"name": "Target Set Up",
+				},
+				{
 					"type": "link",
 					"doctype": "Energy Point Log",
 					"label": _("Energy Point Leaderboard"),

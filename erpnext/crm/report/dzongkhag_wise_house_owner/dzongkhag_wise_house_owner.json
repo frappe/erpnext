@@ -1,0 +1,25 @@
+{
+ "add_total_row": 0,
+ "creation": "2021-02-24 14:47:15.523894",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "docstatus": 0,
+ "doctype": "Report",
+ "idx": 0,
+ "is_standard": "Yes",
+ "json": "{\"filters\":[],\"fields\":[[\"dzongkhag\",\"Rent Owners\"],[\"_aggregate_column\",\"Rent Owners\"]],\"order_by\":\"`tabRent Owners`.`modified` desc\",\"page_length\":20,\"column_widths\":{\"dzongkhag\":120,\"_aggregate_column\":120},\"group_by\":{\"group_by\":\"`tabRent Owners`.`dzongkhag`\",\"aggregate_function\":\"count\",\"aggregate_on\":\"name\"}}",
+ "modified": "2021-02-24 16:38:20.425585",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Dzongkhag Wise House Owner",
+ "owner": "Administrator",
+ "prepared_report": 0,
+ "ref_doctype": "Rent Owners",
+ "report_name": "Dzongkhag Wise House Owner",
+ "report_type": "Report Builder",
+ "roles": [
+  {
+   "role": "System Manager"
+  }
+ ]
+}

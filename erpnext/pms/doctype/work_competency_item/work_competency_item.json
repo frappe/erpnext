@@ -1,0 +1,43 @@
+{
+ "creation": "2021-03-05 12:10:14.607596",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "employee_category",
+  "column_break_2",
+  "applicable"
+ ],
+ "fields": [
+  {
+   "columns": 8,
+   "fieldname": "employee_category",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Employee Category",
+   "options": "Employee Category"
+  },
+  {
+   "columns": 2,
+   "default": "0",
+   "fieldname": "applicable",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Applicable"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-03-09 15:07:20.268161",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Work Competency Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

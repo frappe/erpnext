@@ -1,0 +1,41 @@
+{
+ "creation": "2021-03-08 11:41:00.819284",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "competency",
+  "column_break_2",
+  "weightage"
+ ],
+ "fields": [
+  {
+   "fieldname": "competency",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Competency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weightage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weightage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-03-18 11:24:12.712786",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Competency Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

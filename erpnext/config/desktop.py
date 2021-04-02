@@ -108,6 +108,37 @@ def get_data():
 			"description": "Quality goals, procedures, reviews and action."
 		},
 
+        {
+			"module_name": "PersonalInfo",
+			"category": "Modules",
+			"label": _("PersonalInfo"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"description": "PersonalInfo Details."
+		},
+		 
+		 {
+			"module_name": "PMS",
+			"category": "Modules",
+			"label": _("Performance Management System"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"description": "PMS Details."
+		},
+		{
+			"module_name": "test123",
+			"category": "Modules",
+			"label": _("test123"),
+			"color": "#1abc9c",
+			"icon": "fa fa-check-square-o",
+			"type": "module",
+			"description": "PMS Details."
+		},
+		
+		
+		
 
 		# Category: "Domains"
 		{

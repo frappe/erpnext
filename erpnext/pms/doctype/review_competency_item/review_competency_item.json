@@ -1,0 +1,55 @@
+{
+ "creation": "2021-03-09 16:43:00.631488",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "competency",
+  "appraisees_remark",
+  "column_break_5",
+  "weightage",
+  "appraisers_remark"
+ ],
+ "fields": [
+  {
+   "fieldname": "appraisees_remark",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Appraisee's Remark"
+  },
+  {
+   "fieldname": "appraisers_remark",
+   "fieldtype": "Small Text",
+   "in_list_view": 1,
+   "label": "Appraiser's Remark"
+  },
+  {
+   "fieldname": "competency",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Work Competency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weightage",
+   "fieldtype": "Float",
+   "label": "Weightage",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-03-18 09:42:18.592619",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Review Competency Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

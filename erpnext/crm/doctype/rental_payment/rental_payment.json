@@ -1,0 +1,209 @@
+{
+ "autoname": "Rental Payment.#####",
+ "creation": "2021-02-24 11:04:31.623759",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "branch",
+  "cost_center",
+  "column_break_3",
+  "posting_date",
+  "notification_date",
+  "section_break_18",
+  "invoice_number",
+  "invoice_date",
+  "column_break_19",
+  "payment_type",
+  "business_activity",
+  "column_break_12",
+  "credit_account",
+  "debit_account",
+  "section_break_15",
+  "tds_percent",
+  "tds_account",
+  "section_break_21",
+  "fiscal_year",
+  "column_break_20",
+  "month",
+  "section_break_24",
+  "amended_from",
+  "table_23"
+ ],
+ "fields": [
+  {
+   "fieldname": "branch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Branch",
+   "options": "Branch"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Cost Center"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Posting Date"
+  },
+  {
+   "fieldname": "notification_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Notification Date"
+  },
+  {
+   "fieldname": "invoice_number",
+   "fieldtype": "Data",
+   "label": "Invoice Number"
+  },
+  {
+   "fieldname": "invoice_date",
+   "fieldtype": "Date",
+   "label": "Invoice Date"
+  },
+  {
+   "fieldname": "payment_type",
+   "fieldtype": "Data",
+   "label": "Payment Type"
+  },
+  {
+   "fieldname": "business_activity",
+   "fieldtype": "Data",
+   "label": "Business Activity"
+  },
+  {
+   "fieldname": "credit_account",
+   "fieldtype": "Data",
+   "label": "Credit Account"
+  },
+  {
+   "fieldname": "debit_account",
+   "fieldtype": "Data",
+   "label": "Debit Account"
+  },
+  {
+   "fieldname": "tds_percent",
+   "fieldtype": "Data",
+   "label": "TDS Percent"
+  },
+  {
+   "fieldname": "tds_account",
+   "fieldtype": "Data",
+   "label": "TDS Account"
+  },
+  {
+   "fieldname": "fiscal_year",
+   "fieldtype": "Data",
+   "label": "Fiscal Year"
+  },
+  {
+   "fieldname": "month",
+   "fieldtype": "Data",
+   "label": "Month"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Rental Payment",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_18",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_19",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_21",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "table_23",
+   "fieldtype": "Table",
+   "options": "Rental Payment Test List"
+  },
+  {
+   "fieldname": "section_break_24",
+   "fieldtype": "Section Break"
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-03-02 12:44:38.406402",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Rental Payment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Employee",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Approver",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

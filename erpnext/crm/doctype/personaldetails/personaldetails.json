@@ -1,0 +1,62 @@
+{
+ "creation": "2021-02-09 14:31:05.570989",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "name1",
+  "designation",
+  "contact_no",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "name1",
+   "fieldtype": "Text",
+   "label": "Name"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Text",
+   "label": "Designation"
+  },
+  {
+   "fieldname": "contact_no",
+   "fieldtype": "Float",
+   "label": "Contact No"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "PersonalDetails",
+   "print_hide": 1,
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-02-09 14:31:05.570989",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "PersonalDetails",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

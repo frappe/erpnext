@@ -1,0 +1,43 @@
+{
+ "autoname": "RentOwnerItem.#####",
+ "creation": "2021-02-19 15:59:19.969166",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "from_date",
+  "to_date",
+  "rent_amount"
+ ],
+ "fields": [
+  {
+   "fieldname": "from_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "From Date"
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "To Date"
+  },
+  {
+   "fieldname": "rent_amount",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Rent Amount"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-02-19 16:00:11.560087",
+ "modified_by": "Administrator",
+ "module": "CRM",
+ "name": "Rent Owner Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

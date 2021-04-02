@@ -1,0 +1,103 @@
+{
+ "autoname": "ETI.#####",
+ "creation": "2021-03-11 09:43:56.591098",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "performance_target",
+  "weightage",
+  "quantity",
+  "timeline",
+  "appraisers_remark",
+  "column_break_5",
+  "self_rating",
+  "supervisor_rating",
+  "quality",
+  "background",
+  "appraisees_remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "performance_target",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Performance Target",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weightage",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Weightage",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "self_rating",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Self Rating",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "supervisor_rating",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Supervisor Rating",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Float",
+   "label": "Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "quality",
+   "fieldtype": "Float",
+   "label": "Quality",
+   "read_only": 1
+  },
+  {
+   "fieldname": "appraisees_remarks",
+   "fieldtype": "Small Text",
+   "label": "Appraisee's Remarks",
+   "read_only": 1
+  },
+  {
+   "fieldname": "appraisers_remark",
+   "fieldtype": "Small Text",
+   "label": "Appraiser's Remark",
+   "read_only": 1
+  },
+  {
+   "fieldname": "timeline",
+   "fieldtype": "Date",
+   "label": "Timeline",
+   "read_only": 1
+  },
+  {
+   "fieldname": "background",
+   "fieldtype": "Data",
+   "label": "Background",
+   "read_only": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-03-24 17:04:40.493290",
+ "modified_by": "Administrator",
+ "module": "PMS",
+ "name": "Evaluate Target Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
