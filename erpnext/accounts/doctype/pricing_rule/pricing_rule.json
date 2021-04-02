@@ -358,7 +358,6 @@
    "reqd": 1
   },
   {
-   "depends_on": "eval: doc.selling == 1",
    "fieldname": "margin",
    "fieldtype": "Section Break",
    "label": "Margin"

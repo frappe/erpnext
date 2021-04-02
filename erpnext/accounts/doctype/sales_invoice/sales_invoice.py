@@ -23,6 +23,7 @@ from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -75,6 +76,8 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
+		
+		self.set_tax_withholding()
 
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -152,6 +155,32 @@ class SalesInvoice(SellingController):
 			cost_center_company = frappe.get_cached_value("Cost Center", item.cost_center, "company")
 			if cost_center_company != self.company:
 				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
+
+	def set_tax_withholding(self):
+		tax_withholding_details = get_party_tax_withholding_details(self)
+
+		if not tax_withholding_details:
+			return
+
+		accounts = []
+		tax_withholding_account = tax_withholding_details.get("account_head")
+
+		for d in self.taxes:
+			if d.account_head == tax_withholding_account:
+				d.update(tax_withholding_details)
+			accounts.append(d.account_head)
+
+		if not accounts or tax_withholding_account not in accounts:
+			self.append("taxes", tax_withholding_details)
+
+		to_remove = [d for d in self.taxes
+			if not d.tax_amount and d.charge_type == "Actual" and d.account_head == tax_withholding_account]
+
+		for d in to_remove:
+			self.remove(d)
+
+		# calculate totals again after applying TDS
+		self.calculate_taxes_and_totals()
 
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
