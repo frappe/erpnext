@@ -10,6 +10,7 @@
   "naming_series",
   "student",
   "student_name",
+  "student_mobile_number",
   "course_schedule",
   "student_group",
   "column_break_3",
@@ -93,11 +94,19 @@
    "options": "Student Attendance",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "student.student_mobile_number",
+   "fieldname": "student_mobile_number",
+   "fieldtype": "Read Only",
+   "label": "Student Mobile Number",
+   "options": "Phone"
   }
  ],
+ "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-07-08 13:55:42.580181",
+ "modified": "2021-03-24 00:02:11.005895",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Student Attendance",

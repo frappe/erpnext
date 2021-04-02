@@ -207,11 +207,11 @@ class update_entries_after(object):
 
 
 	def build(self):
-		from erpnext.controllers.stock_controller import check_if_future_sle_exists
+		from erpnext.controllers.stock_controller import future_sle_exists
 
 		if self.args.get("sle_id"):
 			self.process_sle_against_current_timestamp()
-			if not check_if_future_sle_exists(self.args):
+			if not future_sle_exists(self.args):
 				self.update_bin()
 		else:
 			entries_to_fix = self.get_future_entries_to_fix()

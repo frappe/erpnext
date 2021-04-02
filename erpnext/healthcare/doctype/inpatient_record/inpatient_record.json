@@ -53,7 +53,7 @@
   "discharge_ordered_date",
   "discharge_practitioner",
   "discharge_encounter",
-  "discharge_date",
+  "discharge_datetime",
   "cb_discharge",
   "discharge_instructions",
   "followup_date",
@@ -404,14 +404,15 @@
    "permlevel": 1
   },
   {
-   "fieldname": "discharge_date",
-   "fieldtype": "Date",
+   "fieldname": "discharge_datetime",
+   "fieldtype": "Datetime",
    "label": "Discharge Date",
    "read_only": 1
   }
  ],
+ "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-05-21 02:26:22.144575",
+ "modified": "2021-03-18 14:44:11.689956",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",
