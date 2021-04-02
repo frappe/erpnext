@@ -118,7 +118,7 @@ class Gstr1Report(object):
 				row.append(invoice_details.get(fieldname))
 		taxable_value = 0
 
-		if invoice in self.cgst_igst_invoices:
+		if invoice in self.cgst_sgst_invoices:
 			division_factor = 2
 		else:
 			division_factor = 1
@@ -128,6 +128,11 @@ class Gstr1Report(object):
 				if self.item_tax_rate.get(invoice) and tax_rate/division_factor in self.item_tax_rate.get(invoice, {}).get(item_code, []):
 					taxable_value += abs(net_amount)
 				elif not self.item_tax_rate.get(invoice):
+					taxable_value += abs(net_amount)
+				elif tax_rate:
+					taxable_value += abs(net_amount)
+				elif not tax_rate and self.filters.get('type_of_business') == 'EXPORT' \
+					and invoice_details.get('export_type') == "Without Payment of Tax":
 					taxable_value += abs(net_amount)
 
 		row += [tax_rate or 0, taxable_value]
@@ -146,6 +151,7 @@ class Gstr1Report(object):
 				{select_columns}
 			from `tab{doctype}`
 			where docstatus = 1 {where_conditions}
+			and is_opening = 'No'
 			order by posting_date desc
 			""".format(select_columns=self.select_columns, doctype=self.doctype,
 				where_conditions=conditions), self.filters, as_dict=1)
@@ -227,9 +233,10 @@ class Gstr1Report(object):
 
 		self.items_based_on_tax_rate = {}
 		self.invoice_cess = frappe._dict()
-		self.cgst_igst_invoices = []
+		self.cgst_sgst_invoices = []
 
 		unidentified_gst_accounts = []
+		unidentified_gst_accounts_invoice = []
 		for parent, account, item_wise_tax_detail, tax_amount in self.tax_details:
 			if account in self.gst_accounts.cess_account:
 				self.invoice_cess.setdefault(parent, tax_amount)
@@ -245,19 +252,21 @@ class Gstr1Report(object):
 						if not (cgst_or_sgst or account in self.gst_accounts.igst_account):
 							if "gst" in account.lower() and account not in unidentified_gst_accounts:
 								unidentified_gst_accounts.append(account)
+								unidentified_gst_accounts_invoice.append(parent)
 							continue
 
 						for item_code, tax_amounts in item_wise_tax_detail.items():
 							tax_rate = tax_amounts[0]
-							if cgst_or_sgst:
-								tax_rate *= 2
-								if parent not in self.cgst_igst_invoices:
-									self.cgst_igst_invoices.append(parent)
+							if tax_rate:
+								if cgst_or_sgst:
+									tax_rate *= 2
+									if parent not in self.cgst_sgst_invoices:
+										self.cgst_sgst_invoices.append(parent)
 
-							rate_based_dict = self.items_based_on_tax_rate\
-								.setdefault(parent, {}).setdefault(tax_rate, [])
-							if item_code not in rate_based_dict:
-								rate_based_dict.append(item_code)
+								rate_based_dict = self.items_based_on_tax_rate\
+									.setdefault(parent, {}).setdefault(tax_rate, [])
+								if item_code not in rate_based_dict:
+									rate_based_dict.append(item_code)
 					except ValueError:
 						continue
 		if unidentified_gst_accounts:
@@ -266,7 +275,7 @@ class Gstr1Report(object):
 
 		# Build itemised tax for export invoices where tax table is blank
 		for invoice, items in iteritems(self.invoice_items):
-			if invoice not in self.items_based_on_tax_rate \
+			if invoice not in self.items_based_on_tax_rate  and invoice not in unidentified_gst_accounts_invoice \
 				and frappe.db.get_value(self.doctype, invoice, "export_type") == "Without Payment of Tax":
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 

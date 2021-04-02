@@ -2,6 +2,7 @@ import frappe
 import numpy as np
 from frappe.utils import cint
 from erpnext.portal.product_configurator.item_variants_cache import ItemVariantsCacheManager
+from erpnext.shopping_cart.doctype.shopping_cart_settings.shopping_cart_settings import get_shopping_cart_settings
 
 def get_field_filter_data():
 	product_settings = get_product_settings()
@@ -14,13 +15,15 @@ def get_field_filter_data():
 	for f in fields:
 		doctype = f.get_link_doctype()
 
-		# apply enable/disable filter
+		# apply enable/disable/show_in_website filter
 		meta = frappe.get_meta(doctype)
 		filters = {}
 		if meta.has_field('enabled'):
 			filters['enabled'] = 1
 		if meta.has_field('disabled'):
 			filters['disabled'] = 0
+		if meta.has_field('show_in_website'):
+			filters['show_in_website'] = 1
 
 		values = [d.name for d in frappe.get_all(doctype, filters)]
 		filter_data.append([f, values])
@@ -247,6 +250,8 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 
 	optional_attributes = item_cache.get_optional_attributes()
 	exact_match = []
+	shopping_cart_settings = get_shopping_cart_settings()
+	allow_items_not_in_stock = cint(shopping_cart_settings.allow_items_not_in_stock)
 	# search for exact match if all selected attributes are required attributes
 	if len(selected_attributes.keys()) >= (len(attribute_list) - len(optional_attributes)):
 		item_attribute_value_map = item_cache.get_item_attribute_value_map()
@@ -266,14 +271,13 @@ def get_next_attribute_and_values(item_code, selected_attributes):
 	else:
 		product_info = None
 
-	product_info["allow_items_not_in_stock"] = cint(data.cart_settings.allow_items_not_in_stock)
-
 	return {
 		'next_attribute': next_attribute,
 		'valid_options_for_attributes': valid_options_for_attributes,
 		'filtered_items_count': filtered_items_count,
 		'filtered_items': filtered_items if filtered_items_count < 10 else [],
 		'exact_match': exact_match,
+		'allow_items_not_in_stock': allow_items_not_in_stock,
 		'product_info': product_info
 	}
 
@@ -376,7 +380,7 @@ def get_items(filters=None, search=None):
 
 	results = frappe.db.sql('''
 		SELECT
-			`tabItem`.`name`, `tabItem`.`item_name`,
+			`tabItem`.`name`, `tabItem`.`item_name`, `tabItem`.`item_code`,
 			`tabItem`.`website_image`, `tabItem`.`image`,
 			`tabItem`.`web_long_description`, `tabItem`.`description`,
 			`tabItem`.`route`

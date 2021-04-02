@@ -223,6 +223,8 @@ def get_benefit_amount_based_on_pro_rata(sal_struct, component_max_benefit):
 	return benefit_amount
 
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_earning_components(doctype, txt, searchfield, start, page_len, filters):
 	if len(filters) < 2:
 		return {}

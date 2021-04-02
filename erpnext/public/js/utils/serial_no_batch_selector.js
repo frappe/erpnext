@@ -133,6 +133,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 					() => me.update_batch_serial_no_items(),
 					() => {
 						refresh_field("items");
+						refresh_field("packed_items");
 						if (me.callback) {
 							return me.callback(me.item);
 						}
@@ -147,7 +148,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 			if (this.item.serial_no) {
 				this.dialog.fields_dict.serial_no.set_value(this.item.serial_no);
 			}
-			
+
 			if (this.has_batch && !this.has_serial_no && d.batch_no) {
 				this.frm.doc.items.forEach(data => {
 					if(data.item_code == d.item_code) {
@@ -229,7 +230,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				this.map_row_values(row, batch, 'batch_no',
 					'selected_qty', this.values.warehouse);
 			});
-		} 
+		}
 	},
 
 	update_serial_no_item() {
@@ -248,7 +249,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				filters: { 'name': ["in", selected_serial_nos]},
 				fields: ["batch_no", "name"]
 			}).then((data) => {
-				// data = [{batch_no: 'batch-1', name: "SR-001"}, 
+				// data = [{batch_no: 'batch-1', name: "SR-001"},
 				// 	{batch_no: 'batch-2', name: "SR-003"}, {batch_no: 'batch-2', name: "SR-004"}]
 				const batch_serial_map = data.reduce((acc, d) => {
 					if (!acc[d['batch_no']]) acc[d['batch_no']] = [];
@@ -296,6 +297,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		} else {
 			row.warehouse = values.warehouse || warehouse;
 		}
+
+		this.frm.dirty();
 	},
 
 	update_total_qty: function() {
@@ -333,8 +336,8 @@ erpnext.SerialNoBatchSelector = Class.extend({
 							};
 						},
 						change: function () {
-							let val = this.get_value();
-							if (val.length === 0) {
+							const batch_no = this.get_value();
+							if (!batch_no) {
 								this.grid_row.on_grid_fields_dict
 									.available_qty.set_value(0);
 								return;
@@ -348,20 +351,17 @@ erpnext.SerialNoBatchSelector = Class.extend({
 									return row.on_grid_fields_dict.batch_no.get_value();
 								}
 							});
-							if (selected_batches.includes(val)) {
+							if (selected_batches.includes(batch_no)) {
 								this.set_value("");
-								frappe.throw(__(`Batch ${val} already selected.`));
+								frappe.throw(__(`Batch ${batch_no} already selected.`));
 								return;
 							}
-
-							let batch_number = me.item.batch_no ||
-								this.grid_row.on_grid_fields_dict.batch_no.get_value();
 
 							if (me.warehouse_details.name) {
 								frappe.call({
 									method: 'erpnext.stock.doctype.batch.batch.get_batch_qty',
 									args: {
-										batch_no: batch_number,
+										batch_no,
 										warehouse: me.warehouse_details.name,
 										item_code: me.item_code
 									},

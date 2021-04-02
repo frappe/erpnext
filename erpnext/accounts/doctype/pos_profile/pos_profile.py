@@ -115,6 +115,8 @@ def get_item_groups(pos_profile):
 def get_series():
 	return frappe.get_meta("Sales Invoice").get_field("naming_series").options or ""
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def pos_profile_query(doctype, txt, searchfield, start, page_len, filters):
 	user = frappe.session['user']
 	company = filters.get('company') or frappe.defaults.get_user_default('company')

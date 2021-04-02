@@ -12,8 +12,8 @@ from frappe.model.document import Document
 class AssetValueAdjustment(Document):
 	def validate(self):
 		self.validate_date()
-		self.set_difference_amount()
 		self.set_current_asset_value()
+		self.set_difference_amount()
 
 	def on_submit(self):
 		self.make_depreciation_entry()

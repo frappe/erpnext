@@ -60,12 +60,13 @@ class BankReconciliation(Document):
 		""".format(condition=condition), {"account": self.account, "from":self.from_date,
 				"to": self.to_date, "bank_account": self.bank_account}, as_dict=1)
 
-		pos_entries = []
+		
+		pos_sales_invoices, pos_purchase_invoices = [], []
 		if self.include_pos_transactions:
-			pos_entries = frappe.db.sql("""
+			pos_sales_invoices = frappe.db.sql("""
 				select
 					"Sales Invoice Payment" as payment_document, sip.name as payment_entry, sip.amount as debit,
-					si.posting_date, si.debit_to as against_account, sip.clearance_date,
+					si.posting_date, si.customer as against_account, sip.clearance_date,
 					account.account_currency, 0 as credit
 				from `tabSales Invoice Payment` sip, `tabSales Invoice` si, `tabAccount` account
 				where
@@ -75,7 +76,20 @@ class BankReconciliation(Document):
 					si.posting_date ASC, si.name DESC
 			""", {"account":self.account, "from":self.from_date, "to":self.to_date}, as_dict=1)
 
-		entries = sorted(list(payment_entries)+list(journal_entries+list(pos_entries)),
+			pos_purchase_invoices = frappe.db.sql("""
+				select
+					"Purchase Invoice" as payment_document, pi.name as payment_entry, pi.paid_amount as credit,
+					pi.posting_date, pi.supplier as against_account, pi.clearance_date,
+					account.account_currency, 0 as debit
+				from `tabPurchase Invoice` pi, `tabAccount` account
+				where
+					pi.cash_bank_account=%(account)s and pi.docstatus=1 and account.name = pi.cash_bank_account
+					and pi.posting_date >= %(from)s and pi.posting_date <= %(to)s
+				order by
+					pi.posting_date ASC, pi.name DESC
+			""", {"account": self.account, "from": self.from_date, "to": self.to_date}, as_dict=1)
+
+		entries = sorted(list(payment_entries) + list(journal_entries + list(pos_sales_invoices) + list(pos_purchase_invoices)),
 			key=lambda k: k['posting_date'] or getdate(nowdate()))
 
 		self.set('payment_entries', [])

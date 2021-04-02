@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils.nestedset import NestedSet
+from frappe.utils.nestedset import NestedSet, rebuild_tree
 from frappe import _
 
 class QualityProcedure(NestedSet):
@@ -42,6 +42,8 @@ class QualityProcedure(NestedSet):
 			doc.save(ignore_permissions=True)
 
 	def set_parent(self):
+		rebuild_tree('Quality Procedure', 'parent_quality_procedure')
+
 		for process in self.processes:
 			# Set parent for only those children who don't have a parent
 			parent_quality_procedure = frappe.db.get_value("Quality Procedure", process.procedure, "parent_quality_procedure")

@@ -9,11 +9,13 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.doctype.purchase_invoice.test_purchase_invoice import make_purchase_invoice
 from erpnext.accounts.doctype.payment_entry.test_payment_entry import get_payment_entry
 from erpnext.accounts.page.bank_reconciliation.bank_reconciliation import reconcile, get_linked_payments
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 test_dependencies = ["Item", "Cost Center"]
 
 class TestBankTransaction(unittest.TestCase):
 	def setUp(self):
+		make_pos_profile()
 		add_transactions()
 		add_payments()
 
@@ -26,6 +28,9 @@ class TestBankTransaction(unittest.TestCase):
 		# Delete directly in DB to avoid validation errors for countries not allowing deletion
 		frappe.db.sql("""delete from `tabPayment Entry Reference`""")
 		frappe.db.sql("""delete from `tabPayment Entry`""")
+
+		# Delete POS Profile
+		frappe.db.sql("delete from `tabPOS Profile`")
 
 		frappe.flags.test_bank_transactions_created = False
 		frappe.flags.test_payments_created = False

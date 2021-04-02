@@ -55,7 +55,7 @@ class BankStatementTransactionEntry(Document):
 
 	def populate_payment_entries(self):
 		if self.bank_statement is None: return
-		filename = self.bank_statement.split("/")[-1]
+		file_url = self.bank_statement
 		if (len(self.new_transaction_items + self.reconciled_transaction_items) > 0):
 			frappe.throw(_("Transactions already retreived from the statement"))
 
@@ -65,7 +65,7 @@ class BankStatementTransactionEntry(Document):
 		if self.bank_settings:
 			mapped_items = frappe.get_doc("Bank Statement Settings", self.bank_settings).mapped_items
 		statement_headers = self.get_statement_headers()
-		transactions = get_transaction_entries(filename, statement_headers)
+		transactions = get_transaction_entries(file_url, statement_headers)
 		for entry in transactions:
 			date = entry[statement_headers["Date"]].strip()
 			#print("Processing entry DESC:{0}-W:{1}-D:{2}-DT:{3}".format(entry["Particulars"], entry["Withdrawals"], entry["Deposits"], entry["Date"]))
@@ -398,20 +398,21 @@ def get_transaction_info(headers, header_index, row):
 			transaction[header] = ""
 	return transaction
 
-def get_transaction_entries(filename, headers):
+def get_transaction_entries(file_url, headers):
 	header_index = {}
 	rows, transactions = [], []
 
-	if (filename.lower().endswith("xlsx")):
+	if (file_url.lower().endswith("xlsx")):
 		from frappe.utils.xlsxutils import read_xlsx_file_from_attached_file
-		rows = read_xlsx_file_from_attached_file(file_id=filename)
-	elif (filename.lower().endswith("csv")):
+		rows = read_xlsx_file_from_attached_file(file_url=file_url)
+	elif (file_url.lower().endswith("csv")):
 		from frappe.utils.csvutils import read_csv_content
-		_file = frappe.get_doc("File", {"file_name": filename})
+		_file = frappe.get_doc("File", {"file_url": file_url})
 		filepath = _file.get_full_path()
 		with open(filepath,'rb') as csvfile:
 			rows = read_csv_content(csvfile.read())
-	elif (filename.lower().endswith("xls")):
+	elif (file_url.lower().endswith("xls")):
+		filename = file_url.split("/")[-1]
 		rows = get_rows_from_xls_file(filename)
 	else:
 		frappe.throw(_("Only .csv and .xlsx files are supported currently"))

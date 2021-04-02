@@ -71,7 +71,7 @@ class ProgramEnrollment(Document):
 	def create_course_enrollments(self):
 		student = frappe.get_doc("Student", self.student)
 		program = frappe.get_doc("Program", self.program)
-		course_list = [course.course for course in program.get_all_children()]
+		course_list = [course.course for course in program.courses]
 		for course_name in course_list:
 			student.enroll_in_course(course_name=course_name, program_enrollment=self.name)
 
@@ -97,6 +97,7 @@ class ProgramEnrollment(Document):
 		return quiz_progress
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 	if filters.get('program'):
 		return frappe.db.sql("""select course, course_name from `tabProgram Course`
@@ -115,6 +116,7 @@ def get_program_courses(doctype, txt, searchfield, start, page_len, filters):
 				})
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_students(doctype, txt, searchfield, start, page_len, filters):
 	if not filters.get("academic_term"):
 		filters["academic_term"] = frappe.defaults.get_defaults().academic_term

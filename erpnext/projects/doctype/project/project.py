@@ -238,6 +238,8 @@ def get_list_context(context=None):
 		"row_template": "templates/includes/projects/project_row.html"
 	}
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_users_for_project(doctype, txt, searchfield, start, page_len, filters):
 	conditions = []
 	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)

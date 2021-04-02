@@ -427,6 +427,7 @@ class TestMaterialRequest(unittest.TestCase):
 			"basic_rate": 1.0
 		})
 		se_doc.get("items")[1].update({
+			"item_code": "_Test Item Home Desktop 100",
 			"qty": 3.0,
 			"transfer_qty": 3.0,
 			"s_warehouse": "_Test Warehouse 1 - _TC",
@@ -537,7 +538,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 		mr = make_material_request(item_code='_Test FG Item', material_request_type='Manufacture',
 			uom="_Test UOM 1", conversion_factor=12)
-		
+
 		requested_qty = self._get_requested_qty('_Test FG Item', '_Test Warehouse - _TC')
 
 		self.assertEqual(requested_qty, existing_requested_qty + 120)

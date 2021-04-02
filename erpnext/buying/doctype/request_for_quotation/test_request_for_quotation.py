@@ -6,12 +6,14 @@ from __future__ import unicode_literals
 import unittest
 
 import frappe
-from erpnext.templates.pages.rfq import check_supplier_has_docname_access
 from frappe.utils import nowdate
+from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.templates.pages.rfq import check_supplier_has_docname_access
+from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
+from erpnext.buying.doctype.request_for_quotation.request_for_quotation import create_supplier_quotation
 
 class TestRequestforQuotation(unittest.TestCase):
 	def test_quote_status(self):
-		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
 		rfq = make_request_for_quotation()
 
 		self.assertEqual(rfq.get('suppliers')[0].quote_status, 'Pending')
@@ -31,7 +33,6 @@ class TestRequestforQuotation(unittest.TestCase):
 		self.assertEqual(rfq.get('suppliers')[1].quote_status, 'No Quote')
 
 	def test_make_supplier_quotation(self):
-		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
 		rfq = make_request_for_quotation()
 
 		sq = make_supplier_quotation(rfq.name, rfq.get('suppliers')[0].supplier)
@@ -51,15 +52,13 @@ class TestRequestforQuotation(unittest.TestCase):
 		self.assertEqual(sq1.get('items')[0].qty, 5)
 
 	def test_make_supplier_quotation_with_special_characters(self):
-		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import make_supplier_quotation
-
 		frappe.delete_doc_if_exists("Supplier", "_Test Supplier '1", force=1)
 		supplier = frappe.new_doc("Supplier")
 		supplier.supplier_name = "_Test Supplier '1"
 		supplier.supplier_group = "_Test Supplier Group"
 		supplier.insert()
 
-		rfq = make_request_for_quotation(supplier_wt_appos)
+		rfq = make_request_for_quotation(supplier_data=supplier_wt_appos)
 
 		sq = make_supplier_quotation(rfq.name, supplier_wt_appos[0].get("supplier"))
 		sq.submit()
@@ -76,7 +75,6 @@ class TestRequestforQuotation(unittest.TestCase):
 		frappe.form_dict.name = None
 
 	def test_make_supplier_quotation_from_portal(self):
-		from erpnext.buying.doctype.request_for_quotation.request_for_quotation import create_supplier_quotation
 		rfq = make_request_for_quotation()
 		rfq.get('items')[0].rate = 100
 		rfq.supplier = rfq.suppliers[0].supplier
@@ -90,12 +88,34 @@ class TestRequestforQuotation(unittest.TestCase):
 		self.assertEqual(supplier_quotation_doc.get('items')[0].qty, 5)
 		self.assertEqual(supplier_quotation_doc.get('items')[0].amount, 500)
 
+	def test_make_multi_uom_supplier_quotation(self):
+		item_code = "_Test Multi UOM RFQ Item"
+		if not frappe.db.exists('Item', item_code):
+			item = make_item(item_code, {'stock_uom': '_Test UOM'})
+			row = item.append('uoms', {
+				'uom': 'Kg',
+				'conversion_factor': 2
+			})
+			row.db_update()
 
-def make_request_for_quotation(supplier_data=None):
+		rfq = make_request_for_quotation(item_code="_Test Multi UOM RFQ Item", uom="Kg", conversion_factor=2)
+		rfq.get('items')[0].rate = 100
+		rfq.supplier = rfq.suppliers[0].supplier
+
+		self.assertEqual(rfq.items[0].stock_qty, 10)
+
+		supplier_quotation_name = create_supplier_quotation(rfq)
+		supplier_quotation = frappe.get_doc('Supplier Quotation', supplier_quotation_name)
+
+		self.assertEqual(supplier_quotation.items[0].qty, 5)
+		self.assertEqual(supplier_quotation.items[0].stock_qty, 10)
+
+def make_request_for_quotation(**args):
 	"""
 	:param supplier_data: List containing supplier data
 	"""
-	supplier_data = supplier_data if supplier_data else get_supplier_data()
+	args = frappe._dict(args)
+	supplier_data = args.get("supplier_data") if args.get("supplier_data") else get_supplier_data()
 	rfq = frappe.new_doc('Request for Quotation')
 	rfq.transaction_date = nowdate()
 	rfq.status = 'Draft'
@@ -106,11 +126,13 @@ def make_request_for_quotation(supplier_data=None):
 		rfq.append('suppliers', data)
 
 	rfq.append("items", {
-		"item_code": "_Test Item",
+		"item_code": args.item_code or "_Test Item",
 		"description": "_Test Item",
-		"uom": "_Test UOM",
-		"qty": 5,
-		"warehouse": "_Test Warehouse - _TC",
+		"uom": args.uom or "_Test UOM",
+		"stock_uom": args.stock_uom or "_Test UOM",
+		"qty": args.qty or 5,
+		"conversion_factor": args.conversion_factor or 1.0,
+		"warehouse": args.warehouse or "_Test Warehouse - _TC",
 		"schedule_date": nowdate()
 	})
 

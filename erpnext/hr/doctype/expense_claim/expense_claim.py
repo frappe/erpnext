@@ -2,7 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-import frappe
+import frappe, erpnext
 from frappe import _
 from frappe.utils import get_fullname, flt, cstr
 from frappe.model.document import Document
@@ -128,7 +128,7 @@ class ExpenseClaim(AccountsController):
 					"debit": data.sanctioned_amount,
 					"debit_in_account_currency": data.sanctioned_amount,
 					"against": self.employee,
-					"cost_center": data.cost_center
+					"cost_center": data.cost_center or self.cost_center
 				}, item=data)
 			)
 
@@ -285,7 +285,7 @@ def make_bank_entry(dt, dn):
 	je = frappe.new_doc("Journal Entry")
 	je.voucher_type = 'Bank Entry'
 	je.company = expense_claim.company
-	je.remark = 'Payment against Expense Claim: ' + dn;
+	je.remark = 'Payment against Expense Claim: ' + dn
 
 	je.append("accounts", {
 		"account": expense_claim.payable_account,
@@ -293,6 +293,7 @@ def make_bank_entry(dt, dn):
 		"reference_type": "Expense Claim",
 		"party_type": "Employee",
 		"party": expense_claim.employee,
+		"cost_center": erpnext.get_default_cost_center(expense_claim.company),
 		"reference_name": expense_claim.name
 	})
 
@@ -303,6 +304,7 @@ def make_bank_entry(dt, dn):
 		"reference_name": expense_claim.name,
 		"balance": default_bank_cash_account.balance,
 		"account_currency": default_bank_cash_account.account_currency,
+		"cost_center": erpnext.get_default_cost_center(expense_claim.company),
 		"account_type": default_bank_cash_account.account_type
 	})
 

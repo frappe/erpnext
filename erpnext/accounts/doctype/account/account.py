@@ -244,6 +244,8 @@ class Account(NestedSet):
 
 		super(Account, self).on_trash(True)
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_parent_account(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""select name from tabAccount
 		where is_group = 1 and docstatus != 2 and company = %s

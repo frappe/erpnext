@@ -75,23 +75,23 @@ frappe.ui.form.on("Project", {
 			frm.add_custom_button(__('Cancelled'), () => {
 				frm.events.set_status(frm, 'Cancelled');
 			}, __('Set Status'));
-		}
 
-		if (frappe.model.can_read("Task")) {
-			frm.add_custom_button(__("Gantt Chart"), function () {
-				frappe.route_options = {
-					"project": frm.doc.name
-				};
-				frappe.set_route("List", "Task", "Gantt");
-			});
-
-			frm.add_custom_button(__("Kanban Board"), () => {
-				frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
-					project: frm.doc.project_name
-				}).then(() => {
-					frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
+			if (frappe.model.can_read("Task")) {
+				frm.add_custom_button(__("Gantt Chart"), function () {
+					frappe.route_options = {
+						"project": frm.doc.name
+					};
+					frappe.set_route("List", "Task", "Gantt");
 				});
-			});
+
+				frm.add_custom_button(__("Kanban Board"), () => {
+					frappe.call('erpnext.projects.doctype.project.project.create_kanban_board_if_not_exists', {
+						project: frm.doc.project_name
+					}).then(() => {
+						frappe.set_route('List', 'Task', 'Kanban', frm.doc.project_name);
+					});
+				});
+			}
 		}
 	},
 
@@ -119,9 +119,7 @@ frappe.ui.form.on("Project", {
 	},
 
 	collect_progress: function(frm) {
-		if (frm.doc.collect_progress) {
-			frm.set_df_property("message", "reqd", 1);
-		}
+		frm.set_df_property("message", "reqd", frm.doc.collect_progress);
 	}
 });
 

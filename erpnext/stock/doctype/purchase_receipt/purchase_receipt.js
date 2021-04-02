@@ -101,12 +101,18 @@ erpnext.stock.PurchaseReceiptController = erpnext.buying.BuyingController.extend
 			if (this.frm.doc.docstatus == 0) {
 				this.frm.add_custom_button(__('Purchase Order'),
 					function () {
+						if (!me.frm.doc.supplier) {
+							frappe.throw({
+								title: __("Mandatory"),
+								message: __("Please Select a Supplier")
+							});
+						}
 						erpnext.utils.map_current_doc({
 							method: "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_receipt",
 							source_doctype: "Purchase Order",
 							target: me.frm,
 							setters: {
-								supplier: me.frm.doc.supplier || undefined,
+								supplier: me.frm.doc.supplier,
 							},
 							get_query_filters: {
 								docstatus: 1,

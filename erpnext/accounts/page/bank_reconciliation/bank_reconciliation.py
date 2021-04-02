@@ -260,7 +260,11 @@ def check_amount_vs_description(amount_matching, description_matching):
 						continue
 
 				if "reference_no" in am_match and "reference_no" in des_match:
-					if difflib.SequenceMatcher(lambda x: x == " ", am_match["reference_no"], des_match["reference_no"]).ratio() > 70:
+					# Sequence Matcher does not handle None as input
+					am_reference = am_match["reference_no"] or ""
+					des_reference = des_match["reference_no"] or ""
+
+					if difflib.SequenceMatcher(lambda x: x == " ", am_reference, des_reference).ratio() > 70:
 						if am_match not in result:
 							result.append(am_match)
 		if result:
@@ -285,6 +289,8 @@ def get_matching_transactions_payments(description_matching):
 	else:
 		return []
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def payment_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
 	if not account:
@@ -313,6 +319,8 @@ def payment_entry_query(doctype, txt, searchfield, start, page_len, filters):
 		}
 	)
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 	account = frappe.db.get_value("Bank Account", filters.get("bank_account"), "account")
 
@@ -348,6 +356,8 @@ def journal_entry_query(doctype, txt, searchfield, start, page_len, filters):
 		}
 	)
 
+@frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def sales_invoices_query(doctype, txt, searchfield, start, page_len, filters):
 	return frappe.db.sql("""
 		SELECT

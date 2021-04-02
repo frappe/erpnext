@@ -263,13 +263,14 @@ class Subscription(Document):
 			invoice.set_taxes()
 
 		# Due date
-		invoice.append(
-			'payment_schedule',
-			{
-				'due_date': add_days(self.current_invoice_end, cint(self.days_until_due)),
-				'invoice_portion': 100
-			}
-		)
+		if self.days_until_due:
+			invoice.append(
+				'payment_schedule',
+				{
+					'due_date': add_days(self.current_invoice_end, cint(self.days_until_due)),
+					'invoice_portion': 100
+				}
+			)
 
 		# Discounts
 		if self.additional_discount_percentage:
@@ -297,7 +298,8 @@ class Subscription(Document):
 		Returns the `Item`s linked to `Subscription Plan`
 		"""
 		if prorate:
-			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start)
+			prorate_factor = get_prorata_factor(self.current_invoice_end, self.current_invoice_start,
+				self.generate_invoice_at_period_start)
 
 		items = []
 		customer = self.customer
@@ -326,19 +328,26 @@ class Subscription(Document):
 
 	def is_postpaid_to_invoice(self):
 		return getdate(nowdate()) > getdate(self.current_invoice_end) or \
-			(getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start)) and \
-			not self.has_outstanding_invoice()
+			(getdate(nowdate()) >= getdate(self.current_invoice_end) and getdate(self.current_invoice_end) == getdate(self.current_invoice_start))
 
 	def is_prepaid_to_invoice(self):
 		if not self.generate_invoice_at_period_start:
 			return False
 
-		if self.is_new_subscription():
+		if self.is_new_subscription() and getdate(nowdate()) >= getdate(self.current_invoice_start):
 			return True
 
 		# Check invoice dates and make sure it doesn't have outstanding invoices
-		return getdate(nowdate()) >= getdate(self.current_invoice_start) and not self.has_outstanding_invoice()
-	
+		return getdate(nowdate()) >= getdate(self.current_invoice_start)
+
+	def is_current_invoice_generated(self):
+		invoice = self.get_current_invoice()
+
+		if invoice and getdate(self.current_invoice_start) <= getdate(invoice.posting_date) <= getdate(self.current_invoice_end):
+			return True
+
+		return False
+
 	def is_current_invoice_paid(self):
 		if self.is_new_subscription():
 			return False
@@ -346,7 +355,7 @@ class Subscription(Document):
 		last_invoice = frappe.get_doc('Sales Invoice', self.invoices[-1].invoice)
 		if getdate(last_invoice.posting_date) == getdate(self.current_invoice_start) and last_invoice.status == 'Paid':
 			return True
-		
+
 		return False
 
 	def process_for_active(self):
@@ -358,7 +367,8 @@ class Subscription(Document):
 		2. Change the `Subscription` status to 'Past Due Date'
 		3. Change the `Subscription` status to 'Cancelled'
 		"""
-		if not self.is_current_invoice_paid() and (self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
+		if not self.is_current_invoice_generated() and not self.is_current_invoice_paid() and \
+			(self.is_postpaid_to_invoice() or self.is_prepaid_to_invoice()):
 			self.generate_invoice()
 			if self.current_invoice_is_past_due():
 				self.status = 'Past Due Date'
@@ -368,6 +378,9 @@ class Subscription(Document):
 
 		if self.cancel_at_period_end and getdate(nowdate()) > getdate(self.current_invoice_end):
 			self.cancel_subscription_at_period_end()
+
+		if self.is_current_invoice_generated() and getdate() > getdate(self.current_invoice_end):
+			self.update_subscription_period(add_days(self.current_invoice_end, 1))
 
 	def cancel_subscription_at_period_end(self):
 		"""
@@ -395,6 +408,15 @@ class Subscription(Document):
 				self.update_subscription_period(add_days(self.current_invoice_end, 1))
 			else:
 				self.set_status_grace_period()
+
+			if getdate() > getdate(self.current_invoice_end):
+				self.update_subscription_period(add_days(self.current_invoice_end, 1))
+
+			# Generate invoices periodically even if current invoice are unpaid
+			if self.generate_new_invoices_past_due_date and not self.is_current_invoice_generated() and (self.is_postpaid_to_invoice()
+				or self.is_prepaid_to_invoice()):
+				prorate = frappe.db.get_single_value('Subscription Settings', 'prorate')
+				self.generate_invoice(prorate)
 
 	@staticmethod
 	def is_not_outstanding(invoice):
@@ -447,11 +469,13 @@ class Subscription(Document):
 		if invoice:
 			return invoice.precision('grand_total')
 
-
-def get_prorata_factor(period_end, period_start):
-	diff = flt(date_diff(nowdate(), period_start) + 1)
-	plan_days = flt(date_diff(period_end, period_start) + 1)
-	prorate_factor = diff / plan_days
+def get_prorata_factor(period_end, period_start, is_prepaid):
+	if is_prepaid:
+		prorate_factor = 1
+	else:
+		diff = flt(date_diff(nowdate(), period_start) + 1)
+		plan_days = flt(date_diff(period_end, period_start) + 1)
+		prorate_factor = diff / plan_days
 
 	return prorate_factor
 

@@ -98,11 +98,17 @@ class ProductionPlan(Document):
 		elif self.get_items_from == "Material Request":
 			self.get_mr_items()
 
+	def get_so_mr_list(self, field, table):
+		"""Returns a list of Sales Orders or Material Requests from the respective tables"""
+		so_mr_list = [d.get(field) for d in self.get(table) if d.get(field)]
+		return so_mr_list
+
 	def get_so_items(self):
-		so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
-		if not so_list:
-			msgprint(_("Please enter Sales Orders in the above table"))
-			return []
+		# Check for empty table or empty rows
+		if not self.get("sales_orders") or not self.get_so_mr_list("sales_order", "sales_orders"):
+			frappe.throw(_("Please fill the Sales Orders table"), title=_("Sales Orders Required"))
+
+		so_list = self.get_so_mr_list("sales_order", "sales_orders")
 
 		item_condition = ""
 		if self.item_code:
@@ -134,10 +140,11 @@ class ProductionPlan(Document):
 		self.calculate_total_planned_qty()
 
 	def get_mr_items(self):
-		mr_list = [d.material_request for d in self.material_requests if d.material_request]
-		if not mr_list:
-			msgprint(_("Please enter Material Requests in the above table"))
-			return []
+		# Check for empty table or empty rows
+		if not self.get("material_requests") or not self.get_so_mr_list("material_request", "material_requests"):
+			frappe.throw(_("Please fill the Material Requests table"), title=_("Material Requests Required"))
+
+		mr_list = self.get_so_mr_list("material_request", "material_requests")
 
 		item_condition = ""
 		if self.item_code:
@@ -315,12 +322,13 @@ class ProductionPlan(Document):
 		work_orders = []
 		bom_data = {}
 
-		get_sub_assembly_items(item.get("bom_no"), bom_data)
+		get_sub_assembly_items(item.get("bom_no"), bom_data, item.get("qty"))
 
 		for key, data in bom_data.items():
 			data.update({
-				'qty': data.get("stock_qty") * item.get("qty"),
+				'qty': data.get("stock_qty"),
 				'production_plan': self.name,
+				'use_multi_level_bom': item.get("use_multi_level_bom"),
 				'company': self.company,
 				'fg_warehouse': item.get("fg_warehouse"),
 				'update_consumed_material_cost_in_project': 0
@@ -414,14 +422,13 @@ class ProductionPlan(Document):
 			msgprint(_("No material request created"))
 
 @frappe.whitelist()
-def download_raw_materials(production_plan):
-	doc = frappe.get_doc('Production Plan', production_plan)
-	doc.check_permission()
-
+def download_raw_materials(doc):
 	item_list = [['Item Code', 'Description', 'Stock UOM', 'Required Qty', 'Warehouse',
 		'projected Qty', 'Actual Qty']]
 
-	doc = doc.as_dict()
+	if isinstance(doc, string_types):
+		doc = frappe._dict(json.loads(doc))
+
 	for d in get_items_for_material_requests(doc, ignore_existing_ordered_qty=True):
 		item_list.append([d.get('item_code'), d.get('description'), d.get('stock_uom'), d.get('quantity'),
 			d.get('warehouse'), d.get('projected_qty'), d.get('actual_qty')])
@@ -614,7 +621,13 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 		doc = frappe._dict(json.loads(doc))
 
 	doc['mr_items'] = []
+
 	po_items = doc.get('po_items') if doc.get('po_items') else doc.get('items')
+	# Check for empty table or empty rows
+	if not po_items or not [row.get('item_code') for row in po_items if row.get('item_code')]:
+		frappe.throw(_("Items to Manufacture are required to pull the Raw Materials associated with it."),
+			title=_("Items Required"))
+
 	company = doc.get('company')
 	warehouse = doc.get('for_warehouse')
 
@@ -696,8 +709,12 @@ def get_items_for_material_requests(doc, ignore_existing_ordered_qty=None):
 					mr_items.append(items)
 
 	if not mr_items:
-		frappe.msgprint(_("""As raw materials projected quantity is more than required quantity, there is no need to create material request.
-			Still if you want to make material request, kindly enable <b>Ignore Existing Projected Quantity</b> checkbox"""))
+		to_enable = frappe.bold(_("Ignore Existing Projected Quantity"))
+		warehouse = frappe.bold(doc.get('for_warehouse'))
+		message = _("As there are sufficient raw materials, Material Request is not required for Warehouse {0}.").format(warehouse) + "<br><br>"
+		message += _(" If you still want to proceed, please enable {0}.").format(to_enable)
+
+		frappe.msgprint(message, title=_("Note"))
 
 	return mr_items
 
@@ -711,7 +728,7 @@ def get_item_data(item_code):
 #		"description": item_details.get("description")
 	}
 
-def get_sub_assembly_items(bom_no, bom_data):
+def get_sub_assembly_items(bom_no, bom_data, to_produce_qty):
 	data = get_children('BOM', parent = bom_no)
 	for d in data:
 		if d.expandable:
@@ -728,6 +745,6 @@ def get_sub_assembly_items(bom_no, bom_data):
 				})
 
 			bom_item = bom_data.get(key)
-			bom_item["stock_qty"] += d.stock_qty / d.parent_bom_qty
+			bom_item["stock_qty"] += (d.stock_qty / d.parent_bom_qty) * flt(to_produce_qty)
 
-			get_sub_assembly_items(bom_item.get("bom_no"), bom_data)
+			get_sub_assembly_items(bom_item.get("bom_no"), bom_data, bom_item["stock_qty"])

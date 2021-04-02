@@ -52,7 +52,7 @@ var create_multiple_dialog = function(listview){
 					}
 				},
 				freeze: true,
-				freeze_message: "Creating Lab Test..."
+				freeze_message: __("Creating Lab Test...")
 			});
 			dialog.hide();
 		}

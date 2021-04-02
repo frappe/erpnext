@@ -69,7 +69,7 @@ frappe.query_reports["Accounts Receivable"] = {
 					filters: {
 						'company': company
 					}
-				}
+				};
 			}
 		},
 		{

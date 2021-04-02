@@ -226,6 +226,7 @@ def get_projectwise_timesheet_data(project, parent=None):
 			and sales_invoice is null""".format(cond), {'project': project, 'parent': parent}, as_dict=1)
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_timesheet(doctype, txt, searchfield, start, page_len, filters):
 	if not filters: filters = {}
 

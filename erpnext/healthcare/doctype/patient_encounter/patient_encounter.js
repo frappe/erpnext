@@ -116,7 +116,7 @@ var schedule_inpatient = function(frm) {
 			}
 		},
 		freeze: true,
-		freeze_message: "Process Inpatient Scheduling"
+		freeze_message: __("Process Inpatient Scheduling")
 	});
 };
 
@@ -130,7 +130,7 @@ var schedule_discharge = function(frm) {
 			}
 		},
 		freeze: true,
-		freeze_message: "Process Discharge"
+		freeze_message: __("Process Discharge")
 	});
 };
 
@@ -311,5 +311,5 @@ var calculate_age = function(birth) {
 	var age = new Date();
 	age.setTime(ageMS);
 	var years =  age.getFullYear() - 1970;
-	return  years + " Year(s) " + age.getMonth() + " Month(s) " + age.getDate() + " Day(s)";
+	return `${years} ${__('Years(s)')} ${age.getMonth()} ${__('Month(s)')} ${age.getDate()} ${__('Day(s)')}`;
 };

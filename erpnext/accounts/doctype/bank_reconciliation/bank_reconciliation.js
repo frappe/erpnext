@@ -21,6 +21,14 @@ frappe.ui.form.on("Bank Reconciliation", {
 			};
 		});
 
+		frm.set_query("bank_account", function() {
+			return {
+				"filters": {
+					"is_company_account": 1
+				}
+			};
+		});
+
 		frm.set_value("from_date", frappe.datetime.month_start());
 		frm.set_value("to_date", frappe.datetime.month_end());
 	},

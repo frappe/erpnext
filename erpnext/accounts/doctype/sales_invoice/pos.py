@@ -153,8 +153,8 @@ def update_multi_mode_option(doc, pos_profile):
 
 def get_mode_of_payment(doc):
 	return frappe.db.sql("""
-		select mpa.default_account, mpa.parent, mp.type as type 
-		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp 
+		select mpa.default_account, mpa.parent, mp.type as type
+		from `tabMode of Payment Account` mpa,`tabMode of Payment` mp
 		where mpa.parent = mp.name and mpa.company = %(company)s and mp.enabled = 1""",
 	{'company': doc.company}, as_dict=1)
 
@@ -175,6 +175,13 @@ def get_items_list(pos_profile, company):
 		if args_list:
 			cond = "and i.item_group in (%s)" % (', '.join(['%s'] * len(args_list)))
 
+	bin_join = bin_cond = ""
+	if pos_profile.get('hide_unavailable_items'):
+		bin_join = ",`tabBin` b"
+		bin_cond = "and i.item_code = b.item_code and ifnull(b.actual_qty, 0) > 0 "
+		if pos_profile.get('warehouse'):
+			bin_cond += "and b.warehouse = {}".format(frappe.db.escape(pos_profile.get('warehouse')))
+
 	return frappe.db.sql("""
 		select
 			i.name, i.item_code, i.item_name, i.description, i.item_group, i.has_batch_no,
@@ -186,11 +193,13 @@ def get_items_list(pos_profile, company):
 		left join `tabItem Default` id on id.parent = i.name and id.company = %s
 		left join `tabItem Tax` it on it.parent = i.name
 		left join `tabUOM Conversion Detail` c on i.name = c.parent and i.sales_uom = c.uom
+		{bin_join}
 		where
 			i.disabled = 0 and i.has_variants = 0 and i.is_sales_item = 1
 			{cond}
+			{bin_cond}
 		group by i.item_code
-		""".format(cond=cond), tuple([company] + args_list), as_dict=1)
+		""".format(cond=cond, bin_join=bin_join, bin_cond=bin_cond), tuple([company] + args_list), as_dict=1)
 
 
 def get_item_groups(pos_profile):
@@ -385,6 +394,14 @@ def get_pricing_rule_data(doc):
 						between ifnull(valid_from, '2000-01-01') and ifnull(valid_upto, '2500-12-31')
 						order by priority desc, name desc""",
                         {'company': doc.company, 'price_list': doc.selling_price_list, 'date': nowdate()}, as_dict=1)
+
+		for row in pricing_rules:
+			if row.apply_on:
+				doctype = "Pricing Rule " + row.apply_on
+				apply_on = frappe.scrub(row.apply_on)
+				row[apply_on] = [d.get(apply_on) for d in frappe.get_all(doctype,
+					filters = {"parent": row.name}, fields = [apply_on])]
+
 	return pricing_rules
 
 
@@ -425,10 +442,10 @@ def make_invoice(pos_profile, doc_list={}, email_queue_list={}, customers_list={
 				name_list.append(name)
 
 	email_queue = make_email_queue(email_queue_list)
-	
+
 	if isinstance(pos_profile, string_types):
 		pos_profile = json.loads(pos_profile)
-	
+
 	customers = get_customers_list(pos_profile)
 	return {
 		'invoice': name_list,

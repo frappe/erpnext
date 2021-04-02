@@ -135,14 +135,9 @@
   "state_name": "Delhi"
  },
  {
-  "state_number": "25",
-  "state_code": "DD",
-  "state_name": "Daman and Diu"
- },
- {
   "state_number": "26",
   "state_code": "DN",
-  "state_name": "Dadra and Nagar Haveli"
+  "state_name": "Dadra and Nagar Haveli and Daman and Diu"
  },
  {
   "state_number": "22",
@@ -173,5 +168,10 @@
   "state_number": "37",
   "state_code": "AD",
   "state_name": "Andhra Pradesh (New)"
+ },
+ {
+  "state_number": "38",
+  "state_code": "LA",
+  "state_name": "Ladakh"
  }
 ]

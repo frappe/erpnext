@@ -1,7 +1,7 @@
 <div class="pos-list-row pos-bill-item {{ selected_class }}" data-item-code="{{ item_code }}">
 	<div class="cell subject">
 		<!--<input class="list-row-checkbox" type="checkbox" data-name="{{item_code}}">-->
-		<a class="grey list-id" title="{{ item_name }}">{{ strip_html(__(item_name)) || item_code }}</a>
+		<a class="grey list-id" title="{{ title }}">{{ strip_html(__(title)) }}</a>
 	</div>
 	<div class="cell text-right">{%= qty %}</div>
 	<div class="cell text-right">{%= discount_percentage %}</div>

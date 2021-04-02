@@ -4,17 +4,16 @@
 from __future__ import unicode_literals
 import frappe
 
+
 def execute():
 	frappe.reload_doc("erpnext_integrations", "doctype", "plaid_settings")
 	plaid_settings = frappe.get_single("Plaid Settings")
 	if plaid_settings.enabled:
-		if not (frappe.conf.plaid_client_id and frappe.conf.plaid_env \
-			and frappe.conf.plaid_public_key and frappe.conf.plaid_secret):
+		if not (frappe.conf.plaid_client_id and frappe.conf.plaid_env and frappe.conf.plaid_secret):
 			plaid_settings.enabled = 0
 		else:
 			plaid_settings.update({
 				"plaid_client_id": frappe.conf.plaid_client_id,
-				"plaid_public_key": frappe.conf.plaid_public_key,
 				"plaid_env": frappe.conf.plaid_env,
 				"plaid_secret": frappe.conf.plaid_secret
 			})

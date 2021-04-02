@@ -106,7 +106,7 @@ def make_supplier_scorecard(source_name, target_doc=None):
 			"doctype": "Supplier Scorecard Scoring Criteria",
 			"postprocess": update_criteria_fields,
 		}
-	}, target_doc, post_process)
+	}, target_doc, post_process, ignore_permissions=True)
 
 	return doc
 

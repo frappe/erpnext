@@ -74,7 +74,7 @@ def validate_returned_items(doc):
 	for d in doc.get("items"):
 		if d.item_code and (flt(d.qty) < 0 or flt(d.get('received_qty')) < 0):
 			if d.item_code not in valid_items:
-				frappe.throw(_("Row # {0}: Returned Item {1} does not exists in {2} {3}")
+				frappe.throw(_("Row # {0}: Returned Item {1} does not exist in {2} {3}")
 					.format(d.idx, d.item_code, doc.doctype, doc.return_against))
 			else:
 				ref = valid_items.get(d.item_code, frappe._dict())
@@ -266,6 +266,8 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.purchase_order = source_doc.purchase_order
 			target_doc.purchase_order_item = source_doc.purchase_order_item
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
+			target_doc.purchase_receipt_item = source_doc.name
+
 		elif doctype == "Purchase Invoice":
 			target_doc.received_qty = -1* source_doc.received_qty
 			target_doc.rejected_qty = -1* source_doc.rejected_qty
@@ -276,20 +278,27 @@ def make_return_doc(doctype, source_name, target_doc=None):
 			target_doc.rejected_warehouse = source_doc.rejected_warehouse
 			target_doc.po_detail = source_doc.po_detail
 			target_doc.pr_detail = source_doc.pr_detail
+			target_doc.purchase_invoice_item = source_doc.name
+			target_doc.price_list_rate = 0
+
 		elif doctype == "Delivery Note":
 			target_doc.against_sales_order = source_doc.against_sales_order
 			target_doc.against_sales_invoice = source_doc.against_sales_invoice
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.si_detail = source_doc.si_detail
 			target_doc.expense_account = source_doc.expense_account
+			target_doc.dn_detail = source_doc.name
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
+
 		elif doctype == "Sales Invoice":
 			target_doc.sales_order = source_doc.sales_order
 			target_doc.delivery_note = source_doc.delivery_note
 			target_doc.so_detail = source_doc.so_detail
 			target_doc.dn_detail = source_doc.dn_detail
 			target_doc.expense_account = source_doc.expense_account
+			target_doc.sales_invoice_item = source_doc.name
+			target_doc.price_list_rate = 0
 			if default_warehouse_for_sales_return:
 				target_doc.warehouse = default_warehouse_for_sales_return
 

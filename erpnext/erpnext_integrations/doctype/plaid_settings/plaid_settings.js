@@ -4,15 +4,15 @@
 frappe.provide("erpnext.integrations");
 
 frappe.ui.form.on('Plaid Settings', {
-	enabled: function(frm) {
+	enabled: function (frm) {
 		frm.toggle_reqd('plaid_client_id', frm.doc.enabled);
 		frm.toggle_reqd('plaid_secret', frm.doc.enabled);
-		frm.toggle_reqd('plaid_public_key', frm.doc.enabled);
 		frm.toggle_reqd('plaid_env', frm.doc.enabled);
 	},
-	refresh: function(frm) {
-		if(frm.doc.enabled) {
-			frm.add_custom_button('Link a new bank account', () => {
+
+	refresh: function (frm) {
+		if (frm.doc.enabled) {
+			frm.add_custom_button(__('Link a new bank account'), () => {
 				new erpnext.integrations.plaidLink(frm);
 			});
 		}
@@ -22,17 +22,24 @@ frappe.ui.form.on('Plaid Settings', {
 erpnext.integrations.plaidLink = class plaidLink {
 	constructor(parent) {
 		this.frm = parent;
-		this.product = ["transactions", "auth"];
 		this.plaidUrl = 'https://cdn.plaid.com/link/v2/stable/link-initialize.js';
 		this.init_config();
 	}
 
-	init_config() {
-		const me = this;
-		me.plaid_env = me.frm.doc.plaid_env;
-		me.plaid_public_key = me.frm.doc.plaid_public_key;
-		me.client_name = frappe.boot.sitename;
-		me.init_plaid();
+	async init_config() {
+		this.product = ["auth", "transactions"];
+		this.plaid_env = this.frm.doc.plaid_env;
+		this.client_name = frappe.boot.sitename;
+		this.token = await this.get_link_token();
+		this.init_plaid();
+	}
+
+	async get_link_token() {
+		const token = await this.frm.call("get_link_token").then(resp => resp.message);
+		if (!token) {
+			frappe.throw(__('Cannot retrieve link token. Check Error Log for more information'));
+		}
+		return token;
 	}
 
 	init_plaid() {
@@ -69,39 +76,43 @@ erpnext.integrations.plaidLink = class plaidLink {
 	}
 
 	onScriptLoaded(me) {
-		me.linkHandler = window.Plaid.create({
+		me.linkHandler = Plaid.create({
 			clientName: me.client_name,
+			product: me.product,
 			env: me.plaid_env,
-			key: me.plaid_public_key,
-			onSuccess: me.plaid_success,
-			product: me.product
+			token: me.token,
+			onSuccess: me.plaid_success
 		});
 	}
 
 	onScriptError(error) {
-		frappe.msgprint('There was an issue loading the link-initialize.js script');
-		frappe.msgprint(error);
+		frappe.msgprint(__("There was an issue connecting to Plaid's authentication server. Check browser console for more information"));
+		console.log(error);
 	}
 
 	plaid_success(token, response) {
 		const me = this;
 
 		frappe.prompt({
-			fieldtype:"Link",
+			fieldtype: "Link",
 			options: "Company",
-			label:__("Company"),
-			fieldname:"company",
-			reqd:1
+			label: __("Company"),
+			fieldname: "company",
+			reqd: 1
 		}, (data) => {
 			me.company = data.company;
-			frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_institution', {token: token, response: response})
-				.then((result) => {
-					frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_bank_accounts', {response: response,
-						bank: result, company: me.company});
-				})
-				.then(() => {
-					frappe.show_alert({message:__("Bank accounts added"), indicator:'green'});
+			frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_institution', {
+				token: token,
+				response: response
+			}).then((result) => {
+				frappe.xcall('erpnext.erpnext_integrations.doctype.plaid_settings.plaid_settings.add_bank_accounts', {
+					response: response,
+					bank: result,
+					company: me.company
 				});
+			}).then(() => {
+				frappe.show_alert({ message: __("Bank accounts added"), indicator: 'green' });
+			});
 		}, __("Select a company"), __("Continue"));
 	}
 };

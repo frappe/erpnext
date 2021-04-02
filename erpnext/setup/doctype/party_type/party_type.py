@@ -10,6 +10,7 @@ class PartyType(Document):
 	pass
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_party_type(doctype, txt, searchfield, start, page_len, filters):
 	cond = ''
 	if filters and filters.get('account'):

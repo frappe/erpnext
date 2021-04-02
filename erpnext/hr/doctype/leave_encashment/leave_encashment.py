@@ -95,7 +95,11 @@ class LeaveEncashment(Document):
 		create_leave_ledger_entry(self, args, submit)
 
 		# create reverse entry for expired leaves
-		to_date = self.get_leave_allocation().get('to_date')
+		leave_allocation = self.get_leave_allocation()
+		if not leave_allocation:
+			return
+
+		to_date = leave_allocation.get('to_date')
 		if to_date < getdate(nowdate()):
 			args = frappe._dict(
 				leaves=self.encashable_days,

@@ -7,6 +7,7 @@ import frappe
 import unittest
 from frappe.utils.make_random import get_random
 from frappe.utils import nowdate, add_days, getdate
+from erpnext.accounts.doctype.pos_profile.test_pos_profile import make_pos_profile
 
 test_dependencies = ["Company"]
 
@@ -14,6 +15,7 @@ class TestFeeValidity(unittest.TestCase):
 	def test_fee_validity(self):
 		frappe.db.sql("""delete from `tabPatient Appointment`""")
 		frappe.db.sql("""delete from `tabFee Validity`""")
+		make_pos_profile()
 		patient = get_random("Patient")
 		practitioner = get_random("Healthcare Practitioner")
 		department = get_random("Medical Department")

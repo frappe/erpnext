@@ -12,9 +12,10 @@ frappe.ui.form.on('Payment Entry', {
 
 	setup: function(frm) {
 		frm.set_query("paid_from", function() {
+			frm.events.validate_company(frm);
+
 			var account_types = in_list(["Pay", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -23,27 +24,34 @@ frappe.ui.form.on('Payment Entry', {
 				}
 			}
 		});
+
 		frm.set_query("party_type", function() {
+			frm.events.validate_company(frm);
 			return{
-				"filters": {
+				filters: {
 					"name": ["in", Object.keys(frappe.boot.party_account_types)],
 				}
 			}
 		});
+
 		frm.set_query("party_bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":0
+					is_company_account: 0,
+					party_type: frm.doc.party_type,
+					party: frm.doc.party
 				}
 			}
 		});
+
 		frm.set_query("bank_account", function() {
 			return {
 				filters: {
-					"is_company_account":1
+					is_company_account: 1
 				}
 			}
 		});
+
 		frm.set_query("contact_person", function() {
 			if (frm.doc.party) {
 				return {
@@ -55,10 +63,12 @@ frappe.ui.form.on('Payment Entry', {
 				};
 			}
 		});
+
 		frm.set_query("paid_to", function() {
+			frm.events.validate_company(frm);
+
 			var account_types = in_list(["Receive", "Internal Transfer"], frm.doc.payment_type) ?
 				["Bank", "Cash"] : [frappe.boot.party_account_types[frm.doc.party_type]];
-
 			return {
 				filters: {
 					"account_type": ["in", account_types],
@@ -147,6 +157,12 @@ frappe.ui.form.on('Payment Entry', {
 		frm.events.show_general_ledger(frm);
 	},
 
+	validate_company: (frm) => {
+		if (!frm.doc.company){
+			frappe.throw({message:__("Please select a Company first."), title: __("Mandatory")});
+		}
+	},
+
 	company: function(frm) {
 		frm.events.hide_unhide_fields(frm);
 		frm.events.set_dynamic_labels(frm);
@@ -171,7 +187,7 @@ frappe.ui.form.on('Payment Entry', {
 
 		frm.toggle_display("base_received_amount", (
 			frm.doc.paid_to_account_currency != company_currency &&
-			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency 
+			frm.doc.paid_from_account_currency != frm.doc.paid_to_account_currency
 			&& frm.doc.base_paid_amount != frm.doc.base_received_amount
 		));
 
@@ -326,7 +342,7 @@ frappe.ui.form.on('Payment Entry', {
 							() => {
 								frm.set_party_account_based_on_party = false;
 								if (r.message.bank_account) {
-									frm.set_value("party_bank_account", r.message.bank_account);
+									frm.set_value("bank_account", r.message.bank_account);
 								}
 							}
 						]);
@@ -370,6 +386,8 @@ frappe.ui.form.on('Payment Entry', {
 
 	set_account_currency_and_balance: function(frm, account, currency_field,
 			balance_field, callback_function) {
+
+		var company_currency = frappe.get_doc(":Company", frm.doc.company).default_currency;
 		if (frm.doc.posting_date && account) {
 			frappe.call({
 				method: "erpnext.accounts.doctype.payment_entry.payment_entry.get_account_details",
@@ -396,6 +414,14 @@ frappe.ui.form.on('Payment Entry', {
 
 									if(!frm.doc.paid_amount && frm.doc.received_amount)
 										frm.events.received_amount(frm);
+
+									if (frm.doc.paid_from_account_currency == frm.doc.paid_to_account_currency
+										&& frm.doc.paid_amount != frm.doc.received_amount) {
+											if (company_currency != frm.doc.paid_from_account_currency &&
+												frm.doc.payment_type == "Pay") {
+													frm.doc.paid_amount = frm.doc.received_amount;
+												}
+										}
 								}
 							},
 							() => {

@@ -12,7 +12,6 @@ from erpnext.stock.doctype.item.item import validate_end_of_life
 
 def update_last_purchase_rate(doc, is_submit):
 	"""updates last_purchase_rate in item table for each item"""
-
 	import frappe.utils
 	this_purchase_date = frappe.utils.getdate(doc.get('posting_date') or doc.get('transaction_date'))
 
@@ -23,7 +22,7 @@ def update_last_purchase_rate(doc, is_submit):
 		# compare last purchase date and this transaction's date
 		last_purchase_rate = None
 		if last_purchase_details and \
-				(last_purchase_details.purchase_date > this_purchase_date):
+				(doc.get('docstatus') == 2 or last_purchase_details.purchase_date > this_purchase_date):
 			last_purchase_rate = last_purchase_details['base_net_rate']
 		elif is_submit == 1:
 			# even if this transaction is the latest one, it should be submitted
@@ -36,9 +35,7 @@ def update_last_purchase_rate(doc, is_submit):
 				frappe.throw(_("UOM Conversion factor is required in row {0}").format(d.idx))
 
 		# update last purchsae rate
-		if last_purchase_rate:
-			frappe.db.sql("""update `tabItem` set last_purchase_rate = %s where name = %s""",
-				(flt(last_purchase_rate), d.item_code))
+		frappe.db.set_value('Item', d.item_code, 'last_purchase_rate', flt(last_purchase_rate))
 
 def validate_for_items(doc):
 	items = []

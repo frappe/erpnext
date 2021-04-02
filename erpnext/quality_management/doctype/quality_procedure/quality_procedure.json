@@ -21,8 +21,7 @@
    "fieldname": "parent_quality_procedure",
    "fieldtype": "Link",
    "label": "Parent Procedure",
-   "options": "Quality Procedure",
-   "read_only": 1
+   "options": "Quality Procedure"
   },
   {
    "default": "0",
@@ -73,7 +72,7 @@
  ],
  "is_tree": 1,
  "links": [],
- "modified": "2020-06-17 17:25:03.434953",
+ "modified": "2020-10-12 16:14:11.167537",
  "modified_by": "Administrator",
  "module": "Quality Management",
  "name": "Quality Procedure",

@@ -195,10 +195,21 @@ def create_sensitivity():
 
 def add_healthcare_service_unit_tree_root():
 	record = [
-	 {
-	  "doctype": "Healthcare Service Unit",
-	  "healthcare_service_unit_name": "All Healthcare Service Units",
-	  "is_group": 1
-	 }
+		{
+			"doctype": "Healthcare Service Unit",
+			"healthcare_service_unit_name": "All Healthcare Service Units",
+			"is_group": 1,
+			"company": get_company()
+	 	}
 	]
 	insert_record(record)
+
+def get_company():
+	company = frappe.defaults.get_defaults().company
+	if company:
+		return company
+	else:
+		company = frappe.get_list("Company", limit=1)
+		if company:
+			return company[0].name
+	return None

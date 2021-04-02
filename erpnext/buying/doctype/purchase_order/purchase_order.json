@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -998,6 +997,7 @@
    "print_hide": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "subscription_section",
    "fieldtype": "Section Break",
    "label": "Subscription Section"
@@ -1056,7 +1056,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-12 14:08:11.777120",
+ "modified": "2021-01-22 20:27:11.418690",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
@@ -1113,5 +1113,6 @@
  "sort_field": "modified",
  "sort_order": "DESC",
  "timeline_field": "supplier",
- "title_field": "title"
+ "title_field": "supplier",
+ "track_changes": 1
 }

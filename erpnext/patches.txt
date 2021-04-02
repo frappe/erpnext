@@ -635,7 +635,7 @@ execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart')
 execute:frappe.reload_doc('desk', 'doctype', 'dashboard_chart_field')
 erpnext.patches.v12_0.add_default_dashboards
 erpnext.patches.v12_0.remove_bank_remittance_custom_fields
-erpnext.patches.v12_0.generate_leave_ledger_entries
+erpnext.patches.v12_0.generate_leave_ledger_entries #04-11-2020
 erpnext.patches.v12_0.move_credit_limit_to_customer_credit_limit
 erpnext.patches.v12_0.add_variant_of_in_item_attribute_table
 erpnext.patches.v12_0.rename_bank_account_field_in_journal_entry_account
@@ -652,6 +652,7 @@ erpnext.patches.v12_0.update_price_or_product_discount
 erpnext.patches.v12_0.add_export_type_field_in_party_master
 erpnext.patches.v12_0.rename_bank_reconciliation_fields # 2020-01-22
 erpnext.patches.v12_0.create_irs_1099_field_united_states
+erpnext.patches.v12_0.set_purchase_receipt_delivery_note_detail
 erpnext.patches.v12_0.add_permission_in_lower_deduction
 erpnext.patches.v12_0.set_permission_einvoicing
 erpnext.patches.v12_0.set_received_qty_in_material_request_as_per_stock_uom
@@ -669,5 +670,14 @@ erpnext.patches.v12_0.set_serial_no_status #2020-05-21
 erpnext.patches.v12_0.update_price_list_currency_in_bom
 erpnext.patches.v12_0.update_uom_conversion_factor
 erpnext.patches.v12_0.set_italian_import_supplier_invoice_permissions
+erpnext.patches.v12_0.unhide_cost_center_field
 execute:frappe.reload_doc("HR", "doctype", "Employee Advance")
 erpnext.patches.v12_0.move_due_advance_amount_to_pending_amount
+erpnext.patches.v12_0.set_multi_uom_in_rfq
+erpnext.patches.v12_0.update_state_code_for_daman_and_diu
+erpnext.patches.v12_0.rename_lost_reason_detail
+erpnext.patches.v12_0.update_leave_application_status
+erpnext.patches.v12_0.update_payment_entry_status
+erpnext.patches.v12_0.add_transporter_address_field #2020-10-27
+erpnext.patches.v12_0.setup_einvoice_fields #2020-12-02
+erpnext.patches.v12_0.add_state_code_for_ladakh

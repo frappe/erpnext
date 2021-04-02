@@ -24,7 +24,7 @@ class TestUnitedStates(unittest.TestCase):
 
     def test_irs_1099_report(self):
         make_payment_entry_to_irs_1099_supplier()
-        filters = frappe._dict({"fiscal_year": "_Test Fiscal Year 2016", "company": "_Test Company"})
+        filters = frappe._dict({"fiscal_year": "_Test Fiscal Year 2016", "company": "_Test Company 1"})
         columns, data = execute_1099_report(filters)
         print(columns, data)
         expected_row = {'supplier': '_US 1099 Test Supplier',
@@ -42,10 +42,10 @@ def make_payment_entry_to_irs_1099_supplier():
 
     pe = frappe.new_doc("Payment Entry")
     pe.payment_type = "Pay"
-    pe.company = "_Test Company"
+    pe.company = "_Test Company 1"
     pe.posting_date = "2016-01-10"
-    pe.paid_from = "_Test Bank USD - _TC"
-    pe.paid_to = "_Test Payable USD - _TC"
+    pe.paid_from = "_Test Bank USD - _TC1"
+    pe.paid_to = "_Test Payable USD - _TC1"
     pe.paid_amount = 100
     pe.received_amount = 100
     pe.reference_no = "For IRS 1099 testing"

@@ -2,16 +2,16 @@
 	<div class='container pb-5'>
 		<div class="mb-3">
 			<a href="{{ back.url }}" class="text-muted">
-				Back to {{ back.name }}
+				{{_('Back to')}} {{ _(back.name) }}
 			</a>
 		</div>
 		<h1>{{ title }}</h1>
 		<p class='lead' style="max-width: 100%;">{{ description or ''}}</p>
 		<p class="mt-4">
 			{% if frappe.session.user == 'Guest' %}
-			<a id="signup" class="btn btn-primary btn-lg" href="/login#signup">Sign Up</a>
+			<a id="signup" class="btn btn-primary btn-lg" href="/login#signup">{{_('Sign Up')}}</a>
 			{% elif not has_access %}
-			<button id="enroll" class="btn btn-primary btn-lg" onclick="enroll()" disabled>Enroll</button>
+			<button id="enroll" class="btn btn-primary btn-lg" onclick="enroll()" disabled>{{_('Enroll')}}</button>
 			{% endif %}
 		</p>
 	</div>
@@ -28,7 +28,7 @@
 
 		let btn = document.getElementById('enroll');
 		btn.disbaled = true;
-		btn.innerText = 'Enrolling...'
+		btn.innerText = __('Enrolling...')
 
 		let opts = {
 			method: 'erpnext.education.utils.enroll_in_program',
@@ -44,7 +44,7 @@
 					window.location.reload()
 				}
 			})
-			success_dialog.set_message('You have successfully enrolled for the program ');
+			success_dialog.set_message(__('You have successfully enrolled for the program '));
 			success_dialog.$message.show()
 			success_dialog.show();
 			btn.disbaled = false;

@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import flt, fmt_money, getdate, formatdate
+from frappe.utils import flt, fmt_money, getdate, formatdate, cint
 from frappe.model.document import Document
 from frappe.model.naming import set_name_from_naming_options
 from frappe.model.meta import get_field_precision
@@ -75,12 +75,6 @@ class GLEntry(Document):
 			if not self.cost_center and self.voucher_type != 'Period Closing Voucher':
 				frappe.throw(_("{0} {1}: Cost Center is required for 'Profit and Loss' account {2}. Please set up a default Cost Center for the Company.")
 					.format(self.voucher_type, self.voucher_no, self.account))
-		else:
-			from erpnext.accounts.utils import get_allow_cost_center_in_entry_of_bs_account
-			if not get_allow_cost_center_in_entry_of_bs_account() and self.cost_center:
-				self.cost_center = None
-			if self.project:
-				self.project = None
 
 	def validate_dimensions_for_pl_and_bs(self):
 
@@ -137,9 +131,17 @@ class GLEntry(Document):
 
 			return self.cost_center_company[self.cost_center]
 
+		def _check_is_group():
+			return cint(frappe.get_cached_value('Cost Center', self.cost_center, 'is_group'))
+
 		if self.cost_center and _get_cost_center_company() != self.company:
 			frappe.throw(_("{0} {1}: Cost Center {2} does not belong to Company {3}")
 				.format(self.voucher_type, self.voucher_no, self.cost_center, self.company))
+
+		if not self.flags.from_repost and not self.voucher_type == 'Period Closing Voucher' \
+			and self.cost_center and _check_is_group():
+			frappe.throw(_("""{0} {1}: Cost Center {2} is a group cost center and group cost centers cannot
+				be used in transactions""").format(self.voucher_type, self.voucher_no, frappe.bold(self.cost_center)))
 
 	def validate_party(self):
 		validate_party_frozen_disabled(self.party_type, self.party)

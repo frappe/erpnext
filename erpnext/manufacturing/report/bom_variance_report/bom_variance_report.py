@@ -30,7 +30,7 @@ def get_columns(filters):
 				"width": 180
 			}
 		])
-	
+
 	columns.extend([
 		{
 			"label": _("Finished Good"),
@@ -73,7 +73,7 @@ def get_columns(filters):
 	])
 
 	return columns
-	
+
 def get_data(filters):
 	cond = "1=1"
 
@@ -95,6 +95,7 @@ def get_data(filters):
 	return results
 
 @frappe.whitelist()
+@frappe.validate_and_sanitize_search_inputs
 def get_work_orders(doctype, txt, searchfield, start, page_len, filters):
 	cond = "1=1"
 	if filters.get('bom_no'):

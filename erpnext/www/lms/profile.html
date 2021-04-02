@@ -30,7 +30,7 @@
 			</ul>
 		</div>
 		<div class='card-footer'>
-			<span class="small">{{ program.completion }}% Complete</span>
+			<span class="small">{{ program.completion }}{{_('% Complete')}}</span>
 		</div>
 	</div>
 	</a>
@@ -43,11 +43,11 @@
 		<div class="mb-3 row">
 			<div class="col-md-7">
 				<a href="/lms" class="text-muted">
-					Back to Home
+					{{_('Back to Home')}}
 				</a>
 			</div>
 			<div class="col-md-5 text-right">
-				<a href="/update-profile?name={{ frappe.session.user }}" target="blank" class="mt-0 text-muted">Edit Profile</a>
+				<a href="/update-profile?name={{ frappe.session.user }}" target="blank" class="mt-0 text-muted">{{_('Edit Profile')}}</a>
 			</div>
 		</div>
 		<h1>{{ student.first_name }} {{ student.last_name or '' }}</h1>
