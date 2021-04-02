@@ -372,7 +372,7 @@ def make_einvoice(invoice):
 	einvoice = safe_json_load(einvoice)
 
 	validations = json.loads(read_json('einv_validation'))
-	errors = validate_einvoice(validations, einvoice)
+	errors = validate_einvoice(validations, einvoice, [])
 	if errors:
 		message = "\n".join([
 			"E Invoice: ", json.dumps(einvoice, indent=4),
@@ -396,7 +396,7 @@ def safe_json_load(json_string):
 		snippet = json_string[start:end]
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
-def validate_einvoice(validations, einvoice, errors=[]):
+def validate_einvoice(validations, einvoice, errors):
 	for fieldname, field_validation in validations.items():
 		value = einvoice.get(fieldname, None)
 		if not value or value == "None":
