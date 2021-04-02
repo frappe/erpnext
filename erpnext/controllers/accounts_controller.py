@@ -205,7 +205,7 @@ class AccountsController(TransactionBase):
 			self.delivery_notes = list(set(item.delivery_note for item in self.items if item.get("delivery_note")))
 		if self.doctype == "Purchase Invoice":
 			self.purchase_receipts = list(set(item.purchase_receipt for item in self.items if item.get("purchase_receipt")))
-		if self.doctype in ["Sales Invoice", "Delivery Note"]:
+		if self.doctype in ["Sales Invoice", "Delivery Note", "Material Request"]:
 			self.sales_orders = list(set(item.sales_order for item in self.items if item.get('sales_order')))
 		if self.doctype in ["Purchase Invoice", "Purchase Receipt"]:
 			self.purchase_orders = list(set(item.purchase_order for item in self.items if item.get('purchase_order')))
