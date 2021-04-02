@@ -74,7 +74,7 @@ def setup_bom(**args):
 		})
 
 	if not args.raw_materials:
-		if not frappe.db.exists('Item', "Test Extra Item 1"):
+		if not frappe.db.exists('Item', "Test Extra Item N-1"):
 			make_item("Test Extra Item N-1", {
 				'is_stock_item': 1,
 			})
