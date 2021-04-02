@@ -766,7 +766,7 @@ def get_price_list_rate(args, item_doc, out):
 def insert_item_price(args):
 	"""Insert Item Price if Price List and Price List Rate are specified and currency is the same"""
 	if frappe.db.get_value("Price List", args.price_list, "currency", cache=True) == args.currency \
-		and cint(frappe.db.get_single_value("Stock Settings", "auto_insert_price_list_rate_if_missing")):
+		and cint(frappe.get_cached_value("Stock Settings", None, "auto_insert_price_list_rate_if_missing")):
 		if frappe.has_permission("Item Price", "write"):
 			price_list_rate = (args.rate / args.get('conversion_factor')
 				if args.get("conversion_factor") else args.rate)
