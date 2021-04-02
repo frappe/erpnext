@@ -115,14 +115,15 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def validate_address_fields(addr):
-	if (not addr.gstin
-		or not addr.city
-		or not addr.pincode
-		or not addr.address_title
-		or not addr.address_line1
-		or not addr.address_line2
-		or not addr.gst_state_number):
+def get_party_details(address_name, company_address=None, billing_address=None, shipping_address=None):
+	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
+
+	if ((not d.gstin and not shipping_address)
+		or not d.city
+		or not d.pincode
+		or not d.address_title
+		or not d.address_line1
+		or not d.gst_state_number):
 
 		frappe.throw(
 			msg=_('Address lines, city, pincode, gstin is mandatory for address {}. Please set them and try again.').format(
@@ -142,15 +143,17 @@ def get_party_details(address_name):
 		# according to einvoice standard
 		addr.pincode = 999999
 
-	return frappe._dict(dict(
-		gstin=addr.gstin,
-		legal_name=sanitize_for_json(addr.address_title),
-		location=sanitize_for_json(addr.city),
-		pincode=addr.pincode,
-		state_code=addr.gst_state_number,
-		address_line1=sanitize_for_json(addr.address_line1),
-		address_line2=sanitize_for_json(addr.address_line2)
+	party_address_details = frappe._dict(dict(
+		legal_name=sanitize_for_json(d.address_title),
+		location=sanitize_for_json(d.city),
+		pincode=d.pincode,
+		state_code=d.gst_state_number,
+		address_line1=sanitize_for_json(d.address_line1),
+		address_line2=sanitize_for_json(d.address_line2)
 	))
+	if d.gstin:
+		party_address_details.gstin = d.gstin
+	return party_address_details
 
 def get_gstin_details(gstin):
 	if not hasattr(frappe.local, 'gstin_cache'):
@@ -406,14 +409,17 @@ def make_einvoice(invoice):
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
 	invoice_value_details = get_invoice_value_details(invoice)
-	seller_details = get_party_details(invoice.company_address)
+	seller_details = get_party_details(invoice.company_address, company_address=1)
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
-		buyer_details = get_party_details(invoice.customer_address)
-		place_of_supply = get_place_of_supply(invoice, invoice.doctype) or sanitize_for_json(invoice.billing_address_gstin)
-		place_of_supply = place_of_supply[:2]
+		buyer_details = get_party_details(invoice.customer_address, billing_address=1)
+		place_of_supply = get_place_of_supply(invoice, invoice.doctype)
+		if place_of_supply:
+			place_of_supply = place_of_supply.split('-')[0]
+		else:
+			place_of_supply = sanitize_for_json(invoice.billing_address_gstin)[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 
 	seller_details.update(dict(legal_name=invoice.company))
@@ -424,7 +430,7 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-			shipping_details = get_party_details(invoice.shipping_address_name)
+			shipping_details = get_party_details(invoice.shipping_address_name, shipping_address=1)
 
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
