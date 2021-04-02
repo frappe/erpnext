@@ -99,6 +99,11 @@ frappe.query_reports["Stock Balance"] = {
 			"fieldtype": "Check"
 		},
 		{
+			"fieldname": "show_projected_qty",
+			"label": __("Show Projected Qty"),
+			"fieldtype": "Check"
+		},
+		{
 			"fieldname": "show_variant_attributes",
 			"label": __("Show Variant Attributes"),
 			"fieldtype": "Check"

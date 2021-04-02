@@ -20,6 +20,7 @@ template = frappe._dict({
 	"out_qty": 0.0, "out_val": 0.0,
 	"sales_qty": 0.0, "sales_val": 0.0,
 	"bal_qty": 0.0, "bal_val": 0.0,
+	"ordered_qty": 0.0, "projected_qty": 0.0,
 	"val_rate": 0.0
 })
 
@@ -51,7 +52,8 @@ def execute(filters=None):
 	if not sle:
 		return columns, []
 
-	iwb_map = get_item_warehouse_map(filters, sle)
+	ordered_qty_map = get_item_po_detail(filters)
+	iwb_map = get_item_warehouse_map(filters, sle, ordered_qty_map)
 	item_map = get_item_details(items, sle, filters)
 	item_reorder_detail_map = get_item_reorder_details(item_map.keys())
 
@@ -64,6 +66,7 @@ def execute(filters=None):
 		if item_map.get(item):
 			qty_dict = iwb_map[(company, item, warehouse)]
 			alt_uom_size = item_map[item]["alt_uom_size"] if filters.qty_field == "Contents Qty" and item_map[item]["alt_uom"] else 1.0
+
 			item_reorder_level = 0
 			item_reorder_qty = 0
 			if item + warehouse in item_reorder_detail_map:
@@ -87,6 +90,8 @@ def execute(filters=None):
 				"bal_qty": qty_dict.bal_qty * alt_uom_size,
 				"reorder_level": item_reorder_level * alt_uom_size,
 				"reorder_qty": item_reorder_qty * alt_uom_size,
+				"ordered_qty": qty_dict.ordered_qty * alt_uom_size,
+				"projected_qty": (qty_dict.ordered_qty + qty_dict.bal_qty) * alt_uom_size,
 				"company": company
 			}
 
@@ -142,6 +147,8 @@ def get_columns(filters, show_amounts=True, show_item_name=True):
 		{"label": _("Out Value"), "fieldname": "out_val", "fieldtype": "Currency", "width": 90, "is_value": True},
 		{"label": _("Bal Qty"), "fieldname": "bal_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Bal Value"), "fieldname": "bal_val", "fieldtype": "Currency", "width": 90, "is_value": True},
+		{"label": _("Ordered Qty"), "fieldname": "ordered_qty", "fieldtype": "Float", "width": 80, "convertible": "qty", "projected_column": 1},
+		{"label": _("Projected Qty"), "fieldname": "projected_qty", "fieldtype": "Float", "width": 80, "convertible": "qty", "projected_column": 1},
 		{"label": _("Avg Rate"), "fieldname": "val_rate", "fieldtype": "Currency", "width": 100, "convertible": "rate", "is_value": True},
 		{"label": _("Purchase Qty"), "fieldname": "purchase_qty", "fieldtype": "Float", "width": 80, "convertible": "qty"},
 		{"label": _("Purchase Value"), "fieldname": "purchase_val", "fieldtype": "Currency", "width": 90, "is_value": True},
@@ -168,6 +175,9 @@ def get_columns(filters, show_amounts=True, show_item_name=True):
 
 	if cint(filters.consolidated):
 		columns = list(filter(lambda d: d.get('fieldname') not in ['warehouse', 'company'], columns))
+
+	if not cint(filters.show_projected_qty):
+		columns = list(filter(lambda d: not d.get('projected_column'), columns))
 
 	return columns
 
@@ -218,7 +228,7 @@ def get_stock_ledger_entries(filters, items):
 		order by posting_date, posting_time, creation, actual_qty""" % #nosec
 		(item_conditions_sql, conditions), as_dict=1)
 
-def get_item_warehouse_map(filters, sle):
+def get_item_warehouse_map(filters, sle, ordered_qty_map=None):
 	iwb_map = {}
 	from_date = getdate(filters.get("from_date"))
 	to_date = getdate(filters.get("to_date"))
@@ -259,6 +269,14 @@ def get_item_warehouse_map(filters, sle):
 		qty_dict.val_rate = d.valuation_rate
 		qty_dict.bal_qty += qty_diff
 		qty_dict.bal_val += value_diff
+
+	if ordered_qty_map:
+		for key, ordered_qty in ordered_qty_map.items():
+			if key not in iwb_map:
+				iwb_map[key] = frappe._dict(template.copy())
+
+			qty_dict = iwb_map[key]
+			qty_dict.ordered_qty = ordered_qty
 
 	if cint(filters.filter_item_without_transactions):
 		iwb_map = filter_items_with_no_transactions(iwb_map)
@@ -364,6 +382,27 @@ def get_item_reorder_details(items):
 		""".format(', '.join([frappe.db.escape(i, percent=False) for i in items])), as_dict=1)
 
 	return dict((d.parent + d.warehouse, d) for d in item_reorder_details)
+
+def get_item_po_detail(filters):
+	po_map = {}
+
+	if filters.show_projected_qty:
+		po_data = frappe.db.sql("""
+			select po.company, po_item.item_code, po_item.warehouse,
+				sum((po_item.qty - po_item.received_qty)*po_item.conversion_factor) as ordered_qty
+			from `tabPurchase Order` po
+			inner join `tabPurchase Order Item` po_item on po.name = po_item.parent
+			where po.docstatus = 1 and po.status not in ('Closed', 'Delivered')
+				and po_item.qty > po_item.received_qty and po_item.delivered_by_supplier = 0
+				and po.transaction_date <= %s
+			group by company, item_code, warehouse
+		""", [filters.to_date], as_dict=1)
+
+		po_map = {}
+		for d in po_data:
+			po_map[(d.company, d.item_code, d.warehouse)] = d.ordered_qty
+
+	return po_map
 
 def validate_filters(filters):
 	if not (filters.get("item_code") or filters.get("warehouse")):
