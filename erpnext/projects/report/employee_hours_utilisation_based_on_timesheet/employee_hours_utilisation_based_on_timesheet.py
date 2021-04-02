@@ -143,8 +143,14 @@ class EmployeeHoursReport:
 			return 
 
 		avg_utilisation = 0.0
+		total_billed, total_non_billed = 0.0, 0.0
+		total_untracked = 0.0
+
 		for row in self.data:
 			avg_utilisation += row['per_util']
+			total_billed += row['billed_hours']
+			total_non_billed += row['non_billed_hours']
+			total_untracked += row['untracked_hours']
 
 		avg_utilisation /= len(self.data)
 		avg_utilisation = flt(avg_utilisation, 2)
@@ -156,6 +162,21 @@ class EmployeeHoursReport:
 				'indicator': 'Red' if avg_utilisation < THRESHOLD_PERCENTAGE else 'Green',
 				'label': _('Average Utilisation'),
 				'datatype': 'Percentage'
+			},
+			{
+				'value': total_billed,
+				'label': _('Total Billed Hours'),
+				'datatype': 'Float'
+			},
+			{
+				'value': total_non_billed,
+				'label': _('Total Non-Billed Hours'),
+				'datatype': 'Float'
+			},
+			{
+				'value': total_untracked,
+				'label': _('Total Untracked Hours'),
+				'datatype': 'Float'
 			}
 		]
 
