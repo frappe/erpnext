@@ -222,7 +222,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				}
 			}
 
-			if (this.frm.doc.delivery_status !== "To Receive") {
+			if (this.frm.doc.vehicle) {
 				if (this.frm.doc.invoice_status === "To Receive") {
 					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
 				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
