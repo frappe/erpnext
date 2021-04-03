@@ -134,7 +134,12 @@ class TestBOM(unittest.TestCase):
 		bom.items[0].conversion_factor = 6
 		bom.insert()
 
-		reset_item_valuation_rate(item_code='_Test Item', qty=200, rate=200)
+		reset_item_valuation_rate(
+			item_code='_Test Item',
+			warehouse_list=["_Test Warehouse - _TC"],
+			qty=200,
+			rate=200
+		)
 
 		bom.update_cost()
 
