@@ -500,7 +500,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.salary_structure)",
    "fetch_from": "salary_structure.currency",
    "fieldname": "currency",
@@ -632,7 +631,7 @@
  "idx": 9,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-02-19 11:48:05.383945",
+ "modified": "2021-03-31 21:44:09.772331",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Slip",

@@ -127,20 +127,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 		this.set_dynamic_labels();
 	},
 
-	price_list_rate: function(doc, cdt, cdn) {
-		var item = frappe.get_doc(cdt, cdn);
-		frappe.model.round_floats_in(item, ["price_list_rate", "discount_percentage"]);
-
-		// check if child doctype is Sales Order Item/Qutation Item and calculate the rate
-		if(in_list(["Quotation Item", "Sales Order Item", "Delivery Note Item", "Sales Invoice Item", "POS Invoice Item"]), cdt)
-			this.apply_pricing_rule_on_item(item);
-		else
-			item.rate = flt(item.price_list_rate * (1 - item.discount_percentage / 100.0),
-				precision("rate", item));
-
-		this.calculate_taxes_and_totals();
-	},
-
 	discount_percentage: function(doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 		item.discount_amount = 0.0;
@@ -351,26 +337,6 @@ erpnext.selling.SellingController = erpnext.TransactionController.extend({
 			}
 		}
 		refresh_field('product_bundle_help');
-	},
-
-	margin_rate_or_amount: function(doc, cdt, cdn) {
-		// calculated the revised total margin and rate on margin rate changes
-		var item = locals[cdt][cdn];
-		this.apply_pricing_rule_on_item(item)
-		this.calculate_taxes_and_totals();
-		cur_frm.refresh_fields();
-	},
-
-	margin_type: function(doc, cdt, cdn){
-		// calculate the revised total margin and rate on margin type changes
-		var item = locals[cdt][cdn];
-		if(!item.margin_type) {
-			frappe.model.set_value(cdt, cdn, "margin_rate_or_amount", 0);
-		} else {
-			this.apply_pricing_rule_on_item(item, doc,cdt, cdn)
-			this.calculate_taxes_and_totals();
-			cur_frm.refresh_fields();
-		}
 	},
 
 	company_address: function() {
