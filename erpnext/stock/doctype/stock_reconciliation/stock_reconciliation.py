@@ -29,6 +29,8 @@ class StockReconciliation(StockController):
 		self.remove_items_with_no_change()
 		self.validate_data()
 		self.validate_expense_account()
+		self.validate_customer_provided_item()
+		self.set_zero_value_for_customer_provided_items()
 		self.set_total_qty_and_amount()
 		self.validate_putaway_capacity()
 
@@ -217,7 +219,7 @@ class StockReconciliation(StockController):
 					if row.valuation_rate in ("", None):
 						row.valuation_rate = previous_sle.get("valuation_rate", 0)
 
-				if row.qty and not row.valuation_rate:
+				if row.qty and not row.valuation_rate and not row.allow_zero_valuation_rate:
 					frappe.throw(_("Valuation Rate required for Item {0} at row {1}").format(row.item_code, row.idx))
 
 				if ((previous_sle and row.qty == previous_sle.get("qty_after_transaction")
@@ -435,6 +437,20 @@ class StockReconciliation(StockController):
 		elif self.purpose == "Opening Stock" or not frappe.db.sql("""select name from `tabStock Ledger Entry` limit 1"""):
 			if frappe.db.get_value("Account", self.expense_account, "report_type") == "Profit and Loss":
 				frappe.throw(_("Difference Account must be a Asset/Liability type account, since this Stock Reconciliation is an Opening Entry"), OpeningEntryAccountError)
+
+	def set_zero_value_for_customer_provided_items(self):
+		changed_any_values = False
+
+		for d in self.get('items'):
+			is_customer_item = frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item')
+			if is_customer_item and d.valuation_rate:
+				d.valuation_rate = 0.0
+				changed_any_values = True
+
+		if changed_any_values:
+			msgprint(_("Valuation rate for customer provided items has been set to zero."),
+				title=_("Note"), indicator="blue")
+
 
 	def set_total_qty_and_amount(self):
 		for d in self.get("items"):
