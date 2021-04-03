@@ -21,7 +21,8 @@ class TestEmployee(unittest.TestCase):
 
 		from erpnext.hr.doctype.employee.employee import get_employees_who_are_born_today, send_birthday_reminders
 
-		self.assertTrue(employee.name in [e.name for e in get_employees_who_are_born_today()])
+		employees_born_today = get_employees_who_are_born_today()
+		self.assertTrue(employees_born_today.get("_Test Company"))
 
 		frappe.db.sql("delete from `tabEmail Queue`")
 
@@ -47,6 +48,7 @@ class TestEmployee(unittest.TestCase):
 		self.assertRaises(EmployeeLeftValidationError, employee1_doc.save)
 
 def make_employee(user, company=None, **kwargs):
+	""
 	if not frappe.db.get_value("User", user):
 		frappe.get_doc({
 			"doctype": "User",

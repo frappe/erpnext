@@ -99,7 +99,7 @@ execute:frappe.delete_doc("DocType", "Purchase Request")
 execute:frappe.delete_doc("DocType", "Purchase Request Item")
 erpnext.patches.v4_2.recalculate_bom_cost
 erpnext.patches.v4_2.fix_gl_entries_for_stock_transactions
-erpnext.patches.v4_2.update_requested_and_ordered_qty
+erpnext.patches.v4_2.update_requested_and_ordered_qty #2021-03-31
 execute:frappe.rename_doc("DocType", "Support Ticket", "Issue", force=True)
 erpnext.patches.v4_4.make_email_accounts
 execute:frappe.delete_doc("DocType", "Contact Control")
@@ -208,7 +208,7 @@ erpnext.patches.v5_7.update_item_description_based_on_item_master
 erpnext.patches.v5_7.item_template_attributes
 execute:frappe.delete_doc_if_exists("DocType", "Manage Variants")
 execute:frappe.delete_doc_if_exists("DocType", "Manage Variants Item")
-erpnext.patches.v4_2.repost_reserved_qty #2016-04-15
+erpnext.patches.v4_2.repost_reserved_qty #2021-03-31
 erpnext.patches.v5_4.update_purchase_cost_against_project
 erpnext.patches.v5_8.update_order_reference_in_return_entries
 erpnext.patches.v5_8.add_credit_note_print_heading
@@ -720,7 +720,7 @@ erpnext.patches.v13_0.delete_report_requested_items_to_order
 erpnext.patches.v12_0.update_item_tax_template_company
 erpnext.patches.v13_0.move_branch_code_to_bank_account
 erpnext.patches.v13_0.healthcare_lab_module_rename_doctypes
-erpnext.patches.v13_0.add_standard_navbar_items #4
+erpnext.patches.v13_0.add_standard_navbar_items #2021-03-24
 erpnext.patches.v13_0.stock_entry_enhancements
 erpnext.patches.v12_0.update_state_code_for_daman_and_diu
 erpnext.patches.v12_0.rename_lost_reason_detail
@@ -730,6 +730,7 @@ erpnext.patches.v13_0.setting_custom_roles_for_some_regional_reports
 erpnext.patches.v13_0.rename_issue_doctype_fields
 erpnext.patches.v13_0.change_default_pos_print_format
 erpnext.patches.v13_0.set_youtube_video_id
+erpnext.patches.v13_0.set_app_name
 erpnext.patches.v13_0.print_uom_after_quantity_patch
 erpnext.patches.v13_0.set_payment_channel_in_payment_gateway_account
 erpnext.patches.v13_0.create_healthcare_custom_fields_in_stock_entry_detail
@@ -744,12 +745,19 @@ erpnext.patches.v13_0.create_leave_policy_assignment_based_on_employee_current_l
 erpnext.patches.v13_0.update_pos_closing_entry_in_merge_log
 erpnext.patches.v13_0.add_po_to_global_search
 erpnext.patches.v13_0.update_returned_qty_in_pr_dn
+execute:frappe.rename_doc("Workspace", "Loan", "Loan Management", ignore_if_exists=True, force=True)
 erpnext.patches.v13_0.create_uae_pos_invoice_fields
 erpnext.patches.v13_0.update_project_template_tasks
 erpnext.patches.v13_0.set_company_in_leave_ledger_entry
 erpnext.patches.v13_0.convert_qi_parameter_to_link_field
 erpnext.patches.v13_0.setup_patient_history_settings_for_standard_doctypes
 erpnext.patches.v13_0.add_naming_series_to_old_projects # 1-02-2021
-erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
+erpnext.patches.v13_0.update_payment_terms_outstanding
 erpnext.patches.v12_0.add_state_code_for_ladakh
+erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
+erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
 erpnext.patches.v13_0.update_vehicle_no_reqd_condition
+erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
+erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
+erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
+erpnext.patches.v13_0.setup_uae_vat_fields

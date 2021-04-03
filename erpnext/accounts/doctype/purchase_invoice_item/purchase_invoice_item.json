@@ -28,10 +28,16 @@
   "stock_qty",
   "sec_break1",
   "price_list_rate",
-  "discount_percentage",
-  "discount_amount",
   "col_break3",
   "base_price_list_rate",
+  "section_break_26",
+  "margin_type",
+  "margin_rate_or_amount",
+  "rate_with_margin",
+  "column_break_30",
+  "discount_percentage",
+  "discount_amount",
+  "base_rate_with_margin",
   "sec_break2",
   "rate",
   "amount",
@@ -789,6 +795,7 @@
    "fieldname": "stock_uom_rate",
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
+   "no_copy": 1,
    "options": "currency",
    "read_only": 1
   },
@@ -799,12 +806,54 @@
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_26",
+   "fieldtype": "Section Break",
+   "label": "Discount and Margin"
+  },
+  {
+   "depends_on": "price_list_rate",
+   "fieldname": "margin_type",
+   "fieldtype": "Select",
+   "label": "Margin Type",
+   "options": "\nPercentage\nAmount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate",
+   "fieldname": "margin_rate_or_amount",
+   "fieldtype": "Float",
+   "label": "Margin Rate or Amount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_30",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "base_rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-30 21:43:21.488258",
+ "modified": "2021-02-23 00:59:52.614805",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",

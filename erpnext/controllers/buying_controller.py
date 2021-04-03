@@ -20,16 +20,6 @@ from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 from erpnext.stock.utils import get_incoming_rate
 
 class BuyingController(StockController):
-	def __setup__(self):
-		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
-				 "print_taxes_with_zero_amount"))
-			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
-
-			self.print_templates = {
-				"total": "templates/print_formats/includes/total.html",
-				"taxes": "templates/print_formats/includes/taxes.html"
-			}
 
 	def get_feed(self):
 		if self.get("supplier_name"):
@@ -288,7 +278,7 @@ class BuyingController(StockController):
 
 		if self.is_subcontracted == "Yes":
 			if self.doctype in ["Purchase Receipt", "Purchase Invoice"] and not self.supplier_warehouse:
-				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted Purchase Receipt"))
+				frappe.throw(_("Supplier Warehouse mandatory for sub-contracted {0}").format(self.doctype))
 
 			for item in self.get("items"):
 				if item in self.sub_contracted_items and not item.bom:

@@ -1,0 +1,40 @@
+{%- macro card(title, image, url, text_primary=False) -%}
+{%- set align_class = resolve_class({
+	'text-right': text_primary,
+	'text-centre': align == 'Center',
+	'text-left': align == 'Left',
+}) -%}
+<div class="card h-100">
+	{% if image %}
+	<img class="card-img-top" src="{{ image }}" alt="{{ title }}">
+	{% endif %}
+	<div class="card-body text-center text-muted small">
+		{{ title or '' }}
+	</div>
+	<a href="{{ url or '#' }}" class="stretched-link"></a>
+</div>
+{%- endmacro -%}
+
+<div class="section-with-cards product-category-section">
+	{%- if title -%}
+	<h2 class="section-title">{{ title }}</h2>
+	{%- endif -%}
+	{%- if subtitle -%}
+	<p class="section-description">{{ subtitle }}</p>
+	{%- endif -%}
+	<!-- {%- set card_size = card_size or 'Small' -%} -->
+	<div class="{{ resolve_class({'mt-6': title}) }}">
+		<div class="card-grid">
+			{%- for index in ['1', '2', '3', '4', '5', '6', '7', '8'] -%}
+			{%- set category = values['category_' + index] -%}
+				{%- if category -%}
+					{%- set category = frappe.get_doc("Item Group", category) -%}
+					{{ card(category.name, category.image, category.route) }}
+				{%- endif -%}
+			{%- endfor -%}
+		</div>
+	</div>
+</div>
+
+<style>
+</style>

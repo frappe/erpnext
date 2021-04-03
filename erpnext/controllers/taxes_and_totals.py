@@ -15,6 +15,8 @@ from erpnext.accounts.doctype.journal_entry.journal_entry import get_exchange_ra
 class calculate_taxes_and_totals(object):
 	def __init__(self, doc):
 		self.doc = doc
+		frappe.flags.round_off_applicable_accounts = []
+		get_round_off_applicable_accounts(self.doc.company, frappe.flags.round_off_applicable_accounts)
 		self.calculate()
 
 	def calculate(self):
@@ -107,11 +109,16 @@ class calculate_taxes_and_totals(object):
 					elif item.discount_amount and item.pricing_rules:
 						item.rate =  item.price_list_rate - item.discount_amount
 
-				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item', 'POS Invoice Item']:
+				if item.doctype in ['Quotation Item', 'Sales Order Item', 'Delivery Note Item', 'Sales Invoice Item', 'POS Invoice Item', 'Purchase Invoice Item', 'Purchase Order Item', 'Purchase Receipt Item']:
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-						item.discount_amount = item.rate_with_margin - item.rate
+
+						if item.discount_amount and not item.discount_percentage:
+							item.rate = item.rate_with_margin - item.discount_amount
+						else:
+							item.discount_amount = item.rate_with_margin - item.rate
+
 					elif flt(item.price_list_rate) > 0:
 						item.discount_amount = item.price_list_rate - item.rate
 				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
@@ -239,9 +246,6 @@ class calculate_taxes_and_totals(object):
 
 		self.doc.round_floats_in(self.doc, ["total", "base_total", "net_total", "base_net_total"])
 
-		if self.doc.doctype == 'Sales Invoice' and self.doc.is_pos:
-			self.doc.pos_total_qty = self.doc.total_qty
-
 	def calculate_taxes(self):
 		self.doc.rounding_adjustment = 0
 		# maintain actual tax rate based on idx
@@ -335,8 +339,16 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
+		current_tax_amount = self.get_final_current_tax_amount(tax, current_tax_amount)
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
+		return current_tax_amount
+
+	def get_final_current_tax_amount(self, tax, current_tax_amount):
+		# Some countries need individual tax components to be rounded
+		# Handeled via regional doctypess
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			current_tax_amount = round(current_tax_amount, 0)
 		return current_tax_amount
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
@@ -696,6 +708,15 @@ def get_itemised_tax_breakup_html(doc):
 		)
 	)
 
+@frappe.whitelist()
+def get_round_off_applicable_accounts(company, account_list):
+	account_list = get_regional_round_off_accounts(company, account_list)
+
+	return account_list
+
+@erpnext.allow_regional
+def get_regional_round_off_accounts(company, account_list):
+	pass
 
 @erpnext.allow_regional
 def update_itemised_tax_data(doc):
@@ -779,7 +800,7 @@ class init_landed_taxes_and_totals(object):
 		for d in self.doc.get(self.tax_field):
 			if d.account_currency == company_currency:
 				d.exchange_rate = 1
-			elif not d.exchange_rate or d.exchange_rate == 1 or self.doc.posting_date:
+			elif not d.exchange_rate:
 				d.exchange_rate = get_exchange_rate(self.doc.posting_date, account=d.expense_account,
 					account_currency=d.account_currency, company=self.doc.company)
 

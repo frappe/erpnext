@@ -8,7 +8,7 @@ frappe.listview_settings['BOM'] = {
 		} else if(doc.is_active) {
 			return [__("Active"), "blue", "is_active,=,Yes"];
 		} else if(!doc.is_active) {
-			return [__("Not active"), "darkgrey", "is_active,=,No"];
+			return [__("Not active"), "gray", "is_active,=,No"];
 		}
 	}
 };

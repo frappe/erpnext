@@ -1,14 +1,17 @@
+import onScan from 'onscan.js';
+
 erpnext.PointOfSale.ItemSelector = class {
+	// eslint-disable-next-line no-unused-vars
 	constructor({ frm, wrapper, events, pos_profile, settings }) {
 		this.wrapper = wrapper;
 		this.events = events;
 		this.pos_profile = pos_profile;
 		this.hide_images = settings.hide_images;
 		this.auto_add_item = settings.auto_add_item_to_cart;
-		
+
 		this.inti_component();
 	}
-	
+
 	inti_component() {
 		this.prepare_dom();
 		this.make_search_bar();
@@ -19,21 +22,16 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	prepare_dom() {
 		this.wrapper.append(
-			`<section class="col-span-6 flex shadow rounded items-selector bg-white mx-h-70 h-100">
-				<div class="flex flex-col rounded w-full scroll-y">
-					<div class="filter-section flex p-8 pb-2 bg-white sticky z-100">
-						<div class="search-field flex f-grow-3 mr-8 items-center text-grey"></div>
-						<div class="item-group-field flex f-grow-1 items-center text-grey text-bold"></div>
-					</div>
-					<div class="flex flex-1 flex-col p-8 pt-2">
-						<div class="text-grey mb-6">ALL ITEMS</div>
-						<div class="items-container grid grid-cols-4 gap-8">
-						</div>
-					</div>
+			`<section class="items-selector">
+				<div class="filter-section">
+					<div class="label">All Items</div>
+					<div class="search-field"></div>
+					<div class="item-group-field"></div>
 				</div>
+				<div class="items-container"></div>
 			</section>`
 		);
-		
+
 		this.$component = this.wrapper.find('.items-selector');
 		this.$items_container = this.$component.find('.items-container');
 	}
@@ -42,7 +40,7 @@ erpnext.PointOfSale.ItemSelector = class {
 		if (!this.item_group) {
 			const res = await frappe.db.get_value("Item Group", {lft: 1, is_group: 1}, "name");
 			this.parent_item_group = res.message.name;
-		};
+		}
 		if (!this.price_list) {
 			const res = await frappe.db.get_value("POS Profile", this.pos_profile, "selling_price_list");
 			this.price_list = res.message.selling_price_list;
@@ -54,11 +52,12 @@ erpnext.PointOfSale.ItemSelector = class {
 	}
 
 	get_items({start = 0, page_length = 40, search_value=''}) {
-		const price_list = this.events.get_frm().doc?.selling_price_list || this.price_list;
+		const doc = this.events.get_frm().doc;
+		const price_list = (doc && doc.selling_price_list) || this.price_list;
 		let { item_group, pos_profile } = this;
 
 		!item_group && (item_group = this.parent_item_group);
-		
+
 		return frappe.call({
 			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_items",
 			freeze: true,
@@ -73,11 +72,12 @@ erpnext.PointOfSale.ItemSelector = class {
 		items.forEach(item => {
 			const item_html = this.get_item_html(item);
 			this.$items_container.append(item_html);
-		})
+		});
 	}
 
 	get_item_html(item) {
 		const me = this;
+		// eslint-disable-next-line no-unused-vars
 		const { item_image, serial_no, batch_no, barcode, actual_qty, stock_uom } = item;
 		const indicator_color = actual_qty > 10 ? "green" : actual_qty <= 0 ? "red" : "orange";
 
@@ -85,32 +85,34 @@ erpnext.PointOfSale.ItemSelector = class {
 			if (!me.hide_images && item_image) {
 				return `<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
-						</div>`
+						</div>`;
 			} else {
-				return `<div class="flex items-center justify-center h-32 bg-light-grey text-6xl text-grey-100">
-							${frappe.get_abbr(item.item_name)}
-						</div>`
+				return `<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
 			}
 		}
 
 		return (
-			`<div class="item-wrapper rounded shadow pointer no-select" data-item-code="${escape(item.item_code)}"
-				data-serial-no="${escape(serial_no)}" data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
+			`<div class="item-wrapper"
+				data-item-code="${escape(item.item_code)}" data-serial-no="${escape(serial_no)}"
+				data-batch-no="${escape(batch_no)}" data-uom="${escape(stock_uom)}"
 				title="Avaiable Qty: ${actual_qty}">
+
 				${get_item_image_html()}
-				<div class="flex items-center pr-4 pl-4 h-10 justify-between">
-					<div class="flex items-center f-shrink-1 text-dark-grey overflow-hidden whitespace-nowrap">
+
+				<div class="item-detail">
+					<div class="item-name">
 						<span class="indicator ${indicator_color}"></span>
 						${frappe.ellipsis(item.item_name, 18)}
 					</div>
-					<div class="f-shrink-0 text-dark-grey text-bold ml-4">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
+					<div class="item-rate">${format_currency(item.price_list_rate, item.currency, 0) || 0}</div>
 				</div>
 			</div>`
-		)
+		);
 	}
 
 	make_search_bar() {
 		const me = this;
+		const doc = me.events.get_frm().doc;
 		this.$component.find('.search-field').html('');
 		this.$component.find('.item-group-field').html('');
 
@@ -118,7 +120,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			df: {
 				label: __('Search'),
 				fieldtype: 'Data',
-				placeholder: __('Search by item code, serial number, batch no or barcode')
+				placeholder: __('Search by item code, serial number or barcode')
 			},
 			parent: this.$component.find('.search-field'),
 			render_input: true,
@@ -138,9 +140,9 @@ erpnext.PointOfSale.ItemSelector = class {
 					return {
 						query: 'erpnext.selling.page.point_of_sale.point_of_sale.item_group_query',
 						filters: {
-							pos_profile: me.events.get_frm().doc?.pos_profile
+							pos_profile: doc ? doc.pos_profile : ''
 						}
-					}
+					};
 				},
 			},
 			parent: this.$component.find('.item-group-field'),
@@ -150,13 +152,18 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.item_group_field.toggle_label(false);
 	}
 
+	set_search_value(value) {
+		$(this.search_field.$input[0]).val(value).trigger("input");
+	}
+
 	bind_events() {
 		const me = this;
+		window.onScan = onScan;
 		onScan.attachTo(document, {
 			onScan: (sScancode) => {
 				if (this.search_field && this.$component.is(':visible')) {
 					this.search_field.set_focus();
-					$(this.search_field.$input[0]).val(sScancode).trigger("input");
+					this.set_search_value(sScancode);
 					this.barcode_scanned = true;
 				}
 			}
@@ -168,14 +175,15 @@ erpnext.PointOfSale.ItemSelector = class {
 			let batch_no = unescape($item.attr('data-batch-no'));
 			let serial_no = unescape($item.attr('data-serial-no'));
 			let uom = unescape($item.attr('data-uom'));
-			
+
 			// escape(undefined) returns "undefined" then unescape returns "undefined"
 			batch_no = batch_no === "undefined" ? undefined : batch_no;
 			serial_no = serial_no === "undefined" ? undefined : serial_no;
 			uom = uom === "undefined" ? undefined : uom;
 
 			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
-		})
+			me.set_search_value('');
+		});
 
 		this.search_field.$input.on('input', (e) => {
 			clearTimeout(this.last_search);
@@ -228,7 +236,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			}
 		});
 	}
-	
+
 	filter_items({ search_term='' }={}) {
 		if (search_term) {
 			search_term = search_term.toLowerCase();
@@ -246,6 +254,7 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		this.get_items({ search_value: search_term })
 			.then(({ message }) => {
+				// eslint-disable-next-line no-unused-vars
 				const { items, serial_no, batch_no, barcode } = message;
 				if (search_term && !barcode) {
 					this.search_index[search_term] = items;
@@ -259,26 +268,26 @@ erpnext.PointOfSale.ItemSelector = class {
 	add_filtered_item_to_cart() {
 		this.$items_container.find(".item-wrapper").click();
 	}
-	
+
 	resize_selector(minimize) {
-		minimize ? 
-		this.$component.find('.search-field').removeClass('mr-8') : 
-		this.$component.find('.search-field').addClass('mr-8');
-
-		minimize ? 
-		this.$component.find('.filter-section').addClass('flex-col') : 
-		this.$component.find('.filter-section').removeClass('flex-col');
+		minimize ?
+			this.$component.find('.filter-section').css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
+			this.$component.find('.filter-section').css('grid-template-columns', 'repeat(12, minmax(0, 1fr))');
 
 		minimize ?
-		this.$component.removeClass('col-span-6').addClass('col-span-2') :
-		this.$component.removeClass('col-span-2').addClass('col-span-6')
+			this.$component.find('.search-field').css('margin', 'var(--margin-sm) 0px') :
+			this.$component.find('.search-field').css('margin', '0px var(--margin-sm)');
 
 		minimize ?
-		this.$items_container.removeClass('grid-cols-4').addClass('grid-cols-1') :
-		this.$items_container.removeClass('grid-cols-1').addClass('grid-cols-4')
+			this.$component.css('grid-column', 'span 2 / span 2') :
+			this.$component.css('grid-column', 'span 6 / span 6');
+
+		minimize ?
+			this.$items_container.css('grid-template-columns', 'repeat(1, minmax(0, 1fr))') :
+			this.$items_container.css('grid-template-columns', 'repeat(4, minmax(0, 1fr))');
 	}
 
 	toggle_component(show) {
-		show ? this.$component.removeClass('d-none') : this.$component.addClass('d-none');
+		show ? this.$component.css('display', 'flex') : this.$component.css('display', 'none');
 	}
-}
+};

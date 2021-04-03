@@ -16,16 +16,6 @@ from erpnext.controllers.stock_controller import StockController
 from erpnext.controllers.sales_and_purchase_return import get_rate_for_return
 
 class SellingController(StockController):
-	def __setup__(self):
-		if hasattr(self, "taxes"):
-			self.flags.print_taxes_with_zero_amount = cint(frappe.db.get_single_value("Print Settings",
-				"print_taxes_with_zero_amount"))
-			self.flags.show_inclusive_tax_in_print = self.is_inclusive_tax()
-
-			self.print_templates = {
-				"total": "templates/print_formats/includes/total.html",
-				"taxes": "templates/print_formats/includes/taxes.html"
-			}
 
 	def get_feed(self):
 		return _("To {0} | {1} {2}").format(self.customer_name, self.currency,
@@ -151,6 +141,11 @@ class SellingController(StockController):
 			sales_person.allocated_amount = flt(
 				self.base_net_total * sales_person.allocated_percentage / 100.0,
 				self.precision("allocated_amount", sales_person))
+
+			if sales_person.commission_rate:
+				sales_person.incentives = flt(
+					sales_person.allocated_amount * flt(sales_person.commission_rate) / 100.0, 
+					self.precision("incentives", sales_person))
 
 			total += sales_person.allocated_percentage
 

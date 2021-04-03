@@ -15,6 +15,7 @@
     "snyk": "^1.290.1"
   },
   "dependencies": {
+    "onscan.js": "^1.5.2"
   },
   "scripts": {
     "snyk-protect": "snyk protect",

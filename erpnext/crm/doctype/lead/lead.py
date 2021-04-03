@@ -352,7 +352,7 @@ def get_lead_with_phone_number(number):
 	leads = frappe.get_all('Lead', or_filters={
 		'phone': ['like', '%{}'.format(number)],
 		'mobile_no': ['like', '%{}'.format(number)]
-	}, limit=1)
+	}, limit=1, order_by="creation DESC")
 
 	lead = leads[0].name if leads else None
 

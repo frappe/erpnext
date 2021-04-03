@@ -29,7 +29,7 @@ class POSInvoiceMergeLog(Document):
 		for d in self.pos_invoices:
 			status, docstatus, is_return, return_against = frappe.db.get_value(
 				'POS Invoice', d.pos_invoice, ['status', 'docstatus', 'is_return', 'return_against'])
-			
+
 			bold_pos_invoice = frappe.bold(d.pos_invoice)
 			bold_status = frappe.bold(status)
 			if docstatus != 1:
@@ -58,7 +58,7 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice, credit_note = "", ""
 		if sales:
 			sales_invoice = self.process_merging_into_sales_invoice(sales)
-		
+
 		if returns:
 			credit_note = self.process_merging_into_credit_note(returns)
 
@@ -74,7 +74,7 @@ class POSInvoiceMergeLog(Document):
 
 	def process_merging_into_sales_invoice(self, data):
 		sales_invoice = self.get_new_sales_invoice()
-		
+
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
 		sales_invoice.is_consolidated = 1
@@ -98,19 +98,19 @@ class POSInvoiceMergeLog(Document):
 		self.consolidated_credit_note = credit_note.name
 
 		return credit_note.name
-	
+
 	def merge_pos_invoice_into(self, invoice, data):
 		items, payments, taxes = [], [], []
 		loyalty_amount_sum, loyalty_points_sum = 0, 0
 		for doc in data:
 			map_doc(doc, invoice, table_map={ "doctype": invoice.doctype })
-			
+
 			if doc.redeem_loyalty_points:
 				invoice.loyalty_redemption_account = doc.loyalty_redemption_account
 				invoice.loyalty_redemption_cost_center = doc.loyalty_redemption_cost_center
 				loyalty_points_sum += doc.loyalty_points
 				loyalty_amount_sum += doc.loyalty_amount
-			
+
 			for item in doc.get('items'):
 				found = False
 				for i in items:
@@ -118,12 +118,13 @@ class POSInvoiceMergeLog(Document):
 						i.uom == item.uom and i.net_rate == item.net_rate):
 						found = True
 						i.qty = i.qty + item.qty
+
 				if not found:
 					item.rate = item.net_rate
 					item.price_list_rate = 0
 					si_item = map_child_doc(item, invoice, {"doctype": "Sales Invoice Item"})
 					items.append(si_item)
-			
+
 			for tax in doc.get('taxes'):
 				found = False
 				for t in taxes:
@@ -162,7 +163,7 @@ class POSInvoiceMergeLog(Document):
 		invoice.ignore_pricing_rule = 1
 
 		return invoice
-	
+
 	def get_new_sales_invoice(self):
 		sales_invoice = frappe.new_doc('Sales Invoice')
 		sales_invoice.customer = self.customer
@@ -194,7 +195,7 @@ def get_all_unconsolidated_invoices():
 	}
 	pos_invoices = frappe.db.get_all('POS Invoice', filters=filters,
 		fields=["name as pos_invoice", 'posting_date', 'grand_total', 'customer'])
-	
+
 	return pos_invoices
 
 def get_invoice_customer_map(pos_invoices):
@@ -204,7 +205,7 @@ def get_invoice_customer_map(pos_invoices):
 		customer = invoice.get('customer')
 		pos_invoice_customer_map.setdefault(customer, [])
 		pos_invoice_customer_map[customer].append(invoice)
-	
+
 	return pos_invoice_customer_map
 
 def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
@@ -212,8 +213,8 @@ def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 5 and closing_entry:
-		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
 		closing_entry.set_status(update=True, status='Queued')
+		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
 	else:
 		create_merge_logs(invoice_by_customer, closing_entry)
 
@@ -225,8 +226,8 @@ def unconsolidate_pos_invoices(closing_entry):
 	)
 
 	if len(merge_logs) >= 5:
-		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
 		closing_entry.set_status(update=True, status='Queued')
+		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
 	else:
 		cancel_merge_logs(merge_logs, closing_entry)
 

@@ -5,7 +5,7 @@ import frappe
 from erpnext.hooks import regional_overrides
 from frappe.utils import getdate
 
-__version__ = '13.0.0-beta.13'
+__version__ = '13.0.0'
 
 def get_default_company(user=None):
 	'''Get default company for user'''
@@ -109,7 +109,7 @@ def get_region(company=None):
 	'''
 	if company or frappe.flags.company:
 		return frappe.get_cached_value('Company',
-			company or frappe.flags.company,  'country')
+			company or frappe.flags.company, 'country')
 	elif frappe.flags.country:
 		return frappe.flags.country
 	else:
