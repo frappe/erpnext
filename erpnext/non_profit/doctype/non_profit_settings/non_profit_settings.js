@@ -19,12 +19,22 @@ frappe.ui.form.on("Non Profit Settings", {
 			};
 		});
 
-		frm.set_query("debit_account", function() {
+		frm.set_query("membership_debit_account", function() {
 			return {
 				filters: {
 					"account_type": "Receivable",
 					"is_group": 0,
 					"company": frm.doc.company
+				}
+			};
+		});
+
+		frm.set_query("donation_debit_account", function() {
+			return {
+				filters: {
+					"account_type": "Receivable",
+					"is_group": 0,
+					"company": frm.doc.donation_company
 				}
 			};
 		});
@@ -36,6 +46,17 @@ frappe.ui.form.on("Non Profit Settings", {
 					"account_type": ["in", account_types],
 					"is_group": 0,
 					"company": frm.doc.company
+				}
+			};
+		});
+
+		frm.set_query("donation_payment_account", function () {
+			var account_types = ["Bank", "Cash"];
+			return {
+				filters: {
+					"account_type": ["in", account_types],
+					"is_group": 0,
+					"company": frm.doc.donation_company
 				}
 			};
 		});

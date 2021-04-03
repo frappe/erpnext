@@ -15,6 +15,7 @@ from frappe.utils import add_months, formatdate, getdate, today
 
 class PlaidSettings(Document):
 	@staticmethod
+	@frappe.whitelist()
 	def get_link_token():
 		plaid = PlaidConnector()
 		return plaid.get_link_token()
