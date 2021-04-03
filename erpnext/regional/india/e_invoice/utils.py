@@ -397,7 +397,7 @@ def safe_json_load(json_string):
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
 def validate_einvoice(validations, einvoice, errors=None):
-	if not errors:
+	if errors is None:
 		errors = []
 	for fieldname, field_validation in validations.items():
 		value = einvoice.get(fieldname, None)
@@ -412,12 +412,12 @@ def validate_einvoice(validations, einvoice, errors=None):
 
 			if isinstance(value, list):
 				for d in value:
-					errors = validate_einvoice(child_validations, d, errors)
+					validate_einvoice(child_validations, d, errors)
 					if not d:
 						# remove empty dicts
 						einvoice.pop(fieldname, None)
 			else:
-				errors = validate_einvoice(child_validations, value, errors)
+				validate_einvoice(child_validations, value, errors)
 				if not value:
 					# remove empty dicts
 					einvoice.pop(fieldname, None)
