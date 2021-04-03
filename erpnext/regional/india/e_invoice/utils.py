@@ -344,8 +344,8 @@ def make_einvoice(invoice):
 	
 	if invoice.is_return and invoice.return_against:
 		prev_doc_details = get_return_doc_reference(invoice)
-	
-	if invoice.transporter:
+
+	if invoice.transporter and cint(invoice.distance):
 		eway_bill_details = get_eway_bill_details(invoice)
 	
 	# not yet implemented
@@ -426,7 +426,7 @@ def validate_einvoice(validations, einvoice, errors=[]):
 			errors.append(_('{} should not exceed {} characters').format(label, max_length))
 		if value_type == 'number' and (value > maximum or value < minimum):
 			errors.append(_('{} {} should be between {} and {}').format(label, value, minimum, maximum))
-		if pattern_str and not pattern.match(value):
+		if pattern_str and not pattern.match(value) and field_validation.get('validationMsg'):
 			errors.append(field_validation.get('validationMsg'))
 	
 	return errors
@@ -455,13 +455,20 @@ class GSPConnector():
 	def get_credentials(self):
 		if self.invoice:
 			gstin = self.get_seller_gstin()
-			credentials = next(d for d in self.e_invoice_settings.credentials if d.gstin == gstin)
+			if not self.e_invoice_settings.enable:
+				frappe.throw(_("E-Invoicing is disabled. Please enable it from {} to generate e-invoices.").format(get_link_to_form("E Invoice Settings", "E Invoice Settings")))
+
+			credentials_for_gstin = [d for d in self.e_invoice_settings.credentials if d.gstin == gstin]
+			if credentials_for_gstin:
+				credentials = credentials_for_gstin[0]
+			else:
+				frappe.throw(_('Cannot find e-invoicing credentials for GSTIN {}. Please check E-Invoice Settings').format(gstin))
 		else:
 			credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
 		return credentials
 	
 	def get_seller_gstin(self):
-		gstin = self.invoice.company_gstin or frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
+		gstin = frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
 		if not gstin:
 			frappe.throw(_('Cannot retrieve Company GSTIN. Please select company address with valid GSTIN.'))
 		return gstin
