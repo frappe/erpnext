@@ -136,7 +136,8 @@ class TestBOM(unittest.TestCase):
 
 		reset_item_valuation_rate(
 			item_code='_Test Item',
-			warehouse_list=["_Test Warehouse - _TC"],
+			warehouse_list=frappe.get_all("Warehouse",
+				{"is_group":0, "company": bom.company}, pluck="name"),
 			qty=200,
 			rate=200
 		)
