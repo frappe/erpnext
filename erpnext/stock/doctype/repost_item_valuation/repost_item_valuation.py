@@ -39,6 +39,7 @@ class RepostItemValuation(Document):
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=frappe.flags.in_test, doc=self)
 
+	@frappe.whitelist()
 	def restart_reposting(self):
 		self.set_status('Queued')
 		frappe.enqueue(repost, timeout=1800, queue='long',

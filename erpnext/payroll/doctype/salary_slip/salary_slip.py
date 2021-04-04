@@ -142,6 +142,7 @@ class SalarySlip(TransactionBase):
 			self.start_date = date_details.start_date
 			self.end_date = date_details.end_date
 
+	@frappe.whitelist()
 	def get_emp_and_working_day_details(self):
 		'''First time, load all the components from salary structure'''
 		if self.employee:
@@ -617,12 +618,15 @@ class SalarySlip(TransactionBase):
 
 			component_row = self.append(component_type)
 			for attr in (
-				'depends_on_payment_days', 'salary_component', 'abbr'
+				'depends_on_payment_days', 'salary_component',
 				'do_not_include_in_total', 'is_tax_applicable',
 				'is_flexible_benefit', 'variable_based_on_taxable_salary',
 				'exempted_from_income_tax'
 			):
 				component_row.set(attr, component_data.get(attr))
+
+			abbr = component_data.get('abbr') or component_data.get('salary_component_abbr')
+			component_row.set('abbr', abbr)
 
 		if additional_salary:
 			component_row.default_amount = 0
@@ -1114,10 +1118,12 @@ class SalarySlip(TransactionBase):
 			self.bank_name = emp.bank_name
 			self.bank_account_no = emp.bank_ac_no
 
+	@frappe.whitelist()
 	def process_salary_based_on_working_days(self):
 		self.get_working_days_details(lwp=self.leave_without_pay)
 		self.calculate_net_pay()
 
+	@frappe.whitelist()
 	def set_totals(self):
 		self.gross_pay = 0.0
 		if self.salary_slip_based_on_timesheet == 1:
