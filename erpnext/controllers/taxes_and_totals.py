@@ -313,7 +313,7 @@ class calculate_taxes_and_totals(object):
 		if i==0:
 			tax.base_total = self.doc.base_net_total + tax.base_tax_amount_after_discount_amount
 		else:
-			tax.base_total = self.doc['taxes'][i-1].base_total + tax.base_tax_amount_after_discount_amount
+			tax.base_total = self.doc.get('taxes')[i-1].base_total + tax.base_tax_amount_after_discount_amount
 
 		tax.total = flt(flt(tax.base_total) * self.doc.conversion_rate, tax.precision("base_tax_amount"))
 
