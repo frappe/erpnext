@@ -310,12 +310,12 @@ class calculate_taxes_and_totals(object):
 				tax.tax_amount_after_discount_amount = flt(flt(tax.base_tax_amount_after_discount_amount) * self.doc.conversion_rate,
 					tax.precision("base_tax_amount"))
 
-		if i==0:
-			tax.base_total = self.doc.base_net_total + tax.base_tax_amount_after_discount_amount
-		else:
-			tax.base_total = self.doc.get('taxes')[i-1].base_total + tax.base_tax_amount_after_discount_amount
+			if i==0:
+				tax.base_total = self.doc.base_net_total + tax.base_tax_amount_after_discount_amount
+			else:
+				tax.base_total = self.doc.get('taxes')[i-1].base_total + tax.base_tax_amount_after_discount_amount
 
-		tax.total = flt(flt(tax.base_total) * self.doc.conversion_rate, tax.precision("base_tax_amount"))
+			tax.total = flt(flt(tax.base_total) * self.doc.conversion_rate, tax.precision("base_tax_amount"))
 
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
