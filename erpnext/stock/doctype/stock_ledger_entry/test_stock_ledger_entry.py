@@ -313,8 +313,8 @@ class TestStockLedgerEntry(unittest.TestCase):
 
 		# Set User with Stock User role but not Stock Manager
 		try:
-			frappe.set_user("test@example.com")
 			user = frappe.get_doc("User", "test@example.com")
+			frappe.set_user(user.name)
 			user.add_roles("Stock User")
 			user.remove_roles("Stock Manager")
 
@@ -325,7 +325,9 @@ class TestStockLedgerEntry(unittest.TestCase):
 			# Block back-dated entry
 			self.assertRaises(BackDatedStockTransaction, back_dated_se_1.submit)
 
+			frappe.set_user("Administrator")
 			user.add_roles("Stock Manager")
+			frappe.set_user(user.name)
 
 			# Back dated entry allowed to Stock Manager
 			back_dated_se_2 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
@@ -337,6 +339,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		finally:
 			frappe.db.set_value("Stock Settings", None, "role_allowed_to_create_edit_back_dated_transactions", None)
 			frappe.set_user("Administrator")
+			user.remove_roles("Stock Manager")
 
 
 def create_repack_entry(**args):
