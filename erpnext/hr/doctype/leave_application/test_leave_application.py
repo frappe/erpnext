@@ -11,6 +11,7 @@ from frappe.utils import add_days, nowdate, now_datetime, getdate, add_months
 from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 from erpnext.hr.doctype.leave_allocation.test_leave_allocation import create_leave_allocation
 from erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment import create_assignment_for_multiple_employees
+from erpnext.hr.doctype.employee.test_employee import make_employee
 
 test_dependencies = ["Leave Allocation", "Leave Block List", "Employee"]
 
@@ -564,6 +565,46 @@ class TestLeaveApplication(unittest.TestCase):
 		create_carry_forwarded_allocation(employee, leave_type)
 
 		self.assertEquals(get_leave_balance_on(employee.name, leave_type.name, add_days(nowdate(), -85), add_days(nowdate(), -84)), 0)
+
+	def test_leave_approver_perms(self):
+		employee = get_employee()
+		user = "test_approver_perm_emp@example.com"
+		approver = make_employee(user, "_Test Company")
+
+		# set approver for employee
+		employee.reload()
+		employee.leave_approver = user
+		employee.save()
+		self.assertTrue("Leave Approver" in frappe.get_roles(user))
+
+		make_allocation_record(employee.name)
+
+		application = self.get_application(_test_records[0])
+		application.leave_approver = user
+		application.insert()
+		self.assertTrue(application.name in frappe.share.get_shared("Leave Application", user))
+
+		# check shared doc revoked
+		application.reload()
+		application.leave_approver = "test@example.com"
+		application.save()
+		self.assertTrue(application.name not in frappe.share.get_shared("Leave Application", user))
+
+		application.reload()
+		application.leave_approver = user
+		application.save()
+
+		frappe.set_user(user)
+		application.reload()
+		application.status = "Approved"
+		application.submit()
+
+		# unset leave approver
+		frappe.set_user("Administrator")
+		employee.reload()
+		employee.leave_approver = ""
+		employee.save()
+
 
 def create_carry_forwarded_allocation(employee, leave_type):
 		# initial leave allocation
