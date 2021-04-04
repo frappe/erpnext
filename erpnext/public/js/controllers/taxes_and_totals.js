@@ -79,6 +79,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
 		this.calculate_taxes();
+		this.round_off_taxes();
 		this.manipulate_grand_total_for_inclusive_tax();
 		this.calculate_totals();
 		this._cleanup();
@@ -341,6 +342,29 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		});
 	},
 
+	round_off_taxes: function() {
+		let me = this;
+		// Round of taxes to whole numbers based on regional settings
+		$.each(this.frm.doc['taxes'] || [], function(i, tax) {
+			if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
+				tax.base_tax_amount = Math.round(tax.base_tax_amount);
+				tax.base_tax_amount_after_discount_amount = Math.round(tax.base_tax_amount_after_discount_amount);
+
+				tax.tax_amount = flt(flt(tax.base_tax_amount) * me.frm.doc.conversion_rate, precision("base_tax_amount", tax));
+				tax.tax_amount_after_discount_amount = flt(flt(tax.base_tax_amount_after_discount_amount) * me.frm.doc.conversion_rate,
+					precision("base_tax_amount", tax));
+			}
+
+			if (i==0) {
+				tax.base_total = me.frm.doc.base_net_total + tax.base_tax_amount_after_discount_amount;
+			} else {
+				tax.base_total = me.frm.doc['taxes'][i-1].base_total + tax.base_tax_amount_after_discount_amount;
+			}
+
+			tax.total = flt(flt(tax.base_total) * me.frm.doc.conversion_rate, precision("base_tax_amount", tax));
+		});
+	},
+
 	set_cumulative_total: function(row_idx, tax) {
 		var tax_amount = tax.tax_amount_after_discount_amount;
 		if (tax.category == 'Valuation') {
@@ -393,16 +417,7 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 			current_tax_amount = tax_rate * item.qty;
 		}
 
-		current_tax_amount = this.get_final_tax_amount(tax, current_tax_amount);
 		this.set_item_wise_tax(item, tax, tax_rate, current_tax_amount);
-
-		return current_tax_amount;
-	},
-
-	get_final_tax_amount: function(tax, current_tax_amount) {
-		if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
-			current_tax_amount = Math.round(current_tax_amount);
-		}
 
 		return current_tax_amount;
 	},

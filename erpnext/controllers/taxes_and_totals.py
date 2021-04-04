@@ -44,6 +44,7 @@ class calculate_taxes_and_totals(object):
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
 		self.calculate_taxes()
+		self.round_off_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
@@ -299,6 +300,23 @@ class calculate_taxes_and_totals(object):
 								- flt(self.doc.discount_amount) - tax.total,
 								self.doc.precision("rounding_adjustment"))
 
+	def round_off_taxes(self):
+		for i, tax in enumerate(self.doc.get('taxes')):
+			if tax.account_head in frappe.flags.round_off_applicable_accounts:
+				tax.base_tax_amount = round(tax.base_tax_amount, 0)
+				tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
+
+				tax.tax_amount = flt(flt(tax.base_tax_amount) * self.doc.conversion_rate, tax.precision("base_tax_amount"))
+				tax.tax_amount_after_discount_amount = flt(flt(tax.base_tax_amount_after_discount_amount) * self.doc.conversion_rate,
+					tax.precision("base_tax_amount"))
+
+		if i==0:
+			tax.base_total = self.doc.base_net_total + tax.base_tax_amount_after_discount_amount
+		else:
+			tax.base_total = self.doc['taxes'][i-1].base_total + tax.base_tax_amount_after_discount_amount
+
+		tax.total = flt(flt(tax.base_total) * self.doc.conversion_rate, tax.precision("base_tax_amount"))
+
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
 		# if tax/charges is for deduction, multiply by -1
@@ -337,16 +355,8 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
-		current_tax_amount = self.get_final_current_tax_amount(tax, current_tax_amount)
 		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
-		return current_tax_amount
-
-	def get_final_current_tax_amount(self, tax, current_tax_amount):
-		# Some countries need individual tax components to be rounded
-		# Handeled via regional doctypess
-		if tax.account_head in frappe.flags.round_off_applicable_accounts:
-			current_tax_amount = round(current_tax_amount, 0)
 		return current_tax_amount
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
