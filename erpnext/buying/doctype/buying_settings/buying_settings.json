@@ -14,6 +14,7 @@
   "pr_required",
   "maintain_same_rate",
   "maintain_same_rate_action",
+  "role_to_override_stop_action",
   "allow_multiple_items",
   "subcontract",
   "backflush_raw_materials_of_subcontract_based_on",
@@ -100,6 +101,13 @@
    "label": "Action If Same Rate is Not Maintained",
    "mandatory_depends_on": "maintain_same_rate",
    "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval:doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
@@ -107,7 +115,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-11 17:31:21.293142",
+ "modified": "2021-04-04 20:01:44.087066",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

@@ -122,8 +122,10 @@ class TransactionBase(StatusUpdater):
 
 		if self.doctype in buying_doctypes:
 			action = frappe.db.get_single_value("Buying Settings", "maintain_same_rate_action")
+			settings_doc = "Buying Settings"
 		else:
 			action = frappe.db.get_single_value("Selling Settings", "maintain_same_rate_action")
+			settings_doc = "Selling Settings"
 
 		for ref_dt, ref_dn_field, ref_link_field in ref_details:
 			for d in self.get("items"):
@@ -132,8 +134,11 @@ class TransactionBase(StatusUpdater):
 
 					if abs(flt(d.rate - ref_rate, d.precision("rate"))) >= .01:
 						if action == "Stop":
-							frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
-								d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
+							role_allowed_to_override = frappe.db.get_single_value(settings_doc, 'role_to_override_stop_action')
+
+							if role_allowed_to_override not in frappe.get_roles():
+								frappe.throw(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
+									d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate))
 						else:
 							frappe.msgprint(_("Row #{0}: Rate must be same as {1}: {2} ({3} / {4})").format(
 								d.idx, ref_dt, d.get(ref_dn_field), d.rate, ref_rate), title=_("Warning"), indicator="orange")

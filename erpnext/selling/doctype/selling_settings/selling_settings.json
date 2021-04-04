@@ -19,6 +19,7 @@
   "sales_update_frequency",
   "maintain_same_sales_rate",
   "maintain_same_rate_action",
+  "role_to_override_stop_action",
   "editable_price_list_rate",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
@@ -144,6 +145,13 @@
    "label": "Action If Same Rate is Not Maintained",
    "mandatory_depends_on": "maintain_same_sales_rate",
    "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval: doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
@@ -151,7 +159,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-11 17:43:55.584040",
+ "modified": "2021-04-04 20:18:12.814624",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
