@@ -4,11 +4,11 @@ import frappe
 
 from frappe.utils.make_random import get_random
 from frappe.utils import get_timestamp
-from erpnext.projects.report.employee_hours_utilisation_based_on_timesheet.employee_hours_utilisation_based_on_timesheet import execute
+from erpnext.projects.report.employee_hours_utilization_based_on_timesheet.employee_hours_utilization_based_on_timesheet import execute
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.projects.doctype.project.test_project import make_project
 
-class TestEmployeeUtilisation(unittest.TestCase):
+class TestEmployeeUtilization(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create test employee
@@ -69,7 +69,7 @@ class TestEmployeeUtilisation(unittest.TestCase):
         frappe.db.sql("DELETE FROM `tabTimesheet` WHERE company='_Test Company'")
         frappe.db.sql(f"DELETE FROM `tabProject` WHERE name='{cls.test_project.name}'")
 
-    def test_utilisation_report_with_required_filters_only(self):
+    def test_utilization_report_with_required_filters_only(self):
         filters = {
             "company": "_Test Company",
             "from_date": "2021-04-01",
@@ -99,7 +99,7 @@ class TestEmployeeUtilisation(unittest.TestCase):
 
         self.assertEqual(report[1], expected_data)
     
-    def test_utilisation_report_for_single_employee(self):
+    def test_utilization_report_for_single_employee(self):
         filters = {
             "company": "_Test Company",
             "from_date": "2021-04-01",
@@ -122,7 +122,7 @@ class TestEmployeeUtilisation(unittest.TestCase):
 
         self.assertEqual(report[1], expected_data)
 
-    def test_utilisation_report_for_project(self):
+    def test_utilization_report_for_project(self):
         filters = {
             "company": "_Test Company",
             "from_date": "2021-04-01",
