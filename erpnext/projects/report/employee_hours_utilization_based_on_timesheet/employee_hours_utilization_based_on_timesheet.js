@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Employee Hours Utilisation Based On Timesheet"] = {
+frappe.query_reports["Employee Hours Utilization Based On Timesheet"] = {
 	"filters": [
 		{
 			fieldname: "company",

@@ -11,7 +11,7 @@ def execute(filters=None):
 	return EmployeeHoursReport(filters).run()
 
 class EmployeeHoursReport:
-	'''Employee Hours Utilisation Report Based On Timesheet'''
+	'''Employee Hours Utilization Report Based On Timesheet'''
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
 
@@ -78,7 +78,7 @@ class EmployeeHoursReport:
 	def generate_data(self):
 		self.generate_filtered_time_logs()
 		self.generate_stats_by_employee()
-		self.calculate_utilisations()
+		self.calculate_utilizations()
 
 		self.data = []
 
@@ -88,7 +88,7 @@ class EmployeeHoursReport:
 			row.update(data)
 			self.data.append(row)
 
-		#  Sort by descending order of percentage utilisation
+		#  Sort by descending order of percentage utilization
 		self.data.sort(key=lambda x: x['per_util'], reverse=True)
 
 	def generate_filtered_time_logs(self):
@@ -128,7 +128,7 @@ class EmployeeHoursReport:
 			else:
 				self.stats_by_employee[emp]['non_billed_hours'] += flt(hours, 2)
 
-	def calculate_utilisations(self):
+	def calculate_utilizations(self):
 		# (9.0) Will be fetched from HR settings
 		TOTAL_HOURS = flt(9.0 * self.day_span, 2)
 		for emp, data in iteritems(self.stats_by_employee):
@@ -147,25 +147,25 @@ class EmployeeHoursReport:
 		if not self.data:
 			return 
 
-		avg_utilisation = 0.0
+		avg_utilization = 0.0
 		total_billed, total_non_billed = 0.0, 0.0
 		total_untracked = 0.0
 
 		for row in self.data:
-			avg_utilisation += row['per_util']
+			avg_utilization += row['per_util']
 			total_billed += row['billed_hours']
 			total_non_billed += row['non_billed_hours']
 			total_untracked += row['untracked_hours']
 
-		avg_utilisation /= len(self.data)
-		avg_utilisation = flt(avg_utilisation, 2)
+		avg_utilization /= len(self.data)
+		avg_utilization = flt(avg_utilization, 2)
 
 		THRESHOLD_PERCENTAGE = 70.0
 		self.report_summary = [
 			{
-				'value': f'{avg_utilisation}%',
-				'indicator': 'Red' if avg_utilisation < THRESHOLD_PERCENTAGE else 'Green',
-				'label': _('Average Utilisation'),
+				'value': f'{avg_utilization}%',
+				'indicator': 'Red' if avg_utilization < THRESHOLD_PERCENTAGE else 'Green',
+				'label': _('Average Utilization'),
 				'datatype': 'Percentage'
 			},
 			{
