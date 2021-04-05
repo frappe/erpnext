@@ -13,6 +13,7 @@
   "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
   "leave_settings",
+  "send_leave_notification",
   "leave_approval_notification_template",
   "leave_status_notification_template",
   "role_allowed_to_create_backdated_leave_application",
@@ -69,15 +70,19 @@
    "label": "Leave Settings"
   },
   {
+   "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_approval_notification_template",
    "fieldtype": "Link",
    "label": "Leave Approval Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
    "options": "Email Template"
   },
   {
+   "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_status_notification_template",
    "fieldtype": "Link",
    "label": "Leave Status Notification Template",
+   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
    "options": "Email Template"
   },
   {
@@ -132,13 +137,19 @@
    "fieldname": "automatically_allocate_leaves_based_on_leave_policy",
    "fieldtype": "Check",
    "label": "Automatically Allocate Leaves Based On Leave Policy"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_leave_notification",
+   "fieldtype": "Check",
+   "label": "Send Leave Notification"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-08-27 14:30:28.995324",
+ "modified": "2021-03-14 02:04:22.907159",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
@@ -155,5 +166,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "ASC"
+ "sort_order": "ASC",
+ "track_changes": 1
 }

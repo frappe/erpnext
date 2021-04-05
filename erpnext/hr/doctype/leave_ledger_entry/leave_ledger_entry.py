@@ -52,7 +52,9 @@ def create_leave_ledger_entry(ref_doc, args, submit=True):
 	ledger.update(args)
 
 	if submit:
-		frappe.get_doc(ledger).submit()
+		doc = frappe.get_doc(ledger)
+		doc.flags.ignore_permissions = 1
+		doc.submit()
 	else:
 		delete_ledger_entry(ledger)
 

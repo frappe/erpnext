@@ -10,33 +10,7 @@ from frappe.utils import nowdate, add_months
 
 class TestMembership(unittest.TestCase):
 	def setUp(self):
-		# Get default company
-		company = frappe.get_doc("Company", erpnext.get_default_company())
-
-		# update membership settings
-		settings = frappe.get_doc("Membership Settings")
-		# Enable razorpay
-		settings.enable_razorpay = 1
-		settings.billing_cycle = "Monthly"
-		settings.billing_frequency = 24
-		# Enable invoicing
-		settings.enable_invoicing = 1
-		settings.make_payment_entry = 1
-		settings.company = company.name
-		settings.payment_account = company.default_cash_account
-		settings.debit_account = company.default_receivable_account
-		settings.save()
-
-		# make test plan
-		if not frappe.db.exists("Membership Type", "_rzpy_test_milythm"):
-			plan = frappe.new_doc("Membership Type")
-			plan.membership_type = "_rzpy_test_milythm"
-			plan.amount = 100
-			plan.razorpay_plan_id = "_rzpy_test_milythm"
-			plan.linked_item = create_item("_Test Item for Non Profit Membership").name
-			plan.insert()
-		else:
-			plan = frappe.get_doc("Membership Type", "_rzpy_test_milythm")
+		plan = setup_membership()
 
 		# make test member
 		self.member_doc = create_member(frappe._dict({
@@ -78,7 +52,7 @@ class TestMembership(unittest.TestCase):
 		})
 
 def set_config(key, value):
-	frappe.db.set_value("Membership Settings", None, key, value)
+	frappe.db.set_value("Non Profit Settings", None, key, value)
 
 def make_membership(member, payload={}):
 	data = {
@@ -109,3 +83,36 @@ def create_item(item_code):
 	else:
 		item = frappe.get_doc("Item", item_code)
 	return item
+
+def setup_membership():
+	# Get default company
+	company = frappe.get_doc("Company", erpnext.get_default_company())
+
+	# update non profit settings
+	settings = frappe.get_doc("Non Profit Settings")
+	# Enable razorpay
+	settings.enable_razorpay_for_memberships = 1
+	settings.billing_cycle = "Monthly"
+	settings.billing_frequency = 24
+	# Enable invoicing
+	settings.allow_invoicing = 1
+	settings.automate_membership_payment_entries = 1
+	settings.company = company.name
+	settings.donation_company = company.name
+	settings.membership_payment_account = company.default_cash_account
+	settings.membership_debit_account = company.default_receivable_account
+	settings.flags.ignore_mandatory = True
+	settings.save()
+
+	# make test plan
+	if not frappe.db.exists("Membership Type", "_rzpy_test_milythm"):
+		plan = frappe.new_doc("Membership Type")
+		plan.membership_type = "_rzpy_test_milythm"
+		plan.amount = 100
+		plan.razorpay_plan_id = "_rzpy_test_milythm"
+		plan.linked_item = create_item("_Test Item for Non Profit Membership").name
+		plan.insert()
+	else:
+		plan = frappe.get_doc("Membership Type", "_rzpy_test_milythm")
+
+	return plan

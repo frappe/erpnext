@@ -12,6 +12,7 @@
   "item_name": "_Test Item",
   "apply_warehouse_wise_reorder_level": 1,
   "gst_hsn_code": "999800",
+  "opening_stock": 10,
   "valuation_rate": 100,
   "item_defaults": [{
     "company": "_Test Company",
@@ -92,7 +93,7 @@
    {
     "doctype": "Item Tax",
     "parentfield": "taxes",
-    "item_tax_template": "_Test Account Excise Duty @ 10"
+    "item_tax_template": "_Test Account Excise Duty @ 10 - _TC"
    }
   ],
   "stock_uom": "_Test UOM 1"
@@ -370,12 +371,12 @@
    {
     "doctype": "Item Tax",
     "parentfield": "taxes",
-    "item_tax_template": "_Test Account Excise Duty @ 10"
+    "item_tax_template": "_Test Account Excise Duty @ 10 - _TC"
    },
    {
     "doctype": "Item Tax",
     "parentfield": "taxes",
-    "item_tax_template": "_Test Account Excise Duty @ 12",
+    "item_tax_template": "_Test Account Excise Duty @ 12 - _TC",
     "tax_category": "_Test Tax Category 1"
    }
   ]
@@ -449,13 +450,13 @@
    {
     "doctype": "Item Tax",
     "parentfield": "taxes",
-    "item_tax_template": "_Test Account Excise Duty @ 20"
+    "item_tax_template": "_Test Account Excise Duty @ 20 - _TC"
    },
    {
     "doctype": "Item Tax",
     "parentfield": "taxes",
     "tax_category": "_Test Tax Category 1",
-    "item_tax_template": "_Test Item Tax Template 1"
+    "item_tax_template": "_Test Item Tax Template 1 - _TC"
    }
   ]
  },

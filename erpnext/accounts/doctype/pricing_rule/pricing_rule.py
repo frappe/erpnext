@@ -136,7 +136,7 @@ class PricingRule(Document):
 			for d in self.items:
 				max_discount = frappe.get_cached_value("Item", d.item_code, "max_discount")
 				if max_discount and flt(self.discount_percentage) > flt(max_discount):
-					throw(_("Max discount allowed for item: {0} is {1}%").format(self.item_code, max_discount))
+					throw(_("Max discount allowed for item: {0} is {1}%").format(d.item_code, max_discount))
 
 	def validate_price_list_with_currency(self):
 		if self.currency and self.for_price_list:
@@ -237,6 +237,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		"doctype": args.doctype,
 		"has_margin": False,
 		"name": args.name,
+		"free_item_data": [],
 		"parent": args.parent,
 		"parenttype": args.parenttype,
 		"child_docname": args.get('child_docname')

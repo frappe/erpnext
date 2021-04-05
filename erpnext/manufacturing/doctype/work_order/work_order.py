@@ -509,6 +509,7 @@ class WorkOrder(Document):
 				stock_bin = get_bin(d.item_code, d.source_warehouse)
 				stock_bin.update_reserved_qty_for_production()
 
+	@frappe.whitelist()
 	def get_items_and_operations_from_bom(self):
 		self.set_required_items()
 		self.set_work_order_operations()
@@ -528,6 +529,10 @@ class WorkOrder(Document):
 		if not reset_only_qty:
 			self.required_items = []
 
+		operation = None
+		if self.get('operations') and len(self.operations) == 1:
+			operation = self.operations[0].operation
+
 		if self.bom_no and self.qty:
 			item_dict = get_bom_items_as_dict(self.bom_no, self.company, qty=self.qty,
 				fetch_exploded = self.use_multi_level_bom)
@@ -536,6 +541,9 @@ class WorkOrder(Document):
 				for d in self.get("required_items"):
 					if item_dict.get(d.item_code):
 						d.required_qty = item_dict.get(d.item_code).get("qty")
+
+					if not d.operation:
+						d.operation = operation
 			else:
 				# Attribute a big number (999) to idx for sorting putpose in case idx is NULL
 				# For instance in BOM Explosion Item child table, the items coming from sub assembly items
@@ -543,7 +551,7 @@ class WorkOrder(Document):
 					self.append('required_items', {
 						'rate': item.rate,
 						'amount': item.amount,
-						'operation': item.operation,
+						'operation': item.operation or operation,
 						'item_code': item.item_code,
 						'item_name': item.item_name,
 						'description': item.description,
@@ -606,6 +614,7 @@ class WorkOrder(Document):
 
 			item.db_set('consumed_qty', flt(consumed_qty), update_modified=False)
 
+	@frappe.whitelist()
 	def make_bom(self):
 		data = frappe.db.sql(""" select sed.item_code, sed.qty, sed.s_warehouse
 			from `tabStock Entry Detail` sed, `tabStock Entry` se
@@ -879,7 +888,7 @@ def create_job_card(work_order, row, qty=0, enable_capacity_planning=False, auto
 			doc.schedule_time_logs(row)
 
 		doc.insert()
-		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)))
+		frappe.msgprint(_("Job card {0} created").format(get_link_to_form("Job Card", doc.name)), alert=True)
 
 	return doc
 

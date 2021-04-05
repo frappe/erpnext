@@ -142,13 +142,15 @@ def add_standard_navbar_items():
 		}
 	]
 
-	current_nabvar_items = navbar_settings.help_dropdown
+	current_navbar_items = navbar_settings.help_dropdown
 	navbar_settings.set('help_dropdown', [])
 
 	for item in erpnext_navbar_items:
-		navbar_settings.append('help_dropdown', item)
+		current_labels = [item.get('item_label') for item in current_navbar_items]
+		if not item.get('item_label') in current_labels:
+			navbar_settings.append('help_dropdown', item)
 
-	for item in current_nabvar_items:
+	for item in current_navbar_items:
 		navbar_settings.append('help_dropdown', {
 			'item_label': item.item_label,
 			'item_type': item.item_type,
@@ -161,5 +163,4 @@ def add_standard_navbar_items():
 	navbar_settings.save()
 
 def add_app_name():
-	settings = frappe.get_doc("System Settings")
-	settings.app_name = _("ERPNext")
+	frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
