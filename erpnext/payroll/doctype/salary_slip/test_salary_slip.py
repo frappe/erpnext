@@ -21,6 +21,7 @@ from erpnext.payroll.doctype.employee_tax_exemption_declaration.test_employee_ta
 class TestSalarySlip(unittest.TestCase):
 	def setUp(self):
 		setup_test()
+
 	def tearDown(self):
 		frappe.db.set_value("Payroll Settings", None, "include_holidays_in_total_working_days", 0)
 		frappe.set_user("Administrator")
@@ -245,7 +246,7 @@ class TestSalarySlip(unittest.TestCase):
 		make_salary_structure("Test Loan Repayment Salary Structure", "Monthly", employee=applicant, currency='INR',
 			payroll_period=payroll_period)
 
-		frappe.db.sql("""delete from `tabLoan""")
+		frappe.db.sql("delete from tabLoan")
 		loan = create_loan(applicant, "Car Loan", 11000, "Repay Over Number of Periods", 20, posting_date=add_months(nowdate(), -1))
 		loan.repay_from_salary = 1
 		loan.submit()
@@ -360,7 +361,6 @@ class TestSalarySlip(unittest.TestCase):
 		# as per assigned salary structure 40500 in monthly salary so 236000*5/100/12
 		frappe.db.sql("""delete from `tabPayroll Period`""")
 		frappe.db.sql("""delete from `tabSalary Component`""")
-		frappe.db.sql("""delete from `tabAdditional Salary`""")
 
 		payroll_period = create_payroll_period()
 

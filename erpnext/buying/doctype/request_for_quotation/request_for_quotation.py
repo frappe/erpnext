@@ -66,6 +66,7 @@ class RequestforQuotation(BuyingController):
 	def on_cancel(self):
 		frappe.db.set(self, 'status', 'Cancelled')
 
+	@frappe.whitelist()
 	def get_supplier_email_preview(self, supplier):
 		"""Returns formatted email preview as string."""
 		rfq_suppliers = list(filter(lambda row: row.supplier == supplier, self.suppliers))
@@ -126,6 +127,10 @@ class RequestforQuotation(BuyingController):
 			contact.append('links', {
 				'link_doctype': 'Supplier',
 				'link_name': rfq_supplier.supplier
+			})
+			contact.append('email_ids', {
+				'email_id': user.name,
+				'is_primary': 1
 			})
 
 		if not contact.email_id and not contact.user:

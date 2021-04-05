@@ -10,6 +10,7 @@ import sys
 import json
 import base64
 import frappe
+import six
 import traceback
 import io
 from frappe import _, bold
@@ -86,10 +87,10 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def get_party_details(address_name):
+def get_party_details(address_name, company_address=None, billing_address=None, shipping_address=None):
 	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 
-	if (not d.gstin
+	if ((not d.gstin and not shipping_address)
 		or not d.city
 		or not d.pincode
 		or not d.address_title
@@ -107,13 +108,17 @@ def get_party_details(address_name):
 		# according to einvoice standard
 		pincode = 999999
 
-	return frappe._dict(dict(
-		gstin=d.gstin, legal_name=d.address_title,
-		location=d.city, pincode=d.pincode,
+	party_address_details = frappe._dict(dict(
+		legal_name=sanitize_for_json(d.address_title),
+		location=sanitize_for_json(d.city),
+		pincode=d.pincode,
 		state_code=d.gst_state_number,
-		address_line1=d.address_line1,
-		address_line2=d.address_line2
+		address_line1=sanitize_for_json(d.address_line1),
+		address_line2=sanitize_for_json(d.address_line2)
 	))
+	if d.gstin:
+		party_address_details.gstin = d.gstin
+	return party_address_details
 
 def get_gstin_details(gstin):
 	if not hasattr(frappe.local, 'gstin_cache'):
@@ -146,8 +151,11 @@ def get_overseas_address_details(address_name):
 		)
 
 	return frappe._dict(dict(
-		gstin='URP', legal_name=address_title, location=city,
-		address_line1=address_line1, address_line2=address_line2,
+		gstin='URP',
+		legal_name=sanitize_for_json(address_title),
+		location=city,
+		address_line1=sanitize_for_json(address_line1),
+		address_line2=sanitize_for_json(address_line2),
 		pincode=999999, state_code=96, place_of_supply=96
 	))
 
@@ -160,7 +168,7 @@ def get_item_list(invoice):
 		item.update(d.as_dict())
 
 		item.sr_no = d.idx
-		item.description = d.item_name.replace('"', '\\"')
+		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
 		item.discount_amount = 0
@@ -196,9 +204,11 @@ def update_item_taxes(invoice, item):
 		item[attr] = 0
 
 	for t in invoice.taxes:
-		# this contains item wise tax rate & tax amount (incl. discount)
-		item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
-		if t.account_head in gst_accounts_list:
+		is_applicable = t.tax_amount and t.account_head in gst_accounts_list
+		if is_applicable:
+			# this contains item wise tax rate & tax amount (incl. discount)
+			item_tax_detail = json.loads(t.item_wise_tax_detail).get(item.item_code)
+
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
 			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
@@ -223,7 +233,7 @@ def get_invoice_value_details(invoice):
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(invoice.base_total)
-		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+		invoice_value_details.invoice_discount_amt = abs(invoice.base_discount_amount)
 	else:
 		invoice_value_details.base_total = abs(invoice.base_net_total)
 		# since tax already considers discount amount
@@ -320,14 +330,17 @@ def make_einvoice(invoice):
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
 	invoice_value_details = get_invoice_value_details(invoice)
-	seller_details = get_party_details(invoice.company_address)
+	seller_details = get_party_details(invoice.company_address, company_address=1)
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
-		buyer_details = get_party_details(invoice.customer_address)
-		place_of_supply = get_place_of_supply(invoice, invoice.doctype) or invoice.billing_address_gstin
-		place_of_supply = place_of_supply[:2]
+		buyer_details = get_party_details(invoice.customer_address, billing_address=1)
+		place_of_supply = get_place_of_supply(invoice, invoice.doctype)
+		if place_of_supply:
+			place_of_supply = place_of_supply.split('-')[0]
+		else:
+			place_of_supply = sanitize_for_json(invoice.billing_address_gstin)[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
@@ -335,7 +348,7 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-			shipping_details = get_party_details(invoice.shipping_address_name)
+			shipping_details = get_party_details(invoice.shipping_address_name, shipping_address=1)
 
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -356,7 +369,7 @@ def make_einvoice(invoice):
 		period_details=period_details, prev_doc_details=prev_doc_details,
 		export_details=export_details, eway_bill_details=eway_bill_details
 	)
-	einvoice = json.loads(einvoice)
+	einvoice = safe_json_load(einvoice)
 
 	validations = json.loads(read_json('einv_validation'))
 	errors = validate_einvoice(validations, einvoice)
@@ -371,7 +384,21 @@ def make_einvoice(invoice):
 
 	return einvoice
 
-def validate_einvoice(validations, einvoice, errors=[]):
+def safe_json_load(json_string):
+	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
+
+	try:
+		return json.loads(json_string)
+	except JSONDecodeError as e:
+		# print a snippet of 40 characters around the location where error occured
+		pos = e.pos
+		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
+		snippet = json_string[start:end]
+		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
+
+def validate_einvoice(validations, einvoice, errors=None):
+	if errors is None:
+		errors = []
 	for fieldname, field_validation in validations.items():
 		value = einvoice.get(fieldname, None)
 		if not value or value == "None":
@@ -797,6 +824,13 @@ class GSPConnector():
 		self.invoice.flags.ignore_validate_update_after_submit = True
 		self.invoice.flags.ignore_validate = True
 		self.invoice.save()
+
+
+def sanitize_for_json(string):
+	"""Escape JSON specific characters from a string."""
+
+	# json.dumps adds double-quotes to the string. Indexing to remove them.
+	return json.dumps(string)[1:-1]
 
 @frappe.whitelist()
 def get_einvoice(doctype, docname):

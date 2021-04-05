@@ -24,6 +24,25 @@ class EmailDigest(Document):
 		self._accounts = {}
 		self.currency = frappe.db.get_value('Company',  self.company,  "default_currency")
 
+	@frappe.whitelist()
+	def get_users(self):
+		"""get list of users"""
+		user_list = frappe.db.sql("""
+			select name, enabled from tabUser
+			where name not in ({})
+			and user_type != "Website User"
+			order by enabled desc, name asc""".format(", ".join(["%s"]*len(STANDARD_USERS))), STANDARD_USERS, as_dict=1)
+
+		if self.recipient_list:
+			recipient_list = self.recipient_list.split("\n")
+		else:
+			recipient_list = []
+		for p in user_list:
+			p["checked"] = p["name"] in recipient_list and 1 or 0
+
+		frappe.response['user_list'] = user_list
+
+	@frappe.whitelist()
 	def send(self):
 		# send email only to enabled users
 		valid_users = [p[0] for p in frappe.db.sql("""select name from `tabUser`

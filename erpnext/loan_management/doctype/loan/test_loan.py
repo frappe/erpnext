@@ -275,6 +275,11 @@ class TestLoan(unittest.TestCase):
 		frappe.db.sql(""" UPDATE `tabLoan Security Price` SET loan_security_price = 250
 			where loan_security='Test Security 2'""")
 
+		create_process_loan_security_shortfall()
+		loan_security_shortfall = frappe.get_doc("Loan Security Shortfall", {"loan": loan.name})
+		self.assertEquals(loan_security_shortfall.status, "Completed")
+		self.assertEquals(loan_security_shortfall.shortfall_amount, 0)
+
 	def test_loan_security_unpledge(self):
 		pledge = [{
 			"loan_security": "Test Security 1",
@@ -547,7 +552,7 @@ class TestLoan(unittest.TestCase):
 
 		# 30 days - grace period
 		penalty_days = 30 - 4
-		penalty_applicable_amount = flt(amounts['interest_amount']/2, 2)
+		penalty_applicable_amount = flt(amounts['interest_amount']/2)
 		penalty_amount = flt((((penalty_applicable_amount * 25) / 100) * penalty_days), 2)
 		process = process_loan_interest_accrual_for_demand_loans(posting_date = '2019-11-30')
 
