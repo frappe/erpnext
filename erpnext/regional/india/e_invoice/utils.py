@@ -109,7 +109,7 @@ def get_party_details(address_name, company_address=None, billing_address=None, 
 
 	party_address_details = frappe._dict(dict(
 		legal_name=d.address_title,
-		location=d.city,
+		location=d.city, pincode=d.pincode,
 		state_code=d.gst_state_number,
 		address_line1=d.address_line1,
 		address_line2=d.address_line2
