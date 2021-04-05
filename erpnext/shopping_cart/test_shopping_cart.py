@@ -16,6 +16,11 @@ class TestShoppingCart(unittest.TestCase):
 		Note:
 		Shopping Cart == Quotation
 	"""
+
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.sql("delete from `tabTax Rule`")
+
 	def setUp(self):
 		frappe.set_user("Administrator")
 		create_test_contact_and_address()
@@ -100,6 +105,7 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(len(quotation.get("items")), 1)
 
 	def test_tax_rule(self):
+		self.create_tax_rule()
 		self.login_as_customer()
 		quotation = self.create_quotation()
 
@@ -114,6 +120,13 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(quotation.total_taxes_and_charges, 1000.0)
 
 		self.remove_test_quotation(quotation)
+
+	def create_tax_rule(self):
+		tax_rule = frappe.get_test_records("Tax Rule")[0]
+		try:
+			frappe.get_doc(tax_rule).insert()
+		except frappe.DuplicateEntryError:
+			pass
 
 	def create_quotation(self):
 		quotation = frappe.new_doc("Quotation")
