@@ -100,7 +100,7 @@ class SalaryStructure(Document):
 					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 			else:
 				assign_salary_structure_for_employees(employees, self,
-					payroll_payable_account=payroll_payable_account, 
+					payroll_payable_account=payroll_payable_account,
 					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 		else:
 			frappe.msgprint(_("No Employee Found"))
