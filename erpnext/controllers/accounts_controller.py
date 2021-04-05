@@ -1195,6 +1195,13 @@ class AccountsController(TransactionBase):
 		for item_group, group_data in grouped.items():
 			out[item_group] = grouped[item_group]
 
+		# reset item index
+		item_idx = 1
+		for item_group_group in grouped.values():
+			for item in item_group_group['items']:
+				item.ig_idx = item_idx
+				item_idx += 1
+
 		return out
 
 	def calculate_taxes_for_group(self, group_data):
@@ -1205,6 +1212,7 @@ class AccountsController(TransactionBase):
 		for tax in self.taxes:
 			new_tax_row = frappe._dict({k:v for (k, v) in tax.as_dict().items() if k in tax_copy_fields})
 			new_tax_row.tax_amount_after_discount_amount = 0
+			new_tax_row.tax_amount = 0
 			new_tax_row.total = 0
 
 			group_data.taxes[tax.name] = new_tax_row
@@ -1214,6 +1222,10 @@ class AccountsController(TransactionBase):
 			item_tax_detail = json.loads(item.item_tax_detail or '{}')
 			for tax_row_name, tax_amount in item_tax_detail.items():
 				group_data.taxes[tax_row_name].tax_amount_after_discount_amount += flt(tax_amount)
+
+			item_tax_detail_before_discount = json.loads(item.item_tax_detail_before_discount or '{}')
+			for tax_row_name, tax_amount in item_tax_detail_before_discount.items():
+				group_data.taxes[tax_row_name].tax_amount += flt(tax_amount)
 
 		# calculate total after taxes
 		for i, tax in enumerate(group_data.taxes.values()):

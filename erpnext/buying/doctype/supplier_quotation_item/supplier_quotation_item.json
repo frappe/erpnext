@@ -110,6 +110,7 @@
   "request_for_quotation_item",
   "item_tax_rate",
   "item_tax_detail",
+  "item_tax_detail_before_discount",
   "section_break_44",
   "page_break"
  ],
@@ -917,11 +918,19 @@
    "label": "Item Tax Detail",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "item_tax_detail_before_discount",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Item Tax Detail (Before Discount)",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-11-02 13:42:41.260335",
+ "modified": "2021-04-05 17:37:13.591222",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier Quotation Item",

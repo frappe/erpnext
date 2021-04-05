@@ -491,17 +491,19 @@ class calculate_taxes_and_totals(object):
 		if row_idx == 0:
 			tax.total = self.doc.taxable_total + tax_amount
 
-			if self.doc.apply_discount_on == "Grand Total":
-				tax.displayed_total = self.doc.taxable_total + tax_amount_before_discount
-			else:
-				tax.displayed_total = tax.total
+			if not self.discount_amount_applied:
+				if self.doc.apply_discount_on == "Grand Total":
+					tax.displayed_total = self.doc.taxable_total + tax_amount_before_discount
+				else:
+					tax.displayed_total = tax.total
 		else:
 			tax.total = self.doc.get("taxes")[row_idx-1].total + tax_amount
 
-			if self.doc.apply_discount_on == "Grand Total":
-				tax.displayed_total = self.doc.get("taxes")[row_idx-1].displayed_total + tax_amount_before_discount
-			else:
-				tax.displayed_total = tax.total
+			if not self.discount_amount_applied:
+				if self.doc.apply_discount_on == "Grand Total":
+					tax.displayed_total = self.doc.get("taxes")[row_idx-1].displayed_total + tax_amount_before_discount
+				else:
+					tax.displayed_total = tax.total
 
 		if self.should_round_transaction_currency():
 			tax.total = flt(tax.total, tax.precision("total"))
@@ -663,6 +665,8 @@ class calculate_taxes_and_totals(object):
 			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
 		for item in self.doc.get("items"):
 			item.item_tax_detail = json.dumps(item.item_tax_detail, separators=(',', ':'))
+			if not self.discount_amount_applied:
+				item.item_tax_detail_before_discount = item.item_tax_detail
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:

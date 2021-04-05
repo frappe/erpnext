@@ -140,6 +140,7 @@
   "page_break",
   "item_tax_rate",
   "item_tax_detail",
+  "item_tax_detail_before_discount",
   "transaction_date"
  ],
  "fields": [
@@ -1212,11 +1213,19 @@
    "hidden": 1,
    "label": "Is Vehicle",
    "read_only": 1
+  },
+  {
+   "fieldname": "item_tax_detail_before_discount",
+   "fieldtype": "Small Text",
+   "hidden": 1,
+   "label": "Item Tax Detail (Before Discount)",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2020-12-04 16:12:46.146308",
+ "modified": "2021-04-05 17:37:13.591222",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order Item",

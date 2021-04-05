@@ -552,18 +552,22 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		if(row_idx==0) {
 			tax.total = this.frm.doc.taxable_total + tax_amount;
 
-			if (this.frm.doc.apply_discount_on == "Grand Total") {
-				tax.displayed_total = this.frm.doc.taxable_total + tax_amount_before_discount;
-			} else {
-				tax.displayed_total = tax.total;
+			if (!this.discount_amount_applied) {
+				if (this.frm.doc.apply_discount_on == "Grand Total") {
+					tax.displayed_total = this.frm.doc.taxable_total + tax_amount_before_discount;
+				} else {
+					tax.displayed_total = tax.total;
+				}
 			}
 		} else {
 			tax.total = this.frm.doc["taxes"][row_idx-1].total + tax_amount;
 
-			if (this.frm.doc.apply_discount_on == "Grand Total") {
-				tax.displayed_total = this.frm.doc["taxes"][row_idx - 1].displayed_total + tax_amount_before_discount;
-			} else {
-				tax.displayed_total = tax.total;
+			if (!this.discount_amount_applied) {
+				if (this.frm.doc.apply_discount_on == "Grand Total") {
+					tax.displayed_total = this.frm.doc["taxes"][row_idx - 1].displayed_total + tax_amount_before_discount;
+				} else {
+					tax.displayed_total = tax.total;
+				}
 			}
 		}
 
@@ -777,6 +781,8 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	_cleanup: function() {
+		var me = this;
+
 		this.frm.doc.base_in_words = this.frm.doc.in_words = "";
 
 		if(this.frm.doc["items"] && this.frm.doc["items"].length) {
@@ -788,6 +794,9 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 
 			$.each(this.frm.doc["items"] || [], function(i, item) {
 				item.item_tax_detail = JSON.stringify(item.item_tax_detail);
+				if (!me.discount_amount_applied) {
+					item.item_tax_detail_before_discount = item.item_tax_detail;
+				}
 			});
 		}
 
