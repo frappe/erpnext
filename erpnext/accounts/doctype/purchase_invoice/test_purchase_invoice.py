@@ -898,7 +898,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.submit_journal_entries = 1
 		acc_settings.save()
 
-		item = create_item("_Test Item for Deferred Accounting")
+		item = create_item("_Test Item for Deferred Accounting", is_purchase_item=True)
 		item.enable_deferred_expense = 1
 		item.deferred_expense_account = deferred_account
 		item.save()

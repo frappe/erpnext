@@ -125,7 +125,6 @@
    "options": "Income Tax Slab"
   },
   {
-   "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.salary_structure)",
    "fetch_from": "salary_structure.currency",
    "fieldname": "currency",
@@ -146,7 +145,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 18:07:48.251311",
+ "modified": "2021-03-31 15:49:36.361253",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Salary Structure Assignment",
