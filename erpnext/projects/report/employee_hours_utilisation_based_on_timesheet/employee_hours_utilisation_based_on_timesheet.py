@@ -134,6 +134,11 @@ class EmployeeHoursReport:
 		for emp, data in iteritems(self.stats_by_employee):
 			data['total_hours'] = TOTAL_HOURS
 			data['untracked_hours'] = flt(TOTAL_HOURS - data['billed_hours'] - data['non_billed_hours'], 2)
+
+			# To handle overtime edge-case
+			if data['untracked_hours'] < 0:
+				data['untracked_hours'] = 0.0
+				
 			data['per_util'] = flt(((data['billed_hours'] + data['non_billed_hours']) / TOTAL_HOURS) * 100, 2)
 	
 	def generate_report_summary(self):
