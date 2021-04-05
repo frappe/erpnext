@@ -50,6 +50,7 @@ class TaxExemption80GCertificate(Document):
 			frappe.throw(_('Please set the {0} for company {1}').format(frappe.bold('PAN Number'),
 				get_link_to_form('Company', self.company)))
 
+	@frappe.whitelist()
 	def set_company_address(self):
 		address = get_company_address(self.company)
 		self.company_address = address.company_address
@@ -70,6 +71,7 @@ class TaxExemption80GCertificate(Document):
 		else:
 			self.title = self.donor_name
 
+	@frappe.whitelist()
 	def get_payments(self):
 		if not self.member:
 			frappe.throw(_('Please select a Member first.'))

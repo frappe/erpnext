@@ -74,6 +74,7 @@ class Membership(Document):
 			self.generate_invoice(with_payment_entry=settings.automate_membership_payment_entries, save=True)
 
 
+	@frappe.whitelist()
 	def generate_invoice(self, save=True, with_payment_entry=False):
 		if not (self.paid or self.currency or self.amount):
 			frappe.throw(_("The payment for this membership is not paid. To generate invoice fill the payment details"))
@@ -130,6 +131,7 @@ class Membership(Document):
 		pe.save()
 		pe.submit()
 
+	@frappe.whitelist()
 	def send_acknowlement(self):
 		settings = frappe.get_doc("Non Profit Settings")
 		if not settings.send_email:

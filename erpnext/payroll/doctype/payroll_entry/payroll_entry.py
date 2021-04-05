@@ -96,6 +96,7 @@ class PayrollEntry(Document):
 
 		return emp_list
 
+	@frappe.whitelist()
 	def fill_employee_details(self):
 		self.set('employees', [])
 		employees = self.get_emp_list()
@@ -143,6 +144,7 @@ class PayrollEntry(Document):
 			if not self.get(fieldname):
 				frappe.throw(_("Please set {0}").format(self.meta.get_label(fieldname)))
 
+	@frappe.whitelist()
 	def create_salary_slips(self):
 		"""
 			Creates salary slip for selected employees if already not created
@@ -329,6 +331,7 @@ class PayrollEntry(Document):
 		amount = flt(amount) * flt(conversion_rate)
 		return exchange_rate, amount
 
+	@frappe.whitelist()
 	def make_payment_entry(self):
 		self.check_permission('write')
 

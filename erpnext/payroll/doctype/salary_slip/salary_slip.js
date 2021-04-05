@@ -220,7 +220,7 @@ frappe.ui.form.on('Salary Slip Timesheet', {
 });
 
 var set_totals = function(frm) {
-	if (frm.doc.docstatus === 0) {
+	if (frm.doc.docstatus === 0 && frm.doc.doctype === "Salary Slip") {
 		if (frm.doc.earnings || frm.doc.deductions) {
 			frappe.call({
 				method: "set_totals",
