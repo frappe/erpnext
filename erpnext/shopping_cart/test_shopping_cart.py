@@ -16,6 +16,11 @@ class TestShoppingCart(unittest.TestCase):
 		Note:
 		Shopping Cart == Quotation
 	"""
+
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.sql("delete from `tabTax Rule`")
+
 	def setUp(self):
 		frappe.set_user("Administrator")
 		create_test_contact_and_address()
@@ -51,8 +56,8 @@ class TestShoppingCart(unittest.TestCase):
 	def test_add_to_cart(self):
 		self.login_as_customer()
 
-		# remove from cart
-		self.remove_all_items_from_cart()
+		# clear existing quotations
+		self.clear_existing_quotations()
 
 		# add first item
 		update_cart("_Test Item", 1)
@@ -100,6 +105,7 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(len(quotation.get("items")), 1)
 
 	def test_tax_rule(self):
+		self.create_tax_rule()
 		self.login_as_customer()
 		quotation = self.create_quotation()
 
@@ -114,6 +120,13 @@ class TestShoppingCart(unittest.TestCase):
 		self.assertEqual(quotation.total_taxes_and_charges, 1000.0)
 
 		self.remove_test_quotation(quotation)
+
+	def create_tax_rule(self):
+		tax_rule = frappe.get_test_records("Tax Rule")[0]
+		try:
+			frappe.get_doc(tax_rule).insert()
+		except frappe.DuplicateEntryError:
+			pass
 
 	def create_quotation(self):
 		quotation = frappe.new_doc("Quotation")
@@ -195,10 +208,15 @@ class TestShoppingCart(unittest.TestCase):
 			"_Test Contact For _Test Customer")
 		frappe.set_user("test_contact_customer@example.com")
 
-	def remove_all_items_from_cart(self):
-		quotation = _get_cart_quotation()
-		quotation.flags.ignore_permissions=True
-		quotation.delete()
+	def clear_existing_quotations(self):
+		quotations = frappe.get_all("Quotation", filters={
+			"party_name": get_party().name,
+			"order_type": "Shopping Cart",
+			"docstatus": 0
+		}, order_by="modified desc", pluck="name")
+
+		for quotation in quotations:
+			frappe.delete_doc("Quotation", quotation, ignore_permissions=True, force=True)
 
 	def create_user_if_not_exists(self, email, first_name = None):
 		if frappe.db.exists("User", email):
