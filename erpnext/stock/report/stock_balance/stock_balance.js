@@ -120,7 +120,7 @@ frappe.query_reports["Stock Balance"] = {
 
 		if (["out_qty", "out_val"].includes(column.fieldname) && flt(value) > 0) {
 			style['color'] = 'red';
-		} else if (["in_qty", "in_val"].includes(column.fieldname) && flt(value) > 0) {
+		} else if (["in_qty", "in_val", "ordered_qty"].includes(column.fieldname) && flt(value) > 0) {
 			style['color'] = 'green';
 		}
 
