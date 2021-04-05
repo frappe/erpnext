@@ -22,7 +22,7 @@ class TestPickList(unittest.TestCase):
 				'purpose': 'Opening Stock',
 				'expense_account': 'Temporary Opening - _TC',
 				'items': [{
-					'item_code': '_Test Item Home Desktop 100',
+					'item_code': '_Test Item',
 					'warehouse': '_Test Warehouse - _TC',
 					'valuation_rate': 100,
 					'qty': 5
@@ -37,7 +37,7 @@ class TestPickList(unittest.TestCase):
 			'customer': '_Test Customer',
 			'items_based_on': 'Sales Order',
 			'locations': [{
-				'item_code': '_Test Item Home Desktop 100',
+				'item_code': '_Test Item',
 				'qty': 5,
 				'stock_qty': 5,
 				'conversion_factor': 1,
@@ -47,7 +47,7 @@ class TestPickList(unittest.TestCase):
 		})
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].item_code, '_Test Item Home Desktop 100')
+		self.assertEqual(pick_list.locations[0].item_code, '_Test Item')
 		self.assertEqual(pick_list.locations[0].warehouse, '_Test Warehouse - _TC')
 		self.assertEqual(pick_list.locations[0].qty, 5)
 
@@ -237,7 +237,7 @@ class TestPickList(unittest.TestCase):
 				'purpose': 'Opening Stock',
 				'expense_account': 'Temporary Opening - _TC',
 				'items': [{
-					'item_code': '_Test Item Home Desktop 100',
+					'item_code': '_Test Item',
 					'warehouse': '_Test Warehouse - _TC',
 					'valuation_rate': 100,
 					'qty': 10
@@ -251,7 +251,7 @@ class TestPickList(unittest.TestCase):
 				'customer': '_Test Customer',
 				'company': '_Test Company',
 				'items': [{
-					'item_code': '_Test Item Home Desktop 100',
+					'item_code': '_Test Item',
 					'qty': 10,
 					'delivery_date': frappe.utils.today()
 				}],
@@ -264,14 +264,14 @@ class TestPickList(unittest.TestCase):
 			'customer': '_Test Customer',
 			'items_based_on': 'Sales Order',
 			'locations': [{
-				'item_code': '_Test Item Home Desktop 100',
+				'item_code': '_Test Item',
 				'qty': 5,
 				'stock_qty': 5,
 				'conversion_factor': 1,
 				'sales_order': '_T-Sales Order-1',
 				'sales_order_item': '_T-Sales Order-1_item',
 			}, {
-				'item_code': '_Test Item Home Desktop 100',
+				'item_code': '_Test Item',
 				'qty': 5,
 				'stock_qty': 5,
 				'conversion_factor': 1,
@@ -281,12 +281,12 @@ class TestPickList(unittest.TestCase):
 		})
 		pick_list.set_item_locations()
 
-		self.assertEqual(pick_list.locations[0].item_code, '_Test Item Home Desktop 100')
+		self.assertEqual(pick_list.locations[0].item_code, '_Test Item')
 		self.assertEqual(pick_list.locations[0].warehouse, '_Test Warehouse - _TC')
 		self.assertEqual(pick_list.locations[0].qty, 5)
 		self.assertEqual(pick_list.locations[0].sales_order_item, '_T-Sales Order-1_item')
 
-		self.assertEqual(pick_list.locations[1].item_code, '_Test Item Home Desktop 100')
+		self.assertEqual(pick_list.locations[1].item_code, '_Test Item')
 		self.assertEqual(pick_list.locations[1].warehouse, '_Test Warehouse - _TC')
 		self.assertEqual(pick_list.locations[1].qty, 5)
 		self.assertEqual(pick_list.locations[1].sales_order_item, sales_order.items[0].name)

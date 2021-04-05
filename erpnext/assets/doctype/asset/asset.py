@@ -553,6 +553,7 @@ class Asset(AccountsController):
 			make_gl_entries(gl_entries)
 			self.db_set('booked_fixed_asset', 1)
 
+	@frappe.whitelist()
 	def get_depreciation_rate(self, args, on_validate=False):
 		if isinstance(args, string_types):
 			args = json.loads(args)

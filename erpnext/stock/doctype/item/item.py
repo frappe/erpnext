@@ -50,6 +50,7 @@ class Item(WebsiteGenerator):
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 
+	@frappe.whitelist()
 	def set_asset_naming_series(self):
 		if not hasattr(self, '_asset_naming_series'):
 			from erpnext.assets.doctype.asset.asset import get_asset_naming_series
@@ -706,6 +707,7 @@ class Item(WebsiteGenerator):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
 
+	@frappe.whitelist()
 	def copy_specification_from_item_group(self):
 		self.set("website_specifications", [])
 		if self.item_group:

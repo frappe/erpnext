@@ -110,7 +110,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	get_gross_profit(out)
 	if args.doctype == 'Material Request':
 		out.rate = args.rate or out.price_list_rate
-		out.amount = flt(args.qty * out.rate)
+		out.amount = flt(args.qty) * flt(out.rate)
 
 	return out
 
@@ -314,7 +314,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
 		"against_blanket_order": args.get("against_blanket_order"),
-		"bom_no": item.get("default_bom")
+		"bom_no": item.get("default_bom"),
+		"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
+		"weight_uom": args.get("weight_uom") or item.get("weight_uom")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -368,6 +370,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	meta = frappe.get_meta(child_doctype)
 	if meta.get_field("barcode"):
 		update_barcode_value(out)
+
+	if out.get("weight_per_unit"):
+		out['total_weight'] = out.weight_per_unit * out.stock_qty
 
 	return out
 
