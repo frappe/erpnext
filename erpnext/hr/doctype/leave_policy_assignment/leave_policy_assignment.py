@@ -10,7 +10,6 @@ from frappe.utils import getdate, date_diff, comma_and, formatdate, get_datetime
 from math import ceil
 import json
 from six import string_types
-from frappe.utils import comma_and
 
 class LeavePolicyAssignment(Document):
 
@@ -83,9 +82,9 @@ class LeavePolicyAssignment(Document):
 			from_date=self.effective_from,
 			to_date=self.effective_to,
 			new_leaves_allocated=new_leaves_allocated,
-			leave_period=self.leave_period or None,
+			leave_period=self.leave_period if self.assignment_based_on == "Leave Policy" else '',
 			leave_policy_assignment = self.name,
-			leave_policy = self.leave_policy,
+			leave_policy = self.leave_policy ,
 			carry_forward=carry_forward
 			))
 		allocation.save(ignore_permissions = True)

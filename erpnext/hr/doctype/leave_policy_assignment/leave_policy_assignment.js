@@ -12,6 +12,14 @@ frappe.ui.form.on('Leave Policy Assignment', {
 				}
 			};
 		});
+		frm.set_query('leave_period', function(doc) {
+			return {
+				filters: {
+					"is_active": 1,
+					"company": frm.doc.company
+				}
+			};
+		});
 	},
 
 	assignment_based_on: function(frm) {
