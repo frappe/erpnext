@@ -56,6 +56,7 @@ class TestLeaveApplication(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
 		set_leave_approver()
+		frappe.db.sql("delete from tabAttendance where employee='_T-Employee-00001'")
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -230,8 +231,9 @@ class TestLeaveApplication(unittest.TestCase):
 	def test_optional_leave(self):
 		leave_period = get_leave_period()
 		today = nowdate()
-		from datetime import date
 		holiday_list = 'Test Holiday List for Optional Holiday'
+		optional_leave_date = add_days(today, 7)
+
 		if not frappe.db.exists('Holiday List', holiday_list):
 			frappe.get_doc(dict(
 				doctype = 'Holiday List',
@@ -239,7 +241,7 @@ class TestLeaveApplication(unittest.TestCase):
 				from_date = add_months(today, -6),
 				to_date = add_months(today, 6),
 				holidays = [
-					dict(holiday_date = today, description = 'Test')
+					dict(holiday_date = optional_leave_date, description = 'Test')
 				]
 			)).insert()
 		employee = get_employee()
@@ -255,7 +257,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		allocate_leaves(employee, leave_period, leave_type, 10)
 
-		date = add_days(today, - 1)
+		date = add_days(today, 6)
 
 		leave_application = frappe.get_doc(dict(
 			doctype = 'Leave Application',
@@ -270,14 +272,14 @@ class TestLeaveApplication(unittest.TestCase):
 		# can only apply on optional holidays
 		self.assertRaises(NotAnOptionalHoliday, leave_application.insert)
 
-		leave_application.from_date = today
-		leave_application.to_date = today
+		leave_application.from_date = optional_leave_date
+		leave_application.to_date = optional_leave_date
 		leave_application.status = "Approved"
 		leave_application.insert()
 		leave_application.submit()
 
 		# check leave balance is reduced
-		self.assertEqual(get_leave_balance_on(employee.name, leave_type, today), 9)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type, optional_leave_date), 9)
 
 	def test_leaves_allowed(self):
 		employee = get_employee()
@@ -341,7 +343,7 @@ class TestLeaveApplication(unittest.TestCase):
 			to_date = add_days(date, 4),
 			company = "_Test Company",
 			docstatus = 1,
-            status = "Approved"
+			status = "Approved"
 		))
 
 		self.assertRaises(frappe.ValidationError, leave_application.insert)
@@ -363,7 +365,7 @@ class TestLeaveApplication(unittest.TestCase):
 			to_date = add_days(date, 4),
 			company = "_Test Company",
 			docstatus = 1,
-            status = "Approved"
+			status = "Approved"
 		))
 
 		self.assertTrue(leave_application.insert())
@@ -393,7 +395,7 @@ class TestLeaveApplication(unittest.TestCase):
 			to_date = add_days(date, 4),
 			company = "_Test Company",
 			docstatus = 1,
-            status = "Approved"
+			status = "Approved"
 		))
 
 		self.assertRaises(frappe.ValidationError, leave_application.insert)
@@ -508,7 +510,7 @@ class TestLeaveApplication(unittest.TestCase):
 			description = "_Test Reason",
 			company = "_Test Company",
 			docstatus = 1,
-            status = "Approved"
+			status = "Approved"
 		))
 		leave_application.submit()
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_application.name))
@@ -540,7 +542,7 @@ class TestLeaveApplication(unittest.TestCase):
 			description = "_Test Reason",
 			company = "_Test Company",
 			docstatus = 1,
-            status = "Approved"
+			status = "Approved"
 		))
 		leave_application.submit()
 

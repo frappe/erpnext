@@ -195,6 +195,10 @@ sounds = [
 	{"name": "call-disconnect", "src": "/assets/erpnext/sounds/call-disconnect.mp3", "volume": 0.2},
 ]
 
+has_upload_permission = {
+	"Employee": "erpnext.hr.doctype.employee.employee.has_upload_permission"
+}
+
 has_website_permission = {
 	"Sales Order": "erpnext.controllers.website_list_for_contact.has_website_permission",
 	"Quotation": "erpnext.controllers.website_list_for_contact.has_website_permission",
