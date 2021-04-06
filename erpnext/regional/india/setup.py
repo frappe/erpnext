@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.india import states
 from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
@@ -18,6 +19,7 @@ def setup(company=None, patch=True):
 # TODO: for all countries
 def setup_company_independent_fixtures():
 	make_custom_fields()
+	make_property_setters()
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
@@ -109,6 +111,11 @@ def add_print_formats():
 	frappe.db.set_value("Print Format", "GST POS Invoice", "disabled", 0)
 	frappe.db.set_value("Print Format", "GST Tax Invoice", "disabled", 0)
 	frappe.db.set_value("Print Format", "GST E-Invoice", "disabled", 0)
+
+def make_property_setters():
+	# GST rules do not allow for an invoice no. bigger than 16 characters
+	make_property_setter('Sales Invoice', 'naming_series', 'options', 'SINV-.YY.-\nSRET-.YY.-', '')
+	make_property_setter('Purchase Invoice', 'naming_series', 'options', 'PINV-.YY.-\nPRET-.YY.-', '')
 
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',

@@ -21,6 +21,7 @@
   "interest_payable",
   "payable_amount",
   "column_break_9",
+  "shortfall_amount",
   "payable_principal_amount",
   "penalty_amount",
   "amount_paid",
@@ -31,6 +32,7 @@
   "column_break_21",
   "reference_date",
   "principal_amount_paid",
+  "total_penalty_paid",
   "total_interest_paid",
   "repayment_details",
   "amended_from"
@@ -226,12 +228,25 @@
    "fieldtype": "Percent",
    "label": "Rate Of Interest",
    "read_only": 1
+  },
+  {
+   "fieldname": "shortfall_amount",
+   "fieldtype": "Currency",
+   "label": "Shortfall Amount",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_penalty_paid",
+   "fieldtype": "Currency",
+   "label": "Total Penalty Paid",
+   "options": "Company:company:default_currency"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-05 10:06:58.792841",
+ "modified": "2021-04-05 13:45:19.137896",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",
