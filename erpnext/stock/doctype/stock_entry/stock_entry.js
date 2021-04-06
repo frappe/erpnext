@@ -603,6 +603,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 				'voucher_no'		: d.name,
 				'customer_provided'	: cint(frm.doc.customer_provided),
 				'allow_zero_valuation': 1,
+				'stock_entry_type': frm.doc.stock_entry_type,
 			};
 
 			return frappe.call({
@@ -826,17 +827,40 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 	},
 
+	get_args_for_stock_entry_type: function () {
+		var items = [];
+		$.each(this.frm.doc.items || [], function (i, d){
+			items.push({"name": d.name, "expense_account": d.expense_account})
+		});
+		var args = {
+			stock_entry_type: this.frm.doc.stock_entry_type,
+			company: this.frm.doc.company,
+			is_opening: this.frm.doc.is_opening,
+			items: items
+		}
+		return args;
+	},
+
 	stock_entry_type: function () {
 		var me = this;
 		if (me.frm.doc.stock_entry_type) {
+			var args = me.get_args_for_stock_entry_type()
 			frappe.call({
 				method: "erpnext.stock.doctype.stock_entry_type.stock_entry_type.get_stock_entry_type_details",
 				args: {
-					stock_entry_type: me.frm.doc.stock_entry_type
+					args: args
 				},
 				callback: function (r) {
 					if (!r.exc) {
-						me.frm.set_value(r.message);
+						me.frm.set_value(r.message.parent);
+						if (r.message.items) {
+							$.each(me.frm.doc.items || [], function (i, d) {
+								if (r.message.items[d.name]) {
+									d.expense_account = r.message.items[d.name];
+									refresh_field("expense_account", d.name, "items");
+								}
+							})
+						}
 						me.toggle_related_fields(me.frm.doc);
 					}
 				}
@@ -868,19 +892,24 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 
 	set_default_account: function(force, callback) {
 		var me = this;
+		var args = me.get_args_for_stock_entry_type()
 
 		if(this.frm.doc.company && erpnext.is_perpetual_inventory_enabled(this.frm.doc.company)) {
 			return this.frm.call({
-				method: "erpnext.accounts.utils.get_company_default",
+				method: "erpnext.stock.doctype.stock_entry.stock_entry.get_item_expense_accounts",
 				args: {
-					"fieldname": me.frm.doc.is_opening == "Yes" ? "temporary_opening_account" : "stock_adjustment_account",
-					"company": this.frm.doc.company
+					args: args
 				},
 				callback: function(r) {
 					if (!r.exc) {
-						$.each(me.frm.doc.items || [], function(i, d) {
-							if(!d.expense_account || force) d.expense_account = r.message;
-						});
+						$.each(me.frm.doc.items || [], function (i, d) {
+							if (r.message[d.name]) {
+								if(!d.expense_account || force) {
+									d.expense_account = r.message[d.name];
+									refresh_field("expense_account", d.name, "items");
+								}
+							}
+						})
 						if(callback) callback();
 					}
 				}

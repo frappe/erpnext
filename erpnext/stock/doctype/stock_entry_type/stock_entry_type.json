@@ -14,7 +14,8 @@
   "posting_date",
   "column_break_4",
   "source_warehouse_type",
-  "target_warehouse_type"
+  "target_warehouse_type",
+  "expense_account"
  ],
  "fields": [
   {
@@ -84,9 +85,16 @@
    "fieldtype": "Select",
    "label": "Provided By Customer",
    "options": "\nNo\nYes"
+  },
+  {
+   "fieldname": "expense_account",
+   "fieldtype": "Link",
+   "ignore_user_permissions": 1,
+   "label": "Expense Account",
+   "options": "Account"
   }
  ],
- "modified": "2021-03-09 17:52:09.461514",
+ "modified": "2021-04-05 18:31:46.571532",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry Type",

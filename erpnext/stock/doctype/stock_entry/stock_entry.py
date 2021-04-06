@@ -360,6 +360,7 @@ class StockEntry(StockController):
 			for d in self.items:
 				d.allow_zero_valuation_rate = 1
 
+
 	def validate_work_order(self):
 		if self.purpose in ("Manufacture", "Material Transfer for Manufacture", "Material Consumption for Manufacture"):
 			# check if work order is entered
@@ -857,10 +858,8 @@ class StockEntry(StockController):
 			if not ret.get(field):
 				ret[field] = frappe.get_cached_value('Company',  self.company,  company_field)
 
-		if self.is_opening == "Yes":
-			temporary_opening_account = frappe.get_cached_value('Company',  self.company,  'temporary_opening_account')
-			if temporary_opening_account:
-				ret['expense_account'] = temporary_opening_account
+		ret['expense_account'] = get_expense_account(self.company, stock_entry_type=self.stock_entry_type,
+			is_opening=self.is_opening, expense_account=ret.get('expense_account'))
 
 		args['posting_date'] = self.posting_date
 		args['posting_time'] = self.posting_time
@@ -1262,7 +1261,9 @@ class StockEntry(StockController):
 			se_child.uom = item_dict[d]["uom"] if item_dict[d].get("uom") else stock_uom
 			se_child.stock_uom = stock_uom
 			se_child.qty = flt(item_dict[d]["qty"], se_child.precision("qty"))
-			se_child.expense_account = frappe.get_cached_value('Company', self.company, "stock_adjustment_account") or item_dict[d].get("expense_account")
+
+			se_child.expense_account = get_expense_account(self.company, stock_entry_type=self.stock_entry_type,
+				is_opening=self.is_opening, expense_account=item_dict[d].get("expense_account"))
 			se_child.cost_center = item_dict[d].get("cost_center")
 			se_child.allow_alternative_item = item_dict[d].get("allow_alternative_item", 0)
 			se_child.subcontracted_item = item_dict[d].get("main_item_code")
@@ -1643,3 +1644,33 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 			format(max_retain_qty, batch_no, item_code), alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+@frappe.whitelist()
+def get_expense_account(company, stock_entry_type=None, is_opening='No', expense_account=None):
+	if company and is_opening == 'Yes':
+		return frappe.get_cached_value('Company', company, 'temporary_opening_account')
+
+	if stock_entry_type:
+		account = frappe.get_cached_value('Stock Entry Type', stock_entry_type, 'expense_account')
+		if account:
+			return account
+
+	if frappe.get_cached_value('Company', company, 'stock_adjustment_account'):
+		return frappe.get_cached_value('Company', company, 'stock_adjustment_account')
+
+	return expense_account
+
+@frappe.whitelist()
+def get_item_expense_accounts(args):
+	if isinstance(args, string_types):
+		args = json.loads(args)
+
+	args = frappe._dict(args)
+
+	expense_account_item = {}
+	for d in args.get('items'):
+		account = get_expense_account(company=args.company, stock_entry_type=args.stock_entry_type,
+			is_opening=args.is_opening, expense_account=d.get('expense_account'))
+		expense_account_item[d.get("name")] = account
+
+	return expense_account_item
