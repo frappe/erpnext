@@ -817,7 +817,11 @@ def get_gst_tax_amount(doc):
 			continue
 
 		if flt(tax.base_tax_amount_after_discount_amount) and tax.account_head in gst_account_list:
-			base_gst_tax += tax.base_tax_amount_after_discount_amount
-			gst_tax += tax.tax_amount_after_discount_amount
+			if tax.add_deduct_tax == "Add":
+				base_gst_tax += tax.base_tax_amount_after_discount_amount
+				gst_tax += tax.tax_amount_after_discount_amount
+			else:
+				base_gst_tax -= tax.base_tax_amount_after_discount_amount
+				gst_tax -= tax.tax_amount_after_discount_amount
 
 	return gst_tax, base_gst_tax
