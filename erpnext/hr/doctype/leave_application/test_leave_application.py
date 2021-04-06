@@ -582,6 +582,8 @@ class TestLeaveApplication(unittest.TestCase):
 		make_allocation_record(employee.name)
 
 		application = self.get_application(_test_records[0])
+		application.from_date = '2018-01-01'
+		application.to_date = '2018-01-03'
 		application.leave_approver = user
 		application.insert()
 		self.assertTrue(application.name in frappe.share.get_shared("Leave Application", user))
