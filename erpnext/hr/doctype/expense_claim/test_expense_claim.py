@@ -135,6 +135,7 @@ class TestExpenseClaim(unittest.TestCase):
 		expense_claim.reload()
 		expense_claim.status = "Approved"
 		expense_claim.submit()
+		frappe.set_user("Administrator")
 
 
 def get_payable_account(company):
