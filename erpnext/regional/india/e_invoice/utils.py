@@ -233,7 +233,7 @@ def get_invoice_value_details(invoice):
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
 		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
-		invoice_value_details.invoice_discount_amt = abs(invoice.base_discount_amount)
+		invoice_value_details.invoice_discount_amt = 0
 	else:
 		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 		# since tax already considers discount amount
