@@ -23,7 +23,7 @@ class EmployeeHoursReport:
 	def validate_dates(self):
 		self.day_span = (self.to_date - self.from_date).days
 
-		if self.day_span < 0:
+		if self.day_span <= 0:
 			frappe.throw(_('From Date must come before To Date'))
 
 	def run(self):
