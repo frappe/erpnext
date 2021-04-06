@@ -62,6 +62,12 @@ class LoanRepayment(AccountsController):
 		if not self.payable_amount:
 			self.payable_amount = flt(amounts['payable_amount'], precision)
 
+		shortfall_amount = flt(frappe.db.get_value('Loan Security Shortfall', {'loan': self.against_loan, 'status': 'Pending'},
+			'shortfall_amount'))
+
+		if shortfall_amount:
+			self.shortfall_amount = shortfall_amount
+
 		if amounts.get('due_date'):
 			self.due_date = amounts.get('due_date')
 
@@ -78,7 +84,7 @@ class LoanRepayment(AccountsController):
 		if not self.amount_paid:
 			frappe.throw(_("Amount paid cannot be zero"))
 
-		if self.amount_paid < self.penalty_amount:
+		if not self.shortfall_amount and self.amount_paid < self.penalty_amount:
 			msg = _("Paid amount cannot be less than {0}").format(self.penalty_amount)
 			frappe.throw(msg)
 
@@ -157,11 +163,28 @@ class LoanRepayment(AccountsController):
 	def allocate_amounts(self, repayment_details):
 		self.set('repayment_details', [])
 		self.principal_amount_paid = 0
-		total_interest_paid = 0
-		interest_paid = self.amount_paid - self.penalty_amount
+		self.total_penalty_paid = 0
+		interest_paid = self.amount_paid
 
-		if self.amount_paid - self.penalty_amount > 0:
-			interest_paid = self.amount_paid - self.penalty_amount
+		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
+			self.principal_amount_paid = self.shortfall_amount
+		elif self.shortfall_amount:
+			self.principal_amount_paid = self.amount_paid
+
+		interest_paid -= self.principal_amount_paid
+
+		if interest_paid > 0:
+			if self.penalty_amount and interest_paid > self.penalty_amount:
+				self.total_penalty_paid = self.penalty_amount
+			elif self.penalty_amount:
+				self.total_penalty_paid = interest_paid
+
+			interest_paid -= self.total_penalty_paid
+
+		total_interest_paid = 0
+		# interest_paid = self.amount_paid - self.principal_amount_paid - self.penalty_amount
+
+		if interest_paid > 0:
 			for lia, amounts in iteritems(repayment_details.get('pending_accrual_entries', [])):
 				if amounts['interest_amount'] + amounts['payable_principal_amount'] <= interest_paid:
 					interest_amount = amounts['interest_amount']
@@ -186,7 +209,7 @@ class LoanRepayment(AccountsController):
 					'paid_principal_amount': paid_principal
 				})
 
-		if repayment_details['unaccrued_interest'] and interest_paid:
+		if repayment_details['unaccrued_interest'] and interest_paid > 0:
 			# no of days for which to accrue interest
 			# Interest can only be accrued for an entire day and not partial
 			if interest_paid > repayment_details['unaccrued_interest']:
@@ -202,20 +225,20 @@ class LoanRepayment(AccountsController):
 				interest_paid -= no_of_days * per_day_interest
 
 		self.total_interest_paid = total_interest_paid
-		if interest_paid:
+		if interest_paid > 0:
 			self.principal_amount_paid += interest_paid
 
 	def make_gl_entries(self, cancel=0, adv_adj=0):
 		gle_map = []
 		loan_details = frappe.get_doc("Loan", self.against_loan)
 
-		if self.penalty_amount:
+		if self.total_penalty_paid:
 			gle_map.append(
 				self.get_gl_dict({
 					"account": loan_details.loan_account,
 					"against": loan_details.payment_account,
-					"debit": self.penalty_amount,
-					"debit_in_account_currency": self.penalty_amount,
+					"debit": self.total_penalty_paid,
+					"debit_in_account_currency": self.total_penalty_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
 					"remarks": _("Penalty against loan:") + self.against_loan,
@@ -230,8 +253,8 @@ class LoanRepayment(AccountsController):
 				self.get_gl_dict({
 					"account": loan_details.penalty_income_account,
 					"against": loan_details.payment_account,
-					"credit": self.penalty_amount,
-					"credit_in_account_currency": self.penalty_amount,
+					"credit": self.total_penalty_paid,
+					"credit_in_account_currency": self.total_penalty_paid,
 					"against_voucher_type": "Loan",
 					"against_voucher": self.against_loan,
 					"remarks": _("Penalty against loan:") + self.against_loan,

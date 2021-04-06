@@ -8,7 +8,7 @@ from frappe.utils import getdate, validate_email_address, today, add_years, form
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
-	set_user_permission_if_allowed, has_permission
+	set_user_permission_if_allowed, has_permission, get_doc_permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
@@ -66,7 +66,7 @@ class Employee(NestedSet):
 	def validate_user_details(self):
 		data = frappe.db.get_value('User',
 			self.user_id, ['enabled', 'user_image'], as_dict=1)
-		if data.get("user_image"):
+		if data.get("user_image") and self.image == '':
 			self.image = data.get("user_image")
 		self.validate_for_enabled_user_id(data.get("enabled", 0))
 		self.validate_duplicate_user_id()
@@ -80,6 +80,7 @@ class Employee(NestedSet):
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
+		self.update_approver_role()
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
@@ -144,6 +145,17 @@ class Employee(NestedSet):
 					pass
 
 		user.save()
+
+	def update_approver_role(self):
+		if self.leave_approver:
+			user = frappe.get_doc("User", self.leave_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Leave Approver")
+
+		if self.expense_approver:
+			user = frappe.get_doc("User", self.expense_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Expense Approver")
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
@@ -501,3 +513,10 @@ def has_user_permission_for_employee(user_name, employee_name):
 		'allow': 'Employee',
 		'for_value': employee_name
 	})
+
+def has_upload_permission(doc, ptype='read', user=None):
+	if not user:
+		user = frappe.session.user
+	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
+		return True
+	return doc.user_id == user

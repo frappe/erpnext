@@ -6,6 +6,10 @@ from erpnext.hr.doctype.leave_type.test_leave_type import create_leave_type
 from erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry import process_expired_allocation, expire_allocation
 
 class TestLeaveAllocation(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		frappe.db.sql("delete from `tabLeave Period`")
+
 	def test_overlapping_allocation(self):
 		frappe.db.sql("delete from `tabLeave Allocation`")
 
