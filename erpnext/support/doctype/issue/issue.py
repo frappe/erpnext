@@ -165,6 +165,7 @@ class Issue(Document):
 		communication.ignore_mandatory = True
 		communication.save()
 
+	@frappe.whitelist()
 	def split_issue(self, subject, communication_id):
 		# Bug: Pressing enter doesn't send subject
 		from copy import deepcopy
@@ -259,6 +260,7 @@ class Issue(Document):
 				self.set_response_and_resolution_time(priority=self.priority, service_level_agreement=self.service_level_agreement)
 				frappe.msgprint(_("Service Level Agreement has been changed to {0}.").format(self.service_level_agreement))
 
+	@frappe.whitelist()
 	def reset_service_level_agreement(self, reason, user):
 		if not frappe.db.get_single_value("Support Settings", "allow_resetting_service_level_agreement"):
 			frappe.throw(_("Allow Resetting Service Level Agreement from Support Settings."))
