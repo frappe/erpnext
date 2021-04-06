@@ -3,7 +3,6 @@ import unittest
 import frappe
 
 from frappe.utils.make_random import get_random
-from frappe.utils import get_timestamp
 from erpnext.projects.report.employee_hours_utilization_based_on_timesheet.employee_hours_utilization_based_on_timesheet import execute
 from erpnext.hr.doctype.employee.test_employee import make_employee
 from erpnext.projects.doctype.project.test_project import make_project
@@ -161,4 +160,4 @@ class TestEmployeeUtilization(unittest.TestCase):
         for i in range(4):
             self.assertEqual(
                 summary[i]['value'], expected_summary_values[i]
-        )
+            )
