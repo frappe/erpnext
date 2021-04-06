@@ -12,7 +12,7 @@ from erpnext.loan_management.doctype.loan_security_unpledge.loan_security_unpled
 class LoanSecurityShortfall(Document):
 	pass
 
-def update_shortfall_status(loan, security_value):
+def update_shortfall_status(loan, security_value, on_cancel=0):
 	loan_security_shortfall = frappe.db.get_value("Loan Security Shortfall",
 		{"loan": loan, "status": "Pending"}, ['name', 'shortfall_amount'], as_dict=1)
 
