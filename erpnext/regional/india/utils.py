@@ -861,16 +861,16 @@ def update_taxable_values(doc, method):
 				considered_rows.append(prev_row_id)
 
 	for item in doc.get('items'):
-		proportionate_value = item.base_net_amount if item.base_net_amount else item.qty
-
-		if doc.apply_discount_on == 'Net Total' and doc.discount_amount:
+		if doc.apply_discount_on == 'Grand Total' and doc.discount_amount:
+			proportionate_value = item.base_amount if doc.base_total else item.qty
 			total_value = doc.base_total if doc.base_total else doc.total_qty
 		else:
-			total_value = doc.base_net_total if doc.base_total else doc.total_qty
+			proportionate_value = item.base_net_amount if doc.base_net_total else item.qty
+			total_value = doc.base_net_total if doc.base_net_total else doc.total_qty
 
 		applicable_charges = flt(flt(proportionate_value * (flt(additional_taxes) / flt(total_value)),
 			item.precision('taxable_value')))
-		item.taxable_value = applicable_charges + item.base_net_amount
+		item.taxable_value = applicable_charges + proportionate_value
 		total_charges += applicable_charges
 		item_count += 1
 

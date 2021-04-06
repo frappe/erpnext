@@ -171,9 +171,14 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-		item.discount_amount = 0
-		item.unit_rate = abs(item.taxable_value / item.qty)
-		item.gross_amount = abs(item.taxable_value)
+
+		if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+			item.discount_amount = abs(item.base_amount - item.base_net_amount)
+		else:
+			item.discount_amount = 0
+
+		item.unit_rate = abs((item.taxable_value - item.discount_amount)/ item.qty)
+		item.gross_amount = abs(item.taxable_value + item.discount_amount)
 		item.taxable_value = abs(item.taxable_value)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
@@ -232,8 +237,12 @@ def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+		# Discount already applied on net total which means on items
 		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 		invoice_value_details.invoice_discount_amt = 0
+	elif invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount:
+		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 	else:
 		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 		# since tax already considers discount amount
@@ -259,6 +268,8 @@ def update_invoice_taxes(invoice, invoice_value_details):
 	considered_rows = []
 
 	for t in invoice.taxes:
+		tax_amount = t.base_tax_amount if (invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount) \
+						else t.base_tax_amount_after_discount_amount
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
 				# using after discount amt since item also uses after discount amt for cess calc
@@ -266,10 +277,11 @@ def update_invoice_taxes(invoice, invoice_value_details):
 
 			for tax_type in ['igst', 'cgst', 'sgst']:
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount_after_discount_amount)
+
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.tax_amount)
 				update_other_charges(t, invoice_value_details, gst_accounts_list, invoice, considered_rows)
 		else:
-			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
+			invoice_value_details.total_other_charges += abs(t.tax_amount)
 
 	return invoice_value_details
 
