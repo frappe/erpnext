@@ -12,8 +12,8 @@ class TestEmployeeUtilization(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create test employee
-        cls.test_emp1 = make_employee("test@example.com", "_Test Company")
-        cls.test_emp2 = make_employee("test1@example.com", "_Test Company")
+        cls.test_emp1 = make_employee("test1@employeeutil.com", "_Test Company")
+        cls.test_emp2 = make_employee("test2@employeeutil.com", "_Test Company")
 
         # Create test project
         cls.test_project = make_project({"project_name": "_Test Project"})
@@ -80,7 +80,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
         expected_data = [
             {
-                'employee': 'EMP-00002', 
+                'employee': self.test_emp2, 
                 'billed_hours': 0.0, 
                 'non_billed_hours': 10.0, 
                 'total_hours': 18.0, 
@@ -88,7 +88,7 @@ class TestEmployeeUtilization(unittest.TestCase):
                 'per_util': 55.56
             }, 
             {
-                'employee': 'EMP-00001', 
+                'employee': self.test_emp1, 
                 'billed_hours': 5.0, 
                 'non_billed_hours': 0.0, 
                 'total_hours': 18.0, 
@@ -111,7 +111,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
         expected_data = [
             {
-                'employee': 'EMP-00001', 
+                'employee': self.test_emp1, 
                 'billed_hours': 5.0, 
                 'non_billed_hours': 0.0, 
                 'total_hours': 18.0, 
@@ -134,7 +134,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
         expected_data = [
             {
-                'employee': 'EMP-00002', 
+                'employee': self.test_emp2, 
                 'billed_hours': 0.0, 
                 'non_billed_hours': 10.0, 
                 'total_hours': 18.0, 
