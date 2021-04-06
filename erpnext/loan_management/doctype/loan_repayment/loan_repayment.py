@@ -31,7 +31,6 @@ class LoanRepayment(AccountsController):
 	def on_submit(self):
 		self.update_paid_amount()
 		self.make_gl_entries()
-		#self.repost_future_loan_interest_accruals()
 
 	def on_cancel(self):
 		self.mark_as_unpaid()
@@ -296,10 +295,6 @@ class LoanRepayment(AccountsController):
 
 		if gle_map:
 			make_gl_entries(gle_map, cancel=cancel, adv_adj=adv_adj, merge_entries=False)
-
-	# def repost_future_loan_interest_accruals(self):
-	# 	future_lias = frappe.db.get_all("Loan Interest Accrual", {"docstatus": 1, "posting_date": (">", self.posting_date)})
-	# 	if future_lias:
 
 def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 	payment_type, interest_payable, payable_principal_amount, amount_paid, penalty_amount=None):
