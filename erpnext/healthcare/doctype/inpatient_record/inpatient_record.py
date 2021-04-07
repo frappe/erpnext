@@ -53,12 +53,15 @@ class InpatientRecord(Document):
 				+ """ <b><a href="/app/Form/Inpatient Record/{0}">{0}</a></b>""".format(ip_record[0].name))
 			frappe.throw(msg)
 
+	@frappe.whitelist()
 	def admit(self, service_unit, check_in, expected_discharge=None):
 		admit_patient(self, service_unit, check_in, expected_discharge)
 
+	@frappe.whitelist()
 	def discharge(self):
 		discharge_patient(self)
 
+	@frappe.whitelist()
 	def transfer(self, service_unit, check_in, leave_from):
 		if leave_from:
 			patient_leave_service_unit(self, check_in, leave_from)
@@ -151,7 +154,7 @@ def check_out_inpatient(inpatient_record):
 
 def discharge_patient(inpatient_record):
 	validate_inpatient_invoicing(inpatient_record)
-	inpatient_record.discharge_date = today()
+	inpatient_record.discharge_datetime = now_datetime()
 	inpatient_record.status = "Discharged"
 
 	inpatient_record.save(ignore_permissions = True)
