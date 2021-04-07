@@ -55,26 +55,26 @@ frappe.ui.form.on('Salary Structure', {
 	},
 
 	set_earning_deduction_component: function(frm) {
-		if(!frm.doc.currency && !frm.doc.company) return;
+		if(!frm.doc.company) return;
 		frm.set_query("salary_component", "earnings", function() {
 			return {
-				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
-				filters: {type: "earning", currency: frm.doc.currency, company: frm.doc.company}
+				filters: {type: "earning", company: frm.doc.company}
 			};
 		});
 		frm.set_query("salary_component", "deductions", function() {
 			return {
-				query : "erpnext.payroll.doctype.salary_structure.salary_structure.get_earning_deduction_components",
-				filters: {type: "deduction", currency: frm.doc.currency, company: frm.doc.company}
+				filters: {type: "deduction", company: frm.doc.company}
 			};
 		});
 	},
 
+	company: function(frm) {
+		frm.trigger('set_earning_deduction_component');
+	},
 
 	currency: function(frm) {
 		calculate_totals(frm.doc);
 		frm.trigger("set_dynamic_labels")
-		frm.trigger('set_earning_deduction_component');
 		frm.refresh()
 	},
 
@@ -118,6 +118,7 @@ frappe.ui.form.on('Salary Structure', {
 		fields_read_only.forEach(function(field) {
 			frappe.meta.get_docfield("Salary Detail", field, frm.doc.name).read_only = 1;
 		});
+		frm.trigger('set_earning_deduction_component');
 	},
 
 	assign_to_employees:function (frm) {

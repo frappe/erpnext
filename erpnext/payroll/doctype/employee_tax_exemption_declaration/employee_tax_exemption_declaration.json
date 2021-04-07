@@ -108,7 +108,7 @@
    "read_only": 1
   },
   {
-   "default": "Company:company:default_currency",
+   "depends_on": "eval: doc.employee",
    "fieldname": "currency",
    "fieldtype": "Link",
    "label": "Currency",
@@ -119,7 +119,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-20 16:42:24.493761",
+ "modified": "2021-03-31 21:39:59.237361",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Tax Exemption Declaration",

@@ -16,6 +16,7 @@ class TestEmployee(unittest.TestCase):
 		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
 		employee.date_of_birth = "1992" + frappe.utils.nowdate()[4:]
 		employee.company_email = "test@example.com"
+		employee.company = "_Test Company"
 		employee.save()
 
 		from erpnext.hr.doctype.employee.employee import get_employees_who_are_born_today, send_birthday_reminders

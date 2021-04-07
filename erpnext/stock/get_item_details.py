@@ -19,7 +19,7 @@ from erpnext.stock.doctype.item_manufacturer.item_manufacturer import get_item_m
 
 from six import string_types, iteritems
 
-sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice']
+sales_doctypes = ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'POS Invoice']
 purchase_doctypes = ['Material Request', 'Supplier Quotation', 'Purchase Order', 'Purchase Receipt', 'Purchase Invoice']
 
 @frappe.whitelist()
@@ -74,7 +74,9 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 
 	update_party_blanket_order(args, out)
 
-	get_price_list_rate(args, item, out)
+	if not doc or cint(doc.get('is_return')) == 0:
+		# get price list rate only if the invoice is not a credit or debit note
+		get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
 		out.update(get_pos_profile_item_details(args.company, args))
@@ -108,7 +110,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	get_gross_profit(out)
 	if args.doctype == 'Material Request':
 		out.rate = args.rate or out.price_list_rate
-		out.amount = flt(args.qty * out.rate)
+		out.amount = flt(args.qty) * flt(out.rate)
 
 	return out
 
@@ -312,7 +314,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
 		"against_blanket_order": args.get("against_blanket_order"),
-		"bom_no": item.get("default_bom")
+		"bom_no": item.get("default_bom"),
+		"weight_per_unit": args.get("weight_per_unit") or item.get("weight_per_unit"),
+		"weight_uom": args.get("weight_uom") or item.get("weight_uom")
 	})
 
 	if item.get("enable_deferred_revenue") or item.get("enable_deferred_expense"):
@@ -366,6 +370,9 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 	meta = frappe.get_meta(child_doctype)
 	if meta.get_field("barcode"):
 		update_barcode_value(out)
+
+	if out.get("weight_per_unit"):
+		out['total_weight'] = out.weight_per_unit * out.stock_qty
 
 	return out
 
@@ -672,6 +679,8 @@ def get_item_price(args, item_code, ignore_party=False):
 		and price_list=%(price_list)s
 		and ifnull(uom, '') in ('', %(uom)s)"""
 
+	conditions += "and ifnull(batch_no, '') in ('', %(batch_no)s)"
+
 	if not ignore_party:
 		if args.get("customer"):
 			conditions += " and customer=%(customer)s"
@@ -690,7 +699,7 @@ def get_item_price(args, item_code, ignore_party=False):
 
 	return frappe.db.sql(""" select name, price_list_rate, uom
 		from `tabItem Price` {conditions}
-		order by valid_from desc, uom desc """.format(conditions=conditions), args)
+		order by valid_from desc, batch_no desc, uom desc """.format(conditions=conditions), args)
 
 def get_price_list_rate_for(args, item_code):
 	"""
@@ -709,6 +718,7 @@ def get_price_list_rate_for(args, item_code):
 			"uom": args.get('uom'),
 			"transaction_date": args.get('transaction_date'),
 			"posting_date": args.get('posting_date'),
+			"batch_no": args.get('batch_no')
 	}
 
 	item_price_data = 0

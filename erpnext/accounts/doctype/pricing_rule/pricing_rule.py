@@ -237,6 +237,7 @@ def get_pricing_rule_for_item(args, price_list_rate=0, doc=None, for_validate=Fa
 		"doctype": args.doctype,
 		"has_margin": False,
 		"name": args.name,
+		"free_item_data": [],
 		"parent": args.parent,
 		"parenttype": args.parenttype,
 		"child_docname": args.get('child_docname')
@@ -345,8 +346,12 @@ def apply_price_discount_rule(pricing_rule, item_details, args):
 	if ((pricing_rule.margin_type in ['Amount', 'Percentage'] and pricing_rule.currency == args.currency)
 			or (pricing_rule.margin_type == 'Percentage')):
 		item_details.margin_type = pricing_rule.margin_type
-		item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 		item_details.has_margin = True
+
+		if pricing_rule.apply_multiple_pricing_rules and item_details.margin_rate_or_amount is not None:
+			item_details.margin_rate_or_amount += pricing_rule.margin_rate_or_amount
+		else:
+			item_details.margin_rate_or_amount = pricing_rule.margin_rate_or_amount
 
 	if pricing_rule.rate_or_discount == 'Rate':
 		pricing_rule_rate = 0.0

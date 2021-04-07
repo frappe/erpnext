@@ -25,7 +25,8 @@ from erpnext.stock.doctype.packed_item.packed_item import make_packing_list
 
 class AccountMissingError(frappe.ValidationError): pass
 
-force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate", "pricing_rules")
+force_item_fields = ("item_group", "brand", "stock_uom", "is_fixed_asset", "item_tax_rate",
+	"pricing_rules", "weight_per_unit", "weight_uom", "total_weight")
 
 class AccountsController(TransactionBase):
 	def __init__(self, *args, **kwargs):
@@ -75,6 +76,9 @@ class AccountsController(TransactionBase):
 		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
+		self.validate_inter_company_reference()
+
+		self.set_incoming_rate()
 
 		if self.meta.get_field("currency"):
 			self.calculate_taxes_and_totals()
@@ -110,8 +114,20 @@ class AccountsController(TransactionBase):
 			self.set_inter_company_account()
 
 		validate_regional(self)
+
+		validate_einvoice_fields(self)
+
 		if self.doctype != 'Material Request':
 			apply_pricing_rule_on_transaction(self)
+
+	def before_cancel(self):
+		validate_einvoice_fields(self)
+
+	def on_trash(self):
+		# delete sl and gl entries on deletion of transaction
+		if frappe.db.get_single_value('Accounts Settings', 'delete_linked_ledger_entries'):
+			frappe.db.sql("delete from `tabGL Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name))
+			frappe.db.sql("delete from `tabStock Ledger Entry` where voucher_type=%s and voucher_no=%s", (self.doctype, self.name))
 
 	def validate_deferred_start_and_end_date(self):
 		for d in self.items:
@@ -200,6 +216,17 @@ class AccountsController(TransactionBase):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company,
 									 self.meta.get_label(date_field), self)
 
+	def validate_inter_company_reference(self):
+		if self.doctype not in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
+			return
+
+		if self.is_internal_transfer():
+			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')
+				or self.get('inter_company_order_reference')):
+				msg = _("Internal Sale or Delivery Reference missing. ")
+				msg += _("Please create purchase from internal sale or delivery document itself")
+				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
+
 	def validate_due_date(self):
 		if self.get('is_pos'): return
 
@@ -276,6 +303,7 @@ class AccountsController(TransactionBase):
 					args["doctype"] = self.doctype
 					args["name"] = self.name
 					args["child_docname"] = item.name
+					args["ignore_pricing_rule"] = self.ignore_pricing_rule if hasattr(self, 'ignore_pricing_rule') else 0
 
 					if not args.get("transaction_date"):
 						args["transaction_date"] = args.get("posting_date")
@@ -442,8 +470,10 @@ class AccountsController(TransactionBase):
 			account_currency = get_account_currency(gl_dict.account)
 
 		if gl_dict.account and self.doctype not in ["Journal Entry",
-													"Period Closing Voucher", "Payment Entry"]:
+			"Period Closing Voucher", "Payment Entry", "Purchase Receipt", "Purchase Invoice", "Stock Entry"]:
 			self.validate_account_currency(gl_dict.account, account_currency)
+
+		if gl_dict.account and self.doctype not in ["Journal Entry", "Period Closing Voucher", "Payment Entry"]:
 			set_balance_in_account_currency(gl_dict, account_currency, self.get("conversion_rate"),
 											self.company_currency)
 
@@ -874,7 +904,8 @@ class AccountsController(TransactionBase):
 		else:
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
-					d.payment_amount = flt(grand_total * flt(d.invoice_portion) / 100, d.precision('payment_amount'))
+					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+					d.outstanding = d.payment_amount
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
@@ -956,9 +987,9 @@ class AccountsController(TransactionBase):
 			It will an internal transfer if its an internal customer and representation
 			company is same as billing company
 		"""
-		if self.doctype == 'Sales Invoice':
+		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Sales Order'):
 			internal_party_field = 'is_internal_customer'
-		else:
+		elif self.doctype in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
 			internal_party_field = 'is_internal_supplier'
 
 		if self.get(internal_party_field) and (self.represents_company == self.company):
@@ -1189,17 +1220,23 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, bill_dat
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
+	term_details.discount_type = term.discount_type
+	term_details.discount = term.discount
+	# term_details.discounted_amount = flt(grand_total) * (term.discount / 100) if term.discount_type == 'Percentage' else discount
+	term_details.outstanding = term_details.payment_amount
+	term_details.mode_of_payment = term.mode_of_payment
+
 	if bill_date:
 		term_details.due_date = get_due_date(term, bill_date)
+		term_details.discount_date = get_discount_date(term, bill_date)
 	elif posting_date:
 		term_details.due_date = get_due_date(term, posting_date)
+		term_details.discount_date = get_discount_date(term, posting_date)
 
 	if getdate(term_details.due_date) < getdate(posting_date):
 		term_details.due_date = posting_date
-	term_details.mode_of_payment = term.mode_of_payment
 
 	return term_details
-
 
 def get_due_date(term, posting_date=None, bill_date=None):
 	due_date = None
@@ -1212,6 +1249,16 @@ def get_due_date(term, posting_date=None, bill_date=None):
 		due_date = add_months(get_last_day(date), term.credit_months)
 	return due_date
 
+def get_discount_date(term, posting_date=None, bill_date=None):
+	discount_validity = None
+	date = bill_date or posting_date
+	if term.discount_validity_based_on == "Day(s) after invoice date":
+		discount_validity = add_days(date, term.discount_validity)
+	elif term.discount_validity_based_on == "Day(s) after the end of the invoice month":
+		discount_validity = add_days(get_last_day(date), term.discount_validity)
+	elif term.discount_validity_based_on == "Month(s) after the end of the invoice month":
+		discount_validity = add_months(get_last_day(date), term.discount_validity)
+	return discount_validity
 
 def get_supplier_block_status(party_name):
 	"""
@@ -1475,6 +1522,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 	parent.flags.ignore_validate_update_after_submit = True
 	parent.set_qty_as_per_stock_uom()
 	parent.calculate_taxes_and_totals()
+	parent.set_total_in_words()
 	if parent_doctype == "Sales Order":
 		make_packing_list(parent)
 		parent.set_gross_profit()
@@ -1517,4 +1565,8 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 
 @erpnext.allow_regional
 def validate_regional(doc):
+	pass
+
+@erpnext.allow_regional
+def validate_einvoice_fields(doc):
 	pass

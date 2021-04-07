@@ -10,8 +10,7 @@ import frappe.defaults
 from frappe.utils import cint, nowdate, nowtime, cstr, add_days, flt, today
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.accounts.utils import get_balance_on
-from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt \
-	import get_gl_entries, set_perpetual_inventory
+from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import get_gl_entries
 from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice, make_delivery_trip
 from erpnext.stock.doctype.stock_entry.test_stock_entry \
 	import make_stock_entry, make_serialized_item, get_qty_after_transaction
@@ -24,9 +23,6 @@ from erpnext.stock.doctype.warehouse.test_warehouse import get_warehouse
 from erpnext.stock.doctype.item.test_item import create_item
 
 class TestDeliveryNote(unittest.TestCase):
-	def setUp(self):
-		set_perpetual_inventory(0)
-
 	def test_over_billing_against_dn(self):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", 1)
 
@@ -43,7 +39,6 @@ class TestDeliveryNote(unittest.TestCase):
 
 	def test_delivery_note_no_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
-		set_perpetual_inventory(0, company)
 		make_stock_entry(target="_Test Warehouse - _TC", qty=5, basic_rate=100)
 
 		stock_queue = json.loads(get_previous_sle({
@@ -494,7 +489,10 @@ class TestDeliveryNote(unittest.TestCase):
 	def test_closed_delivery_note(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import update_delivery_note_status
 
-		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1', cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
+		make_stock_entry(target="Stores - TCP1", qty=5, basic_rate=100)
+
+		dn = create_delivery_note(company='_Test Company with perpetual inventory', warehouse='Stores - TCP1',
+			cost_center = 'Main - TCP1', expense_account = "Cost of Goods Sold - TCP1", do_not_submit=True)
 
 		dn.submit()
 

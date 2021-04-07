@@ -2,7 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Accounting Dimension', {
-
 	refresh: function(frm) {
 		frm.set_query('document_type', () => {
 			let invalid_doctypes = frappe.model.core_doctypes_list;

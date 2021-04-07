@@ -114,7 +114,7 @@ class TestSalaryStructure(unittest.TestCase):
 		self.assertEqual(sal_struct.currency, 'USD')
 
 def make_salary_structure(salary_structure, payroll_frequency, employee=None, dont_submit=False, other_details=None,
-	test_tax=False, company=None, currency=erpnext.get_default_currency()):
+	test_tax=False, company=None, currency=erpnext.get_default_currency(), payroll_period=None):
 	if test_tax:
 		frappe.db.sql("""delete from `tabSalary Structure` where name=%s""",(salary_structure))
 
@@ -141,16 +141,24 @@ def make_salary_structure(salary_structure, payroll_frequency, employee=None, do
 
 	if employee and not frappe.db.get_value("Salary Structure Assignment",
 		{'employee':employee, 'docstatus': 1}) and salary_structure_doc.docstatus==1:
-			create_salary_structure_assignment(employee, salary_structure, company=company, currency=currency)
+			create_salary_structure_assignment(employee, salary_structure, company=company, currency=currency,
+			payroll_period=payroll_period)
 
 	return salary_structure_doc
 
-def create_salary_structure_assignment(employee, salary_structure, from_date=None, company=None, currency=erpnext.get_default_currency()):
+def create_salary_structure_assignment(employee, salary_structure, from_date=None, company=None, currency=erpnext.get_default_currency(),
+	payroll_period=None):
+
 	if frappe.db.exists("Salary Structure Assignment", {"employee": employee}):
 		frappe.db.sql("""delete from `tabSalary Structure Assignment` where employee=%s""",(employee))
 
-	payroll_period = create_payroll_period()
-	create_tax_slab(payroll_period, allow_tax_exemption=True, currency=currency)
+	if not payroll_period:
+		payroll_period = create_payroll_period()
+
+	income_tax_slab = frappe.db.get_value("Income Tax Slab", {"currency": currency})
+
+	if not income_tax_slab:
+		income_tax_slab = create_tax_slab(payroll_period, allow_tax_exemption=True, currency=currency)
 
 	salary_structure_assignment = frappe.new_doc("Salary Structure Assignment")
 	salary_structure_assignment.employee = employee
@@ -162,7 +170,7 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.payroll_payable_account = get_payable_account(company)
 	salary_structure_assignment.company = company or erpnext.get_default_company()
 	salary_structure_assignment.save(ignore_permissions=True)
-	salary_structure_assignment.income_tax_slab = "Tax Slab: _Test Payroll Period"
+	salary_structure_assignment.income_tax_slab = income_tax_slab
 	salary_structure_assignment.submit()
 	return salary_structure_assignment
 

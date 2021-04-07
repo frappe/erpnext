@@ -23,6 +23,7 @@
   "employee_benefits",
   "totals",
   "total_amount",
+  "column_break",
   "pro_rata_dispensed_amount"
  ],
  "fields": [
@@ -123,7 +124,6 @@
    "read_only": 1
   },
   {
-   "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.employee)",
    "fieldname": "currency",
    "fieldtype": "Link",
@@ -139,11 +139,15 @@
    "label": "Company",
    "options": "Company",
    "reqd": 1
+  },
+  {
+   "fieldname": "column_break",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-25 11:49:05.095101",
+ "modified": "2021-03-31 21:35:08.940087",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Application",

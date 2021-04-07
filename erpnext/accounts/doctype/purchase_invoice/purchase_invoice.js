@@ -26,6 +26,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 			};
 		});
 	},
+
+	company: function() {
+		erpnext.accounts.dimensions.update_dimension(this.frm, this.frm.doctype);
+	},
+
 	onload: function() {
 		this._super();
 
@@ -41,6 +46,8 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 		if (this.frm.doc.supplier && this.frm.doc.__islocal) {
 			this.frm.trigger('supplier');
 		}
+
+		erpnext.accounts.dimensions.setup_dimension_filters(this.frm, this.frm.doctype);
 	},
 
 	refresh: function(doc) {
@@ -268,8 +275,11 @@ erpnext.accounts.PurchaseInvoice = erpnext.buying.BuyingController.extend({
 
 	supplier: function() {
 		var me = this;
-		if(this.frm.updating_party_details)
+
+		// Do not update if inter company reference is there as the details will already be updated
+		if(this.frm.updating_party_details || this.frm.doc.inter_company_invoice_reference)
 			return;
+
 		erpnext.utils.get_party_details(this.frm, "erpnext.accounts.party.get_party_details",
 			{
 				posting_date: this.frm.doc.posting_date,
@@ -498,7 +508,7 @@ cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
 frappe.ui.form.on("Purchase Invoice", {
 	setup: function(frm) {
 		frm.custom_make_buttons = {
-			'Purchase Invoice': 'Debit Note',
+			'Purchase Invoice': 'Return / Debit Note',
 			'Payment Entry': 'Payment'
 		}
 
@@ -511,19 +521,10 @@ frappe.ui.form.on("Purchase Invoice", {
 				}
 			}
 		}
-
-		frm.set_query("cost_center", function() {
-			return {
-				filters: {
-					company: frm.doc.company,
-					is_group: 0
-				}
-			};
-		});
 	},
 
 	onload: function(frm) {
-		if(frm.doc.__onload) {
+		if(frm.doc.__onload && frm.is_new()) {
 			if(frm.doc.supplier) {
 				frm.doc.apply_tds = frm.doc.__onload.supplier_tds ? 1 : 0;
 			}

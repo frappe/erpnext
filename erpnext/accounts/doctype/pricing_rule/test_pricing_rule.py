@@ -56,6 +56,7 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEqual(details.get("discount_percentage"), 10)
 
 		prule = frappe.get_doc(test_record.copy())
+		prule.priority = 1
 		prule.applicable_for = "Customer"
 		prule.title = "_Test Pricing Rule for Customer"
 		self.assertRaises(MandatoryError, prule.insert)
@@ -261,6 +262,7 @@ class TestPricingRule(unittest.TestCase):
 			"rate_or_discount": "Discount Percentage",
 			"rate": 0,
 			"discount_percentage": 17.5,
+			"priority": 1,
 			"company": "_Test Company"
 		}).insert()
 
@@ -323,6 +325,21 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(item.margin_rate_or_amount, 10)
 		self.assertEquals(item.rate_with_margin, 1100)
 		self.assertEqual(item.discount_percentage, 10)
+		self.assertEquals(item.discount_amount, 110)
+		self.assertEquals(item.rate, 990)
+
+	def test_pricing_rule_with_margin_and_discount_amount(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		make_pricing_rule(selling=1, margin_type="Percentage", margin_rate_or_amount=10,
+			rate_or_discount="Discount Amount", discount_amount=110)
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].price_list_rate = 1000
+		si.payment_schedule = []
+		si.insert(ignore_permissions=True)
+
+		item = si.items[0]
+		self.assertEquals(item.margin_rate_or_amount, 10)
+		self.assertEquals(item.rate_with_margin, 1100)
 		self.assertEquals(item.discount_amount, 110)
 		self.assertEquals(item.rate, 990)
 
@@ -557,6 +574,8 @@ def make_pricing_rule(**args):
 		"rate": args.rate or 0.0,
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
 		"condition": args.condition or '',
+		"priority": 1,
+		"discount_amount": args.discount_amount or 0.0,
 		"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0
 	})
 

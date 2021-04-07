@@ -4,9 +4,9 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe.utils import cint, flt, add_months, today, date_diff, getdate, add_days, cstr, nowdate, get_link_to_form
+from frappe.utils import cint, flt, getdate, add_days, cstr, nowdate, get_link_to_form, formatdate
 from frappe import _, msgprint, throw
-from erpnext.accounts.party import get_party_account, get_due_date
+from erpnext.accounts.party import get_party_account, get_due_date, get_party_details
 from frappe.model.mapper import get_mapped_doc
 from erpnext.controllers.selling_controller import SellingController
 from erpnext.accounts.utils import get_account_currency
@@ -21,6 +21,9 @@ from erpnext.accounts.general_ledger import get_round_off_account_and_cost_cente
 from erpnext.accounts.doctype.loyalty_program.loyalty_program import \
 	get_loyalty_program_details_with_points, get_loyalty_details, validate_loyalty_points
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
+from frappe.model.utils import get_fetch_values
+from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -73,6 +76,8 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
+		
+		self.set_tax_withholding()
 
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -151,6 +156,32 @@ class SalesInvoice(SellingController):
 			if cost_center_company != self.company:
 				frappe.throw(_("Row #{0}: Cost Center {1} does not belong to company {2}").format(frappe.bold(item.idx), frappe.bold(item.cost_center), frappe.bold(self.company)))
 
+	def set_tax_withholding(self):
+		tax_withholding_details = get_party_tax_withholding_details(self)
+
+		if not tax_withholding_details:
+			return
+
+		accounts = []
+		tax_withholding_account = tax_withholding_details.get("account_head")
+
+		for d in self.taxes:
+			if d.account_head == tax_withholding_account:
+				d.update(tax_withholding_details)
+			accounts.append(d.account_head)
+
+		if not accounts or tax_withholding_account not in accounts:
+			self.append("taxes", tax_withholding_details)
+
+		to_remove = [d for d in self.taxes
+			if not d.tax_amount and d.charge_type == "Actual" and d.account_head == tax_withholding_account]
+
+		for d in to_remove:
+			self.remove(d)
+
+		# calculate totals again after applying TDS
+		self.calculate_taxes_and_totals()
+
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 
@@ -179,6 +210,12 @@ class SalesInvoice(SellingController):
 
 		# this sequence because outstanding may get -ve
 		self.make_gl_entries()
+
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
 
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
@@ -228,9 +265,27 @@ class SalesInvoice(SellingController):
 		if len(self.payments) == 0 and self.is_pos:
 			frappe.throw(_("At least one mode of payment is required for POS invoice."))
 
-	def before_cancel(self):
-		self.update_time_sheet(None)
+	def check_if_consolidated_invoice(self):
+		# since POS Invoice extends Sales Invoice, we explicitly check if doctype is Sales Invoice
+		if self.doctype == "Sales Invoice" and self.is_consolidated:
+			invoice_or_credit_note = "consolidated_credit_note" if self.is_return else "consolidated_invoice"
+			pos_closing_entry = frappe.get_all(
+				"POS Invoice Merge Log",
+				filters={ invoice_or_credit_note: self.name },
+				pluck="pos_closing_entry"
+			)
+			if pos_closing_entry:
+				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}. ").format(
+					frappe.bold("Consolidated Sales Invoice"),
+					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
+				)
+				frappe.throw(msg, title=_("Not Allowed"))
 
+	def before_cancel(self):
+		self.check_if_consolidated_invoice()
+
+		super(SalesInvoice, self).before_cancel()
+		self.update_time_sheet(None)
 
 	def on_cancel(self):
 		super(SalesInvoice, self).on_cancel()
@@ -258,6 +313,10 @@ class SalesInvoice(SellingController):
 			self.update_stock_ledger()
 
 		self.make_gl_entries_on_cancel()
+
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
 		frappe.db.set(self, 'status', 'Cancelled')
 
 		if frappe.db.get_single_value('Selling Settings', 'sales_update_frequency') == "Each Transaction":
@@ -279,7 +338,7 @@ class SalesInvoice(SellingController):
 		if "Healthcare" in active_domains:
 			manage_invoice_submit_cancel(self, "on_cancel")
 
-		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry')
+		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 
 	def update_status_updater_args(self):
 		if cint(self.update_stock):
@@ -426,7 +485,9 @@ class SalesInvoice(SellingController):
 			if not for_validate and not self.customer:
 				self.customer = pos.customer
 
-			self.ignore_pricing_rule = pos.ignore_pricing_rule
+			if not for_validate:
+				self.ignore_pricing_rule = pos.ignore_pricing_rule
+
 			if pos.get('account_for_change_amount'):
 				self.account_for_change_amount = pos.get('account_for_change_amount')
 
@@ -542,7 +603,12 @@ class SalesInvoice(SellingController):
 		self.against_income_account = ','.join(against_acc)
 
 	def add_remarks(self):
-		if not self.remarks: self.remarks = 'No Remarks'
+		if not self.remarks:
+			if self.po_no and self.po_date:
+				self.remarks = _("Against Customer Order {0} dated {1}").format(self.po_no,
+					formatdate(self.po_date))
+			else:
+				self.remarks = _("No Remarks")
 
 	def validate_auto_set_posting_time(self):
 		# Don't auto set the posting date and time if invoice is amended
@@ -722,22 +788,20 @@ class SalesInvoice(SellingController):
 			if d.delivery_note and frappe.db.get_value("Delivery Note", d.delivery_note, "docstatus") != 1:
 				throw(_("Delivery Note {0} is not submitted").format(d.delivery_note))
 
-	def make_gl_entries(self, gl_entries=None):
-		from erpnext.accounts.general_ledger import make_reverse_gl_entries
+	def make_gl_entries(self, gl_entries=None, from_repost=False):
+		from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries
 
 		auto_accounting_for_stock = erpnext.is_perpetual_inventory_enabled(self.company)
 		if not gl_entries:
 			gl_entries = self.get_gl_entries()
 
 		if gl_entries:
-			from erpnext.accounts.general_ledger import make_gl_entries
-
 			# if POS and amount is written off, updating outstanding amt after posting all gl entries
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
 			if self.docstatus == 1:
-				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False)
+				make_gl_entries(gl_entries, update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
 			elif self.docstatus == 2:
 				make_reverse_gl_entries(voucher_type=self.doctype, voucher_no=self.name)
 
@@ -1524,7 +1588,7 @@ def validate_inter_company_transaction(doc, doctype):
 	details = get_inter_company_details(doc, doctype)
 	price_list = doc.selling_price_list if doctype in ["Sales Invoice", "Sales Order", "Delivery Note"] else doc.buying_price_list
 	valid_price_list = frappe.db.get_value("Price List", {"name": price_list, "buying": 1, "selling": 1})
-	if not valid_price_list:
+	if not valid_price_list and not doc.is_internal_transfer():
 		frappe.throw(_("Selected Price List should have buying and selling fields checked."))
 
 	party = details.get("party")
@@ -1547,6 +1611,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	if doctype in ["Sales Invoice", "Sales Order"]:
 		source_doc = frappe.get_doc(doctype, source_name)
 		target_doctype = "Purchase Invoice" if doctype == "Sales Invoice" else "Purchase Order"
+		target_detail_field = "sales_invoice_item" if doctype == "Sales Invoice" else "sales_order_item"
 		source_document_warehouse_field = 'target_warehouse'
 		target_document_warehouse_field = 'from_warehouse'
 	else:
@@ -1560,6 +1625,7 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 
 	def set_missing_values(source, target):
 		target.run_method("set_missing_values")
+		set_purchase_references(target)
 
 	def update_details(source_doc, target_doc, source_parent):
 		target_doc.inter_company_invoice_reference = source_doc.name
@@ -1567,18 +1633,37 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			currency = frappe.db.get_value('Supplier', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.supplier = details.get("party")
+			target_doc.is_internal_supplier = 1
+			target_doc.ignore_pricing_rule = 1
 			target_doc.buying_price_list = source_doc.selling_price_list
+
+			# Invert Addresses
+			update_address(target_doc, 'supplier_address', 'address_display', source_doc.company_address)
+			update_address(target_doc, 'shipping_address', 'shipping_address_display', source_doc.customer_address)
 
 			if currency:
 				target_doc.currency = currency
+
+			update_taxes(target_doc, party=target_doc.supplier, party_type='Supplier', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.supplier_address,
+				company_address=target_doc.shipping_address)
+
 		else:
 			currency = frappe.db.get_value('Customer', details.get('party'), 'default_currency')
 			target_doc.company = details.get("company")
 			target_doc.customer = details.get("party")
 			target_doc.selling_price_list = source_doc.buying_price_list
 
+			update_address(target_doc, 'company_address', 'company_address_display', source_doc.supplier_address)
+			update_address(target_doc, 'shipping_address_name', 'shipping_address', source_doc.shipping_address)
+			update_address(target_doc, 'customer_address', 'address_display', source_doc.shipping_address)
+
 			if currency:
 				target_doc.currency = currency
+
+			update_taxes(target_doc, party=target_doc.customer, party_type='Customer', company=target_doc.company,
+				doctype=target_doc.doctype, party_address=target_doc.customer_address,
+				company_address=target_doc.company_address, shipping_address_name=target_doc.shipping_address_name)
 
 	item_field_map = {
 		"doctype": target_doctype + " Item",
@@ -1587,25 +1672,33 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 			"expense_account",
 			"cost_center",
 			"warehouse"
-		]
+		],
+		"field_map": {
+			'rate': 'rate',
+		}
 	}
 
-	if source_doc.get('update_stock'):
-		item_field_map.update({
-			'field_map': {
-				source_document_warehouse_field: target_document_warehouse_field,
-				'batch_no': 'batch_no',
-				'serial_no': 'serial_no'
-			}
+	if doctype in ["Sales Invoice", "Sales Order"]:
+		item_field_map["field_map"].update({
+			"name": target_detail_field,
 		})
 
+	if source_doc.get('update_stock'):
+		item_field_map["field_map"].update({
+			source_document_warehouse_field: target_document_warehouse_field,
+			'batch_no': 'batch_no',
+			'serial_no': 'serial_no'
+		})
 
 	doclist = get_mapped_doc(doctype, source_name,	{
 		doctype: {
 			"doctype": target_doctype,
 			"postprocess": update_details,
+			"set_target_warehouse": "set_from_warehouse",
 			"field_no_map": [
-				"taxes_and_charges"
+				"taxes_and_charges",
+				"set_warehouse",
+				"shipping_address"
 			]
 		},
 		doctype +" Item": item_field_map
@@ -1613,6 +1706,110 @@ def make_inter_company_transaction(doctype, source_name, target_doc=None):
 	}, target_doc, set_missing_values)
 
 	return doclist
+
+def set_purchase_references(doc):
+	# add internal PO or PR links if any
+	if doc.is_internal_transfer():
+		if doc.doctype == 'Purchase Receipt':
+			so_item_map = get_delivery_note_details(doc.inter_company_invoice_reference)
+
+			if so_item_map:
+				pd_item_map, parent_child_map, warehouse_map = \
+					get_pd_details('Purchase Order Item', so_item_map, 'sales_order_item')
+
+				update_pr_items(doc, so_item_map, pd_item_map, parent_child_map, warehouse_map)
+
+		elif doc.doctype == 'Purchase Invoice':
+			dn_item_map, so_item_map = get_sales_invoice_details(doc.inter_company_invoice_reference)
+			# First check for Purchase receipt
+			if list(dn_item_map.values()):
+				pd_item_map, parent_child_map, warehouse_map = \
+					get_pd_details('Purchase Receipt Item', dn_item_map, 'delivery_note_item')
+
+				update_pi_items(doc, 'pr_detail', 'purchase_receipt',
+					dn_item_map, pd_item_map, parent_child_map, warehouse_map)
+
+			if list(so_item_map.values()):
+				pd_item_map, parent_child_map, warehouse_map = \
+					get_pd_details('Purchase Order Item', so_item_map, 'sales_order_item')
+
+				update_pi_items(doc, 'po_detail', 'purchase_order',
+					so_item_map, pd_item_map, parent_child_map, warehouse_map)
+
+def update_pi_items(doc, detail_field, parent_field, sales_item_map,
+	purchase_item_map, parent_child_map, warehouse_map):
+	for item in doc.get('items'):
+		item.set(detail_field, purchase_item_map.get(sales_item_map.get(item.sales_invoice_item)))
+		item.set(parent_field, parent_child_map.get(sales_item_map.get(item.sales_invoice_item)))
+		if doc.update_stock:
+			item.warehouse = warehouse_map.get(sales_item_map.get(item.sales_invoice_item))
+
+def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, warehouse_map):
+	for item in doc.get('items'):
+		item.purchase_order_item = purchase_item_map.get(sales_item_map.get(item.delivery_note_item))
+		item.warehouse = warehouse_map.get(sales_item_map.get(item.delivery_note_item))
+		item.purchase_order = parent_child_map.get(sales_item_map.get(item.delivery_note_item))
+
+def get_delivery_note_details(internal_reference):
+	so_item_map = {}
+
+	si_item_details = frappe.get_all('Delivery Note Item', fields=['name', 'so_detail'],
+		filters={'parent': internal_reference})
+
+	for d in si_item_details:
+		so_item_map.setdefault(d.name, d.so_detail)
+
+	return so_item_map
+
+def get_sales_invoice_details(internal_reference):
+	dn_item_map = {}
+	so_item_map = {}
+
+	si_item_details = frappe.get_all('Sales Invoice Item', fields=['name', 'so_detail',
+		'dn_detail'], filters={'parent': internal_reference})
+
+	for d in si_item_details:
+		if d.dn_detail:
+			dn_item_map.setdefault(d.name, d.dn_detail)
+		if d.so_detail:
+			so_item_map.setdefault(d.name, d.so_detail)
+
+	return dn_item_map, so_item_map
+
+def get_pd_details(doctype, sd_detail_map, sd_detail_field):
+	pd_item_map = {}
+	accepted_warehouse_map = {}
+	parent_child_map = {}
+
+	pd_item_details = frappe.get_all(doctype,
+		fields=[sd_detail_field, 'name', 'warehouse', 'parent'], filters={sd_detail_field: ('in', list(sd_detail_map.values()))})
+
+	for d in pd_item_details:
+		pd_item_map.setdefault(d.get(sd_detail_field), d.name)
+		parent_child_map.setdefault(d.get(sd_detail_field), d.parent)
+		accepted_warehouse_map.setdefault(d.get(sd_detail_field), d.warehouse)
+
+	return pd_item_map, parent_child_map, accepted_warehouse_map
+
+def update_taxes(doc, party=None, party_type=None, company=None, doctype=None, party_address=None,
+	company_address=None, shipping_address_name=None, master_doctype=None):
+	# Update Party Details
+	party_details = get_party_details(party=party, party_type=party_type, company=company,
+		doctype=doctype, party_address=party_address, company_address=company_address,
+		shipping_address=shipping_address_name)
+
+	# Update taxes and charges if any
+	doc.taxes_and_charges = party_details.get('taxes_and_charges')
+	doc.set('taxes', party_details.get('taxes'))
+
+def update_address(doc, address_field, address_display_field, address_name):
+	doc.set(address_field, address_name)
+	fetch_values = get_fetch_values(doc.doctype, address_field, address_name)
+
+	for key, value in fetch_values.items():
+		doc.set(key, value)
+
+	doc.set(address_display_field, get_address_display(doc.get(address_field)))
 
 @frappe.whitelist()
 def get_loyalty_programs(customer):
@@ -1689,6 +1886,7 @@ def get_mode_of_payment_info(mode_of_payment, company):
 		where mpa.parent = mp.name and mpa.company = %s and mp.enabled = 1 and mp.name = %s""",
 	(company, mode_of_payment), as_dict=1)
 
+@frappe.whitelist()
 def create_dunning(source_name, target_doc=None):
 	from frappe.model.mapper import get_mapped_doc
 	from erpnext.accounts.doctype.dunning.dunning import get_dunning_letter_text, calculate_interest_and_amount

@@ -38,7 +38,7 @@ def get_warehouse_account_map(company=None):
 			frappe.flags.warehouse_account_map[company] = warehouse_account
 		else:
 			frappe.flags.warehouse_account_map = warehouse_account
-	
+
 	return frappe.flags.warehouse_account_map.get(company) or frappe.flags.warehouse_account_map
 
 def get_warehouse_account(warehouse, warehouse_account=None):
@@ -65,9 +65,13 @@ def get_warehouse_account(warehouse, warehouse_account=None):
 		account = get_company_default_inventory_account(warehouse.company)
 
 	if not account and warehouse.company:
+		account = frappe.db.get_value('Account',
+			{'account_type': 'Stock', 'is_group': 0, 'company': warehouse.company}, 'name')
+
+	if not account and warehouse.company and not warehouse.is_group:
 		frappe.throw(_("Please set Account in Warehouse {0} or Default Inventory Account in Company {1}")
 			.format(warehouse.name, warehouse.company))
 	return account
 
 def get_company_default_inventory_account(company):
-	return frappe.get_cached_value('Company',  company,  'default_inventory_account')
+	return frappe.get_cached_value('Company',  company, 'default_inventory_account')

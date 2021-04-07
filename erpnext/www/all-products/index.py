@@ -15,6 +15,9 @@ def get_context(context):
 
 	context.items = get_products_for_website(field_filters, attribute_filters, search)
 
+	# Add homepage as parent
+	context.parents = [{"name": frappe._("Home"), "route":"/"}]
+
 	product_settings = get_product_settings()
 	context.field_filters = get_field_filter_data() \
 		if product_settings.enable_field_filters else []
