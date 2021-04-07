@@ -56,7 +56,7 @@ class ProductQuery:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
 			if product_info:
 				item.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
-				item.price = product_info['price'].get('price_list_rate')
+				item.price = product_info['price'].get('price_list_rate') if product_info['price'] else None
 
 			if self.settings.show_stock_availability:
 				if item.get("website_warehouse"):
