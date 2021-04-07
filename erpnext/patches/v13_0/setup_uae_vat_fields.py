@@ -9,4 +9,8 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc('regional', 'report', 'uae_vat_201')
+	frappe.reload_doc('regional', 'doctype', 'uae_vat_settings')
+	frappe.reload_doc('regional', 'doctype', 'uae_vat_account')
+
 	setup()
