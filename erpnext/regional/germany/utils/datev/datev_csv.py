@@ -56,10 +56,10 @@ def get_datev_csv(data, filters, csv_class):
 	)
 
 	if not six.PY2:
-		data = data.encode('latin_1')
+		data = data.encode('latin_1', errors='replace')
 
 	header = get_header(filters, csv_class)
-	header = ';'.join(header).encode('latin_1')
+	header = ';'.join(header).encode('latin_1', errors='replace')
 
 	# 1st Row: Header with meta data
 	# 2nd Row: Data heading (Überschrift der Nutzdaten), included in `data` here.
