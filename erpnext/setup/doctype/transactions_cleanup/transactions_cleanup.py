@@ -19,10 +19,6 @@ class TransactionsCleanup(Document):
 		
 	def on_submit(self):
 		for doctype in self.doctypes:
-			for doc in frappe.get_all(doctype.doctype_name):
-				print("*" * 50)
-				print(doc)
-				frappe.db.delete(doctype.doctype_name, {
-					'name' : doc.name,
-					'company' : self.company
-				})
+			frappe.db.delete(doctype.doctype_name, {
+				'company' : self.company
+			})
