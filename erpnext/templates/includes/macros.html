@@ -236,3 +236,59 @@
 	</p>
 </div>
 {%- endmacro -%}
+
+{%- macro ratings_summary(reviews, reviews_per_rating, average_rating, average_whole_rating)-%}
+<!-- Ratings Summary -->
+<h2 class="reviews-header">
+	{{ _("Customer Ratings") }}
+</h2>
+
+{% if reviews %}
+	{% set rating_title = frappe.utils.cstr(average_rating) + " " + _("out of 5") %}
+	{{ ratings_with_title(average_whole_rating, rating_title, "lg", "rating-summary-title") }}
+{% endif %}
+
+<!-- Rating Progress Bars -->
+<div class="rating-progress-bar-section">
+	{% for percent in reviews_per_rating %}
+		<div class="mt-4 col-sm-4 small rating-bar-title">
+			{{ loop.index }} star
+		</div>
+		<div class="row">
+			<div class="col-md-7">
+				<div class="progress rating-progress-bar" title="{{ percent }} % of reviews are {{ loop.index }} star">
+					<div class="progress-bar" role="progressbar"
+						aria-valuenow="{{ percent }}"
+						aria-valuemin="0" aria-valuemax="100"
+						style="width: {{ percent }}%; background-color: var(--text-on-green);">
+					</div>
+				</div>
+			</div>
+			<div class="col-sm-1 small">
+				{{ percent }}%
+			</div>
+		</div>
+	{% endfor %}
+</div>
+{%- endmacro -%}
+
+{%- macro user_review(reviews)-%}
+<!-- User Reviews -->
+<div class="user-reviews">
+	{% for review in reviews %}
+		<div class="mb-3 review">
+			{{ ratings_with_title(review.rating, _(review.review_title), "md", "user-review-title") }}
+
+			<div class="review-signature">
+				<span class="reviewer">{{ _(review.customer) }}</span>
+				<span>{{ review.published_on }}</span>
+			</div>
+			<div class="product-description mb-4 mt-4">
+				<p>
+					{{ _(review.comment) }}
+				</p>
+			</div>
+		</div>
+	{% endfor %}
+</div>
+{%- endmacro -%}
