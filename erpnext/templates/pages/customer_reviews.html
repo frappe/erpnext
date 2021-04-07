@@ -1,0 +1,45 @@
+{% extends "templates/web.html" %}
+{% from "erpnext/templates/includes/macros.html" import user_review, ratings_summary %}
+
+{% block title %} {{ _("Customer Reviews") }} {% endblock %}
+
+{% block page_content %}
+<div class="product-container col-md-12">
+<div style="display: flex;">
+	<div class="col-md-4 order-md-1 mt-8" style="max-width: 300px;">
+		{{ ratings_summary(reviews, reviews_per_rating, average_rating, average_whole_rating) }}
+
+		<!-- Write a Review for legitimate users -->
+		{% if frappe.session.user != "Guest" %}
+		<button class="btn btn-light btn-write-review mr-2 mt-4 mb-4 w-100"
+			data-web-item="{{ web_item }}">
+			{{ _("Write a Review") }}
+		</button>
+		{% endif %}
+	</div>
+
+	<!-- Reviews and Comments -->
+	<div class="col-12 order-2 col-md-9 order-md-2 mt-8 ml-16">
+		<h2 class="reviews-header">
+			{{ _("Reviews") }}
+		</h2>
+		{% if reviews %}
+			{{ user_review(reviews) }}
+
+			{% if not reviews | len >= total_reviews %}
+				<button class="btn btn-light btn-view-more mr-2 mt-4 mb-4 w-30"
+					data-web-item="{{ web_item }}">
+					{{ _("View More") }}
+				</button>
+			{% endif %}
+
+		{% else %}
+			<h6 class="text-muted mt-6">
+				{{ _("No Reviews") }}
+			</h6>
+		{% endif %}
+	</div>
+</div>
+</div>
+
+{% endblock %}

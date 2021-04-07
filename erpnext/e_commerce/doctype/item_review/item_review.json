@@ -79,13 +79,14 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-24 22:27:28.094535",
+ "modified": "2021-04-02 15:56:00.447950",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Item Review",
  "owner": "Administrator",
  "permissions": [
   {
+   "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
@@ -93,9 +94,11 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
-   "share": 1
+   "share": 1,
+   "write": 1
   },
   {
+   "create": 1,
    "delete": 1,
    "email": 1,
    "export": 1,
@@ -103,6 +106,17 @@
    "read": 1,
    "report": 1,
    "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "report": 1,
+   "role": "Customer",
    "share": 1
   }
  ],
