@@ -13,6 +13,10 @@
   "standard_working_hours",
   "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
+  "reminders_section",
+  "stop_birthday_reminders",
+  "send_holiday_reminders",
+  "send_work_anniversary_reminders",
   "leave_settings",
   "send_leave_notification",
   "leave_approval_notification_template",
@@ -142,6 +146,24 @@
    "fieldname": "standard_working_hours",
    "fieldtype": "Int",
    "label": "Standard Working Hours"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "reminders_section",
+   "fieldtype": "Section Break",
+   "label": "Reminders"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_holiday_reminders",
+   "fieldtype": "Check",
+   "label": "Send Holiday Reminders"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_work_anniversary_reminders",
+   "fieldtype": "Check",
+   "label": "Send Work Anniversary Reminders"
   }
  ],
  "icon": "fa fa-cog",
