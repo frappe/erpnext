@@ -239,40 +239,56 @@ def get_customers(filters):
 	return frappe.db.sql("""
 		SELECT
 
-			acc.account_number as 'Konto',
-			CASE cus.customer_type WHEN 'Company' THEN cus.customer_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
-			CASE cus.customer_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
-			CASE cus.customer_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
-			CASE cus.customer_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
+			par.debtor_creditor_number as 'Konto',
+			CASE cus.customer_type
+				WHEN 'Company' THEN cus.customer_name
+				ELSE null
+				END as 'Name (Adressatentyp Unternehmen)',
+			CASE cus.customer_type
+				WHEN 'Individual' THEN TRIM(SUBSTR(cus.customer_name, LOCATE(' ', cus.customer_name)))
+				ELSE null
+				END as 'Name (Adressatentyp natürl. Person)',
+			CASE cus.customer_type
+				WHEN 'Individual' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(cus.customer_name, ' ', 1), ' ', -1)
+				ELSE null
+				END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE cus.customer_type
+				WHEN 'Individual' THEN '1'
+				WHEN 'Company' THEN '2'
+				ELSE '0'
+				END as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
 			UPPER(country.code) as 'Land',
 			adr.address_line2 as 'Adresszusatz',
-			con.email_id as 'E-Mail',
-			coalesce(con.mobile_no, con.phone) as 'Telefon',
+			adr.email_id as 'E-Mail',
+			adr.phone as 'Telefon',
+			adr.fax as 'Fax',
 			cus.website as 'Internet',
 			cus.tax_id as 'Steuernummer'
 
-		FROM `tabParty Account` par
+		FROM `tabCustomer` cus
 
-			left join `tabAccount` acc
-			on acc.name = par.account
+			left join `tabParty Account` par
+			on par.parent = cus.name
+			and par.parenttype = 'Customer'
+			and par.company = %(company)s
 
-			left join `tabCustomer` cus
-			on cus.name = par.parent
+			left join `tabDynamic Link` dyn_adr
+			on dyn_adr.link_name = cus.name
+			and dyn_adr.link_doctype = 'Customer'
+			and dyn_adr.parenttype = 'Address'
 
 			left join `tabAddress` adr
-			on adr.name = cus.customer_primary_address
+			on adr.name = dyn_adr.parent
+			and adr.is_primary_address = '1'
 
 			left join `tabCountry` country
 			on country.name = adr.country
 
-			left join `tabContact` con
-			on con.name = cus.customer_primary_contact
-
-		WHERE par.company = %(company)s
-		AND par.parenttype = 'Customer'""", filters, as_dict=1)
+		WHERE adr.is_primary_address = '1'
+		""", filters, as_dict=1)
 
 
 def get_suppliers(filters):
@@ -285,35 +301,48 @@ def get_suppliers(filters):
 	return frappe.db.sql("""
 		SELECT
 
-			acc.account_number as 'Konto',
-			CASE sup.supplier_type WHEN 'Company' THEN sup.supplier_name ELSE null END as 'Name (Adressatentyp Unternehmen)',
-			CASE sup.supplier_type WHEN 'Individual' THEN con.last_name ELSE null END as 'Name (Adressatentyp natürl. Person)',
-			CASE sup.supplier_type WHEN 'Individual' THEN con.first_name ELSE null END as 'Vorname (Adressatentyp natürl. Person)',
-			CASE sup.supplier_type WHEN 'Individual' THEN '1' WHEN 'Company' THEN '2' ELSE '0' end as 'Adressatentyp',
+			par.debtor_creditor_number as 'Konto',
+			CASE sup.supplier_type
+				WHEN 'Company' THEN sup.supplier_name
+				ELSE null
+				END as 'Name (Adressatentyp Unternehmen)',
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN TRIM(SUBSTR(sup.supplier_name, LOCATE(' ', sup.supplier_name)))
+				ELSE null
+				END as 'Name (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN SUBSTRING_INDEX(SUBSTRING_INDEX(sup.supplier_name, ' ', 1), ' ', -1)
+				ELSE null
+				END as 'Vorname (Adressatentyp natürl. Person)',
+			CASE sup.supplier_type
+				WHEN 'Individual' THEN '1'
+				WHEN 'Company' THEN '2'
+				ELSE '0'
+				END as 'Adressatentyp',
 			adr.address_line1 as 'Straße',
 			adr.pincode as 'Postleitzahl',
 			adr.city as 'Ort',
 			UPPER(country.code) as 'Land',
 			adr.address_line2 as 'Adresszusatz',
-			con.email_id as 'E-Mail',
-			coalesce(con.mobile_no, con.phone) as 'Telefon',
+			adr.email_id as 'E-Mail',
+			adr.phone as 'Telefon',
+			adr.fax as 'Fax',
 			sup.website as 'Internet',
 			sup.tax_id as 'Steuernummer',
 			case sup.on_hold when 1 then sup.release_date else null end as 'Zahlungssperre bis'
 
-		FROM `tabParty Account` par
+		FROM `tabSupplier` sup
 
-			left join `tabAccount` acc
-			on acc.name = par.account
-
-			left join `tabSupplier` sup
-			on sup.name = par.parent
+			left join `tabParty Account` par
+			on par.parent = sup.name
+			and par.parenttype = 'Supplier'
+			and par.company = %(company)s
 
 			left join `tabDynamic Link` dyn_adr
 			on dyn_adr.link_name = sup.name
 			and dyn_adr.link_doctype = 'Supplier'
 			and dyn_adr.parenttype = 'Address'
-			
+
 			left join `tabAddress` adr
 			on adr.name = dyn_adr.parent
 			and adr.is_primary_address = '1'
@@ -321,17 +350,8 @@ def get_suppliers(filters):
 			left join `tabCountry` country
 			on country.name = adr.country
 
-			left join `tabDynamic Link` dyn_con
-			on dyn_con.link_name = sup.name
-			and dyn_con.link_doctype = 'Supplier'
-			and dyn_con.parenttype = 'Contact'
-
-			left join `tabContact` con
-			on con.name = dyn_con.parent
-			and con.is_primary_contact = '1'
-
-		WHERE par.company = %(company)s
-		AND par.parenttype = 'Supplier'""", filters, as_dict=1)
+		WHERE adr.is_primary_address = '1'
+		""", filters, as_dict=1)
 
 
 def get_account_names(filters):
