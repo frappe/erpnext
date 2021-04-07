@@ -21,6 +21,7 @@ class LoanRepayment(AccountsController):
 	def validate(self):
 		amounts = calculate_amounts(self.against_loan, self.posting_date)
 		self.set_missing_values(amounts)
+		self.check_future_entries()
 		self.validate_amount()
 		self.allocate_amounts(amounts)
 
@@ -68,6 +69,13 @@ class LoanRepayment(AccountsController):
 
 		if amounts.get('due_date'):
 			self.due_date = amounts.get('due_date')
+
+	def check_future_entries(self):
+		future_repayment_date = frappe.db.get_value("Loan Repayment", {"posting_date": (">", self.posting_date),
+			"docstatus": 1, "against_loan": self.against_loan}, 'posting_date')
+
+		if future_repayment_date:
+			frappe.throw("Repayment already made till date {0}".format(getdate(future_repayment_date)))
 
 	def validate_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
@@ -307,7 +315,9 @@ def create_repayment_entry(loan, applicant, company, posting_date, loan_type,
 
 	return lr
 
-def get_accrued_interest_entries(against_loan):
+def get_accrued_interest_entries(against_loan, posting_date=None):
+	if not posting_date:
+		posting_date = getdate()
 
 	unpaid_accrued_entries = frappe.db.sql(
 		"""
@@ -318,12 +328,13 @@ def get_accrued_interest_entries(against_loan):
 				`tabLoan Interest Accrual`
 			WHERE
 				loan = %s
+			AND posting_date <= %s
 			AND (interest_amount - paid_interest_amount > 0 OR
 				payable_principal_amount - paid_principal_amount > 0)
 			AND
 				docstatus = 1
 			ORDER BY posting_date
-		""", (against_loan), as_dict=1)
+		""", (against_loan, posting_date), as_dict=1)
 
 	return unpaid_accrued_entries
 
@@ -335,7 +346,7 @@ def get_amounts(amounts, against_loan, posting_date):
 
 	against_loan_doc = frappe.get_doc("Loan", against_loan)
 	loan_type_details = frappe.get_doc("Loan Type", against_loan_doc.loan_type)
-	accrued_interest_entries = get_accrued_interest_entries(against_loan_doc.name)
+	accrued_interest_entries = get_accrued_interest_entries(against_loan_doc.name, posting_date)
 
 	pending_accrual_entries = {}
 
