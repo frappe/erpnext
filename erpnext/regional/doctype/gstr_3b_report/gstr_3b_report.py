@@ -166,7 +166,7 @@ class GSTR3BReport(Document):
 		inward_nil_exempt = self.get_inward_nil_exempt(self.gst_details.get("gst_state"))
 		self.set_inter_state_supply(inter_state_supplies)
 		self.set_inward_nil_exempt(inward_nil_exempt)
-
+		self.get_itc_reversal_entries()
 		self.missing_field_invoices = self.get_missing_field_invoices()
 
 		self.json_output = frappe.as_json(self.report_dict)
@@ -248,6 +248,32 @@ class GSTR3BReport(Document):
 
 			if key[0] == "UIN Holders":
 				self.report_dict["inter_sup"]["uin_details"].append(value)
+
+	def get_itc_reversal_entries(self):
+		reversal_entries = frappe.db.sql(""" select ja.account, j.reversal_type, sum(credit_in_account_currency) as amount
+			from `tabJournal Entry` j, `tabJournal Entry Account` ja
+			where j.docstatus = 1
+			and ja.parent = j.name
+			and j.voucher_type = 'Reversal Of ITC'
+			and month(j.posting_date) = %s and year(j.posting_date) = %s
+			and j.company = %s and j.company_gstin = %s
+			group by ja.account, j.reversal_type""", (self.month_no, self.year, self.company,
+			self.gst_details.get("gstin")), as_dict=1)
+
+		for entry in reversal_entries:
+			if entry.reversal_type == 'As per rules 42 & 43 of CGST Rules':
+				index = 0
+			else:
+				index = 1
+
+			if entry.account in [a.cgst_account for a in self.account_heads]:
+				self.report_dict["itc_elg"]["itc_rev"][index]["camt"] += flt(entry.amount)
+			if entry.account in [a.sgst_account for a in self.account_heads]:
+				self.report_dict["itc_elg"]["itc_rev"][index]["samt"] += flt(entry.amount)
+			if entry.account in [a.igst_account for a in self.account_heads]:
+				self.report_dict["itc_elg"]["itc_rev"][index]["iamt"] += flt(entry.amount)
+			if entry.account in [a.cess_account for a in self.account_heads]:
+				self.report_dict["itc_elg"]["itc_rev"][index]["csamt"] += flt(entry.amount)
 
 	def get_total_taxable_value(self, doctype, reverse_charge):
 
