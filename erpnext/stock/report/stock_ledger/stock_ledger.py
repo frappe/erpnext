@@ -27,6 +27,14 @@ def execute(filters=None):
 	conversion_factors = []
 	if opening_row:
 		data.append(opening_row)
+		if include_uom:
+			conversion_factor = 1
+			alt_uom_size = 1
+			if opening_row.get('item_code'):
+				item_detail = item_details.get(opening_row.get('item_code'), {})
+				conversion_factor = flt(item_detail.get('conversion_factor')) or 1
+				alt_uom_size = item_detail.alt_uom_size if filters.qty_field == "Contents Qty" and item_detail.alt_uom else 1.0
+			conversion_factors.append(conversion_factor * alt_uom_size)
 
 	actual_qty = stock_value = 0
 
