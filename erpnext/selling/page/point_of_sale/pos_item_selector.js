@@ -152,6 +152,10 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.item_group_field.toggle_label(false);
 	}
 
+	set_search_value(value) {
+		$(this.search_field.$input[0]).val(value).trigger("input");
+	}
+
 	bind_events() {
 		const me = this;
 		window.onScan = onScan;
@@ -159,7 +163,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			onScan: (sScancode) => {
 				if (this.search_field && this.$component.is(':visible')) {
 					this.search_field.set_focus();
-					$(this.search_field.$input[0]).val(sScancode).trigger("input");
+					this.set_search_value(sScancode);
 					this.barcode_scanned = true;
 				}
 			}
@@ -178,6 +182,7 @@ erpnext.PointOfSale.ItemSelector = class {
 			uom = uom === "undefined" ? undefined : uom;
 
 			me.events.item_selected({ field: 'qty', value: "+1", item: { item_code, batch_no, serial_no, uom }});
+			me.set_search_value('');
 		});
 
 		this.search_field.$input.on('input', (e) => {

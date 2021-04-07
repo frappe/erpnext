@@ -22,6 +22,13 @@ frappe.ui.form.on('Social Media Post', {
                 add_post_btn(frm); 
             }
             else {
+                frappe.call({
+                    doc: frm.doc,
+					method: 'get_status',
+					callback: function() {
+						
+					}
+                });
                 frm.disable_form();
             }
 

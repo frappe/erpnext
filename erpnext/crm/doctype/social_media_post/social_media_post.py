@@ -49,6 +49,11 @@ class SocialMediaPost(Document):
 			linkedin.delete_post(self.linkedin_post_id)
 		self.post_status = 'Cancelled'
 
+	def get_status(self):
+		twitter = frappe.get_doc("Twitter Settings")
+		return twitter.get_status(self.twitter_post_id)
+
+
 def process_scheduled_social_media_posts():
 	posts = frappe.get_list("Social Media Post", filters={"post_status": "Scheduled", "docstatus":1}, fields= ["name", "scheduled_time","post_status"])
 	start = frappe.utils.now_datetime()

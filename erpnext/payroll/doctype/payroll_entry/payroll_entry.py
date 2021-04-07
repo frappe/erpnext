@@ -95,6 +95,7 @@ class PayrollEntry(Document):
 
 		return emp_list
 
+	@frappe.whitelist()
 	def fill_employee_details(self):
 		self.set('employees', [])
 		employees = self.get_emp_list()
@@ -142,6 +143,7 @@ class PayrollEntry(Document):
 			if not self.get(fieldname):
 				frappe.throw(_("Please set {0}").format(self.meta.get_label(fieldname)))
 
+	@frappe.whitelist()
 	def create_salary_slips(self):
 		"""
 			Creates salary slip for selected employees if already not created
@@ -183,6 +185,7 @@ class PayrollEntry(Document):
 		""" % ('%s', '%s', '%s','%s', cond), (ss_status, self.start_date, self.end_date, self.salary_slip_based_on_timesheet), as_dict=as_dict)
 		return ss_list
 
+	@frappe.whitelist()
 	def submit_salary_slips(self):
 		self.check_permission('write')
 		ss_list = self.get_sal_slip_list(ss_status=0)
@@ -329,6 +332,7 @@ class PayrollEntry(Document):
 		amount = flt(amount) * flt(conversion_rate)
 		return exchange_rate, amount
 
+	@frappe.whitelist()
 	def make_payment_entry(self):
 		self.check_permission('write')
 
@@ -406,6 +410,7 @@ class PayrollEntry(Document):
 		self.update(get_start_end_dates(self.payroll_frequency,
 			self.start_date or self.posting_date, self.company))
 
+	@frappe.whitelist()
 	def validate_employee_attendance(self):
 		employees_to_mark_attendance = []
 		days_in_payroll, days_holiday, days_attendance_marked = 0, 0, 0

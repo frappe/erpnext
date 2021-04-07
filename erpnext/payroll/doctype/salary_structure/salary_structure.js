@@ -142,6 +142,8 @@ frappe.ui.form.on('Salary Structure', {
 			],
 			primary_action: function() {
 				var data = d.get_values();
+				delete data.company
+				delete data.currency
 				frappe.call({
 					doc: frm.doc,
 					method: "assign_salary_structure",

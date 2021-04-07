@@ -13,4 +13,4 @@ def get_context(context):
 
 
 def get_featured_programs():
-	return utils.get_portal_programs()
+	return utils.get_portal_programs() or []

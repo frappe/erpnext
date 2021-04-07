@@ -172,7 +172,7 @@
    "fieldname": "rounding",
    "fieldtype": "Select",
    "label": "Rounding",
-   "options": "0.5\n1.0"
+   "options": "\n0.25\n0.5\n1.0"
   },
   {
    "depends_on": "is_carry_forward",
@@ -197,6 +197,7 @@
    "label": "Based On Date Of Joining"
   },
   {
+   "default": "0",
    "depends_on": "eval:doc.is_lwp == 0",
    "fieldname": "is_ppl",
    "fieldtype": "Check",
@@ -213,7 +214,7 @@
  "icon": "fa fa-flag",
  "idx": 1,
  "links": [],
- "modified": "2020-10-15 15:49:47.555105",
+ "modified": "2021-03-02 11:22:33.776320",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Leave Type",
