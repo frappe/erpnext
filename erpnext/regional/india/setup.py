@@ -105,8 +105,17 @@ def add_print_formats():
 	frappe.reload_doc("accounts", "print_format", "gst_pos_invoice")
 	frappe.reload_doc("accounts", "print_format", "GST E-Invoice")
 
-	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
-		name in('GST POS Invoice', 'GST Tax Invoice', 'GST E-Invoice') """)
+	frappe.db.set_value("Print Format", "GST POS Invoice", "disabled", 0)
+	frappe.db.set_value("Print Format", "GST Tax Invoice", "disabled", 0)
+	frappe.db.set_value("Print Format", "GST E-Invoice", "disabled", 0)
+
+def make_property_setters():
+	# GST rules do not allow for an invoice no. bigger than 16 characters
+	journal_entry_types = frappe.get_meta("Journal Entry").get_options("voucher_type").split("\n") + ['Reversal Of ITC']
+
+	make_property_setter('Sales Invoice', 'naming_series', 'options', 'SINV-.YY.-\nSRET-.YY.-', '')
+	make_property_setter('Purchase Invoice', 'naming_series', 'options', 'PINV-.YY.-\nPRET-.YY.-', '')
+	make_property_setter('Journal Entry', 'voucher_type', 'options', '\n'.join(journal_entry_types), '')
 
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
@@ -218,6 +227,23 @@ def make_custom_fields(update=True):
 				fieldtype='Date', insert_after='shipping_bill_number', print_hide=1,
 				depends_on="eval:doc.gst_category=='Overseas' "),
 		]
+
+	journal_entry_fields = [
+		dict(fieldname='reversal_type', label='Reversal Type',
+			fieldtype='Select', insert_after='voucher_type', print_hide=1,
+			options="As per rules 42 & 43 of CGST Rules\nOthers",
+			depends_on="eval:doc.voucher_type=='Reversal Of ITC'",
+			mandatory_depends_on="eval:doc.voucher_type=='Reversal Of ITC'"),
+		dict(fieldname='company_address', label='Company Address',
+			fieldtype='Link', options='Address', insert_after='reversal_type',
+			print_hide=1, depends_on="eval:doc.voucher_type=='Reversal Of ITC'",
+			mandatory_depends_on="eval:doc.voucher_type=='Reversal Of ITC'"),
+		dict(fieldname='company_gstin', label='Company GSTIN',
+			fieldtype='Data', read_only=1, insert_after='company_address', print_hide=1,
+			fetch_from='company_address.gstin',
+			depends_on="eval:doc.voucher_type=='Reversal Of ITC'",
+			mandatory_depends_on="eval:doc.voucher_type=='Reversal Of ITC'")
+	]
 
 	inter_state_gst_field = [
 		dict(fieldname='is_inter_state', label='Is Inter State',
@@ -433,6 +459,7 @@ def make_custom_fields(update=True):
 		'Purchase Receipt': purchase_invoice_gst_fields,
 		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
 		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
+		'Journal Entry': journal_entry_fields,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
 		'Item': [

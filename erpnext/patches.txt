@@ -758,3 +758,4 @@ erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v12_0.create_taxable_value_field
 erpnext.patches.v12_0.add_company_link_to_einvoice_settings
 erpnext.patches.v13_0.update_payment_terms_outstanding
+erpnext.patches.v12_0.create_itc_reversal_custom_fields #1
