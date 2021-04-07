@@ -260,8 +260,7 @@ class IssueSummary(object):
 					self.issue_summary_data[value]['avg_user_resolution_time'] = entry.get('avg_user_resolution_time') or 0.0
 
 	def get_chart_data(self):
-		if not self.data:
-			return None
+		self.chart = []
 
 		labels = []
 		open_issues = []
@@ -310,8 +309,7 @@ class IssueSummary(object):
 		}
 
 	def get_report_summary(self):
-		if not self.data:
-			return None
+		self.report_summary = []
 
 		open_issues = 0
 		replied = 0

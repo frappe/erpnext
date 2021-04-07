@@ -39,6 +39,7 @@ class Item(Document):
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 
+	@frappe.whitelist()
 	def set_asset_naming_series(self):
 		if not hasattr(self, '_asset_naming_series'):
 			from erpnext.assets.doctype.asset.asset import get_asset_naming_series

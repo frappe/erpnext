@@ -81,12 +81,18 @@ class Project(Document):
 
 	def calculate_start_date(self, task_details):
 		self.start_date = add_days(self.expected_start_date, task_details.start)
-		self.start_date = update_if_holiday(self.holiday_list, self.start_date)
+		self.start_date = self.update_if_holiday(self.start_date)
 		return self.start_date
 
 	def calculate_end_date(self, task_details):
 		self.end_date = add_days(self.start_date, task_details.duration)
-		return update_if_holiday(self.holiday_list, self.end_date)
+		return self.update_if_holiday(self.end_date)
+
+	def update_if_holiday(self, date):
+		holiday_list = self.holiday_list or get_holiday_list(self.company)
+		while is_holiday(holiday_list, date):
+			date = add_days(date, 1)
+		return date
 
 	def dependency_mapping(self, template_tasks, project_tasks):
 		for template_task in template_tasks:
@@ -541,9 +547,3 @@ def set_project_status(project, status):
 
 	project.status = status
 	project.save()
-
-def update_if_holiday(holiday_list, date):
-	holiday_list = holiday_list or get_holiday_list()
-	while is_holiday(holiday_list, date):
-		date = add_days(date, 1)
-	return date
