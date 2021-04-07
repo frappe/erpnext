@@ -88,6 +88,32 @@ COLUMNS = [
 		"fieldtype": "Dynamic Link",
 		"options": "Beleginfo - Art 2",
 		"width": 150
+	},
+	{
+		"label": "Beleginfo - Art 3",
+		"fieldname": "Beleginfo - Art 3",
+		"fieldtype": "Link",
+		"options": "DocType",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 3",
+		"fieldname": "Beleginfo - Inhalt 3",
+		"fieldtype": "Dynamic Link",
+		"options": "Beleginfo - Art 3",
+		"width": 150
+	}
+		,{
+		"label": "Beleginfo - Art 4",
+		"fieldname": "Beleginfo - Art 4",
+		"fieldtype": "Data",
+		"width": 100
+	},
+	{
+		"label": "Beleginfo - Inhalt 4",
+		"fieldname": "Beleginfo - Inhalt 4",
+		"fieldtype": "Data",
+		"width": 150
 	}
 ]
 
@@ -169,13 +195,30 @@ def get_transactions(filters, as_dict=1):
 			gl.voucher_type as 'Beleginfo - Art 1',
 			gl.voucher_no as 'Beleginfo - Inhalt 1',
 			gl.against_voucher_type as 'Beleginfo - Art 2',
-			gl.against_voucher as 'Beleginfo - Inhalt 2'
+			gl.against_voucher as 'Beleginfo - Inhalt 2',
+			gl.party_type as 'Beleginfo - Art 3',
+			gl.party as 'Beleginfo - Inhalt 3',
+			case gl.party_type when 'Customer' then 'Debitorennummer' when 'Supplier' then 'Kreditorennummer' else NULL end as 'Beleginfo - Art 4',
+			par.debtor_creditor_number as 'Beleginfo - Inhalt 4'
 
 		FROM `tabGL Entry` gl
 
 			/* Kontonummer */
 			left join `tabAccount` acc 
 			on gl.account = acc.name
+
+			left join `tabCustomer` cus
+			on gl.party_type = 'Customer'
+			and gl.party = cus.name
+
+			left join `tabSupplier` sup
+			on gl.party_type = 'Supplier'
+			and gl.party = sup.name
+
+			left join `tabParty Account` par
+			on par.parent = gl.party
+			and par.parenttype = gl.party_type
+			and par.company = %(company)s
 
 		WHERE gl.company = %(company)s 
 		AND DATE(gl.posting_date) >= %(from_date)s
