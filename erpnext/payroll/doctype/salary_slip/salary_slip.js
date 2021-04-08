@@ -39,7 +39,8 @@ frappe.ui.form.on("Salary Slip", {
 
 		frm.set_query("employee", function() {
 			return {
-				query: "erpnext.controllers.queries.employee_query"
+				query: "erpnext.controllers.queries.employee_query",
+				filters: frm.doc.company
 			};
 		});
 	},
@@ -93,28 +94,31 @@ frappe.ui.form.on("Salary Slip", {
 	},
 
 	set_exchange_rate: function(frm, company_currency) {
-		if (frm.doc.currency) {
-			var from_currency = frm.doc.currency;
-			if (from_currency != company_currency) {
-				frm.events.hide_loan_section(frm);
-				frappe.call({
-					method: "erpnext.setup.utils.get_exchange_rate",
-					args: {
-						from_currency: from_currency,
-						to_currency: company_currency,
-					},
-					callback: function(r) {
-						frm.set_value("exchange_rate", flt(r.message));
-						frm.set_df_property("exchange_rate", "hidden", 0);
-						frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
-							+ " = [?] " + company_currency);
-					}
-				});
-			} else {
-				frm.set_value("exchange_rate", 1.0);
-				frm.set_df_property("exchange_rate", "hidden", 1);
-				frm.set_df_property("exchange_rate", "description", "");
-			}
+		if (frm.doc.docstatus === 0) {
+			if (frm.doc.currency) {
+				var from_currency = frm.doc.currency;
+				if (from_currency != company_currency) {
+					frm.events.hide_loan_section(frm);
+					frappe.call({
+						method: "erpnext.setup.utils.get_exchange_rate",
+						args: {
+							from_currency: from_currency,
+							to_currency: company_currency,
+						},
+						callback: function(r) {
+							if (r.message) {
+								frm.set_value("exchange_rate", flt(r.message));
+								frm.set_df_property('exchange_rate', 'hidden', 0);
+								frm.set_df_property("exchange_rate", "description", "1 " + frm.doc.currency
+									+ " = [?] " + company_currency);
+							}
+						}
+					});
+				} else {
+					frm.set_value("exchange_rate", 1.0);
+					frm.set_df_property('exchange_rate', 'hidden', 1);
+					frm.set_df_property("exchange_rate", "description", "" );
+				}
 		}
 	},
 
