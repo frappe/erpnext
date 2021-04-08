@@ -765,3 +765,4 @@ execute:frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
 erpnext.patches.v13_0.rename_discharge_date_in_ip_record
 erpnext.patches.v12_0.purchase_receipt_status
 erpnext.patches.v13_0.germany_make_custom_fields
+erpnext.patches.v13_0.germany_fill_debtor_creditor_number
