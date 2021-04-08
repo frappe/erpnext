@@ -27,6 +27,10 @@ def validate_eligibility(doc):
 	if isinstance(doc, six.string_types):
 		doc = json.loads(doc)
 
+	invalid_doctype = doc.get('doctype') != 'Sales Invoice'
+	if invalid_doctype:
+		return False
+
 	einvoicing_enabled = cint(frappe.db.get_single_value('E Invoice Settings', 'enable'))
 	if not einvoicing_enabled:
 		return False
@@ -36,12 +40,11 @@ def validate_eligibility(doc):
 		return False
 
 	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
-	invalid_doctype = doc.get('doctype') != 'Sales Invoice'
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
 
-	if invalid_company or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied:
 		return False
 
 	return True
