@@ -438,6 +438,16 @@
    "dependencies": "GL Entry",
    "hidden": 0,
    "is_query_report": 1,
+   "label": "Tax Detail",
+   "link_to": "Tax Detail",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "GL Entry",
+   "hidden": 0,
+   "is_query_report": 1,
    "label": "DATEV Export",
    "link_to": "DATEV",
    "link_type": "Report",

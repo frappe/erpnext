@@ -376,16 +376,8 @@ erpnext.TaxDetail = class TaxDetail {
 		this.controls = controls;
 	}
 	show_help() {
-		const help = __(`<strong>Help:</strong> Your custom report is built from General Ledger Entries within the date range.
-			You can add multiple sections to the report using the New Section button.
-			Each component added to a section adds a subset of the data into the specified section.
-			Beware of duplicated data rows.
-			The Filtered Row component type saves the datatable column filters to specify the added data.
-			The Section component type refers to the data in a previously defined section, but it cannot refer to its parent section.
-			The Amount column is summed to give the section subtotal.
-			Use the Show Detail box to see the data rows included in each section in the final report.
-			Once finished, hit Save & Run. Report contributed by`);
-		this.qr.$report_footer.append(`<div class="col-md-12">${help}<a href="https://www.casesolved.co.uk"> Case Solved</a></div>`);
+		const help = __('Your custom report is built from General Ledger Entries within the date range. You can add multiple sections to the report using the New Section button. Each component added to a section adds a subset of the data into the specified section. Beware of duplicated data rows. The Filtered Row component type saves the datatable column filters to specify the added data. The Section component type refers to the data in a previously defined section, but it cannot refer to its parent section. The Amount column is summed to give the section subtotal. Use the Show Detail box to see the data rows included in each section in the final report. Once finished, hit Save & Run. Report contributed by');
+		this.qr.$report_footer.append('<div class="col-md-12"><strong>' + __('Help') + `: </strong>${help}<a href="https://www.casesolved.co.uk"> Case Solved</a></div>`);
 	}
 }
 
