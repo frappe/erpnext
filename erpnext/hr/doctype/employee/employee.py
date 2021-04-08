@@ -343,15 +343,31 @@ def send_birthday_reminder(recipients, reminder_text, birthday_persons, message)
 
 def get_employees_who_are_born_today():
 	"""Get all employee born today & group them based on their company"""
+	return get_employees_having_event_today("birthday") 
+
+def get_employees_having_event_today(event_type):
+	"""Get all employee who have `event_type` today 
+	& group them based on their company. `event_type`
+	can be `birthday` or `work_anniversary`"""
+
 	from collections import defaultdict
+
+	# Set column based on event type
+	if event_type == 'birthday':
+		condition_column = 'date_of_birth'
+	elif event_type == 'work_anniversary':
+		condition_column = 'date_of_joining'
+	else:
+		return
+
 	employees_born_today = frappe.db.multisql({
 		"mariadb": """
-			SELECT `personal_email`, `company`, `company_email`, `user_id`, `employee_name` AS 'name', `image`
+			SELECT `personal_email`, `company`, `company_email`, `user_id`, `employee_name` AS 'name', `image`, `date_of_joining`
 			FROM `tabEmployee`
 			WHERE
-				DAY(date_of_birth) = DAY(%(today)s)
+				DAY(%(condition_column)s) = DAY(%(today)s)
 			AND
-				MONTH(date_of_birth) = MONTH(%(today)s)
+				MONTH(%(condition_column)s) = MONTH(%(today)s)
 			AND
 				`status` = 'Active'
 		""",
@@ -359,13 +375,13 @@ def get_employees_who_are_born_today():
 			SELECT "personal_email", "company", "company_email", "user_id", "employee_name" AS 'name', "image"
 			FROM "tabEmployee"
 			WHERE
-				DATE_PART('day', "date_of_birth") = date_part('day', %(today)s)
+				DATE_PART('day', %(condition_column)s) = date_part('day', %(today)s)
 			AND
-				DATE_PART('month', "date_of_birth") = date_part('month', %(today)s)
+				DATE_PART('month', %(condition_column)s) = date_part('month', %(today)s)
 			AND
 				"status" = 'Active'
 		""",
-	}, dict(today=today()), as_dict=1)
+	}, dict(today=today(), condition_column=condition_column), as_dict=1)
 
 	grouped_employees = defaultdict(lambda: [])
 
