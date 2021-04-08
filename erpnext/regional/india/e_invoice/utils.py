@@ -19,7 +19,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
 from frappe.integrations.utils import make_post_request, make_get_request
-from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply, validate_gstin_for_india
+from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
 from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form, getdate, time_diff_in_hours
 
 @frappe.whitelist()
@@ -118,62 +118,38 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def get_party_details(address_name, company_address=None, billing_address=None, shipping_address=None):
-	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
-
-	if ((not d.gstin and not shipping_address)
-		or not d.city
-		or not d.pincode
-		or not d.address_title
-		or not d.address_line1
-		or not d.gst_state_number):
+def validate_address_fields(address, is_shipping_address):
+	if ((not address.gstin and not is_shipping_address)
+		or not address.city
+		or not address.pincode
+		or not address.address_title
+		or not address.address_line1
+		or not address.gst_state_number):
 
 		frappe.throw(
-			msg=_('Address lines, city, pincode, gstin is mandatory for address {}. Please set them and try again.').format(
-				get_link_to_form('Address', addr.name)
-			),
+			msg=_('Address Lines, City, Pincode, GSTIN are mandatory for address {}. Please set them and try again.').format(address.name),
 			title=_('Missing Address Fields')
 		)
 	
-	validate_gstin_for_india(addr, '')
-
-def get_party_details(address_name):
+def get_party_details(address_name, is_shipping_address=False):
 	addr = frappe.get_doc('Address', address_name)
 	
-	validate_address_fields(addr)
+	validate_address_fields(addr, is_shipping_address)
 
 	if addr.gst_state_number == 97:
 		# according to einvoice standard
 		addr.pincode = 999999
 
 	party_address_details = frappe._dict(dict(
-		legal_name=sanitize_for_json(d.address_title),
-		location=sanitize_for_json(d.city),
-		pincode=d.pincode,
-		state_code=d.gst_state_number,
-		address_line1=sanitize_for_json(d.address_line1),
-		address_line2=sanitize_for_json(d.address_line2)
+		legal_name=sanitize_for_json(addr.address_title),
+		location=sanitize_for_json(addr.city),
+		pincode=addr.pincode, gstin=addr.gstin,
+		state_code=addr.gst_state_number,
+		address_line1=sanitize_for_json(addr.address_line1),
+		address_line2=sanitize_for_json(addr.address_line2)
 	))
-	if d.gstin:
-		party_address_details.gstin = d.gstin
+
 	return party_address_details
-
-def get_gstin_details(gstin):
-	if not hasattr(frappe.local, 'gstin_cache'):
-		frappe.local.gstin_cache = {}
-
-	key = gstin
-	details = frappe.local.gstin_cache.get(key)
-	if details:
-		return details
-
-	details = frappe.cache().hget('gstin_cache', key)
-	if details:
-		frappe.local.gstin_cache[key] = details
-		return details
-
-	if not details:
-		return GSPConnector.get_gstin_details(gstin)
 
 def get_overseas_address_details(address_name):
 	address_title, address_line1, address_line2, city = frappe.db.get_value(
@@ -356,9 +332,15 @@ def get_eway_bill_details(invoice):
 
 def validate_mandatory_fields(invoice):
 	if not invoice.company_address:
-		frappe.throw(_('Company Address is mandatory to fetch company GSTIN details.'), title=_('Missing Fields'))
+		frappe.throw(
+			_('Company Address is mandatory to fetch company GSTIN details. Please set Company Address and try again.'),
+			title=_('Missing Fields')
+		)
 	if not invoice.customer_address:
-		frappe.throw(_('Customer Address is mandatory to fetch customer GSTIN details.'), title=_('Missing Fields'))
+		frappe.throw(
+			_('Customer Address is mandatory to fetch customer GSTIN details. Please set Company Address and try again.'),
+			title=_('Missing Fields')
+		)
 	if not frappe.db.get_value('Address', invoice.company_address, 'gstin'):
 		frappe.throw(
 			_('GSTIN is mandatory to fetch company GSTIN details. Please enter GSTIN in selected company address.'),
@@ -412,12 +394,12 @@ def make_einvoice(invoice):
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
 	invoice_value_details = get_invoice_value_details(invoice)
-	seller_details = get_party_details(invoice.company_address, company_address=1)
+	seller_details = get_party_details(invoice.company_address)
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
-		buyer_details = get_party_details(invoice.customer_address, billing_address=1)
+		buyer_details = get_party_details(invoice.customer_address)
 		place_of_supply = get_place_of_supply(invoice, invoice.doctype)
 		if place_of_supply:
 			place_of_supply = place_of_supply.split('-')[0]
@@ -433,7 +415,7 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-			shipping_details = get_party_details(invoice.shipping_address_name, shipping_address=1)
+			shipping_details = get_party_details(invoice.shipping_address_name, is_shipping_address=True)
 
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
