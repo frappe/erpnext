@@ -39,6 +39,7 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "hidden": 1,
    "label": "Status",
    "options": "Draft\nCompleted"
   }
@@ -46,7 +47,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-08 22:22:53.979926",
+ "modified": "2021-04-09 01:08:52.839585",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transactions Cleanup",
