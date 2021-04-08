@@ -102,8 +102,8 @@ COLUMNS = [
 		"fieldtype": "Dynamic Link",
 		"options": "Beleginfo - Art 3",
 		"width": 150
-	}
-		,{
+	},
+	{
 		"label": "Beleginfo - Art 4",
 		"fieldname": "Beleginfo - Art 4",
 		"fieldtype": "Data",
