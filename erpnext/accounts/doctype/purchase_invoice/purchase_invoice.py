@@ -1218,7 +1218,7 @@ def make_purchase_receipt(source_name, target_doc=None):
 		target.base_amount = (flt(obj.qty) - flt(obj.received_qty)) * \
 			flt(obj.rate) * flt(source_parent.conversion_rate)
 
-	doc = get_mapped_doc("Purchase Invoice", source_name,	{
+	doc = get_mapped_doc("Purchase Invoice", source_name, {
 		"Purchase Invoice": {
 			"doctype": "Purchase Receipt",
 			"validation": {
