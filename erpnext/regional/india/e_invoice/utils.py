@@ -983,8 +983,12 @@ def generate_eway_bill(doctype, docname, **kwargs):
 
 @frappe.whitelist()
 def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
-	gsp_connector = GSPConnector(doctype, docname)
-	gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+	# TODO: uncomment when eway_bill api from Adequare is enabled
+	# gsp_connector = GSPConnector(doctype, docname)
+	# gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
+
+	# update cancelled status only, to be able to cancel irn next
+	frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 1)
 
 @frappe.whitelist()
 def generate_einvoices(docnames):

@@ -110,45 +110,25 @@ erpnext.setup_einvoice_actions = (doctype) => {
 			}
 
 			if (irn && ewaybill && !irn_cancelled && !eway_bill_cancelled) {
-				const fields = [
-					{
-						"label": "Reason",
-						"fieldname": "reason",
-						"fieldtype": "Select",
-						"reqd": 1,
-						"default": "1-Duplicate",
-						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
-					},
-					{
-						"label": "Remark",
-						"fieldname": "remark",
-						"fieldtype": "Data",
-						"reqd": 1
-					}
-				];
 				const action = () => {
-					const d = new frappe.ui.Dialog({
-						title: __('Cancel E-Way Bill'),
-						fields: fields,
+					let message = __('Cancellation of e-way bill is currently not supported. ');
+					message += '<br><br>';
+					message += __('You must cancel the e-way bill on the portal and then use this popup to update the cancelled status in the ERPNext system.');
+
+					frappe.msgprint({
+						title: __('Update E-Way Bill Cancelled Status?'),
+						message: message,
+						indicator: 'orange',
 						primary_action: function() {
-							const data = d.get_values();
 							frappe.call({
 								method: 'erpnext.regional.india.e_invoice.utils.cancel_eway_bill',
-								args: {
-									doctype,
-									docname: name,
-									eway_bill: ewaybill,
-									reason: data.reason.split('-')[0],
-									remark: data.remark
-								},
+								args: { doctype, docname: name },
 								freeze: true,
-								callback: () => frm.reload_doc() || d.hide(),
-								error: () => d.hide()
+								callback: () => frm.reload_doc()
 							});
 						},
-						primary_action_label: __('Submit')
+						primary_action_label: __('Yes')
 					});
-					d.show();
 				};
 				add_custom_button(__("Cancel E-Way Bill"), action);
 			}
