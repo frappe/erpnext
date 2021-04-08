@@ -130,7 +130,7 @@ def validate_address_fields(address, is_shipping_address):
 			msg=_('Address Lines, City, Pincode, GSTIN are mandatory for address {}. Please set them and try again.').format(address.name),
 			title=_('Missing Address Fields')
 		)
-	
+
 def get_party_details(address_name, is_shipping_address=False):
 	addr = frappe.get_doc('Address', address_name)
 	
@@ -707,7 +707,7 @@ class GSPConnector():
 			if time_diff_in_hours(now_datetime(), self.invoice.ack_date) > 24:
 				frappe.throw(_('E-Invoice cannot be cancelled after 24 hours of IRN generation.'), title=_('Not Allowed'), exc=CancellationNotAllowed)
 			if not irn:
-				frappe.throw(_('IRN not found. You must generate IRN before cancelling.'), title=_('Cancellation Not Allowed'), exc=CancellationNotAllowed)
+				frappe.throw(_('IRN not found. You must generate IRN before cancelling.'), title=_('Not Allowed'), exc=CancellationNotAllowed)
 
 			headers = self.get_headers()
 			data = json.dumps({
@@ -717,9 +717,9 @@ class GSPConnector():
 			}, indent=4)
 
 			res = self.make_request('post', self.cancel_irn_url, headers, data)
-			if res.get('success'):
+			if res.get('success') or '9999' in res.get('message'):
 				self.invoice.irn_cancelled = 1
-				self.invoice.irn_cancel_date = res.get('result')['CancelDate']
+				self.invoice.irn_cancel_date = res.get('result')['CancelDate'] if res.get('result') else ""
 				self.invoice.einvoice_status = 'Cancelled'
 				self.invoice.flags.updater_reference = {
 					'doctype': self.invoice.doctype,
