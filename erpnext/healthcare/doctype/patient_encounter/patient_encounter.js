@@ -9,10 +9,16 @@ frappe.ui.form.on('Patient Encounter', {
 		];
 		frm.get_field('drug_prescription').grid.editable_fields = [
 			{fieldname: 'drug_code', columns: 2},
-			{fieldname: 'drug_name', columns: 2},
-			{fieldname: 'dosage', columns: 2},
-			{fieldname: 'period', columns: 2}
+			{fieldname: 'drug_name', columns: 3},
+			{fieldname: 'dosage', columns: 1},
+			{fieldname: 'period', columns: 2},
+			{fieldname: 'dosage_form', columns: 2}
 		];
+		if (frappe.meta.get_docfield('Drug Prescription', 'medication').in_list_view === 1) {
+			frm.get_field('drug_prescription').grid.editable_fields.splice(0, 0, {fieldname: 'medication', columns: 3});
+			frm.get_field('drug_prescription').grid.editable_fields.splice(2, 1); // remove item description
+		}
+
 		frm.get_field('lab_test_prescription').grid.editable_fields = [
 			{fieldname: 'lab_test_code', columns: 2},
 			{fieldname: 'lab_test_name', columns: 4},
