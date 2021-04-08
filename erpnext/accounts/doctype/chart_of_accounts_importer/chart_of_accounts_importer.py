@@ -297,7 +297,7 @@ def validate_accounts(file_name):
 			msg = _("Please make sure the file you are using has 'Parent Account' column present in the header.")
 			msg += "<br><br>"
 			msg += _("Alternatively, you can download the template and fill your data in.")
-			frappe.throw(msg)
+			frappe.throw(msg, title=_("Parent Account Missing"))
 		if account["parent_account"] and accounts_dict.get(account["parent_account"]):
 			accounts_dict[account["parent_account"]]["is_group"] = 1
 
