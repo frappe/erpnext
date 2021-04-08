@@ -4,15 +4,14 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
+from frappe.utils import (getdate, validate_email_address, today, 
+                          add_years, cstr, comma_sep)
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
 	set_user_permission_if_allowed, has_permission, get_doc_permissions
-from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
-from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
 class EmployeeUserDisabledError(frappe.ValidationError): pass
 class EmployeeLeftValidationError(frappe.ValidationError): pass
@@ -285,6 +284,68 @@ def update_user_permissions(doc, method):
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
+def send_work_anniversary_reminders():
+	"""Send Employee Work Anniversary Reminders if 'Send Work Anniversary Reminders' is checked"""
+	to_send = int(frappe.db.get_single_value("HR Settings", "send_work_anniversary_reminders") or 1) 
+	if not to_send:
+		return
+	
+	employees_joined_today = get_employees_having_an_event_today("work_anniversary")
+
+	for company, anniversary_persons in employees_joined_today.items():
+		employee_emails = get_all_employee_emails(company)
+		anniversary_person_emails = [get_employee_email(doc) for doc in anniversary_persons]
+		recipients = list(set(employee_emails) - set(anniversary_person_emails))
+
+		reminder_text, message = get_work_anniversary_reminder_text_and_message(anniversary_persons)		
+		send_work_anniversary_reminder(recipients, reminder_text, anniversary_persons, message)
+
+		if len(anniversary_persons) > 1:
+			# email for people sharing work anniversaries
+			for person in anniversary_persons:
+				person_email = person["user_id"] or person["personal_email"] or person["company_email"]	
+				others = [d for d in anniversary_persons if d != person]
+				reminder_text, message = get_work_anniversary_reminder_text_and_message(others)
+				send_work_anniversary_reminder(person_email, reminder_text, others, message)
+
+def get_work_anniversary_reminder_text_and_message(anniversary_persons):
+	if len(anniversary_persons) == 1:
+		anniversary_person = anniversary_persons[0]['name']
+		# Number of years completed at the company
+		completed_years = getdate().year - anniversary_persons[0]['date_of_joining'].year
+		anniversary_person += f" completed {completed_years} years"
+	else:
+		person_names_with_years = []
+		for person in anniversary_persons:
+			person_text = person['name']
+			# Number of years completed at the company
+			completed_years = getdate().year - person['date_of_joining'].year
+			person_text += f" completed {completed_years} years"
+			person_names_with_years.append(person_text)
+
+		# converts ["Jim", "Rim", "Dim"] to Jim, Rim & Dim
+		anniversary_person = comma_sep(person_names_with_years, frappe._("{0} & {1}"), False)
+
+	reminder_text = _("Today {0} at our Company! 🎉").format(anniversary_person)
+	message = _("A friendly reminder of an important date for our team.")
+	message += "<br>"
+	message += _("Everyone, let’s congratulate {0} on their work anniversary!").format(anniversary_person)
+
+	return reminder_text, message
+
+def send_work_anniversary_reminder(recipients, reminder_text, anniversary_persons, message):
+	frappe.sendmail(
+		recipients=recipients,
+		subject=_("Work Anniversary Reminder"),
+		template="anniversary_reminder",
+		args=dict(
+			reminder_text=reminder_text,
+			anniversary_persons=anniversary_persons,
+			message=message,
+		),
+		header=_("🎊️🎊️ Work Anniversary Reminder 🎊️🎊️")
+	)
+
 def send_birthday_reminders():
 	"""Send Employee birthday reminders if no 'Stop Birthday Reminders' is not set."""
 	if int(frappe.db.get_single_value("HR Settings", "stop_birthday_reminders") or 0):
@@ -317,9 +378,7 @@ def get_birthday_reminder_text_and_message(birthday_persons):
 	else:
 		# converts ["Jim", "Rim", "Dim"] to Jim, Rim & Dim
 		person_names = [d['name'] for d in birthday_persons]
-		last_person = person_names[-1]
-		birthday_person_text = ", ".join(person_names[:-1])
-		birthday_person_text = _("{} & {}").format(birthday_person_text, last_person)
+		birthday_person_text = comma_sep(person_names, frappe._("{0} & {1}"), False)
 
 	reminder_text = _("Today is {0}'s birthday 🎉").format(birthday_person_text)
 	message = _("A friendly reminder of an important date for our team.")
@@ -343,9 +402,9 @@ def send_birthday_reminder(recipients, reminder_text, birthday_persons, message)
 
 def get_employees_who_are_born_today():
 	"""Get all employee born today & group them based on their company"""
-	return get_employees_having_event_today("birthday") 
+	return get_employees_having_an_event_today("birthday") 
 
-def get_employees_having_event_today(event_type):
+def get_employees_having_an_event_today(event_type):
 	"""Get all employee who have `event_type` today 
 	& group them based on their company. `event_type`
 	can be `birthday` or `work_anniversary`"""
@@ -361,23 +420,23 @@ def get_employees_having_event_today(event_type):
 		return
 
 	employees_born_today = frappe.db.multisql({
-		"mariadb": """
+		"mariadb": f"""
 			SELECT `personal_email`, `company`, `company_email`, `user_id`, `employee_name` AS 'name', `image`, `date_of_joining`
 			FROM `tabEmployee`
 			WHERE
-				DAY(%(condition_column)s) = DAY(%(today)s)
+				DAY({condition_column}) = DAY(%(today)s)
 			AND
-				MONTH(%(condition_column)s) = MONTH(%(today)s)
+				MONTH({condition_column}) = MONTH(%(today)s)
 			AND
 				`status` = 'Active'
 		""",
-		"postgres": """
+		"postgres": f"""
 			SELECT "personal_email", "company", "company_email", "user_id", "employee_name" AS 'name', "image"
 			FROM "tabEmployee"
 			WHERE
-				DATE_PART('day', %(condition_column)s) = date_part('day', %(today)s)
+				DATE_PART('day', {condition_column}) = date_part('day', %(today)s)
 			AND
-				DATE_PART('month', %(condition_column)s) = date_part('month', %(today)s)
+				DATE_PART('month', {condition_column}) = date_part('month', %(today)s)
 			AND
 				"status" = 'Active'
 		""",

@@ -35,6 +35,32 @@ class TestEmployee(unittest.TestCase):
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue("Subject: Birthday Reminder" in email_queue[0].message)
 
+	def test_work_anniversary_reminder(self):
+		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
+		employee.date_of_joining = "1998" + frappe.utils.nowdate()[4:]
+		employee.company_email = "test@example.com"
+		employee.company = "_Test Company"
+		employee.save()
+
+		from erpnext.hr.doctype.employee.employee import get_employees_having_an_event_today, send_work_anniversary_reminders
+
+		employees_having_work_anniversary = get_employees_having_an_event_today('work_anniversary')
+		self.assertTrue(employees_having_work_anniversary.get("_Test Company"))
+
+		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
+		hr_settings.send_work_anniversary_reminders = 1
+		hr_settings.save()
+
+		# Clear Email queue
+		frappe.db.sql("delete from `tabEmail Queue`")
+
+		send_work_anniversary_reminders()
+
+		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
+
+		print(email_queue[0].message)
+		self.assertTrue("Subject: Work Anniversary Reminder" in email_queue[0].message)
+		
 	def test_employee_status_left(self):
 		employee1 = make_employee("test_employee_1@company.com")
 		employee2 = make_employee("test_employee_2@company.com")
