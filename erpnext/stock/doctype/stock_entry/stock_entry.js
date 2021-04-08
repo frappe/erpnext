@@ -100,6 +100,13 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+
+		frappe.db.get_single_value('Stock Settings', 'disable_serial_no_and_batch_selector')
+		.then((value) => {
+			if (value) {
+				frappe.flags.hide_serial_batch_dialog = true;
+			}
+		});
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -721,7 +728,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 							no_batch_serial_number_value = !d.batch_no;
 						}
 
-						if (no_batch_serial_number_value) {
+						if (no_batch_serial_number_value && !frappe.flags.hide_serial_batch_dialog) {
 							erpnext.stock.select_batch_and_serial_no(frm, d);
 						}
 					}
