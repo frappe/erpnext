@@ -11,7 +11,7 @@ def make_custom_fields():
 	custom_fields = {
 		'Party Account': [
 			dict(fieldname='debtor_creditor_number', label='Debtor/Creditor Number',
-			fieldtype='Data', insert_after='account')
+			fieldtype='Data', insert_after='account', translatable=0)
 		]
 	}
 
