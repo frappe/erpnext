@@ -423,7 +423,7 @@ def make_einvoice(invoice):
 	if invoice.is_return:
 		prev_doc_details = get_return_doc_reference(invoice)
 
-	if invoice.transporter:
+	if invoice.transporter and flt(invoice.distance) and not invoice.is_return:
 		eway_bill_details = get_eway_bill_details(invoice)
 
 	# not yet implemented
