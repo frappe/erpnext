@@ -44,7 +44,6 @@ class calculate_taxes_and_totals(object):
 		self.determine_exclusive_rate()
 		self.calculate_net_total()
 		self.calculate_taxes()
-		self.round_off_taxes()
 		self.manipulate_grand_total_for_inclusive_tax()
 		self.calculate_totals()
 		self._cleanup()
@@ -288,10 +287,13 @@ class calculate_taxes_and_totals(object):
 				# set precision in the last item iteration
 				if n == len(self.doc.get("items")) - 1:
 					self.round_off_totals(tax)
+					self._set_in_company_currency(tax,
+						["tax_amount", "tax_amount_after_discount_amount"])
+
+					self.round_off_base_values(tax)
 					self.set_cumulative_total(i, tax)
 
-					self._set_in_company_currency(tax,
-						["total", "tax_amount", "tax_amount_after_discount_amount"])
+					self._set_in_company_currency(tax, ["total"])
 
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
@@ -299,23 +301,6 @@ class calculate_taxes_and_totals(object):
 							self.doc.rounding_adjustment = flt(self.doc.grand_total
 								- flt(self.doc.discount_amount) - tax.total,
 								self.doc.precision("rounding_adjustment"))
-
-	def round_off_taxes(self):
-		for i, tax in enumerate(self.doc.get('taxes')):
-			if tax.account_head in frappe.flags.round_off_applicable_accounts:
-				tax.base_tax_amount = round(tax.base_tax_amount, 0)
-				tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
-
-				tax.tax_amount = flt(flt(tax.base_tax_amount) * self.doc.conversion_rate, tax.precision("base_tax_amount"))
-				tax.tax_amount_after_discount_amount = flt(flt(tax.base_tax_amount_after_discount_amount) * self.doc.conversion_rate,
-					tax.precision("base_tax_amount"))
-
-			if i==0:
-				tax.base_total = self.doc.base_net_total + tax.base_tax_amount_after_discount_amount
-			else:
-				tax.base_total = self.doc.get('taxes')[i-1].base_total + tax.base_tax_amount_after_discount_amount
-
-			tax.total = flt(flt(tax.base_total) * self.doc.conversion_rate, tax.precision("base_tax_amount"))
 
 	def get_tax_amount_if_for_valuation_or_deduction(self, tax_amount, tax):
 		# if just for valuation, do not add the tax amount in total
@@ -369,9 +354,19 @@ class calculate_taxes_and_totals(object):
 		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount)]
 
 	def round_off_totals(self, tax):
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			tax.tax_amount = round(tax.tax_amount, 0)
+			tax.tax_amount_after_discount_amount = round(tax.tax_amount_after_discount_amount, 0)
+
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount,
 			tax.precision("tax_amount"))
+
+	def round_off_base_values(self, tax):
+		# Round off to nearest integer based on regional settings
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			tax.base_tax_amount = round(tax.base_tax_amount, 0)
+			tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
 
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# if fully inclusive taxes and diff

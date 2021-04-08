@@ -79,7 +79,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 		this.determine_exclusive_rate();
 		this.calculate_net_total();
 		this.calculate_taxes();
-		this.round_off_taxes();
 		this.manipulate_grand_total_for_inclusive_tax();
 		this.calculate_totals();
 		this._cleanup();
@@ -324,12 +323,15 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 				// set precision in the last item iteration
 				if (n == me.frm.doc["items"].length - 1) {
 					me.round_off_totals(tax);
+					me.set_in_company_currency(tax,
+						["tax_amount", "tax_amount_after_discount_amount"]);
+
+					me.round_off_base_values(tax);
 
 					// in tax.total, accumulate grand total for each item
 					me.set_cumulative_total(i, tax);
 
-					me.set_in_company_currency(tax,
-						["total", "tax_amount", "tax_amount_after_discount_amount"]);
+					me.set_in_company_currency(tax, ["total"]);
 
 					// adjust Discount Amount loss in last tax iteration
 					if ((i == me.frm.doc["taxes"].length - 1) && me.discount_amount_applied
@@ -339,29 +341,6 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 					}
 				}
 			});
-		});
-	},
-
-	round_off_taxes: function() {
-		let me = this;
-		// Round of taxes to whole numbers based on regional settings
-		$.each(this.frm.doc['taxes'] || [], function(i, tax) {
-			if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
-				tax.base_tax_amount = Math.round(tax.base_tax_amount);
-				tax.base_tax_amount_after_discount_amount = Math.round(tax.base_tax_amount_after_discount_amount);
-
-				tax.tax_amount = flt(flt(tax.base_tax_amount) * me.frm.doc.conversion_rate, precision("base_tax_amount", tax));
-				tax.tax_amount_after_discount_amount = flt(flt(tax.base_tax_amount_after_discount_amount) * me.frm.doc.conversion_rate,
-					precision("base_tax_amount", tax));
-			}
-
-			if (i==0) {
-				tax.base_total = me.frm.doc.base_net_total + tax.base_tax_amount_after_discount_amount;
-			} else {
-				tax.base_total = me.frm.doc['taxes'][i-1].base_total + tax.base_tax_amount_after_discount_amount;
-			}
-
-			tax.total = flt(flt(tax.base_total) * me.frm.doc.conversion_rate, precision("base_tax_amount", tax));
 		});
 	},
 
@@ -435,8 +414,20 @@ erpnext.taxes_and_totals = erpnext.payments.extend({
 	},
 
 	round_off_totals: function(tax) {
+		if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
+			tax.tax_amount= Math.round(tax.tax_amount);
+			tax.tax_amount_after_discount_amount = Math.round(tax.tax_amount_after_discount_amount);
+		}
+
 		tax.tax_amount = flt(tax.tax_amount, precision("tax_amount", tax));
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount, precision("tax_amount", tax));
+	},
+
+	round_off_base_values: function(tax) {
+		if (frappe.flags.round_off_applicable_accounts.includes(tax.account_head)) {
+			tax.base_tax_amount= Math.round(tax.base_tax_amount);
+			tax.base_tax_amount_after_discount_amount = Math.round(tax.base_tax_amount_after_discount_amount);
+		}
 	},
 
 	manipulate_grand_total_for_inclusive_tax: function() {
