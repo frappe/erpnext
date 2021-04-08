@@ -14,7 +14,7 @@ frappe.ui.form.on('Medication', {
 		mark_change_in_item(frm);
 	},
 
-	is_billable: function (frm) {
+	is_billable: function(frm) {
 		mark_change_in_item(frm);
 	},
 
@@ -27,9 +27,14 @@ frappe.ui.form.on('Medication', {
 	},
 	refresh: function(frm) {
 		if (!frm.doc.__islocal) {
-			cur_frm.add_custom_button(__('Change Item Code'), function() {
+			frm.add_custom_button(__('Change Item Code'), function() {
 				change_medication_code(frm.doc);
 			});
+			frm.set_df_property('item_code', 'hidden', true);
+			frm.set_df_property('stock_uom', 'read_only', true);
+			if (frm.doc.is_billable && frm.doc.rate > 0) {
+				frm.set_df_property('rate', 'read_only', true);
+			}
 		}
 	}
 });
@@ -42,8 +47,8 @@ let mark_change_in_item = function(frm) {
 
 let change_medication_code = function(doc) {
 	let d = new frappe.ui.Dialog({
-		title:__('Change Item Code'),
-		fields:[
+		title: __('Change Item Code'),
+		fields: [
 			{
 				'fieldtype': 'Data',
 				'label': 'Item Code',
@@ -57,8 +62,8 @@ let change_medication_code = function(doc) {
 			if (values) {
 				frappe.call({
 					'method': 'erpnext.healthcare.doctype.medication.medication.change_item_code_from_medication',
-					'args': {item_code: values.item_code, doc: doc},
-					callback: function () {
+					'args': { item_code: values.item_code, doc: doc },
+					callback: function() {
 						cur_frm.reload_doc();
 						frappe.show_alert({
 							message: 'Item Code renamed successfully',

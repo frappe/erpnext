@@ -13,6 +13,7 @@ from frappe.model.mapper import get_mapped_doc
 class PatientEncounter(Document):
 	def validate(self):
 		self.set_title()
+		self.validate_medications()
 
 	def on_update(self):
 		if self.appointment:
@@ -32,6 +33,12 @@ class PatientEncounter(Document):
 	def set_title(self):
 		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
 			self.practitioner_name or self.practitioner)[:100]
+
+	def validate_medications(self):
+		if self.drug_prescription:
+			for item in self.drug_prescription:
+				if not item.medication and not item.drug_code:
+					frappe.throw(_('Error: <b>Drug Prescription</b> Row #{} Medication or Item Code is mandatory').format(item.idx))
 
 @frappe.whitelist()
 def make_ip_medication_order(source_name, target_doc=None):

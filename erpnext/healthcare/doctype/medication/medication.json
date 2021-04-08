@@ -1,38 +1,38 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:{medication_name}",
+ "autoname": "field:medication_name",
  "creation": "2020-03-24 15:56:36.583587",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "national_drug_code",
   "medication_name",
-  "generic_name",
+  "national_drug_code",
   "medication_class",
-  "is_generic",
+  "generic_name",
+  "abbr",
   "column_break_4",
   "disabled",
   "strength",
   "strength_uom",
-  "abbr",
+  "dosage_form",
+  "is_generic",
+  "defaults_section",
+  "default_prescription_dosage",
+  "default_interval",
+  "default_interval_uom",
+  "column_break_16",
+  "default_prescription_duration",
   "item_and_price_section",
   "item",
   "item_code",
   "item_group",
-  "description",
   "stock_uom",
   "column_break_14",
   "is_billable",
   "rate",
-  "defaults_section",
-  "default_dosage_form",
-  "default_prescription_dosage",
-  "column_break_6",
-  "default_prescription_duration",
-  "default_interval",
-  "default_interval_uom",
+  "description",
   "drug_interactions_section",
   "bypass_medication_class_interaction_check",
   "medication_class_interaction",
@@ -41,7 +41,7 @@
   "allergy_interaction",
   "allowed_diagnostic_codes_section",
   "bypass_medical_coding_check",
-  "codification_table",
+  "allowed_diagnostic_codes",
   "section_break_36",
   "reference_url",
   "change_in_item"
@@ -58,7 +58,8 @@
    "fieldtype": "Data",
    "label": "Medication Name",
    "no_copy": 1,
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "generic_name",
@@ -82,18 +83,15 @@
    "fieldtype": "Float",
    "label": "Strength",
    "no_copy": 1,
-   "precision": "2"
+   "precision": "2",
+   "reqd": 1
   },
   {
    "fieldname": "strength_uom",
    "fieldtype": "Link",
    "label": "Strength UOM",
-   "options": "UOM"
-  },
-  {
-   "fieldname": "abbr",
-   "fieldtype": "Data",
-   "label": "Abbr"
+   "options": "UOM",
+   "reqd": 1
   },
   {
    "fieldname": "item",
@@ -106,39 +104,35 @@
   {
    "fieldname": "defaults_section",
    "fieldtype": "Section Break",
-   "label": "Defaults"
-  },
-  {
-   "fieldname": "default_dosage_form",
-   "fieldtype": "Link",
-   "label": "Default Dosage Form",
-   "options": "Dosage Form"
+   "label": "Default Dosage"
   },
   {
    "fieldname": "default_prescription_dosage",
    "fieldtype": "Link",
    "label": "Default Prescription Dosage",
-   "options": "Prescription Dosage"
-  },
-  {
-   "fieldname": "column_break_6",
-   "fieldtype": "Column Break"
+   "mandatory_depends_on": "!dosage_by_interval",
+   "options": "Prescription Dosage",
+   "reqd": 1
   },
   {
    "fieldname": "default_prescription_duration",
    "fieldtype": "Link",
    "label": "Default Prescription Duration",
-   "options": "Prescription Duration"
+   "mandatory_depends_on": "!dosage_by_interval",
+   "options": "Prescription Duration",
+   "reqd": 1
   },
   {
    "fieldname": "default_interval",
    "fieldtype": "Int",
-   "label": "Default Interval"
+   "label": "Default Interval",
+   "mandatory_depends_on": "dosage_by_interval"
   },
   {
    "fieldname": "default_interval_uom",
    "fieldtype": "Select",
    "label": "Default Interval UOM",
+   "mandatory_depends_on": "dosage_by_interval",
    "options": "Hour\nDay"
   },
   {
@@ -149,6 +143,7 @@
   {
    "fieldname": "drug_interactions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Drug Interactions"
   },
   {
@@ -167,6 +162,7 @@
   {
    "fieldname": "allergy_interactions_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Allergy Interactions"
   },
   {
@@ -185,6 +181,7 @@
   {
    "fieldname": "allowed_diagnostic_codes_section",
    "fieldtype": "Section Break",
+   "hidden": 1,
    "label": "Allowed Diagnostic Codes"
   },
   {
@@ -194,13 +191,7 @@
    "label": "Bypass Medical Coding Check"
   },
   {
-   "depends_on": "eval:!doc.bypass_medical_coding_check",
-   "fieldname": "codification_table",
-   "fieldtype": "Table",
-   "label": "Codification Table",
-   "options": "Codification Table"
-  },
-  {
+   "description": "Properties of the linked Item, you may further configure Batch Number and Expiry, Serial Number, Shelf Life etc. in the Item master",
    "fieldname": "item_and_price_section",
    "fieldtype": "Section Break",
    "label": "Item and Price"
@@ -210,7 +201,8 @@
    "fieldtype": "Data",
    "label": "Item Code",
    "no_copy": 1,
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "item_group",
@@ -266,7 +258,8 @@
   },
   {
    "fieldname": "section_break_36",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "hidden": 1
   },
   {
    "fieldname": "stock_uom",
@@ -281,10 +274,35 @@
    "fieldname": "is_generic",
    "fieldtype": "Check",
    "label": "Is Generic"
+  },
+  {
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Abbr",
+   "no_copy": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "dosage_form",
+   "fieldtype": "Link",
+   "label": "Dosage Form",
+   "options": "Dosage Form"
+  },
+  {
+   "depends_on": "eval:!doc.bypass_medical_coding_check",
+   "fieldname": "allowed_diagnostic_codes",
+   "fieldtype": "Table",
+   "label": "Codification Table",
+   "options": "Codification Table"
+  },
+  {
+   "fieldname": "column_break_16",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2020-09-27 10:52:54.683402",
+ "modified": "2021-04-08 08:51:10.729710",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Medication",
@@ -315,6 +333,7 @@
    "write": 1
   }
  ],
+ "search_fields": "abbr, national_drug_code, generic_name",
  "sort_field": "modified",
  "sort_order": "DESC",
  "track_changes": 1
