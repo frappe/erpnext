@@ -2,10 +2,8 @@ from __future__ import unicode_literals
 
 from bs4 import BeautifulSoup
 import frappe, unittest
-from frappe.utils import set_request, get_html_for_route
-from frappe.website.render import render
+from frappe.utils import get_html_for_route
 from erpnext.e_commerce.product_query import ProductQuery
-from erpnext.stock.doctype.item.test_item import make_item_variant
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
 
 test_dependencies = ["Item"]
@@ -84,7 +82,7 @@ class TestProductConfigurator(unittest.TestCase):
 
 	def publish_items_on_website(self):
 		if frappe.db.exists("Item",  "_Test Item") and not frappe.db.exists("Website Item",  {"item_code": "_Test Item"}):
-				make_website_item(frappe.get_cached_doc("Item",  "_Test Item"))
+			make_website_item(frappe.get_cached_doc("Item",  "_Test Item"))
 
 		if frappe.db.exists("Item",  "_Test Variant Item") and not frappe.db.exists("Website Item",  {"item_code": "_Test Variant Item"}):
 			make_website_item(frappe.get_cached_doc("Item",  "_Test Variant Item"))

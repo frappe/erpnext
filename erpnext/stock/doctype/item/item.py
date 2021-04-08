@@ -343,7 +343,6 @@ class Item(Document):
 					(self.item_name, self.description, self.brand, self.name))
 
 	def on_trash(self):
-		super(Item, self).on_trash()
 		frappe.db.sql("""delete from tabBin where item_code=%s""", self.name)
 		frappe.db.sql("delete from `tabItem Price` where item_code=%s", self.name)
 		for variant_of in frappe.get_all("Item", filters={"variant_of": self.name}):
