@@ -10,11 +10,11 @@ class ProductQuery:
 	"""Query engine for product listing
 
 	Attributes:
-	    fields (list): Fields to fetch in query
-	    conditions (string): Conditions for query building
-	    or_conditions (string): Search conditions
-	    page_length (Int): Length of page for the query
-	    settings (Document): E Commerce Settings DocType
+		fields (list): Fields to fetch in query
+		conditions (string): Conditions for query building
+		or_conditions (string): Search conditions
+		page_length (Int): Length of page for the query
+		settings (Document): E Commerce Settings DocType
 	"""
 
 	def __init__(self):
@@ -31,16 +31,18 @@ class ProductQuery:
 		"""Summary
 
 		Args:
-		    attributes (dict, optional): Item Attribute filters
-		    fields (dict, optional): Field level filters
-		    search_term (str, optional): Search term to lookup
-		    start (int, optional): Page start
+			attributes (dict, optional): Item Attribute filters
+			fields (dict, optional): Field level filters
+			search_term (str, optional): Search term to lookup
+			start (int, optional): Page start
 
 		Returns:
-		    list: List of results with set fields
+			list: List of results with set fields
 		"""
-		if fields: self.build_fields_filters(fields)
-		if search_term: self.build_search_filters(search_term)
+		if fields:
+			self.build_fields_filters(fields)
+		if search_term:
+			self.build_search_filters(search_term)
 
 		if self.settings.hide_variants:
 			self.conditions += " and wi.variant_of is null"
@@ -72,13 +74,13 @@ class ProductQuery:
 			if self.settings.show_stock_availability:
 				if item.get("website_warehouse"):
 					stock_qty = frappe.utils.flt(
-							frappe.db.get_value("Bin",
-								{
-									"item_code": item.item_code,
-									"warehouse": item.get("website_warehouse")
-								},
-								"actual_qty")
-							)
+						frappe.db.get_value("Bin",
+							{
+								"item_code": item.item_code,
+								"warehouse": item.get("website_warehouse")
+							},
+							"actual_qty")
+					)
 					item.in_stock = "green" if stock_qty else "red"
 				elif not frappe.db.get_value("Item", item.item_code, "is_stock_item"):
 					item.in_stock = "green" # non-stock item will always be available
@@ -117,7 +119,8 @@ class ProductQuery:
 		self.conditions += " and iva.parent = wi.item_code"
 
 		for attribute, values in attributes.items():
-			if not isinstance(values, list): values = [values]
+			if not isinstance(values, list):
+				values = [values]
 
 			conditions_copy = self.conditions
 			substitutions_copy = self.substitutions.copy()
@@ -140,7 +143,7 @@ class ProductQuery:
 		"""Build filters for field values
 
 		Args:
-		    filters (dict): Filters
+			filters (dict): Filters
 		"""
 		for field, values in filters.items():
 			if not values:
@@ -167,7 +170,7 @@ class ProductQuery:
 		"""Query search term in specified fields
 
 		Args:
-		    search_term (str): Search candidate
+			search_term (str): Search candidate
 		"""
 		# Default fields to search from
 		default_fields = {'name', 'item_name', 'description', 'item_group'}

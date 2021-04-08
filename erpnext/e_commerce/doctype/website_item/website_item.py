@@ -48,6 +48,7 @@ class WebsiteItem(WebsiteGenerator):
 		self.update_template_item()
 
 	def on_trash(self):
+		super(WebsiteItem, self).on_trash()
 		self.publish_unpublish_desk_item(publish=False)
 
 	def validate_duplicate_website_item(self):
@@ -169,8 +170,8 @@ class WebsiteItem(WebsiteGenerator):
 
 		context.parents = get_parent_item_groups(self.item_group, from_item=True)
 		self.attributes = frappe.get_all("Item Variant Attribute",
-					  fields=["attribute", "attribute_value"],
-					  filters={"parent": self.item_code})
+			fields=["attribute", "attribute_value"],
+			filters={"parent": self.item_code})
 		self.set_variant_context(context)
 		self.set_attribute_context(context)
 		self.set_disabled_attributes(context)
@@ -181,7 +182,7 @@ class WebsiteItem(WebsiteGenerator):
 
 		context.wished = False
 		if frappe.db.exists("Wishlist Items", {"item_code": self.item_code, "parent": frappe.session.user}):
-				context.wished = True
+			context.wished = True
 
 		return context
 
@@ -192,8 +193,8 @@ class WebsiteItem(WebsiteGenerator):
 			# load variants
 			# also used in set_attribute_context
 			context.variants = frappe.get_all("Item",
-				 filters={"variant_of": self.name, "show_variant_in_website": 1},
-				 order_by="name asc")
+				filters={"variant_of": self.name, "show_variant_in_website": 1},
+				order_by="name asc")
 
 			variant = frappe.form_dict.variant
 			if not variant and context.variants:
@@ -227,8 +228,8 @@ class WebsiteItem(WebsiteGenerator):
 			# load attributes
 			for v in context.variants:
 				v.attributes = frappe.get_all("Item Variant Attribute",
-					  fields=["attribute", "attribute_value"],
-					  filters={"parent": v.name})
+					fields=["attribute", "attribute_value"],
+					filters={"parent": v.name})
 				# make a map for easier access in templates
 				v.attribute_map = frappe._dict({})
 				for attr in v.attributes:
@@ -379,7 +380,8 @@ def invalidate_cache_for_web_item(doc):
 
 @frappe.whitelist()
 def make_website_item(doc, save=True):
-	if not doc: return
+	if not doc:
+		return
 
 	if isinstance(doc, string_types):
 		doc = json.loads(doc)

@@ -53,7 +53,7 @@ def remove_from_wishlist(item_code):
 			delete
 			from `tabWishlist Items`
 			where item_code=%(item_code)s
-		"""%{"item_code": frappe.db.escape(item_code)})
+		""" % {"item_code": frappe.db.escape(item_code)})
 
 		frappe.db.commit()
 

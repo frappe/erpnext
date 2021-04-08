@@ -26,7 +26,6 @@ $(() => {
 						{fieldname: "comment", fieldtype: "Small Text", label: "Your Review"}
 					],
 					primary_action: function() {
-						let me = this;
 						let data = d.get_values();
 						frappe.call({
 							method: "erpnext.e_commerce.doctype.item_review.item_review.add_item_review",
@@ -39,7 +38,7 @@ $(() => {
 							freeze: true,
 							freeze_message: __("Submitting Review ..."),
 							callback: (r) => {
-								if(!r.exc) {
+								if (!r.exc) {
 									frappe.msgprint({
 										message: __("Thank you for submitting your review"),
 										title: __("Review Submitted"),
@@ -74,7 +73,7 @@ $(() => {
 						end: me.page_length
 					},
 					callback: (result) => {
-						if(result.message) {
+						if (result.message) {
 							let res = result.message;
 							me.get_user_review_html(res.reviews);
 
@@ -85,7 +84,7 @@ $(() => {
 
 						}
 					}
-				})
+				});
 			});
 
 		}
@@ -121,7 +120,7 @@ $(() => {
 
 		get_review_stars(rating) {
 			let stars = ``;
-			for(let i = 1; i < 6; i++) {
+			for (let i = 1; i < 6; i++) {
 				let fill_class = i <= rating ? 'star-click' : '';
 				stars += `<svg class="icon icon-md ${fill_class}">
 						<use href="#icon-star"></use>
