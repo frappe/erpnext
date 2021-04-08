@@ -298,7 +298,7 @@ def get_items_by_fields(field_filters):
 
 
 def get_items(filters=None, search=None):
-	start = frappe.form_dict.start or 0
+	start = frappe.form_dict.get('start', 0)
 	products_settings = get_product_settings()
 	page_length = products_settings.products_per_page
 

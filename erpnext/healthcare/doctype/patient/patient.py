@@ -111,6 +111,7 @@ class Patient(Document):
 			age_str = str(age.years) + ' ' + _("Years(s)") + ' ' + str(age.months) + ' ' + _("Month(s)") + ' ' + str(age.days) + ' ' + _("Day(s)")
 		return age_str
 
+	@frappe.whitelist()
 	def invoice_patient_registration(self):
 		if frappe.db.get_single_value('Healthcare Settings', 'registration_fee'):
 			company = frappe.defaults.get_user_default('company')
