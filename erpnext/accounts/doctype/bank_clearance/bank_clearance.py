@@ -12,6 +12,7 @@ form_grid_templates = {
 }
 
 class BankClearance(Document):
+	@frappe.whitelist()
 	def get_payment_entries(self):
 		if not (self.from_date and self.to_date):
 			frappe.throw(_("From Date and To Date are Mandatory"))
@@ -108,6 +109,7 @@ class BankClearance(Document):
 			row.update(d)
 			self.total_amount += flt(amount)
 
+	@frappe.whitelist()
 	def update_clearance_date(self):
 		clearance_date_updated = False
 		for d in self.get('payment_entries'):
