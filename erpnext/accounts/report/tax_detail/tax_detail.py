@@ -11,7 +11,7 @@ from frappe import _
 # field lists in multiple doctypes will be coalesced
 required_sql_fields = {
 	("GL Entry", 1): ["posting_date"],
-	("Account",): ["account_type"],
+	("Account",): ["root_type", "account_type"],
 	("GL Entry", 2): ["account", "voucher_type", "voucher_no", "debit", "credit"],
 	("Purchase Invoice Item", "Sales Invoice Item"): ["base_net_amount", "item_tax_rate", "item_tax_template", "item_group", "item_name"],
 	("Purchase Invoice", "Sales Invoice"): ["taxes_and_charges", "tax_category"],
