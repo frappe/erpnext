@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-from erpnext.regional.germany.setup import make_custom_fields
+
 
 def execute():
 	"""Move account number into the new custom field debtor_creditor_number.
