@@ -8,7 +8,8 @@
  "field_order": [
   "company",
   "doctypes",
-  "amended_from"
+  "amended_from",
+  "status"
  ],
  "fields": [
   {
@@ -34,12 +35,18 @@
    "options": "Transactions Cleanup",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Draft\nCompleted"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-06 23:20:34.518253",
+ "modified": "2021-04-08 22:22:53.979926",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transactions Cleanup",

@@ -20,7 +20,9 @@ class TransactionsCleanup(Document):
 			print(doctype_to_be_deleted.autoname)
 			prefix, hashes = doctype_to_be_deleted.autoname.rsplit(".", 1)
 			print(prefix)
-		# print(self.as_dict())
+			# print(self.status)
+			print(self.docstatus)
+		print(self.as_dict())
 		
 	def on_submit(self):
 		for doctype in self.doctypes:
