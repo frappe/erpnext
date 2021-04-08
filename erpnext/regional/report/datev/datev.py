@@ -146,10 +146,8 @@ def validate(filters):
 	validate_fiscal_year(from_date, to_date, company)
 
 	if not frappe.db.exists('DATEV Settings', filters.get('company')):
-		frappe.log_error(_('Please create {} for Company {}.').format(
-			'<a href="desk#List/DATEV%20Settings/List">{}</a>'.format(_('DATEV Settings')),
-			frappe.bold(filters.get('company'))
-		))
+		msg = 'Please create DATEV Settings for Company {}'.format(filters.get('company'))
+		frappe.log_error(msg, title='DATEV Settings missing')
 		return False
 
 	return True
