@@ -6,7 +6,8 @@ def execute():
 
 	for row in homepage.products:
 		web_item = frappe.db.get_value("Website Item", {"item_code": row.item_code}, "name")
-		if not web_item: continue
+		if not web_item:
+			continue
 
 		row.item_code = web_item
 

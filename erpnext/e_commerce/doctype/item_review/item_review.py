@@ -4,9 +4,6 @@
 
 from __future__ import unicode_literals
 from datetime import datetime
-from six import string_types
-import json
-
 import frappe
 from frappe.model.document import Document
 from frappe.contacts.doctype.contact.contact import get_contact_name

@@ -3,7 +3,8 @@
 # For license information, please see license.txt
 
 import frappe
-from frappe import _
+from frappe.utils import cint
+from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import cint
 from frappe.utils import get_datetime, get_datetime_str, now_datetime
@@ -29,7 +30,8 @@ class ECommerceSettings(Document):
 		frappe.clear_document_cache("E Commerce Settings", "E Commerce Settings")
 
 	def validate_field_filters(self):
-		if not (self.enable_field_filters and self.filter_fields): return
+		if not (self.enable_field_filters and self.filter_fields):
+			return
 
 		item_meta = frappe.get_meta("Item")
 		valid_fields = [df.fieldname for df in item_meta.fields if df.fieldtype in ["Link", "Table MultiSelect"]]
@@ -39,7 +41,8 @@ class ECommerceSettings(Document):
 				frappe.throw(_("Filter Fields Row #{0}: Fieldname <b>{1}</b> must be of type 'Link' or 'Table MultiSelect'").format(f.idx, f.fieldname))
 
 	def validate_attribute_filters(self):
-		if not (self.enable_attribute_filters and self.filter_attributes): return
+		if not (self.enable_attribute_filters and self.filter_attributes):
+			return
 
 		# if attribute filters are enabled, hide_variants should be disabled
 		self.hide_variants = 0

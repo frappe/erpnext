@@ -14,7 +14,8 @@ class ProductFiltersBuilder:
 		self.item_group = item_group
 
 	def get_field_filters(self):
-		if not self.item_group and not self.doc.enable_field_filters: return
+		if not self.item_group and not self.doc.enable_field_filters:
+			return
 
 		filter_fields = [row.fieldname for row in self.doc.filter_fields]
 
@@ -48,7 +49,8 @@ class ProductFiltersBuilder:
 				values = [d.name for d in frappe.get_all(doctype, filters)]
 
 			# Remove None
-			if None in values: values.remove(None)
+			if None in values:
+				values.remove(None)
 
 			if values:
 				filter_data.append([df, values])
@@ -56,7 +58,8 @@ class ProductFiltersBuilder:
 		return filter_data
 
 	def get_attribute_filters(self):
-		if not self.item_group and not self.doc.enable_attribute_filters: return
+		if not self.item_group and not self.doc.enable_attribute_filters:
+			return
 
 		attributes = [row.attribute for row in self.doc.filter_attributes]
 

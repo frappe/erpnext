@@ -106,7 +106,7 @@ class TestProductConfigurator(unittest.TestCase):
 
 	def publish_items_on_website(self):
 		if frappe.db.exists("Item",  "_Test Item") and not frappe.db.exists("Website Item",  {"item_code": "_Test Item"}):
-				make_website_item(frappe.get_cached_doc("Item",  "_Test Item"))
+			make_website_item(frappe.get_cached_doc("Item",  "_Test Item"))
 
 		if frappe.db.exists("Item",  "_Test Variant Item") and not frappe.db.exists("Website Item",  {"item_code": "_Test Variant Item"}):
 			make_website_item(frappe.get_cached_doc("Item",  "_Test Variant Item"))

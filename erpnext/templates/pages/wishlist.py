@@ -19,7 +19,7 @@ def get_context(context):
 						"warehouse": item.get("warehouse")
 					},
 					"actual_qty")
-				)
+			)
 			item.available = True if stock_qty else False
 
 	context.items = items
@@ -34,5 +34,5 @@ def get_wishlist_items():
 			from
 				`tabWishlist Items`
 			where
-				parent=%(user)s"""%{"user": frappe.db.escape(frappe.session.user)}, as_dict=1)
+				parent=%(user)s""" % {"user": frappe.db.escape(frappe.session.user)}, as_dict=1)
 	return
