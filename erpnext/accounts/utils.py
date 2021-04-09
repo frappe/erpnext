@@ -621,6 +621,12 @@ def remove_ref_doc_link_from_jv(ref_type, ref_no):
 			where reference_type=%s and reference_name=%s
 			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
 
+		frappe.db.sql("""update `tabJournal Entry Account`
+			set original_reference_type=null, original_reference_name=null,
+				modified=%s, modified_by=%s
+			where original_reference_type=%s and original_reference_name=%s
+			and docstatus < 2""", (now(), frappe.session.user, ref_type, ref_no))
+
 		msg_jv_list = ["<a href='#Form/Journal Entry/{0}'>{0}</a>".format(jv) for jv in list(set(linked_jv))]
 		frappe.msgprint(_("Journal Entries {0} are un-linked").format(", ".join(msg_jv_list)))
 
