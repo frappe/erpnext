@@ -467,7 +467,7 @@ class update_entries_after(object):
 
 	def get_sle_before_datetime(self):
 		"""get previous stock ledger entry before current time-bucket"""
-		return get_stock_ledger_entries(self.args, "<", "desc", "limit 1", for_update=False)
+		return get_stock_ledger_entries(self.args, "<", "desc", "limit 1", for_update=True)
 
 	def get_sle_after_datetime(self):
 		"""get Stock Ledger Entries after a particular datetime, for reposting"""
@@ -480,7 +480,7 @@ class update_entries_after(object):
 
 		if not self.batch_data:
 			previous_batch_sle = get_stock_ledger_entries(sle, "<", "desc", "limit 1",
-				for_update=False, batch_sle=True)
+				for_update=True, batch_sle=True)
 			previous_batch_sle = previous_batch_sle[0] if previous_batch_sle else frappe._dict()
 
 			self.batch_data = self.previous_batch_sle_dict[sle.batch_no] = frappe._dict()
