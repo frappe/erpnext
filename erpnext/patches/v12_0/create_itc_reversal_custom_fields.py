@@ -27,6 +27,11 @@ def execute():
 				fetch_from='company_address.gstin',
 				depends_on="eval:doc.voucher_type=='Reversal Of ITC'",
 				mandatory_depends_on="eval:doc.voucher_type=='Reversal Of ITC'")
+		],
+		'Purchase Invoice': [
+			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
+				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
+				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nITC on Reverse Charge\nIneligible\nAll Other ITC', default="All Other ITC")
 		]
 	}
 
