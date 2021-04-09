@@ -9,26 +9,6 @@ from frappe.model.document import Document
 
 class TransactionsCleanup(Document):
 	def before_save(self):
-		print("*" * 50)
-		print(self.name)
-		print(self.company) # prints name of the company
-
-		# for doctype in self.doctypes:
-		# 	print(doctype.name)
-
-		# 	print(doctype.doctype_name) # prints name of the doctype to be deleted
-		# 	print(frappe.get_all(doctype.doctype_name)) # prints the docs to be deleted 
-		# 	# doctype_to_be_deleted = doctype.doctype_name
-		# 	# print(doctype_to_be_deleted)
-		# 	print("*" * 50)
-		# 	doctype_to_be_deleted = frappe.get_doc('DocType', doctype.doctype_name)
-		# 	print(doctype_to_be_deleted.autoname)
-		# 	prefix, hashes = doctype_to_be_deleted.autoname.rsplit(".", 1)
-		# 	print(prefix)
-		# 	# print(self.status)
-		# 	print(self.docstatus)
-		# print(self.as_dict())
-
 		# prepopulating the 'Additional DocTypes' table if it's not empty
 		if not self.doctypes:
 			doctypes = frappe.get_all('Doctype',
@@ -47,8 +27,6 @@ class TransactionsCleanup(Document):
 							"doctype_name" : doctype.name,
 						})
 						break
-
-		#testing area
 		
 	def on_submit(self):
 		for doctype in self.doctypes or self.customisable_doctypes:
