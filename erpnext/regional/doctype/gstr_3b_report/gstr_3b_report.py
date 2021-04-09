@@ -183,6 +183,7 @@ class GSTR3BReport(Document):
 		itc_type_map = {
 			'IMPG': 'Import Of Capital Goods',
 			'IMPS': 'Import Of Service',
+			'ISRC': 'ITC on Reverse Charge',
 			'ISD': 'Input Service Distributor',
 			'OTH': 'All Other ITC'
 		}
@@ -198,7 +199,7 @@ class GSTR3BReport(Document):
 				itc_type = 'All Other ITC'
 				gst_category = ['Unregistered', 'Overseas']
 			else:
-				gst_category = ['Unregistered', 'Overseas', 'Registered Regular']
+				gst_category = ['Overseas', 'Registered Regular']
 				reverse_charge = ["N", "Y"]
 
 			for account_head in self.account_heads:
