@@ -25,7 +25,8 @@
    "fieldname": "doctypes",
    "fieldtype": "Table",
    "label": "Additional DocTypes",
-   "options": "Transactions Cleanup Doctype"
+   "options": "Transactions Cleanup Doctype",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -53,7 +54,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-09 20:58:02.953452",
+ "modified": "2021-04-10 00:14:07.967271",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transactions Cleanup",
