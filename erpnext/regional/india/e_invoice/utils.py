@@ -787,6 +787,8 @@ class GSPConnector():
 
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')
+		self.invoice.ack_no = res.get('AckNo')
+		self.invoice.ack_date = res.get('AckDt')
 		self.invoice.signed_einvoice = dec_signed_invoice
 		self.invoice.signed_qr_code = res.get('SignedQRCode')
 
