@@ -7,6 +7,7 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
+  "customisable_doctypes",
   "doctypes",
   "amended_from",
   "status"
@@ -23,9 +24,8 @@
   {
    "fieldname": "doctypes",
    "fieldtype": "Table",
-   "label": "Doctypes",
-   "options": "Transactions Cleanup Doctype",
-   "reqd": 1
+   "label": "Additional DocTypes",
+   "options": "Transactions Cleanup Doctype"
   },
   {
    "fieldname": "amended_from",
@@ -42,12 +42,18 @@
    "hidden": 1,
    "label": "Status",
    "options": "Draft\nCompleted"
+  },
+  {
+   "fieldname": "customisable_doctypes",
+   "fieldtype": "Table",
+   "label": "DocTypes",
+   "options": "Transactions Cleanup Doctype"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-09 01:08:52.839585",
+ "modified": "2021-04-09 20:58:02.953452",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transactions Cleanup",
