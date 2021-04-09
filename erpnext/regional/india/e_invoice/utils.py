@@ -177,8 +177,8 @@ def get_item_list(invoice):
 		else:
 			item.discount_amount = 0
 
-		item.unit_rate = abs((item.taxable_value - item.discount_amount)/ item.qty)
-		item.gross_amount = abs(item.taxable_value + item.discount_amount)
+		item.unit_rate = abs(abs(item.taxable_value) - item.discount_amount)/ item.qty)
+		item.gross_amount = abs(item.taxable_value) + item.discount_amount
 		item.taxable_value = abs(item.taxable_value)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
