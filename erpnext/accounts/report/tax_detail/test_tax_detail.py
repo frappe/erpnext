@@ -1,6 +1,10 @@
 from __future__ import unicode_literals
 
-import frappe, unittest, datetime, json, os
+import frappe
+import unittest
+import datetime
+import json
+import os
 from frappe.utils import getdate, add_to_date, get_first_day, get_last_day
 from .tax_detail import filter_match, save_custom_report
 
@@ -38,12 +42,8 @@ class TestTaxDetail(unittest.TestCase):
 					db_doc.submit()
 				else:
 					db_doc.insert()
-			except frappe.exceptions.DuplicateEntryError as e:
+			except frappe.exceptions.DuplicateEntryError:
 				pass
-				#print(f'Duplicate Entry: {e}')
-			except:
-				print(f'\nError importing {doc["doctype"]}: {doc["name"]}')
-				raise
 
 		self.load_defcols()
 

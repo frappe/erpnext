@@ -3,7 +3,8 @@
 # Contributed by Case Solved and sponsored by Nulight Studios
 
 from __future__ import unicode_literals
-import frappe, json
+import frappe
+import json
 from frappe import _
 
 # NOTE: Payroll is implemented using Journal Entries which are included as GL Entries
@@ -86,26 +87,35 @@ def run_report(report_name, data):
 				except KeyError:
 					frappe.throw(_("A report component can only refer to an earlier section: ") + section_name)
 
-		if show_detail: new_data += report[section_name]['rows']
-		new_data += [ {'voucher_no': section_name, 'amount': report[section_name]['subtotal']} ]
-		summary += [ {'label': section_name, 'datatype': 'Currency', 'value': report[section_name]['subtotal']} ]
-		if show_detail: new_data += [ {} ]
+		if show_detail:
+			new_data += report[section_name]['rows']
+		new_data += [{'voucher_no': section_name, 'amount': report[section_name]['subtotal']}]
+		summary += [{'label': section_name, 'datatype': 'Currency', 'value': report[section_name]['subtotal']}]
+		if show_detail:
+			new_data += [{}]
 	return new_data or data, summary or None
 
 def filter_match(value, string):
 	"Approximation to datatable filters"
 	import datetime
-	if string == '': return True
-	if value is None: value = -999999999999999
-	elif isinstance(value, datetime.date): return True
+	if string == '':
+		return True
+	if value is None:
+		value = -999999999999999
+	elif isinstance(value, datetime.date):
+		return True
 
 	if isinstance(value, str):
 		value = value.lower()
 		string = string.lower()
-		if string[0] == '<': return True if string[1:].strip() else False
-		elif string[0] == '>': return False if string[1:].strip() else True
-		elif string[0] == '=': return string[1:] in value if string[1:] else False
-		elif string[0:2] == '!=': return string[2:] not in value
+		if string[0] == '<':
+			return True if string[1:].strip() else False
+		elif string[0] == '>':
+			return False if string[1:].strip() else True
+		elif string[0] == '=':
+			return string[1:] in value if string[1:] else False
+		elif string[0:2] == '!=':
+			return string[2:] not in value
 		elif len(string.split(':')) == 2:
 			pre, post = string.split(':')
 			return (True if not pre.strip() and post.strip() in value else False)
@@ -114,7 +124,8 @@ def filter_match(value, string):
 	else:
 		if string[0] in ['<', '>', '=']:
 			operator = string[0]
-			if operator == '=': operator = '=='
+			if operator == '=':
+				operator = '=='
 			string = string[1:].strip()
 		elif string[0:2] == '!=':
 			operator = '!='
@@ -132,12 +143,16 @@ def filter_match(value, string):
 		num = float(string) if string.strip() else 0
 		return eval(f'{value} {operator} {num}')
 	except ValueError:
-		if operator == '<': return True
+		if operator == '<':
+			return True
 		return False
 
 
-abbrev = lambda dt: ''.join(l[0].lower() for l in dt.split(' ')) + '.'
-doclist = lambda dt, dfs: [abbrev(dt) + f for f in dfs]
+def abbrev(dt):
+	return ''.join(l[0].lower() for l in dt.split(' ')) + '.'
+
+def doclist(dt, dfs):
+	return [abbrev(dt) + f for f in dfs]
 
 def as_split(fields):
 	for field in fields:
@@ -165,7 +180,8 @@ def get_columns(fieldlist):
 	for doctypes, docfields in fieldlist.items():
 		fieldmap = {name: new_name for name, new_name in as_split(docfields)}
 		for doctype in doctypes:
-			if isinstance(doctype, int): break
+			if isinstance(doctype, int):
+				break
 			meta = frappe.get_meta(doctype)
 			# get column field metadata from the db
 			fieldmeta = {}
@@ -203,8 +219,10 @@ def modify_report_data(data):
 	import json
 	new_data = []
 	for line in data:
-		if line.debit: line.amount = -line.debit
-		else: line.amount = line.credit
+		if line.debit:
+			line.amount = -line.debit
+		else:
+			line.amount = line.credit
 		# Remove Invoice GL Tax Entries and generate Tax entries from the invoice lines
 		if "Invoice" in line.voucher_type:
 			if line.account_type != "Tax":
@@ -226,7 +244,8 @@ def modify_report_data(data):
 			new_data += [line]
 	return new_data
 
-####### JS client utilities
+
+# JS client utilities
 
 custom_report_dict = {
 	'ref_doctype': 'GL Entry',
