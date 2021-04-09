@@ -6,7 +6,7 @@ import frappe, erpnext
 from frappe import _
 from frappe.utils import get_fullname, flt, cstr, get_link_to_form
 from frappe.model.document import Document
-from erpnext.hr.utils import set_employee_name
+from erpnext.hr.utils import set_employee_name, share_doc_with_approver
 from erpnext.accounts.party import get_party_account
 from erpnext.accounts.general_ledger import make_gl_entries
 from erpnext.accounts.doctype.sales_invoice.sales_invoice import get_bank_cash_account
@@ -52,6 +52,9 @@ class ExpenseClaim(AccountsController):
 			self.status = "Unpaid"
 		elif self.docstatus == 1 and self.approval_status == 'Rejected':
 			self.status = 'Rejected'
+
+	def on_update(self):
+		share_doc_with_approver(self, self.expense_approver)
 
 	def set_payable_account(self):
 		if not self.payable_account and not self.is_paid:
@@ -211,6 +214,7 @@ class ExpenseClaim(AccountsController):
 			self.total_claimed_amount += flt(d.amount)
 			self.total_sanctioned_amount += flt(d.sanctioned_amount)
 
+	@frappe.whitelist()
 	def calculate_taxes(self):
 		self.total_taxes_and_charges = 0
 		for tax in self.taxes:
