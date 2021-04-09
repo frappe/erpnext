@@ -2,8 +2,7 @@ from __future__ import unicode_literals
 
 import frappe
 from frappe.model.db_query import DatabaseQuery
-from frappe.model.meta import get_field_precision
-from frappe.utils import flt
+from frappe.utils import flt, cint
 
 @frappe.whitelist()
 def get_data(item_code=None, warehouse=None, item_group=None,
