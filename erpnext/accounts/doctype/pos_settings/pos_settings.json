@@ -5,7 +5,9 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "invoice_fields"
+  "invoice_fields",
+  "section_break_2",
+  "pos_search_fields"
  ],
  "fields": [
   {
@@ -13,11 +15,22 @@
    "fieldtype": "Table",
    "label": "POS Field",
    "options": "POS Field"
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "description": "Add \"Fields\" from \"Item\" master that should be searchable in POS",
+   "fieldname": "pos_search_fields",
+   "fieldtype": "Table",
+   "label": "Search Fields",
+   "options": "POS Search Fields"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-01 15:46:41.478928",
+ "modified": "2021-04-05 17:16:36.003567",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",

@@ -4,6 +4,7 @@
 frappe.ui.form.on('POS Settings', {
 	onload: function(frm) {
 		frm.trigger("get_invoice_fields");
+		frm.trigger("add_search_options");
 	},
 
 	get_invoice_fields: function(frm) {
@@ -18,7 +19,32 @@ frappe.ui.form.on('POS Settings', {
 
 			frappe.meta.get_docfield("POS Field", "fieldname", frm.doc.name).options = [""].concat(fields);
 		});
-	}
+	},
+
+	add_search_options: function(frm) {
+		debugger;
+		frappe.model.with_doctype("Item", () => {
+
+
+		// var fields = await frappe.get_doc("DocType", "Item");
+		var fields = $.map(frappe.get_doc("DocType", "Item").fields, function(d) {
+			if (frappe.model.no_value_type.indexOf(d.fieldtype) === -1 || ['Button'].includes(d.fieldtype)) {
+				return { label: d.label + ' (' + d.fieldtype + ')', value: d.fieldname };
+			} else {
+				return null;
+			}
+		});
+		// var fieldnames;
+		// fieldnames = frappe.get_meta("Item").get_fieldnames()
+		console.log('Stop')
+		// console.log(fields)
+
+		frappe.meta.get_docfield("POS Search Fields", "fieldname", frm.doc.name).options = [""].concat(fields);
+		// frappe.model
+
+	});
+	console.log('Stop')
+}
 });
 
 frappe.ui.form.on("POS Field", {
@@ -35,4 +61,8 @@ frappe.ui.form.on("POS Field", {
 		doc.default_value = df.default;
 		frm.refresh_field("fields");
 	}
+});
+
+frappe.ui.form.on("POS Search Fields", {
+
 });
