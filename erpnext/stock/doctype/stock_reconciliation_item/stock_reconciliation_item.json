@@ -56,7 +56,7 @@
    "read_only": 1
   },
   {
-   "columns": 3,
+   "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -70,14 +70,15 @@
    "fieldtype": "Column Break"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Quantity"
+   "in_standard_filter": 1,
+   "label": "Physical Qty"
   },
   {
-   "columns": 2,
+   "columns": 1,
    "fieldname": "valuation_rate",
    "fieldtype": "Currency",
    "in_list_view": 1,
@@ -111,10 +112,13 @@
    "label": "Before reconciliation"
   },
   {
+   "columns": 1,
    "default": "0",
    "fieldname": "current_qty",
    "fieldtype": "Float",
-   "label": "Current Qty",
+   "in_list_view": 1,
+   "label": "System Qty",
+   "precision": "6",
    "read_only": 1
   },
   {
@@ -148,9 +152,13 @@
    "fieldtype": "Section Break"
   },
   {
+   "columns": 1,
    "fieldname": "quantity_difference",
-   "fieldtype": "Read Only",
-   "label": "Quantity Difference"
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty Difference",
+   "precision": "6",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_16",
@@ -171,7 +179,7 @@
   }
  ],
  "istable": 1,
- "modified": "2020-10-01 01:41:48.331974",
+ "modified": "2021-04-09 15:15:49.842035",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

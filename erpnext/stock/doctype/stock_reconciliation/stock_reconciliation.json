@@ -9,11 +9,23 @@
   "naming_series",
   "company",
   "purpose",
+  "reset_rate",
   "col1",
   "posting_date",
   "posting_time",
   "set_posting_time",
+  "get_items_from_section",
   "sb9",
+  "default_warehouse",
+  "get_batches",
+  "get_items",
+  "column_break_14",
+  "selected_item_group",
+  "selected_item_code",
+  "column_break_17",
+  "sort_by",
+  "positive_or_negative",
+  "section_break_20",
   "items",
   "section_break_9",
   "expense_account",
@@ -45,6 +57,7 @@
    "reqd": 1
   },
   {
+   "default": "Stock Reconciliation",
    "fieldname": "purpose",
    "fieldtype": "Select",
    "label": "Purpose",
@@ -81,6 +94,7 @@
    "label": "Edit Posting Date and Time"
   },
   {
+   "collapsible_depends_on": "eval:doc.docstatus==0",
    "fieldname": "sb9",
    "fieldtype": "Section Break"
   },
@@ -149,13 +163,81 @@
   {
    "fieldname": "dimension_col_break",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "reset_rate",
+   "fieldtype": "Check",
+   "label": "Reset Valuation Rate"
+  },
+  {
+   "collapsible_depends_on": "eval:doc.docstatus==0",
+   "fieldname": "get_items_from_section",
+   "fieldtype": "Section Break",
+   "label": "Get Items From"
+  },
+  {
+   "fieldname": "default_warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "default": "1",
+   "fieldname": "get_batches",
+   "fieldtype": "Check",
+   "label": "Get Batches"
+  },
+  {
+   "fieldname": "get_items",
+   "fieldtype": "Button",
+   "label": "Get Items"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:!doc.selected_item_code",
+   "fieldname": "selected_item_group",
+   "fieldtype": "Link",
+   "label": "Item Group",
+   "options": "Item Group"
+  },
+  {
+   "fieldname": "selected_item_code",
+   "fieldtype": "Link",
+   "label": "Item Code",
+   "options": "Item"
+  },
+  {
+   "fieldname": "column_break_17",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Item Group",
+   "fieldname": "sort_by",
+   "fieldtype": "Select",
+   "label": "Sort By",
+   "options": "Item Code\nItem Group\nStock Qty"
+  },
+  {
+   "default": "Positive Only",
+   "fieldname": "positive_or_negative",
+   "fieldtype": "Select",
+   "label": "Positive or Negative Qty",
+   "options": "Positive Only\nNegative Only\nPositive and Negative"
+  },
+  {
+   "fieldname": "section_break_20",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-03-09 22:59:59.123140",
+ "modified": "2021-03-29 16:14:53.865932",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",

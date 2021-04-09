@@ -29,6 +29,7 @@
   "batch_stock_value",
   "stock_value_difference",
   "stock_queue",
+  "reset_rate",
   "project",
   "company",
   "fiscal_year",
@@ -222,7 +223,6 @@
   {
    "fieldname": "stock_queue",
    "fieldtype": "Text",
-   "hidden": 1,
    "label": "Stock Queue (FIFO)",
    "oldfieldname": "fcfs_stack",
    "oldfieldtype": "Text",
@@ -316,13 +316,21 @@
    "label": "Batch Valuation Rate",
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "default": "0",
+   "depends_on": "eval:doc.voucher_type == \"Stock Reconciliation\"",
+   "fieldname": "reset_rate",
+   "fieldtype": "Check",
+   "label": "Reset Rate",
+   "read_only": 1
   }
  ],
  "hide_toolbar": 1,
  "icon": "fa fa-list",
  "idx": 1,
  "in_create": 1,
- "modified": "2021-03-12 15:06:24.666545",
+ "modified": "2021-03-29 15:04:23.335002",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Ledger Entry",

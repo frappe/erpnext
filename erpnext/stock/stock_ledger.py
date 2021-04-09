@@ -185,13 +185,20 @@ class update_entries_after(object):
 
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
-			if sle.voucher_type=="Stock Reconciliation" and not sle.batch_no:
+			if sle.voucher_type == "Stock Reconciliation":
+				sle.actual_qty = sle.qty_after_transaction - self.qty_after_transaction
+				self.actual_qty = sle.actual_qty
+
+			if sle.voucher_type=="Stock Reconciliation" and sle.reset_rate and not sle.batch_no:
 				# assert
 				self.valuation_rate = sle.valuation_rate
 				self.qty_after_transaction = sle.qty_after_transaction
 				self.stock_queue = [[self.qty_after_transaction, self.valuation_rate]]
 				self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 			else:
+				if sle.voucher_type == "Stock Reconciliation" and flt(sle.actual_qty) > 0:
+					sle.incoming_rate = self.valuation_rate
+
 				if self.valuation_method == "Moving Average":
 					self.get_moving_average_values(sle)
 					# self.qty_after_transaction and self.stock_value already set in self.get_moving_average_values()
