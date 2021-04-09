@@ -12,6 +12,7 @@ class TransactionsCleanup(Document):
 		print("*" * 50)
 		print(self.name)
 		print(self.company) # prints name of the company
+
 		# for doctype in self.doctypes:
 		# 	print(doctype.name)
 
@@ -46,6 +47,8 @@ class TransactionsCleanup(Document):
 							"doctype_name" : doctype.name,
 						})
 						break
+
+		#testing area
 		
 	def on_submit(self):
 		for doctype in self.doctypes or self.customisable_doctypes:
@@ -53,19 +56,18 @@ class TransactionsCleanup(Document):
 				'company' : self.company
 			})
 
-			doctype_to_be_cleared = frappe.get_doc('DocType', doctype.doctype_name)
-			if doctype_to_be_cleared.autoname:
-				if '#' in doctype_to_be_cleared.autoname:
-					self.update_naming_series(doctype_to_be_cleared)
+			naming_series = frappe.db.get_value('DocType', doctype.doctype_name, 'autoname')
+			if naming_series:
+				if '#' in naming_series:
+					self.update_naming_series(naming_series, doctype.doctype_name)
 
-	def update_naming_series(self, doctype):
-		print(doctype.autoname)
-		if '.' in doctype.autoname:
-			prefix, hashes = doctype.autoname.rsplit(".", 1)
+	def update_naming_series(self, naming_series, doctype_name):
+		if '.' in naming_series:
+			prefix, hashes = naming_series.rsplit(".", 1)
 		else:
-			prefix, hashes = doctype.autoname.rsplit("{", 1)
+			prefix, hashes = naming_series.rsplit("{", 1)
 		last = frappe.db.sql("""select max(name) from `tab{0}`
-						where name like %s""".format(doctype.name), prefix + "%")
+						where name like %s""".format(doctype_name), prefix + "%")
 		if last and last[0][0]:
 			last = cint(last[0][0].replace(prefix, ""))
 		else:
