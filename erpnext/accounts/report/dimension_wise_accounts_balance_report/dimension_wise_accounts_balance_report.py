@@ -4,11 +4,10 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import (flt, getdate, get_first_day, add_months, add_days, formatdate, cstr, cint)
+from frappe.utils import (flt, cstr)
 
-from erpnext.accounts.report.financial_statements import get_accounts, filter_accounts, get_appropriate_currency, get_fiscal_year_data, validate_fiscal_year, filter_out_zero_value_rows
-from erpnext.accounts.doctype.accounting_dimension.accounting_dimension import get_accounting_dimensions, get_dimension_with_children
-from erpnext.accounts.report.trial_balance.trial_balance import validate_filters, get_opening_balances, calculate_values
+from erpnext.accounts.report.financial_statements import filter_accounts, filter_out_zero_value_rows
+from erpnext.accounts.report.trial_balance.trial_balance import validate_filters
 
 from six import itervalues
 
@@ -114,7 +113,6 @@ def format_gl_entries(gl_entries_by_account, accounts_by_name, dimension_items_l
 				)
 			for item in dimension_items_list:
 				if item == entry.dimension_item:
-					x = flt(entry.debit) - flt(entry.credit)
 					d[frappe.scrub(item)] = d.get(frappe.scrub(item), 0.0) + flt(entry.debit) - flt(entry.credit)
 
 def prepare_data(accounts, filters, parent_children_map, company_currency, dimension_items_list):
