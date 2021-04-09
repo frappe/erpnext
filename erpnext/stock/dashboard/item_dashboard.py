@@ -43,7 +43,7 @@ def get_data(item_code=None, warehouse=None, item_group=None,
 		limit_start=start,
 		limit_page_length='21')
 
-	precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"))
+	precision = cint(frappe.db.get_single_value("System Settings", "float_precision"))
 
 	for item in items:
 		item.update({
