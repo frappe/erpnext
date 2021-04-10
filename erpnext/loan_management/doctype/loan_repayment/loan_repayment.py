@@ -227,6 +227,14 @@ class LoanRepayment(AccountsController):
 		gle_map = []
 		loan_details = frappe.get_doc("Loan", self.against_loan)
 
+		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
+			remarks = _("Shortfall Repayment of {0}.\nRepayment against Loan: {1}").format(self.shortfall_amount,
+				self.against_loan)
+		elif self.shortfall_amount:
+			remarks = _("Shortfall Repayment of {0}").format(self.shortfall_amount)
+		else:
+			remarks = _("Repayment against Loan: ") + self.against_loan
+
 		if self.total_penalty_paid:
 			gle_map.append(
 				self.get_gl_dict({
@@ -267,7 +275,7 @@ class LoanRepayment(AccountsController):
 				"debit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": _("Repayment against Loan: ") + self.against_loan,
+				"remarks": remarks,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(self.posting_date)
 			})
@@ -283,7 +291,7 @@ class LoanRepayment(AccountsController):
 				"credit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": _("Repayment against Loan: ") + self.against_loan,
+				"remarks": remarks,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(self.posting_date)
 			})

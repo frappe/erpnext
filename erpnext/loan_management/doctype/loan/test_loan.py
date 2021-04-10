@@ -523,7 +523,7 @@ class TestLoan(unittest.TestCase):
 		self.assertEqual(flt(repayment_entry.total_interest_paid, 0), flt(interest_amount, 0))
 
 	def test_penalty(self):
-		loan = create_loan_scenario_for_penalty(self)
+		loan, amounts = create_loan_scenario_for_penalty(self)
 		# 30 days - grace period
 		penalty_days = 30 - 4
 		penalty_applicable_amount = flt(amounts['interest_amount']/2)
@@ -537,7 +537,7 @@ class TestLoan(unittest.TestCase):
 		self.assertEquals(calculated_penalty_amount, penalty_amount)
 
 	def test_penalty_repayment(self):
-		loan = create_loan_scenario_for_penalty(self)
+		loan, dummy = create_loan_scenario_for_penalty(self)
 		amounts = calculate_amounts(loan.name, '2019-11-30 00:00:00')
 
 		first_penalty = 10000
@@ -670,7 +670,7 @@ def create_loan_scenario_for_penalty(doc):
 
 	repayment_entry.submit()
 
-	return loan
+	return loan, amounts
 
 def create_loan_accounts():
 	if not frappe.db.exists("Account", "Loans and Advances (Assets) - _TC"):
