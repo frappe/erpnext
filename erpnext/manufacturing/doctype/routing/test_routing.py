@@ -13,8 +13,15 @@ from erpnext.manufacturing.doctype.workstation.test_workstation import make_work
 from erpnext.manufacturing.doctype.work_order.test_work_order import make_wo_order_test_record
 
 class TestRouting(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		cls.item_code = "Test Routing Item - A"
+
+	@classmethod
+	def tearDownClass(cls):
+		frappe.db.sql('delete from tabBOM where item=%s', cls.item_code)
+
 	def test_sequence_id(self):
-		item_code = "Test Routing Item - A"
 		operations = [{"operation": "Test Operation A", "workstation": "Test Workstation A", "time_in_mins": 30},
 			{"operation": "Test Operation B", "workstation": "Test Workstation A", "time_in_mins": 20}]
 
@@ -22,8 +29,8 @@ class TestRouting(unittest.TestCase):
 
 		setup_operations(operations)
 		routing_doc = create_routing(routing_name="Testing Route", operations=operations)
-		bom_doc = setup_bom(item_code=item_code, routing=routing_doc.name)
-		wo_doc = make_wo_order_test_record(production_item = item_code, bom_no=bom_doc.name)
+		bom_doc = setup_bom(item_code=self.item_code, routing=routing_doc.name)
+		wo_doc = make_wo_order_test_record(production_item = self.item_code, bom_no=bom_doc.name)
 
 		for row in routing_doc.operations:
 			self.assertEqual(row.sequence_id, row.idx)
