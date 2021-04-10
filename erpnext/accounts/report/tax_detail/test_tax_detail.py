@@ -18,6 +18,23 @@ class TestTaxDetail(unittest.TestCase):
 		self.from_date = get_first_day(now)
 		self.to_date = get_last_day(now)
 
+		for fy in frappe.get_list('Fiscal Year', fields=('year', 'year_start_date', 'year_end_date')):
+			if now >= fy['year_start_date'] and now <= fy['year_end_date']:
+				break
+		else:
+			docs = [{
+				"companies": [{
+					"company": "_T",
+					"parent": "_Test Fiscal",
+					"parentfield": "companies",
+					"parenttype": "Fiscal Year"
+				}],
+				"doctype": "Fiscal Year",
+				"year": "_Test Fiscal",
+				"year_end_date": get_year_ending(now),
+				"year_start_date": get_year_start(now)
+			}] + docs
+
 		docs = [{
 			"abbr": "_T",
 			"company_name": "_T",
@@ -25,17 +42,6 @@ class TestTaxDetail(unittest.TestCase):
 			"default_currency": "GBP",
 			"doctype": "Company",
 			"name": "_T"
-		},{
-			"companies": [{
-				"company": "_T",
-				"parent": "_Test Fiscal",
-				"parentfield": "companies",
-				"parenttype": "Fiscal Year"
-			}],
-			"doctype": "Fiscal Year",
-			"year": "_Test Fiscal",
-			"year_end_date": get_year_ending(now),
-			"year_start_date": get_year_start(now)
 		}] + docs
 
 		for doc in docs:
