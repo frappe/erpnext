@@ -1,4 +1,5 @@
 pip==20.3.4
+python==3
 braintree==3.57.1
 frappe
 gocardless-pro==1.11.0
