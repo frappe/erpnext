@@ -19,6 +19,19 @@ class TestTaxDetail(unittest.TestCase):
 		self.to_date = get_last_day(now)
 
 		docs = [{
+			"abbr": "_T",
+			"company_name": "_T",
+			"country": "United Kingdom",
+			"default_currency": "GBP",
+			"doctype": "Company",
+			"name": "_T"
+		},{
+			"companies": [{
+				"company": "_T",
+				"parent": "_Test Fiscal",
+				"parentfield": "companies",
+				"parenttype": "Fiscal Year"
+			}],
 			"doctype": "Fiscal Year",
 			"year": "_Test Fiscal",
 			"year_end_date": get_year_ending(now),

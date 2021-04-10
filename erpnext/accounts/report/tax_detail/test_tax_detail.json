@@ -1,12 +1,5 @@
 [
  {
-  "abbr": "_T",
-  "company_name": "_T",
-  "country": "United Kingdom",
-  "default_currency": "GBP",
-  "doctype": "Company",
-  "name": "_T"
- },{
   "account_manager": null,
   "accounts": [],
   "companies": [],
@@ -297,7 +290,7 @@
   "discount_amount": 0.0,
   "docstatus": 0,
   "doctype": "Purchase Invoice",
-  "due_date": "2021-04-30",
+  "due_date": null,
   "from_date": null,
   "grand_total": 511.68,
   "group_same_items": 0,
@@ -521,7 +514,7 @@
   "discount_amount": 0.0,
   "docstatus": 0,
   "doctype": "Sales Invoice",
-  "due_date": "2021-03-31",
+  "due_date": null,
   "from_date": null,
   "grand_total": 868.25,
   "group_same_items": 0,
