@@ -69,11 +69,7 @@ class TestTaxDetail(unittest.TestCase):
 				'report_name': 'Tax Detail'
 			}, user=frappe.session.user)
 
-	def setUp(self):
-		self.load_testdocs()
-		self.load_defcols()
-
-	def tearDown(self):
+	def rm_testdocs(self):
 		"Remove the Company and all data"
 		from erpnext.setup.doctype.company.delete_company_transactions import delete_company_transactions
 		delete_company_transactions(self.company.name)
@@ -81,6 +77,8 @@ class TestTaxDetail(unittest.TestCase):
 
 
 	def test_report(self):
+		self.load_testdocs()
+		self.load_defcols()
 		report_name = save_custom_report(
 			'Tax Detail',
 			'_Test Tax Detail',
@@ -118,6 +116,8 @@ class TestTaxDetail(unittest.TestCase):
 				self.assertDictEqual(row, {'voucher_no': label, 'amount': value})
 		self.assertListEqual(data.get('report_summary'),
 			[{'label': label, 'datatype': 'Currency', 'value': value} for label, value in expected])
+
+		self.rm_testdocs()
 
 	def test_filter_match(self):
 		# None - treated as -inf number except range
