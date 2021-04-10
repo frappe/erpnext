@@ -33,8 +33,19 @@ class SalesPerson(NestedSet):
 			where sales_person = %s and docstatus=1 and parenttype = 'Sales Invoice'
 		""",(self.sales_person_name))
 
+		allocated_qty = frappe.db.sql("""
+			select
+				sum(inv.total_qty * steam.allocated_percentage / 100),
+				sum(inv.total_alt_uom_qty * steam.allocated_percentage / 100)
+			from `tabSales Team` steam
+			inner join `tabSales Invoice` inv on steam.parent = inv.name
+			where steam.sales_person = %s and inv.docstatus=1 and steam.parenttype = 'Sales Invoice'
+		""",(self.sales_person_name))
+
 		info = {}
 		info["allocated_amount"] = flt(allocated_amount[0][0]) if allocated_amount else 0
+		info["allocated_stock_qty"] = flt(allocated_qty[0][0]) if allocated_qty else 0
+		info["allocated_alt_uom_qty"] = flt(allocated_qty[0][1]) if allocated_qty else 0
 		info["currency"] = company_default_currency
 
 		self.set_onload('dashboard_info', info)

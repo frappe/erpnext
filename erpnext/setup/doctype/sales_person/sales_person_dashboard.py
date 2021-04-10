@@ -11,5 +11,13 @@ def get_data():
 				'label': _('Sales'),
 				'items': ['Sales Order', 'Delivery Note', 'Sales Invoice']
 			},
+			{
+				'label': _('Reference'),
+				'items': ['Customer']
+			},
+			{
+				'label': _('Vehicle Booking'),
+				'items': ['Vehicle Booking Order']
+			},
 		]
 	}

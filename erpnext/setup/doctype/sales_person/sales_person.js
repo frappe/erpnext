@@ -6,7 +6,11 @@ frappe.ui.form.on('Sales Person', {
 		if(frm.doc.__onload && frm.doc.__onload.dashboard_info) {
 			var info = frm.doc.__onload.dashboard_info;
 			frm.dashboard.add_indicator(__('Total Contribution Amount: {0}',
-				[format_currency(info.allocated_amount, info.currency)]), 'blue');
+				[format_currency(info.allocated_amount, info.currency)]), 'green');
+			frm.dashboard.add_indicator(__('Total Contribution Stock Qty: {0}',
+				[frappe.format(info.allocated_stock_qty, {'fieldtype': 'Float'}, {'inline': 1})]), 'blue');
+			frm.dashboard.add_indicator(__('Total Contribution Contents Qty: {0}',
+				[frappe.format(info.allocated_alt_uom_qty, {'fieldtype': 'Float'}, {'inline': 1})]), 'purple');
 		}
 	},
 
