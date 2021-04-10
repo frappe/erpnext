@@ -1,6 +1,6 @@
 scipy
-braintree==3.57.1
 liblapack
+braintree==3.57.1
 testfm
 git+git://github.com/grafos-ml/test.fm
 frappe-bench
