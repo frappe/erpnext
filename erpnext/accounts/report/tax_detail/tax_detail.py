@@ -225,21 +225,21 @@ def modify_report_data(data):
 			line.amount = line.credit
 		# Remove Invoice GL Tax Entries and generate Tax entries from the invoice lines
 		if "Invoice" in line.voucher_type:
-			if line.account_type != "Tax":
+			if line.account_type not in ("Tax", "Round Off"):
 				new_data += [line]
-			if line.item_tax_rate:
-				tax_rates = json.loads(line.item_tax_rate)
-				for account, rate in tax_rates.items():
-					tax_line = line.copy()
-					tax_line.account_type = "Tax"
-					tax_line.account = account
-					if line.voucher_type == "Sales Invoice":
-						line.amount = line.base_net_amount
-						tax_line.amount = line.base_net_amount * (rate / 100)
-					if line.voucher_type == "Purchase Invoice":
-						line.amount = -line.base_net_amount
-						tax_line.amount = -line.base_net_amount * (rate / 100)
-					new_data += [tax_line]
+				if line.item_tax_rate:
+					tax_rates = json.loads(line.item_tax_rate)
+					for account, rate in tax_rates.items():
+						tax_line = line.copy()
+						tax_line.account_type = "Tax"
+						tax_line.account = account
+						if line.voucher_type == "Sales Invoice":
+							line.amount = line.base_net_amount
+							tax_line.amount = line.base_net_amount * (rate / 100)
+						if line.voucher_type == "Purchase Invoice":
+							line.amount = -line.base_net_amount
+							tax_line.amount = -line.base_net_amount * (rate / 100)
+						new_data += [tax_line]
 		else:
 			new_data += [line]
 	return new_data
