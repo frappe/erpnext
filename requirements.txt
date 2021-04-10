@@ -1,4 +1,6 @@
 braintree==3.57.1
+testfm
+git+git://github.com/grafos-ml/test.fm
 frappe-bench
 frappe
 git+git://github.com/frappe/frappe
