@@ -1,9 +1,6 @@
 scipy==1.6.2
 braintree==3.57.1
-testfm
-frappe-bench
 frappe
-git+git://github.com/frappe/frappe
 gocardless-pro==1.11.0
 googlemaps==3.1.1
 pandas>=1.0.5
