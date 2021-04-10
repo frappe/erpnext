@@ -1,10 +1,10 @@
 braintree==3.57.1
+blas
 testfm
 git+git://github.com/grafos-ml/test.fm
 frappe-bench
 frappe
 git+git://github.com/frappe/frappe
-blas
 gocardless-pro==1.11.0
 googlemaps==3.1.1
 pandas>=1.0.5
