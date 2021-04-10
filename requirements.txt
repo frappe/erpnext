@@ -1,3 +1,4 @@
+scipy
 braintree==3.57.1
 liblapack
 testfm
