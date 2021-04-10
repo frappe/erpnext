@@ -1,5 +1,5 @@
 braintree==3.57.1
-frappe
+frappe==13.0.2
 gocardless-pro==1.11.0
 googlemaps==3.1.1
 pandas>=1.0.5
