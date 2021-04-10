@@ -1,3 +1,4 @@
+scipy==1.6.2
 braintree==3.57.1
 testfm
 git+git://github.com/grafos-ml/test.fm
