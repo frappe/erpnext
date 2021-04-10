@@ -59,6 +59,7 @@
   "show_in_website": 1,
   "website_warehouse": "_Test Warehouse - _TC",
   "gst_hsn_code": "999800",
+  "opening_stock": 10,
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",
