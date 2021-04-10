@@ -406,8 +406,7 @@ class StockController(AccountsController):
 	def set_rate_of_stock_uom(self):
 		if self.doctype in ["Purchase Receipt", "Purchase Invoice", "Purchase Order", "Sales Invoice", "Sales Order", "Delivery Note", "Quotation"]:
 			for d in self.get("items"):
-				if d.conversion_factor:
-					d.stock_uom_rate = d.rate / d.conversion_factor
+				d.stock_uom_rate = d.rate / (d.conversion_factor or 1)
 
 	def validate_internal_transfer(self):
 		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Purchase Invoice', 'Purchase Receipt') \

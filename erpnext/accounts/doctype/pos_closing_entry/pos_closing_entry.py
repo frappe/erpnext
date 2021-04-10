@@ -18,7 +18,7 @@ class POSClosingEntry(StatusUpdater):
 
 		self.validate_pos_closing()
 		self.validate_pos_invoices()
-	
+
 	def validate_pos_closing(self):
 		user = frappe.db.sql("""
 			SELECT name FROM `tabPOS Closing Entry`
@@ -37,12 +37,12 @@ class POSClosingEntry(StatusUpdater):
 			bold_user = frappe.bold(self.user)
 			frappe.throw(_("POS Closing Entry {} against {} between selected period")
 				.format(bold_already_exists, bold_user), title=_("Invalid Period"))
-	
+
 	def validate_pos_invoices(self):
 		invalid_rows = []
 		for d in self.pos_transactions:
 			invalid_row = {'idx': d.idx}
-			pos_invoice = frappe.db.get_values("POS Invoice", d.pos_invoice, 
+			pos_invoice = frappe.db.get_values("POS Invoice", d.pos_invoice,
 				["consolidated_invoice", "pos_profile", "docstatus", "owner"], as_dict=1)[0]
 			if pos_invoice.consolidated_invoice:
 				invalid_row.setdefault('msg', []).append(_('POS Invoice is {}').format(frappe.bold("already consolidated")))
@@ -68,14 +68,15 @@ class POSClosingEntry(StatusUpdater):
 
 		frappe.throw(error_list, title=_("Invalid POS Invoices"), as_list=True)
 
+	@frappe.whitelist()
 	def get_payment_reconciliation_details(self):
 		currency = frappe.get_cached_value('Company', self.company,  "default_currency")
 		return frappe.render_template("erpnext/accounts/doctype/pos_closing_entry/closing_voucher_details.html",
 			{"data": self, "currency": currency})
-	
+
 	def on_submit(self):
 		consolidate_pos_invoices(closing_entry=self)
-	
+
 	def on_cancel(self):
 		unconsolidate_pos_invoices(closing_entry=self)
 
