@@ -5,34 +5,27 @@ import unittest
 import datetime
 import json
 import os
-from frappe.utils import getdate, add_to_date, get_first_day, get_last_day
+from frappe.utils import getdate, add_to_date, get_first_day, get_last_day, get_year_start, get_year_ending
 from .tax_detail import filter_match, save_custom_report
 
 class TestTaxDetail(unittest.TestCase):
 	def load_testdocs(self):
 		datapath, _ = os.path.splitext(os.path.realpath(__file__))
 		with open(datapath + '.json', 'r') as fp:
-			self.docs = json.load(fp)
+			docs = json.load(fp)
 
-	def load_defcols(self):
-		custom_report = frappe.get_doc('Report', 'Tax Detail')
-		self.default_columns, _ = custom_report.run_query_report(
-			filters={
-				'from_date': '2021-03-01',
-				'to_date': '2021-03-31',
-				'company': '_T',
-				'mode': 'run',
-				'report_name': 'Tax Detail'
-			}, user=frappe.session.user)
-
-	def setUp(self):
-		"Add Transactions in 01-03-2021 - 31-03-2021"
-		self.load_testdocs()
 		now = getdate()
 		self.from_date = get_first_day(now)
 		self.to_date = get_last_day(now)
 
-		for doc in self.docs:
+		docs = [{
+			"doctype": "Fiscal Year",
+			"year": "_Test Fiscal",
+			"year_end_date": get_year_ending(now),
+			"year_start_date": get_year_start(now)
+		}] + docs
+
+		for doc in docs:
 			try:
 				db_doc = frappe.get_doc(doc)
 				if 'Invoice' in db_doc.doctype:
@@ -45,15 +38,28 @@ class TestTaxDetail(unittest.TestCase):
 			except frappe.exceptions.DuplicateEntryError:
 				pass
 
+	def load_defcols(self):
+		self.company = frappe.get_doc('Company', '_T')
+		custom_report = frappe.get_doc('Report', 'Tax Detail')
+		self.default_columns, _ = custom_report.run_query_report(
+			filters={
+				'from_date': '2021-03-01',
+				'to_date': '2021-03-31',
+				'company': self.company.name,
+				'mode': 'run',
+				'report_name': 'Tax Detail'
+			}, user=frappe.session.user)
+
+	def setUp(self):
+		self.load_testdocs()
 		self.load_defcols()
 
 	def tearDown(self):
 		"Remove the Company and all data"
 		from erpnext.setup.doctype.company.delete_company_transactions import delete_company_transactions
-		for co in filter(lambda doc: doc['doctype'] == 'Company', self.docs):
-			delete_company_transactions(co['name'])
-			db_co = frappe.get_doc('Company', co['name'])
-			db_co.delete()
+		delete_company_transactions(self.company.name)
+		self.company.delete()
+
 
 	def test_report(self):
 		report_name = save_custom_report(
@@ -78,7 +84,7 @@ class TestTaxDetail(unittest.TestCase):
 			filters={
 				'from_date': self.from_date,
 				'to_date': self.to_date,
-				'company': '_T',
+				'company': self.company.name,
 				'mode': 'run',
 				'report_name': report_name
 			}, user=frappe.session.user)
