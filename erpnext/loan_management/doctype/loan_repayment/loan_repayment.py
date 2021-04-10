@@ -75,7 +75,7 @@ class LoanRepayment(AccountsController):
 			"docstatus": 1, "against_loan": self.against_loan}, 'posting_date')
 
 		if future_repayment_date:
-			frappe.throw("Repayment already made till date {0}".format(getdate(future_repayment_date)))
+			frappe.throw("Repayment already made till date {0}".format(get_datetime(future_repayment_date)))
 
 	def validate_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
