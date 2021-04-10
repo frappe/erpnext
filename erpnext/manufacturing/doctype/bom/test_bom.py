@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import unittest
 import frappe
-from frappe.utils import cstr
+from frappe.utils import cstr, flt
 from frappe.test_runner import make_test_records
 from erpnext.stock.doctype.stock_reconciliation.test_stock_reconciliation import create_stock_reconciliation
 from erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool import update_cost
@@ -81,15 +81,27 @@ class TestBOM(unittest.TestCase):
 		bom = frappe.copy_doc(test_records[2])
 		bom.insert()
 
-		# test amounts in selected currency
-		self.assertEqual(bom.operating_cost, 100)
-		self.assertEqual(bom.raw_material_cost, 351.68)
-		self.assertEqual(bom.total_cost, 451.68)
+		raw_material_cost = 0.0
+		op_cost = 0.0
+
+		for op_row in bom.operations:
+			op_cost += op_row.operating_cost
+
+		for row in bom.items:
+			raw_material_cost += row.amount
+
+		base_raw_material_cost = raw_material_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
+		base_op_cost = op_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
 
 		# test amounts in selected currency
-		self.assertEqual(bom.base_operating_cost, 6000)
-		self.assertEqual(bom.base_raw_material_cost, 21100.80)
-		self.assertEqual(bom.base_total_cost, 27100.80)
+		self.assertEqual(bom.operating_cost, op_cost)
+		self.assertEqual(bom.raw_material_cost, raw_material_cost)
+		self.assertEqual(bom.total_cost, raw_material_cost + op_cost)
+
+		# test amounts in selected currency
+		self.assertEqual(bom.base_operating_cost, base_op_cost)
+		self.assertEqual(bom.base_raw_material_cost, base_raw_material_cost)
+		self.assertEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
 
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
