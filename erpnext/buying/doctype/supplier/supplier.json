@@ -413,7 +413,7 @@
  "icon": "fa fa-user",
  "idx": 370,
  "image_field": "image",
- "modified": "2021-01-21 17:10:38.975663",
+ "modified": "2021-04-10 14:50:15.057141",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Supplier",
@@ -451,6 +451,11 @@
    "read": 1,
    "report": 1,
    "role": "Stock User"
+  },
+  {
+   "read": 1,
+   "report": 1,
+   "role": "Vehicle Manager"
   },
   {
    "email": 1,
