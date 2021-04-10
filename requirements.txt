@@ -1,4 +1,4 @@
-pip==21.0.1
+pip==20.3.4
 braintree==3.57.1
 frappe
 gocardless-pro==1.11.0
