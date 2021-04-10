@@ -354,6 +354,10 @@ frappe.ui.form.on('Material Request', {
 	},
 	material_request_type: function(frm) {
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
+
+		if (frm.doc.material_request_type !== 'Material Transfer' && frm.doc.set_from_warehouse) {
+			frm.set_value('set_from_warehouse', '');
+		}
 	},
 
 });

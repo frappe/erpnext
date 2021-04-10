@@ -127,7 +127,6 @@
   "write_off_cost_center",
   "advances_section",
   "allocate_advances_automatically",
-  "adjust_advance_taxes",
   "get_advances",
   "advances",
   "payment_schedule_section",
@@ -1327,13 +1326,6 @@
    "options": "Project"
   },
   {
-   "default": "0",
-   "description": "Taxes paid while advance payment will be adjusted against this invoice",
-   "fieldname": "adjust_advance_taxes",
-   "fieldtype": "Check",
-   "label": "Adjust Advance Taxes"
-  },
-  {
    "depends_on": "eval:doc.is_internal_supplier",
    "description": "Unrealized Profit / Loss account for intra-company transfers",
    "fieldname": "unrealized_profit_loss_account",
@@ -1378,7 +1370,7 @@
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-09 21:12:30.422084",
+ "modified": "2021-03-30 21:45:58.334107",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
