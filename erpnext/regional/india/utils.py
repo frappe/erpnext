@@ -748,16 +748,18 @@ def update_grand_total_for_rcm(doc, method):
 		update_totals(gst_tax, base_gst_tax, doc)
 
 def update_totals(gst_tax, base_gst_tax, doc):
-	doc.base_grand_total -= base_gst_tax
 	doc.grand_total -= gst_tax
+	doc.base_grand_total = (doc.grand_total * doc.conversion_rate)
 
 	if doc.meta.get_field("rounded_total"):
 		if not doc.is_rounded_total_disabled():
 			doc.rounded_total = round_based_on_smallest_currency_fraction(doc.grand_total,
 				doc.currency, doc.precision("rounded_total"))
+			doc.base_rounded_total += doc.rounded_total * doc.conversion_rate
 
 			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
 				doc.precision("rounding_adjustment"))
+			doc.base_rounding_adjustment = doc.rounding_adjustment * doc.conversion_rate
 
 		calculate_outstanding_amount(doc)
 
