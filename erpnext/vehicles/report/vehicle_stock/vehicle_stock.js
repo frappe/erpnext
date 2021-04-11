@@ -5,6 +5,19 @@
 frappe.query_reports["Vehicle Stock"] = {
 	filters: [
 		{
+			fieldname: "status",
+			label: __("Status"),
+			fieldtype: "Select",
+			options: [
+				'All Vehicles',
+				'In Stock Vehicles',
+				'Dispatched Vehicles',
+				'In Stock and Dispatched Vehicles',
+				'Delivered Vehicles',
+			],
+			default: 'All Vehicles'
+		},
+		{
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
@@ -19,14 +32,31 @@ frappe.query_reports["Vehicle Stock"] = {
 			default: frappe.datetime.get_today()
 		},
 		{
-			fieldname: "item_code",
-			label: __("Vehicle Item Code (Variant)"),
+			fieldname: "variant_of",
+			label: __("Model Item Code"),
 			fieldtype: "Link",
 			options: "Item",
 			get_query: function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {"is_vehicle": 1}
+					filters: {"is_vehicle": 1, "has_variants": 1, "include_disabled": 1}
+				};
+			}
+		},
+		{
+			fieldname: "item_code",
+			label: __("Variant Item Code"),
+			fieldtype: "Link",
+			options: "Item",
+			get_query: function(asd) {
+				var variant_of = frappe.query_report.get_filter_value('variant_of');
+				var filters = {"is_vehicle": 1, "include_disabled": 1};
+				if (variant_of) {
+					filters['variant_of'] = variant_of;
+				}
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: filters
 				};
 			}
 		},
@@ -52,14 +82,14 @@ frappe.query_reports["Vehicle Stock"] = {
 			fieldname: "group_by_1",
 			label: __("Group By Level 1"),
 			fieldtype: "Select",
-			options: ["Ungrouped", "Group by Item", "Group by Item Group", "Group by Brand", "Group by Warehouse"],
+			options: ["Ungrouped", "Group by Model", "Group by Variant", "Group by Item Group", "Group by Brand", "Group by Warehouse"],
 			default: "Ungrouped"
 		},
 		{
 			fieldname: "group_by_2",
 			label: __("Group By Level 2"),
 			fieldtype: "Select",
-			options: ["Ungrouped", "Group by Item", "Group by Item Group", "Group by Brand", "Group by Warehouse"],
+			options: ["Ungrouped", "Group by Model", "Group by Variant", "Group by Item Group", "Group by Brand", "Group by Warehouse"],
 			default: "Ungrouped"
 		},
 	],
