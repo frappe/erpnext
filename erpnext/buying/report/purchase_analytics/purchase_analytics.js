@@ -79,7 +79,13 @@ frappe.query_reports["Purchase Analytics"] = {
 			fieldname: "item_code",
 			label: __("Item"),
 			fieldtype: "Link",
-			options: "Item"
+			options: "Item",
+			get_query: function() {
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1}
+				}
+			},
 		},
 		{
 			fieldname: "item_group",

@@ -101,6 +101,7 @@ frappe.query_reports["Accounts Payable Summary"] = {
 			"get_query": function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1}
 				};
 			}
 		},

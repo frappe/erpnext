@@ -194,13 +194,13 @@ def tax_account_query(doctype, txt, searchfield, start, page_len, filters):
 def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=False):
 	conditions = []
 
-	#Get searchfields from meta and use in Item Link field query
+	# Get searchfields from meta and use in Item Link field query
 	meta = frappe.get_meta("Item", cached=True)
 	searchfields = meta.get_search_fields()
-
 	if "description" in searchfields:
 		searchfields.remove("description")
 
+	# Columns
 	columns = ''
 	extra_searchfields = [field for field in searchfields
 		if not field in ["name", "item_name", "item_group", "brand"]]
@@ -208,15 +208,17 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 	if extra_searchfields:
 		columns = ", " + ", ".join(extra_searchfields)
 
-	searchfields = searchfields + [field for field in[searchfield or "name", "item_code", "item_group", "item_name"]
+	searchfields = searchfields + [field for field in [searchfield or "name", "item_code", "item_group", "item_name"]
 		if not field in searchfields]
 	searchfields = " or ".join([field + " like %(txt)s" for field in searchfields])
 
+	# Description Conditions
 	description_cond = ''
 	if frappe.db.count('Item', cache=True) < 50000:
 		# scan description only if items are less than 50000
 		description_cond = 'or tabItem.description LIKE %(txt)s'
 
+	# Item applicability condition
 	applicable_to_item_cond = ""
 	if filters and isinstance(filters, dict) and filters.get('applicable_to_item'):
 		applicable_to_item = filters.get('applicable_to_item')
@@ -242,6 +244,28 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 					where ap.parent = tabItem.name and {0}))
 			""".format(applicable_to_item_match_cond)
 
+	# Default Conditions
+	default_conditions = []
+	default_disabled_condition = "tabItem.disabled = 0"
+	default_variant_condition = "tabItem.has_variants = 0"
+	default_eol_condition = "(tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')"
+
+	if filters and isinstance(filters, dict):
+		if filters.get('include_disabled'):
+			filters.pop('include_disabled')
+		else:
+			if not filters.get('disabled'):
+				default_conditions.append(default_disabled_condition)
+			if not filters.get('end_of_life'):
+				default_conditions.append(default_eol_condition)
+
+		if not filters.get('has_variants'):
+			default_conditions.append(default_variant_condition)
+	else:
+		default_conditions = [default_disabled_condition, default_variant_condition, default_eol_condition]
+
+	default_conditions = "and {0}".format(" and ".join(default_conditions)) if default_conditions else ""
+
 	return frappe.db.sql("""select tabItem.name,
 		if(length(tabItem.item_name) > 40,
 			concat(substr(tabItem.item_name, 1, 40), "..."), item_name) as item_name,
@@ -249,12 +273,15 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 		{columns}
 		from tabItem
 		where tabItem.docstatus < 2
-			and tabItem.has_variants=0
-			and tabItem.disabled=0
-			and (tabItem.end_of_life > %(today)s or ifnull(tabItem.end_of_life, '0000-00-00')='0000-00-00')
-			and ({scond} or tabItem.item_code IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
-				{description_cond})
-			{fcond} {mcond} {applicable_to_item_cond}
+			{default_conditions}
+			and (
+				{scond}
+				or tabItem.name IN (select parent from `tabItem Barcode` where barcode LIKE %(txt)s)
+				{description_cond}
+			)
+			{fcond}
+			{mcond}
+			{applicable_to_item_cond}
 		order by
 			if(locate(%(_txt)s, name), locate(%(_txt)s, name), 99999),
 			if(locate(%(_txt)s, item_name), locate(%(_txt)s, item_name), 99999),
@@ -262,6 +289,7 @@ def item_query(doctype, txt, searchfield, start, page_len, filters, as_dict=Fals
 			name, item_name
 		limit %(start)s, %(page_len)s """.format(
 			columns=columns,
+			default_conditions=default_conditions,
 			scond=searchfields,
 			fcond=get_filters_cond(doctype, filters, conditions).replace('%', '%%'),
 			mcond=get_match_cond(doctype).replace('%', '%%'),

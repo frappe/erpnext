@@ -18,7 +18,8 @@ frappe.query_reports["Stock Analytics"] = {
 			options:"Item",
 			get_query: function() {
 				return {
-					query: "erpnext.controllers.queries.item_query"
+					query: "erpnext.controllers.queries.item_query",
+					filters: {'include_disabled': 1}
 				}
 			},
 			default: "",
