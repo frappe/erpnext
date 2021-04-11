@@ -124,9 +124,12 @@ class SalarySlip(TransactionBase):
 
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:
+			cond = ""
+			if self.payroll_entry:
+				cond += "and payroll_entry = '{0}'".format(self.payroll_entry)
 			ret_exist = frappe.db.sql("""select name from `tabSalary Slip`
 						where start_date = %s and end_date = %s and docstatus != 2
-						and employee = %s and name != %s""",
+						and employee = %s and name != %s {0}""".format(cond),
 						(self.start_date, self.end_date, self.employee, self.name))
 			if ret_exist:
 				self.employee = ''
@@ -618,12 +621,15 @@ class SalarySlip(TransactionBase):
 
 			component_row = self.append(component_type)
 			for attr in (
-				'depends_on_payment_days', 'salary_component', 'abbr'
+				'depends_on_payment_days', 'salary_component',
 				'do_not_include_in_total', 'is_tax_applicable',
 				'is_flexible_benefit', 'variable_based_on_taxable_salary',
 				'exempted_from_income_tax'
 			):
 				component_row.set(attr, component_data.get(attr))
+
+			abbr = component_data.get('abbr') or component_data.get('salary_component_abbr')
+			component_row.set('abbr', abbr)
 
 		if additional_salary:
 			component_row.default_amount = 0
@@ -1050,7 +1056,7 @@ class SalarySlip(TransactionBase):
 			repayment_entry.save()
 			repayment_entry.submit()
 
-			loan.loan_repayment_entry = repayment_entry.name
+			frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
 
 	def cancel_loan_repayment_entry(self):
 		for loan in self.loans:
