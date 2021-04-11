@@ -17,14 +17,20 @@ class TransactionsCleanup(Document):
 					'istable' : 0
 				})
 			
+			print("*" * 100)
 			ignore = ['Item', 'Company', 'Customer', 'Supplier', 'Shipment', 'DATEV Settings']
 			for doctype in doctypes:
 				if doctype.name not in ignore:
 					doctype_fields = frappe.get_meta(doctype.name).as_dict()['fields']
 					for doctype_field in doctype_fields:
 						if doctype_field['fieldtype'] == 'Link' and doctype_field['options'] == 'Company':
+							no_of_docs = frappe.db.count(doctype.name, {
+								'company' : self.company
+								})
+							print(doctype.name, no_of_docs)
 							self.append('doctypes', {
 								"doctype_name" : doctype.name,
+								"no_of_docs" : no_of_docs
 							})
 							break
 		

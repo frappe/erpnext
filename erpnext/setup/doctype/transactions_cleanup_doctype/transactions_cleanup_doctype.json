@@ -5,7 +5,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "doctype_name"
+  "doctype_name",
+  "no_of_docs"
  ],
  "fields": [
   {
@@ -15,12 +16,17 @@
    "label": "DocType",
    "options": "DocType",
    "reqd": 1
+  },
+  {
+   "fieldname": "no_of_docs",
+   "fieldtype": "Int",
+   "label": "Number of Docs"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-07 07:34:00.124124",
+ "modified": "2021-04-10 02:46:23.149762",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transactions Cleanup Doctype",
