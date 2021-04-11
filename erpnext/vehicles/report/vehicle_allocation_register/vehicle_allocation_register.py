@@ -33,7 +33,8 @@ class VehicleAllocationRegisterReport(object):
 		allocation_data = frappe.db.sql("""
 			select m.name as vehicle_allocation, m.item_code, m.supplier, m.allocation_period, m.delivery_period,
 				m.sr_no, m.code, m.is_additional, m.booking_price, m.vehicle_color,
-				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date
+				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
+				item.variant_of, item.item_group, item.brand
 			from `tabVehicle Allocation` m
 			inner join `tabItem` item on item.name = m.item_code
 			inner join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
@@ -51,7 +52,8 @@ class VehicleAllocationRegisterReport(object):
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
-				m.customer_advance, m.supplier_advance
+				m.customer_advance, m.supplier_advance,
+				item.variant_of, item.item_group, item.brand
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
 			left join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
@@ -120,8 +122,10 @@ class VehicleAllocationRegisterReport(object):
 
 			if not group_label or group_label == "Ungrouped":
 				continue
-			elif group_label == "Item":
+			elif group_label == "Variant":
 				group_field = "original_item_code"
+			elif group_label == "Model":
+				group_field = "variant_of"
 			else:
 				group_field = scrub(group_label)
 
@@ -141,6 +145,7 @@ class VehicleAllocationRegisterReport(object):
 
 		group_reference_doctypes = {
 			"original_item_code": "Item",
+			"variant_of": "Item",
 			"allocation_period": "Vehicle Allocation Period",
 			"delivery_period": "Vehicle Allocation Period",
 		}
@@ -155,6 +160,8 @@ class VehicleAllocationRegisterReport(object):
 
 		if "original_item_code" in grouped_by:
 			totals['item_code'] = totals['original_item_code']
+		elif "variant_of" in grouped_by:
+			totals['item_code'] = totals['variant_of']
 
 		count = len(data)
 		booked = len([d for d in data if d.vehicle_booking_order])
@@ -187,8 +194,11 @@ class VehicleAllocationRegisterReport(object):
 			self.filters.delivery_to_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.to_delivery_period, "to_date")
 			conditions.append("dp.to_date <= %(delivery_to_date)s")
 
+		if self.filters.variant_of:
+			conditions.append("item.variant_of = %(variant_of)s")
+
 		if self.filters.item_code:
-			conditions.append("m.item_code = %(item_code)s")
+			conditions.append("item.name = %(item_code)s")
 
 		if self.filters.item_group:
 			conditions.append(get_item_group_condition(self.filters.item_group))
@@ -231,16 +241,15 @@ class VehicleAllocationRegisterReport(object):
 
 	def get_columns(self):
 		return [
-			{"label": _("Reference"), "fieldname": "reference", "fieldtype": "Dynamic Link", "options": "reference_type", "width": 160},
+			{"label": _("Reference"), "fieldname": "reference", "fieldtype": "Dynamic Link", "options": "reference_type", "width": 165},
 			{"label": _("Sr #"), "fieldname": "sr_no", "fieldtype": "Int", "width": 45},
-			{"label": _("Allocation Code"), "fieldname": "code", "fieldtype": "Data", "width": 150},
+			{"label": _("Allocation Code"), "fieldname": "code", "fieldtype": "Data", "width": 160},
 			{"label": _("Additional"), "fieldname": "is_additional", "fieldtype": "Check", "width": 60},
 			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 120},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
-			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
-			{"label": _("Booking Price"), "fieldname": "booking_price", "fieldtype": "Data", "width": 100},
+			{"label": _("Item Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Color"), "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
-			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 100},
+			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 200},
 			# {"label": _("Customer (User)"), "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 100},
 			# {"label": _("Financer"), "fieldname": "financer", "fieldtype": "Link", "options": "Customer", "width": 100},
@@ -251,6 +260,7 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Deposit Date"), "fieldname": "supplier_payment_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 100},
 			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
+			{"label": _("Booking Price"), "fieldname": "booking_price", "fieldtype": "Data", "width": 100},
 			{"label": _("Supplier"), "fieldname": "supplier", "fieldtype": "Data", "width": 100},
 		]
 

@@ -49,14 +49,31 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			options: "Vehicle Allocation Period"
 		},
 		{
-			fieldname: "item_code",
-			label: __("Vehicle Item Code (Variant)"),
+			fieldname: "variant_of",
+			label: __("Model Item Code"),
 			fieldtype: "Link",
 			options: "Item",
 			get_query: function() {
 				return {
 					query: "erpnext.controllers.queries.item_query",
-					filters: {"is_vehicle": 1, "include_in_vehicle_booking": 1}
+					filters: {"is_vehicle": 1, "include_in_vehicle_booking": 1, "include_disabled": 1, "has_variants": 1}
+				};
+			}
+		},
+		{
+			fieldname: "item_code",
+			label: __("Variant Item Code"),
+			fieldtype: "Link",
+			options: "Item",
+			get_query: function() {
+				var variant_of = frappe.query_report.get_filter_value('variant_of');
+				var filters = {"is_vehicle": 1, "include_in_vehicle_booking": 1, "include_disabled": 1};
+				if (variant_of) {
+					filters['variant_of'] = variant_of;
+				}
+				return {
+					query: "erpnext.controllers.queries.item_query",
+					filters: filters
 				};
 			}
 		},
@@ -95,30 +112,30 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			label: __("Group By Level 1"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Allocation Period", "Group by Delivery Period",
-				"Group by Item", "Group by Item Group", "Group by Brand"],
-			default: "Ungrouped"
+				"Group by Variant Item", "Group by Model Item", "Group by Item Group", "Group by Brand"],
+			default: "Group by Allocation Period"
 		},
 		{
 			fieldname: "group_by_2",
 			label: __("Group By Level 2"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Allocation Period", "Group by Delivery Period",
-				"Group by Item", "Group by Item Group", "Group by Brand"],
-			default: "Group by Allocation Period"
+				"Group by Variant", "Group by Model", "Group by Item Group", "Group by Brand"],
+			default: "Group by Model"
 		},
 		{
 			fieldname: "group_by_3",
 			label: __("Group By Level 3"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Allocation Period", "Group by Delivery Period",
-				"Group by Item", "Group by Item Group", "Group by Brand"],
-			default: "Group by Item"
+				"Group by Variant", "Group by Model", "Group by Item Group", "Group by Brand"],
+			default: "Group by Variant"
 		},
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
-		if (data.original_item_code !== data.item_code) {
+		if (data.original_item_code !== data.item_code && data.item_code !== data.variant_of) {
 			if (['item_code', 'code'].includes(column.fieldname)) {
 				style['font-weight'] = 'bold';
 			}
