@@ -2,7 +2,15 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Transactions Cleanup', {
-	// after_save(frm) {
+	
+	
+});
+	
+
+
+
+
+// after_save(frm) {
 	// 	frappe.confirm(__("Are you sure you want to delete all this?"), function() {
 	// 		frappe.call({
 	// 			method:
@@ -16,8 +24,8 @@ frappe.ui.form.on('Transactions Cleanup', {
 	// 		})
 	// 	} , () => this.handle_save_fail(btn, on_error) );
 	// }
-});
-	
+
+
 
 			// frappe.validated = true;
 			// this.script_manager.trigger("before_submit").then(function() {

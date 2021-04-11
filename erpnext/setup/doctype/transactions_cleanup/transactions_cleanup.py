@@ -17,16 +17,16 @@ class TransactionsCleanup(Document):
 					'istable' : 0
 				})
 			
+			ignore = ['Item', 'Company', 'Customer', 'Supplier', 'Shipment', 'DATEV Settings']
 			for doctype in doctypes:
-				doctype_obj = frappe.get_doc('DocType', doctype.name)
-				doctype_dict = doctype_obj.as_dict()
-				doctype_fields = doctype_dict['fields']
-				for doctype_field in doctype_fields:
-					if doctype_field['fieldname'] == "company":
-						self.append('doctypes',{
-							"doctype_name" : doctype.name,
-						})
-						break
+				if doctype.name not in ignore:
+					doctype_fields = frappe.get_meta(doctype.name).as_dict()['fields']
+					for doctype_field in doctype_fields:
+						if doctype_field['fieldtype'] == 'Link' and doctype_field['options'] == 'Company':
+							self.append('doctypes', {
+								"doctype_name" : doctype.name,
+							})
+							break
 		
 	def on_submit(self):
 		for doctype in self.doctypes or self.customisable_doctypes:
