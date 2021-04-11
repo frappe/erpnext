@@ -278,10 +278,10 @@ def update_invoice_taxes(invoice, invoice_value_details):
 			for tax_type in ['igst', 'cgst', 'sgst']:
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
 
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.tax_amount)
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(tax_amount)
 				update_other_charges(t, invoice_value_details, gst_accounts_list, invoice, considered_rows)
 		else:
-			invoice_value_details.total_other_charges += abs(t.tax_amount)
+			invoice_value_details.total_other_charges += abs(tax_amount)
 
 	return invoice_value_details
 
