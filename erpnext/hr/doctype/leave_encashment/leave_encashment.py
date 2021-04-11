@@ -63,6 +63,7 @@ class LeaveEncashment(Document):
 				frappe.db.get_value('Leave Allocation', self.leave_allocation, 'total_leaves_encashed') - self.encashable_days)
 		self.create_leave_ledger_entry(submit=False)
 
+	@frappe.whitelist()
 	def get_leave_details_for_encashment(self):
 		salary_structure = get_assigned_salary_structure(self.employee, self.encashment_date or getdate(nowdate()))
 		if not salary_structure:

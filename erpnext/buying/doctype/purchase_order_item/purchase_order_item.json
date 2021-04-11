@@ -27,11 +27,17 @@
   "stock_qty",
   "sec_break1",
   "price_list_rate",
+  "last_purchase_rate",
+  "col_break3",
+  "base_price_list_rate",
+  "discount_and_margin_section",
+  "margin_type",
+  "margin_rate_or_amount",
+  "rate_with_margin",
+  "column_break_28",
   "discount_percentage",
   "discount_amount",
-  "col_break3",
-  "last_purchase_rate",
-  "base_price_list_rate",
+  "base_rate_with_margin",
   "sec_break2",
   "rate",
   "amount",
@@ -733,7 +739,51 @@
    "fieldname": "stock_uom_rate",
    "fieldtype": "Currency",
    "label": "Rate of Stock UOM",
+   "no_copy": 1,
    "options": "currency",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "discount_and_margin_section",
+   "fieldtype": "Section Break",
+   "label": "Discount and Margin"
+  },
+  {
+   "depends_on": "price_list_rate",
+   "fieldname": "margin_type",
+   "fieldtype": "Select",
+   "label": "Margin Type",
+   "options": "\nPercentage\nAmount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate",
+   "fieldname": "margin_rate_or_amount",
+   "fieldtype": "Float",
+   "label": "Margin Rate or Amount",
+   "print_hide": 1
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin",
+   "options": "currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_28",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.margin_type && doc.price_list_rate && doc.margin_rate_or_amount",
+   "fieldname": "base_rate_with_margin",
+   "fieldtype": "Currency",
+   "label": "Rate With Margin (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
    "read_only": 1
   }
  ],
@@ -741,7 +791,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-01-30 21:44:41.816974",
+ "modified": "2021-02-23 01:00:27.132705",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",
