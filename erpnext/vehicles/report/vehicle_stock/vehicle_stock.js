@@ -41,7 +41,23 @@ frappe.query_reports["Vehicle Stock"] = {
 					query: "erpnext.controllers.queries.item_query",
 					filters: {"is_vehicle": 1, "has_variants": 1, "include_disabled": 1}
 				};
+			},
+			on_change: function() {
+				var variant_of = frappe.query_report.get_filter_value('variant_of');
+				if(!variant_of) {
+					frappe.query_report.set_filter_value('variant_of_name', "");
+				} else {
+					frappe.db.get_value("Item", variant_of, 'item_name', function(value) {
+						frappe.query_report.set_filter_value('variant_of_name', value['item_name']);
+					});
+				}
 			}
+		},
+		{
+			"fieldname":"variant_of_name",
+			"label": __("Model Name"),
+			"fieldtype": "Data",
+			"hidden": 1
 		},
 		{
 			fieldname: "item_code",
@@ -58,7 +74,23 @@ frappe.query_reports["Vehicle Stock"] = {
 					query: "erpnext.controllers.queries.item_query",
 					filters: filters
 				};
+			},
+			on_change: function() {
+				var item_code = frappe.query_report.get_filter_value('item_code');
+				if(!item_code) {
+					frappe.query_report.set_filter_value('item_name', "");
+				} else {
+					frappe.db.get_value("Item", item_code, 'item_name', function(value) {
+						frappe.query_report.set_filter_value('item_name', value['item_name']);
+					});
+				}
 			}
+		},
+		{
+			"fieldname":"item_name",
+			"label": __("Variant Item Name"),
+			"fieldtype": "Data",
+			"hidden": 1
 		},
 		{
 			fieldname: "warehouse",

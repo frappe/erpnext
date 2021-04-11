@@ -124,11 +124,16 @@ class VehicleStockReport(object):
 
 	def prepare_data(self):
 		for d in self.data:
-			item_data = self.item_data.get(d.item_code, frappe._dict())
-			d.item_name = item_data.item_name
-			d.variant_of = item_data.variant_of
-			d.item_group = item_data.item_group
-			d.brand = item_data.brand
+			variant_data = self.item_data.get(d.item_code, frappe._dict())
+			model_data = self.item_data.get(variant_data.variant_of, frappe._dict())
+
+			d.item_name = variant_data.item_name
+			d.item_group = variant_data.item_group
+			d.brand = variant_data.brand
+
+			d.variant_of = variant_data.variant_of
+			d.variant_of_name = model_data.item_name
+
 			d.disable_item_formatter = 1
 
 			vehicle_data = self.vehicle_data.get(d.vehicle, frappe._dict())
@@ -229,7 +234,8 @@ class VehicleStockReport(object):
 		if not self.group_by:
 			return data
 
-		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
+		return group_report_data(data, self.group_by,
+			calculate_totals=self.calculate_group_totals, postprocess_group=self.postprocess_group)
 
 	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
 		totals = frappe._dict()
@@ -248,26 +254,57 @@ class VehicleStockReport(object):
 
 		totals['vehicle'] = "'{0}: {1}'".format(reference_dt, grouped_by.get(reference_field))
 
-		if 'item_code' in grouped_by or 'variant_of' in grouped_by:
+		if 'item_code' in grouped_by:
 			totals['item_name'] = data[0].item_name
 			totals['disable_item_formatter'] = data[0].disable_item_formatter
 
-		count = len(data)
-		totals['code'] = "{0}".format(count)
+		if 'variant_of' in grouped_by:
+			totals['variant_of_name'] = data[0].variant_of_name
+			totals['disable_item_formatter'] = data[0].disable_item_formatter
+
+		status_counts = {}
+		for d in data:
+			status_counts.setdefault(d.status, 0)
+			status_counts[d.status] += 1
+
+		status_counts_text = ", ".join(["{0}: {1}".format(status, frappe.format(count))\
+			for status, count in status_counts.items()])
+
+		total_text = ""
+		if len(status_counts) > 1:
+			total_count = len(data)
+			total_text = "Total: {0}".format(frappe.format(total_count))
+
+		totals['status'] = "{0}{1}{2}".format(total_text, ", " if total_text and status_counts_text else "", status_counts_text)
 
 		return totals
+
+	def postprocess_group(self, group_object, grouped_by):
+		group_object.item_name = group_object.totals.item_name
+		group_object.variant_of_name = group_object.totals.variant_of_name
 
 	def get_item_data(self):
 		self.item_data = {}
 
 		item_conditions = self.get_item_conditions()
-		data = frappe.db.sql("""
+		variant_data = frappe.db.sql("""
 			select name, item_name, variant_of, item_group, brand
 			from `tabItem` item
 			where is_vehicle = 1 {0}
 		""".format(item_conditions), self.filters, as_dict=1)
 
-		for d in data:
+		model_item_codes = list(set([d.variant_of for d in variant_data if d.variant_of]))
+		if model_item_codes:
+			model_data = frappe.db.sql("""
+				select name, item_name, variant_of, item_group, brand
+				from `tabItem` item
+				where name in %s
+			""", [model_item_codes], as_dict=1)
+
+			for d in model_data:
+				self.item_data[d.name] = d
+
+		for d in variant_data:
 			self.item_data[d.name] = d
 
 		return self.item_data

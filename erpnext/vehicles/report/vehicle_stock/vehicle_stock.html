@@ -1,0 +1,132 @@
+<style>
+@media screen {
+	.print-format {
+		padding: 8mm;
+	}
+}
+
+.print-format {
+	font-size: 8pt;
+}
+.print-format td, .print-format th {
+	vertical-align: middle !important;
+}
+</style>
+
+{% function print_group(data, group) { %}
+<h2 class="text-center" style="margin-top:0;">{%= __("Vehicle Stock") %}</h2>
+
+<h4 class="text-center">
+	{% if (filters.status && filters.status != 'All Vehicles') { %}
+		{%= filters.status %}
+	{% } %}
+</h4>
+
+<h5 class="text-center">
+	{% if (filters.from_date == filters.to_date) { %}
+		{%= frappe.datetime.str_to_user(filters.from_date) %}
+	{% } else { %}
+		{%= frappe.datetime.str_to_user(filters.from_date) %}
+		{%= __("to") %}
+		{%= frappe.datetime.str_to_user(filters.to_date) %}
+	{% } %}
+</h5>
+
+<div class="clearfix">
+	<div class="pull-left" style="width: 50%">
+	{% if (filters.item_code || group.item_code) { %}
+	<div>
+		<strong>Variant:</strong> {%= filters.item_code || group.item_code %}
+		{% if ((filters.item_name || group.item_name) && (filters.item_name || group.item_name) != (filters.item_code || group.item_code)) { %}
+			- {%= filters.item_name || group.item_name %}
+		{% } %}
+	</div>
+	{% } %}
+	{% if (filters.variant_of || group.variant_of) { %}
+	<div>
+		<strong>Model:</strong> {%= filters.variant_of || group.variant_of %}
+		{% if ((filters.variant_of_name || group.variant_of_name) && (filters.variant_of_name || group.variant_of_name) != (filters.variant_of || group.variant_of)) { %}
+			- {%= filters.variant_of_name || group.variant_of_name %}
+		{% } %}
+	</div>
+	{% } %}
+	</div>
+	<div class="pull-right" style="width: 50%">
+	{% if (filters.warehouse || group.warehouse) { %}
+		<strong>Warehouse:</strong> {%= filters.warehouse || group.warehouse %}
+	{% } %}
+	</div>
+</div>
+
+<table class="table table-bordered">
+	<thead>
+		<tr>
+			<th class="text-center">{%= __("Date") %}</th>
+			<th class="text-center">{%= __("Variant") %}</th>
+			<th class="text-center">{%= __("Vehicle") %}</th>
+			<th class="text-center">{%= __("Reference") %}</th>
+			<th class="text-center">{%= __("Status") %}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{% for(var i=0, l=data.length; i<l; i++) { %}
+			<tr>
+			{% if(data[i]["_isGroupTotal"]) { %}
+				<td colspan="5">
+					<b>{%= data[i].status %}</b>
+				</td>
+			{% } else { %}
+				<td class="text-nowrap">
+					{% if(data[i].received_date) { %}
+						<div>Received: {%= frappe.datetime.str_to_user(data[i].received_date) %}</div>
+					{% } %}
+					{% if(data[i].delivery_date) { %}
+						<div>Delivered: {%= frappe.datetime.str_to_user(data[i].delivery_date) %}</div>
+					{% } %}
+					{% if(data[i].dispatch_date && !data[i].received_date) { %}
+						<div>Dispatched: {%= frappe.datetime.str_to_user(data[i].dispatch_date) %}</div>
+					{% } %}
+				</td>
+
+				<td>
+					<div>{%= data[i].item_code %}</div>
+					{% if(data[i].item_name && data[i].item_name != data[i].item_code) { %}
+						<div>{%= data[i].item_name %}</div>
+					{% } %}
+				</td>
+
+				<td class="text-nowrap">
+					{% if(data[i].chassis_no) { %}
+						<div>Chassis #: {%= data[i].chassis_no %}</div>
+					{% } %}
+					{% if(data[i].engine_no) { %}
+						<div>Engine #: {%= data[i].engine_no %}</div>
+					{% } %}
+					{% if(data[i].license_plate && data[i].license_plate != 'Unregistered') { %}
+						<div>Reg #: {%= data[i].license_plate %}</div>
+					{% } %}
+				</td>
+
+				<td>
+					{% if(data[i].customer_name) { %}
+						<div>{%= data[i].customer_name %}</div>
+					{% } %}
+					{% if(data[i].vehicle_booking_order) { %}
+						<div>Booking #: {%= data[i].vehicle_booking_order %}</div>
+					{% } %}
+					{% if(data[i].project) { %}
+						<div>{%= __("Project") %}: {%= data[i].project %}</div>
+					{% } %}
+				</td>
+
+				<td class="text-center" {% if (data[i].status_color) { %} style="color: {%= data[i].status_color %} !important;"{% } %}>
+					{%= data[i].status %}
+				</td>
+			{% } %}
+		{% } %}
+	</tbody>
+</table>
+<p class="text-right text-muted">Printed On {%= frappe.datetime.str_to_user(frappe.datetime.get_datetime_as_string()) %}</p>
+{% } %}
+
+{{ frappe.utils.print_report_groups(original_data, print_group, print_settings.page_break_groups, _p) }}
