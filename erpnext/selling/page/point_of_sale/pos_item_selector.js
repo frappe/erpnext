@@ -1,3 +1,5 @@
+var over_ride_barcode_decode = 0;
+
 erpnext.PointOfSale.ItemSelector = class {
 	constructor({ frm, wrapper, events, pos_profile, settings }) {
 		this.wrapper = wrapper;
@@ -5,16 +7,25 @@ erpnext.PointOfSale.ItemSelector = class {
 		this.pos_profile = pos_profile;
 		this.hide_images = settings.hide_images;
 		this.auto_add_item = settings.auto_add_item_to_cart;
-		
 		this.inti_component();
 	}
 	
 	inti_component() {
 		this.prepare_dom();
+		this.load_pos_settings();
 		this.make_search_bar();
 		this.load_items_data();
 		this.bind_events();
 		this.attach_shortcuts();
+	}
+
+	load_pos_settings(){
+		frappe.call({
+			method: "erpnext.selling.page.point_of_sale.point_of_sale.get_pos_settings",
+			callback: function(response){
+				over_ride_barcode_decode = response.message.over_ride_barcode_decode;
+			}
+		})
 	}
 
 	prepare_dom() {
@@ -152,6 +163,33 @@ erpnext.PointOfSale.ItemSelector = class {
 
 	bind_events() {
 		const me = this;
+		onScan.decodeKeyEvent = function(e){
+			var t = this._getNormalizedKeyNum(e);
+			switch (!0) {
+				case 48 <= t && t <= 90:
+				case 106 <= t && t <= 111:
+					if(over_ride_barcode_decode == 0){
+						if (void 0 !== e.key && "" !== e.key) return e.key;
+						var n = String.fromCharCode(t);
+						switch (e.shiftKey) {
+							case !1:
+								n = n.toLowerCase();
+								break;
+							case !0:
+								n = n.toUpperCase()
+						}
+						return n;
+					}
+					
+				case 96 <= t && t <= 105:
+					if(over_ride_barcode_decode == 0){
+						return t - 96
+					}
+
+			}
+			return ""
+		}
+		
 		onScan.attachTo(document, {
 			onScan: (sScancode) => {
 				if (this.search_field && this.$component.is(':visible')) {

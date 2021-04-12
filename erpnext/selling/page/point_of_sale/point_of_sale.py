@@ -258,3 +258,7 @@ def set_customer_info(fieldname, customer, value=""):
 		contact_doc.set('phone_nos', [{ 'phone': value, 'is_primary_mobile_no': 1}])
 		frappe.db.set_value('Customer', customer, 'mobile_no', value)
 	contact_doc.save()
+
+@frappe.whitelist()
+def get_pos_settings():
+	return frappe.get_single('POS Settings')

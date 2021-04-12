@@ -5,7 +5,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "invoice_fields"
+  "invoice_fields",
+  "over_ride_barcode_decode"
  ],
  "fields": [
   {
@@ -13,11 +14,17 @@
    "fieldtype": "Table",
    "label": "POS Field",
    "options": "POS Field"
+  },
+  {
+   "default": "0",
+   "fieldname": "over_ride_barcode_decode",
+   "fieldtype": "Check",
+   "label": "Allow Special Char On Scan"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-01 15:46:41.478928",
+ "modified": "2021-04-12 16:43:40.281959",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",
