@@ -762,3 +762,4 @@ erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
 erpnext.patches.v13_0.setup_uae_vat_fields
 erpnext.patches.v13_0.fix_non_unique_represents_company
+erpnext.patches.v12_0.create_taxable_value_field
