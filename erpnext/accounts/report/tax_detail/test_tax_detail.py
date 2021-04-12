@@ -10,6 +10,7 @@ from .tax_detail import filter_match, save_custom_report
 
 class TestTaxDetail(unittest.TestCase):
 	def load_testdocs(self):
+		from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
 		datapath, _ = os.path.splitext(os.path.realpath(__file__))
 		with open(datapath + '.json', 'r') as fp:
 			docs = json.load(fp)
@@ -18,10 +19,9 @@ class TestTaxDetail(unittest.TestCase):
 		self.from_date = get_first_day(now)
 		self.to_date = get_last_day(now)
 
-		for fy in frappe.get_list('Fiscal Year', fields=('year', 'year_start_date', 'year_end_date')):
-			if now >= fy['year_start_date'] and now <= fy['year_end_date']:
-				break
-		else:
+		try:
+			get_fiscal_year(now, company="_T")
+		except FiscalYearError:
 			docs = [{
 				"companies": [{
 					"company": "_T",
