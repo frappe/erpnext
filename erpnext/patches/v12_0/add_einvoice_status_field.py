@@ -40,7 +40,7 @@ def execute():
 	}
 	create_custom_fields(custom_fields, update=True)
 
-	if frappe.db.exists('E Invoice Settings') and frappe.db.get_single_value('E Invoice Settings', 'enable')):
+	if frappe.db.exists('E Invoice Settings') and frappe.db.get_single_value('E Invoice Settings', 'enable'):
 		frappe.db.sql('''
 			UPDATE `tabSales Invoice` SET einvoice_status = 'Pending'
 			WHERE
