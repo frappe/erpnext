@@ -44,7 +44,7 @@ def execute():
 		frappe.db.sql('''
 			UPDATE `tabSales Invoice` SET einvoice_status = 'Pending'
 			WHERE
-				posting_date >= '2020-11-01'
+				posting_date >= '2021-04-01'
 				AND ifnull(irn, '') = ''
 				AND ifnull(`billing_address_gstin`, '') != ifnull(`company_gstin`, '')
 				AND ifnull(gst_category, '') in ('Registered Regular', 'SEZ', 'Overseas', 'Deemed Export')
