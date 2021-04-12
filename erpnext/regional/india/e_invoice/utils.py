@@ -171,10 +171,15 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-		item.discount_amount = 0
-		item.unit_rate = abs(item.base_net_amount / item.qty)
-		item.gross_amount = abs(item.base_net_amount)
-		item.taxable_value = abs(item.base_net_amount)
+
+		if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+			item.discount_amount = abs(item.base_amount - item.base_net_amount)
+		else:
+			item.discount_amount = 0
+
+		item.unit_rate = abs((abs(item.taxable_value) - item.discount_amount)/ item.qty)
+		item.gross_amount = abs(item.taxable_value) + item.discount_amount
+		item.taxable_value = abs(item.taxable_value)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
@@ -211,7 +216,7 @@ def update_item_taxes(invoice, item):
 
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
-			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
+			item_tax_amount = (item_tax_rate / 100) * item.taxable_value
 
 			if t.account_head in gst_accounts.cess_account:
 				item_tax_amount_after_discount = item_tax_detail[1]
@@ -232,10 +237,14 @@ def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
-		invoice_value_details.base_total = abs(invoice.base_total)
-		invoice_value_details.invoice_discount_amt = abs(invoice.base_discount_amount)
+		# Discount already applied on net total which means on items
+		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
+		invoice_value_details.invoice_discount_amt = 0
+	elif invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount:
+		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 	else:
-		invoice_value_details.base_total = abs(invoice.base_net_total)
+		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 		# since tax already considers discount amount
 		invoice_value_details.invoice_discount_amt = 0
 
@@ -256,7 +265,11 @@ def update_invoice_taxes(invoice, invoice_value_details):
 	invoice_value_details.total_igst_amt = 0
 	invoice_value_details.total_cess_amt = 0
 	invoice_value_details.total_other_charges = 0
+	considered_rows = []
+
 	for t in invoice.taxes:
+		tax_amount = t.base_tax_amount if (invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount) \
+						else t.base_tax_amount_after_discount_amount
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
 				# using after discount amt since item also uses after discount amt for cess calc
@@ -264,11 +277,25 @@ def update_invoice_taxes(invoice, invoice_value_details):
 
 			for tax_type in ['igst', 'cgst', 'sgst']:
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount_after_discount_amount)
+
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(tax_amount)
+				update_other_charges(t, invoice_value_details, gst_accounts_list, invoice, considered_rows)
 		else:
-			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
+			invoice_value_details.total_other_charges += abs(tax_amount)
 
 	return invoice_value_details
+
+def update_other_charges(tax_row, invoice_value_details, gst_accounts_list, invoice, considered_rows):
+	prev_row_id = cint(tax_row.row_id) - 1
+	if tax_row.account_head in gst_accounts_list and prev_row_id not in considered_rows:
+		if tax_row.charge_type == 'On Previous Row Amount':
+			amount = invoice.get('taxes')[prev_row_id].tax_amount_after_discount_amount
+			invoice_value_details.total_other_charges -= abs(amount)
+			considered_rows.append(prev_row_id)
+		if tax_row.charge_type == 'On Previous Row Total':
+			amount = invoice.get('taxes')[prev_row_id].base_total - invoice.base_net_total
+			invoice_value_details.total_other_charges -= abs(amount)
+			considered_rows.append(prev_row_id)
 
 def get_payment_details(invoice):
 	payee_name = invoice.company

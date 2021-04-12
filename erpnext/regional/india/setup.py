@@ -127,6 +127,9 @@ def make_custom_fields(update=True):
 	is_non_gst = dict(fieldname='is_non_gst', label='Is Non GST',
 		fieldtype='Check', fetch_from='item_code.is_non_gst', insert_after='is_nil_exempt',
 		print_hide=1)
+	taxable_value = dict(fieldname='taxable_value', label='Taxable Value',
+		fieldtype='Currency', insert_after='base_net_amount', hidden=1, options="Company:company:default_currency",
+		print_hide=1)
 
 	purchase_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
@@ -460,7 +463,7 @@ def make_custom_fields(update=True):
 		'Supplier Quotation Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Sales Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Delivery Note Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
-		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
