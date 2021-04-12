@@ -95,12 +95,12 @@ class TestExpenseClaim(unittest.TestCase):
 	def test_rejected_expense_claim(self):
 		payable_account = get_payable_account(company_name)
 		expense_claim = frappe.get_doc({
-			 "doctype": "Expense Claim",
-			 "employee": "_T-Employee-00001",
-			 "payable_account": payable_account,
-			 "approval_status": "Rejected",
-			 "expenses":
-			 	[{ "expense_type": "Travel", "default_account": "Travel Expenses - _TC4", "amount": 300, "sanctioned_amount": 200 }]
+			"doctype": "Expense Claim",
+			"employee": "_T-Employee-00001",
+			"payable_account": payable_account,
+			"approval_status": "Rejected",
+			"expenses":
+				[{ "expense_type": "Travel", "default_account": "Travel Expenses - _TC4", "amount": 300, "sanctioned_amount": 200 }]
 		})
 		expense_claim.submit()
 
@@ -109,6 +109,34 @@ class TestExpenseClaim(unittest.TestCase):
 
 		gl_entry = frappe.get_all('GL Entry', {'voucher_type': 'Expense Claim', 'voucher_no': expense_claim.name})
 		self.assertEquals(len(gl_entry), 0)
+
+	def test_expense_approver_perms(self):
+		user = "test_approver_perm_emp@example.com"
+		make_employee(user, "_Test Company")
+
+		# check doc shared
+		payable_account = get_payable_account("_Test Company")
+		expense_claim = make_expense_claim(payable_account, 300, 200, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+		expense_claim.expense_approver = user
+		expense_claim.save()
+		self.assertTrue(expense_claim.name in frappe.share.get_shared("Expense Claim", user))
+
+		# check shared doc revoked
+		expense_claim.reload()
+		expense_claim.expense_approver = "test@example.com"
+		expense_claim.save()
+		self.assertTrue(expense_claim.name not in frappe.share.get_shared("Expense Claim", user))
+
+		expense_claim.reload()
+		expense_claim.expense_approver = user
+		expense_claim.save()
+
+		frappe.set_user(user)
+		expense_claim.reload()
+		expense_claim.status = "Approved"
+		expense_claim.submit()
+		frappe.set_user("Administrator")
+
 
 def get_payable_account(company):
 	return frappe.get_cached_value('Company', company, 'default_payable_account')
@@ -133,21 +161,21 @@ def make_expense_claim(payable_account, amount, sanctioned_amount, company, acco
 
 	currency, cost_center = frappe.db.get_value('Company', company, ['default_currency', 'cost_center'])
 	expense_claim = {
-		 "doctype": "Expense Claim",
-		 "employee": employee,
-		 "payable_account": payable_account,
-		 "approval_status": "Approved",
-		 "company": company,
-		'currency': currency,
-		 "expenses": [{
+		"doctype": "Expense Claim",
+		"employee": employee,
+		"payable_account": payable_account,
+		"approval_status": "Approved",
+		"company": company,
+		"currency": currency,
+		"expenses": [{
 			"expense_type": "Travel",
 			"default_account": account,
 			"currency": currency,
 			"amount": amount,
 			"sanctioned_amount": sanctioned_amount,
 			"cost_center": cost_center
-			}]
-		}
+		}]
+	}
 	if taxes:
 		expense_claim.update(taxes)
 

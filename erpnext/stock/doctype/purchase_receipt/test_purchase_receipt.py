@@ -191,7 +191,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
 		self.assertEqual(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
-		
+
 		pr.cancel()
 
 	def test_subcontracting_gle_fg_item_rate_zero(self):
@@ -911,6 +911,57 @@ class TestPurchaseReceipt(unittest.TestCase):
 		ste2.cancel()
 		ste1.cancel()
 		po.cancel()
+
+
+	def test_po_to_pi_and_po_to_pr_worflow_full(self):
+		"""Test following behaviour:
+			- Create PO
+			- Create PI from PO and submit
+			- Create PR from PO and submit
+		"""
+		from erpnext.buying.doctype.purchase_order import test_purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order
+
+		po = test_purchase_order.create_purchase_order()
+
+		pi = purchase_order.make_purchase_invoice(po.name)
+		pi.submit()
+
+		pr = purchase_order.make_purchase_receipt(po.name)
+		pr.submit()
+
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "Completed")
+		self.assertEqual(pr.per_billed, 100)
+
+	def test_po_to_pi_and_po_to_pr_worflow_partial(self):
+		"""Test following behaviour:
+			- Create PO
+			- Create partial PI from PO and submit
+			- Create PR from PO and submit
+		"""
+		from erpnext.buying.doctype.purchase_order import test_purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order
+
+		po = test_purchase_order.create_purchase_order()
+
+		pi = purchase_order.make_purchase_invoice(po.name)
+		pi.items[0].qty /= 2   # roughly 50%, ^ this function only creates PI with 1 item.
+		pi.submit()
+
+		pr = purchase_order.make_purchase_receipt(po.name)
+		pr.save()
+		# per_billed is only updated after submission.
+		self.assertEqual(flt(pr.per_billed), 0)
+
+		pr.submit()
+
+		pi.load_from_db()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "To Bill")
+		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

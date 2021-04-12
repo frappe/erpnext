@@ -87,10 +87,10 @@ def get_doc_details(invoice):
 		invoice_date=invoice_date
 	))
 
-def get_party_details(address_name):
+def get_party_details(address_name, company_address=None, billing_address=None, shipping_address=None):
 	d = frappe.get_all('Address', filters={'name': address_name}, fields=['*'])[0]
 
-	if (not d.gstin
+	if ((not d.gstin and not shipping_address)
 		or not d.city
 		or not d.pincode
 		or not d.address_title
@@ -108,8 +108,7 @@ def get_party_details(address_name):
 		# according to einvoice standard
 		pincode = 999999
 
-	return frappe._dict(dict(
-		gstin=d.gstin,
+	party_address_details = frappe._dict(dict(
 		legal_name=sanitize_for_json(d.address_title),
 		location=sanitize_for_json(d.city),
 		pincode=d.pincode,
@@ -117,6 +116,9 @@ def get_party_details(address_name):
 		address_line1=sanitize_for_json(d.address_line1),
 		address_line2=sanitize_for_json(d.address_line2)
 	))
+	if d.gstin:
+		party_address_details.gstin = d.gstin
+	return party_address_details
 
 def get_gstin_details(gstin):
 	if not hasattr(frappe.local, 'gstin_cache'):
@@ -169,10 +171,15 @@ def get_item_list(invoice):
 		item.description = sanitize_for_json(d.item_name)
 
 		item.qty = abs(item.qty)
-		item.discount_amount = 0
-		item.unit_rate = abs(item.base_net_amount / item.qty)
-		item.gross_amount = abs(item.base_net_amount)
-		item.taxable_value = abs(item.base_net_amount)
+
+		if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
+			item.discount_amount = abs(item.base_amount - item.base_net_amount)
+		else:
+			item.discount_amount = 0
+
+		item.unit_rate = abs((abs(item.taxable_value) - item.discount_amount)/ item.qty)
+		item.gross_amount = abs(item.taxable_value) + item.discount_amount
+		item.taxable_value = abs(item.taxable_value)
 
 		item.batch_expiry_date = frappe.db.get_value('Batch', d.batch_no, 'expiry_date') if d.batch_no else None
 		item.batch_expiry_date = format_date(item.batch_expiry_date, 'dd/mm/yyyy') if item.batch_expiry_date else None
@@ -209,7 +216,7 @@ def update_item_taxes(invoice, item):
 
 			item_tax_rate = item_tax_detail[0]
 			# item tax amount excluding discount amount
-			item_tax_amount = (item_tax_rate / 100) * item.base_net_amount
+			item_tax_amount = (item_tax_rate / 100) * item.taxable_value
 
 			if t.account_head in gst_accounts.cess_account:
 				item_tax_amount_after_discount = item_tax_detail[1]
@@ -230,10 +237,14 @@ def get_invoice_value_details(invoice):
 	invoice_value_details = frappe._dict(dict())
 
 	if invoice.apply_discount_on == 'Net Total' and invoice.discount_amount:
-		invoice_value_details.base_total = abs(invoice.base_total)
-		invoice_value_details.invoice_discount_amt = abs(invoice.base_discount_amount)
+		# Discount already applied on net total which means on items
+		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
+		invoice_value_details.invoice_discount_amt = 0
+	elif invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount:
+		invoice_value_details.invoice_discount_amt = invoice.base_discount_amount
+		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 	else:
-		invoice_value_details.base_total = abs(invoice.base_net_total)
+		invoice_value_details.base_total = abs(sum([i.taxable_value for i in invoice.get('items')]))
 		# since tax already considers discount amount
 		invoice_value_details.invoice_discount_amt = 0
 
@@ -254,7 +265,11 @@ def update_invoice_taxes(invoice, invoice_value_details):
 	invoice_value_details.total_igst_amt = 0
 	invoice_value_details.total_cess_amt = 0
 	invoice_value_details.total_other_charges = 0
+	considered_rows = []
+
 	for t in invoice.taxes:
+		tax_amount = t.base_tax_amount if (invoice.apply_discount_on == 'Grand Total' and invoice.discount_amount) \
+						else t.base_tax_amount_after_discount_amount
 		if t.account_head in gst_accounts_list:
 			if t.account_head in gst_accounts.cess_account:
 				# using after discount amt since item also uses after discount amt for cess calc
@@ -262,11 +277,25 @@ def update_invoice_taxes(invoice, invoice_value_details):
 
 			for tax_type in ['igst', 'cgst', 'sgst']:
 				if t.account_head in gst_accounts[f'{tax_type}_account']:
-					invoice_value_details[f'total_{tax_type}_amt'] += abs(t.base_tax_amount_after_discount_amount)
+
+					invoice_value_details[f'total_{tax_type}_amt'] += abs(tax_amount)
+				update_other_charges(t, invoice_value_details, gst_accounts_list, invoice, considered_rows)
 		else:
-			invoice_value_details.total_other_charges += abs(t.base_tax_amount_after_discount_amount)
+			invoice_value_details.total_other_charges += abs(tax_amount)
 
 	return invoice_value_details
+
+def update_other_charges(tax_row, invoice_value_details, gst_accounts_list, invoice, considered_rows):
+	prev_row_id = cint(tax_row.row_id) - 1
+	if tax_row.account_head in gst_accounts_list and prev_row_id not in considered_rows:
+		if tax_row.charge_type == 'On Previous Row Amount':
+			amount = invoice.get('taxes')[prev_row_id].tax_amount_after_discount_amount
+			invoice_value_details.total_other_charges -= abs(amount)
+			considered_rows.append(prev_row_id)
+		if tax_row.charge_type == 'On Previous Row Total':
+			amount = invoice.get('taxes')[prev_row_id].base_total - invoice.base_net_total
+			invoice_value_details.total_other_charges -= abs(amount)
+			considered_rows.append(prev_row_id)
 
 def get_payment_details(invoice):
 	payee_name = invoice.company
@@ -328,14 +357,17 @@ def make_einvoice(invoice):
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
 	invoice_value_details = get_invoice_value_details(invoice)
-	seller_details = get_party_details(invoice.company_address)
+	seller_details = get_party_details(invoice.company_address, company_address=1)
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
 	else:
-		buyer_details = get_party_details(invoice.customer_address)
-		place_of_supply = get_place_of_supply(invoice, invoice.doctype) or sanitize_for_json(invoice.billing_address_gstin)
-		place_of_supply = place_of_supply[:2]
+		buyer_details = get_party_details(invoice.customer_address, billing_address=1)
+		place_of_supply = get_place_of_supply(invoice, invoice.doctype)
+		if place_of_supply:
+			place_of_supply = place_of_supply.split('-')[0]
+		else:
+			place_of_supply = sanitize_for_json(invoice.billing_address_gstin)[:2]
 		buyer_details.update(dict(place_of_supply=place_of_supply))
 
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
@@ -343,7 +375,7 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-			shipping_details = get_party_details(invoice.shipping_address_name)
+			shipping_details = get_party_details(invoice.shipping_address_name, shipping_address=1)
 
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -391,7 +423,9 @@ def safe_json_load(json_string):
 		snippet = json_string[start:end]
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
-def validate_einvoice(validations, einvoice, errors=[]):
+def validate_einvoice(validations, einvoice, errors=None):
+	if errors is None:
+		errors = []
 	for fieldname, field_validation in validations.items():
 		value = einvoice.get(fieldname, None)
 		if not value or value == "None":
@@ -780,6 +814,8 @@ class GSPConnector():
 
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')
+		self.invoice.ack_no = res.get('AckNo')
+		self.invoice.ack_date = res.get('AckDt')
 		self.invoice.signed_einvoice = dec_signed_invoice
 		self.invoice.signed_qr_code = res.get('SignedQRCode')
 
