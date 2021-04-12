@@ -39,12 +39,11 @@ def validate_eligibility(doc):
 	if getdate(doc.get('posting_date')) < getdate(einvoicing_eligible_from):
 		return False
 
-	invalid_company = not frappe.db.get_value('E Invoice User', {'company': doc.get('company')})
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
 
-	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_supply_type or company_transaction or no_taxes_applied:
 		return False
 
 	return True
@@ -401,7 +400,7 @@ def validate_totals(einvoice):
 	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
 
-	if abs(flt(value_details['TotInvVal']) - total_item_value) > 1:
+	if abs(flt(value_details['TotInvVal']) + flt(value_details['Discount']) - total_item_value) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
 
 	calculated_invoice_value = \
@@ -463,13 +462,38 @@ def make_einvoice(invoice):
 		period_details=period_details, prev_doc_details=prev_doc_details,
 		export_details=export_details, eway_bill_details=eway_bill_details
 	)
-	einvoice = safe_json_load(einvoice)
 
-	einvoice = santize_einvoice_fields(einvoice)
+	try:
+		einvoice = safe_json_load(einvoice)
+		einvoice = santize_einvoice_fields(einvoice)
+		validate_totals(einvoice)
 
-	validate_totals(einvoice)
+	except Exception:
+		log_error(einvoice)
+		link_to_error_list = '<a href="List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
+		frappe.throw(
+			_('An error occurred while creating e-invoice for {}. Please check {} for more information.').format(
+				invoice.name, link_to_error_list),
+			title=_('E Invoice Creation Failed')
+		)
 
 	return einvoice
+
+def log_error(data=None):
+	if not isinstance(data, dict):
+		data = json.loads(data)
+
+	seperator = "--" * 50
+	err_tb = traceback.format_exc()
+	err_msg = str(sys.exc_info()[1])
+	data = json.dumps(data, indent=4)
+
+	message = "\n".join([
+		"Error", err_msg, seperator,
+		"Data:", data, seperator,
+		"Exception:", err_tb
+	])
+	frappe.log_error(title=_('E Invoice Request Failed'), message=message)
 
 def santize_einvoice_fields(einvoice):
 	int_fields = ["Pin","Distance","CrDay"]
@@ -611,7 +635,7 @@ class GSPConnector():
 			self.e_invoice_settings.reload()
 
 		except Exception:
-			self.log_error(res)
+			log_error(res)
 			self.raise_error(True)
 
 	def get_headers(self):
@@ -633,14 +657,14 @@ class GSPConnector():
 			if res.get('success'):
 				return res.get('result')
 			else:
-				self.log_error(res)
+				log_error(res)
 				raise RequestFailed
 
 		except RequestFailed:
 			self.raise_error()
 
 		except Exception:
-			self.log_error()
+			log_error()
 			self.raise_error(True)
 
 	@staticmethod
@@ -689,7 +713,7 @@ class GSPConnector():
 
 		except Exception as e:
 			self.set_failed_status(errors=str(e))
-			self.log_error(data)
+			log_error(data)
 			self.raise_error(True)
 
 	@staticmethod
@@ -730,7 +754,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error()
+			log_error()
 			self.raise_error(True)
 
 	def cancel_irn(self, irn, reason, remark):
@@ -775,7 +799,7 @@ class GSPConnector():
 
 		except Exception as e:
 			self.set_failed_status(errors=str(e))
-			self.log_error(data)
+			log_error(data)
 			self.raise_error(True)
 
 	@staticmethod
@@ -839,7 +863,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error(data)
+			log_error(data)
 			self.raise_error(True)
 
 	def cancel_eway_bill(self, eway_bill, reason, remark):
@@ -871,7 +895,7 @@ class GSPConnector():
 			self.raise_error(errors=errors)
 
 		except Exception:
-			self.log_error(data)
+			log_error(data)
 			self.raise_error(True)
 
 	def sanitize_error_message(self, message):
@@ -899,22 +923,6 @@ class GSPConnector():
 				errors[idx] = errors[idx][:-6]
 
 		return errors
-
-	def log_error(self, data={}):
-		if not isinstance(data, dict):
-			data = json.loads(data)
-
-		seperator = "--" * 50
-		err_tb = traceback.format_exc()
-		err_msg = str(sys.exc_info()[1])
-		data = json.dumps(data, indent=4)
-
-		message = "\n".join([
-			"Error", err_msg, seperator,
-			"Data:", data, seperator,
-			"Exception:", err_tb
-		])
-		frappe.log_error(title=_('E Invoice Request Failed'), message=message)
 
 	def raise_error(self, raise_exception=False, errors=[]):
 		title = _('E Invoice Request Failed')
