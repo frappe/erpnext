@@ -12,5 +12,5 @@ def execute():
 			select dl.link_name from `tabAddress` a, `tabDynamic Link` dl
 			where a.gstin = %s and dl.parent = a.name and dl.link_doctype = 'Company'
 		""", (creds.get('gstin')))
-		if company_name[0]:
+		if company_name and len(company_name) == 1:
 			frappe.db.set_value('E Invoice User', creds.get('name'), 'company', company_name[0][0])
