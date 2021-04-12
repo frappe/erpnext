@@ -12,6 +12,8 @@
   "default_booking_terms",
   "section_break_11",
   "vehicle_allocation_periodicity",
+  "column_break_8",
+  "dealership_code",
   "section_break_14",
   "role_change_booking_after_payment",
   "maximum_payment_adjustment"
@@ -70,11 +72,20 @@
    "fieldname": "maximum_payment_adjustment",
    "fieldtype": "Currency",
    "label": "Maximum Payment Adjustment"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "dealership_code",
+   "fieldtype": "Data",
+   "label": "Dealership Code"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-03-25 13:21:54.392170",
+ "modified": "2021-04-12 11:04:07.563807",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

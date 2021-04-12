@@ -1231,7 +1231,7 @@ def validate_supplier_payment_for_update(vbo_doc):
 			.format(frappe.bold(vbo_doc.name)))
 
 
-def get_booking_payments(vehicle_booking_order, include_draft=False):
+def get_booking_payments(vehicle_booking_order, include_draft=False, payment_type=None):
 	if not vehicle_booking_order:
 		return []
 
@@ -1242,8 +1242,12 @@ def get_booking_payments(vehicle_booking_order, include_draft=False):
 	if include_draft:
 		docstatus_cond = "p.docstatus < 2"
 
+	payment_type_cond = ""
+	if payment_type:
+		payment_type_cond = "and p.payment_type = {0}".format(frappe.db.escape(payment_type))
+
 	payment_entries = frappe.db.sql("""
-		select p.name, p.posting_date,
+		select p.name, p.posting_date, p.creation,
 			p.vehicle_booking_order, p.party_type, p.party,
 			p.payment_type, i.amount,
 			i.instrument_type, i.instrument_title,
@@ -1252,9 +1256,9 @@ def get_booking_payments(vehicle_booking_order, include_draft=False):
 			i.name as row_id, i.vehicle_booking_payment_row
 		from `tabVehicle Booking Payment Detail` i
 		inner join `tabVehicle Booking Payment` p on p.name = i.parent
-		where {0} and p.vehicle_booking_order in %s
+		where {0} and p.vehicle_booking_order in %s {1}
 		order by i.instrument_date, p.posting_date, p.creation
-	""".format(docstatus_cond), [vehicle_booking_order], as_dict=1)
+	""".format(docstatus_cond, payment_type_cond), [vehicle_booking_order], as_dict=1)
 
 	return payment_entries
 
