@@ -39,7 +39,7 @@
 			{{ doc.website_content or '' }}
 
 			<!-- Reviews and Comments -->
-			{% if shopping_cart.cart_settings.enable_reviews %}
+			{% if shopping_cart.cart_settings.enable_reviews and not doc.has_variants %}
 				{% include "templates/generators/item/item_reviews.html"%}
 			{% endif %}
 		</div>

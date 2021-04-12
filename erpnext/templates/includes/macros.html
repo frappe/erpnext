@@ -138,35 +138,47 @@
 		{% endif %}
 	</div>
 	{% if is_featured %}
-	<div class="product-price">{{ item.formatted_price or '' }}</div>
-	<div class="product-description ellipsis">{{ description or '' }}</div>
-	{% else %}
-	<div class="product-category">{{ item.item_group or '' }}</div>
-	<div style="display: flex;">
-		{% if item.formatted_price %}
 		<div class="product-price">{{ item.formatted_price or '' }}</div>
-		{% endif %}
-		{% if item.has_variants %}
-		<a href="/{{ item.route or '#' }}">
-			<div class="btn btn-sm btn-explore-variants">
-				{{ _('Explore') }}
+		<div class="product-description ellipsis">{{ description or '' }}</div>
+	{% else %}
+		<div class="product-category">{{ item.item_group or '' }}</div>
+
+		{% if item.formatted_price %}
+			<div class="product-price">
+				{{ item.formatted_price or '' }}
+
+				{% if item.get("formatted_mrp") %}
+					<small class="ml-1 text-muted">
+						<s>{{ item.formatted_mrp }}</s>
+					</small>
+					<small class="ml-1" style="color: #F47A7A; font-weight: 500;">
+						{{ item.discount }} OFF
+					</small>
+				{% endif %}
+
 			</div>
-		</a>
-		{% elif settings.enabled %}
-			<div id="{{ item.name }}" class="btn btn-sm btn-add-to-cart-list not-added"
+		{% endif %}
+
+		{% if item.has_variants %}
+			<a href="/{{ item.route or '#' }}">
+				<div class="btn btn-sm btn-explore-variants w-100 mt-4">
+					{{ _('Explore') }}
+				</div>
+			</a>
+		{% elif settings.enabled and (settings.allow_items_not_in_stock or item.in_stock != "red")%}
+			<div id="{{ item.name }}" class="btn btn-sm btn-add-to-cart-list not-added w-100 mt-4"
 				data-item-code="{{ item.item_code }}">
 				{{ _('Add to Cart') }}
 			</div>
 		{% endif %}
-	</div>
 	{% endif %}
 </div>
 {%- endmacro -%}
 
 
 {%- macro wishlist_card(item, settings) %}
-<div class="col-sm-3 item-card">
-	<div class="card text-center">
+<div class="col-sm-3 wishlist-card">
+	<div class="card text-center" style="max-height: 390px;">
 		{% if item.image %}
 			<div class="card-img-container">
 				<a href="/{{ item.route or '#' }}" style="text-decoration: none;">
@@ -201,22 +213,33 @@
 	<div style="margin-top: 16px;">
 		<div class="product-title">{{ item.item_name or item.item_code or ''}}</div>
 	</div>
-	<div class="product-price">{{ item.formatted_price or '' }}</div>
+	<div class="product-price">
+		{{ item.formatted_price or '' }}
+
+		{% if item.get("formatted_mrp") %}
+			<small class="ml-1 text-muted">
+				<s>{{ item.formatted_mrp }}</s>
+			</small>
+			<small class="ml-1" style="color: #F47A7A; font-weight: 500;">
+				{{ item.discount }} OFF
+			</small>
+		{% endif %}
+	</div>
 
 	{% if (item.available and settings.show_stock_availability) or (not settings.show_stock_availability) %}
-	<!-- Show move to cart button if in stock or if showing stock availability is disabled -->
-	<button data-item-code="{{ item.item_code}}" class="btn btn-add-to-cart w-100 wishlist-cart-not-added">
-		<span class="mr-2">
-			<svg class="icon icon-md">
-				<use href="#icon-assets"></use>
-			</svg>
-		</span>
-		{{ _("Move to Cart") }}
-	</button>
+		<!-- Show move to cart button if in stock or if showing stock availability is disabled -->
+		<button data-item-code="{{ item.item_code}}" class="btn btn-add-to-cart w-100 wishlist-cart-not-added mt-2">
+			<span class="mr-2">
+				<svg class="icon icon-md">
+					<use href="#icon-assets"></use>
+				</svg>
+			</span>
+			{{ _("Move to Cart") }}
+		</button>
 	{% else %}
-	<div style="color: #F47A7A; width: 100%;">
-		{{ _("Not in Stock") }}
-	</div>
+		<div class="mt-4" style="color: #F47A7A; width: 100%;">
+			{{ _("Not in Stock") }}
+		</div>
 	{% endif %}
 </div>
 {%- endmacro -%}
