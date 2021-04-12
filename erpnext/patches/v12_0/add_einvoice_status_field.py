@@ -58,7 +58,7 @@ def execute():
 			WHERE ifnull(irn_cancelled, 0) = 1''')
 
 	# set correct acknowledgement in e-invoices
-	einvoices = frappe.get_all('Sales Invoice', { 'irn': ['is', 'set'] }, ['name', 'signed_einvoice'])
+	einvoices = frappe.get_all('Sales Invoice', {'irn': ['is', 'set']}, ['name', 'signed_einvoice'])
 
 	if einvoices:
 		for inv in einvoices:
