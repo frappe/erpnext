@@ -79,8 +79,11 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
 		sales_invoice.is_consolidated = 1
+		sales_invoice.set_posting_time = 1
+		sales_invoice.posting_date = getdate(self.posting_date)
 		sales_invoice.save()
 		sales_invoice.submit()
+
 		self.consolidated_invoice = sales_invoice.name
 
 		return sales_invoice.name
@@ -92,10 +95,13 @@ class POSInvoiceMergeLog(Document):
 		credit_note = self.merge_pos_invoice_into(credit_note, data)
 
 		credit_note.is_consolidated = 1
+		credit_note.set_posting_time = 1
+		credit_note.posting_date = getdate(self.posting_date)
 		# TODO: return could be against multiple sales invoice which could also have been consolidated?
 		# credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
 		credit_note.submit()
+
 		self.consolidated_credit_note = credit_note.name
 
 		return credit_note.name
@@ -171,8 +177,6 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice = frappe.new_doc('Sales Invoice')
 		sales_invoice.customer = self.customer
 		sales_invoice.is_pos = 1
-		# date can be pos closing date?
-		sales_invoice.posting_date = getdate(nowdate())
 
 		return sales_invoice
 
@@ -257,7 +261,7 @@ def unconsolidate_pos_invoices(closing_entry):
 def create_merge_logs(invoice_by_customer, closing_entry={}):
 	for customer, invoices in iteritems(invoice_by_customer):
 		merge_log = frappe.new_doc('POS Invoice Merge Log')
-		merge_log.posting_date = getdate(nowdate())
+		merge_log.posting_date = getdate(closing_entry.get('posting_date'))
 		merge_log.customer = customer
 		merge_log.pos_closing_entry = closing_entry.get('name', None)
 
