@@ -1029,11 +1029,13 @@ def generate_einvoices(docnames):
 
 		if failures:
 			show_bulk_action_failure_message(failures)
-		else:
-			frappe.msgprint(
-				_('{} e-invoice generated successfully').format(frappe.bold(len(docnames))),
-				title=_('Bulk E-Invoice Generation Success')
-			)
+
+		success = len(docnames) - len(failures)
+		frappe.msgprint(
+			_('{} e-invoices generated successfully').format(success),
+			title=_('Bulk E-Invoice Generation Complete')
+		)
+			
 	else:
 		enqueue_bulk_action(schedule_bulk_generate_irn, docnames=docnames)
 
@@ -1061,7 +1063,7 @@ def show_bulk_action_failure_message(failures):
 
 		frappe.msgprint(
 			message,
-			title=_('Bulk E-Invoice Generation Failed'),
+			title=_('Bulk E-Invoice Generation Complete'),
 			indicator='red'
 		)
 
@@ -1075,11 +1077,12 @@ def cancel_irns(docnames, reason, remark):
 
 		if failures:
 			show_bulk_action_failure_message(failures)
-		else:
-			frappe.msgprint(
-				_('{} e-invoice cancelled successfully').format(frappe.bold(len(docnames))),
-				title=_('Bulk E-Invoice Cancellation Success')
-			)
+
+		success = len(docnames) - len(failures)
+		frappe.msgprint(
+			_('{} e-invoices cancelled successfully').format(success),
+			title=_('Bulk E-Invoice Cancellation Complete')
+		)
 	else:
 		enqueue_bulk_action(schedule_bulk_cancel_irn, docnames=docnames, reason=reason, remark=remark)
 
