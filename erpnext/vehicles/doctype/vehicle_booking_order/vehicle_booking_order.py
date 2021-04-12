@@ -1251,7 +1251,7 @@ def get_booking_payments(vehicle_booking_order, include_draft=False, payment_typ
 			p.vehicle_booking_order, p.party_type, p.party,
 			p.payment_type, i.amount,
 			i.instrument_type, i.instrument_title,
-			i.instrument_no, i.instrument_date,
+			i.instrument_no, i.instrument_date, i.bank,
 			p.deposit_slip_no, p.deposit_type,
 			i.name as row_id, i.vehicle_booking_payment_row
 		from `tabVehicle Booking Payment Detail` i
