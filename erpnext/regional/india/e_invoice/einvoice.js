@@ -113,7 +113,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 				const action = () => {
 					let message = __('Cancellation of e-way bill is currently not supported. ');
 					message += '<br><br>';
-					message += __('You must cancel the e-way bill on the portal and then use this popup to update the cancelled status in the ERPNext system.');
+					message += __('You must first use the portal to cancel the e-way bill and then update the cancelled status in the ERPNext system.');
 
 					frappe.msgprint({
 						title: __('Update E-Way Bill Cancelled Status?'),
