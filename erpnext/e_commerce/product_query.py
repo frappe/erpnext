@@ -56,9 +56,13 @@ class ProductQuery:
 		# add price and availability info in results
 		for item in result:
 			product_info = get_product_info_for_website(item.item_code, skip_quotation_creation=True).get('product_info')
-			if product_info:
-				item.formatted_price = product_info['price'].get('formatted_price') if product_info['price'] else None
-				item.price = product_info['price'].get('price_list_rate') if product_info['price'] else None
+			if product_info and product_info['price']:
+				item.formatted_mrp = product_info['price'].get('formatted_mrp')
+				item.formatted_price = product_info['price'].get('formatted_price')
+				if item.formatted_mrp:
+					item.discount = product_info['price'].get('formatted_discount_percent') or \
+						product_info['price'].get('formatted_discount_rate')
+				item.price = product_info['price'].get('price_list_rate')
 
 			if self.settings.show_stock_availability:
 				if item.get("website_warehouse"):

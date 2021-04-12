@@ -59,7 +59,7 @@ body.product-page {
 
 .item-card-group-section {
 	.card {
-		height: 360px;
+		height: 400px;
 		align-items: center;
 		justify-content: center;
 
@@ -134,6 +134,11 @@ body.product-page {
 	}
 
 	.item-card {
+		padding: var(--padding-sm);
+		min-width: 300px;
+	}
+
+	.wishlist-card {
 		padding: var(--padding-sm);
 		min-width: 260px;
 	}
@@ -624,8 +629,7 @@ body.product-page {
 .btn-explore-variants {
 	box-shadow: none;
 	margin: var(--margin-sm) 0;
-	margin-left: 18px;
-	max-height: 30px; // to avoid resizing on window resize
+	max-height: 50px; // to avoid resizing on window resize
 	flex: none;
 	transition: 0.3s ease;
 	color: var(--orange-500);
@@ -641,13 +645,12 @@ body.product-page {
 .btn-add-to-cart-list{
 	box-shadow: none;
 	margin: var(--margin-sm) 0;
-	max-height: 30px; // to avoid resizing on window resize
+	max-height: 50px; // to avoid resizing on window resize
 	flex: none;
 	transition: 0.3s ease;
 }
 
 .not-added {
-	margin-left: 18px;
 	color: var(--blue-500);
 	background-color: white;
 	border: 1px solid var(--blue-500);
@@ -659,7 +662,6 @@ body.product-page {
 }
 
 .added-to-cart {
-	margin-left: 18px;
 	background-color: var(--dark-green-400);
 	color: white;
 	border: 2px solid var(--green-300);

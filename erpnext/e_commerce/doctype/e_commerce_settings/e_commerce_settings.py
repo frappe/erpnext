@@ -4,7 +4,7 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe.utils import cint
+from frappe.utils import cint, comma_and
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import get_datetime, get_datetime_str, now_datetime
