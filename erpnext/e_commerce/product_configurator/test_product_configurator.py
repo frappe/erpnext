@@ -1,7 +1,8 @@
 from __future__ import unicode_literals
 
 from bs4 import BeautifulSoup
-import frappe, unittest
+import frappe
+import unittest
 from frappe.utils import get_html_for_route
 from erpnext.e_commerce.product_query import ProductQuery
 from erpnext.e_commerce.doctype.website_item.website_item import make_website_item
