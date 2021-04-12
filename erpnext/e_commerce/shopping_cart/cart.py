@@ -11,7 +11,7 @@ from frappe.utils.nestedset import get_root_of
 
 from erpnext.e_commerce.doctype.e_commerce_settings.e_commerce_settings import get_shopping_cart_settings
 from erpnext.accounts.utils import get_account_name
-from erpnext.utilities.product import get_qty_in_stock
+from erpnext.utilities.product import get_web_item_qty_in_stock
 
 
 class WebsitePriceListMissingError(frappe.ValidationError):
@@ -93,7 +93,7 @@ def place_order():
 				item.item_code, ["website_warehouse", "is_stock_item"])
 
 			if is_stock_item:
-				item_stock = get_qty_in_stock(item.item_code, "website_warehouse")
+				item_stock = get_web_item_qty_in_stock(item.item_code, "website_warehouse")
 				if not cint(item_stock.in_stock):
 					throw(_("{1} Not in Stock").format(item.item_code))
 				if item.qty > item_stock.stock_qty[0][0]:
