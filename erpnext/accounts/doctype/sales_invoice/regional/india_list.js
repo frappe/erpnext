@@ -83,7 +83,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 				frappe.call({
 					method: 'erpnext.regional.india.e_invoice.utils.cancel_irns',
 					args: { 
-						doctype,
+						doctype: list_view.doctype,
 						docnames,
 						reason: data.reason.split('-')[0],
 						remark: data.remark
@@ -103,7 +103,7 @@ frappe.listview_settings['Sales Invoice'].onload = function (list_view) {
 		einvoicing_enabled = enabled;
 	});
 
-	list_view.$result.on("change", "input[type=checkbox]", (e) => {
+	list_view.$result.on("change", "input[type=checkbox]", () => {
 		if (einvoicing_enabled) {
 			const docnames = list_view.get_checked_items(true);
 			// show/hide e-invoicing actions when no sales invoices are checked

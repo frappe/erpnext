@@ -39,7 +39,7 @@ def validate_eligibility(doc):
 	if getdate(doc.get('posting_date')) < getdate(einvoicing_eligible_from):
 		return False
 
-	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
+	invalid_company = not frappe.db.get_value('E Invoice User', {'company': doc.get('company')})
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
@@ -472,7 +472,8 @@ def make_einvoice(invoice):
 	return einvoice
 
 def santize_einvoice_fields(einvoice):
-	number_fields = ["Pin","Qty","FreeQty","UnitPrice","TotAmt","Discount","PreTaxVal","AssAmt","GstRt","IgstAmt","CgstAmt","SgstAmt","CesRt","CesAmt","CesNonAdvlAmt","StateCesRt","StateCesAmt","StateCesNonAdvlAmt","OthChrg","TotItemVal","AssVal","CgstVal","SgstVal","IgstVal","CesVal","StCesVal","Discount","OthChrg","RndOffAmt","TotInvVal","TotInvValFc","CrDay","PaidAmt","PaymtDue","ExpDuty","Distance"]
+	int_fields = ["Pin","Distance","CrDay"]
+	float_fields = ["Qty","FreeQty","UnitPrice","TotAmt","Discount","PreTaxVal","AssAmt","GstRt","IgstAmt","CgstAmt","SgstAmt","CesRt","CesAmt","CesNonAdvlAmt","StateCesRt","StateCesAmt","StateCesNonAdvlAmt","OthChrg","TotItemVal","AssVal","CgstVal","SgstVal","IgstVal","CesVal","StCesVal","Discount","OthChrg","RndOffAmt","TotInvVal","TotInvValFc","PaidAmt","PaymtDue","ExpDuty",]
 	copy = einvoice.copy()
 	for key, value in copy.items():
 		if isinstance(value, list):
@@ -496,8 +497,11 @@ def santize_einvoice_fields(einvoice):
 		elif not value or value == "None":
 			einvoice.pop(key, None)
 
-		elif key in number_fields:
-			einvoice[key] = flt(value, 2) if '.' in value else cint(value)
+		elif key in float_fields:
+			einvoice[key] = flt(value, 2)
+
+		elif key in int_fields:
+			einvoice[key] = cint(value)
 
 	return einvoice
 
@@ -513,8 +517,10 @@ def safe_json_load(json_string):
 		snippet = json_string[start:end]
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
-class RequestFailed(Exception): pass
-class CancellationNotAllowed(Exception): pass
+class RequestFailed(Exception):
+	pass
+class CancellationNotAllowed(Exception):
+	pass
 
 class GSPConnector():
 	def __init__(self, doctype=None, docname=None):
