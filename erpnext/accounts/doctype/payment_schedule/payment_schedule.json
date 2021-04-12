@@ -65,7 +65,6 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Payment Amount",
-   "options": "currency",
    "reqd": 1
   },
   {
@@ -150,7 +149,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-15 21:03:12.540546",
+ "modified": "2021-04-12 15:39:47.363609",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
