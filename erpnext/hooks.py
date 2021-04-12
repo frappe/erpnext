@@ -255,7 +255,8 @@ doc_events = {
 			"erpnext.regional.italy.utils.sales_invoice_on_cancel",
 			"erpnext.erpnext_integrations.taxjar_integration.delete_transaction"
 		],
-		"on_trash": "erpnext.regional.check_deletion_permission"
+		"on_trash": "erpnext.regional.check_deletion_permission",
+		"validate": ["erpnext.regional.india.utils.update_taxable_values"]
 	},
 	"Purchase Invoice": {
 		"validate": [
