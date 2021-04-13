@@ -769,3 +769,4 @@ erpnext.patches.v13_0.rename_discharge_date_in_ip_record
 erpnext.patches.v12_0.create_taxable_value_field
 erpnext.patches.v12_0.add_gst_category_in_delivery_note
 erpnext.patches.v12_0.purchase_receipt_status
+erpnext.patches.v12_0.add_document_type_field_for_italy_einvoicing
