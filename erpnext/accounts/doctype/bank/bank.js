@@ -42,10 +42,7 @@ let add_fields_to_mapping_table = function (frm) {
 		});
 	});
 
-	frappe.meta.get_docfield("Bank Transaction Mapping", "bank_transaction_field",
-		frm.doc.name).options = options;
-
-	frm.fields_dict.bank_transaction_mapping.grid.refresh();
+	frm.fields_dict.bank_transaction_mapping.grid.update_docfield_property('frm.fields_dict.bank_transaction_mapping.grid', 'options', options);
 };
 
 erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {

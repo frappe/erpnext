@@ -16,8 +16,13 @@ frappe.ui.form.on('POS Settings', {
 				}
 			});
 
-			frappe.meta.get_docfield("POS Field", "fieldname", frm.doc.name).options = [""].concat(fields);
+			frm.fields_dict.invoice_fields.grid.update_docfield_property(
+				'fieldname',
+				'options',
+				[""].concat(fields)
+			);
 		});
+
 	}
 });
 
