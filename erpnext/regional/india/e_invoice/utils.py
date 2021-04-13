@@ -483,7 +483,7 @@ def show_link_to_error_log(invoice, einvoice):
 	)
 
 def log_error(data=None):
-	if not isinstance(data, dict):
+	if isinstance(data, six.string_types):
 		data = json.loads(data)
 
 	seperator = "--" * 50
