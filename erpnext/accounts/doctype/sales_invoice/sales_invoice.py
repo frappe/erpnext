@@ -183,12 +183,14 @@ class SalesInvoice(SellingController):
 
 								if tax_detail.tax_rate == 15:
 									if self.exonerated == 1:
+										taxed15 += item.amount * (tax_detail.tax_rate/100)
 										exonerated += item.amount
 									else:
 										taxed15 += item.amount * (tax_detail.tax_rate/100)
 								
 								if tax_detail.tax_rate == 18:
 									if self.exonerated == 1:
+										taxed18 += item.amount * (tax_detail.tax_rate/100)
 										exonerated += item.amount
 									else:
 										taxed18 += item.amount * (tax_detail.tax_rate/100)
@@ -199,6 +201,16 @@ class SalesInvoice(SellingController):
 		self.isv18 = taxed18
 		self.total_exonerated = exonerated
 		self.total_exempt = exempt
+		self.total_taxes_and_charges = taxed15 + taxed18
+
+		if self.exonerated == 1:
+			self.grand_total -= self.total_taxes_and_charges
+			self.rounded_total -= self.total_taxes_and_charges
+			self.outstanding_amount -= self.total_taxes_and_charges
+		else:
+			self.grand_total = self.total
+			self.rounded_total = self.grand_total
+			self.outstanding_amount = self.grand_total
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
@@ -245,7 +257,9 @@ class SalesInvoice(SellingController):
 
 		date = now.date()
 
-		if current_value + 1 <= int(cai[0].final_number) and str(date) <= str(cai[0].issue_deadline):
+		number_final = current_value + 1
+
+		if number_final <= int(cai[0].final_number) and str(date) <= str(cai[0].issue_deadline):
 			self.assing_data(cai[0].cai, cai[0].issue_deadline, cai[0].initial_number, cai[0].final_number, user, cai[0].prefix)
 
 			amount = int(cai[0].final_number) - current_value
@@ -364,6 +378,9 @@ class SalesInvoice(SellingController):
 	def before_save(self):
 		set_account_for_mode_of_payment(self)
 	
+	# def calculate_taxes_items:
+	# 	items = frappe.get_all("Sales Invoice Item") 
+
 	def before_naming(self):
 		if self.docstatus == 0:
 			self.assign_cai()
