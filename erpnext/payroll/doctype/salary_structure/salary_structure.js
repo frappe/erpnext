@@ -119,9 +119,11 @@ frappe.ui.form.on('Salary Structure', {
 		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"];
 		fields_read_only.forEach(function(field) {
 			frm.fields_dict.earnings.grid.update_docfield_property(
-				field, 'read_only', 1);
+				field, 'read_only', 1
+			);
 			frm.fields_dict.deductions.grid.update_docfield_property(
-				field, 'read_only', 1);
+				field, 'read_only', 1
+			);
 		});
 		frm.trigger('set_earning_deduction_component');
 	},
