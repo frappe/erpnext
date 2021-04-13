@@ -464,18 +464,21 @@ def make_einvoice(invoice):
 	try:
 		einvoice = safe_json_load(einvoice)
 		einvoice = santize_einvoice_fields(einvoice)
-		validate_totals(einvoice)
-
 	except Exception:
-		log_error(einvoice)
-		link_to_error_list = '<a href="List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
-		frappe.throw(
-			_('An error occurred while creating e-invoice for {}. Please check {} for more information.').format(
-				invoice.name, link_to_error_list),
-			title=_('E Invoice Creation Failed')
-		)
+		show_link_to_error_log(invoice, einvoice)
+
+	validate_totals(einvoice)
 
 	return einvoice
+
+def show_link_to_error_log(invoice, einvoice):
+	err_log = log_error(einvoice)
+	link_to_error_log = get_link_to_form('Error Log', err_log.name, 'Error Log')
+	frappe.throw(
+		_('An error occurred while creating e-invoice for {}. Please check {} for more information.').format(
+			invoice.name, link_to_error_log),
+		title=_('E Invoice Creation Failed')
+	)
 
 def log_error(data=None):
 	if isinstance(data, six.string_types):
