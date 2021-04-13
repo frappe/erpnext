@@ -51,7 +51,7 @@ def create_hsn_codes(data, code_field):
 
 def add_custom_roles_for_reports():
 	for report_name in ('GST Sales Register', 'GST Purchase Register',
-		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill'):
+		'GST Itemised Sales Register', 'GST Itemised Purchase Register', 'Eway Bill', 'E-Invoice Summary'):
 
 		if not frappe.db.get_value('Custom Role', dict(report=report_name)):
 			frappe.get_doc(dict(
@@ -127,6 +127,9 @@ def make_custom_fields(update=True):
 	is_non_gst = dict(fieldname='is_non_gst', label='Is Non GST',
 		fieldtype='Check', fetch_from='item_code.is_non_gst', insert_after='is_nil_exempt',
 		print_hide=1)
+	taxable_value = dict(fieldname='taxable_value', label='Taxable Value',
+		fieldtype='Currency', insert_after='base_net_amount', hidden=1, options="Company:company:default_currency",
+		print_hide=1)
 
 	purchase_invoice_gst_category = [
 		dict(fieldname='gst_section', label='GST Details', fieldtype='Section Break',
@@ -154,6 +157,13 @@ def make_custom_fields(update=True):
 			depends_on='eval:in_list(["SEZ", "Overseas", "Deemed Export"], doc.gst_category)',
 			options='\nWith Payment of Tax\nWithout Payment of Tax', fetch_from='customer.export_type',
 			fetch_if_empty=1),
+	]
+
+	delivery_note_gst_category = [
+		dict(fieldname='gst_category', label='GST Category',
+			fieldtype='Select', insert_after='gst_vehicle_type', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+			fetch_from='customer.gst_category', fetch_if_empty=1),
 	]
 
 	invoice_gst_fields = [
@@ -280,7 +290,7 @@ def make_custom_fields(update=True):
 			'allow_on_submit': 1,
 			'insert_after': 'customer_name_in_arabic',
 			'translatable': 0,
-    	}
+		}
 	]
 
 	si_ewaybill_fields = [
@@ -408,21 +418,37 @@ def make_custom_fields(update=True):
 		dict(fieldname='irn', label='IRN', fieldtype='Data', read_only=1, insert_after='customer', no_copy=1, print_hide=1,
 			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
 
-		dict(fieldname='ack_no', label='Ack. No.', fieldtype='Data', read_only=1, hidden=1, insert_after='irn', no_copy=1, print_hide=1),
-
-		dict(fieldname='ack_date', label='Ack. Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_no', no_copy=1, print_hide=1),
-
 		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
 			depends_on='eval:(doc.irn_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
 
 		dict(fieldname='eway_bill_cancelled', label='E-Way Bill Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
 			depends_on='eval:(doc.eway_bill_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
 
-		dict(fieldname='signed_einvoice', fieldtype='Code', options='JSON', hidden=1, no_copy=1, print_hide=1, read_only=1),
+		dict(fieldname='einvoice_section', label='E-Invoice Fields', fieldtype='Section Break', insert_after='gst_vehicle_type',
+			print_hide=1, hidden=1),
+		
+		dict(fieldname='ack_no', label='Ack. No.', fieldtype='Data', read_only=1, hidden=1, insert_after='einvoice_section',
+			no_copy=1, print_hide=1),
+		
+		dict(fieldname='ack_date', label='Ack. Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_no', no_copy=1, print_hide=1),
 
-		dict(fieldname='signed_qr_code', fieldtype='Code', options='JSON', hidden=1, no_copy=1, print_hide=1, read_only=1),
+		dict(fieldname='irn_cancel_date', label='Cancel Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_date', 
+			no_copy=1, print_hide=1),
 
-		dict(fieldname='qrcode_image', label='QRCode', fieldtype='Attach Image', hidden=1, no_copy=1, print_hide=1, read_only=1)
+		dict(fieldname='signed_einvoice', label='Signed E-Invoice', fieldtype='Code', options='JSON', hidden=1, insert_after='irn_cancel_date',
+			no_copy=1, print_hide=1, read_only=1),
+
+		dict(fieldname='signed_qr_code', label='Signed QRCode', fieldtype='Code', options='JSON', hidden=1, insert_after='signed_einvoice',
+			no_copy=1, print_hide=1, read_only=1),
+
+		dict(fieldname='qrcode_image', label='QRCode', fieldtype='Attach Image', hidden=1, insert_after='signed_qr_code',
+			no_copy=1, print_hide=1, read_only=1),
+
+		dict(fieldname='einvoice_status', label='E-Invoice Status', fieldtype='Select', insert_after='qrcode_image',
+			options='\nPending\nGenerated\nCancelled\nFailed', default=None, hidden=1, no_copy=1, print_hide=1, read_only=1),
+
+		dict(fieldname='failure_description', label='E-Invoice Failure Description', fieldtype='Code', options='JSON',
+			hidden=1, insert_after='einvoice_status', no_copy=1, print_hide=1, read_only=1)
 	]
 
 	custom_fields = {
@@ -438,7 +464,7 @@ def make_custom_fields(update=True):
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
 		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
-		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
+		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields + delivery_note_gst_category,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
 		'Item': [
@@ -453,7 +479,7 @@ def make_custom_fields(update=True):
 		'Supplier Quotation Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Sales Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Delivery Note Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
-		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
