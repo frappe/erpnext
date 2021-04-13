@@ -233,3 +233,15 @@ def create_role_permissions_for_doctype(doc, data):
 			args[perm] = 1
 
 		doc.append('user_doctypes', args)
+
+def update_select_perm_after_install():
+	if not frappe.flags.update_select_perm_after_migrate:
+		return
+
+	frappe.flags.ignore_select_perm = False
+	for row in frappe.get_all('User Type', filters= {'is_standard': 0}):
+		print('Updating user type :- ', row.name)
+		doc = frappe.get_doc('User Type', row.name)
+		doc.save()
+
+	frappe.flags.update_select_perm_after_migrate = False
