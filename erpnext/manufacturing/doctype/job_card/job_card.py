@@ -47,6 +47,8 @@ class JobCard(Document):
 				if d.completed_qty:
 					self.total_completed_qty += d.completed_qty
 
+			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
+
 	def get_overlap_for(self, args, check_next_available_slot=False):
 		production_capacity = 1
 
@@ -164,6 +166,7 @@ class JobCard(Document):
 			"time_in_mins": time_diff_in_minutes(row.planned_end_time, row.planned_start_time),
 		})
 
+	@frappe.whitelist()
 	def get_required_items(self):
 		if not self.get('work_order'):
 			return
@@ -255,6 +258,9 @@ class JobCard(Document):
 				data.actual_operation_time = time_in_mins
 				data.actual_start_time = time_data[0].start_time if time_data else None
 				data.actual_end_time = time_data[0].end_time if time_data else None
+				if data.get("workstation") != self.workstation:
+					# workstations can change in a job card
+					data.workstation = self.workstation
 
 		wo.flags.ignore_validate_update_after_submit = True
 		wo.update_operation_status()
