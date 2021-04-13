@@ -59,7 +59,7 @@ frappe.ui.form.on('Therapy Plan', {
 
 		if (frm.doc.therapy_plan_template) {
 			frm.fields_dict.therapy_plan_details.grid.update_docfield_property(
-				'therapy_type', 'read_only', 1,
+				'therapy_type', 'read_only', 1
 			);
 			frm.fields_dict.therapy_plan_details.grid.update_docfield_property(
 				'no_of_sessions', 'read_only', 1
