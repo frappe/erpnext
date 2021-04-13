@@ -235,7 +235,7 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 
 		if (invoices) {
 			this.frm.fields_dict.payment.grid.update_docfield_property(
-				'invoice_number', options, "\n" + invoices.join("\n")
+				'invoice_number', 'options', "\n" + invoices.join("\n")
 			)
 
 			$.each(me.frm.doc.payments || [], function(i, p) {
