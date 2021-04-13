@@ -16,6 +16,7 @@ class TaxExemption80GCertificate(Document):
 		self.validate_duplicates()
 		self.validate_company_details()
 		self.set_company_address()
+		self.calculate_total()
 		self.set_title()
 
 	def validate_date(self):
@@ -49,17 +50,28 @@ class TaxExemption80GCertificate(Document):
 			frappe.throw(_('Please set the {0} for company {1}').format(frappe.bold('PAN Number'),
 				get_link_to_form('Company', self.company)))
 
+	@frappe.whitelist()
 	def set_company_address(self):
 		address = get_company_address(self.company)
 		self.company_address = address.company_address
 		self.company_address_display = address.company_address_display
 
+	def calculate_total(self):
+		if self.recipient == 'Donor':
+			return
+
+		total = 0
+		for entry in self.payments:
+			total += flt(entry.amount)
+		self.total = total
+
 	def set_title(self):
-		if self.recipient == "Member":
+		if self.recipient == 'Member':
 			self.title = self.member_name
 		else:
 			self.title = self.donor_name
 
+	@frappe.whitelist()
 	def get_payments(self):
 		if not self.member:
 			frappe.throw(_('Please select a Member first.'))
@@ -71,7 +83,7 @@ class TaxExemption80GCertificate(Document):
 			'from_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
 			'to_date': ['between', (fiscal_year.year_start_date, fiscal_year.year_end_date)],
 			'membership_status': ('!=', 'Cancelled')
-		}, ['from_date', 'amount', 'name', 'invoice', 'payment_id'])
+		}, ['from_date', 'amount', 'name', 'invoice', 'payment_id'], order_by='from_date')
 
 		if not memberships:
 			frappe.msgprint(_('No Membership Payments found against the Member {0}').format(self.member))

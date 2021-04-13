@@ -11,10 +11,14 @@
   "from_warehouse",
   "warehouse",
   "column_break_4",
+  "required_bom_qty",
   "quantity",
   "uom",
   "projected_qty",
   "actual_qty",
+  "ordered_qty",
+  "reserved_qty_for_production",
+  "safety_stock",
   "item_details",
   "description",
   "min_order_qty",
@@ -129,11 +133,40 @@
    "fieldtype": "Link",
    "label": "From Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fetch_from": "item_code.safety_stock",
+   "fieldname": "safety_stock",
+   "fieldtype": "Float",
+   "label": "Safety Stock",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "ordered_qty",
+   "fieldtype": "Float",
+   "label": "Ordered Qty",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "reserved_qty_for_production",
+   "fieldtype": "Float",
+   "label": "Reserved Qty for Production",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "required_bom_qty",
+   "fieldtype": "Float",
+   "label": "Required Qty as per BOM",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2020-02-03 12:22:29.913302",
+ "modified": "2021-03-26 12:41:13.013149",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Request Plan Item",

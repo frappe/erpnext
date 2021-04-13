@@ -1054,6 +1054,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval: doc.show_in_website || doc.show_variant_in_website",
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
@@ -1066,7 +1067,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-03-15 13:41:04.108932",
+ "modified": "2021-03-18 14:04:38.575519",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
