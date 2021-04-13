@@ -133,7 +133,9 @@
 
 				<td class="text-center text-nowrap">
 					<div>{%= data[i].bill_no %}</div>
-					<div>{%= data[i].invoice_status %}</div>
+					{% if (data[i].bill_no) { %}
+						<div>{%= data[i].invoice_status %}</div>
+					{% } %}
 				</td>
 
 				<td class="text-center" {% if (data[i].status_color) { %} style="color: {%= data[i].status_color %} !important;"{% } %}>
