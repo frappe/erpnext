@@ -147,7 +147,9 @@ class calculate_taxes_and_totals(object):
 				validate_taxes_and_charges(tax)
 				validate_inclusive_tax(tax, self.doc)
 
-			tax.item_wise_tax_detail = {}
+			if not self.doc.get('is_consolidated'):
+				tax.item_wise_tax_detail = {}
+
 			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
@@ -338,7 +340,9 @@ class calculate_taxes_and_totals(object):
 			current_tax_amount = tax_rate * item.qty
 
 		current_tax_amount = self.get_final_current_tax_amount(tax, current_tax_amount)
-		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
+
+		if not self.doc.get("is_consolidated"):
+			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
 		return current_tax_amount
 
@@ -440,8 +444,9 @@ class calculate_taxes_and_totals(object):
 			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
 	def _cleanup(self):
-		for tax in self.doc.get("taxes"):
-			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
+		if not self.doc.get('is_consolidated'):
+			for tax in self.doc.get("taxes"):
+				tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:
