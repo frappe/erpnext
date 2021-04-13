@@ -17,7 +17,7 @@ from frappe import _, bold
 from pyqrcode import create as qrcreate
 from frappe.integrations.utils import make_post_request, make_get_request
 from erpnext.regional.india.utils import get_gst_accounts, get_place_of_supply
-from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, get_link_to_form
+from frappe.utils.data import cstr, cint, format_date, flt, time_diff_in_seconds, now_datetime, add_to_date, getdate, get_link_to_form
 
 @frappe.whitelist()
 def validate_eligibility(doc):
