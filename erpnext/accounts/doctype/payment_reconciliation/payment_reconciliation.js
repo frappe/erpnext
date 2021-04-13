@@ -234,8 +234,9 @@ erpnext.accounts.PaymentReconciliationController = frappe.ui.form.Controller.ext
 		});
 
 		if (invoices) {
-			frappe.meta.get_docfield("Payment Reconciliation Payment", "invoice_number",
-				me.frm.doc.name).options = "\n" + invoices.join("\n");
+			this.frm.fields_dict.payment.grid.update_docfield_property(
+				'invoice_number', options, "\n" + invoices.join("\n")
+			)
 
 			$.each(me.frm.doc.payments || [], function(i, p) {
 				if(!in_list(invoices, cstr(p.invoice_number))) p.invoice_number = null;

@@ -1,9 +1,6 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-// print heading
-cur_frm.pformat.print_heading = 'Invoice';
-
 {% include 'erpnext/selling/sales_common.js' %};
 frappe.provide("erpnext.accounts");
 
