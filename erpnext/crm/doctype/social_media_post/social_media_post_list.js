@@ -4,7 +4,8 @@ frappe.listview_settings['Social Media Post'] = {
         return [__(doc.post_status), {
             "Scheduled": "orange",
             "Posted": "green",
-            "Error": "red"
+            "Error": "red",
+            "Deleted": "red"
             }[doc.post_status]];
         }
 }

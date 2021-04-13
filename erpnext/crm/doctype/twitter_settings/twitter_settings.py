@@ -86,28 +86,31 @@ class TwitterSettings(Document):
 			return response
 
 		except TweepError as e:
-			content = json.loads(e.response.content)
-			content = content["errors"][0]
-			if e.response.status_code == 401:
-				self.db_set("session_status", "Expired")
-				frappe.db.commit()
-			frappe.throw(content["message"],title="Twitter Error {0} : {1}".format(e.response.status_code, e.response.reason))
+			self.api_error(e)
 
 	def delete_tweet(self, tweet_id):
 		api = self.get_api()
 		try: 
 			api.destroy_status(tweet_id)
 		except TweepError as e:
-			content = json.loads(e.response.content)
-			content = content["errors"][0]
-			if e.response.status_code == 401:
-				self.db_set("session_status", "Expired")
-				frappe.db.commit()
-			frappe.throw(content["message"],title="Twitter Error {0} : {1}".format(e.response.status_code, e.response.reason))
-	
-	def get_status(self, tweet_id):
+			self.api_error(e)
+
+	def get_tweet(self, tweet_id):
 		api = self.get_api()
-		return api.get_status(tweet_id)
+		try: 
+			response = api.get_status(tweet_id, trim_user=True, include_entities=True)
+		except TweepError as e:
+			self.api_error(e)
+		
+		return response._json
+	
+	def api_error(self, e):
+		content = json.loads(e.response.content)
+		content = content["errors"][0]
+		if e.response.status_code == 401:
+			self.db_set("session_status", "Expired")
+			frappe.db.commit()
+		frappe.throw(content["message"],title="Twitter Error {0} : {1}".format(e.response.status_code, e.response.reason))
 
 
 @frappe.whitelist(allow_guest=True)

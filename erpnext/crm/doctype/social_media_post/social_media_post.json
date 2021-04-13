@@ -72,7 +72,7 @@
    "fieldtype": "Select",
    "label": "Post Status",
    "no_copy": 1,
-   "options": "\nScheduled\nPosted\nCancelled\nError",
+   "options": "\nScheduled\nPosted\nCancelled\nDeleted\nError",
    "read_only": 1
   },
   {
@@ -152,7 +152,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-02-18 14:06:44.633463",
+ "modified": "2021-04-14 14:24:59.821223",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Social Media Post",

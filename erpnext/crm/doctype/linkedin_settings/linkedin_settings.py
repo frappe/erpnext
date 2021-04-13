@@ -3,11 +3,11 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, requests, json
+import frappe, requests
 from frappe import _
-from frappe.utils import get_site_url, get_url_to_form, get_link_to_form
+from frappe.utils import get_site_url, get_url_to_form
 from frappe.model.document import Document
-from frappe.utils.file_manager import get_file, get_file_path
+from frappe.utils.file_manager import get_file_path
 from six.moves.urllib.parse import urlencode
 
 class LinkedInSettings(Document):
@@ -51,16 +51,16 @@ class LinkedInSettings(Document):
 			"session_status": "Active"
 		})
 		frappe.local.response["type"] = "redirect"
-		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings","LinkedIn Settings")
+		frappe.local.response["location"] = get_url_to_form("LinkedIn Settings", "LinkedIn Settings")
 
-	def post(self, text, media=None):
+	def post(self, text, title, media=None):
 		if not media:
-			return self.post_text(text)
+			return self.post_text(text, title)
 		else:
 			media_id = self.upload_image(media)
 
 			if media_id:
-				return self.post_text(text, media_id=media_id)
+				return self.post_text(text, title, media_id=media_id)
 			else:
 				frappe.log_error("Failed to upload media.","LinkedIn Upload Error")
 
@@ -94,7 +94,7 @@ class LinkedInSettings(Document):
 
 		return None
 
-	def post_text(self, text, media_id=None):
+	def post_text(self, text, title, media_id=None):
 		url = "https://api.linkedin.com/v2/shares"
 		headers = self.get_headers()
 		headers["X-Restli-Protocol-Version"] = "2.0.0"
@@ -105,7 +105,7 @@ class LinkedInSettings(Document):
 				"linkedInDistributionTarget": {}
 			},
 			"owner":"urn:li:organization:{0}".format(self.company_id),
-			"subject": "Test Share Subject",
+			"subject": title,
 			"text": {
 				"text": text
 			}
@@ -144,18 +144,8 @@ class LinkedInSettings(Document):
 				raise
 
 		except Exception as e:
-			content = json.loads(response.content)
-
-			if response.status_code == 401:
-				self.db_set("session_status", "Expired")
-				frappe.db.commit()
-				frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
-			elif response.status_code == 403:
-				frappe.msgprint(_("You Didn't have permission to access this API"))
-				frappe.throw(content["message"], title="LinkedIn Error - Access Denied")
-			else:
-				frappe.throw(response.reason, title=response.status_code)
-
+			self.api_error(response)
+		
 		return response
 
 	def get_headers(self):
@@ -172,11 +162,40 @@ class LinkedInSettings(Document):
 
 	def delete_post(self, post_id):
 		try:
-			response = requests.delete("https://api.linkedin.com/v2/shares/{0}".format(post_id), self.get_headers())
+			response = requests.delete(url="https://api.linkedin.com/v2/shares/urn:li:share:{0}".format(post_id), headers=self.get_headers())
 			if response.status_code !=200:
 				raise
 		except Exception as e:
-			content = json.loads(response.content)
+			self.api_error(response)
+	
+	def get_post(self, post_id):
+		url = "https://api.linkedin.com/v2/organizationalEntityShareStatistics?q=organizationalEntity&organizationalEntity=urn:li:organization:{0}&shares[0]=urn:li:share:{1}".format(self.company_id, post_id)
+
+		try:
+			response = requests.get(url=url, headers=self.get_headers())
+			if response.status_code !=200:
+				raise
+	
+		except Exception as e:
+			self.api_error(response)
+
+		response = frappe.parse_json(response.content.decode())
+		if len(response.elements):
+			return response.elements[0]
+
+		return None
+
+	def api_error(self, response):
+		content = frappe.parse_json(response.content.decode())
+
+		if response.status_code == 401:
+			self.db_set("session_status", "Expired")
+			frappe.db.commit()
+			frappe.throw(content["message"], title="LinkedIn Error - Unauthorized")
+		elif response.status_code == 403:
+			frappe.msgprint(_("You Didn't have permission to access this API"))
+			frappe.throw(content["message"], title="LinkedIn Error - Access Denied")
+		else:
 			frappe.throw(response.reason, title=response.status_code)
 
 @frappe.whitelist(allow_guest=True)
