@@ -466,7 +466,8 @@
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "fieldname": "project",
@@ -1133,7 +1134,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-05 17:37:13.591222",
+ "modified": "2021-04-13 18:12:07.490034",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order Item",

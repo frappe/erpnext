@@ -514,6 +514,7 @@
    "options": "Warehouse",
    "print_hide": 1,
    "print_width": "100px",
+   "search_index": 1,
    "width": "100px"
   },
   {
@@ -1207,7 +1208,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-05 17:37:13.591222",
+ "modified": "2021-04-13 18:16:47.538917",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note Item",
