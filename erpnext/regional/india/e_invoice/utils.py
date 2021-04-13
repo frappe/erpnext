@@ -386,7 +386,9 @@ def throw_error_list(errors, title):
 	else:
 		frappe.throw(errors[0], title=title)
 
-def validate_einvoice(validations, einvoice, errors=[]):
+def validate_einvoice(validations, einvoice, errors=None):
+	if errors is None:
+		errors = []
 	for fieldname, field_validation in validations.items():
 		value = einvoice.get(fieldname, None)
 		if not value or value == "None":

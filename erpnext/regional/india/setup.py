@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 
 import frappe, os, json
 from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
+from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 from frappe.permissions import add_permission, update_permission_property
 from erpnext.regional.india import states
 from erpnext.accounts.utils import get_fiscal_year, FiscalYearError
@@ -19,6 +20,7 @@ def setup(company=None, patch=True):
 # TODO: for all countries
 def setup_company_independent_fixtures():
 	make_custom_fields()
+	make_property_setters()
 	add_permissions()
 	add_custom_roles_for_reports()
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
@@ -97,6 +99,11 @@ def add_print_formats():
 
 	frappe.db.sql(""" update `tabPrint Format` set disabled = 0 where
 		name in('GST POS Invoice', 'GST Tax Invoice', 'GST E-Invoice') """)
+
+def make_property_setters():
+	# GST rules do not allow for an invoice no. bigger than 16 characters
+	make_property_setter('Sales Invoice', 'naming_series', 'options', 'SINV-.YY.-\nSRET-.YY.-', '')
+	make_property_setter('Purchase Invoice', 'naming_series', 'options', 'PINV-.YY.-\nPRET-.YY.-', '')
 
 def make_custom_fields(update=True):
 	hsn_sac_field = dict(fieldname='gst_hsn_code', label='HSN/SAC',
@@ -397,9 +404,9 @@ def make_custom_fields(update=True):
 	si_einvoice_fields = [
 		dict(fieldname='irn', label='IRN', fieldtype='Data', read_only=1, insert_after='customer', no_copy=1, print_hide=1,
 			depends_on='eval:in_list(["Registered Regular", "SEZ", "Overseas", "Deemed Export"], doc.gst_category) && doc.irn_cancelled === 0'),
-		
+
 		dict(fieldname='ack_no', label='Ack. No.', fieldtype='Data', read_only=1, hidden=1, insert_after='irn', no_copy=1, print_hide=1),
-		
+
 		dict(fieldname='ack_date', label='Ack. Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_no', no_copy=1, print_hide=1),
 
 		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
@@ -616,7 +623,7 @@ def set_tax_withholding_category(company):
 				fy_exist = [k for k in doc.get('rates') if k.get('fiscal_year')==fiscal_year]
 				if not fy_exist:
 					doc.append("rates", d.get('rates')[0])
-					
+
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
 			doc.save()
