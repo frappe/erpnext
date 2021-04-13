@@ -7,7 +7,6 @@ import frappe.share
 from frappe import _
 from frappe.utils import cstr, now_datetime, cint, flt, get_time, get_datetime, get_link_to_form, date_diff, nowdate
 from erpnext.controllers.status_updater import StatusUpdater
-from erpnext.accounts.utils import get_fiscal_year
 
 from six import string_types
 
