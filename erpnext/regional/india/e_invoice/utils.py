@@ -532,6 +532,8 @@ def santize_einvoice_fields(einvoice):
 		elif key in int_fields:
 			einvoice[key] = cint(value)
 
+	return einvoice
+
 def safe_json_load(json_string):
 	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
 	try:
