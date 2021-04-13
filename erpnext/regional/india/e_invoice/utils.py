@@ -587,7 +587,7 @@ class GSPConnector():
 			self.credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
 
 	def get_seller_gstin(self):
-		gstin = self.invoice.company_gstin or frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
+		gstin = frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
 		if not gstin:
 			frappe.throw(_('Cannot retrieve Company GSTIN. Please select company address with valid GSTIN.'))
 		return gstin
