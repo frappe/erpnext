@@ -334,7 +334,7 @@ erpnext.accounts.JournalEntry = frappe.ui.form.Controller.extend({
 				+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
 				+ " " + dr_or_cr
 				+ "</div>";
-		}
+		};
 		this.frm.fields_dict.accounts.grid.update_docfield_property('balance', 'formatter', formatter);
 		this.frm.fields_dict.accounts.grid.update_docfield_property('party_balance', 'formatter', formatter);
 	},
