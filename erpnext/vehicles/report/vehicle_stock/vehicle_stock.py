@@ -179,9 +179,14 @@ class VehicleStockReport(object):
 			if d.vehicle_booking_order and not d.dispatch_date:
 				d.dispatch_date = vehicle_data.get('dispatch_date')
 
-			# Booking Customer Name
+			# Booking Data
 			if d.vehicle_booking_order and d.vehicle_booking_order in self.booking_by_booking_data:
-				d.customer_name = self.booking_by_booking_data[d.vehicle_booking_order].get('customer_name')
+				booking_data = self.booking_by_booking_data[d.vehicle_booking_order]
+				d.customer_name = booking_data.get('customer_name')
+				d.contact_number = booking_data.get('contact_mobile') or booking_data.get('contact_phone')
+
+				d.bill_no = booking_data.get('bill_no')
+				d.invoice_status = booking_data.get('invoice_status')
 
 			# Status
 			if d.qty > 0:
@@ -392,7 +397,10 @@ class VehicleStockReport(object):
 			return {}
 
 		data = frappe.db.sql("""
-			select name, vehicle, vehicle_receipt, customer, customer_name
+			select name, vehicle, vehicle_receipt,
+				customer, customer_name,
+				contact_mobile, contact_phone,
+				bill_no, invoice_status
 			from `tabVehicle Booking Order`
 			where docstatus = 1 and vehicle in %s
 		""", [vehicle_names], as_dict=1)
@@ -443,8 +451,11 @@ class VehicleStockReport(object):
 			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 100},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
+			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
 			{"label": _("Project"), "fieldname": "project", "fieldtype": "Link", "options": "Project", "width": 100},
+			{"label": _("Invoice"), "fieldname": "bill_no", "fieldtype": "Data", "width": 80},
+			{"label": _("Inv Status"), "fieldname": "invoice_status", "fieldtype": "Data", "width": 80},
 			{"label": _("Dispatched"), "fieldname": "dispatch_date", "fieldtype": "Date", "width": 85},
 			{"label": _("Received"), "fieldname": "received_date", "fieldtype": "Date", "width": 80},
 			{"label": _("Delivered"), "fieldname": "delivery_date", "fieldtype": "Date", "width": 80},

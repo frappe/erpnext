@@ -6,7 +6,7 @@
 }
 
 .print-format {
-	font-size: 8pt;
+	font-size: 7.5pt;
 }
 .print-format td, .print-format th {
 	vertical-align: middle !important;
@@ -61,10 +61,13 @@
 <table class="table table-bordered">
 	<thead>
 		<tr>
+			<th class="text-center">#</th>
 			<th class="text-center">{%= __("Date") %}</th>
 			<th class="text-center">{%= __("Variant") %}</th>
 			<th class="text-center">{%= __("Vehicle") %}</th>
+			<th class="text-center">{%= __("Customer") %}</th>
 			<th class="text-center">{%= __("Reference") %}</th>
+			<th class="text-center">{%= __("Invoice") %}</th>
 			<th class="text-center">{%= __("Status") %}</th>
 		</tr>
 	</thead>
@@ -72,10 +75,13 @@
 		{% for(var i=0, l=data.length; i<l; i++) { %}
 			<tr>
 			{% if(data[i]["_isGroupTotal"]) { %}
-				<td colspan="5">
+				<td></td>
+				<td colspan="7">
 					<b>{%= data[i].status %}</b>
 				</td>
 			{% } else { %}
+				<td class="text-center">{%= i+1 %}</td>
+
 				<td class="text-nowrap">
 					{% if(data[i].received_date) { %}
 						<div>Received: {%= frappe.datetime.str_to_user(data[i].received_date) %}</div>
@@ -111,16 +117,27 @@
 					{% if(data[i].customer_name) { %}
 						<div>{%= data[i].customer_name %}</div>
 					{% } %}
-					{% if(data[i].vehicle_booking_order) { %}
-						<div>Booking #: {%= data[i].vehicle_booking_order %}</div>
-					{% } %}
-					{% if(data[i].project) { %}
-						<div>{%= __("Project") %}: {%= data[i].project %}</div>
+					{% if(data[i].contact_number) { %}
+						<div>Contact #: {%= data[i].contact_number %}</div>
 					{% } %}
 				</td>
 
+				<td>
+					{% if(data[i].vehicle_booking_order) { %}
+						<div>{%= data[i].vehicle_booking_order %}</div>
+					{% } %}
+					{% if(data[i].project) { %}
+						<div>{%= data[i].project %}</div>
+					{% } %}
+				</td>
+
+				<td class="text-center text-nowrap">
+					<div>{%= data[i].bill_no %}</div>
+					<div>{%= data[i].invoice_status %}</div>
+				</td>
+
 				<td class="text-center" {% if (data[i].status_color) { %} style="color: {%= data[i].status_color %} !important;"{% } %}>
-					{%= data[i].status %}
+					{%= cstr(data[i].status).split("(").join("<br>(") %}
 				</td>
 			{% } %}
 		{% } %}
