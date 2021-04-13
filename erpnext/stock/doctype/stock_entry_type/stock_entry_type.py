@@ -36,6 +36,7 @@ def get_stock_entry_type_details(args):
 
 	if doc.is_opening:
 		out.is_opening = doc.is_opening
+		args.is_opening = out.is_opening
 		if doc.posting_date:
 			out.posting_date = doc.posting_date
 
