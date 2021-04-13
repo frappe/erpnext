@@ -74,7 +74,7 @@ def get_stock_value_on(warehouse=None, posting_date=None, item_code=None):
 	return sum(sle_map.values())
 
 @frappe.whitelist()
-def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None,
+def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None, batch_no=None,
 	with_valuation_rate=False, with_serial_no=False):
 	"""Returns stock balance quantity at given warehouse on given posting date or current date.
 
@@ -89,7 +89,8 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 		"item_code": item_code,
 		"warehouse":warehouse,
 		"posting_date": posting_date,
-		"posting_time": posting_time
+		"posting_time": posting_time,
+		"batch_no": batch_no
 	}
 
 	last_entry = get_previous_sle(args)
@@ -102,10 +103,14 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 				len(get_serial_nos_data(serial_nos)) < last_entry.qty_after_transaction):
 				serial_nos = get_serial_nos_data_after_transactions(args)
 
-			return ((last_entry.qty_after_transaction, last_entry.valuation_rate, last_entry.stock_value, serial_nos)
+			return ((last_entry.qty_after_transaction,
+					 last_entry.batch_valuation_rate if batch_no else last_entry.valuation_rate,
+					 last_entry.batch_stock_value if batch_no else last_entry.stock_value, serial_nos)
 				if last_entry else (0.0, 0.0, 0.0, 0.0))
 		else:
-			return (last_entry.qty_after_transaction, last_entry.valuation_rate, last_entry.stock_value) \
+			return (last_entry.qty_after_transaction,
+					last_entry.batch_valuation_rate if batch_no else last_entry.valuation_rate,
+					last_entry.batch_stock_value if batch_no else last_entry.stock_value) \
 				if last_entry else (0.0, 0.0, 0.0)
 	else:
 		return last_entry.qty_after_transaction if last_entry else 0.0

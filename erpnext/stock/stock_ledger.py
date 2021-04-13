@@ -186,18 +186,46 @@ class update_entries_after(object):
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
 			if sle.voucher_type == "Stock Reconciliation":
-				sle.actual_qty = sle.qty_after_transaction - self.qty_after_transaction
-				self.actual_qty = sle.actual_qty
+				if self.batch_wise_valuation:
+					sle.actual_qty = sle.batch_qty_after_transaction - self.batch_data.batch_qty_after_transaction
+					self.actual_qty = sle.actual_qty
+				else:
+					sle.actual_qty = sle.qty_after_transaction - self.qty_after_transaction
+					self.actual_qty = sle.actual_qty
 
-			if sle.voucher_type=="Stock Reconciliation" and sle.reset_rate and not sle.batch_no:
+			if sle.voucher_type=="Stock Reconciliation" and sle.reset_rate:
 				# assert
-				self.valuation_rate = sle.valuation_rate
-				self.qty_after_transaction = sle.qty_after_transaction
-				self.stock_queue = [[self.qty_after_transaction, self.valuation_rate]]
-				self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
+				if self.batch_wise_valuation:
+					self.batch_data.batch_valuation_rate = sle.batch_valuation_rate
+					self.batch_data.batch_qty_after_transaction = sle.batch_qty_after_transaction
+
+					self.batch_data.batch_stock_value = flt(self.batch_data.batch_qty_after_transaction) * flt(self.batch_data.batch_valuation_rate)
+					stock_value_difference = self.batch_data.batch_stock_value - self.batch_data.prev_batch_stock_value
+					self.stock_value = self.prev_stock_value + stock_value_difference
+
+					if flt(sle.actual_qty) > 0:
+						sle.incoming_rate = stock_value_difference / sle.actual_qty
+					else:
+						sle.incoming_rate = 0
+				else:
+					self.valuation_rate = sle.valuation_rate
+					self.qty_after_transaction = sle.qty_after_transaction
+					self.stock_queue = [[self.qty_after_transaction, self.valuation_rate]]
+					self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
+
+					if flt(sle.actual_qty) > 0:
+						sle.incoming_rate = (self.stock_value - self.prev_stock_value) / sle.actual_qty
+					else:
+						sle.incoming_rate = 0
 			else:
-				if sle.voucher_type == "Stock Reconciliation" and flt(sle.actual_qty) > 0:
-					sle.incoming_rate = self.valuation_rate
+				if sle.voucher_type == "Stock Reconciliation":
+					if flt(sle.actual_qty) > 0:
+						if self.batch_wise_valuation:
+							sle.incoming_rate = self.batch_data.batch_valuation_rate
+						else:
+							sle.incoming_rate = self.valuation_rate
+					else:
+						sle.incoming_rate = 0
 
 				if self.valuation_method == "Moving Average":
 					self.get_moving_average_values(sle)

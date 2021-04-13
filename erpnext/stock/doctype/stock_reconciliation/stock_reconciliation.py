@@ -66,7 +66,7 @@ class StockReconciliation(StockController):
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
 		def _changed(item):
-			if item.qty is None or item.qty == item.current_qty:
+			if (item.qty is None or item.qty == item.current_qty) and (item.valuation_rate is None or item.valuation_rate == item.current_valuation_rate):
 				return False
 			else:
 				# set default as current rates
@@ -162,11 +162,17 @@ class StockReconciliation(StockController):
 		sl_entries = []
 
 		for d in self.items:
-			sl_entries.append(self.get_sl_entries(d, {
-				"qty_after_transaction": flt(d.qty),
-				"valuation_rate": flt(d.valuation_rate),
+			sle = {
 				"reset_rate": cint(self.reset_rate)
-			}))
+			}
+			if d.batch_no:
+				sle["batch_qty_after_transaction"] = flt(d.qty)
+				sle["batch_valuation_rate"] = flt(d.valuation_rate)
+			else:
+				sle["qty_after_transaction"] = flt(d.qty)
+				sle["valuation_rate"] = flt(d.valuation_rate)
+
+			sl_entries.append(self.get_sl_entries(d, sle))
 
 		if self.docstatus == 2:
 			sl_entries.reverse()
@@ -381,8 +387,7 @@ def get_item_details(args):
 	stock_value_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"),
 		currency=frappe.get_cached_value('Company', args.company, "default_currency"))
 
-	if out.qty:
-		out.quantity_difference = flt(out.qty) - flt(out.current_qty)
+	out.quantity_difference = flt(out.qty) - flt(out.current_qty)
 
 	# if out.quantity_difference:
 	if cint(args.reset_rate):
@@ -407,7 +412,8 @@ def get_stock_balance_for(item_code, warehouse, posting_date, posting_time, batc
 
 	item_dict = frappe.get_cached_value("Item", item_code, ["has_batch_no"], as_dict=1)
 	qty, rate, amount = get_stock_balance(item_code, warehouse,
-		posting_date, posting_time, with_valuation_rate=with_valuation_rate)
+		posting_date, posting_time, batch_no=item_dict.get("has_batch_no") and batch_no or None,
+		with_valuation_rate=with_valuation_rate)
 
 	if item_dict.get("has_batch_no") and batch_no:
 		qty = flt(get_batch_qty_on(batch_no, warehouse, posting_date, posting_time))
