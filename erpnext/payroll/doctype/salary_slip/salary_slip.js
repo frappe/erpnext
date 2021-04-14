@@ -119,6 +119,7 @@ frappe.ui.form.on("Salary Slip", {
 					frm.set_df_property('exchange_rate', 'hidden', 1);
 					frm.set_df_property("exchange_rate", "description", "" );
 				}
+			}
 		}
 	},
 

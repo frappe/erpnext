@@ -666,7 +666,6 @@ class GSPConnector():
 		except Exception:
 			log_error()
 			self.raise_error(True)
-
 	@staticmethod
 	def get_gstin_details(gstin):
 		'''fetch and cache GSTIN details'''
@@ -959,7 +958,6 @@ class GSPConnector():
 			'label': _('IRN Generated')
 		}
 		self.update_invoice()
-
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
