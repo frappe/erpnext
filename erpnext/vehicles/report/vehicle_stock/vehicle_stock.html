@@ -95,9 +95,9 @@
 				</td>
 
 				<td>
-					<div>{%= data[i].item_code %}</div>
-					{% if(data[i].item_name && data[i].item_name != data[i].item_code) { %}
-						<div>{%= data[i].item_name %}</div>
+					<div>{%= data[i].item_name %}</div>
+					{% if(data[i].color) { %}
+						<div>Color: {%= data[i].color %}</div>
 					{% } %}
 				</td>
 

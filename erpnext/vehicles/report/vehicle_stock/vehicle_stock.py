@@ -141,6 +141,7 @@ class VehicleStockReport(object):
 			d.engine_no = vehicle_data.engine_no
 			d.license_plate = vehicle_data.license_plate
 			d.unregistered = vehicle_data.unregistered
+			d.color = vehicle_data.color
 			d.customer = vehicle_data.customer
 			d.customer_name = vehicle_data.customer_name
 
@@ -322,7 +323,7 @@ class VehicleStockReport(object):
 			return self.vehicle_data
 
 		data = frappe.db.sql("""
-			select name, item_code, chassis_no, engine_no, license_plate, unregistered, dispatch_date
+			select name, item_code, chassis_no, engine_no, license_plate, color, unregistered, dispatch_date
 			from `tabVehicle`
 			where name in %s
 		""", [vehicle_names], as_dict=1)
@@ -448,7 +449,8 @@ class VehicleStockReport(object):
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Chassis No"), "fieldname": "chassis_no", "fieldtype": "Data", "width": 150},
 			{"label": _("Engine No"), "fieldname": "engine_no", "fieldtype": "Data", "width": 115},
-			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 100},
+			{"label": _("Color"), "fieldname": "color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
+			{"label": _("License Plate"), "fieldname": "license_plate", "fieldtype": "Data", "width": 60},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 130},
 			{"label": _("Customer Name"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
