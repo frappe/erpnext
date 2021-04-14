@@ -108,7 +108,6 @@ class POSInvoice(SalesInvoice):
 				filters = { "item_code": d.item_code, "warehouse": d.warehouse }
 				if d.batch_no:
 					filters["batch_no"] = d.batch_no
-
 				reserved_serial_nos = get_pos_reserved_serial_nos(filters)
 				serial_nos = get_serial_nos(d.serial_no)
 				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
@@ -355,6 +354,7 @@ class POSInvoice(SalesInvoice):
 
 		return profile
 
+	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):
 		profile = self.set_pos_fields(for_validate)
 
@@ -377,6 +377,7 @@ class POSInvoice(SalesInvoice):
 				"allow_print_before_pay": profile.get("allow_print_before_pay")
 			}
 
+	@frappe.whitelist()
 	def reset_mode_of_payments(self):
 		if self.pos_profile:
 			pos_profile = frappe.get_cached_doc('POS Profile', self.pos_profile)
@@ -389,6 +390,7 @@ class POSInvoice(SalesInvoice):
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
 
+	@frappe.whitelist()
 	def create_payment_request(self):
 		for pay in self.payments:
 			if pay.type == "Phone":
