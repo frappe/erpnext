@@ -558,7 +558,6 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			);
 		}
-
 		for (let i in frm.doc.items) {
 			let item = frm.doc.items[i];
 
@@ -856,7 +855,6 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
-		this.frm.trigger('add_to_transit');
 	},
 
 	scan_barcode: function() {
