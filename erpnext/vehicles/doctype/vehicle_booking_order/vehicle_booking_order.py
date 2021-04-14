@@ -72,6 +72,7 @@ class VehicleBookingOrder(AccountsController):
 		self.update_payment_status()
 		self.update_delivery_status()
 		self.update_invoice_status()
+		self.update_transfer_customer()
 		self.set_status()
 
 	def before_submit(self):
@@ -543,6 +544,24 @@ class VehicleBookingOrder(AccountsController):
 				"invoice_status": self.invoice_status
 			})
 
+	def update_transfer_customer(self, update=False):
+		vehicle_transfer_letter = None
+
+		if self.docstatus != 0:
+			vehicle_transfer_letter = frappe.db.get_all("Vehicle Transfer Letter", {"vehicle_booking_order": self.name, "docstatus": 1},
+				['customer', 'customer_name'], order_by="posting_date desc, creation desc", limit=1)
+
+		vehicle_transfer_letter = vehicle_transfer_letter[0] if vehicle_transfer_letter else frappe._dict()
+
+		self.transfer_customer = vehicle_transfer_letter.customer
+		self.transfer_customer_name = vehicle_transfer_letter.customer_name
+
+		if update:
+			self.db_set({
+				"transfer_customer": self.transfer_customer,
+				"transfer_customer_name": self.transfer_customer_name
+			})
+
 	def set_status(self, update=False, status=None, update_modified=True):
 		if self.is_new():
 			if self.get('amended_from'):
@@ -899,6 +918,8 @@ def get_next_document(vehicle_booking_order, doctype):
 		return get_vehicle_invoice_receipt(doc)
 	elif doctype == "Vehicle Invoice Delivery":
 		return get_vehicle_invoice_delivery(doc)
+	elif doctype == "Vehicle Transfer Letter":
+		return get_vehicle_transfer_letter(doc)
 	else:
 		frappe.throw(_("Invalid DocType"))
 
@@ -913,9 +934,22 @@ def get_vehicle_receipt(source):
 
 
 def get_vehicle_delivery(source):
+	source.check_outstanding_payment_for_delivery()
 	check_if_doc_exists("Vehicle Delivery", source.name)
 
 	target = frappe.new_doc("Vehicle Delivery")
+	set_next_document_values(source, target)
+	target.run_method("set_missing_values")
+	return target
+
+
+def get_vehicle_transfer_letter(source):
+	check_if_doc_exists("Vehicle Transfer Letter", source.name)
+
+	if not has_previous_doc("Vehicle Delivery", source):
+		frappe.throw(_("Cannot make Vehicle Transfer Letter against Vehicle Booking Order before making Vehicle Delivery"))
+
+	target = frappe.new_doc("Vehicle Transfer Letter")
 	set_next_document_values(source, target)
 	target.run_method("set_missing_values")
 	return target
@@ -933,8 +967,7 @@ def get_vehicle_invoice_receipt(source):
 def get_vehicle_invoice_delivery(source):
 	check_if_doc_exists("Vehicle Invoice Delivery", source.name)
 
-	prev_doc = get_previous_doc("Vehicle Invoice Receipt", source)
-	if not prev_doc:
+	if not has_previous_doc("Vehicle Invoice Receipt", source):
 		frappe.throw(_("Cannot make Vehicle Invoice Delivery against Vehicle Booking Order before making Vehicle Invoice Receipt"))
 
 	target = frappe.new_doc("Vehicle Invoice Delivery")
@@ -949,13 +982,9 @@ def check_if_doc_exists(doctype, vehicle_booking_order):
 		frappe.throw(_("{0} already exists").format(frappe.get_desk_link(doctype, existing)))
 
 
-def get_previous_doc(doctype, source):
+def has_previous_doc(doctype, source):
 	prev_docname = frappe.db.get_value(doctype, {"vehicle_booking_order": source.name, "docstatus": 1})
-	if not prev_docname:
-		return None
-
-	prev_doc = frappe.get_doc(doctype, prev_docname)
-	return prev_doc
+	return prev_docname
 
 
 def set_next_document_values(source, target):
@@ -963,24 +992,23 @@ def set_next_document_values(source, target):
 		frappe.throw(_("Please set Vehicle first"))
 	if source.vehicle_allocation_required and not source.vehicle_allocation and target.doctype != 'Purchase Order':
 		frappe.throw(_("Please set Vehicle Allocation first"))
-	if target.doctype == "Vehicle Delivery":
-		source.check_outstanding_payment_for_delivery()
 
 	target.vehicle_booking_order = source.name
 	target.company = source.company
 
+	if target.doctype != "Vehicle Transfer Letter":
+		if target.meta.has_field('customer'):
+			target.customer = source.customer
+			target.customer_name = source.customer_name
+
+		if target.meta.has_field('customer_address'):
+			target.customer_address = source.customer_address
+
+		if target.meta.has_field('contact_person'):
+			target.contact_person = source.contact_person
+
 	if target.meta.has_field('supplier'):
 		target.supplier = source.supplier
-
-	if target.meta.has_field('customer'):
-		target.customer = source.customer
-		target.customer_name = source.customer_name
-
-	if target.meta.has_field('customer_address'):
-		target.customer_address = source.customer_address
-
-	if target.meta.has_field('contact_person'):
-		target.contact_person = source.contact_person
 
 	if target.meta.has_field('warehouse'):
 		target.warehouse = source.warehouse

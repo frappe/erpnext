@@ -11,6 +11,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			'Vehicle Delivery': 'Deliver Vehicle',
 			'Vehicle Invoice Receipt': 'Receive Invoice',
 			'Vehicle Invoice Delivery': 'Deliver Invoice',
+			'Vehicle Transfer Letter': 'Transfer Letter',
 			'Purchase Order': 'Purchase Order',
 		}
 	},
@@ -220,6 +221,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
 				} else if (this.frm.doc.delivery_status === "To Deliver") {
 					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
+				} else if (this.frm.doc.delivery_status === "Delivered" && !this.frm.doc.transfer_customer) {
+					this.frm.add_custom_button(__('Transfer Letter'), () => this.make_next_document('Vehicle Transfer Letter'));
 				}
 
 				if (this.frm.doc.invoice_status === "To Receive") {
