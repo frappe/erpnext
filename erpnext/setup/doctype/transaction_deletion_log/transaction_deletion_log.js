@@ -9,15 +9,16 @@ frappe.ui.form.on('Transaction Deletion Log', {
 			"Company", "Bank Account", "Item Tax Template", "Mode Of Payment",
 			"Item Default", "Customer", "Supplier", "GST Account"]
 
-		var i;
-		for (i = 0; i < doctypes_to_be_ignored.length; i++) { 
-			frm.add_child('customisable_doctypes', {
-					doctype_name : doctypes_to_be_ignored[i]
-				});
+		if (!(frm.doc.customisable_doctypes)){
+			var i;
+			for (i = 0; i < doctypes_to_be_ignored.length; i++) { 
+				frm.add_child('customisable_doctypes', {
+						doctype_name : doctypes_to_be_ignored[i]
+					});
+			}
 		}
-		
+
 		frm.get_field('customisable_doctypes').grid.cannot_add_rows = true;
-		// frm.get_field('customisable_doctypes').grid.only_sortable();
 		frm.refresh_field('customisable_doctypes');
 	}
 });
