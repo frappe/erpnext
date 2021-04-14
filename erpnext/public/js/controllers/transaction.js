@@ -1989,7 +1989,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			primary_action: function () {
 				const data = dialog.get_values();
 				frappe.call({
-					method: "erpnext.controllers.accounts_controller.make_quality_inspections",
+					method: "erpnext.controllers.stock_controller.make_quality_inspections",
 					args: {
 						doctype: me.frm.doc.doctype,
 						docname: me.frm.doc.name,
