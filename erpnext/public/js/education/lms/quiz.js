@@ -28,8 +28,6 @@ class Quiz {
 				this.initialiseTimer(data.duration);
 				this.is_time_bound = true;
 				this.time_taken = 0;
-			} else if (data.activity && data.activity.is_complete && data.activity.time_taken) {
-				this.calculate_and_display_time(data.activity.time_taken, "Time Taken - ");
 			}
 		}
 		data.questions.forEach(question_data => {
@@ -49,7 +47,9 @@ class Quiz {
 				indicator = 'green'
 				message = 'You have already cleared the quiz.'
 			}
-
+			if (data.activity.time_taken) {
+				this.calculate_and_display_time(data.activity.time_taken, "Time Taken - ");
+			}
 			this.set_quiz_footer(message, indicator, data.activity.score)
 		}
 		else {
@@ -108,7 +108,7 @@ class Quiz {
 	submit() {
 		if (this.is_time_bound) {
 			clearInterval(this.timer);
-			this.calculate_and_display_time(this.time_taken, "Time Taken - ");
+			$(".lms-timer").text("");
 		}
 		this.submit_btn.innerText = 'Evaluating..'
 		this.submit_btn.disabled = true
