@@ -567,6 +567,7 @@ def create_salary_slips_for_employees(employees, args, publish_progress=True):
 			if publish_progress:
 				frappe.publish_progress(count*100/len(set(employees) - set(salary_slips_exists_for)),
 					title = _("Creating Salary Slips..."))
+
 		else:
 			salary_slips_not_created.append(emp)
 

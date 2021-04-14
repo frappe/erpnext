@@ -46,7 +46,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 						"default": "1-Duplicate",
 						"options": ["1-Duplicate", "2-Data Entry Error", "3-Order Cancelled", "4-Other"]
 					},
-					{ 
+					{
 						"label": "Remark",
 						"fieldname": "remark",
 						"fieldtype": "Data",
@@ -61,7 +61,7 @@ erpnext.setup_einvoice_actions = (doctype) => {
 							const data = d.get_values();
 							frappe.call({
 								method: 'erpnext.regional.india.e_invoice.utils.cancel_irn',
-								args: { 
+								args: {
 									doctype,
 									docname: name,
 									irn: irn,
@@ -235,7 +235,7 @@ const get_preview_dialog = (frm, action) => {
 		title: __("Preview"),
 		size: "large",
 		fields: [
-			{ 
+			{
 				"label": "Preview",
 				"fieldname": "preview_html",
 				"fieldtype": "HTML"

@@ -466,21 +466,24 @@ def make_einvoice(invoice):
 	try:
 		einvoice = safe_json_load(einvoice)
 		einvoice = santize_einvoice_fields(einvoice)
-		validate_totals(einvoice)
-
 	except Exception:
-		log_error(einvoice)
-		link_to_error_list = '<a href="List/Error Log/List?method=E Invoice Request Failed">Error Log</a>'
-		frappe.throw(
-			_('An error occurred while creating e-invoice for {}. Please check {} for more information.').format(
-				invoice.name, link_to_error_list),
-			title=_('E Invoice Creation Failed')
-		)
+		show_link_to_error_log(invoice, einvoice)
+
+	validate_totals(einvoice)
 
 	return einvoice
 
+def show_link_to_error_log(invoice, einvoice):
+	err_log = log_error(einvoice)
+	link_to_error_log = get_link_to_form('Error Log', err_log.name, 'Error Log')
+	frappe.throw(
+		_('An error occurred while creating e-invoice for {}. Please check {} for more information.').format(
+			invoice.name, link_to_error_log),
+		title=_('E Invoice Creation Failed')
+	)
+
 def log_error(data=None):
-	if not isinstance(data, dict):
+	if isinstance(data, six.string_types):
 		data = json.loads(data)
 
 	seperator = "--" * 50
@@ -587,7 +590,7 @@ class GSPConnector():
 			self.credentials = self.e_invoice_settings.credentials[0] if self.e_invoice_settings.credentials else None
 
 	def get_seller_gstin(self):
-		gstin = self.invoice.company_gstin or frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
+		gstin = frappe.db.get_value('Address', self.invoice.company_address, 'gstin')
 		if not gstin:
 			frappe.throw(_('Cannot retrieve Company GSTIN. Please select company address with valid GSTIN.'))
 		return gstin
@@ -666,7 +669,6 @@ class GSPConnector():
 		except Exception:
 			log_error()
 			self.raise_error(True)
-
 	@staticmethod
 	def get_gstin_details(gstin):
 		'''fetch and cache GSTIN details'''
@@ -959,7 +961,6 @@ class GSPConnector():
 			'label': _('IRN Generated')
 		}
 		self.update_invoice()
-
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
