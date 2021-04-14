@@ -27,7 +27,7 @@ jobs:
           MYSQL_ALLOW_EMPTY_PASSWORD: YES
         ports:
           - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3 --tmpfs /var/lib/mysql:rw
 
     steps:
       - name: Clone
