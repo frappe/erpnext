@@ -1414,37 +1414,6 @@ def validate_and_delete_children(parent, data):
 
 
 @frappe.whitelist()
-def make_quality_inspections(doctype, docname, items):
-	items = json.loads(items).get('items')
-	inspections = []
-
-	for item in items:
-		if item.get("sample_size") > item.get("qty"):
-			frappe.throw(_("{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})").format(
-				item_name=item.get("item_name"),
-				sample_size=item.get("sample_size"),
-				accepted_quantity=item.get("qty")
-			))
-
-		quality_inspection = frappe.get_doc({
-			"doctype": "Quality Inspection",
-			"inspection_type": "Incoming",
-			"inspected_by": frappe.session.user,
-			"reference_type": doctype,
-			"reference_name": docname,
-			"item_code": item.get("item_code"),
-			"description": item.get("description"),
-			"sample_size": item.get("sample_size"),
-			"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
-			"batch_no": item.get("batch_no")
-		}).insert()
-		quality_inspection.save()
-		inspections.append(quality_inspection)
-
-	return [get_link_to_form("Quality Inspection", inspection.name) for inspection in inspections]
-
-
-@frappe.whitelist()
 def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, child_docname="items"):
 	def check_doc_permissions(doc, perm_type='create'):
 		try:

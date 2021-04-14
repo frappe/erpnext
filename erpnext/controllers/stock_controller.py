@@ -1,17 +1,21 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe.utils import cint, flt, cstr, get_link_to_form, today, getdate
-from frappe import _
-import frappe.defaults
+import json
 from collections import defaultdict
-from erpnext.accounts.utils import get_fiscal_year, check_if_stock_and_account_balance_synced
+
+import frappe
+import frappe.defaults
+from frappe import _
+from frappe.utils import cint, cstr, flt, get_link_to_form, getdate
+
+import erpnext
 from erpnext.accounts.general_ledger import make_gl_entries, make_reverse_gl_entries, process_gl_map
+from erpnext.accounts.utils import check_if_stock_and_account_balance_synced, get_fiscal_year
 from erpnext.controllers.accounts_controller import AccountsController
-from erpnext.stock.stock_ledger import get_valuation_rate
 from erpnext.stock import get_warehouse_account_map
+from erpnext.stock.stock_ledger import get_valuation_rate
+
 
 class QualityInspectionRequiredError(frappe.ValidationError): pass
 class QualityInspectionRejectedError(frappe.ValidationError): pass
@@ -190,7 +194,6 @@ class StockController(AccountsController):
 		if hasattr(self, "items"):
 			item_doclist = self.get("items")
 		elif self.doctype == "Stock Reconciliation":
-			import json
 			item_doclist = []
 			data = json.loads(self.reconciliation_json)
 			for row in data[data.index(self.head_row)+1:]:
@@ -320,7 +323,7 @@ class StockController(AccountsController):
 		return serialized_items
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company, validate_disabled_warehouse
+		from erpnext.stock.utils import validate_disabled_warehouse, validate_warehouse_company
 
 		warehouses = list(set([d.warehouse for d in
 			self.get("items") if getattr(d, "warehouse", None)]))
@@ -500,6 +503,38 @@ class StockController(AccountsController):
 		elif not is_reposting_pending():
 			check_if_stock_and_account_balance_synced(self.posting_date,
 				self.company, self.doctype, self.name)
+
+
+@frappe.whitelist()
+def make_quality_inspections(doctype, docname, items):
+	items = json.loads(items).get('items')
+	inspections = []
+
+	for item in items:
+		if item.get("sample_size") > item.get("qty"):
+			frappe.throw(_("{item_name}'s Sample Size ({sample_size}) cannot be greater than the Accepted Quantity ({accepted_quantity})").format(
+				item_name=item.get("item_name"),
+				sample_size=item.get("sample_size"),
+				accepted_quantity=item.get("qty")
+			))
+
+		quality_inspection = frappe.get_doc({
+			"doctype": "Quality Inspection",
+			"inspection_type": "Incoming",
+			"inspected_by": frappe.session.user,
+			"reference_type": doctype,
+			"reference_name": docname,
+			"item_code": item.get("item_code"),
+			"description": item.get("description"),
+			"sample_size": item.get("sample_size"),
+			"item_serial_no": item.get("serial_no").split("\n")[0] if item.get("serial_no") else None,
+			"batch_no": item.get("batch_no")
+		}).insert()
+		quality_inspection.save()
+		inspections.append(quality_inspection)
+
+	return [get_link_to_form("Quality Inspection", inspection.name) for inspection in inspections]
+
 
 def is_reposting_pending():
 	return frappe.db.exists("Repost Item Valuation",
