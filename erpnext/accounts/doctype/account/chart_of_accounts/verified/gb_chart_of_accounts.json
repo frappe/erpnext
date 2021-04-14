@@ -1,0 +1,270 @@
+{
+    "country_code": "gb",
+    "name": "United Kingdom - Chart of Accounts",
+    "tree": {
+        "Assets": {
+            "root_type": "Asset",
+            "Current Assets": {
+                "Accounts Receivable": {
+                    "Debtors": {
+                        "account_type": "Receivable"
+                    }
+                },
+                "Cash at Bank and In Hand": {
+                    "account_type": "Cash",
+                    "Bank Accounts": {
+                        "account_type": "Bank",
+                        "Default Bank": {
+                            "account_type": "Bank"
+                        }
+                    },
+                    "Cash": {
+                        "account_type": "Cash"
+                    }
+                },
+                "Loans and Advances": {
+                    "Director Loans": {
+                        "is_group": 1,
+                        "account_number": ""
+                    },
+                    "Employee Advances": {
+                        "account_type": "Receivable"
+                    }
+                },
+                "Stocks": {
+                    "account_type": "Stock",
+                    "Stock": {
+                        "account_type": "Stock"
+                    }
+                },
+                "Tax Assets": {
+                    "VAT on Purchases": {
+                        "account_type": "Tax"
+                    }
+                }
+            },
+            "Fixed Assets": {
+                "Intangible Assets": {
+                    "Amortisation": {
+                        "account_type": "Fixed Asset"
+                    }
+                },
+                "Tangible Assets": {
+                    "Accumulated Depreciation": {
+                        "account_type": "Accumulated Depreciation"
+                    }
+                }
+            }
+        },
+        "Equity": {
+            "root_type": "Equity",
+            "Called Up Share Capital": {
+                "account_type": "Equity"
+            },
+            "Dividends Paid": {
+                "account_type": "Equity"
+            },
+            "Retained Profit": {
+                "account_type": "Equity"
+            },
+            "Revaluation Reserve": {
+                "account_type": "Equity"
+            }
+        },
+        "Expenditure": {
+            "root_type": "Expense",
+            "Accommodation Costs": {
+                "Light, Heat and Power": {
+                    "account_type": "Expense Account"
+                },
+                "Rent and Rates": {
+                    "account_type": "Expense Account"
+                },
+                "Repairs, Renewals and Maintenance": {
+                    "account_type": "Expense Account"
+                }
+            },
+            "Administrative Expenses": {
+                "Advertising and Promotions": {
+                    "account_type": "Expense Account"
+                },
+                "Bad Debts": {
+                    "account_type": "Expense Account"
+                },
+                "Banking and Financial Charges": {
+                    "account_type": "Expense Account"
+                },
+                "Depreciation": {
+                    "account_type": "Depreciation"
+                },
+                "Donations": {
+                    "Charities": {
+                        "account_type": "Expense Account"
+                    },
+                    "Grassroots Sports": {
+                        "account_type": "Expense Account"
+                    }
+                },
+                "Entertaining": {
+                    "Allowable Entertaining": {
+                        "account_type": "Expense Account"
+                    },
+                    "Disallowable Entertaining": {
+                        "account_type": "Expense Account"
+                    }
+                },
+                "Insurance": {
+                    "account_type": "Expense Account"
+                },
+                "Interest Paid": {
+                    "account_type": "Expense Account"
+                },
+                "Internet and Telephone": {
+                    "account_type": "Expense Account"
+                },
+                "Loss on Asset Disposal": {
+                    "account_type": "Expense Account"
+                },
+                "Penalties and Fines": {
+                    "account_type": "Expense Account"
+                },
+                "Post, Print & Stationery": {
+                    "account_type": "Expense Account"
+                },
+                "Sundry Expenses": {
+                    "Exchange Gain/Loss": {
+                        "account_type": "Expense Account"
+                    },
+                    "Rounding": {
+                        "account_type": "Round Off"
+                    },
+                    "Small Miscellaneous Expenses": {
+                        "account_type": "Expense Account"
+                    }
+                },
+                "Travel and Subsistence": {
+                    "account_type": "Expense Account"
+                },
+                "Vehicle Expenses": {
+                    "account_type": "Expense Account"
+                }
+            },
+            "Cost of Sales": {
+                "Cost of Goods Sold": {
+                    "account_type": "Cost of Goods Sold"
+                },
+                "Expenses Included In Valuation": {
+                    "account_type": "Expenses Included In Valuation"
+                },
+                "Stock Adjustment": {
+                    "account_type": "Stock Adjustment"
+                }
+            },
+            "Distribution Costs": {
+                "account_type": "Expense Account"
+            },
+            "Employment": {
+                "Accountancy and Audit": {
+                    "account_type": "Expense Account"
+                },
+                "Commission": {
+                    "account_type": "Expense Account"
+                },
+                "Consultancy": {
+                    "account_type": "Expense Account"
+                },
+                "Director Pensions": {
+                    "account_type": "Expense Account"
+                },
+                "Director Remuneration": {
+                    "account_type": "Expense Account"
+                },
+                "Legal and Professional Fees": {
+                    "account_type": "Expense Account"
+                },
+                "Salaries and Wages": {
+                    "account_type": "Expense Account"
+                },
+                "Subcontractors' Payments (CIS)": {
+                    "account_type": "Expense Account"
+                }
+            },
+            "Property Income Expenses": {
+                "Allowable Property Expenses": {
+                    "account_type": "Expense Account"
+                },
+                "Disallowable Property Expenses": {
+                    "account_type": "Expense Account"
+                }
+            },
+            "Trading Losses": {
+                "Losses from a Later Period Brought Back": {
+                    "account_type": "Expense Account"
+                },
+                "Losses from an Earlier Period Carried Forward": {
+                    "account_type": "Expense Account"
+                }
+            }
+        },
+        "Income": {
+            "root_type": "Income",
+            "Ancillary Income": {
+                "account_type": "Income Account"
+            },
+            "Income from Property": {
+                "account_type": "Income Account"
+            },
+            "Interest Received": {
+                "Non-trade Interest": {
+                    "account_type": "Income Account"
+                },
+                "Trade Interest": {
+                    "account_type": "Income Account"
+                }
+            },
+            "Turnover": {
+                "Sales": {
+                    "account_type": "Income Account"
+                }
+            }
+        },
+        "Liabilities": {
+            "root_type": "Liability",
+            "Current Liabilities": {
+                "Accounts Payable": {
+                    "Credit Cards": {
+                        "Default Credit Card": {
+                            "account_type": "Bank"
+                        }
+                    },
+                    "Creditors": {
+                        "account_type": "Payable"
+                    },
+                    "Payroll": {
+                        "Remuneration due after 9 months": {},
+                        "Remuneration due within 9 months": {}
+                    }
+                },
+                "Duty & Tax Liabilities": {
+                    "Corporation Tax Liability": {
+                        "account_type": "Tax"
+                    },
+                    "VAT Liability": {
+                        "account_type": "Tax"
+                    },
+                    "VAT on Sales": {
+                        "account_type": "Tax"
+                    }
+                },
+                "Stock Received But Not Billed": {
+                    "account_type": "Stock Received But Not Billed"
+                }
+            },
+            "Long-term Liabilities": {
+                "Liability Provision": {
+                    "account_type": "Payable"
+                }
+            }
+        }
+    }
+}
