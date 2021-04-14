@@ -124,7 +124,6 @@
    "read_only": 1
   },
   {
-   "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.employee)",
    "fieldname": "currency",
    "fieldtype": "Link",
@@ -148,7 +147,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-14 15:52:08.566418",
+ "modified": "2021-03-31 22:35:08.940087",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Employee Benefit Application",
