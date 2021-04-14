@@ -15,7 +15,7 @@ def delete_company_transactions(company_name):
 	frappe.only_for("System Manager")
 	doc = frappe.get_doc("Company", company_name)
 
-	if frappe.session.user != doc.owner:
+	if frappe.session.user != doc.owner and frappe.session.user != 'Administrator':
 		frappe.throw(_("Transactions can only be deleted by the creator of the Company"),
 			frappe.PermissionError)
 
