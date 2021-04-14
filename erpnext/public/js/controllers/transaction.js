@@ -1927,7 +1927,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				cannot_add_rows: true,
 				in_place_edit: true,
 				data: data,
-				get_data: () => { return data },
+				get_data: () => {
+					return data;
+				},
 				fields: [
 					{
 						fieldtype: "Data",
@@ -2001,7 +2003,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 							frappe.msgprint({
 								message: __("Quality Inspections Created: {0}", [r.message.join(", ")]),
 								indicator: "green"
-							})
+							});
 						}
 						dialog.hide();
 					}
@@ -2024,7 +2026,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				});
 				dialog_items.grid.refresh();
 			}
-		})
+		});
 
 		data = dialog.fields_dict.items.df.data;
 		if (!data.length) {
