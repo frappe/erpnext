@@ -293,7 +293,7 @@ def validate_accounts(file_name):
 	accounts_dict = {}
 	for account in accounts:
 		accounts_dict.setdefault(account["account_name"], account)
-		if not hasattr(account, "parent_account"):
+		if not account.get("parent_account", "") and (not account.get("is_group", 0) or not account.get("root_type", "")):
 			msg = _("Please make sure the file you are using has 'Parent Account' column present in the header.")
 			msg += "<br><br>"
 			msg += _("Alternatively, you can download the template and fill your data in.")
