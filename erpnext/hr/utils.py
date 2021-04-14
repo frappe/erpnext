@@ -1,15 +1,18 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-import frappe, erpnext
-from frappe import _
-from frappe.utils import formatdate, format_datetime, getdate, get_datetime, nowdate, flt, cstr, add_days, today
-from frappe.model.document import Document
-from frappe.desk.form import assign_to
+import erpnext
+import frappe
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from frappe import _
+from frappe.desk.form import assign_to
+from frappe.model.document import Document
+from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
+	get_datetime, getdate, nowdate, today, unique)
+
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
+
 
 class EmployeeBoardingController(Document):
 	'''
@@ -48,27 +51,38 @@ class EmployeeBoardingController(Document):
 				continue
 
 			task = frappe.get_doc({
-					"doctype": "Task",
-					"project": self.project,
-					"subject": activity.activity_name + " : " + self.employee_name,
-					"description": activity.description,
-					"department": self.department,
-					"company": self.company,
-					"task_weight": activity.task_weight
-				}).insert(ignore_permissions=True)
+				"doctype": "Task",
+				"project": self.project,
+				"subject": activity.activity_name + " : " + self.employee_name,
+				"description": activity.description,
+				"department": self.department,
+				"company": self.company,
+				"task_weight": activity.task_weight
+			}).insert(ignore_permissions=True)
 			activity.db_set("task", task.name)
+
 			users = [activity.user] if activity.user else []
 			if activity.role:
-				user_list = frappe.db.sql_list('''select distinct(parent) from `tabHas Role`
-					where parenttype='User' and role=%s''', activity.role)
-				users = users + user_list
+				user_list = frappe.db.sql_list('''
+					SELECT
+						DISTINCT(has_role.parent)
+					FROM
+						`tabHas Role` has_role
+							LEFT JOIN `tabUser` user
+								ON has_role.parent = user.name
+					WHERE
+						has_role.parenttype = 'User'
+							AND user.enabled = 1
+							AND has_role.role = %s
+				''', activity.role)
+				users = unique(users + user_list)
 
 				if "Administrator" in users:
 					users.remove("Administrator")
 
 			# assign the task the users
 			if users:
-				self.assign_task_to_users(task, set(users))
+				self.assign_task_to_users(task, users)
 
 	def assign_task_to_users(self, task, users):
 		for user in users:
@@ -490,3 +504,25 @@ def grant_leaves_automatically():
 		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "leaves_allocated":0})
 		for assignment in lpa:
 			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
+
+def share_doc_with_approver(doc, user):
+	# if approver does not have permissions, share
+	if not frappe.has_permission(doc=doc, ptype="submit", user=user):
+		frappe.share.add(doc.doctype, doc.name, user, submit=1,
+			flags={"ignore_share_permission": True})
+
+		frappe.msgprint(_("Shared with the user {0} with {1} access").format(
+			user, frappe.bold("submit"), alert=True))
+
+	# remove shared doc if approver changes
+	doc_before_save = doc.get_doc_before_save()
+	if doc_before_save:
+		approvers = {
+			"Leave Application": "leave_approver",
+			"Expense Claim": "expense_approver",
+			"Shift Request": "approver"
+		}
+
+		approver = approvers.get(doc.doctype)
+		if doc_before_save.get(approver) != doc.get(approver):
+			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))

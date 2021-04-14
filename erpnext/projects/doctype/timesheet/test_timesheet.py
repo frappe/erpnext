@@ -13,9 +13,18 @@ from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_
 from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 from erpnext.payroll.doctype.salary_structure.test_salary_structure \
 	import make_salary_structure, create_salary_structure_assignment
+from erpnext.payroll.doctype.salary_slip.test_salary_slip import (
+	make_earning_salary_component,
+	make_deduction_salary_component
+)
 from erpnext.hr.doctype.employee.test_employee import make_employee
 
 class TestTimesheet(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		make_earning_salary_component(setup=True, company_list=['_Test Company'])
+		make_deduction_salary_component(setup=True, company_list=['_Test Company'])
+
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Structure", "Salary Structure Assignment", "Timesheet"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
@@ -49,7 +58,7 @@ class TestTimesheet(unittest.TestCase):
 		self.assertEqual(timesheet.total_billable_amount, 0)
 
 	def test_salary_slip_from_timesheet(self):
-		emp = make_employee("test_employee_6@salary.com")
+		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 
 		salary_structure = make_salary_structure_for_timesheet(emp)
 		timesheet = make_timesheet(emp, simulate = True, billable=1)

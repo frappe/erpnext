@@ -207,11 +207,11 @@ class update_entries_after(object):
 
 
 	def build(self):
-		from erpnext.controllers.stock_controller import check_if_future_sle_exists
+		from erpnext.controllers.stock_controller import future_sle_exists
 
 		if self.args.get("sle_id"):
 			self.process_sle_against_current_timestamp()
-			if not check_if_future_sle_exists(self.args):
+			if not future_sle_exists(self.args):
 				self.update_bin()
 		else:
 			entries_to_fix = self.get_future_entries_to_fix()
@@ -372,7 +372,8 @@ class update_entries_after(object):
 		elif sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Delivery Note", "Sales Invoice"):
 			if frappe.get_cached_value(sle.voucher_type, sle.voucher_no, "is_return"):
 				from erpnext.controllers.sales_and_purchase_return import get_rate_for_return # don't move this import to top
-				rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code, voucher_detail_no=sle.voucher_detail_no)
+				rate = get_rate_for_return(sle.voucher_type, sle.voucher_no, sle.item_code,
+					voucher_detail_no=sle.voucher_detail_no, sle = sle)
 			else:
 				if sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
 					rate_field = "valuation_rate"

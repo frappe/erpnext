@@ -405,10 +405,10 @@ class TestSalesInvoice(unittest.TestCase):
 		item_row = si.get("items")[0]
 
 		add_items = [
-			(54, '_Test Account Excise Duty @ 12'),
-			(288, '_Test Account Excise Duty @ 15'),
-			(144, '_Test Account Excise Duty @ 20'),
-			(430, '_Test Item Tax Template 1')
+			(54, '_Test Account Excise Duty @ 12 - _TC'),
+			(288, '_Test Account Excise Duty @ 15 - _TC'),
+			(144, '_Test Account Excise Duty @ 20 - _TC'),
+			(430, '_Test Item Tax Template 1 - _TC')
 		]
 		for qty, item_tax_template in add_items:
 			item_row_copy = copy.deepcopy(item_row)
@@ -1166,10 +1166,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_create_so_with_margin(self):
 		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True)
-		price_list_rate = 100
+		price_list_rate = flt(100) * flt(si.plc_conversion_rate)
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = 'Percentage'
 		si.items[0].margin_rate_or_amount = 25
+		si.items[0].discount_amount = 0.0
+		si.items[0].discount_percentage = 0.0
 		si.save()
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
@@ -1800,6 +1802,15 @@ class TestSalesInvoice(unittest.TestCase):
 		si.selling_price_list = "_Test Price List Rest of the World"
 		si.update_stock = 1
 		si.items[0].target_warehouse = 'Work In Progress - TCP1'
+
+		# Add stock to stores for succesful stock transfer
+		make_stock_entry(
+			target="Stores - TCP1",
+			company = "_Test Company with perpetual inventory",
+			qty=1,
+			basic_rate=100
+		)
+
 		add_taxes(si)
 		si.save()
 
@@ -2077,14 +2088,14 @@ def check_gl_entries(doc, voucher_no, expected_gle, posting_date):
 			item.save()
 
 		item.append("taxes", {
-			"item_tax_template": "_Test Item Tax Template 1",
+			"item_tax_template": "_Test Item Tax Template 1 - _TC",
 			"valid_from": add_days(nowdate(), 1)
 		})
 
 		item.save()
 
 		sales_invoice = create_sales_invoice(item = "_Test Item 2", do_not_save=1)
-		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1"
+		sales_invoice.items[0].item_tax_template = "_Test Item Tax Template 1 - _TC"
 		self.assertRaises(frappe.ValidationError, sales_invoice.save)
 
 		item.taxes = []
@@ -2106,6 +2117,7 @@ def create_sales_invoice(**args):
 	si.return_against = args.return_against
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
+	si.naming_series = args.naming_series or "T-SINV-"
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

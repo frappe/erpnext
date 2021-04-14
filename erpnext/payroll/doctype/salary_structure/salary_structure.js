@@ -111,12 +111,19 @@ frappe.ui.form.on('Salary Structure', {
 				frappe.set_route('Form', 'Salary Structure Assignment', doc.name);
 			});
 			frm.add_custom_button(__("Assign to Employees"),function () {
-			frm.trigger('assign_to_employees')
-		})
+				frm.trigger('assign_to_employees')
+			})
 		}
+
+		// set columns read-only
 		let fields_read_only = ["is_tax_applicable", "is_flexible_benefit", "variable_based_on_taxable_salary"];
 		fields_read_only.forEach(function(field) {
-			frappe.meta.get_docfield("Salary Detail", field, frm.doc.name).read_only = 1;
+			frm.fields_dict.earnings.grid.update_docfield_property(
+				field, 'read_only', 1
+			);
+			frm.fields_dict.deductions.grid.update_docfield_property(
+				field, 'read_only', 1
+			);
 		});
 		frm.trigger('set_earning_deduction_component');
 	},
@@ -142,6 +149,8 @@ frappe.ui.form.on('Salary Structure', {
 			],
 			primary_action: function() {
 				var data = d.get_values();
+				delete data.company
+				delete data.currency
 				frappe.call({
 					doc: frm.doc,
 					method: "assign_salary_structure",
