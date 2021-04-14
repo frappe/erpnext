@@ -307,6 +307,8 @@ auto_cancel_exempted_doctypes= [
 	"Inpatient Medication Entry"
 ]
 
+after_migrate = ["erpnext.setup.install.update_select_perm_after_install"]
+
 scheduler_events = {
 	"cron": {
 		"0/30 * * * *": [
