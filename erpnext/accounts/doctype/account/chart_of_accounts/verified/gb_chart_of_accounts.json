@@ -35,6 +35,9 @@
                     "account_type": "Stock",
                     "Stock": {
                         "account_type": "Stock"
+                    },
+                    "Capital Work In Progress": {
+                        "account_type": "Capital Work in Progress"
                     }
                 },
                 "Tax Assets": {
@@ -132,13 +135,13 @@
                     "account_type": "Expense Account"
                 },
                 "Sundry Expenses": {
-                    "Exchange Gain/Loss": {
-                        "account_type": "Expense Account"
-                    },
                     "Rounding": {
                         "account_type": "Round Off"
                     },
                     "Small Miscellaneous Expenses": {
+                        "account_type": "Expense Account"
+                    },
+                    "Exchange Loss": {
                         "account_type": "Expense Account"
                     }
                 },
@@ -158,6 +161,9 @@
                 },
                 "Stock Adjustment": {
                     "account_type": "Stock Adjustment"
+                },
+                "Expenses Included In Asset Valuation": {
+                    "account_type": "Expenses Included In Asset Valuation"
                 }
             },
             "Distribution Costs": {
@@ -204,6 +210,12 @@
                 "Losses from an Earlier Period Carried Forward": {
                     "account_type": "Expense Account"
                 }
+            },
+            "Deferred Expense": {
+                "account_type": "Expense Account"
+            },
+            "Unrealised Loss": {
+                "account_type": "Expense Account"
             }
         },
         "Income": {
@@ -226,6 +238,9 @@
                 "Sales": {
                     "account_type": "Income Account"
                 }
+            },
+            "Deferred Revenue": {
+                "account_type": "Income Account"
             }
         },
         "Liabilities": {
@@ -256,14 +271,23 @@
                         "account_type": "Tax"
                     }
                 },
-                "Stock Received But Not Billed": {
-                    "account_type": "Stock Received But Not Billed"
+                "Received But Not Billed": {
+                    "Service Received But Not Billed": {
+                        "account_type": "Service Received But Not Billed"
+                    },
+                    "Stock Received But Not Billed": {
+                        "account_type": "Stock Received But Not Billed"
+                    },
+                    "Asset Received But Not Billed": {
+                        "account_type": "Asset Received But Not Billed"
+                    }
                 }
             },
             "Long-term Liabilities": {
                 "Liability Provision": {
                     "account_type": "Payable"
-                }
+                },
+                "Unrealised Liability": {}
             }
         }
     }
