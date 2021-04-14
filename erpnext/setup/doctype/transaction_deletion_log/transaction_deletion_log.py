@@ -7,7 +7,7 @@ from frappe.utils import cint
 import frappe
 from frappe.model.document import Document
 
-class TransactionsCleanup(Document):
+class TransactionDeletionLog(Document):
 	def before_save(self):
 		# prepopulating the 'Additional DocTypes' table if it's not empty
 		if not self.doctypes:
@@ -18,7 +18,7 @@ class TransactionsCleanup(Document):
 				})
 			
 			print("*" * 100)
-			ignore = ['Item', 'Company', 'Customer', 'Supplier', 'Shipment', 'DATEV Settings', 'Transactions Cleanup']
+			ignore = ['Item', 'Company', 'Customer', 'Supplier', 'Shipment', 'DATEV Settings', 'Transaction Deletion Log']
 			for doctype in doctypes:
 				if doctype.name not in ignore:
 					doctype_fields = frappe.get_meta(doctype.name).as_dict()['fields']

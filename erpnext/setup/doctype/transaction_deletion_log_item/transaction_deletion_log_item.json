@@ -20,16 +20,17 @@
   {
    "fieldname": "no_of_docs",
    "fieldtype": "Int",
+   "in_list_view": 1,
    "label": "Number of Docs"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-10 02:46:23.149762",
+ "modified": "2021-04-14 21:47:14.131612",
  "modified_by": "Administrator",
  "module": "Setup",
- "name": "Transactions Cleanup Doctype",
+ "name": "Transaction Deletion Log Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",
