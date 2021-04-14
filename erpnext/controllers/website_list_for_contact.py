@@ -25,7 +25,7 @@ def get_transaction_list(doctype, txt=None, filters=None, limit_start=0, limit_p
 
 	if not filters: filters = []
 
-	if doctype in ['Supplier Quotation', 'Purchase Invoice', 'Quotation']:
+	if doctype in ['Supplier Quotation', 'Purchase Invoice']:
 		filters.append((doctype, 'docstatus', '<', 2))
 	else:
 		filters.append((doctype, 'docstatus', '=', 1))
