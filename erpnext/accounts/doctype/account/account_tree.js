@@ -51,6 +51,15 @@ frappe.treeview_settings["Account"] = {
 			label: __('New Company'),
 			action: function() { frappe.new_doc("Company", true) },
 			condition: 'frappe.boot.user.can_create.indexOf("Company") !== -1'
+		},
+		{
+			label: __('Export Fixture'),
+			action: () => {
+				frappe.call({
+					method: 'erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.export_coa_to_json',
+					args: {company: frappe.treeview_settings['Account'].treeview.page.fields_dict.company.get_value()}
+				})},
+			condition: 'frappe.boot.developer_mode === 1 && frappe.boot.user.roles.indexOf("System Manager") !== -1'
 		}
 	],
 	fields: [

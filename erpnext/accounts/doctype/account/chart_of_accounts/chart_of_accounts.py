@@ -232,3 +232,22 @@ def build_tree_from_json(chart_template, chart_data=None):
 
 	_import_accounts(chart, None)
 	return accounts
+
+@frappe.whitelist()
+def export_coa_to_json(company):
+	"Export a company coa as a verified json chart template"
+	frappe.only_for('System Manager')
+	tree = get_chart(None, existing_company=company)
+	db_co = frappe.get_doc('Company', company)
+	country = db_co.country
+	country_code = frappe.get_value('Country', country, 'code')
+
+	data = {
+		'country_code': country_code,
+		'name': country + ' - Chart of Accounts',
+		'tree': tree
+	}
+
+	path = os.path.join(os.path.dirname(__file__), 'verified', country_code + '_chart_of_accounts.json')
+	with open(path, 'w') as fp:
+		json.dump(data, fp, indent=4)
