@@ -15,5 +15,9 @@ frappe.ui.form.on('Transaction Deletion Log', {
 					doctype_name : doctypes_to_be_ignored[i]
 				});
 		}
+		
+		frm.get_field('customisable_doctypes').grid.cannot_add_rows = true;
+		// frm.get_field('customisable_doctypes').grid.only_sortable();
+		frm.refresh_field('customisable_doctypes');
 	}
 });
