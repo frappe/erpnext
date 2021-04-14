@@ -23,6 +23,7 @@
   "rate_of_interest",
   "is_secured_loan",
   "disbursement_date",
+  "closure_date",
   "disbursed_amount",
   "column_break_11",
   "maximum_loan_amount",
@@ -348,12 +349,18 @@
    "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "closure_date",
+   "fieldtype": "Date",
+   "label": "Closure Date",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-24 12:27:23.208240",
+ "modified": "2021-04-10 09:28:21.946972",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan",

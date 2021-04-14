@@ -276,13 +276,6 @@ cur_frm.fields_dict['items'].grid.get_field('project').get_query = function(doc,
 	}
 }
 
-cur_frm.cscript.select_print_heading = function(doc, cdt, cdn) {
-	if(doc.select_print_heading)
-		cur_frm.pformat.print_heading = doc.select_print_heading;
-	else
-		cur_frm.pformat.print_heading = "Purchase Receipt";
-}
-
 cur_frm.fields_dict['select_print_heading'].get_query = function(doc, cdt, cdn) {
 	return {
 		filters: [

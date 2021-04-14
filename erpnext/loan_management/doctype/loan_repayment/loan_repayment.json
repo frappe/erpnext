@@ -239,14 +239,16 @@
   {
    "fieldname": "total_penalty_paid",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Penalty Paid",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-05 13:45:19.137896",
+ "modified": "2021-04-10 10:00:31.859076",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Repayment",

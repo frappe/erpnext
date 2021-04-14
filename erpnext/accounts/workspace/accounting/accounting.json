@@ -444,6 +444,16 @@
    "type": "Link"
   },
   {
+    "dependencies": "GL Entry",
+    "hidden": 0,
+    "is_query_report": 1,
+    "label": "UAE VAT 201",
+    "link_to": "UAE VAT 201",
+    "link_type": "Report",
+    "onboard": 0,
+    "type": "Link"
+   },
+  {
    "hidden": 0,
    "is_query_report": 0,
    "label": "Financial Statements",
