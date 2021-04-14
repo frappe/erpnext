@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
 from frappe.model.meta import get_field_precision
+from erpnext.stock.utils import get_incoming_rate
 from frappe.utils import flt, get_datetime, format_datetime
 
 class StockOverReturnError(frappe.ValidationError): pass
@@ -389,9 +390,23 @@ def make_return_doc(doctype, source_name, target_doc=None):
 
 	return doclist
 
-def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None, item_row=None, voucher_detail_no=None):
+def get_rate_for_return(voucher_type, voucher_no, item_code, return_against=None,
+	item_row=None, voucher_detail_no=None, sle=None):
 	if not return_against:
 		return_against = frappe.get_cached_value(voucher_type, voucher_no, "return_against")
+
+	if not return_against and voucher_type == 'Sales Invoice' and sle:
+		return get_incoming_rate({
+			"item_code": sle.item_code,
+			"warehouse": sle.warehouse,
+			"posting_date": sle.get('posting_date'),
+			"posting_time": sle.get('posting_time'),
+			"qty": sle.actual_qty,
+			"serial_no": sle.get('serial_no'),
+			"company": sle.company,
+			"voucher_type": sle.voucher_type,
+			"voucher_no": sle.voucher_no
+		}, raise_error_if_no_rate=False)
 
 	return_against_item_field = get_return_against_item_fields(voucher_type)
 
