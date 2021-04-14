@@ -4,28 +4,7 @@ from frappe import _
 def get_data():
 	return [
 		{
-			"label": _("Vehicle Masters"),
-			"items": [
-				{
-					"type": "doctype",
-					"name": "Item",
-					"label": _("Vehicle Item (Variant)"),
-					"description": _("Vehicle Item/Variant List"),
-					"onboard": 1,
-					"route_options": {
-						"is_vehicle": 1
-					}
-				},
-				{
-					"type": "doctype",
-					"name": "Vehicle",
-					"description": _("Vehicle List."),
-					"onboard": 1,
-				},
-			]
-		},
-		{
-			"label": _("Transactions"),
+			"label": _("Booking"),
 			"items": [
 				{
 					"type": "doctype",
@@ -39,6 +18,31 @@ def get_data():
 					"dependencies": ["Vehicle Booking Order"],
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Allocation Register",
+					"doctype": "Vehicle Allocation",
+					"dependencies": ["Vehicle Allocation"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Booking Deposit Summary",
+					"doctype": "Vehicle Booking Payment",
+					"dependencies": ["Vehicle Booking Payment"],
+				},
+			]
+		},
+		{
+			"label": _("Stock"),
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Vehicle",
+					"description": _("Vehicle List."),
+					"onboard": 1,
+				},
+				{
 					"type": "doctype",
 					"name": "Vehicle Receipt",
 					"dependencies": ["Vehicle"],
@@ -49,6 +53,19 @@ def get_data():
 					"dependencies": ["Vehicle"],
 				},
 				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Stock",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
+					"onboard": 1,
+				},
+			],
+		},
+		{
+			"label": _("Vehicle Documents"),
+			"items": [
+				{
 					"type": "doctype",
 					"name": "Vehicle Invoice Receipt",
 					"dependencies": ["Vehicle Booking Order"],
@@ -58,49 +75,39 @@ def get_data():
 					"name": "Vehicle Invoice Delivery",
 					"dependencies": ["Vehicle Booking Order"],
 				},
-			]
+				{
+					"type": "doctype",
+					"name": "Vehicle Transfer Letter",
+					"dependencies": ["Vehicle"],
+				},
+			],
 		},
 		{
-			"label": _("Allocation"),
+			"label": _("Masters"),
 			"items": [
 				{
 					"type": "doctype",
-					"name": "Vehicle Allocation",
-					"onboard": 1
+					"name": "Item",
+					"label": _("Vehicle Item (Variants and Models)"),
+					"description": _("Vehicle Item (Models and Variant) List"),
+					"onboard": 1,
+					"route_options": {
+						"is_vehicle": 1
+					}
 				},
 				{
 					"type": "doctype",
-					"name": "Vehicle Allocation Creation Tool",
+					"name": "Customer",
+					"onboard": 1,
+					"description": _("Customer List."),
 				},
 				{
 					"type": "doctype",
 					"name": "Vehicle Allocation Period",
 				},
-			]
-		},
-		{
-			"label": _("Reports"),
-			"items": [
 				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Allocation Register",
-					"doctype": "Vehicle Allocation",
-					"dependencies": ["Vehicle Allocation"],
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Stock",
-					"doctype": "Vehicle",
-					"dependencies": ["Vehicle"],
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Booking Deposit Summary",
-					"doctype": "Vehicle Booking Payment",
-					"dependencies": ["Vehicle Booking Payment"],
+					"type": "doctype",
+					"name": "Vehicle Allocation"
 				},
 			]
 		},
@@ -115,6 +122,10 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Withholding Tax Rule",
+				},
+				{
+					"type": "doctype",
+					"name": "Vehicle Allocation Creation Tool",
 				},
 			]
 		}
