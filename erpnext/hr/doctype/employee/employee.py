@@ -80,6 +80,7 @@ class Employee(NestedSet):
 			self.update_user()
 			self.update_user_permissions()
 		self.reset_employee_emails_cache()
+		self.update_approver_role()
 
 	def update_user_permissions(self):
 		if not self.create_user_permission: return
@@ -144,6 +145,17 @@ class Employee(NestedSet):
 					pass
 
 		user.save()
+
+	def update_approver_role(self):
+		if self.leave_approver:
+			user = frappe.get_doc("User", self.leave_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Leave Approver")
+
+		if self.expense_approver:
+			user = frappe.get_doc("User", self.expense_approver)
+			user.flags.ignore_permissions = True
+			user.add_roles("Expense Approver")
 
 	def validate_date(self):
 		if self.date_of_birth and getdate(self.date_of_birth) > getdate(today()):
@@ -503,7 +515,7 @@ def has_user_permission_for_employee(user_name, employee_name):
 	})
 
 def has_upload_permission(doc, ptype='read', user=None):
-	if not user: 
+	if not user:
 		user = frappe.session.user
 	if get_doc_permissions(doc, user=user, ptype=ptype).get(ptype):
 		return True

@@ -201,7 +201,6 @@ erpnext.PointOfSale.ItemDetails = class {
 						me.events.form_updated(me.doctype, me.name, 'rate', this.value).then(() => {
 							const item_row = frappe.get_doc(me.doctype, me.name);
 							const doc = me.events.get_frm().doc;
-
 							me.$item_price.html(format_currency(item_row.rate, doc.currency));
 							me.render_discount_dom(item_row);
 						});

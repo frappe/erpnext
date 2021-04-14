@@ -346,7 +346,7 @@ def create_delivery_note(source_name, target_doc=None):
 
 		if dn_item:
 			dn_item.warehouse = location.warehouse
-			dn_item.qty = location.picked_qty
+			dn_item.qty = flt(location.picked_qty) / (flt(location.conversion_factor) or 1)
 			dn_item.batch_no = location.batch_no
 			dn_item.serial_no = location.serial_no
 
@@ -379,7 +379,6 @@ def create_stock_entry(pick_list):
 	else:
 		stock_entry = update_stock_entry_items_with_no_reference(pick_list, stock_entry)
 
-	stock_entry.set_incoming_rate()
 	stock_entry.set_actual_qty()
 	stock_entry.calculate_rate_and_amount()
 
