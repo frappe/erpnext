@@ -292,10 +292,9 @@ $.extend(erpnext.utils, {
 		}
 	},
 	overrides_parent_value_in_all_rows: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
-		let d = locals[dt][dn];
-		if(doc[parent_fieldname]){
+		if (doc[parent_fieldname]) {
 			let cl = doc[table_fieldname] || [];
-			for(let i = 0; i < cl.length; i++) {
+			for (let i = 0; i < cl.length; i++) {
 				cl[i][fieldname] = doc[parent_fieldname];
 			}
 			frappe.refresh_field(table_fieldname);
