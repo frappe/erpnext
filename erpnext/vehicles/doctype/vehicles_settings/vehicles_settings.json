@@ -16,6 +16,9 @@
   "dealership_code",
   "section_break_14",
   "role_change_booking_after_payment",
+  "role_change_booking_after_vehicle_receipt",
+  "role_change_booking_after_vehicle_delivery",
+  "column_break_14",
   "maximum_payment_adjustment"
  ],
  "fields": [
@@ -81,11 +84,27 @@
    "fieldname": "dealership_code",
    "fieldtype": "Data",
    "label": "Dealership Code"
+  },
+  {
+   "fieldname": "role_change_booking_after_vehicle_receipt",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Change Booking Details after Vehicle Receipt",
+   "options": "Role"
+  },
+  {
+   "fieldname": "role_change_booking_after_vehicle_delivery",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Change Booking Details after Vehicle Delivery",
+   "options": "Role"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-04-12 11:04:07.563807",
+ "modified": "2021-04-15 00:51:08.788806",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",

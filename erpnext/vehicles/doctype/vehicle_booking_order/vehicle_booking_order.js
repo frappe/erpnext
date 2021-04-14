@@ -198,6 +198,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	add_create_buttons: function () {
+		// Customer Payment Button (allowed on draft too)
 		if (this.frm.doc.docstatus < 2) {
 			if (flt(this.frm.doc.customer_outstanding) > 0) {
 				this.frm.add_custom_button(__('Customer Payment'),
@@ -208,21 +209,19 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		if (this.frm.doc.docstatus === 1) {
 			var unpaid = flt(this.frm.doc.customer_outstanding) > 0 || flt(this.frm.doc.supplier_outstanding) > 0;
 
+			// Supplier Payment Button
 			if (flt(this.frm.doc.supplier_outstanding) > 0) {
 				this.frm.add_custom_button(__('Supplier Payment'), () => this.make_payment_entry('Supplier'), __('Payment'));
 			}
 
+			// Receive/Deliver Vehicle and Invoice
 			if (this.frm.doc.vehicle) {
 				if (this.frm.doc.delivery_status === "To Receive") {
 					this.frm.add_custom_button(__('Receive Vehicle'), () => this.make_next_document('Vehicle Receipt'));
 				} else if (this.frm.doc.delivery_status === "To Deliver") {
-					if (!flt(this.frm.doc.customer_outstanding) && !flt(this.frm.doc.supplier_outstanding)) {
-						this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
-					}
+					this.frm.add_custom_button(__('Deliver Vehicle'), () => this.make_next_document('Vehicle Delivery'));
 				}
-			}
 
-			if (this.frm.doc.vehicle) {
 				if (this.frm.doc.invoice_status === "To Receive") {
 					this.frm.add_custom_button(__('Receive Invoice'), () => this.make_next_document('Vehicle Invoice Receipt'));
 				} else if (this.frm.doc.invoice_status === "To Deliver" && this.frm.doc.delivery_status === "Delivered") {
@@ -230,33 +229,47 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				}
 			}
 
+			// Change / Select labels
 			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
 			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Vehicle Allocation" : "Select Allocation";
 			var select_delivery_period_label = this.frm.doc.delivery_period ? "Change Delivery Period" : "Select Delivery Period";
 
-			if (this.frm.doc.delivery_status === "To Receive") {
-				this.frm.add_custom_button(__("Update Customer Details"), () => this.update_customer_details(),
-					__("Change"));
+			// Change Buttons
+			if (this.frm.doc.__onload && this.frm.doc.__onload.can_change) {
+				if (this.frm.doc.__onload.can_change.customer_details) {
+					this.frm.add_custom_button(__("Update Customer Details"), () => this.change_customer_details(),
+						__("Change"));
+				}
 
-				if (this.frm.doc.vehicle_allocation_required) {
-					this.frm.add_custom_button(__(select_allocation_label), () => this.select_allocation(),
+				if (this.frm.doc.__onload.can_change.allocation) {
+					this.frm.add_custom_button(__(select_allocation_label), () => this.change_allocation(),
 						this.frm.doc.vehicle_allocation ? __("Change") : null);
 				}
 
-				this.frm.add_custom_button(__(select_delivery_period_label), () => this.select_delivery_period(),
-					this.frm.doc.delivery_period ? __("Change") : null);
+				if (this.frm.doc.__onload.can_change.delivery_period) {
+					this.frm.add_custom_button(__(select_delivery_period_label), () => this.change_delivery_period(),
+						this.frm.doc.delivery_period ? __("Change") : null);
+				}
 
-				this.frm.add_custom_button(__("Change Vehicle Color"), () => this.select_color(),
-					__("Change"));
+				if (this.frm.doc.__onload.can_change.color) {
+					this.frm.add_custom_button(__("Change Vehicle Color"), () => this.change_color(),
+						__("Change"));
+				}
 
-				this.frm.add_custom_button(__(select_vehicle_label), () => this.select_vehicle(),
-					this.frm.doc.vehicle ? __("Change") : null);
+				if (this.frm.doc.__onload.can_change.vehicle) {
+					this.frm.add_custom_button(__(select_vehicle_label), () => this.change_vehicle(),
+						this.frm.doc.vehicle ? __("Change") : null);
+				}
 
-				this.frm.add_custom_button(__("Change Payment Adjustment"), () => this.select_payment_adjustment(),
-					__("Change"));
+				if (this.frm.doc.__onload.can_change.payment_adjustment) {
+					this.frm.add_custom_button(__("Change Payment Adjustment"), () => this.change_payment_adjustment(),
+						__("Change"));
+				}
 
-				this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.select_item_code(),
-					__("Change"));
+				if (this.frm.doc.__onload.can_change.item) {
+					this.frm.add_custom_button(__("Change Vehicle Item (Variant)"), () => this.change_item(),
+						__("Change"));
+				}
 			}
 
 			if (this.frm.doc.vehicle_allocation_required && !this.frm.doc.vehicle_allocation) {
@@ -657,7 +670,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	select_vehicle: function () {
+	change_vehicle: function () {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Vehicle"),
@@ -681,9 +694,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			]
 		});
 
-		dialog.set_primary_action(__("Update"), function () {
+		dialog.set_primary_action(__("Change"), function () {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_vehicle_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_vehicle",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					vehicle: dialog.get_value('vehicle')
@@ -699,7 +712,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		dialog.show();
 	},
 
-	select_allocation: function () {
+	change_allocation: function () {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Allocation"),
@@ -724,9 +737,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			]
 		});
 
-		dialog.set_primary_action(__("Update"), function () {
+		dialog.set_primary_action(__("Change"), function () {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_allocation_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_allocation",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					vehicle_allocation: dialog.get_value('vehicle_allocation')
@@ -742,7 +755,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		dialog.show();
 	},
 
-	select_delivery_period: function () {
+	change_delivery_period: function () {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Delivery Period"),
@@ -752,9 +765,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			]
 		});
 
-		dialog.set_primary_action(__("Update"), function () {
+		dialog.set_primary_action(__("Change"), function () {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_delivery_period_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_delivery_period",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					delivery_period: dialog.get_value('delivery_period')
@@ -770,7 +783,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		dialog.show();
 	},
 
-	select_color: function () {
+	change_color: function () {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Select Color"),
@@ -784,9 +797,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			]
 		});
 
-		dialog.set_primary_action(__("Update"), function () {
+		dialog.set_primary_action(__("Change"), function () {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_color_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_color",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					color_1: dialog.get_value('color_1'),
@@ -804,13 +817,13 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		dialog.show();
 	},
 
-	update_customer_details: function () {
+	change_customer_details: function () {
 		var me = this;
 
 		frappe.confirm(__('Are you sure you want to update details from Customer Master(s)? This may change the Invoice Total.'),
 			function() {
 				frappe.call({
-					method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_customer_details_in_booking",
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_customer_details",
 					args: {
 						vehicle_booking_order: me.frm.doc.name,
 					},
@@ -824,7 +837,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		)
 	},
 
-	select_item_code: function () {
+	change_item: function () {
 		var me = this;
 
 		frappe.db.get_value("Item", me.frm.doc.item_code, 'variant_of', (r) => {
@@ -857,7 +870,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 			dialog.set_primary_action(__("Change"), function () {
 				frappe.call({
-					method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_item_in_booking",
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_item",
 					args: {
 						vehicle_booking_order: me.frm.doc.name,
 						item_code: dialog.get_value('item_code')
@@ -874,7 +887,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		});
 	},
 
-	select_payment_adjustment: function () {
+	change_payment_adjustment: function () {
 		var me = this;
 		var dialog = new frappe.ui.Dialog({
 			title: __("Change Payment Adjustment"),
@@ -885,9 +898,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			]
 		});
 
-		dialog.set_primary_action(__("Update"), function () {
+		dialog.set_primary_action(__("Change"), function () {
 			frappe.call({
-				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_payment_adjustment_in_booking",
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_payment_adjustment",
 				args: {
 					vehicle_booking_order: me.frm.doc.name,
 					payment_adjustment: dialog.get_value('payment_adjustment')
