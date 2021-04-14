@@ -63,17 +63,17 @@ class VehicleTransactionController(StockController):
 	def set_missing_values(self, for_validate=False):
 		vehicle_booking_order_details = get_vehicle_booking_order_details(self.as_dict())
 		for k, v in vehicle_booking_order_details.items():
-			if not self.get(k) or k in force_fields:
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
 
 		vehicle_details = get_vehicle_details(self.get('vehicle'), get_vehicle_booking_order=False)
 		for k, v in vehicle_details.items():
-			if not self.get(k) or k in force_fields:
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
 
 		customer_details = get_customer_details(self.as_dict())
 		for k, v in customer_details.items():
-			if not self.get(k) or k in force_fields:
+			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
 
 		if self.get('item_code') and not self.get('item_name'):

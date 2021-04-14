@@ -703,3 +703,4 @@ erpnext.patches.v12_0.update_total_rm_qty
 erpnext.patches.v12_0.set_uom_in_bom_explosion_and_wo
 erpnext.patches.v12_0.set_stock_uom_in_work_order
 erpnext.patches.v12_0.set_item_tax_detail_before_discount
+erpnext.patches.v12_0.fix_party_in_vehicle_delivery_sle
