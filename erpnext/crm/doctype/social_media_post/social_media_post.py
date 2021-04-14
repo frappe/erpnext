@@ -70,15 +70,15 @@ class SocialMediaPost(Document):
 		except:
 			self.db_set("post_status", "Error")
 			title = _("Error while POSTING {0}").format(self.name)
-			traceback = frappe.get_traceback()
-			frappe.log_error(message=traceback , title=title)
+			frappe.log_error(message=frappe.get_traceback() , title=title)
 
 def process_scheduled_social_media_posts():
-	posts = frappe.get_list("Social Media Post", filters={"post_status": "Scheduled", "docstatus":1}, fields= ["name", "scheduled_time","post_status"])
+	posts = frappe.get_list("Social Media Post", filters={"post_status": "Scheduled", "docstatus":1}, fields= ["name", "scheduled_time"])
 	start = frappe.utils.now_datetime()
 	end = start + datetime.timedelta(minutes=10)
 	for post in posts:
 		if post.scheduled_time:
 			post_time = frappe.utils.get_datetime(post.scheduled_time)
 			if post_time > start and post_time <= end:
-				publish('Social Media Post', post.name)
+				sm_post = frappe.get_doc('Social Media Post', post.name)
+				sm_post.post()
