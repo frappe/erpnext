@@ -108,7 +108,6 @@ class POSInvoice(SalesInvoice):
 				filters = { "item_code": d.item_code, "warehouse": d.warehouse }
 				if d.batch_no:
 					filters["batch_no"] = d.batch_no
-
 				reserved_serial_nos = get_pos_reserved_serial_nos(filters)
 				serial_nos = get_serial_nos(d.serial_no)
 				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]

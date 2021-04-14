@@ -93,15 +93,15 @@ class TestBOM(unittest.TestCase):
 		base_raw_material_cost = raw_material_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
 		base_op_cost = op_cost * flt(bom.conversion_rate, bom.precision("conversion_rate"))
 
-		# test amounts in selected currency
-		self.assertEqual(bom.operating_cost, op_cost)
-		self.assertEqual(bom.raw_material_cost, raw_material_cost)
-		self.assertEqual(bom.total_cost, raw_material_cost + op_cost)
+		# test amounts in selected currency, almostEqual checks for 7 digits by default
+		self.assertAlmostEqual(bom.operating_cost, op_cost)
+		self.assertAlmostEqual(bom.raw_material_cost, raw_material_cost)
+		self.assertAlmostEqual(bom.total_cost, raw_material_cost + op_cost)
 
 		# test amounts in selected currency
-		self.assertEqual(bom.base_operating_cost, base_op_cost)
-		self.assertEqual(bom.base_raw_material_cost, base_raw_material_cost)
-		self.assertEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
+		self.assertAlmostEqual(bom.base_operating_cost, base_op_cost)
+		self.assertAlmostEqual(bom.base_raw_material_cost, base_raw_material_cost)
+		self.assertAlmostEqual(bom.base_total_cost, base_raw_material_cost + base_op_cost)
 
 	def test_bom_cost_multi_uom_multi_currency_based_on_price_list(self):
 		frappe.db.set_value("Price List", "_Test Price List", "price_not_uom_dependent", 1)
