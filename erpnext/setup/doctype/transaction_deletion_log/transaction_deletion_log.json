@@ -7,8 +7,8 @@
  "engine": "InnoDB",
  "field_order": [
   "company",
-  "customisable_doctypes",
   "doctypes",
+  "doctypes_to_be_ignored",
   "amended_from",
   "status"
  ],
@@ -22,16 +22,11 @@
    "reqd": 1
   },
   {
-   "fieldname": "customisable_doctypes",
-   "fieldtype": "Table",
-   "label": "DocTypes That Won't Be Affected",
-   "options": "Transaction Deletion Log Item"
-  },
-  {
    "fieldname": "doctypes",
    "fieldtype": "Table",
-   "label": "Additional DocTypes",
-   "options": "Transaction Deletion Log Item"
+   "label": "DocTypes",
+   "options": "Transaction Deletion Log Item",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -48,12 +43,18 @@
    "hidden": 1,
    "label": "Status",
    "options": "Draft\nCompleted"
+  },
+  {
+   "fieldname": "doctypes_to_be_ignored",
+   "fieldtype": "Table",
+   "label": "DocTypes That Won't Be Affected",
+   "options": "Transaction Deletion Log Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-14 21:46:34.206957",
+ "modified": "2021-04-15 04:45:00.316986",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Log",

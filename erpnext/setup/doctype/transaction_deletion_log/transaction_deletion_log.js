@@ -3,22 +3,22 @@
 
 frappe.ui.form.on('Transaction Deletion Log', {
 	refresh: function(frm) {
-		let doctypes_to_be_ignored = ["Account", "Cost Center", "Warehouse", "Budget",
+		let doctypes_to_be_ignored_list = ["Account", "Cost Center", "Warehouse", "Budget",
 			"Party Account", "Employee", "Sales Taxes and Charges Template",
 			"Purchase Taxes and Charges Template", "POS Profile", "BOM",
 			"Company", "Bank Account", "Item Tax Template", "Mode Of Payment",
 			"Item Default", "Customer", "Supplier", "GST Account"]
 
-		if (!(frm.doc.customisable_doctypes)){
+		if (!(frm.doc.doctypes_to_be_ignored)){
 			var i;
-			for (i = 0; i < doctypes_to_be_ignored.length; i++) { 
-				frm.add_child('customisable_doctypes', {
-						doctype_name : doctypes_to_be_ignored[i]
+			for (i = 0; i < doctypes_to_be_ignored_list.length; i++) { 
+				frm.add_child('doctypes_to_be_ignored', {
+						doctype_name : doctypes_to_be_ignored_list[i]
 					});
 			}
 		}
 
-		frm.get_field('customisable_doctypes').grid.cannot_add_rows = true;
-		frm.refresh_field('customisable_doctypes');
+		frm.get_field('doctypes_to_be_ignored').grid.cannot_add_rows = true;
+		frm.refresh_field('doctypes_to_be_ignored');
 	}
 });
