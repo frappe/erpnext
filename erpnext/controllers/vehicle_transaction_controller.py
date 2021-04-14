@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe import _
-from frappe.utils import cstr
+from frappe.utils import cstr, getdate
 from erpnext.controllers.stock_controller import StockController
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import validate_vehicle_item
 from erpnext.accounts.party import validate_party_frozen_disabled
@@ -126,19 +126,19 @@ class VehicleTransactionController(StockController):
 	def validate_vehicle_booking_order(self):
 		if self.vehicle_booking_order:
 			vbo = frappe.db.get_value("Vehicle Booking Order", self.vehicle_booking_order,
-				['docstatus', 'customer', 'financer', 'supplier', 'item_code', 'vehicle'], as_dict=1)
+				['docstatus', 'customer', 'financer', 'supplier', 'item_code', 'vehicle', 'vehicle_delivered_date'], as_dict=1)
 
 			if not vbo:
 				frappe.throw(_("Vehicle Booking Order {0} does not exist").format(self.vehicle_booking_order))
 
 			if self.get('customer'):
-				if not self.get('is_transfer'):
+				if self.doctype != 'Vehicle Transfer Letter':
 					if self.customer not in (vbo.customer, vbo.financer):
 						frappe.throw(_("Customer does not match in {0}")
 							.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 				else:
 					if self.customer in (vbo.customer, vbo.financer):
-						frappe.throw(_("Customer cannot be the same as in {0} when delivery is a transfer")
+						frappe.throw(_("Customer (New Owner) cannot be the same as in {0} for transfer")
 							.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.get('vehicle_owner'):
@@ -160,6 +160,13 @@ class VehicleTransactionController(StockController):
 				if self.vehicle != vbo.vehicle:
 					frappe.throw(_("Vehicle does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
+
+			if self.doctype == "Vehicle Transfer Letter":
+				if not vbo.vehicle_delivered_date:
+					frappe.throw(_("Cannot make Vehicle Transfer Letter before Vehicle Delivery"))
+				if getdate(self.posting_date) < getdate(vbo.vehicle_delivered_date):
+					frappe.throw(_("Transfer Date cannot be before Delivery Date {0}")
+						.format(frappe.format(getdate(vbo.vehicle_delivered_date))))
 
 			if vbo.docstatus != 1:
 				frappe.throw(_("Cannot make {0} against {1} because it is not submitted")
@@ -265,7 +272,12 @@ def get_vehicle_booking_order_details(args):
 	out = frappe._dict()
 
 	if booking_details:
-		out.customer = booking_details.customer
+		if args.doctype == "Vehicle Transfer Letter":
+			out.vehicle_owner = booking_details.financer if booking_details.financer and booking_details.finance_type == 'Leased' \
+				else booking_details.customer
+		else:
+			out.customer = booking_details.customer
+
 		out.supplier = booking_details.supplier
 		out.item_code = booking_details.item_code
 		out.vehicle = booking_details.vehicle
@@ -287,7 +299,8 @@ def get_vehicle_booking_order_details(args):
 
 	out.finance_type = booking_details.finance_type
 
-	out.vehicle_owner = booking_details.financer if booking_details.financer and booking_details.finance_type == 'Leased' else None
+	if args.doctype != "Vehicle Transfer Letter":
+		out.vehicle_owner = booking_details.financer if booking_details.financer and booking_details.finance_type == 'Leased' else None
 
 	return out
 

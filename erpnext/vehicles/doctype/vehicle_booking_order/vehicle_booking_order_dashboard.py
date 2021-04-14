@@ -12,7 +12,7 @@ def get_data():
 		'transactions': [
 			{
 				'label': _('Payment'),
-				'items': ['Vehicle Booking Payment', 'Payment Request']
+				'items': ['Vehicle Booking Payment']
 			},
 			{
 				'label': _('Delivery'),
@@ -21,6 +21,10 @@ def get_data():
 			{
 				'label': _('Invoice'),
 				'items': ['Vehicle Invoice Receipt', 'Vehicle Invoice Delivery']
+			},
+			{
+				'label': _('Transfer'),
+				'items': ['Vehicle Transfer Letter']
 			}
 		]
 	}

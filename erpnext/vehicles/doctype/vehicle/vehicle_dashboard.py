@@ -11,7 +11,7 @@ def get_data():
 			},
 			{
 				'label': ['Vehicle Transaction'],
-				'items': ['Vehicle Receipt', 'Vehicle Delivery']
+				'items': ['Vehicle Receipt', 'Vehicle Delivery', 'Vehicle Transfer Letter']
 			},
 		]
 

@@ -112,17 +112,13 @@ class SerialNo(StockController):
 			self.purchase_date = purchase_sle.posting_date
 			self.purchase_time = purchase_sle.posting_time
 			self.purchase_rate = purchase_sle.incoming_rate
-			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice", "Vehicle Receipt"):
-				self.supplier, self.supplier_name = \
-					frappe.db.get_value(purchase_sle.voucher_type, purchase_sle.voucher_no,
-						["supplier", "supplier_name"])
 
 			# If sales return entry
 			if self.purchase_document_type == 'Delivery Note':
 				self.sales_invoice = None
 		else:
 			for fieldname in ("purchase_document_type", "purchase_document_no",
-				"purchase_date", "purchase_time", "purchase_rate", "supplier", "supplier_name"):
+				"purchase_date", "purchase_time", "purchase_rate"):
 					self.set(fieldname, None)
 
 	def set_sales_details(self, delivery_sle):
@@ -131,23 +127,71 @@ class SerialNo(StockController):
 			self.delivery_document_no = delivery_sle.voucher_no
 			self.delivery_date = delivery_sle.posting_date
 			self.delivery_time = delivery_sle.posting_time
-			if delivery_sle.voucher_type in ("Delivery Note", "Sales Invoice"):
-				self.customer, self.customer_name = \
-					frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
-						["customer", "customer_name"])
-			elif delivery_sle.voucher_type == "Vehicle Delivery":
-				self.customer, self.customer_name, self.vehicle_owner, self.vehicle_owner_name = \
-					frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
-						["customer", "customer_name", "vehicle_owner", "vehicle_owner_name"])
 
 			if self.warranty_period:
 				self.warranty_expiry_date	= add_days(cstr(delivery_sle.posting_date),
 					cint(self.warranty_period))
 		else:
 			for fieldname in ("delivery_document_type", "delivery_document_no",
-				"delivery_date", "delivery_time", "customer", "customer_name",
+				"delivery_date", "delivery_time",
 				"warranty_expiry_date"):
 					self.set(fieldname, None)
+
+	def set_party_details(self, purchase_sle, delivery_sle):
+		purchase_details = None
+		if purchase_sle:
+			if purchase_sle.voucher_type in ("Purchase Receipt", "Purchase Invoice"):
+				purchase_details = frappe.db.get_value(purchase_sle.voucher_type, purchase_sle.voucher_no,
+					["supplier", "supplier_name"], as_dict=1)
+			elif purchase_sle.voucher_type == "Vehicle Receipt":
+				purchase_details = frappe.db.get_value(purchase_sle.voucher_type, purchase_sle.voucher_no,
+					["supplier", "supplier_name", "customer", "customer_name"], as_dict=1)
+
+			if purchase_details:
+				self.update(purchase_details)
+		else:
+			self.supplier = None
+			self.supplier_name = None
+
+		sales_details = None
+		if delivery_sle:
+			if delivery_sle.voucher_type in ("Delivery Note", "Sales Invoice"):
+				sales_details = frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
+					["customer", "customer_name"], as_dict=1)
+			elif delivery_sle.voucher_type == "Vehicle Delivery":
+				sales_details = frappe.db.get_value(delivery_sle.voucher_type, delivery_sle.voucher_no,
+					["customer", "customer_name", "vehicle_owner", "vehicle_owner_name"], as_dict=1)
+
+			if sales_details:
+				self.update(sales_details)
+		else:
+			if purchase_details:
+				self.customer = purchase_details.get('customer')
+				self.customer_name = purchase_details.get('customer_name')
+			else:
+				self.customer = None
+				self.customer_name = None
+			self.vehicle_owner = None
+			self.vehicle_owner_name = None
+
+		if self.vehicle:
+			last_date = None
+			dates = [self.purchase_date, self.delivery_date]
+			dates = [getdate(d) for d in dates if d]
+			if dates:
+				last_date = max(dates)
+
+			filters = {"vehicle": self.vehicle, "docstatus": 1}
+			if last_date:
+				filters['posting_date'] = ['>=', last_date]
+
+			transfer_letter_details = frappe.get_all("Vehicle Transfer Letter", fields=['customer', 'customer_name'],
+				filters=filters, order_by="posting_date desc, creation desc", limit=1)
+
+			if transfer_letter_details:
+				self.update(transfer_letter_details[0])
+				self.vehicle_owner = None
+				self.vehicle_owner_name = None
 
 	def get_last_sle(self, serial_no=None):
 		entries = {}
@@ -229,6 +273,7 @@ class SerialNo(StockController):
 		last_sle = self.get_last_sle(serial_no)
 		self.set_purchase_details(last_sle.get("purchase_sle"))
 		self.set_sales_details(last_sle.get("delivery_sle"))
+		self.set_party_details(last_sle.get("purchase_sle"), last_sle.get("delivery_sle"))
 		self.set_maintenance_status()
 		self.set_status()
 
