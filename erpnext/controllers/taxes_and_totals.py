@@ -291,10 +291,13 @@ class calculate_taxes_and_totals(object):
 				# set precision in the last item iteration
 				if n == len(self.doc.get("items")) - 1:
 					self.round_off_totals(tax)
+					self._set_in_company_currency(tax,
+						["tax_amount", "tax_amount_after_discount_amount"])
+
+					self.round_off_base_values(tax)
 					self.set_cumulative_total(i, tax)
 
-					self._set_in_company_currency(tax,
-						["total", "tax_amount", "tax_amount_after_discount_amount"])
+					self._set_in_company_currency(tax, ["total"])
 
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
@@ -341,18 +344,9 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
-		current_tax_amount = self.get_final_current_tax_amount(tax, current_tax_amount)
-
 		if not self.doc.get("is_consolidated"):
 			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
-		return current_tax_amount
-
-	def get_final_current_tax_amount(self, tax, current_tax_amount):
-		# Some countries need individual tax components to be rounded
-		# Handeled via regional doctypess
-		if tax.account_head in frappe.flags.round_off_applicable_accounts:
-			current_tax_amount = round(current_tax_amount, 0)
 		return current_tax_amount
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
@@ -365,9 +359,19 @@ class calculate_taxes_and_totals(object):
 		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount)]
 
 	def round_off_totals(self, tax):
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			tax.tax_amount = round(tax.tax_amount, 0)
+			tax.tax_amount_after_discount_amount = round(tax.tax_amount_after_discount_amount, 0)
+
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount,
 			tax.precision("tax_amount"))
+
+	def round_off_base_values(self, tax):
+		# Round off to nearest integer based on regional settings
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			tax.base_tax_amount = round(tax.base_tax_amount, 0)
+			tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
 
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# if fully inclusive taxes and diff
