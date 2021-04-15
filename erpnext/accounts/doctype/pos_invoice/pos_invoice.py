@@ -96,30 +96,49 @@ class POSInvoice(SalesInvoice):
 				if paid_amt and pay.amount != paid_amt:
 					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
+	def validate_pos_reserved_serial_nos(self, item):
+		msg = ''
+		serial_nos = get_serial_nos(item.serial_no)
+		filters = { "item_code": item.item_code, "warehouse": item.warehouse }
+		if item.batch_no:
+			filters["batch_no"] = item.batch_no
+
+		reserved_serial_nos = get_pos_reserved_serial_nos(filters)
+		invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
+
+		bold_invalid_serial_nos = frappe.bold(', '.join(invalid_serial_nos))
+		if len(invalid_serial_nos) == 1:
+			frappe.throw(_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
+						.format(item.idx, bold_invalid_serial_nos), title=_("Item Unavailable"))
+		elif invalid_serial_nos:
+			frappe.throw(_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
+						.format(item.idx, bold_invalid_serial_nos), title=_("Item Unavailable"))
+
+	def validate_delivered_serial_nos(self, item):
+		msg = ''
+		serial_nos = get_serial_nos(item.serial_no)
+		delivered_serial_nos = frappe.db.get_list('Serial No', {
+			'item_code': item.item_code,
+			'name': ['in', serial_nos],
+			'sales_invoice': ['is', 'set']
+		}, pluck='name')
+
+		if delivered_serial_nos:
+			bold_delivered_serial_nos = frappe.bold(', '.join(delivered_serial_nos))
+			frappe.throw(_("Row #{}: Serial No. {} has already been transacted into another Sales Invoice. Please select valid serial no.")
+						.format(item.idx, bold_delivered_serial_nos), title=_("Item Unavailable"))
+
 	def validate_stock_availablility(self):
 		if self.is_return:
 			return
 
-		allow_negative_stock = frappe.db.get_value('Stock Settings', None, 'allow_negative_stock')
+		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
 		error_msg = []
 		for d in self.get('items'):
 			msg = ""
 			if d.serial_no:
-				filters = { "item_code": d.item_code, "warehouse": d.warehouse }
-				if d.batch_no:
-					filters["batch_no"] = d.batch_no
-				reserved_serial_nos = get_pos_reserved_serial_nos(filters)
-				serial_nos = get_serial_nos(d.serial_no)
-				invalid_serial_nos = [s for s in serial_nos if s in reserved_serial_nos]
-
-				bold_invalid_serial_nos = frappe.bold(', '.join(invalid_serial_nos))
-				if len(invalid_serial_nos) == 1:
-					msg = (_("Row #{}: Serial No. {} has already been transacted into another POS Invoice. Please select valid serial no.")
-								.format(d.idx, bold_invalid_serial_nos))
-				elif invalid_serial_nos:
-					msg = (_("Row #{}: Serial Nos. {} has already been transacted into another POS Invoice. Please select valid serial no.")
-								.format(d.idx, bold_invalid_serial_nos))
-
+				self.validate_pos_reserved_serial_nos(d)
+				self.validate_delivered_serial_nos(d)
 			else:
 				if allow_negative_stock:
 					return
@@ -127,15 +146,11 @@ class POSInvoice(SalesInvoice):
 				available_stock = get_stock_availability(d.item_code, d.warehouse)
 				item_code, warehouse, qty = frappe.bold(d.item_code), frappe.bold(d.warehouse), frappe.bold(d.qty)
 				if flt(available_stock) <= 0:
-					msg = (_('Row #{}: Item Code: {} is not available under warehouse {}.').format(d.idx, item_code, warehouse))
+					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.')
+								.format(d.idx, item_code, warehouse), title=_("Item Unavailable"))
 				elif flt(available_stock) < flt(d.qty):
-					msg = (_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.')
-								.format(d.idx, item_code, warehouse, qty))
-			if msg:
-				error_msg.append(msg)
-
-		if error_msg:
-			frappe.throw(error_msg, title=_("Item Unavailable"), as_list=True)
+					frappe.throw(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.')
+								.format(d.idx, item_code, warehouse, qty), title=_("Item Unavailable"))
 
 	def validate_serialised_or_batched_item(self):
 		error_msg = []
