@@ -49,7 +49,7 @@ def get_average_age(fifo_queue, to_date):
 	for batch in fifo_queue:
 		batch_age = date_diff(to_date, batch[1])
 
-		if type(batch[0]) in ['int', 'float']:
+		if isinstance(batch[0], (int, float)):
 			age_qty += batch_age * batch[0]
 			total_qty += batch[0]
 		else:
