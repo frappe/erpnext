@@ -598,10 +598,10 @@ class SalarySlip(TransactionBase):
 				continue
 
 			if (
-				not d.additional_salary
-				and (not additional_salary or additional_salary.overwrite)
-				or additional_salary
-				and additional_salary.name == d.additional_salary
+				(not d.additional_salary
+				and (not additional_salary or additional_salary.overwrite))
+				or (additional_salary
+				and additional_salary.name == d.additional_salary)
 			):
 				component_row = d
 				break
@@ -611,7 +611,7 @@ class SalarySlip(TransactionBase):
 			self.set(component_type, [
 				d for d in self.get(component_type)
 				if d.salary_component != component_data.salary_component
-				or d.additional_salary and additional_salary.name != d.additional_salary
+				or (d.additional_salary and additional_salary.name != d.additional_salary)
 				or d == component_row
 			])
 
@@ -633,8 +633,6 @@ class SalarySlip(TransactionBase):
 
 		if additional_salary:
 			component_row.default_amount = 0
-			component_row.additional_amount = amount
-			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date
 		else:
