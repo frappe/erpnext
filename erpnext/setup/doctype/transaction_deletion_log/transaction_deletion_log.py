@@ -24,13 +24,13 @@ class TransactionDeletionLog(Document):
 							doctype_field['fieldname'] : self.company
 						})
 						if no_of_docs > 0:
-							# to populate DocTypes table
+							# populate DocTypes table
 							self.append('doctypes', {
 								"doctype_name" : doctype.name,
 								"no_of_docs" : no_of_docs
 							})
 
-							# to delete the docs linked with the specified company
+							# delete the docs linked with the specified company
 							frappe.db.delete(doctype.name, {
 								doctype_field['fieldname'] : self.company
 							})

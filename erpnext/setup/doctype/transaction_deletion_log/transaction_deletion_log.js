@@ -20,5 +20,9 @@ frappe.ui.form.on('Transaction Deletion Log', {
 
 		frm.get_field('doctypes_to_be_ignored').grid.cannot_add_rows = true;
 		frm.refresh_field('doctypes_to_be_ignored');
+
+		// var col= document.querySelector('[data-fieldname="no_of_docs"]');
+		// console.log(col);
+		// col.style.display = "none"
 	}
 });
