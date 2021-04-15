@@ -35,11 +35,12 @@ def validate_eligibility(doc):
 	if getdate(doc.get('posting_date')) < getdate('2021-04-01'):
 		return False
 
+	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
 
-	if invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_company or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
 		return False
 
 	return True
