@@ -501,14 +501,16 @@ class update_entries_after(object):
 		if ((self.exceptions[0]["voucher_type"], self.exceptions[0]["voucher_no"]) in
 			frappe.local.flags.currently_saving):
 
-			msg = _("{0} units of {1}{2} needed in {3} to complete this transaction.").format(
-				abs(deficiency),
+			msg = _("{0} {1} of {2}{3} needed in {4} to complete this transaction.").format(
+				frappe.bold(frappe.format(abs(deficiency), df={"fieldtype": "Float", "precision": self.qty_db_precision})),
+				exc.stock_uom,
 				frappe.get_desk_link('Item', self.item_code),
 				batch_msg,
 				frappe.get_desk_link('Warehouse', self.warehouse))
 		else:
-			msg = _("{0} units of {1}{2} needed in {3} on {4} {5} for {6} to complete this transaction.").format(
-				abs(deficiency),
+			msg = _("{0} {1} of {2}{3} needed in {4} on {5} {6} for {7} to complete this transaction.").format(
+				frappe.bold(frappe.format(abs(deficiency), df={"fieldtype": "Float", "precision": self.qty_db_precision})),
+				exc.stock_uom,
 				frappe.get_desk_link('Item', self.item_code),
 				batch_msg,
 				frappe.get_desk_link('Warehouse', self.warehouse),
