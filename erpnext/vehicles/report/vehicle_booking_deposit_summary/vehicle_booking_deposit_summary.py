@@ -38,7 +38,7 @@ class VehicleBookingDepositSummaryReport(object):
 			inner join `tabVehicle Booking Order` vbo on vbo.name = dep_m.vehicle_booking_order
 			inner join `tabItem` i on i.name = vbo.item_code
 			where dep_m.docstatus = 1 {0}
-			order by deposit_date, deposit_slip_no, receipt_date
+			order by deposit_date, deposit_slip_no, dep_i.idx
 		""".format(conditions), self.filters, as_dict=1)
 
 		vehicle_booking_orders = list(set([d.vehicle_booking_order for d in self.data]))
