@@ -124,9 +124,12 @@ class SalarySlip(TransactionBase):
 
 	def check_existing(self):
 		if not self.salary_slip_based_on_timesheet:
+			cond = ""
+			if self.payroll_entry:
+				cond += "and payroll_entry = '{0}'".format(self.payroll_entry)
 			ret_exist = frappe.db.sql("""select name from `tabSalary Slip`
 						where start_date = %s and end_date = %s and docstatus != 2
-						and employee = %s and name != %s""",
+						and employee = %s and name != %s {0}""".format(cond),
 						(self.start_date, self.end_date, self.employee, self.name))
 			if ret_exist:
 				self.employee = ''
@@ -595,10 +598,10 @@ class SalarySlip(TransactionBase):
 				continue
 
 			if (
-				not d.additional_salary
-				and (not additional_salary or additional_salary.overwrite)
-				or additional_salary
-				and additional_salary.name == d.additional_salary
+				(not d.additional_salary
+				and (not additional_salary or additional_salary.overwrite))
+				or (additional_salary
+				and additional_salary.name == d.additional_salary)
 			):
 				component_row = d
 				break
@@ -608,7 +611,7 @@ class SalarySlip(TransactionBase):
 			self.set(component_type, [
 				d for d in self.get(component_type)
 				if d.salary_component != component_data.salary_component
-				or d.additional_salary and additional_salary.name != d.additional_salary
+				or (d.additional_salary and additional_salary.name != d.additional_salary)
 				or d == component_row
 			])
 
@@ -630,8 +633,6 @@ class SalarySlip(TransactionBase):
 
 		if additional_salary:
 			component_row.default_amount = 0
-			component_row.additional_amount = amount
-			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date
 		else:
@@ -1053,7 +1054,7 @@ class SalarySlip(TransactionBase):
 			repayment_entry.save()
 			repayment_entry.submit()
 
-			loan.loan_repayment_entry = repayment_entry.name
+			frappe.db.set_value("Salary Slip Loan", loan.name, "loan_repayment_entry", repayment_entry.name)
 
 	def cancel_loan_repayment_entry(self):
 		for loan in self.loans:
