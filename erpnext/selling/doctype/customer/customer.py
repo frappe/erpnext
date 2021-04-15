@@ -38,11 +38,19 @@ class Customer(TransactionBase):
 			set_name_by_naming_series(self)
 
 	def get_customer_name(self):
-		if frappe.db.get_value("Customer", self.customer_name):
+
+		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			count = frappe.db.sql("""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
 				 where name like %s""", "%{0} - %".format(self.customer_name), as_list=1)[0][0]
 			count = cint(count) + 1
-			return "{0} - {1}".format(self.customer_name, cstr(count))
+
+			new_customer_name = "{0} - {1}".format(self.customer_name, cstr(count))
+
+			msgprint(_("Changed customer name to '{}' as '{}' already exists.")
+					.format(new_customer_name, self.customer_name),
+					title=_("Note"), indicator="yellow")
+
+			return new_customer_name
 
 		return self.customer_name
 
