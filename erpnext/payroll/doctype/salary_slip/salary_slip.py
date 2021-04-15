@@ -633,8 +633,6 @@ class SalarySlip(TransactionBase):
 
 		if additional_salary:
 			component_row.default_amount = 0
-			component_row.additional_amount = amount
-			component_row.additional_salary = additional_salary.name
 			component_row.deduct_full_tax_on_selected_payroll_date = \
 				additional_salary.deduct_full_tax_on_selected_payroll_date
 		else:
