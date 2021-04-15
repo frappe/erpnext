@@ -2,9 +2,8 @@
 // License: GNU General Public License v3. See license.txt
 
 frappe.provide("erpnext.maintenance");
-
 frappe.ui.form.on('Maintenance Schedule', {
-	setup: function(frm) {
+	setup: function (frm) {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
@@ -12,30 +11,30 @@ frappe.ui.form.on('Maintenance Schedule', {
 		frm.add_fetch('item_code', 'item_name', 'item_name');
 		frm.add_fetch('item_code', 'description', 'description');
 	},
-	onload: function(frm) {
+	onload: function (frm) {
 		if (!frm.doc.status) {
-			frm.set_value({status:'Draft'});
+			frm.set_value({ status: 'Draft' });
 		}
 		if (frm.doc.__islocal) {
-			frm.set_value({transaction_date: frappe.datetime.get_today()});
+			frm.set_value({ transaction_date: frappe.datetime.get_today() });
 		}
 	},
-	refresh: function(frm) {
+	refresh: function (frm) {
 		setTimeout(() => {
 			frm.toggle_display('generate_schedule', !(frm.is_new()));
 			frm.toggle_display('schedule', !(frm.is_new()));
-		},10);
+		}, 10);
 	},
-	customer: function(frm) {
+	customer: function (frm) {
 		erpnext.utils.get_party_details(frm)
 	},
-	customer_address: function(frm) {
+	customer_address: function (frm) {
 		erpnext.utils.get_address_display(frm, 'customer_address', 'address_display');
 	},
-	contact_person: function(frm) {
+	contact_person: function (frm) {
 		erpnext.utils.get_contact_details(frm);
 	},
-	generate_schedule: function(frm) {
+	generate_schedule: function (frm) {
 		if (frm.is_new()) {
 			frappe.msgprint(__('Please save first'));
 		} else {
@@ -46,14 +45,14 @@ frappe.ui.form.on('Maintenance Schedule', {
 
 // TODO commonify this code
 erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
-	refresh: function() {
-		frappe.dynamic_link = {doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer'}
+	refresh: function () {
+		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer' }
 
 		var me = this;
 
 		if (this.frm.doc.docstatus === 0) {
 			this.frm.add_custom_button(__('Sales Order'),
-				function() {
+				function () {
 					erpnext.utils.map_current_doc({
 						method: "erpnext.selling.doctype.sales_order.sales_order.make_maintenance_schedule",
 						source_doctype: "Sales Order",
@@ -68,7 +67,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					});
 				}, __("Get Items From"));
 		} else if (this.frm.doc.docstatus === 1) {
-			this.frm.add_custom_button(__('Create Maintenance Visit'), function() {
+			this.frm.add_custom_button(__('Create Maintenance Visit'), function () {
 				frappe.model.open_mapped_doc({
 					method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
 					source_name: me.frm.doc.name,
@@ -78,26 +77,26 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	start_date: function(doc, cdt, cdn) {
+	start_date: function (doc, cdt, cdn) {
 		this.set_no_of_visits(doc, cdt, cdn);
 	},
 
-	end_date: function(doc, cdt, cdn) {
+	end_date: function (doc, cdt, cdn) {
 		this.set_no_of_visits(doc, cdt, cdn);
 	},
 
-	periodicity: function(doc, cdt, cdn) {
+	periodicity: function (doc, cdt, cdn) {
 		this.set_no_of_visits(doc, cdt, cdn);
-	},
 
-	set_no_of_visits: function(doc, cdt, cdn) {
+	},
+	no_of_visits: function(doc,cdt,cdn){
+		this.set_no_of_visits(doc,cdt,cdn);
+	},
+	
+	set_no_of_visits: function (doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 
-		if (item.start_date && item.end_date && item.periodicity) {
-			if(item.start_date > item.end_date) {
-				frappe.msgprint(__("Row {0}:Start Date must be before End Date", [item.idx]));
-				return;
-			}
+		if (item.start_date && item.periodicity) {
 
 			var date_diff = frappe.datetime.get_diff(item.end_date, item.start_date) + 1;
 
@@ -110,10 +109,28 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 			}
 
 			var no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
-			frappe.model.set_value(item.doctype, item.name, "no_of_visits", no_of_visits);
+			if (no_of_visits == 0 || !no_of_visits) {
+
+				let end_date = frappe.datetime.add_days(item.start_date, days_in_period[item.periodicity])
+				frappe.model.set_value(item.doctype, item.name, "end_date", end_date)
+				var date_diff = frappe.datetime.get_diff(item.end_date, item.start_date) + 1;
+				var no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
+				frappe.model.set_value(item.doctype, item.name, "no_of_visits", no_of_visits);
+
+			}
+			else if(item.no_of_visits > no_of_visits){
+				var end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits*days_in_period[item.periodicity])
+				frappe.model.set_value(item.doctype, item.name, "end_date", end_date)
+				
+			}
+			else if(item.no_of_visits < no_of_visits){
+				var end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits*days_in_period[item.periodicity])
+				frappe.model.set_value(item.doctype, item.name, "end_date", end_date)
+				
+			}		
 		}
 	},
 });
 
-$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({frm: cur_frm}));
+$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceSchedule({ frm: cur_frm }));
 
