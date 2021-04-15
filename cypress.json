@@ -1,0 +1,11 @@
+{
+  "baseUrl": "http://test-develop:8001/",
+  "projectId": "92odwv",
+  "adminPassword": "admin",
+  "defaultCommandTimeout": 20000,
+  "pageLoadTimeout": 15000,
+  "retries": {
+    "runMode": 2,
+    "openMode": 2
+  }
+}
