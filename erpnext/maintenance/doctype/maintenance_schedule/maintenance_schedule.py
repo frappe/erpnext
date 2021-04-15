@@ -33,7 +33,7 @@ class MaintenanceSchedule(TransactionBase):
 				count = count + 1
 				child.sales_person = d.sales_person
 
-		self.save()
+		
 
 	def on_submit(self):
 		if not self.get('schedules'):
@@ -169,9 +169,12 @@ class MaintenanceSchedule(TransactionBase):
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
+		self.generate_schedule()
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')
+		
+		
 
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
