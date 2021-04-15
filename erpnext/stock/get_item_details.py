@@ -1057,7 +1057,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
 		"price_list_uom_dependant": price_list_uom_dependant,
-		"plc_conversion_rate": plc_conversion_rate
+		"plc_conversion_rate": plc_conversion_rate or 1
 	})
 
 @frappe.whitelist()
