@@ -182,7 +182,7 @@ erpnext.PointOfSale.ItemSelector = class {
 					return 0 + (iCode - 96);
 			}
 			return '';
-		}
+		};
 
 		onScan.attachTo(document, {
 			onScan: (sScancode) => {
