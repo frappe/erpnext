@@ -40,7 +40,7 @@ def validate_eligibility(doc):
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
 
-	if invalid_company or invalid_doctype or invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied:
 		return False
 
 	return True
