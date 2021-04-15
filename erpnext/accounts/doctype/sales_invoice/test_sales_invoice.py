@@ -1166,10 +1166,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_create_so_with_margin(self):
 		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True)
-		price_list_rate = 100
+		price_list_rate = flt(100) * flt(si.plc_conversion_rate)
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = 'Percentage'
 		si.items[0].margin_rate_or_amount = 25
+		si.items[0].discount_amount = 0.0
+		si.items[0].discount_percentage = 0.0
 		si.save()
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
@@ -2115,6 +2117,7 @@ def create_sales_invoice(**args):
 	si.return_against = args.return_against
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
+	si.naming_series = args.naming_series or "T-SINV-"
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

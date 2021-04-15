@@ -10,10 +10,12 @@ frappe.ui.form.on('Products Settings', {
 				df => ['Link', 'Table MultiSelect'].includes(df.fieldtype) && !df.hidden
 			).map(df => ({ label: df.label, value: df.fieldname }));
 
-			const field = frappe.meta.get_docfield("Website Filter Field", "fieldname", frm.docname);
-			field.fieldtype = 'Select';
-			field.options = valid_fields;
-			frm.fields_dict.filter_fields.grid.refresh();
+			frm.fields_dict.filter_fields.grid.update_docfield_property(
+				'fieldname', 'fieldtype', 'Select'
+			);
+			frm.fields_dict.filter_fields.grid.update_docfield_property(
+				'fieldname', 'options', valid_fields
+			);
 		});
 	}
 });

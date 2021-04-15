@@ -12,6 +12,10 @@ from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_pu
 from erpnext.stock.doctype.item.test_item import make_item
 
 class TestPOSInvoice(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		frappe.db.sql("delete from `tabTax Rule`")
+
 	def tearDown(self):
 		if frappe.session.user != "Administrator":
 			frappe.set_user("Administrator")
