@@ -19,6 +19,7 @@ frappe.ui.form.on('Transaction Deletion Log', {
 		}
 
 		frm.get_field('doctypes_to_be_ignored').grid.cannot_add_rows = true;
+		frm.fields_dict["doctypes_to_be_ignored"].grid.set_column_disp("no_of_docs", false)
 		frm.refresh_field('doctypes_to_be_ignored');
 
 		// var col= document.querySelector('[data-fieldname="no_of_docs"]');
