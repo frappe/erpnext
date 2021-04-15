@@ -1,88 +1,114 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-erpnext.SMSManager = function SMSManager(doc) {
+erpnext.SMSManager = function SMSManager(doc, options) {
 	var me = this;
+
+	if (!options) {
+		options = {};
+	}
+
 	this.setup = function() {
-		var default_msg = {
-			'Lead'				: '',
-			'Opportunity'			: 'Your enquiry has been logged into the system. Ref No: ' + doc.name,
-			'Quotation'			: 'Quotation ' + doc.name + ' has been sent via email. Thanks!',
-			'Sales Order'		: 'Sales Order ' + doc.name + ' has been created against '
-						+ (doc.quotation_no ? ('Quote No:' + doc.quotation_no) : '')
-						+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),
-			'Delivery Note'		: 'Items has been delivered against delivery note: ' + doc.name
-						+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),
-			'Sales Invoice': 'Invoice ' + doc.name + ' has been sent via email '
-						+ (doc.po_no ? (' for your PO: ' + doc.po_no) : ''),
-			'Material Request'			: 'Material Request ' + doc.name + ' has been raised in the system',
-			'Purchase Order'	: 'Purchase Order ' + doc.name + ' has been sent via email',
-			'Purchase Receipt'	: 'Items has been received against purchase receipt: ' + doc.name
+		if (in_list(['Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype)) {
+			this.show({
+				contact: doc.contact_person,
+				mobile_no: doc.contact_mobile,
+				party_doctype: 'Customer',
+				party_name: doc.customer
+			});
+		} else if (doc.doctype == 'Quotation') {
+			this.show({
+				contact: doc.contact_person,
+				mobile_no: doc.contact_mobile,
+				party_doctype: doc.quotation_to,
+				party_name: doc.party_name
+			});
+		} else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype)) {
+			this.show({
+				contact: doc.contact_person,
+				mobile_no: doc.contact_mobile,
+				party_doctype: 'Supplier',
+				party_name: doc.supplier
+			});
+		} else if (doc.doctype == 'Lead') {
+			this.show({
+				mobile_no: doc.mobile_no
+			});
+		} else if (doc.doctype == 'Opportunity') {
+			this.show({
+				contact: doc.contact_no
+			});
+		} else if (doc.doctype == 'Material Request') {
+			this.show({});
+		} else if (doc.doctype == 'Vehicle Booking Order') {
+			this.show({
+				mobile_no: doc.contact_mobile,
+				party_doctype: 'Customer',
+				party_name: doc.customer
+			});
 		}
-
-		if (in_list(['Sales Order', 'Delivery Note', 'Sales Invoice'], doc.doctype))
-			this.show(doc.contact_person, 'Customer', doc.customer, '', default_msg[doc.doctype]);
-		else if (doc.doctype === 'Quotation')
-			this.show(doc.contact_person, 'Customer', doc.party_name, '', default_msg[doc.doctype]);
-		else if (in_list(['Purchase Order', 'Purchase Receipt'], doc.doctype))
-			this.show(doc.contact_person, 'Supplier', doc.supplier, '', default_msg[doc.doctype]);
-		else if (doc.doctype == 'Lead')
-			this.show('', '', '', doc.mobile_no, default_msg[doc.doctype]);
-		else if (doc.doctype == 'Opportunity')
-			this.show('', '', '', doc.contact_no, default_msg[doc.doctype]);
-		else if (doc.doctype == 'Quotation')
-			this.show(doc.contact_person, doc.quotation_to, doc.party_name, '', default_msg[doc.doctype]);
-		else if (doc.doctype == 'Material Request')
-			this.show('', '', '', '', default_msg[doc.doctype]);
-
 	};
 
-	this.get_contact_number = function(contact, ref_doctype, ref_name) {
+	this.show = function(args) {
+		if (!args) {
+			args = {};
+		}
+
+		me.message = options.message || args.message;
+		me.type = options.type || args.type;
+		me.contact = options.contact || args.contact;
+		me.mobile_no = options.mobile_no || args.mobile_no;
+		me.party_doctype = options.party_doctype || args.party_doctype;
+		me.party_name = options.party_name || args.party_name;
+		me.reference_doctype = options.reference_doctype || doc.doctype;
+		me.reference_name = options.reference_name || doc.name;
+
+		this.get_sms_defaults();
+	};
+
+	this.get_sms_defaults = function() {
 		frappe.call({
-			method: "frappe.core.doctype.sms_settings.sms_settings.get_contact_number",
+			method: "erpnext.setup.doctype.sms_template.sms_template.get_sms_defaults",
 			args: {
-				contact_name: contact,
-				ref_doctype: ref_doctype,
-				ref_name: ref_name
+				dt: doc.doctype,
+				dn: doc.name,
+				type: me.type,
+				contact: me.contact,
+				mobile_no: me.mobile_no,
+				party_doctype: me.party_doctype,
+				party_name: me.party_name
 			},
 			callback: function(r) {
-				if(r.exc) { frappe.msgprint(r.exc); return; }
-				me.number = r.message;
-				me.show_dialog();
+				if(!r.exc) {
+					me.mobile_no = r.message.mobile_no || me.mobile_no;
+					me.message = r.message.message || me.message;
+					me.show_dialog();
+				}
 			}
 		});
 	};
 
-	this.show = function(contact, ref_doctype, ref_name, mobile_nos, message) {
-		this.message = message;
-		if (mobile_nos) {
-			me.number = mobile_nos;
-			me.show_dialog();
-		} else if (contact){
-			this.get_contact_number(contact, ref_doctype, ref_name)
-		} else {
-			me.show_dialog();
-		}
-	}
 	this.show_dialog = function() {
 		if(!me.dialog)
 			me.make_dialog();
 		me.dialog.set_values({
 			'message': me.message,
-			'number': me.number
+			'mobile_no': me.mobile_no
 		})
 		me.dialog.show();
 	}
+
 	this.make_dialog = function() {
 		var d = new frappe.ui.Dialog({
-			title: 'Send SMS',
+			title: __('Send {0} SMS', [me.type || '']),
 			width: 400,
 			fields: [
-				{fieldname:'number', fieldtype:'Data', label:'Mobile Number', reqd:1},
-				{fieldname:'message', fieldtype:'Text', label:'Message', reqd:1},
+				{fieldname:'mobile_no', fieldtype:'Data', label:'Mobile Number', reqd: 1},
+				{fieldname:'message', fieldtype:'Text', label:'Message', reqd: 1},
 				{fieldname:'send', fieldtype:'Button', label:'Send'}
 			]
-		})
+		});
+
 		d.fields_dict.send.input.onclick = function() {
 			var btn = d.fields_dict.send.input;
 			var v = me.dialog.get_values();
@@ -91,18 +117,28 @@ erpnext.SMSManager = function SMSManager(doc) {
 				frappe.call({
 					method: "frappe.core.doctype.sms_settings.sms_settings.send_sms",
 					args: {
-						receiver_list: [v.number],
-						msg: v.message
+						receiver_list: [v.mobile_no],
+						msg: v.message,
+						type: me.type,
+						reference_doctype: me.reference_doctype,
+						reference_name: me.reference_name,
+						party_doctype: me.party_doctype,
+						party_name: me.party_name
 					},
 					callback: function(r) {
 						$(btn).done_working();
-						if(r.exc) {frappe.msgprint(r.exc); return; }
-						me.dialog.hide();
+						if(!r.exc) {
+							me.dialog.hide();
+						}
 					}
 				});
 			}
-		}
-		this.dialog = d;
+		};
+		
+		$(d.fields_dict.send.input).addClass('btn-primary');
+
+		me.dialog = d;
 	}
+
 	this.setup();
 }
