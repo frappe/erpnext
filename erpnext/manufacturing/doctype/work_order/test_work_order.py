@@ -371,14 +371,14 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_job_card(self):
 		stock_entries = []
-		data = frappe.get_cached_value('BOM',
-			{'docstatus': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
+		bom = frappe.get_doc('BOM', {
+			'docstatus': 1,
+			'with_operations': 1,
+			'company': '_Test Company'
+		})
 
-		bom, bom_item = data
-
-		bom_doc = frappe.get_doc('BOM', bom)
-		work_order = make_wo_order_test_record(item=bom_item, qty=1,
-			bom_no=bom, source_warehouse="_Test Warehouse - _TC")
+		work_order = make_wo_order_test_record(item=bom.item, qty=1,
+			bom_no=bom.name, source_warehouse="_Test Warehouse - _TC")
 
 		for row in work_order.required_items:
 			stock_entry_doc = test_stock_entry.make_stock_entry(item_code=row.item_code,
@@ -390,14 +390,14 @@ class TestWorkOrder(unittest.TestCase):
 		stock_entries.append(ste)
 
 		job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name})
-		self.assertEqual(len(job_cards), len(bom_doc.operations))
+		self.assertEqual(len(job_cards), len(bom.operations))
 
 		for i, job_card in enumerate(job_cards):
 			doc = frappe.get_doc("Job Card", job_card)
 			doc.append("time_logs", {
-				"from_time": now(),
-				"hours": i,
-				"to_time": add_to_date(now(), i),
+				"from_time": add_to_date(None, i),
+				"hours": 1,
+				"to_time": add_to_date(None, i + 1),
 				"completed_qty": doc.for_quantity
 			})
 			doc.submit()
