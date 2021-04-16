@@ -3,20 +3,15 @@
 
 frappe.ui.form.on('Transaction Deletion Log', {
 	refresh: function(frm) {
-		let doctypes_to_be_ignored_list = ["Account", "Cost Center", "Warehouse", "Budget",
-			"Party Account", "Employee", "Sales Taxes and Charges Template",
-			"Purchase Taxes and Charges Template", "POS Profile", "BOM",
-			"Company", "Bank Account", "Item Tax Template", "Mode Of Payment",
-			"Item Default", "Customer", "Supplier", "GST Account"]
-
-		if (!(frm.doc.doctypes_to_be_ignored)){
-			var i;
-			for (i = 0; i < doctypes_to_be_ignored_list.length; i++) { 
-				frm.add_child('doctypes_to_be_ignored', {
-						doctype_name : doctypes_to_be_ignored_list[i]
-					});
+		let doctypes_to_be_ignored_array;	
+		frappe.call({
+			method : "erpnext.setup.doctype.transaction_deletion_log.transaction_deletion_log.doctypes",
+			callback: function(r){
+				doctypes_to_be_ignored_array = r.message;
+				populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm);
+				frm.refresh_field('doctypes_to_be_ignored');
 			}
-		}
+		});
 
 		frm.get_field('doctypes_to_be_ignored').grid.cannot_add_rows = true;
 		frm.fields_dict["doctypes_to_be_ignored"].grid.set_column_disp("no_of_docs", false)
@@ -27,3 +22,14 @@ frappe.ui.form.on('Transaction Deletion Log', {
 		// col.style.display = "none"
 	}
 });
+
+function populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm) {
+	if (!(frm.doc.doctypes_to_be_ignored)){
+		var i;
+		for (i = 0; i < doctypes_to_be_ignored_array.length; i++) {     
+			frm.add_child('doctypes_to_be_ignored', {
+					doctype_name : doctypes_to_be_ignored_array[i]					
+				});
+		}
+	}
+}

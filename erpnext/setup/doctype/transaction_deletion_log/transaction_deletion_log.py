@@ -8,6 +8,10 @@ import frappe
 from frappe.model.document import Document
 
 class TransactionDeletionLog(Document):
+	def validate(self):
+		max_num_of_doctypes = len(doctypes())
+		print("*" * 100)
+
 	def on_submit(self):
 		doctypes = frappe.get_all('Doctype',
 			filters={
@@ -54,3 +58,12 @@ class TransactionDeletionLog(Document):
 			last = 0
 
 		frappe.db.sql("""update tabSeries set current = %s where name=%s""", (last, prefix))
+
+@frappe.whitelist()
+def doctypes():
+	doctypes_to_be_ignored_list = ["Account", "Cost Center", "Warehouse", "Budget",
+		"Party Account", "Employee", "Sales Taxes and Charges Template",
+		"Purchase Taxes and Charges Template", "POS Profile", "BOM",
+		"Company", "Bank Account", "Item Tax Template", "Mode Of Payment",
+		"Item Default", "Customer", "Supplier", "GST Account"]
+	return doctypes_to_be_ignored_list
