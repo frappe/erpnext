@@ -439,14 +439,14 @@ def make_einvoice(invoice):
 
 	seller_details.update(dict(legal_name=invoice.company))
 	buyer_details.update(dict(legal_name=invoice.customer_name or invoice.customer))
-	
+
 	shipping_details = payment_details = prev_doc_details = eway_bill_details = frappe._dict({})
 	if invoice.shipping_address_name and invoice.customer_address != invoice.shipping_address_name:
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
 			shipping_details = get_party_details(invoice.shipping_address_name, shipping_address=True)
-	
+
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
 
@@ -466,7 +466,7 @@ def make_einvoice(invoice):
 		period_details=period_details, prev_doc_details=prev_doc_details,
 		export_details=export_details, eway_bill_details=eway_bill_details
 	)
-	
+
 	try:
 		einvoice = safe_json_load(einvoice)
 		einvoice = santize_einvoice_fields(einvoice)
@@ -573,7 +573,7 @@ class GSPConnector():
 			gstin = self.get_seller_gstin()
 			credentials_for_gstin = [d for d in self.e_invoice_settings.credentials if d.gstin == gstin]
 			if credentials_for_gstin:
-				self.credentials = credentials_for_gstin[0]
+				credentials = credentials_for_gstin[0]
 			else:
 				frappe.throw(_('Cannot find e-invoicing credentials for selected Company GSTIN. Please check E-Invoice Settings'))
 		else:
