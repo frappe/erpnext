@@ -135,8 +135,7 @@ class MaintenanceSchedule(TransactionBase):
 				}
 
 				if date_diff < days_in_period[d.periodicity]:
-					throw(_("Row {0}: To set {1} periodicity, difference between from and to date \
-						must be greater than or equal to {2}")
+					throw(_("Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}")
 						.format(d.idx, d.periodicity, days_in_period[d.periodicity]))
 
 	def validate_maintenance_detail(self):
