@@ -331,20 +331,22 @@ def check_serial_no_validity_on_cancel(serial_no, sle):
 	sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse", "company", "status"], as_dict=1)
 	sr_link = frappe.utils.get_link_to_form("Serial No", serial_no)
 	doc_link = frappe.utils.get_link_to_form(sle.voucher_type, sle.voucher_no)
+	actual_qty = cint(sle.actual_qty)
+	is_stock_reco = sle.voucher_type == "Stock Reconciliation"
 	msg = None
 
-	if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
-		# if actual_qty < 0, receipt is being cancelled
+	if sr and (actual_qty < 0 or is_stock_reco) and sr.warehouse != sle.warehouse:
+		# receipt(inward) is being cancelled
 		msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}").format(
 			sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse))
-	elif sr and cint(sle.actual_qty) > 0:
-		# if actual_qty > 0, delivery is being cancelled, check for warehouse.
+	elif sr and actual_qty > 0 and not is_stock_reco:
+		# delivery is being cancelled, check for warehouse.
 		if sr.warehouse:
-			# if warehouse exists, serial no is active in another warehouse/company.
+			# serial no is active in another warehouse/company.
 			msg = _("Cannot cancel {0} {1} as Serial No {2} is active in warehouse {3}").format(
 				sle.voucher_type, doc_link, sr_link, frappe.bold(sr.warehouse))
 		elif sr.company != sle.company and sr.status == "Delivered":
-			# if company differs it could be inactive (allowed) or delivered from another company (block).
+			# serial no is inactive (allowed) or delivered from another company (block).
 			msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the company {3}").format(
 				sle.voucher_type, doc_link, sr_link, frappe.bold(sle.company))
 
