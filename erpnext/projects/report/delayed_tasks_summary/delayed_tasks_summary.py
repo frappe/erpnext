@@ -54,7 +54,7 @@ def get_chart_data(data):
 		if entry.get("delay") > 0:
 			delay = delay + 1
 		else:
-			on_track = on_track+ 1
+			on_track = on_track + 1
 	charts = {
 		"data": {
 			"labels": ["On Track", "Delayed"],
@@ -95,13 +95,13 @@ def get_columns():
 			"fieldname": "priority",
 			"fieldtype": "Data",
 			"label": "Priority",
-			"width": 100
+			"width": 80
 		},
 		{
 			"fieldname": "progress",
 			"fieldtype": "Data",
 			"label": "Progress (%)",
-			"width": 100
+			"width": 120
 		},
 		{
 			"fieldname": "exp_start_date",
@@ -125,7 +125,7 @@ def get_columns():
 			"fieldname": "delay",
 			"fieldtype": "Data",
 			"label": "Delay (In Days)",
-			"width": 70
+			"width": 120
 		}
 	]
 	return columns
