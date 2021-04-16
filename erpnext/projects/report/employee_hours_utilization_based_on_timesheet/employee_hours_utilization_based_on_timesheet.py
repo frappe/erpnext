@@ -41,7 +41,14 @@ class EmployeeHoursReport:
 				'options': 'Employee',
 				'fieldname': 'employee',
 				'fieldtype': 'Link',
-				'width': 200
+				'width': 230
+			},
+			{
+				'label': _('Department'),
+				'options': 'Department',
+				'fieldname': 'department',
+				'fieldtype': 'Link', 
+				'width': 170
 			},
 			{
 				'label': _('Total Hours'),
@@ -68,7 +75,7 @@ class EmployeeHoursReport:
 				'width': 150
 			},
 			{
-				'label': _('% Utilization'),
+				'label': _('% Utilization (Billed Hours + Non-Billed Hours / Total Hours)'),
 				'fieldname': 'per_util',
 				'fieldtype': 'Percentage',
 				'width': 200
@@ -78,6 +85,11 @@ class EmployeeHoursReport:
 	def generate_data(self):
 		self.generate_filtered_time_logs()
 		self.generate_stats_by_employee()
+		self.set_employee_department_and_name()
+
+		if self.filters.department:
+			self.filter_stats_by_department()
+
 		self.calculate_utilizations()
 
 		self.data = []
@@ -91,26 +103,36 @@ class EmployeeHoursReport:
 		#  Sort by descending order of percentage utilization
 		self.data.sort(key=lambda x: x['per_util'], reverse=True)
 
+	def filter_stats_by_department(self):
+		filtered_data = frappe._dict()
+		for emp, data in self.stats_by_employee.items():
+			if data['department'] == self.filters.department:
+				filtered_data[emp] = data
+		
+		# Update stats
+		self.stats_by_employee = filtered_data
+
 	def generate_filtered_time_logs(self):
 		additional_filters = ''
 
-		if self.filters.employee:
-			additional_filters += f"AND tt.employee = '{self.filters.employee}'"
-		
-		if self.filters.project:
-			additional_filters += f"AND ttd.project = '{self.filters.project}'"
+		filter_fields = ['employee', 'project', 'company']
 
-		if self.filters.company:
-			additional_filters += f"AND tt.company = '{self.filters.company}'"
+		for field in filter_fields:
+			if self.filters.get(field):
+				if field == 'project':
+					additional_filters += f"AND ttd.{field} = '{self.filters.get(field)}'"
+				else:
+					additional_filters += f"AND tt.{field} = '{self.filters.get(field)}'"
 
 		self.filtered_time_logs = frappe.db.sql('''
 			SELECT tt.employee AS employee, ttd.hours AS hours, ttd.billable AS billable, ttd.project AS project
 			FROM `tabTimesheet Detail` AS ttd 
 			JOIN `tabTimesheet` AS tt 
 				ON ttd.parent = tt.name
-			WHERE tt.start_date BETWEEN '{0}' AND '{1}'
+			WHERE tt.employee IS NOT NULL
+			AND tt.start_date BETWEEN '{0}' AND '{1}'
 			AND tt.end_date BETWEEN '{0}' AND '{1}'
-			{2};  
+			{2}
 		'''.format(self.filters.from_date, self.filters.to_date, additional_filters))
 
 	def generate_stats_by_employee(self):
@@ -128,6 +150,18 @@ class EmployeeHoursReport:
 			else:
 				self.stats_by_employee[emp]['non_billed_hours'] += flt(hours, 2)
 
+	def set_employee_department_and_name(self):
+		for emp in self.stats_by_employee:
+			emp_name = frappe.db.get_value(
+				'Employee', emp, 'employee_name'
+			)
+			emp_dept = frappe.db.get_value(
+				'Employee', emp, 'department'
+			)
+
+			self.stats_by_employee[emp]['department'] = emp_dept
+			self.stats_by_employee[emp]['employee_name'] = emp_name
+		
 	def calculate_utilizations(self):
 		# (9.0) Will be fetched from HR settings
 		TOTAL_HOURS = flt(9.0 * self.day_span, 2)
@@ -195,10 +229,7 @@ class EmployeeHoursReport:
 
 
 		for row in self.data:
-			emp_name = frappe.db.get_value(
-				'Employee', row['employee'], 'employee_name'
-			)
-			labels.append(emp_name)
+			labels.append(row.get('employee_name'))
 			billed_hours.append(row.get('billed_hours'))
 			non_billed_hours.append(row.get('non_billed_hours'))
 			untracked_hours.append(row.get('untracked_hours'))
