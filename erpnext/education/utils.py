@@ -237,7 +237,7 @@ def get_quiz(quiz_name, course):
 			'questions': questions,
 			'activity': None,
 			'duration':duration
-			}
+		}
 
 	student = get_current_student()
 	course_enrollment = get_enrollment("course", course, student.name)
@@ -246,7 +246,7 @@ def get_quiz(quiz_name, course):
 		'questions': questions, 
 		'activity': {'is_complete': status, 'score': score, 'result': result, 'time_taken': time_taken},
 		'duration': quiz.duration
-		}
+	}
 
 def get_topic_progress(topic, course_name, program):
 	"""
