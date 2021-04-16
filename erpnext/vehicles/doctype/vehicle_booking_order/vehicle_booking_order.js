@@ -23,7 +23,9 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		this.set_dynamic_link();
 		this.set_finance_type_mandatory();
 		this.setup_route_options();
+		this.setup_notification();
 		this.add_create_buttons();
+		this.setup_dashboard();
 	},
 
 	onload: function () {
@@ -293,6 +295,99 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				this.frm.custom_buttons[__('Deliver Invoice')] && this.frm.custom_buttons[__('Deliver Invoice')].addClass('btn-primary');
 			}
 		}
+	},
+
+	setup_dashboard: function () {
+		var me = this;
+		var company_currency = erpnext.get_currency(me.frm.doc.company);
+
+		var customer_outstanding_color = me.frm.doc.customer_outstanding ? "orange" : "green";
+		me.frm.dashboard.add_indicator(__('Customer Outstanding: {0}',
+			[format_currency(me.frm.doc.customer_outstanding, company_currency)]), customer_outstanding_color);
+
+		var supplier_outstanding_color;
+		if (!me.frm.doc.supplier_outstanding) {
+			supplier_outstanding_color = "green";
+		} else if (me.frm.doc.supplier_outstanding == me.frm.doc.customer_outstanding) {
+			supplier_outstanding_color = "blue";
+		} else {
+			supplier_outstanding_color = "orange";
+		}
+		me.frm.dashboard.add_indicator(__('Supplier Outstanding: {0}',
+			[format_currency(me.frm.doc.supplier_outstanding, company_currency)]), supplier_outstanding_color);
+
+		var delivery_status_color;
+		if (me.frm.doc.delivery_status == "To Receive") {
+			delivery_status_color = "blue";
+		} else if (me.frm.doc.delivery_status == "To Deliver") {
+			delivery_status_color = "orange";
+		} else if (me.frm.doc.delivery_status == "Delivered") {
+			delivery_status_color = "green";
+		}
+		me.frm.dashboard.add_indicator(__('Delivery Status: {0}', [me.frm.doc.delivery_status]),
+			delivery_status_color);
+
+		var invoice_status_color;
+		if (me.frm.doc.invoice_status == "To Receive") {
+			invoice_status_color = "blue";
+		} else if (me.frm.doc.invoice_status == "To Deliver") {
+			invoice_status_color = "orange";
+		} else if (me.frm.doc.invoice_status == "Delivered") {
+			invoice_status_color = "green";
+		}
+		me.frm.dashboard.add_indicator(__('Invoice Status: {0}', [me.frm.doc.invoice_status]),
+			invoice_status_color);
+
+		var notification_count = JSON.parse(me.frm.doc.notification_count || '{}');
+
+		var booking_confirmation_count = notification_count['Booking Confirmation'] || {};
+		var booking_confirmation_color = booking_confirmation_count.sms ? "green" : "yellow";
+		var booking_confirmation_status = booking_confirmation_count.sms ? __("{0} SMS", [cint(booking_confirmation_count.sms)])
+			: __("Not Sent");
+		me.frm.dashboard.add_indicator(__('Booking Confirmation: {0}', [booking_confirmation_status]),
+			booking_confirmation_color);
+
+		var balance_payment_count = notification_count['Balance Payment Request'] || {};
+		var balance_payment_color = balance_payment_count.sms ? "green" : "yellow";
+		var balance_payment_status = balance_payment_count.sms ? __("{0} SMS", [cint(balance_payment_count.sms)])
+			: __("Not Sent");
+		me.frm.dashboard.add_indicator(__('Balance Payment Request: {0}', [balance_payment_status]),
+			balance_payment_color);
+
+		var ready_for_delivery_count = notification_count['Ready For Delivery'] || {};
+		var ready_for_delivery_color = ready_for_delivery_count.sms ? "green" : this.frm.doc.delivery_status == "To Deliver" ? "yellow" : "blue";
+		var ready_for_delivery_status = ready_for_delivery_count.sms ? __("{0} SMS", [cint(ready_for_delivery_count.sms)])
+			: __("Not Sent");
+		me.frm.dashboard.add_indicator(__('Ready For Delivery: {0}', [ready_for_delivery_status]),
+			ready_for_delivery_color);
+
+		var congratulations_count = notification_count['Congratulations'] || {};
+		var congratulations_color = congratulations_count.sms ? "green" : this.frm.doc.delivery_status == "Delivered" ? "yellow" : "blue";
+		var congratulations_status = congratulations_count.sms ? __("{0} SMS", [cint(congratulations_count.sms)])
+			: __("Not Sent");
+		me.frm.dashboard.add_indicator(__('Congratutions: {0}', [congratulations_status]),
+			congratulations_color);
+	},
+
+	setup_notification: function() {
+		var me = this;
+		if(this.frm.doc.docstatus === 1) {
+			this.frm.add_custom_button(__("Booking Confirmation"), () => this.send_sms('Booking Confirmation'),
+				__("Notify"));
+			this.frm.add_custom_button(__("Balance Payment Request"), () => this.send_sms('Balance Payment Request'),
+				__("Notify"));
+			this.frm.add_custom_button(__("Ready For Delivery"), () => this.send_sms('Ready For Delivery'),
+				__("Notify"));
+			this.frm.add_custom_button(__("Congratulations"), () => this.send_sms('Congratulations'),
+				__("Notify"));
+		}
+	},
+
+	send_sms: function(type) {
+		var sms_man = new erpnext.SMSManager(this.frm.doc, {
+			method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.send_sms",
+			type: type
+		});
 	},
 
 	company: function () {

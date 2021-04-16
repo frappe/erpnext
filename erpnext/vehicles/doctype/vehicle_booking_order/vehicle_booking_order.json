@@ -114,6 +114,7 @@
   "invoice_delivered_date",
   "bill_no",
   "bill_date",
+  "notification_count",
   "terms_section_break",
   "tc_name",
   "terms",
@@ -955,12 +956,20 @@
    "label": "Transfer Customer Name",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "notification_count",
+   "fieldtype": "Code",
+   "hidden": 1,
+   "label": "Notification Count",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-15 02:10:50.879062",
+ "modified": "2021-04-16 03:20:24.900233",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

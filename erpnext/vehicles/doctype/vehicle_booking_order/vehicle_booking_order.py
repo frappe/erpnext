@@ -1049,6 +1049,30 @@ def get_booking_payments(vehicle_booking_order, include_draft=False, payment_typ
 	return payment_entries
 
 
+@frappe.whitelist()
+def send_sms(receiver_list, msg, success_msg=True, type=None,
+		reference_doctype=None, reference_name=None, party_doctype=None, party_name=None):
+	from frappe.core.doctype.sms_settings.sms_settings import send_sms
+
+	if not type:
+		frappe.throw(_("SMS Type is mandatory"))
+
+	if reference_doctype != 'Vehicle Booking Order':
+		frappe.throw(_("Reference DocType must be Vehicle Booking Order"))
+
+	notification_count_json = frappe.db.get_value("Vehicle Booking Order", reference_name, "notification_count")
+	notification_count = json.loads(notification_count_json or "{}")
+
+	notification_count.setdefault(type, {}).setdefault('sms', 0)
+	notification_count[type]['sms'] += 1
+
+	notification_count_json = json.dumps(notification_count, separators=(',', ':'))
+	frappe.db.set_value("Vehicle Booking Order", reference_name, "notification_count", notification_count_json,
+		notify=True)
+
+	send_sms(receiver_list, msg, success_msg, type, reference_doctype, reference_name, party_doctype, party_name)
+
+
 def update_vehicle_booked(vehicle, is_booked):
 	is_booked = cint(is_booked)
 	frappe.db.set_value("Vehicle", vehicle, "is_booked", is_booked, notify=True)
