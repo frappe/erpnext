@@ -379,7 +379,21 @@ class StockEntry(StockController):
 				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")
 					.format(d.idx, frappe.bold(d.operation), frappe.bold(total_completed_qty), work_order_link, job_card_link), OperationsNotCompleteError)
-
+	@frappe.whitelist()
+	def get_se_data(self):
+		all_se = frappe.db.get_all("Stock Entry", {'docstatus':1,'work_order':self.work_order, 'stock_entry_type':'Material Transfer for Manufacture'}, 'name')
+		
+		total_weight = 0
+		for se in self.items:
+			doc = frappe.get_doc("Stock Entry", se.get('name'))
+			for item in doc.get('items'):
+				item_weight_per_unit = frappe.db.get_value("Item", {'item_code':item.get('item_code')}, 'weight_per_unit')
+				item_weight = item_weight_per_unit * item.get('transfer_qty')
+				total_weight += item_weight
+		query = """update `tabWork Order` set material_transferred_for_manufacturing = {0} where name = '{1}';""".format(total_weight,self.work_order)
+		frappe.db.sql(query)
+		frappe.db.commit()
+		return total_weight
 	def check_duplicate_entry_for_work_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
 			"work_order": self.work_order,
@@ -1141,7 +1155,7 @@ class StockEntry(StockController):
 						"cost_center": item_account_details.get("buying_cost_center"),
 					}
 				})
-
+	
 	def get_transfered_raw_materials(self):
 		transferred_materials = frappe.db.sql("""
 			select

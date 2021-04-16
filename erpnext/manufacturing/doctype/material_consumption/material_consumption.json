@@ -1,0 +1,164 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2021-04-12 14:37:38.569709",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "work_order",
+  "job_card",
+  "s_warehouse",
+  "weight",
+  "column_break_6",
+  "company",
+  "type",
+  "cost_of_consumption",
+  "material_to_consume_section",
+  "materials_to_consume",
+  "pick_list_items_section",
+  "pick_list_item",
+  "material_consumption_detail_section",
+  "material_consumption_detail",
+  "assign_material",
+  "section_break_19",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "label": "Work Order",
+   "options": "Work Order"
+  },
+  {
+   "fieldname": "job_card",
+   "fieldtype": "Link",
+   "label": "Job Card",
+   "options": "Job Card",
+   "read_only": 1
+  },
+  {
+   "fieldname": "s_warehouse",
+   "fieldtype": "Link",
+   "label": "Source Warehouse",
+   "options": "Warehouse",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Data",
+   "label": "Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "label": "Company",
+   "options": "Company"
+  },
+  {
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "\nManual\nPick List"
+  },
+  {
+   "fieldname": "cost_of_consumption",
+   "fieldtype": "Currency",
+   "label": "Cost Of Consumption",
+   "options": "Company:company:default_crrency",
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.type == 'Manual'",
+   "fieldname": "material_to_consume_section",
+   "fieldtype": "Section Break",
+   "label": "Material To Consume"
+  },
+  {
+   "fieldname": "pick_list_item",
+   "fieldtype": "Table",
+   "label": "Pick List Item",
+   "options": "Pick List Item"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Material Consumption",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "depends_on": "eval:doc.type == 'Pick List'",
+   "fieldname": "pick_list_items_section",
+   "fieldtype": "Section Break",
+   "label": "Pick List Items"
+  },
+  {
+   "depends_on": "eval:doc.type == 'Manual'",
+   "fieldname": "material_consumption_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Material Consumption Detail "
+  },
+  {
+   "fieldname": "material_consumption_detail",
+   "fieldtype": "Table",
+   "label": "Material Consumption Detail",
+   "options": "Material Consumption Detail"
+  },
+  {
+   "fieldname": "assign_material",
+   "fieldtype": "Button",
+   "label": "Assign Material"
+  },
+  {
+   "fieldname": "section_break_19",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "materials_to_consume",
+   "fieldtype": "Table",
+   "label": "Material To Consume",
+   "options": "Materials to Consume Items"
+  },
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Sereis",
+   "options": "MC-.YYYY.-.####"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-04-16 13:24:48.799474",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Material Consumption",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

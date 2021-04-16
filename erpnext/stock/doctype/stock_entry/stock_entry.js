@@ -844,7 +844,15 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 		this.frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
 
-	refresh: function() {
+	refresh: function(frm) {
+		console.log('obj: ',frm)
+		if(frm.work_order){
+			console.log("frm.doc.work_order: ")
+			console.log(frm.work_order)
+			if(frm.doc.stock_entry_type === "Material Consumption for Manufacture") {
+				set_qty(frm)
+			}
+		}
 		var me = this;
 		erpnext.toggle_naming_series();
 		this.toggle_related_fields(this.frm.doc);
@@ -1063,5 +1071,19 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 	});
 
 }
-
+ 
 $.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
+
+function set_qty(frm){
+	frappe.call({
+		method:'get_se_data',
+		doc: frm,
+		callback(resp){
+			console.log("weight: ", resp.message)
+			if(resp.message){
+				frm.fg_completed_qty = resp.message
+				refresh_field('fg_completed_qty')
+			}
+		}
+	})
+}

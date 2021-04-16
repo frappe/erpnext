@@ -33,15 +33,66 @@ class PickList(Document):
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
 
+	# def get_available_item_locations_for_batched_item_in_consumer_material(self,item_code, from_warehouses, required_qty, company):
+	# 	print('self is',self)
+	# if from_warehouses:
+	# 	#warehouse_condition = "and warehouse = '{0}'".format(from_warehouses)
+	# 	warehouse_condition = 'and warehouse in %(warehouses)s'
+	# else:
+	# 	warehouse_condition = "and warehouse = '{0}'".format(from_warehouses) if from_warehouses else ''
+	# 	#warehouse_condition = 'and warehouse in %(warehouses)s'
+	# 	#warehouse_condition = 'and warehouse in %(warehouses)s' if from_warehouses else ''
+	# print("## "*300)
+	# print(from_warehouses)
+	# print(warehouse_condition)
+	# # print("***************************cond: ")
+	# # if 1 == 1:
+	# # 	warehouse_condition = 'and warehouse = "{0}"'.format(from_warehouses)
+	# query = """
+	# 	SELECT
+	# 		sle.`warehouse`,
+	# 		sle.`batch_no`,
+	# 		SUM(sle.`actual_qty`) AS `qty`
+	# 	FROM
+	# 		`tabStock Ledger Entry` sle, `tabBatch` batch
+	# 	WHERE
+	# 		sle.batch_no = batch.name
+	# 		and sle.`item_code`=%(item_code)s
+	# 		and sle.`company` = %(company)s
+	# 		and batch.disabled = 0
+	# 		and IFNULL(batch.`expiry_date`, '2200-01-01') > %(today)s
+	# 		{warehouse_condition}
+	# 	GROUP BY
+	# 		`warehouse`,
+	# 		`batch_no`,
+	# 		`item_code`
+	# 	HAVING `qty` > 0
+	# 	ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
+	# """.format(warehouse_condition=warehouse_condition)
+	# print(query)
+	# batch_locations = frappe.db.sql(query, { #nosec
+	# 	'item_code': item_code,
+	# 	'company': company,
+	# 	'today': today(),
+	# 	'warehouses': from_warehouses
+	# }, as_dict=1)
+
+	# return batch_locations
+
+
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
 		from_warehouses = None
-		if self.parent_warehouse:
+		if self.parent_warehouse and self.is_material_consumption == 0:
 			from_warehouses = frappe.db.get_descendants('Warehouse', self.parent_warehouse)
-
+		if self.is_material_consumption == 1:
+			wip_warehouse = frappe.db.get_value("Work Order", {"name": self.consume_work_order},['wip_warehouse'])
+			from_warehouses = wip_warehouse
+			print("*******"*20)
+			print(wip_warehouse)
 		# Create replica before resetting, to handle empty table on update after submit.
 		locations_replica  = self.get('locations')
 
@@ -49,9 +100,10 @@ class PickList(Document):
 		self.delete_key('locations')
 		for item_doc in items:
 			item_code = item_doc.item_code
-
+			print("#### "*300)
+			print(from_warehouses)
 			self.item_location_map.setdefault(item_code,
-				get_available_item_locations(item_code, from_warehouses, self.item_count_map.get(item_code), self.company))
+				get_available_item_locations(self,item_code, from_warehouses, self.item_count_map.get(item_code), self.company))
 
 			locations = get_items_with_location_and_quantity(item_doc, self.item_location_map, self.docstatus)
 
@@ -107,6 +159,34 @@ class PickList(Document):
 
 		return item_map.values()
 
+	@frappe.whitelist()
+	def consumption_list(self):
+		query = """SELECT * FROM `tabWork Order Item` where parent = '{0}';""".format(self.consume_work_order)
+		all_items = frappe.db.sql(query, as_dict = True)
+		data_list = []
+		for item in all_items:
+			qty = item.get('transferred_qty') - item.get('consumed_qty')
+			data = {
+				"item_code":item.get("item_code"),
+				"transferred_qty": item.get('transferred_qty'),
+				"consumed_qty": item.get('consumed_qty'),
+				"qty": qty,
+				"stock_qty": qty
+			}
+			if qty > 0:
+				data_list.append(data)
+		if(len(data_list) == 0):
+			frappe.msgprint("No item Found")
+		for data in data_list:
+			self.append("locations", {
+				"item_code":data.get("item_code"),
+				"transferred_qty": data.get('transferred_qty'),
+				"consumed_qty": data.get('consumed_qty'),
+				"qty": data.get('qty'),
+				"stock_qty": data.get('stock_qty')
+			})
+		return True
+
 
 def validate_item_locations(pick_list):
 	if not pick_list.locations:
@@ -159,17 +239,17 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 	item_location_map[item_doc.item_code] = available_locations
 	return locations
 
-def get_available_item_locations(item_code, from_warehouses, required_qty, company, ignore_validation=False):
+def get_available_item_locations(self,item_code, from_warehouses, required_qty, company, ignore_validation=False):
 	locations = []
 	has_serial_no  = frappe.get_cached_value('Item', item_code, 'has_serial_no')
 	has_batch_no = frappe.get_cached_value('Item', item_code, 'has_batch_no')
-
+	
 	if has_batch_no and has_serial_no:
 		locations = get_available_item_locations_for_serial_and_batched_item(item_code, from_warehouses, required_qty, company)
 	elif has_serial_no:
 		locations = get_available_item_locations_for_serialized_item(item_code, from_warehouses, required_qty, company)
 	elif has_batch_no:
-		locations = get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company)
+		locations = get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company, self)
 	else:
 		locations = get_available_item_locations_for_other_item(item_code, from_warehouses, required_qty, company)
 
@@ -216,9 +296,23 @@ def get_available_item_locations_for_serialized_item(item_code, from_warehouses,
 
 	return locations
 
-def get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company):
-	warehouse_condition = 'and warehouse in %(warehouses)s' if from_warehouses else ''
-	batch_locations = frappe.db.sql("""
+def get_available_item_locations_for_batched_item(item_code, from_warehouses, required_qty, company, self=None):
+	if from_warehouses and self.is_material_consumption == 0:
+		warehouse_condition = 'and warehouse in %(warehouses)s'
+	if from_warehouses and self.is_material_consumption == 1:
+		warehouse_condition = "and warehouse = '{0}'".format(from_warehouses)
+	if isinstance(from_warehouses,list) and self.is_material_consumption == 0:
+		warehouse_condition = 'and warehouse in %(warehouses)s'
+	else:
+		warehouse_condition = "and warehouse = '{0}'".format(from_warehouses) if from_warehouses else ''
+	print("## "*300)
+	print(from_warehouses)
+	print(warehouse_condition)
+	print("self is: ", self.is_material_consumption)
+	# print("***************************cond: ")
+	# if 1 == 1:
+	# 	warehouse_condition = 'and warehouse = "{0}"'.format(from_warehouses)
+	query = """
 		SELECT
 			sle.`warehouse`,
 			sle.`batch_no`,
@@ -238,7 +332,9 @@ def get_available_item_locations_for_batched_item(item_code, from_warehouses, re
 			`item_code`
 		HAVING `qty` > 0
 		ORDER BY IFNULL(batch.`expiry_date`, '2200-01-01'), batch.`creation`
-	""".format(warehouse_condition=warehouse_condition), { #nosec
+	""".format(warehouse_condition=warehouse_condition)
+	print(query)
+	batch_locations = frappe.db.sql(query, { #nosec
 		'item_code': item_code,
 		'company': company,
 		'today': today(),
@@ -426,7 +522,6 @@ def get_item_details(item_code, uom=None):
 		details.update(get_conversion_factor(item_code, uom))
 
 	return details
-
 
 def update_delivery_note_item(source, target, delivery_note):
 	cost_center = frappe.db.get_value('Project', delivery_note.project, 'cost_center')
