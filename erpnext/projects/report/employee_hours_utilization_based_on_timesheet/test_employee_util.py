@@ -77,25 +77,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
         report = execute(filters)
 
-        expected_data = [
-            {
-                'employee': self.test_emp2, 
-                'billed_hours': 0.0, 
-                'non_billed_hours': 10.0, 
-                'total_hours': 18.0, 
-                'untracked_hours': 8.0, 
-                'per_util': 55.56
-            }, 
-            {
-                'employee': self.test_emp1, 
-                'billed_hours': 5.0, 
-                'non_billed_hours': 0.0, 
-                'total_hours': 18.0, 
-                'untracked_hours': 13.0, 
-                'per_util': 27.78
-            }
-        ]
-
+        expected_data = self.get_expected_data_for_test_employees()
         self.assertEqual(report[1], expected_data)
     
     def test_utilization_report_for_single_employee(self):
@@ -108,9 +90,12 @@ class TestEmployeeUtilization(unittest.TestCase):
 
         report = execute(filters)
 
+        emp1_data = frappe.get_doc('Employee', self.test_emp1)
         expected_data = [
             {
                 'employee': self.test_emp1, 
+                'employee_name': emp1_data.employee_name,
+                'department': emp1_data.department,
                 'billed_hours': 5.0, 
                 'non_billed_hours': 0.0, 
                 'total_hours': 18.0, 
@@ -130,10 +115,13 @@ class TestEmployeeUtilization(unittest.TestCase):
         }
 
         report = execute(filters)
-
+        
+        emp2_data = frappe.get_doc('Employee', self.test_emp2)
         expected_data = [
             {
-                'employee': self.test_emp2, 
+                'employee': self.test_emp2,
+                'employee_name': emp2_data.employee_name,
+                'department': emp2_data.department,
                 'billed_hours': 0.0, 
                 'non_billed_hours': 10.0, 
                 'total_hours': 18.0, 
@@ -142,6 +130,20 @@ class TestEmployeeUtilization(unittest.TestCase):
             }
         ]
 
+        self.assertEqual(report[1], expected_data)
+
+    def test_utilization_report_for_department(self):
+        emp1_data = frappe.get_doc('Employee', self.test_emp1)
+        filters = {
+            "company": "_Test Company",
+            "from_date": "2021-04-01",
+            "to_date": "2021-04-03",
+            "department": emp1_data.department
+        }
+
+        report = execute(filters)
+
+        expected_data = self.get_expected_data_for_test_employees()
         self.assertEqual(report[1], expected_data)
 
     def test_report_summary_data(self):
@@ -161,3 +163,30 @@ class TestEmployeeUtilization(unittest.TestCase):
             self.assertEqual(
                 summary[i]['value'], expected_summary_values[i]
             )
+
+    def get_expected_data_for_test_employees(self):
+        emp1_data = frappe.get_doc('Employee', self.test_emp1)
+        emp2_data = frappe.get_doc('Employee', self.test_emp2)
+        
+        return [
+            {
+                'employee': self.test_emp2, 
+                'employee_name': emp2_data.employee_name,
+                'department': emp2_data.department, 
+                'billed_hours': 0.0, 
+                'non_billed_hours': 10.0, 
+                'total_hours': 18.0, 
+                'untracked_hours': 8.0, 
+                'per_util': 55.56
+            }, 
+            {
+                'employee': self.test_emp1, 
+                'employee_name': emp1_data.employee_name,
+                'department': emp1_data.department, 
+                'billed_hours': 5.0, 
+                'non_billed_hours': 0.0, 
+                'total_hours': 18.0, 
+                'untracked_hours': 13.0, 
+                'per_util': 27.78
+            }
+        ]

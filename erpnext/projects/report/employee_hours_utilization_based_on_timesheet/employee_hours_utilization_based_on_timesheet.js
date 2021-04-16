@@ -33,6 +33,12 @@ frappe.query_reports["Employee Hours Utilization Based On Timesheet"] = {
 			options: "Employee"
 		},
 		{
+			fieldname: "department",
+			label: __("Department"),
+			fieldtype: "Link",
+			options: "Department"
+		},
+		{
 			fieldname: "project",
 			label: __("Project"),
 			fieldtype: "Link",
