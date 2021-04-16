@@ -372,13 +372,37 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	setup_notification: function() {
 		var me = this;
 		if(this.frm.doc.docstatus === 1) {
-			this.frm.add_custom_button(__("Booking Confirmation"), () => this.send_sms('Booking Confirmation'),
-				__("Notify"));
-			this.frm.add_custom_button(__("Balance Payment Request"), () => this.send_sms('Balance Payment Request'),
-				__("Notify"));
-			this.frm.add_custom_button(__("Ready For Delivery"), () => this.send_sms('Ready For Delivery'),
-				__("Notify"));
-			this.frm.add_custom_button(__("Congratulations"), () => this.send_sms('Congratulations'),
+			var notification_count = JSON.parse(this.frm.doc.notification_count || '{}');
+
+			if (this.frm.doc.delivery_status == "To Receive") {
+				var booking_confirmation_count = notification_count['Booking Confirmation'] || {};
+				let label = __("Booking Confirmation{0}", [booking_confirmation_count.sms ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Booking Confirmation'),
+					__("Notify"));
+			}
+
+			if (this.frm.doc.customer_outstanding) {
+				var balance_payment_count = notification_count['Balance Payment Request'] || {};
+				let label = __("Balance Payment Request{0}", [balance_payment_count.sms ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Balance Payment Request'),
+					__("Notify"));
+			}
+
+			if (this.frm.doc.delivery_status == "To Deliver") {
+				var ready_for_delivery_count = notification_count['Ready For Delivery'] || {};
+				let label = __("Ready For Delivery{0}", [ready_for_delivery_count.sms ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Ready For Delivery'),
+					__("Notify"));
+			}
+
+			if (this.frm.doc.delivery_status == "Delivered") {
+				var congratulations_count = notification_count['Congratulations'] || {};
+				let label = __("Congratulations{0}", [congratulations_count.sms ? " (Resend)" : ""]);
+				this.frm.add_custom_button(label, () => this.send_sms('Congratulations'),
+					__("Notify"));
+			}
+
+			this.frm.add_custom_button(__("Custom Message"), () => this.send_sms('Custom Message'),
 				__("Notify"));
 		}
 	},

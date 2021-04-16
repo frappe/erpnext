@@ -1060,8 +1060,22 @@ def send_sms(receiver_list, msg, success_msg=True, type=None,
 	if reference_doctype != 'Vehicle Booking Order':
 		frappe.throw(_("Reference DocType must be Vehicle Booking Order"))
 
-	notification_count_json = frappe.db.get_value("Vehicle Booking Order", reference_name, "notification_count")
-	notification_count = json.loads(notification_count_json or "{}")
+	vbo = frappe.db.get_value("Vehicle Booking Order", reference_name,
+		["delivery_status", "customer_outstanding", "notification_count"], as_dict=1)
+
+	if not vbo:
+		frappe.throw(_("Vehicle Booking Order {0} does not exist").format(reference_name))
+
+	if type == "Booking Confirmation" and vbo.delivery_status != "To Receive":
+		frappe.throw(_("Cannot send Booking Confirmation SMS after receiving Vehicle"))
+	if type == "Balance Payment Request" and not vbo.customer_outstanding:
+		frappe.throw(_("Cannot send Balance Payment Request SMS because Customer Outstanding amount is zero"))
+	if type == "Ready For Delivery" and not vbo.delivery_status != 'To Deliver':
+		frappe.throw(_("Cannot send Ready For Delivery SMS because delivery status is not 'To Deliver'"))
+	if type == "Congratulations" and not vbo.delivery_status != 'Delivered':
+		frappe.throw(_("Cannot send Ready Congratulations SMS because vehicle has not been delivered yet"))
+
+	notification_count = json.loads(vbo.notification_count or "{}")
 
 	notification_count.setdefault(type, {}).setdefault('sms', 0)
 	notification_count[type]['sms'] += 1
