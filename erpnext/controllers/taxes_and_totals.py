@@ -113,10 +113,12 @@ class calculate_taxes_and_totals(object):
 					item.rate_with_margin, item.base_rate_with_margin = self.calculate_margin(item)
 					if flt(item.rate_with_margin) > 0:
 						item.rate = flt(item.rate_with_margin * (1.0 - (item.discount_percentage / 100.0)), item.precision("rate"))
-						if not item.discount_amount:
+
+						if item.discount_amount and not item.discount_percentage:
+							item.rate = item.rate_with_margin - item.discount_amount
+						else:
 							item.discount_amount = item.rate_with_margin - item.rate
-						elif not item.discount_percentage:
-							item.rate -= item.discount_amount
+
 					elif flt(item.price_list_rate) > 0:
 						item.discount_amount = item.price_list_rate - item.rate
 				elif flt(item.price_list_rate) > 0 and not item.discount_amount:
@@ -147,7 +149,9 @@ class calculate_taxes_and_totals(object):
 				validate_taxes_and_charges(tax)
 				validate_inclusive_tax(tax, self.doc)
 
-			tax.item_wise_tax_detail = {}
+			if not self.doc.get('is_consolidated'):
+				tax.item_wise_tax_detail = {}
+
 			tax_fields = ["total", "tax_amount_after_discount_amount",
 				"tax_amount_for_current_item", "grand_total_for_current_item",
 				"tax_fraction_for_current_item", "grand_total_fraction_for_current_item"]
@@ -287,10 +291,13 @@ class calculate_taxes_and_totals(object):
 				# set precision in the last item iteration
 				if n == len(self.doc.get("items")) - 1:
 					self.round_off_totals(tax)
+					self._set_in_company_currency(tax,
+						["tax_amount", "tax_amount_after_discount_amount"])
+
+					self.round_off_base_values(tax)
 					self.set_cumulative_total(i, tax)
 
-					self._set_in_company_currency(tax,
-						["total", "tax_amount", "tax_amount_after_discount_amount"])
+					self._set_in_company_currency(tax, ["total"])
 
 					# adjust Discount Amount loss in last tax iteration
 					if i == (len(self.doc.get("taxes")) - 1) and self.discount_amount_applied \
@@ -337,16 +344,9 @@ class calculate_taxes_and_totals(object):
 		elif tax.charge_type == "On Item Quantity":
 			current_tax_amount = tax_rate * item.qty
 
-		current_tax_amount = self.get_final_current_tax_amount(tax, current_tax_amount)
-		self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
+		if not self.doc.get("is_consolidated"):
+			self.set_item_wise_tax(item, tax, tax_rate, current_tax_amount)
 
-		return current_tax_amount
-
-	def get_final_current_tax_amount(self, tax, current_tax_amount):
-		# Some countries need individual tax components to be rounded
-		# Handeled via regional doctypess
-		if tax.account_head in frappe.flags.round_off_applicable_accounts:
-			current_tax_amount = round(current_tax_amount, 0)
 		return current_tax_amount
 
 	def set_item_wise_tax(self, item, tax, tax_rate, current_tax_amount):
@@ -359,9 +359,19 @@ class calculate_taxes_and_totals(object):
 		tax.item_wise_tax_detail[key] = [tax_rate,flt(item_wise_tax_amount)]
 
 	def round_off_totals(self, tax):
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			tax.tax_amount = round(tax.tax_amount, 0)
+			tax.tax_amount_after_discount_amount = round(tax.tax_amount_after_discount_amount, 0)
+
 		tax.tax_amount = flt(tax.tax_amount, tax.precision("tax_amount"))
 		tax.tax_amount_after_discount_amount = flt(tax.tax_amount_after_discount_amount,
 			tax.precision("tax_amount"))
+
+	def round_off_base_values(self, tax):
+		# Round off to nearest integer based on regional settings
+		if tax.account_head in frappe.flags.round_off_applicable_accounts:
+			tax.base_tax_amount = round(tax.base_tax_amount, 0)
+			tax.base_tax_amount_after_discount_amount = round(tax.base_tax_amount_after_discount_amount, 0)
 
 	def manipulate_grand_total_for_inclusive_tax(self):
 		# if fully inclusive taxes and diff
@@ -440,8 +450,9 @@ class calculate_taxes_and_totals(object):
 			self._set_in_company_currency(self.doc, ["rounding_adjustment", "rounded_total"])
 
 	def _cleanup(self):
-		for tax in self.doc.get("taxes"):
-			tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
+		if not self.doc.get('is_consolidated'):
+			for tax in self.doc.get("taxes"):
+				tax.item_wise_tax_detail = json.dumps(tax.item_wise_tax_detail, separators=(',', ':'))
 
 	def set_discount_amount(self):
 		if self.doc.additional_discount_percentage:

@@ -110,7 +110,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 	get_gross_profit(out)
 	if args.doctype == 'Material Request':
 		out.rate = args.rate or out.price_list_rate
-		out.amount = flt(args.qty * out.rate)
+		out.amount = flt(args.qty) * flt(out.rate)
 
 	return out
 
@@ -922,10 +922,19 @@ def get_projected_qty(item_code, warehouse):
 		{"item_code": item_code, "warehouse": warehouse}, "projected_qty")}
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse):
-	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
+def get_bin_details(item_code, warehouse, company=None):
+	bin_details = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty", "reserved_qty"], as_dict=True, cache=True) \
 			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+	if company:
+		bin_details['company_total_stock'] = get_company_total_stock(item_code, company)
+	return bin_details
+
+def get_company_total_stock(item_code, company):
+	return frappe.db.sql("""SELECT sum(actual_qty) from 
+		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name) 
+		WHERE `tabWarehouse`.company = '{0}' and `tabBin`.item_code = '{1}'"""
+		.format(company, item_code))[0][0]
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
