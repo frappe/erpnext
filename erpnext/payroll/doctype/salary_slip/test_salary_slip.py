@@ -312,7 +312,7 @@ class TestSalarySlip(unittest.TestCase):
 		frappe.db.sql("DELETE FROM `tabSalary Slip` where employee_name = 'test_ytd@salary.com'")
 
 		create_salary_slips_for_payroll_period(applicant, salary_structure.name,
-			payroll_period, deduct_random=False)
+			payroll_period, deduct_random=False, num=6)
 
 		salary_slips = frappe.get_all('Salary Slip', fields=['year_to_date', 'net_pay'], filters={'employee_name':
 			'test_ytd@salary.com'}, order_by = 'posting_date')

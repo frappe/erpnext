@@ -179,11 +179,15 @@ class TestStockEntry(unittest.TestCase):
 	def test_material_transfer_gl_entry(self):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 
-		mtn = make_stock_entry(item_code="_Test Item", source="Stores - TCP1",
+		item_code = 'Hand Sanitizer - 001'
+		create_item(item_code =item_code, is_stock_item = 1,
+			is_purchase_item=1, opening_stock=1000, valuation_rate=10, company=company, warehouse="Stores - TCP1")
+
+		mtn = make_stock_entry(item_code=item_code, source="Stores - TCP1",
 			target="Finished Goods - TCP1", qty=45, company=company)
 
 		self.check_stock_ledger_entries("Stock Entry", mtn.name,
-			[["_Test Item", "Stores - TCP1", -45.0], ["_Test Item", "Finished Goods - TCP1", 45.0]])
+			[[item_code, "Stores - TCP1", -45.0], [item_code, "Finished Goods - TCP1", 45.0]])
 
 		source_warehouse_account = get_inventory_account(mtn.company, mtn.get("items")[0].s_warehouse)
 

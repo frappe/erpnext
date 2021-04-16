@@ -124,10 +124,10 @@ def repost_entries():
 		return
 
 	for d in frappe.get_all('Company', filters= {'enable_perpetual_inventory': 1}):
-		check_if_stock_and_account_balance_synced(today(), d.company)
+		check_if_stock_and_account_balance_synced(today(), d.name)
 
 def get_repost_item_valuation_entries():
-	date = add_to_date(today(), hours=-12)
+	date = add_to_date(today(), hours=-3)
 
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
 		WHERE status != 'Completed' and creation <= %s and docstatus = 1
