@@ -681,3 +681,6 @@ erpnext.patches.v12_0.update_payment_entry_status
 erpnext.patches.v12_0.add_transporter_address_field #2020-10-27
 erpnext.patches.v12_0.setup_einvoice_fields #2020-12-02
 erpnext.patches.v12_0.add_state_code_for_ladakh
+erpnext.patches.v12_0.create_taxable_value_field
+erpnext.patches.v12_0.purchase_receipt_status
+erpnext.patches.v12_0.add_company_link_to_einvoice_settings

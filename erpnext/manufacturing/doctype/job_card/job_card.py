@@ -39,6 +39,8 @@ class JobCard(Document):
 				if d.completed_qty:
 					self.total_completed_qty += d.completed_qty
 
+			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
+
 	def get_overlap_for(self, args):
 		existing = frappe.db.sql("""select jc.name as name from
 			`tabJob Card Time Log` jctl, `tabJob Card` jc where jctl.parent = jc.name and
