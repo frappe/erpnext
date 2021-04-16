@@ -664,7 +664,8 @@ class AccountsController(TransactionBase):
 						if self.party_account_currency != self.company_currency else 1),
 					'grand_total': (self.base_grand_total
 						if self.party_account_currency == self.company_currency else self.grand_total),
-					'outstanding_amount': self.outstanding_amount
+					'outstanding_amount': self.outstanding_amount,
+					'difference_account': frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
 				})
 				lst.append(args)
 

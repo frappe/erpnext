@@ -667,6 +667,9 @@ class PaymentEntry(AccountsController):
 
 		if account_details:
 			row.update(account_details)
+		
+		if not row.get('amount'):
+			return
 
 		self.append('deductions', row)
 		self.set_unallocated_amount()
