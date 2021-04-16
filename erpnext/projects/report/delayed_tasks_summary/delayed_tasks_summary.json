@@ -9,7 +9,7 @@
  "filters": [],
  "idx": 0,
  "is_standard": "Yes",
- "modified": "2021-03-25 15:03:31.311234",
+ "modified": "2021-04-15 15:49:35.432486",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Delayed Tasks Summary",
@@ -21,6 +21,9 @@
  "roles": [
   {
    "role": "Projects User"
+  },
+  {
+   "role": "Projects Manager"
   }
  ]
 }

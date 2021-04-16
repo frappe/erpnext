@@ -14,13 +14,26 @@ def execute(filters=None):
 
 def get_data(filters):
 	conditions = get_conditions(filters)
-	tasks = frappe.get_all("Task", conditions, ["name", "subject", "exp_start_date", "exp_end_date", "status", "priority", "completed_on", "progress"], order_by="creation")
+	tasks = frappe.get_all("Task",
+			filters = conditions,
+			fields = ["name", "subject", "exp_start_date", "exp_end_date",
+					"status", "priority", "completed_on", "progress"],
+			order_by="creation"
+		)
 	for task in tasks:
 		if task.exp_end_date:
 			if task.completed_on:
 				task.delay = date_diff(task.completed_on, task.exp_end_date)
+			elif task.status == "Completed":
+				# task is completed but completed on is not set (for older tasks)
+				task.delay = 0
 			else:
+				# task not completed
 				task.delay = date_diff(nowdate(), task.exp_end_date)
+		else:
+			# task has no end date, hence no delay
+			task.delay = 0
+
 	return tasks
 
 def get_conditions(filters):
@@ -36,25 +49,23 @@ def get_conditions(filters):
 	return conditions
 
 def get_chart_data(data):
-	on_track = []
-	delay = []
-
+	delay, on_track = 0, 0
 	for entry in data:
 		if entry.get("delay") > 0:
-			delay.append(entry.get("delay"))
+			delay = delay + 1
 		else:
-			on_track.append(entry.get("delay"))
+			on_track = on_track+ 1
 	charts = {
-		'data': {
-			'labels': ["On Track", "Delayed"],
-			'datasets': [
+		"data": {
+			"labels": ["On Track", "Delayed"],
+			"datasets": [
 				{
-					'name': 'Delayed',
-					'values': [len(on_track), len(delay)]
+					"name": "Delayed",
+					"values": [on_track, delay]
 				}
 			]
 		},
-		'type': 'percentage',
+		"type": "percentage",
 		"colors": ["#84D5BA", "#CB4B5F"]
 	}
 	return charts
@@ -113,7 +124,7 @@ def get_columns():
 		{
 			"fieldname": "delay",
 			"fieldtype": "Data",
-			"label": "Delay",
+			"label": "Delay (In Days)",
 			"width": 70
 		}
 	]

@@ -39,14 +39,14 @@ class TestDelayedTasksSummary(unittest.TestCase):
 		report = execute(filters)
 		data = list(filter(lambda x: x.subject == "_Test Task 99", report[1]))[0]
 		
-		for key in ["subjet", "status", "priority", "delay"]:
+		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[0].get(key), data.get(key))
 
 		filters.status = "Completed"
 		report = execute(filters)
 		data = list(filter(lambda x: x.subject == "_Test Task 98", report[1]))[0]
 
-		for key in ["subjet", "status", "priority", "delay"]:
+		for key in ["subject", "status", "priority", "delay"]:
 			self.assertEqual(expected_data[1].get(key), data.get(key))
 
 	def tearDown(self):
