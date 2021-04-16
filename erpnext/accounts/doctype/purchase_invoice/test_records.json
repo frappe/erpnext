@@ -43,7 +43,7 @@
    }
   ],
   "grand_total": 0,
-  "naming_series": "_T-BILL",
+  "naming_series": "T-PINV-",
   "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
@@ -168,7 +168,7 @@
    }
   ],
   "grand_total": 0,
-  "naming_series": "_T-Purchase Invoice-",
+  "naming_series": "T-PINV-",
   "taxes": [
    {
     "account_head": "_Test Account Shipping Charges - _TC",
