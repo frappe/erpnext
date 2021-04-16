@@ -576,7 +576,7 @@ class GSPConnector():
 			gstin = self.get_seller_gstin()
 			credentials_for_gstin = [d for d in self.e_invoice_settings.credentials if d.gstin == gstin]
 			if credentials_for_gstin:
-				self.credentials = credentials_for_gstin[0]
+				credentials = credentials_for_gstin[0]
 			else:
 				frappe.throw(_('Cannot find e-invoicing credentials for selected Company GSTIN. Please check E-Invoice Settings'))
 		else:
