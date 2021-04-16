@@ -27,17 +27,18 @@
    "ignore_user_permissions": 1,
    "in_list_view": 1,
    "label": "Drug",
-   "options": "Item",
+   "options": "Medication",
    "reqd": 1
   },
   {
-   "fetch_from": "drug_code.item_name",
+   "fetch_from": "drug_code.medication_name",
    "fieldname": "drug_name",
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Drug Name / Description"
   },
   {
+   "fetch_from": "drug_code.default_prescription_dosage",
    "fieldname": "dosage",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -47,6 +48,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "drug_code.default_prescription_duration",
    "fieldname": "period",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
@@ -56,6 +58,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "drug_code.default_dosage_form",
    "fieldname": "dosage_form",
    "fieldtype": "Link",
    "ignore_user_permissions": 1,
