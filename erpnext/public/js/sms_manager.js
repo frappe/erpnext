@@ -14,7 +14,7 @@ erpnext.SMSManager = function SMSManager(doc, options) {
 				contact: doc.contact_person,
 				mobile_no: doc.contact_mobile,
 				party_doctype: 'Customer',
-				party_name: doc.customer
+				party_name: doc.bill_to || doc.customer
 			});
 		} else if (doc.doctype == 'Quotation') {
 			this.show({
@@ -115,7 +115,7 @@ erpnext.SMSManager = function SMSManager(doc, options) {
 			if(v) {
 				$(btn).set_working();
 				frappe.call({
-					method: "frappe.core.doctype.sms_settings.sms_settings.send_sms",
+					method: options.method || "frappe.core.doctype.sms_settings.sms_settings.send_sms",
 					args: {
 						receiver_list: [v.mobile_no],
 						msg: v.message,
@@ -126,10 +126,12 @@ erpnext.SMSManager = function SMSManager(doc, options) {
 						party_name: me.party_name
 					},
 					callback: function(r) {
-						$(btn).done_working();
 						if(!r.exc) {
 							me.dialog.hide();
 						}
+					},
+					always: function () {
+						$(btn).done_working();
 					}
 				});
 			}
