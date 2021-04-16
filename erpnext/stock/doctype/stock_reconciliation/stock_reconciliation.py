@@ -398,7 +398,7 @@ class StockReconciliation(StockController):
 		merge_similar_entries = {}
 
 		for d in sl_entries:
-			if not d.serial_no or d.actual_qty < 0:
+			if not d.serial_no or flt(d.get("actual_qty")) < 0:
 				new_sl_entries.append(d)
 				continue
 
