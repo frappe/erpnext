@@ -7,9 +7,6 @@ frappe.ui.form.on('Maintenance Schedule', {
 		frm.set_query('contact_person', erpnext.queries.contact_query);
 		frm.set_query('customer_address', erpnext.queries.address_query);
 		frm.set_query('customer', erpnext.queries.customer);
-
-		frm.add_fetch('item_code', 'item_name', 'item_name');
-		frm.add_fetch('item_code', 'description', 'description');
 	},
 	onload: function (frm) {
 		if (!frm.doc.status) {
@@ -46,7 +43,7 @@ frappe.ui.form.on('Maintenance Schedule', {
 // TODO commonify this code
 erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 	refresh: function () {
-		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer' }
+		frappe.dynamic_link = { doc: this.frm.doc, fieldname: 'customer', doctype: 'Customer' };
 
 		var me = this;
 
@@ -89,10 +86,10 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		this.set_no_of_visits(doc, cdt, cdn);
 
 	},
-	no_of_visits: function(doc,cdt,cdn){
-		this.set_no_of_visits(doc,cdt,cdn);
+	no_of_visits: function (doc, cdt, cdn) {
+		this.set_no_of_visits(doc, cdt, cdn);
 	},
-	
+
 	set_no_of_visits: function (doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
 
@@ -111,23 +108,21 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 			var no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
 			if (no_of_visits == 0 || !no_of_visits) {
 
-				let end_date = frappe.datetime.add_days(item.start_date, days_in_period[item.periodicity])
-				frappe.model.set_value(item.doctype, item.name, "end_date", end_date)
-				var date_diff = frappe.datetime.get_diff(item.end_date, item.start_date) + 1;
-				var no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
+				let end_date = frappe.datetime.add_days(item.start_date, days_in_period[item.periodicity]);
+				frappe.model.set_value(item.doctype, item.name, "end_date", end_date);
+				date_diff = frappe.datetime.get_diff(item.end_date, item.start_date) + 1;
+				no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
 				frappe.model.set_value(item.doctype, item.name, "no_of_visits", no_of_visits);
 
+			} else if (item.no_of_visits > no_of_visits) {
+				let end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity]);
+				frappe.model.set_value(item.doctype, item.name, "end_date", end_date);
+
+			} else if (item.no_of_visits < no_of_visits) {
+				let end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity]);
+				frappe.model.set_value(item.doctype, item.name, "end_date", end_date);
+
 			}
-			else if(item.no_of_visits > no_of_visits){
-				var end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits*days_in_period[item.periodicity])
-				frappe.model.set_value(item.doctype, item.name, "end_date", end_date)
-				
-			}
-			else if(item.no_of_visits < no_of_visits){
-				var end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits*days_in_period[item.periodicity])
-				frappe.model.set_value(item.doctype, item.name, "end_date", end_date)
-				
-			}		
 		}
 	},
 });
