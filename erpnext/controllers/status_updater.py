@@ -371,10 +371,12 @@ class StatusUpdater(Document):
 			ref_doc.db_set("per_billed", per_billed)
 			ref_doc.set_status(update=True)
 
-def get_allowance_for(item_code, item_allowance={}, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
+def get_allowance_for(item_code, item_allowance=None, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
 	"""
 		Returns the allowance for the item, if not set, returns global allowance
 	"""
+	if item_allowance is None:
+		item_allowance = {}
 	if qty_or_amount == "qty":
 		if item_allowance.get(item_code, frappe._dict()).get("qty"):
 			return item_allowance[item_code].qty, item_allowance, global_qty_allowance, global_amount_allowance
