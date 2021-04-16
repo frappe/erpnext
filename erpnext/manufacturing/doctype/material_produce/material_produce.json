@@ -1,0 +1,218 @@
+{
+ "actions": [],
+ "autoname": "naming_series:",
+ "creation": "2021-04-13 15:11:41.034482",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "work_order",
+  "bom",
+  "batch_size",
+  "partial_produce",
+  "column_break_6",
+  "t_warehouse",
+  "company",
+  "material_produce_item_section",
+  "material_produce_item",
+  "material_produce_details_section",
+  "material_produce_details",
+  "add_details",
+  "section_break_13",
+  "column_break_15",
+  "produced",
+  "cost_details_section",
+  "cost_of_rm_consumed",
+  "total_cost_of_rm_consumed_for_partial_close",
+  "total_cost_of_operation_consumed_for_partial_close",
+  "column_break_20",
+  "cost_of_operation_consumed",
+  "wo_actual_rm_cost",
+  "amount",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Sereis",
+   "options": "MP-.YYYY.-.####",
+   "reqd": 1
+  },
+  {
+   "fieldname": "work_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Work Order",
+   "options": "Work Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "bom",
+   "fieldtype": "Link",
+   "label": "BOM",
+   "options": "BOM"
+  },
+  {
+   "fieldname": "batch_size",
+   "fieldtype": "Data",
+   "label": "Batch Size"
+  },
+  {
+   "fieldname": "partial_produce",
+   "fieldtype": "Data",
+   "label": "Partial Produce"
+  },
+  {
+   "fieldname": "column_break_6",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "t_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Target Warehosue",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "material_produce_item",
+   "fieldtype": "Table",
+   "label": "Material Produce Item",
+   "options": "Material Produce Item"
+  },
+  {
+   "fieldname": "material_produce_details_section",
+   "fieldtype": "Section Break",
+   "label": "Material Produce Details"
+  },
+  {
+   "fieldname": "material_produce_details",
+   "fieldtype": "Table",
+   "label": "Material Produce Details",
+   "options": "Material Produce Detail"
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Material Produce",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "produced",
+   "fieldtype": "Check",
+   "label": "Produced"
+  },
+  {
+   "fieldname": "cost_details_section",
+   "fieldtype": "Section Break",
+   "label": "Cost Details"
+  },
+  {
+   "fieldname": "cost_of_rm_consumed",
+   "fieldtype": "Currency",
+   "label": "Cost of RM Consumed",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "total_cost_of_rm_consumed_for_partial_close",
+   "fieldtype": "Data",
+   "label": "Total Cost of RM Consumed for Partial Close"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Material Produce",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_cost_of_operation_consumed_for_partial_close",
+   "fieldtype": "Currency",
+   "label": "Total Cost of Operation Consumed for Partial Close",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cost_of_operation_consumed",
+   "fieldtype": "Currency",
+   "label": "Cost of Operation Consumed ",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "wo_actual_rm_cost",
+   "fieldtype": "Currency",
+   "label": "WO Actual RM Cost ",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "material_produce_item_section",
+   "fieldtype": "Section Break",
+   "label": "Material Produce Item"
+  },
+  {
+   "fieldname": "add_details",
+   "fieldtype": "Button",
+   "label": "Assigned"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-04-13 18:48:19.775646",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Material Produce",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

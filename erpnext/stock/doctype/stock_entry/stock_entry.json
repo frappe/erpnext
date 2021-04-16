@@ -13,6 +13,7 @@
   "stock_entry_type",
   "outgoing_stock_entry",
   "purpose",
+  "material_consumption",
   "add_to_transit",
   "work_order",
   "purchase_order",
@@ -27,6 +28,7 @@
   "set_posting_time",
   "inspection_required",
   "from_bom",
+  "partial",
   "apply_putaway_rule",
   "sb1",
   "bom_no",
@@ -648,6 +650,20 @@
    "fieldname": "apply_putaway_rule",
    "fieldtype": "Check",
    "label": "Apply Putaway Rule"
+  },
+  {
+   "default": "0",
+   "depends_on": "eval: doc.stock_entry_type === \"Manufacture\"",
+   "fieldname": "partial",
+   "fieldtype": "Check",
+   "label": "Partial",
+   "read_only": 1
+  },
+  {
+   "fieldname": "material_consumption",
+   "fieldtype": "Link",
+   "label": "Material Consumption",
+   "options": "Material Consumption"
   }
  ],
  "icon": "fa fa-file-text",
@@ -655,7 +671,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-09 14:58:13.267321",
+ "modified": "2021-04-16 20:23:49.675367",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
