@@ -13,11 +13,12 @@ frappe.ui.form.on('Healthcare Service Order', {
 			};
 		});
 
-		frm.set_query('order_doctype', function () {
+		frm.set_query('order_doctype', function() {
+			let service_order_doctypes = ['Medication', 'Therapy Type', 'Lab Test Template',
+				'Clinical Procedure Template'];
 			return {
 				filters: {
-					'module': 'Healthcare'
-					//  TODO: filter service doctypes
+					name: ['in', service_order_doctypes]
 				}
 			};
 		});

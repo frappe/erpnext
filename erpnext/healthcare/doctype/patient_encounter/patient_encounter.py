@@ -219,29 +219,3 @@ def create_healthcare_service_order(encounter):
 				# 'healthcare_service_unit_type':therapy_type.get_value('healthcare_service_unit_type')
 				}
 			make_healthcare_service_order(args)
-	if encounter.radiology_procedure_prescription:
-		for radiology in encounter.radiology_procedure_prescription:
-			radiology_template = frappe.get_doc('Radiology Examination Template', radiology.radiology_examination_template)
-			args={
-				'healthcare_service_order_category': radiology_template.get_value('healthcare_service_order_category'),
-				'patient_care_type': radiology_template.get_value('patient_care_type'),
-				'order_date': encounter.get_value('encounter_date'),
-				'ordered_by': encounter.get_value('practitioner'),
-				'order_group': encounter.name,
-				'replaces': radiology.get_value('replaces'),
-				'patient': encounter.get_value('patient'),
-				'order_doctype': 'Radiology Examination Template',
-				'order': radiology_template.name,
-				'order_description': radiology_template.get_value('description'),
-				'quantity' : 1,
-				'intent': radiology.get_value('intent'),
-				'priority': radiology.get_value('priority'),
-				'sequence': radiology.get_value('sequence'),
-				'as_needed': radiology.get_value('as_needed'),
-				'staff_role': radiology_template.get_value('staff_role'),
-				'note': radiology.get_value('note'),
-				'patient_instruction': radiology.get_value('patient_instruction'),
-				'healthcare_service_unit_type':radiology_template.get_value('healthcare_service_unit_type'),
-				'company':encounter.company
-				}
-			make_healthcare_service_order(args)

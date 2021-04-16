@@ -11,7 +11,6 @@ from frappe.utils import getdate
 
 class HealthcareServiceOrder(Document):
 	def validate(self):
-		self.set_practitioner_details()
 		self.set_patient_details()
 		self.set_order_details()
 
@@ -20,12 +19,6 @@ class HealthcareServiceOrder(Document):
 	def before_submit(self):
 		if self.status != 'Active':
 			self.status = 'Active'
-
-	def set_practitioner_details(self):
-		if self.practitioner and not self.medical_department:
-			self.medical_department = frappe.db.get_value('Healthcare Practitioner', self.practitioner, 'department')
-		else:
-			frappe.throw(_('Practitioner is mandatory to create Healthcare Service Order'))
 
 	def set_patient_details(self):
 		if self.patient:
@@ -45,11 +38,11 @@ class HealthcareServiceOrder(Document):
 	def set_order_details(self):
 		if self.order_doctype and self.order_template:
 			order_template = frappe.get_doc(self.order_doctype, self.order_template)
-			if not self.healthcare_service_order_category and order_template.healthcare_service_order_category:
+			if not self.healthcare_service_order_category and order_template.get('healthcare_service_order_category'):
 				self.healthcare_service_order_category = order_template.healthcare_service_order_category
-			if not self.patient_care_type and order_template.patient_care_type:
+			if not self.patient_care_type and order_template.get('patient_care_type'):
 				self.patient_care_type = order_template.patient_care_type
-			if not self.staff_role and order_template.staff_role:
+			if not self.staff_role and order_template.get('staff_role'):
 				self.staff_role = order_template.staff_role
 		else:
 			frappe.throw(_('Order Type and Order Template are mandatory to create Healthcare Service Order'))

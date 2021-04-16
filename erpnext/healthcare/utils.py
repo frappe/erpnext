@@ -698,6 +698,10 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 	return {'html': doc_html}
 
 
+def get_healthcare_service_order_doctypes():
+	return frappe.get_hooks("healthcare_service_order_doctypes")
+
+
 def update_address_links(address, method):
 	'''
 	Hook validate Address
