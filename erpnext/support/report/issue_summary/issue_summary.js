@@ -39,6 +39,7 @@ frappe.query_reports["Issue Summary"] = {
 			label: __("Status"),
 			fieldtype: "Select",
 			options:[
+				"",
 				{label: __('Open'), value: 'Open'},
 				{label: __('Replied'), value: 'Replied'},
 				{label: __('Resolved'), value: 'Resolved'},

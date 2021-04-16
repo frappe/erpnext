@@ -33,6 +33,7 @@ class TherapyPlan(Document):
 		self.db_set('total_sessions', total_sessions)
 		self.db_set('total_sessions_completed', total_sessions_completed)
 
+	@frappe.whitelist()
 	def set_therapy_details_from_template(self):
 		# Add therapy types in the child table
 		self.set('therapy_plan_details', [])

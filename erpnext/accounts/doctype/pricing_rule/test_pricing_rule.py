@@ -328,6 +328,21 @@ class TestPricingRule(unittest.TestCase):
 		self.assertEquals(item.discount_amount, 110)
 		self.assertEquals(item.rate, 990)
 
+	def test_pricing_rule_with_margin_and_discount_amount(self):
+		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
+		make_pricing_rule(selling=1, margin_type="Percentage", margin_rate_or_amount=10,
+			rate_or_discount="Discount Amount", discount_amount=110)
+		si = create_sales_invoice(do_not_save=True)
+		si.items[0].price_list_rate = 1000
+		si.payment_schedule = []
+		si.insert(ignore_permissions=True)
+
+		item = si.items[0]
+		self.assertEquals(item.margin_rate_or_amount, 10)
+		self.assertEquals(item.rate_with_margin, 1100)
+		self.assertEquals(item.discount_amount, 110)
+		self.assertEquals(item.rate, 990)
+
 	def test_pricing_rule_for_product_discount_on_same_item(self):
 		frappe.delete_doc_if_exists('Pricing Rule', '_Test Pricing Rule')
 		test_record = {
@@ -560,6 +575,7 @@ def make_pricing_rule(**args):
 		"margin_rate_or_amount": args.margin_rate_or_amount or 0.0,
 		"condition": args.condition or '',
 		"priority": 1,
+		"discount_amount": args.discount_amount or 0.0,
 		"apply_multiple_pricing_rules": args.apply_multiple_pricing_rules or 0
 	})
 

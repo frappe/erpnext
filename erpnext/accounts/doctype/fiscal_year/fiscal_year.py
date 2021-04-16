@@ -12,6 +12,7 @@ from frappe.model.document import Document
 class FiscalYearIncorrectDate(frappe.ValidationError): pass
 
 class FiscalYear(Document):
+	@frappe.whitelist()
 	def set_as_default(self):
 		frappe.db.set_value("Global Defaults", None, "current_fiscal_year", self.name)
 		global_defaults = frappe.get_doc("Global Defaults")
@@ -54,7 +55,7 @@ class FiscalYear(Document):
 	def on_update(self):
 		check_duplicate_fiscal_year(self)
 		frappe.cache().delete_value("fiscal_years")
-	
+
 	def on_trash(self):
 		global_defaults = frappe.get_doc("Global Defaults")
 		if global_defaults.current_fiscal_year == self.name:
