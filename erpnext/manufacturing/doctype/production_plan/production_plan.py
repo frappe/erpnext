@@ -765,7 +765,7 @@ def get_items_for_material_requests(doc, warehouses=None):
 		to_enable = frappe.bold(_("Ignore Existing Projected Quantity"))
 		warehouse = frappe.bold(doc.get('for_warehouse'))
 		message = _("As there are sufficient raw materials, Material Request is not required for Warehouse {0}.").format(warehouse) + "<br><br>"
-		message += _(" If you still want to proceed, please enable {0}.").format(to_enable)
+		message += _("If you still want to proceed, please enable {0}.").format(to_enable)
 
 		frappe.msgprint(message, title=_("Note"))
 
