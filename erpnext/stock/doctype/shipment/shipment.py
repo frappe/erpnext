@@ -23,10 +23,10 @@ class Shipment(Document):
 			frappe.throw(_('Please enter Shipment Parcel information'))
 		if self.value_of_goods == 0:
 			frappe.throw(_('Value of goods cannot be 0'))
-		self.status = 'Submitted'
+		self.db_set('status', 'Submitted')
 
 	def on_cancel(self):
-		self.status = 'Cancelled'
+		self.db_set('status', 'Cancelled')
 
 	def validate_weight(self):
 		for parcel in self.shipment_parcel:
