@@ -1308,9 +1308,9 @@ class AccountsController(TransactionBase):
 			self.payment_terms_template = ''
 			return
 
-		posting_date = self.get("bill_date") or self.get("posting_date") or self.get("transaction_date")
-		date = self.get("due_date")
-		due_date = date or posting_date
+		posting_date = self.get("posting_date") or self.get("transaction_date")
+		bill_date = self.get("bill_date") if self.doctype != 'Vehicle Booking Order' else None
+		due_date = self.get("due_date") or posting_date
 		grand_total = flt(self.get("rounded_total") or self.get('grand_total') or self.get('invoice_total'))
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
 			grand_total = grand_total - flt(self.write_off_amount)
@@ -1322,7 +1322,8 @@ class AccountsController(TransactionBase):
 
 		if not self.get("payment_schedule"):
 			if self.get("payment_terms_template"):
-				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total, delivery_date=self.get('delivery_date'))
+				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total,
+					delivery_date=self.get('delivery_date'), bill_date=bill_date)
 				for item in data:
 					self.append("payment_schedule", item)
 			else:
