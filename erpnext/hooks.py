@@ -297,6 +297,7 @@ scheduler_events = {
 		"erpnext.support.doctype.issue.issue.auto_close_tickets",
 		"erpnext.crm.doctype.opportunity.opportunity.auto_close_opportunity",
 		"erpnext.controllers.accounts_controller.update_invoice_status",
+		"erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.update_overdue_status",
 		"erpnext.accounts.doctype.fiscal_year.fiscal_year.auto_create_fiscal_year",
 		"erpnext.hr.doctype.employee.employee.send_birthday_reminders",
 		"erpnext.projects.doctype.task.task.set_tasks_as_overdue",

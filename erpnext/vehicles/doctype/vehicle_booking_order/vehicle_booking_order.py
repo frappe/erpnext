@@ -82,12 +82,11 @@ class VehicleBookingOrder(AccountsController):
 	def on_submit(self):
 		self.update_allocation_status()
 		self.update_vehicle_status()
-		self.set_status()
 
 	def on_cancel(self):
 		self.update_allocation_status()
 		self.update_vehicle_status()
-		self.set_status()
+		self.db_set('status', 'Cancelled')
 
 	def onload(self):
 		super(VehicleBookingOrder, self).onload()
@@ -604,7 +603,13 @@ class VehicleBookingOrder(AccountsController):
 					else:
 						self.status = "To Deposit Payment"
 				else:
-					self.status = "To Receive Payment"
+					if getdate(self.due_date) < getdate(today()):
+						self.status = "Payment Overdue"
+					else:
+						self.status = "To Receive Payment"
+
+			elif getdate(self.delivery_date) < getdate(today()) and self.delivery_status != "Delivered":
+				self.status = "Delivery Overdue"
 
 			elif self.vehicle_allocation_required and not self.vehicle_allocation:
 				self.status = "To Assign Allocation"
@@ -1096,12 +1101,47 @@ def send_sms(receiver_list, msg, success_msg=True, type=None,
 	if type == "Ready For Delivery" and not vbo_doc.delivery_status != 'To Deliver':
 		frappe.throw(_("Cannot send Ready For Delivery SMS because delivery status is not 'To Deliver'"))
 	if type == "Congratulations" and not vbo_doc.invoice_status != 'Delivered':
-		frappe.throw(_("Cannot send Ready Congratulations SMS because Invoice has not been delivered yet"))
+		frappe.throw(_("Cannot send Congratulations SMS because Invoice has not been delivered yet"))
 
 	vbo_doc.add_notification_count(type, "SMS", update=1)
 	vbo_doc.notify_update()
 
 	send_sms(receiver_list, msg, success_msg, type, reference_doctype, reference_name, party_doctype, party_name)
+
+
+def update_overdue_status():
+	if 'Vehicles' not in frappe.get_active_domains():
+		return
+
+	frappe.db.sql("""
+		update `tabVehicle Booking Order`
+		set customer_payment_status = 'Overdue'
+		where docstatus = 1 and due_date < CURDATE() and customer_outstanding > 0
+	""")
+	frappe.db.sql("""
+		update `tabVehicle Booking Order`
+		set supplier_payment_status = 'Overdue'
+		where docstatus = 1 and due_date < CURDATE() and supplier_outstanding > 0
+	""")
+
+	frappe.db.sql("""
+		update `tabVehicle Booking Order`
+		set status = 'Payment Overdue'
+		where docstatus = 1
+			and status = 'To Receive Payment'
+			and due_date < CURDATE()
+			and customer_outstanding > 0
+	""")
+
+	frappe.db.sql("""
+		update `tabVehicle Booking Order`
+		set status = 'Delivery Overdue'
+		where docstatus = 1
+			and delivery_status != 'Delivered'
+			and delivery_date < CURDATE()
+			and customer_outstanding <= 0
+			and supplier_advance <= 0
+	""")
 
 
 def update_vehicle_booked(vehicle, is_booked):

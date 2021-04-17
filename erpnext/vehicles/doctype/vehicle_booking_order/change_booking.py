@@ -127,8 +127,9 @@ def can_change_delivery_period(vbo_doc, throw=False):
 		if check_supplier_payment_exists(vbo_doc, throw=throw):
 			return False
 
-	if check_vehicle_received(vbo_doc, throw=throw):
-		return False
+	if not allowed_after_vehicle_receipt():
+		if check_vehicle_received(vbo_doc, throw=throw):
+			return False
 
 	return True
 
@@ -288,10 +289,9 @@ def handle_delivery_period_changed(vbo_doc):
 	vbo_doc.validate_delivery_date()
 
 	vbo_doc.due_date = to_date
-	if len(vbo_doc.payment_schedule) == 1:
-		vbo_doc.payment_schedule[0].due_date = to_date
-
+	vbo_doc.payment_schedule = []
 	vbo_doc.validate_payment_schedule()
+	vbo_doc.update_payment_status()
 
 	frappe.msgprint(_("Delivery Period has been changed from {0} to {1}")
 		.format(frappe.bold(vbo_doc._doc_before_save.delivery_period or 'None'), frappe.bold(vbo_doc.delivery_period)))
@@ -314,10 +314,7 @@ def save_vehicle_booking_for_update(vbo_doc, update_child_tables=True):
 	vbo_doc.db_update()
 
 	if update_child_tables:
-		for d in vbo_doc.sales_team:
-			d.db_update()
-		for d in vbo_doc.payment_schedule:
-			d.db_update()
+		vbo_doc.update_children()
 
 	vbo_doc.notify_update()
 	vbo_doc.save_version()

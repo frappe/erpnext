@@ -9,7 +9,7 @@ frappe.listview_settings['Vehicle Booking Order'] = {
 			return [__(doc.status), "yellow", `status,=,${doc.status}`];
 		} else if(["To Deposit Payment", "To Deliver Vehicle", "To Deliver Invoice"].includes(doc.status)) {
 			return [__(doc.status), "orange", `status,=,${doc.status}`];
-		} else if(["Overdue Payment", "Overdue Delivery"].includes(doc.status)) {
+		} else if(["Payment Overdue", "Delivery Overdue"].includes(doc.status)) {
 			return [__(doc.status), "red", `status,=,${doc.status}`];
 		}
 	},

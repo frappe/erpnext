@@ -504,7 +504,7 @@
    "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
-   "options": "Draft\nTo Receive Payment\nTo Assign Allocation\nTo Deposit Payment\nTo Assign Vehicle\nTo Receive Vehicle\nTo Receive Invoice\nTo Deliver Vehicle\nTo Deliver Invoice\nCompleted\nCancelled",
+   "options": "Draft\nTo Receive Payment\nPayment Overdue\nTo Assign Allocation\nTo Deposit Payment\nDelivery Overdue\nTo Assign Vehicle\nTo Receive Vehicle\nTo Receive Invoice\nTo Deliver Vehicle\nTo Deliver Invoice\nCompleted\nCancelled",
    "read_only": 1,
    "reqd": 1,
    "search_index": 1
@@ -969,7 +969,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-17 17:16:47.038564",
+ "modified": "2021-04-17 22:41:17.951316",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
