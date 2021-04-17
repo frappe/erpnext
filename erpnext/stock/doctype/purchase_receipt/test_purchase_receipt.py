@@ -582,6 +582,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 			serial_no=serial_no, basic_rate=100, do_not_submit=True)
 		se.submit()
 
+		se.cancel()
 		dn.cancel()
 		pr1.cancel()
 
