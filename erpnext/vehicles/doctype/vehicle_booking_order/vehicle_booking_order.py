@@ -483,6 +483,29 @@ class VehicleBookingOrder(AccountsController):
 			frappe.throw(_("Cannot deliver vehicle because there is a Supplier Outstanding of {0}")
 				.format(self.get_formatted("supplier_outstanding")))
 
+	def get_notification_count(self, notification_type, notification_medium):
+		row = self.get('notification_count',
+			{"notification_type": notification_type, "notification_medium": notification_medium})
+
+		row = row[0] if row else {}
+		return cint(row.get('notification_count'))
+
+	def add_notification_count(self, notification_type, notification_medium, count=1, update=False):
+		filters = {"notification_type": notification_type, "notification_medium": notification_medium}
+
+		row = self.get('notification_count', filters)
+		if row:
+			row = row[0]
+		else:
+			row = self.append('notification_count', filters)
+			row.notification_count = 0
+
+		count = cint(count) or 1
+		row.notification_count += count
+
+		if update:
+			row.db_update()
+
 	def get_vehicle_receipts(self):
 		fields = ['name', 'posting_date', 'supplier_delivery_note', 'supplier', 'vehicle_booking_order']
 
@@ -1060,29 +1083,19 @@ def send_sms(receiver_list, msg, success_msg=True, type=None,
 	if reference_doctype != 'Vehicle Booking Order':
 		frappe.throw(_("Reference DocType must be Vehicle Booking Order"))
 
-	vbo = frappe.db.get_value("Vehicle Booking Order", reference_name,
-		["delivery_status", "customer_outstanding", "notification_count"], as_dict=1)
+	vbo_doc = frappe.get_doc("Vehicle Booking Order", reference_name)
 
-	if not vbo:
-		frappe.throw(_("Vehicle Booking Order {0} does not exist").format(reference_name))
-
-	if type == "Booking Confirmation" and vbo.delivery_status != "To Receive":
+	if type == "Booking Confirmation" and vbo_doc.delivery_status != "To Receive":
 		frappe.throw(_("Cannot send Booking Confirmation SMS after receiving Vehicle"))
-	if type == "Balance Payment Request" and not vbo.customer_outstanding:
+	if type == "Balance Payment Request" and not vbo_doc.customer_outstanding:
 		frappe.throw(_("Cannot send Balance Payment Request SMS because Customer Outstanding amount is zero"))
-	if type == "Ready For Delivery" and not vbo.delivery_status != 'To Deliver':
+	if type == "Ready For Delivery" and not vbo_doc.delivery_status != 'To Deliver':
 		frappe.throw(_("Cannot send Ready For Delivery SMS because delivery status is not 'To Deliver'"))
-	if type == "Congratulations" and not vbo.delivery_status != 'Delivered':
-		frappe.throw(_("Cannot send Ready Congratulations SMS because vehicle has not been delivered yet"))
+	if type == "Congratulations" and not vbo_doc.invoice_status != 'Delivered':
+		frappe.throw(_("Cannot send Ready Congratulations SMS because Invoice has not been delivered yet"))
 
-	notification_count = json.loads(vbo.notification_count or "{}")
-
-	notification_count.setdefault(type, {}).setdefault('sms', 0)
-	notification_count[type]['sms'] += 1
-
-	notification_count_json = json.dumps(notification_count, separators=(',', ':'))
-	frappe.db.set_value("Vehicle Booking Order", reference_name, "notification_count", notification_count_json,
-		notify=True)
+	vbo_doc.add_notification_count(type, "SMS", update=1)
+	vbo_doc.notify_update()
 
 	send_sms(receiver_list, msg, success_msg, type, reference_doctype, reference_name, party_doctype, party_name)
 

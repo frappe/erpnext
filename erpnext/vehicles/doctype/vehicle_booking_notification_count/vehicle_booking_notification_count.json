@@ -1,0 +1,44 @@
+{
+ "creation": "2021-04-17 16:09:31.927442",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "notification_type",
+  "notification_medium",
+  "notification_count"
+ ],
+ "fields": [
+  {
+   "fieldname": "notification_type",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Notification Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "notification_medium",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Notification Medium",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "notification_count",
+   "fieldtype": "Int",
+   "label": "Notification Count"
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-04-17 16:45:22.653005",
+ "modified_by": "Administrator",
+ "module": "Vehicles",
+ "name": "Vehicle Booking Notification Count",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
