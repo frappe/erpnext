@@ -198,7 +198,7 @@ def get_item_warehouse_map(filters, sle):
 		else:
 			qty_diff = flt(d.actual_qty)
 
-		value_diff = flt(d.stock_value) - flt(qty_dict.bal_val)
+		value_diff = flt(d.stock_value_difference)
 
 		if d.posting_date < from_date:
 			qty_dict.opening_qty += qty_diff
