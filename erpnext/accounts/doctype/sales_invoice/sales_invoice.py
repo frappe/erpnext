@@ -24,6 +24,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -214,6 +215,9 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
@@ -390,6 +394,7 @@ class SalesInvoice(SellingController):
 		if validate_against_credit_limit:
 			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
+	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):
 		if cint(self.is_pos):
 			self.set_pos_fields(for_validate)
@@ -723,6 +728,7 @@ class SalesInvoice(SellingController):
 		else:
 			self.calculate_billing_amount_for_timesheet()
 
+	@frappe.whitelist()
 	def add_timesheet_data(self):
 		self.set('timesheets', [])
 		if self.project:
@@ -1280,6 +1286,7 @@ class SalesInvoice(SellingController):
 				break
 
 	# Healthcare
+	@frappe.whitelist()
 	def set_healthcare_services(self, checked_values):
 		self.set("items", [])
 		from erpnext.stock.get_item_details import get_item_details
