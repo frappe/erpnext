@@ -67,6 +67,7 @@ class Company(NestedSet):
 		if frappe.db.sql("select abbr from tabCompany where name!=%s and abbr=%s", (self.name, self.abbr)):
 			frappe.throw(_("Abbreviation already used for another company"))
 
+	@frappe.whitelist()
 	def create_default_tax_template(self):
 		setup_taxes_and_charges(self.name, self.country)
 

@@ -1,10 +1,12 @@
 {
+ "actions": [],
  "creation": "2019-03-24 14:48:59.649168",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
   "disable",
+  "apply_multiple_pricing_rules",
   "column_break_2",
   "rule_description",
   "section_break_1",
@@ -25,7 +27,7 @@
   "threshold_percentage",
   "column_break_15",
   "priority",
-  "apply_multiple_pricing_rules"
+  "is_recursive"
  ],
  "fields": [
   {
@@ -152,10 +154,19 @@
    "fieldname": "apply_multiple_pricing_rules",
    "fieldtype": "Check",
    "label": "Apply Multiple Pricing Rules"
+  },
+  {
+   "default": "0",
+   "description": "Discounts to be applied in sequential ranges like buy 1 get 1, buy 2 get 2, buy 3 get 3 and so on",
+   "fieldname": "is_recursive",
+   "fieldtype": "Check",
+   "label": "Is Recursive"
   }
  ],
+ "index_web_pages_for_search": 1,
  "istable": 1,
- "modified": "2019-07-21 00:00:56.674284",
+ "links": [],
+ "modified": "2021-03-06 21:58:18.162346",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Promotional Scheme Product Discount",

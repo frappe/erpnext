@@ -12,6 +12,7 @@ from erpnext.accounts.doctype.account.account import get_account_currency
 from erpnext.controllers.taxes_and_totals import init_landed_taxes_and_totals
 
 class LandedCostVoucher(Document):
+	@frappe.whitelist()
 	def get_items_from_purchase_receipts(self):
 		self.set("items", [])
 		for pr in self.get("purchase_receipts"):
