@@ -561,7 +561,6 @@ def get_material_request_items(row, sales_order, company,
 			'item_name': row.item_name,
 			'quantity': required_qty,
 			'required_bom_qty': total_qty,
-			'description': row.description,
 			'stock_uom': row.get("stock_uom"),
 			'warehouse': warehouse or row.get('source_warehouse') \
 				or row.get('default_warehouse') or item_group_defaults.get("default_warehouse"),

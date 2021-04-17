@@ -46,7 +46,6 @@ class SalesInvoice(SellingController):
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_billed',
 			'source_field': 'amount',
-			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
 			'keyword': 'Billed',

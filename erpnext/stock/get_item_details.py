@@ -309,8 +309,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
 		"is_fixed_asset": item.is_fixed_asset,
-		"weight_per_unit":item.weight_per_unit,
-		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
 		"against_blanket_order": args.get("against_blanket_order"),
