@@ -25,7 +25,6 @@
   "amended_from",
   "transaction_date",
   "booking_number",
-  "payment_terms_template",
   "section_break_30",
   "sales_team",
   "customer_details_section",
@@ -93,6 +92,7 @@
   "additional_services_section",
   "additional_items",
   "payment_schedule_section",
+  "payment_terms_template",
   "payment_schedule",
   "status_section",
   "customer_payment_status",
@@ -481,7 +481,6 @@
   },
   {
    "collapsible": 1,
-   "collapsible_depends_on": "payment_terms_template",
    "fieldname": "payment_schedule_section",
    "fieldtype": "Section Break",
    "label": "Payment Schedule"
@@ -970,7 +969,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-17 16:11:23.275759",
+ "modified": "2021-04-17 17:16:47.038564",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

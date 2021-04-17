@@ -298,6 +298,10 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	setup_dashboard: function () {
+		if (this.frm.doc.docstatus !== 1) {
+			return;
+		}
+
 		var me = this;
 		var company_currency = erpnext.get_currency(me.frm.doc.company);
 
@@ -643,12 +647,8 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 	delivery_date: function () {
 		if (this.frm.doc.delivery_date) {
-			this.frm.set_value('due_date', this.frm.doc.delivery_date);
+			this.frm.trigger('payment_terms_template');
 		}
-	},
-
-	due_date: function () {
-		this.frm.trigger('payment_terms_template');
 	},
 
 	vehicle_allocation: function () {
@@ -715,9 +715,17 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				callback: function(r) {
 					if(r.message && !r.exc) {
 						me.frm.set_value("payment_schedule", r.message);
+						if (me.frm.doc.payment_schedule && me.frm.doc.payment_schedule.length) {
+							me.frm.set_value("due_date", me.frm.doc.payment_schedule[me.frm.doc.payment_schedule.length-1].due_date);
+						} else {
+							me.frm.set_value("due_date", doc.delivery_date);
+						}
 					}
 				}
 			})
+		} else if(doc.delivery_date) {
+			me.frm.set_value("payment_schedule", []);
+			me.frm.set_value("due_date", doc.delivery_date);
 		}
 	},
 

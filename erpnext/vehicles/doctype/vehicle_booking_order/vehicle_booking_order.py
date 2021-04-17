@@ -363,8 +363,8 @@ class VehicleBookingOrder(AccountsController):
 
 	def validate_payment_schedule(self):
 		self.validate_payment_schedule_dates()
-		self.set_due_date()
 		self.set_payment_schedule()
+		self.set_due_date()
 		self.validate_payment_schedule_amount()
 		self.validate_due_date()
 
@@ -685,6 +685,10 @@ def get_customer_details(args, get_withholding_tax=True):
 	if get_withholding_tax and args.item_code:
 		out.exempt_from_vehicle_withholding_tax = cint(frappe.get_cached_value("Item", args.item_code, "exempt_from_vehicle_withholding_tax"))
 		out.withholding_tax_amount = get_withholding_tax_amount(args.transaction_date, args.item_code, out.tax_status, args.company)
+
+	default_payment_terms = frappe.get_cached_value("Vehicles Settings", None, "default_payment_terms")
+	if default_payment_terms:
+		out.payment_terms_template = default_payment_terms
 
 	return out
 

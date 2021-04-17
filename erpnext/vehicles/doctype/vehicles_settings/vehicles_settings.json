@@ -7,9 +7,10 @@
  "field_order": [
   "vehicle_price_list",
   "fni_price_list",
-  "column_break_3",
   "company_contact",
+  "column_break_3",
   "default_booking_terms",
+  "default_payment_terms",
   "section_break_11",
   "vehicle_allocation_periodicity",
   "column_break_8",
@@ -100,11 +101,17 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "default_payment_terms",
+   "fieldtype": "Link",
+   "label": "Default Payment Terms Template",
+   "options": "Payment Terms Template"
   }
  ],
  "icon": "fa fa-cog",
  "issingle": 1,
- "modified": "2021-04-15 00:51:08.788806",
+ "modified": "2021-04-17 17:20:40.276040",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicles Settings",
