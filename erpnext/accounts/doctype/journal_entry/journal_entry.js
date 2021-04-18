@@ -4,6 +4,7 @@
 frappe.provide("erpnext.accounts");
 frappe.provide("erpnext.journal_entry");
 
+{% include "erpnext/vehicles/vehicle_accounting_dimensions.js" %}
 
 frappe.ui.form.on("Journal Entry", {
 	setup: function(frm) {

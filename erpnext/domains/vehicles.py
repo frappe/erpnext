@@ -52,7 +52,8 @@ accounting_dimension_fields = [
 	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_2", "fieldtype": "Column Break",
 		"insert_after": "vehicle_booking_order"},
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
-		"insert_after": "vehicle_accounting_dimensions_cb_2", "in_standard_filter": 1, "ignore_user_permissions": 1},
+		"insert_after": "vehicle_accounting_dimensions_cb_2", "in_standard_filter": 1, "ignore_user_permissions": 1,
+		"fetch_from": "", "fetch_if_empty": 0},
 
 	{"label": "Vehicle Item Name", "fieldname": "applies_to_item_name", "fieldtype": "Data",
 		"insert_after": "cost_center", "read_only": 1, "fetch_from": "applies_to_vehicle.item_name"},

@@ -60,6 +60,7 @@ class JournalEntry(AccountsController):
 		self.set_party_name()
 		self.validate_inter_company_accounts()
 		self.set_original_reference()
+		self.validate_vehicle_accounting_dimensions()
 
 		if not self.title:
 			self.title = self.get_title()
@@ -741,6 +742,16 @@ class JournalEntry(AccountsController):
 		for d in self.get("accounts"):
 			if d.party_type and d.party:
 				d.party_name = get_party_name(d.party_type, d.party)
+
+	def validate_vehicle_accounting_dimensions(self):
+		if 'Vehicles' not in frappe.get_active_domains():
+			return
+
+		from erpnext.vehicles.vehicle_accounting_dimensions import remove_vehicle_details_if_empty
+		remove_vehicle_details_if_empty(self)
+
+		for d in self.accounts:
+			remove_vehicle_details_if_empty(d)
 
 
 @frappe.whitelist()

@@ -73,6 +73,7 @@ class PaymentEntry(AccountsController):
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
 		self.set_original_reference()
+		self.validate_vehicle_accounting_dimensions()
 
 	def before_submit(self):
 		self.validate_is_advance()
@@ -664,6 +665,13 @@ class PaymentEntry(AccountsController):
 
 		self.append('deductions', row)
 		self.set_unallocated_amount()
+
+	def validate_vehicle_accounting_dimensions(self):
+		if 'Vehicles' not in frappe.get_active_domains():
+			return
+
+		from erpnext.vehicles.vehicle_accounting_dimensions import remove_vehicle_details_if_empty
+		remove_vehicle_details_if_empty(self)
 
 @frappe.whitelist()
 def get_outstanding_reference_documents(args):
