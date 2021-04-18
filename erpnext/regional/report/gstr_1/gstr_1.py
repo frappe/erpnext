@@ -42,7 +42,7 @@ class Gstr1Report(object):
 
 	def run(self):
 		self.get_columns()
-		self.gst_accounts = get_gst_accounts(self.filters.company)
+		self.gst_accounts = get_gst_accounts(self.filters.company, only_non_reverse_charge=1)
 		self.get_invoice_data()
 
 		if self.invoices:
