@@ -432,30 +432,21 @@ class PurchaseReceipt(BuyingController):
 
 		asset_amount = flt(item.net_amount) + flt(item.item_tax_amount/self.conversion_rate)
 		base_asset_amount = flt(item.base_net_amount + item.item_tax_amount)
+		remarks = self.get("remarks") or _("Accounting Entry for Asset")
 
 		cwip_account_currency = get_account_currency(cwip_account)
 		# debit cwip account
-		gl_entries.append(self.get_gl_dict({
-			"account": cwip_account,
-			"against": arbnb_account,
-			"cost_center": item.cost_center,
-			"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-			"debit": base_asset_amount,
-			"debit_in_account_currency": (base_asset_amount
-				if cwip_account_currency == self.company_currency else asset_amount)
-		}, item=item))
+		debit_in_account_currency = (base_asset_amount
+			if cwip_account_currency == self.company_currency else asset_amount)
+		add_gl_entry(gl_entries, cwip_account, item.cost_center, base_asset_amount, 0.0, remarks,
+			arbnb_account, debit_in_account_currency=debit_in_account_currency, item=item)
 
 		asset_rbnb_currency = get_account_currency(arbnb_account)
 		# credit arbnb account
-		gl_entries.append(self.get_gl_dict({
-			"account": arbnb_account,
-			"against": cwip_account,
-			"cost_center": item.cost_center,
-			"remarks": self.get("remarks") or _("Accounting Entry for Asset"),
-			"credit": base_asset_amount,
-			"credit_in_account_currency": (base_asset_amount
-				if asset_rbnb_currency == self.company_currency else asset_amount)
-		}, item=item))
+		credit_in_account_currency = (base_asset_amount
+			if asset_rbnb_currency == self.company_currency else asset_amount)
+		add_gl_entry(gl_entries, arbnb_account, item.cost_center, 0.0, base_asset_amount, remarks,
+			cwip_account, credit_in_account_currency=credit_in_account_currency, item=item)
 
 	def add_lcv_gl_entries(self, item, gl_entries):
 		expenses_included_in_asset_valuation = self.get_company_default("expenses_included_in_asset_valuation")
@@ -466,23 +457,13 @@ class PurchaseReceipt(BuyingController):
 			# This returns company's default cwip account
 			asset_account = get_asset_account("capital_work_in_progress_account", company=self.company)
 
-		gl_entries.append(self.get_gl_dict({
-			"account": expenses_included_in_asset_valuation,
-			"against": asset_account,
-			"cost_center": item.cost_center,
-			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-			"credit": flt(item.landed_cost_voucher_amount),
-			"project": item.project
-		}, item=item))
+		remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
-		gl_entries.append(self.get_gl_dict({
-			"account": asset_account,
-			"against": expenses_included_in_asset_valuation,
-			"cost_center": item.cost_center,
-			"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
-			"debit": flt(item.landed_cost_voucher_amount),
-			"project": item.project
-		}, item=item))
+		add_gl_entry(gl_entries, expenses_included_in_asset_valuation, item.cost_center, 0.0, flt(item.landed_cost_voucher_amount),
+			remarks, asset_account, project=item.project, item=item)
+
+		add_gl_entry(gl_entries, asset_account, item.cost_center, 0.0, flt(item.landed_cost_voucher_amount),
+			remarks, expenses_included_in_asset_valuation, project=item.project, item=item
 
 	def update_assets(self, item, valuation_rate):
 		assets = frappe.db.get_all('Asset',
