@@ -16,6 +16,7 @@ from six import string_types
 
 force_fields = [
 	'customer_name', 'vehicle_owner_name',
+	'variant_of', 'variant_of_name',
 	'tax_id', 'tax_cnic', 'tax_strn',
 	'address_display', 'contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'booking_customer_name', 'booking_address_display', 'booking_email', 'booking_mobile', 'booking_phone',
@@ -76,8 +77,12 @@ class VehicleTransactionController(StockController):
 			if self.meta.has_field(k) and (not self.get(k) or k in force_fields):
 				self.set(k, v)
 
-		if self.get('item_code') and not self.get('item_name'):
-			self.item_name = frappe.get_cached_value("Item", self.item_code, 'item_name')
+		if self.get('item_code'):
+			if not self.get('item_name'):
+				self.item_name = frappe.get_cached_value("Item", self.item_code, 'item_name')
+
+			self.variant_of = frappe.get_cached_value("Item", self.item_code, 'variant_of')
+			self.variant_of_name = frappe.get_cached_value("Item", self.variant_of, 'item_name') if self.variant_of else None
 
 	def update_stock_ledger(self):
 		qty = 1 if self.doctype == "Vehicle Receipt" else -1
@@ -153,7 +158,7 @@ class VehicleTransactionController(StockController):
 
 			if self.get('item_code'):
 				if self.item_code != vbo.item_code:
-					frappe.throw(_("Vehicle Item Code (Variant) does not match in {0}")
+					frappe.throw(_("Variant Item Code does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.get('vehicle'):
@@ -187,7 +192,7 @@ class VehicleTransactionController(StockController):
 
 			if self.get('item_code'):
 				if project.applies_to_item and self.item_code != project.applies_to_item:
-					frappe.throw(_("Vehicle Item Code (Variant) does not match in {0}")
+					frappe.throw(_("Variant Item Code does not match in {0}")
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.get('vehicle'):

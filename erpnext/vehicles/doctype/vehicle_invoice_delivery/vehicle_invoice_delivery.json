@@ -22,6 +22,8 @@
   "bill_no",
   "bill_date",
   "vehicle_details_section",
+  "variant_of",
+  "variant_of_name",
   "item_code",
   "item_name",
   "item_group",
@@ -146,7 +148,7 @@
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Vehicle Item Code (Variant)",
+   "label": "Variant Item Code",
    "options": "Item",
    "reqd": 1,
    "search_index": 1
@@ -156,7 +158,7 @@
    "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
-   "label": "Vehicle Item Name",
+   "label": "Variant Item Name",
    "read_only": 1
   },
   {
@@ -234,12 +236,31 @@
    "options": "Vehicle Invoice Delivery",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-10 14:47:41.364065",
+ "modified": "2021-04-18 15:09:19.399387",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Invoice Delivery",

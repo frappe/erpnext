@@ -977,7 +977,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 				title: __("Change Vehicle Item (Variant)"),
 				fields: [
 					{
-						label: __("Vehicle Item Code (Variant)"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1,
+						label: __("Variant Item Code"), fieldname: "item_code", fieldtype: "Link", options: "Item", reqd: 1,
 						onchange: () => {
 							let item_code = dialog.get_value('item_code');
 							if (item_code) {
@@ -990,7 +990,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 						},
 						get_query: () => erpnext.queries.item(item_filters)
 					},
-					{label: __("Vehicle Item Name"), fieldname: "item_name", fieldtype: "Data", read_only: 1}
+					{label: __("Variant Item Name"), fieldname: "item_name", fieldtype: "Data", read_only: 1}
 				]
 			});
 

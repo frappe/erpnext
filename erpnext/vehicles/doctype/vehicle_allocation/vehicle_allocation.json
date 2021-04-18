@@ -10,6 +10,8 @@
   "title",
   "naming_series",
   "company",
+  "variant_of",
+  "variant_of_name",
   "item_code",
   "item_name",
   "column_break_6",
@@ -56,7 +58,7 @@
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_standard_filter": 1,
-   "label": "Vehicle Item Code",
+   "label": "Variant Item Code",
    "options": "Item",
    "reqd": 1,
    "search_index": 1
@@ -67,7 +69,7 @@
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Vehicle Item Name",
+   "label": "Variant Item Name",
    "read_only": 1
   },
   {
@@ -179,11 +181,30 @@
    "options": "Vehicle Allocation",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-03-22 19:12:53.755959",
+ "modified": "2021-04-18 15:09:19.399387",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation",

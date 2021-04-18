@@ -200,22 +200,22 @@ def can_change_customer_details(vbo_doc, throw=False):
 @frappe.whitelist()
 def change_item(vehicle_booking_order, item_code):
 	if not item_code:
-		frappe.throw(_("Vehicle Item Code (Variant) not provided"))
+		frappe.throw(_("Variant Item Code not provided"))
 
 	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
 	can_change_item(vbo_doc, throw=True)
 
 	if item_code == vbo_doc.item_code:
-		frappe.throw(_("Vehicle Item Code (Variant) {0} is already selected in {1}").format(frappe.bold(item_code), vehicle_booking_order))
+		frappe.throw(_("Variant Item Code {0} is already selected in {1}").format(frappe.bold(item_code), vehicle_booking_order))
 
 	previous_item_code = vbo_doc.item_code
 	previous_item = frappe.get_cached_doc("Item", previous_item_code)
-	template_item_name = frappe.get_cached_value("Item", previous_item.variant_of, "item_name") if previous_item.variant_of else None
-	item = frappe.get_cached_doc("Item", item_code)
+	new_item = frappe.get_cached_doc("Item", item_code)
+	model_item_name = frappe.get_cached_value("Item", previous_item.variant_of, "item_name") if previous_item.variant_of else None
 
-	if previous_item.variant_of and item.variant_of != previous_item.variant_of:
-		frappe.throw(_("New Vehicle Item (Variant) must be a variant of {0}").format
-			(frappe.bold(template_item_name or previous_item.variant_of)))
+	if previous_item.variant_of and new_item.variant_of != previous_item.variant_of:
+		frappe.throw(_("New Variant Item Code must be a variant of {0}").format
+			(frappe.bold(model_item_name or previous_item.variant_of)))
 
 	if not vbo_doc.previous_item_code:
 		vbo_doc.previous_item_code = vbo_doc.item_code
@@ -248,7 +248,7 @@ def change_item(vehicle_booking_order, item_code):
 
 	save_vehicle_booking_for_update(vbo_doc)
 
-	frappe.msgprint(_("Vehicle Item Code (Variant) Updated Successfully"), indicator='green')
+	frappe.msgprint(_("Variant Item Code Updated Successfully"), indicator='green')
 
 
 def can_change_item(vbo_doc, throw=False):

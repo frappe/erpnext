@@ -27,7 +27,7 @@ address_fields = ['address_line1', 'address_line2', 'city', 'state']
 
 force_fields = [
 	'customer_name', 'financer_name', 'lessee_name', 'customer_category',
-	'item_name', 'item_group', 'brand',
+	'item_name', 'item_group', 'brand', 'variant_of', 'variant_of_name',
 	'customer_address',
 	'address_display', 'contact_display', 'financer_contact_display', 'contact_email', 'contact_mobile', 'contact_phone',
 	'father_name', 'husband_name',
@@ -807,7 +807,7 @@ def get_item_details(args):
 	if not args.company:
 		frappe.throw(_("Company is mandatory"))
 	if not args.item_code:
-		frappe.throw(_("Vehicle Item Code is mandatory"))
+		frappe.throw(_("Variant Item Code is mandatory"))
 
 	out = frappe._dict()
 
@@ -817,6 +817,9 @@ def get_item_details(args):
 	out.item_name = item.item_name
 	out.item_group = item.item_group
 	out.brand = item.brand
+
+	out.variant_of = item.variant_of
+	out.variant_of_name = frappe.get_cached_value("Item", item.variant_of, "item_name") if item.variant_of else None
 
 	item_defaults = get_item_defaults(item.name, args.company)
 	item_group_defaults = get_item_group_defaults(item.name, args.company)
@@ -858,7 +861,7 @@ def get_vehicle_default_supplier(item_code, company):
 	if not company:
 		frappe.throw(_("Company is mandatory"))
 	if not item_code:
-		frappe.throw(_("Vehicle Item Code is mandatory"))
+		frappe.throw(_("Variant Item Code is mandatory"))
 
 	item = frappe.get_cached_doc("Item", item_code)
 
@@ -875,7 +878,7 @@ def get_vehicle_default_supplier(item_code, company):
 
 def get_vehicle_price(item_code, vehicle_price_list, fni_price_list, transaction_date, tax_status, company):
 	if not item_code:
-		frappe.throw(_("Vehicle Item Code is mandatory"))
+		frappe.throw(_("Variant Item Code is mandatory"))
 	if not vehicle_price_list:
 		frappe.throw(_("Vehicle Price List is mandatory for Vehicle Price"))
 

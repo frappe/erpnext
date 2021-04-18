@@ -9,6 +9,8 @@
  "field_order": [
   "naming_series",
   "image",
+  "variant_of",
+  "variant_of_name",
   "item_code",
   "item_group",
   "column_break_3",
@@ -558,10 +560,29 @@
    "fieldtype": "Date",
    "label": "Dispatch Date",
    "no_copy": 1
+  },
+  {
+   "fetch_from": "item_code.variant_of",
+   "fieldname": "variant_of",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "in_standard_filter": 1,
+   "label": "Model Item Code",
+   "options": "Item",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fetch_from": "variant_of.item_name",
+   "fieldname": "variant_of_name",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Model Item Name",
+   "read_only": 1
   }
  ],
  "image_field": "image",
- "modified": "2021-03-22 23:48:49.905708",
+ "modified": "2021-04-18 15:09:19.399387",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",

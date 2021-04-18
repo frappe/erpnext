@@ -92,6 +92,9 @@ class Vehicle(Document):
 		self.brand = item.brand
 		self.warranty_period = item.warranty_period
 
+		self.variant_of = item.variant_of
+		self.variant_of_name = frappe.get_cached_value("Item", self.variant_of, 'item_name') if self.variant_of else None
+
 	def validate_vehicle_id(self):
 		import re
 
