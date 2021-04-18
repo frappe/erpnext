@@ -151,6 +151,10 @@ frappe.ui.form.on('Payroll Entry', {
 		filters['company'] = frm.doc.company;
 		filters['start_date'] = frm.doc.start_date;
 		filters['end_date'] = frm.doc.end_date;
+		filters['salary_slip_based_on_timesheet'] = frm.doc.salary_slip_based_on_timesheet
+		filters['payroll_frequency'] = frm.doc.payroll_frequency
+		filters['payroll_payable_account'] = frm.doc.payroll_payable_account
+		filters['currency'] = frm.doc.currency
 
 		if (frm.doc.department) {
 			filters['department'] = frm.doc.department;
