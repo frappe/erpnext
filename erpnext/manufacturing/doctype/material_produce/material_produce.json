@@ -57,13 +57,16 @@
   },
   {
    "fieldname": "batch_size",
-   "fieldtype": "Data",
-   "label": "Batch Size"
+   "fieldtype": "Float",
+   "label": "Batch Size",
+   "read_only": 1
   },
   {
+   "default": "0",
    "fieldname": "partial_produce",
-   "fieldtype": "Data",
-   "label": "Partial Produce"
+   "fieldtype": "Check",
+   "label": "Partial Produce",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_6",
@@ -193,7 +196,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-13 18:48:19.775646",
+ "modified": "2021-04-19 02:07:25.572455",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce",

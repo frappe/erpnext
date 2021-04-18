@@ -28,6 +28,7 @@
    "in_list_view": 1,
    "label": "Item Code",
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -35,7 +36,8 @@
    "fieldname": "item_name",
    "fieldtype": "Read Only",
    "in_list_view": 1,
-   "label": "Item Name"
+   "label": "Item Name",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -43,7 +45,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Item Group",
-   "options": "Item Group"
+   "options": "Item Group",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -52,6 +55,7 @@
    "in_list_view": 1,
    "label": "Warehouse",
    "options": "Warehouse",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -71,20 +75,23 @@
    "fieldname": "scheduled_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Scheduled Qty"
+   "label": "Scheduled Qty",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "qty_produced",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty Produced"
+   "label": "Qty Produced",
+   "read_only": 1
   },
   {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nSet\nNot Set"
+   "options": "\nSet\nNot Set",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -99,7 +106,8 @@
    "fieldname": "qty_already_produced",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Qty Already Produced"
+   "label": "Qty Already Produced",
+   "read_only": 1
   },
   {
    "bold": 1,
@@ -117,13 +125,14 @@
   {
    "fieldname": "data",
    "fieldtype": "Code",
-   "label": "Data"
+   "label": "Data",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-13 18:42:38.443843",
+ "modified": "2021-04-19 02:21:36.832953",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce Item",

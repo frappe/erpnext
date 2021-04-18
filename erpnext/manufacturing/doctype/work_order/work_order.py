@@ -623,8 +623,10 @@ class WorkOrder(Document):
 		mc.type = "Manual"
 		for res in wo_doc.required_items:
 			item_doc = frappe.get_doc("Item",res.item_code)
-			qty = res.get('transferred_qty') - res.get("consumed_qty")
+			float_precision = cint(frappe.db.get_default("float_precision")) or 2
+			qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
 			if qty > 0:
+				print("res.item_code: ", res.item_code)
 				mc.append("materials_to_consume", {
 					"item": res.item_code,
 					"item_name": res.item_name,
