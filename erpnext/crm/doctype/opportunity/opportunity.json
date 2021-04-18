@@ -33,7 +33,10 @@
   "to_discuss",
   "section_break_14",
   "currency",
+  "exchange_rate",
   "opportunity_amount",
+  "base_opportunity_amount",
+  "bas",
   "with_items",
   "column_break_17",
   "probability",
@@ -426,12 +429,30 @@
    "fieldtype": "Link",
    "label": "Print Language",
    "options": "Language"
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate"
+  },
+  {
+   "fieldname": "base_opportunity_amount",
+   "fieldtype": "Currency",
+   "label": "Opportunity Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bas",
+   "fieldtype": "Data",
+   "label": "bas"
   }
  ],
  "icon": "fa fa-info-sign",
  "idx": 195,
  "links": [],
- "modified": "2021-01-06 19:42:46.190051",
+ "modified": "2021-04-19 00:33:23.719072",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity",

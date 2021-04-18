@@ -73,6 +73,7 @@ frappe.ui.form.on("Opportunity", {
 	refresh: function(frm) {
 		var doc = frm.doc;
 		frm.trigger('setup_opportunity_from');
+		frm.trigger('change_grid_labels');
 		erpnext.toggle_naming_series();
 
 		if(!doc.__islocal && doc.status!=="Lost") {
@@ -122,6 +123,20 @@ frappe.ui.form.on("Opportunity", {
 		}
 	},
 
+	currency: function(frm) {
+		frappe.call({
+			method: "erpnext.setup.utils.get_exchange_rate",
+			args: {
+				from_currency: frm.doc.currency,
+				to_currency: erpnext.get_currency(frm.doc.company)
+			},
+			callback: function(r) {
+				if (r.message) {
+					frm.set_value('exchange_rate', flt(r.message))	
+				}
+			}
+		});
+	},
 	set_dynamic_field_label: function(frm){
 		if (frm.doc.opportunity_from) {
 			frm.set_df_property("party_name", "label", frm.doc.opportunity_from);
@@ -142,6 +157,35 @@ frappe.ui.form.on("Opportunity", {
 		})
 	},
 
+	change_grid_labels: function(frm) {
+		console.log('working');
+		let company_currency = erpnext.get_currency(frm.doc.company);
+		frm.set_currency_labels(["base_rate", "base_amount"],
+			company_currency, "items");
+
+		frm.set_currency_labels(["rate", "amount"],
+			frm.doc.currency, "items");
+		let item_grid = frm.fields_dict.items.grid;
+		$.each(["base_rate", "base_amount"], function(i, fname) {
+			if(frappe.meta.get_docfield(item_grid.doctype, fname))
+				item_grid.set_column_disp(fname, frm.doc.currency != company_currency);
+		});
+		frm.refresh_fields();
+	}
+});
+frappe.ui.form.on("Opportunity Item", {
+	calculate: function(frm, cdt, cdn) {
+		let row = frappe.get_doc(cdt, cdn);
+		frappe.model.set_value(cdt, cdn, 'quantity_and_rate', flt(row.qty) * flt(row.rate));
+		frappe.model.set_value(cdt, cdn, 'basic_rate', flt(frm.doc.exchange_rate) * flt(row.rate));
+		frappe.model.set_value(cdt, cdn, 'base_amount', flt(frm.doc.exchange_rate) * flt(row.quantity_and_rate));
+	},
+	qty: function(frm, cdt, cdn) {
+		frm.trigger('calculate', cdt, cdn);
+	},
+	rate: function(frm, cdt, cdn) {
+		frm.trigger('calculate', cdt, cdn);
+	}
 })
 
 // TODO commonify this code
@@ -159,6 +203,7 @@ erpnext.crm.Opportunity = frappe.ui.form.Controller.extend({
 		}
 
 		this.setup_queries();
+		this.frm.trigger('currency');
 	},
 
 	setup_queries: function() {
