@@ -83,8 +83,7 @@
    "fieldname": "qty_produced",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Qty Produced",
-   "read_only": 1
+   "label": "Qty Produced"
   },
   {
    "fieldname": "status",
@@ -132,7 +131,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-19 02:21:36.832953",
+ "modified": "2021-04-19 03:02:31.320588",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce Item",
