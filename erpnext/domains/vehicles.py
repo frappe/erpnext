@@ -45,24 +45,26 @@ service_person_fields = [
 ]
 
 accounting_dimension_fields = [
-	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_1", "fieldtype": "Column Break",
-		"insert_after": "project"},
-	{"label": "Vehicle Booking Order", "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order",
-		"insert_after": "vehicle_accounting_dimensions_cb_1", "in_standard_filter": 1, "ignore_user_permissions": 1},
-	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_2", "fieldtype": "Column Break",
-		"insert_after": "vehicle_booking_order"},
 	{"label": "Applies to Vehicle", "fieldname": "applies_to_vehicle", "fieldtype": "Link", "options": "Vehicle",
-		"insert_after": "vehicle_accounting_dimensions_cb_2", "in_standard_filter": 1, "ignore_user_permissions": 1,
-		"fetch_from": "", "fetch_if_empty": 0},
+		"insert_after": "cost_center", "in_standard_filter": 1, "ignore_user_permissions": 1},
+	{"label": "Vehicle Booking Order", "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order",
+		"insert_after": "project", "in_standard_filter": 1, "ignore_user_permissions": 1},
+
+	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_1", "fieldtype": "Column Break",
+		"insert_after": "vehicle_booking_order"},
 
 	{"label": "Vehicle Item Name", "fieldname": "applies_to_item_name", "fieldtype": "Data",
-		"insert_after": "cost_center", "read_only": 1, "fetch_from": "applies_to_vehicle.item_name"},
-	{"label": "Chassis No", "fieldname": "vehicle_chassis_no", "fieldtype": "Data",
-		"insert_after": "project", "read_only": 1, "fetch_from": "applies_to_vehicle.chassis_no"},
-	{"label": "Engine No", "fieldname": "vehicle_engine_no", "fieldtype": "Data",
-		"insert_after": "vehicle_booking_order", "read_only": 1, "fetch_from": "applies_to_vehicle.engine_no"},
+		"insert_after": "vehicle_accounting_dimensions_cb_1", "read_only": 1, "fetch_from": "applies_to_vehicle.item_name"},
 	{"label": "License Plate", "fieldname": "vehicle_license_plate", "fieldtype": "Data", "depends_on": "eval:!doc.vehicle_unregistered",
-		"insert_after": "applies_to_vehicle", "read_only": 1, "fetch_from": "applies_to_vehicle.license_plate"},
+		"insert_after": "applies_to_item_name", "read_only": 1, "fetch_from": "applies_to_vehicle.license_plate"},
+
+	{"label": "", "fieldname": "vehicle_accounting_dimensions_cb_2", "fieldtype": "Column Break",
+		"insert_after": "vehicle_license_plate"},
+
+	{"label": "Chassis No", "fieldname": "vehicle_chassis_no", "fieldtype": "Data",
+		"insert_after": "vehicle_accounting_dimensions_cb_2", "read_only": 1, "fetch_from": "applies_to_vehicle.chassis_no"},
+	{"label": "Engine No", "fieldname": "vehicle_engine_no", "fieldtype": "Data",
+		"insert_after": "vehicle_chassis_no", "read_only": 1, "fetch_from": "applies_to_vehicle.engine_no"},
 ]
 
 for d in applies_to_fields:

@@ -79,7 +79,6 @@
    "read_only": 1
   },
   {
-   "description": "If Income or Expense",
    "fieldname": "cost_center",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -320,7 +319,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-01-31 22:06:27.798782",
+ "modified": "2021-04-19 04:33:19.426858",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Journal Entry Account",
