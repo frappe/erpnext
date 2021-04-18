@@ -139,7 +139,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 		var me = this;
 
 		frappe.call({
-			method: "erpnext.controllers.vehicle_transaction_controller.get_customer_details",
+			method: "erpnext.vehicles.vehicle_transaction_controller.get_customer_details",
 			args: {
 				args: {
 					doctype: me.frm.doc.doctype,
@@ -162,7 +162,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	get_vehicle_booking_order_details: function () {
 		var me = this;
 		frappe.call({
-			method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_booking_order_details",
+			method: "erpnext.vehicles.vehicle_transaction_controller.get_vehicle_booking_order_details",
 			args: {
 				args: {
 					doctype: me.frm.doc.doctype,
@@ -184,7 +184,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 	get_vehicle_details: function () {
 		var me = this;
 		frappe.call({
-			method: "erpnext.controllers.vehicle_transaction_controller.get_vehicle_details",
+			method: "erpnext.vehicles.vehicle_transaction_controller.get_vehicle_details",
 			args: {
 				doctype: me.frm.doc.doctype,
 				vehicle: me.frm.doc.vehicle,
@@ -212,7 +212,7 @@ erpnext.vehicles.VehicleTransactionController = erpnext.stock.StockController.ex
 
 	get_contact_details: function (contact, prefix) {
 		frappe.call({
-			method: "erpnext.controllers.vehicle_transaction_controller.get_contact_details",
+			method: "erpnext.vehicles.vehicle_transaction_controller.get_contact_details",
 			args: {
 				contact: contact,
 				prefix: prefix

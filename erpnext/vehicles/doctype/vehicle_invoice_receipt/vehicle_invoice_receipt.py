@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.controllers.vehicle_transaction_controller import VehicleTransactionController
+from erpnext.vehicles.vehicle_transaction_controller import VehicleTransactionController
 
 class VehicleInvoiceReceipt(VehicleTransactionController):
 	def get_feed(self):
