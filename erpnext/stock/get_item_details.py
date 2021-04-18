@@ -309,8 +309,6 @@ def get_basic_details(args, item, overwrite_warehouse=True):
 		"update_stock": args.get("update_stock") if args.get('doctype') in ['Sales Invoice', 'Purchase Invoice'] else 0,
 		"delivered_by_supplier": item.delivered_by_supplier if args.get("doctype") in ["Sales Order", "Sales Invoice"] else 0,
 		"is_fixed_asset": item.is_fixed_asset,
-		"weight_per_unit":item.weight_per_unit,
-		"weight_uom":item.weight_uom,
 		"last_purchase_rate": item.last_purchase_rate if args.get("doctype") in ["Purchase Order"] else 0,
 		"transaction_date": args.get("transaction_date"),
 		"against_blanket_order": args.get("against_blanket_order"),
@@ -922,10 +920,19 @@ def get_projected_qty(item_code, warehouse):
 		{"item_code": item_code, "warehouse": warehouse}, "projected_qty")}
 
 @frappe.whitelist()
-def get_bin_details(item_code, warehouse):
-	return frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
+def get_bin_details(item_code, warehouse, company=None):
+	bin_details = frappe.db.get_value("Bin", {"item_code": item_code, "warehouse": warehouse},
 		["projected_qty", "actual_qty", "reserved_qty"], as_dict=True, cache=True) \
 			or {"projected_qty": 0, "actual_qty": 0, "reserved_qty": 0}
+	if company:
+		bin_details['company_total_stock'] = get_company_total_stock(item_code, company)
+	return bin_details
+
+def get_company_total_stock(item_code, company):
+	return frappe.db.sql("""SELECT sum(actual_qty) from 
+		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name) 
+		WHERE `tabWarehouse`.company = '{0}' and `tabBin`.item_code = '{1}'"""
+		.format(company, item_code))[0][0]
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
