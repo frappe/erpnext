@@ -13,11 +13,9 @@ from erpnext.regional.india import state_numbers
 
 class GSTR3BReport(Document):
 	def before_save(self):
-
 		self.get_data()
 
 	def get_data(self):
-
 		self.report_dict = {
 			"gstin": "",
 			"ret_period": "",
@@ -178,8 +176,7 @@ class GSTR3BReport(Document):
 		self.report_dict["inward_sup"]["isup_details"][1]["intra"] = flt(inward_nil_exempt.get("non_gst").get("intra"), 2)
 
 	def set_itc_details(self, itc_details):
-
-		itc_type_map = {
+		itc_eligible_type_map = {
 			'IMPG': 'Import Of Capital Goods',
 			'IMPS': 'Import Of Service',
 			'ISRC': 'ITC on Reverse Charge',
@@ -187,53 +184,35 @@ class GSTR3BReport(Document):
 			'OTH': 'All Other ITC'
 		}
 
+		itc_ineligible_map = {
+			'RUL': 'Ineligible As Per Section 17(5)',
+			'OTH': 'Ineligible Others'
+		}
+
 		net_itc = self.report_dict["itc_elg"]["itc_net"]
 
 		for d in self.report_dict["itc_elg"]["itc_avl"]:
-
-			itc_type = itc_type_map.get(d["ty"])
-
-			if d["ty"] == 'ISRC':
-				reverse_charge = ["Y"]
-				itc_type = 'All Other ITC'
-				gst_category = ['Unregistered', 'Overseas']
-			else:
-				gst_category = ['Overseas', 'Registered Regular']
-				reverse_charge = ["N", "Y"]
-
-			for account_head in self.account_heads:
-				for category in gst_category:
-					for charge_type in reverse_charge:
-						for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
-							d[key[0]] += flt(itc_details.get((category, itc_type, charge_type, account_head.get(key[1])), {}).get("amount"), 2)
-
+			itc_type = itc_eligible_type_map.get(d["ty"])
 			for key in ['iamt', 'camt', 'samt', 'csamt']:
+				d[key] = flt(itc_details.get(itc_type, {}).get(key))
 				net_itc[key] += flt(d[key], 2)
 
-		for account_head in self.account_heads:
-			itc_inelg = self.report_dict["itc_elg"]["itc_inelg"][1]
-			for key in [['iamt', 'igst_account'], ['camt', 'cgst_account'], ['samt', 'sgst_account'], ['csamt', 'cess_account']]:
-				itc_inelg[key[0]] = flt(itc_details.get(("Ineligible", "N", account_head.get(key[1])), {}).get("amount"), 2)
+		for d in self.report_dict["itc_elg"]["itc_inelg"]:
+			itc_type = itc_ineligible_map.get(d["ty"])
+			for key in ['iamt', 'camt', 'samt', 'csamt']:
+				d[key] = flt(itc_details.get(itc_type, {}).get(key))
 
 	def prepare_data(self, doctype, tax_details, supply_type, supply_category, gst_category_list, reverse_charge="N"):
-
-		account_map = {
-			'sgst_account': 'samt',
-			'cess_account': 'csamt',
-			'cgst_account': 'camt',
-			'igst_account': 'iamt'
-		}
-
 		txval = 0
 		total_taxable_value = self.get_total_taxable_value(doctype, reverse_charge)
 
 		for gst_category in gst_category_list:
 			txval += total_taxable_value.get(gst_category,0)
-			for account_head in self.account_heads:
-				for account_type, account_name in iteritems(account_head):
-					if account_map.get(account_type) in self.report_dict.get(supply_type).get(supply_category):
-						self.report_dict[supply_type][supply_category][account_map.get(account_type)] += \
-							flt(tax_details.get((account_name, gst_category), {}).get("amount"), 2)
+			for key in ['camt', 'samt', 'iamt', 'csamt']:
+				for account_head in self.account_heads.get(key):
+					if key in self.report_dict.get(supply_type).get(supply_category):
+						self.report_dict[supply_type][supply_category][key] += \
+							flt(tax_details.get((account_head, gst_category), {}).get("amount"), 2)
 
 		self.report_dict[supply_type][supply_category]["txval"] += flt(txval, 2)
 
@@ -261,23 +240,20 @@ class GSTR3BReport(Document):
 			group by ja.account, j.reversal_type""", (self.month_no, self.year, self.company,
 			self.gst_details.get("gstin")), as_dict=1)
 
+		net_itc = self.report_dict["itc_elg"]["itc_net"]
+
 		for entry in reversal_entries:
 			if entry.reversal_type == 'As per rules 42 & 43 of CGST Rules':
 				index = 0
 			else:
 				index = 1
 
-			if entry.account in [a.cgst_account for a in self.account_heads]:
-				self.report_dict["itc_elg"]["itc_rev"][index]["camt"] += flt(entry.amount)
-			if entry.account in [a.sgst_account for a in self.account_heads]:
-				self.report_dict["itc_elg"]["itc_rev"][index]["samt"] += flt(entry.amount)
-			if entry.account in [a.igst_account for a in self.account_heads]:
-				self.report_dict["itc_elg"]["itc_rev"][index]["iamt"] += flt(entry.amount)
-			if entry.account in [a.cess_account for a in self.account_heads]:
-				self.report_dict["itc_elg"]["itc_rev"][index]["csamt"] += flt(entry.amount)
+			for key in ['camt', 'samt', 'iamt', 'csamt']:
+				if entry.account in self.account_heads.get(key):
+					self.report_dict["itc_elg"]["itc_rev"][index][key] += flt(entry.amount)
+					net_itc[key] -= flt(entry.amount)
 
 	def get_total_taxable_value(self, doctype, reverse_charge):
-
 		return frappe._dict(frappe.db.sql("""
 			select gst_category, sum(net_total) as total
 			from `tab{doctype}`
@@ -289,28 +265,30 @@ class GSTR3BReport(Document):
 			.format(doctype = doctype), (self.month_no, self.year, reverse_charge, self.company, self.gst_details.get("gstin"))))
 
 	def get_itc_details(self):
-		itc_amount = frappe.db.sql("""
-			select s.gst_category, sum(t.base_tax_amount_after_discount_amount) as tax_amount,
-			t.account_head, s.eligibility_for_itc, s.reverse_charge
-			from `tabPurchase Invoice` s , `tabPurchase Taxes and Charges` t
-			where s.docstatus = 1 and t.parent = s.name
-			and month(s.posting_date) = %s and year(s.posting_date) = %s and s.company = %s
-			and s.company_gstin = %s
-			group by t.account_head, s.gst_category, s.eligibility_for_itc
-			""",
-			(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+		itc_amounts = frappe.db.sql("""
+			SELECT eligibility_for_itc, sum(itc_integrated_tax) as itc_integrated_tax,
+			sum(itc_central_tax) as itc_central_tax,
+			sum(itc_state_tax) as itc_state_tax,
+			sum(itc_cess_amount) as itc_cess_amount
+			FROM `tabPurchase Invoice`
+			where docstatus = 1
+			and month(posting_date) = %s and year(posting_date) = %s and company = %s
+			and company_gstin = %s
+			group by eligibility_for_itc
+		""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1, debug=1)
 
 		itc_details = {}
-
-		for d in itc_amount:
-			itc_details.setdefault((d.gst_category, d.eligibility_for_itc, d.reverse_charge, d.account_head),{
-				"amount": d.tax_amount
+		for d in itc_amounts:
+			itc_details.setdefault(d.eligibility_for_itc, {
+				'iamt': d.itc_integrated_tax,
+				'camt': d.itc_central_tax,
+				'samt': d.itc_state_tax,
+				'csamt': d.itc_cess_amount
 			})
 
 		return itc_details
 
 	def get_nil_rated_supply_value(self):
-
 		return frappe.db.sql("""
 			select sum(i.base_amount) as total from
 			`tabSales Invoice Item` i, `tabSales Invoice` s
@@ -340,17 +318,9 @@ class GSTR3BReport(Document):
 				'csamt': 0.0
 			})
 
-			if d.account_head in [a.cgst_account for a in self.account_heads]:
-				inter_state_supply_tax_mapping[d.name]['camt'] += d.tax_amount
-
-			if d.account_head in [a.sgst_account for a in self.account_heads]:
-				inter_state_supply_tax_mapping[d.name]['samt'] += d.tax_amount
-
-			if d.account_head in [a.igst_account for a in self.account_heads]:
-				inter_state_supply_tax_mapping[d.name]['iamt'] += d.tax_amount
-
-			if d.account_head in [a.cess_account for a in self.account_heads]:
-				inter_state_supply_tax_mapping[d.name]['csamt'] += d.tax_amount
+			for key in ['camt', 'samt', 'iamt', 'csamt']:
+				if d.account_head in self.account_heads.get(key):
+					inter_state_supply_tax_mapping[d.name][key] += d.tax_amount
 
 		for key, value in iteritems(inter_state_supply_tax_mapping):
 			if value.get('place_of_supply'):
@@ -416,7 +386,6 @@ class GSTR3BReport(Document):
 		return inward_nil_exempt_details
 
 	def get_tax_amounts(self, doctype, reverse_charge="N"):
-
 		if doctype == "Sales Invoice":
 			tax_template = 'Sales Taxes and Charges'
 		elif doctype == "Purchase Invoice":
@@ -437,7 +406,7 @@ class GSTR3BReport(Document):
 
 		for d in tax_amounts:
 			tax_details.setdefault(
-				(d.account_head,d.gst_category),{
+				(d.account_head, d.gst_category),{
 					"amount": d.get("tax_amount"),
 				}
 			)
@@ -445,7 +414,6 @@ class GSTR3BReport(Document):
 		return tax_details
 
 	def get_company_gst_details(self):
-
 		gst_details =  frappe.get_all("Address",
 			fields=["gstin", "gst_state", "gst_state_number"],
 			filters={
@@ -458,20 +426,28 @@ class GSTR3BReport(Document):
 			frappe.throw(_("Please enter GSTIN and state for the Company Address {0}").format(self.company_address))
 
 	def get_account_heads(self):
+		account_map = {
+			'sgst_account': 'samt',
+			'cess_account': 'csamt',
+			'cgst_account': 'camt',
+			'igst_account': 'iamt'
+		}
 
-		account_heads =  frappe.get_all("GST Account",
-			fields=["cgst_account", "sgst_account", "igst_account", "cess_account"],
-			filters={
-				"company":self.company
-			})
+		account_heads = {}
+		gst_settings_accounts = frappe.get_all("GST Account",
+			filters={'company': self.company, 'is_reverse_charge_account': 0},
+			fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
-		if account_heads:
-			return account_heads
-		else:
-			frappe.throw(_("Please set account heads in GST Settings for Compnay {0}").format(self.company))
+		if not gst_settings_accounts:
+			frappe.throw(_("Please set GST Accounts in GST Settings"))
+
+		for d in gst_settings_accounts:
+			for acc, val in d.items():
+				account_heads.setdefault(account_map.get(acc), []).append(val)
+
+		return account_heads
 
 	def get_missing_field_invoices(self):
-
 		missing_field_invoices = []
 
 		for doctype in ["Sales Invoice", "Purchase Invoice"]:
@@ -496,13 +472,11 @@ class GSTR3BReport(Document):
 		return ",".join(missing_field_invoices)
 
 def get_state_code(state):
-
 	state_code = state_numbers.get(state)
 
 	return state_code
 
 def get_period(month, year=None):
-
 	month_no = {
 		"January": 1,
 		"February": 2,
@@ -526,13 +500,11 @@ def get_period(month, year=None):
 
 @frappe.whitelist()
 def view_report(name):
-
 	json_data = frappe.get_value("GSTR 3B Report", name, 'json_output')
 	return json.loads(json_data)
 
 @frappe.whitelist()
 def make_json(name):
-
 	json_data = frappe.get_value("GSTR 3B Report", name, 'json_output')
 	file_name = "GST3B.json"
 	frappe.local.response.filename = file_name
