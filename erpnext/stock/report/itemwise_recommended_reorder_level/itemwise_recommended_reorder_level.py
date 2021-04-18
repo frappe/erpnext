@@ -55,33 +55,31 @@ def get_item_info(filters):
 
 
 def get_consumed_items(condition):
-	stock_entry_types_to_exclude = ', '.join([f"'{se}'" for se in [
+	purpose_to_exclude = [
 		"Material Transfer for Manufacture",
 		"Material Transfer",
 		"Send to Subcontractor"
-	]])
-	condition += f"""
+	]
+
+	condition += """
 		and (
-			stock_entry_type is NULL
-			or stock_entry_type not in ({stock_entry_types_to_exclude})
+			purpose is NULL
+			or purpose not in ({})
 		)
-	"""
-	condition = condition.replace("posting_date",
-					"`tabStock Ledger Entry`.posting_date")
+	""".format(', '.join([f"'{p}'" for p in purpose_to_exclude]))
+	condition = condition.replace("posting_date", "sle.posting_date")
+
 	consumed_items = frappe.db.sql("""
 		select item_code, abs(sum(actual_qty)) as consumed_qty
-		from `tabStock Ledger Entry` left join `tabStock Entry`
-			on `tabStock Ledger Entry`.voucher_no = `tabStock Entry`.name
+		from `tabStock Ledger Entry` as sle left join `tabStock Entry` as se
+			on sle.voucher_no = se.name
 		where
 			actual_qty < 0
 			and voucher_type not in ('Delivery Note', 'Sales Invoice')
 			%s
 		group by item_code""" % condition, as_dict=1)
 
-	consumed_items_map = {}
-	for item in consumed_items:
-		consumed_items_map.setdefault(item.item_code, item.consumed_qty)
-
+	consumed_items_map = {item.item_code : item.consumed_qty for item in consumed_items}
 	return consumed_items_map
 
 def get_delivered_items(condition):
