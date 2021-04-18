@@ -486,7 +486,6 @@
 				"sales_tax_templates": [
 					{
 						"title": "Umsatzsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -513,7 +512,6 @@
 				"purchase_tax_templates": [
 					{
 						"title": "Abziehbare Vorsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -567,7 +565,6 @@
 				"sales_tax_templates": [
 					{
 						"title": "Umsatzsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -594,7 +591,6 @@
 				"purchase_tax_templates": [
 					{
 						"title": "Abziehbare Vorsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -625,7 +621,6 @@
 				"sales_tax_templates": [
 					{
 						"title": "Umsatzsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -652,7 +647,6 @@
 				"purchase_tax_templates": [
 					{
 						"title": "Abziehbare Vorsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -683,7 +677,6 @@
 				"sales_tax_templates": [
 					{
 						"title": "Umsatzsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -708,7 +701,6 @@
 				"purchase_tax_templates": [
 					{
 						"title": "Abziehbare Vorsteuer 19%",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
@@ -829,7 +821,6 @@
 				"item_tax_templates": [
 					{
 						"title": "In State GST",
-						"is_default": 1,
 						"taxes": [
 							{
 								"tax_type": {
@@ -893,7 +884,6 @@
 				"*": [
 					{
 						"title": "In State GST",
-						"is_default": 1,
 						"taxes": [
 							{
 								"account_head": {
