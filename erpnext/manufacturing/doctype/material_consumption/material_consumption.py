@@ -79,7 +79,7 @@ class MaterialConsumption(Document):
                             se_item = stock_entry.append("items")
                             se_item.item_code = line.get('item_code')
                             se_item.qty = line.get('qty_to_consume')
-                            se_item.s_warehouse = line.get('warehouse')
+                            se_item.s_warehouse = self.s_warehouse
                             se_item.t_warehouse = self.s_warehouse
                             se_item.item_name = itm_doc.item_name
                             se_item.description = itm_doc.description
@@ -146,7 +146,7 @@ class MaterialConsumption(Document):
                 se_item = stock_entry.append("items")
                 se_item.item_code = res.item_code
                 se_item.qty = res.picked_qty
-                se_item.s_warehouse = res.warehouse
+                #se_item.s_warehouse = res.warehouse
                 se_item.s_warehouse = self.s_warehouse
                 se_item.item_name = itm_doc.item_name
                 se_item.description = itm_doc.description
