@@ -765,6 +765,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment (Company Currency)",
@@ -810,6 +811,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "label": "Rounding Adjustment",
@@ -1124,7 +1126,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-20 22:07:23.487138",
+ "modified": "2021-04-19 00:55:30.781375",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",
