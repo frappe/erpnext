@@ -5,14 +5,12 @@ def get_data():
 	return {
 		'fieldname': 'vehicle_booking_order',
 		'non_standard_fieldnames': {
-			'Journal Entry': 'original_reference_name',
-			'Payment Entry': 'original_reference_name',
 			'Payment Request': 'reference_name',
 		},
 		'transactions': [
 			{
 				'label': _('Payment'),
-				'items': ['Vehicle Booking Payment']
+				'items': ['Vehicle Booking Payment', 'Journal Entry', 'Payment Entry']
 			},
 			{
 				'label': _('Delivery'),

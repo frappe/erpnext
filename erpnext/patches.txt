@@ -690,7 +690,7 @@ erpnext.patches.v12_0.remove_stin_property_setter
 erpnext.patches.v12_0.add_vehicles_domain
 erpnext.patches.v12_0.set_bill_to_in_sales_invoice
 erpnext.patches.v12_0.update_vehicle_color_link
-erpnext.patches.v12_0.resetup_vehicle_domain #4-10 #8-11/2 #19-11 #18-12
+erpnext.patches.v12_0.resetup_vehicle_domain #4-10-2020 #8-11-2020/2 #19-11-2020 #18-12-2020 #19-04-2021
 erpnext.patches.v12_0.set_item_tax_details #19-11-2020
 erpnext.patches.v12_0.create_item_source_from_db_and_df
 erpnext.patches.v12_0.set_customer_primary_address_and_contact

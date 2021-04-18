@@ -63,6 +63,10 @@
   "column_break_42",
   "poa_address",
   "poa_address_display",
+  "sec_applies_to",
+  "applies_to_item",
+  "col_break_applies_to",
+  "applies_to_item_name",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -1758,12 +1762,39 @@
    "fieldname": "update_item_prices",
    "fieldtype": "Button",
    "label": "Update Price List"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "applies_to_item",
+   "fieldname": "sec_applies_to",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Applies To"
+  },
+  {
+   "depends_on": "eval:doc.applies_to_item_name != doc.applies_to_item",
+   "fetch_from": "applies_to_item.item_name",
+   "fieldname": "applies_to_item_name",
+   "fieldtype": "Data",
+   "label": "Applies to Item Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "applies_to_item",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Applies to Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "col_break_applies_to",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-03-24 10:38:32.249751",
+ "modified": "2021-04-19 01:29:42.095552",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

@@ -20,10 +20,6 @@
   "naming_series",
   "transaction_date",
   "valid_till",
-  "sec_applies_to",
-  "applies_to_item",
-  "col_break_applies_to",
-  "applies_to_item_name",
   "more_info",
   "transaction_type",
   "order_type",
@@ -49,6 +45,19 @@
   "contact_email",
   "contact_mobile",
   "contact_phone",
+  "sec_applies_to",
+  "applies_to_item",
+  "col_break_applies_to",
+  "applies_to_item_name",
+  "sec_insurance",
+  "insurance_company",
+  "insurance_company_name",
+  "col_break_insurance",
+  "insurance_policy_no",
+  "insurance_loss_no",
+  "col_break_insurance2",
+  "insurance_surveyor",
+  "insurance_surveyor_company",
   "currency_and_price_list",
   "currency",
   "conversion_rate",
@@ -113,14 +122,15 @@
   "total_discount_after_taxes",
   "base_total_discount_after_taxes",
   "section_break_44",
-  "coupon_code",
-  "column_break_103",
   "apply_discount_on",
+  "column_break_103",
   "additional_discount_percentage",
   "column_break_46",
-  "referral_sales_partner",
   "discount_amount",
   "base_discount_amount",
+  "column_break_113",
+  "coupon_code",
+  "referral_sales_partner",
   "totals",
   "grand_total",
   "base_grand_total",
@@ -1301,13 +1311,71 @@
    "fieldtype": "Data",
    "label": "Phone No",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_113",
+   "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "insurance_company",
+   "fieldname": "sec_insurance",
+   "fieldtype": "Section Break",
+   "hidden": 1,
+   "label": "Insurance Details"
+  },
+  {
+   "fieldname": "insurance_company",
+   "fieldtype": "Link",
+   "label": "Insurance Company",
+   "options": "Customer"
+  },
+  {
+   "depends_on": "eval:doc.insurance_company && doc.insurance_company_name != doc.insurance_company",
+   "fetch_from": "insurance_company.customer_name",
+   "fieldname": "insurance_company_name",
+   "fieldtype": "Data",
+   "label": "Insurance Company Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "col_break_insurance",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_policy_no",
+   "fieldtype": "Data",
+   "label": "Policy #"
+  },
+  {
+   "fieldname": "col_break_insurance2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "insurance_loss_no",
+   "fieldtype": "Data",
+   "label": "Loss #"
+  },
+  {
+   "fieldname": "insurance_surveyor",
+   "fieldtype": "Link",
+   "label": "Insurance Surveyor",
+   "options": "Insurance Surveyor"
+  },
+  {
+   "fetch_from": "insurance_surveyor.insurance_surveyor_company",
+   "fetch_if_empty": 1,
+   "fieldname": "insurance_surveyor_company",
+   "fieldtype": "Link",
+   "label": "Insurance Surveyor Company",
+   "options": "Insurance Surveyor Company"
   }
  ],
  "icon": "fa fa-shopping-cart",
  "idx": 82,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2020-12-21 16:45:29.494814",
+ "modified": "2021-04-19 01:22:40.140268",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",
