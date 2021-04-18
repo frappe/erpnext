@@ -626,7 +626,6 @@ class WorkOrder(Document):
 			float_precision = cint(frappe.db.get_default("float_precision")) or 2
 			qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
 			if qty > 0:
-				print("res.item_code: ", res.item_code)
 				mc.append("materials_to_consume", {
 					"item": res.item_code,
 					"item_name": res.item_name,
@@ -979,8 +978,6 @@ def make_material_produce(doc_name,partial=0):
 	mc.t_warehouse = wo_doc.fg_warehouse
 	mc.company = wo_doc.company
 	item_doc = frappe.get_doc("Item", wo_doc.production_item)
-	print("***** "*200)
-	print(wo_doc.get("fg_warehouse"))
 
 	mc.append("material_produce_item", {
 		"item_code": wo_doc.production_item,

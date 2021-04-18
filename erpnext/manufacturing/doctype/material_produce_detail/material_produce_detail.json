@@ -33,7 +33,6 @@
   {
    "fieldname": "t_warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Target Warehouse",
    "options": "Warehouse",
    "reqd": 1
@@ -49,6 +48,7 @@
    "default": "0",
    "fieldname": "has_batch_no",
    "fieldtype": "Check",
+   "in_list_view": 1,
    "label": "Has batch No"
   },
   {
@@ -59,12 +59,14 @@
   {
    "fieldname": "rate",
    "fieldtype": "Currency",
+   "in_list_view": 1,
    "label": "Rate",
    "options": "Company:company:default_currency"
   },
   {
    "fieldname": "weight",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Weight"
   },
   {
@@ -76,7 +78,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-13 14:53:29.382885",
+ "modified": "2021-04-19 03:00:09.441211",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce Detail",
