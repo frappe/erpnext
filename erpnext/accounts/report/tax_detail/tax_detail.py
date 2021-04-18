@@ -80,12 +80,12 @@ def run_report(report_name, data):
 						report[section_name]['subtotal'] += row['amount']
 			if component['type'] == 'section':
 				if component_name == section_name:
-					frappe.throw(_("A report component cannot refer to its parent section: ") + section_name)
+					frappe.throw(_("A report component cannot refer to its parent section") + ": " + section_name)
 				try:
 					report[section_name]['rows'] += report[component_name]['rows']
 					report[section_name]['subtotal'] += report[component_name]['subtotal']
 				except KeyError:
-					frappe.throw(_("A report component can only refer to an earlier section: ") + section_name)
+					frappe.throw(_("A report component can only refer to an earlier section") + ": " + section_name)
 
 		if show_detail:
 			new_data += report[section_name]['rows']
@@ -141,7 +141,7 @@ def filter_match(value, string):
 
 	try:
 		num = float(string) if string.strip() else 0
-		return eval(f'{value} {operator} {num}')
+		return frappe.safe_eval(f'{value} {operator} {num}')
 	except ValueError:
 		if operator == '<':
 			return True

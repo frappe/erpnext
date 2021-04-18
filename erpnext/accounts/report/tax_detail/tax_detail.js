@@ -273,7 +273,7 @@ erpnext.TaxDetail = class TaxDetail {
 			click: () => {
 				let cur_section = this.controls['section_name'].get_input_value();
 				if (cur_section) {
-					frappe.confirm(__('Are you sure you want to delete section ') + cur_section + '?',
+					frappe.confirm(__('Are you sure you want to delete section') + ' ' + cur_section + '?',
 					() => {this.delete(cur_section, 'section')});
 				}
 			}
@@ -354,7 +354,7 @@ erpnext.TaxDetail = class TaxDetail {
 			click: () => {
 				const component = this.controls['component'].get_input_value();
 				if (component) {
-					frappe.confirm(__('Are you sure you want to delete component ') + component + '?',
+					frappe.confirm(__('Are you sure you want to delete component') + ' ' + component + '?',
 					() => {this.delete(component, 'component')});
 				}
 			}
