@@ -286,7 +286,7 @@ class PurchaseReceipt(BuyingController):
 
 						add_gl_entry(gl_entries, warehouse_account[d.from_warehouse]['account'], d.cost_center,
 							-1 * flt(d.base_net_amount, d.precision("base_net_amount")), 0.0, remarks, warehouse_account,
-							account_currency=credit_currency, item=d)
+							debit_in_account_currency=-1 * credit_amount, account_currency=credit_currency, item=d)
 
 					# Amount added through landed-cost-voucher
 					if d.landed_cost_voucher_amount and landed_cost_entries:
@@ -296,7 +296,8 @@ class PurchaseReceipt(BuyingController):
 								account_currency!=self.company_currency) else flt(amount["amount"]))
 
 							add_gl_entry(gl_entries, account, d.cost_center, 0.0, credit_amount, remarks,
-								warehouse_account, account_currency=account_currency, project=d.project, item=d)
+								warehouse_account, credit_in_account_currency=flt(amount["amount"]),
+								account_currency=account_currency, project=d.project, item=d)
 
 					# sub-contracting warehouse
 					if flt(d.rm_supp_cost) and warehouse_account.get(self.supplier_warehouse):
@@ -389,7 +390,8 @@ class PurchaseReceipt(BuyingController):
 					i += 1
 
 	def add_gl_entry(self, gl_entries, account, cost_center, debit, credit, remarks, against_account,
-		account_currency=None, project=None, voucher_detail_no=None, item=None):
+		debit_in_account_currency=None, credit_in_account_currency=None, account_currency=None,
+		project=None, voucher_detail_no=None, item=None):
 		gl_entry = {
 			"account": account,
 			"cost_center": cost_center,
@@ -401,6 +403,12 @@ class PurchaseReceipt(BuyingController):
 
 		if voucher_detail_no:
 			gl_entry.update({"voucher_detail_no": voucher_detail_no})
+
+		if debit_in_account_currency:
+			gl_entry.update({"debit_in_account_currency": debit_in_account_currency})
+
+		if credit_in_account_currency:
+			gl_entry.update({"credit_in_account_currency": credit_in_account_currency})
 
 		gl_entries.append(self.get_gl_dict(gl_entry, item=item))
 
