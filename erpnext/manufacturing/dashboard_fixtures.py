@@ -43,7 +43,6 @@ def get_charts():
 	return [{
 		"doctype": "Dashboard Chart",
 		"based_on": "modified",
-		"time_interval": "Yearly",
 		"chart_type": "Sum",
 		"chart_name": _("Produced Quantity"),
 		"name": "Produced Quantity",
@@ -60,7 +59,6 @@ def get_charts():
 	}, {
 		"doctype": "Dashboard Chart",
 		"based_on": "creation",
-		"time_interval": "Yearly",
 		"chart_type": "Sum",
 		"chart_name": _("Completed Operation"),
 		"name": "Completed Operation",
