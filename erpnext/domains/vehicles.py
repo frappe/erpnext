@@ -67,6 +67,11 @@ accounting_dimension_fields = [
 		"insert_after": "vehicle_chassis_no", "read_only": 1, "fetch_from": "applies_to_vehicle.engine_no"},
 ]
 
+accounting_dimension_table_fields = deepcopy(accounting_dimension_fields)
+for d in accounting_dimension_table_fields:
+	if 'in_standard_filter' in d:
+		del d['in_standard_filter']
+
 for d in applies_to_fields:
 	d['translatable'] = 0
 for d in applies_to_project_fields:
@@ -133,7 +138,7 @@ data = {
 		"Purchase Invoice": applies_to_fields,
 		"Project": applies_to_project_fields + service_person_fields,
 		"Journal Entry": accounting_dimension_fields,
-		"Journal Entry Account": accounting_dimension_fields,
+		"Journal Entry Account": accounting_dimension_table_fields,
 		"Payment Entry": accounting_dimension_fields,
 	},
 	'default_portal_role': 'Customer'
