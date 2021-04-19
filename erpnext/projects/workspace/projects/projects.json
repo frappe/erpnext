@@ -134,8 +134,8 @@
    "dependencies": "Timesheet, Sales Invoice, Salary Slip",
    "hidden": 0,
    "is_query_report": 1,
-   "label": "Profitability",
-   "link_to": "Profitability",
+   "label": "Project Profitability",
+   "link_to": "Project Profitability",
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
@@ -161,7 +161,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-03-25 13:25:17.609608",
+ "modified": "2021-04-16 16:27:16.548780",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
