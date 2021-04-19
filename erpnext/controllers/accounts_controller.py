@@ -659,6 +659,7 @@ class AccountsController(TransactionBase):
 					'dr_or_cr': dr_or_cr,
 					'unadjusted_amount': flt(d.advance_amount),
 					'allocated_amount': flt(d.allocated_amount),
+					'precision': d.precision('advance_amount'),
 					'exchange_rate': (self.conversion_rate
 						if self.party_account_currency != self.company_currency else 1),
 					'grand_total': (self.base_grand_total
@@ -716,7 +717,9 @@ class AccountsController(TransactionBase):
 						total_billed_amt = abs(total_billed_amt)
 						max_allowed_amt = abs(max_allowed_amt)
 
-					if total_billed_amt - max_allowed_amt > 0.01:
+					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+
+					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
 						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 							.format(item.item_code, item.idx, max_allowed_amt))
 
