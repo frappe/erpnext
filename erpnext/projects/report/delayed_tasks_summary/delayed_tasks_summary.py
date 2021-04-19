@@ -34,6 +34,8 @@ def get_data(filters):
 			# task has no end date, hence no delay
 			task.delay = 0
 
+	# Sort by descending order of delay
+	tasks.sort(key=lambda x: x["delay"], reverse=True)
 	return tasks
 
 def get_conditions(filters):
