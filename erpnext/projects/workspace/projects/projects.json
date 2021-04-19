@@ -159,6 +159,16 @@
    "link_type": "Report",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "dependencies": "Task",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Delayed Tasks Summary",
+   "link_to": "Delayed Tasks Summary",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
  "modified": "2021-04-19 16:17:30.142545",
