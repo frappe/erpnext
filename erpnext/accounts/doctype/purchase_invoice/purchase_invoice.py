@@ -95,17 +95,17 @@ class PurchaseInvoice(BuyingController):
 
 								if tax_detail.tax_rate == 15:
 									if self.exonerated == 1:
-										taxed15 += item.amount * (tax_detail.tax_rate/100)
+										taxed15 += item.amount - (item.amount/1.15)
 										exonerated += item.amount
 									else:
-										taxed15 += item.amount * (tax_detail.tax_rate/100)
+										taxed15 += item.amount - (item.amount/1.15)
 								
 								if tax_detail.tax_rate == 18:
 									if self.exonerated == 1:
-										taxed18 += item.amount * (tax_detail.tax_rate/100)
+										taxed18 += item.amount - (item.amount/1.18)
 										exonerated += item.amount
 									else:
-										taxed18 += item.amount * (tax_detail.tax_rate/100)
+										taxed18 += item.amount - (item.amount/1.18)
 				else:
 					exempt += item.amount
 	
