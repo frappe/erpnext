@@ -100,7 +100,7 @@ status_map = {
 		["Queued", "eval:self.status == 'Queued'"],
 		["Cancelled", "eval:self.docstatus == 2"],
 	],
-	"Transactions Cleanup": [
+	"Transaction Deletion Log": [
 		["Draft", None],
 		["Completed", "eval:self.docstatus == 1"],
 	]

@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Transaction Deletion Log', {
-	refresh: function(frm) {
+	onload: function(frm) {
 		let doctypes_to_be_ignored_array;	
 		frappe.call({
 			method : "erpnext.setup.doctype.transaction_deletion_log.transaction_deletion_log.doctypes",

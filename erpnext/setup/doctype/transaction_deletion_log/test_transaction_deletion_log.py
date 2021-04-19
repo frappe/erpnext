@@ -10,24 +10,24 @@ class TestTransactionDeletionLog(unittest.TestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
-	def test_no_of_docs(self):
+	def test_doctypes_contain_company_field(self):
+		tdr = create_transaction_deletion_request('Pied Piper')
+		for doctype in tdr.doctypes:
+			contains_company = False
+			doctype_fields = frappe.get_meta(doctype.doctype_name).as_dict()['fields']
+			for doctype_field in doctype_fields:
+				if doctype_field['fieldtype'] == 'Link' and doctype_field['options'] == 'Company':
+					contains_company = True
+					break
+			self.assertTrue(contains_company)
+	
+	def test_no_of_docs_is_correct(self):
 		for i in range(5):
 			create_todo('Pied Piper')
 		tdr = create_transaction_deletion_request('Pied Piper')
 		for doctype in tdr.doctypes:
 			if doctype.doctype_name == 'ToDo':
 				self.assertEqual(doctype.no_of_docs, 5)
-
-	def test_doctypes_contain_company_field(self):
-		tdr = create_transaction_deletion_request('Pied Piper')
-		for doctype in tdr.doctypes:
-			flag = False
-			doctype_fields = frappe.get_meta(doctype.doctype_name).as_dict()['fields']
-			for doctype_field in doctype_fields:
-				if doctype_field['fieldtype'] == 'Link' and doctype_field['options'] == 'Company':
-					flag = True
-					break
-			self.assertTrue(flag)
 
 def create_transaction_deletion_request(company):
 	tdr = frappe.get_doc({
