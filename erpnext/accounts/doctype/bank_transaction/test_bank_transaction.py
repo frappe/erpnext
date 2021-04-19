@@ -61,7 +61,6 @@ class TestBankTransaction(unittest.TestCase):
 	def test_debit_credit_output(self):
 		bank_transaction = frappe.get_doc("Bank Transaction", dict(description="Auszahlung Karte MC/000002916 AUTOMAT 698769 K002 27.10. 14:07"))
 		linked_payments = get_linked_payments(bank_transaction.name, ['payment_entry', 'exact_match'])
-		print(linked_payments)
 		self.assertTrue(linked_payments[0][3])
 
 	# Check error if already reconciled

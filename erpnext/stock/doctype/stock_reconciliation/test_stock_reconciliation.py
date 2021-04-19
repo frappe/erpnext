@@ -32,7 +32,7 @@ class TestStockReconciliation(unittest.TestCase):
 		company = frappe.db.get_value('Warehouse', 'Stores - TCP1', 'company')
 		# [[qty, valuation_rate, posting_date,
 		#		posting_time, expected_stock_value, bin_qty, bin_valuation]]
-		
+
 		input_data = [
 			[50, 1000, "2012-12-26", "12:00"],
 			[25, 900, "2012-12-26", "12:00"],
@@ -86,7 +86,7 @@ class TestStockReconciliation(unittest.TestCase):
 		se1.cancel()
 
 	def test_get_items(self):
-		create_warehouse("_Test Warehouse Group 1", 
+		create_warehouse("_Test Warehouse Group 1",
 			{"is_group": 1, "company": "_Test Company", "parent_warehouse": "All Warehouses - _TC"})
 		create_warehouse("_Test Warehouse Ledger 1",
 			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC", "company": "_Test Company"})
