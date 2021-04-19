@@ -74,6 +74,8 @@ class BuyingController(StockController):
 			self.update_valuation_rate("items")
 
 	def set_missing_values(self, for_validate=False):
+		from erpnext.controllers.accounts_controller import force_party_fields
+
 		super(BuyingController, self).set_missing_values(for_validate)
 
 		self.set_supplier_from_item_default()
@@ -81,8 +83,16 @@ class BuyingController(StockController):
 
 		# set contact and address details for supplier, if they are not mentioned
 		if getattr(self, "supplier", None):
-			self.update_if_missing(get_party_details(self.supplier, party_type="Supplier", ignore_permissions=self.flags.ignore_permissions, letter_of_credit=self.get("letter_of_credit"),
-			doctype=self.doctype, company=self.company, party_address=self.supplier_address, shipping_address=self.get('shipping_address')))
+			self.update_if_missing(get_party_details(self.supplier,
+				party_type="Supplier",
+				ignore_permissions=self.flags.ignore_permissions,
+				letter_of_credit=self.get("letter_of_credit"),
+				doctype=self.doctype,
+				company=self.company,
+				party_address=self.supplier_address,
+				shipping_address=self.get('shipping_address'),
+				contact_person=self.get('contact_person')
+			), force_fields=force_party_fields)
 
 		self.set_missing_item_details(for_validate)
 

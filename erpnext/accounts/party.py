@@ -24,7 +24,7 @@ class DuplicatePartyAccountError(frappe.ValidationError): pass
 def get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, bill_to=None, company=None, posting_date=None,
 	bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
 	transaction_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, has_stin=None,
-	party_address=None, company_address=None, shipping_address=None, pos_profile=None):
+	party_address=None, company_address=None, shipping_address=None, contact_person=None, pos_profile=None):
 
 	if not party:
 		return {}
@@ -33,12 +33,12 @@ def get_party_details(party=None, account=None, party_type="Customer", letter_of
 	return _get_party_details(party, account, party_type, letter_of_credit, bill_to, company, posting_date,
 		bill_date, price_list, currency, doctype, ignore_permissions, fetch_payment_terms_template,
 		transaction_type, cost_center, tax_id, tax_cnic, tax_strn, has_stin,
-		party_address, shipping_address, company_address, pos_profile)
+		party_address, shipping_address, company_address, contact_person, pos_profile)
 
 def _get_party_details(party=None, account=None, party_type="Customer", letter_of_credit=None, bill_to=None, company=None, posting_date=None,
 		bill_date=None, price_list=None, currency=None, doctype=None, ignore_permissions=False, fetch_payment_terms_template=True,
 		transaction_type=None, cost_center=None, tax_id=None, tax_cnic=None, tax_strn=None, has_stin=None,
-		party_address=None, shipping_address=None, company_address=None, pos_profile=None):
+		party_address=None, shipping_address=None, company_address=None, contact_person=None, pos_profile=None):
 
 	party_details = frappe._dict(set_due_date(party, party_type, company, posting_date, bill_date, doctype))
 	party = party_details[scrub(party_type)]
@@ -66,7 +66,7 @@ def _get_party_details(party=None, account=None, party_type="Customer", letter_o
 	currency = party.default_currency if party.get("default_currency") else get_company_currency(company)
 
 	party_address, shipping_address = set_address_details(party_details, party, party_type, doctype, company, party_address, company_address, shipping_address, bill_to)
-	set_contact_details(party_details, billing_party_doc, billing_party_type)
+	set_contact_details(party_details, billing_party_doc, billing_party_type, contact_person)
 	set_other_values(party_details, party, party_type)
 	set_price_list(party_details, party, party_type, price_list, pos_profile)
 
@@ -148,8 +148,8 @@ def set_address_details(party_details, party, party_type, doctype=None, company=
 def get_regional_address_details(party_details, doctype, company):
 	pass
 
-def set_contact_details(party_details, party, party_type):
-	party_details.contact_person = get_default_contact(party_type, party.name)
+def set_contact_details(party_details, party, party_type, contact_person=None):
+	party_details.contact_person = contact_person or get_default_contact(party_type, party.name)
 
 	if not party_details.contact_person:
 		party_details.update({

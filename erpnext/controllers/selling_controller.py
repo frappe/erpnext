@@ -74,6 +74,8 @@ class SellingController(StockController):
 		self.set_price_list_and_item_details(for_validate=for_validate)
 
 	def set_missing_lead_customer_details(self):
+		from erpnext.controllers.accounts_controller import force_party_fields
+
 		customer, lead = None, None
 		if getattr(self, "customer", None):
 			customer = self.customer
@@ -101,16 +103,19 @@ class SellingController(StockController):
 				doctype=self.doctype, company=self.company,
 				fetch_payment_terms_template=fetch_payment_terms_template,
 				has_stin=self.get("has_stin"),
-				party_address=self.customer_address, shipping_address=self.shipping_address_name)
+				party_address=self.customer_address,
+				shipping_address=self.shipping_address_name,
+				contact_person=self.get('contact_person'),
+			)
 			if not self.meta.get_field("sales_team") and "sales_team" in party_details:
 				party_details.pop("sales_team")
-			self.update_if_missing(party_details)
+			self.update_if_missing(party_details, force_fields=force_party_fields)
 
 		elif lead:
 			from erpnext.crm.doctype.lead.lead import get_lead_details
 			self.update_if_missing(get_lead_details(lead,
 				posting_date=self.get('transaction_date') or self.get('posting_date'),
-				company=self.company))
+				company=self.company), force_fields=force_party_fields)
 
 	def set_price_list_and_item_details(self, for_validate=False):
 		self.set_price_list_currency("Selling")
