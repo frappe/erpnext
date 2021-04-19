@@ -713,7 +713,9 @@ def get_tax_template(doctype, txt, searchfield, start, page_len, filters):
 		return [(d,) for d in set(taxes)]
 
 
-def get_fields(doctype, fields=[]):
+def get_fields(doctype, fields=None):
+	if fields is None:
+		fields = []
 	meta = frappe.get_meta(doctype)
 	fields.extend(meta.get_search_fields())
 

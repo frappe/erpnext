@@ -22,7 +22,7 @@
   "base_amount",
   "column_break_16",
   "rate",
-  "quantity_and_rate"
+  "amount"
  ],
  "fields": [
   {
@@ -152,7 +152,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "quantity_and_rate",
+   "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Amount",
@@ -164,7 +164,7 @@
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-17 03:13:13.271097",
+ "modified": "2021-04-20 03:47:44.398982",
  "modified_by": "Administrator",
  "module": "CRM",
  "name": "Opportunity Item",

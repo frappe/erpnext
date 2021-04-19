@@ -36,6 +36,20 @@ class Opportunity(TransactionBase):
 		if not self.with_items:
 			self.items = []
 
+		else:
+			self.calculate_totals()
+
+	def calculate_totals(self):
+		total = base_total = 0
+		for item in self.get('items'):
+			item.amount = item.rate * item.qty
+			item.basic_rate = self.conversion_rate * item.rate
+			item.base_amount = self.conversion_rate * item.amount
+			total += item.amount
+			base_total += item.base_amount
+		self.total = total
+		self.base_total = base_total
+
 	def make_new_lead_if_required(self):
 		"""Set lead against new opportunity"""
 		if (not self.get("party_name")) and self.contact_email:
@@ -219,13 +233,6 @@ def make_quotation(source_name, target_doc=None):
 
 		company_currency = frappe.get_cached_value('Company',  quotation.company,  "default_currency")
 
-		if quotation.quotation_to == 'Customer' and quotation.party_name:
-			party_account_currency = get_party_account_currency("Customer", quotation.party_name, quotation.company)
-		else:
-			party_account_currency = company_currency
-
-		quotation.currency = party_account_currency or company_currency
-
 		if company_currency == quotation.currency:
 			exchange_rate = 1
 		else:
@@ -249,7 +256,7 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"opportunity_from": "quotation_to",
-				"name": "enq_no",
+				"name": "enq_no"
 			}
 		},
 		"Opportunity Item": {
