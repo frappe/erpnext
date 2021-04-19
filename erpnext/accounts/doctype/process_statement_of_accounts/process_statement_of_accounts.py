@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute as get_ageing
 from erpnext import get_company_currency
+from erpnext.accounts.party import get_party_account_currency
 
 from frappe.core.doctype.communication.email import make
 from frappe.utils.print_format import report_to_pdf
@@ -68,7 +69,8 @@ def get_report_pdf(doc, consolidated=True):
 			'account': doc.account if doc.account else None,
 			'party_type': 'Customer',
 			'party': [entry.customer],
-			'presentation_currency': doc.currency or get_company_currency(doc.company),
+			'presentation_currency': get_party_account_currency('Customer', entry.customer, doc.company) \
+				or doc.currency or get_company_currency(doc.company),
 			'group_by': doc.group_by,
 			'currency': doc.currency,
 			'cost_center': [cc.cost_center_name for cc in doc.cost_center],
