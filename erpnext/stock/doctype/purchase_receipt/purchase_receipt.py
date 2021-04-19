@@ -389,7 +389,7 @@ class PurchaseReceipt(BuyingController):
 
 					i += 1
 
-	def self.add_gl_entry(self, gl_entries, account, cost_center, debit, credit, remarks, against_account,
+	def add_gl_entry(self, gl_entries, account, cost_center, debit, credit, remarks, against_account,
 		debit_in_account_currency=None, credit_in_account_currency=None, account_currency=None,
 		project=None, voucher_detail_no=None, item=None):
 		gl_entry = {
