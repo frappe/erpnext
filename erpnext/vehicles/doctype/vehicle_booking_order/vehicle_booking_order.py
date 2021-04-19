@@ -1101,9 +1101,9 @@ def send_sms(receiver_list, msg, success_msg=True, type=None,
 		frappe.throw(_("Cannot send Booking Confirmation SMS after receiving Vehicle"))
 	if type == "Balance Payment Request" and not vbo_doc.customer_outstanding:
 		frappe.throw(_("Cannot send Balance Payment Request SMS because Customer Outstanding amount is zero"))
-	if type == "Ready For Delivery" and not vbo_doc.delivery_status != 'To Deliver':
+	if type == "Ready For Delivery" and vbo_doc.delivery_status != 'To Deliver':
 		frappe.throw(_("Cannot send Ready For Delivery SMS because delivery status is not 'To Deliver'"))
-	if type == "Congratulations" and not vbo_doc.invoice_status != 'Delivered':
+	if type == "Congratulations" and vbo_doc.invoice_status != 'Delivered':
 		frappe.throw(_("Cannot send Congratulations SMS because Invoice has not been delivered yet"))
 
 	vbo_doc.add_notification_count(type, "SMS", update=1)
