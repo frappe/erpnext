@@ -64,6 +64,14 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					});
 				}, __("Get Items From"));
 		} else if (this.frm.doc.docstatus === 1) {
+			var s = me.frm.doc.schedules;
+			let flag = 0
+			for(let i in s){
+				if (s[i].completion_status == pending){
+					flag = 1
+				}
+			}
+			if(count){
 			this.frm.add_custom_button(__('Create Maintenance Visit'), function () {
 				let items = me.frm.doc.items;
 				let s = me.frm.doc.schedules;
@@ -103,7 +111,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 							let field = d.get_field("scheduled_date");
 							dates = ""
 							for (let i in s) {
-								if (s[i].item_name == this.value) {
+								if (s[i].item_name == this.value && s[i].completion_status == "Pending") {
 									dates = dates + '\n' + formatDate(s[i].scheduled_date);
 								}
 
@@ -154,6 +162,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 
 			}, __('Create'));
 		}
+	}
 	},
 
 	start_date: function (doc, cdt, cdn) {
