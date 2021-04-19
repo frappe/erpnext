@@ -561,7 +561,7 @@ def get_json(filters, report_name, data):
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-	gst_json = {"gstin": "", "version": "GST2.2.9",
+	gst_json = {"version": "GST2.2.9",
 		"hash": "hash", "gstin": gstin, "fp": fp}
 
 	res = {}
