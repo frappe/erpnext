@@ -159,6 +159,31 @@ erpnext.PointOfSale.ItemSelector = class {
 	bind_events() {
 		const me = this;
 		window.onScan = onScan;
+
+		onScan.decodeKeyEvent = function (oEvent) {
+			var iCode = this._getNormalizedKeyNum(oEvent);
+			switch (true) {
+				case iCode >= 48 && iCode <= 90: // numbers and letters
+				case iCode >= 106 && iCode <= 111: // operations on numeric keypad (+, -, etc.)
+				case (iCode >= 160 && iCode <= 164) || iCode == 170: // ^ ! # $ *
+				case iCode >= 186 && iCode <= 194: // (; = , - . / `)
+				case iCode >= 219 && iCode <= 222: // ([ \ ] ')
+					if (oEvent.key !== undefined && oEvent.key !== '') {
+						return oEvent.key;
+					}
+
+					var sDecoded = String.fromCharCode(iCode);
+					switch (oEvent.shiftKey) {
+						case false: sDecoded = sDecoded.toLowerCase(); break;
+						case true: sDecoded = sDecoded.toUpperCase(); break;
+					}
+					return sDecoded;
+				case iCode >= 96 && iCode <= 105: // numbers on numeric keypad
+					return 0 + (iCode - 96);
+			}
+			return '';
+		};
+
 		onScan.attachTo(document, {
 			onScan: (sScancode) => {
 				if (this.search_field && this.$component.is(':visible')) {

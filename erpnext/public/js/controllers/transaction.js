@@ -1103,6 +1103,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				to_currency: to_currency,
 				args: args
 			},
+			freeze: true,
+			freeze_message: __("Fetching exchange rates ..."),
 			callback: function(r) {
 				callback(flt(r.message));
 			}
