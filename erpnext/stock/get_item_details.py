@@ -609,8 +609,12 @@ def get_price_list_rate(args, item_doc, out):
 	meta = frappe.get_meta(args.parenttype or args.doctype)
 
 	if meta.get_field("currency") or args.get('currency'):
-		pl_details = get_price_list_currency_and_exchange_rate(args)
-		args.update(pl_details)
+		if not args.get("price_list_currency") or not args.get("plc_conversion_rate"):
+			# if currency and plc_conversion_rate exist then
+			# `get_price_list_currency_and_exchange_rate` has already been called
+			pl_details = get_price_list_currency_and_exchange_rate(args)
+			args.update(pl_details)
+
 		if meta.get_field("currency"):
 			validate_conversion_rate(args, meta)
 
@@ -1000,6 +1004,8 @@ def apply_price_list(args, as_doc=False):
 	args = process_args(args)
 
 	parent = get_price_list_currency_and_exchange_rate(args)
+	args.update(parent)
+
 	children = []
 
 	if "items" in args:
@@ -1064,7 +1070,7 @@ def get_price_list_currency_and_exchange_rate(args):
 	return frappe._dict({
 		"price_list_currency": price_list_currency,
 		"price_list_uom_dependant": price_list_uom_dependant,
-		"plc_conversion_rate": plc_conversion_rate
+		"plc_conversion_rate": plc_conversion_rate or 1
 	})
 
 @frappe.whitelist()
