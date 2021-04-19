@@ -251,7 +251,7 @@ def get_tds_amount(ldc, parties, inv, tax_details, fiscal_year_details, tax_dedu
 	threshold = tax_details.get('threshold', 0)
 	cumulative_threshold = tax_details.get('cumulative_threshold', 0)
 
-	if ((threshold and supp_credit_amt >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
+	if ((threshold and inv.net_total >= threshold) or (cumulative_threshold and supp_credit_amt >= cumulative_threshold)):
 		if ldc and is_valid_certificate(
 			ldc.valid_from, ldc.valid_upto,
 			inv.posting_date, tax_deducted,
