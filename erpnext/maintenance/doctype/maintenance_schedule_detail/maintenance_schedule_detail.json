@@ -10,10 +10,11 @@
   "item_code",
   "item_name",
   "scheduled_date",
-  "actual_date",
   "sales_person",
+  "actual_date",
+  "completion_status",
   "serial_no",
-  "completion_status"
+  "item_ref"
  ],
  "fields": [
   {
@@ -29,11 +30,9 @@
    "search_index": 1
   },
   {
-   "columns": 2,
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
-   "in_list_view": 1,
    "label": "Item Name",
    "oldfieldname": "item_name",
    "oldfieldtype": "Data",
@@ -71,7 +70,8 @@
    "label": "Sales Person",
    "oldfieldname": "incharge_name",
    "oldfieldtype": "Link",
-   "options": "Sales Person"
+   "options": "Sales Person",
+   "read_only_depends_on": "eval:doc.completion_status != \"Pending\""
   },
   {
    "fieldname": "serial_no",
@@ -85,16 +85,25 @@
    "width": "160px"
   },
   {
+   "columns": 2,
    "fieldname": "completion_status",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Completion Status",
-   "options": "Pending\nPartially Completed\nFully Completed"
+   "options": "Pending\nPartially Completed\nFully Completed",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_ref",
+   "fieldtype": "Data",
+   "label": "Item Reference",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-19 16:18:36.723319",
+ "modified": "2021-04-19 17:42:31.685710",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",

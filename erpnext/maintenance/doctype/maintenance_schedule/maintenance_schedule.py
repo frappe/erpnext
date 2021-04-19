@@ -33,6 +33,7 @@ class MaintenanceSchedule(TransactionBase):
 				count = count + 1
 				child.sales_person = d.sales_person
 				child.completion_status = "Pending"
+				child.item_ref = d.name
 
 	def on_submit(self):
 		if not self.get('schedules'):
@@ -171,9 +172,7 @@ class MaintenanceSchedule(TransactionBase):
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')
-
-
-
+	
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
 			serial_no_doc = frappe.get_doc("Serial No", serial_no)
@@ -255,6 +254,8 @@ def make_maintenance_visit(source_name, target_doc=None,item_name=None,s_id=None
 
 	def update_sid(source, target, parent):
 		target.prevdoc_detail_docname = s_id
+		sales_person = frappe.db.get_value('Maintenance Schedule Detail', s_id, 'sales_person')
+		target.service_person = sales_person
 
 	doclist = get_mapped_doc("Maintenance Schedule", source_name, {
 			"Maintenance Schedule": {
@@ -275,7 +276,7 @@ def make_maintenance_visit(source_name, target_doc=None,item_name=None,s_id=None
 					},
 					"condition": lambda doc: doc.item_name == item_name,
 
-										"postprocess": update_sid
+					"postprocess": update_sid
 
 			}
 	}, target_doc)

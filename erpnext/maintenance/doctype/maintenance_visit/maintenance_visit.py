@@ -4,6 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
+from frappe.utils import get_datetime
 
 from erpnext.utilities.transaction_base import TransactionBase
 
@@ -16,8 +17,33 @@ class MaintenanceVisit(TransactionBase):
 			if d.serial_no and not frappe.db.exists("Serial No", d.serial_no):
 				frappe.throw(_("Serial No {0} does not exist").format(d.serial_no))
 
+	def validate_mntc_date(self):
+		if self.maintenance_type == "Scheduled":
+			p = self.purposes
+			for i in p:
+				detail_ref = i.prevdoc_detail_docname
+			item_ref = frappe.db.get_value('Maintenance Schedule Detail', detail_ref , 'item_ref')
+			start_date, end_date = frappe.db.get_value('Maintenance Schedule Item', item_ref, ['start_date', 'end_date'])
+			if get_datetime(self.mntc_date) < get_datetime(start_date) or get_datetime(self.mntc_date) > get_datetime(end_date):
+				frappe.throw(_("Date must be between {0} and {1}").format(start_date,end_date))
+
 	def validate(self):
 		self.validate_serial_no()
+		self.validate_mntc_date()
+		
+	def update_completion_status(self):
+		if self.maintenance_type == "Scheduled":
+			p = self.purposes
+			for i in p:
+				detail_ref = i.prevdoc_detail_docname
+			frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'completion_status', self.completion_status)
+	
+	def update_actual_date(self):
+		if self.maintenance_type == "Scheduled":
+			p = self.purposes
+			for i in p:
+				detail_ref = i.prevdoc_detail_docname
+			frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'actual_date', self.mntc_date)
 
 	def update_customer_issue(self, flag):
 		for d in self.get('purposes'):
@@ -77,6 +103,8 @@ class MaintenanceVisit(TransactionBase):
 	def on_submit(self):
 		self.update_customer_issue(1)
 		frappe.db.set(self, 'status', 'Submitted')
+		self.update_completion_status()
+		self.update_actual_date()
 
 	def on_cancel(self):
 		self.check_if_last_visit()
