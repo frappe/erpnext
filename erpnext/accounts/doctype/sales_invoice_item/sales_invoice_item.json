@@ -44,6 +44,7 @@
   "rate",
   "amount",
   "item_tax_template",
+  "tax_detail",
   "col_break3",
   "base_rate",
   "base_amount",
@@ -109,7 +110,7 @@
   },
   {
    "bold": 1,
-   "columns": 4,
+   "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_list_view": 1,
@@ -455,8 +456,7 @@
    "fieldname": "item_tax_template",
    "fieldtype": "Link",
    "label": "Item Tax Template",
-   "options": "Item Tax Template",
-   "print_hide": 1
+   "options": "Item Tax Template"
   },
   {
    "default": ":Company",
@@ -819,11 +819,21 @@
    "options": "Category for sale",
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "columns": 1,
+   "fetch_from": "item_code.tax_detail",
+   "fieldname": "tax_detail",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Tax Detail",
+   "options": "Tax Detail",
+   "reqd": 1
   }
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-03-30 15:17:21.232055",
+ "modified": "2021-04-15 15:54:26.553921",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",
