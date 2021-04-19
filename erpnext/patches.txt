@@ -693,7 +693,7 @@ execute:frappe.reload_doctype('Dashboard')
 execute:frappe.reload_doc('desk', 'doctype', 'number_card_link')
 execute:frappe.delete_doc_if_exists('Dashboard', 'Accounts')
 erpnext.patches.v13_0.update_actual_start_and_end_date_in_wo
-erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes #2020-05-25
+erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes #2021-04-16
 erpnext.patches.v12_0.update_bom_in_so_mr
 execute:frappe.delete_doc("Report", "Department Analytics")
 execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
@@ -772,3 +772,4 @@ erpnext.patches.v12_0.purchase_receipt_status
 erpnext.patches.v13_0.fix_non_unique_represents_company
 erpnext.patches.v12_0.add_document_type_field_for_italy_einvoicing
 erpnext.patches.v13_0.make_non_standard_user_type #13-04-2021
+erpnext.patches.v13_0.update_shipment_status
