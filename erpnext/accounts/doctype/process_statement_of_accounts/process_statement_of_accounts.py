@@ -7,8 +7,9 @@ import frappe
 from frappe.model.document import Document
 from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute as get_ageing
-from frappe.core.doctype.communication.email import make
+from erpnext import get_company_currency
 
+from frappe.core.doctype.communication.email import make
 from frappe.utils.print_format import report_to_pdf
 from frappe.utils.pdf import get_pdf
 from frappe.utils import today, add_days, add_months, getdate, format_date
@@ -64,16 +65,16 @@ def get_report_pdf(doc, consolidated=True):
 			'to_date': doc.to_date,
 			'company': doc.company,
 			'finance_book': doc.finance_book if doc.finance_book else None,
-			"account": doc.account if doc.account else None,
+			'account': doc.account if doc.account else None,
 			'party_type': 'Customer',
 			'party': [entry.customer],
+			'presentation_currency': doc.currency or get_company_currency(doc.company),
 			'group_by': doc.group_by,
 			'currency': doc.currency,
 			'cost_center': [cc.cost_center_name for cc in doc.cost_center],
 			'project': [p.project_name for p in doc.project],
 			'show_opening_entries': 0,
 			'include_default_book_entries': 0,
-			'show_cancelled_entries': 1,
 			'tax_id': tax_id if tax_id else None
 		})
 		col, res = get_soa(filters)

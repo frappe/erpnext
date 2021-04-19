@@ -19,7 +19,7 @@
 		</tr>
 	</thead>
 	<tbody>
-        {% for row in data %}
+		{% for row in data %}
 			<tr>
 			{% if(row.posting_date) %}
 				<td>{{ frappe.format(row.posting_date, 'Date') }}</td>
@@ -78,10 +78,10 @@
 	</thead>
 	<tbody>
 		<tr>
-			<td>{{ aging.range1 }}</td>
-			<td>{{ aging.range2 }}</td>
-			<td>{{ aging.range3 }}</td>
-			<td>{{ aging.range4 }}</td>
+			<td>{{ frappe.utils.fmt_money(aging.range1, currency=filters.presentation_currency) }}</td>
+			<td>{{ frappe.utils.fmt_money(aging.range2, currency=filters.presentation_currency) }}</td>
+			<td>{{ frappe.utils.fmt_money(aging.range3, currency=filters.presentation_currency) }}</td>
+			<td>{{ frappe.utils.fmt_money(aging.range4, currency=filters.presentation_currency) }}</td>
 		</tr>
 	</tbody>
 </table>
