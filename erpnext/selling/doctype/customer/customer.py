@@ -625,6 +625,8 @@ def make_contact(args, is_primary_contact=1):
 		contact.add_phone(args.get('mobile_no'), is_primary_mobile_no=True)
 	if args.get('phone_no'):
 		contact.add_phone(args.get('phone_no'), is_primary_phone=True)
+
+	contact.flags.from_linked_document = (args.get('doctype'), args.get('name'))
 	contact.insert()
 
 	return contact
@@ -653,7 +655,10 @@ def make_address(args, is_primary_address=1):
 			'link_doctype': args.get('doctype'),
 			'link_name': args.get('name')
 		}]
-	}).insert()
+	})
+
+	address.flags.from_linked_document = (args.get('doctype'), args.get('name'))
+	address.insert()
 
 	return address
 
