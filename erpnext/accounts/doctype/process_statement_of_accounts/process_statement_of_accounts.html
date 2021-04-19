@@ -19,7 +19,7 @@
 		</tr>
 	</thead>
 	<tbody>
-        {% for row in data %}
+		{% for row in data %}
 			<tr>
 			{% if(row.posting_date) %}
 				<td>{{ frappe.format(row.posting_date, 'Date') }}</td>
