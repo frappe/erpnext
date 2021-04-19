@@ -35,12 +35,6 @@ class SellingController(StockController):
 	def onload(self):
 		super(SellingController, self).onload()
 
-		if self.docstatus == 0:
-			if self.get('customer'):
-				self.update(get_fetch_values(self.doctype, 'customer', self.customer))
-			if self.get('bill_to'):
-				self.update(get_fetch_values(self.doctype, 'bill_to', self.bill_to))
-
 		if self.doctype in ("Sales Order", "Delivery Note", "Sales Invoice"):
 			for item in self.get("items"):
 				item.update(get_bin_details(item.item_code, item.warehouse))

@@ -89,6 +89,9 @@ class AccountsController(TransactionBase):
 
 		self.set_onload("enable_dynamic_bundling", self.dynamic_bundling_enabled())
 
+		if self.docstatus == 0:
+			self.set_missing_values()
+
 	def dynamic_bundling_enabled(self):
 		return self.doctype in ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice'] and\
 			frappe.get_cached_value('Stock Settings', None, "enable_dynamic_bundling")
