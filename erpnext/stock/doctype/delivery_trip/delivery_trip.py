@@ -90,6 +90,7 @@ class DeliveryTrip(Document):
 		delivery_notes = [get_link_to_form("Delivery Note", note) for note in delivery_notes]
 		frappe.msgprint(_("Delivery Notes {0} updated").format(", ".join(delivery_notes)))
 
+	@frappe.whitelist()
 	def process_route(self, optimize):
 		"""
 		Estimate the arrival times for each stop in the Delivery Trip.

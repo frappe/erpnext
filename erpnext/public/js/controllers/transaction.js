@@ -1103,6 +1103,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				to_currency: to_currency,
 				args: args
 			},
+			freeze: true,
+			freeze_message: __("Fetching exchange rates ..."),
 			callback: function(r) {
 				callback(flt(r.message));
 			}
@@ -1174,8 +1176,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 			// for handling customization not to fetch price list rate
-			if (frappe.flags.dont_fetch_price_list_rate) {
-				return;
+			if(frappe.flags.dont_fetch_price_list_rate) {
+				return
 			}
 
 			if (!dont_fetch_price_list_rate &&
