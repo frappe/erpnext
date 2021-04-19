@@ -120,6 +120,9 @@ class PricingRule(Document):
 		for other_field in cleanup_other_fields:
 			self.set(other_field, None)
 
+		if self.price_or_product_discount == 'Price' and self.is_recursive:
+			self.is_recursive = 0
+
 	def validate_rate_or_discount(self):
 		for field in ["Rate"]:
 			if flt(self.get(frappe.scrub(field))) < 0:

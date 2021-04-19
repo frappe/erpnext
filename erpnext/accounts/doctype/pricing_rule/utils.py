@@ -320,8 +320,8 @@ def filter_pricing_rules_for_qty_amount(qty, rate, pricing_rules, args=None):
 		if rule.get("uom"):
 			conversion_factor = get_conversion_factor(rule.item_code, rule.uom).get("conversion_factor", 1)
 
-		if (flt(qty) >= (flt(rule.min_qty) * conversion_factor)
-			and (flt(qty)<= (rule.max_qty * conversion_factor) if rule.max_qty else True)):
+		if (flt(qty) >= (flt(rule.min_qty) * conversion_factor) and
+			(flt(qty)<= (rule.max_qty * conversion_factor) if (rule.max_qty and not rule.get('is_recursive')) else True)):
 			status = True
 
 		# if user has created item price against the transaction UOM
@@ -511,7 +511,16 @@ def get_product_discount_rule(pricing_rule, item_details, args=None, doc=None):
 	qty = pricing_rule.free_qty or 1
 	if pricing_rule.is_recursive:
 		transaction_qty = args.get('qty') if args else doc.total_qty
-		if transaction_qty:
+
+		if (flt(pricing_rule.get('min_qty', 0)) > 0 and transaction_qty
+			and transaction_qty >= pricing_rule.get('min_qty')):
+			if not flt(pricing_rule.get('max_qty', 0)):
+				qty = (qty * frappe.utils.floor(transaction_qty / pricing_rule.get('min_qty')))
+			elif (flt(pricing_rule.get('max_qty', 0)) > 0
+				and transaction_qty >= pricing_rule.get('max_qty')):
+				qty = (qty * frappe.utils.ceil(transaction_qty / pricing_rule.get('max_qty')))
+
+		elif transaction_qty:
 			qty = flt(transaction_qty) * qty
 
 	free_item_data_args = {
