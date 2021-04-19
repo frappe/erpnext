@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Profitability"] = {
+frappe.query_reports["Project Profitability"] = {
 	"filters": [
 		{
 			"fieldname": "company",
@@ -25,6 +25,12 @@ frappe.query_reports["Profitability"] = {
 			"fieldtype": "Date",
 			"reqd": 1,
 			"default": frappe.datetime.now_date()
+		},
+		{
+			"fieldname": "project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
 		},
 		{
 			"fieldname": "customer_name",
