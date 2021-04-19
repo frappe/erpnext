@@ -32,8 +32,7 @@ class MaintenanceSchedule(TransactionBase):
 				child.idx = count
 				count = count + 1
 				child.sales_person = d.sales_person
-
-		
+				child.completion_status = "Pending"
 
 	def on_submit(self):
 		if not self.get('schedules'):
@@ -58,9 +57,9 @@ class MaintenanceSchedule(TransactionBase):
 
 			if no_email_sp:
 				frappe.msgprint(
-					frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
-						self.owner, "<br>" + "<br>".join(no_email_sp)
-				))
+						frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
+								self.owner, "<br>" + "<br>".join(no_email_sp)
+						))
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
 				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
@@ -69,12 +68,12 @@ class MaintenanceSchedule(TransactionBase):
 			for key in scheduled_date:
 				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)
 				event = frappe.get_doc({
-					"doctype": "Event",
-					"owner": email_map.get(d.sales_person, self.owner),
-					"subject": description,
-					"description": description,
-					"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
-					"event_type": "Private",
+						"doctype": "Event",
+						"owner": email_map.get(d.sales_person, self.owner),
+						"subject": description,
+						"description": description,
+						"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
+						"event_type": "Private",
 				})
 				event.add_participant(self.doctype, self.name)
 				event.insert(ignore_permissions=1)
@@ -92,7 +91,7 @@ class MaintenanceSchedule(TransactionBase):
 				start_date_copy = add_days(start_date_copy, add_by)
 				if len(schedule_list) < no_of_visit:
 					schedule_date = self.validate_schedule_date_for_holiday_list(getdate(start_date_copy),
-						sales_person)
+							sales_person)
 					if schedule_date > getdate(end_date):
 						schedule_date = getdate(end_date)
 					schedule_list.append(schedule_date)
@@ -127,16 +126,16 @@ class MaintenanceSchedule(TransactionBase):
 			if d.start_date and d.end_date and d.periodicity and d.periodicity!="Random":
 				date_diff = (getdate(d.end_date) - getdate(d.start_date)).days + 1
 				days_in_period = {
-					"Weekly": 7,
-					"Monthly": 30,
-					"Quarterly": 90,
-					"Half Yearly": 180,
-					"Yearly": 365
+						"Weekly": 7,
+						"Monthly": 30,
+						"Quarterly": 90,
+						"Half Yearly": 180,
+						"Yearly": 365
 				}
 
 				if date_diff < days_in_period[d.periodicity]:
 					throw(_("Row {0}: To set {1} periodicity, difference between from and to date must be greater than or equal to {2}")
-						.format(d.idx, d.periodicity, days_in_period[d.periodicity]))
+							.format(d.idx, d.periodicity, days_in_period[d.periodicity]))
 
 	def validate_maintenance_detail(self):
 		if not self.get('items'):
@@ -172,8 +171,8 @@ class MaintenanceSchedule(TransactionBase):
 
 	def on_update(self):
 		frappe.db.set(self, 'status', 'Draft')
-		
-		
+
+
 
 	def update_amc_date(self, serial_nos, amc_expiry_date=None):
 		for serial_no in serial_nos:
@@ -184,27 +183,27 @@ class MaintenanceSchedule(TransactionBase):
 	def validate_serial_no(self, item_code, serial_nos, amc_start_date):
 		for serial_no in serial_nos:
 			sr_details = frappe.db.get_value("Serial No", serial_no,
-				["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date", "item_code"], as_dict=1)
+					["warranty_expiry_date", "amc_expiry_date", "warehouse", "delivery_date", "item_code"], as_dict=1)
 
 			if not sr_details:
 				frappe.throw(_("Serial No {0} not found").format(serial_no))
 
 			if sr_details.get("item_code") != item_code:
 				frappe.throw(_("Serial No {0} does not belong to Item {1}")
-					.format(frappe.bold(serial_no), frappe.bold(item_code)), title="Invalid")
+						.format(frappe.bold(serial_no), frappe.bold(item_code)), title="Invalid")
 
 			if sr_details.warranty_expiry_date \
-				and getdate(sr_details.warranty_expiry_date) >= getdate(amc_start_date):
+					and getdate(sr_details.warranty_expiry_date) >= getdate(amc_start_date):
 				throw(_("Serial No {0} is under warranty upto {1}")
-					.format(serial_no, sr_details.warranty_expiry_date))
+						.format(serial_no, sr_details.warranty_expiry_date))
 
 			if sr_details.amc_expiry_date and getdate(sr_details.amc_expiry_date) >= getdate(amc_start_date):
 				throw(_("Serial No {0} is under maintenance contract upto {1}")
-					.format(serial_no, sr_details.amc_expiry_date))
+						.format(serial_no, sr_details.amc_expiry_date))
 
 			if not sr_details.warehouse and sr_details.delivery_date and \
-				getdate(sr_details.delivery_date) >= getdate(amc_start_date):
-					throw(_("Maintenance start date can not be before delivery date for Serial No {0}")
+					getdate(sr_details.delivery_date) >= getdate(amc_start_date):
+				throw(_("Maintenance start date can not be before delivery date for Serial No {0}")
 						.format(serial_no))
 
 	def validate_schedule(self):
@@ -248,31 +247,37 @@ class MaintenanceSchedule(TransactionBase):
 		delete_events(self.doctype, self.name)
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doc=None):
+def make_maintenance_visit(source_name, target_doc=None,item_name=None,s_id=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def update_status(source, target, parent):
 		target.maintenance_type = "Scheduled"
 
+	def update_sid(source, target, parent):
+		target.prevdoc_detail_docname = s_id
+
 	doclist = get_mapped_doc("Maintenance Schedule", source_name, {
-		"Maintenance Schedule": {
-			"doctype": "Maintenance Visit",
-			"field_map": {
-				"name": "maintenance_schedule"
+			"Maintenance Schedule": {
+					"doctype": "Maintenance Visit",
+					"field_map": {
+							"name": "maintenance_schedule"
+					},
+					"validation": {
+							"docstatus": ["=", 1]
+					},
+					"postprocess": update_status
 			},
-			"validation": {
-				"docstatus": ["=", 1]
-			},
-			"postprocess": update_status
-		},
-		"Maintenance Schedule Item": {
-			"doctype": "Maintenance Visit Purpose",
-			"field_map": {
-				"parent": "prevdoc_docname",
-				"parenttype": "prevdoc_doctype",
-				"sales_person": "service_person"
+			"Maintenance Schedule Item": {
+					"doctype": "Maintenance Visit Purpose",
+					"field_map": {
+							"parent": "prevdoc_docname",
+							"parenttype": "prevdoc_doctype",
+					},
+					"condition": lambda doc: doc.item_name == item_name,
+
+										"postprocess": update_sid
+
 			}
-		}
 	}, target_doc)
 
 	return doclist
