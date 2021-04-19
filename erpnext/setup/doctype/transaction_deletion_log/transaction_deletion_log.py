@@ -10,7 +10,8 @@ from frappe.model.document import Document
 class TransactionDeletionLog(Document):
 	def validate(self):
 		max_num_of_doctypes = len(doctypes())
-		print("*" * 100)
+		if !(len(self.get("doctypes_to_be_ignored")) == max_num_of_doctypes):
+			frappe.throw(__("DocTypes should not be added to the 'DocTypes That Won't Be Affected' table."))
 
 	def on_submit(self):
 		doctypes = frappe.get_all('Doctype',
