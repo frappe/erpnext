@@ -26,7 +26,7 @@ class EmployeeAdvance(StatusUpdater):
 			self.project = frappe.db.get_value("Task", self.task, "project")
 
 	def on_cancel(self):
-		self.set_status()
+		self.db_set('status', 'Cancelled')
 
 	def validate_employee_advance_account(self):
 		company_currency = erpnext.get_company_currency(self.company)

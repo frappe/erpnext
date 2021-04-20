@@ -136,6 +136,7 @@
   {
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "options": "Draft\nUnpaid\nUnclaimed\nClaimed\nDeducted from Salary\nCancelled",
@@ -275,7 +276,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-01-28 15:00:19.004538",
+ "modified": "2021-04-20 14:41:33.141665",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Advance",

@@ -129,7 +129,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2020-03-03 16:14:09.077006",
+ "modified": "2021-04-20 14:42:33.776719",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Additional Salary",
@@ -151,6 +151,8 @@
    "write": 1
   },
   {
+   "amend": 1,
+   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
