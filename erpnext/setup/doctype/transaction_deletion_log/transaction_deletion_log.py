@@ -18,8 +18,9 @@ class TransactionDeletionLog(Document):
 				frappe.throw(_("DocTypes should not be added manually to the 'DocTypes That Won't Be Affected' table."))
 
 	def before_submit(self):
-		singles_and_tables = frappe.get_all('DocType', or_filters = {'issingle': 1, 'istable': 1}, pluck = "name")
-		doctypes_to_be_ignored_list = singles_and_tables + get_doctypes_to_be_ignored()
+		singles = frappe.get_all('DocType', filters = {'issingle': 1}, pluck = "name")
+		tables = frappe.get_all('DocType', filters = {'istable': 1}, pluck = "name")
+		doctypes_to_be_ignored_list = singles + get_doctypes_to_be_ignored()
 		docfields = frappe.get_all('Docfield', 
 			filters = {
 				'fieldtype': 'Link', 
@@ -34,10 +35,11 @@ class TransactionDeletionLog(Document):
 						})
 				if no_of_docs > 0:
 					# populate DocTypes table
-					self.append('doctypes', {
-						"doctype_name" : docfield['parent'],
-						"no_of_docs" : no_of_docs
-					})
+					if docfield['parent'] not in tables:
+						self.append('doctypes', {
+							"doctype_name" : docfield['parent'],
+							"no_of_docs" : no_of_docs
+						})
 
 					# delete the docs linked with the specified company
 					frappe.db.delete(docfield['parent'], {
