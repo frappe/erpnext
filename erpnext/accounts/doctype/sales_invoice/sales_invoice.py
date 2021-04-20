@@ -406,7 +406,7 @@ class SalesInvoice(SellingController):
 		super(SalesInvoice, self).set_missing_values(for_validate)
 
 		if not self.get('payment_terms_template'):
-			if self.items[0].sales_order:
+			if self.get('items') and self.items[0].sales_order:
 				payment_terms_template = frappe.db.get_value('Sales Order', self.items[0].sales_order, 'payment_terms_template')
 				if payment_terms_template:
 					self.payment_terms_template = payment_terms_template
