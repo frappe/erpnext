@@ -32,9 +32,9 @@ class TestProjectProfitability(unittest.TestCase):
 		expected_data = [
 			{
 				'customer_name': '_Test Customer',
-				'title': 'test_employee_9@salary.com',
-				'grand_total': 100.0,
-				'gross_pay': 78100.0,
+				'employee_name': 'test_employee_9@salary.com',
+				'base_grand_total': 100.0,
+				'base_gross_pay': 78100.0,
 				'profit': -19425.0,
 				'total_billed_hours': 2.0,
 				'utilization': 0.25,
@@ -42,10 +42,10 @@ class TestProjectProfitability(unittest.TestCase):
 				'total_working_days': 1.0
 			}
 		]
-		for key in ['customer_name','title','grand_total','gross_pay','profit','total_billed_hours','utilization','fractional_cost','total_working_days']:
+		for key in ['customer_name','employee_name','base_grand_total','base_gross_pay','profit','total_billed_hours','utilization','fractional_cost','total_working_days']:
 			self.assertEqual(expected_data[0].get(key), report[1][0].get(key))
 
 	def tearDown(self):
-		frappe.get_doc('Sales Invoice', self.sales_invoice.name).cancel()
-		frappe.get_doc('Salary Slip', self.salary_slip.name).cancel()
-		frappe.get_doc('Timesheet', self.timesheet.name).cancel()
+		frappe.get_doc("Sales Invoice", self.sales_invoice.name).cancel()
+		frappe.get_doc("Salary Slip", self.salary_slip.name).cancel()
+		frappe.get_doc("Timesheet", self.timesheet.name).cancel()
