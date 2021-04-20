@@ -9,6 +9,7 @@ from frappe.model.document import Document
 from erpnext.education.doctype.student_group.student_group import get_students
 
 class StudentGroupCreationTool(Document):
+	@frappe.whitelist()
 	def get_courses(self):
 		group_list = []
 
@@ -42,6 +43,7 @@ class StudentGroupCreationTool(Document):
 
 		return group_list
 
+	@frappe.whitelist()
 	def create_student_groups(self):
 		if not self.courses:
 			frappe.throw(_("""No Student Groups created."""))

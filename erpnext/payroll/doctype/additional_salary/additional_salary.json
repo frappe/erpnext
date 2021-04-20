@@ -163,7 +163,6 @@
    "read_only": 1
   },
   {
-   "default": "Company:company:default_currency",
    "depends_on": "eval:(doc.docstatus==1 || doc.employee)",
    "fieldname": "currency",
    "fieldtype": "Link",
@@ -176,7 +175,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-10-20 17:51:13.419716",
+ "modified": "2021-03-31 22:33:59.098532",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Additional Salary",

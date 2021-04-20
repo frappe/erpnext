@@ -1,15 +1,13 @@
-braintree==3.57.1
 frappe
-gocardless-pro==1.11.0
-googlemaps==3.1.1
-pandas>=1.0.5
-plaid-python>=7.0.0
-pycountry==19.8.18
-PyGithub==1.44.1
-python-stdnum==1.12
-python-youtube==0.6.0
-taxjar==1.9.0
-tweepy==3.8.0
-Unidecode==1.1.1
-WooCommerce==2.1.1
-pycryptodome==3.9.8
+gocardless-pro~=1.22.0
+googlemaps  # used in ERPNext, but dependency is defined in Frappe
+pandas~=1.1.5
+plaid-python~=7.2.1
+pycountry~=20.7.3
+PyGithub~=1.54.1
+python-stdnum~=1.16
+python-youtube~=0.8.0
+taxjar~=1.9.2
+tweepy~=3.10.0
+Unidecode~=1.2.0
+WooCommerce~=3.0.0
