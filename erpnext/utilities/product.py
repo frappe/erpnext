@@ -16,7 +16,7 @@ def get_web_item_qty_in_stock(item_code, item_warehouse_field, warehouse=None):
 		warehouse = frappe.db.get_value("Website Item", {"item_code": item_code}, item_warehouse_field)
 
 	if not warehouse and template_item_code and template_item_code != item_code:
-		warehouse = frappe.db.get_value("Website Item", {"item_code": template_item_code }, item_warehouse_field)
+		warehouse = frappe.db.get_value("Website Item", {"item_code": template_item_code}, item_warehouse_field)
 
 	if warehouse:
 		stock_qty = frappe.db.sql("""
@@ -98,6 +98,7 @@ def get_price(item_code, price_list, customer_group, company, qty=1):
 				mrp = price_obj.price_list_rate or 0
 
 				if pricing_rule.pricing_rule_for == "Discount Percentage":
+					price_obj.discount_percent = pricing_rule.discount_percentage
 					price_obj.formatted_discount_percent = str(flt(pricing_rule.discount_percentage, 0)) + "%"
 					price_obj.price_list_rate = flt(price_obj.price_list_rate * (1.0 - (flt(pricing_rule.discount_percentage) / 100.0)))
 
@@ -140,6 +141,6 @@ def get_non_stock_item_status(item_code, item_warehouse_field):
 	if frappe.db.exists("Product Bundle", item_code):
 		items = frappe.get_doc("Product Bundle", item_code).get_all_children()
 		bundle_warehouse = frappe.db.get_value('Item', item_code, item_warehouse_field)
-		return all([ get_web_item_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock for d in items ])
+		return all([get_web_item_qty_in_stock(d.item_code, item_warehouse_field, bundle_warehouse).in_stock for d in items])
 	else:
 		return 1

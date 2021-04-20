@@ -90,12 +90,14 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 		field_filters['item_group'] = self.name
 
 		engine = ProductQuery()
-		context.items = engine.query(attribute_filters, field_filters, search, start)
+		context.items, discounts = engine.query(attribute_filters, field_filters, search, start)
 
 		filter_engine = ProductFiltersBuilder(self.name)
 
 		context.field_filters = filter_engine.get_field_filters()
 		context.attribute_filters = filter_engine.get_attribute_filters()
+		if discounts:
+			context.discount_filters = filter_engine.get_discount_filters(discounts)
 
 		context.update({
 			"parents": get_parent_item_groups(self.parent_item_group),
