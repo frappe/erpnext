@@ -133,8 +133,6 @@ frappe.ui.form.on('Salary Structure', {
 			title: __("Assign to Employees"),
 			fields: [
 				{fieldname: "sec_break", fieldtype: "Section Break", label: __("Filter Employees By (Optional)")},
-				{fieldname: "company", fieldtype: "Link", options: "Company", label: __("Company"), default: frm.doc.company, read_only:1},
-				{fieldname: "currency", fieldtype: "Link", options: "Currency", label: __("Currency"), default: frm.doc.currency, read_only:1},
 				{fieldname: "grade", fieldtype: "Link", options: "Employee Grade", label: __("Employee Grade")},
 				{fieldname:'department', fieldtype:'Link', options: 'Department', label: __('Department')},
 				{fieldname:'designation', fieldtype:'Link', options: 'Designation', label: __('Designation')},
