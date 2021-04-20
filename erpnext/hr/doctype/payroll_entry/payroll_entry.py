@@ -435,7 +435,7 @@ class PayrollEntry(Document):
 				accounts.append({
 					"account": round_off_account,
 					"debit_in_account_currency": round_off_amount if round_off_amount > 0 else 0,
-					"credit_in_account_currency": round_off_amount if round_off_amount < 0 else 0,
+					"credit_in_account_currency": abs(round_off_amount) if round_off_amount < 0 else 0,
 					"cost_center": self.cost_center or round_off_cost_center,
 				})
 
