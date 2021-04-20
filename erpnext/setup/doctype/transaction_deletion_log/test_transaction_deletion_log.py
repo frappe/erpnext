@@ -23,12 +23,12 @@ class TestTransactionDeletionLog(unittest.TestCase):
 	
 	def test_no_of_docs_is_correct(self):
 		for i in range(5):
-			create_todo('Pied Piper')
+			create_task('Pied Piper')
 		tdr = create_transaction_deletion_request('Pied Piper')
 		for doctype in tdr.doctypes:
-			if doctype.doctype_name == 'ToDo':
+			if doctype.doctype_name == 'Task':
 				self.assertEqual(doctype.no_of_docs, 5)
-
+		
 def create_transaction_deletion_request(company):
 	tdr = frappe.get_doc({
 		'doctype': 'Transaction Deletion Log',
@@ -38,10 +38,10 @@ def create_transaction_deletion_request(company):
 	return tdr
 
 
-def create_todo(company):
-	todo = frappe.get_doc({
-		'doctype': 'ToDo',
+def create_task(company):
+	task = frappe.get_doc({
+		'doctype': 'Task',
 		'company': company,
-		'description': 'Delete'
+		'subject': 'Delete'
 	})
-	todo.insert()
+	task.insert()
