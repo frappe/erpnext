@@ -69,13 +69,6 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 		this.frm.set_query("vehicle", () => me.vehicle_query());
 
-		this.frm.set_query("selling_transaction_type", function() {
-			return {filters: {"selling": 1}};
-		});
-		this.frm.set_query("buying_transaction_type", function() {
-			return {filters: {"buying": 1}};
-		});
-
 		this.frm.set_query("allocation_period", function () {
 			var filters = {
 				item_code: me.frm.doc.item_code,
@@ -472,15 +465,37 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 						item_code: me.frm.doc.item_code,
 						customer: me.frm.doc.customer,
 						supplier: me.frm.doc.supplier,
-						tranasction_date: me.frm.doc.transaction_date,
-						selling_transaction_type: me.frm.doc.selling_transaction_type,
-						buying_transaction_type: me.frm.doc.buying_transaction_type,
+						transaction_date: me.frm.doc.transaction_date,
 						vehicle_price_list: me.frm.doc.vehicle_price_list
 					}
 				},
 				callback: function (r) {
 					if (!r.exc) {
 						me.frm.set_value("vehicle_allocation", null);
+						me.frm.trigger('vehicle_amount');
+					}
+				}
+			});
+		}
+	},
+
+	get_vehicle_price: function() {
+		var me = this;
+
+		if (me.frm.doc.company && me.frm.doc.item_code && me.frm.doc.vehicle_price_list) {
+			me.frm.call({
+				method: "erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order.get_vehicle_price",
+				child: me.frm.doc,
+				args: {
+					company: me.frm.doc.company,
+					item_code: me.frm.doc.item_code,
+					vehicle_price_list: me.frm.doc.vehicle_price_list,
+					fni_price_list: me.frm.doc.fni_price_list,
+					transaction_date: me.frm.doc.transaction_date,
+					tax_status: me.frm.doc.tax_status,
+				},
+				callback: function (r) {
+					if (!r.exc) {
 						me.frm.trigger('vehicle_amount');
 					}
 				}
@@ -642,6 +657,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 	},
 
 	transaction_date: function () {
+		this.get_vehicle_price();
 		this.frm.trigger('payment_terms_template');
 	},
 

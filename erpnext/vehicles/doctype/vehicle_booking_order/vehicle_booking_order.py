@@ -876,6 +876,7 @@ def get_vehicle_default_supplier(item_code, company):
 	return default_supplier
 
 
+@frappe.whitelist()
 def get_vehicle_price(item_code, vehicle_price_list, fni_price_list, transaction_date, tax_status, company):
 	if not item_code:
 		frappe.throw(_("Variant Item Code is mandatory"))
