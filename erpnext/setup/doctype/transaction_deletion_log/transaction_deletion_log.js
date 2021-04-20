@@ -5,7 +5,7 @@ frappe.ui.form.on('Transaction Deletion Log', {
 	onload: function(frm) {
 		let doctypes_to_be_ignored_array;	
 		frappe.call({
-			method : "erpnext.setup.doctype.transaction_deletion_log.transaction_deletion_log.doctypes",
+			method : "erpnext.setup.doctype.transaction_deletion_log.transaction_deletion_log.get_doctypes_to_be_ignored",
 			callback: function(r){
 				doctypes_to_be_ignored_array = r.message;
 				populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm);
