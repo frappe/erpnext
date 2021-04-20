@@ -75,4 +75,4 @@ def get_customer():
 	if customer:
 		return frappe.db.get_value("Customer", customer)
 	else:
-		frappe.throw("You are not verified to write a review yet. Please contact us for verification.")
+		frappe.throw(_("You are not verified to write a review yet. Please contact us for verification."))

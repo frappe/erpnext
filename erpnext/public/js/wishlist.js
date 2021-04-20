@@ -48,7 +48,7 @@ $.extend(wishlist, {
 			});
 
 			let success_action = function() {
-				const $card_wrapper = $move_to_cart_btn.closest(".item-card");
+				const $card_wrapper = $move_to_cart_btn.closest(".wishlist-card");
 				$card_wrapper.addClass("wish-removed");
 			};
 			let args = { item_code: item_code };
@@ -63,7 +63,7 @@ $.extend(wishlist, {
 			let item_code = $remove_wish_btn.data("item-code");
 
 			let success_action = function() {
-				const $card_wrapper = $remove_wish_btn.closest(".item-card");
+				const $card_wrapper = $remove_wish_btn.closest(".wishlist-card");
 				$card_wrapper.addClass("wish-removed");
 			};
 			let args = { item_code: item_code };
