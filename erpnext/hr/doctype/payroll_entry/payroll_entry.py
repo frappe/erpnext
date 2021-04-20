@@ -215,7 +215,6 @@ class PayrollEntry(Document):
 			self.queue_action('_submit_salary_slips', timeout=600, sal_slips=ss_list)
 		else:
 			self._submit_salary_slips(ss_list, publish_progress=False)
-			frappe.msgprint(_("Submitted Salary Slips Successfully"))
 
 	def _submit_salary_slips(self, sal_slips, publish_progress=True):
 		self.check_permission('write')
@@ -228,27 +227,25 @@ class PayrollEntry(Document):
 			if ss_obj.net_pay < 0:
 				not_submitted_ss.append(ss.name)
 			else:
-				try:
-					ss_obj.submit()
-					submitted_ss.append(ss_obj)
-				except frappe.ValidationError:
-					not_submitted_ss.append(ss.name)
+				ss_obj.submit()
+				submitted_ss.append(ss_obj)
+
 			if publish_progress:
 				frappe.publish_progress((count + 1) * 100 / len(sal_slips), title=_("Submitting Salary Slips..."))
 
+		self.make_accrual_jv_entry()
 		if submitted_ss:
-			self.make_accrual_jv_entry()
-			frappe.msgprint(_("Salary Slip submitted for period from {0} to {1}")
-				.format(self.get_formatted('start_date'), self.get_formatted('end_date')))
-
 			self.email_salary_slip(submitted_ss)
 
-			self.db_set("salary_slips_submitted", 1)
-			self.notify_update()
+			frappe.msgprint(_("Salary Slips submitted for period from {0} to {1}")
+				.format(self.get_formatted('start_date'), self.get_formatted('end_date')))
+
+		self.db_set("salary_slips_submitted", 1)
+		self.notify_update()
 
 		if not submitted_ss and not not_submitted_ss:
 			frappe.msgprint(
-				_("No salary slip found to submit for the above selected criteria OR salary slip already submitted"))
+				_("No Salary Slips found to submit for the above selected criteria OR salary slip already submitted"))
 
 		if not_submitted_ss:
 			frappe.msgprint(_("Could not submit some Salary Slips"))
