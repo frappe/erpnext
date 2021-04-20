@@ -881,35 +881,70 @@
 						]
 					}
 				],
-				"*": [
+				"sales_tax_templates": [
 					{
-						"title": "In State GST",
+						"title": "Output GST In-state",
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "SGST",
+									"account_name": "Output Tax SGST",
 									"tax_rate": 9.00
 								}
 							},
 							{
 								"account_head": {
-									"account_name": "CGST",
+									"account_name": "Output Tax CGST",
 									"tax_rate": 9.00
 								}
 							}
 						]
 					},
 					{
-						"title": "Out of State GST",
+						"title": "Output GST Out-state",
 						"taxes": [
 							{
 								"account_head": {
-									"account_name": "IGST",
+									"account_name": "Output Tax IGST",
 									"tax_rate": 18.00
 								}
 							}
 						]
+					}
+				],
+				"purchase_tax_templates": [
+					{
+						"title": "Input GST In-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 9.00,
+									"root_type": "Asset"
+								}
+							},
+							{
+								"account_head": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 9.00,
+									"root_type": "Asset"
+								}
+							}
+						]
 					},
+					{
+						"title": "Input GST Out-state",
+						"taxes": [
+							{
+								"account_head": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 18.00,
+									"root_type": "Asset"
+								}
+							}
+						]
+					}
+				],
+				"*": [
 					{
 						"title": "VAT 5%",
 						"taxes": [
@@ -1001,7 +1036,7 @@
 		"Italy VAT 4%":{
 			"account_name": "IVA 4%",
 			"tax_rate": 4.00
-		}		
+		}
 	},
 
 	"Ivory Coast": {
