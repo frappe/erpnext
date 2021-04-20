@@ -48,31 +48,41 @@ $.extend(erpnext, {
 		return cint(frappe.boot.sysdefaults.allow_stale);
 	},
 
-	setup_serial_no: function() {
-		var grid_row = cur_frm.open_grid_row();
-		if(!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
+	setup_serial_or_batch_no: function() {
+		let grid_row = cur_frm.open_grid_row();
+		if (!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
 			grid_row.grid_form.fields_dict.serial_no.get_status()!=="Write") return;
 
-		var $btn = $('<button class="btn btn-sm btn-default">'+__("Add Serial No")+'</button>')
-			.appendTo($("<div>")
-				.css({"margin-bottom": "10px", "margin-top": "10px"})
-				.appendTo(grid_row.grid_form.fields_dict.serial_no.$wrapper));
+		let me = this;
+		let attachSelectorButton = (innerText, appendLoction) => {
+			let $btnDiv = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
+				.appendTo(appendLoction)
+			let $btn = $(`<button class="btn btn-sm btn-default">${innerText}</button>`)
+				.appendTo($btnDiv);
 
-		var me = this;
-		$btn.on("click", function() {
-			let callback = '';
-			let on_close = '';
+			$btn.on("click", function() {
+				let callback = '';
+				let on_close = '';
+				me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
+					callback, on_close, true);
+			})
+		}
 
-			frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 'has_serial_no',
-				(data) => {
-					if(data) {
-						grid_row.doc.has_serial_no = data.has_serial_no;
-						me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-							callback, on_close, true);
-					}
+		frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 
+			['has_serial_no', 'has_batch_no'],
+			({has_serial_no, has_batch_no}) => {
+				grid_row.doc.has_serial_no = has_serial_no
+				grid_row.doc.has_batch_no = has_batch_no
+
+				if (has_serial_no) {
+					attachSelectorButton(__("Add Serial No"), grid_row.grid_form.fields_dict.serial_no.$wrapper)
+				} else if (has_batch_no) {
+					attachSelectorButton(__("Pick Batch No"), grid_row.grid_form.fields_dict.batch_no.$wrapper)
+				} else {
+					// Do nothing
 				}
-			);
-		});
+			}
+		);
 	},
 
 	route_to_adjustment_jv: (args) => {
