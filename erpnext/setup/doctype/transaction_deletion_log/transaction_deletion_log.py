@@ -22,13 +22,12 @@ class TransactionDeletionLog(Document):
 				'options': 'Company',
 				'parent': ['not in', singles_and_tables]},
 			fields=["parent", "fieldname"])
-
-		ignore = ['Transaction Deletion Log', 'Opening Invoice Creation Tool', 'Chart of Accounts Importer', 'Payment Reconciliation', 'Bank Reconciliation Tool', 'Global Defaults', 'Employee Attendance Tool', 'Leave Control Panel', 'Shopping Cart Settings', 'Homepage', 'Woocommerce Settings', 'Shopify Settings', 'Amazon MWS Settings', 'QuickBooks Migrator']	
+	
 		for doctype in doctypes:
-			if doctype['parent'] not in ignore:
+			if doctype['parent'] != 'Transaction Deletion Log':
 				no_of_docs = frappe.db.count(doctype['parent'], {
 							doctype['fieldname'] : self.company
-						}, debug=1)
+						})
 				if no_of_docs > 0:
 					# populate DocTypes table
 					self.append('doctypes', {
