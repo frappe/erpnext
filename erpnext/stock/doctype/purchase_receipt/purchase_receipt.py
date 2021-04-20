@@ -231,13 +231,13 @@ class PurchaseReceipt(BuyingController):
 		from erpnext.accounts.general_ledger import process_gl_map
 		gl_entries = []
 
-		self.make_item_gl_entries(gl_entries)
+		self.make_item_gl_entries(gl_entries, warehouse_account=warehouse_account)
 		self.make_tax_gl_entries(gl_entries)
 		self.get_asset_gl_entry(gl_entries)
 
 		return process_gl_map(gl_entries)
 
-	def make_item_gl_entries(self, gl_entries):
+	def make_item_gl_entries(self, gl_entries, warehouse_account=None):
 		stock_rbnb = self.get_company_default("stock_received_but_not_billed")
 		landed_cost_entries = get_item_account_wise_additional_cost(self.name)
 		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
@@ -343,6 +343,7 @@ class PurchaseReceipt(BuyingController):
 				"\n".join(warehouse_with_no_account))
 
 	def make_tax_gl_entries(self, gl_entries):
+		expenses_included_in_valuation = self.get_company_default("expenses_included_in_valuation")
 		negative_expense_to_be_booked = sum([flt(d.item_tax_amount) for d in self.get('items')])
 		# Cost center-wise amount breakup for other charges included for valuation
 		valuation_tax = {}
