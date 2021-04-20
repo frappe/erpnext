@@ -820,29 +820,165 @@
 			"*": {
 				"item_tax_templates": [
 					{
-						"title": "In State GST",
+						"title": "GST 9%",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "SGST",
+									"account_name": "Output Tax SGST",
 									"tax_rate": 9.00
 								}
 							},
 							{
 								"tax_type": {
-									"account_name": "CGST",
+									"account_name": "Output Tax CGST",
 									"tax_rate": 9.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 18.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 9.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 9.00
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 18.00
 								}
 							}
 						]
 					},
 					{
-						"title": "Out of State GST",
+						"title": "GST 5%",
 						"taxes": [
 							{
 								"tax_type": {
-									"account_name": "IGST",
-									"tax_rate": 18.00
+									"account_name": "Output Tax SGST",
+									"tax_rate": 2.5
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax CGST",
+									"tax_rate": 2.5
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 5.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 2.5
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 2.5
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 5.0
+								}
+							}
+						]
+					},
+					{
+						"title": "GST 12%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Output Tax SGST",
+									"tax_rate": 6.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax CGST",
+									"tax_rate": 6.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 12.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 6.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 6.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 12.0
+								}
+							}
+						]
+					},
+					{
+						"title": "GST 28%",
+						"taxes": [
+							{
+								"tax_type": {
+									"account_name": "Output Tax SGST",
+									"tax_rate": 14.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax CGST",
+									"tax_rate": 14.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Output Tax IGST",
+									"tax_rate": 28.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax SGST",
+									"tax_rate": 14.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax CGST",
+									"tax_rate": 14.0
+								}
+							},
+							{
+								"tax_type": {
+									"account_name": "Input Tax IGST",
+									"tax_rate": 28.0
 								}
 							}
 						]
