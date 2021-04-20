@@ -399,7 +399,7 @@ class Item(Document):
 		if not records: return
 		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
 
-		msg = _("The items {0} and {1} are present in the following {2} : ").format(
+		msg = _("The items {0} and {1} are present in the following {2} :").format(
 			frappe.bold(old_name), frappe.bold(new_name), document)
 
 		msg += '<br>'
