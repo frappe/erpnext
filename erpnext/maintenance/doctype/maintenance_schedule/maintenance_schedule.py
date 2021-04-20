@@ -10,6 +10,7 @@ from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
 from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class MaintenanceSchedule(TransactionBase):
 	@frappe.whitelist()
@@ -246,17 +247,27 @@ class MaintenanceSchedule(TransactionBase):
 		delete_events(self.doctype, self.name)
 
 @frappe.whitelist()
+def update_serial_nos(s_id):
+	serial_nos = frappe.db.get_value('Maintenance Schedule Detail', s_id, 'serial_no')
+	if serial_nos:
+		serial_nos = get_serial_nos(serial_nos)
+		return serial_nos
+	else:
+		return False
+
+@frappe.whitelist()
 def make_maintenance_visit(source_name, target_doc=None,item_name=None,s_id=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def update_status(source, target, parent):
 		target.maintenance_type = "Scheduled"
-
+		
 	def update_sid(source, target, parent):
 		target.prevdoc_detail_docname = s_id
 		sales_person = frappe.db.get_value('Maintenance Schedule Detail', s_id, 'sales_person')
 		target.service_person = sales_person
-
+		target.serial_no = ''
+	
 	doclist = get_mapped_doc("Maintenance Schedule", source_name, {
 			"Maintenance Schedule": {
 					"doctype": "Maintenance Visit",

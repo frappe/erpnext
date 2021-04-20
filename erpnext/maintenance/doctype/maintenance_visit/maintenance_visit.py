@@ -30,20 +30,21 @@ class MaintenanceVisit(TransactionBase):
 	def validate(self):
 		self.validate_serial_no()
 		self.validate_mntc_date()
+	
+	def get_schedule_datail_ref(self):
+		if self.maintenance_type == "Scheduled":
+			p = self.purposes
+			for i in p:
+				detail_ref = i.prevdoc_detail_docname
+			return detail_ref
 		
 	def update_completion_status(self):
-		if self.maintenance_type == "Scheduled":
-			p = self.purposes
-			for i in p:
-				detail_ref = i.prevdoc_detail_docname
-			frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'completion_status', self.completion_status)
+		detail_ref = self.get_schedule_datail_ref()
+		frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'completion_status', self.completion_status)
 	
 	def update_actual_date(self):
-		if self.maintenance_type == "Scheduled":
-			p = self.purposes
-			for i in p:
-				detail_ref = i.prevdoc_detail_docname
-			frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'actual_date', self.mntc_date)
+		detail_ref = self.get_schedule_datail_ref()
+		frappe.db.set_value('Maintenance Schedule Detail', detail_ref, 'actual_date', self.mntc_date)
 
 	def update_customer_issue(self, flag):
 		for d in self.get('purposes'):
