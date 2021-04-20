@@ -17,7 +17,7 @@ def get_context(context):
 		start = 0
 
 	engine = ProductQuery()
-	context.items = engine.query(attribute_filters, field_filters, search, start)
+	context.items, discounts = engine.query(attribute_filters, field_filters, search, start)
 
 	# Add homepage as parent
 	context.parents = [{"name": frappe._("Home"), "route":"/"}]
@@ -26,6 +26,8 @@ def get_context(context):
 
 	context.field_filters = filter_engine.get_field_filters()
 	context.attribute_filters = filter_engine.get_attribute_filters()
+	if discounts:
+		context.discount_filters = filter_engine.get_discount_filters(discounts)
 
 	context.e_commerce_settings = engine.settings
 	context.page_length = engine.settings.products_per_page or 20
@@ -39,12 +41,13 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 	attribute_filters = frappe.parse_json(attribute_filters)
 
 	engine = ProductQuery()
-	items = engine.query(attribute_filters, field_filters, search_term=None, start=0)
+	items, discounts = engine.query(attribute_filters, field_filters, search_term=None, start=0)
 
 	item_html = []
 	for item in items:
 		item_html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
-			'item': item
+			'item': item,
+			'e_commerce_settings': None
 		}))
 	html = ''.join(item_html)
 

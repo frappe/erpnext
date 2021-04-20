@@ -32,12 +32,16 @@ $(() => {
 					if (this.attribute_filters[attribute_name].length === 0) {
 						delete this.attribute_filters[attribute_name];
 					}
-				} else if ($checkbox.is('.field-filter')) {
+				} else if ($checkbox.is('.field-filter') || $checkbox.is('.discount-filter')) {
 					const {
 						filterName: filter_name,
 						filterValue: filter_value
 					} = $checkbox.data();
 
+					if ($checkbox.is('.discount-filter')) {
+						// clear previous discount filter to accomodate new
+						delete this.field_filters["discount"];
+					}
 					if (is_checked) {
 						this.field_filters[filter_name] = this.field_filters[filter_name] || [];
 						this.field_filters[filter_name].push(filter_value);
