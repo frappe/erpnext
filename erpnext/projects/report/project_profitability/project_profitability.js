@@ -27,12 +27,6 @@ frappe.query_reports["Project Profitability"] = {
 			"default": frappe.datetime.now_date()
 		},
 		{
-			"fieldname": "project",
-			"label": __("Project"),
-			"fieldtype": "Link",
-			"options": "Project"
-		},
-		{
 			"fieldname": "customer_name",
 			"label": __("Customer"),
 			"fieldtype": "Link",
@@ -43,6 +37,12 @@ frappe.query_reports["Project Profitability"] = {
 			"label": __("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee"
+		},
+		{
+			"fieldname": "project",
+			"label": __("Project"),
+			"fieldtype": "Link",
+			"options": "Project"
 		}
 	]
 };
