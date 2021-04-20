@@ -58,6 +58,7 @@
   "rejected_warehouse",
   "col_break_warehouse",
   "set_from_warehouse",
+  "supplier_warehouse",
   "is_subcontracted",
   "items_section",
   "update_stock",
@@ -1351,7 +1352,7 @@
    "options": "Company"
   },
   {
-   "depends_on": "eval:doc.update_stock && (doc.is_subcontracted==\"Yes\" || doc.is_internal_supplier)",
+   "depends_on": "eval:doc.update_stock && doc.is_internal_supplier",
    "description": "Sets 'From Warehouse' in each row of the items table.",
    "fieldname": "set_from_warehouse",
    "fieldtype": "Link",
