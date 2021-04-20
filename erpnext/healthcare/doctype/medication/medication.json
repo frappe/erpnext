@@ -33,15 +33,6 @@
   "is_billable",
   "rate",
   "description",
-  "drug_interactions_section",
-  "bypass_medication_class_interaction_check",
-  "medication_class_interaction",
-  "allergy_interactions_section",
-  "bypass_allergy_check",
-  "allergy_interaction",
-  "allowed_diagnostic_codes_section",
-  "bypass_medical_coding_check",
-  "allowed_diagnostic_codes",
   "section_break_36",
   "reference_url",
   "change_in_item"
@@ -139,56 +130,6 @@
    "fieldname": "reference_url",
    "fieldtype": "HTML Editor",
    "label": "Reference URL"
-  },
-  {
-   "fieldname": "drug_interactions_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Drug Interactions"
-  },
-  {
-   "default": "1",
-   "fieldname": "bypass_medication_class_interaction_check",
-   "fieldtype": "Check",
-   "label": "Bypass Medication Class Interaction Check"
-  },
-  {
-   "depends_on": "eval:!doc.bypass_medication_class_interaction_check",
-   "fieldname": "medication_class_interaction",
-   "fieldtype": "Table",
-   "label": "Medication Class Interaction",
-   "options": "Medication Class Interaction"
-  },
-  {
-   "fieldname": "allergy_interactions_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Allergy Interactions"
-  },
-  {
-   "default": "1",
-   "fieldname": "bypass_allergy_check",
-   "fieldtype": "Check",
-   "label": "Bypass Allergy Check"
-  },
-  {
-   "depends_on": "eval:!doc.bypass_allergy_check",
-   "fieldname": "allergy_interaction",
-   "fieldtype": "Table",
-   "label": "Allergy Interaction",
-   "options": "Allergy Interaction"
-  },
-  {
-   "fieldname": "allowed_diagnostic_codes_section",
-   "fieldtype": "Section Break",
-   "hidden": 1,
-   "label": "Allowed Diagnostic Codes"
-  },
-  {
-   "default": "1",
-   "fieldname": "bypass_medical_coding_check",
-   "fieldtype": "Check",
-   "label": "Bypass Medical Coding Check"
   },
   {
    "description": "Properties of the linked Item, you may further configure Batch Number and Expiry, Serial Number, Shelf Life etc. in the Item master",
@@ -290,19 +231,12 @@
    "options": "Dosage Form"
   },
   {
-   "depends_on": "eval:!doc.bypass_medical_coding_check",
-   "fieldname": "allowed_diagnostic_codes",
-   "fieldtype": "Table",
-   "label": "Codification Table",
-   "options": "Codification Table"
-  },
-  {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2021-04-08 08:51:10.729710",
+ "modified": "2021-04-19 18:43:03.163230",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Medication",
