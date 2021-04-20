@@ -546,6 +546,13 @@ def safe_json_load(json_string):
 		snippet = json_string[start:end]
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
+def throw_error_list(errors, title):
+	if len(errors) > 1:
+		li = ['<li>'+ d +'</li>' for d in errors]
+		frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=title)
+	else:
+		frappe.throw(errors[0], title=title)
+
 class RequestFailed(Exception): pass
 
 class GSPConnector():
