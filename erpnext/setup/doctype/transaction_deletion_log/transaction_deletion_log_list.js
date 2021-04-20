@@ -3,7 +3,7 @@
 
 frappe.listview_settings['Transaction Deletion Log'] = {
 	get_indicator: function(doc) {
-		if(doc.docstatus == 0) {
+		if (doc.docstatus == 0) {
 			return [__("Draft"), "red"];
 		} else {
 			return [__("Completed"), "green"];
