@@ -24,7 +24,7 @@
   {
    "fieldname": "doctypes",
    "fieldtype": "Table",
-   "label": "DocTypes",
+   "label": "Summary",
    "options": "Transaction Deletion Log Item",
    "read_only": 1
   },
@@ -47,14 +47,14 @@
   {
    "fieldname": "doctypes_to_be_ignored",
    "fieldtype": "Table",
-   "label": "DocTypes That Won't Be Affected",
+   "label": "Excluded DocTypes",
    "options": "Transaction Deletion Log Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 04:45:00.316986",
+ "modified": "2021-04-20 22:01:09.061815",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Transaction Deletion Log",
