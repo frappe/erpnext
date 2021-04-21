@@ -97,9 +97,8 @@ class POSInvoice(SalesInvoice):
 					return frappe.throw(_("Payment related to {0} is not completed").format(pay.mode_of_payment))
 
 	def validate_pos_reserved_serial_nos(self, item):
-		msg = ''
 		serial_nos = get_serial_nos(item.serial_no)
-		filters = { "item_code": item.item_code, "warehouse": item.warehouse }
+		filters = {"item_code": item.item_code, "warehouse": item.warehouse}
 		if item.batch_no:
 			filters["batch_no"] = item.batch_no
 
@@ -115,7 +114,6 @@ class POSInvoice(SalesInvoice):
 						.format(item.idx, bold_invalid_serial_nos), title=_("Item Unavailable"))
 
 	def validate_delivered_serial_nos(self, item):
-		msg = ''
 		serial_nos = get_serial_nos(item.serial_no)
 		delivered_serial_nos = frappe.db.get_list('Serial No', {
 			'item_code': item.item_code,
