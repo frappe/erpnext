@@ -80,6 +80,10 @@ def from_detailed_data(company_name, data):
 	item_tax_templates = tax_templates.get('item_tax_templates') or tax_templates.get('*')
 	tax_categories = tax_templates.get('tax_categories')
 
+	if tax_categories:
+		for tax_category in tax_categories:
+			make_tax_category(tax_category)
+
 	if sales_tax_templates:
 		for template in sales_tax_templates:
 			make_taxes_and_charges_template(company_name, 'Sales Taxes and Charges Template', template)
@@ -91,10 +95,6 @@ def from_detailed_data(company_name, data):
 	if item_tax_templates:
 		for template in item_tax_templates:
 			make_item_tax_template(company_name, template)
-
-	if tax_categories:
-		for tax_category in tax_categories:
-			make_tax_category(tax_category)
 
 
 def make_taxes_and_charges_template(company_name, doctype, template):
@@ -154,8 +154,9 @@ def make_item_tax_template(company_name, template):
 def make_tax_category(tax_category):
 	""" Make tax category based on title if not already created """
 	doctype = 'Tax Category'
-	if not frappe.db.exists(doctype, tax_category)
-	frappe.get_doc(tax_category).insert(ignore_permissions=True)
+	if not frappe.db.exists(doctype, tax_category):
+		tax_category['doctype'] = doctype
+		frappe.get_doc(tax_category).insert(ignore_permissions=True)
 
 def get_or_create_account(company_name, account):
 	"""
@@ -167,12 +168,13 @@ def get_or_create_account(company_name, account):
 
 	existing_accounts = frappe.get_list('Account',
 		filters={
-			'company': company_name,
-			'root_type': root_type
+			'account_name': account.get('account_name'),
+			'account_number': account.get('account_number', '')
 		},
 		or_filters={
-			'account_name': account.get('account_name'),
-			'account_number': account.get('account_number')
+			'company': company_name,
+			'root_type': root_type,
+			'is_group': 0
 		}
 	)
 
