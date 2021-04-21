@@ -34,16 +34,21 @@ frappe.ui.form.on('Maintenance Visit', {
 	},
 	onload: function (frm, cdt, cdn) {
 		let item = locals[cdt][cdn];
-		let s_id = item.purposes[0].prevdoc_detail_docname;
-		frappe.call({
-			method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.update_serial_nos",
-			args: {
-				s_id: s_id
-			},
-			callback: function (r) {
-				serial_nos = r.message;
-			}
-		});
+		if (frm.maintenance_type == 'Scheduled') {
+
+			let s_id = item.purposes[0].prevdoc_detail_docname;
+			frappe.call({
+				method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.update_serial_nos",
+				args: {
+					s_id: s_id
+				},
+				callback: function (r) {
+					serial_nos = r.message;
+				}
+			});
+
+		}
+
 		if (!frm.doc.status) {
 			frm.set_value({ status: 'Draft' });
 		}
