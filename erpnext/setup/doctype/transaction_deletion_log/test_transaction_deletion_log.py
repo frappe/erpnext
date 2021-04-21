@@ -21,7 +21,7 @@ class TestTransactionDeletionLog(unittest.TestCase):
 					break
 			self.assertTrue(contains_company)
 	
-	def test_no_of_docs_is_correct(self):
+	def test_deletion_is_successful(self):
 		for i in range(5):
 			create_task('Pied Piper')
 		tdr = create_transaction_deletion_request('Pied Piper')
