@@ -216,7 +216,8 @@ erpnext.buying.BuyingController = erpnext.TransactionController.extend({
 				child: item,
 				args: {
 					item_code: item.item_code,
-					warehouse: item.warehouse
+					warehouse: item.warehouse,
+					company: doc.company
 				}
 			});
 		}

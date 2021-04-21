@@ -112,9 +112,7 @@ def place_order():
 def request_for_quotation():
 	quotation = _get_cart_quotation()
 	quotation.flags.ignore_permissions = True
-	quotation.save()
-	if not get_shopping_cart_settings().save_quotations_as_draft:
-		quotation.submit()
+	quotation.submit()
 	return quotation.name
 
 @frappe.whitelist()
@@ -232,12 +230,12 @@ def update_cart_address(address_type, address_name):
 	if address_type.lower() == "billing":
 		quotation.customer_address = address_name
 		quotation.address_display = address_display
-		quotation.shipping_address_name == quotation.shipping_address_name or address_name
+		quotation.shipping_address_name = quotation.shipping_address_name or address_name
 		address_doc = next((doc for doc in get_billing_addresses() if doc["name"] == address_name), None)
 	elif address_type.lower() == "shipping":
 		quotation.shipping_address_name = address_name
 		quotation.shipping_address = address_display
-		quotation.customer_address == quotation.customer_address or address_name
+		quotation.customer_address = quotation.customer_address or address_name
 		address_doc = next((doc for doc in get_shipping_addresses() if doc["name"] == address_name), None)
 	apply_cart_settings(quotation=quotation)
 
