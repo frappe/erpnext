@@ -51,13 +51,13 @@ class TransactionDeletionLog(Document):
 							docfield['fieldname'] : self.company
 						})
 
-				# #delete version log
-				# frappe.db.sql("""delete from `tabVersion` where ref_doctype=%s and docname in
-				# 	(select name from `tab{0}` where `{1}`=%s)""".format(docfield['parent'],
-				# 		docfield['fieldname']), (docfield['parent'], self.company))
+				#delete version log
+				frappe.db.sql("""delete from `tabVersion` where ref_doctype=%s and docname in
+					(select name from `tab{0}` where `{1}`=%s)""".format(docfield['parent'],
+						docfield['fieldname']), (docfield['parent'], self.company))
 
-				# # delete communication
-				# self.delete_communications(docfield['parent'], docfield['fieldname'])
+				# delete communication
+				self.delete_communications(docfield['parent'], docfield['fieldname'])
 
 				if no_of_docs > 0:
 					# populate DocTypes table
@@ -90,6 +90,15 @@ class TransactionDeletionLog(Document):
 			last = 0
 
 		frappe.db.sql("""update tabSeries set current = %s where name=%s""", (last, prefix))
+
+	def delete_communications(self, doctype, company_fieldname):
+        reference_docs = frappe.get_all(doctype, filters={company_fieldname:self.company})
+        reference_doc_names = [r.name for r in reference_docs]
+
+        communications = frappe.get_all("Communication", filters={"reference_doctype":doctype,"reference_name":["in", reference_doc_names]})
+        communication_names = [c.name for c in communications]
+
+        frappe.delete_doc("Communication", communication_names, ignore_permissions=True)
 
 @frappe.whitelist()
 def get_doctypes_to_be_ignored():
