@@ -5,7 +5,8 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "invoice_fields"
+  "invoice_fields",
+  "pos_search_fields"
  ],
  "fields": [
   {
@@ -13,11 +14,17 @@
    "fieldtype": "Table",
    "label": "POS Field",
    "options": "POS Field"
+  },
+  {
+   "fieldname": "pos_search_fields",
+   "fieldtype": "Table",
+   "label": "POS Search Fields",
+   "options": "POS Search Fields"
   }
  ],
  "issingle": 1,
  "links": [],
- "modified": "2020-06-01 15:46:41.478928",
+ "modified": "2021-04-19 14:56:24.465218",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "POS Settings",

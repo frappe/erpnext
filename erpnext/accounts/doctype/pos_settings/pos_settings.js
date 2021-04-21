@@ -1,9 +1,12 @@
 // Copyright (c) 2017, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
+let search_fields_datatypes = ['Data', 'Link', 'Dynamic Link', 'Long Text', 'Select', 'Small Text', 'Text', 'Text Editor'];
+
 frappe.ui.form.on('POS Settings', {
 	onload: function(frm) {
 		frm.trigger("get_invoice_fields");
+		frm.trigger("add_search_options");
 	},
 
 	get_invoice_fields: function(frm) {
@@ -21,6 +24,38 @@ frappe.ui.form.on('POS Settings', {
 			);
 		});
 
+	},
+
+	add_search_options: function(frm) {
+		frappe.model.with_doctype("Item", () => {
+			var fields = $.map(frappe.get_doc("DocType", "Item").fields, function(d) {
+				if (search_fields_datatypes.includes(d.fieldtype)) {
+					return [d.label];
+				} else {
+					return null;
+				}
+			});
+
+			fields.unshift('');
+			frm.set_df_property('pos_search_fields', 'options', fields, cur_frm.docname, 'field');
+		});
+
+	}
+});
+
+frappe.ui.form.on("POS Search Fields", {
+	field: function(frm, doctype, name) {
+		var doc = frappe.get_doc(doctype, name);
+		var df = $.map(frappe.get_doc("DocType", "Item").fields, function(d) {
+			if (doc.field == d.label && search_fields_datatypes.includes(d.fieldtype)) {
+				return d;
+			} else {
+				return null;
+			}
+		})[0];
+
+		doc.fieldname = df.fieldname;
+		frm.refresh_field("fields");
 	}
 });
 
