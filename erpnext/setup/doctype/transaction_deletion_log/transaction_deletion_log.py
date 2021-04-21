@@ -92,39 +92,39 @@ class TransactionDeletionLog(Document):
 		frappe.db.sql("""update tabSeries set current = %s where name=%s""", (last, prefix))
 
 	def delete_communications(self, doctype, company_fieldname):
-        reference_docs = frappe.get_all(doctype, filters={company_fieldname:self.company})
-        reference_doc_names = [r.name for r in reference_docs]
+		reference_docs = frappe.get_all(doctype, filters={company_fieldname:self.company})
+		reference_doc_names = [r.name for r in reference_docs]
 
-        communications = frappe.get_all("Communication", filters={"reference_doctype":doctype,"reference_name":["in", reference_doc_names]})
-        communication_names = [c.name for c in communications]
+		communications = frappe.get_all("Communication", filters={"reference_doctype":doctype,"reference_name":["in", reference_doc_names]})
+		communication_names = [c.name for c in communications]
 
-        frappe.delete_doc("Communication", communication_names, ignore_permissions=True)
+		frappe.delete_doc("Communication", communication_names, ignore_permissions=True)
 
 	def delete_bins(self):
-        frappe.db.sql("""delete from tabBin where warehouse in
-                (select name from tabWarehouse where company=%s)""", self.company)
+		frappe.db.sql("""delete from tabBin where warehouse in
+				(select name from tabWarehouse where company=%s)""", self.company)
 
-    def delete_lead_addresses(self):
-        """Delete addresses to which leads are linked"""
-        leads = frappe.get_all("Lead", filters={"company": self.company})
-        leads = [ "'%s'"%row.get("name") for row in leads ]
-        addresses = []
-        if leads:
-            addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name
-                in ({leads})""".format(leads=",".join(leads)))
+	def delete_lead_addresses(self):
+		"""Delete addresses to which leads are linked"""
+		leads = frappe.get_all("Lead", filters={"company": self.company})
+		leads = [ "'%s'"%row.get("name") for row in leads ]
+		addresses = []
+		if leads:
+			addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name
+				in ({leads})""".format(leads=",".join(leads)))
 
-            if addresses:
-                addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
+			if addresses:
+				addresses = ["%s" % frappe.db.escape(addr) for addr in addresses]
 
-                frappe.db.sql("""delete from tabAddress where name in ({addresses}) and
-                    name not in (select distinct dl1.parent from `tabDynamic Link` dl1
-                    inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent
-                    and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses)))
+				frappe.db.sql("""delete from tabAddress where name in ({addresses}) and
+					name not in (select distinct dl1.parent from `tabDynamic Link` dl1
+					inner join `tabDynamic Link` dl2 on dl1.parent=dl2.parent
+					and dl1.link_doctype<>dl2.link_doctype)""".format(addresses=",".join(addresses)))
 
-                frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead'
-                    and parenttype='Address' and link_name in ({leads})""".format(leads=",".join(leads)))
+				frappe.db.sql("""delete from `tabDynamic Link` where link_doctype='Lead'
+					and parenttype='Address' and link_name in ({leads})""".format(leads=",".join(leads)))
 
-            frappe.db.sql("""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(leads=",".join(leads)))
+			frappe.db.sql("""update tabCustomer set lead_name=NULL where lead_name in ({leads})""".format(leads=",".join(leads)))
 
 @frappe.whitelist()
 def get_doctypes_to_be_ignored():
