@@ -98,7 +98,8 @@ def get_columns(filters):
 	]
 
 	for day in range(filters["total_days_in_month"]):
-		columns.append(cstr(day+1) +"::20")
+		width = "10" if day + 1 < 10 else "35"
+		columns.append(cstr(day+1) +"::" + width)
 
 	columns += [_("Total Present") + ":Float:80", _("Total Leaves") + ":Float:80",  _("Total Absent") + ":Float:80"]
 	return columns
