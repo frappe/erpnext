@@ -731,12 +731,12 @@ def set_tax_withholding_category(company):
 	docs = get_tds_details(accounts, fiscal_year)
 
 	for d in docs:
-		try:
+		if not frappe.db.exists("Tax Withholding Category", d.get("name")):
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
 			doc.insert()
-		except frappe.DuplicateEntryError:
+		else:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
 
 			if accounts:
