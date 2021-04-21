@@ -8,31 +8,30 @@
  "engine": "InnoDB",
  "field_order": [
   "medication_name",
-  "national_drug_code",
   "medication_class",
-  "generic_name",
   "abbr",
+  "national_drug_code",
+  "generic_name",
   "column_break_4",
-  "disabled",
   "strength",
   "strength_uom",
   "dosage_form",
-  "is_generic",
-  "defaults_section",
-  "default_prescription_dosage",
-  "default_interval",
-  "default_interval_uom",
-  "column_break_16",
-  "default_prescription_duration",
-  "item_and_price_section",
+  "disabled",
+  "item_details",
   "item",
   "item_code",
   "item_group",
   "stock_uom",
+  "description",
   "column_break_14",
   "is_billable",
   "rate",
-  "description",
+  "defaults_section",
+  "default_prescription_dosage",
+  "default_prescription_duration",
+  "column_break_16",
+  "default_interval",
+  "default_interval_uom",
   "section_break_36",
   "reference_url",
   "change_in_item"
@@ -132,12 +131,6 @@
    "label": "Reference URL"
   },
   {
-   "description": "Properties of the linked Item, you may further configure Batch Number and Expiry, Serial Number, Shelf Life etc. in the Item master",
-   "fieldname": "item_and_price_section",
-   "fieldtype": "Section Break",
-   "label": "Item and Price"
-  },
-  {
    "fieldname": "item_code",
    "fieldtype": "Data",
    "label": "Item Code",
@@ -172,21 +165,6 @@
    "label": "Disabled"
   },
   {
-   "allow_in_quick_entry": 1,
-   "default": "0",
-   "fieldname": "is_billable",
-   "fieldtype": "Check",
-   "label": "Is Billable"
-  },
-  {
-   "allow_in_quick_entry": 1,
-   "depends_on": "is_billable",
-   "fieldname": "rate",
-   "fieldtype": "Float",
-   "label": "Rate",
-   "mandatory_depends_on": "is_billable"
-  },
-  {
    "default": "0",
    "fieldname": "change_in_item",
    "fieldtype": "Check",
@@ -211,12 +189,6 @@
    "reqd": 1
   },
   {
-   "default": "0",
-   "fieldname": "is_generic",
-   "fieldtype": "Check",
-   "label": "Is Generic"
-  },
-  {
    "fieldname": "abbr",
    "fieldtype": "Data",
    "in_list_view": 1,
@@ -228,15 +200,39 @@
    "fieldname": "dosage_form",
    "fieldtype": "Link",
    "label": "Dosage Form",
-   "options": "Dosage Form"
+   "options": "Dosage Form",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
+  },
+  {
+   "collapsible": 1,
+   "collapsible_depends_on": "!doc.__islocal",
+   "description": "Properties of the linked Item, you may further configure Batch Number and Expiry, Serial Number, Shelf Life etc. in the Item master",
+   "fieldname": "item_details",
+   "fieldtype": "Section Break",
+   "label": "Linked Item"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "default": "0",
+   "fieldname": "is_billable",
+   "fieldtype": "Check",
+   "label": "Is Billable"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "depends_on": "is_billable",
+   "fieldname": "rate",
+   "fieldtype": "Float",
+   "label": "Rate",
+   "mandatory_depends_on": "is_billable"
   }
  ],
  "links": [],
- "modified": "2021-04-19 18:43:03.163230",
+ "modified": "2021-04-21 17:17:52.995701",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Medication",

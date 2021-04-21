@@ -28,7 +28,6 @@ def get_healthcare_services_to_invoice(patient, company):
 		items_to_invoice += get_inpatient_services_to_invoice(patient, company)
 		items_to_invoice += get_therapy_plans_to_invoice(patient, company)
 		items_to_invoice += get_therapy_sessions_to_invoice(patient, company)
-		items_to_invoice += get_radiology_examinations_to_invoice(patient, company)
 		items_to_invoice += get_healthcare_service_orders_to_invoice(patient, company)
 
 		return items_to_invoice
