@@ -206,11 +206,11 @@ class SalesInvoice(SellingController):
 		if self.exonerated == 1:
 			self.grand_total -= self.total_taxes_and_charges
 			self.rounded_total -= self.total_taxes_and_charges
-			self.outstanding_amount -= self.total_taxes_and_charges
 		else:
 			self.grand_total = self.total
 			self.rounded_total = self.grand_total
-			self.outstanding_amount = self.grand_total
+		
+		self.outstanding_amount = self.grand_total - self.total_advance
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
