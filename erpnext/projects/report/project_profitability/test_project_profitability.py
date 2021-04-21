@@ -29,21 +29,26 @@ class TestProjectProfitability(unittest.TestCase):
 		}
 
 		report = execute(filters)
-		expected_data = [
-			{
-				'customer_name': '_Test Customer',
-				'employee_name': 'test_employee_9@salary.com',
-				'base_grand_total': 100.0,
-				'base_gross_pay': 78100.0,
-				'profit': -19425.0,
-				'total_billed_hours': 2.0,
-				'utilization': 0.25,
-				'fractional_cost': 19525.0,
-				'total_working_days': 1.0
-			}
-		]
-		for key in ['customer_name','employee_name','base_grand_total','base_gross_pay','profit','total_billed_hours','utilization','fractional_cost','total_working_days']:
-			self.assertEqual(expected_data[0].get(key), report[1][0].get(key))
+
+		row = report[1][0]
+		timesheet = frappe.get_doc("Timesheet", self.timesheet.name)
+
+		self.assertEqual(self.sales_invoice.customer, row.customer_name)
+		self.assertEqual(timesheet.title, row.employee_name)
+		self.assertEqual(self.sales_invoice.base_grand_total, row.base_grand_total)
+		self.assertEqual(self.salary_slip.base_gross_pay, row.base_gross_pay)
+		self.assertEqual(timesheet.total_billed_hours, row.total_billed_hours)
+		self.assertEqual(self.salary_slip.total_working_days, row.total_working_days)
+
+		standard_working_hours = frappe.db.get_single_value("HR Settings", "standard_working_hours")
+		utilization = timesheet.total_billed_hours/(self.salary_slip.total_working_days * standard_working_hours)
+		self.assertEqual(utilization, row.utilization)
+		
+		profit = self.sales_invoice.base_grand_total - self.salary_slip.base_gross_pay * utilization
+		self.assertEqual(profit, row.profit)
+
+		fractional_cost = self.salary_slip.base_gross_pay * utilization
+		self.assertEqual(fractional_cost, row.fractional_cost)
 
 	def tearDown(self):
 		frappe.get_doc("Sales Invoice", self.sales_invoice.name).cancel()
