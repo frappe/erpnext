@@ -7,7 +7,7 @@
 >>>>>>> f1ce418bdc (fix: Hide Attribute filters if 'Hide Variants' is enabled in E Commerce Settings)
 import frappe
 from frappe import _dict
-from frappe.utils import floor, ceil, flt
+from frappe.utils import floor
 
 class ProductFiltersBuilder:
 	def __init__(self, item_group=None):
@@ -101,8 +101,8 @@ class ProductFiltersBuilder:
 		min_discount, max_discount = discounts[0], discounts[1]
 		# [25, 60]
 		min_range_absolute, max_range_absolute = floor(min_discount), floor(max_discount)
-		min_range = int(min_discount - (min_range_absolute%10)) # 20
-		max_range = int(max_discount - (max_range_absolute%10)) # 60
+		min_range = int(min_discount - (min_range_absolute % 10)) # 20
+		max_range = int(max_discount - (max_range_absolute % 10)) # 60
 
 		for discount in range(min_range, (max_range + 1), 10):
 			label = f"{discount}% and above"
