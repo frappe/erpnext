@@ -53,7 +53,9 @@ class BOMUpdateTool(Document):
 			rate=%s, amount=stock_qty*%s where bom_no = %s and docstatus < 2 and parenttype='BOM'""",
 			(self.new_bom, unit_cost, unit_cost, self.current_bom))
 
-	def get_parent_boms(self, bom, bom_list=[]):
+	def get_parent_boms(self, bom, bom_list=None):
+		if bom_list is None:
+			bom_list = []
 		data = frappe.db.sql("""SELECT DISTINCT parent FROM `tabBOM Item`
 			WHERE bom_no = %s AND docstatus < 2 AND parenttype='BOM'""", bom)
 
