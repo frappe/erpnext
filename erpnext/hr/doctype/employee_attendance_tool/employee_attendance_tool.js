@@ -125,6 +125,7 @@ erpnext.EmployeeSelector = Class.extend({
 		var mark_employee_toolbar = $('<div class="col-sm-12 bottom-toolbar">\
 			<button class="btn btn-primary btn-mark-present btn-xs"></button>\
 			<button class="btn btn-default btn-mark-absent btn-xs"></button>\
+			<button class="btn btn-default btn-mark-late btn-xs"></button>\
 			<button class="btn btn-default btn-mark-half-day btn-xs"></button></div>')
 
 		employee_toolbar.find(".btn-add")
@@ -186,6 +187,32 @@ erpnext.EmployeeSelector = Class.extend({
 					args:{
 						"employee_list":employee_absent,
 						"status":"Absent",
+						"date":frm.doc.date,
+						"company":frm.doc.company
+					},
+
+					callback: function(r) {
+						erpnext.employee_attendance_tool.load_employees(frm);
+
+					}
+				});
+			});
+
+		mark_employee_toolbar.find(".btn-mark-late")
+			.html(__('Mark Late'))
+			.on("click", function() {
+				var employee_late = [];
+				$(me.wrapper).find('input[type="checkbox"]').each(function(i, check) {
+					if($(check).is(":checked")) {
+						employee_late.push(employee[i]);
+					}
+				});
+				frappe.call({
+					method: "erpnext.hr.doctype.employee_attendance_tool.employee_attendance_tool.mark_employee_attendance",
+					args:{
+						"employee_list": employee_late,
+						"status":"Present",
+						"late_entry": 1,
 						"date":frm.doc.date,
 						"company":frm.doc.company
 					},
