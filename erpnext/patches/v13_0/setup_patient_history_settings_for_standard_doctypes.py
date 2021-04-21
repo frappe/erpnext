@@ -8,6 +8,7 @@ def execute():
 
 	frappe.reload_doc("healthcare", "doctype", "Inpatient Medication Order")
 	frappe.reload_doc("healthcare", "doctype", "Therapy Session")
+	frappe.reload_doc("healthcare", "doctype", "Clinical Procedure")
 	frappe.reload_doc("healthcare", "doctype", "Patient History Settings")
 	frappe.reload_doc("healthcare", "doctype", "Patient History Standard Document Type")
 	frappe.reload_doc("healthcare", "doctype", "Patient History Custom Document Type")

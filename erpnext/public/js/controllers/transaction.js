@@ -1174,8 +1174,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			}
 
 			// for handling customization not to fetch price list rate
-			if (frappe.flags.dont_fetch_price_list_rate) {
-				return;
+			if(frappe.flags.dont_fetch_price_list_rate) {
+				return
 			}
 
 			if (!dont_fetch_price_list_rate &&
