@@ -120,6 +120,7 @@ def prepare_data(accounts, filters, parent_children_map, company_currency, dimen
 
 	for d in accounts:
 		has_value = False
+		total = 0
 		row = {
 			"account": d.name,
 			"parent_account": d.parent_account,
@@ -137,8 +138,10 @@ def prepare_data(accounts, filters, parent_children_map, company_currency, dimen
 			if abs(row[frappe.scrub(item)]) >= 0.005:
 				# ignore zero values
 				has_value = True
+				total += flt(d.get(frappe.scrub(item), 0.0), 3)
 
 		row["has_value"] = has_value
+		row["total"] = total
 		data.append(row)
 
 	return data
@@ -195,6 +198,13 @@ def get_columns(dimension_items_list, accumulated_values=1, company=None):
 		columns.append({
 			"fieldname": frappe.scrub(item),
 			"label": item,
+			"fieldtype": "Currency",
+			"options": "currency",
+			"width": 150
+		})
+	columns.append({
+			"fieldname": "total",
+			"label": "Total",
 			"fieldtype": "Currency",
 			"options": "currency",
 			"width": 150
