@@ -7,17 +7,34 @@ from frappe.utils import cint
 import frappe
 from frappe.model.document import Document
 from frappe import _
+from frappe.desk.notifications import clear_notifications
+import functools
+
 
 class TransactionDeletionLog(Document):
 	def validate(self):
 		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
 		for doctype in self.doctypes_to_be_ignored:
 			if doctype.doctype_name not in doctypes_to_be_ignored_list:
-				print("*" * 100)
-				print(doctype.doctype_name)
 				frappe.throw(_("DocTypes should not be added manually to the 'DocTypes That Won't Be Affected' table."))
 
 	def before_submit(self):
+		frappe.only_for("System Manager")
+		company_obj = frappe.get_doc("Company", self.company)
+		if frappe.session.user != company_obj.owner and frappe.session.user !='Administrator':
+			frappe.throw(_("Transactions can only be deleted by the creator of the Company or the administrator."), 
+			   frappe.PermissionError)
+
+		# self.delete_bins()
+		# self.delete_lead_addresses()
+		
+		# reset company values
+		company_obj.total_monthly_sales = 0
+		company_obj.sales_monthly_history = None
+		company_obj.save()
+		# Clear notification counts
+		clear_notifications()
+
 		singles = frappe.get_all('DocType', filters = {'issingle': 1}, pluck = "name")
 		tables = frappe.get_all('DocType', filters = {'istable': 1}, pluck = "name")
 		doctypes_to_be_ignored_list = singles + get_doctypes_to_be_ignored()
@@ -33,6 +50,15 @@ class TransactionDeletionLog(Document):
 				no_of_docs = frappe.db.count(docfield['parent'], {
 							docfield['fieldname'] : self.company
 						})
+
+				# #delete version log
+				# frappe.db.sql("""delete from `tabVersion` where ref_doctype=%s and docname in
+				# 	(select name from `tab{0}` where `{1}`=%s)""".format(docfield['parent'],
+				# 		docfield['fieldname']), (docfield['parent'], self.company))
+
+				# # delete communication
+				# self.delete_communications(docfield['parent'], docfield['fieldname'])
+
 				if no_of_docs > 0:
 					# populate DocTypes table
 					if docfield['parent'] not in tables:
