@@ -15,6 +15,7 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 class TestPOSInvoice(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=200, basic_rate=100)
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def tearDown(self):
