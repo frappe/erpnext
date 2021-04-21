@@ -17,8 +17,6 @@ frappe.ui.form.on("Item", {
 			frm.fields_dict["attributes"].grid.set_column_disp("attribute_value", true);
 		}
 
-		// should never check Private
-		frm.fields_dict["website_image"].df.is_private = 0;
 		if (frm.doc.is_fixed_asset) {
 			frm.trigger("set_asset_naming_series");
 		}
@@ -405,10 +403,12 @@ $.extend(erpnext.item, {
 		}, __("Actions"));
 	},
 
-	weight_to_validate: function(frm){
-		if((frm.doc.nett_weight || frm.doc.gross_weight) && !frm.doc.weight_uom) {
-			frappe.msgprint(__('Weight is mentioned,\nPlease mention "Weight UOM" too'));
-			frappe.validated = 0;
+	weight_to_validate: function(frm) {
+		if (frm.doc.weight_per_unit && !frm.doc.weight_uom) {
+			frappe.msgprint({
+				message: __("Please mention 'Weight UOM' along with Weight."),
+				title: __("Note")
+			});
 		}
 	},
 
@@ -482,7 +482,7 @@ $.extend(erpnext.item, {
 								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
 								me.multiple_variant_dialog.get_primary_btn()
 									.html(__(
-										`Make ${no_of_combinations} Variant${no_of_combinations === 1 ? '' : 's'}`
+										'Make {0} Variant{1}', [no_of_combinations, no_of_combinations === 1 ? '' : 's']
 									));
 								me.multiple_variant_dialog.enable_primary_action();
 							}
