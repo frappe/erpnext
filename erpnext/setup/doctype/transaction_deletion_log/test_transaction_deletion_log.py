@@ -21,13 +21,23 @@ class TestTransactionDeletionLog(unittest.TestCase):
 					break
 			self.assertTrue(contains_company)
 	
-	def test_deletion_is_successful(self):
+	def test_no_of_docs_is_correct(self):
 		for i in range(5):
 			create_task('Pied Piper')
 		tdr = create_transaction_deletion_request('Pied Piper')
 		for doctype in tdr.doctypes:
 			if doctype.doctype_name == 'Task':
 				self.assertEqual(doctype.no_of_docs, 5)
+
+	def test_deletion_is_successful(self):
+		create_task('Pied Piper')
+		create_transaction_deletion_request('Pied Piper')
+		tasks_containing_company = frappe.get_all('Task',
+		filters = {
+			'company' : 'Pied Piper'
+		})
+		self.assertEqual(tasks_containing_company, [])
+		
 		
 def create_transaction_deletion_request(company):
 	tdr = frappe.get_doc({
@@ -35,6 +45,7 @@ def create_transaction_deletion_request(company):
 		'company': company
 	})
 	tdr.insert()
+	tdr.before_submit()
 	return tdr
 
 
