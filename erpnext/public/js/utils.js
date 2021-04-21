@@ -56,7 +56,7 @@ $.extend(erpnext, {
 		let me = this;
 		let attachSelectorButton = (innerText, appendLoction) => {
 			let $btnDiv = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
-				.appendTo(appendLoction)
+				.appendTo(appendLoction);
 			let $btn = $(`<button class="btn btn-sm btn-default">${innerText}</button>`)
 				.appendTo($btnDiv);
 
@@ -65,19 +65,19 @@ $.extend(erpnext, {
 				let on_close = '';
 				me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
 					callback, on_close, true);
-			})
-		}
+			});
+		};
 
-		frappe.model.get_value('Item', {'name':grid_row.doc.item_code}, 
+		frappe.model.get_value('Item', {'name': grid_row.doc.item_code},
 			['has_serial_no', 'has_batch_no'],
 			({has_serial_no, has_batch_no}) => {
-				grid_row.doc.has_serial_no = has_serial_no
-				grid_row.doc.has_batch_no = has_batch_no
+				grid_row.doc.has_serial_no = has_serial_no;
+				grid_row.doc.has_batch_no = has_batch_no;
 
 				if (has_serial_no) {
-					attachSelectorButton(__("Add Serial No"), grid_row.grid_form.fields_dict.serial_no.$wrapper)
+					attachSelectorButton(__("Add Serial No"), grid_row.grid_form.fields_dict.serial_no.$wrapper);
 				} else if (has_batch_no) {
-					attachSelectorButton(__("Pick Batch No"), grid_row.grid_form.fields_dict.batch_no.$wrapper)
+					attachSelectorButton(__("Pick Batch No"), grid_row.grid_form.fields_dict.batch_no.$wrapper);
 				} else {
 					// Do nothing
 				}
