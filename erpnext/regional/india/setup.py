@@ -427,13 +427,13 @@ def make_custom_fields(update=True):
 
 		dict(fieldname='einvoice_section', label='E-Invoice Fields', fieldtype='Section Break', insert_after='gst_vehicle_type',
 			print_hide=1, hidden=1),
-		
+
 		dict(fieldname='ack_no', label='Ack. No.', fieldtype='Data', read_only=1, hidden=1, insert_after='einvoice_section',
 			no_copy=1, print_hide=1),
-		
+
 		dict(fieldname='ack_date', label='Ack. Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_no', no_copy=1, print_hide=1),
 
-		dict(fieldname='irn_cancel_date', label='Cancel Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_date', 
+		dict(fieldname='irn_cancel_date', label='Cancel Date', fieldtype='Data', read_only=1, hidden=1, insert_after='ack_date',
 			no_copy=1, print_hide=1),
 
 		dict(fieldname='signed_einvoice', label='Signed E-Invoice', fieldtype='Code', options='JSON', hidden=1, insert_after='irn_cancel_date',
@@ -696,12 +696,12 @@ def set_tax_withholding_category(company):
 	docs = get_tds_details(accounts, fiscal_year)
 
 	for d in docs:
-		try:
+		if not frappe.db.exists("Tax Withholding Category", d.get("name")):
 			doc = frappe.get_doc(d)
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
 			doc.insert()
-		except frappe.DuplicateEntryError:
+		else:
 			doc = frappe.get_doc("Tax Withholding Category", d.get("name"))
 
 			if accounts:
