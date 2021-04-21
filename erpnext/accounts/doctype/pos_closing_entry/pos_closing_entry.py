@@ -89,8 +89,8 @@ class POSClosingEntry(StatusUpdater):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
-	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'])
-	return [c['user'] for c in cashiers_list]
+	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'], as_list=1)
+	return [c for c in cashiers_list]
 
 @frappe.whitelist()
 def get_pos_invoices(start, end, pos_profile, user):
