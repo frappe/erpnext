@@ -32,8 +32,7 @@ def execute(filters=None):
 		if not emp_det:
 			continue
 
-		row = [emp, emp_det.employee_name, emp_det.branch, emp_det.department, emp_det.designation,
-			emp_det.company]
+		row = [emp, emp_det.employee_name, emp_det.department, emp_det.designation]
 
 		total_p = total_a = total_l = 0.0
 		for day in range(filters["total_days_in_month"]):
@@ -92,13 +91,12 @@ def execute(filters=None):
 
 def get_columns(filters):
 	columns = [
-		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140", _("Branch")+ ":Link/Branch:120",
+		_("Employee") + ":Link/Employee:120", _("Employee Name") + "::140",
 		_("Department") + ":Link/Department:120", _("Designation") + ":Link/Designation:120",
-		 _("Company") + ":Link/Company:120"
 	]
 
 	for day in range(filters["total_days_in_month"]):
-		width = "10" if day + 1 < 10 else "35"
+		width = "20" if day + 1 < 10 else "35"
 		columns.append(cstr(day+1) +"::" + width)
 
 	columns += [_("Total Present") + ":Float:80", _("Total Leaves") + ":Float:80",  _("Total Absent") + ":Float:80"]
