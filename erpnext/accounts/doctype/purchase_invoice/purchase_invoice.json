@@ -82,7 +82,7 @@
   "column_break_49",
   "shipping_rule",
   "section_break_51",
-  "exonerated",
+  "tax_included",
   "taxes_and_charges",
   "taxes",
   "sec_tax_breakup",
@@ -890,6 +890,7 @@
   {
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "currency",
@@ -1305,12 +1306,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "exonerated",
-   "fieldtype": "Check",
-   "label": "Exonerated"
-  },
-  {
    "fieldname": "isv15",
    "fieldtype": "Currency",
    "label": "ISV 15%"
@@ -1329,12 +1324,18 @@
    "fieldname": "total_exonerated",
    "fieldtype": "Currency",
    "label": "Total Exonerated"
+  },
+  {
+   "default": "0",
+   "fieldname": "tax_included",
+   "fieldtype": "Check",
+   "label": "Tax Included"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-04-09 14:44:21.107363",
+ "modified": "2021-04-20 16:00:05.728350",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
