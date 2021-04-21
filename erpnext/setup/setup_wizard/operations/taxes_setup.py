@@ -77,16 +77,11 @@ def simple_to_detailed(templates):
 def from_detailed_data(company_name, data):
 	"""Create Taxes and Charges Templates from detailed data."""
 	coa_name = frappe.db.get_value('Company', company_name, 'chart_of_accounts')
-	coa_data = data.get('chart_of_accounts', {})
-	tax_templates = coa_data.get(coa_name) or coa_data.get('*', {})
-	tax_categories = data.get('tax_categories')
-	sales_tax_templates = tax_templates.get('sales_tax_templates') or tax_templates.get('*', {})
-	purchase_tax_templates = tax_templates.get('purchase_tax_templates') or tax_templates.get('*', {})
-	item_tax_templates = tax_templates.get('item_tax_templates') or tax_templates.get('*', {})
-
-	if tax_categories:
-		for tax_category in tax_categories:
-			make_tax_catgory(tax_category)
+	tax_templates = data.get(coa_name) or data.get('*')
+	sales_tax_templates = tax_templates.get('sales_tax_templates') or tax_templates.get('*')
+	purchase_tax_templates = tax_templates.get('purchase_tax_templates') or tax_templates.get('*')
+	item_tax_templates = tax_templates.get('item_tax_templates') or tax_templates.get('*')
+	tax_categories = tax_templates.get('tax_categories')
 
 	if sales_tax_templates:
 		for template in sales_tax_templates:
@@ -99,6 +94,10 @@ def from_detailed_data(company_name, data):
 	if item_tax_templates:
 		for template in item_tax_templates:
 			make_item_tax_template(company_name, template)
+
+	if tax_categories:
+		for tax_category in tax_categories:
+			make_tax_category(tax_category)
 
 
 def make_taxes_and_charges_template(company_name, doctype, template):
@@ -158,6 +157,11 @@ def make_item_tax_template(company_name, template):
 
 	return frappe.get_doc(template).insert(ignore_permissions=True)
 
+def make_tax_category(tax_category):
+	""" Make tax category based on title if not already created """
+	doctype = 'Tax Category'
+	if not frappe.db.exists(doctype, tax_category)
+	frappe.get_doc(tax_category).insert(ignore_permissions=True)
 
 def get_or_create_account(company_name, account):
 	"""
