@@ -517,6 +517,7 @@ class AccountsController(TransactionBase):
 		frappe.db.sql("""delete from `tab%s` where parentfield=%s and parent = %s
 			and allocated_amount = 0""" % (childtype, '%s', '%s'), (parentfield, self.name))
 
+	@frappe.whitelist()
 	def apply_shipping_rule(self):
 		if self.shipping_rule:
 			shipping_rule = frappe.get_doc("Shipping Rule", self.shipping_rule)
@@ -537,6 +538,7 @@ class AccountsController(TransactionBase):
 
 		return {}
 
+	@frappe.whitelist()
 	def set_advances(self):
 		"""Returns list of advances against Account, Party, Reference"""
 
@@ -657,6 +659,7 @@ class AccountsController(TransactionBase):
 					'dr_or_cr': dr_or_cr,
 					'unadjusted_amount': flt(d.advance_amount),
 					'allocated_amount': flt(d.allocated_amount),
+					'precision': d.precision('advance_amount'),
 					'exchange_rate': (self.conversion_rate
 						if self.party_account_currency != self.company_currency else 1),
 					'grand_total': (self.base_grand_total
@@ -1444,7 +1447,7 @@ def update_child_qty_rate(parent_doctype, trans_items, parent_doctype_name, chil
 			)
 
 	def get_new_child_item(item_row):
-		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item" 
+		child_doctype = "Sales Order Item" if parent_doctype == "Sales Order" else "Purchase Order Item"
 		return set_order_defaults(parent_doctype, parent_doctype_name, child_doctype, child_docname, item_row)
 
 	def validate_quantity(child_item, d):
