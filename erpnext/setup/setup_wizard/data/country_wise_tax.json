@@ -818,6 +818,28 @@
 	"India": {
 		"chart_of_accounts": {
 			"*": {
+				"tax_categories": [
+					{
+						"title": "In-Sate",
+						"is_inter_state": 0,
+						"gst_state": ""
+					},
+					{
+						"title": "Out-Sate",
+						"is_inter_state": 1,
+						"gst_state": ""
+					},
+					{
+						"title": "Reverse Charge",
+						"is_inter_state": 0,
+						"gst_state": ""
+					},
+					{
+						"title": "Registered Composition",
+						"is_inter_state": 0,
+						"gst_state": ""
+					}
+				],
 				"item_tax_templates": [
 					{
 						"title": "GST 9%",
