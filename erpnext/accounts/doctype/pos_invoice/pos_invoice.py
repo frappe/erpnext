@@ -215,9 +215,8 @@ class POSInvoice(SalesInvoice):
 		for d in self.get("items"):
 			is_stock_item = frappe.get_cached_value("Item", d.get("item_code"), "is_stock_item")
 			if not is_stock_item:
-				frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice. ").format(
-					d.idx, frappe.bold(d.item_code)
-				), title=_("Invalid Item"))
+				frappe.throw(_("Row #{}: Item {} is a non stock item. You can only include stock items in a POS Invoice. ")
+					.format(d.idx, frappe.bold(d.item_code)), title=_("Invalid Item"))
 
 	def validate_mode_of_payment(self):
 		if len(self.payments) == 0:
