@@ -5,17 +5,17 @@ frappe.ui.form.on('Transaction Deletion Log', {
 	onload: function(frm) {
 		let doctypes_to_be_ignored_array;	
 		frappe.call({
-			method: "erpnext.setup.doctype.transaction_deletion_log.transaction_deletion_log.get_doctypes_to_be_ignored",
+			method: 'erpnext.setup.doctype.transaction_deletion_log.transaction_deletion_log.get_doctypes_to_be_ignored',
 			callback: function(r) {
 				doctypes_to_be_ignored_array = r.message;
 				populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm);
-				frm.fields_dict["doctypes_to_be_ignored"].grid.set_column_disp("no_of_docs", false);
+				frm.fields_dict['doctypes_to_be_ignored'].grid.set_column_disp('no_of_docs', false);
 				frm.refresh_field('doctypes_to_be_ignored');
 			}
 		});
 
 		frm.get_field('doctypes_to_be_ignored').grid.cannot_add_rows = true;
-		frm.fields_dict["doctypes_to_be_ignored"].grid.set_column_disp("no_of_docs", false);
+		frm.fields_dict['doctypes_to_be_ignored'].grid.set_column_disp('no_of_docs', false);
 		frm.refresh_field('doctypes_to_be_ignored');
 	}
 });
