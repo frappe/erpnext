@@ -16,6 +16,14 @@ from frappe.website.doctype.website_slideshow.website_slideshow import get_slide
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
 
+# SEARCH 
+from erpnext.templates.pages.product_search import (
+	insert_item_to_index, 
+	update_index_for_item, 
+	delete_item_from_index
+)
+# -----
+
 class WebsiteItem(WebsiteGenerator):
 	website = frappe._dict(
 		page_title_field="web_item_name",
@@ -49,6 +57,8 @@ class WebsiteItem(WebsiteGenerator):
 
 	def on_trash(self):
 		super(WebsiteItem, self).on_trash()
+		# Delete Item from search index
+		delete_item_from_index(self)
 		self.publish_unpublish_desk_item(publish=False)
 
 	def validate_duplicate_website_item(self):
@@ -376,6 +386,9 @@ def invalidate_cache_for_web_item(doc):
 	for item_group in website_item_groups:
 		invalidate_cache_for(doc, item_group)
 
+	# Update Search Cache
+	update_index_for_item(doc)
+
 	invalidate_item_variants_cache_for_website(doc)
 
 @frappe.whitelist()
@@ -402,6 +415,10 @@ def make_website_item(doc, save=True):
 		return website_item
 
 	website_item.save()
+
+	# Add to search cache
+	insert_item_to_index(website_item)
+	
 	return [website_item.name, website_item.web_item_name]
 
 def on_doctype_update():

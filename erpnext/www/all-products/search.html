@@ -1,0 +1,14 @@
+{% extends "templates/web.html" %}
+
+
+{% block title %}{{ _('Search') }}{% endblock %}
+{% block header %}
+<div class="mb-6">{{ _('Search Products') }}</div>
+{% endblock header %}
+
+{% block page_content %}
+<input type="text" name="query" id="search-box">
+<ul id="results">
+
+</ul>
+{% endblock %}
