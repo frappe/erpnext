@@ -262,6 +262,7 @@ doc_events = {
 		],
 		"on_trash": "erpnext.regional.check_deletion_permission",
 		"validate": [
+			"erpnext.regional.india.utils.validate_document_name",
 			"erpnext.regional.india.utils.update_taxable_values"
 		]
 	},
