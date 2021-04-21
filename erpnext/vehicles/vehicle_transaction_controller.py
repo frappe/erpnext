@@ -167,8 +167,6 @@ class VehicleTransactionController(StockController):
 						.format(frappe.get_desk_link("Vehicle Booking Order", self.vehicle_booking_order)))
 
 			if self.doctype == "Vehicle Transfer Letter":
-				if not vbo.vehicle_delivered_date:
-					frappe.throw(_("Cannot make Vehicle Transfer Letter before Vehicle Delivery"))
 				if getdate(self.posting_date) < getdate(vbo.vehicle_delivered_date):
 					frappe.throw(_("Transfer Date cannot be before Delivery Date {0}")
 						.format(frappe.format(getdate(vbo.vehicle_delivered_date))))
