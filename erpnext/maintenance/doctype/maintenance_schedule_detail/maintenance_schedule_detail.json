@@ -9,10 +9,14 @@
  "field_order": [
   "item_code",
   "item_name",
+  "column_break_3",
   "scheduled_date",
-  "sales_person",
   "actual_date",
+  "section_break_6",
+  "sales_person",
+  "column_break_8",
   "completion_status",
+  "section_break_10",
   "serial_no",
   "item_ref"
  ],
@@ -95,15 +99,33 @@
   },
   {
    "fieldname": "item_ref",
-   "fieldtype": "Data",
+   "fieldtype": "Link",
+   "hidden": 1,
    "label": "Item Reference",
+   "options": "Maintenance Schedule Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_8",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_10",
+   "fieldtype": "Section Break"
   }
  ],
  "idx": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-19 17:42:31.685710",
+ "modified": "2021-04-21 11:07:29.524071",
  "modified_by": "Administrator",
  "module": "Maintenance",
  "name": "Maintenance Schedule Detail",
