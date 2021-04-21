@@ -26,6 +26,7 @@ from erpnext.accounts.doctype.sales_invoice.sales_invoice import validate_inter_
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.stock.doctype.purchase_receipt.purchase_receipt import get_item_account_wise_additional_cost
+from frappe.utils.data import money_in_words
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -107,6 +108,7 @@ class PurchaseInvoice(BuyingController):
 			self.total_exonerated = self.total
 		
 		self.outstanding_amount = self.grand_total - self.total_advance
+		self.in_words = money_in_words(self.grand_total)
 
 	def invoice_is_blocked(self):
 		return self.on_hold and (not self.release_date or self.release_date > getdate(nowdate()))

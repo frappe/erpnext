@@ -30,6 +30,7 @@ from erpnext.healthcare.utils import manage_invoice_submit_cancel
 from six import iteritems
 from datetime import datetime, timedelta, date
 from frappe.model.naming import parse_naming_series
+from frappe.utils.data import money_in_words
 
 form_grid_templates = {
 	"items": "templates/form_grid/item_grid.html"
@@ -211,6 +212,7 @@ class SalesInvoice(SellingController):
 			self.rounded_total = self.grand_total
 		
 		self.outstanding_amount = self.grand_total - self.total_advance
+		self.in_words = money_in_words(self.grand_total)
 
 	# def validate_camps(self):
 	# 	if not self.type_document:
@@ -250,6 +252,9 @@ class SalesInvoice(SellingController):
 		user = frappe.session.user
 
 		cai = frappe.get_all("CAI", ["initial_number", "final_number", "name_cai", "cai", "issue_deadline", "prefix"], filters = { "status": "Active", "prefix": self.naming_series})
+
+		if len(cai) == 0:
+			frappe.throw(_("This secuence no assign cai"))
 
 		current_value = self.get_current(cai[0].prefix)
 
