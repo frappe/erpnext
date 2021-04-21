@@ -1597,6 +1597,6 @@ def get_items_from_warehouse(warehouse, posting_date, posting_time, company):
 			"stock_uom": d[5],
 			"transfer_qty": stock_bal[0],
 			"conversion_factor": 1,
-		});
+		})
 
 	return res
