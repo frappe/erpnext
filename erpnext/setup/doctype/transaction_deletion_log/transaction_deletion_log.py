@@ -8,8 +8,6 @@ import frappe
 from frappe.model.document import Document
 from frappe import _
 from frappe.desk.notifications import clear_notifications
-import functools
-
 
 class TransactionDeletionLog(Document):
 	def validate(self):
@@ -23,7 +21,7 @@ class TransactionDeletionLog(Document):
 		company_obj = frappe.get_doc('Company', self.company)
 		if frappe.session.user != company_obj.owner and frappe.session.user != 'Administrator':
 			frappe.throw(_('Transactions can only be deleted by the creator of the Company or the administrator.'), 
-			   frappe.PermissionError)
+				frappe.PermissionError)
 
 		self.delete_bins()
 		self.delete_lead_addresses()
@@ -107,7 +105,7 @@ class TransactionDeletionLog(Document):
 	def delete_lead_addresses(self):
 		"""Delete addresses to which leads are linked"""
 		leads = frappe.get_all('Lead', filters={'company': self.company})
-		leads = [ "'%s'"%row.get("name") for row in leads ]
+		leads = ["'%s'" % row.get("name") for row in leads]
 		addresses = []
 		if leads:
 			addresses = frappe.db.sql_list("""select parent from `tabDynamic Link` where link_name
