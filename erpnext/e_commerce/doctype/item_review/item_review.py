@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 from datetime import datetime
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from frappe.contacts.doctype.contact.contact import get_contact_name
 from frappe.utils import flt, cint
