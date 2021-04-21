@@ -13,3 +13,4 @@ tweepy==3.8.0
 Unidecode==1.1.1
 WooCommerce==2.1.1
 pycryptodome==3.9.8
+redisearch==2.0.0
