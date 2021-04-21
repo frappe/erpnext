@@ -14,7 +14,7 @@ from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.stock.doctype.batch.batch import get_batch_no, set_batch_nos, get_batch_qty
 from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, add_additional_cost
-from erpnext.stock.utils import get_bin
+from erpnext.stock.utils import get_bin, get_stock_balance
 from frappe.model.mapper import get_mapped_doc
 from erpnext.stock.doctype.serial_no.serial_no import update_serial_nos_after_submit, get_serial_nos
 from erpnext.stock.doctype.stock_reconciliation.stock_reconciliation import OpeningEntryAccountError
@@ -1570,3 +1570,33 @@ def validate_sample_quantity(item_code, sample_quantity, qty, batch_no = None):
 			format(max_retain_qty, batch_no, item_code), alert=True)
 		sample_quantity = qty_diff
 	return sample_quantity
+
+@frappe.whitelist()
+def get_items_from_warehouse(warehouse, posting_date, posting_time, company):
+	lft, rgt = frappe.db.get_value("Warehouse", warehouse, ["lft", "rgt"])
+	items = frappe.db.sql("""
+		select i.name, i.item_name, bin.warehouse, i.item_group, i.description, i.stock_uom
+		from tabBin bin, tabItem i
+		where i.name=bin.item_code and i.disabled=0 and i.is_stock_item = 1
+		and i.has_variants = 0 and i.has_serial_no = 0 and i.has_batch_no = 0
+		and exists(select name from `tabWarehouse` where lft >= %s and rgt <= %s and name=bin.warehouse)
+	""", (lft, rgt))
+
+	res = []
+	for d in set(items):
+		stock_bal = get_stock_balance(d[0], d[2], posting_date, posting_time, with_valuation_rate=True)
+
+		res.append({
+			"item_code": d[0],
+			"s_warehouse": d[2],
+			"item_group": d[3],
+			"description": d[4],
+			"qty": stock_bal[0],
+			"basic_rate": stock_bal[1],
+			"uom": d[5],
+			"stock_uom": d[5],
+			"transfer_qty": stock_bal[0],
+			"conversion_factor": 1,
+		});
+
+	return res

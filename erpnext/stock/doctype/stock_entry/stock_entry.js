@@ -244,6 +244,29 @@ frappe.ui.form.on('Stock Entry', {
 					}
 				})
 			}, __("Get items from"));
+
+			frm.add_custom_button(__("Source Warehouse"), function() {
+				if(!frm.doc.from_warehouse) frappe.throw(__("Please select source warehouse!"));
+				frappe.call({
+					method: "erpnext.stock.doctype.stock_entry.stock_entry.get_items_from_warehouse",
+					freeze: true,
+					freeze_message: __("Loading items from warehosue..."),
+					args: {
+						warehouse: frm.doc.from_warehouse,
+						posting_date: frm.doc.posting_date,
+						posting_time: frm.doc.posting_time,
+						company: frm.doc.company
+					},
+					callback(r) {
+						frm.clear_table("items");
+						r.message.forEach(item => {
+							var d = frm.add_child("items");
+							$.extend(d, item)
+						});
+						frm.refresh_field("items");
+					}
+				});
+			}, __("Get items from"));
 		}
 		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
 			frm.add_custom_button(__('Expired Batches'), function() {
@@ -265,6 +288,7 @@ frappe.ui.form.on('Stock Entry', {
 							});
 						}
 					}
+
 				});
 			}, __("Get items from"));
 		}
