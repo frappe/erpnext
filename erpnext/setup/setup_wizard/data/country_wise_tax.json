@@ -1168,12 +1168,12 @@
 			"*": {
 				"tax_categories": [
 					{
-						"title": "In-Sate",
+						"title": "In-State",
 						"is_inter_state": 0,
 						"gst_state": ""
 					},
 					{
-						"title": "Out-Sate",
+						"title": "Out-State",
 						"is_inter_state": 1,
 						"gst_state": ""
 					},
@@ -1394,16 +1394,19 @@
 							{
 								"account_head": {
 									"account_name": "Output Tax SGST",
-									"tax_rate": 9.00
+									"tax_rate": 9.00,
+									"account_type": "Tax"
 								}
 							},
 							{
 								"account_head": {
 									"account_name": "Output Tax CGST",
-									"tax_rate": 9.00
+									"tax_rate": 9.00,
+									"account_type": "Tax"
 								}
 							}
-						]
+						],
+						"tax_category": "In-State"
 					},
 					{
 						"title": "Output GST Out-state",
@@ -1411,10 +1414,12 @@
 							{
 								"account_head": {
 									"account_name": "Output Tax IGST",
-									"tax_rate": 18.00
+									"tax_rate": 18.00,
+									"account_type": "Tax"
 								}
 							}
-						]
+						],
+						"tax_category": "Out-State"
 					}
 				],
 				"purchase_tax_templates": [
@@ -1425,17 +1430,20 @@
 								"account_head": {
 									"account_name": "Input Tax SGST",
 									"tax_rate": 9.00,
-									"root_type": "Asset"
+									"root_type": "Asset",
+									"account_type": "Tax"
 								}
 							},
 							{
 								"account_head": {
 									"account_name": "Input Tax CGST",
 									"tax_rate": 9.00,
-									"root_type": "Asset"
+									"root_type": "Asset",
+									"account_type": "Tax"
 								}
 							}
-						]
+						],
+						"tax_category": "In-State"
 					},
 					{
 						"title": "Input GST Out-state",
@@ -1444,10 +1452,12 @@
 								"account_head": {
 									"account_name": "Input Tax IGST",
 									"tax_rate": 18.00,
-									"root_type": "Asset"
+									"root_type": "Asset",
+									"account_type": "Tax"
 								}
 							}
-						]
+						],
+						"tax_category": "Out-State"
 					}
 				],
 				"*": [
