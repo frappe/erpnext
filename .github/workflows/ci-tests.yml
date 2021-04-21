@@ -85,10 +85,9 @@ jobs:
         run: |
           cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
           cd ${GITHUB_WORKSPACE}
-          pip install coveralls==2.2.0
-          pip install coverage==4.5.4
-          coveralls
+          pip install coveralls==3.0.1
+          pip install coverage==5.5
+          coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-
