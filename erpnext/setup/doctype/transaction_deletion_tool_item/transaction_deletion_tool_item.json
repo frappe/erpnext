@@ -30,7 +30,7 @@
  "modified": "2021-04-14 21:47:14.131612",
  "modified_by": "Administrator",
  "module": "Setup",
- "name": "Transaction Deletion Log Item",
+ "name": "Transaction Deletion Tool Item",
  "owner": "Administrator",
  "permissions": [],
  "sort_field": "modified",

@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-class TestTransactionDeletionLog(unittest.TestCase):
+class TestTransactionDeletionTest(unittest.TestCase):
 	def tearDown(self):
 		frappe.db.rollback()
 
@@ -41,7 +41,7 @@ class TestTransactionDeletionLog(unittest.TestCase):
 		
 def create_transaction_deletion_request(company):
 	tdr = frappe.get_doc({
-		'doctype': 'Transaction Deletion Log',
+		'doctype': 'Transaction Deletion Tool',
 		'company': company
 	})
 	tdr.insert()

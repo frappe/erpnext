@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.desk.notifications import clear_notifications
 
-class TransactionDeletionLog(Document):
+class TransactionDeletionTool(Document):
 	def validate(self):
 		frappe.only_for('System Manager')
 		company_obj = frappe.get_doc('Company', self.company)
@@ -22,11 +22,10 @@ class TransactionDeletionLog(Document):
 				frappe.throw(_("DocTypes should not be added manually to the 'DocTypes That Won't Be Affected' table."))
 
 	def before_submit(self):
-		company_obj = frappe.get_doc('Company', self.company)
-		
 		self.delete_bins()
 		self.delete_lead_addresses()
 		
+		company_obj = frappe.get_doc('Company', self.company)
 		# reset company values
 		company_obj.total_monthly_sales = 0
 		company_obj.sales_monthly_history = None

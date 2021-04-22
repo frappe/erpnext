@@ -1,7 +1,7 @@
 // Copyright (c) 2018, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
-frappe.listview_settings['Transaction Deletion Log'] = {
+frappe.listview_settings['Transaction Deletion Tool'] = {
 	get_indicator: function(doc) {
 		if (doc.docstatus == 0) {
 			return [__("Draft"), "red"];

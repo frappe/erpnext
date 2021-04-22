@@ -25,15 +25,21 @@
    "fieldname": "doctypes",
    "fieldtype": "Table",
    "label": "Summary",
-   "options": "Transaction Deletion Log Item",
+   "options": "Transaction Deletion Tool Item",
    "read_only": 1
+  },
+  {
+   "fieldname": "doctypes_to_be_ignored",
+   "fieldtype": "Table",
+   "label": "Excluded DocTypes",
+   "options": "Transaction Deletion Tool Item"
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Transaction Deletion Log",
+   "options": "Transaction Deletion Tool",
    "print_hide": 1,
    "read_only": 1
   },
@@ -43,21 +49,15 @@
    "hidden": 1,
    "label": "Status",
    "options": "Draft\nCompleted"
-  },
-  {
-   "fieldname": "doctypes_to_be_ignored",
-   "fieldtype": "Table",
-   "label": "Excluded DocTypes",
-   "options": "Transaction Deletion Log Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-20 22:01:09.061815",
+ "modified": "2021-04-22 19:39:27.635656",
  "modified_by": "Administrator",
  "module": "Setup",
- "name": "Transaction Deletion Log",
+ "name": "Transaction Deletion Tool",
  "owner": "Administrator",
  "permissions": [
   {
