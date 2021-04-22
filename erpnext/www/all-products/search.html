@@ -1,7 +1,11 @@
 {% extends "templates/web.html" %}
 
-
 {% block title %}{{ _('Search') }}{% endblock %}
+
+{%- block head_include %}
+	<link rel="stylesheet" href="search.css">
+{% endblock -%}
+
 {% block header %}
 <div class="mb-6">{{ _('Search Products') }}</div>
 {% endblock header %}
