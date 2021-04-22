@@ -778,7 +778,7 @@ class TestPurchaseOrder(unittest.TestCase):
 			is_subcontracted="Yes", supplier_warehouse="_Test Warehouse 1 - _TC")
 
 		make_stock_entry(target="_Test Warehouse - _TC",
-			item_code="_Test Item Home Desktop 100", qty=10, basic_rate=100)
+			item_code="_Test Item Home Desktop 100", qty=20, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "Test Extra Item 1", qty=100, basic_rate=100)
 		make_stock_entry(target="_Test Warehouse - _TC",

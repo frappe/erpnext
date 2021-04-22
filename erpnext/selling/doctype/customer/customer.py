@@ -38,11 +38,19 @@ class Customer(TransactionBase):
 			set_name_by_naming_series(self)
 
 	def get_customer_name(self):
-		if frappe.db.get_value("Customer", self.customer_name):
+
+		if frappe.db.get_value("Customer", self.customer_name) and not frappe.flags.in_import:
 			count = frappe.db.sql("""select ifnull(MAX(CAST(SUBSTRING_INDEX(name, ' ', -1) AS UNSIGNED)), 0) from tabCustomer
 				 where name like %s""", "%{0} - %".format(self.customer_name), as_list=1)[0][0]
 			count = cint(count) + 1
-			return "{0} - {1}".format(self.customer_name, cstr(count))
+
+			new_customer_name = "{0} - {1}".format(self.customer_name, cstr(count))
+
+			msgprint(_("Changed customer name to '{}' as '{}' already exists.")
+					.format(new_customer_name, self.customer_name),
+					title=_("Note"), indicator="yellow")
+
+			return new_customer_name
 
 		return self.customer_name
 
@@ -230,13 +238,20 @@ class Customer(TransactionBase):
 			frappe.db.set(self, "customer_name", newdn)
 
 	def set_loyalty_program(self):
-		if self.loyalty_program: return
+		if self.loyalty_program:
+			return
+
 		loyalty_program = get_loyalty_programs(self)
-		if not loyalty_program: return
+		if not loyalty_program:
+			return
+
 		if len(loyalty_program) == 1:
 			self.loyalty_program = loyalty_program[0]
 		else:
-			frappe.msgprint(_("Multiple Loyalty Program found for the Customer. Please select manually."))
+			frappe.msgprint(
+				_("Multiple Loyalty Programs found for Customer {}. Please select manually.")
+				.format(frappe.bold(self.customer_name))
+			)
 
 	def create_onboarding_docs(self, args):
 		defaults = frappe.defaults.get_defaults()
@@ -340,7 +355,6 @@ def _set_missing_values(source, target):
 @frappe.whitelist()
 def get_loyalty_programs(doc):
 	''' returns applicable loyalty programs for a customer '''
-	from frappe.desk.treeview import get_children
 
 	lp_details = []
 	loyalty_programs = frappe.get_all("Loyalty Program",
@@ -349,14 +363,32 @@ def get_loyalty_programs(doc):
 			"ifnull(to_date, '2500-01-01')": [">=", today()]})
 
 	for loyalty_program in loyalty_programs:
-		customer_groups = [d.value for d in get_children("Customer Group", loyalty_program.customer_group)] + [loyalty_program.customer_group]
-		customer_territories = [d.value for d in get_children("Territory", loyalty_program.customer_territory)] + [loyalty_program.customer_territory]
-
-		if (not loyalty_program.customer_group or doc.customer_group in customer_groups)\
-			and (not loyalty_program.customer_territory or doc.territory in customer_territories):
+		if (
+			(not loyalty_program.customer_group
+			or doc.customer_group in get_nested_links(
+				"Customer Group",
+				loyalty_program.customer_group,
+				doc.flags.ignore_permissions
+			))
+			and (not loyalty_program.customer_territory
+			or doc.territory in get_nested_links(
+				"Territory",
+				loyalty_program.customer_territory,
+				doc.flags.ignore_permissions
+			))
+		):
 			lp_details.append(loyalty_program.name)
 
 	return lp_details
+
+def get_nested_links(link_doctype, link_name, ignore_permissions=False):
+	from frappe.desk.treeview import _get_children
+
+	links = [link_name]
+	for d in _get_children(link_doctype, link_name, ignore_permissions):
+		links.append(d.value)
+
+	return links
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs

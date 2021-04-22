@@ -87,50 +87,6 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		for d in invoices:
 			d.cancel()
 
-	def test_single_threshold_tds_with_previous_vouchers(self):
-		invoices = []
-		frappe.db.set_value("Supplier", "Test TDS Supplier2", "tax_withholding_category", "Single Threshold TDS")
-		pi = create_purchase_invoice(supplier="Test TDS Supplier2")
-		pi.submit()
-		invoices.append(pi)
-
-		pi = create_purchase_invoice(supplier="Test TDS Supplier2")
-		pi.submit()
-		invoices.append(pi)
-
-		self.assertEqual(pi.taxes_and_charges_deducted, 2000)
-		self.assertEqual(pi.grand_total, 8000)
-
-		# delete invoices to avoid clashing
-		for d in invoices:
-			d.cancel()
-
-	def test_single_threshold_tds_with_previous_vouchers_and_no_tds(self):
-		invoices = []
-		doc = create_supplier(supplier_name = "Test TDS Supplier ABC",
-			tax_withholding_category="Single Threshold TDS")
-		supplier = doc.name
-
-		pi = create_purchase_invoice(supplier=supplier)
-		pi.submit()
-		invoices.append(pi)
-
-		# TDS not applied
-		pi = create_purchase_invoice(supplier=supplier, do_not_apply_tds=True)
-		pi.submit()
-		invoices.append(pi)
-
-		pi = create_purchase_invoice(supplier=supplier)
-		pi.submit()
-		invoices.append(pi)
-
-		self.assertEqual(pi.taxes_and_charges_deducted, 2000)
-		self.assertEqual(pi.grand_total, 8000)
-
-		# delete invoices to avoid clashing
-		for d in invoices:
-			d.cancel()
-
 	def test_cumulative_threshold_tcs(self):
 		frappe.db.set_value("Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS")
 		invoices = []
@@ -177,7 +133,7 @@ def cancel_invoices():
 
 	for d in purchase_invoices:
 		frappe.get_doc('Purchase Invoice', d).cancel()
-	
+
 	for d in sales_invoices:
 		frappe.get_doc('Sales Invoice', d).cancel()
 
@@ -229,7 +185,8 @@ def create_sales_invoice(**args):
 			'qty': args.qty or 1,
 			'rate': args.rate or 10000,
 			'cost_center': 'Main - _TC',
-			'expense_account': 'Cost of Goods Sold - _TC'
+			'expense_account': 'Cost of Goods Sold - _TC',
+			'warehouse': args.warehouse or '_Test Warehouse - _TC'
 		}]
 	})
 

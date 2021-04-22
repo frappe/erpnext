@@ -15,7 +15,7 @@ def delete_company_transactions(company_name):
 	frappe.only_for("System Manager")
 	doc = frappe.get_doc("Company", company_name)
 
-	if frappe.session.user != doc.owner:
+	if frappe.session.user != doc.owner and frappe.session.user != 'Administrator':
 		frappe.throw(_("Transactions can only be deleted by the creator of the Company"),
 			frappe.PermissionError)
 
@@ -27,7 +27,7 @@ def delete_company_transactions(company_name):
 		if doctype not in ("Account", "Cost Center", "Warehouse", "Budget",
 			"Party Account", "Employee", "Sales Taxes and Charges Template",
 			"Purchase Taxes and Charges Template", "POS Profile", "BOM",
-			"Company", "Bank Account", "Item Tax Template", "Mode Of Payment",
+			"Company", "Bank Account", "Item Tax Template", "Mode Of Payment", "Mode of Payment Account",
 			"Item Default", "Customer", "Supplier", "GST Account"):
 				delete_for_doctype(doctype, company_name)
 

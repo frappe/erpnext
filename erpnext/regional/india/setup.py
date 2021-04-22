@@ -160,6 +160,13 @@ def make_custom_fields(update=True):
 			fetch_if_empty=1),
 	]
 
+	delivery_note_gst_category = [
+		dict(fieldname='gst_category', label='GST Category',
+			fieldtype='Select', insert_after='gst_vehicle_type', print_hide=1,
+			options='\nRegistered Regular\nRegistered Composition\nUnregistered\nSEZ\nOverseas\nConsumer\nDeemed Export\nUIN Holders',
+			fetch_from='customer.gst_category', fetch_if_empty=1),
+	]
+
 	invoice_gst_fields = [
 		dict(fieldname='invoice_copy', label='Invoice Copy',
 			fieldtype='Select', insert_after='export_type', print_hide=1, allow_on_submit=1,
@@ -284,7 +291,7 @@ def make_custom_fields(update=True):
 			'allow_on_submit': 1,
 			'insert_after': 'customer_name_in_arabic',
 			'translatable': 0,
-    	}
+		}
 	]
 
 	si_ewaybill_fields = [
@@ -458,7 +465,7 @@ def make_custom_fields(update=True):
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
 		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
-		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields,
+		'Delivery Note': sales_invoice_gst_fields + ewaybill_fields + sales_invoice_shipping_fields + delivery_note_gst_category,
 		'Sales Order': sales_invoice_gst_fields,
 		'Tax Category': inter_state_gst_field,
 		'Item': [

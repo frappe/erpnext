@@ -13,7 +13,8 @@ frappe.ui.form.on('Job Card', {
 		});
 	},
 
-	refresh: function(frm) {
+	refresh: function(frm,cdt,cdn) {
+		set_qty_to_table(frm,cdt,cdn)
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
 
@@ -301,3 +302,11 @@ frappe.ui.form.on('Job Card Time Log', {
 		frm.set_value('started_time', '');
 	}
 })
+
+function set_qty_to_table(frm,cdt,cdn){
+	var time_log = locals[cdt][cdn].time_logs
+	time_log.map(job => {
+		job.completed_qty = frm.doc.for_quantity
+	})
+	frm.refresh_field('time_logs')
+}
