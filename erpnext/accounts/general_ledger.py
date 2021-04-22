@@ -170,11 +170,11 @@ def round_off_debit_credit(gl_map):
 	else:
 		allowance = .5
 
-	if abs(debit_credit_diff) >= allowance:
+	if abs(debit_credit_diff) > allowance:
 		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")
 			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
 
-	elif abs(debit_credit_diff) >= (1.0 / (10**precision)):
+	elif abs(debit_credit_diff) > (1.0 / (10**precision)):
 		make_round_off_gle(gl_map, debit_credit_diff, precision)
 
 def make_round_off_gle(gl_map, debit_credit_diff, precision):
