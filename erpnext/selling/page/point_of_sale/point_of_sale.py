@@ -81,7 +81,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 			condition=condition,
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition
-		), {'warehouse': warehouse}, as_dict=1, debug=True)
+		), {'warehouse': warehouse}, as_dict=1)
 
 	if items_data:
 		items = [d.item_code for d in items_data]
