@@ -18,8 +18,11 @@
   "status",
   "section_break_9",
   "result",
+  "section_break_11",
   "activity_date",
-  "score"
+  "score",
+  "column_break_14",
+  "time_taken"
  ],
  "fields": [
   {
@@ -104,10 +107,24 @@
    "fieldtype": "Data",
    "in_list_view": 1,
    "label": "Student Name"
+  },
+  {
+   "fieldname": "time_taken",
+   "fieldtype": "Duration",
+   "label": "Time Taken",
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "section_break_11",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2021-01-17 16:38:12.608710",
+ "modified": "2020-12-24 15:41:20.085380",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Quiz Activity",

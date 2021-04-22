@@ -164,7 +164,13 @@ def create_salary_structure_assignment(employee, salary_structure, from_date=Non
 	salary_structure_assignment.employee = employee
 	salary_structure_assignment.base = 50000
 	salary_structure_assignment.variable = 5000
-	salary_structure_assignment.from_date = from_date or add_days(nowdate(), -1)
+
+	if getdate(nowdate()).day == 1:
+		date = from_date or nowdate()
+	else:
+		date = from_date or add_days(nowdate(), -1)
+
+	salary_structure_assignment.from_date = date
 	salary_structure_assignment.salary_structure = salary_structure
 	salary_structure_assignment.currency = currency
 	salary_structure_assignment.payroll_payable_account = get_payable_account(company)

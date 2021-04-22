@@ -14,7 +14,10 @@
   "quiz_configuration_section",
   "passing_score",
   "max_attempts",
-  "grading_basis"
+  "grading_basis",
+  "column_break_7",
+  "is_time_bound",
+  "duration"
  ],
  "fields": [
   {
@@ -65,10 +68,26 @@
    "in_list_view": 1,
    "label": "Course",
    "options": "Course"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_time_bound",
+   "fieldtype": "Check",
+   "label": "Is Time-Bound"
+  },
+  {
+   "depends_on": "is_time_bound",
+   "fieldname": "duration",
+   "fieldtype": "Duration",
+   "label": "Duration"
+  },
+  {
+   "fieldname": "column_break_7",
+   "fieldtype": "Column Break"
   }
  ],
  "links": [],
- "modified": "2021-01-17 15:29:12.299551",
+ "modified": "2021-04-22 15:41:35.043262",
  "modified_by": "Administrator",
  "module": "Education",
  "name": "Quiz",
