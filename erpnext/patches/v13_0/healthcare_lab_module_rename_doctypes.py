@@ -38,16 +38,27 @@ def execute():
 			""".format(doctype), {'parentfield': parentfield})
 
 		# copy renamed child table fields (fields were already renamed in old doctype json, hence sql)
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_name = test_name""")
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_event = test_event""")
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_uom = test_uom""")
-		frappe.db.sql("""UPDATE `tabNormal Test Result` SET lab_test_comment = test_comment""")
-		frappe.db.sql("""UPDATE `tabNormal Test Template` SET lab_test_event = test_event""")
-		frappe.db.sql("""UPDATE `tabNormal Test Template` SET lab_test_uom = test_uom""")
-		frappe.db.sql("""UPDATE `tabDescriptive Test Result` SET lab_test_particulars = test_particulars""")
-		frappe.db.sql("""UPDATE `tabLab Test Group Template` SET lab_test_template = test_template""")
-		frappe.db.sql("""UPDATE `tabLab Test Group Template` SET lab_test_description = test_description""")
-		frappe.db.sql("""UPDATE `tabLab Test Group Template` SET lab_test_rate = test_rate""")
+		try:
+			frappe.db.sql("""UPDATE `tabNormal Test Result` SET
+				lab_test_name = test_name,
+				lab_test_event = test_event,
+				lab_test_uom = test_uom,
+				lab_test_comment = test_comment""")
+
+			frappe.db.sql("""UPDATE `tabNormal Test Template` SET
+				lab_test_event = test_event,
+				lab_test_uom = test_uom""")
+
+			frappe.db.sql("""UPDATE `tabDescriptive Test Result` SET
+				lab_test_particulars = test_particulars""")
+
+			frappe.db.sql("""UPDATE `tabLab Test Group Template` SET
+				lab_test_template = test_template,
+				lab_test_description = test_description,
+				lab_test_rate = test_rate""")
+		except Exception as e:
+			if e.args[0]==1054:
+				pass
 
 		# rename field
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test')
