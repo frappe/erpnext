@@ -25,6 +25,11 @@ def get_data(filters):
 def get_rows(filters):
 	conditions = get_conditions(filters)
 	standard_working_hours = frappe.db.get_single_value("HR Settings", "standard_working_hours")
+	if not standard_working_hours:
+		hr_settings = "<a href='/app/hr-settings'>HR Settings</a>"
+		frappe.msgprint(_("The metrics for this report are calculated based on the Standard Working Hours. Please set Standard Working Hours in {0}.").format(hr_settings))
+		return []
+
 	sql = """ 
 			SELECT
 				*
@@ -89,7 +94,7 @@ def get_conditions(filters):
 	conditions = []
 
 	if filters.get("company"):
-		conditions.append("tabTimesheet.company='{0}'".format(filters.get("company")))
+		conditions.append("tabTimesheet.company={0}".format(frappe.db.escape(filters.get("company"))))
 
 	if filters.get("start_date"):
 		conditions.append("tabTimesheet.start_date>='{0}'".format(filters.get("start_date")))
@@ -98,13 +103,13 @@ def get_conditions(filters):
 		conditions.append("tabTimesheet.end_date<='{0}'".format(filters.get("end_date")))
 
 	if filters.get("customer_name"):
-		conditions.append("si.customer_name='{0}'".format(filters.get("customer_name")))
+		conditions.append("si.customer_name={0}".format(frappe.db.escape(filters.get("customer_name"))))
 
 	if filters.get("employee"):
-		conditions.append("tabTimesheet.employee='{0}'".format(filters.get("employee")))
+		conditions.append("tabTimesheet.employee={0}".format(frappe.db.escape(filters.get("employee"))))
 
 	if filters.get("project"):
-		conditions.append("tabTimesheet.parent_project='{0}'".format(filters.get("project")))
+		conditions.append("tabTimesheet.parent_project={0}".format(frappe.db.escape(filters.get("project"))))
 	
 	conditions = " and ".join(conditions)
 	return conditions
