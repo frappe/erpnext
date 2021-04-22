@@ -131,9 +131,7 @@ class POSInvoice(SalesInvoice):
 			return
 
 		allow_negative_stock = frappe.db.get_single_value('Stock Settings', 'allow_negative_stock')
-		error_msg = []
 		for d in self.get('items'):
-			msg = ""
 			if d.serial_no:
 				self.validate_pos_reserved_serial_nos(d)
 				self.validate_delivered_serial_nos(d)
@@ -147,8 +145,8 @@ class POSInvoice(SalesInvoice):
 					frappe.throw(_('Row #{}: Item Code: {} is not available under warehouse {}.')
 								.format(d.idx, item_code, warehouse), title=_("Item Unavailable"))
 				elif flt(available_stock) < flt(d.qty):
-					frappe.throw(_('Row #{}: Stock quantity not enough for Item Code: {} under warehouse {}. Available quantity {}.')
-								.format(d.idx, item_code, warehouse, available_stock), title=_("Item Unavailable"))
+					frappe.throw(_('Row #{}: Stock quantity {} not enough for Item Code: {} under warehouse {}. Available quantity {}.')
+								.format(d.idx, d.qty, item_code, warehouse, available_stock), title=_("Item Unavailable"))
 
 	def validate_serialised_or_batched_item(self):
 		error_msg = []
