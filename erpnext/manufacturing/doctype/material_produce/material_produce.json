@@ -110,15 +110,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Material Produce",
-   "print_hide": 1,
-   "read_only": 1
-  },
-  {
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
   },
