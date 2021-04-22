@@ -49,10 +49,10 @@ class TransactionDeletionTool(Document):
 							docfield['fieldname'] : self.company
 						})
 
-				self.delete_version_log(docfield['parent'], docfield['fieldname'])
-				self.delete_communications(docfield['parent'], docfield['fieldname'])
-
 				if no_of_docs > 0:
+					self.delete_version_log(docfield['parent'], docfield['fieldname'])
+					self.delete_communications(docfield['parent'], docfield['fieldname'])
+
 					# populate DocTypes table
 					if docfield['parent'] not in tables:
 						self.append('doctypes', {
