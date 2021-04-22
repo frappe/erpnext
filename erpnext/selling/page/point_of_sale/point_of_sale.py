@@ -81,7 +81,7 @@ def get_items(start, page_length, price_list, item_group, pos_profile, search_va
 			condition=condition,
 			bin_join_selection=bin_join_selection,
 			bin_join_condition=bin_join_condition
-		), {'warehouse': warehouse}, as_dict=1)
+		), {'warehouse': warehouse}, as_dict=1, debug=True)
 
 	if items_data:
 		items = [d.item_code for d in items_data]
@@ -139,16 +139,24 @@ def get_conditions(item_code, serial_no, batch_no, barcode):
 	if serial_no or batch_no or barcode:
 		return "item.name = {0}".format(frappe.db.escape(item_code))
 
-	cond = "("
-	cond += """item.name like {item_code}
+	return make_condition(item_code)
+
+def make_condition(item_code):
+	condition = "("
+	condition += """item.name like {item_code}
 		or item.item_name like {item_code}""".format(item_code = frappe.db.escape('%' + item_code + '%'))
+	condition += add_search_fields_condition(item_code)
+	condition += ")"
+
+	return condition
+
+def add_search_fields_condition(item_code):
+	condition = ''
 	search_fields = frappe.get_all('POS Search Fields', fields = ['fieldname'])
 	if search_fields:
 		for field in search_fields:
-			cond += " or item.{0} like {1}".format(field['fieldname'], frappe.db.escape('%' + item_code + '%'))
-	cond += ")"
-
-	return cond
+			condition += " or item.{0} like {1}".format(field['fieldname'], frappe.db.escape('%' + item_code + '%'))
+	return condition
 
 def get_item_group_condition(pos_profile):
 	cond = "and 1=1"
