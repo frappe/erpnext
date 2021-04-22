@@ -18,7 +18,6 @@ def execute(filters=None):
 
 def get_data(filters):
 	data = get_rows(filters)
-	data = handle_multi_currency(data, filters)
 	data = calculate_cost_and_profit(data)
 	return data
 
@@ -52,37 +51,6 @@ def get_rows(filters):
 				WHERE
 					{0}) as t""".format(conditions)
 	return frappe.db.sql(sql,filters, as_dict=True)
-
-def handle_multi_currency(data, filters):
-	currency_precision = get_currency_precision() or 2
-	company_currency = frappe.get_cached_value("Company", filters.get("company"), "default_currency")
-	
-	for row in data:
-		row.currency = company_currency
-
-		if filters.get("employee"):
-			party_currency = get_employee_currency(row.employee)
-
-		if filters.get("customer_name"):
-			party_currency = frappe.db.get_value("Customer", row.customer_name, ["default_currency"])
-
-			if party_currency and party_currency != company_currency:
-				exchange_rate = get_exchange_rate(company_currency, party_currency)
-				row.currency = party_currency
-
-				row.base_grand_total = flt(flt(row.base_grand_total) *
-				flt(exchange_rate), currency_precision)
-
-				row.base_gross_pay = flt(flt(row.base_gross_pay) *
-				flt(exchange_rate), currency_precision)
-
-				row.profit = flt(flt(row.profit) *
-				flt(exchange_rate), currency_precision)
-
-				row.fractional_cost = flt(flt(row.fractional_cost) *
-				flt(exchange_rate), currency_precision)
-
-	return data
 
 def calculate_cost_and_profit(data):
 	for row in data:
