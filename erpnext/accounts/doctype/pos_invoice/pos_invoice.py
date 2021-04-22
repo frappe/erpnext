@@ -220,7 +220,7 @@ class POSInvoice(SalesInvoice):
 		base_grand_total = flt(self.base_rounded_total) or flt(self.base_grand_total)
 		if not flt(self.change_amount) and grand_total < flt(self.paid_amount):
 			self.change_amount = flt(self.paid_amount - grand_total + flt(self.write_off_amount))
-			self.base_change_amount = flt(self.base_paid_amount - base_grand_total + flt(self.base_write_off_amount))
+			self.base_change_amount = flt(self.base_paid_amount) - base_grand_total + flt(self.base_write_off_amount)
 
 		if flt(self.change_amount) and not self.account_for_change_amount:
 			frappe.msgprint(_("Please enter Account for Change Amount"), raise_exception=1)
@@ -354,6 +354,7 @@ class POSInvoice(SalesInvoice):
 
 		return profile
 
+	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):
 		profile = self.set_pos_fields(for_validate)
 
@@ -376,12 +377,20 @@ class POSInvoice(SalesInvoice):
 				"allow_print_before_pay": profile.get("allow_print_before_pay")
 			}
 
+	@frappe.whitelist()
+	def reset_mode_of_payments(self):
+		if self.pos_profile:
+			pos_profile = frappe.get_cached_doc('POS Profile', self.pos_profile)
+			update_multi_mode_option(self, pos_profile)
+			self.paid_amount = 0
+
 	def set_account_for_mode_of_payment(self):
 		self.payments = [d for d in self.payments if d.amount or d.base_amount or d.default]
 		for pay in self.payments:
 			if not pay.account:
 				pay.account = get_bank_cash_account(pay.mode_of_payment, self.company).get("account")
 
+	@frappe.whitelist()
 	def create_payment_request(self):
 		for pay in self.payments:
 			if pay.type == "Phone":

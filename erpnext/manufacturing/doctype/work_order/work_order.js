@@ -127,6 +127,7 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
+		set_material_transfer_for_manufacturing(frm)
 		erpnext.toggle_naming_series();
 		erpnext.work_order.set_custom_buttons(frm);
 		frm.set_intro("");
@@ -181,6 +182,13 @@ frappe.ui.form.on("Work Order", {
 				frm.trigger("make_bom");
 			});
 		}
+
+		// if(frm.doc.status == "Submitted" || frm.doc.status == "Not Started" || frm.doc.status == "In Process"){
+            
+           
+
+        // }
+
 	},
 
 	make_job_card: function(frm) {
@@ -551,17 +559,59 @@ erpnext.work_order = {
 							}
 						}
 						if (counter > 0) {
-							var consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
-								const backflush_raw_materials_based_on = frm.doc.__onload.backflush_raw_materials_based_on;
-								erpnext.work_order.make_consumption_se(frm, backflush_raw_materials_based_on);
-							});
-							consumption_btn.addClass('btn-primary');
+							frm.add_custom_button(__('Consume Material'),function() {
+								frappe.call({
+									doc: frm.doc,
+									method: "make_consume_material",
+									callback: function(r){
+										if (r.message) {
+											var doc = frappe.model.sync(r.message)[0];
+											frappe.set_route("Form", doc.doctype, doc.name);
+										}
+									}
+								});
+							})
+							// var consumption_btn = frm.add_custom_button(__('Material Consumption'), function() {
+							// 	const backflush_raw_materials_based_on = frm.doc.__onload.backflush_raw_materials_based_on;
+							// 	erpnext.work_order.make_consumption_se(frm, backflush_raw_materials_based_on);
+							// });
+							// consumption_btn.addClass('btn-primary');
 						}
 					}
 
-					var finish_btn = frm.add_custom_button(__('Finish'), function() {
-						erpnext.work_order.make_se(frm, 'Manufacture');
-					});
+					// var finish_btn = frm.add_custom_button(__('Partial'), function() {
+					// 	erpnext.work_order.make_se(frm, 'Manufacture');
+					// },("Finish"));
+					frm.add_custom_button(__('Partial'),function() {
+						frappe.call({
+							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
+							args: {
+							  doc_name: frm.doc.name,
+							  partial: 1
+							},
+							callback: function(r){
+								if (r.message) {
+									var doc = frappe.model.sync(r.message)[0];
+									frappe.set_route("Form", doc.doctype, doc.name);
+								}
+							}
+						});
+					}, __('Finish'))
+					frm.add_custom_button(__('Complete'),function() {
+						frappe.call({
+							method: "erpnext.manufacturing.doctype.work_order.work_order.make_material_produce",
+							args: {
+							  doc_name: frm.doc.name,
+							  partial: 0
+							},
+							callback: function(r){
+								if (r.message) {
+									var doc = frappe.model.sync(r.message)[0];
+									frappe.set_route("Form", doc.doctype, doc.name);
+								}
+							}
+						});
+					}, __('Finish'))
 
 					if(doc.material_transferred_for_manufacturing>=doc.qty) {
 						// all materials transferred for manufacturing, make this primary
@@ -717,3 +767,19 @@ erpnext.work_order = {
 		});
 	}
 };
+
+function set_material_transfer_for_manufacturing(frm){
+    frappe.call({
+        method: "erpnext.manufacturing.doctype.work_order.work_order.get_se_data",
+        args: {
+            wo: frm.doc.name
+        },
+        callback: function(res){
+            if(res.message){
+                // console.log('res.message is: ', res.message)
+                frm.doc.material_transferred_for_manufacturing = res.message
+                frm.refresh_field('material_transferred_for_manufacturing')
+            }
+        }
+    })
+}

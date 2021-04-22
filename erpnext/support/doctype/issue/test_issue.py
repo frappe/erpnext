@@ -12,7 +12,6 @@ from datetime import timedelta
 class TestIssue(unittest.TestCase):
 	def setUp(self):
 		frappe.db.sql("delete from `tabService Level Agreement`")
-		frappe.db.sql("delete from `tabEmployee`")
 		frappe.db.set_value("Support Settings", None, "track_service_level_agreement", 1)
 		create_service_level_agreements_for_issues()
 

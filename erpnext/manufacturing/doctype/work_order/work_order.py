@@ -509,6 +509,7 @@ class WorkOrder(Document):
 				stock_bin = get_bin(d.item_code, d.source_warehouse)
 				stock_bin.update_reserved_qty_for_production()
 
+	@frappe.whitelist()
 	def get_items_and_operations_from_bom(self):
 		self.set_required_items()
 		self.set_work_order_operations()
@@ -612,7 +613,34 @@ class WorkOrder(Document):
 				})[0][0]
 
 			item.db_set('consumed_qty', flt(consumed_qty), update_modified=False)
+	@frappe.whitelist()
+	def make_consume_material(self):
+		wo_doc = frappe.get_doc('Work Order',self.name)
+		mc = frappe.new_doc("Material Consumption")
+		mc.work_order = self.name
+		mc.s_warehouse = wo_doc.wip_warehouse
+		mc.company = wo_doc.company
+		mc.type = "Manual"
+		for res in wo_doc.required_items:
+			item_doc = frappe.get_doc("Item",res.item_code)
+			float_precision = cint(frappe.db.get_default("float_precision")) or 2
+			qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
+			if qty > 0:
+				mc.append("materials_to_consume", {
+					"item": res.item_code,
+					"item_name": res.item_name,
+					"s_warehouse": res.source_warehouse,
+					"has_batch_no": item_doc.has_batch_no,
+					"uom": item_doc.stock_uom,
+					"status": "Not Assigned",
+					"qty_to_issue": qty,
+					"weight_per_unit": res.weight_per_unit,
+					"type": res.type
+				})
+		# mc.insert(ignore_permissions=True)
+		return mc.as_dict()
 
+	@frappe.whitelist()
 	def make_bom(self):
 		data = frappe.db.sql(""" select sed.item_code, sed.qty, sed.s_warehouse
 			from `tabStock Entry Detail` sed, `tabStock Entry` se
@@ -937,3 +965,75 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 	doc.set_item_locations()
 
 	return doc
+
+@frappe.whitelist()
+def make_material_produce(doc_name,partial=0):
+	wo_doc = frappe.get_doc('Work Order', doc_name)
+	bom = frappe.get_doc('BOM', wo_doc.bom_no)
+	mc = frappe.new_doc("Material Produce")
+	mc.work_order = wo_doc.name
+	mc.bom = bom.name
+	mc.batch_size = bom.batch_size
+	mc.partial_produce = partial
+	mc.t_warehouse = wo_doc.fg_warehouse
+	mc.company = wo_doc.company
+	item_doc = frappe.get_doc("Item", wo_doc.production_item)
+
+	mc.append("material_produce_item", {
+		"item_code": wo_doc.production_item,
+		"item_name": wo_doc.item_name,
+		"item_group": item_doc.item_group,
+		"s_warehouse": wo_doc.get("fg_warehouse"),
+		"uom": item_doc.stock_uom,
+		"status": "Not Set",
+		"type": "FG",
+		"scheduled_qty": wo_doc.qty,
+		"qty_produced": wo_doc.qty - wo_doc.produced_qty,
+		"qty_already_produced": wo_doc.produced_qty
+	})
+	bom = frappe.get_doc("BOM",wo_doc.bom_no)
+	for res in bom.scrap_items:
+		item_doc = frappe.get_doc("Item", res.item_code)
+		mc.append("material_produce_item", {
+			"item_code": res.item_code,
+			"item_name": item_doc.item_name,
+			"item_group": item_doc.item_group,
+			"s_warehouse": wo_doc.wip_warehouse,
+			"uom": res.stock_uom,
+			"status": "Not Set",
+			"type": "Scrap",
+			"scheduled_qty": res.stock_qty,
+		})
+	if partial == "0":
+		total_cost_rm_consumed = total_cost_operation_consumed = 0
+		partial_pro = frappe.get_list("Material Produce", fields=['name'],
+									filters={'work_order': wo_doc.name, 'company': wo_doc.company, 'partial_produce': 1 , 'docstatus': 1})
+		for res in partial_pro:
+			pro_doc = frappe.get_doc("Material Produce", res.name)
+			total_cost_rm_consumed += pro_doc.cost_of_rm_consumed
+			total_cost_operation_consumed += pro_doc.cost_of_operation_consumed
+		mc.total_cost_of_rm_consumed = total_cost_rm_consumed
+		mc.total_cost_of_operation_consumed = total_cost_operation_consumed
+		mc.wo_actual_rm_cost = wo_doc.actual_rm_cost
+		mc.wo_actual_operation_cost = wo_doc.actual_operating_cost
+		mc.amount = wo_doc.actual_rm_cost + wo_doc.actual_operating_cost - total_cost_rm_consumed - total_cost_operation_consumed
+	mc.insert(ignore_permissions=True)
+	return mc.as_dict()
+
+@frappe.whitelist()
+def get_se_data(wo):
+	all_se = frappe.db.get_all("Stock Entry", {'docstatus':1,'work_order':wo, 'stock_entry_type':'Material Transfer for Manufacture'}, 'name')
+	
+	total_weight = 0
+	for se in all_se:
+		doc = frappe.get_doc("Stock Entry", se.get('name'))
+		for item in doc.get('items'):
+			item_weight_per_unit = frappe.db.get_value("Item", {'item_code':item.get('item_code')}, 'weight_per_unit')
+			item_weight = item_weight_per_unit * item.get('transfer_qty')
+			total_weight += item_weight
+	query = """update `tabWork Order` set material_transferred_for_manufacturing = {0} where name = '{1}';""".format(total_weight,wo)
+	frappe.db.sql(query)
+	frappe.db.commit()
+	return total_weight
+
+

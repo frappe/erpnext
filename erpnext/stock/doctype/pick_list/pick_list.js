@@ -58,7 +58,7 @@ frappe.ui.form.on('Pick List', {
 		// Button on the form
 		frm.events.set_item_locations(frm, false);
 	},
-	refresh: (frm) => {
+	refresh: (frm,cdt,cdn) => {
 		frm.trigger('add_get_items_button');
 		if (frm.doc.docstatus === 1) {
 			frappe.xcall('erpnext.stock.doctype.pick_list.pick_list.target_document_exists', {
@@ -77,6 +77,15 @@ frappe.ui.form.on('Pick List', {
 					frm.add_custom_button(__('Stock Entry'), () => frm.trigger('create_stock_entry'), __('Create'));
 				}
 			});
+		}
+	},
+	onload_post_render: (frm) => {
+		if(frm.doc.purpose === "Material Transfer"){
+			frm.doc.is_material_consumption = 1
+			frm.refresh_field('is_material_consumption')
+		}
+		if(frm.doc.is_material_consumption ===1){
+			get_material_consumption_data(frm)
 		}
 	},
 	work_order: (frm) => {
@@ -162,7 +171,7 @@ frappe.ui.form.on('Pick List', {
 				get_query_filters: get_query_filters
 			});
 		});
-	}
+	},
 });
 
 frappe.ui.form.on('Pick List Item', {
@@ -200,5 +209,21 @@ function get_item_details(item_code, uom=null) {
 			item_code,
 			uom
 		});
+	}
+}
+
+function get_material_consumption_data(frm) {
+	frm.clear_table('locations');
+	if(frm.doc.material_consumption && frm.doc.consume_work_order){
+		frappe.call({
+			doc: frm.doc,
+			method: "consumption_list",
+			callback: function(r){
+				if(r.message === true){
+					frm.refresh_field('locations')
+				}
+			}
+		
+		})
 	}
 }

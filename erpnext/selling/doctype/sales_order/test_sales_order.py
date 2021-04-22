@@ -1,11 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-import frappe
 import json
-from frappe.utils import flt, add_days, nowdate
-import frappe.permissions
 import unittest
+import frappe
+import frappe.permissions
+from frappe.utils import flt, add_days, nowdate
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -461,10 +462,8 @@ class TestSalesOrder(unittest.TestCase):
 	def test_update_child_perm(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)
 
-		user = 'test@example.com'
-		test_user = frappe.get_doc('User', user)
-		test_user.add_roles("Accounts User")
-		frappe.set_user(user)
+		test_user = create_user("test_so_child_perms@example.com", "Accounts User")
+		frappe.set_user(test_user.name)
 
 		# update qty
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': so.items[0].name}])
@@ -473,18 +472,14 @@ class TestSalesOrder(unittest.TestCase):
 		# add new item
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
-		test_user.remove_roles("Accounts User")
-		frappe.set_user("Administrator")
 
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
 
-		frappe.set_user("Administrator")
 		workflow = make_sales_order_workflow()
 		so = make_sales_order(item_code= "_Test Item", qty=1, rate=150, do_not_submit=1)
 		apply_workflow(so, 'Approve')
 
-		frappe.set_user("Administrator")
 		user = 'test@example.com'
 		test_user = frappe.get_doc('User', user)
 		test_user.add_roles("Sales User", "Test Junior Approver")
@@ -644,33 +639,31 @@ class TestSalesOrder(unittest.TestCase):
 		frappe.db.set_value("Stock Settings", None, "default_warehouse", old_stock_settings_value)
 
 	def test_warehouse_user(self):
-		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
-		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")
-
-		test_user = frappe.get_doc("User", "test@example.com")
-		test_user.add_roles("Sales User", "Stock User")
-		test_user.remove_roles("Sales Manager")
+		test_user = create_user("test_so_warehouse_user@example.com", "Sales User", "Stock User")
 
 		test_user_2 = frappe.get_doc("User", "test2@example.com")
 		test_user_2.add_roles("Sales User", "Stock User")
 		test_user_2.remove_roles("Sales Manager")
 
-		frappe.set_user("test@example.com")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", test_user.name)
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", test_user_2.name)
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", test_user_2.name)
 
-		so = make_sales_order(company="_Test Company 1",
+		frappe.set_user(test_user.name)
+
+		so = make_sales_order(company="_Test Company 1", customer="_Test Customer 1",
 			warehouse="_Test Warehouse 2 - _TC1", do_not_save=True)
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
 		self.assertRaises(frappe.PermissionError, so.insert)
 
-		frappe.set_user("test2@example.com")
+		frappe.set_user(test_user_2.name)
 		so.insert()
 
 		frappe.set_user("Administrator")
-		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
-		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", test_user.name)
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", test_user_2.name)
+		frappe.permissions.remove_user_permission("Company", "_Test Company 1", test_user_2.name)
 
 	def test_block_delivery_note_against_cancelled_sales_order(self):
 		so = make_sales_order()

@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "creation": "2021-04-12 16:16:48.764116",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "uom",
+  "warehouse",
+  "batch",
+  "column_break_5",
+  "balance_qty",
+  "expiry_date_batch",
+  "life_left_batch",
+  "qty_to_consume"
+ ],
+ "fields": [
+  {
+   "columns": 2,
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "UOM",
+   "options": "UOM",
+   "reqd": 1
+  },
+  {
+   "columns": 2,
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "columns": 1,
+   "fieldname": "batch",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Batch",
+   "options": "Batch"
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "columns": 1,
+   "fieldname": "balance_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Balance Qty"
+  },
+  {
+   "fieldname": "expiry_date_batch",
+   "fieldtype": "Date",
+   "label": "Expiry Date Batch"
+  },
+  {
+   "columns": 1,
+   "fieldname": "life_left_batch",
+   "fieldtype": "Int",
+   "in_list_view": 1,
+   "label": "Life Left Batch"
+  },
+  {
+   "columns": 1,
+   "fieldname": "qty_to_consume",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Qty To Consume"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-04-17 00:39:57.487629",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Material Consumption Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

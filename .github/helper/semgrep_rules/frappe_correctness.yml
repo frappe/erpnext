@@ -1,0 +1,74 @@
+# This file specifies rules for correctness according to how frappe doctype data model works.
+
+rules:
+- id: frappe-modifying-after-submit
+  patterns:
+    - pattern: self.$ATTR = ...
+    - pattern-inside: |
+        def on_submit(self, ...):
+          ...
+    - metavariable-regex:
+        metavariable: '$ATTR'
+        # this is negative look-ahead, add more attrs to ignore like (ignore|ignore_this_too|ignore_me)
+        regex: '^(?!status_updater)(.*)$'
+  message: |
+    Doctype modified after submission. Please check if modification of self.$ATTR is commited to database.
+  languages: [python]
+  severity: ERROR
+
+- id: frappe-modifying-after-cancel
+  patterns:
+    - pattern: self.$ATTR = ...
+    - pattern-inside: |
+        def on_cancel(self, ...):
+          ...
+    - metavariable-regex:
+        metavariable: '$ATTR'
+        regex: '^(?!ignore_linked_doctypes|status_updater)(.*)$'
+  message: |
+    Doctype modified after cancellation. Please check if modification of self.$ATTR is commited to database.
+  languages: [python]
+  severity: ERROR
+
+- id: frappe-print-function-in-doctypes
+  pattern: print(...)
+  message: |
+      Did you mean to leave this print statement in? Consider using msgprint or logger instead of print statement.
+  languages: [python]
+  severity: WARNING
+  paths:
+      exclude:
+        - test_*.py
+      include:
+        - "*/**/doctype/*"
+
+- id: frappe-modifying-child-tables-while-iterating
+  pattern-either:
+    - pattern: |
+        for $ROW in self.$TABLE:
+            ...
+            self.remove(...)
+    - pattern: |
+        for $ROW in self.$TABLE:
+            ...
+            self.append(...)
+  message: |
+      Child table being modified while iterating on it.
+  languages: [python]
+  severity: ERROR
+  paths:
+      include:
+        - "*/**/doctype/*"
+
+- id: frappe-same-key-assigned-twice
+  pattern-either:
+    - pattern: |
+        {..., $X: $A, ..., $X: $B, ...}
+    - pattern: |
+        dict(..., ($X, $A), ..., ($X, $B), ...)
+    - pattern: |
+        _dict(..., ($X, $A), ..., ($X, $B), ...)
+  message: |
+      key `$X` is uselessly assigned twice. This could be a potential bug.
+  languages: [python]
+  severity: ERROR

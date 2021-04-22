@@ -379,7 +379,21 @@ class StockEntry(StockController):
 				job_card_link = frappe.utils.get_link_to_form('Job Card', job_card)
 				frappe.throw(_("Row #{0}: Operation {1} is not completed for {2} qty of finished goods in Work Order {3}. Please update operation status via Job Card {4}.")
 					.format(d.idx, frappe.bold(d.operation), frappe.bold(total_completed_qty), work_order_link, job_card_link), OperationsNotCompleteError)
-
+	@frappe.whitelist()
+	def get_se_data(self):
+		all_se = frappe.db.get_all("Stock Entry", {'docstatus':1,'work_order':self.work_order, 'stock_entry_type':'Material Transfer for Manufacture'}, 'name')
+		
+		total_weight = 0
+		for se in self.items:
+			doc = frappe.get_doc("Stock Entry", se.get('name'))
+			for item in doc.get('items'):
+				item_weight_per_unit = frappe.db.get_value("Item", {'item_code':item.get('item_code')}, 'weight_per_unit')
+				item_weight = item_weight_per_unit * item.get('transfer_qty')
+				total_weight += item_weight
+		query = """update `tabWork Order` set material_transferred_for_manufacturing = {0} where name = '{1}';""".format(total_weight,self.work_order)
+		frappe.db.sql(query)
+		frappe.db.commit()
+		return total_weight
 	def check_duplicate_entry_for_work_order(self):
 		other_ste = [t[0] for t in frappe.db.get_values("Stock Entry",  {
 			"work_order": self.work_order,
@@ -458,7 +472,7 @@ class StockEntry(StockController):
 			Set rate for outgoing, scrapped and finished items
 		"""
 		# Set rate for outgoing items
-		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate)
+		outgoing_items_cost = self.set_rate_for_outgoing_items(reset_outgoing_rate, raise_error_if_no_rate)
 		finished_item_qty = sum([d.transfer_qty for d in self.items if d.is_finished_item])
 
 		# Set basic rate for incoming items
@@ -482,13 +496,13 @@ class StockEntry(StockController):
 			d.basic_rate = flt(d.basic_rate, d.precision("basic_rate"))
 			d.basic_amount = flt(flt(d.transfer_qty) * flt(d.basic_rate), d.precision("basic_amount"))
 
-	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True):
+	def set_rate_for_outgoing_items(self, reset_outgoing_rate=True, raise_error_if_no_rate=True):
 		outgoing_items_cost = 0.0
 		for d in self.get('items'):
 			if d.s_warehouse:
 				if reset_outgoing_rate:
 					args = self.get_args_for_incoming_rate(d)
-					rate = get_incoming_rate(args)
+					rate = get_incoming_rate(args, raise_error_if_no_rate)
 					if rate > 0:
 						d.basic_rate = rate
 
@@ -839,6 +853,7 @@ class StockEntry(StockController):
 			if not pro_doc.operations:
 				pro_doc.set_actual_dates()
 
+	@frappe.whitelist()
 	def get_item_details(self, args=None, for_update=False):
 		item = frappe.db.sql("""select i.name, i.stock_uom, i.description, i.image, i.item_name, i.item_group,
 				i.has_batch_no, i.sample_quantity, i.has_serial_no, i.allow_alternative_item,
@@ -913,6 +928,7 @@ class StockEntry(StockController):
 
 		return ret
 
+	@frappe.whitelist()
 	def set_items_for_stock_in(self):
 		self.items = []
 
@@ -937,6 +953,7 @@ class StockEntry(StockController):
 					'batch_no': d.batch_no
 				})
 
+	@frappe.whitelist()
 	def get_items(self):
 		self.set('items', [])
 		self.validate_work_order()
@@ -1010,7 +1027,8 @@ class StockEntry(StockController):
 
 		self.set_scrap_items()
 		self.set_actual_qty()
-		self.calculate_rate_and_amount(raise_error_if_no_rate=False)
+		self.validate_customer_provided_item()
+		self.calculate_rate_and_amount()
 
 	def set_scrap_items(self):
 		if self.purpose != "Send to Subcontractor" and self.purpose in ["Manufacture", "Repack"]:
@@ -1137,7 +1155,7 @@ class StockEntry(StockController):
 						"cost_center": item_account_details.get("buying_cost_center"),
 					}
 				})
-
+	
 	def get_transfered_raw_materials(self):
 		transferred_materials = frappe.db.sql("""
 			select

@@ -14,6 +14,7 @@ class ProgramEnrollmentTool(Document):
 		academic_term_reqd = cint(frappe.db.get_single_value('Education Settings', 'academic_term_reqd'))
 		self.set_onload("academic_term_reqd", academic_term_reqd)
 
+	@frappe.whitelist()
 	def get_students(self):
 		students = []
 		if not self.get_students_from:
@@ -49,6 +50,7 @@ class ProgramEnrollmentTool(Document):
 		else:
 			frappe.throw(_("No students Found"))
 
+	@frappe.whitelist()
 	def enroll_students(self):
 		total = len(self.students)
 		for i, stud in enumerate(self.students):
