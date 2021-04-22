@@ -9,7 +9,12 @@ from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_w
 
 # For SEARCH -------
 import redis
-from redisearch import Client, AutoCompleter, Suggestion, IndexDefinition, TextField, TagField
+from redisearch import (
+	Client, AutoCompleter, Query,
+	Suggestion, IndexDefinition, 
+	TextField, TagField,
+	Document
+	)
 
 WEBSITE_ITEM_INDEX = 'website_items_index'
 WEBSITE_ITEM_KEY_PREFIX = 'website_item:'
@@ -60,21 +65,46 @@ def get_product_list(search=None, start=0, limit=12):
 
 @frappe.whitelist(allow_guest=True)
 def search(query):
+	if not query:
+		# TODO: return top/recent searches
+		return []
+
 	ac = AutoCompleter(WEBSITE_ITEM_NAME_AUTOCOMPLETE, port=13000)
+	client = Client(WEBSITE_ITEM_INDEX, port=13000)
 	suggestions = ac.get_suggestions(query, num=10)
-	print(suggestions)
-	return list([s.string for s in suggestions])
+
+	# Build a query
+	query_string = query
+
+	for s in suggestions:
+		query_string += f"|({s.string})"
+
+	q = Query(query_string)
+
+	print(f"Executing query: {q.query_string()}")
+
+	results = client.search(q)
+	results = list(map(convert_to_dict, results.docs))
+
+	print("SEARCH RESULTS ------------------\n ", results)
+
+	return results
+
+def convert_to_dict(redis_search_doc):
+	return redis_search_doc.__dict__
 
 def create_website_items_index():
 	'''Creates Index Definition'''
+	# CREATE index
+	client = Client(WEBSITE_ITEM_INDEX, port=13000)
+
 	# DROP if already exists
 	try:
 		client.drop_index()
 	except:
 		pass
 
-	# CREATE index
-	client = Client(WEBSITE_ITEM_INDEX, port=13000)
+	
 	idx_def = IndexDefinition([WEBSITE_ITEM_KEY_PREFIX])
 
 	client.create_index(
@@ -90,11 +120,11 @@ def insert_item_to_index(website_item_doc):
 	r = redis.Redis("localhost", 13000)
 	web_item = create_web_item_map(website_item_doc)
 	r.hset(key, mapping=web_item)
-	insert_to_name_ac(website_item_doc.name)
+	insert_to_name_ac(website_item_doc.web_item_name, website_item_doc.name)
 
-def insert_to_name_ac(name):
+def insert_to_name_ac(web_name, doc_name):
 	ac = AutoCompleter(WEBSITE_ITEM_NAME_AUTOCOMPLETE, port=13000)
-	ac.add_suggestions(Suggestion(name))
+	ac.add_suggestions(Suggestion(web_name, payload=doc_name))
 
 def create_web_item_map(website_item_doc):
 	web_item = {}
@@ -167,5 +197,6 @@ def get_cache_key(name):
 	return f"{WEBSITE_ITEM_KEY_PREFIX}{name}"
 
 # TODO: Remove later
+# Figure out a way to run this at startup
 define_autocomplete_dictionary()
 create_website_items_index()
