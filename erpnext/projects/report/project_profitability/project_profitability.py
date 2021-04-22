@@ -4,10 +4,6 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from erpnext.payroll.doctype.salary_structure_assignment.salary_structure_assignment import get_employee_currency
-from erpnext.accounts.utils import get_currency_precision
-from frappe.utils import flt
-from erpnext.setup.utils import get_exchange_rate
 
 def execute(filters=None):
 	columns, data = [], []
