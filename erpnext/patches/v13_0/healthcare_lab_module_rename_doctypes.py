@@ -48,7 +48,7 @@ def execute():
 		for new, old in rename_fields.items():
 			if frappe.db.has_column('Normal Test Result', old):
 				frappe.db.sql("""UPDATE `tabNormal Test Result` SET {} = {}"""
-					.format(old, new))
+					.format(new, old))
 
 		if frappe.db.has_column('Normal Test Template', 'test_event'):
 			frappe.db.sql("""UPDATE `tabNormal Test Template` SET lab_test_event = test_event""")
@@ -68,7 +68,7 @@ def execute():
 		for new, old in rename_fields.items():
 			if frappe.db.has_column('Lab Test Group Template', old):
 				frappe.db.sql("""UPDATE `tabLab Test Group Template` SET {} = {}"""
-					.format(old, new))
+					.format(new, old))
 
 		# rename field
 		frappe.reload_doc('healthcare', 'doctype', 'lab_test')
