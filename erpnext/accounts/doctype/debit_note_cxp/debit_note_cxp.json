@@ -167,11 +167,12 @@
    "fieldname": "total_references",
    "fieldtype": "Currency",
    "label": "Total References",
-   "options": "Currency"
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-04-20 15:02:20.734153",
+ "modified": "2021-04-23 14:22:01.001772",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXP",

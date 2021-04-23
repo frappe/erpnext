@@ -13,7 +13,7 @@ frappe.ui.form.on('Debit Note CXP', {
 
 		frm.set_query("reference_name", "references", function(doc, cdt, cdn) {
 			const child = locals[cdt][cdn];
-			const filters = {"status": 'Unpaid'};
+			const filters = {"docstatus": 1,"status": "Unpaid"};
 			const party_type_doctypes = ['Purchase Invoice'];
 			if (in_list(party_type_doctypes, child.reference_doctype)) {
 				filters[doc.party_type.toLowerCase()] = doc.supplier;
@@ -24,17 +24,4 @@ frappe.ui.form.on('Debit Note CXP', {
 			};
 		});
     },
-
-	amount_references:function(frm, cdt, cdn){
-		var d = locals[cdt][cdn];
-		debugger
-		frappe.model.set_value(d.doctype, d.name, "total_amount", d.total_amount);
-		var total = 0;
-		debugger
-		frm.doc.references.forEach(function(d) { total += d.total_amount; });
-		debugger
-		frm.set_value("total_references", total);
-		frm.refresh_field("total_references");
-	},
-
 });
