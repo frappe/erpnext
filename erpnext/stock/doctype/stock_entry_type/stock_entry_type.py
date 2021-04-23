@@ -27,21 +27,20 @@ def get_stock_entry_type_details(args):
 
 	doc = frappe.get_cached_doc("Stock Entry Type", args.stock_entry_type)
 	out = frappe._dict({
-		"parent": {
+		"parent": frappe._dict({
 			'source_warehouse_type': doc.source_warehouse_type,
 			'target_warehouse_type': doc.target_warehouse_type,
-		},
+		}),
 		"items": {}
 	})
 
 	if doc.is_opening:
-		out.is_opening = doc.is_opening
-		args.is_opening = out.is_opening
+		out.parent.is_opening = doc.is_opening
+		args.is_opening = out.parent.is_opening
 		if doc.posting_date:
-			out.posting_date = doc.posting_date
+			out.parent.posting_date = doc.posting_date
 
-	if doc.customer_provided:
-		out.customer_provided = cint(doc.customer_provided == "Yes")
+	out.parent.customer_provided = cint(doc.customer_provided == "Yes")
 
 	if args.get('items'):
 		out['items'] = get_item_expense_accounts(args)
