@@ -10,8 +10,13 @@
   "due_date",
   "invoice_portion",
   "payment_amount",
-  "mode_of_payment",
-  "paid_amount"
+  "outstanding",
+  "paid_amount",
+  "discounted_amount",
+  "column_break_3",
+  "base_payment_amount",
+  "base_outstanding",
+  "base_paid_amount"
  ],
  "fields": [
   {
@@ -52,6 +57,7 @@
    "fieldtype": "Currency",
    "in_list_view": 1,
    "label": "Payment Amount",
+   "options": "currency",
    "reqd": 1
   },
   {
@@ -63,12 +69,102 @@
   {
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
-   "label": "Paid Amount"
+   "label": "Paid Amount",
+   "options": "currency"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "depends_on": "discounted_amount",
+   "fieldname": "discounted_amount",
+   "fieldtype": "Currency",
+   "label": "Discounted Amount",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "payment_amount",
+   "fieldname": "outstanding",
+   "fieldtype": "Currency",
+   "label": "Outstanding",
+   "options": "currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_5",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "discount",
+   "fieldname": "discount_date",
+   "fieldtype": "Date",
+   "label": "Discount Date",
+   "mandatory_depends_on": "discount"
+  },
+  {
+   "default": "Percentage",
+   "fetch_from": "payment_term.discount_type",
+   "fieldname": "discount_type",
+   "fieldtype": "Select",
+   "label": "Discount Type",
+   "options": "Percentage\nAmount"
+  },
+  {
+   "fetch_from": "payment_term.discount",
+   "fieldname": "discount",
+   "fieldtype": "Float",
+   "label": "Discount"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_15",
+   "fieldtype": "Section Break",
+   "label": "Description"
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "base_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Payment Amount (Company Currency)",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "default": "0",
+   "fieldname": "base_outstanding",
+   "fieldtype": "Currency",
+   "label": "Outstanding (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "base_paid_amount",
+   "fieldtype": "Currency",
+   "label": "Paid Amount (Company Currency)",
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-04-12 15:39:47.363609",
+ "modified": "2021-04-23 13:55:59.548043",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
