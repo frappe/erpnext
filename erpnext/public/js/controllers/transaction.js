@@ -1354,6 +1354,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				company_currency, "payment_schedule");
 			this.frm.set_currency_labels(["payment_amount", "outstanding", "paid_amount"],
 				this.frm.doc.currency, "payment_schedule");
+
 			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
 			$.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function(i, fname) {
 				if(frappe.meta.get_docfield(schedule_grid.doctype, fname))
@@ -2013,7 +2014,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	payment_term: function(doc, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.payment_term) {
-			debugger;
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
