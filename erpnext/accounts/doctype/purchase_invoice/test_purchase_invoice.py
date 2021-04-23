@@ -397,7 +397,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.update({
 			"payment_schedule": get_payment_terms("_Test Payment Term Template",
-				pi.posting_date, pi.grand_total)
+				pi.posting_date, pi.grand_total, pi.base_grand_total)
 		})
 
 		pi.save()
