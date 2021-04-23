@@ -16,27 +16,7 @@ class POSClosingEntry(StatusUpdater):
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
 			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
 
-		self.validate_pos_closing()
 		self.validate_pos_invoices()
-
-	def validate_pos_closing(self):
-		user = frappe.db.sql("""
-			SELECT name FROM `tabPOS Closing Entry`
-			WHERE
-				user = %(user)s AND docstatus = 1 AND pos_profile = %(profile)s AND
-				(period_start_date between %(start)s and %(end)s OR period_end_date between %(start)s and %(end)s)
-			""", {
-				'user': self.user,
-				'profile': self.pos_profile,
-				'start': self.period_start_date,
-				'end': self.period_end_date
-			})
-
-		if user:
-			bold_already_exists = frappe.bold(_("already exists"))
-			bold_user = frappe.bold(self.user)
-			frappe.throw(_("POS Closing Entry {} against {} between selected period")
-				.format(bold_already_exists, bold_user), title=_("Invalid Period"))
 
 	def validate_pos_invoices(self):
 		invalid_rows = []
@@ -89,8 +69,8 @@ class POSClosingEntry(StatusUpdater):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
-	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'])
-	return [c['user'] for c in cashiers_list]
+	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'], as_list=1)
+	return [c for c in cashiers_list]
 
 @frappe.whitelist()
 def get_pos_invoices(start, end, pos_profile, user):
