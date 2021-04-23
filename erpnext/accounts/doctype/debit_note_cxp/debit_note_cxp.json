@@ -1,0 +1,198 @@
+{
+ "autoname": "naming_series:",
+ "creation": "2021-04-15 14:42:10.585619",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "naming_series",
+  "cai",
+  "supplier",
+  "rtn",
+  "column_break_1",
+  "posting_date",
+  "due_date",
+  "party_type",
+  "reason_debit_note",
+  "section_break_1",
+  "references",
+  "total_references",
+  "section_break_2",
+  "amount",
+  "column_break_2",
+  "affects_sale_book",
+  "affects_sales_month",
+  "tax_base",
+  "tax_template",
+  "isv",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "bold": 1,
+   "fieldname": "naming_series",
+   "fieldtype": "Select",
+   "label": "Series",
+   "no_copy": 1,
+   "options": "DN-CXP-.YYYY.-",
+   "print_hide": 1,
+   "reqd": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "posting_date",
+   "fieldtype": "Date",
+   "label": "Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "due_date",
+   "fieldtype": "Date",
+   "label": "Due Date",
+   "reqd": 1
+  },
+  {
+   "fieldname": "reason_debit_note",
+   "fieldtype": "Link",
+   "label": "Reason Debit Note",
+   "options": "Reason Debit Note",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_1",
+   "fieldtype": "Section Break",
+   "label": "Document to which it applies"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Amount",
+   "options": "Currency",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "affects_sale_book",
+   "fieldtype": "Check",
+   "label": "Affects Purchases Book"
+  },
+  {
+   "default": "0",
+   "fieldname": "affects_sales_month",
+   "fieldtype": "Check",
+   "label": "Affects Purchases Month"
+  },
+  {
+   "fieldname": "tax_base",
+   "fieldtype": "Currency",
+   "label": "Tax Base",
+   "options": "Currency"
+  },
+  {
+   "depends_on": "eval:((doc.tax_base > 0))",
+   "fieldname": "tax_template",
+   "fieldtype": "Link",
+   "label": "Tax Template",
+   "options": "Item Tax Template"
+  },
+  {
+   "depends_on": "eval:((doc.tax_template != null))",
+   "fieldname": "isv",
+   "fieldtype": "Currency",
+   "label": "Isv",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Debit Note CXC",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "supplier",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Supplier",
+   "options": "Supplier",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "supplier.rtn",
+   "fetch_if_empty": 1,
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break",
+   "label": "Totals and tax"
+  },
+  {
+   "fieldname": "cai",
+   "fieldtype": "Data",
+   "label": "Cai",
+   "reqd": 1
+  },
+  {
+   "fieldname": "references",
+   "fieldtype": "Table",
+   "label": "References",
+   "options": "Debit Note Reference"
+  },
+  {
+   "default": "Supplier",
+   "fieldname": "party_type",
+   "fieldtype": "Link",
+   "label": "Party Type",
+   "options": "DocType",
+   "read_only": 1,
+   "set_only_once": 1
+  },
+  {
+   "fieldname": "total_references",
+   "fieldtype": "Currency",
+   "label": "Total References",
+   "options": "Currency",
+   "read_only": 1
+  }
+ ],
+ "is_submittable": 1,
+ "modified": "2021-04-23 14:22:01.001772",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Debit Note CXP",
+ "name_case": "Title Case",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
