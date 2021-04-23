@@ -39,7 +39,7 @@ class TransactionDeletionTool(Document):
 		singles = frappe.get_all('DocType', filters = {'issingle': 1}, pluck = 'name')
 		tables = frappe.get_all('DocType', filters = {'istable': 1}, pluck = 'name')
 		doctypes_to_be_ignored_list = singles + get_doctypes_to_be_ignored()
-		docfields = frappe.get_all('Docfield', 
+		docfields = frappe.get_all('DocField', 
 			filters = {
 				'fieldtype': 'Link', 
 				'options': 'Company',
