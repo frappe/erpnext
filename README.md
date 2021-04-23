@@ -39,6 +39,10 @@ ERPNext is built on the [Frappe Framework](https://github.com/frappe/frappe), a 
 
 ---
 
+### Containerized Installation
+
+Use docker to deploy ERPNext in production or for development of frappe framework apps. See https://github.com/frappe/frappe_docker for more details.
+
 ### Full Install
 
 The Easy Way: our install script for bench will install all dependencies (e.g. MariaDB). See https://github.com/frappe/bench for more details.
