@@ -384,7 +384,7 @@ class Subscription(Document):
 		invoice.flags.ignore_mandatory = True
 		invoice.save()
 
-		if self.submit_invoice == 1:
+		if self.submit_invoice:
 			invoice.submit()
 
 		return invoice
