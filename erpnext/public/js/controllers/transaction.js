@@ -1995,6 +1995,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					terms_template: doc.payment_terms_template,
 					posting_date: posting_date,
 					grand_total: doc.rounded_total || doc.grand_total,
+					base_grand_total: doc.base_rounded_total || doc.base_grand_total,
 					bill_date: doc.bill_date
 				},
 				callback: function(r) {
@@ -2009,13 +2010,15 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	payment_term: function(doc, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.payment_term) {
+			debugger;
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
 					term: row.payment_term,
 					bill_date: this.frm.doc.bill_date,
 					posting_date: this.frm.doc.posting_date || this.frm.doc.transaction_date,
-					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total
+					grand_total: this.frm.doc.rounded_total || this.frm.doc.grand_total,
+					base_grand_total: this.frm.doc.base_rounded_total || this.frm.doc.base_grand_total
 				},
 				callback: function(r) {
 					if(r.message && !r.exc) {
