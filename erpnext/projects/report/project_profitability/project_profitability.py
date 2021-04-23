@@ -21,11 +21,13 @@ def get_rows(filters):
 	conditions = get_conditions(filters)
 	standard_working_hours = frappe.db.get_single_value("HR Settings", "standard_working_hours")
 	if not standard_working_hours:
-		hr_settings = "<a href='/app/hr-settings'>HR Settings</a>"
-		frappe.msgprint(_("The metrics for this report are calculated based on the Standard Working Hours. Please set Standard Working Hours in {0}.").format(hr_settings))
+		msg = _("The metrics for this report are calculated based on the Standard Working Hours. Please set {0} in {1}.").format(
+			frappe.bold("Standard Working Hours"), frappe.utils.get_link_to_form("HR Settings", "HR Settings"))
+
+		frappe.msgprint(msg)
 		return []
 
-	sql = """ 
+	sql = """
 			SELECT
 				*
 			FROM
@@ -74,7 +76,7 @@ def get_conditions(filters):
 
 	if filters.get("project"):
 		conditions.append("tabTimesheet.parent_project={0}".format(frappe.db.escape(filters.get("project"))))
-	
+
 	conditions = " and ".join(conditions)
 	return conditions
 
