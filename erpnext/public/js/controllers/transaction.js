@@ -2013,6 +2013,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	payment_term: function(doc, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.payment_term) {
+			debugger;
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
