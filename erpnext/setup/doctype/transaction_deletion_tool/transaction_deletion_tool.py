@@ -22,6 +22,9 @@ class TransactionDeletionTool(Document):
 				frappe.throw(_("DocTypes should not be added manually to the 'DocTypes That Won't Be Affected' table."))
 
 	def before_submit(self):
+		if not self.doctypes_to_be_ignored:
+			self.populate_doctypes_to_be_ignored_table()
+
 		self.delete_bins()
 		self.delete_lead_addresses()
 		
@@ -68,7 +71,14 @@ class TransactionDeletionTool(Document):
 					naming_series = frappe.db.get_value('DocType', docfield['parent'], 'autoname')
 					if naming_series:
 						if '#' in naming_series:
-							self.update_naming_series(naming_series, docfield['parent'])			
+							self.update_naming_series(naming_series, docfield['parent'])	
+
+	def populate_doctypes_to_be_ignored_table(self):		
+		doctypes_to_be_ignored_list = get_doctypes_to_be_ignored()
+		for doctype in doctypes_to_be_ignored_list:
+			self.append('doctypes_to_be_ignored', {
+						'doctype_name' : doctype
+					})
 
 	def update_naming_series(self, naming_series, doctype_name):
 		if '.' in naming_series:
