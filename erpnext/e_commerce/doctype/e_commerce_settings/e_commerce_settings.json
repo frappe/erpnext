@@ -44,7 +44,9 @@
   "enable_attribute_filters",
   "filter_attributes",
   "shop_by_category_section",
-  "slideshow"
+  "slideshow",
+  "item_search_settings_section",
+  "search_index_fields"
  ],
  "fields": [
   {
@@ -300,12 +302,23 @@
    "fieldname": "enable_reviews",
    "fieldtype": "Check",
    "label": "Enable Reviews and Ratings"
+  },
+  {
+   "fieldname": "search_index_fields",
+   "fieldtype": "Small Text",
+   "label": "Search Index Fields"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "item_search_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Search Settings"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-23 17:15:01.956630",
+ "modified": "2021-04-23 13:30:50.286088",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
