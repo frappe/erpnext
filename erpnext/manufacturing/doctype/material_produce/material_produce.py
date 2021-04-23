@@ -61,6 +61,39 @@ class MaterialProduce(Document):
 
     def on_submit(self):
         self.make_se()
+        self.cost_details_calculation()
+
+    def cost_details_calculation(self):
+        if self.partial_produce:
+            wo = frappe.get_doc("Work Order", self.work_order)
+            total_transfer_qty = 0
+            for res in self.material_produce_item:
+                if res.type == "FG":
+                    total_transfer_qty += res.qty_produced
+            self.cost_of_rm_consumed = (wo.planned_rm_cost/wo.qty)*total_transfer_qty
+            self.cost_of_operation_consumed = (wo.planned_operating_cost/wo.qty)*total_transfer_qty
+        else:
+            tcrmc = tcoc = scrap_cost = 0
+            wo = frappe.get_doc("Work Order", self.work_order)
+            value = frappe.db.sql("""select cost_of_rm_consumed, cost_of_operation_consumed from `tabMaterial Produce`
+                                  where partial_produce = 1 and work_order = {self.work_order}""", as_dict = True)
+            for val in value:
+                tcrmc += val.cost_of_rm_consumed
+                tcoc += val.cost_of_operation_consumed
+
+            self.total_cost_of_rm_consumed_for_partial_close = tcrmc
+            self.total_cost_of_operation_consumed_for_partial_close = tcoc
+            self.wo_actual_rm_cost = wo.actual_rm_cost
+            self.wo_actual_operating_cost = wo.total_operating_cost
+
+            for res in self.material_produce_item:
+                if res.data:
+                    for line in json.loads(res.data):
+                        scrap_cost += line.rate
+            self.cost_of_scrap = scrap_cost
+
+            self.amount = (self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_operation_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap)
+            
 
     def make_stock_entry(self):
         return self.make_se()

@@ -26,9 +26,11 @@
   "cost_of_rm_consumed",
   "total_cost_of_rm_consumed_for_partial_close",
   "total_cost_of_operation_consumed_for_partial_close",
+  "cost_of_scrap",
   "column_break_20",
   "cost_of_operation_consumed",
   "wo_actual_rm_cost",
+  "wo_actual_operating_cost",
   "amount",
   "amended_from"
  ],
@@ -182,12 +184,24 @@
    "fieldname": "add_details",
    "fieldtype": "Button",
    "label": "Assigned"
+  },
+  {
+   "fieldname": "wo_actual_operating_cost",
+   "fieldtype": "Currency",
+   "label": "WO Actual Operating Cost",
+   "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "cost_of_scrap",
+   "fieldtype": "Currency",
+   "label": "Cost of Scrap",
+   "options": "Company:company:default_currency"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-19 02:07:25.572455",
+ "modified": "2021-04-23 17:14:15.061474",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce",
