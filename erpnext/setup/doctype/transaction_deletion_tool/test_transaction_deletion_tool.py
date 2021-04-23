@@ -55,7 +55,7 @@ def create_transaction_deletion_request(company):
 		'company': company
 	})
 	tdr.insert()
-	tdr.before_submit()
+	tdr.submit()
 	return tdr
 
 
