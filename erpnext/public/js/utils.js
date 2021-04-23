@@ -51,35 +51,18 @@ $.extend(erpnext, {
 	setup_serial_or_batch_no: function() {
 		let grid_row = cur_frm.open_grid_row();
 		if (!grid_row || !grid_row.grid_form.fields_dict.serial_no ||
-			grid_row.grid_form.fields_dict.serial_no.get_status()!=="Write") return;
-
-		let me = this;
-		let attachSelectorButton = (innerText, appendLoction) => {
-			let $btnDiv = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
-				.appendTo(appendLoction);
-			let $btn = $(`<button class="btn btn-sm btn-default">${innerText}</button>`)
-				.appendTo($btnDiv);
-
-			$btn.on("click", function() {
-				let callback = '';
-				let on_close = '';
-				me.show_serial_batch_selector(grid_row.frm, grid_row.doc,
-					callback, on_close, true);
-			});
-		};
+			grid_row.grid_form.fields_dict.serial_no.get_status() !== "Write") return;
 
 		frappe.model.get_value('Item', {'name': grid_row.doc.item_code},
-			['has_serial_no', 'has_batch_no'],
-			({has_serial_no, has_batch_no}) => {
-				grid_row.doc.has_serial_no = has_serial_no;
-				grid_row.doc.has_batch_no = has_batch_no;
+			['has_serial_no', 'has_batch_no'], ({has_serial_no, has_batch_no}) => {
+				Object.assign(grid_row.doc, {has_serial_no, has_batch_no});
 
 				if (has_serial_no) {
-					attachSelectorButton(__("Add Serial No"), grid_row.grid_form.fields_dict.serial_no.$wrapper);
+					attachSelectorButton(__("Add Serial No"),
+						grid_row.grid_form.fields_dict.serial_no.$wrapper, this, grid_row);
 				} else if (has_batch_no) {
-					attachSelectorButton(__("Pick Batch No"), grid_row.grid_form.fields_dict.batch_no.$wrapper);
-				} else {
-					// Do nothing
+					attachSelectorButton(__("Pick Batch No"),
+						grid_row.grid_form.fields_dict.batch_no.$wrapper, this, grid_row);
 				}
 			}
 		);
@@ -753,3 +736,14 @@ $(document).on('app_ready', function() {
 		});
 	}
 });
+
+function attachSelectorButton(innerText, appendLoction, context, grid_row) {
+	let $btnDiv = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
+		.appendTo(appendLoction);
+	let $btn = $(`<button class="btn btn-sm btn-default">${innerText}</button>`)
+		.appendTo($btnDiv);
+
+	$btn.on("click", function() {
+		context.show_serial_batch_selector(grid_row.frm, grid_row.doc, "", "", true);
+	});
+}
