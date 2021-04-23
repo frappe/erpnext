@@ -649,6 +649,10 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 										let key = item.name;
 										me.apply_rule_on_other_items({key: item});
 									}
+								},
+								() => {
+									var company_currency = me.get_company_currency();
+									me.update_item_grid_labels(company_currency);
 								}
 							]);
 						}
@@ -1146,7 +1150,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(frappe.flags.dont_fetch_price_list_rate) {
 				return
 			}
-			
+
 			if (!dont_fetch_price_list_rate &&
 				frappe.meta.has_field(doc.doctype, "price_list_currency")) {
 				this.apply_price_list(item, true);
@@ -1288,11 +1292,9 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	change_grid_labels: function(company_currency) {
 		var me = this;
 
-		this.frm.set_currency_labels(["base_rate", "base_net_rate", "base_price_list_rate", "base_amount", "base_net_amount"],
-			company_currency, "items");
+		this.update_item_grid_labels(company_currency);
 
-		this.frm.set_currency_labels(["rate", "net_rate", "price_list_rate", "amount", "net_amount", "stock_uom_rate"],
-			this.frm.doc.currency, "items");
+		this.toggle_item_grid_columns(company_currency);
 
 		if(this.frm.fields_dict["operations"]) {
 			this.frm.set_currency_labels(["operating_cost", "hour_rate"], this.frm.doc.currency, "operations");
@@ -1327,6 +1329,42 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				this.frm.doc.party_account_currency, "advances");
 		}
 
+		this.update_payment_schedule_grid_labels(company_currency);
+
+		// set labels
+		var $wrapper = $(this.frm.wrapper);
+	},
+
+	update_item_grid_labels: function(company_currency) {
+		this.frm.set_currency_labels([
+			"base_rate", "base_net_rate", "base_price_list_rate",
+			"base_amount", "base_net_amount", "base_rate_with_margin"
+		], company_currency, "items");
+
+		this.frm.set_currency_labels([
+			"rate", "net_rate", "price_list_rate", "amount",
+			"net_amount", "stock_uom_rate", "rate_with_margin"
+		], this.frm.doc.currency, "items");
+	},
+
+	update_payment_schedule_grid_labels: function(company_currency) {
+		const me = this;
+		if(this.frm.fields_dict["payment_schedule"]) {
+			this.frm.set_currency_labels(["base_payment_amount", "base_outstanding", "base_paid_amount"],
+				company_currency, "payment_schedule");
+			this.frm.set_currency_labels(["payment_amount", "outstanding", "paid_amount"],
+				this.frm.doc.currency, "payment_schedule");
+
+			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
+			$.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function(i, fname) {
+				if(frappe.meta.get_docfield(schedule_grid.doctype, fname))
+					schedule_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
+			});
+		}
+	},
+
+	toggle_item_grid_columns: function(company_currency) {
+		const me = this;
 		// toggle columns
 		var item_grid = this.frm.fields_dict["items"].grid;
 		$.each(["base_rate", "base_price_list_rate", "base_amount"], function(i, fname) {
@@ -1346,9 +1384,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			if(frappe.meta.get_docfield(item_grid.doctype, fname))
 				item_grid.set_column_disp(fname, (show && (me.frm.doc.currency != company_currency)));
 		});
-
-		// set labels
-		var $wrapper = $(this.frm.wrapper);
 	},
 
 	recalculate: function() {
@@ -1968,6 +2003,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 				callback: function(r) {
 					if(r.message && !r.exc) {
 						me.frm.set_value("payment_schedule", r.message);
+						const company_currency = me.get_company_currency();
+						this.update_payment_schedule_grid_labels(company_currency);
 					}
 				}
 			})
@@ -1977,7 +2014,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	payment_term: function(doc, cdt, cdn) {
 		var row = locals[cdt][cdn];
 		if(row.payment_term) {
-			debugger;
 			frappe.call({
 				method: "erpnext.controllers.accounts_controller.get_payment_term_details",
 				args: {
@@ -1991,6 +2027,8 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 					if(r.message && !r.exc) {
 						for (var d in r.message) {
 							frappe.model.set_value(cdt, cdn, d, r.message[d]);
+							const company_currency = me.get_company_currency();
+							this.update_payment_schedule_grid_labels(company_currency);
 						}
 					}
 				}
