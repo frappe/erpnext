@@ -16,7 +16,7 @@ frappe.query_reports["Sales Person Commission Summary"] = {
 			label: __("Document Type"),
 			fieldtype: "Select",
 			options: "Sales Order\nDelivery Note\nSales Invoice",
-			default: "Sales Order"
+			default: "Sales Invoice"
 		},
 		{
 			fieldname: "from_date",
