@@ -693,7 +693,7 @@ execute:frappe.reload_doctype('Dashboard')
 execute:frappe.reload_doc('desk', 'doctype', 'number_card_link')
 execute:frappe.delete_doc_if_exists('Dashboard', 'Accounts')
 erpnext.patches.v13_0.update_actual_start_and_end_date_in_wo
-erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes #2020-05-25
+erpnext.patches.v13_0.set_company_field_in_healthcare_doctypes #2021-04-16
 erpnext.patches.v12_0.update_bom_in_so_mr
 execute:frappe.delete_doc("Report", "Department Analytics")
 execute:frappe.rename_doc("Desk Page", "Loan Management", "Loan", force=True)
@@ -756,13 +756,20 @@ erpnext.patches.v13_0.update_payment_terms_outstanding
 erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.item_reposting_for_incorrect_sl_and_gl
 erpnext.patches.v13_0.delete_old_bank_reconciliation_doctypes
-erpnext.patches.v13_0.update_vehicle_no_reqd_condition
+erpnext.patches.v12_0.update_vehicle_no_reqd_condition
+erpnext.patches.v12_0.add_einvoice_status_field #2021-03-17
+erpnext.patches.v12_0.add_einvoice_summary_report_permissions
 erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
 erpnext.patches.v13_0.setup_gratuity_rule_for_india_and_uae
 erpnext.patches.v13_0.setup_uae_vat_fields
 execute:frappe.db.set_value('System Settings', None, 'app_name', 'ERPNext')
+erpnext.patches.v12_0.add_company_link_to_einvoice_settings
 erpnext.patches.v13_0.rename_discharge_date_in_ip_record
 erpnext.patches.v12_0.create_taxable_value_field
 erpnext.patches.v12_0.add_gst_category_in_delivery_note
 erpnext.patches.v12_0.purchase_receipt_status
+erpnext.patches.v13_0.fix_non_unique_represents_company
+erpnext.patches.v12_0.add_document_type_field_for_italy_einvoicing
+erpnext.patches.v13_0.make_non_standard_user_type #13-04-2021
+erpnext.patches.v13_0.update_shipment_status
