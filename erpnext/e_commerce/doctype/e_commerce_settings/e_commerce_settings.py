@@ -24,6 +24,7 @@ class ECommerceSettings(Document):
 		self.validate_field_filters()
 		self.validate_attribute_filters()
 		self.validate_checkout()
+		self.validate_search_index_fields()
 		if self.enabled:
 			self.validate_exchange_rates_exist()
 
@@ -50,6 +51,16 @@ class ECommerceSettings(Document):
 	def validate_checkout(self):
 		if self.enable_checkout and not self.payment_gateway_account:
 			self.enable_checkout = 0
+
+	def validate_search_index_fields(self):
+		if not self.search_index_fields:
+			return 
+		
+		# Clean up
+		fields = self.search_index_fields.replace(' ', '')
+		fields = fields.strip(',')
+
+		self.search_index_fields = fields
 
 	def validate_exchange_rates_exist(self):
 		"""check if exchange rates exist for all Price List currencies (to company's currency)"""
