@@ -1,5 +1,4 @@
 {
- "actions": [],
  "allow_import": 1,
  "autoname": "naming_series:",
  "creation": "2013-05-21 16:16:39",
@@ -923,6 +922,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -1304,8 +1304,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "links": [],
- "modified": "2020-04-14 23:03:51.540813",
+ "modified": "2021-04-20 16:36:56.067996",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
