@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "autoname": "field:manufacturer_name",
+ "creation": "2021-04-22 19:02:27.968065",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "manufacturer_name",
+  "item"
+ ],
+ "fields": [
+  {
+   "fieldname": "manufacturer_name",
+   "fieldtype": "Data",
+   "label": "Manufacturer Name",
+   "unique": 1
+  },
+  {
+   "fieldname": "item",
+   "fieldtype": "Table",
+   "label": "Item",
+   "options": "Manufacturer_item_test"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-04-22 19:53:22.381049",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Manufacturer_test",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

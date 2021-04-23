@@ -1,0 +1,84 @@
+{
+ "actions": [],
+ "autoname": "Req.###",
+ "creation": "2021-04-22 23:39:02.204611",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "manufacturer_name",
+  "item_name",
+  "vendors_stock",
+  "requested_quantity",
+  "supply_quantity",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Requested_item_test",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "manufacturer_name",
+   "fieldtype": "Data",
+   "label": "Manufacturer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item Name",
+   "options": "Item_test",
+   "read_only": 1
+  },
+  {
+   "fieldname": "requested_quantity",
+   "fieldtype": "Int",
+   "label": "Requested Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "supply_quantity",
+   "fieldtype": "Int",
+   "label": "Supply Quantity",
+   "read_only": 1
+  },
+  {
+   "fieldname": "vendors_stock",
+   "fieldtype": "Table",
+   "label": "Vendors Stock",
+   "options": "Warehouse_vendors_stock_test"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-04-23 13:30:46.314480",
+ "modified_by": "Administrator",
+ "module": "Stock",
+ "name": "Requested_item_test",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
