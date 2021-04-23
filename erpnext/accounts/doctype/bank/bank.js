@@ -40,11 +40,11 @@ let add_fields_to_mapping_table = function (frm) {
 				options.push(value.fieldname);
 			}
 		});
+		frm.fields_dict.bank_transaction_mapping.grid.update_docfield_property(
+			'bank_transaction_field', 'options', options
+		);
 	});
 
-	frm.fields_dict.bank_transaction_mapping.grid.update_docfield_property(
-		'bank_transaction_field', 'options', options
-	);
 };
 
 erpnext.integrations.refreshPlaidLink = class refreshPlaidLink {
