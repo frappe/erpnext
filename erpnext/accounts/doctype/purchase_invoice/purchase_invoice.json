@@ -890,7 +890,6 @@
   {
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
-   "hidden": 1,
    "label": "Rounding Adjustment",
    "no_copy": 1,
    "options": "currency",
@@ -928,6 +927,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -1335,7 +1335,7 @@
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
- "modified": "2021-04-20 16:00:05.728350",
+ "modified": "2021-04-23 16:17:49.047179",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",
