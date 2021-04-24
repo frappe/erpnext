@@ -364,7 +364,7 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
     if stock_entry.material_produce:
         mp_doc = frappe.get_doc("Material Produce", stock_entry.material_produce)
         if not mp_doc.partial_produce:
-            operating_cost_per_unit = (mp_doc.wo_actual_operation_cost - mp_doc.total_cost_of_operation_consumed) / stock_entry.fg_completed_qty
+            operating_cost_per_unit = (mp_doc.wo_actual_operating_cost - mp_doc.total_cost_of_operation_consumed_for_partial_close) / stock_entry.fg_completed_qty
     if operating_cost_per_unit:
         stock_entry.append('additional_costs', {
             "expense_account": expense_account,
