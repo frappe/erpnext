@@ -24,7 +24,13 @@
   "auto_leave_encashment",
   "restrict_backdated_leave_application",
   "hiring_settings",
-  "check_vacancies"
+  "interview_reminder",
+  "interview_reminder_message",
+  "remind_before",
+  "check_vacancies",
+  "column_break_23",
+  "interview_feedback_reminder",
+  "feedback_reminder_message"
  ],
  "fields": [
   {
@@ -142,13 +148,50 @@
    "fieldname": "standard_working_hours",
    "fieldtype": "Int",
    "label": "Standard Working Hours"
+  },
+  {
+   "default": "1",
+   "fieldname": "interview_reminder",
+   "fieldtype": "Check",
+   "label": "Interview Reminder"
+  },
+  {
+   "default": "00:15:00",
+   "fieldname": "remind_before",
+   "fieldtype": "Time",
+   "label": "Remind Before",
+   "read_only_depends_on": "eval: !doc.interview_reminder"
+  },
+  {
+   "default": "Interview: {{doc.name}} is scheduled on {{ doc.scheduled_on}} at Frappe technologies\nThank you, Good day!",
+   "fieldname": "interview_reminder_message",
+   "fieldtype": "Small Text",
+   "label": "Interview Reminder Message",
+   "read_only_depends_on": "eval: !doc.interview_reminder"
+  },
+  {
+   "default": "1",
+   "fieldname": "interview_feedback_reminder",
+   "fieldtype": "Check",
+   "label": "Interview Feedback Reminder"
+  },
+  {
+   "default": "Interview Feedback for Interview: {{ doc.name }} is not submitted yet. Please, Submit your Feedback.\nThank you, Good day!",
+   "fieldname": "feedback_reminder_message",
+   "fieldtype": "Small Text",
+   "label": "Feedback Reminder Message",
+   "read_only_depends_on": "eval: !doc.interview_feedback_reminder"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-11 10:52:56.192773",
+ "modified": "2021-06-22 10:52:56.192773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

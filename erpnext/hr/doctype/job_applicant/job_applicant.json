@@ -11,10 +11,7 @@
  "field_order": [
   "applicant_name",
   "email_id",
-  "phone_number",
-  "country",
-  "status",
-  "column_break_3",
+  "designation",
   "job_title",
   "source",
   "source_name",
@@ -24,10 +21,17 @@
   "notes",
   "cover_letter",
   "resume_attachment",
+  "column_break_3",
+  "status",
   "resume_link",
+  "phone_number",
+  "location",
+  "country",
   "section_break_16",
-  "currency",
+  "cover_letter",
+  "notes",
   "column_break_18",
+  "currency",
   "lower_range",
   "upper_range"
  ],
@@ -46,7 +50,8 @@
    "fieldtype": "Data",
    "label": "Email Address",
    "options": "Email",
-   "reqd": 1
+   "reqd": 1,
+   "unique": 1
   },
   {
    "fieldname": "status",
@@ -83,18 +88,9 @@
    "options": "Employee"
   },
   {
-   "fieldname": "section_break_6",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "cover_letter",
    "fieldtype": "Text",
    "label": "Cover Letter"
-  },
-  {
-   "fieldname": "resume_attachment",
-   "fieldtype": "Attach",
-   "label": "Resume Attachment"
   },
   {
    "fieldname": "notes",
@@ -120,15 +116,10 @@
    "label": "Resume Link"
   },
   {
-   "fieldname": "applicant_rating",
-   "fieldtype": "Rating",
-   "in_list_view": 1,
-   "label": "Applicant Rating"
-  },
-  {
+   "collapsible": 1,
    "fieldname": "section_break_16",
    "fieldtype": "Section Break",
-   "label": "Salary Expectation"
+   "label": "Cover Letter And Salary Expectation"
   },
   {
    "fieldname": "lower_range",
@@ -160,13 +151,26 @@
    "label": "Employee Referral",
    "options": "Employee Referral",
    "read_only": 1
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Link",
+   "label": "Location",
+   "options": "Location"
+  },
+  {
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "reqd": 1
   }
  ],
  "icon": "fa fa-user",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-24 15:51:11.117517",
+ "modified": "2021-05-05 15:51:11.117517",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Applicant",
@@ -180,6 +184,42 @@
    "read": 1,
    "report": 1,
    "role": "HR User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Interviewer",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
    "share": 1,
    "write": 1
   }

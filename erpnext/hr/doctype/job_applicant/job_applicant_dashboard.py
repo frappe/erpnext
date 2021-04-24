@@ -9,7 +9,10 @@ def get_data():
                 'items': ['Employee', 'Employee Onboarding']
             },
             {
-                'items': ['Job Offer']
+                'items': ['Job Offer', 'Appointment Letter']
             },
+            {
+                'items': ['Interview']
+            }
         ],
     }

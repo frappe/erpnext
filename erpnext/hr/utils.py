@@ -8,7 +8,7 @@ from frappe import _
 from frappe.desk.form import assign_to
 from frappe.model.document import Document
 from frappe.utils import (add_days, cstr, flt, format_datetime, formatdate,
-	get_datetime, getdate, nowdate, today, unique)
+	get_datetime, getdate, nowdate, today, unique, get_link_to_form)
 
 
 class DuplicateDeclarationError(frappe.ValidationError): pass
@@ -522,3 +522,11 @@ def share_doc_with_approver(doc, user):
 		approver = approvers.get(doc.doctype)
 		if doc_before_save.get(approver) != doc.get(approver):
 			frappe.share.remove(doc.doctype, doc.name, doc_before_save.get(approver))
+
+def validate_interviewer_roles(user_list):
+	for user in user_list:
+		user_roles = frappe.get_doc("User", user).get("roles")
+		if 'Interviewer' not in [d.role for d in user_roles] :
+			frappe.throw(_("User {0} is not an interviewer. You need to give the Interviewer Role.").format(get_link_to_form("User", user)))
+
+

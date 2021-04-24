@@ -8,8 +8,7 @@ from frappe.model.document import Document
 import frappe
 from frappe import _
 from frappe.utils import comma_and, validate_email_address
-
-class DuplicationError(frappe.ValidationError): pass
+from erpnext.hr.doctype.interview.interview import get_interviewer
 
 class JobApplicant(Document):
 	def onload(self):
@@ -24,7 +23,6 @@ class JobApplicant(Document):
 		self.name = " - ".join(keys)
 
 	def validate(self):
-		self.check_email_id_is_unique()
 		if self.email_id:
 			validate_email_address(self.email_id, True)
 
@@ -42,12 +40,47 @@ class JobApplicant(Document):
 		elif self.status in ["Accepted", "Rejected"]:
 			emp_ref.db_set("status", self.status)
 
+@frappe.whitelist()
+def create_interview(doc, interview_round):
+	import json
+	from six import string_types
 
-	def check_email_id_is_unique(self):
-		if self.email_id:
-			names = frappe.db.sql_list("""select name from `tabJob Applicant`
-				where email_id=%s and name!=%s and job_title=%s""", (self.email_id, self.name, self.job_title))
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
 
-			if names:
-				frappe.throw(_("Email Address must be unique, already exists for {0}").format(comma_and(names)), frappe.DuplicateEntryError)
+	if doc:
+		doc = frappe.get_doc(doc)
+
+	round_designation = frappe.db.get_value("Interview Round", interview_round, "designation")
+
+	if round_designation and round_designation != doc.designation:
+		frappe.throw(_("Interview Round: {0} is only applicable for Designation: {1}").format(interview_round, round_designation))
+
+	interview = frappe.new_doc("Interview")
+	interview.interview_round = interview_round
+	interview.job_applicant = doc.name
+	interview.designation = doc.designation
+	interview.resume_link = doc.resume_link
+	interview.job_opening = doc.job_title
+	interviewer_detail = get_interviewer(interview_round)
+
+	for d in interviewer_detail:
+		interview.append("interview_detail", {
+			"interviewer": d.interviewer
+		})
+	return interview
+
+@frappe.whitelist()
+def get_interview_details(job_applicant):
+	interview_detail = frappe.db.get_all("Interview", filters = {
+		"job_applicant":job_applicant,"docstatus": 1}, fields=[
+		"name", "interview_round", "expected_average_rating", "average_rating", "average_rating_value", "status"])
+	print(interview_detail)
+	interview_detail_map = {}
+
+	for detail in interview_detail:
+		interview_detail_map[detail.name] = detail
+
+	print(interview_detail_map)
+	return interview_detail_map
 

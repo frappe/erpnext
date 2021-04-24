@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "autoname": "HR-INTRV-FEED-.####",
+ "creation": "2021-04-12 17:03:13.833285",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "interview",
+  "interviewer",
+  "column_break_3",
+  "interview_round",
+  "section_break_4",
+  "skill_assessment",
+  "average_rating",
+  "average_rating_value",
+  "section_break_7",
+  "feedback",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "interview",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Interview",
+   "options": "Interview",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "interview.interview_round",
+   "fieldname": "interview_round",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Interview Round",
+   "options": "Interview Round",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "interviewer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Interviewer",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_4",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "skill_assessment",
+   "fieldtype": "Table",
+   "label": "Skill Assessment",
+   "options": "Skill Assessment",
+   "reqd": 1
+  },
+  {
+   "fieldname": "average_rating",
+   "fieldtype": "Rating",
+   "label": "Average Rating",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_7",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "feedback",
+   "fieldtype": "Text",
+   "label": "Feedback"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Interview Feedback",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "average_rating_value",
+   "fieldtype": "Float",
+   "label": "Average Rating(Value)",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-04-22 15:22:56.306451",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Interview Feedback",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Interviewer",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

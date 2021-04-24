@@ -1,0 +1,234 @@
+{
+ "actions": [],
+ "autoname": "HR-INTRV-.YYYY.-.####",
+ "creation": "2021-04-12 15:03:11.524090",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "interview_round",
+  "job_applicant",
+  "job_opening",
+  "designation",
+  "column_break_4",
+  "scheduled_on",
+  "original_date",
+  "status",
+  "resume_link",
+  "interview_details_section",
+  "interview_detail",
+  "ratings_section",
+  "average_rating",
+  "average_rating_value",
+  "column_break_12",
+  "expected_average_rating",
+  "section_break_13",
+  "interview_summary",
+  "reminded",
+  "amended_from"
+ ],
+ "fields": [
+  {
+   "fieldname": "job_applicant",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Job Applicant",
+   "options": "Job Applicant",
+   "reqd": 1
+  },
+  {
+   "fieldname": "job_opening",
+   "fieldtype": "Link",
+   "label": "Job Opening",
+   "options": "Job Opening",
+   "read_only": 1
+  },
+  {
+   "fieldname": "interview_round",
+   "fieldtype": "Link",
+   "label": "Interview Round",
+   "options": "Interview Round",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "default": "Scheduled",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Scheduled\nIn Review\nCompleted\nCancelled",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "ratings_section",
+   "fieldtype": "Section Break",
+   "label": "Ratings"
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "average_rating",
+   "fieldtype": "Rating",
+   "label": "Average rating",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "interview_summary",
+   "fieldtype": "Text",
+   "label": "Interview Summary"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "resume_link",
+   "fieldtype": "Data",
+   "label": "Resume link"
+  },
+  {
+   "fieldname": "interview_details_section",
+   "fieldtype": "Section Break",
+   "label": "Interview Detail"
+  },
+  {
+   "fetch_from": "interview_round.expected_average_rating",
+   "fieldname": "expected_average_rating",
+   "fieldtype": "Rating",
+   "label": "Expected Average Rating",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_13",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "interview_round.designation",
+   "fieldname": "designation",
+   "fieldtype": "Link",
+   "label": "Designation",
+   "options": "Designation",
+   "read_only": 1
+  },
+  {
+   "fieldname": "interview_detail",
+   "fieldtype": "Table",
+   "label": "Interview Detail",
+   "options": "Interview Detail",
+   "reqd": 1
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Interview",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "original_date",
+   "fieldtype": "Datetime",
+   "hidden": 1,
+   "label": "Original Date"
+  },
+  {
+   "fieldname": "scheduled_on",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Scheduled on",
+   "reqd": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "description": "The Value is defined out of 5. It will get updated during Interview Feedback submission",
+   "fieldname": "average_rating_value",
+   "fieldtype": "Float",
+   "label": "Average Rating(value)",
+   "precision": "3",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "reminded",
+   "fieldtype": "Check",
+   "hidden": 1,
+   "label": "Reminded"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2021-04-24 15:39:12.175191",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Interview",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Interviewer",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  },
+  {
+   "cancel": 1,
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "submit": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

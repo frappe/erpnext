@@ -1,0 +1,41 @@
+{
+ "actions": [],
+ "creation": "2021-04-12 17:07:39.656289",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "skill",
+  "rating"
+ ],
+ "fields": [
+  {
+   "fieldname": "skill",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Skill",
+   "options": "Skill",
+   "read_only": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "rating",
+   "fieldtype": "Rating",
+   "in_list_view": 1,
+   "label": "Rating",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-04-12 17:18:14.032298",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Skill Assessment",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}
