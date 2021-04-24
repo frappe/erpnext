@@ -131,8 +131,7 @@ class ImportSupplierInvoice(Document):
 
 	@frappe.whitelist()
 	def process_file_data(self):
-		self.status = "Processing File Data"
-		self.save()
+		self.db_set("status", "Processing File Data", notify=True, commit=True)
 		frappe.enqueue_doc(self.doctype, self.name, "import_xml_data", queue="long", timeout=3600)
 
 	def publish(self, title, message, count, total):
