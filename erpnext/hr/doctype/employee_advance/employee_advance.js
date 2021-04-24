@@ -6,7 +6,7 @@ frappe.ui.form.on('Employee Advance', {
 		frm.add_fetch("employee", "company", "company");
 		frm.add_fetch("company", "default_employee_advance_account", "advance_account");
 
-		frm.set_query("employee", function () {
+		frm.set_query("employee", function() {
 			return {
 				filters: {
 					"status": "Active"
