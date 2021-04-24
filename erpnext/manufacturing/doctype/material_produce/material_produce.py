@@ -76,7 +76,7 @@ class MaterialProduce(Document):
             tcrmc = tcoc = scrap_cost = 0
             wo = frappe.get_doc("Work Order", self.work_order)
             value = frappe.db.sql("""select cost_of_rm_consumed, cost_of_operation_consumed from `tabMaterial Produce`
-                                  where partial_produce = 1 and work_order = {self.work_order}""", as_dict = True)
+                                  where partial_produce = 1 and work_order = {0}""".format(self.work_order), as_dict = True)
             for val in value:
                 tcrmc += val.cost_of_rm_consumed
                 tcoc += val.cost_of_operation_consumed
