@@ -20,9 +20,6 @@ class LeavePolicyAssignment(Document):
 	def on_submit(self):
 		self.grant_leave_alloc_for_employee()
 
-	def get_allocation(self):
-		return frappe.get_all("Leave Allocation", filters = {"leave_policy_assignment": self.name})
-
 	def set_dates(self):
 		if self.assignment_based_on == "Leave Period":
 			self.effective_from, self.effective_to = frappe.db.get_value("Leave Period", self.leave_period, ["from_date", "to_date"])
@@ -30,18 +27,17 @@ class LeavePolicyAssignment(Document):
 			self.effective_from = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 
 	def validate_policy_assignment_overlap(self):
-		if self.docstatus == 1:
-			leave_policy_assignments = frappe.get_all("Leave Policy Assignment", filters = {
-				"employee": self.employee,
-				"name": ("!=", self.name),
-				"docstatus": 1,
-				"effective_to": (">=", self.effective_from),
-				"effective_from": ("<=", self.effective_to)
-			})
+		leave_policy_assignments = frappe.get_all("Leave Policy Assignment", filters = {
+			"employee": self.employee,
+			"name": ("!=", self.name),
+			"docstatus": 1,
+			"effective_to": (">=", self.effective_from),
+			"effective_from": ("<=", self.effective_to)
+		})
 
-			if len(leave_policy_assignments):
-				frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
-					.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
+		if len(leave_policy_assignments):
+			frappe.throw(_("Leave Policy: {0} already assigned for Employee {1} for period {2} to {3}")
+				.format(bold(self.leave_policy), bold(self.employee), bold(formatdate(self.effective_from)), bold(formatdate(self.effective_to))))
 
 	@frappe.whitelist()
 	def grant_leave_alloc_for_employee(self):

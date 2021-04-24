@@ -133,12 +133,6 @@
    "options": "Role"
   },
   {
-   "default": "0",
-   "fieldname": "automatically_allocate_leaves_based_on_leave_policy",
-   "fieldtype": "Check",
-   "label": "Automatically Allocate Leaves Based On Leave Policy"
-  },
-  {
    "default": "1",
    "fieldname": "send_leave_notification",
    "fieldtype": "Check",
