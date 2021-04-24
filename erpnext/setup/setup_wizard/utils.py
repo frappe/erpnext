@@ -9,5 +9,4 @@ def complete():
 		'data', 'test_mfg.json'), 'r') as f:
 		data = json.loads(f.read())
 
-	#setup_wizard.create_sales_tax(data)
 	setup_complete(data)
