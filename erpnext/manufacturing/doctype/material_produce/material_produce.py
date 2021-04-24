@@ -122,63 +122,63 @@ class MaterialProduce(Document):
         for res in self.material_produce_item:
             if res.type == "FG":
                 total_transfer_qty += res.qty_produced
-        for res in wo.required_items:
-            qty = 0
-            if res.transferred_qty:
-                expense_account, cost_center = frappe.db.get_values("Company", self.company, ["default_expense_account", "cost_center"])[0]
-                item_expense_account, item_cost_center = frappe.db.get_value("Item Default",
-                                {'parent': res.item_code,'company': self.company},["expense_account","buying_cost_center"])
-                if not cost_center and not item_cost_center:
-                    frappe.throw(_("Please update default Cost Center for company {0}").format(self.company))
-                if self.partial_produce:
-                    if res.additional_material:
-                        qty = res.transferred_qty
-                    else:
-                        bom = frappe.get_doc("BOM",wo.bom_no)
-                        if bom.exploded_items:
-                            query = frappe.db.sql("""select (bl.stock_qty / ifnull(b.quantity, 1)) as 'qty' 
-                                from `tabBOM` as b 
-                                inner join `tabBOM Explosion Item` as bl on bl.parent = b.name
-                                where bl.item_code = %s and b.name = %s limit 1""",(res.item_code,bom.name))
-                            if query:
-                                qty = float(query[0][0]) * total_transfer_qty
-                            else:
-                                qty = res.transferred_qty
-                        elif bom.scrap_items:
-                            query = frappe.db.sql("""select (bl.stock_qty / ifnull(b.quantity, 1)) as 'qty' 
-                                from `tabBOM` as b 
-                                inner join `tabBOM Scrap Item` as bl on bl.parent = b.name
-                                where bl.item_code = %s and b.name = %s limit 1""",(res.item_code,bom.name))
-                            if query:
-                                qty = float(query[0][0]) * total_transfer_qty
-                            else:
-                                qty = res.transferred_qty
-                        else:
-                            query = frappe.db.sql("""select (bl.qty / ifnull(b.quantity, 1)) as 'qty' 
-                                from `tabBOM` as b 
-                                inner join `tabBOM Item` as bl on bl.parent = b.name
-                                where bl.item_code = %s and b.name = %s limit 1""",(res.item_code,bom.name))
-                            if query:
-                                qty = float(query[0][0]) * total_transfer_qty
-                            else:
-                                qty = res.transferred_qty
-                else:
-                    qty = res.transferred_qty - res.consumed_qty
-                    stock_entry.completed_work_order = 1
-                itm_doc = frappe.get_doc("Item",res.item_code)
-                if qty > 0:
-                    se_item = stock_entry.append("items")
-                    se_item.item_code = res.item_code
-                    se_item.qty = qty
-                    se_item.s_warehouse = wo.wip_warehouse
-                    se_item.item_name = itm_doc.item_name
-                    se_item.description = itm_doc.description
-                    se_item.uom = itm_doc.stock_uom
-                    se_item.stock_uom = itm_doc.stock_uom
-                    se_item.expense_account = item_expense_account or expense_account
-                    se_item.cost_center = item_cost_center or cost_center
-                    # in stock uom
-                    se_item.conversion_factor = 1.00
+#         for res in wo.required_items:
+#             qty = 0
+#             if res.transferred_qty:
+#                 expense_account, cost_center = frappe.db.get_values("Company", self.company, ["default_expense_account", "cost_center"])[0]
+#                 item_expense_account, item_cost_center = frappe.db.get_value("Item Default",
+#                                 {'parent': res.item_code,'company': self.company},["expense_account","buying_cost_center"])
+#                 if not cost_center and not item_cost_center:
+#                     frappe.throw(_("Please update default Cost Center for company {0}").format(self.company))
+#                 if self.partial_produce:
+#                     if res.additional_material:
+#                         qty = res.transferred_qty
+#                     else:
+#                         bom = frappe.get_doc("BOM",wo.bom_no)
+#                         if bom.exploded_items:
+#                             query = frappe.db.sql("""select (bl.stock_qty / ifnull(b.quantity, 1)) as 'qty' 
+#                                 from `tabBOM` as b 
+#                                 inner join `tabBOM Explosion Item` as bl on bl.parent = b.name
+#                                 where bl.item_code = %s and b.name = %s limit 1""",(res.item_code,bom.name))
+#                             if query:
+#                                 qty = float(query[0][0]) * total_transfer_qty
+#                             else:
+#                                 qty = res.transferred_qty
+#                         elif bom.scrap_items:
+#                             query = frappe.db.sql("""select (bl.stock_qty / ifnull(b.quantity, 1)) as 'qty' 
+#                                 from `tabBOM` as b 
+#                                 inner join `tabBOM Scrap Item` as bl on bl.parent = b.name
+#                                 where bl.item_code = %s and b.name = %s limit 1""",(res.item_code,bom.name))
+#                             if query:
+#                                 qty = float(query[0][0]) * total_transfer_qty
+#                             else:
+#                                 qty = res.transferred_qty
+#                         else:
+#                             query = frappe.db.sql("""select (bl.qty / ifnull(b.quantity, 1)) as 'qty' 
+#                                 from `tabBOM` as b 
+#                                 inner join `tabBOM Item` as bl on bl.parent = b.name
+#                                 where bl.item_code = %s and b.name = %s limit 1""",(res.item_code,bom.name))
+#                             if query:
+#                                 qty = float(query[0][0]) * total_transfer_qty
+#                             else:
+#                                 qty = res.transferred_qty
+#                 else:
+#                     qty = res.transferred_qty - res.consumed_qty
+#                     stock_entry.completed_work_order = 1
+#                 itm_doc = frappe.get_doc("Item",res.item_code)
+#                 if qty > 0:
+#                     se_item = stock_entry.append("items")
+#                     se_item.item_code = res.item_code
+#                     se_item.qty = qty
+#                     se_item.s_warehouse = wo.wip_warehouse
+#                     se_item.item_name = itm_doc.item_name
+#                     se_item.description = itm_doc.description
+#                     se_item.uom = itm_doc.stock_uom
+#                     se_item.stock_uom = itm_doc.stock_uom
+#                     se_item.expense_account = item_expense_account or expense_account
+#                     se_item.cost_center = item_cost_center or cost_center
+#                     # in stock uom
+#                     se_item.conversion_factor = 1.00
         stock_entry.calculate_rate_and_amount(raise_error_if_no_rate=False)
         for res in self.material_produce_item:
             if res.data:
