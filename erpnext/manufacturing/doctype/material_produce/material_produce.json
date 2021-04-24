@@ -129,13 +129,17 @@
   {
    "fieldname": "cost_of_rm_consumed",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Cost of RM Consumed",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "total_cost_of_rm_consumed_for_partial_close",
    "fieldtype": "Data",
-   "label": "Total Cost of RM Consumed for Partial Close"
+   "hidden": 1,
+   "label": "Total Cost of RM Consumed for Partial Close",
+   "read_only": 1
   },
   {
    "fieldname": "amended_from",
@@ -149,8 +153,10 @@
   {
    "fieldname": "total_cost_of_operation_consumed_for_partial_close",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Total Cost of Operation Consumed for Partial Close",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_20",
@@ -159,20 +165,26 @@
   {
    "fieldname": "cost_of_operation_consumed",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Cost of Operation Consumed ",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "wo_actual_rm_cost",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "WO Actual RM Cost ",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "amount",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Amount",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "allow_on_submit": 1,
@@ -188,20 +200,24 @@
   {
    "fieldname": "wo_actual_operating_cost",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "WO Actual Operating Cost",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   },
   {
    "fieldname": "cost_of_scrap",
    "fieldtype": "Currency",
+   "hidden": 1,
    "label": "Cost of Scrap",
-   "options": "Company:company:default_currency"
+   "options": "Company:company:default_currency",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-23 17:14:15.061474",
+ "modified": "2021-04-24 11:22:37.115886",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Produce",
