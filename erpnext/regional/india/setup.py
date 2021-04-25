@@ -193,13 +193,17 @@ def make_custom_fields(update=True):
 				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nITC on Reverse Charge\nIneligible As Per Section 17(5)\nIneligible Others\nAll Other ITC',
 				default="All Other ITC"),
 			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
-				fieldtype='Data', insert_after='eligibility_for_itc', print_hide=1),
+				fieldtype='Currency', insert_after='eligibility_for_itc',
+				options='Company:company:default_currency', print_hide=1),
 			dict(fieldname='itc_central_tax', label='Availed ITC Central Tax',
-				fieldtype='Data', insert_after='itc_integrated_tax', print_hide=1),
+				fieldtype='Currency', insert_after='itc_integrated_tax',
+				options='Company:company:default_currency', print_hide=1),
 			dict(fieldname='itc_state_tax', label='Availed ITC State/UT Tax',
-				fieldtype='Data', insert_after='itc_central_tax', print_hide=1),
+				fieldtype='Currency', insert_after='itc_central_tax',
+				options='Company:company:default_currency', print_hide=1),
 			dict(fieldname='itc_cess_amount', label='Availed ITC Cess',
-				fieldtype='Data', insert_after='itc_state_tax', print_hide=1),
+				fieldtype='Currency', insert_after='itc_state_tax',
+				options='Company:company:default_currency', print_hide=1),
 		]
 
 	sales_invoice_gst_fields = [

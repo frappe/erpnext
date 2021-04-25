@@ -9,6 +9,9 @@ def execute():
 	if not company:
 		return
 
+	frappe.reload_doc("regional", "doctype", "gst_settings")
+	frappe.reload_doc("accounts", "doctype", "gst_account")
+
 	journal_entry_types = frappe.get_meta("Journal Entry").get_options("voucher_type").split("\n") + ['Reversal Of ITC']
 	make_property_setter('Journal Entry', 'voucher_type', 'options', '\n'.join(journal_entry_types), '')
 
@@ -49,6 +52,18 @@ def execute():
 		WHERE dt = 'Purchase Invoice' and fieldname in ('itc_integrated_tax', 'itc_state_tax', 'itc_central_tax',
 			'itc_cess_amount')
 	""")
+
+	frappe.db.sql("""UPDATE `tabPurchase Invoice` set itc_integrated_tax = '0'
+		WHERE trim(coalesce(itc_integrated_tax, '')) = '' """)
+
+	frappe.db.sql("""UPDATE `tabPurchase Invoice` set itc_state_tax = '0'
+		WHERE trim(coalesce(itc_state_tax, '')) = '' """)
+
+	frappe.db.sql("""UPDATE `tabPurchase Invoice` set itc_central_tax = '0'
+		WHERE trim(coalesce(itc_central_tax, '')) = '' """)
+
+	frappe.db.sql("""UPDATE `tabPurchase Invoice` set itc_cess_amount = '0'
+		WHERE trim(coalesce(itc_cess_amount, '')) = '' """)
 
 	# Get purchase invoices
 	invoices = frappe.get_all('Purchase Invoice',
