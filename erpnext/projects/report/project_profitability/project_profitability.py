@@ -133,14 +133,14 @@ def get_columns():
 			"label": _("Sales Invoice"),
 			"fieldtype": "Link",
 			"options": "Sales Invoice",
-			"width": 180
+			"width": 120
 		},
 		{
 			"fieldname": "timesheet",
 			"label": _("Timesheet"),
 			"fieldtype": "Link",
 			"options": "Timesheet",
-			"width": 130
+			"width": 120
 		},
 		{
 			"fieldname": "project",
@@ -174,37 +174,37 @@ def get_columns():
 			"fieldname": "utilization",
 			"label": _("Utilization"),
 			"fieldtype": "Percentage",
-			"width": 120
+			"width": 100
 		},
 		{
 			"fieldname": "fractional_cost",
 			"label": _("Fractional Cost"),
 			"fieldtype": "Int",
-			"width": 100
+			"width": 120
 		},
 		{
 			"fieldname": "total_billed_hours",
 			"label": _("Total Billed Hours"),
 			"fieldtype": "Int",
-			"width": 100
+			"width": 150
 		},
 		{
 			"fieldname": "start_date",
 			"label": _("Start Date"),
 			"fieldtype": "Date",
-			"width": 120
+			"width": 100
 		},
 		{
 			"fieldname": "end_date",
 			"label": _("End Date"),
 			"fieldtype": "Date",
-			"width": 120
+			"width": 100
 		},
 		{
 			"label": _("Currency"),
 			"fieldname": "currency",
 			"fieldtype": "Link",
 			"options": "Currency",
-			"width": 100
+			"width": 80
 		}
 	]
