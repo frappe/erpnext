@@ -293,7 +293,7 @@ class PurchaseReceipt(BuyingController):
 					if d.landed_cost_voucher_amount and landed_cost_entries:
 						for account, amount in iteritems(landed_cost_entries[(d.item_code, d.name)]):
 							account_currency = get_account_currency(account)
-							credit_amount = (flt(amount["base_amount"]) if (amount["base_amount"] or \
+							credit_amount = (flt(amount["base_amount"]) if (amount["base_amount"] or
 								account_currency!=self.company_currency) else flt(amount["amount"]))
 
 							self.add_gl_entry(gl_entries, account, d.cost_center, 0.0, credit_amount, remarks,
