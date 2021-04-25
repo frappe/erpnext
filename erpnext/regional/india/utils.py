@@ -176,8 +176,6 @@ def get_regional_address_details(party_details, doctype, company):
 
 	if doctype in ("Sales Invoice", "Delivery Note", "Sales Order"):
 		master_doctype = "Sales Taxes and Charges Template"
-
-		get_tax_template_for_sez(party_details, master_doctype, company, 'Customer')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
 		if party_details.get('taxes_and_charges'):
@@ -188,7 +186,6 @@ def get_regional_address_details(party_details, doctype, company):
 
 	elif doctype in ("Purchase Invoice", "Purchase Order", "Purchase Receipt"):
 		master_doctype = "Purchase Taxes and Charges Template"
-		get_tax_template_for_sez(party_details, master_doctype, company, 'Supplier')
 		get_tax_template_based_on_category(master_doctype, company, party_details)
 
 		if party_details.get('taxes_and_charges'):
@@ -259,20 +256,6 @@ def get_tax_template(master_doctype, company, is_inter_state, state_code):
 			default_tax = frappe.db.get_value(master_doctype,
 				{'company': company, 'disabled': 0, 'tax_category': tax_category.name}, 'name')
 	return default_tax
-
-def get_tax_template_for_sez(party_details, master_doctype, company, party_type):
-
-	gst_details = frappe.db.get_value(party_type, {'name': party_details.get(frappe.scrub(party_type))},
-			['gst_category', 'export_type'], as_dict=1)
-
-	if gst_details:
-		if gst_details.gst_category == 'SEZ' and gst_details.export_type == 'With Payment of Tax':
-			default_tax = frappe.db.get_value(master_doctype, {"company": company, "is_inter_state":1, "disabled":0,
-				"gst_state": number_state_mapping[party_details.company_gstin[:2]]})
-
-			party_details["taxes_and_charges"] = default_tax
-			party_details.taxes = get_taxes_and_charges(master_doctype, default_tax)
-
 
 def calculate_annual_eligible_hra_exemption(doc):
 	basic_component, hra_component = frappe.db.get_value('Company',  doc.company,  ["basic_component", "hra_component"])
