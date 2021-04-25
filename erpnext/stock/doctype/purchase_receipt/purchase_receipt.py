@@ -258,8 +258,8 @@ class PurchaseReceipt(BuyingController):
 
 					warehouse_account_name = warehouse_account[d.warehouse]["account"]
 					warehouse_account_currency = warehouse_account[d.warehouse]["account_currency"]
-					supplier_warehouse_account = warehouse_account[self.supplier_warehouse]["account"]
-					supplier_warehouse_account_currency = warehouse_account[self.supplier_warehouse]["account_currency"]
+					supplier_warehouse_account = warehouse_account.get(self.supplier_warehouse, {}).get("account")
+					supplier_warehouse_account_currency = warehouse_account.get(self.supplier_warehouse, {}).get("account_currency")
 					remarks = self.get("remarks") or _("Accounting Entry for Stock")
 
 					# If PR is sub-contracted and fg item rate is zero
