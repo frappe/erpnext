@@ -34,7 +34,6 @@ frappe.ui.form.on('POS Settings', {
 	add_search_options: function(frm) {
 		frappe.model.with_doctype("Item", () => {
 			var fields = $.map(frappe.get_doc("DocType", "Item").fields, function(d) {
-				debugger;
 				if (search_fields_datatypes.includes(d.fieldtype) && !(do_not_include_fields.includes(d.fieldname))) {
 					return [d.label];
 				} else {
@@ -43,7 +42,7 @@ frappe.ui.form.on('POS Settings', {
 			});
 
 			fields.unshift('');
-			frm.set_df_property('pos_search_fields', 'options', fields, cur_frm.docname, 'field');
+			frm.fields_dict.pos_search_fields.grid.update_docfield_property('field', 'options', fields);
 		});
 
 	}
