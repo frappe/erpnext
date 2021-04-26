@@ -154,13 +154,14 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-17 06:51:26.082879",
+ "modified": "2021-04-19 18:10:57.368490",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Type",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
