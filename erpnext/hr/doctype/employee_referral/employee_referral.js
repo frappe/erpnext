@@ -20,7 +20,7 @@ frappe.ui.form.on('Employee Referral', {
 
 				let additional_salary_count = data[0].additional_salary_count;
 
-				if (frm.doc.is_applicable_for_referral_compensation && !additional_salary_count) {
+				if (frm.doc.is_applicable_for_referral_bonus && !additional_salary_count) {
 					frm.add_custom_button(__("Create Additional Salary"), function() {
 						frm.events.create_additional_salary(frm);
 					});

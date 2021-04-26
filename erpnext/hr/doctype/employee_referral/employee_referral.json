@@ -22,10 +22,10 @@
   "employee",
   "employee_name",
   "column_break_14",
-  "is_applicable_for_referral_compensation",
+  "is_applicable_for_referral_bonus",
   "department",
   "additional_information_section",
-  "why_this_candidate_is_qualified_for_this_position",
+  "qualification_reason",
   "column_break_17",
   "work_references",
   "amended_from"
@@ -128,11 +128,6 @@
    "label": "Additional Information "
   },
   {
-   "fieldname": "why_this_candidate_is_qualified_for_this_position",
-   "fieldtype": "Text",
-   "label": "Why this Candidate is qualified for this position"
-  },
-  {
    "fieldname": "column_break_17",
    "fieldtype": "Column Break"
   },
@@ -171,15 +166,20 @@
   },
   {
    "default": "1",
-   "fieldname": "is_applicable_for_referral_compensation",
+   "fieldname": "is_applicable_for_referral_bonus",
    "fieldtype": "Check",
-   "label": "Is applicable for referral compensation"
+   "label": "Is applicable for referral Bonus"
+  },
+  {
+   "fieldname": "qualification_reason",
+   "fieldtype": "Text",
+   "label": "Why is this Candidate Qualified for this Position?"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-25 14:45:42.897710",
+ "modified": "2021-04-26 12:30:42.147443",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Referral",
