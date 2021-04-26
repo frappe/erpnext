@@ -17,6 +17,7 @@ from redisearch import (
 WEBSITE_ITEM_INDEX = 'website_items_index'
 WEBSITE_ITEM_KEY_PREFIX = 'website_item:'
 WEBSITE_ITEM_NAME_AUTOCOMPLETE = 'website_items_name_dict'
+WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE = 'website_items_category_dict'
 
 ALLOWED_INDEXABLE_FIELDS_SET = {
 	'item_code',
@@ -108,27 +109,36 @@ def delete_item_from_index(website_item_doc):
 	return True
 
 def define_autocomplete_dictionary():
-	print("Defining ac dict...")
-	# AC for name
-	# TODO: AC for category
+	"""Creates an autocomplete search dictionary for `name`.
+	   Also creats autocomplete dictionary for `categories` if 
+	   checked in E Commerce Settings"""
 
 	r = redis.Redis("localhost", 13000)
-	ac = AutoCompleter(WEBSITE_ITEM_NAME_AUTOCOMPLETE, port=13000)
+	name_ac = AutoCompleter(WEBSITE_ITEM_NAME_AUTOCOMPLETE, port=13000)
+	cat_ac = AutoCompleter(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE, port=13000)
 
+	ac_categories = frappe.db.get_single_value(
+		'E Commerce Settings', 
+		'show_categories_in_search_autocomplete'
+	)
+	
+	# Delete both autocomplete dicts
 	try:
 		r.delete(WEBSITE_ITEM_NAME_AUTOCOMPLETE)
+		r.delete(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE)
 	except:
 		return False
 	
 	items = frappe.get_all(
 		'Website Item', 
-		fields=['web_item_name'], 
+		fields=['web_item_name', 'item_group'], 
 		filters={"published": True}
 	)
 
 	for item in items:
-		print("adding suggestion: " + item.web_item_name)
-		ac.add_suggestions(Suggestion(item.web_item_name))
+		name_ac.add_suggestions(Suggestion(item.web_item_name))
+		if ac_categories and item.item_group:
+			cat_ac.add_suggestions(Suggestion(item.item_group))
 
 	return True
 

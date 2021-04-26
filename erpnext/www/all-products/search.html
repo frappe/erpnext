@@ -12,7 +12,19 @@
 
 {% block page_content %}
 <input type="text" name="query" id="search-box">
-<ul id="results">
 
-</ul>
+<!-- Search Results -->
+<h2>Products</h2>
+<ul id="results">Start typing...</ul>
+
+{% set show_categories = frappe.db.get_single_value('E Commerce Settings', 'show_categories_in_search_autocomplete') %}
+
+{% if show_categories %}
+<div id="categories">
+	<h2>Categories</h2>
+	<ul id="category-suggestions">
+	</ul>
+</div>
+{% endif %}
+
 {% endblock %}
