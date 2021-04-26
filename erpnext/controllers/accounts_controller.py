@@ -90,6 +90,8 @@ class AccountsController(TransactionBase):
 		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
+		self.validate_party_accounts()
+
 		self.validate_inter_company_reference()
 
 		self.set_incoming_rate()
@@ -232,6 +234,27 @@ class AccountsController(TransactionBase):
 			if date_field and self.get(date_field):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company,
 									 self.meta.get_label(date_field), self)
+
+	def validate_party_accounts(self):
+		if self.doctype not in ('Sales Invoice', 'Purchase Invoice'):
+			return
+
+		if self.doctype == 'Sales Invoice':
+			party_account_field = 'debit_to'
+			item_field = 'income_account'
+			party_account_label = 'Debit To'
+			item_field_label = 'Income Account'
+		else:
+			party_account_field = 'credit_to'
+			item_field = 'expense_account'
+			party_account_label = 'Credit To'
+			item_field_label = 'Expense Account'
+
+		for item in self.get('items'):
+			if item.get(item_field) == self.get(party_account_field):
+				frappe.throw(_("Row {0}: {1} {2} cannot be same as {3} (Party Account) {4}").format(item.idx,
+					frappe.bold(item_field_label), item.get(item_field), frappe.bold(party_account_label),
+					self.get(party_account_field)))
 
 	def validate_inter_company_reference(self):
 		if self.doctype not in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
