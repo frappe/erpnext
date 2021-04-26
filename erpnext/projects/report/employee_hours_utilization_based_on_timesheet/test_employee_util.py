@@ -96,6 +96,7 @@ class TestEmployeeUtilization(unittest.TestCase):
         expected_data = [
             {
                 'employee': self.test_emp1,
+                'employee_name': 'test1@employeeutil.com',
                 'billed_hours': 5.0,
                 'non_billed_hours': 0.0,
                 'department': emp1_data.department,
@@ -122,6 +123,7 @@ class TestEmployeeUtilization(unittest.TestCase):
         expected_data = [
             {
                 'employee': self.test_emp2,
+                'employee_name': 'test2@employeeutil.com',
                 'billed_hours': 0.0,
                 'non_billed_hours': 10.0,
                 'department': emp2_data.department,
@@ -173,6 +175,7 @@ class TestEmployeeUtilization(unittest.TestCase):
         return [
             {
                 'employee': self.test_emp2,
+                'employee_name': 'test2@employeeutil.com',
                 'billed_hours': 0.0,
                 'non_billed_hours': 10.0,
                 'department': emp2_data.department,
@@ -183,6 +186,7 @@ class TestEmployeeUtilization(unittest.TestCase):
             },
             {
                 'employee': self.test_emp1,
+                'employee_name': 'test1@employeeutil.com',
                 'billed_hours': 5.0,
                 'non_billed_hours': 0.0,
                 'department': emp1_data.department,
