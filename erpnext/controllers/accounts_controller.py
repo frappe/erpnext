@@ -242,19 +242,15 @@ class AccountsController(TransactionBase):
 		if self.doctype == 'Sales Invoice':
 			party_account_field = 'debit_to'
 			item_field = 'income_account'
-			party_account_label = 'Debit To'
-			item_field_label = 'Income Account'
 		else:
 			party_account_field = 'credit_to'
 			item_field = 'expense_account'
-			party_account_label = 'Credit To'
-			item_field_label = 'Expense Account'
 
 		for item in self.get('items'):
 			if item.get(item_field) == self.get(party_account_field):
 				frappe.throw(_("Row {0}: {1} {2} cannot be same as {3} (Party Account) {4}").format(item.idx,
-					frappe.bold(item_field_label), item.get(item_field), frappe.bold(party_account_label),
-					self.get(party_account_field)))
+					frappe.bold(frappe.unscrub(item_field)), item.get(item_field),
+					frappe.bold(frappe.unscrub(party_account_field)), self.get(party_account_field)))
 
 	def validate_inter_company_reference(self):
 		if self.doctype not in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
