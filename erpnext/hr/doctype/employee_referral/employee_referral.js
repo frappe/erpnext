@@ -3,29 +3,30 @@
 
 frappe.ui.form.on('Employee Referral', {
 	refresh: function(frm) {
-		if (frm.doc.docstatus == 1 && frm.doc.status === "Pending") {
+		if (frm.doc.docstatus === 1 && frm.doc.status === "Pending") {
 			frm.add_custom_button(__("Create Job Applicant"), function() {
 				frm.events.create_job_applicant(frm);
 			});
 		}
 
 		// To check whether Payment is done or not
-		frappe.db.get_list('Additional Salary', {
-			filters: {
-				ref_docname: cur_frm.doc.name,
-			},
-			fields: ['count(*) as count']
-		}).then((data) => {
+		if (frm.doc.docstatus === 1 && frm.doc.status === "Accepted") {
+			frappe.db.get_list('Additional Salary', {
+				filters: {
+					ref_docname: cur_frm.doc.name,
+				},
+				fields: ['count(name) as additional_salary_count']
+			}).then((data) => {
 
-			let additional_salary_count = data[0].count;
+				let additional_salary_count = data[0].additional_salary_count;
 
-			if (frm.doc.docstatus == 1 &&frm.doc.status === "Accepted" &&
-				frm.doc.is_applicable_for_referral_compensation && !additional_salary_count) {
-				frm.add_custom_button(__("Create Additional Salary"), function() {
-					frm.events.create_additional_salary(frm);
-				});
-			}
-		});
+				if (frm.doc.is_applicable_for_referral_compensation && !additional_salary_count) {
+					frm.add_custom_button(__("Create Additional Salary"), function() {
+						frm.events.create_additional_salary(frm);
+					});
+				}
+			});
+		}
 
 
 
