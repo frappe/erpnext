@@ -4,6 +4,11 @@
 frappe.ui.form.on('Employee Referral', {
 	refresh: function(frm) {
 		if (frm.doc.docstatus === 1 && frm.doc.status === "Pending") {
+			frm.add_custom_button(__("Reject Employee Referral"), function() {
+				frm.doc.status = "Rejected";
+				frm.dirty();
+				frm.save_or_update();
+			});
 			frm.add_custom_button(__("Create Job Applicant"), function() {
 				frm.events.create_job_applicant(frm);
 			});

@@ -49,8 +49,8 @@ def create_additional_salary(doc):
 
 	if not frappe.db.exists("Additional Salary", {'ref_docname': doc.name}):
 		additional_salary = frappe.new_doc('Additional Salary')
-		additional_salary.employee = doc.employee
-		additional_salary.company = frappe.db.get_value("Employee", doc.employee, "company")
+		additional_salary.employee = doc.referrer
+		additional_salary.company = frappe.db.get_value("Employee", doc.referrer, "company")
 		additional_salary.overwrite_salary_structure_amount = 0
 		additional_salary.ref_doctype = doc.doctype
 		additional_salary.ref_docname = doc.name

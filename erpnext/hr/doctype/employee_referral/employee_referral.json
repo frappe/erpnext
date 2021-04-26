@@ -19,8 +19,9 @@
   "current_job_title",
   "for_designation",
   "referrer_details_section",
-  "employee",
-  "employee_name",
+  "data_14",
+  "referrer",
+  "referrer_name",
   "column_break_14",
   "is_applicable_for_referral_bonus",
   "department",
@@ -100,20 +101,6 @@
    "label": "Referrer Details"
   },
   {
-   "fieldname": "employee",
-   "fieldtype": "Link",
-   "label": "Employee ",
-   "options": "Employee",
-   "reqd": 1
-  },
-  {
-   "fetch_from": "employee.employee_name",
-   "fieldname": "employee_name",
-   "fieldtype": "Data",
-   "label": "Employee Name",
-   "read_only": 1
-  },
-  {
    "fetch_from": "employee.department",
    "fieldname": "department",
    "fieldtype": "Link",
@@ -173,12 +160,30 @@
    "fieldname": "qualification_reason",
    "fieldtype": "Text",
    "label": "Why is this Candidate Qualified for this Position?"
+  },
+  {
+   "fieldname": "data_14",
+   "fieldtype": "Data"
+  },
+  {
+   "fieldname": "referrer",
+   "fieldtype": "Link",
+   "label": "Referrer",
+   "options": "Employee",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "referrer.full_name",
+   "fieldname": "referrer_name",
+   "fieldtype": "Data",
+   "label": "Referrer Name",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-26 12:37:17.212177",
+ "modified": "2021-04-26 16:39:24.661693",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Referral",

@@ -52,7 +52,7 @@ def create_employee_referral():
 	emp_ref.email = "a@b.c"
 	emp_ref.date = today()
 	emp_ref.for_designation = create_designation().name
-	emp_ref.employee = make_employee("testassetmovemp@example.com", company="_Test Company")
+	emp_ref.referrer = make_employee("testassetmovemp@example.com", company="_Test Company")
 	emp_ref.is_applicable_for_employee_referral_compensation = 1
 	emp_ref.save()
 	emp_ref.submit()
