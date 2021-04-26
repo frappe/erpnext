@@ -62,6 +62,7 @@ class HolidayList(Document):
 
 		return date_list
 
+	@frappe.whitelist()
 	def clear_table(self):
 		self.set('holidays', [])
 
