@@ -241,7 +241,13 @@ class WorkOrder(Document):
 		if not self.fg_warehouse:
 			frappe.throw(_("For Warehouse is required before Submit"))
 
-		self.update_work_order_qty_in_so()
+		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
+		pp_ref = prod_plan.prod_plan_ref
+		if pp_ref:
+			self.update_work_order_qty_in_combined_so()
+		else:
+			self.update_work_order_qty_in_so()
+
 		self.update_reserved_qty_for_production()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -357,6 +363,25 @@ class WorkOrder(Document):
 		work_order_qty = qty[0][0] if qty and qty[0][0] else 0
 		frappe.db.set_value('Sales Order Item',
 			self.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
+		
+	def update_work_order_qty_in_combined_so(self):
+		total_bundle_qty = 1
+		if self.product_bundle_item:
+			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
+				`tabProduct Bundle Item` where parent = %s""", (frappe.db.escape(self.product_bundle_item)))[0][0]
+
+			if not total_bundle_qty:
+				# product bundle is 0 (product bundle allows 0 qty for items)
+				total_bundle_qty = 1
+
+		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
+		pp_ref = prod_plan.prod_plan_ref
+		for p in pp_ref:
+			if p.item_ref == self.production_plan_item:
+				work_order_qty = int(p.qty)
+				frappe.db.set_value('Sales Order Item',
+					p.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
+
 
 	def update_completed_qty_in_material_request(self):
 		if self.material_request:
