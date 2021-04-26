@@ -46,13 +46,15 @@ class TestEmployeeReferral(unittest.TestCase):
 
 
 def create_employee_referral():
-	emp_ref = frappe.get_doc("Employee Referral")
+	emp_ref = frappe.new_doc("Employee Referral")
 	emp_ref.first_name = "Mahesh"
 	emp_ref.last_name = "Singh"
 	emp_ref.email = "a@b.c"
 	emp_ref.date = today()
-	emp_ref.designation = create_designation().name
+	emp_ref.for_designation = create_designation().name
 	emp_ref.employee = make_employee("testassetmovemp@example.com", company="_Test Company")
 	emp_ref.is_applicable_for_employee_referral_compensation = 1
 	emp_ref.save()
 	emp_ref.submit()
+
+	return emp_ref
