@@ -8,7 +8,7 @@ def get_data():
 		},
 		'transactions': [
 			{
-				'items': ["Job Applicant", "Additional Salary"]
+				'items': ['Job Applicant', 'Additional Salary']
 			},
 
 		]

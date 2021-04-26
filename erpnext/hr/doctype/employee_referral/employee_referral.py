@@ -51,8 +51,12 @@ def create_additional_salary(doc):
 	if isinstance(doc, string_types):
 		doc = frappe._dict(json.loads(doc))
 
+	if doc.status != "Accepted":
+		frappe.throw(_("Additional Salary can only be created against Employee Referral with status {0}").format(
+			frappe.bold("Accepted")))
+
 	if not frappe.db.exists("Additional Salary", {"ref_docname": doc.name}):
-		additional_salary = frappe.new_doc('Additional Salary')
+		additional_salary = frappe.new_doc("Additional Salary")
 		additional_salary.employee = doc.referrer
 		additional_salary.company = frappe.db.get_value("Employee", doc.referrer, "company")
 		additional_salary.overwrite_salary_structure_amount = 0

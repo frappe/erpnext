@@ -17,8 +17,8 @@ class AdditionalSalary(Document):
 		self.validate_dates()
 		self.validate_salary_structure()
 		self.validate_recurring_additional_salary_overlap()
-		if self.ref_doctype == "Employee Referral" and self.type == "Deduction":
-			frappe.throw(_("Earning Salary Component is required for Employee Referral"))
+		self.validate_employee_referral()
+
 		if self.amount < 0:
 			frappe.throw(_("Amount should not be less than zero"))
 
@@ -71,6 +71,16 @@ class AdditionalSalary(Document):
 				frappe.throw(_("To date can not be greater than employee's relieving date."))
 			if self.payroll_date and getdate(self.payroll_date) > getdate(relieving_date):
 				frappe.throw(_("Payroll date can not be greater than employee's relieving date."))
+
+	def validate_employee_referral(self):
+		if self.ref_doctype == "Employee Referral":
+			if self.type == "Deduction":
+				frappe.throw(_("Earning Salary Component is required for Employee Referral Bonus."))
+
+			referral_status = frappe.db.get_value("Employee Referral", self.ref_docname, "status")
+			if referral_status != "Accepted":
+				frappe.throw(_("Additional Salary for referral bonus can only be created against Employee Referral with status {0}").format(
+					frappe.bold("Accepted")))
 
 	def get_amount(self, sal_start_date, sal_end_date):
 		start_date = getdate(sal_start_date)
