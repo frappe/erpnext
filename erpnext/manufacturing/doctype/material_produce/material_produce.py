@@ -89,7 +89,8 @@ class MaterialProduce(Document):
             for res in self.material_produce_item:
                 if res.data:
                     for line in json.loads(res.data):
-                        scrap_cost += line.rate
+                        if line.rate:
+                            scrap_cost += line.rate
             self.cost_of_scrap = scrap_cost
 
             self.amount = (self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_operation_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap)
