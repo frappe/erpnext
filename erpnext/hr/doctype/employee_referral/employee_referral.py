@@ -11,9 +11,17 @@ from frappe.model.document import Document
 class EmployeeReferral(Document):
 	def validate(self):
 		self.set_full_name()
+		self.set_referral_bonus_payment_status()
 
 	def set_full_name(self):
 		self.full_name = " ".join(filter(None, [self.first_name, self.last_name]))
+
+	def set_referral_bonus_payment_status(self):
+		if not self.is_applicable_for_referral_bonus:
+			self.referral_payment_status = ""
+		else:
+			if not self.referral_payment_status:
+				self.referral_payment_status = "Unpaid"
 
 
 @frappe.whitelist()
@@ -50,10 +58,6 @@ def create_additional_salary(doc):
 
 	if isinstance(doc, string_types):
 		doc = frappe._dict(json.loads(doc))
-
-	if doc.status != "Accepted":
-		frappe.throw(_("Additional Salary can only be created against Employee Referral with status {0}").format(
-			frappe.bold("Accepted")))
 
 	if not frappe.db.exists("Additional Salary", {"ref_docname": doc.name}):
 		additional_salary = frappe.new_doc("Additional Salary")

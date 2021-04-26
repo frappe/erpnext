@@ -24,6 +24,7 @@
   "referrer_name",
   "column_break_14",
   "is_applicable_for_referral_bonus",
+  "referral_payment_status",
   "department",
   "additional_information_section",
   "qualification_reason",
@@ -181,12 +182,19 @@
    "fieldname": "resume_link",
    "fieldtype": "Data",
    "label": "Resume Link"
+  },
+  {
+   "fieldname": "referral_payment_status",
+   "fieldtype": "Select",
+   "label": "Referral Bonus Payment Status",
+   "options": "\nUnpaid\nPaid",
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-26 20:13:51.908906",
+ "modified": "2021-04-26 21:21:38.094086",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Referral",

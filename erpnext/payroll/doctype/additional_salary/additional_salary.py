@@ -13,6 +13,11 @@ class AdditionalSalary(Document):
 		if self.ref_doctype == "Employee Advance" and self.ref_docname:
 			frappe.db.set_value("Employee Advance", self.ref_docname, "return_amount", self.amount)
 
+		self.update_employee_referral()
+
+	def on_cancel(self):
+		self.update_employee_referral(cancel=True)
+
 	def validate(self):
 		self.validate_dates()
 		self.validate_salary_structure()
@@ -74,13 +79,24 @@ class AdditionalSalary(Document):
 
 	def validate_employee_referral(self):
 		if self.ref_doctype == "Employee Referral":
+			referral_details = frappe.db.get_value("Employee Referral", self.ref_docname,
+				["is_applicable_for_referral_bonus", "status"], as_dict=1)
+
+			if not referral_details.is_applicable_for_referral_bonus:
+				frappe.throw(_("Employee Referral {0} is not applicable for referral bonus.").format(
+					self.ref_docname))
+
 			if self.type == "Deduction":
 				frappe.throw(_("Earning Salary Component is required for Employee Referral Bonus."))
 
-			referral_status = frappe.db.get_value("Employee Referral", self.ref_docname, "status")
-			if referral_status != "Accepted":
+			if referral_details.status != "Accepted":
 				frappe.throw(_("Additional Salary for referral bonus can only be created against Employee Referral with status {0}").format(
 					frappe.bold("Accepted")))
+
+	def update_employee_referral(self, cancel=False):
+		if self.ref_doctype == "Employee Referral":
+			status = "Unpaid" if cancel else "Paid"
+			frappe.db.set_value("Employee Referral", self.ref_docname, "referral_payment_status", status)
 
 	def get_amount(self, sal_start_date, sal_end_date):
 		start_date = getdate(sal_start_date)

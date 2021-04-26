@@ -28,6 +28,7 @@ frappe.ui.form.on("Employee Referral", {
 			frappe.db.get_list("Additional Salary", {
 				filters: {
 					ref_docname: cur_frm.doc.name,
+					docstatus: 1
 				},
 				fields: ["count(name) as additional_salary_count"]
 			}).then((data) => {
