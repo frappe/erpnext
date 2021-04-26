@@ -112,8 +112,7 @@ def get_additional_salaries(employee, start_date, end_date, component_type):
 	for d in additional_salary_list:
 		if d.overwrite:
 			if d.component in components_to_overwrite:
-				frappe.throw(_("Multiple Additional Salaries with overwrite "
-					"property exist for Salary Component {0} between {1} and {2}.").format(
+				frappe.throw(_("Multiple Additional Salaries with overwrite property exist for Salary Component {0} between {1} and {2}.").format(
 					frappe.bold(d.component), start_date, end_date), title=_("Error"))
 
 			components_to_overwrite.append(d.component)
