@@ -16,14 +16,14 @@ frappe.query_reports["Employee Hours Utilization Based On Timesheet"] = {
 			fieldname: "from_date",
 			label: __("From Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_global_default("year_start_date"),
+			default: frappe.datetime.add_months(frappe.datetime.get_today(), -1),
 			reqd: 1
 		},
 		{
 			fieldname:"to_date",
 			label: __("To Date"),
 			fieldtype: "Date",
-			default: frappe.defaults.get_global_default("year_end_date"),
+			default: frappe.datetime.now_date(),
 			reqd: 1
 		},
 		{

@@ -57,34 +57,34 @@ class EmployeeHoursReport:
 				'options': 'Department',
 				'fieldname': 'department',
 				'fieldtype': 'Link',
+				'width': 120
+			},
+			{
+				'label': _('Total Hours (T)'),
+				'fieldname': 'total_hours',
+				'fieldtype': 'Float',
+				'width': 120
+			},
+			{
+				'label': _('Billed Hours (B)'),
+				'fieldname': 'billed_hours',
+				'fieldtype': 'Float',
 				'width': 170
 			},
 			{
-				'label': _('Total Hours'),
-				'fieldname': 'total_hours',
-				'fieldtype': 'Float',
-				'width': 150
-			},
-			{
-				'label': _('Billed Hours'),
-				'fieldname': 'billed_hours',
-				'fieldtype': 'Float',
-				'width': 150
-			},
-			{
-				'label': _('Non-Billed Hours'),
+				'label': _('Non-Billed Hours (NB)'),
 				'fieldname': 'non_billed_hours',
 				'fieldtype': 'Float',
-				'width': 150
+				'width': 170
 			},
 			{
-				'label': _('Untracked Hours'),
+				'label': _('Untracked Hours (U)'),
 				'fieldname': 'untracked_hours',
 				'fieldtype': 'Float',
-				'width': 150
+				'width': 170
 			},
 			{
-				'label': _('% Utilization (Billed Hours + Non-Billed Hours / Total Hours)'),
+				'label': _('% Utilization (B + NB) / T'),
 				'fieldname': 'per_util',
 				'fieldtype': 'Percentage',
 				'width': 200
