@@ -139,10 +139,6 @@ def get_party_details(address_name, is_shipping_address=False):
 		address_line1=sanitize_for_json(addr.address_line1),
 		address_line2=sanitize_for_json(addr.address_line2)
 	))
-	if d.gstin:
-		party_address_details.gstin = d.gstin
-
-	return party_address_details
 
 	return party_address_details
 
@@ -427,7 +423,7 @@ def make_einvoice(invoice):
 	item_list = get_item_list(invoice)
 	doc_details = get_doc_details(invoice)
 	invoice_value_details = get_invoice_value_details(invoice)
-	seller_details = get_party_details(invoice.company_address, company_address=1)
+	seller_details = get_party_details(invoice.company_address)
 
 	if invoice.gst_category == 'Overseas':
 		buyer_details = get_overseas_address_details(invoice.customer_address)
@@ -448,7 +444,7 @@ def make_einvoice(invoice):
 		if invoice.gst_category == 'Overseas':
 			shipping_details = get_overseas_address_details(invoice.shipping_address_name)
 		else:
-			shipping_details = get_party_details(invoice.shipping_address_name, shipping_address=True)
+			shipping_details = get_party_details(invoice.shipping_address_name, is_shipping_address=True)
 	
 	if invoice.is_pos and invoice.base_paid_amount:
 		payment_details = get_payment_details(invoice)
@@ -550,6 +546,13 @@ def safe_json_load(json_string):
 		snippet = json_string[start:end]
 		frappe.throw(_("Error in input data. Please check for any special characters near following input: <br> {}").format(snippet))
 
+def throw_error_list(errors, title):
+	if len(errors) > 1:
+		li = ['<li>'+ d +'</li>' for d in errors]
+		frappe.throw("<ul style='padding-left: 20px'>{}</ul>".format(''.join(li)), title=title)
+	else:
+		frappe.throw(errors[0], title=title)
+
 class RequestFailed(Exception): pass
 
 class GSPConnector():
@@ -576,7 +579,7 @@ class GSPConnector():
 			gstin = self.get_seller_gstin()
 			credentials_for_gstin = [d for d in self.e_invoice_settings.credentials if d.gstin == gstin]
 			if credentials_for_gstin:
-				self.credentials = credentials_for_gstin[0]
+				credentials = credentials_for_gstin[0]
 			else:
 				frappe.throw(_('Cannot find e-invoicing credentials for selected Company GSTIN. Please check E-Invoice Settings'))
 		else:
