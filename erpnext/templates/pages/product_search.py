@@ -9,7 +9,11 @@ from erpnext.e_commerce.shopping_cart.product_info import set_product_info_for_w
 
 # For SEARCH -------
 from redisearch import AutoCompleter, Client, Query
-from erpnext.e_commerce.website_item_indexing import WEBSITE_ITEM_INDEX, WEBSITE_ITEM_NAME_AUTOCOMPLETE
+from erpnext.e_commerce.website_item_indexing import (
+	WEBSITE_ITEM_INDEX, 
+	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
+	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE
+)
 # -----------------
 
 no_cache = 1
@@ -83,3 +87,14 @@ def search(query):
 
 def convert_to_dict(redis_search_doc):
 	return redis_search_doc.__dict__
+
+@frappe.whitelist(allow_guest=True)
+def get_category_suggestions(query):
+	if not query:
+		# TODO: return top/recent searches
+		return []
+
+	ac = AutoCompleter(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE, port=13000)
+	suggestions = ac.get_suggestions(query, num=10)
+
+	return [s.string for s in suggestions]
