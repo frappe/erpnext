@@ -124,6 +124,7 @@ class ImportSupplierInvoice(Document):
 					if disc_line.find("Percentuale"):
 						invoices_args["total_discount"] += flt((flt(disc_line.Percentuale.text) / 100) * (rate * qty))
 
+	@frappe.whitelist()
 	def process_file_data(self):
 		self.status = "Processing File Data"
 		self.save()
