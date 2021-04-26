@@ -801,13 +801,10 @@ frappe.ui.form.on('Payment Entry', {
 				row.allocated_amount = 0;
 
 			} else if (frappe.flags.allocate_payment_amount != 0 && (!row.allocated_amount || paid_amount_change)) {
-				if (row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
+				if (row.outstanding_amount > 0 && allocated_positive_outstanding >= 0) {
 					row.allocated_amount = (row.outstanding_amount >= allocated_positive_outstanding) ?
 						allocated_positive_outstanding : row.outstanding_amount;
 					allocated_positive_outstanding -= flt(row.allocated_amount);
-
-				} else if (row.outstanding_amount > 0 && allocated_positive_outstanding == 0) {
-					row.allocated_amount = null;
 
 				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
 					row.allocated_amount = (Math.abs(row.outstanding_amount) >= allocated_negative_outstanding) ?
