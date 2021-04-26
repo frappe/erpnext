@@ -17,7 +17,7 @@ from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups,
 from erpnext.e_commerce.doctype.item_review.item_review import get_item_reviews
 
 # SEARCH 
-from erpnext.templates.pages.product_search import (
+from erpnext.e_commerce.website_item_indexing import (
 	insert_item_to_index, 
 	update_index_for_item, 
 	delete_item_from_index
