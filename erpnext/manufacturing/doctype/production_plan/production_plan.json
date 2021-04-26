@@ -28,7 +28,10 @@
   "material_requests",
   "select_items_to_manufacture_section",
   "get_items",
+  "combine_items",
   "po_items",
+  "section_break_25",
+  "prod_plan_ref",
   "material_request_planning",
   "include_non_stock_items",
   "include_subcontracted_items",
@@ -316,13 +319,30 @@
    "fieldname": "include_safety_stock",
    "fieldtype": "Check",
    "label": "Include Safety Stock in Required Qty Calculation"
+  },
+  {
+   "fieldname": "prod_plan_ref",
+   "fieldtype": "Table",
+   "hidden": 1,
+   "label": "Production Plan Item Reference",
+   "options": "Production Plan Item Reference"
+  },
+  {
+   "default": "0",
+   "fieldname": "combine_items",
+   "fieldtype": "Check",
+   "label": "Consolidate Items"
+  },
+  {
+   "fieldname": "section_break_25",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-08 11:17:25.470147",
+ "modified": "2021-04-26 14:11:43.564957",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",
