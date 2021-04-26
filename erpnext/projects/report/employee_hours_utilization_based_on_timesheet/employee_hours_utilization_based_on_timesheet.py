@@ -88,6 +88,12 @@ class EmployeeHoursReport:
 				'fieldname': 'per_util',
 				'fieldtype': 'Percentage',
 				'width': 200
+			},
+			{
+				'label': _('% Utilization (B / T)'),
+				'fieldname': 'per_util_billed_only',
+				'fieldtype': 'Percentage',
+				'width': 200
 			}
 		]
 
@@ -182,6 +188,7 @@ class EmployeeHoursReport:
 				data['untracked_hours'] = 0.0
 
 			data['per_util'] = flt(((data['billed_hours'] + data['non_billed_hours']) / TOTAL_HOURS) * 100, 2)
+			data['per_util_billed_only'] = flt((data['billed_hours'] / TOTAL_HOURS) * 100, 2)
 
 	def generate_report_summary(self):
 		self.report_summary = []
@@ -190,11 +197,13 @@ class EmployeeHoursReport:
 			return
 
 		avg_utilization = 0.0
+		avg_utilization_billed_only = 0.0
 		total_billed, total_non_billed = 0.0, 0.0
 		total_untracked = 0.0
 
 		for row in self.data:
 			avg_utilization += row['per_util']
+			avg_utilization_billed_only += row['per_util_billed_only']
 			total_billed += row['billed_hours']
 			total_non_billed += row['non_billed_hours']
 			total_untracked += row['untracked_hours']
@@ -202,12 +211,21 @@ class EmployeeHoursReport:
 		avg_utilization /= len(self.data)
 		avg_utilization = flt(avg_utilization, 2)
 
+		avg_utilization_billed_only /= len(self.data)
+		avg_utilization_billed_only = flt(avg_utilization_billed_only, 2)
+
 		THRESHOLD_PERCENTAGE = 70.0
 		self.report_summary = [
 			{
 				'value': f'{avg_utilization}%',
 				'indicator': 'Red' if avg_utilization < THRESHOLD_PERCENTAGE else 'Green',
-				'label': _('Average Utilization'),
+				'label': _('Avg Utilization'),
+				'datatype': 'Percentage'
+			},
+			{
+				'value': f'{avg_utilization_billed_only}%',
+				'indicator': 'Red' if avg_utilization_billed_only < THRESHOLD_PERCENTAGE else 'Green',
+				'label': _('Avg Utilization (Billed Only)'),
 				'datatype': 'Percentage'
 			},
 			{
@@ -218,11 +236,6 @@ class EmployeeHoursReport:
 			{
 				'value': total_non_billed,
 				'label': _('Total Non-Billed Hours'),
-				'datatype': 'Float'
-			},
-			{
-				'value': total_untracked,
-				'label': _('Total Untracked Hours'),
 				'datatype': 'Float'
 			}
 		]
