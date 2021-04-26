@@ -122,7 +122,6 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "additional_information_section",
    "fieldtype": "Section Break",
    "label": "Additional Information "
@@ -179,7 +178,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-26 12:30:42.147443",
+ "modified": "2021-04-26 12:37:17.212177",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Referral",
