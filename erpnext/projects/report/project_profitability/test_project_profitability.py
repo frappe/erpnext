@@ -3,7 +3,7 @@ import unittest
 import frappe
 from frappe.utils import getdate, nowdate
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.projects.doctype.timesheet.test_timesheet import make_salary_structure_for_timesheet, make_timesheet 
+from erpnext.projects.doctype.timesheet.test_timesheet import make_salary_structure_for_timesheet, make_timesheet
 from erpnext.projects.doctype.timesheet.timesheet import make_salary_slip, make_sales_invoice
 from erpnext.projects.report.project_profitability.project_profitability import execute
 
@@ -20,6 +20,8 @@ class TestProjectProfitability(unittest.TestCase):
 		self.sales_invoice = make_sales_invoice(self.timesheet.name, '_Test Item', '_Test Customer')
 		self.sales_invoice.due_date = nowdate()
 		self.sales_invoice.submit()
+
+		frappe.db.set_value("HR Settings", "HR Settings", "standard_working_hours", 8)
 
 	def test_project_profitability(self):
 		filters = {
@@ -43,7 +45,7 @@ class TestProjectProfitability(unittest.TestCase):
 		standard_working_hours = frappe.db.get_single_value("HR Settings", "standard_working_hours")
 		utilization = timesheet.total_billed_hours/(self.salary_slip.total_working_days * standard_working_hours)
 		self.assertEqual(utilization, row.utilization)
-		
+
 		profit = self.sales_invoice.base_grand_total - self.salary_slip.base_gross_pay * utilization
 		self.assertEqual(profit, row.profit)
 

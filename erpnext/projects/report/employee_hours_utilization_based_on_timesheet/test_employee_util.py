@@ -20,6 +20,8 @@ class TestEmployeeUtilization(unittest.TestCase):
         # Create test timesheets
         cls.create_test_timesheets()
 
+        frappe.db.set_value("HR Settings", "HR Settings", "standard_working_hours", 9)
+
     @classmethod
     def create_test_timesheets(cls):
         timesheet1 = frappe.new_doc("Timesheet")
@@ -51,7 +53,7 @@ class TestEmployeeUtilization(unittest.TestCase):
         })
 
         timesheet2.save()
-        timesheet2.submit()  
+        timesheet2.submit()
 
     @classmethod
     def tearDownClass(cls):
@@ -59,8 +61,8 @@ class TestEmployeeUtilization(unittest.TestCase):
         frappe.db.sql("""
             DELETE FROM `tabTimesheet Detail`
             WHERE parent IN (
-                SELECT name 
-                FROM `tabTimesheet` 
+                SELECT name
+                FROM `tabTimesheet`
                 WHERE company = '_Test Company'
             )
         """)
@@ -72,14 +74,14 @@ class TestEmployeeUtilization(unittest.TestCase):
         filters = {
             "company": "_Test Company",
             "from_date": "2021-04-01",
-            "to_date": "2021-04-03" 
+            "to_date": "2021-04-03"
         }
 
         report = execute(filters)
 
         expected_data = self.get_expected_data_for_test_employees()
         self.assertEqual(report[1], expected_data)
-    
+
     def test_utilization_report_for_single_employee(self):
         filters = {
             "company": "_Test Company",
@@ -93,14 +95,14 @@ class TestEmployeeUtilization(unittest.TestCase):
         emp1_data = frappe.get_doc('Employee', self.test_emp1)
         expected_data = [
             {
-                'employee': self.test_emp1, 
-                'employee_name': emp1_data.employee_name,
+                'employee': self.test_emp1,
+                'billed_hours': 5.0,
+                'non_billed_hours': 0.0,
                 'department': emp1_data.department,
-                'billed_hours': 5.0, 
-                'non_billed_hours': 0.0, 
-                'total_hours': 18.0, 
-                'untracked_hours': 13.0, 
-                'per_util': 27.78
+                'total_hours': 18.0,
+                'untracked_hours': 13.0,
+                'per_util': 27.78,
+                'per_util_billed_only': 27.78
             }
         ]
 
@@ -115,18 +117,18 @@ class TestEmployeeUtilization(unittest.TestCase):
         }
 
         report = execute(filters)
-        
+
         emp2_data = frappe.get_doc('Employee', self.test_emp2)
         expected_data = [
             {
                 'employee': self.test_emp2,
-                'employee_name': emp2_data.employee_name,
+                'billed_hours': 0.0,
+                'non_billed_hours': 10.0,
                 'department': emp2_data.department,
-                'billed_hours': 0.0, 
-                'non_billed_hours': 10.0, 
-                'total_hours': 18.0, 
-                'untracked_hours': 8.0, 
-                'per_util': 55.56
+                'total_hours': 18.0,
+                'untracked_hours': 8.0,
+                'per_util': 55.56,
+                'per_util_billed_only': 0.0
             }
         ]
 
@@ -155,7 +157,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
         report = execute(filters)
         summary = report[4]
-        expected_summary_values = ['41.67%', 5.0, 10.0, 21.0]
+        expected_summary_values = ['41.67%', '13.89%', 5.0, 10.0]
 
         self.assertEqual(len(summary), 4)
 
@@ -167,26 +169,26 @@ class TestEmployeeUtilization(unittest.TestCase):
     def get_expected_data_for_test_employees(self):
         emp1_data = frappe.get_doc('Employee', self.test_emp1)
         emp2_data = frappe.get_doc('Employee', self.test_emp2)
-        
+
         return [
             {
-                'employee': self.test_emp2, 
-                'employee_name': emp2_data.employee_name,
-                'department': emp2_data.department, 
-                'billed_hours': 0.0, 
-                'non_billed_hours': 10.0, 
-                'total_hours': 18.0, 
-                'untracked_hours': 8.0, 
-                'per_util': 55.56
-            }, 
+                'employee': self.test_emp2,
+                'billed_hours': 0.0,
+                'non_billed_hours': 10.0,
+                'department': emp2_data.department,
+                'total_hours': 18.0,
+                'untracked_hours': 8.0,
+                'per_util': 55.56,
+                'per_util_billed_only': 0.0
+            },
             {
-                'employee': self.test_emp1, 
-                'employee_name': emp1_data.employee_name,
-                'department': emp1_data.department, 
-                'billed_hours': 5.0, 
-                'non_billed_hours': 0.0, 
-                'total_hours': 18.0, 
-                'untracked_hours': 13.0, 
-                'per_util': 27.78
+                'employee': self.test_emp1,
+                'billed_hours': 5.0,
+                'non_billed_hours': 0.0,
+                'department': emp1_data.department,
+                'total_hours': 18.0,
+                'untracked_hours': 13.0,
+                'per_util': 27.78,
+                'per_util_billed_only': 27.78
             }
         ]
