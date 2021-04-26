@@ -13,7 +13,7 @@ class EmployeeReferral(Document):
 		self.set_full_name()
 
 	def set_full_name(self):
-		self.full_name = self.first_name + " "+self.last_name
+		self.full_name = " ".join(filter(None, [self.first_name, self.last_name]))
 
 @frappe.whitelist()
 def create_job_applicant(source_name, target_doc=None):

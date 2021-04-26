@@ -15,11 +15,10 @@
   "column_break_6",
   "date",
   "status",
+  "for_designation",
   "current_employer",
   "current_job_title",
-  "for_designation",
   "referrer_details_section",
-  "data_14",
   "referrer",
   "referrer_name",
   "column_break_14",
@@ -27,7 +26,6 @@
   "department",
   "additional_information_section",
   "qualification_reason",
-  "column_break_17",
   "work_references",
   "amended_from"
  ],
@@ -35,14 +33,12 @@
   {
    "fieldname": "first_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "First Name ",
    "reqd": 1
   },
   {
    "fieldname": "last_name",
    "fieldtype": "Data",
-   "in_list_view": 1,
    "label": "Last Name",
    "reqd": 1
   },
@@ -56,6 +52,7 @@
   {
    "fieldname": "contact_no",
    "fieldtype": "Data",
+   "in_standard_filter": 1,
    "label": "Contact No.",
    "options": "Phone"
   },
@@ -71,6 +68,7 @@
   {
    "fieldname": "date",
    "fieldtype": "Date",
+   "in_standard_filter": 1,
    "label": "Date",
    "reqd": 1
   },
@@ -78,6 +76,7 @@
    "allow_on_submit": 1,
    "fieldname": "status",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Status",
    "no_copy": 1,
    "options": "Pending\nIn Process\nAccepted\nRejected",
@@ -114,12 +113,8 @@
    "label": "Additional Information "
   },
   {
-   "fieldname": "column_break_17",
-   "fieldtype": "Column Break"
-  },
-  {
    "fieldname": "work_references",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Work References"
   },
   {
@@ -138,6 +133,8 @@
   {
    "fieldname": "for_designation",
    "fieldtype": "Link",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "For Designation ",
    "options": "Designation",
    "reqd": 1
@@ -145,6 +142,8 @@
   {
    "fieldname": "email",
    "fieldtype": "Data",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
    "label": "Email",
    "options": "Email",
    "reqd": 1,
@@ -154,28 +153,26 @@
    "default": "1",
    "fieldname": "is_applicable_for_referral_bonus",
    "fieldtype": "Check",
-   "label": "Is applicable for referral Bonus"
+   "label": "Is Applicable for Referral Bonus"
   },
   {
    "fieldname": "qualification_reason",
-   "fieldtype": "Text",
+   "fieldtype": "Text Editor",
    "label": "Why is this Candidate Qualified for this Position?"
-  },
-  {
-   "fieldname": "data_14",
-   "fieldtype": "Data"
   },
   {
    "fieldname": "referrer",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Referrer",
    "options": "Employee",
    "reqd": 1
   },
   {
-   "fetch_from": "referrer.full_name",
+   "fetch_from": "referrer.employee_name",
    "fieldname": "referrer_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Referrer Name",
    "read_only": 1
   }
@@ -183,7 +180,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-26 16:39:24.661693",
+ "modified": "2021-04-26 18:03:14.298193",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Referral",
@@ -274,5 +271,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "title_field": "full_name"
 }
