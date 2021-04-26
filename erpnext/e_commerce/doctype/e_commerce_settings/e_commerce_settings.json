@@ -46,7 +46,8 @@
   "shop_by_category_section",
   "slideshow",
   "item_search_settings_section",
-  "search_index_fields"
+  "search_index_fields",
+  "show_categories_in_search_autocomplete"
  ],
  "fields": [
   {
@@ -313,12 +314,18 @@
    "fieldname": "item_search_settings_section",
    "fieldtype": "Section Break",
    "label": "Item Search Settings"
+  },
+  {
+   "default": "1",
+   "fieldname": "show_categories_in_search_autocomplete",
+   "fieldtype": "Check",
+   "label": "Show Categories in Search Autocomplete"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-23 13:30:50.286088",
+ "modified": "2021-04-26 09:50:40.581354",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",

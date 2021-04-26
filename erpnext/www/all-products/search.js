@@ -1,10 +1,10 @@
-console.log("search.js reloaded");
+console.log("search.js loaded");
 
-const search_box = document.getElementById("search-box");
+const searchBox = document.getElementById("search-box");
 const results = document.getElementById("results");
+const categoryList = document.getElementById("category-suggestions");
 
 function populateResults(data) {
-    console.log(data);
     html = ""
     for (let res of data.message) {
         html += `<li>
@@ -12,11 +12,24 @@ function populateResults(data) {
         <a href="/${res.route}">${res.web_item_name}</a>
         </li>`
     }
-    console.log(html);
     results.innerHTML = html;
 }
 
-search_box.addEventListener("input", (e) => {
+function populateCategoriesList(data) {
+    if (data.length === 0) {
+        categoryList.innerText = "No matches";
+        return;
+    }
+
+    html = ""
+    for (let category of data.message) {
+        html += `<li>${category}</li>`
+    }
+
+    categoryList.innerHTML = html;
+}
+
+searchBox.addEventListener("input", (e) => {
     frappe.call({
         method: "erpnext.templates.pages.product_search.search", 
         args: {
@@ -25,5 +38,19 @@ search_box.addEventListener("input", (e) => {
         callback: (data) => {
             populateResults(data);
         }
-    })
+    });
+
+    // If there is a suggestion list node
+    if (categoryList) {
+        frappe.call({
+            method: "erpnext.templates.pages.product_search.get_category_suggestions",
+            args: {
+                query: e.target.value
+            },
+            callback: (data) => {
+                populateCategoriesList(data);
+            }
+        });
+    }
 });
+
