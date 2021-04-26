@@ -146,7 +146,6 @@
    "label": "Send Leave Notification"
   },
   {
-   "default": "8",
    "fieldname": "standard_working_hours",
    "fieldtype": "Int",
    "label": "Standard Working Hours"
@@ -156,7 +155,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-16 15:45:18.467699",
+ "modified": "2021-04-26 10:52:56.192773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
