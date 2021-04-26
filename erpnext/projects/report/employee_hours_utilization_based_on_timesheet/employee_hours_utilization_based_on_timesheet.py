@@ -19,12 +19,21 @@ class EmployeeHoursReport:
 		self.to_date = getdate(self.filters.to_date)
 
 		self.validate_dates()
-	
+		self.validate_standard_working_hours()
+
 	def validate_dates(self):
 		self.day_span = (self.to_date - self.from_date).days
 
 		if self.day_span <= 0:
 			frappe.throw(_('From Date must come before To Date'))
+
+	def validate_standard_working_hours(self):
+		self.standard_working_hours = frappe.db.get_single_value('HR Settings', 'standard_working_hours')
+		if not self.standard_working_hours:
+			msg = _('The metrics for this report are calculated based on the Standard Working Hours. Please set {0} in {1}.').format(
+				frappe.bold('Standard Working Hours'), frappe.utils.get_link_to_form('HR Settings', 'HR Settings'))
+
+			frappe.throw(msg)
 
 	def run(self):
 		self.generate_columns()
@@ -47,7 +56,7 @@ class EmployeeHoursReport:
 				'label': _('Department'),
 				'options': 'Department',
 				'fieldname': 'department',
-				'fieldtype': 'Link', 
+				'fieldtype': 'Link',
 				'width': 170
 			},
 			{
@@ -81,7 +90,7 @@ class EmployeeHoursReport:
 				'width': 200
 			}
 		]
-	
+
 	def generate_data(self):
 		self.generate_filtered_time_logs()
 		self.generate_stats_by_employee()
@@ -108,7 +117,7 @@ class EmployeeHoursReport:
 		for emp, data in self.stats_by_employee.items():
 			if data['department'] == self.filters.department:
 				filtered_data[emp] = data
-		
+
 		# Update stats
 		self.stats_by_employee = filtered_data
 
@@ -126,8 +135,8 @@ class EmployeeHoursReport:
 
 		self.filtered_time_logs = frappe.db.sql('''
 			SELECT tt.employee AS employee, ttd.hours AS hours, ttd.billable AS billable, ttd.project AS project
-			FROM `tabTimesheet Detail` AS ttd 
-			JOIN `tabTimesheet` AS tt 
+			FROM `tabTimesheet Detail` AS ttd
+			JOIN `tabTimesheet` AS tt
 				ON ttd.parent = tt.name
 			WHERE tt.employee IS NOT NULL
 			AND tt.start_date BETWEEN '{0}' AND '{1}'
@@ -161,10 +170,9 @@ class EmployeeHoursReport:
 
 			self.stats_by_employee[emp]['department'] = emp_dept
 			self.stats_by_employee[emp]['employee_name'] = emp_name
-		
+
 	def calculate_utilizations(self):
-		# (9.0) Will be fetched from HR settings
-		TOTAL_HOURS = flt(9.0 * self.day_span, 2)
+		TOTAL_HOURS = flt(self.standard_working_hours * self.day_span, 2)
 		for emp, data in iteritems(self.stats_by_employee):
 			data['total_hours'] = TOTAL_HOURS
 			data['untracked_hours'] = flt(TOTAL_HOURS - data['billed_hours'] - data['non_billed_hours'], 2)
@@ -172,14 +180,14 @@ class EmployeeHoursReport:
 			# To handle overtime edge-case
 			if data['untracked_hours'] < 0:
 				data['untracked_hours'] = 0.0
-				
+
 			data['per_util'] = flt(((data['billed_hours'] + data['non_billed_hours']) / TOTAL_HOURS) * 100, 2)
-	
+
 	def generate_report_summary(self):
 		self.report_summary = []
 
 		if not self.data:
-			return 
+			return
 
 		avg_utilization = 0.0
 		total_billed, total_non_billed = 0.0, 0.0
@@ -233,7 +241,7 @@ class EmployeeHoursReport:
 			billed_hours.append(row.get('billed_hours'))
 			non_billed_hours.append(row.get('non_billed_hours'))
 			untracked_hours.append(row.get('untracked_hours'))
-		
+
 		self.chart = {
 			'data': {
 				'labels': labels[:30],
