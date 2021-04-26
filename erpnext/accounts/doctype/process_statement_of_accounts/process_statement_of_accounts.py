@@ -4,13 +4,13 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute as get_ageing
 from erpnext import get_company_currency
 from erpnext.accounts.party import get_party_account_currency
 
-from frappe.core.doctype.communication.email import make
 from frappe.utils.print_format import report_to_pdf
 from frappe.utils.pdf import get_pdf
 from frappe.utils import today, add_days, add_months, getdate, format_date
@@ -31,7 +31,7 @@ class ProcessStatementOfAccounts(Document):
 		validate_template(self.body)
 
 		if not self.customers:
-			frappe.throw(frappe._('Customers not selected.'))
+			frappe.throw(_('Customers not selected.'))
 
 		if self.enable_auto_email:
 			self.to_date = self.start_date
@@ -62,6 +62,8 @@ def get_report_pdf(doc, consolidated=True):
 				ageing[0]['ageing_based_on'] = doc.ageing_based_on
 
 		tax_id = frappe.get_doc('Customer', entry.customer).tax_id
+		presentation_currency =  get_party_account_currency('Customer', entry.customer, doc.company) \
+				or doc.currency or get_company_currency(doc.company)
 
 		filters= frappe._dict({
 			'from_date': doc.from_date,
@@ -71,8 +73,7 @@ def get_report_pdf(doc, consolidated=True):
 			'account': doc.account if doc.account else None,
 			'party_type': 'Customer',
 			'party': [entry.customer],
-			'presentation_currency': get_party_account_currency('Customer', entry.customer, doc.company) \
-				or doc.currency or get_company_currency(doc.company),
+			'presentation_currency': presentation_currency,
 			'group_by': doc.group_by,
 			'currency': doc.currency,
 			'cost_center': [cc.cost_center_name for cc in doc.cost_center],
@@ -175,7 +176,7 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 	if customer_collection == 'Sales Person':
 		customers = get_customers_based_on_sales_person(collection_name)
 		if not bool(customers):
-			frappe.throw('No Customers found with selected options.')
+			frappe.throw(_('No Customers found with selected options.'))
 	else:
 		if customer_collection == 'Sales Partner':
 			customers = frappe.get_list('Customer', fields=['name', 'email_id'], \
@@ -207,14 +208,14 @@ def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=Tr
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:
-			frappe.throw('No billing email found for customer: '+ customer_name)
+			frappe.throw(_("No billing email found for customer: {0}").format(customer_name))
 		else:
 			return ''
 
 	if billing_and_primary:
 		primary_email =  frappe.get_value('Customer', customer_name, 'email_id')
 		if primary_email is None and int(primary_mandatory):
-			frappe.throw('No primary email found for customer: '+ customer_name)
+			frappe.throw(_("No primary email found for customer: {0}").format(customer_name))
 		return [primary_email or '', billing_email[0][0]]
 	else:
 		return billing_email[0][0] or ''
