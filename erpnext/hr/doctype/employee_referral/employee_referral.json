@@ -12,6 +12,7 @@
   "email",
   "contact_no",
   "resume",
+  "resume_link",
   "column_break_6",
   "date",
   "status",
@@ -175,12 +176,17 @@
    "in_list_view": 1,
    "label": "Referrer Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "resume_link",
+   "fieldtype": "Data",
+   "label": "Resume Link"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-26 18:03:14.298193",
+ "modified": "2021-04-26 20:13:51.908906",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Referral",
@@ -199,6 +205,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "create": 1,
    "email": 1,
    "export": 1,
@@ -207,9 +214,11 @@
    "report": 1,
    "role": "Employee",
    "share": 1,
+   "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -223,6 +232,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
