@@ -261,9 +261,9 @@ def unconsolidate_pos_invoices(closing_entry):
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	for customer, invoices in iteritems(invoice_by_customer):
 		merge_log = frappe.new_doc('POS Invoice Merge Log')
-		merge_log.posting_date = getdate(closing_entry.get('posting_date'))
+		merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
 		merge_log.customer = customer
-		merge_log.pos_closing_entry = closing_entry.get('name', None)
+		merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
 
 		merge_log.set('pos_invoices', invoices)
 		merge_log.save(ignore_permissions=True)
@@ -286,7 +286,7 @@ def cancel_merge_logs(merge_logs, closing_entry=None):
 def enqueue_job(job, **kwargs):
 	check_scheduler_status()
 
-	closing_entry = kwargs.get('closing_entry')
+	closing_entry = kwargs.get('closing_entry') or {}
 
 	job_name = closing_entry.get("name")
 	if not job_already_enqueued(job_name):
