@@ -290,6 +290,7 @@ frappe.ui.form.on('Stock Entry', {
 						frm.clear_table("items");
 						r.message.forEach(item => {
 							var d = frm.add_child("items");
+							d.t_warehouse = frm.doc.to_warehouse;
 							$.extend(d, item);
 						});
 						frm.refresh_field("items");
