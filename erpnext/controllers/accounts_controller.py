@@ -90,6 +90,8 @@ class AccountsController(TransactionBase):
 		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
+		self.validate_party_accounts()
+
 		self.validate_inter_company_reference()
 
 		self.set_incoming_rate()
@@ -233,6 +235,23 @@ class AccountsController(TransactionBase):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company,
 									 self.meta.get_label(date_field), self)
 
+	def validate_party_accounts(self):
+		if self.doctype not in ('Sales Invoice', 'Purchase Invoice'):
+			return
+
+		if self.doctype == 'Sales Invoice':
+			party_account_field = 'debit_to'
+			item_field = 'income_account'
+		else:
+			party_account_field = 'credit_to'
+			item_field = 'expense_account'
+
+		for item in self.get('items'):
+			if item.get(item_field) == self.get(party_account_field):
+				frappe.throw(_("Row {0}: {1} {2} cannot be same as {3} (Party Account) {4}").format(item.idx,
+					frappe.bold(frappe.unscrub(item_field)), item.get(item_field),
+					frappe.bold(frappe.unscrub(party_account_field)), self.get(party_account_field)))
+
 	def validate_inter_company_reference(self):
 		if self.doctype not in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
 			return
@@ -240,7 +259,7 @@ class AccountsController(TransactionBase):
 		if self.is_internal_transfer():
 			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')
 				or self.get('inter_company_order_reference')):
-				msg = _("Internal Sale or Delivery Reference missing. ")
+				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
 
@@ -717,7 +736,9 @@ class AccountsController(TransactionBase):
 						total_billed_amt = abs(total_billed_amt)
 						max_allowed_amt = abs(max_allowed_amt)
 
-					if total_billed_amt - max_allowed_amt > 0.01:
+					role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+
+					if total_billed_amt - max_allowed_amt > 0.01 and role_allowed_to_over_bill not in frappe.get_roles():
 						frappe.throw(_("Cannot overbill for Item {0} in row {1} more than {2}. To allow over-billing, please set allowance in Accounts Settings")
 							.format(item.item_code, item.idx, max_allowed_amt))
 
