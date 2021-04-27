@@ -2,35 +2,35 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:service_order_priority",
+ "autoname": "field:priority",
  "beta": 1,
  "creation": "2020-07-20 16:55:08.862332",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "service_order_priority",
+  "priority",
   "color"
  ],
  "fields": [
-  {
-   "fieldname": "service_order_priority",
-   "fieldtype": "Data",
-   "in_list_view": 1,
-   "label": "Service Order Priority",
-   "reqd": 1,
-   "unique": 1
-  },
   {
    "allow_in_quick_entry": 1,
    "fieldname": "color",
    "fieldtype": "Color",
    "in_list_view": 1,
    "label": "Color"
+  },
+  {
+   "fieldname": "priority",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Priority",
+   "reqd": 1,
+   "unique": 1
   }
  ],
  "links": [],
- "modified": "2021-03-14 18:39:07.540309",
+ "modified": "2021-04-27 16:39:41.304396",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order Priority",

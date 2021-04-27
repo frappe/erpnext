@@ -2,14 +2,14 @@
  "actions": [],
  "allow_import": 1,
  "allow_rename": 1,
- "autoname": "field:service_order_category_name",
+ "autoname": "field:category",
  "beta": 1,
  "creation": "2020-07-20 16:52:53.440961",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
-  "service_order_category_name",
+  "category",
   "patient_care_type"
  ],
  "fields": [
@@ -25,16 +25,16 @@
   },
   {
    "allow_in_quick_entry": 1,
-   "fieldname": "service_order_category_name",
+   "fieldname": "category",
    "fieldtype": "Data",
    "in_list_view": 1,
-   "label": "Service Order Category Name",
+   "label": "Category",
    "reqd": 1,
    "unique": 1
   }
  ],
  "links": [],
- "modified": "2021-03-14 18:37:45.290599",
+ "modified": "2021-04-27 16:25:47.091151",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order Category",
@@ -86,9 +86,9 @@
  ],
  "quick_entry": 1,
  "restrict_to_domain": "Healthcare",
- "search_fields": "service_order_category_name,patient_care_type",
+ "search_fields": "category,patient_care_type",
  "sort_field": "modified",
  "sort_order": "DESC",
- "title_field": "service_order_category_name",
+ "title_field": "category",
  "track_changes": 1
 }

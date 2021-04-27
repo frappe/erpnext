@@ -172,20 +172,21 @@
    "options": "Patient Care Type"
   },
   {
-   "default": "Draft",
+   "allow_on_submit": 1,
+   "default": "Active",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Draft\nActive\nOn Hold\nRevoked\nCompleted\nReplaced\nError\nUnknown",
+   "options": "Active\nOn Hold\nRevoked\nCompleted\nReplaced\nError\nUnknown",
    "reqd": 1
   },
   {
    "fieldname": "intent",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Intent",
-   "options": "Order\nProposal\nPlan\nDirective\nOriginal Order\nReflex Order\nFiller Order\nInstance Order\nOption"
+   "options": "Healthcare Service Order Intent"
   },
   {
    "fieldname": "priority",
@@ -515,7 +516,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-27 15:08:37.625034",
+ "modified": "2021-04-27 16:14:00.554549",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",
