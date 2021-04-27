@@ -295,6 +295,9 @@ class BuyingController(StockController):
 			for raw_material in transferred_raw_materials + non_stock_items:
 				rm_item_key = (raw_material.rm_item_code, item.item_code, item.purchase_order)
 				raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
+				if not raw_material_data and raw_material.get('batch_nos'):
+					backflushed_raw_materials_map.setdefault(rm_item_key, {'consumed_batch': {}})
+					raw_material_data = backflushed_raw_materials_map.get(rm_item_key, {})
 
 				consumed_qty = raw_material_data.get('qty', 0)
 				consumed_serial_nos = raw_material_data.get('serial_no', '')
@@ -336,6 +339,7 @@ class BuyingController(StockController):
 					self.append_raw_material_to_be_backflushed(item, raw_material, qty)
 
 	def append_raw_material_to_be_backflushed(self, fg_item_doc, raw_material_data, qty):
+		qty = flt(qty, fg_item_doc.precision('qty'))
 		rm = self.append('supplied_items', {})
 		rm.update(raw_material_data)
 
@@ -1073,6 +1077,6 @@ def get_batches_with_qty(item_code, fg_item, required_qty, transferred_batch_qty
 		if backflushed_batches.get(row.get('batch'), 0) > 0:
 			backflushed_batches[row.get('batch')] += row.get('qty')
 		else:
-			backflushed_batches[row.get('batch')] = row.get('qty')
+			backflushed_batches.setdefault(row.get('batch'), row.get('qty'))
 
 	return available_batches
