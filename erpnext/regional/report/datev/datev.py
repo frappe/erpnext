@@ -3,9 +3,9 @@
 Provide a report and downloadable CSV according to the German DATEV format.
 
 - Query report showing only the columns that contain data, formatted nicely for
-  dispay to the user.
+	dispay to the user.
 - CSV download functionality `download_datev_csv` that provides a CSV file with
-  all required columns. Used to import the data into the DATEV Software.
+	all required columns. Used to import the data into the DATEV Software.
 """
 from __future__ import unicode_literals
 
