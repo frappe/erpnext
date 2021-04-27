@@ -27,6 +27,12 @@ frappe.query_reports["Vehicle Booking Deposit Summary"] = {
 			default: frappe.datetime.get_today()
 		},
 		{
+			fieldname: "deposit_type",
+			label: __("Deposit Type"),
+			fieldtype: "Select",
+			options: "\nNCS\nDirect Deposit"
+		},
+		{
 			fieldname: "supplier",
 			label: __("Supplier"),
 			fieldtype: "Link",

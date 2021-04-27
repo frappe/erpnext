@@ -103,6 +103,9 @@ class VehicleBookingDepositSummaryReport(object):
 		if self.filters.supplier:
 			conditions.append("dep_m.party_type = 'Supplier' and dep_m.party = %(party)s")
 
+		if self.filters.deposit_type:
+			conditions.append("dep_m.deposit_type = %(deposit_type)s")
+
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_columns(self):
