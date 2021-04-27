@@ -1,6 +1,6 @@
 import frappe
 from frappe import _
-from frappe.utils import cstr, flt
+from frappe.utils import cstr, flt, cint
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import force_fields,\
 	get_customer_details, get_item_details, update_vehicle_booked, update_allocation_booked
 
@@ -14,6 +14,7 @@ def set_can_change_onload(vbo_doc):
 		"customer_details": can_change_customer_details(vbo_doc),
 		"item": can_change_item(vbo_doc),
 		"payment_adjustment": can_change_payment_adjustment(vbo_doc),
+		"priority": can_change_priority(vbo_doc)
 	}
 	vbo_doc.set_onload("can_change", can_change)
 
@@ -263,7 +264,13 @@ def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
 	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
 	can_change_payment_adjustment(vbo_doc, throw=True)
 
-	vbo_doc.payment_adjustment = flt(payment_adjustment)
+	payment_adjustment = flt(payment_adjustment, vbo_doc.precision('payment_adjustment'))
+
+	if payment_adjustment == flt(vbo_doc.payment_adjustment):
+		frappe.throw(_("Payment Adjustment is already {0}"
+			.format(frappe.bold(vbo_doc.get_formatted('payment_adjustment')))))
+
+	vbo_doc.payment_adjustment = payment_adjustment
 
 	vbo_doc.calculate_outstanding_amount()
 	vbo_doc.update_payment_status()
@@ -275,6 +282,30 @@ def change_payment_adjustment(vehicle_booking_order, payment_adjustment):
 
 
 def can_change_payment_adjustment(vbo_doc, throw=False):
+	if not allowed_after_vehicle_delivery():
+		if check_vehicle_delivered(vbo_doc, throw=throw):
+			return False
+
+	return True
+
+
+@frappe.whitelist()
+def change_priority(vehicle_booking_order, priority):
+	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
+	can_change_priority(vbo_doc, throw=True)
+
+	priority = cint(priority)
+
+	if priority == cint(vbo_doc.priority):
+		frappe.throw(_("Priority is the same"))
+
+	vbo_doc.priority = priority
+	save_vehicle_booking_for_update(vbo_doc)
+
+	frappe.msgprint(_("Payment Adjustment Updated Successfully"), indicator='green', alert=True)
+
+
+def can_change_priority(vbo_doc, throw=False):
 	if not allowed_after_vehicle_delivery():
 		if check_vehicle_delivered(vbo_doc, throw=throw):
 			return False

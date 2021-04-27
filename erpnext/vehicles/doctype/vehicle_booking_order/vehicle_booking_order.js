@@ -230,6 +230,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			var select_vehicle_label = this.frm.doc.vehicle ? "Change Vehicle" : "Select Vehicle";
 			var select_allocation_label = this.frm.doc.vehicle_allocation ? "Change Vehicle Allocation" : "Select Allocation";
 			var select_delivery_period_label = this.frm.doc.delivery_period ? "Change Delivery Period" : "Select Delivery Period";
+			var change_priority_label = cint(this.frm.doc.priority) ? "Mark as Normal Priority" : "Mark as High Priority";
 
 			// Change Buttons
 			if (this.frm.doc.__onload && this.frm.doc.__onload.can_change) {
@@ -260,6 +261,11 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 
 				if (this.frm.doc.__onload.can_change.payment_adjustment) {
 					this.frm.add_custom_button(__("Change Payment Adjustment"), () => this.change_payment_adjustment(),
+						__("Change"));
+				}
+
+				if (this.frm.doc.__onload.can_change.priority) {
+					this.frm.add_custom_button(__(change_priority_label), () => this.change_priority(),
 						__("Change"));
 				}
 
@@ -1057,6 +1063,30 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 			});
 		});
 		dialog.show();
+	},
+
+	change_priority: function () {
+		var me = this;
+
+		var new_priority = cint(me.frm.doc.priority) ? 0 : 1;
+		var priority_label = new_priority ? "High" : "Normal";
+
+		frappe.confirm(__(`Are you sure you want to change the priority to <b>${__(priority_label)}</b>`),
+			function() {
+				frappe.call({
+					method: "erpnext.vehicles.doctype.vehicle_booking_order.change_booking.change_priority",
+					args: {
+						vehicle_booking_order: me.frm.doc.name,
+						priority: new_priority
+					},
+					callback: function (r) {
+						if (!r.exc) {
+							me.frm.reload_doc();
+						}
+					}
+				});
+			}
+		)
 	},
 
 	get_notification_count: function (notification_type, notification_medium) {
