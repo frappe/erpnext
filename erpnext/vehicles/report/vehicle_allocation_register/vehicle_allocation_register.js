@@ -131,15 +131,33 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 				"Group by Variant", "Group by Model", "Group by Item Group", "Group by Brand"],
 			default: "Group by Variant"
 		},
+		{
+			fieldname: "priority",
+			label: __("High Priority Only"),
+			fieldtype: "Check",
+		},
 	],
 	formatter: function(value, row, column, data, default_formatter) {
 		var style = {};
 
 		if (data.original_item_code !== data.item_code && data.item_code !== data.variant_of) {
-			if (['item_code', 'code'].includes(column.fieldname)) {
+			if (['item_code', 'code', 'previous_item_code'].includes(column.fieldname)) {
 				style['font-weight'] = 'bold';
+				style['background-color'] = '#ffe2a7';
 			}
-			style['background-color'] = '#ffe2a7';
+		}
+
+		if (data.previous_color && data.previous_color !== data.vehicle_color) {
+			if (['vehicle_color', 'previous_color'].includes(column.fieldname)) {
+				style['font-weight'] = 'bold';
+				style['background-color'] = '#ffe2a7';
+			}
+		}
+
+		if (data.priority) {
+			if (['priority', 'delivery_period'].includes(column.fieldname)) {
+				style['background-color'] = '#ffb7b7';
+			}
 		}
 
 		return default_formatter(value, row, column, data, {css: style});

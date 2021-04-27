@@ -46,9 +46,9 @@ class VehicleAllocationRegisterReport(object):
 
 		booking_data = frappe.db.sql("""
 			select m.name as vehicle_booking_order, m.item_code, m.previous_item_code,
-				m.supplier, m.allocation_period, m.delivery_period,
+				m.supplier, m.allocation_period, m.delivery_period, m.priority,
 				m.vehicle_allocation, m.transaction_date,
-				m.color_1, m.color_2, m.color_3,
+				m.color_1, m.color_2, m.color_3, m.previous_color,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
@@ -74,10 +74,14 @@ class VehicleAllocationRegisterReport(object):
 				d.code = 'Unassigned'
 
 		self.data = unallocated_bookings + allocation_data
+
+		if cint(self.filters.priority):
+			self.data = [d for d in self.data if cint(d.get('priority'))]
+
 		return self.data
 
 	def prepare_data(self):
-		self.get_payment_data()
+		# self.get_payment_data()
 
 		for d in self.data:
 			if d.vehicle_allocation:
@@ -96,11 +100,11 @@ class VehicleAllocationRegisterReport(object):
 
 			d.original_item_code = d.get('previous_item_code') or d.item_code
 
-			if d.vehicle_booking_order in self.customer_payments:
-				d.customer_payment_date = self.customer_payments[d.vehicle_booking_order][0].instrument_date
-
-			if d.vehicle_booking_order in self.supplier_payments:
-				d.supplier_payment_date = self.supplier_payments[d.vehicle_booking_order][0].posting_date
+			# if d.vehicle_booking_order in self.customer_payments:
+			# 	d.customer_payment_date = self.customer_payments[d.vehicle_booking_order][0].instrument_date
+			#
+			# if d.vehicle_booking_order in self.supplier_payments:
+			# 	d.supplier_payment_date = self.supplier_payments[d.vehicle_booking_order][0].posting_date
 
 		self.data = sorted(self.data, key=lambda d: (
 			bool(d.vehicle_allocation),
@@ -244,7 +248,7 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Reference"), "fieldname": "reference", "fieldtype": "Dynamic Link", "options": "reference_type", "width": 165},
 			{"label": _("Sr #"), "fieldname": "sr_no", "fieldtype": "Int", "width": 45},
 			{"label": _("Allocation Code"), "fieldname": "code", "fieldtype": "Data", "width": 160},
-			{"label": _("Additional"), "fieldname": "is_additional", "fieldtype": "Check", "width": 60},
+			{"label": _("Additional"), "fieldname": "is_additional", "fieldtype": "Check", "width": 55},
 			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 120},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
 			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
@@ -256,10 +260,11 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Instrument Date"), "fieldname": "customer_payment_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Deposit Date"), "fieldname": "supplier_payment_date", "fieldtype": "Date", "width": 100},
+			# {"label": _("Instrument Date"), "fieldname": "customer_payment_date", "fieldtype": "Date", "width": 100},
+			# {"label": _("Deposit Date"), "fieldname": "supplier_payment_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 100},
 			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
+			{"label": _("Previous Color"), "fieldname": "previous_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("Booking Price"), "fieldname": "booking_price", "fieldtype": "Data", "width": 100},
 			{"label": _("Supplier"), "fieldname": "supplier", "fieldtype": "Data", "width": 100},
 		]
