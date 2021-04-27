@@ -13,6 +13,11 @@ class HealthcareServiceOrder(Document):
 	def validate(self):
 		self.set_patient_details()
 		self.set_order_details()
+		self.set_title()
+
+	def set_title(self):
+		if frappe.flags.in_import and self.title:
+			return
 
 		self.title = f'{self.patient_name} - {self.order_template}'
 

@@ -9,71 +9,71 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "title",
   "naming_series",
-  "status",
-  "column_break_4",
-  "company",
-  "order_date",
-  "order_time",
-  "amended_from",
-  "order_and_reason_section",
   "order_doctype",
   "order_template",
-  "healthcare_service_order_category",
+  "order_date",
+  "order_time",
+  "column_break_4",
+  "status",
+  "company",
+  "expected_date",
+  "patient_detail_section",
+  "patient",
+  "patient_name",
+  "patient_gender",
+  "patient_birth_date",
+  "patient_age_data",
+  "patient_age",
+  "patient_blood_group",
+  "column_break_16",
+  "patient_email",
+  "patient_mobile",
+  "inpatient_record",
+  "inpatient_status",
+  "order_source_section",
+  "practitioner",
+  "medical_department",
+  "referred_to_practitioner",
+  "column_break_10",
+  "order_group",
+  "sequence",
+  "order_details",
+  "staff_role",
   "item_code",
+  "healthcare_service_order_category",
+  "patient_care_type",
   "column_break_14",
   "reason",
   "intent",
   "priority",
-  "patient_care_type",
-  "order_source_section",
-  "practitioner",
-  "medical_department",
-  "column_break_10",
-  "order_group",
-  "patient_detai_section",
-  "patient",
-  "patient_gender",
-  "patient_age_data",
-  "inpatient_record",
-  "column_break_16",
-  "patient_name",
-  "patient_blood_group",
-  "patient_email",
-  "patient_mobile",
-  "inpatient_status",
-  "patient_birth_date",
-  "patient_age",
-  "order_detail_section",
+  "order_specs_section",
   "quantity",
-  "sequence",
-  "expected_date",
   "dosage_form",
   "dosage",
   "as_needed",
   "occurence",
-  "number_of_occurrences",
-  "duration",
-  "body_part",
-  "column_break_91",
-  "referred_to_practitioner",
-  "staff_role",
   "healthcare_service_unit_type",
+  "invoiced",
+  "column_break_91",
   "order_description",
   "patient_instructions",
   "medical_code_section",
   "medical_code_standard",
-  "column_break_24",
   "medical_code",
-  "billing_section",
-  "invoiced",
   "origin_section",
   "order_reference_doctype",
   "order_reference_name",
   "column_break_9",
   "source",
   "referring_practitioner",
-  "color"
+  "color",
+  "order",
+  "reason_reference_doctype",
+  "reason_reference",
+  "order_group_doctype",
+  "amended_from"
  ],
  "fields": [
   {
@@ -84,10 +84,10 @@
    "reqd": 1
   },
   {
+   "depends_on": "order_group",
    "fieldname": "sequence",
    "fieldtype": "Int",
-   "label": "Sequence in Order Group",
-   "set_only_once": 1
+   "label": "Sequence in Order Group"
   },
   {
    "fieldname": "column_break_4",
@@ -100,8 +100,7 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Order Date",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "collapsible": 1,
@@ -115,21 +114,14 @@
    "fieldname": "order_group",
    "fieldtype": "Link",
    "label": "Order Group (Encounter)",
-   "options": "Patient Encounter",
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "order_detail_section",
-   "fieldtype": "Section Break",
-   "label": "Order Detail"
+   "options": "Patient Encounter"
   },
   {
    "fieldname": "order_doctype",
    "fieldtype": "Link",
    "label": "Order Type",
    "options": "DocType",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fieldname": "column_break_9",
@@ -154,15 +146,14 @@
   {
    "fieldname": "expected_date",
    "fieldtype": "Date",
-   "label": "Expected Date",
-   "set_only_once": 1
+   "label": "Expected By"
   },
   {
+   "description": "The role responsible for performing the service",
    "fieldname": "staff_role",
    "fieldtype": "Link",
    "label": "Staff Role",
-   "options": "Role",
-   "set_only_once": 1
+   "options": "Role"
   },
   {
    "fieldname": "order",
@@ -213,54 +204,39 @@
    "fieldname": "medical_code_standard",
    "fieldtype": "Link",
    "label": "Medical Code Standard",
-   "options": "Medical Code Standard",
-   "set_only_once": 1
-  },
-  {
-   "fieldname": "column_break_24",
-   "fieldtype": "Column Break"
+   "options": "Medical Code Standard"
   },
   {
    "depends_on": "medical_code_standard",
    "fieldname": "medical_code",
    "fieldtype": "Link",
    "label": "Medical Code",
-   "options": "Medical Code",
-   "set_only_once": 1
+   "options": "Medical Code"
   },
   {
    "default": "1",
    "fieldname": "quantity",
    "fieldtype": "Int",
-   "label": "Quantity",
-   "set_only_once": 1
+   "label": "Quantity"
   },
   {
    "default": "0",
+   "description": "Pre-condition for performing the service. For example \"pain\", \"on flare-up\", etc.",
    "fieldname": "as_needed",
    "fieldtype": "Check",
-   "label": "As Needed",
-   "set_only_once": 1
+   "label": "As Needed"
   },
   {
    "fieldname": "healthcare_service_unit_type",
    "fieldtype": "Link",
    "label": "Healthcare Service Unit Type",
-   "options": "Healthcare Service Unit Type",
-   "set_only_once": 1
+   "options": "Healthcare Service Unit Type"
   },
   {
    "fieldname": "reason",
    "fieldtype": "Link",
    "label": "Reason",
    "options": "Healthcare Service Order Reason"
-  },
-  {
-   "fieldname": "body_part",
-   "fieldtype": "Link",
-   "label": "Body Part",
-   "options": "Body Part",
-   "set_only_once": 1
   },
   {
    "fieldname": "reason_reference_doctype",
@@ -283,8 +259,7 @@
   {
    "fieldname": "order_description",
    "fieldtype": "Small Text",
-   "label": "Order Description",
-   "set_only_once": 1
+   "label": "Order Description"
   },
   {
    "fieldname": "patient",
@@ -292,8 +267,7 @@
    "in_standard_filter": 1,
    "label": "Patient",
    "options": "Patient",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "fetch_from": "patient.patient_name",
@@ -318,7 +292,6 @@
    "fieldtype": "Link",
    "label": "Company",
    "options": "Company",
-   "read_only": 1,
    "reqd": 1
   },
   {
@@ -351,17 +324,11 @@
    "read_only": 1
   },
   {
-   "collapsible": 1,
-   "fieldname": "billing_section",
-   "fieldtype": "Section Break",
-   "label": "Billing"
-  },
-  {
    "fieldname": "practitioner",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Practitioner",
+   "label": "Ordered by Practitioner",
    "options": "Healthcare Practitioner",
    "reqd": 1,
    "set_only_once": 1
@@ -371,19 +338,10 @@
    "fieldtype": "Column Break"
   },
   {
+   "collapsible": 1,
    "fieldname": "order_source_section",
    "fieldtype": "Section Break",
    "label": "Order Source"
-  },
-  {
-   "fieldname": "patient_detai_section",
-   "fieldtype": "Section Break",
-   "label": "Patient"
-  },
-  {
-   "fieldname": "order_and_reason_section",
-   "fieldtype": "Section Break",
-   "label": "Order and Reason"
   },
   {
    "fetch_from": "practitioner.department",
@@ -408,34 +366,27 @@
    "label": "Color"
   },
   {
+   "depends_on": "eval:doc.order_doctype===\"Medication\";",
    "fieldname": "dosage_form",
    "fieldtype": "Link",
    "label": "Dosage Form",
+   "mandatory_depends_on": "eval:doc.order_doctype===\"Medication\";",
    "options": "Dosage Form"
   },
   {
+   "depends_on": "eval:doc.order_doctype===\"Medication\";",
    "fieldname": "dosage",
    "fieldtype": "Link",
    "label": "Dosage",
+   "mandatory_depends_on": "eval:doc.order_doctype===\"Medication\";",
    "options": "Prescription Dosage"
   },
   {
-   "fieldname": "duration",
-   "fieldtype": "Duration",
-   "label": "Duration",
-   "set_only_once": 1
-  },
-  {
-   "depends_on": "eval: !doc.as_needed",
+   "depends_on": "eval:!doc.as_needed;",
    "fieldname": "occurence",
    "fieldtype": "Link",
    "label": "Occurence",
    "options": "Prescription Duration"
-  },
-  {
-   "fieldname": "number_of_occurrences",
-   "fieldtype": "Int",
-   "label": "Number of Occurrences"
   },
   {
    "fieldname": "referred_to_practitioner",
@@ -444,10 +395,11 @@
    "options": "Healthcare Practitioner"
   },
   {
-   "fetch_from": "order.item",
+   "depends_on": "order_template",
+   "fetch_from": "order_template.item",
    "fieldname": "item_code",
    "fieldtype": "Read Only",
-   "label": "Item Code",
+   "label": "Order Item Code",
    "options": "Item"
   },
   {
@@ -475,8 +427,7 @@
    "fieldtype": "Dynamic Link",
    "label": "Order Template",
    "options": "order_doctype",
-   "reqd": 1,
-   "set_only_once": 1
+   "reqd": 1
   },
   {
    "default": "Patient Encounter",
@@ -536,12 +487,35 @@
    "hidden": 1,
    "label": "Birth Date",
    "read_only": 1
+  },
+  {
+   "fieldname": "order_details",
+   "fieldtype": "Section Break",
+   "label": "Order Details"
+  },
+  {
+   "fieldname": "patient_detail_section",
+   "fieldtype": "Section Break",
+   "label": "Patient Details"
+  },
+  {
+   "fieldname": "order_specs_section",
+   "fieldtype": "Section Break",
+   "label": "Order Specifications"
+  },
+  {
+   "fieldname": "title",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Title",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-08 19:12:48.028350",
+ "modified": "2021-04-27 15:08:37.625034",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",
@@ -596,6 +570,7 @@
  "search_fields": "order, patient, order_group",
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "title",
  "track_changes": 1,
  "track_seen": 1
 }
