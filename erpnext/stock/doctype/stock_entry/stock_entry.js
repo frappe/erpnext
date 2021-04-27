@@ -295,7 +295,7 @@ frappe.ui.form.on('Stock Entry', {
 						frm.refresh_field("items");
 					}
 				});
-			}, __("Get items from"));
+			}, __("Get Items From"));
 
 		}
 		if (frm.doc.docstatus===0 && frm.doc.purpose == "Material Issue") {
