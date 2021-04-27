@@ -10,6 +10,7 @@
   "retirement_age",
   "emp_created_by",
   "column_break_4",
+  "standard_working_hours",
   "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
   "leave_settings",
@@ -143,13 +144,18 @@
    "fieldname": "send_leave_notification",
    "fieldtype": "Check",
    "label": "Send Leave Notification"
+  },
+  {
+   "fieldname": "standard_working_hours",
+   "fieldtype": "Int",
+   "label": "Standard Working Hours"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-14 02:04:22.907159",
+ "modified": "2021-04-26 10:52:56.192773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

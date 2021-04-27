@@ -38,12 +38,13 @@ def validate_eligibility(doc):
 	einvoicing_eligible_from = frappe.db.get_single_value('E Invoice Settings', 'applicable_from') or '2021-04-01'
 	if getdate(doc.get('posting_date')) < getdate(einvoicing_eligible_from):
 		return False
-
+	
+	invalid_company = not frappe.db.get_value('E Invoice User', { 'company': doc.get('company') })
 	invalid_supply_type = doc.get('gst_category') not in ['Registered Regular', 'SEZ', 'Overseas', 'Deemed Export']
 	company_transaction = doc.get('billing_address_gstin') == doc.get('company_gstin')
 	no_taxes_applied = not doc.get('taxes')
 
-	if invalid_supply_type or company_transaction or no_taxes_applied:
+	if invalid_company or invalid_supply_type or company_transaction or no_taxes_applied:
 		return False
 
 	return True
@@ -338,9 +339,7 @@ def get_eway_bill_details(invoice):
 	if invoice.is_return:
 		frappe.throw(_('E-Way Bill cannot be generated for Credit Notes & Debit Notes. Please clear fields in the Transporter Section of the invoice.'),
 			title=_('Invalid Fields'))
-	
-	if not invoice.distance:
-		frappe.throw(_('Distance is mandatory for generating e-way bill for an e-invoice.'), title=_('Missing Field'))
+
 
 	mode_of_transport = { '': '', 'Road': '1', 'Air': '2', 'Rail': '3', 'Ship': '4' }
 	vehicle_type = { 'Regular': 'R', 'Over Dimensional Cargo (ODC)': 'O' }
@@ -400,7 +399,7 @@ def validate_totals(einvoice):
 	if abs(flt(value_details['AssVal']) - total_item_ass_value) > 1:
 		frappe.throw(_('Total Taxable Value of the items is not equal to the Invoice Net Total. Please check item taxes / discounts for any correction.'))
 
-	if abs(flt(value_details['TotInvVal']) + flt(value_details['Discount']) - total_item_value) > 1:
+	if abs(flt(value_details['TotInvVal']) + flt(value_details['Discount']) - flt(value_details['OthChrg']) - total_item_value) > 1:
 		frappe.throw(_('Total Value of the items is not equal to the Invoice Grand Total. Please check item taxes / discounts for any correction.'))
 
 	calculated_invoice_value = \
@@ -449,7 +448,7 @@ def make_einvoice(invoice):
 	if invoice.is_return:
 		prev_doc_details = get_return_doc_reference(invoice)
 
-	if invoice.transporter and flt(invoice.distance) and not invoice.is_return:
+	if invoice.transporter and not invoice.is_return:
 		eway_bill_details = get_eway_bill_details(invoice)
 
 	# not yet implemented
@@ -1026,12 +1025,12 @@ def generate_eway_bill(doctype, docname, **kwargs):
 	gsp_connector.generate_eway_bill(**kwargs)
 
 @frappe.whitelist()
-def cancel_eway_bill(doctype, docname, eway_bill, reason, remark):
+def cancel_eway_bill(doctype, docname):
 	# TODO: uncomment when eway_bill api from Adequare is enabled
 	# gsp_connector = GSPConnector(doctype, docname)
 	# gsp_connector.cancel_eway_bill(eway_bill, reason, remark)
 
-	# update cancelled status only, to be able to cancel irn next
+	frappe.db.set_value(doctype, docname, 'ewaybill', '')
 	frappe.db.set_value(doctype, docname, 'eway_bill_cancelled', 1)
 
 @frappe.whitelist()
