@@ -32,29 +32,30 @@ frappe.ui.form.on('Interview', {
 							args: {
 								interview_name: frm.doc.name
 							}
-						});
+						})
 						frm.refresh();
 					});
-				});
+				}).addClass("btn-primary");
 			}
-
-			let allowed_interviewers = [];
-			frm.doc.interview_detail.forEach(values => {
-				allowed_interviewers.push(values.interviewer);
-			});
-			if ((allowed_interviewers.includes(frappe.session.user)) && now_date_time > frm.doc.scheduled_on) {
-				frm.add_custom_button(__("Submit Feedback"), function () {
-					frappe.call({
-						method: "erpnext.hr.doctype.interview.interview.get_expected_skill_set",
-						args: {
-							interview_round: frm.doc.interview_round
-						},
-						callback: function (r) {
-							frm.events.create_feedback_dialog(frm, r.message);
-							frm.refresh();
-						}
-					});
+			if (frm.doc.status != "Completed") {
+				let allowed_interviewers = [];
+				frm.doc.interview_detail.forEach(values => {
+					allowed_interviewers.push(values.interviewer);
 				});
+				if ((allowed_interviewers.includes(frappe.session.user)) && now_date_time > frm.doc.scheduled_on) {
+					frm.add_custom_button(__("Submit Feedback"), function () {
+						frappe.call({
+							method: "erpnext.hr.doctype.interview.interview.get_expected_skill_set",
+							args: {
+								interview_round: frm.doc.interview_round
+							},
+							callback: function (r) {
+								frm.events.create_feedback_dialog(frm, r.message);
+								frm.refresh();
+							}
+						});
+					});
+				}
 			}
 		}
 	},

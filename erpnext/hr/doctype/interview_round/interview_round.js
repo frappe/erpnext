@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Interview Round', {
-	onload: function(frm) {
+	refresh: function(frm) {
 		if (!cur_frm.doc.__islocal) {
 			frm.add_custom_button(__("Create Interview"), function() {
 				frm.events.create_interview(frm);

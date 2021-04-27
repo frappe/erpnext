@@ -26,7 +26,7 @@ class Interview(Document):
 			}
 		)
 		if duplicate_interview:
-			frappe.throw(_("Job Applicant are not allowed to appear twice for same Interview round. Interview already scheduled for Job Applicant: {0}, Reference: {1}").format(
+			frappe.throw(_("Job Applicants are not allowed to appear twice for the same Interview round. Interview already scheduled for Job Applicant: {0}, Reference: {1}").format(
 				frappe.bold(self.job_applicant),
 				frappe.bold(get_link_to_form("Interview", duplicate_interview)))
 			)

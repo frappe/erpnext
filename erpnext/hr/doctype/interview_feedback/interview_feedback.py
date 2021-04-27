@@ -43,7 +43,7 @@ class InterviewFeedback(Document):
 		})
 
 		if duplicate_feedback:
-			frappe.throw(_("Interviewer are not allowed to submit Interview Feedback twice. Please cancel interview "))
+			frappe.throw(_("Interviewers are not allowed to submit Interview Feedback twice. Please cancel previous Interview Feedback"))
 
 
 	def calculate_average_rating(self):
