@@ -11,7 +11,8 @@ def get_data():
 			'Work Order': 'production_item',
 			'Product Bundle': 'new_item_code',
 			'BOM': 'item',
-			'Batch': 'item'
+			'Batch': 'item',
+			'Memos': 'item'
 		},
 		'transactions': [
 			{
@@ -24,7 +25,7 @@ def get_data():
 			},
 			{
 				'label': _('Sell'),
-				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Backorder']
+				'items': ['Quotation', 'Sales Order', 'Delivery Note', 'Sales Invoice', 'Backorder', 'Memos']
 			},
 			{
 				'label': _('Buy'),
