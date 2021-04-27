@@ -60,10 +60,13 @@ frappe.ui.form.VehicleQuickEntryForm = frappe.ui.form.QuickEntryForm.extend({
 		};
 		me.dialog.fields_dict["item_code"].df.onchange();
 
-		me.dialog.get_field("insurance_company").get_query = function () {
-			return {
-				filters: {
-					'is_insurance_company': 1
+		var insurance_field = me.dialog.get_field("insurance_company");
+		if (insurance_field) {
+			insurance_field.get_query = function () {
+				return {
+					filters: {
+						'is_insurance_company': 1
+					}
 				}
 			}
 		}

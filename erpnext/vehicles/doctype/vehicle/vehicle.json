@@ -42,6 +42,14 @@
   "insurance_start_date",
   "column_break_23",
   "insurance_end_date",
+  "warranty_amc_details",
+  "warranty_no",
+  "column_break7",
+  "warranty_period",
+  "column_break_40",
+  "warranty_expiry_date",
+  "column_break_64",
+  "maintenance_status",
   "purchase_details",
   "purchase_document_type",
   "purchase_document_no",
@@ -61,19 +69,12 @@
   "delivery_time",
   "column_break5",
   "sales_invoice",
-  "warranty_amc_details",
-  "column_break6",
-  "maintenance_status",
-  "warranty_period",
-  "column_break7",
-  "warranty_expiry_date",
-  "column_break_64",
-  "amc_expiry_date",
   "more_info",
   "status",
   "is_booked",
   "column_break_60",
   "employee",
+  "amc_expiry_date",
   "company"
  ],
  "fields": [
@@ -135,13 +136,11 @@
    "options": "Employee"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "insurance_details",
    "fieldtype": "Section Break",
    "label": "Insurance Details"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "insurance_company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
@@ -149,7 +148,6 @@
    "options": "Customer"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "column_break_15",
    "fieldtype": "Column Break"
   },
@@ -367,12 +365,7 @@
   {
    "fieldname": "warranty_amc_details",
    "fieldtype": "Section Break",
-   "label": "Warranty / AMC Details"
-  },
-  {
-   "fieldname": "column_break6",
-   "fieldtype": "Column Break",
-   "width": "50%"
+   "label": "Warranty Details"
   },
   {
    "fieldname": "maintenance_status",
@@ -444,12 +437,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "column_break_19",
    "fieldtype": "Column Break"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "column_break_23",
    "fieldtype": "Column Break"
   },
@@ -490,19 +481,16 @@
    "label": "Image"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "insurance_policy_no",
    "fieldtype": "Data",
    "label": "Insurance Policy No"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "insurance_start_date",
    "fieldtype": "Date",
    "label": "Insurance Start Date"
   },
   {
-   "allow_in_quick_entry": 1,
    "fieldname": "insurance_end_date",
    "fieldtype": "Date",
    "label": "Insurance End Date"
@@ -579,10 +567,19 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "warranty_no",
+   "fieldtype": "Data",
+   "label": "Warranty Number"
+  },
+  {
+   "fieldname": "column_break_40",
+   "fieldtype": "Column Break"
   }
  ],
  "image_field": "image",
- "modified": "2021-04-18 15:09:19.399387",
+ "modified": "2021-04-27 15:27:35.072348",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
