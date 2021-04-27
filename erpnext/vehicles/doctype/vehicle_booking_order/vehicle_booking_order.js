@@ -295,7 +295,7 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		}
 	},
 
-	setup_dashboard: function () {
+	setup_dashboard: function() {
 		if (this.frm.doc.docstatus !== 1) {
 			return;
 		}
@@ -303,9 +303,12 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		var me = this;
 		var company_currency = erpnext.get_currency(me.frm.doc.company);
 
+		me.frm.dashboard.stats_area.removeClass('hidden');
+		me.frm.dashboard.stats_area_row.addClass('flex');
+		me.frm.dashboard.stats_area_row.css('flex-wrap', 'wrap');
+
+		// Payment Status
 		var customer_outstanding_color = me.frm.doc.customer_outstanding ? "orange" : "green";
-		me.frm.dashboard.add_indicator(__('Customer Outstanding: {0}',
-			[format_currency(me.frm.doc.customer_outstanding, company_currency)]), customer_outstanding_color);
 
 		var supplier_outstanding_color;
 		if (!me.frm.doc.supplier_outstanding) {
@@ -315,9 +318,36 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		} else {
 			supplier_outstanding_color = "orange";
 		}
-		me.frm.dashboard.add_indicator(__('Supplier Outstanding: {0}',
-			[format_currency(me.frm.doc.supplier_outstanding, company_currency)]), supplier_outstanding_color);
 
+		var payment_adjustment_color;
+		if (!me.frm.doc.payment_adjustment) {
+			payment_adjustment_color = 'grey';
+		} else if (me.frm.doc.payment_adjustment > 0) {
+			payment_adjustment_color = 'blue';
+		} else {
+			payment_adjustment_color = 'orange';
+		}
+
+		me.add_indicator_section(__("Payment"), [
+			{
+				contents: __('Invoice Total: {0}', [format_currency(me.frm.doc.invoice_total, company_currency)]),
+				indicator: 'blue'
+			},
+			{
+				contents: __('Payment Adjustment: {0}', [format_currency(me.frm.doc.payment_adjustment, company_currency)]),
+				indicator: payment_adjustment_color
+			},
+			{
+				contents: __('Customer Outstanding: {0}', [format_currency(me.frm.doc.customer_outstanding, company_currency)]),
+				indicator: customer_outstanding_color
+			},
+			{
+				contents: __('Supplier Outstanding: {0}', [format_currency(me.frm.doc.supplier_outstanding, company_currency)]),
+				indicator: supplier_outstanding_color
+			},
+		]);
+
+		// Fulfilment Status
 		var delivery_status_color;
 		if (me.frm.doc.delivery_status == "To Receive") {
 			delivery_status_color = "blue";
@@ -326,8 +356,6 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		} else if (me.frm.doc.delivery_status == "Delivered") {
 			delivery_status_color = "green";
 		}
-		me.frm.dashboard.add_indicator(__('Delivery Status: {0}', [me.frm.doc.delivery_status]),
-			delivery_status_color);
 
 		var invoice_status_color;
 		if (me.frm.doc.invoice_status == "To Receive") {
@@ -337,36 +365,79 @@ erpnext.vehicles.VehicleBookingOrder = frappe.ui.form.Controller.extend({
 		} else if (me.frm.doc.invoice_status == "Delivered") {
 			invoice_status_color = "green";
 		}
-		me.frm.dashboard.add_indicator(__('Invoice Status: {0}', [me.frm.doc.invoice_status]),
-			invoice_status_color);
 
+		me.add_indicator_section(__("Fulfilment"), [
+			{
+				contents: __('Priority: {0}', [cint(me.frm.doc.priority) ? 'High' : 'Normal']),
+				indicator: cint(me.frm.doc.priority) ? 'red' : 'blue'
+			},
+			{
+				contents: __('Delivery Status: {0}', [me.frm.doc.delivery_status]),
+				indicator: delivery_status_color
+			},
+			{
+				contents: __('Invoice Status: {0}', [me.frm.doc.invoice_status]),
+				indicator: invoice_status_color
+			},
+		]);
+
+		// Notification Status
 		var booking_confirmation_count = me.get_notification_count('Booking Confirmation', 'SMS');
 		var booking_confirmation_color = booking_confirmation_count ? "green" : this.frm.doc.delivery_status == "To Receive" ? "yellow" : "grey";
 		var booking_confirmation_status = booking_confirmation_count ? __("{0} SMS", [booking_confirmation_count])
 			: __("Not Sent");
-		me.frm.dashboard.add_indicator(__('Booking Confirmation: {0}', [booking_confirmation_status]),
-			booking_confirmation_color);
 
 		var balance_payment_count = me.get_notification_count('Balance Payment Request', 'SMS');
 		var balance_payment_color = balance_payment_count ? "green" : this.frm.doc.customer_outstanding ? "yellow" : "grey";
 		var balance_payment_status = balance_payment_count ? __("{0} SMS", [balance_payment_count])
 			: __("Not Sent");
-		me.frm.dashboard.add_indicator(__('Balance Payment Request: {0}', [balance_payment_status]),
-			balance_payment_color);
 
 		var ready_for_delivery_count = me.get_notification_count('Ready For Delivery', 'SMS');
 		var ready_for_delivery_color = ready_for_delivery_count ? "green" : this.frm.doc.delivery_status == "To Deliver" ? "yellow" : "grey";
 		var ready_for_delivery_status = ready_for_delivery_count ? __("{0} SMS", [ready_for_delivery_count])
 			: __("Not Sent");
-		me.frm.dashboard.add_indicator(__('Ready For Delivery: {0}', [ready_for_delivery_status]),
-			ready_for_delivery_color);
 
 		var congratulations_count = me.get_notification_count('Congratulations', 'SMS');
 		var congratulations_color = congratulations_count ? "green" : this.frm.doc.invoice_status == "Delivered" ? "yellow" : "grey";
 		var congratulations_status = congratulations_count ? __("{0} SMS", [congratulations_count])
 			: __("Not Sent");
-		me.frm.dashboard.add_indicator(__('Congratulations: {0}', [congratulations_status]),
-			congratulations_color);
+
+		me.add_indicator_section(__("Notification"), [
+			{
+				contents: __('Booking Confirmation: {0}', [booking_confirmation_status]),
+				indicator: booking_confirmation_color
+			},
+			{
+				contents: __('Balance Payment Request: {0}', [balance_payment_status]),
+				indicator: balance_payment_color
+			},
+			{
+				contents: __('Ready For Delivery: {0}', [ready_for_delivery_status]),
+				indicator: ready_for_delivery_color
+			},
+			{
+				contents: __('Congratulations: {0}', [congratulations_status]),
+				indicator: congratulations_color
+			},
+		]);
+	},
+
+	add_indicator_section: function (title, items) {
+		var items_html = '';
+		$.each(items || [], function (i, d) {
+			items_html += `<div class="badge-link small">
+				<span class="indicator ${d.indicator}">${d.contents}</span>
+			</div>`
+		});
+
+		var html = $(`<div class="flex-column col-sm-4 col-md-4">
+			<div><h6>${title}</h6></div>
+			${items_html}
+		</div>`);
+
+		html.appendTo(this.frm.dashboard.stats_area_row);
+
+		return html
 	},
 
 	setup_notification: function() {
