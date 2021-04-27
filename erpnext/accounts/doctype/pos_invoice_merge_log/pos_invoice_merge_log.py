@@ -235,8 +235,8 @@ def get_invoice_customer_map(pos_invoices):
 
 	return pos_invoice_customer_map
 
-def consolidate_pos_invoices(pos_invoices=[], closing_entry=None):
-	invoices = pos_invoices or closing_entry.get('pos_transactions') or get_all_unconsolidated_invoices()
+def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
+	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
 	if len(invoices) >= 1 and closing_entry:
