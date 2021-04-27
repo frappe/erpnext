@@ -143,14 +143,18 @@ def change_color(vehicle_booking_order, color_1, color_2, color_3):
 	vbo_doc = get_vehicle_booking_for_update(vehicle_booking_order)
 	can_change_color(vbo_doc, throw=True)
 
-	if cstr(color_1) == cstr(vbo_doc.color_1) and cstr(color_2) == cstr(vbo_doc.color_2) and cstr(color_3) == cstr \
-			(vbo_doc.color_3):
+	if cstr(color_1) == cstr(vbo_doc.color_1) and cstr(color_2) == cstr(vbo_doc.color_2) and cstr(color_3) == cstr(vbo_doc.color_3):
 		frappe.throw(_("Color is the same in Vehicle Allocation {0}").format(vehicle_booking_order))
+
+	if not vbo_doc.previous_color:
+		vbo_doc.previous_color = vbo_doc.color_1
 
 	vbo_doc.color_1 = color_1
 	vbo_doc.color_2 = color_2
 	vbo_doc.color_3 = color_3
+
 	vbo_doc.validate_color_mandatory()
+	vbo_doc.validate_color()
 
 	save_vehicle_booking_for_update(vbo_doc)
 

@@ -58,6 +58,7 @@ class VehicleBookingOrder(AccountsController):
 		self.validate_vehicle_item()
 		self.validate_vehicle()
 		self.validate_allocation()
+		self.validate_color()
 		self.validate_delivery_date()
 
 		self.set_title()
@@ -177,6 +178,11 @@ class VehicleBookingOrder(AccountsController):
 		if self.docstatus == 0 or (self.docstatus == 1 and self.previous_item_code == self.item_code):
 			self.previous_item_code = None
 			self.previous_item_name = None
+
+	def validate_color(self):
+		# remove previous color if Draft or if current color and previous color are the same
+		if self.docstatus == 0 or (self.docstatus == 1 and self.previous_color == self.color_1):
+			self.previous_color = None
 
 	def validate_vehicle(self):
 		if self.vehicle:

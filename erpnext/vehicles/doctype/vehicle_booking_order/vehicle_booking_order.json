@@ -65,6 +65,7 @@
   "previous_item_code",
   "previous_item_name",
   "vehicle_color",
+  "previous_color",
   "color_1",
   "color_2",
   "color_3",
@@ -994,7 +995,8 @@
    "fieldname": "priority",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "High Priority"
+   "label": "High Priority",
+   "no_copy": 1
   },
   {
    "fieldname": "section_break_73",
@@ -1011,12 +1013,20 @@
   {
    "fieldname": "column_break_78",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "previous_color",
+   "fieldtype": "Link",
+   "label": "Color (Before Color Change)",
+   "no_copy": 1,
+   "options": "Vehicle Color",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-28 00:57:10.200202",
+ "modified": "2021-04-28 01:19:02.124668",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
