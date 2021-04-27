@@ -755,3 +755,5 @@ erpnext.patches.v12_0.add_state_code_for_ladakh
 erpnext.patches.v13_0.update_vehicle_no_reqd_condition
 erpnext.patches.v13_0.setup_fields_for_80g_certificate_and_donation
 erpnext.patches.v13_0.rename_membership_settings_to_non_profit_settings
+erpnext.patches.v12_0.create_taxable_value_field
+erpnext.patches.v12_0.add_company_link_to_einvoice_settings
