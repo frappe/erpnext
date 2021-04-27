@@ -25,8 +25,6 @@
   "amended_from",
   "transaction_date",
   "booking_number",
-  "section_break_30",
-  "sales_team",
   "customer_details_section",
   "customer_category",
   "tax_status",
@@ -39,6 +37,7 @@
   "address_and_contact_section",
   "customer_address",
   "address_display",
+  "col_break_33",
   "address_line1",
   "address_line2",
   "city",
@@ -75,13 +74,26 @@
   "vehicle_engine_no",
   "allocation_details_section",
   "delivery_period",
-  "delivery_date",
+  "vehicle_receipt",
   "column_break_53",
-  "allocation_period",
-  "due_date",
+  "delivery_date",
+  "vehicle_received_date",
+  "vehicle_delivered_date",
   "column_break_55",
+  "due_date",
+  "invoice_received_date",
+  "invoice_delivered_date",
+  "column_break_78",
+  "bill_no",
+  "bill_date",
+  "supplier_delivery_note",
+  "priority",
+  "section_break_73",
   "vehicle_allocation",
+  "column_break_75",
   "allocation_title",
+  "column_break_77",
+  "allocation_period",
   "pricing_section",
   "vehicle_amount",
   "fni_amount",
@@ -96,6 +108,8 @@
   "payment_schedule_section",
   "payment_terms_template",
   "payment_schedule",
+  "section_break_30",
+  "sales_team",
   "status_section",
   "customer_payment_status",
   "customer_advance",
@@ -106,16 +120,7 @@
   "supplier_outstanding",
   "column_break_71",
   "delivery_status",
-  "vehicle_receipt",
-  "vehicle_received_date",
-  "vehicle_delivered_date",
-  "supplier_delivery_note",
-  "column_break_74",
   "invoice_status",
-  "invoice_received_date",
-  "invoice_delivered_date",
-  "bill_no",
-  "bill_date",
   "notification_count",
   "terms_section_break",
   "tc_name",
@@ -227,7 +232,6 @@
   {
    "fieldname": "address_display",
    "fieldtype": "Small Text",
-   "hidden": 1,
    "label": "Customer Address Display",
    "read_only": 1
   },
@@ -330,7 +334,6 @@
    "label": "Sales Team"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "sales_team",
    "fieldtype": "Table",
    "label": "Sales Team",
@@ -560,10 +563,6 @@
    "reqd": 1
   },
   {
-   "fieldname": "column_break_74",
-   "fieldtype": "Column Break"
-  },
-  {
    "default": "0",
    "depends_on": "eval:!doc.customer",
    "fieldname": "customer_is_company",
@@ -730,7 +729,7 @@
   {
    "fieldname": "allocation_details_section",
    "fieldtype": "Section Break",
-   "label": "Delivery / Allocation Details"
+   "label": "Delivery Details"
   },
   {
    "depends_on": "vehicle_allocation_required",
@@ -985,12 +984,39 @@
    "hidden": 1,
    "label": "Model Item Name",
    "read_only": 1
+  },
+  {
+   "fieldname": "col_break_33",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "priority",
+   "fieldtype": "Check",
+   "in_standard_filter": 1,
+   "label": "High Priority"
+  },
+  {
+   "fieldname": "section_break_73",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_75",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_77",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_78",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-18 15:09:19.399387",
+ "modified": "2021-04-28 00:57:10.200202",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",
