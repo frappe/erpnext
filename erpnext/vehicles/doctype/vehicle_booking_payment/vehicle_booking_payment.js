@@ -4,10 +4,17 @@
 frappe.provide("erpnext.vehicles");
 
 erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
+	setup: function () {
+		this.frm.custom_make_buttons = {
+			'Vehicle Booking Payment': 'Create Deposit',
+		}
+	},
+
 	refresh: function() {
 		erpnext.toggle_naming_series();
 		erpnext.hide_company();
 		this.set_instruments_table_read_only();
+		this.add_create_buttons();
 	},
 
 	onload: function () {
@@ -49,6 +56,17 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 				filters: filters
 			}
 		});
+	},
+
+	add_create_buttons: function () {
+		if (this.frm.doc.docstatus === 1 && this.frm.doc.payment_type === "Receive") {
+			var undeposited = (this.frm.doc.instruments || []).filter(d => !cint(d.deposited));
+			if (undeposited && undeposited.length) {
+				var label = __("Create Deposit");
+				this.frm.add_custom_button(label, () => this.make_deposit_entry());
+				this.frm.custom_buttons[__(label)] && this.frm.custom_buttons[__(label)].addClass('btn-primary');
+			}
+		}
 	},
 
 	payment_type: function () {
@@ -153,7 +171,8 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 			frappe.call({
 				method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_undeposited_instruments",
 				args: {
-					vehicle_booking_order: me.frm.doc.vehicle_booking_order,
+					reference_dt: 'Vehicle Booking Order',
+					reference_dn: me.frm.doc.vehicle_booking_order,
 				},
 				callback: function (r) {
 					if (r.message && !r.exc) {
@@ -169,6 +188,19 @@ erpnext.vehicles.VehicleBookingPayment = frappe.ui.form.Controller.extend({
 			});
 		}
 	},
+
+	make_deposit_entry: function () {
+		return frappe.call({
+			method: "erpnext.vehicles.doctype.vehicle_booking_payment.vehicle_booking_payment.get_deposit_entry",
+			args: {
+				"vehicle_booking_payment": this.frm.doc.name
+			},
+			callback: function (r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		});
+	}
 });
 
 $.extend(cur_frm.cscript, new erpnext.vehicles.VehicleBookingPayment({frm: cur_frm}));

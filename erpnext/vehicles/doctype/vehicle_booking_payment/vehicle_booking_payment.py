@@ -282,21 +282,28 @@ def get_vehicle_booking_party(vehicle_booking_order, party_type):
 
 
 @frappe.whitelist()
-def get_undeposited_instruments(vehicle_booking_order):
+def get_undeposited_instruments(reference_dt, reference_dn, throw=False):
+	if reference_dt == "Vehicle Booking Order":
+		reference_field = 'vehicle_booking_order'
+	elif reference_dt == "Vehicle Booking Payment":
+		reference_field = 'name'
+	else:
+		frappe.throw(_("Reference document must be either 'Vehicle Booking Order' or 'Vehicle Booking Payment'"))
+
 	fields = ", ".join(["i.`{0}`".format(f) for f in instrument_copy_fields])
 
 	instruments = frappe.db.sql("""
 		select p.name as vehicle_booking_payment, i.name as vehicle_booking_payment_row, {0}
 		from `tabVehicle Booking Payment Detail` i
 		inner join `tabVehicle Booking Payment` p on p.name = i.parent
-		where p.docstatus = 1 and p.payment_type = 'Receive' and p.vehicle_booking_order = %s
+		where p.docstatus = 1 and p.payment_type = 'Receive' and p.`{1}` = %s
 			and not exists(select dep.name from `tabVehicle Booking Payment Detail` dep
 				where dep.docstatus = 1 and dep.vehicle_booking_payment_row = i.name)
-	""".format(fields), vehicle_booking_order, as_dict=1)
+	""".format(fields, reference_field), reference_dn, as_dict=1)
 
 	if not instruments:
 		frappe.msgprint(_("No undeposited instruments found against {0}")
-			.format(frappe.get_desk_link("Vehicle Booking Order", vehicle_booking_order)), indicator='orange')
+			.format(frappe.get_desk_link(reference_dt, reference_dn)), indicator='orange', raise_exception=cint(throw))
 
 	return instruments
 
@@ -328,11 +335,40 @@ def get_payment_entry(vehicle_booking_order, party_type):
 		doc.party = vbo.company
 
 	if doc.payment_type == "Pay":
-		instruments = get_undeposited_instruments(vehicle_booking_order)
+		instruments = get_undeposited_instruments('Vehicle Booking Order', vehicle_booking_order)
 		for d in instruments:
 			doc.append('instruments', d)
 	else:
 		doc.append('instruments')
+
+	doc.set_party_name()
+	doc.calculate_total_amount()
+
+	return doc
+
+
+@frappe.whitelist()
+def get_deposit_entry(vehicle_booking_payment):
+	receiving_document = frappe.get_doc("Vehicle Booking Payment", vehicle_booking_payment)
+
+	if receiving_document.docstatus != 1:
+		frappe.throw(_("{0} is not submitted").format(frappe.get_desk_link("Vehicle Booking Payment", vehicle_booking_payment)))
+
+	if receiving_document.payment_type != 'Receive':
+		frappe.throw(_("{0} is not of type 'Receive'"))
+
+	undeposited = get_undeposited_instruments('Vehicle Booking Payment', vehicle_booking_payment, throw=True)
+
+	doc = frappe.new_doc("Vehicle Booking Payment")
+	doc.posting_date = nowdate()
+	doc.payment_type = "Pay"
+	doc.vehicle_booking_order = receiving_document.vehicle_booking_order
+	doc.party_type = 'Supplier'
+	doc.party = frappe.db.get_value("Vehicle Booking Order", receiving_document.vehicle_booking_order, 'supplier')\
+		if receiving_document.vehicle_booking_order else None
+
+	for d in undeposited:
+		doc.append('instruments', d)
 
 	doc.set_party_name()
 	doc.calculate_total_amount()
