@@ -224,7 +224,6 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 	combine_items: function (frm) {
-		frm.clear_table('po_items');
 		frm.clear_table('prod_plan_ref');
 
 		frappe.call({
