@@ -258,7 +258,13 @@ class WorkOrder(Document):
 		self.validate_cancel()
 
 		frappe.db.set(self,'status', 'Cancelled')
-		self.update_work_order_qty_in_so()
+		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
+		pp_ref = prod_plan.prod_plan_ref
+		if pp_ref:
+			self.update_work_order_qty_in_combined_so(cancel = True)
+		else:
+			self.update_work_order_qty_in_so()
+			
 		self.delete_job_card()
 		self.update_completed_qty_in_material_request()
 		self.update_planned_qty()
@@ -364,7 +370,7 @@ class WorkOrder(Document):
 		frappe.db.set_value('Sales Order Item',
 			self.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
 		
-	def update_work_order_qty_in_combined_so(self):
+	def update_work_order_qty_in_combined_so(self, cancel = None):
 		total_bundle_qty = 1
 		if self.product_bundle_item:
 			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
@@ -378,7 +384,7 @@ class WorkOrder(Document):
 		pp_ref = prod_plan.prod_plan_ref
 		for p in pp_ref:
 			if p.item_ref == self.production_plan_item:
-				work_order_qty = int(p.qty)
+				work_order_qty = int(p.qty) if not cancel else 0
 				frappe.db.set_value('Sales Order Item',
 					p.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
 
