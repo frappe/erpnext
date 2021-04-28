@@ -102,13 +102,6 @@ class PurchaseInvoice(BuyingController):
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
-		self.check_exchange_rate_difference()
-
-	def check_exchange_rate_difference(self):
-		purchase_receipt_name = self.as_dict()['items'][0]['purchase_receipt']
-		purchase_receipt = frappe.get_doc('Purchase Receipt', purchase_receipt_name)
-		if self.conversion_rate != purchase_receipt.conversion_rate:
-			print("*" * 100)
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
@@ -506,6 +499,8 @@ class PurchaseInvoice(BuyingController):
 						"cost_center": self.cost_center
 					}, self.party_account_currency, item=self)
 				)
+				print("*" * 100)
+				print("Supplier GL Entry")
 
 	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
@@ -555,6 +550,8 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"debit": -1 * flt(item.base_net_amount, item.precision("base_net_amount")),
 						}, warehouse_account[item.from_warehouse]["account_currency"], item=item))
+						print("*" * 100)
+						print("1")
 
 						# Do not book expense for transfer within same company transfer
 						if not self.is_internal_transfer():
@@ -568,8 +565,10 @@ class PurchaseInvoice(BuyingController):
 									"project": item.project
 								}, account_currency, item=item)
 							)
+							print("*" * 100)
+							print("2")
 
-					else:
+					else:			# delete comment later - add condition and change GL entries here? $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 						if not self.is_internal_transfer():
 							gl_entries.append(
 								self.get_gl_dict({
@@ -594,6 +593,8 @@ class PurchaseInvoice(BuyingController):
 								"credit_in_account_currency": flt(amount["amount"]),
 								"project": item.project or self.project
 							}, item=item))
+							print("*" * 100)
+							print("5")
 
 					# sub-contracting warehouse
 					if flt(item.rm_supp_cost):
@@ -609,6 +610,8 @@ class PurchaseInvoice(BuyingController):
 							"remarks": self.get("remarks") or _("Accounting Entry for Stock"),
 							"credit": flt(item.rm_supp_cost)
 						}, warehouse_account[self.supplier_warehouse]["account_currency"], item=item))
+						print("*" * 100)
+						print("6")
 
 				elif not item.is_fixed_asset or (item.is_fixed_asset and not is_cwip_accounting_enabled(asset_category)):
 					expense_account = (item.expense_account
@@ -634,13 +637,50 @@ class PurchaseInvoice(BuyingController):
 								expense_account = service_received_but_not_billed_account
 
 					if not self.is_internal_transfer():
-						gl_entries.append(self.get_gl_dict({
-								"account": expense_account,
-								"against": self.supplier,
-								"debit": amount,
-								"cost_center": item.cost_center,
-								"project": item.project or self.project
-							}, account_currency, item=item))
+						# check exchange rate difference
+						# purchase_receipt_name = self.as_dict()['items'][0]['purchase_receipt']
+						purchase_receipt_name = item.purchase_receipt
+						purchase_receipt = frappe.get_doc('Purchase Receipt', purchase_receipt_name)
+						if self.conversion_rate == purchase_receipt.conversion_rate:
+							gl_entries.append(self.get_gl_dict({
+									"account": expense_account,
+									"against": self.supplier,
+									"debit": amount,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item))
+		
+						else:
+							# Purchase Invoice: item.expense_account - Stock Received But Not Billed 
+							gle = frappe.get_all('GL Entry')
+							for gl_entry_name in gle:
+								gl_entry = frappe.get_doc('GL Entry', gl_entry_name)
+								if gl_entry.voucher_no == purchase_receipt.name:
+									# if gl_entry.account == self.as_dict()['items'][0]['expense_account']:
+									if gl_entry.account == item.expense_account:
+										debit_at_old_exchange_rate = gl_entry.credit
+										break
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": expense_account,
+									"against": self.supplier,
+									"debit": debit_at_old_exchange_rate,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+							discrepancy_caused_by_exchange_rate_difference = amount - debit_at_old_exchange_rate
+							gl_entries.append(
+								self.get_gl_dict({
+									"account": self.get_company_default("exchange_gain_loss_account"),		
+									"against": self.supplier,
+									"debit": discrepancy_caused_by_exchange_rate_difference,
+									"cost_center": item.cost_center,
+									"project": item.project or self.project
+								}, account_currency, item=item)
+							)
+						print("*" * 100)
+						print("7")
 
 					# If asset is bought through this document and not linked to PR
 					if self.update_stock and item.landed_cost_voucher_amount:
@@ -663,6 +703,8 @@ class PurchaseInvoice(BuyingController):
 							"debit": flt(item.landed_cost_voucher_amount),
 							"project": item.project or self.project
 						}, item=item))
+						print("*" * 100)
+						print("8")
 
 						# update gross amount of asset bought through this document
 						assets = frappe.db.get_all('Asset',
@@ -691,6 +733,8 @@ class PurchaseInvoice(BuyingController):
 									"project": item.project or self.project
 								}, item=item)
 							)
+							print("*" * 100)
+							print("9")
 
 							self.negative_expense_to_be_booked += flt(item.item_tax_amount, \
 								item.precision("item_tax_amount"))
