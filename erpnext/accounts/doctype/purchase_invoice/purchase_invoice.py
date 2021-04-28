@@ -568,7 +568,7 @@ class PurchaseInvoice(BuyingController):
 							print("*" * 100)
 							print("2")
 
-					else:			# delete comment later - add condition and change GL entries here? $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+					else:
 						if not self.is_internal_transfer():
 							gl_entries.append(
 								self.get_gl_dict({
@@ -637,8 +637,7 @@ class PurchaseInvoice(BuyingController):
 								expense_account = service_received_but_not_billed_account
 
 					if not self.is_internal_transfer():
-						# check exchange rate difference
-						# purchase_receipt_name = self.as_dict()['items'][0]['purchase_receipt']
+						# check if the exchange rate has changed
 						purchase_receipt_name = item.purchase_receipt
 						purchase_receipt = frappe.get_doc('Purchase Receipt', purchase_receipt_name)
 						if self.conversion_rate == purchase_receipt.conversion_rate:
@@ -651,12 +650,10 @@ class PurchaseInvoice(BuyingController):
 								}, account_currency, item=item))
 		
 						else:
-							# Purchase Invoice: item.expense_account - Stock Received But Not Billed 
 							gle = frappe.get_all('GL Entry')
 							for gl_entry_name in gle:
 								gl_entry = frappe.get_doc('GL Entry', gl_entry_name)
 								if gl_entry.voucher_no == purchase_receipt.name:
-									# if gl_entry.account == self.as_dict()['items'][0]['expense_account']:
 									if gl_entry.account == item.expense_account:
 										debit_at_old_exchange_rate = gl_entry.credit
 										break
