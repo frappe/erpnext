@@ -102,6 +102,13 @@ class PurchaseInvoice(BuyingController):
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
+		self.check_exchange_rate_difference()
+
+	def check_exchange_rate_difference(self):
+		purchase_receipt_name = self.as_dict()['items'][0]['purchase_receipt']
+		purchase_receipt = frappe.get_doc('Purchase Receipt', purchase_receipt_name)
+		if self.conversion_rate != purchase_receipt.conversion_rate:
+			print("*" * 100)
 
 	def validate_release_date(self):
 		if self.release_date and getdate(nowdate()) >= getdate(self.release_date):
