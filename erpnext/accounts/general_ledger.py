@@ -18,7 +18,8 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
-			else:
+			# Post GL Map proccess there may no be any GL Entries
+			elif gl_map:
 				frappe.throw(_("Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction."))
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
