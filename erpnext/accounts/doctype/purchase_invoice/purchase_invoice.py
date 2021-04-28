@@ -499,8 +499,6 @@ class PurchaseInvoice(BuyingController):
 						"cost_center": self.cost_center
 					}, self.party_account_currency, item=self)
 				)
-				print("*" * 100)
-				print("Supplier GL Entry")
 
 	def make_item_gl_entries(self, gl_entries):
 		# item gl entries
