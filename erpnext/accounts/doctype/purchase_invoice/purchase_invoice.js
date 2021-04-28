@@ -514,6 +514,28 @@ frappe.ui.form.on("Purchase Invoice", {
 		}
 	},
 
+	refresh: function(frm) {
+		frm.events.add_custom_buttons(frm);
+	},
+
+	add_custom_buttons: function(frm) {
+		if (frm.doc.per_received < 100) {
+			frm.add_custom_button(__('Purchase Receipt'), () => {
+				frm.events.make_purchase_receipt(frm);
+			}, __('Create'));
+		}
+
+		if (frm.doc.docstatus == 1 && frm.doc.per_received > 0) {
+			frm.add_custom_button(__('Purchase Receipt'), () => {
+				frappe.route_options = {
+					'purchase_invoice': frm.doc.name
+				}
+
+				frappe.set_route("List", "Purchase Receipt", "List")
+			}, __('View'));
+		}
+	},
+
 	onload: function(frm) {
 		if(frm.doc.__onload && frm.is_new()) {
 			if(frm.doc.supplier) {
@@ -539,5 +561,13 @@ frappe.ui.form.on("Purchase Invoice", {
 	update_stock: function(frm) {
 		hide_fields(frm.doc);
 		frm.fields_dict.items.grid.toggle_reqd("item_code", frm.doc.update_stock? true: false);
+	},
+
+	make_purchase_receipt: function(frm) {
+		frappe.model.open_mapped_doc({
+			method: "erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_purchase_receipt",
+			frm: frm,
+			freeze_message: __("Creating Purchase Receipt ...")
+		})
 	}
 })

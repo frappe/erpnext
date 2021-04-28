@@ -131,6 +131,26 @@
    "type": "Link"
   },
   {
+   "dependencies": "Timesheet",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Employee Hours Utilization",
+   "link_to": "Employee Hours Utilization Based On Timesheet",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "dependencies": "Timesheet, Sales Invoice, Salary Slip",
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Project Profitability",
+   "link_to": "Project Profitability",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
    "dependencies": "Project",
    "hidden": 0,
    "is_query_report": 1,
@@ -161,7 +181,7 @@
    "type": "Link"
   }
  ],
- "modified": "2021-03-26 16:32:00.628561",
+ "modified": "2021-04-25 16:27:16.548780",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Projects",
