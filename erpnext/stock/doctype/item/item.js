@@ -46,9 +46,6 @@ frappe.ui.form.on("Item", {
 			}, __("View"));
 		}
 
-		if (!frm.doc.is_fixed_asset) {
-			erpnext.item.make_dashboard(frm);
-		}
 
 		if (frm.doc.is_fixed_asset) {
 			frm.trigger('is_fixed_asset');
@@ -96,6 +93,10 @@ frappe.ui.form.on("Item", {
 
 		erpnext.item.edit_prices_button(frm);
 		erpnext.item.toggle_attributes(frm);
+		
+		if (!frm.doc.is_fixed_asset) {
+			erpnext.item.make_dashboard(frm);
+		}
 
 		frm.add_custom_button(__('Duplicate'), function() {
 			var new_item = frappe.model.copy_doc(frm.doc);
