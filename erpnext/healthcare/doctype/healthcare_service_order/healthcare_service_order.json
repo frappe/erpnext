@@ -1,7 +1,6 @@
 {
  "actions": [],
  "allow_auto_repeat": 1,
- "allow_copy": 1,
  "autoname": "naming_series:",
  "beta": 1,
  "creation": "2020-09-09 15:30:33.141582",
@@ -172,14 +171,13 @@
    "options": "Patient Care Type"
   },
   {
-   "allow_on_submit": 1,
-   "default": "Active",
+   "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Status",
-   "options": "Active\nOn Hold\nRevoked\nCompleted\nReplaced\nError\nUnknown",
+   "options": "Active\nOn Hold\nCompleted\nRevoked\nReplaced\nEntered in Error\nUnknown\nDraft\nSubmitted\nCancelled",
    "reqd": 1
   },
   {
@@ -516,7 +514,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-27 16:14:00.554549",
+ "modified": "2021-04-28 10:41:05.245473",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",

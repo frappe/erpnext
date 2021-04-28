@@ -51,3 +51,8 @@ class HealthcareServiceOrder(Document):
 				self.staff_role = order_template.staff_role
 		else:
 			frappe.throw(_('Order Type and Order Template are mandatory to create Healthcare Service Order'))
+
+
+@frappe.whitelist()
+def set_status(docname, status):
+	frappe.db.set_value('Healthcare Service Order', docname, 'status', status)

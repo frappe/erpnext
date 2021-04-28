@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Healthcare Service Order', {
-	onload: function(frm) {
+	refresh: function(frm) {
 		frm.set_query('order_group', function () {
 			return {
 				filters: {
@@ -38,6 +38,82 @@ frappe.ui.form.on('Healthcare Service Order', {
 				}
 			};
 		});
+
+		frm.trigger('setup_status_buttons');
+	},
+
+	setup_status_buttons: function(frm) {
+		if (frm.doc.docstatus === 1) {
+
+			if (frm.doc.status === 'Active') {
+				frm.add_custom_button(__('On Hold'), function() {
+					frm.events.set_status(frm, status='On Hold')
+				}, __('Status'));
+
+				frm.add_custom_button(__('Completed'), function() {
+					frm.events.set_status(frm, status='Completed')
+				}, __('Status'));
+			}
+
+			if (frm.doc.status === 'On Hold') {
+				frm.add_custom_button(__('Active'), function() {
+					frm.events.set_status(frm, status='Active')
+				}, __('Status'));
+
+				frm.add_custom_button(__('Completed'), function() {
+					frm.events.set_status(frm, status='Completed')
+				}, __('Status'));
+			}
+
+		} else if (frm.doc.docstatus === 2) {
+
+			frm.add_custom_button(__('Revoked'), function() {
+				frm.events.set_status(frm, status='Revoked')
+			}, __('Status'));
+
+			frm.add_custom_button(__('Replaced'), function() {
+				frm.events.set_status(frm, status='Replaced')
+			}, __('Status'));
+
+			frm.add_custom_button(__('Entered in Error'), function() {
+				frm.events.set_status(frm, status='Entered in Error')
+			}, __('Status'));
+
+			frm.add_custom_button(__('Unknown'), function() {
+				frm.events.set_status(frm, status='Unknown')
+			}, __('Status'));
+
+		}
+	},
+
+	set_status: function(frm, status) {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.healthcare_service_order.healthcare_service_order.set_status',
+			async: false,
+			freeze: true,
+			args: {
+				docname: frm.doc.name,
+				status: status
+			},
+			callback: function(r) {
+				frm.reload_doc();
+			}
+		});
+	},
+
+	after_cancel: function(frm) {
+		frappe.prompt([
+			{
+				fieldname: 'reason_for_cancellation',
+				label: __('Reason for Cancellation'),
+				fieldtype: 'Select',
+				options: ['Revoked', 'Replaced', 'Entered in Error', 'Unknown'],
+				reqd: 1
+			}
+		],
+		function(data) {
+			frm.events.set_status(frm, data.reason_for_cancellation);
+		}, __('Reason for Cancellation'), __('Submit'));
 	},
 
 	patient: function(frm) {
