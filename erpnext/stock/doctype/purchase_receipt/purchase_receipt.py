@@ -53,7 +53,20 @@ class PurchaseReceipt(BuyingController):
 			'target_ref_field': 'stock_qty',
 			'source_field': 'stock_qty',
 			'percent_join_field': 'material_request'
+		},
+		{
+			'source_dt': 'Purchase Receipt Item',
+			'target_dt': 'Purchase Invoice Item',
+			'join_field': 'purchase_invoice_item',
+			'target_field': 'received_qty',
+			'target_parent_dt': 'Purchase Invoice',
+			'target_parent_field': 'per_received',
+			'target_ref_field': 'qty',
+			'source_field': 'received_qty',
+			'percent_join_field': 'purchase_invoice',
+			'overflow_type': 'receipt'
 		}]
+
 		if cint(self.is_return):
 			self.status_updater.extend([
 				{
@@ -221,6 +234,7 @@ class PurchaseReceipt(BuyingController):
 		self.ignore_linked_doctypes = ('GL Entry', 'Stock Ledger Entry', 'Repost Item Valuation')
 		self.delete_auto_created_batches()
 
+	@frappe.whitelist()
 	def get_current_stock(self):
 		for d in self.get('supplied_items'):
 			if self.supplier_warehouse:
@@ -513,7 +527,9 @@ class PurchaseReceipt(BuyingController):
 	def update_billing_status(self, update_modified=True):
 		updated_pr = [self.name]
 		for d in self.get("items"):
-			if d.purchase_order_item:
+			if d.purchase_invoice and d.purchase_invoice_item:
+				d.db_set('billed_amt', d.amount, update_modified=update_modified)
+			elif d.purchase_order_item:
 				updated_pr += update_billed_amount_based_on_po(d.purchase_order_item, update_modified)
 
 		for pr in set(updated_pr):
