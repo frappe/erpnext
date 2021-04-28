@@ -276,7 +276,7 @@ class Subscription(Document):
 				frappe.throw(_('Subscription End Date is mandatory to follow calendar months'))
 
 			if billing_info[0]['billing_interval'] != 'Month':
-				frappe.throw('Billing Interval in Subscription Plan must be Month to follow calendar months')
+				frappe.throw(_('Billing Interval in Subscription Plan must be Month to follow calendar months'))
 
 	def after_insert(self):
 		# todo: deal with users who collect prepayments. Maybe a new Subscription Invoice doctype?
