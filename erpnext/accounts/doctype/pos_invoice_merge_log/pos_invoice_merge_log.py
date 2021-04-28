@@ -235,11 +235,11 @@ def get_invoice_customer_map(pos_invoices):
 
 	return pos_invoice_customer_map
 
-def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
-	invoices = pos_invoices or closing_entry.get('pos_transactions') or get_all_unconsolidated_invoices()
+def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
+	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
-	if len(invoices) >= 5 and closing_entry:
+	if len(invoices) >= 1 and closing_entry:
 		closing_entry.set_status(update=True, status='Queued')
 		enqueue_job(create_merge_logs, invoice_by_customer=invoice_by_customer, closing_entry=closing_entry)
 	else:
@@ -252,18 +252,18 @@ def unconsolidate_pos_invoices(closing_entry):
 		pluck='name'
 	)
 
-	if len(merge_logs) >= 5:
+	if len(merge_logs) >= 1:
 		closing_entry.set_status(update=True, status='Queued')
 		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
 		cancel_merge_logs(merge_logs, closing_entry)
 
-def create_merge_logs(invoice_by_customer, closing_entry={}):
+def create_merge_logs(invoice_by_customer, closing_entry=None):
 	for customer, invoices in iteritems(invoice_by_customer):
 		merge_log = frappe.new_doc('POS Invoice Merge Log')
-		merge_log.posting_date = getdate(closing_entry.get('posting_date'))
+		merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
 		merge_log.customer = customer
-		merge_log.pos_closing_entry = closing_entry.get('name', None)
+		merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
 
 		merge_log.set('pos_invoices', invoices)
 		merge_log.save(ignore_permissions=True)
@@ -273,7 +273,7 @@ def create_merge_logs(invoice_by_customer, closing_entry={}):
 		closing_entry.set_status(update=True, status='Submitted')
 		closing_entry.update_opening_entry()
 
-def cancel_merge_logs(merge_logs, closing_entry={}):
+def cancel_merge_logs(merge_logs, closing_entry=None):
 	for log in merge_logs:
 		merge_log = frappe.get_doc('POS Invoice Merge Log', log)
 		merge_log.flags.ignore_permissions = True
@@ -283,20 +283,20 @@ def cancel_merge_logs(merge_logs, closing_entry={}):
 		closing_entry.set_status(update=True, status='Cancelled')
 		closing_entry.update_opening_entry(for_cancel=True)
 
-def enqueue_job(job, merge_logs=None, invoice_by_customer=None, closing_entry=None):
+def enqueue_job(job, **kwargs):
 	check_scheduler_status()
+
+	closing_entry = kwargs.get('closing_entry') or {}
 
 	job_name = closing_entry.get("name")
 	if not job_already_enqueued(job_name):
 		enqueue(
 			job,
+			**kwargs,
 			queue="long",
 			timeout=10000,
 			event="processing_merge_logs",
 			job_name=job_name,
-			closing_entry=closing_entry,
-			invoice_by_customer=invoice_by_customer,
-			merge_logs=merge_logs,
 			now=frappe.conf.developer_mode or frappe.flags.in_test
 		)
 
