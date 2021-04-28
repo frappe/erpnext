@@ -474,11 +474,16 @@ $.extend(erpnext.item, {
 								me.multiple_variant_dialog.get_primary_btn().html(__('Create Variants'));
 								me.multiple_variant_dialog.disable_primary_action();
 							} else {
+
 								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
-								me.multiple_variant_dialog.get_primary_btn()
-									.html(__(
-										`Make ${no_of_combinations} Variant${no_of_combinations === 1 ? '' : 's'}`
-									));
+								let msg;
+								if (no_of_combinations === 1){
+									msg = __("Make {0} Variant").format(no_of_combinations);
+								}
+								else {
+									msg = __("Make {0} Variants").format(no_of_combinations);
+								}
+								me.multiple_variant_dialog.get_primary_btn().html(msg);
 								me.multiple_variant_dialog.enable_primary_action();
 							}
 						}
