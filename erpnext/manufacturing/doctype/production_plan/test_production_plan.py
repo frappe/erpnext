@@ -100,7 +100,7 @@ class TestProductionPlan(unittest.TestCase):
 
 	def test_production_plan_sales_orders(self):
 		item = 'Test Production Item 1'
-		so = make_sales_order(item_code=item, qty=5)
+		so = make_sales_order(item_code=item, qty=1)
 		sales_order = so.name
 		sales_order_item = so.items[0].name
 
@@ -124,8 +124,8 @@ class TestProductionPlan(unittest.TestCase):
 
 		wo_doc = frappe.get_doc('Work Order', work_order)
 		wo_doc.update({
-			'wip_warehouse': '_Test Warehouse 1 - _TC',
-			'fg_warehouse': '_Test Warehouse - _TC'
+			'wip_warehouse': 'Work In Progress - _TC',
+			'fg_warehouse': 'Finished Goods - _TC'
 		})
 		wo_doc.submit()
 
@@ -144,6 +144,57 @@ class TestProductionPlan(unittest.TestCase):
 		sales_orders = [d.get('name') for d in sales_orders if d.get('name') == sales_order]
 
 		self.assertEqual(sales_orders, [])
+
+	def test_production_plan_combine_items(self):
+		item = 'Test Production Item 1'
+		so = make_sales_order(item_code=item, qty=1)
+		sales_order = so.name
+		sales_order_item = so.items[0].name
+
+		pln = frappe.new_doc('Production Plan')
+		pln.company = so.company
+		pln.get_items_from = 'Sales Order'
+		pln.append('sales_orders', {
+			'sales_order': so.name,
+			'sales_order_date': so.transaction_date,
+			'customer': so.customer,
+			'grand_total': so.grand_total
+		})
+		so = make_sales_order(item_code=item, qty=2)
+		pln.append('sales_orders', {
+			'sales_order': so.name,
+			'sales_order_date': so.transaction_date,
+			'customer': so.customer,
+			'grand_total': so.grand_total
+		})
+		pln.combine_items = 1
+		pln.get_so_items()
+		pln.save()
+		pp = frappe.get_doc('Production Plan',pln.name)
+		for d in pp.prod_plan_ref:
+			d.item_ref = pp.po_items[0].name
+		pln.submit()
+
+		self.assertTrue(pln.po_items[0].planned_qty,3)		
+		
+		
+		pln.make_work_order()
+
+		work_order = frappe.db.get_value('Work Order', {'production_plan_item': pln.po_items[0].name,
+			'production_plan': pln.name,}, 'name')
+
+		wo_doc = frappe.get_doc('Work Order', work_order)
+		wo_doc.update({
+			'wip_warehouse': 'Work In Progress - _TC',
+		})
+
+		wo_doc.submit()
+		for d in pln.prod_plan_ref:
+			so_wo_qty = frappe.db.get_value('Sales Order Item', d.sales_order_item, 'work_order_qty')
+			self.assertTrue(so_wo_qty,d.qty)
+			
+			
+
 
 	def test_pp_to_mr_customer_provided(self):
 		#Material Request from Production Plan for Customer Provided
