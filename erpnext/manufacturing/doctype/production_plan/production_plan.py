@@ -201,6 +201,7 @@ class ProductionPlan(Document):
 				pi.sales_order = data.parent
 				pi.sales_order_item = data.name
 				pi.description = data.description
+				pi.item_reference = data.name
 				
 					
 			elif self.get_items_from == "Material Request":
