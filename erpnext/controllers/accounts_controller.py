@@ -905,7 +905,7 @@ class AccountsController(TransactionBase):
 				for item in data:
 					self.append("payment_schedule", item)
 			else:
-				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total)
+				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, base_payment_amount=base_grand_total)
 				self.append("payment_schedule", data)
 		else:
 			for d in self.get("payment_schedule"):
@@ -968,7 +968,8 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-
+			print(total, base_total)
+			print(grand_total, base_grand_total)
 			if total != flt(grand_total, self.precision("grand_total")) or \
 				base_total != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
