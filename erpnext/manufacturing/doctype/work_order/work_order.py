@@ -256,12 +256,12 @@ class WorkOrder(Document):
 		self.yeild_calc()
 
 	def yeild_calc(self):
-		self.actual_yeild = flt(flt(self.actual_fg_weight)/flt(self.actual_rm_weight), self.precision('actual_yeild'))
+		if self.actual_rm_weight == 0:
+			self.actual_yeild = 0
+		else:
+			self.actual_yeild = flt(flt(self.actual_fg_weight)/flt(self.actual_rm_weight), self.precision('actual_yeild'))
 		self.yeild_deviation = flt(flt(self.bom_yeild) - flt(self.actual_yeild), self.precision('yeild_deviation'))
-		print("**********"*100)
-		print(self.actual_yeild)
-		print(self.yeild_deviation)
-		print("##########"*100)
+		
 
 	def bom_details(self):
 		bo = frappe.get_doc("BOM", self.bom_no)
