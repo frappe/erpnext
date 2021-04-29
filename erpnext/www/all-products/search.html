@@ -11,20 +11,29 @@
 {% endblock header %}
 
 {% block page_content %}
-<input type="text" name="query" id="search-box">
-
-<!-- Search Results -->
-<h2>Products</h2>
-<ul id="results">Start typing...</ul>
-
-{% set show_categories = frappe.db.get_single_value('E Commerce Settings', 'show_categories_in_search_autocomplete') %}
-
-{% if show_categories %}
-<div id="categories">
-	<h2>Categories</h2>
-	<ul id="category-suggestions">
-	</ul>
+<div class="input-group mb-3">
+	<input type="text" name="query" id="search-box" class="form-control" placeholder="Search for products..." aria-label="Product" aria-describedby="button-addon2">
+	<div class="input-group-append">
+		<button class="btn btn-outline-secondary" type="button" id="button-addon2">Search</button>
+	</div>
 </div>
-{% endif %}
+
+<div class="row mt-2">
+	<!-- Search Results -->
+	<div class="col-sm">
+		<h2>Products</h2>
+		<ul id="results" class="list-group"></ul>
+	</div>
+	
+	{% set show_categories = frappe.db.get_single_value('E Commerce Settings', 'show_categories_in_search_autocomplete') %}
+	
+	{% if show_categories %}
+	<div id="categories" class="col-sm">
+		<h2>Categories</h2>
+		<ul id="category-suggestions">
+		</ul>
+	</div>
+	{% endif %}
+</div>
 
 {% endblock %}

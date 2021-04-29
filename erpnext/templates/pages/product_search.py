@@ -76,7 +76,7 @@ def search(query):
 	query_string = query
 
 	for s in suggestions:
-		query_string += f"|({s.string})"
+		query_string += f"|('{s.string}')"
 
 	q = Query(query_string)
 

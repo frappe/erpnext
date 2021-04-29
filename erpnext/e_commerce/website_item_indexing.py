@@ -153,7 +153,6 @@ def reindex_all_web_items():
 	for item in items:
 		web_item = create_web_item_map(item)
 		key = get_cache_key(item.name)
-		print(key, web_item)
 		r.hset(key, mapping=web_item)
 
 def get_cache_key(name):
