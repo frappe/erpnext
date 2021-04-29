@@ -41,7 +41,7 @@ frappe.ui.form.on('Delivery Trip', {
 	},
 
 	refresh: function (frm) {
-		if (frm.doc.docstatus == 1) {
+		if (frm.doc.docstatus == 1 || frm.doc.status == 'Draft') {
 			frm.add_custom_button(__('Expense Claim'), function(){
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.make_expense_claim',
