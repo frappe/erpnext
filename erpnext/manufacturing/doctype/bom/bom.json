@@ -10,12 +10,12 @@
   "company",
   "item_name",
   "uom",
-  "weight_per_unit",
   "cb0",
   "is_active",
   "is_default",
   "allow_alternative_item",
   "set_rate_of_sub_assembly_item_based_on_bom",
+  "allow_adding_items",
   "project",
   "quantity",
   "image",
@@ -513,10 +513,10 @@
    "read_only": 1
   },
   {
-   "fieldname": "weight_per_unit",
-   "fieldtype": "Float",
-   "label": "Weight per Unit",
-   "read_only": 1
+   "default": "0",
+   "fieldname": "allow_adding_items",
+   "fieldtype": "Check",
+   "label": "Allow Adding Items other than BOM Items"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -524,7 +524,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-27 12:54:08.348612",
+ "modified": "2021-04-29 18:32:06.561983",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
