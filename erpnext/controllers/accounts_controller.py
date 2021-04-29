@@ -913,7 +913,6 @@ class AccountsController(TransactionBase):
 					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
 					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
 					d.outstanding = d.payment_amount
-					d.base_outstanding = d.base_payment_amount
 
 	def set_due_date(self):
 		due_dates = [d.due_date for d in self.get("payment_schedule") if d.due_date]
@@ -968,7 +967,6 @@ class AccountsController(TransactionBase):
 				else:
 					grand_total -= self.get("total_advance")
 					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
-			print(total, base_total)
 			print(grand_total, base_grand_total)
 			if total != flt(grand_total, self.precision("grand_total")) or \
 				base_total != flt(base_grand_total, self.precision("base_grand_total")):
@@ -1239,7 +1237,6 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, base_gra
 	term_details.discount_type = term.discount_type
 	term_details.discount = term.discount
 	term_details.outstanding = term_details.payment_amount
-	term_details.base_outstanding = term_details.base_payment_amount
 	term_details.mode_of_payment = term.mode_of_payment
 
 	if bill_date:
