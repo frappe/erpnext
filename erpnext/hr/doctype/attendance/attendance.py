@@ -35,7 +35,8 @@ class Attendance(Document):
 				and docstatus != 2
 		""", (self.employee, getdate(self.attendance_date), self.name))
 		if res:
-			frappe.throw(_("Attendance for employee {0} is already marked").format(self.employee))
+			frappe.throw(_("Attendance for employee {0} is already marked for the date {1}").format(
+				frappe.bold(self.employee), frappe.bold(self.attendance_date)))
 
 	def check_leave_record(self):
 		leave_record = frappe.db.sql("""

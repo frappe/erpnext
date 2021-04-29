@@ -10,10 +10,12 @@ from erpnext.accounts.doctype.pos_invoice.pos_invoice import make_sales_return
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.doctype.purchase_receipt.test_purchase_receipt import make_purchase_receipt
 from erpnext.stock.doctype.item.test_item import make_item
+from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sales_invoice
 
 class TestPOSInvoice(unittest.TestCase):
 	@classmethod
 	def setUpClass(cls):
+		make_stock_entry(target="_Test Warehouse - _TC", item_code="_Test Item", qty=800, basic_rate=100)
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def tearDown(self):
@@ -309,6 +311,34 @@ class TestPOSInvoice(unittest.TestCase):
 
 		pos.insert()
 		pos.submit()
+
+		pos2 = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+
+		pos2.get("items")[0].serial_no = serial_nos[0]
+		pos2.append("payments", {'mode_of_payment': 'Bank Draft', 'account': '_Test Bank - _TC', 'amount': 1000})
+
+		self.assertRaises(frappe.ValidationError, pos2.insert)
+
+	def test_delivered_serialized_item_transaction(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_serialized_item
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+		se = make_serialized_item(company='_Test Company',
+			target_warehouse="Stores - _TC", cost_center='Main - _TC', expense_account='Cost of Goods Sold - _TC')
+
+		serial_nos = get_serial_nos(se.get("items")[0].serial_no)
+
+		si = create_sales_invoice(company='_Test Company', debit_to='Debtors - _TC',
+			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
+			expense_account='Cost of Goods Sold - _TC', cost_center='Main - _TC',
+			item=se.get("items")[0].item_code, rate=1000, do_not_save=1)
+
+		si.get("items")[0].serial_no = serial_nos[0]
+		si.insert()
+		si.submit()
 
 		pos2 = create_pos_invoice(company='_Test Company', debit_to='Debtors - _TC',
 			account_for_change_amount='Cash - _TC', warehouse='Stores - _TC', income_account='Sales - _TC',
