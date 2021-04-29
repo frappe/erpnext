@@ -242,8 +242,8 @@ class WorkOrder(Document):
 			frappe.throw(_("For Warehouse is required before Submit"))
 
 		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
-		pp_ref = prod_plan.prod_plan_ref
-		if pp_ref:
+		
+		if prod_plan.prod_plan_ref:
 			self.update_work_order_qty_in_combined_so()
 		else:
 			self.update_work_order_qty_in_so()
@@ -259,9 +259,9 @@ class WorkOrder(Document):
 
 		frappe.db.set(self,'status', 'Cancelled')
 		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
-		pp_ref = prod_plan.prod_plan_ref
-		if pp_ref:
-			self.update_work_order_qty_in_combined_so(cancel = True)
+
+		if prod_plan.prod_plan_ref:
+			self.update_work_order_combined_on_cancel()
 		else:
 			self.update_work_order_qty_in_so()
 			
@@ -370,7 +370,7 @@ class WorkOrder(Document):
 		frappe.db.set_value('Sales Order Item',
 			self.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
 		
-	def update_work_order_qty_in_combined_so(self, cancel = None):
+	def update_work_order_qty_in_combined_so(self):
 		total_bundle_qty = 1
 		if self.product_bundle_item:
 			total_bundle_qty = frappe.db.sql(""" select sum(qty) from
@@ -381,14 +381,22 @@ class WorkOrder(Document):
 				total_bundle_qty = 1
 
 		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
-		pp_ref = prod_plan.prod_plan_ref
 		pp_item = frappe.get_doc('Production Plan Item', self.production_plan_item)
-		item_ref = pp_item.item_reference
-		for p in pp_ref:
-			if p.item_ref == item_ref:
-				work_order_qty = int(p.qty) if not cancel else 0
+		
+		for p in prod_plan.prod_plan_ref:
+			if p.item_ref == pp_item.item_reference:
+				work_order_qty = int(p.qty)
 				frappe.db.set_value('Sales Order Item',
 					p.sales_order_item, 'work_order_qty', flt(work_order_qty/total_bundle_qty, 2))
+	
+	def update_work_order_combined_on_cancel(self):
+		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
+		pp_item = frappe.get_doc('Production Plan Item', self.production_plan_item)
+		
+		for p in prod_plan.prod_plan_ref:
+			if p.item_ref == pp_item.item_reference:
+				frappe.db.set_value('Sales Order Item',
+					p.sales_order_item, 'work_order_qty', 0.0)
 
 
 	def update_completed_qty_in_material_request(self):
