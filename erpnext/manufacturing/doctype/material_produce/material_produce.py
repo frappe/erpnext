@@ -46,7 +46,7 @@ class MaterialProduce(Document):
                         "t_warehouse": res.t_warehouse,
                         "qty_produced": res.qty_produced,
                         "has_batch_no": res.has_batch_no,
-                        "batch": res.batch_series,
+                        "batch": res.batch,
                         "rate": res.rate,
                         "weight": res.weight,
                         "line_ref": res.line_ref
