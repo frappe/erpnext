@@ -642,7 +642,7 @@ class PurchaseInvoice(BuyingController):
 								self.get_gl_dict({
 									"account": expense_account,
 									"against": self.supplier,
-									"debit": debit_at_old_exchange_rate,
+									"debit": item.qty * item.rate * purchase_receipt_conversion_rate,
 									"cost_center": item.cost_center,
 									"project": item.project or self.project
 								}, account_currency, item=item)
