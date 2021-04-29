@@ -247,6 +247,36 @@ class WorkOrder(Document):
 		self.update_planned_qty()
 		self.update_ordered_qty()
 		self.create_job_card()
+	
+	def before_save(self):
+		self.planned_rm_cost_calc()
+		self.bom_details()
+
+	def on_change(self):
+		self.yeild_calc()
+
+	def yeild_calc(self):
+		self.actual_yeild = flt(flt(self.actual_fg_weight)/flt(self.actual_rm_weight), self.precision('actual_yeild'))
+		self.yeild_deviation = flt(flt(self.bom_yeild) - flt(self.actual_yeild), self.precision('yeild_deviation'))
+		print("**********"*100)
+		print(self.actual_yeild)
+		print(self.yeild_deviation)
+		print("##########"*100)
+
+	def bom_details(self):
+		bo = frappe.get_doc("BOM", self.bom_no)
+		self.bom_yeild = flt(bo.yeild, self.precision('bom_yeild'))
+		
+		value = 0
+		for row in self.required_items:
+			value += flt(row.required_qty) * flt(row.weight_per_unit) 
+		self.bom_weight = flt(value, self.precision('bom_weight'))
+
+	def planned_rm_cost_calc(self):
+		value = 0
+		for row in self.required_items:
+			value += flt(row.required_qty) * flt(row.rate)
+		self.planned_rm_cost = flt(value, self.precision('planned_rm_cost'))
 
 	def on_cancel(self):
 		self.validate_cancel()

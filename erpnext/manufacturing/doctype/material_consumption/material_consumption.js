@@ -40,7 +40,7 @@ function get_available_qty_data(frm,line_obj){
             line_id: line_obj.name,
             company: frm.doc.company,
             item_code: line_obj.item,
-            warehouse: line_obj.s_warehouse,
+            warehouse: frm.doc.s_warehouse,
             has_batch_no:line_obj.has_batch_no,
             data:line_obj.data
         },
