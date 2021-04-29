@@ -975,6 +975,7 @@ var get_healthcare_services_to_invoice = function(frm) {
 	let selected_patient = '';
 	var dialog = new frappe.ui.Dialog({
 		title: __("Get Items from Healthcare Services"),
+		size: 'large',
 		fields:[
 			{
 				fieldtype: 'Link',
