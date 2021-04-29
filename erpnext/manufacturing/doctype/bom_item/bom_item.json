@@ -13,6 +13,7 @@
   "bom_no",
   "source_warehouse",
   "allow_alternative_item",
+  "allowed_to_change_qty_in_wo",
   "section_break_5",
   "description",
   "col_break1",
@@ -284,13 +285,19 @@
    "fieldname": "sourced_by_supplier",
    "fieldtype": "Check",
    "label": "Sourced by Supplier"
+  },
+  {
+   "default": "0",
+   "fieldname": "allowed_to_change_qty_in_wo",
+   "fieldtype": "Check",
+   "label": "Allowed to Change Qty in WO"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2020-10-08 14:19:37.563300",
+ "modified": "2021-04-29 18:49:16.116125",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
