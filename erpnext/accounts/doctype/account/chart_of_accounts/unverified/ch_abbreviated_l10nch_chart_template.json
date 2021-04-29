@@ -1,6 +1,6 @@
 {
     "country_code": "ch",
-    "name": "Switzerland - Plan comptable STERCHI abrégé",
+    "name": "Switzerland - Plan comptable STERCHI Abr\u00e9g\u00e9",
     "tree": {
         "Actif": {
           "Actifs circulants": {
@@ -102,28 +102,28 @@
                   "Corrections de la valeur des avances et des pr\u00eats envers des tiers": {
                     "account_number": "1149"
                   },
-                  "Impôt pr\u00e9alable : TVA s/mat\u00e9riel, marchandises, prestations et \u00e9nergie": {
+                  "Imp\u00f4t pr\u00e9alable : TVA s/mat\u00e9riel, marchandises, prestations et \u00e9nergie": {
                     "account_type": "Tax",
                     "account_number": "1170"
                   },
-                  "Impôt pr\u00e9alable : TVA s/investissements et autres charges d’exploitation": {
+                  "Imp\u00f4t pr\u00e9alable : TVA s/investissements et autres charges d’exploitation": {
                     "account_type": "Tax",
                     "account_number": "1171"
                   },
-                  "R\u00e9conciliation de l'impôt pr\u00e9alable lors de changement de m\u00e9thode": {
+                  "R\u00e9conciliation de l'imp\u00f4t pr\u00e9alable lors de changement de m\u00e9thode": {
                     "account_number": "1172"
                   },
-                  "R\u00e9duction de l'impôt pr\u00e9alabe": {
+                  "R\u00e9duction de l'imp\u00f4t pr\u00e9alable": {
                     "account_number": "1173"
                   },
-                  "Correction de l'impôt pr\u00e9alabe": {
+                  "Correction de l'imp\u00f4t pr\u00e9alable": {
                     "account_number": "1174"
                   },
                   "D\u00e9compte TVA": {
                     "account_type": "Tax",
                     "account_number": "1175"
                   },
-                  "Impôt anticip\u00e9 \u00e0 r\u00e9cup\u00e9rer": {
+                  "Imp\u00f4t anticip\u00e9 \u00e0 r\u00e9cup\u00e9rer": {
                     "account_number": "1176"
                   },
                   "Cr\u00e9ances envers l'administration des douanes": {
@@ -135,7 +135,7 @@
                   "Compte courant Caisse d'allocations familiales (CAF)": {
                     "account_number": "1181"
                   },
-                  "Compte courant Institutions de rp\u00e9voyance professionnelle": {
+                  "Compte courant Institutions de pr\u00e9voyance professionnelle": {
                     "account_number": "1182"
                   },
                   "Compte courant Assurance-accidents": {
@@ -144,7 +144,7 @@
                   "Compte courant Assurance maladie (indemnit\u00e9 journali\u00e8re maladie)": {
                     "account_number": "1184"
                   },
-                  "Compte courant Impôt \u00e0 la source": {
+                  "Compte courant Imp\u00f4t \u00e0 la source": {
                     "account_number": "1188"
                   },
                   "Cr\u00e9ances (WIR)": {
@@ -156,7 +156,7 @@
                   "Acomptes pay\u00e9s": {
                     "account_number": "1192"
                   },
-                  "D\u00e9pôt de garantie de loyer": {
+                  "D\u00e9p\u00f4t de garantie de loyer": {
                     "account_number": "1193"
                   },
                   "Corrections de la valeur des cr\u00e9ances \u00e0 court terme": {
@@ -249,7 +249,7 @@
                   },
                   "account_number": "148"
               },
-              "Immobilisation corporelles meubles": {
+              "Immobilisation corporelle meubles": {
                   "Machines et appareils": {
                       "account_number": "1500"
                   },
@@ -282,7 +282,7 @@
                   },
                   "account_number": "150"
               },
-              "Immobilisation corporelles immeubles": {
+              "Immobilisation corporelle immeubles": {
                   "Immeubles d’exploitation": {
                       "account_number": "1600"
                   },
@@ -378,16 +378,16 @@
                       "account_type": "Tax",
                       "account_number": "2201"
                   },
-                  "Impôt sur les acquisitions": {
+                  "Imp\u00f4t sur les acquisitions": {
                       "account_number": "2203"
                   },
-                  "Impôt anticip\u00e9 \u00e0 payer": {
+                  "Imp\u00f4t anticip\u00e9 \u00e0 payer": {
                       "account_number": "2206"
                   },
                   "Droit de timbre": {
                       "account_number": "2207"
                   },
-                  "Impôt directs": {
+                  "Imp\u00f4t directs": {
                       "account_number": "2208"
                   },
                   "Autres dettes \u00e0 court terme envers des tiers (sans int\u00e9r\u00eats)": {
@@ -402,7 +402,7 @@
                   "Autres dettes \u00e0 court terme relatives aux charges salariales (sans int\u00e9r\u00eats)": {
                       "account_number": "2270"
                   },
-                  "Compte courant Impôt \u00e0 la source": {
+                  "Compte courant Imp\u00f4t \u00e0 la source": {
                       "account_number": "2279"
                   },
                   "account_number": "220"
@@ -461,7 +461,7 @@
                   },
                   "account_number": "280"
               },
-              "R\u00e9serves et b\u00e9n\u00e9fice report\u00e9 ou perte report\u00e9es": {
+              "R\u00e9serves et b\u00e9n\u00e9fice report\u00e9 ou perte report\u00e9e": {
                   "R\u00e9serve l\u00e9gale issue du capital": {
                       "account_number": "2900"
                   },
@@ -474,7 +474,7 @@
                   "R\u00e9serves facultatives issues du b\u00e9n\u00e9fice": {
                       "account_number": "2960"
                   },
-                  "B\u00e9n\u00e9fice ou perte report\u00e9": {
+                  "B\u00e9n\u00e9fice ou perte report\u00e9e": {
                       "account_number": "2970"
                   },
                   "B\u00e9n\u00e9fice ou perte de l’exercice": {
@@ -543,7 +543,7 @@
           "Charges d’\u00e9nergie pour l’exploitation": {
               "account_number": "4500"
           },
-          "D\u00e9ductions sur les charges (escomptes, rabais, ristourne, ...)": {
+          "D\u00e9ductions sur les charges (escomptes, rabais, , ...)": {
               "account_number": "4900"
           },
           "root_type": "Expense",
@@ -590,7 +590,7 @@
           "Charges d’administration": {
               "account_number": "6500"
           },
-          "Frais informatique": {
+          "Frais informatiques": {
               "account_number": "6570"
           },
           "Charges de publicit\u00e9": {
@@ -605,14 +605,14 @@
           "Charges financi\u00e8res": {
               "account_number": "6900"
           },
-          "Produits financi\u00e8rs": {
+          "Produits financiers": {
               "account_number": "6950"
           },
           "root_type": "Expense",
           "account_number": "6"
         },
         "R\u00e9sultat des activit\u00e9s annexes d’exploitation": {
-          "Produits accessoire": {
+          "Produits accessoires": {
               "account_number": "7000"
           },
           "Charges accessoires": {
@@ -624,7 +624,7 @@
           "Charges des immeubles d’exploitation": {
               "account_number": "7510"
           },
-          "root_type": "Expense",
+          "root_type": "Equity",
           "account_number": "7"
         },
         "R\u00e9sultats exceptionnels et hors exploitation": {
@@ -640,22 +640,22 @@
           "Produits extraordinaires, exceptionnels ou hors p\u00e9riode": {
               "account_number": "8510"
           },
-          "Impôts direct": {
-              "Impôts sur le b\u00e9n\u00e9fice/Impôts cantonaux et communaux": {
+          "Imp\u00f4ts directs": {
+              "Imp\u00f4ts sur le b\u00e9n\u00e9fice/Imp\u00f4ts cantonaux et communaux": {
                   "account_number": "8900"
               },
-              "Impôts sur le capital/Impôt f\u00e9d\u00e9raux": {
+              "Imp\u00f4ts sur le capital/Imp\u00f4t f\u00e9d\u00e9raux": {
                   "account_number": "8901"
               },
-              "Impôts directs hors p\u00e9riode": {
+              "Imp\u00f4ts directs hors p\u00e9riode": {
                   "account_number": "8902"
               },
               "account_number": "89"
           },
-          "root_type": "Expense",
+          "root_type": "Equity",
           "account_number": "8"
         },
-        "Clôture": {
+        "Cl\u00f4ture": {
           "Utilisation du b\u00e9n\u00e9fice": {
               "B\u00e9n\u00e9fice ou perte de l'exercice": {
                   "account_number": "9200"
