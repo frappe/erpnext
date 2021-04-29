@@ -64,6 +64,9 @@ class MaterialProduce(Document):
         self.cost_details_calculation()
         self.calc_actual_fg_wt_on_wo() 
 
+    def on_cancel(self):
+        self.calc_actual_fg_wt_on_wo()
+
     def calc_actual_fg_wt_on_wo(self):
         wo = frappe.get_doc("Work Order", self.work_order)
         wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
@@ -93,11 +96,11 @@ class MaterialProduce(Document):
             self.wo_actual_rm_cost = wo.actual_rm_cost
             self.wo_actual_operating_cost = wo.total_operating_cost
 
-            # for res in self.material_produce_item:
-            #     if res.data:
-            #         for line in json.loads(res.data):
-            #             if line.per_item_rate:
-            #                 scrap_cost += line.per_item_rate
+            for res in self.material_produce_item:
+                if res.data:
+                    for line in json.loads(res.data):
+                        if line.type == "Scrap" and line.rate:
+                            scrap_cost += line.rate
             self.cost_of_scrap = scrap_cost
 
             self.amount = (self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_operation_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap)
