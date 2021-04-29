@@ -12,7 +12,8 @@ from redisearch import AutoCompleter, Client, Query
 from erpnext.e_commerce.website_item_indexing import (
 	WEBSITE_ITEM_INDEX, 
 	WEBSITE_ITEM_NAME_AUTOCOMPLETE,
-	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE
+	WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE,
+	make_key
 )
 # -----------------
 
@@ -64,8 +65,10 @@ def search(query):
 		# TODO: return top/recent searches
 		return []
 
-	ac = AutoCompleter(WEBSITE_ITEM_NAME_AUTOCOMPLETE, port=13000)
-	client = Client(WEBSITE_ITEM_INDEX, port=13000)
+	red = frappe.cache()
+
+	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
+	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
 	suggestions = ac.get_suggestions(query, num=10)
 
 	# Build a query
@@ -94,7 +97,7 @@ def get_category_suggestions(query):
 		# TODO: return top/recent searches
 		return []
 
-	ac = AutoCompleter(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE, port=13000)
+	ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=frappe.cache())
 	suggestions = ac.get_suggestions(query, num=10)
 
 	return [s.string for s in suggestions]
