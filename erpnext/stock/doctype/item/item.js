@@ -477,11 +477,10 @@ $.extend(erpnext.item, {
 
 								let no_of_combinations = lengths.reduce((a, b) => a * b, 1);
 								let msg;
-								if (no_of_combinations === 1){
-									msg = __("Make {0} Variant").format(no_of_combinations);
-								}
-								else {
-									msg = __("Make {0} Variants").format(no_of_combinations);
+								if (no_of_combinations === 1) {
+									msg = __("Make {0} Variant", [no_of_combinations]);
+								} else {
+									msg = __("Make {0} Variants", [no_of_combinations]);
 								}
 								me.multiple_variant_dialog.get_primary_btn().html(msg);
 								me.multiple_variant_dialog.enable_primary_action();
