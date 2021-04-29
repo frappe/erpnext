@@ -21,6 +21,7 @@
   "column_break_4",
   "vehicle",
   "departure_time",
+  "employee_code",
   "delivery_service_stops",
   "delivery_stops",
   "calculate_arrival_time",
@@ -176,11 +177,18 @@
    "fieldtype": "Data",
    "label": "Driver Email",
    "read_only": 1
+  },
+  {
+   "fetch_from": "driver.employee",
+   "fieldname": "employee_code",
+   "fieldtype": "Data",
+   "label": "Employee Code",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-01-26 22:37:14.824021",
+ "modified": "2021-04-29 22:41:30.848768",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",
