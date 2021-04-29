@@ -14,7 +14,7 @@ from six import string_types
 
 class HealthcareServiceOrder(Document):
 	def validate(self):
-		self.set_patient_age()()
+		self.set_patient_age()
 		self.set_order_details()
 		self.set_title()
 

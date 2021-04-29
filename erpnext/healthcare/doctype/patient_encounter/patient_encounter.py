@@ -9,7 +9,6 @@ from frappe.model.document import Document
 from frappe.utils import cstr, getdate, add_days
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
-from erpnext.healthcare.utils import make_healthcare_service_order
 
 class PatientEncounter(Document):
 	def validate(self):
@@ -24,7 +23,7 @@ class PatientEncounter(Document):
 		if self.therapies:
 			create_therapy_plan(self)
 
-		make_healthcare_service_order(self)
+		self.make_healthcare_service_order()
 
 	def on_cancel(self):
 		if self.appointment:
@@ -44,6 +43,67 @@ class PatientEncounter(Document):
 		for item in self.drug_prescription:
 			if not item.medication and not item.drug_code:
 				frappe.throw(_('Row #{0} (Drug Prescription): Medication or Item Code is mandatory').format(item.idx))
+
+	def make_healthcare_service_order(self):
+		if self.drug_prescription:
+			for drug in self.drug_prescription:
+				medication = frappe.get_doc('Medication', drug.drug_code)
+				order = self.get_order_details(medication, drug)
+				order.insert(ignore_permissions=True, ignore_mandatory=True)
+
+		if self.lab_test_prescription:
+			for lab_test in self.lab_test_prescription:
+				lab_template = frappe.get_doc('Lab Test Template', lab_test.lab_test_code)
+				order = self.get_order_details(lab_template, lab_test)
+				order.insert(ignore_permissions=True, ignore_mandatory=True)
+
+		if self.procedure_prescription:
+			for procedure in self.procedure_prescription:
+				procedure_template = frappe.get_doc('Clinical Procedure Template', procedure.procedure)
+				order = self.get_order_details(procedure_template, procedure)
+				order.insert(ignore_permissions=True, ignore_mandatory=True)
+
+		if self.therapies:
+			for therapy in self.therapies:
+				therapy_type = frappe.get_doc('Therapy Type', therapy.therapy_type)
+				order = self.get_order_details(therapy_type, therapy)
+				order.insert(ignore_permissions=True, ignore_mandatory=True)
+
+	def get_order_details(self, doc, line_item):
+		order = frappe.get_doc({
+			'doctype': 'Healthcare Service Order',
+			'order_doctype': doc.doctype,
+			'order_template': doc.name,
+			'order_date': self.encounter_date,
+			'order_time': self.encounter_time,
+			'company': self.company,
+			'status': 'Draft',
+			'patient': self.get('patient'),
+			'practitioner': self.practitioner,
+			'order_group': self.name,
+			'sequence': line_item.get('sequence'),
+			'healthcare_service_order_category': doc.get('healthcare_service_order_category'),
+			'patient_care_type': doc.get('patient_care_type'),
+			'intent': line_item.get('intent'),
+			'priority': line_item.get('priority'),
+			'quantity': line_item.get_quantity() if line_item.doctype == 'Drug Prescription' else 1,
+			'dosage': line_item.get('dosage'),
+			'dosage_form': line_item.get('dosage_form'),
+			'expected_date': line_item.get('expected_date'),
+			'as_needed': line_item.get('as_needed'),
+			'occurrence': line_item.get('occurrence'),
+			'staff_role': doc.get('staff_role'),
+			'note': line_item.get('note'),
+			'patient_instruction': line_item.get('patient_instruction')
+		})
+
+		if doc.doctype == 'Lab Test Template':
+			description = doc.get('lab_test_description')
+		else:
+			description = doc.get('description')
+
+		order.update({'order_description': description})
+		return order
 
 @frappe.whitelist()
 def make_ip_medication_order(source_name, target_doc=None):
