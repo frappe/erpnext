@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import frappe
-import redis
+from frappe.utils.redis_wrapper import RedisWrapper
 
 from redisearch import (
         Client, AutoCompleter, Query,
@@ -12,6 +12,9 @@ from redisearch import (
         TextField, TagField,
         Document
 	)
+
+def make_key(key):
+	return "{0}|{1}".format(frappe.conf.db_name, key).encode('utf-8')
 
 # GLOBAL CONSTANTS
 WEBSITE_ITEM_INDEX = 'website_items_index'
@@ -31,7 +34,7 @@ ALLOWED_INDEXABLE_FIELDS_SET = {
 def create_website_items_index():
 	'''Creates Index Definition'''
 	# CREATE index
-	client = Client(WEBSITE_ITEM_INDEX, port=13000)
+	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=frappe.cache())
 
 	# DROP if already exists
 	try:
@@ -40,7 +43,7 @@ def create_website_items_index():
 		pass
 
 	
-	idx_def = IndexDefinition([WEBSITE_ITEM_KEY_PREFIX])
+	idx_def = IndexDefinition([make_key(WEBSITE_ITEM_KEY_PREFIX)])
 
 	# Based on e-commerce settings
 	idx_fields = frappe.db.get_single_value(
@@ -55,7 +58,7 @@ def create_website_items_index():
 
 	client.create_index(
 		[TextField("web_item_name", sortable=True)] + idx_fields,
-		definition=idx_def
+		definition=idx_def,
 	)
 
 	reindex_all_web_items()
@@ -70,13 +73,16 @@ def to_search_field(field):
 def insert_item_to_index(website_item_doc):
 	# Insert item to index
 	key = get_cache_key(website_item_doc.name)
-	r = redis.Redis("localhost", 13000)
+	r = frappe.cache()
 	web_item = create_web_item_map(website_item_doc)
-	r.hset(key, mapping=web_item)
+
+	for k, v in web_item.items():
+		super(RedisWrapper, r).hset(make_key(key), k, v)
+
 	insert_to_name_ac(website_item_doc.web_item_name, website_item_doc.name)
 
 def insert_to_name_ac(web_name, doc_name):
-	ac = AutoCompleter(WEBSITE_ITEM_NAME_AUTOCOMPLETE, port=13000)
+	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=frappe.cache())
 	ac.add_suggestions(Suggestion(web_name, payload=doc_name))
 
 def create_web_item_map(website_item_doc):
@@ -97,7 +103,7 @@ def update_index_for_item(website_item_doc):
 	create_website_items_index()
 
 def delete_item_from_index(website_item_doc):
-	r = redis.Redis("localhost", 13000)
+	r = frappe.cache()
 	key = get_cache_key(website_item_doc.name)
 	
 	try:
@@ -113,9 +119,9 @@ def define_autocomplete_dictionary():
 	   Also creats autocomplete dictionary for `categories` if 
 	   checked in E Commerce Settings"""
 
-	r = redis.Redis("localhost", 13000)
-	name_ac = AutoCompleter(WEBSITE_ITEM_NAME_AUTOCOMPLETE, port=13000)
-	cat_ac = AutoCompleter(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE, port=13000)
+	r = frappe.cache()
+	name_ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=r)
+	cat_ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=r)
 
 	ac_categories = frappe.db.get_single_value(
 		'E Commerce Settings', 
@@ -124,8 +130,8 @@ def define_autocomplete_dictionary():
 	
 	# Delete both autocomplete dicts
 	try:
-		r.delete(WEBSITE_ITEM_NAME_AUTOCOMPLETE)
-		r.delete(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE)
+		r.delete(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE))
+		r.delete(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE))
 	except:
 		return False
 	
@@ -149,11 +155,14 @@ def reindex_all_web_items():
 		filters={"published": True}
 	)
 
-	r = redis.Redis("localhost", 13000)
+	r = frappe.cache()
 	for item in items:
 		web_item = create_web_item_map(item)
-		key = get_cache_key(item.name)
-		r.hset(key, mapping=web_item)
+		key = make_key(get_cache_key(item.name))
+
+		for k, v in web_item.items():
+			super(RedisWrapper, r).hset(key, k, v)
+
 
 def get_cache_key(name):
 	name = frappe.scrub(name)
