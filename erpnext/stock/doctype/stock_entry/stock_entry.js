@@ -919,6 +919,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				method: "get_items",
 				callback: function(r) {
 					if(!r.exc) refresh_field("items");
+					if(me.frm.doc.bom_no) attachBOMItems(me.frm.doc.bom_no)
 				}
 			});
 		}
@@ -1062,6 +1063,22 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 		});
 	});
 
+}
+
+function attachBOMItems(bom_no) {
+	if (checkShouldNotAttachBOMItems(bom_no)) return
+	frappe.db.get_doc("BOM",bom_no).then(bom => {
+		const {name, items} = bom
+		erpnext.stock.bom = {name, items:{}}
+		items.forEach(item => {
+			erpnext.stock.bom.items[item.item_code] = item;
+		});
+	});
+}
+
+function checkShouldNotAttachBOMItems(bom_no) {
+	return erpnext.stock.bom
+		&& erpnext.stock.bom.name === bom_no
 }
 
 $.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
