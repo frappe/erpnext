@@ -16,7 +16,7 @@ frappe.ui.form.on('Salary Structure', {
 	onload: function(frm) {
 
 		let help_button = $(`<a class = 'control-label'>
-			${__(Condition and Formula Help)}
+			${__("Condition and Formula Help")}
 		</a>`).click(()=>{
 
 			let d = new frappe.ui.Dialog({
