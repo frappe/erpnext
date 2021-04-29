@@ -18,6 +18,9 @@ class LabTest(Document):
 		self.db_set('submitted_date', getdate())
 		self.db_set('status', 'Completed')
 
+		if self.healthcare_service_order:
+			frappe.db.set_value('Healthcare Service Order', self.healthcare_service_order, 'status', 'Completed')
+
 	def on_cancel(self):
 		self.db_set('status', 'Cancelled')
 		self.reload()

@@ -42,6 +42,9 @@ class TherapySession(Document):
 	def on_submit(self):
 		self.update_sessions_count_in_therapy_plan()
 
+		if self.healthcare_service_order:
+			frappe.db.set_value('Healthcare Service Order', self.healthcare_service_order, 'status', 'Completed')
+
 	def on_update(self):
 		if self.appointment:
 			frappe.db.set_value('Patient Appointment', self.appointment, 'status', 'Closed')

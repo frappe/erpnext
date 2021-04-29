@@ -40,6 +40,7 @@ frappe.ui.form.on('Healthcare Service Order', {
 		});
 
 		frm.trigger('setup_status_buttons');
+		frm.trigger('setup_create_buttons');
 	},
 
 	setup_status_buttons: function(frm) {
@@ -97,6 +98,69 @@ frappe.ui.form.on('Healthcare Service Order', {
 			},
 			callback: function(r) {
 				frm.reload_doc();
+			}
+		});
+	},
+
+	setup_create_buttons: function(frm) {
+		if (frm.doc.docstatus !== 1 || frm.doc.status === 'Completed') return;
+
+		if (frm.doc.order_doctype === 'Clinical Procedure Template') {
+
+			frm.add_custom_button(__('Clinical Procedure'), function() {
+				frm.trigger('make_clinical_procedure');
+			}, __('Create'));
+
+
+		} else if (frm.doc.order_doctype === 'Lab Test Template') {
+
+			frm.add_custom_button(__('Lab Test'), function() {
+				frm.trigger('make_lab_test');
+			}, __('Create'));
+
+		} else if (frm.doc.order_doctype === 'Therapy Type') {
+
+			frm.add_custom_button(__('Therapy Session'), function() {
+				frm.trigger('make_therapy_session');
+			}, __('Create'));
+
+		}
+
+		frm.page.set_inner_btn_group_as_primary(__('Create'));
+	},
+
+	make_clinical_procedure: function(frm) {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.healthcare_service_order.healthcare_service_order.make_clinical_procedure',
+			args: { service_order: frm.doc },
+			freeze: true,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
+	make_lab_test: function(frm) {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.healthcare_service_order.healthcare_service_order.make_lab_test',
+			args: { service_order: frm.doc },
+			freeze: true,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
+			}
+		});
+	},
+
+	make_therapy_session: function(frm) {
+		frappe.call({
+			method: 'erpnext.healthcare.doctype.healthcare_service_order.healthcare_service_order.make_therapy_session',
+			args: { service_order: frm.doc },
+			freeze: true,
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route('Form', doclist[0].doctype, doclist[0].name);
 			}
 		});
 	},

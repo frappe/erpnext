@@ -69,7 +69,8 @@
   "descriptive_toggle",
   "sensitivity_toggle",
   "amended_from",
-  "prescription"
+  "prescription",
+  "healthcare_service_order"
  ],
  "fields": [
   {
@@ -555,11 +556,21 @@
    "label": "Organism Test Result",
    "options": "Organism Test Result",
    "print_hide": 1
+  },
+  {
+   "fieldname": "healthcare_service_order",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Healthcare Service Order",
+   "no_copy": 1,
+   "options": "Healthcare Service Order",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-30 11:04:17.195848",
+ "modified": "2021-04-28 23:54:19.219801",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

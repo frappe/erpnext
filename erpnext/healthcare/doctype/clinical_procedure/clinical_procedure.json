@@ -44,6 +44,7 @@
   "sb_refs",
   "column_break_34",
   "prescription",
+  "healthcare_service_order",
   "amended_from"
  ],
  "fields": [
@@ -299,11 +300,21 @@
    "label": "Medical Code",
    "options": "Medical Code",
    "read_only": 1
+  },
+  {
+   "fieldname": "healthcare_service_order",
+   "fieldtype": "Link",
+   "hidden": 1,
+   "label": "Healthcare Service Order",
+   "no_copy": 1,
+   "options": "Healthcare Service Order",
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-06-29 14:28:11.779815",
+ "modified": "2021-04-28 23:52:28.797148",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",

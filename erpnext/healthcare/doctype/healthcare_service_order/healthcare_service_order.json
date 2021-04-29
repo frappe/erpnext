@@ -513,8 +513,21 @@
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
- "links": [],
- "modified": "2021-04-28 10:41:05.245473",
+ "links": [
+  {
+   "link_doctype": "Lab Test",
+   "link_fieldname": "healthcare_service_order"
+  },
+  {
+   "link_doctype": "Clinical Procedure",
+   "link_fieldname": "healthcare_service_order"
+  },
+  {
+   "link_doctype": "Therapy Session",
+   "link_fieldname": "healthcare_service_order"
+  }
+ ],
+ "modified": "2021-04-29 11:40:43.400263",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",
