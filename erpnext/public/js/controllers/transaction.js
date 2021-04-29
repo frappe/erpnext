@@ -1330,9 +1330,6 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 		}
 
 		this.update_payment_schedule_grid_labels(company_currency);
-
-		// set labels
-		var $wrapper = $(this.frm.wrapper);
 	},
 
 	update_item_grid_labels: function(company_currency) {
@@ -1349,7 +1346,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	update_payment_schedule_grid_labels: function(company_currency) {
 		const me = this;
-		if(this.frm.fields_dict["payment_schedule"]) {
+		if (this.frm.fields_dict["payment_schedule"]) {
 			this.frm.set_currency_labels(["base_payment_amount", "base_outstanding", "base_paid_amount"],
 				company_currency, "payment_schedule");
 			this.frm.set_currency_labels(["payment_amount", "outstanding", "paid_amount"],
@@ -1357,7 +1354,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 			var schedule_grid = this.frm.fields_dict["payment_schedule"].grid;
 			$.each(["base_payment_amount", "base_outstanding", "base_paid_amount"], function(i, fname) {
-				if(frappe.meta.get_docfield(schedule_grid.doctype, fname))
+				if (frappe.meta.get_docfield(schedule_grid.doctype, fname))
 					schedule_grid.set_column_disp(fname, me.frm.doc.currency != company_currency);
 			});
 		}
@@ -2012,6 +2009,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 	},
 
 	payment_term: function(doc, cdt, cdn) {
+		const me = this;
 		var row = locals[cdt][cdn];
 		if(row.payment_term) {
 			frappe.call({
@@ -2028,7 +2026,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 						for (var d in r.message) {
 							frappe.model.set_value(cdt, cdn, d, r.message[d]);
 							const company_currency = me.get_company_currency();
-							this.update_payment_schedule_grid_labels(company_currency);
+							me.update_payment_schedule_grid_labels(company_currency);
 						}
 					}
 				}
