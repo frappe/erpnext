@@ -8,6 +8,7 @@ from frappe.model.document import Document
 from datetime import datetime
 import json
 from frappe import _
+from frappe.utils import cint, cstr, flt
 
 class MaterialConsumption(Document):
     @frappe.whitelist()
@@ -41,7 +42,22 @@ class MaterialConsumption(Document):
 
     def on_submit(self):
         self.make_stock_entry()
-        
+
+    def on_change(self):
+        self.calc_actual_rm_wt_on_wo()
+
+    def calc_actual_rm_wt_on_wo(self):
+        wo = frappe.get_doc("Work Order", self.work_order)
+        value = 0
+        for row in wo.required_items:
+            if row.type == "RM":
+                value += flt(row.consumed_qty, row.precision('consumed_qty')) * flt(row.weight_per_unit, row.precision('weight_per_unit'))
+                # print("*********"*100)
+                # print(row.consumed_qty)
+                # print(row.weight_per_unit)
+        wo.actual_rm_weight = flt(value, wo.precision('actual_rm_weight'))
+        wo.db_update()
+
     def make_stock_entry(self):
         if self.type == "Manual":
             lst = []
@@ -185,7 +201,7 @@ class MaterialConsumption(Document):
         set_material_cost(self,stock_entry)
 
 
-def set_material_cost(self, stock_entry):
+def set_material_cost(self, stock_entry): 
     if stock_entry.material_consumption:
         m_doc = frappe.get_doc("Material Consumption", stock_entry.material_consumption)
         m_doc.cost_of_consumption = stock_entry.total_outgoing_value
