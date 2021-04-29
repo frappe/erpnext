@@ -413,8 +413,6 @@ accounting_dimension_doctypes = ["GL Entry", "Sales Invoice", "Purchase Invoice"
 	"Subscription Plan"
 ]
 
-healthcare_service_order_doctypes = ["Medication", "Therapy Type", "Lab Test Template", "Clinical Procedure Template"]
-
 regional_overrides = {
 	'France': {
 		'erpnext.tests.test_regional.test_method': 'erpnext.regional.france.utils.test_method'

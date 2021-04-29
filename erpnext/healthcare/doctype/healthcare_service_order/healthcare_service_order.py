@@ -67,6 +67,8 @@ def make_clinical_procedure(service_order):
 	doc.patient_age = service_order.patient_age_data
 	doc.inpatient_record = service_order.inpatient_record
 	doc.practitioner = service_order.practitioner
+	doc.start_date = service_order.occurrence_date
+	doc.start_time = service_order.occurrence_time
 	doc.medical_department = service_order.medical_department
 	doc.medical_code = service_order.medical_code
 
@@ -92,6 +94,8 @@ def make_lab_test(service_order):
 	doc.mobile = service_order.patient_mobile
 	doc.practitioner = service_order.practitioner
 	doc.requesting_department = service_order.medical_department
+	doc.date = service_order.occurrence_date
+	doc.time = service_order.occurrence_time
 	doc.invoiced = service_order.invoiced
 	doc.medical_code = service_order.medical_code
 
@@ -113,6 +117,8 @@ def make_therapy_session(service_order):
 	doc.patient_age = service_order.patient_age_data
 	doc.practitioner = service_order.practitioner
 	doc.department = service_order.medical_department
+	doc.start_date = service_order.occurrence_date
+	doc.start_time = service_order.occurrence_time
 	doc.invoiced = service_order.invoiced
 	doc.medical_code = service_order.medical_code
 

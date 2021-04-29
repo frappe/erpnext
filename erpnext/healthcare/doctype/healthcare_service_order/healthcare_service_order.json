@@ -50,9 +50,11 @@
   "order_specs_section",
   "quantity",
   "dosage_form",
-  "dosage",
   "as_needed",
-  "occurence",
+  "dosage",
+  "period",
+  "occurrence_date",
+  "occurrence_time",
   "healthcare_service_unit_type",
   "invoiced",
   "column_break_91",
@@ -220,10 +222,10 @@
   },
   {
    "default": "0",
-   "description": "Pre-condition for performing the service. For example \"pain\", \"on flare-up\", etc.",
+   "description": "Perform the service only if there is a need. For example \"pain\", \"on flare-up\", etc.",
    "fieldname": "as_needed",
    "fieldtype": "Check",
-   "label": "As Needed"
+   "label": "Occurrence As Needed"
   },
   {
    "fieldname": "healthcare_service_unit_type",
@@ -373,19 +375,12 @@
    "options": "Dosage Form"
   },
   {
-   "depends_on": "eval:doc.order_doctype===\"Medication\";",
+   "depends_on": "eval:!doc.as_needed && doc.order_doctype===\"Medication\";",
    "fieldname": "dosage",
    "fieldtype": "Link",
    "label": "Dosage",
    "mandatory_depends_on": "eval:doc.order_doctype===\"Medication\";",
    "options": "Prescription Dosage"
-  },
-  {
-   "depends_on": "eval:!doc.as_needed;",
-   "fieldname": "occurence",
-   "fieldtype": "Link",
-   "label": "Occurence",
-   "options": "Prescription Duration"
   },
   {
    "fieldname": "referred_to_practitioner",
@@ -509,6 +504,25 @@
    "label": "Title",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "depends_on": "eval:!doc.as_needed && doc.order_doctype===\"Medication\";",
+   "fieldname": "period",
+   "fieldtype": "Link",
+   "label": "Period",
+   "options": "Prescription Duration"
+  },
+  {
+   "depends_on": "eval:!doc.as_needed && doc.order_doctype!==\"Medication\";",
+   "fieldname": "occurrence_date",
+   "fieldtype": "Date",
+   "label": "Occurrence Date"
+  },
+  {
+   "depends_on": "eval:!doc.as_needed && doc.order_doctype!==\"Medication\";",
+   "fieldname": "occurrence_time",
+   "fieldtype": "Time",
+   "label": "Occurrence Time"
   }
  ],
  "index_web_pages_for_search": 1,
@@ -527,7 +541,7 @@
    "link_fieldname": "healthcare_service_order"
   }
  ],
- "modified": "2021-04-29 11:40:43.400263",
+ "modified": "2021-04-29 13:50:16.225374",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",

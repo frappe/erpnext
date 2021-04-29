@@ -18,6 +18,8 @@
   "column_break_26",
   "company",
   "status",
+  "date",
+  "time",
   "submitted_date",
   "result_date",
   "approved_date",
@@ -566,11 +568,27 @@
    "options": "Healthcare Service Order",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Date"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "time",
+   "fieldtype": "Time",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Time"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-28 23:54:19.219801",
+ "modified": "2021-04-29 13:56:02.043744",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

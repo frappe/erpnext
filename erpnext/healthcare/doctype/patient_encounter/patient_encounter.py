@@ -89,9 +89,9 @@ class PatientEncounter(Document):
 			'quantity': line_item.get_quantity() if line_item.doctype == 'Drug Prescription' else 1,
 			'dosage': line_item.get('dosage'),
 			'dosage_form': line_item.get('dosage_form'),
+			'period': line_item.get('period'),
 			'expected_date': line_item.get('expected_date'),
 			'as_needed': line_item.get('as_needed'),
-			'occurrence': line_item.get('occurrence'),
 			'staff_role': doc.get('staff_role'),
 			'note': line_item.get('note'),
 			'patient_instruction': line_item.get('patient_instruction')
