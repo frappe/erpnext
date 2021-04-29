@@ -49,10 +49,23 @@
   "operations",
   "section_break_22",
   "planned_operating_cost",
-  "actual_operating_cost",
   "additional_operating_cost",
   "column_break_24",
+  "actual_operating_cost",
   "total_operating_cost",
+  "column_break_47",
+  "planned_rm_cost",
+  "scrap_cost",
+  "actual_rm_cost",
+  "weight_details_section",
+  "bom_yeild",
+  "bom_weight",
+  "column_break_53",
+  "actual_rm_weight",
+  "actual_fg_weight",
+  "column_break_56",
+  "actual_yeild",
+  "yeild_deviation",
   "more_info",
   "description",
   "stock_uom",
@@ -345,6 +358,7 @@
    "fieldname": "planned_operating_cost",
    "fieldtype": "Currency",
    "label": "Planned Operating Cost",
+   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -371,7 +385,6 @@
    "fieldname": "total_operating_cost",
    "fieldtype": "Currency",
    "label": "Total Operating Cost",
-   "no_copy": 1,
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -488,6 +501,88 @@
    "fieldtype": "Float",
    "label": "Lead Time",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_47",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "planned_rm_cost",
+   "fieldtype": "Currency",
+   "label": "Planned RM Cost",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "actual_rm_cost",
+   "fieldtype": "Currency",
+   "label": "Actual RM Cost",
+   "no_copy": 1,
+   "options": "Company:company:default_currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight_details_section",
+   "fieldtype": "Section Break",
+   "label": "Weight Details"
+  },
+  {
+   "fieldname": "bom_yeild",
+   "fieldtype": "Percent",
+   "label": "BOM Yeild",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "bom_weight",
+   "fieldtype": "Float",
+   "label": "BOM Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_53",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "actual_rm_weight",
+   "fieldtype": "Float",
+   "label": "Actual RM weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "actual_fg_weight",
+   "fieldtype": "Float",
+   "label": "Actual FG Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_56",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "actual_yeild",
+   "fieldtype": "Percent",
+   "label": "Actual Yeild",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "yeild_deviation",
+   "fieldtype": "Percent",
+   "label": "Yeild Deviation",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "scrap_cost",
+   "fieldtype": "Currency",
+   "label": "Scrap Cost",
+   "options": "Company:company:default_currency"
   }
  ],
  "icon": "fa fa-cogs",
@@ -495,7 +590,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-16 13:27:51.116484",
+ "modified": "2021-04-27 15:25:29.904068",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
