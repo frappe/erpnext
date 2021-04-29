@@ -1,4 +1,4 @@
-console.log("search.js loaded");
+let loading = false;
 
 const searchBox = document.getElementById("search-box");
 const results = document.getElementById("results");
@@ -7,7 +7,7 @@ const categoryList = document.getElementById("category-suggestions");
 function populateResults(data) {
     html = ""
     for (let res of data.message) {
-        html += `<li>
+        html += `<li class="list-group-item list-group-item-action">
         <img class="item-thumb" src="${res.thumbnail || ''}" />
         <a href="/${res.route}">${res.web_item_name}</a>
         </li>`
@@ -17,7 +17,7 @@ function populateResults(data) {
 
 function populateCategoriesList(data) {
     if (data.length === 0) {
-        categoryList.innerText = "No matches";
+        categoryList.innerHTML = 'Type something...';
         return;
     }
 
@@ -29,7 +29,15 @@ function populateCategoriesList(data) {
     categoryList.innerHTML = html;
 }
 
+function updateLoadingState() {
+    if (loading) {
+        results.innerHTML = `<div class="spinner-border"><span class="sr-only">loading...<span></div>`;
+    }
+}
+
 searchBox.addEventListener("input", (e) => {
+    loading = true;
+    updateLoadingState();
     frappe.call({
         method: "erpnext.templates.pages.product_search.search", 
         args: {
@@ -37,6 +45,7 @@ searchBox.addEventListener("input", (e) => {
         },
         callback: (data) => {
             populateResults(data);
+            loading = false;
         }
     });
 
