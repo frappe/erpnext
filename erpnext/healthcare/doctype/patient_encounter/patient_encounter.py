@@ -82,7 +82,6 @@ class PatientEncounter(Document):
 			'practitioner': self.practitioner,
 			'order_group': self.name,
 			'sequence': line_item.get('sequence'),
-			'healthcare_service_order_category': doc.get('healthcare_service_order_category'),
 			'patient_care_type': doc.get('patient_care_type'),
 			'intent': line_item.get('intent'),
 			'priority': line_item.get('priority'),

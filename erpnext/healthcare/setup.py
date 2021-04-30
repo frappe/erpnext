@@ -235,12 +235,6 @@ def setup_healthcare_service_order_masters():
 		{"doctype": "Patient Care Type", "patient_care_type": _("Intervention")},
 		{"doctype": "Patient Care Type", "patient_care_type": _("Diagnostic")},
 
-		{"doctype": "Healthcare Service Order Category", "category": _("Intervention"), "patient_care_type": _("Intervention")},
-		{"doctype": "Healthcare Service Order Category", "category": _("Therapy"), "patient_care_type": _("Intervention")},
-		{"doctype": "Healthcare Service Order Category", "category": _("Medication"), "patient_care_type": _("Intervention")},
-		{"doctype": "Healthcare Service Order Category", "category": _("Clinical Procedure"), "patient_care_type": _("Intervention")},
-		{"doctype": "Healthcare Service Order Category", "category": _("Laboratory Procedure"), "patient_care_type": _("Diagnostic")},
-
 		{"doctype": "Healthcare Service Order Intent", "intent": _("Order")},
 		{"doctype": "Healthcare Service Order Intent", "intent": _("Proposal")},
 		{"doctype": "Healthcare Service Order Intent", "intent": _("Plan")},

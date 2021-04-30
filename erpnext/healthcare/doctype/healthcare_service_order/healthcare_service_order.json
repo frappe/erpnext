@@ -41,10 +41,8 @@
   "order_details",
   "staff_role",
   "item_code",
-  "healthcare_service_order_category",
   "patient_care_type",
   "column_break_14",
-  "reason",
   "intent",
   "priority",
   "order_specs_section",
@@ -151,6 +149,8 @@
   },
   {
    "description": "The role responsible for performing the service",
+   "fetch_from": "order_template.staff_role",
+   "fetch_if_empty": 1,
    "fieldname": "staff_role",
    "fieldtype": "Link",
    "label": "Staff Role",
@@ -164,7 +164,7 @@
    "set_only_once": 1
   },
   {
-   "fetch_from": "healthcare_service_order_category.patient_care_type",
+   "fetch_from": "order_template.patient_care_type",
    "fetch_if_empty": 1,
    "fieldname": "patient_care_type",
    "fieldtype": "Link",
@@ -234,12 +234,6 @@
    "options": "Healthcare Service Unit Type"
   },
   {
-   "fieldname": "reason",
-   "fieldtype": "Link",
-   "label": "Reason",
-   "options": "Healthcare Service Order Reason"
-  },
-  {
    "fieldname": "reason_reference_doctype",
    "fieldtype": "Link",
    "label": "Reason Reference DocType",
@@ -280,13 +274,6 @@
   {
    "fieldname": "column_break_16",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "healthcare_service_order_category",
-   "fieldtype": "Link",
-   "in_standard_filter": 1,
-   "label": "Healthcare Service Order Category",
-   "options": "Healthcare Service Order Category"
   },
   {
    "fieldname": "company",
@@ -541,7 +528,7 @@
    "link_fieldname": "healthcare_service_order"
   }
  ],
- "modified": "2021-04-29 13:50:16.225374",
+ "modified": "2021-04-30 16:04:12.671393",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",

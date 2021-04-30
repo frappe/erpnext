@@ -49,6 +49,14 @@ frappe.ui.form.on('Clinical Procedure Template', {
 				change_template_code(frm.doc);
 			});
 		}
+
+		frm.set_query('staff_role', function () {
+			return {
+				filters: {
+					'restrict_to_domain': 'Healthcare'
+				}
+			};
+		});
 	}
 });
 

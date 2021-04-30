@@ -17,6 +17,14 @@ frappe.ui.form.on('Lab Test Template', {
 				}
 			};
 		});
+
+		frm.set_query('staff_role', function () {
+			return {
+				filters: {
+					'restrict_to_domain': 'Healthcare'
+				}
+			};
+		});
 	},
 	medical_code: function(frm) {
 		frm.set_query('medical_code', function() {

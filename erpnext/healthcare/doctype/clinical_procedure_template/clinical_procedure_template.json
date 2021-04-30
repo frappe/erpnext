@@ -36,9 +36,7 @@
   "column_break_23",
   "medical_code",
   "service_order_defaults_section",
-  "service_order_category",
   "patient_care_type",
-  "column_break_28",
   "staff_role"
  ],
  "fields": [
@@ -211,20 +209,10 @@
    "label": "Service Order Defaults"
   },
   {
-   "fieldname": "service_order_category",
-   "fieldtype": "Link",
-   "label": "Service Order Category",
-   "options": "Healthcare Service Order Category"
-  },
-  {
    "fieldname": "patient_care_type",
    "fieldtype": "Link",
    "label": "Patient Care Type",
    "options": "Patient Care Type"
-  },
-  {
-   "fieldname": "column_break_28",
-   "fieldtype": "Column Break"
   },
   {
    "fieldname": "staff_role",
@@ -234,7 +222,7 @@
   }
  ],
  "links": [],
- "modified": "2021-04-08 19:06:04.030431",
+ "modified": "2021-04-30 11:12:09.088800",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure Template",
