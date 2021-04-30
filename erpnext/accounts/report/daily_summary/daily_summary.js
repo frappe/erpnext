@@ -2,7 +2,7 @@
 // For license information, please see license.txt
 /* eslint-disable */
 
-frappe.query_reports["Sale for day"] = {
+frappe.query_reports["Daily summary"] = {
 	"filters": [
 		{
 			"fieldname":"from_date",
@@ -19,10 +19,10 @@ frappe.query_reports["Sale for day"] = {
 			"reqd": 1
 		},
 		{
-			"fieldname":"prefix",
-			"label": __("Prefix"),
+			"fieldname":"serie",
+			"label": __("Serie"),
 			"fieldtype": "Link",
-			"options": "Prefix sales for days",
+			"options": "Daily summary series",
 			"reqd": 1
 		},
 	]
