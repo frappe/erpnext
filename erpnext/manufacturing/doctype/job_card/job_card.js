@@ -18,6 +18,11 @@ frappe.ui.form.on('Job Card', {
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
 
+		frm.add_custom_button(__('Add Additional Items'),function() {
+			var usr = frappe.session.user
+			frappe.new_doc("Additional Item", {"job_card" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
+		})
+		
 		if(!frm.doc.__islocal && frm.doc.items && frm.doc.items.length) {
 			if (frm.doc.for_quantity != frm.doc.transferred_qty) {
 				frm.add_custom_button(__("Material Request"), () => {
