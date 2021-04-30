@@ -251,6 +251,7 @@ class WorkOrder(Document):
 	def before_save(self):
 		self.planned_rm_cost_calc()
 		self.bom_details()
+		self.scrap_cost_calc()
 
 	def on_change(self):
 		self.yeild_calc()
@@ -262,6 +263,12 @@ class WorkOrder(Document):
 			self.actual_yeild = flt(flt(self.actual_fg_weight)/flt(self.actual_rm_weight), self.precision('actual_yeild'))
 		self.yeild_deviation = flt(flt(self.bom_yeild) - flt(self.actual_yeild), self.precision('yeild_deviation'))
 		
+	def scrap_cost_calc(self):
+		bo = frappe.get_doc("BOM", self.bom_no)
+		if bo.quantity == 0:
+			self.scrap_cost = 0
+		else:
+			self.scrap_cost = flt(flt(bo.scrap_material_cost)/flt(bo.quantity)*flt(self.qty), self.precision('scrap_cost'))
 
 	def bom_details(self):
 		bo = frappe.get_doc("BOM", self.bom_no)

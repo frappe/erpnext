@@ -90,7 +90,9 @@ function add_details_line(frm,line_obj){
             batch_size: frm.doc.batch_size,
             work_order: frm.doc.work_order,
             data:line_obj.data,
-            amount: frm.doc.amount
+            amount: frm.doc.amount,
+            type: line_obj.type,
+            bom: frm.doc.bom
         },
         callback: function (r) {
             if(r.message){
