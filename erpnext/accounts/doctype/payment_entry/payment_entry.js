@@ -561,7 +561,7 @@ frappe.ui.form.on('Payment Entry', {
 			flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate));
 
 		if(frm.doc.payment_type == "Pay")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, 1);
 		else
 			frm.events.set_unallocated_amount(frm);
 
