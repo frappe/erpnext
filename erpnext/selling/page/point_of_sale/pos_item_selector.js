@@ -168,6 +168,7 @@ erpnext.PointOfSale.ItemSelector = class {
 				case (iCode >= 160 && iCode <= 164) || iCode == 170: // ^ ! # $ *
 				case iCode >= 186 && iCode <= 194: // (; = , - . / `)
 				case iCode >= 219 && iCode <= 222: // ([ \ ] ')
+				case iCode == 32: // spacebar
 					if (oEvent.key !== undefined && oEvent.key !== '') {
 						return oEvent.key;
 					}

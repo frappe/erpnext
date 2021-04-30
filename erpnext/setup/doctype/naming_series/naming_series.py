@@ -159,6 +159,7 @@ class NamingSeries(Document):
 		if frappe.db.get_value('Series', series, 'name', order_by="name") == None:
 			frappe.db.sql("insert into tabSeries (name, current) values (%s, 0)", (series))
 
+	@frappe.whitelist()
 	def update_series_start(self):
 		if self.prefix:
 			prefix = self.parse_naming_series()

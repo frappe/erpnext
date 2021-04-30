@@ -4,10 +4,12 @@
 
 from __future__ import unicode_literals
 import frappe
+from frappe import _
 from frappe.model.document import Document
 from erpnext.accounts.report.general_ledger.general_ledger import execute as get_soa
 from erpnext.accounts.report.accounts_receivable_summary.accounts_receivable_summary import execute as get_ageing
-from frappe.core.doctype.communication.email import make
+from erpnext import get_company_currency
+from erpnext.accounts.party import get_party_account_currency
 
 from frappe.utils.print_format import report_to_pdf
 from frappe.utils.pdf import get_pdf
@@ -29,7 +31,7 @@ class ProcessStatementOfAccounts(Document):
 		validate_template(self.body)
 
 		if not self.customers:
-			frappe.throw(frappe._('Customers not selected.'))
+			frappe.throw(_('Customers not selected.'))
 
 		if self.enable_auto_email:
 			self.to_date = self.start_date
@@ -38,7 +40,7 @@ class ProcessStatementOfAccounts(Document):
 
 def get_report_pdf(doc, consolidated=True):
 	statement_dict = {}
-	aging = ''
+	ageing = ''
 	base_template_path = "frappe/www/printview.html"
 	template_path = "erpnext/accounts/doctype/process_statement_of_accounts/process_statement_of_accounts.html"
 
@@ -54,26 +56,30 @@ def get_report_pdf(doc, consolidated=True):
 				'range4': 120,
 				'customer': entry.customer
 			})
-			col1, aging = get_ageing(ageing_filters)
-			aging[0]['ageing_based_on'] = doc.ageing_based_on
+			col1, ageing = get_ageing(ageing_filters)
+
+			if ageing:
+				ageing[0]['ageing_based_on'] = doc.ageing_based_on
 
 		tax_id = frappe.get_doc('Customer', entry.customer).tax_id
+		presentation_currency =  get_party_account_currency('Customer', entry.customer, doc.company) \
+				or doc.currency or get_company_currency(doc.company)
 
 		filters= frappe._dict({
 			'from_date': doc.from_date,
 			'to_date': doc.to_date,
 			'company': doc.company,
 			'finance_book': doc.finance_book if doc.finance_book else None,
-			"account": doc.account if doc.account else None,
+			'account': doc.account if doc.account else None,
 			'party_type': 'Customer',
 			'party': [entry.customer],
+			'presentation_currency': presentation_currency,
 			'group_by': doc.group_by,
 			'currency': doc.currency,
 			'cost_center': [cc.cost_center_name for cc in doc.cost_center],
 			'project': [p.project_name for p in doc.project],
 			'show_opening_entries': 0,
 			'include_default_book_entries': 0,
-			'show_cancelled_entries': 1,
 			'tax_id': tax_id if tax_id else None
 		})
 		col, res = get_soa(filters)
@@ -83,11 +89,14 @@ def get_report_pdf(doc, consolidated=True):
 
 		if len(res) == 3:
 			continue
+
 		html = frappe.render_template(template_path, \
-			{"filters": filters, "data": res, "aging": aging[0] if doc.include_ageing else None})
+			{"filters": filters, "data": res, "ageing": ageing[0] if (doc.include_ageing and ageing) else None})
+
 		html = frappe.render_template(base_template_path, {"body": html, \
 			"css": get_print_style(), "title": "Statement For " + entry.customer})
 		statement_dict[entry.customer] = html
+
 	if not bool(statement_dict):
 		return False
 	elif consolidated:
@@ -167,7 +176,7 @@ def fetch_customers(customer_collection, collection_name, primary_mandatory):
 	if customer_collection == 'Sales Person':
 		customers = get_customers_based_on_sales_person(collection_name)
 		if not bool(customers):
-			frappe.throw('No Customers found with selected options.')
+			frappe.throw(_('No Customers found with selected options.'))
 	else:
 		if customer_collection == 'Sales Partner':
 			customers = frappe.get_list('Customer', fields=['name', 'email_id'], \
@@ -199,14 +208,14 @@ def get_customer_emails(customer_name, primary_mandatory, billing_and_primary=Tr
 
 	if len(billing_email) == 0 or (billing_email[0][0] is None):
 		if billing_and_primary:
-			frappe.throw('No billing email found for customer: '+ customer_name)
+			frappe.throw(_("No billing email found for customer: {0}").format(customer_name))
 		else:
 			return ''
 
 	if billing_and_primary:
 		primary_email =  frappe.get_value('Customer', customer_name, 'email_id')
 		if primary_email is None and int(primary_mandatory):
-			frappe.throw('No primary email found for customer: '+ customer_name)
+			frappe.throw(_("No primary email found for customer: {0}").format(customer_name))
 		return [primary_email or '', billing_email[0][0]]
 	else:
 		return billing_email[0][0] or ''
