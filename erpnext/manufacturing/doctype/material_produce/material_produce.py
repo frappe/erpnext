@@ -97,10 +97,11 @@ class MaterialProduce(Document):
             self.wo_actual_operating_cost = wo.total_operating_cost
 
             for res in self.material_produce_item:
-                if res.data:
+                if res.type == "Scrap" and res.data:
                     for line in json.loads(res.data):
-                        if line.type == "Scrap" and line.rate:
+                        if line.rate:
                             scrap_cost += line.rate
+            print(scrap_cost)
             self.cost_of_scrap = scrap_cost
 
             self.amount = (self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_operation_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap)
@@ -243,7 +244,7 @@ class MaterialProduce(Document):
 
 
 @frappe.whitelist()
-def add_details_line(line_id, work_order, item_code, warehouse,qty_produced=None,batch_size=None, data=None, amount=None):
+def add_details_line(bom, type, line_id, work_order, item_code, warehouse,qty_produced=None,batch_size=None, data=None, amount=None):
     if qty_produced:
         qty_produced = float(qty_produced)
     else:
@@ -278,7 +279,18 @@ def add_details_line(line_id, work_order, item_code, warehouse,qty_produced=None
         else:
             amount = float(amount)
         if qty_produced > 1:
-            per_item_rate = amount / qty_produced
+            if type == "Scrap":
+                bo = frappe.get_doc("BOM", bom)
+                if bo.scrap_items:
+                    for row in bo.scrap_items:
+                        per_item_rate = flt(row.rate, row.precision('rate'))
+                        print(per_item_rate)
+                        break
+                else:
+                    per_item_rate = 0
+            else:
+                per_item_rate = flt(flt(amount) / flt(qty_produced), 3)
+                print(per_item_rate)
         else:
             per_item_rate = 0
 
@@ -380,7 +392,10 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
     if stock_entry.material_produce:
         mp_doc = frappe.get_doc("Material Produce", stock_entry.material_produce)
         if not mp_doc.partial_produce:
-            operating_cost_per_unit = (mp_doc.wo_actual_operating_cost - mp_doc.total_cost_of_operation_consumed_for_partial_close) / stock_entry.fg_completed_qty
+            if stock_entry.fg_completed_qty == 0:
+                operating_cost_per_unit = 0
+            else:
+                operating_cost_per_unit = flt((flt(mp_doc.wo_actual_operating_cost) - flt(mp_doc.total_cost_of_operation_consumed_for_partial_close)) / flt(stock_entry.fg_completed_qty))
     if operating_cost_per_unit:
         stock_entry.append('additional_costs', {
             "expense_account": expense_account,
