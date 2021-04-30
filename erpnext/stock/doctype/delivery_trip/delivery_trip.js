@@ -40,8 +40,8 @@ frappe.ui.form.on('Delivery Trip', {
 		})
 	},
 
-	refresh: function (frm) {
-		if (frm.doc.docstatus == 1 || frm.doc.status == 'Draft') {
+	onload: function (frm) {
+		if (frm.doc.docstatus == 1) {
 			frm.add_custom_button(__('Expense Claim'), function() {
 				frappe.model.open_mapped_doc({
 					method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.make_expense_claim',
@@ -49,7 +49,9 @@ frappe.ui.form.on('Delivery Trip', {
 				});
 			}, __("Create"));
 		}
-		
+	},
+
+	refresh: function (frm) {
 		if (frm.doc.docstatus == 1 && frm.doc.delivery_stops.length > 0) {
 			frm.add_custom_button(__("Notify Customers via Email"), function () {
 				frm.trigger('notify_customers');
