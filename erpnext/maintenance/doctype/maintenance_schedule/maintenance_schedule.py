@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 
-from frappe.utils import add_days, getdate, cint, cstr
+from frappe.utils import add_days, getdate, cint, cstr, date_diff, formatdate
 
 from frappe import throw, _
 from erpnext.utilities.transaction_base import TransactionBase, delete_events
@@ -35,6 +35,39 @@ class MaintenanceSchedule(TransactionBase):
 				child.sales_person = d.sales_person
 				child.completion_status = "Pending"
 				child.item_ref = d.name
+
+	@frappe.whitelist()
+	def validate_end_date_visits(self):
+		days_in_period = {
+			"Weekly": 7,
+			"Monthly": 30,
+			"Quarterly": 91,
+			"Half Yearly": 182,
+			"Yearly": 365
+		}
+		for i in self.items:
+			
+			if i.periodicity and i.start_date:
+				if not i.end_date:
+					if i.no_of_visits:
+						i.end_date = add_days(i.start_date, i.no_of_visits * days_in_period[i.periodicity])
+					else:
+						i.end_date = add_days(i.start_date, days_in_period[i.periodicity])
+						
+				diff = date_diff(i.end_date, i.start_date) + 1
+				no_of_visits = cint(diff / days_in_period[i.periodicity])
+				
+				if not i.no_of_visits or i.no_of_visits == 0:
+					i.end_date = add_days(i.start_date, days_in_period[i.periodicity])
+					diff = date_diff(i.end_date, i.start_date ) + 1
+					i.no_of_visits = cint(diff / days_in_period[i.periodicity])
+					
+				elif i.no_of_visits > no_of_visits:
+					i.end_date = add_days(i.start_date, i.no_of_visits * days_in_period[i.periodicity])
+
+				elif i.no_of_visits < no_of_visits:
+					i.end_date = add_days(i.start_date, i.no_of_visits * days_in_period[i.periodicity])
+
 
 	def on_submit(self):
 		if not self.get('schedules'):
@@ -166,6 +199,7 @@ class MaintenanceSchedule(TransactionBase):
 					throw(_("Maintenance Schedule {0} exists against {1}").format(chk[0][0], d.sales_order))
 
 	def validate(self):
+		self.validate_end_date_visits()
 		self.validate_maintenance_detail()
 		self.validate_dates_with_periodicity()
 		self.validate_sales_order()
@@ -245,6 +279,30 @@ class MaintenanceSchedule(TransactionBase):
 
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
+
+	
+	@frappe.whitelist()
+	def get_pending_data(self,data_type,s_date = None, item_name = None):
+		if data_type == "date":
+			dates = ""
+			for i in self.schedules:
+				if i.item_name == item_name and i.completion_status == "Pending":
+					dates = dates + "\n" + formatdate(i.scheduled_date, "dd-MM-yyyy")
+			return dates
+		elif data_type == "items":
+			items = ""
+			for i in self.items:
+				for s in self.schedules:
+					if i.item_name == s.item_name and s.completion_status == "Pending":
+						items = items + "\n" + i.item_name
+						break
+			return items
+		elif data_type == "id":
+			for s in self.schedules:
+				if s.item_name == item_name and s_date == formatdate(s.scheduled_date,"dd-mm-yyyy"):
+					return s.name
+				
+					
 
 @frappe.whitelist()
 def update_serial_nos(s_id):
