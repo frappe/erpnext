@@ -73,31 +73,11 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 			}
 			if (flag) {
 				this.frm.add_custom_button(__('Create Maintenance Visit'), function () {
-					let items = me.frm.doc.items;
-					let s = me.frm.doc.schedules;
 					let options = "";
-					let dates = "";
-					for (let i in items) {
-						for (let d in s) {
-							if (s[d].item_name == items[i].item_name && s[d].completion_status == "Pending") {
-								options = options + '\n' + items[i].item_name;
-								break;
-							}
-						}
-					}
-					function formatDate(date) {
-						var d = new Date(date),
-							month = '' + (d.getMonth() + 1),
-							day = '' + d.getDate(),
-							year = d.getFullYear();
-
-						if (month.length < 2)
-							month = '0' + month;
-						if (day.length < 2)
-							day = '0' + day;
-
-						return [day, month, year].join('-');
-					}
+					
+					me.frm.call('get_pending_data',{data_type:"items"}).then(r =>{
+						options = r.message
+						
 					var schedule_id = "";
 					var d = new frappe.ui.Dialog({
 						title: __("Enter Visit Details"),
@@ -109,30 +89,23 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 							reqd: 1,
 							onchange: function () {
 								let field = d.get_field("scheduled_date");
-								dates = "";
-								for (let i in s) {
-									if (s[i].item_name == this.value && s[i].completion_status == "Pending") {
-										dates = dates + '\n' + formatDate(s[i].scheduled_date);
-									}
-
-								}
-								field.df.options = dates;
-								field.refresh();
+								me.frm.call('get_pending_data',{item_name:this.value,data_type:"date"}).then(r =>{
+									field.df.options = r.message;
+									field.refresh();
+								})
 							}
 						},
 						{
 							label: __('Scheduled Date'),
 							fieldname: 'scheduled_date',
 							fieldtype: 'Select',
-							options: dates,
+							options: "",
 							reqd: 1,
 							onchange: function () {
 								let field = d.get_field('item_name');
-								for (let i in s) {
-									if (s[i].item_name == field.value && formatDate(s[i].scheduled_date) == this.value) {
-										schedule_id = s[i].name;
-									}
-								}
+								me.frm.call('get_pending_data',{item_name:field.value,s_date:this.value,data_type:"id"}).then(r =>{
+									schedule_id = r.message;
+								})
 							}
 						},
 						],
@@ -159,7 +132,7 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 						}
 					});
 					d.show();
-
+				});
 				}, __('Create'));
 			}
 		}
@@ -185,35 +158,8 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 		var item = frappe.get_doc(cdt, cdn);
 
 		if (item.start_date && item.periodicity) {
-
-			var date_diff = frappe.datetime.get_diff(item.end_date, item.start_date) + 1;
-
-			var days_in_period = {
-				"Weekly": 7,
-				"Monthly": 30,
-				"Quarterly": 91,
-				"Half Yearly": 182,
-				"Yearly": 365
-			}
-
-			var no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
-			if (no_of_visits == 0 || !no_of_visits) {
-
-				let end_date = frappe.datetime.add_days(item.start_date, days_in_period[item.periodicity]);
-				frappe.model.set_value(item.doctype, item.name, "end_date", end_date);
-				date_diff = frappe.datetime.get_diff(item.end_date, item.start_date) + 1;
-				no_of_visits = cint(date_diff / days_in_period[item.periodicity]);
-				frappe.model.set_value(item.doctype, item.name, "no_of_visits", no_of_visits);
-
-			} else if (item.no_of_visits > no_of_visits) {
-				let end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity]);
-				frappe.model.set_value(item.doctype, item.name, "end_date", end_date);
-
-			} else if (item.no_of_visits < no_of_visits) {
-				let end_date = frappe.datetime.add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity]);
-				frappe.model.set_value(item.doctype, item.name, "end_date", end_date);
-
-			}
+			me.frm.call('validate_end_date_visits')
+			
 		}
 	},
 });
