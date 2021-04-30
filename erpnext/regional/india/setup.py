@@ -25,6 +25,7 @@ def setup_company_independent_fixtures(patch=False):
 	frappe.enqueue('erpnext.regional.india.setup.add_hsn_sac_codes', now=frappe.flags.in_test)
 	create_gratuity_rule()
 	add_print_formats()
+	update_accounts_settings_for_taxes()
 
 def add_hsn_sac_codes():
 	if frappe.flags.in_test and frappe.flags.created_hsn_codes:
@@ -733,6 +734,7 @@ def set_tax_withholding_category(company):
 	for d in docs:
 		if not frappe.db.exists("Tax Withholding Category", d.get("name")):
 			doc = frappe.get_doc(d)
+			doc.flags.ignore_validate = True
 			doc.flags.ignore_permissions = True
 			doc.flags.ignore_mandatory = True
 			doc.insert()
@@ -749,11 +751,12 @@ def set_tax_withholding_category(company):
 					doc.append("rates", d.get('rates')[0])
 
 			doc.flags.ignore_permissions = True
+			doc.flags.ignore_validdate = True
 			doc.flags.ignore_mandatory = True
+			doc.flags.ignore_links = True
 			doc.save()
 
 def set_tds_account(docs, company):
-	abbr = frappe.get_value("Company", company, "abbr")
 	parent_account = frappe.db.get_value("Account", filters = {"account_name": "Duties and Taxes", "company": company})
 	if parent_account:
 		docs.extend([
@@ -912,7 +915,6 @@ def get_tds_details(accounts, fiscal_year):
 	]
 
 def create_gratuity_rule():
-
 	# Standard Indain Gratuity Rule
 	if not frappe.db.exists("Gratuity Rule", "Indian Standard Gratuity Rule"):
 		rule = frappe.new_doc("Gratuity Rule")
@@ -930,3 +932,7 @@ def create_gratuity_rule():
 
 		rule.flags.ignore_mandatory = True
 		rule.save()
+
+def update_accounts_settings_for_taxes():
+	if frappe.db.count('Company') == 1:
+		frappe.db.set_value('Accounts Settings', None, "add_taxes_from_item_tax_template", 0)
