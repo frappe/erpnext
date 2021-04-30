@@ -14,7 +14,7 @@
   "column_break_5",
   "expense_approver",
   "approval_status",
-  "delivery_trip_number",
+  "delivery_trip",
   "is_paid",
   "expense_details",
   "expenses",
@@ -368,9 +368,9 @@
    "read_only": 1
   },
   {
-   "fieldname": "delivery_trip_number",
+   "fieldname": "delivery_trip",
    "fieldtype": "Link",
-   "label": "Delivery Trip Number",
+   "label": "Delivery Trip",
    "options": "Delivery Trip"
   }
  ],
@@ -378,7 +378,7 @@
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-30 03:29:24.818446",
+ "modified": "2021-04-30 21:22:13.241670",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Expense Claim",

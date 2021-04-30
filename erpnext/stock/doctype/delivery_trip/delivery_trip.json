@@ -21,7 +21,7 @@
   "column_break_4",
   "vehicle",
   "departure_time",
-  "employee_code",
+  "employee",
   "delivery_service_stops",
   "delivery_stops",
   "calculate_arrival_time",
@@ -180,16 +180,16 @@
   },
   {
    "fetch_from": "driver.employee",
-   "fieldname": "employee_code",
+   "fieldname": "employee",
    "fieldtype": "Link",
-   "label": "Employee Code",
+   "label": "Employee",
    "options": "Employee",
    "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-30 03:17:08.201772",
+ "modified": "2021-04-30 21:21:36.610142",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Trip",
