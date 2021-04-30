@@ -17,10 +17,13 @@ frappe.ui.form.on('Job Card', {
 		set_qty_to_table(frm,cdt,cdn)
 		frappe.flags.pause_job = 0;
 		frappe.flags.resume_job = 0;
-
-		frm.add_custom_button(__('Add Additional Items'),function() {
-			var usr = frappe.session.user
-			frappe.new_doc("Additional Item", {"job_card" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
+		frappe.db.get_value("Work Order", {"name":frm.doc.work_order}, 'transfer_material_against', resp => {
+			if(resp.transfer_material_against === "Job Card") {
+				frm.add_custom_button(__('Add Additional Items'),function() {
+					var usr = frappe.session.user
+					frappe.new_doc("Additional Item", {"job_card" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
+				})
+			}
 		})
 		
 		if(!frm.doc.__islocal && frm.doc.items && frm.doc.items.length) {
