@@ -2,7 +2,8 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # See license.txt
 from __future__ import unicode_literals
-from frappe.utils.data import get_datetime, add_days
+from frappe.utils.data import add_days, today
+from erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule import make_maintenance_visit
 
 import frappe
 import unittest
@@ -21,6 +22,52 @@ class TestMaintenanceSchedule(unittest.TestCase):
 		ms.cancel()
 		events_after_cancel = get_events(ms)
 		self.assertTrue(len(events_after_cancel) == 0)
+	
+	def test_make_schedule(self):
+		ms = make_maintenance_schedule()
+		ms.save()
+		i = ms.items[0]
+		expected_end_date = add_days(i.start_date, i.no_of_visits * 7)
+		self.assertEqual(i.end_date, expected_end_date)
+
+		i.no_of_visits = 2
+		ms.save()
+		expected_end_date = add_days(i.start_date, i.no_of_visits * 7)
+		self.assertEqual(i.end_date, expected_end_date)
+
+		items = ms.get_pending_data(data_type = "items")
+		items = items.split('\n')
+		items.pop(0)
+		expected_items = ['_Test Item']
+		self.assertTrue(items,expected_items)
+
+		dates = ms.get_pending_data(data_type = "date",item_name = i.item_name)
+		dates = dates.split('\n')
+		dates.pop(0)
+		expected_dates = ['07-05-2021','14-05-2021']
+		self.assertEqual(dates,expected_dates)
+
+		
+		ms.submit()
+		s_id = ms.get_pending_data(data_type = "id",item_name = i.item_name, s_date = "14-05-2021")
+		test = make_maintenance_visit(source_name = ms.name, item_name = "_Test Item", s_id = s_id)
+		visit = frappe.new_doc('Maintenance Visit')
+		visit = test
+		visit.completion_status = "Partially Completed"
+
+		visit.set('purposes',[{
+			'item_code':i.item_code,
+			'description':"test",
+			'work_done':"test",
+			'prevdoc_docname':ms.name,
+			'prevdoc_doctype':ms.doctype,
+			'prevdoc_detail_docname':s_id
+		}])
+		visit.submit()
+		ms = frappe.get_doc('Maintenance Schedule',ms.name)
+		self.assertTrue(ms.schedules[1].completion_status,"Partially Completed")
+	
+
 
 def get_events(ms):
 	return frappe.get_all("Event Participants", filters={
@@ -29,16 +76,16 @@ def get_events(ms):
 			"parenttype": "Event"
 		})
 
+
 def make_maintenance_schedule():
 	ms = frappe.new_doc("Maintenance Schedule")
 	ms.company = "_Test Company"
 	ms.customer = "_Test Customer"
-	ms.transaction_date = get_datetime()
+	ms.transaction_date = today()
 
 	ms.append("items", {
 		"item_code": "_Test Item",
-		"start_date": get_datetime(),
-		"end_date": add_days(get_datetime(), 32),
+		"start_date": today(),
 		"periodicity": "Weekly",
 		"no_of_visits": 4,
 		"sales_person": "Sales Team",
