@@ -399,12 +399,12 @@ def get_driver_email(driver):
 @frappe.whitelist()
 def make_expense_claim(source_name, target_doc=None):
 	doc = get_mapped_doc("Delivery Trip", source_name,
-        {"Delivery Trip": {
-            "doctype": "Expense Claim",
-            "field_map": {
-                "employee": "employee_code",
+		{"Delivery Trip": {
+			"doctype": "Expense Claim",
+			"field_map": {
+				"employee": "employee_code",
 				"delivery_trip_number": "name"
-            }
-        }}, target_doc)
+			}
+		}}, target_doc)
 
 	return doc
