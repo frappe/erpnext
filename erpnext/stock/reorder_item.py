@@ -5,8 +5,10 @@ from __future__ import unicode_literals
 import frappe
 import erpnext
 import json
+import math
 from frappe.utils import flt, nowdate, add_days, cint
 from frappe import _
+from erpnext.stock.get_item_details import get_conversion_factor
 
 def reorder_item():
 	""" Reorder item if stock reaches reorder level"""
@@ -142,14 +144,13 @@ def create_material_request(material_requests):
 					if request_type == 'Purchase':
 						uom = item.purchase_uom or item.stock_uom
 						if uom != item.stock_uom:
-							conversion_factor = frappe.db.get_value("UOM Conversion Detail",
-								{'parent': item.name, 'uom': uom}, 'conversion_factor') or 1.0
+							conversion_factor = flt(get_conversion_factor(d.item_code, uom)['conversion_factor'])
 
 					mr.append("items", {
 						"doctype": "Material Request Item",
 						"item_code": d.item_code,
 						"schedule_date": add_days(nowdate(),cint(item.lead_time_days)),
-						"qty": d.reorder_qty / conversion_factor,
+						"qty": math.ceil(d.reorder_qty / conversion_factor),
 						"uom": uom,
 						"stock_uom": item.stock_uom,
 						"warehouse": d.warehouse,
