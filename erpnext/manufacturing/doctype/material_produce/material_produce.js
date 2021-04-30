@@ -95,6 +95,7 @@ function add_details_line(frm,line_obj){
         callback: function (r) {
             if(r.message){
                 frm.clear_table('material_produce_details');
+                console.log('msg: ', r.message)
                 for (const d of r.message){
                     var row = frm.add_child('material_produce_details');
                     row.item_code = d.item_code;
@@ -102,7 +103,7 @@ function add_details_line(frm,line_obj){
                     row.t_warehouse = d.t_warehouse,
                     row.qty_produced = d.qty_produced,
                     row.has_batch_no = d.has_batch_no,
-                    row.batch = d.batch,
+                    row.batch_series = d.batch,
                     row.rate = d.rate,
                     row.weight = d.weight,
                     row.line_ref = d.line_ref

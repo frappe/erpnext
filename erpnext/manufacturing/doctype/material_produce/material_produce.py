@@ -254,7 +254,11 @@ def add_details_line(line_id, work_order, item_code, warehouse,qty_produced=None
         lst = []
         batch_option = None
         enabled = frappe.db.get_single_value('Batch Settings', 'enabled')
-        if enabled:
+        # item_master_batch_series = frappe.db.get_value('Item', {"item_code": item_code}, ['batch_series'])
+        # if item_master_batch_series:
+        if item.batch_number_series:
+            batch_option = item.batch_number_series
+        elif enabled:
             is_finish_batch_series = frappe.db.get_single_value('Batch Settings', 'is_finish_batch_series')
             batch_series = frappe.db.get_single_value('Batch Settings', 'batch_series')
             if is_finish_batch_series == 'Use Work Order as Series':
@@ -262,10 +266,10 @@ def add_details_line(line_id, work_order, item_code, warehouse,qty_produced=None
             if is_finish_batch_series == 'Create New':
                 batch_option = batch_series
         else:
-            if item.batch_number_series:
-                batch_option = item.batch_number_series
-            else:
-                batch_option = str(work_order) + "-.##"
+            # if item.batch_number_series:
+            #     batch_option = item.batch_number_series
+            # else:
+            batch_option = str(work_order) + "-.##"
         if not amount:
             amount = 0
         else:
