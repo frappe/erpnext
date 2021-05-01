@@ -416,7 +416,7 @@ class update_entries_after(object):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no)
+		stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no, for_update=True)
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		for d in stock_entry.items:
@@ -604,7 +604,7 @@ class update_entries_after(object):
 				batch = self.wh_data.stock_queue[index]
 				if qty_to_pop >= batch[0]:
 					# consume current batch
-					qty_to_pop = qty_to_pop - batch[0]
+					qty_to_pop = _round_off_if_near_zero(qty_to_pop - batch[0])
 					self.wh_data.stock_queue.pop(index)
 					if not self.wh_data.stock_queue and qty_to_pop:
 						# stock finished, qty still remains to be withdrawn
@@ -618,8 +618,8 @@ class update_entries_after(object):
 					batch[0] = batch[0] - qty_to_pop
 					qty_to_pop = 0
 
-		stock_value = sum((flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue))
-		stock_qty = sum((flt(batch[0]) for batch in self.wh_data.stock_queue))
+		stock_value = _round_off_if_near_zero(sum((flt(batch[0]) * flt(batch[1]) for batch in self.wh_data.stock_queue)))
+		stock_qty = _round_off_if_near_zero(sum((flt(batch[0]) for batch in self.wh_data.stock_queue)))
 
 		if stock_qty:
 			self.wh_data.valuation_rate = stock_value / flt(stock_qty)
@@ -858,3 +858,12 @@ def get_future_sle_with_negative_qty(args):
 		order by timestamp(posting_date, posting_time) asc
 		limit 1
 	""", args, as_dict=1)
+
+def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
+	""" Rounds off the number to zero only if number is close to zero for decimal
+		specified in precision. Precision defaults to 6.
+	"""
+	if flt(number) < (1.0 / (10**precision)):
+		return 0
+
+	return flt(number)

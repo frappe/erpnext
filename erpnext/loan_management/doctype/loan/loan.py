@@ -44,6 +44,7 @@ class Loan(AccountsController):
 
 	def on_cancel(self):
 		self.unlink_loan_security_pledge()
+		self.ignore_linked_doctypes = ['GL Entry']
 
 	def set_missing_fields(self):
 		if not self.company:
