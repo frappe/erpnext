@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form, time_diff_in_hours
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict, get_bom_item_rate
+from frappe.model.meta import get_field_precision
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life, get_item_defaults
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
@@ -654,14 +655,16 @@ class WorkOrder(Document):
 	def make_consume_material(self):
 		wo_doc = frappe.get_doc('Work Order',self.name)
 		mc = frappe.new_doc("Material Consumption")
+		precision = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty_to_issue"))
 		mc.work_order = self.name
 		mc.s_warehouse = wo_doc.wip_warehouse
 		mc.company = wo_doc.company
 		mc.type = "Manual"
 		for res in wo_doc.required_items:
 			item_doc = frappe.get_doc("Item",res.item_code)
-			float_precision = cint(frappe.db.get_default("float_precision")) or 2
-			qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
+			# float_precision = cint(frappe.db.get_default("float_precision")) or 2
+			# qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
+			qty = flt(res.get('transferred_qty')) - flt(res.get("consumed_qty"))
 			if qty > 0:
 				mc.append("materials_to_consume", {
 					"item": res.item_code,
@@ -670,7 +673,7 @@ class WorkOrder(Document):
 					"has_batch_no": item_doc.has_batch_no,
 					"uom": item_doc.stock_uom,
 					"status": "Not Assigned",
-					"qty_to_issue": qty,
+					"qty_to_issue": flt(qty, precision),
 					"weight_per_unit": res.weight_per_unit,
 					"type": res.type
 				})

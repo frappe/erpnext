@@ -60,7 +60,7 @@ function get_available_qty_data(frm,line_obj){
                         row.life_left_batch = d.life_left_batch;
                     }
                     if(d.qty_to_consume){
-                        row.qty_to_consume = d.qty_to_consume
+                        row.qty_to_consume = flt(d.qty_to_consume, row.precision('qty_to_consume'))
                     }
                 }
                 frm.refresh_field('material_consumption_detail');

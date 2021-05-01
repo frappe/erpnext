@@ -5,6 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
+from frappe.model.meta import get_field_precision
 from datetime import datetime
 import json
 from frappe import _
@@ -25,17 +26,18 @@ class MaterialConsumption(Document):
                         "stock_uom": res.uom,
                         "warehouse": res.warehouse,
                         "batch_no": res.batch,
-                        "balance_qty": res.balance_qty,
+                        "balance_qty": flt(res.balance_qty, res.precision('balance_qty')),
                         "expiry_date_batch": res.expiry_date_batch,
                         "life_left_batch": res.life_left_batch,
-                        "qty_to_consume": res.qty_to_consume,
+                        "qty_to_consume": flt(res.qty_to_consume, res.precision('qty_to_consume')),
                         "consume_item": res.consume_item
                         })
-                    total_qty += res.qty_to_consume
+                    total_qty += flt(res.qty_to_consume, res.precision('qty_to_consume'))
             if line_id:
                 l_doc = frappe.get_doc("Materials to Consume Items",line_id)
                 l_doc.data = json.dumps(lst)
-                l_doc.qty_issued = total_qty
+                precision = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty_issued"))
+                l_doc.qty_issued = flt(total_qty, precision)
                 l_doc.status = "Assigned"
                 l_doc.save(ignore_permissions=True)
         return True
@@ -59,6 +61,7 @@ class MaterialConsumption(Document):
         wo.db_update()
 
     def make_stock_entry(self):
+        precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("picked_qty"))
         if self.type == "Manual":
             lst = []
             for res in self.materials_to_consume:
@@ -94,7 +97,7 @@ class MaterialConsumption(Document):
                             itm_doc = frappe.get_doc("Item",line.get('item_code'))
                             se_item = stock_entry.append("items")
                             se_item.item_code = line.get('item_code')
-                            se_item.qty = line.get('qty_to_consume')
+                            se_item.qty = flt(line.get('qty_to_consume'), se_item.precision('qty'))
                             se_item.s_warehouse = self.s_warehouse
                             se_item.t_warehouse = self.s_warehouse
                             se_item.item_name = itm_doc.item_name
@@ -112,10 +115,10 @@ class MaterialConsumption(Document):
                             item_master_wigth_per_unit = frappe.db.get_value("Item", {"item_code":line.get('item_code')}, 'weight_per_unit')
                             if item_master_wigth_per_unit:
                                 if self.type == "Manual":
-                                    qty = res.get('qty_issued') * item_master_wigth_per_unit
+                                    qty = flt(res.get('qty_issued'), res.precision('qty_issued')) * item_master_wigth_per_unit
                                     total_transfer_qty += qty
                                 if self.type == "Pick List":
-                                    qty = res.get('picked_qty') * item_master_wigth_per_unit
+                                    qty = flt(flt(res.get('picked_qty')) * flt(item_master_wigth_per_unit), precision1)
                                     total_transfer_qty += qty
                             if not item_master_wigth_per_unit:
                                 m = "Please Enter weight per unit for item {0}".format(line.get('item_code'))
@@ -161,7 +164,7 @@ class MaterialConsumption(Document):
                 itm_doc = frappe.get_doc("Item", res.item_code)
                 se_item = stock_entry.append("items")
                 se_item.item_code = res.item_code
-                se_item.qty = res.picked_qty
+                se_item.qty = flt(res.picked_qty, res.precision('qty'))
                 se_item.s_warehouse = res.warehouse
                 #se_item.s_warehouse = self.s_warehouse
                 se_item.item_name = itm_doc.item_name
@@ -178,7 +181,7 @@ class MaterialConsumption(Document):
                 # if self.type == "Pick List":
                 item_master_wigth_per_unit = frappe.db.get_value("Item", {"item_code":res.get('item_code')}, 'weight_per_unit')
                 if item_master_wigth_per_unit:
-                    qty = res.get('picked_qty') * item_master_wigth_per_unit
+                    qty = flt(flt(res.get('picked_qty')) * flt(item_master_wigth_per_unit), precision1)
                     total_transfer_qty += qty
                 if not item_master_wigth_per_unit:
                     m = "Please Enter weight per unit for item {0}".format(line.get('item_code'))
@@ -316,9 +319,9 @@ def add_pick_list_item(doc_name,pick_list):
             'description': res.description,
             'item_group': res.item_group,
             'warehouse': res.warehouse,
-            'qty': res.qty,
-            'stock_qty': res.stock_qty,
-            'picked_qty': res.picked_qty,
+            'qty': flt(res.qty, res.precision('qty')),
+            'stock_qty': flt(res.stock_qty, res.precision('stock_qty')),
+            'picked_qty': flt(res.picked_qty, res.precision('picked_qty')),
             'uom': res.uom,
             'stock_uom': res.stock_uom,
             'serial_no': res.serial_no,
@@ -333,16 +336,17 @@ def add_pick_list_item(doc_name,pick_list):
    
 @frappe.whitelist()
 def consumption_list(wo):
+    precision1 = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty"))
     query = """SELECT * FROM `tabWork Order Item` where parent = '{0}';""".format(wo)
 
     all_items = frappe.db.sql(query, as_dict = True)
     data_list = []
     for item in all_items:
-        qty = item.get('transferred_qty') - item.get('consumed_qty')
+        qty = flt(item.get('transferred_qty'), item.precision('transferred_qty')) - flt(item.get('consumed_qty'), item.precision('consumed_qty'))
         data = {
             "item_code":item.get("item_code"),
-            "transferred_qty": item.get('transferred_qty'),
-            "consumed_qty": item.get('consumed_qty'),
+            "transferred_qty": flt(item.get('transferred_qty'), item.precision('transferred_qty')),
+            "consumed_qty": flt(item.get('consumed_qty'), item.precision('consumed_qty')),
             "qty": qty,
             "stock_qty": 10
         }
