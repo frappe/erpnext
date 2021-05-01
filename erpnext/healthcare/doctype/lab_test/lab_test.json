@@ -26,7 +26,6 @@
   "expected_result_date",
   "expected_result_time",
   "printed_on",
-  "invoiced",
   "sb_first",
   "patient",
   "patient_name",
@@ -63,6 +62,9 @@
   "result_legend_section",
   "legend_print_position",
   "result_legend",
+  "more_information_section",
+  "healthcare_service_order",
+  "invoiced",
   "section_break_50",
   "email_sent",
   "sms_sent",
@@ -71,8 +73,7 @@
   "descriptive_toggle",
   "sensitivity_toggle",
   "amended_from",
-  "prescription",
-  "healthcare_service_order"
+  "prescription"
  ],
  "fields": [
   {
@@ -562,7 +563,6 @@
   {
    "fieldname": "healthcare_service_order",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Healthcare Service Order",
    "no_copy": 1,
    "options": "Healthcare Service Order",
@@ -584,11 +584,17 @@
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Time"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-29 13:56:02.043744",
+ "modified": "2021-05-01 20:01:55.611050",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Lab Test",

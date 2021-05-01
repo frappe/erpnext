@@ -14,7 +14,6 @@
   "medical_code",
   "column_break_30",
   "company",
-  "invoiced",
   "section_break_6",
   "patient",
   "patient_name",
@@ -42,9 +41,9 @@
   "column_break_27",
   "consumption_details",
   "sb_refs",
-  "column_break_34",
-  "prescription",
   "healthcare_service_order",
+  "invoiced",
+  "prescription",
   "amended_from"
  ],
  "fields": [
@@ -264,7 +263,8 @@
   {
    "collapsible": 1,
    "fieldname": "sb_refs",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "More Information"
   },
   {
    "fieldname": "patient_name",
@@ -278,10 +278,6 @@
    "in_list_view": 1,
    "label": "Practitioner Name",
    "read_only": 1
-  },
-  {
-   "fieldname": "column_break_34",
-   "fieldtype": "Column Break"
   },
   {
    "allow_on_submit": 1,
@@ -304,7 +300,6 @@
   {
    "fieldname": "healthcare_service_order",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Healthcare Service Order",
    "no_copy": 1,
    "options": "Healthcare Service Order",
@@ -314,7 +309,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-28 23:52:28.797148",
+ "modified": "2021-05-01 20:03:38.692352",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Clinical Procedure",

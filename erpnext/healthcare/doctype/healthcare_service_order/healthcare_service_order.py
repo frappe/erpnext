@@ -36,10 +36,10 @@ class HealthcareServiceOrder(Document):
 	def set_order_details(self):
 		if self.order_doctype and self.order_template:
 			order_template = frappe.get_doc(self.order_doctype, self.order_template)
-			if not self.healthcare_service_order_category and order_template.get('healthcare_service_order_category'):
-				self.healthcare_service_order_category = order_template.healthcare_service_order_category
+
 			if not self.patient_care_type and order_template.get('patient_care_type'):
 				self.patient_care_type = order_template.patient_care_type
+
 			if not self.staff_role and order_template.get('staff_role'):
 				self.staff_role = order_template.staff_role
 		else:

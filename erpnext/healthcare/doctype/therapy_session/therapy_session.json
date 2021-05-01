@@ -27,14 +27,15 @@
   "service_unit",
   "start_date",
   "start_time",
-  "invoiced",
   "exercises_section",
   "exercises",
   "section_break_23",
   "total_counts_targeted",
   "column_break_25",
   "total_counts_completed",
+  "more_information_section",
   "healthcare_service_order",
+  "invoiced",
   "amended_from"
  ],
  "fields": [
@@ -224,17 +225,22 @@
   {
    "fieldname": "healthcare_service_order",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Healthcare Service Order",
    "no_copy": 1,
    "options": "Healthcare Service Order",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "more_information_section",
+   "fieldtype": "Section Break",
+   "label": "More Information"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-29 11:36:08.172905",
+ "modified": "2021-05-01 20:05:19.221039",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Therapy Session",
