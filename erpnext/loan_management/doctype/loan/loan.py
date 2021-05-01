@@ -193,7 +193,8 @@ def request_loan_closure(loan, posting_date=None):
 		posting_date = getdate()
 
 	amounts = calculate_amounts(loan, posting_date)
-	pending_amount = amounts['payable_amount'] + amounts['unaccrued_interest']
+	pending_amount = amounts['pending_principal_amount'] + amounts['unaccrued_interest'] + \
+		amounts['interest_amount'] + amounts['penalty_amount']
 
 	loan_type = frappe.get_value('Loan', loan, 'loan_type')
 	write_off_limit = frappe.get_value('Loan Type', loan_type, 'write_off_amount')
