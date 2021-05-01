@@ -9,7 +9,6 @@ import json
 from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
-from frappe.model.mapper import get_mapped_doc
 from six import string_types
 
 class HealthcareServiceOrder(Document):

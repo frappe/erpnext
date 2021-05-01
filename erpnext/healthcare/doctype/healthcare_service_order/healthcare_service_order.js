@@ -48,40 +48,40 @@ frappe.ui.form.on('Healthcare Service Order', {
 
 			if (frm.doc.status === 'Active') {
 				frm.add_custom_button(__('On Hold'), function() {
-					frm.events.set_status(frm, status='On Hold')
+					frm.events.set_status(frm, 'On Hold');
 				}, __('Status'));
 
 				frm.add_custom_button(__('Completed'), function() {
-					frm.events.set_status(frm, status='Completed')
+					frm.events.set_status(frm, 'Completed');
 				}, __('Status'));
 			}
 
 			if (frm.doc.status === 'On Hold') {
 				frm.add_custom_button(__('Active'), function() {
-					frm.events.set_status(frm, status='Active')
+					frm.events.set_status(frm, 'Active');
 				}, __('Status'));
 
 				frm.add_custom_button(__('Completed'), function() {
-					frm.events.set_status(frm, status='Completed')
+					frm.events.set_status(frm, 'Completed');
 				}, __('Status'));
 			}
 
 		} else if (frm.doc.docstatus === 2) {
 
 			frm.add_custom_button(__('Revoked'), function() {
-				frm.events.set_status(frm, status='Revoked')
+				frm.events.set_status(frm, 'Revoked');
 			}, __('Status'));
 
 			frm.add_custom_button(__('Replaced'), function() {
-				frm.events.set_status(frm, status='Replaced')
+				frm.events.set_status(frm, 'Replaced');
 			}, __('Status'));
 
 			frm.add_custom_button(__('Entered in Error'), function() {
-				frm.events.set_status(frm, status='Entered in Error')
+				frm.events.set_status(frm, 'Entered in Error');
 			}, __('Status'));
 
 			frm.add_custom_button(__('Unknown'), function() {
-				frm.events.set_status(frm, status='Unknown')
+				frm.events.set_status(frm, 'Unknown');
 			}, __('Status'));
 
 		}
@@ -97,7 +97,7 @@ frappe.ui.form.on('Healthcare Service Order', {
 				status: status
 			},
 			callback: function(r) {
-				frm.reload_doc();
+				if (!r.exc) frm.reload_doc();
 			}
 		});
 	},
@@ -195,7 +195,7 @@ frappe.ui.form.on('Healthcare Service Order', {
 	},
 
 	birth_date: function(frm) {
-		age_str = calculate_age(frm.doc.birth_date);
+		let age_str = calculate_age(frm.doc.birth_date);
 		frm.set_value('patient_age', age_str);
 	}
 });

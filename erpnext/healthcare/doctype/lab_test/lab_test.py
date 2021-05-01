@@ -53,7 +53,7 @@ class LabTest(Document):
 					item.secondary_uom_result = float(item.result_value) * float(item.conversion_factor)
 				except:
 					item.secondary_uom_result = ''
-					frappe.msgprint(_('Row #{0}: Result for Secondary UOM not calculated'.format(item.idx)), title = _('Warning'))
+					frappe.msgprint(_('Row #{0}: Result for Secondary UOM not calculated').format(item.idx), title = _('Warning'))
 
 	def validate_result_values(self):
 		if self.normal_test_items:
@@ -232,9 +232,9 @@ def create_sample_doc(template, patient, invoice, company = None):
 			sample_collection = frappe.get_doc('Sample Collection', sample_exists[0][0])
 			quantity = int(sample_collection.sample_qty) + int(template.sample_qty)
 			if template.sample_details:
-				sample_details = sample_collection.sample_details + '\n-\n' + _('Test: ')
+				sample_details = sample_collection.sample_details + '\n-\n' + _('Test:')
 				sample_details += (template.get('lab_test_name') or template.get('template')) +	'\n'
-				sample_details += _('Collection Details: ') + '\n\t' + template.sample_details
+				sample_details += _('Collection Details:') + '\n\t' + template.sample_details
 				frappe.db.set_value('Sample Collection', sample_collection.name, 'sample_details', sample_details)
 
 			frappe.db.set_value('Sample Collection', sample_collection.name, 'sample_qty', quantity)

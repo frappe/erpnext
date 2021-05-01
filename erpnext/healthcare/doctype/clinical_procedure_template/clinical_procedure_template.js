@@ -187,7 +187,7 @@ frappe.tour['Clinical Procedure Template'] = [
 	{
 		fieldname: 'consume_stock',
 		title: __('Allow Stock Consumption'),
-		description: __('Check this if the Clinical Procedure utilises consumables. Click ') + "<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/clinical_procedure_template#22-manage-procedure-consumables' target='_blank'>here</a>" + __(' to know more')
+		description: __('Check this if the Clinical Procedure utilises consumables. Click {0} to know more', ["<a href='https://docs.erpnext.com/docs/user/manual/en/healthcare/clinical_procedure_template#22-manage-procedure-consumables' target='_blank'>here</a>"])
 
 	},
 	{

@@ -8,7 +8,7 @@ import frappe
 import json
 from frappe import _
 from frappe.utils.formatters import format_value
-from frappe.utils import time_diff_in_hours, rounded, getdate, flt
+from frappe.utils import time_diff_in_hours, rounded, flt, get_link_to_form
 from six import string_types
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_income_account
 from erpnext.healthcare.doctype.fee_validity.fee_validity import create_fee_validity
@@ -162,8 +162,9 @@ def get_clinical_procedures_to_invoice(patient, company):
 
 			service_item = frappe.db.get_single_value('Healthcare Settings', 'clinical_procedure_consumable_item')
 			if not service_item:
-				msg = _('Please Configure Clinical Procedure Consumable Item in ')
-				msg += '''<b><a href='/app/Form/Healthcare Settings'>Healthcare Settings</a></b>'''
+				msg = _('Please Configure Clinical Procedure Consumable Item in {0}').format(
+					get_link_to_form('Healthcare Settings', 'Healthcare Settings'))
+
 				frappe.throw(msg, title=_('Missing Configuration'))
 
 			clinical_procedures_to_invoice.append({
