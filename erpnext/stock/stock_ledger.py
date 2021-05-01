@@ -416,7 +416,7 @@ class update_entries_after(object):
 		frappe.db.set_value("Stock Entry Detail", sle.voucher_detail_no, "basic_rate", outgoing_rate)
 
 		# Update outgoing item's rate, recalculate FG Item's rate and total incoming/outgoing amount
-		stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no)
+		stock_entry = frappe.get_doc("Stock Entry", sle.voucher_no, for_update=True)
 		stock_entry.calculate_rate_and_amount(reset_outgoing_rate=False, raise_error_if_no_rate=False)
 		stock_entry.db_update()
 		for d in stock_entry.items:

@@ -7,8 +7,26 @@ rules:
     - pattern-inside: |
         def on_submit(self, ...):
           ...
+    - metavariable-regex:
+        metavariable: '$ATTR'
+        # this is negative look-ahead, add more attrs to ignore like (ignore|ignore_this_too|ignore_me)
+        regex: '^(?!status_updater)(.*)$'
   message: |
     Doctype modified after submission. Please check if modification of self.$ATTR is commited to database.
+  languages: [python]
+  severity: ERROR
+
+- id: frappe-modifying-after-cancel
+  patterns:
+    - pattern: self.$ATTR = ...
+    - pattern-inside: |
+        def on_cancel(self, ...):
+          ...
+    - metavariable-regex:
+        metavariable: '$ATTR'
+        regex: '^(?!ignore_linked_doctypes|status_updater)(.*)$'
+  message: |
+    Doctype modified after cancellation. Please check if modification of self.$ATTR is commited to database.
   languages: [python]
   severity: ERROR
 
