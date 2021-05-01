@@ -18,6 +18,7 @@ import frappe
 from frappe import _
 from frappe.model.document import Document
 from frappe.model.naming import make_autoname
+from frappe.model.meta import get_field_precision
 import json
 # from erpnext.manufacturing.doctype.bom.bom import add_additional_cost
 from frappe.utils import cint, cstr, flt
@@ -47,7 +48,7 @@ class MaterialProduce(Document):
                         "qty_produced": res.qty_produced,
                         "has_batch_no": res.has_batch_no,
                         "batch": res.batch_series,
-                        "rate": res.rate,
+                        "rate": flt(res.rate, res.precision('rate')),
                         "weight": res.weight,
                         "line_ref": res.line_ref
                     })
@@ -74,14 +75,15 @@ class MaterialProduce(Document):
         wo.db_update()
 
     def cost_details_calculation(self):
+        precision1 = get_field_precision(frappe.get_meta("Material Produce").get_field("cost_of_scrap"))
         if self.partial_produce:
             wo = frappe.get_doc("Work Order", self.work_order)
             total_transfer_qty = 0
             for res in self.material_produce_item:
                 if res.type == "FG":
-                    total_transfer_qty += res.qty_produced
-            self.cost_of_rm_consumed = (wo.planned_rm_cost/wo.qty)*total_transfer_qty
-            self.cost_of_operation_consumed = (wo.planned_operating_cost/wo.qty)*total_transfer_qty
+                    total_transfer_qty += flt(res.qty_produced, self.precision('cost_of_rm_consumed'))
+            self.cost_of_rm_consumed = ((flt(wo.planned_rm_cost), wo.precision('planned_rm_cost'))/(flt(wo.qty), wo.precision('qty')))*total_transfer_qty
+            self.cost_of_operation_consumed = ((flt(wo.planned_operating_cost), wo.precision('planned_operating_cost'))/(flt(wo.qty), wo.precision('qty')))*total_transfer_qty
         else:
             tcrmc = tcoc = scrap_cost = 0
             wo = frappe.get_doc("Work Order", self.work_order)
@@ -100,9 +102,8 @@ class MaterialProduce(Document):
                 if res.type == "Scrap" and res.data:
                     for line in json.loads(res.data):
                         if line.rate:
-                            scrap_cost += line.rate
-            print(scrap_cost)
-            self.cost_of_scrap = scrap_cost
+                            scrap_cost += flt(line.rate, precision1)
+            self.cost_of_scrap = flt(scrap_cost, self.precision('cost_of_scrap'))
 
             self.amount = (self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_operation_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap)
             
@@ -245,6 +246,9 @@ class MaterialProduce(Document):
 
 @frappe.whitelist()
 def add_details_line(bom, type, line_id, work_order, item_code, warehouse,qty_produced=None,batch_size=None, data=None, amount=None):
+    # print(type)
+    # precision = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty_to_issue"))
+    # print(precision)
     if qty_produced:
         qty_produced = float(qty_produced)
     else:
@@ -253,7 +257,9 @@ def add_details_line(bom, type, line_id, work_order, item_code, warehouse,qty_pr
         batch_size = float(batch_size)
     else:
         batch_size = 0
+    print("*****"*20)
     if not data:
+        print("ppppp"*20)
         item = frappe.get_doc("Item", item_code)
         lst = []
         batch_option = None
@@ -289,7 +295,7 @@ def add_details_line(bom, type, line_id, work_order, item_code, warehouse,qty_pr
                 else:
                     per_item_rate = 0
             else:
-                per_item_rate = flt(flt(amount) / flt(qty_produced), 3)
+                per_item_rate = flt((flt(amount) / flt(qty_produced)), 3)
                 print(per_item_rate)
         else:
             per_item_rate = 0
@@ -351,6 +357,7 @@ def add_details_line(bom, type, line_id, work_order, item_code, warehouse,qty_pr
             })
         return lst
     else:
+        print("OOOOO"*20)
         return json.loads(data)
 
 def add_additional_cost(stock_entry, work_order):

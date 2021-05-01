@@ -41,6 +41,7 @@ frappe.ui.form.on('Material Produce Item', {
             frappe.throw(__("Please Save Material Produce first!"))
         }
         var row = locals[cdt][cdn];
+        console.log(row);
         add_details_line(frm,row)
     },
 });
@@ -97,7 +98,7 @@ function add_details_line(frm,line_obj){
         callback: function (r) {
             if(r.message){
                 frm.clear_table('material_produce_details');
-                console.log('msg: ', r.message)
+                // console.log('msg: ', r.message)
                 for (const d of r.message){
                     var row = frm.add_child('material_produce_details');
                     row.item_code = d.item_code;
