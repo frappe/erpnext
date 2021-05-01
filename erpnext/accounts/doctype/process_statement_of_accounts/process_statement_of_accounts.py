@@ -62,7 +62,7 @@ def get_report_pdf(doc, consolidated=True):
 				ageing[0]['ageing_based_on'] = doc.ageing_based_on
 
 		tax_id = frappe.get_doc('Customer', entry.customer).tax_id
-		presentation_currency =  get_party_account_currency('Customer', entry.customer, doc.company) \
+		presentation_currency = get_party_account_currency('Customer', entry.customer, doc.company) \
 				or doc.currency or get_company_currency(doc.company)
 
 		filters= frappe._dict({
