@@ -70,7 +70,6 @@ class Loan(AccountsController):
 			frappe.throw(_("Repay From Salary can be selected only for term loans"))
 
 	def make_repayment_schedule(self):
-
 		if not self.repayment_start_date:
 			frappe.throw(_("Repayment Start Date is mandatory for term loans"))
 
@@ -78,10 +77,9 @@ class Loan(AccountsController):
 		payment_date = self.repayment_start_date
 		balance_amount = self.loan_amount
 		while(balance_amount > 0):
-			interest_amount = rounded(balance_amount * flt(self.rate_of_interest) / (12*100))
+			interest_amount = flt(balance_amount * flt(self.rate_of_interest) / (12*100))
 			principal_amount = self.monthly_repayment_amount - interest_amount
-			balance_amount = rounded(balance_amount + interest_amount - self.monthly_repayment_amount)
-
+			balance_amount = flt(balance_amount + interest_amount - self.monthly_repayment_amount)
 			if balance_amount < 0:
 				principal_amount += balance_amount
 				balance_amount = 0.0
