@@ -38,7 +38,7 @@
    "fieldname": "healthcare_service",
    "fieldtype": "Select",
    "label": "Healthcare Service",
-   "options": "\nAppointment Type\nClinical Procedure Template\nTherapy Type\nMedication\nLab Test Template\nRadiology Examination Template\nHealthcare Service Unit Type"
+   "options": "\nAppointment Type\nClinical Procedure Template\nTherapy Type\nMedication\nLab Test Template\nHealthcare Service Unit Type"
   },
   {
    "depends_on": "eval:doc.coverage_based_on == 'Service'",
@@ -184,7 +184,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-01-19 15:55:45.775112",
+ "modified": "2021-05-02 11:57:45.775112",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Insurance Coverage",

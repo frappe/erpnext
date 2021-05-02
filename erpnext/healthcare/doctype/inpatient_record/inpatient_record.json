@@ -445,18 +445,6 @@
   },
   {
    "collapsible": 1,
-   "fieldname": "radiology_orders_section",
-   "fieldtype": "Section Break",
-   "label": "Radiology Orders"
-  },
-  {
-   "fieldname": "radiology_procedure_prescription",
-   "fieldtype": "Table",
-   "label": "Radiology Procedure Prescription",
-   "options": "Radiology Procedure Prescription"
-  },
-  {
-   "collapsible": 1,
    "fieldname": "diet_recommendation_section",
    "fieldtype": "Section Break",
    "label": "Diet Recommendation"
@@ -509,7 +497,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-02 12:00:17.318988",
+ "modified": "2021-05-02 12:03:17.318988",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Inpatient Record",

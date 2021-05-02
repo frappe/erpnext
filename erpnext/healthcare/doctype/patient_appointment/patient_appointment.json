@@ -36,7 +36,6 @@
   "appointment_date",
   "appointment_time",
   "appointment_datetime",
-  "practitioner_availability",
   "sb_source",
   "source",
   "column_break_30",
@@ -376,67 +375,6 @@
    "fieldtype": "Column Break"
   },
   {
-   "depends_on": "eval:!doc.procedure_template && !doc.therapy_type",
-   "fieldname": "radiology_examination_template",
-   "fieldtype": "Link",
-   "label": "Radiology Examination Template",
-   "options": "Radiology Examination Template"
-  },
-  {
-   "fieldname": "radiology_procedure_prescription",
-   "fieldtype": "Link",
-   "hidden": 1,
-   "label": "Radiology Procedure Prescription",
-   "options": "Radiology Procedure Prescription",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:!doc.procedure_template && doc.__islocal && doc.patient",
-   "fieldname": "get_ordered_radiology_procedures",
-   "fieldtype": "Button",
-   "label": "Get Ordered Radiology Procedures"
-  },
-  {
-   "depends_on": "eval: !doc.procedure_template && doc.patient",
-   "fetch_from": "service_unit.modality_type",
-   "fetch_if_empty": 1,
-   "fieldname": "modality_type",
-   "fieldtype": "Link",
-   "label": "Modality Type",
-   "options": "Modality Type",
-   "read_only": 1
-  },
-  {
-   "depends_on": "eval:doc.modality_type && doc.patient",
-   "fetch_from": "service_unit.modality_name",
-   "fieldname": "modality",
-   "fieldtype": "Data",
-   "label": "Modality",
-   "read_only": 1
-  },
-  {
-   "fieldname": "practitioner_availability",
-   "fieldtype": "Link",
-   "label": "Practitioner Availability",
-   "options": "Practitioner Availability",
-   "read_only": 1
-  },
-  {
-   "fetch_from": "patient.triage",
-   "fieldname": "triage",
-   "fieldtype": "Link",
-   "label": "Triage",
-   "options": "Triage",
-   "read_only": 1
-  },
-  {
-   "fieldname": "patient_referral",
-   "fieldtype": "Link",
-   "label": "Patient Referral",
-   "options": "Patient Referral",
-   "read_only": 1
-  },
-  {
    "depends_on": "eval:doc.patient",
    "fieldname": "section_break_19",
    "fieldtype": "Section Break"
@@ -457,13 +395,6 @@
   {
    "fieldname": "column_break_3",
    "fieldtype": "Column Break"
-  },
-  {
-   "depends_on": "triage",
-   "fetch_from": "triage.color",
-   "fieldname": "color",
-   "fieldtype": "Color",
-   "label": "Color"
   },
   {
    "fieldname": "section_break_5",
@@ -510,7 +441,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-02 06:54:39.770467",
+ "modified": "2021-05-02 11:59:40.770467",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

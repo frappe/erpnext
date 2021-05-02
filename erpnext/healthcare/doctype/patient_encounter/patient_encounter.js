@@ -395,7 +395,6 @@ var refer_practitioner = function(frm) {
 		primary_action : function() {
 			var args = {
 				patient: frm.doc.patient,
-				triage:frm.doc.triage,
 				diagnosis:frm.doc.diagnosis,
 				complaint:frm.doc.symptoms,
 				patient_encounter: frm.doc.name,

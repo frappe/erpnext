@@ -360,17 +360,6 @@
    "options": "Healthcare Practitioner"
   },
   {
-   "fieldname": "radiology_procedure_prescription",
-   "fieldtype": "Table",
-   "label": "Radiology Procedure",
-   "options": "Radiology Procedure Prescription"
-  },
-  {
-   "fieldname": "radiology_procedures_section",
-   "fieldtype": "Section Break",
-   "label": "Radiology Orders"
-  },
-  {
    "fieldname": "patient_vitals_summary_section",
    "fieldtype": "Section Break",
    "label": "Patient Vitals Summary"
@@ -383,14 +372,6 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
-  },
-  {
-   "fetch_from": "patient.triage",
-   "fieldname": "triage",
-   "fieldtype": "Link",
-   "label": "Triage",
-   "options": "Triage",
-   "read_only": 1
   },
   {
    "fieldname": "diet_recommendation_section",
@@ -446,7 +427,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-02 11:50:00.783119",
+ "modified": "2020-05-02 11:57:00.783119",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
