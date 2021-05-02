@@ -5,18 +5,19 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, nowdate
+from frappe.utils import getdate, get_link_to_form
 from frappe.model.document import Document
 
 class HealthcareInsuranceContract(Document):
 	def validate(self):
 		if self.is_active:
-			contract = frappe.db.exists('Healthcare Insurance Contract',
-			{
+			contract = frappe.db.exists('Healthcare Insurance Contract', {
 				'insurance_company': self.insurance_company,
-				'start_date':("<=", getdate(nowdate())),
-				'end_date':(">=", getdate(nowdate())),
-				'is_active': 1
+				'start_date':('<=', getdate()),
+				'end_date':('>=', getdate()),
+				'is_active': 1,
+				'name': ('!=', self.name)
 			})
-			if contract and contract != self.name:
-				frappe.throw(_('There exist an active contract with this insurance company {0}').format(contract))
+			if contract:
+				frappe.throw(_('An active contract with this insurance company already exists: {0}').format(
+					get_link_to_form('Healthcare Insurance Contract', contract)), title=_('Duplicate Contract'))

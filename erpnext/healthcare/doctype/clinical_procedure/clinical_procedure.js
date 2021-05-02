@@ -131,9 +131,9 @@ frappe.ui.form.on('Clinical Procedure', {
 				}).addClass("btn-primary");
 			}
 		}
-		frm.set_query('insurance_subscription', function(){
-			return{
-				filters:{
+		frm.set_query('insurance_subscription', function() {
+			return {
+				filters: {
 					'patient': frm.doc.patient,
 					'docstatus': 1
 				}

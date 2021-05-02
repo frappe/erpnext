@@ -14,9 +14,9 @@
  "field_order": [
   "naming_series",
   "insurance_company_name",
+  "customer",
   "column_break_3",
   "company",
-  "customer",
   "address_and_contacts_section",
   "address_html",
   "website",
@@ -61,6 +61,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "address_and_contacts_section",
    "fieldtype": "Section Break",
    "label": "Address and Contacts",
@@ -112,8 +113,21 @@
    "reqd": 1
   }
  ],
- "links": [],
- "modified": "2021-01-19 14:04:13.813892",
+ "links": [
+  {
+   "link_doctype": "Healthcare Insurance Contract",
+   "link_fieldname": "insurance_company"
+  },
+  {
+   "link_doctype": "Healthcare Insurance Coverage Plan",
+   "link_fieldname": "insurance_company"
+  },
+  {
+   "link_doctype": "Healthcare Insurance Subscription",
+   "link_fieldname": "insurance_company"
+  }
+ ],
+ "modified": "2021-05-02 15:24:26.677522",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Company",

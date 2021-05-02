@@ -14,6 +14,7 @@ def setup_healthcare():
 	create_duration()
 	create_dosage()
 	create_healthcare_item_groups()
+	create_customer_groups()
 	create_sensitivity()
 	add_healthcare_service_unit_tree_root()
 	setup_patient_history_settings()
@@ -181,6 +182,13 @@ def create_healthcare_item_groups():
 			'is_group': 0, 'parent_item_group': _('All Item Groups') },
 		{'doctype': 'Item Group', 'item_group_name': _('Drug'),
 			'is_group': 0, 'parent_item_group': _('All Item Groups') }
+	]
+	insert_record(records)
+
+def create_customer_groups():
+	records = [
+		{'doctype': 'Customer Group', 'customer_group_name': _('Healthcare Insurance Company'),
+			'is_group': 0, 'parent_customer_group': _('All Customer Groups')}
 	]
 	insert_record(records)
 

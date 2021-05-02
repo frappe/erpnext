@@ -16,11 +16,11 @@
   "insurance_company_name",
   "insurance_company_customer",
   "default_price_list",
-  "column_break_6",
+  "apply_coverage_on_amount_with_tax",
   "is_active",
+  "column_break_6",
   "start_date",
   "end_date",
-  "apply_coverage_on_amount_with_tax",
   "amended_from"
  ],
  "fields": [
@@ -29,7 +29,7 @@
    "fieldtype": "Select",
    "hidden": 1,
    "label": "Contract ",
-   "options": "HIC-.YYYY.",
+   "options": "HLC-IC-.YYYY.-",
    "set_only_once": 1
   },
   {
@@ -67,7 +67,7 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "0",
+   "default": "1",
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Is Active"
@@ -106,7 +106,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-19 14:08:27.852969",
+ "modified": "2021-05-02 22:54:31.958241",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Contract",

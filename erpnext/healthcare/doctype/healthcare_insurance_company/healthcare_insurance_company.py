@@ -10,35 +10,37 @@ from frappe.contacts.address_and_contact import load_address_and_contact
 
 class HealthcareInsuranceCompany(Document):
 	def after_insert(self):
-		create_customer(self)
+		self.create_customer()
 		self.reload()
+
 	def	onload(self):
 		load_address_and_contact(self)
-def create_customer(doc):
-	customer_group = frappe.db.exists('Customer Group',{
-	'customer_group_name': 'Healthcare Insurance Company'})
-	if not customer_group:
-		customer_group=frappe.get_doc({
-		'customer_group_name': 'Healthcare Insurance Company',
-		'parent_customer_group': 'All Customer Groups',
-		'doctype': 'Customer Group'
-		}).insert().name
-	territory = frappe.get_value('Selling Settings', None, 'territory')
-	if not (territory):
-		territory = 'Rest Of The World'
-		frappe.msgprint(_('Please set default  territory in Selling Settings'), alert=True)
-	customer = frappe.new_doc('Customer')
-	customer.customer_name = doc.insurance_company_name
-	customer.customer_group = customer_group
-	customer.territory = territory
-	customer.customer_type = 'Company'
-	if doc.insurance_company_receivable_account:
+
+	def create_customer(self):
 		accounts = []
-		accounts.append({
-			'account': doc.insurance_company_receivable_account,
-			'company': doc.company
-		})
-		customer.set('accounts', accounts)
-	customer.save(ignore_permissions = True)
-	frappe.db.set_value('Healthcare Insurance Company', doc.name, 'customer', customer.name)
-	frappe.msgprint(_('Customer {0} is created.').format(customer.name), alert=True)
+
+		if self.insurance_company_receivable_account:
+			accounts.append({
+				'account': self.insurance_company_receivable_account,
+				'company': self.company
+			})
+
+		customer_group = frappe.db.exists('Customer Group', {'customer_group_name': _('Healthcare Insurance Company')})
+		if not customer_group:
+			customer_group = frappe.get_doc({
+				'customer_group_name': 'Healthcare Insurance Company',
+				'parent_customer_group': 'All Customer Groups',
+				'doctype': 'Customer Group'
+			}).insert(ignore_permissions=True, ignore_mandatory=True)
+
+		customer = frappe.get_doc({
+			'doctype': 'Customer',
+			'customer_name': self.insurance_company_name,
+			'customer_group': customer_group or frappe.db.get_single_value('Selling Settings', 'customer_group'),
+			'territory': frappe.db.get_single_value('Selling Settings', 'territory'),
+			'customer_type': 'Company',
+			'accounts': accounts
+		}).insert(ignore_permissions=True, ignore_mandatory=True)
+
+		self.db_set('customer', customer.name)
+		frappe.msgprint(_('Customer {0} is created.').format(customer.name), alert=True)

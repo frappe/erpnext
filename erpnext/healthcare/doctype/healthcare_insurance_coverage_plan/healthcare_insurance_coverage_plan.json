@@ -23,22 +23,23 @@
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Series",
-   "options": "HICP-.YYYY.-",
+   "options": "HLC-ICP-.YYYY.-",
    "set_only_once": 1
   },
   {
    "fieldname": "coverage_plan_name",
    "fieldtype": "Data",
-   "label": "Coverage Plan Name"
+   "label": "Coverage Plan Name",
+   "reqd": 1
   },
   {
    "fieldname": "insurance_company",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Insurance Company",
-   "options": "Healthcare Insurance Company"
+   "options": "Healthcare Insurance Company",
+   "reqd": 1
   },
   {
    "fetch_from": "insurance_company.insurance_company_name",
@@ -53,7 +54,7 @@
    "fieldtype": "Column Break"
   },
   {
-   "default": "0",
+   "default": "1",
    "fieldname": "is_active",
    "fieldtype": "Check",
    "label": "Is Active"
@@ -68,7 +69,7 @@
   }
  ],
  "links": [],
- "modified": "2021-01-19 15:31:17.157787",
+ "modified": "2021-05-02 15:59:28.220674",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Coverage Plan",
