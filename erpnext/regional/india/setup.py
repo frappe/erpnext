@@ -15,6 +15,7 @@ def setup(company=None, patch=True):
 	setup_company_independent_fixtures(patch=patch)
 	if not patch:
 		make_fixtures(company)
+		setup_gst_settings(company)
 
 # TODO: for all countries
 def setup_company_independent_fixtures(patch=False):
@@ -663,6 +664,57 @@ def make_fixtures(company=None):
 
 	# create records for Tax Withholding Category
 	set_tax_withholding_category(company)
+
+def setup_gst_settings(company):
+	# Will only add default GST accounts if present
+	input_account_names = ['Input Tax CGST', 'Input Tax SGST', 'Input Tax IGST']
+	output_account_names = ['Output Tax CGST', 'Output Tax SGST', 'Output Tax IGST']
+	gst_settings = frappe.get_single('GST Settings')
+	existing_account_list = []
+
+	for account in gst_settings.get('gst_accounts'):
+		for key in ['cgst_account', 'sgst_account', 'igst_account']:
+			existing_account_list.append(account.get(key))
+
+	gst_accounts = frappe._dict(frappe.get_all("Account",
+		{'company': company, 'name': ('like', "%GST%")}, ['account_name', 'name'], as_list=1))
+
+	all_input_account_exists = 0
+	all_output_account_exists = 0
+
+	for account in input_account_names:
+		if not gst_accounts.get(account):
+			all_input_account_exists = 1
+
+		# Check if already added in GST Settings
+		if gst_accounts.get(account) in existing_account_list:
+			all_input_account_exists = 1
+
+	for account in output_account_names:
+		if not gst_accounts.get(account):
+			all_output_account_exists = 1
+
+		# Check if already added in GST Settings
+		if gst_accounts.get(account) in existing_account_list:
+			all_output_account_exists = 1
+
+	if not all_input_account_exists:
+		gst_settings.append('gst_accounts', {
+			'company': company,
+			'cgst_account': gst_accounts.get(input_account_names[0]),
+			'sgst_account': gst_accounts.get(input_account_names[1]),
+			'igst_account': gst_accounts.get(input_account_names[2])
+		})
+
+	if not all_output_account_exists:
+		gst_settings.append('gst_accounts', {
+			'company': company,
+			'cgst_account': gst_accounts.get(output_account_names[0]),
+			'sgst_account': gst_accounts.get(output_account_names[1]),
+			'igst_account': gst_accounts.get(output_account_names[2])
+		})
+
+	gst_settings.save()
 
 def set_salary_components(docs):
 	docs.extend([
