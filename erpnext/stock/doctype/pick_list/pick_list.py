@@ -200,7 +200,7 @@ def validate_item_locations(pick_list):
 
 def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
 	precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("stock_qty"))
-	precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("qty"))
+	precision2 = get_field_precision(frappe.get_meta("Pick List Item").get_field("qty"))
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
 
