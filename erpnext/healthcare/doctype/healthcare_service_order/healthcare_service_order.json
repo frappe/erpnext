@@ -550,6 +550,8 @@
   },
   {
    "allow_on_submit": 1,
+   "fetch_from": "insurance_claim.claim_status",
+   "fetch_if_empty": 1,
    "fieldname": "claim_status",
    "fieldtype": "Select",
    "label": "Claim Status",
@@ -573,7 +575,7 @@
    "link_fieldname": "healthcare_service_order"
   }
  ],
- "modified": "2021-05-02 11:04:12.671393",
+ "modified": "2021-05-02 11:24:12.671393",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",

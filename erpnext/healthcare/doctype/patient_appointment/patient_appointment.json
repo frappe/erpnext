@@ -500,6 +500,8 @@
    "read_only": 1
   },
   {
+   "fetch_from": "insurance_claim.claim_status",
+   "fetch_if_empty": 1,
    "fieldname": "claim_status",
    "fieldtype": "Select",
    "label": "Claim Status",
@@ -508,7 +510,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-02 06:53:39.770467",
+ "modified": "2021-05-02 06:54:39.770467",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",

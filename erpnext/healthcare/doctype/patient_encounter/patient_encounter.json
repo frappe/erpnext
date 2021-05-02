@@ -435,6 +435,8 @@
   },
   {
    "allow_on_submit": 1,
+   "fetch_from": "insurance_claim.claim_status",
+   "fetch_if_empty": 1,
    "fieldname": "claim_status",
    "fieldtype": "Select",
    "label": "Claim Status",
@@ -444,7 +446,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-02 11:39:00.783119",
+ "modified": "2020-05-02 11:40:00.783119",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
