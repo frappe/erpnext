@@ -189,24 +189,6 @@ def build_account_tree(tree, parent, all_accounts):
 		build_account_tree(tree[child.account_name], child, all_accounts)
 
 @frappe.whitelist()
-def validate_bank_account(coa, bank_account):
-	accounts = []
-	chart = get_chart(coa)
-
-	if chart:
-		def _get_account_names(account_master):
-			for account_name, child in iteritems(account_master):
-				if account_name not in ["account_number", "account_type",
-					"root_type", "is_group", "tax_rate"]:
-					accounts.append(account_name)
-
-					_get_account_names(child)
-
-		_get_account_names(chart)
-
-	return (bank_account in accounts)
-
-@frappe.whitelist()
 def build_tree_from_json(chart_template, chart_data=None):
 	''' get chart template from its folder and parse the json to be rendered as tree '''
 	chart = chart_data or get_chart(chart_template)
