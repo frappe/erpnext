@@ -19,6 +19,21 @@ class GSTSettings(Document):
 			from tabAddress where country = "India" and ifnull(gstin, '')!='' ''')
 		self.set_onload('data', data)
 
+	def validate(self):
+		# Validate duplicate accounts
+		self.validate_duplicate_accounts()
+
+	def validate_duplicate_accounts(self):
+		account_list = []
+		for account in self.get('gst_accounts'):
+			for fieldname in ['cgst_account', 'sgst_account', 'igst_account', 'cess_account']:
+				if account.get(fieldname) in account_list:
+					frappe.throw(_("Account {0} appears multiple times").format(
+						frappe.bold(account.get(fieldname))))
+
+				if account.get(fieldname):
+					account_list.append(account.get(fieldname))
+
 @frappe.whitelist()
 def send_reminder():
 	frappe.has_permission('GST Settings', throw=True)
