@@ -139,34 +139,8 @@ erpnext.setup.slides_settings = [
 		},
 
 		validate: function () {
-			let me = this;
-			let exist;
-
 			if (!this.validate_fy_dates()) {
 				return false;
-			}
-
-			// Validate bank name
-			if(me.values.bank_account){
-				frappe.call({
-					async: false,
-					method: "erpnext.accounts.doctype.account.chart_of_accounts.chart_of_accounts.validate_bank_account",
-					args: {
-						"coa": me.values.chart_of_accounts,
-						"bank_account": me.values.bank_account
-					},
-					callback: function (r) {
-						if(r.message){
-							exist = r.message;
-							me.get_field("bank_account").set_value("");
-							let message = __('Account {0} already exists. Please enter a different name for your bank account.',
-								[me.values.bank_account]
-							);
-							frappe.msgprint(message);
-						}
-					}
-				});
-				return !exist; // Return False if exist = true
 			}
 
 			return true;
