@@ -28,6 +28,12 @@ class Account(NestedSet):
 		from erpnext.accounts.utils import get_autoname_with_number
 		self.name = get_autoname_with_number(self.account_number, self.account_name, None, self.company)
 
+	def before_insert(self):
+		# Update Bank account name if conflicting with any other account
+		if frappe.flags.in_install and self.account_type == 'Bank':
+			if frappe.db.get_value('Account', {'account_name': self.account_name}):
+				self.account_name = self.account_name + '-1'
+
 	def validate(self):
 		from erpnext.accounts.utils import validate_field_number
 		if frappe.local.flags.allow_unverified_charts:
