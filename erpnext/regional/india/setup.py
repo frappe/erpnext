@@ -681,7 +681,7 @@ def make_custom_fields(update=True):
 
 def make_fixtures(company=None):
 	docs = []
-	company = company.name if company else frappe.db.get_value("Global Defaults", None, "default_company")
+	company = company or frappe.db.get_value("Global Defaults", None, "default_company")
 
 	set_salary_components(docs)
 	set_tds_account(docs, company)
