@@ -143,7 +143,10 @@ frappe.ui.form.on('Patient Encounter', {
 						'type': data.message.appointment_type,
 						'practitioner': data.message.practitioner,
 						'invoiced': data.message.invoiced,
-						'company': data.message.company
+						'company': data.message.company,
+						'appointment_type': data.message.appointment_type,
+						'insurance_subscription': data.message.insurance_subscription,
+						'insurance_claim': data.message.insurance_claim
 					};
 					frm.set_value(values);
 					frm.set_df_property('patient', 'read_only', 1);
@@ -160,7 +163,10 @@ frappe.ui.form.on('Patient Encounter', {
 				'patient_sex': '',
 				'patient_age': '',
 				'inpatient_record': '',
-				'inpatient_status': ''
+				'inpatient_status': '',
+				'insurance_subscription': '',
+				'insurance_claim': ''
+
 			};
 			frm.set_value(values);
 			frm.set_df_property('patient', 'read_only', 0);

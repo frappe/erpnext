@@ -24,6 +24,7 @@ class PatientEncounter(Document):
 			create_therapy_plan(self)
 
 		self.make_healthcare_service_order()
+		make_insurance_claim(self)
 
 	def on_cancel(self):
 		if self.appointment:
@@ -77,9 +78,11 @@ class PatientEncounter(Document):
 			'order_date': self.encounter_date,
 			'order_time': self.encounter_time,
 			'company': self.company,
+			'insurance_subscription': self.insurance_subscription,
 			'status': 'Draft',
 			'patient': self.get('patient'),
 			'practitioner': self.practitioner,
+			'referring_practitioner': self.referring_practitioner,
 			'order_group': self.name,
 			'sequence': line_item.get('sequence'),
 			'patient_care_type': doc.get('patient_care_type'),
@@ -171,3 +174,14 @@ def delete_ip_medication_order(encounter):
 	record = frappe.db.exists('Inpatient Medication Order', {'patient_encounter': encounter.name})
 	if record:
 		frappe.delete_doc('Inpatient Medication Order', record, force=1)
+
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription and not doc.insurance_claim:
+		from erpnext.healthcare.utils import create_insurance_claim, get_service_item_and_practitioner_charge
+		billing_item, rate  = get_service_item_and_practitioner_charge(doc)
+		insurance_claim, claim_status = create_insurance_claim(doc, 'Appointment Type', doc.appointment_type, 1, billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			doc.reload()

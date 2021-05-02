@@ -45,6 +45,9 @@ class ClinicalProcedure(Document):
 
 		self.reload()
 
+	def on_submit(self):
+		make_insurance_claim(self)
+
 	def set_status(self):
 		if self.docstatus == 0:
 			self.status = 'Draft'
@@ -255,3 +258,14 @@ def make_procedure(source_name, target_doc=None):
 		}, target_doc, set_missing_values)
 
 	return doc
+
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription and not doc.insurance_claim:
+		from erpnext.healthcare.utils import create_insurance_claim
+		billing_item = frappe.get_cached_value('Clinical Procedure Template', doc.procedure_template, 'item')
+		insurance_claim, claim_status = create_insurance_claim(doc, 'Clinical Procedure Template', doc.procedure_template, 1, billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			doc.reload()

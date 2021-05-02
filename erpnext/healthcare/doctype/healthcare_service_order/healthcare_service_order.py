@@ -17,6 +17,13 @@ class HealthcareServiceOrder(Document):
 		self.set_order_details()
 		self.set_title()
 
+	def after_insert(self):
+		make_insurance_claim(self)
+
+	def validate(self):
+		if self.insurance_subscription and self.claim_status == 'Pending':
+			self.status = 'Waiting'
+
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
 			return
@@ -122,3 +129,12 @@ def make_therapy_session(service_order):
 	doc.medical_code = service_order.medical_code
 
 	return doc
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription and not doc.insurance_claim:
+		from erpnext.healthcare.utils import create_insurance_claim
+		insurance_claim, claim_status = create_insurance_claim(doc, doc.order_doctype, doc.order, doc.quantity, doc.billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			doc.reload()

@@ -393,7 +393,10 @@ def make_encounter(source_name, target_doc=None):
 				['medical_department', 'department'],
 				['patient_sex', 'patient_sex'],
 				['invoiced', 'invoiced'],
-				['company', 'company']
+				['company', 'company'],
+				['appointment_type', 'appointment_type'],
+				['insurance_subscription', 'insurance_subscription'],
+				['insurance_claim', 'insurance_claim']
 			]
 		}
 	}, target_doc)
@@ -507,3 +510,14 @@ def update_appointment_status():
 
 	for appointment in appointments:
 		frappe.get_doc('Patient Appointment', appointment.name).set_status()
+
+
+def make_insurance_claim(doc):
+	if doc.insurance_subscription and not doc.insurance_claim:
+		from erpnext.healthcare.utils import create_insurance_claim, get_service_item_and_practitioner_charge
+		billing_item, rate  = get_service_item_and_practitioner_charge(doc)
+		insurance_claim, claim_status = create_insurance_claim(doc, 'Appointment Type', doc.appointment_type, 1, billing_item)
+		if insurance_claim:
+			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
+			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			doc.reload()
