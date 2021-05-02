@@ -160,13 +160,14 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-09-04 22:38:19.894488",
+ "modified": "2021-04-19 18:23:16.953305",
  "modified_by": "Administrator",
  "module": "Loan Management",
  "name": "Loan Security Pledge",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -181,6 +182,7 @@
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
