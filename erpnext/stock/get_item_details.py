@@ -470,7 +470,9 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-def _get_item_tax_template(args, taxes, out={}, for_validate=False):
+def _get_item_tax_template(args, taxes, out=None, for_validate=False):
+	if out is None:
+		out = {}
 	taxes_with_validity = []
 	taxes_with_no_validity = []
 
