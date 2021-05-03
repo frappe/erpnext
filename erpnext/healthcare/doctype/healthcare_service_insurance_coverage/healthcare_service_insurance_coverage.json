@@ -10,11 +10,10 @@
  "field_order": [
   "naming_series",
   "title",
-  "is_active",
-  "section_break_3",
   "coverage_based_on",
   "healthcare_insurance_coverage_plan",
   "insurance_coverage_plan_name",
+  "is_active",
   "column_break_3",
   "healthcare_service",
   "healthcare_service_template",
@@ -34,19 +33,20 @@
  ],
  "fields": [
   {
-   "depends_on": "eval:doc.coverage_based_on == 'Service'",
+   "depends_on": "eval:doc.coverage_based_on==='Service'",
    "fieldname": "healthcare_service",
-   "fieldtype": "Select",
+   "fieldtype": "Link",
    "label": "Healthcare Service",
-   "options": "\nAppointment Type\nClinical Procedure Template\nTherapy Type\nMedication\nLab Test Template\nHealthcare Service Unit Type"
+   "mandatory_depends_on": "eval:doc.coverage_based_on==='Service'",
+   "options": "DocType"
   },
   {
-   "depends_on": "eval:doc.coverage_based_on == 'Service'",
    "fieldname": "healthcare_service_template",
    "fieldtype": "Dynamic Link",
    "label": "Healthcare Service Template",
-   "mandatory_depends_on": "healthcare_service",
-   "options": "healthcare_service"
+   "mandatory_depends_on": "eval:doc.coverage_based_on==='Service'",
+   "options": "healthcare_service",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_3",
@@ -76,12 +76,13 @@
    "fieldname": "coverage",
    "fieldtype": "Percent",
    "in_list_view": 1,
-   "label": "Coverage"
+   "label": "Coverage Percentage",
+   "reqd": 1
   },
   {
    "fieldname": "discount",
    "fieldtype": "Percent",
-   "label": "Discount"
+   "label": "Discount Percentage"
   },
   {
    "description": "Number of claims allowed per year",
@@ -111,58 +112,61 @@
    "fieldtype": "Date",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Start Date"
+   "label": "Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "end_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,
-   "label": "End Date"
+   "label": "End Date",
+   "reqd": 1
   },
   {
    "fieldname": "naming_series",
    "fieldtype": "Select",
-   "hidden": 1,
    "label": "Series",
-   "options": "HSIC-.YYYY.-"
+   "options": "HSIC-.YYYY.-",
+   "set_only_once": 1
   },
   {
    "fieldname": "coverage_based_on",
    "fieldtype": "Select",
    "in_standard_filter": 1,
    "label": "Coverage Based on ",
-   "options": "Service\nItem\nItem Group\nMedical Code"
+   "options": "Service\nItem\nItem Group\nMedical Code",
+   "reqd": 1
   },
   {
-   "fieldname": "section_break_3",
-   "fieldtype": "Section Break"
-  },
-  {
-   "depends_on": "eval:doc.coverage_based_on == 'Medical Code'",
+   "depends_on": "eval:doc.coverage_based_on==='Medical Code'",
    "fieldname": "medical_code_standard",
    "fieldtype": "Link",
    "label": "Medical Code Standard",
+   "mandatory_depends_on": "eval:doc.coverage_based_on==='Medical Code'",
    "options": "Medical Code Standard"
   },
   {
-   "depends_on": "eval:doc.coverage_based_on == 'Medical Code'",
+   "depends_on": "eval:doc.coverage_based_on==='Medical Code' && doc.medical_code_standard;",
    "fieldname": "medical_code",
    "fieldtype": "Link",
    "label": "Medical Code",
+   "mandatory_depends_on": "eval:doc.coverage_based_on==='Medical Code'",
    "options": "Medical Code"
   },
   {
-   "depends_on": "eval:doc.coverage_based_on == 'Item'",
+   "depends_on": "eval:doc.coverage_based_on==='Item'",
    "fieldname": "item",
    "fieldtype": "Link",
    "label": "Item",
+   "mandatory_depends_on": "eval:doc.coverage_based_on==='Item'",
    "options": "Item"
   },
   {
-   "depends_on": "eval:doc.coverage_based_on == 'Item Group'",
+   "depends_on": "eval:doc.coverage_based_on==='Item Group'",
    "fieldname": "item_group",
    "fieldtype": "Link",
    "label": "Item Group",
+   "mandatory_depends_on": "eval:doc.coverage_based_on==='Item Group'",
    "options": "Item Group"
   },
   {
@@ -184,7 +188,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-02 11:57:45.775112",
+ "modified": "2021-05-02 23:37:10.190268",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Insurance Coverage",
