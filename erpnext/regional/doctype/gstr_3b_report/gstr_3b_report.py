@@ -129,20 +129,11 @@ class GSTR3BReport(Document):
 			WHERE p.docstatus = 1 and p.name = i.parent
 			and p.is_opening = 'No'
 			and p.gst_category != 'Registered Composition'
-			and (i.is_nil_exempt = 1 or i.is_non_gst = 1) and
+			and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_catgory = 'Registered Composition') and
 			month(p.posting_date) = %s and year(p.posting_date) = %s
 			and p.company = %s and p.company_gstin = %s
 			GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst""",
 			(self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
-
-		inward_nil_exempt += frappe.db.sql("""
-			SELECT sum(base_net_total) as base_amount, gst_category, place_of_supply
-			FROM `tabPurchase Invoice`
-			WHERE docstatus = 1 and is_opening = 'No'
-			and gst_category = 'Registered Composition'
-			and month(posting_date) = %s and year(posting_date) = %s
-			and company = %s and company_gstin = %s
-			group by place_of_supply""", (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		inward_nil_exempt_details = {
 			"gst": {
@@ -168,14 +159,18 @@ class GSTR3BReport(Document):
 
 		return inward_nil_exempt_details
 
-	def get_outward_supply_details(self, doctype):
-		self.get_outward_tax_invoices(doctype)
+	def get_outward_supply_details(self, doctype, reverse_charge=None):
+		self.get_outward_tax_invoices(doctype, reverse_charge=reverse_charge)
 		self.get_outward_items(doctype)
 		self.get_outward_tax_details(doctype)
 
-	def get_outward_tax_invoices(self, doctype):
+	def get_outward_tax_invoices(self, doctype, reverse_charge=None):
 		self.invoices = []
 		self.invoice_detail_map = {}
+		condition = ''
+
+		if reverse_charge:
+			condition += 'AND reverse_charge = Y'
 
 		invoice_details = frappe.db.sql("""
 			SELECT
@@ -189,8 +184,10 @@ class GSTR3BReport(Document):
 				AND company = %s
 				AND company_gstin = %s
 				AND is_opening = 'No'
+				{reverse_charge}
 			ORDER BY name
-		""".format(doctype=doctype), (self.month_no, self.year, self.company, self.gst_details.get("gstin")), as_dict=1)
+		""".format(doctype=doctype, reverse_charge=condition), (self.month_no, self.year,
+			self.company, self.gst_details.get("gstin")), as_dict=1)
 
 		for d in invoice_details:
 			self.invoice_detail_map.setdefault(d.name, d)
@@ -319,6 +316,10 @@ class GSTR3BReport(Document):
 										inter_state_supply_details[(gst_category, place_of_supply)]['iamt'] += (taxable_value * rate /100)
 
 		self.set_inter_state_supply(inter_state_supply_details)
+
+	def set_supplies_liable_to_reverse_charge(self):
+		# ToDo:
+		pass
 
 	def set_inter_state_supply(self, inter_state_supply):
 		for key, value in iteritems(inter_state_supply):
