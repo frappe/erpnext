@@ -67,6 +67,8 @@ def search(query):
 
 	red = frappe.cache()
 
+	query = clean_up_query(query)
+
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
 	suggestions = ac.get_suggestions(query, num=10)
@@ -75,7 +77,7 @@ def search(query):
 	query_string = query
 
 	for s in suggestions:
-		query_string += f"|('{s.string}')"
+		query_string += f"|('{clean_up_query(s.string)}')"
 
 	q = Query(query_string)
 
@@ -87,6 +89,9 @@ def search(query):
 	print("SEARCH RESULTS ------------------\n ", results)
 
 	return results
+
+def clean_up_query(query):
+	return ''.join(c for c in query if c.isalnum() or c.isspace())
 
 def convert_to_dict(redis_search_doc):
 	return redis_search_doc.__dict__
