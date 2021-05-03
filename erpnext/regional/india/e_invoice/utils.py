@@ -847,6 +847,7 @@ class GSPConnector():
 			res = self.make_request('post', self.generate_ewaybill_url, headers, data)
 			if res.get('success'):
 				self.invoice.ewaybill = res.get('result').get('EwbNo')
+				self.invoice.eway_bill_validity = res.get('result').get('EwbValidTill')
 				self.invoice.eway_bill_cancelled = 0
 				self.invoice.update(args)
 				self.invoice.flags.updater_reference = {
@@ -944,6 +945,7 @@ class GSPConnector():
 
 		self.invoice.irn = res.get('Irn')
 		self.invoice.ewaybill = res.get('EwbNo')
+		self.invoice.eway_bill_validity = res.get('EwbValidTill')
 		self.invoice.ack_no = res.get('AckNo')
 		self.invoice.ack_date = res.get('AckDt')
 		self.invoice.signed_einvoice = dec_signed_invoice
@@ -960,6 +962,7 @@ class GSPConnector():
 			'label': _('IRN Generated')
 		}
 		self.update_invoice()
+
 	def attach_qrcode_image(self):
 		qrcode = self.invoice.signed_qr_code
 		doctype = self.invoice.doctype
