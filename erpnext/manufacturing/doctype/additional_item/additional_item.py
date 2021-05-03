@@ -17,6 +17,9 @@ class AdditionalItem(Document):
 		if bom:
 			doc = frappe.get_doc("BOM",bom[0].get('bom_no') )
 			item_list = []
+			wo_doc = frappe.get_doc("Work Order", self.work_order)
+			bom_doc = frappe.get_doc("BOM", wo_doc.bom_no)
+			
 			if doc.get('allow_adding_items') == 1:
 				items = frappe.db.sql("select distinct item_code from `tabItem` where is_stock_item = 1 and disabled = 0",as_dict = True)
 				for i in items:
@@ -26,6 +29,11 @@ class AdditionalItem(Document):
 				items = frappe.db.sql(query, as_dict = True)
 				for i in items:
 					item_list.append(i.get('item_code'))
+			
+			for i in bom_doc.items:
+				print(i.get("allowed_to_change_qty_in_wo"), i.get('item_code'))
+				if i.get("allowed_to_change_qty_in_wo") == 0:
+					item_list.remove(i.get('item_code'))
 			return item_list
 	
 	@frappe.whitelist()
