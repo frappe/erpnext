@@ -90,6 +90,8 @@ class AccountsController(TransactionBase):
 		self.ensure_supplier_is_not_blocked()
 
 		self.validate_date_with_fiscal_year()
+		self.validate_party_accounts()
+
 		self.validate_inter_company_reference()
 
 		self.set_incoming_rate()
@@ -233,6 +235,23 @@ class AccountsController(TransactionBase):
 				validate_fiscal_year(self.get(date_field), self.fiscal_year, self.company,
 									 self.meta.get_label(date_field), self)
 
+	def validate_party_accounts(self):
+		if self.doctype not in ('Sales Invoice', 'Purchase Invoice'):
+			return
+
+		if self.doctype == 'Sales Invoice':
+			party_account_field = 'debit_to'
+			item_field = 'income_account'
+		else:
+			party_account_field = 'credit_to'
+			item_field = 'expense_account'
+
+		for item in self.get('items'):
+			if item.get(item_field) == self.get(party_account_field):
+				frappe.throw(_("Row {0}: {1} {2} cannot be same as {3} (Party Account) {4}").format(item.idx,
+					frappe.bold(frappe.unscrub(item_field)), item.get(item_field),
+					frappe.bold(frappe.unscrub(party_account_field)), self.get(party_account_field)))
+
 	def validate_inter_company_reference(self):
 		if self.doctype not in ('Purchase Invoice', 'Purchase Receipt', 'Purchase Order'):
 			return
@@ -240,7 +259,7 @@ class AccountsController(TransactionBase):
 		if self.is_internal_transfer():
 			if not (self.get('inter_company_reference') or self.get('inter_company_invoice_reference')
 				or self.get('inter_company_order_reference')):
-				msg = _("Internal Sale or Delivery Reference missing. ")
+				msg = _("Internal Sale or Delivery Reference missing.")
 				msg += _("Please create purchase from internal sale or delivery document itself")
 				frappe.throw(msg, title=_("Internal Sales Reference Missing"))
 
@@ -904,29 +923,34 @@ class AccountsController(TransactionBase):
 		date = self.get("due_date")
 		due_date = date or posting_date
 
-		if party_account_currency == self.company_currency:
-			grand_total = self.get("base_rounded_total") or self.base_grand_total
-		else:
-			grand_total = self.get("rounded_total") or self.grand_total
+		base_grand_total = self.get("base_rounded_total") or self.base_grand_total
+		grand_total = self.get("rounded_total") or self.grand_total
 
 		if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+			base_grand_total = base_grand_total - flt(self.base_write_off_amount)
 			grand_total = grand_total - flt(self.write_off_amount)
 
 		if self.get("total_advance"):
-			grand_total -= self.get("total_advance")
+			if party_account_currency == self.company_currency:
+				base_grand_total -= self.get("total_advance")
+				grand_total = flt(base_grand_total / self.get("conversion_rate"), self.precision("grand_total"))
+			else:
+				grand_total -= self.get("total_advance")
+				base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
 
 		if not self.get("payment_schedule"):
 			if self.get("payment_terms_template"):
-				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total)
+				data = get_payment_terms(self.payment_terms_template, posting_date, grand_total, base_grand_total)
 				for item in data:
 					self.append("payment_schedule", item)
 			else:
-				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total)
+				data = dict(due_date=due_date, invoice_portion=100, payment_amount=grand_total, base_payment_amount=base_grand_total)
 				self.append("payment_schedule", data)
 		else:
 			for d in self.get("payment_schedule"):
 				if d.invoice_portion:
 					d.payment_amount = flt(grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
+					d.base_payment_amount = flt(base_grand_total * flt(d.invoice_portion / 100), d.precision('payment_amount'))
 					d.outstanding = d.payment_amount
 
 	def set_due_date(self):
@@ -963,22 +987,28 @@ class AccountsController(TransactionBase):
 
 		if self.get("payment_schedule"):
 			total = 0
+			base_total = 0
 			for d in self.get("payment_schedule"):
 				total += flt(d.payment_amount)
+				base_total += flt(d.base_payment_amount)
 
-			if party_account_currency == self.company_currency:
-				total = flt(total, self.precision("base_grand_total"))
-				grand_total = flt(self.get("base_rounded_total") or self.base_grand_total, self.precision('base_grand_total'))
-			else:
-				total = flt(total, self.precision("grand_total"))
-				grand_total = flt(self.get("rounded_total") or self.grand_total, self.precision('grand_total'))
-
-			if self.get("total_advance"):
-				grand_total -= self.get("total_advance")
+			base_grand_total = self.get("base_rounded_total") or self.base_grand_total
+			grand_total = self.get("rounded_total") or self.grand_total
 
 			if self.doctype in ("Sales Invoice", "Purchase Invoice"):
+				base_grand_total = base_grand_total - flt(self.base_write_off_amount)
 				grand_total = grand_total - flt(self.write_off_amount)
-			if total != flt(grand_total, self.precision("grand_total")):
+
+			if self.get("total_advance"):
+				if party_account_currency == self.company_currency:
+					base_grand_total -= self.get("total_advance")
+					grand_total = flt(base_grand_total / self.get("conversion_rate"), self.precision("grand_total"))
+				else:
+					grand_total -= self.get("total_advance")
+					base_grand_total = flt(grand_total * self.get("conversion_rate"), self.precision("base_grand_total"))
+			print(grand_total, base_grand_total)
+			if total != flt(grand_total, self.precision("grand_total")) or \
+				base_total != flt(base_grand_total, self.precision("base_grand_total")):
 				frappe.throw(_("Total Payment Amount in Payment Schedule must be equal to Grand / Rounded Total"))
 
 	def is_rounded_total_disabled(self):
@@ -1218,7 +1248,7 @@ def update_invoice_status():
 
 
 @frappe.whitelist()
-def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_date=None):
+def get_payment_terms(terms_template, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
 	if not terms_template:
 		return
 
@@ -1226,14 +1256,14 @@ def get_payment_terms(terms_template, posting_date=None, grand_total=None, bill_
 
 	schedule = []
 	for d in terms_doc.get("terms"):
-		term_details = get_payment_term_details(d, posting_date, grand_total, bill_date)
+		term_details = get_payment_term_details(d, posting_date, grand_total, base_grand_total, bill_date)
 		schedule.append(term_details)
 
 	return schedule
 
 
 @frappe.whitelist()
-def get_payment_term_details(term, posting_date=None, grand_total=None, bill_date=None):
+def get_payment_term_details(term, posting_date=None, grand_total=None, base_grand_total=None, bill_date=None):
 	term_details = frappe._dict()
 	if isinstance(term, text_type):
 		term = frappe.get_doc("Payment Term", term)
@@ -1242,9 +1272,9 @@ def get_payment_term_details(term, posting_date=None, grand_total=None, bill_dat
 	term_details.description = term.description
 	term_details.invoice_portion = term.invoice_portion
 	term_details.payment_amount = flt(term.invoice_portion) * flt(grand_total) / 100
+	term_details.base_payment_amount = flt(term.invoice_portion) * flt(base_grand_total) / 100
 	term_details.discount_type = term.discount_type
 	term_details.discount = term.discount
-	# term_details.discounted_amount = flt(grand_total) * (term.discount / 100) if term.discount_type == 'Percentage' else discount
 	term_details.outstanding = term_details.payment_amount
 	term_details.mode_of_payment = term.mode_of_payment
 

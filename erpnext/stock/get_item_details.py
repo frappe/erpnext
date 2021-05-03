@@ -86,7 +86,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		out.update(get_bin_details(args.item_code, out.warehouse))
+		out.update(get_bin_details(args.item_code, out.warehouse, args.company))
 
 	# update args with out, if key or value not exists
 	for key, value in iteritems(out):
