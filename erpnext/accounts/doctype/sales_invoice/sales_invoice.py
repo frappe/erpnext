@@ -1761,7 +1761,8 @@ def get_delivery_note_details(internal_reference):
 		filters={'parent': internal_reference})
 
 	for d in si_item_details:
-		so_item_map.setdefault(d.name, d.so_detail)
+		if d.so_detail:
+			so_item_map.setdefault(d.name, d.so_detail)
 
 	return so_item_map
 
