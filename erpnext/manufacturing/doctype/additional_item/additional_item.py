@@ -44,16 +44,23 @@ class AdditionalItem(Document):
 
 		for item in self.items:
 			if item.get("item") in wo_item:
-				q = """select rate from `tabWork Order Item` where parent = "{0}" and item_code="{1}";""".format(self.work_order,item.get("item"))
-				item_rate = frappe.db.sql(q,as_dict = True)
-				item_index = wo_item.index(item.get('item'))
-				old_qty = wo_item_qty[item_index]
-				item_qty = item.get('qty')
-				total_qty = int(old_qty) + int(item_qty)
-				amount = total_qty * int(item_rate[0].get("rate"))
-				query = """UPDATE `tabWork Order Item` SET required_qty = {0}, amount = {1}  WHERE parent='{2}' and item_code='{3}';""".format(total_qty,amount,self.work_order,item.get("item"))
-				frappe.db.sql(query)
-				frappe.db.commit()
+				q = """select allowed_to_change_qty_in_wo from `tabBOM Item` where parent = '{0}' and item_code = '{1}'""".format(work_order.get('bom_no'),item.get("item"))
+				change_in_qty = frappe.db.sql(q, as_dict = True)[0].get('allowed_to_change_qty_in_wo')
+				
+				if change_in_qty == 1:
+					q = """select rate from `tabWork Order Item` where parent = "{0}" and item_code="{1}";""".format(self.work_order,item.get("item"))
+					item_rate = frappe.db.sql(q,as_dict = True)
+					item_index = wo_item.index(item.get('item'))
+					old_qty = wo_item_qty[item_index]
+					item_qty = item.get('qty')
+					total_qty = int(old_qty) + int(item_qty)
+					amount = total_qty * int(item_rate[0].get("rate"))
+					query = """UPDATE `tabWork Order Item` SET required_qty = {0}, amount = {1}  WHERE parent='{2}' and item_code='{3}';""".format(total_qty,amount,self.work_order,item.get("item"))
+					frappe.db.sql(query)
+					frappe.db.commit()
+				else:
+					msg = "Item <b>{0}</b> is not allowed to change in qty".format(item.get("item"))
+					frappe.throw(msg)
 			else:
 				item_master = frappe.db.get_value('Item', {'item_code':item.get('item')},['item_name','include_item_in_manufacturing','description'], as_dict = 1)
 				
@@ -67,24 +74,28 @@ class AdditionalItem(Document):
 				if not rate_with_warehouse and rate_without_warehouse:
 					rate = rate_without_warehouse
 				amt = float(item.get("qty")) * float(rate)
+				bom_doc = frappe.get_doc("BOM", doc.bom_no)
+				if bom_doc.allow_adding_items == 0:
+					msg = "Adding item other than BOM Item is not allowed for BOM <b>{0}</b>". format(doc.bom_no)
+					frappe.throw(msg)
+				if bom_doc.allow_adding_items == 1:
+					doc.append("required_items", {
+						"item_name": item_master.get("item_name"),
+						"item_code": item.get("item"),
+						"required_qty": item.get("qty"),
+						"source_warehouse": doc.source_warehouse,
+						"include_item_in_manufacturing": item_master.get('include_item_in_manufacturing'),
+						"additional_material":1,
+						"wip_warehouse": doc.wip_warehouse,
+						"type": "RM",
+						'available_qty_at_source_warehouse': item.get("current_stock"),
+						"weight_per_unit": item.get("weight_per_unit"),
+						"description" : item_master.get("description"),
+						'rate': rate,
+						'amount': amt
 
-				doc.append("required_items", {
-					"item_name": item_master.get("item_name"),
-					"item_code": item.get("item"),
-					"required_qty": item.get("qty"),
-					"source_warehouse": doc.source_warehouse,
-					"include_item_in_manufacturing": item_master.get('include_item_in_manufacturing'),
-					"additional_material":1,
-					"wip_warehouse": doc.wip_warehouse,
-					"type": "RM",
-					'available_qty_at_source_warehouse': item.get("current_stock"),
-					"weight_per_unit": item.get("weight_per_unit"),
-					"description" : item_master.get("description"),
-					'rate': rate,
-					'amount': amt
-
-				})
-				doc.save(ignore_permissions= True)
+					})
+					doc.save(ignore_permissions= True)
 
 @frappe.whitelist()
 def get_item_data(item,wo):
