@@ -26,8 +26,9 @@
   "insurance_company_name",
   "insurance_company_customer",
   "column_break_15",
-  "subscription_end_date",
+  "subscription_expiry",
   "healthcare_insurance_coverage_plan",
+  "coverage_plan_name",
   "amended_from"
  ],
  "fields": [
@@ -125,18 +126,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "subscription_end_date",
-   "fieldtype": "Date",
-   "in_list_view": 1,
-   "label": "Subscription End Date",
-   "reqd": 1
-  },
-  {
    "fieldname": "healthcare_insurance_coverage_plan",
    "fieldtype": "Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
-   "label": "Healthcare Insurance Coverage Plan",
+   "label": "Coverage Plan",
    "options": "Healthcare Insurance Coverage Plan",
    "reqd": 1
   },
@@ -162,11 +156,50 @@
    "hidden": 1,
    "label": "Title",
    "read_only": 1
+  },
+  {
+   "fetch_from": "healthcare_insurance_coverage_plan.coverage_plan_name",
+   "fieldname": "coverage_plan_name",
+   "fieldtype": "Data",
+   "label": "Coverage Plan Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "subscription_expiry",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Subscription Expiry",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "links": [],
- "modified": "2021-01-19 14:21:57.110208",
+ "links": [
+  {
+   "link_doctype": "Patient Appointment",
+   "link_fieldname": "insurance_subscription"
+  },
+  {
+   "link_doctype": "Patient Encounter",
+   "link_fieldname": "insurance_subscription"
+  },
+  {
+   "link_doctype": "Healthcare Service Order",
+   "link_fieldname": "insurance_subscription"
+  },
+  {
+   "link_doctype": "Clinical Procedure",
+   "link_fieldname": "insurance_subscription"
+  },
+  {
+   "link_doctype": "Inpatient Record",
+   "link_fieldname": "insurance_subscription"
+  },
+  {
+   "link_doctype": "Lab Test",
+   "link_fieldname": "insurance_subscription"
+  }
+ ],
+ "modified": "2021-05-03 21:52:39.294101",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Subscription",

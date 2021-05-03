@@ -22,6 +22,10 @@ def get_data():
 			{
 				'label': _('Orders'),
 				'items': ['Inpatient Medication Order']
+			},
+			{
+				'label': _('Subscriptions'),
+				'items': ['Healthcare Insurance Subscription']
 			}
 		]
 	}

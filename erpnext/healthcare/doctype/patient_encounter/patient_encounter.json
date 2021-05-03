@@ -374,17 +374,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "diet_recommendation_section",
-   "fieldtype": "Section Break",
-   "label": "Diet Recommendation"
-  },
-  {
-   "fieldname": "diet_recommendation",
-   "fieldtype": "Table",
-   "label": "Diet Recommendation",
-   "options": "Diet Recommendation"
-  },
-  {
    "fieldname": "insurance_section",
    "fieldtype": "Section Break",
    "label": "Insurance"
@@ -427,7 +416,7 @@
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2020-05-02 11:57:00.783119",
+ "modified": "2020-05-03 11:57:00.783119",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Encounter",
