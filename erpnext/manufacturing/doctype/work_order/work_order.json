@@ -275,6 +275,7 @@
    "label": "Required Items"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "required_items",
    "fieldtype": "Table",
    "label": "Required Items",
@@ -590,7 +591,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-27 15:25:29.904068",
+ "modified": "2021-05-01 20:07:00.577877",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
