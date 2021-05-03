@@ -30,6 +30,7 @@
   "additional_discount_percentage",
   "additional_discount_amount",
   "sb_3",
+  "submit_invoice",
   "invoices",
   "accounting_dimensions_section",
   "dimension_col_break"
@@ -202,9 +203,15 @@
    "fieldname": "generate_new_invoices_past_due_date",
    "fieldtype": "Check",
    "label": "Generate New Invoices Past Due Date"
+  },
+  {
+   "default": "1",
+   "fieldname": "submit_invoice",
+   "fieldtype": "Check",
+   "label": "Submit Invoice Automatically"
   }
  ],
- "modified": "2020-11-29 22:46:14.879289",
+ "modified": "2021-05-03 13:35:21.422940",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Subscription",
