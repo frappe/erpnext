@@ -435,6 +435,35 @@ class TestPurchaseOrder(unittest.TestCase):
 		po.load_from_db()
 		self.assertEqual(po.get("items")[0].received_qty, 5)
 
+	def test_purchase_order_invoice_receipt_workflow(self):
+		from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import make_purchase_receipt
+
+		po = create_purchase_order()
+		pi = make_pi_from_po(po.name)
+
+		pi.submit()
+
+		pr = make_purchase_receipt(pi.name)
+		pr.submit()
+
+		pi.load_from_db()
+
+		self.assertEquals(pi.per_received, 100.00)
+		self.assertEquals(pi.items[0].qty, pi.items[0].received_qty)
+
+		po.load_from_db()
+
+		self.assertEquals(po.per_received, 100.00)
+		self.assertEquals(po.per_billed, 100.00)
+
+		pr.cancel()
+
+		pi.load_from_db()
+		pi.cancel()
+
+		po.load_from_db()
+		po.cancel()
+
 	def test_make_purchase_invoice(self):
 		po = create_purchase_order(do_not_submit=True)
 
