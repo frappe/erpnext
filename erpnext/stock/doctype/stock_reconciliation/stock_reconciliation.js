@@ -49,7 +49,9 @@ frappe.ui.form.on("Stock Reconciliation", {
 			frm.trigger("set_expense_account");
 		}
 
-		frm.events.update_item_details(frm);
+		if (!frm.doc.__islocal) {
+			frm.events.update_item_details(frm);
+		}
 	},
 
 	refresh: function(frm) {
@@ -65,6 +67,22 @@ frappe.ui.form.on("Stock Reconciliation", {
 		frm.events.update_item_details(frm);
 	},
 
+	// loose_uom: function (frm) {
+	// 	frm.events.update_conversion_factor(frm);
+	// },
+	//
+	// update_conversion_factor: function(frm) {
+	// 	frappe.call({
+	// 		method: "update_conversion_factor",
+	// 		doc: frm.doc,
+	// 		freeze: true,
+	// 		callback: function (r) {
+	// 			frm.dirty();
+	// 			frm.refresh_fields();
+	// 		}
+	// 	});
+	// },
+
 	get_items: function(frm) {
 		frappe.call({
 			method:"erpnext.stock.doctype.stock_reconciliation.stock_reconciliation.get_items",
@@ -79,7 +97,8 @@ frappe.ui.form.on("Stock Reconciliation", {
 					get_batches: cint(frm.doc.get_batches),
 					sort_by: frm.doc.sort_by,
 					positive_or_negative: frm.doc.positive_or_negative,
-					reset_rate: frm.doc.reset_rate
+					reset_rate: frm.doc.reset_rate,
+					loose_uom: frm.doc.loose_uom
 				}
 			},
 			callback: function(r) {
@@ -115,6 +134,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 						qty: d.qty,
 						valuation_rate: d.valuation_rate,
 						reset_rate: frm.doc.reset_rate,
+						loose_uom: frm.doc.loose_uom
 					}
 				},
 				callback: function(r) {
@@ -128,7 +148,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 
 	update_item_details: function(frm) {
-		if (frm.doc.docstatus == 0 && !frm.doc.__islocal) {
+		if (frm.doc.docstatus == 0) {
 			frappe.call({
 				method: "update_item_details",
 				doc: frm.doc,
@@ -157,10 +177,12 @@ frappe.ui.form.on("Stock Reconciliation", {
 	},
 	set_amount_quantity: function(doc, cdt, cdn) {
 		var d = frappe.model.get_doc(cdt, cdn);
-		if (d.qty || d.valuation_rate) {
+		if (d.qty || d.loose_qty || d.valuation_rate) {
 			frappe.model.set_value(cdt, cdn, "amount", flt(d.qty) * flt(d.valuation_rate));
 			frappe.model.set_value(cdt, cdn, "quantity_difference", flt(d.qty) - flt(d.current_qty));
 			frappe.model.set_value(cdt, cdn, "amount_difference", flt(d.amount) - flt(d.current_amount));
+			frappe.model.set_value(cdt, cdn, "stock_loose_qty", flt(d.loose_qty) * flt(d.conversion_factor));
+			frappe.model.set_value(cdt, cdn, "total_qty", flt(d.qty) + flt(d.stock_loose_qty));
 		}
 	},
 	company: function(frm) {
@@ -207,10 +229,32 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 	qty: function(frm, cdt, cdn) {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
 	},
+	loose_qty: function(frm, cdt, cdn) {
+		frm.events.set_amount_quantity(frm, cdt, cdn);
+	},
 	valuation_rate: function(frm, cdt, cdn) {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
-	}
+	},
 
+	loose_uom: function(frm, cdt, cdn) {
+		var item = frappe.get_doc(cdt, cdn);
+		debugger;
+		if(item.item_code && item.loose_uom) {
+			return frm.call({
+				method: "erpnext.stock.get_item_details.get_conversion_factor",
+				child: item,
+				args: {
+					item_code: item.item_code,
+					uom: item.loose_uom
+				},
+				callback: function(r) {
+					if(!r.exc) {
+						frm.cscript.conversion_factor(frm.doc, cdt, cdn);
+					}
+				}
+			});
+		}
+	},
 });
 
 erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
@@ -253,6 +297,10 @@ erpnext.stock.StockReconciliation = erpnext.stock.StockController.extend({
 				this.show_general_ledger();
 			}
 		}
+	},
+
+	conversion_factor: function(doc, cdt, cdn) {
+		this.frm.events.set_amount_quantity(doc, cdt, cdn);
 	},
 
 });

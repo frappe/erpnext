@@ -15,7 +15,7 @@ from erpnext.stock.doctype.item.item import get_item_defaults
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.setup.doctype.brand.brand import get_brand_defaults
 from erpnext.setup.doctype.item_source.item_source import get_item_source_defaults
-from erpnext.stock.get_item_details import get_default_cost_center
+from erpnext.stock.get_item_details import get_default_cost_center, get_conversion_factor
 from frappe.model.meta import get_field_precision
 import json
 from six import string_types
@@ -53,25 +53,39 @@ class StockReconciliation(StockController):
 
 	def update_current_qty_valuation_rate(self):
 		for item in self.items:
-			qty, rate, amount = get_stock_balance_for(item.item_code, item.warehouse,
-				self.posting_date, self.posting_time, item.batch_no, with_valuation_rate=True)
+			if item.item_code:
+				if not item.loose_uom:
+					item.loose_qty = 0
+					item.conversion_factor = 1
+				elif item.loose_uom == item.stock_uom:
+					item.conversion_factor = 1
+				elif not flt(item.conversion_factor):
+					item.conversion_factor = get_conversion_factor(item.item_code, item.loose_uom)["conversion_factor"]
 
-			item.current_qty = qty
-			item.current_valuation_rate = rate
-			item.current_amount = amount
+				item.stock_loose_qty = flt(item.loose_qty) * flt(item.conversion_factor)
+				item.total_qty = flt(flt(item.qty) + item.stock_loose_qty, item.precision("total_qty"))
 
-			if not cint(self.reset_rate):
-				item.valuation_rate = item.current_valuation_rate
+				qty, rate, amount = get_stock_balance_for(item.item_code, item.warehouse,
+					self.posting_date, self.posting_time, item.batch_no, with_valuation_rate=True)
+
+				item.current_qty = qty
+				item.current_valuation_rate = rate
+				item.current_amount = amount
+
+				if not cint(self.reset_rate):
+					item.valuation_rate = item.current_valuation_rate
+
 
 	def remove_items_with_no_change(self):
 		"""Remove items if qty or rate is not changed"""
 		def _changed(item):
-			if (item.qty is None or item.qty == item.current_qty) and (item.valuation_rate is None or item.valuation_rate == item.current_valuation_rate):
+			if ((item.qty is None and item.loose_qty is None) or item.total_qty == item.current_qty) and (item.valuation_rate is None or item.valuation_rate == item.current_valuation_rate):
 				return False
 			else:
 				# set default as current rates
-				if item.qty is None:
+				if item.qty is None and item.loose_qty is None:
 					item.qty = item.current_qty
+					item.loose_qty = 0
 
 				return True
 
@@ -110,12 +124,12 @@ class StockReconciliation(StockController):
 				self.validation_messages.append(_get_msg(row_num, _("Warehouse not found in the system")))
 
 			# if both not specified
-			if row.qty in ["", None] and row.valuation_rate in ["", None]:
+			if row.total_qty in ["", None] and row.valuation_rate in ["", None]:
 				self.validation_messages.append(_get_msg(row_num,
 					_("Please specify either Quantity or Valuation Rate or both")))
 
 			# do not allow negative quantity
-			if flt(row.qty) < 0:
+			if flt(row.total_qty) < 0:
 				self.validation_messages.append(_get_msg(row_num,
 					_("Negative Quantity is not allowed")))
 
@@ -166,10 +180,10 @@ class StockReconciliation(StockController):
 				"reset_rate": cint(self.reset_rate)
 			}
 			if d.batch_no:
-				sle["batch_qty_after_transaction"] = flt(d.qty)
+				sle["batch_qty_after_transaction"] = flt(d.total_qty)
 				sle["batch_valuation_rate"] = flt(d.valuation_rate)
 			else:
-				sle["qty_after_transaction"] = flt(d.qty)
+				sle["qty_after_transaction"] = flt(d.total_qty)
 				sle["valuation_rate"] = flt(d.valuation_rate)
 
 			sl_entries.append(self.get_sl_entries(d, sle))
@@ -202,20 +216,19 @@ class StockReconciliation(StockController):
 
 		self.difference_amount = 0.0
 		for d in self.get("items"):
-			d.quantity_difference = flt(d.qty) - flt(d.current_qty)
-
+			d.quantity_difference = flt(d.total_qty) - flt(d.current_qty)
 			if cint(self.reset_rate):
-				d.amount = flt(d.qty) * flt(d.valuation_rate)
+				d.amount = flt(d.total_qty) * flt(d.valuation_rate)
 			else:
 				if d.quantity_difference and d.quantity_difference < 0:
 					args = get_args_for_incoming_rate(self, d)
 					incoming_rate = get_incoming_rate(args, raise_error_if_no_rate=False)
 					d.amount = d.current_amount + (d.quantity_difference * incoming_rate)
 				else:
-					d.amount = flt(d.qty) * flt(d.current_valuation_rate)
+					d.amount = flt(d.total_qty) * flt(d.current_valuation_rate)
 
 			if not cint(self.reset_rate):
-				d.valuation_rate = d.amount / flt(d.qty) if flt(d.qty) else d.current_valuation_rate
+				d.valuation_rate = d.amount / flt(d.total_qty) if flt(d.total_qty) else d.current_valuation_rate
 
 			d.amount = flt(d.amount, stock_value_precision)
 			d.amount_difference = flt(d.amount) - flt(d.current_amount)
@@ -303,7 +316,8 @@ def get_items(args):
 			"posting_time": args.posting_time,
 			"item_code": item_code,
 			"warehouse": warehouse,
-			"reset_rate": cint(args.reset_rate)
+			"reset_rate": cint(args.reset_rate),
+			"loose_uom": args.loose_uom
 		}
 		batch_list = []
 
@@ -354,6 +368,8 @@ def get_item_details(args):
 	out.item_name = args.item_name or item.item_name
 	out.item_group = item.item_group
 
+	out.loose_uom = args.loose_uom or item.stock_uom
+	out.stock_uom = item.stock_uom
 	if args.warehouse:
 		out.warehouse = args.warehouse
 	else:
@@ -387,19 +403,24 @@ def get_item_details(args):
 	stock_value_precision = get_field_precision(frappe.get_meta("Stock Ledger Entry").get_field("stock_value"),
 		currency=frappe.get_cached_value('Company', args.company, "default_currency"))
 
-	out.quantity_difference = flt(out.qty) - flt(out.current_qty)
+	out.conversion_factor = get_conversion_factor(out.item_code, out.loose_uom)["conversion_factor"]
+	out.loose_qty = 0
+	out.stock_loose_qty = flt(out.conversion_factor) * flt(out.loose_qty)
+	out.total_qty = flt(out.qty) + flt(out.stock_loose_qty)
+
+	out.quantity_difference = flt(out.total_qty) - flt(out.current_qty)
 
 	# if out.quantity_difference:
 	if cint(args.reset_rate):
-		out.amount = flt(out.qty) * flt(out.current_valuation_rate)
+		out.amount = flt(out.total_qty) * flt(out.current_valuation_rate)
 	else:
 		if out.quantity_difference < 0:
 			incoming_rate = get_incoming_rate(get_args_for_incoming_rate(args, out))
 			out.amount = flt(out.current_amount) + (incoming_rate * out.quantity_difference)
 		else:
-			out.amount = flt(out.qty) * out.current_valuation_rate
+			out.amount = flt(out.total_qty) * out.current_valuation_rate
 
-	out.valuation_rate = flt(out.amount / flt(out.qty) if flt(out.qty) else out.current_valuation_rate)
+	out.valuation_rate = flt(out.amount / flt(out.total_qty) if flt(out.total_qty) else out.current_valuation_rate)
 
 	out.amount = flt(out.amount, stock_value_precision)
 	out.amount_difference = flt(out.amount) - flt(out.current_amount)

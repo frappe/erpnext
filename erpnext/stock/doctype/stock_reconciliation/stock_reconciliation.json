@@ -22,6 +22,7 @@
   "column_break_14",
   "selected_item_group",
   "selected_item_code",
+  "loose_uom",
   "column_break_17",
   "sort_by",
   "positive_or_negative",
@@ -231,13 +232,19 @@
   {
    "fieldname": "section_break_20",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "loose_uom",
+   "fieldtype": "Link",
+   "label": "Loose UOM",
+   "options": "UOM"
   }
  ],
  "icon": "fa fa-upload-alt",
  "idx": 1,
  "is_submittable": 1,
  "max_attachments": 1,
- "modified": "2021-03-29 16:14:53.865932",
+ "modified": "2021-04-22 22:19:25.648141",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation",

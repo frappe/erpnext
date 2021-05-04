@@ -10,9 +10,17 @@
   "item_name",
   "warehouse",
   "column_break_6",
+  "section_break_6",
   "qty",
+  "stock_uom",
+  "loose_qty",
+  "loose_uom",
+  "column_break_13",
+  "stock_loose_qty",
+  "total_qty",
   "valuation_rate",
   "amount",
+  "conversion_factor",
   "serial_no_and_batch_section",
   "serial_no",
   "column_break_11",
@@ -59,7 +67,6 @@
    "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Warehouse",
    "options": "Warehouse",
@@ -176,10 +183,62 @@
    "fieldtype": "Link",
    "label": "Batch No",
    "options": "Batch"
+  },
+  {
+   "fieldname": "conversion_factor",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Conversion Factor",
+   "precision": "9",
+   "read_only": 1
+  },
+  {
+   "fieldname": "loose_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Loose Qty"
+  },
+  {
+   "fieldname": "loose_uom",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Loose UOM",
+   "options": "UOM"
+  },
+  {
+   "fieldname": "stock_uom",
+   "fieldtype": "Link",
+   "label": "Stock UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "section_break_6",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_qty",
+   "fieldtype": "Float",
+   "in_list_view": 1,
+   "label": "Total Physical Qty",
+   "precision": "6",
+   "read_only": 1
+  },
+  {
+   "fieldname": "stock_loose_qty",
+   "fieldtype": "Float",
+   "label": "Loose Qty as per Stock UOM",
+   "precision": "6",
+   "read_only": 1
   }
  ],
  "istable": 1,
- "modified": "2021-04-09 15:15:49.842035",
+ "modified": "2021-04-23 16:52:55.737642",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",
