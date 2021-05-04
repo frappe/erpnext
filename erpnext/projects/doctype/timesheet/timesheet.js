@@ -174,9 +174,10 @@ frappe.ui.form.on("Timesheet Detail", {
 
 		var $trigger_again = $('.form-grid').find('.grid-row').find('.btn-open-row');
 		$trigger_again.on('click', () => {
-			$('.form-grid')
-				.find('[data-fieldname="timer"]')
-				.append(frappe.render_template("timesheet"));
+			let $timer = $('.form-grid').find('[data-fieldname="timer"]')
+			if ($timer.get(0)) {
+				$timer.append(frappe.render_template("timesheet"));
+			}
 			frm.trigger("control_timer");
 		});
 	},
