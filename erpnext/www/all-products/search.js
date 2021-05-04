@@ -8,7 +8,7 @@ function populateResults(data) {
     html = ""
     for (let res of data.message) {
         html += `<li class="list-group-item list-group-item-action">
-        <img class="item-thumb" src="${res.thumbnail || ''}" />
+        <img class="item-thumb" src="${res.thumbnail || 'img/placeholder.png'}" />
         <a href="/${res.route}">${res.web_item_name}</a>
         </li>`
     }
