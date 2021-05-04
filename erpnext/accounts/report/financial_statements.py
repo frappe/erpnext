@@ -523,3 +523,11 @@ def get_columns(periodicity, period_list, accumulated_values=1, company=None):
 			})
 
 	return columns
+
+def get_filtered_list_for_consolidated_report(filters, period_list):
+	filtered_summary_list = []
+	for period in  period_list:
+		if period == filters.get('company'):
+			filtered_summary_list.append(period)
+
+	return filtered_summary_list
