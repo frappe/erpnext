@@ -80,6 +80,9 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
+		
+		if not self.creation_date:
+			self.creation_date = datetime.now()
 
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -159,6 +162,8 @@ class SalesInvoice(SellingController):
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
 						exonerated += self.total
+						self.grand_total = self.total
+						self.rounded_total = self.grand_total
 					else:
 						invoice_table_taxes = frappe.get_all("Sales Taxes and Charges", ["name", "rate", "tax_amount"], filters = {"parent": self.name})
 
