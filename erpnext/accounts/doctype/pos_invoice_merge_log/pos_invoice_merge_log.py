@@ -12,6 +12,7 @@ from frappe.utils.background_jobs import enqueue
 from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
+import json
 
 from six import iteritems
 
@@ -78,8 +79,11 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice = self.merge_pos_invoice_into(sales_invoice, data)
 
 		sales_invoice.is_consolidated = 1
+		sales_invoice.set_posting_time = 1
+		sales_invoice.posting_date = getdate(self.posting_date)
 		sales_invoice.save()
 		sales_invoice.submit()
+
 		self.consolidated_invoice = sales_invoice.name
 
 		return sales_invoice.name
@@ -91,10 +95,13 @@ class POSInvoiceMergeLog(Document):
 		credit_note = self.merge_pos_invoice_into(credit_note, data)
 
 		credit_note.is_consolidated = 1
+		credit_note.set_posting_time = 1
+		credit_note.posting_date = getdate(self.posting_date)
 		# TODO: return could be against multiple sales invoice which could also have been consolidated?
 		# credit_note.return_against = self.consolidated_invoice
 		credit_note.save()
 		credit_note.submit()
+
 		self.consolidated_credit_note = credit_note.name
 
 		return credit_note.name
@@ -131,12 +138,14 @@ class POSInvoiceMergeLog(Document):
 					if t.account_head == tax.account_head and t.cost_center == tax.cost_center:
 						t.tax_amount = flt(t.tax_amount) + flt(tax.tax_amount_after_discount_amount)
 						t.base_tax_amount = flt(t.base_tax_amount) + flt(tax.base_tax_amount_after_discount_amount)
+						update_item_wise_tax_detail(t, tax)
 						found = True
 				if not found:
 					tax.charge_type = 'Actual'
 					tax.included_in_print_rate = 0
 					tax.tax_amount = tax.tax_amount_after_discount_amount
 					tax.base_tax_amount = tax.base_tax_amount_after_discount_amount
+					tax.item_wise_tax_detail = tax.item_wise_tax_detail
 					taxes.append(tax)
 
 			for payment in doc.get('payments'):
@@ -168,11 +177,9 @@ class POSInvoiceMergeLog(Document):
 		sales_invoice = frappe.new_doc('Sales Invoice')
 		sales_invoice.customer = self.customer
 		sales_invoice.is_pos = 1
-		# date can be pos closing date?
-		sales_invoice.posting_date = getdate(nowdate())
 
 		return sales_invoice
-	
+
 	def update_pos_invoices(self, invoice_docs, sales_invoice='', credit_note=''):
 		for doc in invoice_docs:
 			doc.load_from_db()
@@ -186,6 +193,26 @@ class POSInvoiceMergeLog(Document):
 			si = frappe.get_doc('Sales Invoice', si_name)
 			si.flags.ignore_validate = True
 			si.cancel()
+
+def update_item_wise_tax_detail(consolidate_tax_row, tax_row):
+	consolidated_tax_detail = json.loads(consolidate_tax_row.item_wise_tax_detail)
+	tax_row_detail = json.loads(tax_row.item_wise_tax_detail)
+
+	if not consolidated_tax_detail:
+		consolidated_tax_detail = {}
+
+	for item_code, tax_data in tax_row_detail.items():
+		if consolidated_tax_detail.get(item_code):
+			consolidated_tax_data = consolidated_tax_detail.get(item_code)
+			consolidated_tax_detail.update({
+				item_code: [consolidated_tax_data[0], consolidated_tax_data[1] + tax_data[1]]
+			})
+		else:
+			consolidated_tax_detail.update({
+				item_code: [tax_data[0], tax_data[1]]
+			})
+
+	consolidate_tax_row.item_wise_tax_detail = json.dumps(consolidated_tax_detail, separators=(',', ':'))
 
 def get_all_unconsolidated_invoices():
 	filters = {
@@ -208,13 +235,13 @@ def get_invoice_customer_map(pos_invoices):
 
 	return pos_invoice_customer_map
 
-def consolidate_pos_invoices(pos_invoices=[], closing_entry={}):
-	invoices = pos_invoices or closing_entry.get('pos_transactions') or get_all_unconsolidated_invoices()
+def consolidate_pos_invoices(pos_invoices=None, closing_entry=None):
+	invoices = pos_invoices or (closing_entry and closing_entry.get('pos_transactions')) or get_all_unconsolidated_invoices()
 	invoice_by_customer = get_invoice_customer_map(invoices)
 
-	if len(invoices) >= 5 and closing_entry:
+	if len(invoices) >= 1 and closing_entry:
 		closing_entry.set_status(update=True, status='Queued')
-		enqueue_job(create_merge_logs, invoice_by_customer, closing_entry)
+		enqueue_job(create_merge_logs, invoice_by_customer=invoice_by_customer, closing_entry=closing_entry)
 	else:
 		create_merge_logs(invoice_by_customer, closing_entry)
 
@@ -225,28 +252,28 @@ def unconsolidate_pos_invoices(closing_entry):
 		pluck='name'
 	)
 
-	if len(merge_logs) >= 5:
+	if len(merge_logs) >= 1:
 		closing_entry.set_status(update=True, status='Queued')
-		enqueue_job(cancel_merge_logs, merge_logs, closing_entry)
+		enqueue_job(cancel_merge_logs, merge_logs=merge_logs, closing_entry=closing_entry)
 	else:
 		cancel_merge_logs(merge_logs, closing_entry)
 
-def create_merge_logs(invoice_by_customer, closing_entry={}):
+def create_merge_logs(invoice_by_customer, closing_entry=None):
 	for customer, invoices in iteritems(invoice_by_customer):
 		merge_log = frappe.new_doc('POS Invoice Merge Log')
-		merge_log.posting_date = getdate(nowdate())
+		merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
 		merge_log.customer = customer
-		merge_log.pos_closing_entry = closing_entry.get('name', None)
+		merge_log.pos_closing_entry = closing_entry.get('name') if closing_entry else None
 
 		merge_log.set('pos_invoices', invoices)
 		merge_log.save(ignore_permissions=True)
 		merge_log.submit()
-	
+
 	if closing_entry:
 		closing_entry.set_status(update=True, status='Submitted')
 		closing_entry.update_opening_entry()
 
-def cancel_merge_logs(merge_logs, closing_entry={}):
+def cancel_merge_logs(merge_logs, closing_entry=None):
 	for log in merge_logs:
 		merge_log = frappe.get_doc('POS Invoice Merge Log', log)
 		merge_log.flags.ignore_permissions = True
@@ -256,19 +283,20 @@ def cancel_merge_logs(merge_logs, closing_entry={}):
 		closing_entry.set_status(update=True, status='Cancelled')
 		closing_entry.update_opening_entry(for_cancel=True)
 
-def enqueue_job(job, invoice_by_customer, closing_entry):
+def enqueue_job(job, **kwargs):
 	check_scheduler_status()
+
+	closing_entry = kwargs.get('closing_entry') or {}
 
 	job_name = closing_entry.get("name")
 	if not job_already_enqueued(job_name):
 		enqueue(
 			job,
+			**kwargs,
 			queue="long",
 			timeout=10000,
 			event="processing_merge_logs",
 			job_name=job_name,
-			closing_entry=closing_entry,
-			invoice_by_customer=invoice_by_customer,
 			now=frappe.conf.developer_mode or frappe.flags.in_test
 		)
 

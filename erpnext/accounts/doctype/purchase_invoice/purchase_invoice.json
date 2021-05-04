@@ -163,7 +163,8 @@
   "to_date",
   "column_break_114",
   "auto_repeat",
-  "update_auto_repeat_reference"
+  "update_auto_repeat_reference",
+  "per_received"
  ],
  "fields": [
   {
@@ -1364,13 +1365,22 @@
    "print_hide": 1,
    "print_width": "50px",
    "width": "50px"
+  },
+  {
+   "fieldname": "per_received",
+   "fieldtype": "Percent",
+   "hidden": 1,
+   "label": "Per Received",
+   "no_copy": 1,
+   "print_hide": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 204,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-30 21:45:58.334107",
+ "modified": "2021-03-30 22:45:58.334107",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice",

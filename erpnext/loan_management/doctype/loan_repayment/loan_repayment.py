@@ -75,17 +75,13 @@ class LoanRepayment(AccountsController):
 			"docstatus": 1, "against_loan": self.against_loan}, 'posting_date')
 
 		if future_repayment_date:
-			frappe.throw("Repayment already made till date {0}".format(getdate(future_repayment_date)))
+			frappe.throw("Repayment already made till date {0}".format(get_datetime(future_repayment_date)))
 
 	def validate_amount(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
 
 		if not self.amount_paid:
 			frappe.throw(_("Amount paid cannot be zero"))
-
-		if not self.shortfall_amount and self.amount_paid < self.penalty_amount:
-			msg = _("Paid amount cannot be less than {0}").format(self.penalty_amount)
-			frappe.throw(msg)
 
 	def book_unaccrued_interest(self):
 		precision = cint(frappe.db.get_default("currency_precision")) or 2
@@ -231,6 +227,14 @@ class LoanRepayment(AccountsController):
 		gle_map = []
 		loan_details = frappe.get_doc("Loan", self.against_loan)
 
+		if self.shortfall_amount and self.amount_paid > self.shortfall_amount:
+			remarks = _("Shortfall Repayment of {0}.\nRepayment against Loan: {1}").format(self.shortfall_amount,
+				self.against_loan)
+		elif self.shortfall_amount:
+			remarks = _("Shortfall Repayment of {0}").format(self.shortfall_amount)
+		else:
+			remarks = _("Repayment against Loan: ") + self.against_loan
+
 		if self.total_penalty_paid:
 			gle_map.append(
 				self.get_gl_dict({
@@ -271,7 +275,7 @@ class LoanRepayment(AccountsController):
 				"debit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": _("Repayment against Loan: ") + self.against_loan,
+				"remarks": remarks,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(self.posting_date)
 			})
@@ -287,7 +291,7 @@ class LoanRepayment(AccountsController):
 				"credit_in_account_currency": self.amount_paid,
 				"against_voucher_type": "Loan",
 				"against_voucher": self.against_loan,
-				"remarks": _("Repayment against Loan: ") + self.against_loan,
+				"remarks": remarks,
 				"cost_center": self.cost_center,
 				"posting_date": getdate(self.posting_date)
 			})
@@ -338,6 +342,18 @@ def get_accrued_interest_entries(against_loan, posting_date=None):
 
 	return unpaid_accrued_entries
 
+def get_penalty_details(against_loan):
+	penalty_details = frappe.db.sql("""
+		SELECT posting_date, (penalty_amount - total_penalty_paid) as pending_penalty_amount
+		FROM `tabLoan Repayment` where posting_date >= (SELECT MAX(posting_date) from `tabLoan Repayment`
+		where against_loan = %s) and docstatus = 1 and against_loan = %s
+	""", (against_loan, against_loan))
+
+	if penalty_details:
+		return penalty_details[0][0], flt(penalty_details[0][1])
+	else:
+		return None, 0
+
 # This function returns the amounts that are payable at the time of loan repayment based on posting date
 # So it pulls all the unpaid Loan Interest Accrual Entries and calculates the penalty if applicable
 
@@ -348,6 +364,7 @@ def get_amounts(amounts, against_loan, posting_date):
 	loan_type_details = frappe.get_doc("Loan Type", against_loan_doc.loan_type)
 	accrued_interest_entries = get_accrued_interest_entries(against_loan_doc.name, posting_date)
 
+	computed_penalty_date, pending_penalty_amount = get_penalty_details(against_loan)
 	pending_accrual_entries = {}
 
 	total_pending_interest = 0
@@ -362,8 +379,13 @@ def get_amounts(amounts, against_loan, posting_date):
 		# and if no_of_late days are positive then penalty is levied
 
 		due_date = add_days(entry.posting_date, 1)
-		no_of_late_days = date_diff(posting_date,
-			add_days(due_date, loan_type_details.grace_period_in_days)) + 1
+		due_date_after_grace_period = add_days(due_date, loan_type_details.grace_period_in_days)
+
+		# Consider one day after already calculated penalty
+		if computed_penalty_date and getdate(computed_penalty_date) >= due_date_after_grace_period:
+			due_date_after_grace_period = add_days(computed_penalty_date, 1)
+
+		no_of_late_days = date_diff(posting_date, due_date_after_grace_period) + 1
 
 		if no_of_late_days > 0 and (not against_loan_doc.repay_from_salary) and entry.accrual_type == 'Regular':
 			penalty_amount += (entry.interest_amount * (loan_type_details.penalty_interest_rate / 100) * no_of_late_days)
@@ -401,7 +423,7 @@ def get_amounts(amounts, against_loan, posting_date):
 	amounts["pending_principal_amount"] = flt(pending_principal_amount, precision)
 	amounts["payable_principal_amount"] = flt(payable_principal_amount, precision)
 	amounts["interest_amount"] = flt(total_pending_interest, precision)
-	amounts["penalty_amount"] = flt(penalty_amount, precision)
+	amounts["penalty_amount"] = flt(penalty_amount + pending_penalty_amount, precision)
 	amounts["payable_amount"] = flt(payable_principal_amount + total_pending_interest + penalty_amount, precision)
 	amounts["pending_accrual_entries"] = pending_accrual_entries
 	amounts["unaccrued_interest"] = flt(unaccrued_interest, precision)
@@ -413,7 +435,6 @@ def get_amounts(amounts, against_loan, posting_date):
 
 @frappe.whitelist()
 def calculate_amounts(against_loan, posting_date, payment_type=''):
-
 	amounts = {
 		'penalty_amount': 0.0,
 		'interest_amount': 0.0,

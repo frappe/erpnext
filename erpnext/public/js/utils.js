@@ -291,17 +291,15 @@ $.extend(erpnext.utils, {
 			return options[0];
 		}
 	},
-	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
-		var d = locals[dt][dn];
-		if(d[fieldname]){
-			var cl = doc[table_fieldname] || [];
-			for(var i = 0; i < cl.length; i++) {
+	overrides_parent_value_in_all_rows: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
+		if (doc[parent_fieldname]) {
+			let cl = doc[table_fieldname] || [];
+			for (let i = 0; i < cl.length; i++) {
 				cl[i][fieldname] = doc[parent_fieldname];
 			}
+			frappe.refresh_field(table_fieldname);
 		}
-		refresh_field(table_fieldname);
 	},
-
 	create_new_doc: function (doctype, update_fields) {
 		frappe.model.with_doctype(doctype, function() {
 			var new_doc = frappe.model.get_new_doc(doctype);
@@ -714,7 +712,7 @@ erpnext.utils.map_current_doc = function(opts) {
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
-	if (doc && value && doc.item_name && doc.item_name !== value) {
+	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
 		return value + ': ' + doc.item_name;
 	} else if (!value && doc.doctype && doc.item_name) {
 		// format blank value in child table

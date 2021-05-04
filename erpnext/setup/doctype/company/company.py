@@ -17,6 +17,7 @@ from frappe.utils.nestedset import NestedSet
 from past.builtins import cmp
 import functools
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
@@ -68,11 +69,7 @@ class Company(NestedSet):
 
 	@frappe.whitelist()
 	def create_default_tax_template(self):
-		from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
-		create_sales_tax({
-			'country': self.country,
-			'company_name': self.name
-		})
+		setup_taxes_and_charges(self.name, self.country)
 
 	def validate_default_accounts(self):
 		accounts = [
