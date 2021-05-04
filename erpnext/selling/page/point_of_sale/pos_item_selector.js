@@ -84,8 +84,8 @@ erpnext.PointOfSale.ItemSelector = class {
 		let qty_to_display = actual_qty;
 
 		if (Math.round(qty_to_display) > 999) {
-			qty_to_display = Math.round(qty_to_display)/1000
-			qty_to_display = qty_to_display.toFixed(1) + 'K'
+			qty_to_display = Math.round(qty_to_display)/1000;
+			qty_to_display = qty_to_display.toFixed(1) + 'K';
 		}
 
 		function get_item_image_html() {
