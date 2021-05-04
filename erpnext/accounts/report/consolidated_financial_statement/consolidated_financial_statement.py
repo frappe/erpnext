@@ -329,8 +329,9 @@ def prepare_data(accounts, start_date, end_date, balance_must_be, companies, com
 		has_value = False
 		total = 0
 		row = frappe._dict({
-			"account_name": _(d.account_name),
-			"account": _(d.account_name),
+			"account_name": ('%s - %s' %(_(d.account_number), _(d.account_name))
+				if d.account_number else _(d.account_name)),
+			"account": _(d.name),
 			"parent_account": _(d.parent_account),
 			"indent": flt(d.indent),
 			"year_start_date": start_date,
