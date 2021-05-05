@@ -163,6 +163,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "cost_of_operation_consumed",
    "fieldtype": "Currency",
    "hidden": 1,

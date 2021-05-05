@@ -23,6 +23,7 @@
    "in_list_view": 1,
    "label": "Item",
    "options": "Item",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -32,6 +33,7 @@
    "in_list_view": 1,
    "label": "UOM",
    "options": "UOM",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -41,6 +43,7 @@
    "in_list_view": 1,
    "label": "Warehouse",
    "options": "Warehouse",
+   "read_only": 1,
    "reqd": 1
   },
   {
@@ -49,7 +52,8 @@
    "fieldtype": "Link",
    "in_list_view": 1,
    "label": "Batch",
-   "options": "Batch"
+   "options": "Batch",
+   "read_only": 1
   },
   {
    "fieldname": "column_break_5",
@@ -60,19 +64,22 @@
    "fieldname": "balance_qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "label": "Balance Qty"
+   "label": "Balance Qty",
+   "read_only": 1
   },
   {
    "fieldname": "expiry_date_batch",
    "fieldtype": "Date",
-   "label": "Expiry Date Batch"
+   "label": "Expiry Date Batch",
+   "read_only": 1
   },
   {
    "columns": 1,
    "fieldname": "life_left_batch",
    "fieldtype": "Int",
    "in_list_view": 1,
-   "label": "Life Left Batch"
+   "label": "Life Left Batch",
+   "read_only": 1
   },
   {
    "columns": 1,
@@ -85,7 +92,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-17 00:39:57.487629",
+ "modified": "2021-05-03 12:27:56.277433",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Consumption Detail",

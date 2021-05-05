@@ -30,7 +30,7 @@ class MaterialProduce(Document):
             total_qty = 0
             line_id = None
             for res in self.material_produce_details:
-                total_qty += res.qty_produced
+                total_qty += flt(res.qty_produced, res.precision('qty_produced'))
                 line_id = res.line_ref
 
             l_doc = frappe.get_doc("Material Produce Item", line_id)
@@ -45,7 +45,7 @@ class MaterialProduce(Document):
                         "item_code": res.item_code,
                         "item_name": res.item_name,
                         "t_warehouse": res.t_warehouse,
-                        "qty_produced": res.qty_produced,
+                        "qty_produced": flt(res.qty_produced, res.precision('qty_produced')),
                         "has_batch_no": res.has_batch_no,
                         "batch": res.batch_series,
                         "rate": flt(res.rate, res.precision('rate')),
@@ -55,14 +55,13 @@ class MaterialProduce(Document):
             if line_id:
                 l_doc = frappe.get_doc("Material Produce Item", line_id)
                 l_doc.data = json.dumps(lst)
-                l_doc.qty_produced = total_qty
+                l_doc.qty_produced = flt(total_qty, l_doc.precision('qty_produced'))
                 l_doc.status = "Set"
                 l_doc.save(ignore_permissions=True)
         return True
 
     def on_submit(self):
         self.make_se()
-        self.cost_details_calculation()
         self.calc_actual_fg_wt_on_wo() 
 
     def on_cancel(self):
@@ -71,7 +70,6 @@ class MaterialProduce(Document):
     def calc_actual_fg_wt_on_wo(self):
         wo = frappe.get_doc("Work Order", self.work_order)
         wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
-        print(wo.actual_fg_weight)
         wo.db_update()
 
     def cost_details_calculation(self):
@@ -81,22 +79,26 @@ class MaterialProduce(Document):
             total_transfer_qty = 0
             for res in self.material_produce_item:
                 if res.type == "FG":
-                    total_transfer_qty += flt(res.qty_produced, self.precision('cost_of_rm_consumed'))
-            self.cost_of_rm_consumed = ((flt(wo.planned_rm_cost), wo.precision('planned_rm_cost'))/(flt(wo.qty), wo.precision('qty')))*total_transfer_qty
-            self.cost_of_operation_consumed = ((flt(wo.planned_operating_cost), wo.precision('planned_operating_cost'))/(flt(wo.qty), wo.precision('qty')))*total_transfer_qty
+                    total_transfer_qty += flt(res.qty_produced)
+            if wo.qty == 0:
+                self.cost_of_rm_consumed = 0
+                self.cost_of_operation_consumed = 0
+            else:
+                self.cost_of_rm_consumed = flt(((flt(wo.planned_rm_cost))/(flt(wo.qty)))*total_transfer_qty, self.precision("cost_of_rm_consumed"))
+                self.cost_of_operation_consumed = flt((flt(wo.planned_operating_cost)/flt(wo.qty))*total_transfer_qty, self.precision('cost_of_operation_consumed'))
         else:
             tcrmc = tcoc = scrap_cost = 0
             wo = frappe.get_doc("Work Order", self.work_order)
             value = frappe.db.sql("""select cost_of_rm_consumed, cost_of_operation_consumed from `tabMaterial Produce`
-                                  where partial_produce = 1 and work_order = %s""",(self.work_order), as_dict = True)
+                                  where partial_produce = 1 and docstatus = 1 and work_order = %s""",(self.work_order), as_dict = True)
             for val in value:
                 tcrmc += val.cost_of_rm_consumed
                 tcoc += val.cost_of_operation_consumed
 
-            self.total_cost_of_rm_consumed_for_partial_close = tcrmc
-            self.total_cost_of_operation_consumed_for_partial_close = tcoc
-            self.wo_actual_rm_cost = wo.actual_rm_cost
-            self.wo_actual_operating_cost = wo.total_operating_cost
+            self.total_cost_of_rm_consumed_for_partial_close = flt(tcrmc, self.precision('total_cost_of_rm_consumed_for_partial_close'))
+            self.total_cost_of_operation_consumed_for_partial_close = flt(tcoc, self.precision('total_cost_of_operation_consumed_for_partial_close'))
+            self.wo_actual_rm_cost = flt(wo.actual_rm_cost, self.precision('wo_actual_rm_cost'))
+            self.wo_actual_operating_cost = flt(wo.total_operating_cost, self.precision('wo_actual_operating_cost'))
 
             for res in self.material_produce_item:
                 if res.type == "Scrap" and res.data:
@@ -105,9 +107,9 @@ class MaterialProduce(Document):
                             scrap_cost += flt(line.rate, precision1)
             self.cost_of_scrap = flt(scrap_cost, self.precision('cost_of_scrap'))
 
-            self.amount = (self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_operation_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap)
+            self.amount = flt((self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_rm_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap), self.precision('amount'))
+            print(self.amount)
             
-
     def make_stock_entry(self):
         return self.make_se()
 
@@ -134,7 +136,7 @@ class MaterialProduce(Document):
         wo = frappe.get_doc("Work Order",self.work_order)
         for res in self.material_produce_item:
             if res.type == "FG":
-                total_transfer_qty += res.qty_produced
+                total_transfer_qty += flt(res.qty_produced, res.precision('qty_produced'))
 
 #         for res in wo.required_items:
 #             qty = 0
@@ -217,7 +219,7 @@ class MaterialProduce(Document):
                     if line.get('qty_produced') > 0:
                         se_item = stock_entry.append("items")
                         se_item.item_code = line.get('item_code')
-                        se_item.qty = line.get('qty_produced')
+                        se_item.qty = flt(line.get('qty_produced'), se_item.precision('qty'))
                         se_item.t_warehouse = line.get('t_warehouse')
                         se_item.item_name = itm_doc.item_name
                         se_item.description = itm_doc.description
@@ -233,132 +235,150 @@ class MaterialProduce(Document):
             # if res.type == "FG":
             #     total_transfer_qty += res.qty_produced
         stock_entry.from_bom = 1
-        stock_entry.fg_completed_qty = total_transfer_qty
+        stock_entry.fg_completed_qty = flt(total_transfer_qty, stock_entry.precision('fg_completed_qty'))
         add_additional_cost(stock_entry, wo)
         stock_entry.set_actual_qty()
         stock_entry.set_missing_values()
         stock_entry.insert(ignore_permissions=True)
         stock_entry.validate()
+        # for res in self.material_produce_item:
+        #     if res.data:
+        #         for line in json.loads(res.data):
         stock_entry.flags.ignore_validate_update_after_submit = True
         stock_entry.submit()
         return stock_entry.as_dict()
 
 
-@frappe.whitelist()
-def add_details_line(bom, type, line_id, work_order, item_code, warehouse,qty_produced=None,batch_size=None, data=None, amount=None):
-    # print(type)
-    # precision = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty_to_issue"))
-    # print(precision)
-    if qty_produced:
-        qty_produced = float(qty_produced)
-    else:
-        qty_produced = 0
-    if batch_size:
-        batch_size = float(batch_size)
-    else:
-        batch_size = 0
-    print("*****"*20)
-    if not data:
-        print("ppppp"*20)
-        item = frappe.get_doc("Item", item_code)
-        lst = []
-        batch_option = None
-        enabled = frappe.db.get_single_value('Batch Settings', 'enabled')
-        # item_master_batch_series = frappe.db.get_value('Item', {"item_code": item_code}, ['batch_series'])
-        # if item_master_batch_series:
-        if item.batch_number_series:
-            batch_option = item.batch_number_series
-        elif enabled:
-            is_finish_batch_series = frappe.db.get_single_value('Batch Settings', 'is_finish_batch_series')
-            batch_series = frappe.db.get_single_value('Batch Settings', 'batch_series')
-            if is_finish_batch_series == 'Use Work Order as Series':
-                batch_option = str(work_order) + "-.##"
-            if is_finish_batch_series == 'Create New':
-                batch_option = batch_series
+    @frappe.whitelist()
+    def add_details_line(self, partial_produce, bom, type, line_id, work_order, item_code, warehouse,qty_produced=None,batch_size=None, data=None, amount=None):
+        precision1 = get_field_precision(frappe.get_meta("Material Produce Detail").get_field("qty_produced"))
+        precision2 = get_field_precision(frappe.get_meta("Material Produce").get_field("batch_size"))
+        precision3 = get_field_precision(frappe.get_meta("Material Produce").get_field("amount"))
+        precision4 = get_field_precision(frappe.get_meta("Material Produce Detail").get_field("rate"))
+        if qty_produced:
+            qty_produced = flt(qty_produced, precision1)
         else:
-            # if item.batch_number_series:
-            #     batch_option = item.batch_number_series
-            # else:
-            batch_option = str(work_order) + "-.##"
-        if not amount:
-            amount = 0
+            qty_produced = 0
+        if batch_size:
+            batch_size = flt(batch_size, precision2)
         else:
-            amount = float(amount)
-        if qty_produced > 1:
-            if type == "Scrap":
-                bo = frappe.get_doc("BOM", bom)
-                if bo.scrap_items:
-                    for row in bo.scrap_items:
-                        per_item_rate = flt(row.rate, row.precision('rate'))
-                        print(per_item_rate)
-                        break
-                else:
-                    per_item_rate = 0
+            batch_size = 0
+            print("data"*5, str(data))
+        if not data:
+            print("notdata"*5, str(data))
+            item = frappe.get_doc("Item", item_code)
+            lst = []
+            batch_option = None
+            enabled = frappe.db.get_single_value('Batch Settings', 'enabled')
+            # item_master_batch_series = frappe.db.get_value('Item', {"item_code": item_code}, ['batch_series'])
+            # if item_master_batch_series:
+            if item.batch_number_series:
+                batch_option = item.batch_number_series
+            elif enabled:
+                is_finish_batch_series = frappe.db.get_single_value('Batch Settings', 'is_finish_batch_series')
+                batch_series = frappe.db.get_single_value('Batch Settings', 'batch_series')
+                if is_finish_batch_series == 'Use Work Order as Series':
+                    batch_option = str(work_order) + "-.##"
+                if is_finish_batch_series == 'Create New':
+                    batch_option = batch_series
             else:
-                per_item_rate = flt((flt(amount) / flt(qty_produced)), 3)
-                print(per_item_rate)
-        else:
-            per_item_rate = 0
-
-        if item.has_batch_no:
-            remaining_size = qty_produced
-            if batch_size:
-                while True:
-                    if (remaining_size >= batch_size):
-                        lst.append({
-                            "item_code": item.name,
-                            "item_name": item.item_name,
-                            "t_warehouse": warehouse,
-                            "qty_produced": batch_size,
-                            "has_batch_no": item.has_batch_no,
-                            "batch": batch_option if item.has_batch_no else None,
-                            "rate": per_item_rate,
-                            "weight": item.weight_per_unit,
-                            "line_ref": line_id
-                        })
+                # if item.batch_number_series:
+                #     batch_option = item.batch_number_series
+                # else:
+                batch_option = str(work_order) + "-.##"
+            if not amount:
+                amount = 0
+            else:
+                amount = flt(amount, precision3)
+            if qty_produced >= 1:
+                if type == "Scrap":
+                    bo = frappe.get_doc("BOM", bom)
+                    if bo.scrap_items:
+                        for row in bo.scrap_items:
+                            per_item_rate = flt(row.rate, row.precision('rate'))
+                            break
                     else:
-                        lst.append({
-                            "item_code": item.name,
-                            "item_name": item.item_name,
-                            "t_warehouse": warehouse,
-                            "qty_produced": remaining_size,
-                            "has_batch_no": item.has_batch_no,
-                            "batch": batch_option if item.has_batch_no else None,
-                            "rate": per_item_rate,
-                            "weight": item.weight_per_unit,
-                            "line_ref": line_id
-                        })
-                        break
-                    remaining_size -= batch_size
-                    if(remaining_size < 1):
-                        break
+                        per_item_rate = 0
+                else:
+                    if partial_produce:
+                        if self.cost_of_rm_consumed == 0:
+                            wo = frappe.get_doc("Work Order", self.work_order)
+                            total_transfer_qty = 0
+                            for res in self.material_produce_item:
+                                if res.type == "FG":
+                                    total_transfer_qty += flt(res.qty_produced)
+                            if wo.qty == 0:
+                                self.cost_of_rm_consumed = 0
+                                self.cost_of_operation_consumed = 0
+                            else:
+                                self.cost_of_rm_consumed = flt(((flt(wo.planned_rm_cost))/(flt(wo.qty)))*total_transfer_qty, self.precision("cost_of_rm_consumed"))
+                                self.cost_of_operation_consumed = flt((flt(wo.planned_operating_cost)/flt(wo.qty))*total_transfer_qty, self.precision('cost_of_operation_consumed'))
+                        per_item_rate = flt((flt(self.cost_of_rm_consumed)+flt(self.cost_of_operation_consumed))/flt(qty_produced), precision4)
+                    else:
+                        per_item_rate = flt(flt(amount) / flt(qty_produced), precision4)
+            else:
+                per_item_rate = 0
+
+            if item.has_batch_no:
+                remaining_size = qty_produced
+                if batch_size:
+                    while True:
+                        if (remaining_size >= batch_size):
+                            lst.append({
+                                "item_code": item.name,
+                                "item_name": item.item_name,
+                                "t_warehouse": warehouse,
+                                "qty_produced": flt(batch_size, precision1),
+                                "has_batch_no": item.has_batch_no,
+                                "batch": batch_option if item.has_batch_no else None,
+                                "rate": flt(per_item_rate, precision4),
+                                "weight": item.weight_per_unit,
+                                "line_ref": line_id
+                            })
+                        else:
+                            lst.append({
+                                "item_code": item.name,
+                                "item_name": item.item_name,
+                                "t_warehouse": warehouse,
+                                "qty_produced": flt(remaining_size, precision1),
+                                "has_batch_no": item.has_batch_no,
+                                "batch": batch_option if item.has_batch_no else None,
+                                "rate": flt(per_item_rate, precision4),
+                                "weight": item.weight_per_unit,
+                                "line_ref": line_id
+                            })
+                            break
+                        remaining_size -= batch_size
+                        if(remaining_size < 1):
+                            break
+                else:
+                    lst.append({
+                        "item_code": item.name,
+                        "item_name": item.item_name,
+                        "t_warehouse": warehouse,
+                        "qty_produced": flt(qty_produced, precision1),
+                        "has_batch_no": item.has_batch_no,
+                        "batch": batch_option if item.has_batch_no else None,
+                        "rate": flt(per_item_rate, precision4),
+                        "weight": item.weight_per_unit,
+                        "line_ref": line_id
+                    })
             else:
                 lst.append({
                     "item_code": item.name,
                     "item_name": item.item_name,
                     "t_warehouse": warehouse,
-                    "qty_produced": qty_produced,
+                    "qty_produced": flt(qty_produced, precision1),
                     "has_batch_no": item.has_batch_no,
-                    "batch": batch_option if item.has_batch_no else None,
-                    "rate": per_item_rate,
                     "weight": item.weight_per_unit,
+                    "rate": flt(per_item_rate, precision4),
                     "line_ref": line_id
                 })
+            self.cost_details_calculation()
+            return lst
         else:
-            lst.append({
-                "item_code": item.name,
-                "item_name": item.item_name,
-                "t_warehouse": warehouse,
-                "qty_produced": qty_produced,
-                "has_batch_no": item.has_batch_no,
-                "weight": item.weight_per_unit,
-                "rate": per_item_rate,
-                "line_ref": line_id
-            })
-        return lst
-    else:
-        print("OOOOO"*20)
-        return json.loads(data)
+            self.cost_details_calculation()
+            return json.loads(data)
 
 def add_additional_cost(stock_entry, work_order):
     # Add non stock items cost in the additional cost
@@ -383,7 +403,7 @@ def add_non_stock_items_cost(stock_entry, work_order, expense_account):
 
     non_stock_items_cost = 0.0
     for name in non_stock_items:
-        non_stock_items_cost += flt(items.get(name[0])) * flt(stock_entry.fg_completed_qty) / flt(bom.quantity)
+        non_stock_items_cost += flt(items.get(name[0])) * flt((stock_entry.fg_completed_qty), stock_entry.precision('fg_completed_qty')) / flt((bom.quantity), bom.precision('quantity'))
 
     if non_stock_items_cost:
         stock_entry.append('additional_costs', {
@@ -402,21 +422,21 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
             if stock_entry.fg_completed_qty == 0:
                 operating_cost_per_unit = 0
             else:
-                operating_cost_per_unit = flt((flt(mp_doc.wo_actual_operating_cost) - flt(mp_doc.total_cost_of_operation_consumed_for_partial_close)) / flt(stock_entry.fg_completed_qty))
+                operating_cost_per_unit = flt((flt((mp_doc.wo_actual_operating_cost), mp_doc.precision('wo_actual_operating_cost')) - flt((mp_doc.total_cost_of_operation_consumed_for_partial_close), mp_doc.precision('total_cost_of_operation_consumed_for_partial_close'))) / flt((stock_entry.fg_completed_qty), stock_entry.precision('fg_completed_qty')))
     if operating_cost_per_unit:
         stock_entry.append('additional_costs', {
             "expense_account": expense_account,
             "description": _("Operating Cost as per Work Order / BOM"),
-            "amount": operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
+            "amount": operating_cost_per_unit * flt((stock_entry.fg_completed_qty), stock_entry.precision('fg_completed_qty'))
         })
 
     if work_order and work_order.additional_operating_cost and work_order.qty:
         additional_operating_cost_per_unit = \
-            flt(work_order.additional_operating_cost) / flt(work_order.qty)
+            flt((work_order.additional_operating_cost), work_order.precision('additional_operating_cost')) / flt((work_order.qty), work_order.precision('qty'))
 
         if additional_operating_cost_per_unit:
             stock_entry.append('additional_costs', {
                 "expense_account": expense_account,
                 "description": "Additional Operating Cost",
-                "amount": additional_operating_cost_per_unit * flt(stock_entry.fg_completed_qty)
+                "amount": additional_operating_cost_per_unit * flt((stock_entry.fg_completed_qty), stock_entry.precision('fg_completed_qty'))
             })

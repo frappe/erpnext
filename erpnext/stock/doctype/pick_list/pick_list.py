@@ -19,7 +19,6 @@ from frappe.model.meta import get_field_precision
 # TODO: Prioritize SO or WO group warehouse
 
 class PickList(Document):
-	precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("stock_qty"))
 	def before_save(self):
 		self.set_item_locations()
 
@@ -31,7 +30,7 @@ class PickList(Document):
 				frappe.throw(_("Row #{0}: {1} does not have any available serial numbers in {2}").format(
 					frappe.bold(item.idx), frappe.bold(item.item_code), frappe.bold(item.warehouse)),
 					title=_("Serial Nos Required"))
-			if len(item.serial_no.split('\n')) == flt(item.picked_qty, item.precision('picked_qty')):
+			if len(item.serial_no.split('\n')) == item.picked_qty:
 				continue
 			frappe.throw(_('For item {0} at row {1}, count of serial numbers does not match with the picked quantity')
 				.format(frappe.bold(item.item_code), frappe.bold(item.idx)), title=_("Quantity Mismatch"))
@@ -85,7 +84,6 @@ class PickList(Document):
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
-		precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("stock_qty"))
 		items = self.aggregate_item_qty()
 		self.item_location_map = frappe._dict()
 
@@ -116,7 +114,7 @@ class PickList(Document):
 
 			for row in locations:
 				row.update({
-					'picked_qty': flt(row.stock_qty, precision1)
+					'picked_qty': row.stock_qty
 				})
 
 				location = item_doc.as_dict()
@@ -152,14 +150,14 @@ class PickList(Document):
 			item.name = None
 
 			if item_map.get(key):
-				item_map[key].qty += flt(item.qty, item.precision('qty'))
-				item_map[key].stock_qty += flt(item.stock_qty, item.precision('stock_qty'))
+				item_map[key].qty += item.qty
+				item_map[key].stock_qty += item.stock_qty
 			else:
 				item_map[key] = item
 
 			# maintain count of each item (useful to limit get query)
 			self.item_count_map.setdefault(item_code, 0)
-			self.item_count_map[item_code] += flt(item.stock_qty, item.precision('stock_qty'))
+			self.item_count_map[item_code] += item.stock_qty
 
 		return item_map.values()
 
@@ -199,8 +197,6 @@ def validate_item_locations(pick_list):
 		frappe.throw(_("Add items in the Item Locations table"))
 
 def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus):
-	precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("stock_qty"))
-	precision2 = get_field_precision(frappe.get_meta("Pick List Item").get_field("qty"))
 	available_locations = item_location_map.get(item_doc.item_code)
 	locations = []
 
@@ -212,12 +208,12 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 		item_location = frappe._dict(item_location)
 
 		stock_qty = remaining_stock_qty if item_location.qty >= remaining_stock_qty else item_location.qty
-		qty = flt(flt(stock_qty, precision1) / flt((item_doc.conversion_factor or 1)), precision2)
+		qty = stock_qty / (item_doc.conversion_factor or 1)
 
 		uom_must_be_whole_number = frappe.db.get_value('UOM', item_doc.uom, 'must_be_whole_number')
 		if uom_must_be_whole_number:
 			qty = floor(qty)
-			stock_qty = flt(qty * item_doc.conversion_factor, precision1)
+			stock_qty = qty * item_doc.conversion_factor
 			if not stock_qty: break
 
 		serial_nos = None
@@ -225,19 +221,19 @@ def get_items_with_location_and_quantity(item_doc, item_location_map, docstatus)
 			serial_nos = '\n'.join(item_location.serial_no[0: cint(stock_qty)])
 
 		locations.append(frappe._dict({
-			'qty': flt(qty, precision1),
-			'stock_qty': flt(stock_qty, precision1),
+			'qty': qty,
+			'stock_qty': stock_qty,
 			'warehouse': item_location.warehouse,
 			'serial_no': serial_nos,
 			'batch_no': item_location.batch_no
 		}))
 
-		remaining_stock_qty -= flt(stock_qty, precision1)
+		remaining_stock_qty -= stock_qty
 
-		qty_diff = flt(flt(item_location.qty) - flt(stock_qty), precision1)
+		qty_diff = item_location.qty - stock_qty
 		# if extra quantity is available push current warehouse to available locations
 		if qty_diff > 0:
-			item_location.qty = flt(qty_diff, precision1)
+			item_location.qty = qty_diff
 			if item_location.serial_no:
 				# set remaining serial numbers
 				item_location.serial_no = item_location.serial_no[-int(qty_diff):]

@@ -250,26 +250,28 @@ class WorkOrder(Document):
 		self.create_job_card()
 	
 	def before_save(self):
-		self.planned_rm_cost_calc()
 		self.bom_details()
-		self.scrap_cost_calc()
 
 	def on_change(self):
+		self.planned_rm_cost_calc()
 		self.yeild_calc()
+		self.scrap_cost_calc()
 
 	def yeild_calc(self):
 		if self.actual_rm_weight == 0:
 			self.actual_yeild = 0
 		else:
 			self.actual_yeild = flt(flt(self.actual_fg_weight)/flt(self.actual_rm_weight), self.precision('actual_yeild'))
+
 		self.yeild_deviation = flt(flt(self.bom_yeild) - flt(self.actual_yeild), self.precision('yeild_deviation'))
 		
 	def scrap_cost_calc(self):
 		bo = frappe.get_doc("BOM", self.bom_no)
-		if bo.quantity == 0:
-			self.scrap_cost = 0
+		if bo.quantity >= 0:
+			self.scrap_cost = flt((flt(bo.scrap_material_cost)/flt(bo.quantity))*flt(self.qty), self.precision('scrap_cost'))
 		else:
-			self.scrap_cost = flt(flt(bo.scrap_material_cost)/flt(bo.quantity)*flt(self.qty), self.precision('scrap_cost'))
+			self.scrap_cost = 0
+			
 
 	def bom_details(self):
 		bo = frappe.get_doc("BOM", self.bom_no)
@@ -277,7 +279,7 @@ class WorkOrder(Document):
 		
 		value = 0
 		for row in self.required_items:
-			value += flt(row.required_qty) * flt(row.weight_per_unit) 
+			value += flt(row.required_qty, row.precision('required_qty')) * flt(row.weight_per_unit, row.precision('weight_per_unit')) 
 		self.bom_weight = flt(value, self.precision('bom_weight'))
 
 	def planned_rm_cost_calc(self):

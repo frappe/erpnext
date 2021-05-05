@@ -36,8 +36,7 @@ class MaterialConsumption(Document):
             if line_id:
                 l_doc = frappe.get_doc("Materials to Consume Items",line_id)
                 l_doc.data = json.dumps(lst)
-                precision = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty_issued"))
-                l_doc.qty_issued = flt(total_qty, precision)
+                l_doc.qty_issued = flt(total_qty, l_doc.precision('qty_issued'))
                 l_doc.status = "Assigned"
                 l_doc.save(ignore_permissions=True)
         return True
@@ -54,14 +53,12 @@ class MaterialConsumption(Document):
         for row in wo.required_items:
             if row.type == "RM":
                 value += flt(row.consumed_qty, row.precision('consumed_qty')) * flt(row.weight_per_unit, row.precision('weight_per_unit'))
-                # print("*********"*100)
-                # print(row.consumed_qty)
-                # print(row.weight_per_unit)
         wo.actual_rm_weight = flt(value, wo.precision('actual_rm_weight'))
         wo.db_update()
 
     def make_stock_entry(self):
         precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("picked_qty"))
+        precision2 = get_field_precision(frappe.get_meta("Work Order").get_field("bom_yeild"))
         if self.type == "Manual":
             lst = []
             for res in self.materials_to_consume:
@@ -127,11 +124,11 @@ class MaterialConsumption(Document):
                 bom_yeild = frappe.db.get_value("Work Order", {"name":self.work_order},['bom_yeild'])
                 
                 if(bom_yeild > 0):
-                    calculated_qty = (total_transfer_qty) * (bom_yeild/100)
+                    calculated_qty = (total_transfer_qty) * (flt(bom_yeild, precision2)/100)
                 else:
                     calculated_qty = total_transfer_qty
                 stock_entry.from_bom = 1
-                stock_entry.fg_completed_qty = calculated_qty
+                stock_entry.fg_completed_qty = flt(calculated_qty, stock_entry.precision('fg_completed_qty'))
                 stock_entry.set_actual_qty()
                 stock_entry.calculate_rate_and_amount()
                 stock_entry.insert(ignore_permissions=True)
@@ -264,7 +261,7 @@ def get_available_qty_data(line_id, company, item_code, warehouse, has_batch_no=
                 warehouse_lst.append(w.get('name'))
             query = """select sle.item_code, warehouse, sle.company, sle.stock_uom, batch_no, sum(sle.actual_qty) as balance_qty 
                     from `tabStock Ledger Entry` sle force index (posting_sort_index) 
-                    where sle.docstatus < 2 and is_cancelled = 0 and sle.batch_no is not null 
+                    where sle.docstatus < 2 and is_cancelled = 0 and sle.batch_no is not null
                     and company = '{0}' and sle.item_code = '{1}'""".format(company, item_code)
             if len(warehouse_lst) > 1:
                 query += " and warehouse in {0}".format(tuple(warehouse_lst))
@@ -336,7 +333,6 @@ def add_pick_list_item(doc_name,pick_list):
    
 @frappe.whitelist()
 def consumption_list(wo):
-    precision1 = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty"))
     query = """SELECT * FROM `tabWork Order Item` where parent = '{0}';""".format(wo)
 
     all_items = frappe.db.sql(query, as_dict = True)
