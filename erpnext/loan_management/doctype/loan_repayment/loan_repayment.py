@@ -435,7 +435,6 @@ def get_amounts(amounts, against_loan, posting_date):
 
 @frappe.whitelist()
 def calculate_amounts(against_loan, posting_date, payment_type=''):
-
 	amounts = {
 		'penalty_amount': 0.0,
 		'interest_amount': 0.0,
