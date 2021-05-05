@@ -71,6 +71,7 @@
    "label": "Leave Settings"
   },
   {
+   "default": "Leave Approval Notification",
    "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_approval_notification_template",
    "fieldtype": "Link",
@@ -79,6 +80,7 @@
    "options": "Email Template"
   },
   {
+   "default": "Leave Status Notification",
    "depends_on": "eval: doc.send_leave_notification == 1",
    "fieldname": "leave_status_notification_template",
    "fieldtype": "Link",
@@ -155,7 +157,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-26 10:52:56.192773",
+ "modified": "2021-05-05 12:25:24.082705",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
