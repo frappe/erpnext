@@ -31,7 +31,8 @@ class VehicleBookingDepositSummaryReport(object):
 				dep_m.posting_date as deposit_date, rec_m.posting_date as receipt_date, dep_i.instrument_date,
 				dep_i.amount, dep_m.total_amount, dep_i.instrument_no, dep_i.bank, dep_m.deposit_slip_no,
 				rec_m.party_name as customer_name, dep_m.vehicle_booking_order,
-				vbo.tax_id, vbo.tax_cnic, vbo.finance_type, vbo.item_code, i.item_name, vbo.allocation_period,
+				vbo.tax_id, vbo.tax_cnic, vbo.finance_type, vbo.item_code, item.item_name,
+				vbo.allocation_period, vbo.delivery_period,
 				vbo.invoice_total
 			from `tabVehicle Booking Payment Detail` dep_i
 			inner join `tabVehicle Booking Payment` dep_m on dep_m.name = dep_i.parent
@@ -39,8 +40,9 @@ class VehicleBookingDepositSummaryReport(object):
 				and rec_i.parent = dep_i.vehicle_booking_payment
 			inner join `tabVehicle Booking Payment` rec_m on rec_m.name = rec_i.parent
 			inner join `tabVehicle Booking Order` vbo on vbo.name = dep_m.vehicle_booking_order
-			inner join `tabItem` i on i.name = vbo.item_code
+			inner join `tabItem` item on item.name = vbo.item_code
 			left join `tabVehicle Allocation Period` ap on ap.name = vbo.allocation_period
+			left join `tabVehicle Allocation Period` dp on dp.name = vbo.delivery_period
 			where dep_m.docstatus = 1 {0}
 			order by deposit_date, deposit_slip_no, dep_i.idx
 		""".format(conditions), self.filters, as_dict=1)
@@ -67,6 +69,7 @@ class VehicleBookingDepositSummaryReport(object):
 				d.tax_cnic_ntn = d.tax_cnic or d.tax_id
 
 			d.dealership_code = dealership_code
+			d.disable_item_formatter = 1
 
 			all_deposits = self.payment_by_booking.get(d.vehicle_booking_order, [])
 
@@ -110,6 +113,12 @@ class VehicleBookingDepositSummaryReport(object):
 		if self.filters.deposit_type:
 			conditions.append("dep_m.deposit_type = %(deposit_type)s")
 
+		if self.filters.variant_of:
+			conditions.append("item.variant_of = %(variant_of)s")
+
+		if self.filters.item_code:
+			conditions.append("item.name = %(item_code)s")
+
 		if self.filters.from_allocation_period:
 			self.filters.allocation_from_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.from_allocation_period, "from_date")
 			conditions.append("ap.from_date >= %(allocation_from_date)s")
@@ -117,6 +126,14 @@ class VehicleBookingDepositSummaryReport(object):
 		if self.filters.to_allocation_period:
 			self.filters.allocation_to_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.to_allocation_period, "to_date")
 			conditions.append("ap.to_date <= %(allocation_to_date)s")
+
+		if self.filters.from_delivery_period:
+			self.filters.delivery_from_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.from_delivery_period, "from_date")
+			conditions.append("dp.from_date >= %(delivery_from_date)s")
+
+		if self.filters.to_delivery_period:
+			self.filters.delivery_to_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.to_delivery_period, "to_date")
+			conditions.append("dp.to_date <= %(delivery_to_date)s")
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
@@ -130,15 +147,16 @@ class VehicleBookingDepositSummaryReport(object):
 			{"label": _("Bank"), "fieldname": "bank", "fieldtype": "Link", "options": "Bank", "width": 110},
 			{"label": _("Deposit Slip"), "fieldname": "deposit_slip_no", "fieldtype": "Data", "width": 90},
 			{"label": _("Customer"), "fieldname": "customer_name", "fieldtype": "Data", "width": 150},
-			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 100},
+			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
 			{"label": _("Dealer Code"), "fieldname": "dealership_code", "fieldtype": "Data", "width": 90},
 			{"label": _("Booking #"), "fieldname": "vehicle_booking_order", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105},
-			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
+			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
-			{"label": _("Advance/Balance"), "fieldname": "deposit_stage", "fieldtype": "Data", "width": 150},
-			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 90},
-			{"label": _("Deposit Document"), "fieldname": "deposit_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 90},
-			{"label": _("Receipt Document"), "fieldname": "receipt_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 90},
+			{"label": _("Advance/Balance"), "fieldname": "deposit_stage", "fieldtype": "Data", "width": 120},
+			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 120},
+			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
+			{"label": _("Deposit Document"), "fieldname": "deposit_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 100},
+			{"label": _("Receipt Document"), "fieldname": "receipt_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 100},
 		]
 
 
