@@ -80,6 +80,9 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
+		
+		if not self.creation_date:
+			self.creation_date = datetime.now()
 
 		self.validate_proj_cust()
 		self.validate_pos_return()
@@ -153,6 +156,8 @@ class SalesInvoice(SellingController):
 		taxed18 = 0
 		exempt = 0
 		exonerated = 0
+		taxed_sales15 = 0
+		taxed_sales18 = 0
 
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
@@ -184,16 +189,20 @@ class SalesInvoice(SellingController):
 
 								if tax_detail.tax_rate == 15:
 									if self.exonerated == 1:
+										taxed_sales15 += item.amount/1.15
 										taxed15 += item.amount - (item.amount/1.15)
 										exonerated += item.amount
 									else:
+										taxed_sales15 += item.amount/1.15
 										taxed15 += item.amount - (item.amount/1.15)
 								
 								if tax_detail.tax_rate == 18:
 									if self.exonerated == 1:
+										taxed_sales18 += item.amount/1.18
 										taxed18 += item.amount - (item.amount/1.18)
 										exonerated += item.amount
 									else:
+										taxed_sales18 += item.amount/1.18
 										taxed18 += item.amount - (item.amount/1.18)
 				else:
 					exempt += item.amount
@@ -203,6 +212,8 @@ class SalesInvoice(SellingController):
 		self.total_exonerated = exonerated
 		self.total_exempt = exempt
 		self.total_taxes_and_charges = taxed15 + taxed18
+		self.taxed_sales15 = taxed_sales15
+		self.taxed_sales18 = taxed_sales18
 
 		if self.exonerated == 1:
 			self.grand_total -= self.total_taxes_and_charges
@@ -220,7 +231,7 @@ class SalesInvoice(SellingController):
 	
 	def exonerated_value(self):
 		if self.exonerated == 1:
-			if self.grand_total > self.total:
+			if self.grand_total < self.total:
 				self.grand_total -= self.total_taxes_and_charges
 				self.outstanding_amount -= self.total_taxes_and_charges
 
@@ -389,6 +400,26 @@ class SalesInvoice(SellingController):
 	def before_naming(self):
 		if self.docstatus == 0:
 			self.assign_cai()
+			self.create_prefix_for_days()
+			self.create_daily_summary_series()
+
+	def create_prefix_for_days(self):
+		prefix = cai = frappe.get_all("Prefix sales for days", ["name_prefix"], filters = {"name_prefix": self.naming_series})
+
+		if len(prefix) == 0:
+			doc = frappe.new_doc('Prefix sales for days')
+			doc.name_prefix = self.naming_series
+			doc.insert()
+	
+	def create_daily_summary_series(self):
+		split_serie = self.naming_series.split('-')
+		serie =  "{}-{}".format(split_serie[0], split_serie[1])
+		prefix = cai = frappe.get_all("Daily summary series", ["name_serie"], filters = {"name_serie": serie})
+
+		if len(prefix) == 0:
+			doc = frappe.new_doc('Daily summary series')
+			doc.name_serie = serie
+			doc.insert()
 
 	def on_submit(self):
 		self.validate_pos_paid_amount()
@@ -948,8 +979,8 @@ class SalesInvoice(SellingController):
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
-			if self.exonerated == 1:
-				gl_entries.pop(1)
+			# if self.exonerated == 1:
+			# 	gl_entries.pop(1)
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
