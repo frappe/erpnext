@@ -71,7 +71,7 @@ def search(query):
 
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
-	suggestions = ac.get_suggestions(query, num=10)
+	suggestions = ac.get_suggestions(query, num=10, fuzzy=len(query) > 4)
 
 	# Build a query
 	query_string = query
