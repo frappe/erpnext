@@ -3,9 +3,10 @@
 
 from __future__ import unicode_literals
 import frappe
-from frappe import _
-from frappe.utils import getdate, nowdate
+from frappe import _, scrub, unscrub
+from frappe.utils import getdate, nowdate, cstr, flt
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import get_booking_payments
+from frappe.desk.query_report import group_report_data
 
 
 class VehicleBookingDepositSummaryReport(object):
@@ -17,8 +18,10 @@ class VehicleBookingDepositSummaryReport(object):
 
 	def run(self):
 		self.get_data()
-		data = self.prepare_data()
+		self.prepare_data()
 		columns = self.get_columns()
+
+		data = self.get_grouped_data()
 
 		return columns, data
 
@@ -31,7 +34,8 @@ class VehicleBookingDepositSummaryReport(object):
 				dep_m.posting_date as deposit_date, rec_m.posting_date as receipt_date, dep_i.instrument_date,
 				dep_i.amount, dep_m.total_amount, dep_i.instrument_no, dep_i.bank, dep_m.deposit_slip_no,
 				rec_m.party_name as customer_name, dep_m.vehicle_booking_order,
-				vbo.tax_id, vbo.tax_cnic, vbo.finance_type, vbo.item_code, item.item_name,
+				vbo.tax_id, vbo.tax_cnic, vbo.finance_type,
+				vbo.item_code, item.item_name, item.variant_of,
 				vbo.allocation_period, vbo.delivery_period,
 				vbo.invoice_total
 			from `tabVehicle Booking Payment Detail` dep_i
@@ -63,6 +67,9 @@ class VehicleBookingDepositSummaryReport(object):
 		dealership_code = frappe.get_cached_value("Vehicles Settings", None, "dealership_code")
 
 		for d in self.data:
+			d.reference_type = "Vehicle Booking Payment"
+			d.reference = d.deposit_doc
+
 			if d.finance_type == "Leased":
 				d.tax_cnic_ntn = d.tax_id
 			else:
@@ -94,6 +101,60 @@ class VehicleBookingDepositSummaryReport(object):
 				d.deposit_stage = "Balance"
 
 		return self.data
+
+	def get_grouped_data(self):
+		data = self.data
+
+		self.group_by = []
+		for i in range(3):
+			group_label = self.filters.get("group_by_" + str(i + 1), "").replace("Group by ", "")
+
+			if not group_label or group_label == "Ungrouped":
+				continue
+			elif group_label == "Variant":
+				group_field = "item_code"
+			elif group_label == "Model":
+				group_field = "variant_of"
+			else:
+				group_field = scrub(group_label)
+
+			self.group_by.append(group_field)
+
+		if not self.group_by:
+			return data
+
+		return group_report_data(data, self.group_by, calculate_totals=self.calculate_group_totals)
+
+	def calculate_group_totals(self, data, group_field, group_value, grouped_by):
+		totals = frappe._dict()
+
+		# Copy grouped by into total row
+		for f, g in grouped_by.items():
+			totals[f] = g
+
+		# Sum
+		sum_fields = ['amount']
+		for f in sum_fields:
+			totals[f] = sum([flt(d.get(f)) for d in data])
+
+		group_reference_doctypes = {
+			"item_code": "Item",
+			"variant_of": "Item",
+			"allocation_period": "Vehicle Allocation Period",
+			"delivery_period": "Vehicle Allocation Period",
+		}
+
+		# set reference field
+		reference_field = group_field[0] if isinstance(group_field, (list, tuple)) else group_field
+		reference_dt = group_reference_doctypes.get(reference_field, unscrub(cstr(reference_field)))
+		totals['reference_type'] = reference_dt
+		totals['reference'] = grouped_by.get(reference_field)
+
+		# set item code when grouped by model
+		if "variant_of" in grouped_by:
+			totals['item_code'] = totals['variant_of']
+
+		return totals
 
 	def get_conditions(self):
 		conditions = []
@@ -139,6 +200,7 @@ class VehicleBookingDepositSummaryReport(object):
 
 	def get_columns(self):
 		return [
+			{"label": _("Reference"), "fieldname": "reference", "fieldtype": "Dynamic Link", "options": "reference_type", "width": 100},
 			{"label": _("Instrument Date"), "fieldname": "instrument_date", "fieldtype": "Date", "width": 90},
 			{"label": _("Receipt Date"), "fieldname": "receipt_date", "fieldtype": "Date", "width": 90},
 			{"label": _("Deposit Date"), "fieldname": "deposit_date", "fieldtype": "Date", "width": 90},
@@ -155,7 +217,6 @@ class VehicleBookingDepositSummaryReport(object):
 			{"label": _("Advance/Balance"), "fieldname": "deposit_stage", "fieldtype": "Data", "width": 120},
 			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 120},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
-			{"label": _("Deposit Document"), "fieldname": "deposit_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 100},
 			{"label": _("Receipt Document"), "fieldname": "receipt_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 100},
 		]
 
