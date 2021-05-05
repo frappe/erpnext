@@ -36,6 +36,7 @@ def create_job_applicant(source_name, target_doc=None):
 	job_applicant.source = "Employee Referral"
 	job_applicant.employee_referral = emp_ref.name
 	job_applicant.status = status
+	job_applicant.designation = emp_ref.for_designation
 	job_applicant.applicant_name = emp_ref.full_name
 	job_applicant.email_id = emp_ref.email
 	job_applicant.phone_number = emp_ref.contact_no
