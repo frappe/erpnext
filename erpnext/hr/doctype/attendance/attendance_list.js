@@ -11,7 +11,7 @@ frappe.listview_settings['Attendance'] = {
 	},
 	onload: function (list_view) {
 		let me = this;
-		const months = moment.months()
+		const months = moment.months();
 		list_view.page.add_inner_button(__("Mark Attendance"), function () {
 			let dialog = new frappe.ui.Dialog({
 				title: __("Mark Attendance"),

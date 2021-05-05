@@ -32,7 +32,7 @@ frappe.ui.form.on('Interview', {
 							args: {
 								interview_name: frm.doc.name
 							}
-						})
+						});
 						frm.refresh();
 					});
 				}).addClass("btn-primary");
@@ -101,20 +101,20 @@ frappe.ui.form.on('Interview', {
 		let d = new frappe.ui.Dialog({
 			title: __("Submit Feedback"),
 			fields: [{
-				fieldname: "skill_set",
-				fieldtype: "Table",
-				label: "Rate Based On Skill Set",
-				cannot_add_rows: false,
-				in_editable_grid: true,
-				reqd: 1,
-				fields: fields,
-				data: data
-			},
-			{
-				fieldname: "feedback",
-				fieldtype: "Small Text",
-				label: "Feedback"
-			}
+					fieldname: "skill_set",
+					fieldtype: "Table",
+					label: "Rate Based On Skill Set",
+					cannot_add_rows: false,
+					in_editable_grid: true,
+					reqd: 1,
+					fields: fields,
+					data: data
+				},
+				{
+					fieldname: "feedback",
+					fieldtype: "Small Text",
+					label: "Feedback"
+				}
 			],
 			size: "large",
 			primary_action: function (values) {

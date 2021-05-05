@@ -49,7 +49,6 @@ frappe.ui.form.on("Job Applicant", {
 	},
 
 	make_dashboard: function(frm) {
-		console.log("Hello");
 		frappe.call({
 			method: "erpnext.hr.doctype.job_applicant.job_applicant.get_interview_details",
 			args: {

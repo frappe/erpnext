@@ -3,9 +3,10 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe, math, datetime
+import frappe
+import datetime
 from frappe import _
-from frappe.utils import get_link_to_form, today, get_datetime
+from frappe.utils import get_link_to_form, get_datetime
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_interviewer_roles
 
@@ -116,7 +117,7 @@ def send_review_reminder(interview_name):
 		if len(recipients):
 			frappe.sendmail(
 				recipients= recipients,
-				subject='Interview Feedback Submission Reminder'.format(interview_name),
+				subject='Interview Feedback Submission Reminder',
 				message=message,
 				reference_doctype="Interview",
 				reference_name=interview_name
@@ -129,7 +130,7 @@ def send_interview_reminder():
 		reminder_date_time = datetime.datetime.now() + datetime.timedelta(
 			hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
 
-		interviews =  frappe.get_all("Interview", filters={
+		interviews = frappe.get_all("Interview", filters={
 			'scheduled_on': ['between', (datetime.datetime.now(), reminder_date_time)],
 			'status': "Scheduled",
 			'reminded': 0,
@@ -146,7 +147,7 @@ def send_interview_reminder():
 
 			frappe.sendmail(
 				recipients= recipients,
-				subject='Interview Reminder '.format(doc.name),
+				subject='Interview Reminder',
 				message=message,
 				reference_doctype=doc.doctype,
 				reference_name=doc.name

@@ -32,8 +32,7 @@ class InterviewFeedback(Document):
 			frappe.throw(_("{0} submission before {1} is not allowed").format(
 				frappe.bold("Interview Feedback"),
 				frappe.bold("Interview Scheduled Date")
-				)
-			)
+			))
 
 	def validate_duplicate(self):
 		duplicate_feedback = frappe.db.exists("Interview Feedback", {
@@ -62,7 +61,6 @@ class InterviewFeedback(Document):
 		self.set_interview_average_rating()
 
 	def set_interview_average_rating(self):
-		interview = frappe.get_doc("Interview", self.interview)
 		update_rating(self.interview, self.interviewer, self.name, self.feedback, self.average_rating)
 
 	def before_cancel(self):
