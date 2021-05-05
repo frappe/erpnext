@@ -8,6 +8,7 @@ def get_data():
 			'Delivery Note': 'against_sales_invoice',
 			'Journal Entry': 'reference_name',
 			'Payment Entry': 'reference_name',
+			'Credit Note CXP': 'reference_name',
 			'Payment Request': 'reference_name',
 			'Sales Invoice': 'return_against',
 			'Auto Repeat': 'reference_document',
@@ -26,7 +27,7 @@ def get_data():
 			},
 			{
 				'label': _('Returns'),
-				'items': ['Sales Invoice']
+				'items': ['Sales Invoice', 'Credit Note CXP']
 			},
 			{
 				'label': _('Subscription'),

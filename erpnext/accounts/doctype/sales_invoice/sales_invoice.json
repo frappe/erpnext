@@ -1037,6 +1037,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -1706,7 +1707,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-03-24 13:54:27.173484",
+ "modified": "2021-04-30 13:36:15.704592",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

@@ -7,7 +7,7 @@
  "field_order": [
   "naming_series",
   "status",
-  "party",
+  "customer",
   "column_break_1",
   "posting_date",
   "due_date",
@@ -18,12 +18,14 @@
   "authorized_range",
   "section_break_1",
   "amount",
-  "column_break_2",
+  "taxes",
+  "section_break_2",
+  "company",
   "affects_sale_book",
   "affects_sales_month",
-  "tax_base",
-  "tax_template",
-  "isv",
+  "column_break_2",
+  "isv_18",
+  "isv_15",
   "document_balance",
   "outstanding_amount",
   "amended_from"
@@ -76,7 +78,7 @@
    "fieldname": "amount",
    "fieldtype": "Currency",
    "in_list_view": 1,
-   "label": "Amount",
+   "label": "Net Subtotal",
    "options": "Currency",
    "reqd": 1
   },
@@ -97,23 +99,17 @@
    "label": "Affects Sales Month"
   },
   {
-   "fieldname": "tax_base",
-   "fieldtype": "Currency",
-   "label": "Tax Base",
-   "options": "Currency"
-  },
-  {
    "fieldname": "document_balance",
    "fieldtype": "Currency",
    "label": "Document Balance",
-   "options": "currency",
+   "options": "Currency",
    "read_only": 1
   },
   {
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
-   "options": "currency",
+   "options": "Currency",
    "read_only": 1
   },
   {
@@ -126,32 +122,11 @@
    "read_only": 1
   },
   {
-   "fieldname": "party",
-   "fieldtype": "Link",
-   "in_list_view": 1,
-   "label": "Customer",
-   "options": "Customer",
-   "reqd": 1
-  },
-  {
    "fieldname": "reason_debit_note",
    "fieldtype": "Link",
    "label": "Reason Debit Note",
-   "options": "Reason Debit Note",
+   "options": "Reason Debit And Credit Note",
    "reqd": 1
-  },
-  {
-   "fieldname": "tax_template",
-   "fieldtype": "Link",
-   "label": "Tax Template",
-   "options": "Item Tax Template"
-  },
-  {
-   "fieldname": "isv",
-   "fieldtype": "Currency",
-   "label": "Isv",
-   "options": "currency",
-   "read_only": 1
   },
   {
    "collapsible": 1,
@@ -176,9 +151,54 @@
    "fieldtype": "Data",
    "label": "Authorized Range",
    "read_only": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_standard_filter": 1,
+   "label": "Company",
+   "options": "Company",
+   "print_hide": 1,
+   "read_only": 1,
+   "remember_last_selected_value": 1,
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "reqd": 1
+  },
+  {
+   "fieldname": "taxes",
+   "fieldtype": "Table",
+   "label": "Taxes",
+   "options": "Multiple Taxes",
+   "reqd": 1
+  },
+  {
+   "fieldname": "section_break_2",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "isv_18",
+   "fieldtype": "Currency",
+   "label": "Isv 18%",
+   "options": "Currency",
+   "read_only": 1
+  },
+  {
+   "fieldname": "isv_15",
+   "fieldtype": "Currency",
+   "label": "Isv 15%",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
- "modified": "2021-04-21 13:59:35.178000",
+ "is_submittable": 1,
+ "modified": "2021-05-03 16:45:36.706144",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXC",
