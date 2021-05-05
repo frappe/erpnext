@@ -323,7 +323,7 @@
    "label": "Show Categories in Search Autocomplete"
   },
   {
-   "default": "1",
+   "default": "0",
    "description": "e.g. \"iPhone 12 by Apple\"",
    "fieldname": "show_brand_line",
    "fieldtype": "Check",
@@ -333,7 +333,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-05 13:05:52.615719",
+ "modified": "2021-05-05 13:41:11.483232",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
