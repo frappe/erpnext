@@ -751,16 +751,19 @@ def update_itc_availed_fields(doc, method):
 	if country != 'India':
 		return
 
+	# Initialize values
+	doc.itc_integrated_tax = doc.itc_state_tax = doc.itc_central_tax = doc.itc_cess_amount = 0
 	gst_accounts = get_gst_accounts(doc.company, only_non_reverse_charge=1)
+
 	for tax in doc.get('taxes'):
 		if tax.account_head in gst_accounts.get('igst_account'):
-			doc.itc_integrated_tax += tax.base_tax_amount_after_discount_amount
+			doc.itc_integrated_tax += flt(tax.base_tax_amount_after_discount_amount)
 		if tax.account_head in gst_accounts.get('sgst_account'):
-			doc.itc_state_tax += tax.base_tax_amount_after_discount_amount
+			doc.itc_state_tax += flt(tax.base_tax_amount_after_discount_amount)
 		if tax.account_head in gst_accounts.get('cgst_account'):
-			doc.itc_central_tax += tax.base_tax_amount_after_discount_amount
+			doc.itc_central_tax += flt(tax.base_tax_amount_after_discount_amount)
 		if tax.account_head in gst_accounts.get('cess_account'):
-			doc.itc_cess_amount += tax.base_tax_amount_after_discount_amount
+			doc.itc_cess_amount += flt(tax.base_tax_amount_after_discount_amount)
 
 @frappe.whitelist()
 def get_regional_round_off_accounts(company, account_list):

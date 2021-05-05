@@ -28,6 +28,9 @@ class GSTR3BReport(Document):
 		self.get_outward_supply_details("Sales Invoice")
 		self.set_outward_taxable_supplies()
 
+		self.get_outward_supply_details("Purchase Invoice", reverse_charge=True)
+		self.set_supplies_liable_to_reverse_charge()
+
 		itc_details = self.get_itc_details()
 		self.set_itc_details(itc_details)
 		self.get_itc_reversal_entries()
@@ -128,7 +131,7 @@ class GSTR3BReport(Document):
 			WHERE p.docstatus = 1 and p.name = i.parent
 			and p.is_opening = 'No'
 			and p.gst_category != 'Registered Composition'
-			and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_catgory = 'Registered Composition') and
+			and (i.is_nil_exempt = 1 or i.is_non_gst = 1 or p.gst_category = 'Registered Composition') and
 			month(p.posting_date) = %s and year(p.posting_date) = %s
 			and p.company = %s and p.company_gstin = %s
 			GROUP BY p.place_of_supply, i.is_nil_exempt, i.is_non_gst""",
@@ -171,7 +174,7 @@ class GSTR3BReport(Document):
 		condition = ''
 
 		if reverse_charge:
-			condition += 'AND reverse_charge = Y'
+			condition += "AND reverse_charge = 'Y'"
 
 		invoice_details = frappe.db.sql("""
 			SELECT
@@ -319,8 +322,18 @@ class GSTR3BReport(Document):
 		self.set_inter_state_supply(inter_state_supply_details)
 
 	def set_supplies_liable_to_reverse_charge(self):
-		# ToDo:
-		pass
+		for inv, items_based_on_rate in self.items_based_on_tax_rate.items():
+			for rate, items in items_based_on_rate.items():
+				for item_code, taxable_value in self.invoice_items.get(inv).items():
+					if item_code in items:
+						if inv in self.cgst_sgst_invoices:
+							tax_rate = rate/2
+							self.report_dict['sup_details']['isup_rev']['camt'] += (taxable_value * tax_rate /100)
+							self.report_dict['sup_details']['isup_rev']['samt'] += (taxable_value * tax_rate /100)
+							self.report_dict['sup_details']['isup_rev']['txval'] += taxable_value
+						else:
+							self.report_dict['sup_details']['isup_rev']['iamt'] += (taxable_value * rate /100)
+							self.report_dict['sup_details']['isup_rev']['txval'] += taxable_value
 
 	def set_inter_state_supply(self, inter_state_supply):
 		for key, value in iteritems(inter_state_supply):
