@@ -162,8 +162,6 @@ class SalesInvoice(SellingController):
 		if self.taxes_and_charges:
 					if self.exonerated == 1:
 						exonerated += self.total
-						self.grand_total = self.total
-						self.rounded_total = self.grand_total
 					else:
 						invoice_table_taxes = frappe.get_all("Sales Taxes and Charges", ["name", "rate", "tax_amount"], filters = {"parent": self.name})
 
@@ -233,7 +231,7 @@ class SalesInvoice(SellingController):
 	
 	def exonerated_value(self):
 		if self.exonerated == 1:
-			if self.grand_total > self.total:
+			if self.grand_total < self.total:
 				self.grand_total -= self.total_taxes_and_charges
 				self.outstanding_amount -= self.total_taxes_and_charges
 
@@ -981,8 +979,8 @@ class SalesInvoice(SellingController):
 			update_outstanding = "No" if (cint(self.is_pos) or self.write_off_account or
 				cint(self.redeem_loyalty_points)) else "Yes"
 
-			if self.exonerated == 1:
-				gl_entries.pop(1)
+			# if self.exonerated == 1:
+			# 	gl_entries.pop(1)
 
 			make_gl_entries(gl_entries, cancel=(self.docstatus == 2),
 				update_outstanding=update_outstanding, merge_entries=False, from_repost=from_repost)
