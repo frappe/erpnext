@@ -61,7 +61,7 @@ class HealthcareServiceInsuranceCoverage(Document):
 
 def get_service_insurance_coverage_details(service_doctype, service, service_item, insurance_subscription):
 	valid_date = getdate()
-	coverage, discount = 0
+	coverage = discount = 0
 	is_auto_approval = True
 	insurance_details = False
 
@@ -69,7 +69,7 @@ def get_service_insurance_coverage_details(service_doctype, service, service_ite
 		['name', 'healthcare_insurance_coverage_plan', 'insurance_company'], as_dict=True)
 	coverage_plan = insurance_subscription.healthcare_insurance_coverage_plan
 
-	if insurance_subscription and is_valid_insurance(insurance_subscription.name, valid_date):
+	if insurance_subscription and is_valid_insurance(insurance_subscription, valid_date):
 		coverage_list = get_insurance_coverage_list(coverage_plan, valid_date)
 
 		if not coverage_list:

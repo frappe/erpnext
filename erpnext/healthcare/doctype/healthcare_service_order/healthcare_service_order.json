@@ -29,8 +29,6 @@
   "column_break_16",
   "patient_email",
   "patient_mobile",
-  "marital_status",
-  "occupation",
   "inpatient_record",
   "inpatient_status",
   "order_source_section",
@@ -55,7 +53,6 @@
   "period",
   "occurrence_date",
   "occurrence_time",
-  "healthcare_service_unit_type",
   "invoiced",
   "column_break_91",
   "order_description",
@@ -78,7 +75,9 @@
   "reason_reference_doctype",
   "reason_reference",
   "order_group_doctype",
-  "amended_from"
+  "amended_from",
+  "insurance_claim",
+  "claim_status"
  ],
  "fields": [
   {
@@ -232,12 +231,6 @@
    "fieldname": "as_needed",
    "fieldtype": "Check",
    "label": "Occurrence As Needed"
-  },
-  {
-   "fieldname": "healthcare_service_unit_type",
-   "fieldtype": "Link",
-   "label": "Healthcare Service Unit Type",
-   "options": "Healthcare Service Unit Type"
   },
   {
    "fieldname": "reason_reference_doctype",
@@ -575,7 +568,7 @@
    "link_fieldname": "healthcare_service_order"
   }
  ],
- "modified": "2021-05-02 11:24:12.671393",
+ "modified": "2021-05-05 14:26:01.768532",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",

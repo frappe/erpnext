@@ -253,7 +253,7 @@ def get_inpatient_services_to_invoice(patient, company):
 		if service_unit_type and service_unit_type.is_billable:
 			hours_occupied = flt(time_diff_in_hours(inpatient_occupancy.check_out, inpatient_occupancy.check_in), 2)
 			qty = 0.5
-			if hours_occupied > 0:
+			if hours_occupied > 0 and service_unit_type.no_of_hours:
 				actual_qty = hours_occupied / service_unit_type.no_of_hours
 				floor = math.floor(actual_qty)
 				decimal_part = actual_qty - floor

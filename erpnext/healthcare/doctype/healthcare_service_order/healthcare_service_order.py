@@ -20,10 +20,6 @@ class HealthcareServiceOrder(Document):
 	def after_insert(self):
 		make_insurance_claim(self)
 
-	def validate(self):
-		if self.insurance_subscription and self.claim_status == 'Pending':
-			self.status = 'Waiting'
-
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
 			return
