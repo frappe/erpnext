@@ -1379,7 +1379,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 	update_payment_schedule_grid_labels: function(company_currency) {
 		const me = this;
-		if (this.frm.fields_dict["payment_schedule"]) {
+		if (this.frm.doc.payment_schedule.length > 0) {
 			this.frm.set_currency_labels(["base_payment_amount", "base_outstanding", "base_paid_amount"],
 				company_currency, "payment_schedule");
 			this.frm.set_currency_labels(["payment_amount", "outstanding", "paid_amount"],
