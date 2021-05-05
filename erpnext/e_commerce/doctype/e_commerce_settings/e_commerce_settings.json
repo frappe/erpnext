@@ -47,7 +47,8 @@
   "slideshow",
   "item_search_settings_section",
   "search_index_fields",
-  "show_categories_in_search_autocomplete"
+  "show_categories_in_search_autocomplete",
+  "show_brand_line"
  ],
  "fields": [
   {
@@ -320,12 +321,19 @@
    "fieldname": "show_categories_in_search_autocomplete",
    "fieldtype": "Check",
    "label": "Show Categories in Search Autocomplete"
+  },
+  {
+   "default": "1",
+   "description": "e.g. \"iPhone 12 by Apple\"",
+   "fieldname": "show_brand_line",
+   "fieldtype": "Check",
+   "label": "Show Brand Line"
   }
  ],
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-26 09:50:40.581354",
+ "modified": "2021-05-05 13:05:52.615719",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "E Commerce Settings",
