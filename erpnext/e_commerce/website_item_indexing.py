@@ -99,8 +99,6 @@ def update_index_for_item(website_item_doc):
 	# Reinsert to Cache
 	insert_item_to_index(website_item_doc)
 	define_autocomplete_dictionary()
-	# TODO: Only reindex updated items
-	create_website_items_index()
 
 def delete_item_from_index(website_item_doc):
 	r = frappe.cache()
@@ -111,8 +109,15 @@ def delete_item_from_index(website_item_doc):
 	except:
 		return False
 
-	# TODO: Also delete autocomplete suggestion
+	delete_from_ac_dict(website_item_doc)
+
 	return True
+
+def delete_from_ac_dict(website_item_doc):
+	'''Removes this items's name from autocomplete dictionary'''
+	r = frappe.cache()
+	name_ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=r)
+	name_ac.delete(website_item_doc.web_item_name)
 
 def define_autocomplete_dictionary():
 	"""Creates an autocomplete search dictionary for `name`.
@@ -162,7 +167,6 @@ def reindex_all_web_items():
 
 		for k, v in web_item.items():
 			super(RedisWrapper, r).hset(key, k, v)
-
 
 def get_cache_key(name):
 	name = frappe.scrub(name)

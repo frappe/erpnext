@@ -3,3 +3,7 @@
     width: 50px;
     object-fit: cover;
 }
+
+.brand-line {
+    color: gray;
+}

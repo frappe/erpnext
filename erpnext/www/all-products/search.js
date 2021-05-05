@@ -3,13 +3,14 @@ let loading = false;
 const searchBox = document.getElementById("search-box");
 const results = document.getElementById("results");
 const categoryList = document.getElementById("category-suggestions");
+const showBrandLine = document.getElementById("show-brand-line");
 
 function populateResults(data) {
     html = ""
     for (let res of data.message) {
         html += `<li class="list-group-item list-group-item-action">
         <img class="item-thumb" src="${res.thumbnail || 'img/placeholder.png'}" />
-        <a href="/${res.route}">${res.web_item_name}</a>
+        <a href="/${res.route}">${res.web_item_name} <span class="brand-line">${showBrandLine && res.brand ? "by " + res.brand : ""}</span></a>
         </li>`
     }
     results.innerHTML = html;

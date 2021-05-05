@@ -26,13 +26,17 @@
 	</div>
 	
 	{% set show_categories = frappe.db.get_single_value('E Commerce Settings', 'show_categories_in_search_autocomplete') %}
-	
 	{% if show_categories %}
 	<div id="categories" class="col-sm">
 		<h2>Categories</h2>
 		<ul id="category-suggestions">
 		</ul>
 	</div>
+	{% endif %}
+	
+	{% set show_brand_line = frappe.db.get_single_value('E Commerce Settings', 'show_brand_line') %}
+	{% if show_brand_line %}
+	<span id="show-brand-line"></span>
 	{% endif %}
 </div>
 
