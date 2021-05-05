@@ -482,7 +482,7 @@ def make_custom_fields(update=True):
 		'Sales Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Purchase Order Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Purchase Receipt Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
-		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
+		'Purchase Invoice Item': [hsn_sac_field, nil_rated_exempt, is_non_gst, taxable_value],
 		'Material Request Item': [hsn_sac_field, nil_rated_exempt, is_non_gst],
 		'Salary Component': [
 			dict(fieldname=  'component_type',

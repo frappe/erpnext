@@ -37,6 +37,11 @@ def execute():
 				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
 				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nITC on Reverse Charge\nIneligible As Per Section 17(5)\nIneligible Others\nAll Other ITC',
 				default="All Other ITC")
+		],
+		'Purchase Invoice Item': [
+			dict(fieldname='taxable_value', label='Taxable Value',
+				fieldtype='Currency', insert_after='base_net_amount', hidden=1, options="Company:company:default_currency",
+				print_hide=1)
 		]
 	}
 
