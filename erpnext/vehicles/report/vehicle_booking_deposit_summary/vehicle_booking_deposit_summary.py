@@ -4,13 +4,16 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import flt
+from frappe.utils import getdate, nowdate
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import get_booking_payments
 
 
 class VehicleBookingDepositSummaryReport(object):
 	def __init__(self, filters=None):
 		self.filters = frappe._dict(filters or {})
+
+		self.filters.from_date = getdate(self.filters.from_date or nowdate())
+		self.filters.to_date = getdate(self.filters.to_date or nowdate())
 
 	def run(self):
 		self.get_data()
@@ -25,10 +28,10 @@ class VehicleBookingDepositSummaryReport(object):
 		self.data = frappe.db.sql("""
 			select
 				dep_m.name as deposit_doc, rec_m.name as receipt_doc,
-				dep_m.posting_date as deposit_date, rec_m.posting_date as receipt_date,
+				dep_m.posting_date as deposit_date, rec_m.posting_date as receipt_date, dep_i.instrument_date,
 				dep_i.amount, dep_m.total_amount, dep_i.instrument_no, dep_i.bank, dep_m.deposit_slip_no,
 				rec_m.party_name as customer_name, dep_m.vehicle_booking_order,
-				vbo.tax_id, vbo.tax_cnic, vbo.finance_type, vbo.item_code, i.item_name,
+				vbo.tax_id, vbo.tax_cnic, vbo.finance_type, vbo.item_code, i.item_name, vbo.allocation_period,
 				vbo.invoice_total
 			from `tabVehicle Booking Payment Detail` dep_i
 			inner join `tabVehicle Booking Payment` dep_m on dep_m.name = dep_i.parent
@@ -37,6 +40,7 @@ class VehicleBookingDepositSummaryReport(object):
 			inner join `tabVehicle Booking Payment` rec_m on rec_m.name = rec_i.parent
 			inner join `tabVehicle Booking Order` vbo on vbo.name = dep_m.vehicle_booking_order
 			inner join `tabItem` i on i.name = vbo.item_code
+			left join `tabVehicle Allocation Period` ap on ap.name = vbo.allocation_period
 			where dep_m.docstatus = 1 {0}
 			order by deposit_date, deposit_slip_no, dep_i.idx
 		""".format(conditions), self.filters, as_dict=1)
@@ -106,12 +110,19 @@ class VehicleBookingDepositSummaryReport(object):
 		if self.filters.deposit_type:
 			conditions.append("dep_m.deposit_type = %(deposit_type)s")
 
+		if self.filters.from_allocation_period:
+			self.filters.allocation_from_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.from_allocation_period, "from_date")
+			conditions.append("ap.from_date >= %(allocation_from_date)s")
+
+		if self.filters.to_allocation_period:
+			self.filters.allocation_to_date = frappe.get_cached_value("Vehicle Allocation Period", self.filters.to_allocation_period, "to_date")
+			conditions.append("ap.to_date <= %(allocation_to_date)s")
+
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 	def get_columns(self):
 		return [
-			{"label": _("Deposit Document"), "fieldname": "deposit_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 90},
-			{"label": _("Receipt Document"), "fieldname": "receipt_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 90},
+			{"label": _("Instrument Date"), "fieldname": "instrument_date", "fieldtype": "Date", "width": 90},
 			{"label": _("Receipt Date"), "fieldname": "receipt_date", "fieldtype": "Date", "width": 90},
 			{"label": _("Deposit Date"), "fieldname": "deposit_date", "fieldtype": "Date", "width": 90},
 			{"label": _("Amount"), "fieldname": "amount", "fieldtype": "Currency", "width": 100},
@@ -125,6 +136,9 @@ class VehicleBookingDepositSummaryReport(object):
 			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 100},
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Advance/Balance"), "fieldname": "deposit_stage", "fieldtype": "Data", "width": 150},
+			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 90},
+			{"label": _("Deposit Document"), "fieldname": "deposit_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 90},
+			{"label": _("Receipt Document"), "fieldname": "receipt_doc", "fieldtype": "Link", "options": "Vehicle Booking Payment", "width": 90},
 		]
 
 
