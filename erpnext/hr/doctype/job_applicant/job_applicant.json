@@ -11,22 +11,18 @@
  "field_order": [
   "applicant_name",
   "email_id",
-  "designation",
   "job_title",
-  "source",
-  "source_name",
-  "employee_referral",
-  "applicant_rating",
-  "section_break_6",
-  "notes",
-  "cover_letter",
-  "resume_attachment",
   "column_break_3",
   "status",
+  "designation",
   "resume_link",
+  "section_break_8",
   "phone_number",
   "location",
   "country",
+  "column_break_12",
+  "source",
+  "employee_referral",
   "section_break_16",
   "cover_letter",
   "notes",
@@ -79,13 +75,6 @@
    "fieldtype": "Link",
    "label": "Source",
    "options": "Job Applicant Source"
-  },
-  {
-   "depends_on": "eval: doc.source==\"Employee Referral\" ",
-   "fieldname": "source_name",
-   "fieldtype": "Link",
-   "label": "Source Name",
-   "options": "Employee"
   },
   {
    "fieldname": "cover_letter",
@@ -164,13 +153,21 @@
    "label": "Designation",
    "options": "Designation",
    "reqd": 1
+  },
+  {
+   "fieldname": "section_break_8",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-user",
  "idx": 1,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-05 15:51:11.117517",
+ "modified": "2021-05-05 13:50:48.301140",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Job Applicant",

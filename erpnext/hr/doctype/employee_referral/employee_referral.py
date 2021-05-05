@@ -33,6 +33,7 @@ def create_job_applicant(source_name, target_doc=None):
 		status = "Open"
 
 	job_applicant = frappe.new_doc("Job Applicant")
+	job_applicant.source = "Employee Referral"
 	job_applicant.employee_referral = emp_ref.name
 	job_applicant.status = status
 	job_applicant.applicant_name = emp_ref.full_name
