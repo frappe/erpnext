@@ -56,25 +56,25 @@ class TestLoan(unittest.TestCase):
 	def test_loan(self):
 		loan = frappe.get_doc("Loan", {"applicant":self.applicant1})
 		self.assertEquals(loan.monthly_repayment_amount, 15052)
-		self.assertEquals(loan.total_interest_payable, 21034)
-		self.assertEquals(loan.total_payment, 301034)
+		self.assertEquals(flt(loan.total_interest_payable, 0), 21034)
+		self.assertEquals(flt(loan.total_payment, 0), 301034)
 
 		schedule = loan.repayment_schedule
 
 		self.assertEqual(len(schedule), 20)
 
-		for idx, principal_amount, interest_amount, balance_loan_amount in [[3, 13369, 1683, 227079], [19, 14941, 105, 0], [17, 14740, 312, 29785]]:
-			self.assertEqual(schedule[idx].principal_amount, principal_amount)
-			self.assertEqual(schedule[idx].interest_amount, interest_amount)
-			self.assertEqual(schedule[idx].balance_loan_amount, balance_loan_amount)
+		for idx, principal_amount, interest_amount, balance_loan_amount in [[3, 13369, 1683, 227080], [19, 14941, 105, 0], [17, 14740, 312, 29785]]:
+			self.assertEqual(flt(schedule[idx].principal_amount, 0), principal_amount)
+			self.assertEqual(flt(schedule[idx].interest_amount, 0), interest_amount)
+			self.assertEqual(flt(schedule[idx].balance_loan_amount, 0), balance_loan_amount)
 
 		loan.repayment_method = "Repay Fixed Amount per Period"
 		loan.monthly_repayment_amount = 14000
 		loan.save()
 
 		self.assertEquals(len(loan.repayment_schedule), 22)
-		self.assertEquals(loan.total_interest_payable, 22712)
-		self.assertEquals(loan.total_payment, 302712)
+		self.assertEquals(flt(loan.total_interest_payable, 0), 22712)
+		self.assertEquals(flt(loan.total_payment, 0), 302712)
 
 	def test_loan_with_security(self):
 

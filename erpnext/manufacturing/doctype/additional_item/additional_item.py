@@ -10,12 +10,16 @@ class AdditionalItem(Document):
 	def after_save(self):
 		self.date= nowdate()
 		self.user = frappe.session.user
+	@frappe.whitelist()
 	def bom_wise_item(self):
 		q = """select bom_no from `tabWork Order` where name ='{0}';""".format(self.work_order)
 		bom = frappe.db.sql(q, as_dict = True)
 		if bom:
 			doc = frappe.get_doc("BOM",bom[0].get('bom_no') )
 			item_list = []
+			wo_doc = frappe.get_doc("Work Order", self.work_order)
+			bom_doc = frappe.get_doc("BOM", wo_doc.bom_no)
+			
 			if doc.get('allow_adding_items') == 1:
 				items = frappe.db.sql("select distinct item_code from `tabItem` where is_stock_item = 1 and disabled = 0",as_dict = True)
 				for i in items:
@@ -25,8 +29,14 @@ class AdditionalItem(Document):
 				items = frappe.db.sql(query, as_dict = True)
 				for i in items:
 					item_list.append(i.get('item_code'))
+			
+			for i in bom_doc.items:
+				print(i.get("allowed_to_change_qty_in_wo"), i.get('item_code'))
+				if i.get("allowed_to_change_qty_in_wo") == 0:
+					item_list.remove(i.get('item_code'))
 			return item_list
 	
+	@frappe.whitelist()
 	def get_job_card(self):
 		all_job_card = frappe.db.get_all("Job Card", {"work_order": self.work_order}, ['name'])
 		job_card = []
@@ -54,6 +64,7 @@ class AdditionalItem(Document):
 				query = """UPDATE `tabWork Order Item` SET required_qty = {0}, amount = {1}  WHERE parent='{2}' and item_code='{3}';""".format(total_qty,amount,self.work_order,item.get("item"))
 				frappe.db.sql(query)
 				frappe.db.commit()
+				
 			else:
 				item_master = frappe.db.get_value('Item', {'item_code':item.get('item')},['item_name','include_item_in_manufacturing','description'], as_dict = 1)
 				
@@ -67,7 +78,7 @@ class AdditionalItem(Document):
 				if not rate_with_warehouse and rate_without_warehouse:
 					rate = rate_without_warehouse
 				amt = float(item.get("qty")) * float(rate)
-
+				
 				doc.append("required_items", {
 					"item_name": item_master.get("item_name"),
 					"item_code": item.get("item"),

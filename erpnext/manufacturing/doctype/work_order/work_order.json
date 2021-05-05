@@ -276,6 +276,7 @@
    "label": "Required Items"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "required_items",
    "fieldtype": "Table",
    "label": "Required Items",
