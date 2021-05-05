@@ -1150,7 +1150,7 @@ def update_overdue_status():
 			and delivery_status != 'Delivered'
 			and delivery_date < CURDATE()
 			and customer_outstanding <= 0
-			and supplier_advance <= 0
+			and supplier_outstanding <= 0
 	""")
 
 
