@@ -10,6 +10,7 @@
   "naming_series",
   "customer",
   "customer_name",
+  "client_name",
   "rtn",
   "tax_id",
   "is_pos",
@@ -89,8 +90,12 @@
   "total_net_weight",
   "taxes_section",
   "exonerated",
-  "taxes_and_charges",
+  "sale_order",
+  "oc_exenta",
+  "reg_sag",
+  "n_reg_exonerados",
   "column_break_38",
+  "taxes_and_charges",
   "shipping_rule",
   "tax_category",
   "section_break_40",
@@ -260,8 +265,7 @@
    "fieldname": "tax_id",
    "fieldtype": "Data",
    "label": "Tax Id",
-   "print_hide": 1,
-   "read_only": 1
+   "print_hide": 1
   },
   {
    "fieldname": "project",
@@ -1592,8 +1596,7 @@
    "fieldtype": "Link",
    "label": "Reason for sale",
    "options": "Reason for sale",
-   "print_hide": 1,
-   "reqd": 1
+   "print_hide": 1
   },
   {
    "fieldname": "authorized_range",
@@ -1617,8 +1620,7 @@
    "fetch_from": "customer.rtn",
    "fieldname": "rtn",
    "fieldtype": "Data",
-   "label": "RTN",
-   "read_only": 1
+   "label": "RTN"
   },
   {
    "fieldname": "column_numeration",
@@ -1702,12 +1704,38 @@
    "fieldtype": "Data",
    "label": "Cashier",
    "read_only": 1
+  },
+  {
+   "fetch_from": "customer.customer_name",
+   "fieldname": "client_name",
+   "fieldtype": "Data",
+   "label": "Client Name"
+  },
+  {
+   "fieldname": "sale_order",
+   "fieldtype": "Data",
+   "label": "Sale Order"
+  },
+  {
+   "fieldname": "oc_exenta",
+   "fieldtype": "Data",
+   "label": "O/C Exenta"
+  },
+  {
+   "fieldname": "reg_sag",
+   "fieldtype": "Data",
+   "label": "N. de Reg. De La SAG"
+  },
+  {
+   "fieldname": "n_reg_exonerados",
+   "fieldtype": "Data",
+   "label": "N Reg de Exonerados"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-05-05 14:01:02.599994",
+ "modified": "2021-05-05 16:00:41.794506",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
