@@ -1,6 +1,6 @@
 {
  "autoname": "field:reason",
- "creation": "2021-04-15 13:43:46.038758",
+ "creation": "2021-04-29 14:44:05.478599",
  "doctype": "DocType",
  "editable_grid": 1,
  "engine": "InnoDB",
@@ -17,10 +17,10 @@
    "unique": 1
   }
  ],
- "modified": "2021-04-15 13:43:46.038758",
+ "modified": "2021-04-29 14:44:05.478599",
  "modified_by": "Administrator",
  "module": "Accounts",
- "name": "Reason Debit Note",
+ "name": "Reason Debit And Credit Note",
  "name_case": "Title Case",
  "owner": "Administrator",
  "permissions": [

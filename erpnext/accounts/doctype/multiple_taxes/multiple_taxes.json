@@ -1,0 +1,39 @@
+{
+ "creation": "2021-05-03 14:34:03.405579",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "isv",
+  "base_isv"
+ ],
+ "fields": [
+  {
+   "fieldname": "isv",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "ISV",
+   "options": "Item Tax Template",
+   "reqd": 1
+  },
+  {
+   "fieldname": "base_isv",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Base Isv",
+   "options": "Currency",
+   "reqd": 1
+  }
+ ],
+ "istable": 1,
+ "modified": "2021-05-03 15:36:13.207056",
+ "modified_by": "Administrator",
+ "module": "Accounts",
+ "name": "Multiple Taxes",
+ "owner": "Administrator",
+ "permissions": [],
+ "quick_entry": 1,
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

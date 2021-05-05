@@ -121,9 +121,7 @@
   "additional_discount_percentage",
   "discount_amount",
   "totals",
-  "taxed_sales15",
   "isv15",
-  "taxed_sales18",
   "isv18",
   "total_exempt",
   "total_exonerated",
@@ -203,8 +201,7 @@
   "auto_repeat",
   "update_auto_repeat_reference",
   "against_income_account",
-  "pos_total_qty",
-  "creation_date"
+  "pos_total_qty"
  ],
  "fields": [
   {
@@ -1040,6 +1037,7 @@
    "read_only": 1
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "outstanding_amount",
    "fieldtype": "Currency",
    "label": "Outstanding Amount",
@@ -1704,28 +1702,12 @@
    "fieldtype": "Data",
    "label": "Cashier",
    "read_only": 1
-  },
-  {
-   "fieldname": "taxed_sales15",
-   "fieldtype": "Currency",
-   "label": "Taxed Sales 15%"
-  },
-  {
-   "fieldname": "taxed_sales18",
-   "fieldtype": "Currency",
-   "label": "Taxed Sales 18%"
-  },
-  {
-   "fieldname": "creation_date",
-   "fieldtype": "Date",
-   "hidden": 1,
-   "label": "Creation Date"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-05-03 11:04:16.578272",
+ "modified": "2021-05-05 14:01:02.599994",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
