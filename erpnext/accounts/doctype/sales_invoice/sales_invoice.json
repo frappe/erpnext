@@ -126,7 +126,9 @@
   "additional_discount_percentage",
   "discount_amount",
   "totals",
+  "taxed_sales15",
   "isv15",
+  "taxed_sales18",
   "isv18",
   "total_exempt",
   "total_exonerated",
@@ -206,7 +208,8 @@
   "auto_repeat",
   "update_auto_repeat_reference",
   "against_income_account",
-  "pos_total_qty"
+  "pos_total_qty",
+  "creation_date"
  ],
  "fields": [
   {
@@ -264,6 +267,7 @@
   {
    "fieldname": "tax_id",
    "fieldtype": "Data",
+   "hidden": 1,
    "label": "Tax Id",
    "print_hide": 1
   },
@@ -1730,12 +1734,27 @@
    "fieldname": "n_reg_exonerados",
    "fieldtype": "Data",
    "label": "N Reg de Exonerados"
+  },
+  {
+   "fieldname": "creation_date",
+   "fieldtype": "Date",
+   "label": "Creation Date"
+  },
+  {
+   "fieldname": "taxed_sales15",
+   "fieldtype": "Currency",
+   "label": "Taxed Sales15"
+  },
+  {
+   "fieldname": "taxed_sales18",
+   "fieldtype": "Currency",
+   "label": "Taxed Sales18"
   }
  ],
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-05-05 16:00:41.794506",
+ "modified": "2021-05-05 17:22:25.097268",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
