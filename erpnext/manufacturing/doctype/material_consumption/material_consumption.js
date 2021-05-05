@@ -32,7 +32,6 @@ frappe.ui.form.on('Materials to Consume Items', {
     },
 });
 
-
 function get_available_qty_data(frm,line_obj){
     frappe.call({
         method: "erpnext.manufacturing.doctype.material_consumption.material_consumption.get_available_qty_data",
@@ -47,20 +46,25 @@ function get_available_qty_data(frm,line_obj){
         callback: function (r) {
             if(r.message){
                 frm.clear_table('material_consumption_detail');
+                $('*[data-fieldname="material_consumption_detail"]').find('.grid-remove-rows').hide();
+                $('*[data-fieldname="material_consumption_detail"]').find('.grid-remove-all-rows').hide();
+                $('*[data-fieldname="material_consumption_detail"]').find('.grid-add-row').hide();
                 for (const d of r.message){
-                    var row = frm.add_child('material_consumption_detail');
-                    row.item = d.item_code;
-                    row.uom = d.stock_uom;
-                    row.warehouse = d.warehouse;
-                    row.balance_qty = d.balance_qty;
-                    row.consume_item = line_obj.name;
-                    if(line_obj.has_batch_no == 1){
-                        row.batch = d.batch_no;
-                        row.expiry_date_batch = d.expiry_date;
-                        row.life_left_batch = d.life_left_batch;
-                    }
-                    if(d.qty_to_consume){
-                        row.qty_to_consume = flt(d.qty_to_consume, row.precision('qty_to_consume'))
+                    if (d.balance_qty > 0) {
+                        var row = frm.add_child('material_consumption_detail');
+                        row.item = d.item_code;
+                        row.uom = d.stock_uom;
+                        row.warehouse = d.warehouse;
+                        row.balance_qty = flt(d.balance_qty, precision('balance_qty'));
+                        row.consume_item = line_obj.name;
+                        if(line_obj.has_batch_no == 1){
+                            row.batch = d.batch_no;
+                            row.expiry_date_batch = d.expiry_date;
+                            row.life_left_batch = d.life_left_batch;
+                        }
+                        if(d.qty_to_consume){
+                            row.qty_to_consume = flt(d.qty_to_consume, precision('qty_to_consume'));
+                        }
                     }
                 }
                 frm.refresh_field('material_consumption_detail');

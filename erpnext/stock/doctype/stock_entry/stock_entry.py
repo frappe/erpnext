@@ -548,6 +548,13 @@ class StockEntry(StockController):
 			bom_items = self.get_bom_raw_materials(finished_item_qty)
 			outgoing_items_cost = sum([flt(row.qty)*flt(row.rate) for row in bom_items.values()])
 
+		if frappe.db.get_single_value("Manufacturing Settings", "material_consumption") and self.material_produce:
+			mp_doc = frappe.get_doc("Material Produce", self.material_produce)
+			if mp_doc.partial_produce:
+				outgoing_items_cost = flt(mp_doc.cost_of_rm_consumed, mp_doc.precision('cost_of_rm_consumed')) + flt(mp_doc.cost_of_operation_consumed, mp_doc.precision('cost_of_operation_consumed'))
+			else:
+				outgoing_items_cost = flt(mp_doc.amount, mp_doc.precision('amount')) - flt(mp_doc.cost_of_scrap, mp_doc.precision('cost_of_scrap'))
+				
 		return flt((outgoing_items_cost - scrap_items_cost) / finished_item_qty)
 
 	def distribute_additional_costs(self):
