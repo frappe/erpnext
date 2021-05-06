@@ -808,7 +808,6 @@ def get_incomes_expenses_for_period(account, from_date, to_date):
 			val = balance_on_to_date - balance_before_from_date
 		else:
 			last_year_closing_balance = get_balance_on(account, date=fy_start_date - timedelta(days=1))
-			print(fy_start_date - timedelta(days=1), last_year_closing_balance)
 			val = balance_on_to_date + (last_year_closing_balance - balance_before_from_date)
 
 		return val
