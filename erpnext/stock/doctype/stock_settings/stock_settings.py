@@ -31,7 +31,7 @@ class StockSettings(Document):
 		if self.show_barcode_field != cint(frappe.db.get_single_value('Stock Settings', 'show_barcode_field')):
 			for name in ["barcode", "barcodes", "scan_barcode"]:
 				frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
-					'value': 0 if self.show_barcode_field else 1})
+					'value': 0 if self.show_barcode_field else 1}, validate_fields_for_doctype=False)
 
 		self.validate_warehouses()
 		self.cant_change_valuation_method()
@@ -68,10 +68,10 @@ class StockSettings(Document):
 		self.toggle_warehouse_field_for_inter_warehouse_transfer()
 
 	def toggle_warehouse_field_for_inter_warehouse_transfer(self):
-		make_property_setter("Sales Invoice Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check")
-		make_property_setter("Delivery Note Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check")
-		make_property_setter("Purchase Invoice Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check")
-		make_property_setter("Purchase Receipt Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check")
+		make_property_setter("Sales Invoice Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Delivery Note Item", "target_warehouse", "hidden", 1 - cint(self.allow_from_dn), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Purchase Invoice Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check", validate_fields_for_doctype=False)
+		make_property_setter("Purchase Receipt Item", "from_warehouse", "hidden", 1 - cint(self.allow_from_pr), "Check", validate_fields_for_doctype=False)
 
 
 def clean_all_descriptions():
