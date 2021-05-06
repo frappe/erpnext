@@ -216,11 +216,9 @@ class SalesInvoice(SellingController):
 		self.taxed_sales18 = taxed_sales18
 
 		if self.exonerated == 1:
-			self.grand_total -= self.total_taxes_and_charges
-			self.rounded_total -= self.total_taxes_and_charges
+			self.grand_total = self.total - self.total_taxes_and_charges - self.discount_amount
 		else:
-			self.grand_total = self.total
-			self.rounded_total = self.grand_total
+			self.grand_total = self.total - self.discount_amount
 		
 		self.outstanding_amount = self.grand_total - self.total_advance
 		self.in_words = money_in_words(self.grand_total)
