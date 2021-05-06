@@ -33,7 +33,7 @@ class TestDeliveryTrip(unittest.TestCase):
 	def test_expense_claim_fields_are_fetched_properly(self):
 		payable_account = get_payable_account(self.delivery_trip.company)
 		account = frappe.get_value('Company', self.delivery_trip.company, 'write_off_account')
-		self.delivery_trip.employee =  make_employee("test_employee@company.com")
+		self.delivery_trip.employee = make_employee("test_employee@company.com")
 		expense_claim = make_expense_claim(payable_account = payable_account, amount = 1000, sanctioned_amount = 1000, company = self.delivery_trip.company, account = account, do_not_submit = True)
 		expense_claim.delivery_trip = self.delivery_trip.name
 		expense_claim.employee = self.delivery_trip.employee
