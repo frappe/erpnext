@@ -107,6 +107,7 @@ frappe.ui.form.on('Stock Entry', {
 				frappe.flags.hide_serial_batch_dialog = true;
 			}
 		});
+		attachBOMItems(frm.doc.bom_no);
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -311,6 +312,7 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		frm.trigger("setup_quality_inspection");
+		attachBOMItems(frm.doc.bom_no)
 	},
 
 	stock_entry_type: function(frm){
@@ -1077,8 +1079,10 @@ function attachBOMItems(bom_no) {
 }
 
 function checkShouldNotAttachBOMItems(bom_no) {
-	return erpnext.stock.bom
-		&& erpnext.stock.bom.name === bom_no
+  return (
+    bom_no === undefined ||
+    (erpnext.stock.bom && erpnext.stock.bom.name === bom_no)
+  );
 }
 
 $.extend(cur_frm.cscript, new erpnext.stock.StockEntry({frm: cur_frm}));
