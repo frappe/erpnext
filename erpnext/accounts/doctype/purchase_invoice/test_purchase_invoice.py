@@ -30,6 +30,32 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def tearDownClass(self):
 		unlink_payment_on_cancel_of_invoice(0)
 
+	def test_gl_entries_with_exchange_rate_difference(self):
+		pr = make_purchase_receipt(company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", 
+			warehouse= "Stores - TCP1", cost_center = "Main - TCP1", get_taxes_and_charges=True,)
+		pr.currency = 'USD'
+		pr.conversion_rate = 70
+		pr.insert(ignore_if_duplicate = True)
+		pr.submit()	
+
+		pi = make_purchase_invoice(company="_Test Company with perpetual inventory", supplier_warehouse="Work In Progress - TCP1", 
+			warehouse= "Stores - TCP1", cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1", 
+			get_taxes_and_charges=True, qty=10,do_not_save= "True")
+		pi.currency = 'USD'
+		pi.conversion_rate = 80
+
+		for d in pi.items:
+			d.purchase_receipt = pr.name
+
+		pi.insert(ignore_if_duplicate = True)
+		pi.submit()
+
+		gl_entries = frappe.get_all('GL Entry', filters = {'account': 'Exchange Gain/Loss - TCP1'})
+		voucher_no = frappe.get_value('GL Entry', gl_entries[-1]['name'], 'voucher_no')
+		self.assertEqual(pi.name, voucher_no)
+
+
+
 	def test_gl_entries_without_perpetual_inventory(self):
 		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
 		pi = frappe.copy_doc(test_records[0])
@@ -397,7 +423,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.update({
 			"payment_schedule": get_payment_terms("_Test Payment Term Template",
-				pi.posting_date, pi.grand_total)
+				pi.posting_date, pi.grand_total, pi.base_grand_total)
 		})
 
 		pi.save()
