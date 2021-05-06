@@ -10,6 +10,8 @@ from frappe.utils import get_datetime
 from erpnext.hr.doctype.interview.interview import update_rating
 from erpnext.hr.utils import validate_interviewer_roles
 
+class UnexpectedSkillError(frappe.ValidationError): pass
+
 class InterviewFeedback(Document):
 	def validate(self):
 		self.calculate_average_rating()
@@ -17,6 +19,7 @@ class InterviewFeedback(Document):
 		self.validate_interviewer()
 		self.validate_interview_date()
 		self.validate_duplicate()
+		self.validate_skills()
 
 	def validate_interviewer(self):
 		applicable_interviewers = get_applicable_interviewers(self.interview)
@@ -44,6 +47,12 @@ class InterviewFeedback(Document):
 		if duplicate_feedback:
 			frappe.throw(_("Interviewers are not allowed to submit Interview Feedback twice. Please cancel previous Interview Feedback"))
 
+	def validate_skills(self):
+		skills = frappe.get_all("Expected Skill Set", filters={"parent": self.interview_round}, fields = ["skill"])
+		skills = [d.skill for d in skills]
+
+		if skills != [d.skill for d in self.skill_assessment]:
+			frappe.throw(_("Only Expected skills from Interview Round: {0} are allowed to rate").format(self.interview_round), exc = UnexpectedSkillError)
 
 	def calculate_average_rating(self):
 		total_rating = 0
