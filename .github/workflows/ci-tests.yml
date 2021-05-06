@@ -1,6 +1,6 @@
 name: CI
 
-on: [pull_request, workflow_dispatch, push]
+on: [pull_request, workflow_dispatch]
 
 jobs:
   test:
