@@ -12,13 +12,13 @@ jobs:
       matrix:
        include:
         - TYPE: "server"
-          JOB_NAME: "Server"
+          JOB_NAME: "Server.1"
           RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --with-coverage --ci-build-id $GITHUB_RUN_ID --app erpnext
         - TYPE: "server"
-          JOB_NAME: "Server"
+          JOB_NAME: "Server.2"
           RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --with-coverage --ci-build-id $GITHUB_RUN_ID --app erpnext
         - TYPE: "server"
-          JOB_NAME: "Server"
+          JOB_NAME: "Server.3"
           RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --with-coverage --ci-build-id $GITHUB_RUN_ID --app erpnext
         - TYPE: "patch"
           JOB_NAME: "Patch"
@@ -86,29 +86,37 @@ jobs:
         env:
           TYPE: ${{ matrix.TYPE }}
 
-      # - name: Coverage - Pull Request
-      #   if: matrix.TYPE == 'server' && github.event_name == 'pull_request'
-      #   run: |
-      #     cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
-      #     cd ${GITHUB_WORKSPACE}
-      #     pip install coveralls==2.2.0
-      #     pip install coverage==4.5.4
-      #     coveralls --service=github
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-      #     COVERALLS_SERVICE_NAME: github
+      - name: Upload Coverage Data
+        if: matrix.TYPE == 'server'
+        run: |
+          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
+          cd ${GITHUB_WORKSPACE}
+          pip3 install coverage==5.5
+          pip3 install coveralls==3.0.1
+          coveralls --service=github-actions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+          COVERALLS_FLAG_NAME: run-${{ matrix.container }}
+          COVERALLS_SERVICE_NAME: github-actions
+          COVERALLS_PARALLEL: true
 
-      # - name: Coverage - Push
-      #   if: matrix.TYPE == 'server' && github.event_name == 'push'
-      #   run: |
-      #     cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
-      #     cd ${GITHUB_WORKSPACE}
-      #     pip install coveralls==2.2.0
-      #     pip install coverage==4.5.4
-      #     coveralls --service=github-actions
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #     COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-      #     COVERALLS_SERVICE_NAME: github-actions
+  coveralls:
+    name: Coverage Wrap Up
+    needs: test
+    container: python:3-slim
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Coveralls Finished
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          ls -al
+          pip3 install coverage==5.5
+          pip3 install coveralls==3.0.1
+          coveralls --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
