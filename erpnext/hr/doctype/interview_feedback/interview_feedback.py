@@ -10,7 +10,8 @@ from frappe.utils import get_datetime
 from erpnext.hr.doctype.interview.interview import update_rating
 from erpnext.hr.utils import validate_interviewer_roles
 
-class UnexpectedSkillError(frappe.ValidationError): pass
+class UnexpectedSkillError(frappe.ValidationError):
+	pass
 
 class InterviewFeedback(Document):
 	def validate(self):

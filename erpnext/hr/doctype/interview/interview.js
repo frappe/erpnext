@@ -100,7 +100,8 @@ frappe.ui.form.on('Interview', {
 
 		let d = new frappe.ui.Dialog({
 			title: __("Submit Feedback"),
-			fields: [{
+			fields: [
+				{
 					fieldname: "skill_set",
 					fieldtype: "Table",
 					label: "Rate Based On Skill Set",

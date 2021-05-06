@@ -46,7 +46,7 @@ class TestInterviewFeedback(unittest.TestCase):
 		frappe.set_user(interviewer)
 
 		#calculating Average
-		interview_feedback_1 = create_interview_feedback(interview.name, interviewer, skill_ratings, save_and_submit=True )
+		interview_feedback_1 = create_interview_feedback(interview.name, interviewer, skill_ratings, save_and_submit=True)
 		total_rating = 0
 		for d in interview_feedback_1.skill_assessment:
 			if d.rating:
@@ -54,12 +54,11 @@ class TestInterviewFeedback(unittest.TestCase):
 
 		avg_rating = total_rating/len(interview_feedback_1.skill_assessment) if len(interview_feedback_1.skill_assessment) else 1
 
-		average_rating_value = avg_rating
 		self.assertEqual(flt(avg_rating, 3), interview_feedback_1.average_rating_value)
 
-		avg_on_interview_detail = frappe.get_all("Interview Detail", filters={
-			"interview_feedback": interview_feedback_1.name
-			}, fields = ['interviewer', 'average_rating_value']
+		avg_on_interview_detail = frappe.get_all("Interview Detail",
+			filters={"interview_feedback": interview_feedback_1.name},
+			fields = ['interviewer', 'average_rating_value']
 		)[0]
 
 		# 1. average should be refelected in Interview Detail.

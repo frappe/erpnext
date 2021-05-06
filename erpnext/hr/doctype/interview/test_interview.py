@@ -10,7 +10,7 @@ from erpnext.hr.doctype.job_applicant.test_job_applicant import create_job_appli
 from erpnext.hr.doctype.designation.test_designation import create_designation
 from frappe.core.doctype.user_permission.test_user_permission import create_user
 from erpnext.hr.doctype.interview_round.test_interview_round import create_interview_round
-from frappe.utils import get_datetime, add_days, add_to_date
+from frappe.utils import get_datetime, add_days
 from erpnext.hr.doctype.interview.interview import DuplicateInterviewRoundError
 
 
@@ -46,7 +46,7 @@ class TestInterview(unittest.TestCase):
 
 		self.assertEqual(interview.scheduled_on, add_days(get_datetime(previous_scheduled_date), 2))
 
-		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Your Interview session is rescheduled from%")} )
+		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Your Interview session is rescheduled from%")})
 		self.assertIsNotNone(notification)
 
 	def test_notification_for_scheduling(self):
@@ -68,7 +68,7 @@ class TestInterview(unittest.TestCase):
 
 		interview.reload()
 		self.assertEqual(interview.reminded, 1)
-		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")} )
+		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")})
 		self.assertIsNotNone(notification)
 
 
@@ -83,13 +83,13 @@ class TestInterview(unittest.TestCase):
 
 		job_applicant = create_job_applicant()
 		scheduled_on = add_days(get_datetime(), -4)
-		interview = create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on, save_and_submit=True)
+		create_interview_and_dependencies(job_applicant.name, scheduled_on=scheduled_on, save_and_submit=True)
 
 
 		frappe.db.sql("DELETE FROM `tabEmail Queue`")
 		send_daily_feedback_reminder()
 
-		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")} )
+		notification = frappe.get_all("Email Queue", filters={"message": ("like", "%Interview Reminder%")})
 		self.assertIsNotNone(notification)
 
 
@@ -99,7 +99,7 @@ def set_reminder_message_and_set_remind_before():
 	frappe.db.set_value("HR Settings", None, "remind_before", "00:15:00")
 	frappe.db.set_value("HR Settings", None, "feedback_reminder_message", message)
 
-def create_interview_and_dependencies(job_applicant, scheduled_on=None, save=False, save_and_submit = False, designation=None ):
+def create_interview_and_dependencies(job_applicant, scheduled_on=None, save=False, save_and_submit = False, designation=None):
 	if designation:
 		designation=create_designation(designation_name = "_Test_Sales_manager").name
 

@@ -65,12 +65,12 @@ def set_default_settings(args):
 
 	hr_settings.interview_reminder = 1
 	message = _("Interview: {{doc.name}} is scheduled on {{doc.scheduled_on}} at Frappe technologies Thank you, Good day!")
-	hr_settings.interview_reminder_message = messsage
+	hr_settings.interview_reminder_message = message
 	hr_settings.remind_before = "00:15:00"
 
 	message = _("Interview Feedback for Interview: {{ doc.name }} is not submitted yet. Please, Submit your Feedback. Thank you, Good day!")
 	hr_settings.interview_feedback_reminder = 1
-	hr_settings.feedback_reminder_message = messsage
+	hr_settings.feedback_reminder_message = message
 
 	hr_settings.save()
 

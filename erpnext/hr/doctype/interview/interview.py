@@ -11,7 +11,8 @@ from frappe.model.document import Document
 from erpnext.hr.utils import validate_interviewer_roles
 
 
-class DuplicateInterviewRoundError(frappe.ValidationError): pass
+class DuplicateInterviewRoundError(frappe.ValidationError):
+	pass
 class Interview(Document):
 
 	def validate(self):
@@ -33,16 +34,14 @@ class Interview(Document):
 				frappe.bold(get_link_to_form("Interview", duplicate_interview)))
 			)
 
-	#Also handeled at Client Side Validation is only For Creation Through API
+	# Also handeled at Client Side Validation is only For Creation Through API
 	def validate_designation(self):
 		applicant_designation = frappe.db.get_value("Job Applicant", self.job_applicant, 'designation')
+		# intially designation is pulled from Interview round
 		if self.designation :
-			if self.designation != applicant_designation: #intially designation is pulled from Interview round
-				frappe.throw(_('Interview Round: {0} is only for Designation: {1}. Job Applicant: {2} had applied for {3}'),
-					exc = DuplicateInterviewRoundError
-				).format(
-					self.interview_round, self.designation, applicant_designation
-				)
+			if self.designation != applicant_designation:
+				frappe.throw(_('Interview Round: {0} is only for Designation: {1}. Job Applicant: {2} had applied for {3}').format(
+					self.interview_round, self.designation, applicant_designation), exc = DuplicateInterviewRoundError)
 		else:
 			self.designation = applicant_designation
 
