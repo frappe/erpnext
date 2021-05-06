@@ -18,8 +18,9 @@ class TestInterview(unittest.TestCase):
 
 	def tearDown(self):
 		frappe.db.sql("DELETE FROM `tabInterview Round`")
-		frappe.db.sql("DELETE FROM `tabInterview Feedback`")
 		frappe.db.sql("DELETE FROM `tabInterview`")
+		frappe.db.sql("DELETE FROM `tabExpected Skill Set`")
+		frappe.db.sql("DELETE FROM `tabInterview Detail`")
 
 	def test_validations_for_designation(self):
 		job_applicant = create_job_applicant()
@@ -103,7 +104,7 @@ def create_interview_and_dependencies(job_applicant, scheduled_on=None, save=Fal
 		designation=create_designation(designation_name = "_Test_Sales_manager").name
 
 	interviewer_1 = create_user("test_interviewer1@example.com", "Interviewer")
-	interviewer_2 = create_user("test_interviewer1@example.com", "Interviewer")
+	interviewer_2 = create_user("test_interviewer2@example.com", "Interviewer")
 
 	interview_round = create_interview_round(
 		"Technical Round", ["Python", "JS"],

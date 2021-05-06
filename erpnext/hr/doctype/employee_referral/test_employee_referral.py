@@ -16,7 +16,6 @@ class TestEmployeeReferral(unittest.TestCase):
 		frappe.db.sql("DELETE FROM `TabJob Applicant`")
 		frappe.db.sql("DELETE FROM `TabEmployee Referral`")
 
-
 	def test_workflow_and_status_sync(self):
 		emp_ref = create_employee_referral()
 

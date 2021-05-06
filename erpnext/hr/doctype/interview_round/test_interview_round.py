@@ -9,7 +9,8 @@ import unittest
 
 class TestInterviewRound(unittest.TestCase):
 	def tearDown(self):
-		frappe.db.sql("DELETE FROM `tabInterview Round` Where 1")
+		frappe.db.sql("DELETE FROM `tabInterview Round`")
+		frappe.db.sql("DELETE FROM `tabExpected Skill Set`")
 
 	def test_role_validation(self):
 		interviewer = create_user("test_interviewer@example.com")
