@@ -364,7 +364,7 @@ class ReceivablePayableReport(object):
 		payment_terms_details = frappe.db.sql("""
 			select
 				si.name, si.party_account_currency, si.currency, si.conversion_rate,
-				ps.due_date, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
+				ps.due_date, ps.payment_term, ps.payment_amount, ps.description, ps.paid_amount, ps.discounted_amount
 			from `tab{0}` si, `tabPayment Schedule` ps
 			where
 				si.name = ps.parent and
@@ -394,7 +394,7 @@ class ReceivablePayableReport(object):
 			"due_date": d.due_date,
 			"invoiced": invoiced,
 			"invoice_grand_total": row.invoiced,
-			"payment_term": d.description,
+			"payment_term": d.description or d.payment_term,
 			"paid": d.paid_amount + d.discounted_amount,
 			"credit_note": 0.0,
 			"outstanding": invoiced - d.paid_amount - d.discounted_amount

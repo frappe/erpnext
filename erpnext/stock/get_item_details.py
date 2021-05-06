@@ -86,7 +86,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		out.update(get_bin_details(args.item_code, args.get("from_warehouse")))
 
 	elif out.get("warehouse"):
-		out.update(get_bin_details(args.item_code, out.warehouse))
+		out.update(get_bin_details(args.item_code, out.warehouse, args.company))
 
 	# update args with out, if key or value not exists
 	for key, value in iteritems(out):
@@ -470,7 +470,9 @@ def get_item_tax_template(args, item, out):
 			item_tax_template = _get_item_tax_template(args, item_group_doc.taxes, out)
 			item_group = item_group_doc.parent_item_group
 
-def _get_item_tax_template(args, taxes, out={}, for_validate=False):
+def _get_item_tax_template(args, taxes, out=None, for_validate=False):
+	if out is None:
+		out = {}
 	taxes_with_validity = []
 	taxes_with_no_validity = []
 
@@ -935,8 +937,8 @@ def get_bin_details(item_code, warehouse, company=None):
 def get_company_total_stock(item_code, company):
 	return frappe.db.sql("""SELECT sum(actual_qty) from 
 		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name) 
-		WHERE `tabWarehouse`.company = '{0}' and `tabBin`.item_code = '{1}'"""
-		.format(company, item_code))[0][0]
+		WHERE `tabWarehouse`.company = %s and `tabBin`.item_code = %s""",
+		(company, item_code))[0][0]
 
 @frappe.whitelist()
 def get_serial_no_details(item_code, warehouse, stock_qty, serial_no):
