@@ -756,13 +756,13 @@ def update_itc_availed_fields(doc, method):
 	gst_accounts = get_gst_accounts(doc.company, only_non_reverse_charge=1)
 
 	for tax in doc.get('taxes'):
-		if tax.account_head in gst_accounts.get('igst_account'):
+		if tax.account_head in gst_accounts.get('igst_account', []):
 			doc.itc_integrated_tax += flt(tax.base_tax_amount_after_discount_amount)
-		if tax.account_head in gst_accounts.get('sgst_account'):
+		if tax.account_head in gst_accounts.get('sgst_account', []):
 			doc.itc_state_tax += flt(tax.base_tax_amount_after_discount_amount)
-		if tax.account_head in gst_accounts.get('cgst_account'):
+		if tax.account_head in gst_accounts.get('cgst_account', []):
 			doc.itc_central_tax += flt(tax.base_tax_amount_after_discount_amount)
-		if tax.account_head in gst_accounts.get('cess_account'):
+		if tax.account_head in gst_accounts.get('cess_account', []):
 			doc.itc_cess_amount += flt(tax.base_tax_amount_after_discount_amount)
 
 @frappe.whitelist()

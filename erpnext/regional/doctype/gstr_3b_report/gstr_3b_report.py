@@ -9,7 +9,7 @@ import frappe
 from six import iteritems
 from frappe import _
 from frappe.model.document import Document
-from frappe.utils import flt, getdate, cstr
+from frappe.utils import flt, cstr
 from erpnext.regional.india import state_numbers
 
 class GSTR3BReport(Document):
@@ -278,9 +278,9 @@ class GSTR3BReport(Document):
 
 		# Build itemised tax for export invoices, nil and exempted where tax table is blank
 		for invoice, items in iteritems(self.invoice_items):
-			if invoice not in self.items_based_on_tax_rate and (self.invoice_detail_map.get(invoice, {}).get('export_type')\
-				 == "Without Payment of Tax"):
-					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
+			if invoice not in self.items_based_on_tax_rate and (self.invoice_detail_map.get(invoice, {}).get('export_type')
+				== "Without Payment of Tax"):
+				self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
 	def set_outward_taxable_supplies(self):
 		inter_state_supply_details = {}
@@ -310,14 +310,14 @@ class GSTR3BReport(Document):
 								place_of_supply = self.invoice_detail_map.get(inv, {}).get('place_of_supply', '00-Other Territory')
 
 								if gst_category in ['Unregistered', 'Registered Composition', 'UIN Holders'] and \
-									self.gst_details.get("gst_state") != place_of_supply:
-										inter_state_supply_details.set_default((gst_category, place_of_supply), {
-											"txval": 0.0,
-											"pos": value.get('place_of_supply').split("-")[0],
-											"iamt": 0.0
-										})
-										inter_state_supply_details[(gst_category, place_of_supply)]['taxval'] += taxable_value
-										inter_state_supply_details[(gst_category, place_of_supply)]['iamt'] += (taxable_value * rate /100)
+								self.gst_details.get("gst_state") != place_of_supply.split("-")[1]:
+									inter_state_supply_details.set_default((gst_category, place_of_supply), {
+										"txval": 0.0,
+										"pos": place_of_supply.split("-")[0],
+										"iamt": 0.0
+									})
+									inter_state_supply_details[(gst_category, place_of_supply)]['taxval'] += taxable_value
+									inter_state_supply_details[(gst_category, place_of_supply)]['iamt'] += (taxable_value * rate /100)
 
 		self.set_inter_state_supply(inter_state_supply_details)
 

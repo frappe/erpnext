@@ -63,7 +63,7 @@ class Gstr1Report(object):
 				for rate, items in items_based_on_rate.items():
 					row, taxable_value = self.get_row_data_for_invoice(inv, invoice_details, rate, items)
 
-					if self.filters.get("type_of_business") ==  "CDNR-REG":
+					if self.filters.get("type_of_business") == "CDNR-REG":
 						row.append("Y" if invoice_details.posting_date <= date(2017, 7, 1) else "N")
 						row.append("C" if invoice_details.is_return else "D")
 
@@ -106,7 +106,7 @@ class Gstr1Report(object):
 	def get_row_data_for_invoice(self, invoice, invoice_details, tax_rate, items):
 		row = []
 		for fieldname in self.invoice_fields:
-			if self.filters.get("type_of_business") ==  "CDNR-REG" and fieldname == "invoice_value":
+			if self.filters.get("type_of_business") == "CDNR-REG" and fieldname == "invoice_value":
 				row.append(abs(invoice_details.base_rounded_total) or abs(invoice_details.base_grand_total))
 			elif fieldname == "invoice_value":
 				row.append(invoice_details.base_rounded_total or invoice_details.base_grand_total)
@@ -188,7 +188,7 @@ class Gstr1Report(object):
 				SUBSTR(place_of_supply, 1, 2) = SUBSTR(company_gstin, 1, 2)
 					OR grand_total <= {0}) and is_return != 1 AND gst_category ='Unregistered' """.format(flt(b2c_limit))
 
-		elif self.filters.get("type_of_business") ==  "CDNR-REG":
+		elif self.filters.get("type_of_business") == "CDNR-REG":
 			conditions += """ AND (is_return = 1 OR is_debit_note = 1) AND IFNULL(gst_category, '') in ('Registered Regular', 'Deemed Export', 'SEZ')"""
 
 		elif self.filters.get("type_of_business") ==  "EXPORT":
@@ -404,7 +404,7 @@ class Gstr1Report(object):
 						"width": 100
 					}
 				]
-		elif self.filters.get("type_of_business") ==  "CDNR-REG":
+		elif self.filters.get("type_of_business") == "CDNR-REG":
 			self.invoice_columns = [
 				{
 					"fieldname": "customer_gstin",
