@@ -120,38 +120,15 @@ class VehicleBookingOrder(AccountsController):
 			return
 
 		payment_entries = get_booking_payments(self.name, include_draft=cint(self.docstatus == 0))
-		customer_payments_by_row_id = {}
-
-		for d in payment_entries:
-			if d.payment_type == "Receive":
-				self.customer_payments.append(d)
-				customer_payments_by_row_id[d.row_id] = d
-
-			if d.payment_type == "Pay":
-				self.supplier_payments.append(d)
-
-		for d in self.supplier_payments:
-			if d.vehicle_booking_payment_row:
-				customer_payment_row = customer_payments_by_row_id.get(d.vehicle_booking_payment_row)
-				if customer_payment_row:
-					customer_payment_row.deposit_slip_no = d.deposit_slip_no
-					customer_payment_row.deposit_type = d.deposit_type
-					customer_payment_row.deposit_date = d.posting_date
+		self.customer_payments, self.supplier_payments = separate_customer_and_supplier_payments(payment_entries)
 
 		self.is_full_payment = False
 		self.is_partial_payment = False
 
 		if self.customer_payments:
-			first_receipt_document = self.customer_payments[0].name
+			initial_payments, balance_payments = separate_advance_and_balance_payments(self.customer_payments, self.supplier_payments)
 
-			if self.supplier_payments:
-				first_deposit_posting_date = self.supplier_payments[0].posting_date
-				initial_payments = [d.amount for d in self.customer_payments\
-					if d.name == first_receipt_document or d.posting_date <= first_deposit_posting_date]
-			else:
-				initial_payments = [d.amount for d in self.customer_payments]
-
-			initial_payments_amount = flt(sum(initial_payments), self.precision('invoice_total'))
+			initial_payments_amount = flt(sum([d.amount for d in initial_payments]), self.precision('invoice_total'))
 			self.is_full_payment = initial_payments_amount >= self.invoice_total
 			self.is_partial_payment = not self.is_full_payment
 
@@ -1089,6 +1066,57 @@ def get_booking_payments(vehicle_booking_order, include_draft=False, payment_typ
 	""".format(docstatus_cond, payment_type_cond), [vehicle_booking_order], as_dict=1)
 
 	return payment_entries
+
+
+def separate_customer_and_supplier_payments(payment_entries):
+	customer_payments = []
+	supplier_payments = []
+
+	if payment_entries:
+		customer_payments_by_row_id = {}
+
+		for d in payment_entries:
+			if d.payment_type == "Receive":
+				customer_payments.append(d)
+				customer_payments_by_row_id[d.row_id] = d
+
+			if d.payment_type == "Pay":
+				supplier_payments.append(d)
+				d.deposit_doc_name = d.name
+				d.deposit_date = d.posting_date
+
+		for d in supplier_payments:
+			if d.vehicle_booking_payment_row:
+				customer_payment_row = customer_payments_by_row_id.get(d.vehicle_booking_payment_row)
+				if customer_payment_row:
+					customer_payment_row.deposit_slip_no = d.deposit_slip_no
+					customer_payment_row.deposit_type = d.deposit_type
+					customer_payment_row.deposit_doc_name = d.name
+					customer_payment_row.deposit_date = d.posting_date
+
+	customer_payments = sorted(customer_payments, key=lambda d: (d.instrument_date, d.posting_date, d.creation))
+	supplier_payments = sorted(supplier_payments, key=lambda d: (d.posting_date, d.creation, d.idx))
+
+	return customer_payments, supplier_payments
+
+
+def separate_advance_and_balance_payments(customer_payments, supplier_payments):
+	advance_payments = []
+	balance_payments = []
+
+	if customer_payments:
+		if supplier_payments:
+			first_deposit_document = supplier_payments[0].name
+
+			for d in customer_payments:
+				if d.deposit_doc_name == first_deposit_document:
+					advance_payments.append(d)
+				else:
+					balance_payments.append(d)
+		else:
+			advance_payments = customer_payments
+
+	return advance_payments, balance_payments
 
 
 @frappe.whitelist()
