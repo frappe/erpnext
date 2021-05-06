@@ -90,12 +90,6 @@ frappe.ui.form.on("Company", {
 			frm.toggle_enable("default_currency", (frm.doc.__onload &&
 				!frm.doc.__onload.transactions_exist));
 
-			if (frm.has_perm('write')) {
-				frm.add_custom_button(__('Create Tax Template'), function() {
-					frm.trigger("make_default_tax_template");
-				});
-			}
-
 			if (frappe.perm.has_perm("Cost Center", 0, 'read')) {
 				frm.add_custom_button(__('Cost Centers'), function() {
 					frappe.set_route('Tree', 'Cost Center', {'company': frm.doc.name});
