@@ -1106,10 +1106,10 @@ def separate_advance_and_balance_payments(customer_payments, supplier_payments):
 
 	if customer_payments:
 		if supplier_payments:
-			first_deposit_document = supplier_payments[0].name
+			first_deposit_date = getdate(supplier_payments[0].posting_date)
 
 			for d in customer_payments:
-				if d.deposit_doc_name == first_deposit_document:
+				if d.deposit_date and getdate(d.deposit_date) == first_deposit_date:
 					advance_payments.append(d)
 				else:
 					balance_payments.append(d)
