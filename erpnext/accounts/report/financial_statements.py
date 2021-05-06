@@ -119,10 +119,10 @@ def validate_fiscal_year(fiscal_year, from_fiscal_year, to_fiscal_year):
 
 def validate_dates(from_date, to_date):
 	if not from_date or not to_date:
-		frappe.throw("From Date and To Date are mandatory")
+		frappe.throw(_("From Date and To Date are mandatory"))
 
 	if to_date < from_date:
-		frappe.throw("To Date cannot be less than From Date")
+		frappe.throw(_("To Date cannot be less than From Date"))
 
 def get_months(start_date, end_date):
 	diff = (12 * end_date.year + end_date.month) - (12 * start_date.year + start_date.month)
