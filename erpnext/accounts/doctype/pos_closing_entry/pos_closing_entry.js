@@ -84,7 +84,7 @@ frappe.ui.form.on('POS Closing Entry', {
 				refresh_fields(frm);
 				set_html_data(frm);
 			}
-		})
+		});
 	},
 
 	before_save: function(frm) {

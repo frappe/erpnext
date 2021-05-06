@@ -351,7 +351,7 @@ def job_already_enqueued(job_name):
 def safe_load_json(message):
 	try:
 		json_message = json.loads(message).get('message')
-	except:
-		json_message = message_log
+	except JSONDecodeError as e:
+		json_message = message
 
 	return json_message
