@@ -40,6 +40,19 @@ frappe.ui.form.on('POS Closing Entry', {
 
 	refresh: function(frm) {
 		if (frm.doc.docstatus == 1 && frm.doc.status == 'Failed') {
+			const issue = '<a id="jump_to_error" style="text-decoration: underline;">issue</a>';
+			frm.dashboard.set_headline(
+				__('POS Closing failed while running in a background process. You can resolve the {0} and retry the process again.', [issue]));
+			
+			$('#jump_to_error').on('click', (e) => {
+				e.preventDefault();
+				frappe.utils.scroll_to(
+					cur_frm.get_field("error_message").$wrapper,
+					true,
+					30
+				);
+			});
+
 			frm.add_custom_button(__('Retry'), function () {
 				frm.call('retry', {}, () => {
 					frm.reload_doc();
