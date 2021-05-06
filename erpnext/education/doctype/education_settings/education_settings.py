@@ -31,9 +31,9 @@ class EducationSettings(Document):
 	def validate(self):
 		from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 		if self.get('instructor_created_by')=='Naming Series':
-			make_property_setter('Instructor', "naming_series", "hidden", 0, "Check")
+			make_property_setter('Instructor', "naming_series", "hidden", 0, "Check", validate_fields_for_doctype=False)
 		else:
-			make_property_setter('Instructor', "naming_series", "hidden", 1, "Check")
+			make_property_setter('Instructor', "naming_series", "hidden", 1, "Check", validate_fields_for_doctype=False)
 
 def update_website_context(context):
 	context["lms_enabled"] = frappe.get_doc("Education Settings").enable_lms
