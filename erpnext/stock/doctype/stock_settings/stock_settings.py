@@ -28,9 +28,10 @@ class StockSettings(Document):
 			frappe.msgprint (_("`Freeze Stocks Older Than` should be smaller than %d days.") %stock_frozen_limit)
 
 		# show/hide barcode field
-		for name in ["barcode", "barcodes", "scan_barcode"]:
-			frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
-				'value': 0 if self.show_barcode_field else 1})
+		if self.show_barcode_field != cint(frappe.db.get_single_value('Stock Settings', 'show_barcode_field')):
+			for name in ["barcode", "barcodes", "scan_barcode"]:
+				frappe.make_property_setter({'fieldname': name, 'property': 'hidden',
+					'value': 0 if self.show_barcode_field else 1})
 
 		self.validate_warehouses()
 		self.cant_change_valuation_method()
