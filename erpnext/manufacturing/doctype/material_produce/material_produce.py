@@ -61,8 +61,12 @@ class MaterialProduce(Document):
         return True
 
     def on_submit(self):
-        self.make_se()
-        self.calc_actual_fg_wt_on_wo() 
+        value = frappe.db.sql("""select * from `tabMaterial Consumption` where work_order = %s and docstatus = 1""", (self.work_order))
+        if value:
+            self.make_se()
+            self.calc_actual_fg_wt_on_wo() 
+        else:
+            frappe.throw(_('Atleast one submitted Material Consumption required'))
 
     def on_cancel(self):
         self.calc_actual_fg_wt_on_wo()
