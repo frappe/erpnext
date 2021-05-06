@@ -52,11 +52,6 @@ def get_setup_stages(args=None):
 				'fail_msg': 'Failed to set defaults',
 				'tasks': [
 					{
-						'fn': setup_post_company_fixtures,
-						'args': args,
-						'fail_msg': _("Failed to setup post company fixtures")
-					},
-					{
 						'fn': setup_defaults,
 						'args': args,
 						'fail_msg': _("Failed to setup defaults")
@@ -94,9 +89,6 @@ def stage_fixtures(args):
 def setup_company(args):
 	fixtures.install_company(args)
 
-def setup_post_company_fixtures(args):
-	fixtures.install_post_company_fixtures(args)
-
 def setup_defaults(args):
 	fixtures.install_defaults(frappe._dict(args))
 
@@ -129,7 +121,6 @@ def login_as_first_user(args):
 def setup_complete(args=None):
 	stage_fixtures(args)
 	setup_company(args)
-	setup_post_company_fixtures(args)
 	setup_defaults(args)
 	stage_four(args)
 	fin(args)
