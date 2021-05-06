@@ -13,8 +13,7 @@ from frappe.model.mapper import map_doc, map_child_doc
 from frappe.utils.scheduler import is_scheduler_inactive
 from frappe.core.page.background_jobs.background_jobs import get_info
 import json
-
-from six import iteritems
+import six
 
 class POSInvoiceMergeLog(Document):
 	def validate(self):
@@ -260,7 +259,7 @@ def unconsolidate_pos_invoices(closing_entry):
 
 def create_merge_logs(invoice_by_customer, closing_entry=None):
 	try:
-		for customer, invoices in iteritems(invoice_by_customer):
+		for customer, invoices in six.iteritems(invoice_by_customer):
 			merge_log = frappe.new_doc('POS Invoice Merge Log')
 			merge_log.posting_date = getdate(closing_entry.get('posting_date')) if closing_entry else nowdate()
 			merge_log.customer = customer
@@ -349,9 +348,11 @@ def job_already_enqueued(job_name):
 		return True
 
 def safe_load_json(message):
+	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
+
 	try:
 		json_message = json.loads(message).get('message')
-	except JSONDecodeError as e:
+	except JSONDecodeError:
 		json_message = message
 
 	return json_message
