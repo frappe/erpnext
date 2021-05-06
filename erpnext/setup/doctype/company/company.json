@@ -99,7 +99,6 @@
   "company_description",
   "registration_info",
   "registration_details",
-  "delete_company_transactions",
   "lft",
   "rgt",
   "old_parent"
@@ -667,11 +666,6 @@
    "oldfieldtype": "Code"
   },
   {
-   "fieldname": "delete_company_transactions",
-   "fieldtype": "Button",
-   "label": "Delete Company Transactions"
-  },
-  {
    "fieldname": "lft",
    "fieldtype": "Int",
    "hidden": 1,
@@ -747,7 +741,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-02-16 15:53:37.167589",
+ "modified": "2021-05-07 03:11:28.189740",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
