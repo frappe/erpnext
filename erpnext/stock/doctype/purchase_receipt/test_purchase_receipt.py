@@ -620,10 +620,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
 		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
 
-		self.assertEquals(len(assets), 3)
+		self.assertEqual(len(assets), 3)
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
-		self.assertEquals(location, "Test Location")
+		self.assertEqual(location, "Test Location")
 
 		pr.cancel()
 
@@ -728,7 +728,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1.submit()
 
 		pi = make_purchase_invoice(pr.name)
-		self.assertEquals(pi.items[0].qty, 3)
+		self.assertEqual(pi.items[0].qty, 3)
 
 		pr1.cancel()
 		pr.reload()
@@ -759,8 +759,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr2.submit()
 
 		pi2 = make_purchase_invoice(pr1.name)
-		self.assertEquals(pi2.items[0].qty, 2)
-		self.assertEquals(pi2.items[1].qty, 1)
+		self.assertEqual(pi2.items[0].qty, 2)
+		self.assertEqual(pi2.items[1].qty, 1)
 
 		pr2.cancel()
 		pi1.cancel()
