@@ -129,9 +129,9 @@ class StockReconciliation(StockController):
 					_("Please specify either Quantity or Valuation Rate or both")))
 
 			# do not allow negative quantity
-			if flt(row.total_qty) < 0:
-				self.validation_messages.append(_get_msg(row_num,
-					_("Negative Quantity is not allowed")))
+			# if flt(row.total_qty) < 0:
+			# 	self.validation_messages.append(_get_msg(row_num,
+			# 		_("Negative Quantity is not allowed")))
 
 			# do not allow negative valuation
 			'''if flt(row.valuation_rate) < 0:
