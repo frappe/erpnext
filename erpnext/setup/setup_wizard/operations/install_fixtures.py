@@ -422,8 +422,13 @@ def install_post_company_fixtures(args=None):
 		{'doctype': 'Department', 'department_name': _('Legal'), 'parent_department': _('All Departments'), 'company': args.company_name},
 	]
 
-	for department in records:
-		frappe.get_doc(department).db_insert()
+	# Make root department with NSM updation
+	make_records(records[:1])
+
+	frappe.local.flags.ignore_update_nsm = True
+	make_records(records[1:])
+	frappe.local.flags.ignore_update_nsm = False
+	
 	rebuild_tree("Department", "parent_department")
 
 
