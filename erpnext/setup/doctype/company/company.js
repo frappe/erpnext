@@ -120,7 +120,7 @@ frappe.ui.form.on("Company", {
 				}, __('Manage'));
 			}
 
-			if (frappe.user.has_role('System Manager')){
+			if (frappe.user.has_role('System Manager')) {
 				if (frm.has_perm('write')) {
 					frm.add_custom_button(__('Delete Transactions'), function() {
 						frm.trigger("delete_company_transactions");
