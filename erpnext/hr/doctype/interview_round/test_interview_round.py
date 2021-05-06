@@ -8,28 +8,31 @@ from frappe.core.doctype.user_permission.test_user_permission import create_user
 import unittest
 
 class TestInterviewRound(unittest.TestCase):
-
 	def tearDown(self):
-		frappe.db.sql("DELETE FROM`tabInterview Round` Where 1")
+		frappe.db.sql("DELETE FROM `tabInterview Round` Where 1")
 
 	def test_role_validation(self):
-		intreviewer = create_user("test_interviewer@example.com")
-		interview_round = create_interview_round("Technical Round", ["Python", "JS"], intreviewer.name, False)
+		interviewer = create_user("test_interviewer@example.com")
+		interview_round = create_interview_round("Technical Round", ["Python", "JS"], interviewers=[interviewer.name], save=False)
 		self.assertRaises(frappe.ValidationError, interview_round.save)
 
 
-def create_interview_round(name, skill_set, interviewer, save=True):
+def create_interview_round(name, skill_set, interviewers=[], designation=None, save=True):
 	create_skill_set(skill_set)
 	interview_round = frappe.new_doc("Interview Round")
 	interview_round.round_name = name
 	interview_round.interview_type = create_interview_type()
 	interview_round.expected_average_rating = 4
+	if designation:
+		interview_round.designation = designation
+
 	for skill in skill_set:
 		interview_round.append("expected_skill_set", {"skill": skill})
 
-	interview_round.append("interviewer", {
-		"user": interviewer
-	})
+	for interviewer in interviewers:
+		interview_round.append("interviewer", {
+			"user": interviewer
+		})
 
 	if save:
 		interview_round.save()
