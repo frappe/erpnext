@@ -20,10 +20,11 @@
   "discount",
   "section_break_9",
   "payment_amount",
+  "outstanding",
+  "paid_amount",
   "discounted_amount",
   "column_break_3",
-  "outstanding",
-  "paid_amount"
+  "base_payment_amount"
  ],
  "fields": [
   {
@@ -78,7 +79,8 @@
    "depends_on": "paid_amount",
    "fieldname": "paid_amount",
    "fieldtype": "Currency",
-   "label": "Paid Amount"
+   "label": "Paid Amount",
+   "options": "currency"
   },
   {
    "fieldname": "column_break_3",
@@ -97,6 +99,7 @@
    "fieldname": "outstanding",
    "fieldtype": "Currency",
    "label": "Outstanding",
+   "options": "currency",
    "read_only": 1
   },
   {
@@ -145,12 +148,18 @@
   {
    "fieldname": "section_break_4",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "base_payment_amount",
+   "fieldtype": "Currency",
+   "label": "Payment Amount (Company Currency)",
+   "options": "Company:company:default_currency"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-02-15 21:03:12.540546",
+ "modified": "2021-04-28 05:41:35.084233",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Schedule",
