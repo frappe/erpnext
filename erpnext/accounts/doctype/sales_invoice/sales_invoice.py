@@ -1111,7 +1111,7 @@ class SalesInvoice(SellingController):
 			if not item.serial_no:
 				continue
 
-			for serial_no in item.serial_no.split("\n"):
+			for serial_no in get_serial_nos(item.serial_no):
 				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
 					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
