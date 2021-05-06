@@ -79,7 +79,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
-		out.update(get_pos_profile_item_details(args.company, args))
+		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
 
 	if (args.get("doctype") == "Material Request" and
 		args.get("material_request_type") == "Material Transfer"):
@@ -935,8 +935,8 @@ def get_bin_details(item_code, warehouse, company=None):
 	return bin_details
 
 def get_company_total_stock(item_code, company):
-	return frappe.db.sql("""SELECT sum(actual_qty) from 
-		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name) 
+	return frappe.db.sql("""SELECT sum(actual_qty) from
+		(`tabBin` INNER JOIN `tabWarehouse` ON `tabBin`.warehouse = `tabWarehouse`.name)
 		WHERE `tabWarehouse`.company = %s and `tabBin`.item_code = %s""",
 		(company, item_code))[0][0]
 
