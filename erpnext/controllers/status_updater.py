@@ -98,6 +98,7 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus == 1"],
 		["Queued", "eval:self.status == 'Queued'"],
+		["Failed", "eval:self.status == 'Failed'"],
 		["Cancelled", "eval:self.docstatus == 2"],
 	]
 }
