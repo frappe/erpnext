@@ -115,7 +115,7 @@ frappe.ui.form.on("Company", {
 			}
 
 			if (frm.has_perm('write')) {
-				frm.add_custom_button(__('Default Tax Template'), function() {
+				frm.add_custom_button(__('Create Tax Template'), function() {
 					frm.trigger("make_default_tax_template");
 				}, __('Manage'));
 			}
