@@ -776,3 +776,4 @@ erpnext.patches.v13_0.update_shipment_status
 erpnext.patches.v13_0.remove_attribute_field_from_item_variant_setting
 erpnext.patches.v13_0.germany_make_custom_fields
 erpnext.patches.v13_0.germany_fill_debtor_creditor_number
+erpnext.patches.v13_0.set_pos_closing_as_failed
