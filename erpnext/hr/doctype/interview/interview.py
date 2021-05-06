@@ -11,13 +11,14 @@ from frappe.model.document import Document
 from erpnext.hr.utils import validate_interviewer_roles
 
 
+class DuplicateInterviewRoundError(frappe.ValidationError): pass
 class Interview(Document):
 
 	def validate(self):
 		validate_interviewer_roles([d.interviewer for d in self.interview_detail])
 		self.validate_duplicate_interview()
+		self.validate_designation()
 		self.set_status()
-
 
 	def validate_duplicate_interview(self):
 		duplicate_interview = frappe.db.exists("Interview", {
@@ -31,6 +32,19 @@ class Interview(Document):
 				frappe.bold(self.job_applicant),
 				frappe.bold(get_link_to_form("Interview", duplicate_interview)))
 			)
+
+	#Also handeled at Client Side Validation is only For Creation Through API
+	def validate_designation(self):
+		applicant_designation = frappe.db.get_value("Job Applicant", self.job_applicant, 'designation')
+		if self.designation :
+			if self.designation != applicant_designation: #intially designation is pulled from Interview round
+				frappe.throw(_('Interview Round: {0} is only for Designation: {1}. Job Applicant: {2} had applied for {3}'),
+					exc = DuplicateInterviewRoundError
+				).format(
+					self.interview_round, self.designation, applicant_designation
+				)
+		else:
+			self.designation = applicant_designation
 
 	def set_status(self):
 		if get_datetime() > get_datetime(self.scheduled_on):
@@ -124,8 +138,8 @@ def send_review_reminder(interview_name):
 			)
 
 def send_interview_reminder():
-	if frappe.db.get_single_value('Hr Settings', 'interview_feedback_reminder'):
-		remind_before = frappe.db.get_single_value('Hr Settings',  'remind_before')
+	if frappe.db.get_single_value('Hr Settings', 'interview_reminder'):
+		remind_before = frappe.db.get_single_value('Hr Settings',  'remind_before') or "00:15:00"
 		remind_before = datetime.datetime.strptime(remind_before, '%H:%M:%S')
 		reminder_date_time = datetime.datetime.now() + datetime.timedelta(
 			hours=remind_before.hour, minutes=remind_before.minute, seconds=remind_before.second)
@@ -154,7 +168,6 @@ def send_interview_reminder():
 			)
 
 			doc.db_set("reminded", 1)
-
 
 def send_daily_feedback_reminder():
 	interviews = frappe.get_all("Interview", filters={"status": "In Review", "docstatus": 1})
