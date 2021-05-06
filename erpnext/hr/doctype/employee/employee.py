@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 
 from frappe.utils import (getdate, validate_email_address, today, 
-                          add_years, cstr, comma_sep)
+                          add_years, cstr, comma_sep, comma_and)
 from frappe.model.naming import set_name_by_naming_series
 from frappe import throw, _, scrub
 from frappe.permissions import add_user_permission, remove_user_permission, \
@@ -284,6 +284,44 @@ def update_user_permissions(doc, method):
 		employee = frappe.get_doc("Employee", {"user_id": doc.name})
 		employee.update_user_permissions()
 
+def send_holiday_reminders():
+	"""Send holiday reminders to Employees if 'Send Holiday Reminders' is checked"""
+	to_send = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1)
+	if not to_send:
+		return
+	
+	employees = frappe.db.get_all('Employee', pluck='name')
+
+	for employee in employees:
+		has_holiday, holiday_descriptions = is_holiday(employee, only_non_weekly=True, with_description=True)
+		if is_holiday(employee, only_non_weekly=True):
+			send_holiday_reminder_to_employee(employee, holiday_descriptions)
+
+def send_holiday_reminder_to_employee(employee, descriptions):
+	reminder_text, message = get_holiday_reminder_text_and_message(employee, descriptions)
+	
+	employee_doc = frappe.get_doc('Employee', employee)
+	employee_email = get_employee_email(employee_doc)
+
+	frappe.sendmail(
+		recipients=[employee_email],
+		subject=_("Holiday Reminder"),
+		template="holiday_reminder",
+		args=dict(
+			reminder_text=reminder_text,
+			message=message
+		),
+		header=_("Today is a holiday for you.")
+	)
+
+def get_holiday_reminder_text_and_message(employee, descriptions):
+	description = descriptions[0] if len(descriptions) == 1 else comma_and(descriptions, add_quotes=False)
+	
+	reminder_text = _("This email is to remind you about today's holiday.")
+	message = _("Holiday is on the occassion of {0}.").format(description)
+
+	return reminder_text, message
+
 def send_work_anniversary_reminders():
 	"""Send Employee Work Anniversary Reminders if 'Send Work Anniversary Reminders' is checked"""
 	to_send = int(frappe.db.get_single_value("HR Settings", "send_work_anniversary_reminders") or 1) 
@@ -464,17 +502,40 @@ def get_holiday_list_for_employee(employee, raise_exception=True):
 
 	return holiday_list
 
-def is_holiday(employee, date=None, raise_exception=True):
-	'''Returns True if given Employee has an holiday on the given date
-	:param employee: Employee `name`
-	:param date: Date to check. Will check for today if None'''
+def is_holiday(employee, date=None, raise_exception=True, only_non_weekly=False, with_description=False):
+	'''
+	Returns True if given Employee has an holiday on the given date
+		:param employee: Employee `name`
+		:param date: Date to check. Will check for today if None
+		:param raise_exception: Raise an exception if no holiday list found, default is True
+		:param only_non_weekly: Check only non-weekly holidays, default is False
+	'''
 
 	holiday_list = get_holiday_list_for_employee(employee, raise_exception)
 	if not date:
 		date = today()
+	
+	if not holiday_list:
+		return False
+	
+	filters = {
+		'parent': holiday_list,
+		'holiday_date': date
+	}
+	if only_non_weekly:
+		filters['weekly_off'] = False
 
-	if holiday_list:
-		return frappe.get_all('Holiday List', dict(name=holiday_list, holiday_date=date)) and True or False
+	holidays = frappe.get_all(
+		'Holiday', 
+		fields=['description'],
+		filters=filters, 
+		pluck='description'
+	)
+
+	if with_description:
+		return len(holidays), holidays
+
+	return len(holidays) > 0
 
 @frappe.whitelist()
 def deactivate_sales_person(status = None, employee = None):
