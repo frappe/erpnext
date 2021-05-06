@@ -25,6 +25,8 @@ doctype_js = {
 	"Communication": "public/js/communication.js",
 	"Event": "public/js/event.js",
 	"Newsletter": "public/js/newsletter.js"
+	
+	
 }
 
 override_doctype_class = {
