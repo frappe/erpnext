@@ -131,7 +131,7 @@ def get_report_summary(period_list, asset, liability, equity, provisional_profit
 	net_asset, net_liability, net_equity, net_provisional_profit_loss = 0.0, 0.0, 0.0, 0.0
 
 	if filters.get('accumulated_values'):
-		period_list = []
+		period_list = [period_list[-1]]
 
 	# from consolidated financial statement
 	if filters.get('accumulated_in_group_company'):
