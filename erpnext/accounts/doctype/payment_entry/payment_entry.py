@@ -849,7 +849,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 				total_amount = ref_doc.advance_amount
 			elif ref_doc.doctype == "Debit Note CXC":
 				total_amount = ref_doc.amount
-			elif ref_doc.doctype == "Credit Note CXC":
+			elif ref_doc.doctype == "Credit Note CXP":
 				total_amount = ref_doc.amount
 			else:
 				total_amount = ref_doc.base_grand_total
@@ -862,7 +862,7 @@ def get_reference_details(reference_doctype, reference_name, party_account_curre
 			exchange_rate = ref_doc.get("conversion_rate") or \
 				get_exchange_rate(party_account_currency, company_currency, ref_doc.posting_date)
 
-		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Credit Note CXC"):
+		if reference_doctype in ("Sales Invoice", "Purchase Invoice", "Debit Note CXC", "Credit Note CXP"):
 			outstanding_amount = ref_doc.get("outstanding_amount")
 			bill_no = ref_doc.get("bill_no")
 		elif reference_doctype == "Expense Claim":

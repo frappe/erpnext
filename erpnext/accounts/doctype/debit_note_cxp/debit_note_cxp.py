@@ -40,6 +40,8 @@ class DebitNoteCXP(Document):
 				self.amount_total = self.amount + self.isv_15
 			elif self.isv_18 != None:
 				self.amount_total = self.amount + self.isv_18
+			elif self.isv_15 != None and self.isv_18 != None:
+				self.amount_total = self.amount
 	
 	def calculate_isv(self):
 		for taxes_list in self.get("taxes"):

@@ -25,15 +25,27 @@ class DebitNoteCXC(Document):
 			total_base += taxes_list.base_isv
 			if total_base > self.amount:
 				frappe.throw(_("Base tax cannot be greater than the amount"))
-		if len(self.get("taxes")) > 0:	
+		if len(self.get("taxes")) > 1:	
 			self.calculate_isv()
 			total_taxes = self.isv_15 + self.isv_18
 			total = self.amount + total_taxes
 			self.document_balance = total
 			self.outstanding_amount = total
 		else:
-			self.document_balance = self.amount
-			self.outstanding_amount = self.amount
+			self.calculate_isv()
+			total = 0
+			total_taxes = 0
+			if self.isv_15 != None:
+				total_taxes += self.isv_15
+				total = self.amount + total_taxes
+			elif self.isv_18 != None:
+				total_taxes += self.isv_18
+				total = self.amount + total_taxes
+			self.document_balance = total
+			self.outstanding_amount = total
+			if total == 0 and total_taxes ==0:
+				self.document_balance = self.amount
+				self.outstanding_amount = self.amount
 
 	def calculate_isv(self):
 		for taxes_list in self.get("taxes"):
