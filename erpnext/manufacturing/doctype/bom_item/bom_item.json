@@ -292,27 +292,13 @@
    "label": "Sourced by Supplier"
   },
   {
-   "default": "0",
-   "fieldname": "allowed_to_change_qty_in_wo",
-   "fieldtype": "Check",
-   "label": "Allowed to Change Qty in WO"
-  },
-  {
-   "default": "RM",
-   "fieldname": "type",
-   "fieldtype": "Select",
-   "in_list_view": 1,
-   "label": "Type",
-   "options": "RM\nPKG",
-   "reqd": 1
-  },
-  {
    "collapsible": 1,
    "fieldname": "item_weight",
    "fieldtype": "Section Break",
    "label": "Item Weight"
   },
   {
+   "fetch_from": "item_code.weight_per_unit",
    "fieldname": "weight_per_unit",
    "fieldtype": "Float",
    "label": "Weight Per Unit",
@@ -331,13 +317,28 @@
    "hidden": 1,
    "label": "Total Weight",
    "read_only": 1
+  },
+  {
+   "default": "RM",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "RM\nPKG",
+   "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "allowed_to_change_qty_in_wo",
+   "fieldtype": "Check",
+   "label": "Allowed to Change Qty in WO"
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-07 16:58:41.366185",
+ "modified": "2021-05-07 18:55:12.172899",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
