@@ -40,6 +40,13 @@
   "items",
   "scrap_section",
   "scrap_items",
+  "weight",
+  "rm_weight",
+  "yeild",
+  "column_break_48",
+  "fg_weight",
+  "column_break_50",
+  "bom_weight",
   "costing",
   "operating_cost",
   "raw_material_cost",
@@ -517,6 +524,44 @@
    "fieldname": "allow_adding_items",
    "fieldtype": "Check",
    "label": "Allow Adding Items other than BOM Items"
+  },
+  {
+   "fieldname": "weight",
+   "fieldtype": "Section Break",
+   "label": "Weight Details"
+  },
+  {
+   "fieldname": "rm_weight",
+   "fieldtype": "Float",
+   "label": "RM Weight",
+   "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "yeild",
+   "fieldtype": "Percent",
+   "label": "Yeild",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_48",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "fg_weight",
+   "fieldtype": "Float",
+   "label": "FG Weight",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_50",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "bom_weight",
+   "fieldtype": "Float",
+   "label": "BOM Weight",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-sitemap",
@@ -524,7 +569,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-29 18:32:06.561983",
+ "modified": "2021-05-07 16:47:55.548563",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
