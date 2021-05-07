@@ -305,6 +305,7 @@
    "read_only": 1
   },
   {
+   "fetch_from": "item_code.weight_uom",
    "fieldname": "weight_uom",
    "fieldtype": "Link",
    "label": "Weight UOM",
@@ -338,7 +339,7 @@
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-07 18:55:12.172899",
+ "modified": "2021-05-07 19:17:47.347809",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
