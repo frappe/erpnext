@@ -473,7 +473,7 @@ class TestWorkOrder(unittest.TestCase):
 	def test_cost_center_for_manufacture(self):
 		wo_order = make_wo_order_test_record()
 		ste = make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
-		self.assertEquals(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
+		self.assertEqual(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
 
 	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
@@ -539,11 +539,11 @@ class TestWorkOrder(unittest.TestCase):
 		ste_cancel_list.append(ste1)
 
 		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Material Consumption for Manufacture", 2))
-		self.assertEquals(ste3.fg_completed_qty, 2)
+		self.assertEqual(ste3.fg_completed_qty, 2)
 
 		expected_qty = {"_Test Item": 2, "_Test Item Home Desktop 100": 4}
 		for row in ste3.items:
-			self.assertEquals(row.qty, expected_qty.get(row.item_code))
+			self.assertEqual(row.qty, expected_qty.get(row.item_code))
 		ste_cancel_list.reverse()
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
@@ -577,7 +577,7 @@ class TestWorkOrder(unittest.TestCase):
 		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
 		for ste_row in ste3.items:
 			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
-				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+				self.assertEqual(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
 
 		ste3.submit()
 		ste_cancel_list.append(ste3)
@@ -585,7 +585,7 @@ class TestWorkOrder(unittest.TestCase):
 		ste2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
 		for ste_row in ste2.items:
 			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
-				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+				self.assertEqual(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
 		ste_cancel_list.reverse()
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
