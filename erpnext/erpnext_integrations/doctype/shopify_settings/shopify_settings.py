@@ -30,7 +30,7 @@ class ShopifySettings(Document):
 		webhooks = ["orders/create", "orders/paid", "orders/fulfilled"]
 		# url = get_shopify_url('admin/webhooks.json', self)
 		created_webhooks = [d.method for d in self.webhooks]
-		url = get_shopify_url('admin/api/2020-04/webhooks.json', self)
+		url = get_shopify_url('admin/api/2021-04/webhooks.json', self)
 		for method in webhooks:
 			session = get_request_session()
 			try:
@@ -56,7 +56,7 @@ class ShopifySettings(Document):
 		deleted_webhooks = []
 
 		for d in self.webhooks:
-			url = get_shopify_url('admin/api/2020-04/webhooks/{0}.json'.format(d.webhook_id), self)
+			url = get_shopify_url('admin/api/2021-04/webhooks/{0}.json'.format(d.webhook_id), self)
 			try:
 				res = session.delete(url, headers=get_header(self))
 				res.raise_for_status()
