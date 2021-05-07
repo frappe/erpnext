@@ -249,15 +249,32 @@ class WorkOrder(Document):
 		self.update_ordered_qty()
 		self.create_job_card()
 		self.scrap_cost_calc()
-	
+		
 	def before_save(self):
-		print("Before save")
-		self.bom_details()
+		bo = frappe.get_doc("BOM", self.bom_no)
+		for row1 in self.required_items:
+			for row2 in bo.items:
+				if row1.item_name == row2.item_name:
+					row1.type = row2.type
+					bo.db_update()
+					break
 		value = 0
 		for row in self.required_items:
 			if row.type == "RM":
 				value += flt(row.required_qty)*flt(row.weight_per_unit)
 		self.planned_rm_weight = flt(value, self.precision('planned_rm_weight'))
+		self.bom_details()
+		self.planned_rm_cost_calc()
+
+	def bom_details(self):
+		bo = frappe.get_doc("BOM", self.bom_no)
+		self.bom_yeild = flt(bo.yeild, self.precision('bom_yeild'))
+		
+		value = 0
+		for row in self.required_items:
+			value += flt(row.required_qty) * flt(row.weight_per_unit) 
+		print(self.bom_weight)
+		self.bom_weight = flt(value, self.precision('bom_weight'))
 
 	# def on_change(self):
 	# 	# self.planned_rm_cost_calc() # wo.items.required_qty
@@ -275,29 +292,17 @@ class WorkOrder(Document):
 		
 	def scrap_cost_calc(self):
 		bo = frappe.get_doc("BOM", self.bom_no)
-		if bo.quantity >= 0:
+		if bo.quantity > 0:
 			self.scrap_cost = flt((flt(bo.scrap_material_cost)/flt(bo.quantity))*flt(self.qty), self.precision('scrap_cost'))
 		else:
 			self.scrap_cost = 0
-			
 
-	def bom_details(self):
-		print("coming to bom_details")
-		bo = frappe.get_doc("BOM", self.bom_no)
-		self.bom_yeild = flt(bo.yeild, self.precision('bom_yeild'))
-		
-		value = 0
-		for row in self.required_items:
-			value += flt(row.required_qty) * flt(row.weight_per_unit) 
-		print(self.bom_weight)
-		self.bom_weight = flt(value, self.precision('bom_weight'))
-
+	@frappe.whitelist()
 	def planned_rm_cost_calc(self):
 		value = 0
 		for row in self.required_items:
 			value += flt(row.required_qty) * flt(row.rate)
 		self.planned_rm_cost = flt(value, self.precision('planned_rm_cost'))
-		return True
 
 	def on_cancel(self):
 		self.validate_cancel()
