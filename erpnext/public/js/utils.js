@@ -58,10 +58,10 @@ $.extend(erpnext, {
 				Object.assign(grid_row.doc, {has_serial_no, has_batch_no});
 
 				if (has_serial_no) {
-					attachSelectorButton(__("Add Serial No"),
+					attach_selector_button(__("Add Serial No"),
 						grid_row.grid_form.fields_dict.serial_no.$wrapper, this, grid_row);
 				} else if (has_batch_no) {
-					attachSelectorButton(__("Pick Batch No"),
+					attach_selector_button(__("Pick Batch No"),
 						grid_row.grid_form.fields_dict.batch_no.$wrapper, this, grid_row);
 				}
 			}
@@ -737,11 +737,11 @@ $(document).on('app_ready', function() {
 	}
 });
 
-function attachSelectorButton(innerText, appendLoction, context, grid_row) {
-	let $btnDiv = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
-		.appendTo(appendLoction);
-	let $btn = $(`<button class="btn btn-sm btn-default">${innerText}</button>`)
-		.appendTo($btnDiv);
+function attach_selector_button(inner_text, append_loction, context, grid_row) {
+	let $btn_div = $("<div>").css({"margin-bottom": "10px", "margin-top": "10px"})
+		.appendTo(append_loction);
+	let $btn = $(`<button class="btn btn-sm btn-default">${inner_text}</button>`)
+		.appendTo($btn_div);
 
 	$btn.on("click", function() {
 		context.show_serial_batch_selector(grid_row.frm, grid_row.doc, "", "", true);
