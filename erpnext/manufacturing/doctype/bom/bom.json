@@ -40,6 +40,7 @@
   "items",
   "scrap_section",
   "scrap_items",
+  "section_break_35",
   "weight",
   "rm_weight",
   "yeild",
@@ -562,6 +563,10 @@
    "fieldtype": "Float",
    "label": "BOM Weight",
    "read_only": 1
+  },
+  {
+   "fieldname": "section_break_35",
+   "fieldtype": "Section Break"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -569,7 +574,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-07 16:47:55.548563",
+ "modified": "2021-05-07 17:21:37.180644",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",
