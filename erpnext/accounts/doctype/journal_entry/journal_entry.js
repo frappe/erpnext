@@ -327,18 +327,16 @@ erpnext.accounts.JournalEntry = class JournalEntry extends frappe.ui.form.Contro
 	}
 
 	setup_balance_formatter() {
-		var me = this;
-		$.each(["balance", "party_balance"], function(i, field) {
-			var df = frappe.meta.get_docfield("Journal Entry Account", field, me.frm.doc.name);
-			df.formatter = function(value, df, options, doc) {
-				var currency = frappe.meta.get_field_currency(df, doc);
-				var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
-				return "<div style='text-align: right'>"
-					+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
-					+ " " + dr_or_cr
-					+ "</div>";
-			}
-		})
+		const formatter = function(value, df, options, doc) {
+			var currency = frappe.meta.get_field_currency(df, doc);
+			var dr_or_cr = value ? ('<label>' + (value > 0.0 ? __("Dr") : __("Cr")) + '</label>') : "";
+			return "<div style='text-align: right'>"
+				+ ((value==null || value==="") ? "" : format_currency(Math.abs(value), currency))
+				+ " " + dr_or_cr
+				+ "</div>";
+		};
+		this.frm.fields_dict.accounts.grid.update_docfield_property('balance', 'formatter', formatter);
+		this.frm.fields_dict.accounts.grid.update_docfield_property('party_balance', 'formatter', formatter);
 	}
 
 	reference_name(doc, cdt, cdn) {
@@ -431,15 +429,6 @@ cur_frm.cscript.validate = function(doc,cdt,cdn) {
 	cur_frm.cscript.update_totals(doc);
 }
 
-cur_frm.cscript.select_print_heading = function(doc,cdt,cdn){
-	if(doc.select_print_heading){
-		// print heading
-		cur_frm.pformat.print_heading = doc.select_print_heading;
-	}
-	else
-		cur_frm.pformat.print_heading = __("Journal Entry");
-}
-
 frappe.ui.form.on("Journal Entry Account", {
 	party: function(frm, cdt, cdn) {
 		var d = frappe.get_doc(cdt, cdn);
@@ -511,8 +500,11 @@ $.extend(erpnext.journal_entry, {
 		};
 
 		$.each(field_label_map, function (fieldname, label) {
-			var df = frappe.meta.get_docfield("Journal Entry Account", fieldname, frm.doc.name);
-			df.label = frm.doc.multi_currency ? (label + " in Account Currency") : label;
+			frm.fields_dict.accounts.grid.update_docfield_property(
+				fieldname,
+				'label',
+				frm.doc.multi_currency ? (label + " in Account Currency") : label
+			);
 		})
 	},
 

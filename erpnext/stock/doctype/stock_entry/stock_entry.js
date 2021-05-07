@@ -100,6 +100,13 @@ frappe.ui.form.on('Stock Entry', {
 
 		frm.add_fetch("bom_no", "inspection_required", "inspection_required");
 		erpnext.accounts.dimensions.setup_dimension_filters(frm, frm.doctype);
+
+		frappe.db.get_single_value('Stock Settings', 'disable_serial_no_and_batch_selector')
+		.then((value) => {
+			if (value) {
+				frappe.flags.hide_serial_batch_dialog = true;
+			}
+		});
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -551,7 +558,6 @@ frappe.ui.form.on('Stock Entry', {
 				})
 			);
 		}
-
 		for (let i in frm.doc.items) {
 			let item = frm.doc.items[i];
 
@@ -721,7 +727,7 @@ frappe.ui.form.on('Stock Entry Detail', {
 							no_batch_serial_number_value = !d.batch_no;
 						}
 
-						if (no_batch_serial_number_value) {
+						if (no_batch_serial_number_value && !frappe.flags.hide_serial_batch_dialog) {
 							erpnext.stock.select_batch_and_serial_no(frm, d);
 						}
 					}
@@ -849,7 +855,6 @@ erpnext.stock.StockEntry = class StockEntry extends erpnext.stock.StockControlle
 		}
 		erpnext.hide_company();
 		erpnext.utils.add_item(this.frm);
-		this.frm.trigger('add_to_transit');
 	}
 
 	scan_barcode() {

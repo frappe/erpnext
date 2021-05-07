@@ -88,7 +88,7 @@ class SalaryStructure(Document):
 		return employees
 
 	@frappe.whitelist()
-	def assign_salary_structure(self, grade=None, department=None, designation=None,employee=None,
+	def assign_salary_structure(self, grade=None, department=None, designation=None, employee=None,
 			payroll_payable_account=None, from_date=None, base=None, variable=None, income_tax_slab=None):
 		employees = self.get_employees(company= self.company, grade= grade,department= department,designation= designation,name=employee)
 
@@ -100,7 +100,7 @@ class SalaryStructure(Document):
 					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 			else:
 				assign_salary_structure_for_employees(employees, self,
-					payroll_payable_account=payroll_payable_account, 
+					payroll_payable_account=payroll_payable_account,
 					from_date=from_date, base=base, variable=variable, income_tax_slab=income_tax_slab)
 		else:
 			frappe.msgprint(_("No Employee Found"))
