@@ -77,7 +77,7 @@ class VehicleBookingOrder(AccountsController):
 		self.set_status()
 
 	def before_submit(self):
-		self.validate_allocation_required()
+		self.validate_delivery_period_mandatory()
 		self.validate_color_mandatory()
 
 	def on_submit(self):
@@ -250,10 +250,9 @@ class VehicleBookingOrder(AccountsController):
 				frappe.throw(_("Delivery Due Date must be within Delivery Period {0} if Delivery Period is selected")
 					.format(self.delivery_period))
 
-	def validate_allocation_required(self):
-		required = frappe.get_cached_value("Item", self.item_code, "vehicle_allocation_required")
-		if required and not self.delivery_period:
-			frappe.throw(_("Delivery Period is required for allocation of {0} before submission").format(self.item_name or self.item_code))
+	def validate_delivery_period_mandatory(self):
+		if not self.delivery_period:
+			frappe.throw(_("Delivery Period is mandatory before submission"))
 
 	def validate_color_mandatory(self):
 		if not self.color_1:
