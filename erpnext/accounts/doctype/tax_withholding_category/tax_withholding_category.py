@@ -23,7 +23,7 @@ def get_party_details(inv):
 		party = inv.supplier
 
 	if not party:
-		frappe.throw(_("Please select {0} first"))
+		frappe.throw(_("Please select {0} first").format(party_type))
 
 	return party_type, party
 
