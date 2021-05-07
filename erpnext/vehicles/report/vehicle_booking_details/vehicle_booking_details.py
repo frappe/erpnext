@@ -42,12 +42,16 @@ class VehicleBookingDetailsReport(object):
 				m.color_1, m.color_2, m.color_3, m.previous_color,
 				1 as qty, m.invoice_total, m.payment_adjustment,
 				m.status,
-				m.customer_advance, m.supplier_advance
+				m.customer_advance, m.supplier_advance,
+				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person,
+				sum(ifnull(sp.allocated_percentage, 100)) as allocated_percentage
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
 			left join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
 			left join `tabVehicle Allocation Period` dp on dp.name = m.delivery_period
+			left join `tabSales Team` sp on sp.parent = m.name and sp.parenttype = 'Vehicle Booking Order'
 			where m.docstatus = 1 {conditions}
+			group by m.name
 			order by {order_by}
 		""".format(conditions=filter_conditions, order_by=self.order_by), self.filters, as_dict=1)
 
@@ -68,7 +72,17 @@ class VehicleBookingDetailsReport(object):
 
 			d.original_item_code = d.get('previous_item_code') or d.item_code
 
+			self.apply_sales_person_contribution(d)
+
 		return self.data
+
+	def apply_sales_person_contribution(self, row):
+		if self.filters.sales_person:
+			row['actual_invoice_total'] = row["invoice_total"]
+
+			fields = ['qty', 'invoice_total']
+			for f in fields:
+				row[f] *= row.allocated_percentage / 100
 
 	def get_grouped_data(self):
 		data = self.data
@@ -101,7 +115,7 @@ class VehicleBookingDetailsReport(object):
 			totals[f] = g
 
 		# Sum
-		sum_fields = ['invoice_total', 'qty']
+		sum_fields = ['invoice_total', 'qty', 'actual_invoice_total']
 		for f in sum_fields:
 			totals[f] = sum([flt(d.get(f)) for d in data])
 
@@ -128,6 +142,10 @@ class VehicleBookingDetailsReport(object):
 		# set item_code from model
 		if "variant_of" in grouped_by:
 			totals['item_code'] = totals['variant_of']
+
+		# Calculate sales person contribution percentage
+		if totals.get('actual_invoice_total'):
+			totals['allocated_percentage'] = totals['invoice_total'] / totals['actual_invoice_total'] * 100
 
 		return totals
 
@@ -171,6 +189,11 @@ class VehicleBookingDetailsReport(object):
 		if self.filters.priority:
 			conditions.append("m.priority = 1")
 
+		if self.filters.get("sales_person"):
+			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
+			conditions.append("""sp.sales_person in (select name from `tabSales Person`
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
@@ -197,6 +220,13 @@ class VehicleBookingDetailsReport(object):
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
 			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
+		]
+
+		columns.append({"label": _("Sales Person"), "fieldtype": "Data", "fieldname": "sales_person", "width": 150})
+		if self.filters.sales_person:
+			columns.append({"label": _("% Contribution"), "fieldtype": "Percent", "fieldname": "allocated_percentage", "width": 60})
+
+		columns += [
 			{"label": _("Allocation"), "fieldname": "allocation_title", "fieldtype": "Data", "width": 200},
 			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Previous Color"), "fieldname": "previous_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
