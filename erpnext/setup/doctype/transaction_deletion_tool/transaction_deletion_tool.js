@@ -17,7 +17,13 @@ frappe.ui.form.on('Transaction Deletion Tool', {
 		frm.get_field('doctypes_to_be_ignored').grid.cannot_add_rows = true;
 		frm.fields_dict['doctypes_to_be_ignored'].grid.set_column_disp('no_of_docs', false);
 		frm.refresh_field('doctypes_to_be_ignored');
+	},
+
+	refresh: function(frm) {
+		frm.fields_dict['doctypes_to_be_ignored'].grid.set_column_disp('no_of_docs', false);
+		frm.refresh_field('doctypes_to_be_ignored');
 	}
+	
 });
 
 function populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm) {
