@@ -130,7 +130,10 @@ class BOM(WebsiteGenerator):
 			for row in self.items:
 					value2 += flt(row.stock_qty) * flt(row.weight_per_unit)
 		self.bom_weight = flt(value2, self.precision('bom_weight'))
-		self.yeild = flt((self.fg_weight/self.rm_weight)*100, self.precision('yeild'))
+		if self.rm_weight == 0:
+			self.yeild = 0
+		else:
+			self.yeild = flt((self.fg_weight/self.rm_weight)*100, self.precision('yeild'))
 
 	@frappe.whitelist()
 	def get_routing(self):
