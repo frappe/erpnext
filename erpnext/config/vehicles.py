@@ -128,5 +128,17 @@ def get_data():
 					"name": "Vehicle Allocation Creation Tool",
 				},
 			]
-		}
+		},
+		{
+			"label": _("Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Booking Details",
+					"doctype": "Vehicle Booking Order",
+					"dependencies": ["Vehicle Booking Order"],
+				},
+			]
+		},
 	]
