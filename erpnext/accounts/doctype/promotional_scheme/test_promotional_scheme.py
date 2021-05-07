@@ -48,7 +48,7 @@ def make_promotional_scheme():
 	ps = frappe.new_doc('Promotional Scheme')
 	ps.name = '_Test Scheme'
 	ps.append('items',{
-		'item_code': 'Test Production Item 1'
+		'item_code': '_Test Item'
 	})
 	ps.selling = 1
 	ps.append('price_discount_slabs',{
