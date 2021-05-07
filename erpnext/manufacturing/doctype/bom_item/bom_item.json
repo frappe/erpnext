@@ -36,6 +36,10 @@
   "section_break_18",
   "scrap",
   "qty_consumed_per_unit",
+  "item_weight",
+  "weight_per_unit",
+  "weight_uom",
+  "total_weight",
   "section_break_27",
   "has_variants",
   "include_item_in_manufacturing",
@@ -301,13 +305,39 @@
    "label": "Type",
    "options": "RM\nPKG",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "item_weight",
+   "fieldtype": "Section Break",
+   "label": "Item Weight"
+  },
+  {
+   "fieldname": "weight_per_unit",
+   "fieldtype": "Float",
+   "label": "Weight Per Unit",
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight_uom",
+   "fieldtype": "Link",
+   "label": "Weight UOM",
+   "options": "UOM",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "hidden": 1,
+   "label": "Total Weight",
+   "read_only": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-05-07 16:51:40.632818",
+ "modified": "2021-05-07 16:58:41.366185",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
