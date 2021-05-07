@@ -175,8 +175,7 @@
    "fieldname": "taxes",
    "fieldtype": "Table",
    "label": "Taxes",
-   "options": "Multiple Taxes",
-   "reqd": 1
+   "options": "Multiple Taxes"
   },
   {
    "fieldname": "section_break_2",
@@ -198,7 +197,7 @@
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-06 11:21:40.595583",
+ "modified": "2021-05-07 11:26:39.111395",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Debit Note CXC",
