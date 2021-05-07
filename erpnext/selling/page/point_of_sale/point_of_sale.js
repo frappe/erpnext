@@ -7,7 +7,7 @@ frappe.pages['point-of-sale'].on_page_load = function(wrapper) {
 		single_column: true
 	});
 
-	frappe.require('assets/js/point-of-sale.min.js', function() {
+	frappe.require('point-of-sale.bundle.js', function() {
 		wrapper.pos = new erpnext.PointOfSale.Controller(wrapper);
 		window.cur_pos = wrapper.pos;
 	});
