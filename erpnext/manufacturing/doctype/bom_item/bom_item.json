@@ -9,6 +9,7 @@
   "item_code",
   "item_name",
   "operation",
+  "type",
   "column_break_3",
   "bom_no",
   "source_warehouse",
@@ -291,13 +292,22 @@
    "fieldname": "allowed_to_change_qty_in_wo",
    "fieldtype": "Check",
    "label": "Allowed to Change Qty in WO"
+  },
+  {
+   "default": "RM",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Type",
+   "options": "RM\nPKG",
+   "reqd": 1
   }
  ],
  "idx": 1,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2021-04-29 18:49:16.116125",
+ "modified": "2021-05-07 16:51:40.632818",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM Item",
