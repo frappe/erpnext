@@ -402,7 +402,7 @@ def make_expense_claim(source_name, target_doc=None):
 		{"Delivery Trip": {
 			"doctype": "Expense Claim",
 			"field_map": {
-				"delivery_trip": "name"
+				"name" : "delivery_trip"
 			}
 		}}, target_doc)
 
