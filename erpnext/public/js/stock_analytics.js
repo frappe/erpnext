@@ -31,6 +31,30 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 		if(opts) $.extend(args, opts);
 
 		super(args);
+
+		this.filters = [
+			{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
+				options:[{label:__("Value"), value:"Value"}, {label:__("Quantity"), value:"Quantity"}],
+				filter: function(val, item, opts, me) {
+					return me.apply_zero_filter(val, item, opts, me);
+				}},
+			{fieldtype:"Select", label: __("Brand"), link:"Brand", fieldname: "brand",
+				default_value: __("Select Brand..."), filter: function(val, item, opts) {
+					return val == opts.default_value || item.brand == val || item._show;
+				}, link_formatter: {filter_input: "brand"}},
+			{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
+				default_value: __("Select Warehouse...")},
+			{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
+			{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
+			{fieldtype:"Select", label: __("Range"), fieldname: "range",
+				options:[
+					{label:__("Daily"), value:"Daily"},
+					{label:__("Weekly"), value:"Weekly"},
+					{label:__("Monthly"), value:"Monthly"},
+					{label:__("Quarterly"), value:"Quarterly"},
+					{label:__("Yearly"), value:"Yearly"},
+				]}
+		];
 	}
 	setup_columns() {
 		var std_columns = [
@@ -44,30 +68,6 @@ erpnext.StockAnalytics = class StockAnalytics extends erpnext.StockGridReport {
 		this.make_date_range_columns();
 		this.columns = std_columns.concat(this.columns);
 	}
-
-	filters = [
-		{fieldtype:"Select", label: __("Value or Qty"), fieldname: "value_or_qty",
-			options:[{label:__("Value"), value:"Value"}, {label:__("Quantity"), value:"Quantity"}],
-			filter: function(val, item, opts, me) {
-				return me.apply_zero_filter(val, item, opts, me);
-			}},
-		{fieldtype:"Select", label: __("Brand"), link:"Brand", fieldname: "brand",
-			default_value: __("Select Brand..."), filter: function(val, item, opts) {
-				return val == opts.default_value || item.brand == val || item._show;
-			}, link_formatter: {filter_input: "brand"}},
-		{fieldtype:"Select", label: __("Warehouse"), link:"Warehouse", fieldname: "warehouse",
-			default_value: __("Select Warehouse...")},
-		{fieldtype:"Date", label: __("From Date"), fieldname: "from_date"},
-		{fieldtype:"Date", label: __("To Date"), fieldname: "to_date"},
-		{fieldtype:"Select", label: __("Range"), fieldname: "range",
-			options:[
-				{label:__("Daily"), value:"Daily"},
-				{label:__("Weekly"), value:"Weekly"},
-				{label:__("Monthly"), value:"Monthly"},
-				{label:__("Quarterly"), value:"Quarterly"},
-				{label:__("Yearly"), value:"Yearly"},
-			]}
-	]
 
 	setup_filters() {
 		var me = this;
