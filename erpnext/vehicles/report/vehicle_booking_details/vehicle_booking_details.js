@@ -152,6 +152,15 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			}
 		}
 
+		$.each(['customer_outstanding', 'supplier_outstanding', 'undeposited_amount'], function (i, f) {
+			if (column.fieldname === f) {
+				style['color'] = flt(data[f]) ? 'orange' : 'green';
+			}
+		});
+		if (column.fieldname == 'payment_adjustment' && flt(data.payment_adjustment)) {
+			style['color'] = 'red';
+		}
+
 		return default_formatter(value, row, column, data, {css: style});
 	},
 	"initial_depth": 2

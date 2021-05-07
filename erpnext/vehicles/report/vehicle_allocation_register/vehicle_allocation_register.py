@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _, scrub, unscrub
-from frappe.utils import cint, cstr
+from frappe.utils import cint, cstr, flt
 from erpnext.vehicles.doctype.vehicle_booking_order.vehicle_booking_order import get_booking_payments,\
 	separate_customer_and_supplier_payments, separate_advance_and_balance_payments
 from erpnext.stock.report.stock_ledger.stock_ledger import get_item_group_condition
@@ -53,7 +53,8 @@ class VehicleAllocationRegisterReport(object):
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
-				m.customer_advance, m.supplier_advance,
+				m.invoice_total, m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
+				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
 				item.variant_of, item.item_group, item.brand
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
@@ -112,6 +113,29 @@ class VehicleAllocationRegisterReport(object):
 
 		return self.data
 
+	def set_payment_details(self):
+		self.get_payment_data()
+		for d in self.data:
+			booking_payment_entries = self.payment_by_booking.get(d.vehicle_booking_order) or []
+
+			customer_payments, supplier_payments = separate_customer_and_supplier_payments(booking_payment_entries)
+			advance_payments, balance_payments = separate_advance_and_balance_payments(customer_payments, supplier_payments)
+
+			if advance_payments:
+				d.advance_payment_date = advance_payments[0].deposit_date
+				d.advance_payment_amount = sum([d.amount for d in advance_payments])
+			if balance_payments:
+				d.balance_payment_date = balance_payments[-1].deposit_date
+				d.balance_payment_amount = sum([d.amount for d in balance_payments])
+
+	def get_payment_data(self):
+		booking_numbers = list(set([d.vehicle_booking_order for d in self.data if d.vehicle_booking_order]))
+		payment_entries = get_booking_payments(booking_numbers)
+
+		self.payment_by_booking = {}
+		for d in payment_entries:
+			self.payment_by_booking.setdefault(d.vehicle_booking_order, []).append(d)
+
 	def get_grouped_data(self):
 		data = self.data
 
@@ -141,6 +165,13 @@ class VehicleAllocationRegisterReport(object):
 		# Copy grouped by into total row
 		for f, g in grouped_by.items():
 			totals[f] = g
+
+		# Sum
+		sum_fields = ['invoice_total',
+			'customer_advance', 'supplier_advance', 'advance_payment_amount', 'balance_payment_amount',
+			'payment_adjustment', 'customer_outstanding', 'supplier_outstanding', 'undeposited_amount']
+		for f in sum_fields:
+			totals[f] = sum([flt(d.get(f)) for d in data])
 
 		group_reference_doctypes = {
 			"original_item_code": "Item",
@@ -222,29 +253,6 @@ class VehicleAllocationRegisterReport(object):
 
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
-	def set_payment_details(self):
-		self.get_payment_data()
-		for d in self.data:
-			booking_payment_entries = self.payment_by_booking.get(d.vehicle_booking_order) or []
-
-			customer_payments, supplier_payments = separate_customer_and_supplier_payments(booking_payment_entries)
-			advance_payments, balance_payments = separate_advance_and_balance_payments(customer_payments, supplier_payments)
-
-			if advance_payments:
-				d.advance_payment_date = advance_payments[0].deposit_date
-				d.advance_payment_amount = sum([d.amount for d in advance_payments])
-			if balance_payments:
-				d.balance_payment_date = balance_payments[-1].deposit_date
-				d.balance_payment_amount = sum([d.amount for d in balance_payments])
-
-	def get_payment_data(self):
-		booking_numbers = list(set([d.vehicle_booking_order for d in self.data if d.vehicle_booking_order]))
-		payment_entries = get_booking_payments(booking_numbers)
-
-		self.payment_by_booking = {}
-		for d in payment_entries:
-			self.payment_by_booking.setdefault(d.vehicle_booking_order, []).append(d)
-
 
 	def get_columns(self):
 		return [
@@ -263,11 +271,17 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 100},
+			{"label": _("Invoice Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 120},
+			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 120},
+			{"label": _("Payment Deposited"), "fieldname": "supplier_advance", "fieldtype": "Currency", "width": 120},
+			{"label": _("Undeposited Amount"), "fieldname": "undeposited_amount", "fieldtype": "Currency", "width": 120},
+			{"label": _("Payment Adjustment"), "fieldname": "payment_adjustment", "fieldtype": "Currency", "width": 120},
+			{"label": _("Customer Outstanding"), "fieldname": "customer_outstanding", "fieldtype": "Currency", "width": 120},
+			{"label": _("Supplier Outstanding"), "fieldname": "supplier_outstanding", "fieldtype": "Currency", "width": 120},
 			{"label": _("Advance Payment Date"), "fieldname": "advance_payment_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Advance Payment Amount"), "fieldname": "advance_payment_amount", "fieldtype": "Currency", "width": 100},
+			{"label": _("Advance Payment Amount"), "fieldname": "advance_payment_amount", "fieldtype": "Currency", "width": 120},
 			{"label": _("Balance Payment Date"), "fieldname": "balance_payment_date", "fieldtype": "Date", "width": 100},
-			{"label": _("Balance Payment Amount"), "fieldname": "balance_payment_amount", "fieldtype": "Currency", "width": 100},
+			{"label": _("Balance Payment Amount"), "fieldname": "balance_payment_amount", "fieldtype": "Currency", "width": 120},
 			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Previous Color"), "fieldname": "previous_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("Booking Price"), "fieldname": "booking_price", "fieldtype": "Data", "width": 100},
