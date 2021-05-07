@@ -7,9 +7,8 @@ import unittest
 
 import erpnext
 import frappe
-from erpnext.stock.doctype.delivery_trip.delivery_trip import get_contact_and_address, notify_customers
+from erpnext.stock.doctype.delivery_trip.delivery_trip import get_contact_and_address, notify_customers, make_expense_claim
 from erpnext.hr.doctype.employee.test_employee import make_employee
-from erpnext.hr.doctype.expense_claim.test_expense_claim import get_payable_account, make_expense_claim
 from erpnext.tests.utils import create_test_contact_and_address
 from frappe.utils import add_days, flt, now_datetime, nowdate
 
@@ -31,13 +30,7 @@ class TestDeliveryTrip(unittest.TestCase):
 		frappe.db.sql("delete from `tabDelivery Trip`")
 
 	def test_expense_claim_fields_are_fetched_properly(self):
-		payable_account = get_payable_account(self.delivery_trip.company)
-		account = frappe.get_value('Company', self.delivery_trip.company, 'write_off_account')
-		self.delivery_trip.employee = make_employee("test_employee@company.com")
-		expense_claim = make_expense_claim(payable_account = payable_account, amount = 1000, sanctioned_amount = 1000, company = self.delivery_trip.company, account = account, do_not_submit = True)
-		expense_claim.delivery_trip = self.delivery_trip.name
-		expense_claim.employee = self.delivery_trip.employee
-
+		expense_claim = make_expense_claim(self.delivery_trip.name)
 		self.assertEqual(self.delivery_trip.name, expense_claim.delivery_trip)
 
 	def test_delivery_trip_notify_customers(self):
