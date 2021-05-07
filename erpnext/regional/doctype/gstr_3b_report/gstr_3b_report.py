@@ -202,26 +202,27 @@ class GSTR3BReport(Document):
 		self.is_nil_exempt = []
 		self.is_non_gst = []
 
-		item_details = frappe.db.sql("""
-			SELECT
-				item_code, parent, taxable_value, base_net_amount, item_tax_rate,
-				is_nil_exempt, is_non_gst
-			FROM
-				`tab%s Item`
-			WHERE parent in (%s)
-		""" % (doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
+		if self.get('invoices'):
+			item_details = frappe.db.sql("""
+				SELECT
+					item_code, parent, taxable_value, base_net_amount, item_tax_rate,
+					is_nil_exempt, is_non_gst
+				FROM
+					`tab%s Item`
+				WHERE parent in (%s)
+			""" % (doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
 
-		for d in item_details:
-			if d.item_code not in self.invoice_items.get(d.parent, {}):
-				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
-					sum((i.get('taxable_value', 0) or i.get('base_net_amount', 0)) for i in item_details
-						if i.item_code == d.item_code and i.parent == d.parent))
+			for d in item_details:
+				if d.item_code not in self.invoice_items.get(d.parent, {}):
+					self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
+						sum((i.get('taxable_value', 0) or i.get('base_net_amount', 0)) for i in item_details
+							if i.item_code == d.item_code and i.parent == d.parent))
 
-			if d.is_nil_exempt and d.item_code not in self.is_nil_exempt:
-				self.is_nil_exempt.append(d.item_code)
+				if d.is_nil_exempt and d.item_code not in self.is_nil_exempt:
+					self.is_nil_exempt.append(d.item_code)
 
-			if d.is_non_gst and d.item_code not in self.is_non_gst:
-				self.is_non_gst.append(d.item_code)
+				if d.is_non_gst and d.item_code not in self.is_non_gst:
+					self.is_non_gst.append(d.item_code)
 
 	def get_outward_tax_details(self, doctype):
 		if doctype == "Sales Invoice":
@@ -233,54 +234,56 @@ class GSTR3BReport(Document):
 		self.invoice_cess = frappe._dict()
 		self.cgst_sgst_invoices = []
 
-		tax_details = frappe.db.sql("""
-			SELECT
-				parent, account_head, item_wise_tax_detail, base_tax_amount_after_discount_amount
-			FROM `tab%s`
-			WHERE
-				parenttype = %s and docstatus = 1
-				and parent in (%s)
-			ORDER BY account_head
-		""" % (tax_template, '%s', ', '.join(['%s']*len(self.invoices))),
-			tuple([doctype] + list(self.invoices)))
+		if self.get('invoices'):
+			tax_details = frappe.db.sql("""
+				SELECT
+					parent, account_head, item_wise_tax_detail, base_tax_amount_after_discount_amount
+				FROM `tab%s`
+				WHERE
+					parenttype = %s and docstatus = 1
+					and parent in (%s)
+				ORDER BY account_head
+			""" % (tax_template, '%s', ', '.join(['%s']*len(self.invoices))),
+				tuple([doctype] + list(self.invoices)))
 
-		for parent, account, item_wise_tax_detail, tax_amount in tax_details:
-			if account in self.account_heads.get('csamt'):
-				self.invoice_cess.setdefault(parent, tax_amount)
-			else:
-				if item_wise_tax_detail:
-					try:
-						item_wise_tax_detail = json.loads(item_wise_tax_detail)
-						cgst_or_sgst = False
-						if account in self.account_heads.get('camt') \
-							or account in self.account_heads.get('samt'):
-							cgst_or_sgst = True
+			for parent, account, item_wise_tax_detail, tax_amount in tax_details:
+				if account in self.account_heads.get('csamt'):
+					self.invoice_cess.setdefault(parent, tax_amount)
+				else:
+					if item_wise_tax_detail:
+						try:
+							item_wise_tax_detail = json.loads(item_wise_tax_detail)
+							cgst_or_sgst = False
+							if account in self.account_heads.get('camt') \
+								or account in self.account_heads.get('samt'):
+								cgst_or_sgst = True
 
-						for item_code, tax_amounts in item_wise_tax_detail.items():
-							if not (cgst_or_sgst or account in self.account_heads.get('iamt') or
-								(item_code in self.is_non_gst + self.is_nil_exempt)):
-								continue
+							for item_code, tax_amounts in item_wise_tax_detail.items():
+								if not (cgst_or_sgst or account in self.account_heads.get('iamt') or
+									(item_code in self.is_non_gst + self.is_nil_exempt)):
+									continue
 
-							tax_rate = tax_amounts[0]
-							if tax_rate:
-								if cgst_or_sgst:
-									tax_rate *= 2
-									if parent not in self.cgst_sgst_invoices:
-										self.cgst_sgst_invoices.append(parent)
+								tax_rate = tax_amounts[0]
+								if tax_rate:
+									if cgst_or_sgst:
+										tax_rate *= 2
+										if parent not in self.cgst_sgst_invoices:
+											self.cgst_sgst_invoices.append(parent)
 
-								rate_based_dict = self.items_based_on_tax_rate\
-									.setdefault(parent, {}).setdefault(tax_rate, [])
-								if item_code not in rate_based_dict:
-									rate_based_dict.append(item_code)
-					except ValueError:
-						continue
+									rate_based_dict = self.items_based_on_tax_rate\
+										.setdefault(parent, {}).setdefault(tax_rate, [])
+									if item_code not in rate_based_dict:
+										rate_based_dict.append(item_code)
+						except ValueError:
+							continue
 
 
-		# Build itemised tax for export invoices, nil and exempted where tax table is blank
-		for invoice, items in iteritems(self.invoice_items):
-			if invoice not in self.items_based_on_tax_rate and (self.invoice_detail_map.get(invoice, {}).get('export_type')
-				== "Without Payment of Tax"):
-				self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
+		if self.get('invoice_items'):
+			# Build itemised tax for export invoices, nil and exempted where tax table is blank
+			for invoice, items in iteritems(self.invoice_items):
+				if invoice not in self.items_based_on_tax_rate and (self.invoice_detail_map.get(invoice, {}).get('export_type')
+					== "Without Payment of Tax"):
+					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
 	def set_outward_taxable_supplies(self):
 		inter_state_supply_details = {}
@@ -311,12 +314,12 @@ class GSTR3BReport(Document):
 
 								if gst_category in ['Unregistered', 'Registered Composition', 'UIN Holders'] and \
 								self.gst_details.get("gst_state") != place_of_supply.split("-")[1]:
-									inter_state_supply_details.set_default((gst_category, place_of_supply), {
+									inter_state_supply_details.setdefault((gst_category, place_of_supply), {
 										"txval": 0.0,
 										"pos": place_of_supply.split("-")[0],
 										"iamt": 0.0
 									})
-									inter_state_supply_details[(gst_category, place_of_supply)]['taxval'] += taxable_value
+									inter_state_supply_details[(gst_category, place_of_supply)]['txval'] += taxable_value
 									inter_state_supply_details[(gst_category, place_of_supply)]['iamt'] += (taxable_value * rate /100)
 
 		self.set_inter_state_supply(inter_state_supply_details)
