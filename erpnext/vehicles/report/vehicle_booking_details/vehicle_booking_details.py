@@ -42,7 +42,7 @@ class VehicleBookingDetailsReport(object):
 				m.allocation_period, m.delivery_period, m.priority, m.allocation_title,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				m.color_1, m.color_2, m.color_3, m.previous_color,
-				1 as qty, m.invoice_total, m.status,
+				1 as qty_booked, m.invoice_total, m.status,
 				m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
 				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
 				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person,
@@ -66,6 +66,8 @@ class VehicleBookingDetailsReport(object):
 
 			d.disable_item_formatter = cint(self.show_item_name)
 
+			d.qty_delivered = 1 if d.get('vehicle_delivered_date') else 0
+
 			is_leased = d.financer and d.finance_type == "Leased"
 
 			d.vehicle_color = d.vehicle_color or d.color_1 or d.color_2 or d.color_3
@@ -84,7 +86,7 @@ class VehicleBookingDetailsReport(object):
 		if self.filters.sales_person:
 			row['actual_invoice_total'] = row["invoice_total"]
 
-			fields = ['qty', 'invoice_total']
+			fields = ['qty_booked', 'qty_delivered', 'invoice_total']
 			for f in fields:
 				row[f] *= row.allocated_percentage / 100
 
@@ -142,7 +144,7 @@ class VehicleBookingDetailsReport(object):
 			totals[f] = g
 
 		# Sum
-		sum_fields = ['invoice_total', 'qty', 'actual_invoice_total',
+		sum_fields = ['invoice_total', 'qty_booked', 'qty_delivered', 'actual_invoice_total',
 			'customer_advance', 'supplier_advance', 'advance_payment_amount', 'balance_payment_amount',
 			'payment_adjustment', 'customer_outstanding', 'supplier_outstanding', 'undeposited_amount']
 		for f in sum_fields:
@@ -252,7 +254,8 @@ class VehicleBookingDetailsReport(object):
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Color"), "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
-			{"label": _("Units"), "fieldname": "qty", "fieldtype": "Float", "width": 60, "precision": "1" if self.filters.sales_person else "0"},
+			{"label": _("Booked"), "fieldname": "qty_booked", "fieldtype": "Float", "width": 65, "precision": "1" if self.filters.sales_person else "0"},
+			{"label": _("Delivered"), "fieldname": "qty_delivered", "fieldtype": "Float", "width": 75, "precision": "1" if self.filters.sales_person else "0"},
 			{"label": _("Invoice Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 120},
 			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
 			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},

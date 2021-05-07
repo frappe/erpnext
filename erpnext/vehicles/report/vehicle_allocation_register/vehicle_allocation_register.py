@@ -92,6 +92,8 @@ class VehicleAllocationRegisterReport(object):
 				d.reference = d.vehicle_booking_order
 				d.allocation_period = None
 
+			d.qty_delivered = 1 if d.get('vehicle_delivered_date') else 0
+
 			is_leased = d.financer and d.finance_type == "Leased"
 
 			d.vehicle_color = d.vehicle_color or d.color_1 or d.color_2 or d.color_3
@@ -167,7 +169,7 @@ class VehicleAllocationRegisterReport(object):
 			totals[f] = g
 
 		# Sum
-		sum_fields = ['invoice_total',
+		sum_fields = ['invoice_total', 'qty_delivered',
 			'customer_advance', 'supplier_advance', 'advance_payment_amount', 'balance_payment_amount',
 			'payment_adjustment', 'customer_outstanding', 'supplier_outstanding', 'undeposited_amount']
 		for f in sum_fields:
@@ -271,6 +273,7 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Sr #"), "fieldname": "sr_no", "fieldtype": "Int", "width": 45},
 			{"label": _("Allocation Code"), "fieldname": "code", "fieldtype": "Data", "width": 160},
 			{"label": _("Additional"), "fieldname": "is_additional", "fieldtype": "Check", "width": 55},
+			{"label": _("Delivered"), "fieldname": "qty_delivered", "fieldtype": "Int", "width": 75},
 			{"label": _("Allocation Period"), "fieldname": "allocation_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 120},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
 			{"label": _("Variant Code"), "fieldname": "item_code", "fieldtype": "Link", "options": "Item", "width": 120},

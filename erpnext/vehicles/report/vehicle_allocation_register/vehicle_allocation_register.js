@@ -175,6 +175,11 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			style['color'] = 'red';
 		}
 
+		if (column.fieldname == 'qty_delivered' && !data._isGroupTotal) {
+			style['font-weight'] = 'bold';
+			style['color'] = flt(data.qty_delivered) ? 'green' : 'orange';
+		}
+
 		return default_formatter(value, row, column, data, {css: style});
 	},
 	"initial_depth": 1

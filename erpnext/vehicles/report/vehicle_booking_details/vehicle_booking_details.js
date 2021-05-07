@@ -161,6 +161,10 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			style['color'] = 'red';
 		}
 
+		if (column.fieldname == 'qty_delivered' && !data._isGroupTotal) {
+			style['color'] = flt(data.qty_delivered) ? 'green' : 'red';
+		}
+
 		return default_formatter(value, row, column, data, {css: style});
 	},
 	"initial_depth": 2
