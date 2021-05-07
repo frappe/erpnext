@@ -11,6 +11,9 @@
   "job_card",
   "s_warehouse",
   "weight",
+  "wo_rm_weight_to_consume",
+  "weight_consumed",
+  "consumption_deviation_percentage",
   "column_break_6",
   "company",
   "type",
@@ -134,12 +137,33 @@
    "fieldtype": "Select",
    "label": "Sereis",
    "options": "MC-.YYYY.-.####"
+  },
+  {
+   "fieldname": "wo_rm_weight_to_consume",
+   "fieldtype": "Float",
+   "label": "WO RM weight to Consume",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "weight_consumed",
+   "fieldtype": "Float",
+   "label": "Weight Consumed",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "consumption_deviation_percentage",
+   "fieldtype": "Percent",
+   "label": "Consumption Deviation Percentage",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-03 12:26:56.921836",
+ "modified": "2021-05-07 13:18:27.906837",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Material Consumption",

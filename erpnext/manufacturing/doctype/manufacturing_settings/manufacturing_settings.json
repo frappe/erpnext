@@ -26,7 +26,10 @@
   "column_break_16",
   "overproduction_percentage_for_work_order",
   "other_settings_section",
-  "update_bom_costs_automatically"
+  "update_bom_costs_automatically",
+  "allowed_deviation_percentage_section",
+  "allowed_consumption_deviation_percentage",
+  "allowed_production_deviation_percentage"
  ],
  "fields": [
   {
@@ -155,13 +158,28 @@
   {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "allowed_deviation_percentage_section",
+   "fieldtype": "Section Break",
+   "label": "Allowed Deviation Percentage"
+  },
+  {
+   "fieldname": "allowed_consumption_deviation_percentage",
+   "fieldtype": "Percent",
+   "label": "Allowed Consumption Deviation percentage"
+  },
+  {
+   "fieldname": "allowed_production_deviation_percentage",
+   "fieldtype": "Percent",
+   "label": "Allowed Production Deviation percentage"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 10:55:43.996581",
+ "modified": "2021-05-07 13:28:21.420793",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",

@@ -248,22 +248,30 @@ class WorkOrder(Document):
 		self.update_planned_qty()
 		self.update_ordered_qty()
 		self.create_job_card()
+		self.scrap_cost_calc()
 	
 	def before_save(self):
+		print("Before save")
 		self.bom_details()
+		value = 0
+		for row in self.required_items:
+			if row.type == "RM":
+				value += flt(row.required_qty)*flt(row.weight_per_unit)
+		self.planned_rm_weight = flt(value, self.precision('planned_rm_weight'))
 
-	def on_change(self):
-		self.planned_rm_cost_calc()
-		self.yeild_calc()
-		self.scrap_cost_calc()
+	# def on_change(self):
+	# 	# self.planned_rm_cost_calc() # wo.items.required_qty
+	# 	self.yeild_calc()  # wo.actual_fg_weight
 
 	def yeild_calc(self):
-		if self.actual_rm_weight == 0:
+		print("actualrmweight **********"*20, str(self.actual_rm_weight))
+		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
 			self.actual_yeild = 0
 		else:
 			self.actual_yeild = flt(flt(self.actual_fg_weight)/flt(self.actual_rm_weight), self.precision('actual_yeild'))
 
 		self.yeild_deviation = flt(flt(self.bom_yeild) - flt(self.actual_yeild), self.precision('yeild_deviation'))
+		return True
 		
 	def scrap_cost_calc(self):
 		bo = frappe.get_doc("BOM", self.bom_no)
@@ -274,12 +282,14 @@ class WorkOrder(Document):
 			
 
 	def bom_details(self):
+		print("coming to bom_details")
 		bo = frappe.get_doc("BOM", self.bom_no)
 		self.bom_yeild = flt(bo.yeild, self.precision('bom_yeild'))
 		
 		value = 0
 		for row in self.required_items:
-			value += flt(row.required_qty, row.precision('required_qty')) * flt(row.weight_per_unit, row.precision('weight_per_unit')) 
+			value += flt(row.required_qty) * flt(row.weight_per_unit) 
+		print(self.bom_weight)
 		self.bom_weight = flt(value, self.precision('bom_weight'))
 
 	def planned_rm_cost_calc(self):
@@ -287,6 +297,7 @@ class WorkOrder(Document):
 		for row in self.required_items:
 			value += flt(row.required_qty) * flt(row.rate)
 		self.planned_rm_cost = flt(value, self.precision('planned_rm_cost'))
+		return True
 
 	def on_cancel(self):
 		self.validate_cancel()

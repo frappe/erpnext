@@ -61,6 +61,7 @@
   "bom_yeild",
   "bom_weight",
   "column_break_53",
+  "planned_rm_weight",
   "actual_rm_weight",
   "actual_fg_weight",
   "column_break_56",
@@ -276,7 +277,6 @@
    "label": "Required Items"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "required_items",
    "fieldtype": "Table",
    "label": "Required Items",
@@ -586,6 +586,13 @@
    "fieldtype": "Currency",
    "label": "Scrap Cost",
    "options": "Company:company:default_currency"
+  },
+  {
+   "fieldname": "planned_rm_weight",
+   "fieldtype": "Float",
+   "label": "Planned RM Weight",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -593,7 +600,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-05 08:15:59.377560",
+ "modified": "2021-05-07 14:51:13.957254",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",
