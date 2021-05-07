@@ -30,5 +30,5 @@ class AccountsSettings(Document):
 	def enable_payment_schedule_in_print(self):
 		show_in_print = cint(self.show_payment_schedule_in_print)
 		for doctype in ("Sales Order", "Sales Invoice", "Purchase Order", "Purchase Invoice"):
-			make_property_setter(doctype, "due_date", "print_hide", show_in_print, "Check")
-			make_property_setter(doctype, "payment_schedule", "print_hide",  0 if show_in_print else 1, "Check")
+			make_property_setter(doctype, "due_date", "print_hide", show_in_print, "Check", validate_fields_for_doctype=False)
+			make_property_setter(doctype, "payment_schedule", "print_hide",  0 if show_in_print else 1, "Check", validate_fields_for_doctype=False)
