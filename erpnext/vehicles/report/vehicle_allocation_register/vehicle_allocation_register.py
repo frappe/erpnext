@@ -28,9 +28,6 @@ class VehicleAllocationRegisterReport(object):
 		allocation_conditions = self.get_conditions('allocation')
 		booking_conditions = self.get_conditions('booking')
 
-		vbo_join = "left join `tabVehicle Booking Order` vbo on m.name = vbo.vehicle_allocation" \
-			if self.filters.customer or self.filters.financer else ""
-
 		allocation_data = frappe.db.sql("""
 			select m.name as vehicle_allocation, m.item_code, m.supplier, m.allocation_period, m.delivery_period,
 				m.sr_no, m.code, m.is_additional, m.booking_price, m.vehicle_color,
@@ -40,27 +37,30 @@ class VehicleAllocationRegisterReport(object):
 			inner join `tabItem` item on item.name = m.item_code
 			inner join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
 			inner join `tabVehicle Allocation Period` dp on dp.name = m.delivery_period
-			{vbo_join}
-			where m.docstatus = 1 and item.vehicle_allocation_required = 1 {conditions}
+			left join `tabVehicle Booking Order` vbo on m.name = vbo.vehicle_allocation
+			where m.docstatus = 1 {conditions}
 			order by ap.from_date, m.item_code, m.is_additional, m.sr_no
-		""".format(conditions=allocation_conditions, vbo_join=vbo_join), self.filters, as_dict=1)
+		""".format(conditions=allocation_conditions), self.filters, as_dict=1)
 
 		booking_data = frappe.db.sql("""
 			select m.name as vehicle_booking_order, m.item_code, m.previous_item_code,
-				m.supplier, m.allocation_period, m.delivery_period, m.priority,
-				m.vehicle_allocation, m.transaction_date,
+				m.supplier, m.allocation_period, m.delivery_period, m.vehicle_allocation, m.priority,
+				m.transaction_date, m.vehicle_delivered_date, m.status,	
 				m.color_1, m.color_2, m.color_3, m.previous_color,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
 				m.invoice_total, m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
 				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
-				item.variant_of, item.item_group, item.brand
+				item.variant_of, item.item_group, item.brand,
+				GROUP_CONCAT(DISTINCT sp.sales_person SEPARATOR ', ') as sales_person
 			from `tabVehicle Booking Order` m
 			inner join `tabItem` item on item.name = m.item_code
 			left join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
 			left join `tabVehicle Allocation Period` dp on dp.name = m.delivery_period
+			left join `tabSales Team` sp on sp.parent = m.name and sp.parenttype = 'Vehicle Booking Order'
 			where m.docstatus = 1 and item.vehicle_allocation_required = 1 {0}
+			group by m.name
 		""".format(booking_conditions), self.filters, as_dict=1)
 
 		self.allocation_to_row = {}
@@ -77,8 +77,8 @@ class VehicleAllocationRegisterReport(object):
 
 		self.data = unallocated_bookings + allocation_data
 
-		if cint(self.filters.priority):
-			self.data = [d for d in self.data if cint(d.get('priority'))]
+		if self.filters.get('sales_person'):
+			self.data = [d for d in self.data if d.get('sales_person')]
 
 		return self.data
 
@@ -251,6 +251,17 @@ class VehicleAllocationRegisterReport(object):
 		if self.filters.supplier:
 			conditions.append("m.supplier = %(supplier)s")
 
+		if self.filters.priority:
+			if cond_type == 'booking':
+				conditions.append("m.priority = 1")
+			else:
+				conditions.append("vbo.priority = 1")
+
+		if self.filters.get("sales_person") and cond_type == 'booking':
+			lft, rgt = frappe.db.get_value("Sales Person", self.filters.sales_person, ["lft", "rgt"])
+			conditions.append("""sp.sales_person in (select name from `tabSales Person`
+					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
+
 		return "and {}".format(" and ".join(conditions)) if conditions else ""
 
 
@@ -271,6 +282,9 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
 			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
+			{"label": _("Delivery Date"), "fieldname": "vehicle_delivered_date", "fieldtype": "Date", "width": 100},
+			{"label": _("Sales Person"), "fieldtype": "Data", "fieldname": "sales_person", "width": 150},
+			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
 			{"label": _("Invoice Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 120},
 			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 120},
 			{"label": _("Payment Deposited"), "fieldname": "supplier_advance", "fieldtype": "Currency", "width": 120},
