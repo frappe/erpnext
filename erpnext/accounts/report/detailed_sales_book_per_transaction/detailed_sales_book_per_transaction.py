@@ -86,10 +86,10 @@ def return_data(filters):
 		split_final_range = debit_note.name.split("-")
 		final_range = split_final_range[3]
 
-		multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "isv", "base_isv"], filters = {"parent": debit_note.name})
+		multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "base_isv"], filters = {"parent": debit_note.name})
 
 		for multiple_taxe in multiples_taxes:
-			item_tax_templates = frappe.get_all("Item Tax Template", ["name", "isv", "base_isv"], filters = {"parent": multiple_taxe.name})
+			item_tax_templates = frappe.get_all("Item Tax Template", ["name"], filters = {"parent": multiple_taxe.name})
 
 			for tax_tamplate in item_tax_templates:
 
