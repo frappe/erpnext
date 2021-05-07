@@ -561,7 +561,7 @@ frappe.ui.form.on('Payment Entry', {
 			flt(frm.doc.received_amount) * flt(frm.doc.target_exchange_rate));
 
 		if(frm.doc.payment_type == "Pay")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount);
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.received_amount, 1);
 		else
 			frm.events.set_unallocated_amount(frm);
 
@@ -582,7 +582,7 @@ frappe.ui.form.on('Payment Entry', {
 		}
 
 		if(frm.doc.payment_type == "Receive")
-			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount);
+			frm.events.allocate_party_amount_against_ref_docs(frm, frm.doc.paid_amount, 1);
 		else
 			frm.events.set_unallocated_amount(frm);
 	},
@@ -606,9 +606,9 @@ frappe.ui.form.on('Payment Entry', {
 			{fieldtype:"Float", label: __("Less Than Amount"), fieldname:"outstanding_amt_less_than"},
 			{fieldtype:"Section Break"},
 			{fieldtype:"Link", label:__("Cost Center"), fieldname:"cost_center", options:"Cost Center",
-                "get_query": function() {
-                    return {
-                        "filters": {"company": frm.doc.company}
+				"get_query": function() {
+					return {
+						"filters": {"company": frm.doc.company}
 					}
 				}
 			},
@@ -743,7 +743,7 @@ frappe.ui.form.on('Payment Entry', {
 		});
 	},
 
-	allocate_party_amount_against_ref_docs: function(frm, paid_amount) {
+	allocate_party_amount_against_ref_docs: function(frm, paid_amount, paid_amount_change) {
 		var total_positive_outstanding_including_order = 0;
 		var total_negative_outstanding = 0;
 		var total_deductions = frappe.utils.sum($.map(frm.doc.deductions || [],
@@ -800,22 +800,15 @@ frappe.ui.form.on('Payment Entry', {
 				//If allocate payment amount checkbox is unchecked, set zero to allocate amount
 				row.allocated_amount = 0;
 
-			} else if (frappe.flags.allocate_payment_amount != 0 && !row.allocated_amount) {
-				if (row.outstanding_amount > 0 && allocated_positive_outstanding > 0) {
-					if (row.outstanding_amount >= allocated_positive_outstanding) {
-						row.allocated_amount = allocated_positive_outstanding;
-					} else {
-						row.allocated_amount = row.outstanding_amount;
-					}
-
+			} else if (frappe.flags.allocate_payment_amount != 0 && (!row.allocated_amount || paid_amount_change)) {
+				if (row.outstanding_amount > 0 && allocated_positive_outstanding >= 0) {
+					row.allocated_amount = (row.outstanding_amount >= allocated_positive_outstanding) ?
+						allocated_positive_outstanding : row.outstanding_amount;
 					allocated_positive_outstanding -= flt(row.allocated_amount);
-				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
-					if (Math.abs(row.outstanding_amount) >= allocated_negative_outstanding) {
-						row.allocated_amount = -1*allocated_negative_outstanding;
-					} else {
-						row.allocated_amount = row.outstanding_amount;
-					};
 
+				} else if (row.outstanding_amount < 0 && allocated_negative_outstanding) {
+					row.allocated_amount = (Math.abs(row.outstanding_amount) >= allocated_negative_outstanding) ?
+						-1*allocated_negative_outstanding : row.outstanding_amount;
 					allocated_negative_outstanding -= Math.abs(flt(row.allocated_amount));
 				}
 			}
