@@ -37,7 +37,7 @@ class ShopifySettings(Document):
 				res = session.post(url, data=json.dumps({
 					"webhook": {
 						"topic": method,
-						"address": get_webhook_address(connector_name='shopify_connection', method='store_request_data'),
+						"address": get_webhook_address(connector_name='shopify_connection', method='store_request_data', force_https=True),
 						"format": "json"
 						}
 					}), headers=get_header(self))
