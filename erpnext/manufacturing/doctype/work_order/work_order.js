@@ -442,7 +442,19 @@ frappe.ui.form.on("Work Order", {
 	additional_operating_cost: function(frm) {
 		erpnext.work_order.calculate_cost(frm.doc);
 		erpnext.work_order.calculate_total_cost(frm);
+	},
+
+	actual_fg_weight: function(frm) {
+		frappe.call({
+			method: "yeild_calc",
+			callback: function(r) {
+				if(r.message) {
+					console.log(r.message);
+				}
+			}
+		});
 	}
+
 });
 
 frappe.ui.form.on("Work Order Item", {
@@ -489,7 +501,19 @@ frappe.ui.form.on("Work Order Item", {
 				}
 			});
 		}
+	},
+
+	required_qty: function(frm, cdt, cdn) {
+		frappe.call({
+			"method": "planned_rm_cost_calc",
+			callback: function(r) {
+				if(r.message) {
+					console.log(r.message);
+				}
+			}
+		});
 	}
+
 });
 
 frappe.ui.form.on("Work Order Operation", {
