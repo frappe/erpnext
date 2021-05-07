@@ -1,4 +1,4 @@
-name: CI
+name: Server
 
 on: [pull_request, workflow_dispatch]
 
@@ -7,24 +7,12 @@ jobs:
     runs-on: ubuntu-18.04
 
     strategy:
-      fail-fast: false
+      fail-fast: true
 
       matrix:
-       include:
-        - TYPE: "server"
-          JOB_NAME: "Server.1"
-          RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --with-coverage --ci-build-id $GITHUB_RUN_ID --app erpnext
-        - TYPE: "server"
-          JOB_NAME: "Server.2"
-          RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --with-coverage --ci-build-id $GITHUB_RUN_ID --app erpnext
-        - TYPE: "server"
-          JOB_NAME: "Server.3"
-          RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --with-coverage --ci-build-id $GITHUB_RUN_ID --app erpnext
-        - TYPE: "patch"
-          JOB_NAME: "Patch"
-          RUN_COMMAND: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate
+        container: [1, 2]
 
-    name: ${{ matrix.JOB_NAME }}
+    name: Server Tests
 
     services:
       mysql:
@@ -42,7 +30,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.7
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
@@ -55,6 +43,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
+
       - name: Cache node modules
         uses: actions/cache@v2
         env:
@@ -66,6 +55,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -82,12 +72,11 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Tests
-        run: ${{ matrix.RUN_COMMAND }}
+        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --build-number ${{ matrix.container }} --total-builds 2 --with-coverage
         env:
-          TYPE: ${{ matrix.TYPE }}
+          TYPE: server
 
       - name: Upload Coverage Data
-        if: matrix.TYPE == 'server'
         run: |
           cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
           cd ${GITHUB_WORKSPACE}
@@ -113,10 +102,8 @@ jobs:
       - name: Coveralls Finished
         run: |
           cd ${GITHUB_WORKSPACE}
-          ls -al
           pip3 install coverage==5.5
           pip3 install coveralls==3.0.1
           coveralls --finish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
