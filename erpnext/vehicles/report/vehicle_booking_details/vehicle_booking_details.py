@@ -245,6 +245,8 @@ class VehicleBookingDetailsReport(object):
 			columns.append({"label": _("Booking #"), "fieldname": "name", "fieldtype": "Link", "options": "Vehicle Booking Order", "width": 105})
 
 		columns += [
+			{"label": _("Booked"), "fieldname": "qty_booked", "fieldtype": "Float", "width": 65, "precision": "1" if self.filters.sales_person else "0"},
+			{"label": _("Delivered"), "fieldname": "qty_delivered", "fieldtype": "Float", "width": 75, "precision": "1" if self.filters.sales_person else "0"},
 			{"label": _("Booking Date"), "fieldname": "transaction_date", "fieldtype": "Date", "width": 100},
 			{"label": _("Delivery Date"), "fieldname": "vehicle_delivered_date", "fieldtype": "Date", "width": 100},
 			# {"label": _("Customer (User)"), "fieldname": "customer", "fieldtype": "Link", "options": "Customer", "width": 100},
@@ -254,12 +256,6 @@ class VehicleBookingDetailsReport(object):
 			{"label": _("Variant Name"), "fieldname": "item_name", "fieldtype": "Data", "width": 150},
 			{"label": _("Color"), "fieldname": "vehicle_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("Delivery Period"), "fieldname": "delivery_period", "fieldtype": "Link", "options": "Vehicle Allocation Period", "width": 110},
-			{"label": _("Booked"), "fieldname": "qty_booked", "fieldtype": "Float", "width": 65, "precision": "1" if self.filters.sales_person else "0"},
-			{"label": _("Delivered"), "fieldname": "qty_delivered", "fieldtype": "Float", "width": 75, "precision": "1" if self.filters.sales_person else "0"},
-			{"label": _("Invoice Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 120},
-			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
-			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
-			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 		]
 
 		columns.append({"label": _("Sales Person"), "fieldtype": "Data", "fieldname": "sales_person", "width": 150})
@@ -267,7 +263,11 @@ class VehicleBookingDetailsReport(object):
 			columns.append({"label": _("% Contribution"), "fieldtype": "Percent", "fieldname": "allocated_percentage", "width": 60})
 
 		columns += [
+			{"label": _("Status"), "fieldname": "status", "fieldtype": "Data", "width": 140},
+			{"label": _("CNIC/NTN"), "fieldname": "tax_cnic_ntn", "fieldtype": "Data", "width": 110},
+			{"label": _("Contact"), "fieldname": "contact_number", "fieldtype": "Data", "width": 110},
 			{"label": _("Allocation"), "fieldname": "allocation_title", "fieldtype": "Data", "width": 200},
+			{"label": _("Invoice Total"), "fieldname": "invoice_total", "fieldtype": "Currency", "width": 120},
 			{"label": _("Payment Received"), "fieldname": "customer_advance", "fieldtype": "Currency", "width": 120},
 			{"label": _("Payment Deposited"), "fieldname": "supplier_advance", "fieldtype": "Currency", "width": 120},
 			{"label": _("Undeposited Amount"), "fieldname": "undeposited_amount", "fieldtype": "Currency", "width": 120},
