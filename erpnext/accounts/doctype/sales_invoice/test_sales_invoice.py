@@ -1166,10 +1166,12 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_create_so_with_margin(self):
 		si = create_sales_invoice(item_code="_Test Item", qty=1, do_not_submit=True)
-		price_list_rate = 100
+		price_list_rate = flt(100) * flt(si.plc_conversion_rate)
 		si.items[0].price_list_rate = price_list_rate
 		si.items[0].margin_type = 'Percentage'
 		si.items[0].margin_rate_or_amount = 25
+		si.items[0].discount_amount = 0.0
+		si.items[0].discount_percentage = 0.0
 		si.save()
 		self.assertEqual(si.get("items")[0].rate, flt((price_list_rate*25)/100 + price_list_rate))
 
@@ -1800,6 +1802,15 @@ class TestSalesInvoice(unittest.TestCase):
 		si.selling_price_list = "_Test Price List Rest of the World"
 		si.update_stock = 1
 		si.items[0].target_warehouse = 'Work In Progress - TCP1'
+
+		# Add stock to stores for succesful stock transfer
+		make_stock_entry(
+			target="Stores - TCP1",
+			company = "_Test Company with perpetual inventory",
+			qty=1,
+			basic_rate=100
+		)
+
 		add_taxes(si)
 		si.save()
 
@@ -1868,7 +1879,17 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_einvoice_submission_without_irn(self):
 		# init
-		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 1)
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 1
+		einvoice_settings.applicable_from = nowdate()
+		einvoice_settings.append('credentials', {
+			'company': '_Test Company',
+			'gstin': '27AAECE4835E1ZR',
+			'username': 'test',
+			'password': 'test'
+		})
+		einvoice_settings.save()
+
 		country = frappe.flags.country
 		frappe.flags.country = 'India'
 
@@ -1879,7 +1900,8 @@ class TestSalesInvoice(unittest.TestCase):
 		si.submit()
 
 		# reset
-		frappe.db.set_value('E Invoice Settings', 'E Invoice Settings', 'enable', 0)
+		einvoice_settings = frappe.get_doc('E Invoice Settings')
+		einvoice_settings.enable = 0
 		frappe.flags.country = country
 
 	def test_einvoice_json(self):
@@ -2106,6 +2128,7 @@ def create_sales_invoice(**args):
 	si.return_against = args.return_against
 	si.currency=args.currency or "INR"
 	si.conversion_rate = args.conversion_rate or 1
+	si.naming_series = args.naming_series or "T-SINV-"
 
 	si.append("items", {
 		"item_code": args.item or args.item_code or "_Test Item",

@@ -113,6 +113,7 @@ class BOM(WebsiteGenerator):
 
 		return item
 
+	@frappe.whitelist()
 	def get_routing(self):
 		if self.routing:
 			self.set("operations", [])
@@ -145,6 +146,7 @@ class BOM(WebsiteGenerator):
 				if not item.get(r):
 					item.set(r, ret[r])
 
+	@frappe.whitelist()
 	def get_bom_material_detail(self, args=None):
 		""" Get raw material details like uom, desc and rate"""
 		if not args:
@@ -210,6 +212,7 @@ class BOM(WebsiteGenerator):
 								.format(self.rm_cost_as_per, arg["item_code"]), alert=True)
 		return flt(rate) * flt(self.plc_conversion_rate or 1) / (self.conversion_rate or 1)
 
+	@frappe.whitelist()
 	def update_cost(self, update_parent=True, from_child_bom=False, save=True):
 		if self.docstatus == 2:
 			return
@@ -970,6 +973,9 @@ def item_query(doctype, txt, searchfield, start, page_len, filters):
 		if not has_variants:
 			query_filters["has_variants"] = 0
 
+	if filters and filters.get("is_stock_item"):
+		query_filters["is_stock_item"] = 1
+		
 	return frappe.get_all("Item",
 		fields = fields, filters=query_filters,
 		or_filters = or_cond_filters, order_by=order_by,

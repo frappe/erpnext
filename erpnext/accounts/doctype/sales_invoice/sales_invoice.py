@@ -24,6 +24,7 @@ from erpnext.accounts.deferred_revenue import validate_service_stop_date
 from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 from frappe.model.utils import get_fetch_values
 from frappe.contacts.doctype.address.address import get_address_display
+from erpnext.accounts.doctype.tax_withholding_category.tax_withholding_category import get_party_tax_withholding_details
 
 from erpnext.healthcare.utils import manage_invoice_submit_cancel
 
@@ -45,7 +46,6 @@ class SalesInvoice(SellingController):
 			'target_parent_dt': 'Sales Order',
 			'target_parent_field': 'per_billed',
 			'source_field': 'amount',
-			'join_field': 'so_detail',
 			'percent_join_field': 'sales_order',
 			'status_field': 'billing_status',
 			'keyword': 'Billed',
@@ -76,7 +76,7 @@ class SalesInvoice(SellingController):
 
 		if not self.is_pos:
 			self.so_dn_required()
-		
+
 		self.set_tax_withholding()
 
 		self.validate_proj_cust()
@@ -214,6 +214,9 @@ class SalesInvoice(SellingController):
 		if self.update_stock == 1:
 			self.repost_future_sle_and_gle()
 
+		if self.update_stock == 1:
+			self.repost_future_sle_and_gle()
+
 		if not self.is_return:
 			self.update_billing_status_for_zero_amount_refdoc("Delivery Note")
 			self.update_billing_status_for_zero_amount_refdoc("Sales Order")
@@ -272,7 +275,7 @@ class SalesInvoice(SellingController):
 				pluck="pos_closing_entry"
 			)
 			if pos_closing_entry:
-				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}. ").format(
+				msg = _("To cancel a {} you need to cancel the POS Closing Entry {}.").format(
 					frappe.bold("Consolidated Sales Invoice"),
 					get_link_to_form("POS Closing Entry", pos_closing_entry[0])
 				)
@@ -390,6 +393,7 @@ class SalesInvoice(SellingController):
 		if validate_against_credit_limit:
 			check_credit_limit(self.customer, self.company, bypass_credit_limit_check_at_sales_order)
 
+	@frappe.whitelist()
 	def set_missing_values(self, for_validate=False):
 		pos = self.set_pos_fields(for_validate)
 
@@ -544,12 +548,12 @@ class SalesInvoice(SellingController):
 			frappe.throw(_("Debit To is required"), title=_("Account Missing"))
 
 		if account.report_type != "Balance Sheet":
-			msg = _("Please ensure {} account is a Balance Sheet account. ").format(frappe.bold("Debit To"))
+			msg = _("Please ensure {} account is a Balance Sheet account.").format(frappe.bold("Debit To")) + " "
 			msg += _("You can change the parent account to a Balance Sheet account or select a different account.")
 			frappe.throw(msg, title=_("Invalid Account"))
 
 		if self.customer and account.account_type != "Receivable":
-			msg = _("Please ensure {} account is a Receivable account. ").format(frappe.bold("Debit To"))
+			msg = _("Please ensure {} account is a Receivable account.").format(frappe.bold("Debit To")) + " "
 			msg += _("Change the account type to Receivable or select a different account.")
 			frappe.throw(msg, title=_("Invalid Account"))
 
@@ -729,6 +733,7 @@ class SalesInvoice(SellingController):
 		else:
 			self.calculate_billing_amount_for_timesheet()
 
+	@frappe.whitelist()
 	def add_timesheet_data(self):
 		self.set('timesheets', [])
 		if self.project:
@@ -1106,7 +1111,7 @@ class SalesInvoice(SellingController):
 			if not item.serial_no:
 				continue
 
-			for serial_no in item.serial_no.split("\n"):
+			for serial_no in get_serial_nos(item.serial_no):
 				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
 					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
@@ -1286,6 +1291,7 @@ class SalesInvoice(SellingController):
 				break
 
 	# Healthcare
+	@frappe.whitelist()
 	def set_healthcare_services(self, checked_values):
 		self.set("items", [])
 		from erpnext.stock.get_item_details import get_item_details
@@ -1749,15 +1755,10 @@ def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, wa
 		item.purchase_order = parent_child_map.get(sales_item_map.get(item.delivery_note_item))
 
 def get_delivery_note_details(internal_reference):
-	so_item_map = {}
-
 	si_item_details = frappe.get_all('Delivery Note Item', fields=['name', 'so_detail'],
 		filters={'parent': internal_reference})
 
-	for d in si_item_details:
-		so_item_map.setdefault(d.name, d.so_detail)
-
-	return so_item_map
+	return {d.name: d.so_detail for d in si_item_details if d.so_detail}
 
 def get_sales_invoice_details(internal_reference):
 	dn_item_map = {}

@@ -11,6 +11,7 @@ from erpnext.accounts.utils import (get_outstanding_invoices,
 from erpnext.controllers.accounts_controller import get_advance_payment_entries
 
 class PaymentReconciliation(Document):
+	@frappe.whitelist()
 	def get_unreconciled_entries(self):
 		self.get_nonreconciled_payment_entries()
 		self.get_invoice_entries()
@@ -113,7 +114,7 @@ class PaymentReconciliation(Document):
 				'party_type': self.party_type,
 				'voucher_type': voucher_type,
 				'account': self.receivable_payable_account
-			}, as_dict=1, debug=1)
+			}, as_dict=1)
 
 	def add_payment_entries(self, entries):
 		self.set('payments', [])
@@ -147,6 +148,7 @@ class PaymentReconciliation(Document):
 			ent.currency = e.get('currency')
 			ent.outstanding_amount = e.get('outstanding_amount')
 
+	@frappe.whitelist()
 	def reconcile(self, args):
 		for e in self.get('payments'):
 			e.invoice_type = None
@@ -197,6 +199,7 @@ class PaymentReconciliation(Document):
 			'difference_account': row.difference_account
 		})
 
+	@frappe.whitelist()
 	def get_difference_amount(self, child_row):
 		if child_row.get("reference_type") != 'Payment Entry': return
 

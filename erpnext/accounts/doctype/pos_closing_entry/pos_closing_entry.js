@@ -22,7 +22,43 @@ frappe.ui.form.on('POS Closing Entry', {
 		});
 		
 		if (frm.doc.docstatus === 0 && !frm.doc.amended_from) frm.set_value("period_end_date", frappe.datetime.now_datetime());
-		if (frm.doc.docstatus === 1) set_html_data(frm);
+		
+		frappe.realtime.on('closing_process_complete', async function(data) {
+			await frm.reload_doc();
+			if (frm.doc.status == 'Failed' && frm.doc.error_message && data.user == frappe.session.user) {
+				frappe.msgprint({
+					title: __('POS Closing Failed'),
+					message: frm.doc.error_message,
+					indicator: 'orange',
+					clear: true
+				});
+			}
+		});
+
+		set_html_data(frm);
+	},
+
+	refresh: function(frm) {
+		if (frm.doc.docstatus == 1 && frm.doc.status == 'Failed') {
+			const issue = '<a id="jump_to_error" style="text-decoration: underline;">issue</a>';
+			frm.dashboard.set_headline(
+				__('POS Closing failed while running in a background process. You can resolve the {0} and retry the process again.', [issue]));
+			
+			$('#jump_to_error').on('click', (e) => {
+				e.preventDefault();
+				frappe.utils.scroll_to(
+					cur_frm.get_field("error_message").$wrapper,
+					true,
+					30
+				);
+			});
+
+			frm.add_custom_button(__('Retry'), function () {
+				frm.call('retry', {}, () => {
+					frm.reload_doc();
+				});
+			});
+		}
 	},
 
 	pos_opening_entry(frm) {
@@ -61,43 +97,23 @@ frappe.ui.form.on('POS Closing Entry', {
 				refresh_fields(frm);
 				set_html_data(frm);
 			}
-		})
+		});
+	},
+
+	before_save: function(frm) {
+		for (let row of frm.doc.pos_transactions) {
+			frappe.db.get_doc("POS Invoice", row.pos_invoice).then(doc => {
+				cur_frm.doc.grand_total -= flt(doc.grand_total);
+				cur_frm.doc.net_total -= flt(doc.net_total);
+				cur_frm.doc.total_quantity -= flt(doc.total_qty);
+				refresh_payments(doc, cur_frm, 1);
+				refresh_taxes(doc, cur_frm, 1);
+				refresh_fields(cur_frm);
+				set_html_data(cur_frm);
+			});
+		}
 	}
 });
-
-cur_frm.cscript.before_pos_transactions_remove = function(doc, cdt, cdn) {
-	const removed_row = locals[cdt][cdn];
-
-	if (!removed_row.pos_invoice) return;
-
-	frappe.db.get_doc("POS Invoice", removed_row.pos_invoice).then(doc => {
-		cur_frm.doc.grand_total -= flt(doc.grand_total);
-		cur_frm.doc.net_total -= flt(doc.net_total);
-		cur_frm.doc.total_quantity -= flt(doc.total_qty);
-		refresh_payments(doc, cur_frm, 1);
-		refresh_taxes(doc, cur_frm, 1);
-		refresh_fields(cur_frm);
-		set_html_data(cur_frm);
-	});
-}
-
-frappe.ui.form.on('POS Invoice Reference', {
-	pos_invoice(frm, cdt, cdn) {
-		const added_row = locals[cdt][cdn];
-
-		if (!added_row.pos_invoice) return;
-
-		frappe.db.get_doc("POS Invoice", added_row.pos_invoice).then(doc => {
-			frm.doc.grand_total += flt(doc.grand_total);
-			frm.doc.net_total += flt(doc.net_total);
-			frm.doc.total_quantity += flt(doc.total_qty);
-			refresh_payments(doc, frm);
-			refresh_taxes(doc, frm);
-			refresh_fields(frm);
-			set_html_data(frm);
-		});
-	}
-})
 
 frappe.ui.form.on('POS Closing Entry Detail', {
 	closing_amount: (frm, cdt, cdn) => {
@@ -177,11 +193,13 @@ function refresh_fields(frm) {
 }
 
 function set_html_data(frm) {
-	frappe.call({
-		method: "get_payment_reconciliation_details",
-		doc: frm.doc,
-		callback: (r) => {
-			frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
-		}
-	})
+	if (frm.doc.docstatus === 1 && frm.doc.status == 'Submitted') {
+		frappe.call({
+			method: "get_payment_reconciliation_details",
+			doc: frm.doc,
+			callback: (r) => {
+				frm.get_field("payment_reconciliation_details").$wrapper.html(r.message);
+			}
+		});
+	}
 }
