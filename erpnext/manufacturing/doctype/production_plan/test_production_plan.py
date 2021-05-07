@@ -167,8 +167,8 @@ class TestProductionPlan(unittest.TestCase):
 		})
 		pln.combine_items = 1
 		pln.get_so_items()
-		for d in pln.prod_plan_ref:
-			d.item_ref = pln.po_items[0].name
+		for plan_reference in pln.prod_plan_references:
+			plan_reference.item_reference = pln.po_items[0].name
 		pln.submit()
 
 		self.assertTrue(pln.po_items[0].planned_qty,3)	
@@ -184,13 +184,14 @@ class TestProductionPlan(unittest.TestCase):
 
 		wo_doc.submit()
 		so_items = []
-		for d in pln.prod_plan_ref:
-			so_items.append(d.sales_order_item)
-			so_wo_qty = frappe.db.get_value('Sales Order Item', d.sales_order_item, 'work_order_qty')
-			self.assertEqual(so_wo_qty, d.qty)
+		for plan_reference in pln.prod_plan_references:
+			so_items.append(plan_reference.sales_order_item)
+			so_wo_qty = frappe.db.get_value('Sales Order Item', plan_reference.sales_order_item, 'work_order_qty')
+			self.assertEqual(so_wo_qty, plan_reference.qty)
+
 		wo_doc.cancel()
-		for s in so_items:
-			so_wo_qty = frappe.db.get_value('Sales Order Item', s, 'work_order_qty')
+		for so_item in so_items:
+			so_wo_qty = frappe.db.get_value('Sales Order Item', so_item, 'work_order_qty')
 			self.assertEqual(so_wo_qty, 0.0)
 		
 		lat_plan = frappe.get_doc('Production Plan',pln.name)

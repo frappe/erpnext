@@ -172,7 +172,7 @@ class ProductionPlan(Document):
 			item_details = get_item_details(data.item_code)
 			if self.combine_items:	
 				if item_details.bom_no in refs.keys():
-					refs[item_details.bom_no]['qty'] = refs[item_details.bom_no]['qty'] + data.pending_qty
+					refs[item_details.bom_no]['qty'] += data.pending_qty
 					refs[item_details.bom_no]['so'].append(data.parent)	
 					refs[item_details.bom_no]['so_items'].append(data.name)
 					refs[item_details.bom_no]['planned_qty'].append(data.pending_qty)
@@ -217,15 +217,15 @@ class ProductionPlan(Document):
 			self.add_pp_ref(refs)
 
 	def add_pp_ref(self, refs):
-		for r in refs:
+		for bom_no in refs:
 			idx = 0
-			for so in refs[r]['so']:
-				self.append('prod_plan_ref', {
-						'item_ref': refs[r]['ref'],
+			for so in refs[bom_no]['so']:
+				self.append('prod_plan_references', {
+						'item_reference': refs[bom_no]['ref'],
 						'sales_order': so,
-						'sales_order_item':refs[r]['so_items'][idx],
-						'qty':refs[r]['planned_qty'][idx]
-						})
+						'sales_order_item':refs[bom_no]['so_items'][idx],
+						'qty':refs[bom_no]['planned_qty'][idx]
+				})
 				idx+=1
 
 
