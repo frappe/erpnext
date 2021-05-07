@@ -77,7 +77,7 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				label: __(me.has_batch && !me.has_serial_no ? 'Selected Qty' : 'Qty'),
 				default: flt(me.item.stock_qty),
 			},
-			...getPendingQtyFields(me),
+			...get_pending_qty_fields(me),
 			{
 				fieldname: 'auto_fetch_button',
 				fieldtype:'Button',
@@ -316,19 +316,19 @@ erpnext.SerialNoBatchSelector = Class.extend({
 		qty_field.set_input(total_qty);
 	},
 	update_pending_qtys: function() {
-		const pendingQtyField = this.dialog.fields_dict.pending_qty;
-		const totalSelectedQtyField = this.dialog.fields_dict.total_selected_qty;
+		const pending_qty_field = this.dialog.fields_dict.pending_qty;
+		const total_selected_qty_field = this.dialog.fields_dict.total_selected_qty;
 
-		if (!pendingQtyField || !totalSelectedQtyField) return;
+		if (!pending_qty_field || !total_selected_qty_field) return;
 
 		const me = this;
-		const requiredQty = this.dialog.fields_dict.required_qty.value;
-		const selectedQty = this.dialog.fields_dict.qty.value;
-		const totalSelectedQty = selectedQty + calcTotalSelectedQty(me);
-		const pendingQty = requiredQty - totalSelectedQty;
+		const required_qty = this.dialog.fields_dict.required_qty.value;
+		const selected_qty = this.dialog.fields_dict.qty.value;
+		const total_selected_qty = selected_qty + calc_total_selected_qty(me);
+		const pending_qty = required_qty - total_selected_qty;
 
-		pendingQtyField.set_input(pendingQty);
-		totalSelectedQtyField.set_input(totalSelectedQty);
+		pending_qty_field.set_input(pending_qty);
+		total_selected_qty_field.set_input(total_selected_qty);
 	},
 	get_batch_fields: function() {
 		var me = this;
@@ -529,23 +529,23 @@ erpnext.SerialNoBatchSelector = Class.extend({
 	}
 });
 
-function getPendingQtyFields(me) {
-	if (!checkCanCalculatePendingQty(me)) return [];
+function get_pending_qty_fields(me) {
+	if (!check_can_calculate_pending_qty(me)) return [];
 	const { frm: { doc: { fg_completed_qty }}, item: { item_code, stock_qty }} = me;
 	const { qty_consumed_per_unit } = erpnext.stock.bom.items[item_code];
 
-	const totalSelectedQty = calcTotalSelectedQty(me);
-	const requiredQty = flt(fg_completed_qty) * flt(qty_consumed_per_unit);
-	const pendingQty = requiredQty - (flt(stock_qty) + totalSelectedQty);
+	const total_selected_qty = calc_total_selected_qty(me);
+	const required_qty = flt(fg_completed_qty) * flt(qty_consumed_per_unit);
+	const pending_qty = required_qty - (flt(stock_qty) + total_selected_qty);
 
-	const pendingQtyFields =  [
+	const pending_qty_fields =  [
 		{ fieldtype: 'Section Break', label: __('Pending Quantity') },
 		{
 			fieldname: 'required_qty',
 			read_only: 1,
 			fieldtype: 'Float',
 			label: __('Required Qty'),
-			default: requiredQty
+			default: required_qty
 		},
 		{ fieldtype: 'Column Break' },
 		{
@@ -553,7 +553,7 @@ function getPendingQtyFields(me) {
 			read_only: 1,
 			fieldtype: 'Float',
 			label: __('Total Selected Qty'),
-			default: totalSelectedQty
+			default: total_selected_qty
 		},
 		{ fieldtype: 'Column Break' },
 		{
@@ -561,13 +561,13 @@ function getPendingQtyFields(me) {
 			read_only: 1,
 			fieldtype: 'Float',
 			label: __('Pending Qty'),
-			default: pendingQty
+			default: pending_qty
 		},
 	];
-	return pendingQtyFields;
+	return pending_qty_fields;
 }
 
-function calcTotalSelectedQty(me) {
+function calc_total_selected_qty(me) {
 	const { frm: { doc: { items }}, item: { name, item_code }} = me;
 	const totalSelectedQty = items
 		.filter( item => ( item.name !== name ) && ( item.item_code === item_code ) )
@@ -576,7 +576,7 @@ function calcTotalSelectedQty(me) {
 	return totalSelectedQty;
 }
 
-function checkCanCalculatePendingQty(me) {
+function check_can_calculate_pending_qty(me) {
 	const { frm: { doc }, item } = me;
 	const docChecks = doc.bom_no
 		&& doc.fg_completed_qty

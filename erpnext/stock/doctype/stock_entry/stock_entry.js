@@ -107,7 +107,7 @@ frappe.ui.form.on('Stock Entry', {
 				frappe.flags.hide_serial_batch_dialog = true;
 			}
 		});
-		attachBOMItems(frm.doc.bom_no);
+		attach_bom_items(frm.doc.bom_no);
 	},
 
 	setup_quality_inspection: function(frm) {
@@ -312,7 +312,7 @@ frappe.ui.form.on('Stock Entry', {
 		}
 
 		frm.trigger("setup_quality_inspection");
-		attachBOMItems(frm.doc.bom_no)
+		attach_bom_items(frm.doc.bom_no)
 	},
 
 	stock_entry_type: function(frm){
@@ -921,7 +921,7 @@ erpnext.stock.StockEntry = erpnext.stock.StockController.extend({
 				method: "get_items",
 				callback: function(r) {
 					if(!r.exc) refresh_field("items");
-					if(me.frm.doc.bom_no) attachBOMItems(me.frm.doc.bom_no)
+					if(me.frm.doc.bom_no) attach_bom_items(me.frm.doc.bom_no)
 				}
 			});
 		}
@@ -1067,8 +1067,8 @@ erpnext.stock.select_batch_and_serial_no = (frm, item) => {
 
 }
 
-function attachBOMItems(bom_no) {
-	if (checkShouldNotAttachBOMItems(bom_no)) return
+function attach_bom_items(bom_no) {
+	if (check_should_not_attach_bom_items(bom_no)) return
 	frappe.db.get_doc("BOM",bom_no).then(bom => {
 		const {name, items} = bom
 		erpnext.stock.bom = {name, items:{}}
@@ -1078,7 +1078,7 @@ function attachBOMItems(bom_no) {
 	});
 }
 
-function checkShouldNotAttachBOMItems(bom_no) {
+function check_should_not_attach_bom_items(bom_no) {
   return (
     bom_no === undefined ||
     (erpnext.stock.bom && erpnext.stock.bom.name === bom_no)
