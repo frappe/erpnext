@@ -8,6 +8,7 @@
   "operation",
   "item_code",
   "source_warehouse",
+  "type",
   "column_break_3",
   "item_name",
   "description",
@@ -127,11 +128,18 @@
    "fieldtype": "Currency",
    "label": "Amount",
    "read_only": 1
+  },
+  {
+   "default": "RM",
+   "fieldname": "type",
+   "fieldtype": "Select",
+   "label": "Type",
+   "options": "RM\nPKG"
   }
  ],
  "istable": 1,
  "links": [],
- "modified": "2021-05-03 09:27:46.282645",
+ "modified": "2021-05-07 22:33:17.818839",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order Item",

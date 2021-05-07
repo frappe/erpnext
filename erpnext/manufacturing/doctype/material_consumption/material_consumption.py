@@ -54,13 +54,21 @@ class MaterialConsumption(Document):
         self.deviation_calculation()
 
     def deviation_calculation(self):
-        value1 = 0
         wo = frappe.get_doc("Work Order", self.work_order)
         self.wo_rm_weight_to_consume = wo.planned_rm_weight
-        for row in wo.required_items:
-            if row.type == "RM":
-                value1 += flt(row.consumed_qty)*flt(row.weight_per_unit)
-        self.weight_consumed = flt(value1, self.precision('weight_consumed'))
+        if self.type == "Manual":
+            value = 0
+            for row in self.materials_to_consume:
+                item = frappe.get_doc("Item", row.item)
+                value += flt(row.qty_issued)*flt(item.weight_per_unit)
+        else:
+            value = 0
+            for row in self.pick_list_item:
+                item = frappe.get_doc("Item", row.item_code)
+                value += flt(row.picked_qty)*flt(item.weight_per_unit)
+
+        self.weight_consumed = flt(value, self.precision('weight_consumed'))
+
         if self.wo_rm_weight_to_consume == 0:
             self.consumption_deviation_percentage = 0
         else:
