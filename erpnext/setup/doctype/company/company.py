@@ -622,5 +622,4 @@ def create_transaction_deletion_request(company):
 		'company': company
 	})
 	tdr.insert()
-	tdr.docstatus = 1
-	tdr.save()
+	tdr.submit()
