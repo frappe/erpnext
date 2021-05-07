@@ -169,8 +169,16 @@ class VehicleBookingDetailsReport(object):
 			totals['reference'] = "'Total'"
 
 		# set item_code from model
-		if "variant_of" in grouped_by:
+		if "item_code" in grouped_by:
+			totals['original_item_code'] = totals['item_code']
+		elif "variant_of" in grouped_by:
 			totals['item_code'] = totals['variant_of']
+			totals['original_item_code'] = totals['variant_of']
+
+		totals['disable_item_formatter'] = cint(self.show_item_name)
+
+		if totals.get('item_code'):
+			totals['item_name'] = frappe.get_cached_value("Item", totals.get('item_code'), 'item_name')
 
 		# Calculate sales person contribution percentage
 		if totals.get('actual_invoice_total'):
