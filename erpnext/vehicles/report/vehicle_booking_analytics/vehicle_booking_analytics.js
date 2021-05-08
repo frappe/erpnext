@@ -16,7 +16,7 @@ frappe.query_reports["Vehicle Booking Analytics"] = {
 			fieldname: "tree_type",
 			label: __("Tree Type"),
 			fieldtype: "Select",
-			options: ["Item Group", "Model", "Variant", "Brand", "Sales Person"],
+			options: ["Model", "Variant", "Vehicle Color", "Sales Person"],
 			default: "Variant",
 			reqd: 1
 		},

@@ -90,6 +90,11 @@ class VehicleBookingAnalytics(object):
 			self.get_entries("item.brand")
 			self.get_rows()
 
+		elif self.filters.tree_type == 'Vehicle Color':
+			self.get_entries("m.vehicle_color")
+			self.set_vehicle_color()
+			self.get_rows()
+
 		elif self.filters.tree_type in ["Item Group", "Sales Person"]:
 			if self.filters.tree_type == 'Item Group':
 				entity_field = "item.item_group"
@@ -120,10 +125,15 @@ class VehicleBookingAnalytics(object):
 		delivery_period_join = "left join `tabVehicle Allocation Period` dp on dp.name = m.delivery_period" \
 			if include_delivery_period else ""
 
+		color_fields = ""
+		if self.filters.tree_type == "Vehicle Color":
+			color_fields = "m.color_1, m.color_2, m.color_3, "
+
 		self.entries = frappe.db.sql("""
 			select
 				{entity_field} as entity,
 				{entity_name_field}
+				{color_fields}
 				{value_field} as value_field,
 				{date_field} as date
 			from `tabVehicle Booking Order` m
@@ -142,6 +152,7 @@ class VehicleBookingAnalytics(object):
 			sales_team_join=sales_team_join,
 			supplier_join=supplier_join,
 			delivery_period_join=delivery_period_join,
+			color_fields=color_fields,
 			filter_conditions=filter_conditions
 		), self.filters, as_dict=1)
 
@@ -149,12 +160,16 @@ class VehicleBookingAnalytics(object):
 			for d in self.entries:
 				self.entity_names.setdefault(d.entity, d.entity_name)
 
+	def set_vehicle_color(self):
+		for d in self.entries:
+			d.entity = d.entity or d.color_1 or d.color_2 or d.color_3
+
 	def get_value_fieldname(self):
 		filter_to_field = {
 			"Units": "1",
 			"Invoice Total": "invoice_total",
 		}
-		return filter_to_field.get(self.filters.value_field, "base_net_amount")
+		return filter_to_field.get(self.filters.value_field, "1")
 
 	def get_value_fieldtype(self):
 		filter_to_field = {
