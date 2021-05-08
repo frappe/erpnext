@@ -217,10 +217,10 @@ class VehicleBookingDetailsReport(object):
 			conditions.append("item.brand = %(brand)s")
 
 		if self.filters.customer:
-			conditions.append("vbo.customer = %(customer)s")
+			conditions.append("m.customer = %(customer)s")
 
 		if self.filters.financer:
-			conditions.append("vbo.financer = %(financer)s")
+			conditions.append("m.financer = %(financer)s")
 
 		if self.filters.supplier:
 			conditions.append("m.supplier = %(supplier)s")
