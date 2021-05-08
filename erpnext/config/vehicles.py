@@ -18,18 +18,10 @@ def get_data():
 					"dependencies": ["Vehicle Booking Order"],
 				},
 				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Allocation Register",
-					"doctype": "Vehicle Allocation",
-					"dependencies": ["Vehicle Allocation"],
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Booking Deposit Summary",
-					"doctype": "Vehicle Booking Payment",
-					"dependencies": ["Vehicle Booking Payment"],
+					"type": "doctype",
+					"name": "Customer",
+					"onboard": 1,
+					"description": _("Customer List."),
 				},
 			]
 		},
@@ -51,14 +43,6 @@ def get_data():
 					"type": "doctype",
 					"name": "Vehicle Delivery",
 					"dependencies": ["Vehicle"],
-				},
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Stock",
-					"doctype": "Vehicle",
-					"dependencies": ["Vehicle"],
-					"onboard": 1,
 				},
 			],
 		},
@@ -97,17 +81,58 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Customer",
-					"onboard": 1,
-					"description": _("Customer List."),
-				},
-				{
-					"type": "doctype",
 					"name": "Vehicle Allocation Period",
 				},
 				{
 					"type": "doctype",
 					"name": "Vehicle Allocation"
+				},
+			]
+		},
+		{
+			"label": _("Key Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Allocation Register",
+					"doctype": "Vehicle Allocation",
+					"dependencies": ["Vehicle Allocation"],
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Stock",
+					"doctype": "Vehicle",
+					"dependencies": ["Vehicle"],
+					"onboard": 1,
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Booking Details",
+					"doctype": "Vehicle Booking Order",
+					"dependencies": ["Vehicle Booking Order"],
+				},
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Booking Deposit Summary",
+					"doctype": "Vehicle Booking Payment",
+					"dependencies": ["Vehicle Booking Payment"],
+				},
+			]
+		},
+		{
+			"label": _("Summary Reports"),
+			"items": [
+				{
+					"type": "report",
+					"is_query_report": True,
+					"name": "Vehicle Booking Analytics",
+					"doctype": "Vehicle Booking Order",
+					"dependencies": ["Vehicle Booking Order"],
 				},
 			]
 		},
@@ -126,18 +151,6 @@ def get_data():
 				{
 					"type": "doctype",
 					"name": "Vehicle Allocation Creation Tool",
-				},
-			]
-		},
-		{
-			"label": _("Reports"),
-			"items": [
-				{
-					"type": "report",
-					"is_query_report": True,
-					"name": "Vehicle Booking Details",
-					"doctype": "Vehicle Booking Order",
-					"dependencies": ["Vehicle Booking Order"],
 				},
 			]
 		},
