@@ -644,7 +644,8 @@
    "fieldtype": "Date",
    "label": "Vehicle Delivered Date",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "invoice_received_date",
@@ -763,7 +764,8 @@
    "in_standard_filter": 1,
    "label": "Vehicle Allocation",
    "no_copy": 1,
-   "options": "Vehicle Allocation"
+   "options": "Vehicle Allocation",
+   "search_index": 1
   },
   {
    "depends_on": "vehicle_allocation_required",
@@ -780,7 +782,8 @@
    "fieldtype": "Check",
    "hidden": 1,
    "label": "Vehicle Allocation Required",
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "column_break_55",
@@ -1026,7 +1029,7 @@
  "icon": "fa fa-file-text",
  "image_field": "image",
  "is_submittable": 1,
- "modified": "2021-04-28 01:19:02.124668",
+ "modified": "2021-05-09 02:16:54.714334",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Booking Order",

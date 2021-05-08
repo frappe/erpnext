@@ -171,7 +171,8 @@
    "in_standard_filter": 1,
    "label": "Is Booked",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "fieldname": "amended_from",
@@ -204,7 +205,7 @@
  ],
  "icon": "fa fa-file-text",
  "is_submittable": 1,
- "modified": "2021-04-18 15:09:19.399387",
+ "modified": "2021-05-09 02:18:53.668731",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle Allocation",
