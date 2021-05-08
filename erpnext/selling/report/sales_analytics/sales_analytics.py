@@ -54,10 +54,12 @@ class Analytics(object):
 				"width": 180
 			})
 
+		fieldtype = self.get_value_fieldtype()
+
 		self.columns.append({
 			"label": _("Total"),
 			"fieldname": "total",
-			"fieldtype": "Float",
+			"fieldtype": fieldtype,
 			"width": 120
 		})
 
@@ -66,7 +68,7 @@ class Analytics(object):
 			self.columns.append({
 				"label": _(period),
 				"fieldname": scrub(period),
-				"fieldtype": "Float",
+				"fieldtype": fieldtype,
 				"period_column": True,
 				"width": 120
 			})

@@ -56,10 +56,18 @@ class VehicleBookingAnalytics(object):
 				"width": 180
 			})
 
+		fieldtype = self.get_value_fieldtype()
+		precision = "0"
+		if self.filters.sales_person or self.filters.tree_type == "Sales Person":
+			precision = "1"
+		if fieldtype == "Currency":
+			precision = None
+
 		self.columns.append({
 			"label": _("Total"),
 			"fieldname": "total",
-			"fieldtype": "Float",
+			"fieldtype": fieldtype,
+			"precision": precision,
 			"width": 120
 		})
 
@@ -68,9 +76,10 @@ class VehicleBookingAnalytics(object):
 			self.columns.append({
 				"label": _(period),
 				"fieldname": scrub(period),
-				"fieldtype": "Float",
+				"fieldtype": fieldtype,
+				"precision": precision,
 				"period_column": True,
-				"width": 120
+				"width": 100
 			})
 
 	def get_data(self):
