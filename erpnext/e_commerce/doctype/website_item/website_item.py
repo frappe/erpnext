@@ -138,7 +138,7 @@ class WebsiteItem(WebsiteGenerator):
 			try:
 				file_doc = frappe.get_doc("File", {
 					"file_url": self.website_image,
-					"attached_to_doctype": "Item",
+					"attached_to_doctype": "Website Item",
 					"attached_to_name": self.name
 				})
 			except frappe.DoesNotExistError:
@@ -161,7 +161,7 @@ class WebsiteItem(WebsiteGenerator):
 					file_doc = frappe.get_doc({
 						"doctype": "File",
 						"file_url": self.website_image,
-						"attached_to_doctype": "Item",
+						"attached_to_doctype": "Website Item",
 						"attached_to_name": self.name
 					}).save()
 
