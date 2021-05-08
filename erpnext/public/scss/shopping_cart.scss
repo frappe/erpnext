@@ -769,3 +769,11 @@ body.product-page {
 		margin-top: 6px;
 	}
 }
+
+.offer-container {
+	border: 1px solid var(--gray-300);
+	border-style: dashed;
+	border-radius: 4px;
+	padding: 6px;
+	font-size: 14px;
+}
