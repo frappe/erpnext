@@ -41,7 +41,7 @@ class VehicleBookingDetailsReport(object):
 				m.item_code, m.item_name, m.previous_item_code, item.variant_of, item.item_group, item.brand,
 				m.allocation_period, m.delivery_period, m.priority, m.allocation_title,
 				m.contact_person, m.contact_mobile, m.contact_phone,
-				m.color_1, m.color_2, m.color_3, m.previous_color,
+				m.color_1, m.color_2, m.color_3, m.vehicle_color, m.previous_color,
 				1 as qty_booked, m.invoice_total, m.status,
 				m.customer_advance, m.supplier_advance, m.customer_advance - m.supplier_advance as undeposited_amount,
 				m.payment_adjustment, m.customer_outstanding, m.supplier_outstanding,
@@ -209,6 +209,9 @@ class VehicleBookingDetailsReport(object):
 
 		if self.filters.item_code:
 			conditions.append("item.name = %(item_code)s")
+
+		if self.filters.vehicle_color:
+			conditions.append("(m.vehicle_color = %(vehicle_color)s or (m.color_1 = %(vehicle_color)s and ifnull(m.vehicle_color, '') = ''))")
 
 		if self.filters.item_group:
 			conditions.append(get_item_group_condition(self.filters.item_group))

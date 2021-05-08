@@ -64,6 +64,12 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			}
 		},
 		{
+			fieldname: "vehicle_color",
+			label: __("Vehicle Color"),
+			fieldtype: "Link",
+			options: "Vehicle Color"
+		},
+		{
 			fieldname: "item_group",
 			label: __("Item Group"),
 			fieldtype: "Link",
@@ -103,7 +109,7 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			fieldname: "group_by_1",
 			label: __("Group By Level 1"),
 			fieldtype: "Select",
-			options: ["Ungrouped", "Group by Variant", "Group by Model", "Group by Item Group", "Group by Brand",
+			options: ["Ungrouped", "Group by Variant", "Group by Model", "Group by Vehicle Color", "Group by Item Group", "Group by Brand",
 				"Group by Delivery Period", "Group by Sales Person", "Group by Status"],
 			default: "Ungrouped"
 		},
@@ -111,7 +117,7 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			fieldname: "group_by_2",
 			label: __("Group By Level 2"),
 			fieldtype: "Select",
-			options: ["Ungrouped", "Group by Variant", "Group by Model", "Group by Item Group", "Group by Brand",
+			options: ["Ungrouped", "Group by Variant", "Group by Model", "Group by Vehicle Color", "Group by Item Group", "Group by Brand",
 				"Group by Delivery Period", "Group by Sales Person", "Group by Status"],
 			default: "Group by Model"
 		},
@@ -119,7 +125,7 @@ frappe.query_reports["Vehicle Booking Details"] = {
 			fieldname: "group_by_3",
 			label: __("Group By Level 3"),
 			fieldtype: "Select",
-			options: ["Ungrouped", "Group by Variant", "Group by Model", "Group by Item Group", "Group by Brand",
+			options: ["Ungrouped", "Group by Variant", "Group by Model", "Group by Vehicle Color", "Group by Item Group", "Group by Brand",
 				"Group by Delivery Period", "Group by Sales Person", "Group by Status"],
 			default: "Group by Variant"
 		},
