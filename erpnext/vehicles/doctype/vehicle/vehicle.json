@@ -95,7 +95,8 @@
    "in_preview": 1,
    "in_standard_filter": 1,
    "label": "License Plate",
-   "no_copy": 1
+   "no_copy": 1,
+   "search_index": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -127,7 +128,8 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Chassis No"
+   "label": "Chassis No",
+   "search_index": 1
   },
   {
    "fieldname": "employee",
@@ -169,6 +171,7 @@
    "label": "Vehicle Item Code",
    "options": "Item",
    "reqd": 1,
+   "search_index": 1,
    "set_only_once": 1
   },
   {
@@ -451,7 +454,8 @@
    "in_list_view": 1,
    "in_preview": 1,
    "in_standard_filter": 1,
-   "label": "Engine No"
+   "label": "Engine No",
+   "search_index": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -531,7 +535,8 @@
    "fieldname": "unregistered",
    "fieldtype": "Check",
    "in_standard_filter": 1,
-   "label": "Is Unregistered"
+   "label": "Is Unregistered",
+   "search_index": 1
   },
   {
    "default": "0",
@@ -540,7 +545,8 @@
    "in_standard_filter": 1,
    "label": "Is Booked",
    "no_copy": 1,
-   "read_only": 1
+   "read_only": 1,
+   "search_index": 1
   },
   {
    "allow_in_quick_entry": 1,
@@ -579,7 +585,7 @@
   }
  ],
  "image_field": "image",
- "modified": "2021-04-27 15:27:35.072348",
+ "modified": "2021-05-09 02:20:35.348183",
  "modified_by": "Administrator",
  "module": "Vehicles",
  "name": "Vehicle",
