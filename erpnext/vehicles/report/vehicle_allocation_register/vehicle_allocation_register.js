@@ -165,6 +165,12 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 				style['background-color'] = '#ffe2a7';
 			}
 		}
+		if (data.booking_color && data.booking_color !== data.vehicle_color) {
+			if (['vehicle_color', 'booking_color'].includes(column.fieldname)) {
+				style['font-weight'] = 'bold';
+				style['background-color'] = '#ffe2a7';
+			}
+		}
 
 		if (data.priority) {
 			if (['priority', 'delivery_period'].includes(column.fieldname)) {

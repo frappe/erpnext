@@ -97,9 +97,10 @@ class VehicleAllocationRegisterReport(object):
 
 			d.qty_delivered = 1 if d.get('vehicle_delivered_date') else 0
 
-			is_leased = d.financer and d.finance_type == "Leased"
-
 			d.vehicle_color = d.vehicle_color or d.color_1 or d.color_2 or d.color_3
+			d.booking_color = d.color_1 or d.color_2 or d.color_3
+
+			is_leased = d.financer and d.finance_type == "Leased"
 			d.tax_cnic_ntn = d.tax_id or d.tax_cnic if is_leased else d.tax_cnic or d.tax_id
 			d.contact_number = d.contact_mobile or d.contact_phone
 
@@ -319,6 +320,7 @@ class VehicleAllocationRegisterReport(object):
 			{"label": _("Balance Payment Amount"), "fieldname": "balance_payment_amount", "fieldtype": "Currency", "width": 120},
 			{"label": _("Previous Variant"), "fieldname": "previous_item_code", "fieldtype": "Link", "options": "Item", "width": 120},
 			{"label": _("Previous Color"), "fieldname": "previous_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
+			{"label": _("Booking Color"), "fieldname": "booking_color", "fieldtype": "Link", "options": "Vehicle Color", "width": 120},
 			{"label": _("Booking Price"), "fieldname": "booking_price", "fieldtype": "Data", "width": 100},
 			{"label": _("Supplier"), "fieldname": "supplier", "fieldtype": "Data", "width": 100},
 		]
