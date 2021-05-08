@@ -78,6 +78,12 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			}
 		},
 		{
+			fieldname: "vehicle_color",
+			label: __("Vehicle Color"),
+			fieldtype: "Link",
+			options: "Vehicle Color"
+		},
+		{
 			fieldname: "item_group",
 			label: __("Item Group"),
 			fieldtype: "Link",
@@ -118,7 +124,7 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			label: __("Group By Level 1"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Allocation Period", "Group by Delivery Period", "Group by Variant", "Group by Model",
-				"Group by Item Group", "Group by Brand", "Group by Sales Person", "Group by Status"],
+				"Group by Vehicle Color", "Group by Item Group", "Group by Brand", "Group by Sales Person", "Group by Status"],
 			default: "Group by Allocation Period"
 		},
 		{
@@ -126,7 +132,7 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			label: __("Group By Level 2"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Allocation Period", "Group by Delivery Period", "Group by Variant", "Group by Model",
-				"Group by Item Group", "Group by Brand", "Group by Sales Person", "Group by Status"],
+				"Group by Vehicle Color", "Group by Item Group", "Group by Brand", "Group by Sales Person", "Group by Status"],
 			default: "Group by Model"
 		},
 		{
@@ -134,7 +140,7 @@ frappe.query_reports["Vehicle Allocation Register"] = {
 			label: __("Group By Level 3"),
 			fieldtype: "Select",
 			options: ["Ungrouped", "Group by Allocation Period", "Group by Delivery Period", "Group by Variant", "Group by Model",
-				"Group by Item Group", "Group by Brand", "Group by Sales Person", "Group by Status"],
+				"Group by Vehicle Color", "Group by Item Group", "Group by Brand", "Group by Sales Person", "Group by Status"],
 			default: "Group by Variant"
 		},
 		{

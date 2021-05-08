@@ -37,16 +37,18 @@ class VehicleAllocationRegisterReport(object):
 			inner join `tabItem` item on item.name = m.item_code
 			inner join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
 			inner join `tabVehicle Allocation Period` dp on dp.name = m.delivery_period
-			left join `tabVehicle Booking Order` vbo on m.name = vbo.vehicle_allocation
+			left join `tabVehicle Booking Order` vbo on m.name = vbo.vehicle_allocation and vbo.docstatus = 1
 			where m.docstatus = 1 {conditions}
 			order by ap.from_date, m.item_code, m.is_additional, m.sr_no
 		""".format(conditions=allocation_conditions), self.filters, as_dict=1)
+
+		self.filters.allocation_names = [d.vehicle_allocation for d in allocation_data]
 
 		booking_data = frappe.db.sql("""
 			select m.name as vehicle_booking_order, m.item_code, m.previous_item_code,
 				m.supplier, m.allocation_period, m.delivery_period, m.vehicle_allocation, m.priority,
 				m.transaction_date, m.vehicle_delivered_date, m.status,	
-				m.color_1, m.color_2, m.color_3, m.previous_color,
+				m.color_1, m.color_2, m.color_3, m.vehicle_color, m.previous_color,
 				m.customer, m.financer, m.customer_name, m.finance_type, m.tax_id, m.tax_cnic,
 				m.contact_person, m.contact_mobile, m.contact_phone,
 				ap.from_date as allocation_from_date, dp.from_date as delivery_from_date,
@@ -59,7 +61,8 @@ class VehicleAllocationRegisterReport(object):
 			left join `tabVehicle Allocation Period` ap on ap.name = m.allocation_period
 			left join `tabVehicle Allocation Period` dp on dp.name = m.delivery_period
 			left join `tabSales Team` sp on sp.parent = m.name and sp.parenttype = 'Vehicle Booking Order'
-			where m.docstatus = 1 and item.vehicle_allocation_required = 1 {0}
+			where m.docstatus = 1 and m.vehicle_allocation_required = 1
+				and (m.vehicle_allocation in %(allocation_names)s or {0})
 			group by m.name
 		""".format(booking_conditions), self.filters, as_dict=1)
 
@@ -230,7 +233,19 @@ class VehicleAllocationRegisterReport(object):
 			conditions.append("item.variant_of = %(variant_of)s")
 
 		if self.filters.item_code:
-			conditions.append("item.name = %(item_code)s")
+			if cond_type == 'booking':
+				conditions.append("(m.item_code = %(item_code)s or m.previous_item_code = %(item_code)s)")
+			else:
+				conditions.append("(m.item_code = %(item_code)s or vbo.item_code = %(item_code)s or vbo.previous_item_code = %(item_code)s)")
+
+		if self.filters.vehicle_color:
+			if cond_type == 'booking':
+				conditions.append("""(m.vehicle_color = %(vehicle_color)s or m.previous_color = %(vehicle_color)s
+					or (m.color_1 = %(vehicle_color)s and ifnull(m.vehicle_color, '') = ''))""")
+			else:
+				conditions.append("""(m.vehicle_color = %(vehicle_color)s
+					or vbo.vehicle_color = %(vehicle_color)s or vbo.previous_color = %(vehicle_color)s
+					or (vbo.color_1 = %(vehicle_color)s and ifnull(vbo.vehicle_color, '') = ''))""")
 
 		if self.filters.item_group:
 			conditions.append(get_item_group_condition(self.filters.item_group))
@@ -264,8 +279,11 @@ class VehicleAllocationRegisterReport(object):
 			conditions.append("""sp.sales_person in (select name from `tabSales Person`
 					where lft>=%s and rgt<=%s and docstatus<2)""" % (lft, rgt))
 
-		return "and {}".format(" and ".join(conditions)) if conditions else ""
+		out = " and ".join(conditions)
+		if cond_type != "booking":
+			out = "and {}".format(out) if conditions else ""
 
+		return out
 
 	def get_columns(self):
 		return [
