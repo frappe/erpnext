@@ -25,21 +25,21 @@
    "fieldname": "doctypes",
    "fieldtype": "Table",
    "label": "Summary",
-   "options": "Transaction Deletion Tool Item",
+   "options": "Transaction Deletion Record Item",
    "read_only": 1
   },
   {
    "fieldname": "doctypes_to_be_ignored",
    "fieldtype": "Table",
    "label": "Excluded DocTypes",
-   "options": "Transaction Deletion Tool Item"
+   "options": "Transaction Deletion Record Item"
   },
   {
    "fieldname": "amended_from",
    "fieldtype": "Link",
    "label": "Amended From",
    "no_copy": 1,
-   "options": "Transaction Deletion Tool",
+   "options": "Transaction Deletion Record",
    "print_hide": 1,
    "read_only": 1
   },
@@ -54,10 +54,10 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-22 19:39:27.635656",
+ "modified": "2021-05-08 23:13:48.049879",
  "modified_by": "Administrator",
  "module": "Setup",
- "name": "Transaction Deletion Tool",
+ "name": "Transaction Deletion Record",
  "owner": "Administrator",
  "permissions": [
   {

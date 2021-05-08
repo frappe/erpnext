@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 import frappe
 import unittest
 
-class TestTransactionDeletionTest(unittest.TestCase):
+class TestTransactionDeletionRecord(unittest.TestCase):
 	def setUp(self):
 		create_company('Dunder Mifflin Paper Co')
 
@@ -51,7 +51,7 @@ def create_company(company_name):
 
 def create_transaction_deletion_request(company):
 	tdr = frappe.get_doc({
-		'doctype': 'Transaction Deletion Tool',
+		'doctype': 'Transaction Deletion Record',
 		'company': company
 	})
 	tdr.insert()

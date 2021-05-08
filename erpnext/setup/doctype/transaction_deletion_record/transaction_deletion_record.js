@@ -1,12 +1,12 @@
 // Copyright (c) 2021, Frappe Technologies Pvt. Ltd. and contributors
 // For license information, please see license.txt
 
-frappe.ui.form.on('Transaction Deletion Tool', {
+frappe.ui.form.on('Transaction Deletion Record', {
 	onload: function(frm) {
 		if (frm.doc.docstatus == 0) {
 			let doctypes_to_be_ignored_array;	
 			frappe.call({
-				method: 'erpnext.setup.doctype.transaction_deletion_tool.transaction_deletion_tool.get_doctypes_to_be_ignored',
+				method: 'erpnext.setup.doctype.transaction_deletion_record.transaction_deletion_record.get_doctypes_to_be_ignored',
 				callback: function(r) {
 					doctypes_to_be_ignored_array = r.message;
 					populate_doctypes_to_be_ignored(doctypes_to_be_ignored_array, frm);

@@ -9,7 +9,7 @@ from frappe.model.document import Document
 from frappe import _
 from frappe.desk.notifications import clear_notifications
 
-class TransactionDeletionTool(Document):
+class TransactionDeletionRecord(Document):
 	def validate(self):
 		frappe.only_for('System Manager')
 		company_obj = frappe.get_doc('Company', self.company)

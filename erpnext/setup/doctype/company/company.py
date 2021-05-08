@@ -618,7 +618,7 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 @frappe.whitelist()
 def create_transaction_deletion_request(company):
 	tdr = frappe.get_doc({
-		'doctype': 'Transaction Deletion Tool',
+		'doctype': 'Transaction Deletion Record',
 		'company': company
 	})
 	tdr.insert()
