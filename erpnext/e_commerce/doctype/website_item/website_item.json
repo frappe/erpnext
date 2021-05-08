@@ -37,6 +37,8 @@
   "display_additional_information_section",
   "show_tabbed_section",
   "tabs",
+  "offers_section",
+  "offers",
   "section_break_6",
   "ranking",
   "set_meta_tags",
@@ -76,6 +78,7 @@
    "read_only": 1
   },
   {
+   "collapsible": 1,
    "fieldname": "section_break_6",
    "fieldtype": "Section Break",
    "label": "Search and SEO"
@@ -179,7 +182,6 @@
    "read_only": 1
   },
   {
-   "fetch_from": "item_code.image",
    "fieldname": "image",
    "fieldtype": "Attach Image",
    "hidden": 1,
@@ -286,13 +288,25 @@
    "fieldname": "show_tabbed_section",
    "fieldtype": "Check",
    "label": "Add Section with Tabs"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "offers_section",
+   "fieldtype": "Section Break",
+   "label": "Offers"
+  },
+  {
+   "fieldname": "offers",
+   "fieldtype": "Table",
+   "label": "Offers to Display",
+   "options": "Website Offer"
   }
  ],
  "has_web_view": 1,
  "image_field": "image",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-03-18 20:37:54.955364",
+ "modified": "2021-04-22 15:29:13.541145",
  "modified_by": "Administrator",
  "module": "E-commerce",
  "name": "Website Item",
@@ -307,6 +321,42 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Website Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock User",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Stock Manager",
    "share": 1,
    "write": 1
   }
