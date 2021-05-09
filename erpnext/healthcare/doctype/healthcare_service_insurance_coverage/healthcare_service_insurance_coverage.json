@@ -22,11 +22,10 @@
   "item",
   "item_group",
   "coverage_deatils_section",
+  "claim_approval_mode",
   "coverage",
   "discount",
   "maximum_number_of_claims",
-  "approval_mandatory_for_claim",
-  "manual_approval_only",
   "column_break_12",
   "start_date",
   "end_date"
@@ -89,19 +88,6 @@
    "fieldname": "maximum_number_of_claims",
    "fieldtype": "Int",
    "label": "Maximum Number of Claims"
-  },
-  {
-   "default": "0",
-   "fieldname": "approval_mandatory_for_claim",
-   "fieldtype": "Check",
-   "label": "Approval Mandatory for Claim"
-  },
-  {
-   "default": "0",
-   "depends_on": "approval_mandatory_for_claim",
-   "fieldname": "manual_approval_only",
-   "fieldtype": "Check",
-   "label": "Manual Approval Only"
   },
   {
    "fieldname": "column_break_12",
@@ -184,11 +170,19 @@
    "in_standard_filter": 1,
    "label": "Insurance Coverage Plan Name",
    "read_only": 1
+  },
+  {
+   "default": "Automatic",
+   "fieldname": "claim_approval_mode",
+   "fieldtype": "Select",
+   "label": "Claim Approval Mode",
+   "options": "Automatic\nManual\nElectronic",
+   "reqd": 1
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-02 23:37:10.190268",
+ "modified": "2021-05-06 15:23:47.720845",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Insurance Coverage",

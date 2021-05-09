@@ -129,8 +129,8 @@ def make_therapy_session(service_order):
 def make_insurance_claim(doc):
 	if doc.insurance_subscription and not doc.insurance_claim:
 		from erpnext.healthcare.utils import create_insurance_claim
-		insurance_claim, claim_status = create_insurance_claim(doc, doc.order_doctype, doc.order, doc.quantity, doc.billing_item)
+		insurance_claim, approval_status = create_insurance_claim(doc, doc.order_doctype, doc.order, doc.quantity, doc.billing_item)
 		if insurance_claim:
 			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
-			frappe.set_value(doc.doctype, doc.name ,'claim_status', claim_status)
+			frappe.set_value(doc.doctype, doc.name ,'approval_status', approval_status)
 			doc.reload()

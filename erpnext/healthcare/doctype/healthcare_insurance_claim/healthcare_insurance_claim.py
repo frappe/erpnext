@@ -5,76 +5,107 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate,nowdate
+from frappe.utils import getdate
 from frappe.model.document import Document
 
 class HealthcareInsuranceClaim(Document):
-	def after_insert(self):
-		if self.create_coverage:
-			create_coverage_for_service_or_item(self)
+	def on_update(self):
+		self.update_approval_status_in_service()
+
 	def on_update_after_submit(self):
-		if self.claim_status != 'Pending':
-			update_claim_status_to_service(self)
-		if self.claim_status == 'Invoiced':
-			create_journal_entry_insurance_claim(self)
+		self.update_approval_status_in_service()
 
-def update_claim_status_to_service(doc):
-	service_name = frappe.db.exists(doc.service_doctype,
-	{
-		'insurance_claim': doc.name,
-		'claim_status': 'Pending'
-	})
-	if service_name:
-		frappe.db.set_value(doc.service_doctype, service_name, 'claim_status', doc.claim_status)
+		if self.status == 'Invoiced' and not self.ref_journal_entry:
+			self.create_journal_entry()
 
-def create_journal_entry_insurance_claim(self):
-	# create jv
-	sales_invoice = frappe.get_doc('Sales Invoice', self.sales_invoice)
-	insurance_company = frappe.get_doc('Healthcare Insurance Company', self.insurance_company)
-	from erpnext.accounts.party import get_party_account
-	journal_entry = frappe.new_doc('Journal Entry')
-	journal_entry.company = sales_invoice.company
-	journal_entry.posting_date =  self.billing_date
-	accounts = []
-	tax_amount = 0.0
-	accounts.append({
+	def before_cancel(self):
+		if self.approval_status == 'Approved':
+			frappe.throw(_('Cannot cancel Approved Insurance Claim'))
+
+	def on_cancel(self):
+		if self.status != 'Invoiced':
+			self.update_approval_status_in_service(cancel=True)
+
+	def update_approval_status_in_service(self, cancel=False):
+		service_docname = frappe.db.exists(self.service_doctype, {'insurance_claim': self.name})
+
+		if service_docname:
+			# unlink claim from service
+			if cancel:
+				frappe.db.set_value(self.service_doctype, service_docname, {
+					'insurance_claim': '',
+					'approval_status': ''
+				})
+				frappe.msgprint(_('Insurance Claim unlinked from the {0} {1}').format(self.service_doctype, service_docname))
+			else:
+				frappe.db.set_value(self.service_doctype, service_docname, 'approval_status', self.approval_status)
+
+	def create_journal_entry(self):
+		from erpnext.accounts.party import get_party_account
+
+		sales_invoice = frappe.db.get_value('Sales Invoice', self.sales_invoice,
+			['customer', 'company'], as_dict=True)
+
+		insurance_company = frappe.get_doc('Healthcare Insurance Company', self.insurance_company,
+			fields=['insurance_company_receivable_account', 'customer'], as_dict=True)
+
+		journal_entry = frappe.new_doc('Journal Entry')
+		journal_entry.company = sales_invoice.company
+		journal_entry.posting_date =  self.billing_date
+
+		journal_entry.append('accounts', {
 			'account': get_party_account('Customer', sales_invoice.customer, sales_invoice.company),
 			'credit_in_account_currency': self.coverage_amount,
 			'party_type': 'Customer',
 			'party': sales_invoice.customer,
-			'reference_type': sales_invoice.doctype,
-			'reference_name': sales_invoice.name
+			'reference_type': 'DocType',
+			'reference_name': self.sales_invoice
 		})
-	accounts.append({
+
+		journal_entry.append('accounts', {
 			'account': insurance_company.insurance_company_receivable_account,
 			'debit_in_account_currency': self.coverage_amount,
 			'party_type': 'Customer',
-			'party': insurance_company.customer,
+			'party': insurance_company.customer
 		})
-	journal_entry.set('accounts', accounts)
-	journal_entry.save(ignore_permissions = True)
-	journal_entry.submit()
-	frappe.db.set_value('Healthcare Insurance Claim', self.name, 'service_billed_jv', journal_entry.name)
-	self.reload()
-def create_coverage_for_service_or_item(self):
-	healthcare_insurance_coverage_plan = frappe.db.get_value('Healthcare Insurance Subscription', self.insurance_subscription, 'healthcare_insurance_coverage_plan')
-	if healthcare_insurance_coverage_plan:
-		coverage_based_on = ''
-		if self.healthcare_service_type and self.service_template:
-			coverage_based_on = 'Service'
-		elif self.medical_code:
-			coverage_based_on = 'Medical Code'
-		elif self.service_item:
-			coverage_based_on = 'Item'
-		coverage_service = frappe.new_doc('Healthcare Service Insurance Coverage')
-		coverage_service.coverage_based_on = coverage_based_on
-		coverage_service.healthcare_insurance_coverage_plan = healthcare_insurance_coverage_plan
-		coverage_service.healthcare_service = self.healthcare_service_type if self.healthcare_service_type and coverage_based_on == 'Service' else ''
-		coverage_service.healthcare_service_template = self.service_template if self.service_template and coverage_based_on == 'Service' else  ''
-		coverage_service.medical_code = self.medical_code if self.medical_code and coverage_based_on == 'Medical Code' else ''
-		coverage_service.item = self.service_item if self.service_item and coverage_based_on == 'Item' else  ''
-		coverage_service.coverage = self.coverage if self.coverage else 0
-		coverage_service.discount = self.discount if self.discount else 0
-		coverage_service.start_date = self.claim_posting_date if self.claim_posting_date else nowdate()
-		coverage_service.end_date = self.approval_validity_end_date if self.approval_validity_end_date else nowdate()
-		coverage_service.save(ignore_permissions = True)
+
+		journal_entry.flags.ignore_permissions = True
+		journal_entry.flags.ignore_mandatory = True
+		journal_entry.submit()
+
+		self.db_set('ref_journal_entry', journal_entry.name)
+
+@frappe.whitelist()
+def create_insurance_coverage(doc):
+	from six import string_types
+	import json
+
+	if isinstance(doc, string_types):
+		doc = json.loads(doc)
+		doc = frappe._dict(doc)
+
+	coverage_plan = frappe.db.get_value('Healthcare Insurance Subscription',
+		doc.insurance_subscription, 'healthcare_insurance_coverage_plan')
+
+	coverage_service = frappe.new_doc('Healthcare Service Insurance Coverage')
+	coverage_service.coverage_based_on = doc.coverage_based_on
+	coverage_service.healthcare_insurance_coverage_plan = coverage_plan
+	coverage_service.insurance_coverage_plan_name = frappe.db.get_value('Healthcare Insurance Coverage Plan',
+		coverage_plan, 'coverage_plan_name')
+
+
+	if doc.coverage_based_on == 'Service':
+		coverage_service.healthcare_service = doc.healthcare_service_type
+		coverage_service.healthcare_service_template = doc.service_template
+
+	elif doc.coverage_based_on == 'Medical Code':
+		coverage_service.medical_code = doc.medical_code
+
+	elif doc.coverage_based_on == 'Item':
+		coverage_service.item = doc.service_item
+
+	coverage_service.coverage = doc.coverage
+	coverage_service.discount = doc.discount
+	coverage_service.start_date = doc.claim_posting_date or getdate()
+	coverage_service.end_date = doc.approval_validity_end_date
+	return coverage_service

@@ -77,7 +77,7 @@
   "order_group_doctype",
   "amended_from",
   "insurance_claim",
-  "claim_status"
+  "approval_status"
  ],
  "fields": [
   {
@@ -543,9 +543,9 @@
   },
   {
    "allow_on_submit": 1,
-   "fetch_from": "insurance_claim.claim_status",
+   "fetch_from": "insurance_claim.approval_status",
    "fetch_if_empty": 1,
-   "fieldname": "claim_status",
+   "fieldname": "approval_status",
    "fieldtype": "Select",
    "label": "Claim Status",
    "options": "\nPending\nApproved\nRejected\nInvoiced",
@@ -568,7 +568,7 @@
    "link_fieldname": "healthcare_service_order"
   }
  ],
- "modified": "2021-05-05 14:26:01.768532",
+ "modified": "2021-05-06 21:55:41.297889",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Service Order",
@@ -625,5 +625,6 @@
  "sort_order": "DESC",
  "title_field": "title",
  "track_changes": 1,
- "track_seen": 1
+ "track_seen": 1,
+ "track_views": 1
 }

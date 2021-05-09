@@ -14,16 +14,17 @@
   "insurance_company",
   "insurance_subscription",
   "claim_details_section",
-  "mode_of_claim_approval",
+  "claim_approval_mode",
   "claim_posting_date",
   "column_break_10",
-  "claim_status",
+  "status",
+  "approval_status",
   "approval_validity_end_date",
   "service_and_item_details_section",
+  "coverage_based_on",
   "healthcare_service_type",
   "service_template",
   "service_doctype",
-  "create_coverage",
   "column_break_17",
   "service_item",
   "medical_code",
@@ -42,8 +43,8 @@
   "billing_date",
   "billing_amount",
   "amended_from",
-  "referance_section",
-  "service_billed_jv"
+  "reference_section",
+  "ref_journal_entry"
  ],
  "fields": [
   {
@@ -98,30 +99,15 @@
    "label": "Claim Details"
   },
   {
-   "allow_on_submit": 1,
-   "fieldname": "mode_of_claim_approval",
-   "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "label": "Mode of Claim Approval",
-   "options": "\nElectronic\nManual\nAutomatic"
-  },
-  {
    "fieldname": "claim_posting_date",
    "fieldtype": "Date",
    "in_standard_filter": 1,
-   "label": "Claim Posting Date"
+   "label": "Claim Posting Date",
+   "reqd": 1
   },
   {
    "fieldname": "column_break_10",
    "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "claim_status",
-   "fieldtype": "Select",
-   "in_standard_filter": 1,
-   "label": "Claim Status",
-   "options": "\nPending\nApproved\nRejected\nInvoiced"
   },
   {
    "allow_on_submit": 1,
@@ -132,21 +118,25 @@
   {
    "fieldname": "service_and_item_details_section",
    "fieldtype": "Section Break",
-   "label": "Service And Item Details"
+   "label": "Service and Item Details"
   },
   {
+   "depends_on": "eval:doc.coverage_based_on===\"Service\";",
    "fieldname": "healthcare_service_type",
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Healthcare Service Type",
+   "mandatory_depends_on": "eval:doc.coverage_based_on===\"Service\";",
    "options": "DocType"
   },
   {
+   "depends_on": "eval:doc.coverage_based_on===\"Service\";",
    "fieldname": "service_template",
    "fieldtype": "Dynamic Link",
    "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Service Template",
+   "mandatory_depends_on": "eval:doc.coverage_based_on===\"Service\";",
    "options": "healthcare_service_type"
   },
   {
@@ -162,16 +152,20 @@
    "fieldtype": "Column Break"
   },
   {
+   "fetch_from": "service_template.item",
    "fieldname": "service_item",
    "fieldtype": "Link",
    "label": "Service Item",
+   "mandatory_depends_on": "eval:doc.coverage_based_on===\"Item\";",
    "options": "Item",
-   "reqd": 1
+   "read_only_depends_on": "eval:doc.coverage_based_on===\"Service\";"
   },
   {
+   "depends_on": "eval:doc.coverage_based_on===\"Medical Code\";",
    "fieldname": "medical_code",
    "fieldtype": "Data",
-   "label": "Medical Code"
+   "label": "Medical Code",
+   "mandatory_depends_on": "eval:doc.coverage_based_on===\"Medical Code\";"
   },
   {
    "fieldname": "rate_and_coverage_details_section",
@@ -179,7 +173,6 @@
    "label": "Rate and Coverage Details"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "price_list_rate",
    "fieldtype": "Currency",
    "label": "Price List Rate"
@@ -201,13 +194,11 @@
    "fieldtype": "Column Break"
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "discount",
    "fieldtype": "Percent",
    "label": "Discount "
   },
   {
-   "allow_on_submit": 1,
    "fieldname": "coverage",
    "fieldtype": "Percent",
    "label": "Coverage"
@@ -270,34 +261,65 @@
   },
   {
    "collapsible": 1,
-   "fieldname": "referance_section",
+   "fieldname": "reference_section",
    "fieldtype": "Section Break",
-   "label": "Referance"
+   "label": "Reference"
   },
   {
-   "fieldname": "service_billed_jv",
+   "default": "Automatic",
+   "fieldname": "claim_approval_mode",
+   "fieldtype": "Select",
+   "in_standard_filter": 1,
+   "label": "Claim Approval Mode",
+   "options": "Automatic\nManual\nElectronic",
+   "reqd": 1
+  },
+  {
+   "description": "Journal Entry auto-created to transfer patient receivables to insurance company's receivables",
+   "fieldname": "ref_journal_entry",
    "fieldtype": "Link",
-   "label": "Service Billed JV",
+   "label": "Reference Journal Entry",
    "options": "Journal Entry",
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "create_coverage",
-   "fieldtype": "Check",
-   "label": "Create Coverage"
+   "allow_on_submit": 1,
+   "default": "Pending",
+   "fieldname": "approval_status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Approval Status",
+   "options": "Pending\nApproved\nRejected",
+   "permlevel": 1
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "in_standard_filter": 1,
+   "label": "Status",
+   "options": "\nDraft\nSubmitted\nCancelled\nInvoiced\nPaid",
+   "read_only": 1
+  },
+  {
+   "fieldname": "coverage_based_on",
+   "fieldtype": "Select",
+   "label": "Coverage Based on",
+   "options": "Service\nItem\nMedical Code"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-03 21:54:14.658120",
+ "modified": "2021-05-09 11:00:34.290698",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Claim",
  "owner": "Administrator",
  "permissions": [
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -307,11 +329,13 @@
    "read": 1,
    "report": 1,
    "role": "System Manager",
+   "select": 1,
    "share": 1,
    "submit": 1,
    "write": 1
   },
   {
+   "amend": 1,
    "cancel": 1,
    "create": 1,
    "delete": 1,
@@ -321,8 +345,22 @@
    "read": 1,
    "report": 1,
    "role": "Healthcare Administrator",
+   "select": 1,
    "share": 1,
    "submit": 1,
+   "write": 1
+  },
+  {
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "permlevel": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "Healthcare Administrator",
+   "select": 1,
+   "share": 1,
    "write": 1
   }
  ],

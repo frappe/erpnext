@@ -30,7 +30,7 @@ def get_claim_item(insurance_company, from_date=False, to_date=False, posting_da
 		from
 			`tabHealthcare Insurance Claim`
 		where
-			insurance_company='{0}' and docstatus=1  and claim_status="Invoiced"
+			insurance_company='{0}' and docstatus=1  and status="Invoiced"
 	"""
 	if posting_date_type == 'Claim Posting Date':
 		if from_date:
