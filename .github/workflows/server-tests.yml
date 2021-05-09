@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        container: [1, 2, 3]
+        container: [1, 2, 3, 4]
 
     name: Server Tests
 
@@ -30,7 +30,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.7
+          python-version: 3.6
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
