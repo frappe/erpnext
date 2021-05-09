@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate, flt
+from frappe.utils import getdate, flt, get_link_to_form
 from frappe.model.document import Document
 from erpnext.healthcare.doctype.healthcare_service_insurance_coverage.healthcare_service_insurance_coverage import get_service_insurance_coverage_details
 
@@ -127,7 +127,7 @@ def make_insurance_claim(doc, service_doctype, service, qty, billing_item=None):
 	claim.insurance_company = doc.insurance_company
 	claim.healthcare_service_type = service_doctype
 	claim.service_template = service
-	claim.approval_status = 'Automatic' if insurance_details.claim_approval_mode == 'Automatic' else 'Pending'
+	claim.approval_status = 'Approved' if insurance_details.claim_approval_mode == 'Automatic' else 'Pending'
 	claim.claim_approval_mode = insurance_details.claim_approval_mode
 	claim.claim_posting_date = getdate()
 	claim.quantity = qty
@@ -147,7 +147,7 @@ def make_insurance_claim(doc, service_doctype, service, qty, billing_item=None):
 	claim.flags.ignore_mandatory = True
 	claim.submit()
 
-	update_claim_status_in_service(doc, claim)
+	update_claim_status_in_doc(doc, claim)
 
 
 def get_insurance_details(doc, service_doctype, service, billing_item=None):
@@ -162,7 +162,7 @@ def get_insurance_details(doc, service_doctype, service, billing_item=None):
 		return
 
 	insurance_subscription = frappe.db.get_value('Healthcare Insurance Subscription', doc.insurance_subscription,
-		fields=['insurance_company', 'healthcare_insurance_coverage_plan'], as_dict=True)
+		['insurance_company', 'healthcare_insurance_coverage_plan'], as_dict=True)
 	price_list_rate = get_insurance_price_list_rate(insurance_subscription, billing_item)
 
 	insurance_details.update({'price_list_rate': price_list_rate})
@@ -203,12 +203,10 @@ def update_claim_status_in_doc(doc, claim):
 
 
 def update_insurance_claim(insurance_claim, sales_invoice_name, posting_date, total_amount):
-	insurance_claim = frappe.get_doc('Healthcare Insurance Claim', insurance_claim)
-	insurance_claim.sales_invoice = sales_invoice_name
-	insurance_claim.sales_invoice_posting_date = posting_date
-	insurance_claim.billing_date = getdate()
-	insurance_claim.billing_amount = total_amount
-	insurance_claim.status = 'Invoiced'
-	insurance_claim.flags.ignore_mandatory = True
-	insurance_claim.flags.ignore_permissions = True
-	insurance_claim.save()
+	frappe.db.set_value('Healthcare Insurance Claim', insurance_claim, {
+		'sales_invoice': sales_invoice_name,
+		'sales_invoice_posting_date': posting_date,
+		'billing_date': getdate(),
+		'billing_amount': total_amount,
+		'status': 'Invoiced'
+	})
