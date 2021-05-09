@@ -2,7 +2,7 @@ from __future__ import unicode_literals
 import frappe, re, json
 from frappe import _
 import erpnext
-from frappe.utils import cstr, flt, cint, date_diff, month_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words, getdate
+from frappe.utils import cstr, flt, cint, date_diff, nowdate, round_based_on_smallest_currency_fraction, money_in_words, getdate
 from erpnext.regional.india import states, state_numbers
 from erpnext.controllers.taxes_and_totals import get_itemised_tax, get_itemised_taxable_amount
 from erpnext.controllers.accounts_controller import get_taxes_and_charges
