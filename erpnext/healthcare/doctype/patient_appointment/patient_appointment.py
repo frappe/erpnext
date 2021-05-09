@@ -14,6 +14,7 @@ from frappe.core.doctype.sms_settings.sms_settings import send_sms
 from erpnext.hr.doctype.employee.employee import is_holiday
 from erpnext.healthcare.doctype.healthcare_settings.healthcare_settings import get_receivable_account, get_income_account
 from erpnext.healthcare.utils import check_fee_validity, get_service_item_and_practitioner_charge, manage_fee_validity
+from erpnext.healthcare.doctype.healthcare_insurance_claim.healthcare_insurance_claim import make_insurance_claim
 
 class PatientAppointment(Document):
 	def validate(self):
@@ -30,6 +31,18 @@ class PatientAppointment(Document):
 		invoice_appointment(self)
 		self.update_fee_validity()
 		send_confirmation_msg(self)
+
+		if self.appointment_type and self.insurance_subscription and not self.insurance_claim:
+			from erpnext.healthcare.utils import create_insurance_claim, get_service_item_and_practitioner_charge
+			billing_item, rate = get_service_item_and_practitioner_charge(self)
+
+			make_insurance_claim(
+				doc=self,
+				service_doctype='Appointment Type',
+				service=self.appointment_type,
+				qty=1,
+				billing_item=billing_item
+			)
 
 	def set_title(self):
 		self.title = _('{0} with {1}').format(self.patient_name or self.patient,
@@ -510,14 +523,3 @@ def update_appointment_status():
 
 	for appointment in appointments:
 		frappe.get_doc('Patient Appointment', appointment.name).set_status()
-
-
-def make_insurance_claim(doc):
-	if doc.insurance_subscription and not doc.insurance_claim:
-		from erpnext.healthcare.utils import create_insurance_claim, get_service_item_and_practitioner_charge
-		billing_item, rate  = get_service_item_and_practitioner_charge(doc)
-		insurance_claim, approval_status = create_insurance_claim(doc, 'Appointment Type', doc.appointment_type, 1, billing_item)
-		if insurance_claim:
-			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
-			frappe.set_value(doc.doctype, doc.name ,'approval_status', approval_status)
-			doc.reload()

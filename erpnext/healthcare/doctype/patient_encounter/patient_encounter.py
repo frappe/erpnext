@@ -9,6 +9,8 @@ from frappe.model.document import Document
 from frappe.utils import cstr, getdate, add_days
 from frappe import _
 from frappe.model.mapper import get_mapped_doc
+from erpnext.healthcare.utils import get_service_item_and_practitioner_charge
+from erpnext.healthcare.doctype.healthcare_insurance_claim.healthcare_insurance_claim import make_insurance_claim
 
 class PatientEncounter(Document):
 	def validate(self):
@@ -24,7 +26,16 @@ class PatientEncounter(Document):
 			create_therapy_plan(self)
 
 		self.make_healthcare_service_order()
-		make_insurance_claim(self)
+
+		if self.appointment_type and self.insurance_subscription and not self.insurance_claim:
+			billing_item, rate = get_service_item_and_practitioner_charge(self)
+			make_insurance_claim(
+				doc=self,
+				service_doctype='Appointment Type',
+				service=self.appointment_type,
+				qty=1,
+				billing_item=billing_item
+			)
 
 	def on_cancel(self):
 		if self.appointment:
@@ -174,14 +185,3 @@ def delete_ip_medication_order(encounter):
 	record = frappe.db.exists('Inpatient Medication Order', {'patient_encounter': encounter.name})
 	if record:
 		frappe.delete_doc('Inpatient Medication Order', record, force=1)
-
-
-def make_insurance_claim(doc):
-	if doc.insurance_subscription and not doc.insurance_claim:
-		from erpnext.healthcare.utils import create_insurance_claim, get_service_item_and_practitioner_charge
-		billing_item, rate  = get_service_item_and_practitioner_charge(doc)
-		insurance_claim, approval_status = create_insurance_claim(doc, 'Appointment Type', doc.appointment_type, 1, billing_item)
-		if insurance_claim:
-			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
-			frappe.set_value(doc.doctype, doc.name ,'approval_status', approval_status)
-			doc.reload()

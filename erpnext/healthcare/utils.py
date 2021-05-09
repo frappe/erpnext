@@ -35,8 +35,7 @@ def get_healthcare_services_to_invoice(patient, company):
 
 def validate_customer_created(patient):
 	if not frappe.db.get_value('Patient', patient.name, 'customer'):
-		msg = _("Please set a Customer linked to the Patient")
-		msg +=  " <b><a href='/app/Form/Patient/{0}'>{0}</a></b>".format(patient.name)
+		msg = _('Please set a Customer linked to the Patient {0}').format('Patient', patient.name)
 		frappe.throw(msg, title=_('Customer Not Found'))
 
 
@@ -518,11 +517,7 @@ def set_invoiced(item, method, ref_invoice=None):
 		}
 		dt = order_map.get(order_doctype)
 		if dt:
-			frappe.db.set_value(dt,
-				{'healthcare_service_order': item.reference_dn},
-				'invoiced',
-				invoiced
-			)
+			frappe.db.set_value(dt, {'healthcare_service_order': item.reference_dn}, 'invoiced', invoiced)
 
 
 def validate_invoiced_on_submit(item):
@@ -792,102 +787,3 @@ def render_doc_as_html(doctype, docname, exclude_fields = []):
 		doc_html = "<div class='small'><div class='col-md-12 text-right'><a class='btn btn-default btn-xs' href='/app/Form/%s/%s'></a></div>" %(doctype, docname) + doc_html + '</div>'
 
 	return {'html': doc_html}
-
-
-def update_address_links(address, method):
-	'''
-	Hook validate Address
-	If Patient is linked in Address, also link the associated Customer
-	'''
-	if 'Healthcare' not in frappe.get_active_domains():
-		return
-
-	patient_links = list(filter(lambda link: link.get('link_doctype') == 'Patient', address.links))
-
-	for link in patient_links:
-		customer = frappe.db.get_value('Patient', link.get('link_name'), 'customer')
-		if customer and not address.has_link('Customer', customer):
-			address.append('links', dict(link_doctype = 'Customer', link_name = customer))
-
-
-def update_patient_email_and_phone_numbers(contact, method):
-	'''
-	Hook validate Contact
-	Update linked Patients' primary mobile and phone numbers
-	'''
-	if 'Healthcare' not in frappe.get_active_domains():
-		return
-
-	if contact.is_primary_contact and (contact.email_id or contact.mobile_no or contact.phone):
-		patient_links = list(filter(lambda link: link.get('link_doctype') == 'Patient', contact.links))
-
-		for link in patient_links:
-			contact_details = frappe.db.get_value('Patient', link.get('link_name'), ['email', 'mobile', 'phone'], as_dict=1)
-			if contact.email_id and contact.email_id != contact_details.get('email'):
-				frappe.db.set_value('Patient', link.get('link_name'), 'email', contact.email_id)
-			if contact.mobile_no and contact.mobile_no != contact_details.get('mobile'):
-				frappe.db.set_value('Patient', link.get('link_name'), 'mobile', contact.mobile_no)
-			if contact.phone and contact.phone != contact_details.get('phone'):
-				frappe.db.set_value('Patient', link.get('link_name'), 'phone', contact.phone)
-
-
-def create_insurance_claim(doc, service_doctype, service, qty, billing_item):
-	from erpnext.healthcare.doctype.healthcare_service_insurance_coverage.healthcare_service_insurance_coverage import get_service_insurance_coverage_details
-	insurance_details = get_service_insurance_coverage_details(service_doctype, service, billing_item, doc.insurance_subscription)
-	if insurance_details:
-		insurance_subscription = frappe.get_doc('Healthcare Insurance Subscription', doc.insurance_subscription)
-		price_list_rate = get_insurance_price_list_rate(insurance_subscription.healthcare_insurance_coverage_plan, insurance_subscription.insurance_company, billing_item)
-		insurance_claim = frappe.new_doc('Healthcare Insurance Claim')
-		insurance_claim.patient = doc.patient
-		insurance_claim.reference_dt = doc.doctype
-		insurance_claim.reference_dn = doc.name
-		insurance_claim.insurance_subscription = doc.insurance_subscription
-		insurance_claim.insurance_company = doc.insurance_company
-		insurance_claim.healthcare_service_type = service_doctype
-		insurance_claim.service_template = service
-		insurance_claim.approval_status = 'Approved' if insurance_details.is_auto_approval else 'Pending'
-		insurance_claim.claim_approval_mode = 'Automatic' if insurance_details.is_auto_approval else ''
-		insurance_claim.claim_posting_date = nowdate()
-		insurance_claim.quantity = qty
-		insurance_claim.service_doctype = doc.doctype
-		insurance_claim.service_item = billing_item
-		insurance_claim.discount = insurance_details.discount
-		insurance_claim.price_list_rate = price_list_rate
-		insurance_claim.amount = float(price_list_rate) * float(qty)
-		if insurance_claim.discount and float(insurance_claim.discount) > 0:
-			insurance_claim.discount_amount = float(insurance_claim.price_list_rate) * float(insurance_claim.discount) * 0.01
-			insurance_claim.amount = float(price_list_rate - insurance_claim.discount_amount) * float(qty)
-		insurance_claim.coverage = insurance_details.coverage
-		insurance_claim.coverage_amount = float(insurance_claim.amount) * 0.01 * float(insurance_claim.coverage)
-		insurance_claim.save(ignore_permissions=True)
-		insurance_claim.submit()
-		return insurance_claim.name , insurance_claim.approval_status
-	return False, False
-
-def get_insurance_price_list_rate(healthcare_insurance_coverage_plan, insurance_company, billing_item):
-	rate = 0.0
-	if healthcare_insurance_coverage_plan:
-		price_list = frappe.db.get_value('Healthcare Insurance Coverage Plan', healthcare_insurance_coverage_plan, 'price_list')
-		if not price_list:
-			price_list = frappe.db.get_value('Healthcare Insurance Contract', {'insurance_company': insurance_company}, 'default_price_list')
-			if not price_list:
-				price_list = frappe.db.get_value('Selling Settings', None, 'selling_price_list')
-		if price_list:
-			item_price = frappe.db.exists('Item Price',
-						{
-							'item_code': billing_item,
-							'price_list': price_list
-						})
-			if item_price:
-				rate = frappe.db.get_value('Item Price', item_price, 'price_list_rate')
-				print(rate)
-	return rate
-
-def update_insurance_claim(insurance_claim, sales_invoice_name, posting_date, total_amount):
-	insurance_claim = frappe.get_doc('Healthcare Insurance Claim', insurance_claim)
-	insurance_claim.sales_invoice = sales_invoice_name
-	insurance_claim.sales_invoice_posting_date = posting_date
-	insurance_claim.billing_date = nowdate()
-	insurance_claim.billing_amount = total_amount
-	insurance_claim.status = 'Invoiced'
-	insurance_claim.save(ignore_permissions= True)

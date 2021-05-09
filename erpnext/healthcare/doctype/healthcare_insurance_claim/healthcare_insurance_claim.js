@@ -23,8 +23,8 @@ frappe.ui.form.on('Healthcare Insurance Claim', {
 		});
 
 		frm.set_query('healthcare_service_type', function() {
-			let service_doctypes = ['Medication', 'Therapy Type', 'Lab Test Template',
-				'Clinical Procedure Template'];
+			let service_doctypes = ['Therapy Type', 'Lab Test Template',
+				'Clinical Procedure Template', 'Appointment Type'];
 			return {
 				filters: {
 					name: ['in', service_doctypes]

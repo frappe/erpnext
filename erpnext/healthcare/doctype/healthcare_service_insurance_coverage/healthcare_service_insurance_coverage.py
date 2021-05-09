@@ -81,25 +81,25 @@ def get_service_insurance_coverage_details(service_doctype, service, service_ite
 			return
 
 		if any((coverage['healthcare_service_template'] == service) for coverage in coverage_list):
-			coverage, discount, is_auto_approval = get_insurance_coverage_details(coverage_plan, service=service)
-			insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
+			coverage, discount, claim_approval_mode = get_insurance_coverage_details(coverage_plan, service=service)
+			insurance_details = frappe._dict({'claim_approval_mode': claim_approval_mode, 'discount': discount, 'coverage': coverage})
 
 		elif any((coverage['item'] == service_item) for coverage in coverage_list):
-			coverage, discount, is_auto_approval = get_insurance_coverage_details(coverage_plan, service_item=service_item)
-			insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
+			coverage, discount, claim_approval_mode = get_insurance_coverage_details(coverage_plan, service_item=service_item)
+			insurance_details = frappe._dict({'claim_approval_mode': claim_approval_mode, 'discount': discount, 'coverage': coverage})
 
 		else:
 			medical_code = frappe.db.get_value(service_doctype, service, 'medical_code')
 			if medical_code:
 				if any((coverage['medical_code'] == medical_code) for coverage in coverage_list):
-					coverage, discount, is_auto_approval = get_insurance_coverage_details(coverage_plan, medical_code=medical_code)
-					insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
+					coverage, discount, claim_approval_mode = get_insurance_coverage_details(coverage_plan, medical_code=medical_code)
+					insurance_details = frappe._dict({'claim_approval_mode': claim_approval_mode, 'discount': discount, 'coverage': coverage})
 			else:
 				item_group = frappe.db.get_value('Item', service_item, 'item_group')
 				if item_group:
 					if any((coverage['item_group'] == item_group) for coverage in coverage_list):
-						coverage, discount, is_auto_approval = get_insurance_coverage_details(coverage_plan, item_group=item_group)
-						insurance_details = frappe._dict({'is_auto_approval': is_auto_approval, 'discount': discount, 'coverage': coverage})
+						coverage, discount, claim_approval_mode = get_insurance_coverage_details(coverage_plan, item_group=item_group)
+						insurance_details = frappe._dict({'claim_approval_mode': claim_approval_mode, 'discount': discount, 'coverage': coverage})
 
 	return insurance_details
 
@@ -107,7 +107,7 @@ def get_service_insurance_coverage_details(service_doctype, service, service_ite
 def get_insurance_coverage_details(coverage_plan, service=None, service_item=None,
 	medical_code=None, item_group=None):
 	coverage = discount = 0
-	is_auto_approval = True
+	claim_approval_mode = 'Automatic'
 
 	filters = {'healthcare_insurance_coverage_plan': coverage_plan, 'is_active': 1}
 
@@ -131,11 +131,9 @@ def get_insurance_coverage_details(coverage_plan, service=None, service_item=Non
 
 		coverage = insurance_coverage.coverage
 		discount = insurance_coverage.discount
+		claim_approval_mode = insurance_coverage.claim_approval_mode
 
-		if insurance_coverage.claim_approval_mode != 'Automatic':
-			is_auto_approval = False
-
-	return coverage, discount, is_auto_approval
+	return coverage, discount, claim_approval_mode
 
 
 def is_valid_insurance(insurance_subscription, posting_date):

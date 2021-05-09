@@ -12,6 +12,7 @@ from erpnext.healthcare.doctype.lab_test.lab_test import create_sample_doc
 from erpnext.stock.stock_ledger import get_previous_sle
 from erpnext.stock.get_item_details import get_item_details
 from frappe.model.mapper import get_mapped_doc
+from erpnext.healthcare.doctype.healthcare_insurance_claim.healthcare_insurance_claim import make_insurance_claim
 
 class ClinicalProcedure(Document):
 	def validate(self):
@@ -46,7 +47,13 @@ class ClinicalProcedure(Document):
 		self.reload()
 
 	def on_submit(self):
-		make_insurance_claim(self)
+		if self.insurance_subscription and not self.insurance_claim:
+			make_insurance_claim(
+				doc=self,
+				service_doctype='Clinical Procedure Template',
+				service=self.procedure_template,
+				qty=1
+			)
 
 	def set_status(self):
 		if self.docstatus == 0:
@@ -258,14 +265,3 @@ def make_procedure(source_name, target_doc=None):
 		}, target_doc, set_missing_values)
 
 	return doc
-
-
-def make_insurance_claim(doc):
-	if doc.insurance_subscription and not doc.insurance_claim:
-		from erpnext.healthcare.utils import create_insurance_claim
-		billing_item = frappe.get_cached_value('Clinical Procedure Template', doc.procedure_template, 'item')
-		insurance_claim, approval_status = create_insurance_claim(doc, 'Clinical Procedure Template', doc.procedure_template, 1, billing_item)
-		if insurance_claim:
-			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
-			frappe.set_value(doc.doctype, doc.name ,'approval_status', approval_status)
-			doc.reload()

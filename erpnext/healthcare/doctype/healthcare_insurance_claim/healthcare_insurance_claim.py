@@ -5,8 +5,9 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import getdate
+from frappe.utils import getdate, flt
 from frappe.model.document import Document
+from erpnext.healthcare.doctype.healthcare_service_insurance_coverage.healthcare_service_insurance_coverage import get_service_insurance_coverage_details
 
 class HealthcareInsuranceClaim(Document):
 	def on_update(self):
@@ -75,6 +76,7 @@ class HealthcareInsuranceClaim(Document):
 
 		self.db_set('ref_journal_entry', journal_entry.name)
 
+
 @frappe.whitelist()
 def create_insurance_coverage(doc):
 	from six import string_types
@@ -109,3 +111,104 @@ def create_insurance_coverage(doc):
 	coverage_service.start_date = doc.claim_posting_date or getdate()
 	coverage_service.end_date = doc.approval_validity_end_date
 	return coverage_service
+
+
+def make_insurance_claim(doc, service_doctype, service, qty, billing_item=None):
+	insurance_details = get_insurance_details(doc, service_doctype, service, billing_item)
+
+	if not insurance_details:
+		return
+
+	claim = frappe.new_doc('Healthcare Insurance Claim')
+	claim.patient = doc.patient
+	claim.reference_dt = doc.doctype
+	claim.reference_dn = doc.name
+	claim.insurance_subscription = doc.insurance_subscription
+	claim.insurance_company = doc.insurance_company
+	claim.healthcare_service_type = service_doctype
+	claim.service_template = service
+	claim.approval_status = 'Automatic' if insurance_details.claim_approval_mode == 'Automatic' else 'Pending'
+	claim.claim_approval_mode = insurance_details.claim_approval_mode
+	claim.claim_posting_date = getdate()
+	claim.quantity = qty
+	claim.service_doctype = doc.doctype
+	claim.service_item = billing_item
+	claim.discount = insurance_details.discount
+	claim.price_list_rate = insurance_details.price_list_rate
+	claim.amount = flt(insurance_details.price_list_rate) * flt(qty)
+
+	if claim.discount:
+		claim.discount_amount = flt(claim.price_list_rate) * flt(claim.discount) * 0.01
+		claim.amount = flt(claim.price_list_rate - claim.discount_amount) * flt(qty)
+
+	claim.coverage = insurance_details.coverage
+	claim.coverage_amount = flt(claim.amount) * 0.01 * flt(claim.coverage)
+	claim.flags.ignore_permissions = True
+	claim.flags.ignore_mandatory = True
+	claim.submit()
+
+	update_claim_status_in_service(doc, claim)
+
+
+def get_insurance_details(doc, service_doctype, service, billing_item=None):
+	if not billing_item:
+		billing_item = frappe.get_cached_value(service_doctype, service, 'item')
+
+	insurance_details = get_service_insurance_coverage_details(service_doctype, service, billing_item, doc.insurance_subscription)
+
+	if not insurance_details:
+		frappe.msgprint(_('Insurance Coverage not found for {0}: {1}').format(
+			service_doctype, frappe.bold(service)))
+		return
+
+	insurance_subscription = frappe.db.get_value('Healthcare Insurance Subscription', doc.insurance_subscription,
+		fields=['insurance_company', 'healthcare_insurance_coverage_plan'], as_dict=True)
+	price_list_rate = get_insurance_price_list_rate(insurance_subscription, billing_item)
+
+	insurance_details.update({'price_list_rate': price_list_rate})
+
+	return insurance_details
+
+
+def get_insurance_price_list_rate(insurance_subscription, billing_item):
+	rate = 0.0
+
+	if insurance_subscription.healthcare_insurance_coverage_plan:
+		price_list = frappe.db.get_value('Healthcare Insurance Coverage Plan', insurance_subscription.healthcare_insurance_coverage_plan, 'price_list')
+		if not price_list:
+			price_list = frappe.db.get_value('Healthcare Insurance Contract', {'insurance_company': insurance_subscription.insurance_company}, 'default_price_list')
+			if not price_list:
+				price_list = frappe.db.get_single_value('Selling Settings', 'selling_price_list')
+
+		if price_list:
+			item_price = frappe.db.exists('Item Price', {
+				'item_code': billing_item,
+				'price_list': price_list
+			})
+			if item_price:
+				rate = frappe.db.get_value('Item Price', item_price, 'price_list_rate')
+
+	return rate
+
+
+def update_claim_status_in_doc(doc, claim):
+	if claim:
+		doc.reload()
+		doc.db_set('insurance_claim', claim.name)
+		doc.db_set('approval_status', claim.approval_status)
+
+		frappe.msgprint(_('Healthcare Insurance Claim {0} created successfully').format(
+			get_link_to_form('Healthcare Insurance Claim', claim.name)),
+			title=_('Success'), indicator='green')
+
+
+def update_insurance_claim(insurance_claim, sales_invoice_name, posting_date, total_amount):
+	insurance_claim = frappe.get_doc('Healthcare Insurance Claim', insurance_claim)
+	insurance_claim.sales_invoice = sales_invoice_name
+	insurance_claim.sales_invoice_posting_date = posting_date
+	insurance_claim.billing_date = getdate()
+	insurance_claim.billing_amount = total_amount
+	insurance_claim.status = 'Invoiced'
+	insurance_claim.flags.ignore_mandatory = True
+	insurance_claim.flags.ignore_permissions = True
+	insurance_claim.save()

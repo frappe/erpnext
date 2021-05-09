@@ -10,6 +10,7 @@ from frappe import _
 from frappe.model.document import Document
 from frappe.utils import getdate
 from six import string_types
+from erpnext.healthcare.doctype.healthcare_insurance_claim.healthcare_insurance_claim import make_insurance_claim
 
 class HealthcareServiceOrder(Document):
 	def validate(self):
@@ -17,8 +18,15 @@ class HealthcareServiceOrder(Document):
 		self.set_order_details()
 		self.set_title()
 
-	def after_insert(self):
-		make_insurance_claim(self)
+	def on_submit(self):
+		if self.insurance_subscription and not self.insurance_claim:
+			make_insurance_claim(
+				doc=self,
+				service_doctype=self.order_doctype,
+				service=self.order_template,
+				qty=self.quantity,
+				billing_item=self.billing_item
+			)
 
 	def set_title(self):
 		if frappe.flags.in_import and self.title:
@@ -125,12 +133,3 @@ def make_therapy_session(service_order):
 	doc.medical_code = service_order.medical_code
 
 	return doc
-
-def make_insurance_claim(doc):
-	if doc.insurance_subscription and not doc.insurance_claim:
-		from erpnext.healthcare.utils import create_insurance_claim
-		insurance_claim, approval_status = create_insurance_claim(doc, doc.order_doctype, doc.order, doc.quantity, doc.billing_item)
-		if insurance_claim:
-			frappe.set_value(doc.doctype, doc.name ,'insurance_claim', insurance_claim)
-			frappe.set_value(doc.doctype, doc.name ,'approval_status', approval_status)
-			doc.reload()

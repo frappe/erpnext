@@ -54,10 +54,15 @@
   "paid_amount",
   "ref_sales_invoice",
   "section_break_3",
-  "referring_practitioner",
   "reminded",
   "column_break_36",
-  "notes"
+  "notes",
+  "section_break_19",
+  "column_break_23",
+  "column_break_27",
+  "emergency_section",
+  "column_break_3",
+  "section_break_5"
  ],
  "fields": [
   {
@@ -418,6 +423,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "appointment_type",
    "fieldname": "insurance_subscription",
    "fieldtype": "Link",
    "label": "Insurance Subscription",
@@ -441,7 +447,7 @@
   }
  ],
  "links": [],
- "modified": "2021-05-06 11:59:40.770467",
+ "modified": "2021-05-09 21:05:08.353654",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Patient Appointment",
