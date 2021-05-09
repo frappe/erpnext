@@ -4,6 +4,8 @@ on:
   pull_request:
     branches:
       - develop
+      - version-13-hotfix
+      - version-13-pre-release
 jobs:
   semgrep:
     name: Frappe Linter
