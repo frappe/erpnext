@@ -170,6 +170,7 @@ class PaymentRequest(Document):
 			party_amount=party_amount, bank_account=self.payment_account, bank_amount=bank_amount)
 
 		payment_entry.update({
+			"bank_account": self.payment_account,
 			"reference_no": self.name,
 			"reference_date": nowdate(),
 			"remarks": "Payment Entry against {0} {1} via Payment Request {2}".format(self.reference_doctype,
