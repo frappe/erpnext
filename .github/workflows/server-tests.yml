@@ -72,9 +72,10 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Tests
-        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --build-number ${{ matrix.container }} --total-builds 3 --with-coverage
+        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage
         env:
           TYPE: server
+          CI_BUILD_ID: ${{ github.run_id }}
 
       - name: Upload Coverage Data
         run: |
