@@ -1329,7 +1329,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 
 		this.toggle_item_grid_columns(company_currency);
 
-		if(this.frm.doc.operations && this.frm.doc.operations.length > 0) {
+		if (this.frm.doc.operations && this.frm.doc.operations.length > 0) {
 			this.frm.set_currency_labels(["operating_cost", "hour_rate"], this.frm.doc.currency, "operations");
 			this.frm.set_currency_labels(["base_operating_cost", "base_hour_rate"], company_currency, "operations");
 
@@ -1340,7 +1340,7 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		if(this.frm.doc.scrap_items && this.frm.doc.scrap_items.length > 0) {
+		if (this.frm.doc.scrap_items && this.frm.doc.scrap_items.length > 0) {
 			this.frm.set_currency_labels(["rate", "amount"], this.frm.doc.currency, "scrap_items");
 			this.frm.set_currency_labels(["base_rate", "base_amount"], company_currency, "scrap_items");
 
@@ -1351,13 +1351,13 @@ erpnext.TransactionController = erpnext.taxes_and_totals.extend({
 			});
 		}
 
-		if(this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
+		if (this.frm.doc.taxes && this.frm.doc.taxes.length > 0) {
 			this.frm.set_currency_labels(["tax_amount", "total", "tax_amount_after_discount"], this.frm.doc.currency, "taxes");
 
 			this.frm.set_currency_labels(["base_tax_amount", "base_total", "base_tax_amount_after_discount"], company_currency, "taxes");
 		}
 
-		if(this.frm.doc.advances && this.frm.doc.advances.length > 0) {
+		if (this.frm.doc.advances && this.frm.doc.advances.length > 0) {
 			this.frm.set_currency_labels(["advance_amount", "allocated_amount"],
 				this.frm.doc.party_account_currency, "advances");
 		}
