@@ -316,9 +316,10 @@ class TestStockLedgerEntry(unittest.TestCase):
 		# Set User with Stock User role but not Stock Manager
 		try:
 			user = frappe.get_doc("User", "test@example.com")
-			frappe.set_user(user.name)
 			user.add_roles("Stock User")
 			user.remove_roles("Stock Manager")
+
+			frappe.set_user(user.name)
 
 			stock_entry_on_today = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100)
 			back_dated_se_1 = make_stock_entry(target="_Test Warehouse - _TC", qty=10, basic_rate=100,
