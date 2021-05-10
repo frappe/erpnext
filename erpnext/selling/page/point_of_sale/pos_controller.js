@@ -58,7 +58,7 @@ erpnext.PointOfSale.Controller = class {
 		}
 		const pos_profile_query = {
 			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-			filters: { company: frappe.defaults.get_default('company') }
+			filters: { company: dialog.fields_dict.company.get_value() }
 		}
 		const dialog = new frappe.ui.Dialog({
 			title: __('Create POS Opening Entry'),
