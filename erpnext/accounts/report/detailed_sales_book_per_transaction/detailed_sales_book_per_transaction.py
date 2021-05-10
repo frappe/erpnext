@@ -37,27 +37,28 @@ def return_data(filters):
 
 		split_serie = salary_slip.naming_series.split('-')
 		serie =  "{}-{}".format(split_serie[0], split_serie[1])		
-			
-		total_exempt = salary_slip.total_exempt
-		total_exonerated = salary_slip.total_exonerated
-		taxed_sales15 = salary_slip.taxed_sales15
-		isv15 += salary_slip.isv15
-		taxed_sales18 = salary_slip.taxed_sales18
-		isv18 = salary_slip.isv18
-		is_row = True
-		split_final_range = salary_slip.name.split("-")
-		final_range = split_final_range[3]
+
+		if serie_number == serie:	
+			total_exempt = salary_slip.total_exempt
+			total_exonerated = salary_slip.total_exonerated
+			taxed_sales15 = salary_slip.taxed_sales15
+			isv15 += salary_slip.isv15
+			taxed_sales18 = salary_slip.taxed_sales18
+			isv18 = salary_slip.isv18
+			is_row = True
+			split_final_range = salary_slip.name.split("-")
+			final_range = split_final_range[3]
 		
-		grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
+			grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
 
-		final_range = "{}-{}".format(initial_range, final_range)
+			final_range = "{}-{}".format(initial_range, final_range)
 
-		row = [posting_date, rtn, salary_slip.client_name, type_transaction, serie_number,salary_slip.name, salary_slip.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
-		data.append(row)
+			row = [posting_date, rtn, salary_slip.client_name, type_transaction, serie_number,salary_slip.name, salary_slip.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+			data.append(row)
 	
 	conditions = return_filters_debit_note(filters, from_date, to_date)
 
-	debit_notes = frappe.get_all("Debit Note CXC", ["name", "customer", "cai", "naming_series", "posting_date", "isv_18", "isv_15", "outstanding_amount"], filters = conditions, order_by = "name asc")
+	debit_notes = frappe.get_all("Debit Note CXC", ["name", "customer", "cai", "naming_series", "posting_date", "isv_18", "isv_15", "outstanding_amount", "amount"], filters = conditions, order_by = "name asc")
 
 	for debit_note in debit_notes:
 		split_date = str(debit_note.posting_date).split("T")[0].split("-")
@@ -78,37 +79,38 @@ def return_data(filters):
 		serie =  "{}-{}".format(split_serie[0], split_serie[1])		
 		rtn = ""
 
-		split_initial_range = debit_note.name.split("-")
-		initial_range = split_initial_range[3]
+		if serie_number == serie:
+			split_initial_range = debit_note.name.split("-")
+			initial_range = split_initial_range[3]
 
-		isv15 += debit_note.isv_15
-		isv18 = debit_note.isv_18
-		split_final_range = debit_note.name.split("-")
-		final_range = split_final_range[3]
+			isv15 += debit_note.isv_15
+			isv18 = debit_note.isv_18
+			split_final_range = debit_note.name.split("-")
+			final_range = split_final_range[3]
 
-		multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "base_isv"], filters = {"parent": debit_note.name})
+			multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "base_isv"], filters = {"parent": debit_note.name})
 
-		for multiple_taxe in multiples_taxes:
-			item_tax_templates = frappe.get_all("Item Tax Template", ["name"], filters = {"parent": multiple_taxe.name})
+			for multiple_taxe in multiples_taxes:
+				item_tax_templates = frappe.get_all("Item Tax Template", ["name"], filters = {"parent": multiple_taxe.name})
 
-			for tax_tamplate in item_tax_templates:
+				for tax_tamplate in item_tax_templates:
 
-				tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
+					tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
 								
-				for tax_detail in tax_details:
+					for tax_detail in tax_details:
 
-					if tax_detail.tax_rate == 15:
-						taxed_sales15 += multiple_taxe.base_isv
+						if tax_detail.tax_rate == 15:
+							taxed_sales15 += multiple_taxe.base_isv
 								
-					if tax_detail.tax_rate == 18:
-						taxed_sales18 += multiple_taxe.base_isv							
+						if tax_detail.tax_rate == 18:
+							taxed_sales18 += multiple_taxe.base_isv							
 		
-		grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
+			grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
 
-		final_range = "{}-{}".format(initial_range, final_range)
+			final_range = "{}-{}".format(initial_range, final_range)
 
-		row = [posting_date,rtn,debit_note.customer, type_transaction, serie_number, debit_note.name, debit_note.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
-		data.append(row)
+			row = [posting_date,rtn,debit_note.customer, type_transaction, serie_number, debit_note.name, debit_note.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+			data.append(row)
 
 	return data
 
