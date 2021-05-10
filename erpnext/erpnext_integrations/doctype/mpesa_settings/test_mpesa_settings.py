@@ -81,7 +81,7 @@ class TestMpesaSettings(unittest.TestCase):
 		integration_request.reload()
 		self.assertEqual(pos_invoice.mpesa_receipt_number, "LGR7OWQX0R")
 		self.assertEqual(integration_request.status, "Completed")
-		
+
 		frappe.db.set_value("Customer", "_Test Customer", "default_currency", "")
 		integration_request.delete()
 		pr.reload()
@@ -139,7 +139,7 @@ class TestMpesaSettings(unittest.TestCase):
 		pr.cancel()
 		pr.delete()
 		pos_invoice.delete()
-	
+
 	def test_processing_of_only_one_succes_callback_payload(self):
 		create_mpesa_settings(payment_gateway_name="Payment")
 		mpesa_account = frappe.db.get_value("Payment Gateway Account", {"payment_gateway": 'Mpesa-Payment'}, "payment_account")
