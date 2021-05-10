@@ -51,7 +51,11 @@ def get_period_list(from_fiscal_year, to_fiscal_year, period_start_date, period_
 			"from_date": start_date
 		})
 
-		to_date = add_months(start_date, months_to_add)
+		if i==0 and filter_based_on == 'Date Range':
+			to_date = add_months(get_first_day(start_date), months_to_add)
+		else:
+			to_date = add_months(start_date, months_to_add)
+
 		start_date = to_date
 
 		# Subtract one day from to_date, as it may be first day in next fiscal year or month

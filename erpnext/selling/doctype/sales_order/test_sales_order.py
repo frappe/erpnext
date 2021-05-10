@@ -1,11 +1,12 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 from __future__ import unicode_literals
-import frappe
 import json
-from frappe.utils import flt, add_days, nowdate
-import frappe.permissions
 import unittest
+import frappe
+import frappe.permissions
+from frappe.utils import flt, add_days, nowdate
+from frappe.core.doctype.user_permission.test_user_permission import create_user
 from erpnext.selling.doctype.sales_order.sales_order \
 	import make_material_request, make_delivery_note, make_sales_invoice, WarehouseRequired
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
@@ -340,6 +341,9 @@ class TestSalesOrder(unittest.TestCase):
 		prev_total = so.get("base_total")
 		prev_total_in_words = so.get("base_in_words")
 
+		# get reserved qty before update items
+		reserved_qty_for_second_item = get_reserved_qty("_Test Item 2")
+
 		first_item_of_so = so.get("items")[0]
 		trans_item = json.dumps([
 			{'item_code' : first_item_of_so.item_code, 'rate' : first_item_of_so.rate, \
@@ -353,6 +357,10 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(so.get("items")[-1].rate, 200)
 		self.assertEqual(so.get("items")[-1].qty, 7)
 		self.assertEqual(so.get("items")[-1].amount, 1400)
+
+		# reserved qty should increase after adding row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item + 7)
+
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 		updated_total = so.get("base_total")
@@ -372,6 +380,9 @@ class TestSalesOrder(unittest.TestCase):
 		create_dn_against_so(so.name, 2)
 		make_sales_invoice(so.name)
 
+		# get reserved qty before update items
+		reserved_qty_for_second_item = get_reserved_qty("_Test Item 2")
+
 		# add an item so as to try removing items
 		trans_item = json.dumps([
 			{"item_code": '_Test Item', "qty": 5, "rate":1000, "docname": so.get("items")[0].name},
@@ -380,6 +391,9 @@ class TestSalesOrder(unittest.TestCase):
 		update_child_qty_rate('Sales Order', trans_item, so.name)
 		so.reload()
 		self.assertEqual(len(so.get("items")), 2)
+
+		# reserved qty should increase after adding row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item + 2)
 
 		# check if delivered items can be removed
 		trans_item = json.dumps([{
@@ -401,6 +415,10 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.reload()
 		self.assertEqual(len(so.get("items")), 1)
+
+		# reserved qty should decrease (back to initial) after deleting row
+		self.assertEqual(get_reserved_qty('_Test Item 2'), reserved_qty_for_second_item)
+
 		self.assertEqual(so.status, 'To Deliver and Bill')
 
 
@@ -444,10 +462,8 @@ class TestSalesOrder(unittest.TestCase):
 	def test_update_child_perm(self):
 		so = make_sales_order(item_code= "_Test Item", qty=4)
 
-		user = 'test@example.com'
-		test_user = frappe.get_doc('User', user)
-		test_user.add_roles("Accounts User")
-		frappe.set_user(user)
+		test_user = create_user("test_so_child_perms@example.com", "Accounts User")
+		frappe.set_user(test_user.name)
 
 		# update qty
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 200, 'qty' : 7, 'docname': so.items[0].name}])
@@ -456,18 +472,14 @@ class TestSalesOrder(unittest.TestCase):
 		# add new item
 		trans_item = json.dumps([{'item_code' : '_Test Item', 'rate' : 100, 'qty' : 2}])
 		self.assertRaises(frappe.ValidationError, update_child_qty_rate,'Sales Order', trans_item, so.name)
-		test_user.remove_roles("Accounts User")
-		frappe.set_user("Administrator")
 
 	def test_update_child_qty_rate_with_workflow(self):
 		from frappe.model.workflow import apply_workflow
 
-		frappe.set_user("Administrator")
 		workflow = make_sales_order_workflow()
 		so = make_sales_order(item_code= "_Test Item", qty=1, rate=150, do_not_submit=1)
 		apply_workflow(so, 'Approve')
 
-		frappe.set_user("Administrator")
 		user = 'test@example.com'
 		test_user = frappe.get_doc('User', user)
 		test_user.add_roles("Sales User", "Test Junior Approver")
@@ -508,11 +520,17 @@ class TestSalesOrder(unittest.TestCase):
 
 		so = make_sales_order(item_code = "_Test Item", warehouse=None)
 
+		# get reserved qty of packed item
+		existing_reserved_qty = get_reserved_qty("_Packed Item")
+
 		added_item = json.dumps([{"item_code" : "_Product Bundle Item", "rate" : 200, 'qty' : 2}])
 		update_child_qty_rate('Sales Order', added_item, so.name)
 
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 4)
+
+		# reserved qty in packed item should increase after adding bundle item
+		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 4)
 
 		# test uom and conversion factor change
 		update_uom_conv_factor = json.dumps([{
@@ -527,6 +545,9 @@ class TestSalesOrder(unittest.TestCase):
 
 		so.reload()
 		self.assertEqual(so.packed_items[0].qty, 8)
+
+		# reserved qty in packed item should increase after changing bundle item uom
+		self.assertEqual(get_reserved_qty("_Packed Item"), existing_reserved_qty + 8)
 
 	def test_update_child_with_tax_template(self):
 		"""
@@ -555,12 +576,12 @@ class TestSalesOrder(unittest.TestCase):
 		new_item_with_tax = frappe.get_doc("Item", "Test Item with Tax")
 
 		new_item_with_tax.append("taxes", {
-			"item_tax_template": "Test Update Items Template",
+			"item_tax_template": "Test Update Items Template - _TC",
 			"valid_from": nowdate()
 		})
 		new_item_with_tax.save()
 
-		tax_template = "_Test Account Excise Duty @ 10"
+		tax_template = "_Test Account Excise Duty @ 10 - _TC"
 		item =  "_Test Item Home Desktop 100"
 		if not frappe.db.exists("Item Tax", {"parent":item, "item_tax_template":tax_template}):
 			item_doc = frappe.get_doc("Item", item)
@@ -614,37 +635,35 @@ class TestSalesOrder(unittest.TestCase):
 		so.cancel()
 		so.delete()
 		new_item_with_tax.delete()
-		frappe.get_doc("Item Tax Template", "Test Update Items Template").delete()
+		frappe.get_doc("Item Tax Template", "Test Update Items Template - _TC").delete()
 		frappe.db.set_value("Stock Settings", None, "default_warehouse", old_stock_settings_value)
 
 	def test_warehouse_user(self):
-		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
-		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.add_user_permission("Company", "_Test Company 1", "test2@example.com")
-
-		test_user = frappe.get_doc("User", "test@example.com")
-		test_user.add_roles("Sales User", "Stock User")
-		test_user.remove_roles("Sales Manager")
+		test_user = create_user("test_so_warehouse_user@example.com", "Sales User", "Stock User")
 
 		test_user_2 = frappe.get_doc("User", "test2@example.com")
 		test_user_2.add_roles("Sales User", "Stock User")
 		test_user_2.remove_roles("Sales Manager")
 
-		frappe.set_user("test@example.com")
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 1 - _TC", test_user.name)
+		frappe.permissions.add_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", test_user_2.name)
+		frappe.permissions.add_user_permission("Company", "_Test Company 1", test_user_2.name)
 
-		so = make_sales_order(company="_Test Company 1",
+		frappe.set_user(test_user.name)
+
+		so = make_sales_order(company="_Test Company 1", customer="_Test Customer 1",
 			warehouse="_Test Warehouse 2 - _TC1", do_not_save=True)
 		so.conversion_rate = 0.02
 		so.plc_conversion_rate = 0.02
 		self.assertRaises(frappe.PermissionError, so.insert)
 
-		frappe.set_user("test2@example.com")
+		frappe.set_user(test_user_2.name)
 		so.insert()
 
 		frappe.set_user("Administrator")
-		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", "test@example.com")
-		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", "test2@example.com")
-		frappe.permissions.remove_user_permission("Company", "_Test Company 1", "test2@example.com")
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 1 - _TC", test_user.name)
+		frappe.permissions.remove_user_permission("Warehouse", "_Test Warehouse 2 - _TC1", test_user_2.name)
+		frappe.permissions.remove_user_permission("Company", "_Test Company 1", test_user_2.name)
 
 	def test_block_delivery_note_against_cancelled_sales_order(self):
 		so = make_sales_order()
@@ -743,7 +762,7 @@ class TestSalesOrder(unittest.TestCase):
 		so = make_sales_order(item_list=so_items, do_not_submit=True)
 		so.submit()
 
-		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
+		po = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
 		po.submit()
 
 		dn = create_dn_against_so(so.name, delivered_qty=2)
@@ -825,7 +844,7 @@ class TestSalesOrder(unittest.TestCase):
 		so.submit()
 
 		# create po for only one item
-		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])
+		po1 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[0]])[0]
 		po1.submit()
 
 		self.assertEqual(so.customer, po1.customer)
@@ -835,7 +854,7 @@ class TestSalesOrder(unittest.TestCase):
 		self.assertEqual(len(po1.items), 1)
 
 		# create po for remaining item
-		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])
+		po2 = make_purchase_order_for_default_supplier(so.name, selected_items=[so_items[1]])[0]
 		po2.submit()
 
 		# teardown
@@ -845,6 +864,45 @@ class TestSalesOrder(unittest.TestCase):
 		po2.cancel()
 		so.load_from_db()
 		so.cancel()
+
+	def test_drop_shipping_full_for_default_suppliers(self):
+		"""Test if multiple POs are generated in one go against different default suppliers."""
+		from erpnext.selling.doctype.sales_order.sales_order import make_purchase_order_for_default_supplier
+
+		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 1"):
+			make_item("_Test Item for Drop Shipping 1", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		if not frappe.db.exists("Item", "_Test Item for Drop Shipping 2"):
+			make_item("_Test Item for Drop Shipping 2", {"is_stock_item": 1, "delivered_by_supplier": 1})
+
+		so_items = [
+			{
+				"item_code": "_Test Item for Drop Shipping 1",
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier'
+			},
+			{
+				"item_code": "_Test Item for Drop Shipping 2",
+				"warehouse": "",
+				"qty": 2,
+				"rate": 400,
+				"delivered_by_supplier": 1,
+				"supplier": '_Test Supplier 1'
+			}
+		]
+
+		# create so and po
+		so = make_sales_order(item_list=so_items, do_not_submit=True)
+		so.submit()
+
+		purchase_orders = make_purchase_order_for_default_supplier(so.name, selected_items=so_items)
+
+		self.assertEqual(len(purchase_orders), 2)
+		self.assertEqual(purchase_orders[0].supplier, '_Test Supplier')
+		self.assertEqual(purchase_orders[1].supplier, '_Test Supplier 1')
 
 	def test_reserved_qty_for_closing_so(self):
 		bin = frappe.get_all("Bin", filters={"item_code": "_Test Item", "warehouse": "_Test Warehouse - _TC"},

@@ -85,6 +85,7 @@ class Opportunity(TransactionBase):
 			self.opportunity_from = "Lead"
 			self.party_name = lead_name
 
+	@frappe.whitelist()
 	def declare_enquiry_lost(self, lost_reasons_list, detailed_reason=None):
 		if not self.has_active_quotation():
 			frappe.db.set(self, 'status', 'Lost')
@@ -248,7 +249,6 @@ def make_quotation(source_name, target_doc=None):
 			"doctype": "Quotation",
 			"field_map": {
 				"opportunity_from": "quotation_to",
-				"opportunity_type": "order_type",
 				"name": "enq_no",
 			}
 		},

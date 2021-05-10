@@ -98,6 +98,7 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus == 1"],
 		["Queued", "eval:self.status == 'Queued'"],
+		["Failed", "eval:self.status == 'Failed'"],
 		["Cancelled", "eval:self.docstatus == 2"],
 	]
 }
@@ -201,10 +202,14 @@ class StatusUpdater(Document):
 			get_allowance_for(item['item_code'], self.item_allowance,
 				self.global_qty_allowance, self.global_amount_allowance, qty_or_amount)
 
-		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
-		 	item[args['target_ref_field']]) * 100
+		role_allowed_to_over_deliver_receive = frappe.db.get_single_value('Stock Settings', 'role_allowed_to_over_deliver_receive')
+		role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+		role = role_allowed_to_over_deliver_receive if qty_or_amount == 'qty' else role_allowed_to_over_bill
 
-		if overflow_percent - allowance > 0.01:
+		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
+			item[args['target_ref_field']]) * 100
+
+		if overflow_percent - allowance > 0.01 and role not in frappe.get_roles():
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+allowance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
@@ -371,10 +376,12 @@ class StatusUpdater(Document):
 			ref_doc.db_set("per_billed", per_billed)
 			ref_doc.set_status(update=True)
 
-def get_allowance_for(item_code, item_allowance={}, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
+def get_allowance_for(item_code, item_allowance=None, global_qty_allowance=None, global_amount_allowance=None, qty_or_amount="qty"):
 	"""
 		Returns the allowance for the item, if not set, returns global allowance
 	"""
+	if item_allowance is None:
+		item_allowance = {}
 	if qty_or_amount == "qty":
 		if item_allowance.get(item_code, frappe._dict()).get("qty"):
 			return item_allowance[item_code].qty, item_allowance, global_qty_allowance, global_amount_allowance

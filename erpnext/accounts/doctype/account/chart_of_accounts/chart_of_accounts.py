@@ -62,10 +62,10 @@ def create_charts(company, chart_template=None, existing_company=None, custom_ch
 
 	# Rebuild NestedSet HSM tree for Account Doctype
 	# after all accounts are already inserted.
-	frappe.local.flags.ignore_on_update = True
+	frappe.local.flags.ignore_update_nsm = True
 	_import_accounts(chart, None, None, root_account=True)
 	rebuild_tree("Account", "parent_account")
-	frappe.local.flags.ignore_on_update = False
+	frappe.local.flags.ignore_update_nsm = False
 
 
 def add_suffix_if_duplicate(account_name, account_number, accounts):

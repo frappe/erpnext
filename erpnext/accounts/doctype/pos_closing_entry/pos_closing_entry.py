@@ -16,33 +16,13 @@ class POSClosingEntry(StatusUpdater):
 		if frappe.db.get_value("POS Opening Entry", self.pos_opening_entry, "status") != "Open":
 			frappe.throw(_("Selected POS Opening Entry should be open."), title=_("Invalid Opening Entry"))
 
-		self.validate_pos_closing()
 		self.validate_pos_invoices()
-	
-	def validate_pos_closing(self):
-		user = frappe.db.sql("""
-			SELECT name FROM `tabPOS Closing Entry`
-			WHERE
-				user = %(user)s AND docstatus = 1 AND pos_profile = %(profile)s AND
-				(period_start_date between %(start)s and %(end)s OR period_end_date between %(start)s and %(end)s)
-			""", {
-				'user': self.user,
-				'profile': self.pos_profile,
-				'start': self.period_start_date,
-				'end': self.period_end_date
-			})
 
-		if user:
-			bold_already_exists = frappe.bold(_("already exists"))
-			bold_user = frappe.bold(self.user)
-			frappe.throw(_("POS Closing Entry {} against {} between selected period")
-				.format(bold_already_exists, bold_user), title=_("Invalid Period"))
-	
 	def validate_pos_invoices(self):
 		invalid_rows = []
 		for d in self.pos_transactions:
 			invalid_row = {'idx': d.idx}
-			pos_invoice = frappe.db.get_values("POS Invoice", d.pos_invoice, 
+			pos_invoice = frappe.db.get_values("POS Invoice", d.pos_invoice,
 				["consolidated_invoice", "pos_profile", "docstatus", "owner"], as_dict=1)[0]
 			if pos_invoice.consolidated_invoice:
 				invalid_row.setdefault('msg', []).append(_('POS Invoice is {}').format(frappe.bold("already consolidated")))
@@ -68,16 +48,21 @@ class POSClosingEntry(StatusUpdater):
 
 		frappe.throw(error_list, title=_("Invalid POS Invoices"), as_list=True)
 
+	@frappe.whitelist()
 	def get_payment_reconciliation_details(self):
 		currency = frappe.get_cached_value('Company', self.company,  "default_currency")
 		return frappe.render_template("erpnext/accounts/doctype/pos_closing_entry/closing_voucher_details.html",
 			{"data": self, "currency": currency})
-	
+
 	def on_submit(self):
 		consolidate_pos_invoices(closing_entry=self)
-	
+
 	def on_cancel(self):
 		unconsolidate_pos_invoices(closing_entry=self)
+
+	@frappe.whitelist()
+	def retry(self):
+		consolidate_pos_invoices(closing_entry=self)
 
 	def update_opening_entry(self, for_cancel=False):
 		opening_entry = frappe.get_doc("POS Opening Entry", self.pos_opening_entry)
@@ -88,8 +73,8 @@ class POSClosingEntry(StatusUpdater):
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
 def get_cashiers(doctype, txt, searchfield, start, page_len, filters):
-	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'])
-	return [c['user'] for c in cashiers_list]
+	cashiers_list = frappe.get_all("POS Profile User", filters=filters, fields=['user'], as_list=1)
+	return [c for c in cashiers_list]
 
 @frappe.whitelist()
 def get_pos_invoices(start, end, pos_profile, user):
