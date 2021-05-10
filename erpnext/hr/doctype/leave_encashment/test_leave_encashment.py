@@ -91,7 +91,7 @@ class TestLeaveEncashment(unittest.TestCase):
 		self.assertEqual(len(leave_ledger_entry), 1)
 		self.assertEqual(leave_ledger_entry[0].employee, leave_encashment.employee)
 		self.assertEqual(leave_ledger_entry[0].leave_type, leave_encashment.leave_type)
-		self.assertEqual(leave_ledger_entry[0].leaves, leave_encashment.encashable_days *  -1)
+		self.assertEqual(leave_ledger_entry[0].leaves, leave_encashment.encashable_days * -1)
 
 		# check if leave ledger entry is deleted on cancellation
 
