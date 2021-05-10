@@ -78,65 +78,61 @@ frappe.ui.form.on('Asset', {
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 		frm.events.make_schedules_editable(frm);
 
-		if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
-			frm.add_custom_button("General Ledger", function() {
-				frappe.route_options = {
-					"voucher_no": frm.doc.name,
-					"from_date": frm.doc.available_for_use_date,
-					"to_date": frm.doc.available_for_use_date,
-					"company": frm.doc.company
-				};
-				frappe.set_route("query-report", "General Ledger");
-			});
-		}
-
 		if (frm.doc.docstatus==1) {
 			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
 				frm.add_custom_button("Transfer Asset", function() {
 					erpnext.asset.transfer_asset(frm);
-				}, __("Actions"));
+				}, __("Manage"));
 
 				frm.add_custom_button("Scrap Asset", function() {
 					erpnext.asset.scrap_asset(frm);
-				}, __("Actions"));
+				}, __("Manage"));
 
 				frm.add_custom_button("Sell Asset", function() {
 					frm.trigger("make_sales_invoice");
-				}, __("Actions"));
+				}, __("Manage"));
 
 			} else if (frm.doc.status=='Scrapped') {
 				frm.add_custom_button("Restore Asset", function() {
 					erpnext.asset.restore_asset(frm);
-				}, __("Actions"));
+				}, __("Manage"));
 			}
 
 			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
-				frm.add_custom_button(__("Asset Maintenance"), function() {
+				frm.add_custom_button(__("Maintain Asset"), function() {
 					frm.trigger("create_asset_maintenance");
-				}, __('Create'));
+				}, __("Manage"));
 			}
-			if (frm.doc.docstatus == 1) {
-				frm.add_custom_button(__("Asset Repair"), function() {
-					// frappe.model.open_mapped_doc({
-					// 	method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.make_expense_claim',
-					// 	frm: cur_frm,
-					// });
-					frm.trigger("create_asset_repair");
-				}, __("Create"));
-			}
+		
+			frm.add_custom_button(__("Repair Asset"), function() {
+				frm.trigger("create_asset_repair");
+			}, __("Manage"));
+			
 			if (frm.doc.status != 'Fully Depreciated') {
-				frm.add_custom_button(__("Asset Value Adjustment"), function() {
+				frm.add_custom_button(__("Adjust Asset Value"), function() {
 					frm.trigger("create_asset_adjustment");
-				}, __('Create'));
+				}, __("Manage"));
 			}
 
 			if (!frm.doc.calculate_depreciation) {
-				frm.add_custom_button(__("Depreciation Entry"), function() {
+				frm.add_custom_button(__("Create Depreciation Entry"), function() {
 					frm.trigger("make_journal_entry");
-				}, __('Create'));
+				}, __("Manage"));
 			}
 
-			frm.page.set_inner_btn_group_as_primary(__('Create'));
+			if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
+				frm.add_custom_button("View General Ledger", function() {
+					frappe.route_options = {
+						"voucher_no": frm.doc.name,
+						"from_date": frm.doc.available_for_use_date,
+						"to_date": frm.doc.available_for_use_date,
+						"company": frm.doc.company
+					};
+					frappe.set_route("query-report", "General Ledger");
+				}, __("Manage"));
+			}
+
+			frm.page.set_inner_btn_group_as_primary(__("Manage"));
 			frm.trigger("setup_chart");
 		}
 
