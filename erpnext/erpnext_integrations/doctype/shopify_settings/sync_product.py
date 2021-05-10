@@ -95,7 +95,7 @@ def create_item(shopify_item, warehouse, has_variant=0, attributes=None,variant_
 		"variant_of": variant_of,
 		"sync_with_shopify": 1,
 		"is_stock_item": 1,
-		"item_code": cstr(shopify_item.get("item_code")) or cstr(shopify_item.get("id")),
+		"item_code": shopify_item.get("sku") or get_sku(shopify_item) or cstr(shopify_item.get("item_code")),
 		"item_name": shopify_item.get("title", '').strip(),
 		"description": shopify_item.get("body_html") or shopify_item.get("title"),
 		"shopify_description": shopify_item.get("body_html") or shopify_item.get("title"),
@@ -141,7 +141,7 @@ def create_item_variants(shopify_item, warehouse, attributes, shopify_variants_a
 		for variant in shopify_item.get("variants"):
 			shopify_item_variant = {
 				"id" : variant.get("id"),
-				"item_code": variant.get("id"),
+				"item_code": variant.get("sku") or variant.get("id"),
 				"title": variant.get("title"),
 				"product_type": shopify_item.get("product_type"),
 				"sku": variant.get("sku"),
