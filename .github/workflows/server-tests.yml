@@ -76,7 +76,7 @@ jobs:
         env:
           TYPE: server
           CI_BUILD_ID: ${{ github.run_id }}
-          ORCHESTRATOR_URL: ${{ secrets.ORCHESTRATOR_URL }}
+          ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
 
       - name: Upload Coverage Data
         run: |
@@ -87,7 +87,6 @@ jobs:
           coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
           COVERALLS_FLAG_NAME: run-${{ matrix.container }}
           COVERALLS_SERVICE_NAME: ${{ github.event_name == 'pull_request' && 'github' || 'github-actions' }}
           COVERALLS_PARALLEL: true
