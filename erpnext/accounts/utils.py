@@ -358,12 +358,16 @@ def reconcile_against_document(args):
 		else:
 			update_reference_in_payment_entry(d, doc)
 
+		doc.db_update()
+
 		# re-submit advance entry
 		doc = frappe.get_doc(d.voucher_type, d.voucher_no)
 		doc.make_gl_entries(cancel = 0, adv_adj =1)
 
 		if d.voucher_type in ('Payment Entry', 'Journal Entry'):
 			doc.update_expense_claim()
+
+		doc.db_update()
 
 def check_if_advance_entry_modified(args):
 	"""
