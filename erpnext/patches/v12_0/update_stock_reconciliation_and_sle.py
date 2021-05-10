@@ -7,8 +7,8 @@ def execute():
 
 	frappe.db.sql("""
 		update  `tabStock Ledger Entry` sle 
-		inner join `tabStock Reconciliation` sr on sr.name=sle.voucher_no
 		set sle.reset_rate = 1
+		where voucher_type = 'Stock Reconciliation'
 	""")
 
 	frappe.db.sql("""
