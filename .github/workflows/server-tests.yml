@@ -76,6 +76,7 @@ jobs:
         env:
           TYPE: server
           CI_BUILD_ID: ${{ github.run_id }}
+          ORCHESTRATOR_URL: ${{ secrets.ORCHESTRATOR_URL }}
 
       - name: Upload Coverage Data
         run: |
