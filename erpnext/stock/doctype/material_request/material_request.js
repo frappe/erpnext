@@ -60,6 +60,7 @@ frappe.ui.form.on('Material Request', {
 	refresh: function(frm) {
 		frm.events.make_custom_buttons(frm);
 		frm.cscript.add_rounding_button();
+		frm.cscript.del_zero_qty_rows_button();
 		frm.toggle_reqd('customer', frm.doc.material_request_type=="Customer Provided");
 	},
 
@@ -385,6 +386,19 @@ erpnext.buying.MaterialRequestController = erpnext.buying.BuyingController.exten
 						}
 					}
 				});
+			})
+		}
+	},
+
+	del_zero_qty_rows_button: function () {
+		var me = this;
+		if (me.frm.doc.docstatus === 0) {
+			me.frm.fields_dict.items.grid.add_custom_button(__("Remove 0 Qty rows"),  function () {
+				$.each(me.frm.doc.items, function(i,d) {
+					if ( d.qty == 0 ) {
+						me.frm.fields_dict.items.grid.grid_rows[i].remove()
+					}
+				})
 			})
 		}
 	},

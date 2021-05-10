@@ -608,7 +608,8 @@
    "oldfieldname": "warehouse",
    "oldfieldtype": "Link",
    "options": "Warehouse",
-   "print_hide": 1
+   "print_hide": 1,
+   "search_index": 1
   },
   {
    "fieldname": "target_warehouse",
@@ -1350,7 +1351,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-05 17:37:13.591222",
+ "modified": "2021-04-13 18:12:06.399479",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice Item",

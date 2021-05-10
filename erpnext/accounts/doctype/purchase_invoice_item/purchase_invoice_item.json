@@ -445,7 +445,8 @@
    "fieldtype": "Link",
    "in_standard_filter": 1,
    "label": "Accepted Warehouse",
-   "options": "Warehouse"
+   "options": "Warehouse",
+   "search_index": 1
   },
   {
    "fieldname": "rejected_warehouse",
@@ -1214,7 +1215,7 @@
  ],
  "idx": 1,
  "istable": 1,
- "modified": "2021-04-05 17:37:13.591222",
+ "modified": "2021-04-13 18:12:09.436732",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Purchase Invoice Item",
