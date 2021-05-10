@@ -638,12 +638,11 @@ def create_asset_maintenance(asset, item_code, item_name, asset_category, compan
 	return asset_maintenance
 
 @frappe.whitelist()
-def create_asset_repair(asset, item_code, item_name):
+def create_asset_repair(asset, asset_name):
 	asset_repair = frappe.new_doc("Asset Repair")
 	asset_repair.update({
-		"asset_name": asset,
-		"item_code": item_code,
-		"item_name": item_name
+		"asset": asset,
+		"asset_name": asset_name
 	})
 	return asset_repair
 

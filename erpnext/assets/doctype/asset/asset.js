@@ -317,8 +317,7 @@ frappe.ui.form.on('Asset', {
 		frappe.call({
 			args: {
 				"asset": frm.doc.name,
-				"item_code": frm.doc.item_code,
-				"item_name": frm.doc.item_name
+				"asset_name": frm.doc.asset_name
 			},
 			method: "erpnext.assets.doctype.asset.asset.create_asset_repair",
 			callback: function(r) {
