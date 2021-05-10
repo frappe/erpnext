@@ -20,9 +20,9 @@ frappe.query_reports["Detailed sales book per transaction"] = {
 		},
 		{
 			"fieldname":"prefix",
-			"label": __("Prefix"),
+			"label": __("Serie"),
 			"fieldtype": "Link",
-			"options": "Prefix sales for days",
+			"options": "Daily summary series",
 			"reqd": 1
 		},
 	]
