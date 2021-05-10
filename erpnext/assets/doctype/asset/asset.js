@@ -115,6 +115,15 @@ frappe.ui.form.on('Asset', {
 					frm.trigger("create_asset_maintenance");
 				}, __('Create'));
 			}
+			if (frm.doc.docstatus == 1) {
+				frm.add_custom_button(__("Asset Repair"), function() {
+					// frappe.model.open_mapped_doc({
+					// 	method: 'erpnext.stock.doctype.delivery_trip.delivery_trip.make_expense_claim',
+					// 	frm: cur_frm,
+					// });
+					frm.trigger("create_asset_repair");
+				}, __("Create"));
+			}
 			if (frm.doc.status != 'Fully Depreciated') {
 				frm.add_custom_button(__("Asset Value Adjustment"), function() {
 					frm.trigger("create_asset_adjustment");
@@ -297,6 +306,21 @@ frappe.ui.form.on('Asset', {
 				"company": frm.doc.company
 			},
 			method: "erpnext.assets.doctype.asset.asset.create_asset_maintenance",
+			callback: function(r) {
+				var doclist = frappe.model.sync(r.message);
+				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
+			}
+		})
+	},
+
+	create_asset_repair: function(frm) {
+		frappe.call({
+			args: {
+				"asset": frm.doc.name,
+				"item_code": frm.doc.item_code,
+				"item_name": frm.doc.item_name
+			},
+			method: "erpnext.assets.doctype.asset.asset.create_asset_repair",
 			callback: function(r) {
 				var doclist = frappe.model.sync(r.message);
 				frappe.set_route("Form", doclist[0].doctype, doclist[0].name);
