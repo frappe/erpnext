@@ -240,6 +240,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 			item_code = "Test Extra Item 1", qty=10, basic_rate=100)
 		se2 = make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "_Test FG Item", qty=1, basic_rate=100)
+		se3 = make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Test Extra Item 2", qty=1, basic_rate=100)
 		rm_items = [
 			{
 				"item_code": item_code,
@@ -274,6 +276,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		se.cancel()
 		se1.cancel()
 		se2.cancel()
+		se3.cancel()
 		po.reload()
 		po.cancel()
 
