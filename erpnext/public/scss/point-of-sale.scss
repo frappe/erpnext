@@ -766,9 +766,10 @@
 		> .payment-modes {
 			display: flex;
 			padding-bottom: var(--padding-sm);
-			margin-bottom: var(--margin-xs);
+			margin-bottom: var(--margin-sm);
 			overflow-x: scroll;
 			overflow-y: hidden;
+			flex-shrink: 0;
 
 			> .payment-mode-wrapper {
 				min-width: 40%;
@@ -825,9 +826,24 @@
 		> .fields-numpad-container {
 			display: flex;
 			flex: 1;
+			height: 100%;
+    		position: relative;
+			justify-content: flex-end;
 
 			> .fields-section {
 				flex: 1;
+				position: absolute;
+				display: flex;
+				flex-direction: column;
+				width: 50%;
+				height: 100%;
+				top: 0;
+				left: 0;
+				padding-bottom: var(--margin-md);
+
+				.invoice-fields {
+					overflow-y: scroll;
+				}
 			}
 
 			> .number-pad {
@@ -835,6 +851,7 @@
 				display: flex;
 				justify-content: flex-end;
 				align-items: flex-end;
+				max-width: 50%;
 
 				.numpad-container {
 					display: grid;
@@ -861,6 +878,7 @@
 			margin-bottom: var(--margin-sm);
 			justify-content: center;
 			flex-direction: column;
+			flex-shrink: 0;
 
 			> .totals {
 				display: flex;
