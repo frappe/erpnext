@@ -64,6 +64,12 @@ def set_default_settings(args):
 	hr_settings.leave_status_notification_template = _("Leave Status Notification")
 	hr_settings.save()
 
+
+	payroll_settings = frappe.get_doc("Payroll Settings")
+	payroll_settings.overtime_based_on = "Attendance"
+	Payroll_settings.overtime_salary_component = _("Overtime Allowance")
+	payroll_settings.save()
+
 def set_no_copy_fields_in_variant_settings():
 	# set no copy fields of an item doctype to item variant settings
 	doc = frappe.get_doc('Item Variant Settings')

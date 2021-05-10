@@ -16,7 +16,12 @@
   "email_salary_slip_to_employee",
   "encrypt_salary_slips_in_emails",
   "show_leave_balances_in_salary_slip",
-  "password_policy"
+  "password_policy",
+  "section_break_12",
+  "overtime_based_on",
+  "overtime_salary_component",
+  "column_break_14",
+  "fetch_standard_working_hours_from_shift_type"
  ],
  "fields": [
   {
@@ -91,13 +96,41 @@
    "fieldname": "show_leave_balances_in_salary_slip",
    "fieldtype": "Check",
    "label": "Show Leave Balances in Salary Slip"
+  },
+  {
+   "fieldname": "overtime_salary_component",
+   "fieldtype": "Link",
+   "label": "Overtime Salary Component",
+   "options": "Salary Component"
+  },
+  {
+   "fieldname": "section_break_12",
+   "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "description": "If unchecked, Standard Working Hours as defined in HR Settings will be taken into consideration.",
+   "fieldname": "fetch_standard_working_hours_from_shift_type",
+   "fieldtype": "Check",
+   "label": "Fetch Standard Working Hours from Shift Type"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "Attendance",
+   "fieldname": "overtime_based_on",
+   "fieldtype": "Select",
+   "label": "Calculate Overtime Hours  Based On",
+   "options": "Attendance\nTimesheet"
   }
  ],
  "icon": "fa fa-cog",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-03 17:49:59.579723",
+ "modified": "2021-05-10 12:56:08.161319",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Payroll Settings",
