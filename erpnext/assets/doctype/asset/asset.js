@@ -78,36 +78,36 @@ frappe.ui.form.on('Asset', {
 		frm.toggle_display("next_depreciation_date", frm.doc.docstatus < 1);
 		frm.events.make_schedules_editable(frm);
 
+		if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
+			frm.add_custom_button("General Ledger", function() {
+				frappe.route_options = {
+					"voucher_no": frm.doc.name,
+					"from_date": frm.doc.available_for_use_date,
+					"to_date": frm.doc.available_for_use_date,
+					"company": frm.doc.company
+				};
+				frappe.set_route("query-report", "General Ledger");
+			});
+		}
+
 		if (frm.doc.docstatus==1) {
 			if (in_list(["Submitted", "Partially Depreciated", "Fully Depreciated"], frm.doc.status)) {
 				frm.add_custom_button("Transfer Asset", function() {
 					erpnext.asset.transfer_asset(frm);
-				});
+				}, __("Actions"));
 
 				frm.add_custom_button("Scrap Asset", function() {
 					erpnext.asset.scrap_asset(frm);
-				});
+				}, __("Actions"));
 
 				frm.add_custom_button("Sell Asset", function() {
 					frm.trigger("make_sales_invoice");
-				});
+				}, __("Actions"));
 
 			} else if (frm.doc.status=='Scrapped') {
 				frm.add_custom_button("Restore Asset", function() {
 					erpnext.asset.restore_asset(frm);
-				});
-			}
-
-			if (frm.doc.purchase_receipt || !frm.doc.is_existing_asset) {
-				frm.add_custom_button("General Ledger", function() {
-					frappe.route_options = {
-						"voucher_no": frm.doc.name,
-						"from_date": frm.doc.available_for_use_date,
-						"to_date": frm.doc.available_for_use_date,
-						"company": frm.doc.company
-					};
-					frappe.set_route("query-report", "General Ledger");
-				});
+				}, __("Actions"));
 			}
 
 			if (frm.doc.maintenance_required && !frm.doc.maintenance_schedule) {
