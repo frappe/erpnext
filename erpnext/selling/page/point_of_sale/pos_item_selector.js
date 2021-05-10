@@ -90,14 +90,16 @@ erpnext.PointOfSale.ItemSelector = class {
 
 		function get_item_image_html() {
 			if (!me.hide_images && item_image) {
-				return `<div class="flex" style="margin: 8px; justify-content: flex-end">
-						<span class="indicator-pill whitespace-nowrap ${indicator_color}" id="text">${qty_to_display}</span></div>
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
 						<div class="flex items-center justify-center h-32 border-b-grey text-6xl text-grey-100">
 							<img class="h-full" src="${item_image}" alt="${frappe.get_abbr(item.item_name)}" style="object-fit: cover;">
 						</div>`;
 			} else {
-				return `<div class="flex" style="margin: 8px; justify-content: flex-end">
-						<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span></div>
+				return `<div class="item-qty-pill">
+							<span class="indicator-pill whitespace-nowrap ${indicator_color}">${qty_to_display}</span>
+						</div>
 						<div class="item-display abbr">${frappe.get_abbr(item.item_name)}</div>`;
 			}
 		}

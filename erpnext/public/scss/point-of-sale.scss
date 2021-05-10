@@ -129,9 +129,18 @@
 				@extend .pointer-no-select;
 				border-radius: var(--border-radius-md);
 				box-shadow: var(--shadow-base);
+				position: relative;
 
 				&:hover {
 					transform: scale(1.02, 1.02);
+				}
+
+				.item-qty-pill {
+					position: absolute;
+					display: flex;
+					margin: var(--margin-sm);
+					justify-content: flex-end;
+					right: 0px;
 				}
 
 				.item-display {
