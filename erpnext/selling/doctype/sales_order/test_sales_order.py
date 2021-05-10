@@ -85,7 +85,7 @@ class TestSalesOrder(unittest.TestCase):
 		si1.update_billed_amount_in_sales_order = 1
 		si1.submit()
 		so.load_from_db()
-		self.assertEquals(so.per_billed, 0)
+		self.assertEqual(so.per_billed, 0)
 
 	def test_make_sales_invoice_with_terms(self):
 		so = make_sales_order(do_not_submit=True)
@@ -996,7 +996,7 @@ class TestSalesOrder(unittest.TestCase):
 		# Check if Work Orders were raised
 		for item in so_item_name:
 			wo_qty = frappe.db.sql("select sum(qty) from `tabWork Order` where sales_order=%s and sales_order_item=%s", (so.name, item))
-			self.assertEquals(wo_qty[0][0], so_item_name.get(item))
+			self.assertEqual(wo_qty[0][0], so_item_name.get(item))
 
 	def test_serial_no_based_delivery(self):
 		frappe.set_value("Stock Settings", None, "automatically_set_serial_nos_based_on_fifo", 1)

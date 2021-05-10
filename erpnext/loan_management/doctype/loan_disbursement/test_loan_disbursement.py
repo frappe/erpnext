@@ -87,7 +87,7 @@ class TestLoanDisbursement(unittest.TestCase):
 		loan = create_demand_loan(self.applicant, "Demand Loan", loan_application, posting_date='2019-10-01')
 		loan.submit()
 
-		self.assertEquals(loan.loan_amount, 1000000)
+		self.assertEqual(loan.loan_amount, 1000000)
 
 		first_date = '2019-10-01'
 		last_date = '2019-10-30'
@@ -114,5 +114,5 @@ class TestLoanDisbursement(unittest.TestCase):
 		per_day_interest = get_per_day_interest(1500000, 13.5, '2019-10-30')
 		interest = per_day_interest * 15
 
-		self.assertEquals(amounts['pending_principal_amount'], 1500000)
-		self.assertEquals(amounts['interest_amount'], flt(interest + previous_interest, 2))
+		self.assertEqual(amounts['pending_principal_amount'], 1500000)
+		self.assertEqual(amounts['interest_amount'], flt(interest + previous_interest, 2))
