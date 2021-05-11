@@ -23,11 +23,13 @@
   "capitalize_repair_cost",
   "column_break_8",
   "payable_account",
+  "section_break_17",
+  "stock_items",
   "section_break_9",
   "description",
   "column_break_9",
   "actions_performed",
-  "section_break_17",
+  "section_break_23",
   "downtime",
   "column_break_19",
   "amended_from"
@@ -176,12 +178,22 @@
    "fieldname": "accounting_details",
    "fieldtype": "Section Break",
    "label": "Accounting Details"
+  },
+  {
+   "fieldname": "stock_items",
+   "fieldtype": "Table",
+   "label": "Stock Items",
+   "options": "Stock Item"
+  },
+  {
+   "fieldname": "section_break_23",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-11 23:25:48.956382",
+ "modified": "2021-05-12 03:23:30.618741",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
