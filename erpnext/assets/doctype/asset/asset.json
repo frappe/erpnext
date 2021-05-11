@@ -23,6 +23,7 @@
   "asset_name",
   "asset_category",
   "location",
+  "asset_value",
   "custodian",
   "department",
   "disposal_date",
@@ -480,6 +481,12 @@
    "fieldname": "section_break_36",
    "fieldtype": "Section Break",
    "label": "Finance Books"
+  },
+  {
+   "fieldname": "asset_value",
+   "fieldtype": "Currency",
+   "label": "Asset Value",
+   "read_only": 1
   }
  ],
  "idx": 72,
@@ -502,7 +509,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-01-22 12:38:59.091510",
+ "modified": "2021-05-11 23:47:15.831720",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",
