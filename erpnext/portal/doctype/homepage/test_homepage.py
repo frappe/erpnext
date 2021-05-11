@@ -13,7 +13,7 @@ class TestHomepage(unittest.TestCase):
 		set_request(method='GET', path='home')
 		response = render()
 
-		self.assertEquals(response.status_code, 200)
+		self.assertEqual(response.status_code, 200)
 
 		html = frappe.safe_decode(response.get_data())
 		self.assertTrue('<section class="hero-section' in html)
