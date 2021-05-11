@@ -1,16 +1,13 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
-
 import frappe
 from frappe.utils.redis_wrapper import RedisWrapper
 
 from redisearch import (
-        Client, AutoCompleter, Query,
+        Client, AutoCompleter,
         Suggestion, IndexDefinition, 
-        TextField, TagField,
-        Document
+        TextField, TagField
 	)
 
 def make_key(key):
