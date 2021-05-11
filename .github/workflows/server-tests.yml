@@ -10,7 +10,7 @@ jobs:
       fail-fast: false
 
       matrix:
-        container: [1, 2, 3, 4]
+        container: [1, 2, 3]
 
     name: Server Tests
 
