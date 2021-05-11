@@ -7,6 +7,9 @@ import frappe
 from frappe import _
 from frappe.utils import time_diff_in_hours
 from frappe.model.document import Document
+from frappe.utils import flt
+from erpnext.accounts.general_ledger import make_gl_entries
+from erpnext.controllers.accounts_controller import AccountsController
 
 class AssetRepair(Document):
 	def validate(self):
@@ -18,6 +21,73 @@ class AssetRepair(Document):
 		else:
 			frappe.db.set_value('Asset', self.asset, 'status', 'Submitted')
 
+	def on_submit(self):
+		self.increase_asset_value()
+
+	def increase_asset_value(self):
+		if self.capitalize_repair_cost:
+			asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value') + self.repair_cost
+			frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
+
+	# 	self.make_gl_entries()
+
+	# def on_cancel(self):
+	# 	if self.payable_account:
+	# 		self.make_gl_entries(cancel=True)
+
+	# def make_gl_entries(self, cancel=False):
+	# 	if flt(self.repair_cost) > 0:
+	# 		gl_entries = self.get_gl_entries()
+	# 		make_gl_entries(gl_entries, cancel)
+
+	# def get_gl_entries(self):
+	# 	gl_entry = []
+	# 	company = frappe.db.get_value('Asset', self.asset, 'company')
+	# 	repair_and_maintenance_account = frappe.db.get_value('Company', company, 'repair_and_maintenance_account')
+
+	# 	gl_entry = frappe.get_doc({
+	# 		"doctype": "GL Entry",
+	# 		"account": self.payable_account,
+	# 		"credit": self.repair_cost,
+	# 		"credit_in_account_currency": self.repair_cost,
+	# 		"against": repair_and_maintenance_account,
+	# 		"voucher_type": self.doctype,
+	# 		"voucher_no": self.name
+	# 	})
+	# 	gl_entry.insert()
+	# 	gl_entry = frappe.get_doc({
+	# 		"doctype": "GL Entry",
+	# 		"account": repair_and_maintenance_account,
+	# 		"debit": self.repair_cost,
+	# 		"credit_in_account_currency": self.repair_cost,
+	# 		"against": self.payable_account,
+	# 		"voucher_type": self.doctype,
+	# 		"voucher_no": self.name
+	# 	})
+	# 	gl_entry.insert()
+
+		# gl_entry.append(
+		# 	self.get_gl_dict({
+		# 		"account": self.payable_account,
+		# 		"credit": self.repair_cost,
+		# 		"credit_in_account_currency": self.repair_cost,
+		# 		"against": repair_and_maintenance_account,
+		# 		"against_voucher_type": self.doctype,
+		# 		"against_voucher": self.name
+		# 	})
+		# )
+
+		# gl_entry.append(
+		# 	self.get_gl_dict({
+		# 		"account": repair_and_maintenance_account,
+		# 		"debit": self.repair_cost,
+		# 		"credit_in_account_currency": self.repair_cost,
+		# 		"against": self.payable_account,
+		# 		"against_voucher_type": self.doctype,
+		# 		"against_voucher": self.name
+		# 	})
+		# )
+	
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
 	downtime = time_diff_in_hours(completion_date, failure_date)
