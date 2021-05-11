@@ -7,11 +7,19 @@ import frappe
 import erpnext
 import unittest
 import frappe.utils
+
+from frappe.utils import getdate
+from datetime import timedelta
+
+
 from erpnext.hr.doctype.employee.employee import EmployeeLeftValidationError
 
 test_records = frappe.get_test_records('Employee')
 
 class TestEmployee(unittest.TestCase):
+	def setUp(self):
+		frappe.db.sql("delete from `tabEmail Queue`")
+
 	def test_birthday_reminders(self):
 		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
 		employee.date_of_birth = "1992" + frappe.utils.nowdate()[4:]
@@ -24,8 +32,6 @@ class TestEmployee(unittest.TestCase):
 		employees_born_today = get_employees_who_are_born_today()
 		self.assertTrue(employees_born_today.get("_Test Company"))
 
-		frappe.db.sql("delete from `tabEmail Queue`")
-
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
 		hr_settings.stop_birthday_reminders = 0
 		hr_settings.save()
@@ -35,7 +41,7 @@ class TestEmployee(unittest.TestCase):
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
 		self.assertTrue("Subject: Birthday Reminder" in email_queue[0].message)
 
-	def test_work_anniversary_reminder(self):
+	def test_work_anniversary_reminders(self):
 		employee = frappe.get_doc("Employee", frappe.db.sql_list("select name from tabEmployee limit 1")[0])
 		employee.date_of_joining = "1998" + frappe.utils.nowdate()[4:]
 		employee.company_email = "test@example.com"
@@ -51,16 +57,47 @@ class TestEmployee(unittest.TestCase):
 		hr_settings.send_work_anniversary_reminders = 1
 		hr_settings.save()
 
-		# Clear Email queue
-		frappe.db.sql("delete from `tabEmail Queue`")
-
 		send_work_anniversary_reminders()
 
 		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
-
-		print(email_queue[0].message)
 		self.assertTrue("Subject: Work Anniversary Reminder" in email_queue[0].message)
-		
+	
+	def test_holiday_reminders(self):
+		from erpnext.hr.doctype.holiday_list.test_holiday_list import make_holiday_list
+		from erpnext.hr.doctype.employee.employee import send_holiday_reminders
+
+		# Create a test holiday list
+		today_date = getdate()
+		test_holiday_dates = [today_date, today_date-timedelta(days=4), today_date-timedelta(days=3)]
+		test_holiday_list = make_holiday_list(
+			'TestHolidayRemindersList', 
+			holiday_dates=[
+				{'holiday_date': test_holiday_dates[0], 'description': 'test holiday1'},
+				{'holiday_date': test_holiday_dates[1], 'description': 'test holiday2'},
+				{'holiday_date': test_holiday_dates[2], 'description': 'test holiday3', 'weekly_off': 1}
+			]
+		)
+
+		# Create a test employee
+		test_employee = frappe.get_doc(
+			'Employee',
+			make_employee('test@gopher.io', company="_Test Company")
+		)
+
+		# Attach the holiday list to employee
+		test_employee.holiday_list = test_holiday_list.name
+		test_employee.save()
+
+		# Get HR settings and enable daily holiday reminders
+		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
+		hr_settings.send_holiday_reminders = 1
+		hr_settings.save()
+
+		send_holiday_reminders()
+
+		email_queue = frappe.db.sql("""select * from `tabEmail Queue`""", as_dict=True)
+		self.assertTrue("holiday" in email_queue[0].message)
+	
 	def test_employee_status_left(self):
 		employee1 = make_employee("test_employee_1@company.com")
 		employee2 = make_employee("test_employee_2@company.com")
