@@ -17,8 +17,17 @@ frappe.ui.form.on('Asset Repair', {
 	// 	});
 	// },
 
+	// stock_items_add: function(frm){
+	// 	var table = frm.doc.stock_items;
+	// 	for(var i in table) {
+	// 		if (table[i].valuation_rate == 0) {  
+	// 			frm.set_value(table[i].total_value, (table[i].valuation_rate * table[i].consumed_quantity))
+	// 		}
+	// 	}
+	// },
+
 	refresh: function(frm) {
-		frm.toggle_display(['completion_date', 'repair_status', 'accounting_details'], !(frm.doc.__islocal));
+		frm.toggle_display(['completion_date', 'repair_status', 'accounting_details', 'stock_items_section'], !(frm.doc.__islocal));
 	},
 
 	repair_status: (frm) => {

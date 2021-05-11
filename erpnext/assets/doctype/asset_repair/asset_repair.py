@@ -16,17 +16,33 @@ class AssetRepair(Document):
 		if self.repair_status == "Completed" and not self.completion_date:
 			frappe.throw(_("Please select Completion Date for Completed Repair"))
 
+		self.update_status()
+		self.set_total_value()
+
+	def set_total_value(self):
+		for item in self.stock_items:
+			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
+
+	def update_status(self):
 		if self.repair_status == 'Pending':
 			frappe.db.set_value('Asset', self.asset, 'status', 'Out of Order')
 		else:
 			frappe.db.set_value('Asset', self.asset, 'status', 'Submitted')
 
 	def on_submit(self):
+		if self.repair_status == "Pending":
+			frappe.throw(_("Please update Repair Status."))
+
 		self.increase_asset_value()
 
 	def increase_asset_value(self):
 		if self.capitalize_repair_cost:
 			asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value') + self.repair_cost
+			for item in self.stock_items:
+				asset_value += item.total_value
+
+			print("*" * 20)
+			print(asset_value)
 			frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
 
 	# 	self.make_gl_entries()

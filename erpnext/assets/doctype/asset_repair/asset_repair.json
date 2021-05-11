@@ -23,7 +23,7 @@
   "capitalize_repair_cost",
   "column_break_8",
   "payable_account",
-  "section_break_17",
+  "stock_items_section",
   "stock_items",
   "section_break_9",
   "description",
@@ -114,10 +114,6 @@
    "label": "Actions performed"
   },
   {
-   "fieldname": "section_break_17",
-   "fieldtype": "Section Break"
-  },
-  {
    "allow_on_submit": 1,
    "fieldname": "downtime",
    "fieldtype": "Data",
@@ -188,12 +184,16 @@
   {
    "fieldname": "section_break_23",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "stock_items_section",
+   "fieldtype": "Section Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-12 03:23:30.618741",
+ "modified": "2021-05-12 04:45:38.714776",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
