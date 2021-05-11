@@ -377,6 +377,7 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 					"company": woocommerce_settings.company}, "default_supplier")
 				invoice_doc.append("backorder_items", {
 					"item_code": item['item_code'], 
+					"item_name": item['item_name'], 
 					"supplier": supplier,
 					"qty": item["qty"],
 					"actual_qty":item["actual_qty"]
@@ -385,6 +386,10 @@ def set_items_in_sales_invoice(edited_line_items, customer_code, invoice_doc, wo
 				invoice_doc.append("items", item)
 				if item["item_group"] != "Tests":
 					item_tax = (item['rate'] * tax_rate) * item["qty"]
+
+			# We need to flag the update backorder if backorder_items has contents
+			if invoice_doc.get("backorder_items"):
+				invoice_doc.set("update_backorder", 1)
 
 		else: # item["is_stock_item"] == 0 
 			invoice_doc.append("items", item)
