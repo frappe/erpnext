@@ -88,9 +88,9 @@ class TestExpenseClaim(unittest.TestCase):
 		])
 
 		for gle in gl_entries:
-			self.assertEquals(expected_values[gle.account][0], gle.account)
-			self.assertEquals(expected_values[gle.account][1], gle.debit)
-			self.assertEquals(expected_values[gle.account][2], gle.credit)
+			self.assertEqual(expected_values[gle.account][0], gle.account)
+			self.assertEqual(expected_values[gle.account][1], gle.debit)
+			self.assertEqual(expected_values[gle.account][2], gle.credit)
 
 	def test_rejected_expense_claim(self):
 		payable_account = get_payable_account(company_name)
@@ -104,11 +104,11 @@ class TestExpenseClaim(unittest.TestCase):
 		})
 		expense_claim.submit()
 
-		self.assertEquals(expense_claim.status, 'Rejected')
-		self.assertEquals(expense_claim.total_sanctioned_amount, 0.0)
+		self.assertEqual(expense_claim.status, 'Rejected')
+		self.assertEqual(expense_claim.total_sanctioned_amount, 0.0)
 
 		gl_entry = frappe.get_all('GL Entry', {'voucher_type': 'Expense Claim', 'voucher_no': expense_claim.name})
-		self.assertEquals(len(gl_entry), 0)
+		self.assertEqual(len(gl_entry), 0)
 
 	def test_expense_approver_perms(self):
 		user = "test_approver_perm_emp@example.com"

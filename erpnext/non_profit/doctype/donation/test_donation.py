@@ -39,7 +39,7 @@ class TestDonation(unittest.TestCase):
 		donation.on_payment_authorized()
 		donation.reload()
 
-		self.assertEquals(donation.paid, 1)
+		self.assertEqual(donation.paid, 1)
 		self.assertTrue(frappe.db.exists('Payment Entry', {'reference_no': donation.name}))
 
 
