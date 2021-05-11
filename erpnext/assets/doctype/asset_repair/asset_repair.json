@@ -18,8 +18,9 @@
   "column_break_6",
   "completion_date",
   "repair_status",
-  "section_break_7",
+  "accounting_details",
   "repair_cost",
+  "capitalize_repair_cost",
   "column_break_8",
   "payable_account",
   "section_break_9",
@@ -162,19 +163,25 @@
    "options": "Account"
   },
   {
-   "fieldname": "section_break_7",
-   "fieldtype": "Section Break",
-   "label": "Accounting Details"
-  },
-  {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "capitalize_repair_cost",
+   "fieldtype": "Check",
+   "label": "Capitalize Repair Cost"
+  },
+  {
+   "fieldname": "accounting_details",
+   "fieldtype": "Section Break",
+   "label": "Accounting Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-11 05:11:58.330860",
+ "modified": "2021-05-11 23:25:48.956382",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
