@@ -285,7 +285,9 @@ def update_user_permissions(doc, method):
 		employee.update_user_permissions()
 
 def send_holiday_reminders():
-	"""Send holiday reminders to Employees if 'Send Holiday Reminders' is checked"""
+	"""
+		Send holiday reminders to Employees if 'Send Holiday Reminders' is checked
+	"""
 	to_send = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1)
 	if not to_send:
 		return
@@ -293,12 +295,12 @@ def send_holiday_reminders():
 	employees = frappe.db.get_all('Employee', pluck='name')
 
 	for employee in employees:
-		has_holiday, holiday_descriptions = is_holiday(employee, only_non_weekly=True, with_description=True)
-		if is_holiday(employee, only_non_weekly=True):
+		has_holiday, holiday_descriptions = is_holiday(employee, only_non_weekly=True, with_description=True, raise_exception=False)
+		if has_holiday:
 			send_holiday_reminder_to_employee(employee, holiday_descriptions)
 
 def send_holiday_reminder_to_employee(employee, descriptions):
-	reminder_text, message = get_holiday_reminder_text_and_message(employee, descriptions)
+	reminder_text, message = get_holiday_reminder_text_and_message(descriptions)
 	
 	employee_doc = frappe.get_doc('Employee', employee)
 	employee_email = get_employee_email(employee_doc)
@@ -314,7 +316,7 @@ def send_holiday_reminder_to_employee(employee, descriptions):
 		header=_("Today is a holiday for you.")
 	)
 
-def get_holiday_reminder_text_and_message(employee, descriptions):
+def get_holiday_reminder_text_and_message(descriptions):
 	description = descriptions[0] if len(descriptions) == 1 else comma_and(descriptions, add_quotes=False)
 	
 	reminder_text = _("This email is to remind you about today's holiday.")
@@ -408,7 +410,7 @@ def send_birthday_reminders():
 				send_birthday_reminder(person_email, reminder_text, others, message)
 
 def get_employee_email(employee_doc):
-	return employee_doc["user_id"] or employee_doc["personal_email"] or employee_doc["company_email"]
+	return employee_doc.get("user_id") or employee_doc.get("personal_email") or employee_doc.get("company_email")
 
 def get_birthday_reminder_text_and_message(birthday_persons):
 	if len(birthday_persons) == 1:
