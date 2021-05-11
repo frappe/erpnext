@@ -1,7 +1,6 @@
 # Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 # License: GNU General Public License v3. See license.txt
 
-from __future__ import unicode_literals
 import frappe
 from frappe.utils import cstr, nowdate, cint
 from erpnext.setup.doctype.item_group.item_group import get_item_for_list_in_html
@@ -60,9 +59,9 @@ def get_product_list(search=None, start=0, limit=12):
 	return [get_item_for_list_in_html(r) for r in data]
 
 @frappe.whitelist(allow_guest=True)
-def search(query):
+def search(query, limit=10, fuzzy_search=True):
 	if not query:
-		# TODO: return top/recent searches
+		# TODO: return top searches
 		return []
 
 	red = frappe.cache()
@@ -71,7 +70,11 @@ def search(query):
 
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_NAME_AUTOCOMPLETE), conn=red)
 	client = Client(make_key(WEBSITE_ITEM_INDEX), conn=red)
-	suggestions = ac.get_suggestions(query, num=10, fuzzy=len(query) > 4)
+	suggestions = ac.get_suggestions(
+		query, 
+		num=limit, 
+		fuzzy= fuzzy_search and len(query) > 4 # Fuzzy on length < 3 can be real slow
+	)
 
 	# Build a query
 	query_string = query
@@ -86,6 +89,7 @@ def search(query):
 	results = client.search(q)
 	results = list(map(convert_to_dict, results.docs))
 
+	# FOR DEBUGGING
 	print("SEARCH RESULTS ------------------\n ", results)
 
 	return results
@@ -99,7 +103,7 @@ def convert_to_dict(redis_search_doc):
 @frappe.whitelist(allow_guest=True)
 def get_category_suggestions(query):
 	if not query:
-		# TODO: return top/recent searches
+		# TODO: return top searches
 		return []
 
 	ac = AutoCompleter(make_key(WEBSITE_ITEM_CATEGORY_AUTOCOMPLETE), conn=frappe.cache())
