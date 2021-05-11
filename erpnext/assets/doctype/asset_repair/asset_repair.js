@@ -2,8 +2,23 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Asset Repair', {
+	// setup: function(frm) {
+	// 	frm.add_fetch("company", "repair_and_maintenance_account", "payable_account");
+
+	// 	frm.set_query("payable_account", function() {
+	// 		return {
+	// 			filters: {
+	// 				"report_type": "Balance Sheet",
+	// 				"account_type": "Payable",
+	// 				"company": frm.doc.company,
+	// 				"is_group": 0
+	// 			}
+	// 		};
+	// 	});
+	// },
+
 	refresh: function(frm) {
-		frm.toggle_display(['completion_date', 'repair_status'], !(frm.doc.__islocal));
+		frm.toggle_display(['completion_date', 'repair_status', 'accounting_details'], !(frm.doc.__islocal));
 	},
 
 	repair_status: (frm) => {
