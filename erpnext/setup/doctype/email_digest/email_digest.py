@@ -249,7 +249,7 @@ class EmailDigest(Document):
 				card = cache.get(cache_key)
 
 				if card:
-					card = eval(card)
+					card = frappe.safe_eval(card)
 
 				else:
 					card = frappe._dict(getattr(self, "get_" + key)())
