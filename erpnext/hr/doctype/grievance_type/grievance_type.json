@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "autoname": "Prompt",
+ "creation": "2021-05-11 12:41:50.256071",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "is_applicable_for_suspension",
+  "number_of_days_for_suspension",
+  "column_break_3",
+  "is_applicable_for_pay_cut",
+  "section_break_5",
+  "description"
+ ],
+ "fields": [
+  {
+   "default": "0",
+   "fieldname": "is_applicable_for_suspension",
+   "fieldtype": "Check",
+   "label": "Is Applicable for Suspension"
+  },
+  {
+   "depends_on": "eval: doc.is_applicable_for_suspension == 1",
+   "fieldname": "number_of_days_for_suspension",
+   "fieldtype": "Int",
+   "label": "Number of days for Suspension",
+   "mandatory_depends_on": "eval: doc.is_applicable_for_suspension == 1"
+  },
+  {
+   "fieldname": "column_break_3",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_applicable_for_pay_cut",
+   "fieldtype": "Check",
+   "label": "Is Applicable for pay cut "
+  },
+  {
+   "fieldname": "section_break_5",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2021-05-11 14:59:30.664922",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Grievance Type",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "HR User",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC"
+}

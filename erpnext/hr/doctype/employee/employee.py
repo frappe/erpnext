@@ -2,17 +2,17 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
+from os import name
 import frappe
 
-from frappe.utils import getdate, validate_email_address, today, add_years, format_datetime, cstr
+from frappe.utils import getdate, validate_email_address, today, add_years, format_date, cstr, get_link_to_form
 from frappe.model.naming import set_name_by_naming_series
-from frappe import throw, _, scrub
+from frappe import throw, _, scrub, bold
 from frappe.permissions import add_user_permission, remove_user_permission, \
 	set_user_permission_if_allowed, has_permission, get_doc_permissions
 from frappe.model.document import Document
 from erpnext.utilities.transaction_base import delete_events
 from frappe.utils.nestedset import NestedSet
-from erpnext.hr.doctype.job_offer.job_offer import get_staffing_plan_detail
 
 class EmployeeUserDisabledError(frappe.ValidationError): pass
 class EmployeeLeftValidationError(frappe.ValidationError): pass
@@ -37,7 +37,7 @@ class Employee(NestedSet):
 
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
-		validate_status(self.status, ["Active", "Temporary Leave", "Left"])
+		validate_status(self.status, ["Active", "Suspended", "Left"])
 
 		self.employee = self.name
 		self.set_employee_name()
@@ -46,6 +46,7 @@ class Employee(NestedSet):
 		self.validate_status()
 		self.validate_reports_to()
 		self.validate_preferred_email()
+		self.validated_suspension()
 		if self.job_applicant:
 			self.validate_onboarding_process()
 
@@ -172,6 +173,26 @@ class Employee(NestedSet):
 
 		elif self.contract_end_date and self.date_of_joining and (getdate(self.contract_end_date) <= getdate(self.date_of_joining)):
 			throw(_("Contract End Date must be greater than Date of Joining"))
+
+	def validated_suspension(self):
+		if self.status != "Suspended":
+			grievance = frappe.get_all("Employee Grievance", filters={
+				"status": 'Resolved',
+				"employee_responsible": self.name,
+				"docstatus": 1,
+				"suspended_from": ("<", today()),
+				"suspended_to": (">", today()),
+			}, fields = ["name", "suspended_from", "suspended_to"])
+
+
+			if len(grievance):
+				self.db_set("status", "Suspended")
+				grievance = grievance[0]
+				frappe.throw(_("You are not allowed to change status, due to suspension from {0} to {1}. Reference: {2} ").format(
+					bold(format_date(grievance.suspended_from, )),
+					bold(format_date(grievance.suspended_to)),
+					bold(get_link_to_form("Employee Grievance", grievance.name))
+				))
 
 	def validate_email(self):
 		if self.company_email:

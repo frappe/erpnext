@@ -12,8 +12,12 @@ frappe.ui.form.on('Additional Salary', {
 				}
 			};
 		});
+	},
 
-		frm.trigger('set_earning_component');
+	onload: function(frm) {
+		if (frm.doc.type) {
+			frm.trigger('set_component_query');
+		}
 	},
 
 	employee: function(frm) {
@@ -46,14 +50,19 @@ frappe.ui.form.on('Additional Salary', {
 	},
 
 	company: function(frm) {
-		frm.trigger('set_earning_component');
+		frm.set_value("type", "");
+		frm.trigger('set_component_query');
 	},
 
-	set_earning_component: function(frm) {
+	set_component_query: function(frm) {
 		if (!frm.doc.company) return;
+		let filters = {company: frm.doc.company};
+		if (frm.doc.type) {
+			filters.type = frm.doc.type;
+		}
 		frm.set_query("salary_component", function() {
 			return {
-				filters: {type: ["in", ["earning", "deduction"]], company: frm.doc.company}
+				filters: filters
 			};
 		});
 	},
