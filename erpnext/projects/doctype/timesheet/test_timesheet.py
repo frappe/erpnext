@@ -37,7 +37,7 @@ class TestTimesheet(unittest.TestCase):
 		emp = make_employee("test_employee_6@salary.com")
 
 		make_salary_structure_for_timesheet(emp)
-		timesheet = make_timesheet(emp, simulate=True, billable=1)
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
 
 		self.assertEqual(timesheet.total_hours, 2)
 		self.assertEqual(timesheet.total_billable_hours, 2)
@@ -49,7 +49,7 @@ class TestTimesheet(unittest.TestCase):
 		emp = make_employee("test_employee_6@salary.com")
 
 		make_salary_structure_for_timesheet(emp)
-		timesheet = make_timesheet(emp, simulate=True, billable=0)
+		timesheet = make_timesheet(emp, simulate=True, is_billable=0)
 
 		self.assertEqual(timesheet.total_hours, 2)
 		self.assertEqual(timesheet.total_billable_hours, 0)
@@ -61,7 +61,7 @@ class TestTimesheet(unittest.TestCase):
 		emp = make_employee("test_employee_6@salary.com", company="_Test Company")
 
 		salary_structure = make_salary_structure_for_timesheet(emp)
-		timesheet = make_timesheet(emp, simulate = True, billable=1)
+		timesheet = make_timesheet(emp, simulate = True, is_billable=1)
 		salary_slip = make_salary_slip(timesheet.name)
 		salary_slip.submit()
 
@@ -82,7 +82,7 @@ class TestTimesheet(unittest.TestCase):
 	def test_sales_invoice_from_timesheet(self):
 		emp = make_employee("test_employee_6@salary.com")
 
-		timesheet = make_timesheet(emp, simulate=True, billable=1)
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1)
 		sales_invoice = make_sales_invoice(timesheet.name, '_Test Item', '_Test Customer')
 		sales_invoice.due_date = nowdate()
 		sales_invoice.submit()
@@ -100,7 +100,7 @@ class TestTimesheet(unittest.TestCase):
 		emp = make_employee("test_employee_6@salary.com")
 		project = frappe.get_value("Project", {"project_name": "_Test Project"})
 
-		timesheet = make_timesheet(emp, simulate=True, billable=1, project=project, company='_Test Company')
+		timesheet = make_timesheet(emp, simulate=True, is_billable=1, project=project, company='_Test Company')
 		sales_invoice = create_sales_invoice(do_not_save=True)
 		sales_invoice.project = project
 		sales_invoice.submit()
@@ -171,13 +171,13 @@ def make_salary_structure_for_timesheet(employee, company=None):
 	return salary_structure
 
 
-def make_timesheet(employee, simulate=False, billable = 0, activity_type="_Test Activity Type", project=None, task=None, company=None):
+def make_timesheet(employee, simulate=False, is_billable = 0, activity_type="_Test Activity Type", project=None, task=None, company=None):
 	update_activity_type(activity_type)
 	timesheet = frappe.new_doc("Timesheet")
 	timesheet.employee = employee
 	timesheet.company = company or '_Test Company'
 	timesheet_detail = timesheet.append('time_logs', {})
-	timesheet_detail.billable = billable
+	timesheet_detail.is_billable = is_billable
 	timesheet_detail.activity_type = activity_type
 	timesheet_detail.from_time = now_datetime()
 	timesheet_detail.hours = 2

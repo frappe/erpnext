@@ -685,14 +685,16 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	project: function(frm){
-		frm.call({
-			method: "add_timesheet_data",
-			doc: frm.doc,
-			callback: function(r, rt) {
-				refresh_field(['timesheets'])
-			}
-		})
-		frm.refresh();
+		if (!frm.doc.is_return) {
+			frm.call({
+				method: "add_timesheet_data",
+				doc: frm.doc,
+				callback: function(r, rt) {
+					refresh_field(['timesheets'])
+				}
+			})
+			frm.refresh();
+		}
 	},
 
 	onload: function(frm) {
@@ -808,27 +810,45 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	refresh: function(frm) {
-		if (frm.doc.project) {
+		if (frm.doc.project && frm.doc.docstatus===0 && !frm.doc.is_return) {
 			frm.add_custom_button(__('Fetch Timesheet'), function() {
 				let d = new frappe.ui.Dialog({
 					title: __('Fetch Timesheet'),
 					fields: [
 						{
-							"label" : "From",
+							"label" : __("From"),
 							"fieldname": "from_time",
 							"fieldtype": "Date",
 							"reqd": 1,
+						},
+						{
+							"label" : __("Currency"),
+							"fieldname": "currency",
+							"fieldtype": "Link",
+							"options": "Currency",
+							"default": frm.doc.currency,
+							"reqd": 1,
+							"read_only": 1
 						},
 						{
 							fieldtype: 'Column Break',
 							fieldname: 'col_break_1',
 						},
 						{
-							"label" : "To",
+							"label" : __("To"),
 							"fieldname": "to_time",
 							"fieldtype": "Date",
 							"reqd": 1,
-						}
+						},
+						{
+							"label" : __("Project"),
+							"fieldname": "project",
+							"fieldtype": "Link",
+							"options": "Project",
+							"default": frm.doc.project,
+							"reqd": 1,
+							"read_only": 1
+						},
 					],
 					primary_action: function() {
 						let data = d.get_values();
@@ -837,7 +857,8 @@ frappe.ui.form.on('Sales Invoice', {
 							args: {
 								from_time: data.from_time,
 								to_time: data.to_time,
-								project: frm.doc.project
+								project: data.project,
+								currency: data.currency
 							},
 							callback: function(r) {
 								if(!r.exc) {
@@ -845,9 +866,11 @@ frappe.ui.form.on('Sales Invoice', {
 										frm.clear_table('timesheets')
 										r.message.forEach((d) => {
 											frm.add_child('timesheets',{
+												'activity_type': d.activity_type,
+												'description': d.description,
 												'time_sheet': d.parent,
 												'billing_hours': d.billing_hours,
-												'billing_amount': d.billing_amt,
+												'billing_amount': d.billing_amount,
 												'timesheet_detail': d.name
 											});
 										});
