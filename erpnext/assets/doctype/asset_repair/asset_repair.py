@@ -5,11 +5,10 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours
+from frappe.utils import time_diff_in_hours, getdate
 from frappe.model.document import Document
 from frappe.utils import flt
 from erpnext.accounts.general_ledger import make_gl_entries
-from erpnext.controllers.accounts_controller import AccountsController
 
 class AssetRepair(Document):
 	def validate(self):
@@ -66,7 +65,8 @@ class AssetRepair(Document):
 			"against": repair_and_maintenance_account,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
-			"cost_center": self.cost_center
+			"cost_center": self.cost_center,
+			"posting_date": getdate()
 		})
 		gl_entry.insert()
 		gl_entry = frappe.get_doc({
@@ -77,7 +77,8 @@ class AssetRepair(Document):
 			"against": self.payable_account,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
-			"cost_center": self.cost_center
+			"cost_center": self.cost_center,
+			"posting_date": getdate()
 		})
 		gl_entry.insert()
 	
