@@ -843,6 +843,7 @@ def validate_negative_qty_in_future_sle(args, allow_negative_stock=None):
 			frappe.throw(message, NegativeStockError, title='Insufficient Stock')
 
 def get_future_sle_with_negative_qty(args):
+	args = _switch_values(args.copy(), ['batch_no', 'serial_no'])
 	return frappe.db.sql("""
 		select
 			qty_after_transaction, posting_date, posting_time,
@@ -852,6 +853,8 @@ def get_future_sle_with_negative_qty(args):
 			item_code = %(item_code)s
 			and warehouse = %(warehouse)s
 			and voucher_no != %(voucher_no)s
+			and ifnull(batch_no,'') = %(batch_no)s
+			and ifnull(serial_no,'') = %(serial_no)s
 			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
 			and is_cancelled = 0
 			and qty_after_transaction < 0
@@ -867,3 +870,8 @@ def _round_off_if_near_zero(number: float, precision: int = 6) -> float:
 		return 0
 
 	return flt(number)
+
+def _switch_values(target, keys, value_from=None, value_to=""):
+	for k in keys:
+		target[k] = value_to if target[k] == value_from else target[k]
+	return target
