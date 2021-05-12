@@ -41,7 +41,7 @@ class AssetRepair(Document):
 			asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value') + self.repair_cost
 			for item in self.stock_items:
 				asset_value += item.total_value
-				
+
 			frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
 
 	def on_cancel(self):
@@ -66,7 +66,7 @@ class AssetRepair(Document):
 			"against": repair_and_maintenance_account,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
-			"cost_center": "Main - F"
+			"cost_center": self.cost_center
 		})
 		gl_entry.insert()
 		gl_entry = frappe.get_doc({
@@ -77,7 +77,7 @@ class AssetRepair(Document):
 			"against": self.payable_account,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
-			"cost_center": "Main - F"
+			"cost_center": self.cost_center
 		})
 		gl_entry.insert()
 	
