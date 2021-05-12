@@ -19,7 +19,10 @@
   "maintenance_manager",
   "maintenance_manager_name",
   "section_break_8",
-  "asset_maintenance_tasks"
+  "asset_maintenance_tasks",
+  "stock_consumption_details_section",
+  "warehouse",
+  "stock_items"
  ],
  "fields": [
   {
@@ -107,10 +110,27 @@
    "fieldname": "stock_consumption",
    "fieldtype": "Check",
    "label": "Stock Consumed During Maintenance"
+  },
+  {
+   "fieldname": "stock_consumption_details_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Consumption Details"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
+  },
+  {
+   "fieldname": "stock_items",
+   "fieldtype": "Table",
+   "label": "Stock Items",
+   "options": "Stock Item"
   }
  ],
  "links": [],
- "modified": "2021-05-13 05:20:45.809270",
+ "modified": "2021-05-13 05:24:58.480132",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance",
