@@ -156,6 +156,8 @@ def return_data(filters):
 			row = [posting_date, serie_number, type_transaction, final_range, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
 			data.append(row)
 	
+	conditions = return_filters_credit_note(filters, from_date, to_date)
+	
 	credit_notes = frappe.get_all("Credit Note CXC", ["name", "naming_series", "posting_date", "isv_18", "isv_15", "amount_total"], filters = conditions, order_by = "name asc")
 
 	dates.clear()
@@ -238,11 +240,22 @@ def return_filters(filters, from_date, to_date):
 
 	conditions += "{"
 	conditions += '"creation_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += '}'
 
 	return conditions
 
 def return_filters_debit_note(filters, from_date, to_date):
+	conditions = ''	
+
+	conditions += "{"
+	conditions += '"posting_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
+	conditions += ', "company": "{}"'.format(filters.get("company"))
+	conditions += '}'
+
+	return conditions
+
+def return_filters_credit_note(filters, from_date, to_date):
 	conditions = ''	
 
 	conditions += "{"
