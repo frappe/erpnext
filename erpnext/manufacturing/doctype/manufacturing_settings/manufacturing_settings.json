@@ -176,6 +176,16 @@
    "fieldtype": "Table",
    "label": "Staging Details",
    "options": "Staging Details"
+  },
+  {
+   "fieldname": "allowed_consumption_deviation_percentage",
+   "fieldtype": "Float",
+   "label": "Allowed Consumption Deviation percentage"
+  },
+  {
+   "fieldname": "allowed_production_deviation_percentage",
+   "fieldtype": "Float",
+   "label": "Allowed Production Deviation percentage"
   }
  ],
  "icon": "icon-wrench",

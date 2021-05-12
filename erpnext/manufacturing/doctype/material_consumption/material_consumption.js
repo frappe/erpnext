@@ -55,7 +55,7 @@ function get_available_qty_data(frm,line_obj){
                         row.item = d.item_code;
                         row.uom = d.stock_uom;
                         row.warehouse = d.warehouse;
-                        row.balance_qty = flt(d.balance_qty, precision('balance_qty'));
+                        row.balance_qty = flt(d.balance_qty, precision('balance_qty', row));
                         row.consume_item = line_obj.name;
                         if(line_obj.has_batch_no == 1){
                             row.batch = d.batch_no;
@@ -63,7 +63,7 @@ function get_available_qty_data(frm,line_obj){
                             row.life_left_batch = d.life_left_batch;
                         }
                         if(d.qty_to_consume){
-                            row.qty_to_consume = flt(d.qty_to_consume, precision('qty_to_consume'));
+                            row.qty_to_consume = flt(d.qty_to_consume, precision('qty_to_consume', row));
                         }
                     }
                 }

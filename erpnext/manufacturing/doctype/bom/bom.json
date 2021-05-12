@@ -540,7 +540,7 @@
   {
    "allow_on_submit": 1,
    "fieldname": "yeild",
-   "fieldtype": "Percent",
+   "fieldtype": "Float",
    "label": "Yeild",
    "read_only": 1
   },
@@ -574,7 +574,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-07 17:21:37.180644",
+ "modified": "2021-05-10 16:26:12.820254",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

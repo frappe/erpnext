@@ -39,16 +39,20 @@ class MaterialConsumption(Document):
                 l_doc.qty_issued = flt(total_qty, l_doc.precision('qty_issued'))
                 l_doc.status = "Assigned"
                 l_doc.save(ignore_permissions=True)
+        self.reload()
+        self.deviation_calculation()
         return True
 
     def on_submit(self):
-        self.make_stock_entry()
         mf_settings = frappe.get_doc("Manufacturing Settings")
         if (mf_settings.allowed_consumption_deviation_percentage > 0) and (self.consumption_deviation_percentage > mf_settings.allowed_consumption_deviation_percentage):
             frappe.throw(_('Maximum deviation allowed for consumption is {0}').format(mf_settings.allowed_consumption_deviation_percentage))
+        else:
+            self.calc_actual_rm_wt_on_wo()
+            self.make_stock_entry()
 
-    def on_change(self):
-        self.calc_actual_rm_wt_on_wo()
+    # def on_change(self):
+    #     self.calc_actual_rm_wt_on_wo()
 
     def before_save(self):
         self.deviation_calculation()
@@ -69,19 +73,24 @@ class MaterialConsumption(Document):
 
         self.weight_consumed = flt(value, self.precision('weight_consumed'))
 
-        if self.wo_rm_weight_to_consume == 0:
+        if wo.planned_rm_weight == 0:
             self.consumption_deviation_percentage = 0
         else:
-            self.consumption_deviation_percentage = flt((flt(self.wo_rm_weight_to_consume)-flt(self.weight_consumed))/flt(self.wo_rm_weight_to_consume), self.precision('consumption_deviation_percentage'))
+            self.consumption_deviation_percentage = flt(((flt(flt(self.weight_consumed)+flt(wo.actual_rm_weight))-flt(wo.planned_rm_weight))/flt(wo.planned_rm_weight))*100, self.precision('consumption_deviation_percentage'))
+        self.db_update()
+        self.reload()
 
     def calc_actual_rm_wt_on_wo(self):
         wo = frappe.get_doc("Work Order", self.work_order)
         value = 0
         for row in wo.required_items:
-            if row.type == "RM":
-                value += flt(row.consumed_qty) * flt(row.weight_per_unit)
+            if row.consumed_qty > 0:
+                if row.type == "RM":
+                    item_wt = frappe.get_doc("Item", row.item_code)
+                    value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
         wo.actual_rm_weight = flt(value, wo.precision('actual_rm_weight'))
-        wo.db_update()
+        # wo.db_update()
+        # return True
 
     def make_stock_entry(self):
         precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("picked_qty"))
@@ -208,7 +217,8 @@ class MaterialConsumption(Document):
                     qty = flt(flt(res.get('picked_qty')) * flt(item_master_wigth_per_unit), precision1)
                     total_transfer_qty += qty
                 if not item_master_wigth_per_unit:
-                    m = "Please Enter weight per unit for item {0}".format(line.get('item_code'))
+                    # m = "Please Enter weight per unit for item {0}".format(line.get('item_code'))
+                    m = "Please Enter weight per unit for item {0}".format(res.get('item_code'))
                     frappe.throw(_(m))
             bom_yeild = frappe.db.get_value("Work Order", {"name":self.work_order},['bom_yeild'])
             if bom_yeild:
