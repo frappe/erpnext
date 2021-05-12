@@ -12,6 +12,7 @@
   "column_break_3",
   "item_code",
   "item_name",
+  "stock_consumption",
   "section_break_6",
   "maintenance_team",
   "column_break_9",
@@ -100,10 +101,16 @@
    "label": "Maintenance Tasks",
    "options": "Asset Maintenance Task",
    "reqd": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "stock_consumption",
+   "fieldtype": "Check",
+   "label": "Stock Consumed During Maintenance"
   }
  ],
  "links": [],
- "modified": "2020-05-28 20:28:32.993823",
+ "modified": "2021-05-13 05:20:45.809270",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Maintenance",
