@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
-
+import collections, functools, operator
 from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days, get_link_to_form
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
@@ -212,7 +212,10 @@ class MaterialRequest(BuyingController):
 			doc = frappe.get_doc('Production Plan', production_plan)
 			doc.set_status()
 			doc.db_set('status', doc.status)
-
+	@frappe.whitelist()
+	def set_target_warehouse(self):
+		q = "select staging_material_request_warehouse from `tabStaging Details` where company = '{0}'".format(self.company)
+		return frappe.db.sql(q, as_dict = True)[0].get('staging_material_request_warehouse')
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
 		material_request_map = {}
@@ -571,3 +574,35 @@ def create_pick_list(source_name, target_doc=None):
 	doc.set_item_locations()
 
 	return doc
+
+@frappe.whitelist()
+def get_wo_items(schedule_start_from,schedule_start_to,item_to_manufacture = None):
+	all_wo = frappe.db.get_all("Work Order", {"planned_start_date":['between',[schedule_start_from,schedule_start_to]]}, 'name')
+	all_data = []
+	for wo in all_wo:
+		wo_wise_data = frappe.db.get_all("Work Order Item", {'parent':wo.get('name')},['item_code','transferred_qty','required_qty','description'])
+		for itm in wo_wise_data:
+			float_precision = (frappe.db.get_default("float_precision")) or 2
+			qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
+			if qty > 0:
+				itm['qty'] = qty
+				itm['description'] = itm.get('description')
+				all_data.append(itm)
+	
+	c = {}
+	for d in all_data:
+		c.setdefault(d['item_code'], []).append(d['qty'])
+		result = [{'item_code': k, 'qty': v} for k,v in c.items()]
+	data_set = []
+	for res in result:
+		d = {}
+		qty_sum = 0
+		item_detail = frappe.get_value("Item",{'item_code':res.get('item_code')},['description','stock_uom'],as_dict = True)
+		d['item_code'] = res.get('item_code')
+		d['desc'] = item_detail.get('desc')
+		d['stock_uom'] = item_detail.get('stock_uom')
+		for r in res.get('qty'):
+			qty_sum +=r
+		d['qty'] = qty_sum
+		data_set.append(d)
+	return data_set
