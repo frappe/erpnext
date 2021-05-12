@@ -73,8 +73,8 @@ class AssetRepair(Document):
 		gl_entry = frappe.get_doc({
 			"doctype": "GL Entry",
 			"account": self.payable_account,
-			"credit": self.repair_cost,
-			"credit_in_account_currency": self.repair_cost,
+			"credit": self.total_repair_cost,
+			"credit_in_account_currency": self.total_repair_cost,
 			"against": repair_and_maintenance_account,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
@@ -85,8 +85,8 @@ class AssetRepair(Document):
 		gl_entry = frappe.get_doc({
 			"doctype": "GL Entry",
 			"account": repair_and_maintenance_account,
-			"debit": self.repair_cost,
-			"debit_in_account_currency": self.repair_cost,
+			"debit": self.total_repair_cost,
+			"debit_in_account_currency": self.total_repair_cost,
 			"against": self.payable_account,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
@@ -95,39 +95,39 @@ class AssetRepair(Document):
 		})
 		gl_entry.insert()
 
-	# 	if self.capitalize_repair_cost:
-	# 		fixed_asset_account = self.get_fixed_asset_account()
-	# 		gl_entry = frappe.get_doc({
-	# 			"doctype": "GL Entry",
-	# 			"account": self.payable_account,
-	# 			"credit": self.total_repair_cost,
-	# 			"credit_in_account_currency": self.repair_cost,
-	# 			"against": repair_and_maintenance_account,
-	# 			"voucher_type": self.doctype,
-	# 			"voucher_no": self.name,
-	# 			"cost_center": self.cost_center,
-	# 			"posting_date": getdate()
-	# 		})
-	# 		gl_entry.insert()
-	# 		gl_entry = frappe.get_doc({
-	# 			"doctype": "GL Entry",
-	# 			"account": fixed_asset_account,
-	# 			"debit": self.total_repair_cost,
-	# 			"debit_in_account_currency": self.repair_cost,
-	# 			"against": self.payable_account,
-	# 			"voucher_type": self.doctype,
-	# 			"voucher_no": self.name,
-	# 			"cost_center": self.cost_center,
-	# 			"posting_date": getdate()
-	# 		})
-	# 		gl_entry.insert()
+		if self.capitalize_repair_cost:
+			fixed_asset_account = self.get_fixed_asset_account()
+			gl_entry = frappe.get_doc({
+				"doctype": "GL Entry",
+				"account": self.payable_account,
+				"credit": self.total_repair_cost,
+				"credit_in_account_currency": self.total_repair_cost,
+				"against": repair_and_maintenance_account,
+				"voucher_type": "Asset",		
+				"voucher_no": self.asset,
+				"cost_center": self.cost_center,
+				"posting_date": getdate()
+			})
+			gl_entry.insert()
+			gl_entry = frappe.get_doc({
+				"doctype": "GL Entry",
+				"account": fixed_asset_account,
+				"debit": self.total_repair_cost,
+				"debit_in_account_currency": self.total_repair_cost,
+				"against": self.payable_account,
+				"voucher_type": "Asset",
+				"voucher_no": self.asset,
+				"cost_center": self.cost_center,
+				"posting_date": getdate()
+			})
+			gl_entry.insert()
 
-	# def get_fixed_asset_account(self):
-	# 	asset_category = frappe.get_doc('Asset Category', frappe.db.get_value('Asset', self.asset, 'asset_category'))
-	# 	company = frappe.db.get_value('Asset', self.asset, 'company')
-	# 	for account in asset_category.accounts:
-	# 		if account.company_name == company:
-	# 			return account.fixed_asset_account
+	def get_fixed_asset_account(self):
+		asset_category = frappe.get_doc('Asset Category', frappe.db.get_value('Asset', self.asset, 'asset_category'))
+		company = frappe.db.get_value('Asset', self.asset, 'company')
+		for account in asset_category.accounts:
+			if account.company_name == company:
+				return account.fixed_asset_account
 			
 	
 @frappe.whitelist()
