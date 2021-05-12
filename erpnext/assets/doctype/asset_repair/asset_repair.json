@@ -13,8 +13,6 @@
   "asset_name",
   "section_break_5",
   "failure_date",
-  "assign_to",
-  "assign_to_name",
   "column_break_6",
   "completion_date",
   "repair_status",
@@ -61,20 +59,6 @@
    "fieldtype": "Datetime",
    "label": "Failure Date",
    "reqd": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "fieldname": "assign_to",
-   "fieldtype": "Link",
-   "label": "Assign To",
-   "options": "User"
-  },
-  {
-   "allow_on_submit": 1,
-   "fetch_from": "assign_to.full_name",
-   "fieldname": "assign_to_name",
-   "fieldtype": "Read Only",
-   "label": "Assign To Name"
   },
   {
    "fieldname": "column_break_6",
@@ -218,7 +202,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-12 21:03:59.032864",
+ "modified": "2021-05-12 21:09:27.994356",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
