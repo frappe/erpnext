@@ -52,7 +52,7 @@ class BankStatementImport(DataImport):
 		)
 
 		if 'Bank Account' not in json.dumps(preview):
-			frappe.throw('Please Add the Bank Account Column')
+			frappe.throw(_("Please add the Bank Account column"))
 
 		from frappe.core.page.background_jobs.background_jobs import get_info
 		from frappe.utils.scheduler import is_scheduler_inactive
