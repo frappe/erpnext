@@ -41,13 +41,6 @@ frappe.listview_settings['Leave Policy Assignment'] = {
 					fieldtype: 'Link',
 					options: "Leave Period",
 					label: __('Leave Period'),
-					get_query: function () {
-						return {
-							filters: {
-								"docstatus": 1
-							}
-						};
-					},
 					depends_on: doc => {
 						return doc.assignment_based_on == 'Leave Period';
 					},
