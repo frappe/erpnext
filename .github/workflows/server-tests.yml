@@ -12,7 +12,7 @@ jobs:
       matrix:
         container: [1, 2, 3]
 
-    name: Server Tests
+    name: Python Unit Tests
 
     services:
       mysql:
