@@ -119,7 +119,7 @@ def return_data(filters):
 			split_serie = debit_note.naming_series.split('-')
 			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
 				
-			if date == debit_note.creation_date and serie_number == serie:
+			if date == debit_note.posting_date and serie_number == serie:
 				if cont == 0:
 					split_initial_range = debit_note.name.split("-")
 					initial_range = split_initial_range[3]
@@ -131,10 +131,85 @@ def return_data(filters):
 				final_range = split_final_range[3]
 				cont += 1
 
-			multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "isv", "base_isv"], filters = {"parent": debit_note.name})
+			multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "base_isv", "isv"], filters = {"parent": debit_note.name})
 
 			for multiple_taxe in multiples_taxes:
-				item_tax_templates = frappe.get_all("Item Tax Template", ["name", "isv", "base_isv"], filters = {"parent": multiple_taxe.name})
+				item_tax_templates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": multiple_taxe.isv})
+
+				for tax_tamplate in item_tax_templates:
+
+					tax_details = frappe.get_all("Item Tax Template Detail", ["name", "tax_rate"], filters = {"parent": tax_tamplate.name})
+								
+					for tax_detail in tax_details:
+
+						if tax_detail.tax_rate == 15:
+							taxed_sales15 += multiple_taxe.base_isv
+								
+						if tax_detail.tax_rate == 18:
+							taxed_sales18 += multiple_taxe.base_isv							
+		
+		grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
+
+		final_range = "{}-{}".format(initial_range, final_range)
+
+		if is_row:
+			row = [posting_date, serie_number, type_transaction, final_range, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+			data.append(row)
+	
+	credit_notes = frappe.get_all("Credit Note CXC", ["name", "naming_series", "posting_date", "isv_18", "isv_15", "amount_total"], filters = conditions, order_by = "name asc")
+
+	dates.clear()
+
+	for credit_note in credit_notes:
+		if len(dates) == 0:
+			register = credit_note.posting_date
+			dates.append(register)
+		else:
+			new_date = False
+			if credit_note.posting_date in dates:
+				new_date = False
+			else:
+				register = credit_note.posting_date
+				dates.append(register)
+
+	dates_reverse = sorted(dates, reverse=False)
+
+	for date in dates_reverse:		
+		split_date = str(date).split("T")[0].split("-")
+		posting_date = "-".join(reversed(split_date))
+		serie_number = filters.get("serie")
+		type_transaction = "CN"
+		initial_range = ""
+		final_range = ""
+		total_exempt = 0
+		total_exonerated = 0
+		taxed_sales15 = 0
+		isv15 = 0
+		taxed_sales18 = 0
+		isv18 = 0
+		is_row = False
+		cont = 0
+
+		for credit_note in credit_notes:
+			split_serie = credit_note.naming_series.split('-')
+			serie =  "{}-{}".format(split_serie[0], split_serie[1])		
+				
+			if date == credit_note.posting_date and serie_number == serie:
+				if cont == 0:
+					split_initial_range = credit_note.name.split("-")
+					initial_range = split_initial_range[3]
+
+				isv15 += credit_note.isv_15
+				isv18 = credit_note.isv_18
+				is_row = True
+				split_final_range = credit_note.name.split("-")
+				final_range = split_final_range[3]
+				cont += 1
+
+			multiples_taxes = frappe.get_all("Multiple Taxes", ["name", "base_isv", "isv"], filters = {"parent": credit_note.name})
+
+			for multiple_taxe in multiples_taxes:
+				item_tax_templates = frappe.get_all("Item Tax Template", ["name"], filters = {"name": multiple_taxe.isv})
 
 				for tax_tamplate in item_tax_templates:
 
