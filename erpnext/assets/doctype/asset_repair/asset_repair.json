@@ -23,9 +23,10 @@
   "accounting_details",
   "repair_cost",
   "capitalize_repair_cost",
+  "stock_consumption",
   "column_break_8",
   "payable_account",
-  "stock_items_section",
+  "stock_consumption_details_section",
   "stock_items",
   "section_break_9",
   "description",
@@ -174,10 +175,6 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "stock_items_section",
-   "fieldtype": "Section Break"
-  },
-  {
    "fieldname": "accounting_dimensions_section",
    "fieldtype": "Section Break",
    "label": "Accounting Dimensions"
@@ -197,12 +194,23 @@
   {
    "fieldname": "column_break_14",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "stock_consumption",
+   "fieldtype": "Check",
+   "label": "Stock Consumed During Repair"
+  },
+  {
+   "fieldname": "stock_consumption_details_section",
+   "fieldtype": "Section Break",
+   "label": "Stock Consumption Details"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-12 21:09:27.994356",
+ "modified": "2021-05-12 21:20:18.276755",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
