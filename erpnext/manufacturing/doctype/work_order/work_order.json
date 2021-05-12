@@ -62,9 +62,11 @@
   "bom_weight",
   "column_break_53",
   "planned_rm_weight",
+  "transfered_rm_weight",
   "actual_rm_weight",
-  "actual_fg_weight",
+  "consumption_deviation",
   "column_break_56",
+  "actual_fg_weight",
   "actual_yeild",
   "yeild_deviation",
   "more_info",
@@ -277,6 +279,7 @@
    "label": "Required Items"
   },
   {
+   "allow_on_submit": 1,
    "fieldname": "required_items",
    "fieldtype": "Table",
    "label": "Required Items",
@@ -533,7 +536,7 @@
   },
   {
    "fieldname": "bom_yeild",
-   "fieldtype": "Percent",
+   "fieldtype": "Float",
    "label": "BOM Yeild",
    "no_copy": 1,
    "read_only": 1
@@ -569,14 +572,14 @@
   },
   {
    "fieldname": "actual_yeild",
-   "fieldtype": "Percent",
+   "fieldtype": "Float",
    "label": "Actual Yeild",
    "no_copy": 1,
    "read_only": 1
   },
   {
    "fieldname": "yeild_deviation",
-   "fieldtype": "Percent",
+   "fieldtype": "Float",
    "label": "Yeild Deviation",
    "no_copy": 1,
    "read_only": 1
@@ -593,6 +596,21 @@
    "label": "Planned RM Weight",
    "no_copy": 1,
    "read_only": 1
+  },
+  {
+   "allow_on_submit": 1,
+   "fieldname": "consumption_deviation",
+   "fieldtype": "Float",
+   "label": "Consumption Deviation",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "transfered_rm_weight",
+   "fieldtype": "Float",
+   "label": "Transfered RM Weight",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "icon": "fa fa-cogs",
@@ -600,7 +618,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-07 14:51:13.957254",
+ "modified": "2021-05-12 11:31:16.914657",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Work Order",

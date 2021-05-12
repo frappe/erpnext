@@ -137,6 +137,15 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
+		console.log("Refresh working");
+		if(frm.doc.transfer_material_against === "Work Order"){
+			console.log("Add Additional Items button should work");
+			frm.add_custom_button(__('Add Additional Items'),function() {
+				var usr = frappe.session.user
+				frappe.new_doc("Additional Item", {"work_order" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
+				//console.log("********** finished")
+			})
+		}
 		set_material_transfer_for_manufacturing(frm)
 		erpnext.toggle_naming_series();
 		erpnext.work_order.set_custom_buttons(frm);
@@ -414,8 +423,10 @@ frappe.ui.form.on("Work Order", {
 	qty: function(frm) {
 		frm.trigger('bom_no');
 	},
-
-	before_submit: function(frm,cdt,cdn) {
+	// before_save: function(frm){
+	// 	frm.refresh_field('planned_rm_weight')
+	// },
+	before_submit: function(frm) {
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
 			frm.doc.operations && frm.doc.operations.length > 0);
@@ -463,16 +474,27 @@ frappe.ui.form.on("Work Order", {
 		erpnext.work_order.calculate_total_cost(frm);
 	},
 
-	actual_fg_weight: function(frm) {
-		frappe.call({
-			method: "yeild_calc",
-			callback: function(r) {
-				if(r.message) {
-					console.log(r.message);
-				}
-			}
-		});
-	}
+	// actual_fg_weight: function(frm) {
+	// 	frappe.call({
+	// 		method: "yeild_calc",
+	// 		callback: function(r) {
+	// 			if(r.message) {
+	// 				console.log(r.message);
+	// 			}
+	// 		}
+	// 	});
+	// },
+
+	// actual_rm_weight: function(frm) {
+	// 	frappe.call({
+	// 		method: "consumption_dev",
+	// 		callback: function(r) {
+	// 			if(r.message) {
+	// 				frm.reload_doc();
+	// 			}
+	// 		}
+	// 	});
+	// }
 
 });
 
@@ -520,18 +542,18 @@ frappe.ui.form.on("Work Order Item", {
 				}
 			});
 		}
-	},
-
-	required_qty: function(frm, cdt, cdn) {
-		frappe.call({
-			"method": "planned_rm_cost_calc",
-			callback: function(r) {
-				if(r.message) {
-					console.log(r.message);
-				}
-			}
-		});
 	}
+
+	// required_qty: function(frm, cdt, cdn) {
+	// 	frappe.call({
+	// 		"method": "planned_rm_cost_calc",
+	// 		callback: function(r) {
+	// 			if(r.message) {
+	// 				console.log(r.message);
+	// 			}
+	// 		}
+	// 	});
+	// }
 
 });
 
@@ -572,12 +594,12 @@ erpnext.work_order = {
 					erpnext.work_order.stop_work_order(frm, "Resumed");
 				}, __("Status"));
 			}
-
 			const show_start_btn = (frm.doc.skip_transfer
 				|| frm.doc.transfer_material_against == 'Job Card') ? 0 : 1;
 
 			if (show_start_btn) {
-				if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
+				// if ((flt(doc.material_transferred_for_manufacturing) < flt(doc.qty))
+				if ((flt(doc.transfered_rm_weight) < flt(doc.planned_rm_weight))
 					&& frm.doc.status != 'Stopped') {
 					frm.has_start_btn = true;
 					frm.add_custom_button(__('Create Pick List'), function() {
@@ -689,9 +711,9 @@ erpnext.work_order = {
 
 	calculate_total_cost: function(frm) {
 		let variable_cost = flt(frm.doc.actual_operating_cost) || flt(frm.doc.planned_operating_cost);
+		console.log(variable_cost);
 		frm.set_value("total_operating_cost", (flt(frm.doc.additional_operating_cost) + variable_cost));
 	},
-
 	set_default_warehouse: function(frm) {
 		if (!(frm.doc.wip_warehouse || frm.doc.fg_warehouse)) {
 			frappe.call({
@@ -710,12 +732,15 @@ erpnext.work_order = {
 	get_max_transferable_qty: (frm, purpose) => {
 		let max = 0;
 		if (frm.doc.skip_transfer) {
-			max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
+			// max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
+			max = flt(frm.doc.planned_rm_weight) - flt(frm.doc.actual_rm_weight);
 		} else {
 			if (purpose === 'Manufacture') {
-				max = flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty);
+				// max = flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty);
+				max = flt(frm.doc.transfered_rm_weight) - flt(frm.doc.actual_rm_weight);
 			} else {
-				max = flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
+				// max = flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
+				max = flt(frm.doc.planned_rm_weight) - flt(frm.doc.transfered_rm_weight);
 			}
 		}
 		return flt(max, precision('qty'));
@@ -769,6 +794,7 @@ erpnext.work_order = {
 				frappe.model.sync(pick_list);
 				frappe.set_route('Form', pick_list.doctype, pick_list.name);
 			});
+			console.log(data);
 	},
 
 	make_consumption_se: function(frm, backflush_raw_materials_based_on) {
