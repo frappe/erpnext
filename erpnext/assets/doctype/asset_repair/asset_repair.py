@@ -37,21 +37,25 @@ class AssetRepair(Document):
 
 	def on_submit(self):
 		self.check_repair_status()
-		self.check_stock_items()
+		self.check_for_stock_items_and_warehouse()
 		self.check_for_payable_account()
 		self.check_for_cost_center()
 
 		self.increase_asset_value()
+		if self.stock_consumption:
+			self.decrease_stock_quantity()
 		self.make_gl_entries()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
 			frappe.throw(_("Please update Repair Status."))
 
-	def check_stock_items(self):
+	def check_for_stock_items_and_warehouse(self):
 		if self.stock_consumption:
 			if not self.stock_items:
 				frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
+			if not self.warehouse:
+				frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Repair were taken."))
 
 	def check_for_payable_account(self):
 		if not self.payable_account:
@@ -68,6 +72,22 @@ class AssetRepair(Document):
 				asset_value += item.total_value
 
 			frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
+		
+	def decrease_stock_quantity(self):
+		stock_entry = frappe.get_doc({
+			"doctype": "Stock Entry",
+			"stock_entry_type": "Material Issue"
+		})
+
+		for stock_item in self.stock_items:
+			stock_entry.append('items', {
+				"s_warehouse": self.warehouse,
+				"item_code": stock_item.item,
+				"qty": stock_item.consumed_quantity
+			})
+
+		stock_entry.insert()
+		stock_entry.submit()
 
 	def on_cancel(self):
 		if self.payable_account:
