@@ -2,3 +2,11 @@
     <span>{{ reminder_text }}</span>
     <p class="text-muted">{{ message }}</p>
 </div>
+
+{% if advance_holiday_reminder %}
+    <ol>
+        {% for holiday in holidays %}
+            <li>{{ holiday.holiday_date }} - {{ holiday.description }}</li>
+        {% endfor %}
+    </ol>
+{% endif %}
