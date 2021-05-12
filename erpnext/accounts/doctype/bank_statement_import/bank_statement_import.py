@@ -77,7 +77,7 @@ class BankStatementImport(DataImport):
 				google_sheets_url=self.google_sheets_url,
 				bank=self.bank,
 				template_options=self.template_options,
-				now=1#frappe.conf.developer_mode or frappe.flags.in_test,
+				now=frappe.conf.developer_mode or frappe.flags.in_test,
 			)
 			return True
 
