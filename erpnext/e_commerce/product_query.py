@@ -22,7 +22,7 @@ class ProductQuery:
 	def __init__(self):
 		self.settings = frappe.get_doc("E Commerce Settings")
 		self.page_length = self.settings.products_per_page or 20
-		self.fields = ['wi.name', 'wi.item_name', 'wi.item_code', 'wi.website_image', 'wi.variant_of',
+		self.fields = ['wi.web_item_name', 'wi.name', 'wi.item_name', 'wi.item_code', 'wi.website_image', 'wi.variant_of',
 			'wi.has_variants', 'wi.item_group', 'wi.image', 'wi.web_long_description', 'wi.description',
 			'wi.route', 'wi.website_warehouse']
 		self.conditions = ""
