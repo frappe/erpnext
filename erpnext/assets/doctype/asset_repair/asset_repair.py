@@ -42,11 +42,24 @@ class AssetRepair(Document):
 				self.total_repair_cost += item.total_value
 
 	def on_submit(self):
-		if self.repair_status == "Pending":
-			frappe.throw(_("Please update Repair Status."))
+		self.check_repair_status()
+		self.check_for_payable_account()
+		self.check_for_cost_center()
 
 		self.increase_asset_value()
 		self.make_gl_entries()
+
+	def check_repair_status(self):
+		if self.repair_status == "Pending":
+			frappe.throw(_("Please update Repair Status."))
+
+	def check_for_payable_account(self):
+		if not self.payable_account:
+			frappe.throw(_("Please enter Payable Account."))
+
+	def check_for_cost_center(self):
+		if not self.cost_center:
+			frappe.throw(_("Please enter Cost Center."))
 
 	def increase_asset_value(self):
 		if self.capitalize_repair_cost:
