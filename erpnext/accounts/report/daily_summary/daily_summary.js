@@ -25,5 +25,12 @@ frappe.query_reports["Daily summary"] = {
 			"options": "Daily summary series",
 			"reqd": 1
 		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"reqd": 1
+		}
 	]
 };

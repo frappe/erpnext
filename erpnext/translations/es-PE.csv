@@ -1022,3 +1022,4 @@ DocType: Landed Cost Voucher,Get Items From Purchase Receipts,Obtener los elemen
 DocType: Item,Serial Number Series,Número de Serie Serie
 DocType: Sales Invoice,Product Bundle Help,Ayuda del conjunto/paquete de productos
 DocType: Currency Exchange,Specify Exchange Rate to convert one currency into another,Especificar Tipo de Cambio para convertir una moneda en otra
+DocType: Sales Invoice,Client Name,Nombre del cliente

@@ -30,3 +30,4 @@ apps/erpnext/erpnext/utilities/user_progress.py,Classrooms/ Laboratories etc whe
 apps/erpnext/erpnext/templates/includes/cart/cart_dropdown.html,Checkout,Finalizando pedido
 DocType: Guardian Student,Guardian Student,Guardián del Estudiante
 DocType: BOM Operation,Base Hour Rate(Company Currency),Tarifa Base por Hora (Divisa de Compañía)
+DocType: Sales Invoice,Client Name,Nombre del cliente

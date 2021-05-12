@@ -10,3 +10,4 @@ DocType: Item,Asset Naming Series,Series de Nombres de Activos
 ,BOM Variance Report,Informe de varianza BOM(Lista de Materiales)
 apps/erpnext/erpnext/hr/doctype/employee_promotion/employee_promotion.py +15,Cannot promote Employee with status Left,No se puede promover Empleado con estado ha salido
 apps/erpnext/erpnext/accounts/doctype/purchase_invoice/purchase_invoice.js +710,Auto repeat document updated,Repetición automática del documento actualizado
+DocType: Sales Invoice,Client Name,Nombre del cliente

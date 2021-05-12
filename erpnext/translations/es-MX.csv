@@ -17,6 +17,7 @@ apps/erpnext/erpnext/accounts/doctype/payment_request/payment_request.py +48,The
 apps/erpnext/erpnext/hr/doctype/salary_structure/salary_structure.js +488,Show Salary Slip,Mostrar Recibo de Nómina
 apps/erpnext/erpnext/hr/doctype/salary_slip/salary_slip.py +328,Leave Without Pay does not match with approved Leave Application records,Permiso sin sueldo no coincide con los registros de Solicitud de Permiso aprobadas
 DocType: Purchase Taxes and Charges Template,"Standard tax template that can be applied to all Purchase Transactions. This template can contain list of tax heads and also other expense heads like ""Shipping"", ""Insurance"", ""Handling"" etc.
+DocType: Sales Invoice,Client Name,Nombre del cliente
 
 #### Note
 

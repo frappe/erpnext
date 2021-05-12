@@ -14,3 +14,4 @@ DocType: Timesheet,Billing Details,Detalles de Facturación
 DocType: Tax Rule,Billing State,Región de Facturación
 DocType: Purchase Order Item,Billed Amt,Monto Facturado
 DocType: Item Tax,Tax Rate,Tasa de Impuesto
+DocType: Sales Invoice,Client Name,Nombre del cliente
