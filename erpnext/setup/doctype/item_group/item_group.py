@@ -67,37 +67,14 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			frappe.throw(frappe._("An item exists with same name ({0}), please change the item group name or rename the item").format(self.name), frappe.NameError)
 
 	def get_context(self, context):
-		context.show_search=True
+		context.show_search = True
 		context.page_length = cint(frappe.db.get_single_value('E Commerce Settings', 'products_per_page')) or 6
-		context.e_commerce_settings = frappe.get_cached_doc('E Commerce Settings', 'E Commerce Settings')
 		context.search_link = '/product_search'
-
-		if frappe.form_dict:
-			search = frappe.form_dict.search
-			field_filters = frappe.parse_json(frappe.form_dict.field_filters)
-			attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
-			start = frappe.parse_json(frappe.form_dict.start)
-		else:
-			search = None
-			attribute_filters = None
-			field_filters = {}
-			start = 0
-
-		if not field_filters:
-			field_filters = {}
-
-		# Ensure the query remains within current item group
-		field_filters['item_group'] = self.name
-
-		engine = ProductQuery()
-		context.items, discounts = engine.query(attribute_filters, field_filters, search, start)
 
 		filter_engine = ProductFiltersBuilder(self.name)
 
 		context.field_filters = filter_engine.get_field_filters()
 		context.attribute_filters = filter_engine.get_attribute_filters()
-		if discounts:
-			context.discount_filters = filter_engine.get_discount_filters(discounts)
 
 		context.update({
 			"parents": get_parent_item_groups(self.parent_item_group),
@@ -126,6 +103,7 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 
 		context.no_breadcrumbs = False
 		context.title = self.website_title or self.name
+		context.name = self.name
 
 		return context
 

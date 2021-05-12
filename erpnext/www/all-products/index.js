@@ -1,6 +1,17 @@
 $(() => {
 	class ProductListing {
 		constructor() {
+			let is_item_group_page = $(".item-group-content").data("item-group");
+			let item_group = is_item_group_page || null;
+
+			// Render Products
+			frappe.require('assets/js/e-commerce.min.js', function() {
+				new erpnext.ProductView({
+					products_section: $('#product-listing'),
+					item_group: item_group
+				});
+			});
+
 			this.bind_filters();
 			this.bind_card_actions();
 			this.bind_search();
@@ -77,8 +88,8 @@ $(() => {
 		}
 
 		bind_card_actions() {
-			erpnext.shopping_cart.bind_add_to_cart_action();
-			erpnext.wishlist.bind_wishlist_action();
+			e_commerce.shopping_cart.bind_add_to_cart_action();
+			e_commerce.wishlist.bind_wishlist_action();
 		}
 
 		bind_search() {

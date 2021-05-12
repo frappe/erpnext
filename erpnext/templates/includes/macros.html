@@ -66,7 +66,8 @@
 	'align-items-start': align == 'Left',
 }) -%}
 {%- set col_size = 3 if is_full_width else 4 -%}
-{%- set title = item.item_name or item.item_code -%}
+{%- set title = item.web_item_name or item.item_name or item.item_code -%}
+{%- set title = title[:50] + "..." if title|len > 50 else title -%}
 {%- set image = item.website_image or item.image -%}
 {%- set description = item.website_description or item.description-%}
 
@@ -120,11 +121,13 @@
 <div class="card-body {{ align_class }}" style="width:100%">
 	<div style="margin-top: 16px; display: flex;">
 		<a href="/{{ item.route or '#' }}">
-			<div class="product-title">{{ title or '' }}</div>
+			<div class="product-title">
+				{{ title or '' }}
+				{% if item.in_stock %}
+				<span class="indicator {{ item.in_stock }} card-indicator"></span>
+				{% endif %}
+			</div>
 		</a>
-		{% if item.in_stock %}
-			<span class="indicator {{ item.in_stock }} card-indicator"></span>
-		{% endif %}
 		{% if not item.has_variants and settings.enable_wishlist %}
 			<div class="like-action"
 				data-item-code="{{ item.item_code }}"
@@ -363,7 +366,7 @@
 		<div class="filter-options">
 			{% for attr_value in attribute.item_attribute_values %}
 			<div class="checkbox">
-				<label data-value="{{ value }}">
+				<label data-value="{{ attr_value }}">
 					<input type="checkbox"
 						class="product-filter attribute-filter"
 						id="{{attr_value.name}}"
@@ -380,25 +383,4 @@
 		{% endif %}
 	</div>
 {% endfor %}
-{%- endmacro -%}
-
-{%- macro discount_range_filters(filters)-%}
-<div class="mb-4 filter-block pb-5">
-	<div class="filter-label mb-3">{{ _("Discounts") }}</div>
-	<div class="filter-options">
-		{% for entry in filters %}
-		<div class="checkbox">
-			<label data-value="{{ entry[0] }}">
-				<input type="radio" class="product-filter discount-filter"
-					name="discount" id="{{ entry[0] }}"
-					data-filter-name="discount" data-filter-value="{{ entry[0] }}"
-				>
-					<span class="label-area" for="{{ entry[0] }}">
-						{{ entry[1] }}
-					</span>
-			</label>
-		</div>
-		{% endfor %}
-	</div>
-</div>
 {%- endmacro -%}

@@ -6,33 +6,55 @@ from erpnext.e_commerce.filters import ProductFiltersBuilder
 sitemap = 1
 
 def get_context(context):
+	# Add homepage as parent
+	context.parents = [{"name": frappe._("Home"), "route":"/"}]
 
+	filter_engine = ProductFiltersBuilder()
+	context.field_filters = filter_engine.get_field_filters()
+	context.attribute_filters = filter_engine.get_attribute_filters()
+
+	context.page_length = cint(frappe.db.get_single_value('E Commerce Settings', 'products_per_page'))or 20
+
+	context.no_cache = 1
+
+@frappe.whitelist(allow_guest=True)
+def get_product_filter_data():
+	"""Get pre-rendered filtered products and discount filters on load."""
 	if frappe.form_dict:
 		search = frappe.form_dict.search
 		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
 		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
 		start = cint(frappe.parse_json(frappe.form_dict.start))
+		item_group = frappe.form_dict.item_group
 	else:
-		search = field_filters = attribute_filters = None
+		search, attribute_filters, item_group = None, None, None
+		field_filters = {}
 		start = 0
 
+	if item_group:
+		field_filters['item_group'] = item_group
+
 	engine = ProductQuery()
-	context.items, discounts = engine.query(attribute_filters, field_filters, search, start)
+	items, discounts = engine.query(attribute_filters, field_filters, search_term=search, start=start)
 
-	# Add homepage as parent
-	context.parents = [{"name": frappe._("Home"), "route":"/"}]
+	item_html = []
+	for item in items:
+		item_html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
+			'item': item,
+			'e_commerce_settings': engine.settings
+		}))
+	html = ''.join(item_html)
 
-	filter_engine = ProductFiltersBuilder()
+	if not items:
+		html = frappe.render_template('erpnext/www/all-products/not_found.html', {})
 
-	context.field_filters = filter_engine.get_field_filters()
-	context.attribute_filters = filter_engine.get_attribute_filters()
+	# discount filter data
+	filters = {}
 	if discounts:
-		context.discount_filters = filter_engine.get_discount_filters(discounts)
+		filter_engine = ProductFiltersBuilder()
+		filters["discount_filters"] = filter_engine.get_discount_filters(discounts)
 
-	context.e_commerce_settings = engine.settings
-	context.page_length = engine.settings.products_per_page or 20
-
-	context.no_cache = 1
+	return html, filters
 
 @frappe.whitelist(allow_guest=True)
 def get_products_html_for_website(field_filters=None, attribute_filters=None):
@@ -47,7 +69,7 @@ def get_products_html_for_website(field_filters=None, attribute_filters=None):
 	for item in items:
 		item_html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
 			'item': item,
-			'e_commerce_settings': None
+			'e_commerce_settings': engine.settings
 		}))
 	html = ''.join(item_html)
 
