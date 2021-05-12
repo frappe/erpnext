@@ -3,8 +3,8 @@
 
 import frappe
 from frappe import _
-from frappe.utils import comma_sep, comma_and, getdate, today
-from erpnext.hr.doctype.employee.employee import get_all_employee_emails, get_employee_email, is_holiday
+from frappe.utils import comma_sep, comma_and, getdate, today, add_months, add_days
+from erpnext.hr.doctype.employee.employee import get_all_employee_emails, get_employee_email, is_holiday, get_holiday_list_for_employee
 
 # -----------------
 # HOLIDAY REMINDERS
@@ -218,3 +218,65 @@ def send_work_anniversary_reminder(recipients, reminder_text, anniversary_person
 		),
 		header=_("🎊️🎊️ Work Anniversary Reminder 🎊️🎊️")
 	)
+
+
+# ----------------------------------
+# ADVANCE HOLIDAY REMINDERS
+# ----------------------------------
+def send_reminders_in_advance_weekly():
+	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders_in_advance") or 1) 
+	frequency = frappe.db.get_single_value("HR Settings", "frequency")
+	if not (to_send_in_advance and frequency == "Weekly"):
+		return
+
+	send_advance_holiday_reminders("Weekly")
+
+def send_reminders_in_advance_monthly():
+	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders_in_advance") or 1) 
+	frequency = frappe.db.get_single_value("HR Settings", "frequency")
+	if not (to_send_in_advance and frequency == "Monthly"):
+		return
+
+	send_advance_holiday_reminders("Monthly")
+
+def send_advance_holiday_reminders(frequency):
+	"""Send Holiday Reminders in Advance to Employees
+	`frequency` (str): 'Weekly' or 'Monthly'
+	"""
+	if frequency == "Weekly":
+		start_date = add_days(getdate(), 1)
+		end_date = add_days(getdate(), 7)
+	elif frequency == "Monthly":
+		# Sent on 1st of every month
+		start_date = add_days(getdate())
+		end_date = add_months(getdate(), 1)
+	else:
+		return 
+
+	employees = frappe.db.get_all('Employee', pluck='name')
+	for employee in employees:
+		holidays = get_holidays_for_employee_between(start_date, end_date)
+		
+		if not (holidays is None):
+			send_holidays_reminder_in_advance(employee, holidays)
+
+def get_holidays_for_employee_between(employee, start_date, end_date):
+	holiday_list = get_holiday_list_for_employee(employee, raise_exception=False)
+	
+	if holiday_list:
+		filters = {
+			'parent': holiday_list,
+			'holiday_date': ('between', [start_date, end_date]),
+			'weekly_off': False
+		}
+
+		holidays = frappe.get_all(
+			'Holiday', 
+			fields=['description', 'holiday_date'],
+			filters=filters
+		)
+
+		return holidays
+
+def send_holidays_reminder_in_advance(employee, holidays):
+	pass
