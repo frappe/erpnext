@@ -744,8 +744,9 @@
   },
   {
    "fieldname": "repair_and_maintenance_account",
-   "fieldtype": "Data",
-   "label": "Repair and Maintenance Account"
+   "fieldtype": "Link",
+   "label": "Repair and Maintenance Account",
+   "options": "Account"
   }
  ],
  "icon": "fa fa-building",
@@ -753,7 +754,7 @@
  "image_field": "company_logo",
  "is_tree": 1,
  "links": [],
- "modified": "2021-05-11 21:47:04.667950",
+ "modified": "2021-05-12 16:51:08.187233",
  "modified_by": "Administrator",
  "module": "Setup",
  "name": "Company",
