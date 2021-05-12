@@ -17,7 +17,6 @@ class AssetRepair(Document):
 
 		self.update_status()
 		self.set_total_value()		# change later
-		self.check_stock_items()
 		self.calculate_total_repair_cost()
 		
 	def update_status(self):
@@ -30,11 +29,6 @@ class AssetRepair(Document):
 		for item in self.stock_items:
 			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
 
-	def check_stock_items(self):
-		if self.stock_consumption:
-			if not self.stock_items:
-				frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
-
 	def calculate_total_repair_cost(self):
 		self.total_repair_cost = self.repair_cost
 		if self.stock_consumption:
@@ -43,6 +37,7 @@ class AssetRepair(Document):
 
 	def on_submit(self):
 		self.check_repair_status()
+		self.check_stock_items()
 		self.check_for_payable_account()
 		self.check_for_cost_center()
 
@@ -52,6 +47,11 @@ class AssetRepair(Document):
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
 			frappe.throw(_("Please update Repair Status."))
+
+	def check_stock_items(self):
+		if self.stock_consumption:
+			if not self.stock_items:
+				frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
 
 	def check_for_payable_account(self):
 		if not self.payable_account:

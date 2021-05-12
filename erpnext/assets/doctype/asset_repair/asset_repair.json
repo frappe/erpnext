@@ -28,6 +28,7 @@
   "payable_account",
   "total_repair_cost",
   "stock_consumption_details_section",
+  "warehouse",
   "stock_items",
   "section_break_9",
   "description",
@@ -211,12 +212,18 @@
    "fieldname": "total_repair_cost",
    "fieldtype": "Currency",
    "label": "Total Repair Cost"
+  },
+  {
+   "fieldname": "warehouse",
+   "fieldtype": "Link",
+   "label": "Warehouse",
+   "options": "Warehouse"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-13 02:40:57.953076",
+ "modified": "2021-05-13 03:50:39.146322",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
