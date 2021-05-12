@@ -16,7 +16,8 @@
 {% endblock %}
 
 {% block page_content %}
-<div class="item-group-content" itemscope itemtype="http://schema.org/Product">
+<div class="item-group-content" itemscope itemtype="http://schema.org/Product"
+	data-item-group="{{ name }}">
 	<div class="item-group-slideshow">
 		{% if slideshow %}<!-- slideshow -->
 			{{ web_block(
@@ -33,7 +34,7 @@
 		{% endif %}
 	</div>
 	<div class="row">
-		<div class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
+		<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
 			{% if sub_categories %}
 			<div class="sub-category-container">
 				<div class="heading"> {{ _('Sub Categories') }} </div>
@@ -48,15 +49,9 @@
 				{% endfor %}
 			</div>
 			{% endif %}
-			<div class="row products-list">
-				{% if items %}
-					{% for item in items %}
-						{% include "erpnext/www/all-products/item_row.html" %}
-					{% endfor %}
-				{% else %}
-					{% include "erpnext/www/all-products/not_found.html" %}
-				{% endif %}
-			</div>
+
+			<!-- Products Rendered in all-products/index.js-->
+
 		</div>
 		<div class="col-12 order-1 col-md-3 order-md-1">
 			<div class="collapse d-md-block mr-4 filters-section" id="product-filters">
@@ -70,10 +65,6 @@
 				<!-- attribute filters -->
 				{{ attribute_filter_section(attribute_filters) }}
 
-				<!-- discount filters -->
-				{% if discount_filters %}
-					{{ discount_range_filters(discount_filters) }}
-				{% endif %}
 			</div>
 
 			<script>

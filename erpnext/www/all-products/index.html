@@ -7,7 +7,8 @@
 {% endblock header %}
 
 {% block page_content %}
-<div class="row" style="display: none;">
+<!-- Old Search -->
+<!-- <div class="row" style="display: none;">
 	<div class="col-8">
 		<div class="input-group input-group-sm mb-3">
 			<input type="search" class="form-control" placeholder="{{_('Search')}}"
@@ -29,22 +30,16 @@
 			{{ _('Toggle Filters') }}
 		</button>
 	</div>
-</div>
+</div> -->
 
+<!-- Items section -->
 <div class="row">
-	<div class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
-		<div class="row products-list">
-			{% if items %}
-				{% for item in items %}
-					{% include "erpnext/www/all-products/item_row.html" %}
-				{% endfor %}
-			{% else %}
-				{% include "erpnext/www/all-products/not_found.html" %}
-			{% endif %}
-		</div>
+	<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
+		<!-- Rendered via JS -->
 	</div>
-	<div class="col-12 order-1 col-md-3 order-md-1">
 
+	<!-- Filters Section -->
+	<div class="col-12 order-1 col-md-3 order-md-1">
 		{% if frappe.form_dict.start or frappe.form_dict.field_filters or frappe.form_dict.attribute_filters or frappe.form_dict.search %}
 
 
@@ -63,11 +58,6 @@
 			<!-- attribute filters -->
 			{% if attribute_filters %}
 				{{ attribute_filter_section(attribute_filters) }}
-			{% endif %}
-
-			<!-- discount filters -->
-			{% if discount_filters %}
-				{{ discount_range_filters(discount_filters) }}
 			{% endif %}
 		</div>
 
@@ -91,7 +81,10 @@
 		</script>
 	</div>
 </div>
-<div class="row product-paging-area mt-5">
+
+<!-- TODO -->
+<!-- Paging Section -->
+<!-- <div class="row product-paging-area mt-5">
 	<div class="col-3">
 	</div>
 	<div class="col-9 text-right">
@@ -102,7 +95,7 @@
 		<button class="btn btn-default btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
 		{% endif %}
 	</div>
-</div>
+</div> -->
 
 <script>
 	frappe.ready(() => {
