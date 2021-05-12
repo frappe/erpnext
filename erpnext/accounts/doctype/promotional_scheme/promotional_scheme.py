@@ -106,14 +106,14 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 
 	return new_doc
 
-def set_args(args,pr,doc,child_doc,discount_fields,d):
+def set_args(args, pr, doc, child_doc, discount_fields, child_doc_fields):
 	pr.update(args)
 	for field in (other_fields + discount_fields):
-		pr.set(field, d.get(field))
+		pr.set(field, child_doc_fields.get(field))
 
-	pr.promotional_scheme_id = d.name
+	pr.promotional_scheme_id = child_doc_fields.name
 	pr.promotional_scheme = doc.name
-	pr.disable = d.disable if d.disable else doc.disable
+	pr.disable = child_doc_fields.disable if child_doc_fields.disable else doc.disable
 	pr.price_or_product_discount = ('Price'
 		if child_doc == 'price_discount_slabs' else 'Product')
 
