@@ -30,6 +30,8 @@
   "stock_consumption_details_section",
   "warehouse",
   "stock_items",
+  "asset_depreciation_details_section",
+  "increase_in_asset_life",
   "section_break_9",
   "description",
   "column_break_9",
@@ -218,12 +220,22 @@
    "fieldtype": "Link",
    "label": "Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "fieldname": "asset_depreciation_details_section",
+   "fieldtype": "Section Break",
+   "label": "Asset Depreciation Details"
+  },
+  {
+   "fieldname": "increase_in_asset_life",
+   "fieldtype": "Int",
+   "label": "Increase In Asset Life"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-13 03:50:39.146322",
+ "modified": "2021-05-13 05:08:00.676616",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
