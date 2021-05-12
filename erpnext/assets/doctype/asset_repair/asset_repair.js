@@ -28,7 +28,7 @@ frappe.ui.form.on('Asset Repair', {
 
 	refresh: function(frm) {
 		frm.toggle_display(['completion_date', 'repair_status', 'accounting_details', 'accounting_dimensions_section'], !(frm.doc.__islocal));
-		frm.toggle_display(['stock_consumption_details_section'], frm.doc.stock_consumption)
+		frm.toggle_display(['stock_consumption_details_section', 'total_repair_cost'], frm.doc.stock_consumption)
 
 		if (frm.doc.docstatus) {
 			frm.add_custom_button("View General Ledger", function() {

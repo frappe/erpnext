@@ -16,17 +16,30 @@ class AssetRepair(Document):
 			frappe.throw(_("Please select Completion Date for Completed Repair"))
 
 		self.update_status()
-		self.set_total_value()
-
-	def set_total_value(self):
-		for item in self.stock_items:
-			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
-
+		self.set_total_value()		# change later
+		self.check_stock_items()
+		self.calculate_total_repair_cost()
+		
 	def update_status(self):
 		if self.repair_status == 'Pending':
 			frappe.db.set_value('Asset', self.asset, 'status', 'Out of Order')
 		else:
 			frappe.db.set_value('Asset', self.asset, 'status', 'Submitted')
+
+	def set_total_value(self):
+		for item in self.stock_items:
+			item.total_value = flt(item.valuation_rate) * flt(item.consumed_quantity)
+
+	def check_stock_items(self):
+		if self.stock_consumption:
+			if not self.stock_items:
+				frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
+
+	def calculate_total_repair_cost(self):
+		self.total_repair_cost = self.repair_cost
+		if self.stock_consumption:
+			for item in self.stock_items:
+				self.total_repair_cost += item.total_value
 
 	def on_submit(self):
 		if self.repair_status == "Pending":
@@ -81,6 +94,41 @@ class AssetRepair(Document):
 			"posting_date": getdate()
 		})
 		gl_entry.insert()
+
+	# 	if self.capitalize_repair_cost:
+	# 		fixed_asset_account = self.get_fixed_asset_account()
+	# 		gl_entry = frappe.get_doc({
+	# 			"doctype": "GL Entry",
+	# 			"account": self.payable_account,
+	# 			"credit": self.total_repair_cost,
+	# 			"credit_in_account_currency": self.repair_cost,
+	# 			"against": repair_and_maintenance_account,
+	# 			"voucher_type": self.doctype,
+	# 			"voucher_no": self.name,
+	# 			"cost_center": self.cost_center,
+	# 			"posting_date": getdate()
+	# 		})
+	# 		gl_entry.insert()
+	# 		gl_entry = frappe.get_doc({
+	# 			"doctype": "GL Entry",
+	# 			"account": fixed_asset_account,
+	# 			"debit": self.total_repair_cost,
+	# 			"debit_in_account_currency": self.repair_cost,
+	# 			"against": self.payable_account,
+	# 			"voucher_type": self.doctype,
+	# 			"voucher_no": self.name,
+	# 			"cost_center": self.cost_center,
+	# 			"posting_date": getdate()
+	# 		})
+	# 		gl_entry.insert()
+
+	# def get_fixed_asset_account(self):
+	# 	asset_category = frappe.get_doc('Asset Category', frappe.db.get_value('Asset', self.asset, 'asset_category'))
+	# 	company = frappe.db.get_value('Asset', self.asset, 'company')
+	# 	for account in asset_category.accounts:
+	# 		if account.company_name == company:
+	# 			return account.fixed_asset_account
+			
 	
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
