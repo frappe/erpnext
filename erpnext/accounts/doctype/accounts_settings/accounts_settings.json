@@ -10,6 +10,7 @@
   "accounts_transactions_settings_section",
   "over_billing_allowance",
   "role_allowed_to_over_bill",
+  "credit_controller",
   "make_payment_via_journal_entry",
   "column_break_11",
   "check_supplier_invoice_uniqueness",
@@ -26,7 +27,6 @@
   "acc_frozen_upto",
   "frozen_accounts_modifier",
   "column_break_4",
-  "credit_controller",
   "deferred_accounting_settings_section",
   "book_deferred_entries_based_on",
   "column_break_18",
@@ -76,7 +76,7 @@
    "fieldname": "credit_controller",
    "fieldtype": "Link",
    "in_list_view": 1,
-   "label": "Credit Controller",
+   "label": "Role allowed to bypass Credit Limit",
    "options": "Role"
   },
   {
@@ -260,7 +260,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-30 15:25:10.381008",
+ "modified": "2021-05-12 17:32:29.850565",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Accounts Settings",

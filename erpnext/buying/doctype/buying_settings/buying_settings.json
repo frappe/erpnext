@@ -6,12 +6,15 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
+  "supplier_and_price_defaults_section",
   "supp_master_name",
   "supplier_group",
-  "buying_price_list",
   "column_break_3",
+  "buying_price_list",
+  "transactions_settings_section",
   "po_required",
   "pr_required",
+  "column_break_9",
   "maintain_same_rate",
   "maintain_same_rate_action",
   "role_to_override_stop_action",
@@ -67,12 +70,12 @@
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item To Be Added Multiple Times in a Transaction"
+   "label": "Allow Item to be Added Multiple Times in a Transaction"
   },
   {
    "fieldname": "subcontract",
    "fieldtype": "Section Break",
-   "label": "Subcontract"
+   "label": "Sub-contracting Settings"
   },
   {
    "default": "Material Transferred for Subcontract",
@@ -98,7 +101,7 @@
    "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
-   "label": "Action If Same Rate is Not Maintained",
+   "label": "Action if Same Rate is Not Maintained",
    "mandatory_depends_on": "maintain_same_rate",
    "options": "Stop\nWarn"
   },
@@ -108,6 +111,20 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
    "options": "Role"
+  },
+  {
+   "fieldname": "supplier_and_price_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Supplier Settings"
+  },
+  {
+   "fieldname": "transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transactions Settings"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "fa fa-cog",
@@ -115,7 +132,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-04 20:01:44.087066",
+ "modified": "2021-05-12 17:33:28.818553",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Buying Settings",

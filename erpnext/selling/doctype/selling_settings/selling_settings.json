@@ -6,24 +6,31 @@
  "document_type": "Other",
  "engine": "InnoDB",
  "field_order": [
+  "customer_defaults_section",
   "cust_master_name",
-  "campaign_naming_by",
   "customer_group",
+  "column_break_4",
   "territory",
-  "selling_price_list",
-  "close_opportunity_after_days",
+  "crm_settings_section",
+  "campaign_naming_by",
   "default_valid_till",
-  "column_break_5",
+  "column_break_9",
+  "close_opportunity_after_days",
+  "item_price_settings_section",
+  "selling_price_list",
+  "column_break_15",
+  "maintain_same_sales_rate",
+  "maintain_same_rate_action",
+  "editable_price_list_rate",
+  "validate_selling_price",
+  "sales_transactions_settings_section",
   "so_required",
   "dn_required",
   "sales_update_frequency",
-  "maintain_same_sales_rate",
-  "maintain_same_rate_action",
+  "column_break_5",
   "role_to_override_stop_action",
-  "editable_price_list_rate",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
-  "validate_selling_price",
   "hide_tax_id"
  ],
  "fields": [
@@ -116,7 +123,7 @@
    "default": "0",
    "fieldname": "allow_multiple_items",
    "fieldtype": "Check",
-   "label": "Allow Item to Be Added Multiple Times in a Transaction"
+   "label": "Allow Item to be Added Multiple Times in a Transaction"
   },
   {
    "default": "0",
@@ -142,7 +149,7 @@
    "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
    "fieldname": "maintain_same_rate_action",
    "fieldtype": "Select",
-   "label": "Action If Same Rate is Not Maintained",
+   "label": "Action if Same Rate is Not Maintained",
    "mandatory_depends_on": "maintain_same_sales_rate",
    "options": "Stop\nWarn"
   },
@@ -152,6 +159,38 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Override Stop Action",
    "options": "Role"
+  },
+  {
+   "fieldname": "customer_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Customer Defaults"
+  },
+  {
+   "fieldname": "crm_settings_section",
+   "fieldtype": "Section Break",
+   "label": "CRM Settings"
+  },
+  {
+   "fieldname": "item_price_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Item Price Settings"
+  },
+  {
+   "fieldname": "column_break_4",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_9",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "sales_transactions_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Transaction Settings"
   }
  ],
  "icon": "fa fa-cog",
@@ -159,7 +198,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-04-04 20:18:12.814624",
+ "modified": "2021-05-12 17:34:09.170453",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
