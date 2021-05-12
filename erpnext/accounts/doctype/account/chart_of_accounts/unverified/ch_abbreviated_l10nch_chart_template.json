@@ -457,30 +457,38 @@
           "Capitaux propres (personnes morales)": {
               "Capital social (capital-actions, capital de fondation, capital propre)": {
                   "Capital social de la S.\u00e0.r.l": {
+                      "account_type": "Equity",
                       "account_number": "2800"
                   },
                   "account_number": "280"
               },
               "R\u00e9serves et b\u00e9n\u00e9fice report\u00e9 ou perte report\u00e9e": {
                   "R\u00e9serve l\u00e9gale issue du capital": {
+                      "account_type": "Equity",
                       "account_number": "2900"
                   },
                   "R\u00e9serves d‘\u00e9valuation": {
+                      "account_type": "Equity",
                       "account_number": "2940"
                   },
                   "R\u00e9serve l\u00e9gale issue du b\u00e9n\u00e9fice": {
+                      "account_type": "Equity",
                       "account_number": "2950"
                   },
                   "R\u00e9serves facultatives issues du b\u00e9n\u00e9fice": {
+                      "account_type": "Equity",
                       "account_number": "2960"
                   },
                   "B\u00e9n\u00e9fice ou perte report\u00e9e": {
+                      "account_type": "Equity",
                       "account_number": "2970"
                   },
                   "B\u00e9n\u00e9fice ou perte de l’exercice": {
+                      "account_type": "Equity",
                       "account_number": "2979"
                   },
                   "Propres actions, parts sociales, droits de participations (poste n\u00e9gatif)": {
+                      "account_type": "Equity",
                       "account_number": "2980"
                   },
                   "account_number": "290"
@@ -624,7 +632,7 @@
           "Charges des immeubles d’exploitation": {
               "account_number": "7510"
           },
-          "root_type": "Equity",
+          "root_type": "Expense",
           "account_number": "7"
         },
         "R\u00e9sultats exceptionnels et hors exploitation": {
@@ -652,7 +660,7 @@
               },
               "account_number": "89"
           },
-          "root_type": "Equity",
+          "root_type": "Expense",
           "account_number": "8"
         },
         "Cl\u00f4ture": {

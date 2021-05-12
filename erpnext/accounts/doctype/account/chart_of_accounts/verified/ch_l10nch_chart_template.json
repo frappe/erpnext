@@ -1082,7 +1082,7 @@
                 "Provisions pour travaux de garantie \u00e0 long terme": {
                     "account_number": "2630"
                 },
-                "Provisions pour risques li\u00e9s au engagements d\u00e9coulant d'obligations de prendre livraison \u00e0 long terme": {
+                "Provisions pour risques li\u00e9s aux engagements d\u00e9coulant d'obligations de prendre livraison \u00e0 long terme": {
                     "account_number": "2631"
                 },
                 "Provisions pour imp\u00f4ts directs \u00e0 long terme": {
@@ -1140,42 +1140,54 @@
           "Capitaux propres (personnes morales)": {
               "Capital social (capital-actions, capital de fondation, capital propre)": {
                   "Capital social de la S.\u00e0.r.l": {
+                      "account_type": "Equity",
                       "account_number": "2800"
                   },
                   "account_number": "280"
               },
               "R\u00e9serves et b\u00e9n\u00e9fice report\u00e9 ou perte report\u00e9e": {
                   "Agio \u00e0 la fondation ou lors d'augmentations de capital": {
+                      "account_type": "Equity",
                       "account_number": "2900"
                   },
                   "Autres apports,primes et contributions": {
+                      "account_type": "Equity",
                       "account_number": "2901"
                   },
                   "Agio lors de fusion, de scission ou de cession d'actifs": {
+                      "account_type": "Equity",
                       "account_number": "2902"
                   },
                   "Gain lors de r\u00e9duction du capital": {
+                      "account_type": "Equity",
                       "account_number": "2903"
                   },
                   "R\u00e9serves d‘\u00e9valuation": {
+                      "account_type": "Equity",
                       "account_number": "2940"
                   },
                   "R\u00e9serve l\u00e9gale issue du b\u00e9n\u00e9fice": {
+                      "account_type": "Equity",
                       "account_number": "2950"
                   },
                   "R\u00e9serves facultatives issues du b\u00e9n\u00e9fice": {
+                      "account_type": "Equity",
                       "account_number": "2960"
                   },
                   "B\u00e9n\u00e9fice ou perte report\u00e9e": {
+                      "account_type": "Equity",
                       "account_number": "2970"
                   },
                   "B\u00e9n\u00e9fice ou perte de l’exercice": {
+                      "account_type": "Equity",
                       "account_number": "2979"
                   },
                   "Propres actions, parts sociales": {
+                      "account_type": "Equity",
                       "account_number": "2980"
                   },
                   "Commandite propre": {
+                      "account_type": "Equity",
                       "account_number": "2985"
                   },
                   "account_number": "290"
@@ -3161,7 +3173,7 @@
               },
               "account_number": "75"
           },
-          "root_type": "Equity",
+          "root_type": "Expense",
           "account_number": "7"
         },
         "R\u00e9sultats exceptionnels et hors exploitation": {
@@ -3276,7 +3288,7 @@
               },
               "account_number": "89"
           },
-          "root_type": "Equity",
+          "root_type": "Expense",
           "account_number": "8"
         },
         "Cl\u00f4ture": {
