@@ -18,9 +18,8 @@ class TestPromotionalScheme(unittest.TestCase):
 		self.assertTrue(price_doc_details.discount_percentage,20)
 
 		ps.price_discount_slabs[0].min_qty = 6
-		ps.append('customer',{
-		'customer': "_Test Customer 2"
-	})
+		ps.append('customer', {  
+			'customer': "_Test Customer 2"})
 		ps.save()
 		price_rules = frappe.get_all('Pricing Rule', fields = ["promotional_scheme_id", "name"],
 			filters = {'promotional_scheme': ps.name})
@@ -39,11 +38,7 @@ class TestPromotionalScheme(unittest.TestCase):
 		price_rules = frappe.get_all('Pricing Rule', fields = ["promotional_scheme_id", "name"],
 			filters = {'promotional_scheme': ps.name})
 		self.assertEqual(price_rules,[])
-
 		
-
-
-
 def make_promotional_scheme():
 	ps = frappe.new_doc('Promotional Scheme')
 	ps.name = '_Test Scheme'
