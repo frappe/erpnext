@@ -16,11 +16,11 @@ frappe.ui.form.on('Salary Structure', {
 	onload: function(frm) {
 
 		let help_button = $(`<a class = 'control-label'>
-			Condition and Formula Help
+			${__("Condition and Formula Help")}
 		</a>`).click(()=>{
 
 			let d = new frappe.ui.Dialog({
-				title: 'Condition and Formula Help',
+				title: __('Condition and Formula Help'),
 				fields: [
 					{
 						fieldname: 'msg_wrapper',

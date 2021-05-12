@@ -28,5 +28,5 @@ class PayrollSettings(Document):
 
 	def toggle_rounded_total(self):
 		self.disable_rounded_total = cint(self.disable_rounded_total)
-		make_property_setter("Salary Slip", "rounded_total", "hidden", self.disable_rounded_total, "Check")
-		make_property_setter("Salary Slip", "rounded_total", "print_hide", self.disable_rounded_total, "Check")
+		make_property_setter("Salary Slip", "rounded_total", "hidden", self.disable_rounded_total, "Check", validate_fields_for_doctype=False)
+		make_property_setter("Salary Slip", "rounded_total", "print_hide", self.disable_rounded_total, "Check", validate_fields_for_doctype=False)
