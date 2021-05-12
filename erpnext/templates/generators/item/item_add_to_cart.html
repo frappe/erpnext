@@ -143,7 +143,7 @@
 			const $btn = $(e.currentTarget);
 			$btn.prop('disabled', true);
 			const item_code = $btn.data('item-code');
-			erpnext.shopping_cart.update_cart({
+			e_commerce.shopping_cart.update_cart({
 				item_code,
 				qty: 1,
 				callback(r) {
@@ -170,11 +170,11 @@
 			};
 			let success_action = function() {
 				$btn.prop('disabled', false);
-				erpnext.wishlist.set_wishlist_count();
+				e_commerce.wishlist.set_wishlist_count();
 				$('.btn-add-to-wishlist, .btn-view-in-wishlist').toggleClass('hidden');
 
 			};
-			erpnext.wishlist.add_remove_from_wishlist("add", args, success_action, failure_action);
+			e_commerce.wishlist.add_remove_from_wishlist("add", args, success_action, failure_action);
 		});
 
 		$('.page_content').on('click', '.offer-details', (e) => {

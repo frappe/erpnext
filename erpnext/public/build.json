@@ -66,5 +66,8 @@
 	"js/hierarchy-chart.min.js": [
 		"public/js/hierarchy_chart/hierarchy_chart_desktop.js",
 		"public/js/hierarchy_chart/hierarchy_chart_mobile.js"
+	],
+	"js/e-commerce.min.js": [
+		"e_commerce/product_view.js"
 	]
 }

@@ -68,7 +68,6 @@ body.product-page {
 
 .item-card-group-section {
 	.card {
-		height: 400px;
 		align-items: center;
 		justify-content: center;
 
@@ -778,4 +777,8 @@ body.product-page {
 	border-radius: 4px;
 	padding: 6px;
 	font-size: 14px;
+}
+
+#toggle-view {
+	float: right;
 }

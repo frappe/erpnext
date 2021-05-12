@@ -1,8 +1,8 @@
-frappe.provide("erpnext.wishlist");
-var wishlist = erpnext.wishlist;
+frappe.provide("e_commerce.wishlist");
+var wishlist = e_commerce.wishlist;
 
-frappe.provide("erpnext.shopping_cart");
-var shopping_cart = erpnext.shopping_cart;
+frappe.provide("e_commerce.shopping_cart");
+var shopping_cart = e_commerce.shopping_cart;
 
 $.extend(wishlist, {
 	set_wishlist_count: function() {
@@ -79,7 +79,7 @@ $.extend(wishlist, {
 			let me = this;
 
 			let success_action = function() {
-				erpnext.wishlist.set_wishlist_count();
+				e_commerce.wishlist.set_wishlist_count();
 			};
 
 			if ($wish_icon.hasClass('wished')) {
