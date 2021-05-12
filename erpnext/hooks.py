@@ -304,7 +304,8 @@ doc_events = {
 # if payment entry not in auto cancel exempted doctypes it will cancel payment entry.
 auto_cancel_exempted_doctypes= [
 	"Payment Entry",
-	"Inpatient Medication Entry"
+	"Inpatient Medication Entry",
+	"Timesheet"
 ]
 
 after_migrate = ["erpnext.setup.install.update_select_perm_after_install"]

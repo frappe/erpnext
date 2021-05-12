@@ -31,7 +31,7 @@ class TestEmployeeUtilization(unittest.TestCase):
         timesheet1.append("time_logs", {
             "activity_type": get_random("Activity Type"),
             "hours": 5,
-            "billable": 1,
+            "is_billable": 1,
             "from_time": '2021-04-01 13:30:00.000000',
             "to_time": '2021-04-01 18:30:00.000000'
         })
@@ -46,7 +46,7 @@ class TestEmployeeUtilization(unittest.TestCase):
         timesheet2.append("time_logs", {
             "activity_type": get_random("Activity Type"),
             "hours": 10,
-            "billable": 0,
+            "is_billable": 0,
             "from_time": '2021-04-01 13:30:00.000000',
             "to_time": '2021-04-01 23:30:00.000000',
             "project": cls.test_project.name

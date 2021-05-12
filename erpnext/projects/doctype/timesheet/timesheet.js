@@ -90,17 +90,50 @@ frappe.ui.form.on("Timesheet", {
 		}
 		if(frm.doc.per_billed > 0) {
 			frm.fields_dict["time_logs"].grid.toggle_enable("billing_hours", false);
-			frm.fields_dict["time_logs"].grid.toggle_enable("billable", false);
+			frm.fields_dict["time_logs"].grid.toggle_enable("is_billable", false);
 		}
+		frm.trigger('setup_filters');
+	},
+
+	customer: function(frm) {
+		frm.set_query('parent_project', function(doc) {
+			return {
+				filters: {
+					"customer": doc.customer
+				}
+			};
+		});
+		frm.set_query('project', 'time_logs', function(doc) {
+			return {
+				filters: {
+					"customer": doc.customer
+				}
+			};
+		});
+		frm.refresh();
 	},
 
 	make_invoice: function(frm) {
+		let fields = [{
+			"fieldtype": "Link",
+			"label": __("Item Code"),
+			"fieldname": "item_code",
+			"options": "Item"
+		}]
+
+		if (!frm.doc.customer) {
+			fields.push({
+				"fieldtype": "Link",
+				"label": __("Customer"),
+				"fieldname": "customer",
+				"options": "Customer",
+				"default": frm.doc.customer
+			});
+		}
+
 		let dialog = new frappe.ui.Dialog({
-			title: __("Select Item (optional)"),
-			fields: [
-				{"fieldtype": "Link", "label": __("Item Code"), "fieldname": "item_code", "options":"Item"},
-				{"fieldtype": "Link", "label": __("Customer"), "fieldname": "customer", "options":"Customer"}
-			]
+			title: __("Create Sales Invoice"),
+			fields: fields
 		});
 
 		dialog.set_primary_action(__('Create Sales Invoice'), () => {
@@ -113,7 +146,8 @@ frappe.ui.form.on("Timesheet", {
 				args: {
 					"source_name": frm.doc.name,
 					"item_code": args.item_code,
-					"customer": args.customer
+					"customer": frm.doc.customer || args.customer,
+					"currency": frm.doc.currency
 				},
 				freeze: true,
 				callback: function(r) {
@@ -136,8 +170,7 @@ frappe.ui.form.on("Timesheet", {
 
 	parent_project: function(frm) {
 		set_project_in_timelog(frm);
-	},
-
+	}
 });
 
 frappe.ui.form.on("Timesheet Detail", {
@@ -196,7 +229,7 @@ frappe.ui.form.on("Timesheet Detail", {
 		calculate_billing_costing_amount(frm, cdt, cdn);
 	},
 
-	billable: function(frm, cdt, cdn) {
+	is_billable: function(frm, cdt, cdn) {
 		update_billing_hours(frm, cdt, cdn);
 		update_time_rates(frm, cdt, cdn);
 		calculate_billing_costing_amount(frm, cdt, cdn);
@@ -239,9 +272,9 @@ var calculate_end_time = function(frm, cdt, cdn) {
 	}
 };
 
-var update_billing_hours = function(frm, cdt, cdn){
-	var child = locals[cdt][cdn];
-	if(!child.billable) {
+var update_billing_hours = function(frm, cdt, cdn) {
+	let child = frappe.get_doc(cdt, cdn);
+	if (!child.is_billable) {
 		frappe.model.set_value(cdt, cdn, 'billing_hours', 0.0);
 	} else {
 		// bill all hours by default
@@ -249,19 +282,19 @@ var update_billing_hours = function(frm, cdt, cdn){
 	}
 };
 
-var update_time_rates = function(frm, cdt, cdn){
-	var child = locals[cdt][cdn];
-	if(!child.billable){
+var update_time_rates = function(frm, cdt, cdn) {
+	let child = frappe.get_doc(cdt, cdn);
+	if (!child.is_billable) {
 		frappe.model.set_value(cdt, cdn, 'billing_rate', 0.0);
 	}
 };
 
-var calculate_billing_costing_amount = function(frm, cdt, cdn){
-	var child = locals[cdt][cdn];
-	var billing_amount = 0.0;
-	var costing_amount = 0.0;
+var calculate_billing_costing_amount = function(frm, cdt, cdn) {
+	let child = frappe.get_doc(cdt, cdn);
+	let billing_amount = 0.0;
+	let costing_amount = 0.0;
 
-	if(child.billing_hours && child.billable){
+	if (child.billing_hours && child.is_billable) {
 		billing_amount = (child.billing_hours * child.billing_rate);
 	}
 	costing_amount = flt(child.costing_rate * child.hours);
@@ -271,18 +304,18 @@ var calculate_billing_costing_amount = function(frm, cdt, cdn){
 };
 
 var calculate_time_and_amount = function(frm) {
-	var tl = frm.doc.time_logs || [];
-	var total_working_hr = 0;
-	var total_billing_hr = 0;
-	var total_billable_amount = 0;
-	var total_costing_amount = 0;
+	let tl = frm.doc.time_logs || [];
+	let total_working_hr = 0;
+	let total_billing_hr = 0;
+	let total_billable_amount = 0;
+	let total_costing_amount = 0;
 	for(var i=0; i<tl.length; i++) {
 		if (tl[i].hours) {
 			total_working_hr += tl[i].hours;
 			total_billable_amount += tl[i].billing_amount;
 			total_costing_amount += tl[i].costing_amount;
 
-			if(tl[i].billable){
+			if (tl[i].is_billable) {
 				total_billing_hr += tl[i].billing_hours;
 			}
 		}
