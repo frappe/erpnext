@@ -23,7 +23,8 @@ class AssetRepair(Document):
 		if self.repair_status == 'Pending':
 			frappe.db.set_value('Asset', self.asset, 'status', 'Out of Order')
 		else:
-			frappe.db.set_value('Asset', self.asset, 'status', 'Submitted')
+			asset = frappe.get_doc('Asset', self.asset)
+			asset.set_status()
 
 	def set_total_value(self):
 		for item in self.stock_items:
