@@ -22,6 +22,7 @@ erpnext.PointOfSale.Controller = class {
 	}
 
 	create_opening_voucher() {
+		debugger;
 		const me = this;
 		const table_fields = [
 			{
