@@ -33,7 +33,7 @@ form_grid_templates = {
 	"operations": "templates/form_grid/work_order_grid.html"
 }
 
-class WorkOrder(Document):
+class WorkOrder(Document):	
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
@@ -57,6 +57,30 @@ class WorkOrder(Document):
 
 		self.set_required_items(reset_only_qty = len(self.get("required_items")))
 
+	@frappe.whitelist()
+	def make_read_only(self):
+		return frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+	
+	@frappe.whitelist()
+	def get_warehouse(self):
+		table = frappe.db.get_all("Staging Details",["company","staging_picklist_warehouse",'staging_material_request_warehouse'])
+		enable = frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+		if enable == 1:
+			company_data = []
+			for t in table:
+				if t.get('company') == self.company:
+					company_data.append(t)
+			if len(company_data) > 0:
+				for data in company_data:
+					q = "update `tabWork Order` set source_warehouse = '{0}' where name='{1}'".format(company_data[0].get("staging_picklist_warehouse"), self.name)
+					#print(q)
+					frappe.db.sql(q)
+					frappe.db.commit()
+					return company_data[0].get("staging_picklist_warehouse")
+			else:
+				msg = "stagging warehouse not defined for company {0} in manufacturing settings".format(self.company)
+				frappe.throw(msg)
+	
 	def validate_sales_order(self):
 		if self.sales_order:
 			self.check_sales_order_on_hold_or_close()
@@ -1017,7 +1041,10 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 			'condition': lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
 		},
 	}, target_doc)
-
+	enable = frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+	if enable ==1:
+		warehouse = frappe.db.get_value("Work Order", {'name': source_name},'source_warehouse')
+		doc.parent_warehouse = warehouse
 	doc.for_qty = for_qty
 
 	doc.set_item_locations()

@@ -11,6 +11,7 @@
   "naming_series",
   "title",
   "material_request_type",
+  "manufacturing_staging",
   "transfer_status",
   "customer",
   "status",
@@ -37,7 +38,8 @@
   "tc_name",
   "terms",
   "reference",
-  "job_card"
+  "job_card",
+  "work_order_filter_criteria_section"
  ],
  "fields": [
   {
@@ -308,13 +310,25 @@
    "label": "Transfer Status",
    "options": "\nNot Started\nIn Transit\nCompleted",
    "read_only": 1
+  },
+  {
+   "depends_on": "eval: doc.purpose === \"Manufacturing Staging\"",
+   "fieldname": "work_order_filter_criteria_section",
+   "fieldtype": "Section Break",
+   "label": "Work Order Filter Criteria"
+  },
+  {
+   "default": "0",
+   "fieldname": "manufacturing_staging",
+   "fieldtype": "Check",
+   "label": "Manufacturing Staging"
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 23:52:55.392512",
+ "modified": "2021-05-12 17:30:23.579240",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",

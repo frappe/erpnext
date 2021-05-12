@@ -107,6 +107,16 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	onload: function(frm) {
+		frappe.call({
+			method:'make_read_only',
+			doc: frm.doc,
+			callback: function(resp){
+				if(resp.message && resp.message ===1){
+					frm.set_df_property("source_warehouse", "read_only",1)
+					frm.refresh_field('source_warehouse')
+				}
+			}
+		})
 		if (!frm.doc.status)
 			frm.doc.status = 'Draft';
 
@@ -144,7 +154,6 @@ frappe.ui.form.on("Work Order", {
 			frm.add_custom_button(__('Add Additional Items'),function() {
 				var usr = frappe.session.user
 				frappe.new_doc("Additional Item", {"work_order" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
-				//console.log("********** finished")
 			})
 		}
 		if (frm.doc.docstatus === 1
@@ -188,13 +197,6 @@ frappe.ui.form.on("Work Order", {
 				frm.trigger("make_bom");
 			});
 		}
-
-		// if(frm.doc.status == "Submitted" || frm.doc.status == "Not Started" || frm.doc.status == "In Process"){
-            
-           
-
-        // }
-
 	},
 
 	make_job_card: function(frm) {
@@ -413,11 +415,28 @@ frappe.ui.form.on("Work Order", {
 		frm.trigger('bom_no');
 	},
 
-	before_submit: function(frm) {
+	before_submit: function(frm,cdt,cdn) {
 		frm.fields_dict.required_items.grid.toggle_reqd("source_warehouse", true);
 		frm.toggle_reqd("transfer_material_against",
 			frm.doc.operations && frm.doc.operations.length > 0);
 		frm.fields_dict.operations.grid.toggle_reqd("workstation", frm.doc.operations);
+		
+		frappe.call({
+			"method": "get_warehouse",
+			"doc": frm.doc,
+			callback: function(resp){
+				if(resp.message){
+					console.log("massage is: ", resp.message)
+					frm.set_value('source_warehouse', resp.message)
+					frm.refresh_field("source_warehouse")
+					var table = locals[cdt][cdn].required_items
+					table.map(item => {
+						item.source_warehouse = resp.message
+					})
+					frm.refresh_field('required_items')
+				}
+			}
+		})
 	},
 
 	set_sales_order: function(frm) {
