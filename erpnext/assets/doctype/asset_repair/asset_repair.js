@@ -27,7 +27,7 @@ frappe.ui.form.on('Asset Repair', {
 	// },
 
 	refresh: function(frm) {
-		frm.toggle_display(['completion_date', 'repair_status', 'accounting_details', 'stock_items_section'], !(frm.doc.__islocal));
+		frm.toggle_display(['completion_date', 'repair_status', 'accounting_details', 'stock_items_section', 'accounting_dimensions_section'], !(frm.doc.__islocal));
 	},
 
 	repair_status: (frm) => {

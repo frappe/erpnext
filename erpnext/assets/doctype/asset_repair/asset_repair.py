@@ -41,9 +41,7 @@ class AssetRepair(Document):
 			asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value') + self.repair_cost
 			for item in self.stock_items:
 				asset_value += item.total_value
-
-			print("*" * 20)
-			print(asset_value)
+				
 			frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
 
 	def on_cancel(self):

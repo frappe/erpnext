@@ -18,6 +18,10 @@
   "column_break_6",
   "completion_date",
   "repair_status",
+  "accounting_dimensions_section",
+  "cost_center",
+  "column_break_14",
+  "project",
   "accounting_details",
   "repair_cost",
   "capitalize_repair_cost",
@@ -188,12 +192,33 @@
   {
    "fieldname": "stock_items_section",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "accounting_dimensions_section",
+   "fieldtype": "Section Break",
+   "label": "Accounting Dimensions"
+  },
+  {
+   "fieldname": "cost_center",
+   "fieldtype": "Link",
+   "label": "Cost Center",
+   "options": "Cost Center"
+  },
+  {
+   "fieldname": "project",
+   "fieldtype": "Link",
+   "label": "Project",
+   "options": "Project"
+  },
+  {
+   "fieldname": "column_break_14",
+   "fieldtype": "Column Break"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-12 04:45:38.714776",
+ "modified": "2021-05-12 21:03:59.032864",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
