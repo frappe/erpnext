@@ -47,6 +47,13 @@ class BankStatementImport(DataImport):
 
 	def start_import(self):
 
+		preview = frappe.get_doc("Bank Statement Import", self.name).get_preview_from_template(
+			self.import_file, self.google_sheets_url
+		)
+
+		if 'Bank Account' not in json.dumps(preview):
+			frappe.throw(_("Please add the Bank Account column"))
+
 		from frappe.core.page.background_jobs.background_jobs import get_info
 		from frappe.utils.scheduler import is_scheduler_inactive
 
@@ -67,6 +74,7 @@ class BankStatementImport(DataImport):
 				data_import=self.name,
 				bank_account=self.bank_account,
 				import_file_path=self.import_file,
+				google_sheets_url=self.google_sheets_url,
 				bank=self.bank,
 				template_options=self.template_options,
 				now=frappe.conf.developer_mode or frappe.flags.in_test,
@@ -90,18 +98,20 @@ def download_errored_template(data_import_name):
 	data_import = frappe.get_doc("Bank Statement Import", data_import_name)
 	data_import.export_errored_rows()
 
-def start_import(data_import, bank_account, import_file_path, bank, template_options):
+def start_import(data_import, bank_account, import_file_path, google_sheets_url, bank, template_options):
 	"""This method runs in background job"""
 
 	update_mapping_db(bank, template_options)
 
 	data_import = frappe.get_doc("Bank Statement Import", data_import)
+	file = import_file_path if import_file_path else google_sheets_url
 
-	import_file = ImportFile("Bank Transaction", file = import_file_path, import_type="Insert New Records")
+	import_file = ImportFile("Bank Transaction", file = file, import_type="Insert New Records")
 	data = import_file.raw_data
 
-	add_bank_account(data, bank_account)
-	write_files(import_file, data)
+	if import_file_path:
+		add_bank_account(data, bank_account)
+		write_files(import_file, data)
 
 	try:
 		i = Importer(data_import.reference_doctype, data_import=data_import)
