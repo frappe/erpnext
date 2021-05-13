@@ -516,13 +516,13 @@ class PaymentEntry(AccountsController):
 			if self.payment_type == "Receive" \
 				and self.base_total_allocated_amount < self.base_received_amount_after_tax + total_deductions \
 				and self.total_allocated_amount < self.paid_amount_after_tax + (total_deductions / self.source_exchange_rate):
-					self.unallocated_amount = (self.received_amount_after_tax + total_deductions -
-						self.base_total_allocated_amount) / self.source_exchange_rate
+				self.unallocated_amount = (self.received_amount_after_tax + total_deductions -
+					self.base_total_allocated_amount) / self.source_exchange_rate
 			elif self.payment_type == "Pay" \
 				and self.base_total_allocated_amount < (self.base_paid_amount_after_tax - total_deductions) \
 				and self.total_allocated_amount < self.received_amount_after_tax + (total_deductions / self.target_exchange_rate):
-					self.unallocated_amount = (self.base_paid_amount_after_tax - (total_deductions +
-						self.base_total_allocated_amount)) / self.target_exchange_rate
+				self.unallocated_amount = (self.base_paid_amount_after_tax - (total_deductions +
+					self.base_total_allocated_amount)) / self.target_exchange_rate
 
 	def set_difference_amount(self):
 		base_unallocated_amount = flt(self.unallocated_amount) * (flt(self.source_exchange_rate)
@@ -719,8 +719,8 @@ class PaymentEntry(AccountsController):
 					"account": d.account_head,
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					dr_or_cr: d.base_tax_amount,
-					dr_or_cr + "_in_account_currency": d.base_tax_amount \
-						if account_currency==self.company_currency \
+					dr_or_cr + "_in_account_currency": d.base_tax_amount
+						if account_currency==self.company_currency
 						else d.tax_amount,
 					"cost_center": d.cost_center
 				}, account_currency, item=d))
@@ -730,8 +730,8 @@ class PaymentEntry(AccountsController):
 					"account": self.advance_tax_account,
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					rev_dr_cr: d.base_tax_amount,
-					rev_dr_cr + "_in_account_currency": d.base_tax_amount \
-						if account_currency==self.company_currency \
+					rev_dr_cr + "_in_account_currency": d.base_tax_amount
+						if account_currency==self.company_currency
 						else d.tax_amount,
 					"cost_center": d.cost_center or self.cost_center
 				}, account_currency, item=d))
@@ -806,7 +806,6 @@ class PaymentEntry(AccountsController):
 
 		for i, tax in enumerate(self.taxes):
 			tax_rate = tax.rate
-			current_tax_rate = 0.0
 
 			# To set row_id by default as previous row.
 			if tax.charge_type in ["On Previous Row Amount", "On Previous Row Total"]:
