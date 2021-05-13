@@ -67,12 +67,13 @@ class AssetRepair(Document):
 			frappe.throw(_("Please enter Cost Center."))
 
 	def increase_asset_value(self):
-		if self.capitalize_repair_cost:
-			asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value') + self.repair_cost
-			for item in self.stock_items:
-				asset_value += item.total_value
+		asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value')
+		for item in self.stock_items:
+			asset_value += item.total_value
 
-			frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
+		if self.capitalize_repair_cost:
+			asset_value += self.repair_cost
+		frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
 		
 	def decrease_stock_quantity(self):
 		stock_entry = frappe.get_doc({
