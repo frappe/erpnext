@@ -684,6 +684,7 @@
    "is_query_report": 0,
    "label": "Goods and Services Tax (GST India)",
    "onboard": 0,
+   "only_for": "India",
    "type": "Card Break"
   },
   {
