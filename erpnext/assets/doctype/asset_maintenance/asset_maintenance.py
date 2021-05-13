@@ -24,6 +24,16 @@ class AssetMaintenance(Document):
 			assign_tasks(self.name, task.assign_to, task.maintenance_task, task.next_due_date)
 		self.sync_maintenance_tasks()
 
+	def on_submit(self):
+		self.check_for_stock_items_and_warehouse()
+
+	def check_for_stock_items_and_warehouse(self):
+		if self.stock_consumption:
+			if not self.stock_items:
+				frappe.throw(_("Please enter Stock Items consumed during Asset Maintenance."))
+			if not self.warehouse:
+				frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Maintenance were taken."))
+
 	def sync_maintenance_tasks(self):
 		tasks_names = []
 		for task in self.get('asset_maintenance_tasks'):
