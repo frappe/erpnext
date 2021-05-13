@@ -94,7 +94,7 @@ def get_report_pdf(doc, consolidated=True):
 			continue
 
 		html = frappe.render_template(template_path, \
-			{"filters": filters, "data": res, "aging": aging[0] if doc.include_ageing else None,
+			{"filters": filters, "data": res, "ageing": ageing[0] if doc.include_ageing else None,
 				"letter_head": letter_head if doc.letter_head else None,
 				"terms_and_conditions": frappe.db.get_value('Terms and Conditions', doc.terms_and_conditions, 'terms')
 					if doc.terms_and_conditions else None})

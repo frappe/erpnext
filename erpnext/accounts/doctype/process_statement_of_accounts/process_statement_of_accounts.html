@@ -79,8 +79,8 @@
 		</tbody>
 	</table>
 	<br>
-	{% if aging %}
-	<h4 class="text-center">{{ _("Ageing Report based on ") }} {{ aging.ageing_based_on }}
+	{% if ageing %}
+	<h4 class="text-center">{{ _("Ageing Report based on ") }} {{ ageing.ageing_based_on }}
 		{{ _("up to " ) }}  {{ frappe.format(filters.to_date, 'Date')}}
 	</h4>
 	<table class="table table-bordered">
@@ -94,10 +94,10 @@
 		</thead>
 		<tbody>
 			<tr>
-				<td>{{ frappe.utils.fmt_money(aging.range1, currency=filters.presentation_currency) }}</td>
-				<td>{{ frappe.utils.fmt_money(aging.range2, currency=filters.presentation_currency) }}</td>
-				<td>{{ frappe.utils.fmt_money(aging.range3, currency=filters.presentation_currency) }}</td>
-				<td>{{ frappe.utils.fmt_money(aging.range4, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range1, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range2, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range3, currency=filters.presentation_currency) }}</td>
+				<td>{{ frappe.utils.fmt_money(ageing.range4, currency=filters.presentation_currency) }}</td>
 			</tr>
 		</tbody>
 	</table>
