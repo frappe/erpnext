@@ -136,7 +136,7 @@ def get_gle_map(filters, documents):
 	# create gle_map of the form
 	# {"purchase_invoice": list of dict of all gle created for this invoice}
 	gle_map = {}
-	filter_obj = {}
+
 	gle = frappe.db.get_all('GL Entry',
 		{
 			"voucher_no": ["in", documents],
@@ -242,7 +242,7 @@ def get_payment_entires(filters):
 
 	if filters.get('purchase_invoice') or filters.get('purchase_order'):
 		parent = frappe.db.get_all('Payment Entry Reference',
-			{ 'reference_name': ('in', [d.get('name') for d in filters.get('invoices')])}, ['parent'])
+			{'reference_name': ('in', [d.get('name') for d in filters.get('invoices')])}, ['parent'])
 
 		filter_dict.update({'name': ('in', [d.get('parent') for d in parent])})
 
