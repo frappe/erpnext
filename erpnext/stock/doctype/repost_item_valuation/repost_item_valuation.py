@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, add_to_date, now
+from frappe.utils import cint, get_link_to_form, add_to_date, now, today
 from erpnext.stock.stock_ledger import repost_future_sle
 from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
 from frappe.utils.user import get_users_with_role
