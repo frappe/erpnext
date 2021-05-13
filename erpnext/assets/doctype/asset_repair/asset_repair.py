@@ -41,10 +41,13 @@ class AssetRepair(Document):
 		self.check_for_payable_account()
 		self.check_for_cost_center()
 
-		self.increase_asset_value()
+		if self.stock_consumption or self.capitalize_repair_cost:
+			self.increase_asset_value()
 		if self.stock_consumption:
 			self.check_for_stock_items_and_warehouse()
 			self.decrease_stock_quantity()
+		if self.capitalize_repair_cost:
+			self.check_for_purchase_invoice()
 		self.make_gl_entries()
 
 	def check_repair_status(self):
@@ -89,6 +92,10 @@ class AssetRepair(Document):
 
 		stock_entry.insert()
 		stock_entry.submit()
+
+	def check_for_purchase_invoice(self):
+		if not self.purchase_invoice:
+			frappe.throw(_("Please link Purchase Invoice."))
 
 	def on_cancel(self):
 		if self.payable_account:
