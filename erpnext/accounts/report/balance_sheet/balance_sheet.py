@@ -135,7 +135,7 @@ def get_report_summary(period_list, asset, liability, equity, provisional_profit
 
 	# from consolidated financial statement
 	if filters.get('accumulated_in_group_company'):
-		period_list = get_filtered_list_for_consolidated_report(period_list)
+		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 
 	for period in period_list:
 		key = period if consolidated else period.key
