@@ -93,6 +93,10 @@ erpnext.PointOfSale.Controller = class {
 					})
 					return frappe.utils.play_sound("error");
 				}
+
+				// filter balance details for empty rows
+				balance_details = balance_details.filter(d => d.mode_of_payment);
+
 				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
 				const res = await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze:true });
 				!res.exc && me.prepare_app_defaults(res.message);
@@ -275,11 +279,6 @@ erpnext.PointOfSale.Controller = class {
 					const item_row = frappe.model.get_doc(cdt, cdn);
 					if (item_row && item_row[fieldname] != value) {
 
-						if (fieldname === 'qty' && flt(value) == 0) {
-							this.remove_item_from_cart();
-							return;
-						}
-
 						const { item_code, batch_no, uom } = this.item_details.current_item;
 						const event = {
 							field: fieldname,
@@ -393,6 +392,7 @@ erpnext.PointOfSale.Controller = class {
 					this.recent_order_list.toggle_component(false);
 					frappe.run_serially([
 						() => this.frm.refresh(name),
+						() => this.frm.call('reset_mode_of_payments'),
 						() => this.cart.load_invoice(),
 						() => this.item_selector.toggle_component(true)
 					]);

@@ -64,10 +64,7 @@ erpnext.PointOfSale.PastOrderSummary = class {
 				{fieldname: 'print', fieldtype: 'Data', label: 'Print Preview'}
 			],
 			primary_action: () => {
-				const frm = this.events.get_frm();
-				frm.doc = this.doc;
-				frm.print_preview.lang_code = frm.doc.language;
-				frm.print_preview.printit(true);
+				this.print_receipt();
 			},
 			primary_action_label: __('Print'),
 		});
@@ -179,6 +176,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			this.show_summary_placeholder();
 		});
 
+		this.$summary_container.on('click', '.delete-btn', () => {
+			this.events.delete_order(this.doc.name);
+			this.show_summary_placeholder();
+			// this.toggle_component(false);
+			// this.$component.find('.no-summary-placeholder').removeClass('d-none');
+			// this.$summary_wrapper.addClass('d-none');
+		});
+
 		this.$summary_container.on('click', '.new-btn', () => {
 			this.events.new_order();
 			this.toggle_component(false);
@@ -192,11 +197,19 @@ erpnext.PointOfSale.PastOrderSummary = class {
 		});
 
 		this.$summary_container.on('click', '.print-btn', () => {
-			const frm = this.events.get_frm();
-			frm.doc = this.doc;
-			frm.print_preview.lang_code = frm.doc.language;
-			frm.print_preview.printit(true);
+			this.print_receipt();
 		});
+	}
+
+	print_receipt() {
+		const frm = this.events.get_frm();
+		frappe.utils.print(
+			this.doc.doctype,
+			this.doc.name,
+			frm.pos_print_format,
+			this.doc.letter_head,
+			this.doc.language || frappe.boot.lang
+		);
 	}
 
 	attach_shortcuts() {

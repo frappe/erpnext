@@ -14,6 +14,7 @@ class InpatientMedicationEntry(Document):
 	def validate(self):
 		self.validate_medication_orders()
 
+	@frappe.whitelist()
 	def get_medication_orders(self):
 		# pull inpatient medication orders based on selected filters
 		orders = get_pending_medication_orders(self)

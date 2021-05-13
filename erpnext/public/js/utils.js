@@ -291,17 +291,15 @@ $.extend(erpnext.utils, {
 			return options[0];
 		}
 	},
-	copy_parent_value_in_all_row: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
-		var d = locals[dt][dn];
-		if(d[fieldname]){
-			var cl = doc[table_fieldname] || [];
-			for(var i = 0; i < cl.length; i++) {
+	overrides_parent_value_in_all_rows: function(doc, dt, dn, table_fieldname, fieldname, parent_fieldname) {
+		if (doc[parent_fieldname]) {
+			let cl = doc[table_fieldname] || [];
+			for (let i = 0; i < cl.length; i++) {
 				cl[i][fieldname] = doc[parent_fieldname];
 			}
+			frappe.refresh_field(table_fieldname);
 		}
-		refresh_field(table_fieldname);
 	},
-
 	create_new_doc: function (doctype, update_fields) {
 		frappe.model.with_doctype(doctype, function() {
 			var new_doc = frappe.model.get_new_doc(doctype);
@@ -595,21 +593,7 @@ erpnext.utils.update_child_items = function(opts) {
 }
 
 erpnext.utils.map_current_doc = function(opts) {
-	let query_args = {};
-	if (opts.get_query_filters) {
-		query_args.filters = opts.get_query_filters;
-	}
-
-	if (opts.get_query_method) {
-		query_args.query = opts.get_query_method;
-	}
-
-	if (query_args.filters || query_args.query) {
-		opts.get_query = () => {
-			return query_args;
-		}
-	}
-	var _map = function() {
+	function _map() {
 		if($.isArray(cur_frm.doc.items) && cur_frm.doc.items.length > 0) {
 			// remove first item row if empty
 			if(!cur_frm.doc.items[0].item_code) {
@@ -683,8 +667,22 @@ erpnext.utils.map_current_doc = function(opts) {
 			}
 		});
 	}
-	if(opts.source_doctype) {
-		var d = new frappe.ui.form.MultiSelectDialog({
+
+	let query_args = {};
+	if (opts.get_query_filters) {
+		query_args.filters = opts.get_query_filters;
+	}
+
+	if (opts.get_query_method) {
+		query_args.query = opts.get_query_method;
+	}
+
+	if (query_args.filters || query_args.query) {
+		opts.get_query = () => query_args;
+	}
+
+	if (opts.source_doctype) {
+		const d = new frappe.ui.form.MultiSelectDialog({
 			doctype: opts.source_doctype,
 			target: opts.target,
 			date_field: opts.date_field || undefined,
@@ -703,14 +701,18 @@ erpnext.utils.map_current_doc = function(opts) {
 				_map();
 			},
 		});
-	} else if(opts.source_name) {
+
+		return d;
+	}
+
+	if (opts.source_name) {
 		opts.source_name = [opts.source_name];
 		_map();
 	}
 }
 
 frappe.form.link_formatters['Item'] = function(value, doc) {
-	if (doc && value && doc.item_name && doc.item_name !== value) {
+	if (doc && value && doc.item_name && doc.item_name !== value && doc.item_code === value) {
 		return value + ': ' + doc.item_name;
 	} else if (!value && doc.doctype && doc.item_name) {
 		// format blank value in child table

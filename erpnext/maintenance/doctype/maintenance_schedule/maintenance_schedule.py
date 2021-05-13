@@ -12,6 +12,7 @@ from erpnext.stock.utils import get_valid_serial_nos
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 
 class MaintenanceSchedule(TransactionBase):
+	@frappe.whitelist()
 	def generate_schedule(self):
 		self.set('schedules', [])
 		frappe.db.sql("""delete from `tabMaintenance Schedule Detail`

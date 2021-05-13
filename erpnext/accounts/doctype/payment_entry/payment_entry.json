@@ -676,8 +676,7 @@
    "hidden": 1,
    "label": "Title",
    "print_hide": 1,
-   "show_days": 1,
-   "show_seconds": 1
+   "read_only": 1
   },
   {
    "depends_on": "party",
@@ -869,7 +868,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-02-27 13:56:20.007336",
+ "modified": "2021-03-08 13:05:16.958866",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Payment Entry",

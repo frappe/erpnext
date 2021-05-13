@@ -140,7 +140,7 @@ frappe.ui.form.on("Company", {
 			doc: frm.doc,
 			freeze: true,
 			callback: function() {
-				frappe.msgprint(__("Default tax templates for sales and purchase are created."));
+				frappe.msgprint(__("Default tax templates for sales, purchase and items are created."));
 			}
 		})
 	},
@@ -259,6 +259,7 @@ erpnext.company.setup_queries = function(frm) {
 		["default_payroll_payable_account", {"root_type": "Liability"}],
 		["round_off_account", {"root_type": "Expense"}],
 		["write_off_account", {"root_type": "Expense"}],
+		["default_discount_account", {}],
 		["discount_allowed_account", {"root_type": "Expense"}],
 		["discount_received_account", {"root_type": "Income"}],
 		["exchange_gain_loss_account", {"root_type": "Expense"}],

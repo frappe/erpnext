@@ -14,10 +14,15 @@ test_records = frappe.get_test_records('Tax Rule')
 from six import iteritems
 
 class TestTaxRule(unittest.TestCase):
-	def setUp(self):
+	@classmethod
+	def setUpClass(cls):
+		frappe.db.set_value("Shopping Cart Settings", None, "enabled", 0)
+
+	@classmethod
+	def tearDownClass(cls):
 		frappe.db.sql("delete from `tabTax Rule`")
 
-	def tearDown(self):
+	def setUp(self):
 		frappe.db.sql("delete from `tabTax Rule`")
 
 	def test_conflict(self):
