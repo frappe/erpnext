@@ -26,6 +26,7 @@ class AssetMaintenance(Document):
 
 	def on_submit(self):
 		self.check_for_stock_items_and_warehouse()
+		self.increase_asset_value()
 
 	def check_for_stock_items_and_warehouse(self):
 		if self.stock_consumption:
@@ -33,6 +34,13 @@ class AssetMaintenance(Document):
 				frappe.throw(_("Please enter Stock Items consumed during Asset Maintenance."))
 			if not self.warehouse:
 				frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Maintenance were taken."))
+
+	def increase_asset_value(self):
+		asset_value = frappe.db.get_value('Asset', self.asset, 'asset_value')
+		for item in self.stock_items:
+			asset_value += item.total_value
+
+		frappe.db.set_value('Asset', self.asset, 'asset_value', asset_value)
 
 	def sync_maintenance_tasks(self):
 		tasks_names = []
