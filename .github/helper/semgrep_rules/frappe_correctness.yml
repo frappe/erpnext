@@ -1,32 +1,93 @@
 # This file specifies rules for correctness according to how frappe doctype data model works.
 
 rules:
-- id: frappe-modifying-after-submit
+- id: frappe-modifying-but-not-comitting
   patterns:
-    - pattern: self.$ATTR = ...
-    - pattern-inside: |
-        def on_submit(self, ...):
+    - pattern: |
+        def $METHOD(self, ...):
           ...
+          self.$ATTR = ...
+    - pattern-not: |
+        def $METHOD(self, ...):
+          ...
+          self.$ATTR = ...
+          ...
+          self.db_set(..., self.$ATTR, ...)
+    - pattern-not: |
+        def $METHOD(self, ...):
+          ...
+          self.$ATTR = $SOME_VAR
+          ...
+          self.db_set(..., $SOME_VAR, ...)
+    - pattern-not: |
+        def $METHOD(self, ...):
+          ...
+          self.$ATTR = $SOME_VAR
+          ...
+          self.save()
     - metavariable-regex:
         metavariable: '$ATTR'
         # this is negative look-ahead, add more attrs to ignore like (ignore|ignore_this_too|ignore_me)
-        regex: '^(?!status_updater)(.*)$'
+        regex: '^(?!ignore_linked_doctypes|status_updater)(.*)$'
+    - metavariable-regex:
+        metavariable: "$METHOD"
+        regex: "(on_submit|on_cancel)"
   message: |
-    Doctype modified after submission. Please check if modification of self.$ATTR is commited to database.
+    DocType modified in self.$METHOD. Please check if modification of self.$ATTR is commited to database.
   languages: [python]
   severity: ERROR
 
-- id: frappe-modifying-after-cancel
+- id: frappe-modifying-but-not-comitting-other-method
   patterns:
-    - pattern: self.$ATTR = ...
-    - pattern-inside: |
-        def on_cancel(self, ...):
+  - pattern: |
+      class $DOCTYPE(...):
+        def $METHOD(self, ...):
           ...
-    - metavariable-regex:
-        metavariable: '$ATTR'
-        regex: '^(?!ignore_linked_doctypes|status_updater)(.*)$'
+          self.$ANOTHER_METHOD()
+          ...
+
+        def $ANOTHER_METHOD(self, ...):
+          ...
+          self.$ATTR = ...
+  - pattern-not: |
+      class $DOCTYPE(...):
+        def $METHOD(self, ...):
+          ...
+          self.$ANOTHER_METHOD()
+          ...
+
+        def $ANOTHER_METHOD(self, ...):
+          ...
+          self.$ATTR = ...
+          ...
+          self.db_set(..., self.$ATTR, ...)
+  - pattern-not: |
+      class $DOCTYPE(...):
+        def $METHOD(self, ...):
+          ...
+          self.$ANOTHER_METHOD()
+          ...
+
+        def $ANOTHER_METHOD(self, ...):
+          ...
+          self.$ATTR = $SOME_VAR
+          ...
+          self.db_set(..., $SOME_VAR, ...)
+  - pattern-not: |
+      class $DOCTYPE(...):
+        def $METHOD(self, ...):
+          ...
+          self.$ANOTHER_METHOD()
+          ...
+          self.save()
+        def $ANOTHER_METHOD(self, ...):
+          ...
+          self.$ATTR = ...
+  - metavariable-regex:
+      metavariable: "$METHOD"
+      regex: "(on_submit|on_cancel)"
   message: |
-    Doctype modified after cancellation. Please check if modification of self.$ATTR is commited to database.
+    self.$ANOTHER_METHOD is called from self.$METHOD, check if changes to self.$ATTR are commited to database.
   languages: [python]
   severity: ERROR
 
