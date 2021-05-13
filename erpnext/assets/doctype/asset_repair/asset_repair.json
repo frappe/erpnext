@@ -21,13 +21,12 @@
   "column_break_14",
   "project",
   "accounting_details",
-  "payable_account",
-  "purchase_invoice",
+  "repair_cost",
+  "capitalize_repair_cost",
   "stock_consumption",
   "column_break_8",
-  "repair_cost",
   "total_repair_cost",
-  "capitalize_repair_cost",
+  "purchase_invoice",
   "stock_consumption_details_section",
   "warehouse",
   "stock_items",
@@ -150,12 +149,6 @@
    "label": "Asset Name"
   },
   {
-   "fieldname": "payable_account",
-   "fieldtype": "Link",
-   "label": "Payable Account",
-   "options": "Account"
-  },
-  {
    "fieldname": "column_break_8",
    "fieldtype": "Column Break"
   },
@@ -243,7 +236,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-13 23:01:03.638835",
+ "modified": "2021-05-14 02:31:57.226273",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",

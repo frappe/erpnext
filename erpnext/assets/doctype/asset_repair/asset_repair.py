@@ -38,7 +38,6 @@ class AssetRepair(Document):
 
 	def on_submit(self):
 		self.check_repair_status()
-		self.check_for_payable_account()
 		self.check_for_cost_center()
 
 		if self.stock_consumption or self.capitalize_repair_cost:
@@ -59,10 +58,6 @@ class AssetRepair(Document):
 			frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
 		if not self.warehouse:
 			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Repair were taken."))
-
-	def check_for_payable_account(self):
-		if not self.payable_account:
-			frappe.throw(_("Please enter Payable Account."))
 
 	def check_for_cost_center(self):
 		if not self.cost_center:
@@ -98,8 +93,7 @@ class AssetRepair(Document):
 			frappe.throw(_("Please link Purchase Invoice."))
 
 	def on_cancel(self):
-		if self.payable_account:
-			self.make_gl_entries(cancel=True)
+		self.make_gl_entries(cancel=True)
 
 	def make_gl_entries(self, cancel=False):
 		if flt(self.repair_cost) > 0:
