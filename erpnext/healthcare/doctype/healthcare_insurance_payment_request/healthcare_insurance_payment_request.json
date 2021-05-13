@@ -8,6 +8,7 @@
  "engine": "InnoDB",
  "field_order": [
   "naming_series",
+  "company",
   "insurance_company",
   "insurance_company_name",
   "column_break_4",
@@ -15,10 +16,8 @@
   "from_date",
   "to_date",
   "section_break_8",
-  "healthcare_insurance_payment_request_item",
-  "section_break_10",
+  "claims",
   "total_claim_amount",
-  "company",
   "amended_from"
  ],
  "fields": [
@@ -31,13 +30,16 @@
   {
    "fieldname": "insurance_company",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Insurance Company",
-   "options": "Healthcare Insurance Company"
+   "options": "Healthcare Insurance Company",
+   "reqd": 1
   },
   {
    "fetch_from": "insurance_company.insurance_company_name",
    "fieldname": "insurance_company_name",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Insurance Company Name",
    "read_only": 1
   },
@@ -48,47 +50,45 @@
   {
    "fieldname": "posting_date_type",
    "fieldtype": "Select",
+   "in_standard_filter": 1,
    "label": "Posting Date Type",
-   "options": "Claim Posting Date\nSales Invoice  Posting Date"
+   "options": "Claim Posting Date\nSales Invoice Posting Date",
+   "reqd": 1
   },
   {
    "default": "Today",
    "fieldname": "from_date",
    "fieldtype": "Date",
-   "label": "From Date"
+   "in_standard_filter": 1,
+   "label": "From Date",
+   "reqd": 1
   },
   {
    "default": "Today",
    "fieldname": "to_date",
    "fieldtype": "Date",
-   "label": "To Date"
+   "in_standard_filter": 1,
+   "label": "To Date",
+   "reqd": 1
   },
   {
    "fieldname": "section_break_8",
-   "fieldtype": "Section Break"
-  },
-  {
-   "fieldname": "healthcare_insurance_payment_request_item",
-   "fieldtype": "Table",
-   "label": "Healthcare Insurance Payment Request Item",
-   "options": "Healthcare Insurance Payment Request Item"
-  },
-  {
-   "fieldname": "section_break_10",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Claims"
   },
   {
    "fieldname": "total_claim_amount",
    "fieldtype": "Currency",
-   "label": "Total Claim Amount"
+   "in_list_view": 1,
+   "label": "Total Claim Amount",
+   "read_only": 1
   },
   {
    "fieldname": "company",
    "fieldtype": "Link",
-   "hidden": 1,
    "label": "Company",
    "options": "Company",
-   "read_only": 1
+   "reqd": 1
   },
   {
    "fieldname": "amended_from",
@@ -98,12 +98,17 @@
    "options": "Healthcare Insurance Payment Request",
    "print_hide": 1,
    "read_only": 1
+  },
+  {
+   "fieldname": "claims",
+   "fieldtype": "Table",
+   "options": "Healthcare Insurance Payment Request Item"
   }
  ],
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-09 09:08:33.588897",
+ "modified": "2021-05-13 16:21:25.157406",
  "modified_by": "Administrator",
  "module": "Healthcare",
  "name": "Healthcare Insurance Payment Request",
@@ -124,6 +129,7 @@
  ],
  "sort_field": "modified",
  "sort_order": "DESC",
+ "title_field": "insurance_company_name",
  "track_changes": 1,
  "track_seen": 1
 }
