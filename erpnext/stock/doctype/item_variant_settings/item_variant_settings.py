@@ -13,9 +13,10 @@ class ItemVariantSettings(Document):
 	def set_default_fields(self):
 		self.fields = []
 		fields = frappe.get_meta('Item').fields
-		exclude_fields = ["naming_series", "item_code", "item_name", "published_in_website",
+		exclude_fields = {"naming_series", "item_code", "item_name", "published_in_website",
 			"standard_rate", "opening_stock", "image", "description",
-			"variant_of", "valuation_rate", "description", "barcodes"]
+			"variant_of", "valuation_rate", "description", "barcodes",
+		  "has_variants", "attributes"}
 
 		for d in fields:
 			if not d.no_copy and d.fieldname not in exclude_fields and \

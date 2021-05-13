@@ -10,6 +10,7 @@
   "retirement_age",
   "emp_created_by",
   "column_break_4",
+  "standard_working_hours",
   "stop_birthday_reminders",
   "expense_approver_mandatory_in_expense_claim",
   "leave_settings",
@@ -22,7 +23,6 @@
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
   "restrict_backdated_leave_application",
-  "automatically_allocate_leaves_based_on_leave_policy",
   "hiring_settings",
   "check_vacancies"
  ],
@@ -133,23 +133,22 @@
    "options": "Role"
   },
   {
-   "default": "0",
-   "fieldname": "automatically_allocate_leaves_based_on_leave_policy",
-   "fieldtype": "Check",
-   "label": "Automatically Allocate Leaves Based On Leave Policy"
-  },
-  {
    "default": "1",
    "fieldname": "send_leave_notification",
    "fieldtype": "Check",
    "label": "Send Leave Notification"
+  },
+  {
+   "fieldname": "standard_working_hours",
+   "fieldtype": "Int",
+   "label": "Standard Working Hours"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-14 02:04:22.907159",
+ "modified": "2021-05-11 10:52:56.192773",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
