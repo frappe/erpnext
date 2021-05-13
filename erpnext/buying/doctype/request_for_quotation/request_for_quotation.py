@@ -82,7 +82,7 @@ class RequestforQuotation(BuyingController):
 	def send_to_supplier(self):
 		"""Sends RFQ mail to involved suppliers."""
 		for rfq_supplier in self.suppliers:
-			if rfq_supplier.send_email:
+			if rfq_supplier.email_id is not None and rfq_supplier.send_email:
 				self.validate_email_id(rfq_supplier)
 
 				# make new user if required
