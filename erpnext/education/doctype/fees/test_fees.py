@@ -9,8 +9,7 @@ from frappe.utils import nowdate
 from frappe.utils.make_random import get_random
 from erpnext.education.doctype.program.test_program import make_program_and_linked_courses
 
-# test_records = frappe.get_test_records('Fees')
-
+test_dependencies = ['Company']
 class TestFees(unittest.TestCase):
 
 	def test_fees(self):

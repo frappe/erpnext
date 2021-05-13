@@ -517,7 +517,7 @@ def download_ewb_json():
 
 		if not isinstance(docname, list):
 			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
-			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
+			filename_prefix = re.sub(r'[^\w_.)( -]', '', docname)
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
