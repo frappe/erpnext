@@ -143,6 +143,7 @@
    "reqd": 1
   },
   {
+   "fetch_from": "asset.asset_name",
    "fieldname": "asset_name",
    "fieldtype": "Read Only",
    "label": "Asset Name"
@@ -235,7 +236,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-13 05:11:42.550016",
+ "modified": "2021-05-13 05:55:16.131448",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
