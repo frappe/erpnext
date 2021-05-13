@@ -47,7 +47,7 @@ class AssetRepair(Document):
 			self.decrease_stock_quantity()
 		if self.capitalize_repair_cost:
 			self.check_for_purchase_invoice()
-		self.make_gl_entries()
+			self.make_gl_entries()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
@@ -104,14 +104,16 @@ class AssetRepair(Document):
 		gl_entry = []
 		company = frappe.db.get_value('Asset', self.asset, 'company')
 		repair_and_maintenance_account = frappe.db.get_value('Company', company, 'repair_and_maintenance_account')
+		fixed_asset_account = self.get_fixed_asset_account()
+		expense_account = frappe.get_doc('Purchase Invoice', self.purchase_invoice).items[0].expense_account	
 
 		gl_entry = frappe.get_doc({
 			"doctype": "GL Entry",
-			"account": self.payable_account,
+			"account": expense_account,
 			"credit": self.total_repair_cost,
 			"credit_in_account_currency": self.total_repair_cost,
 			"against": repair_and_maintenance_account,
-			"voucher_type": self.doctype,
+			"voucher_type": self.doctype,		
 			"voucher_no": self.name,
 			"cost_center": self.cost_center,
 			"posting_date": getdate()
@@ -119,43 +121,18 @@ class AssetRepair(Document):
 		gl_entry.insert()
 		gl_entry = frappe.get_doc({
 			"doctype": "GL Entry",
-			"account": repair_and_maintenance_account,
+			"account": fixed_asset_account,
 			"debit": self.total_repair_cost,
 			"debit_in_account_currency": self.total_repair_cost,
-			"against": self.payable_account,
+			"against": expense_account,
 			"voucher_type": self.doctype,
 			"voucher_no": self.name,
 			"cost_center": self.cost_center,
-			"posting_date": getdate()
+			"posting_date": getdate(),
+			"against_voucher_type": "Purchase Invoice",
+			"against_voucher": self.purchase_invoice
 		})
 		gl_entry.insert()
-
-		if self.capitalize_repair_cost:
-			fixed_asset_account = self.get_fixed_asset_account()
-			gl_entry = frappe.get_doc({
-				"doctype": "GL Entry",
-				"account": self.payable_account,
-				"credit": self.total_repair_cost,
-				"credit_in_account_currency": self.total_repair_cost,
-				"against": repair_and_maintenance_account,
-				"voucher_type": "Asset",		
-				"voucher_no": self.asset,
-				"cost_center": self.cost_center,
-				"posting_date": getdate()
-			})
-			gl_entry.insert()
-			gl_entry = frappe.get_doc({
-				"doctype": "GL Entry",
-				"account": fixed_asset_account,
-				"debit": self.total_repair_cost,
-				"debit_in_account_currency": self.total_repair_cost,
-				"against": self.payable_account,
-				"voucher_type": "Asset",
-				"voucher_no": self.asset,
-				"cost_center": self.cost_center,
-				"posting_date": getdate()
-			})
-			gl_entry.insert()
 
 	def get_fixed_asset_account(self):
 		asset_category = frappe.get_doc('Asset Category', frappe.db.get_value('Asset', self.asset, 'asset_category'))
