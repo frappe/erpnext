@@ -16,36 +16,36 @@ from erpnext.hr.doctype.employee.test_employee import make_employee
 test_dependencies = ["Leave Allocation", "Leave Block List", "Employee"]
 
 _test_records = [
- {
-  "company": "_Test Company",
-  "doctype": "Leave Application",
-  "employee": "_T-Employee-00001",
-  "from_date": "2013-05-01",
-  "description": "_Test Reason",
-  "leave_type": "_Test Leave Type",
-  "posting_date": "2013-01-02",
-  "to_date": "2013-05-05"
- },
- {
-  "company": "_Test Company",
-  "doctype": "Leave Application",
-  "employee": "_T-Employee-00002",
-  "from_date": "2013-05-01",
-  "description": "_Test Reason",
-  "leave_type": "_Test Leave Type",
-  "posting_date": "2013-01-02",
-  "to_date": "2013-05-05"
- },
- {
-  "company": "_Test Company",
-  "doctype": "Leave Application",
-  "employee": "_T-Employee-00001",
-  "from_date": "2013-01-15",
-  "description": "_Test Reason",
-  "leave_type": "_Test Leave Type LWP",
-  "posting_date": "2013-01-02",
-  "to_date": "2013-01-15"
- }
+	{
+		"company": "_Test Company",
+		"doctype": "Leave Application",
+		"employee": "_T-Employee-00001",
+		"from_date": "2013-05-01",
+		"description": "_Test Reason",
+		"leave_type": "_Test Leave Type",
+		"posting_date": "2013-01-02",
+		"to_date": "2013-05-05"
+	},
+	{
+		"company": "_Test Company",
+		"doctype": "Leave Application",
+		"employee": "_T-Employee-00002",
+		"from_date": "2013-05-01",
+		"description": "_Test Reason",
+		"leave_type": "_Test Leave Type",
+		"posting_date": "2013-01-02",
+		"to_date": "2013-05-05"
+	},
+	{
+		"company": "_Test Company",
+		"doctype": "Leave Application",
+		"employee": "_T-Employee-00001",
+		"from_date": "2013-01-15",
+		"description": "_Test Reason",
+		"leave_type": "_Test Leave Type LWP",
+		"posting_date": "2013-01-02",
+		"to_date": "2013-01-15"
+	}
 ]
 
 
@@ -516,9 +516,9 @@ class TestLeaveApplication(unittest.TestCase):
 		leave_application.submit()
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_application.name))
 
-		self.assertEquals(leave_ledger_entry[0].employee, leave_application.employee)
-		self.assertEquals(leave_ledger_entry[0].leave_type, leave_application.leave_type)
-		self.assertEquals(leave_ledger_entry[0].leaves, leave_application.total_leave_days * -1)
+		self.assertEqual(leave_ledger_entry[0].employee, leave_application.employee)
+		self.assertEqual(leave_ledger_entry[0].leave_type, leave_application.leave_type)
+		self.assertEqual(leave_ledger_entry[0].leaves, leave_application.total_leave_days * -1)
 
 		# check if leave ledger entry is deleted on cancellation
 		leave_application.cancel()
@@ -549,11 +549,11 @@ class TestLeaveApplication(unittest.TestCase):
 
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', '*', filters=dict(transaction_name=leave_application.name))
 
-		self.assertEquals(len(leave_ledger_entry), 2)
-		self.assertEquals(leave_ledger_entry[0].employee, leave_application.employee)
-		self.assertEquals(leave_ledger_entry[0].leave_type, leave_application.leave_type)
-		self.assertEquals(leave_ledger_entry[0].leaves, -9)
-		self.assertEquals(leave_ledger_entry[1].leaves, -2)
+		self.assertEqual(len(leave_ledger_entry), 2)
+		self.assertEqual(leave_ledger_entry[0].employee, leave_application.employee)
+		self.assertEqual(leave_ledger_entry[0].leave_type, leave_application.leave_type)
+		self.assertEqual(leave_ledger_entry[0].leaves, -9)
+		self.assertEqual(leave_ledger_entry[1].leaves, -2)
 
 	def test_leave_application_creation_after_expiry(self):
 		# test leave balance for carry forwarded allocation
@@ -566,7 +566,7 @@ class TestLeaveApplication(unittest.TestCase):
 
 		create_carry_forwarded_allocation(employee, leave_type)
 
-		self.assertEquals(get_leave_balance_on(employee.name, leave_type.name, add_days(nowdate(), -85), add_days(nowdate(), -84)), 0)
+		self.assertEqual(get_leave_balance_on(employee.name, leave_type.name, add_days(nowdate(), -85), add_days(nowdate(), -84)), 0)
 
 	def test_leave_approver_perms(self):
 		employee = get_employee()
