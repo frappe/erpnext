@@ -299,14 +299,14 @@ class WorkOrder(Document):
 	# 	# self.planned_rm_cost_calc() # wo.items.required_qty
 	# 	self.yeild_calc()  # wo.actual_fg_weight
 
-	#def on_change(self):
-		# self.planned_rm_weight_calc()
-		# self.calc_rm_weight_and_consump_dev()
-		# self.transfered_rm_weight_calculation()
-		# self.bom_details()
-		# self.planned_rm_cost_calc()
-		# self.scrap_cost_calc()
-		# self.yeild_calc()
+	def on_change(self):
+		self.planned_rm_weight_calc()
+		self.calc_rm_weight_and_consump_dev()
+		self.transfered_rm_weight_calculation()
+		self.bom_details()
+		self.planned_rm_cost_calc()
+		self.scrap_cost_calc()
+		self.yeild_calc()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
