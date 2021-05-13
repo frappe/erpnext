@@ -38,12 +38,12 @@ class AssetRepair(Document):
 
 	def on_submit(self):
 		self.check_repair_status()
-		self.check_for_stock_items_and_warehouse()
 		self.check_for_payable_account()
 		self.check_for_cost_center()
 
 		self.increase_asset_value()
 		if self.stock_consumption:
+			self.check_for_stock_items_and_warehouse()
 			self.decrease_stock_quantity()
 		self.make_gl_entries()
 
@@ -52,11 +52,10 @@ class AssetRepair(Document):
 			frappe.throw(_("Please update Repair Status."))
 
 	def check_for_stock_items_and_warehouse(self):
-		if self.stock_consumption:
-			if not self.stock_items:
-				frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
-			if not self.warehouse:
-				frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Repair were taken."))
+		if not self.stock_items:
+			frappe.throw(_("Please enter Stock Items consumed during Asset Repair."))
+		if not self.warehouse:
+			frappe.throw(_("Please enter Warehouse from which Stock Items consumed during Asset Repair were taken."))
 
 	def check_for_payable_account(self):
 		if not self.payable_account:
