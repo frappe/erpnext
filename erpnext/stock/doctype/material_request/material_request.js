@@ -85,6 +85,10 @@ frappe.ui.form.on('Material Request', {
 		if(frm.doc.manufacturing_staging === 1 && frm.doc.company){
 			set_target_warehouse(frm)
 		}
+		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
+			frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+				__("Get Items From"));
+		}
 	},
 	
 	onload_post_render: function(frm) {
@@ -414,10 +418,6 @@ frappe.ui.form.on('Material Request', {
 
 		if (frm.doc.material_request_type !== 'Material Transfer' && frm.doc.set_from_warehouse) {
 			frm.set_value('set_from_warehouse', '');
-		}
-		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
-			frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
-				__("Get Items From"));
 		}
 	},
 
