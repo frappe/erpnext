@@ -299,14 +299,14 @@ class WorkOrder(Document):
 	# 	# self.planned_rm_cost_calc() # wo.items.required_qty
 	# 	self.yeild_calc()  # wo.actual_fg_weight
 
-	def on_change(self):
-		self.planned_rm_weight_calc()
-		self.calc_rm_weight_and_consump_dev()
-		self.transfered_rm_weight_calculation()
-		self.bom_details()
-		self.planned_rm_cost_calc()
-		self.scrap_cost_calc()
-		self.yeild_calc()
+	#def on_change(self):
+		# self.planned_rm_weight_calc()
+		# self.calc_rm_weight_and_consump_dev()
+		# self.transfered_rm_weight_calculation()
+		# self.bom_details()
+		# self.planned_rm_cost_calc()
+		# self.scrap_cost_calc()
+		# self.yeild_calc()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
@@ -393,7 +393,9 @@ class WorkOrder(Document):
 		if self.planned_rm_weight == 0:
 			self.consumption_deviation = 0
 		else:
-			self.consumption_deviation = flt(((flt(self.actual_rm_weight)-flt(self.planned_rm_weight))/flt(self.planned_rm_weight))*100, self.precision('consumption_deviation'))
+			float_precision = cint(frappe.db.get_default("float_precision")) or 2
+			self.consumption_deviation = flt(((flt(self.actual_rm_weight)-flt(self.planned_rm_weight))/flt(self.planned_rm_weight))*100, float_precision)
+			
 			frappe.db.set_value("Work Order", self.name, "consumption_deviation", self.consumption_deviation)
 		# self.db_update()
 		# self.reload()

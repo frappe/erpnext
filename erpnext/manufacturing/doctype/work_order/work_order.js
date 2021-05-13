@@ -137,15 +137,6 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
-		// console.log("Refresh working");
-		// if(frm.doc.transfer_material_against === "Work Order"){
-		// 	console.log("Add Additional Items button should work");
-		// 	frm.add_custom_button(__('Add Additional Items'),function() {
-		// 		var usr = frappe.session.user
-		// 		frappe.new_doc("Additional Item", {"work_order" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
-		// 		//console.log("********** finished")
-		// 	})
-		// }
 		set_material_transfer_for_manufacturing(frm)
 		erpnext.toggle_naming_series();
 		erpnext.work_order.set_custom_buttons(frm);
