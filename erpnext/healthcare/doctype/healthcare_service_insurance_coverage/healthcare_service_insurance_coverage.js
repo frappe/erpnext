@@ -16,7 +16,7 @@ frappe.ui.form.on('Healthcare Service Insurance Coverage', {
 				filters: {
 					'medical_code_standard': frm.doc.medical_code_standard
 				}
-			}
+			};
 		});
 
 		frm.set_query('healthcare_service', function() {

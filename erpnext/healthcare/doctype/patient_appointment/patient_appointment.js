@@ -137,9 +137,10 @@ frappe.ui.form.on('Patient Appointment', {
 				create_vital_signs(frm);
 			}, __('Create'));
 		}
-		frm.set_query('insurance_subscription', function(){
-			return{
-				filters:{
+
+		frm.set_query('insurance_subscription', function() {
+			return {
+				filters: {
 					'patient': frm.doc.patient,
 					'docstatus': 1
 				}
@@ -481,7 +482,7 @@ let get_prescribed_procedure = function(frm) {
 	}
 };
 
-let show_procedure_templates = function(frm, result){
+let show_procedure_templates = function(frm, result) {
 	let d = new frappe.ui.Dialog({
 		title: __('Prescribed Procedures'),
 		fields: [
@@ -490,6 +491,7 @@ let show_procedure_templates = function(frm, result){
 			}
 		]
 	});
+
 	let html_field = d.fields_dict.procedure_template.$wrapper;
 	html_field.empty();
 	$.each(result, function(x, y) {
@@ -520,7 +522,7 @@ let show_procedure_templates = function(frm, result){
 		});
 	});
 	if (!result) {
-		let msg = __('There are no procedure prescribed for ') + frm.doc.patient;
+		let msg = __('There are no procedures prescribed for {0}', frm.doc.patient);
 		$(repl('<div class="col-xs-12" style="padding-top:20px;" >%(msg)s</div></div>', {msg: msg})).appendTo(html_field);
 	}
 	d.show();

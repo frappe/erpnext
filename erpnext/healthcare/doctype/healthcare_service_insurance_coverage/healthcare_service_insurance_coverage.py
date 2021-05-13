@@ -66,7 +66,6 @@ class HealthcareServiceInsuranceCoverage(Document):
 def get_service_insurance_coverage_details(service_doctype, service, service_item, insurance_subscription):
 	valid_date = getdate()
 	coverage = discount = 0
-	is_auto_approval = True
 	insurance_details = False
 
 	insurance_subscription = frappe.db.get_value('Healthcare Insurance Subscription', insurance_subscription,
@@ -138,15 +137,15 @@ def get_insurance_coverage_details(coverage_plan, service=None, service_item=Non
 
 def is_valid_insurance(insurance_subscription, posting_date):
 	if frappe.db.exists('Healthcare Insurance Contract', {
-			'insurance_company': insurance_subscription.insurance_company,
-			'start_date':('<=', getdate(posting_date)),
-			'end_date':('>=', getdate(posting_date)),
-			'is_active': 1
-		}):
+		'insurance_company': insurance_subscription.insurance_company,
+		'start_date':('<=', getdate(posting_date)),
+		'end_date':('>=', getdate(posting_date)),
+		'is_active': 1
+	}):
 		if frappe.db.exists('Healthcare Insurance Subscription', {
-				'name': insurance_subscription.name,
-				'subscription_expiry':('>=', getdate(posting_date))
-			}):
+			'name': insurance_subscription.name,
+			'subscription_expiry':('>=', getdate(posting_date))
+		}):
 			return True
 	return False
 

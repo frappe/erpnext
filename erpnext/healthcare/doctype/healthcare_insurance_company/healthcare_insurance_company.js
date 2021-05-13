@@ -3,7 +3,7 @@
 
 frappe.ui.form.on('Healthcare Insurance Company', {
 	refresh: function(frm) {
-		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Insurance Company'}
+		frappe.dynamic_link = {doc: frm.doc, fieldname: 'name', doctype: 'Insurance Company'};
 
 		if (frm.doc.__islocal) {
 			hide_field(['address_html', 'contact_html', 'address_contacts']);

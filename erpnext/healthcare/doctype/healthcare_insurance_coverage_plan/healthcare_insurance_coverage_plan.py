@@ -3,8 +3,6 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
-import frappe
-from frappe.utils import getdate, nowdate
 from frappe.model.document import Document
 from erpnext.healthcare.doctype.healthcare_insurance_contract.healthcare_insurance_contract import validate_insurance_contract
 

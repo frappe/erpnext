@@ -13,7 +13,7 @@ class HealthcareInsuranceCompany(Document):
 		self.create_customer()
 		self.reload()
 
-	def	onload(self):
+	def onload(self):
 		load_address_and_contact(self)
 
 	def create_customer(self):

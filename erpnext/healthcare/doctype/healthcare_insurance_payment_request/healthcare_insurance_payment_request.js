@@ -8,7 +8,7 @@ frappe.ui.form.on('Healthcare Insurance Payment Request', {
 				filters: {
 					'company': frm.doc.company
 				}
-			}
+			};
 		});
 
 		if (frm.doc.docstatus == 1) {
@@ -54,7 +54,7 @@ frappe.ui.form.on('Healthcare Insurance Payment Request', {
 
 		$.each(frm.doc.claims || [], (_i, claim) => {
 			total_claim_amount += flt(claim.claim_amount);
-		})
+		});
 
 		frm.set_value('total_claim_amount', total_claim_amount);
 		refresh_field('total_claim_amount');

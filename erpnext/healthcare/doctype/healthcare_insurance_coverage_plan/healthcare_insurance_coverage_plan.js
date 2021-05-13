@@ -2,9 +2,6 @@
 // For license information, please see license.txt
 
 frappe.ui.form.on('Healthcare Insurance Coverage Plan', {
-	refresh: function(frm) {
-	},
-
 	insurance_company: function(frm) {
 		if (frm.doc.insurance_company) {
 			frappe.call({

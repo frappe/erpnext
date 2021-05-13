@@ -32,4 +32,4 @@ def validate_insurance_contract(insurance_company):
 	})
 
 	if not contract:
-		frappe.throw(_('There is no valid contract with this Insurance Company {0}').format(self.insurance_company))
+		frappe.throw(_('There is no valid contract with this Insurance Company {0}').format(insurance_company))

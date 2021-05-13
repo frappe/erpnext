@@ -7,4 +7,4 @@ frappe.listview_settings['Healthcare Service Insurance Coverage'] = {
 			return [__('Not Active'), 'grey', 'is_active,=,No'];
 		}
 	}
-}
+};

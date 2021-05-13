@@ -88,7 +88,7 @@ frappe.ui.form.on('Healthcare Insurance Claim', {
 
 			if (frm.doc.discount) {
 				discount_amount = flt(frm.doc.price_list_rate) * flt(frm.doc.discount) * 0.01;
-				rate = flt(rate) - flt(discount_amount)
+				rate = flt(rate) - flt(discount_amount);
 			}
 
 			let amount = flt(frm.doc.quantity) * flt(rate);

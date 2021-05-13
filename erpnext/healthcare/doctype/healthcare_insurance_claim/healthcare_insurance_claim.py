@@ -52,7 +52,7 @@ class HealthcareInsuranceClaim(Document):
 
 		journal_entry = frappe.new_doc('Journal Entry')
 		journal_entry.company = sales_invoice.company
-		journal_entry.posting_date =  self.billing_date
+		journal_entry.posting_date = self.billing_date
 
 		journal_entry.append('accounts', {
 			'account': get_party_account('Customer', sales_invoice.customer, sales_invoice.company),

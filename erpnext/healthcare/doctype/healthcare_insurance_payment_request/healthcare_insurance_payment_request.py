@@ -43,13 +43,11 @@ class HealthcareInsurancePaymentRequest(Document):
 
 		if self.posting_date_type == 'Claim Posting Date':
 			filters.update({
-				'claim_posting_date': ('>=', self.from_date),
-				'claim_posting_date': ('<=', self.to_date)
+				'claim_posting_date': ('between', [self.from_date, self.to_date]),
 			})
 		else:
 			filters.update({
-				'sales_invoice_posting_date': ('>=', self.from_date),
-				'sales_invoice_posting_date': ('<=', self.to_date)
+				'sales_invoice_posting_date': ('between', [self.from_date, self.to_date]),
 			})
 
 		return frappe.db.get_all('Healthcare Insurance Claim',

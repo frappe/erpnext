@@ -4,7 +4,7 @@
 frappe.ui.form.on('Healthcare Insurance Contract', {
 	refresh: function(frm) {
 		if (frm.doc.__islocal && !frm.doc.start_date) {
-			frm.set_value('start_date', frappe.datetime.get_today())
+			frm.set_value('start_date', frappe.datetime.get_today());
 		}
 	},
 

@@ -42,8 +42,7 @@ frappe.ui.form.on('Inpatient Record', {
 						'healthcare_practitioner_type': 'External'
 					}
 				};
-			}
-			else {
+			} else {
 				return {
 					filters: {
 						'healthcare_practitioner_type': 'Internal'
