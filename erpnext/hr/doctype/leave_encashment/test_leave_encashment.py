@@ -44,10 +44,6 @@ class TestLeaveEncashment(unittest.TestCase):
 		salary_structure = make_salary_structure("Salary Structure for Encashment", "Monthly", self.employee,
 			other_details={"leave_encashment_amount_per_day": 50})
 
-		#grant Leaves
-		frappe.get_doc("Leave Policy Assignment", leave_policy_assignments[0]).grant_leave_alloc_for_employee()
-
-
 	def tearDown(self):
 		for dt in ["Leave Period", "Leave Allocation", "Leave Ledger Entry", "Additional Salary", "Leave Encashment", "Salary Structure", "Leave Policy"]:
 			frappe.db.sql("delete from `tab%s`" % dt)
@@ -88,10 +84,10 @@ class TestLeaveEncashment(unittest.TestCase):
 
 		leave_ledger_entry = frappe.get_all('Leave Ledger Entry', fields='*', filters=dict(transaction_name=leave_encashment.name))
 
-		self.assertEquals(len(leave_ledger_entry), 1)
-		self.assertEquals(leave_ledger_entry[0].employee, leave_encashment.employee)
-		self.assertEquals(leave_ledger_entry[0].leave_type, leave_encashment.leave_type)
-		self.assertEquals(leave_ledger_entry[0].leaves, leave_encashment.encashable_days *  -1)
+		self.assertEqual(len(leave_ledger_entry), 1)
+		self.assertEqual(leave_ledger_entry[0].employee, leave_encashment.employee)
+		self.assertEqual(leave_ledger_entry[0].leave_type, leave_encashment.leave_type)
+		self.assertEqual(leave_ledger_entry[0].leaves, leave_encashment.encashable_days * -1)
 
 		# check if leave ledger entry is deleted on cancellation
 

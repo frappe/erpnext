@@ -20,13 +20,13 @@ class TestPatientAppointment(unittest.TestCase):
 		patient, medical_department, practitioner = create_healthcare_docs()
 		frappe.db.set_value('Healthcare Settings', None, 'automate_appointment_invoicing', 0)
 		appointment = create_appointment(patient, practitioner, nowdate())
-		self.assertEquals(appointment.status, 'Open')
+		self.assertEqual(appointment.status, 'Open')
 		appointment = create_appointment(patient, practitioner, add_days(nowdate(), 2))
-		self.assertEquals(appointment.status, 'Scheduled')
+		self.assertEqual(appointment.status, 'Scheduled')
 		encounter = create_encounter(appointment)
-		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
+		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Closed')
 		encounter.cancel()
-		self.assertEquals(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Open')
+		self.assertEqual(frappe.db.get_value('Patient Appointment', appointment.name, 'status'), 'Open')
 
 	def test_start_encounter(self):
 		patient, medical_department, practitioner = create_healthcare_docs()
