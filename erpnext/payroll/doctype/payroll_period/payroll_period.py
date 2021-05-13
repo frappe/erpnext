@@ -7,7 +7,7 @@ import frappe
 from frappe import _
 from frappe.utils import date_diff, getdate, formatdate, cint, month_diff, flt, add_months
 from frappe.model.document import Document
-from erpnext.hr.utils import get_holidays_for_employee
+from erpnext.hr.utils import get_holiday_dates_for_employee
 
 class PayrollPeriod(Document):
 	def validate(self):
@@ -65,7 +65,7 @@ def get_payroll_period_days(start_date, end_date, employee, company=None):
 		actual_no_of_days = date_diff(getdate(payroll_period[0][2]), getdate(payroll_period[0][1])) + 1
 		working_days = actual_no_of_days
 		if not cint(frappe.db.get_value("Payroll Settings", None, "include_holidays_in_total_working_days")):
-			holidays = get_holidays_for_employee(employee, getdate(payroll_period[0][1]), getdate(payroll_period[0][2]))
+			holidays = get_holiday_dates_for_employee(employee, getdate(payroll_period[0][1]), getdate(payroll_period[0][2]))
 			working_days -= len(holidays)
 		return payroll_period[0][0], working_days, actual_no_of_days
 	return False, False, False
