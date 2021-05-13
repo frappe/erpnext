@@ -80,7 +80,7 @@ class LeavePolicyAssignment(Document):
 			new_leaves_allocated=new_leaves_allocated,
 			leave_period=self.leave_period if self.assignment_based_on == "Leave Policy" else '',
 			leave_policy_assignment = self.name,
-			leave_policy = self.leave_policy ,
+			leave_policy = self.leave_policy,
 			carry_forward=carry_forward
 			))
 		allocation.save(ignore_permissions = True)
@@ -173,4 +173,3 @@ def get_leave_type_details():
 	for d in leave_types:
 		leave_type_details.setdefault(d.name, d)
 	return leave_type_details
-
