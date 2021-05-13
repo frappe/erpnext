@@ -365,10 +365,8 @@ scheduler_events = {
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
-		"erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment.automatically_allocate_leaves_based_on_leave_policy",
 		"erpnext.hr.utils.generate_leave_encashment",
 		"erpnext.hr.utils.allocate_earned_leaves",
-		"erpnext.hr.utils.grant_leaves_automatically",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead"
@@ -426,7 +424,8 @@ regional_overrides = {
 		'erpnext.hr.utils.calculate_annual_eligible_hra_exemption': 'erpnext.regional.india.utils.calculate_annual_eligible_hra_exemption',
 		'erpnext.hr.utils.calculate_hra_exemption_for_period': 'erpnext.regional.india.utils.calculate_hra_exemption_for_period',
 		'erpnext.accounts.doctype.purchase_invoice.purchase_invoice.make_regional_gl_entries': 'erpnext.regional.india.utils.make_regional_gl_entries',
-		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields'
+		'erpnext.controllers.accounts_controller.validate_einvoice_fields': 'erpnext.regional.india.e_invoice.utils.validate_einvoice_fields',
+		'erpnext.assets.doctype.asset.asset.get_depreciation_amount': 'erpnext.regional.india.utils.get_depreciation_amount'
 	},
 	'United Arab Emirates': {
 		'erpnext.controllers.taxes_and_totals.update_itemised_tax_data': 'erpnext.regional.united_arab_emirates.utils.update_itemised_tax_data',
