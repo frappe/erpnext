@@ -166,6 +166,11 @@ frappe.query_reports["General Ledger"] = {
 			"fieldname": "show_cancelled_entries",
 			"label": __("Show Cancelled Entries"),
 			"fieldtype": "Check"
+		},
+		{
+			"fieldname": "show_net_values_in_party_account",
+			"label": __("Show Net Values in Party Account"),
+			"fieldtype": "Check"
 		}
 	]
 }
