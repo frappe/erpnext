@@ -16,6 +16,7 @@
   "is_pos",
   "is_consolidated",
   "is_return",
+  "is_debit_note",
   "update_billed_amount_in_sales_order",
   "column_break1",
   "company",
@@ -392,7 +393,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "return_against",
+   "depends_on": "eval:doc.return_against || doc.is_debit_note",
    "fieldname": "return_against",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -401,7 +402,7 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1,
+   "read_only_depends_on": "eval:doc.is_return",
    "search_index": 1
   },
   {
@@ -1953,6 +1954,12 @@
   },
   {
    "default": "0",
+   "fieldname": "is_debit_note",
+   "fieldtype": "Check",
+   "label": "Is Debit Note"
+  },
+  {
+   "default": 0,
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
@@ -1969,7 +1976,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-04-15 23:57:58.766651",
+ "modified": "2021-04-23 22:36:32.916354",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
