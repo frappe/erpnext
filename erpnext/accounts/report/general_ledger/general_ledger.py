@@ -344,12 +344,33 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 	consolidated_gle = OrderedDict()
 	group_by = group_by_field(filters.get('group_by'))
 
+	if filters.get('show_net_values_in_party_account'):
+		account_type_map = get_account_type_map(filters.get('company'))
+
 	def update_value_in_dict(data, key, gle):
 		data[key].debit += flt(gle.debit)
 		data[key].credit += flt(gle.credit)
 
 		data[key].debit_in_account_currency += flt(gle.debit_in_account_currency)
 		data[key].credit_in_account_currency += flt(gle.credit_in_account_currency)
+
+		if filters.get('show_net_values_in_party_account') and \
+			account_type_map.get(data[key].account) in ('Receivable', 'Payable'):
+			net_value = flt(data[key].debit) - flt(data[key].credit)
+			net_value_in_account_currency = flt(data[key].debit_in_account_currency) \
+				- flt(data[key].credit_in_account_currency)
+
+			if net_value < 0:
+				dr_or_cr = 'credit'
+				rev_dr_or_cr = 'debit'
+			else:
+				dr_or_cr = 'debit'
+				rev_dr_or_cr = 'credit'
+
+			data[key][dr_or_cr] = abs(net_value)
+			data[key][dr_or_cr+'_in_account_currency'] = abs(net_value_in_account_currency)
+			data[key][rev_dr_or_cr] = 0
+			data[key][rev_dr_or_cr+'_in_account_currency'] = 0
 
 		if data[key].against_voucher and gle.against_voucher:
 			data[key].against_voucher += ', ' + gle.against_voucher
@@ -387,6 +408,12 @@ def get_accountwise_gle(filters, accounting_dimensions, gl_entries, gle_map):
 		entries.append(value)
 
 	return totals, entries
+
+def get_account_type_map(company):
+	account_type_map = frappe._dict(frappe.get_all('Account', fields=['name', 'account_type'],
+		filters={'company': company}, as_list=1))
+
+	return account_type_map
 
 def get_result_as_list(data, filters):
 	balance, balance_in_account_currency = 0, 0
