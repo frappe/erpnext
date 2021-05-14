@@ -10,6 +10,8 @@ frappe.ui.form.on('Material Consumption', {
             method: "set_consume_material",
             callback: function(r) {
                 frm.clear_table('material_consumption_detail');
+                // frm.refresh_field("weight_consumed");
+                // frm.refresh_field("consumption_deviation_percentage");
                 frm.reload_doc();
             }
         });

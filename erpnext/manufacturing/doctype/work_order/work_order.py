@@ -220,8 +220,11 @@ class WorkOrder(Document):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 			based on Stock Entry"""
 
+		# allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			# "overproduction_percentage_for_work_order"))
+
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
-			"overproduction_percentage_for_work_order"))
+			"allowed_consumption_deviation_percentage"))
 
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
@@ -233,7 +236,8 @@ class WorkOrder(Document):
 				from `tabStock Entry` where work_order=%s and docstatus=1
 				and purpose=%s""", (self.name, purpose))[0][0])
 
-			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
+			# completed_qty = self.qty + (allowance_percentage/100 * self.qty)
+			completed_qty = self.planned_rm_weight + (allowance_percentage/100 * self.planned_rm_weight)
 			if qty > completed_qty:
 				frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
 					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
@@ -307,6 +311,7 @@ class WorkOrder(Document):
 		self.planned_rm_cost_calc()
 		self.scrap_cost_calc()
 		self.yeild_calc()
+		self.actual_yeild_on_wo()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
@@ -315,6 +320,13 @@ class WorkOrder(Document):
 		# self.qty = flt(value, self.precision('qty'))
 		# self.db_update()
 		# self.reload()
+
+	def actual_yeild_on_wo(self):
+		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(self.weight_per_unit), self.precision('actual_fg_weight'))
+		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
+			self.actual_yeild = 0
+		else:
+			self.actual_yeild = flt((flt(self.actual_fg_weight)/flt(self.actual_rm_weight))*100)
 	
 	def planned_rm_weight_calc(self):
 		value = 0
@@ -353,11 +365,11 @@ class WorkOrder(Document):
 		# self.reload()
 		
 	def yeild_calc(self):
-		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
-			self.actual_yeild = 0
-		else:
-			self.actual_yeild = flt(flt(self.actual_fg_weight)/flt(self.actual_rm_weight), self.precision('actual_yeild'))
-		frappe.db.set_value("Work Order", self.name, "actual_yeild", self.actual_yeild)
+		# if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
+		# 	self.actual_yeild = 0
+		# else:
+		# 	self.actual_yeild = flt((flt(self.actual_fg_weight)/flt(self.actual_rm_weight))*100, self.precision('actual_yeild'))
+		# frappe.db.set_value("Work Order", self.name, "actual_yeild", self.actual_yeild)
 		self.yeild_deviation = flt(flt(self.bom_yeild) - flt(self.actual_yeild), self.precision('yeild_deviation'))
 		frappe.db.set_value("Work Order", self.name, "yeild_deviation", self.yeild_deviation)
 		# return True

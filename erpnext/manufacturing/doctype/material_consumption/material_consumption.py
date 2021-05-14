@@ -39,7 +39,6 @@ class MaterialConsumption(Document):
                 l_doc.qty_issued = flt(total_qty, l_doc.precision('qty_issued'))
                 l_doc.status = "Assigned"
                 l_doc.save(ignore_permissions=True)
-        self.reload()
         self.deviation_calculation()
         return True
 
@@ -52,7 +51,8 @@ class MaterialConsumption(Document):
             self.make_stock_entry()
 
     # def on_change(self):
-    #     self.calc_actual_rm_wt_on_wo()
+    #     self.deviation_calculation()
+        # self.calc_actual_rm_wt_on_wo()
 
     def before_save(self):
         self.deviation_calculation()
@@ -77,8 +77,8 @@ class MaterialConsumption(Document):
             self.consumption_deviation_percentage = 0
         else:
             self.consumption_deviation_percentage = flt(((flt(flt(self.weight_consumed)+flt(wo.actual_rm_weight))-flt(wo.planned_rm_weight))/flt(wo.planned_rm_weight))*100, self.precision('consumption_deviation_percentage'))
-        self.db_update()
-        self.reload()
+        # self.db_update()
+        # self.reload()
 
     def calc_actual_rm_wt_on_wo(self):
         wo = frappe.get_doc("Work Order", self.work_order)
