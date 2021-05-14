@@ -20,6 +20,7 @@ from frappe.model.meta import get_field_precision
 
 class PickList(Document):
 	def before_save(self):
+		self.weight_details()
 		self.set_item_locations()
 
 	def before_submit(self):
@@ -81,6 +82,17 @@ class PickList(Document):
 
 	# return batch_locations
 
+	def weight_details(self):
+		total_weight = total_stock_weight = total_picked_weight = 0
+		if self.locations:
+			for row in self.locations:
+				item_wt = frappe.get_doc("Item", row.item_code)
+				total_weight += flt(row.qty)+flt(item_wt.weight_per_unit) 
+				total_stock_weight += flt(row.stock_qty)+flt(item_wt.weight_per_unit) 
+				total_picked_weight += flt(row.picked_qty)+flt(item_wt.weight_per_unit) 
+		self.total_weight = flt(total_weight, self.precision('total_weight'))
+		self.total_stock_weight = flt(total_stock_weight, self.precision('total_stock_weight'))
+		self.total_picked_weight = flt(total_picked_weight, self.precision('total_picked_weight'))
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):

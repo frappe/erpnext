@@ -61,20 +61,54 @@ class MaterialProduce(Document):
         return True
 
     def on_submit(self):
-        value = frappe.db.sql("""select * from `tabMaterial Consumption` where work_order = %s and docstatus = 1""", (self.work_order))
-        if value:
-            self.make_se()
-            self.calc_actual_fg_wt_on_wo() 
-        else:
-            frappe.throw(_('Atleast one submitted Material Consumption required'))
+        self.our_validation()
 
     def on_cancel(self):
-        self.calc_actual_fg_wt_on_wo()
+        pass
+        # self.calc_actual_fg_wt_on_wo()
 
-    def calc_actual_fg_wt_on_wo(self):
+    # def calc_actual_fg_wt_on_wo(self):
+    #     wo = frappe.get_doc("Work Order", self.work_order)
+    #     wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
+    #     # wo.db_update()
+
+    def our_validation(self):
+        if self.partial_produce:
+            wo = frappe.get_doc("Work Order" ,self.work_order)
+            wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
+            self.make_se()
+        else:
+            atleast_one_mc = frappe.db.sql("""select * from `tabMaterial Consumption` where work_order = %s and docstatus = 1""", (self.work_order))
+            if atleast_one_mc:
+                # no_previous_complete_mc = frappe.db.count('Material Produce', {'work_order': self.work_order, 'docstatus': 1, 'partial_produce': 0})
+                previous_complete_mp = frappe.db.sql("""select * from `tabMaterial Produce` where work_order = %s and docstatus = 1 and partial_produce = 1""", (self.work_order))
+                if not previous_complete_mp:
+                    mfg = frappe.get_doc("Manufacturing Settings")
+                    wo = frappe.get_doc("Work Order", self.work_order)
+                    if self.actual_yeild_on_wo() >= (wo.bom_yeild-mfg.allowed_production_deviation_percentage) and self.actual_yeild_on_wo() <= (wo.bom_yeild+mfg.allowed_production_deviation_percentage):
+                    # self.calc_actual_fg_wt_on_wo() 
+                        wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
+                        self.make_se()
+                    else:
+                        frappe.throw(_('Actual yeild is not within deviation limits'))
+                else:
+                    frappe.throw(_('Another complete Material Produce for {0} is already present'.format(self.work_order)))
+            else:
+                frappe.throw(_('Atleast one submitted Material Consumption required'))
+
+    def actual_yeild_on_wo(self):
+        value = 0
         wo = frappe.get_doc("Work Order", self.work_order)
         wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
-        wo.db_update()
+        print("produced_qty", str(wo.produced_qty))
+        print("weight_per_unit", str(wo.weight_per_unit))
+        print("actual_fg_weight", str(wo.actual_fg_weight))
+        if wo.actual_rm_weight == 0 or wo.actual_rm_weight == None:
+            wo.actual_yeild = 0
+        else:
+            # wo.actual_yeild = flt((flt(wo.actual_fg_weight)/flt(wo.actual_rm_weight))*100, wo.precision('actual_yeild'))
+            value = flt((flt(wo.actual_fg_weight)/flt(wo.actual_rm_weight))*100)
+        return value
 
     def cost_details_calculation(self):
         precision1 = get_field_precision(frappe.get_meta("Material Produce").get_field("cost_of_scrap"))
@@ -105,14 +139,14 @@ class MaterialProduce(Document):
             self.wo_actual_operating_cost = flt(wo.total_operating_cost, self.precision('wo_actual_operating_cost'))
 
             for res in self.material_produce_item:
+                scrap_cost = 0
                 if res.type == "Scrap" and res.data:
                     for line in json.loads(res.data):
-                        if line.rate:
-                            scrap_cost += flt(line.rate, precision1)
+                        if line.get('rate'):
+                            scrap_cost += flt(line.get('rate'))
             self.cost_of_scrap = flt(scrap_cost, self.precision('cost_of_scrap'))
 
             self.amount = flt((self.wo_actual_rm_cost + self.wo_actual_operating_cost) - (self.total_cost_of_rm_consumed_for_partial_close + self.total_cost_of_operation_consumed_for_partial_close + self.cost_of_scrap), self.precision('amount'))
-            print(self.amount)
             
     def make_stock_entry(self):
         return self.make_se()
@@ -267,9 +301,7 @@ class MaterialProduce(Document):
             batch_size = flt(batch_size, precision2)
         else:
             batch_size = 0
-            print("data"*5, str(data))
         if not data:
-            print("notdata"*5, str(data))
             item = frappe.get_doc("Item", item_code)
             lst = []
             batch_option = None
