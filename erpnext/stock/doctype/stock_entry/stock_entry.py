@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 import frappe.defaults
-from frappe import _
+from frappe import _, msgprint
 from frappe.utils import cstr, cint, flt, comma_or, getdate, nowdate, formatdate, format_time
 from erpnext.stock.utils import get_incoming_rate
 from erpnext.stock.stock_ledger import get_previous_sle, NegativeStockError, get_valuation_rate
@@ -60,6 +60,7 @@ class StockEntry(StockController):
 		self.validate_purpose()
 		self.validate_item()
 		self.validate_customer_provided_item()
+		self.set_zero_value_for_customer_provided_items()
 		self.validate_qty()
 		self.set_transfer_qty()
 		self.validate_uom_is_integer("uom", "qty")
@@ -167,6 +168,19 @@ class StockEntry(StockController):
 		if self.job_card and self.purpose not in ['Material Transfer for Manufacture', 'Repack']:
 			frappe.throw(_("For job card {0}, you can only make the 'Material Transfer for Manufacture' type stock entry")
 				.format(self.job_card))
+
+	def set_zero_value_for_customer_provided_items(self):
+		changed_any_values = False
+
+		for d in self.get('items'):
+			is_customer_item = frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item')
+			if is_customer_item and d.basic_rate:
+				d.basic_rate = 0.0
+				changed_any_values = True
+
+		if changed_any_values:
+			msgprint(_("Basic rate for customer provided items has been set to zero."),
+				title=_("Note"), indicator="blue")
 
 	def delete_linked_stock_entry(self):
 		if self.purpose == "Send to Warehouse":
