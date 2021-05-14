@@ -78,6 +78,14 @@ erpnext.SerialNoBatchSelector = Class.extend({
 				default: flt(me.item.stock_qty),
 			},
 			{
+				fieldname: 'uom',
+				read_only: 1,
+				fieldtype: 'Link',
+				options: 'UOM',
+				label: __('UOM'),
+				default: me.item.uom
+			},
+			{
 				fieldname: 'auto_fetch_button',
 				fieldtype:'Button',
 				hidden: me.has_batch && !me.has_serial_no,
