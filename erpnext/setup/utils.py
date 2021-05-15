@@ -98,10 +98,10 @@ def get_exchange_rate(from_currency, to_currency, transaction_date=None, args=No
 
 		if not value:
 			import requests
-			api_url = "https://frankfurter.app/{0}".format(transaction_date)
+			api_url = "https://api.exchangerate.host/latest"
 			response = requests.get(api_url, params={
-				"base": from_currency,
-				"symbols": to_currency
+				"symbols": from_currency+","+to_currency,
+				"base": from_currency
 			})
 			# expire in 6 hours
 			response.raise_for_status()
