@@ -74,7 +74,7 @@ class MaterialProduce(Document):
 
     def our_validation(self):
         if self.partial_produce:
-            wo = frappe.get_doc("Work Order" ,self.work_order)
+            wo = frappe.get_doc("Work Order", self.work_order)
             wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
             self.make_se()
         else:
@@ -100,9 +100,7 @@ class MaterialProduce(Document):
         value = 0
         wo = frappe.get_doc("Work Order", self.work_order)
         wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
-        print("produced_qty", str(wo.produced_qty))
-        print("weight_per_unit", str(wo.weight_per_unit))
-        print("actual_fg_weight", str(wo.actual_fg_weight))
+        # frappe.db.set_value("Work Order", self.work_order, "actual_fg_weight", wo.actual_fg_weight)
         if wo.actual_rm_weight == 0 or wo.actual_rm_weight == None:
             wo.actual_yeild = 0
         else:

@@ -276,6 +276,7 @@ class WorkOrder(Document):
 		self.update_planned_qty()
 		self.update_ordered_qty()
 		self.create_job_card()
+		self.bom_details()
 		# self.scrap_cost_calc()
 		
 	def before_save(self):
@@ -307,11 +308,11 @@ class WorkOrder(Document):
 		self.planned_rm_weight_calc()
 		self.calc_rm_weight_and_consump_dev()
 		self.transfered_rm_weight_calculation()
-		self.bom_details()
+		# self.bom_details()
 		self.planned_rm_cost_calc()
 		self.scrap_cost_calc()
-		self.yeild_calc()
 		self.actual_yeild_on_wo()
+		self.yeild_calc()
 		# value = 0
 		# for row in self.required_items:
 		# 	value += flt(row.required_qty)
@@ -370,7 +371,10 @@ class WorkOrder(Document):
 		# else:
 		# 	self.actual_yeild = flt((flt(self.actual_fg_weight)/flt(self.actual_rm_weight))*100, self.precision('actual_yeild'))
 		# frappe.db.set_value("Work Order", self.name, "actual_yeild", self.actual_yeild)
-		self.yeild_deviation = flt(flt(self.bom_yeild) - flt(self.actual_yeild), self.precision('yeild_deviation'))
+		if self.bom_yeild == 0:
+			self.yeild_deviation = 0
+		else:
+			self.yeild_deviation = flt(((flt(self.actual_yeild) - flt(self.bom_yeild))/flt(self.bom_yeild))*100, self.precision('yeild_deviation'))
 		frappe.db.set_value("Work Order", self.name, "yeild_deviation", self.yeild_deviation)
 		# return True
 		
@@ -405,8 +409,8 @@ class WorkOrder(Document):
 		if self.planned_rm_weight == 0:
 			self.consumption_deviation = 0
 		else:
-			float_precision = cint(frappe.db.get_default("float_precision")) or 2
-			self.consumption_deviation = flt(((flt(self.actual_rm_weight)-flt(self.planned_rm_weight))/flt(self.planned_rm_weight))*100, float_precision)
+			# float_precision = cint(frappe.db.get_default("float_precision")) or 2
+			self.consumption_deviation = flt(((flt(self.actual_rm_weight)-flt(self.planned_rm_weight))/flt(self.planned_rm_weight))*100, self.precision('consumption_deviation'))
 			
 			frappe.db.set_value("Work Order", self.name, "consumption_deviation", self.consumption_deviation)
 		# self.db_update()
