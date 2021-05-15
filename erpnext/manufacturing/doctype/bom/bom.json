@@ -521,12 +521,6 @@
    "read_only": 1
   },
   {
-   "default": "0",
-   "fieldname": "allow_adding_items",
-   "fieldtype": "Check",
-   "label": "Allow Adding Items other than BOM Items"
-  },
-  {
    "fieldname": "weight",
    "fieldtype": "Section Break",
    "label": "Weight Details"
@@ -567,6 +561,12 @@
   {
    "fieldname": "section_break_35",
    "fieldtype": "Section Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_adding_items",
+   "fieldtype": "Check",
+   "label": "Allow Adding Items other than BOM Items"
   }
  ],
  "icon": "fa fa-sitemap",
@@ -574,7 +574,7 @@
  "image_field": "image",
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-10 16:26:12.820254",
+ "modified": "2021-05-15 06:14:59.345619",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "BOM",

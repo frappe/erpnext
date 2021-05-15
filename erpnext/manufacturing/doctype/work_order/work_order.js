@@ -137,6 +137,12 @@ frappe.ui.form.on("Work Order", {
 	},
 
 	refresh: function(frm) {
+		if(frm.doc.transfer_material_against === "Work Order"){
+			frm.add_custom_button(__('Add Additional Items'),function() {
+				var usr = frappe.session.user
+				frappe.new_doc("Additional Item", {"work_order" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
+			})
+		}
 		set_material_transfer_for_manufacturing(frm)
 		erpnext.toggle_naming_series();
 		erpnext.work_order.set_custom_buttons(frm);
@@ -150,12 +156,6 @@ frappe.ui.form.on("Work Order", {
 			frm.trigger('show_progress_for_items');
 			frm.trigger('show_progress_for_operations');
 		}
-		// if(frm.doc.transfer_material_against === "Work Order"){
-		// 	frm.add_custom_button(__('Add Additional Items'),function() {
-		// 		var usr = frappe.session.user
-		// 		frappe.new_doc("Additional Item", {"work_order" : frm.doc.name, "user": usr, 'date': frappe.datetime.now_date()})
-		// 	})
-		// }
 		if (frm.doc.docstatus === 1
 			&& frm.doc.operations && frm.doc.operations.length
 			&& frm.doc.qty != frm.doc.material_transferred_for_manufacturing) {
