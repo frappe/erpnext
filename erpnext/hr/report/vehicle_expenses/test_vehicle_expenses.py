@@ -46,7 +46,8 @@ class TestVehicleExpenses(unittest.TestCase):
 			'fuel_qty': 50.0,
 			'fuel_price': 500.0,
 			'fuel_expense': 25000.0,
-			'service_expense': 2000.0
+			'service_expense': 2000.0,
+			'employee': self.employee_id
 		}]
 
 		self.assertEqual(report[1], expected_data)

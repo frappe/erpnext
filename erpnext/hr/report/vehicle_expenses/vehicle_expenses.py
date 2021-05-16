@@ -86,6 +86,13 @@ def get_columns():
 			'fieldtype': 'Currency',
 			'label': _('Service Expense'),
 			'width': 150
+		},
+		{
+			'fieldname': 'employee',
+			'fieldtype': 'Link',
+			'label': _('Employee'),
+			'options': 'Employee',
+			'width': 150
 		}
 	]
 
@@ -98,7 +105,7 @@ def get_vehicle_log_data(filters):
 	data = frappe.db.sql("""
 		SELECT
 			vhcl.license_plate as vehicle, vhcl.make, vhcl.model,
-			vhcl.location, log.name, log.odometer, log.date,
+			vhcl.location, log.name, log.odometer, log.date, log.employee,
 			log.fuel_qty, log.price as fuel_price,
 			log.fuel_qty * log.price as fuel_expense
 		FROM

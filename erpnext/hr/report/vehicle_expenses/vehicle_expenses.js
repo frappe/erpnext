@@ -34,6 +34,12 @@ frappe.query_reports["Vehicle Expenses"] = {
 			"reqd": 1,
 			"depends_on": "eval: doc.filter_based_on == 'Date Range'",
 			"default": frappe.datetime.nowdate()
+		},
+		{
+			"fieldname": "employee",
+			"label": __("Employee"),
+			"fieldtype": "Link",
+			"options": "Employee"
 		}
 	]
 }

@@ -198,24 +198,24 @@ def make_custom_fields(update=True):
 				print_hide=1, read_only=1),
 		]
 
-	# purchase_invoice_itc_fields = [
-	# 		dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
-	# 			fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
-	# 			options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nITC on Reverse Charge\nIneligible As Per Section 17(5)\nIneligible Others\nAll Other ITC',
-	# 			default="All Other ITC"),
-	# 		dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
-	# 			fieldtype='Currency', insert_after='eligibility_for_itc',
-	# 			options='Company:company:default_currency', print_hide=1),
-	# 		dict(fieldname='itc_central_tax', label='Availed ITC Central Tax',
-	# 			fieldtype='Currency', insert_after='itc_integrated_tax',
-	# 			options='Company:company:default_currency', print_hide=1),
-	# 		dict(fieldname='itc_state_tax', label='Availed ITC State/UT Tax',
-	# 			fieldtype='Currency', insert_after='itc_central_tax',
-	# 			options='Company:company:default_currency', print_hide=1),
-	# 		dict(fieldname='itc_cess_amount', label='Availed ITC Cess',
-	# 			fieldtype='Currency', insert_after='itc_state_tax',
-	# 			options='Company:company:default_currency', print_hide=1),
-	# 	]
+	purchase_invoice_itc_fields = [
+			dict(fieldname='eligibility_for_itc', label='Eligibility For ITC',
+				fieldtype='Select', insert_after='reason_for_issuing_document', print_hide=1,
+				options='Input Service Distributor\nImport Of Service\nImport Of Capital Goods\nITC on Reverse Charge\nIneligible As Per Section 17(5)\nIneligible Others\nAll Other ITC',
+				default="All Other ITC"),
+			dict(fieldname='itc_integrated_tax', label='Availed ITC Integrated Tax',
+				fieldtype='Currency', insert_after='eligibility_for_itc',
+				options='Company:company:default_currency', print_hide=1),
+			dict(fieldname='itc_central_tax', label='Availed ITC Central Tax',
+				fieldtype='Currency', insert_after='itc_integrated_tax',
+				options='Company:company:default_currency', print_hide=1),
+			dict(fieldname='itc_state_tax', label='Availed ITC State/UT Tax',
+				fieldtype='Currency', insert_after='itc_central_tax',
+				options='Company:company:default_currency', print_hide=1),
+			dict(fieldname='itc_cess_amount', label='Availed ITC Cess',
+				fieldtype='Currency', insert_after='itc_state_tax',
+				options='Company:company:default_currency', print_hide=1),
+		]
 
 	sales_invoice_gst_fields = [
 			dict(fieldname='billing_address_gstin', label='Billing Address GSTIN',
@@ -489,7 +489,7 @@ def make_custom_fields(update=True):
 			dict(fieldname='gst_state_number', label='GST State Number',
 				fieldtype='Data', insert_after='gst_state', read_only=1),
 		],
-		# 'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
+		'Purchase Invoice': purchase_invoice_gst_category + invoice_gst_fields + purchase_invoice_itc_fields + purchase_invoice_gst_fields,
 		'Purchase Order': purchase_invoice_gst_fields,
 		'Purchase Receipt': purchase_invoice_gst_fields,
 		'Sales Invoice': sales_invoice_gst_category + invoice_gst_fields + sales_invoice_shipping_fields + sales_invoice_gst_fields + si_ewaybill_fields + si_einvoice_fields,
