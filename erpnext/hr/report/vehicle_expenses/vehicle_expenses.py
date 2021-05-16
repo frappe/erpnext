@@ -138,7 +138,7 @@ def get_service_expense(logname):
 
 def get_chart_data(data, filters):
 	period_list = get_period_list(filters.fiscal_year, filters.fiscal_year,
-		filters.from_date, filters.to_date, filters.filter_based_on, "Monthly", company=filters.company)
+		filters.from_date, filters.to_date, filters.filter_based_on, "Monthly")
 
 	fuel_data, service_data = [], []
 
