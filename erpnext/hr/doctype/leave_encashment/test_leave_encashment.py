@@ -44,10 +44,6 @@ class TestLeaveEncashment(unittest.TestCase):
 		salary_structure = make_salary_structure("Salary Structure for Encashment", "Monthly", self.employee,
 			other_details={"leave_encashment_amount_per_day": 50})
 
-		#grant Leaves
-		frappe.get_doc("Leave Policy Assignment", leave_policy_assignments[0]).grant_leave_alloc_for_employee()
-
-
 	def tearDown(self):
 		for dt in ["Leave Period", "Leave Allocation", "Leave Ledger Entry", "Additional Salary", "Leave Encashment", "Salary Structure", "Leave Policy"]:
 			frappe.db.sql("delete from `tab%s`" % dt)

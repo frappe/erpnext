@@ -3,8 +3,9 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
-from frappe.utils import cint, nowdate
+from frappe.utils import cint, flt
 from frappe import throw, _
+from collections import defaultdict
 from frappe.utils.nestedset import NestedSet
 from erpnext.stock import get_warehouse_account
 from frappe.contacts.address_and_contact import load_address_and_contact
@@ -139,8 +140,6 @@ class Warehouse(NestedSet):
 
 @frappe.whitelist()
 def get_children(doctype, parent=None, company=None, is_root=False):
-	from erpnext.stock.utils import get_stock_value_from_bin
-
 	if is_root:
 		parent = ""
 
@@ -153,12 +152,47 @@ def get_children(doctype, parent=None, company=None, is_root=False):
 
 	warehouses = frappe.get_list(doctype, fields=fields, filters=filters, order_by='name')
 
+	company_currency = ''
+	if company:
+		company_currency = frappe.get_cached_value('Company', company, 'default_currency')
+
+	warehouse_wise_value = get_warehouse_wise_stock_value(company)
+
 	# return warehouses
 	for wh in warehouses:
-		wh["balance"] = get_stock_value_from_bin(warehouse=wh.value)
-		if company:
-			wh["company_currency"] = frappe.db.get_value('Company', company, 'default_currency')
+		wh["balance"] = warehouse_wise_value.get(wh.value)
+		if company_currency:
+			wh["company_currency"] = company_currency
 	return warehouses
+
+def get_warehouse_wise_stock_value(company):
+	warehouses = frappe.get_all('Warehouse',
+		fields = ['name', 'parent_warehouse'], filters = {'company': company})
+	parent_warehouse = {d.name : d.parent_warehouse for d in warehouses}
+
+	filters = {'warehouse': ('in', [data.name for data in warehouses])}
+	bin_data = frappe.get_all('Bin', fields = ['sum(stock_value) as stock_value', 'warehouse'],
+		filters = filters, group_by = 'warehouse')
+
+	warehouse_wise_stock_value = defaultdict(float)
+	for row in bin_data:
+		if not row.stock_value:
+			continue
+
+		warehouse_wise_stock_value[row.warehouse] = row.stock_value
+		update_value_in_parent_warehouse(warehouse_wise_stock_value,
+			parent_warehouse, row.warehouse, row.stock_value)
+
+	return warehouse_wise_stock_value
+
+def update_value_in_parent_warehouse(warehouse_wise_stock_value, parent_warehouse_dict, warehouse, stock_value):
+	parent_warehouse = parent_warehouse_dict.get(warehouse)
+	if not parent_warehouse:
+		return
+
+	warehouse_wise_stock_value[parent_warehouse] += flt(stock_value)
+	update_value_in_parent_warehouse(warehouse_wise_stock_value, parent_warehouse_dict,
+		parent_warehouse, stock_value)
 
 @frappe.whitelist()
 def add_node():

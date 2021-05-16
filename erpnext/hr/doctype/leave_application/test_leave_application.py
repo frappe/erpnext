@@ -446,8 +446,6 @@ class TestLeaveApplication(unittest.TestCase):
 
 		leave_policy_assignments = create_assignment_for_multiple_employees([employee.name], frappe._dict(data))
 
-		frappe.get_doc("Leave Policy Assignment", leave_policy_assignments[0]).grant_leave_alloc_for_employee()
-
 		from erpnext.hr.utils import allocate_earned_leaves
 		i = 0
 		while(i<14):

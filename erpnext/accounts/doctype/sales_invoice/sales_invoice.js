@@ -17,7 +17,7 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 		var me = this;
 		this._super();
 
-		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice'];
+		this.frm.ignore_doctypes_on_cancel_all = ['POS Invoice', 'Timesheet'];
 		if(!this.frm.doc.__islocal && !this.frm.doc.customer && this.frm.doc.debit_to) {
 			// show debit_to in print format
 			this.frm.set_df_property("debit_to", "print_hide", 0);
@@ -582,6 +582,16 @@ frappe.ui.form.on('Sales Invoice', {
 			};
 		});
 
+		frm.set_query("adjustment_against", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					customer: frm.doc.customer,
+					docstatus: 1
+				}
+			};
+		});
+
 		frm.custom_make_buttons = {
 			'Delivery Note': 'Delivery',
 			'Sales Invoice': 'Return / Credit Note',
@@ -809,8 +819,20 @@ frappe.ui.form.on('Sales Invoice', {
 		}
 	},
 
+	add_timesheet_row: function(frm, row, exchange_rate) {
+		frm.add_child('timesheets',{
+			'activity_type': row.activity_type,
+			'description': row.description,
+			'time_sheet': row.parent,
+			'billing_hours': row.billing_hours,
+			'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
+			'timesheet_detail': row.name
+		});
+		frm.refresh_field('timesheets')
+	},
+
 	refresh: function(frm) {
-		if (frm.doc.project && frm.doc.docstatus===0 && !frm.doc.is_return) {
+		if (frm.doc.docstatus===0 && !frm.doc.is_return) {
 			frm.add_custom_button(__('Fetch Timesheet'), function() {
 				let d = new frappe.ui.Dialog({
 					title: __('Fetch Timesheet'),
@@ -820,15 +842,6 @@ frappe.ui.form.on('Sales Invoice', {
 							"fieldname": "from_time",
 							"fieldtype": "Date",
 							"reqd": 1,
-						},
-						{
-							"label" : __("Currency"),
-							"fieldname": "currency",
-							"fieldtype": "Link",
-							"options": "Currency",
-							"default": frm.doc.currency,
-							"reqd": 1,
-							"read_only": 1
 						},
 						{
 							fieldtype: 'Column Break',
@@ -845,9 +858,7 @@ frappe.ui.form.on('Sales Invoice', {
 							"fieldname": "project",
 							"fieldtype": "Link",
 							"options": "Project",
-							"default": frm.doc.project,
-							"reqd": 1,
-							"read_only": 1
+							"default": frm.doc.project
 						},
 					],
 					primary_action: function() {
@@ -857,24 +868,33 @@ frappe.ui.form.on('Sales Invoice', {
 							args: {
 								from_time: data.from_time,
 								to_time: data.to_time,
-								project: data.project,
-								currency: data.currency
+								project: data.project
 							},
 							callback: function(r) {
 								if(!r.exc) {
 									if(r.message.length > 0) {
 										frm.clear_table('timesheets')
 										r.message.forEach((d) => {
-											frm.add_child('timesheets',{
-												'activity_type': d.activity_type,
-												'description': d.description,
-												'time_sheet': d.parent,
-												'billing_hours': d.billing_hours,
-												'billing_amount': d.billing_amount,
-												'timesheet_detail': d.name
-											});
+											let exchange_rate = 1.0;
+											if (frm.doc.currency != d.currency) {
+												frappe.call({
+													method: "erpnext.setup.utils.get_exchange_rate",
+													args: {
+														from_currency: d.currency,
+														to_currency: frm.doc.currency
+													},
+													callback: function(r) {
+														if (r.message) {
+															exchange_rate = r.message;
+															frm.events.add_timesheet_row(frm, d, exchange_rate);
+														}
+													}
+												});
+											}
+											else {
+												frm.events.add_timesheet_row(frm, d, exchange_rate);
+											}
 										});
-										frm.refresh_field('timesheets')
 									}
 									else {
 										frappe.msgprint(__('No Timesheet Found.'))
@@ -888,6 +908,10 @@ frappe.ui.form.on('Sales Invoice', {
 				});
 				d.show();
 			})
+		}
+
+		if (frm.doc.is_debit_note) {
+			frm.set_df_property('return_against', 'label', 'Adjustment Against');
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {
