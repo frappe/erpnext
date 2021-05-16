@@ -320,7 +320,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 			if(me.values) {
 				me.values.sub_con_rm_items.map((row,i) => {
 					if (!row.item_code || !row.rm_item_code || !row.warehouse || !row.qty || row.qty === 0) {
-						frappe.throw(__("Item Code, warehouse, quantity are required on row {0}", [i+1]));
+						frappe.throw(__("Item Code and warehouse and quantity are required on row {0}", [i+1]));
 					}
 				})
 				me._make_rm_stock_entry(me.dialog.fields_dict.sub_con_rm_items.grid.get_selected_children())
@@ -516,7 +516,7 @@ erpnext.buying.PurchaseOrderController = erpnext.buying.BuyingController.extend(
 					args: {
 						reference_doctype: me.frm.doctype,
 						reference_name: me.frm.docname,
-						content: __('Reason for hold: ')+data.reason_for_hold,
+						content: __('Reason for hold:') + " " +data.reason_for_hold,
 						comment_email: frappe.session.user,
 						comment_by: frappe.session.user_fullname
 					},

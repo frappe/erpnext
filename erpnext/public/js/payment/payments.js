@@ -13,7 +13,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.$body = this.dialog.body;
 		this.set_payment_primary_action();
 		this.make_keyboard();
-		this.select_text()
+		this.select_text();
 	},
 
 	select_text: function() {
@@ -43,15 +43,15 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		$(this.$body).empty();
 		$(this.$body).html(frappe.render_template('pos_payment', this.frm.doc))
 		this.show_payment_details();
-		this.bind_keyboard_event()
-		this.clear_amount()
+		this.bind_keyboard_event();
+		this.clear_amount();
 	},
 
 	make_multimode_payment: function() {
 		var me = this;
 
-		if(this.frm.doc.change_amount > 0) {
-			me.payment_val = me.doc.outstanding_amount
+		if (this.frm.doc.change_amount > 0) {
+			me.payment_val = me.doc.outstanding_amount;
 		}
 
 		this.payments = frappe.model.add_child(this.frm.doc, 'Multi Mode Payment', "payments");
@@ -112,7 +112,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 		$(this.$body).find('.pos-payment-row').click(function() {
 			me.idx = $(this).attr("idx");
-			me.set_outstanding_amount()
+			me.set_outstanding_amount();
 		});
 
 		$(this.$body).find('.form-control').click(function() {
@@ -133,8 +133,8 @@ erpnext.payments = erpnext.stock.StockController.extend({
 	highlight_selected_row: function() {
 		var me = this;
 		var selected_row = $(this.$body).find(repl(".pos-payment-row[idx='%(idx)s']", {'idx': this.idx}));
-		$(this.$body).find('.pos-payment-row').removeClass('selected-payment-mode')
-		selected_row.addClass('selected-payment-mode')
+		$(this.$body).find('.pos-payment-row').removeClass('selected-payment-mode');
+		selected_row.addClass('selected-payment-mode');
 		$(this.$body).find('.amount').attr('disabled', true);
 		this.selected_mode.attr('disabled', false);
 	},
@@ -143,15 +143,15 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 		$(this.$body).find('.pos-keyboard-key').click(function(){
 			me.payment_val += $(this).text();
-			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency))
-			me.idx = me.selected_mode.attr("idx")
-			me.update_paid_amount()
-		})
+			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency));
+			me.idx = me.selected_mode.attr("idx");
+			me.update_paid_amount();
+		});
 
 		$(this.$body).find('.delete-btn').click(function() {
 			me.payment_val =  cstr(flt(me.selected_mode.val())).slice(0, -1);
 			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency));
-			me.idx = me.selected_mode.attr("idx")
+			me.idx = me.selected_mode.attr("idx");
 			me.update_paid_amount();
 		})
 
@@ -161,10 +161,10 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 		this.selected_mode.change(function() {
 			me.payment_val =  flt($(this).val()) || 0.0;
-			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency))
-			me.idx = me.selected_mode.attr("idx")
-			me.update_payment_amount()
-		})
+			me.selected_mode.val(format_currency(me.payment_val, me.frm.doc.currency));
+			me.idx = me.selected_mode.attr("idx");
+			me.update_payment_amount();
+		});
 	},
 
 	clear_amount: function() {
@@ -177,7 +177,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 			me.selected_mode.val(0.0);
 			me.highlight_selected_row();
 			me.update_payment_amount();
-		})
+		});
 	},
 
 	write_off_amount: function(write_off_amount) {
@@ -186,32 +186,32 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		this.frm.doc.write_off_amount = flt(write_off_amount, precision("write_off_amount"));
 		this.frm.doc.base_write_off_amount = flt(this.frm.doc.write_off_amount * this.frm.doc.conversion_rate,
 			precision("base_write_off_amount"));
-		this.calculate_outstanding_amount(false)
-		this.show_amounts()
+		this.calculate_outstanding_amount(false);
+		this.show_amounts();
 	},
 
 	change_amount: function(change_amount) {
 		var me = this;
 
 		this.frm.doc.change_amount = flt(change_amount, precision("change_amount"));
-		this.calculate_write_off_amount()
-		this.show_amounts()
+		this.calculate_write_off_amount();
+		this.show_amounts();
 	},
 
 	update_paid_amount: function(update_write_off) {
 		var me = this;
-		if(in_list(['change_amount', 'write_off_amount'], this.idx)){
+		if (in_list(['change_amount', 'write_off_amount'], this.idx)) {
 			var value = me.selected_mode.val();
-			if(me.idx == 'change_amount'){
-				me.change_amount(value)
+			if (me.idx == 'change_amount') {
+				me.change_amount(value);
 			} else{
 				if(flt(value) == 0 && update_write_off && me.frm.doc.outstanding_amount > 0) {
 					value = flt(me.frm.doc.outstanding_amount / me.frm.doc.conversion_rate, precision(me.idx));
 				}
-				me.write_off_amount(value)
+				me.write_off_amount(value);
 			}
-		}else{
-			this.update_payment_amount()
+		} else {
+			this.update_payment_amount();
 		}
 	},
 
@@ -220,7 +220,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 		$.each(this.frm.doc.payments, function(index, data) {
 			if(cint(me.idx) == cint(data.idx)){
-				data.amount = flt(me.selected_mode.val(), 2)
+				data.amount = flt(me.selected_mode.val(), 2);
 			}
 		})
 
@@ -232,8 +232,8 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		var me = this;
 		$(this.$body).find(".write_off_amount").val(format_currency(this.frm.doc.write_off_amount, this.frm.doc.currency));
 		$(this.$body).find('.paid_amount').text(format_currency(this.frm.doc.paid_amount, this.frm.doc.currency));
-		$(this.$body).find('.change_amount').val(format_currency(this.frm.doc.change_amount, this.frm.doc.currency))
-		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, frappe.get_doc(":Company", this.frm.doc.company).default_currency))
+		$(this.$body).find('.change_amount').val(format_currency(this.frm.doc.change_amount, this.frm.doc.currency));
+		$(this.$body).find('.outstanding_amount').text(format_currency(this.frm.doc.outstanding_amount, frappe.get_doc(":Company", this.frm.doc.company).default_currency));
 		this.update_invoice();
 	}
 })
