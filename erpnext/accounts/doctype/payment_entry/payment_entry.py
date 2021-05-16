@@ -482,7 +482,7 @@ class PaymentEntry(AccountsController):
 
 		self.received_amount_after_tax = flt(flt(self.received_amount) + flt(applicable_tax),
 			self.precision("paid_amount_after_tax"))
-		self.base_received_amount_after_tax = flt(flt(self.received_amount_after_tax) * flt(self.source_exchange_rate),
+		self.base_received_amount_after_tax = flt(flt(self.received_amount_after_tax) * flt(self.target_exchange_rate),
 			self.precision("base_paid_amount_after_tax"))
 
 	def set_amounts_in_company_currency(self):
@@ -720,8 +720,8 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					dr_or_cr: d.base_tax_amount,
 					dr_or_cr + "_in_account_currency": d.base_tax_amount
-						if account_currency==self.company_currency
-						else d.tax_amount,
+					if account_currency==self.company_currency
+					else d.tax_amount,
 					"cost_center": d.cost_center
 				}, account_currency, item=d))
 
@@ -731,8 +731,8 @@ class PaymentEntry(AccountsController):
 					"against": self.party if self.payment_type=="Receive" else self.paid_from,
 					rev_dr_cr: d.base_tax_amount,
 					rev_dr_cr + "_in_account_currency": d.base_tax_amount
-						if account_currency==self.company_currency
-						else d.tax_amount,
+					if account_currency==self.company_currency
+					else d.tax_amount,
 					"cost_center": d.cost_center or self.cost_center
 				}, account_currency, item=d))
 
@@ -804,7 +804,7 @@ class PaymentEntry(AccountsController):
 		self.total_taxes_and_charges = 0.0
 		self.base_total_taxes_and_charges = 0.0
 
-		for i, tax in enumerate(self.taxes):
+		for i, tax in enumerate(self.get('taxes')):
 			tax_rate = tax.rate
 
 			# To set row_id by default as previous row.
@@ -821,11 +821,11 @@ class PaymentEntry(AccountsController):
 				current_tax_amount = (tax_rate / 100.0) * self.paid_amount
 			elif tax.charge_type == "On Previous Row Amount":
 				current_tax_amount = (tax_rate / 100.0) * \
-					self.taxes[cint(tax.row_id) - 1].tax_amount
+					self.get('taxes')[cint(tax.row_id) - 1].tax_amount
 
 			elif tax.charge_type == "On Previous Row Total":
 				current_tax_amount = (tax_rate / 100.0) * \
-					self.taxes[cint(tax.row_id) - 1].total
+					self.get('taxes')[cint(tax.row_id) - 1].total
 
 			tax.tax_amount = current_tax_amount
 			tax.base_tax_amount = tax.tax_amount * self.source_exchange_rate
@@ -839,7 +839,7 @@ class PaymentEntry(AccountsController):
 				if i == 0:
 					tax.total = flt(self.paid_amount + current_tax_amount, self.precision("total", tax))
 				else:
-					tax.total = flt(self.taxes[i-1].total + current_tax_amount, self.precision("total", tax))
+					tax.total = flt(self.get('taxes')[i-1].total + current_tax_amount, self.precision("total", tax))
 
 				tax.base_total = tax.total * self.source_exchange_rate
 
