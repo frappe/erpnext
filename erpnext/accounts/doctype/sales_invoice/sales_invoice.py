@@ -934,8 +934,8 @@ class SalesInvoice(SellingController):
 							"against": self.customer,
 							dr_or_cr: unallocated_amount,
 							dr_or_cr + "_in_account_currency": unallocated_amount
-								if account_currency==self.company_currency
-								else unallocated_amount,
+							if account_currency==self.company_currency
+							else unallocated_amount,
 							'cost_center': tax.cost_center
 						}, account_currency, item=tax))
 
@@ -945,8 +945,8 @@ class SalesInvoice(SellingController):
 							"against": self.customer,
 							rev_dr_cr: unallocated_amount,
 							rev_dr_cr + "_in_account_currency": unallocated_amount
-								if account_currency==self.company_currency
-								else unallocated_amount,
+							if account_currency==self.company_currency
+							else unallocated_amount,
 							'cost_center': tax.cost_center
 						}, account_currency, item=tax))
 
