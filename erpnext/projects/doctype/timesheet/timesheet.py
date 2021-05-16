@@ -145,8 +145,8 @@ class Timesheet(Document):
 		data.project = data.project or frappe.db.get_value("Task", data.task, "project")
 
 	def validate_project(self, data):
-		if self.parent_project != data.project:
-			frappe.throw(_("Row {0}: Poject must be same as {1}.")).format(data.idx, self.parent_project)
+		if self.parent_project and self.parent_project != data.project:
+			frappe.throw(_("Row {0}: Project must be same as the one set in the Timesheet: {1}.")).format(data.idx, self.parent_project)
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
 		if not value or ignore_validation:
@@ -208,27 +208,25 @@ class Timesheet(Document):
 			ts_detail.billing_rate = 0.0
 
 @frappe.whitelist()
-def get_projectwise_timesheet_data(project, parent=None, from_time=None, to_time=None, currency=None):
-	condition = field = join = ''
+def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to_time=None):
+	condition = ''
+	if project:
+		condition += "and tsd.project = %(project)s"
 	if parent:
-		condition = "AND tsd.parent = %(parent)s"
+		condition += "AND tsd.parent = %(parent)s"
 	if from_time and to_time:
 		condition += "AND CAST(tsd.from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
-	if currency:
-		field = ", ts.currency as currency"
-		join = " INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent "
-		condition += " AND ts.currency = %(currency)s"
 
 	return frappe.db.sql("""SELECT tsd.name as name, 
 				tsd.parent as parent, tsd.billing_hours as billing_hours, 
 				tsd.billing_amount as billing_amount, tsd.activity_type as activity_type, 
-				tsd.description as description {0}
+				tsd.description as description, ts.currency as currency
 			FROM `tabTimesheet Detail` tsd 
-				{1} where tsd.parenttype = 'Timesheet' 
-				and tsd.docstatus=1 
-				and tsd.project = %(project)s {2} 
+			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent  
+			WHERE tsd.parenttype = 'Timesheet' 
+				and tsd.docstatus=1 {0} 
 				and tsd.is_billable = 1
-				and tsd.sales_invoice is null""".format(field, join, condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time, 'currency': currency}, as_dict=1)
+				and tsd.sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
 
 @frappe.whitelist()
 @frappe.validate_and_sanitize_search_inputs
