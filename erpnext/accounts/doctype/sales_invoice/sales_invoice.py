@@ -888,42 +888,43 @@ class SalesInvoice(SellingController):
 	def allocate_advance_taxes(self, gl_entries):
 		tax_map = self.get_tax_map()
 		for pe in self.get('advances'):
-			pe = frappe.get_doc('Payment Entry', pe.reference_name)
-			for tax in pe.get('taxes'):
-				account_currency = get_account_currency(tax.account_head)
-				dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
-				rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+			if pe.reference_type == 'Payment Entry':
+				pe = frappe.get_doc('Payment Entry', pe.reference_name)
+				for tax in pe.get('taxes'):
+					account_currency = get_account_currency(tax.account_head)
+					dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+					rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
 
-				unallocated_amount = tax.tax_amount - tax.allocated_amount
-				if tax_map.get(tax.account_head):
-					amount = tax_map.get(tax.account_head)
-					if amount < unallocated_amount:
-						unallocated_amount = amount
+					unallocated_amount = tax.tax_amount - tax.allocated_amount
+					if tax_map.get(tax.account_head):
+						amount = tax_map.get(tax.account_head)
+						if amount < unallocated_amount:
+							unallocated_amount = amount
 
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": tax.account_head,
-							"against": self.customer,
-							dr_or_cr: unallocated_amount,
-							dr_or_cr + "_in_account_currency": unallocated_amount
-							if account_currency==self.company_currency
-							else unallocated_amount,
-							'cost_center': tax.cost_center
-						}, account_currency, item=tax))
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": tax.account_head,
+								"against": self.customer,
+								dr_or_cr: unallocated_amount,
+								dr_or_cr + "_in_account_currency": unallocated_amount
+								if account_currency==self.company_currency
+								else unallocated_amount,
+								'cost_center': tax.cost_center
+							}, account_currency, item=tax))
 
-					gl_entries.append(
-						self.get_gl_dict({
-							"account": pe.advance_tax_account,
-							"against": self.customer,
-							rev_dr_cr: unallocated_amount,
-							rev_dr_cr + "_in_account_currency": unallocated_amount
-							if account_currency==self.company_currency
-							else unallocated_amount,
-							'cost_center': tax.cost_center
-						}, account_currency, item=tax))
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": pe.advance_tax_account,
+								"against": self.customer,
+								rev_dr_cr: unallocated_amount,
+								rev_dr_cr + "_in_account_currency": unallocated_amount
+								if account_currency==self.company_currency
+								else unallocated_amount,
+								'cost_center': tax.cost_center
+							}, account_currency, item=tax))
 
-					frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount + unallocated_amount)
-					tax_map[tax.account_head] -= unallocated_amount
+						frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount + unallocated_amount)
+						tax_map[tax.account_head] -= unallocated_amount
 
 	def make_internal_transfer_gl_entries(self, gl_entries):
 		if self.is_internal_transfer() and flt(self.base_total_taxes_and_charges):
