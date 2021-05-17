@@ -143,7 +143,6 @@ def create_item_code(amazon_item_json, sku):
 	item.description = amazon_item_json.Product.AttributeSets.ItemAttributes.Title
 	item.brand = new_brand
 	item.manufacturer = new_manufacturer
-	item.web_long_description = amazon_item_json.Product.AttributeSets.ItemAttributes.Title
 
 	item.image = amazon_item_json.Product.AttributeSets.ItemAttributes.SmallImage.URL
 

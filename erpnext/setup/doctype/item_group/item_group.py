@@ -11,7 +11,6 @@ from frappe.website.website_generator import WebsiteGenerator
 from frappe.website.render import clear_cache
 from frappe.website.doctype.website_slideshow.website_slideshow import get_slideshow
 from six.moves.urllib.parse import quote
-from erpnext.e_commerce.product_query import ProductQuery
 from erpnext.e_commerce.filters import ProductFiltersBuilder
 
 class ItemGroup(NestedSet, WebsiteGenerator):
