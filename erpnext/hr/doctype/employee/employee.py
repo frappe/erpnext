@@ -2,7 +2,6 @@
 # License: GNU General Public License v3. See license.txt
 
 from __future__ import unicode_literals
-from os import name
 import frappe
 
 from frappe.utils import getdate, validate_email_address, today, add_years, format_date, cstr, get_link_to_form
@@ -188,7 +187,7 @@ class Employee(NestedSet):
 			if len(grievance):
 				self.db_set("status", "Suspended")
 				grievance = grievance[0]
-				frappe.throw(_("You are not allowed to change status, due to suspension from {0} to {1}. Reference: {2} ").format(
+				frappe.throw(_("You are not allowed to change status, due to suspension from {0} to {1}. Reference: {2}").format(
 					bold(format_date(grievance.suspended_from, )),
 					bold(format_date(grievance.suspended_to)),
 					bold(get_link_to_form("Employee Grievance", grievance.name))
