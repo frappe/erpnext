@@ -27,7 +27,7 @@ erpnext.ProductGrid = class {
 			html += me.get_image_html(item, title);
 			html += me.get_card_body_html(item, title, me.settings);
 			html += `</div></div>`;
-		})
+		});
 
 		let $product_wrapper = this.products_section;
 		$product_wrapper.append(html);
@@ -36,7 +36,7 @@ erpnext.ProductGrid = class {
 	get_image_html(item, title) {
 		let image = item.website_image || item.image;
 
-		if(image) {
+		if (image) {
 			return `
 				<div class="card-img-container">
 					<a href="/${ item.route || '#' }" style="text-decoration: none;">
@@ -85,11 +85,11 @@ erpnext.ProductGrid = class {
 				<div class="product-title">
 					${ title || '' }
 		`;
-		if (item.in_stock) {
+		if (item.in_stock && settings.show_stock_availability) {
 			title_html += `<span class="indicator ${ item.in_stock } card-indicator"></span>`;
 		}
 		title_html += `</div></a>`;
-		return title_html
+		return title_html;
 	}
 
 	get_wishlist_icon(item) {
@@ -145,4 +145,4 @@ erpnext.ProductGrid = class {
 			`;
 		}
 	}
-}
+};
