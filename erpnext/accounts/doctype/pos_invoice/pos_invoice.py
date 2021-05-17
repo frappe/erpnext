@@ -461,7 +461,17 @@ def get_stock_availability(item_code, warehouse):
 		order by posting_date desc, posting_time desc
 		limit 1""", (item_code, warehouse), as_dict=1)
 
-	pos_sales_qty = frappe.db.sql("""select sum(p_item.qty) as qty
+	pos_sales_qty = get_pos_reserved_qty(item_code, warehouse)
+
+	sle_qty = latest_sle[0].qty_after_transaction or 0 if latest_sle else 0
+
+	if sle_qty and pos_sales_qty:
+		return sle_qty - pos_sales_qty
+	else:
+		return sle_qty
+
+def get_pos_reserved_qty(item_code, warehouse):
+	reserved_qty = frappe.db.sql("""select sum(p_item.qty) as qty
 		from `tabPOS Invoice` p, `tabPOS Invoice Item` p_item
 		where p.name = p_item.parent
 		and p.consolidated_invoice is NULL
@@ -470,14 +480,8 @@ def get_stock_availability(item_code, warehouse):
 		and p_item.item_code = %s
 		and p_item.warehouse = %s
 		""", (item_code, warehouse), as_dict=1)
-
-	sle_qty = latest_sle[0].qty_after_transaction or 0 if latest_sle else 0
-	pos_sales_qty = pos_sales_qty[0].qty or 0 if pos_sales_qty else 0
-
-	if sle_qty and pos_sales_qty:
-		return sle_qty - pos_sales_qty
-	else:
-		return sle_qty
+	
+	return reserved_qty[0].qty or 0 if reserved_qty else 0
 
 @frappe.whitelist()
 def make_sales_return(source_name, target_doc=None):
