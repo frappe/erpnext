@@ -67,10 +67,12 @@ frappe.ui.form.on('Employee Grievance', {
 		let method = '';
 		if (action === "suspend") {
 			method = "erpnext.hr.doctype.employee_grievance.employee_grievance.suspend_employee";
-			message = __('Are you sure you want to Suspend ')+frm.doc.employee_responsible+' ?';
+			message =  __('Are you sure you want to Suspend');
+			message += " "+frm.doc.employee_responsible+'?';
 		} else if (action === "unsuspend") {
 			method = "erpnext.hr.doctype.employee_grievance.employee_grievance.unsuspend_employee";
-			message = __('Are you sure you want to Un-suspend ')+frm.doc.employee_responsible+' ?';
+			message = __('Are you sure you want to Un-suspend');
+			message += " "+frm.doc.employee_responsible+'?';
 		}
 
 		if (frm.doc.employee_responsible) {
