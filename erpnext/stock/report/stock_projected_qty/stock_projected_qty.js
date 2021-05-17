@@ -14,7 +14,14 @@ frappe.query_reports["Stock Projected Qty"] = {
 			"fieldname":"warehouse",
 			"label": __("Warehouse"),
 			"fieldtype": "Link",
-			"options": "Warehouse"
+			"options": "Warehouse",
+			"get_query": () => {
+				return {
+					filters: {
+						company: frappe.query_report.get_filter_value('company')
+					}
+				}
+			}
 		},
 		{
 			"fieldname":"item_code",
