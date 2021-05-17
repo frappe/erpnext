@@ -119,7 +119,7 @@ frappe.ui.form.on("Timesheet", {
 			"label": __("Item Code"),
 			"fieldname": "item_code",
 			"options": "Item"
-		}]
+		}];
 
 		if (!frm.doc.customer) {
 			fields.push({
