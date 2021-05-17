@@ -45,7 +45,7 @@ def get_columns():
 			'width': 100
 		},
 		{
-			'fieldname': 'log',
+			'fieldname': 'log_name',
 			'fieldtype': 'Link',
 			'label': _('Vehicle Log'),
 			'options': 'Vehicle Log',
@@ -55,13 +55,13 @@ def get_columns():
 			'fieldname': 'odometer',
 			'fieldtype': 'Int',
 			'label': _('Odometer Value'),
-			'width': 150
+			'width': 120
 		},
 		{
 			'fieldname': 'date',
 			'fieldtype': 'Date',
 			'label': _('Date'),
-			'width': 80
+			'width': 100
 		},
 		{
 			'fieldname': 'fuel_qty',
@@ -101,25 +101,48 @@ def get_columns():
 
 def get_vehicle_log_data(filters):
 	start_date, end_date = get_period_dates(filters)
+	conditions, values = get_conditions(filters)
 
 	data = frappe.db.sql("""
 		SELECT
 			vhcl.license_plate as vehicle, vhcl.make, vhcl.model,
-			vhcl.location, log.name, log.odometer, log.date, log.employee,
-			log.fuel_qty, log.price as fuel_price,
+			vhcl.location, log.name as log_name, log.odometer,
+			log.date, log.employee, log.fuel_qty,
+			log.price as fuel_price,
 			log.fuel_qty * log.price as fuel_expense
 		FROM
 			`tabVehicle` vhcl,`tabVehicle Log` log
 		WHERE
 			vhcl.license_plate = log.license_plate
 			and log.docstatus = 1
-			and date between %s and %s
-		ORDER BY date""", (start_date, end_date), as_dict=1)
+			and date between %(start_date)s and %(end_date)s
+			{0}
+		ORDER BY date""".format(conditions), values, as_dict=1)
 
 	for row in data:
 		row['service_expense'] = get_service_expense(row.name)
 
 	return data
+
+
+def get_conditions(filters):
+	conditions = ''
+
+	start_date, end_date = get_period_dates(filters)
+	values = {
+		'start_date': start_date,
+		'end_date': end_date
+	}
+
+	if filters.employee:
+		conditions += ' and log.employee = %(employee)s'
+		values['employee'] = filters.employee
+
+	if filters.vehicle:
+		conditions += ' and vhcl.license_plate = %(vehicle)s'
+		values['vehicle'] = filters.vehicle
+
+	return conditions, values
 
 
 def get_period_dates(filters):
@@ -145,7 +168,7 @@ def get_service_expense(logname):
 
 def get_chart_data(data, filters):
 	period_list = get_period_list(filters.fiscal_year, filters.fiscal_year,
-		filters.from_date, filters.to_date, filters.filter_based_on, "Monthly")
+		filters.from_date, filters.to_date, filters.filter_based_on, 'Monthly')
 
 	fuel_data, service_data = [], []
 
@@ -183,7 +206,8 @@ def get_chart_data(data, filters):
 			'labels': labels,
 			'datasets': datasets
 		},
-		'type': 'line'
+		'type': 'line',
+		'fieldtype': 'Currency'
 	}
 
 	return chart

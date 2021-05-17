@@ -36,11 +36,17 @@ frappe.query_reports["Vehicle Expenses"] = {
 			"default": frappe.datetime.nowdate()
 		},
 		{
+			"fieldname": "vehicle",
+			"label": __("Vehicle"),
+			"fieldtype": "Link",
+			"options": "Vehicle"
+		},
+		{
 			"fieldname": "employee",
 			"label": __("Employee"),
 			"fieldtype": "Link",
 			"options": "Employee"
 		}
 	]
-}
+};
 
