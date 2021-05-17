@@ -46,7 +46,7 @@ frappe.ui.form.on('Employee Grievance', {
 				let suspended_to = frappe.datetime.global_date_format(frm.doc.suspended_to);
 
 				let message_line1 = "Employee: <b>"+ frm.doc.employee_responsible +"</b> is suspended from <b>"+ suspended_from+"</b> to <b>" +suspended_to + "</b>.";
-				let message_line2 = "Employee will be un-suspended automatically or you can do it manually by clicking on unsuspend Employee.";
+				let message_line2 = "Employee will be unsuspended automatically or you can do it manually by clicking on unsuspend Employee.";
 
 				let html = '<span class="indicator whitespace-nowrap orange"><span>';
 				html += message_line1;
@@ -56,7 +56,7 @@ frappe.ui.form.on('Employee Grievance', {
 				frm.dashboard.set_headline_alert(html);
 				frm.dashboard.show();
 
-				frm.add_custom_button(__("Un-suspend Employee"), function () {
+				frm.add_custom_button(__("Unsuspend Employee"), function () {
 					frm.events.suspend_or_unsuspend_employee(frm, "unsuspend");
 				});
 			}

@@ -35,7 +35,7 @@
    "default": "0",
    "fieldname": "is_applicable_for_pay_cut",
    "fieldtype": "Check",
-   "label": "Is Applicable for pay cut "
+   "label": "Is Applicable for Pay-cut "
   },
   {
    "fieldname": "section_break_5",
@@ -49,7 +49,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2021-05-11 14:59:30.664922",
+ "modified": "2021-05-17 16:18:04.301216",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Grievance Type",
