@@ -86,15 +86,6 @@ class TestCompany(unittest.TestCase):
 					self.delete_mode_of_payment(template)
 					frappe.delete_doc("Company", template)
 
-	def test_delete_communication(self):
-		from erpnext.setup.doctype.company.delete_company_transactions import delete_communications
-		company = create_child_company()
-		lead = create_test_lead_in_company(company)
-		communication = create_company_communication("Lead", lead)
-		delete_communications("Lead", "Test Company", "company")
-		self.assertFalse(frappe.db.exists("Communcation", communication))
-		self.assertFalse(frappe.db.exists({"doctype":"Comunication Link", "link_name": communication}))
-
 	def delete_mode_of_payment(self, company):
 		frappe.db.sql(""" delete from `tabMode of Payment Account`
 			where company =%s """, (company))
