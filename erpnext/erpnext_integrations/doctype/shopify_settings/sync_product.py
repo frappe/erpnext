@@ -8,7 +8,7 @@ from erpnext.erpnext_integrations.doctype.shopify_settings.shopify_settings impo
 shopify_variants_attr_list = ["option1", "option2", "option3"]
 
 def sync_item_from_shopify(shopify_settings, item):
-	url = get_shopify_url("admin/api/2020-04/products/{0}.json".format(item.get("product_id")), shopify_settings)
+	url = get_shopify_url("admin/api/2021-04/products/{0}.json".format(item.get("product_id")), shopify_settings)
 	session = get_request_session()
 
 	try:

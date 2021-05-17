@@ -9,6 +9,8 @@ from erpnext.accounts.doctype.sales_invoice.test_sales_invoice import create_sal
 from erpnext.accounts.doctype.accounting_dimension.test_accounting_dimension import create_dimension, disable_dimension
 from erpnext.exceptions import InvalidAccountDimensionError, MandatoryAccountDimensionError
 
+test_dependencies = ['Location', 'Cost Center', 'Department']
+
 class TestAccountingDimensionFilter(unittest.TestCase):
 	def setUp(self):
 		create_dimension()

@@ -335,13 +335,13 @@ def get_url(shopify_settings):
 
 	if not last_order_id:
 		if shopify_settings.sync_based_on == 'Date':
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&created_at_min={0}&since_id=0".format(
+			url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&created_at_min={0}&since_id=0".format(
 				get_datetime(shopify_settings.from_date)), shopify_settings)
 		else:
-			url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(
+			url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&since_id={0}".format(
 				shopify_settings.from_order_id), shopify_settings)
 	else:
-		url = get_shopify_url("admin/api/2020-10/orders.json?limit=250&since_id={0}".format(last_order_id), shopify_settings)
+		url = get_shopify_url("admin/api/2021-04/orders.json?limit=250&since_id={0}".format(last_order_id), shopify_settings)
 
 	return url
 

@@ -11,6 +11,8 @@ from erpnext.buying.doctype.purchase_order.test_purchase_order import create_pur
 from erpnext.accounts.doctype.budget.budget import get_actual_expense, BudgetError
 from erpnext.accounts.doctype.journal_entry.test_journal_entry import make_journal_entry
 
+test_dependencies = ['Monthly Distribution']
+
 class TestBudget(unittest.TestCase):
 	def test_monthly_budget_crossed_ignore(self):
 		set_total_expense_zero(nowdate(), "cost_center")
