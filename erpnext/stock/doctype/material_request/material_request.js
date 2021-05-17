@@ -269,15 +269,26 @@ frappe.ui.form.on('Material Request', {
 						} else {
 							erpnext.utils.remove_empty_first_row(frm, "items");
 							$.each(r.message, function(i, item) {
+								console.log(item)
 								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
 								d.item_code = item.item_code;
-								// d.item_name = item.item_name;
-								d.description = item.description;
-								// d.warehouse = values.warehouse;
+								d.item_name = item.item_name;
+								d.description = item.desc;
+								d.warehouse = frm.doc.set_warehouse;
 								d.uom = item.stock_uom;
 								//d.stock_uom = item.stock_uom;
+								d.cost_center = item.cost_center;
+								d.expense_account = item.expense_account
+								//d.warehouse = item.default_warehouse;
+								d.multi_order_qty = item.multi_order_qty;
 								d.conversion_factor = 1;
 								d.qty = item.qty;
+								d.production_item_name = item.production_item_name;
+								d.projected_qty = item.projected_qty;
+								d.actual_qty = item.actual_qty;
+								d.rate = item.valuation_rate;
+								d.min_order_qty = item.min_order_qty;
+								d.amount = item.valuation_rate * item.qty;
 								// d.project = item.project;
 							});
 						}
@@ -323,6 +334,7 @@ frappe.ui.form.on('Material Request', {
 								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
 								d.item_code = item.item_code;
 								d.item_name = item.item_name;
+								d.production_item_name =  item.production_item_name;
 								d.description = item.description;
 								d.warehouse = values.warehouse;
 								d.uom = item.stock_uom;
