@@ -41,7 +41,7 @@ def build_conditions(process_type, account, company):
 	if account:
 		conditions += "AND %s='%s'"%(deferred_account, account)
 	elif company:
-		conditions += "AND p.company='%s'"%(company)
+		conditions += f"AND p.company = {frappe.db.escape(company)}"
 
 	return conditions
 
