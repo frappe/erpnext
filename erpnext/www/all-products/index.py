@@ -2,6 +2,7 @@ import frappe
 from frappe.utils import cint
 from erpnext.e_commerce.product_query import ProductQuery
 from erpnext.e_commerce.filters import ProductFiltersBuilder
+from erpnext.setup.doctype.item_group.item_group import get_child_groups
 
 sitemap = 1
 
@@ -24,29 +25,20 @@ def get_product_filter_data():
 		search = frappe.form_dict.search
 		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
 		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
-		start = cint(frappe.parse_json(frappe.form_dict.start))
+		start = cint(frappe.parse_json(frappe.form_dict.start)) if frappe.form_dict.start else 0
 		item_group = frappe.form_dict.item_group
 	else:
 		search, attribute_filters, item_group = None, None, None
 		field_filters = {}
 		start = 0
 
+	sub_categories = []
 	if item_group:
 		field_filters['item_group'] = item_group
+		sub_categories = get_child_groups(item_group)
 
 	engine = ProductQuery()
 	items, discounts = engine.query(attribute_filters, field_filters, search_term=search, start=start)
-
-	item_html = []
-	for item in items:
-		item_html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
-			'item': item,
-			'e_commerce_settings': engine.settings
-		}))
-	html = ''.join(item_html)
-
-	if not items:
-		html = frappe.render_template('erpnext/www/all-products/not_found.html', {})
 
 	# discount filter data
 	filters = {}
@@ -54,26 +46,4 @@ def get_product_filter_data():
 		filter_engine = ProductFiltersBuilder()
 		filters["discount_filters"] = filter_engine.get_discount_filters(discounts)
 
-	return html, filters
-
-@frappe.whitelist(allow_guest=True)
-def get_products_html_for_website(field_filters=None, attribute_filters=None):
-	"""Get Products on filter change."""
-	field_filters = frappe.parse_json(field_filters)
-	attribute_filters = frappe.parse_json(attribute_filters)
-
-	engine = ProductQuery()
-	items, discounts = engine.query(attribute_filters, field_filters, search_term=None, start=0)
-
-	item_html = []
-	for item in items:
-		item_html.append(frappe.render_template('erpnext/www/all-products/item_row.html', {
-			'item': item,
-			'e_commerce_settings': engine.settings
-		}))
-	html = ''.join(item_html)
-
-	if not items:
-		html = frappe.render_template('erpnext/www/all-products/not_found.html', {})
-
-	return html
+	return items or [], filters, engine.settings, sub_categories
