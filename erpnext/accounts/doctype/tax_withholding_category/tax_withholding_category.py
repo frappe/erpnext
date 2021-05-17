@@ -22,6 +22,9 @@ def get_party_details(inv):
 		party_type = 'Supplier'
 		party = inv.supplier
 
+	if not party:
+		frappe.throw(_("Please select {0} first").format(party_type))
+
 	return party_type, party
 
 def get_party_tax_withholding_details(inv, tax_withholding_category=None):

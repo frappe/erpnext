@@ -169,9 +169,9 @@ frappe.ui.form.on("Company", {
 					return;
 				}
 				frappe.call({
-					method: "erpnext.setup.doctype.company.delete_company_transactions.delete_company_transactions",
+					method: "erpnext.setup.doctype.company.company.create_transaction_deletion_request",
 					args: {
-						company_name: data.company_name
+						company: data.company_name
 					},
 					freeze: true,
 					callback: function(r, rt) {
