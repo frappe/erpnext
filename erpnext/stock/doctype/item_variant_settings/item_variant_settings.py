@@ -16,7 +16,7 @@ class ItemVariantSettings(Document):
 		exclude_fields = {"naming_series", "item_code", "item_name", "published_in_website",
 			"standard_rate", "opening_stock", "image", "description",
 			"variant_of", "valuation_rate", "description", "barcodes",
-		  "has_variants", "attributes"}
+			"has_variants", "attributes"}
 
 		for d in fields:
 			if not d.no_copy and d.fieldname not in exclude_fields and \

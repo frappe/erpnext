@@ -239,11 +239,8 @@ execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Price List")
 execute:frappe.delete_doc_if_exists("DocType", "Shopping Cart Taxes and Charges Master")
 
 erpnext.patches.v6_4.set_user_in_contact
-erpnext.patches.v6_4.make_image_thumbnail #2015-10-20
-erpnext.patches.v6_5.show_in_website_for_template_item
 erpnext.patches.v6_4.fix_expense_included_in_valuation
 execute:frappe.delete_doc_if_exists("Report", "Item-wise Last Purchase Rate")
-erpnext.patches.v6_6.fix_website_image
 erpnext.patches.v6_6.remove_fiscal_year_from_leave_allocation
 execute:frappe.delete_doc_if_exists("DocType", "Stock UOM Replace Utility")
 erpnext.patches.v6_8.make_webform_standard #2015-11-23
@@ -363,7 +360,6 @@ erpnext.patches.v7_1.set_budget_against_as_cost_center
 erpnext.patches.v7_1.set_currency_exchange_date
 erpnext.patches.v7_1.set_sales_person_status
 erpnext.patches.v7_1.repost_stock_for_deleted_bins_for_merging_items
-erpnext.patches.v7_2.update_website_for_variant
 erpnext.patches.v7_2.update_assessment_modules
 erpnext.patches.v7_2.update_doctype_status
 erpnext.patches.v7_2.update_salary_slips
