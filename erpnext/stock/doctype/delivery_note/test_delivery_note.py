@@ -710,7 +710,7 @@ class TestDeliveryNote(unittest.TestCase):
 		dn1.submit()
 
 		si = make_sales_invoice(dn.name)
-		self.assertEquals(si.items[0].qty, 1)
+		self.assertEqual(si.items[0].qty, 1)
 
 	def test_make_sales_invoice_from_dn_with_returned_qty_duplicate_items(self):
 		from erpnext.stock.doctype.delivery_note.delivery_note import make_sales_invoice
@@ -738,8 +738,8 @@ class TestDeliveryNote(unittest.TestCase):
 		dn1.submit()
 
 		si2 = make_sales_invoice(dn.name)
-		self.assertEquals(si2.items[0].qty, 2)
-		self.assertEquals(si2.items[1].qty, 1)
+		self.assertEqual(si2.items[0].qty, 2)
+		self.assertEqual(si2.items[1].qty, 1)
 
 def create_delivery_note(**args):
 	dn = frappe.new_doc("Delivery Note")

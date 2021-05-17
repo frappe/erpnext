@@ -422,6 +422,9 @@ def make_custom_fields(update=True):
 		dict(fieldname='irn_cancelled', label='IRN Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
 			depends_on='eval:(doc.irn_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
 
+		dict(fieldname='eway_bill_validity', label='E-Way Bill Validity', fieldtype='Data', no_copy=1, print_hide=1,
+			depends_on='ewaybill', read_only=1, allow_on_submit=1, insert_after='ewaybill'),
+
 		dict(fieldname='eway_bill_cancelled', label='E-Way Bill Cancelled', fieldtype='Check', no_copy=1, print_hide=1,
 			depends_on='eval:(doc.eway_bill_cancelled === 1)', read_only=1, allow_on_submit=1, insert_after='customer'),
 
