@@ -249,7 +249,7 @@ def send_advance_holiday_reminders(frequency):
 		end_date = add_days(getdate(), 7)
 	elif frequency == "Monthly":
 		# Sent on 1st of every month
-		start_date = add_days(getdate())
+		start_date = getdate()
 		end_date = add_months(getdate(), 1)
 	else:
 		return 
@@ -257,6 +257,7 @@ def send_advance_holiday_reminders(frequency):
 	employees = frappe.db.get_all('Employee', pluck='name')
 	for employee in employees:
 		holidays = get_holidays_for_employee(
+			employee,
 			start_date, end_date, 
 			only_non_weekly=True, 
 			raise_exception=False
@@ -266,4 +267,21 @@ def send_advance_holiday_reminders(frequency):
 			send_holidays_reminder_in_advance(employee, holidays)
 
 def send_holidays_reminder_in_advance(employee, holidays):
-	pass
+	employee_doc = frappe.get_doc('Employee', employee)
+	employee_email = get_employee_email(employee_doc)
+	frequency = frappe.db.get_single_value("HR Settings", "frequency")
+	
+	email_header = _("Holidays this Month.") if frequency == "Monthly" else _("Holidays this Week.")
+	frappe.sendmail(
+		recipients=[employee_email],
+		subject=_("Upcoming Holidays Reminder"),
+		template="holiday_reminder",
+		args=dict(
+			reminder_text=_("Hey {}! This email is to remind you about the upcoming holidays.").format(employee_doc.get('first_name')),
+			message=_("Below is the list of upcoming holidays for you:"),
+			advance_holiday_reminder=True,
+			holidays=holidays,
+			frequency=frequency[:-2]
+		),
+		header=email_header
+	)

@@ -4,9 +4,13 @@
 </div>
 
 {% if advance_holiday_reminder %}
+    {% if holidays | len > 0 %}
     <ol>
         {% for holiday in holidays %}
-            <li>{{ holiday.holiday_date }} - {{ holiday.description }}</li>
+            <li>{{ frappe.format(holiday.holiday_date, 'Date') }} - {{ holiday.description }}</li>
         {% endfor %}
     </ol>
+    {% else %}
+    <p>You don't have no upcoming holidays this {{ frequency }}.</p>
+    {% endif %}
 {% endif %}
