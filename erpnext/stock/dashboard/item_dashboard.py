@@ -79,7 +79,8 @@ def get_data(item_code=None, warehouse=None, item_group=None, brand=None,
 	try:
 		# check if user has any restrictions based on user permissions on warehouse
 		if DatabaseQuery('Warehouse', user=frappe.session.user).build_match_conditions():
-			filters.append(['warehouse', 'in', [w.name for w in frappe.get_list('Warehouse')]])
+			warehouse_string = ', '.join([ ('\'' + w.name + '\'') for w in frappe.get_list('Warehouse')])
+			warehouse_filter += "and bin.warehouse in ({})".format(warehouse_string)
 	except frappe.PermissionError:
 		# user does not have access on warehouse
 		return []
@@ -133,7 +134,7 @@ def get_data(item_code=None, warehouse=None, item_group=None, brand=None,
 		"brand_filter": brand_filter,
 	}, 
 	"""
-	items = frappe.db.sql(SQL_query, as_dict=1, debug=0)
+	items = frappe.db.sql(SQL_query, as_dict=1, debug=1)
 	for item in items:
 		item.update({
 			'item_name': frappe.get_cached_value("Item", item.item_code, 'item_name'),
