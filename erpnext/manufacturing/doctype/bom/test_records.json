@@ -124,7 +124,7 @@
   "is_default": 1,
   "currency": "USD",
   "conversion_rate": 60,
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "item": "_Test FG Item 2",
   "quantity": 1.0,
   "with_operations": 1

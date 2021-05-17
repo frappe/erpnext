@@ -14,7 +14,7 @@ class TestAccount(unittest.TestCase):
 			acc.account_name = "Debtors"
 			acc.parent_account = "Accounts Receivable - _TC"
 			acc.account_number = "1210"
-			acc.company = "_Test Company"
+			acc.company = "_Test's Company"
 			acc.insert()
 
 		account_number, account_name = frappe.db.get_value("Account", "1210 - Debtors - _TC",
@@ -41,33 +41,33 @@ class TestAccount(unittest.TestCase):
 			acc.account_name = "Current Assets"
 			acc.is_group = 1
 			acc.parent_account = "Application of Funds (Assets) - _TC"
-			acc.company = "_Test Company"
+			acc.company = "_Test's Company"
 			acc.insert()
 		if not frappe.db.exists("Account", "Securities and Deposits - _TC"):
 			acc = frappe.new_doc("Account")
 			acc.account_name = "Securities and Deposits"
 			acc.parent_account = "Current Assets - _TC"
 			acc.is_group = 1
-			acc.company = "_Test Company"
+			acc.company = "_Test's Company"
 			acc.insert()
 		if not frappe.db.exists("Account", "Earnest Money - _TC"):
 			acc = frappe.new_doc("Account")
 			acc.account_name = "Earnest Money"
 			acc.parent_account = "Securities and Deposits - _TC"
-			acc.company = "_Test Company"
+			acc.company = "_Test's Company"
 			acc.insert()
 		if not frappe.db.exists("Account", "Cash In Hand - _TC"):
 			acc = frappe.new_doc("Account")
 			acc.account_name = "Cash In Hand"
 			acc.is_group = 1
 			acc.parent_account = "Current Assets - _TC"
-			acc.company = "_Test Company"
+			acc.company = "_Test's Company"
 			acc.insert()
 		if not frappe.db.exists("Account", "Accumulated Depreciation - _TC"):
 			acc = frappe.new_doc("Account")
 			acc.account_name = "Accumulated Depreciation"
 			acc.parent_account = "Fixed Assets - _TC"
-			acc.company = "_Test Company"
+			acc.company = "_Test's Company"
 			acc.account_type = "Accumulated Depreciation"
 			acc.insert()
 
@@ -222,7 +222,7 @@ def _make_test_records(verbose=None):
 		["_Test Payable USD", "Current Liabilities", 0, "Payable", "USD"]
 	]
 
-	for company, abbr in [["_Test Company", "_TC"], ["_Test Company 1", "_TC1"], ["_Test Company with perpetual inventory", "TCP1"]]:
+	for company, abbr in [["_Test's Company", "_TC"], ["_Test Company 1", "_TC1"], ["_Test Company with perpetual inventory", "TCP1"]]:
 		test_objects = make_test_objects("Account", [{
 				"doctype": "Account",
 				"account_name": account_name,

@@ -265,9 +265,9 @@ def add_vouchers():
 		"name": "Cash"
 	})
 
-	if not frappe.db.get_value('Mode of Payment Account', {'company': "_Test Company", 'parent': "Cash"}):
+	if not frappe.db.get_value('Mode of Payment Account', {'company': "_Test's Company", 'parent': "Cash"}):
 		mode_of_payment.append("accounts", {
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"default_account": "_Test Bank - _TC"
 		})
 		mode_of_payment.save()

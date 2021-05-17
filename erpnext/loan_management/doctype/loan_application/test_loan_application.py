@@ -13,7 +13,7 @@ class TestLoanApplication(unittest.TestCase):
 		create_loan_accounts()
 		create_loan_type("Home Loan", 500000, 9.2, 0, 1, 0, 'Cash', 'Payment Account - _TC', 'Loan Account - _TC',
 			'Interest Income Account - _TC', 'Penalty Income Account - _TC', 'Repay Over Number of Periods', 18)
-		self.applicant = make_employee("kate_loan@loan.com", "_Test Company")
+		self.applicant = make_employee("kate_loan@loan.com", "_Test's Company")
 		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant, currency='INR')
 		self.create_loan_application()
 
@@ -26,7 +26,7 @@ class TestLoanApplication(unittest.TestCase):
 			"loan_amount": 250000,
 			"repayment_method": "Repay Over Number of Periods",
 			"repayment_periods": 18,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		})
 		loan_application.insert()
 

@@ -543,11 +543,11 @@ class TestPurchaseOrder(unittest.TestCase):
 		frappe.db.set_value("Buying Settings", None, "allow_multiple_items", 1)
 		frappe.get_doc({
 			"doctype": "Purchase Order",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"supplier" : "_Test Supplier",
 			"is_subcontracted" : "No",
 			"schedule_date": add_days(nowdate(), 1),
-			"currency" : frappe.get_cached_value('Company',  "_Test Company",  "default_currency"),
+			"currency" : frappe.get_cached_value('Company',  "_Test's Company",  "default_currency"),
 			"conversion_factor" : 1,
 			"items" : get_same_items(),
 			"group_same_items": 1
@@ -1110,7 +1110,7 @@ def create_purchase_order(**args):
 		po.transaction_date = args.transaction_date
 
 	po.schedule_date = add_days(nowdate(), 1)
-	po.company = args.company or "_Test Company"
+	po.company = args.company or "_Test's Company"
 	po.supplier = args.customer or "_Test Supplier"
 	po.is_subcontracted = args.is_subcontracted or "No"
 	po.currency = args.currency or frappe.get_cached_value('Company',  po.company,  "default_currency")

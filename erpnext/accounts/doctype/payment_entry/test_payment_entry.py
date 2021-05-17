@@ -245,8 +245,8 @@ class TestPaymentEntry(unittest.TestCase):
 
 	def test_payment_entry_against_ec(self):
 
-		payable = frappe.get_cached_value('Company',  "_Test Company",  'default_payable_account')
-		ec = make_expense_claim(payable, 300, 300, "_Test Company", "Travel Expenses - _TC")
+		payable = frappe.get_cached_value('Company',  "_Test's Company",  'default_payable_account')
+		ec = make_expense_claim(payable, 300, 300, "_Test's Company", "Travel Expenses - _TC")
 		pe = get_payment_entry("Expense Claim", ec.name, bank_account="_Test Bank USD - _TC", bank_amount=300)
 		pe.reference_no = "1"
 		pe.reference_date = "2016-01-01"
@@ -302,7 +302,7 @@ class TestPaymentEntry(unittest.TestCase):
 
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Pay"
-		pe.company = "_Test Company"
+		pe.company = "_Test's Company"
 		pe.posting_date = "2016-01-10"
 		pe.paid_from = "_Test Bank USD - _TC"
 		pe.paid_to = "_Test Bank - _TC"
@@ -326,7 +326,7 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_internal_transfer_usd_to_inr(self):
 		pe = frappe.new_doc("Payment Entry")
 		pe.payment_type = "Internal Transfer"
-		pe.company = "_Test Company"
+		pe.company = "_Test's Company"
 		pe.paid_from = "_Test Bank USD - _TC"
 		pe.paid_to = "_Test Bank - _TC"
 		pe.paid_amount = 100
@@ -362,7 +362,7 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_payment_against_negative_sales_invoice(self):
 		pe1 = frappe.new_doc("Payment Entry")
 		pe1.payment_type = "Pay"
-		pe1.company = "_Test Company"
+		pe1.company = "_Test's Company"
 		pe1.party_type = "Customer"
 		pe1.party = "_Test Customer"
 		pe1.paid_from = "_Test Cash - _TC"
@@ -491,7 +491,7 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_against_sales_invoice_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test's Company")
 
 		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
 
@@ -527,7 +527,7 @@ class TestPaymentEntry(unittest.TestCase):
 	def test_payment_entry_against_purchase_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test's Company")
 
 		pi =  make_purchase_invoice_against_cost_center(cost_center=cost_center, credit_to="Creditors - _TC")
 
@@ -564,7 +564,7 @@ class TestPaymentEntry(unittest.TestCase):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on
 		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test's Company")
 
 		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
 

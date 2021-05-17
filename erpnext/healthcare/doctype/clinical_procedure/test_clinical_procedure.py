@@ -60,7 +60,7 @@ def create_procedure(procedure_template, patient, practitioner):
 	procedure.practitioner = practitioner
 	procedure.consume_stock = procedure_template.allow_stock_consumption
 	procedure.items = procedure_template.items
-	procedure.company = "_Test Company"
+	procedure.company = "_Test's Company"
 	procedure.warehouse = "_Test Warehouse - _TC"
 	procedure.submit()
 	return procedure

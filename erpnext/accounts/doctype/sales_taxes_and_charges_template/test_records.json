@@ -1,6 +1,6 @@
 [
  {
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
@@ -23,7 +23,7 @@
   "title": "_Test Sales Taxes and Charges Template"
  },
  {
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
@@ -106,7 +106,7 @@
   "title": "_Test India Tax Master"
  },
  {
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
@@ -129,7 +129,7 @@
   "title": "_Test Sales Taxes and Charges Template - Rest of the World"
  },
  {
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
@@ -152,7 +152,7 @@
   "title": "_Test Sales Taxes and Charges Template 1"
  },
  {
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "doctype": "Sales Taxes and Charges Template",
   "taxes": [
    {
@@ -177,7 +177,7 @@
  {
 	"doctype" : "Sales Taxes and Charges Template",
 	"title": "_Test Tax 1",
-	"company": "_Test Company",
+	"company": "_Test's Company",
 	"taxes":[{
 		"charge_type": "Actual",
 		"account_head": "Sales Expenses - _TC",
@@ -189,7 +189,7 @@
  {
 	"doctype" : "Sales Taxes and Charges Template",
 	"title": "_Test Tax 2",
-	"company": "_Test Company",
+	"company": "_Test's Company",
 	"taxes":[{
 		"charge_type": "Actual",
 		"account_head": "Sales Expenses - _TC",

@@ -178,7 +178,7 @@ def make_tax_rule(**args):
 		if key != "save":
 			tax_rule.set(key, val)
 
-	tax_rule.company = args.company or "_Test Company"
+	tax_rule.company = args.company or "_Test's Company"
 
 	if args.save:
 		tax_rule.insert()

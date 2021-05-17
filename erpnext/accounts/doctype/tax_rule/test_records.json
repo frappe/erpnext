@@ -10,7 +10,7 @@
 		"shipping_city": "_Test City",
 		"shipping_country": "India",
 		"priority": 1,
-		"company": "_Test Company"
+		"company": "_Test's Company"
 	},	
 	{
 		"doctype": "Tax Rule",
@@ -23,6 +23,6 @@
 		"shipping_state": "Test State",
 		"shipping_country": "India",
 		"priority": 2,
-		"company": "_Test Company"
+		"company": "_Test's Company"
 	}
 ]

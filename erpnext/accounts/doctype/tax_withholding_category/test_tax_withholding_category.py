@@ -257,7 +257,7 @@ def create_records():
 		}).insert()
 
 def create_tax_with_holding_category():
-	fiscal_year = get_fiscal_year(today(), company="_Test Company")[0]
+	fiscal_year = get_fiscal_year(today(), company="_Test's Company")[0]
 
 	# Cummulative thresold
 	if not frappe.db.exists("Tax Withholding Category", "Cumulative Threshold TDS"):

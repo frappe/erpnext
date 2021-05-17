@@ -2,7 +2,7 @@
  {
   "bill_no": "NA",
   "buying_price_list": "_Test Price List",
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "conversion_rate": 1,
   "credit_to": "_Test Payable - _TC",
   "currency": "INR",
@@ -147,7 +147,7 @@
  {
   "bill_no": "NA",
   "buying_price_list": "_Test Price List",
-  "company": "_Test Company",
+  "company": "_Test's Company",
   "conversion_rate": 1.0,
   "credit_to": "_Test Payable - _TC",
   "currency": "INR",

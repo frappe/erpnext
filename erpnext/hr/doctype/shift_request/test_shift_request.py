@@ -37,7 +37,7 @@ class TestShiftRequest(unittest.TestCase):
 	def test_shift_request_approver_perms(self):
 		employee = frappe.get_doc("Employee", "_T-Employee-00001")
 		user = "test_approver_perm_emp@example.com"
-		make_employee(user, "_Test Company")
+		make_employee(user, "_Test's Company")
 
 		# set approver for employee
 		employee.reload()
@@ -82,7 +82,7 @@ def make_shift_request(approver, do_not_submit=0):
 	shift_request = frappe.get_doc({
 		"doctype": "Shift Request",
 		"shift_type": "Day Shift",
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"employee": "_T-Employee-00001",
 		"employee_name": "_Test Employee",
 		"from_date": nowdate(),

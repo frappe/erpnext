@@ -63,10 +63,10 @@ class TestPaymentRequest(unittest.TestCase):
 		self.assertEqual(pr.currency, "USD")
 
 	def test_payment_entry(self):
-		frappe.db.set_value("Company", "_Test Company",
+		frappe.db.set_value("Company", "_Test's Company",
 			"exchange_gain_loss_account", "_Test Exchange Gain/Loss - _TC")
-		frappe.db.set_value("Company", "_Test Company", "write_off_account", "_Test Write Off - _TC")
-		frappe.db.set_value("Company", "_Test Company", "cost_center", "_Test Cost Center - _TC")
+		frappe.db.set_value("Company", "_Test's Company", "write_off_account", "_Test Write Off - _TC")
+		frappe.db.set_value("Company", "_Test's Company", "cost_center", "_Test Cost Center - _TC")
 
 		so_inr = make_sales_order(currency="INR")
 		pr = make_payment_request(dt="Sales Order", dn=so_inr.name, recipient_id="saurabh@erpnext.com",

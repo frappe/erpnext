@@ -18,7 +18,7 @@ class TestShiftAssignment(unittest.TestCase):
 		shift_assignment = frappe.get_doc({
 			"doctype": "Shift Assignment",
 			"shift_type": "Day Shift",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"employee": "_T-Employee-00001",
 			"start_date": nowdate()
 		}).insert()
@@ -32,7 +32,7 @@ class TestShiftAssignment(unittest.TestCase):
 		shift_assignment_1 = frappe.get_doc({
 			"doctype": "Shift Assignment",
 			"shift_type": "Day Shift",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"employee": "_T-Employee-00001",
 			"start_date": nowdate(),
 			"status": 'Active'
@@ -44,7 +44,7 @@ class TestShiftAssignment(unittest.TestCase):
 		shift_assignment = frappe.get_doc({
 			"doctype": "Shift Assignment",
 			"shift_type": "Day Shift",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"employee": "_T-Employee-00001",
 			"start_date": add_days(nowdate(), 2)
 		})
@@ -57,7 +57,7 @@ class TestShiftAssignment(unittest.TestCase):
 			shift_assignment_1 = frappe.get_doc({
 				"doctype": "Shift Assignment",
 				"shift_type": "Day Shift",
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"employee": "_T-Employee-00001",
 				"start_date": nowdate(),
 				"end_date": add_days(nowdate(), 30),
@@ -70,7 +70,7 @@ class TestShiftAssignment(unittest.TestCase):
 			shift_assignment_3 = frappe.get_doc({
 				"doctype": "Shift Assignment",
 				"shift_type": "Day Shift",
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"employee": "_T-Employee-00001",
 				"start_date":add_days(nowdate(), 10),
 				"end_date": add_days(nowdate(), 35),

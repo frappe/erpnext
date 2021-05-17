@@ -35,13 +35,13 @@ class TestPricingRule(unittest.TestCase):
 			"rate_or_discount": "Discount Percentage",
 			"rate": 0,
 			"discount_percentage": 10,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
 		args = frappe._dict({
 			"item_code": "_Test Item",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Sales Order",
@@ -118,7 +118,7 @@ class TestPricingRule(unittest.TestCase):
 			"rate": 0,
 			"margin_type": "Percentage",
 			"margin_rate_or_amount": 10,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
@@ -133,7 +133,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args = frappe._dict({
 			"item_code": "_Test FG Item 2",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Sales Order",
@@ -172,14 +172,14 @@ class TestPricingRule(unittest.TestCase):
 			"discount_percentage": 10,
 			"applicable_for": "Customer Group",
 			"customer_group": "All Customer Groups",
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
 		args = frappe._dict({
 			"item_code": "Mixed Cond Item 1",
 			"item_group": "Products",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Sales Order",
@@ -229,12 +229,12 @@ class TestPricingRule(unittest.TestCase):
 			"rate_or_discount": "Discount Percentage",
 			"rate": 0,
 			"discount_percentage": 7.5,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}).insert()
 
 		args = frappe._dict({
 			"item_code": "Test Variant PRT",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Sales Order",
@@ -263,7 +263,7 @@ class TestPricingRule(unittest.TestCase):
 			"rate": 0,
 			"discount_percentage": 17.5,
 			"priority": 1,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}).insert()
 
 		details = get_item_details(args)
@@ -284,7 +284,7 @@ class TestPricingRule(unittest.TestCase):
 			"min_qty": 5,
 			"max_qty": 7,
 			"discount_percentage": 17.5,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
@@ -362,7 +362,7 @@ class TestPricingRule(unittest.TestCase):
 			"price_or_product_discount": "Product",
 			"same_item": 1,
 			"free_qty": 1,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
@@ -393,7 +393,7 @@ class TestPricingRule(unittest.TestCase):
 			"same_item": 0,
 			"free_item": "_Test Item 2",
 			"free_qty": 1,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 		frappe.get_doc(test_record.copy()).insert()
 
@@ -423,7 +423,7 @@ class TestPricingRule(unittest.TestCase):
 			"max_amt": 10000,
 			"discount_percentage": 17.5,
 			"price_or_product_discount": "Price",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"valid_from": frappe.utils.nowdate(),
 			"valid_upto": frappe.utils.nowdate()
 		}
@@ -431,7 +431,7 @@ class TestPricingRule(unittest.TestCase):
 
 		args = frappe._dict({
 			"item_code": "_Test Item",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Sales Invoice",
@@ -518,7 +518,7 @@ class TestPricingRule(unittest.TestCase):
 			"rate": 0,
 			"margin_type": "Percentage",
 			"margin_rate_or_amount": 2,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 		rule = frappe.get_doc(pricing_rule_record)
 		rule.insert()
@@ -560,7 +560,7 @@ def make_pricing_rule(**args):
 	doc = frappe.get_doc({
 		"doctype": "Pricing Rule",
 		"title": args.title or "_Test Pricing Rule",
-		"company": args.company or "_Test Company",
+		"company": args.company or "_Test's Company",
 		"apply_on": args.apply_on or "Item Code",
 		"applicable_for": args.applicable_for,
 		"selling": args.selling or 0,

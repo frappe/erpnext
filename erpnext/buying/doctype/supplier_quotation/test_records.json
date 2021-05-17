@@ -1,7 +1,7 @@
 [
  {
   "buying_price_list": "_Test Price List", 
-  "company": "_Test Company", 
+  "company": "_Test's Company", 
   "conversion_rate": 1.0, 
   "currency": "INR", 
   "doctype": "Supplier Quotation", 

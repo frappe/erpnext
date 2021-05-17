@@ -272,7 +272,7 @@ class TestPOSInvoice(unittest.TestCase):
 		self.assertEqual(pos_return2.get('items')[0].serial_no, serial_nos[1])
 
 	def test_pos_change_amount(self):
-		pos = create_pos_invoice(company= "_Test Company", debit_to="Debtors - _TC",
+		pos = create_pos_invoice(company= "_Test's Company", debit_to="Debtors - _TC",
 			income_account = "Sales - _TC", expense_account = "Cost of Goods Sold - _TC", rate=105,
 			cost_center = "Main - _TC", do_not_save=True)
 
@@ -356,7 +356,7 @@ class TestPOSInvoice(unittest.TestCase):
 
 		create_records()
 		frappe.db.set_value("Customer", "Test Loyalty Customer", "loyalty_program", "Test Single Loyalty")
-		before_lp_details = get_loyalty_program_details_with_points("Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty")
+		before_lp_details = get_loyalty_program_details_with_points("Test Loyalty Customer", company="_Test's Company", loyalty_program="Test Single Loyalty")
 
 		inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000)
 
@@ -376,7 +376,7 @@ class TestPOSInvoice(unittest.TestCase):
 		# add 10 loyalty points
 		create_pos_invoice(customer="Test Loyalty Customer", rate=10000)
 
-		before_lp_details = get_loyalty_program_details_with_points("Test Loyalty Customer", company="_Test Company", loyalty_program="Test Single Loyalty")
+		before_lp_details = get_loyalty_program_details_with_points("Test Loyalty Customer", company="_Test's Company", loyalty_program="Test Single Loyalty")
 
 		inv = create_pos_invoice(customer="Test Loyalty Customer", rate=10000, do_not_save=1)
 		inv.redeem_loyalty_points = 1
@@ -517,7 +517,7 @@ def create_pos_invoice(**args):
 		pos_inv.set_posting_time = 1
 	pos_inv.posting_date = args.posting_date or frappe.utils.nowdate()
 
-	pos_inv.company = args.company or "_Test Company"
+	pos_inv.company = args.company or "_Test's Company"
 	pos_inv.customer = args.customer or "_Test Customer"
 	pos_inv.debit_to = args.debit_to or "Debtors - _TC"
 	pos_inv.is_return = args.is_return

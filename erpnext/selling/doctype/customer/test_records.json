@@ -48,7 +48,7 @@
   "doctype": "Customer",
   "territory": "_Test Territory",
   "accounts": [{
-	  "company": "_Test Company",
+	  "company": "_Test's Company",
 	  "account": "_Test Receivable USD - _TC"
   }]
  },

@@ -53,7 +53,7 @@ class TestMaterialRequest(unittest.TestCase):
 
 	def _insert_stock_entry(self, qty1, qty2, warehouse = None ):
 		se = frappe.get_doc({
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"doctype": "Stock Entry",
 			"posting_date": "2013-03-01",
 			"posting_time": "00:00:00",
@@ -622,7 +622,7 @@ def make_material_request(**args):
 	args = frappe._dict(args)
 	mr = frappe.new_doc("Material Request")
 	mr.material_request_type = args.material_request_type or "Purchase"
-	mr.company = args.company or "_Test Company"
+	mr.company = args.company or "_Test's Company"
 	mr.customer = args.customer or '_Test Customer'
 	mr.append("items", {
 		"item_code": args.item_code or "_Test Item",

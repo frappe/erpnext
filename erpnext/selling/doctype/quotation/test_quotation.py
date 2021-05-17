@@ -254,7 +254,7 @@ def make_quotation(**args):
 	if args.transaction_date:
 		qo.transaction_date = args.transaction_date
 
-	qo.company = args.company or "_Test Company"
+	qo.company = args.company or "_Test's Company"
 	qo.party_name = args.party_name or "_Test Customer"
 	qo.currency = args.currency or "INR"
 	if args.selling_price_list:

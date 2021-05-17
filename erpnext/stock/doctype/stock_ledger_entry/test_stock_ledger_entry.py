@@ -27,7 +27,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		frappe.db.sql("delete from `tabBin` where item_code in (%s)" % (', '.join(['%s']*len(items))), items)
 
 	def test_item_cost_reposting(self):
-		company = "_Test Company"
+		company = "_Test's Company"
 
 		# _Test Item for Reposting at Stores warehouse on 10-04-2020: Qty = 50, Rate = 100
 		create_stock_reconciliation(
@@ -124,10 +124,10 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(repack.items[1].get("basic_rate"), 750)
 
 	def test_purchase_return_valuation_reposting(self):
-		pr = make_purchase_receipt(company="_Test Company", posting_date='2020-04-10',
+		pr = make_purchase_receipt(company="_Test's Company", posting_date='2020-04-10',
 			warehouse="Stores - _TC", item_code="_Test Item for Reposting", qty=5, rate=100)
 
-		return_pr = make_purchase_receipt(company="_Test Company", posting_date='2020-04-15',
+		return_pr = make_purchase_receipt(company="_Test's Company", posting_date='2020-04-15',
 			warehouse="Stores - _TC", item_code="_Test Item for Reposting", is_return=1, return_against=pr.name, qty=-2)
 
 		# check sle
@@ -146,7 +146,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		self.assertEqual(stock_value_difference, -220)
 
 	def test_sales_return_valuation_reposting(self):
-		company = "_Test Company"
+		company = "_Test's Company"
 		item_code="_Test Item for Reposting"
 
 		# Purchase Return: Qty = 5, Rate = 100
@@ -208,7 +208,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 		pr.cancel()
 
 	def test_reposting_of_sales_return_for_packed_item(self):
-		company = "_Test Company"
+		company = "_Test's Company"
 		packed_item_code="_Test Item for Reposting"
 		bundled_item = "_Test Bundled Item for Reposting"
 		create_product_bundle_item(bundled_item, [[packed_item_code, 4]])
@@ -274,7 +274,7 @@ class TestStockLedgerEntry(unittest.TestCase):
 	def test_sub_contracted_item_costing(self):
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
 
-		company = "_Test Company"
+		company = "_Test's Company"
 		rm_item_code="_Test Item for Reposting"
 		subcontracted_item = "_Test Subcontracted Item for Reposting"
 
@@ -349,7 +349,7 @@ def create_repack_entry(**args):
 	args = frappe._dict(args)
 	repack = frappe.new_doc("Stock Entry")
 	repack.stock_entry_type = "Repack"
-	repack.company = args.company or "_Test Company"
+	repack.company = args.company or "_Test's Company"
 	repack.posting_date = args.posting_date
 	repack.set_posting_time = 1
 	repack.append("items", {

@@ -18,7 +18,7 @@ class TestCompensatoryLeaveRequest(unittest.TestCase):
 		frappe.db.sql(''' delete from `tabLeave Ledger Entry`''')
 		frappe.db.sql(''' delete from `tabLeave Allocation`''')
 		frappe.db.sql(''' delete from `tabAttendance` where attendance_date in {0} '''.format((today(), add_days(today(), -1)))) #nosec
-		create_leave_period(add_months(today(), -3), add_months(today(), 3), "_Test Company")
+		create_leave_period(add_months(today(), -3), add_months(today(), 3), "_Test's Company")
 		create_holiday_list()
 
 		employee = get_employee()

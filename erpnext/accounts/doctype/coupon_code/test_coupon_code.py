@@ -33,7 +33,7 @@ def test_create_test_data():
 		"valuation_rate": 5000,
 		"standard_rate":5000,
 		"item_defaults": [{
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"default_warehouse": "Stores - _TC",
 		"default_price_list":"_Test Price List",
 		"expense_account": "Cost of Goods Sold - _TC",
@@ -70,7 +70,7 @@ def test_create_test_data():
 		"selling": 1,
 		"rate_or_discount": "Discount Percentage",
 		"discount_percentage": 30,
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"currency":"INR",
 		"for_price_list":"_Test Price List"
 		})

@@ -27,7 +27,7 @@ class TestProductConfigurator(unittest.TestCase):
 				"item_group": "_Test Item Group",
 				"stock_uom": "_Test UOM",
 				"item_defaults": [{
-					"company": "_Test Company",
+					"company": "_Test's Company",
 					"default_warehouse": "_Test Warehouse - _TC",
 					"expense_account": "_Test Account Cost for Goods Sold - _TC",
 					"buying_cost_center": "_Test Cost Center - _TC",

@@ -198,7 +198,7 @@ def create_records():
 			"doctype": "Account",
 			"account_name": "Loyalty",
 			"parent_account": "Direct Expenses - _TC",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"is_group": 0,
 			"account_type": "Expense Account",
 		}).insert()
@@ -213,7 +213,7 @@ def create_records():
 			"loyalty_program_type": "Single Tier Program",
 			"conversion_factor": 1,
 			"expiry_duration": 10,
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"cost_center": "Main - _TC",
 			"expense_account": "Loyalty - _TC",
 			"collection_rules": [{
@@ -243,7 +243,7 @@ def create_records():
 			"loyalty_program_type": "Multiple Tier Program",
 			"conversion_factor": 1,
 			"expiry_duration": 10,
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"cost_center": "Main - _TC",
 			"expense_account": "Loyalty - _TC",
 			"collection_rules": [
@@ -267,7 +267,7 @@ def create_records():
 			"item_code": "Loyal Item",
 			"item_name": "Loyal Item",
 			"item_group": "All Item Groups",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"is_stock_item": 1,
 			"opening_stock": 100,
 			"valuation_rate": 10000,

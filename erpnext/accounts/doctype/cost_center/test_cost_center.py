@@ -31,7 +31,7 @@ class TestCostCenter(unittest.TestCase):
 			frappe.get_doc(test_records[1]).insert()
 
 		invalid_distributed_cost_center = frappe.get_doc({
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"cost_center_name": "_Test Distributed Cost Center",
 			"doctype": "Cost Center",
 			"is_group": 0,
@@ -52,12 +52,12 @@ class TestCostCenter(unittest.TestCase):
 def create_cost_center(**args):
 	args = frappe._dict(args)
 	if args.cost_center_name:
-		company = args.company or "_Test Company"
+		company = args.company or "_Test's Company"
 		company_abbr = frappe.db.get_value("Company", company, "abbr")
 		cc_name = args.cost_center_name + " - " + company_abbr
 		if not frappe.db.exists("Cost Center", cc_name):
 			cc = frappe.new_doc("Cost Center")
-			cc.company = args.company or "_Test Company"
+			cc.company = args.company or "_Test's Company"
 			cc.cost_center_name = args.cost_center_name
 			cc.is_group = args.is_group or 0
 			cc.parent_cost_center = args.parent_cost_center or "_Test Company - _TC"

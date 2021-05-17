@@ -252,7 +252,7 @@ class TestAsset(unittest.TestCase):
 		asset.load_from_db()
 		self.assertEqual(asset.status, "Submitted")
 
-		frappe.db.set_value("Company", "_Test Company", "series_for_depreciation_entry", "DEPR-")
+		frappe.db.set_value("Company", "_Test's Company", "series_for_depreciation_entry", "DEPR-")
 		post_depreciation_entries(date="2021-01-01")
 		asset.load_from_db()
 
@@ -428,7 +428,7 @@ class TestAsset(unittest.TestCase):
 		asset.submit()
 		post_depreciation_entries(date="2021-01-01")
 
-		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test Company")
+		si = make_sales_invoice(asset=asset.name, item_code="Macbook Pro", company="_Test's Company")
 		si.customer = "_Test Customer"
 		si.due_date = nowdate()
 		si.get("items")[0].rate = 25000
@@ -574,7 +574,7 @@ class TestAsset(unittest.TestCase):
 
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", 0)
 		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", "")
-		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account", "")
+		frappe.db.get_value("Company", "_Test's Company", "capital_work_in_progress_account", "")
 
 		# case 0 -- PI with cwip disable, Asset with cwip disabled, No cwip account set
 		pi = make_purchase_invoice(item_code="Macbook Pro", qty=1, rate=200000.0, location="Test Location", update_stock=1)
@@ -633,7 +633,7 @@ class TestAsset(unittest.TestCase):
 
 		frappe.db.set_value("Asset Category", "Computers", "enable_cwip_accounting", cwip)
 		frappe.db.set_value("Asset Category Account", name, "capital_work_in_progress_account", cwip_acc)
-		frappe.db.get_value("Company", "_Test Company", "capital_work_in_progress_account", cwip_acc)
+		frappe.db.get_value("Company", "_Test's Company", "capital_work_in_progress_account", cwip_acc)
 
 def create_asset_data():
 	if not frappe.db.exists("Asset Category", "Computers"):
@@ -658,7 +658,7 @@ def create_asset(**args):
 		"asset_name": args.asset_name or "Macbook Pro 1",
 		"asset_category": "Computers",
 		"item_code": args.item_code or "Macbook Pro",
-		"company": args.company or"_Test Company",
+		"company": args.company or"_Test's Company",
 		"purchase_date": "2015-01-01",
 		"calculate_depreciation": 0,
 		"gross_purchase_amount": 100000,
@@ -688,7 +688,7 @@ def create_asset_category():
 	asset_category.frequency_of_depreciation = 3
 	asset_category.enable_cwip_accounting = 1
 	asset_category.append("accounts", {
-		"company_name": "_Test Company",
+		"company_name": "_Test's Company",
 		"fixed_asset_account": "_Test Fixed Asset - _TC",
 		"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
 		"depreciation_expense_account": "_Test Depreciations - _TC"
@@ -716,7 +716,7 @@ def create_fixed_asset_item():
 		pass
 
 def set_depreciation_settings_in_company():
-	company = frappe.get_doc("Company", "_Test Company")
+	company = frappe.get_doc("Company", "_Test's Company")
 	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - _TC"
 	company.depreciation_expense_account = "_Test Depreciations - _TC"
 	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"

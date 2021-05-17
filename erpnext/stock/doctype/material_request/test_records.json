@@ -1,6 +1,6 @@
 [
  {
-  "company": "_Test Company", 
+  "company": "_Test's Company", 
   "doctype": "Material Request", 
   "fiscal_year": "_Test Fiscal Year 2013", 
   "items": [
@@ -33,7 +33,7 @@
   "schedule_date": "2013-02-19"
  },
  {
-  "company": "_Test Company", 
+  "company": "_Test's Company", 
   "doctype": "Material Request", 
   "fiscal_year": "_Test Fiscal Year 2013", 
   "items": [

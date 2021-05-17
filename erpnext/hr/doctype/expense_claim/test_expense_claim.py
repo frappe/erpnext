@@ -112,11 +112,11 @@ class TestExpenseClaim(unittest.TestCase):
 
 	def test_expense_approver_perms(self):
 		user = "test_approver_perm_emp@example.com"
-		make_employee(user, "_Test Company")
+		make_employee(user, "_Test's Company")
 
 		# check doc shared
-		payable_account = get_payable_account("_Test Company")
-		expense_claim = make_expense_claim(payable_account, 300, 200, "_Test Company", "Travel Expenses - _TC", do_not_submit=True)
+		payable_account = get_payable_account("_Test's Company")
+		expense_claim = make_expense_claim(payable_account, 300, 200, "_Test's Company", "Travel Expenses - _TC", do_not_submit=True)
 		expense_claim.expense_approver = user
 		expense_claim.save()
 		self.assertTrue(expense_claim.name in frappe.share.get_shared("Expense Claim", user))

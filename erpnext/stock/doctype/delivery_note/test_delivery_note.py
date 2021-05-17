@@ -748,7 +748,7 @@ def create_delivery_note(**args):
 	dn.posting_time = args.posting_time or nowtime()
 	dn.set_posting_time = 1
 
-	dn.company = args.company or "_Test Company"
+	dn.company = args.company or "_Test's Company"
 	dn.customer = args.customer or "_Test Customer"
 	dn.currency = args.currency or "INR"
 	dn.is_return = args.is_return

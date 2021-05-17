@@ -217,7 +217,7 @@ class TestSalarySlip(unittest.TestCase):
 
 		make_employee("test_email_salary_slip@salary.com")
 		ss = make_employee_salary_slip("test_email_salary_slip@salary.com", "Monthly", "Test Salary Slip Email")
-		ss.company = "_Test Company"
+		ss.company = "_Test's Company"
 		ss.save()
 		ss.submit()
 
@@ -229,7 +229,7 @@ class TestSalarySlip(unittest.TestCase):
 		from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
-		applicant = make_employee("test_loan_repayment_salary_slip@salary.com", company="_Test Company")
+		applicant = make_employee("test_loan_repayment_salary_slip@salary.com", company="_Test's Company")
 
 		create_loan_accounts()
 
@@ -241,7 +241,7 @@ class TestSalarySlip(unittest.TestCase):
 			interest_income_account='Interest Income Account - _TC',
 			penalty_income_account='Penalty Income Account - _TC')
 
-		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test's Company")
 
 		make_salary_structure("Test Loan Repayment Salary Structure", "Monthly", employee=applicant, currency='INR',
 			payroll_period=payroll_period)
@@ -285,9 +285,9 @@ class TestSalarySlip(unittest.TestCase):
 
 	def test_multi_currency_salary_slip(self):
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
-		applicant = make_employee("test_multi_currency_salary_slip@salary.com", company="_Test Company")
+		applicant = make_employee("test_multi_currency_salary_slip@salary.com", company="_Test's Company")
 		frappe.db.sql("""delete from `tabSalary Structure` where name='Test Multi Currency Salary Slip'""")
-		salary_structure = make_salary_structure("Test Multi Currency Salary Slip", "Monthly", employee=applicant, company="_Test Company", currency='USD')
+		salary_structure = make_salary_structure("Test Multi Currency Salary Slip", "Monthly", employee=applicant, company="_Test's Company", currency='USD')
 		salary_slip = make_salary_slip(salary_structure.name, employee = applicant)
 		salary_slip.exchange_rate = 70
 		salary_slip.calculate_net_pay()
@@ -298,15 +298,15 @@ class TestSalarySlip(unittest.TestCase):
 	def test_year_to_date_computation(self):
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
-		applicant = make_employee("test_ytd@salary.com", company="_Test Company")
+		applicant = make_employee("test_ytd@salary.com", company="_Test's Company")
 
-		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test's Company")
 
 		create_tax_slab(payroll_period, allow_tax_exemption=True, currency="INR", effective_date=getdate("2019-04-01"),
-			company="_Test Company")
+			company="_Test's Company")
 
 		salary_structure = make_salary_structure("Monthly Salary Structure Test for Salary Slip YTD",
-			"Monthly", employee=applicant, company="_Test Company", currency="INR", payroll_period=payroll_period)
+			"Monthly", employee=applicant, company="_Test's Company", currency="INR", payroll_period=payroll_period)
 
 		# clear salary slip for this employee
 		frappe.db.sql("DELETE FROM `tabSalary Slip` where employee_name = 'test_ytd@salary.com'")
@@ -325,15 +325,15 @@ class TestSalarySlip(unittest.TestCase):
 	def test_component_wise_year_to_date_computation(self):
 		from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_salary_structure
 
-		applicant = make_employee("test_ytd@salary.com", company="_Test Company")
+		applicant = make_employee("test_ytd@salary.com", company="_Test's Company")
 
-		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test Company")
+		payroll_period = create_payroll_period(name="_Test Payroll Period 1", company="_Test's Company")
 
 		create_tax_slab(payroll_period, allow_tax_exemption=True, currency="INR", effective_date=getdate("2019-04-01"),
-			company="_Test Company")
+			company="_Test's Company")
 
 		salary_structure = make_salary_structure("Monthly Salary Structure Test for Salary Slip YTD",
-			"Monthly", employee=applicant, company="_Test Company", currency="INR", payroll_period=payroll_period)
+			"Monthly", employee=applicant, company="_Test's Company", currency="INR", payroll_period=payroll_period)
 
 		# clear salary slip for this employee
 		frappe.db.sql("DELETE FROM `tabSalary Slip` where employee_name = 'test_ytd@salary.com'")
@@ -791,7 +791,7 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 		leave_type = leave_type,
 		from_date = from_date,
 		to_date = to_date,
-		company = company or erpnext.get_default_company() or "_Test Company",
+		company = company or erpnext.get_default_company() or "_Test's Company",
 		docstatus = 1,
 		status = "Approved",
 		leave_approver = 'test@example.com'
@@ -799,8 +799,8 @@ def make_leave_application(employee, from_date, to_date, leave_type, company=Non
 	leave_application.submit()
 
 def setup_test():
-	make_earning_salary_component(setup=True, company_list=["_Test Company"])
-	make_deduction_salary_component(setup=True, company_list=["_Test Company"])
+	make_earning_salary_component(setup=True, company_list=["_Test's Company"])
+	make_deduction_salary_component(setup=True, company_list=["_Test's Company"])
 
 	for dt in ["Leave Application", "Leave Allocation", "Salary Slip", "Attendance", "Additional Salary"]:
 		frappe.db.sql("delete from `tab%s`" % dt)

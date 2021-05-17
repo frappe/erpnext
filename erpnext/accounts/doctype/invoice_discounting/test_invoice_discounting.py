@@ -12,13 +12,13 @@ from erpnext.accounts.doctype.account.test_account import create_account
 from erpnext.accounts.doctype.journal_entry.journal_entry import get_payment_entry_against_invoice
 class TestInvoiceDiscounting(unittest.TestCase):
 	def setUp(self):
-		self.ar_credit = create_account(account_name="_Test Accounts Receivable Credit", parent_account = "Accounts Receivable - _TC", company="_Test Company")
-		self.ar_discounted = create_account(account_name="_Test Accounts Receivable Discounted", parent_account = "Accounts Receivable - _TC", company="_Test Company")
-		self.ar_unpaid = create_account(account_name="_Test Accounts Receivable Unpaid", parent_account = "Accounts Receivable - _TC", company="_Test Company")
-		self.short_term_loan = create_account(account_name="_Test Short Term Loan", parent_account = "Source of Funds (Liabilities) - _TC", company="_Test Company")
-		self.bank_account = create_account(account_name="_Test Bank 2", parent_account = "Bank Accounts - _TC", company="_Test Company")
-		self.bank_charges_account = create_account(account_name="_Test Bank Charges Account", parent_account = "Expenses - _TC", company="_Test Company")
-		frappe.db.set_value("Company", "_Test Company", "default_bank_account", self.bank_account)
+		self.ar_credit = create_account(account_name="_Test Accounts Receivable Credit", parent_account = "Accounts Receivable - _TC", company="_Test's Company")
+		self.ar_discounted = create_account(account_name="_Test Accounts Receivable Discounted", parent_account = "Accounts Receivable - _TC", company="_Test's Company")
+		self.ar_unpaid = create_account(account_name="_Test Accounts Receivable Unpaid", parent_account = "Accounts Receivable - _TC", company="_Test's Company")
+		self.short_term_loan = create_account(account_name="_Test Short Term Loan", parent_account = "Source of Funds (Liabilities) - _TC", company="_Test's Company")
+		self.bank_account = create_account(account_name="_Test Bank 2", parent_account = "Bank Accounts - _TC", company="_Test's Company")
+		self.bank_charges_account = create_account(account_name="_Test Bank Charges Account", parent_account = "Expenses - _TC", company="_Test's Company")
+		frappe.db.set_value("Company", "_Test's Company", "default_bank_account", self.bank_account)
 
 	def test_total_amount(self):
 		inv1 = create_sales_invoice(rate=200)
@@ -279,7 +279,7 @@ def create_invoice_discounting(invoices, **args):
 	args = frappe._dict(args)
 	inv_disc = frappe.new_doc("Invoice Discounting")
 	inv_disc.posting_date = args.posting_date or nowdate()
-	inv_disc.company = args.company or "_Test Company"
+	inv_disc.company = args.company or "_Test's Company"
 	inv_disc.bank_account = args.bank_account
 	inv_disc.short_term_loan = args.short_term_loan
 	inv_disc.accounts_receivable_credit = args.accounts_receivable_credit

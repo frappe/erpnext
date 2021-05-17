@@ -11,8 +11,8 @@ class TestEmployeeUtilization(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Create test employee
-        cls.test_emp1 = make_employee("test1@employeeutil.com", "_Test Company")
-        cls.test_emp2 = make_employee("test2@employeeutil.com", "_Test Company")
+        cls.test_emp1 = make_employee("test1@employeeutil.com", "_Test's Company")
+        cls.test_emp2 = make_employee("test2@employeeutil.com", "_Test's Company")
 
         # Create test project
         cls.test_project = make_project({"project_name": "_Test Project"})
@@ -72,7 +72,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
     def test_utilization_report_with_required_filters_only(self):
         filters = {
-            "company": "_Test Company",
+            "company": "_Test's Company",
             "from_date": "2021-04-01",
             "to_date": "2021-04-03"
         }
@@ -84,7 +84,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
     def test_utilization_report_for_single_employee(self):
         filters = {
-            "company": "_Test Company",
+            "company": "_Test's Company",
             "from_date": "2021-04-01",
             "to_date": "2021-04-03",
             "employee": self.test_emp1
@@ -111,7 +111,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
     def test_utilization_report_for_project(self):
         filters = {
-            "company": "_Test Company",
+            "company": "_Test's Company",
             "from_date": "2021-04-01",
             "to_date": "2021-04-03",
             "project": self.test_project.name
@@ -139,7 +139,7 @@ class TestEmployeeUtilization(unittest.TestCase):
     def test_utilization_report_for_department(self):
         emp1_data = frappe.get_doc('Employee', self.test_emp1)
         filters = {
-            "company": "_Test Company",
+            "company": "_Test's Company",
             "from_date": "2021-04-01",
             "to_date": "2021-04-03",
             "department": emp1_data.department
@@ -152,7 +152,7 @@ class TestEmployeeUtilization(unittest.TestCase):
 
     def test_report_summary_data(self):
         filters = {
-            "company": "_Test Company",
+            "company": "_Test's Company",
             "from_date": "2021-04-01",
             "to_date": "2021-04-03"
         }

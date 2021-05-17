@@ -36,7 +36,7 @@
   "supplier_name": "_Test Supplier USD",
   "supplier_group": "_Test Supplier Group",
   "accounts": [{
-    "company": "_Test Company",
+    "company": "_Test's Company",
     "account": "_Test Payable USD - _TC"
   }]
  },

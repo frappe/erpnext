@@ -107,7 +107,7 @@ def get_filters():
 	return {
 		"from_date": "1900-01-01",
 		"to_date": today(),
-		"company": "_Test Company"
+		"company": "_Test's Company"
 	}
 
 def create_sales_invoice_record(qty=1):
@@ -152,7 +152,7 @@ def create_records():
 		"item_code": "Consulting",
 		"item_name": "Consulting",
 		"item_group": "All Item Groups",
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"is_stock_item": 0
 	}).insert()
 

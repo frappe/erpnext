@@ -1064,7 +1064,7 @@ def make_purchase_receipt(**args):
 		pr.posting_time = args.posting_time
 	if args.posting_date or args.posting_time:
 		pr.set_posting_time = 1
-	pr.company = args.company or "_Test Company"
+	pr.company = args.company or "_Test's Company"
 	pr.supplier = args.supplier or "_Test Supplier"
 	pr.is_subcontracted = args.is_subcontracted or "No"
 	pr.supplier_warehouse = args.supplier_warehouse or "_Test Warehouse 1 - _TC"

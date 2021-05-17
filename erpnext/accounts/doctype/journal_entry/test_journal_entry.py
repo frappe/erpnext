@@ -270,7 +270,7 @@ class TestJournalEntry(unittest.TestCase):
 	def test_jv_with_cost_centre(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test's Company")
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center = cost_center, save=False)
 		jv.voucher_type = "Bank Entry"
 		jv.multi_currency = 0
@@ -342,7 +342,7 @@ class TestJournalEntry(unittest.TestCase):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		from erpnext.accounts.utils import get_balance_on
 		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test's Company")
 		jv = make_journal_entry("_Test Cash - _TC", "_Test Bank - _TC", 100, cost_center = cost_center, save=False)
 		account_balance = get_balance_on(account="_Test Bank - _TC", cost_center=cost_center)
 		jv.voucher_type = "Bank Entry"
@@ -362,7 +362,7 @@ def make_journal_entry(account1, account2, amount, cost_center=None, posting_dat
 
 	jv = frappe.new_doc("Journal Entry")
 	jv.posting_date = posting_date or nowdate()
-	jv.company = "_Test Company"
+	jv.company = "_Test's Company"
 	jv.user_remark = "test"
 	jv.multi_currency = 1
 	jv.set("accounts", [

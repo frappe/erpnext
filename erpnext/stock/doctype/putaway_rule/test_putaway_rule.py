@@ -374,7 +374,7 @@ def create_putaway_rule(**args):
 	putaway = frappe.new_doc("Putaway Rule")
 
 	putaway.disable = args.disable or 0
-	putaway.company = args.company or "_Test Company"
+	putaway.company = args.company or "_Test's Company"
 	putaway.item_code = args.item or args.item_code or "_Test Item"
 	putaway.warehouse = args.warehouse
 	putaway.priority = args.priority or 1

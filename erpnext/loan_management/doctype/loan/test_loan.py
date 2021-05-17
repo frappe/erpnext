@@ -45,7 +45,7 @@ class TestLoan(unittest.TestCase):
 		create_loan_security_price("Test Security 2", 250, "Nos", get_datetime() , get_datetime(add_to_date(nowdate(), hours=24)))
 
 		self.applicant1 = make_employee("robert_loan@loan.com")
-		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant1, currency='INR', company="_Test Company")
+		make_salary_structure("Test Salary Structure Loan", "Monthly", employee=self.applicant1, currency='INR', company="_Test's Company")
 		if not frappe.db.exists("Customer", "_Test Loan Customer"):
 			frappe.get_doc(get_customer_dict('_Test Loan Customer')).insert(ignore_permissions=True)
 
@@ -677,7 +677,7 @@ def create_loan_accounts():
 		frappe.get_doc({
 			"doctype": "Account",
 			"account_name": "Loans and Advances (Assets)",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"root_type": "Asset",
 			"report_type": "Balance Sheet",
 			"currency": "INR",
@@ -689,7 +689,7 @@ def create_loan_accounts():
 	if not frappe.db.exists("Account", "Loan Account - _TC"):
 		frappe.get_doc({
 			"doctype": "Account",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"account_name": "Loan Account",
 			"root_type": "Asset",
 			"report_type": "Balance Sheet",
@@ -701,7 +701,7 @@ def create_loan_accounts():
 	if not frappe.db.exists("Account", "Payment Account - _TC"):
 		frappe.get_doc({
 			"doctype": "Account",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"account_name": "Payment Account",
 			"root_type": "Asset",
 			"report_type": "Balance Sheet",
@@ -713,7 +713,7 @@ def create_loan_accounts():
 	if not frappe.db.exists("Account", "Interest Income Account - _TC"):
 		frappe.get_doc({
 			"doctype": "Account",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"root_type": "Income",
 			"account_name": "Interest Income Account",
 			"report_type": "Profit and Loss",
@@ -725,7 +725,7 @@ def create_loan_accounts():
 	if not frappe.db.exists("Account", "Penalty Income Account - _TC"):
 		frappe.get_doc({
 			"doctype": "Account",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"account_name": "Penalty Income Account",
 			"root_type": "Income",
 			"report_type": "Profit and Loss",
@@ -741,7 +741,7 @@ def create_loan_type(loan_name, maximum_loan_amount, rate_of_interest, penalty_i
 	if not frappe.db.exists("Loan Type", loan_name):
 		loan_type = frappe.get_doc({
 			"doctype": "Loan Type",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"loan_name": loan_name,
 			"is_term_loan": is_term_loan,
 			"maximum_loan_amount": maximum_loan_amount,
@@ -796,7 +796,7 @@ def create_loan_security_pledge(applicant, pledges, loan_application=None, loan=
 	lsp = frappe.new_doc("Loan Security Pledge")
 	lsp.applicant_type = 'Customer'
 	lsp.applicant = applicant
-	lsp.company = "_Test Company"
+	lsp.company = "_Test's Company"
 	lsp.loan_application = loan_application
 
 	if loan:
@@ -819,7 +819,7 @@ def make_loan_disbursement_entry(loan, amount, disbursement_date=None):
 		"doctype": "Loan Disbursement",
 		"against_loan": loan,
 		"disbursement_date": disbursement_date,
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"disbursed_amount": amount,
 		"cost_center": 'Main - _TC'
 	}).insert(ignore_permissions=True)
@@ -848,7 +848,7 @@ def create_repayment_entry(loan, applicant, posting_date, paid_amount):
 	lr = frappe.get_doc({
 		"doctype": "Loan Repayment",
 		"against_loan": loan,
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"posting_date": posting_date or nowdate(),
 		"applicant": applicant,
 		"amount_paid": paid_amount,
@@ -889,7 +889,7 @@ def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_p
 	loan = frappe.get_doc({
 		"doctype": "Loan",
 		"applicant_type": "Employee",
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"applicant": applicant,
 		"loan_type": loan_type,
 		"loan_amount": loan_amount,
@@ -906,7 +906,7 @@ def create_loan(applicant, loan_type, loan_amount, repayment_method, repayment_p
 def create_loan_with_security(applicant, loan_type, repayment_method, repayment_periods, loan_application, posting_date=None, repayment_start_date=None):
 	loan = frappe.get_doc({
 		"doctype": "Loan",
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"applicant_type": "Customer",
 		"posting_date": posting_date or nowdate(),
 		"loan_application": loan_application,
@@ -932,7 +932,7 @@ def create_demand_loan(applicant, loan_type, loan_application, posting_date=None
 
 	loan = frappe.get_doc({
 		"doctype": "Loan",
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"applicant_type": "Customer",
 		"posting_date": posting_date or nowdate(),
 		'loan_application': loan_application,

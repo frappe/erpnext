@@ -83,7 +83,7 @@ class TestInpatientRecord(unittest.TestCase):
 
 		# Patient Encounter
 		patient_encounter = create_patient_encounter()
-		encounters = get_encounters_to_invoice(patient, "_Test Company")
+		encounters = get_encounters_to_invoice(patient, "_Test's Company")
 		encounter_ids = [entry.reference_name for entry in encounters]
 		self.assertFalse(patient_encounter.name in encounter_ids)
 
@@ -139,20 +139,20 @@ def create_inpatient(patient):
 	inpatient_record.phone = patient_obj.phone
 	inpatient_record.inpatient = "Scheduled"
 	inpatient_record.scheduled_date = today()
-	inpatient_record.company = "_Test Company"
+	inpatient_record.company = "_Test's Company"
 	return inpatient_record
 
 
 def get_healthcare_service_unit(unit_name=None):
 	if not unit_name:
-		service_unit = get_random("Healthcare Service Unit", filters={"inpatient_occupancy": 1, "company": "_Test Company"})
+		service_unit = get_random("Healthcare Service Unit", filters={"inpatient_occupancy": 1, "company": "_Test's Company"})
 	else:
 		service_unit = frappe.db.exists("Healthcare Service Unit", {"healthcare_service_unit_name": unit_name})
 
 	if not service_unit:
 		service_unit = frappe.new_doc("Healthcare Service Unit")
 		service_unit.healthcare_service_unit_name = unit_name or "Test Service Unit Ip Occupancy"
-		service_unit.company = "_Test Company"
+		service_unit.company = "_Test's Company"
 		service_unit.service_unit_type = get_service_unit_type()
 		service_unit.inpatient_occupancy = 1
 		service_unit.occupancy_status = "Vacant"

@@ -14,7 +14,7 @@ class TestShoppingCartSettings(unittest.TestCase):
 
 	def get_cart_settings(self):
 		return frappe.get_doc({"doctype": "Shopping Cart Settings",
-			"company": "_Test Company"})
+			"company": "_Test's Company"})
 
 	def test_exchange_rate_exists(self):
 		frappe.db.sql("""delete from `tabCurrency Exchange`""")

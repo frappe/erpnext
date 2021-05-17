@@ -94,7 +94,7 @@ class TestWarehouse(unittest.TestCase):
 
 def create_warehouse(warehouse_name, properties=None, company=None):
 	if not company:
-		company = "_Test Company"
+		company = "_Test's Company"
 
 	warehouse_id = erpnext.encode_company_abbr(warehouse_name, company)
 	if not frappe.db.exists("Warehouse", warehouse_id):
@@ -116,7 +116,7 @@ def get_warehouse(**args):
 		return frappe.get_doc("Warehouse", args.warehouse_name + " - " + args.abbr)
 	else:
 		w = frappe.get_doc({
-		"company": args.company or "_Test Company",
+		"company": args.company or "_Test's Company",
 		"doctype": "Warehouse",
 		"warehouse_name": args.warehouse_name,
 		"is_group": 0,

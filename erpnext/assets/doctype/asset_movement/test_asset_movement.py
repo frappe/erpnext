@@ -58,7 +58,7 @@ class TestAssetMovement(unittest.TestCase):
 		movement1.cancel()
 		self.assertEqual(frappe.db.get_value("Asset", asset.name, "location"), "Test Location")
 
-		employee = make_employee("testassetmovemp@example.com", company="_Test Company")
+		employee = make_employee("testassetmovemp@example.com", company="_Test's Company")
 		movement3 = create_asset_movement(purpose = 'Issue', company = asset.company, 
 			assets = [{ 'asset': asset.name , 'source_location': 'Test Location', 'to_employee': employee}],
 			reference_doctype = 'Purchase Receipt', reference_name = pr.name)

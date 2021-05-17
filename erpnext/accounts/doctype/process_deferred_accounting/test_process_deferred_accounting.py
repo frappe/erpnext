@@ -13,7 +13,7 @@ class TestProcessDeferredAccounting(unittest.TestCase):
 	def test_creation_of_ledger_entry_on_submit(self):
 		''' test creation of gl entries on submission of document '''
 		deferred_account = create_account(account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _TC", company="_Test Company")
+			parent_account="Current Liabilities - _TC", company="_Test's Company")
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_revenue = 1

@@ -87,14 +87,14 @@ class TestStockReconciliation(unittest.TestCase):
 
 	def test_get_items(self):
 		create_warehouse("_Test Warehouse Group 1",
-			{"is_group": 1, "company": "_Test Company", "parent_warehouse": "All Warehouses - _TC"})
+			{"is_group": 1, "company": "_Test's Company", "parent_warehouse": "All Warehouses - _TC"})
 		create_warehouse("_Test Warehouse Ledger 1",
-			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC", "company": "_Test Company"})
+			{"is_group": 0, "parent_warehouse": "_Test Warehouse Group 1 - _TC", "company": "_Test's Company"})
 
 		create_item("_Test Stock Reco Item", is_stock_item=1, valuation_rate=100,
 			warehouse="_Test Warehouse Ledger 1 - _TC", opening_stock=100)
 
-		items = get_items("_Test Warehouse Group 1 - _TC", nowdate(), nowtime(), "_Test Company")
+		items = get_items("_Test Warehouse Group 1 - _TC", nowdate(), nowtime(), "_Test's Company")
 
 		self.assertEqual(["_Test Stock Reco Item", "_Test Warehouse Ledger 1 - _TC", 100],
 			[items[0]["item_code"], items[0]["warehouse"], items[0]["qty"]])
@@ -245,7 +245,7 @@ def create_stock_reconciliation(**args):
 	sr.posting_date = args.posting_date or nowdate()
 	sr.posting_time = args.posting_time or nowtime()
 	sr.set_posting_time = 1
-	sr.company = args.company or "_Test Company"
+	sr.company = args.company or "_Test's Company"
 	sr.expense_account = args.expense_account or \
 		("Stock Adjustment - _TC" if frappe.get_all("Stock Ledger Entry") else "Temporary Opening - _TC")
 	sr.cost_center = args.cost_center \
@@ -275,7 +275,7 @@ def set_valuation_method(item_code, valuation_method):
 
 	frappe.db.set_value("Item", item_code, "valuation_method", valuation_method)
 
-	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test Company"}, fields=["name", "is_group"]):
+	for warehouse in frappe.get_all("Warehouse", filters={"company": "_Test's Company"}, fields=["name", "is_group"]):
 		if not warehouse.is_group:
 			update_entries_after({
 				"item_code": item_code,

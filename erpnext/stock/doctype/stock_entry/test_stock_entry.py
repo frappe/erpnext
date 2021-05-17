@@ -546,7 +546,7 @@ class TestStockEntry(unittest.TestCase):
 
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
 			"production_item": "_Test FG Item 2",
 			"bom_no": bom_no,
@@ -578,7 +578,7 @@ class TestStockEntry(unittest.TestCase):
 
 		work_order = frappe.new_doc("Work Order")
 		work_order.update({
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"fg_warehouse": "_Test Warehouse 1 - _TC",
 			"production_item": "_Test Variant Item-S",
 			"bom_no": bom_no,
@@ -639,7 +639,7 @@ class TestStockEntry(unittest.TestCase):
 			item.save()
 
 		receipt_entry = frappe.new_doc("Stock Entry")
-		receipt_entry.company = "_Test Company"
+		receipt_entry.company = "_Test's Company"
 		receipt_entry.purpose = "Material Receipt"
 		receipt_entry.append("items", {
 			"item_code": test_item_code,
@@ -705,7 +705,7 @@ class TestStockEntry(unittest.TestCase):
 
 	# 	work_order = frappe.new_doc("Work Order")
 	# 	work_order.update({
-	# 		"company": "_Test Company",
+	# 		"company": "_Test's Company",
 	# 		"fg_warehouse": "_Test Warehouse 1 - _TC",
 	# 		"production_item": "_Test FG Item 2",
 	# 		"bom_no": bom_no,

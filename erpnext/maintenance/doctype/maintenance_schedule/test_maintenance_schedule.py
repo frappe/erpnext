@@ -31,7 +31,7 @@ def get_events(ms):
 
 def make_maintenance_schedule():
 	ms = frappe.new_doc("Maintenance Schedule")
-	ms.company = "_Test Company"
+	ms.company = "_Test's Company"
 	ms.customer = "_Test Customer"
 	ms.transaction_date = get_datetime()
 

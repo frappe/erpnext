@@ -17,7 +17,7 @@ test_dependencies = ["Leave Allocation", "Leave Block List", "Employee"]
 
 _test_records = [
 	{
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"doctype": "Leave Application",
 		"employee": "_T-Employee-00001",
 		"from_date": "2013-05-01",
@@ -27,7 +27,7 @@ _test_records = [
 		"to_date": "2013-05-05"
 	},
 	{
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"doctype": "Leave Application",
 		"employee": "_T-Employee-00002",
 		"from_date": "2013-05-01",
@@ -37,7 +37,7 @@ _test_records = [
 		"to_date": "2013-05-05"
 	},
 	{
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"doctype": "Leave Application",
 		"employee": "_T-Employee-00001",
 		"from_date": "2013-01-15",
@@ -303,7 +303,7 @@ class TestLeaveApplication(unittest.TestCase):
 			description = "_Test Reason",
 			from_date = date,
 			to_date = add_days(date, 2),
-			company = "_Test Company",
+			company = "_Test's Company",
 			docstatus = 1,
 			status = "Approved"
 		))
@@ -316,7 +316,7 @@ class TestLeaveApplication(unittest.TestCase):
 			description = "_Test Reason",
 			from_date = add_days(date, 4),
 			to_date = add_days(date, 8),
-			company = "_Test Company",
+			company = "_Test's Company",
 			docstatus = 1,
 			status = "Approved"
 		))
@@ -342,7 +342,7 @@ class TestLeaveApplication(unittest.TestCase):
 			description = "_Test Reason",
 			from_date = date,
 			to_date = add_days(date, 4),
-			company = "_Test Company",
+			company = "_Test's Company",
 			docstatus = 1,
 			status = "Approved"
 		))
@@ -364,7 +364,7 @@ class TestLeaveApplication(unittest.TestCase):
 			description = "_Test Reason",
 			from_date = date,
 			to_date = add_days(date, 4),
-			company = "_Test Company",
+			company = "_Test's Company",
 			docstatus = 1,
 			status = "Approved"
 		))
@@ -394,7 +394,7 @@ class TestLeaveApplication(unittest.TestCase):
 			description = "_Test Reason",
 			from_date = date,
 			to_date = add_days(date, 4),
-			company = "_Test Company",
+			company = "_Test's Company",
 			docstatus = 1,
 			status = "Approved"
 		))
@@ -509,7 +509,7 @@ class TestLeaveApplication(unittest.TestCase):
 			from_date = add_days(nowdate(), 1),
 			to_date = add_days(nowdate(), 4),
 			description = "_Test Reason",
-			company = "_Test Company",
+			company = "_Test's Company",
 			docstatus = 1,
 			status = "Approved"
 		))
@@ -541,7 +541,7 @@ class TestLeaveApplication(unittest.TestCase):
 			from_date = add_days(nowdate(), -3),
 			to_date = add_days(nowdate(), 7),
 			description = "_Test Reason",
-			company = "_Test Company",
+			company = "_Test's Company",
 			docstatus = 1,
 			status = "Approved"
 		))
@@ -571,7 +571,7 @@ class TestLeaveApplication(unittest.TestCase):
 	def test_leave_approver_perms(self):
 		employee = get_employee()
 		user = "test_approver_perm_emp@example.com"
-		make_employee(user, "_Test Company")
+		make_employee(user, "_Test's Company")
 
 		# set approver for employee
 		employee.reload()
@@ -657,7 +657,7 @@ def set_leave_approver():
 def get_leave_period():
 	leave_period_name = frappe.db.exists({
 		"doctype": "Leave Period",
-		"company": "_Test Company"
+		"company": "_Test's Company"
 	})
 	if leave_period_name:
 		return frappe.get_doc("Leave Period", leave_period_name[0][0])
@@ -667,7 +667,7 @@ def get_leave_period():
 				doctype = 'Leave Period',
 				from_date = add_months(nowdate(), -6),
 				to_date = add_months(nowdate(), 6),
-				company = "_Test Company",
+				company = "_Test's Company",
 				is_active = 1
 			)).insert()
 

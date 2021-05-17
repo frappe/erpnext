@@ -9,8 +9,8 @@ from erpnext.accounts.doctype.gl_entry.gl_entry import rename_gle_sle_docs
 
 class TestGLEntry(unittest.TestCase):
 	def test_round_off_entry(self):
-		frappe.db.set_value("Company", "_Test Company", "round_off_account", "_Test Write Off - _TC")
-		frappe.db.set_value("Company", "_Test Company", "round_off_cost_center", "_Test Cost Center - _TC")
+		frappe.db.set_value("Company", "_Test's Company", "round_off_account", "_Test Write Off - _TC")
+		frappe.db.set_value("Company", "_Test's Company", "round_off_cost_center", "_Test Cost Center - _TC")
 
 		jv = make_journal_entry("_Test Account Cost for Goods Sold - _TC",
 			"_Test Bank - _TC", 100, "_Test Cost Center - _TC", submit=False)

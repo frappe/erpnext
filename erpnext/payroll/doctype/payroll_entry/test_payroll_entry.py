@@ -27,8 +27,8 @@ class TestPayrollEntry(unittest.TestCase):
 			"Payroll Entry", "Salary Structure", "Salary Structure Assignment", "Payroll Employee Detail", "Additional Salary"]:
 				frappe.db.sql("delete from `tab%s`" % dt)
 
-		make_earning_salary_component(setup=True, company_list=["_Test Company"])
-		make_deduction_salary_component(setup=True, test_tax=False, company_list=["_Test Company"])
+		make_earning_salary_component(setup=True, company_list=["_Test's Company"])
+		make_deduction_salary_component(setup=True, test_tax=False, company_list=["_Test's Company"])
 
 		frappe.db.set_value("Payroll Settings", None, "email_salary_slip_to_employee", 0)
 
@@ -86,14 +86,14 @@ class TestPayrollEntry(unittest.TestCase):
 	def test_payroll_entry_with_employee_cost_center(self): # pylint: disable=no-self-use
 		for data in frappe.get_all('Salary Component', fields = ["name"]):
 			if not frappe.db.get_value('Salary Component Account',
-				{'parent': data.name, 'company': "_Test Company"}, 'name'):
+				{'parent': data.name, 'company': "_Test's Company"}, 'name'):
 				get_salary_component_account(data.name)
 
 		if not frappe.db.exists('Department', "cc - _TC"):
 			frappe.get_doc({
 				'doctype': 'Department',
 				'department_name': "cc",
-				"company": "_Test Company"
+				"company": "_Test's Company"
 			}).insert()
 
 		frappe.db.sql("""delete from `tabEmployee` where employee_name='test_employee1@example.com' """)
@@ -102,26 +102,26 @@ class TestPayrollEntry(unittest.TestCase):
 		frappe.db.sql("""delete from `tabSalary Structure` where name='_Test Salary Structure 2' """)
 
 		employee1 = make_employee("test_employee1@example.com", payroll_cost_center="_Test Cost Center - _TC",
-			department="cc - _TC", company="_Test Company")
+			department="cc - _TC", company="_Test's Company")
 		employee2 = make_employee("test_employee2@example.com", payroll_cost_center="_Test Cost Center 2 - _TC",
-			department="cc - _TC", company="_Test Company")
+			department="cc - _TC", company="_Test's Company")
 
 		if not frappe.db.exists("Account", "_Test Payroll Payable - _TC"):
 				create_account(account_name="_Test Payroll Payable",
-					company="_Test Company", parent_account="Current Liabilities - _TC")
+					company="_Test's Company", parent_account="Current Liabilities - _TC")
 
-		if not frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") or \
-			frappe.db.get_value("Company", "_Test Company", "default_payroll_payable_account") != "_Test Payroll Payable - _TC":
-				frappe.db.set_value("Company", "_Test Company", "default_payroll_payable_account",
+		if not frappe.db.get_value("Company", "_Test's Company", "default_payroll_payable_account") or \
+			frappe.db.get_value("Company", "_Test's Company", "default_payroll_payable_account") != "_Test Payroll Payable - _TC":
+				frappe.db.set_value("Company", "_Test's Company", "default_payroll_payable_account",
 					"_Test Payroll Payable - _TC")
-		currency=frappe.db.get_value("Company", "_Test Company", "default_currency")
-		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test Company", currency=currency, test_tax=False)
-		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test Company", currency=currency, test_tax=False)
+		currency=frappe.db.get_value("Company", "_Test's Company", "default_currency")
+		make_salary_structure("_Test Salary Structure 1", "Monthly", employee1, company="_Test's Company", currency=currency, test_tax=False)
+		make_salary_structure("_Test Salary Structure 2", "Monthly", employee2, company="_Test's Company", currency=currency, test_tax=False)
 
 		dates = get_start_end_dates('Monthly', nowdate())
 		if not frappe.db.get_value("Salary Slip", {"start_date": dates.start_date, "end_date": dates.end_date}):
 			pe = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, payable_account="_Test Payroll Payable - _TC",
-				currency=frappe.db.get_value("Company", "_Test Company", "default_currency"), department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
+				currency=frappe.db.get_value("Company", "_Test's Company", "default_currency"), department="cc - _TC", company="_Test Company", payment_account="Cash - _TC", cost_center="Main - _TC")
 			je = frappe.db.get_value("Salary Slip", {"payroll_entry": pe.name}, "journal_entry")
 			je_entries = frappe.db.sql("""
 				select account, cost_center, debit, credit
@@ -151,8 +151,8 @@ class TestPayrollEntry(unittest.TestCase):
 
 	def test_loan(self):
 		branch = "Test Employee Branch"
-		applicant = make_employee("test_employee@loan.com", company="_Test Company")
-		company = "_Test Company"
+		applicant = make_employee("test_employee@loan.com", company="_Test's Company")
+		company = "_Test's Company"
 		holiday_list = make_holiday("test holiday for loan")
 
 		company_doc = frappe.get_doc('Company', company)
@@ -173,7 +173,7 @@ class TestPayrollEntry(unittest.TestCase):
 		employee_doc.save()
 
 		salary_structure = "Test Salary Structure for Loan"
-		make_salary_structure(salary_structure, "Monthly", employee=employee_doc.name, company="_Test Company", currency=company_doc.default_currency)
+		make_salary_structure(salary_structure, "Monthly", employee=employee_doc.name, company="_Test's Company", currency=company_doc.default_currency)
 
 		if not frappe.db.exists("Loan Type", "Car Loan"):
 			create_loan_accounts()
@@ -193,7 +193,7 @@ class TestPayrollEntry(unittest.TestCase):
 		process_loan_interest_accrual_for_term_loans(posting_date=nowdate())
 
 		dates = get_start_end_dates('Monthly', nowdate())
-		make_payroll_entry(company="_Test Company", start_date=dates.start_date, payable_account=company_doc.default_payroll_payable_account,
+		make_payroll_entry(company="_Test's Company", start_date=dates.start_date, payable_account=company_doc.default_payroll_payable_account,
 			currency=company_doc.default_currency, end_date=dates.end_date, branch=branch, cost_center="Main - _TC", payment_account="Cash - _TC")
 
 		name = frappe.db.get_value('Salary Slip',

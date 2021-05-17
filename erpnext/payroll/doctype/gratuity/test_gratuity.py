@@ -143,7 +143,7 @@ def create_gratuity(**args):
 		gratuity.salary_component = "Performance Bonus"
 	else:
 		gratuity.expense_account =  args.expense_account or 'Payment Account - _TC'
-		gratuity.payable_account = args.payable_account or get_payable_account("_Test Company")
+		gratuity.payable_account = args.payable_account or get_payable_account("_Test's Company")
 		gratuity.mode_of_payment = args.mode_of_payment or 'Cash'
 
 	gratuity.save()
@@ -159,7 +159,7 @@ def set_mode_of_payment_account():
 
 	mode_of_payment.accounts = []
 	mode_of_payment.append("accounts", {
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"default_account": "_Test Bank - _TC"
 	})
 	mode_of_payment.save()
@@ -167,7 +167,7 @@ def set_mode_of_payment_account():
 def create_account():
 	return frappe.get_doc({
 			"doctype": "Account",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"account_name": "Payment Account",
 			"root_type": "Asset",
 			"report_type": "Balance Sheet",

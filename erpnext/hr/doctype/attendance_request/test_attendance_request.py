@@ -23,7 +23,7 @@ class TestAttendanceRequest(unittest.TestCase):
 		attendance_request.from_date = date(date.today().year, 1, 1)
 		attendance_request.to_date = date(date.today().year, 1, 2)
 		attendance_request.reason = "On Duty"
-		attendance_request.company = "_Test Company"
+		attendance_request.company = "_Test's Company"
 		attendance_request.insert()
 		attendance_request.submit()
 		attendance = frappe.get_doc('Attendance', {
@@ -44,7 +44,7 @@ class TestAttendanceRequest(unittest.TestCase):
 		attendance_request.from_date = date(date.today().year, 1, 1)
 		attendance_request.to_date = date(date.today().year, 1, 2)
 		attendance_request.reason = "Work From Home"
-		attendance_request.company = "_Test Company"
+		attendance_request.company = "_Test's Company"
 		attendance_request.insert()
 		attendance_request.submit()
 		attendance = frappe.get_doc('Attendance', {

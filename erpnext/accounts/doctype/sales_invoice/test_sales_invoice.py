@@ -326,7 +326,7 @@ class TestSalesInvoice(unittest.TestCase):
 		self.assertEqual(si.rounding_adjustment, -0.01)
 
 	def test_discount_amount_gl_entry(self):
-		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
+		frappe.db.set_value("Company", "_Test's Company", "round_off_account", "Round Off - _TC")
 		si = frappe.copy_doc(test_records[3])
 		si.discount_amount = 104.94
 		si.append("taxes", {
@@ -1217,7 +1217,7 @@ class TestSalesInvoice(unittest.TestCase):
 			"payment_type": "Receive",
 			"party_type": "Customer",
 			"party": "_Test Customer",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"paid_from_account_currency": "INR",
 			"paid_to_account_currency": "INR",
 			"source_exchange_rate": 1,
@@ -1374,14 +1374,14 @@ class TestSalesInvoice(unittest.TestCase):
 		return si
 
 	def test_company_monthly_sales(self):
-		existing_current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
+		existing_current_month_sales = frappe.get_cached_value('Company',  "_Test's Company",  "total_monthly_sales")
 
 		si = create_sales_invoice()
-		current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
+		current_month_sales = frappe.get_cached_value('Company',  "_Test's Company",  "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales + si.base_grand_total)
 
 		si.cancel()
-		current_month_sales = frappe.get_cached_value('Company',  "_Test Company",  "total_monthly_sales")
+		current_month_sales = frappe.get_cached_value('Company',  "_Test's Company",  "total_monthly_sales")
 		self.assertEqual(current_month_sales, existing_current_month_sales)
 
 	def test_rounding_adjustment(self):
@@ -1537,7 +1537,7 @@ class TestSalesInvoice(unittest.TestCase):
 	def test_sales_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test's Company")
 
 		si =  create_sales_invoice_against_cost_center(cost_center=cost_center, debit_to="Debtors - _TC")
 		self.assertEqual(si.cost_center, cost_center)
@@ -1625,7 +1625,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _TC", company="_Test Company")
+			parent_account="Current Liabilities - _TC", company="_Test's Company")
 
 		item = create_item("_Test Item for Deferred Accounting")
 		item.enable_deferred_revenue = 1
@@ -1647,7 +1647,7 @@ class TestSalesInvoice(unittest.TestCase):
 			start_date="2019-01-01",
 			end_date="2019-03-31",
 			type="Income",
-			company="_Test Company"
+			company="_Test's Company"
 		))
 
 		pda1.insert()
@@ -1666,7 +1666,7 @@ class TestSalesInvoice(unittest.TestCase):
 
 	def test_fixed_deferred_revenue(self):
 		deferred_account = create_account(account_name="Deferred Revenue",
-			parent_account="Current Liabilities - _TC", company="_Test Company")
+			parent_account="Current Liabilities - _TC", company="_Test's Company")
 
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		acc_settings.book_deferred_entries_based_on = 'Months'
@@ -1692,7 +1692,7 @@ class TestSalesInvoice(unittest.TestCase):
 			start_date="2019-01-01",
 			end_date="2019-03-31",
 			type="Income",
-			company="_Test Company"
+			company="_Test's Company"
 		))
 
 		pda1.insert()
@@ -1989,7 +1989,7 @@ def make_test_address_for_ewaybill():
 
 		address.append("links", {
 			"link_doctype": "Company",
-			"link_name": "_Test Company"
+			"link_name": "_Test's Company"
 		})
 
 		address.save()
@@ -2038,12 +2038,12 @@ def make_sales_invoice_for_ewaybill():
 	gst_account = frappe.get_all(
 		"GST Account",
 		fields=["cgst_account", "sgst_account", "igst_account"],
-		filters = {"company": "_Test Company"}
+		filters = {"company": "_Test's Company"}
 	)
 
 	if not gst_account:
 		gst_settings.append("gst_accounts", {
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"cgst_account": "CGST - _TC",
 			"sgst_account": "SGST - _TC",
 			"igst_account": "IGST - _TC",
@@ -2119,7 +2119,7 @@ def create_sales_invoice(**args):
 		si.set_posting_time = 1
 	si.posting_date = args.posting_date or nowdate()
 
-	si.company = args.company or "_Test Company"
+	si.company = args.company or "_Test's Company"
 	si.customer = args.customer or "_Test Customer"
 	si.debit_to = args.debit_to or "Debtors - _TC"
 	si.update_stock = args.update_stock
@@ -2165,7 +2165,7 @@ def create_sales_invoice_against_cost_center(**args):
 		si.set_posting_time = 1
 	si.posting_date = args.posting_date or nowdate()
 
-	si.company = args.company or "_Test Company"
+	si.company = args.company or "_Test's Company"
 	si.cost_center = args.cost_center or "_Test Cost Center - _TC"
 	si.customer = args.customer or "_Test Customer"
 	si.debit_to = args.debit_to or "Debtors - _TC"

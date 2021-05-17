@@ -93,7 +93,7 @@ class TestOpeningInvoiceCreationTool(unittest.TestCase):
 
 def get_opening_invoice_creation_dict(**args):
 	party = "Customer" if args.get("invoice_type", "Sales") == "Sales" else "Supplier"
-	company = args.get("company", "_Test Company")
+	company = args.get("company", "_Test's Company")
 
 	invoice_dict = frappe._dict({
 		"company": company,

@@ -37,7 +37,7 @@ def make_item(item_code, properties=None):
 	if item.is_stock_item:
 		for item_default in [doc for doc in item.get("item_defaults") if not doc.default_warehouse]:
 			item_default.default_warehouse = "_Test Warehouse - _TC"
-			item_default.company = "_Test Company"
+			item_default.company = "_Test's Company"
 	item.insert()
 
 	return item
@@ -84,7 +84,7 @@ class TestItem(unittest.TestCase):
 
 		details = get_item_details({
 			"item_code": "_Test Item",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Sales Order",
@@ -146,7 +146,7 @@ class TestItem(unittest.TestCase):
 			details = get_item_details({
 				"item_code": data['item_code'],
 				"tax_category": data['tax_category'],
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"price_list": "_Test Price List",
 				"currency": "_Test Currency",
 				"doctype": "Sales Order",
@@ -169,7 +169,7 @@ class TestItem(unittest.TestCase):
 			"item_group": "_Test Item Group",
 			"brand": "_Test Brand With Item Defaults",
 			"item_defaults": [{
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"default_warehouse": "_Test Warehouse 2 - _TC",  # no override
 				"expense_account": "_Test Account Stock Expenses - _TC",  # override brand default
 				"buying_cost_center": "_Test Write Off Cost Center - _TC",  # override item group default
@@ -185,7 +185,7 @@ class TestItem(unittest.TestCase):
 		}
 		sales_item_details = get_item_details({
 			"item_code": "Test Item With Defaults",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Sales Invoice",
@@ -206,7 +206,7 @@ class TestItem(unittest.TestCase):
 		}
 		purchase_item_details = get_item_details({
 			"item_code": "Test Item With Defaults",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"price_list": "_Test Price List",
 			"currency": "_Test Currency",
 			"doctype": "Purchase Invoice",
@@ -318,7 +318,7 @@ class TestItem(unittest.TestCase):
 			"item_defaults": [
 				{
 					"default_warehouse": "_Test Warehouse - _TC",
-					"company": "_Test Company"
+					"company": "_Test's Company"
 				}
 			],
 			"has_variants": 1
@@ -510,7 +510,7 @@ def create_item(item_code, is_stock_item=None, valuation_rate=0, warehouse=None,
 		item.customer = customer or ''
 		item.append("item_defaults", {
 			"default_warehouse": warehouse or '_Test Warehouse - _TC',
-			"company": company or "_Test Company"
+			"company": company or "_Test's Company"
 		})
 		item.save()
 	else:

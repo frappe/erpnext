@@ -92,7 +92,7 @@ def create_dimension():
 		})
 
 		dimension1.append("dimension_defaults", {
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"reference_document": "Location",
 			"default_dimension": "Block 1",
 			"mandatory_for_bs": 1

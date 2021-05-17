@@ -47,7 +47,7 @@ class TestSerialNo(unittest.TestCase):
 		# check Serial No details after delivery
 		self.assertEqual(serial_no.status, "Delivered")
 		self.assertEqual(serial_no.warehouse, None)
-		self.assertEqual(serial_no.company, "_Test Company")
+		self.assertEqual(serial_no.company, "_Test's Company")
 		self.assertEqual(serial_no.delivery_document_type, "Delivery Note")
 		self.assertEqual(serial_no.delivery_document_no, dn.name)
 
@@ -77,7 +77,7 @@ class TestSerialNo(unittest.TestCase):
 
 		# check Serial No details after purchase in first company
 		self.assertEqual(sn_doc.status, "Active")
-		self.assertEqual(sn_doc.company, "_Test Company")
+		self.assertEqual(sn_doc.company, "_Test's Company")
 		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.purchase_document_no, se.name)
 
@@ -86,7 +86,7 @@ class TestSerialNo(unittest.TestCase):
 		sn_doc.reload()
 		# check Serial No details after delivery from **first** company
 		self.assertEqual(sn_doc.status, "Delivered")
-		self.assertEqual(sn_doc.company, "_Test Company")
+		self.assertEqual(sn_doc.company, "_Test's Company")
 		self.assertEqual(sn_doc.warehouse, None)
 		self.assertEqual(sn_doc.delivery_document_no, dn.name)
 
@@ -170,7 +170,7 @@ class TestSerialNo(unittest.TestCase):
 		# Fallback on Purchase Receipt in FIRST company if
 		# Delivery from FIRST company is cancelled
 		self.assertEqual(sn_doc.status, "Active")
-		self.assertEqual(sn_doc.company, "_Test Company")
+		self.assertEqual(sn_doc.company, "_Test's Company")
 		self.assertEqual(sn_doc.warehouse, "_Test Warehouse - _TC")
 		self.assertEqual(sn_doc.purchase_document_no, se.name)
 

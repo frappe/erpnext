@@ -658,7 +658,7 @@ def allow_overproduction(fieldname, percentage):
 
 def make_wo_order_test_record(**args):
 	args = frappe._dict(args)
-	if args.company and args.company != "_Test Company":
+	if args.company and args.company != "_Test's Company":
 		warehouse_map = {
 			"fg_warehouse": "_Test FG Warehouse",
 			"wip_warehouse": "_Test WIP Warehouse"
@@ -676,7 +676,7 @@ def make_wo_order_test_record(**args):
 	wo_order.wip_warehouse = args.wip_warehouse or "_Test Warehouse - _TC"
 	wo_order.fg_warehouse = args.fg_warehouse or "_Test Warehouse 1 - _TC"
 	wo_order.scrap_warehouse = args.fg_warehouse or "_Test Scrap Warehouse - _TC"
-	wo_order.company = args.company or "_Test Company"
+	wo_order.company = args.company or "_Test's Company"
 	wo_order.stock_uom = args.stock_uom or "_Test UOM"
 	wo_order.use_multi_level_bom=0
 	wo_order.skip_transfer=args.skip_transfer or 0

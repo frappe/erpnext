@@ -31,7 +31,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		unlink_payment_on_cancel_of_invoice(0)
 
 	def test_gl_entries_without_perpetual_inventory(self):
-		frappe.db.set_value("Company", "_Test Company", "round_off_account", "Round Off - _TC")
+		frappe.db.set_value("Company", "_Test's Company", "round_off_account", "Round Off - _TC")
 		pi = frappe.copy_doc(test_records[0])
 		self.assertTrue(not cint(erpnext.is_perpetual_inventory_enabled(pi.company)))
 		pi.insert()
@@ -684,7 +684,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			"payment_type": "Pay",
 			"party_type": "Supplier",
 			"party": "_Test Supplier",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"paid_from_account_currency": "INR",
 			"paid_to_account_currency": "INR",
 			"source_exchange_rate": 1,
@@ -805,7 +805,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 	def test_purchase_invoice_with_cost_center(self):
 		from erpnext.accounts.doctype.cost_center.test_cost_center import create_cost_center
 		cost_center = "_Test Cost Center for BS Account - _TC"
-		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test Company")
+		create_cost_center(cost_center_name="_Test Cost Center for BS Account", company="_Test's Company")
 
 		pi =  make_purchase_invoice_against_cost_center(cost_center=cost_center, credit_to="Creditors - _TC")
 		self.assertEqual(pi.cost_center, cost_center)
@@ -891,7 +891,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_deferred_expense_via_journal_entry(self):
 		deferred_account = create_account(account_name="Deferred Expense",
-			parent_account="Current Assets - _TC", company="_Test Company")
+			parent_account="Current Assets - _TC", company="_Test's Company")
 
 		acc_settings = frappe.get_doc('Accounts Settings', 'Accounts Settings')
 		acc_settings.book_deferred_entries_via_journal_entry = 1
@@ -919,7 +919,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			start_date="2019-01-01",
 			end_date="2019-03-31",
 			type="Expense",
-			company="_Test Company"
+			company="_Test's Company"
 		))
 
 		pda1.insert()
@@ -970,7 +970,7 @@ def make_purchase_invoice(**args):
 	if args.cash_bank_account:
 		pi.cash_bank_account=args.cash_bank_account
 
-	pi.company = args.company or "_Test Company"
+	pi.company = args.company or "_Test's Company"
 	pi.supplier = args.supplier or "_Test Supplier"
 	pi.currency = args.currency or "INR"
 	pi.conversion_rate = args.conversion_rate or 1
@@ -1023,7 +1023,7 @@ def make_purchase_invoice_against_cost_center(**args):
 	if args.cash_bank_account:
 		pi.cash_bank_account=args.cash_bank_account
 
-	pi.company = args.company or "_Test Company"
+	pi.company = args.company or "_Test's Company"
 	pi.cost_center = args.cost_center or "_Test Cost Center - _TC"
 	pi.supplier = args.supplier or "_Test Supplier"
 	pi.currency = args.currency or "INR"

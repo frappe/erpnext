@@ -44,7 +44,7 @@ class TestAssetMaintenance(unittest.TestCase):
 					"doctype": "Asset Maintenance",
 					"asset_name": "Photocopier",
 					"maintenance_team": "Team Awesome",
-					"company": "_Test Company",
+					"company": "_Test's Company",
 					"asset_maintenance_tasks": get_maintenance_tasks()
 				}).insert()
 
@@ -82,7 +82,7 @@ def create_asset_data():
 			"item_code": "Photocopier",
 			"item_name": "Photocopier",
 			"item_group": "All Item Groups",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"is_fixed_asset": 1,
 			"is_stock_item": 0,
 			"asset_category": "Equipment",
@@ -109,7 +109,7 @@ def create_maintenance_team():
 			"doctype": "Asset Maintenance Team",
 			"maintenance_manager": "marcus@abc.com",
 			"maintenance_team_name": "Team Awesome",
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"maintenance_team_members": get_maintenance_team(user_list)
 		}).insert()
 
@@ -143,7 +143,7 @@ def create_asset_category():
 	asset_category.total_number_of_depreciations = 3
 	asset_category.frequency_of_depreciation = 3
 	asset_category.append("accounts", {
-		"company_name": "_Test Company",
+		"company_name": "_Test's Company",
 		"fixed_asset_account": "_Test Fixed Asset - _TC",
 		"accumulated_depreciation_account": "_Test Accumulated Depreciations - _TC",
 		"depreciation_expense_account": "_Test Depreciations - _TC"
@@ -151,7 +151,7 @@ def create_asset_category():
 	asset_category.insert()
 
 def set_depreciation_settings_in_company():
-	company = frappe.get_doc("Company", "_Test Company")
+	company = frappe.get_doc("Company", "_Test's Company")
 	company.accumulated_depreciation_account = "_Test Accumulated Depreciations - _TC"
 	company.depreciation_expense_account = "_Test Depreciations - _TC"
 	company.disposal_account = "_Test Gain/Loss on Asset Disposal - _TC"

@@ -511,7 +511,7 @@ class TestSalesOrder(unittest.TestCase):
 		if not frappe.db.exists("Item", "_Product Bundle Item"):
 			bundle_item = make_item("_Product Bundle Item", {"is_stock_item": 0})
 			bundle_item.append("item_defaults", {
-					"company": "_Test Company",
+					"company": "_Test's Company",
 					"default_warehouse": "_Test Warehouse - _TC"})
 			bundle_item.save(ignore_permissions=True)
 
@@ -1008,7 +1008,7 @@ class TestSalesOrder(unittest.TestCase):
 					"item_defaults": [
 						{
 							"default_warehouse": "_Test Warehouse - _TC",
-							"company": "_Test Company"
+							"company": "_Test's Company"
 						}]
 					})
 		frappe.db.sql("""delete from `tabSerial No` where item_code=%s""", (item.item_code))
@@ -1017,7 +1017,7 @@ class TestSalesOrder(unittest.TestCase):
 					"item_defaults": [
 						{
 							"default_warehouse": "_Test Warehouse - _TC",
-							"company": "_Test Company"
+							"company": "_Test's Company"
 						}]
 					})
 		make_item("_Test Item B", {"maintain_stock": 1,
@@ -1025,7 +1025,7 @@ class TestSalesOrder(unittest.TestCase):
 					"item_defaults": [
 						{
 							"default_warehouse": "_Test Warehouse - _TC",
-							"company": "_Test Company"
+							"company": "_Test's Company"
 						}]
 					})
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -1158,7 +1158,7 @@ class TestSalesOrder(unittest.TestCase):
 			"item_defaults": [
 				{
 					"default_warehouse": "_Test Warehouse - _TC",
-					"company": "_Test Company"
+					"company": "_Test's Company"
 				}]
 			})
 		make_item("_Test Raw Item A", {"maintain_stock": 1,
@@ -1166,7 +1166,7 @@ class TestSalesOrder(unittest.TestCase):
 					"item_defaults": [
 						{
 							"default_warehouse": "_Test Warehouse - _TC",
-							"company": "_Test Company"
+							"company": "_Test's Company"
 						}]
 					})
 		make_item("_Test Raw Item B", {"maintain_stock": 1,
@@ -1174,7 +1174,7 @@ class TestSalesOrder(unittest.TestCase):
 					"item_defaults": [
 						{
 							"default_warehouse": "_Test Warehouse - _TC",
-							"company": "_Test Company"
+							"company": "_Test's Company"
 						}]
 					})
 		from erpnext.manufacturing.doctype.production_plan.test_production_plan import make_bom
@@ -1225,7 +1225,7 @@ def make_sales_order(**args):
 		so.transaction_date = args.transaction_date
 
 	so.set_warehouse = "" # no need to test set_warehouse permission since it only affects the client
-	so.company = args.company or "_Test Company"
+	so.company = args.company or "_Test's Company"
 	so.customer = args.customer or "_Test Customer"
 	so.currency = args.currency or "INR"
 	so.po_no = args.po_no or '12345'

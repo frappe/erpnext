@@ -259,7 +259,7 @@ def set_total_expense_zero(posting_date, budget_against_field=None, budget_again
 		"account": "_Test Account Cost for Goods Sold - _TC",
 		"cost_center": "_Test Cost Center - _TC",
 		"monthly_end_date": posting_date,
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"fiscal_year": fiscal_year,
 		"budget_against_field": budget_against_field,
 	})
@@ -307,7 +307,7 @@ def make_budget(**args):
 
 	budget.fiscal_year = fiscal_year
 	budget.monthly_distribution = "_Test Distribution"
-	budget.company = "_Test Company"
+	budget.company = "_Test's Company"
 	budget.applicable_on_booking_actual_expenses = 1
 	budget.action_if_annual_budget_exceeded = "Stop"
 	budget.action_if_accumulated_monthly_budget_exceeded = "Ignore"

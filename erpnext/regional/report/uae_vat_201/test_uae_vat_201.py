@@ -133,7 +133,7 @@ def make_supplier():
 
 def create_warehouse(warehouse_name, properties=None, company=None):
 	if not company:
-		company = "_Test Company"
+		company = "_Test's Company"
 
 	warehouse_id = erpnext.encode_company_abbr(warehouse_name, company)
 	if not frappe.db.exists("Warehouse", warehouse_id):

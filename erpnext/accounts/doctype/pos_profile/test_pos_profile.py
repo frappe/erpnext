@@ -14,7 +14,7 @@ class TestPOSProfile(unittest.TestCase):
 	def test_pos_profile(self):
 		make_pos_profile()
 
-		pos_profile = get_pos_profile("_Test Company") or {}
+		pos_profile = get_pos_profile("_Test's Company") or {}
 		if pos_profile:
 			doc = frappe.get_doc("POS Profile", pos_profile.get("name"))
 			doc.append('item_groups', {'item_group': '_Test Item Group'})
@@ -76,7 +76,7 @@ def make_pos_profile(**args):
 	args = frappe._dict(args)
 
 	pos_profile = frappe.get_doc({
-		"company": args.company or "_Test Company",
+		"company": args.company or "_Test's Company",
 		"cost_center": args.cost_center or "_Test Cost Center - _TC",
 		"currency": args.currency or "INR",
 		"doctype": "POS Profile",
@@ -93,7 +93,7 @@ def make_pos_profile(**args):
 	})
 
 	mode_of_payment = frappe.get_doc("Mode of Payment", "Cash")
-	company = args.company or "_Test Company"
+	company = args.company or "_Test's Company"
 	default_account = args.income_account or "Sales - _TC"
 
 	if not frappe.db.get_value("Mode of Payment Account", {"company": company, "parent": "Cash"}):

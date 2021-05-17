@@ -103,7 +103,7 @@ def get_project(name, template):
 		status = 'Open',
 		project_template = template.name,
 		expected_start_date = nowdate(),
-		company="_Test Company"
+		company="_Test's Company"
 	)).insert()
 
 	return project

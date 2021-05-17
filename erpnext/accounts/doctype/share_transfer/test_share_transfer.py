@@ -24,7 +24,7 @@ class TestShareTransfer(unittest.TestCase):
 				"to_no": 500,
 				"no_of_shares": 500,
 				"rate": 10,
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"asset_account": "Cash - _TC",
 				"equity_or_liability_account": "Creditors - _TC"
 			},
@@ -39,7 +39,7 @@ class TestShareTransfer(unittest.TestCase):
 				"to_no": 200,
 				"no_of_shares": 100,
 				"rate": 15,
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"equity_or_liability_account": "Creditors - _TC"
 			},
 			{
@@ -53,7 +53,7 @@ class TestShareTransfer(unittest.TestCase):
 				"to_no": 500,
 				"no_of_shares": 300,
 				"rate": 20,
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"equity_or_liability_account": "Creditors - _TC"
 			},
 			{
@@ -67,7 +67,7 @@ class TestShareTransfer(unittest.TestCase):
 				"to_no": 400,
 				"no_of_shares": 200,
 				"rate": 15,
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"equity_or_liability_account": "Creditors - _TC"
 			},
 			{
@@ -80,7 +80,7 @@ class TestShareTransfer(unittest.TestCase):
 				"to_no": 500,
 				"no_of_shares": 100,
 				"rate": 25,
-				"company": "_Test Company",
+				"company": "_Test's Company",
 				"asset_account": "Cash - _TC",
 				"equity_or_liability_account": "Creditors - _TC"
 			}
@@ -101,7 +101,7 @@ class TestShareTransfer(unittest.TestCase):
 			"to_no": 100,
 			"no_of_shares": 100,
 			"rate": 15,
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"equity_or_liability_account": "Creditors - _TC"
 		})
 		self.assertRaises(ShareDontExists, doc.insert)
@@ -116,7 +116,7 @@ class TestShareTransfer(unittest.TestCase):
 			"to_no": 200,
 			"no_of_shares": 200,
 			"rate": 15,
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"asset_account": "Cash - _TC",
 			"equity_or_liability_account": "Creditors - _TC"
 		})

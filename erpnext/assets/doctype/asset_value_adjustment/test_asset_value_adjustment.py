@@ -83,7 +83,7 @@ def make_asset_value_adjustment(**args):
 
 	doc = frappe.get_doc({
 		"doctype": "Asset Value Adjustment",
-		"company": args.company or "_Test Company",
+		"company": args.company or "_Test's Company",
 		"asset": args.asset,
 		"date": args.date or nowdate(),
 		"new_asset_value": args.new_asset_value,

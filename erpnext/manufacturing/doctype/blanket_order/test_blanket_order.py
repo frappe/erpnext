@@ -70,7 +70,7 @@ def make_blanket_order(**args):
 	args = frappe._dict(args)
 	bo = frappe.new_doc("Blanket Order")
 	bo.blanket_order_type = args.blanket_order_type
-	bo.company = args.company or "_Test Company"
+	bo.company = args.company or "_Test's Company"
 
 	if args.blanket_order_type == "Selling":
 		bo.customer = args.customer or "_Test Customer"

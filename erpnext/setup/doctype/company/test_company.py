@@ -20,7 +20,7 @@ class TestCompany(unittest.TestCase):
 		company.abbr = "CFEC"
 		company.default_currency = "INR"
 		company.create_chart_of_accounts_based_on = "Existing Company"
-		company.existing_company = "_Test Company"
+		company.existing_company = "_Test's Company"
 		company.save()
 
 		expected_results = {

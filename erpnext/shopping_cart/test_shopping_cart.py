@@ -149,7 +149,7 @@ class TestShoppingCart(unittest.TestCase):
 				"qty": 1
 			}],
 			"taxes": frappe.get_doc("Sales Taxes and Charges Template", "_Test Tax 1 - _TC").taxes,
-			"company": "_Test Company"
+			"company": "_Test's Company"
 		}
 
 		quotation.update(values)
@@ -168,7 +168,7 @@ class TestShoppingCart(unittest.TestCase):
 
 		settings.update({
 			"enabled": 1,
-			"company": "_Test Company",
+			"company": "_Test's Company",
 			"default_customer_group": "_Test Customer Group",
 			"quotation_series": "_T-Quotation-",
 			"price_list": "_Test Price List India"

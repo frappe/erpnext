@@ -66,7 +66,7 @@ def make_opportunity(**args):
 
 	opp_doc = frappe.get_doc({
 		"doctype": "Opportunity",
-		"company": args.company or "_Test Company",
+		"company": args.company or "_Test's Company",
 		"opportunity_from": args.opportunity_from or "Customer",
 		"opportunity_type": "Sales",
 		"with_items": args.with_items or 0,

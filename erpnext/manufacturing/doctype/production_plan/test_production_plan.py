@@ -180,7 +180,7 @@ class TestProductionPlan(unittest.TestCase):
 
 		item_code = "Test BOM 1"
 		pln = frappe.new_doc('Production Plan')
-		pln.company = "_Test Company"
+		pln.company = "_Test's Company"
 		pln.append("po_items", {
 			"item_code": item_code,
 			"bom_no": frappe.db.get_value('BOM', {'item': "Test BOM 1"}),

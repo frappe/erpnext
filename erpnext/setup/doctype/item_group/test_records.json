@@ -5,7 +5,7 @@
   "item_group_name": "_Test Item Group", 
   "parent_item_group": "All Item Groups",
   "item_group_defaults": [{
-		"company": "_Test Company",
+		"company": "_Test's Company",
 		"buying_cost_center": "_Test Cost Center 2 - _TC",
 		"selling_cost_center": "_Test Cost Center 2 - _TC"
 	}]
