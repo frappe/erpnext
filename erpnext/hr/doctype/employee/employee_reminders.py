@@ -4,7 +4,7 @@
 import frappe
 from frappe import _
 from frappe.utils import comma_sep, comma_and, getdate, today, add_months, add_days
-from erpnext.hr.doctype.employee.employee import get_all_employee_emails, get_employee_email, is_holiday, get_holiday_list_for_employee
+from erpnext.hr.doctype.employee.employee import get_all_employee_emails, get_employee_email, is_holiday
 from erpnext.hr.utils import get_holidays_for_employee
 
 # -----------------
