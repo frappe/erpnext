@@ -1111,7 +1111,7 @@ class SalesInvoice(SellingController):
 			if not item.serial_no:
 				continue
 
-			for serial_no in item.serial_no.split("\n"):
+			for serial_no in get_serial_nos(item.serial_no):
 				if serial_no and frappe.db.get_value('Serial No', serial_no, 'item_code') == item.item_code:
 					frappe.db.set_value('Serial No', serial_no, 'sales_invoice', invoice)
 
@@ -1755,15 +1755,10 @@ def update_pr_items(doc, sales_item_map, purchase_item_map, parent_child_map, wa
 		item.purchase_order = parent_child_map.get(sales_item_map.get(item.delivery_note_item))
 
 def get_delivery_note_details(internal_reference):
-	so_item_map = {}
-
 	si_item_details = frappe.get_all('Delivery Note Item', fields=['name', 'so_detail'],
 		filters={'parent': internal_reference})
 
-	for d in si_item_details:
-		so_item_map.setdefault(d.name, d.so_detail)
-
-	return so_item_map
+	return {d.name: d.so_detail for d in si_item_details if d.so_detail}
 
 def get_sales_invoice_details(internal_reference):
 	dn_item_map = {}
