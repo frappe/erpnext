@@ -229,11 +229,6 @@ body.product-page {
 		color: var(--text-color);
 	}
 
-	.product-code {
-		color: var(--text-muted);
-		font-size: 13px;
-	}
-
 	.product-description {
 		font-size: 13px;
 		color: var(--gray-800);
@@ -300,6 +295,11 @@ body.product-page {
 			font-size: var(--text-base);
 		}
 	}
+}
+
+.product-code {
+	color: var(--text-muted);
+	font-size: 13px;
 }
 
 .item-configurator-dialog {

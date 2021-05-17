@@ -69,6 +69,8 @@
 		"public/js/bank_reconciliation_tool/dialog_manager.js"
 	],
 	"js/e-commerce.min.js": [
-		"e_commerce/product_view.js"
+		"e_commerce/product_view.js",
+		"e_commerce/product_grid.js",
+		"e_commerce/product_list.js"
 	]
 }
