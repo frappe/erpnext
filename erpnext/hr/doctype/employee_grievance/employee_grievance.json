@@ -128,7 +128,7 @@
    "fetch_from": "grievance_type.is_applicable_for_pay_cut",
    "fieldname": "is_applicable_for_pay_cut",
    "fieldtype": "Check",
-   "label": "Is Applicable for pay cut ",
+   "label": "Is Applicable for Pay-cut ",
    "read_only": 1
   },
   {
@@ -243,7 +243,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-13 15:46:07.976156",
+ "modified": "2021-05-17 16:18:35.755201",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Employee Grievance",
