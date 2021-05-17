@@ -55,6 +55,31 @@ class LeaveAllocation(Document):
 		if self.carry_forward:
 			self.set_carry_forwarded_leaves_in_previous_allocation(on_cancel=True)
 
+	def on_update_after_submit(self):
+		if self.has_value_changed("new_leaves_allocated"):
+			ledger_entries = frappe.get_all("Leave Ledger Entry",
+								filters={
+									"transaction_type": "Leave Allocation",
+									"transaction_name": self.name,
+									"employee": self.employee,
+									"company": self.company,
+									"leave_type": self.leave_type
+								},
+								fields=["leaves"])
+
+			total_existing_leaves = 0
+			for entry in ledger_entries:
+				total_existing_leaves += entry.leaves
+
+			leaves_to_be_added = self.new_leaves_allocated - total_existing_leaves
+			args = dict(
+				leaves=leaves_to_be_added,
+				from_date=self.from_date,
+				to_date= self.to_date,
+				is_carry_forward=0
+			)
+			create_leave_ledger_entry(self, args, True)
+
 	def update_leave_policy_assignments_when_no_allocations_left(self):
 		allocations = frappe.db.get_list("Leave Allocation", filters = {
 			"docstatus": 1,
