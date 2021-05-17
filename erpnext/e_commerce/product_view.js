@@ -14,7 +14,7 @@ erpnext.ProductView =  class {
 	}
 
 	prepare_view_toggler() {
-		if(!$("#list").length || !$("#image-view").length) {
+		if (!$("#list").length || !$("#image-view").length) {
 			this.render_view_toggler();
 			this.bind_view_toggler_actions();
 			this.set_view_state();
@@ -109,13 +109,13 @@ erpnext.ProductView =  class {
 			attribute_filters: attribute_filters,
 			item_group: this.item_group,
 			start: filters.start || null
-		}
+		};
 	}
 
 	add_paging_section(settings) {
 		$(".product-paging-area").remove();
 
-		if(this.products) {
+		if (this.products) {
 			let paging_html = `
 				<div class="row product-paging-area mt-5">
 					<div class="col-3">
@@ -126,13 +126,13 @@ erpnext.ProductView =  class {
 			let start = query_params.start ? cint(JSON.parse(query_params.start)) : 0;
 			let page_length = settings.products_per_page || 0;
 
-			if(start > 0) {
+			if (start > 0) {
 				paging_html += `
 					<button class="btn btn-default btn-prev" data-start="${ start - page_length }" style="float: left">
 						${ __("Prev") }
 					</button>`;
 			}
-			if(this.products.length > page_length || this.products.length == page_length) {
+			if (this.products.length > page_length || this.products.length == page_length) {
 				paging_html += `
 					<button class="btn btn-default btn-next" data-start="${ start + page_length }">
 						${ __("Next") }
@@ -171,7 +171,7 @@ erpnext.ProductView =  class {
 
 			$("#products-grid-area").addClass("hidden");
 			$("#products-list-area").removeClass("hidden");
-		})
+		});
 
 		$("#image-view").click(function() {
 			let $btn = $(this);
@@ -246,7 +246,7 @@ erpnext.ProductView =  class {
 	}
 
 	render_item_sub_categories(categories) {
-		if(categories) {
+		if (categories) {
 			let sub_group_html = `
 				<div class="sub-category-container">
 					<div class="heading"> ${ __('Sub Categories') } </div>
@@ -262,10 +262,10 @@ erpnext.ProductView =  class {
 						</div>
 					</a>
 				`;
-			})
+			});
 			sub_group_html += `</div>`;
 
 			$("#product-listing").prepend(sub_group_html);
 		}
 	}
-}
+};

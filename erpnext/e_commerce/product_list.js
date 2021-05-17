@@ -27,7 +27,7 @@ erpnext.ProductList = class {
 			html += me.get_image_html(item, title);
 			html += me.get_row_body_html(item, title, me.settings);
 			html += `</div>`;
-		})
+		});
 
 		let $product_wrapper = this.products_section;
 		$product_wrapper.append(html);
@@ -36,7 +36,7 @@ erpnext.ProductList = class {
 	get_image_html(item, title) {
 		let image = item.website_image || item.image;
 
-		if(image) {
+		if (image) {
 			return `
 				<div class="col-2 border text-center rounded product-image" style="overflow: hidden; max-height: 200px;">
 					<a class="product-link product-list-link" href="/${ item.route || '#' }">
@@ -74,7 +74,7 @@ erpnext.ProductList = class {
 				</a>
 		`;
 
-		if (item.in_stock) {
+		if (item.in_stock && settings.show_stock_availability) {
 			title_html += `<span class="indicator ${ item.in_stock } card-indicator"></span>`;
 		}
 		title_html += `</div>`;
@@ -92,7 +92,7 @@ erpnext.ProductList = class {
 		return title_html;
 	}
 
-	get_item_details(item, settings) {
+	get_item_details(item) {
 		let details = `
 			<p class="product-code">
 				Item Code : ${ item.item_code }
@@ -104,7 +104,7 @@ erpnext.ProductList = class {
 				${ item.formatted_price || '' }
 		`;
 
-		if(item.formatted_mrp) {
+		if (item.formatted_mrp) {
 			details += `
 				<small class="ml-1 text-muted">
 					<s>${ item.formatted_mrp }</s>
@@ -155,4 +155,4 @@ erpnext.ProductList = class {
 		}
 	}
 
-}
+};

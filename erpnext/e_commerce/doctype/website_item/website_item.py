@@ -203,7 +203,7 @@ class WebsiteItem(WebsiteGenerator):
 			# load variants
 			# also used in set_attribute_context
 			context.variants = frappe.get_all("Item",
-				filters={"variant_of": self.name, "show_variant_in_website": 1},
+				filters={"variant_of": self.name, "published_in_website": 1},
 				order_by="name asc")
 
 			variant = frappe.form_dict.variant
