@@ -467,7 +467,6 @@ def add_operations_cost(stock_entry, work_order=None, expense_account=None):
     if work_order and work_order.additional_operating_cost and work_order.qty:
         additional_operating_cost_per_unit = \
             flt((work_order.additional_operating_cost), work_order.precision('additional_operating_cost')) / flt((work_order.qty), work_order.precision('qty'))
-
         if additional_operating_cost_per_unit:
             stock_entry.append('additional_costs', {
                 "expense_account": expense_account,

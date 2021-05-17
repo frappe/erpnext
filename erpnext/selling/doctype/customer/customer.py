@@ -490,7 +490,7 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 	outstanding_based_on_gle = flt(outstanding_based_on_gle[0][0]) if outstanding_based_on_gle else 0
 
 	# Outstanding based on Sales Order
-	outstanding_based_on_so = 0.0
+	outstanding_based_on_so = 0
 
 	# if credit limit check is bypassed at sales order level,
 	# we should not consider outstanding Sales Orders, when customer credit balance report is run
@@ -501,9 +501,11 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			where customer=%s and docstatus = 1 and company=%s
 			and per_billed < 100 and status != 'Closed'""", (customer, company))
 
-		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0.0
+		outstanding_based_on_so = flt(outstanding_based_on_so[0][0]) if outstanding_based_on_so else 0
 
 	# Outstanding based on Delivery Note, which are not created against Sales Order
+	outstanding_based_on_dn = 0
+
 	unmarked_delivery_note_items = frappe.db.sql("""select
 			dn_item.name, dn_item.amount, dn.base_net_total, dn.base_grand_total
 		from `tabDelivery Note` dn, `tabDelivery Note Item` dn_item
@@ -515,15 +517,29 @@ def get_customer_outstanding(customer, company, ignore_outstanding_sales_order=F
 			and ifnull(dn_item.against_sales_invoice, '') = ''
 		""", (customer, company), as_dict=True)
 
-	outstanding_based_on_dn = 0.0
+	if not unmarked_delivery_note_items:
+		return outstanding_based_on_gle + outstanding_based_on_so
+
+	si_amounts = frappe.db.sql("""
+		SELECT
+			dn_detail, sum(amount) from `tabSales Invoice Item`
+		WHERE
+			docstatus = 1
+			and dn_detail in ({})
+		GROUP BY dn_detail""".format(", ".join(
+			frappe.db.escape(dn_item.name)
+			for dn_item in unmarked_delivery_note_items
+		))
+	)
+
+	si_amounts = {si_item[0]: si_item[1] for si_item in si_amounts}
 
 	for dn_item in unmarked_delivery_note_items:
-		si_amount = frappe.db.sql("""select sum(amount)
-			from `tabSales Invoice Item`
-			where dn_detail = %s and docstatus = 1""", dn_item.name)[0][0]
+		dn_amount = flt(dn_item.amount)
+		si_amount = flt(si_amounts.get(dn_item.name))
 
-		if flt(dn_item.amount) > flt(si_amount) and dn_item.base_net_total:
-			outstanding_based_on_dn += ((flt(dn_item.amount) - flt(si_amount)) \
+		if dn_amount > si_amount and dn_item.base_net_total:
+			outstanding_based_on_dn += ((dn_amount - si_amount)
 				/ dn_item.base_net_total) * dn_item.base_grand_total
 
 	return outstanding_based_on_gle + outstanding_based_on_so + outstanding_based_on_dn

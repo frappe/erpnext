@@ -197,6 +197,13 @@ frappe.ui.form.on("Work Order", {
 				frm.trigger("make_bom");
 			});
 		}
+
+		// if(frm.doc.status == "Submitted" || frm.doc.status == "Not Started" || frm.doc.status == "In Process"){
+            
+           
+
+        // }
+
 	},
 
 	make_job_card: function(frm) {
