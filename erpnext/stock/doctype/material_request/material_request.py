@@ -7,7 +7,7 @@
 from __future__ import unicode_literals
 import frappe
 import json
-
+import collections, functools, operator
 from frappe.utils import cstr, flt, getdate, new_line_sep, nowdate, add_days, get_link_to_form
 from frappe import msgprint, _
 from frappe.model.mapper import get_mapped_doc
@@ -212,7 +212,10 @@ class MaterialRequest(BuyingController):
 			doc = frappe.get_doc('Production Plan', production_plan)
 			doc.set_status()
 			doc.db_set('status', doc.status)
-
+	@frappe.whitelist()
+	def set_target_warehouse(self):
+		q = "select staging_material_request_warehouse from `tabStaging Details` where company = '{0}'".format(self.company)
+		return frappe.db.sql(q, as_dict = True)[0].get('staging_material_request_warehouse')
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
 		material_request_map = {}
@@ -571,3 +574,54 @@ def create_pick_list(source_name, target_doc=None):
 	doc.set_item_locations()
 
 	return doc
+
+@frappe.whitelist()
+def get_wo_items(schedule_start_from,schedule_start_to,item_to_manufacture = None):
+	all_wo = frappe.db.get_all("Work Order", {"planned_start_date":['between',[schedule_start_from,schedule_start_to]]}, 'name')
+	all_data = []
+	for wo in all_wo:
+		wo_wise_data = frappe.db.get_all("Work Order Item", {'parent':wo.get('name')},['item_code','transferred_qty','required_qty','description'])
+		for itm in wo_wise_data:
+			float_precision = (frappe.db.get_default("float_precision")) or 2
+			qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
+			if qty > 0:
+				itm['qty'] = qty
+				itm['description'] = itm.get('description')
+				all_data.append(itm)
+	
+	c = {}
+	if len(all_data) > 0:
+		for d in all_data:
+			c.setdefault(d['item_code'], []).append(d['qty'])
+			result = [{'item_code': k, 'qty': v} for k,v in c.items()]
+		data_set = []
+		if result:
+			for res in result:
+				d = {}
+				qty_sum = 0
+				item_detail = frappe.get_value("Item",{'item_code':res.get('item_code')},['description','stock_uom','item_name','production_item_name','item_name','allowed_in_wo_staging','multi_order_qty','min_order_qty'],as_dict = True)
+				default_data = frappe.db.get_value('Item Default', {'parent': res.get('item_code')},['buying_cost_center','expense_account','default_warehouse'],as_dict = True)
+				bin_data = frappe.db.get_value('Bin', {'item_code': res.get('item_code')},['projected_qty','actual_qty','valuation_rate'],as_dict = True)
+				d['item_code'] = res.get('item_code')
+				d['desc'] = item_detail.get('description')
+				d['stock_uom'] = item_detail.get('stock_uom')
+				d['item_name'] = item_detail.get('item_name')
+				d['production_item_name'] = item_detail['production_item_name']
+				d['cost_center'] = default_data.get('buying_cost_center')
+				d['expense_account'] = default_data.get('expense_account')
+				d['min_order_qty'] = item_detail.get('min_order_qty')
+				if bin_data:
+					d['projected_qty'] = bin_data.get('projected_qty')
+					d['actual_qty'] = bin_data.get('actual_qty')
+					d['valuation_rate'] = bin_data.get('valuation_rate')
+
+				#d['default_warehouse'] = default_data.get('default_warehouse')
+
+				for r in res.get('qty'):
+					qty_sum +=r
+				d['qty'] = qty_sum
+				d['production_item_name'] = item_detail['production_item_name']
+				d['multi_order_qty'] = item_detail['multi_order_qty']
+				if item_detail.get('allowed_in_wo_staging') == 'Yes':
+					data_set.append(d)
+		return data_set

@@ -1,0 +1,66 @@
+{
+ "actions": [],
+ "creation": "2021-04-29 19:48:26.986876",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "item",
+  "item_name",
+  "qty",
+  "uom",
+  "total_weight",
+  "weight_per_unit"
+ ],
+ "fields": [
+  {
+   "fieldname": "item",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Item",
+   "options": "Item"
+  },
+  {
+   "fieldname": "item_name",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Item Name"
+  },
+  {
+   "fieldname": "qty",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Qty"
+  },
+  {
+   "fieldname": "uom",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "UOM"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Read Only",
+   "in_list_view": 1,
+   "label": "Total Weight"
+  },
+  {
+   "fieldname": "weight_per_unit",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Weight Per Unit"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-04-29 19:50:59.368770",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Additional Items Detail",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

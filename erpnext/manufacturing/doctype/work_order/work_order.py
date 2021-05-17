@@ -9,6 +9,7 @@ from frappe import _
 from frappe.utils import flt, get_datetime, getdate, date_diff, cint, nowdate, get_link_to_form, time_diff_in_hours
 from frappe.model.document import Document
 from erpnext.manufacturing.doctype.bom.bom import validate_bom_no, get_bom_items_as_dict, get_bom_item_rate
+from frappe.model.meta import get_field_precision
 from dateutil.relativedelta import relativedelta
 from erpnext.stock.doctype.item.item import validate_end_of_life, get_item_defaults
 from erpnext.manufacturing.doctype.workstation.workstation import WorkstationHolidayError
@@ -32,7 +33,7 @@ form_grid_templates = {
 	"operations": "templates/form_grid/work_order_grid.html"
 }
 
-class WorkOrder(Document):
+class WorkOrder(Document):	
 	def onload(self):
 		ms = frappe.get_doc("Manufacturing Settings")
 		self.set_onload("material_consumption", ms.material_consumption)
@@ -56,6 +57,30 @@ class WorkOrder(Document):
 
 		self.set_required_items(reset_only_qty = len(self.get("required_items")))
 
+	@frappe.whitelist()
+	def make_read_only(self):
+		return frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+	
+	@frappe.whitelist()
+	def get_warehouse(self):
+		table = frappe.db.get_all("Staging Details",["company","staging_picklist_warehouse",'staging_material_request_warehouse'])
+		enable = frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+		if enable == 1:
+			company_data = []
+			for t in table:
+				if t.get('company') == self.company:
+					company_data.append(t)
+			if len(company_data) > 0:
+				for data in company_data:
+					q = "update `tabWork Order` set source_warehouse = '{0}' where name='{1}'".format(company_data[0].get("staging_picklist_warehouse"), self.name)
+					#print(q)
+					frappe.db.sql(q)
+					frappe.db.commit()
+					return company_data[0].get("staging_picklist_warehouse")
+			else:
+				msg = "stagging warehouse not defined for company {0} in manufacturing settings".format(self.company)
+				frappe.throw(msg)
+	
 	def validate_sales_order(self):
 		if self.sales_order:
 			self.check_sales_order_on_hold_or_close()
@@ -195,8 +220,11 @@ class WorkOrder(Document):
 		"""Update **Manufactured Qty** and **Material Transferred for Qty** in Work Order
 			based on Stock Entry"""
 
+		# allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
+			# "overproduction_percentage_for_work_order"))
+
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
-			"overproduction_percentage_for_work_order"))
+			"allowed_consumption_deviation_percentage"))
 
 		for purpose, fieldname in (("Manufacture", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
@@ -208,7 +236,8 @@ class WorkOrder(Document):
 				from `tabStock Entry` where work_order=%s and docstatus=1
 				and purpose=%s""", (self.name, purpose))[0][0])
 
-			completed_qty = self.qty + (allowance_percentage/100 * self.qty)
+			# completed_qty = self.qty + (allowance_percentage/100 * self.qty)
+			completed_qty = self.planned_rm_weight + (allowance_percentage/100 * self.planned_rm_weight)
 			if qty > completed_qty:
 				frappe.throw(_("{0} ({1}) cannot be greater than planned quantity ({2}) in Work Order {3}").format(\
 					self.meta.get_label(fieldname), qty, completed_qty, self.name), StockOverProductionError)
@@ -247,6 +276,145 @@ class WorkOrder(Document):
 		self.update_planned_qty()
 		self.update_ordered_qty()
 		self.create_job_card()
+		self.bom_details()
+		# self.scrap_cost_calc()
+		
+	def before_save(self):
+		bo = frappe.get_doc("BOM", self.bom_no)
+		for row1 in self.required_items:
+			for row2 in bo.items:
+				if row1.item_name == row2.item_name:
+					row1.type = row2.type
+					bo.db_update()
+					break
+		# value = 0
+		# for row in self.required_items:
+		# 	if row.type == "RM":
+		# 		item_wt = frappe.get_doc("Item", row.item_code)
+		# 		value += flt(row.required_qty)*flt(item_wt.weight_per_unit)
+		# self.planned_rm_weight = flt(value, self.precision('planned_rm_weight'))
+		# self.bom_details()
+		# self.planned_rm_cost_calc()
+
+
+
+	# def on_change(self):
+	# 	self.calc_actual_rm_wt_on_wo()
+	# 	self.consumption_dev()
+	# 	# self.planned_rm_cost_calc() # wo.items.required_qty
+	# 	self.yeild_calc()  # wo.actual_fg_weight
+
+	def on_change(self):
+		self.planned_rm_weight_calc()
+		self.calc_rm_weight_and_consump_dev()
+		self.transfered_rm_weight_calculation()
+		# self.bom_details()
+		self.planned_rm_cost_calc()
+		self.scrap_cost_calc()
+		self.actual_yeild_on_wo()
+		self.yeild_calc()
+		# value = 0
+		# for row in self.required_items:
+		# 	value += flt(row.required_qty)
+		
+		# print(value)
+		# self.qty = flt(value, self.precision('qty'))
+		# self.db_update()
+		# self.reload()
+
+	def actual_yeild_on_wo(self):
+		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(self.weight_per_unit), self.precision('actual_fg_weight'))
+		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
+			self.actual_yeild = 0
+		else:
+			self.actual_yeild = flt((flt(self.actual_fg_weight)/flt(self.actual_rm_weight))*100)
+	
+	def planned_rm_weight_calc(self):
+		value = 0
+		for row in self.required_items:
+			if row.type == "RM":
+				item_wt = frappe.get_doc("Item", row.item_code)
+				value += flt(row.required_qty)*flt(item_wt.weight_per_unit)
+		self.planned_rm_weight = flt(value, self.precision('planned_rm_weight'))
+		frappe.db.set_value("Work Order", self.name, "planned_rm_weight", self.planned_rm_weight)
+
+	def bom_details(self):
+		bo = frappe.get_doc("BOM", self.bom_no)
+		self.bom_yeild = flt(bo.yeild, self.precision('bom_yeild'))
+		frappe.db.set_value("Work Order", self.name, "bom_yeild", self.bom_yeild)
+		value = 0
+		for row in self.required_items:
+			item_wt = frappe.get_doc("Item", row.item_code)
+			value += flt(row.required_qty) * flt(item_wt.weight_per_unit) 
+		self.bom_weight = flt(value, self.precision('bom_weight'))
+		frappe.db.set_value("Work Order", self.name, "bom_weight", self.bom_weight)
+
+	# def consumption_dev(self):
+	# 	if self.planned_rm_weight == 0:
+	# 		self.consumption_deviation = 0
+	# 	else:
+	# 		self.consumption_deviation = flt(((flt(self.actual_rm_weight)-flt(self.planned_rm_weight))/flt(self.planned_rm_weight))*100, self.precision('consumption_deviation'))
+
+	def transfered_rm_weight_calculation(self):
+		value = 0
+		for row in self.required_items:
+			item_wt = frappe.get_doc("Item", row.item_code)
+			value += flt(row.transferred_qty) * flt(item_wt.weight_per_unit)
+		self.transfered_rm_weight = flt(value, self.precision('qty'))
+		frappe.db.set_value("Work Order", self.name, "transfered_rm_weight", self.transfered_rm_weight)
+		# self.db_update()
+		# self.reload()
+		
+	def yeild_calc(self):
+		# if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
+		# 	self.actual_yeild = 0
+		# else:
+		# 	self.actual_yeild = flt((flt(self.actual_fg_weight)/flt(self.actual_rm_weight))*100, self.precision('actual_yeild'))
+		# frappe.db.set_value("Work Order", self.name, "actual_yeild", self.actual_yeild)
+		if self.bom_yeild == 0:
+			self.yeild_deviation = 0
+		else:
+			self.yeild_deviation = flt(((flt(self.actual_yeild) - flt(self.bom_yeild))/flt(self.bom_yeild))*100, self.precision('yeild_deviation'))
+		frappe.db.set_value("Work Order", self.name, "yeild_deviation", self.yeild_deviation)
+		# return True
+		
+	def scrap_cost_calc(self):
+		bo = frappe.get_doc("BOM", self.bom_no)
+		if bo.quantity > 0:
+			self.scrap_cost = flt((flt(bo.scrap_material_cost)/flt(bo.quantity))*flt(self.qty), self.precision('scrap_cost'))
+		else:
+			self.scrap_cost = 0
+		frappe.db.set_value("Work Order", self.name, "scrap_cost", self.scrap_cost)
+
+	# @frappe.whitelist()
+	def planned_rm_cost_calc(self):
+		value = 0
+		for row in self.required_items:
+			value += flt(row.required_qty) * flt(row.rate)
+		self.planned_rm_cost = flt(value, self.precision('planned_rm_cost'))
+		frappe.db.set_value("Work Order", self.name, "planned_rm_cost", self.planned_rm_cost)
+		# return True
+
+
+	# @frappe.whitelist()
+	def calc_rm_weight_and_consump_dev(self):
+		# print("Changed on_change \n"*20)
+		value = 0
+		for row in self.required_items:
+			if row.type == "RM":
+				item_wt = frappe.get_doc("Item", row.item_code)
+				value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
+		self.actual_rm_weight = flt(value, self.precision('actual_rm_weight'))
+		frappe.db.set_value("Work Order", self.name, "actual_rm_weight", self.actual_rm_weight)
+		if self.planned_rm_weight == 0:
+			self.consumption_deviation = 0
+		else:
+			# float_precision = cint(frappe.db.get_default("float_precision")) or 2
+			self.consumption_deviation = flt(((flt(self.actual_rm_weight)-flt(self.planned_rm_weight))/flt(self.planned_rm_weight))*100, self.precision('consumption_deviation'))
+			
+			frappe.db.set_value("Work Order", self.name, "consumption_deviation", self.consumption_deviation)
+		# self.db_update()
+		# self.reload()
 
 	def on_cancel(self):
 		self.validate_cancel()
@@ -617,14 +785,16 @@ class WorkOrder(Document):
 	def make_consume_material(self):
 		wo_doc = frappe.get_doc('Work Order',self.name)
 		mc = frappe.new_doc("Material Consumption")
+		precision = get_field_precision(frappe.get_meta("Materials to Consume Items").get_field("qty_to_issue"))
 		mc.work_order = self.name
 		mc.s_warehouse = wo_doc.wip_warehouse
 		mc.company = wo_doc.company
 		mc.type = "Manual"
 		for res in wo_doc.required_items:
 			item_doc = frappe.get_doc("Item",res.item_code)
-			float_precision = cint(frappe.db.get_default("float_precision")) or 2
-			qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
+			# float_precision = cint(frappe.db.get_default("float_precision")) or 2
+			# qty = flt((res.get('transferred_qty') - res.get("consumed_qty")),float_precision)
+			qty = flt(res.get('transferred_qty')) - flt(res.get("consumed_qty"))
 			if qty > 0:
 				mc.append("materials_to_consume", {
 					"item": res.item_code,
@@ -633,7 +803,7 @@ class WorkOrder(Document):
 					"has_batch_no": item_doc.has_batch_no,
 					"uom": item_doc.stock_uom,
 					"status": "Not Assigned",
-					"qty_to_issue": qty,
+					"qty_to_issue": flt(qty, precision),
 					"weight_per_unit": res.weight_per_unit,
 					"type": res.type
 				})
@@ -926,11 +1096,11 @@ def get_work_order_operation_data(work_order, operation, workstation):
 @frappe.whitelist()
 def create_pick_list(source_name, target_doc=None, for_qty=None):
 	for_qty = for_qty or json.loads(target_doc).get('for_qty')
-	max_finished_goods_qty = frappe.db.get_value('Work Order', source_name, 'qty')
+	# max_finished_goods_qty = frappe.db.get_value('Work Order', source_name, 'qty')
+	max_finished_goods_qty = frappe.db.get_value('Work Order', source_name, 'planned_rm_weight')
 	def update_item_quantity(source, target, source_parent):
 		pending_to_issue = flt(source.required_qty) - flt(source.transferred_qty)
 		desire_to_transfer = flt(source.required_qty) / max_finished_goods_qty * flt(for_qty)
-
 		qty = 0
 		if desire_to_transfer <= pending_to_issue:
 			qty = desire_to_transfer
@@ -959,7 +1129,10 @@ def create_pick_list(source_name, target_doc=None, for_qty=None):
 			'condition': lambda doc: abs(doc.transferred_qty) < abs(doc.required_qty)
 		},
 	}, target_doc)
-
+	enable = frappe.db.get_single_value("Manufacturing Settings", "enable_staging")
+	if enable ==1:
+		warehouse = frappe.db.get_value("Work Order", {'name': source_name},'source_warehouse')
+		doc.parent_warehouse = warehouse
 	doc.for_qty = for_qty
 
 	doc.set_item_locations()
@@ -1035,5 +1208,3 @@ def get_se_data(wo):
 	frappe.db.sql(query)
 	frappe.db.commit()
 	return total_weight
-
-

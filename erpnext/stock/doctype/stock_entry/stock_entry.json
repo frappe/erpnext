@@ -16,6 +16,7 @@
   "material_consumption",
   "add_to_transit",
   "work_order",
+  "material_produce",
   "purchase_order",
   "delivery_note_no",
   "sales_invoice_no",
@@ -664,6 +665,13 @@
    "fieldtype": "Link",
    "label": "Material Consumption",
    "options": "Material Consumption"
+  },
+  {
+   "fieldname": "material_produce",
+   "fieldtype": "Link",
+   "label": "Material Produce",
+   "options": "Material Produce",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-file-text",
@@ -671,7 +679,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-16 20:23:49.675367",
+ "modified": "2021-05-04 18:31:50.102160",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",

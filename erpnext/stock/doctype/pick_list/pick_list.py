@@ -9,15 +9,18 @@ from six import iteritems
 from frappe.model.document import Document
 from frappe import _
 from collections import OrderedDict
+
 from frappe.utils import floor, flt, today, cint
 from frappe.model.mapper import get_mapped_doc, map_child_doc
 from erpnext.stock.get_item_details import get_conversion_factor
 from erpnext.selling.doctype.sales_order.sales_order import make_delivery_note as create_delivery_note_from_sales_order
+from frappe.model.meta import get_field_precision
 
 # TODO: Prioritize SO or WO group warehouse
 
 class PickList(Document):
 	def before_save(self):
+		self.weight_details()
 		self.set_item_locations()
 
 	def before_submit(self):
@@ -79,6 +82,17 @@ class PickList(Document):
 
 	# return batch_locations
 
+	def weight_details(self):
+		total_weight = total_stock_weight = total_picked_weight = 0
+		if self.locations:
+			for row in self.locations:
+				item_wt = frappe.get_doc("Item", row.item_code)
+				total_weight += flt(row.qty)+flt(item_wt.weight_per_unit) 
+				total_stock_weight += flt(row.stock_qty)+flt(item_wt.weight_per_unit) 
+				total_picked_weight += flt(row.picked_qty)+flt(item_wt.weight_per_unit) 
+		self.total_weight = flt(total_weight, self.precision('total_weight'))
+		self.total_stock_weight = flt(total_stock_weight, self.precision('total_stock_weight'))
+		self.total_picked_weight = flt(total_picked_weight, self.precision('total_picked_weight'))
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
@@ -161,6 +175,8 @@ class PickList(Document):
 
 	@frappe.whitelist()
 	def consumption_list(self):
+		precision1 = get_field_precision(frappe.get_meta("Pick List Item").get_field("stock_qty"))
+		precision2 = get_field_precision(frappe.get_meta("Pick List Item").get_field("qty"))
 		query = """SELECT * FROM `tabWork Order Item` where parent = '{0}';""".format(self.consume_work_order)
 		all_items = frappe.db.sql(query, as_dict = True)
 		data_list = []
@@ -170,8 +186,8 @@ class PickList(Document):
 				"item_code":item.get("item_code"),
 				"transferred_qty": item.get('transferred_qty'),
 				"consumed_qty": item.get('consumed_qty'),
-				"qty": qty,
-				"stock_qty": qty
+				"qty": flt(qty, precision2),
+				"stock_qty": flt(qty, precision1)
 			}
 			if qty > 0:
 				data_list.append(data)
@@ -182,8 +198,8 @@ class PickList(Document):
 				"item_code":data.get("item_code"),
 				"transferred_qty": data.get('transferred_qty'),
 				"consumed_qty": data.get('consumed_qty'),
-				"qty": data.get('qty'),
-				"stock_qty": data.get('stock_qty')
+				"qty": flt(data.get('qty'), precision2),
+				"stock_qty": flt(data.get('stock_qty'), precision1)
 			})
 		return True
 

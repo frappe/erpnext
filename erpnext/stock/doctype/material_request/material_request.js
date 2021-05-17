@@ -73,8 +73,24 @@ frappe.ui.form.on('Material Request', {
 
 	company: function(frm) {
 		erpnext.accounts.dimensions.update_dimension(frm, frm.doctype);
+		if(frm.doc.manufacturing_staging === 1 && frm.doc.company){
+			set_target_warehouse(frm)
+		}
 	},
 
+	manufacturing_staging: function(frm){
+		if(frm.doc.manufacturing_staging === 1 && !frm.doc.company){
+			frappe.throw("Please select Company")
+		}
+		if(frm.doc.manufacturing_staging === 1 && frm.doc.company){
+			set_target_warehouse(frm)
+		}
+		if (frm.doc.docstatus===0 && frm.doc.manufacturing_staging === 1) {
+			frm.add_custom_button(__('Work Order'), () => frm.events.get_items_from_wo(frm),
+				__("Get Items From"));
+		}
+	},
+	
 	onload_post_render: function(frm) {
 		frm.get_field("items").grid.set_multiple_add("item_code", "qty");
 	},
@@ -156,7 +172,7 @@ frappe.ui.form.on('Material Request', {
 			frm.add_custom_button(__('Sales Order'), () => frm.events.get_items_from_sales_order(frm),
 				__("Get Items From"));
 		}
-
+		
 		if (frm.doc.docstatus == 1 && frm.doc.status == 'Stopped') {
 			frm.add_custom_button(__('Re-open'), () => frm.events.update_status(frm, 'Submitted'));
 		}
@@ -230,6 +246,62 @@ frappe.ui.form.on('Material Request', {
 		});
 	},
 
+	get_items_from_wo: function(frm) {
+		var d = new frappe.ui.Dialog({
+			title: __("Get Items from Work Order"),
+			fields: [
+				{"fieldname":"schedule_start_from", "fieldtype":"Date", "label":__("Schedule Start From"),
+				reqd: 1 },
+				{"fieldname":"schedule_start_to", "fieldtype":"Date", "label":__("Schedule Start To"),
+				reqd: 1 },
+				{"fieldname":"item_to_manufacture", "fieldtype":"Link",
+					"label":__("Item To Manufacture"), options:"Item"}
+			],
+			primary_action_label: 'Get Items',
+			primary_action(values) {
+				if(!values) return;
+				frappe.call({
+					method: "erpnext.stock.doctype.material_request.material_request.get_wo_items",
+					args: values,
+					callback: function(r) {
+						if (!r.message) {
+							frappe.throw(__("Item not found"));
+						} else {
+							erpnext.utils.remove_empty_first_row(frm, "items");
+							$.each(r.message, function(i, item) {
+								console.log(item)
+								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
+								d.item_code = item.item_code;
+								d.item_name = item.item_name;
+								d.description = item.desc;
+								d.warehouse = frm.doc.set_warehouse;
+								d.uom = item.stock_uom;
+								//d.stock_uom = item.stock_uom;
+								d.cost_center = item.cost_center;
+								d.expense_account = item.expense_account
+								//d.warehouse = item.default_warehouse;
+								d.multi_order_qty = item.multi_order_qty;
+								d.conversion_factor = 1;
+								d.qty = item.qty;
+								d.production_item_name = item.production_item_name;
+								d.projected_qty = item.projected_qty;
+								d.actual_qty = item.actual_qty;
+								d.rate = item.valuation_rate;
+								d.min_order_qty = item.min_order_qty;
+								d.amount = item.valuation_rate * item.qty;
+								// d.project = item.project;
+							});
+						}
+						d.hide();
+						refresh_field("items");
+					}
+				});
+			}
+		});
+
+		d.show();
+	},
+
 	get_items_from_bom: function(frm) {
 		var d = new frappe.ui.Dialog({
 			title: __("Get Items from BOM"),
@@ -262,6 +334,7 @@ frappe.ui.form.on('Material Request', {
 								var d = frappe.model.add_child(cur_frm.doc, "Material Request Item", "items");
 								d.item_code = item.item_code;
 								d.item_name = item.item_name;
+								d.production_item_name =  item.production_item_name;
 								d.description = item.description;
 								d.warehouse = values.warehouse;
 								d.uom = item.stock_uom;
@@ -478,4 +551,17 @@ function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){
 		erpnext.utils.copy_value_in_all_rows(frm.doc, frm.doc.doctype, frm.doc.name, "items", "schedule_date");
 	}
+}
+
+function set_target_warehouse(frm){
+		if(frm.doc.company && frm.doc.manufacturing_staging === 1){
+			frappe.call({
+				method:'set_target_warehouse',
+				doc: frm.doc,
+				callback: function(resp){
+					frm.doc.set_warehouse = resp.message
+					frm.refresh_field('set_warehouse')
+				}
+			})
+		}
 }

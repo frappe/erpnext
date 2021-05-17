@@ -18,6 +18,7 @@
   "item_name",
   "item_group",
   "is_item_from_hub",
+  "allowed_in_wo_staging",
   "stock_uom",
   "column_break0",
   "disabled",
@@ -1058,6 +1059,13 @@
    "fieldname": "website_image_alt",
    "fieldtype": "Data",
    "label": "Image Description"
+  },
+  {
+   "default": "Yes",
+   "fieldname": "allowed_in_wo_staging",
+   "fieldtype": "Select",
+   "label": "Allowed in WO Staging",
+   "options": "Yes\nNo"
   }
  ],
  "has_web_view": 1,
@@ -1067,7 +1075,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-03-18 14:04:38.575519",
+ "modified": "2021-05-17 15:25:43.610651",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",

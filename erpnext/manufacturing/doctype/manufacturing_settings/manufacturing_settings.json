@@ -26,7 +26,10 @@
   "column_break_16",
   "overproduction_percentage_for_work_order",
   "other_settings_section",
-  "update_bom_costs_automatically"
+  "update_bom_costs_automatically",
+  "staging_section",
+  "enable_staging",
+  "staging_details"
  ],
  "fields": [
   {
@@ -155,13 +158,41 @@
   {
    "fieldname": "column_break_5",
    "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "enable_staging",
+   "fieldtype": "Check",
+   "label": "Enable Staging"
+  },
+  {
+   "fieldname": "staging_section",
+   "fieldtype": "Section Break",
+   "label": "Staging "
+  },
+  {
+   "depends_on": "eval: doc.enable_staging == 1;",
+   "fieldname": "staging_details",
+   "fieldtype": "Table",
+   "label": "Staging Details",
+   "options": "Staging Details"
+  },
+  {
+   "fieldname": "allowed_consumption_deviation_percentage",
+   "fieldtype": "Float",
+   "label": "Allowed Consumption Deviation percentage"
+  },
+  {
+   "fieldname": "allowed_production_deviation_percentage",
+   "fieldtype": "Float",
+   "label": "Allowed Production Deviation percentage"
   }
  ],
  "icon": "icon-wrench",
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 10:55:43.996581",
+ "modified": "2021-05-12 17:55:28.519418",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Manufacturing Settings",
