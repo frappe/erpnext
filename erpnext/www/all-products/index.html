@@ -32,8 +32,8 @@
 	</div>
 </div> -->
 
-<!-- Items section -->
 <div class="row">
+	<!-- Items section -->
 	<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
 		<!-- Rendered via JS -->
 	</div>
@@ -81,21 +81,6 @@
 		</script>
 	</div>
 </div>
-
-<!-- TODO -->
-<!-- Paging Section -->
-<!-- <div class="row product-paging-area mt-5">
-	<div class="col-3">
-	</div>
-	<div class="col-9 text-right">
-		{% if frappe.form_dict.start|int > 0 %}
-		<button class="btn btn-default btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</button>
-		{% endif %}
-		{% if items|length >= page_length %}
-		<button class="btn btn-default btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
-		{% endif %}
-	</div>
-</div> -->
 
 <script>
 	frappe.ready(() => {

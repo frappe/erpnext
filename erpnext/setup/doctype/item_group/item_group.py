@@ -81,7 +81,6 @@ class ItemGroup(NestedSet, WebsiteGenerator):
 			"title": self.name
 		})
 
-		context.sub_categories = get_child_groups(self.name)
 		if self.slideshow:
 			values = {
 				'show_indicators': 1,

@@ -59,7 +59,7 @@
 
 {% endmacro %}
 
-{%- macro item_card(item, settings=None, is_featured=False, is_full_width=False, align="Left") -%}
+{%- macro item_card(item, is_featured=False, is_full_width=False, align="Left") -%}
 {%- set align_items_class = resolve_class({
 	'align-items-end': align == 'Right',
 	'align-items-center': align == 'Center',
@@ -80,12 +80,12 @@
 				<img class="card-img" src="{{ image }}" alt="{{ title }}">
 			</div>
 			<div class="col-md-6">
-				{{ item_card_body(title, settings, description, item, is_featured, align) }}
+				{{ item_card_body(title, description, item, is_featured, align) }}
 			</div>
 		</div>
 		{% else %}
 			<div class="col-md-12">
-				{{ item_card_body(title, settings, description, item, is_featured, align) }}
+				{{ item_card_body(title, description, item, is_featured, align) }}
 			</div>
 		{% endif %}
 	</div>
@@ -106,13 +106,13 @@
 			</div>
 		</a>
 		{% endif %}
-		{{ item_card_body(title, settings, description, item, is_featured, align) }}
+		{{ item_card_body(title, description, item, is_featured, align) }}
 	</div>
 </div>
 {% endif %}
 {%- endmacro -%}
 
-{%- macro item_card_body(title, settings, description, item, is_featured, align) -%}
+{%- macro item_card_body(title, description, item, is_featured, align) -%}
 {%- set align_class = resolve_class({
 	'text-right': align == 'Right',
 	'text-center': align == 'Center' and not is_featured,
@@ -128,52 +128,12 @@
 				{% endif %}
 			</div>
 		</a>
-		{% if not item.has_variants and settings.enable_wishlist %}
-			<div class="like-action"
-				data-item-code="{{ item.item_code }}"
-				data-price="{{ item.price }}"
-				data-formatted-price="{{ item.get('formatted_price') }}">
-				<svg class="icon sm">
-					{%- set icon_class = "wished" if item.wished else "not-wished"-%}
-					<use class="{{ icon_class }} wish-icon" href="#icon-heart"></use>
-				</svg>
-			</div>
-		{% endif %}
 	</div>
 	{% if is_featured %}
 		<div class="product-price">{{ item.formatted_price or '' }}</div>
 		<div class="product-description ellipsis">{{ description or '' }}</div>
 	{% else %}
 		<div class="product-category">{{ item.item_group or '' }}</div>
-
-		{% if item.formatted_price %}
-			<div class="product-price">
-				{{ item.formatted_price or '' }}
-
-				{% if item.get("formatted_mrp") %}
-					<small class="ml-1 text-muted">
-						<s>{{ item.formatted_mrp }}</s>
-					</small>
-					<small class="ml-1" style="color: #F47A7A; font-weight: 500;">
-						{{ item.discount }} OFF
-					</small>
-				{% endif %}
-
-			</div>
-		{% endif %}
-
-		{% if item.has_variants %}
-			<a href="/{{ item.route or '#' }}">
-				<div class="btn btn-sm btn-explore-variants w-100 mt-4">
-					{{ _('Explore') }}
-				</div>
-			</a>
-		{% elif settings.enabled and (settings.allow_items_not_in_stock or item.in_stock != "red")%}
-			<div id="{{ item.name }}" class="btn btn-sm btn-add-to-cart-list not-added w-100 mt-4"
-				data-item-code="{{ item.item_code }}">
-				{{ _('Add to Cart') }}
-			</div>
-		{% endif %}
 	{% endif %}
 </div>
 {%- endmacro -%}

@@ -35,24 +35,9 @@
 	</div>
 	<div class="row">
 		<div id="product-listing" class="col-12 order-2 col-md-9 order-md-2 item-card-group-section">
-			{% if sub_categories %}
-			<div class="sub-category-container">
-				<div class="heading"> {{ _('Sub Categories') }} </div>
-			</div>
-			<div class="sub-category-container scroll-categories">
-				{% for row in sub_categories%}
-				<a href="{{ row.route or '#' }}" style="text-decoration: none;">
-					<div class="category-pill">
-						{{ row.name }}
-					</div>
-				</a>
-				{% endfor %}
-			</div>
-			{% endif %}
-
 			<!-- Products Rendered in all-products/index.js-->
-
 		</div>
+
 		<div class="col-12 order-1 col-md-3 order-md-1">
 			<div class="collapse d-md-block mr-4 filters-section" id="product-filters">
 				<div class="d-flex justify-content-between align-items-center mb-5 title-section">
@@ -85,16 +70,6 @@
 					}, 300));
 				})
 			</script>
-		</div>
-	</div>
-	<div class="row">
-		<div class="col-12">
-			{% if frappe.form_dict.start|int > 0 %}
-			<button class="btn btn-outline-secondary btn-prev" data-start="{{ frappe.form_dict.start|int - page_length }}">{{ _("Prev") }}</button>
-			{% endif %}
-			{% if items|length >= page_length %}
-			<button class="btn btn-outline-secondary btn-next" data-start="{{ frappe.form_dict.start|int + page_length }}">{{ _("Next") }}</button>
-			{% endif %}
 		</div>
 	</div>
 </div>

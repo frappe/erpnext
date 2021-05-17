@@ -1,14 +1,16 @@
 $(() => {
 	class ProductListing {
 		constructor() {
+			let me = this;
 			let is_item_group_page = $(".item-group-content").data("item-group");
-			let item_group = is_item_group_page || null;
+			this.item_group = is_item_group_page || null;
 
-			// Render Products
+			// Render Products and Discount Filters
 			frappe.require('assets/js/e-commerce.min.js', function() {
 				new erpnext.ProductView({
+					view_type: "List",
 					products_section: $('#product-listing'),
-					item_group: item_group
+					item_group: me.item_group
 				});
 			});
 
@@ -19,6 +21,7 @@ $(() => {
 		}
 
 		bind_filters() {
+			let me = this;
 			this.field_filters = {};
 			this.attribute_filters = {};
 
@@ -73,17 +76,14 @@ $(() => {
 				window.history.pushState('filters', '', `${location.pathname}?` + query_string);
 
 				$('.page_content input').prop('disabled', true);
-				this.get_items_with_filters()
-					.then(html => {
-						$('.products-list').html(html);
-					})
-					.then(data => {
-						$('.page_content input').prop('disabled', false);
-						return data;
-					})
-					.catch(() => {
-						$('.page_content input').prop('disabled', false);
+				frappe.require('assets/js/e-commerce.min.js', function() {
+					new erpnext.ProductView({
+						view_type: "List",
+						products_section: $('#product-listing'),
+						item_group: me.item_group
 					});
+					$('.page_content input').prop('disabled', false);
+				});
 			}, 1000));
 		}
 
@@ -132,23 +132,6 @@ $(() => {
 				}
 				this.attribute_filters = attribute_filters;
 			}
-		}
-
-		get_items_with_filters() {
-			const { attribute_filters, field_filters } = this;
-			const args = {
-				field_filters: if_key_exists(field_filters),
-				attribute_filters: if_key_exists(attribute_filters)
-			};
-
-			return new Promise((resolve, reject) => {
-				frappe.call('erpnext.www.all-products.index.get_products_html_for_website', args)
-					.then(r => {
-						if (r.exc) reject(r.exc);
-						else resolve(r.message);
-					})
-					.fail(reject);
-			});
 		}
 	}
 
