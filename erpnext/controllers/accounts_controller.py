@@ -721,16 +721,17 @@ class AccountsController(TransactionBase):
 			tax_map = self.get_tax_map()
 
 			for pe in self.get('advances'):
-				pe = frappe.get_doc('Payment Entry', pe.reference_name)
-				for tax in pe.get('taxes'):
-					allocated_amount = tax_map.get(tax.account_head) - allocated_tax_map.get(tax.account_head)
-					if allocated_amount > tax.tax_amount:
-						allocated_amount = tax.tax_amount
+				if pe.reference_type == 'Payment Entry':
+					pe = frappe.get_doc('Payment Entry', pe.reference_name)
+					for tax in pe.get('taxes'):
+						allocated_amount = tax_map.get(tax.account_head) - allocated_tax_map.get(tax.account_head)
+						if allocated_amount > tax.tax_amount:
+							allocated_amount = tax.tax_amount
 
-					if allocated_amount:
-						frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount - allocated_amount)
-						tax_map[tax.account_head] -= allocated_amount
-						allocated_tax_map[tax.account_head] -= allocated_amount
+						if allocated_amount:
+							frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount - allocated_amount)
+							tax_map[tax.account_head] -= allocated_amount
+							allocated_tax_map[tax.account_head] -= allocated_amount
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_allowance_for
