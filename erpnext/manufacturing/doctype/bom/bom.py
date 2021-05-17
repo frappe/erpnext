@@ -113,6 +113,28 @@ class BOM(WebsiteGenerator):
 
 		return item
 
+	def before_save(self):
+		self.weight_calculation()
+
+	def weight_calculation(self):
+		value1 = value2 = value3 = 0
+		if self.items:
+			for row in self.items:
+				if row.type == "RM":
+					value1 += flt(row.stock_qty) * flt(row.weight_per_unit)
+					value3 += flt(row.qty) * flt(row.weight_per_unit)
+
+		self.rm_weight = flt(value1, self.precision('rm_weight'))
+		self.fg_weight = flt(value3, self.precision('fg_weight'))
+		if self.items:
+			for row in self.items:
+					value2 += flt(row.stock_qty) * flt(row.weight_per_unit)
+		self.bom_weight = flt(value2, self.precision('bom_weight'))
+		if self.rm_weight == 0:
+			self.yeild = 0
+		else:
+			self.yeild = flt((self.fg_weight/self.rm_weight)*100, self.precision('yeild'))
+
 	@frappe.whitelist()
 	def get_routing(self):
 		if self.routing:

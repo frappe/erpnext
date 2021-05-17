@@ -21,6 +21,12 @@
   "get_item_locations",
   "section_break_6",
   "locations",
+  "weight_details_section",
+  "total_weight",
+  "column_break_18",
+  "total_stock_weight",
+  "column_break_20",
+  "total_picked_weight",
   "amended_from"
  ],
  "fields": [
@@ -135,11 +141,45 @@
    "fieldtype": "Link",
    "label": "Material Consumption",
    "options": "Material Consumption"
+  },
+  {
+   "fieldname": "weight_details_section",
+   "fieldtype": "Section Break",
+   "label": "Weight Detais"
+  },
+  {
+   "fieldname": "total_weight",
+   "fieldtype": "Float",
+   "label": "Total Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_18",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_stock_weight",
+   "fieldtype": "Float",
+   "label": "Total Stock Weight",
+   "no_copy": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_20",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "total_picked_weight",
+   "fieldtype": "Float",
+   "label": "Total Picked Weight",
+   "no_copy": 1,
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-13 20:41:09.346973",
+ "modified": "2021-05-14 16:07:22.750736",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Pick List",

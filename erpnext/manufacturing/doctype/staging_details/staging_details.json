@@ -1,0 +1,50 @@
+{
+ "actions": [],
+ "creation": "2021-05-10 18:48:30.578740",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "company",
+  "staging_picklist_warehouse",
+  "staging_material_request_warehouse"
+ ],
+ "fields": [
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Company",
+   "options": "Company",
+   "reqd": 1
+  },
+  {
+   "fieldname": "staging_picklist_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Staging Picklist Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  },
+  {
+   "fieldname": "staging_material_request_warehouse",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Staging Material Request Warehouse",
+   "options": "Warehouse",
+   "reqd": 1
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2021-05-11 16:19:59.478654",
+ "modified_by": "Administrator",
+ "module": "Manufacturing",
+ "name": "Staging Details",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "track_changes": 1
+}

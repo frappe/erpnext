@@ -79,36 +79,46 @@ function make_stock_entry(frm){
 }
 
 function add_details_line(frm,line_obj){
+    console.log(frm.doc.amount);
     frappe.call({
-        method: "erpnext.manufacturing.doctype.material_produce.material_produce.add_details_line",
+        method: "add_details_line",
+        doc: frm.doc,
         args: {
             line_id: line_obj.name,
-            company: frm.doc.company,
+            // company: frm.doc.company,
             item_code: line_obj.item_code,
             warehouse: line_obj.s_warehouse,
             qty_produced: line_obj.qty_produced,
             batch_size: frm.doc.batch_size,
             work_order: frm.doc.work_order,
             data:line_obj.data,
-            amount: frm.doc.amount
+            amount: frm.doc.amount,
+            type: line_obj.type,
+            bom: frm.doc.bom,
+            // cost_of_rm_consumed: frm.doc.cost_of_rm_consumed,
+            // cost_of_operation_consumed: frm.doc.cost_of_operation_consumed,
+            partial_produce: frm.doc.partial_produce
         },
         callback: function (r) {
             if(r.message){
+                frm.refresh_field("cost_of_rm_consumed");
+                frm.refresh_field("cost_of_operation_consumed");
                 frm.clear_table('material_produce_details');
                 for (const d of r.message){
                     var row = frm.add_child('material_produce_details');
                     row.item_code = d.item_code;
                     row.item_name= d.item_name,
                     row.t_warehouse = d.t_warehouse,
-                    row.qty_produced = d.qty_produced,
+                    row.qty_produced = flt(d.qty_produced, precision('qty_produced', row)),
                     row.has_batch_no = d.has_batch_no,
-                    row.batch = d.batch,
-                    row.rate = d.rate,
+                    row.batch_series = d.batch,
+                    row.rate = flt(d.rate, precision('rate', row)),
                     row.weight = d.weight,
                     row.line_ref = d.line_ref
                 }
                 frm.refresh_field('material_produce_details');
             }
+            frm.save();
         }
     });
 }
