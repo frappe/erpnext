@@ -16,7 +16,7 @@ from erpnext.controllers.buying_controller import BuyingController
 from erpnext.manufacturing.doctype.work_order.work_order import get_item_details
 from erpnext.buying.utils import check_on_hold_or_closed_status, validate_for_items
 from erpnext.stock.doctype.item.item import get_item_defaults
-
+import math
 from six import string_types
 
 form_grid_templates = {
@@ -599,29 +599,32 @@ def get_wo_items(schedule_start_from,schedule_start_to,item_to_manufacture = Non
 			for res in result:
 				d = {}
 				qty_sum = 0
-				item_detail = frappe.get_value("Item",{'item_code':res.get('item_code')},['description','stock_uom','item_name','production_item_name','item_name','allowed_in_wo_staging','multi_order_qty','min_order_qty'],as_dict = True)
-				default_data = frappe.db.get_value('Item Default', {'parent': res.get('item_code')},['buying_cost_center','expense_account','default_warehouse'],as_dict = True)
-				bin_data = frappe.db.get_value('Bin', {'item_code': res.get('item_code')},['projected_qty','actual_qty','valuation_rate'],as_dict = True)
-				d['item_code'] = res.get('item_code')
-				d['desc'] = item_detail.get('description')
-				d['stock_uom'] = item_detail.get('stock_uom')
-				d['item_name'] = item_detail.get('item_name')
-				d['production_item_name'] = item_detail['production_item_name']
-				d['cost_center'] = default_data.get('buying_cost_center')
-				d['expense_account'] = default_data.get('expense_account')
-				d['min_order_qty'] = item_detail.get('min_order_qty')
-				if bin_data:
+				item_detail = frappe.get_value("Item",{'item_code':res.get('item_code')},['description','stock_uom','item_name','production_item_name','item_name','allowed_in_wo_staging','multi_order_qty','min_order_qty','staging_multiple'],as_dict = True)
+				if item_detail.get('allowed_in_wo_staging') == 'Yes':
+					default_data = frappe.db.get_value('Item Default', {'parent': res.get('item_code')},['buying_cost_center','expense_account','default_warehouse'],as_dict = True)
+					bin_data = frappe.db.get_value('Bin', {'item_code': res.get('item_code')},['projected_qty','actual_qty','valuation_rate'],as_dict = True)
+					d['item_code'] = res.get('item_code')
+					d['desc'] = item_detail.get('description')
+					d['stock_uom'] = item_detail.get('stock_uom')
+					d['item_name'] = item_detail.get('item_name')
+					d['production_item_name'] = item_detail['production_item_name']
+					d['cost_center'] = default_data.get('buying_cost_center')
+					d['expense_account'] = default_data.get('expense_account')
+					d['min_order_qty'] = item_detail.get('min_order_qty')
+					#if bin_data:
 					d['projected_qty'] = bin_data.get('projected_qty')
 					d['actual_qty'] = bin_data.get('actual_qty')
 					d['valuation_rate'] = bin_data.get('valuation_rate')
 
-				#d['default_warehouse'] = default_data.get('default_warehouse')
-
-				for r in res.get('qty'):
-					qty_sum +=r
-				d['qty'] = qty_sum
-				d['production_item_name'] = item_detail['production_item_name']
-				d['multi_order_qty'] = item_detail['multi_order_qty']
-				if item_detail.get('allowed_in_wo_staging') == 'Yes':
+					for r in res.get('qty'):
+						qty_sum +=r
+					if(item_detail.get('staging_multiple') > 0):
+						#round_up_qty=(round(qty/self.staging_multiple),up)*self.staging_multiple
+						round_up_qty = (math.ceil(qty_sum/item_detail.get('staging_multiple'))) * item_detail.get('staging_multiple')
+						d['qty'] = round_up_qty
+					else:
+						d['qty'] = qty_sum
+					d['production_item_name'] = item_detail['production_item_name']
+					d['multi_order_qty'] = item_detail['multi_order_qty']
 					data_set.append(d)
 		return data_set
