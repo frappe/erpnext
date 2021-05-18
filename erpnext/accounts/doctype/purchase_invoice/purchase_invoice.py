@@ -90,6 +90,7 @@ class PurchaseInvoice(BuyingController):
 		self.check_conversion_rate()
 		self.validate_credit_to_acc()
 		self.clear_unallocated_advances("Purchase Invoice Advance", "advances")
+		self.set_advance_gain_or_loss()
 		self.check_on_hold_or_closed_status()
 		self.validate_with_previous_doc()
 		self.validate_uom_is_integer("uom", "qty")
@@ -454,6 +455,7 @@ class PurchaseInvoice(BuyingController):
 			self.get_asset_gl_entry(gl_entries)
 
 		self.make_tax_gl_entries(gl_entries)
+		self.make_exchange_gain_loss_gl_entries(gl_entries)
 		self.make_internal_transfer_gl_entries(gl_entries)
 
 		gl_entries = make_regional_gl_entries(gl_entries, self)
@@ -473,6 +475,43 @@ class PurchaseInvoice(BuyingController):
 				if is_cwip_accounting_enabled(asset_category):
 					return 1
 		return 0
+
+	def make_exchange_gain_loss_gl_entries(self, gl_entries):
+		for d in self.get("advances"):
+			if d.exchange_gain_loss:
+				gain_loss_account = frappe.db.get_value('Company', self.company, 'exchange_gain_loss_account')
+				account_currency = get_account_currency(gain_loss_account)
+				if account_currency != self.company_currency:
+					frappe.throw(_("Currency for {0} must be {1}").format(d.account, self.company_currency))
+				
+				dr_or_cr = 'debit' if d.exchange_gain_loss > 0 else 'credit'
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": gain_loss_account,
+						"account_currency": account_currency,
+						"against": self.supplier,
+						dr_or_cr + "_in_account_currency": abs(d.exchange_gain_loss),
+						dr_or_cr: abs(d.exchange_gain_loss),
+						"cost_center": self.cost_center,
+						"project": self.project
+					}, item=d)
+				)
+
+				dr_or_cr = 'debit' if dr_or_cr == 'credit' else 'credit'
+
+				gl_entries.append(
+					self.get_gl_dict({
+						"account": self.credit_to,
+						"party_type": "Supplier",
+						"party": self.supplier,
+						"against": gain_loss_account,
+						dr_or_cr + "_in_account_currency": flt(abs(d.exchange_gain_loss) / self.conversion_rate),
+						dr_or_cr: abs(d.exchange_gain_loss),
+						"cost_center": self.cost_center,
+						"project": self.project
+					}, self.party_account_currency, item=self)
+				)
 
 	def make_supplier_gl_entry(self, gl_entries):
 		# Checked both rounding_adjustment and rounded_total
