@@ -120,7 +120,7 @@ def get_vehicle_log_data(filters):
 		ORDER BY date""".format(conditions), values, as_dict=1)
 
 	for row in data:
-		row['service_expense'] = get_service_expense(row.name)
+		row['service_expense'] = get_service_expense(row.log_name)
 
 	return data
 

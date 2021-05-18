@@ -40,7 +40,7 @@ class TestVehicleExpenses(unittest.TestCase):
 			'make': 'Maruti',
 			'model': 'PCM',
 			'location': 'Mumbai',
-			'name': vehicle_log.name,
+			'log_name': vehicle_log.name,
 			'odometer': 5010,
 			'date': getdate(),
 			'fuel_qty': 50.0,
