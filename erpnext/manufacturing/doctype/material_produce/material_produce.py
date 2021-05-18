@@ -268,8 +268,7 @@ class MaterialProduce(Document):
                         se_item.is_scrap_item = 1 if res.type == 'Scrap' else 0
                         # in stock uom
                         se_item.conversion_factor = 1.00
-            # if res.type == "FG":
-            #     total_transfer_qty += res.qty_produced
+            
         stock_entry.from_bom = 1
         stock_entry.fg_completed_qty = flt(total_transfer_qty, stock_entry.precision('fg_completed_qty'))
         add_additional_cost(stock_entry, wo)
@@ -277,9 +276,7 @@ class MaterialProduce(Document):
         stock_entry.set_missing_values()
         stock_entry.insert(ignore_permissions=True)
         stock_entry.validate()
-        # for res in self.material_produce_item:
-        #     if res.data:
-        #         for line in json.loads(res.data):
+        stock_entry.validate_work_order()
         stock_entry.flags.ignore_validate_update_after_submit = True
         stock_entry.submit()
         return stock_entry.as_dict()

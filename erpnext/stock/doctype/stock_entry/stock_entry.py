@@ -65,7 +65,7 @@ class StockEntry(StockController):
 		self.validate_uom_is_integer("uom", "qty")
 		self.validate_uom_is_integer("stock_uom", "transfer_qty")
 		self.validate_warehouse()
-		self.validate_work_order()
+		#self.validate_work_order()
 		self.validate_bom()
 		self.mark_finished_and_scrap_items()
 		self.validate_finished_goods()
