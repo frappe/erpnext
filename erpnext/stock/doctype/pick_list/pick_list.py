@@ -83,16 +83,18 @@ class PickList(Document):
 	# return batch_locations
 
 	def weight_details(self):
-		total_weight = total_stock_weight = total_picked_weight = 0
+		total_stock_weight = total_picked_weight = 0
 		if self.locations:
 			for row in self.locations:
-				item_wt = frappe.get_doc("Item", row.item_code)
-				total_weight += flt(row.qty)+flt(item_wt.weight_per_unit) 
-				total_stock_weight += flt(row.stock_qty)+flt(item_wt.weight_per_unit) 
-				total_picked_weight += flt(row.picked_qty)+flt(item_wt.weight_per_unit) 
-		self.total_weight = flt(total_weight, self.precision('total_weight'))
+				item_wt = frappe.get_doc("Item", row.item_code) 
+				total_stock_weight += flt(row.stock_qty)*flt(item_wt.weight_per_unit) 
+				total_picked_weight += flt(row.picked_qty)*flt(item_wt.weight_per_unit) 
+		
 		self.total_stock_weight = flt(total_stock_weight, self.precision('total_stock_weight'))
 		self.total_picked_weight = flt(total_picked_weight, self.precision('total_picked_weight'))
+		if self.work_order:
+			weight = frappe.db.get_value("Work Order", {'name':self.work_order}, 'planned_rm_weight')
+			self.planned_rm_weight = weight
 
 	@frappe.whitelist()
 	def set_item_locations(self, save=False):
