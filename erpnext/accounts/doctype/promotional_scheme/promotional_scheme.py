@@ -85,12 +85,12 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 				if docname:
 					pr = frappe.get_doc('Pricing Rule', docname[0].get('name'))
 					temp_args[applicable_for] = applicable_for_value
-					pr = set_args(temp_args,pr,doc,child_doc,discount_fields,d)
+					pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
 				else:
 					pr = frappe.new_doc("Pricing Rule")
 					pr.title = make_autoname("{0}/.####".format(doc.name))
 					temp_args[applicable_for] = applicable_for_value
-					pr = set_args(temp_args,pr,doc,child_doc,discount_fields,d)
+					pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
 				
 				new_doc.append(pr)
 				
@@ -101,7 +101,7 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 				pr.title = make_autoname("{0}/.####".format(doc.name))
 				temp_args = args.copy()
 				temp_args[applicable_for] = args[applicable_for][i]
-				pr = set_args(temp_args,pr,doc,child_doc,discount_fields,d)
+				pr = set_args(temp_args, pr, doc, child_doc, discount_fields, d)
 				new_doc.append(pr)
 
 	return new_doc
