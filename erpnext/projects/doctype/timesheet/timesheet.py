@@ -209,7 +209,7 @@ def get_projectwise_timesheet_data(project, parent=None, from_time=None, to_time
 	if parent:
 		condition = "AND parent = %(parent)s"
 	if from_time and to_time:
-		condition += "AND from_time BETWEEN %(from_time)s AND %(to_time)s"
+		condition += "AND CAST(from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
 
 	return frappe.db.sql("""select name, parent, billing_hours, billing_amount as billing_amt
 			from `tabTimesheet Detail` where parenttype = 'Timesheet' and docstatus=1 and project = %(project)s {0} and billable = 1

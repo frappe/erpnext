@@ -80,14 +80,29 @@ jobs:
         env:
           TYPE: ${{ matrix.TYPE }}
 
-      - name: Coverage
-        if: matrix.TYPE == 'server'
+      - name: Coverage - Pull Request
+        if: matrix.TYPE == 'server' && github.event_name == 'pull_request'
         run: |
           cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
           cd ${GITHUB_WORKSPACE}
-          pip install coveralls==3.0.1
-          pip install coverage==5.5
+          pip install coveralls==2.2.0
+          pip install coverage==4.5.4
           coveralls --service=github
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+          COVERALLS_SERVICE_NAME: github
+          
+      - name: Coverage - Push
+        if: matrix.TYPE == 'server' && github.event_name == 'push'
+        run: |
+          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
+          cd ${GITHUB_WORKSPACE}
+          pip install coveralls==2.2.0
+          pip install coverage==4.5.4
+          coveralls --service=github-actions
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+          COVERALLS_SERVICE_NAME: github-actions
+
