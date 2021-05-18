@@ -3,53 +3,74 @@
 
 import frappe
 from frappe import _
-from frappe.utils import comma_sep, comma_and, getdate, today, add_months, add_days
-from erpnext.hr.doctype.employee.employee import get_all_employee_emails, get_employee_email, is_holiday
+from frappe.utils import comma_sep, getdate, today, add_months, add_days
+from erpnext.hr.doctype.employee.employee import get_all_employee_emails, get_employee_email
 from erpnext.hr.utils import get_holidays_for_employee
 
 # -----------------
 # HOLIDAY REMINDERS
 # -----------------
-def send_holiday_reminders():
-	"""
-		Send holiday reminders to Employees if 'Send Holiday Reminders' is checked
-	"""
-	to_send = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1)
-	if not to_send:
+def send_reminders_in_advance_weekly():
+	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1) 
+	frequency = frappe.db.get_single_value("HR Settings", "frequency")
+	if not (to_send_in_advance and frequency == "Weekly"):
 		return
-	
+
+	send_advance_holiday_reminders("Weekly")
+
+def send_reminders_in_advance_monthly():
+	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1) 
+	frequency = frappe.db.get_single_value("HR Settings", "frequency")
+	if not (to_send_in_advance and frequency == "Monthly"):
+		return
+
+	send_advance_holiday_reminders("Monthly")
+
+def send_advance_holiday_reminders(frequency):
+	"""Send Holiday Reminders in Advance to Employees
+	`frequency` (str): 'Weekly' or 'Monthly'
+	"""
+	if frequency == "Weekly":
+		start_date = add_days(getdate(), 1)
+		end_date = add_days(getdate(), 7)
+	elif frequency == "Monthly":
+		# Sent on 1st of every month
+		start_date = getdate()
+		end_date = add_months(getdate(), 1)
+	else:
+		return 
+
 	employees = frappe.db.get_all('Employee', pluck='name')
-
 	for employee in employees:
-		has_holiday, holiday_descriptions = is_holiday(employee, only_non_weekly=True, with_description=True, raise_exception=False)
-		if has_holiday:
-			send_holiday_reminder_to_employee(employee, holiday_descriptions)
+		holidays = get_holidays_for_employee(
+			employee,
+			start_date, end_date, 
+			only_non_weekly=True, 
+			raise_exception=False
+		)
+		
+		if not (holidays is None):
+			send_holidays_reminder_in_advance(employee, holidays)
 
-def send_holiday_reminder_to_employee(employee, descriptions):
-	reminder_text, message = get_holiday_reminder_text_and_message(descriptions)
-	
+def send_holidays_reminder_in_advance(employee, holidays):
 	employee_doc = frappe.get_doc('Employee', employee)
 	employee_email = get_employee_email(employee_doc)
-
+	frequency = frappe.db.get_single_value("HR Settings", "frequency")
+	
+	email_header = _("Holidays this Month.") if frequency == "Monthly" else _("Holidays this Week.")
 	frappe.sendmail(
 		recipients=[employee_email],
-		subject=_("Holiday Reminder"),
+		subject=_("Upcoming Holidays Reminder"),
 		template="holiday_reminder",
 		args=dict(
-			reminder_text=reminder_text,
-			message=message
+			reminder_text=_("Hey {}! This email is to remind you about the upcoming holidays.").format(employee_doc.get('first_name')),
+			message=_("Below is the list of upcoming holidays for you:"),
+			advance_holiday_reminder=True,
+			holidays=holidays,
+			frequency=frequency[:-2]
 		),
-		header=_("Today is a holiday for you.")
-	)
-
-def get_holiday_reminder_text_and_message(descriptions):
-	description = descriptions[0] if len(descriptions) == 1 else comma_and(descriptions, add_quotes=False)
-	
-	reminder_text = _("This email is to remind you about today's holiday.")
-	message = _("Holiday is on the occassion of {0}.").format(description)
-
-	return reminder_text, message
-
+		header=email_header
+)
 
 # ------------------
 # BIRTHDAY REMINDERS
@@ -219,70 +240,4 @@ def send_work_anniversary_reminder(recipients, reminder_text, anniversary_person
 			message=message,
 		),
 		header=_("🎊️🎊️ Work Anniversary Reminder 🎊️🎊️")
-	)
-
-
-# ----------------------------------
-# ADVANCE HOLIDAY REMINDERS
-# ----------------------------------
-def send_reminders_in_advance_weekly():
-	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1) 
-	frequency = frappe.db.get_single_value("HR Settings", "frequency")
-	if not (to_send_in_advance and frequency == "Weekly"):
-		return
-
-	send_advance_holiday_reminders("Weekly")
-
-def send_reminders_in_advance_monthly():
-	to_send_in_advance = int(frappe.db.get_single_value("HR Settings", "send_holiday_reminders") or 1) 
-	frequency = frappe.db.get_single_value("HR Settings", "frequency")
-	if not (to_send_in_advance and frequency == "Monthly"):
-		return
-
-	send_advance_holiday_reminders("Monthly")
-
-def send_advance_holiday_reminders(frequency):
-	"""Send Holiday Reminders in Advance to Employees
-	`frequency` (str): 'Weekly' or 'Monthly'
-	"""
-	if frequency == "Weekly":
-		start_date = add_days(getdate(), 1)
-		end_date = add_days(getdate(), 7)
-	elif frequency == "Monthly":
-		# Sent on 1st of every month
-		start_date = getdate()
-		end_date = add_months(getdate(), 1)
-	else:
-		return 
-
-	employees = frappe.db.get_all('Employee', pluck='name')
-	for employee in employees:
-		holidays = get_holidays_for_employee(
-			employee,
-			start_date, end_date, 
-			only_non_weekly=True, 
-			raise_exception=False
-		)
-		
-		if not (holidays is None):
-			send_holidays_reminder_in_advance(employee, holidays)
-
-def send_holidays_reminder_in_advance(employee, holidays):
-	employee_doc = frappe.get_doc('Employee', employee)
-	employee_email = get_employee_email(employee_doc)
-	frequency = frappe.db.get_single_value("HR Settings", "frequency")
-	
-	email_header = _("Holidays this Month.") if frequency == "Monthly" else _("Holidays this Week.")
-	frappe.sendmail(
-		recipients=[employee_email],
-		subject=_("Upcoming Holidays Reminder"),
-		template="holiday_reminder",
-		args=dict(
-			reminder_text=_("Hey {}! This email is to remind you about the upcoming holidays.").format(employee_doc.get('first_name')),
-			message=_("Below is the list of upcoming holidays for you:"),
-			advance_holiday_reminder=True,
-			holidays=holidays,
-			frequency=frequency[:-2]
-		),
-		header=email_header
 	)
