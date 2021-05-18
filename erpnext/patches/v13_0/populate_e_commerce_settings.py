@@ -4,6 +4,8 @@ from frappe.utils import cint
 
 def execute():
 	frappe.reload_doc("e_commerce", "doctype", "e_commerce_settings")
+	frappe.reload_doc("portal", "doctype", "website_filter_field")
+	frappe.reload_doc("portal", "doctype", "website_attribute")
 
 	products_settings_fields = [
 		"hide_variants", "home_page_is_products", "products_per_page",
