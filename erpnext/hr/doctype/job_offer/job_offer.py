@@ -22,15 +22,14 @@ class JobOffer(Document):
 
 	def validate_vacancies(self):
 		staffing_plan = get_staffing_plan_detail(self.designation, self.company, self.offer_date)
-		check_vacancies = frappe.get_single("HR Settings").check_vacancies
-		if staffing_plan and check_vacancies:
+		if staffing_plan:
 			job_offers = self.get_job_offer(staffing_plan.from_date, staffing_plan.to_date)
 			if not staffing_plan.get("vacancies") or cint(staffing_plan.vacancies) - len(job_offers) <= 0:
 				error_variable = 'for ' + frappe.bold(self.designation)
 				if staffing_plan.get("parent"):
 					error_variable = frappe.bold(get_link_to_form("Staffing Plan", staffing_plan.parent))
 
-				frappe.throw(_("There are no vacancies under staffing plan {0}").format(error_variable))
+				frappe.msgprint(_("There are no vacancies under staffing plan {0}").format(error_variable), title = "Warning")
 
 	def on_change(self):
 		update_job_applicant(self.status, self.job_applicant)
