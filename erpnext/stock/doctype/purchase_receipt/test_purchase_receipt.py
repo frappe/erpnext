@@ -13,8 +13,9 @@ from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import make_item
 from six import iteritems
+from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
@@ -143,6 +144,62 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertFalse(frappe.db.get_value('Batch', {'item': item.name, 'reference_name': pr.name}))
 		self.assertFalse(frappe.db.get_all('Serial No', {'batch_no': batch_no}))
+
+	def test_duplicate_serial_nos(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = frappe.db.exists("Item", {'item_name': 'Test Serialized Item 123'})
+		if not item:
+			item = create_item("Test Serialized Item 123")
+			item.has_serial_no = 1
+			item.serial_no_series = "TSI123-.####"
+			item.save()
+		else:
+			item = frappe.get_doc("Item", {'item_name': 'Test Serialized Item 123'})
+
+		# First make purchase receipt
+		pr = make_purchase_receipt(item_code=item.name, qty=2, rate=500)
+		pr.load_from_db()
+
+		serial_nos = frappe.db.get_value('Stock Ledger Entry',
+			{'voucher_type': 'Purchase Receipt', 'voucher_no': pr.name, 'item_code': item.name}, 'serial_no')
+
+		serial_nos = get_serial_nos(serial_nos)
+
+		self.assertEquals(get_serial_nos(pr.items[0].serial_no), serial_nos)
+
+		# Then tried to receive same serial nos in difference company
+		pr_different_company = make_purchase_receipt(item_code=item.name, qty=2, rate=500,
+			serial_no='\n'.join(serial_nos), company='_Test Company 1', do_not_submit=True,
+			warehouse = 'Stores - _TC1')
+
+		self.assertRaises(SerialNoDuplicateError, pr_different_company.submit)
+
+		# Then made delivery note to remove the serial nos from stock
+		dn = create_delivery_note(item_code=item.name, qty=2, rate = 1500, serial_no='\n'.join(serial_nos))
+		dn.load_from_db()
+		self.assertEquals(get_serial_nos(dn.items[0].serial_no), serial_nos)
+
+		posting_date = add_days(today(), -3)
+
+		# Try to receive same serial nos again in the same company with backdated.
+		pr1 = make_purchase_receipt(item_code=item.name, qty=2, rate=500,
+			posting_date=posting_date, serial_no='\n'.join(serial_nos), do_not_submit=True)
+
+		self.assertRaises(SerialNoExistsInFutureTransaction, pr1.submit)
+
+		# Try to receive same serial nos with different company with backdated.
+		pr2 = make_purchase_receipt(item_code=item.name, qty=2, rate=500,
+			posting_date=posting_date, serial_no='\n'.join(serial_nos), company='_Test Company 1', do_not_submit=True,
+			warehouse = 'Stores - _TC1')
+
+		self.assertRaises(SerialNoExistsInFutureTransaction, pr2.submit)
+
+		# Receive the same serial nos after the delivery note posting date and time
+		make_purchase_receipt(item_code=item.name, qty=2, rate=500, serial_no='\n'.join(serial_nos))
+
+		# Raise the error for backdated deliver note entry cancel
+		self.assertRaises(SerialNoExistsInFutureTransaction, dn.cancel)
 
 	def test_purchase_receipt_gl_entry(self):
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory",
@@ -564,30 +621,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 			{"purchase_document_type": "Purchase Receipt", "purchase_document_no": new_pr_doc.name}, "name"))
 
 		new_pr_doc.cancel()
-
-	def test_not_accept_duplicate_serial_no(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-
-		item_code = frappe.db.get_value('Item', {'has_serial_no': 1, 'is_fixed_asset': 0, "has_batch_no": 0})
-		if not item_code:
-			item = make_item("Test Serial Item 1", dict(has_serial_no=1, has_batch_no=0))
-			item_code = item.name
-
-		serial_no = random_string(5)
-		pr1 = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no)
-		dn = create_delivery_note(item_code=item_code, qty=1, serial_no=serial_no)
-
-		pr2 = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no, do_not_submit=True)
-		self.assertRaises(SerialNoDuplicateError, pr2.submit)
-
-		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1,
-			serial_no=serial_no, basic_rate=100, do_not_submit=True)
-		se.submit()
-
-		se.cancel()
-		dn.cancel()
-		pr1.cancel()
 
 	def test_auto_asset_creation(self):
 		asset_item = "Test Asset Item"
