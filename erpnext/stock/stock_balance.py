@@ -299,7 +299,7 @@ def repost_all_stock_vouchers():
 		print("Getting Stock Vouchers List")
 		vouchers = frappe.db.sql("""select distinct voucher_type, voucher_no
 			from `tabStock Ledger Entry` sle
-			order by posting_date, posting_time, name""")
+			order by posting_date, posting_time, creation""")
 
 		print("Deleting SLEs")
 		frappe.db.sql("delete from `tabStock Ledger Entry`")
