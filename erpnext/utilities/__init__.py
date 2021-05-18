@@ -12,7 +12,6 @@ def update_doctypes():
 
 		for f in dt.fields:
 			if f.fieldname == d.fieldname and f.fieldtype in ("Text", "Small Text"):
-				print(f.parent, f.fieldname)
 				f.fieldtype = "Text Editor"
 				dt.save()
 				break

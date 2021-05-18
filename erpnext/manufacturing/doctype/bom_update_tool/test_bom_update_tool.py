@@ -45,16 +45,16 @@ class TestBOMUpdateTool(unittest.TestCase):
 		else:
 			doc = frappe.get_doc("BOM", bom_no)
 
-		self.assertEquals(doc.total_cost, 200)
+		self.assertEqual(doc.total_cost, 200)
 
 		frappe.db.set_value("Item", "BOM Cost Test Item 2", "valuation_rate", 200)
 		update_cost()
 
 		doc.load_from_db()
-		self.assertEquals(doc.total_cost, 300)
+		self.assertEqual(doc.total_cost, 300)
 
 		frappe.db.set_value("Item", "BOM Cost Test Item 2", "valuation_rate", 100)
 		update_cost()
 
 		doc.load_from_db()
-		self.assertEquals(doc.total_cost, 200)
+		self.assertEqual(doc.total_cost, 200)

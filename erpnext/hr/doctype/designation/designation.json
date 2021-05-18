@@ -182,6 +182,10 @@
    "share": 1,
    "submit": 0,
    "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Sales User"
   }
  ],
  "quick_entry": 1,

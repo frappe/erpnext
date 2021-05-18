@@ -1,24 +1,12 @@
-name: CI
+name: Patch
 
-on: [pull_request, workflow_dispatch, push]
+on: [pull_request, workflow_dispatch]
 
 jobs:
   test:
     runs-on: ubuntu-18.04
 
-    strategy:
-      fail-fast: false
-
-      matrix:
-       include:
-        - TYPE: "server"
-          JOB_NAME: "Server"
-          RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-tests --app erpnext --coverage
-        - TYPE: "patch"
-          JOB_NAME: "Patch"
-          RUN_COMMAND: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate
-
-    name: ${{ matrix.JOB_NAME }}
+    name: Patch Test
 
     services:
       mysql:
@@ -49,6 +37,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
+
       - name: Cache node modules
         uses: actions/cache@v2
         env:
@@ -60,6 +49,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -75,19 +65,5 @@ jobs:
       - name: Install
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
-      - name: Run Tests
-        run: ${{ matrix.RUN_COMMAND }}
-        env:
-          TYPE: ${{ matrix.TYPE }}
-
-      - name: Coverage
-        if: matrix.TYPE == 'server'
-        run: |
-          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
-          cd ${GITHUB_WORKSPACE}
-          pip install coveralls==3.0.1
-          pip install coverage==5.5
-          coveralls --service=github
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
+      - name: Run Patch Tests
+        run: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate

@@ -517,7 +517,7 @@ def download_ewb_json():
 
 		if not isinstance(docname, list):
 			# removes characters not allowed in a filename (https://stackoverflow.com/a/38766141/4767738)
-			filename_prefix = re.sub('[^\w_.)( -]', '', docname)
+			filename_prefix = re.sub(r'[^\w_.)( -]', '', docname)
 
 	frappe.local.response.filename = '{0}_e-WayBill_Data_{1}.json'.format(filename_prefix, frappe.utils.random_string(5))
 
@@ -879,3 +879,24 @@ def update_taxable_values(doc, method):
 	if total_charges != additional_taxes:
 		diff = additional_taxes - total_charges
 		doc.get('items')[item_count - 1].taxable_value += diff
+
+def get_depreciation_amount(asset, depreciable_value, row):
+	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
+
+	if row.depreciation_method in ("Straight Line", "Manual"):
+		depreciation_amount = (flt(row.value_after_depreciation) -
+			flt(row.expected_value_after_useful_life)) / depreciation_left
+	else:
+		rate_of_depreciation = row.rate_of_depreciation
+		# if its the first depreciation
+		if depreciable_value == asset.gross_purchase_amount:
+			# as per IT act, if the asset is purchased in the 2nd half of fiscal year, then rate is divided by 2
+			diff = date_diff(asset.available_for_use_date, row.depreciation_start_date)
+			if diff <= 180:
+				rate_of_depreciation = rate_of_depreciation / 2
+				frappe.msgprint(
+					_('As per IT Act, the rate of depreciation for the first depreciation entry is reduced by 50%.'))
+
+		depreciation_amount = flt(depreciable_value * (flt(rate_of_depreciation) / 100))
+
+	return depreciation_amount

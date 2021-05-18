@@ -5,40 +5,44 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "item_defaults_section",
   "item_naming_by",
   "item_group",
   "stock_uom",
   "default_warehouse",
-  "sample_retention_warehouse",
   "column_break_4",
   "valuation_method",
+  "sample_retention_warehouse",
+  "use_naming_series",
+  "naming_series_prefix",
+  "section_break_9",
   "over_delivery_receipt_allowance",
   "role_allowed_to_over_deliver_receive",
-  "action_if_quality_inspection_is_not_submitted",
-  "show_barcode_field",
-  "clean_description_html",
-  "disable_serial_no_and_batch_selector",
-  "section_break_7",
+  "column_break_12",
   "auto_insert_price_list_rate_if_missing",
   "allow_negative_stock",
-  "column_break_10",
+  "show_barcode_field",
+  "clean_description_html",
+  "action_if_quality_inspection_is_not_submitted",
+  "section_break_7",
   "automatically_set_serial_nos_based_on_fifo",
   "set_qty_in_transactions_based_on_serial_no_input",
+  "column_break_10",
+  "disable_serial_no_and_batch_selector",
   "auto_material_request",
   "auto_indent",
+  "column_break_27",
   "reorder_email_notify",
   "inter_warehouse_transfer_settings_section",
   "allow_from_dn",
+  "column_break_31",
   "allow_from_pr",
   "control_historical_stock_transactions_section",
-  "role_allowed_to_create_edit_back_dated_transactions",
-  "column_break_26",
   "stock_frozen_upto",
   "stock_frozen_upto_days",
-  "stock_auth_role",
-  "batch_id_sb",
-  "use_naming_series",
-  "naming_series_prefix"
+  "column_break_26",
+  "role_allowed_to_create_edit_back_dated_transactions",
+  "stock_auth_role"
  ],
  "fields": [
   {
@@ -102,23 +106,24 @@
    "default": "1",
    "fieldname": "show_barcode_field",
    "fieldtype": "Check",
-   "label": "Show Barcode Field"
+   "label": "Show Barcode Field in Stock Transactions"
   },
   {
    "default": "1",
    "fieldname": "clean_description_html",
    "fieldtype": "Check",
-   "label": "Convert Item Description to Clean HTML"
+   "label": "Convert Item Description to Clean HTML in Transactions"
   },
   {
    "fieldname": "section_break_7",
-   "fieldtype": "Section Break"
+   "fieldtype": "Section Break",
+   "label": "Serialised and Batch Setting"
   },
   {
    "default": "0",
    "fieldname": "auto_insert_price_list_rate_if_missing",
    "fieldtype": "Check",
-   "label": "Auto Insert Price List Rate If Missing"
+   "label": "Auto Insert Item Price If Missing"
   },
   {
    "default": "0",
@@ -180,15 +185,10 @@
    "options": "Role"
   },
   {
-   "fieldname": "batch_id_sb",
-   "fieldtype": "Section Break",
-   "label": "Batch Identification"
-  },
-  {
    "default": "0",
    "fieldname": "use_naming_series",
    "fieldtype": "Check",
-   "label": "Use Naming Series"
+   "label": "Have Default Naming Series for Batch ID?"
   },
   {
    "default": "BATCH-",
@@ -242,6 +242,28 @@
    "fieldtype": "Link",
    "label": "Role Allowed to Over Deliver/Receive",
    "options": "Role"
+  },
+  {
+   "fieldname": "item_defaults_section",
+   "fieldtype": "Section Break",
+   "label": "Item Defaults"
+  },
+  {
+   "fieldname": "section_break_9",
+   "fieldtype": "Section Break",
+   "label": "Stock Transactions Settings"
+  },
+  {
+   "fieldname": "column_break_12",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_27",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_31",
+   "fieldtype": "Column Break"
   }
  ],
  "icon": "icon-cog",
@@ -249,7 +271,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-03-11 18:48:14.513055",
+ "modified": "2021-04-30 17:27:42.709231",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Settings",
