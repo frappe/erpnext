@@ -19,20 +19,23 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/stock",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-10-14 14:54:42.741971",
+ "modified": "2021-05-18 17:01:36.137180",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Setup your Warehouse"
+   "step": "Create an Item"
   },
   {
-   "step": "Create a Product"
+   "step": "View Warehouses"
   },
   {
-   "step": "Create a Supplier"
+   "step": "Create a Warehouse"
+  },
+  {
+   "step": "Stock Settings"
   },
   {
    "step": "Introduction to Stock Entry"
@@ -41,10 +44,13 @@
    "step": "Create a Stock Entry"
   },
   {
+   "step": "View Stock Ledger"
+  },
+  {
    "step": "Create a Purchase Receipt"
   },
   {
-   "step": "Stock Settings"
+   "step": "Create a Delivery Note"
   }
  ],
  "subtitle": "Inventory, Warehouses, Analysis, and more.",

@@ -1,0 +1,23 @@
+{
+ "action": "View Report",
+ "creation": "2021-05-17 16:16:10.727959",
+ "description": "# View Stock Ledger\nThe [**Stock Ledger**](https://docs.erpnext.com/docs/user/manual/en/stock/stock-ledger) is a detailed record that keeps track of stock movements for a company. \n\nIn this step we will view the *Stock Ledger*.",
+ "docstatus": 0,
+ "doctype": "Onboarding Step",
+ "idx": 0,
+ "is_complete": 0,
+ "is_single": 0,
+ "is_skipped": 0,
+ "modified": "2021-05-18 16:16:38.150079",
+ "modified_by": "Administrator",
+ "name": "View Stock Ledger",
+ "owner": "Administrator",
+ "reference_report": "Stock Ledger",
+ "report_description": "You can set the filters to see entries specific to the previous steps.",
+ "report_reference_doctype": "Stock Ledger Entry",
+ "report_type": "Script Report",
+ "show_form_tour": 0,
+ "show_full_form": 0,
+ "title": "View Stock Ledger",
+ "validate_action": 1
+}
