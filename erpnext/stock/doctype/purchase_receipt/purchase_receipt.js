@@ -358,7 +358,7 @@ frappe.tour['Purchase Receipt'] = [
 	{
 		fieldname: "items",
 		title: __("Items"),
-		description: __("This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc. ") +
+		description: __("This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc.") + " " +
 		__("Different 'Source Warehouse' and 'Target Warehouse' can be set for each row.")
 	},
 	{
