@@ -347,3 +347,23 @@ var validate_sample_quantity = function(frm, cdt, cdn) {
 		});
 	}
 };
+
+
+frappe.tour['Purchase Receipt'] = [
+	{
+		fieldname: "supplier",
+		title: __("Supplier"),
+		description: __("This field is used to set the 'Supplier'.")
+	},
+	{
+		fieldname: "items",
+		title: __("Items"),
+		description: __("This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc. ") +
+		__("Different 'Source Warehouse' and 'Target Warehouse' can be set for each row.")
+	},
+	{
+		fieldname: "set_posting_time",
+		title: __("Edit Posting Date and Time"),
+		description: __("This option can be checked to edit the 'Posting Date' and 'Posting Time' fields.")
+	}
+]
