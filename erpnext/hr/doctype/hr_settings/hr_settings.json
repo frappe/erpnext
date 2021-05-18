@@ -19,11 +19,7 @@
   "column_break_18",
   "expense_approver_mandatory_in_expense_claim",
   "allow_backdated_leave_application",
-  "role_allowed_to_create_backdated_leave_application",
-  "hiring_settings",
-  "leave_approval_notification_template",
-  "send_leave_notification",
-  "leave_status_notification_template"
+  "role_allowed_to_create_backdated_leave_application"
  ],
  "fields": [
   {
@@ -69,22 +65,6 @@
    "label": "Leave and Expense Settings"
   },
   {
-   "depends_on": "eval: doc.send_leave_notification == 1",
-   "fieldname": "leave_approval_notification_template",
-   "fieldtype": "Link",
-   "label": "Leave Approval Notification Template",
-   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
-   "options": "Email Template"
-  },
-  {
-   "depends_on": "eval: doc.send_leave_notification == 1",
-   "fieldname": "leave_status_notification_template",
-   "fieldtype": "Link",
-   "label": "Leave Status Notification Template",
-   "mandatory_depends_on": "eval: doc.send_leave_notification == 1",
-   "options": "Email Template"
-  },
-  {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
   },
@@ -101,12 +81,6 @@
    "label": "Show Leaves Of All Department Members In Calendar"
   },
   {
-   "collapsible": 1,
-   "fieldname": "hiring_settings",
-   "fieldtype": "Section Break",
-   "label": "Hiring Settings"
-  },
-  {
    "default": "0",
    "fieldname": "auto_leave_encashment",
    "fieldtype": "Check",
@@ -119,12 +93,6 @@
    "label": "Role Allowed to Create Backdated Leave Application",
    "mandatory_depends_on": "eval:doc.allow_backdated_leave_application == 0",
    "options": "Role"
-  },
-  {
-   "default": "1",
-   "fieldname": "send_leave_notification",
-   "fieldtype": "Check",
-   "label": "Send Leave Notification"
   },
   {
    "fieldname": "standard_working_hours",
@@ -142,7 +110,7 @@
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-18 03:50:37.688852",
+ "modified": "2021-05-18 06:05:38.149589",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
