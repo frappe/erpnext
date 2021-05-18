@@ -86,3 +86,26 @@ function convert_to_group_or_ledger(frm){
 		
 	})
 }
+
+frappe.tour['Warehouse'] = [
+	{
+		fieldname: "warehouse_name",
+		title: __("Warehouse Name"),
+		description: __("A 'Warehouse Name' can be assigned to the warehouse. This should reflect the type of goods it contains.")
+	},
+	{
+		fieldname: "warehouse_type",
+		title: __("Warehouse Type"),
+		description: __("A 'Warehouse Type' can be set to classify warehouses.")
+	},
+	{
+		fieldname: "is_group",
+		title: __("Is Group"),
+		description: __("If you check 'Is Group', you can group warehouses under this warehouse.")
+	},
+	{
+		fieldname: "account",
+		title: __("Account"),
+		description: __("This field can be used to set a default account for all transactions with this warehouse.")
+	},
+]
