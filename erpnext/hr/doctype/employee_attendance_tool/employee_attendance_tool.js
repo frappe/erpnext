@@ -68,13 +68,13 @@ erpnext.employee_attendance_tool = {
 	}
 }
 
-erpnext.MarkedEmployee = Class.extend({
-	init: function(frm, wrapper, employee) {
+erpnext.MarkedEmployee = class MarkedEmployee {
+	constructor(frm, wrapper, employee) {
 		this.wrapper = wrapper;
 		this.frm = frm;
 		this.make(frm, employee);
-	},
-	make: function(frm, employee) {
+	}
+	make(frm, employee) {
 		var me = this;
 		$(this.wrapper).empty();
 
@@ -104,16 +104,16 @@ erpnext.MarkedEmployee = Class.extend({
 				})).appendTo(row);
 		});
 	}
-});
+};
 
 
-erpnext.EmployeeSelector = Class.extend({
-	init: function(frm, wrapper, employee) {
+erpnext.EmployeeSelector = class EmployeeSelector {
+	constructor(frm, wrapper, employee) {
 		this.wrapper = wrapper;
 		this.frm = frm;
 		this.make(frm, employee);
-	},
-	make: function(frm, employee) {
+	}
+	make(frm, employee) {
 		var me = this;
 
 		$(this.wrapper).empty();
@@ -266,6 +266,6 @@ erpnext.EmployeeSelector = Class.extend({
 
 		mark_employee_toolbar.appendTo($(this.wrapper));
 	}
-});
+};
 
 

@@ -72,8 +72,8 @@ frappe.ui.form.on('Student Attendance Tool', {
 });
 
 
-education.StudentsEditor = Class.extend({
-	init: function(frm, wrapper, students) {
+education.StudentsEditor = class StudentsEditor {
+	constructor(frm, wrapper, students) {
 		this.wrapper = wrapper;
 		this.frm = frm;
 		if(students.length > 0) {
@@ -81,8 +81,8 @@ education.StudentsEditor = Class.extend({
 		} else {
 			this.show_empty_state();
 		}
-	},
-	make: function(frm, students) {
+	}
+	make(frm, students) {
 		var me = this;
 
 		$(this.wrapper).empty();
@@ -173,13 +173,13 @@ education.StudentsEditor = Class.extend({
 		});
 
 		$(htmls.join("")).appendTo(me.wrapper);
-	},
+	}
 
-	show_empty_state: function() {
+	show_empty_state() {
 		$(this.wrapper).html(
 			`<div class="text-center text-muted" style="line-height: 100px;">
 				${__("No Students in")} ${this.frm.doc.student_group}
 			</div>`
 		);
 	}
-});
+};
