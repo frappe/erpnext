@@ -7,24 +7,23 @@
  "engine": "InnoDB",
  "field_order": [
   "employee_settings",
-  "retirement_age",
   "emp_created_by",
-  "column_break_4",
   "standard_working_hours",
+  "column_break_4",
+  "retirement_age",
   "stop_birthday_reminders",
-  "expense_approver_mandatory_in_expense_claim",
   "leave_settings",
-  "send_leave_notification",
-  "leave_approval_notification_template",
-  "leave_status_notification_template",
-  "role_allowed_to_create_backdated_leave_application",
-  "column_break_18",
   "leave_approver_mandatory_in_leave_application",
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
-  "restrict_backdated_leave_application",
+  "column_break_18",
+  "expense_approver_mandatory_in_expense_claim",
+  "allow_backdated_leave_application",
+  "role_allowed_to_create_backdated_leave_application",
   "hiring_settings",
-  "check_vacancies"
+  "leave_approval_notification_template",
+  "send_leave_notification",
+  "leave_status_notification_template"
  ],
  "fields": [
   {
@@ -43,7 +42,7 @@
    "description": "Employee records are created using the selected field",
    "fieldname": "emp_created_by",
    "fieldtype": "Select",
-   "label": "Employee Records to be created by",
+   "label": "Employee Naming By",
    "options": "Naming Series\nEmployee Number\nFull Name"
   },
   {
@@ -67,7 +66,7 @@
    "collapsible": 1,
    "fieldname": "leave_settings",
    "fieldtype": "Section Break",
-   "label": "Leave Settings"
+   "label": "Leave and Expense Settings"
   },
   {
    "depends_on": "eval: doc.send_leave_notification == 1",
@@ -109,27 +108,16 @@
   },
   {
    "default": "0",
-   "fieldname": "check_vacancies",
-   "fieldtype": "Check",
-   "label": "Check Vacancies On Job Offer Creation"
-  },
-  {
-   "default": "0",
    "fieldname": "auto_leave_encashment",
    "fieldtype": "Check",
    "label": "Auto Leave Encashment"
   },
   {
-   "default": "0",
-   "fieldname": "restrict_backdated_leave_application",
-   "fieldtype": "Check",
-   "label": "Restrict Backdated Leave Application"
-  },
-  {
-   "depends_on": "eval:doc.restrict_backdated_leave_application == 1",
+   "depends_on": "eval:doc.allow_backdated_leave_application == 0",
    "fieldname": "role_allowed_to_create_backdated_leave_application",
    "fieldtype": "Link",
    "label": "Role Allowed to Create Backdated Leave Application",
+   "mandatory_depends_on": "eval:doc.allow_backdated_leave_application == 0",
    "options": "Role"
   },
   {
@@ -142,13 +130,19 @@
    "fieldname": "standard_working_hours",
    "fieldtype": "Int",
    "label": "Standard Working Hours"
+  },
+  {
+   "default": "0",
+   "fieldname": "allow_backdated_leave_application",
+   "fieldtype": "Check",
+   "label": "Allow Backdated Leave Application"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-11 10:52:56.192773",
+ "modified": "2021-05-18 03:50:37.688852",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
