@@ -5,7 +5,8 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 from frappe.utils import flt
-from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data)
+from erpnext.accounts.report.financial_statements import (get_period_list, get_columns, get_data,
+	get_filtered_list_for_consolidated_report)
 
 def execute(filters=None):
 	period_list = get_period_list(filters.from_fiscal_year, filters.to_fiscal_year,
@@ -33,12 +34,16 @@ def execute(filters=None):
 	chart = get_chart_data(filters, columns, income, expense, net_profit_loss)
 
 	currency = filters.presentation_currency or frappe.get_cached_value('Company', filters.company, "default_currency")
-	report_summary = get_report_summary(period_list, filters.periodicity, income, expense, net_profit_loss, currency)
+	report_summary = get_report_summary(period_list, filters.periodicity, income, expense, net_profit_loss, currency, filters)
 
 	return columns, data, None, chart, report_summary
 
-def get_report_summary(period_list, periodicity, income, expense, net_profit_loss, currency, consolidated=False):
+def get_report_summary(period_list, periodicity, income, expense, net_profit_loss, currency, filters, consolidated=False):
 	net_income, net_expense, net_profit = 0.0, 0.0, 0.0
+
+	# from consolidated financial statement
+	if filters.get('accumulated_in_group_company'):
+		period_list = get_filtered_list_for_consolidated_report(filters, period_list)
 
 	for period in period_list:
 		key = period if consolidated else period.key
