@@ -12,15 +12,10 @@ frappe.ui.form.on("Stock Reconciliation", {
 			return {
 				query: "erpnext.controllers.queries.item_query",
 				filters:{
-					"is_stock_item": 1,
-					"has_serial_no": 0
+					"is_stock_item": 1
 				}
 			}
 		});
-
-		if (cur_frm.doc.reset_rate) {
-
-		}
 
 		var me = this;
 
@@ -93,6 +88,7 @@ frappe.ui.form.on("Stock Reconciliation", {
 					company: frm.doc.company,
 					warehouse: frm.doc.default_warehouse,
 					item_group: frm.doc.selected_item_group,
+					brand: frm.doc.selected_brand,
 					item_code: frm.doc.selected_item_code,
 					get_batches: cint(frm.doc.get_batches),
 					sort_by: frm.doc.sort_by,
@@ -131,7 +127,6 @@ frappe.ui.form.on("Stock Reconciliation", {
 						warehouse: d.warehouse,
 						batch_no: d.batch_no,
 						cost_center: d.cost_center,
-						qty: d.qty,
 						valuation_rate: d.valuation_rate,
 						reset_rate: frm.doc.reset_rate,
 						loose_uom: frm.doc.loose_uom
@@ -236,9 +231,17 @@ frappe.ui.form.on("Stock Reconciliation Item", {
 		frm.events.set_amount_quantity(frm, cdt, cdn);
 	},
 
+	serial_no: function(frm, cdt, cdn) {
+		var child = locals[cdt][cdn];
+
+		if (child.serial_no) {
+			const serial_nos = child.serial_no.trim().split('\n');
+			frappe.model.set_value(cdt, cdn, "qty", serial_nos.length);
+		}
+	},
+
 	loose_uom: function(frm, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
-		debugger;
 		if(item.item_code && item.loose_uom) {
 			return frm.call({
 				method: "erpnext.stock.get_item_details.get_conversion_factor",

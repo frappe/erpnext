@@ -506,9 +506,6 @@ class PurchaseInvoice(BuyingController):
 			for item in pr_doc.get("items"):
 				item.db_update()
 
-			# update latest valuation rate in serial no
-			update_rate_in_serial_no_for_non_asset_items(pr_doc)
-
 			# update stock & gl entries for cancelled state of PR
 			pr_doc.docstatus = 2
 			pr_doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)

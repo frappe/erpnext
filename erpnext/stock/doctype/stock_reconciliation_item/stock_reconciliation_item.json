@@ -8,29 +8,32 @@
   "barcode",
   "item_code",
   "item_name",
-  "warehouse",
   "column_break_6",
+  "warehouse",
+  "batch_no",
   "section_break_6",
   "qty",
   "stock_uom",
+  "column_break_13",
   "loose_qty",
   "loose_uom",
-  "column_break_13",
+  "cb_13",
+  "conversion_factor",
   "stock_loose_qty",
   "total_qty",
+  "column_break_15",
   "valuation_rate",
   "amount",
-  "conversion_factor",
-  "serial_no_and_batch_section",
-  "serial_no",
-  "column_break_11",
-  "batch_no",
   "section_break_3",
   "current_qty",
-  "current_serial_no",
   "column_break_9",
   "current_valuation_rate",
+  "column_break_23",
   "current_amount",
+  "serial_no_and_batch_section",
+  "current_serial_no",
+  "column_break_11",
+  "serial_no",
   "section_break_14",
   "quantity_difference",
   "column_break_16",
@@ -44,7 +47,6 @@
    "print_hide": 1
   },
   {
-   "columns": 3,
    "fieldname": "item_code",
    "fieldtype": "Link",
    "in_global_search": 1,
@@ -55,11 +57,11 @@
    "reqd": 1
   },
   {
+   "fetch_from": "item_code.item_name",
    "fieldname": "item_name",
    "fieldtype": "Data",
    "in_global_search": 1,
    "label": "Item Name",
-   "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
   },
@@ -67,6 +69,7 @@
    "columns": 2,
    "fieldname": "warehouse",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "in_standard_filter": 1,
    "label": "Warehouse",
    "options": "Warehouse",
@@ -81,7 +84,6 @@
    "fieldname": "qty",
    "fieldtype": "Float",
    "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Physical Qty"
   },
   {
@@ -106,8 +108,8 @@
   },
   {
    "fieldname": "serial_no",
-   "fieldtype": "Small Text",
-   "label": "Serial No"
+   "fieldtype": "Long Text",
+   "label": "Physical Serial Nos"
   },
   {
    "fieldname": "column_break_11",
@@ -116,7 +118,7 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break",
-   "label": "Before reconciliation"
+   "label": "Before Reconciliation"
   },
   {
    "columns": 1,
@@ -131,7 +133,7 @@
   {
    "fieldname": "current_serial_no",
    "fieldtype": "Small Text",
-   "label": "Current Serial No",
+   "label": "System Serial Nos",
    "no_copy": 1,
    "print_hide": 1,
    "read_only": 1
@@ -143,14 +145,14 @@
   {
    "fieldname": "current_valuation_rate",
    "fieldtype": "Currency",
-   "label": "Current Valuation Rate",
+   "label": "System Valuation Rate",
    "options": "Company:company:default_currency",
    "read_only": 1
   },
   {
    "fieldname": "current_amount",
    "fieldtype": "Currency",
-   "label": "Current Amount",
+   "label": "System Amount",
    "options": "Company:company:default_currency",
    "read_only": 1
   },
@@ -181,13 +183,13 @@
   {
    "fieldname": "batch_no",
    "fieldtype": "Link",
+   "in_standard_filter": 1,
    "label": "Batch No",
    "options": "Batch"
   },
   {
    "fieldname": "conversion_factor",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Conversion Factor",
    "precision": "9",
    "read_only": 1
@@ -195,14 +197,11 @@
   {
    "fieldname": "loose_qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
-   "in_standard_filter": 1,
    "label": "Loose Qty"
   },
   {
    "fieldname": "loose_uom",
    "fieldtype": "Link",
-   "in_list_view": 1,
    "label": "Loose UOM",
    "options": "UOM"
   },
@@ -224,7 +223,6 @@
   {
    "fieldname": "total_qty",
    "fieldtype": "Float",
-   "in_list_view": 1,
    "label": "Total Physical Qty",
    "precision": "6",
    "read_only": 1
@@ -235,10 +233,22 @@
    "label": "Loose Qty as per Stock UOM",
    "precision": "6",
    "read_only": 1
+  },
+  {
+   "fieldname": "column_break_15",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "column_break_23",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "cb_13",
+   "fieldtype": "Column Break"
   }
  ],
  "istable": 1,
- "modified": "2021-04-23 16:52:55.737642",
+ "modified": "2021-05-18 17:52:28.311417",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Reconciliation Item",

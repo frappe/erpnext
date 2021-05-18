@@ -80,14 +80,14 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 
 	If `with_valuation_rate` is True, will return tuple (qty, rate)"""
 
-	from erpnext.stock.stock_ledger import get_previous_sle
+	from erpnext.stock.stock_ledger import get_previous_sle, get_serial_nos_after_sle
 
 	if not posting_date: posting_date = nowdate()
 	if not posting_time: posting_time = nowtime()
 
 	args = {
 		"item_code": item_code,
-		"warehouse":warehouse,
+		"warehouse": warehouse,
 		"posting_date": posting_date,
 		"posting_time": posting_time,
 		"batch_no": batch_no
@@ -101,12 +101,13 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 
 			if (serial_nos and
 				len(get_serial_nos_data(serial_nos)) < last_entry.qty_after_transaction):
-				serial_nos = get_serial_nos_data_after_transactions(args)
+				serial_nos = get_serial_nos_after_sle(args)
 
 			return ((last_entry.qty_after_transaction,
-					 last_entry.batch_valuation_rate if batch_no else last_entry.valuation_rate,
-					 last_entry.batch_stock_value if batch_no else last_entry.stock_value, serial_nos)
-				if last_entry else (0.0, 0.0, 0.0, 0.0))
+					last_entry.batch_valuation_rate if batch_no else last_entry.valuation_rate,
+					last_entry.batch_stock_value if batch_no else last_entry.stock_value,
+					serial_nos)
+				if last_entry else (0.0, 0.0, 0.0, ""))
 		else:
 			return (last_entry.qty_after_transaction,
 					last_entry.batch_valuation_rate if batch_no else last_entry.valuation_rate,
@@ -114,23 +115,6 @@ def get_stock_balance(item_code, warehouse, posting_date=None, posting_time=None
 				if last_entry else (0.0, 0.0, 0.0)
 	else:
 		return last_entry.qty_after_transaction if last_entry else 0.0
-
-def get_serial_nos_data_after_transactions(args):
-	serial_nos = []
-	data = frappe.db.sql(""" SELECT serial_no, actual_qty
-		FROM `tabStock Ledger Entry`
-		WHERE
-			item_code = %(item_code)s and warehouse = %(warehouse)s
-			and timestamp(posting_date, posting_time) < timestamp(%(posting_date)s, %(posting_time)s)
-			order by posting_date, posting_time asc """, args, as_dict=1)
-
-	for d in data:
-		if d.actual_qty > 0:
-			serial_nos.extend(get_serial_nos_data(d.serial_no))
-		else:
-			serial_nos = list(set(serial_nos) - set(get_serial_nos_data(d.serial_no)))
-
-	return '\n'.join(serial_nos)
 
 def get_serial_nos_data(serial_nos):
 	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos

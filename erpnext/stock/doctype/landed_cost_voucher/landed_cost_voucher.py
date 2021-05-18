@@ -281,11 +281,6 @@ class LandedCostVoucher(AccountsController):
 			for item in doc.get("items"):
 				item.db_update()
 
-			# asset rate will be updated while creating asset gl entries from PI or PY
-
-			# update latest valuation rate in serial no
-			update_rate_in_serial_no_for_non_asset_items(doc)
-
 			# update stock & gl entries for cancelled state of PR
 			doc.docstatus = 2
 			doc.update_stock_ledger(allow_negative_stock=True, via_landed_cost_voucher=True)

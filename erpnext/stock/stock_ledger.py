@@ -162,7 +162,7 @@ class update_entries_after(object):
 		bin_doc.save(ignore_permissions=True)
 
 	def process_sle(self, sle):
-		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+		from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos, update_args_for_serial_no
 
 		if self.batch_wise_valuation:
 			self.get_previous_batch_sle(sle)
@@ -177,55 +177,21 @@ class update_entries_after(object):
 				self.qty_after_transaction += flt(sle.actual_qty)
 				return
 
-		if get_serial_nos(sle.serial_no):
+		serial_nos = get_serial_nos(sle.serial_no)
+		if serial_nos:
+			if sle.voucher_type == "Stock Reconciliation" and not sle.reset_rate:
+				self.set_stock_reconciliation_incoming_rate(sle)
+
 			self.get_serialized_values(sle)
 			self.qty_after_transaction += flt(sle.actual_qty)
-			if sle.voucher_type == "Stock Reconciliation":
-				self.qty_after_transaction = sle.qty_after_transaction
-
 			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
 		else:
-			if sle.voucher_type == "Stock Reconciliation":
-				if self.batch_wise_valuation:
-					sle.actual_qty = sle.batch_qty_after_transaction - self.batch_data.batch_qty_after_transaction
-					self.actual_qty = sle.actual_qty
-				else:
-					sle.actual_qty = sle.qty_after_transaction - self.qty_after_transaction
-					self.actual_qty = sle.actual_qty
-
 			if sle.voucher_type=="Stock Reconciliation" and sle.reset_rate:
-				# assert
-				if self.batch_wise_valuation:
-					self.batch_data.batch_valuation_rate = sle.batch_valuation_rate
-					self.batch_data.batch_qty_after_transaction = sle.batch_qty_after_transaction
-
-					self.batch_data.batch_stock_value = flt(self.batch_data.batch_qty_after_transaction) * flt(self.batch_data.batch_valuation_rate)
-					stock_value_difference = self.batch_data.batch_stock_value - self.batch_data.prev_batch_stock_value
-					self.stock_value = self.prev_stock_value + stock_value_difference
-
-					if flt(sle.actual_qty) > 0:
-						sle.incoming_rate = stock_value_difference / sle.actual_qty
-					else:
-						sle.incoming_rate = 0
-				else:
-					self.valuation_rate = sle.valuation_rate
-					self.qty_after_transaction = sle.qty_after_transaction
-					self.stock_queue = [[self.qty_after_transaction, self.valuation_rate]]
-					self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
-
-					if flt(sle.actual_qty) > 0:
-						sle.incoming_rate = (self.stock_value - self.prev_stock_value) / sle.actual_qty
-					else:
-						sle.incoming_rate = 0
+				self.get_stock_reconciliation_reset_values(sle)
 			else:
 				if sle.voucher_type == "Stock Reconciliation":
-					if flt(sle.actual_qty) > 0:
-						if self.batch_wise_valuation:
-							sle.incoming_rate = self.batch_data.batch_valuation_rate
-						else:
-							sle.incoming_rate = self.valuation_rate
-					else:
-						sle.incoming_rate = 0
+					self.set_stock_reconciliation_actual_qty(sle)
+					self.set_stock_reconciliation_incoming_rate(sle)
 
 				if self.valuation_method == "Moving Average":
 					self.get_moving_average_values(sle)
@@ -264,6 +230,10 @@ class update_entries_after(object):
 
 		sle.doctype="Stock Ledger Entry"
 		frappe.get_doc(sle).db_update()
+
+		for serial_no in serial_nos:
+			sr_doc = frappe.get_doc("Serial No", serial_no)
+			update_args_for_serial_no(sr_doc, serial_no, sle)
 
 	def validate_negative_stock(self, sle, validate_batch=False):
 		"""
@@ -484,6 +454,50 @@ class update_entries_after(object):
 		if not self.stock_queue:
 			self.stock_queue.append([0, flt(sle.incoming_rate or sle.outgoing_rate or self.valuation_rate, self.val_rate_db_precision)])
 
+	def set_stock_reconciliation_actual_qty(self, sle):
+		if self.batch_wise_valuation:
+			sle.actual_qty = sle.batch_qty_after_transaction - self.batch_data.batch_qty_after_transaction
+			self.actual_qty = sle.actual_qty
+		else:
+			sle.actual_qty = sle.qty_after_transaction - self.qty_after_transaction
+			self.actual_qty = sle.actual_qty
+
+	def set_stock_reconciliation_incoming_rate(self, sle):
+		if flt(sle.actual_qty) > 0:
+			if self.batch_wise_valuation:
+				sle.incoming_rate = self.batch_data.batch_valuation_rate
+			else:
+				sle.incoming_rate = self.valuation_rate
+		else:
+			sle.incoming_rate = 0
+
+	def get_stock_reconciliation_reset_values(self, sle):
+		self.set_stock_reconciliation_actual_qty(sle)
+
+		if self.batch_wise_valuation:
+			self.batch_data.batch_valuation_rate = sle.batch_valuation_rate
+			self.batch_data.batch_qty_after_transaction = sle.batch_qty_after_transaction
+
+			self.batch_data.batch_stock_value = flt(self.batch_data.batch_qty_after_transaction) * flt(
+				self.batch_data.batch_valuation_rate)
+			stock_value_difference = self.batch_data.batch_stock_value - self.batch_data.prev_batch_stock_value
+			self.stock_value = self.prev_stock_value + stock_value_difference
+
+			if flt(sle.actual_qty) > 0:
+				sle.incoming_rate = stock_value_difference / sle.actual_qty
+			else:
+				sle.incoming_rate = 0
+		else:
+			self.valuation_rate = sle.valuation_rate
+			self.qty_after_transaction = sle.qty_after_transaction
+			self.stock_queue = [[self.qty_after_transaction, self.valuation_rate]]
+			self.stock_value = flt(self.qty_after_transaction) * flt(self.valuation_rate)
+
+			if flt(sle.actual_qty) > 0:
+				sle.incoming_rate = (self.stock_value - self.prev_stock_value) / sle.actual_qty
+			else:
+				sle.incoming_rate = 0
+
 	def check_if_allow_zero_valuation_rate(self, voucher_type, voucher_detail_no):
 		ref_item_dt = ""
 
@@ -620,6 +634,22 @@ def get_stock_ledger_entries(previous_sle, operator=None,
 			"for_update": for_update and "for update" or "",
 			"order": order
 		}, previous_sle, as_dict=1, debug=debug)
+
+def get_serial_nos_after_sle(args, for_update=False):
+	from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
+
+	data = get_stock_ledger_entries(args, "<=", "asc", batch_sle=args.get('batch_no'), check_serial_no=False,
+		for_update=for_update)
+
+	serial_nos = set()
+	for d in data:
+		sle_serial_nos = set(get_serial_nos(d.serial_no))
+		if d.actual_qty > 0:
+			serial_nos = serial_nos.union(sle_serial_nos)
+		else:
+			serial_nos = serial_nos - sle_serial_nos
+
+	return '\n'.join(serial_nos)
 
 def get_valuation_rate(item_code, warehouse, voucher_type, voucher_no, batch_no=None,
 	allow_zero_rate=False, currency=None, company=None, raise_error_if_no_rate=True, batch_wise_valuation=None):
