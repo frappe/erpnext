@@ -1106,13 +1106,13 @@ frappe.tour['Stock Entry'] = [
 	{
 		fieldname: "stock_entry_type",
 		title: __("Stock Entry Type"),
-		description: __("There are multiple 'Stock Entry Type's you can even create your own. ") +
+		description: __("There are multiple 'Stock Entry Type's you can even create your own.") + " " +
 		__("For moving material between warehouses you can select 'Material Transfer'")
 	},
 	{
 		fieldname: "items",
 		title: __("Items"),
-		description: __("This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc. ") +
+		description: __("This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc.") + " " +
 		__("Different 'Source Warehouse' and 'Target Warehouse' can be set for each row.")
 	},
 	{

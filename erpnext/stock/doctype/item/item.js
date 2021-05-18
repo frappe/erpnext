@@ -804,7 +804,7 @@ frappe.tour['Item'] = [
 	{
 		fieldname: "item_code",
 		title: __("Item Code"),
-		description: __("The Item Code can be thought of as a short-form that refers to the item. ") +
+		description: __("The Item Code can be thought of as a short-form that refers to the item.") + " " +
 			__("For more information click here: ") +
 			"<a href='https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-codification' target='_blank'>Item Codification</a>" +
 			__("."),
@@ -812,23 +812,23 @@ frappe.tour['Item'] = [
 	{
 		fieldname: "item_group",
 		title: __("Item Group"),
-		description: __("This is used for categorizing items under a common criteria. ") +
-			__("For more information click here: ") +
+		description: __("This is used for categorizing items under a common criteria.") + " " +
+			__("For more information click here:") + " " +
 			"<a href='https://docs.erpnext.com/docs/user/manual/en/stock/item-group' target='_blank'>Item Group</a>" +
 			__("."),
 	},
 	{
 		fieldname: "stock_uom",
 		title: __("Default Unit of Measure"),
-		description: __("The Item Code can be thought of as a short-form that refers to the item. ") +
-			__("For more information click here: ") +
+		description: __("The Item Code can be thought of as a short-form that refers to the item.") + " " +
+			__("For more information click here:") + " " +
 			"<a href='https://docs.erpnext.com/docs/user/manual/en/stock/uom' target='_blank'>Unit of Measure</a>" +
 			__("."),
 	},
 	{
 		fieldname: "is_stock_item",
 		title: __("Maintain Stock"),
-		description: __("Selecting this creates a stock item and 'Stock Ledger' entries are created for all transcations. ") +
+		description: __("Selecting this creates a stock item and 'Stock Ledger' entries are created for all transcations.") + " " +
 			__("Unselect this for a non-stock item such as a service.")
 	},
 ]
