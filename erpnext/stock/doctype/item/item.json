@@ -19,6 +19,7 @@
   "item_group",
   "is_item_from_hub",
   "allowed_in_wo_staging",
+  "staging_multiple",
   "stock_uom",
   "column_break0",
   "disabled",
@@ -1066,6 +1067,13 @@
    "fieldtype": "Select",
    "label": "Allowed in WO Staging",
    "options": "Yes\nNo"
+  },
+  {
+   "depends_on": "eval:doc.allowed_in_wo_staging === \"Yes\"",
+   "fieldname": "staging_multiple",
+   "fieldtype": "Float",
+   "label": "Stock qty multiples for staging",
+   "non_negative": 1
   }
  ],
  "has_web_view": 1,
@@ -1075,7 +1083,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-05-17 15:25:43.610651",
+ "modified": "2021-05-18 15:33:19.314700",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
