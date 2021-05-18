@@ -14,6 +14,7 @@ from frappe.model.document import Document
 from erpnext.manufacturing.doctype.workstation.workstation import (check_if_within_operating_hours,
 	WorkstationHolidayError)
 from erpnext.manufacturing.doctype.manufacturing_settings.manufacturing_settings import get_mins_between_operations
+from erpnext.setup.utils import get_exchange_rate
 
 class OverlapError(frappe.ValidationError): pass
 class OverWorkLoggedError(frappe.ValidationError): pass
@@ -37,9 +38,9 @@ class Timesheet(Document):
 		self.total_hours = 0.0
 		self.total_billable_hours = 0.0
 		self.total_billed_hours = 0.0
-		self.total_billable_amount = 0.0
-		self.total_costing_amount = 0.0
-		self.total_billed_amount = 0.0
+		self.total_billable_amount = self.base_total_billable_amount = 0.0
+		self.total_costing_amount = self.base_total_costing_amount = 0.0
+		self.total_billed_amount = self.base_total_billed_amount = 0.0
 
 		for d in self.get("time_logs"):
 			self.update_billing_hours(d)
@@ -47,10 +48,13 @@ class Timesheet(Document):
 
 			self.total_hours += flt(d.hours)
 			self.total_costing_amount += flt(d.costing_amount)
+			self.base_total_costing_amount += flt(d.base_costing_amount)
 			if d.is_billable:
 				self.total_billable_hours += flt(d.billing_hours)
 				self.total_billable_amount += flt(d.billing_amount)
+				self.base_total_billable_amount += flt(d.base_billing_amount)
 				self.total_billed_amount += flt(d.billing_amount) if d.sales_invoice else 0.0
+				self.base_total_billed_amount += flt(d.base_billing_amount) if d.sales_invoice else 0.0
 				self.total_billed_hours += flt(d.billing_hours) if d.sales_invoice else 0.0
 
 	def calculate_percentage_billed(self):
@@ -330,12 +334,17 @@ def set_missing_values(time_sheet, target):
 	})
 
 @frappe.whitelist()
-def get_activity_cost(employee=None, activity_type=None):
+def get_activity_cost(employee=None, activity_type=None, currency=None):
+	base_currency = frappe.defaults.get_global_default('currency')
 	rate = frappe.db.get_values("Activity Cost", {"employee": employee,
 		"activity_type": activity_type}, ["costing_rate", "billing_rate"], as_dict=True)
 	if not rate:
 		rate = frappe.db.get_values("Activity Type", {"activity_type": activity_type},
 			["costing_rate", "billing_rate"], as_dict=True)
+		if rate and currency and currency!=base_currency:
+			exchnage_rate = get_exchange_rate(base_currency, currency)
+			rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchnage_rate
+			rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchnage_rate
 
 	return rate[0] if rate else {}
 
