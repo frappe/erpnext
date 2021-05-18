@@ -356,11 +356,11 @@ erpnext.accounts.SalesInvoiceController = erpnext.selling.SellingController.exte
 	},
 
 	items_on_form_rendered: function() {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	packed_items_on_form_rendered: function(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	},
 
 	make_sales_return: function() {
@@ -578,6 +578,16 @@ frappe.ui.form.on('Sales Invoice', {
 					company: frm.doc.company,
 					is_group: 0,
 					root_type: "Liability",
+				}
+			};
+		});
+
+		frm.set_query("adjustment_against", function() {
+			return {
+				filters: {
+					company: frm.doc.company,
+					customer: frm.doc.customer,
+					docstatus: 1
 				}
 			};
 		});
@@ -865,6 +875,10 @@ frappe.ui.form.on('Sales Invoice', {
 				});
 				d.show();
 			})
+		}
+
+		if (frm.doc.is_debit_note) {
+			frm.set_df_property('return_against', 'label', 'Adjustment Against');
 		}
 
 		if (frappe.boot.active_domains.includes("Healthcare")) {

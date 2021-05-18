@@ -14,6 +14,7 @@ from frappe import _, ValidationError
 from erpnext.controllers.stock_controller import StockController
 from six import string_types
 from six.moves import map
+
 class SerialNoCannotCreateDirectError(ValidationError): pass
 class SerialNoCannotCannotChangeError(ValidationError): pass
 class SerialNoNotRequiredError(ValidationError): pass
@@ -242,7 +243,7 @@ def validate_serial_no(sle, item_det):
 				if frappe.db.exists("Serial No", serial_no):
 					sr = frappe.db.get_value("Serial No", serial_no, ["name", "item_code", "batch_no", "sales_order",
 						"delivery_document_no", "delivery_document_type", "warehouse", "purchase_document_type",
-						"purchase_document_no", "company"], as_dict=1)
+						"purchase_document_no", "company", "status"], as_dict=1)
 
 					if sr.item_code!=sle.item_code:
 						if not allow_serial_nos_with_different_item(serial_no, sle):
@@ -264,6 +265,9 @@ def validate_serial_no(sle, item_det):
 						if sr.warehouse!=sle.warehouse:
 							frappe.throw(_("Serial No {0} does not belong to Warehouse {1}").format(serial_no,
 								sle.warehouse), SerialNoWarehouseError)
+
+						if not sr.purchase_document_no:
+							frappe.throw(_("Serial No {0} not in stock").format(serial_no), SerialNoNotExistsError)
 
 						if sle.voucher_type in ("Delivery Note", "Sales Invoice"):
 
@@ -322,11 +326,35 @@ def validate_serial_no(sle, item_det):
 			frappe.throw(_("Serial Nos Required for Serialized Item {0}").format(sle.item_code),
 				SerialNoRequiredError)
 	elif serial_nos:
+		# SLE is being cancelled and has serial nos
 		for serial_no in serial_nos:
-			sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse"], as_dict=1)
-			if sr and cint(sle.actual_qty) < 0 and sr.warehouse != sle.warehouse:
-				frappe.throw(_("Cannot cancel {0} {1} because Serial No {2} does not belong to the warehouse {3}")
-					.format(sle.voucher_type, sle.voucher_no, serial_no, sle.warehouse))
+			check_serial_no_validity_on_cancel(serial_no, sle)
+
+def check_serial_no_validity_on_cancel(serial_no, sle):
+	sr = frappe.db.get_value("Serial No", serial_no, ["name", "warehouse", "company", "status"], as_dict=1)
+	sr_link = frappe.utils.get_link_to_form("Serial No", serial_no)
+	doc_link = frappe.utils.get_link_to_form(sle.voucher_type, sle.voucher_no)
+	actual_qty = cint(sle.actual_qty)
+	is_stock_reco = sle.voucher_type == "Stock Reconciliation"
+	msg = None
+
+	if sr and (actual_qty < 0 or is_stock_reco) and sr.warehouse != sle.warehouse:
+		# receipt(inward) is being cancelled
+		msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the warehouse {3}").format(
+			sle.voucher_type, doc_link, sr_link, frappe.bold(sle.warehouse))
+	elif sr and actual_qty > 0 and not is_stock_reco:
+		# delivery is being cancelled, check for warehouse.
+		if sr.warehouse:
+			# serial no is active in another warehouse/company.
+			msg = _("Cannot cancel {0} {1} as Serial No {2} is active in warehouse {3}").format(
+				sle.voucher_type, doc_link, sr_link, frappe.bold(sr.warehouse))
+		elif sr.company != sle.company and sr.status == "Delivered":
+			# serial no is inactive (allowed) or delivered from another company (block).
+			msg = _("Cannot cancel {0} {1} as Serial No {2} does not belong to the company {3}").format(
+				sle.voucher_type, doc_link, sr_link, frappe.bold(sle.company))
+
+	if msg:
+		frappe.throw(msg, title=_("Cannot cancel"))
 
 def validate_material_transfer_entry(sle_doc):
 	sle_doc.update({
@@ -356,19 +384,6 @@ def has_serial_no_exists(sn, sle):
 
 	if sn.company != sle.company:
 		return False
-
-	status = False
-	if sn.purchase_document_no:
-		if (sle.voucher_type in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"] and
-			sn.delivery_document_type not in ['Purchase Receipt', 'Stock Entry', "Purchase Invoice"]):
-			status = True
-
-		# If status is receipt then system will allow to in-ward the delivered serial no
-		if (status and sle.voucher_type == "Stock Entry" and frappe.db.get_value("Stock Entry",
-			sle.voucher_no, "purpose") in ("Material Receipt", "Material Transfer")):
-			status = False
-
-	return status
 
 def allow_serial_nos_with_different_item(sle_serial_no, sle):
 	"""

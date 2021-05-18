@@ -17,6 +17,7 @@ from frappe.utils.nestedset import NestedSet
 from past.builtins import cmp
 import functools
 from erpnext.accounts.doctype.account.account import get_account_currency
+from erpnext.setup.setup_wizard.operations.taxes_setup import setup_taxes_and_charges
 
 class Company(NestedSet):
 	nsm_parent_field = 'parent_company'
@@ -68,11 +69,7 @@ class Company(NestedSet):
 
 	@frappe.whitelist()
 	def create_default_tax_template(self):
-		from erpnext.setup.setup_wizard.operations.taxes_setup import create_sales_tax
-		create_sales_tax({
-			'country': self.country,
-			'company_name': self.name
-		})
+		setup_taxes_and_charges(self.name, self.country)
 
 	def validate_default_accounts(self):
 		accounts = [
@@ -617,3 +614,12 @@ def get_default_company_address(name, sort_key='is_primary_address', existing_ad
 		return sorted(out, key = functools.cmp_to_key(lambda x,y: cmp(y[1], x[1])))[0][0]
 	else:
 		return None
+
+@frappe.whitelist()
+def create_transaction_deletion_request(company):
+	tdr = frappe.get_doc({
+		'doctype': 'Transaction Deletion Record',
+		'company': company
+	})
+	tdr.insert()
+	tdr.submit()

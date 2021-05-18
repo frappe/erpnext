@@ -16,6 +16,7 @@
   "is_pos",
   "is_consolidated",
   "is_return",
+  "is_debit_note",
   "update_billed_amount_in_sales_order",
   "column_break1",
   "company",
@@ -118,6 +119,7 @@
   "in_words",
   "total_advance",
   "outstanding_amount",
+  "disable_rounded_total",
   "advances_section",
   "allocate_advances_automatically",
   "get_advances",
@@ -391,7 +393,7 @@
    "read_only": 1
   },
   {
-   "depends_on": "return_against",
+   "depends_on": "eval:doc.return_against || doc.is_debit_note",
    "fieldname": "return_against",
    "fieldtype": "Link",
    "hide_days": 1,
@@ -400,7 +402,7 @@
    "no_copy": 1,
    "options": "Sales Invoice",
    "print_hide": 1,
-   "read_only": 1,
+   "read_only_depends_on": "eval:doc.is_return",
    "search_index": 1
   },
   {
@@ -1109,6 +1111,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounding_adjustment",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1120,6 +1123,7 @@
    "read_only": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "base_rounded_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1168,6 +1172,7 @@
    "reqd": 1
   },
   {
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounding_adjustment",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1180,6 +1185,7 @@
   },
   {
    "bold": 1,
+   "depends_on": "eval:!doc.disable_rounded_total",
    "fieldname": "rounded_total",
    "fieldtype": "Currency",
    "hide_days": 1,
@@ -1945,6 +1951,19 @@
    "fieldtype": "Link",
    "label": "Set Target Warehouse",
    "options": "Warehouse"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_debit_note",
+   "fieldtype": "Check",
+   "label": "Is Debit Note"
+  },
+  {
+   "default": 0,
+   "depends_on": "grand_total",
+   "fieldname": "disable_rounded_total",
+   "fieldtype": "Check",
+   "label": "Disable Rounded Total"
   }
  ],
  "icon": "fa fa-file-text",
@@ -1957,7 +1976,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-03-31 15:42:26.261540",
+ "modified": "2021-04-23 22:36:32.916354",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

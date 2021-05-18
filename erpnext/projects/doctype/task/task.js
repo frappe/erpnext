@@ -32,7 +32,8 @@ frappe.ui.form.on("Task", {
 
 		frm.set_query("parent_task", function () {
 			let filters = {
-				"is_group": 1
+				"is_group": 1,
+				"name": ["!=", frm.doc.name]
 			};
 			if (frm.doc.project) filters["project"] = frm.doc.project;
 			return {

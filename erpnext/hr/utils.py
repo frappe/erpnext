@@ -32,13 +32,15 @@ class EmployeeBoardingController(Document):
 			project_name += self.job_applicant
 		else:
 			project_name += self.employee
+
 		project = frappe.get_doc({
 				"doctype": "Project",
 				"project_name": project_name,
 				"expected_start_date": self.date_of_joining if self.doctype == "Employee Onboarding" else self.resignation_letter_date,
 				"department": self.department,
 				"company": self.company
-			}).insert(ignore_permissions=True)
+			}).insert(ignore_permissions=True, ignore_mandatory=True)
+
 		self.db_set("project", project.name)
 		self.db_set("boarding_status", "Pending")
 		self.reload()
@@ -497,13 +499,6 @@ def get_previous_claimed_amount(employee, payroll_period, non_pro_rata=False, co
 	if sum_of_claimed_amount and flt(sum_of_claimed_amount[0].total_amount) > 0:
 		total_claimed_amount = sum_of_claimed_amount[0].total_amount
 	return total_claimed_amount
-
-def grant_leaves_automatically():
-	automatically_allocate_leaves_based_on_leave_policy = frappe.db.get_singles_value("HR Settings", "automatically_allocate_leaves_based_on_leave_policy")
-	if automatically_allocate_leaves_based_on_leave_policy:
-		lpa = frappe.db.get_all("Leave Policy Assignment", filters={"effective_from": getdate(), "docstatus": 1, "leaves_allocated":0})
-		for assignment in lpa:
-			frappe.get_doc("Leave Policy Assignment", assignment.name).grant_leave_alloc_for_employee()
 
 def share_doc_with_approver(doc, user):
 	# if approver does not have permissions, share

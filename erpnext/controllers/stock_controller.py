@@ -117,7 +117,6 @@ class StockController(AccountsController):
 							"account": expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
-							"project": item_row.project or self.get('project'),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
@@ -380,8 +379,7 @@ class StockController(AccountsController):
 					link = frappe.utils.get_link_to_form('Quality Inspection', d.quality_inspection)
 					frappe.throw(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx), QualityInspectionNotSubmittedError)
 
-				qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
-				if qa_failed:
+				if qa_doc.status != 'Accepted':
 					frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
 						.format(d.idx, d.item_code), QualityInspectionRejectedError)
 			elif qa_required :
@@ -483,7 +481,7 @@ class StockController(AccountsController):
 			)
 		message += "<br><br>"
 		rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
-		message += _(" Please adjust the qty or edit {0} to proceed.").format(rule_link)
+		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
 	def repost_future_sle_and_gle(self):

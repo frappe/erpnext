@@ -1,0 +1,34 @@
+name: Semgrep
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - version-13-hotfix
+      - version-13-pre-release
+jobs:
+  semgrep:
+    name: Frappe Linter
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup python3
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+
+    - name: Setup semgrep
+      run: |
+        python -m pip install -q semgrep
+        git fetch origin $GITHUB_BASE_REF:$GITHUB_BASE_REF -q
+
+    - name: Semgrep errors
+      run: |
+        files=$(git diff --name-only --diff-filter=d $GITHUB_BASE_REF)
+        [[ -d .github/helper/semgrep_rules ]] && semgrep --severity ERROR --config=.github/helper/semgrep_rules --quiet --error $files
+        semgrep --config="r/python.lang.correctness" --quiet --error $files
+
+    - name: Semgrep warnings
+      run: |
+        files=$(git diff --name-only --diff-filter=d $GITHUB_BASE_REF)
+        [[ -d .github/helper/semgrep_rules ]] && semgrep --severity WARNING --severity INFO --config=.github/helper/semgrep_rules --quiet $files
