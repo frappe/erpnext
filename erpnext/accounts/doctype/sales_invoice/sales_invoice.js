@@ -356,11 +356,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 
 	items_on_form_rendered() {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	}
 
 	packed_items_on_form_rendered(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	}
 
 	make_sales_return() {

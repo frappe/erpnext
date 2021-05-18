@@ -1,6 +1,6 @@
-name: CI
+name: Server
 
-on: [pull_request, workflow_dispatch, push]
+on: [pull_request, workflow_dispatch]
 
 jobs:
   test:
@@ -10,15 +10,9 @@ jobs:
       fail-fast: false
 
       matrix:
-       include:
-        - TYPE: "server"
-          JOB_NAME: "Server"
-          RUN_COMMAND: cd ~/frappe-bench/ && bench --site test_site run-tests --app erpnext --coverage
-        - TYPE: "patch"
-          JOB_NAME: "Patch"
-          RUN_COMMAND: cd ~/frappe-bench/ && wget http://build.erpnext.com/20171108_190013_955977f8_database.sql.gz &&  bench --site test_site --force restore ~/frappe-bench/20171108_190013_955977f8_database.sql.gz && bench --site test_site migrate
+        container: [1, 2, 3]
 
-    name: ${{ matrix.JOB_NAME }}
+    name: Python Unit Tests
 
     services:
       mysql:
@@ -36,7 +30,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v2
         with:
-          python-version: 3.6
+          python-version: 3.7
 
       - name: Add to Hosts
         run: echo "127.0.0.1 test_site" | sudo tee -a /etc/hosts
@@ -49,6 +43,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pip-
             ${{ runner.os }}-
+
       - name: Cache node modules
         uses: actions/cache@v2
         env:
@@ -60,6 +55,7 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
+
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
@@ -76,33 +72,39 @@ jobs:
         run: bash ${GITHUB_WORKSPACE}/.github/helper/install.sh
 
       - name: Run Tests
-        run: ${{ matrix.RUN_COMMAND }}
+        run: cd ~/frappe-bench/ && bench --site test_site run-parallel-tests --app erpnext --use-orchestrator --with-coverage
         env:
-          TYPE: ${{ matrix.TYPE }}
+          TYPE: server
+          CI_BUILD_ID: ${{ github.run_id }}
+          ORCHESTRATOR_URL: http://test-orchestrator.frappe.io
 
-      - name: Coverage - Pull Request
-        if: matrix.TYPE == 'server' && github.event_name == 'pull_request'
+      - name: Upload Coverage Data
         run: |
           cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
           cd ${GITHUB_WORKSPACE}
-          pip install coveralls==2.2.0
-          pip install coverage==4.5.4
-          coveralls --service=github
+          pip3 install coverage==5.5
+          pip3 install coveralls==3.0.1
+          coveralls
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-          COVERALLS_SERVICE_NAME: github
-          
-      - name: Coverage - Push
-        if: matrix.TYPE == 'server' && github.event_name == 'push'
-        run: |
-          cp ~/frappe-bench/sites/.coverage ${GITHUB_WORKSPACE}
-          cd ${GITHUB_WORKSPACE}
-          pip install coveralls==2.2.0
-          pip install coverage==4.5.4
-          coveralls --service=github-actions
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_TOKEN }}
-          COVERALLS_SERVICE_NAME: github-actions
+          COVERALLS_FLAG_NAME: run-${{ matrix.container }}
+          COVERALLS_SERVICE_NAME: ${{ github.event_name == 'pull_request' && 'github' || 'github-actions' }}
+          COVERALLS_PARALLEL: true
 
+  coveralls:
+    name: Coverage Wrap Up
+    needs: test
+    container: python:3-slim
+    runs-on: ubuntu-18.04
+    steps:
+      - name: Clone
+        uses: actions/checkout@v2
+
+      - name: Coveralls Finished
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          pip3 install coverage==5.5
+          pip3 install coveralls==3.0.1
+          coveralls --finish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -15,7 +15,13 @@ from erpnext.payroll.doctype.salary_structure.test_salary_structure import make_
 from erpnext.loan_management.doctype.loan.test_loan import create_loan, make_loan_disbursement_entry, create_loan_type, create_loan_accounts
 from erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual import process_loan_interest_accrual_for_term_loans
 
+test_dependencies = ['Holiday List']
+
 class TestPayrollEntry(unittest.TestCase):
+	@classmethod
+	def setUpClass(cls):
+		frappe.db.set_value("Company", erpnext.get_default_company(), "default_holiday_list", '_Test Holiday List')
+
 	def setUp(self):
 		for dt in ["Salary Slip", "Salary Component", "Salary Component Account",
 			"Payroll Entry", "Salary Structure", "Salary Structure Assignment", "Payroll Employee Detail", "Additional Salary"]:

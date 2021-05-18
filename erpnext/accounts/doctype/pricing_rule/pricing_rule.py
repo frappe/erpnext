@@ -152,7 +152,7 @@ class PricingRule(Document):
 			frappe.throw(_("Valid from date must be less than valid upto date"))
 
 	def validate_condition(self):
-		if self.condition and ("=" in self.condition) and re.match("""[\w\.:_]+\s*={1}\s*[\w\.@'"]+""", self.condition):
+		if self.condition and ("=" in self.condition) and re.match(r'[\w\.:_]+\s*={1}\s*[\w\.@\'"]+', self.condition):
 			frappe.throw(_("Invalid condition expression"))
 
 #--------------------------------------------------------------------------------

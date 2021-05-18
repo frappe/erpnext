@@ -273,11 +273,11 @@ erpnext.stock.DeliveryNoteController = class DeliveryNoteController extends erpn
 	}
 
 	items_on_form_rendered(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	}
 
 	packed_items_on_form_rendered(doc, grid_row) {
-		erpnext.setup_serial_no();
+		erpnext.setup_serial_or_batch_no();
 	}
 
 	close_delivery_note(doc){
