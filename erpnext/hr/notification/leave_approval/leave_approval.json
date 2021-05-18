@@ -1,0 +1,30 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status == \"Open\" and doc.docstatus ==  0 ",
+ "creation": "2021-05-18 05:19:49.609229",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Leave Application",
+ "enabled": 1,
+ "event": "Method",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "\n\n\n<h3>Leave Application Notification</h3>\n\n<p>Leave Application:{{ doc.name }} by {{ doc.employee }} require action. Please Approve or Reject the Application</p>\n\n<h4>Details:</h4>\n<ul>\n<li>Employee: {{ doc.employee }}</li>\n<li>Employee Name: {{ doc.employee_name }}</li>\n<li>Leave Type: {{ doc.leave_type }}</li>\n<li>From Date: {{ doc.from_date }}</li>\n<li>To Date: {{ doc.to_date }}</li>\n</ul>",
+ "method": "on_update",
+ "modified": "2021-05-18 05:43:50.541612",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Leave Approval",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "receiver_by_document_field": "leave_approver",
+   "receiver_by_role": "Leave Approver"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Leave Application Approval Notification"
+}

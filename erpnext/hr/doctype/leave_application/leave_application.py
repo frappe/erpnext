@@ -38,11 +38,6 @@ class LeaveApplication(Document):
 		self.validate_applicable_after()
 
 	def on_update(self):
-		if self.status == "Open" and self.docstatus < 1:
-			# notify leave approver about creation
-			if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
-				self.notify_leave_approver()
-
 		share_doc_with_approver(self, self.leave_approver)
 
 	def on_submit(self):
@@ -52,9 +47,6 @@ class LeaveApplication(Document):
 		self.validate_back_dated_application()
 		self.update_attendance()
 
-		# notify leave applier about approval
-		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
-			self.notify_employee()
 		self.create_leave_ledger_entry()
 		self.reload()
 
@@ -63,9 +55,6 @@ class LeaveApplication(Document):
 
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
-		# notify leave applier about cancellation
-		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
-			self.notify_employee()
 		self.cancel_attendance()
 
 	def validate_applicable_after(self):
@@ -84,10 +73,15 @@ class LeaveApplication(Document):
 						frappe.throw(_("{0} applicable after {1} working days").format(self.leave_type, leave_type.applicable_after))
 
 	def validate_dates(self):
-		if frappe.db.get_single_value("HR Settings", "restrict_backdated_leave_application"):
+		if not frappe.db.get_single_value("HR Settings", "allow_backdated_leave_application"):
 			if self.from_date and self.from_date < frappe.utils.today():
 				allowed_role = frappe.db.get_single_value("HR Settings", "role_allowed_to_create_backdated_leave_application")
-				if allowed_role not in frappe.get_roles():
+				user = frappe.get_doc("User", frappe.session.user)
+				user_roles = [d.role for d in user.roles]
+				if not allowed_role:
+					frappe.throw(_('Backdated Leave Application is restricted. Please set "Role Allowed to Create Backdated Leave Application" in Hr settings'))
+
+				if (allowed_role and allowed_role not in user_roles):
 					frappe.throw(_("Only users with the {0} role can create backdated leave applications").format(allowed_role))
 
 		if self.from_date and self.to_date and (getdate(self.to_date) < getdate(self.from_date)):
@@ -300,74 +294,6 @@ class LeaveApplication(Document):
 
 		if self.half_day == 0:
 			self.half_day_date = None
-
-	def notify_employee(self):
-		employee = frappe.get_doc("Employee", self.employee)
-		if not employee.user_id:
-			return
-
-		parent_doc = frappe.get_doc('Leave Application', self.name)
-		args = parent_doc.as_dict()
-
-		template = frappe.db.get_single_value('HR Settings', 'leave_status_notification_template')
-		if not template:
-			frappe.msgprint(_("Please set default template for Leave Status Notification in HR Settings."))
-			return
-		email_template = frappe.get_doc("Email Template", template)
-		message = frappe.render_template(email_template.response, args)
-
-		self.notify({
-			# for post in messages
-			"message": message,
-			"message_to": employee.user_id,
-			# for email
-			"subject": email_template.subject,
-			"notify": "employee"
-		})
-
-	def notify_leave_approver(self):
-		if self.leave_approver:
-			parent_doc = frappe.get_doc('Leave Application', self.name)
-			args = parent_doc.as_dict()
-
-			template = frappe.db.get_single_value('HR Settings', 'leave_approval_notification_template')
-			if not template:
-				frappe.msgprint(_("Please set default template for Leave Approval Notification in HR Settings."))
-				return
-			email_template = frappe.get_doc("Email Template", template)
-			message = frappe.render_template(email_template.response, args)
-
-			self.notify({
-				# for post in messages
-				"message": message,
-				"message_to": self.leave_approver,
-				# for email
-				"subject": email_template.subject
-			})
-
-	def notify(self, args):
-		args = frappe._dict(args)
-		# args -> message, message_to, subject
-		if cint(self.follow_via_email):
-			contact = args.message_to
-			if not isinstance(contact, list):
-				if not args.notify == "employee":
-					contact = frappe.get_doc('User', contact).email or contact
-
-			sender      	    = dict()
-			sender['email']     = frappe.get_doc('User', frappe.session.user).email
-			sender['full_name'] = frappe.utils.get_fullname(sender['email'])
-
-			try:
-				frappe.sendmail(
-					recipients = contact,
-					sender = sender['email'],
-					subject = args.subject,
-					message = args.message,
-				)
-				frappe.msgprint(_("Email sent to {0}").format(contact))
-			except frappe.OutgoingEmailError:
-				pass
 
 	def create_leave_ledger_entry(self, submit=True):
 		if self.status != 'Approved' and submit:

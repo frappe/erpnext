@@ -1,0 +1,29 @@
+{
+ "attach_print": 0,
+ "channel": "Email",
+ "condition": "doc.status == 1",
+ "creation": "2021-05-18 05:41:03.982209",
+ "days_in_advance": 0,
+ "docstatus": 0,
+ "doctype": "Notification",
+ "document_type": "Leave Application",
+ "enabled": 1,
+ "event": "Value Change",
+ "idx": 0,
+ "is_standard": 1,
+ "message": "\t\n<h3>Leave Application Notification</h3>\n<p>Leave Application:{{ doc.name }}/p>\n\n<h4>Details:</h4>\n<ul>\n<li>Leave Approver: {{ doc.leave_approver }}</li>\n<li>Status: {{ doc.status }}</li>\n<li>Leave Type: {{ doc.leave_type }}</li>\n<li>From Date: {{ doc.from_date }}</li>\n<li>To Date: {{ doc.to_date }}</li>\n</ul>",
+ "modified": "2021-05-18 05:41:03.982209",
+ "modified_by": "Administrator",
+ "module": "HR",
+ "name": "Leave Status",
+ "owner": "Administrator",
+ "recipients": [
+  {
+   "receiver_by_document_field": "owner"
+  }
+ ],
+ "send_system_notification": 1,
+ "send_to_all_assignees": 0,
+ "subject": "Leave Application Status Notification",
+ "value_changed": "status"
+}
