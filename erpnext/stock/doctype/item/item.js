@@ -792,7 +792,7 @@ frappe.ui.form.on("UOM Conversion Detail", {
 			});
 		}
 	}
-})
+});
 
 
 frappe.tour['Item'] = [
@@ -805,7 +805,7 @@ frappe.tour['Item'] = [
 		fieldname: "item_code",
 		title: __("Item Code"),
 		description: __("The Item Code can be thought of as a short-form that refers to the item.") + " " +
-			__("For more information click here: ") +
+			__("For more information click here:") + " " +
 			"<a href='https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-codification' target='_blank'>Item Codification</a>" +
 			__("."),
 	},
@@ -831,4 +831,4 @@ frappe.tour['Item'] = [
 		description: __("Selecting this creates a stock item and 'Stock Ledger' entries are created for all transcations.") + " " +
 			__("Unselect this for a non-stock item such as a service.")
 	},
-]
+];

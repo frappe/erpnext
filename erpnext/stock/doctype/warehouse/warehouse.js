@@ -108,4 +108,4 @@ frappe.tour['Warehouse'] = [
 		title: __("Account"),
 		description: __("This field can be used to set a default account for all transactions with this warehouse.")
 	},
-]
+];
