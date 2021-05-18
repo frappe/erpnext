@@ -491,7 +491,7 @@ class StockEntry(StockController):
 
 			# get basic rate
 			if not d.bom_no:
-				if (not flt(d.basic_rate) and not d.allow_zero_valuation_rate) or d.s_warehouse or force:
+				if d.s_warehouse or force:
 					basic_rate = flt(get_incoming_rate(args, raise_error_if_no_rate), self.precision("basic_rate", d))
 					if basic_rate > 0:
 						d.basic_rate = basic_rate
