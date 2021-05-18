@@ -13,10 +13,10 @@
   "standard_working_hours",
   "expense_approver_mandatory_in_expense_claim",
   "reminders_section",
-  "stop_birthday_reminders",
+  "send_birthday_reminders",
   "send_work_anniversary_reminders",
+  "separator",
   "send_holiday_reminders",
-  "send_holiday_reminders_in_advance",
   "frequency",
   "leave_settings",
   "send_leave_notification",
@@ -54,13 +54,6 @@
   {
    "fieldname": "column_break_4",
    "fieldtype": "Column Break"
-  },
-  {
-   "default": "0",
-   "description": "Don't send employee birthday reminders",
-   "fieldname": "stop_birthday_reminders",
-   "fieldtype": "Check",
-   "label": "Stop Birthday Reminders"
   },
   {
    "default": "1",
@@ -150,6 +143,7 @@
   },
   {
    "collapsible": 1,
+   "description": "Configure reminder that you want to send to your employees",
    "fieldname": "reminders_section",
    "fieldtype": "Section Break",
    "label": "Reminders"
@@ -158,34 +152,41 @@
    "default": "1",
    "fieldname": "send_holiday_reminders",
    "fieldtype": "Check",
-   "label": "Send Holiday Reminders"
+   "label": "Holidays"
   },
   {
    "default": "1",
+   "description": "Reminders for birthdays and work anniversaries are sent on the day of the event",
    "fieldname": "send_work_anniversary_reminders",
    "fieldtype": "Check",
-   "label": "Send Work Anniversary Reminders"
+   "label": "Work Anniversaries "
   },
   {
-   "default": "0",
-   "fieldname": "send_holiday_reminders_in_advance",
-   "fieldtype": "Check",
-   "label": "Send Holiday Reminders In Advance"
-  },
-  {
-   "default": "Monthly",
-   "depends_on": "eval:doc.send_holiday_reminders_in_advance",
+   "default": "Weekly",
+   "depends_on": "eval:doc.send_holiday_reminders",
    "fieldname": "frequency",
    "fieldtype": "Select",
-   "label": "Frequency",
+   "label": "How often do you want to send holiday reminders?",
    "options": "Weekly\nMonthly"
+  },
+  {
+   "default": "1",
+   "fieldname": "send_birthday_reminders",
+   "fieldtype": "Check",
+   "label": "Birthdays"
+  },
+  {
+   "fieldname": "separator",
+   "fieldtype": "HTML",
+   "label": "Separator",
+   "options": "<hr>"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-11 13:36:32.812397",
+ "modified": "2021-05-18 12:09:26.487040",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
