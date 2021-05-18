@@ -7,20 +7,37 @@ def execute():
 	frappe.reload_doc("e_commerce", "doctype", "website_item")
 	frappe.reload_doc("stock", "doctype", "item")
 
-	web_fields_to_map = ["route", "slideshow", "website_image", "website_image_alt",
+	item_fields = ["item_code", "item_name", "item_group", "stock_uom", "brand", "image",
+		"has_variants", "variant_of", "description", "weightage"]
+	web_fields_to_map = ["route", "slideshow", "website_image_alt",
 		"website_warehouse", "web_long_description", "website_content"]
 
-	items = frappe.db.sql("""
-		Select
-			item_code, item_name, item_group, stock_uom, brand, image,
-			has_variants, variant_of, description, weightage,
-			route, slideshow, website_image_alt,
-			website_warehouse, web_long_description, website_content
-		from
-			`tabItem`
-		where
-			show_in_website = 1
-			or show_variant_in_website = 1""", as_dict=1)
+	item_table_fields = frappe.db.sql("desc `tabItem`", as_dict=1)
+	item_table_fields = [d.get('Field') for d in item_table_fields]
+
+	# prepare fields to query from Item, check if the field exists in Item master
+	web_query_fields = []
+	for field in web_fields_to_map:
+		if field in item_table_fields:
+			web_query_fields.append(field)
+			item_fields.append(field)
+
+	# check if the filter fields exist in Item master
+	or_filters = {}
+	for field in ["show_in_website", "show_variant_in_website"]:
+		if field in item_table_fields:
+			or_filters[field] = 1
+
+	if not web_query_fields or not or_filters:
+		# web fields to map are not present in Item master schema
+		# most likely a fresh installation that doesnt need this patch
+		return
+
+	items = frappe.db.get_all(
+		"Item",
+		fields=item_fields,
+		or_filters=or_filters
+	)
 
 	for item in items:
 		if frappe.db.exists("Website Item", {"item_code": item.item_code}):
@@ -34,12 +51,15 @@ def execute():
 			website_item.save()
 
 		# move Website Item Group & Website Specification table to Website Item
-		for doc in ("Website Item Group", "Item Website Specification"):
-			frappe.db.sql("""Update `tab{doctype}`
+		for doctype in ("Website Item Group", "Item Website Specification"):
+			web_item, item = website_item.name, item.item_code
+			frappe.db.sql(f"""
+				Update `tab{doctype}`
 				set
 					parenttype = 'Website Item',
 					parent = '{web_item}'
 				where
 					parenttype = 'Item'
 					and parent = '{item}'
-				""".format(doctype=doc, web_item=website_item.name, item=item.item_code))
+				"""
+			)
