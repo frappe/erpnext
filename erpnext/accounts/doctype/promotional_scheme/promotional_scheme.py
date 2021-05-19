@@ -30,8 +30,15 @@ class PromotionalScheme(Document):
 			frappe.throw(_("Price or product discount slabs are required"))
 
 	def on_update(self):
-		data = frappe.get_all('Pricing Rule', fields = ["promotional_scheme_id", "name", "creation"], order_by = 'creation asc',
-			filters = {'promotional_scheme': self.name, 'applicable_for': self.applicable_for}) or {}
+		data = frappe.get_all(
+			'Pricing Rule',
+			fields = ["promotional_scheme_id", "name", "creation"],
+			filters = {
+				'promotional_scheme': self.name,
+				'applicable_for': self.applicable_for
+			},
+			order_by = 'creation asc',
+		) or {}
 		self.update_pricing_rules(data)
 
 	def update_pricing_rules(self, data):
@@ -77,10 +84,15 @@ def _get_pricing_rules(doc, child_doc, discount_fields, rules = {}):
 	for d in doc.get(child_doc):
 		if d.name in rules:
 			for applicable_for_value in args.get(applicable_for):
-				
 				temp_args = args.copy()
-				docname = frappe.get_all('Pricing Rule', fields = ["promotional_scheme_id", "name", applicable_for],
-					filters = {'promotional_scheme_id': d.name, applicable_for: applicable_for_value})
+				docname = frappe.get_all(
+					'Pricing Rule',
+					fields = ["promotional_scheme_id", "name", applicable_for],
+					filters = {
+						'promotional_scheme_id': d.name,
+						applicable_for: applicable_for_value
+					}
+				)
 					
 				if docname:
 					pr = frappe.get_doc('Pricing Rule', docname[0].get('name'))
@@ -139,7 +151,6 @@ def get_args_for_pricing_rule(doc):
 			for applicable_for_values in doc.get(applicable_for):
 				items.append(applicable_for_values.get(applicable_for))	
 			args[d] = items	
-		
 		else:
 			args[d] = doc.get(d)
 	return args
