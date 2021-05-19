@@ -26,6 +26,7 @@
   "allow_alternative_item",
   "is_stock_item",
   "include_item_in_manufacturing",
+  "bom_item_type",
   "opening_stock",
   "valuation_rate",
   "standard_rate",
@@ -1074,6 +1075,13 @@
    "fieldtype": "Float",
    "label": "Stock qty multiples for staging",
    "non_negative": 1
+  },
+  {
+   "default": "RM",
+   "fieldname": "bom_item_type",
+   "fieldtype": "Select",
+   "label": "BOM Item Type",
+   "options": "RM\nFG"
   }
  ],
  "has_web_view": 1,
@@ -1083,7 +1091,7 @@
  "index_web_pages_for_search": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2021-05-18 15:33:19.314700",
+ "modified": "2021-05-18 20:32:49.142635",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
