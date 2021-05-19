@@ -14,3 +14,36 @@ frappe.ui.form.on('Holiday List', {
 		}
 	}
 });
+
+frappe.tour['Holiday List'] = [
+	{
+		fieldname: "holiday_list_name",
+		title: "Holiday List Name",
+		description: __("Provide a name to this Holiday List."),
+	},
+	{
+		fieldname: "from_date",
+		title: "From Date",
+		description: __("Select your calendar year's From Date, based on your HR policy"),
+	},
+	{
+		fieldname: "to_date",
+		title: "To Date",
+		description: __("Select your calendar year's To Date, based on your HR policy"),
+	},
+	{
+		fieldname: "weekly_off",
+		title: "Weekly Off",
+		description: __("Select your weekly off day"),
+	},
+	{
+		fieldname: "get_weekly_off_dates",
+		title: "Add Holidays",
+		description: __("Click on Add to Holidays"),
+	},
+	{
+		fieldname: "holidays",
+		title: "Holidays",
+		description: __("Here, your weekly offs are pre-populated based on selection above. You can add more rows to also add public and national holidays."),
+	},
+];

@@ -12,7 +12,7 @@
   "column_break_4",
   "retirement_age",
   "stop_birthday_reminders",
-  "leave_settings",
+  "leave_and_expense_claim_settings",
   "leave_approver_mandatory_in_leave_application",
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
@@ -59,12 +59,6 @@
    "label": "Expense Approver Mandatory In Expense Claim"
   },
   {
-   "collapsible": 1,
-   "fieldname": "leave_settings",
-   "fieldtype": "Section Break",
-   "label": "Leave and Expense Settings"
-  },
-  {
    "fieldname": "column_break_18",
    "fieldtype": "Column Break"
   },
@@ -104,13 +98,19 @@
    "fieldname": "allow_backdated_leave_application",
    "fieldtype": "Check",
    "label": "Allow Backdated Leave Application"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "leave_and_expense_claim_settings",
+   "fieldtype": "Section Break",
+   "label": "Leave and Expense Claim Settings"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2021-05-18 06:05:38.149589",
+ "modified": "2021-05-18 06:28:23.866074",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",

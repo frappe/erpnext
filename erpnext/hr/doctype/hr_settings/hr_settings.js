@@ -3,3 +3,21 @@
 
 frappe.ui.form.on('HR Settings', {
 });
+
+frappe.tour['HR Settings'] = [
+	{
+		fieldname: "emp_created_by",
+		title: "Employee Naming By",
+		description: __("Employee can be named by Employee No. (if you assign one), or via prefix (naming series). Select your preference here."),
+	},
+	{
+		fieldname: "standard_working_hours",
+		title: "Standard Working Hours",
+		description: __("Enter Standard working hours in a normal day. This will help you to get the over-time hours worked and analytics."),
+	},
+	{
+		fieldname: "leave_and_expense_claim_settings",
+		title: "Leave and Expense Clain Settings",
+		description: __("Review various other settings related to Employee Leaves and Expense Claim"),
+	}
+];

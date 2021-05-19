@@ -13,23 +13,23 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/human-resources",
  "idx": 0,
  "is_complete": 0,
- "modified": "2020-07-08 14:05:47.018799",
+ "modified": "2021-05-19 05:32:01.794628",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "Human Resource",
  "owner": "Administrator",
  "steps": [
   {
-   "step": "Create Department"
-  },
-  {
-   "step": "Create Designation"
+   "step": "HR Settings"
   },
   {
    "step": "Create Holiday list"
   },
   {
    "step": "Create Employee"
+  },
+  {
+   "step": "Data import"
   },
   {
    "step": "Create Leave Type"
@@ -39,9 +39,6 @@
   },
   {
    "step": "Create Leave Application"
-  },
-  {
-   "step": "HR Settings"
   }
  ],
  "subtitle": "Employee, Leaves, and more.",
