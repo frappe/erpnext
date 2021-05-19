@@ -256,6 +256,9 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 	batch_no = None
 	batches = get_batches(item_code, warehouse, qty, throw, serial_no)
 
+	## Filtered out the batch so that only batch have actual qty
+	batches = list(filter(lambda batch : batch.qty > 0, batches)) 
+
 	for batch in batches:
 		if cint(qty) <= cint(batch.qty):
 			batch_no = batch.batch_id
@@ -264,10 +267,29 @@ def get_batch_no(item_code, warehouse, qty=1, throw=False, serial_no=None):
 			break
 
 	if not batch_no:
-		frappe.errprint(batches)
-		frappe.errprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
-
-		frappe.msgprint(_('Please select a Batch for Item {0}. Unable to find a single batch that fulfills this requirement').format(frappe.bold(item_code)))
+		if batches:
+			table_html = """<table class="table table-striped table-bordered">
+			<tr>
+				<th>Batch ID</th>
+				<th>Qty In Stock</th>
+				<th>Expiry Date</th>
+			</tr>"""
+			for batch in batches:
+				table_html += f"""<tr>
+					<td>{batch.batch_id}</td>
+					<td>{batch.qty}</td>
+					<td>{batch.expiry_date}</td>
+				</tr>"""
+			table_html += "</table>"
+		panels = f"""
+			<div class="panel panel-default">
+				<div class="panel-heading">{ item_code }</div>
+				<div class="panel-body">
+					<p>The entered qty is {frappe.bold(qty)}. Please manually select a Batch for Item { frappe.bold(item_code) }. Or you might want to split this item to more rows with different batch!</p>
+			</div>
+		"""
+		final_html = panels + table_html
+		frappe.msgprint(final_html)
 		if throw:
 			raise UnableToSelectBatchError
 
