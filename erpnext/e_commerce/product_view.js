@@ -32,18 +32,17 @@ erpnext.ProductView =  class {
 			method: 'erpnext.e_commerce.doctype.website_item.website_item.get_product_filter_data',
 			args: args,
 			callback: function(result) {
-				if (!result.exc && result) {
-					if (!result.message || !result.message[0].length) {
-						console.log("no items");
+				if (!result.exc && result && result.message) {
+					if (me.item_group && result.message[3].length) {
+						me.render_item_sub_categories(result.message[3]);
+					}
+
+					if (!result.message[0].length) {
 						// if result has no items or result is empty
 						me.render_no_products_section();
 					} else {
-						console.log("there are items");
 						me.render_filters(result.message[1]);
 
-						if (me.item_group) {
-							me.render_item_sub_categories(result.message[3]);
-						}
 						// Render views
 						me.render_list_view(result.message[0], result.message[2]);
 						me.render_grid_view(result.message[0], result.message[2]);

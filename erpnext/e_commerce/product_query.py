@@ -104,27 +104,24 @@ class ProductQuery:
 		elif not frappe.db.get_value("Item", item.item_code, "is_stock_item"):
 			item.in_stock = "green" # non-stock item will always be available
 
-	def query_items(self, conditions, or_conditions, substitutions, start=0):
+	def query_items(self, conditions, or_conditions, substitutions, start=0, with_attributes=False):
 		"""Build a query to fetch Website Items based on field filters."""
 		self.query_fields = (", ").join(self.fields)
 
-		return frappe.db.sql("""
-			select distinct {query_fields}
+		attribute_table = ", `tabItem Variant Attribute` iva" if with_attributes else ""
+
+		return frappe.db.sql(f"""
+			select distinct {self.query_fields}
 			from
-				`tabWebsite Item` wi, `tabItem Variant Attribute` iva
+				`tabWebsite Item` wi {attribute_table}
 			where
 				wi.published = 1
 				{conditions}
 				{or_conditions}
-			limit {limit} offset {start}
-		""".format(
-				query_fields=self.query_fields,
-				conditions=conditions,
-				or_conditions=or_conditions,
-				limit=self.page_length,
-				start=start),
-			tuple(substitutions),
-			as_dict=1)
+			limit {self.page_length} offset {start}
+		""",
+		tuple(substitutions),
+		as_dict=1)
 
 	def query_items_with_attributes(self, attributes, start=0):
 		"""Build a query to fetch Website Items based on field & attribute filters."""
@@ -142,7 +139,8 @@ class ProductQuery:
 				.format(attribute, (", ").join(['%s'] * len(values)))
 			substitutions_copy.extend(values)
 
-			items = self.query_items(conditions_copy, self.or_conditions, substitutions_copy, start=start)
+			items = self.query_items(conditions_copy, self.or_conditions, substitutions_copy,
+				start=start, with_attributes=True)
 
 			items_dict = {item.name: item for item in items}
 			# TODO: Replace Variants by their parent templates
