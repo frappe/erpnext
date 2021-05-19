@@ -13,6 +13,7 @@
   "company",
   "customer",
   "currency",
+  "exchange_rate",
   "sales_invoice",
   "column_break_3",
   "salary_slip",
@@ -32,11 +33,14 @@
   "total_hours",
   "billing_details",
   "total_billable_hours",
-  "total_billed_hours",
-  "total_costing_amount",
+  "base_total_billable_amount",
+  "base_total_billed_amount",
+  "base_total_costing_amount",
   "column_break_10",
+  "total_billed_hours",
   "total_billable_amount",
   "total_billed_amount",
+  "total_costing_amount",
   "per_billed",
   "section_break_18",
   "note",
@@ -283,13 +287,39 @@
    "fieldtype": "Link",
    "label": "Currency",
    "options": "Currency"
+  },
+  {
+   "fieldname": "base_total_costing_amount",
+   "fieldtype": "Currency",
+   "label": "Total Costing Amount",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_billable_amount",
+   "fieldtype": "Currency",
+   "label": "Total Billable Amount",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "base_total_billed_amount",
+   "fieldtype": "Currency",
+   "label": "Total Billed Amount",
+   "print_hide": 1,
+   "read_only": 1
+  },
+  {
+   "fieldname": "exchange_rate",
+   "fieldtype": "Float",
+   "label": "Exchange Rate"
   }
  ],
  "icon": "fa fa-clock-o",
  "idx": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-13 17:13:29.954960",
+ "modified": "2021-05-18 16:10:08.249619",
  "modified_by": "Administrator",
  "module": "Projects",
  "name": "Timesheet",
