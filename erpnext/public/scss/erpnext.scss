@@ -1,4 +1,4 @@
-@import "variables.less";
+@import "frappe/public/scss/desk/variables";
 
 .erpnext-footer {
 	margin: 11px auto;
@@ -141,7 +141,7 @@ body[data-route="pos"] {
 	}
 
 	.pos-payment-row {
-		border-bottom:1px solid @border-color;
+		border-bottom:1px solid $border-color;
 		margin: 2px 0px 5px 0px;
 		height: 60px;
 		margin-top: 0px;
@@ -149,12 +149,12 @@ body[data-route="pos"] {
 	}
 
 	.pos-payment-row:hover, .pos-keyboard-key:hover{
-		background-color: @light-bg;
+		background-color: var(--bg-color);
 		cursor: pointer;
 	}
 
 	.pos-keyboard-key, .delete-btn {
-		border: 1px solid @border-color;
+		border: 1px solid $border-color;
 		height:85px;
 		width:85px;
 		margin:10px 10px;
@@ -165,7 +165,7 @@ body[data-route="pos"] {
 	}
 
 	.numeric-keypad {
-		border: 1px solid @border-color;
+		border: 1px solid $border-color;
 		height:69px;
 		width:69px;
 		font-size:20px;
@@ -192,13 +192,13 @@ body[data-route="pos"] {
 		background-color: #fff;
 		margin-left:-4px;
 
-		@media (max-width: @screen-md) {
+		@media (max-width: map-get($grid-breakpoints, "xl")) {
 			height: 45px;
 			width: 45px;
 			font-size: 14px;
 		}
 
-		@media (max-width: @screen-sm) {
+		@media (max-width: map-get($grid-breakpoints, "lg")) {
 			height: 40px;
 			width: 40px;
 		}
@@ -209,21 +209,21 @@ body[data-route="pos"] {
 
 		& > .row > button {
 			border: none;
-			border-right: 1px solid @border-color;
-			border-bottom: 1px solid @border-color;
+			border-right: 1px solid $border-color;
+			border-bottom: 1px solid $border-color;
 
 			&:first-child {
-				border-left: 1px solid @border-color;
+				border-left: 1px solid $border-color;
 			}
 		}
 
 		& > .row:first-child > button {
-			border-top: 1px solid @border-color;
+			border-top: 1px solid $border-color;
 		}
 	}
 
 	.pos-pay {
-		background-color: @brand-primary;
+		background-color: var(--primary);
 		border: none;
 	}
 
@@ -236,13 +236,13 @@ body[data-route="pos"] {
 	}
 
 	.list-row-head.pos-invoice-list {
-		border-top: 1px solid @border-color;
+		border-top: 1px solid $border-color;
 	}
 
 	.modal-dialog {
 		width: 750px;
 
-		@media (max-width: @screen-xs) {
+		@media (max-width: map-get($grid-breakpoints, 'md')) {
 			width: auto;
 
 			.modal-content {
@@ -251,7 +251,7 @@ body[data-route="pos"] {
 		}
 	}
 
-	@media (max-width: @screen-xs) {
+	@media (max-width: map-get($grid-breakpoints, 'md')) {
 		.amount-row h3 {
 			font-size: 15px;
 		}
@@ -271,7 +271,7 @@ body[data-route="pos"] {
 	}
 
 	.selected-payment-mode {
-		background-color: @light-bg;
+		background-color: var(--bg-color);
 		cursor: pointer;
 	}
 
@@ -291,7 +291,7 @@ body[data-route="pos"] {
 		padding: 9px 15px;
 		font-size: 12px;
 		margin: 0px;
-		border-bottom: 1px solid @border-color;
+		border-bottom: 1px solid $border-color;
 
 		.cell {
 			display: table-cell;
@@ -313,17 +313,17 @@ body[data-route="pos"] {
 
 	.pos-bill-header {
 		background-color: #f5f7fa;
-		border: 1px solid @border-color;
+		border: 1px solid $border-color;
 		padding: 13px 15px;
 	}
 
 	.pos-list-row.active {
-		background-color: @light-yellow;
+		background-color: var(--fg-hover-color);
 	}
 
 	.totals-area {
-		border-right: 1px solid @border-color;
-		border-left: 1px solid @border-color;
+		border-right: 1px solid $border-color;
+		border-left: 1px solid $border-color;
 		margin-bottom: 15px;
 	}
 
@@ -332,12 +332,12 @@ body[data-route="pos"] {
 	}
 
 	.item-cart-items {
-		height: ~"calc(100vh - 526px)";
+		height: calc(100vh - 526px);
 		overflow: auto;
-		border: 1px solid @border-color;
+		border: 1px solid $border-color;
 		border-top: none;
 
-		@media (max-width: @screen-xs) {
+		@media (max-width: map-get($grid-breakpoints, 'md')) {
 			height: 30vh;
 		}
 	}
@@ -359,12 +359,12 @@ body[data-route="pos"] {
 	}
 
 	.item-list {
-		border: 1px solid @border-color;
+		border: 1px solid $border-color;
 		border-top: none;
-		max-height: ~"calc(100vh - 190px)";
+		max-height: calc(100vh - 190px);
 		overflow: auto;
 
-		@media (max-width: @screen-xs) {
+		@media (max-width: map-get($grid-breakpoints, 'md')) {
 			max-height: initial;
 		}
 
@@ -402,7 +402,7 @@ body[data-route="pos"] {
 		&> .pos-list-row {
 			border: none;
 
-			@media (max-width: @screen-md) {
+			@media (max-width: map-get($grid-breakpoints, 'xl')) {
 				padding: 5px 15px;
 			}
 		}
@@ -420,7 +420,7 @@ body[data-route="pos"] {
 		justify-content: center;
 		align-items: center;
 		cursor: pointer;
-		background-color: @light-bg;
+		background-color: var(--bg-color);
 		min-height: 200px;
 	}
 
@@ -428,7 +428,7 @@ body[data-route="pos"] {
 		cursor: pointer;
 	}
 
-	@media (max-width: @screen-xs) {
+	@media (max-width: map-get($grid-breakpoints, 'md')) {
 		.page-actions {
 			max-width: 110px;
 		}

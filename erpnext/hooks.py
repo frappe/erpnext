@@ -15,10 +15,11 @@ app_logo_url = "/assets/erpnext/images/erpnext-logo.svg"
 
 develop_version = '13.x.x-develop'
 
-app_include_js = "/assets/js/erpnext.min.js"
-app_include_css = "/assets/css/erpnext.css"
-web_include_js = "/assets/js/erpnext-web.min.js"
-web_include_css = "/assets/css/erpnext-web.css"
+app_include_js = "erpnext.bundle.js"
+app_include_css = "erpnext.bundle.css"
+web_include_js = "erpnext-web.bundle.js"
+web_include_css = "erpnext-web.bundle.css"
+email_css = "email.bundle.css"
 
 doctype_js = {
 	"Address": "public/js/address.js",
