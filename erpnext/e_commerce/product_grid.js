@@ -60,7 +60,7 @@ erpnext.ProductGrid = class {
 			<div class="card-body text-left" style="width:100%">
 				<div style="margin-top: 16px; display: flex;">
 		`;
-		body_html += this.get_title_with_indicator(item, title);
+		body_html += this.get_title_with_indicator(item, title, settings);
 
 		if (!item.has_variants && settings.enable_wishlist) {
 			body_html += this.get_wishlist_icon(item);
