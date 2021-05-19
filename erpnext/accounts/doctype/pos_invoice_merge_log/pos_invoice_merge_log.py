@@ -56,11 +56,11 @@ class POSInvoiceMergeLog(Document):
 		sales = [d for d in pos_invoice_docs if d.get('is_return') == 0]
 
 		sales_invoice, credit_note = "", ""
-		if sales:
-			sales_invoice = self.process_merging_into_sales_invoice(sales)
-
 		if returns:
 			credit_note = self.process_merging_into_credit_note(returns)
+
+		if sales:
+			sales_invoice = self.process_merging_into_sales_invoice(sales)
 
 		self.save() # save consolidated_sales_invoice & consolidated_credit_note ref in merge log
 
