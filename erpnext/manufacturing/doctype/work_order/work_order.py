@@ -280,13 +280,18 @@ class WorkOrder(Document):
 		# self.scrap_cost_calc()
 		
 	def before_save(self):
-		bo = frappe.get_doc("BOM", self.bom_no)
 		for row1 in self.required_items:
-			for row2 in bo.items:
-				if row1.item_name == row2.item_name:
-					row1.type = row2.type
-					bo.db_update()
-					break
+			bo = frappe.get_doc("Item", row1.item_code)
+			row1.type = bo.bom_item_type
+		# bo = frappe.get_doc("BOM", self.bom_no)
+		# for row1 in self.required_items:
+		# 	for row2 in bo.items:
+		# 		if (row1.item_name == row2.item_name):
+		# 			row1.type = row2.type
+		# 			break
+
+
+
 		# value = 0
 		# for row in self.required_items:
 		# 	if row.type == "RM":
@@ -306,6 +311,7 @@ class WorkOrder(Document):
 
 	def on_change(self):
 		self.planned_rm_weight_calc()
+		self.total_weight()
 		self.calc_rm_weight_and_consump_dev()
 		self.transfered_rm_weight_calculation()
 		# self.bom_details()
@@ -322,6 +328,17 @@ class WorkOrder(Document):
 		# self.db_update()
 		# self.reload()
 
+	def total_weight(self):
+		total_trans = total_planned = 0
+		for row in self.required_items:
+			item_wt = frappe.get_doc("Item", row.item_code)
+			total_trans += flt(row.transferred_qty) * flt(item_wt.weight_per_unit)
+			total_planned += flt(row.required_qty) * flt(item_wt.weight_per_unit)
+		self.planned_total_weight = flt(total_planned, self.precision('planned_total_weight'))
+		self.transferred_total_weight = flt(total_trans, self.precision('transferred_total_weight'))
+		frappe.db.set_value("Work Order", self.name, "planned_total_weight", self.planned_total_weight)
+		frappe.db.set_value("Work Order", self.name, "transferred_total_weight", self.transferred_total_weight)
+
 	def actual_yeild_on_wo(self):
 		self.actual_fg_weight = flt(flt(self.produced_qty) * flt(self.weight_per_unit), self.precision('actual_fg_weight'))
 		if self.actual_rm_weight == 0 or self.actual_rm_weight == None:
@@ -332,8 +349,8 @@ class WorkOrder(Document):
 	def planned_rm_weight_calc(self):
 		value = 0
 		for row in self.required_items:
-			if row.type == "RM":
-				item_wt = frappe.get_doc("Item", row.item_code)
+			item_wt = frappe.get_doc("Item", row.item_code)
+			if item_wt.bom_item_type == "RM":
 				value += flt(row.required_qty)*flt(item_wt.weight_per_unit)
 		self.planned_rm_weight = flt(value, self.precision('planned_rm_weight'))
 		frappe.db.set_value("Work Order", self.name, "planned_rm_weight", self.planned_rm_weight)
@@ -359,7 +376,8 @@ class WorkOrder(Document):
 		value = 0
 		for row in self.required_items:
 			item_wt = frappe.get_doc("Item", row.item_code)
-			value += flt(row.transferred_qty) * flt(item_wt.weight_per_unit)
+			if item_wt.bom_item_type == "RM":
+				value += flt(row.transferred_qty) * flt(item_wt.weight_per_unit)
 		self.transfered_rm_weight = flt(value, self.precision('qty'))
 		frappe.db.set_value("Work Order", self.name, "transfered_rm_weight", self.transfered_rm_weight)
 		# self.db_update()
@@ -401,8 +419,8 @@ class WorkOrder(Document):
 		# print("Changed on_change \n"*20)
 		value = 0
 		for row in self.required_items:
-			if row.type == "RM":
-				item_wt = frappe.get_doc("Item", row.item_code)
+			item_wt = frappe.get_doc("Item", row.item_code)
+			if item_wt.bom_item_type == "RM":
 				value += flt(row.consumed_qty) * flt(item_wt.weight_per_unit)
 		self.actual_rm_weight = flt(value, self.precision('actual_rm_weight'))
 		frappe.db.set_value("Work Order", self.name, "actual_rm_weight", self.actual_rm_weight)

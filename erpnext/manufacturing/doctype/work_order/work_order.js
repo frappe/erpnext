@@ -731,14 +731,14 @@ erpnext.work_order = {
 		let max = 0;
 		if (frm.doc.skip_transfer) {
 			// max = flt(frm.doc.qty) - flt(frm.doc.produced_qty);
-			max = flt(frm.doc.planned_rm_weight) - flt(frm.doc.actual_rm_weight);
+			max = flt(frm.doc.planned_total_weight) - flt(frm.doc.consumed_total_weight);
 		} else {
 			if (purpose === 'Manufacture') {
 				// max = flt(frm.doc.material_transferred_for_manufacturing) - flt(frm.doc.produced_qty);
-				max = flt(frm.doc.transfered_rm_weight) - flt(frm.doc.actual_rm_weight);
+				max = flt(frm.doc.transfered_total_weight) - flt(frm.doc.consumed_total_weight);
 			} else {
 				// max = flt(frm.doc.qty) - flt(frm.doc.material_transferred_for_manufacturing);
-				max = flt(frm.doc.planned_rm_weight) - flt(frm.doc.transfered_rm_weight);
+				max = flt(frm.doc.planned_total_weight) - flt(frm.doc.transfered_total_weight);
 			}
 		}
 		return flt(max, precision('qty'));
