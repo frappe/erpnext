@@ -29,7 +29,7 @@ erpnext.ProductView =  class {
 		$('#list').prop('disabled', true);
 		$('#image-view').prop('disabled', true);
 		frappe.call({
-			method: 'erpnext.www.all-products.index.get_product_filter_data',
+			method: 'erpnext.e_commerce.doctype.website_item.website_item.get_product_filter_data',
 			args: args,
 			callback: function(result) {
 				if (!result.exc && result) {

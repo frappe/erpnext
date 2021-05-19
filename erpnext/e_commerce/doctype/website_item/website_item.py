@@ -442,3 +442,37 @@ def check_if_user_is_customer(user=None):
 			party = contact.links[0].link_name
 
 	return True if party else False
+
+@frappe.whitelist(allow_guest=True)
+def get_product_filter_data():
+	"""Get pre-rendered filtered products and discount filters on load."""
+	from erpnext.e_commerce.product_query import ProductQuery
+	from erpnext.e_commerce.filters import ProductFiltersBuilder
+	from erpnext.setup.doctype.item_group.item_group import get_child_groups
+
+	if frappe.form_dict:
+		search = frappe.form_dict.search
+		field_filters = frappe.parse_json(frappe.form_dict.field_filters)
+		attribute_filters = frappe.parse_json(frappe.form_dict.attribute_filters)
+		start = cint(frappe.parse_json(frappe.form_dict.start)) if frappe.form_dict.start else 0
+		item_group = frappe.form_dict.item_group
+	else:
+		search, attribute_filters, item_group = None, None, None
+		field_filters = {}
+		start = 0
+
+	sub_categories = []
+	if item_group:
+		field_filters['item_group'] = item_group
+		sub_categories = get_child_groups(item_group)
+
+	engine = ProductQuery()
+	items, discounts = engine.query(attribute_filters, field_filters, search_term=search, start=start)
+
+	# discount filter data
+	filters = {}
+	if discounts:
+		filter_engine = ProductFiltersBuilder()
+		filters["discount_filters"] = filter_engine.get_discount_filters(discounts)
+
+	return items or [], filters, engine.settings, sub_categories
