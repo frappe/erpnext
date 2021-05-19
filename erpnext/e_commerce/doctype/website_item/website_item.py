@@ -433,15 +433,16 @@ def check_if_user_is_customer(user=None):
 		user = frappe.session.user
 
 	contact_name = get_contact_name(user)
-	party = None
+	customer = None
 
 	if contact_name:
 		contact = frappe.get_doc('Contact', contact_name)
-		if contact.links:
-			party_doctype = contact.links[0].link_doctype
-			party = contact.links[0].link_name
+		for link in contact.links:
+			if link.link_doctype == "Customer":
+				customer = link.link_name
+				break
 
-	return True if party else False
+	return True if customer else False
 
 @frappe.whitelist(allow_guest=True)
 def get_product_filter_data():
