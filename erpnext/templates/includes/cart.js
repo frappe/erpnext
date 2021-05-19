@@ -19,7 +19,6 @@ $.extend(shopping_cart, {
 		shopping_cart.bind_request_quotation();
 		shopping_cart.bind_change_qty();
 		shopping_cart.bind_change_notes();
-		shopping_cart.bind_dropdown_cart_buttons();
 		shopping_cart.bind_coupon_code();
 	},
 
@@ -129,8 +128,14 @@ $.extend(shopping_cart, {
 				}
 			}
 			input.val(newVal);
+
+			let notes = input.closest("td").siblings().find(".notes").text().trim();
 			var item_code = input.attr("data-item-code");
-			shopping_cart.shopping_cart_update({item_code, qty: newVal});
+			shopping_cart.shopping_cart_update({
+				item_code,
+				qty: newVal,
+				additional_notes: notes
+			});
 		});
 	},
 

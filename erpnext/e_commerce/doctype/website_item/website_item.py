@@ -194,6 +194,7 @@ class WebsiteItem(WebsiteGenerator):
 		if frappe.db.exists("Wishlist Items", {"item_code": self.item_code, "parent": frappe.session.user}):
 			context.wished = True
 
+		context.user_is_customer = check_if_user_is_customer()
 		return context
 
 	def set_variant_context(self, context):
@@ -424,3 +425,20 @@ def make_website_item(doc, save=True):
 def on_doctype_update():
 	# since route is a Text column, it needs a length for indexing
 	frappe.db.add_index("Website Item", ["route(500)"])
+
+def check_if_user_is_customer(user=None):
+	from frappe.contacts.doctype.contact.contact import get_contact_name
+
+	if not user:
+		user = frappe.session.user
+
+	contact_name = get_contact_name(user)
+	party = None
+
+	if contact_name:
+		contact = frappe.get_doc('Contact', contact_name)
+		if contact.links:
+			party_doctype = contact.links[0].link_doctype
+			party = contact.links[0].link_name
+
+	return True if party else False

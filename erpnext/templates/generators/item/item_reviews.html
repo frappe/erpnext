@@ -5,11 +5,11 @@
 		{{ ratings_summary(reviews, reviews_per_rating, average_rating, average_whole_rating) }}
 
 		<!-- Write a Review for legitimate users -->
-		{% if frappe.session.user != "Guest" %}
-		<button class="btn btn-light btn-write-review mr-2 mt-4 mb-4 w-100"
-			data-web-item="{{ doc.name }}">
-			{{ _("Write a Review") }}
-		</button>
+		{% if frappe.session.user != "Guest" and user_is_customer %}
+			<button class="btn btn-light btn-write-review mr-2 mt-4 mb-4 w-100"
+				data-web-item="{{ doc.name }}">
+				{{ _("Write a Review") }}
+			</button>
 		{% endif %}
 	</div>
 
