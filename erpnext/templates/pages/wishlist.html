@@ -17,8 +17,12 @@
 		</div>
 	</div>
 {% else %}
-	<!-- TODO: Make empty state for wishlist -->
-	{% include "erpnext/www/all-products/not_found.html" %}
+	<div class="cart-empty frappe-card">
+		<div class="cart-empty-state">
+			<img src="/assets/erpnext/images/ui-states/cart-empty-state.png" alt="Empty Cart">
+		</div>
+		<div class="cart-empty-message mt-4">{{ _('Wishlist is empty!') }}</p>
+	</div>
 {% endif %}
 
 {% endblock %}
