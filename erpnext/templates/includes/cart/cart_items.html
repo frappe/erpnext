@@ -13,7 +13,7 @@
 			{{ _('Variant of') }} <a href="{{frappe.db.get_value('Item', variant_of, 'route')}}">{{ variant_of }}</a>
 		</span>
 		{% endif %}
-		<div class="mt-2">
+		<div class="mt-2 notes">
 			<textarea data-item-code="{{d.item_code}}" class="form-control" rows="2" placeholder="{{ _('Add notes') }}">{{d.additional_notes or ''}}</textarea>
 		</div>
 	</td>

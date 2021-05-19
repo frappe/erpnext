@@ -58,6 +58,8 @@ $.extend(wishlist, {
 
 	bind_remove_action: function() {
 		// remove item from wishlist
+		let me = this;
+
 		$('.page_content').on("click", ".remove-wish", (e) => {
 			const $remove_wish_btn = $(e.currentTarget);
 			let item_code = $remove_wish_btn.data("item-code");
@@ -65,6 +67,10 @@ $.extend(wishlist, {
 			let success_action = function() {
 				const $card_wrapper = $remove_wish_btn.closest(".wishlist-card");
 				$card_wrapper.addClass("wish-removed");
+				if (frappe.get_cookie("wish_count") == 0) {
+					$(".page_content").empty();
+					me.render_empty_state();
+				}
 			};
 			let args = { item_code: item_code };
 			this.add_remove_from_wishlist("remove", args, success_action);
@@ -77,6 +83,14 @@ $.extend(wishlist, {
 			const $btn = $(e.currentTarget);
 			const $wish_icon = $btn.find('.wish-icon');
 			let me = this;
+
+			if(frappe.session.user==="Guest") {
+				if(localStorage) {
+					localStorage.setItem("last_visited", window.location.pathname);
+				}
+				window.location.href = "/login";
+				return;
+			}
 
 			let success_action = function() {
 				e_commerce.wishlist.set_wishlist_count();
@@ -122,30 +136,48 @@ $.extend(wishlist, {
 			success_action: method to execute on successs,
 			failure_action: method to execute on failure,
 			async: make call asynchronously (true/false).	*/
-		let method = "erpnext.e_commerce.doctype.wishlist.wishlist.add_to_wishlist";
-		if (action === "remove") {
-			method = "erpnext.e_commerce.doctype.wishlist.wishlist.remove_from_wishlist";
-		}
-
-		frappe.call({
-			async: async,
-			type: "POST",
-			method: method,
-			args: args,
-			callback: function (r) {
-				if (r.exc) {
-					if (failure_action && (typeof failure_action === 'function')) {
-						failure_action();
-					}
-					frappe.msgprint({
-						message: __("Sorry, something went wrong. Please refresh."),
-						indicator: "red", title: __("Note")
-					});
-				} else if (success_action && (typeof success_action === 'function')) {
-					success_action();
-				}
+		if (frappe.session.user==="Guest") {
+			if(localStorage) {
+				localStorage.setItem("last_visited", window.location.pathname);
 			}
-		});
+			window.location.href = "/login";
+		} else {
+			let method = "erpnext.e_commerce.doctype.wishlist.wishlist.add_to_wishlist";
+			if (action === "remove") {
+				method = "erpnext.e_commerce.doctype.wishlist.wishlist.remove_from_wishlist";
+			}
+
+			frappe.call({
+				async: async,
+				type: "POST",
+				method: method,
+				args: args,
+				callback: function (r) {
+					if (r.exc) {
+						if (failure_action && (typeof failure_action === 'function')) {
+							failure_action();
+						}
+						frappe.msgprint({
+							message: __("Sorry, something went wrong. Please refresh."),
+							indicator: "red", title: __("Note")
+						});
+					} else if (success_action && (typeof success_action === 'function')) {
+						success_action();
+					}
+				}
+			});
+		}
+	},
+
+	render_empty_state() {
+		$(".page_content").append(`
+			<div class="cart-empty frappe-card">
+				<div class="cart-empty-state">
+					<img src="/assets/erpnext/images/ui-states/cart-empty-state.png" alt="Empty Cart">
+				</div>
+				<div class="cart-empty-message mt-4">${ __('Wishlist is empty !') }</p>
+			</div>
+		`);
 	}
 
 });
