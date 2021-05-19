@@ -166,16 +166,16 @@ class TestProductionPlan(unittest.TestCase):
 			'grand_total': so.grand_total
 		})
 		pln.combine_items = 1
-		pln.get_so_items()
-		for plan_reference in pln.prod_plan_references:
-			plan_reference.item_reference = pln.po_items[0].name
+		pln.get_items()
 		pln.submit()
 
-		self.assertTrue(pln.po_items[0].planned_qty,3)	
+		self.assertTrue(pln.po_items[0].planned_qty, 3)	
 
 		pln.make_work_order()
-		work_order = frappe.db.get_value('Work Order', {'production_plan_item': pln.po_items[0].name,
-			'production_plan': pln.name,}, 'name')
+		work_order = frappe.db.get_value('Work Order', {
+			'production_plan_item': pln.po_items[0].name,
+			'production_plan': pln.name
+		}, 'name')
 
 		wo_doc = frappe.get_doc('Work Order', work_order)
 		wo_doc.update({
@@ -194,8 +194,8 @@ class TestProductionPlan(unittest.TestCase):
 			so_wo_qty = frappe.db.get_value('Sales Order Item', so_item, 'work_order_qty')
 			self.assertEqual(so_wo_qty, 0.0)
 		
-		lat_plan = frappe.get_doc('Production Plan',pln.name)
-		lat_plan.cancel()
+		latest_plan = frappe.get_doc('Production Plan', pln.name)
+		latest_plan.cancel()
 	
 	def test_pp_to_mr_customer_provided(self):
 		#Material Request from Production Plan for Customer Provided

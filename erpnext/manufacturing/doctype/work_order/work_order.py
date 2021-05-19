@@ -377,7 +377,7 @@ class WorkOrder(Document):
 				total_bundle_qty = 1
 
 		prod_plan = frappe.get_doc('Production Plan', self.production_plan)
-		item_reference = frappe.get_value('Production Plan Item', self.production_plan_item,'item_reference')
+		item_reference = frappe.get_value('Production Plan Item', self.production_plan_item, 'sales_order_item')
 		
 		for plan_reference in prod_plan.prod_plan_references:
 			work_order_qty = 0.0

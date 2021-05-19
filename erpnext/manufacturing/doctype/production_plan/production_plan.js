@@ -212,7 +212,7 @@ frappe.ui.form.on('Production Plan', {
 	},
 
 	get_items: function (frm) {
-		frm.clear_table('prod_plan_ref');
+		frm.clear_table('prod_plan_references');
 
 		frappe.call({
 			method: "get_items",
@@ -224,15 +224,13 @@ frappe.ui.form.on('Production Plan', {
 		});
 	},
 	combine_items: function (frm) {
-		frm.clear_table('prod_plan_ref');
+		frm.clear_table('prod_plan_references');
 
 		frappe.call({
 			method: "get_items",
 			freeze: true,
 			doc: frm.doc,
 		});
-
-
 	},
 
 	get_items_for_mr: function(frm) {
