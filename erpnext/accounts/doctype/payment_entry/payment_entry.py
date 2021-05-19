@@ -436,7 +436,10 @@ class PaymentEntry(AccountsController):
 		if not tax_withholding_details:
 			return
 
-		tax_withholding_details.update({'included_in_paid_amount': included_in_paid_amount})
+		tax_withholding_details.update({
+			'included_in_paid_amount': included_in_paid_amount,
+			'cost_center': self.cost_center or erpnext.get_default_cost_center(self.company)
+		})
 
 		accounts = []
 		for d in self.taxes:
@@ -1412,6 +1415,7 @@ def get_payment_entry(dt, dn, party_amount=None, bank_account=None, bank_amount=
 
 	if doc.doctype == 'Purchase Order' and doc.apply_tds:
 		pe.apply_tax_withholding_amount = 1
+		pe.tax_withholding_category = doc.tax_withholding_category
 
 	return pe
 

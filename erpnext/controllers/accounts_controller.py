@@ -700,7 +700,7 @@ class AccountsController(TransactionBase):
 		from erpnext.accounts.utils import unlink_ref_doc_from_payment_entries
 
 		if self.doctype in ["Sales Invoice", "Purchase Invoice"]:
-			self.update_allocated_advance_taxes()
+			self.update_allocated_advance_taxes_on_cancel()
 			if frappe.db.get_single_value('Accounts Settings', 'unlink_payment_on_cancellation_of_invoice'):
 				unlink_ref_doc_from_payment_entries(self)
 
@@ -716,7 +716,7 @@ class AccountsController(TransactionBase):
 
 		return tax_map
 
-	def update_allocated_advance_taxes(self):
+	def update_allocated_advance_taxes_on_cancel(self):
 		if self.get('advances'):
 			tax_accounts = [d.account_head for d in self.get('taxes')]
 			allocated_tax_map = frappe._dict(frappe.get_all('GL Entry', fields=['account', 'sum(credit - debit)'],
@@ -734,9 +734,59 @@ class AccountsController(TransactionBase):
 							allocated_amount = tax.tax_amount
 
 						if allocated_amount:
-							frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount', tax.allocated_amount - allocated_amount)
+							frappe.db.set_value('Advance Taxes and Charges', tax.name, 'allocated_amount',
+								tax.allocated_amount - allocated_amount)
 							tax_map[tax.account_head] -= allocated_amount
 							allocated_tax_map[tax.account_head] -= allocated_amount
+
+	def allocate_advance_taxes(self, gl_entries):
+		tax_map = self.get_tax_map()
+		for pe in self.get("advances"):
+			if pe.reference_type == "Payment Entry":
+				pe = frappe.get_doc("Payment Entry", pe.reference_name)
+				for tax in pe.get("taxes"):
+					account_currency = get_account_currency(tax.account_head)
+
+					if self.doctype == "Purchase Invoice":
+						dr_or_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+						rev_dr_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+					else:
+						dr_or_cr = "debit" if tax.add_deduct_tax == "Add" else "credit"
+						rev_dr_cr = "credit" if tax.add_deduct_tax == "Add" else "debit"
+
+					party = self.supplier if self.doctype == "Purchase Invoice" else self.customer
+					unallocated_amount = tax.tax_amount - tax.allocated_amount
+					if tax_map.get(tax.account_head):
+						amount = tax_map.get(tax.account_head)
+						if amount < unallocated_amount:
+							unallocated_amount = amount
+
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": tax.account_head,
+								"against": party,
+								dr_or_cr: unallocated_amount,
+								dr_or_cr + "_in_account_currency": unallocated_amount
+								if account_currency==self.company_currency
+								else unallocated_amount,
+								"cost_center": tax.cost_center
+							}, account_currency, item=tax))
+
+						gl_entries.append(
+							self.get_gl_dict({
+								"account": pe.advance_tax_account,
+								"against": party,
+								rev_dr_cr: unallocated_amount,
+								rev_dr_cr + "_in_account_currency": unallocated_amount
+								if account_currency==self.company_currency
+								else unallocated_amount,
+								"cost_center": tax.cost_center
+							}, account_currency, item=tax))
+
+						frappe.db.set_value("Advance Taxes and Charges", tax.name, "allocated_amount",
+							tax.allocated_amount + unallocated_amount)
+
+						tax_map[tax.account_head] -= unallocated_amount
 
 	def validate_multiple_billing(self, ref_dt, item_ref_dn, based_on, parentfield):
 		from erpnext.controllers.status_updater import get_allowance_for
