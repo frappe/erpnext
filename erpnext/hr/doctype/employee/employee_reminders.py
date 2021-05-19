@@ -31,7 +31,7 @@ def send_advance_holiday_reminders(frequency):
 	`frequency` (str): 'Weekly' or 'Monthly'
 	"""
 	if frequency == "Weekly":
-		start_date = add_days(getdate(), 1)
+		start_date = getdate()
 		end_date = add_days(getdate(), 7)
 	elif frequency == "Monthly":
 		# Sent on 1st of every month
@@ -70,7 +70,7 @@ def send_holidays_reminder_in_advance(employee, holidays):
 			frequency=frequency[:-2]
 		),
 		header=email_header
-)
+	)
 
 # ------------------
 # BIRTHDAY REMINDERS
