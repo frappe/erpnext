@@ -81,7 +81,9 @@ frappe.ui.form.on('Pick List', {
 	},
 	onload_post_render: (frm) => {
 		if(frm.doc.purpose === "Material Transfer"){
-			frm.doc.is_material_consumption = 1
+			if(frm.doc.consume_work_order && frm.doc.material_consumption) {
+				frm.doc.is_material_consumption = 1
+			}
 			frm.refresh_field('is_material_consumption')
 		}
 		if(frm.doc.is_material_consumption ===1){
