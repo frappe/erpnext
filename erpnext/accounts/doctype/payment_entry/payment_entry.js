@@ -1112,12 +1112,16 @@ frappe.ui.form.on('Payment Entry', {
 
 			current_tax_amount *= (tax.add_deduct_tax == "Deduct") ? -1.0 : 1.0;
 
+			let applicable_tax_amount = 0
+
 			if (!tax.included_in_paid_amount) {
-				if(i==0) {
-					tax.total = flt(frm.doc.paid_amount + current_tax_amount, precision("total", tax));
-				} else {
-					tax.total = flt(frm.doc["taxes"][i-1].total + current_tax_amount, precision("total", tax));
-				}
+				applicable_tax_amount = current_tax_amount
+			}
+
+			if(i==0) {
+				tax.total = flt(frm.doc.paid_amount + applicable_tax_amount, precision("total", tax));
+			} else {
+				tax.total = flt(frm.doc["taxes"][i-1].total + applicable_tax_amount, precision("total", tax));
 			}
 
 			tax.base_total = tax.total * frm.doc.source_exchange_rate;
@@ -1192,6 +1196,11 @@ frappe.ui.form.on('Advance Taxes and Charges', {
 	},
 
 	taxes_remove: function(frm) {
+		frm.events.calculate_taxes(frm);
+		frm.events.set_unallocated_amount(frm);
+	},
+
+	included_in_paid_amount: function(frm) {
 		frm.events.calculate_taxes(frm);
 		frm.events.set_unallocated_amount(frm);
 	}
