@@ -703,7 +703,7 @@ def get_gst_accounts(company, account_wise=False):
 		filters={"parent": "GST Settings", "company": company},
 		fields=["cgst_account", "sgst_account", "igst_account", "cess_account"])
 
-	if not gst_settings_accounts and not frappe.flags.in_test:
+	if not gst_settings_accounts and not frappe.flags.in_test and not frappe.flags.in_migrate:
 		frappe.throw(_("Please set GST Accounts in GST Settings"))
 
 	for d in gst_settings_accounts:
