@@ -18,7 +18,7 @@ def return_data(filters):
 	if filters.get("to_date"): to_date = filters.get("to_date")
 	conditions = return_filters(filters, from_date, to_date)
 
-	salary_slips = frappe.get_all("Sales Invoice", ["name", "creation_date", "rtn", "client_name", "cai", "naming_series", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = conditions, order_by = "name asc")	
+	salary_slips = frappe.get_all("Sales Invoice", ["name", "status","creation_date", "rtn", "client_name", "cai", "naming_series", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = conditions, order_by = "name asc")	
 
 	for salary_slip in salary_slips:
 		split_date = str(salary_slip.creation_date).split("T")[0].split("-")
@@ -38,7 +38,7 @@ def return_data(filters):
 		split_serie = salary_slip.naming_series.split('-')
 		serie =  "{}-{}".format(split_serie[0], split_serie[1])		
 
-		if serie_number == serie:	
+		if serie_number == serie and salary_slip.status != "Return":	
 			total_exempt = salary_slip.total_exempt
 			total_exonerated = salary_slip.total_exonerated
 			taxed_sales15 = salary_slip.taxed_sales15
@@ -56,6 +56,42 @@ def return_data(filters):
 			row = [posting_date, rtn, salary_slip.client_name, type_transaction, serie_number,salary_slip.name, salary_slip.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
 			data.append(row)
 	
+	for salary_slip in salary_slips:
+		split_date = str(salary_slip.creation_date).split("T")[0].split("-")
+		posting_date = "-".join(reversed(split_date))
+		serie_number = filters.get("prefix")	
+		type_transaction = "DEV"
+		initial_range = ""
+		final_range = ""
+		total_exempt = 0
+		total_exonerated = 0
+		taxed_sales15 = 0
+		isv15 = 0
+		taxed_sales18 = 0
+		isv18 = 0
+		rtn = salary_slip.rtn
+
+		split_serie = salary_slip.naming_series.split('-')
+		serie =  "{}-{}".format(split_serie[0], split_serie[1])		
+
+		if serie_number == serie and salary_slip.status == "Return":	
+			total_exempt = salary_slip.total_exempt
+			total_exonerated = salary_slip.total_exonerated
+			taxed_sales15 = salary_slip.taxed_sales15
+			isv15 += salary_slip.isv15
+			taxed_sales18 = salary_slip.taxed_sales18
+			isv18 = salary_slip.isv18
+			is_row = True
+			split_final_range = salary_slip.name.split("-")
+			final_range = split_final_range[3]
+		
+			grand_total = taxed_sales15 + isv15 + taxed_sales18 + isv18 + total_exempt
+
+			final_range = "{}-{}".format(initial_range, final_range)
+
+			row = [posting_date, rtn, salary_slip.client_name, type_transaction, serie_number,salary_slip.name, salary_slip.cai, total_exempt, total_exonerated, taxed_sales15, isv15, taxed_sales18, isv18, grand_total]
+			data.append(row)
+
 	conditions = return_filters_debit_note(filters, from_date, to_date)
 
 	debit_notes = frappe.get_all("Debit Note CXC", ["name", "customer", "cai", "naming_series", "posting_date", "isv_18", "isv_15", "outstanding_amount", "amount"], filters = conditions, order_by = "name asc")
