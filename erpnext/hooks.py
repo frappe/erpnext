@@ -268,10 +268,12 @@ doc_events = {
 	},
 	"Purchase Invoice": {
 		"validate": [
-			"erpnext.regional.india.utils.update_grand_total_for_rcm",
+			"erpnext.regional.india.utils.validate_reverse_charge_transaction",
+			"erpnext.regional.india.utils.update_itc_availed_fields",
 			"erpnext.regional.united_arab_emirates.utils.update_grand_total_for_rcm",
-			"erpnext.regional.united_arab_emirates.utils.validate_returns"
-			]
+			"erpnext.regional.united_arab_emirates.utils.validate_returns",
+			"erpnext.regional.india.utils.update_taxable_values"
+		]
 	},
 	"Payment Entry": {
 		"on_submit": ["erpnext.regional.create_transaction_log", "erpnext.accounts.doctype.payment_request.payment_request.update_payment_req_status", "erpnext.accounts.doctype.dunning.dunning.resolve_dunning"],
@@ -365,10 +367,8 @@ scheduler_events = {
 		"erpnext.setup.doctype.email_digest.email_digest.send",
 		"erpnext.manufacturing.doctype.bom_update_tool.bom_update_tool.update_latest_price_in_all_boms",
 		"erpnext.hr.doctype.leave_ledger_entry.leave_ledger_entry.process_expired_allocation",
-		"erpnext.hr.doctype.leave_policy_assignment.leave_policy_assignment.automatically_allocate_leaves_based_on_leave_policy",
 		"erpnext.hr.utils.generate_leave_encashment",
 		"erpnext.hr.utils.allocate_earned_leaves",
-		"erpnext.hr.utils.grant_leaves_automatically",
 		"erpnext.loan_management.doctype.process_loan_security_shortfall.process_loan_security_shortfall.create_process_loan_security_shortfall",
 		"erpnext.loan_management.doctype.process_loan_interest_accrual.process_loan_interest_accrual.process_loan_interest_accrual_for_term_loans",
 		"erpnext.crm.doctype.lead.lead.daily_open_lead"

@@ -90,9 +90,9 @@ def add_bank_accounts(response, bank, company):
 					"bank": bank["bank_name"],
 					"account": default_gl_account.account,
 					"account_name": account["name"],
-					"account_type": account["type"] or "",
-					"account_subtype": account["subtype"] or "",
-					"mask": account["mask"] or "",
+					"account_type": account.get("type", ""),
+					"account_subtype": account.get("subtype", ""),
+					"mask": account.get("mask", ""),
 					"integration_id": account["id"],
 					"is_company_account": 1,
 					"company": company
