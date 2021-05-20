@@ -55,22 +55,22 @@ class PeriodClosingVoucher(AccountsController):
 		pl_accounts = self.get_pl_balances()
 
 		for acc in pl_accounts:
-			if flt(acc.balance_in_company_currency):
+			if flt(acc.bal_in_company_currency):
 				gl_entries.append(self.get_gl_dict({
 					"account": acc.account,
 					"cost_center": acc.cost_center,
 					"account_currency": acc.account_currency,
-					"debit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
-						if flt(acc.balance_in_account_currency) < 0 else 0,
-					"debit": abs(flt(acc.balance_in_company_currency)) \
-						if flt(acc.balance_in_company_currency) < 0 else 0,
-					"credit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
-						if flt(acc.balance_in_account_currency) > 0 else 0,
-					"credit": abs(flt(acc.balance_in_company_currency)) \
-						if flt(acc.balance_in_company_currency) > 0 else 0
+					"debit_in_account_currency": abs(flt(acc.bal_in_account_currency)) \
+						if flt(acc.bal_in_account_currency) < 0 else 0,
+					"debit": abs(flt(acc.bal_in_company_currency)) \
+						if flt(acc.bal_in_company_currency) < 0 else 0,
+					"credit_in_account_currency": abs(flt(acc.bal_in_account_currency)) \
+						if flt(acc.bal_in_account_currency) > 0 else 0,
+					"credit": abs(flt(acc.bal_in_company_currency)) \
+						if flt(acc.bal_in_company_currency) > 0 else 0
 				}, item=acc))
 
-				net_pl_balance += flt(acc.balance_in_company_currency)
+				net_pl_balance += flt(acc.bal_in_company_currency)
 
 		if net_pl_balance:
 			if self.cost_center_wise_pnl:
@@ -103,19 +103,15 @@ class PeriodClosingVoucher(AccountsController):
 		gl_entries = []
 
 		for acc in pl_accounts:
-			if flt(acc.balance_in_company_currency):
+			if flt(acc.bal_in_company_currency):
 				gl_entry = self.get_gl_dict({
 					"account": self.closing_account_head,
 					"cost_center": acc.cost_center or company_cost_center,
 					"account_currency": acc.account_currency,
-					"debit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
-						if flt(acc.balance_in_account_currency) > 0 else 0,
-					"debit": abs(flt(acc.balance_in_company_currency)) \
-						if flt(acc.balance_in_company_currency) > 0 else 0,
-					"credit_in_account_currency": abs(flt(acc.balance_in_account_currency)) \
-						if flt(acc.balance_in_account_currency) < 0 else 0,
-					"credit": abs(flt(acc.balance_in_company_currency)) \
-						if flt(acc.balance_in_company_currency) < 0 else 0
+					"debit_in_account_currency": abs(flt(acc.bal_in_account_currency)) if flt(acc.bal_in_account_currency) > 0 else 0,
+					"debit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) > 0 else 0,
+					"credit_in_account_currency": abs(flt(acc.bal_in_account_currency)) if flt(acc.bal_in_account_currency) < 0 else 0,
+					"credit": abs(flt(acc.bal_in_company_currency)) if flt(acc.bal_in_company_currency) < 0 else 0
 				}, item=acc)
 
 				self.update_default_dimensions(gl_entry)
@@ -146,12 +142,11 @@ class PeriodClosingVoucher(AccountsController):
 		return frappe.db.sql("""
 			select
 				t1.account, t2.account_currency, {dimension_fields},
-				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as balance_in_account_currency,
-				sum(t1.debit) - sum(t1.credit) as balance_in_company_currency
+				sum(t1.debit_in_account_currency) - sum(t1.credit_in_account_currency) as bal_in_account_currency,
+				sum(t1.debit) - sum(t1.credit) as bal_in_company_currency
 			from `tabGL Entry` t1, `tabAccount` t2
 			where t1.account = t2.name and t2.report_type = 'Profit and Loss'
 			and t2.docstatus < 2 and t2.company = %s
 			and t1.posting_date between %s and %s
 			group by t1.account, {dimension_fields}
-		""".format(dimension_fields = ', '.join(dimension_fields)),
-		(self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
+		""".format(dimension_fields = ', '.join(dimension_fields)), (self.company, self.get("year_start_date"), self.posting_date), as_dict=1)
