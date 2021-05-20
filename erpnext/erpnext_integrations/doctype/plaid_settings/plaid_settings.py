@@ -146,8 +146,9 @@ def sync_transactions(bank, bank_account):
 		transactions = get_transactions(bank=bank, bank_account=bank_account, start_date=start_date, end_date=end_date)
 
 		result = []
-		for transaction in reversed(transactions):
-			result += new_bank_transaction(transaction)
+		if transactions:
+			for transaction in reversed(transactions):
+				result += new_bank_transaction(transaction)
 
 		if result:
 			last_transaction_date = frappe.db.get_value('Bank Transaction', result.pop(), 'date')
