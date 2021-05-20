@@ -1106,18 +1106,23 @@ frappe.tour['Stock Entry'] = [
 	{
 		fieldname: "stock_entry_type",
 		title: __("Stock Entry Type"),
-		description: __("There are multiple 'Stock Entry Type's you can even create your own.") + " " +
-		__("For moving material between warehouses you can select 'Material Transfer'")
+		description: __("Select the type of Stock Entry to be made.") + " " +
+		__("For now, to move stock between warehouses select Material Transfer.")
+	},
+	{
+		fieldname: "from_warehouse",
+		title: __("Default Source Warehouse"),
+		description: __("Select a source warehouse, where you have stock available.")
+	},
+	{
+		fieldname: "to_warehouse",
+		title: __("Default Target Warehouse"),
+		description: __("Select a target warehouse, where stock needs to be transferred.")
 	},
 	{
 		fieldname: "items",
 		title: __("Items"),
-		description: __("This table is used to set details about the 'Item', 'Qty', 'Basic Rate', etc.") + " " +
+		description: __("Select an item and entry quantity to be delivered.") + " " +
 		__("Different 'Source Warehouse' and 'Target Warehouse' can be set for each row.")
 	},
-	{
-		fieldname: "set_posting_time",
-		title: __("Edit Posting Date and Time"),
-		description: __("This option can be checked to edit the 'Posting Date' and 'Posting Time' fields.")
-	}
 ]

@@ -91,21 +91,21 @@ frappe.tour['Warehouse'] = [
 	{
 		fieldname: "warehouse_name",
 		title: __("Warehouse Name"),
-		description: __("A 'Warehouse Name' can be assigned to the warehouse. This should reflect the type of goods it contains.")
+		description: __("Select a name for the warehouse. This should reflect it's location or purpose.")
 	},
 	{
 		fieldname: "warehouse_type",
 		title: __("Warehouse Type"),
-		description: __("A 'Warehouse Type' can be set to classify warehouses.")
+		description: __("Select a warehouse type to categorize the warehouse into a sub-group.")
 	},
 	{
 		fieldname: "is_group",
 		title: __("Is Group"),
-		description: __("If you check 'Is Group', you can group warehouses under this warehouse.")
+		description: __("Check this field to group warehouses under this warehouse.")
 	},
 	{
 		fieldname: "account",
 		title: __("Account"),
-		description: __("This field can be used to set a default account for all transactions with this warehouse.")
+		description: __("Select an account to set a default account for all transactions with this warehouse.")
 	},
 ];
