@@ -19,7 +19,7 @@
  "documentation_url": "https://docs.erpnext.com/docs/user/manual/en/stock",
  "idx": 0,
  "is_complete": 0,
- "modified": "2021-05-18 17:01:36.137180",
+ "modified": "2021-05-20 15:08:11.987145",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock",
@@ -47,10 +47,7 @@
    "step": "View Stock Ledger"
   },
   {
-   "step": "Create a Purchase Receipt"
-  },
-  {
-   "step": "Create a Delivery Note"
+   "step": "Stock Opening Balance"
   }
  ],
  "subtitle": "Inventory, Warehouses, Analysis, and more.",
