@@ -45,6 +45,48 @@ frappe.ui.form.on('Material Request', {
 
 	onload: function(frm) {
 		// add item, if previous view was item
+		var prev_route = frappe.get_prev_route();
+		if (prev_route[1] === 'Work Order') {
+			frm.set_value("manufacturing_staging", 1);
+			frm.set_value("material_request_type","Material Transfer");
+
+			frappe.call({
+				method: "erpnext.stock.doctype.material_request.material_request.get_wo_items",
+				args:{
+					single_wo: 0,
+					work_order: prev_route[2]
+				},
+				freeze_message: "fetching item from work order",
+				callback: function(resp){
+					if(resp.message){
+						resp.message.map(item => {
+							var d = frm.add_child('items')
+							d.item_code = item.item_code;
+								d.item_name = item.item_name;
+								d.description = item.desc;
+								d.warehouse = frm.doc.set_warehouse;
+								d.uom = item.stock_uom;
+								//d.stock_uom = item.stock_uom;
+								d.cost_center = item.cost_center;
+								d.expense_account = item.expense_account
+								//d.warehouse = item.default_warehouse;
+								d.multi_order_qty = item.multi_order_qty;
+								d.conversion_factor = 1;
+								d.qty = item.qty;
+								d.production_item_name = item.production_item_name;
+								d.projected_qty = item.projected_qty;
+								d.actual_qty = item.actual_qty;
+								d.rate = item.valuation_rate;
+								d.min_order_qty = item.min_order_qty;
+								d.amount = item.valuation_rate * item.qty;
+						})
+						frm.refresh_field('items')
+					}
+				}
+			})
+
+		}
+
 		erpnext.utils.add_item(frm);
 
 		// set schedule_date
@@ -259,8 +301,6 @@ frappe.ui.form.on('Material Request', {
 			primary_action_label: 'Get Items',
 			primary_action(values) {
 				values.company = frm.doc.company
-				console.log("#####################")
-				console.log(values)
 				if(!values) return;
 				frappe.call({
 					method: "erpnext.stock.doctype.material_request.material_request.get_wo_items",
