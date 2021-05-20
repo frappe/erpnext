@@ -820,7 +820,7 @@ frappe.ui.form.on('Sales Invoice', {
 	},
 
 	add_timesheet_row: function(frm, row, exchange_rate) {
-		frm.add_child('timesheets',{
+		frm.add_child('timesheets', {
 			'activity_type': row.activity_type,
 			'description': row.description,
 			'time_sheet': row.parent,
@@ -828,7 +828,8 @@ frappe.ui.form.on('Sales Invoice', {
 			'billing_amount': flt(row.billing_amount) * flt(exchange_rate),
 			'timesheet_detail': row.name
 		});
-		frm.refresh_field('timesheets')
+		frm.refresh_field('timesheets');
+		calculate_total_billing_amount(frm);
 	},
 
 	refresh: function(frm) {
@@ -871,36 +872,32 @@ frappe.ui.form.on('Sales Invoice', {
 								project: data.project
 							},
 							callback: function(r) {
-								if(!r.exc) {
-									if(r.message.length > 0) {
-										frm.clear_table('timesheets')
-										r.message.forEach((d) => {
-											let exchange_rate = 1.0;
-											if (frm.doc.currency != d.currency) {
-												frappe.call({
-													method: "erpnext.setup.utils.get_exchange_rate",
-													args: {
-														from_currency: d.currency,
-														to_currency: frm.doc.currency
-													},
-													callback: function(r) {
-														if (r.message) {
-															exchange_rate = r.message;
-															frm.events.add_timesheet_row(frm, d, exchange_rate);
-														}
+								if (!r.exc && r.message.length > 0) {
+									frm.clear_table('timesheets')
+									r.message.forEach((d) => {
+										let exchange_rate = 1.0;
+										if (frm.doc.currency != d.currency) {
+											frappe.call({
+												method: 'erpnext.setup.utils.get_exchange_rate',
+												args: {
+													from_currency: d.currency,
+													to_currency: frm.doc.currency
+												},
+												callback: function(r) {
+													if (r.message) {
+														exchange_rate = r.message;
+														frm.events.add_timesheet_row(frm, d, exchange_rate);
 													}
-												});
-											}
-											else {
-												frm.events.add_timesheet_row(frm, d, exchange_rate);
-											}
-										});
-									}
-									else {
-										frappe.msgprint(__('No Timesheet Found.'))
-									}
-									d.hide();
+												}
+											});
+										} else {
+											frm.events.add_timesheet_row(frm, d, exchange_rate);
+										}
+									});
+								} else {
+									frappe.msgprint(__('No Timesheets found with the selected filters.'))
 								}
+								d.hide();
 							}
 						});
 					},

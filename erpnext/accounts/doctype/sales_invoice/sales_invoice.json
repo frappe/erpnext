@@ -772,6 +772,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Billing Amount",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1960,7 +1961,7 @@
    "label": "Is Debit Note"
   },
   {
-   "default": 0,
+   "default": "0",
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
@@ -1977,7 +1978,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-05-13 17:53:26.185370",
+ "modified": "2021-05-20 22:48:33.988881",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
