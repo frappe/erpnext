@@ -444,6 +444,11 @@ class PaymentEntry(AccountsController):
 		accounts = []
 		for d in self.taxes:
 			if d.account_head == tax_withholding_details.get("account_head"):
+
+				# Preserve user updated included in paid amount
+				if d.included_in_paid_amount:
+					tax_withholding_details.update({'included_in_paid_amount': d.included_in_paid_amount})
+
 				d.update(tax_withholding_details)
 			accounts.append(d.account_head)
 
@@ -839,12 +844,16 @@ class PaymentEntry(AccountsController):
 				current_tax_amount *= 1.0
 
 			if not tax.included_in_paid_amount:
-				if i == 0:
-					tax.total = flt(self.paid_amount + current_tax_amount, self.precision("total", tax))
-				else:
-					tax.total = flt(self.get('taxes')[i-1].total + current_tax_amount, self.precision("total", tax))
+				applicable_tax = current_tax_amount
+			else:
+				applicable_tax = 0
 
-				tax.base_total = tax.total * self.source_exchange_rate
+			if i == 0:
+				tax.total = flt(self.paid_amount + applicable_tax, self.precision("total", tax))
+			else:
+				tax.total = flt(self.get('taxes')[i-1].total + applicable_tax, self.precision("total", tax))
+
+			tax.base_total = tax.total * self.source_exchange_rate
 
 			self.total_taxes_and_charges += current_tax_amount
 			self.base_total_taxes_and_charges += current_tax_amount * self.source_exchange_rate
