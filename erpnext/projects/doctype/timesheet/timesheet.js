@@ -146,10 +146,10 @@ frappe.ui.form.on("Timesheet", {
 		frm.set_currency_labels(["base_total_costing_amount", "base_total_billable_amount", "base_total_billed_amount"], base_currency);
 		frm.set_currency_labels(["total_costing_amount", "total_billable_amount", "total_billed_amount"], frm.doc.currency);
 
-		frm.toggle_display(["base_total_costing_amount", "base_total_billable_amount", "base_total_billed_amount"], 
+		frm.toggle_display(["base_total_costing_amount", "base_total_billable_amount", "base_total_billed_amount"],
 			frm.doc.currency != base_currency)
 
-		if (frm.doc?.time_logs.length > 0) {
+		if (frm.doc.time_logs.length > 0) {
 			frm.set_currency_labels(["base_billing_rate", "base_billing_amount", "base_costing_rate", "base_costing_amount"], base_currency, "time_logs");
 			frm.set_currency_labels(["billing_rate", "billing_amount", "costing_rate", "costing_amount"], frm.doc.currency, "time_logs");
 

@@ -150,7 +150,7 @@ class Timesheet(Document):
 
 	def validate_project(self, data):
 		if self.parent_project and self.parent_project != data.project:
-			frappe.throw(_("Row {0}: Project must be same as the one set in the Timesheet: {1}.")).format(data.idx, self.parent_project)
+			frappe.throw(_("Row {0}: Project must be same as the one set in the Timesheet: {1}.").format(data.idx, self.parent_project))
 
 	def validate_overlap_for(self, fieldname, args, value, ignore_validation=False):
 		if not value or ignore_validation:
@@ -221,14 +221,14 @@ def get_projectwise_timesheet_data(project=None, parent=None, from_time=None, to
 	if from_time and to_time:
 		condition += "AND CAST(tsd.from_time as DATE) BETWEEN %(from_time)s AND %(to_time)s"
 
-	return frappe.db.sql("""SELECT tsd.name as name, 
-				tsd.parent as parent, tsd.billing_hours as billing_hours, 
-				tsd.billing_amount as billing_amount, tsd.activity_type as activity_type, 
+	return frappe.db.sql("""SELECT tsd.name as name,
+				tsd.parent as parent, tsd.billing_hours as billing_hours,
+				tsd.billing_amount as billing_amount, tsd.activity_type as activity_type,
 				tsd.description as description, ts.currency as currency
-			FROM `tabTimesheet Detail` tsd 
-			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent  
-			WHERE tsd.parenttype = 'Timesheet' 
-				and tsd.docstatus=1 {0} 
+			FROM `tabTimesheet Detail` tsd
+			INNER JOIN `tabTimesheet` ts ON ts.name = tsd.parent
+			WHERE tsd.parenttype = 'Timesheet'
+				and tsd.docstatus=1 {0}
 				and tsd.is_billable = 1
 				and tsd.sales_invoice is null""".format(condition), {'project': project, 'parent': parent, 'from_time': from_time, 'to_time': to_time}, as_dict=1)
 
