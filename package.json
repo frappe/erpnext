@@ -12,7 +12,7 @@
     "url": "https://github.com/frappe/erpnext/issues"
   },
   "devDependencies": {
-    "snyk": "^1.290.1"
+    "snyk": "^1.518.0"
   },
   "dependencies": {
     "onscan.js": "^1.5.2"

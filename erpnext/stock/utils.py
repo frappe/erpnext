@@ -172,7 +172,7 @@ def get_bin(item_code, warehouse):
 		bin_obj.flags.ignore_permissions = 1
 		bin_obj.insert()
 	else:
-		bin_obj = frappe.get_cached_doc('Bin', bin)
+		bin_obj = frappe.get_doc('Bin', bin, for_update=True)
 	bin_obj.flags.ignore_permissions = True
 	return bin_obj
 

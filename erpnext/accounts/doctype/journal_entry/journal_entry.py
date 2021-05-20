@@ -592,6 +592,7 @@ class JournalEntry(AccountsController):
 
 			self.validate_total_debit_and_credit()
 
+	@frappe.whitelist()
 	def get_outstanding_invoices(self):
 		self.set('accounts', [])
 		total = 0

@@ -8,6 +8,7 @@ frappe.listview_settings['POS Closing Entry'] = {
 			"Draft": "red",
 			"Submitted": "blue",
 			"Queued": "orange",
+			"Failed": "red",
 			"Cancelled": "red"
 
 		};

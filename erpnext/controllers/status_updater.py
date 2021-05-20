@@ -98,7 +98,12 @@ status_map = {
 		["Draft", None],
 		["Submitted", "eval:self.docstatus == 1"],
 		["Queued", "eval:self.status == 'Queued'"],
+		["Failed", "eval:self.status == 'Failed'"],
 		["Cancelled", "eval:self.docstatus == 2"],
+	],
+	"Transaction Deletion Record": [
+		["Draft", None],
+		["Completed", "eval:self.docstatus == 1"],
 	]
 }
 
@@ -201,10 +206,14 @@ class StatusUpdater(Document):
 			get_allowance_for(item['item_code'], self.item_allowance,
 				self.global_qty_allowance, self.global_amount_allowance, qty_or_amount)
 
-		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
-		 	item[args['target_ref_field']]) * 100
+		role_allowed_to_over_deliver_receive = frappe.db.get_single_value('Stock Settings', 'role_allowed_to_over_deliver_receive')
+		role_allowed_to_over_bill = frappe.db.get_single_value('Accounts Settings', 'role_allowed_to_over_bill')
+		role = role_allowed_to_over_deliver_receive if qty_or_amount == 'qty' else role_allowed_to_over_bill
 
-		if overflow_percent - allowance > 0.01:
+		overflow_percent = ((item[args['target_field']] - item[args['target_ref_field']]) /
+			item[args['target_ref_field']]) * 100
+
+		if overflow_percent - allowance > 0.01 and role not in frappe.get_roles():
 			item['max_allowed'] = flt(item[args['target_ref_field']] * (100+allowance)/100)
 			item['reduce_by'] = item[args['target_field']] - item['max_allowed']
 
