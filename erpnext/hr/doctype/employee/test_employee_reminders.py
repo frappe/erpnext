@@ -7,6 +7,8 @@ import unittest
 from frappe.utils import getdate
 from datetime import timedelta
 from erpnext.hr.doctype.employee.test_employee import make_employee
+from erpnext.hr.doctype.hr_settings.hr_settings import set_proceed_with_frequency_change
+
 
 class TestEmployeeReminders(unittest.TestCase):
 	@classmethod
@@ -124,6 +126,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		# Get HR settings and enable advance holiday reminders
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
 		hr_settings.send_holiday_reminders = 1
+		set_proceed_with_frequency_change()
 		hr_settings.frequency = 'Weekly'
 		hr_settings.save()
 
@@ -147,6 +150,7 @@ class TestEmployeeReminders(unittest.TestCase):
 		# Get HR settings and enable advance holiday reminders
 		hr_settings = frappe.get_doc("HR Settings", "HR Settings")
 		hr_settings.send_holiday_reminders = 1
+		set_proceed_with_frequency_change()
 		hr_settings.frequency = 'Monthly'
 		hr_settings.save()
 

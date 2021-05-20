@@ -9,17 +9,17 @@ from frappe.model.document import Document
 from frappe.utils import format_date
 
 # Wether to proceed with frequency change
-PROCEED_WITH_FREQ_CHANGE = False
+PROCEED_WITH_FREQUENCY_CHANGE = False
 
 class HRSettings(Document):
 	def validate(self):
 		self.set_naming_series()
 
 		# Based on proceed flag
-		global PROCEED_WITH_FREQ_CHANGE
-		if not PROCEED_WITH_FREQ_CHANGE:
+		global PROCEED_WITH_FREQUENCY_CHANGE
+		if not PROCEED_WITH_FREQUENCY_CHANGE:
 			self.validate_frequency_change()
-		PROCEED_WITH_FREQ_CHANGE = False
+		PROCEED_WITH_FREQUENCY_CHANGE = False
 
 	def set_naming_series(self):
 		from erpnext.setup.doctype.naming_series.naming_series import set_by_naming_series
@@ -77,7 +77,7 @@ class HRSettings(Document):
 		)
 
 @frappe.whitelist()
-def set_proceed_with_freq_change():
+def set_proceed_with_frequency_change():
 	'''Enables proceed with frequency change'''
-	global PROCEED_WITH_FREQ_CHANGE
-	PROCEED_WITH_FREQ_CHANGE = True
+	global PROCEED_WITH_FREQUENCY_CHANGE
+	PROCEED_WITH_FREQUENCY_CHANGE = True
