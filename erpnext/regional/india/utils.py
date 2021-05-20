@@ -755,9 +755,9 @@ def update_totals(gst_tax, base_gst_tax, doc):
 		if not doc.is_rounded_total_disabled():
 			doc.rounded_total = round_based_on_smallest_currency_fraction(doc.grand_total,
 				doc.currency, doc.precision("rounded_total"))
-			doc.base_rounded_total += doc.rounded_total * doc.conversion_rate
+			doc.base_rounded_total = doc.rounded_total * doc.conversion_rate
 
-			doc.rounding_adjustment += flt(doc.rounded_total - doc.grand_total,
+			doc.rounding_adjustment = flt(doc.rounded_total - doc.grand_total,
 				doc.precision("rounding_adjustment"))
 			doc.base_rounding_adjustment = doc.rounding_adjustment * doc.conversion_rate
 
