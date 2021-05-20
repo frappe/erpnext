@@ -800,22 +800,22 @@ frappe.ui.form.on("UOM Conversion Detail", {
 
 frappe.tour['Item'] = [
 	{
-		fieldname: "item_name",
-		title: __("Item Name"),
-		description: __("This is the actual name of the product or service.")
-	},
-	{
 		fieldname: "item_code",
 		title: __("Item Code"),
-		description: __("The Item Code can be thought of as a short-form that refers to the item.") + " " +
+		description: __("Select an item code, this can be an SKU or a product code.") + " " +
 			__("For more information click here:") + " " +
 			"<a href='https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-codification' target='_blank'>Item Codification</a>" +
 			__("."),
 	},
 	{
+		fieldname: "item_name",
+		title: __("Item Name"),
+		description: __("Select an item name, this is the actual name of the item. You will be able to search and select an item with its name as well.")
+	},
+	{
 		fieldname: "item_group",
 		title: __("Item Group"),
-		description: __("This is used for categorizing items under a common criteria.") + " " +
+		description: __("Select an item group to categorizing items under a common criteria. You can even create custom Item Groups.") + " " +
 			__("For more information click here:") + " " +
 			"<a href='https://docs.erpnext.com/docs/user/manual/en/stock/item-group' target='_blank'>Item Group</a>" +
 			__("."),
@@ -823,7 +823,7 @@ frappe.tour['Item'] = [
 	{
 		fieldname: "stock_uom",
 		title: __("Default Unit of Measure"),
-		description: __("The Item Code can be thought of as a short-form that refers to the item.") + " " +
+		description: __("This decides the unit of measure in which stock balance will be maintained for this item.") + " " +
 			__("For more information click here:") + " " +
 			"<a href='https://docs.erpnext.com/docs/user/manual/en/stock/uom' target='_blank'>Unit of Measure</a>" +
 			__("."),
@@ -831,7 +831,7 @@ frappe.tour['Item'] = [
 	{
 		fieldname: "is_stock_item",
 		title: __("Maintain Stock"),
-		description: __("Selecting this creates a stock item and 'Stock Ledger' entries are created for all transcations.") + " " +
-			__("Unselect this for a non-stock item such as a service.")
+		description: __("Check this field to maintain stock for this item.") + " " +
+			__("Uncheck this field for non-stock items such as a service.")
 	},
 ];
