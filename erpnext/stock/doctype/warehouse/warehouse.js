@@ -91,7 +91,7 @@ frappe.tour['Warehouse'] = [
 	{
 		fieldname: "warehouse_name",
 		title: __("Warehouse Name"),
-		description: __("Select a name for the warehouse. This should reflect it's location or purpose.")
+		description: __("Select a name for the warehouse. This should reflect its location or purpose.")
 	},
 	{
 		fieldname: "warehouse_type",

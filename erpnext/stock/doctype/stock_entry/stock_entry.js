@@ -1100,11 +1100,6 @@ frappe.tour['Stock Entry'] = [
 		description: __("Select a source warehouse, where you have stock available.")
 	},
 	{
-		fieldname: "to_warehouse",
-		title: __("Default Target Warehouse"),
-		description: __("Select a target warehouse, where stock needs to be transferred.")
-	},
-	{
 		fieldname: "items",
 		title: __("Items"),
 		description: __("Select an item and entry quantity to be delivered.") + " " +
