@@ -748,6 +748,7 @@
   {
    "collapsible": 1,
    "collapsible_depends_on": "eval:doc.total_billing_amount > 0",
+   "depends_on": "eval: !doc.is_return",
    "fieldname": "time_sheet_list",
    "fieldtype": "Section Break",
    "hide_days": 1,
@@ -770,6 +771,7 @@
    "hide_days": 1,
    "hide_seconds": 1,
    "label": "Total Billing Amount",
+   "options": "currency",
    "print_hide": 1,
    "read_only": 1
   },
@@ -1953,6 +1955,12 @@
   },
   {
    "default": "0",
+   "fieldname": "is_debit_note",
+   "fieldtype": "Check",
+   "label": "Is Debit Note"
+  },
+  {
+   "default": "0",
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
@@ -1969,7 +1977,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-04-15 23:57:58.766651",
+ "modified": "2021-05-20 22:48:33.988881",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
