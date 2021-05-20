@@ -71,65 +71,69 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					let options = "";
 					
 					me.frm.call('get_pending_data', {data_type: "items"}).then(r =>{
-						options = r.message
+						options = r.message;
 						
-					let schedule_id = "";
-					let d = new frappe.ui.Dialog({
-						title: __("Enter Visit Details"),
-						fields: [{
-							fieldtype: "Select",
-							fieldname: "item_name",
-							label: __("Item Name"),
-							options: options,
-							reqd: 1,
-							onchange: function () {
-								let field = d.get_field("scheduled_date");
-								me.frm.call('get_pending_data',{item_name:this.value,data_type:"date"}).then(r =>{
-									field.df.options = r.message;
-									field.refresh();
-								})
-							}
-						},
-						{
-							label: __('Scheduled Date'),
-							fieldname: 'scheduled_date',
-							fieldtype: 'Select',
-							options: "",
-							reqd: 1,
-							onchange: function () {
-								let field = d.get_field('item_name');
-								me.frm.call(
-									'get_pending_data',
-									{
-										item_name: field.value,
-										s_date: this.value,
-										data_type: "id"
-									}).then(r =>{
-									schedule_id = r.message;
-								})
-							}
-						},
-						],
-						primary_action_label: 'Create Visit',
-						primary_action(values) {
-							frappe.call({
-								method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
-								args: {
-									item_name: values.item_name,
-									s_id: schedule_id,
-									source_name: me.frm.doc.name,
-								},
-								callback: function (r) {
-									if (!r.exc) {
-										frappe.model.sync(r.message);
-										frappe.set_route("Form", r.message.doctype, r.message.name);
-									}
+						let schedule_id = "";
+						let d = new frappe.ui.Dialog({
+							title: __("Enter Visit Details"),
+							fields: [{
+								fieldtype: "Select",
+								fieldname: "item_name",
+								label: __("Item Name"),
+								options: options,
+								reqd: 1,
+								onchange: function () {
+									let field = d.get_field("scheduled_date");
+									me.frm.call('get_pending_data',
+										{
+											item_name: this.value, 
+											data_type: "date"
+										}).then(r => {
+										field.df.options = r.message;
+										field.refresh();
+									});
 								}
-							});
-							d.hide();
-						}
-					});
-					d.show();
+							},
+							{
+								label: __('Scheduled Date'),
+								fieldname: 'scheduled_date',
+								fieldtype: 'Select',
+								options: "",
+								reqd: 1,
+								onchange: function () {
+									let field = d.get_field('item_name');
+									me.frm.call(
+										'get_pending_data',
+										{
+											item_name: field.value,
+											s_date: this.value,
+											data_type: "id"
+										}).then(r =>{
+										schedule_id = r.message;
+									});
+								}
+							},
+							],
+							primary_action_label: 'Create Visit',
+							primary_action(values) {
+								frappe.call({
+									method: "erpnext.maintenance.doctype.maintenance_schedule.maintenance_schedule.make_maintenance_visit",
+									args: {
+										item_name: values.item_name,
+										s_id: schedule_id,
+										source_name: me.frm.doc.name,
+									},
+									callback: function (r) {
+										if (!r.exc) {
+											frappe.model.sync(r.message);
+											frappe.set_route("Form", r.message.doctype, r.message.name);
+										}
+									}
+								});
+								d.hide();
+							}
+						});
+						d.show();
 				});
 				}, __('Create'));
 			}
@@ -154,9 +158,9 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 
 	set_no_of_visits: function (doc, cdt, cdn) {
 		var item = frappe.get_doc(cdt, cdn);
-
+		let me = this;
 		if (item.start_date && item.periodicity) {
-			me.frm.call('validate_end_date_visits')
+			me.frm.call('validate_end_date_visits');
 			
 		}
 	},

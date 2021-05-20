@@ -58,7 +58,7 @@ class MaintenanceSchedule(TransactionBase):
 				
 				if not item.no_of_visits or item.no_of_visits == 0:
 					item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
-					diff = date_diff(item.end_date, item.start_date ) + 1
+					diff = date_diff(item.end_date, item.start_date) + 1
 					item.no_of_visits = cint(diff / days_in_period[item.periodicity])
 					
 				elif item.no_of_visits > no_of_visits:
@@ -93,8 +93,8 @@ class MaintenanceSchedule(TransactionBase):
 				frappe.msgprint(
 					_("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
 						self.owner, "<br>" + "<br>".join(no_email_sp)
-						)
 					)
+				)
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
 				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
