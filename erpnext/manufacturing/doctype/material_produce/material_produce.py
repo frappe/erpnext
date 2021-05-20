@@ -76,6 +76,7 @@ class MaterialProduce(Document):
         if self.partial_produce:
             wo = frappe.get_doc("Work Order", self.work_order)
             wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
+            frappe.db.set_value("Work Order", self.work_order, "actual_yeild", wo.actual_yeild)
             self.make_se()
         else:
             atleast_one_mc = frappe.db.sql("""select * from `tabMaterial Consumption` where work_order = %s and docstatus = 1""", (self.work_order))
@@ -88,6 +89,7 @@ class MaterialProduce(Document):
                     if self.actual_yeild_on_wo() >= (wo.bom_yeild-mfg.allowed_production_deviation_percentage) and self.actual_yeild_on_wo() <= (wo.bom_yeild+mfg.allowed_production_deviation_percentage):
                     # self.calc_actual_fg_wt_on_wo() 
                         wo.actual_yeild = flt(self.actual_yeild_on_wo(), wo.precision('actual_yeild'))
+                        frappe.db.set_value("Work Order", self.work_order, "actual_yeild", wo.actual_yeild)
                         self.make_se()
                     else:
                         frappe.throw(_('Actual yeild is not within deviation limits'))
@@ -99,8 +101,9 @@ class MaterialProduce(Document):
     def actual_yeild_on_wo(self):
         value = 0
         wo = frappe.get_doc("Work Order", self.work_order)
-        wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
-        # frappe.db.set_value("Work Order", self.work_order, "actual_fg_weight", wo.actual_fg_weight)
+        # wo.actual_fg_weight = flt(flt(wo.produced_qty) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
+        wo.actual_fg_weight = flt(flt(wo.consumed_total_weight) * flt(wo.weight_per_unit), wo.precision('actual_fg_weight'))
+        frappe.db.set_value("Work Order", self.work_order, "actual_fg_weight", wo.actual_fg_weight)
         if wo.actual_rm_weight == 0 or wo.actual_rm_weight == None:
             wo.actual_yeild = 0
         else:
