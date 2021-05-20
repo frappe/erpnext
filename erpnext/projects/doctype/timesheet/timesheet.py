@@ -342,9 +342,9 @@ def get_activity_cost(employee=None, activity_type=None, currency=None):
 		rate = frappe.db.get_values("Activity Type", {"activity_type": activity_type},
 			["costing_rate", "billing_rate"], as_dict=True)
 		if rate and currency and currency!=base_currency:
-			exchnage_rate = get_exchange_rate(base_currency, currency)
-			rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchnage_rate
-			rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchnage_rate
+			exchange_rate = get_exchange_rate(base_currency, currency)
+			rate[0]["costing_rate"] = rate[0]["costing_rate"] * exchange_rate
+			rate[0]["billing_rate"] = rate[0]["billing_rate"] * exchange_rate
 
 	return rate[0] if rate else {}
 
