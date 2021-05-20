@@ -734,7 +734,7 @@ frappe.form.link_formatters['Project'] = function(value, doc) {
 		// if value is blank in report view or project name and name are the same, return as is
 		return value;
 	}
-}
+};
 
 // add description on posting time
 $(document).on('app_ready', function() {
