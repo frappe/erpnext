@@ -2,10 +2,12 @@
 # For license information, please see license.txt
 
 from __future__ import unicode_literals
+from erpnext.accounts.report.profit_and_loss_statement.profit_and_loss_statement import get_chart_data
 import frappe
 from frappe.utils import flt, add_days
 from frappe import _
 from erpnext.hr.doctype.leave_application.leave_application import get_leaves_for_period, get_leave_balance_on
+from itertools import groupby
 
 def execute(filters=None):
 	if filters.to_date <= filters.from_date:
@@ -13,8 +15,8 @@ def execute(filters=None):
 
 	columns = get_columns()
 	data = get_data(filters)
-
-	return columns, data
+	charts = get_chart_data(filters, data, columns)
+	return columns, data, None, charts
 
 def get_columns():
 	columns = [{
@@ -31,9 +33,10 @@ def get_columns():
 		'options': 'Employee'
 	}, {
 		'label': _('Employee Name'),
-		'fieldtype': 'Data',
+		'fieldtype': 'Dynamic Link',
 		'fieldname': 'employee_name',
 		'width': 100,
+		'options': 'employee'
 	}, {
 		'label': _('Opening Balance'),
 		'fieldtype': 'float',
@@ -129,9 +132,6 @@ def get_conditions(filters):
 	if filters.get('employee'):
 		conditions['name'] = filters.get('employee')
 
-	if filters.get('employee'):
-		conditions['name'] = filters.get('employee')
-
 	if filters.get('company'):
 		conditions['company'] = filters.get('company')
 
@@ -190,3 +190,59 @@ def get_allocated_and_expired_leaves(from_date, to_date, employee, leave_type):
 			new_allocation += record.leaves
 
 	return new_allocation, expired_leaves
+
+def get_chart_data(filters, data, columns):
+	labels = []
+	datasets = []
+
+	if not data[0].get('employee_name'):
+		employee_data = []
+		leave_type = None
+		for d in data:
+			if d.get('leave_type'):
+				leave_type = d.get('leave_type')
+			else:
+				new_data = frappe._dict()
+				new_data.update(d)
+				new_data.leave_type = leave_type
+				employee_data.append(new_data)
+	else:
+		employee_data = data
+
+	employee_data = sorted(employee_data, key=lambda k: k['employee_name'])
+	leaves = []
+	for key, group in groupby(employee_data, lambda x: x['employee_name']):
+		leaves_left = False
+		for grp in group:
+			if grp.closing_balance:
+				leaves_left = True
+				print(key)
+				print(grp.leave_type)
+				leave_type_exists = list(filter(lambda x: x.leave_type == grp.leave_type, leaves))
+				print(leave_type_exists)
+				if leave_type_exists:
+					leave_type_exists[0].closing_balance.append(grp.closing_balance)
+				else:
+					leaves.append(frappe._dict({
+						'leave_type': grp.leave_type,
+						'closing_balance': [grp.closing_balance]
+					}))
+				""" leaves.append(grp.closing_balance) """
+		if leaves_left:
+			labels.append(key)
+			""" datasets.append({'name': key, 'values': leaves}) """
+
+	for leave in leaves:
+		datasets.append({'name': leave.leave_type, 'values': [leave.closing_balance]})
+
+	chart = {
+		'data': {
+			'labels': labels,
+			'datasets': datasets
+		},
+		'type': 'bar',
+		'colors': ['#456789', '#EE8888', '#7E77BF']
+	}
+
+	return chart
+

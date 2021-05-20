@@ -269,6 +269,7 @@ def get_total_exemption_amount(declarations):
 	total_exemption_amount = sum([flt(d.total_exemption_amount) for d in exemptions.values()])
 	return total_exemption_amount
 
+@frappe.whitelist()
 def get_leave_period(from_date, to_date, company):
 	leave_period = frappe.db.sql("""
 		select name, from_date, to_date
