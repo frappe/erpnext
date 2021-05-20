@@ -28,15 +28,15 @@ frappe.tour['Stock Settings'] = [
 		description: __("Set a Default Warehouse for Inventory Transactions. This will be fetched into the Default Warehouse in the Item master.")
 	},
 	{
+		fieldname: "valuation_method",
+		title: __("Valuation Method"),
+		description: __("Choose between FIFO and Moving Average Valuation Methods. Click ") + "<a href='https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>here</a>" + __(" to know more about them.")
+	},
+	{
 		fieldname: "allow_negative_stock",
 		title: __("Allow Negative Stock"),
 		description: __("This will allow stock items to be displayed in negative values. Using this option depends on your use case. With this option unchecked, the system warns before obstructing a transaction that is causing negative stock.")
 
-	},
-	{
-		fieldname: "valuation_method",
-		title: __("Valuation Method"),
-		description: __("Choose between FIFO and Moving Average Valuation Methods. Click ") + "<a href='https://docs.erpnext.com/docs/user/manual/en/stock/articles/item-valuation-fifo-and-moving-average' target='_blank'>here</a>" + __(" to know more about them.")
 	},
 	{
 		fieldname: "show_barcode_field",
