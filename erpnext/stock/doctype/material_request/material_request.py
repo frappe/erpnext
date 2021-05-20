@@ -576,10 +576,10 @@ def create_pick_list(source_name, target_doc=None):
 	return doc
 
 @frappe.whitelist()
-def get_wo_items(company,schedule_start_from=None,schedule_start_to=None,item_to_manufacture = None, single_wo = 0, work_order = None):
+def get_wo_items(company=None,schedule_start_from=None,schedule_start_to=None,item_to_manufacture = None, single_wo = 0, work_order = None):
+	if not company:
+		company = frappe.get_value("Work Order", {"name": work_order},'company')
 	all_wo = None
-	print("----"*400)
-	print(single_wo,work_order)
 	if single_wo == 0:
 		all_wo = frappe.db.get_all("Work Order", {"company":company,"planned_start_date":['between',[schedule_start_from,schedule_start_to]]}, 'name')
 	if int(single_wo) == 1 and work_order:

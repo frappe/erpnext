@@ -39,7 +39,7 @@
   "terms",
   "reference",
   "job_card",
-  "work_order_filter_criteria_section"
+  "requesting_work_order"
  ],
  "fields": [
   {
@@ -183,7 +183,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nPartially Received\nOrdered\nIssued\nTransferred\nReceived",
+   "options": "\nDraft\nSubmitted\nStopped\nCancelled\nPending\nPartially Ordered\nOrdered\nIssued\nTransferred\nReceived",
    "print_hide": 1,
    "print_width": "100px",
    "read_only": 1,
@@ -312,23 +312,24 @@
    "read_only": 1
   },
   {
-   "depends_on": "eval: doc.purpose === \"Manufacturing Staging\"",
-   "fieldname": "work_order_filter_criteria_section",
-   "fieldtype": "Section Break",
-   "label": "Work Order Filter Criteria"
-  },
-  {
    "default": "0",
    "fieldname": "manufacturing_staging",
    "fieldtype": "Check",
    "label": "Manufacturing Staging"
+  },
+  {
+   "fieldname": "requesting_work_order",
+   "fieldtype": "Link",
+   "label": "Requesting Work Order",
+   "options": "Work Order",
+   "read_only": 1
   }
  ],
  "icon": "fa fa-ticket",
  "idx": 70,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-12 17:30:23.579240",
+ "modified": "2021-05-20 15:50:57.126189",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Material Request",
