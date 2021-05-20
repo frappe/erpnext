@@ -166,7 +166,7 @@
    "depends_on": "eval:doc.send_holiday_reminders",
    "fieldname": "frequency",
    "fieldtype": "Select",
-   "label": "How often do you want to send holiday reminders?",
+   "label": "Set the frequency for holiday reminders",
    "options": "Weekly\nMonthly"
   },
   {
