@@ -64,6 +64,9 @@ def get_report_pdf(doc, consolidated=True):
 		tax_id = frappe.get_doc('Customer', entry.customer).tax_id
 		presentation_currency = get_party_account_currency('Customer', entry.customer, doc.company) \
 				or doc.currency or get_company_currency(doc.company)
+		if doc.letter_head:
+			from frappe.www.printview import get_letter_head
+			letter_head = get_letter_head(doc, 0)
 
 		filters= frappe._dict({
 			'from_date': doc.from_date,
@@ -91,8 +94,10 @@ def get_report_pdf(doc, consolidated=True):
 			continue
 
 		html = frappe.render_template(template_path, \
-			{"filters": filters, "data": res, "ageing": ageing[0] if (doc.include_ageing and ageing) else None})
-
+			{"filters": filters, "data": res, "ageing": ageing[0] if doc.include_ageing else None,
+				"letter_head": letter_head if doc.letter_head else None,
+				"terms_and_conditions": frappe.db.get_value('Terms and Conditions', doc.terms_and_conditions, 'terms')
+					if doc.terms_and_conditions else None})
 		html = frappe.render_template(base_template_path, {"body": html, \
 			"css": get_print_style(), "title": "Statement For " + entry.customer})
 		statement_dict[entry.customer] = html

@@ -27,10 +27,11 @@ class TestQualityInspection(unittest.TestCase):
 		dn.reload()
 		self.assertRaises(QualityInspectionRejectedError, dn.submit)
 
-		frappe.db.set_value("Quality Inspection Reading", {"parent": qa.name}, "status", "Accepted")
+		frappe.db.set_value("Quality Inspection", qa.name, "status", "Accepted")
 		dn.reload()
 		dn.submit()
 
+		qa.reload()
 		qa.cancel()
 		dn.reload()
 		dn.cancel()

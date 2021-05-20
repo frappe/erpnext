@@ -72,7 +72,7 @@ class StockReconciliation(StockController):
 
 				if item_dict.get("serial_nos"):
 					item.current_serial_no = item_dict.get("serial_nos")
-					if self.purpose == "Stock Reconciliation":
+					if self.purpose == "Stock Reconciliation" and not item.serial_no:
 						item.serial_no = item.current_serial_no
 
 				item.current_qty = item_dict.get("qty")

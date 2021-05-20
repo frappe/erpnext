@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe, erpnext
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, add_to_date, today
+from frappe.utils import cint, get_link_to_form, add_to_date, now, today
 from erpnext.stock.stock_ledger import repost_future_sle
 from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
 from frappe.utils.user import get_users_with_role
@@ -127,7 +127,7 @@ def repost_entries():
 		check_if_stock_and_account_balance_synced(today(), d.name)
 
 def get_repost_item_valuation_entries():
-	date = add_to_date(today(), hours=-3)
+	date = add_to_date(now(), hours=-3)
 
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
 		WHERE status != 'Completed' and creation <= %s and docstatus = 1

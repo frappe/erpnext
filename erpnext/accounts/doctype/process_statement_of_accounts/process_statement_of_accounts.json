@@ -1,6 +1,5 @@
 {
  "actions": [],
- "allow_workflow": 1,
  "autoname": "Prompt",
  "creation": "2020-05-22 16:46:18.712954",
  "doctype": "DocType",
@@ -28,9 +27,11 @@
   "customers",
   "preferences",
   "orientation",
-  "section_break_14",
   "include_ageing",
   "ageing_based_on",
+  "section_break_14",
+  "letter_head",
+  "terms_and_conditions",
   "section_break_1",
   "enable_auto_email",
   "section_break_18",
@@ -270,10 +271,22 @@
    "fieldname": "body",
    "fieldtype": "Text Editor",
    "label": "Body"
+  },
+  {
+   "fieldname": "letter_head",
+   "fieldtype": "Link",
+   "label": "Letter Head",
+   "options": "Letter Head"
+  },
+  {
+   "fieldname": "terms_and_conditions",
+   "fieldtype": "Link",
+   "label": "Terms and Conditions",
+   "options": "Terms and Conditions"
   }
  ],
  "links": [],
- "modified": "2020-08-08 08:47:09.185728",
+ "modified": "2021-05-13 12:44:19.574844",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Process Statement Of Accounts",

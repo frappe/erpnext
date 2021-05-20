@@ -195,8 +195,7 @@ class Asset(AccountsController):
 				# If depreciation is already completed (for double declining balance)
 				if skip_row: continue
 
-				depreciation_amount = self.get_depreciation_amount(value_after_depreciation,
-					d.total_number_of_depreciations, d)
+				depreciation_amount = get_depreciation_amount(self, value_after_depreciation, d)
 
 				if not has_pro_rata or n < cint(number_of_pending_depreciations) - 1:
 					schedule_date = add_months(d.depreciation_start_date,
@@ -208,7 +207,7 @@ class Asset(AccountsController):
 
 				# For first row
 				if has_pro_rata and n==0:
-					depreciation_amount, days, months = get_pro_rata_amt(d, depreciation_amount,
+					depreciation_amount, days, months = self.get_pro_rata_amt(d, depreciation_amount,
 						self.available_for_use_date, d.depreciation_start_date)
 
 					# For first depr schedule date will be the start date
@@ -220,7 +219,7 @@ class Asset(AccountsController):
 					to_date = add_months(self.available_for_use_date,
 						n * cint(d.frequency_of_depreciation))
 
-					depreciation_amount, days, months = get_pro_rata_amt(d,
+					depreciation_amount, days, months = self.get_pro_rata_amt(d,
 						depreciation_amount, schedule_date, to_date)
 
 					monthly_schedule_date = add_months(schedule_date, 1)
@@ -364,24 +363,6 @@ class Asset(AccountsController):
 
 	def get_value_after_depreciation(self, idx):
 		return flt(self.get('finance_books')[cint(idx)-1].value_after_depreciation)
-
-	def get_depreciation_amount(self, depreciable_value, total_number_of_depreciations, row):
-		precision = self.precision("gross_purchase_amount")
-
-		if row.depreciation_method in ("Straight Line", "Manual"):
-			depreciation_left = (cint(row.total_number_of_depreciations) - cint(self.number_of_depreciations_booked))
-
-			if not depreciation_left:
-				frappe.msgprint(_("All the depreciations has been booked"))
-				depreciation_amount = flt(row.expected_value_after_useful_life)
-				return depreciation_amount
-
-			depreciation_amount = (flt(row.value_after_depreciation) -
-				flt(row.expected_value_after_useful_life)) / depreciation_left
-		else:
-			depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100), precision)
-
-		return depreciation_amount
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get('finance_books'):
@@ -575,6 +556,13 @@ class Asset(AccountsController):
 
 			return 100 * (1 - flt(depreciation_rate, float_precision))
 
+	def get_pro_rata_amt(self, row, depreciation_amount, from_date, to_date):
+		days = date_diff(to_date, from_date)
+		months = month_diff(to_date, from_date)
+		total_days = get_total_days(to_date, row.frequency_of_depreciation)
+
+		return (depreciation_amount * flt(days)) / flt(total_days), days, months
+
 def update_maintenance_status():
 	assets = frappe.get_all(
 		"Asset", filters={"docstatus": 1, "maintenance_required": 1}
@@ -758,15 +746,20 @@ def make_asset_movement(assets, purpose=None):
 def is_cwip_accounting_enabled(asset_category):
 	return cint(frappe.db.get_value("Asset Category", asset_category, "enable_cwip_accounting"))
 
-def get_pro_rata_amt(row, depreciation_amount, from_date, to_date):
-	days = date_diff(to_date, from_date)
-	months = month_diff(to_date, from_date)
-	total_days = get_total_days(to_date, row.frequency_of_depreciation)
-
-	return (depreciation_amount * flt(days)) / flt(total_days), days, months
-
 def get_total_days(date, frequency):
 	period_start_date = add_months(date,
 		cint(frequency) * -1)
 
 	return date_diff(date, period_start_date)
+
+@erpnext.allow_regional
+def get_depreciation_amount(asset, depreciable_value, row):
+	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
+
+	if row.depreciation_method in ("Straight Line", "Manual"):
+		depreciation_amount = (flt(row.value_after_depreciation) -
+			flt(row.expected_value_after_useful_life)) / depreciation_left
+	else:
+		depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
+
+	return depreciation_amount

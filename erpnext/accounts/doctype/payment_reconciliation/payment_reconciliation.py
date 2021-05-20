@@ -114,7 +114,7 @@ class PaymentReconciliation(Document):
 				'party_type': self.party_type,
 				'voucher_type': voucher_type,
 				'account': self.receivable_payable_account
-			}, as_dict=1, debug=1)
+			}, as_dict=1)
 
 	def add_payment_entries(self, entries):
 		self.set('payments', [])
