@@ -64,22 +64,17 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 					});
 				}, __("Get Items From"));
 		} else if (this.frm.doc.docstatus === 1) {
-			var s = me.frm.doc.schedules;
-			let flag = 0;
-			for (let i in s) {
-				if (s[i].completion_status == "Pending") {
-					flag = 1;
-				}
-			}
+			let schedules = me.frm.doc.schedules;
+			let flag = schedules.some(schedule => schedule.completion_status === "Pending");
 			if (flag) {
 				this.frm.add_custom_button(__('Create Maintenance Visit'), function () {
 					let options = "";
 					
-					me.frm.call('get_pending_data',{data_type:"items"}).then(r =>{
+					me.frm.call('get_pending_data', {data_type: "items"}).then(r =>{
 						options = r.message
 						
-					var schedule_id = "";
-					var d = new frappe.ui.Dialog({
+					let schedule_id = "";
+					let d = new frappe.ui.Dialog({
 						title: __("Enter Visit Details"),
 						fields: [{
 							fieldtype: "Select",
@@ -103,7 +98,13 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 							reqd: 1,
 							onchange: function () {
 								let field = d.get_field('item_name');
-								me.frm.call('get_pending_data',{item_name:field.value,s_date:this.value,data_type:"id"}).then(r =>{
+								me.frm.call(
+									'get_pending_data',
+									{
+										item_name: field.value,
+										s_date: this.value,
+										data_type: "id"
+									}).then(r =>{
 									schedule_id = r.message;
 								})
 							}
@@ -117,7 +118,6 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 									item_name: values.item_name,
 									s_id: schedule_id,
 									source_name: me.frm.doc.name,
-
 								},
 								callback: function (r) {
 									if (!r.exc) {
@@ -125,8 +125,6 @@ erpnext.maintenance.MaintenanceSchedule = frappe.ui.form.Controller.extend({
 										frappe.set_route("Form", r.message.doctype, r.message.name);
 									}
 								}
-
-
 							});
 							d.hide();
 						}

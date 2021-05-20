@@ -45,28 +45,27 @@ class MaintenanceSchedule(TransactionBase):
 			"Half Yearly": 182,
 			"Yearly": 365
 		}
-		for i in self.items:
-			
-			if i.periodicity and i.start_date:
-				if not i.end_date:
-					if i.no_of_visits:
-						i.end_date = add_days(i.start_date, i.no_of_visits * days_in_period[i.periodicity])
+		for item in self.items:
+			if item.periodicity and item.start_date:
+				if not item.end_date:
+					if item.no_of_visits:
+						item.end_date = add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity])
 					else:
-						i.end_date = add_days(i.start_date, days_in_period[i.periodicity])
+						item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
 						
-				diff = date_diff(i.end_date, i.start_date) + 1
-				no_of_visits = cint(diff / days_in_period[i.periodicity])
+				diff = date_diff(item.end_date, item.start_date) + 1
+				no_of_visits = cint(diff / days_in_period[item.periodicity])
 				
-				if not i.no_of_visits or i.no_of_visits == 0:
-					i.end_date = add_days(i.start_date, days_in_period[i.periodicity])
-					diff = date_diff(i.end_date, i.start_date ) + 1
-					i.no_of_visits = cint(diff / days_in_period[i.periodicity])
+				if not item.no_of_visits or item.no_of_visits == 0:
+					item.end_date = add_days(item.start_date, days_in_period[item.periodicity])
+					diff = date_diff(item.end_date, item.start_date ) + 1
+					item.no_of_visits = cint(diff / days_in_period[item.periodicity])
 					
-				elif i.no_of_visits > no_of_visits:
-					i.end_date = add_days(i.start_date, i.no_of_visits * days_in_period[i.periodicity])
+				elif item.no_of_visits > no_of_visits:
+					item.end_date = add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity])
 
-				elif i.no_of_visits < no_of_visits:
-					i.end_date = add_days(i.start_date, i.no_of_visits * days_in_period[i.periodicity])
+				elif item.no_of_visits < no_of_visits:
+					item.end_date = add_days(item.start_date, item.no_of_visits * days_in_period[item.periodicity])
 
 
 	def on_submit(self):
@@ -92,9 +91,10 @@ class MaintenanceSchedule(TransactionBase):
 
 			if no_email_sp:
 				frappe.msgprint(
-						frappe._("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
-								self.owner, "<br>" + "<br>".join(no_email_sp)
-						))
+					_("Setting Events to {0}, since the Employee attached to the below Sales Persons does not have a User ID{1}").format(
+						self.owner, "<br>" + "<br>".join(no_email_sp)
+						)
+					)
 
 			scheduled_date = frappe.db.sql("""select scheduled_date from
 				`tabMaintenance Schedule Detail` where sales_person=%s and item_code=%s and
@@ -103,12 +103,12 @@ class MaintenanceSchedule(TransactionBase):
 			for key in scheduled_date:
 				description =frappe._("Reference: {0}, Item Code: {1} and Customer: {2}").format(self.name, d.item_code, self.customer)
 				event = frappe.get_doc({
-						"doctype": "Event",
-						"owner": email_map.get(d.sales_person, self.owner),
-						"subject": description,
-						"description": description,
-						"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
-						"event_type": "Private",
+					"doctype": "Event",
+					"owner": email_map.get(d.sales_person, self.owner),
+					"subject": description,
+					"description": description,
+					"starts_on": cstr(key["scheduled_date"]) + " 10:00:00",
+					"event_type": "Private",
 				})
 				event.add_participant(self.doctype, self.name)
 				event.insert(ignore_permissions=1)
@@ -126,7 +126,7 @@ class MaintenanceSchedule(TransactionBase):
 				start_date_copy = add_days(start_date_copy, add_by)
 				if len(schedule_list) < no_of_visit:
 					schedule_date = self.validate_schedule_date_for_holiday_list(getdate(start_date_copy),
-							sales_person)
+						sales_person)
 					if schedule_date > getdate(end_date):
 						schedule_date = getdate(end_date)
 					schedule_list.append(schedule_date)
@@ -280,30 +280,27 @@ class MaintenanceSchedule(TransactionBase):
 	def on_trash(self):
 		delete_events(self.doctype, self.name)
 
-	
 	@frappe.whitelist()
 	def get_pending_data(self,data_type,s_date = None, item_name = None):
 		if data_type == "date":
 			dates = ""
-			for i in self.schedules:
-				if i.item_name == item_name and i.completion_status == "Pending":
-					dates = dates + "\n" + formatdate(i.scheduled_date, "dd-MM-yyyy")
+			for schedule in self.schedules:
+				if schedule.item_name == item_name and schedule.completion_status == "Pending":
+					dates = dates + "\n" + formatdate(schedule.scheduled_date, "dd-MM-yyyy")
 			return dates
 		elif data_type == "items":
 			items = ""
-			for i in self.items:
-				for s in self.schedules:
-					if i.item_name == s.item_name and s.completion_status == "Pending":
-						items = items + "\n" + i.item_name
+			for item in self.items:
+				for schedule in self.schedules:
+					if item.item_name == schedule.item_name and schedule.completion_status == "Pending":
+						items = items + "\n" + item.item_name
 						break
 			return items
 		elif data_type == "id":
-			for s in self.schedules:
-				if s.item_name == item_name and s_date == formatdate(s.scheduled_date,"dd-mm-yyyy"):
-					return s.name
+			for schedule in self.schedules:
+				if schedule.item_name == item_name and s_date == formatdate(schedule.scheduled_date,"dd-mm-yyyy"):
+					return schedule.name
 				
-					
-
 @frappe.whitelist()
 def update_serial_nos(s_id):
 	serial_nos = frappe.db.get_value('Maintenance Schedule Detail', s_id, 'serial_no')
@@ -314,7 +311,7 @@ def update_serial_nos(s_id):
 		return False
 
 @frappe.whitelist()
-def make_maintenance_visit(source_name, target_doc=None,item_name=None,s_id=None):
+def make_maintenance_visit(source_name, target_doc=None, item_name=None, s_id=None):
 	from frappe.model.mapper import get_mapped_doc
 
 	def update_status(source, target, parent):
