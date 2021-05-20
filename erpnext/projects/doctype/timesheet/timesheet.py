@@ -137,7 +137,7 @@ class Timesheet(Document):
 	def validate_time_logs(self):
 		for data in self.get('time_logs'):
 			self.validate_overlap(data)
-			self.validate_task_project(data)
+			self.set_project(data)
 			self.validate_project(data)
 
 	def validate_overlap(self, data):
@@ -145,7 +145,7 @@ class Timesheet(Document):
 		self.validate_overlap_for("user", data, self.user, settings.ignore_user_time_overlap)
 		self.validate_overlap_for("employee", data, self.employee, settings.ignore_employee_time_overlap)
 
-	def validate_task_project(self, data):
+	def set_project(self, data):
 		data.project = data.project or frappe.db.get_value("Task", data.task, "project")
 
 	def validate_project(self, data):
