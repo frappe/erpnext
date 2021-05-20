@@ -183,7 +183,7 @@ class WorkOrder(Document):
 				status = "Not Started"
 				if stock_entries:
 					status = "In Process"
-					produced_qty = stock_entries.get("Manufacture")
+					produced_qty = stock_entries.get("Manufacture") or stock_entries.get("Repack")
 					if flt(produced_qty) >= flt(self.qty):
 						status = "Completed"
 		else:
@@ -198,7 +198,7 @@ class WorkOrder(Document):
 		allowance_percentage = flt(frappe.db.get_single_value("Manufacturing Settings",
 			"overproduction_percentage_for_work_order"))
 
-		for purpose, fieldname in (("Manufacture", "produced_qty"),
+		for purpose, fieldname in (("Manufacture", "produced_qty"), ("Repack", "produced_qty"),
 			("Material Transfer for Manufacture", "material_transferred_for_manufacturing")):
 			if (purpose == 'Material Transfer for Manufacture' and
 				self.operations and self.transfer_material_against == 'Job Card'):
