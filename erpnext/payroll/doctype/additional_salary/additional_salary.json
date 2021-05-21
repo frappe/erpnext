@@ -7,25 +7,30 @@
  "editable_grid": 1,
  "engine": "InnoDB",
  "field_order": [
+  "employee_details_section",
   "naming_series",
   "employee",
   "employee_name",
-  "salary_component",
-  "type",
-  "amount",
-  "ref_doctype",
-  "ref_docname",
-  "amended_from",
   "column_break_5",
   "company",
   "department",
+  "salary_component_and_amount_section",
+  "salary_component",
   "currency",
+  "amount",
+  "column_break_13",
+  "type",
+  "is_recurring",
+  "payroll_date",
   "from_date",
   "to_date",
-  "payroll_date",
-  "is_recurring",
+  "additional_salary_properties_and_references_section",
+  "deduct_full_tax_on_selected_payroll_date",
+  "ref_doctype",
+  "ref_docname",
+  "column_break_22",
   "overwrite_salary_structure_amount",
-  "deduct_full_tax_on_selected_payroll_date"
+  "amended_from"
  ],
  "fields": [
   {
@@ -159,6 +164,7 @@
    "fieldname": "ref_docname",
    "fieldtype": "Dynamic Link",
    "label": "Reference Document",
+   "no_copy": 1,
    "options": "ref_doctype",
    "read_only": 1
   },
@@ -171,11 +177,34 @@
    "print_hide": 1,
    "read_only": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "employee_details_section",
+   "fieldtype": "Section Break",
+   "label": "Employee Details"
+  },
+  {
+   "fieldname": "salary_component_and_amount_section",
+   "fieldtype": "Section Break",
+   "label": "Salary Component and Amount"
+  },
+  {
+   "fieldname": "column_break_13",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "additional_salary_properties_and_references_section",
+   "fieldtype": "Section Break",
+   "label": "Additional Salary Properties And References"
+  },
+  {
+   "fieldname": "column_break_22",
+   "fieldtype": "Column Break"
   }
  ],
  "is_submittable": 1,
  "links": [],
- "modified": "2021-03-31 22:33:59.098532",
+ "modified": "2021-05-21 13:33:56.945865",
  "modified_by": "Administrator",
  "module": "Payroll",
  "name": "Additional Salary",
