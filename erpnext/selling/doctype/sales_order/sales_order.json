@@ -161,7 +161,8 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{customer_name}",
+   "fetch_from": "customer.customer_name",
+   "fetch_if_empty": 1,
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1492,7 +1493,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 23:55:13.439068",
+ "modified": "2021-05-21 09:07:25.920106",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Sales Order",

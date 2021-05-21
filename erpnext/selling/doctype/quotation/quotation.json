@@ -118,7 +118,8 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{customer_name}",
+   "fetch_from": "customer.customer_name",
+   "fetch_if_empty": 1,
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -933,7 +934,7 @@
  "is_submittable": 1,
  "links": [],
  "max_attachments": 1,
- "modified": "2020-10-30 13:58:59.212060",
+ "modified": "2021-05-21 09:06:50.933715",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Quotation",

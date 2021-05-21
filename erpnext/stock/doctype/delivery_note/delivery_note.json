@@ -164,7 +164,8 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{customer_name}",
+   "fetch_from": "customer.customer_name",
+   "fetch_if_empty": 1,
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1289,7 +1290,7 @@
  "idx": 146,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-04-15 23:55:49.620641",
+ "modified": "2021-05-21 09:22:17.242750",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Delivery Note",

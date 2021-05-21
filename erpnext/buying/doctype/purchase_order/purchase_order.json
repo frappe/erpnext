@@ -146,7 +146,8 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{supplier_name}",
+   "fetch_from": "supplier.supplier_name",
+   "fetch_if_empty": 1,
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1124,7 +1125,7 @@
  "idx": 105,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-01-20 22:07:23.487138",
+ "modified": "2021-05-21 09:18:13.935726",
  "modified_by": "Administrator",
  "module": "Buying",
  "name": "Purchase Order",

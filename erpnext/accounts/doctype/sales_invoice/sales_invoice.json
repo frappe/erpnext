@@ -199,7 +199,8 @@
   },
   {
    "allow_on_submit": 1,
-   "default": "{customer_name}",
+   "fetch_from": "customer.customer_name",
+   "fetch_if_empty": 1,
    "fieldname": "title",
    "fieldtype": "Data",
    "hidden": 1,
@@ -1959,7 +1960,7 @@
    "label": "Is Debit Note"
   },
   {
-   "default": 0,
+   "default": "0",
    "depends_on": "grand_total",
    "fieldname": "disable_rounded_total",
    "fieldtype": "Check",
@@ -1976,7 +1977,7 @@
    "link_fieldname": "consolidated_invoice"
   }
  ],
- "modified": "2021-04-23 22:36:32.916354",
+ "modified": "2021-05-21 09:06:36.086730",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",
