@@ -230,7 +230,6 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 		},
 		],
 	});
-	var submitted = false;
 	dialog.show();
 	dialog.get_field('item_code').set_input(item);
 
@@ -254,7 +253,6 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 	}
 
 	dialog.set_primary_action(__('Submit'), function () {
-		if(submitted) return;
 		var values = dialog.get_values();
 		if (!values) {
 			return;
@@ -267,11 +265,12 @@ erpnext.stock.move_item = function (item, source, target, actual_qty, rate, call
 			frappe.msgprint(__('Source and target warehouse must be different'));
 		}
 
-		submitted = true;
 		frappe.call({
 			method: 'erpnext.stock.doctype.stock_entry.stock_entry_utils.make_stock_entry',
 			args: values,
+			btn: dialog.get_primary_btn(),
 			freeze: true,
+			freeze_message: __('Creating Stock Entry'),
 			callback: function (r) {
 				frappe.show_alert(__('Stock Entry {0} created',
 					['<a href="/app/stock-entry/' + r.message.name + '">' + r.message.name + '</a>']));
