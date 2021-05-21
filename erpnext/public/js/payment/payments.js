@@ -84,7 +84,7 @@ erpnext.payments = class payments extends erpnext.stock.StockController {
 	set_outstanding_amount() {
 		this.selected_mode = $(this.$body).find(repl("input[idx='%(idx)s']",{'idx': this.idx}));
 		this.highlight_selected_row();
-		this.payment_val = 0.0
+		this.payment_val = 0.0;
 		if (this.frm.doc.outstanding_amount > 0 && flt(this.selected_mode.val()) == 0.0) {
 			//When user first time click on row
 			this.payment_val = flt(this.frm.doc.outstanding_amount / this.frm.doc.conversion_rate, precision("outstanding_amount"))
