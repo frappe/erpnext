@@ -262,4 +262,4 @@ erpnext.accounts.PaymentReconciliationController = class PaymentReconciliationCo
 
 };
 
-$.extend(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.accounts.PaymentReconciliationController({frm: cur_frm}));

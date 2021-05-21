@@ -450,8 +450,11 @@ erpnext.accounts.SalesInvoiceController = class SalesInvoiceController extends e
 	}
 };
 
+console.log('innn')
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.accounts.SalesInvoiceController({frm: cur_frm}));
+let controller_instance = new erpnext.accounts.SalesInvoiceController({frm: cur_frm})
+extend_cscript(cur_frm.cscript, controller_instance);
+extend_cscript(cur_frm.cscript.__proto_, controller_instance.__proto__);
 
 cur_frm.cscript['Make Delivery Note'] = function() {
 	frappe.model.open_mapped_doc({

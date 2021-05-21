@@ -414,4 +414,4 @@ erpnext.buying.RequestforQuotationController = class RequestforQuotationControll
 };
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.buying.RequestforQuotationController({frm: cur_frm}));

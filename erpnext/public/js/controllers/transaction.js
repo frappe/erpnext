@@ -5,7 +5,7 @@ frappe.provide('erpnext.accounts.dimensions');
 
 erpnext.TransactionController = class TransactionController extends erpnext.taxes_and_totals {
 	setup() {
-		this._super();
+		super.setup();
 		frappe.flags.hide_serial_batch_dialog = true;
 		frappe.ui.form.on(this.frm.doctype + " Item", "rate", function(frm, cdt, cdn) {
 			var item = frappe.get_doc(cdt, cdn);
