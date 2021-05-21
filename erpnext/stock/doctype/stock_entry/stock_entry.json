@@ -637,6 +637,8 @@
   {
    "default": "0",
    "depends_on": "eval: doc.purpose=='Material Transfer' && !doc.outgoing_stock_entry",
+   "fetch_from": "stock_entry_type.add_to_transit",
+   "fetch_if_empty": 1,
    "fieldname": "add_to_transit",
    "fieldtype": "Check",
    "label": "Add to Transit",
@@ -655,7 +657,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-12-09 14:58:13.267321",
+ "modified": "2021-05-21 11:29:11.917161",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Stock Entry",
