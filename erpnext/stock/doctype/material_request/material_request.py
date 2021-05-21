@@ -589,15 +589,16 @@ def get_wo_items(company=None,schedule_start_from=None,schedule_start_to=None,it
 		all_wo.append({'name':work_order})
 	all_data = []
 
-	for wo in all_wo:
-		wo_wise_data = frappe.db.get_all("Work Order Item", {'parent':wo.get('name')},['item_code','transferred_qty','required_qty','description'])
-		for itm in wo_wise_data:
-			float_precision = (frappe.db.get_default("float_precision")) or 2
-			qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
-			if qty > 0:
-				itm['qty'] = qty
-				itm['description'] = itm.get('description')
-				all_data.append(itm)
+	if len(all_wo) > 0:
+		for wo in all_wo:
+			wo_wise_data = frappe.db.get_all("Work Order Item", {'parent':wo.get('name')},['item_code','transferred_qty','required_qty','description'])
+			for itm in wo_wise_data:
+				float_precision = (frappe.db.get_default("float_precision")) or 2
+				qty = flt(itm.get('required_qty') - itm.get('transferred_qty'),float_precision)
+				if qty > 0:
+					itm['qty'] = qty
+					itm['description'] = itm.get('description')
+					all_data.append(itm)
 	
 	c = {}
 	if len(all_data) > 0:
