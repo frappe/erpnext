@@ -201,11 +201,13 @@
    "label": "Stock Consumed During Repair"
   },
   {
+   "depends_on": "stock_consumption",
    "fieldname": "stock_consumption_details_section",
    "fieldtype": "Section Break",
    "label": "Stock Consumption Details"
   },
   {
+   "depends_on": "stock_consumption",
    "fieldname": "total_repair_cost",
    "fieldtype": "Currency",
    "label": "Total Repair Cost"
@@ -217,6 +219,7 @@
    "options": "Warehouse"
   },
   {
+   "depends_on": "capitalize_repair_cost",
    "fieldname": "asset_depreciation_details_section",
    "fieldtype": "Section Break",
    "label": "Asset Depreciation Details"
@@ -224,7 +227,7 @@
   {
    "fieldname": "increase_in_asset_life",
    "fieldtype": "Int",
-   "label": "Increase In Asset Life"
+   "label": "Increase In Asset Life(Months)"
   },
   {
    "fieldname": "purchase_invoice",
@@ -236,7 +239,7 @@
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2021-05-14 02:31:57.226273",
+ "modified": "2021-05-21 10:37:35.002238",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset Repair",
