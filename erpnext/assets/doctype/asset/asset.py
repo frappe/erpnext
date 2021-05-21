@@ -171,14 +171,22 @@ class Asset(AccountsController):
 				d.precision("rate_of_depreciation"))
 
 	def make_depreciation_schedule(self):
-		if 'Manual' not in [d.depreciation_method for d in self.finance_books]:
+		if 'Manual' not in [d.depreciation_method for d in self.finance_books] and not self.schedules:
 			self.schedules = []
 
-		if self.get("schedules") or not self.available_for_use_date:
+		if not self.available_for_use_date:
 			return
 
 		for d in self.get('finance_books'):
 			self.validate_asset_finance_books(d)
+
+			start = 0
+			for n in range (len(self.schedules)):
+				if not self.schedules[n].journal_entry:
+					print("*"*100)
+					del self.schedules[n:]
+					start = n
+					break
 
 			value_after_depreciation = (flt(self.gross_purchase_amount) -
 				flt(self.opening_accumulated_depreciation))
@@ -192,9 +200,9 @@ class Asset(AccountsController):
 
 			if has_pro_rata:
 				number_of_pending_depreciations += 1
-
+			
 			skip_row = False
-			for n in range(number_of_pending_depreciations):
+			for n in range(start, number_of_pending_depreciations):
 				# If depreciation is already completed (for double declining balance)
 				if skip_row: continue
 
@@ -350,11 +358,12 @@ class Asset(AccountsController):
 			if d.finance_book_id not in finance_books:
 				accumulated_depreciation = flt(self.opening_accumulated_depreciation)
 				value_after_depreciation = flt(self.get_value_after_depreciation(d.finance_book_id))
-				finance_books.append(d.finance_book_id)
+				finance_books.append(int(d.finance_book_id))
 
 			depreciation_amount = flt(d.depreciation_amount, d.precision("depreciation_amount"))
 			value_after_depreciation -= flt(depreciation_amount)
 
+			# for the last row, if depreciation method = Straight Line
 			if straight_line_idx and i == max(straight_line_idx) - 1:
 				book = self.get('finance_books')[cint(d.finance_book_id) - 1]
 				depreciation_amount += flt(value_after_depreciation -

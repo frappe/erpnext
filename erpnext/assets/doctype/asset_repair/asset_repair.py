@@ -48,6 +48,7 @@ class AssetRepair(Document):
 		if self.capitalize_repair_cost:
 			self.check_for_purchase_invoice()
 			self.make_gl_entries()
+			self.modify_depreciation_schedule()
 
 	def check_repair_status(self):
 		if self.repair_status == "Pending":
@@ -140,8 +141,16 @@ class AssetRepair(Document):
 		for account in asset_category.accounts:
 			if account.company_name == company:
 				return account.fixed_asset_account
+
+	def modify_depreciation_schedule(self):
+		if self.increase_in_asset_life:
+			asset = frappe.get_doc('Asset', self.asset)
+			asset.flags.ignore_validate_update_after_submit = True
+			for row in asset.finance_books:
+				row.total_number_of_depreciations += self.increase_in_asset_life/row.frequency_of_depreciation
+			asset.prepare_depreciation_data()
+			asset.save()
 			
-	
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
 	downtime = time_diff_in_hours(completion_date, failure_date)
