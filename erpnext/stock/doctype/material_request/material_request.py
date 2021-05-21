@@ -215,7 +215,9 @@ class MaterialRequest(BuyingController):
 	@frappe.whitelist()
 	def set_target_warehouse(self):
 		q = "select staging_material_request_warehouse from `tabStaging Details` where company = '{0}'".format(self.company)
-		return frappe.db.sql(q, as_dict = True)[0].get('staging_material_request_warehouse')
+		staging_warehouse = frappe.db.sql(q, as_dict = True)
+		if len(staging_warehouse) > 0:
+			return staging_warehouse[0].get('staging_material_request_warehouse')
 def update_completed_and_requested_qty(stock_entry, method):
 	if stock_entry.doctype == "Stock Entry":
 		material_request_map = {}
