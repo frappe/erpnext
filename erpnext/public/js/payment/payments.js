@@ -20,7 +20,7 @@ erpnext.payments = erpnext.stock.StockController.extend({
 		$(this.$body).find('.form-control').click(function() {
 			$(this).select();
 		});
-	}
+	},
 
 	set_payment_primary_action: function() {
 		var me = this;
@@ -85,8 +85,8 @@ erpnext.payments = erpnext.stock.StockController.extend({
 
 	set_outstanding_amount: function() {
 		this.selected_mode = $(this.$body).find(repl("input[idx='%(idx)s']",{'idx': this.idx}));
-		this.highlight_selected_row()
-		this.payment_val = 0.0
+		this.highlight_selected_row();
+		this.payment_val = 0.0;
 		if (this.frm.doc.outstanding_amount > 0 && flt(this.selected_mode.val()) == 0.0) {
 			//When user first time click on row
 			this.payment_val = flt(this.frm.doc.outstanding_amount / this.frm.doc.conversion_rate, precision("outstanding_amount"))
