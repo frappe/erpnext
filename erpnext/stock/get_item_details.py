@@ -77,7 +77,7 @@ def get_item_details(args, doc=None, for_validate=False, overwrite_warehouse=Tru
 		get_price_list_rate(args, item, out)
 
 	if args.customer and cint(args.is_pos):
-		out.update(get_pos_profile_item_details(args.company, args))
+		out.update(get_pos_profile_item_details(args.company, args, update_data=True))
 
 	if out.get("warehouse"):
 		out.update(get_bin_details(args.item_code, out.warehouse))
