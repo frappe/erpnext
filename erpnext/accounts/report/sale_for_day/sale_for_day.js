@@ -25,5 +25,12 @@ frappe.query_reports["Sale for day"] = {
 			"options": "Prefix sales for days",
 			"reqd": 1
 		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"reqd": 1
+		}
 	]
 };

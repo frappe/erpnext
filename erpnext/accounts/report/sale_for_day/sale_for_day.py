@@ -23,7 +23,7 @@ def return_data(filters):
 	split_serie = serie.split("-")
 	serie_final = ("{}-{}-{}").format(split_serie[0],split_serie[1],split_serie[2])
 
-	salary_slips = frappe.get_all("Sales Invoice", ["name", "naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = conditions,  order_by = "name asc")
+	salary_slips = frappe.get_all("Sales Invoice", ["name", "status","naming_series", "creation_date", "posting_date", "authorized_range", "total_exempt", "total_exonerated", "taxed_sales15", "isv15", "taxed_sales18", "isv18", "grand_total"], filters = conditions,  order_by = "name asc")
 
 	date_actual = from_date
 
@@ -56,7 +56,7 @@ def return_data(filters):
 
 		for salary_slip in salary_slips:
 			date_validate = salary_slip.creation_date.strftime('%Y-%m-%d')
-			if date == date_validate:
+			if date == date_validate and salary_slip.status != "Return":
 				if cont == 0:
 					split_initial_range = salary_slip.name.split("-")
 					initial_range = split_initial_range[3]
@@ -87,6 +87,7 @@ def return_filters(filters, from_date, to_date):
 	conditions += "{"
 	conditions += '"creation_date": ["between", ["{}", "{}"]]'.format(from_date, to_date)
 	conditions += ', "naming_series": "{}"'.format(filters.get("prefix"))
+	conditions += ', "company": "{}"'.format(filters.get("company"))
 	conditions += '}'
 
 	return conditions

@@ -25,5 +25,12 @@ frappe.query_reports["Detailed sales book per transaction"] = {
 			"options": "Daily summary series",
 			"reqd": 1
 		},
+		{
+			"fieldname":"company",
+			"label": __("Company"),
+			"fieldtype": "Link",
+			"options": "Company",
+			"reqd": 1
+		}
 	]
 };
