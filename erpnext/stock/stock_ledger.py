@@ -624,7 +624,7 @@ class update_entries_after(object):
 							break
 
 					# If no entry found with outgoing rate, collapse stack
-					if index == None:
+					if index is None:  # nosemgrep
 						new_stock_value = sum((d[0]*d[1] for d in self.wh_data.stock_queue)) - qty_to_pop*outgoing_rate
 						new_stock_qty = sum((d[0] for d in self.wh_data.stock_queue)) - qty_to_pop
 						self.wh_data.stock_queue = [[new_stock_qty, new_stock_value/new_stock_qty if new_stock_qty > 0 else outgoing_rate]]
