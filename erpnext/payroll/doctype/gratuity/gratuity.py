@@ -19,9 +19,9 @@ class Gratuity(AccountsController):
 			self.status = "Unpaid"
 
 	def on_submit(self):
-		if self.pay_via_salary_slip:
+		if self.payment_method == "Additional Salary":
 			self.create_additional_salary()
-		else:
+		elif self.payment_method == "Payment Entry":
 			self.create_gl_entries()
 
 	def on_cancel(self):
@@ -66,7 +66,7 @@ class Gratuity(AccountsController):
 		return gl_entry
 
 	def create_additional_salary(self):
-		if self.pay_via_salary_slip:
+		if self.payment_method == 'Additional Salary':
 			additional_salary = frappe.new_doc('Additional Salary')
 			additional_salary.employee = self.employee
 			additional_salary.salary_component = self.salary_component
@@ -242,8 +242,13 @@ def get_salary_structure(employee):
 		order_by = "from_date desc")[0].salary_structure
 
 def get_last_salary_slip(employee):
-	return frappe.get_list("Salary Slip", filters = {
+	salary_slip = frappe.get_list("Salary Slip", filters = {
 			"employee": employee, 'docstatus': 1
 		},
-		order_by = "start_date desc")[0].name
+		order_by = "start_date desc")
+
+	if len(salary_slip):
+		return salary_slip[0].name
+	else:
+		frappe.throw(_("No Salary Slip found for Gratuity Amount calculation."))
 
