@@ -228,11 +228,12 @@ class Asset(AccountsController):
 
 				# For last row
 				elif has_pro_rata and n == cint(number_of_pending_depreciations) - 1:
-					to_date = add_months(self.available_for_use_date,
-						n * cint(d.frequency_of_depreciation))
+					if not self.edit_dates:
+						self.to_date = add_months(self.available_for_use_date,
+							n * cint(d.frequency_of_depreciation))
 
 					depreciation_amount, days, months = get_pro_rata_amt(d,
-						depreciation_amount, schedule_date, to_date)
+						depreciation_amount, schedule_date, self.to_date)
 
 					monthly_schedule_date = add_months(schedule_date, 1)
 

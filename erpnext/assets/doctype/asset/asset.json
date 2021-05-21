@@ -54,6 +54,8 @@
   "next_depreciation_date",
   "section_break_14",
   "schedules",
+  "to_date",
+  "edit_dates",
   "insurance_details",
   "policy_number",
   "insurer",
@@ -487,6 +489,18 @@
    "fieldtype": "Currency",
    "label": "Asset Value",
    "read_only": 1
+  },
+  {
+   "fieldname": "to_date",
+   "fieldtype": "Date",
+   "hidden": 1,
+   "label": "To Date"
+  },
+  {
+   "fieldname": "edit_dates",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "label": "Edit Dates"
   }
  ],
  "idx": 72,
@@ -509,7 +523,7 @@
    "link_fieldname": "asset"
   }
  ],
- "modified": "2021-05-11 23:47:15.831720",
+ "modified": "2021-05-21 12:05:29.424083",
  "modified_by": "Administrator",
  "module": "Assets",
  "name": "Asset",

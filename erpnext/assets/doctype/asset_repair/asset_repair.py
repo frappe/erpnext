@@ -5,9 +5,8 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import time_diff_in_hours, getdate
+from frappe.utils import time_diff_in_hours, getdate, add_days, date_diff, add_months, flt, cint
 from frappe.model.document import Document
-from frappe.utils import flt
 from erpnext.accounts.general_ledger import make_gl_entries
 
 class AssetRepair(Document):
@@ -148,8 +147,29 @@ class AssetRepair(Document):
 			asset.flags.ignore_validate_update_after_submit = True
 			for row in asset.finance_books:
 				row.total_number_of_depreciations += self.increase_in_asset_life/row.frequency_of_depreciation
+
+				asset.edit_dates = ""
+				extra_months = self.increase_in_asset_life % row.frequency_of_depreciation
+				if extra_months != 0:
+					self.calculate_last_schedule_date(asset, row, extra_months)
+					# fix depreciation amount
+
 			asset.prepare_depreciation_data()
 			asset.save()
+
+	# to help modify depreciation schedule when increase_in_asset_life is not a multiple of frequency_of_depreciation
+	def calculate_last_schedule_date(self, asset, row, extra_months):
+		asset.edit_dates = "Don't Edit"
+		number_of_pending_depreciations = cint(row.total_number_of_depreciations) - \
+			cint(asset.number_of_depreciations_booked)
+		last_schedule_date = asset.schedules[len(asset.schedules)-1].schedule_date
+		asset.to_date = add_months(last_schedule_date, extra_months)
+		schedule_date = add_months(row.depreciation_start_date,
+			number_of_pending_depreciations * cint(row.frequency_of_depreciation))
+
+		if asset.to_date > schedule_date:
+			row.total_number_of_depreciations += 1
+
 			
 @frappe.whitelist()
 def get_downtime(failure_date, completion_date):
