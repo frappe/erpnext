@@ -582,15 +582,15 @@ def get_wo_items(company=None,schedule_start_from=None,schedule_start_to=None,it
 	if not company:
 		company = frappe.get_value("Work Order", {"name": work_order},'company')
 	all_wo = []
-	if single_wo == 0:
+	if single_wo == 0 and work_order:
 		all_wo_item = frappe.db.get_all("Work Order", {"company":company,"planned_start_date":['between',[schedule_start_from,schedule_start_to]]}, 'name')
 		for item in all_wo_item:
 			all_wo.append(item)
 	if int(single_wo) == 1 and work_order:
 		all_wo = []
 		all_wo.append({'name':work_order})
+	
 	all_data = []
-
 	if len(all_wo) > 0:
 		for wo in all_wo:
 			wo_wise_data = frappe.db.get_all("Work Order Item", {'parent':wo.get('name')},['item_code','transferred_qty','required_qty','description'])
