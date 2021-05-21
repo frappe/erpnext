@@ -232,7 +232,8 @@ class update_entries_after(object):
 				and is_cancelled = 0
 				and timestamp(posting_date, time_format(posting_time, %(time_format)s)) < timestamp(%(posting_date)s, time_format(%(posting_time)s, %(time_format)s))
 			order by timestamp(posting_date, posting_time) desc, creation desc
-			limit 1""", args, as_dict=1)
+			limit 1
+			for update""", args, as_dict=1)
 
 		return sle[0] if sle else frappe._dict()
 
