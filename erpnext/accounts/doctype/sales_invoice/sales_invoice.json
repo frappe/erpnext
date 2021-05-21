@@ -1371,6 +1371,7 @@
    "width": "50%"
   },
   {
+   "allow_on_submit": 1,
    "default": "Draft",
    "fieldname": "status",
    "fieldtype": "Select",
@@ -1754,7 +1755,7 @@
  "icon": "fa fa-file-text",
  "idx": 181,
  "is_submittable": 1,
- "modified": "2021-05-05 17:22:25.097268",
+ "modified": "2021-05-17 15:18:02.371296",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Sales Invoice",

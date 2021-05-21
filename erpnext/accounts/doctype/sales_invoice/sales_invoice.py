@@ -99,6 +99,9 @@ class SalesInvoice(SellingController):
 		self.set_income_account_for_fixed_assets()
 		validate_inter_company_party(self.doctype, self.customer, self.company, self.inter_company_invoice_reference)
 
+		if self.docstatus == 1:
+			self.update_accounts_status()
+
 		if cint(self.is_pos):
 			self.validate_pos()
 
@@ -257,6 +260,12 @@ class SalesInvoice(SellingController):
 					doc.payment_amount += self.total_taxes_and_charges
 					doc.save()
 
+	def update_accounts_status(self):
+		customer = frappe.get_doc("Customer", self.customer)
+		if customer:
+			customer.debit += self.grand_total
+			customer.save()
+	
 	def discount_product(self):
 		total_discount = 0
 		for d in self.get('items'):

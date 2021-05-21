@@ -20,33 +20,28 @@ class CreditNoteCXP(Document):
 		self.validate_status()
 
 	def calculate_total(self):
-		total_base = 0			
-		for taxes_list in self.get("taxes"):
-			total_base += taxes_list.base_isv
-			if total_base > self.amount:
-				frappe.throw(_("Base tax cannot be greater than the amount"))
-		if len(self.get("taxes")) > 1:	
-			self.calculate_isv()
-			total_taxes = self.isv_15 + self.isv_18
-			total = self.amount + total_taxes
-			self.document_balance = total
-			self.outstanding_amount = total
-		else:
-			self.calculate_isv()
-			total = 0
-			total_taxes = 0
-			if self.isv_15 != None:
-				total_taxes += self.isv_15
-				total = self.amount + total_taxes
-			if self.isv_18 != None:
-				total_taxes += self.isv_18
-				total = self.amount + total_taxes
-			self.document_balance = total
-			self.outstanding_amount = total
-			if total == 0 and total_taxes ==0:
-				self.document_balance = self.amount
-				self.outstanding_amount = self.amount
-	
+		self.calculate_isv()
+		total_base = 0
+		if self.total_exempt != None:
+			if not self.get("taxes"):
+				self.total = self.total_exempt
+				self.outstanding_amount = self.total_exempt
+			else:
+				for taxes_list in self.get("taxes"):
+					total_base += taxes_list.base_isv
+				if self.total_exempt != None:
+					self.total = total_base + self.total_exempt
+					self.outstanding_amount = total_base + self.total_exempt
+				else:
+					self.total = total_base
+					self.outstanding_amount = total_base 
+				if self.isv_15 != None:
+					self.total = total_base + self.total_exempt + self.isv_15
+					self.outstanding_amount = total_base + self.total_exempt + self.isv_15
+				elif self.isv_18 != None:
+					self.total = total_base + self.total_exempt + self.isv_15
+					self.outstanding_amount = total_base + self.total_exempt + self.isv_15
+			
 	def calculate_isv(self):
 		for taxes_list in self.get("taxes"):
 			item_tax_template = frappe.get_all("Item Tax Template", ["name"], filters = {"name": taxes_list.isv})
@@ -60,6 +55,12 @@ class CreditNoteCXP(Document):
 						tx_base = taxes_list.base_isv * (tax.tax_rate/100)
 						self.isv_18 = tx_base
 
+	def update_accounts_status(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.credit += self.total
+			supplier.save()
+	
 	def validate_status(self):
 		if self.outstanding_amount > 0:
 			self.status = "Unpaid"

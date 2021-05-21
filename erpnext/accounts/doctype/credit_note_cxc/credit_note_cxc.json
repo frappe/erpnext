@@ -21,7 +21,7 @@
   "references",
   "total_references",
   "section_break_2",
-  "amount",
+  "total_exempt",
   "taxes",
   "section_break_3",
   "affects_sale_book",
@@ -116,14 +116,6 @@
    "label": "Totals and tax"
   },
   {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Net Subtotal",
-   "options": "Currency",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
   },
@@ -202,10 +194,18 @@
    "label": "Amount Total",
    "options": "Currency",
    "read_only": 1
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Exempt",
+   "options": "Currency",
+   "reqd": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-07 10:40:55.288941",
+ "modified": "2021-05-21 16:21:05.844860",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXC",

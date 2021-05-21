@@ -24,6 +24,36 @@ class Customer(TransactionBase):
 		"""Load address and contacts in `__onload`"""
 		load_address_and_contact(self)
 		self.load_dashboard_info()
+		# self.accounts_status()
+	
+	# def accounts_status(self):
+	# 	total_debit = 0
+	# 	total_credit = 0
+	# 	total_advances = 0
+	# 	pending_returns = 0
+	# 	debit_notes = frappe.get_all("Debit Note CXC", ["name", "total", "status"], filters = {"customer": self.customer_name})
+	# 	sales_invoice = frappe.get_all("Sales Invoice", ["name", "grand_total", "status"], filters = {"customer": self.customer_name})
+	# 	if len(debit_notes) > 0:
+	# 		for a in debit_notes:
+	# 			if a.status != "Draft":
+	# 				total_debit += a.total
+	# 	if len(sales_invoice) > 0:
+	# 		for b in sales_invoice:
+	# 			if b.status != "Draft":
+	# 				total_debit += b.grand_total
+	# 	self.debit = total_debit
+	# 	credit_notes = frappe.get_all("Credit Note CXC", ["name", "amount_total", "docstatus"], filters = {"customer": self.customer_name})
+	# 	payment_entry = frappe.get_all("Payment Entry", ["name", "paid_amount", "docstatus"], filters = {"party": self.customer_name})
+	# 	if len(credit_notes) > 0:
+	# 		for c in credit_notes:
+	# 			if c.docstatus == 1:
+	# 				total_credit += c.amount_total
+	# 	if len(payment_entry) > 0:
+	# 		for d in payment_entry:
+	# 			if c.docstatus == 1:
+	# 				total_credit += d.paid_amount
+	# 	self.credit = total_credit
+	# 	self.remaining_balance = total_debit - total_credit
 
 	def load_dashboard_info(self):
 		info = get_dashboard_info(self.doctype, self.name, self.loyalty_program)
@@ -83,7 +113,7 @@ class Customer(TransactionBase):
 
 	def before_insert(self):
 		self.generateSerie()
-
+	
 	def validate(self):
 		self.flags.is_new_doc = self.is_new()
 		self.flags.old_lead = self.lead_name

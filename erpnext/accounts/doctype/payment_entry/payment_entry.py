@@ -62,6 +62,8 @@ class PaymentEntry(AccountsController):
 		self.validate_allocated_amount()
 		self.ensure_supplier_is_not_blocked()
 		self.set_status()
+		if self.docstatus == 1:
+			self.update_accounts_status()
 
 	def on_submit(self):
 		self.setup_party_account_field()
@@ -85,6 +87,18 @@ class PaymentEntry(AccountsController):
 
 	def update_outstanding_amounts(self):
 		self.set_missing_ref_details(force=True)
+
+	def update_accounts_status(self):
+		if self.party_type == "Customer":
+			customer = frappe.get_doc("Customer", self.party)
+			if customer:
+				customer.credit += self.paid_amount
+				customer.save()
+		elif self.party_type == "Supplier":
+			supplier = frappe.get_doc("Supplier", self.party)
+			if supplier:
+				supplier.credit += self.paid_amount
+				supplier.save()
 
 	def validate_duplicate_entry(self):
 		reference_names = []

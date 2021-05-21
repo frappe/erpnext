@@ -8,6 +8,7 @@
   "naming_series",
   "status",
   "supplier",
+  "rtn",
   "transaction_number",
   "cai",
   "column_break_1",
@@ -15,7 +16,7 @@
   "due_date",
   "reason_credit_note",
   "section_break_1",
-  "amount",
+  "total_exempt",
   "taxes",
   "section_break_3",
   "company",
@@ -24,7 +25,7 @@
   "column_break_2",
   "isv_18",
   "isv_15",
-  "document_balance",
+  "total",
   "outstanding_amount",
   "amended_from"
  ],
@@ -79,23 +80,8 @@
    "fieldtype": "Section Break"
   },
   {
-   "fieldname": "amount",
-   "fieldtype": "Currency",
-   "in_list_view": 1,
-   "label": "Net Subtotal",
-   "options": "Currency",
-   "reqd": 1
-  },
-  {
    "fieldname": "column_break_2",
    "fieldtype": "Column Break"
-  },
-  {
-   "fieldname": "document_balance",
-   "fieldtype": "Currency",
-   "label": "Document Balance",
-   "options": "Currency",
-   "read_only": 1
   },
   {
    "fieldname": "outstanding_amount",
@@ -181,10 +167,31 @@
   {
    "fieldname": "section_break_3",
    "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "total_exempt",
+   "fieldtype": "Currency",
+   "label": "Total exempt",
+   "options": "Currency"
+  },
+  {
+   "fetch_from": "supplier.rtn",
+   "fetch_if_empty": 1,
+   "fieldname": "rtn",
+   "fieldtype": "Data",
+   "label": "RTN",
+   "read_only": 1
+  },
+  {
+   "fieldname": "total",
+   "fieldtype": "Currency",
+   "label": "Amount Total",
+   "options": "Currency",
+   "read_only": 1
   }
  ],
  "is_submittable": 1,
- "modified": "2021-05-07 11:26:32.489311",
+ "modified": "2021-05-19 14:24:28.281545",
  "modified_by": "Administrator",
  "module": "Accounts",
  "name": "Credit Note CXP",

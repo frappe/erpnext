@@ -154,6 +154,8 @@ class PurchaseInvoice(BuyingController):
 		self.create_remarks()
 		self.set_status()
 		self.validate_purchase_receipt_if_update_stock()
+		if self.docstatus == 1:
+			self.update_accounts_status()
 		validate_inter_company_party(self.doctype, self.supplier, self.company, self.inter_company_invoice_reference)
 
 	def validate_release_date(self):
@@ -170,6 +172,12 @@ class PurchaseInvoice(BuyingController):
 
 			frappe.throw(_("""Paid amount + Write Off Amount can not be greater than Grand Total"""))
 
+	def update_accounts_status(self):
+		supplier = frappe.get_doc("Supplier", self.supplier)
+		if supplier:
+			supplier.debit += self.grand_total
+			supplier.save()
+	
 	def create_remarks(self):
 		if not self.remarks:
 			if self.bill_no and self.bill_date:
