@@ -183,13 +183,12 @@ class Asset(AccountsController):
 			start = 0
 			for n in range (len(self.schedules)):
 				if not self.schedules[n].journal_entry:
-					print("*"*100)
 					del self.schedules[n:]
 					start = n
 					break
 
-			value_after_depreciation = (flt(self.gross_purchase_amount) -
-				flt(self.opening_accumulated_depreciation))
+			value_after_depreciation = (flt(self.asset_value) -
+				flt(self.opening_accumulated_depreciation)) - flt(d.expected_value_after_useful_life)
 
 			d.value_after_depreciation = value_after_depreciation
 
