@@ -14,7 +14,7 @@ class TestProjectProfitability(unittest.TestCase):
 		if not frappe.db.exists('Salary Component', 'Timesheet Component'):
 			frappe.get_doc({'doctype': 'Salary Component', 'salary_component': 'Timesheet Component'}).insert()
 		make_salary_structure_for_timesheet(emp, company='_Test Company')
-		self.timesheet = make_timesheet(emp, simulate = True, billable=1)
+		self.timesheet = make_timesheet(emp, simulate = True, is_billable=1)
 		self.salary_slip = make_salary_slip(self.timesheet.name)
 		self.salary_slip.submit()
 		self.sales_invoice = make_sales_invoice(self.timesheet.name, '_Test Item', '_Test Customer')
