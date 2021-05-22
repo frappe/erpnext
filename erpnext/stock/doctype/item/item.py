@@ -359,47 +359,49 @@ class Item(WebsiteGenerator):
 				context.update(get_slideshow(self))
 
 	def set_attribute_context(self, context):
-		if self.has_variants:
-			attribute_values_available = {}
-			context.attribute_values = {}
-			context.selected_attributes = {}
+		if not self.has_variants:
+			return
 
-			# load attributes
-			for v in context.variants:
-				v.attributes = frappe.get_all("Item Variant Attribute",
-					  fields=["attribute", "attribute_value"],
-					  filters={"parent": v.name})
-				# make a map for easier access in templates
-				v.attribute_map = frappe._dict({})
-				for attr in v.attributes:
-					v.attribute_map[attr.attribute] = attr.attribute_value
+		attribute_values_available = {}
+		context.attribute_values = {}
+		context.selected_attributes = {}
 
-				for attr in v.attributes:
-					values = attribute_values_available.setdefault(attr.attribute, [])
-					if attr.attribute_value not in values:
-						values.append(attr.attribute_value)
+		# load attributes
+		for v in context.variants:
+			v.attributes = frappe.get_all("Item Variant Attribute",
+				  fields=["attribute", "attribute_value"],
+				  filters={"parent": v.name})
+			# make a map for easier access in templates
+			v.attribute_map = frappe._dict({})
+			for attr in v.attributes:
+				v.attribute_map[attr.attribute] = attr.attribute_value
 
-					if v.name == context.variant.name:
-						context.selected_attributes[attr.attribute] = attr.attribute_value
+			for attr in v.attributes:
+				values = attribute_values_available.setdefault(attr.attribute, [])
+				if attr.attribute_value not in values:
+					values.append(attr.attribute_value)
 
-			# filter attributes, order based on attribute table
-			for attr in self.attributes:
-				values = context.attribute_values.setdefault(attr.attribute, [])
+				if v.name == context.variant.name:
+					context.selected_attributes[attr.attribute] = attr.attribute_value
 
-				if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
-					for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
-						values.append(val)
+		# filter attributes, order based on attribute table
+		for attr in self.attributes:
+			values = context.attribute_values.setdefault(attr.attribute, [])
 
-				else:
-					# get list of values defined (for sequence)
-					for attr_value in frappe.db.get_all("Item Attribute Value",
-						fields=["attribute_value"],
-						filters={"parent": attr.attribute}, order_by="idx asc"):
+			if cint(frappe.db.get_value("Item Attribute", attr.attribute, "numeric_values")):
+				for val in sorted(attribute_values_available.get(attr.attribute, []), key=flt):
+					values.append(val)
 
-						if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
-							values.append(attr_value.attribute_value)
+			else:
+				# get list of values defined (for sequence)
+				for attr_value in frappe.db.get_all("Item Attribute Value",
+					fields=["attribute_value"],
+					filters={"parent": attr.attribute}, order_by="idx asc"):
 
-			context.variant_info = json.dumps(context.variants)
+					if attr_value.attribute_value in attribute_values_available.get(attr.attribute, []):
+						values.append(attr_value.attribute_value)
+
+		context.variant_info = json.dumps(context.variants)
 
 	def set_disabled_attributes(self, context):
 		"""Disable selection options of attribute combinations that do not result in a variant"""
@@ -736,20 +738,22 @@ class Item(WebsiteGenerator):
 
 	def update_template_item(self):
 		"""Set Show in Website for Template Item if True for its Variant"""
-		if self.variant_of:
-			if self.show_in_website:
-				self.show_variant_in_website = 1
-				self.show_in_website = 0
+		if not self.variant_of:
+			return
 
-			if self.show_variant_in_website:
-				# show template
-				template_item = frappe.get_doc("Item", self.variant_of)
+		if self.show_in_website:
+			self.show_variant_in_website = 1
+			self.show_in_website = 0
 
-				if not template_item.show_in_website:
-					template_item.show_in_website = 1
-					template_item.flags.dont_update_variants = True
-					template_item.flags.ignore_permissions = True
-					template_item.save()
+		if self.show_variant_in_website:
+			# show template
+			template_item = frappe.get_doc("Item", self.variant_of)
+
+			if not template_item.show_in_website:
+				template_item.show_in_website = 1
+				template_item.flags.dont_update_variants = True
+				template_item.flags.ignore_permissions = True
+				template_item.save()
 
 	def validate_item_defaults(self):
 		companies = {row.company for row in self.item_defaults}
