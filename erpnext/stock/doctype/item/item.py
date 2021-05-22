@@ -201,7 +201,7 @@ class Item(WebsiteGenerator):
 	def make_route(self):
 		if not self.route:
 			return cstr(frappe.db.get_value('Item Group', self.item_group,
-					'route')) + '/' + self.scrub((self.item_name if self.item_name else self.item_code) + '-' + random_string(5))
+					'route')) + '/' + self.scrub((self.item_name or self.item_code) + '-' + random_string(5))
 
 	def validate_website_image(self):
 		if frappe.flags.in_import:
@@ -256,7 +256,6 @@ class Item(WebsiteGenerator):
 					"attached_to_name": self.name
 				})
 			except frappe.DoesNotExistError:
-				pass
 				# cleanup
 				frappe.local.message_log.pop()
 
