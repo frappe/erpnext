@@ -56,7 +56,6 @@ def set_filters(filters):
 	elif filters.purchase_order and not filters.supplier:
 		for d in filters.get("invoices"):
 			if d.name == filters.purchase_order:
-				print("$#$#$$#")
 				invoices.append(d)
 
 	filters["invoices"] = invoices if invoices else filters["invoices"]
