@@ -12,7 +12,7 @@ from erpnext.controllers.item_variant import (ItemVariantExistsError,
 		copy_attributes_to_variant, get_variant, make_variant_item_code, validate_item_variant_attributes)
 from erpnext.setup.doctype.item_group.item_group import (get_parent_item_groups, invalidate_cache_for)
 from frappe import _, msgprint
-from frappe.utils import (cint, cstr, flt, formatdate, get_timestamp, getdate,
+from frappe.utils import (cint, cstr, flt, formatdate, getdate,
 		now_datetime, random_string, strip, get_link_to_form, nowtime)
 from frappe.utils.html_utils import clean_html
 from frappe.website.doctype.website_slideshow.website_slideshow import \
@@ -20,8 +20,6 @@ from frappe.website.doctype.website_slideshow.website_slideshow import \
 
 from frappe.website.render import clear_cache
 from frappe.website.website_generator import WebsiteGenerator
-
-from six import iteritems
 
 
 class DuplicateReorderRows(frappe.ValidationError):
@@ -1054,18 +1052,15 @@ def make_item_price(item, price_list_name, item_price):
 	}).insert()
 
 def get_timeline_data(doctype, name):
-	'''returns timeline data based on stock ledger entry'''
-	out = {}
-	items = dict(frappe.db.sql('''select posting_date, count(*)
-		from `tabStock Ledger Entry` where item_code=%s
-			and posting_date > date_sub(curdate(), interval 1 year)
-			group by posting_date''', name))
+	"""get timeline data based on Stock Ledger Entry. This is displayed as heatmap on the item page."""
 
-	for date, count in iteritems(items):
-		timestamp = get_timestamp(date)
-		out.update({timestamp: count})
+	items = frappe.db.sql("""select unix_timestamp(posting_date), count(*)
+							from `tabStock Ledger Entry`
+							where item_code=%s and posting_date > date_sub(curdate(), interval 1 year)
+							group by posting_date""", name)
 
-	return out
+	return dict(items)
+
 
 
 def validate_end_of_life(item_code, end_of_life=None, disabled=None):
