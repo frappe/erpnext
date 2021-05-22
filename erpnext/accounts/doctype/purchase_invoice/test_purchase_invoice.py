@@ -991,7 +991,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 			self.assertEqual(expected_gle[i][1], gle.debit)
 			self.assertEqual(expected_gle[i][2], gle.credit)
 
-		Create Purchase Invoice against Purchase Order
+		# Create Purchase Invoice against Purchase Order
 		purchase_invoice = get_mapped_purchase_invoice(po.name)
 		purchase_invoice.allocate_advances_automatically = 1
 		purchase_invoice.save()
