@@ -205,8 +205,7 @@ class Asset(AccountsController):
 				# If depreciation is already completed (for double declining balance)
 				if skip_row: continue
 
-				depreciation_amount = self.get_depreciation_amount(value_after_depreciation,
-					d.total_number_of_depreciations, d)
+				depreciation_amount = get_depreciation_amount(self, value_after_depreciation, d)
 
 				if not has_pro_rata or n < cint(number_of_pending_depreciations) - 1:
 					schedule_date = add_months(d.depreciation_start_date,
@@ -376,24 +375,6 @@ class Asset(AccountsController):
 
 	def get_value_after_depreciation(self, idx):
 		return flt(self.get('finance_books')[cint(idx)-1].value_after_depreciation)
-
-	def get_depreciation_amount(self, depreciable_value, total_number_of_depreciations, row):
-		precision = self.precision("gross_purchase_amount")
-
-		if row.depreciation_method in ("Straight Line", "Manual"):
-			depreciation_left = (cint(row.total_number_of_depreciations) - cint(self.number_of_depreciations_booked))
-
-			if not depreciation_left:
-				frappe.msgprint(_("All the depreciations has been booked"))
-				depreciation_amount = flt(row.expected_value_after_useful_life)
-				return depreciation_amount
-
-			depreciation_amount = (flt(row.value_after_depreciation) -
-				flt(row.expected_value_after_useful_life)) / depreciation_left
-		else:
-			depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100), precision)
-
-		return depreciation_amount
 
 	def validate_expected_value_after_useful_life(self):
 		for row in self.get('finance_books'):
@@ -791,3 +772,19 @@ def get_total_days(date, frequency):
 		cint(frequency) * -1)
 
 	return date_diff(date, period_start_date)
+
+@erpnext.allow_regional
+def get_depreciation_amount(asset, depreciable_value, row):
+	depreciation_left = flt(row.total_number_of_depreciations) - flt(asset.number_of_depreciations_booked)
+
+	if row.depreciation_method in ("Straight Line", "Manual"):
+		if not asset.to_date:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / depreciation_left
+		else:
+			depreciation_amount = (flt(row.value_after_depreciation) -
+				flt(row.expected_value_after_useful_life)) / (date_diff(asset.to_date, asset.available_for_use_date) / 365)
+	else:
+		depreciation_amount = flt(depreciable_value * (flt(row.rate_of_depreciation) / 100))
+
+	return depreciation_amount
