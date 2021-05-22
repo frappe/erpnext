@@ -127,7 +127,7 @@ class Item(WebsiteGenerator):
 		self.cant_change()
 		self.update_show_in_website()
 
-		if not self.get("__islocal"):
+		if not self.is_new():
 			self.old_item_group = frappe.db.get_value(self.doctype, self.name, "item_group")
 			self.old_website_item_groups = frappe.db.sql_list("""select item_group
 					from `tabWebsite Item Group`
@@ -807,7 +807,7 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Item has variants."))
 
 	def validate_attributes_in_variants(self):
-		if not self.has_variants or self.get("__islocal"):
+		if not self.has_variants or self.is_new():
 			return
 
 		old_doc = self.get_doc_before_save()
@@ -895,7 +895,7 @@ class Item(WebsiteGenerator):
 				frappe.throw(_("Variant Based On cannot be changed"))
 
 	def validate_uom(self):
-		if not self.get("__islocal"):
+		if not self.is_new():
 			check_stock_uom_with_bin(self.name, self.stock_uom)
 		if self.has_variants:
 			for d in frappe.db.get_all("Item", filters={"variant_of": self.name}):
@@ -953,7 +953,7 @@ class Item(WebsiteGenerator):
 				d.variant_of = self.variant_of
 
 	def cant_change(self):
-		if self.get("__islocal"):
+		if self.is_new():
 			return
 
 		fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
