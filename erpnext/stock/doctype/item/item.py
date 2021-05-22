@@ -1244,6 +1244,9 @@ def get_item_details(item_code, company=None):
 
 @frappe.whitelist()
 def get_uom_conv_factor(uom, stock_uom):
+	if uom == stock_uom:
+		return 1.0
+
 	uoms = [uom, stock_uom]
 	value = ""
 	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
