@@ -72,8 +72,6 @@ class Item(WebsiteGenerator):
 		if not self.description:
 			self.description = self.item_name
 
-		# if self.is_sales_item and not self.get('is_item_from_hub'):
-		# 	self.publish_in_hub = 1
 
 	def after_insert(self):
 		'''set opening stock and item price'''
@@ -1277,14 +1275,13 @@ def get_item_attribute(parent, attribute_value=''):
 		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
 
 def update_variants(variants, template, publish_progress=True):
-	count=0
-	for d in variants:
+	total = len(variants)
+	for count, d in enumerate(variants, start=1):
 		variant = frappe.get_doc("Item", d)
 		copy_attributes_to_variant(template, variant)
 		variant.save()
-		count+=1
 		if publish_progress:
-				frappe.publish_progress(count*100/len(variants), title = _("Updating Variants..."))
+			frappe.publish_progress(count / total * 100, title=_("Updating Variants..."))
 
 def on_doctype_update():
 	# since route is a Text column, it needs a length for indexing
