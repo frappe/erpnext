@@ -953,20 +953,22 @@ class Item(WebsiteGenerator):
 				d.variant_of = self.variant_of
 
 	def cant_change(self):
-		if not self.get("__islocal"):
-			fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
+		if self.get("__islocal"):
+			return
 
-			values = frappe.db.get_value("Item", self.name, fields, as_dict=True)
-			if not values.get('valuation_method') and self.get('valuation_method'):
-				values['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+		fields = ("has_serial_no", "is_stock_item", "valuation_method", "has_batch_no")
 
-			if values:
-				for field in fields:
-					if cstr(self.get(field)) != cstr(values.get(field)):
-						if not self.check_if_linked_document_exists(field):
-							break # no linked document, allowed
-						else:
-							frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
+		values = frappe.db.get_value("Item", self.name, fields, as_dict=True)
+		if not values.get('valuation_method') and self.get('valuation_method'):
+			values['valuation_method'] = frappe.db.get_single_value("Stock Settings", "valuation_method") or "FIFO"
+
+		if values:
+			for field in fields:
+				if cstr(self.get(field)) != cstr(values.get(field)):
+					if not self.check_if_linked_document_exists(field):
+						break # no linked document, allowed
+					else:
+						frappe.throw(_("As there are existing transactions against item {0}, you can not change the value of {1}").format(self.name, frappe.bold(self.meta.get_label(field))))
 
 	def check_if_linked_document_exists(self, field):
 		linked_doctypes = ["Delivery Note Item", "Sales Invoice Item", "POS Invoice Item", "Purchase Receipt Item",
