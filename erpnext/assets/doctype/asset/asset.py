@@ -181,7 +181,7 @@ class Asset(AccountsController):
 			self.validate_asset_finance_books(d)
 
 			start = 0
-			for n in range (len(self.schedules)):
+			for n in range(len(self.schedules)):
 				if not self.schedules[n].journal_entry:
 					del self.schedules[n:]
 					start = n
