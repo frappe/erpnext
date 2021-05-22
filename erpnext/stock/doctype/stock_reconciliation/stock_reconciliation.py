@@ -167,8 +167,8 @@ class StockReconciliation(StockController):
 			item = frappe.get_doc("Item", item_code)
 
 			# end of life and stock item
-			validate_end_of_life(item_code, item.end_of_life, item.disabled, verbose=0)
-			validate_is_stock_item(item_code, item.is_stock_item, verbose=0)
+			validate_end_of_life(item_code, item.end_of_life, item.disabled)
+			validate_is_stock_item(item_code, item.is_stock_item)
 
 			# item should not be serialized
 			if item.has_serial_no and not row.serial_no and not item.serial_no_series:
@@ -179,7 +179,7 @@ class StockReconciliation(StockController):
 				raise frappe.ValidationError(_("Batch no is required for batched item {0}").format(item_code))
 
 			# docstatus should be < 2
-			validate_cancelled_item(item_code, item.docstatus, verbose=0)
+			validate_cancelled_item(item_code, item.docstatus)
 
 		except Exception as e:
 			self.validation_messages.append(_("Row # ") + ("%d: " % (row.idx)) + cstr(e))
