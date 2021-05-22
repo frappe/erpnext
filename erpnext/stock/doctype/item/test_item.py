@@ -14,7 +14,6 @@ from erpnext.stock.doctype.item.item import get_uom_conv_factor
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 
-from six import iteritems
 
 test_ignore = ["BOM"]
 test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand"]
@@ -98,7 +97,7 @@ class TestItem(unittest.TestCase):
 			"ignore_pricing_rule": 1
 		})
 
-		for key, value in iteritems(to_check):
+		for key, value in to_check.items():
 			self.assertEqual(value, details.get(key))
 
 	def test_item_tax_template(self):
@@ -194,7 +193,7 @@ class TestItem(unittest.TestCase):
 			"plc_conversion_rate": 1,
 			"customer": "_Test Customer",
 		})
-		for key, value in iteritems(sales_item_check):
+		for key, value in sales_item_check.items():
 			self.assertEqual(value, sales_item_details.get(key))
 
 		purchase_item_check = {
@@ -215,7 +214,7 @@ class TestItem(unittest.TestCase):
 			"plc_conversion_rate": 1,
 			"supplier": "_Test Supplier",
 		})
-		for key, value in iteritems(purchase_item_check):
+		for key, value in purchase_item_check.items():
 			self.assertEqual(value, purchase_item_details.get(key))
 
 	def test_item_attribute_change_after_variant(self):
@@ -464,7 +463,7 @@ class TestItem(unittest.TestCase):
 		self.assertEqual(len(matching_barcodes), 1)
 		details = matching_barcodes[0]
 
-		for key, value in iteritems(barcode_properties):
+		for key, value in barcode_properties.items():
 			self.assertEqual(value, details.get(key))
 
 		# Add barcode again - should cause DuplicateEntryError
