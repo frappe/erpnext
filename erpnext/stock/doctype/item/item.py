@@ -1247,27 +1247,22 @@ def get_uom_conv_factor(uom, stock_uom):
 	if uom == stock_uom:
 		return 1.0
 
-	uoms = [uom, stock_uom]
-	value = ""
-	uom_details = frappe.db.sql("""select to_uom, from_uom, value from `tabUOM Conversion Factor`\
-		where to_uom in ({0})
-		""".format(', '.join([frappe.db.escape(i, percent=False) for i in uoms])), as_dict=True)
+	exact_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom, "from_uom": uom}, ["value"], as_dict=1)
+	if exact_match:
+		return exact_match.value
 
-	for d in uom_details:
-		if d.from_uom == stock_uom and d.to_uom == uom:
-			value = 1/flt(d.value)
-		elif d.from_uom == uom and d.to_uom == stock_uom:
-			value = d.value
+	inverse_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom, "from_uom": stock_uom}, ["value"], as_dict=1)
+	if inverse_match:
+		 return 1 / inverse_match.value
 
-	if not value:
-		uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
-		uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+	# This attempts to try and get conversion from intermediate UOM. E.g. mg <=> g <=> kg
+	uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
+	uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
 
-		if uom_stock and uom_row:
-			if uom_stock.from_uom == uom_row.from_uom:
-				value = flt(uom_stock.value) * 1/flt(uom_row.value)
+	if uom_stock and uom_row:
+		if uom_stock.from_uom == uom_row.from_uom:
+			return  flt(uom_stock.value) * 1/flt(uom_row.value)
 
-	return value
 
 @frappe.whitelist()
 def get_item_attribute(parent, attribute_value=''):
