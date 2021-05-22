@@ -1244,24 +1244,40 @@ def get_item_details(item_code, company=None):
 
 @frappe.whitelist()
 def get_uom_conv_factor(uom, stock_uom):
+	""" Get UOM conversion factor from uom to stock_uom
+		e.g. uom = "Kg", stock_uom = "Gram" then returns 1000.0
+	"""
 	if uom == stock_uom:
 		return 1.0
 
-	exact_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom, "from_uom": uom}, ["value"], as_dict=1)
+	from_uom, to_uom = uom, stock_uom   # renaming for readability
+
+	exact_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": to_uom, "from_uom": from_uom}, ["value"], as_dict=1)
 	if exact_match:
 		return exact_match.value
 
-	inverse_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom, "from_uom": stock_uom}, ["value"], as_dict=1)
+	inverse_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1)
 	if inverse_match:
 		 return 1 / inverse_match.value
 
-	# This attempts to try and get conversion from intermediate UOM. E.g. mg <=> g <=> kg
-	uom_stock = frappe.db.get_value("UOM Conversion Factor", {"to_uom": stock_uom}, ["from_uom", "value"], as_dict=1)
-	uom_row = frappe.db.get_value("UOM Conversion Factor", {"to_uom": uom}, ["from_uom", "value"], as_dict=1)
+	# This attempts to try and get conversion from intermediate UOM.
+	# case:
+	#            g -> mg = 1000
+	#            g -> kg = 0.001
+	# therefore  kg -> mg = 1000  / 0.001 = 1,000,000
+	intermediate_match = frappe.db.sql("""
+			select (first.value / second.value) as value
+			from `tabUOM Conversion Factor` first
+			join `tabUOM Conversion Factor` second
+				on first.from_uom = second.from_uom
+			where
+				first.to_uom = %(to_uom)s
+				and second.to_uom = %(from_uom)s
+			limit 1
+			""", {"to_uom": to_uom, "from_uom": from_uom}, as_dict=1)
 
-	if uom_stock and uom_row:
-		if uom_stock.from_uom == uom_row.from_uom:
-			return  flt(uom_stock.value) * 1/flt(uom_row.value)
+	if intermediate_match:
+		return intermediate_match[0].value
 
 
 @frappe.whitelist()
