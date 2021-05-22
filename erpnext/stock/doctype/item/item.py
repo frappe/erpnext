@@ -539,10 +539,7 @@ class Item(WebsiteGenerator):
 
 	def fill_customer_code(self):
 		""" Append all the customer codes and insert into "customer_code" field of item table """
-		cust_code = []
-		for d in self.get('customer_items'):
-			cust_code.append(d.ref_code)
-		self.customer_code = ','.join(cust_code)
+		self.customer_code = ','.join(d.ref_code for d in self.get("customer_items", []))
 
 	def check_item_tax(self):
 		"""Check whether Tax Rate is not entered twice for same Tax Type"""
@@ -755,7 +752,7 @@ class Item(WebsiteGenerator):
 					template_item.save()
 
 	def validate_item_defaults(self):
-		companies = list(set([row.company for row in self.item_defaults]))
+		companies = {row.company for row in self.item_defaults}
 
 		if len(companies) != len(self.item_defaults):
 			frappe.throw(_("Cannot set multiple Item Defaults for a company."))
