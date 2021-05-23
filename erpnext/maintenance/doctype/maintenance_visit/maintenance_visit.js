@@ -99,4 +99,4 @@ erpnext.maintenance.MaintenanceVisit = class MaintenanceVisit extends frappe.ui.
 	}
 };
 
-$.extend(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.maintenance.MaintenanceVisit({frm: cur_frm}));

@@ -433,7 +433,7 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 			if (doc.material_request_type == "Customer Provided") {
 				return{
 					query: "erpnext.controllers.queries.item_query",
-					filters:{ 
+					filters:{
 						'customer': me.frm.doc.customer,
 						'is_stock_item':1
 					}
@@ -472,7 +472,7 @@ erpnext.buying.MaterialRequestController = class MaterialRequestController exten
 };
 
 // for backward compatibility: combine new and previous states
-$.extend(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.buying.MaterialRequestController({frm: cur_frm}));
 
 function set_schedule_date(frm) {
 	if(frm.doc.schedule_date){

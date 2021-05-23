@@ -135,7 +135,7 @@ erpnext.selling.POSInvoiceController = class POSInvoiceController extends erpnex
 	}
 }
 
-$.extend(cur_frm.cscript, new erpnext.selling.POSInvoiceController({ frm: cur_frm }))
+extend_cscript(cur_frm.cscript, new erpnext.selling.POSInvoiceController({ frm: cur_frm }))
 
 frappe.ui.form.on('POS Invoice', {
 	redeem_loyalty_points: function(frm) {

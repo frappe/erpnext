@@ -55,7 +55,7 @@ erpnext.support.WarrantyClaim = class WarrantyClaim extends frappe.ui.form.Contr
 	}
 };
 
-$.extend(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
+extend_cscript(cur_frm.cscript, new erpnext.support.WarrantyClaim({frm: cur_frm}));
 
 cur_frm.fields_dict['serial_no'].get_query = function(doc, cdt, cdn) {
 	var cond = [];
