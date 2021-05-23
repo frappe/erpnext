@@ -1281,12 +1281,13 @@ def get_uom_conv_factor(uom, stock_uom):
 
 
 @frappe.whitelist()
-def get_item_attribute(parent, attribute_value=''):
+def get_item_attribute(parent, attribute_value=""):
+	"""Used for providing auto-completions in child table."""
 	if not frappe.has_permission("Item"):
 		frappe.throw(_("No Permission"))
 
 	return frappe.get_all("Item Attribute Value", fields = ["attribute_value"],
-		filters = {'parent': parent, 'attribute_value': ("like", "%%%s%%" % attribute_value)})
+		filters = {'parent': parent, 'attribute_value': ("like", f"%{attribute_value}%")})
 
 def update_variants(variants, template, publish_progress=True):
 	total = len(variants)
