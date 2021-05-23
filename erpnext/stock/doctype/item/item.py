@@ -365,8 +365,8 @@ class Item(WebsiteGenerator):
 		# load attributes
 		for v in context.variants:
 			v.attributes = frappe.get_all("Item Variant Attribute",
-				  fields=["attribute", "attribute_value"],
-				  filters={"parent": v.name})
+				fields=["attribute", "attribute_value"],
+				filters={"parent": v.name})
 			# make a map for easier access in templates
 			v.attribute_map = frappe._dict({})
 			for attr in v.attributes:
@@ -1256,7 +1256,7 @@ def get_uom_conv_factor(uom, stock_uom):
 
 	inverse_match = frappe.db.get_value("UOM Conversion Factor", {"to_uom": from_uom, "from_uom": to_uom}, ["value"], as_dict=1)
 	if inverse_match:
-		 return 1 / inverse_match.value
+		return 1 / inverse_match.value
 
 	# This attempts to try and get conversion from intermediate UOM.
 	# case:

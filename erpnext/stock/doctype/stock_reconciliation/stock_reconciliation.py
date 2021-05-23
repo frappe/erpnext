@@ -96,7 +96,7 @@ class StockReconciliation(StockController):
 
 	def validate_data(self):
 		def _get_msg(row_num, msg):
-			return _("Row # {0}: ").format(row_num+1) + msg
+			return _("Row # {0}:").format(row_num+1) + " " + msg
 
 		self.validation_messages = []
 		item_warehouse_combinations = []
@@ -182,7 +182,7 @@ class StockReconciliation(StockController):
 			validate_cancelled_item(item_code, item.docstatus)
 
 		except Exception as e:
-			self.validation_messages.append(_("Row # ") + ("%d: " % (row.idx)) + cstr(e))
+			self.validation_messages.append(_("Row #") + " " + ("%d: " % (row.idx)) + cstr(e))
 
 	def update_stock_ledger(self):
 		"""	find difference between current and expected entries
