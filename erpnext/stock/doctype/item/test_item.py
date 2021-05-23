@@ -374,6 +374,14 @@ class TestItem(unittest.TestCase):
 		self.assertEqual(item_doc.uoms[1].uom, "Kg")
 		self.assertEqual(item_doc.uoms[1].conversion_factor, 1000)
 
+	def test_uom_conv_intermediate(self):
+		factor = get_uom_conv_factor("Pound", "Gram")
+		self.assertAlmostEqual(factor, 453.592, 3)
+
+	def test_uom_conv_base_case(self):
+		factor = get_uom_conv_factor("m", "m")
+		self.assertEqual(factor, 1.0)
+
 	def test_item_variant_by_manufacturer(self):
 		fields = [{'field_name': 'description'}, {'field_name': 'variant_based_on'}]
 		set_item_variant_settings(fields)
