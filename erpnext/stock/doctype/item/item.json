@@ -306,6 +306,7 @@
   {
    "fieldname": "brand",
    "fieldtype": "Link",
+   "in_preview": 1,
    "label": "Brand",
    "oldfieldname": "brand",
    "oldfieldtype": "Link",
@@ -315,7 +316,6 @@
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
-   "in_preview": 1,
    "label": "Description",
    "oldfieldname": "description",
    "oldfieldtype": "Text"
@@ -344,8 +344,7 @@
   {
    "fieldname": "shelf_life_in_days",
    "fieldtype": "Int",
-   "label": "Shelf Life In Days",
-   "mandatory_depends_on": "eval:doc.has_batch_no && doc.has_expiry_date"
+   "label": "Shelf Life In Days"
   },
   {
    "default": "2099-12-31",
@@ -1060,7 +1059,7 @@
  "idx": 2,
  "image_field": "image",
  "max_attachments": 1,
- "modified": "2020-08-06 17:03:26.594319",
+ "modified": "2021-05-24 11:35:27.185136",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Item",
