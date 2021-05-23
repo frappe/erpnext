@@ -10,13 +10,13 @@ from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
 from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
-from erpnext.stock.doctype.item.item import get_uom_conv_factor
+from erpnext.stock.doctype.item.item import get_uom_conv_factor, get_item_attribute
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 
 
 test_ignore = ["BOM"]
-test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand"]
+test_dependencies = ["Warehouse", "Item Group", "Item Tax Template", "Brand", "Item Attribute"]
 
 def make_item(item_code, properties=None):
 	if frappe.db.exists("Item", item_code):
@@ -499,6 +499,21 @@ class TestItem(unittest.TestCase):
 
 		if expected_columns:
 			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")
+
+	def test_attribute_completions(self):
+		expected_attrs = [{'attribute_value': 'Small'},
+		 {'attribute_value': 'Extra Small'},
+		 {'attribute_value': 'Extra Large'},
+		 {'attribute_value': 'Large'},
+		 {'attribute_value': '2XL'},
+		 {'attribute_value': 'Medium'}]
+
+		attrs = get_item_attribute("Test Size")
+		self.assertEqual(attrs, expected_attrs)
+
+		attrs = get_item_attribute("Test Size", attribute_value="extra")
+		self.assertEqual(attrs, [{'attribute_value': 'Extra Small'}, {'attribute_value': 'Extra Large'}])
+
 
 
 def set_item_variant_settings(fields):
