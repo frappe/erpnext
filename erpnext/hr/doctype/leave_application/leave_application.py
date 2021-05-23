@@ -6,7 +6,7 @@ import frappe
 from frappe import _
 from frappe.utils import cint, cstr, date_diff, flt, formatdate, getdate, get_link_to_form, \
 	comma_or, get_fullname, add_days, nowdate, get_datetime_str
-from erpnext.hr.utils import set_employee_name, get_leave_period
+from erpnext.hr.utils import set_employee_name, get_leave_period, share_doc_with_approver
 from erpnext.hr.doctype.leave_block_list.leave_block_list import get_applicable_block_dates
 from erpnext.hr.doctype.employee.employee import get_holiday_list_for_employee
 from erpnext.buying.doctype.supplier_scorecard.supplier_scorecard import daterange
@@ -40,7 +40,10 @@ class LeaveApplication(Document):
 	def on_update(self):
 		if self.status == "Open" and self.docstatus < 1:
 			# notify leave approver about creation
-			self.notify_leave_approver()
+			if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+				self.notify_leave_approver()
+
+		share_doc_with_approver(self, self.leave_approver)
 
 	def on_submit(self):
 		if self.status == "Open":
@@ -50,7 +53,8 @@ class LeaveApplication(Document):
 		self.update_attendance()
 
 		# notify leave applier about approval
-		self.notify_employee()
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
 		self.create_leave_ledger_entry()
 		self.reload()
 
@@ -60,7 +64,8 @@ class LeaveApplication(Document):
 	def on_cancel(self):
 		self.create_leave_ledger_entry(submit=False)
 		# notify leave applier about cancellation
-		self.notify_employee()
+		if frappe.db.get_single_value("HR Settings", "send_leave_notification"):
+			self.notify_employee()
 		self.cancel_attendance()
 
 	def validate_applicable_after(self):
@@ -413,6 +418,7 @@ class LeaveApplication(Document):
 				leaves=date_diff(self.to_date, expiry_date) * -1
 			))
 			create_leave_ledger_entry(self, args, submit)
+
 
 def get_allocation_expiry(employee, leave_type, to_date, from_date):
 	''' Returns expiry of carry forward allocation in leave ledger entry '''

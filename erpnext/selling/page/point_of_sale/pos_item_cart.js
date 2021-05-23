@@ -7,7 +7,6 @@ erpnext.PointOfSale.ItemCart = class {
 		this.allowed_customer_groups = settings.customer_groups;
 		this.allow_rate_change = settings.allow_rate_change;
 		this.allow_discount_change = settings.allow_discount_change;
-
 		this.init_component();
 	}
 
@@ -472,12 +471,13 @@ erpnext.PointOfSale.ItemCart = class {
 		if (!frm) frm = this.events.get_frm();
 
 		this.render_net_total(frm.doc.net_total);
-		this.render_grand_total(frm.doc.grand_total);
+		const grand_total = cint(frappe.sys_defaults.disable_rounded_total) ? frm.doc.grand_total : frm.doc.rounded_total;
+		this.render_grand_total(grand_total);
 
 		const taxes = frm.doc.taxes.map(t => {
 			return {
 				description: t.description, rate: t.rate
-			}
+			};
 		});
 		this.render_taxes(frm.doc.total_taxes_and_charges, taxes);
 	}

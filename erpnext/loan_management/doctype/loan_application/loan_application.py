@@ -197,7 +197,7 @@ def get_proposed_pledge(securities):
 			security.qty = cint(security.amount/security.loan_security_price)
 
 		security.amount = security.qty * security.loan_security_price
-		security.post_haircut_amount = security.amount - (security.amount * security.haircut/100)
+		security.post_haircut_amount = cint(security.amount - (security.amount * security.haircut/100))
 
 		maximum_loan_amount += security.post_haircut_amount
 

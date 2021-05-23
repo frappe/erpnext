@@ -13,8 +13,9 @@ from erpnext.stock.doctype.serial_no.serial_no import SerialNoDuplicateError
 from erpnext.accounts.doctype.account.test_account import get_inventory_account
 from erpnext.stock.doctype.item.test_item import make_item
 from six import iteritems
+from erpnext.stock.stock_ledger import SerialNoExistsInFutureTransaction
 from erpnext.stock.doctype.warehouse.test_warehouse import create_warehouse
-
+from erpnext.stock.doctype.serial_no.serial_no import get_serial_nos
 
 class TestPurchaseReceipt(unittest.TestCase):
 	def setUp(self):
@@ -94,10 +95,15 @@ class TestPurchaseReceipt(unittest.TestCase):
 		frappe.get_doc('Payment Terms Template', '_Test Payment Terms Template For Purchase Invoice').delete()
 
 	def test_purchase_receipt_no_gl_entry(self):
+		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
+
 		company = frappe.db.get_value('Warehouse', '_Test Warehouse - _TC', 'company')
 
-		existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
-			"warehouse": "_Test Warehouse - _TC"}, "stock_value")
+		existing_bin_qty, existing_bin_stock_value = frappe.db.get_value("Bin", {"item_code": "_Test Item",
+			"warehouse": "_Test Warehouse - _TC"}, ["actual_qty", "stock_value"])
+
+		if existing_bin_qty < 0:
+			make_stock_entry(item_code="_Test Item", target="_Test Warehouse - _TC", qty=abs(existing_bin_qty))
 
 		pr = make_purchase_receipt()
 
@@ -138,6 +144,62 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		self.assertFalse(frappe.db.get_value('Batch', {'item': item.name, 'reference_name': pr.name}))
 		self.assertFalse(frappe.db.get_all('Serial No', {'batch_no': batch_no}))
+
+	def test_duplicate_serial_nos(self):
+		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
+
+		item = frappe.db.exists("Item", {'item_name': 'Test Serialized Item 123'})
+		if not item:
+			item = create_item("Test Serialized Item 123")
+			item.has_serial_no = 1
+			item.serial_no_series = "TSI123-.####"
+			item.save()
+		else:
+			item = frappe.get_doc("Item", {'item_name': 'Test Serialized Item 123'})
+
+		# First make purchase receipt
+		pr = make_purchase_receipt(item_code=item.name, qty=2, rate=500)
+		pr.load_from_db()
+
+		serial_nos = frappe.db.get_value('Stock Ledger Entry',
+			{'voucher_type': 'Purchase Receipt', 'voucher_no': pr.name, 'item_code': item.name}, 'serial_no')
+
+		serial_nos = get_serial_nos(serial_nos)
+
+		self.assertEquals(get_serial_nos(pr.items[0].serial_no), serial_nos)
+
+		# Then tried to receive same serial nos in difference company
+		pr_different_company = make_purchase_receipt(item_code=item.name, qty=2, rate=500,
+			serial_no='\n'.join(serial_nos), company='_Test Company 1', do_not_submit=True,
+			warehouse = 'Stores - _TC1')
+
+		self.assertRaises(SerialNoDuplicateError, pr_different_company.submit)
+
+		# Then made delivery note to remove the serial nos from stock
+		dn = create_delivery_note(item_code=item.name, qty=2, rate = 1500, serial_no='\n'.join(serial_nos))
+		dn.load_from_db()
+		self.assertEquals(get_serial_nos(dn.items[0].serial_no), serial_nos)
+
+		posting_date = add_days(today(), -3)
+
+		# Try to receive same serial nos again in the same company with backdated.
+		pr1 = make_purchase_receipt(item_code=item.name, qty=2, rate=500,
+			posting_date=posting_date, serial_no='\n'.join(serial_nos), do_not_submit=True)
+
+		self.assertRaises(SerialNoExistsInFutureTransaction, pr1.submit)
+
+		# Try to receive same serial nos with different company with backdated.
+		pr2 = make_purchase_receipt(item_code=item.name, qty=2, rate=500,
+			posting_date=posting_date, serial_no='\n'.join(serial_nos), company='_Test Company 1', do_not_submit=True,
+			warehouse = 'Stores - _TC1')
+
+		self.assertRaises(SerialNoExistsInFutureTransaction, pr2.submit)
+
+		# Receive the same serial nos after the delivery note posting date and time
+		make_purchase_receipt(item_code=item.name, qty=2, rate=500, serial_no='\n'.join(serial_nos))
+
+		# Raise the error for backdated deliver note entry cancel
+		self.assertRaises(SerialNoExistsInFutureTransaction, dn.cancel)
 
 	def test_purchase_receipt_gl_entry(self):
 		pr = make_purchase_receipt(company="_Test Company with perpetual inventory",
@@ -186,7 +248,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		rm_supp_cost = sum([d.amount for d in pr.get("supplied_items")])
 		self.assertEqual(pr.get("items")[0].rm_supp_cost, flt(rm_supp_cost, 2))
-		
+
 		pr.cancel()
 
 	def test_subcontracting_gle_fg_item_rate_zero(self):
@@ -235,6 +297,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 			item_code = "Test Extra Item 1", qty=10, basic_rate=100)
 		se2 = make_stock_entry(target="_Test Warehouse - _TC",
 			item_code = "_Test FG Item", qty=1, basic_rate=100)
+		se3 = make_stock_entry(target="_Test Warehouse - _TC",
+			item_code = "Test Extra Item 2", qty=1, basic_rate=100)
 		rm_items = [
 			{
 				"item_code": item_code,
@@ -269,6 +333,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		se.cancel()
 		se1.cancel()
 		se2.cancel()
+		se3.cancel()
 		po.reload()
 		po.cancel()
 
@@ -557,29 +622,6 @@ class TestPurchaseReceipt(unittest.TestCase):
 
 		new_pr_doc.cancel()
 
-	def test_not_accept_duplicate_serial_no(self):
-		from erpnext.stock.doctype.stock_entry.test_stock_entry import make_stock_entry
-		from erpnext.stock.doctype.delivery_note.test_delivery_note import create_delivery_note
-
-		item_code = frappe.db.get_value('Item', {'has_serial_no': 1, 'is_fixed_asset': 0, "has_batch_no": 0})
-		if not item_code:
-			item = make_item("Test Serial Item 1", dict(has_serial_no=1, has_batch_no=0))
-			item_code = item.name
-
-		serial_no = random_string(5)
-		pr1 = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no)
-		dn = create_delivery_note(item_code=item_code, qty=1, serial_no=serial_no)
-
-		pr2 = make_purchase_receipt(item_code=item_code, qty=1, serial_no=serial_no, do_not_submit=True)
-		self.assertRaises(SerialNoDuplicateError, pr2.submit)
-
-		se = make_stock_entry(item_code=item_code, target="_Test Warehouse - _TC", qty=1,
-			serial_no=serial_no, basic_rate=100, do_not_submit=True)
-		se.submit()
-
-		dn.cancel()
-		pr1.cancel()
-
 	def test_auto_asset_creation(self):
 		asset_item = "Test Asset Item"
 
@@ -614,10 +656,10 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr = make_purchase_receipt(item_code=asset_item, qty=3)
 		assets = frappe.db.get_all('Asset', filters={'purchase_receipt': pr.name})
 
-		self.assertEquals(len(assets), 3)
+		self.assertEqual(len(assets), 3)
 
 		location = frappe.db.get_value('Asset', assets[0].name, 'location')
-		self.assertEquals(location, "Test Location")
+		self.assertEqual(location, "Test Location")
 
 		pr.cancel()
 
@@ -722,7 +764,7 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr1.submit()
 
 		pi = make_purchase_invoice(pr.name)
-		self.assertEquals(pi.items[0].qty, 3)
+		self.assertEqual(pi.items[0].qty, 3)
 
 		pr1.cancel()
 		pr.reload()
@@ -753,8 +795,8 @@ class TestPurchaseReceipt(unittest.TestCase):
 		pr2.submit()
 
 		pi2 = make_purchase_invoice(pr1.name)
-		self.assertEquals(pi2.items[0].qty, 2)
-		self.assertEquals(pi2.items[1].qty, 1)
+		self.assertEqual(pi2.items[0].qty, 2)
+		self.assertEqual(pi2.items[1].qty, 1)
 
 		pr2.cancel()
 		pi1.cancel()
@@ -906,6 +948,57 @@ class TestPurchaseReceipt(unittest.TestCase):
 		ste2.cancel()
 		ste1.cancel()
 		po.cancel()
+
+
+	def test_po_to_pi_and_po_to_pr_worflow_full(self):
+		"""Test following behaviour:
+			- Create PO
+			- Create PI from PO and submit
+			- Create PR from PO and submit
+		"""
+		from erpnext.buying.doctype.purchase_order import test_purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order
+
+		po = test_purchase_order.create_purchase_order()
+
+		pi = purchase_order.make_purchase_invoice(po.name)
+		pi.submit()
+
+		pr = purchase_order.make_purchase_receipt(po.name)
+		pr.submit()
+
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "Completed")
+		self.assertEqual(pr.per_billed, 100)
+
+	def test_po_to_pi_and_po_to_pr_worflow_partial(self):
+		"""Test following behaviour:
+			- Create PO
+			- Create partial PI from PO and submit
+			- Create PR from PO and submit
+		"""
+		from erpnext.buying.doctype.purchase_order import test_purchase_order
+		from erpnext.buying.doctype.purchase_order import purchase_order
+
+		po = test_purchase_order.create_purchase_order()
+
+		pi = purchase_order.make_purchase_invoice(po.name)
+		pi.items[0].qty /= 2   # roughly 50%, ^ this function only creates PI with 1 item.
+		pi.submit()
+
+		pr = purchase_order.make_purchase_receipt(po.name)
+		pr.save()
+		# per_billed is only updated after submission.
+		self.assertEqual(flt(pr.per_billed), 0)
+
+		pr.submit()
+
+		pi.load_from_db()
+		pr.load_from_db()
+
+		self.assertEqual(pr.status, "To Bill")
+		self.assertAlmostEqual(pr.per_billed, 50.0, places=2)
 
 def get_sl_entries(voucher_type, voucher_no):
 	return frappe.db.sql(""" select actual_qty, warehouse, stock_value_difference

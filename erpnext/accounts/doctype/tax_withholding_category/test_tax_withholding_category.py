@@ -9,7 +9,7 @@ from frappe.utils import today
 from erpnext.accounts.utils import get_fiscal_year
 from erpnext.buying.doctype.supplier.test_supplier import create_supplier
 
-test_dependencies = ["Supplier Group"]
+test_dependencies = ["Supplier Group", "Customer Group"]
 
 class TestTaxWithholdingCategory(unittest.TestCase):
 	@classmethod
@@ -17,6 +17,9 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		# create relevant supplier, etc
 		create_records()
 		create_tax_with_holding_category()
+
+	def tearDown(self):
+		cancel_invoices()
 
 	def test_cumulative_threshold_tds(self):
 		frappe.db.set_value("Supplier", "Test TDS Supplier", "tax_withholding_category", "Cumulative Threshold TDS")
@@ -84,53 +87,59 @@ class TestTaxWithholdingCategory(unittest.TestCase):
 		for d in invoices:
 			d.cancel()
 
-	def test_single_threshold_tds_with_previous_vouchers(self):
+	def test_cumulative_threshold_tcs(self):
+		frappe.db.set_value("Customer", "Test TCS Customer", "tax_withholding_category", "Cumulative Threshold TCS")
 		invoices = []
-		frappe.db.set_value("Supplier", "Test TDS Supplier2", "tax_withholding_category", "Single Threshold TDS")
-		pi = create_purchase_invoice(supplier="Test TDS Supplier2")
-		pi.submit()
-		invoices.append(pi)
 
-		pi = create_purchase_invoice(supplier="Test TDS Supplier2")
-		pi.submit()
-		invoices.append(pi)
+		# create invoices for lower than single threshold tax rate
+		for _ in range(2):
+			si = create_sales_invoice(customer = "Test TCS Customer")
+			si.submit()
+			invoices.append(si)
 
-		self.assertEqual(pi.taxes_and_charges_deducted, 2000)
-		self.assertEqual(pi.grand_total, 8000)
+		# create another invoice whose total when added to previously created invoice,
+		# surpasses cumulative threshhold
+		si = create_sales_invoice(customer = "Test TCS Customer", rate=12000)
+		si.submit()
 
-		# delete invoices to avoid clashing
+		# assert tax collection on total invoice amount created until now
+		tcs_charged = sum([d.base_tax_amount for d in si.taxes if d.account_head == 'TCS - _TC'])
+		self.assertEqual(tcs_charged, 200)
+		self.assertEqual(si.grand_total, 12200)
+		invoices.append(si)
+
+		# TCS is already collected once, so going forward system will collect TCS on every invoice
+		si = create_sales_invoice(customer = "Test TCS Customer", rate=5000)
+		si.submit()
+
+		tcs_charged = sum([d.base_tax_amount for d in si.taxes if d.account_head == 'TCS - _TC'])
+		self.assertEqual(tcs_charged, 500)
+		invoices.append(si)
+
+		#delete invoices to avoid clashing
 		for d in invoices:
 			d.cancel()
 
-	def test_single_threshold_tds_with_previous_vouchers_and_no_tds(self):
-		invoices = []
-		doc = create_supplier(supplier_name = "Test TDS Supplier ABC",
-			tax_withholding_category="Single Threshold TDS")
-		supplier = doc.name
+def cancel_invoices():
+	purchase_invoices = frappe.get_all("Purchase Invoice", {
+		'supplier': ['in', ['Test TDS Supplier', 'Test TDS Supplier1', 'Test TDS Supplier2']],
+		'docstatus': 1
+	}, pluck="name")
 
-		pi = create_purchase_invoice(supplier=supplier)
-		pi.submit()
-		invoices.append(pi)
+	sales_invoices = frappe.get_all("Sales Invoice", {
+		'customer': 'Test TCS Customer',
+		'docstatus': 1
+	}, pluck="name")
 
-		# TDS not applied
-		pi = create_purchase_invoice(supplier=supplier, do_not_apply_tds=True)
-		pi.submit()
-		invoices.append(pi)
+	for d in purchase_invoices:
+		frappe.get_doc('Purchase Invoice', d).cancel()
 
-		pi = create_purchase_invoice(supplier=supplier)
-		pi.submit()
-		invoices.append(pi)
-
-		self.assertEqual(pi.taxes_and_charges_deducted, 2000)
-		self.assertEqual(pi.grand_total, 8000)
-
-		# delete invoices to avoid clashing
-		for d in invoices:
-			d.cancel()
+	for d in sales_invoices:
+		frappe.get_doc('Sales Invoice', d).cancel()
 
 def create_purchase_invoice(**args):
 	# return sales invoice doc object
-	item = frappe.get_doc('Item', {'item_name': 'TDS Item'})
+	item = frappe.db.get_value('Item', {'item_name': 'TDS Item'}, "name")
 
 	args = frappe._dict(args)
 	pi = frappe.get_doc({
@@ -145,7 +154,7 @@ def create_purchase_invoice(**args):
 		"taxes": [],
 		"items": [{
 			'doctype': 'Purchase Invoice Item',
-			'item_code': item.name,
+			'item_code': item,
 			'qty': args.qty or 1,
 			'rate': args.rate or 10000,
 			'cost_center': 'Main - _TC',
@@ -155,6 +164,34 @@ def create_purchase_invoice(**args):
 
 	pi.save()
 	return pi
+
+def create_sales_invoice(**args):
+	# return sales invoice doc object
+	item = frappe.db.get_value('Item', {'item_name': 'TCS Item'}, "name")
+
+	args = frappe._dict(args)
+	si = frappe.get_doc({
+		"doctype": "Sales Invoice",
+		"posting_date": today(),
+		"customer": args.customer,
+		"company": '_Test Company',
+		"taxes_and_charges": "",
+		"currency": "INR",
+		"debit_to": "Debtors - _TC",
+		"taxes": [],
+		"items": [{
+			'doctype': 'Sales Invoice Item',
+			'item_code': item,
+			'qty': args.qty or 1,
+			'rate': args.rate or 10000,
+			'cost_center': 'Main - _TC',
+			'expense_account': 'Cost of Goods Sold - _TC',
+			'warehouse': args.warehouse or '_Test Warehouse - _TC'
+		}]
+	})
+
+	si.save()
+	return si
 
 def create_records():
 	# create a new suppliers
@@ -168,7 +205,17 @@ def create_records():
 			"doctype": "Supplier",
 		}).insert()
 
-	# create an item
+	for name in ['Test TCS Customer']:
+		if frappe.db.exists('Customer', name):
+			continue
+
+		frappe.get_doc({
+			"customer_group": "_Test Customer Group",
+			"customer_name": name,
+			"doctype": "Customer"
+		}).insert()
+
+	# create item
 	if not frappe.db.exists('Item', "TDS Item"):
 		frappe.get_doc({
 			"doctype": "Item",
@@ -178,7 +225,16 @@ def create_records():
 			"is_stock_item": 0,
 		}).insert()
 
-	# create an account
+	if not frappe.db.exists('Item', "TCS Item"):
+		frappe.get_doc({
+			"doctype": "Item",
+			"item_code": "TCS Item",
+			"item_name": "TCS Item",
+			"item_group": "All Item Groups",
+			"is_stock_item": 1
+		}).insert()
+
+	# create tds account
 	if not frappe.db.exists("Account", "TDS - _TC"):
 		frappe.get_doc({
 			'doctype': 'Account',
@@ -187,6 +243,17 @@ def create_records():
 			'parent_account': 'Tax Assets - _TC',
 			'report_type': 'Balance Sheet',
 			'root_type': 'Asset'
+		}).insert()
+
+	# create tcs account
+	if not frappe.db.exists("Account", "TCS - _TC"):
+		frappe.get_doc({
+			'doctype': 'Account',
+			'company': '_Test Company',
+			'account_name': 'TCS',
+			'parent_account': 'Duties and Taxes - _TC',
+			'report_type': 'Balance Sheet',
+			'root_type': 'Liability'
 		}).insert()
 
 def create_tax_with_holding_category():
@@ -207,6 +274,23 @@ def create_tax_with_holding_category():
 			"accounts": [{
 				'company': '_Test Company',
 				'account': 'TDS - _TC'
+			}]
+		}).insert()
+
+	if not frappe.db.exists("Tax Withholding Category", "Cumulative Threshold TCS"):
+		frappe.get_doc({
+			"doctype": "Tax Withholding Category",
+			"name": "Cumulative Threshold TCS",
+			"category_name": "10% TCS",
+			"rates": [{
+				'fiscal_year': fiscal_year,
+				'tax_withholding_rate': 10,
+				'single_threshold': 0,
+				'cumulative_threshold': 30000.00
+			}],
+			"accounts": [{
+				'company': '_Test Company',
+				'account': 'TCS - _TC'
 			}]
 		}).insert()
 

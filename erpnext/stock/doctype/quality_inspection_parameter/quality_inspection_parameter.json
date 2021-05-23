@@ -7,24 +7,34 @@
  "engine": "InnoDB",
  "field_order": [
   "parameter",
+  "parameter_group",
   "description"
  ],
  "fields": [
   {
    "fieldname": "parameter",
    "fieldtype": "Data",
+   "in_list_view": 1,
    "label": "Parameter",
+   "reqd": 1,
    "unique": 1
   },
   {
    "fieldname": "description",
    "fieldtype": "Text Editor",
    "label": "Description"
+  },
+  {
+   "fieldname": "parameter_group",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Parameter Group",
+   "options": "Quality Inspection Parameter Group"
   }
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2020-12-28 18:06:54.897317",
+ "modified": "2021-02-19 20:33:30.657406",
  "modified_by": "Administrator",
  "module": "Stock",
  "name": "Quality Inspection Parameter",

@@ -10,8 +10,38 @@ from erpnext.stock.doctype.item.test_item import make_item_variant
 test_dependencies = ["Item"]
 
 class TestProductConfigurator(unittest.TestCase):
-	def setUp(self):
-		self.create_variant_item()
+	@classmethod
+	def setUpClass(cls):
+		cls.create_variant_item()
+
+	@classmethod
+	def create_variant_item(cls):
+		if not frappe.db.exists('Item', '_Test Variant Item - 2XL'):
+			frappe.get_doc({
+				"description": "_Test Variant Item - 2XL",
+				"item_code": "_Test Variant Item - 2XL",
+				"item_name": "_Test Variant Item - 2XL",
+				"doctype": "Item",
+				"is_stock_item": 1,
+				"variant_of": "_Test Variant Item",
+				"item_group": "_Test Item Group",
+				"stock_uom": "_Test UOM",
+				"item_defaults": [{
+					"company": "_Test Company",
+					"default_warehouse": "_Test Warehouse - _TC",
+					"expense_account": "_Test Account Cost for Goods Sold - _TC",
+					"buying_cost_center": "_Test Cost Center - _TC",
+					"selling_cost_center": "_Test Cost Center - _TC",
+					"income_account": "Sales - _TC"
+				}],
+				"attributes": [
+					{
+						"attribute": "Test Size",
+						"attribute_value": "2XL"
+					}
+				],
+				"show_variant_in_website": 1
+			}).insert()
 
 	def test_product_list(self):
 		template_items = frappe.get_all('Item', {'show_in_website': 1})
@@ -46,39 +76,6 @@ class TestProductConfigurator(unittest.TestCase):
 
 	def test_get_products_for_website(self):
 		items = get_products_for_website(attribute_filters={
-			'Test Size': ['Medium']
+			'Test Size': ['2XL']
 		})
 		self.assertEqual(len(items), 1)
-
-
-	def create_variant_item(self):
-		if not frappe.db.exists('Item', '_Test Variant Item 1'):
-			frappe.get_doc({
-				"description": "_Test Variant Item 12",
-				"doctype": "Item",
-				"is_stock_item": 1,
-				"variant_of": "_Test Variant Item",
-				"item_code": "_Test Variant Item 1",
-				"item_group": "_Test Item Group",
-				"item_name": "_Test Variant Item 1",
-				"stock_uom": "_Test UOM",
-				"item_defaults": [{
-					"company": "_Test Company",
-					"default_warehouse": "_Test Warehouse - _TC",
-					"expense_account": "_Test Account Cost for Goods Sold - _TC",
-					"buying_cost_center": "_Test Cost Center - _TC",
-					"selling_cost_center": "_Test Cost Center - _TC",
-					"income_account": "Sales - _TC"
-				}],
-				"attributes": [
-					{
-						"attribute": "Test Size",
-						"attribute_value": "Medium"
-					}
-				],
-				"show_variant_in_website": 1
-			}).insert()
-
-
-	def tearDown(self):
-		frappe.db.rollback()

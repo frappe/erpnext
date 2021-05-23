@@ -32,6 +32,7 @@
   "material_request_planning",
   "include_non_stock_items",
   "include_subcontracted_items",
+  "include_safety_stock",
   "ignore_existing_ordered_qty",
   "column_break_25",
   "for_warehouse",
@@ -309,13 +310,19 @@
    "fieldtype": "Select",
    "label": "Sales Order Status",
    "options": "\nTo Deliver and Bill\nTo Bill\nTo Deliver"
+  },
+  {
+   "default": "0",
+   "fieldname": "include_safety_stock",
+   "fieldtype": "Check",
+   "label": "Include Safety Stock in Required Qty Calculation"
   }
  ],
  "icon": "fa fa-calendar",
  "index_web_pages_for_search": 1,
  "is_submittable": 1,
  "links": [],
- "modified": "2020-11-10 18:01:54.991970",
+ "modified": "2021-03-08 11:17:25.470147",
  "modified_by": "Administrator",
  "module": "Manufacturing",
  "name": "Production Plan",

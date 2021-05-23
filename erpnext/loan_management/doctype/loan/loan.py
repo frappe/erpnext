@@ -44,6 +44,7 @@ class Loan(AccountsController):
 
 	def on_cancel(self):
 		self.unlink_loan_security_pledge()
+		self.ignore_linked_doctypes = ['GL Entry']
 
 	def set_missing_fields(self):
 		if not self.company:
@@ -70,7 +71,6 @@ class Loan(AccountsController):
 			frappe.throw(_("Repay From Salary can be selected only for term loans"))
 
 	def make_repayment_schedule(self):
-
 		if not self.repayment_start_date:
 			frappe.throw(_("Repayment Start Date is mandatory for term loans"))
 
@@ -78,10 +78,9 @@ class Loan(AccountsController):
 		payment_date = self.repayment_start_date
 		balance_amount = self.loan_amount
 		while(balance_amount > 0):
-			interest_amount = rounded(balance_amount * flt(self.rate_of_interest) / (12*100))
+			interest_amount = flt(balance_amount * flt(self.rate_of_interest) / (12*100))
 			principal_amount = self.monthly_repayment_amount - interest_amount
-			balance_amount = rounded(balance_amount + interest_amount - self.monthly_repayment_amount)
-
+			balance_amount = flt(balance_amount + interest_amount - self.monthly_repayment_amount)
 			if balance_amount < 0:
 				principal_amount += balance_amount
 				balance_amount = 0.0
@@ -195,13 +194,16 @@ def request_loan_closure(loan, posting_date=None):
 		posting_date = getdate()
 
 	amounts = calculate_amounts(loan, posting_date)
-	pending_amount = amounts['payable_amount'] + amounts['unaccrued_interest']
+	pending_amount = amounts['pending_principal_amount'] + amounts['unaccrued_interest'] + \
+		amounts['interest_amount'] + amounts['penalty_amount']
 
 	loan_type = frappe.get_value('Loan', loan, 'loan_type')
 	write_off_limit = frappe.get_value('Loan Type', loan_type, 'write_off_amount')
 
 	# checking greater than 0 as there may be some minor precision error
-	if pending_amount < write_off_limit:
+	if not pending_amount:
+		frappe.db.set_value('Loan', loan, 'status', 'Loan Closure Requested')
+	elif pending_amount < write_off_limit:
 		# Auto create loan write off and update status as loan closure requested
 		write_off = make_loan_write_off(loan)
 		write_off.submit()
@@ -348,3 +350,13 @@ def validate_employee_currency_with_company_currency(applicant, company):
 	if employee_currency != company_currency:
 		frappe.throw(_("Loan cannot be repayed from salary for Employee {0} because salary is processed in currency {1}")
 			.format(applicant, employee_currency))
+
+@frappe.whitelist()
+def get_shortfall_applicants():
+	loans = frappe.get_all('Loan Security Shortfall', {'status': 'Pending'}, pluck='loan')
+	applicants = set(frappe.get_all('Loan', {'name': ('in', loans)}, pluck='name'))
+
+	return {
+		"value": len(applicants),
+		"fieldtype": "Int"
+	}

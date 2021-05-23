@@ -56,10 +56,6 @@ erpnext.PointOfSale.Controller = class {
 				dialog.fields_dict.balance_details.grid.refresh();
 			});
 		}
-		const pos_profile_query = {
-			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-			filters: { company: frappe.defaults.get_default('company') }
-		}
 		const dialog = new frappe.ui.Dialog({
 			title: __('Create POS Opening Entry'),
 			static: true,
@@ -93,6 +89,10 @@ erpnext.PointOfSale.Controller = class {
 					})
 					return frappe.utils.play_sound("error");
 				}
+
+				// filter balance details for empty rows
+				balance_details = balance_details.filter(d => d.mode_of_payment);
+
 				const method = "erpnext.selling.page.point_of_sale.point_of_sale.create_opening_voucher";
 				const res = await frappe.call({ method, args: { pos_profile, company, balance_details }, freeze:true });
 				!res.exc && me.prepare_app_defaults(res.message);
@@ -101,6 +101,10 @@ erpnext.PointOfSale.Controller = class {
 			primary_action_label: __('Submit')
 		});
 		dialog.show();
+		const pos_profile_query = {
+			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+			filters: { company: dialog.fields_dict.company.get_value() }
+		};
 	}
 
 	async prepare_app_defaults(data) {
@@ -275,11 +279,6 @@ erpnext.PointOfSale.Controller = class {
 					const item_row = frappe.model.get_doc(cdt, cdn);
 					if (item_row && item_row[fieldname] != value) {
 
-						if (fieldname === 'qty' && flt(value) == 0) {
-							this.remove_item_from_cart();
-							return;
-						}
-
 						const { item_code, batch_no, uom } = this.item_details.current_item;
 						const event = {
 							field: fieldname,
@@ -393,6 +392,7 @@ erpnext.PointOfSale.Controller = class {
 					this.recent_order_list.toggle_component(false);
 					frappe.run_serially([
 						() => this.frm.refresh(name),
+						() => this.frm.call('reset_mode_of_payments'),
 						() => this.cart.load_invoice(),
 						() => this.item_selector.toggle_component(true)
 					]);
@@ -498,10 +498,11 @@ erpnext.PointOfSale.Controller = class {
 
 	async on_cart_update(args) {
 		frappe.dom.freeze();
+		let item_row = undefined;
 		try {
 			let { field, value, item } = args;
 			const { item_code, batch_no, serial_no, uom } = item;
-			let item_row = this.get_item_from_frm(item_code, batch_no, uom);
+			item_row = this.get_item_from_frm(item_code, batch_no, uom);
 
 			const item_selected_from_selector = field === 'qty' && value === "+1"
 
@@ -553,10 +554,12 @@ erpnext.PointOfSale.Controller = class {
 				this.check_serial_batch_selection_needed(item_row) && this.edit_item_details_of(item_row);
 				this.update_cart_html(item_row);
 			}
+
 		} catch (error) {
 			console.log(error);
 		} finally {
 			frappe.dom.unfreeze();
+			return item_row;
 		}
 	}
 

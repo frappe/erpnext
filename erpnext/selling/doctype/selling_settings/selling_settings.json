@@ -18,6 +18,8 @@
   "dn_required",
   "sales_update_frequency",
   "maintain_same_sales_rate",
+  "maintain_same_rate_action",
+  "role_to_override_stop_action",
   "editable_price_list_rate",
   "allow_multiple_items",
   "allow_against_multiple_purchase_orders",
@@ -133,6 +135,23 @@
    "fieldname": "hide_tax_id",
    "fieldtype": "Check",
    "label": "Hide Customer's Tax ID from Sales Transactions"
+  },
+  {
+   "default": "Stop",
+   "depends_on": "maintain_same_sales_rate",
+   "description": "Configure the action to stop the transaction or just warn if the same rate is not maintained.",
+   "fieldname": "maintain_same_rate_action",
+   "fieldtype": "Select",
+   "label": "Action If Same Rate is Not Maintained",
+   "mandatory_depends_on": "maintain_same_sales_rate",
+   "options": "Stop\nWarn"
+  },
+  {
+   "depends_on": "eval: doc.maintain_same_rate_action == 'Stop'",
+   "fieldname": "role_to_override_stop_action",
+   "fieldtype": "Link",
+   "label": "Role Allowed to Override Stop Action",
+   "options": "Role"
   }
  ],
  "icon": "fa fa-cog",
@@ -140,7 +159,7 @@
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2020-10-13 12:12:56.784014",
+ "modified": "2021-04-04 20:18:12.814624",
  "modified_by": "Administrator",
  "module": "Selling",
  "name": "Selling Settings",
@@ -157,5 +176,6 @@
   }
  ],
  "sort_field": "modified",
- "sort_order": "DESC"
+ "sort_order": "DESC",
+ "track_changes": 1
 }

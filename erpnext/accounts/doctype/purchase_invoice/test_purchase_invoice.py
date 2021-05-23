@@ -397,7 +397,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 		pi.update({
 			"payment_schedule": get_payment_terms("_Test Payment Term Template",
-				pi.posting_date, pi.grand_total)
+				pi.posting_date, pi.grand_total, pi.base_grand_total)
 		})
 
 		pi.save()
@@ -456,7 +456,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		pi = make_purchase_invoice(company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
 			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
-		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2, 
+		return_pi = make_purchase_invoice(is_return=1, return_against=pi.name, qty=-2,
 			company = "_Test Company with perpetual inventory", warehouse= "Stores - TCP1",
 			cost_center = "Main - TCP1", expense_account ="_Test Account Cost for Goods Sold - TCP1")
 
@@ -636,8 +636,8 @@ class TestPurchaseInvoice(unittest.TestCase):
 
 	def test_rejected_serial_no(self):
 		pi = make_purchase_invoice(item_code="_Test Serialized Item With Series", received_qty=2, qty=1,
-			rejected_qty=1, rate=500, update_stock=1,
-			rejected_warehouse = "_Test Rejected Warehouse - _TC")
+			rejected_qty=1, rate=500, update_stock=1, rejected_warehouse = "_Test Rejected Warehouse - _TC",
+			allow_zero_valuation_rate=1)
 
 		self.assertEqual(frappe.db.get_value("Serial No", pi.get("items")[0].serial_no, "warehouse"),
 			pi.get("items")[0].warehouse)
@@ -898,7 +898,7 @@ class TestPurchaseInvoice(unittest.TestCase):
 		acc_settings.submit_journal_entries = 1
 		acc_settings.save()
 
-		item = create_item("_Test Item for Deferred Accounting")
+		item = create_item("_Test Item for Deferred Accounting", is_purchase_item=True)
 		item.enable_deferred_expense = 1
 		item.deferred_expense_account = deferred_account
 		item.save()
@@ -994,7 +994,8 @@ def make_purchase_invoice(**args):
 		"project": args.project,
 		"rejected_warehouse": args.rejected_warehouse or "",
 		"rejected_serial_no": args.rejected_serial_no or "",
-		"asset_location": args.location or ""
+		"asset_location": args.location or "",
+		"allow_zero_valuation_rate": args.get("allow_zero_valuation_rate") or 0
 	})
 
 	if args.get_taxes_and_charges:
@@ -1031,7 +1032,7 @@ def make_purchase_invoice_against_cost_center(**args):
 	pi.is_return = args.is_return
 	pi.credit_to = args.return_against or "Creditors - _TC"
 	pi.is_subcontracted = args.is_subcontracted or "No"
-	if args.supplier_warehouse: 
+	if args.supplier_warehouse:
 		pi.supplier_warehouse = "_Test Warehouse 1 - _TC"
 
 	pi.append("items", {

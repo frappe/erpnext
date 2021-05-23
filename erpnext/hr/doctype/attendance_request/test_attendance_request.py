@@ -8,6 +8,8 @@ import unittest
 from frappe.utils import nowdate
 from datetime import date
 
+test_dependencies = ["Employee"]
+
 class TestAttendanceRequest(unittest.TestCase):
 	def setUp(self):
 		for doctype in ["Attendance Request", "Attendance"]:

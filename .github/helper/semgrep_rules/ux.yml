@@ -1,0 +1,15 @@
+rules:
+- id: frappe-missing-translate-function
+  pattern-either:
+  - patterns:
+      - pattern: frappe.msgprint("...", ...)
+      - pattern-not: frappe.msgprint(_("..."), ...)
+      - pattern-not: frappe.msgprint(__("..."), ...)
+  - patterns:
+      - pattern: frappe.throw("...", ...)
+      - pattern-not: frappe.throw(_("..."), ...)
+      - pattern-not: frappe.throw(__("..."), ...)
+  message: |
+      All user facing text must be wrapped in translate function. Please refer to translation documentation. https://frappeframework.com/docs/user/en/guides/basics/translations
+  languages: [python, javascript, json]
+  severity: ERROR

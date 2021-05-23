@@ -24,6 +24,7 @@ class StockController(AccountsController):
 			self.validate_inspection()
 		self.validate_serialized_batch()
 		self.validate_customer_provided_item()
+		self.set_rate_of_stock_uom()
 		self.validate_internal_transfer()
 		self.validate_putaway_capacity()
 
@@ -73,7 +74,7 @@ class StockController(AccountsController):
 
 		gl_list = []
 		warehouse_with_no_account = []
-		precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
+		precision = self.get_debit_field_precision()
 		for item_row in voucher_details:
 
 			sle_list = sle_map.get(item_row.name)
@@ -116,7 +117,6 @@ class StockController(AccountsController):
 							"account": expense_account,
 							"against": warehouse_account[sle.warehouse]["account"],
 							"cost_center": item_row.cost_center,
-							"project": item_row.project or self.get('project'),
 							"remarks": self.get("remarks") or "Accounting Entry for Stock",
 							"credit": flt(sle.stock_value_difference, precision),
 							"project": item_row.get("project") or self.get("project"),
@@ -130,7 +130,13 @@ class StockController(AccountsController):
 				if frappe.db.get_value("Warehouse", wh, "company"):
 					frappe.throw(_("Warehouse {0} is not linked to any account, please mention the account in the warehouse record or set default inventory account in company {1}.").format(wh, self.company))
 
-		return process_gl_map(gl_list)
+		return process_gl_map(gl_list, precision=precision)
+
+	def get_debit_field_precision(self):
+		if not frappe.flags.debit_field_precision:
+			frappe.flags.debit_field_precision = frappe.get_precision("GL Entry", "debit_in_account_currency")
+
+		return frappe.flags.debit_field_precision
 
 	def update_stock_ledger_entries(self, sle):
 		sle.valuation_rate = get_valuation_rate(sle.item_code, sle.warehouse,
@@ -243,7 +249,7 @@ class StockController(AccountsController):
 				.format(item.idx, frappe.bold(item.item_code), msg), title=_("Expense Account Missing"))
 
 		else:
-			is_expense_account = frappe.db.get_value("Account",
+			is_expense_account = frappe.get_cached_value("Account",
 				item.get("expense_account"), "report_type")=="Profit and Loss"
 			if self.doctype not in ("Purchase Receipt", "Purchase Invoice", "Stock Reconciliation", "Stock Entry") and not is_expense_account:
 				frappe.throw(_("Expense / Difference account ({0}) must be a 'Profit or Loss' account")
@@ -313,7 +319,7 @@ class StockController(AccountsController):
 		return serialized_items
 
 	def validate_warehouse(self):
-		from erpnext.stock.utils import validate_warehouse_company
+		from erpnext.stock.utils import validate_warehouse_company, validate_disabled_warehouse
 
 		warehouses = list(set([d.warehouse for d in
 			self.get("items") if getattr(d, "warehouse", None)]))
@@ -329,6 +335,7 @@ class StockController(AccountsController):
 		warehouses.extend(from_warehouse)
 
 		for w in warehouses:
+			validate_disabled_warehouse(w)
 			validate_warehouse_company(w, self.company)
 
 	def update_billing_percentage(self, update_modified=True):
@@ -372,8 +379,7 @@ class StockController(AccountsController):
 					link = frappe.utils.get_link_to_form('Quality Inspection', d.quality_inspection)
 					frappe.throw(_("Quality Inspection: {0} is not submitted for the item: {1} in row {2}").format(link, d.item_code, d.idx), QualityInspectionNotSubmittedError)
 
-				qa_failed = any([r.status=="Rejected" for r in qa_doc.readings])
-				if qa_failed:
+				if qa_doc.status != 'Accepted':
 					frappe.throw(_("Row {0}: Quality Inspection rejected for item {1}")
 						.format(d.idx, d.item_code), QualityInspectionRejectedError)
 			elif qa_required :
@@ -394,6 +400,11 @@ class StockController(AccountsController):
 			# Customer Provided parts will have zero valuation rate
 			if frappe.db.get_value('Item', d.item_code, 'is_customer_provided_item'):
 				d.allow_zero_valuation_rate = 1
+
+	def set_rate_of_stock_uom(self):
+		if self.doctype in ["Purchase Receipt", "Purchase Invoice", "Purchase Order", "Sales Invoice", "Sales Order", "Delivery Note", "Quotation"]:
+			for d in self.get("items"):
+				d.stock_uom_rate = d.rate / (d.conversion_factor or 1)
 
 	def validate_internal_transfer(self):
 		if self.doctype in ('Sales Invoice', 'Delivery Note', 'Purchase Invoice', 'Purchase Receipt') \
@@ -470,7 +481,7 @@ class StockController(AccountsController):
 			)
 		message += "<br><br>"
 		rule_link = frappe.utils.get_link_to_form("Putaway Rule", rule)
-		message += _(" Please adjust the qty or edit {0} to proceed.").format(rule_link)
+		message += _("Please adjust the qty or edit {0} to proceed.").format(rule_link)
 		return message
 
 	def repost_future_sle_and_gle(self):
@@ -481,8 +492,7 @@ class StockController(AccountsController):
 			"voucher_no": self.name,
 			"company": self.company
 		})
-
-		if check_if_future_sle_exists(args):
+		if future_sle_exists(args):
 			create_repost_item_valuation_entry(args)
 		elif not is_reposting_pending():
 			check_if_stock_and_account_balance_synced(self.posting_date,
@@ -493,37 +503,42 @@ def is_reposting_pending():
 		{'docstatus': 1, 'status': ['in', ['Queued','In Progress']]})
 
 
-def check_if_future_sle_exists(args):
-	sl_entries = frappe.db.get_all("Stock Ledger Entry",
+def future_sle_exists(args):
+	sl_entries = frappe.get_all("Stock Ledger Entry",
 		filters={"voucher_type": args.voucher_type, "voucher_no": args.voucher_no},
 		fields=["item_code", "warehouse"],
 		order_by="creation asc")
 
-	distinct_item_warehouses = list(set([(d.item_code, d.warehouse) for d in sl_entries]))
+	if not sl_entries:
+		return
 
-	sle_exists = False
-	for item_code, warehouse in distinct_item_warehouses:
-		args.update({
-			"item_code": item_code,
-			"warehouse": warehouse
-		})
-		if get_sle(args):
-			sle_exists = True
-			break
-	return sle_exists
+	warehouse_items_map = {}
+	for entry in sl_entries:
+		if entry.warehouse not in warehouse_items_map:
+			warehouse_items_map[entry.warehouse] = set()
 
-def get_sle(args):
+		warehouse_items_map[entry.warehouse].add(entry.item_code)
+
+	or_conditions = []
+	for warehouse, items in warehouse_items_map.items():
+		or_conditions.append(
+			"warehouse = '{}' and item_code in ({})".format(
+				warehouse,
+				", ".join(frappe.db.escape(item) for item in items)
+			)
+		)
+
 	return frappe.db.sql("""
 		select name
 		from `tabStock Ledger Entry`
 		where
-			item_code=%(item_code)s
-			and warehouse=%(warehouse)s
-			and timestamp(posting_date, posting_time) >= timestamp(%(posting_date)s, %(posting_time)s)
+			({})
+			and timestamp(posting_date, posting_time)
+				>= timestamp(%(posting_date)s, %(posting_time)s)
 			and voucher_no != %(voucher_no)s
 			and is_cancelled = 0
 		limit 1
-	""", args)
+		""".format(" or ".join(or_conditions)), args)
 
 def create_repost_item_valuation_entry(args):
 	args = frappe._dict(args)

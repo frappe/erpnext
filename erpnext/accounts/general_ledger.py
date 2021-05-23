@@ -18,7 +18,8 @@ def make_gl_entries(gl_map, cancel=False, adv_adj=False, merge_entries=True, upd
 			gl_map = process_gl_map(gl_map, merge_entries)
 			if gl_map and len(gl_map) > 1:
 				save_entries(gl_map, adv_adj, update_outstanding, from_repost)
-			else:
+			# Post GL Map proccess there may no be any GL Entries
+			elif gl_map:
 				frappe.throw(_("Incorrect number of General Ledger Entries found. You might have selected a wrong Account in the transaction."))
 		else:
 			make_reverse_gl_entries(gl_map, adv_adj=adv_adj, update_outstanding=update_outstanding)
@@ -44,9 +45,9 @@ def validate_accounting_period(gl_map):
 		frappe.throw(_("You cannot create or cancel any accounting entries with in the closed Accounting Period {0}")
 			.format(frappe.bold(accounting_periods[0].name)), ClosedAccountingPeriod)
 
-def process_gl_map(gl_map, merge_entries=True):
+def process_gl_map(gl_map, merge_entries=True, precision=None):
 	if merge_entries:
-		gl_map = merge_similar_entries(gl_map)
+		gl_map = merge_similar_entries(gl_map, precision)
 	for entry in gl_map:
 		# toggle debit, credit if negative entry
 		if flt(entry.debit) < 0:
@@ -69,7 +70,7 @@ def process_gl_map(gl_map, merge_entries=True):
 
 	return gl_map
 
-def merge_similar_entries(gl_map):
+def merge_similar_entries(gl_map, precision=None):
 	merged_gl_map = []
 	accounting_dimensions = get_accounting_dimensions()
 	for entry in gl_map:
@@ -88,7 +89,9 @@ def merge_similar_entries(gl_map):
 
 	company = gl_map[0].company if gl_map else erpnext.get_default_company()
 	company_currency = erpnext.get_company_currency(company)
-	precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
+
+	if not precision:
+		precision = get_field_precision(frappe.get_meta("GL Entry").get_field("debit"), company_currency)
 
 	# filter zero debit and credit entries
 	merged_gl_map = filter(lambda x: flt(x.debit, precision)!=0 or flt(x.credit, precision)!=0, merged_gl_map)
@@ -132,8 +135,8 @@ def make_entry(args, adv_adj, update_outstanding, from_repost=False):
 	gle.update(args)
 	gle.flags.ignore_permissions = 1
 	gle.flags.from_repost = from_repost
-	gle.insert()
-	gle.run_method("on_update_with_args", adv_adj, update_outstanding, from_repost)
+	gle.flags.adv_adj = adv_adj
+	gle.flags.update_outstanding = update_outstanding or 'Yes'
 	gle.submit()
 
 	if not from_repost:
@@ -168,7 +171,7 @@ def round_off_debit_credit(gl_map):
 	else:
 		allowance = .5
 
-	if abs(debit_credit_diff) >= allowance:
+	if abs(debit_credit_diff) > allowance:
 		frappe.throw(_("Debit and Credit not equal for {0} #{1}. Difference is {2}.")
 			.format(gl_map[0].voucher_type, gl_map[0].voucher_no, debit_credit_diff))
 
@@ -194,7 +197,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 
 	if not round_off_gle:
 		for k in ["voucher_type", "voucher_no", "company",
-			"posting_date", "remarks", "is_opening"]:
+			"posting_date", "remarks"]:
 				round_off_gle[k] = gl_map[0][k]
 
 	round_off_gle.update({
@@ -206,6 +209,7 @@ def make_round_off_gle(gl_map, debit_credit_diff, precision):
 		"cost_center": round_off_cost_center,
 		"party_type": None,
 		"party": None,
+		"is_opening": "No",
 		"against_voucher_type": None,
 		"against_voucher": None
 	})

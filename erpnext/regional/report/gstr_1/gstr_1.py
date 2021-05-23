@@ -78,7 +78,7 @@ class Gstr1Report(object):
 				place_of_supply = invoice_details.get("place_of_supply")
 				ecommerce_gstin =  invoice_details.get("ecommerce_gstin")
 
-				b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin, inv),{
+				b2cs_output.setdefault((rate, place_of_supply, ecommerce_gstin),{
 					"place_of_supply": "",
 					"ecommerce_gstin": "",
 					"rate": "",
@@ -90,7 +90,7 @@ class Gstr1Report(object):
 					"invoice_value": invoice_details.get("base_grand_total"),
 				})
 
-				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin, inv))
+				row = b2cs_output.get((rate, place_of_supply, ecommerce_gstin))
 				row["place_of_supply"] = place_of_supply
 				row["ecommerce_gstin"] = ecommerce_gstin
 				row["rate"] = rate
@@ -199,7 +199,7 @@ class Gstr1Report(object):
 		self.item_tax_rate = frappe._dict()
 
 		items = frappe.db.sql("""
-			select item_code, parent, base_net_amount, item_tax_rate
+			select item_code, parent, taxable_value, base_net_amount, item_tax_rate
 			from `tab%s Item`
 			where parent in (%s)
 		""" % (self.doctype, ', '.join(['%s']*len(self.invoices))), tuple(self.invoices), as_dict=1)
@@ -207,7 +207,7 @@ class Gstr1Report(object):
 		for d in items:
 			if d.item_code not in self.invoice_items.get(d.parent, {}):
 				self.invoice_items.setdefault(d.parent, {}).setdefault(d.item_code,
-					sum(i.get('base_net_amount', 0) for i in items
+					sum((i.get('taxable_value', 0) or i.get('base_net_amount', 0)) for i in items
 						if i.item_code == d.item_code and i.parent == d.parent))
 
 				item_tax_rate = {}
@@ -236,6 +236,7 @@ class Gstr1Report(object):
 		self.cgst_sgst_invoices = []
 
 		unidentified_gst_accounts = []
+		unidentified_gst_accounts_invoice = []
 		for parent, account, item_wise_tax_detail, tax_amount in self.tax_details:
 			if account in self.gst_accounts.cess_account:
 				self.invoice_cess.setdefault(parent, tax_amount)
@@ -251,6 +252,7 @@ class Gstr1Report(object):
 						if not (cgst_or_sgst or account in self.gst_accounts.igst_account):
 							if "gst" in account.lower() and account not in unidentified_gst_accounts:
 								unidentified_gst_accounts.append(account)
+								unidentified_gst_accounts_invoice.append(parent)
 							continue
 
 						for item_code, tax_amounts in item_wise_tax_detail.items():
@@ -273,7 +275,7 @@ class Gstr1Report(object):
 
 		# Build itemised tax for export invoices where tax table is blank
 		for invoice, items in iteritems(self.invoice_items):
-			if invoice not in self.items_based_on_tax_rate \
+			if invoice not in self.items_based_on_tax_rate and invoice not in unidentified_gst_accounts_invoice \
 				and frappe.db.get_value(self.doctype, invoice, "export_type") == "Without Payment of Tax":
 					self.items_based_on_tax_rate.setdefault(invoice, {}).setdefault(0, items.keys())
 
@@ -559,7 +561,7 @@ def get_json(filters, report_name, data):
 
 	fp = "%02d%s" % (getdate(filters["to_date"]).month, getdate(filters["to_date"]).year)
 
-	gst_json = {"gstin": "", "version": "GST2.2.9",
+	gst_json = {"version": "GST2.2.9",
 		"hash": "hash", "gstin": gstin, "fp": fp}
 
 	res = {}
