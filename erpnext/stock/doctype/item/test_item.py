@@ -14,6 +14,7 @@ from erpnext.stock.doctype.item.item import (get_uom_conv_factor, get_item_attri
 	validate_is_stock_item, get_timeline_data)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
+from erpnext.tests.utils import change_settings
 
 
 test_ignore = ["BOM"]
@@ -566,6 +567,13 @@ class TestItem(unittest.TestCase):
 			validate_is_stock_item("_Test Item")
 		except frappe.ValidationError as e:
 			self.fail(f"stock item considered non-stock item: {e}")
+
+	@change_settings("Stock Settings", {"item_naming_by": "Naming Series"})
+	def test_autoname_series(self):
+		item = frappe.new_doc("Item")
+		item.item_group = "All Item Groups"
+		item.save()  # if item code saved without item_code then series worked
+
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')
