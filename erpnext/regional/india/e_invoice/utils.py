@@ -534,11 +534,9 @@ def santize_einvoice_fields(einvoice):
 	return einvoice
 
 def safe_json_load(json_string):
-	JSONDecodeError = ValueError if six.PY2 else json.JSONDecodeError
-
 	try:
 		return json.loads(json_string)
-	except JSONDecodeError as e:
+	except json.JSONDecodeError as e:
 		# print a snippet of 40 characters around the location where error occured
 		pos = e.pos
 		start, end = max(0, pos-20), min(len(json_string)-1, pos+20)
