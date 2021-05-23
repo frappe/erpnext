@@ -12,6 +12,7 @@
   "item_name": "_Test Item",
   "apply_warehouse_wise_reorder_level": 1,
   "gst_hsn_code": "999800",
+  "opening_stock": 10,
   "valuation_rate": 100,
   "item_defaults": [{
     "company": "_Test Company",
@@ -58,6 +59,8 @@
   "show_in_website": 1,
   "website_warehouse": "_Test Warehouse - _TC",
   "gst_hsn_code": "999800",
+  "opening_stock": 10,
+  "valuation_rate": 100,
   "item_defaults": [{
     "company": "_Test Company",
     "default_warehouse": "_Test Warehouse - _TC",

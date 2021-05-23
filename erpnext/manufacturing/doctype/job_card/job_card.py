@@ -47,6 +47,8 @@ class JobCard(Document):
 				if d.completed_qty:
 					self.total_completed_qty += d.completed_qty
 
+			self.total_completed_qty = flt(self.total_completed_qty, self.precision("total_completed_qty"))
+
 	def get_overlap_for(self, args, check_next_available_slot=False):
 		production_capacity = 1
 
@@ -164,6 +166,7 @@ class JobCard(Document):
 			"time_in_mins": time_diff_in_minutes(row.planned_end_time, row.planned_start_time),
 		})
 
+	@frappe.whitelist()
 	def get_required_items(self):
 		if not self.get('work_order'):
 			return
@@ -430,6 +433,7 @@ def make_material_request(source_name, target_doc=None):
 def make_stock_entry(source_name, target_doc=None):
 	def update_item(obj, target, source_parent):
 		target.t_warehouse = source_parent.wip_warehouse
+		target.conversion_factor = 1
 
 	def set_missing_values(source, target):
 		target.purpose = "Material Transfer for Manufacture"

@@ -22,7 +22,7 @@ class ShopifySettings(unittest.TestCase):
 			frappe.db.set_value('Stock Settings', None, 'allow_negative_stock', 1)
 
 		# use the fixture data
-		import_doc(frappe.get_app_path("erpnext", "erpnext_integrations/doctype/shopify_settings/test_data/custom_field.json"))
+		import_doc(path=frappe.get_app_path("erpnext", "erpnext_integrations/doctype/shopify_settings/test_data/custom_field.json"))
 
 		frappe.reload_doctype("Customer")
 		frappe.reload_doctype("Sales Order")

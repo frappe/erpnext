@@ -152,6 +152,7 @@ class PackingSlip(Document):
 
 		return cint(recommended_case_no[0][0]) + 1
 
+	@frappe.whitelist()
 	def get_items(self):
 		self.set("items", [])
 

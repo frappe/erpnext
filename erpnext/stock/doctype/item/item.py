@@ -50,6 +50,7 @@ class Item(WebsiteGenerator):
 		self.set_onload('stock_exists', self.stock_ledger_created())
 		self.set_asset_naming_series()
 
+	@frappe.whitelist()
 	def set_asset_naming_series(self):
 		if not hasattr(self, '_asset_naming_series'):
 			from erpnext.assets.doctype.asset.asset import get_asset_naming_series
@@ -62,7 +63,7 @@ class Item(WebsiteGenerator):
 			if self.variant_of:
 				if not self.item_code:
 					template_item_name = frappe.db.get_value("Item", self.variant_of, "item_name")
-					self.item_code = make_variant_item_code(self.variant_of, template_item_name, self)
+					make_variant_item_code(self.variant_of, template_item_name, self)
 			else:
 				from frappe.model.naming import set_name_by_naming_series
 				set_name_by_naming_series(self)
@@ -673,10 +674,10 @@ class Item(WebsiteGenerator):
 		if not records: return
 		document = _("Stock Reconciliation") if len(records) == 1 else _("Stock Reconciliations")
 
-		msg = _("The items {0} and {1} are present in the following {2} : ").format(
+		msg = _("The items {0} and {1} are present in the following {2} :").format(
 			frappe.bold(old_name), frappe.bold(new_name), document)
 
-		msg += '<br>'
+		msg += ' <br>'
 		msg += ', '.join([get_link_to_form("Stock Reconciliation", d.parent) for d in records]) + "<br><br>"
 
 		msg += _("Note: To merge the items, create a separate Stock Reconciliation for the old item {0}").format(
@@ -706,6 +707,7 @@ class Item(WebsiteGenerator):
 		frappe.db.set_value("Stock Settings", None, "allow_negative_stock", existing_allow_negative_stock)
 		frappe.db.auto_commit_on_many_writes = 0
 
+	@frappe.whitelist()
 	def copy_specification_from_item_group(self):
 		self.set("website_specifications", [])
 		if self.item_group:

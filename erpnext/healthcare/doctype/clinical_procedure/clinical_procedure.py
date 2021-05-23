@@ -54,6 +54,7 @@ class ClinicalProcedure(Document):
 	def set_title(self):
 		self.title = _('{0} - {1}').format(self.patient_name or self.patient, self.procedure_template)[:100]
 
+	@frappe.whitelist()
 	def complete_procedure(self):
 		if self.consume_stock and self.items:
 			stock_entry = make_stock_entry(self)
@@ -96,6 +97,7 @@ class ClinicalProcedure(Document):
 		if self.consume_stock and self.items:
 			return stock_entry
 
+	@frappe.whitelist()
 	def start_procedure(self):
 		allow_start = self.set_actual_qty()
 		if allow_start:
@@ -116,6 +118,7 @@ class ClinicalProcedure(Document):
 
 		return allow_start
 
+	@frappe.whitelist()
 	def make_material_receipt(self, submit=False):
 		stock_entry = frappe.new_doc('Stock Entry')
 

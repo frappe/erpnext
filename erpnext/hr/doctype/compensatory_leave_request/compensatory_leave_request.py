@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe import _
-from frappe.utils import date_diff, add_days, getdate, cint
+from frappe.utils import date_diff, add_days, getdate, cint, format_date
 from frappe.model.document import Document
 from erpnext.hr.utils import validate_dates, validate_overlap, get_leave_period, \
 	get_holidays_for_employee, create_additional_leave_ledger_entry
@@ -40,7 +40,12 @@ class CompensatoryLeaveRequest(Document):
 	def validate_holidays(self):
 		holidays = get_holidays_for_employee(self.employee, self.work_from_date, self.work_end_date)
 		if len(holidays) < date_diff(self.work_end_date, self.work_from_date) + 1:
-			frappe.throw(_("Compensatory leave request days not in valid holidays"))
+			if date_diff(self.work_end_date, self.work_from_date):
+				msg = _("The days between {0} to {1} are not valid holidays.").format(frappe.bold(format_date(self.work_from_date)), frappe.bold(format_date(self.work_end_date)))
+			else:
+				msg = _("{0} is not a holiday.").format(frappe.bold(format_date(self.work_from_date)))
+
+			frappe.throw(msg)
 
 	def on_submit(self):
 		company = frappe.db.get_value("Employee", self.employee, "company")
@@ -61,9 +66,9 @@ class CompensatoryLeaveRequest(Document):
 
 			else:
 				leave_allocation = self.create_leave_allocation(leave_period, date_difference)
-			self.leave_allocation=leave_allocation.name
+			self.db_set("leave_allocation", leave_allocation.name)
 		else:
-			frappe.throw(_("There is no leave period in between {0} and {1}").format(self.work_from_date, self.work_end_date))
+			frappe.throw(_("There is no leave period in between {0} and {1}").format(format_date(self.work_from_date), format_date(self.work_end_date)))
 
 	def on_cancel(self):
 		if self.leave_allocation:

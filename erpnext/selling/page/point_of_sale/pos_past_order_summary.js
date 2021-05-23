@@ -176,6 +176,14 @@ erpnext.PointOfSale.PastOrderSummary = class {
 			this.show_summary_placeholder();
 		});
 
+		this.$summary_container.on('click', '.delete-btn', () => {
+			this.events.delete_order(this.doc.name);
+			this.show_summary_placeholder();
+			// this.toggle_component(false);
+			// this.$component.find('.no-summary-placeholder').removeClass('d-none');
+			// this.$summary_wrapper.addClass('d-none');
+		});
+
 		this.$summary_container.on('click', '.new-btn', () => {
 			this.events.new_order();
 			this.toggle_component(false);
@@ -196,11 +204,11 @@ erpnext.PointOfSale.PastOrderSummary = class {
 	print_receipt() {
 		const frm = this.events.get_frm();
 		frappe.utils.print(
-			frm.doctype,
-			frm.docname,
+			this.doc.doctype,
+			this.doc.name,
 			frm.pos_print_format,
-			frm.doc.letter_head,
-			frm.doc.language || frappe.boot.lang
+			this.doc.letter_head,
+			this.doc.language || frappe.boot.lang
 		);
 	}
 

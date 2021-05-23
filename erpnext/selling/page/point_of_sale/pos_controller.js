@@ -56,10 +56,6 @@ erpnext.PointOfSale.Controller = class {
 				dialog.fields_dict.balance_details.grid.refresh();
 			});
 		}
-		const pos_profile_query = {
-			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
-			filters: { company: frappe.defaults.get_default('company') }
-		}
 		const dialog = new frappe.ui.Dialog({
 			title: __('Create POS Opening Entry'),
 			static: true,
@@ -105,6 +101,10 @@ erpnext.PointOfSale.Controller = class {
 			primary_action_label: __('Submit')
 		});
 		dialog.show();
+		const pos_profile_query = {
+			query: 'erpnext.accounts.doctype.pos_profile.pos_profile.pos_profile_query',
+			filters: { company: dialog.fields_dict.company.get_value() }
+		};
 	}
 
 	async prepare_app_defaults(data) {
@@ -278,11 +278,6 @@ erpnext.PointOfSale.Controller = class {
 				form_updated: async (cdt, cdn, fieldname, value) => {
 					const item_row = frappe.model.get_doc(cdt, cdn);
 					if (item_row && item_row[fieldname] != value) {
-
-						if (fieldname === 'qty' && flt(value) == 0) {
-							this.remove_item_from_cart();
-							return;
-						}
 
 						const { item_code, batch_no, uom } = this.item_details.current_item;
 						const event = {

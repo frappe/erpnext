@@ -51,21 +51,22 @@ class TestPayrollEntry(unittest.TestCase):
 
 		company_doc = frappe.get_doc('Company', company)
 		salary_structure = make_salary_structure("_Test Multi Currency Salary Structure", "Monthly", company=company, currency='USD')
-		create_salary_structure_assignment(employee, salary_structure.name, company=company)
+		create_salary_structure_assignment(employee, salary_structure.name, company=company, currency='USD')
 		frappe.db.sql("""delete from `tabSalary Slip` where employee=%s""",(frappe.db.get_value("Employee", {"user_id": "test_muti_currency_employee@payroll.com"})))
 		salary_slip = get_salary_slip("test_muti_currency_employee@payroll.com", "Monthly", "_Test Multi Currency Salary Structure")
 		dates = get_start_end_dates('Monthly', nowdate())
-		payroll_entry = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date, 
+		payroll_entry = make_payroll_entry(start_date=dates.start_date, end_date=dates.end_date,
 			payable_account=company_doc.default_payroll_payable_account, currency='USD', exchange_rate=70)
 		payroll_entry.make_payment_entry()
 
 		salary_slip.load_from_db()
 
 		payroll_je = salary_slip.journal_entry
-		payroll_je_doc = frappe.get_doc('Journal Entry', payroll_je)
+		if payroll_je:
+			payroll_je_doc = frappe.get_doc('Journal Entry', payroll_je)
 
-		self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_debit)
-		self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_credit)
+			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_debit)
+			self.assertEqual(salary_slip.base_gross_pay, payroll_je_doc.total_credit)
 
 		payment_entry = frappe.db.sql('''
 			Select ifnull(sum(je.total_debit),0) as total_debit, ifnull(sum(je.total_credit),0) as total_credit from `tabJournal Entry` je, `tabJournal Entry Account` jea

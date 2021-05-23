@@ -509,6 +509,7 @@ class WorkOrder(Document):
 				stock_bin = get_bin(d.item_code, d.source_warehouse)
 				stock_bin.update_reserved_qty_for_production()
 
+	@frappe.whitelist()
 	def get_items_and_operations_from_bom(self):
 		self.set_required_items()
 		self.set_work_order_operations()
@@ -613,6 +614,7 @@ class WorkOrder(Document):
 
 			item.db_set('consumed_qty', flt(consumed_qty), update_modified=False)
 
+	@frappe.whitelist()
 	def make_bom(self):
 		data = frappe.db.sql(""" select sed.item_code, sed.qty, sed.s_warehouse
 			from `tabStock Entry Detail` sed, `tabStock Entry` se

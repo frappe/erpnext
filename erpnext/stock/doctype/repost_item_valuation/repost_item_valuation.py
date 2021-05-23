@@ -4,8 +4,9 @@
 
 from __future__ import unicode_literals
 import frappe, erpnext
+from rq.timeouts import JobTimeoutException
 from frappe.model.document import Document
-from frappe.utils import cint, get_link_to_form, add_to_date, today
+from frappe.utils import cint, get_link_to_form, add_to_date, now, today, time_diff_in_hours
 from erpnext.stock.stock_ledger import repost_future_sle
 from erpnext.accounts.utils import update_gl_entries_after, check_if_stock_and_account_balance_synced
 from frappe.utils.user import get_users_with_role
@@ -39,6 +40,7 @@ class RepostItemValuation(Document):
 		frappe.enqueue(repost, timeout=1800, queue='long',
 			job_name='repost_sle', now=frappe.flags.in_test, doc=self)
 
+	@frappe.whitelist()
 	def restart_reposting(self):
 		self.set_status('Queued')
 		frappe.enqueue(repost, timeout=1800, queue='long',
@@ -56,7 +58,8 @@ def repost(doc):
 		repost_gl_entries(doc)
 
 		doc.set_status('Completed')
-	except Exception:
+
+	except (Exception, JobTimeoutException):
 		frappe.db.rollback()
 		traceback = frappe.get_traceback()
 		frappe.log_error(traceback)
@@ -112,6 +115,12 @@ def notify_error_to_stock_managers(doc, traceback):
 	frappe.sendmail(recipients=recipients, subject=subject, message=message)
 
 def repost_entries():
+	job_log = frappe.get_all('Scheduled Job Log', fields = ['status', 'creation'],
+		filters = {'scheduled_job_type': 'repost_item_valuation.repost_entries'}, order_by='creation desc', limit=1)
+
+	if job_log and job_log[0]['status'] == 'Start' and time_diff_in_hours(now(), job_log[0]['creation']) < 2:
+		return
+
 	riv_entries = get_repost_item_valuation_entries()
 
 	for row in riv_entries:
@@ -123,10 +132,10 @@ def repost_entries():
 		return
 
 	for d in frappe.get_all('Company', filters= {'enable_perpetual_inventory': 1}):
-		check_if_stock_and_account_balance_synced(today(), d.company)
+		check_if_stock_and_account_balance_synced(today(), d.name)
 
 def get_repost_item_valuation_entries():
-	date = add_to_date(today(), hours=-12)
+	date = add_to_date(now(), hours=-3)
 
 	return frappe.db.sql(""" SELECT name from `tabRepost Item Valuation`
 		WHERE status != 'Completed' and creation <= %s and docstatus = 1

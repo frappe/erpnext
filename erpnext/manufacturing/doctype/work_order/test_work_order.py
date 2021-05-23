@@ -371,14 +371,14 @@ class TestWorkOrder(unittest.TestCase):
 
 	def test_job_card(self):
 		stock_entries = []
-		data = frappe.get_cached_value('BOM',
-			{'docstatus': 1, 'with_operations': 1, 'company': '_Test Company'}, ['name', 'item'])
+		bom = frappe.get_doc('BOM', {
+			'docstatus': 1,
+			'with_operations': 1,
+			'company': '_Test Company'
+		})
 
-		bom, bom_item = data
-
-		bom_doc = frappe.get_doc('BOM', bom)
-		work_order = make_wo_order_test_record(item=bom_item, qty=1,
-			bom_no=bom, source_warehouse="_Test Warehouse - _TC")
+		work_order = make_wo_order_test_record(item=bom.item, qty=1,
+			bom_no=bom.name, source_warehouse="_Test Warehouse - _TC")
 
 		for row in work_order.required_items:
 			stock_entry_doc = test_stock_entry.make_stock_entry(item_code=row.item_code,
@@ -390,14 +390,14 @@ class TestWorkOrder(unittest.TestCase):
 		stock_entries.append(ste)
 
 		job_cards = frappe.get_all('Job Card', filters = {'work_order': work_order.name})
-		self.assertEqual(len(job_cards), len(bom_doc.operations))
+		self.assertEqual(len(job_cards), len(bom.operations))
 
 		for i, job_card in enumerate(job_cards):
 			doc = frappe.get_doc("Job Card", job_card)
 			doc.append("time_logs", {
-				"from_time": now(),
-				"hours": i,
-				"to_time": add_to_date(now(), i),
+				"from_time": add_to_date(None, i),
+				"hours": 1,
+				"to_time": add_to_date(None, i + 1),
 				"completed_qty": doc.for_quantity
 			})
 			doc.submit()
@@ -473,7 +473,7 @@ class TestWorkOrder(unittest.TestCase):
 	def test_cost_center_for_manufacture(self):
 		wo_order = make_wo_order_test_record()
 		ste = make_stock_entry(wo_order.name, "Material Transfer for Manufacture", wo_order.qty)
-		self.assertEquals(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
+		self.assertEqual(ste.get("items")[0].get("cost_center"), "_Test Cost Center - _TC")
 
 	def test_operation_time_with_batch_size(self):
 		fg_item = "Test Batch Size Item For BOM"
@@ -539,11 +539,11 @@ class TestWorkOrder(unittest.TestCase):
 		ste_cancel_list.append(ste1)
 
 		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Material Consumption for Manufacture", 2))
-		self.assertEquals(ste3.fg_completed_qty, 2)
+		self.assertEqual(ste3.fg_completed_qty, 2)
 
 		expected_qty = {"_Test Item": 2, "_Test Item Home Desktop 100": 4}
 		for row in ste3.items:
-			self.assertEquals(row.qty, expected_qty.get(row.item_code))
+			self.assertEqual(row.qty, expected_qty.get(row.item_code))
 		ste_cancel_list.reverse()
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()
@@ -577,7 +577,7 @@ class TestWorkOrder(unittest.TestCase):
 		ste3 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
 		for ste_row in ste3.items:
 			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
-				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+				self.assertEqual(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
 
 		ste3.submit()
 		ste_cancel_list.append(ste3)
@@ -585,7 +585,7 @@ class TestWorkOrder(unittest.TestCase):
 		ste2 = frappe.get_doc(make_stock_entry(wo_order.name, "Manufacture", 2))
 		for ste_row in ste2.items:
 			if itemwise_qty.get(ste_row.item_code) and ste_row.s_warehouse:
-				self.assertEquals(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
+				self.assertEqual(ste_row.qty, itemwise_qty.get(ste_row.item_code) / 2)
 		ste_cancel_list.reverse()
 		for ste_doc in ste_cancel_list:
 			ste_doc.cancel()

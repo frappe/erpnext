@@ -57,6 +57,7 @@ class InpatientMedicationOrder(Document):
 
 		self.db_set('status', status)
 
+	@frappe.whitelist()
 	def add_order_entries(self, order):
 		if order.get('drug_code'):
 			dosage = frappe.get_doc('Prescription Dosage', order.get('dosage'))
