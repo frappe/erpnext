@@ -10,7 +10,8 @@ from frappe.test_runner import make_test_objects
 from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsError,
 	InvalidItemAttributeValueError, get_variant)
 from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
-from erpnext.stock.doctype.item.item import get_uom_conv_factor, get_item_attribute
+from erpnext.stock.doctype.item.item import (get_uom_conv_factor, get_item_attribute,
+	validate_is_stock_item)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 
@@ -544,6 +545,13 @@ class TestItem(unittest.TestCase):
 		except frappe.ValidationError as e:
 			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
 
+	def test_validate_stock_item(self):
+		self.assertRaises(frappe.ValidationError, validate_is_stock_item, "_Test Non Stock Item")
+
+		try:
+			validate_is_stock_item("_Test Item")
+		except frappe.ValidationError as e:
+			self.fail(f"stock item considered non-stock item: {e}")
 
 def set_item_variant_settings(fields):
 	doc = frappe.get_doc('Item Variant Settings')
