@@ -514,6 +514,35 @@ class TestItem(unittest.TestCase):
 		attrs = get_item_attribute("Test Size", attribute_value="extra")
 		self.assertEqual(attrs, [{'attribute_value': 'Extra Small'}, {'attribute_value': 'Extra Large'}])
 
+	def test_check_stock_uom_with_bin(self):
+		# this item has opening stock and stock_uom set in test_records.
+		item = frappe.get_doc("Item", "_Test Item")
+		item.stock_uom = "Gram"
+		self.assertRaises(frappe.ValidationError, item.save)
+
+	def test_check_stock_uom_with_bin_no_sle(self):
+		from erpnext.stock.stock_balance import update_bin_qty
+		item = create_item("_Item with bin qty")
+		item.stock_uom = "Gram"
+		item.save()
+
+		update_bin_qty(item.item_code, "_Test Warehouse - _TC", {
+			"reserved_qty": 10
+		})
+
+		item.stock_uom = "Kilometer"
+		self.assertRaises(frappe.ValidationError, item.save)
+
+		update_bin_qty(item.item_code, "_Test Warehouse - _TC", {
+			"reserved_qty": 0
+		})
+
+		item.load_from_db()
+		item.stock_uom = "Kilometer"
+		try:
+			item.save()
+		except frappe.ValidationError as e:
+			self.fail(f"UoM change not allowed even though no SLE / BIN with positive qty exists: {e}")
 
 
 def set_item_variant_settings(fields):
