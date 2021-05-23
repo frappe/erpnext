@@ -11,7 +11,7 @@ from erpnext.controllers.item_variant import (create_variant, ItemVariantExistsE
 	InvalidItemAttributeValueError, get_variant)
 from erpnext.stock.doctype.item.item import StockExistsForTemplate, InvalidBarcode
 from erpnext.stock.doctype.item.item import (get_uom_conv_factor, get_item_attribute,
-	validate_is_stock_item)
+	validate_is_stock_item, get_timeline_data)
 from erpnext.stock.doctype.stock_entry.stock_entry_utils import make_stock_entry
 from erpnext.stock.get_item_details import get_item_details
 
@@ -487,6 +487,20 @@ class TestItem(unittest.TestCase):
 		new_barcode.barcode = '9999999999999'
 		new_barcode.barcode_type = 'EAN'
 		self.assertRaises(InvalidBarcode, item_doc.save)
+
+	def test_heatmap_data(self):
+		import time
+		data = get_timeline_data("Item", "_Test Item")
+		self.assertTrue(isinstance(data, dict))
+
+		now = time.time()
+		one_year_ago = now - 366 * 24 * 60 * 60
+
+		for timestamp, count in data.items():
+			self.assertIsInstance(timestamp, int)
+			self.assertTrue(one_year_ago <= timestamp <= now)
+			self.assertIsInstance(count, int)
+			self.assertTrue(count >= 0)
 
 	def test_index_creation(self):
 		"check if index is getting created in db"
