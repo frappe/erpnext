@@ -517,18 +517,15 @@ class TestItem(unittest.TestCase):
 			self.fail(f"Expected db index on these columns: {', '.join(expected_columns)}")
 
 	def test_attribute_completions(self):
-		expected_attrs = [{'attribute_value': 'Small'},
-			{'attribute_value': 'Extra Small'},
-			{'attribute_value': 'Extra Large'},
-			{'attribute_value': 'Large'},
-			{'attribute_value': '2XL'},
-			{'attribute_value': 'Medium'}]
+		expected_attrs = {"Small", "Extra Small", "Extra Large", "Large", "2XL", "Medium"}
 
 		attrs = get_item_attribute("Test Size")
-		self.assertEqual(attrs, expected_attrs)
+		received_attrs = {attr.attribute_value for attr in attrs}
+		self.assertEqual(received_attrs, expected_attrs)
 
 		attrs = get_item_attribute("Test Size", attribute_value="extra")
-		self.assertEqual(attrs, [{'attribute_value': 'Extra Small'}, {'attribute_value': 'Extra Large'}])
+		received_attrs = {attr.attribute_value for attr in attrs}
+		self.assertEqual(received_attrs, {"Extra Small", "Extra Large"})
 
 	def test_check_stock_uom_with_bin(self):
 		# this item has opening stock and stock_uom set in test_records.
