@@ -518,11 +518,11 @@ class TestItem(unittest.TestCase):
 
 	def test_attribute_completions(self):
 		expected_attrs = [{'attribute_value': 'Small'},
-		 {'attribute_value': 'Extra Small'},
-		 {'attribute_value': 'Extra Large'},
-		 {'attribute_value': 'Large'},
-		 {'attribute_value': '2XL'},
-		 {'attribute_value': 'Medium'}]
+			{'attribute_value': 'Extra Small'},
+			{'attribute_value': 'Extra Large'},
+			{'attribute_value': 'Large'},
+			{'attribute_value': '2XL'},
+			{'attribute_value': 'Medium'}]
 
 		attrs = get_item_attribute("Test Size")
 		self.assertEqual(attrs, expected_attrs)
