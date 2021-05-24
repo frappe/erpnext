@@ -9,7 +9,7 @@ from erpnext.projects.report.project_profitability.project_profitability import 
 
 class TestProjectProfitability(unittest.TestCase):
 	@classmethod
-	def setUp(self):
+	def setUpClass(self):
 		emp = make_employee('test_employee_9@salary.com', company='_Test Company')
 		if not frappe.db.exists('Salary Component', 'Timesheet Component'):
 			frappe.get_doc({'doctype': 'Salary Component', 'salary_component': 'Timesheet Component'}).insert()
@@ -21,7 +21,7 @@ class TestProjectProfitability(unittest.TestCase):
 		self.sales_invoice.due_date = nowdate()
 		self.sales_invoice.submit()
 
-		frappe.db.set_value("HR Settings", "HR Settings", "standard_working_hours", 8)
+		frappe.db.set_value('HR Settings', None, 'standard_working_hours', 8)
 
 	def test_project_profitability(self):
 		filters = {
@@ -43,6 +43,7 @@ class TestProjectProfitability(unittest.TestCase):
 		self.assertEqual(self.salary_slip.total_working_days, row.total_working_days)
 
 		standard_working_hours = frappe.db.get_single_value("HR Settings", "standard_working_hours")
+		print("standard_working_hours", standard_working_hours)
 		utilization = timesheet.total_billed_hours/(self.salary_slip.total_working_days * standard_working_hours)
 		self.assertEqual(utilization, row.utilization)
 
@@ -52,7 +53,8 @@ class TestProjectProfitability(unittest.TestCase):
 		fractional_cost = self.salary_slip.base_gross_pay * utilization
 		self.assertEqual(fractional_cost, row.fractional_cost)
 
-	def tearDown(self):
+	@classmethod
+	def tearDownClass(self):
 		frappe.get_doc("Sales Invoice", self.sales_invoice.name).cancel()
 		frappe.get_doc("Salary Slip", self.salary_slip.name).cancel()
 		frappe.get_doc("Timesheet", self.timesheet.name).cancel()
